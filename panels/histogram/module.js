@@ -18,6 +18,7 @@ angular.module('kibana.histogram', [])
     legend    : true,
     'x-axis'  : true,
     'y-axis'  : true,
+    count     : 'count',
   }
   _.defaults($scope.panel,_d)
 
@@ -80,12 +81,25 @@ angular.module('kibana.histogram', [])
 
     // Build the facet part, injecting the query in as a facet filter
     _.each(queries, function(v) {
-      request = request
-        .facet($scope.ejs.DateHistogramFacet("chart"+_.indexOf(queries,v))
-          .field($scope.time.field)
-          .interval($scope.panel.interval)
-          .facetFilter($scope.ejs.QueryFilter(v))
-        ).size(0)
+       //Handle the old confs without the fieldvalue
+       if (_.isUndefined($scope.panel.query[_.indexOf(queries,v)].fieldvalue))
+         $scope.panel.query[_.indexOf(queries,v)].fieldvalue=''
+       if (_.isEmpty($scope.panel.query[_.indexOf(queries,v)].fieldvalue)) {
+         request = request
+           .facet($scope.ejs.DateHistogramFacet("chart"+_.indexOf(queries,v))
+             .field($scope.time.field)
+             .interval($scope.panel.interval)
+             .facetFilter($scope.ejs.QueryFilter(v))
+           ).size(0)
+       } else {
+         request = request
+           .facet($scope.ejs.DateHistogramFacet("chart"+_.indexOf(queries,v))
+             .field($scope.time.field)
+             .valueField($scope.panel.query[_.indexOf(queries,v)].fieldvalue)
+             .interval($scope.panel.interval)
+             .facetFilter($scope.ejs.QueryFilter(v))
+           ).size(0)
+       }
     })
 
     // Populate the inspector panel
@@ -127,9 +141,14 @@ angular.module('kibana.histogram', [])
           // Assemble segments
           var segment_data = [];
           _.each(v.entries, function(v, k) {
-            segment_data.push([v['time'],v['count']])
-            hits += v['count']; // The series level hits counter
-            $scope.hits += v['count']; // Entire dataset level hits counter
+             if(_.isUndefined(v[$scope.panel.count])){
+               countField=v['count']
+             } else {
+               countField=v[$scope.panel.count]
+             }
+             segment_data.push([v['time'],countField])
+             hits += countField; // The series level hits counter
+             $scope.hits += countField; // Entire dataset level hits counter
           });
 
           data.splice.apply(data,[1,0].concat(segment_data)) // Join histogram data
