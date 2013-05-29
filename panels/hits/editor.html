@@ -25,6 +25,12 @@
     <div class="span1" ng-show='panel.chart == "pie"'>
       <label class="small">Labels</label><input type="checkbox" ng-model="panel.labels" ng-checked="panel.labels">
     </div>
+    <div class="span1" ng-show='panel.chart == "list"'>
+      <label class="small">Percent</label><input type="checkbox" ng-model="panel.percent" ng-checked="panel.percent">
+    </div>
+    <div class="span1" ng-show='panel.chart == "list"'>
+      <label class="small">Count</label><input type="checkbox" ng-model="panel.count" ng-checked="panel.count">
+    </div>
   </div>
   <h5>Queries</h5>    
   <div class="row-fluid">
