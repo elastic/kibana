@@ -37,6 +37,7 @@
 
   <div ng-show="panel.chart == 'total'"><div ng-style="panel.style" style="line-height:{{panel.style['font-size']}}">{{hits}}</div></div>
 
+  <!-- vertical legend -->
   <div ng-show="panel.arrangement == 'vertical'">
    <table class="table table-condensed table-bordered table-striped" ng-show="panel.chart == 'list'" width="100%" style="line-height:{{panel.style['font-size']}}" ng-style="panel.style">
      <tr ng-repeat="query in data">
@@ -44,11 +45,14 @@
      </tr>
    </table>
   </div>
+  
+  <!-- horizontal legend -->
   <span ng-show="panel.arrangement == 'horizontal' && panel.chart == 'list'">
     <span ng-style="panel.style" style="line-height:{{panel.style['font-size']}}" ng-repeat="query in data">
       <span>{{query.label}}:</span>
       <span ng-show="panel.percent"> {{((100*query.data[0][1])/hits)| number:2}}%</span>
-      <span ng-show="panel.count"> ({{query.hits}})</span>
+      <span ng-show="panel.percent && panel.count">(</span><span ng-show="panel.count">{{query.hits}}</span><span ng-show="panel.percent && panel.count">)</span>
     </span>
   </span>
+  
 </kibana-panel>         
