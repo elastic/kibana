@@ -60,7 +60,7 @@ angular.module('kibana.trends', [])
     }
 
     var _segment = _.isUndefined(segment) ? 0 : segment
-    var request = $scope.ejs.Request();
+    var request = $scope.ejs.Request().types(config.types);
 
     // Build the question part of the query
     var queries = [];

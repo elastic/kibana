@@ -56,7 +56,7 @@ angular.module('kibana.derivequeries', [])
       return
 
     $scope.panel.loading = true;
-    var request = $scope.ejs.Request().indices($scope.index);
+    var request = $scope.ejs.Request().indices($scope.index).types(config.types);
 
     // Terms mode
     request = request

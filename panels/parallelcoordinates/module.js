@@ -61,7 +61,7 @@ angular.module('kibana.parallelcoordinates', [])
       $scope.segment = _segment;
 
       $scope.panel.loading = true;
-      var request = $scope.ejs.Request().indices($scope.index[_segment])
+      var request = $scope.ejs.Request().indices($scope.index[_segment]).types(config.types)
         .query(ejs.FilteredQuery(
           ejs.QueryStringQuery($scope.panel.query || '*'),
           ejs.RangeFilter($scope.time.field)
