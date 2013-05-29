@@ -133,7 +133,7 @@ angular.module('kibana.table', [])
     var _segment = _.isUndefined(segment) ? 0 : segment
     $scope.segment = _segment;
 
-    var request = $scope.ejs.Request().indices($scope.index[_segment])
+    var request = $scope.ejs.Request().indices($scope.index[_segment]).types(config.types)
       .query(ejs.FilteredQuery(
         ejs.QueryStringQuery($scope.panel.query || '*'),
         ejs.RangeFilter($scope.time.field)

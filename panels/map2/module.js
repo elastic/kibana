@@ -81,7 +81,7 @@ angular.module('kibana.map2', [])
         return
 
       $scope.panel.loading = true;
-      var request = $scope.ejs.Request().indices($scope.index);
+      var request = $scope.ejs.Request().indices($scope.index).types(config.types);
 
 
       var metric = 'count';

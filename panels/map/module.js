@@ -59,7 +59,7 @@ angular.module('kibana.map', [])
       return
 
     $scope.panel.loading = true;
-    var request = $scope.ejs.Request().indices($scope.index);
+    var request = $scope.ejs.Request().indices($scope.index).types(config.types);
 
     // Then the insert into facet and make the request
     var request = request

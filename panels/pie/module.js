@@ -97,7 +97,7 @@ angular.module('kibana.pie', [])
       return
 
     $scope.panel.loading = true;
-    var request = $scope.ejs.Request().indices($scope.index);
+    var request = $scope.ejs.Request().indices($scope.index).types(config.types);
 
     // Terms mode
     if ($scope.panel.mode == "terms") {

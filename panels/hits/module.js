@@ -62,7 +62,7 @@ angular.module('kibana.hits', [])
       return
 
     var _segment = _.isUndefined(segment) ? 0 : segment
-    var request = $scope.ejs.Request().indices($scope.index[_segment]);
+    var request = $scope.ejs.Request().indices($scope.index[_segment]).types(config.types);
     
     // Build the question part of the query
     var queries = [];
