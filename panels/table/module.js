@@ -269,7 +269,7 @@ angular.module('kibana.table', [])
 })
 .filter('highlight', function() {
   return function(text) {
-    if (text.toString().length) {
+    if (text != undefined && text.toString().length) {
       return text.toString().
         replace(/&/g, '&amp;').
         replace(/</g, '&lt;').
