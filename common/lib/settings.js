@@ -5,7 +5,8 @@ var Settings = function (s) {
     elasticsearch : 'localhost:9200',
     timeformat    : 'mm/dd HH:MM:ss',
     modules       : [],
-    kibana_index  : 'kibana-int'
+    kibana_index  : 'kibana-int',
+    formatValue   : format_value
   }
 
   // This initializes a new hash on purpose, to avoid adding parameters to 
@@ -18,3 +19,25 @@ var Settings = function (s) {
   return _s;
 
 };
+
+function format_value(source, key, obj) {
+  if(typeof obj == 'object' && _.isArray(obj)) {
+    if(obj.length > 0 && typeof obj[0] === 'object') {
+      var strval = '';
+      for (var objidx = 0, objlen = obj.length; objidx < objlen; objidx++) {
+        if (objidx > 0) {
+          strval = strval + ', ';
+        }
+        strval = strval + JSON.stringify(obj[objidx]);
+      }
+      return strval;
+    } else if(obj.length === 1 && _.isNumber(obj[0])) {
+      return parseFloat(obj[0]);
+    } else {
+      return typeof obj === 'undefined' ? null : obj.join(',');
+    }
+  } else {
+    return typeof obj === 'undefined' ? null : obj.toString();
+  }
+}
+

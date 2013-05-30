@@ -266,6 +266,10 @@ angular.module('kibana.table', [])
     $scope.get_data();
   }
 
+  $scope.formatValue = function(source,key,obj) {
+	return config.formatValue(source, key, obj);
+  }
+
 })
 .filter('highlight', function() {
   return function(text) {
