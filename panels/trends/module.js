@@ -31,15 +31,15 @@ angular.module('kibana.trends', [])
   }
   _.defaults($scope.panel,_d)
 
+  $scope.filter = "";
+
   $scope.init = function () {
     $scope.hits = 0;
     eventBus.register($scope,'time', function(event,time){
       set_time(time)
     });
     eventBus.register($scope,'query', function(event, query) {
-      $scope.panel.query = _.map(query,function(q) {
-        return {query: q, label: q};
-      })
+	  $scope.filter = _.isArray(query) ? query[0] : query;
       $scope.get_data();
     });
     // Now that we're all setup, request the time from our group
@@ -65,8 +65,12 @@ angular.module('kibana.trends', [])
     // Build the question part of the query
     var queries = [];
     _.each($scope.panel.query, function(v) {
+      var query1 = v.query || "*";
+	  var query2 = $scope.filter || "*";
+	  var querystr = (query1 == "*" ? query2 : (query2 == "*" ? query1 : "(" + query1 + ") AND (" + query2 + ")"));
+
       queries.push($scope.ejs.FilteredQuery(
-        ejs.QueryStringQuery(v.query || '*'),
+        ejs.QueryStringQuery(querystr),
         ejs.RangeFilter($scope.time.field)
           .from($scope.time.from)
           .to($scope.time.to))
