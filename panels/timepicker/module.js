@@ -37,6 +37,7 @@ angular.module('kibana.timepicker', [])
     timespan      : '15m',
     timefield     : '@timestamp',
     index         : '_all',
+    types         : config.types,
     defaultindex  : "_all",
     index_interval: "none",
     timeformat    : "",
@@ -78,6 +79,7 @@ angular.module('kibana.timepicker', [])
         }
         break;
     }
+    $scope.types = $scope.panel.types;
     $scope.time.field = $scope.panel.timefield;
     $scope.time_apply();
 
@@ -202,6 +204,7 @@ angular.module('kibana.timepicker', [])
 
   $scope.time_apply = function() {      
     // Update internal time object
+    $scope.types = $scope.panel.types;
     $scope.time = $scope.time_calc();
     $scope.time.field = $scope.panel.timefield
 
@@ -242,7 +245,8 @@ angular.module('kibana.timepicker', [])
     time.from = time.from.toDate()
     time.to   = time.to.toDate()
     time.interval = $scope.panel.index_interval
-    time.pattern = $scope.panel.index 
+    time.pattern = $scope.panel.index
+    time.types = $scope.panel.types
     return time;
   }
 

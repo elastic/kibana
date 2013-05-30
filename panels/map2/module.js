@@ -81,7 +81,7 @@ angular.module('kibana.map2', [])
         return
 
       $scope.panel.loading = true;
-      var request = $scope.ejs.Request().indices($scope.index).types(config.types);
+      var request = $scope.ejs.Request().indices($scope.index).types($scope.types);
 
 
       var metric = 'count';
@@ -156,6 +156,7 @@ angular.module('kibana.map2', [])
     function set_time(time) {
       $scope.time = time;
       $scope.index = _.isUndefined(time.index) ? $scope.index : time.index
+      $scope.types = time.types;
       $scope.get_data();
     }
 

@@ -125,7 +125,7 @@ angular.module('kibana.table', [])
     $scope.panel.error =  false;
 
     // Make sure we have everything for the request to complete
-    if(_.isUndefined($scope.index) || _.isUndefined($scope.time))
+    if(_.isUndefined($scope.index) || _.isUndefined($scope.time) || _.isUndefined($scope.types))
       return
     
     $scope.panel.loading = true;
@@ -133,7 +133,7 @@ angular.module('kibana.table', [])
     var _segment = _.isUndefined(segment) ? 0 : segment
     $scope.segment = _segment;
 
-    var request = $scope.ejs.Request().indices($scope.index[_segment]).types(config.types)
+    var request = $scope.ejs.Request().indices($scope.index[_segment]).types($scope.types)
       .query(ejs.FilteredQuery(
         ejs.QueryStringQuery($scope.panel.query || '*'),
         ejs.RangeFilter($scope.time.field)
@@ -263,6 +263,7 @@ angular.module('kibana.table', [])
   function set_time(time) {
     $scope.time = time;
     $scope.index = _.isUndefined(time.index) ? $scope.index : time.index
+    $scope.types = time.types;
     $scope.get_data();
   }
 

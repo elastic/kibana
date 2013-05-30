@@ -51,7 +51,7 @@ angular.module('kibana.trends', [])
     $scope.panel.loading = true;
 
     // Make sure we have everything for the request to complete
-    if(_.isUndefined($scope.index) || _.isUndefined($scope.time))
+    if(_.isUndefined($scope.index) || _.isUndefined($scope.time) || _.isUndefined($scope.types))
       return
 
     $scope.old_time = {
@@ -60,7 +60,7 @@ angular.module('kibana.trends', [])
     }
 
     var _segment = _.isUndefined(segment) ? 0 : segment
-    var request = $scope.ejs.Request().types(config.types);
+    var request = $scope.ejs.Request().types($scope.types);
 
     // Build the question part of the query
     var queries = [];
@@ -203,6 +203,7 @@ angular.module('kibana.trends', [])
   function set_time(time) {
     $scope.time = time;
     $scope.index = time.index || $scope.index
+    $scope.types = time.types;
     $scope.get_data();
   }
 

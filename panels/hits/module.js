@@ -58,11 +58,11 @@ angular.module('kibana.hits', [])
     $scope.panel.loading = true;
 
     // Make sure we have everything for the request to complete
-    if(_.isUndefined($scope.index) || _.isUndefined($scope.time))
+    if(_.isUndefined($scope.index) || _.isUndefined($scope.time) || _.isUndefined($scope.types))
       return
 
     var _segment = _.isUndefined(segment) ? 0 : segment
-    var request = $scope.ejs.Request().indices($scope.index[_segment]).types(config.types);
+    var request = $scope.ejs.Request().indices($scope.index[_segment]).types($scope.types);
     
     // Build the question part of the query
     var queries = [];
@@ -155,6 +155,7 @@ angular.module('kibana.hits', [])
   function set_time(time) {
     $scope.time = time;
     $scope.index = _.isUndefined(time.index) ? $scope.index : time.index
+    $scope.types = time.types;
     $scope.get_data();
   }
 

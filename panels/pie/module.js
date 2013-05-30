@@ -93,11 +93,11 @@ angular.module('kibana.pie', [])
 
   $scope.get_data = function() {
     // Make sure we have everything for the request to complete
-    if(_.isUndefined($scope.index) || _.isUndefined($scope.time))
+    if(_.isUndefined($scope.index) || _.isUndefined($scope.time) || _.isUndefined($scope.types))
       return
 
     $scope.panel.loading = true;
-    var request = $scope.ejs.Request().indices($scope.index).types(config.types);
+    var request = $scope.ejs.Request().indices($scope.index).types($scope.types);
 
     // Terms mode
     if ($scope.panel.mode == "terms") {
@@ -183,6 +183,7 @@ angular.module('kibana.pie', [])
   function set_time(time) {
     $scope.time = time;
     $scope.index = _.isUndefined(time.index) ? $scope.index : time.index
+    $scope.types = time.types;
     $scope.get_data();
   }
   

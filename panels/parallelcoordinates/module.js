@@ -61,7 +61,7 @@ angular.module('kibana.parallelcoordinates', [])
       $scope.segment = _segment;
 
       $scope.panel.loading = true;
-      var request = $scope.ejs.Request().indices($scope.index[_segment]).types(config.types)
+      var request = $scope.ejs.Request().indices($scope.index[_segment]).types($scope.types)
         .query(ejs.FilteredQuery(
           ejs.QueryStringQuery($scope.panel.query || '*'),
           ejs.RangeFilter($scope.time.field)
@@ -133,6 +133,7 @@ angular.module('kibana.parallelcoordinates', [])
     function set_time(time) {
       $scope.time = time;
       $scope.index = _.isUndefined(time.index) ? $scope.index : time.index
+      $scope.types = time.types;
       $scope.get_data();
     }
 

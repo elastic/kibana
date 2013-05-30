@@ -109,7 +109,7 @@ angular.module('kibana.histogram', [])
   $scope.get_data = function(segment,query_id) {
     delete $scope.panel.error
     // Make sure we have everything for the request to complete
-    if(_.isUndefined($scope.index) || _.isUndefined($scope.time))
+    if(_.isUndefined($scope.index) || _.isUndefined($scope.time) || _.isUndefined($scope.types))
       return
 
     if ($scope.panel.auto_int)
@@ -117,7 +117,7 @@ angular.module('kibana.histogram', [])
 
     $scope.panel.loading = true;
     var _segment = _.isUndefined(segment) ? 0 : segment
-    var request = $scope.ejs.Request().indices($scope.index[_segment]).types(config.types);
+    var request = $scope.ejs.Request().indices($scope.index[_segment]).types($scope.types);
     
     // Build the question part of the query
     var queries = [];
@@ -253,6 +253,7 @@ angular.module('kibana.histogram', [])
   $scope.set_time = function(time) {
     $scope.time = time;
     $scope.index = time.index || $scope.index    
+    $scope.types = time.types;
     $scope.get_data();
   }
 
