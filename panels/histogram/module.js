@@ -70,18 +70,14 @@ angular.module('kibana.histogram', [])
   }
   _.defaults($scope.panel,_d)
 
+  $scope.filter = "";
+
   $scope.init = function() {
     eventBus.register($scope,'time', function(event,time){$scope.set_time(time)});
     
     // Consider eliminating the check for array, this should always be an array
     eventBus.register($scope,'query', function(event, query) {
-      if(_.isArray(query)) {
-        $scope.panel.query = _.map(query,function(q) {
-          return {query: q, label: q};
-        })
-      } else {
-        $scope.panel.query[0] = {query: query, label: query}
-      }
+      $scope.filter = query;
       $scope.get_data();
     });
 
@@ -119,15 +115,31 @@ angular.module('kibana.histogram', [])
     var _segment = _.isUndefined(segment) ? 0 : segment
     var request = $scope.ejs.Request().indices($scope.index[_segment]);
 
+    var queriesstr;
+    var filter = $scope.filter;
+    if (_.isArray(filter) && filter.length == 1) {
+      filter = filter[0];
+    }
+    if(_.isArray(filter)) {
+      queriesstr = _.map(filter, function(q) {
+       return {query: q, label: q};
+      });
+    } else {
+      queriesstr = _.map($scope.panel.query, function(v) {
+        var query1 = v.query || "*";
+        var query2 = filter || "*";
+        var querystr = (query1 == "*" ? query2 : (query2 == "*" ? query1 : "(" + query1 + ") AND (" + query2 + ")"));
+        return { query: querystr, label: v.label};
+      });
+    }
+
     // Build the question part of the query
-    var queries = [];
-    _.each($scope.panel.query, function(v) {
-      queries.push($scope.ejs.FilteredQuery(
+    var queries = _.map(queriesstr, function(v) {
+      return $scope.ejs.FilteredQuery(
         ejs.QueryStringQuery(v.query || '*'),
         ejs.RangeFilter($scope.time.field)
           .from($scope.time.from)
-          .to($scope.time.to))
-      )
+          .to($scope.time.to));
     });
 
     // Build the facet part, injecting the query in as a facet filter
