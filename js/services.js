@@ -112,6 +112,9 @@ angular.module('kibana.services', [])
     return something.then(function(p) {
       var indices = [];
       _.each(p.data, function(v,k) {
+        _.each(v.aliases, function(v,k) {
+          indices.push(k)
+        });
         indices.push(k)
       });
       return indices;
