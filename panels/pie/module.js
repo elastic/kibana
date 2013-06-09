@@ -85,6 +85,9 @@ angular.module('kibana.pie', [])
     case 'terms':
       $scope.panel.query = {query:"*",field:"_all"};
       break;
+    case 'statistics':
+      $scope.panel.query = {query:"*",field:"_all",value:null};
+      break;
     case 'goal':
       $scope.panel.query = {query:"*",goal:100};
       break;
@@ -98,10 +101,8 @@ angular.module('kibana.pie', [])
 
     $scope.panel.loading = true;
     var request = $scope.ejs.Request().indices($scope.index);
-
-    // Terms mode
-    if ($scope.panel.mode == "terms") {
-      request = request
+    termsRequest = function(request) {
+      return request
         .facet(ejs.TermsFacet('pie')
           .field($scope.panel.query.field || $scope.panel.default_field)
           .size($scope.panel['size'])
@@ -113,8 +114,35 @@ angular.module('kibana.pie', [])
                 .from($scope.time.from)
                 .to($scope.time.to)
               )))).size(0)
+    }
 
-      $scope.populate_modal(request);
+    statisticalRequest = function(request, term) {
+      return request
+        .facet(ejs.StatisticalFacet('pie')
+          .field($scope.panel.query.value)
+          .facetFilter(ejs.QueryFilter(
+            ejs.FilteredQuery(
+              ejs.TermQuery($scope.panel.query.field || '*', term),
+              ejs.RangeFilter($scope.time.field)
+                .from($scope.time.from)
+                .to($scope.time.to)
+              )))).size(0)
+    }
+
+    pushData = function(slice) {
+        $scope.data.push();
+        if(!(_.isUndefined($scope.panel.colors)) 
+          && _.isArray($scope.panel.colors)
+          && $scope.panel.colors.length > 0) {
+          slice.color = $scope.panel.colors[k%$scope.panel.colors.length];
+        }
+        $scope.data.push(slice)
+    }
+
+    // Terms mode
+    if ($scope.panel.mode == "terms") {
+
+      $scope.populate_modal(termsRequest(request));
 
       var results = request.doSearch();
 
@@ -125,17 +153,50 @@ angular.module('kibana.pie', [])
         $scope.data = [];
         var k = 0;
         _.each(results.facets.pie.terms, function(v) {
-          var slice = { label : v.term, data : v.count }; 
-          $scope.data.push();
-          if(!(_.isUndefined($scope.panel.colors)) 
-            && _.isArray($scope.panel.colors)
-            && $scope.panel.colors.length > 0) {
-            slice.color = $scope.panel.colors[k%$scope.panel.colors.length];
-          } 
-          $scope.data.push(slice)
+          var slice = { label : v.term, data : v.count };
+          pushData(slice)
           k = k + 1;
         });
         $scope.$emit('render');
+      });
+    // Statistic mode
+    } else if ($scope.panel.mode == "statistics") {
+
+      $scope.populate_modal(termsRequest(request));
+
+      var results = request.doSearch();
+
+      // Populate scope when we have results
+      results.then(function(results) {
+        $scope.panel.loading = false;
+        $scope.data = [];
+        // same as terms
+        if ($scope.panel.query.value === null) {
+          $scope.hits = results.hits.total;
+          var k = 0;
+          _.each(results.facets.pie.terms, function(v) {
+            var slice = { label : v.term, data : v.count };
+            pushData(slice)
+            k = k + 1;
+          });
+          $scope.$emit('render');
+        // statistical facet
+        } else {
+          $scope.hits = 0;
+          var k = 0;
+          _.each(results.facets.pie.terms, function(v) {
+            sub_request = statisticalRequest(request, v.term)
+            var ret = sub_request.doSearch();
+            ret.then(function(ret) {
+              var count = ret.facets.pie.total;
+              $scope.hits += count;
+              var slice = { label : v.term, data : count };
+              pushData(slice)
+              k = k + 1;
+              $scope.$emit('render');
+            });
+          });
+        }
       });
     // Goal mode
     } else {
