@@ -2,7 +2,7 @@
 
   ## Pie
 
-  This panel is probably going away. For now its has 2 modes: 
+  This panel is probably going away. For now its has 2 modes:
     * terms: Run a terms facet on the query. You're gonna have a bad (ES crashing) day
     if you run in this mode on a high cardinality field
     * goal: Compare the query to this number and display the percentage that the query
@@ -19,7 +19,7 @@
   * legend :: Show the legend?
   * labels :: Label the slices of the pie?
   * mode :: 'terms' or 'goal'
-  * default_field ::  LOL wat? A dumb fail over field if for some reason the query object 
+  * default_field ::  LOL wat? A dumb fail over field if for some reason the query object
                       doesn't have a field
   * spyable :: Show the 'eye' icon that displays the last ES query for this panel
 
@@ -37,7 +37,7 @@ angular.module('kibana.pie', [])
 
   // Set and populate defaults
   var _d = {
-    query   : { field:"_all", query:"*", goal: 1}, 
+    query   : { field:"_all", query:"*", goal: 1},
     size    : 10,
     exclude : [],
     donut   : false,
@@ -63,18 +63,18 @@ angular.module('kibana.pie', [])
 
 
   $scope.remove_query = function(q) {
-    if($scope.panel.mode !== 'query') 
+    if($scope.panel.mode !== 'query')
       return false;
     $scope.panel.query = _.without($scope.panel.query,q);
     $scope.get_data();
   }
 
   $scope.add_query = function(label,query) {
-    if($scope.panel.mode !== 'query') 
+    if($scope.panel.mode !== 'query')
       return false;
     $scope.panel.query.unshift({
       query: query,
-      label: label, 
+      label: label,
     });
     $scope.get_data();
   }
@@ -101,7 +101,7 @@ angular.module('kibana.pie', [])
 
     $scope.panel.loading = true;
     var request = $scope.ejs.Request().indices($scope.index);
-    termsRequest = function(request) {
+    var termsRequest = function(request) {
       return request
         .facet(ejs.TermsFacet('pie')
           .field($scope.panel.query.field || $scope.panel.default_field)
@@ -116,7 +116,7 @@ angular.module('kibana.pie', [])
               )))).size(0)
     }
 
-    statisticalRequest = function(request, term) {
+    var statisticalRequest = function(request, term) {
       return request
         .facet(ejs.StatisticalFacet('pie')
           .field($scope.panel.query.value)
@@ -129,9 +129,9 @@ angular.module('kibana.pie', [])
               )))).size(0)
     }
 
-    pushData = function(slice) {
+    var pushData = function(slice) {
         $scope.data.push();
-        if(!(_.isUndefined($scope.panel.colors)) 
+        if(!(_.isUndefined($scope.panel.colors))
           && _.isArray($scope.panel.colors)
           && $scope.panel.colors.length > 0) {
           slice.color = $scope.panel.colors[k%$scope.panel.colors.length];
@@ -207,9 +207,9 @@ angular.module('kibana.pie', [])
           .to($scope.time.to)
           .cache(false))
         .size(0)
-      
+
       $scope.populate_modal(request);
- 
+
       var results = request.doSearch();
 
       results.then(function(results) {
@@ -231,8 +231,8 @@ angular.module('kibana.pie', [])
       body : "<h5>Last Elasticsearch Query</h5><pre>"+
           'curl -XGET '+config.elasticsearch+'/'+$scope.index+"/_search?pretty -d'\n"+
           angular.toJson(JSON.parse(request.toString()),true)+
-        "'</pre>", 
-    } 
+        "'</pre>",
+    }
   }
 
   $scope.build_search = function(field,value) {
@@ -246,7 +246,7 @@ angular.module('kibana.pie', [])
     $scope.index = _.isUndefined(time.index) ? $scope.index : time.index
     $scope.get_data();
   }
-  
+
 })
 .directive('pie', function() {
   return {
@@ -271,7 +271,7 @@ angular.module('kibana.pie', [])
                         .script("common/lib/panels/jquery.flot.pie.js")
 
         if(scope.panel.mode === 'goal')
-          var label = { 
+          var label = {
             show: scope.panel.labels,
             radius: 0,
             formatter: function(label, series){
@@ -283,15 +283,15 @@ angular.module('kibana.pie', [])
                 return ''
             },
           }
-        else 
-          var label = { 
+        else
+          var label = {
             show: scope.panel.labels,
             radius: 2/3,
             formatter: function(label, series){
               return '<div ng-click="build_search(panel.query.field,\''+label+'\') "style="font-size:8pt;text-align:center;padding:2px;color:white;">'+
                 label+'<br/>'+Math.round(series.percent)+'%</div>';
             },
-            threshold: 0.1 
+            threshold: 0.1
           }
 
         var pie = {
@@ -312,10 +312,10 @@ angular.module('kibana.pie', [])
             }
           },
           //grid: { hoverable: true, clickable: true },
-          grid:   { 
+          grid:   {
             backgroundColor: null,
-            hoverable: true, 
-            clickable: true 
+            hoverable: true,
+            clickable: true
           },
           legend: { show: false },
           colors: ['#86B22D','#BF6730','#1D7373','#BFB930','#BF3030','#77207D']
@@ -330,7 +330,7 @@ angular.module('kibana.pie', [])
       }
 
       function piett(x, y, contents) {
-        var tooltip = $('#pie-tooltip').length ? 
+        var tooltip = $('#pie-tooltip').length ?
           $('#pie-tooltip') : $('<div id="pie-tooltip"></div>');
 
         tooltip.html(contents).css({
@@ -356,7 +356,7 @@ angular.module('kibana.pie', [])
       elem.bind("plothover", function (event, pos, item) {
         if (item) {
           var percent = parseFloat(item.series.percent).toFixed(1) + "%";
-          piett(pos.pageX, pos.pageY, "<div style='vertical-align:middle;display:inline-block;background:"+item.series.color+";height:15px;width:15px;border-radius:10px;'></div> " + 
+          piett(pos.pageX, pos.pageY, "<div style='vertical-align:middle;display:inline-block;background:"+item.series.color+";height:15px;width:15px;border-radius:10px;'></div> " +
             (item.series.label||"")+ " " + percent);
         } else {
           $("#pie-tooltip").remove();
