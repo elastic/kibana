@@ -2,11 +2,14 @@
 
   ## Pie
 
-  This panel is probably going away. For now its has 2 modes:
+  This panel is probably going away. For now its has 3 modes:
     * terms: Run a terms facet on the query. You're gonna have a bad (ES crashing) day
     if you run in this mode on a high cardinality field
     * goal: Compare the query to this number and display the percentage that the query
     represents
+    * statistic: Run a statistical facet on the query to allow you get a pie chart
+    based one measure field. it is in contrast with terms mode which is based on
+    a item-by-item counter.
 
   ### Parameters
   * query :: An object with 3 possible parameters depends on the mode:
