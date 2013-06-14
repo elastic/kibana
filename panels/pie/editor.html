@@ -1,18 +1,24 @@
 <div class="row-fluid" ng-switch="panel.mode">
 <div class="span3">
   <label class="small">Mode</label> 
-  <select class="input-small" ng-change="set_mode(panel.mode)" ng-model="panel.mode" ng-options="f for f in ['terms','statistics','goal']"></select>
+  <select class="input-small" ng-change="set_mode(panel.mode)" ng-model="panel.mode" ng-options="f for f in ['terms','goal']"></select>
 </div> 
   <div ng-switch-when="terms">
     <div class="row-fluid">
       <div class="span3">
         <form style="margin-bottom: 0px">
-          <label class="small">Field</label>
+          <label class="small">Key field</label>
           <input type="text" style="width:90%" bs-typeahead="fields.list" ng-model="panel.query.field">
         </form>
       </div>
+      <div class="span3">
+        <form style="margin-bottom: 0px">
+          <label class="small">Value field</label>
+          <input type="text" style="width:90%" bs-typeahead="fields.list" ng-model="panel.query.value">
+        </form>
+      </div>
       <div class="span5">
-        <form class="input-append" style="margin-bottom: 0px">
+        <form class="input-append" style="margin-left: 150px">
           <label class="small">Query</label>
           <input type="text" style="width:80%" ng-model="panel.query.query">
           <button class="btn" ng-click="get_data()"><i class="icon-search"></i></button>
@@ -33,41 +39,14 @@
       </div>
     </div>
   </div>
-  <div ng-switch-when="statistics">
-    <div class="row-fluid">
-      <div class="span3">
-        <form style="margin-bottom: 0px">
-          <label class="small">Key</label>
-          <input type="text" style="width:90%" bs-typeahead="fields.list" ng-model="panel.query.field">
-        </form>
-      </div>
-      <div class="span3">
-        <form style="margin-bottom: 0px">
-          <label class="small">Value</label>
-          <input type="text" style="width:90%" bs-typeahead="fields.list" ng-model="panel.query.value">
-        </form>
-      </div>
-      <div class="span5">
-        <form class="input-append" style="margin-left: 150px">
-          <label class="small">Query</label>
-          <input type="text" style="width:80%" ng-model="panel.query.query">
-          <button class="btn" ng-click="get_data()"><i class="icon-search"></i></button>
-        </form>
-      </div>
-    </div>  
-    <div class="row-fluid">
-      <div class="span3">
-        <label class="small">Length</label>
-        <input type="number" style="width:80%" ng-model="panel.size" ng-change="get_data()">
-      </div>
-    </div>
-  </div>
   <div ng-switch-when="goal">
     <div class="row-fluid">
       <div class="span3">
-        <label class="small">Mode</label> 
-        <select class="input-small" ng-change="set_mode(panel.mode)" ng-model="panel.mode" ng-options="f for f in ['terms','statistics','goal']"></select>
-      </div>   
+        <form style="margin-bottom: 0px">
+          <label class="small">Value field</label>
+          <input type="text" style="width:90%" bs-typeahead="fields.list" ng-model="panel.query.value">
+        </form>
+      </div>
       <div class="span2">
         <form style="margin-bottom: 0px">
           <label class="small">Goal</label>

@@ -7,9 +7,6 @@
     if you run in this mode on a high cardinality field
     * goal: Compare the query to this number and display the percentage that the query
     represents
-    * statistic: Run a statistical facet on the query to allow you get a pie chart
-    based one measure field. it is in contrast with terms mode which is based on
-    a item-by-item counter.
 
   ### Parameters
   * query :: An object with 3 possible parameters depends on the mode:
@@ -88,9 +85,6 @@ angular.module('kibana.pie', [])
     case 'terms':
       $scope.panel.query = {query:"*",field:"_all"};
       break;
-    case 'statistics':
-      $scope.panel.query = {query:"*",field:"_all",value:null};
-      break;
     case 'goal':
       $scope.panel.query = {query:"*",goal:100};
       break;
@@ -104,33 +98,6 @@ angular.module('kibana.pie', [])
 
     $scope.panel.loading = true;
     var request = $scope.ejs.Request().indices($scope.index);
-    var termsRequest = function(request) {
-      return request
-        .facet(ejs.TermsFacet('pie')
-          .field($scope.panel.query.field || $scope.panel.default_field)
-          .size($scope.panel['size'])
-          .exclude($scope.panel.exclude)
-          .facetFilter(ejs.QueryFilter(
-            ejs.FilteredQuery(
-              ejs.QueryStringQuery($scope.panel.query.query || '*'),
-              ejs.RangeFilter($scope.time.field)
-                .from($scope.time.from)
-                .to($scope.time.to)
-              )))).size(0)
-    }
-
-    var statisticalRequest = function(request, term) {
-      return request
-        .facet(ejs.StatisticalFacet('pie')
-          .field($scope.panel.query.value)
-          .facetFilter(ejs.QueryFilter(
-            ejs.FilteredQuery(
-              ejs.TermQuery($scope.panel.query.field || '*', term),
-              ejs.RangeFilter($scope.time.field)
-                .from($scope.time.from)
-                .to($scope.time.to)
-              )))).size(0)
-    }
 
     var pushData = function(slice) {
         $scope.data.push();
@@ -144,28 +111,20 @@ angular.module('kibana.pie', [])
 
     // Terms mode
     if ($scope.panel.mode == "terms") {
+      request = request
+        .facet(ejs.TermsFacet('pie')
+          .field($scope.panel.query.field || $scope.panel.default_field)
+          .size($scope.panel['size'])
+          .exclude($scope.panel.exclude)
+          .facetFilter(ejs.QueryFilter(
+            ejs.FilteredQuery(
+              ejs.QueryStringQuery($scope.panel.query.query || '*'),
+              ejs.RangeFilter($scope.time.field)
+                .from($scope.time.from)
+                .to($scope.time.to)
+              )))).size(0)
 
-      $scope.populate_modal(termsRequest(request));
-
-      var results = request.doSearch();
-
-      // Populate scope when we have results
-      results.then(function(results) {
-        $scope.panel.loading = false;
-        $scope.hits = results.hits.total;
-        $scope.data = [];
-        var k = 0;
-        _.each(results.facets.pie.terms, function(v) {
-          var slice = { label : v.term, data : v.count };
-          pushData(slice)
-          k = k + 1;
-        });
-        $scope.$emit('render');
-      });
-    // Statistic mode
-    } else if ($scope.panel.mode == "statistics") {
-
-      $scope.populate_modal(termsRequest(request));
+      $scope.populate_modal(request);
 
       var results = request.doSearch();
 
@@ -174,7 +133,8 @@ angular.module('kibana.pie', [])
         $scope.panel.loading = false;
         $scope.data = [];
         // same as terms
-        if ($scope.panel.query.value === null) {
+        if (_.isUndefined($scope.panel.query.value)
+            || $scope.panel.query.value === "") {
           $scope.hits = results.hits.total;
           var k = 0;
           _.each(results.facets.pie.terms, function(v) {
@@ -188,13 +148,22 @@ angular.module('kibana.pie', [])
           $scope.hits = 0;
           var k = 0;
           _.each(results.facets.pie.terms, function(v) {
-            sub_request = statisticalRequest(request, v.term)
+            sub_request =  request
+              .facet(ejs.StatisticalFacet('pie')
+                .field($scope.panel.query.value)
+                .facetFilter(ejs.QueryFilter(
+                  ejs.FilteredQuery(
+                    ejs.TermQuery($scope.panel.query.field || '*', v.term),
+                    ejs.RangeFilter($scope.time.field)
+                      .from($scope.time.from)
+                      .to($scope.time.to)
+                    )))).size(0)
             var ret = sub_request.doSearch();
             ret.then(function(ret) {
               var count = ret.facets.pie.total;
               $scope.hits += count;
               var slice = { label : v.term, data : count };
-              pushData(slice)
+              pushData(slice);
               k = k + 1;
               $scope.$emit('render');
             });
@@ -203,21 +172,39 @@ angular.module('kibana.pie', [])
       });
     // Goal mode
     } else {
-      request = request
-        .query(ejs.QueryStringQuery($scope.panel.query.query || '*'))
-        .filter(ejs.RangeFilter($scope.time.field)
-          .from($scope.time.from)
-          .to($scope.time.to)
-          .cache(false))
-        .size(0)
-
+      if (_.isUndefined($scope.panel.query.value)
+          || $scope.panel.query.value === "") {
+          request = request
+            .query(ejs.QueryStringQuery($scope.panel.query.query || '*'))
+            .filter(ejs.RangeFilter($scope.time.field)
+              .from($scope.time.from)
+              .to($scope.time.to)
+              .cache(false))
+            .size(0)
+      } else {
+        request =  request
+          .facet(ejs.StatisticalFacet('pie')
+            .field($scope.panel.query.value)
+            .facetFilter(ejs.QueryFilter(
+              ejs.FilteredQuery(
+                ejs.QueryStringQuery($scope.panel.query.query || '*'),
+                ejs.RangeFilter($scope.time.field)
+                  .from($scope.time.from)
+                  .to($scope.time.to)
+                )))).size(0)
+      }
       $scope.populate_modal(request);
 
       var results = request.doSearch();
 
       results.then(function(results) {
         $scope.panel.loading = false;
-        var complete  = results.hits.total;
+        if (_.isUndefined($scope.panel.query.value)
+            || $scope.panel.query.value === "") {
+          var complete  = results.hits.total;
+        } else {
+          var complete = results.facets.pie.total;
+        }
         var remaining = $scope.panel.query.goal - complete;
         $scope.data = [
           { label : 'Complete', data : complete, color: '#BF6730' },
