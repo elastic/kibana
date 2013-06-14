@@ -156,6 +156,7 @@ angular.module('kibana.histogram', [])
 
     // Populate scope when we have results
     results.then(function(results) {
+      console.log(results);
       $scope.panel.loading = false;
       if(_segment == 0) {
         $scope.hits = 0;
@@ -188,8 +189,9 @@ angular.module('kibana.histogram', [])
           var segment_data = [];
           _.each(v.entries, function(v, k) {
             segment_data.push([v['time'],v[$scope.panel.mode]])
-            hits += v['count']; // The series level hits counter
-            $scope.hits += v['count']; // Entire dataset level hits counter
+            count = v['total'] || v['count'];
+            hits += count; // The series level hits counter
+            $scope.hits += count; // Entire dataset level hits counter
           });
           data.splice.apply(data,[1,0].concat(segment_data)) // Join histogram data
 
