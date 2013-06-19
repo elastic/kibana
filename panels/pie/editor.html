@@ -25,8 +25,8 @@
         <input type="number" style="width:80%" ng-model="panel.size" ng-change="get_data()">
       </div>
       <div class="span8">
+	    <label class="small">Exclude Terms(s) (comma seperated)</label>
         <form class="input-append" style="margin-bottom: 0px">
-          <label class="small">Exclude Terms(s) (comma seperated)</label>
           <input array-join type="text" style="width:90%"  ng-model='panel.exclude'></input>
           <button class="btn" ng-click="get_data()"><i class="icon-search"></i></button>
         </form>
