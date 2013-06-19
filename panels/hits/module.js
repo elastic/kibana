@@ -116,7 +116,8 @@ angular.module('kibana.hits', [])
           $scope.data[i] = { 
             label: $scope.panel.query[i].label || "query"+(parseInt(i)+1), 
             hits: hits,
-            data: [[i,hits]]
+            data: [[i,hits]],
+  		      color: $scope.panel.query[i].color
           };
 
           i++;
