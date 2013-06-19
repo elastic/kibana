@@ -281,4 +281,16 @@ angular.module('kibana.table', [])
     }
     return '';
   }
+})
+.filter('endofline', function(){
+  return function(text){
+    if (!_.isUndefined(text) && !_.isNull(text) && text.toString().length > 0) {
+      return text.toString().
+        replace(/&/g, '&amp;').
+        replace(/</g, '&lt;').
+        replace(/>/g, '&gt;').
+        replace(/\r?\n/g, '<br/>')
+    }
+    return '';
+  }
 });
