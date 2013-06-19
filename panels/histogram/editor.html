@@ -21,12 +21,15 @@
         <input type="text" placeholder="New Label" style="width:70%" ng-model="newlabel">
       </form>
     </div>
-    <div class="span8">
+    <div class="span6">
       <label class="small">Query</label>
       <form class="input-append" style="margin-bottom: 0px">
         <input type="text" placeholder="New Query" style="width:80%" ng-model="newquery">
         <button class="btn" ng-click="add_query(newlabel,newquery);newlabel='';newquery='';set_refresh(true)"><i class="icon-plus"></i></button>
       </form>
+    </div>
+    <div class="span2">
+      <label class="small">Color</label>
     </div>
     <div class="span1">
     </div>
@@ -37,11 +40,25 @@
         <input type="text" style="width:70%" ng-model="q.label" ng-change="set_refresh(true)">
       </form>
     </div>
-    <div class="span8">
+    <div class="span6">
       <form style="margin-bottom: 0px">
         <input type="text" style="width:80%" ng-model="q.query" ng-change="set_refresh(true)">
       </form>
     </div>
+    <div class="span2">
+    	<select style="width:80%" ng-change="set_refresh(true)" class="input-small" ng-model="q.color">
+  		  <option>Default</option>
+  			<option value="#86B22D" style="background-color:#86B22D;">Green</option>
+  			<option value="#BFB930" style="background-color:#BFB930;">Yellow</option>
+  			<option value="#BF6730" style="background-color:#BF6730;">Orange</option>
+  			<option value="#BF3030" style="background-color:#BF3030;">Red</option>
+  			<option value="#1D7373" style="background-color:#1D7373;">Blue</option>
+  			<option value="#77207D" style="background-color:#77207D;">Purple</option>
+  			<option value="#FF0FF7" style="background-color:#FF0FF7;">Pink</option>
+  			<option value="#05FFBC" style="background-color:#05FFBC;">Cyan</option>
+  			<option value="#020AFF" style="background-color:#020AFF;">Dark Blue</option>
+  		</select>
+	  </div>
     <div class="span1">
       <i class="icon-remove pointer" ng-click="remove_query(q)"></i>
     </div>
