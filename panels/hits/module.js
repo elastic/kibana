@@ -268,13 +268,29 @@ angular.module('kibana.hits', [])
         }).appendTo("body");
       }
 
+      function calcTotal(data) {
+        var total = 0;
+			  for(var i = 0; i < 5; i++) {
+				  var item = parseFloat(data[i].data[0][1]);
+				  if(item) {
+					  total += item;
+				  }
+		    }  
+			  return total;
+		  }
+
       elem.bind("plothover", function (event, pos, item) {
+	    var total = calcTotal(scope.data);
         if (item) {
-          var value = scope.panel.chart === 'bar' ? 
-            item.datapoint[1] : item.datapoint[1][0][1];
+          var percent = item.series.data[0][1] / (total / 100);
           tt(pos.pageX, pos.pageY,
             "<div style='vertical-align:middle;border-radius:10px;display:inline-block;background:"+
-            item.series.color+";height:20px;width:20px'></div> "+value.toFixed(0))
+            item.series.color+";height:15px;width:15px;border-radius:10px;'></div> "+ item.series.label + " " + percent.toFixed(1 ) + " %")
+        } else {
+          $("#pie-tooltip").remove();
+        }
+      });
+
         } else {
           $("#pie-tooltip").remove();
         }
