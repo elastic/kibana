@@ -33,21 +33,22 @@ angular.module('kibana.table', [])
 
   // Set and populate defaults
   var _d = {
-    status  : "Stable",
-    query   : "*",
-    size    : 100, // Per page
-    pages   : 5,   // Pages available
-    offset  : 0,
-    sort    : ['@timestamp','desc'],
-    group   : "default",
-    style   : {'font-size': '9pt'},
-    overflow: 'height',
-    fields  : [],
+    status    : "Stable",
+    query     : "*",
+    size      : 100, // Per page
+    pages     : 5,   // Pages available
+    offset    : 0,
+    sort      : ['@timestamp','desc'],
+    group     : "default",
+    style     : {'font-size': '9pt'},
+    overflow  : 'height',
+    fields    : [],
     highlight : [],
-    sortable: true,
-    header  : true,
-    paging  : true, 
-    spyable: true
+    timestamp : ['@timestamp'],
+    sortable  : true,
+    header    : true,
+    paging    : true, 
+    spyable   : true
   }
   _.defaults($scope.panel,_d)
 
@@ -104,6 +105,13 @@ angular.module('kibana.table', [])
     else
       $scope.panel.highlight.push(field)
   }  
+
+  $scope.toggle_timestamp = function(field) {
+    if (_.indexOf($scope.panel.timestamp,field) > -1)
+      $scope.panel.timestamp = _.without($scope.panel.timestamp,field)
+    else
+      $scope.panel.timestamp.push(field)
+  }
 
   $scope.toggle_details = function(row) {
     row.kibana = row.kibana || {};
@@ -191,6 +199,18 @@ angular.module('kibana.table', [])
         if($scope.panel.sort[1] == 'desc')
           $scope.data.reverse();
         
+        $scope.data = _.map($scope.data, function(row) {
+          result = _.map(row._source, function(v,k) {
+            if (_.contains($scope.panel.timestamp, k)) {
+             var d = new Date(v);
+             return d.toLocaleString();
+            }
+            return v;
+          });
+          row._source = _.object(_.keys(row._source),result);
+          return row;
+        });
+
         // Keep only what we need for the set
         $scope.data = $scope.data.slice(0,$scope.panel.size * $scope.panel.pages)
 
