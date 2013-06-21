@@ -51,11 +51,12 @@ angular.module('kibana.pie', [])
     spyable : true,
   }
   _.defaults($scope.panel,_d)
+  $scope.filter = "";
 
   $scope.init = function() {
     eventBus.register($scope,'time', function(event,time){set_time(time)});
     eventBus.register($scope,'query', function(event, query) {
-      $scope.panel.query.query = _.isArray(query) ? query[0] : query;
+	  $scope.filter = _.isArray(query) ? query[0] : query;
       $scope.get_data();
     });
     // Now that we're all setup, request the time from our group
@@ -100,6 +101,10 @@ angular.module('kibana.pie', [])
     $scope.panel.loading = true;
     var request = $scope.ejs.Request().indices($scope.index);
 
+    var query1 = $scope.panel.query.query || "*";
+    var query2 = $scope.filter || "*";
+    var querystr = (query1 == "*" ? query2 : (query2 == "*" ? query1 : "(" + query1 + ") AND (" + query2 + ")"));
+
     // Terms mode
     if ($scope.panel.mode == "terms") {
       request = request
@@ -109,7 +114,7 @@ angular.module('kibana.pie', [])
           .exclude($scope.panel.exclude)
           .facetFilter(ejs.QueryFilter(
             ejs.FilteredQuery(
-              ejs.QueryStringQuery($scope.panel.query.query || '*'),
+              ejs.QueryStringQuery(querystr),
               ejs.RangeFilter($scope.time.field)
                 .from($scope.time.from)
                 .to($scope.time.to)
