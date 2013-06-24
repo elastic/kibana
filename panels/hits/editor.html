@@ -25,21 +25,48 @@
     <div class="span1" ng-show='panel.chart == "pie"'>
       <label class="small">Labels</label><input type="checkbox" ng-model="panel.labels" ng-checked="panel.labels">
     </div>
+    <div class="span1" ng-show='panel.chart == "list"'>
+      <label class="small">Percent</label><input type="checkbox" ng-model="panel.percent" ng-checked="panel.percent">
+    </div>
+    <div class="span1" ng-show='panel.chart == "list"'>
+      <label class="small">Count</label><input type="checkbox" ng-model="panel.count" ng-checked="panel.count">
+    </div>
+    <div class="span1" ng-show='panel.chart == "list"'>
+      <label class="small">Alerts</label><input type="checkbox" ng-model="panel.alerts" ng-checked="panel.alerts">
+    </div>
   </div>
   <h5>Queries</h5>    
   <div class="row-fluid">
     <div class="span3">
-      <form style="margin-bottom: 0px">
-       <label class="small">Label</label>
+      <label class="small">Label</label>
+      <form style="margin-bottom: 25px">
         <input type="text" placeholder="New Label" style="width:70%" ng-model="newlabel">
       </form>
     </div>
-    <div class="span8">
-      <form class="input-append" style="margin-bottom: 0px">
-        <label class="small">Query</label>
-        <input type="text" placeholder="New Query" style="width:80%" ng-model="newquery">
-        <button class="btn" ng-click="add_query(newlabel,newquery);newlabel='';newquery='';set_refresh(true)"><i class="icon-plus"></i></button>
+    <div class="span5">
+      <label class="small">Query</label>
+      <form class="input-append" ng-hide="panel.alerts" style="margin-bottom: 0px">
+        <input type="text" placeholder="New Query" ng-model="newquery">
+        <button class="btn" ng-click="add_query(newlabel,newquery,warnTH,critTH);newlabel='';newquery='';warnTH=undefined;critTH=undefined;set_refresh(true)"><i class="icon-plus"></i></button>
       </form>
+      <form ng-show="panel.alerts" style="margin-bottom: 0px">
+        <input type="text" placeholder="New Query" ng-model="newquery">
+      </form>
+    </div>
+    <div ng-show="panel.alerts">
+     <div class="span2">
+       <label class="small">Warning</label>
+       <form style="margin-bottom: 5px">
+         <input type="number" min="0" max="100" step="any" placeholder="100" style="width: 50px" ng-model="warnTH">
+       </form>
+     </div>
+     <div class="span2" style="margin-left: 0px">
+       <label class="small">Critical</label>
+       <form class="input-append" style="margin-bottom: 5px">
+         <input type="number" min="0" max="100" step="any" placeholder="100" style="width: 50px" ng-model="critTH">
+         <button class="btn" ng-click="add_query(newlabel,newquery,warnTH,critTH);newlabel='';newquery='';warnTH=undefined;critTH=undefined;set_refresh(true)"><i class="icon-plus"></i></button>
+       </form>
+     </div>
     </div>
     <div class="span1">
     </div>
@@ -50,13 +77,30 @@
         <input type="text" style="width:70%" ng-model="q.label" ng-change="set_refresh(true)">
       </form>
     </div>
-    <div class="span8">
-      <form class="input-append" style="margin-bottom: 0px">
-        <input type="text" style="width:80%" ng-model="q.query" ng-change="set_refresh(true)">
+    <div class="span5">
+      <form class="input-append" ng-hide="panel.alerts" style="margin-bottom: 0px">
+        <input type="text" ng-model="q.query" ng-change="set_refresh(true)">
         <button class="btn" ng-click="get_data()"><i class="icon-search"></i></button>
       </form>
+      <form ng-show="panel.alerts" style="margin-bottom: 0px">
+        <input type="text" ng-model="q.query" ng-change="set_refresh(true)">
+      </form>
     </div>
-    <div class="span1">
+    <div ng-show="panel.alerts">
+      <div class="span2">
+        <form style="margin-bottom: 0px">
+          <input type="number"  min="0" max="100" step="any" style="width: 50px" ng-model="q.warnTH" ng-change="set_refresh(true)">
+        </form>
+      </div>
+      <div class="span2" style="margin-left: 0px">
+        <form class="input-append" style="margin-bottom: 0px">
+          <input type="number"  min="0" max="100" step="any" style="width: 50px" ng-model="q.critTH" ng-change="set_refresh(true)">
+          <button class="btn" ng-click="get_data()"><i class="icon-search"></i></button>
+        </form>
+      </div>
+      <span style="margin-left: 20px;"><i class="icon-remove pointer" ng-click="remove_query(q)"></i></span>
+    </div>
+    <div ng-hide="panel.alerts" class="span1" style="margin-left: 0px;">
       <i class="icon-remove pointer" ng-click="remove_query(q)"></i>
     </div>
   </div>

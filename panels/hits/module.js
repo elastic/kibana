@@ -116,15 +116,14 @@ angular.module('kibana.hits', [])
           $scope.data[i] = { 
             label: $scope.panel.query[i].label || "query"+(parseInt(i)+1), 
             hits: hits,
-            data: [[i,hits]]
+            data: [[i,hits,($scope.panel.query[i].warnTH || ($scope.panel.query[i].warnTH=100)),($scope.panel.query[i].critTH || ($scope.panel.query[i].critTH=100))]]
           };
 
           i++;
         });
         $scope.$emit('render');
         if(_segment < $scope.index.length-1) 
-          $scope.get_data(_segment+1,query_id)
-        
+          $scope.get_data(_segment+1,query_id)       
       }
     });
   }
@@ -134,11 +133,17 @@ angular.module('kibana.hits', [])
     $scope.get_data();
   }
 
-  $scope.add_query = function(label,query) {
+  $scope.add_query = function(label,query,warnTH,critTH) {
+    warnTH = _.isUndefined(warnTH) ? 100 : warnTH
+    critTH = _.isUndefined(critTH) ? 100 : critTH
+
     $scope.panel.query.unshift({
       query: query,
       label: label, 
+      warnTH: warnTH,
+      critTH: critTH,
     });
+
     $scope.get_data();
   }
 
