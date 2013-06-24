@@ -10,6 +10,7 @@
   * field :: the field to facet on
   * size :: how many queries to generate
   * fields :: a list of fields known to us
+  * query_mode :: how to create query
   
   ### Group Events
   #### Sends
@@ -34,7 +35,10 @@ angular.module('kibana.derivequeries', [])
     fields  : [],
     spyable : true,
     size    : 5,
-    exclude : []
+    mode    : 'terms only',
+    exclude : [],
+    history : [],
+    remember: 10 // max: 100, angular strap can't take a variable for items param
   }
   _.defaults($scope.panel,_d);
 
@@ -52,6 +56,7 @@ angular.module('kibana.derivequeries', [])
   }
 
   $scope.get_data = function() {
+    update_history($scope.panel.query);
     // Make sure we have everything for the request to complete
     if(_.isUndefined($scope.index) || _.isUndefined($scope.time))
       return
@@ -81,8 +86,15 @@ angular.module('kibana.derivequeries', [])
     results.then(function(results) {
       $scope.panel.loading = false;
       var data = [];
+      if ($scope.panel.query === '' || $scope.panel.mode === 'terms only') {
+        var suffix = '';
+      } else if ($scope.panel.mode === 'AND') {
+        var suffix = ' AND (' + $scope.panel.query + ')';
+      } else if ($scope.panel.mode === 'OR') {
+        var suffix = ' OR (' + $scope.panel.query + ')';
+      }
       _.each(results.facets.query.terms, function(v) {
-        data.push($scope.panel.field+':"'+v.term+'"')
+        data.push($scope.panel.field+':"'+v.term+'"'+suffix)
       });
       $scope.send_query(data)
     });
@@ -119,6 +131,15 @@ angular.module('kibana.derivequeries', [])
     eventBus.broadcast($scope.$id,$scope.panel.group,'query',_query)
   }
 
-
+  var update_history = function(query) {
+    query = _.isArray(query) ? query : [query];
+    if($scope.panel.remember > 0) {
+      $scope.panel.history = _.union(query.reverse(),$scope.panel.history)
+      var _length = $scope.panel.history.length
+      if(_length > $scope.panel.remember) {
+        $scope.panel.history = $scope.panel.history.slice(0,$scope.panel.remember)
+      }
+    }
+  }
 
 });
