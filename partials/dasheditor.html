@@ -20,12 +20,15 @@
           <th>Title</th>
           <th>Delete</th>
           <th>Move</th>
+          <th></th>
+          <th>Hide</th>
         </thead>
         <tr ng-repeat="row in dashboards.rows">
           <td>{{row.title}}</td>
           <td><i ng-click="dashboards.rows = _.without(dashboards.rows,row)" class="pointer icon-remove"></i></td>
           <td><i ng-click="_.move(dashboards.rows,$index,$index-1)" ng-hide="$first" class="pointer icon-arrow-up"></i></td>
           <td><i ng-click="_.move(dashboards.rows,$index,$index+1)" ng-hide="$last" class="pointer icon-arrow-down"></i></td>
+          <td><input type="checkbox" ng-model="row.hide" ng-checked="row.hide"></td>
         </tr>
       </table>
     </div>
