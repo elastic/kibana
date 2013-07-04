@@ -45,6 +45,8 @@ angular.module('kibana.pie', [])
     tilt    : false,
     legend  : true,
     labels  : true,
+	others	: true,
+	missing	: true,
     mode    : "terms",
     group   : "default",
     default_field : 'DEFAULT',
@@ -125,6 +127,10 @@ angular.module('kibana.pie', [])
         $scope.hits = results.hits.total;
         $scope.data = [];
         var k = 0;
+		if($scope.panel.others && results.facets.pie.other > 0)
+			results.facets.pie.terms.push({ 'term': 'Other', 'count': results.facets.pie.other });
+		if($scope.panel.missing && results.facets.pie.missing > 0)
+			results.facets.pie.terms.push({ 'term': 'Missing', 'count': results.facets.pie.missing });
         _.each(results.facets.pie.terms, function(v) {
           var slice = { label : v.term, data : v.count }; 
           $scope.data.push();
