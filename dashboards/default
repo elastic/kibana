@@ -223,6 +223,9 @@
             "@timestamp",
             "@message"
           ],
+          "timestamp": [
+            "@timestamp"
+          ]
           "sortable": true
         }
       ]
