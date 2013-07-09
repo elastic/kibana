@@ -1,0 +1,45 @@
+%div
+  %h5 Allow saving to
+  .row-fluid
+    .span2
+      %label.small Export
+      %input{"ng-checked" => "panel.save.local", "ng-model" => "panel.save.local", :type => "checkbox"}/
+    .span2
+      %label.small Defaults
+      %input{"ng-checked" => "panel.save.default", "ng-model" => "panel.save.default", :type => "checkbox"}/
+    .span2
+      %label.small Gist
+      %input{"ng-checked" => "panel.save.gist", "ng-model" => "panel.save.gist", :type => "checkbox"}/
+    .span2
+      %label.small Elasticsearch
+      %input{"ng-checked" => "panel.save.elasticsearch", "ng-model" => "panel.save.elasticsearch", :type => "checkbox"}/
+  %h5 Allow loading from
+  .row-fluid
+    .span2
+      %label.small Local file
+      %input{"ng-checked" => "panel.load.local", "ng-model" => "panel.load.local", :type => "checkbox"}/
+    .span2
+      %label.small Gist
+      %input{"ng-checked" => "panel.load.gist", "ng-model" => "panel.load.gist", :type => "checkbox"}/
+    .span2
+      %label.small Elasticsearch
+      %input{"ng-checked" => "panel.load.elasticsearch", "ng-model" => "panel.load.elasticsearch", :type => "checkbox"}/
+    .span3{"ng-show" => "panel.load.elasticsearch"}
+      %label.small ES list size
+      %input.input-mini{"ng-model" => "panel.elasticsearch_size", :type => "number"}/
+    .span3{"ng-show" => "panel.load.elasticsearch"}
+      %label.small ES store index
+      %input.input-small{"ng-model" => "panel.elasticsearch_saveto", :type => "text"}/
+  %h5 Sharing
+  .row-fluid
+    .span3
+      %label.small Allow Sharing
+      %input{"ng-checked" => "panel.temp", "ng-model" => "panel.temp", :type => "checkbox"}/
+    .span8{"ng-show" => "panel.temp"}
+      %label.small Shared Link TTL (examples: 1m,1d,1w,30d)
+      %input.input-small{"ng-model" => "panel.temp_ttl", :type => "text"}/
+  %h5 Other Settings
+  .row-fluid
+    .span3
+      %label.small Remove this Dashboard Control from saved copies
+      %input{"ng-checked" => "panel.hide_control", "ng-model" => "panel.hide_control", :type => "checkbox"}/

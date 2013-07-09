@@ -1,0 +1,7 @@
+.modal-header
+  %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", :type => "button"} ×
+  %h3 {{modal.title}}
+.modal-body
+  %div{"ng-bind-html" => "modal.body"}
+.modal-footer
+  %button.btn.btn-success{"ng-click" => "dismiss()", :type => "button"} Close

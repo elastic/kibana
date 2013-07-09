@@ -1,0 +1,61 @@
+%kibana-panel{"ng-controller" => "timepicker", "ng-init" => "init()"}
+  .row-fluid{"ng-switch" => "panel.mode"}
+    %div{"ng-switch-when" => "absolute"}
+      .span5
+        %form.nomargin
+          %label
+            %small From
+          %input.input-smaller{"bs-datepicker" => "", "data-date-format" => "mm/dd/yyyy", "ng-change" => "time_check()", "ng-model" => "timepicker.from.date", :type => "text"}/
+          %input.input-mini{"bs-timepicker" => "", "data-show-meridian" => "false", "data-show-seconds" => "true", "ng-change" => "time_check()", "ng-model" => "timepicker.from.time", :type => "text"}/
+      .span5{:style => "margin-left:10px"}
+        %form.nomargin
+          %label{:style => "margin-left:5px"}
+            %small
+              To (
+              %a{"ng-click" => "to_now()"}> now
+              )
+          %input.input-smaller{"bs-datepicker" => "", "data-date-format" => "mm/dd/yyyy", "ng-change" => "time_check()", "ng-model" => "timepicker.to.date", :type => "text"}/
+          %input.input-mini{"bs-timepicker" => "", "data-show-meridian" => "false", "data-show-seconds" => "true", "ng-change" => "time_check()", "ng-model" => "timepicker.to.time", :type => "text"}/
+      .span1
+        %form.nomargin
+          %label
+            %small
+              %br/
+          %button.btn{"ng-click" => "time_apply()"}
+            %i.icon-ok
+    %div{"ng-switch-when" => "since"}
+      .span5
+        %form.nomargin
+          %label
+            %small Since
+          %input.input-smaller{"bs-datepicker" => "", "data-date-format" => "mm/dd/yyyy", "ng-change" => "time_check()", "ng-model" => "timepicker.from.date", :type => "text"}/
+          %input.input-mini{"bs-timepicker" => "", "data-show-meridian" => "false", "data-show-seconds" => "true", "ng-change" => "time_check()", "ng-model" => "timepicker.from.time", :type => "text"}/
+      .span1{:style => "margin-left:10px"}
+        %form.nomargin
+          %label
+            %small
+              %br/
+          %button.btn{"ng-click" => "time_apply()"}
+            %i.icon-ok
+    %div{"ng-switch-when" => "relative"}
+      .span11
+        %form.nomargin.input-append
+          %label
+            %small The last
+          %button.btn.btn{"ng-class" => "{'btn-success': (panel.timespan == timespan)}", "ng-click" => "set_timespan(timespan)", "ng-repeat" => "timespan in panel.time_options"} {{timespan}}
+          / <select ng-model="panel.sort[0]" ng-options="f for f in fields"></select>
+  .row-fluid.nomargin
+    .span12.small
+      %a{"ng-class" => "{'strong': (panel.mode == 'relative')}", "ng-click" => "set_mode('relative')"} Relative
+      |
+      %a{"ng-class" => "{'strong': (panel.mode == 'absolute')}", "ng-click" => "set_mode('absolute')"} Absolute
+      |
+      %a{"ng-class" => "{'strong': (panel.mode == 'since')}", "ng-click" => "set_mode('since')"} Since
+      %span{"ng-hide" => "panel.mode == 'absolute'"}
+        |
+        %input{"ng-change" => "refresh();", "ng-model" => "panel.refresh.enable", :type => "checkbox"}/
+        Auto-refresh
+        %span{"ng-class" => "{'ng-cloak': !panel.refresh.enable}"}
+          every
+          = succeed "." do
+            %a{"bs-popover" => "'panels/timepicker/refreshctrl.html'", "data-placement" => "bottom", "data-title" => "&lt;small&gt;Auto-refresh Settings&lt;/small&gt;"} {{panel.refresh.interval}}s

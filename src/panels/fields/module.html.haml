@@ -1,0 +1,5 @@
+%kibana-panel{"ng-controller" => "fields", "ng-init" => "init()"}
+  %ul.unstyled{"ng-class" => "{'inline': panel.arrange == 'horizontal'}", :style => "height:{{row.height}};overflow-y:auto;overflow-x:hidden;"}
+    %li{"ng-repeat" => "field in fields", "ng-style" => "panel.style"}
+      %i.pointer{"ng-class" => "{'icon-check': _.indexOf(active,field)&gt;-1,'icon-check-empty': _.indexOf(active,field)&lt;0}", "ng-click" => "toggle_field(field)"}
+      %a{"bs-popover" => "'panels/fields/micropanel.html'", "data-placement" => "{{panel.micropanel_position}}", "data-unique" => "1", "ng-class" => "{label: _.indexOf(active,field)&gt;-1}", "ng-click" => "toggle_micropanel(field)"} {{field}}

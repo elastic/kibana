@@ -1,31 +1,44 @@
-<kibana-panel ng-controller='derivequeries' ng-init="init()">
-  <span ng-show='panel.spyable' style="position:absolute;right:0px;top:0px" class='panelextra pointer'>
-      <i bs-modal="'partials/modal.html'" class="icon-eye-open"></i>
+<kibana-panel ng-controller="derivequeries" ng-init="init()">
+  <span class="panelextra pointer" ng-show="panel.spyable" style="position:absolute;right:0px;top:0px">
+    <i bs-modal="'partials/modal.html'" class="icon-eye-open"></i>
   </span>
   <div ng-show="!panel.multi">
     <form>
       <table class="form-horizontal">
         <tr>
-          <td><label><small>{{panel.label}}</small></label></td>
-          <td><label><small>Field</small></label></td>
+          <td>
+            <label>
+              <small>{{panel.label}}</small>
+            </label>
+          </td>
+          <td>
+            <label>
+              <small>Field</small>
+            </label>
+          </td>
         </tr>
         <tr>
-          <td width="97%" style="padding-right:20px">
-            <input bs-typeahead="panel.history" data-min-length=0 data-items=100 type="text" style="width:100%" ng-model="panel.query">
+          <td style="padding-right:20px" width="97%">
+            <input bs-typeahead="panel.history" data-items="100" data-min-length="0" ng-model="panel.query" style="width:100%" type="text">
           </td>
-          <td ng-show="panel.fields.length > 0">
+          <td ng-show="panel.fields.length &amp;gt; 0">
             <select class="input-small" ng-model="panel.field" ng-options="f for f in panel.fields"></select>
           </td>
           <td ng-show="panel.fields.length == 0">
-            <input class="input-small" ng-model="panel.field" type="text"/>
+            <input class="input-small" ng-model="panel.field" type="text">
           </td>
           <td style="margin-left:20px" width="1%">
-            <button style="margin-top:0px" type="submit" class="btn btn-info" ng-click="get_data()"><i class="icon-search"></i></button>
+            <button class="btn btn-info" ng-click="get_data()" style="margin-top:0px" type="submit">
+              <i class="icon-search"></i>
+            </button>
           </td>
           <td width="1%">
-            <button style="margin-top:0px"  type="submit" class="btn btn-danger" ng-click="panel.query='';get_data()"><i class="icon-ban-circle"></i></button>
+            <button class="btn btn-danger" ng-click="panel.query='';get_data()" style="margin-top:0px" type="submit">
+              <i class="icon-ban-circle"></i>
+            </button>
           </td>
-        <tr>
+        </tr>
+        <tr></tr>
       </table>
     </form>
   </div>

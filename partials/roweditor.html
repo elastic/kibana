@@ -1,32 +1,42 @@
 <div class="modal-header">
-  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-  <h3>{{row.title}} <small>row editor</small></h3>
+  <button aria-hidden="true" class="close" data-dismiss="modal" type="button">×</button>
+  <h3>
+    {{row.title}}
+    <small>row editor</small>
+  </h3>
 </div>
 <div class="modal-body">
   <h4>Row Control</h4>
   <div class="row-fluid">
     <div class="span4">
-      <label class="small">Title</label><input type="text" class="input-medium" ng-model='row.title'></input>
+      <label class="small">Title</label>
+      <input class="input-medium" ng-model="row.title" type="text">
     </div>
     <div class="span2">
-      <label class="small">Height</label><input type="text" class="input-mini" ng-model='row.height'></input>
+      <label class="small">Height</label>
+      <input class="input-mini" ng-model="row.height" type="text">
     </div>
-    <div class="span1"> 
-      <label class="small"> Editable </label><input type="checkbox" ng-model="row.editable" ng-checked="row.editable" />
+    <div class="span1">
+      <label class="small">Editable</label>
+      <input ng-checked="row.editable" ng-model="row.editable" type="checkbox">
     </div>
-    <div class="span1"> 
-      <label class="small"> Collapsable </label><input type="checkbox" ng-model="row.collapsable" ng-checked="row.collapsable" />
+    <div class="span1">
+      <label class="small">Collapsable</label>
+      <input ng-checked="row.collapsable" ng-model="row.collapsable" type="checkbox">
     </div>
   </div>
   <div class="row-fluid">
     <h4>New Panel</h4>
     <form class="input-append">
-    <select class="input-medium input-append" ng-model="panel.type" ng-options="f for f in config.modules|stringSort"></select>
-    <small ng-show="!panel.type">Select Type</small> <button ng-show="panel.type" ng-click="add_panel(row,panel); reset_panel();" class="btn btn-success ">Add <i class="icon-plus"></i></button></form>
-
+      <select class="input-medium input-append" ng-model="panel.type" ng-options="f for f in config.modules|stringSort"></select>
+      <small ng-show="!panel.type">Select Type</small>
+      <button class="btn btn-success" ng-click="add_panel(row,panel); reset_panel();" ng-show="panel.type">
+        Add
+        <i class="icon-plus"></i>
+      </button>
+    </form>
     <div ng-show="!(_.isUndefined(panel.type))">
-      <div ng-include src="'partials/panelgeneral.html'"></div>
-
+      <div ng-include="" src="'partials/panelgeneral.html'"></div>
       <div add-panel="{{panel.type}}"></div>
     </div>
   </div>
@@ -46,16 +56,26 @@
         <tr ng-repeat="panel in row.panels">
           <td>{{panel.title}}</td>
           <td>{{panel.type}}</td>
-          <td><select ng-hide="panel.sizeable == false" class="input-mini" ng-model="panel.span" ng-options="f for f in [0,1,2,3,4,5,6,7,8,9,10,11,12]"></select></td>
-          <td><i ng-click="row.panels = _.without(row.panels,panel)" class="pointer icon-remove"></i></td>
-          <td><i ng-click="_.move(row.panels,$index,$index-1)" ng-hide="$first" class="pointer icon-arrow-up"></i></td>
-          <td><i ng-click="_.move(row.panels,$index,$index+1)" ng-hide="$last" class="pointer icon-arrow-down"></i></td>
-          <td><input type="checkbox" ng-model="panel.hide" ng-checked="panel.hide"></td>
+          <td>
+            <select class="input-mini" ng-hide="panel.sizeable == false" ng-model="panel.span" ng-options="f for f in [0,1,2,3,4,5,6,7,8,9,10,11,12]"></select>
+          </td>
+          <td>
+            <i class="pointer icon-remove" ng-click="row.panels = _.without(row.panels,panel)"></i>
+          </td>
+          <td>
+            <i class="pointer icon-arrow-up" ng-click="_.move(row.panels,$index,$index-1)" ng-hide="$first"></i>
+          </td>
+          <td>
+            <i class="pointer icon-arrow-down" ng-click="_.move(row.panels,$index,$index+1)" ng-hide="$last"></i>
+          </td>
+          <td>
+            <input ng-checked="panel.hide" ng-model="panel.hide" type="checkbox">
+          </td>
         </tr>
       </table>
     </div>
   </div>
 </div>
 <div class="modal-footer">
-  <button type="button" class="btn btn-success" ng-click="dismiss();reset_panel();close_edit()">Close</button>
+  <button class="btn btn-success" ng-click="dismiss();reset_panel();close_edit()" type="button">Close</button>
 </div>

@@ -1,0 +1,46 @@
+!!!
+/[if lt IE 7] <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en" id="ng-app">
+/[if IE 7] <html class="no-js lt-ie9 lt-ie8" lang="en" id="ng-app">
+/[if IE 8] <html class="no-js lt-ie9" lang="en">
+/[if gt IE 8] ><!
+%html.no-js{:lang => "en"}
+  / <![endif]
+  %head
+    %meta{:charset => "utf-8"}/
+    %meta{:content => "IE=edge,chrome=1", "http-equiv" => "X-UA-Compatible"}/
+    %meta{:content => "Search based application built using ElasticSearch, elastic.js, and Angular.js", :name => "description"}/
+    %meta{:content => "width=device-width", :name => "viewport"}/
+    %title Kibana 3
+    %link{:href => "common/css/normalize.min.css", :rel => "stylesheet"}/
+    %link{:href => "common/css/bootstrap.dark.min.css", :rel => "stylesheet"}/
+    %link{:href => "common/css/animate.min.css", :rel => "stylesheet"}/
+    %link{:href => "common/css/bootstrap-responsive.min.css", :rel => "stylesheet"}/
+    %link{:href => "common/css/font-awesome.min.css", :rel => "stylesheet"}/
+    %link{:href => "common/css/main.css", :rel => "stylesheet"}/
+    %link{:href => "common/css/elasticjs.css", :rel => "stylesheet"}/
+    %link{:href => "common/css/timepicker.css", :rel => "stylesheet"}/
+    / project dependency libs
+    %script{:src => "common/lib/LAB.min.js"}
+    %script{:src => "common/lib/underscore.min.js"}
+    %script{:src => "common/lib/settings.js"}
+    %script{:src => "config.js"}
+    %script{:src => "js/app.js"}
+  %body{"ng-cloak" => "", "ng-controller" => "DashCtrl"}
+    .alert.span12{:class => "alert-{{alert.severity}}", "ng-repeat" => "alert in global_alert", :style => "position: fixed;top:2px;opacity:0.9;z-index:8000"}
+      %button.close{"ng-click" => "clear_alert(alert)", :type => "button"} &times;
+      %strong {{alert.title}}
+      %span{"ng-bind-html-unsafe" => "alert.text"}
+      .pull-right.small {{$index + 1}} alert(s)
+    .navbar.navbar-static-top
+      .navbar-inner
+        .container-fluid
+          %p.navbar-text.pull-right
+            %small
+              %strong Kibana 3
+              %small milestone 2
+          %span.brand {{dashboards.title}}
+          .brand
+            %i.icon-cog.pointer{"bs-modal" => "'partials/dasheditor.html'", "ng-show" => "dashboards.editable"}
+    .container-fluid.main
+      .row-fluid
+        %div{"ng-view" => ""}

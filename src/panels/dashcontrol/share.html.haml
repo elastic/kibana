@@ -1,0 +1,10 @@
+.modal-header
+  %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", :type => "button"} ×
+  %h3
+    {{share.title}}
+    %small shareable link
+.modal-body
+  %label Share this dashboard with this URL
+  %input{"ng-change" => "share_link(share.title,share.type,share.id)", "ng-model" => "share.link", :onclick => "this.select()", :onfocus => "this.select()", :style => "width:90%", :type => "text"}/
+.modal-footer
+  %button.btn.btn-success{"ng-click" => "dismiss();$broadcast('render')", :type => "button"} Close

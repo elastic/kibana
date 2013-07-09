@@ -1,0 +1,22 @@
+%a.close{:href => "", "ng-click" => "dismiss()"} ×
+%h4
+  Micro Analysis of {{micropanel.field}}
+  %i.pointer.icon-search{"ng-click" => "build_search('_exists_',micropanel.field);dismiss();"}
+  %i.pointer.icon-ban-circle{"ng-click" => "build_search('_missing_',micropanel.field);dismiss();"}
+  %br/
+  %small {{micropanel.count}} events in the table set
+%table.table.table-bordered.table-striped.table-condensed{:style => "width:480px"}
+  %thead
+    %th {{micropanel.field}}
+    %th Action
+    %th In set
+  %tbody
+    %tr{"ng-repeat" => "field in micropanel.values"}
+      %td {{{true: "__blank__",false:field[0]}[field[0] == ""]}}
+      %td
+        %i.pointer.icon-search{"ng-click" => "build_search(micropanel.field,field[0]);dismiss();"}
+        %i.pointer.icon-ban-circle{"ng-click" => "build_search(micropanel.field,field[0],true);dismiss();"}
+      %td {{field[1]}}
+%span{"ng-repeat" => "(field,count) in micropanel.related"}
+  %a{"ng-click" => "toggle_field(field)"} {{field}}
+  ({{Math.round((count / micropanel.count) * 100)}}%),

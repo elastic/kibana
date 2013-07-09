@@ -1,12 +1,10 @@
 <div class="modal-header">
-  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+  <button aria-hidden="true" class="close" data-dismiss="modal" type="button">×</button>
   <h3>{{modal.title}}</h3>
 </div>
 <div class="modal-body">
-
-  <div ng-bind-html='modal.body'></div>
-  
+  <div ng-bind-html="modal.body"></div>
 </div>
 <div class="modal-footer">
-  <button type="button" class="btn btn-success" ng-click="dismiss()">Close</button>
+  <button class="btn btn-success" ng-click="dismiss()" type="button">Close</button>
 </div>

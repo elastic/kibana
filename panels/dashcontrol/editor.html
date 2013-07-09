@@ -1,51 +1,62 @@
 <div>
   <h5>Allow saving to</h5>
-  <div class="row-fluid">    
+  <div class="row-fluid">
     <div class="span2">
-      <label class="small"> Export </label><input type="checkbox" ng-model="panel.save.local" ng-checked="panel.save.local">
+      <label class="small">Export</label>
+      <input ng-checked="panel.save.local" ng-model="panel.save.local" type="checkbox">
     </div>
     <div class="span2">
-      <label class="small"> Defaults </label><input type="checkbox" ng-model="panel.save.default" ng-checked="panel.save.default">
+      <label class="small">Defaults</label>
+      <input ng-checked="panel.save.default" ng-model="panel.save.default" type="checkbox">
     </div>
     <div class="span2">
-      <label class="small"> Gist </label><input type="checkbox" ng-model="panel.save.gist" ng-checked="panel.save.gist">
+      <label class="small">Gist</label>
+      <input ng-checked="panel.save.gist" ng-model="panel.save.gist" type="checkbox">
     </div>
     <div class="span2">
-      <label class="small"> Elasticsearch </label><input type="checkbox" ng-model="panel.save.elasticsearch" ng-checked="panel.save.elasticsearch">
+      <label class="small">Elasticsearch</label>
+      <input ng-checked="panel.save.elasticsearch" ng-model="panel.save.elasticsearch" type="checkbox">
     </div>
   </div>
   <h5>Allow loading from</h5>
-  <div class="row-fluid">    
+  <div class="row-fluid">
     <div class="span2">
-      <label class="small"> Local file </label><input type="checkbox" ng-model="panel.load.local" ng-checked="panel.load.local">
+      <label class="small">Local file</label>
+      <input ng-checked="panel.load.local" ng-model="panel.load.local" type="checkbox">
     </div>
     <div class="span2">
-      <label class="small"> Gist </label><input type="checkbox" ng-model="panel.load.gist" ng-checked="panel.load.gist">
+      <label class="small">Gist</label>
+      <input ng-checked="panel.load.gist" ng-model="panel.load.gist" type="checkbox">
     </div>
     <div class="span2">
-      <label class="small"> Elasticsearch </label><input type="checkbox" ng-model="panel.load.elasticsearch" ng-checked="panel.load.elasticsearch">
+      <label class="small">Elasticsearch</label>
+      <input ng-checked="panel.load.elasticsearch" ng-model="panel.load.elasticsearch" type="checkbox">
     </div>
     <div class="span3" ng-show="panel.load.elasticsearch">
-      <label class="small">ES list size</label><input class="input-mini" type="number" ng-model="panel.elasticsearch_size">
+      <label class="small">ES list size</label>
+      <input class="input-mini" ng-model="panel.elasticsearch_size" type="number">
     </div>
     <div class="span3" ng-show="panel.load.elasticsearch">
-      <label class="small">ES store index</label><input class="input-small" type="text" ng-model="panel.elasticsearch_saveto">
+      <label class="small">ES store index</label>
+      <input class="input-small" ng-model="panel.elasticsearch_saveto" type="text">
     </div>
   </div>
   <h5>Sharing</h5>
-  <div class="row-fluid">    
-    <div class="span3" >
-      <label class="small">Allow Sharing</label><input type="checkbox" ng-model="panel.temp" ng-checked="panel.temp">
+  <div class="row-fluid">
+    <div class="span3">
+      <label class="small">Allow Sharing</label>
+      <input ng-checked="panel.temp" ng-model="panel.temp" type="checkbox">
     </div>
     <div class="span8" ng-show="panel.temp">
-      <label class="small">Shared Link TTL (examples: 1m,1d,1w,30d)</label><input class="input-small" type="text" ng-model="panel.temp_ttl">
+      <label class="small">Shared Link TTL (examples: 1m,1d,1w,30d)</label>
+      <input class="input-small" ng-model="panel.temp_ttl" type="text">
     </div>
   </div>
   <h5>Other Settings</h5>
-  <div class="row-fluid">    
-    <div class="span3" >
-      <label class="small"> Remove this Dashboard Control from saved copies </label><input type="checkbox" ng-model="panel.hide_control" ng-checked="panel.hide_control">    
+  <div class="row-fluid">
+    <div class="span3">
+      <label class="small">Remove this Dashboard Control from saved copies</label>
+      <input ng-checked="panel.hide_control" ng-model="panel.hide_control" type="checkbox">
     </div>
   </div>
-   
 </div>

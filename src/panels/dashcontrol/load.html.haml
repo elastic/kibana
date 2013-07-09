@@ -1,0 +1,44 @@
+%div
+  %a.close{:href => "", "ng-click" => "dismiss()"} ×
+  %h4 Load
+  %div{"ng-show" => "panel.load.local"}
+    %h5 Local File
+    %form
+      %input#dashupload{"dash-upload" => "", :type => "file"}/
+      %br/
+  %div{"ng-show" => "panel.load.gist"}
+    %h5
+      Gist
+      %small Enter a gist number or url
+    %form
+      %input{"ng-model" => "gist.url", :type => "text"}/
+      %br/
+      %button.btn{"ng-click" => "gist_dblist(gist_id(gist.url))", "ng-show" => "is_gist(gist.url)"}
+        %i.icon-github-alt
+        Get gist:{{gist.url | gistid}}
+      %h6{"ng-show" => "gist.files.length"}
+        Dashboards in gist:{{gist.url | gistid}}
+        %small click to load
+      %h6{"ng-hide" => "gist.files.length"} No gist dashboards found
+      %table.table.table-condensed.table-striped
+        %tr{"ng-repeat" => "file in gist.files"}
+          %td
+            %a{"ng-click" => "dash_load(file)"} {{file.title}}
+  %div{"ng-show" => "panel.load.elasticsearch"}
+    %h5 Elasticsearch
+    %form.input-append
+      %input{"ng-model" => "elasticsearch.query", :type => "text"}/
+      %button.btn{"ng-click" => "elasticsearch_dblist(elasticsearch.query)"}
+        %i.icon-search
+    %h6{"ng-show" => "elasticsearch.dashboards.length"} Elasticsearch stored dashboards
+    %h6{"ng-hide" => "elasticsearch.dashboards.length"} No dashboards matching your query found
+    %table.table.table-condensed.table-striped
+      %tr{"ng-repeat" => "dashboard in elasticsearch.dashboards"}
+        %td
+          %a{"ng-click" => "elasticsearch_delete(dashboard)"}
+            %i.icon-remove
+        %td
+          %a{:href => "#/dashboard/elasticsearch/{{dashboard._id}}"} {{dashboard._id}}
+        %td
+          %a
+            %i.icon-share{"bs-modal" => "'panels/dashcontrol/share.html'", "ng-click" => "share_link(dashboard._id,'elasticsearch',dashboard._id)"}

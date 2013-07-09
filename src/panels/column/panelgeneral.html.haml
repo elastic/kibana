@@ -1,0 +1,13 @@
+.row-fluid
+  .span4
+    %label.small Title
+    %input.input-medium{"ng-model" => "panel.title", :type => "text"}/
+  .span4
+    %label.small Group(s) (comma seperated)
+    %input.input-medium{"array-join" => "", "ng-model" => "panel.group", :type => "text"}/
+  .span2
+    %label.small Height
+    %input.input-mini{"ng-model" => "panel.height", :type => "text"}/
+  .span1
+    %label.small Editable
+    %input{"ng-checked" => "panel.editable", "ng-model" => "panel.editable", :type => "checkbox"}/

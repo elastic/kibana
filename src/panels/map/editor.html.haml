@@ -1,0 +1,29 @@
+.row-fluid
+  .span11
+    The map panel uses 2 letter country or US state codes to plot concentrations on a map. Darker terroritories mean more records matched that area. If multiple queries are sent from a single panel the
+    %strong first query will be displayed
+.row-fluid
+  .span3
+    %form
+      %h6 Field
+      %input.input-small{"bs-typeahead" => "fields.list", "ng-model" => "panel.field", :type => "text"}/
+  .span6
+    %form.input-append
+      %h6 Query
+      %input{"ng-model" => "panel.query", :type => "text"}/
+      %button.btn{"ng-click" => "get_data();"}
+        %i.icon-search
+  .span1
+    %h6 Map
+    %select.input-small{"ng-change" => "$emit('render')", "ng-model" => "panel.map", "ng-options" => "f for f in ['world','europe','usa']"}
+%h5 Panel Spy
+.row-fluid
+  .span2
+    %label.small Spyable
+    %input{"ng-checked" => "panel.spyable", "ng-model" => "panel.spyable", :type => "checkbox"}/
+  .span9.small
+    The panel spy shows 'behind the scenes' information about a panel. It can
+    be accessed by clicking the
+    %i.icon-eye-open
+    in the top right
+    of the panel.

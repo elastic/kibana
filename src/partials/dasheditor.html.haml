@@ -1,0 +1,45 @@
+.modal-header
+  %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", :type => "button"} ×
+  %h3
+    {{dashboards.title}}
+    %small editor
+.modal-body
+  %h4 Dashboard Control
+  .row-fluid
+    .span8
+      %label.small Title
+      %input.input-large{"ng-model" => "dashboards.title", :type => "text"}/
+    .span1
+      %label.small Editable
+      %input{"ng-checked" => "dashboards.editable", "ng-model" => "dashboards.editable", :type => "checkbox"}/
+  .row-fluid
+    .span12
+      %h4 Rows
+      %table.table.table-condensed.table-striped
+        %thead
+          %th Title
+          %th Delete
+          %th Move
+        %tr{"ng-repeat" => "row in dashboards.rows"}
+          %td {{row.title}}
+          %td
+            %i.pointer.icon-remove{"ng-click" => "dashboards.rows = _.without(dashboards.rows,row)"}
+          %td
+            %i.pointer.icon-arrow-up{"ng-click" => "_.move(dashboards.rows,$index,$index-1)", "ng-hide" => "$first"}
+          %td
+            %i.pointer.icon-arrow-down{"ng-click" => "_.move(dashboards.rows,$index,$index+1)", "ng-hide" => "$last"}
+  %h4 New row
+  .row-fluid
+    .span8
+      %label.small Title
+      %input.input-large{"ng-model" => "row.title", :type => "text"}/
+    .span2
+      %label.small Height
+      %input.input-mini{"ng-model" => "row.height", :type => "text"}/
+    .span1
+      %label.small Editable
+      %input{"ng-checked" => "row.editable", "ng-model" => "row.editable", :type => "checkbox"}/
+  %button.btn.btn-primary{"ng-click" => "add_row(dashboards,row); reset_row();"} Create Row
+  %br/
+.modal-footer
+  %button.btn.btn-success{"ng-click" => "dismiss();reset_panel();", :type => "button"} Close

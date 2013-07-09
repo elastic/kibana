@@ -1,6 +1,6 @@
-<kibana-panel ng-controller='map' ng-init="init()">
-  <span ng-show="panel.spyable" style="position:absolute;right:0px;top:0px" class='panelextra pointer'>
+<kibana-panel ng-controller="map" ng-init="init()">
+  <span class="panelextra pointer" ng-show="panel.spyable" style="position:absolute;right:0px;top:0px">
     <i bs-modal="'partials/modal.html'" class="icon-eye-open"></i>
   </span>
-  <div map params="{{panel}}" style="height:{{panel.height || row.height}}"></div>
+  <div map="" params="{{panel}}" style="height:{{panel.height || row.height}}"></div>
 </kibana-panel>

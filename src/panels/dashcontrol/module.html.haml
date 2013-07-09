@@ -1,0 +1,10 @@
+%kibana-panel{"ng-controller" => "dashcontrol", "ng-init" => "init()"}
+  %label.small Dashboard Control
+  %button.btn{"bs-popover" => "'panels/dashcontrol/load.html'", "data-placement" => "bottom", "data-unique" => "1", "ng-click" => "elasticsearch_dblist(elasticsearch.query)", "ng-show" => "panel.load.gist || panel.load.elasticsearch || panel.load.local"}
+    %i.icon-folder-open
+    %i.icon-caret-down
+  %button.btn{"bs-popover" => "'panels/dashcontrol/save.html'", "data-placement" => "bottom", "data-unique" => "1", "ng-show" => "panel.save.gist || panel.save.elasticsearch || panel.save.local || panel.save.default"}
+    %i.icon-save
+    %i.icon-caret-down
+  %button.btn{"bs-modal" => "'panels/dashcontrol/share.html'", "ng-click" => "elasticsearch_save('temp')", "ng-show" => "panel.temp"}
+    %i.icon-share

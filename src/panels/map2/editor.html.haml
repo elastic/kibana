@@ -1,0 +1,129 @@
+:css
+  .tabDetails {
+      border-bottom: 1px solid #ddd;
+      padding-bottom:20px;
+  }
+  .tabDetails td {
+      padding-right: 10px;
+      padding-bottom:10px;
+  }
+%div{"ng-controller" => "map2"}
+  .row-fluid{:style => "margin-bottom:20px"}
+    .span11
+      The map panel is compatible with either Geopoints or two-letter country codes, depending on the graphing options.  Left click to drag/pan map, scroll wheel (or double click) to zoom.  Globes can be spun using ctrl-key + drag.
+  .row-fluid
+    .span10
+      %form.form-horizontal
+        .control-group
+          %label.control-label{:for => "panelfield"} Primary Field
+          .controls
+            %input#panelfield.input{"ng-change" => "get_data()", "ng-model" => "panel.field", :type => "text"}/
+        .control-group
+          %label.control-label{:for => "panelsecondaryfield"} Secondary Field
+          .controls
+            %input#panelsecondaryfield.input{"bs-tooltip" => "'Allows aggregating on Primary field, while counting stats on a secondary (e.g. Group By user_id, Sum(purchase_price)).'", "data-placement" => "right", "ng-change" => "get_data()", "ng-model" => "panel.secondaryfield", :placeholder => "Optional", :type => "text"}/
+        .control-group
+          %label.control-label{:for => "panelquery"} Query
+          .controls
+            %input#panelquery.input{"ng-model" => "panel.query", :type => "text"}/
+  .row-fluid
+    .span11
+      %h4 Display Options
+    /
+      Rolling our own tab control here because the Angular-Strap Tab directive doesn't allow
+      updates to components inside, which is quite bizarre.  Or I just can't figure it out...
+    .span11
+      %ul.nav.nav-tabs{"ng-cloak" => ""}
+        %li{"ng-class" => "{active:isActive(tab)}", "ng-repeat" => "tab in ['Geopoints', 'Binning', 'Choropleth', 'Bullseye', 'Data']"}
+          %a{"ng-click" => "tabClick(tab)"} {{tab}}
+  .row-fluid.tabDetails{"ng-show" => "isActive('geopoints')"}
+    .span8.offset1
+      %table
+        %tbody
+          %tr
+            %td Geopoints
+            %td
+              %button.btn{"bs-button" => "", "bs-tooltip" => "'Compatible with Geopoint Type'", "data-placement" => "right", "ng-change" => "$emit('render')", "ng-class" => "{'btn-success': panel.display.geopoints.enabled}", "ng-model" => "panel.display.geopoints.enabled", :type => "button"} {{panel.display.geopoints.enabled|enabledText}}
+          %tr
+            %td Point size
+            %td
+              %input{"bs-tooltip" => "'Controls the size of the geopoints on the map.'", "data-placement" => "right", "ng-change" => "$emit('render')", "ng-model" => "panel.display.geopoints.pointSize", :style => "width:100px", :type => "text", :value => "{{panel.display.geopoints.pointSize}}"}/
+          %tr
+            %td Point Transparency
+            %td
+              %input{"bs-tooltip" => "'Controls the transparency of geopoints. Valid numbers are between 0.0 and 1.0'", "data-placement" => "right", "ng-change" => "$emit('render')", "ng-model" => "panel.display.geopoints.pointAlpha", :style => "width:100px", :type => "text", :value => "{{panel.display.geopoints.pointAlpha}}"}/
+          %tr
+            %td Autosizing
+            %td
+              %input{"bs-tooltip" => "'Allows point sizes to scale as you zoom in and out of the map.'", "data-placement" => "right", "ng-change" => "$emit('render')", "ng-model" => "panel.display.geopoints.autosize", :type => "checkbox"}/
+  .row-fluid.tabDetails{"ng-show" => "isActive('binning')"}
+    .span8.offset1
+      %table
+        %tbody
+          %tr
+            %td Binning
+            %td
+              %button.btn{"bs-button" => "", "bs-tooltip" => "'Compatible with Geopoint Type'", "data-placement" => "right", "ng-change" => "$emit('render')", "ng-class" => "{'btn-success': panel.display.binning.enabled}", "ng-model" => "panel.display.binning.enabled", :type => "button"} {{panel.display.binning.enabled|enabledText}}
+          %tr
+            %td Hexagon size
+            %td
+              %input{"bs-tooltip" => "'Controls the size of the hexagonal binning'", "data-placement" => "right", "ng-change" => "$emit('render')", "ng-model" => "panel.display.binning.hexagonSize", :style => "width:100px", :type => "text", :value => "{{panel.display.binning.hexagonSize}}"}/
+          %tr
+            %td Hexagon Transparency
+            %td
+              %input{"bs-tooltip" => "'Controls the transparency of hexagonal bins. Valid numbers are between 0.0 and 1.0'", "data-placement" => "right", "ng-change" => "$emit('render')", "ng-model" => "panel.display.binning.hexagonAlpha", :style => "width:100px", :type => "text", :value => "{{panel.display.binning.hexagonAlpha}}"}/
+          %tr
+            %td
+              %button.btn{"bs-button" => "", "ng-change" => "$emit('render')", "ng-class" => "{'btn-success': panel.display.binning.areaEncoding}", "ng-model" => "panel.display.binning.areaEncoding", :type => "button"} Area
+            %td
+              .btn-group{"bs-buttons-radio" => "", "ng-change" => "$emit('render')", "ng-model" => "panel.display.binning.areaEncodingField"}
+                %button.btn{:type => "button", :value => "primary"} Primary Field
+                %button.btn{:type => "button", :value => "secondary"} Secondary Field
+          %tr
+            %td
+              %button.btn{"bs-button" => "", "ng-change" => "$emit('render')", "ng-class" => "{'btn-success': panel.display.binning.colorEncoding}", "ng-model" => "panel.display.binning.colorEncoding", :type => "button"} Color
+            %td
+              .btn-group{"bs-buttons-radio" => "", "ng-change" => "$emit('render')", "ng-model" => "panel.display.binning.colorEncodingField"}
+                %button.btn{:type => "button", :value => "primary"} Primary Field
+                %button.btn{:type => "button", :value => "secondary"} Secondary Field
+  .row-fluid.tabDetails{"ng-show" => "isActive('choropleth')"}
+    .span8.offset1
+      %table
+        %tbody
+          %tr
+            %td Choropleth
+            %td
+              %button.btn{"bs-button" => "", "bs-tooltip" => "'Choropleths color country regions according to your selected field. Compatible with Country-Coded fields'", "data-placement" => "right", "ng-change" => "$emit('render')", "ng-class" => "{'btn-success': panel.display.choropleth.enabled}", "ng-model" => "panel.display.choropleth.enabled", :type => "button"} {{panel.display.choropleth.enabled|enabledText}}
+  .row-fluid.tabDetails{"ng-show" => "isActive('bullseye')"}
+    .span8.offset1
+      %table
+        %tbody
+          %tr
+            %td Bullseye
+            %td
+              %button.btn{"bs-button" => "", "ng-change" => "$emit('render')", "ng-class" => "{'btn-success': panel.display.bullseye.enabled}", "ng-model" => "panel.display.bullseye.enabled", :type => "button"} {{panel.display.bullseye.enabled|enabledText}}
+          %tr
+            %td Bullseye Coordinates
+            %td
+              %input{"bs-tooltip" => "'Latitude of Bullseye'", "data-placement" => "right", "ng-change" => "$emit('render')", "ng-model" => "panel.display.bullseye.coord.lat", :placeholder => "Latitude", :style => "width:100px", :type => "text", :value => "{{panel.display.bullseye.coord.lat}}"}/
+              %input{"bs-tooltip" => "'Longitude of Bullseye'", "data-placement" => "right", "ng-change" => "$emit('render')", "ng-model" => "panel.display.bullseye.coord.lon", :placeholder => "Longitude", :style => "width:100px", :type => "text", :value => "{{panel.display.bullseye.coord.lon}}"}/
+  .row-fluid.tabDetails{"ng-show" => "isActive('data')"}
+    .span8.offset1
+      %table
+        %tbody
+          %tr
+            %td Data Points
+            %td
+              %input{"bs-tooltip" => "'Controls the number of samples used in the map. Be careful with this value!'", "data-placement" => "right", "ng-change" => "get_data()", "ng-model" => "panel.display.data.samples", :style => "width:100px", :type => "text", :value => "{{panel.display.data.samples}}"}/
+          %tr
+            %td Map Projection
+            %td
+              %select{"ng-model" => "panel.display.data.type", "ng-options" => "option.id as option.text for option in panel.display.data.dropdown"}
+  %h5 Panel Spy
+  .row-fluid
+    .span2
+      %label.small Spyable
+      %input{"ng-checked" => "panel.spyable", "ng-model" => "panel.spyable", :type => "checkbox"}/
+    .span9.small
+      The panel spy shows 'behind the scenes' information about a panel. It can be
+      accessed by clicking the in the top right of the panel.
