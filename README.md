@@ -33,6 +33,11 @@ The url entered here _must be reachable_ by your browser.
 3. Point your browser at your installation. If you're using Logstash with the default indexing 
 configuration the default Kibana dashboard should work nicely. 
 
+Example webserver configuration:
+
+        # Serve Kibana on localhost:8080
+        nginx -p $(pwd) -c sample/nginx-standalone.conf`
+
 ### FAQ
 __Q__: Why doesnt it work? I have http://localhost:9200 in my config.js, my webserver and elasticsearch
 server are on the same machine  
