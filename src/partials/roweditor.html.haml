@@ -1,0 +1,58 @@
+.modal-header
+  %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", :type => "button"} ×
+  %h3
+    {{row.title}}
+    %small row editor
+.modal-body
+  %h4 Row Control
+  .row-fluid
+    .span4
+      %label.small Title
+      %input.input-medium{"ng-model" => "row.title", :type => "text"}/
+    .span2
+      %label.small Height
+      %input.input-mini{"ng-model" => "row.height", :type => "text"}/
+    .span1
+      %label.small Editable
+      %input{"ng-checked" => "row.editable", "ng-model" => "row.editable", :type => "checkbox"}/
+    .span1
+      %label.small Collapsable
+      %input{"ng-checked" => "row.collapsable", "ng-model" => "row.collapsable", :type => "checkbox"}/
+  .row-fluid
+    %h4 New Panel
+    %form.input-append
+      %select.input-medium.input-append{"ng-model" => "panel.type", "ng-options" => "f for f in config.modules|stringSort"}
+      %small{"ng-show" => "!panel.type"} Select Type
+      %button.btn.btn-success{"ng-click" => "add_panel(row,panel); reset_panel();", "ng-show" => "panel.type"}
+        Add
+        %i.icon-plus
+    %div{"ng-show" => "!(_.isUndefined(panel.type))"}
+      %div{"ng-include" => "", :src => "'partials/panelgeneral.html'"}
+      %div{"add-panel" => "{{panel.type}}"}
+  .row-fluid
+    .span12
+      %h4 Panels
+      %table.table.table-condensed.table-striped
+        %thead
+          %th Title
+          %th Type
+          %th Span
+          %th Delete
+          %th Move
+          %th
+          %th Hide
+        %tr{"ng-repeat" => "panel in row.panels"}
+          %td {{panel.title}}
+          %td {{panel.type}}
+          %td
+            %select.input-mini{"ng-hide" => "panel.sizeable == false", "ng-model" => "panel.span", "ng-options" => "f for f in [0,1,2,3,4,5,6,7,8,9,10,11,12]"}
+          %td
+            %i.pointer.icon-remove{"ng-click" => "row.panels = _.without(row.panels,panel)"}
+          %td
+            %i.pointer.icon-arrow-up{"ng-click" => "_.move(row.panels,$index,$index-1)", "ng-hide" => "$first"}
+          %td
+            %i.pointer.icon-arrow-down{"ng-click" => "_.move(row.panels,$index,$index+1)", "ng-hide" => "$last"}
+          %td
+            %input{"ng-checked" => "panel.hide", "ng-model" => "panel.hide", :type => "checkbox"}/
+.modal-footer
+  %button.btn.btn-success{"ng-click" => "dismiss();reset_panel();close_edit()", :type => "button"} Close

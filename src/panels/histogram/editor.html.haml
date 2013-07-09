@@ -1,0 +1,104 @@
+%div
+  .row-fluid
+    .span3
+      %label.small Mode
+      %select.input-small{"ng-change" => "set_refresh(true)", "ng-model" => "panel.mode", "ng-options" => "f for f in ['count','min','mean','max','total']"}
+    .span3{"ng-show" => "panel.mode != 'count'"}
+      %label.small Field
+      %form
+        %input.input-small{"bs-typeahead" => "fields.list", "ng-change" => "set_refresh(true)", "ng-model" => "panel.value_field", :placeholder => "Start typing", :type => "text"}/
+    .span5{"ng-show" => "panel.mode != 'count'"}
+      %label.small Note
+      %small
+        In
+        %strong {{panel.mode}}
+        mode the configured field
+        %strong must
+        be a numeric type
+  .row-fluid
+    .span3
+      %form{:style => "margin-bottom: 0px"}
+        %label.small Label
+        %input{"ng-model" => "newlabel", :placeholder => "New Label", :style => "width:70%", :type => "text"}/
+    .span8
+      %label.small Query
+      %form.input-append{:style => "margin-bottom: 0px"}
+        %input{"ng-model" => "newquery", :placeholder => "New Query", :style => "width:80%", :type => "text"}/
+        %button.btn{"ng-click" => "add_query(newlabel,newquery);newlabel='';newquery='';set_refresh(true)"}
+          %i.icon-plus
+    .span1
+  .row-fluid{"ng-repeat" => "q in panel.query"}
+    .span3
+      %form{:style => "margin-bottom: 0px"}
+        %input{"ng-change" => "set_refresh(true)", "ng-model" => "q.label", :style => "width:70%", :type => "text"}/
+    .span8
+      %form{:style => "margin-bottom: 0px"}
+        %input{"ng-change" => "set_refresh(true)", "ng-model" => "q.query", :style => "width:80%", :type => "text"}/
+    .span1
+      %i.icon-remove.pointer{"ng-click" => "remove_query(q)"}
+  %h5 Chart Options
+  .row-fluid{:style => "margin-bottom:10px;"}
+    .span1
+      %label.small Bars
+      %input{"ng-checked" => "panel.bars", "ng-model" => "panel.bars", :type => "checkbox"}/
+    .span1
+      %label.small Lines
+      %input{"ng-checked" => "panel.lines", "ng-model" => "panel.lines", :type => "checkbox"}/
+    .span1
+      %label.small Points
+      %input{"ng-checked" => "panel.points", "ng-model" => "panel.points", :type => "checkbox"}/
+    .span1
+      %label.small Stack
+      %input{"ng-checked" => "panel.stack", "ng-model" => "panel.stack", :type => "checkbox"}/
+    .span1{"ng-show" => "panel.stack"}
+      %label.small{"bs-tooltip" => "'Stack as a percentage of total'"} Percent
+      %input{"ng-checked" => "panel.percentage", "ng-model" => "panel.percentage", :type => "checkbox"}/
+    .span1
+      %label.small Legend
+      %input{"ng-checked" => "panel.legend", "ng-model" => "panel.legend", :type => "checkbox"}/
+    .span1
+      %label.small xAxis
+      %input{"ng-checked" => "panel['x-axis']", "ng-model" => "panel['x-axis']", :type => "checkbox"}/
+    .span1
+      %label.small yAxis
+      %input{"ng-checked" => "panel['y-axis']", "ng-model" => "panel['y-axis']", :type => "checkbox"}/
+    .span2{"ng-show" => "panel.lines"}
+      %label.small Line Fill
+      %select.input-mini{"ng-model" => "panel.fill", "ng-options" => "f for f in [0,1,2,3,4,5,6,7,8,9,10]"}
+    .span2{"ng-show" => "panel.lines"}
+      %label.small Line Width
+      %select.input-mini{"ng-model" => "panel.linewidth", "ng-options" => "f for f in [0,1,2,3,4,5,6,7,8,9,10]"}
+  .row-fluid
+    .span2
+      %label.small Time correction
+      %select.input-small{"ng-model" => "panel.timezone", "ng-options" => "f for f in ['browser','utc']"}
+    .span1
+      %label.small Selectable
+      %input{"ng-checked" => "panel.interactive", "ng-model" => "panel.interactive", :type => "checkbox"}/
+    .span2
+      %label.small Zoom Links
+      %input{"ng-checked" => "panel.zoomlinks", "ng-model" => "panel.zoomlinks", :type => "checkbox"}/
+    .span2
+      %label.small Auto-interval
+      %input{"ng-checked" => "panel.auto_int", "ng-model" => "panel.auto_int", :type => "checkbox"}/
+    .span2{"ng-show" => "panel.auto_int"}
+      %label.small Resolution
+      %input.input-mini{"ng-change" => "set_refresh(true)", "ng-model" => "panel.resolution", :type => "number"}/
+    .span3{"ng-show" => "panel.auto_int"}
+      %label.small Shoot for this many data points, rounding to sane intervals
+    .span2{"ng-hide" => "panel.auto_int"}
+      %label.small Interval
+      %input.input-mini{"ng-change" => "set_refresh(true)", "ng-model" => "panel.interval", :type => "text"}/
+    .span3{"ng-hide" => "panel.auto_int"}
+      %label.small Use Elasticsearch date math format (eg 1m, 5m, 1d, 2w, 1y)
+  %h5 Panel Spy
+  .row-fluid
+    .span2
+      %label.small Spyable
+      %input{"ng-checked" => "panel.spyable", "ng-model" => "panel.spyable", :type => "checkbox"}/
+    .span9.small
+      The panel spy shows 'behind the scenes' information about a panel. It can
+      be accessed by clicking the
+      %i.icon-eye-open
+      in the top right
+      of the panel.

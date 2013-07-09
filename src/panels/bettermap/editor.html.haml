@@ -1,0 +1,36 @@
+.row-fluid
+  .span11
+    This panel uses geoJSON points in a field to place markers on a map.
+    Coordinates
+    = succeed "." do
+      %strong must be stored as an array in Elasticsearch
+    Also note that geoJSON is
+    = succeed "." do
+      %strong long,lat NOT lat,long
+.row-fluid
+  .span11
+    %h6 Query
+    %input{"ng-model" => "panel.query", :style => "width:100%", :type => "text"}/
+.row-fluid
+  .span4
+    %form
+      %h6 Coordinate Field
+      %input.input-small{"bs-typeahead" => "fields.list", "ng-model" => "panel.field", :type => "text"}/
+  .span4
+    %form
+      %h6 Tooltip Field
+      %input.input-small{"bs-typeahead" => "fields.list", "ng-model" => "panel.tooltip", :type => "text"}/
+  .span2
+    %h6 Max Points
+    %input.input-small{"ng-model" => "panel.size", :type => "number"}/
+%h5 Panel Spy
+.row-fluid
+  .span2
+    %label.small Spyable
+    %input{"ng-checked" => "panel.spyable", "ng-model" => "panel.spyable", :type => "checkbox"}/
+  .span9.small
+    The panel spy shows 'behind the scenes' information about a panel. It can
+    be accessed by clicking the
+    %i.icon-eye-open
+    in the top right
+    of the panel.

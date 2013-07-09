@@ -1,0 +1,7 @@
+%form.form-inline.input-append{:name => "refreshPopover", :style => "margin:0px"}
+  %label
+    %small Interval (seconds)
+  %br/
+  %input.input-mini{"ng-model" => "refresh_interval", :type => "number"}/
+  %button.btn{"ng-click" => "set_interval(refresh_interval);dismiss()", :type => "button"}
+    %i.icon-ok

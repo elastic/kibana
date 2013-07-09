@@ -1,0 +1,5 @@
+%kibana-panel{"ng-controller" => "sort", "ng-init" => "init()", :style => "white-space: nowrap;"}
+  %label
+    %small {{panel.label}}
+  %select{"ng-change" => "set_sort()", "ng-model" => "panel.sort[0]", "ng-options" => "f for f in fields", :style => "width:85%"}
+  %i.pointer{"ng-class" => "{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}", "ng-click" => "toggle_sort()"}

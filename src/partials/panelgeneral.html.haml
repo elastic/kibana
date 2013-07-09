@@ -1,0 +1,13 @@
+.row-fluid
+  .span4
+    %label.small Title
+    %input.input-medium{"ng-model" => "panel.title", :type => "text"}/
+  .span4
+    %label.small Group(s) (comma seperated)
+    %input.input-medium{"array-join" => "", "ng-model" => "panel.group", :type => "text"}/
+  .span2{"ng-hide" => "panel.sizeable == false"}
+    %label.small Span
+    %select.input-mini{"ng-model" => "panel.span", "ng-options" => "f for f in [0,1,2,3,4,5,6,7,8,9,10,11,12]"}
+  .span1
+    %label.small Editable
+    %input{"ng-checked" => "panel.editable", "ng-model" => "panel.editable", :type => "checkbox"}/

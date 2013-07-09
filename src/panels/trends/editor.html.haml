@@ -1,0 +1,42 @@
+%div
+  .row-fluid
+    .span12
+      The trends panel will give you a percentage representation of how your query
+      has moved in your current timespan compared a specified amount of time ago. For
+      example, if the time is 1:10pm, your time picker was set to "Last 10m", and the
+      "Time Ago" parameter was set to '1h', the panel would show how much the query
+      results have changed since 12:00-12:10pm
+  %h4 Settings
+  .row-fluid
+    .span3{"ng-hide" => "panel.auto_int"}
+      %label.small Use Elasticsearch date math format here (eg 1m, 5m, 1d, 2w, 1y)
+    .span3
+      %label.small Time Ago
+      %input.input-small{"ng-change" => "set_refresh(true)", "ng-model" => "panel.ago", :type => "text"}/
+    .span2
+      %label.small Font Size
+      %select.input-small{"ng-model" => "panel.style['font-size']", "ng-options" => "f for f in ['7pt','8pt','9pt','10pt','12pt','14pt','16pt','18pt','20pt','24pt','28pt','32pt','36pt','42pt','48pt','52pt','60pt','72pt']"}
+    .span3
+      %label.small List Format
+      %select.input-small{"ng-model" => "panel.arrangement", "ng-options" => "f for f in ['horizontal','vertical']"}
+  %h5 Queries
+  .row-fluid
+    .span3
+      %form{:style => "margin-bottom: 0px"}
+        %label.small Label
+        %input{"ng-model" => "newlabel", :placeholder => "New Label", :style => "width:70%", :type => "text"}/
+    .span8
+      %form.input-append{:style => "margin-bottom: 0px"}
+        %label.small Query
+        %input{"ng-model" => "newquery", :placeholder => "New Query", :style => "width:80%", :type => "text"}/
+        %button.btn{"ng-click" => "add_query(newlabel,newquery);newlabel='';newquery='';set_refresh(true)"}
+          %i.icon-plus
+    .span1
+  .row-fluid{"ng-repeat" => "q in panel.query"}
+    .span3
+      %form{:style => "margin-bottom: 0px"}
+        %input{"ng-change" => "set_refresh(true)", "ng-model" => "q.label", :style => "width:70%", :type => "text"}/
+    .span8
+      %input{"ng-change" => "set_refresh(true)", "ng-model" => "q.query", :style => "width:80%", :type => "text"}/
+    .span1
+      %i.icon-remove.pointer{"ng-click" => "remove_query(q)"}

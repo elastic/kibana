@@ -1,0 +1,65 @@
+.row-fluid{"ng-switch" => "panel.mode"}
+  .span3
+    %label.small Mode
+    %select.input-small{"ng-change" => "set_mode(panel.mode)", "ng-model" => "panel.mode", "ng-options" => "f for f in ['terms','goal']"}
+  %div{"ng-switch-when" => "terms"}
+    .row-fluid
+      .span3
+        %form{:style => "margin-bottom: 0px"}
+          %label.small Field
+          %input{"bs-typeahead" => "fields.list", "ng-model" => "panel.query.field", :style => "width:90%", :type => "text"}/
+      .span5
+        %form.input-append{:style => "margin-bottom: 0px"}
+          %label.small Query
+          %input{"ng-model" => "panel.query.query", :style => "width:80%", :type => "text"}/
+          %button.btn{"ng-click" => "get_data()"}
+            %i.icon-search
+    .row-fluid
+      .span3
+        %label.small Length
+        %input{"ng-change" => "get_data()", "ng-model" => "panel.size", :style => "width:80%", :type => "number"}/
+      .span8
+        %form.input-append{:style => "margin-bottom: 0px"}
+          %label.small Exclude Terms(s) (comma seperated)
+          %input{"array-join" => "", "ng-model" => "panel.exclude", :style => "width:90%", :type => "text"}/
+          %button.btn{"ng-click" => "get_data()"}
+            %i.icon-search
+  %div{"ng-switch-when" => "goal"}
+    .row-fluid
+      .span3
+        %label.small Mode
+        %select.input-small{"ng-change" => "set_mode(panel.mode)", "ng-model" => "panel.mode", "ng-options" => "f for f in ['terms','goal']"}
+      .span2
+        %form{:style => "margin-bottom: 0px"}
+          %label.small Goal
+          %input{"ng-model" => "panel.query.goal", :style => "width:90%", :type => "number"}/
+      .span5
+        %form.input-append{:style => "margin-bottom: 0px"}
+          %label.small Query
+          %input{"ng-model" => "panel.query.query", :style => "width:80%", :type => "text"}/
+          %button.btn{"ng-click" => "get_data()"}
+            %i.icon-search
+.row-fluid
+  .span1
+    %label.small Donut
+    %input{"ng-checked" => "panel.donut", "ng-model" => "panel.donut", :type => "checkbox"}/
+  .span1
+    %label.small Tilt
+    %input{"ng-checked" => "panel.tilt", "ng-model" => "panel.tilt", :type => "checkbox"}/
+  .span1
+    %label.small Labels
+    %input{"ng-checked" => "panel.labels", "ng-model" => "panel.labels", :type => "checkbox"}/
+  .span3
+    %label.small Legend
+    %select.input-small{"ng-model" => "panel.legend", "ng-options" => "f for f in ['above','below','none']"}
+%h5 Panel Spy
+.row-fluid
+  .span2
+    %label.small Spyable
+    %input{"ng-checked" => "panel.spyable", "ng-model" => "panel.spyable", :type => "checkbox"}/
+  .span9.small
+    The panel spy shows 'behind the scenes' information about a panel. It can
+    be accessed by clicking the
+    %i.icon-eye-open
+    in the top right
+    of the panel.

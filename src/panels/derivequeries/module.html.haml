@@ -1,0 +1,27 @@
+%kibana-panel{"ng-controller" => "derivequeries", "ng-init" => "init()"}
+  %span.panelextra.pointer{"ng-show" => "panel.spyable", :style => "position:absolute;right:0px;top:0px"}
+    %i.icon-eye-open{"bs-modal" => "'partials/modal.html'"}
+  %div{"ng-show" => "!panel.multi"}
+    %form
+      %table.form-horizontal
+        %tr
+          %td
+            %label
+              %small {{panel.label}}
+          %td
+            %label
+              %small Field
+        %tr
+          %td{:style => "padding-right:20px", :width => "97%"}
+            %input{"bs-typeahead" => "panel.history", "data-items" => "100", "data-min-length" => "0", "ng-model" => "panel.query", :style => "width:100%", :type => "text"}/
+          %td{"ng-show" => "panel.fields.length &gt; 0"}
+            %select.input-small{"ng-model" => "panel.field", "ng-options" => "f for f in panel.fields"}
+          %td{"ng-show" => "panel.fields.length == 0"}
+            %input.input-small{"ng-model" => "panel.field", :type => "text"}/
+          %td{:style => "margin-left:20px", :width => "1%"}
+            %button.btn.btn-info{"ng-click" => "get_data()", :style => "margin-top:0px", :type => "submit"}
+              %i.icon-search
+          %td{:width => "1%"}
+            %button.btn.btn-danger{"ng-click" => "panel.query='';get_data()", :style => "margin-top:0px", :type => "submit"}
+              %i.icon-ban-circle
+        %tr

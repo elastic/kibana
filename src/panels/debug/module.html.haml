@@ -1,0 +1,18 @@
+%kibana-panel{"ng-controller" => "debug", "ng-init" => "init()"}
+  %table.table-hover.table.table-condensed{"ng-style" => "panel.style", :style => "height:{{panel.height || row.height}};overflow-y:auto;overflow-x:auto"}
+    %thead
+  %th{"ng-repeat" => "th in ['timestamp','from','to','type']", :style => "white-space:nowrap"}
+    {{th}}
+  %tbody{"ng-class-odd" => "'odd'", "ng-repeat" => "event in events"}
+    %tr{"ng-click" => "toggle_details(event)"}
+      %td {{event.header.time}}
+      %td {{event.header.from}}
+      %td {{event.header.to}}
+      %td {{event.header.type}}
+    %tr{"ng-show" => "event.details"}
+      %td
+        %h6 Event header
+        %pre{"ng-style" => "panel.style"} {{event.header | json}}
+      %td{:colspan => "1000"}
+        %h6 Event payload
+        %pre{"ng-style" => "panel.style"} {{event.data | json}}

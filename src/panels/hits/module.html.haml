@@ -1,0 +1,38 @@
+%kibana-panel{"ng-controller" => "hits", "ng-init" => "init()"}
+  %div{:id => "{{$id}}-legend", "ng-show" => "panel.counter_pos == 'above' &amp;&amp; (panel.chart == 'bar' || panel.chart == 'pie')"}
+    / vertical legend
+    %table.small{"ng-show" => "panel.arrangement == 'vertical'"}
+      %tr{"ng-repeat" => "query in plot.getData()"}
+        %td
+          %div{:style => "display:inline-block;border-radius:5px;background:{{query.color}};height:10px;width:10px"}
+        %td{:style => "padding-right:10px;padding-left:10px;"} {{query.label}}
+        %td {{query.data[0][1]}}
+    / horizontal legend
+    .small{"ng-repeat" => "query in plot.getData()", "ng-show" => "panel.arrangement == 'horizontal'", :style => "float:left;padding-left: 10px;"}
+      %span
+      %div{:style => "display:inline-block;border-radius:5px;background:{{query.color}};height:10px;width:10px"}
+      {{query.label}} ({{query.data[0][1]}})
+    %br/
+  %div{:style => "clear:both"}
+  %div{"hits-chart" => "", "ng-show" => "panel.chart == 'pie' || panel.chart == 'bar'", :params => "{{panel}}", :style => "height:{{panel.height || row.height}};position:relative"}
+  %div{:id => "{{$id}}-legend", "ng-show" => "panel.counter_pos == 'below' &amp;&amp; (panel.chart == 'bar' || panel.chart == 'pie')"}
+    / vertical legend
+    %table.small{"ng-show" => "panel.arrangement == 'vertical'"}
+      %tr{"ng-repeat" => "query in plot.getData()"}
+        %td
+          %div{:style => "display:inline-block;border-radius:5px;background:{{query.color}};height:10px;width:10px"}
+        %td{:style => "padding-right:10px;padding-left:10px;"} {{query.label}}
+        %td {{query.data[0][1]}}
+    / horizontal legend
+    .small{"ng-repeat" => "query in plot.getData()", "ng-show" => "panel.arrangement == 'horizontal'", :style => "float:left;padding-left: 10px;"}
+      %span
+      %div{:style => "display:inline-block;border-radius:5px;background:{{query.color}};height:10px;width:10px"}
+      {{query.label}} ({{query.data[0][1]}})
+    %br/
+  %div{"ng-show" => "panel.chart == 'total'"}
+    %div{"ng-style" => "panel.style", :style => "line-height:{{panel.style['font-size']}}"} {{hits}}
+  %span{"ng-show" => "panel.chart == 'list'"}
+    %span{"ng-repeat" => "query in data", "ng-style" => "panel.style", :style => "line-height:{{panel.style['font-size']}}"}
+      {{query.label}} ({{query.hits}})
+      %span
+      %br{"ng-show" => "panel.arrangement == 'vertical' &amp;&amp; panel.chart == 'list'"}/

@@ -1,0 +1,34 @@
+%div
+  .row-fluid
+    %h4 Add Panel to Column
+    %select.input-medium{"ng-change" => "reset_panel(new_panel.type);send_render();", "ng-model" => "new_panel.type", "ng-options" => "f for f in _.without(config.modules,'column')| stringSort"}
+    %small Select Type
+    %div{"ng-show" => "!(_.isUndefined(new_panel.type))"}
+      %div{"column-edit" => "", :config => "config", :dashboards => "dashboards", :panel => "new_panel", :row => "row", :type => "new_panel.type"}
+      %button.btn.btn-primary{"ng-click" => "add_panel(new_panel); reset_panel();"} Create Panel
+      %br/
+  .row-fluid
+    .span12
+      %h4 Panels
+      %table.table.table-condensed.table-striped
+        %thead
+          %th Title
+          %th Type
+          %th Height
+          %th Delete
+          %th Move
+          %th
+          %th Hide
+        %tr{"ng-repeat" => "app in panel.panels"}
+          %td {{app.title}}
+          %td {{app.type}}
+          %td
+            %input.input-small{"ng-model" => "app.height", :type => "text"}/
+          %td
+            %i.pointer.icon-remove{"ng-click" => "panel.panels = _.without(panel.panels,app)"}
+          %td
+            %i.pointer.icon-arrow-up{"ng-click" => "_.move(panel.panels,$index,$index-1)", "ng-hide" => "$first"}
+          %td
+            %i.pointer.icon-arrow-down{"ng-click" => "_.move(panel.panels,$index,$index+1)", "ng-hide" => "$last"}
+          %td
+            %input{"ng-checked" => "app.hide", "ng-model" => "app.hide", :type => "checkbox"}/

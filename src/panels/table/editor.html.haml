@@ -1,0 +1,89 @@
+.row-fluid
+  %div{:style => "width:90%"}
+    %form.input-append
+      %h6 Query
+      %input{"ng-model" => "panel.query", :style => "width:90%", :type => "text"}/
+      %button.btn{"ng-click" => "get_data();"}
+        %i.icon-search
+.row-fluid
+  .span4
+    %form.input-append
+      %h6 Add field
+      %input.input-small{"bs-typeahead" => "fields.list", "ng-model" => "newfield", :type => "text"}/
+      %button.btn{"ng-click" => "toggle_field(newfield);newfield=''"}
+        %i.icon-plus
+  .span8
+    %h6
+      Columns
+      %small Click to remove
+    %span.label.remove.pointer{"ng-click" => "toggle_field(field)", "ng-repeat" => "field in $parent.panel.fields", :style => "margin-left:3px"} {{field}}
+.row-fluid
+  .span4
+    %form.input-append
+      %h6 Add field
+      %input.input-small{"bs-typeahead" => "fields.list", "ng-change" => "set_refresh(true)", "ng-model" => "newhighlight", :type => "text"}/
+      %button.btn{"ng-click" => "toggle_highlight(newhighlight);newhighlight=''"}
+        %i.icon-plus
+  .span8
+    %h6
+      Highlighted fields
+      %small Click to remove
+    %span.label.remove.pointer{"ng-click" => "toggle_highlight(field);set_refresh(true)", "ng-repeat" => "field in $parent.panel.highlight", :style => "margin-left:3px"} {{field}}
+%h5 Options
+.row-fluid
+  .span1
+    %h6 Header
+    %input{"ng-checked" => "panel.header", "ng-model" => "panel.header", :type => "checkbox"}/
+  .span1
+    %h6 Sorting
+    %input{"ng-checked" => "panel.sortable", "ng-model" => "panel.sortable", :type => "checkbox"}/
+  .span4{"ng-show" => "panel.sortable", :style => "white-space:nowrap"}
+    %h6 Sort
+    %input{"ng-model" => "panel.sort[0]", "ng-show" => "all_fields.length&lt;=0 || !all_fields", :style => "width:85%", :type => "text"}/
+    %select{"ng-model" => "panel.sort[0]", "ng-options" => "f for f in all_fields", "ng-show" => "all_fields.length&gt;0", :style => "width:85%"}
+    %i{"ng-class" => "{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}", "ng-click" => "set_sort(panel.sort[0])"}
+  .span3
+    %h6 Font Size
+    %select.input-small{"ng-model" => "panel.style['font-size']", "ng-options" => "f for f in ['7pt','8pt','9pt','10pt','12pt','14pt','16pt','18pt','20pt','24pt','28pt','32pt','36pt','42pt','48pt','52pt','60pt','72pt']"}
+  .span2
+    %h6 Page Control
+    %input{"ng-checked" => "panel.paging", "ng-model" => "panel.paging", :type => "checkbox"}/
+%h5 Paging
+.row-fluid
+  .span2
+    %h6 Per Page
+    %input.input-mini{"ng-change" => "get_data()", "ng-model" => "panel.size", :type => "number"}/
+  .span1
+    %h6 &nbsp;
+    %center
+      %i.icon-remove
+      %center
+  .span2
+    %h6 Page limit
+    %input.input-mini{"ng-change" => "get_data()", "ng-model" => "panel.pages", :type => "number"}/
+  .span2.large
+    %h6 Pageable
+    %strong = {{panel.size * panel.pages}}
+  .span3
+    %h6 Page Overflow
+    %select.input-small{"ng-model" => "panel.overflow", "ng-options" => "f.value as f.key for f in [{key:'scroll',value:'height'},{key:'expand',value:'min-height'}]"}
+/
+  <div class="row-fluid" ng-show='panel.sortable'>
+  <div class="span11">
+  <h6>A note about sorting</h6>
+  Allowing sorting can incur a significant performance penalty if using timestamped indices.
+  Kibana will be unable to query your indices sequentially and thus must query them all at
+  once. Only enable sorting if your cluster is stout enough to handle it.
+  </div>
+  </div>
+%h5 Panel Spy
+.row-fluid
+  .span2
+    %label.small Spyable
+    %input{"ng-checked" => "panel.spyable", "ng-model" => "panel.spyable", :type => "checkbox"}/
+  .span9.small
+    The panel spy shows 'behind the scenes' information about a panel. It can
+    be accessed by clicking the
+    %i.icon-eye-open
+    in the top right
+    of the panel.

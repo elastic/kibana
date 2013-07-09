@@ -1,0 +1,24 @@
+%div
+  .row-fluid
+    .span2
+      %label.small Multi-query
+      %input{"ng-change" => "set_multi(panel.multi) ", "ng-checked" => "panel.multi", "ng-model" => "panel.multi", :type => "checkbox"}/
+    .span3{"ng-show" => "panel.multi"}
+      %label.small Arrangement
+      %select.input-small{"ng-model" => "panel.multi_arrange", "ng-options" => "f for f in ['vertical','horizontal']"}
+  .row-fluid{"ng-show" => "panel.multi"}
+    .span12
+      %h5 A note on multi query panels
+      %p
+        You turned on multi panel support:
+        = succeed "." do
+          %i cool
+        Be aware that not all panels support display of multiple queries. Panels that don't support receiving several queries at one time will (should) display the results of the
+        = succeed "." do
+          %strong first query in the list
+        Further, some panels might not support receiving multiple queries in all modes. For example, the
+        %strong pie panel
+        supports multiple queries only in
+        = succeed "." do
+          %strong query mode
+        In its other modes it will display the results of the first query in the list

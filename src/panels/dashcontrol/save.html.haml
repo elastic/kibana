@@ -1,0 +1,35 @@
+%div
+  %a.close{:href => "", "ng-click" => "dismiss()"} ×
+  %h4 Save
+  %div{"ng-show" => "panel.save.default || panel.save.local"}
+    %h5 Locally
+    %form
+      %ul.nav.nav-list
+        %li
+          %a{"ng-click" => "to_file()", "ng-show" => "panel.save.local"}
+            %i.icon-download
+            Export to File
+        %li
+          %a{"ng-click" => "default()", "ng-show" => "panel.save.default"}
+            %i.icon-bookmark
+            Set as My Default
+        %li
+          %a{"ng-click" => "purge()", "ng-show" => "panel.save.default"}
+            %i.icon-ban-circle
+            Clear My Default
+  %div{"ng-show" => "panel.save.gist"}
+    %h5 Gist
+    %form.input-append
+      %input.input-medium{"ng-model" => "gist.title", :placeholder => "Title", :type => "text"}/
+      %button.btn{"ng-click" => "save_gist()"}
+        %i.icon-github-alt
+    %br/
+    %small{"ng-show" => "gist.last"}
+      Last gist:
+      %a{:href => "{{gist.last}}", :target => "_blank"} {{gist.last}}
+  %div{"ng-show" => "panel.save.elasticsearch"}
+    %h5 Elasticsearch
+    %form.input-append
+      %input.input-medium{"ng-model" => "elasticsearch.title", :placeholder => "Title", :type => "text"}/
+      %button.btn{"ng-click" => "elasticsearch_save('dashboard')"}
+        %i.icon-save

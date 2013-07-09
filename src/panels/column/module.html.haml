@@ -1,0 +1,13 @@
+%kibana-panel{"ng-controller" => "column", "ng-init" => "init();"}
+  / Panels
+  .row-fluid.panel{"ng-hide" => "panel.height == '0px' || panel.hide", "ng-repeat" => "(name, panel) in panel.panels", :style => "min-height:{{panel.height}}; position:relative"}
+    / Error Panel
+    .row-fluid
+      .span12.alert.alert-error.panel-error{"ng-hide" => "!panel.error"}
+        %a.close{"ng-click" => "panel.error=false"} &times;
+        %i.icon-exclamation-sign
+        %strong Oops!
+        {{panel.error}}
+    / Content Panel
+    .row-fluid
+      .span12{"ng-include" => "'panels/'+panel.type+'/module.html'", :style => "margin-top:0px"}

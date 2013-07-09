@@ -1,0 +1,6 @@
+%kibana-panel{"ng-controller" => "text", "ng-init" => "init()"}
+  / <p ng-style="panel.style" ng-bind-html-unsafe="panel.content | striphtml | newlines"></p>
+  %markdown{"ng-show" => "ready &amp;&amp; panel.mode == 'markdown'"}
+    {{panel.content}}
+  %p{"ng-bind-html" => "panel.content | striphtml | newlines", "ng-show" => "panel.mode == 'text'", "ng-style" => "panel.style"}
+  %p{"ng-bind-html" => "panel.content", "ng-show" => "panel.mode == 'html'"}

@@ -1,0 +1,7 @@
+%kibana-panel{"ng-controller" => "trends", "ng-init" => "init()"}
+  %div{"ng-repeat" => "query in trends", "ng-style" => "panel.style", :style => "line-height:{{panel.style['font-size']}};display:inline-block;padding-right: 5px;"}
+    %span.strong{"ng-class" => "{'text-success': query.hits.new &gt;= query.hits.old, 'text-error': query.hits.old &gt; query.hits.new}"}
+      %i.large{"ng-class" => "{'icon-caret-up': query.hits.new &gt;= query.hits.old, 'icon-caret-down': query.hits.old &gt; query.hits.new}"}
+      {{query.percent}}%
+    %span.tiny.pointer.light{"bs-tooltip" => "'Then: '+query.hits.old+', Now: '+query.hits.new"} ({{query.label}})
+    %br{"ng-show" => "panel.arrangement == 'vertical'"}/

@@ -1,0 +1,66 @@
+.row-fluid
+  .span3
+    %h6 Default Mode
+    %select{"ng-model" => "panel.mode", "ng-options" => "f for f in ['relative','absolute','since']", :style => "width:85%"}
+  .span3
+    %h6 Time Field
+    %input.input-small{"ng-model" => "panel.timefield", :type => "text"}/
+.row-fluid
+  %h5 Index Settings
+  .row-fluid{"ng-show" => "panel.index_interval != 'none'"}
+    .span12
+      %p.small
+        Time stamped indices use your selected time range to create a list of
+        indices that match a specified timestamp pattern. This can be very
+        efficient for some data sets (eg, logs) For example, to match the
+        default logstash index pattern you might use
+        = succeed "." do
+          %code [logstash-]YYYY.MM.DD
+        The [] in "[logstash-]" are
+        important as they instruct Kibana not to treat those letters as a
+        pattern.
+      %p.small
+        See
+        %a{:href => "http://momentjs.com/docs/#/displaying/format/"} http://momentjs.com/docs/#/displaying/format/
+        for documentation on date formatting.
+  .row-fluid
+    .span2
+      %h6 Timestamp
+      %select.input-mini{"ng-model" => "panel.index_interval", "ng-options" => "f for f in [\"none\",\"hour\",\"day\",\"week\",\"month\",\"year\"]"}
+    .span5
+      %h6
+        Index
+        %span{"ng-show" => "panel.index_interval != 'none'"}
+          pattern
+          %small Absolutes in []
+      %input.input-medium{"ng-model" => "panel.index", :type => "text"}/
+    .span4
+      %h6
+        Failover Index
+        %small If index not found
+      %input.input-medium{"ng-model" => "panel.defaultindex", :type => "text"}/
+.row-fluid
+  %h5
+    Relative mode
+    %small settings
+  .span6
+    %h6
+      Relative time options
+      %small comma seperated
+    %input.input-large{"array-join" => "", "ng-model" => "panel.time_options", :type => "text"}/
+  .span3
+    %h6 Default timespan
+    %select.input-mini{"ng-model" => "panel.timespan", "ng-options" => "f for f in panel.time_options"}
+  .row-fluid
+    %h5
+      Auto-refresh
+      %small settings
+    .span1
+      %label.small Enable
+      %input{"ng-checked" => "panel.refresh.enable", "ng-model" => "panel.refresh.enable", :type => "checkbox"}/
+    .span2
+      %label.small Interval (seconds)
+      %input.input-mini{"ng-model" => "panel.refresh.interval", :type => "number"}/
+    .span3
+      %label.small Minimum Interval (seconds)
+      %input.input-mini{"ng-model" => "panel.refresh.min", :type => "number"}/

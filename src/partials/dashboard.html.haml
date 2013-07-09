@@ -1,0 +1,25 @@
+.row-fluid.container{:style => "margin-top:10px"}
+  / Rows
+  %div{"ng-controller" => "dashcontrol", "ng-init" => "init()"}
+  .row-fluid.kibana-row{"ng-controller" => "RowCtrl", "ng-repeat" => "(row_name, row) in dashboards.rows", "ng-style" => "row_style(row)"}
+    .row-control
+      .row-fluid.row-header{:style => "padding:0px;margin:0px;height:0px"}
+        %div{:style => "vertical-align:bottom"}
+          %div{"ng-show" => "row.collapsable"}
+            %div{"ng-class" => "{'row-open': !row.collapse, 'row-close': row.collapse}", :style => "position:absolute;margin-left:-60px;"}
+              %span.pointer{"ng-click" => "toggle_row(row)"} {{row.title}}
+              %i.icon-cog.pointer.editlink{"bs-modal" => "'partials/roweditor.html'", "ng-show" => "row.editable"}
+          %small.rotated{"ng-hide" => "row.collapsable"} {{row.title}}
+      .row-fluid{"ng-hide" => "row.collapse", :style => "padding-top:0px"}
+        / Panels
+        .panel{:class => "span{{panel.span}}", "ng-hide" => "panel.span == 0 || panel.hide", "ng-repeat" => "(name, panel) in row.panels", :style => "min-height:{{row.height}}; position:relative"}
+          / Error Panel
+          .row-fluid
+            .span12.alert.alert-error.panel-error{"ng-hide" => "!panel.error"}
+              %a.close{"ng-click" => "panel.error=false"} &times;
+              %i.icon-exclamation-sign
+              %strong Oops!
+              {{panel.error}}
+          / Content Panel
+          .row-fluid
+            .span12{"ng-include" => "'panels/'+panel.type+'/module.html'", :style => "margin-top:0px"}

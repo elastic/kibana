@@ -1,0 +1,18 @@
+.row-fluid{"ng-controller" => "parallelcoordinates"}
+  %div{:style => "width:90%"}
+    %form.input-append
+      %h6 Query
+      %input{"ng-model" => "panel.query", :style => "width:90%", :type => "text"}/
+      %button.btn{"ng-click" => "get_data();"}
+        %i.icon-search
+%h5 Panel Spy
+.row-fluid
+  .span2
+    %label.small Spyable
+    %input{"ng-checked" => "panel.spyable", "ng-model" => "panel.spyable", :type => "checkbox"}/
+  .span9.small
+    The panel spy shows 'behind the scenes' information about a panel. It can
+    be accessed by clicking the
+    %i.icon-eye-open
+    in the top right
+    of the panel.

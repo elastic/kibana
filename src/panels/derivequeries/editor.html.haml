@@ -1,0 +1,18 @@
+%div
+  .row-fluid
+    .span12
+      The derive queries panel takes a query and a field, then runs a terms facet against both and generates a list of terms to query on. For example, you might want to see a histogram of the top 5 requests that return a 404.
+      %strong You should be careful not to select a high cardinality field
+      as Elasticsearch must load all of these values into memory.
+      %p
+        Query Mode allows to optionally append original query to each term in the list.
+  .row-fluid
+    .span1
+      %label.small Length
+      %input{"ng-change" => "set_refresh(true)", "ng-model" => "panel.size", :style => "width:80%", :type => "number"}/
+    .span3
+      %label.small Query Mode
+      %select{"ng-change" => "set_refresh(true)", "ng-model" => "panel.mode", "ng-options" => "f for f in ['terms only','AND', 'OR']", :style => "width:80%"}
+    .span8
+      %label.small Exclude Terms(s) (comma seperated)
+      %input{"array-join" => "", "ng-change" => "set_refresh(true)", "ng-model" => "panel.exclude", :style => "width:90%", :type => "text"}/
