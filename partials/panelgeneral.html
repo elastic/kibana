@@ -1,14 +1,18 @@
-  <div class="row-fluid">
-    <div class="span4">
-      <label class="small">Title</label><input type="text" class="input-medium" ng-model='panel.title'></input>
-    </div>
-    <div class="span4">
-      <label class="small">Group(s) (comma seperated)</label><input array-join type="text" class="input-medium" ng-model='panel.group'></input>
-    </div>
-    <div class="span2" ng-hide="panel.sizeable == false">
-      <label class="small">Span</label> <select class="input-mini" ng-model="panel.span" ng-options="f for f in [0,1,2,3,4,5,6,7,8,9,10,11,12]"></select>
-    </div>
-    <div class="span1"> 
-      <label class="small"> Editable </label><input type="checkbox" ng-model="panel.editable" ng-checked="panel.editable">
-    </div>
+<div class="row-fluid">
+  <div class="span4">
+    <label class="small">Title</label>
+    <input class="input-medium" ng-model="panel.title" type="text">
   </div>
+  <div class="span4">
+    <label class="small">Group(s) (comma seperated)</label>
+    <input array-join="" class="input-medium" ng-model="panel.group" type="text">
+  </div>
+  <div class="span2" ng-hide="panel.sizeable == false">
+    <label class="small">Span</label>
+    <select class="input-mini" ng-model="panel.span" ng-options="f for f in [0,1,2,3,4,5,6,7,8,9,10,11,12]"></select>
+  </div>
+  <div class="span1">
+    <label class="small">Editable</label>
+    <input ng-checked="panel.editable" ng-model="panel.editable" type="checkbox">
+  </div>
+</div>
