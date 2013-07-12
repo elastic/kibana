@@ -35,8 +35,13 @@ configuration the default Kibana dashboard should work nicely.
 
 Example webserver configuration:
 
-        # Serve Kibana on localhost:8080
-        nginx -p $(pwd) -c sample/nginx-standalone.conf`
+        # Serve Kibana on http://localhost:8080
+        nginx -p $(pwd) -c sample/nginx-standalone.conf
+
+Alternative configuration as Elasticsearch site plugin:
+
+        # Serve Kibana at http://localhost:9200/_plugin/kibana
+        $ELASTICSEARCH_PREFIX/bin/plugin install elasticsearch/kibana
 
 ### FAQ
 __Q__: Why doesnt it work? I have http://localhost:9200 in my config.js, my webserver and elasticsearch
