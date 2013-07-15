@@ -35,7 +35,7 @@ angular.module('kibana.fields', [])
     $scope.fields = [];
     eventBus.register($scope,'fields', function(event, fields) {
       $scope.panel.sort = _.clone(fields.sort);
-      $scope.fields     = fields.all,
+      $scope.fields     = fields.all.sort(),
       $scope.active     = _.clone(fields.active);
     });
     eventBus.register($scope,'table_documents', function(event, docs) {
