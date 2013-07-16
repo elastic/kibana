@@ -110,7 +110,10 @@ angular.module('kibana.services', [])
     return something.then(function(p) {
       var indices = [];
       _.each(p.data, function(v,k) {
-        indices.push(k)
+        indices.push(k);
+        _.each(v.aliases, function(a, b) {
+          indices.push(b);
+        });
       });
       return indices;
     });
