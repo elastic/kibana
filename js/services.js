@@ -759,6 +759,180 @@ angular.module('kibana.services', [])
   }
 
 })
+/* Service: fields_from_mapping
+ *
+ * This service provides functionality for retrieving all possible field names
+ * via the elasticsearch GET _mapping API. 
+ *
+*/
+.service('fields_from_mapping', function($http) {
+  // Stores the mapping of a single type.
+  function TypeMapping() {
+    this.data = { };
+  }
+  TypeMapping.prototype = {
+    set: function(name, type) {
+      this.data[name] = type;
+    },
+    get: function(name) {
+      return this.data[name];
+    },
+    field_names: function() {
+      return Object.keys(this.data);
+    },
+    merge: function(other) {
+      var field_names = other.field_names();
+      for (var i in field_names) {
+        var name = field_names[i];
+        this.set(name, other.get(name));
+      }
+    }
+  };
+
+  // Stores zero or more type mappings for a given index.
+  function IndexMapping() {
+    this.types = {};
+  }
+  IndexMapping.prototype = {
+    /* 
+     * Retrieves or creates a type by name
+     * returns an instance of TypeMapping.
+     */
+    type: function(name) {
+      var ret = this.types[name];
+      if (!ret) {
+        this.types[name] = new TypeMapping();
+        ret = this.types[name];
+      }
+      return ret;
+    },
+    /*
+     * Squishes all of the indexes types into a single instance of 
+     * TypeMapping. This is useful if you want to find all the field names
+     * in one shot.
+     *
+     */
+    combined: function(){
+      var ret = new TypeMapping();
+      _.each(this.types, function(type, name) {
+        ret.merge(type);
+      });
+      return(ret);
+    },
+    type_names: function() {
+      return Object.keys(this.types);
+    },
+    all_field_names: function() {
+      return this.combined().field_names();
+    },
+    merge: function(other){
+      var type_names = other.type_names();
+      for (var i in type_names) {
+        var name = type_names[i];
+        this.type(name).merge(other.type(name))
+      }
+    }
+  }
+
+  IndexMapping.merge_mappings = function(mappings) {
+    var ret = new IndexMapping();
+    _.each(mappings, function(index_map, index_name){
+      ret.merge(index_map);
+    });
+    return ret;
+  }
+
+  /*
+   * Parses the mapping from an elasticsearch index.
+   */
+  IndexMapping.parse_es_mapping = function(index_mappings) {
+    var ret = new IndexMapping();
+    function crawl_mapping(path, obj, cb, is_multi_field) {
+      is_multi_field = is_multi_field || false;
+      var name = path[path.length - 1];
+      if(obj.properties) {
+        for(var prop in obj.properties) {
+          crawl_mapping(path.concat(prop), obj.properties[prop], cb);
+        }
+      } else if (obj.type == 'multi_field' && obj.fields) {
+        for(var prop in obj.fields) {
+          if (prop == name) {
+            crawl_mapping(path, obj.fields[prop], cb);
+          } else {
+            /* 
+             * Don't store multi_field values until we decide what to do
+             * with them. They are queryable, but not displayable.
+             */
+             // crawl_mapping(path.concat(prop), obj.fields[prop], cb, true);
+          }
+        }
+      } else {
+        cb(path, obj, is_multi_field)
+      }
+    }
+
+    _.each(index_mappings, function(mapping, type_name) {
+      var type_map = ret.type( type_name );
+      crawl_mapping([], mapping, function(path, obj, is_multi_field) {
+        var name = path.join('.');
+        type_map.set(name, {meta: obj, multi: (is_multi_field == true)});
+      });
+    });
+    return ret;
+  };
+
+  var cached_mappings = {}
+
+  function get_mappings(indices, cb) {
+    var missing_mappings = [];
+    var mappings = {};
+    _.each(indices, function(index) {
+      var existing = cached_mappings[index];
+      if (existing != null) {
+        mappings[index] = existing;
+      } else {
+        missing_mappings.push(index);
+      }
+    });
+
+    if (missing_mappings.length == 0) {
+      cb(mappings);
+      return;
+    }
+
+    var ret = $http({
+      url: config.elasticsearch + "/" + missing_mappings + "/_mapping",
+        method: "GET"
+    }).error(function(data, status, headers, config) {
+      // Handle error condition somehow?
+    })
+    .then(function(mapping_data){
+      _.each(mapping_data.data, function(index_map_data,index_name) {
+        var index_mapping = IndexMapping.parse_es_mapping(index_map_data);
+        cached_mappings[index_name] = index_mapping;
+        mappings[index_name] = index_mapping;
+      });
+      cb(mappings);
+    });
+  }
+
+  /*
+   *
+   *  Provided an array of index names, retrieve all of their mappings, and
+   *  distill a set of queryable field names.
+   */
+  this.field_names_for_indices = function(indices, cb) {
+    if (indices == null) {
+      cb([]);
+      return;
+    }
+
+    get_mappings(indices, function(index_mappings) {
+      var merged = IndexMapping.merge_mappings(index_mappings);
+      cb(merged.all_field_names());
+    });
+  }
+})
 .service('keylistener', function($rootScope) {
   var keys = [];
   $(document).keydown(function (e) {

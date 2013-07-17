@@ -1,0 +1,7 @@
+<kibana-panel ng-controller='fields_from_mapping_demo' ng-init="init()">
+  <ul class="unstyled" style="height:{{row.height}};overflow-y:auto;overflow-x:hidden;" ng-class="{'inline': panel.arrange == 'horizontal'}">
+    <li ng-style="panel.style" ng-repeat="field in fields" >
+      <a data-unique="1" ng-class="{label: _.indexOf(active,field)>-1}">{{field}}</a>
+    </li>
+  </ul>
+</kibana-panel>
