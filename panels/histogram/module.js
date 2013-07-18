@@ -311,7 +311,7 @@ angular.module('kibana.histogram', [])
               },
               yaxis: { 
                 show: scope.panel['y-axis'], 
-                min: 0, 
+                min: null, 
                 max: scope.panel.percentage && scope.panel.stack ? 100 : null, 
                 color: "#c8c8c8" 
               },
