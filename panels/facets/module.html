@@ -1,0 +1,34 @@
+<kibana-panel data-ng-controller='facets' data-ng-init='init()'>
+
+<span style="position:absolute;right:0px;top:0px" class='panelextra pointer'>
+  <i bs-modal="'partials/modal.html'" class="icon-eye-open"></i>
+</span>
+
+<div style="height:{{row.height}};overflow-y:auto;overflow-x:hidden;" >
+  <div class="row-fluid">
+    <table class="table-hover table table-condensed table-striped">
+      <thead> 
+        <tr> 
+          <td><strong>Terms</strong></td>
+          <td><strong>Count</strong></td>
+        </tr> 
+      </thead>
+      <tbody >
+        <tr data-ng-repeat="term in terms">
+          <td data-ng-bind="(term.term)" data-ng-click="update_query(term.term)"></td>
+          <td data-ng-bind="(term.count)"></td>
+        </tr>   
+        <tfoot class="small">
+          <tr>
+            <td colspan="0">
+              <strong>Total: </strong><span data-ng-bind="(total)" /> | 
+              <strong>Other: </strong><span data-ng-bind="(other)" /> | 
+              <strong>Missing: </strong><span data-ng-bind="(missing)" /> 
+            </td>
+          </tr>
+        </tfoot>
+      </tbody>
+    </table>
+  </div>
+</div>
+</kibana-panel>

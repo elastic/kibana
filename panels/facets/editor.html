@@ -1,0 +1,19 @@
+<div class="row-fluid">
+  The facets panel displays the terms of a facet query in a table. <strong>If multiple queries are sent from a single panel the first query will be displayed.</strong>
+</div>
+
+<div class="row-fluid">    
+  <form class="form-inline">
+    <h6>Field</h6>
+    <input bs-typeahead="fields.list" type="text" ng-model="panel.field" ng-change="get_data()" placeholder="Facet field">
+    <span class="help-inline">Field that is used for the facet.</span>
+  </form>
+</div>
+
+<div class="row-fluid">
+  <form class="form-inline">
+    <h6>Size</h6>
+    <input type="number" ng-model="panel.size" ng-change="get_data()" placeholder="Maximum terms">
+    <span class="help-inline">Maximum number of terms in the table.</span>
+  </form>
+</div>
