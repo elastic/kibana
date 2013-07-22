@@ -21,6 +21,7 @@ app.configure(function() {
   app.set('port', process.env.PORT || 3000);
   app.set('elasticsearch-host', process.env.ES_HOST || 'localhost');
   app.set('elasticsearch-port', process.env.ES_PORT || 9200);
+  //Server the kibana folder
   app.use(express["static"](path.join(__dirname, '..')));
   app.use(express.basicAuth(auth));
   app.use(app.router);
