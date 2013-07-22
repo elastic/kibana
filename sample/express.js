@@ -59,6 +59,13 @@ app.put('*', function(req, res) {
   });
 });
 
+app.delete('*', function(req, res) {
+  proxy.proxyRequest(req, res, {
+    host: app.get('elasticsearch-host'),
+    port: app.get('elasticsearch-port')
+  });
+});
+
 http.createServer(app).listen(app.get('port'), function() {
   console.log("Express server listening on port " + app.get('port'));
 });
