@@ -9,6 +9,8 @@
   ** field: Fields to run a terms facet on. Only does anything in terms mode
   ** goal: How many to shoot for, only does anything in goal mode
   * exclude :: In terms mode, ignore these terms
+  * others :: Show the others in the pie
+  * missing :: Show the missing in the pie
   * donut :: Drill a big hole in the pie
   * tilt :: A janky 3D representation of the pie. Looks terrible 90% of the time.
   * legend :: Show the legend?
@@ -44,6 +46,8 @@ angular.module('kibana.pie', [])
     tilt    : false,
     legend  : "above",
     labels  : true,
+    others  : false,
+    missing : false,
     mode    : "terms",
     default_field : 'DEFAULT',
     spyable : true,
@@ -122,13 +126,15 @@ angular.module('kibana.pie', [])
         $scope.panel.loading = false;
         $scope.hits = results.hits.total;
         $scope.data = [];
-        var k = 0;
         _.each(results.facets.pie.terms, function(v) {
           var slice = { label : v.term, data : v.count }; 
           $scope.data.push();
           $scope.data.push(slice);
-          k = k + 1;
         });
+        if($scope.panel.others && results.facets.pie.other > 0)
+          $scope.data.push({ 'label': 'Other', 'data': results.facets.pie.other });
+        if($scope.panel.missing && results.facets.pie.missing > 0)
+          $scope.data.push({ 'label': 'Missing', 'data': results.facets.pie.missing });
         $scope.$emit('render');
       });
     // Goal mode
@@ -282,7 +288,17 @@ angular.module('kibana.pie', [])
           return;
         }
         if(scope.panel.mode === 'terms') {
-          filterSrv.set({type:'terms',field:scope.panel.query.field,value:object.series.label});
+          var field = scope.panel.query.field;
+          var label = object.series.label;
+          if (label == 'Other') {
+            _.each(scope.data, function(v) {
+              filterSrv.set({type:'terms',field:field,value:v.label,mandate:'mustNot'});
+            });
+          } else if (label == 'Missing') {
+              // not supported
+          } else {
+            filterSrv.set({type:'terms',field:field,value:label});
+          }
           dashboard.refresh();
         }
       });

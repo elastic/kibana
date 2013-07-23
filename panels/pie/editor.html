@@ -43,6 +43,12 @@
     <div class="span1">
       <label class="small"> Labels </label><input type="checkbox" ng-model="panel.labels" ng-checked="panel.labels">
     </div>
+    <div class="span1">
+      <label class="small"> Others </label><input type="checkbox" ng-model="panel.others" ng-checked="panel.others" ng-change="set_refresh(true)">
+    </div>
+    <div class="span1">
+      <label class="small"> Missing </label><input type="checkbox" ng-model="panel.missing" ng-checked="panel.missing" ng-change="set_refresh(true)">
+    </div>
     <div class="span3"> 
       <label class="small">Legend</label> 
       <select class="input-small" ng-model="panel.legend" ng-options="f for f in ['above','below','none']"></select></span>
