@@ -16,6 +16,7 @@
   ** query: A string of the query to run
   ** goal: How many to shoot for, only does anything in goal mode
   * exclude :: In terms mode, ignore these terms
+  * rest :: Show the rest in the pie
   * donut :: Drill a big hole in the pie
   * tilt :: A janky 3D representation of the pie. Looks terrible 90% of the time.
   * legend :: Show the legend?
@@ -37,6 +38,7 @@ angular.module('kibana.pie', [])
     query   : { field:"_type", goal: 100}, 
     size    : 10,
     exclude : [],
+    rest    : false,
     donut   : false,
     tilt    : false,
     legend  : "above",
@@ -118,12 +120,18 @@ angular.module('kibana.pie', [])
         $scope.hits = results.hits.total;
         $scope.data = [];
         var k = 0;
+        var sum = 0;
         _.each(results.facets.pie.terms, function(v) {
           var slice = { label : v.term, data : v.count }; 
           $scope.data.push();
           $scope.data.push(slice);
           k = k + 1;
+          sum += v.count;
         });
+        if ($scope.panel.rest && results.facets.pie.total > sum) {
+            var rest = { label: 'other', data : results.facets.pie.total - sum};
+            $scope.data.push(rest);
+        }
         $scope.$emit('render');
       });
     // Goal mode
@@ -273,7 +281,15 @@ angular.module('kibana.pie', [])
           return;
         }
         if(scope.panel.mode === 'terms') {
-          filterSrv.set({type:'terms',field:scope.panel.query.field,value:object.series.label});
+          var field = scope.panel.query.field;
+          var label = object.series.label;
+          if (label == 'other') {
+            _.each(scope.data, function(v) {
+              filterSrv.set({type:'terms',field:field,value:v.label,mandate:'mustNot'});
+            });
+          } else {
+            filterSrv.set({type:'terms',field:field,value:label});
+          }
           dashboard.refresh();
         }
       });
