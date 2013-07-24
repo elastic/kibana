@@ -92,7 +92,6 @@ angular.module('kibana.timepicker', [])
         if($scope.time.from.diff(moment.utc(time.from),'seconds') !== 0 ||
           $scope.time.to.diff(moment.utc(time.to),'seconds') !== 0)
         {
-
           $scope.set_mode('absolute');
 
           // These 3 statements basicly do everything time_apply() does
@@ -176,12 +175,12 @@ angular.module('kibana.timepicker', [])
   // 
   $scope.time_calc = function(){
     var from,to;
-    // If time picker is defined (usually is)
+    // If time picker is defined (usually is) TOFIX: Horrible parsing
     if(!(_.isUndefined($scope.timepicker))) {
       from = $scope.panel.mode === 'relative' ? moment(kbn.time_ago($scope.panel.timespan)) :
-        moment($scope.timepicker.from.date + " " + $scope.timepicker.from.time,'MM/DD/YYYY HH:mm:ss');
+        moment(moment.utc($scope.timepicker.from.date).format('MM/DD/YYYY') + " " + $scope.timepicker.from.time,'MM/DD/YYYY HH:mm:ss');
       to = $scope.panel.mode !== 'absolute' ? moment() :
-        moment($scope.timepicker.to.date + " " + $scope.timepicker.to.time,'MM/DD/YYYY HH:mm:ss');
+        moment(moment.utc($scope.timepicker.to.date).format('MM/DD/YYYY') + " " + $scope.timepicker.to.time,'MM/DD/YYYY HH:mm:ss');
     // Otherwise (probably initialization)
     } else {
       from = $scope.panel.mode === 'relative' ? moment(kbn.time_ago($scope.panel.timespan)) :
@@ -211,11 +210,13 @@ angular.module('kibana.timepicker', [])
     // Remove all other time filters
     filterSrv.removeByType('time');
 
+    
     $scope.time = $scope.time_calc();
     $scope.time.field = $scope.panel.timefield;
+    
     update_panel();
-
     set_time_filter($scope.time);
+
     dashboard.refresh();
 
   };

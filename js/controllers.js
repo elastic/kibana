@@ -13,6 +13,11 @@ angular.module('kibana.controllers', [])
     last: null
   };
 
+  // For
+  $scope.editor = {
+    index: 0
+  };
+
   $scope.init = function() {
 
     $scope.config = config;
@@ -103,6 +108,9 @@ angular.module('kibana.controllers', [])
   };
 
   $scope.toggle_row = function(row) {
+    if(!row.collapsable) {
+      return;
+    }
     row.collapse = row.collapse ? false : true;
     if (!row.collapse) {
       $timeout(function() {
