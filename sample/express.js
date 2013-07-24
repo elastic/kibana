@@ -9,9 +9,8 @@ app = express();
 proxy = new RoutingProxy();
 
 auth = function(username, password, callback) {
-  var fakeUser;
-  console.log(username + ":" + password);
-  fakeUser = {
+  //Perform authentication against whatever database you are using.
+  var fakeUser = {
     id: '123123'
   };
   callback(null, fakeUser);
@@ -22,7 +21,7 @@ app.configure(function() {
   app.set('elasticsearch-host', process.env.ES_HOST || 'localhost');
   app.set('elasticsearch-port', process.env.ES_PORT || 9200);
   //Server the kibana folder
-  app.use(express["static"](path.join(__dirname, '..')));
+  app.use(express.static(path.join(__dirname, '..')));
   app.use(express.basicAuth(auth));
   app.use(app.router);
 });
@@ -59,7 +58,7 @@ app.put('*', function(req, res) {
   });
 });
 
-app.delete('*', function(req, res) {
+app.del('*', function(req, res) {
   proxy.proxyRequest(req, res, {
     host: app.get('elasticsearch-host'),
     port: app.get('elasticsearch-port')
