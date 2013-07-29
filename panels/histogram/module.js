@@ -225,6 +225,14 @@ angular.module('kibana.histogram', [])
       _to = Date.now();
     }
 
+    // sometimes may times swap
+    // in milliseconds zoom-out time error correction
+    if (_to < _from ) {
+      var _swap = _to;
+      _to = _from;
+      _from = _swap;
+    }
+
     if(factor > 1) {
       filterSrv.removeByType('time');
     }
@@ -238,6 +246,42 @@ angular.module('kibana.histogram', [])
     dashboard.refresh();
 
   };
+
+  // function $scope.time_move
+  // factor :: Move factor, so 0.5 = moves timespan in right, -0.5 moves timespan left
+  $scope.time_move = function(factor) {
+    var _now = Date.now();
+    var _range = filterSrv.timeRange('min');
+    var _timespan = (_range.to.valueOf() - _range.from.valueOf());
+
+    var _to = ( _range.to.valueOf() + (_timespan*factor));
+    var _from = ( _range.from.valueOf() + (_timespan*factor));
+
+    // If we're not already looking into the future, don't.
+    if(_to > Date.now() && _range.to < Date.now()) {
+      _to = Date.now();
+      _from = _to - Math.abs((_timespan*factor*2));
+    }
+
+    // sometimes may times swap
+    if (_to < _from ) {
+      var _swap = _to;
+      _to = _from;
+      _from = _swap;
+    }
+
+    filterSrv.removeByType('time');
+    filterSrv.set({
+      type:'time',
+      from:moment.utc(_from),
+      to:moment.utc(_to),
+      field:$scope.panel.time_field
+    });
+    
+    dashboard.refresh();
+
+  };
+
 
   // I really don't like this function, too much dom manip. Break out into directive?
   $scope.populate_modal = function(request) {
