@@ -72,6 +72,7 @@
                   <td>
                     <i class='icon-search pointer' ng-click="build_search(key,value)"></i> 
                     <i class='icon-ban-circle pointer' ng-click="build_search(key,value,true)"></i>
+                    <i class='icon-eye-open ng-scope pointer' bs-popover="'panels/table/micropanel.html'" data-placement="right" ng-click="toggle_micropanel(key)" ng-class="{label: _.contains(panel.fields,field)}" href="" class="ng-scope ng-binding" data-unique="1" data-original-title="" title=""></i>
                   </td>
                   <td>{{value}}</td>
                 </tr> 
