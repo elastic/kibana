@@ -211,6 +211,35 @@
     return 'less then a second'; //'just now' //or other string you like;
   };
 
+  kbn.secondsToHmsDetail = function(seconds){
+    var ret = '';
+    if ((seconds == 0) || (seconds < 0)) {    
+      return '?';
+    }
+    var numyears = Math.floor(seconds / 31536000);
+    if(numyears){
+      ret = ret + numyears + 'y';
+    }
+    var numdays = Math.floor((seconds % 31536000) / 86400);
+    if(numdays){
+      ret = ret + ' '+ numdays + 'd';
+    }
+    var numhours = Math.floor(((seconds % 31536000) % 86400) / 3600);
+    if(numhours){
+      ret = ret + ' '+ numhours + 'h';
+    }
+    var numminutes = Math.floor((((seconds % 31536000) % 86400) % 3600) / 60);
+    if(numminutes){
+      ret = ret + ' '+ numminutes + 'm';
+    }
+    var numseconds = (((seconds % 31536000) % 86400) % 3600) % 60;
+    if(numseconds){
+      ret = ret + ' '+ (Math.round(numseconds * 1000) / 1000) + 's';
+    }
+    return ret;
+  };
+
+
   kbn.to_percent = function(number,outof) {
     return Math.round((number/outof)*10000)/100 + "%";
   };

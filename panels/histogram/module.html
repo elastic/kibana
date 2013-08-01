@@ -33,7 +33,7 @@
       <i class='icon-circle' ng-style="{color: series.info.color}"></i>
       <span class='small histogram-legend-item'>{{series.info.alias}} ({{series.hits}})</span>
     </span>
-    <span ng-show="panel.legend" class="small"><span ng-show="panel.value_field && panel.mode != 'count'">{{panel.value_field}}</span> {{panel.mode}} per <strong>{{panel.interval}}</strong> | (<strong>{{hits}}</strong> hits)</span>
+    <span ng-show="panel.legend" class="small"><span ng-show="panel.value_field && panel.mode != 'count'">{{panel.value_field}}</span> {{panel.mode}} per <strong>{{panel.interval}}</strong> | (<strong>{{hits}}</strong> hits) | (<strong>{{timeframe}}</strong> timeframe)</span>
   </div>
   <center><img ng-show='panel.loading && _.isUndefined(data)' src="common/img/load_big.gif"></center>
   <div histogram-chart class="histogram-chart" params="{{panel}}"></div>

@@ -137,6 +137,7 @@ angular.module('kibana.histogram', [])
       if(_segment === 0) {
         $scope.hits = 0;
         $scope.data = [];
+	$scope.timeframe = 0;
         query_id = $scope.query_id = new Date().getTime();
       }
       
@@ -194,6 +195,8 @@ angular.module('kibana.histogram', [])
 
           i++;
         });
+
+	$scope.timeframe = kbn.secondsToHmsDetail( (_range.to - _range.from) /1000);
 
         // Tell the histogram directive to render.
         $scope.$emit('render');
