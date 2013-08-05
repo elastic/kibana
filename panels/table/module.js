@@ -285,6 +285,5 @@ angular.module('kibana.table', [])
             replace(/&/g, '&amp;').
             replace(/\n/g,'<br/>').
             replace(/\s/g, '&nbsp;');
-
     }
 });
