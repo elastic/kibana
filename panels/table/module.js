@@ -46,6 +46,7 @@ angular.module('kibana.table', [])
     overflow: 'height',
     fields  : [],
     highlight : [],
+    prettyjson : [],
     sortable: true,
     header  : true,
     paging  : true,
@@ -95,11 +96,25 @@ angular.module('kibana.table', [])
     } else {
       $scope.panel.highlight.push(field);
     }
-  };  
+  };
+
+  $scope.toggle_pretty_json = function(field) {
+      if (_.indexOf($scope.panel.prettyjson,field) > -1) {
+          $scope.panel.prettyjson = _.without($scope.panel.prettyjson,field);
+      } else {
+          $scope.panel.prettyjson.push(field);
+      }
+  };
 
   $scope.toggle_details = function(row) {
     row.kibana = row.kibana || {};
     row.kibana.details = !row.kibana.details ? $scope.without_kibana(row) : false;
+
+    _.forEach(row.kibana.details._source, function(value, key) {
+        if(_.indexOf($scope.panel.prettyjson,key) > -1) {
+            row.kibana.details._source[key] = angular.toJson(angular.fromJson('[' + value.toString() + ']'), true);
+        }
+    });
   };
 
   $scope.page = function(page) {
@@ -262,4 +277,13 @@ angular.module('kibana.table', [])
     }
     return '';
   };
+}).filter('nl2br', function() {
+    return function(text) {
+        return text.toString().
+            replace(/</g, '&lt;').
+            replace(/>/g, '&gt;').
+            replace(/&/g, '&amp;').
+            replace(/\n/g,'<br/>').
+            replace(/\s/g, '&nbsp;');
+    }
 });

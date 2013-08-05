@@ -73,7 +73,7 @@
                     <i class='icon-search pointer' ng-click="build_search(key,value)"></i> 
                     <i class='icon-ban-circle pointer' ng-click="build_search(key,value,true)"></i>
                   </td>
-                  <td>{{value}}</td>
+                  <td ng-bind-html="value | nl2br"></td>
                 </tr> 
               </table>
             </td>
