@@ -43,9 +43,11 @@ angular.module('kibana.condition', [])
   $scope.refresh = function() {
 	var id  = $scope.conditionId;
 	var blank = isBlank( $scope.conditionString );
+	//alert("id:" + id + " blank:" + blank );
 	
 	if( id != null && blank ) {
 	  filterSrv.remove( id );
+	  id = null;
 	} else if( id == null ) {
 		id = filterSrv.set({
 		  type:  'querystring',
