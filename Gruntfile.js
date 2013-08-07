@@ -3,16 +3,33 @@
 module.exports = function (grunt) {
 
   var post = ['src/client.js','src/post.js'];
+  var LIVERELOAD_PORT = 35729;
+  var mountFolder = function (connect, dir) {
+    return connect.static(require('path').resolve(dir));
+  };
+
+  // load plugins
+  require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
+  grunt.loadNpmTasks('assemble-less');
 
   // Project configuration.
   grunt.initConfig({
-    pkg: grunt.file.readJSON('package.json'),
-    meta: {
-      banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
-        '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
-        '<%= pkg.homepage ? " * " + pkg.homepage + "\\n" : "" %>' +
-        ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>;' +
-        ' Licensed <%= pkg.license %> */\n\n'
+    connect: {
+      options: {
+        port: 9000,
+        hostname: '0.0.0.0'
+      },
+      livereload: {
+        options: {
+          middleware: function (connect) {
+            return [
+              require('connect-livereload')({ port: LIVERELOAD_PORT }),
+              mountFolder(connect, '.tmp'),
+              mountFolder(connect, '.')
+            ];
+          }
+        }
+      }
     },
     jshint: {
       files: ['Gruntfile.js', 'js/*.js', 'panels/*/*.js' ],
@@ -58,16 +75,47 @@ module.exports = function (grunt) {
           "common/css/bootstrap.light.min.css": "vendor/bootstrap/less/bootstrap.light.less"
         }
       }
+    },
+    pkg: grunt.file.readJSON('package.json'),
+    meta: {
+      banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
+        '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
+        '<%= pkg.homepage ? " * " + pkg.homepage + "\\n" : "" %>' +
+        ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>;' +
+        ' Licensed <%= pkg.license %> */\n\n'
+    },
+    open: {
+      server: {
+        url: 'http://localhost:<%= connect.options.port %>'
+      }
+    },
+    clean: {
+      server: '.tmp'
+    },
+    watch: {
+      livereload: {
+        options: {
+          livereload: LIVERELOAD_PORT
+        },
+        files: [
+          "index.html",
+          "panels/*/*.{html,js}",
+          "partials/*.html"
+        ]
+      }
     }
   });
 
-  // load plugins
-  grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('assemble-less');
-
-
-
   // Default task.
   grunt.registerTask('default', ['jshint','less']);
+
+  grunt.registerTask('server', function (target) {
+    grunt.task.run([
+      'clean:server',
+      'connect:livereload',
+      'open',
+      'watch'
+    ]);
+  });
 
 };
