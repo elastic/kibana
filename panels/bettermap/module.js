@@ -113,7 +113,7 @@ angular.module('kibana.bettermap', [])
       // Check that we're still on the same query, if not stop
       if($scope.query_id === query_id) {
 
-        var scripts = $LAB.script("panels/bettermap/lib/leaflet.js").wait();
+        var scripts = $LAB.script("/node_modules/leaflet/dist/leaflet-src.js").wait();
 
         scripts.wait(function(){
           $scope.data = $scope.data.concat(_.map(results.hits.hits, function(hit) {
@@ -169,11 +169,13 @@ angular.module('kibana.bettermap', [])
       function render_panel() { 
         scope.panelMeta.loading = false;
 
-        var scripts = $LAB.script("panels/bettermap/lib/leaflet.js").wait()
-          .script("panels/bettermap/lib/plugins.js");
+        var scripts = $LAB.script("/node_modules/leaflet/dist/leaflet-src.js").wait()
+          .script("/bower_components/leaflet.markerclusterer/dist/leaflet.markercluster-src.js")
+          .script("/bower_components/leaflet.label/dist/leaflet.label-src.js");
    
         //add markers dynamically
         scripts.wait(function(){
+          L.Icon.Default.imagePath = "/node_modules/leaflet/dist/images/";
           if(_.isUndefined(map)) {
             map = L.map(attrs.id, {
               scrollWheelZoom: false,

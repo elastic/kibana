@@ -6,10 +6,17 @@
   "name": "kibana",
   "version": "3.0.0m3pre",
   "devDependencies": {
-    "grunt": "~0.4.0",
+    "assemble-less": "~0.5.0",
+    "connect-livereload": "~0.2.0",
+    "grunt": "~0.4.1",
     "grunt-contrib": "~0.7.0",
-    "grunt-contrib-jshint": "~0.6.0",
-    "assemble-less": "~0.4.8"
+    "grunt-contrib-clean": "~0.4.1",
+    "grunt-contrib-connect": "~0.3.0",
+    "grunt-contrib-jshint": "~0.6.2",
+    "grunt-contrib-watch": "~0.4.0",
+    "grunt-open": "~0.2.0",
+    "matchdep": "~0.1.2",
+    "leaflet": "0.6.2"
   },
   "license": "Apache License"
 }

@@ -189,8 +189,8 @@ angular.module('kibana.pie', [])
         // IE doesn't work without this
         elem.css({height:scope.panel.height||scope.row.height});
 
-        var scripts = $LAB.script("common/lib/panels/jquery.flot.js").wait()
-                          .script("common/lib/panels/jquery.flot.pie.js");
+        var scripts =  $LAB.script("/bower_components/flot/jquery.flot.js").wait()
+                          .script("/bower_components/flot/jquery.flot.pie.js");
     
         var label;
 

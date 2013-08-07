@@ -291,11 +291,11 @@ angular.module('kibana.histogram', [])
         // Set barwidth based on specified interval
         var barwidth = kbn.interval_to_seconds(scope.panel.interval)*1000;
 
-        var scripts = $LAB.script("common/lib/panels/jquery.flot.js").wait()
-          .script("common/lib/panels/jquery.flot.time.js")
-          .script("common/lib/panels/jquery.flot.stack.js")
-          .script("common/lib/panels/jquery.flot.selection.js")
-          .script("common/lib/panels/timezone.js");
+        var scripts = $LAB.script("/bower_components/flot/jquery.flot.js").wait()
+          .script("/bower_components/flot/jquery.flot.time.js")
+          .script("/bower_components/flot/jquery.flot.stack.js")
+          .script("/bower_components/flot/jquery.flot.selection.js")
+          .script("/bower_components/timezone-js/src/date.js");
                     
         // Populate element. Note that jvectormap appends, does not replace.
         scripts.wait(function(){
