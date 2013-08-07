@@ -100,7 +100,8 @@ module.exports = function (grunt) {
         files: [
           "index.html",
           "panels/*/*.{html,js}",
-          "partials/*.html"
+          "partials/*.html",
+          "js/*.js"
         ]
       }
     }

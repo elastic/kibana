@@ -1,7 +1,10 @@
 <kibana-panel ng-controller='bettermap' ng-init="init()">
   <!-- questionable if this is allowed in HTML5 -->
-  <link rel="stylesheet" href="panels/bettermap/lib/leaflet.css" />
-  <link rel="stylesheet" href="panels/bettermap/lib/plugins.css" />
+  <link rel="stylesheet" href="/bower_components/leaflet/dist/leaflet.css">
+  <link rel="stylesheet" href="/bower_components/leaflet.markerclusterer/dist/MarkerCluster.css">
+  <link rel="stylesheet" href="/bower_components/leaflet.markerclusterer/dist/MarkerCluster.Default.css">
+  <!--[if lte IE 8]><link rel="stylesheet" href="/bower_components/leaflet.markerclusterer/dist/MarkerCluster.Default.ie.css" /><![endif]-->
+  <link rel="stylesheet" href="/bower_components/leaflet.label/dist/leaflet.label.css">
 
   <span ng-show="panel.spyable" style="position:absolute;right:0px;top:0px" class='panelextra pointer'>
     <i bs-modal="'partials/inspector.html'" class="icon-eye-open"></i>

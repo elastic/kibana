@@ -45,7 +45,7 @@ angular.module('kibana.text', [])
       });
 
       function render_panel() {
-        var scripts = $LAB.script("panels/text/lib/showdown.js");
+        var scripts = $LAB.script("/bower_components/showdown/src/showdown.js");
         scripts.wait(function(){
           scope.ready = true;
           var converter = new Showdown.converter();

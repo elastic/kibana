@@ -176,8 +176,8 @@ angular.module('kibana.hits', [])
           });
         } catch(e) {return;}
 
-        var scripts = $LAB.script("common/lib/panels/jquery.flot.js").wait()
-                          .script("common/lib/panels/jquery.flot.pie.js");
+        var scripts = $LAB.script("/bower_components/flot/jquery.flot.js").wait()
+                          .script("/bower_components/flot/jquery.flot.pie.js");
 
         // Populate element.
         scripts.wait(function(){

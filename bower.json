@@ -3,15 +3,17 @@
   "version": "3.0.0m3pre",
    "dependencies": {
     "animate.css": "686cebf30ed60433ee4ed0b32535a1b5d46bd95d",
-    "bootstrap": "2.3.2",
+    "bootstrap": "2.3.1",
+    "darkstrap": "https://github.com/danneu/darkstrap/archive/v0.9.2.zip",
     "font-awesome": "3.2.1",
     "normalize-css": "2.1.0",
     "bootstrap-datepicker": "1.1.1",
     "flot": "0.8.0",
     "timezone-js": "0.4.4",
     "labjs": "14b52d02a45c9b7be5e2640281be357f99852295",
-    "angular-latest": "v1.1.5",
+    "angular": "1.0.7",
     "angular-strap": "0.7.5",
+    "angular-sanitize": "1.0.7",
     "elastic.js": "1.1.1",
     "FileSaver": "1cabd4559f6a66441bc64e6218dc7260242096a4",
     "jquery": "2.0.3",
@@ -20,7 +22,8 @@
     "bootstrap-timepicker": "0.2.3",
     "underscore": "1.5.1",
     "leaflet": "0.6.3",
-    "jvectormap": "1.2.2",
+    "leaflet.markerclusterer": "8ccd5a37ba8c49f0753464e7715c597344bd2501",
+    "leaflet.label": "https://github.com/Leaflet/Leaflet.label/archive/3648ec0f5bde736374b37339a12f9ba53e77d0d7.zip",
     "showdown": "0.3.1"
   }
 }
