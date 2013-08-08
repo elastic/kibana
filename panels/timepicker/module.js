@@ -162,8 +162,8 @@ angular.module('kibana.timepicker', [])
 
   $scope.to_now = function() {
     $scope.timepicker.to = {
-      time : moment().format("HH:mm:ss"),
-      date : moment().format("MM/DD/YYYY")
+      time : convertTimeZone(moment().utc(), dashboard.current.timezone, "HH:mm:ss", "utc"),
+      date : convertTimeZone(moment().utc(), dashboard.current.timezone, "MM/dd/yyyy", "utc")
     };
   };
 
@@ -186,9 +186,9 @@ angular.module('kibana.timepicker', [])
     // If time picker is defined (usually is) TOFIX: Horrible parsing
     if(!(_.isUndefined($scope.timepicker))) {
       from = $scope.panel.mode === 'relative' ? moment(kbn.time_ago($scope.panel.timespan)) :
-        moment(moment.utc($scope.timepicker.from.date).format('MM/DD/YYYY') + " " + $scope.timepicker.from.time,'MM/DD/YYYY HH:mm:ss');
+        moment.utc(convertTimeZone($scope.timepicker.from.date + " " + $scope.timepicker.from.time + " " + getTimeZoneOffset(dashboard.current.timezone), "utc", "MM/dd/yyyy HH:mm:ss", dashboard.current.timezone), 'MM/DD/YYYY HH:mm:ss');
       to = $scope.panel.mode !== 'absolute' ? moment() :
-        moment(moment.utc($scope.timepicker.to.date).format('MM/DD/YYYY') + " " + $scope.timepicker.to.time,'MM/DD/YYYY HH:mm:ss');
+    	moment.utc(convertTimeZone($scope.timepicker.to.date + " " + $scope.timepicker.to.time + " " + getTimeZoneOffset(dashboard.current.timezone), "utc", "MM/dd/yyyy HH:mm:ss", dashboard.current.timezone), 'MM/DD/YYYY HH:mm:ss');
     // Otherwise (probably initialization)
     } else {
       from = $scope.panel.mode === 'relative' ? moment(kbn.time_ago($scope.panel.timespan)) :
@@ -251,14 +251,69 @@ angular.module('kibana.timepicker', [])
     // Janky 0s timeout to get around $scope queue processing view issue
     $scope.timepicker = {
       from : {
-        time : from.format("HH:mm:ss"),
-        date : from.format("MM/DD/YYYY")
+        time : convertTimeZone(from.format(), dashboard.current.timezone, "HH:mm:ss", "utc"),
+        date : convertTimeZone(from.format(), dashboard.current.timezone, "MM/dd/yyyy", "utc")
       },
       to : {
-        time : to.format("HH:mm:ss"),
-        date : to.format("MM/DD/YYYY")
+    	  time : convertTimeZone(to.format(), dashboard.current.timezone, "HH:mm:ss", "utc"),
+          date : convertTimeZone(to.format(), dashboard.current.timezone, "MM/dd/yyyy", "utc")
       } 
     };
   }
+  
+  function getTimeZoneOffset(zone) {
+	  var dt = new timezoneJS.Date();
+	  if (zone == "utc") {
+		  dt.setTimezone("Etc/UTC");
+	  } else if (zone == "browser") {
+		  //do nothing
+	  } else {
+		  dt.setTimezone(zone);
+	  }
+	  var offset = dt.getTimezoneOffset();
+	  var convertedOffset = (offset > 0) ? "-" : "+";
+	  var offsetHour = Math.abs(parseInt(offset/60));
+	  if (offsetHour.toString().length < 2) {
+		  offsetHour = '0' + offsetHour;
+	  }
+	  var offsetMinute = Math.abs(parseInt(offset%60));
+	  if (offsetMinute.toString().length < 2) {
+		  offsetMinute = '0' + offsetMinute;
+	  }
+	  convertedOffset += offsetHour;
+	  convertedOffset += offsetMinute;
+	  return convertedOffset;
+  }
+  
+  function convertTimeZone(text, zone, format, fromZone) {
+      try {
+        
+        if (format === undefined) {
+          format = 'yyyy-MM-dd HH:mm:ss';
+        }
+        if (zone === undefined) {
+          zone = "browser";
+        } else if (zone == "utc") {
+          zone = "Etc/UTC";
+        }
+        var dt;
+        if (fromZone == "utc") {
+        	dt = new timezoneJS.Date(text, "Etc/UTC");
+        } else if (fromZone == "browser") {
+        	dt = new timezoneJS.Date(text);
+        } else {
+        	dt = new timezoneJS.Date(text, fromZone);
+        }
+
+        if (zone != "browser") {
+          dt.setTimezone(zone);
+        }
+        return dt.toString(format); 
+      } catch (e) {
+        return text;
+      }
+  }
+  
+  
 
 });

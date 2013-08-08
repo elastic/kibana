@@ -11,7 +11,8 @@ angular.module('kibana.controllers', [])
     editable: true,
     rows: [],
     last: null,
-    style: 'dark'
+    style: 'dark',
+    timezone: 'browser',
   };
 
   $scope.editor = {
@@ -23,6 +24,7 @@ angular.module('kibana.controllers', [])
     $scope.config = config;
     // Make underscore.js available to views
     $scope._ = _;
+    $scope.timezoneJS = timezoneJS;
     $scope.dashboard = dashboard;
 
     // Provide a global list of all see fields

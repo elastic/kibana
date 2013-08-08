@@ -57,7 +57,8 @@
         </thead>
         <tbody ng-repeat="row in data | slice:panel.offset:panel.offset+panel.size" ng-class-odd="'odd'">
           <tr ng-click="toggle_details(row)" class="pointer">
-            <td ng-repeat="field in panel.fields" ng-bind-html-unsafe="(row.highlight[field]||row._source[field]) | tableHighlight | tableTruncate:panel.trimFactor:panel.fields.length"></td>
+            <td ng-repeat="field in panel.fields" ng-show="field == panel.timeField" ng-bind-html-unsafe="(row.highlight[field]||row._source[field]) | tableHighlight | datetz:dashboard.current.timezone:panel.timeFormatShort | tableTruncate:panel.trimFactor:panel.fields.length"></td>
+            <td ng-repeat="field in panel.fields" ng-show="field != panel.timeField" ng-bind-html-unsafe="(row.highlight[field]||row._source[field]) | tableHighlight | tableTruncate:panel.trimFactor:panel.fields.length"></td>
           </tr>
           <tr ng-show="row.kibana.details">
             <td colspan=1000>
@@ -73,7 +74,8 @@
                     <i class='icon-search pointer' ng-click="build_search(key,value)"></i> 
                     <i class='icon-ban-circle pointer' ng-click="build_search(key,value,true)"></i>
                   </td>
-                  <td>{{value}}</td>
+                  <td ng-show="key == panel.timeField">{{value | datetz:dashboard.current.timezone:panel.timeFormatLong}}</td>
+                  <td ng-show="key != panel.timeField">{{value}}</td>
                 </tr> 
               </table>
             </td>

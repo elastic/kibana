@@ -14,7 +14,13 @@ If you need to configure the default dashboard, please see dashboards/default
 */
 var config = new Settings(
 {
-  // By default this will attempt to reach ES at the same host you have
+  //Specify all the instances of elasticsearch servers. This will be displayed in dashboard configuration. 
+  //Please note that issue of cross domain origin request. To address that you can use apache proxy pass
+  //For example, if i want es2 instance i can setup something like this:
+  //ProxyPassMatch ^(/es2)(/_aliases|.*/_search|.*/_mapping)$ http://192.168.1.2/$2
+  //and in the following config i can add http://mydomain/es2
+  elasticsearch_servers: ["http://"+window.location.hostname+":9200"],
+  //By default this will attempt to reach ES at the same host you have
   // elasticsearch installed on. You probably want to set it to the FQDN of your
   // elasticsearch host
   elasticsearch:    "http://"+window.location.hostname+":9200",   
@@ -24,5 +30,8 @@ var config = new Settings(
                     'timepicker','text','fields','hits','dashcontrol',
                     'column','derivequeries','trends','bettermap','query',
                     'terms'],
+  timezone_path: "tz",
+  //specify what all zone files to load by default eg. ['asia', 'africa']
+  default_zone_file: [],
   }
 );

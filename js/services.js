@@ -152,6 +152,7 @@ angular.module('kibana.services', [])
   var self = this;
 
   this.init = function() {
+    ejs = ejsResource(config.elasticsearch);
     _q = dashboard.current.services.query;
     self.list = dashboard.current.services.query.list;
     self.ids = dashboard.current.services.query.ids;
@@ -269,6 +270,7 @@ angular.module('kibana.services', [])
 
   // Call this whenever we need to reload the important stuff
   this.init = function() {
+    ejs = ejsResource(config.elasticsearch);
     // Accessors
     self.list = dashboard.current.services.filter.list;
     self.ids = dashboard.current.services.filter.ids;
@@ -442,7 +444,8 @@ angular.module('kibana.services', [])
     index: {
       interval: 'none',
       pattern: '_all',
-      default: 'INDEX_MISSING'
+      default: 'INDEX_MISSING',
+      server: config.elasticsearch
     },
   };
 
@@ -503,6 +506,10 @@ angular.module('kibana.services', [])
   // Since the dashboard is responsible for index computation, we can compute and assign the indices 
   // here before telling the panels to refresh
   this.refresh = function() {
+	if (self.current.index.server != undefined) {
+		config.elasticsearch = self.current.index.server;
+		ejs = ejsResource(config.elasticsearch);
+	}
     if(self.current.index.interval !== 'none') {
       if(filterSrv.idsByType('time').length > 0) {
         var _range = filterSrv.timeRange('min');
