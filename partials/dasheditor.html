@@ -11,6 +11,11 @@
     <div class="span4">
       <label class="small">Title</label><input type="text" class="input-large" ng-model='dashboard.current.title'></input>
     </div>
+    <div class="span4">
+      <label class="small">Time Zone</label>
+      <select ng-model='dashboard.current.timezone' ng-options="tz for tz in ['browser', 'utc'].concat(timezoneJS.timezone.getAllZones())">
+      </select>
+    </div>
     <div class="span1"> 
       <label class="small"> Editable </label><input type="checkbox" ng-model="dashboard.current.editable" ng-checked="dashboard.current.editable" />
     </div>

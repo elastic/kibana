@@ -49,6 +49,20 @@
       <input type="number" class="input-small" ng-model="panel.trimFactor">
     </div>
   </div>
+  <div class="row-fluid">
+  	<div class="span3" style="white-space:nowrap">
+      <h6>Time Field</h6>
+      <select ng-show="all_fields.length>0"style="width:85%" ng-model="panel.timeField" ng-options="f for f in all_fields"></select>
+    </div>
+    <div class="span4">
+      <h6>Time Display Format (Short) <i class="icon-question-sign" bs-tooltip="'This format will be used for displaying the time field in table.<br /><br />y : year<br />m : minute<br />s: second<br />S: millisecond<br />h: 12 hour format<br />MM: month (numeric representation)<br />MMM: month (abbrevated text representation)<br />MMMM: month (full text representation)<br />k: AM/PM<br />H: hour<br />E: day<br />Z: timezone abbreviation<br />'"></i></h6>
+      <input type="text" ng-model="panel.timeFormatShort" />
+    </div>
+    <div class="span4">
+      <h6>Time Display Format (Long) <i class="icon-question-sign" bs-tooltip="'This format will be used for displaying the time field in details.<br /><br />y : year<br />m : minute<br />s: second<br />S: millisecond<br />h: 12 hour format<br />MM: month (numeric representation)<br />MMM: month (abbrevated text representation)<br />MMMM: month (full text representation)<br />k: AM/PM<br />H: hour<br />E: day<br />Z: timezone abbreviation<br />'"></i></h6>
+      <input type="text" ng-model="panel.timeFormatLong" />
+    </div>
+  </div>
   <h5>Paging</h5>
   <div class="row-fluid">
     <div class="span2">

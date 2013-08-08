@@ -34,6 +34,7 @@ var labjs = $LAB
   .script("js/controllers.js")
   .script("js/filters.js")
   .script("js/directives.js")
+  .script("common/lib/panels/timezone.js")
   .script("js/panels.js").wait();
 
 _.each(config.modules, function(v) {
@@ -59,6 +60,9 @@ labjs.wait(function(){
         });
     }]);
   angular.element(document).ready(function() {
+	timezoneJS.timezone.zoneFileBasePath = config.timezone_path;
+    timezoneJS.timezone.defaultZoneFile = config.default_zone_file;
+    timezoneJS.timezone.init();
     $('body').attr('ng-controller', 'DashCtrl');
     angular.bootstrap(document, ['kibana']);
   });

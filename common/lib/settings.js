@@ -5,7 +5,9 @@ var Settings = function (s) {
   var _d = {
     elasticsearch : "http://"+window.location.hostname+":9200",
     modules       : [],
-    kibana_index  : 'kibana-int'
+    kibana_index  : 'kibana-int',
+    timezone_path: "/tz",
+    default_zone_file: []
   }
 
   // This initializes a new hash on purpose, to avoid adding parameters to 

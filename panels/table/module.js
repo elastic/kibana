@@ -52,7 +52,10 @@ angular.module('kibana.table', [])
     paging  : true,
     field_list: true,
     trimFactor: 300,
-    spyable : true
+    spyable : true,
+    timeField : "@timestamp",
+    timeFormatShort : "yyyy-MM-dd HH:mm:ss",
+    timeFormatLong : "yyyy-MM-dd HH:mm:ss"
   };
   _.defaults($scope.panel,_d);
 
@@ -272,4 +275,26 @@ angular.module('kibana.table', [])
     }
     return '';
   };
+}).filter('datetz', function () {
+    return function (text, zone, format) {
+        try {
+          var dt = new timezoneJS.Date(text);
+          if (format === undefined) {
+            format = 'yyyy-MM-dd HH:mm:ss';
+          }
+          if (zone === undefined) {
+            zone = "browser";
+          } else if (zone == "utc") {
+            zone = "Etc/UTC";
+          }
+
+          if (zone != "browser") {
+            dt.setTimezone(zone);
+          }
+          return dt.toString(format); 
+        } catch (e) {
+          return text;
+        }
+        //console.log(dt);
+    };
 });

@@ -1,5 +1,6 @@
 {
   "title": "Logstash Search",
+  "timezone": "browser",
   "services": {
     "query": {
       "idQueue": [
@@ -171,7 +172,6 @@
           "interval": "30s",
           "fill": 3,
           "linewidth": 3,
-          "timezone": "browser",
           "spyable": true,
           "zoomlinks": true,
           "bars": true,
@@ -235,6 +235,8 @@
             ]
           },
           "field_list": true,
+          "timeFormatShort" : "yyyy-MM-dd HH:mm:ss",
+    	  "timeFormatLong" : "yyyy-MM-dd HH:mm:ss",
           "status": "Stable"
         }
       ]

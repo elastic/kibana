@@ -14,9 +14,6 @@
   * linewidth ::  Only applies to line charts. How thick the line should be in pixels
                   While the editor only exposes 0-10, this can be any numeric value. 
                   Set to 0 and you'll get something like a scatter plot
-  * timezone :: This isn't totally functional yet. Currently only supports browser and utc.
-                browser will adjust the x-axis labels to match the timezone of the user's 
-                browser
   * spyable ::  Dislay the 'eye' icon that show the last elasticsearch query
   * zoomlinks :: Show the zoom links?
   * bars :: Show bars in the chart
@@ -57,7 +54,6 @@ angular.module('kibana.histogram', [])
     interval    : '5m',
     fill        : 0,
     linewidth   : 3,
-    timezone    : 'browser', // browser, utc or a standard timezone
     spyable     : true,
     zoomlinks   : true,
     bars        : true,
@@ -294,8 +290,7 @@ angular.module('kibana.histogram', [])
         var scripts = $LAB.script("common/lib/panels/jquery.flot.js").wait()
           .script("common/lib/panels/jquery.flot.time.js")
           .script("common/lib/panels/jquery.flot.stack.js")
-          .script("common/lib/panels/jquery.flot.selection.js")
-          .script("common/lib/panels/timezone.js");
+          .script("common/lib/panels/jquery.flot.selection.js");
                     
         // Populate element. Note that jvectormap appends, does not replace.
         scripts.wait(function(){
@@ -324,7 +319,7 @@ angular.module('kibana.histogram', [])
                 max: scope.panel.percentage && scope.panel.stack ? 100 : null, 
               },
               xaxis: {
-                timezone: scope.panel.timezone,
+                timezone: dashboard.current.timezone,
                 show: scope.panel['x-axis'],
                 mode: "time",
                 min: _.isUndefined(scope.range.from) ? null : scope.range.from.getTime(),
