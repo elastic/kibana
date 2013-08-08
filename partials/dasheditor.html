@@ -44,14 +44,18 @@
        </div>
     </div>
     <div class="row-fluid"> 
-      <div class="span3">
+      <div class="span2">
         <h6>Timestamping</h6><select class="input-small" ng-model="dashboard.current.index.interval" ng-options='f for f in ["none","hour","day","week","month","year"]'></select>
       </div>
-      <div class="span5" ng-show="dashboard.current.index.interval != 'none'">
+      <div class="span3">
+        <h6>Elastic Server</h6>
+        <select class="input-medium" ng-model='dashboard.current.index.server' ng-options="server for server in config.elasticsearch_servers"></select>
+      </div>
+      <div class="span3" ng-show="dashboard.current.index.interval != 'none'">
         <h6>Index pattern <small>Absolutes in []</small></h6>
         <input type="text" class="input-medium" ng-model="dashboard.current.index.pattern">
       </div>
-      <div class="span4">
+      <div class="span3">
         <h6>Default Index <small ng-show="dashboard.current.index.interval != 'none'">If index not found</small></h6>
         <input type="text" class="input-medium" ng-model="dashboard.current.index.default">
       </div>

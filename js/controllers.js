@@ -12,7 +12,7 @@ angular.module('kibana.controllers', [])
     rows: [],
     last: null,
     style: 'dark',
-    timezone: 'browser'
+    timezone: 'browser',
   };
 
   $scope.editor = {

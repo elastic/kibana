@@ -3,6 +3,7 @@
 // THESE ARE ONLY DEFAULTS. They are overridden by config.js in the root directory
 var Settings = function (s) {
   var _d = {
+	elasticsearch_servers : ["http://"+window.location.hostname+":9200"],
     elasticsearch : "http://"+window.location.hostname+":9200",
     modules       : [],
     kibana_index  : 'kibana-int',
