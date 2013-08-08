@@ -6,7 +6,7 @@ var Settings = function (s) {
     elasticsearch : "http://"+window.location.hostname+":9200",
     modules       : [],
     kibana_index  : 'kibana-int',
-    timezone_path: "/tz",
+    timezone_path: "tz",
     default_zone_file: []
   }
 

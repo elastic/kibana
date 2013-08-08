@@ -24,7 +24,8 @@ var config = new Settings(
                     'timepicker','text','fields','hits','dashcontrol',
                     'column','derivequeries','trends','bettermap','query',
                     'terms'],
-  timezone_path: "/tz",
-  default_zone_file: ['asia', 'africa'],
+  timezone_path: "tz",
+  //specify what all zone files to load by default eg. ['asia', 'africa']
+  default_zone_file: [],
   }
 );
