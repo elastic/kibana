@@ -10,12 +10,10 @@
 
     <title>Kibana 3</title>
     <link rel="stylesheet" href="/dist/normalize-css/normalize.css">
-    <link rel="stylesheet" href="/dist/bootstrap/css/dark.css" title="Dark">
-    <link rel="stylesheet" ng-href="css/{{dashboard.current.style}}.css">
+    <link rel="stylesheet" href="/dist/bootstrap/css/light.css" title="Light">
     <link rel="stylesheet" href="/dist/animate.css/animate.css">
     <link rel="stylesheet" href="/dist/bootstrap/css/bootstrap-responsive.css">
-    <link rel="stylesheet" href="/dist/font-awesome/css/font-awesome.css">
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/dist/bootstrap-datepicker/css/datepicker.css">
     
     <script src="/dist/labjs/LAB.js"></script>
@@ -27,6 +25,8 @@
   </head>
 
   <body ng-controller="DashCtrl" ng-cloak>
+    <link rel="stylesheet" ng-href="/dist/bootstrap/css/{{dashboard.current.style||'dark'}}.css">
+    <link rel="stylesheet" href="/dist/font-awesome/css/font-awesome.css">
 
     <div ng-repeat='alert in global_alert' class="alert-{{alert.severity}} dashboard-notice" ng-show="$last">
       <button type="button" class="close" ng-click="clear_alert(alert)" style="padding-right:50px">&times;</button>
