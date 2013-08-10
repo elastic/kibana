@@ -17,24 +17,24 @@ var modules = [
 var scripts = [];
 
 var labjs = $LAB
-  .script("/bower_components/jquery/jquery.js").wait()
-  .script("/bower_components/modernizr/modernizr.js")
-  .script("/bower_components/angular/angular.js").wait()
-  .script("/bower_components/angular-strap/dist/angular-strap.js")
-  .script("/bower_components/angular-sanitize/angular-sanitize.js")
-  .script("/bower_components/elastic.js/dist/elastic.js")
-  .script("/bower_components/elastic.js/dist/elastic-angular-client.js").wait()
-  .script("/bower_components/moment/moment.js")
-  .script("/bower_components/FileSaver/FileSaver.js")
-  .script("/bower_components/bootstrap/docs/assets/js/bootstrap.js")
-  .script('/bower_components/bootstrap-datepicker/js/bootstrap-datepicker.js')
-  .script('/bower_components/bootstrap-timepicker/js/bootstrap-timepicker.js').wait()
-  .script("js/shared.js")
-  .script("js/services.js")
-  .script("js/controllers.js")
-  .script("js/filters.js")
-  .script("js/directives.js")
-  .script("js/panels.js").wait();
+  .script("/dist/jquery/jquery.js").wait()
+  .script("/dist/modernizr/modernizr.js")
+  .script("/dist/angular/angular.js").wait()
+  .script("/dist/angular-strap/angular-strap.js")
+  .script("/dist/angular-sanitize/angular-sanitize.js")
+  .script("/dist/elastic.js/elastic.js")
+  .script("/dist/elastic.js/elastic-angular-client.js").wait()
+  .script("/dist/moment/moment.js")
+  .script("/dist/FileSaver/FileSaver.js")
+  .script("/dist/bootstrap/js/bootstrap.js")
+  .script('/dist/bootstrap-datepicker/js/bootstrap-datepicker.js')
+  .script('/dist/bootstrap-timepicker/js/bootstrap-timepicker.js').wait()
+  .script("/js/shared.js")
+  .script("/js/services.js")
+  .script("/js/controllers.js")
+  .script("/js/filters.js")
+  .script("/js/directives.js")
+  .script("/js/panels.js").wait();
 
 _.each(config.modules, function(v) {
   labjs = labjs.script('panels/'+v+'/module.js');

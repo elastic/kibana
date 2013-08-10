@@ -113,7 +113,7 @@ angular.module('kibana.bettermap', [])
       // Check that we're still on the same query, if not stop
       if($scope.query_id === query_id) {
 
-        var scripts = $LAB.script("/node_modules/leaflet/dist/leaflet-src.js").wait();
+        var scripts = $LAB.script("/dist/leaflet/leaflet.js").wait();
 
         scripts.wait(function(){
           $scope.data = $scope.data.concat(_.map(results.hits.hits, function(hit) {
@@ -150,7 +150,7 @@ angular.module('kibana.bettermap', [])
     restrict: 'A',
     link: function(scope, elem, attrs) {
 
-      elem.html('<center><img src="common/img/load_big.gif"></center>');
+      elem.html('<center><img src="/img/load_big.gif"></center>');
 
       // Receive render events
       scope.$on('draw',function(){
@@ -169,13 +169,13 @@ angular.module('kibana.bettermap', [])
       function render_panel() { 
         scope.panelMeta.loading = false;
 
-        var scripts = $LAB.script("/node_modules/leaflet/dist/leaflet-src.js").wait()
-          .script("/bower_components/leaflet.markerclusterer/dist/leaflet.markercluster-src.js")
-          .script("/bower_components/leaflet.label/dist/leaflet.label-src.js");
+        var scripts = $LAB.script("/dist/leaflet/leaflet.js").wait()
+          .script("/dist/leaflet.markerclusterer/leaflet.markercluster.js")
+          .script("/dist/leaflet.label/leaflet.label.js");
    
         //add markers dynamically
         scripts.wait(function(){
-          L.Icon.Default.imagePath = "/node_modules/leaflet/dist/images/";
+          L.Icon.Default.imagePath = "/dist/leaflet/images/";
           if(_.isUndefined(map)) {
             map = L.map(attrs.id, {
               scrollWheelZoom: false,

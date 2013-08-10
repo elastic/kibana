@@ -172,7 +172,7 @@ angular.module('kibana.pie', [])
     restrict: 'A',
     link: function(scope, elem, attrs) {
 
-      elem.html('<center><img src="common/img/load_big.gif"></center>');
+      elem.html('<center><img src="/img/load_big.gif"></center>');
 
       // Receive render events
       scope.$on('render',function(){
@@ -189,8 +189,8 @@ angular.module('kibana.pie', [])
         // IE doesn't work without this
         elem.css({height:scope.panel.height||scope.row.height});
 
-        var scripts =  $LAB.script("/bower_components/flot/jquery.flot.js").wait()
-                          .script("/bower_components/flot/jquery.flot.pie.js");
+        var scripts =  $LAB.script("/dist/flot/jquery.flot.js").wait()
+                          .script("/dist/flot/jquery.flot.pie.js");
     
         var label;
 

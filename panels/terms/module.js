@@ -175,8 +175,8 @@ angular.module('kibana.terms', [])
       // Function for rendering panel
       function render_panel() {
         var plot, chartData;
-        var scripts = $LAB.script("/bower_components/flot/jquery.flot.js").wait()
-                          .script("/bower_components/flot/jquery.flot.pie.js");
+        var scripts = $LAB.script("/dist/flot/jquery.flot.js").wait()
+                          .script("/dist/flot/jquery.flot.pie.js");
 
         // IE doesn't work without this
         elem.css({height:scope.panel.height||scope.row.height});

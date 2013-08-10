@@ -9,27 +9,25 @@
     <meta name="viewport" content="width=device-width">
 
     <title>Kibana 3</title>
-    <link rel="stylesheet" href="/bower_components/normalize-css/normalize.css">
-    <link rel="stylesheet" href="/common/css/bootstrap.dark.min.css" title="Dark">
-    <link rel="stylesheet" ng-href="/common/css/bootstrap.{{dashboard.current.style}}.min.css">
-    <link rel="stylesheet" href="/bower_components/animate.css/animate.css">
-    <link rel="stylesheet" href="/bower_components/bootstrap/docs/assets/css/bootstrap-responsive.css">
-    <link rel="stylesheet" href="/bower_components/font-awesome/css/font-awesome.css">
-    <link rel="stylesheet" href="/common/css/main.css">
-    <link rel="stylesheet" href="/bower_components/bootstrap-datepicker/css/datepicker.css">
+    <link rel="stylesheet" href="/dist/normalize-css/normalize.css">
+    <link rel="stylesheet" href="/dist/bootstrap/css/dark.css" title="Dark">
+    <link rel="stylesheet" ng-href="css/{{dashboard.current.style}}.css">
+    <link rel="stylesheet" href="/dist/animate.css/animate.css">
+    <link rel="stylesheet" href="/dist/bootstrap/css/bootstrap-responsive.css">
+    <link rel="stylesheet" href="/dist/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="/dist/bootstrap-datepicker/css/datepicker.css">
     
-    <script src="/bower_components/labjs/LAB.js"></script>
-    <script src="/bower_components/underscore/underscore.js"></script>
-    <script src="/js/settings.js"></script>
-    <script src="/config.js"></script>
-    <script src="/js/app.js"></script>
+    <script src="/dist/labjs/LAB.js"></script>
+    <script src="/dist/underscore/underscore.js"></script>
+    <script src="js/settings.js"></script> 
+    <script src="config.js"></script>
+    <script src="js/app.js"></script>
 
   </head>
 
   <body ng-controller="DashCtrl" ng-cloak>
 
-    
-    
     <div ng-repeat='alert in global_alert' class="alert-{{alert.severity}} dashboard-notice" ng-show="$last">
       <button type="button" class="close" ng-click="clear_alert(alert)" style="padding-right:50px">&times;</button>
       <strong>{{alert.title}}</strong> <span ng-bind-html-unsafe='alert.text'></span> <div style="padding-right:10px" class='pull-right small'> {{$index + 1}} alert(s) </div>

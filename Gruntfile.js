@@ -1,16 +1,48 @@
 'use strict';
 
 module.exports = function (grunt) {
-
-  var post = ['src/client.js','src/post.js'];
+  var _ = require('underscore');
   var LIVERELOAD_PORT = 35729;
   var mountFolder = function (connect, dir) {
     return connect.static(require('path').resolve(dir));
   };
+  
 
   // load plugins
   require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
   grunt.loadNpmTasks('assemble-less');
+
+  // Find artifacts source and minified version
+  var copy_manifest = grunt.file.readJSON('copy_manifest.js');
+  _.flatMap = _.compose(_.flatten, _.map);
+  function copy_dep(env) {
+    var dev = "dev" === env;
+    return _.flatMap(copy_manifest,function(dependencies,packager){
+      return _.flatMap(dependencies,function(o, name){
+        var artifact;
+        if (dev) {
+          artifact = o.src || o.min;
+        } else {
+          artifact = o.min || o.src;
+        }
+        return {
+          flatten: (o.flatten || false ),
+          expand: true,
+          cwd: packager + '/' + name + '/' + ( o.cwd || "" ),
+          src: artifact,
+          dest: "dist/" + name + "/" + ( o.dest || "" ),
+          rename: function(dest,src) {
+            if(dev) {
+              return dest + src.replace("-src.js",".js");
+            } else {
+              return  dest + src.replace(".min.",".").replace("-min.",".");
+            }
+            
+          }
+        };
+      });
+    });
+  };
 
   // Project configuration.
   grunt.initConfig({
@@ -23,7 +55,7 @@ module.exports = function (grunt) {
         options: {
           middleware: function (connect) {
             return [
-              require('connect-livereload')({ port: LIVERELOAD_PORT }),
+              require('connect-livereload')({port: LIVERELOAD_PORT}),
               mountFolder(connect, '.tmp'),
               mountFolder(connect, '.')
             ];
@@ -31,48 +63,45 @@ module.exports = function (grunt) {
         }
       }
     },
+    copy : {
+      bootstrap: {
+        files: [
+          {expand: true, cwd: 'css/bootstrap-override/', src: "*.less", dest: 'bower_components/bootstrap/less/'}
+        ]
+      },
+      dev: {files: copy_dep("dev")},
+      dist: {files: copy_dep("dist")}
+    },
+    clean: {
+      all: {
+        files:[{
+          src: [
+            '.tmp',
+            'dist/*'
+          ]
+        }]
+      }
+    },
     jshint: {
       files: ['Gruntfile.js', 'js/*.js', 'panels/*/*.js' ],
       options: {
-        bitwise: true,
-        maxlen: 140,
-        curly: true,
-        eqeqeq: true,
-        immed: true,
-        indent: 2,
-        latedef: true,
-        newcap: true,
-        noarg: true,
-        sub: true,
-        undef: true,
-        boss: true,
-        eqnull: true,
-        globalstrict: true,
-        devel: true,
-        node: true,
+        bitwise: true, maxlen: 140, curly: true, eqeqeq: true, immed: true, indent: 2,
+        latedef: true, newcap: true, noarg: true, sub: true, undef: true, boss: true,
+        eqnull: true, globalstrict: true, devel: true, node: true,
         globals: {
-          '$LAB': false,
-          '_': false,
-          '$': false,
-          'kbn' : false,
-          window: false,
-          document: false,
-          exports: true,
-          module: false,
-          config: false,
-          moment: false
+          '$LAB': false, '_': false, '$': false, 'kbn' : false, window: false,
+          document: false, exports: true, module: false, config: false, moment: false
         }
       }
     },
     less: {
-      production: {
+      bootstrap: {
         options: {
-          paths: ["vendor/bootstrap/less"],
-          yuicompress:true
+          paths: ["bower_components/bootstrap/less/"],
         },
         files: {
-          "common/css/bootstrap.dark.min.css": "vendor/bootstrap/less/bootstrap.dark.less",
-          "common/css/bootstrap.light.min.css": "vendor/bootstrap/less/bootstrap.light.less"
+          "dist/bootstrap/css/dark.css": "bower_components/bootstrap/less/bootstrap.dark.less",
+          "dist/bootstrap/css/light.css": "bower_components/bootstrap/less/bootstrap.light.less"
         }
       }
     },
@@ -89,9 +118,6 @@ module.exports = function (grunt) {
         url: 'http://localhost:<%= connect.options.port %>'
       }
     },
-    clean: {
-      server: '.tmp'
-    },
     watch: {
       livereload: {
         options: {
@@ -107,16 +133,20 @@ module.exports = function (grunt) {
     }
   });
 
-  // Default task.
-  grunt.registerTask('default', ['jshint','less']);
+  grunt.registerTask('dist', [
+    'clean:all',
+    'copy:dist',
+    'copy:bootstrap',
+    'less:bootstrap'
+  ]);
 
-  grunt.registerTask('server', function (target) {
-    grunt.task.run([
-      'clean:server',
+  grunt.registerTask('server', [
+      'clean:all',
+      'copy:dist',
+      'copy:bootstrap',
+      'less:bootstrap',
       'connect:livereload',
       'open',
       'watch'
-    ]);
-  });
-
+  ]);
 };

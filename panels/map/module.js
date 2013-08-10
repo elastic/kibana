@@ -118,7 +118,7 @@ angular.module('kibana.map', [])
     restrict: 'A',
     link: function(scope, elem, attrs) {
 
-      elem.html('<center><img src="common/img/load_big.gif"></center>');
+      elem.html('<center><img src="/img/load_big.gif"></center>');
 
       // Receive render events
       scope.$on('render',function(){
@@ -132,8 +132,8 @@ angular.module('kibana.map', [])
 
       function render_panel() {
         // Using LABjs, wait until all scripts are loaded before rendering panel
-        var scripts = $LAB.script("panels/map/lib/jquery.jvectormap.min.js").wait()
-          .script("panels/map/lib/map."+scope.panel.map+".js");
+        var scripts = $LAB.script("/panels/map/lib/jquery.jvectormap.min.js").wait()
+          .script("/panels/map/lib/map."+scope.panel.map+".js");
                     
         // Populate element. Note that jvectormap appends, does not replace.
         scripts.wait(function(){

@@ -4,7 +4,6 @@
    "dependencies": {
     "animate.css": "686cebf30ed60433ee4ed0b32535a1b5d46bd95d",
     "bootstrap": "2.3.1",
-    "darkstrap": "https://github.com/danneu/darkstrap/archive/v0.9.2.zip",
     "font-awesome": "3.2.1",
     "normalize-css": "2.1.0",
     "bootstrap-datepicker": "1.1.1",
