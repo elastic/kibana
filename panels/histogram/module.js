@@ -1,15 +1,11 @@
+/*jshint globalstrict:true */
+/*global angular:true */
+
 /*
 
   ## Histogram
 
-  A bucketted time series representation of the current query or queries. Note that this
-  panel uses facetting. I tried to make it safe by using sequential/serial querying but,
-  yeah, you should know that it uses facetting. It should be pretty safe.
-
   ### Parameters
-  * query ::  an array of objects as such: {query: 'somequery', label 'legent text'}.
-              this is usually populated by a stringquery panel wher the query and label
-              parameter are the same
   * auto_int :: Auto calculate data point interval?
   * resolution ::  If auto_int is enables, shoot for this many data points, rounding to
                     sane intervals
@@ -32,29 +28,34 @@
   * x-axis :: Show x-axis labels and grid lines
   * y-axis :: Show y-axis labels and grid lines
   * interactive :: Allow drag to select time range
-  ### Group Events
-  #### Receives
-  * time :: An object containing the time range to use and the index(es) to query
-  * query :: An Array of queries, even if its only one
-  #### Sends
-  * get_time :: On panel initialization get time range to query
 
 */
 
+'use strict';
+
 angular.module('kibana.histogram', [])
-.controller('histogram', function($scope, eventBus) {
+.controller('histogram', function($scope, querySrv, dashboard, filterSrv) {
+
+  $scope.panelMeta = {
+    status  : "Stable",
+    description : "A bucketed time series chart of the current query or queries. Uses the "+
+      "Elasticsearch date_histogram facet. If using time stamped indices this panel will query"+
+      " them sequentially to attempt to apply the lighest possible load to your Elasticsearch cluster"
+  };
 
   // Set and populate defaults
   var _d = {
-    status      : "Stable",
-    group       : "default",
-    query       : [ {query: "*", label:"Query"} ],
     mode        : 'count',
+    time_field  : '@timestamp',
+    queries     : {
+      mode        : 'all',
+      ids         : []
+    },
     value_field : null,
     auto_int    : true,
     resolution  : 100, 
     interval    : '5m',
-    fill        : 3,
+    fill        : 0,
     linewidth   : 3,
     timezone    : 'browser', // browser, utc or a standard timezone
     spyable     : true,
@@ -68,86 +69,61 @@ angular.module('kibana.histogram', [])
     'y-axis'    : true,
     percentage  : false,
     interactive : true,
-  }
-  _.defaults($scope.panel,_d)
+  };
+
+  _.defaults($scope.panel,_d);
 
   $scope.init = function() {
-    eventBus.register($scope,'time', function(event,time){$scope.set_time(time)});
-    
-    // Consider eliminating the check for array, this should always be an array
-    eventBus.register($scope,'query', function(event, query) {
-      if(_.isArray(query)) {
-        $scope.panel.query = _.map(query,function(q) {
-          return {query: q, label: q};
-        })
-      } else {
-        $scope.panel.query[0] = {query: query, label: query}
-      }
+    $scope.$on('refresh',function(){
       $scope.get_data();
     });
 
-    // Now that we're all setup, request the time from our group if we don't 
-    // have it yet
-    if(_.isUndefined($scope.time))
-      eventBus.broadcast($scope.$id,$scope.panel.group,'get_time')
-  }
-
-  $scope.remove_query = function(q) {
-    $scope.panel.query = _.without($scope.panel.query,q);
     $scope.get_data();
-  }
 
-  $scope.add_query = function(label,query) {
-    if(!(_.isArray($scope.panel.query)))
-      $scope.panel.query = new Array();
-    $scope.panel.query.unshift({
-      query: query,
-      label: label, 
-    });
-    $scope.get_data();
-  }
+  };
 
   $scope.get_data = function(segment,query_id) {
-    delete $scope.panel.error
+    delete $scope.panel.error;
+
     // Make sure we have everything for the request to complete
-    if(_.isUndefined($scope.index) || _.isUndefined($scope.time))
-      return
+    if(dashboard.indices.length === 0) {
+      return;
+    }
 
-    if ($scope.panel.auto_int)
-      $scope.panel.interval = secondsToHms(calculate_interval($scope.time.from,$scope.time.to,$scope.panel.resolution,0)/1000);
 
-    $scope.panel.loading = true;
-    var _segment = _.isUndefined(segment) ? 0 : segment
-    var request = $scope.ejs.Request().indices($scope.index[_segment]);
+    var _range = $scope.range = filterSrv.timeRange('min');
+    
+    if ($scope.panel.auto_int) {
+      $scope.panel.interval = kbn.secondsToHms(
+        kbn.calculate_interval(_range.from,_range.to,$scope.panel.resolution,0)/1000);
+    }
 
-    // Build the question part of the query
-    var queries = [];
-    _.each($scope.panel.query, function(v) {
-      queries.push($scope.ejs.FilteredQuery(
-        ejs.QueryStringQuery(v.query || '*'),
-        ejs.RangeFilter($scope.time.field)
-          .from($scope.time.from)
-          .to($scope.time.to))
-      )
-    });
+    $scope.panelMeta.loading = true;
+    var _segment = _.isUndefined(segment) ? 0 : segment;
+    var request = $scope.ejs.Request().indices(dashboard.indices[_segment]);
 
-    // Build the facet part, injecting the query in as a facet filter
-    _.each(queries, function(v) {
+    $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
+    // Build the query
+    _.each($scope.panel.queries.ids, function(id) {
+      var query = $scope.ejs.FilteredQuery(
+        querySrv.getEjsObj(id),
+        filterSrv.getBoolFilter(filterSrv.ids)
+      );
 
-      var facet = $scope.ejs.DateHistogramFacet("chart"+_.indexOf(queries,v))
-
+      var facet = $scope.ejs.DateHistogramFacet(id);
+      
       if($scope.panel.mode === 'count') {
-        facet = facet.field($scope.time.field)
+        facet = facet.field($scope.panel.time_field);
       } else {
         if(_.isNull($scope.panel.value_field)) {
           $scope.panel.error = "In " + $scope.panel.mode + " mode a field must be specified";
-          return
+          return;
         }
-        facet = facet.keyField($scope.time.field).valueField($scope.panel.value_field)
+        facet = facet.keyField($scope.panel.time_field).valueField($scope.panel.value_field);
       }
-      facet = facet.interval($scope.panel.interval).facetFilter($scope.ejs.QueryFilter(v))
-      request = request.facet(facet).size(0)
-    })
+      facet = facet.interval($scope.panel.interval).facetFilter($scope.ejs.QueryFilter(query));
+      request = request.facet(facet).size(0);
+    });
 
     // Populate the inspector panel
     $scope.populate_modal(request);
@@ -157,8 +133,8 @@ angular.module('kibana.histogram', [])
 
     // Populate scope when we have results
     results.then(function(results) {
-      $scope.panel.loading = false;
-      if(_segment == 0) {
+      $scope.panelMeta.loading = false;
+      if(_segment === 0) {
         $scope.hits = 0;
         $scope.data = [];
         query_id = $scope.query_id = new Date().getTime();
@@ -170,97 +146,122 @@ angular.module('kibana.histogram', [])
         return;
       }
 
-      // Make sure we're still on the same query
-      if($scope.query_id === query_id) {
+      // Convert facet ids to numbers
+      var facetIds = _.map(_.keys(results.facets),function(k){return parseInt(k, 10);});
+
+      // Make sure we're still on the same query/queries
+      if($scope.query_id === query_id && 
+        _.intersection(facetIds,$scope.panel.queries.ids).length === $scope.panel.queries.ids.length
+        ) {
 
         var i = 0;
-        _.each(results.facets, function(v, k) {
+        var data, hits;
+
+        _.each($scope.panel.queries.ids, function(id) {
+          var v = results.facets[id];
 
           // Null values at each end of the time range ensure we see entire range
-          if(_.isUndefined($scope.data[i]) || _segment == 0) {
-            var data = [[$scope.time.from.getTime(), null],[$scope.time.to.getTime(), null]];
-            var hits = 0;
+          if(_.isUndefined($scope.data[i]) || _segment === 0) {
+            data = [];
+            if(filterSrv.idsByType('time').length > 0) {
+              data = [[_range.from.getTime(), null],[_range.to.getTime(), null]];
+              //data = [];
+            }
+            hits = 0;
           } else {
-            var data = $scope.data[i].data
-            var hits = $scope.data[i].hits
+            data = $scope.data[i].data;
+            hits = $scope.data[i].hits;
           }
 
           // Assemble segments
           var segment_data = [];
           _.each(v.entries, function(v, k) {
-            segment_data.push([v['time'],v[$scope.panel.mode]])
-            hits += v['count']; // The series level hits counter
-            $scope.hits += v['count']; // Entire dataset level hits counter
+            segment_data.push([v.time,v[$scope.panel.mode]]);
+            hits += v.count; // The series level hits counter
+            $scope.hits += v.count; // Entire dataset level hits counter
           });
-          data.splice.apply(data,[1,0].concat(segment_data)) // Join histogram data
+          data.splice.apply(data,[1,0].concat(segment_data)); // Join histogram data
 
           // Create the flot series object
           var series = { 
             data: {
-              label: $scope.panel.query[i].label || "query"+(parseInt(i)+1), 
+              info: querySrv.list[id],
               data: data,
               hits: hits
             },
           };
 
-          if (!(_.isUndefined($scope.panel.query[i].color)))
-            series.data.color = $scope.panel.query[i].color;
-          
-          $scope.data[i] = series.data
+          $scope.data[i] = series.data;
 
           i++;
         });
 
         // Tell the histogram directive to render.
-        $scope.$emit('render')
+        $scope.$emit('render');
 
         // If we still have segments left, get them
-        if(_segment < $scope.index.length-1) {
-          $scope.get_data(_segment+1,query_id)
+        if(_segment < dashboard.indices.length-1) {
+          $scope.get_data(_segment+1,query_id);
         }
       
       }
     });
-  }
+  };
 
   // function $scope.zoom
   // factor :: Zoom factor, so 0.5 = cuts timespan in half, 2 doubles timespan
   $scope.zoom = function(factor) {
-    eventBus.broadcast($scope.$id,$scope.panel.group,'zoom',factor);
-  }
+    var _now = Date.now();
+    var _range = filterSrv.timeRange('min');
+    var _timespan = (_range.to.valueOf() - _range.from.valueOf());
+    var _center = _range.to.valueOf() - _timespan/2;
+
+    var _to = (_center + (_timespan*factor)/2);
+    var _from = (_center - (_timespan*factor)/2);
+
+    // If we're not already looking into the future, don't.
+    if(_to > Date.now() && _range.to < Date.now()) {
+      var _offset = _to - Date.now();
+      _from = _from - _offset;
+      _to = Date.now();
+    }
+
+    if(factor > 1) {
+      filterSrv.removeByType('time');
+    }
+    filterSrv.set({
+      type:'time',
+      from:moment.utc(_from),
+      to:moment.utc(_to),
+      field:$scope.panel.time_field
+    });
+    
+    dashboard.refresh();
+
+  };
 
   // I really don't like this function, too much dom manip. Break out into directive?
   $scope.populate_modal = function(request) {
-    $scope.modal = {
-      title: "Inspector",
-      body : "<h5>Last Elasticsearch Query</h5><pre>"+
-          'curl -XGET '+config.elasticsearch+'/'+$scope.index+"/_search?pretty -d'\n"+
-          angular.toJson(JSON.parse(request.toString()),true)+
-        "'</pre>", 
-    } 
-  }
+    $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
+  };
 
   $scope.set_refresh = function (state) { 
     $scope.refresh = state; 
-  }
+  };
 
   $scope.close_edit = function() {
-    if($scope.refresh)
+    if($scope.refresh) {
       $scope.get_data();
+    }
     $scope.refresh =  false;
     $scope.$emit('render');
-  }
-
-  $scope.set_time = function(time) {
-    $scope.time = time;
-    $scope.index = time.index || $scope.index    
-    $scope.get_data();
-  }
+  };
 
 })
-.directive('histogramChart', function(eventBus) {
+.directive('histogramChart', function(dashboard, filterSrv, $rootScope) {
   return {
     restrict: 'A',
+    template: '<div></div>',
     link: function(scope, elem, attrs, ctrl) {
 
       // Receive render events
@@ -275,15 +276,26 @@ angular.module('kibana.histogram', [])
 
       // Function for rendering panel
       function render_panel() {
- 
+
+        // IE doesn't work without this
+        elem.css({height:scope.panel.height||scope.row.height});
+        
+        // Populate from the query service
+        try {
+          _.each(scope.data,function(series) {
+            series.label = series.info.alias;
+            series.color = series.info.color;
+          });
+        } catch(e) {return;}
+
         // Set barwidth based on specified interval
-        var barwidth = interval_to_seconds(scope.panel.interval)*1000
+        var barwidth = kbn.interval_to_seconds(scope.panel.interval)*1000;
 
         var scripts = $LAB.script("common/lib/panels/jquery.flot.js").wait()
           .script("common/lib/panels/jquery.flot.time.js")
           .script("common/lib/panels/jquery.flot.stack.js")
           .script("common/lib/panels/jquery.flot.selection.js")
-          .script("common/lib/panels/timezone.js")
+          .script("common/lib/panels/timezone.js");
                     
         // Populate element. Note that jvectormap appends, does not replace.
         scripts.wait(function(){
@@ -294,7 +306,7 @@ angular.module('kibana.histogram', [])
             var options = {
               legend: { show: false },
               series: {
-                stackpercent: scope.panel.stack ? scope.panel.percentage : false,
+                //stackpercent: scope.panel.stack ? scope.panel.percentage : false,
                 stack: scope.panel.percentage ? null : stack,
                 lines:  { 
                   show: scope.panel.lines, 
@@ -302,7 +314,7 @@ angular.module('kibana.histogram', [])
                   lineWidth: scope.panel.linewidth,
                   steps: false
                 },
-                bars:   { show: scope.panel.bars,  fill: 1, barWidth: barwidth/1.8 },
+                bars:   { show: scope.panel.bars,  fill: 1, barWidth: barwidth/1.8, zero: false },
                 points: { show: scope.panel.points, fill: 1, fillColor: false, radius: 5},
                 shadowSize: 1
               },
@@ -310,51 +322,49 @@ angular.module('kibana.histogram', [])
                 show: scope.panel['y-axis'], 
                 min: 0, 
                 max: scope.panel.percentage && scope.panel.stack ? 100 : null, 
-                color: "#c8c8c8" 
               },
               xaxis: {
                 timezone: scope.panel.timezone,
                 show: scope.panel['x-axis'],
                 mode: "time",
+                min: _.isUndefined(scope.range.from) ? null : scope.range.from.getTime(),
+                max: _.isUndefined(scope.range.to) ? null : scope.range.to.getTime(),
                 timeformat: time_format(scope.panel.interval),
                 label: "Datetime",
-                color: "#c8c8c8",
               },
               grid: {
                 backgroundColor: null,
                 borderWidth: 0,
-                borderColor: '#eee',
-                color: "#eee",
                 hoverable: true,
-              },
-              colors: ['#86B22D','#BF6730','#1D7373','#BFB930','#BF3030','#77207D']
+                color: '#c8c8c8'
+              }
+            };
+
+            if(scope.panel.interactive) {
+              options.selection = { mode: "x", color: '#666' };
             }
 
-            if(scope.panel.interactive)
-              options.selection = { mode: "x", color: '#aaa' };
-
-            scope.plot = $.plot(elem, scope.data, options)
-            
-            // Work around for missing legend at initialization
-            if(!scope.$$phase)
-              scope.$apply()
+            scope.plot = $.plot(elem, scope.data, options);
 
           } catch(e) {
-            elem.text(e)
+            elem.text(e);
           }
-        })
+        });
       }
 
       function time_format(interval) {
-        var _int = interval_to_seconds(interval)
-        if(_int >= 2628000)
-          return "%m/%y"
-        if(_int >= 86400)
-          return "%m/%d/%y"
-        if(_int >= 60)
-          return "%H:%M<br>%m/%d"
-        else
-          return "%H:%M:%S"
+        var _int = kbn.interval_to_seconds(interval);
+        if(_int >= 2628000) {
+          return "%m/%y";
+        }
+        if(_int >= 86400) {
+          return "%m/%d/%y";
+        }
+        if(_int >= 60) {
+          return "%H:%M<br>%m/%d";
+        }
+        
+        return "%H:%M:%S";
       }
 
       function tt(x, y, contents) {
@@ -388,10 +398,14 @@ angular.module('kibana.histogram', [])
       });
 
       elem.bind("plotselected", function (event, ranges) {
-        scope.time.from = moment(ranges.xaxis.from);
-        scope.time.to   = moment(ranges.xaxis.to)
-        eventBus.broadcast(scope.$id,scope.panel.group,'set_time',scope.time)
+        var _id = filterSrv.set({
+          type  : 'time',
+          from  : moment.utc(ranges.xaxis.from),
+          to    : moment.utc(ranges.xaxis.to),
+          field : scope.panel.time_field
+        });
+        dashboard.refresh();
       });
     }
   };
-})
+});

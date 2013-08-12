@@ -1,82 +1,79 @@
+/*jshint globalstrict:true */
+/*global angular:true */
 /*
 
-  ## Termsquery
-
-  Broadcasts an array of queries based on the results of a terms facet
+  ## Derivequeries
 
   ### Parameters
   * label :: The label to stick over the field 
   * query :: A string to use as a filter for the terms facet
   * field :: the field to facet on
+  * rest  :: include a filter that matches all other terms,
   * size :: how many queries to generate
   * fields :: a list of fields known to us
   * query_mode :: how to create query
-  
-  ### Group Events
-  #### Sends
-  * query :: Always broadcast as an array, even in multi: false
-  * get_time :: Request the time object from the timepicker
-  #### Receives
-  * query :: An array of queries. This is probably needs to be fixed.
-  * time :: populate index and time
-  * fields :: A list of fields known to us
+
 */
 
+'use strict';
+
 angular.module('kibana.derivequeries', [])
-.controller('derivequeries', function($scope, eventBus) {
+.controller('derivequeries', function($scope, $rootScope, querySrv, fields, dashboard, filterSrv) {
+
+  $scope.panelMeta = {
+    status  : "Experimental",
+    description : "Creates a new set of queries using the Elasticsearch terms facet. For example,"+
+     " you might want to create 5 queries showing the most frequent HTTP response codes. Be "+
+     "careful not to select a high cardinality field, as Elasticsearch must load all unique values"+
+     " into memory."
+  };
+
 
   // Set and populate defaults
   var _d = {
-    status  : "Beta",
+    loading : false,
     label   : "Search",
     query   : "*",
-    group   : "default",
+    ids     : [],
     field   : '_type',
     fields  : [],
     spyable : true,
+    rest    : false,
     size    : 5,
     mode    : 'terms only',
     exclude : [],
     history : [],
     remember: 10 // max: 100, angular strap can't take a variable for items param
-  }
+  };
   _.defaults($scope.panel,_d);
 
   $scope.init = function() {
-    eventBus.register($scope,'fields', function(event, fields) {
-      $scope.panel.fields = fields.all;
-    });
-    eventBus.register($scope,'time', function(event,time){set_time(time)});
-    eventBus.register($scope,'query', function(event, query) {
-      $scope.panel.query = _.isArray(query) ? query[0] : query;
-      $scope.get_data();
-    });
-    // Now that we're all setup, request the time from our group
-    eventBus.broadcast($scope.$id,$scope.panel.group,'get_time')
-  }
+    $scope.editing = false;
+    $scope.panel.fields = fields.list;
+  };
 
   $scope.get_data = function() {
     update_history($scope.panel.query);
+    
     // Make sure we have everything for the request to complete
-    if(_.isUndefined($scope.index) || _.isUndefined($scope.time))
-      return
+    if(dashboard.indices.length === 0) {
+      return;
+    }
 
-    $scope.panel.loading = true;
-    var request = $scope.ejs.Request().indices($scope.index);
+    $scope.panelMeta.loading = true;
+    var request = $scope.ejs.Request().indices(dashboard.indices);
 
     // Terms mode
     request = request
-      .facet(ejs.TermsFacet('query')
+      .facet($scope.ejs.TermsFacet('query')
         .field($scope.panel.field)
-        .size($scope.panel['size'])
+        .size($scope.panel.size)
         .exclude($scope.panel.exclude)
-        .facetFilter(ejs.QueryFilter(
-          ejs.FilteredQuery(
-            ejs.QueryStringQuery($scope.panel.query || '*'),
-            ejs.RangeFilter($scope.time.field)
-              .from($scope.time.from)
-              .to($scope.time.to)
-            )))).size(0)
+        .facetFilter($scope.ejs.QueryFilter(
+          $scope.ejs.FilteredQuery(
+            $scope.ejs.QueryStringQuery($scope.panel.query || '*'),
+            filterSrv.getBoolFilter(filterSrv.ids)
+            )))).size(0);
 
     $scope.populate_modal(request);
 
@@ -84,62 +81,71 @@ angular.module('kibana.derivequeries', [])
 
     // Populate scope when we have results
     results.then(function(results) {
-      $scope.panel.loading = false;
-      var data = [];
+      $scope.panelMeta.loading = false;
+      var suffix,
+          data = [];
       if ($scope.panel.query === '' || $scope.panel.mode === 'terms only') {
-        var suffix = '';
+        suffix = '';
       } else if ($scope.panel.mode === 'AND') {
-        var suffix = ' AND (' + $scope.panel.query + ')';
+        suffix = ' AND (' + $scope.panel.query + ')';
       } else if ($scope.panel.mode === 'OR') {
-        var suffix = ' OR (' + $scope.panel.query + ')';
+        suffix = ' OR (' + $scope.panel.query + ')';
       }
-      _.each(results.facets.query.terms, function(v) {
-        data.push($scope.panel.field+':"'+v.term+'"'+suffix)
+      var ids = [];
+      var terms = results.facets.query.terms;
+      var others = [];
+      _.each(terms, function(v) {
+        var _q = $scope.panel.field+':"'+v.term+'"'+suffix;
+        // if it isn't in the list, remove it
+        var _iq = querySrv.findQuery(_q);
+        if(!_iq) {
+          ids.push(querySrv.set({alias: v.term, query:_q}));
+        } else {
+          ids.push(_iq.id);
+        }
+        others.push("NOT (" + _q + ")");
       });
-      $scope.send_query(data)
+      if ($scope.panel.rest) {
+        var _other_q = others.join(' AND ');
+        var _iq = querySrv.findQuery(_other_q);
+        if (!_iq) {
+          ids.push(querySrv.set({alias: 'other', query: _other_q}));
+        } else {
+          ids.push(_iq.id);
+        }
+      }
+      _.each(_.difference($scope.panel.ids,ids),function(id){
+        querySrv.remove(id);
+      });
+      $scope.panel.ids = ids;
+      dashboard.refresh();
     });
-  }
+  };
 
   $scope.set_refresh = function (state) { 
     $scope.refresh = state; 
-  }
+  };
 
   $scope.close_edit = function() {
-    if($scope.refresh)
+    if($scope.refresh) {
       $scope.get_data();
+    }
     $scope.refresh =  false;
-  }
+  };
 
   $scope.populate_modal = function(request) {
-    $scope.modal = {
-      title: "Inspector",
-      body : "<h5>Last Elasticsearch Query</h5><pre>"+
-          'curl -XGET '+config.elasticsearch+'/'+$scope.index+"/_search?pretty -d'\n"+
-          angular.toJson(JSON.parse(request.toString()),true)+
-        "'</pre>", 
-    } 
-  }
-
-  function set_time(time) {
-    $scope.time = time;
-    $scope.index = _.isUndefined(time.index) ? $scope.index : time.index
-    $scope.get_data();
-  }
-
-  $scope.send_query = function(query) {
-    var _query = _.isArray(query) ? query : [query]
-    eventBus.broadcast($scope.$id,$scope.panel.group,'query',_query)
-  }
+    $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
+  };
 
   var update_history = function(query) {
     query = _.isArray(query) ? query : [query];
     if($scope.panel.remember > 0) {
-      $scope.panel.history = _.union(query.reverse(),$scope.panel.history)
-      var _length = $scope.panel.history.length
+      $scope.panel.history = _.union(query.reverse(),$scope.panel.history);
+      var _length = $scope.panel.history.length;
       if(_length > $scope.panel.remember) {
-        $scope.panel.history = $scope.panel.history.slice(0,$scope.panel.remember)
+        $scope.panel.history = $scope.panel.history.slice(0,$scope.panel.remember);
       }
     }
-  }
+  };
 
 });
