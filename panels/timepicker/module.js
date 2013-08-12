@@ -186,9 +186,9 @@ angular.module('kibana.timepicker', [])
     // If time picker is defined (usually is) TOFIX: Horrible parsing
     if(!(_.isUndefined($scope.timepicker))) {
       from = $scope.panel.mode === 'relative' ? moment(kbn.time_ago($scope.panel.timespan)) :
-        moment.utc(convertTimeZone($scope.timepicker.from.date + " " + $scope.timepicker.from.time + " " + getTimeZoneOffset(dashboard.current.timezone), "utc", "MM/dd/yyyy HH:mm:ss", dashboard.current.timezone), 'MM/DD/YYYY HH:mm:ss');
+        moment.utc(convertTimeZone(moment($scope.timepicker.from.date).format('MM/DD/YYYY') + " " + $scope.timepicker.from.time + " " + getTimeZoneOffset(dashboard.current.timezone), "utc", "MM/dd/yyyy HH:mm:ss", dashboard.current.timezone), 'MM/DD/YYYY HH:mm:ss');
       to = $scope.panel.mode !== 'absolute' ? moment() :
-    	moment.utc(convertTimeZone($scope.timepicker.to.date + " " + $scope.timepicker.to.time + " " + getTimeZoneOffset(dashboard.current.timezone), "utc", "MM/dd/yyyy HH:mm:ss", dashboard.current.timezone), 'MM/DD/YYYY HH:mm:ss');
+    	moment.utc(convertTimeZone(moment($scope.timepicker.to.date).format('MM/DD/YYYY') + " " + $scope.timepicker.to.time + " " + getTimeZoneOffset(dashboard.current.timezone), "utc", "MM/dd/yyyy HH:mm:ss", dashboard.current.timezone), 'MM/DD/YYYY HH:mm:ss');
     // Otherwise (probably initialization)
     } else {
       from = $scope.panel.mode === 'relative' ? moment(kbn.time_ago($scope.panel.timespan)) :
@@ -299,7 +299,7 @@ angular.module('kibana.timepicker', [])
         var dt;
         if (fromZone == "utc") {
         	dt = new timezoneJS.Date(text, "Etc/UTC");
-        } else if (fromZone == "browser") {
+        } else if (fromZone == "browser" || fromZone == undefined) {
         	dt = new timezoneJS.Date(text);
         } else {
         	dt = new timezoneJS.Date(text, fromZone);
