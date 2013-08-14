@@ -124,7 +124,7 @@ angular.module('kibana.services', [])
   };
 
 })
-.service('querySrv', function(dashboard, ejsResource) {
+.service('querySrv', function($location, dashboard, ejsResource) {
   // Create an object to hold our service state on the dashboard
   dashboard.current.services.query = dashboard.current.services.query || {};
   if ('query' in $location.search()) {
