@@ -38,6 +38,16 @@ angular.module('kibana.query', [])
   };
 
   $scope.refresh = function(query) {
+    var _query_array = $scope.querySrv.list;
+    var _disable_keyword = ["passwd", "password"];
+    for (var i in _query_array) {
+      for (var j in _disable_keyword) {
+        if (_query_array[i].query.indexOf(_disable_keyword[j]) !=-1) {
+          alert('You DO NOT have permission to search: ' + _disable_keyword[j]);
+          return 0;
+        }
+      }
+    } 
     update_history(_.pluck($scope.querySrv.list,'query'));
     $rootScope.$broadcast('refresh');
   };
