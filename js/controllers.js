@@ -3,7 +3,7 @@
 'use strict';
 
 angular.module('kibana.controllers', [])
-.controller('DashCtrl', function($scope, $rootScope, $http, $timeout, $route, ejsResource, 
+.controller('DashCtrl', function($scope, $location, $rootScope, $http, $timeout, $route, ejsResource, 
   fields, dashboard) {
 
   $scope.editor = {
