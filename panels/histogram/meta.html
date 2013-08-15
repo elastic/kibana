@@ -1,0 +1,22 @@
+<div class="row-fluid" style="width:170px">
+  
+  <style>
+    .input-plot-alias {
+      margin-bottom: 5px !important;
+      margin-top: 5px !important;
+    }
+    .btn-plot-remove-color {
+      margin-top: 10px !important;
+      margin-left: 30px;
+    }
+  </style>
+  <a class="close" ng-click="set_refresh(true);dismiss();" href="">×</a>
+  <label class="strong small ">Plot Alias</label>
+  <form>
+    <input class="input-medium input-plot-alias" type="text" ng-model="plot.alias" placeholder='Alias...' ng-change="set_refresh(true);" />
+    <div>
+      <i ng-repeat="color in querySrv.colors" class="pointer" ng-class="{'icon-circle-blank':plot.color == color,'icon-circle':plot.color != color}" ng-style="{color:color}" ng-click="plot.color = color;set_refresh(true);"> </i>
+    </div>
+    <button type="button" class="btn btn-mini btn-plot-remove-color" ng-click="plot.color = null;set_refresh(true);" ng-show="plot.color">Remove color</button>
+  </form>
+</div>

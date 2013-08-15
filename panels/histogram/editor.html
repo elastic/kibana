@@ -1,23 +1,46 @@
+<style>
+    .querySelect .query {
+      margin-right: 5px;
+    }
+    .querySelect .selected {
+      border: 3px solid;
+    }
+    .querySelect .unselected {
+      border: 0px solid;
+    }
+</style>
+
 <div>
-  <div class="row-fluid">
-    <div class="span2">
-      <label class="small">Mode</label> 
-      <select ng-change="set_refresh(true)" class="input-small" ng-model="panel.mode" ng-options="f for f in ['count','min','mean','max','total']"></select>
-    </div>
-    <div class="span2">
-      <label class="small">Time Field</label>
-        <input ng-change="set_refresh(true)" placeholder="Start typing" bs-typeahead="fields.list" type="text" class="input-small" ng-model="panel.time_field">
-    </div>
-    <div class="span2" ng-show="panel.mode != 'count'">
-      <label class="small">Value Field</label>
-        <input ng-change="set_refresh(true)" placeholder="Start typing" bs-typeahead="fields.list" type="text" class="input-small" ng-model="panel.value_field">
-    </div>
-    <div class="span3" ng-show="panel.mode != 'count'">
-      <label class="small">Note</label><small> In <strong>{{panel.mode}}</strong> mode the configured field <strong>must</strong> be a numeric type</small>
-    </div>
+  <h5>Plots Settings</h5>
+  <table class="table table-condensed table-striped">
+    <thead>
+        <tr><th></th><th>Mode</th><th>Value Field</th><th>Paired Query</th><th>Delete</th></tr>
+    </thead>
+    <tbody ng-repeat="plot in panel.plots">
+      <tr>
+        <td><i class="icon-circle pointer" data-unique="1" bs-popover="'panels/histogram/meta.html'" data-placement="right" ng-style="{color: plot.color}"></i></td>
+        <td><select ng-change="set_refresh(true)" class="input-small" ng-model="plot.mode" ng-options="f for f in ['count','min','mean','max','total']"></select></td>
+        <td><input ng-change="set_refresh(true)" placeholder="Start typing" bs-typeahead="fields.list" type="text" class="input-large" ng-model="plot.value_field" ng-show="plot.mode != 'count'"></td>
+        <td><select class="input-small" ng-change="set_refresh(true);" ng-model="plot.queries.mode" ng-options="f for f in ['all','pinned','unpinned','selected']"></select></td>
+        <td><i ng-show="panel.plots.length > 1" class="pointer icon-remove" ng-click="panel.plots = _.without(panel.plots, plot);set_refresh(true)"></i></td>
+      </tr>
+      <tr class="querySelect" ng-show="plot.queries.mode == 'selected'">
+        <td colspan="5">
+          <span ng-style="{'border-color': querySrv.list[id].color}" ng-class="{selected:_.contains(plot.queries.ids,id),unselected:!_.contains(plot.queries.ids,id)}" ng-repeat="id in querySrv.ids" ng-click="plot.queries.ids = _.toggleInOut(plot.queries.ids,id);set_refresh(true);" class="query pointer badge">
+            <i class="icon-circle" ng-style="{color: querySrv.list[id].color}"></i>
+            <span> {{querySrv.list[id].alias || querySrv.list[id].query}}</span>
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <button type="button" class="btn btn-success" ng-click="add_new_plot();set_refresh(true)" style="margin-bottom:10px;"><i class="icon-plus icon-white"></i> Add a Plot</button>
+
+  <h5>Chart Settings</h5>
+  <div class="row-fluid" style="margin-bottom:10px;">
+    <div class="span2"><label class="small">Time field</label> <input ng-change="set_refresh(true)" placeholder="Start typing" bs-typeahead="fields.list" type="text" class="input-small" ng-model="panel.time_field"></div>
   </div>
   <div class="row-fluid" style="margin-bottom:10px;">
-    <h5>Chart Settings</h5>
     <div class="span1"> <label class="small">Bars</label><input type="checkbox" ng-model="panel.bars" ng-checked="panel.bars"></div>
     <div class="span1"> <label class="small">Lines</label><input type="checkbox" ng-model="panel.lines" ng-checked="panel.lines"></div>
     <div class="span1"> <label class="small">Points</label><input type="checkbox" ng-model="panel.points" ng-checked="panel.points"></div>
@@ -60,7 +83,6 @@
       <label class="small">Use Elasticsearch date math format (eg 1m, 5m, 1d, 2w, 1y)</label>
     </div>
   </div>
-  <div class="row-fluid" ng-include="'partials/querySelect.html'"></div>
   <h5>Panel Spy</h5>
   <div class="row-fluid">
     <div class="span2"> 

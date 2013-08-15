@@ -43,15 +43,20 @@ angular.module('kibana.histogram', [])
       " them sequentially to attempt to apply the lighest possible load to your Elasticsearch cluster"
   };
 
-  // Set and populate defaults
-  var _d = {
+  $scope.default_plot = {
     mode        : 'count',
-    time_field  : '@timestamp',
+    value_field : null,
     queries     : {
       mode        : 'all',
-      ids         : []
+      ids         : [],
     },
-    value_field : null,
+    color       : null,
+    alias       : null,
+  };
+  // Set and populate defaults
+  var _d = {
+    plots       : [angular.copy($scope.default_plot)],
+    time_field  : '@timestamp',
     auto_int    : true,
     resolution  : 100, 
     interval    : '5m',
@@ -90,7 +95,6 @@ angular.module('kibana.histogram', [])
       return;
     }
 
-
     var _range = $scope.range = filterSrv.timeRange('min');
     
     if ($scope.panel.auto_int) {
@@ -102,27 +106,31 @@ angular.module('kibana.histogram', [])
     var _segment = _.isUndefined(segment) ? 0 : segment;
     var request = $scope.ejs.Request().indices(dashboard.indices[_segment]);
 
-    $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
-    // Build the query
-    _.each($scope.panel.queries.ids, function(id) {
-      var query = $scope.ejs.FilteredQuery(
-        querySrv.getEjsObj(id),
-        filterSrv.getBoolFilter(filterSrv.ids)
-      );
+    _.each($scope.panel.plots, function(plot) {
 
-      var facet = $scope.ejs.DateHistogramFacet(id);
-      
-      if($scope.panel.mode === 'count') {
-        facet = facet.field($scope.panel.time_field);
-      } else {
-        if(_.isNull($scope.panel.value_field)) {
-          $scope.panel.error = "In " + $scope.panel.mode + " mode a field must be specified";
-          return;
+      plot.queries.ids = querySrv.idsByMode(plot.queries);
+
+      // Build the query
+      _.each(plot.queries.ids, function(queryId) {
+        var query = $scope.ejs.FilteredQuery(
+          querySrv.getEjsObj(queryId),
+          filterSrv.getBoolFilter(filterSrv.ids)
+        );
+
+        var facet = $scope.ejs.DateHistogramFacet($scope.get_facet_id(plot,queryId));
+
+        if(plot.mode === 'count') {
+          facet = facet.field($scope.panel.time_field);
+        } else {
+          if(_.isNull(plot.value_field)) {
+            $scope.panel.error = "In " + plot.mode + " mode a field must be specified";
+            return;
+          }
+          facet = facet.keyField($scope.panel.time_field).valueField(plot.value_field);
         }
-        facet = facet.keyField($scope.panel.time_field).valueField($scope.panel.value_field);
-      }
-      facet = facet.interval($scope.panel.interval).facetFilter($scope.ejs.QueryFilter(query));
-      request = request.facet(facet).size(0);
+        facet = facet.interval($scope.panel.interval).facetFilter($scope.ejs.QueryFilter(query));
+        request = request.facet(facet).size(0);
+      });
     });
 
     // Populate the inspector panel
@@ -146,54 +154,59 @@ angular.module('kibana.histogram', [])
         return;
       }
 
-      // Convert facet ids to numbers
-      var facetIds = _.map(_.keys(results.facets),function(k){return parseInt(k, 10);});
+      var facetIds = _.keys(results.facets);
+      // Compute expected facet ids from plots/queries in current $scope
+      var expectedFacetIds = _.flatten(_.map($scope.panel.plots,function(p){return _.map(p.queries.ids,function(queryId){return $scope.get_facet_id(p,queryId);});}));
 
       // Make sure we're still on the same query/queries
-      if($scope.query_id === query_id && 
-        _.intersection(facetIds,$scope.panel.queries.ids).length === $scope.panel.queries.ids.length
-        ) {
+      if($scope.query_id === query_id && _.intersection(facetIds,expectedFacetIds).length === expectedFacetIds.length) {
 
         var i = 0;
         var data, hits;
 
-        _.each($scope.panel.queries.ids, function(id) {
-          var v = results.facets[id];
+        _.each($scope.panel.plots, function(plot) {
 
-          // Null values at each end of the time range ensure we see entire range
-          if(_.isUndefined($scope.data[i]) || _segment === 0) {
-            data = [];
-            if(filterSrv.idsByType('time').length > 0) {
-              data = [[_range.from.getTime(), null],[_range.to.getTime(), null]];
-              //data = [];
+          _.each(plot.queries.ids, function(queryId) {
+            var v = results.facets[$scope.get_facet_id(plot,queryId)];
+
+            // Null values at each end of the time range ensure we see entire range
+            if(_.isUndefined($scope.data[i]) || _segment === 0) {
+              data = [];
+              if(filterSrv.idsByType('time').length > 0) {
+                data = [[_range.from.getTime(), null],[_range.to.getTime(), null]];
+                //data = [];
+              }
+              hits = 0;
+            } else {
+              data = $scope.data[i].data;
+              hits = $scope.data[i].hits;
             }
-            hits = 0;
-          } else {
-            data = $scope.data[i].data;
-            hits = $scope.data[i].hits;
-          }
 
-          // Assemble segments
-          var segment_data = [];
-          _.each(v.entries, function(v, k) {
-            segment_data.push([v.time,v[$scope.panel.mode]]);
-            hits += v.count; // The series level hits counter
-            $scope.hits += v.count; // Entire dataset level hits counter
+            // Assemble segments
+            var segment_data = [];
+            _.each(v.entries, function(v, k) {
+              segment_data.push([v.time,v[plot.mode]]);
+              hits += v.count; // The series level hits counter
+              $scope.hits += v.count; // Entire dataset level hits counter
+            });
+            data.splice.apply(data,[1,0].concat(segment_data)); // Join histogram data
+
+            // Create the flot series object
+            var series = {
+              data: {
+                info: {
+                  color: plot.color || querySrv.list[queryId].color,
+                  alias: plot.alias || querySrv.list[queryId].alias,
+                },
+                data: data,
+                hits: hits
+              },
+            };
+
+            $scope.data[i] = series.data;
+
+            i++;
           });
-          data.splice.apply(data,[1,0].concat(segment_data)); // Join histogram data
-
-          // Create the flot series object
-          var series = { 
-            data: {
-              info: querySrv.list[id],
-              data: data,
-              hits: hits
-            },
-          };
-
-          $scope.data[i] = series.data;
-
-          i++;
         });
 
         // Tell the histogram directive to render.
@@ -238,6 +251,14 @@ angular.module('kibana.histogram', [])
     
     dashboard.refresh();
 
+  };
+
+  $scope.get_facet_id = function(plot,queryId) {
+    return [_.indexOf($scope.panel.plots,plot).toString(),queryId.toString()].join('');
+  };
+
+  $scope.add_new_plot = function() {
+    $scope.panel.plots.push(angular.copy($scope.default_plot));
   };
 
   // I really don't like this function, too much dom manip. Break out into directive?
@@ -390,6 +411,7 @@ angular.module('kibana.histogram', [])
           tt(pos.pageX, pos.pageY,
             "<div style='vertical-align:middle;display:inline-block;background:"+
             item.series.color+";height:15px;width:15px;border-radius:10px;'></div> "+
+            "<strong>"+item.series.label+"</strong>: "+
             item.datapoint[1].toFixed(0) + " @ " + 
             moment(item.datapoint[0]).format('MM/DD HH:mm:ss'));
         } else {
