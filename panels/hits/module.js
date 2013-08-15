@@ -45,12 +45,17 @@ angular.module('kibana.hits', [])
 
   $scope.init = function () {
     $scope.hits = 0;
+    $scope.formattedHits = 0;
    
     $scope.$on('refresh',function(){
       $scope.get_data();
     });
     $scope.get_data();
 
+  };
+
+  $scope.formatHits = function(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
   $scope.get_data = function(segment,query_id) {
@@ -89,6 +94,7 @@ angular.module('kibana.hits', [])
       $scope.panelMeta.loading = false;
       if(_segment === 0) {
         $scope.hits = 0;
+        $scope.formattedHits = 0;
         $scope.data = [];
         query_id = $scope.query_id = new Date().getTime();
       }
@@ -112,6 +118,7 @@ angular.module('kibana.hits', [])
           var hits = _.isUndefined($scope.data[i]) || _segment === 0 ? 
             v.count : $scope.data[i].hits+v.count;
           $scope.hits += v.count;
+          $scope.formattedHits = $scope.formatHits($scope.hits);
 
           // Create series
           $scope.data[i] = { 
