@@ -134,6 +134,9 @@
 
   kbn.round_interval = function(interval) {
     switch (true) {
+    // 0.1s
+    case (interval <= 100):         
+      return 20;       // 0.02s
     // 0.5s
     case (interval <= 500):         
       return 100;       // 0.1s
@@ -254,7 +257,7 @@
 
   // histogram & trends
   kbn.interval_to_seconds = function(string) {
-    var matches = string.match(/(\d+)([Mwdhmsy])/);
+    var matches = string.match(/(\d*\.{0,1}\d+)([Mwdhmsy])/);
     switch (matches[2]) {
     case 'y': 
       return matches[1]*31536000;
