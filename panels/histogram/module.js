@@ -28,7 +28,9 @@
   * x-axis :: Show x-axis labels and grid lines
   * y-axis :: Show y-axis labels and grid lines
   * interactive :: Allow drag to select time range
-
+  * indices_per_request :: Query this many indicies per request to elasticsearch.
+  *                        Increasing this number will improve the load-time of
+  *                        histogram data.
 */
 
 'use strict';
@@ -72,6 +74,7 @@ angular.module('kibana.histogram', [])
     'y-axis'    : true,
     percentage  : false,
     interactive : true,
+    indices_per_request : 10
   };
 
   _.defaults($scope.panel,_d);
@@ -103,7 +106,9 @@ angular.module('kibana.histogram', [])
 
     $scope.panelMeta.loading = true;
     var _segment = _.isUndefined(segment) ? 0 : segment;
-    var request = $scope.ejs.Request().indices(dashboard.indices[_segment]);
+    var _next_segment = _segment + $scope.panel.indices_per_request;
+    var _indices = dashboard.indices.slice(_segment, _next_segment);
+    var request = $scope.ejs.Request().indices(_indices);
 
     $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
     // Build the query
@@ -203,8 +208,8 @@ angular.module('kibana.histogram', [])
         $scope.$emit('render');
 
         // If we still have segments left, get them
-        if(_segment < dashboard.indices.length-1) {
-          $scope.get_data(_segment+1,query_id);
+        if(_next_segment < dashboard.indices.length-1) {
+          $scope.get_data(_next_segment,query_id);
         }
       
       }
