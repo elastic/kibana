@@ -140,6 +140,7 @@ angular.module('kibana.histogram', [])
       if(_segment === 0) {
         $scope.hits = 0;
         $scope.data = [];
+	$scope.timeframe = 0;
         query_id = $scope.query_id = new Date().getTime();
       }
       
@@ -185,6 +186,44 @@ angular.module('kibana.histogram', [])
           });
           data.splice.apply(data,[1,0].concat(segment_data)); // Join histogram data
 
+        // Add empty values for line graph 
+           if ($scope.panel.lines) {
+             var check_interval = 1000;
+             // setup histogram interval in ms 
+             if ($scope.panel.auto_int) {
+                 check_interval = kbn.calculate_interval(_range.from,_range.to,$scope.panel.resolution,0);
+             } else {
+                 check_interval = kbn.interval_to_seconds($scope.panel.interval)*1000; 
+             }        
+             // start from first element, 0 is null data entry      
+             var actpos = 1;
+             var data_x = [];
+             var cur_time = 0;
+             // check all elements exept last, last is null data entry
+             while (actpos < data.length-1 ) { 
+                // store current timestamp      
+                cur_time = data[actpos][0];
+                //check last data
+                if (cur_time - data[actpos-1][0]> check_interval ) 
+                {
+                 // insert zero data before data point
+                   data_x = [[cur_time - check_interval,0]];
+                   data.splice.apply(data,[actpos,0].concat(data_x));
+                   actpos++;              
+                }
+                //check next data
+                if (data[actpos+1][0] - cur_time > check_interval ) 
+                {
+                 // insert zero data after data point
+                   data_x = [[cur_time + check_interval,0]];
+                   data.splice.apply(data,[actpos + 1 ,0].concat(data_x));
+                   actpos++;              
+                }
+                actpos++;  
+               }
+             }
+  
+
           // Create the flot series object
           var series = { 
             data: {
@@ -198,6 +237,8 @@ angular.module('kibana.histogram', [])
 
           i++;
         });
+
+	$scope.timeframe = kbn.secondsToHmsDetail( (_range.to - _range.from) /1000);
 
         // Tell the histogram directive to render.
         $scope.$emit('render');
@@ -229,6 +270,14 @@ angular.module('kibana.histogram', [])
       _to = Date.now();
     }
 
+    // sometimes may times swap
+    // in milliseconds zoom-out time error correction
+    if (_to < _from ) {
+      var _swap = _to;
+      _to = _from;
+      _from = _swap;
+    }
+
     if(factor > 1) {
       filterSrv.removeByType('time');
     }
@@ -242,6 +291,44 @@ angular.module('kibana.histogram', [])
     dashboard.refresh();
 
   };
+
+  // function $scope.time_move
+  // factor :: Move factor, so 0.5 = moves timespan in right, -0.5 moves timespan left
+  // factor :: Move factor, so 0 = moves to now
+  $scope.time_move = function(factor) {
+    var _now = Date.now();
+    var _range = filterSrv.timeRange('min');
+    var _timespan = (_range.to.valueOf() - _range.from.valueOf());
+
+    var _to = ( _range.to.valueOf() + (_timespan*factor));
+    var _from = ( _range.from.valueOf() + (_timespan*factor));
+
+    // If we're not already looking into the future, don't.
+    if ( ((_to > Date.now()) && (_range.to < Date.now())) || (factor==0)) {
+      _to = Date.now();
+      if (factor == 0) factor = 0.5;
+      _from = _to - Math.abs((_timespan*factor*2));
+    }
+
+    // sometimes may times swap
+    if (_to < _from ) {
+      var _swap = _to;
+      _to = _from;
+      _from = _swap;
+    }
+
+    filterSrv.removeByType('time');
+    filterSrv.set({
+      type:'time',
+      from:moment.utc(_from),
+      to:moment.utc(_to),
+      field:$scope.panel.time_field
+    });
+    
+    dashboard.refresh();
+
+  };
+
 
   // I really don't like this function, too much dom manip. Break out into directive?
   $scope.populate_modal = function(request) {
