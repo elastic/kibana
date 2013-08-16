@@ -182,6 +182,44 @@ angular.module('kibana.histogram', [])
           });
           data.splice.apply(data,[1,0].concat(segment_data)); // Join histogram data
 
+        // Add empty values for line graph 
+           if ($scope.panel.lines) {
+             var check_interval = 1000;
+             // setup histogram interval in ms 
+             if ($scope.panel.auto_int) {
+                 check_interval = kbn.calculate_interval(_range.from,_range.to,$scope.panel.resolution,0);
+             } else {
+                 check_interval = kbn.interval_to_seconds($scope.panel.interval)*1000; 
+             }        
+             // start from first element, 0 is null data entry      
+             var actpos = 1;
+             var data_x = [];
+             var cur_time = 0;
+             // check all elements exept last, last is null data entry
+             while (actpos < data.length-1 ) { 
+                // store current timestamp      
+                cur_time = data[actpos][0];
+                //check last data
+                if (cur_time - data[actpos-1][0]> check_interval ) 
+                {
+                 // insert zero data before data point
+                   data_x = [[cur_time - check_interval,0]];
+                   data.splice.apply(data,[actpos,0].concat(data_x));
+                   actpos++;              
+                }
+                //check next data
+                if (data[actpos+1][0] - cur_time > check_interval ) 
+                {
+                 // insert zero data after data point
+                   data_x = [[cur_time + check_interval,0]];
+                   data.splice.apply(data,[actpos + 1 ,0].concat(data_x));
+                   actpos++;              
+                }
+                actpos++;  
+               }
+             }
+  
+
           // Create the flot series object
           var series = { 
             data: {
