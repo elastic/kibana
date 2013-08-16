@@ -28,6 +28,7 @@ angular.module('kibana.query', [])
     query   : "*",
     pinned  : true,
     history : [],
+    autoalias : true,
     remember: 10 // max: 100, angular strap can't take a variable for items param
   };
   _.defaults($scope.panel,_d);
@@ -48,6 +49,19 @@ angular.module('kibana.query', [])
 
   $scope.toggle_pin = function(id) {
     querySrv.list[id].pin = querySrv.list[id].pin ? false : true;
+  };
+
+  $scope.setalias = function(id) {
+    if ($scope.panel.autoalias) { 
+       querySrv.list[id].alias = $scope.truncText(querySrv.list[id].query, 45, false);
+    }
+  };
+
+  $scope.truncText = function(s, n, truncWordBoundary){
+     var toLong = s.length > n,
+     s_ = toLong ? s.substr(0,n-1) : s;
+     s_ = truncWordBoundary && toLong ? s_.substr(0,s_.lastIndexOf(' ')) : s_;
+     return  toLong ? s_ + '...' : s_;
   };
 
   var update_history = function(query) {
