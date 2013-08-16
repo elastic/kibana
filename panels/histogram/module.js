@@ -252,6 +252,7 @@ angular.module('kibana.histogram', [])
 
   // function $scope.time_move
   // factor :: Move factor, so 0.5 = moves timespan in right, -0.5 moves timespan left
+  // factor :: Move factor, so 0 = moves to now
   $scope.time_move = function(factor) {
     var _now = Date.now();
     var _range = filterSrv.timeRange('min');
@@ -261,8 +262,9 @@ angular.module('kibana.histogram', [])
     var _from = ( _range.from.valueOf() + (_timespan*factor));
 
     // If we're not already looking into the future, don't.
-    if(_to > Date.now() && _range.to < Date.now()) {
+    if ( ((_to > Date.now()) && (_range.to < Date.now())) || (factor==0)) {
       _to = Date.now();
+      if (factor == 0) factor = 0.5;
       _from = _to - Math.abs((_timespan*factor*2));
     }
 

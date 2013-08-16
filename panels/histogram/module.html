@@ -28,6 +28,7 @@
     <span ng-show='panel.zoomlinks && data'>
       <a class='small' ng-click='time_move(-0.5)'><i class='icon-arrow-left pointer'></i> Move</a>
       <a class='small' ng-click='time_move(+0.5)'><i class='icon-arrow-right pointer'></i> Move</a> | 
+      <a class='small' ng-click='time_move(0)'><i class='icon-arrow-right pointer'></i> Now</a> | 
     </span>
     <span ng-show="panel.legend" ng-repeat='series in data' class="histogram-legend">
       <i class='icon-circle' ng-style="{color: series.info.color}"></i>

@@ -236,7 +236,7 @@
     if(numseconds){
       ret = ret + ' '+ (Math.round(numseconds * 1000) / 1000) + 's';
     }
-    return ret;
+    return ret.replace(/^\s+|\s+$/g,"");
   };
 
 
