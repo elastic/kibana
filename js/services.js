@@ -4,15 +4,82 @@
 'use strict';
 
 angular.module('kibana.services', [])
-.service('fields', function() {
-
+.service('fields', function(dashboard, $rootScope, $http) {
   // Save a reference to this
   var self = this;
 
   this.list = ['_type'];
+  this.mapping = {};
 
   this.add_fields = function(f) {
-    self.list = _.union(f,self.list);
+    //self.list = _.union(f,self.list);
+  };
+
+  $rootScope.$watch(function(){return dashboard.indices;},function(n) {
+    if(!_.isUndefined(n) && n.length) {
+      // Only get the mapping for indices we don't know it for
+      var indices = _.difference(n,_.keys(self.mapping));
+      // Only get the mapping if there are indices
+      if(indices.length > 0) {
+        self.map(indices).then(function(result) {
+          self.mapping = _.extend(self.mapping,result);
+          self.list = mapFields(self.mapping);
+        });
+      // Otherwise just use the cached mapping
+      } else {
+        self.list = mapFields(_.pick(self.mapping,n));
+      }
+    }
+  });
+
+  var mapFields = function (m) {
+    var fields = [];
+    _.each(m, function(types,index) {
+      _.each(types, function(v,k) {
+        fields = _.union(fields,_.keys(v));
+      });
+    });
+    return fields;
+  };
+
+  this.map = function(indices) {
+    var request = $http({
+      url: config.elasticsearch + "/" + indices.join(',') + "/_mapping",
+      method: "GET"
+    });
+
+    return request.then(function(p) {
+      var mapping = {};
+      _.each(p.data, function(v,k) {
+        mapping[k] = {};
+        _.each(v, function (v,f) {
+          mapping[k][f] = flatten(v);
+        });
+      });
+      return mapping;
+    });
+  };
+
+  var flatten = function(obj,prefix) {
+    var propName = (prefix) ? prefix :  '',
+      dot = (prefix) ? '.':'',
+      ret = {};
+    for(var attr in obj){
+      // For now only support multi field on the top level
+      // and if if there is a default field set.
+      if(obj[attr]['type'] === 'multi_field') {
+        ret[attr] = obj[attr]['fields'][attr] || obj[attr];
+        continue;
+      }
+      if (attr === 'properties') {
+        _.extend(ret,flatten(obj[attr], propName));
+      } else if(typeof obj[attr] === 'object'){
+        _.extend(ret,flatten(obj[attr], propName + dot + attr));
+      } else {
+        ret[propName] = obj;
+      }
+    }
+    return ret; 
   };
 
 })
@@ -99,7 +166,6 @@ angular.module('kibana.services', [])
     }
   }
 })
-
 .service('timer', function($timeout) {
   // This service really just tracks a list of $timeout promises to give us a
   // method for cancelling them all when we need to
@@ -382,7 +448,13 @@ angular.module('kibana.services', [])
     return _.pluck(_.where(self.list,_require),'id');
   };
 
+  // TOFIX: Error handling when there is more than one field
+  this.timeField = function() {
+    return _.pluck(self.getByType('time'),'field');
+  };
+
   // This special function looks for all time filters, and returns a time range according to the mode
+  // No idea when max would actually be used
   this.timeRange = function(mode) {
     var _t = _.where(self.list,{type:'time',active:true});
     if(_t.length === 0) {
@@ -454,7 +526,7 @@ angular.module('kibana.services', [])
   var self = this;
   var filterSrv,querySrv;
 
-  this.current = {};
+  this.current = _.clone(_dash);
   this.last = {};
 
   $rootScope.$on('$routeChangeSuccess',function(){

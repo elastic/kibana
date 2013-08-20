@@ -6,15 +6,6 @@ angular.module('kibana.controllers', [])
 .controller('DashCtrl', function($scope, $rootScope, $http, $timeout, $route, ejsResource, 
   fields, dashboard) {
 
-  var _d = {
-    title: "",
-    editable: true,
-    rows: [],
-    last: null,
-    style: 'dark'
-  };
-
-  // For
   $scope.editor = {
     index: 0
   };
@@ -80,6 +71,14 @@ angular.module('kibana.controllers', [])
     }
   };
 
+  $scope.setEditorTabs = function(panelMeta) {
+    $scope.editorTabs = ['General','Panel'];
+    if(!_.isUndefined(panelMeta.editorTabs)) {
+      $scope.editorTabs =  _.union($scope.editorTabs,_.pluck(panelMeta.editorTabs,'title'));
+    }
+    return $scope.editorTabs;
+  };
+
   // This is whoafully incomplete, but will do for now 
   $scope.parse_error = function(data) {
     var _error = data.match("nested: (.*?);");
@@ -129,13 +128,12 @@ angular.module('kibana.controllers', [])
     $scope.row.panels.push(panel);
   };
 
-  $scope.reset_panel = function() {
-
+  $scope.reset_panel = function(type) {
     $scope.panel = {
       error   : false,
       span    : 3,
       editable: true,
-      group   : ['default']
+      type    : type
     };
   };
 
