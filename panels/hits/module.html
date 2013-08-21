@@ -36,7 +36,7 @@
 
   </div>
 
-  <div ng-show="panel.chart == 'total'"><div ng-style="panel.style" style="line-height:{{panel.style['font-size']}}">{{formattedHits}}</div></div>
+  <div ng-show="panel.chart == 'total'"><div ng-style="panel.style" style="line-height:{{panel.style['font-size']}}">{{hits}}</div></div>
 
   <span ng-show="panel.chart == 'list'">
     <div ng-style="panel.style" style="display:inline-block;line-height:{{panel.style['font-size']}}" ng-repeat="query in data">
