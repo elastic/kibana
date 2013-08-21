@@ -390,11 +390,17 @@ angular.module('kibana.histogram', [])
 
       elem.bind("plothover", function (event, pos, item) {
         if (item) {
+          if (scope.panel.stack) {
+            var value = item.datapoint[1] - item.datapoint[2];
+          } else {
+            var value = item.datapoint[1];
+          }
           tt(pos.pageX, pos.pageY,
             "<div style='vertical-align:middle;display:inline-block;background:"+
             item.series.color+";height:15px;width:15px;border-radius:10px;'></div> "+
-            item.datapoint[1].toFixed(0) + " @ " + 
-            moment(item.datapoint[0]).format('MM/DD HH:mm:ss'));
+            value.toFixed(0) + " @ " + 
+            moment(item.datapoint[0]).format('MM/DD HH:mm:ss') + " = " +
+            item.series.label);
         } else {
           $("#pie-tooltip").remove();
         }
