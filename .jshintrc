@@ -1,0 +1,33 @@
+{
+    "jquery": true,
+    "browser": true,
+
+    "quotmark":false,
+    "asi": true,
+    "curly": true,
+    "eqeqeq": true,
+    "forin": true,
+    "immed": true,
+    "supernew": true,
+    "expr": true,
+    "indent": 2,
+    "latedef": true,
+    "newcap": true,
+    "noarg": true,
+    "noempty": true,
+    "undef": true,
+    // "unused": true,
+    "trailing": true,
+    "laxbreak": true,
+    "laxcomma": true,
+    "sub": true,
+
+    "predef": [
+        "_",
+        "angular",
+        "kbn",
+        "config",
+        "$LAB",
+        "moment"
+    ]
+}
