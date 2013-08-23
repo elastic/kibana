@@ -164,6 +164,9 @@ angular.module('kibana.histogram', [])
         facet = facet.keyField($scope.panel.time_field).valueField($scope.panel.value_field);
       }
       facet = facet.interval(_interval).facetFilter($scope.ejs.QueryFilter(query));
+      if("browser" == $scope.panel.timezone) {
+        facet.preZoneAdjustLargeInterval(true).preZone(-(new Date().getTimezoneOffset() / 60));
+      }
       request = request.facet(facet).size(0);
     });
 
