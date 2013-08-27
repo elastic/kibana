@@ -431,7 +431,8 @@ angular.module('kibana.histogram', [])
             .html(
               kbn.query_color_dot(item.series.color, 15) + ' ' +
               item.datapoint[1].toFixed(0) + " @ " +
-              moment(item.datapoint[0]).format('MM/DD HH:mm:ss')
+              moment(item.datapoint[0]).format('MM/DD HH:mm:ss') + " = " +
+              (item.series.info.alias || item.series.info.query)
             )
             .place_tt(pos.pageX, pos.pageY);
         } else {
