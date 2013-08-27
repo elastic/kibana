@@ -1,17 +1,27 @@
   <div class="row-fluid">
+    <div class="span2"> 
+      <label class="small">Terms mode</label> 
+      <select class="input-medium" ng-model="panel.tmode" ng-options="f for f in ['terms','terms_stats']"></select></span>
+    </div>
+  </div> 
+  <div class="row-fluid">
     <div class="span2">
       <label class="small">Field</label>
       <input type="text" class="input-small" bs-typeahead="fields.list" ng-model="panel.field" ng-change="set_refresh(true)">
+    </div>
+    <div class="span2" ng-show="panel.tmode == 'terms_stats'">
+      <label class="small">Value field</label>
+      <input type="text" class="input-small" bs-typeahead="fields.list" ng-model="panel.valuefield" ng-change="set_refresh(true)">
     </div>
     <div class="span2">
       <label class="small">Length</label>
       <input class="input-small" type="number" ng-model="panel.size" ng-change="set_refresh(true)">
     </div>
-    <div class="span3"> 
-      <label class="small">Order</label> 
+    <div class="span3" ng-show="panel.tmode == 'terms'"> 
+      <label class="small" ng-show="panel.tmode == 'terms'">Order</label> 
       <select class="input-medium" ng-model="panel.order" ng-options="f for f in ['count','term','reverse_count','reverse_term']" ng-change="set_refresh(true)"></select></span>
     </div>
-    <div class="span4">
+    <div class="span4" ng-show="panel.tmode == 'terms'">
       <label class="small">Exclude Terms(s) (comma seperated)</label>
       <input array-join type="text" ng-model='panel.exclude'></input>
     </div>
