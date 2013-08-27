@@ -18,7 +18,7 @@
       <input class="input-small" type="number" ng-model="panel.size" ng-change="set_refresh(true)">
     </div>
     <div class="span3" ng-show="panel.tmode == 'terms'"> 
-      <label class="small" ng-show="panel.tmode == 'terms'">Order</label> 
+      <label class="small">Order</label> 
       <select class="input-medium" ng-model="panel.order" ng-options="f for f in ['count','term','reverse_count','reverse_term']" ng-change="set_refresh(true)"></select></span>
     </div>
     <div class="span4" ng-show="panel.tmode == 'terms'">
