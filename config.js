@@ -23,6 +23,6 @@ var config = new Settings(
   modules:          ['histogram','map','pie','table','filtering',
                     'timepicker','text','fields','hits','dashcontrol',
                     'column','derivequeries','trends','bettermap','query',
-                    'terms'],
+                    'terms','clusterhealth'],
   }
 );

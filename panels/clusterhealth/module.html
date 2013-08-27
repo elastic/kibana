@@ -1,0 +1,9 @@
+<kibana-panel ng-controller='clusterhealth' ng-init="init()">
+  <div>
+  Elasticsearch Cluster:
+  <span style="color: {{results.status}}">
+  {{results.cluster_name}}
+  </span><br/>
+  Updated: {{lastUpdated}}
+  </div>
+</kibana-panel>
