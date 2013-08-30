@@ -50,6 +50,16 @@ angular.module('kibana.query', [])
     querySrv.list[id].pin = querySrv.list[id].pin ? false : true;
   };
 
+  $scope.typeahead_values = function (input) {
+    var suggestions = _.filter($scope.panel.history, function (entry) {
+      return entry.toLowerCase().indexOf(input.toLowerCase()) !== -1;
+    });
+    if (suggestions.length) {
+      input && suggestions.unshift(input);
+      return suggestions;
+    }
+  };
+
   var update_history = function(query) {
     if($scope.panel.remember > 0) {
       $scope.panel.history = _.union(query.reverse(),$scope.panel.history);
