@@ -30,6 +30,9 @@
   .last-query {
     padding-right: 45px !important;
   }
+  span.pinned.badge:hover .remove-query {
+    opacity: 1
+  }
   .form-search:hover .remove-query {
     opacity: 1;
   }
@@ -58,6 +61,7 @@
     <span class="pointer" ng-show="$first" ng-click="panel.pinned = !panel.pinned"><small class="pins">Pinned</small> <i ng-class="{'icon-caret-right':panel.pinned,'icon-caret-left':!panel.pinned}"></i></span>
     <span ng-show="panel.pinned" class="pinned badge">
       <i class="icon-circle pointer" ng-style="{color: querySrv.list[id].color}" data-unique="1" bs-popover="'panels/query/meta.html'"></i><span bs-tooltip="querySrv.list[id].query"> {{querySrv.list[id].alias || querySrv.list[id].query}}</span>
+      <i class="icon-remove-sign pointer remove-query" ng-click="querySrv.remove(id);refresh()"></i>
     </span>
   </div>
   <span style="display:inline-block" ng-show="unPinnedQueries.length == 0">
