@@ -15,12 +15,6 @@ require.config({
     angular:                  '../vendor/angular/angular',
     'angular-strap':          '../vendor/angular/angular-strap',
     'angular-sanitize':       '../vendor/angular/angular-sanitize',
-    'angular-cookies':        '../vendor/angular/angular-cookies',
-    'angular-loader':         '../vendor/angular/angular-loader',
-    'angular-mocks':          '../vendor/angular/angular-mocks',
-    'angular-resource':       '../vendor/angular/angular-resource',
-    'angular-route':          '../vendor/angular/angular-route',
-    'angular-touch':          '../vendor/angular/angular-touch',
     timepicker:               '../vendor/angular/timepicker',
     datepicker:               '../vendor/angular/datepicker',
 
@@ -71,7 +65,6 @@ require.config({
     'jquery.flot.stack':    ['jquery', 'jquery.flot'],
     'jquery.flot.time':     ['jquery', 'jquery.flot'],
 
-    'angular-strap':        ['angular'],
     'angular-sanitize':     ['angular'],
     'angular-cookies':      ['angular'],
     'angular-loader':       ['angular'],
@@ -80,11 +73,11 @@ require.config({
     'angular-route':        ['angular'],
     'angular-touch':        ['angular'],
 
+    'angular-strap':        ['angular', 'bootstrap','timepicker', 'datepicker'],
+
     timepicker:             ['jquery', 'bootstrap'],
     datepicker:             ['jquery', 'bootstrap'],
 
-    elasticjs:              ['angular', '../vendor/elasticjs/elastic'],
-
-    'angular-strap':        ['angular', 'bootstrap','timepicker', 'datepicker']
+    elasticjs:              ['angular', '../vendor/elasticjs/elastic']
   }
 });

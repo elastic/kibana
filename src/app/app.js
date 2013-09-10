@@ -7,7 +7,6 @@ define([
 
   'elasticjs',
   'bootstrap',
-  'angular-route',
   'angular-sanitize',
   'angular-strap'
 ],
@@ -81,7 +80,6 @@ function (angular, $, _) {
     'elasticjs.service',
     '$strap.directives',
     'ngSanitize',
-    'ngRoute',
     'kibana',
   ];
 
