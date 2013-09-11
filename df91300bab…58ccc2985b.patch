@@ -1,3 +1,860 @@
+From 91a5192a0a7d761bd21bda293b210b570af3ee92 Mon Sep 17 00:00:00 2001
+From: Rashid Khan <rashidkpc@gmail.com>
+Date: Fri, 30 Aug 2013 15:40:12 -0700
+Subject: [PATCH 01/10] Switched settings panels to use tip directive
+
+---
+ config.js                      | 12 ++++++------
+ panels/bettermap/editor.html   |  8 ++++----
+ panels/dashcontrol/editor.html |  8 ++++----
+ panels/histogram/editor.html   |  2 +-
+ panels/map/editor.html         |  8 ++++----
+ panels/table/editor.html       | 12 ++++++------
+ 6 files changed, 25 insertions(+), 25 deletions(-)
+
+diff --git a/config.js b/config.js
+index 8d694bd..eb4678b 100644
+--- a/config.js
++++ b/config.js
+@@ -1,13 +1,13 @@
+ /*
+
+-elasticsearch:  URL to your elasticsearch server. You almost certainly don't
++elasticsearch:  URL to your elasticsearch server. You almost certainly don't
+                 want 'http://localhost:9200' here. Even if Kibana and ES are on
+                 the same host
+ kibana_index:   The default ES index to use for storing Kibana specific object
+-                such as stored dashboards
+-modules:        Panel modules to load. In the future these will be inferred
++                such as stored dashboards
++modules:        Panel modules to load. In the future these will be inferred
+                 from your initial dashboard, though if you share dashboards you
+-                will probably need to list them all here
++                will probably need to list them all here
+
+ If you need to configure the default dashboard, please see dashboards/default
+
+@@ -17,9 +17,9 @@ var config = new Settings(
+   // By default this will attempt to reach ES at the same host you have
+   // elasticsearch installed on. You probably want to set it to the FQDN of your
+   // elasticsearch host
+-  elasticsearch:    "http://"+window.location.hostname+":9200",
++  elasticsearch:    "http://"+window.location.hostname+":9200",
+   // elasticsearch: 'http://localhost:9200',
+-  kibana_index:     "kibana-int",
++  kibana_index:     "kibana-int",
+   modules:          ['histogram','map','pie','table','filtering',
+                     'timepicker','text','fields','hits','dashcontrol',
+                     'column','derivequeries','trends','bettermap','query',
+diff --git a/panels/bettermap/editor.html b/panels/bettermap/editor.html
+index 99d7d12..009ae2a 100644
+--- a/panels/bettermap/editor.html
++++ b/panels/bettermap/editor.html
+@@ -1,8 +1,8 @@
+-  <div class="row-fluid">
++  <div class="row-fluid">
+     <div class="span4">
+       <form>
+-        <h6>Coordinate Field <i class="icon-question-sign" bs-tooltip="'geoJSON array! Long,Lat NOT Lat,Long'"></i></h6>
+-        <input  bs-typeahead="fields.list" type="text" class="input-small" ng-model="panel.field">
++        <h6>Coordinate Field <tip>geoJSON array! Long,Lat NOT Lat,Long</tip></h6>
++        <input bs-typeahead="fields.list" type="text" class="input-small" ng-model="panel.field">
+       </form>
+     </div>
+     <div class="span4">
+@@ -11,7 +11,7 @@
+         <input  bs-typeahead="fields.list" type="text" class="input-small" ng-model="panel.tooltip">
+       </form>
+     </div>
+-    <div class="span2"><h6>Max Points</h6>
++    <div class="span2"><h6>Max Points</h6>
+       <input type="number" class="input-small" ng-model="panel.size">
+     </div>
+   </div>
+diff --git a/panels/dashcontrol/editor.html b/panels/dashcontrol/editor.html
+index 7c87e30..8faf815 100644
+--- a/panels/dashcontrol/editor.html
++++ b/panels/dashcontrol/editor.html
+@@ -1,6 +1,6 @@
+ <div>
+   <h5>Allow saving to</h5>
+-  <div class="row-fluid">
++  <div class="row-fluid">
+     <div class="span2">
+       <label class="small">Export</label><input type="checkbox" ng-model="panel.save.local" ng-checked="panel.save.local">
+     </div>
+@@ -8,14 +8,14 @@
+       <label class="small">Defaults</label><input type="checkbox" ng-model="panel.save.default" ng-checked="panel.save.default">
+     </div>
+     <div class="span2">
+-      <label class="small">Gist <i class="icon-question-sign" bs-tooltip="'Requires your domain to be OAUTH registered with Github'"></i></label><input type="checkbox" ng-model="panel.save.gist" ng-checked="panel.save.gist">
++      <label class="small">Gist <tip>Requires your domain to be OAUTH registered with Github<tip></label><input type="checkbox" ng-model="panel.save.gist" ng-checked="panel.save.gist">
+     </div>
+     <div class="span2">
+       <label class="small">Elasticsearch</label><input type="checkbox" ng-model="panel.save.elasticsearch" ng-checked="panel.save.elasticsearch">
+     </div>
+   </div>
+   <h5>Allow loading from</h5>
+-  <div class="row-fluid">
++  <div class="row-fluid">
+     <div class="span2">
+       <label class="small">Local file</label><input type="checkbox" ng-model="panel.load.local" ng-checked="panel.load.local">
+     </div>
+@@ -30,7 +30,7 @@
+     </div>
+   </div>
+   <h5>Sharing</h5>
+-  <div class="row-fluid">
++  <div class="row-fluid">
+     <div class="span2" >
+       <label class="small">Allow Sharing</label><input type="checkbox" ng-model="panel.temp" ng-checked="panel.temp">
+     </div>
+diff --git a/panels/histogram/editor.html b/panels/histogram/editor.html
+index c200849..365e124 100644
+--- a/panels/histogram/editor.html
++++ b/panels/histogram/editor.html
+@@ -62,7 +62,7 @@
+   <h5>Tooltip Settings</h5>
+   <div class="row-fluid" style="margin-bottom:10px;">
+     <div class="span3">
+-      <label class="small">Stacked Values <i class="icon-question-sign" bs-tooltip="'How should the values in stacked charts to be calculated?'"></i></label>
++      <label class="small">Stacked Values <tip>How should the values in stacked charts to be calculated</tip></label>
+       <select class="input-medium" ng-model="panel.tooltip.value_type" ng-options="f for f in ['cumulative','individual']"></select>
+     </div>
+   </div>
+\ No newline at end of file
+diff --git a/panels/map/editor.html b/panels/map/editor.html
+index f18b696..292788b 100644
+--- a/panels/map/editor.html
++++ b/panels/map/editor.html
+@@ -1,11 +1,11 @@
+-  <div class="row-fluid">
++  <div class="row-fluid">
+     <div class="span3">
+       <form>
+-        <h6>Field</h6>
+-        <input  bs-typeahead="fields.list" type="text" class="input-small" ng-model="panel.field">
++        <h6>Field <tip>2 letter country or state code</tip></h6>
++        <input bs-typeahead="fields.list" type="text" class="input-small" ng-model="panel.field">
+       </form>
+     </div>
+-    <div class="span1"><h6>Map</h6>
++    <div class="span1"><h6>Map</h6>
+       <select ng-change="$emit('render')" class="input-small" ng-model="panel.map" ng-options="f for f in ['world','europe','usa']"></select>
+     </div>
+   </div>
+diff --git a/panels/table/editor.html b/panels/table/editor.html
+index bf77984..c09d9f1 100644
+--- a/panels/table/editor.html
++++ b/panels/table/editor.html
+@@ -1,4 +1,4 @@
+-  <div class="row-fluid">
++  <div class="row-fluid">
+     <div class="span4">
+       <form class="input-append">
+         <h6>Add Column</h6>
+@@ -11,7 +11,7 @@
+       <span style="margin-left:3px" ng-click="toggle_field(field)" ng-repeat="field in $parent.panel.fields" class="label pointer remove">{{field}} </span>
+     </div>
+   </div>
+-  <div class="row-fluid">
++  <div class="row-fluid">
+     <div class="span4">
+       <form class="input-append">
+         <h6>Add field</h6>
+@@ -26,10 +26,10 @@
+   </div>
+   <h5>Options</h5>
+   <div class="row-fluid">
+-    <div class="span1">
++    <div class="span1">
+       <h6>Header</h6><input type="checkbox" ng-model="panel.header" ng-checked="panel.header">
+     </div>
+-    <div class="span1">
++    <div class="span1">
+       <h6>Sorting</h6><input type="checkbox" ng-model="panel.sortable" ng-checked="panel.sortable">
+     </div>
+     <div class="span3" style="white-space:nowrap" ng-show='panel.sortable'>
+@@ -38,11 +38,11 @@
+       <select ng-show="all_fields.length>0"style="width:85%" ng-model="panel.sort[0]" ng-options="f for f in all_fields"></select>
+       <i ng-click="set_sort(panel.sort[0])" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
+     </div>
+-    <div class="span2"><h6>Font Size</h6>
++    <div class="span2"><h6>Font Size</h6>
+       <select class="input-small" ng-model="panel.style['font-size']" ng-options="f for f in ['7pt','8pt','9pt','10pt','12pt','14pt','16pt','18pt','20pt','24pt','28pt','32pt','36pt','42pt','48pt','52pt','60pt','72pt']"></select></span>
+     </div>
+     <div class="span2">
+-      <h6>Trim Factor <i class="icon-question-sign" bs-tooltip="'Trim fields to this long divided by # of rows'"></i></h6>
++      <h6>Trim Factor <tip>Trim fields to this long divided by # of rows</tip></h6>
+       <input type="number" class="input-small" ng-model="panel.trimFactor">
+     </div>
+   </div>
+\ No newline at end of file
+--
+1.8.4
+
+
+From c9eccf99c8e7731330af67709e8bddbc89d7635c Mon Sep 17 00:00:00 2001
+From: Spencer Alger <spencer@spenceralger.com>
+Date: Fri, 30 Aug 2013 16:36:12 -0700
+Subject: [PATCH 02/10] added logic to the micropanel filters in the table
+ panel to handle undefined values better
+
+---
+ panels/table/micropanel.html | 4 ++--
+ panels/table/module.js       | 3 +++
+ 2 files changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/panels/table/micropanel.html b/panels/table/micropanel.html
+index b4a000a..18b572f 100644
+--- a/panels/table/micropanel.html
++++ b/panels/table/micropanel.html
+@@ -1,6 +1,6 @@
+ <a class="close" ng-click="dismiss()" href="">×</a>
+ <h4>
+-  Micro Analysis of {{micropanel.field}}
++  Micro Analysis of {{micropanel.field}}
+   <i class="pointer icon-search" ng-click="fieldExists(micropanel.field,'must');dismiss();"></i>
+   <i class="pointer icon-ban-circle" ng-click="fieldExists(micropanel.field,'mustNot');dismiss();"></i>
+   <br><small>{{micropanel.count}} events in the table set</small>
+@@ -13,7 +13,7 @@
+   </thead>
+   <tbody>
+     <tr ng-repeat='field in micropanel.values'>
+-      <td>{{{true: "__blank__",false:field[0]}[field[0] == ""]|tableTruncate:panel.trimFactor:3}}</td>
++      <td>{{{true: "__blank__", false:field[0] }[field[0] == '' || field[0] == undefined]|tableTruncate:panel.trimFactor:3}}</td>
+       <td style="width:40px">
+         <i class="pointer icon-search" ng-click="build_search(micropanel.field,field[0]);dismiss();"></i>
+         <i class="pointer icon-ban-circle" ng-click="build_search(micropanel.field,field[0],true);dismiss();"></i>
+diff --git a/panels/table/module.js b/panels/table/module.js
+index 631248c..52c7367 100644
+--- a/panels/table/module.js
++++ b/panels/table/module.js
+@@ -127,6 +127,9 @@ angular.module('kibana.table', [])
+     // This needs to be abstracted somewhere
+     if(_.isArray(value)) {
+       query = "(" + _.map(value,function(v){return angular.toJson(v);}).join(" AND ") + ")";
++    } else if (_.isUndefined(value)) {
++      query = '*';
++      negate = !negate;
+     } else {
+       query = angular.toJson(value);
+     }
+--
+1.8.4
+
+
+From a2deecd134d549ce6242fc1026c5d2e28943619a Mon Sep 17 00:00:00 2001
+From: bobrik <ibobrik@gmail.com>
+Date: Mon, 2 Sep 2013 13:02:59 +0400
+Subject: [PATCH 03/10] Removed extra ">" in tooltip
+
+---
+ panels/histogram/editor.html | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/panels/histogram/editor.html b/panels/histogram/editor.html
+index 3cf132b..bd94c10 100644
+--- a/panels/histogram/editor.html
++++ b/panels/histogram/editor.html
+@@ -62,7 +62,7 @@
+   <h5>Tooltip Settings</h5>
+   <div class="row-fluid" style="margin-bottom:10px;">
+     <div class="span3">
+-      <label class="small">Stacked Values <tip>How should the values in stacked charts to be calculated?></tip></label>
++      <label class="small">Stacked Values <tip>How should the values in stacked charts to be calculated?</tip></label>
+       <select class="input-medium" ng-model="panel.tooltip.value_type" ng-options="f for f in ['cumulative','individual']"></select>
+     </div>
+     <div class="span3">
+--
+1.8.4
+
+
+From 968c575408625a44bf1f8ef47cb2297e17545b9e Mon Sep 17 00:00:00 2001
+From: Rashid Khan <rashidkpc@gmail.com>
+Date: Tue, 3 Sep 2013 16:46:12 -0700
+Subject: [PATCH 04/10] templated and scripted dashboards
+
+---
+ dashboards/logstash.js     | 136 +++++++++++++++++++++++++++++++++++++++++++++
+ dashboards/logstash.json   |  14 ++---
+ js/services.js             |  94 ++++++++++++++++++++++++++-----
+ panels/histogram/module.js |   3 +-
+ 4 files changed, 222 insertions(+), 25 deletions(-)
+ create mode 100644 dashboards/logstash.js
+
+diff --git a/dashboards/logstash.js b/dashboards/logstash.js
+new file mode 100644
+index 0000000..a2a811e
+--- /dev/null
++++ b/dashboards/logstash.js
+@@ -0,0 +1,136 @@
++/* Complex scripted Logstash dashboard */
++
++
++var dashboard, ARGS, queries;
++
++// arguments[0] contains a hash of the URL parameters, make it shorter
++ARGS = arguments[0];
++
++// Intialize a skeleton with nothing but a rows array and service object
++dashboard = {
++  rows : [],
++  services : {}
++};
++
++// Set a title
++dashboard.title = 'Logstash Search';
++
++// Allow the user to set the index, if they dont, fall back to logstash.
++if(!_.isUndefined(ARGS.index)) {
++  dashboard.index = {
++    default: ARGS.index,
++    interval: 'none'
++  }
++} else {
++  dashboard.index = {
++    default: ARGS.index||'ADD_A_TIME_FILTER',
++    pattern: ARGS.pattern||'[logstash-]YYYY.MM.DD',
++    interval: ARGS.interval||'day'
++  }
++}
++
++// In this dashboard we let users pass queries as comma seperated list to the query parameter.
++// Or they can specify a split character using the split aparameter
++// If query is defined, split it into a list of query objects
++// NOTE: ids must be integers, hence the parseInt()s
++if(!_.isUndefined(ARGS.query)) {
++  queries = _.object(_.map(ARGS.query.split(ARGS.split||','), function(v,k) {
++    return [k,{
++      query: v,
++      id: parseInt(k),
++      alias: v
++    }];
++  }));
++} else {
++  // No queries passed? Initialize a single query to match everything
++  queries = {
++    0: {
++      query: '*',
++      id: 0
++    }
++  }
++}
++
++// Now populate the query service with our objects
++dashboard.services.query = {
++  list : queries,
++  ids : _.map(_.keys(queries),function(v){return parseInt(v);})
++}
++
++// Lets also add a default time filter, the value of which can be specified by the user
++dashboard.services.filter = {
++  list: {
++    0: {
++      from: kbn.time_ago(ARGS.from||'15m'),
++      to: new Date(),
++      field: ARGS.timefield||"@timestamp",
++      type: "time",
++      active: true,
++      id: 0
++    }
++  },
++  ids: [0]
++}
++
++// Ok, lets make some rows. The Filters row is collapsed by default
++dashboard.rows = [
++  {
++    title: "Input",
++    height: "30px"
++  },
++  {
++    title: "Filters",
++    height: "100px",
++    collapse: true
++  },
++  {
++    title: "Chart",
++    height: "300px"
++  },
++  {
++    title: "Events",
++    height: "400px"
++  }
++];
++
++// Setup some panels. A query panel and a filter panel on the same row
++dashboard.rows[0].panels = [
++  {
++    type: 'query',
++    span: 7
++  },
++  {
++    type: 'timepicker',
++    span: 5,
++    timespan: ARGS.from||'15m'
++  }
++];
++
++// Add a filtering panel to the 2nd row
++dashboard.rows[1].panels = [
++  {
++    type: 'filtering'
++  }
++]
++
++// And a histogram that allows the user to specify the interval and time field
++dashboard.rows[2].panels = [
++  {
++    type: 'histogram',
++    time_field: ARGS.timefield||"@timestamp",
++    auto_int: true
++  }
++]
++
++// And a table row where you can specify field and sort order
++dashboard.rows[3].panels = [
++  {
++    type: 'table',
++    fields: !_.isUndefined(ARGS.fields) ? ARGS.fields.split(',') : ['@timestamp','@message'],
++    sort: !_.isUndefined(ARGS.sort) ? ARGS.sort.split(',') : [ARGS.timefield||'@timestamp','desc'],
++    overflow: 'expand'
++  }
++]
++
++// Now return the object and we're good!
++return dashboard;
+\ No newline at end of file
+diff --git a/dashboards/logstash.json b/dashboards/logstash.json
+index 53ddc57..ead4dca 100644
+--- a/dashboards/logstash.json
++++ b/dashboards/logstash.json
+@@ -3,14 +3,11 @@
+   "services": {
+     "query": {
+       "idQueue": [
+-        1,
+-        2,
+-        3,
+-        4
++        1
+       ],
+       "list": {
+         "0": {
+-          "query": "*",
++          "query": "{{ARGS.query || '*'}}",
+           "alias": "",
+           "color": "#7EB26D",
+           "id": 0
+@@ -22,8 +19,7 @@
+     },
+     "filter": {
+       "idQueue": [
+-        1,
+-        2
++        1
+       ],
+       "list": {
+         "0": {
+@@ -70,7 +66,7 @@
+             "7d",
+             "30d"
+           ],
+-          "timespan": "1h",
++          "timespan": "{{ARGS.from || '1h'}}",
+           "timefield": "@timestamp",
+           "timeformat": "",
+           "refresh": {
+@@ -246,4 +242,4 @@
+     "pattern": "[logstash-]YYYY.MM.DD",
+     "default": "NO_TIME_FILTER_OR_INDEX_PATTERN_NOT_MATCHED"
+   }
+-}
+\ No newline at end of file
++}
+diff --git a/js/services.js b/js/services.js
+index c254735..ee94f35 100644
+--- a/js/services.js
++++ b/js/services.js
+@@ -252,6 +252,13 @@ angular.module('kibana.services', [])
+     ids : [],
+   });
+
++  // Defaults for query objects
++  var _query = {
++    query: '*',
++    alias: '',
++    pin: false,
++    type: 'lucene'
++  };
+   // For convenience
+   var ejs = ejsResource(config.elasticsearch);
+   var _q = dashboard.current.services.query;
+@@ -275,6 +282,12 @@ angular.module('kibana.services', [])
+     self.list = dashboard.current.services.query.list;
+     self.ids = dashboard.current.services.query.ids;
+
++    // Check each query object, populate its defaults
++    _.each(self.list,function(query,id) {
++      _.defaults(query,_query);
++      query.color = colorAt(id);
++    });
++
+     if (self.ids.length === 0) {
+       self.set({});
+     }
+@@ -290,16 +303,12 @@ angular.module('kibana.services', [])
+         return false;
+       }
+     } else {
+-      var _id = nextId();
+-      var _query = {
+-        query: '*',
+-        alias: '',
+-        color: colorAt(_id),
+-        pin: false,
+-        id: _id,
+-        type: 'lucene'
+-      };
++      var _id = query.id || nextId();
++      query.id = _id;
++      query.color = query.color || colorAt(_id);
+       _.defaults(query,_query);
++
++
+       self.list[_id] = query;
+       self.ids.push(_id);
+       return _id;
+@@ -373,11 +382,13 @@ angular.module('kibana.services', [])
+ .service('filterSrv', function(dashboard, ejsResource) {
+   // Create an object to hold our service state on the dashboard
+   dashboard.current.services.filter = dashboard.current.services.filter || {};
+-  _.defaults(dashboard.current.services.filter,{
++
++  // Defaults for it
++  var _d = {
+     idQueue : [],
+     list : {},
+     ids : []
+-  });
++  };
+
+   // For convenience
+   var ejs = ejsResource(config.elasticsearch);
+@@ -388,6 +399,9 @@ angular.module('kibana.services', [])
+
+   // Call this whenever we need to reload the important stuff
+   this.init = function() {
++    // Populate defaults
++    _.defaults(dashboard.current.services.filter,_d);
++
+     // Accessors
+     self.list = dashboard.current.services.filter.list;
+     self.ids = dashboard.current.services.filter.ids;
+@@ -606,6 +620,9 @@ angular.module('kibana.services', [])
+       case ('file'):
+         self.file_load(_id);
+         break;
++      case('script'):
++        self.script_load(_id);
++        break;
+       default:
+         self.file_load('default.json');
+       }
+@@ -665,6 +682,7 @@ angular.module('kibana.services', [])
+   };
+
+   this.dash_load = function(dashboard) {
++
+     // Cancel all timers
+     timer.cancel_all();
+
+@@ -744,11 +762,32 @@ angular.module('kibana.services', [])
+     };
+   };
+
++  var renderTemplate = function(json,params) {
++    var _r;
++    _.templateSettings = {interpolate : /\{\{(.+?)\}\}/g};
++    var template = _.template(json);
++    var rendered = template({ARGS:params});
++
++    try {
++      _r = angular.fromJson(rendered);
++    } catch(e) {
++      _r = false;
++    }
++    return _r;
++  };
++
+   this.file_load = function(file) {
+     return $http({
+       url: "dashboards/"+file,
+       method: "GET",
++      transformResponse: function(response) {
++        return renderTemplate(response,$routeParams);
++      }
+     }).then(function(result) {
++      if(!result) {
++        return false;
++      }
++
+       var _dashboard = result.data;
+       _.defaults(_dashboard,_dash);
+       self.dash_load(_dashboard);
+@@ -759,11 +798,13 @@ angular.module('kibana.services', [])
+     });
+   };
+
+-
+   this.elasticsearch_load = function(type,id) {
+     return $http({
+       url: config.elasticsearch + "/" + config.kibana_index + "/"+type+"/"+id,
+-      method: "GET"
++      method: "GET",
++      transformResponse: function(response) {
++        return renderTemplate(angular.fromJson(response)['_source']['dashboard'],$routeParams);
++      }
+     }).error(function(data, status, headers, conf) {
+       if(status === 0) {
+         alertSrv.set('Error',"Could not contact Elasticsearch at "+config.elasticsearch+
+@@ -774,7 +815,32 @@ angular.module('kibana.services', [])
+       }
+       return false;
+     }).success(function(data, status, headers) {
+-      self.dash_load(angular.fromJson(data['_source']['dashboard']));
++      self.dash_load(data);
++    });
++  };
++
++  this.script_load = function(file) {
++    return $http({
++      url: "dashboards/"+file,
++      method: "GET",
++      transformResponse: function(response) {
++        /*jshint -W054 */
++        var _f = new Function(response);
++        return _f($routeParams);
++      }
++    }).then(function(result) {
++      if(!result) {
++        return false;
++      }
++      var _dashboard = result.data;
++      _.defaults(_dashboard,_dash);
++      self.dash_load(_dashboard);
++      return true;
++    },function(result) {
++      alertSrv.set('Error',
++        "Could not load <i>scripts/"+file+"</i>. Please make sure it exists and returns a valid dashboard" ,
++        'error');
++      return false;
+     });
+   };
+
+diff --git a/panels/histogram/module.js b/panels/histogram/module.js
+index 7a410dd..5bdbb22 100644
+--- a/panels/histogram/module.js
++++ b/panels/histogram/module.js
+@@ -135,8 +135,6 @@ angular.module('kibana.histogram', [])
+     if(dashboard.indices.length === 0) {
+       return;
+     }
+-
+-
+     var _range = $scope.get_time_range();
+     var _interval = $scope.get_interval(_range);
+
+@@ -177,6 +175,7 @@ angular.module('kibana.histogram', [])
+     // Then run it
+     var results = request.doSearch();
+
++
+     // Populate scope when we have results
+     results.then(function(results) {
+       $scope.panelMeta.loading = false;
+--
+1.8.4
+
+
+From 7e5c36e9aa3ec67355207a51c83d29b0e50973f4 Mon Sep 17 00:00:00 2001
+From: Rashid Khan <rashidkpc@gmail.com>
+Date: Wed, 4 Sep 2013 09:40:11 -0700
+Subject: [PATCH 05/10] Made logstash.js look more like logstash.json. Added
+ info notice for lack of failover and time filter
+
+---
+ dashboards/logstash.js | 59 ++++++++++++++++++++++++++++++++++++++++----------
+ js/services.js         | 16 ++++++++------
+ 2 files changed, 56 insertions(+), 19 deletions(-)
+
+diff --git a/dashboards/logstash.js b/dashboards/logstash.js
+index a2a811e..eeb5107 100644
+--- a/dashboards/logstash.js
++++ b/dashboards/logstash.js
+@@ -1,7 +1,27 @@
+-/* Complex scripted Logstash dashboard */
++/*
++ * Complex scripted Logstash dashboard
++ * This script generates a dashboard object that Kibana can load. It also takes a number of user
++ * supplied URL parameters, none are required:
++ *
++ * index :: Which index to search? If this is specified, interval is set to 'none'
++ * pattern :: Does nothing if index is specified. Set a timestamped index pattern. Default: [logstash-]YYYY.MM.DD
++ * interval :: Sets the index interval (eg: day,week,month,year), Default: day
++ *
++ * split :: The character to split the queries on Default: ','
++ * query :: By default, a comma seperated list of queries to run. Default: *
++ *
++ * from :: Search this amount of time back, eg 15m, 1h, 2d. Default: 15m
++ * timefield :: The field containing the time to filter on, Default: @timestamp
++ *
++ * fields :: comma seperated list of fields to show in the table
++ * sort :: comma seperated field to sort on, and direction, eg sort=@timestamp,desc
++ *
++ */
+
++var dashboard, ARGS, queries, _d_timespan;
+
+-var dashboard, ARGS, queries;
++// Set a default timespan if one isn't specified
++_d_timespan = '1h';
+
+ // arguments[0] contains a hash of the URL parameters, make it shorter
+ ARGS = arguments[0];
+@@ -22,6 +42,8 @@ if(!_.isUndefined(ARGS.index)) {
+     interval: 'none'
+   }
+ } else {
++  // Don't fail to default
++  dashboard.failover = false;
+   dashboard.index = {
+     default: ARGS.index||'ADD_A_TIME_FILTER',
+     pattern: ARGS.pattern||'[logstash-]YYYY.MM.DD',
+@@ -58,10 +80,11 @@ dashboard.services.query = {
+ }
+
+ // Lets also add a default time filter, the value of which can be specified by the user
++// This isn't strictly needed, but it gets rid of the info alert about the missing time filter
+ dashboard.services.filter = {
+   list: {
+     0: {
+-      from: kbn.time_ago(ARGS.from||'15m'),
++      from: kbn.time_ago(ARGS.from||_d_timespan),
+       to: new Date(),
+       field: ARGS.timefield||"@timestamp",
+       type: "time",
+@@ -75,7 +98,11 @@ dashboard.services.filter = {
+ // Ok, lets make some rows. The Filters row is collapsed by default
+ dashboard.rows = [
+   {
+-    title: "Input",
++    title: "Options",
++    height: "30px"
++  },
++  {
++    title: "Query",
+     height: "30px"
+   },
+   {
+@@ -96,25 +123,33 @@ dashboard.rows = [
+ // Setup some panels. A query panel and a filter panel on the same row
+ dashboard.rows[0].panels = [
+   {
+-    type: 'query',
+-    span: 7
++    type: 'timepicker',
++    span: 6,
++    timespan: ARGS.from||_d_timespan
+   },
+   {
+-    type: 'timepicker',
+-    span: 5,
+-    timespan: ARGS.from||'15m'
++    type: 'dashcontrol',
++    span: 3
+   }
+ ];
+
+-// Add a filtering panel to the 2nd row
++// Add a filtering panel to the 3rd row
+ dashboard.rows[1].panels = [
+   {
++    type: 'Query'
++  }
++]
++
++
++// Add a filtering panel to the 3rd row
++dashboard.rows[2].panels = [
++  {
+     type: 'filtering'
+   }
+ ]
+
+ // And a histogram that allows the user to specify the interval and time field
+-dashboard.rows[2].panels = [
++dashboard.rows[3].panels = [
+   {
+     type: 'histogram',
+     time_field: ARGS.timefield||"@timestamp",
+@@ -123,7 +158,7 @@ dashboard.rows[2].panels = [
+ ]
+
+ // And a table row where you can specify field and sort order
+-dashboard.rows[3].panels = [
++dashboard.rows[4].panels = [
+   {
+     type: 'table',
+     fields: !_.isUndefined(ARGS.fields) ? ARGS.fields.split(',') : ['@timestamp','@message'],
+diff --git a/js/services.js b/js/services.js
+index ee94f35..66c7044 100644
+--- a/js/services.js
++++ b/js/services.js
+@@ -659,9 +659,7 @@ angular.module('kibana.services', [])
+             if(self.current.failover) {
+               self.indices = [self.current.index.default];
+             } else {
+-              alertSrv.set('No indices matched','The pattern <i>'+self.current.index.pattern+
+-                '</i> did not match any indices in your selected'+
+-                ' time range.','info',5000);
++
+               // Do not issue refresh if no indices match. This should be removed when panels
+               // properly understand when no indices are present
+               return false;
+@@ -670,10 +668,14 @@ angular.module('kibana.services', [])
+           $rootScope.$broadcast('refresh');
+         });
+       } else {
+-        // This is not optimal, we should be getting the entire index list here, or at least every
+-        // index that possibly matches the pattern
+-        self.indices = [self.current.index.default];
+-        $rootScope.$broadcast('refresh');
++        if(self.current.failover) {
++          self.indices = [self.current.index.default];
++          $rootScope.$broadcast('refresh');
++        } else {
++          alertSrv.set("No time filter",
++            'Timestamped indices are configured without a failover. Waiting for time filter.',
++            'info',5000);
++        }
+       }
+     } else {
+       self.indices = [self.current.index.default];
+--
+1.8.4
+
+
+From 0280626a1ed800340feeccf4dff2a5ca5cef2b0a Mon Sep 17 00:00:00 2001
+From: Rashid Khan <rashidkpc@gmail.com>
+Date: Wed, 4 Sep 2013 10:55:48 -0700
+Subject: [PATCH 06/10] Lint dashboard scripts
+
+---
+ Gruntfile.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 diff --git a/Gruntfile.js b/Gruntfile.js
 index 1d640ff..3ff4a52 100644
 --- a/Gruntfile.js
@@ -11,6 +868,291 @@ index 1d640ff..3ff4a52 100644
        options: {
          jshintrc: '.jshintrc'
        }
+--
+1.8.4
+
+
+From 859c399646cff3911a630616a762acb1d55ea06c Mon Sep 17 00:00:00 2001
+From: Rashid Khan <rashidkpc@gmail.com>
+Date: Wed, 4 Sep 2013 10:56:31 -0700
+Subject: [PATCH 07/10] Namespace kibana url parameters
+
+---
+ dashboards/logstash.js | 35 +++++++++++++++++++----------------
+ js/app.js              |  4 ++--
+ js/services.js         |  8 ++++----
+ 3 files changed, 25 insertions(+), 22 deletions(-)
+
+diff --git a/dashboards/logstash.js b/dashboards/logstash.js
+index eeb5107..fb0edd2 100644
+--- a/dashboards/logstash.js
++++ b/dashboards/logstash.js
+@@ -18,14 +18,17 @@
+  *
+  */
+
+-var dashboard, ARGS, queries, _d_timespan;
++'use strict';
++
++// Setup some variables
++var dashboard, queries, _d_timespan;
++
++// All url parameters are available via the ARGS object
++var ARGS;
+
+ // Set a default timespan if one isn't specified
+ _d_timespan = '1h';
+
+-// arguments[0] contains a hash of the URL parameters, make it shorter
+-ARGS = arguments[0];
+-
+ // Intialize a skeleton with nothing but a rows array and service object
+ dashboard = {
+   rows : [],
+@@ -40,7 +43,7 @@ if(!_.isUndefined(ARGS.index)) {
+   dashboard.index = {
+     default: ARGS.index,
+     interval: 'none'
+-  }
++  };
+ } else {
+   // Don't fail to default
+   dashboard.failover = false;
+@@ -48,7 +51,7 @@ if(!_.isUndefined(ARGS.index)) {
+     default: ARGS.index||'ADD_A_TIME_FILTER',
+     pattern: ARGS.pattern||'[logstash-]YYYY.MM.DD',
+     interval: ARGS.interval||'day'
+-  }
++  };
+ }
+
+ // In this dashboard we let users pass queries as comma seperated list to the query parameter.
+@@ -59,7 +62,7 @@ if(!_.isUndefined(ARGS.query)) {
+   queries = _.object(_.map(ARGS.query.split(ARGS.split||','), function(v,k) {
+     return [k,{
+       query: v,
+-      id: parseInt(k),
++      id: parseInt(k,10),
+       alias: v
+     }];
+   }));
+@@ -70,14 +73,14 @@ if(!_.isUndefined(ARGS.query)) {
+       query: '*',
+       id: 0
+     }
+-  }
++  };
+ }
+
+ // Now populate the query service with our objects
+ dashboard.services.query = {
+   list : queries,
+-  ids : _.map(_.keys(queries),function(v){return parseInt(v);})
+-}
++  ids : _.map(_.keys(queries),function(v){return parseInt(v,10);})
++};
+
+ // Lets also add a default time filter, the value of which can be specified by the user
+ // This isn't strictly needed, but it gets rid of the info alert about the missing time filter
+@@ -93,7 +96,7 @@ dashboard.services.filter = {
+     }
+   },
+   ids: [0]
+-}
++};
+
+ // Ok, lets make some rows. The Filters row is collapsed by default
+ dashboard.rows = [
+@@ -138,7 +141,7 @@ dashboard.rows[1].panels = [
+   {
+     type: 'Query'
+   }
+-]
++];
+
+
+ // Add a filtering panel to the 3rd row
+@@ -146,7 +149,7 @@ dashboard.rows[2].panels = [
+   {
+     type: 'filtering'
+   }
+-]
++];
+
+ // And a histogram that allows the user to specify the interval and time field
+ dashboard.rows[3].panels = [
+@@ -155,7 +158,7 @@ dashboard.rows[3].panels = [
+     time_field: ARGS.timefield||"@timestamp",
+     auto_int: true
+   }
+-]
++];
+
+ // And a table row where you can specify field and sort order
+ dashboard.rows[4].panels = [
+@@ -165,7 +168,7 @@ dashboard.rows[4].panels = [
+     sort: !_.isUndefined(ARGS.sort) ? ARGS.sort.split(',') : [ARGS.timefield||'@timestamp','desc'],
+     overflow: 'expand'
+   }
+-]
++];
+
+ // Now return the object and we're good!
+-return dashboard;
+\ No newline at end of file
++return dashboard;
+diff --git a/js/app.js b/js/app.js
+index b812468..7a19033 100644
+--- a/js/app.js
++++ b/js/app.js
+@@ -48,10 +48,10 @@ labjs.wait(function(){
+         .when('/dashboard', {
+           templateUrl: 'partials/dashboard.html',
+         })
+-        .when('/dashboard/:type/:id', {
++        .when('/dashboard/:kbnType/:kbnId', {
+           templateUrl: 'partials/dashboard.html',
+         })
+-        .when('/dashboard/:type/:id/:params', {
++        .when('/dashboard/:kbnType/:kbnId/:params', {
+           templateUrl: 'partials/dashboard.html'
+         })
+         .otherwise({
+diff --git a/js/services.js b/js/services.js
+index 66c7044..372460d 100644
+--- a/js/services.js
++++ b/js/services.js
+@@ -606,9 +606,9 @@ angular.module('kibana.services', [])
+
+   var route = function() {
+     // Is there a dashboard type and id in the URL?
+-    if(!(_.isUndefined($routeParams.type)) && !(_.isUndefined($routeParams.id))) {
+-      var _type = $routeParams.type;
+-      var _id = $routeParams.id;
++    if(!(_.isUndefined($routeParams.kbnType)) && !(_.isUndefined($routeParams.kbnId))) {
++      var _type = $routeParams.kbnType;
++      var _id = $routeParams.kbnId;
+
+       switch(_type) {
+       case ('elasticsearch'):
+@@ -827,7 +827,7 @@ angular.module('kibana.services', [])
+       method: "GET",
+       transformResponse: function(response) {
+         /*jshint -W054 */
+-        var _f = new Function(response);
++        var _f = new Function("ARGS",response);
+         return _f($routeParams);
+       }
+     }).then(function(result) {
+--
+1.8.4
+
+
+From 8c6511d30a418ea9651437e6f35f549bc4547498 Mon Sep 17 00:00:00 2001
+From: Rashid Khan <rashidkpc@gmail.com>
+Date: Fri, 6 Sep 2013 13:02:33 -0700
+Subject: [PATCH 08/10] Moved dashUpload, added icon attribute to tip directive
+
+---
+ js/directives.js | 39 ++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 36 insertions(+), 3 deletions(-)
+
+diff --git a/js/directives.js b/js/directives.js
+index b199127..8f65225 100644
+--- a/js/directives.js
++++ b/js/directives.js
+@@ -12,7 +12,7 @@ angular.module('kibana.directives', [])
+         ' <span class="editlink panelextra pointer" style="right:15px;top:0px" ' +
+         'bs-modal="\'partials/paneleditor.html\'" ng-show="panel.editable != false">'+
+         '<span class="small">{{panel.type}}</span> <i class="icon-cog pointer"></i> '+
+-        '</span><h4>'+
++        '</span><h4 ng-show="panel.title">'+
+         '{{panel.title}} '+
+         '<i class="icon-spinner smaller icon-spin icon-large" ng-show="panelMeta.loading == true && panel.title"></i>'+
+         '</h4>';
+@@ -24,7 +24,8 @@ angular.module('kibana.directives', [])
+   return {
+     restrict: 'E',
+     link: function(scope, elem, attrs) {
+-      var _t = '<i class="icon-question-sign" bs-tooltip="\''+elem.text()+'\'"></i>';
++      var _t = '<i class="icon-'+(attrs.icon||'question-sign')+'" bs-tooltip="\''+
++        kbn.addslashes(elem.text())+'\'"></i>';
+       elem.replaceWith($compile(angular.element(_t))(scope));
+     }
+   };
+@@ -96,5 +97,37 @@ angular.module('kibana.directives', [])
+       });
+     });
+   };
+-}]);
++}])
++.directive('dashUpload', function(timer, dashboard, alertSrv){
++  return {
++    restrict: 'A',
++    link: function(scope, elem, attrs) {
++      function file_selected(evt) {
++        var files = evt.target.files; // FileList object
++
++        // files is a FileList of File objects. List some properties.
++        var output = [];
++        var readerOnload = function(theFile) {
++          return function(e) {
++            dashboard.dash_load(JSON.parse(e.target.result));
++            scope.$apply();
++          };
++        };
++        for (var i = 0, f; f = files[i]; i++) {
++          var reader = new FileReader();
++          reader.onload = (readerOnload)(f);
++          reader.readAsText(f);
++        }
++      }
++
++      // Check for the various File API support.
++      if (window.File && window.FileReader && window.FileList && window.Blob) {
++        // Something
++        document.getElementById('dashupload').addEventListener('change', file_selected, false);
++      } else {
++        alertSrv.set('Oops','Sorry, the HTML5 File APIs are not fully supported in this browser.','error');
++      }
++    }
++  };
++});
+
+--
+1.8.4
+
+
+From eb25ce5f7e90a3f11b2a56eb43ac9ad15a34c40c Mon Sep 17 00:00:00 2001
+From: Rashid Khan <rashidkpc@gmail.com>
+Date: Fri, 6 Sep 2013 13:20:12 -0700
+Subject: [PATCH 09/10] Moved dashboard controller to nav bar
+
+---
+ common/css/bootstrap.dark.min.css          |   2 +-
+ common/css/bootstrap.light.min.css         |   2 +-
+ dashboards/default.json                    |  34 ------
+ dashboards/guided.json                     |  39 -------
+ dashboards/logstash.js                     |   4 -
+ dashboards/logstash.json                   |  25 -----
+ dashboards/noted.json                      |  43 +-------
+ index.html                                 |  11 +-
+ js/app.js                                  |   3 +
+ js/controllers.js                          | 112 +++++++++++++++++++
+ js/filters.js                              |  11 ++
+ js/services.js                             |  34 ++++--
+ panels/dashcontrol/module.html             |   2 +-
+ panels/dashcontrol/module.js               |   4 +-
+ panels/dashcontrol/save.html               |   2 +-
+ partials/dashLoader.html                   |  74 +++++++++++++
+ partials/dashLoaderShare.html              |  11 ++
+ partials/dasheditor.html                   | 170 +++++++++++++++++++----------
+ vendor/bootstrap/less/bootswatch.dark.less |   6 +-
+ vendor/bootstrap/less/variables.light.less |   2 +-
+ 20 files changed, 365 insertions(+), 226 deletions(-)
+ create mode 100644 partials/dashLoader.html
+ create mode 100644 partials/dashLoaderShare.html
+
 diff --git a/common/css/bootstrap.dark.min.css b/common/css/bootstrap.dark.min.css
 index 957f31e..e424647 100644
 --- a/common/css/bootstrap.dark.min.css
@@ -131,222 +1273,25 @@ index 28343a0..e4f9e7b 100644
            "editable": true,
            "group": [
 diff --git a/dashboards/logstash.js b/dashboards/logstash.js
-new file mode 100644
-index 0000000..e67a080
---- /dev/null
+index fb0edd2..e67a080 100644
+--- a/dashboards/logstash.js
 +++ b/dashboards/logstash.js
-@@ -0,0 +1,170 @@
-+/*
-+ * Complex scripted Logstash dashboard
-+ * This script generates a dashboard object that Kibana can load. It also takes a number of user
-+ * supplied URL parameters, none are required:
-+ *
-+ * index :: Which index to search? If this is specified, interval is set to 'none'
-+ * pattern :: Does nothing if index is specified. Set a timestamped index pattern. Default: [logstash-]YYYY.MM.DD
-+ * interval :: Sets the index interval (eg: day,week,month,year), Default: day
-+ *
-+ * split :: The character to split the queries on Default: ','
-+ * query :: By default, a comma seperated list of queries to run. Default: *
-+ *
-+ * from :: Search this amount of time back, eg 15m, 1h, 2d. Default: 15m
-+ * timefield :: The field containing the time to filter on, Default: @timestamp
-+ *
-+ * fields :: comma seperated list of fields to show in the table
-+ * sort :: comma seperated field to sort on, and direction, eg sort=@timestamp,desc
-+ *
-+ */
-+
-+'use strict';
-+
-+// Setup some variables
-+var dashboard, queries, _d_timespan;
-+
-+// All url parameters are available via the ARGS object
-+var ARGS;
-+
-+// Set a default timespan if one isn't specified
-+_d_timespan = '1h';
-+
-+// Intialize a skeleton with nothing but a rows array and service object
-+dashboard = {
-+  rows : [],
-+  services : {}
-+};
-+
-+// Set a title
-+dashboard.title = 'Logstash Search';
-+
-+// Allow the user to set the index, if they dont, fall back to logstash.
-+if(!_.isUndefined(ARGS.index)) {
-+  dashboard.index = {
-+    default: ARGS.index,
-+    interval: 'none'
-+  };
-+} else {
-+  // Don't fail to default
-+  dashboard.failover = false;
-+  dashboard.index = {
-+    default: ARGS.index||'ADD_A_TIME_FILTER',
-+    pattern: ARGS.pattern||'[logstash-]YYYY.MM.DD',
-+    interval: ARGS.interval||'day'
-+  };
-+}
-+
-+// In this dashboard we let users pass queries as comma seperated list to the query parameter.
-+// Or they can specify a split character using the split aparameter
-+// If query is defined, split it into a list of query objects
-+// NOTE: ids must be integers, hence the parseInt()s
-+if(!_.isUndefined(ARGS.query)) {
-+  queries = _.object(_.map(ARGS.query.split(ARGS.split||','), function(v,k) {
-+    return [k,{
-+      query: v,
-+      id: parseInt(k,10),
-+      alias: v
-+    }];
-+  }));
-+} else {
-+  // No queries passed? Initialize a single query to match everything
-+  queries = {
-+    0: {
-+      query: '*',
-+      id: 0
-+    }
-+  };
-+}
-+
-+// Now populate the query service with our objects
-+dashboard.services.query = {
-+  list : queries,
-+  ids : _.map(_.keys(queries),function(v){return parseInt(v,10);})
-+};
-+
-+// Lets also add a default time filter, the value of which can be specified by the user
-+// This isn't strictly needed, but it gets rid of the info alert about the missing time filter
-+dashboard.services.filter = {
-+  list: {
-+    0: {
-+      from: kbn.time_ago(ARGS.from||_d_timespan),
-+      to: new Date(),
-+      field: ARGS.timefield||"@timestamp",
-+      type: "time",
-+      active: true,
-+      id: 0
-+    }
-+  },
-+  ids: [0]
-+};
-+
-+// Ok, lets make some rows. The Filters row is collapsed by default
-+dashboard.rows = [
-+  {
-+    title: "Options",
-+    height: "30px"
-+  },
-+  {
-+    title: "Query",
-+    height: "30px"
-+  },
-+  {
-+    title: "Filters",
-+    height: "100px",
-+    collapse: true
-+  },
-+  {
-+    title: "Chart",
-+    height: "300px"
-+  },
-+  {
-+    title: "Events",
-+    height: "400px"
-+  }
-+];
-+
-+// Setup some panels. A query panel and a filter panel on the same row
-+dashboard.rows[0].panels = [
-+  {
-+    type: 'timepicker',
-+    span: 6,
-+    timespan: ARGS.from||_d_timespan
-+  }
-+];
-+
-+// Add a filtering panel to the 3rd row
-+dashboard.rows[1].panels = [
-+  {
-+    type: 'Query'
-+  }
-+];
-+
-+
-+// Add a filtering panel to the 3rd row
-+dashboard.rows[2].panels = [
-+  {
-+    type: 'filtering'
-+  }
-+];
-+
-+// And a histogram that allows the user to specify the interval and time field
-+dashboard.rows[3].panels = [
-+  {
-+    type: 'histogram',
-+    time_field: ARGS.timefield||"@timestamp",
-+    auto_int: true
-+  }
-+];
-+
-+// And a table row where you can specify field and sort order
-+dashboard.rows[4].panels = [
-+  {
-+    type: 'table',
-+    fields: !_.isUndefined(ARGS.fields) ? ARGS.fields.split(',') : ['@timestamp','@message'],
-+    sort: !_.isUndefined(ARGS.sort) ? ARGS.sort.split(',') : [ARGS.timefield||'@timestamp','desc'],
-+    overflow: 'expand'
-+  }
-+];
-+
-+// Now return the object and we're good!
-+return dashboard;
+@@ -129,10 +129,6 @@ dashboard.rows[0].panels = [
+     type: 'timepicker',
+     span: 6,
+     timespan: ARGS.from||_d_timespan
+-  },
+-  {
+-    type: 'dashcontrol',
+-    span: 3
+   }
+ ];
+
 diff --git a/dashboards/logstash.json b/dashboards/logstash.json
-index 53ddc57..4631e91 100644
+index ead4dca..4631e91 100644
 --- a/dashboards/logstash.json
 +++ b/dashboards/logstash.json
-@@ -3,14 +3,11 @@
-   "services": {
-     "query": {
-       "idQueue": [
--        1,
--        2,
--        3,
--        4
-+        1
-       ],
-       "list": {
-         "0": {
--          "query": "*",
-+          "query": "{{ARGS.query || '*'}}",
-           "alias": "",
-           "color": "#7EB26D",
-           "id": 0
-@@ -22,8 +19,7 @@
-     },
-     "filter": {
-       "idQueue": [
--        1,
--        2
-+        1
-       ],
-       "list": {
-         "0": {
-@@ -70,7 +66,7 @@
-             "7d",
-             "30d"
-           ],
--          "timespan": "1h",
-+          "timespan": "{{ARGS.from || '1h'}}",
-           "timefield": "@timestamp",
-           "timeformat": "",
-           "refresh": {
-@@ -80,31 +76,6 @@
+@@ -76,31 +76,6 @@
            },
            "filter_id": 0,
            "status": "Stable"
@@ -435,7 +1380,9 @@ index fb44e12..27c69ea 100644
 -    "default": "NOT_CONFIGURED"
 +    "default": "_all"
    }
- }
+-}
+\ No newline at end of file
++}
 diff --git a/index.html b/index.html
 index e0831be..0f0c255 100644
 --- a/index.html
@@ -465,10 +1412,10 @@ index e0831be..0f0c255 100644
        </div>
      </div>
 diff --git a/js/app.js b/js/app.js
-index b812468..56a2a23 100644
+index 7a19033..56a2a23 100644
 --- a/js/app.js
 +++ b/js/app.js
-@@ -43,21 +43,24 @@ _.each(config.modules, function(v) {
+@@ -43,6 +43,7 @@ _.each(config.modules, function(v) {
 
  /* Application level module which depends on filters, controllers, and services */
  labjs.wait(function(){
@@ -476,17 +1423,7 @@ index b812468..56a2a23 100644
    angular.module('kibana', modules).config(['$routeProvider', function($routeProvider) {
        $routeProvider
          .when('/dashboard', {
-           templateUrl: 'partials/dashboard.html',
-         })
--        .when('/dashboard/:type/:id', {
-+        .when('/dashboard/:kbnType/:kbnId', {
-           templateUrl: 'partials/dashboard.html',
-         })
--        .when('/dashboard/:type/:id/:params', {
-+        .when('/dashboard/:kbnType/:kbnId/:params', {
-           templateUrl: 'partials/dashboard.html'
-         })
-         .otherwise({
+@@ -58,6 +59,8 @@ labjs.wait(function(){
            redirectTo: 'dashboard'
          });
      }]);
@@ -618,68 +1555,6 @@ index 2107074..4c30671 100644
  });
 
 
-diff --git a/js/directives.js b/js/directives.js
-index b199127..8f65225 100644
---- a/js/directives.js
-+++ b/js/directives.js
-@@ -12,7 +12,7 @@ angular.module('kibana.directives', [])
-         ' <span class="editlink panelextra pointer" style="right:15px;top:0px" ' +
-         'bs-modal="\'partials/paneleditor.html\'" ng-show="panel.editable != false">'+
-         '<span class="small">{{panel.type}}</span> <i class="icon-cog pointer"></i> '+
--        '</span><h4>'+
-+        '</span><h4 ng-show="panel.title">'+
-         '{{panel.title}} '+
-         '<i class="icon-spinner smaller icon-spin icon-large" ng-show="panelMeta.loading == true && panel.title"></i>'+
-         '</h4>';
-@@ -24,7 +24,8 @@ angular.module('kibana.directives', [])
-   return {
-     restrict: 'E',
-     link: function(scope, elem, attrs) {
--      var _t = '<i class="icon-question-sign" bs-tooltip="\''+elem.text()+'\'"></i>';
-+      var _t = '<i class="icon-'+(attrs.icon||'question-sign')+'" bs-tooltip="\''+
-+        kbn.addslashes(elem.text())+'\'"></i>';
-       elem.replaceWith($compile(angular.element(_t))(scope));
-     }
-   };
-@@ -96,5 +97,37 @@ angular.module('kibana.directives', [])
-       });
-     });
-   };
--}]);
-+}])
-+.directive('dashUpload', function(timer, dashboard, alertSrv){
-+  return {
-+    restrict: 'A',
-+    link: function(scope, elem, attrs) {
-+      function file_selected(evt) {
-+        var files = evt.target.files; // FileList object
-+
-+        // files is a FileList of File objects. List some properties.
-+        var output = [];
-+        var readerOnload = function(theFile) {
-+          return function(e) {
-+            dashboard.dash_load(JSON.parse(e.target.result));
-+            scope.$apply();
-+          };
-+        };
-+        for (var i = 0, f; f = files[i]; i++) {
-+          var reader = new FileReader();
-+          reader.onload = (readerOnload)(f);
-+          reader.readAsText(f);
-+        }
-+      }
-+
-+      // Check for the various File API support.
-+      if (window.File && window.FileReader && window.FileList && window.Blob) {
-+        // Something
-+        document.getElementById('dashupload').addEventListener('change', file_selected, false);
-+      } else {
-+        alertSrv.set('Oops','Sorry, the HTML5 File APIs are not fully supported in this browser.','error');
-+      }
-+    }
-+  };
-+});
-
 diff --git a/js/filters.js b/js/filters.js
 index 241497d..fb60c24 100644
 --- a/js/filters.js
@@ -702,97 +1577,10 @@ index 241497d..fb60c24 100644
  });
 \ No newline at end of file
 diff --git a/js/services.js b/js/services.js
-index c254735..d694062 100644
+index 372460d..1d309f5 100644
 --- a/js/services.js
 +++ b/js/services.js
-@@ -90,8 +90,9 @@ angular.module('kibana.services', [])
-         alertSrv.set('Error',"Could not contact Elasticsearch at "+config.elasticsearch+
-           ". Please ensure that Elasticsearch is reachable from your system." ,'error');
-      } else {
--        alertSrv.set('Error',"Could not find "+config.elasticsearch+"/"+indices.join(',')+"/_mapping. If you"+
--          " are using a proxy, ensure it is configured correctly",'error');
-+        alertSrv.set('Error',"No index found at "+config.elasticsearch+"/" +
-+         indices.join(',')+"/_mapping. Please create at least one index."  +
-+         "If you're using a proxy ensure it is configured correctly.",'error');
-       }
-     });
-
-@@ -252,6 +253,13 @@ angular.module('kibana.services', [])
-     ids : [],
-   });
-
-+  // Defaults for query objects
-+  var _query = {
-+    query: '*',
-+    alias: '',
-+    pin: false,
-+    type: 'lucene'
-+  };
-   // For convenience
-   var ejs = ejsResource(config.elasticsearch);
-   var _q = dashboard.current.services.query;
-@@ -275,6 +283,12 @@ angular.module('kibana.services', [])
-     self.list = dashboard.current.services.query.list;
-     self.ids = dashboard.current.services.query.ids;
-
-+    // Check each query object, populate its defaults
-+    _.each(self.list,function(query,id) {
-+      _.defaults(query,_query);
-+      query.color = colorAt(id);
-+    });
-+
-     if (self.ids.length === 0) {
-       self.set({});
-     }
-@@ -290,16 +304,12 @@ angular.module('kibana.services', [])
-         return false;
-       }
-     } else {
--      var _id = nextId();
--      var _query = {
--        query: '*',
--        alias: '',
--        color: colorAt(_id),
--        pin: false,
--        id: _id,
--        type: 'lucene'
--      };
-+      var _id = query.id || nextId();
-+      query.id = _id;
-+      query.color = query.color || colorAt(_id);
-       _.defaults(query,_query);
-+
-+
-       self.list[_id] = query;
-       self.ids.push(_id);
-       return _id;
-@@ -373,11 +383,13 @@ angular.module('kibana.services', [])
- .service('filterSrv', function(dashboard, ejsResource) {
-   // Create an object to hold our service state on the dashboard
-   dashboard.current.services.filter = dashboard.current.services.filter || {};
--  _.defaults(dashboard.current.services.filter,{
-+
-+  // Defaults for it
-+  var _d = {
-     idQueue : [],
-     list : {},
-     ids : []
--  });
-+  };
-
-   // For convenience
-   var ejs = ejsResource(config.elasticsearch);
-@@ -388,6 +400,9 @@ angular.module('kibana.services', [])
-
-   // Call this whenever we need to reload the important stuff
-   this.init = function() {
-+    // Populate defaults
-+    _.defaults(dashboard.current.services.filter,_d);
-+
-     // Accessors
-     self.list = dashboard.current.services.filter.list;
-     self.ids = dashboard.current.services.filter.ids;
-@@ -565,6 +580,20 @@ angular.module('kibana.services', [])
+@@ -579,6 +579,20 @@ angular.module('kibana.services', [])
      failover: false,
      rows: [],
      services: {},
@@ -813,58 +1601,7 @@ index c254735..d694062 100644
      index: {
        interval: 'none',
        pattern: '_all',
-@@ -592,9 +621,9 @@ angular.module('kibana.services', [])
-
-   var route = function() {
-     // Is there a dashboard type and id in the URL?
--    if(!(_.isUndefined($routeParams.type)) && !(_.isUndefined($routeParams.id))) {
--      var _type = $routeParams.type;
--      var _id = $routeParams.id;
-+    if(!(_.isUndefined($routeParams.kbnType)) && !(_.isUndefined($routeParams.kbnId))) {
-+      var _type = $routeParams.kbnType;
-+      var _id = $routeParams.kbnId;
-
-       switch(_type) {
-       case ('elasticsearch'):
-@@ -606,6 +635,9 @@ angular.module('kibana.services', [])
-       case ('file'):
-         self.file_load(_id);
-         break;
-+      case('script'):
-+        self.script_load(_id);
-+        break;
-       default:
-         self.file_load('default.json');
-       }
-@@ -642,9 +674,7 @@ angular.module('kibana.services', [])
-             if(self.current.failover) {
-               self.indices = [self.current.index.default];
-             } else {
--              alertSrv.set('No indices matched','The pattern <i>'+self.current.index.pattern+
--                '</i> did not match any indices in your selected'+
--                ' time range.','info',5000);
-+
-               // Do not issue refresh if no indices match. This should be removed when panels
-               // properly understand when no indices are present
-               return false;
-@@ -653,10 +683,14 @@ angular.module('kibana.services', [])
-           $rootScope.$broadcast('refresh');
-         });
-       } else {
--        // This is not optimal, we should be getting the entire index list here, or at least every
--        // index that possibly matches the pattern
-+        if(self.current.failover) {
-           self.indices = [self.current.index.default];
-           $rootScope.$broadcast('refresh');
-+        } else {
-+          alertSrv.set("No time filter",
-+            'Timestamped indices are configured without a failover. Waiting for time filter.',
-+            'info',5000);
-+        }
-       }
-     } else {
-       self.indices = [self.current.index.default];
-@@ -664,12 +698,20 @@ angular.module('kibana.services', [])
+@@ -683,13 +697,20 @@ angular.module('kibana.services', [])
      }
    };
 
@@ -876,7 +1613,7 @@ index c254735..d694062 100644
 +  };
 +
    this.dash_load = function(dashboard) {
-+
+
      // Cancel all timers
      timer.cancel_all();
 
@@ -886,92 +1623,29 @@ index c254735..d694062 100644
 
      // If not using time based indices, use the default index
      if(dashboard.index.interval === 'none') {
-@@ -744,14 +786,33 @@ angular.module('kibana.services', [])
-     };
-   };
+@@ -790,9 +811,7 @@ angular.module('kibana.services', [])
+         return false;
+       }
 
-+  var renderTemplate = function(json,params) {
-+    var _r;
-+    _.templateSettings = {interpolate : /\{\{(.+?)\}\}/g};
-+    var template = _.template(json);
-+    var rendered = template({ARGS:params});
-+
-+    try {
-+      _r = angular.fromJson(rendered);
-+    } catch(e) {
-+      _r = false;
-+    }
-+    return _r;
-+  };
-+
-   this.file_load = function(file) {
-     return $http({
-       url: "dashboards/"+file,
-       method: "GET",
-+      transformResponse: function(response) {
-+        return renderTemplate(response,$routeParams);
-+      }
-     }).then(function(result) {
 -      var _dashboard = result.data;
 -      _.defaults(_dashboard,_dash);
 -      self.dash_load(_dashboard);
-+      if(!result) {
-+        return false;
-+      }
-+
 +      self.dash_load(dash_defaults(result.data));
        return true;
      },function(result) {
        alertSrv.set('Error',"Could not load <i>dashboards/"+file+"</i>. Please make sure it exists" ,'error');
-@@ -759,11 +820,13 @@ angular.module('kibana.services', [])
-     });
-   };
-
--
-   this.elasticsearch_load = function(type,id) {
-     return $http({
-       url: config.elasticsearch + "/" + config.kibana_index + "/"+type+"/"+id,
--      method: "GET"
-+      method: "GET",
-+      transformResponse: function(response) {
-+        return renderTemplate(angular.fromJson(response)['_source']['dashboard'],$routeParams);
-+      }
-     }).error(function(data, status, headers, conf) {
-       if(status === 0) {
-         alertSrv.set('Error',"Could not contact Elasticsearch at "+config.elasticsearch+
-@@ -774,7 +837,30 @@ angular.module('kibana.services', [])
+@@ -834,9 +853,7 @@ angular.module('kibana.services', [])
+       if(!result) {
+         return false;
        }
-       return false;
-     }).success(function(data, status, headers) {
--      self.dash_load(angular.fromJson(data['_source']['dashboard']));
-+      self.dash_load(data);
-+    });
-+  };
-+
-+  this.script_load = function(file) {
-+    return $http({
-+      url: "dashboards/"+file,
-+      method: "GET",
-+      transformResponse: function(response) {
-+        /*jshint -W054 */
-+        var _f = new Function("ARGS",response);
-+        return _f($routeParams);
-+      }
-+    }).then(function(result) {
-+      if(!result) {
-+        return false;
-+      }
+-      var _dashboard = result.data;
+-      _.defaults(_dashboard,_dash);
+-      self.dash_load(_dashboard);
 +      self.dash_load(dash_defaults(result.data));
-+      return true;
-+    },function(result) {
-+      alertSrv.set('Error',
-+        "Could not load <i>scripts/"+file+"</i>. Please make sure it exists and returns a valid dashboard" ,
-+        'error');
-+      return false;
-     });
-   };
-
-@@ -839,7 +925,6 @@ angular.module('kibana.services', [])
+       return true;
+     },function(result) {
+       alertSrv.set('Error',
+@@ -907,7 +924,6 @@ angular.module('kibana.services', [])
        );
    };
 
@@ -979,7 +1653,7 @@ index c254735..d694062 100644
    this.save_gist = function(title,dashboard) {
      var save = _.clone(dashboard || self.current);
      save.title = title || self.current.title;
-@@ -871,7 +956,7 @@ angular.module('kibana.services', [])
+@@ -939,7 +955,7 @@ angular.module('kibana.services', [])
            var file = JSON.parse(v.content);
            files.push(file);
          } catch(e) {
@@ -988,32 +1662,6 @@ index c254735..d694062 100644
          }
        });
        return files;
-diff --git a/panels/bettermap/editor.html b/panels/bettermap/editor.html
-index 99d7d12..009ae2a 100644
---- a/panels/bettermap/editor.html
-+++ b/panels/bettermap/editor.html
-@@ -1,7 +1,7 @@
-   <div class="row-fluid">
-     <div class="span4">
-       <form>
--        <h6>Coordinate Field <i class="icon-question-sign" bs-tooltip="'geoJSON array! Long,Lat NOT Lat,Long'"></i></h6>
-+        <h6>Coordinate Field <tip>geoJSON array! Long,Lat NOT Lat,Long</tip></h6>
-         <input bs-typeahead="fields.list" type="text" class="input-small" ng-model="panel.field">
-       </form>
-     </div>
-diff --git a/panels/dashcontrol/editor.html b/panels/dashcontrol/editor.html
-index 7c87e30..8faf815 100644
---- a/panels/dashcontrol/editor.html
-+++ b/panels/dashcontrol/editor.html
-@@ -8,7 +8,7 @@
-       <label class="small">Defaults</label><input type="checkbox" ng-model="panel.save.default" ng-checked="panel.save.default">
-     </div>
-     <div class="span2">
--      <label class="small">Gist <i class="icon-question-sign" bs-tooltip="'Requires your domain to be OAUTH registered with Github'"></i></label><input type="checkbox" ng-model="panel.save.gist" ng-checked="panel.save.gist">
-+      <label class="small">Gist <tip>Requires your domain to be OAUTH registered with Github<tip></label><input type="checkbox" ng-model="panel.save.gist" ng-checked="panel.save.gist">
-     </div>
-     <div class="span2">
-       <label class="small">Elasticsearch</label><input type="checkbox" ng-model="panel.save.elasticsearch" ng-checked="panel.save.elasticsearch">
 diff --git a/panels/dashcontrol/module.html b/panels/dashcontrol/module.html
 index c4c3953..71515ce 100644
 --- a/panels/dashcontrol/module.html
@@ -1040,94 +1688,19 @@ index 0a4bf9e..8ea92e1 100644
    };
 
    $scope.panel = $scope.panel || {};
-diff --git a/panels/histogram/editor.html b/panels/histogram/editor.html
-index 8defd4a..bd94c10 100644
---- a/panels/histogram/editor.html
-+++ b/panels/histogram/editor.html
-@@ -62,7 +62,7 @@
-   <h5>Tooltip Settings</h5>
-   <div class="row-fluid" style="margin-bottom:10px;">
-     <div class="span3">
--      <label class="small">Stacked Values <tip>How should the values in stacked charts to be calculated?></tip></label>
-+      <label class="small">Stacked Values <tip>How should the values in stacked charts to be calculated?</tip></label>
-       <select class="input-medium" ng-model="panel.tooltip.value_type" ng-options="f for f in ['cumulative','individual']"></select>
-     </div>
-     <div class="span3">
-diff --git a/panels/histogram/module.js b/panels/histogram/module.js
-index 7a410dd..5bdbb22 100644
---- a/panels/histogram/module.js
-+++ b/panels/histogram/module.js
-@@ -135,8 +135,6 @@ angular.module('kibana.histogram', [])
-     if(dashboard.indices.length === 0) {
-       return;
-     }
--
--
-     var _range = $scope.get_time_range();
-     var _interval = $scope.get_interval(_range);
-
-@@ -177,6 +175,7 @@ angular.module('kibana.histogram', [])
-     // Then run it
-     var results = request.doSearch();
-
-+
-     // Populate scope when we have results
-     results.then(function(results) {
-       $scope.panelMeta.loading = false;
-diff --git a/panels/map/editor.html b/panels/map/editor.html
-index f18b696..292788b 100644
---- a/panels/map/editor.html
-+++ b/panels/map/editor.html
-@@ -1,7 +1,7 @@
-   <div class="row-fluid">
-     <div class="span3">
-       <form>
--        <h6>Field</h6>
-+        <h6>Field <tip>2 letter country or state code</tip></h6>
-         <input bs-typeahead="fields.list" type="text" class="input-small" ng-model="panel.field">
-       </form>
-     </div>
-diff --git a/panels/table/editor.html b/panels/table/editor.html
-index bf77984..c09d9f1 100644
---- a/panels/table/editor.html
-+++ b/panels/table/editor.html
-@@ -42,7 +42,7 @@
-       <select class="input-small" ng-model="panel.style['font-size']" ng-options="f for f in ['7pt','8pt','9pt','10pt','12pt','14pt','16pt','18pt','20pt','24pt','28pt','32pt','36pt','42pt','48pt','52pt','60pt','72pt']"></select></span>
-     </div>
-     <div class="span2">
--      <h6>Trim Factor <i class="icon-question-sign" bs-tooltip="'Trim fields to this long divided by # of rows'"></i></h6>
-+      <h6>Trim Factor <tip>Trim fields to this long divided by # of rows</tip></h6>
-       <input type="number" class="input-small" ng-model="panel.trimFactor">
-     </div>
+diff --git a/panels/dashcontrol/save.html b/panels/dashcontrol/save.html
+index 2879c4a..1df70f9 100644
+--- a/panels/dashcontrol/save.html
++++ b/panels/dashcontrol/save.html
+@@ -8,7 +8,7 @@
+       <ul class="nav nav-list">
+         <li><a ng-show="panel.save.local" ng-click="dashboard.to_file()"><i class="icon-download"></i> Export to File</a></li>
+         <li><a ng-show="panel.save.default" ng-click="set_default()"><i class="icon-bookmark"></i> Set as My Default</a></li>
+-        <li><a ng-show="panel.save.default" ng-click="purge_default()"><i class="icon-ban-circle"></i> Clear My Default</a></li>
++        <li><a ng-show="panel.save.default" ng-click="purge_default()"><i class="icon-ban-circle"></i> Clear My Default</a></li>
+       </ul>
+     </form>
    </div>
-\ No newline at end of file
-diff --git a/panels/table/micropanel.html b/panels/table/micropanel.html
-index b4a000a..18b572f 100644
---- a/panels/table/micropanel.html
-+++ b/panels/table/micropanel.html
-@@ -13,7 +13,7 @@
-   </thead>
-   <tbody>
-     <tr ng-repeat='field in micropanel.values'>
--      <td>{{{true: "__blank__",false:field[0]}[field[0] == ""]|tableTruncate:panel.trimFactor:3}}</td>
-+      <td>{{{true: "__blank__", false:field[0] }[field[0] == '' || field[0] == undefined]|tableTruncate:panel.trimFactor:3}}</td>
-       <td style="width:40px">
-         <i class="pointer icon-search" ng-click="build_search(micropanel.field,field[0]);dismiss();"></i>
-         <i class="pointer icon-ban-circle" ng-click="build_search(micropanel.field,field[0],true);dismiss();"></i>
-diff --git a/panels/table/module.js b/panels/table/module.js
-index 631248c..52c7367 100644
---- a/panels/table/module.js
-+++ b/panels/table/module.js
-@@ -127,6 +127,9 @@ angular.module('kibana.table', [])
-     // This needs to be abstracted somewhere
-     if(_.isArray(value)) {
-       query = "(" + _.map(value,function(v){return angular.toJson(v);}).join(" AND ") + ")";
-+    } else if (_.isUndefined(value)) {
-+      query = '*';
-+      negate = !negate;
-     } else {
-       query = angular.toJson(value);
-     }
 diff --git a/partials/dashLoader.html b/partials/dashLoader.html
 new file mode 100644
 index 0000000..dbaace7
@@ -1231,7 +1804,7 @@ diff --git a/partials/dasheditor.html b/partials/dasheditor.html
 index b86299b..aa2bdf9 100644
 --- a/partials/dasheditor.html
 +++ b/partials/dasheditor.html
-@@ -2,12 +2,12 @@
+@@ -2,44 +2,47 @@
    <div class="pull-right editor-title">Dashboard settings</div>
 
    <div ng-model="editor.index" bs-tabs>
@@ -1242,70 +1815,149 @@ index b86299b..aa2bdf9 100644
 
 -
 -  <div class="row-fluid" ng-show="editor.index == 0">
+-    <div class="span4">
+-      <label class="small">Title</label><input type="text" class="input-large" ng-model='dashboard.current.title'></input>
+-    </div>
+-    <div class="span1">
+-      <label class="small"> Editable </label><input type="checkbox" ng-model="dashboard.current.editable" ng-checked="dashboard.current.editable" />
+-    </div>
+-    <div class="span3">
+-      <label class="small">Style</label><select class="input-small" ng-model="dashboard.current.style" ng-options='f for f in ["dark","light"]'></select>
 +  <div ng-show="editor.index == 0">
 +    <div class="row-fluid">
-       <div class="span4">
-         <label class="small">Title</label><input type="text" class="input-large" ng-model='dashboard.current.title'></input>
-       </div>
-@@ -18,7 +18,10 @@
-         <label class="small">Style</label><select class="input-small" ng-model="dashboard.current.style" ng-options='f for f in ["dark","light"]'></select>
-       </div>
++      <div class="span4">
++        <label class="small">Title</label><input type="text" class="input-large" ng-model='dashboard.current.title'></input>
++      </div>
++      <div class="span1">
++        <label class="small"> Editable </label><input type="checkbox" ng-model="dashboard.current.editable" ng-checked="dashboard.current.editable" />
++      </div>
++      <div class="span3">
++        <label class="small">Style</label><select class="input-small" ng-model="dashboard.current.style" ng-options='f for f in ["dark","light"]'></select>
++      </div>
      </div>
+   </div>
 -  <div class="row-fluid" ng-show="editor.index == 1">
-+  </div>
-+
+-    <h4>Index Settings</h4>
+-    <div ng-show="dashboard.current.index.interval != 'none'" class="row-fluid">
+-       <div class="span12">
+-        <p class="small">
+-          Time stamped indices use your selected time range to create a list of
+-          indices that match a specified timestamp pattern. This can be very
+-          efficient for some data sets (eg, logs) For example, to match the
+-          default logstash index pattern you might use
+-          <code>[logstash-]YYYY.MM.DD</code>. The [] in "[logstash-]" are
+-          important as they instruct Kibana not to treat those letters as a
+-          pattern.
+-          Please also note that indices should rollover at midnight <strong>UTC</strong>.
+-        </p>
+-        <p class="small">
+-          See <a href="http://momentjs.com/docs/#/displaying/format/">http://momentjs.com/docs/#/displaying/format/</a>
+-          for documentation on date formatting.
+-        </p>
+
+-       </div>
 +  <div ng-show="editor.index == 1">
 +    <div class="row-fluid">
-       <h4>Index Settings</h4>
-       <div ng-show="dashboard.current.index.interval != 'none'" class="row-fluid">
-          <div class="span12">
-@@ -36,7 +39,7 @@
-             See <a href="http://momentjs.com/docs/#/displaying/format/">http://momentjs.com/docs/#/displaying/format/</a>
-             for documentation on date formatting.
-           </p>
--
++      <h4>Index Settings</h4>
++      <div ng-show="dashboard.current.index.interval != 'none'" class="row-fluid">
++         <div class="span12">
++          <p class="small">
++            Time stamped indices use your selected time range to create a list of
++            indices that match a specified timestamp pattern. This can be very
++            efficient for some data sets (eg, logs) For example, to match the
++            default logstash index pattern you might use
++            <code>[logstash-]YYYY.MM.DD</code>. The [] in "[logstash-]" are
++            important as they instruct Kibana not to treat those letters as a
++            pattern.
++            Please also note that indices should rollover at midnight <strong>UTC</strong>.
++          </p>
++          <p class="small">
++            See <a href="http://momentjs.com/docs/#/displaying/format/">http://momentjs.com/docs/#/displaying/format/</a>
++            for documentation on date formatting.
++          </p>
 +         </div>
-       </div>
++      </div>
      </div>
-     <div class="row-fluid">
-@@ -57,7 +60,9 @@
+-    <div class="row-fluid">
++    <div class="row-fluid">
+       <div class="span2">
+         <h6>Timestamping</h6><select class="input-small" ng-model="dashboard.current.index.interval" ng-options='f for f in ["none","hour","day","week","month","year"]'></select>
+       </div>
+@@ -57,43 +60,90 @@
        </div>
      </div>
    </div>
 -  <div class="row-fluid" ng-show="editor.index == 2">
+-    <div class="span12">
+-      <table class="table table-condensed table-striped">
+-        <thead>
+-          <th>Title</th>
+-          <th>Delete</th>
+-          <th>Move</th>
+-        </thead>
+-        <tr ng-repeat="row in dashboard.current.rows">
+-          <td>{{row.title}}</td>
+-          <td><i ng-click="dashboard.current.rows = _.without(dashboard.current.rows,row)" class="pointer icon-remove"></i></td>
+-          <td><i ng-click="_.move(dashboard.current.rows,$index,$index-1)" ng-hide="$first" class="pointer icon-arrow-up"></i></td>
+-          <td><i ng-click="_.move(dashboard.current.rows,$index,$index+1)" ng-hide="$last" class="pointer icon-arrow-down"></i></td>
+-        </tr>
+-      </table>
 +
 +  <div ng-show="editor.index == 2">
 +    <div class="row-fluid">
-       <div class="span12">
-         <table class="table table-condensed table-striped">
-           <thead>
-@@ -74,7 +79,7 @@
-         </table>
-       </div>
-     </div>
--  <div class="row-fluid" ng-show="editor.index == 2">
++      <div class="span12">
++        <table class="table table-condensed table-striped">
++          <thead>
++            <th>Title</th>
++            <th>Delete</th>
++            <th>Move</th>
++          </thead>
++          <tr ng-repeat="row in dashboard.current.rows">
++            <td>{{row.title}}</td>
++            <td><i ng-click="dashboard.current.rows = _.without(dashboard.current.rows,row)" class="pointer icon-remove"></i></td>
++            <td><i ng-click="_.move(dashboard.current.rows,$index,$index-1)" ng-hide="$first" class="pointer icon-arrow-up"></i></td>
++            <td><i ng-click="_.move(dashboard.current.rows,$index,$index+1)" ng-hide="$last" class="pointer icon-arrow-down"></i></td>
++          </tr>
++        </table>
++      </div>
++    </div>
 +    <div class="row-fluid">
-       <form>
-         <div class="span5">
-           <label class="small">Title</label>
-@@ -90,10 +95,55 @@
-         </div>
-       </form>
++      <form>
++        <div class="span5">
++          <label class="small">Title</label>
++          <input type="text" class="input-large" ng-model='row.title' placeholder="New row"></input>
++        </div>
++        <div class="span2">
++          <label class="small">Height</label>
++          <input type="text" class="input-mini" ng-model='row.height'></input>
++        </div>
++        <div class="span1">
++          <label class="small"> Editable </label>
++          <input type="checkbox" ng-model="row.editable" ng-checked="row.editable" />
++        </div>
++      </form>
      </div>
--  <!--<div class="row-fluid" ng-show="editor.index == 3">
--    <h6>Region</h6><select class="input-small" ng-model="dashboard.current.time.region" ng-options='f for f in ["africa","america","asia","atlantic","australia","europe","indian","pacific"]'></select>
--  </div>-->
    </div>
+-  <div class="row-fluid" ng-show="editor.index == 2">
+-    <form>
+-      <div class="span5">
+-        <label class="small">Title</label>
+-        <input type="text" class="input-large" ng-model='row.title' placeholder="New row"></input>
 +
 +  <div ng-show="editor.index == 3" ng-controller="dashLoader">
 +    <h5>Allow saving to</h5>
 +    <div class="row-fluid">
 +      <div class="span2">
 +        <label class="small">File</label><input type="checkbox" ng-model="loader.save_local" ng-checked="loader.save_local">
-+      </div>
-+      <div class="span2">
+       </div>
+       <div class="span2">
+-        <label class="small">Height</label>
+-        <input type="text" class="input-mini" ng-model='row.height'></input>
 +        <label class="small">Browser</label><input type="checkbox" ng-model="loader.save_default" ng-checked="loader.save_default">
-+      </div>
+       </div>
+-      <div class="span1">
+-        <label class="small"> Editable </label>
+-        <input type="checkbox" ng-model="row.editable" ng-checked="row.editable" />
 +      <div class="span2">
 +        <label class="small">Gist <tip>Requires your domain to be OAUTH registered with Github<tip></label><input type="checkbox" ng-model="loader.save_gist" ng-checked="loader.save_gist">
 +      </div>
@@ -1323,7 +1975,8 @@ index b86299b..aa2bdf9 100644
 +      </div>
 +      <div class="span2">
 +        <label class="small">Elasticsearch</label><input type="checkbox" ng-model="loader.load_elasticsearch" ng-checked="loader.load_elasticsearch">
-+      </div>
+       </div>
+-    </form>
 +      <div class="span3" ng-show="loader.load.elasticsearch">
 +        <label class="small">ES list size</label><input class="input-mini" type="number" ng-model="loader.load_elasticsearch_size">
 +      </div>
@@ -1340,9 +1993,12 @@ index b86299b..aa2bdf9 100644
 +        <label class="small">TTL Duration <tip>Elasticsearch date math, eg: 1m,1d,1w,30d  </tip></label><input class="input-small" type="text" ng-model="loader.save_temp_ttl">
 +      </div>
 +    </div>
-+  </div>
+   </div>
+-  <!--<div class="row-fluid" ng-show="editor.index == 3">
+-    <h6>Region</h6><select class="input-small" ng-model="dashboard.current.time.region" ng-options='f for f in ["africa","america","asia","atlantic","australia","europe","indian","pacific"]'></select>
+-  </div>-->
 +
-+</div>
+ </div>
 +
  <div class="modal-footer">
    <button ng-click="add_row(dashboard.current,row); reset_row();" class="btn btn-success" ng-show="editor.index == 2">Create Row</button>
@@ -1360,6 +2016,24 @@ index 8621a09..67431f0 100644
     border-right: 1px solid darken(@gray, 15%);
   }
 
+@@ -309,7 +309,7 @@ div.subnav {
+
+  li > a,
+  li > span {
+-
++
+    border: 1px solid transparent;
+    .box-shadow('0 1px 3px rgba(0, 0, 0, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.1)');
+    #gradient > .vertical-three-colors(@gray, @grayDark, 70%, @grayDark);
+@@ -318,7 +318,7 @@ div.subnav {
+      #gradient > .directional(@grayDarker, @grayDark, 280deg);
+      border: 1px solid transparent;
+    }
+- }
++ }
+
+  .disabled a,
+  .disabled a:hover {
 diff --git a/vendor/bootstrap/less/variables.light.less b/vendor/bootstrap/less/variables.light.less
 index 62ac2de..8e0ff9a 100644
 --- a/vendor/bootstrap/less/variables.light.less
@@ -1373,3 +2047,48 @@ index 62ac2de..8e0ff9a 100644
  @navbarLinkColorHover:            @white;
  @navbarLinkColorActive:           @navbarLinkColorHover;
  @navbarLinkBackgroundHover:       @grayDark;
+--
+1.8.4
+
+
+From 6a9a2b95b13346c523351175bc5fac5d43b3a674 Mon Sep 17 00:00:00 2001
+From: Stephen Wood <stephen@moz.com>
+Date: Fri, 6 Sep 2013 16:23:33 -0700
+Subject: [PATCH 10/10] Clarify error message.
+
+Elasticsearch will throw a 404 if there is no indexes added yet, resulting in
+this unclear message -- even for people that are not using any sort of proxy.
+
+This message update should make it easier to quickly troubleshoot why the
+the dialogue is popping up.
+---
+ js/services.js | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/js/services.js b/js/services.js
+index 1d309f5..d694062 100644
+--- a/js/services.js
++++ b/js/services.js
+@@ -89,9 +89,10 @@ angular.module('kibana.services', [])
+       if(status === 0) {
+         alertSrv.set('Error',"Could not contact Elasticsearch at "+config.elasticsearch+
+           ". Please ensure that Elasticsearch is reachable from your system." ,'error');
+-      } else {
+-        alertSrv.set('Error',"Could not find "+config.elasticsearch+"/"+indices.join(',')+"/_mapping. If you"+
+-          " are using a proxy, ensure it is configured correctly",'error');
++     } else {
++        alertSrv.set('Error',"No index found at "+config.elasticsearch+"/" +
++         indices.join(',')+"/_mapping. Please create at least one index."  +
++         "If you're using a proxy ensure it is configured correctly.",'error');
+       }
+     });
+
+@@ -963,4 +964,4 @@ angular.module('kibana.services', [])
+       return false;
+     });
+   };
+-});
+\ No newline at end of file
++});
+--
+1.8.4

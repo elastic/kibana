@@ -283,6 +283,7 @@ function (angular, app, _, kbn, moment) {
 
   });
 
+  // This also escapes some xml sequences
   module.filter('tableHighlight', function() {
     return function(text) {
       if (!_.isUndefined(text) && !_.isNull(text) && text.toString().length > 0) {
