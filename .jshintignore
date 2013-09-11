@@ -2,5 +2,4 @@ node_modules/*
 dist/*
 sample/*
 src/vendor/*
-src/app/panels/*/leaflet/*
-src/app/panels/*/lib/*
+src/app/panels/*/{lib,leaflet}/*

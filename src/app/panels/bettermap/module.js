@@ -14,12 +14,11 @@ define([
   'underscore',
   './leaflet/leaflet-src',
   'require',
-  // 'text!partials/querySelect.html',
 
   'css!./leaflet/leaflet.css',
   'css!./leaflet/plugins.css'
 ],
-function (angular, app, _, L, require) {
+function (angular, app, _, L, localRequire) {
   'use strict';
 
   var module = angular.module('kibana.panels.bettermap', []);
@@ -52,7 +51,12 @@ function (angular, app, _, L, require) {
       tooltip : "_id",
       field   : null
     };
+
     _.defaults($scope.panel,_d);
+    $scope.requireContext = localRequire;
+
+    // inorder to use relative paths in require calls, require needs a context to run. Without
+    // setting this property the paths would be relative to the app not this context/file.
 
     $scope.init = function() {
       $scope.$on('refresh',function(){
@@ -62,7 +66,7 @@ function (angular, app, _, L, require) {
     };
 
     $scope.get_data = function(segment,query_id) {
-      require(['./leaflet/plugins'], function () {
+      $scope.require(['./leaflet/plugins'], function () {
         $scope.panel.error =  false;
 
         // Make sure we have everything for the request to complete
@@ -180,7 +184,7 @@ function (angular, app, _, L, require) {
         var map, layerGroup;
 
         function render_panel() {
-          require(['./leaflet/plugins'], function () {
+          scope.require(['./leaflet/plugins'], function () {
             scope.panelMeta.loading = false;
 
             if(_.isUndefined(map)) {

@@ -16,6 +16,7 @@ function (angular, app, _, config) {
   'use strict';
 
   var module = angular.module('kibana.panels.column', []);
+
   app.useModule(module);
 
   module.controller('column', function($scope, $rootScope, $timeout) {

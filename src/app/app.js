@@ -3,14 +3,16 @@
  */
 define([
   'angular',
-  'jquery', 'underscore',
+  'jquery',
+  'underscore',
+  'require',
 
   'elasticjs',
   'bootstrap',
   'angular-sanitize',
   'angular-strap'
 ],
-function (angular, $, _) {
+function (angular, $, _, appLevelRequire) {
   "use strict";
 
   var app = angular.module('kibana', []),
@@ -110,11 +112,24 @@ function (angular, $, _) {
       .element(document)
       .ready(function() {
         $('body').attr('ng-controller', 'DashCtrl');
-        angular.bootstrap(document, apps_deps);
-        _.each(pre_boot_modules, function (module) {
-          _.extend(module, register_fns);
-        });
-        pre_boot_modules = false;
+        angular.bootstrap(document, apps_deps)
+          .invoke(function ($rootScope) {
+            _.each(pre_boot_modules, function (module) {
+              _.extend(module, register_fns);
+            });
+            pre_boot_modules = false;
+
+            $rootScope.requireContext = appLevelRequire;
+            $rootScope.require = function (deps, fn) {
+              var $scope = this;
+              $scope.requireContext(deps, function () {
+                var deps = _.toArray(arguments);
+                $scope.$apply(function () {
+                  fn.apply($scope, deps);
+                });
+              });
+            };
+          });
       });
   });
 

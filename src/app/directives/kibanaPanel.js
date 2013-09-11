@@ -24,7 +24,7 @@ function (angular) {
           $scope.$watch(attr.type, function (name) {
             elem.addClass("ng-cloak");
             // load the panels module file, then render it in the dom.
-            require([
+            $scope.require([
               'jquery',
               'text!panels/'+name+'/module.html',
 

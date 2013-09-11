@@ -327,9 +327,8 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
 
         // Function for rendering panel
         function render_panel() {
-
           // IE doesn't work without this
-          elem.css({height:scope.panel.height||scope.row.height});
+          elem.css({height:scope.panel.height || scope.row.height});
 
           // Populate from the query service
           try {
