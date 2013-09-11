@@ -5,9 +5,9 @@
 // Base modules
 var modules = [
   'kibana.services',
-  'kibana.controllers', 
-  'kibana.filters', 
-  'kibana.directives', 
+  'kibana.controllers',
+  'kibana.filters',
+  'kibana.directives',
   'elasticjs.service',
   '$strap.directives',
   'kibana.panels',
@@ -43,21 +43,24 @@ _.each(config.modules, function(v) {
 
 /* Application level module which depends on filters, controllers, and services */
 labjs.wait(function(){
+  // Create the module
   angular.module('kibana', modules).config(['$routeProvider', function($routeProvider) {
       $routeProvider
         .when('/dashboard', {
           templateUrl: 'partials/dashboard.html',
         })
-        .when('/dashboard/:type/:id', {
+        .when('/dashboard/:kbnType/:kbnId', {
           templateUrl: 'partials/dashboard.html',
         })
-        .when('/dashboard/:type/:id/:params', {
+        .when('/dashboard/:kbnType/:kbnId/:params', {
           templateUrl: 'partials/dashboard.html'
         })
         .otherwise({
           redirectTo: 'dashboard'
         });
     }]);
+
+  // Wait for ready, then bootstrap
   angular.element(document).ready(function() {
     $('body').attr('ng-controller', 'DashCtrl');
     angular.bootstrap(document, ['kibana']);

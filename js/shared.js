@@ -1,3 +1,4 @@
+/*jshint forin:false*/
 // Wrap this all up in a 'kbn' object so I don't have a billion globals
 (function() {
   'use strict';
@@ -72,10 +73,20 @@
   };
 
   kbn.top_field_values = function(docs,field,count) {
-    var counts = _.countBy(_.pluck(docs,field),function(field){
-      return _.isUndefined(field) ? '' : field;
+    var all_values = _.pluck(docs,field),
+      groups = {};
+
+    // manually grouping into pairs allows us to keep the original value,
+    _.each(all_values, function (value) {
+      var key = _.isUndefined(value) ? '' : value.toString();
+      if (_.has(groups, key)) {
+        groups[key][1] ++;
+      } else {
+        groups[key] = [value, 1];
+      }
     });
-    return _.pairs(counts).sort(function(a, b) {
+
+    return _.values(groups).sort(function(a, b) {
       return a[1] - b[1];
     }).reverse().slice(0,count);
   };
@@ -102,54 +113,54 @@
   kbn.round_interval = function(interval) {
     switch (true) {
     // 0.5s
-    case (interval <= 500):         
+    case (interval <= 500):
       return 100;       // 0.1s
     // 5s
-    case (interval <= 5000):        
+    case (interval <= 5000):
       return 1000;      // 1s
     // 7.5s
-    case (interval <= 7500):        
+    case (interval <= 7500):
       return 5000;      // 5s
     // 15s
-    case (interval <= 15000):       
+    case (interval <= 15000):
       return 10000;     // 10s
     // 45s
-    case (interval <= 45000):       
+    case (interval <= 45000):
       return 30000;     // 30s
     // 3m
-    case (interval <= 180000):      
+    case (interval <= 180000):
       return 60000;     // 1m
     // 9m
-    case (interval <= 450000):      
+    case (interval <= 450000):
       return 300000;    // 5m
     // 20m
-    case (interval <= 1200000):     
+    case (interval <= 1200000):
       return 600000;    // 10m
     // 45m
-    case (interval <= 2700000):     
+    case (interval <= 2700000):
       return 1800000;   // 30m
     // 2h
-    case (interval <= 7200000):     
+    case (interval <= 7200000):
       return 3600000;   // 1h
     // 6h
-    case (interval <= 21600000):    
+    case (interval <= 21600000):
       return 10800000;  // 3h
     // 24h
-    case (interval <= 86400000):      
+    case (interval <= 86400000):
       return 43200000;  // 12h
     // 48h
-    case (interval <= 172800000):     
+    case (interval <= 172800000):
       return 86400000;  // 24h
     // 1w
-    case (interval <= 604800000):   
+    case (interval <= 604800000):
       return 86400000;  // 24h
     // 3w
-    case (interval <= 1814400000):  
+    case (interval <= 1814400000):
       return 604800000; // 1w
     // 2y
-    case (interval < 3628800000):   
+    case (interval < 3628800000):
       return 2592000000; // 30d
-    default:                        
+    default:
       return 31536000000; // 1y
     }
   };
@@ -194,21 +205,21 @@
   kbn.interval_to_seconds = function(string) {
     var matches = string.match(/(\d+(?:\.\d+)?)([Mwdhmsy])/);
     switch (matches[2]) {
-    case 'y': 
+    case 'y':
       return matches[1]*31536000;
-    case 'M': 
+    case 'M':
       return matches[1]*2592000;
-    case 'w': 
+    case 'w':
       return matches[1]*604800;
-    case 'd': 
+    case 'd':
       return matches[1]*86400;
-    case 'h': 
+    case 'h':
       return matches[1]*3600;
-    case 'm': 
+    case 'm':
       return matches[1]*60;
-    case 's': 
+    case 's':
       return matches[1];
-    } 
+    }
   };
 
   // This should go away, moment.js can do this
@@ -235,7 +246,7 @@
               if (objidx > 0) {
                 strval = strval + ', ';
               }
-              
+
               strval = strval + JSON.stringify(obj[objidx]);
             }
             array[rootname] = strval;
@@ -288,6 +299,14 @@
     }
     return sortedObj;
   };
+
+  kbn.query_color_dot = function (color, diameter) {
+    return '<div class="icon-circle" style="' + [
+        'display:inline-block',
+        'color:' + color,
+        'font-size:' + diameter + 'px',
+      ].join(';') + '"></div>';
+  };
 }).call(this);
 
 /*
@@ -299,19 +318,13 @@ _.mixin({
 
     array.splice(toIndex, 0, array.splice(fromIndex, 1)[0] );
     return array;
-  } 
-});
-
-_.mixin({
+  },
   remove: function (array, index) {
     'use strict';
 
     array.splice(index, 1);
     return array;
-  } 
-});
-
-_.mixin({
+  },
   toggleInOut: function(array,value) {
     'use strict';
     if(_.contains(array,value)) {
@@ -322,3 +335,47 @@ _.mixin({
     return array;
   }
 });
+
+/**
+ * jQuery plugins
+ */
+(function () {
+  'use strict';
+
+  var $win = $(window);
+
+  $.fn.place_tt = (function () {
+    var defaults = {
+      offset: 5,
+      css: {
+        position : 'absolute',
+        top : -1000,
+        left : 0,
+        color : "#c8c8c8",
+        padding : '10px',
+        'font-size': '11pt',
+        'font-weight' : 200,
+        'background-color': '#1f1f1f',
+        'border-radius': '5px',
+      }
+    };
+
+    return function (x, y, opts) {
+      opts = $.extend(true, {}, defaults, opts);
+      return this.each(function () {
+        var $tooltip = $(this), width, height;
+
+        $tooltip.css(opts.css);
+        if (!$.contains(document.body, $tooltip[0])) {
+          $tooltip.appendTo(document.body);
+        }
+
+        width = $tooltip.outerWidth(true);
+        height = $tooltip.outerHeight(true);
+
+        $tooltip.css('left', x + opts.offset + width > $win.width() ? x - opts.offset - width : x + opts.offset);
+        $tooltip.css('top', y + opts.offset + height > $win.height() ? y - opts.offset - height : y + opts.offset);
+      });
+    };
+  })();
+}());

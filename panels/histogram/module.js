@@ -72,6 +72,10 @@ angular.module('kibana.histogram', [])
     'y-axis'    : true,
     percentage  : false,
     interactive : true,
+    tooltip     : {
+      value_type: 'cumulative',
+      query_as_alias: false
+    }
   };
 
   _.defaults($scope.panel,_d);
@@ -131,8 +135,6 @@ angular.module('kibana.histogram', [])
     if(dashboard.indices.length === 0) {
       return;
     }
-
-
     var _range = $scope.get_time_range();
     var _interval = $scope.get_interval(_range);
 
@@ -172,6 +174,7 @@ angular.module('kibana.histogram', [])
 
     // Then run it
     var results = request.doSearch();
+
 
     // Populate scope when we have results
     results.then(function(results) {
@@ -391,7 +394,7 @@ angular.module('kibana.histogram', [])
             // when rendering stacked bars, we need to ensure each point that has data is zero-filled
             // so that the stacking happens in the proper order
             var required_times = [];
-            if (scope.panel.bars && stack) {
+            if (scope.data.length > 1) {
               required_times = _.uniq(Array.prototype.concat.apply([], _.map(scope.data, function (query) {
                 return query.time_series.getOrderedTimes();
               })).sort(), true);
@@ -424,32 +427,30 @@ angular.module('kibana.histogram', [])
         return "%H:%M:%S";
       }
 
-      function tt(x, y, contents) {
-        // If the tool tip already exists, don't recreate it, just update it
-        var tooltip = $('#pie-tooltip').length ? $('#pie-tooltip') : $('<div id="pie-tooltip"></div>');
-
-        tooltip.html(contents).css({
-          position: 'absolute',
-          top     : y + 5,
-          left    : x + 5,
-          color   : "#c8c8c8",
-          padding : '10px',
-          'font-size': '11pt',
-          'font-weight' : 200,
-          'background-color': '#1f1f1f',
-          'border-radius': '5px',
-        }).appendTo("body");
-      }
-
+      var $tooltip = $('<div>');
       elem.bind("plothover", function (event, pos, item) {
+        var group, value;
         if (item) {
-          tt(pos.pageX, pos.pageY,
-            "<div style='vertical-align:middle;display:inline-block;background:"+
-            item.series.color+";height:15px;width:15px;border-radius:10px;'></div> "+
-            item.datapoint[1].toFixed(0) + " @ " +
-            moment(item.datapoint[0]).format('MM/DD HH:mm:ss'));
+          if (item.series.info.alias || scope.panel.tooltip.query_as_alias) {
+            group = '<small style="font-size:0.9em;">' +
+              '<i class="icon-circle" style="color:'+item.series.color+';"></i>' + ' ' +
+              (item.series.info.alias || item.series.info.query)+
+            '</small><br>';
+          } else {
+            group = kbn.query_color_dot(item.series.color, 15) + ' ';
+          }
+          if (scope.panel.stack && scope.panel.tooltip.value_type === 'individual')  {
+            value = item.datapoint[1] - item.datapoint[2];
+          } else {
+            value = item.datapoint[1];
+          }
+          $tooltip
+            .html(
+              group + value + " @ " + moment(item.datapoint[0]).format('MM/DD HH:mm:ss')
+            )
+            .place_tt(pos.pageX, pos.pageY);
         } else {
-          $("#pie-tooltip").remove();
+          $tooltip.detach();
         }
       });
 
@@ -471,6 +472,10 @@ angular.module('kibana.histogram', [])
     return parseInt(val, 10);
   }
 
+  function getDatesTime(date) {
+    return Math.floor(date.getTime() / 1000)*1000;
+  }
+
   /**
    * Certain graphs require 0 entries to be specified for them to render
    * properly (like the line graph). So with this we will caluclate all of
@@ -488,7 +493,7 @@ angular.module('kibana.histogram', [])
    *                                the series.
    */
   this.ZeroFilled = function (opts) {
-    this.opts = _.defaults(opts, {
+    opts = _.defaults(opts, {
       interval: '10m',
       start_date: null,
       end_date: null,
@@ -500,13 +505,9 @@ angular.module('kibana.histogram', [])
 
     // will keep all values here, keyed by their time
     this._data = {};
-
-    if (opts.start_date) {
-      this.addValue(opts.start_date, null);
-    }
-    if (opts.end_date) {
-      this.addValue(opts.end_date, null);
-    }
+    this.start_time = opts.start_date && getDatesTime(opts.start_date);
+    this.end_time = opts.end_date && getDatesTime(opts.end_date);
+    this.opts = opts;
   };
 
   /**
@@ -516,7 +517,7 @@ angular.module('kibana.histogram', [])
    */
   this.ZeroFilled.prototype.addValue = function (time, value) {
     if (time instanceof Date) {
-      time = Math.floor(time.getTime() / 1000)*1000;
+      time = getDatesTime(time);
     } else {
       time = base10Int(time);
     }
@@ -550,7 +551,8 @@ angular.module('kibana.histogram', [])
   this.ZeroFilled.prototype.getFlotPairs = function (required_times) {
     var times = this.getOrderedTimes(required_times),
       strategy,
-      pairs;
+      pairs,
+      pairs_empty;
 
     if(this.opts.fill_style === 'all') {
       strategy = this._getAllFlotPairs;
@@ -558,12 +560,23 @@ angular.module('kibana.histogram', [])
       strategy = this._getMinFlotPairs;
     }
 
-    return _.reduce(
+    pairs = _.reduce(
       times,    // what
       strategy, // how
       [],       // where
       this      // context
     );
+
+    // if the start and end of the pairs are inside either the start or end time,
+    // add those times to the series with null values so the graph will stretch to contain them.
+    if (this.start_time && (pairs.length === 0 || pairs[0][0] > this.start_time)) {
+      pairs.unshift([this.start_time, null]);
+    }
+    if (this.end_time && (pairs.length === 0 || pairs[pairs.length - 1][0] < this.end_time)) {
+      pairs.push([this.end_time, null]);
+    }
+
+    return pairs;
   };
 
   /**

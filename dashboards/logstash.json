@@ -3,14 +3,11 @@
   "services": {
     "query": {
       "idQueue": [
-        1,
-        2,
-        3,
-        4
+        1
       ],
       "list": {
         "0": {
-          "query": "*",
+          "query": "{{ARGS.query || '*'}}",
           "alias": "",
           "color": "#7EB26D",
           "id": 0
@@ -22,8 +19,7 @@
     },
     "filter": {
       "idQueue": [
-        1,
-        2
+        1
       ],
       "list": {
         "0": {
@@ -70,7 +66,7 @@
             "7d",
             "30d"
           ],
-          "timespan": "1h",
+          "timespan": "{{ARGS.from || '1h'}}",
           "timefield": "@timestamp",
           "timeformat": "",
           "refresh": {
@@ -80,31 +76,6 @@
           },
           "filter_id": 0,
           "status": "Stable"
-        },
-        {
-          "error": false,
-          "span": 3,
-          "editable": true,
-          "group": [
-            "default"
-          ],
-          "type": "dashcontrol",
-          "save": {
-            "gist": false,
-            "elasticsearch": true,
-            "local": true,
-            "default": true
-          },
-          "load": {
-            "gist": true,
-            "elasticsearch": true,
-            "local": true
-          },
-          "hide_control": false,
-          "elasticsearch_size": 20,
-          "temp": true,
-          "temp_ttl": "30d",
-          "ttl_enable": true
         }
       ]
     },
