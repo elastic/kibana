@@ -126,7 +126,6 @@ angular.module('kibana.terms', [])
       }
       $scope.data = [];
       _.each(results.facets.terms.terms, function(v) {
-<<<<<<< HEAD
         var slice;
         if($scope.panel.tmode === 'terms') {
           slice = { label : v.term, data : [[k,v.count]], actions: true}; 
@@ -134,9 +133,6 @@ angular.module('kibana.terms', [])
         if($scope.panel.tmode === 'terms_stats') {
           slice = { label : v.term, data : [[k,v.total]], actions: true};
         }		
-=======
-        var slice = { label : v.term, data : [[k,v.count]], actions: true};
->>>>>>> upstream/master
         $scope.data.push(slice);
         k = k + 1;
       });
