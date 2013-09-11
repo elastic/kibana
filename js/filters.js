@@ -27,9 +27,12 @@ angular.module('kibana.filters', [])
     }
   };
 }).filter('stringify', function() {
-  return function(arr, start, end) {
-    if(!_.isUndefined(arr)) {
-      return arr.toString();
+  return function(val, start, end) {
+    if(_.isArray(val)) {
+      return val.join(', ');
+    }
+    else if(!_.isUndefined(val)) {
+      return val.toString();
     }
   };
 
