@@ -71,16 +71,15 @@ define(['angular', 'jquery', 'underscore'], function (angular, $, _) {
       if(!_.isString(text)) {
         return text;
       } else {
-        var i=1;
-        _.each(text.match(r1), function(url) {
+        _.each(text.match(r1), function() {
           t1 = text.replace(r1, "<a href=\"$1\" target=\"_blank\">$1</a>");
         });
         text = t1 || text;
-        _.each(text.match(r2), function(url) {
+        _.each(text.match(r2), function() {
           t2 = text.replace(r2, "$1<a href=\"http://$2\" target=\"_blank\">$2</a>");
         });
         text = t2 || text;
-        _.each(text.match(r3), function(url) {
+        _.each(text.match(r3), function() {
           t3 = text.replace(r3, "<a href=\"mailto:$1\">$1</a>");
         });
         text = t3 || text;

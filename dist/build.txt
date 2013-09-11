@@ -9,10 +9,10 @@ app/components/underscore.extended.js
 app/../vendor/elasticjs/elastic.js
 vendor/elasticjs/elastic-angular-client.js
 vendor/bootstrap/bootstrap.js
+vendor/angular/angular-sanitize.js
 vendor/angular/timepicker.js
 vendor/angular/datepicker.js
 vendor/angular/angular-strap.js
-vendor/angular/angular-sanitize.js
 app/components/settings.js
 app/config.js
 app/services/alertSrv.js
@@ -31,6 +31,7 @@ app/controllers/row.js
 app/controllers/all.js
 app/directives/addPanel.js
 app/directives/arrayJoin.js
+app/directives/dashUpload.js
 app/directives/kibanaPanel.js
 app/directives/ngBlur.js
 app/directives/ngModelOnBlur.js
@@ -48,7 +49,6 @@ app/panels/bettermap/leaflet/leaflet-src.js
 vendor/require/css.js
 css!panels/bettermap/leaflet/leaflet.css
 css!panels/bettermap/leaflet/plugins.css
-app/panels/bettermap/leaflet/plugins.js
 app/panels/bettermap/module.js
 
 app/panels/column/module.js
@@ -94,6 +94,8 @@ app/panels/pie/module.js
 
 app/panels/query/module.js
 ----------------
+vendor/require/css.js
+css!panels/query/query.css
 app/panels/query/module.js
 
 app/panels/table/module.js
