@@ -21,7 +21,7 @@
   <!-- keep legend from over lapping -->
   <div style="clear:both"></div>
 
-  <div ng-show="panel.chart == 'pie' || panel.chart == 'bar'" terms-chart params="{{panel}}" style="position:relative"></div>
+  <div ng-show="panel.chart == 'pie' || panel.chart == 'bar'" terms-chart params="{{panel}}" style="position:relative" class="pointer"></div>
 
   <div ng-show="panel.counter_pos == 'below' && (panel.chart == 'bar' || panel.chart == 'pie')" id='{{$id}}-legend'>
     <!-- vertical legend below -->

@@ -34,7 +34,9 @@ define(['angular', 'jquery', 'underscore'], function (angular, $, _) {
 
   module.filter('stringify', function() {
     return function(arr) {
-      if(!_.isUndefined(arr)) {
+      if(_.isObject(arr) && !_.isArray(arr)) {
+        return angular.toJson(arr);
+      } else {
         return arr.toString();
       }
     };

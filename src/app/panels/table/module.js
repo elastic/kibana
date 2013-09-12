@@ -60,10 +60,10 @@ function (angular, app, _, kbn, moment) {
       size    : 100, // Per page
       pages   : 5,   // Pages available
       offset  : 0,
-      sort    : ['@timestamp','desc'],
+      sort    : ['_score','desc'],
       group   : "default",
       style   : {'font-size': '9pt'},
-      overflow: 'height',
+      overflow: 'min-height',
       fields  : [],
       highlight : [],
       sortable: true,

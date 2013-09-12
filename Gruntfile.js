@@ -15,7 +15,7 @@ module.exports = function (grunt) {
         ' Licensed <%= pkg.license %> */\n\n'
     },
     clean: {
-      on_start: ['<%= destDir %>'],
+      on_start: ['<%= destDir %>', '<%= tempDir %>'],
       after_require: ['<%= tempDir %>'],
     },
     copy: {
@@ -29,14 +29,14 @@ module.exports = function (grunt) {
           'img/**/*',
           'panels/bettermap/leaflet/*.png'
         ],
-        dest: '<%= destDir %>'
-      },
-      dist_to_temp: {
-        cwd: '<%= destDir %>',
-        expand: true,
-        src: '**/*',
         dest: '<%= tempDir %>'
-      }
+      }//,
+      // dist_to_temp: {
+      //   cwd: '<%= destDir %>',
+      //   expand: true,
+      //   src: '**/*',
+      //   dest: '<%= tempDir %>'
+      // }
     },
     jshint: {
       // just lint the source dir
@@ -57,7 +57,7 @@ module.exports = function (grunt) {
         expand: true,
         cwd:'<%= srcDir %>/vendor/bootstrap/less/',
         src: ['bootstrap.dark.less', 'bootstrap.light.less'],
-        dest: '<%= destDir %>/css/',
+        dest: '<%= tempDir %>/css/',
       }
     },
     cssmin: {
@@ -67,7 +67,7 @@ module.exports = function (grunt) {
         src: [
           '**/*.css'
         ],
-        dest: '<%= destDir %>'
+        dest: '<%= tempDir %>'
       }
     },
     htmlmin:{
@@ -83,13 +83,13 @@ module.exports = function (grunt) {
           'app/panels/**/*.html',
           'app/partials/**/*.html'
         ],
-        dest: '<%= destDir %>'
+        dest: '<%= tempDir %>'
       }
     },
     ngmin: {
       scripts: {
         expand:true,
-        cwd:'<%= destDir %>',
+        cwd:'<%= tempDir %>',
         src: [
           'app/controllers/**/*.js',
           'app/directives/**/*.js',
@@ -100,7 +100,7 @@ module.exports = function (grunt) {
           'vendor/angular/**/*.js',
           'vendor/elasticjs/elastic-angular-client.js'
         ],
-        dest: '<%= destDir %>'
+        dest: '<%= tempDir %>'
       }
     },
     requirejs: {
@@ -176,6 +176,7 @@ module.exports = function (grunt) {
     }
   ];
 
+  // create a module for each directory in src/app/panels/
   fs.readdirSync(config.srcDir+'/app/panels').forEach(function (panelName) {
     requireModules.push({
       name: 'panels/'+panelName+'/module',
@@ -209,7 +210,6 @@ module.exports = function (grunt) {
     'cssmin',
     'copy:everthing_left_in_src',
     'ngmin',
-    'copy:dist_to_temp',
     'requirejs:compile_temp',
     'clean:after_require'
   ]);

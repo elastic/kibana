@@ -190,10 +190,7 @@
             "font-size": "9pt"
           },
           "overflow": "min-height",
-          "fields": [
-            "@timestamp",
-            "@message"
-          ],
+          "fields": [],
           "highlight": [],
           "sortable": true,
           "header": true,
