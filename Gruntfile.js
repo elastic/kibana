@@ -96,7 +96,7 @@ module.exports = function (grunt) {
           'app/services/**/*.js',
           'app/filters/**/*.js',
           'app/panels/**/*.js',
-          'app/*.js',
+          'app/app.js',
           'vendor/angular/**/*.js',
           'vendor/elasticjs/elastic-angular-client.js'
         ],
@@ -115,6 +115,7 @@ module.exports = function (grunt) {
           optimizeCss: 'none',
           uglify: {
             max_line_length: 1000,
+            // beautify: true, // uncomment for easier debugging
             indent_level: 2,
           },
           preserveLicenseComments: false,
@@ -122,7 +123,7 @@ module.exports = function (grunt) {
           normalizeDirDefines: "none",
           inlineText: true,
           skipPragmas: true,
-          stubModules: ["text"],
+          // stubModules: ["text"],
           optimizeAllPluginResources: false,
           removeCombined: true,
           fileExclusionRegExp: /^\./,
@@ -172,6 +173,7 @@ module.exports = function (grunt) {
         'services/all',
         'jquery.flot',
         'jquery.flot.pie',
+        'text'
       ]
     }
   ];

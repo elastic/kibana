@@ -42,6 +42,7 @@ app/filters/all.js
 app/app.js
 vendor/jquery/jquery.flot.js
 vendor/jquery/jquery.flot.pie.js
+vendor/require/text.js
 
 app/panels/bettermap/module.js
 ----------------

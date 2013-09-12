@@ -21,28 +21,40 @@ function (angular) {
       return {
         restrict: 'E',
         link: function($scope, elem, attr) {
+          // once we have the template, scan it for controllers and
+          // load the module.js if we have any
+
+          // compile the module and uncloack. We're done
+          function loadModule($module) {
+            $module.appendTo(elem);
+            /* jshint indent:false */
+            $compile(elem.contents())($scope);
+            elem.removeClass("ng-cloak");
+          }
+
           $scope.$watch(attr.type, function (name) {
             elem.addClass("ng-cloak");
             // load the panels module file, then render it in the dom.
             $scope.require([
               'jquery',
-              'text!panels/'+name+'/module.html',
-
-              'panels/'+name+'/module'
+              'text!panels/'+name+'/module.html'
             ], function ($, moduleTemplate) {
               var $module = $(moduleTemplate);
+              // top level controllers
+              var $controllers = $module.filter('ngcontroller, [ng-controller], .ng-controller');
+              // add child controllers
+              $controllers = $controllers.add($module.find('ngcontroller, [ng-controller], .ng-controller'));
 
-              $module
-                // top level controllers
-                .filter('ngcontroller, [ng-controller], .ng-controller')
-                // child controllers
-                .add($module.find('ngcontroller, [ng-controller], .ng-controller'))
-                  .first().prepend(editorTemplate);
-
-              $module.appendTo(elem);
-              /* jshint indent:false */
-              $compile(elem.contents())($scope);
-              elem.removeClass("ng-cloak");
+              if ($controllers.length) {
+                $controllers.first().prepend(editorTemplate);
+                $scope.require([
+                  'panels/'+name+'/module'
+                ], function() {
+                  loadModule($module);
+                });
+              } else {
+                loadModule($module);
+              }
             });
           });
         }
