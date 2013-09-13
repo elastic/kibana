@@ -5,6 +5,10 @@
         <input bs-typeahead="fields.list" type="text" class="input-small" ng-model="panel.field">
       </form>
     </div>
+    <div class="span2">
+      <label class="small">Maximum number of countries</label>
+      <input class="input-small" type="number" ng-model="panel.size" ng-change="set_refresh(true)">
+    </div>
     <div class="span1"><h6>Map</h6>
       <select ng-change="$emit('render')" class="input-small" ng-model="panel.map" ng-options="f for f in ['world','europe','usa']"></select>
     </div>
