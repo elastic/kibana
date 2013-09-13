@@ -43,10 +43,11 @@
   </style>
 
   <div class='filtering-container'>
+    <label class="small">Filter</label>
     <span ng-show="filterSrv.ids.length == 0"><h5>No filters available</h5></span>
     <div ng-repeat="id in filterSrv.ids" class="small filter-panel-filter" ng-class="{'filter-deselected': !filterSrv.list[id].active}">
       <div class="filter-{{filterSrv.list[id].mandate}}" >
-        <strong>{{filterSrv.list[id].type}}</strong> 
+        <strong>{{filterSrv.list[id].type}}</strong>
         <span ng-show="!filterSrv.list[id].editing" class="filter-mandate" ng-click="filterSrv.list[id].editing = true">{{filterSrv.list[id].mandate}}</span>
 
         <span ng-show="filterSrv.list[id].editing">
