@@ -17,13 +17,8 @@
       <label class="small">Length</label>
       <input class="input-small" type="number" ng-model="panel.size" ng-change="set_refresh(true)">
     </div>
-<<<<<<< HEAD:panels/terms/editor.html
     <div class="span3" ng-show="panel.tmode == 'terms'"> 
       <label class="small">Order</label> 
-=======
-    <div class="span3">
-      <label class="small">Order</label>
->>>>>>> upstream/master:src/app/panels/terms/editor.html
       <select class="input-medium" ng-model="panel.order" ng-options="f for f in ['count','term','reverse_count','reverse_term']" ng-change="set_refresh(true)"></select></span>
     </div>
     <div class="span4" ng-show="panel.tmode == 'terms'">
