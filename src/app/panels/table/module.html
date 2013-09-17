@@ -65,7 +65,7 @@
               <table class='table table-bordered table-condensed'>
                 <thead>
                   <th>Field</th>
-                  <th>Action</th>
+                  <th>Action&nbsp;<a href="{{config.elasticsearch}}/{{event._index}}/{{event._type}}/{{event._id}}?pretty=true" target="_blank"><i class='icon-external-link pointer' bs-tooltip="'Open document in new window'"></i></a></th>
                   <th>Value</th>
                 </thead>
                 <tr ng-repeat="(key,value) in event.kibana.details._source" ng-class-odd="'odd'">
