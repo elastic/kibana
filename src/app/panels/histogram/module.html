@@ -33,4 +33,21 @@
   </div>
   <center><img ng-show='panel.loading && _.isUndefined(data)' src="img/load_big.gif"></center>
   <div histogram-chart class="pointer histogram-chart" params="{{panel}}"></div>
+  <div class="histogram-tabular">
+    <div class="histogram-tabular-switch" ng-click="showTabular = !showTabular">Tabular Data</div>
+    <table ng-show="showTabular">
+      <thead>
+      <tr>
+        <th>Date</th>
+        <th ng-repeat="title in table.headers">{{title}}</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr ng-repeat="row in table.rows">
+        <td>{{row.time | date:'yyyy-MM-dd HH:mm'}}</td>
+        <td ng-repeat="value in row.values">{{value}}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
