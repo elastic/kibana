@@ -416,6 +416,36 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
 
             scope.plot = $.plot(elem, scope.data, options);
 
+            var tableData = {
+              headers: [],
+              rows: []
+            };
+
+            _.each(scope.data, function (series, column) {
+              var rgb = parseInt(series.info.color.slice(1), 16);
+              tableData.headers[column] = {
+                title: series.info.alias || series.info.query,
+                color: 'rgba('  + [(rgb >> 16) & 255, (rgb >> 8) & 255, rgb & 255, 0.5].join(',') + ')'
+              };
+              _.each(series.data, function (point, row) {
+                if (!tableData.rows[row]) {
+                  tableData.rows[row] = {
+                    time: point[0],
+                    values: []
+                  };
+                }
+                if (point[1] || point[1] === 0) {
+                  tableData.rows[row].values[column] = point[1];
+                }
+              });
+            });
+
+            tableData.rows = _.filter(tableData.rows, function (row) {
+              return !!row.values.length;
+            });
+
+            scope.table = tableData;
+
           } catch(e) {
             elem.text(e);
           }
