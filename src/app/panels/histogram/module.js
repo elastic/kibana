@@ -421,9 +421,13 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
               rows: []
             };
 
-            _.each(scope.data, function (graph, column) {
-              tableData.headers[column] = graph.info.alias || graph.info.query;
-              _.each(graph.data, function (point, row) {
+            _.each(scope.data, function (series, column) {
+              var rgb = parseInt(series.info.color.slice(1), 16);
+              tableData.headers[column] = {
+                title: series.info.alias || series.info.query,
+                color: 'rgba('  + [(rgb >> 16) & 255, (rgb >> 8) & 255, rgb & 255, 0.5].join(',') + ')'
+              };
+              _.each(series.data, function (point, row) {
                 if (!tableData.rows[row]) {
                   tableData.rows[row] = {
                     time: point[0],

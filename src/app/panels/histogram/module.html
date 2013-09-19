@@ -16,6 +16,15 @@
     .histogram-chart {
       position:relative;
     }
+
+    .histogram-tabular td, .histogram-tabular th {
+      border: 1px solid rgb(200, 200, 200);
+    }
+
+    .histogram-tabular td:first-child {
+      width: 1px;
+      white-space: nowrap;
+    }
   </style>
   <span ng-show="panel.spyable" class='spy panelextra pointer'>
       <i bs-modal="'app/partials/inspector.html'" class="icon-eye-open"></i>
@@ -34,20 +43,26 @@
   <center><img ng-show='panel.loading && _.isUndefined(data)' src="img/load_big.gif"></center>
   <div histogram-chart class="pointer histogram-chart" params="{{panel}}"></div>
   <div class="histogram-tabular">
-    <div class="histogram-tabular-switch" ng-click="showTabular = !showTabular">Tabular Data</div>
-    <table ng-show="showTabular">
-      <thead>
-      <tr>
-        <th>Date</th>
-        <th ng-repeat="title in table.headers">{{title}}</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr ng-repeat="row in table.rows">
-        <td>{{row.time | date:'yyyy-MM-dd HH:mm'}}</td>
-        <td ng-repeat="value in row.values">{{value}}</td>
-      </tr>
-      </tbody>
-    </table>
+    <div style="cursor: pointer;" ng-click="showTabular = !showTabular">
+      <i class="icon-cog"/>
+      Tabular Data
+    </div>
+    <div ng-show="showTabular" style="overflow: auto; max-height: 500px; max-width: 100%;">
+      <table style="width: 100%; max-height: 500px;">
+        <thead>
+        <tr>
+          <th>Date</th>
+          <th ng-repeat="header in table.headers"
+              ng-style="{ background: header.color, 'text-shadow': '1px 1px 1px black, -1px -1px 1px black' }">{{header.title}}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="row in table.rows">
+          <td style="text-align: center;"><span style="padding: 2px 5px;">{{row.time | date:'yyyy-MM-dd HH:mm'}}</span></td>
+          <td ng-repeat="value in row.values"><span style="padding: 2px 5px;">{{value}}</span></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>

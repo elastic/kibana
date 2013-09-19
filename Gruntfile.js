@@ -4,7 +4,7 @@ module.exports = function (grunt) {
 
   var config = {
     pkg: grunt.file.readJSON('package.json'),
-    //aws: grunt.file.readJSON('.aws-config.json'),
+    aws: grunt.file.readJSON('.aws-config.json'),
     srcDir: 'src',
     destDir: 'dist',
     tempDir: 'tmp',
