@@ -17,9 +17,9 @@
  * under the License.
  */
 
-package com.elasticsearch.dash;
+package org.elasticsearch.enterprise.monitor;
 
-import com.google.common.collect.ImmutableList;
+import org.elasticsearch.common.collect.ImmutableList;
 import org.elasticsearch.common.component.LifecycleComponent;
 import org.elasticsearch.common.inject.AbstractModule;
 import org.elasticsearch.common.inject.Module;

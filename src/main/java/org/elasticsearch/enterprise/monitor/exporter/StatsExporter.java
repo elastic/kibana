@@ -1,4 +1,4 @@
-package com.elasticsearch.dash;
+package org.elasticsearch.enterprise.monitor.exporter;
 /*
  * Licensed to ElasticSearch under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +21,6 @@ package com.elasticsearch.dash;
 
 import org.elasticsearch.action.admin.cluster.node.stats.NodeStats;
 import org.elasticsearch.action.admin.indices.stats.ShardStats;
-import org.elasticsearch.common.component.CloseableComponent;
 import org.elasticsearch.common.component.LifecycleComponent;
 
 public interface StatsExporter<T> extends LifecycleComponent<T> {

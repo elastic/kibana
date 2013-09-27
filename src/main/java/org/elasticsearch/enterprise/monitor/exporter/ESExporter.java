@@ -1,4 +1,4 @@
-package com.elasticsearch.dash.exporters;
+package org.elasticsearch.enterprise.monitor.exporter;
 /*
  * Licensed to ElasticSearch under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,8 +19,7 @@ package com.elasticsearch.dash.exporters;
  */
 
 
-import com.elasticsearch.dash.StatsExporter;
-import com.google.common.collect.ImmutableMap;
+import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.ElasticSearchIllegalArgumentException;
 import org.elasticsearch.action.admin.cluster.node.stats.NodeStats;
@@ -65,19 +64,18 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         // TODO: move to a single settings.
         targetHost = settings.get("target.host", "localhost");
         targetPort = settings.getAsInt("target.post", 9200);
-        String targetIndexPrefix = settings.get("target.index.prefix", "dash");
+        String targetIndexPrefix = settings.get("target.index.prefix", "");
 
         try {
-            targetPathPrefix = String.format("/%s_%s_",
-                    URLEncoder.encode(targetIndexPrefix,"UTF-8"),
-                    URLEncoder.encode(clusterName.value(),"UTF-8"));
+            if (!targetIndexPrefix.isEmpty()) targetIndexPrefix += targetIndexPrefix + "_";
+            targetPathPrefix = "/"+ URLEncoder.encode(targetIndexPrefix,"UTF-8") + URLEncoder.encode(clusterName.value(),"UTF-8");
 
         } catch (UnsupportedEncodingException e) {
             throw new ElasticSearchException("Can't encode target url", e);
         }
 
 
-        xContentParams = new ToXContent.MapParams(ImmutableMap.of("human_readable","false"));
+        xContentParams = new ToXContent.MapParams(ImmutableMap.of("human_readable", "false"));
 
 
         logger.info("ESExporter initialized. Target: {}:{} Index prefix set to {}", targetHost, targetPort, targetIndexPrefix );
@@ -108,7 +106,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
     @Override
     public void exportShardStats(ShardStats shardStats) {
-        exportXContent("shardstats", shardStats);
+        //exportXContent("shardstats", shardStats);
     }
 
     private void exportXContent(String type,ToXContent xContent) {
