@@ -35,6 +35,7 @@ import org.elasticsearch.common.logging.ESLogger;
 import org.elasticsearch.common.logging.ESLoggerFactory;
 import org.elasticsearch.common.network.NetworkUtils;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
@@ -286,6 +287,14 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         builder.field("id", node.id());
         builder.field("name", node.name());
         builder.field("transport_address", node.address());
+
+        if (node.address().uniqueAddressTypeId() == 1) { // InetSocket
+            InetSocketTransportAddress address = (InetSocketTransportAddress) node.address();
+            InetAddress inetAddress = address.address().getAddress();
+            if (inetAddress != null) {
+                builder.field("ip", inetAddress.getHostAddress());
+            }
+        }
 
         if (hostname != null) {
             builder.field("hostname", hostname);
