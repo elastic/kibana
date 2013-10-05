@@ -74,6 +74,32 @@ function (angular, app, _, L, localRequire) {
       $scope.get_data();
     };
 
+    var extractLatLon = function(field) {
+      if (_.isArray(field)) {
+        return {lat:field[1],lon:[0]};
+      } else if (_.isString(field)) {
+        var split = field.split(',');
+        if (split.length === 2) {
+          try {
+            var ret = {
+              lat: parseFloat(split[0]),
+              lon: parseFloat(split[1])
+            };
+            return ret.lat && ret.lon ? ret : null;
+          } catch (ex) {
+            // deliberately ignore parse error
+          }
+        } else {
+          // XXX decode geohash, new library dependency?
+          return null;
+        }
+      } else if (_.isObject(field)) {
+        // elasticsearch default is lat/lon (not lng)
+        return field.lat && field.lon ? field : null;
+      }
+      return null;
+    };
+
     $scope.get_data = function(segment,query_id) {
       $scope.require(['./leaflet/plugins'], function () {
         $scope.panel.error =  false;
@@ -144,8 +170,9 @@ function (angular, app, _, L, localRequire) {
 
             // Keep only what we need for the set
             $scope.data = $scope.data.slice(0,$scope.panel.size).concat(_.map(results.hits.hits, function(hit) {
+              var latlon = extractLatLon(hit.fields[$scope.panel.field]);
               return {
-                coordinates : new L.LatLng(hit.fields[$scope.panel.field][1],hit.fields[$scope.panel.field][0]),
+                coordinates : latlon ? new L.LatLng(latlon.lat,latlon.lon) : null,
                 tooltip : hit.fields[$scope.panel.tooltip]
               };
             }));
