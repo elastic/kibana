@@ -23,8 +23,8 @@
       ],
       "list": {
         "0": {
-          "from": "2013-07-30T18:58:13.977Z",
-          "to": "2013-07-30T19:58:13.977Z",
+          "from": "{{ARGS.from || ''}}",
+          "to": "{{ARGS.to || ''}}",
           "field": "@timestamp",
           "type": "time",
           "mandate": "must",
@@ -55,7 +55,7 @@
             "default"
           ],
           "type": "timepicker",
-          "mode": "relative",
+          "mode": "{{ARGS.timepicker || 'relative'}}",
           "time_options": [
             "5m",
             "15m",
@@ -76,6 +76,10 @@
             "min": 3
           },
           "filter_id": 0,
+          "time": {
+            "from": "{{ARGS.from || ''}}",
+            "to": "{{ARGS.to || ''}}"
+          },
           "status": "Stable"
         }
       ]
@@ -213,6 +217,7 @@
     }
   ],
   "editable": true,
+  "style": "{{ARGS.style || 'dark'}}",
   "failover": false,
   "index": {
     "interval": "day",
