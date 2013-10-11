@@ -1,4 +1,12 @@
 <div ng-controller='query' ng-init="init()" class="query-panel">
+  <style>
+      .pinned.selected {
+        border: 3px solid;
+      }
+      .pinned.unselected {
+        border: 0px solid;
+      }
+    </style>
   <div ng-repeat="id in (unPinnedQueries = (querySrv.ids|pinnedQuery:false))" ng-class="{'short-query': unPinnedQueries.length>1}">
     <form class="form-search" style="position:relative;margin-bottom:5px;" ng-submit="refresh()">
       <span class="begin-query">
@@ -14,8 +22,10 @@
   </div>
   <div style="display:inline-block" ng-repeat="id in querySrv.ids|pinnedQuery:true">
     <span class="pointer" ng-show="$first" ng-click="panel.pinned = !panel.pinned"><small class="pins">Pinned</small> <i ng-class="{'icon-caret-right':panel.pinned,'icon-caret-left':!panel.pinned}"></i></span>
-    <span ng-show="panel.pinned" class="pinned badge">
-      <i class="icon-circle pointer" ng-style="{color: querySrv.list[id].color}" data-unique="1" bs-popover="'app/panels/query/meta.html'"></i><span bs-tooltip="querySrv.list[id].query"> {{querySrv.list[id].alias || querySrv.list[id].query}}</span>
+    <span ng-show="panel.pinned" class="pinned pointer badge"
+      ng-style="{'border-color': querySrv.list[id].color}"
+      ng-class="{selected:querySrv.list[id].active,unselected:!querySrv.list[id].active}">
+      <i class="icon-circle pointer" ng-style="{color: querySrv.list[id].color}" data-unique="1" bs-popover="'app/panels/query/meta.html'"></i><span bs-tooltip="querySrv.list[id].query" ng-click="querySrv.list[id].active = !querySrv.list[id].active; refresh()"> {{querySrv.list[id].alias || querySrv.list[id].query}}</span>
     </span>
   </div>
   <span style="display:inline-block" ng-show="unPinnedQueries.length == 0">
