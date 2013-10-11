@@ -104,6 +104,8 @@ function (angular, _, config) {
       {
       case 'lucene':
         return ejs.QueryStringQuery(q.query || '*');
+      case 'wildcard': 
+        return ejs.WildcardQuery(q.field,q.query || '*');
       default:
         return _.isUndefined(q.query) ? false : ejs.QueryStringQuery(q.query || '*');
       }
