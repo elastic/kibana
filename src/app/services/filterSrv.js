@@ -169,6 +169,8 @@ define([
         return ejs.QueryFilter(ejs.QueryStringQuery(filter.query)).cache(true);
       case 'field':
         return ejs.QueryFilter(ejs.FieldQuery(filter.field,filter.query)).cache(true);
+      case 'prefix':
+        return ejs.PrefixFilter(filter.field,filter.query).cache(true);
       case 'terms':
         return ejs.TermsFilter(filter.field,filter.value);
       case 'exists':
