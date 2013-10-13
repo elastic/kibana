@@ -55,7 +55,7 @@
             "default"
           ],
           "type": "timepicker",
-          "mode": "{{ARGS.timepicker || 'relative'}}",
+          "mode": "relative",
           "time_options": [
             "5m",
             "15m",
