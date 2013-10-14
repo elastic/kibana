@@ -85,21 +85,27 @@ function (angular, _, config) {
         return _id;
       }
     };
-
-    this.remove = function(id) {
+    
+    this.remove = function(id,keepPinned) {
       if(!_.isUndefined(self.list[id])) {
-        delete self.list[id];
-        // This must happen on the full path also since _.without returns a copy
-        self.ids = dashboard.current.services.query.ids = _.without(self.ids,id);
-        _q.idQueue.unshift(id);
-        _q.idQueue.sort(function(v,k){
-          return v-k;
-        });
-        return true;
+        if ( keepPinned && self.list[id].pin ) {
+          // do not deleted pinned queries if (optional) 'keepPinned' argument is true
+          return false;
+        } else {
+          delete self.list[id];
+          // This must happen on the full path also since _.without returns a copy
+          self.ids = dashboard.current.services.query.ids = _.without(self.ids,id);
+          _q.idQueue.unshift(id);
+          _q.idQueue.sort(function(v,k){
+            return v-k;
+          });
+          return true;
+        }
       } else {
         return false;
       }
     };
+    
 
     this.getEjsObj = function(id) {
       return self.toEjsObj(self.list[id]);

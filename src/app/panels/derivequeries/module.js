@@ -124,7 +124,7 @@ function (angular, app, _) {
           }
         }
         _.each(_.difference($scope.panel.ids,ids),function(id){
-          querySrv.remove(id);
+          querySrv.remove(id, /*keep pinned*/true);
         });
         $scope.panel.ids = ids;
         dashboard.refresh();
