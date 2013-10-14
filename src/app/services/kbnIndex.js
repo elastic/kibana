@@ -29,7 +29,7 @@ function (angular, _, config, moment) {
     // cluster
     function all_indices() {
       var something = $http({
-        url: config.elasticsearch + "/_aliases",
+        url: config.elasticsearch + "/_all/_aliases",
         method: "GET"
       }).error(function(data, status) {
         if(status === 0) {
