@@ -60,8 +60,10 @@ function (angular, app, _, $, kbn) {
       arrangement : 'horizontal',
       chart       : 'bar',
       counter_pos : 'above',
-      spyable     : true
+      spyable     : true,
+      tmode   : 'terms'
     };
+
     _.defaults($scope.panel,_d);
 
     $scope.init = function () {
@@ -95,18 +97,32 @@ function (angular, app, _, $, kbn) {
       });
 
       // Terms mode
-      request = request
-        .facet($scope.ejs.TermsFacet('terms')
-          .field($scope.panel.field)
-          .size($scope.panel.size)
-          .order($scope.panel.order)
-          .exclude($scope.panel.exclude)
-          .facetFilter($scope.ejs.QueryFilter(
-            $scope.ejs.FilteredQuery(
-              boolQuery,
-              filterSrv.getBoolFilter(filterSrv.ids)
-              )))).size(0);
-
+      if($scope.panel.tmode === 'terms') {
+        request = request
+      .facet($scope.ejs.TermsFacet('terms')
+        .field($scope.panel.field)
+        .size($scope.panel.size)
+        .order($scope.panel.order)
+        .exclude($scope.panel.exclude)
+        .facetFilter($scope.ejs.QueryFilter(
+          $scope.ejs.FilteredQuery(
+            boolQuery,
+            filterSrv.getBoolFilter(filterSrv.ids)
+            )))).size(0);
+      }
+      if($scope.panel.tmode === 'terms_stats') {
+        request = request
+      .facet($scope.ejs.TermStatsFacet('terms')
+        .valueField($scope.panel.valuefield)
+        .keyField($scope.panel.field)
+        .size($scope.panel.size)
+        .order('total')
+        .facetFilter($scope.ejs.QueryFilter(
+          $scope.ejs.FilteredQuery(
+            boolQuery,
+            filterSrv.getBoolFilter(filterSrv.ids)
+            )))).size(0);
+      }
       // Populate the inspector panel
       $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
 
@@ -116,10 +132,18 @@ function (angular, app, _, $, kbn) {
       results.then(function(results) {
         var k = 0;
         $scope.panelMeta.loading = false;
-        $scope.hits = results.hits.total;
+        if($scope.panel.tmode === 'terms') {
+          $scope.hits = results.hits.total;
+        }
         $scope.data = [];
         _.each(results.facets.terms.terms, function(v) {
-          var slice = { label : v.term, data : [[k,v.count]], actions: true};
+          var slice;
+          if($scope.panel.tmode === 'terms') {
+            slice = { label : v.term, data : [[k,v.count]], actions: true};
+          }
+          if($scope.panel.tmode === 'terms_stats') {
+            slice = { label : v.term, data : [[k,v.total]], actions: true};
+          }
           $scope.data.push(slice);
           k = k + 1;
         });
