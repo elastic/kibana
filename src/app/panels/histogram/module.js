@@ -286,6 +286,49 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
       });
     };
 
+    $scope.to_csv = function() {
+      var headers = [],
+          rows    = {},
+          csv     = [];
+
+      headers.push("time");
+
+      _.each($scope.data, function(series) {
+        headers.push(series.info.alias || series.info.query);
+        _.each(series.data, function(point, row) {
+          if (!rows[row]) {
+            rows[row] = {
+              time   : point[0],
+              values : []
+            };
+          }
+
+          rows[row].values.push(point[1] || 0);
+        });
+
+        rows = _.filter(rows, function(row) {
+          return row.values.length > 0;
+        });
+      });
+
+      csv.push(headers);
+      _.each(rows, function(row) {
+        var values = [];
+
+        values.push(moment(row.time).format('YYYY-MM-DD HH:mm:ss'));
+        _.each(row.values, function(value) {
+          values.push(value);
+        });
+
+        csv.push(values.join(","));
+      });
+
+      var blob = new Blob([csv.join("\n") + "\n"], { type: "text/csv" });
+      // from filesaver.js
+      window.saveAs(blob, $scope.panel.title + ".csv");
+      return true;
+    };
+
     // function $scope.zoom
     // factor :: Zoom factor, so 0.5 = cuts timespan in half, 2 doubles timespan
     $scope.zoom = function(factor) {
