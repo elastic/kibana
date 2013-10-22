@@ -57,7 +57,8 @@ define([
       donut   : false,
       tilt    : false,
       labels  : true,
-      spyable : true
+      spyable : true,
+      filter  : null
     };
     _.defaults($scope.panel,_d);
 

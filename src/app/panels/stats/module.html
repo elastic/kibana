@@ -1,0 +1,7 @@
+<div ng-controller='stats' ng-init="init()">
+  <div>
+  	<div ng-style="panel.style" style="line-height:{{panel.style['font-size']}}">Total: {{total|number_format:panel.filter}}</div>
+    <div ng-style="panel.style" style="line-height:{{panel.style['font-size']}}">Mean: {{mean|number_format:panel.filter}}</div>
+    <div ng-style="panel.style" style="line-height:{{panel.style['font-size']}}">Standard deviation: {{std_deviation|number_format:panel.filter}}</div>
+  </div>
+</div>
