@@ -27,10 +27,16 @@ function (angular, app, _, $, kbn) {
     $scope.panelMeta = {
       modals : [
         {
-          description: "Inspect",
+          description: "Inspect2",
           icon: "icon-info-sign",
           partial: "app/partials/inspector.html",
           show: $scope.panel.spyable
+        },
+        {
+          description: "Csv",
+          icon: "icon-table",
+          partial: "app/partials/csv.html",
+          show: true
         }
       ],
       editorTabs : [
@@ -167,6 +173,23 @@ function (angular, app, _, $, kbn) {
       if(term.meta === 'missing' && !$scope.panel.missing) {
         return false;
       }
+      return true;
+    };
+
+    $scope.to_csv = function() {
+      var csv = [];
+
+      _.each($scope.data, function(series) {
+        csv.push([series.label, series.data[0][1]].join(","));
+      });
+
+      return csv.join("\n") + "\n";
+    };
+
+    $scope.download_csv = function() {
+      var blob = new Blob([$scope.to_csv()], { type: "text/csv" });
+      // from filesaver.js
+      window.saveAs(blob, $scope.panel.title + "-" + $scope.panel.field + ".csv");
       return true;
     };
 

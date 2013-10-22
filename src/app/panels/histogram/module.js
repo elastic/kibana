@@ -58,6 +58,12 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
           icon: "icon-info-sign",
           partial: "app/partials/inspector.html",
           show: $scope.panel.spyable
+        },
+        {
+          description: "Csv",
+          icon: "icon-table",
+          partial: "app/partials/csv.html",
+          show: true
         }
       ],
       editorTabs : [
@@ -323,7 +329,11 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
         csv.push(values.join(","));
       });
 
-      var blob = new Blob([csv.join("\n") + "\n"], { type: "text/csv" });
+      return csv.join("\n") + "\n";
+    };
+
+    $scope.download_csv = function() {
+      var blob = new Blob([$scope.to_csv()], { type: "text/csv" });
       // from filesaver.js
       window.saveAs(blob, $scope.panel.title + ".csv");
       return true;
