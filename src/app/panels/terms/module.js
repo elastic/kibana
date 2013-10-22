@@ -27,7 +27,7 @@ function (angular, app, _, $, kbn) {
     $scope.panelMeta = {
       modals : [
         {
-          description: "Inspect2",
+          description: "Inspect",
           icon: "icon-info-sign",
           partial: "app/partials/inspector.html",
           show: $scope.panel.spyable
