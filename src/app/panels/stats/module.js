@@ -44,6 +44,14 @@ define([
       style   : { "font-size": '10pt'},
       field   : null,
       filter  : null,
+      count          : true,
+      total          : true,
+      min            : true,
+      max            : true,
+      mean           : true,
+      sum_of_squares : true,
+      variance       : true,
+      std_deviation  : true,
       spyable : true
     };
     _.defaults($scope.panel,_d);
@@ -107,8 +115,12 @@ define([
         $scope.panelMeta.loading = false;
         $scope.count = results.facets.stats.count;
         $scope.total = results.facets.stats.total;
-        $scope.mean = results.facets.stats.mean;
-        $scope.std_deviation = results.facets.stats.std_deviation;
+        $scope.min   = results.facets.stats.min;
+        $scope.max   = results.facets.stats.max;
+        $scope.mean  = results.facets.stats.mean;
+        $scope.sum_of_squares  = results.facets.stats.sum_of_squares;
+        $scope.variance        = results.facets.stats.variance;
+        $scope.std_deviation   = results.facets.stats.std_deviation;
         $scope.$emit('render');
       });
     };
