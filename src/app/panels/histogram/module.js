@@ -289,6 +289,8 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
             $scope.get_data(segment+1,query_id);
           }
         }
+
+        $scope.csv_data = $scope.to_csv();
       });
     };
 
@@ -333,7 +335,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
     };
 
     $scope.download_csv = function() {
-      var blob = new Blob([$scope.to_csv()], { type: "text/csv" });
+      var blob = new Blob([$scope.csv_data], { type: "text/csv" });
       // from filesaver.js
       window.saveAs(blob, $scope.panel.title + ".csv");
       return true;
