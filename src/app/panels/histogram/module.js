@@ -321,7 +321,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
       _.each(rows, function(row) {
         var values = [];
 
-        values.push(moment(row.time).format('YYYY-MM-DD HH:mm:ss'));
+        values.push(moment(row.time).format('YYYY-MM-DDTHH:mm:ss'));
         _.each(row.values, function(value) {
           values.push(value);
         });
