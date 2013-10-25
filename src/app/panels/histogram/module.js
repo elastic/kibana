@@ -517,7 +517,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
 
         var $tooltip = $('<div>');
         elem.bind("plothover", function (event, pos, item) {
-          var group, value;
+          var group, value, time;
           if (item) {
             if (item.series.info.alias || scope.panel.tooltip.query_as_alias) {
               group = '<small style="font-size:0.9em;">' +
@@ -532,9 +532,14 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
             } else {
               value = item.datapoint[1];
             }
+            if (scope.panel.timezone === 'utc') {
+              time = moment.utc(item.datapoint[0]);
+            } else {
+              time = moment(item.datapoint[0]);
+            }
             $tooltip
               .html(
-                group + value + " @ " + moment(item.datapoint[0]).format('MM/DD HH:mm:ss')
+                group + value + " @ " + time.format('MM/DD HH:mm:ss')
               )
               .place_tt(pos.pageX, pos.pageY);
           } else {
