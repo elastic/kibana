@@ -1,0 +1,12 @@
+<div ng-controller='stats' ng-init="init()">
+  <div>
+    <div ng-show="panel.count == true"          ng-style="panel.style" style="line-height:{{panel.style['font-size']}}">Count: {{count|number_format:panel.filter}}</div>
+  	<div ng-show="panel.total == true"          ng-style="panel.style" style="line-height:{{panel.style['font-size']}}">Total: {{total|number_format:panel.filter}}</div>
+  	<div ng-show="panel.min == true"            ng-style="panel.style" style="line-height:{{panel.style['font-size']}}">Min: {{min|number_format:panel.filter}}</div>
+  	<div ng-show="panel.max == true"            ng-style="panel.style" style="line-height:{{panel.style['font-size']}}">Max: {{max|number_format:panel.filter}}</div>
+    <div ng-show="panel.mean == true"           ng-style="panel.style" style="line-height:{{panel.style['font-size']}}">Mean: {{mean|number_format:panel.filter}}</div>
+    <div ng-show="panel.sum_of_squares == true" ng-style="panel.style" style="line-height:{{panel.style['font-size']}}">Sum of squares: {{sum_of_squares|number_format:panel.filter}}</div>
+    <div ng-show="panel.variance == true"       ng-style="panel.style" style="line-height:{{panel.style['font-size']}}">Variance: {{variance|number_format:panel.filter}}</div>
+    <div ng-show="panel.std_deviation == true"  ng-style="panel.style" style="line-height:{{panel.style['font-size']}}">Standard deviation: {{std_deviation|number_format:panel.filter}}</div>
+  </div>
+</div>
