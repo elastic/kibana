@@ -159,6 +159,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
        * linewidth:: Weight of lines in pixels
        */
       linewidth     : 3,
+      gapfill       : 'minimal',
       /** @scratch /panels/histogram/3
        * points:: Show points on chart
        */
@@ -409,7 +410,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
                 interval: _interval,
                 start_date: _range && _range.from,
                 end_date: _range && _range.to,
-                fill_style: $scope.panel.derivative ? 'null' : 'minimal'
+                fill_style: $scope.panel.derivative ? 'null' : $scope.panel.gapfill
               };
               time_series = new timeSeries.ZeroFilled(tsOpts);
               hits = 0;
