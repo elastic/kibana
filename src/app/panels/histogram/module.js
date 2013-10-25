@@ -229,6 +229,14 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
 
       derivative    : false,
       /** @scratch /panels/histogram/3
+       *  logarithmic:: Render the histogram using a logarithmic y-axis
+       */
+      logarithmic : false,
+      /** @scratch /panels/histogram/3
+       *  base:: The logarithmic base used to scale histogram
+       */
+      base        : 1,
+      /** @scratch /panels/histogram/3
        * tooltip object::
        * tooltip.value_type::: Individual or cumulative controls how tooltips are display on stacked charts
        * tooltip.query_as_alias::: If no alias is set, should the query be displayed?
@@ -579,6 +587,37 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
           render_panel(data);
         });
 
+        // Compute the logarithm of the value converted to the specified base
+        function log(x) {
+          return Math.log(x < 0 ? 0 : x) / Math.log(scope.panel.base);
+        }
+
+        // Compute the power value for the specified base
+        function pow(x) {
+          return Math.pow(scope.panel.base, x);
+        }
+
+        // Compute the ticks for the data set
+        var ticks = function(axis) {
+          var ticks = [],
+              u = axis.min,
+              v = axis.max,
+              i = u === 0 ? 0 : Math.floor(log(u)),
+              j = Math.ceil(log(v)),
+              n = scope.panel.base % 1 ? 2 : scope.panel.base;
+          if (isFinite(j - i)) {
+            for (; i < j; i++) {
+              if (i === 0) { ticks.push(0); }
+              for (var k = 1; k < n; k++) { ticks.push(pow(i) * k); }
+            }
+            ticks.push(pow(i));
+            for (i = 0; ticks[i] < u; i++) { i; } // strip small values
+            for (j = ticks.length; ticks[j - 1] > v; j--) { j; } // strip big values
+            ticks = ticks.slice(i, j);
+          }
+          return ticks;
+        };
+
         var scale = function(series,factor) {
           return _.map(series,function(p) {
             return [p[0],p[1]*factor];
@@ -739,8 +778,14 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
               data[i].data = _d;
             }
 
-            plot = $.plot(elem, data, options);
+            // Apply logarithmic scaling functions
+            if (scope.panel.logarithmic) {
+              options.yaxis.transform = function(v) { return v === 0 ? 0 : log(v) + 1; };
+              options.yaxis.inverseTransform = function(v) { return v === 0 ? 0 : pow(v - 1); };
+              options.yaxis.ticks = ticks;
+            }
 
+            plot = $.plot(elem, data, options);
           } catch(e) {
             // Nothing to do here
           }

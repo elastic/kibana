@@ -49,3 +49,15 @@
     </div>
   </div>
 </div>
+
+<h5>Logarithmic Scaling</h5>
+<div class="editor-row">
+  <div class="editor-option">
+    <label class="small">Enabled</label>
+      <input type="checkbox" ng-model="panel.logarithmic" ng-change="set_refresh(true)">
+  </div>
+  <div class="editor-option" ng-show="panel.logarithmic">
+    <label class="small">Base</label>
+      <input type="text" class="input-mini" ng-model="panel.base"  ng-change="set_refresh(true)">
+  </div>
+</div>
