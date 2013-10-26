@@ -156,7 +156,7 @@ define([
       switch(filter.type)
       {
       case 'time':
-        var _f = ejs.RangeFilter(filter.field).from(kbn.parseDate(filter.from).valueOf());
+        var _f = ejs.RangeFilter(filter.field).from(filter.from.valueOf());
         if(!_.isUndefined(filter.to)) {
           _f = _f.to(filter.to.valueOf());
         }
