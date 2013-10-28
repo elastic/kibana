@@ -2,11 +2,23 @@
   "title": "Indices",
   "services": {
     "query": {
-      "idQueue": [
-      ],
+      "idQueue": [],
       "list": {
+        "0": {
+          "id": 0,
+          "type": "topN",
+          "query": "_type:index_stats",
+          "alias": "",
+          "color": "#7EB26D",
+          "pin": false,
+          "enable": true,
+          "field": "index",
+          "size": 6,
+          "union": "none"
+        }
       },
       "ids": [
+        0
       ]
     },
     "filter": {
@@ -24,10 +36,10 @@
         },
         "1": {
           "type": "querystring",
+          "query": "_type:index_stats",
           "mandate": "must",
           "active": true,
-          "alias": "shard starts",
-          "query": "_type:shard_stats",
+          "alias": "",
           "id": 1
         }
       },
@@ -39,71 +51,10 @@
   },
   "rows": [
     {
-      "title": "Node filtering",
-      "height": "50px",
-      "editable": true,
-      "collapse": false,
-      "collapsable": true,
-      "panels": [
-        {
-          "error": false,
-          "span": 4,
-          "editable": true,
-          "type": "derivequeries",
-          "loadingEditor": false,
-          "loading": false,
-          "label": "Search",
-          "query": "*",
-          "field": "index",
-          "fields": [],
-          "spyable": true,
-          "rest": false,
-          "size": 5,
-          "mode": "terms only",
-          "exclude": [],
-          "history": [
-            null
-          ],
-          "queries": [
-          ],
-          "selected_query": null,
-          "use_select": false,
-          "remember": 10,
-          "title": "Indices"
-        },
-        {
-          "error": false,
-          "span": 4,
-          "editable": true,
-          "type": "derivefilters",
-          "loadingEditor": false,
-          "loading": false,
-          "label": "Search",
-          "query": "*",
-          "field": "node.name",
-          "fields": [],
-          "spyable": true,
-          "rest": false,
-          "size": 5,
-          "mode": "terms only",
-          "exclude": [],
-          "history": [
-            null
-          ],
-          "filters": [
-          ],
-          "selected_filters": [],
-          "remember": 10,
-          "title": "Nodes"
-        }
-      ],
-      "notice": false
-    },
-    {
       "title": "Data",
       "height": "150px",
       "editable": true,
-      "collapse": false,
+      "collapse": true,
       "collapsable": true,
       "panels": [
         {
@@ -111,22 +62,18 @@
           "editable": true,
           "type": "histogram",
           "loadingEditor": false,
-          "mode": "total",
+          "mode": "max",
           "time_field": "@timestamp",
           "queries": {
             "mode": "all",
             "ids": [
-              1,
-              4,
-              5,
-              0,
-              6
+              0
             ]
           },
-          "value_field": "docs.count",
+          "value_field": "primaries.docs.count",
           "auto_int": true,
-          "resolution": 100,
-          "interval": "30s",
+          "resolution": 30,
+          "interval": "1m",
           "intervals": [
             "auto",
             "1s",
@@ -159,32 +106,37 @@
           "options": true,
           "tooltip": {
             "value_type": "cumulative",
-            "query_as_alias": false
+            "query_as_alias": true
           },
           "title": "Documents",
-          "extra_filter": "primary:true"
+          "extra_filter": "primary:true",
+          "show_query": true,
+          "legend_counts": false,
+          "zerofill": true,
+          "derivative": false,
+          "scale": 1,
+          "grid": {
+            "max": null,
+            "min": 0
+          }
         },
         {
           "span": 4,
           "editable": true,
           "type": "histogram",
           "loadingEditor": false,
-          "mode": "total",
+          "mode": "max",
           "time_field": "@timestamp",
           "queries": {
             "mode": "all",
             "ids": [
-              1,
-              4,
-              5,
-              0,
-              6
+              0
             ]
           },
-          "value_field": "docs.deleted",
+          "value_field": "total.store.size_in_bytes",
           "auto_int": true,
-          "resolution": 100,
-          "interval": "30s",
+          "resolution": 30,
+          "interval": "1m",
           "intervals": [
             "auto",
             "1s",
@@ -217,31 +169,36 @@
           "options": true,
           "tooltip": {
             "value_type": "cumulative",
-            "query_as_alias": false
+            "query_as_alias": true
           },
-          "title": "Deleted docs"
+          "title": "Index size",
+          "show_query": true,
+          "legend_counts": false,
+          "zerofill": true,
+          "derivative": false,
+          "scale": 1,
+          "grid": {
+            "max": null,
+            "min": 0
+          }
         },
         {
           "span": 4,
           "editable": true,
           "type": "histogram",
           "loadingEditor": false,
-          "mode": "total",
+          "mode": "max",
           "time_field": "@timestamp",
           "queries": {
             "mode": "all",
             "ids": [
-              1,
-              4,
-              5,
-              0,
-              6
+              0
             ]
           },
-          "value_field": "store.size_in_bytes",
+          "value_field": "primaries.docs.deleted",
           "auto_int": true,
-          "resolution": 100,
-          "interval": "30s",
+          "resolution": 30,
+          "interval": "1m",
           "intervals": [
             "auto",
             "1s",
@@ -274,9 +231,18 @@
           "options": true,
           "tooltip": {
             "value_type": "cumulative",
-            "query_as_alias": false
+            "query_as_alias": true
           },
-          "title": "Index size"
+          "title": "Deleted docs",
+          "show_query": true,
+          "legend_counts": false,
+          "zerofill": true,
+          "derivative": false,
+          "scale": 1,
+          "grid": {
+            "max": null,
+            "min": 0
+          }
         }
       ],
       "notice": false
@@ -285,7 +251,7 @@
       "title": "Indexing",
       "height": "150px",
       "editable": true,
-      "collapse": false,
+      "collapse": true,
       "collapsable": true,
       "panels": [
         {
@@ -293,22 +259,18 @@
           "editable": true,
           "type": "histogram",
           "loadingEditor": false,
-          "mode": "total",
+          "mode": "max",
           "time_field": "@timestamp",
           "queries": {
             "mode": "all",
             "ids": [
-              1,
-              4,
-              5,
-              0,
-              6
+              0
             ]
           },
-          "value_field": "indexing.index_total",
+          "value_field": "primaries.indexing.index_total",
           "auto_int": true,
-          "resolution": 100,
-          "interval": "30s",
+          "resolution": 30,
+          "interval": "1m",
           "intervals": [
             "auto",
             "1s",
@@ -341,31 +303,36 @@
           "options": true,
           "tooltip": {
             "value_type": "cumulative",
-            "query_as_alias": false
+            "query_as_alias": true
           },
-          "title": "Indexing requests"
+          "title": "Indexing requests",
+          "show_query": true,
+          "legend_counts": true,
+          "zerofill": true,
+          "derivative": true,
+          "scale": 1,
+          "grid": {
+            "max": null,
+            "min": 0
+          }
         },
         {
           "span": 4,
           "editable": true,
           "type": "histogram",
           "loadingEditor": false,
-          "mode": "total",
+          "mode": "max",
           "time_field": "@timestamp",
           "queries": {
             "mode": "all",
             "ids": [
-              1,
-              4,
-              5,
-              0,
-              6
+              0
             ]
           },
-          "value_field": "indexing.index_time_in_millis",
+          "value_field": "total.indexing.index_time_in_millis",
           "auto_int": true,
-          "resolution": 100,
-          "interval": "30s",
+          "resolution": 30,
+          "interval": "1m",
           "intervals": [
             "auto",
             "1s",
@@ -398,18 +365,27 @@
           "options": true,
           "tooltip": {
             "value_type": "cumulative",
-            "query_as_alias": false
+            "query_as_alias": true
           },
-          "title": "Indexing time"
+          "title": "Indexing time",
+          "show_query": true,
+          "legend_counts": false,
+          "zerofill": true,
+          "derivative": true,
+          "scale": 1,
+          "grid": {
+            "max": null,
+            "min": 0
+          }
         }
       ],
       "notice": false
     },
     {
-      "title": "Search & Get",
+      "title": "Indexing 2",
       "height": "150px",
       "editable": true,
-      "collapse": false,
+      "collapse": true,
       "collapsable": true,
       "panels": [
         {
@@ -417,22 +393,18 @@
           "editable": true,
           "type": "histogram",
           "loadingEditor": false,
-          "mode": "total",
+          "mode": "max",
           "time_field": "@timestamp",
           "queries": {
             "mode": "all",
             "ids": [
-              1,
-              4,
-              5,
-              0,
-              6
+              0
             ]
           },
-          "value_field": "search.query_total",
+          "value_field": "total.refresh.total_time_in_millis",
           "auto_int": true,
-          "resolution": 100,
-          "interval": "30s",
+          "resolution": 30,
+          "interval": "1m",
           "intervals": [
             "auto",
             "1s",
@@ -465,9 +437,151 @@
           "options": true,
           "tooltip": {
             "value_type": "cumulative",
-            "query_as_alias": false
+            "query_as_alias": true
           },
-          "title": "Search requests"
+          "title": "Avg Refresh time",
+          "show_query": true,
+          "legend_counts": false,
+          "zerofill": true,
+          "derivative": true,
+          "scale": 1,
+          "grid": {
+            "max": null,
+            "min": 0
+          }
+        }
+      ],
+      "notice": false
+    },
+    {
+      "title": "Search requests",
+      "height": "150px",
+      "editable": true,
+      "collapse": true,
+      "collapsable": true,
+      "panels": [
+        {
+          "span": 4,
+          "editable": true,
+          "type": "histogram",
+          "loadingEditor": false,
+          "mode": "max",
+          "time_field": "@timestamp",
+          "queries": {
+            "mode": "all",
+            "ids": [
+              0
+            ]
+          },
+          "value_field": "total.search.query_total",
+          "auto_int": true,
+          "resolution": 30,
+          "interval": "1m",
+          "intervals": [
+            "auto",
+            "1s",
+            "1m",
+            "5m",
+            "10m",
+            "30m",
+            "1h",
+            "3h",
+            "12h",
+            "1d",
+            "1w",
+            "1M",
+            "1y"
+          ],
+          "fill": 0,
+          "linewidth": 3,
+          "timezone": "browser",
+          "spyable": true,
+          "zoomlinks": true,
+          "bars": false,
+          "stack": false,
+          "points": false,
+          "lines": true,
+          "legend": true,
+          "x-axis": true,
+          "y-axis": true,
+          "percentage": false,
+          "interactive": true,
+          "options": true,
+          "tooltip": {
+            "value_type": "cumulative",
+            "query_as_alias": true
+          },
+          "title": "Search requests",
+          "show_query": true,
+          "legend_counts": false,
+          "zerofill": true,
+          "derivative": true,
+          "scale": 1,
+          "grid": {
+            "max": null,
+            "min": 0
+          }
+        },
+        {
+          "span": 4,
+          "editable": true,
+          "type": "histogram",
+          "loadingEditor": false,
+          "mode": "max",
+          "time_field": "@timestamp",
+          "queries": {
+            "mode": "all",
+            "ids": [
+              0
+            ]
+          },
+          "value_field": "total.search.query_time_in_millis",
+          "auto_int": true,
+          "resolution": 30,
+          "interval": "1m",
+          "intervals": [
+            "auto",
+            "1s",
+            "1m",
+            "5m",
+            "10m",
+            "30m",
+            "1h",
+            "3h",
+            "12h",
+            "1d",
+            "1w",
+            "1y"
+          ],
+          "fill": 0,
+          "linewidth": 3,
+          "timezone": "browser",
+          "spyable": true,
+          "zoomlinks": true,
+          "bars": false,
+          "stack": false,
+          "points": false,
+          "lines": true,
+          "legend": true,
+          "show_query": true,
+          "legend_counts": false,
+          "x-axis": true,
+          "y-axis": true,
+          "percentage": false,
+          "zerofill": true,
+          "interactive": true,
+          "options": true,
+          "derivative": true,
+          "scale": 1,
+          "tooltip": {
+            "value_type": "cumulative",
+            "query_as_alias": true
+          },
+          "grid": {
+            "max": null,
+            "min": 0
+          },
+          "title": "Avg Search time"
         },
         {
           "span": 4,
@@ -479,17 +593,85 @@
           "queries": {
             "mode": "all",
             "ids": [
-              1,
-              4,
-              5,
-              0,
-              6
+              0
             ]
           },
-          "value_field": "get.total",
+          "value_field": "total.search.open_contexts",
           "auto_int": true,
-          "resolution": 100,
-          "interval": "30s",
+          "resolution": 30,
+          "interval": "1m",
+          "intervals": [
+            "auto",
+            "1s",
+            "1m",
+            "5m",
+            "10m",
+            "30m",
+            "1h",
+            "3h",
+            "12h",
+            "1d",
+            "1w",
+            "1M",
+            "1y"
+          ],
+          "fill": 0,
+          "linewidth": 3,
+          "timezone": "browser",
+          "spyable": true,
+          "zoomlinks": true,
+          "bars": false,
+          "stack": false,
+          "points": false,
+          "lines": true,
+          "legend": true,
+          "x-axis": true,
+          "y-axis": true,
+          "percentage": false,
+          "interactive": true,
+          "options": true,
+          "tooltip": {
+            "value_type": "cumulative",
+            "query_as_alias": true
+          },
+          "title": "Open search context",
+          "show_query": true,
+          "legend_counts": false,
+          "zerofill": true,
+          "derivative": true,
+          "scale": 1,
+          "grid": {
+            "max": null,
+            "min": 0
+          }
+        }
+      ],
+      "notice": false
+    },
+    {
+      "title": "Get requests",
+      "height": "150px",
+      "editable": true,
+      "collapse": true,
+      "collapsable": true,
+      "panels": [
+        {
+          "span": 4,
+          "editable": true,
+          "type": "histogram",
+          "loadingEditor": false,
+          "mode": "total",
+          "time_field": "@timestamp",
+          "queries": {
+            "mode": "all",
+            "ids": [
+              0
+            ]
+          },
+          "value_field": "total.get.total",
+          "auto_int": true,
+          "resolution": 30,
+          "interval": "1m",
           "intervals": [
             "auto",
             "1s",
@@ -522,76 +704,18 @@
           "options": true,
           "tooltip": {
             "value_type": "individual",
-            "query_as_alias": false
+            "query_as_alias": true
           },
-          "title": "GET REQUEST"
-        }
-      ],
-      "notice": false
-    },
-    {
-      "title": "System health",
-      "height": "150px",
-      "editable": true,
-      "collapse": false,
-      "collapsable": true,
-      "panels": [
-        {
-          "span": 4,
-          "editable": true,
-          "type": "histogram",
-          "loadingEditor": false,
-          "mode": "total",
-          "time_field": "@timestamp",
-          "queries": {
-            "mode": "all",
-            "ids": [
-              1,
-              4,
-              5,
-              0,
-              6
-            ]
-          },
-          "value_field": "search.open_contexts",
-          "auto_int": true,
-          "resolution": 100,
-          "interval": "30s",
-          "intervals": [
-            "auto",
-            "1s",
-            "1m",
-            "5m",
-            "10m",
-            "30m",
-            "1h",
-            "3h",
-            "12h",
-            "1d",
-            "1w",
-            "1M",
-            "1y"
-          ],
-          "fill": 0,
-          "linewidth": 3,
-          "timezone": "browser",
-          "spyable": true,
-          "zoomlinks": true,
-          "bars": false,
-          "stack": false,
-          "points": false,
-          "lines": true,
-          "legend": true,
-          "x-axis": true,
-          "y-axis": true,
-          "percentage": false,
-          "interactive": true,
-          "options": true,
-          "tooltip": {
-            "value_type": "cumulative",
-            "query_as_alias": false
-          },
-          "title": "Open search context"
+          "title": "GET REQUESTS",
+          "show_query": true,
+          "legend_counts": false,
+          "zerofill": true,
+          "derivative": true,
+          "scale": 1,
+          "grid": {
+            "max": null,
+            "min": 0
+          }
         },
         {
           "span": 4,
@@ -603,17 +727,13 @@
           "queries": {
             "mode": "all",
             "ids": [
-              1,
-              4,
-              5,
-              0,
-              6
+              0
             ]
           },
-          "value_field": "refresh.total_time_in_millis",
+          "value_field": "total.get.time_in_millis",
           "auto_int": true,
-          "resolution": 100,
-          "interval": "30s",
+          "resolution": 30,
+          "interval": "1m",
           "intervals": [
             "auto",
             "1s",
@@ -626,7 +746,6 @@
             "12h",
             "1d",
             "1w",
-            "1M",
             "1y"
           ],
           "fill": 0,
@@ -639,16 +758,25 @@
           "points": false,
           "lines": true,
           "legend": true,
+          "show_query": true,
+          "legend_counts": false,
           "x-axis": true,
           "y-axis": true,
           "percentage": false,
+          "zerofill": true,
           "interactive": true,
           "options": true,
+          "derivative": true,
+          "scale": 1,
           "tooltip": {
             "value_type": "cumulative",
-            "query_as_alias": false
+            "query_as_alias": true
           },
-          "title": "Avg Refresh time"
+          "grid": {
+            "max": null,
+            "min": 0
+          },
+          "title": "Avg Get time"
         }
       ],
       "notice": false
@@ -672,6 +800,8 @@
       "query": "*",
       "pinned": true,
       "history": [
+        "_type:index_stats",
+        "*",
         "index:\"index2\" AND (_type:shard_stats)",
         "index:\"es_monitor-2013.10.16\" AND (_type:shard_stats)",
         "index:\"kibana-int\" AND (_type:shard_stats)",
@@ -683,7 +813,7 @@
     {
       "type": "filtering",
       "collapse": false,
-      "notice": true,
+      "notice": false,
       "enable": true
     }
   ],
