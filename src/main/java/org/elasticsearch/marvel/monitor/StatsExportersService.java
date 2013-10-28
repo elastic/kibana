@@ -1,4 +1,4 @@
-package org.elasticsearch.enterprise.monitor;
+package org.elasticsearch.marvel.monitor;
 /*
  * Licensed to ElasticSearch under one
  * or more contributor license agreements.  See the NOTICE file
@@ -33,8 +33,8 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.util.concurrent.EsExecutors;
 import org.elasticsearch.discovery.Discovery;
-import org.elasticsearch.enterprise.monitor.exporter.ESExporter;
-import org.elasticsearch.enterprise.monitor.exporter.StatsExporter;
+import org.elasticsearch.marvel.monitor.exporter.ESExporter;
+import org.elasticsearch.marvel.monitor.exporter.StatsExporter;
 import org.elasticsearch.indices.IndicesService;
 import org.elasticsearch.indices.InternalIndicesService;
 import org.elasticsearch.node.service.NodeService;

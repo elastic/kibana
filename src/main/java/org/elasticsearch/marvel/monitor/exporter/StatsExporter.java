@@ -1,4 +1,4 @@
-package org.elasticsearch.enterprise.monitor.exporter;
+package org.elasticsearch.marvel.monitor.exporter;
 /*
  * Licensed to ElasticSearch under one
  * or more contributor license agreements.  See the NOTICE file

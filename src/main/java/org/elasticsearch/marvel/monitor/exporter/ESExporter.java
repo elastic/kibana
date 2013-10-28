@@ -1,4 +1,4 @@
-package org.elasticsearch.enterprise.monitor.exporter;
+package org.elasticsearch.marvel.monitor.exporter;
 /*
  * Licensed to ElasticSearch under one
  * or more contributor license agreements.  See the NOTICE file
@@ -256,7 +256,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         try {
 
 
-            String templateName = "enterprise.monitor." + indexPrefix;
+            String templateName = "marvel.monitor." + indexPrefix;
 
             logger.debug("checking of target has template [{}]", templateName);
             // DO HEAD REQUEST, when elasticsearch supports it
