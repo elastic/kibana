@@ -63,7 +63,8 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
           description: "Csv",
           icon: "icon-table",
           partial: "app/partials/csv.html",
-          show: true
+          show: true,
+          click: function() { $(".csv-data").text($scope.to_csv()); }
         }
       ],
       editorTabs : [
@@ -312,8 +313,6 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
             $scope.get_data(segment+1,query_id);
           }
         }
-
-        $scope.csv_data = $scope.to_csv();
       });
     };
 

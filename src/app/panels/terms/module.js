@@ -36,7 +36,8 @@ function (angular, app, _, $, kbn) {
           description: "Csv",
           icon: "icon-table",
           partial: "app/partials/csv.html",
-          show: true
+          show: true,
+          click: function() { $(".csv-data").text($scope.to_csv()); }
         }
       ],
       editorTabs : [
@@ -140,8 +141,6 @@ function (angular, app, _, $, kbn) {
           data:[[k+1,results.facets.terms.other]],meta:"other",color:'#444'});
 
         $scope.$emit('render');
-
-        $scope.csv_data = $scope.to_csv();
       });
     };
 
