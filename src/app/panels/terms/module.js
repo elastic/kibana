@@ -37,7 +37,7 @@ function (angular, app, _, $, kbn) {
           icon: "icon-table",
           partial: "app/partials/csv.html",
           show: true,
-          click: function() { $(".csv-data").text($scope.to_csv()); }
+          click: function() { $scope.csv_data = $scope.to_csv(); }
         }
       ],
       editorTabs : [
@@ -192,7 +192,7 @@ function (angular, app, _, $, kbn) {
     };
 
     $scope.download_csv = function() {
-      var blob = new Blob([$scope.to_csv()], { type: "text/csv" });
+      var blob = new Blob([$scope.csv_data], { type: "text/csv" });
       // from filesaver.js
       window.saveAs(blob, $scope.panel.title + "-" + $scope.panel.field + ".csv");
       return true;
