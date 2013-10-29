@@ -1,3 +1,20 @@
+div.editor-row {
+  vertical-align: top;
+}
+div.editor-row div.section {
+  margin-right: 20px;
+  vertical-align: top;
+  display: inline-block;
+}
+div.editor-option {
+  vertical-align: top;
+  display: inline-block;
+  margin-right: 10px;
+}
+div.editor-option label {
+  display: block;
+}
+
 #events {
   font-size: 12px;
 }
@@ -14,6 +31,10 @@ div.fake-input {
   background-color: @inputBackground;
   border: 1px solid @inputBorder;
   .border-radius(@inputBorderRadius @inputBorderRadius @inputBorderRadius @inputBorderRadius);
+}
+
+hr.small {
+  margin: 5px 0px;
 }
 
 form input.ng-invalid {
@@ -35,6 +56,13 @@ form input.ng-invalid {
 
 .bordered {
   border: 1px solid @tableBorder;
+}
+
+.table-unpadded {
+  th,
+  td {
+    padding: 0px 2px;
+  }
 }
 
 .spy {
