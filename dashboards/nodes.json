@@ -7,7 +7,7 @@
         "0": {
           "id": 0,
           "type": "topN",
-          "query": "_type:node_stats",
+          "query": "*",
           "alias": "",
           "color": "#7EB26D",
           "pin": false,
@@ -23,13 +23,14 @@
     },
     "filter": {
       "idQueue": [
-        2
+        2,
+        3
       ],
       "list": {
         "0": {
           "type": "time",
           "field": "@timestamp",
-          "from": "now-1h",
+          "from": "now-15m",
           "to": "now",
           "mandate": "must",
           "active": true,
@@ -46,8 +47,8 @@
         }
       },
       "ids": [
-        0,
-        1
+        1,
+        0
       ]
     }
   },
@@ -75,7 +76,7 @@
           "value_field": "os.cpu.user",
           "auto_int": true,
           "resolution": 20,
-          "interval": "1m",
+          "interval": "30s",
           "intervals": [
             "auto",
             "1s",
@@ -120,6 +121,16 @@
           "grid": {
             "max": null,
             "min": 0
+          },
+          "annotate": {
+            "enable": false,
+            "query": "*",
+            "size": 20,
+            "field": "_type",
+            "sort": [
+              "_score",
+              "desc"
+            ]
           }
         },
         {
@@ -138,7 +149,7 @@
           "value_field": "os.mem.used_percent",
           "auto_int": true,
           "resolution": 20,
-          "interval": "5m",
+          "interval": "30s",
           "intervals": [
             "auto",
             "1s",
@@ -183,6 +194,16 @@
           "grid": {
             "max": 100,
             "min": 0
+          },
+          "annotate": {
+            "enable": false,
+            "query": "*",
+            "size": 20,
+            "field": "_type",
+            "sort": [
+              "_score",
+              "desc"
+            ]
           }
         },
         {
@@ -201,7 +222,7 @@
           "value_field": "os.load_average.1m",
           "auto_int": true,
           "resolution": 20,
-          "interval": "1m",
+          "interval": "30s",
           "intervals": [
             "auto",
             "1s",
@@ -246,6 +267,16 @@
           "grid": {
             "max": null,
             "min": 0
+          },
+          "annotate": {
+            "enable": false,
+            "query": "*",
+            "size": 20,
+            "field": "_type",
+            "sort": [
+              "_score",
+              "desc"
+            ]
           }
         }
       ],
@@ -345,7 +376,7 @@
           "value_field": "jvm.mem.heap_used_in_bytes",
           "auto_int": true,
           "resolution": 20,
-          "interval": "1m",
+          "interval": "30s",
           "intervals": [
             "auto",
             "1s",
@@ -390,6 +421,16 @@
           "grid": {
             "max": null,
             "min": 0
+          },
+          "annotate": {
+            "enable": true,
+            "query": "_type:shard_event AND event:STARTED",
+            "size": 20,
+            "field": "message",
+            "sort": [
+              "_score",
+              "desc"
+            ]
           }
         },
         {
@@ -408,7 +449,7 @@
           "value_field": "jvm.gc.collectors.ParNew.collection_time_in_millis",
           "auto_int": true,
           "resolution": 20,
-          "interval": "1m",
+          "interval": "30s",
           "intervals": [
             "auto",
             "1s",
@@ -453,6 +494,16 @@
           "grid": {
             "max": null,
             "min": 0
+          },
+          "annotate": {
+            "enable": false,
+            "query": "*",
+            "size": 20,
+            "field": "_type",
+            "sort": [
+              "_score",
+              "desc"
+            ]
           }
         },
         {
@@ -471,7 +522,7 @@
           "value_field": "jvm.gc.collectors.ParNew.collection_count",
           "auto_int": true,
           "resolution": 20,
-          "interval": "1m",
+          "interval": "30s",
           "intervals": [
             "auto",
             "1s",
@@ -516,6 +567,16 @@
           "grid": {
             "max": null,
             "min": 0
+          },
+          "annotate": {
+            "enable": false,
+            "query": "*",
+            "size": 20,
+            "field": "_type",
+            "sort": [
+              "_score",
+              "desc"
+            ]
           }
         }
       ],
@@ -1417,7 +1478,7 @@
           "value_field": "indices.indexing.index_total",
           "auto_int": true,
           "resolution": 20,
-          "interval": "1m",
+          "interval": "30s",
           "intervals": [
             "auto",
             "1s",
@@ -1460,7 +1521,17 @@
             "max": null,
             "min": 0
           },
-          "title": "Indexing requests"
+          "title": "Indexing requests",
+          "annotate": {
+            "enable": true,
+            "query": "_type:shard_event",
+            "size": 60,
+            "field": "message",
+            "sort": [
+              "_score",
+              "desc"
+            ]
+          }
         },
         {
           "span": 4,
@@ -1478,7 +1549,7 @@
           "value_field": "indices.merges.current_size_in_bytes",
           "auto_int": true,
           "resolution": 20,
-          "interval": "1m",
+          "interval": "30s",
           "intervals": [
             "auto",
             "1s",
@@ -1523,6 +1594,16 @@
           "grid": {
             "max": null,
             "min": 0
+          },
+          "annotate": {
+            "enable": false,
+            "query": "*",
+            "size": 20,
+            "field": "_type",
+            "sort": [
+              "_score",
+              "desc"
+            ]
           }
         },
         {
@@ -1541,7 +1622,7 @@
           "value_field": "indices.refresh.total_time_in_millis",
           "auto_int": true,
           "resolution": 20,
-          "interval": "1m",
+          "interval": "30s",
           "intervals": [
             "auto",
             "1s",
@@ -1584,7 +1665,17 @@
             "max": null,
             "min": 0
           },
-          "title": "Avg refresh time"
+          "title": "Avg refresh time",
+          "annotate": {
+            "enable": false,
+            "query": "*",
+            "size": 20,
+            "field": "_type",
+            "sort": [
+              "_score",
+              "desc"
+            ]
+          }
         }
       ],
       "notice": false
