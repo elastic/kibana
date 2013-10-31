@@ -7,7 +7,7 @@
         "0": {
           "id": 0,
           "type": "topN",
-          "query": "_type:index_stats",
+          "query": "*",
           "alias": "",
           "color": "#7EB26D",
           "pin": false,
@@ -118,6 +118,16 @@
           "grid": {
             "max": null,
             "min": 0
+          },
+          "annotate": {
+            "enable": false,
+            "query": "*",
+            "size": 20,
+            "field": "_type",
+            "sort": [
+              "_score",
+              "desc"
+            ]
           }
         },
         {
@@ -180,6 +190,16 @@
           "grid": {
             "max": null,
             "min": 0
+          },
+          "annotate": {
+            "enable": false,
+            "query": "*",
+            "size": 20,
+            "field": "_type",
+            "sort": [
+              "_score",
+              "desc"
+            ]
           }
         },
         {
@@ -242,6 +262,16 @@
           "grid": {
             "max": null,
             "min": 0
+          },
+          "annotate": {
+            "enable": false,
+            "query": "*",
+            "size": 20,
+            "field": "_type",
+            "sort": [
+              "_score",
+              "desc"
+            ]
           }
         }
       ],
@@ -812,7 +842,7 @@
     },
     {
       "type": "filtering",
-      "collapse": false,
+      "collapse": true,
       "notice": false,
       "enable": true
     }
