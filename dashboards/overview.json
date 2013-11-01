@@ -3,7 +3,6 @@
   "services": {
     "query": {
       "idQueue": [
-        1,
         2,
         3,
         4
@@ -11,16 +10,29 @@
       "list": {
         "0": {
           "query": "*",
-          "alias": "",
+          "alias": "all cluster",
           "color": "#7EB26D",
           "id": 0,
-          "pin": false,
+          "pin": true,
           "type": "lucene",
           "enable": true
+        },
+        "1": {
+          "id": 1,
+          "type": "topN",
+          "query": "_type:node_stats",
+          "alias": "Nodes",
+          "color": "#EAB839",
+          "pin": true,
+          "enable": true,
+          "field": "node.name",
+          "size": 100,
+          "union": "none"
         }
       },
       "ids": [
-        0
+        0,
+        1
       ]
     },
     "filter": {
@@ -61,7 +73,7 @@
           "mode": "max",
           "time_field": "@timestamp",
           "queries": {
-            "mode": "all",
+            "mode": "selected",
             "ids": [
               0
             ]
@@ -132,7 +144,7 @@
           "mode": "max",
           "time_field": "@timestamp",
           "queries": {
-            "mode": "all",
+            "mode": "selected",
             "ids": [
               0
             ]
@@ -203,7 +215,7 @@
           "mode": "max",
           "time_field": "@timestamp",
           "queries": {
-            "mode": "all",
+            "mode": "selected",
             "ids": [
               0
             ]
@@ -268,6 +280,90 @@
         }
       ],
       "notice": false
+    },
+    {
+      "title": "Nodes Load",
+      "height": "75px",
+      "editable": true,
+      "collapse": false,
+      "collapsable": true,
+      "panels": [
+        {
+          "span": 12,
+          "editable": true,
+          "type": "sparklines",
+          "loadingEditor": false,
+          "mode": "max",
+          "time_field": "@timestamp",
+          "queries": {
+            "mode": "selected",
+            "ids": [
+              1
+            ]
+          },
+          "value_field": "node_stats.os.load_average.1m",
+          "interval": "5m",
+          "spyable": true,
+          "title": "Nodes Load"
+        }
+      ],
+      "notice": false
+    },
+    {
+      "title": "Nodes CPU",
+      "height": "75px",
+      "editable": true,
+      "collapse": false,
+      "collapsable": true,
+      "panels": [
+        {
+          "span": 12,
+          "editable": true,
+          "type": "sparklines",
+          "loadingEditor": false,
+          "mode": "max",
+          "time_field": "@timestamp",
+          "queries": {
+            "mode": "selected",
+            "ids": [
+              1
+            ]
+          },
+          "value_field": "node_stats.os.cpu.user",
+          "interval": "5m",
+          "spyable": true,
+          "title": "Nodes CPU"
+        }
+      ],
+      "notice": false
+    },
+    {
+      "title": "Nodes Memory",
+      "height": "75px",
+      "editable": true,
+      "collapse": false,
+      "collapsable": true,
+      "panels": [
+        {
+          "span": 12,
+          "editable": true,
+          "type": "sparklines",
+          "loadingEditor": false,
+          "mode": "max",
+          "time_field": "@timestamp",
+          "queries": {
+            "mode": "selected",
+            "ids": [
+              1
+            ]
+          },
+          "value_field": "os.mem.used_percent",
+          "interval": "5m",
+          "spyable": true,
+          "title": "Node memory"
+        }
+      ],
+      "notice": false
     }
   ],
   "editable": true,
@@ -282,7 +378,7 @@
   "pulldowns": [
     {
       "type": "query",
-      "collapse": true,
+      "collapse": false,
       "notice": false,
       "enable": true,
       "query": "*",
@@ -293,7 +389,7 @@
     {
       "type": "filtering",
       "collapse": true,
-      "notice": true,
+      "notice": false,
       "enable": true
     }
   ],
