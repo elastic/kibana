@@ -53,7 +53,8 @@ function (angular, app, _, $, kbn) {
       chart       : 'bar',
       counter_pos : 'above',
       spyable     : true,
-      tmode   : 'terms'
+      tmode   : 'terms',
+      tstat   : 'total'
     };
 
     _.defaults($scope.panel,_d);
@@ -134,7 +135,7 @@ function (angular, app, _, $, kbn) {
             slice = { label : v.term, data : [[k,v.count]], actions: true};
           }
           if($scope.panel.tmode === 'terms_stats') {
-            slice = { label : v.term, data : [[k,v.total]], actions: true};
+            slice = { label : v.term, data : [[k,v[$scope.panel.tstat]]], actions: true};
           }
           $scope.data.push(slice);
           k = k + 1;

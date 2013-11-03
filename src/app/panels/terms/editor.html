@@ -1,7 +1,11 @@
   <div class="row-fluid">
-    <div class="span2"> 
+    <div class="span3">
       <label class="small">Terms mode</label> 
-      <select class="input-medium" ng-model="panel.tmode" ng-options="f for f in ['terms','terms_stats']"></select></span>
+      <select class="input-medium" ng-model="panel.tmode" ng-options="f for f in ['terms','terms_stats']" ng-change="set_refresh(true)"></select>
+    </div>
+    <div class="span3" ng-show="panel.tmode == 'terms_stats'">
+      <label class="small">Stats type</label>
+      <select class="input-medium" ng-model="panel.tstat" ng-options="f for f in ['count', 'total_count', 'min', 'max', 'total', 'mean']"></select>
     </div>
   </div> 
   <div class="row-fluid">
