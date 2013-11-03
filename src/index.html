@@ -22,6 +22,7 @@
 
   <body ng-cloak>
 
+
     <link rel="stylesheet" ng-href="css/bootstrap.{{dashboard.current.style||'dark'}}.min.css">
     <link rel="stylesheet" href="css/bootstrap-responsive.min.css">
     <link rel="stylesheet" href="css/font-awesome.min.css">
@@ -33,22 +34,15 @@
     <div class="navbar navbar-static-top">
       <div class="navbar-inner">
         <div class="container-fluid">
-          <span class="brand">{{dashboard.current.title}}</span>
-          <ul class="nav" ng-show='dashboard.current.editable'>
-            <li>
-              <a href='#' bs-modal="'app/partials/dasheditor.html'"><i class='icon-cog pointer'></i></a>
-            </li>
-          </ul>
+          <span class="brand"><img src="img/small.png" bs-tooltip="'Kibana 3 milestone pre-5'" data-placement="bottom"> {{dashboard.current.title}}</span>
+
           <ul class="nav pull-right" ng-controller='dashLoader' ng-init="init()" ng-include="'app/partials/dashLoader.html'">
           </ul>
         </div>
       </div>
     </div>
-    <div class="container-fluid main">
-      <div class="row-fluid">
-        <div ng-view></div>
-      </div>
-    </div>
-  </body>
 
+    <div ng-view></div>
+
+  </body>
 </html>

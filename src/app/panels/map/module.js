@@ -22,7 +22,7 @@ define([
   'config',
   './lib/jquery.jvectormap.min'
 ],
-function (angular, app, _, $, config) {
+function (angular, app, _, $) {
   'use strict';
 
   var module = angular.module('kibana.panels.map', []);
@@ -32,6 +32,14 @@ function (angular, app, _, $, config) {
     $scope.panelMeta = {
       editorTabs : [
         {title:'Queries', src:'app/partials/querySelect.html'}
+      ],
+      modals : [
+        {
+          description: "Inspect",
+          icon: "icon-info-sign",
+          partial: "app/partials/inspector.html",
+          show: $scope.panel.spyable
+        }
       ],
       status  : "Stable",
       description : "Displays a map of shaded regions using a field containing a 2 letter country "+
@@ -68,14 +76,17 @@ function (angular, app, _, $, config) {
       $scope.panelMeta.loading = true;
 
 
-      var request;
-      request = $scope.ejs.Request().indices(dashboard.indices);
+      var request,
+        boolQuery,
+        queries;
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
-      // This could probably be changed to a BoolFilter
-      var boolQuery = $scope.ejs.BoolQuery();
-      _.each($scope.panel.queries.ids,function(id) {
-        boolQuery = boolQuery.should(querySrv.getEjsObj(id));
+      request = $scope.ejs.Request().indices(dashboard.indices);
+      queries = querySrv.getQueryObjs($scope.panel.queries.ids);
+
+      boolQuery = $scope.ejs.BoolQuery();
+      _.each(queries,function(q) {
+        boolQuery = boolQuery.should(querySrv.toEjsObj(q));
       });
 
       // Then the insert into facet and make the request
@@ -108,18 +119,11 @@ function (angular, app, _, $, config) {
 
     // I really don't like this function, too much dom manip. Break out into directive?
     $scope.populate_modal = function(request) {
-      $scope.modal = {
-        title: "Inspector",
-        body : "<h5>Last Elasticsearch Query</h5><pre>"+
-            'curl -XGET '+config.elasticsearch+'/'+dashboard.indices+"/_search?pretty -d'\n"+
-            angular.toJson(JSON.parse(request.toString()),true)+
-          "'</pre>",
-      };
+      $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
     };
 
     $scope.build_search = function(field,value) {
       filterSrv.set({type:'querystring',mandate:'must',query:field+":"+value});
-      dashboard.refresh();
     };
 
   });

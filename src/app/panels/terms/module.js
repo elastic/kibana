@@ -25,10 +25,18 @@ function (angular, app, _, $, kbn) {
 
   module.controller('terms', function($scope, querySrv, dashboard, filterSrv) {
     $scope.panelMeta = {
+      modals : [
+        {
+          description: "Inspect",
+          icon: "icon-info-sign",
+          partial: "app/partials/inspector.html",
+          show: $scope.panel.spyable
+        }
+      ],
       editorTabs : [
         {title:'Queries', src:'app/partials/querySelect.html'}
       ],
-      status  : "Beta",
+      status  : "Stable",
       description : "Displays the results of an elasticsearch facet as a pie chart, bar chart, or a "+
         "table"
     };
@@ -78,16 +86,20 @@ function (angular, app, _, $, kbn) {
       $scope.panelMeta.loading = true;
       var request,
         results,
-        boolQuery;
+        boolQuery,
+        queries;
 
       request = $scope.ejs.Request().indices(dashboard.indices);
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
+      queries = querySrv.getQueryObjs($scope.panel.queries.ids);
+
       // This could probably be changed to a BoolFilter
       boolQuery = $scope.ejs.BoolQuery();
-      _.each($scope.panel.queries.ids,function(id) {
-        boolQuery = boolQuery.should(querySrv.getEjsObj(id));
+      _.each(queries,function(q) {
+        boolQuery = boolQuery.should(querySrv.toEjsObj(q));
       });
+
 
       // Terms mode
       if($scope.panel.tmode === 'terms') {
@@ -160,7 +172,6 @@ function (angular, app, _, $, kbn) {
       } else {
         return;
       }
-      dashboard.refresh();
     };
 
     $scope.set_refresh = function (state) {

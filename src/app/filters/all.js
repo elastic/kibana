@@ -1,4 +1,4 @@
-define(['angular', 'jquery', 'underscore'], function (angular, $, _) {
+define(['angular', 'jquery', 'underscore', 'moment'], function (angular, $, _, moment) {
   'use strict';
 
   var module = angular.module('kibana.filters');
@@ -24,6 +24,18 @@ define(['angular', 'jquery', 'underscore'], function (angular, $, _) {
     };
   });
 
+  /*
+    Filter an array of objects by elasticsearch version requirements
+  */
+  module.filter('esVersion', function(esVersion) {
+    return function(items, require) {
+      var ret = _.filter(items,function(qt) {
+        return esVersion.is(qt[require]) ? true : false;
+      });
+      return ret;
+    };
+  });
+
   module.filter('slice', function() {
     return function(arr, start, end) {
       if(!_.isUndefined(arr)) {
@@ -37,8 +49,18 @@ define(['angular', 'jquery', 'underscore'], function (angular, $, _) {
       if(_.isObject(arr) && !_.isArray(arr)) {
         return angular.toJson(arr);
       } else {
-        return arr.toString();
+        return _.isNull(arr) ? null : arr.toString();
       }
+    };
+  });
+
+  module.filter('moment', function() {
+    return function(date,mode) {
+      switch(mode) {
+      case 'ago':
+        return moment(date).fromNow();
+      }
+      return moment(date).fromNow();
     };
   });
 

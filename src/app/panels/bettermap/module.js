@@ -15,6 +15,7 @@ define([
   './leaflet/leaflet-src',
   'require',
 
+  'css!./module.css',
   'css!./leaflet/leaflet.css',
   'css!./leaflet/plugins.css'
 ],
@@ -30,6 +31,14 @@ function (angular, app, _, L, localRequire) {
         {
           title: 'Queries',
           src: 'app/partials/querySelect.html'
+        }
+      ],
+      modals : [
+        {
+          description: "Inspect",
+          icon: "icon-info-sign",
+          partial: "app/partials/inspector.html",
+          show: $scope.panel.spyable
         }
       ],
       status  : "Experimental",
@@ -92,10 +101,11 @@ function (angular, app, _, L, localRequire) {
         var _segment = _.isUndefined(segment) ? 0 : segment;
 
         $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
-        // This could probably be changed to a BoolFilter
+        var queries = querySrv.getQueryObjs($scope.panel.queries.ids);
+
         var boolQuery = $scope.ejs.BoolQuery();
-        _.each($scope.panel.queries.ids,function(id) {
-          boolQuery = boolQuery.should(querySrv.getEjsObj(id));
+        _.each(queries,function(q) {
+          boolQuery = boolQuery.should(querySrv.toEjsObj(q));
         });
 
         var request = $scope.ejs.Request().indices(dashboard.indices[_segment])
@@ -186,7 +196,7 @@ function (angular, app, _, L, localRequire) {
         function render_panel() {
           scope.require(['./leaflet/plugins'], function () {
             scope.panelMeta.loading = false;
-
+            L.Icon.Default.imagePath = 'app/panels/bettermap/leaflet/images';
             if(_.isUndefined(map)) {
               map = L.map(attrs.id, {
                 scrollWheelZoom: false,

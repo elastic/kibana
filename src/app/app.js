@@ -6,11 +6,11 @@ define([
   'jquery',
   'underscore',
   'require',
-
   'elasticjs',
   'bootstrap',
   'angular-sanitize',
   'angular-strap',
+  'angular-dragdrop',
   'extend-jquery'
 ],
 function (angular, $, _, appLevelRequire) {
@@ -83,7 +83,8 @@ function (angular, $, _, appLevelRequire) {
     'elasticjs.service',
     '$strap.directives',
     'ngSanitize',
-    'kibana',
+    'ngDragDrop',
+    'kibana'
   ];
 
   _.each('controllers directives factories services filters'.split(' '),

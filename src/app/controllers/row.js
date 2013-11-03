@@ -16,10 +16,10 @@ function (angular, app, _) {
         collapsable: true,
         editable: true,
         panels: [],
+        notice: false
       };
 
       _.defaults($scope.row,_d);
-
 
       $scope.init = function() {
         $scope.querySrv = querySrv;
@@ -35,7 +35,18 @@ function (angular, app, _) {
           $timeout(function() {
             $scope.$broadcast('render');
           });
+        } else {
+          row.notice = false;
         }
+      };
+
+      $scope.rowSpan = function(row) {
+        var panels = _.filter(row.panels, function(p) {
+          return $scope.isPanel(p);
+        });
+        return _.reduce(_.pluck(panels,'span'), function(p,v) {
+          return p+v;
+        },0);
       };
 
       // This can be overridden by individual panels
@@ -48,9 +59,13 @@ function (angular, app, _) {
       };
 
       $scope.reset_panel = function(type) {
+        var
+          defaultSpan = 4,
+          _as = 12-$scope.rowSpan($scope.row);
+
         $scope.panel = {
           error   : false,
-          span    : 3,
+          span    : _as < defaultSpan && _as > 0 ? _as : defaultSpan,
           editable: true,
           type    : type
         };

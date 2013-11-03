@@ -1207,6 +1207,40 @@
           case 'right':
             tp = {top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left + pos.width}
             break
+
+          // extend placements (top)
+          case 'topLeft':
+            tp = {top: pos.top - actualHeight,  left: pos.left + pos.width / 2 - (actualWidth * .10)};
+            break;
+          case 'topRight':
+            tp = {top: pos.top - actualHeight, left: pos.left + pos.width / 2 - (actualWidth * .90)};
+            break;
+
+          // extend placements (right)
+          case 'rightTop':
+            tp = {top: pos.top + pos.height / 2 - (actualHeight *.10), left: pos.left + pos.width};
+            break;
+          case 'rightBottom':
+            tp = {top: pos.top + pos.height / 2 - (actualHeight * .90), left: pos.left + pos.width};
+            break;
+
+          // extend placements (bottom)
+          case 'bottomLeft':
+            tp = {top: pos.top + pos.height, left: pos.left + pos.width / 2 - (actualWidth * .10)};
+            break;
+          case 'bottomRight':
+            tp = {top: pos.top + pos.height, left: pos.left + pos.width / 2 - (actualWidth * .90)};
+            break;
+
+          // extend placements (left)
+          case 'leftTop':
+            tp = {top: pos.top + pos.height / 2 - (actualHeight *.10), left: pos.left - actualWidth};
+            break;
+          case 'leftBottom':
+            tp = {top: pos.top + pos.height / 2 - (actualHeight * .90), left: pos.left - actualWidth};
+            break;
+
+
         }
 
         this.applyPlacement(tp, placement)
@@ -1872,7 +1906,8 @@
     constructor: Typeahead
 
   , select: function () {
-      var val = this.$menu.find('.active').attr('data-value')
+    // CHANGE (rashidkpc) If nothing is selected, use existing value
+      var val = this.$menu.find('.active').attr('data-value') || this.$element.val();
       this.$element
         .val(this.updater(val))
         .change()
@@ -1971,7 +2006,8 @@
         return i[0]
       })
 
-      items.first().addClass('active')
+      // CHANGE (rashidpc) Do not select first element by default
+      // items.first().addClass('active')
       this.$menu.html(items)
       return this
     }
@@ -2049,7 +2085,7 @@
     }
 
   , keydown: function (e) {
-      this.suppressKeyPressRepeat = ~$.inArray(e.keyCode, [40,38,9,13,27])
+      this.suppressKeyPressRepeat = ~$.inArray(e.keyCode, [40,38,9,13,27,57])
       this.move(e)
     }
 
@@ -2079,11 +2115,17 @@
           break
 
         default:
-          this.lookup()
+          this.lookup();
       }
 
-      e.stopPropagation()
-      e.preventDefault()
+      if(e.keyCode === 13 && typeof this.$menu.find('.active').attr('data-value') === 'undefined') {
+        // CHANGE (rashidkpc). Enter was hit, nothing was selected from typeahead, submit form
+        this.$element.submit();
+      } else {
+        e.stopPropagation()
+        e.preventDefault()
+      }
+
   }
 
   , focus: function (e) {

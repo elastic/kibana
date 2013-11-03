@@ -2,6 +2,9 @@
   display:inline-block;
   margin-right: 10px;
 }
+.short-query input.search-query {
+    width: 280px;
+}
 .begin-query {
   position:absolute;
   left:13px;
@@ -19,6 +22,11 @@
   -moz-box-sizing: border-box;    /* Firefox, other Gecko */
   box-sizing: border-box;         /* Opera/IE 8+ */
 }
+
+.query-disabled {
+  opacity: 0.3;
+}
+
 .form-search:hover .has-remove {
   padding-left: 50px !important;
 }

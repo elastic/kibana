@@ -1,4 +1,4 @@
-/* global _, kbn */
+/* global _ */
 
 /*
  * Complex scripted Logstash dashboard
@@ -29,7 +29,7 @@ var dashboard, queries, _d_timespan;
 var ARGS;
 
 // Set a default timespan if one isn't specified
-_d_timespan = '1h';
+_d_timespan = '1d';
 
 // Intialize a skeleton with nothing but a rows array and service object
 dashboard = {
@@ -73,7 +73,7 @@ if(!_.isUndefined(ARGS.query)) {
   queries = {
     0: {
       query: '*',
-      id: 0
+      id: 0,
     }
   };
 }
@@ -85,16 +85,15 @@ dashboard.services.query = {
 };
 
 // Lets also add a default time filter, the value of which can be specified by the user
-// This isn't strictly needed, but it gets rid of the info alert about the missing time filter
 dashboard.services.filter = {
   list: {
     0: {
-      from: kbn.time_ago(ARGS.from||_d_timespan),
-      to: new Date(),
+      from: "now-"+(ARGS.from||_d_timespan),
+      to: "now",
       field: ARGS.timefield||"@timestamp",
       type: "time",
       active: true,
-      id: 0
+      id: 0,
     }
   },
   ids: [0]
@@ -102,19 +101,6 @@ dashboard.services.filter = {
 
 // Ok, lets make some rows. The Filters row is collapsed by default
 dashboard.rows = [
-  {
-    title: "Options",
-    height: "30px"
-  },
-  {
-    title: "Query",
-    height: "30px"
-  },
-  {
-    title: "Filters",
-    height: "100px",
-    collapse: true
-  },
   {
     title: "Chart",
     height: "300px"
@@ -125,46 +111,26 @@ dashboard.rows = [
   }
 ];
 
-// Setup some panels. A query panel and a filter panel on the same row
+// And a histogram that allows the user to specify the interval and time field
 dashboard.rows[0].panels = [
   {
-    type: 'timepicker',
-    span: 6,
-    timespan: ARGS.from||_d_timespan
-  }
-];
-
-// Add a filtering panel to the 3rd row
-dashboard.rows[1].panels = [
-  {
-    type: 'query'
-  }
-];
-
-
-// Add a filtering panel to the 3rd row
-dashboard.rows[2].panels = [
-  {
-    type: 'filtering'
-  }
-];
-
-// And a histogram that allows the user to specify the interval and time field
-dashboard.rows[3].panels = [
-  {
+    title: 'events over time',
     type: 'histogram',
     time_field: ARGS.timefield||"@timestamp",
-    auto_int: true
+    auto_int: true,
+    span: 12
   }
 ];
 
 // And a table row where you can specify field and sort order
-dashboard.rows[4].panels = [
+dashboard.rows[1].panels = [
   {
+    title: 'all events',
     type: 'table',
     fields: !_.isUndefined(ARGS.fields) ? ARGS.fields.split(',') : [],
     sort: !_.isUndefined(ARGS.sort) ? ARGS.sort.split(',') : [ARGS.timefield||'@timestamp','desc'],
-    overflow: 'expand'
+    overflow: 'expand',
+    span: 12
   }
 ];
 

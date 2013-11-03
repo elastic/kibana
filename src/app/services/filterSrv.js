@@ -1,13 +1,14 @@
 define([
   'angular',
   'underscore',
-  'config'
-], function (angular, _, config) {
+  'config',
+  'kbn'
+], function (angular, _, config, kbn) {
   'use strict';
 
   var module = angular.module('kibana.services');
 
-  module.service('filterSrv', function(dashboard, ejsResource) {
+  module.service('filterSrv', function(dashboard, ejsResource, $rootScope, $timeout) {
     // Create an object to hold our service state on the dashboard
     dashboard.current.services.filter = dashboard.current.services.filter || {};
 
@@ -35,40 +36,96 @@ define([
       self.ids = dashboard.current.services.filter.ids;
       _f = dashboard.current.services.filter;
 
+      _.each(self.list,function(f) {
+        self.set(f,f.id,true);
+      });
+
+      // Date filters hold strings now, not dates
+      /*
       _.each(self.getByType('time',true),function(time) {
         self.list[time.id].from = new Date(time.from);
         self.list[time.id].to = new Date(time.to);
       });
+      */
 
     };
 
     // This is used both for adding filters and modifying them.
     // If an id is passed, the filter at that id is updated
-    this.set = function(filter,id) {
+    this.set = function(filter,id,noRefresh) {
+      var _r;
       _.defaults(filter,{mandate:'must'});
       filter.active = true;
       if(!_.isUndefined(id)) {
         if(!_.isUndefined(self.list[id])) {
           _.extend(self.list[id],filter);
-          return id;
+          _r = id;
         } else {
-          return false;
+          _r = false;
         }
       } else {
         if(_.isUndefined(filter.type)) {
-          return false;
+          _r = false;
         } else {
           var _id = nextId();
           var _filter = {
             alias: '',
-            id: _id
+            id: _id,
+            mandate: 'must'
           };
           _.defaults(filter,_filter);
           self.list[_id] = filter;
           self.ids.push(_id);
-          return _id;
+          _r = _id;
         }
       }
+      if(!$rootScope.$$phase) {
+        $rootScope.$apply();
+      }
+      if(noRefresh !== true) {
+        $timeout(function(){
+          dashboard.refresh();
+        },0);
+      }
+      $rootScope.$broadcast('filter');
+      return _r;
+    };
+
+    this.remove = function(id,noRefresh) {
+      var _r;
+      if(!_.isUndefined(self.list[id])) {
+        delete self.list[id];
+        // This must happen on the full path also since _.without returns a copy
+        self.ids = dashboard.current.services.filter.ids = _.without(self.ids,id);
+        _f.idQueue.unshift(id);
+        _f.idQueue.sort(function(v,k){return v-k;});
+        _r = true;
+      } else {
+        _r = false;
+      }
+      if(!$rootScope.$$phase) {
+        $rootScope.$apply();
+      }
+      if(noRefresh !== true) {
+        $timeout(function(){
+          dashboard.refresh();
+        },0);
+      }
+      $rootScope.$broadcast('filter');
+      return _r;
+    };
+
+    this.removeByType = function(type,noRefresh) {
+      var ids = self.idsByType(type);
+      _.each(ids,function(id) {
+        self.remove(id,true);
+      });
+      if(noRefresh !== true) {
+        $timeout(function(){
+          dashboard.refresh();
+        },0);
+      }
+      return ids;
     };
 
     this.getBoolFilter = function(ids) {
@@ -104,9 +161,11 @@ define([
       switch(filter.type)
       {
       case 'time':
-        return ejs.RangeFilter(filter.field)
-          .from(filter.from.valueOf())
-          .to(filter.to.valueOf());
+        var _f = ejs.RangeFilter(filter.field).from(kbn.parseDate(filter.from).valueOf());
+        if(!_.isUndefined(filter.to)) {
+          _f = _f.to(filter.to.valueOf());
+        }
+        return _f;
       case 'range':
         return ejs.RangeFilter(filter.field)
           .from(filter.from)
@@ -130,14 +189,6 @@ define([
       return _.pick(self.list,self.idsByType(type,inactive));
     };
 
-    this.removeByType = function(type) {
-      var ids = self.idsByType(type);
-      _.each(ids,function(id) {
-        self.remove(id);
-      });
-      return ids;
-    };
-
     this.idsByType = function(type,inactive) {
       var _require = inactive ? {type:type} : {type:type,active:true};
       return _.pluck(_.where(self.list,_require),'id');
@@ -148,42 +199,28 @@ define([
       return _.pluck(self.getByType('time'),'field');
     };
 
-    // This special function looks for all time filters, and returns a time range according to the mode
-    // No idea when max would actually be used
-    this.timeRange = function(mode) {
-      var _t = _.where(self.list,{type:'time',active:true});
-      if(_t.length === 0) {
+    // Parse is used when you need to know about the raw filter
+    this.timeRange = function(parse) {
+      var _t = _.last(_.where(self.list,{type:'time',active:true}));
+      if(_.isUndefined(_t)) {
         return false;
       }
-      switch(mode) {
-      case "min":
+      if(parse === false) {
         return {
-          from: new Date(_.max(_.pluck(_t,'from'))),
-          to: new Date(_.min(_.pluck(_t,'to')))
+          from: _t.from,
+          to: _t.to
         };
-      case "max":
-        return {
-          from: new Date(_.min(_.pluck(_t,'from'))),
-          to: new Date(_.max(_.pluck(_t,'to')))
-        };
-      default:
-        return false;
-      }
-    };
-
-    this.remove = function(id) {
-      if(!_.isUndefined(self.list[id])) {
-        delete self.list[id];
-        // This must happen on the full path also since _.without returns a copy
-        self.ids = dashboard.current.services.filter.ids = _.without(self.ids,id);
-        _f.idQueue.unshift(id);
-        _f.idQueue.sort(function(v,k){return v-k;});
-        return true;
       } else {
-        return false;
+        var
+          _from = _t.from,
+          _to = _t.to || new Date();
+
+        return {
+          from : kbn.parseDate(_from),
+          to : kbn.parseDate(_to)
+        };
       }
     };
-
 
     var nextId = function() {
       if(_f.idQueue.length > 0) {
