@@ -50,7 +50,7 @@
     <div class="span1">
       <label class="small">Missing</label><input type="checkbox" ng-model="panel.missing" ng-checked="panel.missing">
     </div>
-    <div class="span1">
+    <div class="span1" ng-show="panel.tmode != 'terms_stats'">
       <label class="small">Other</label><input type="checkbox" ng-model="panel.other" ng-checked="panel.other">
     </div>
     <div class="span1" ng-show="panel.chart == 'pie'">

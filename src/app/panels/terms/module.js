@@ -61,8 +61,9 @@ function (angular, app, _, $, kbn) {
       chart       : 'bar',
       counter_pos : 'above',
       spyable     : true,
-      tmode   : 'terms',
-      tstat   : 'total'
+      tmode       : 'terms',
+      tstat       : 'total',
+      valuefield  : ''
     };
 
     _.defaults($scope.panel,_d);
@@ -135,28 +136,12 @@ function (angular, app, _, $, kbn) {
 
       // Populate scope when we have results
       results.then(function(results) {
-        var k = 0;
         $scope.panelMeta.loading = false;
         if($scope.panel.tmode === 'terms') {
           $scope.hits = results.hits.total;
         }
-        $scope.data = [];
-        _.each(results.facets.terms.terms, function(v) {
-          var slice;
-          if($scope.panel.tmode === 'terms') {
-            slice = { label : v.term, data : [[k,v.count]], actions: true};
-          }
-          if($scope.panel.tmode === 'terms_stats') {
-            slice = { label : v.term, data : [[k,v[$scope.panel.tstat]]], actions: true};
-          }
-          $scope.data.push(slice);
-          k = k + 1;
-        });
 
-        $scope.data.push({label:'Missing field',
-          data:[[k,results.facets.terms.missing]],meta:"missing",color:'#aaa',opacity:0});
-        $scope.data.push({label:'Other values',
-          data:[[k+1,results.facets.terms.other]],meta:"other",color:'#444'});
+        $scope.results = results;
 
         $scope.$emit('render');
       });
@@ -216,9 +201,35 @@ function (angular, app, _, $, kbn) {
           render_panel();
         });
 
+        function build_results() {
+          var k = 0;
+          scope.data = [];
+          _.each(scope.results.facets.terms.terms, function(v) {
+            var slice;
+            if(scope.panel.tmode === 'terms') {
+              slice = { label : v.term, data : [[k,v.count]], actions: true};
+            }
+            if(scope.panel.tmode === 'terms_stats') {
+              slice = { label : v.term, data : [[k,v[scope.panel.tstat]]], actions: true};
+            }
+            scope.data.push(slice);
+            k = k + 1;
+          });
+
+          scope.data.push({label:'Missing field',
+            data:[[k,scope.results.facets.terms.missing]],meta:"missing",color:'#aaa',opacity:0});
+
+          if(scope.panel.tmode == 'terms') {
+            scope.data.push({label:'Other values',
+              data:[[k+1,scope.results.facets.terms.other]],meta:"other",color:'#444'});
+          }
+        }
+
         // Function for rendering panel
         function render_panel() {
           var plot, chartData;
+
+          build_results();
 
           // IE doesn't work without this
           elem.css({height:scope.panel.height||scope.row.height});

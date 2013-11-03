@@ -1,4 +1,9 @@
 <div ng-controller='terms' ng-init="init()">
+  <div class="small" ng-show="panel.tmode == 'terms_stats'">
+    <span>showing</span>
+    <span class="strong">{{ panel.valuefield }}</span>
+    <span>{{ panel.tstat }}</span>
+  </div>
   <!-- START Pie or bar chart -->
   <div ng-show="panel.counter_pos == 'above' && (panel.chart == 'bar' || panel.chart == 'pie')" id='{{$id}}-legend'>
     <!-- vertical legend above -->
@@ -38,7 +43,7 @@
 
   <table ng-style="panel.style" class="table table-striped table-condensed" ng-show="panel.chart == 'table'">
     <thead>
-      <th>Term</th> <th>Count</th> <th>Action</th>
+      <th>Term</th> <th>{{ panel.tmode == 'terms_stats' ? panel.tstat : 'Count' }}</th> <th>Action</th>
     </thead>
     <tr ng-repeat="term in data" ng-show="showMeta(term)">
       <td>{{term.label}}</td>
