@@ -1,12 +1,20 @@
   <fieldset>
-    <label class="small">Field</label><br>
-    <input ng-model="querySrv.list[id].field" type="text" bs-typeahead="fields.list" placeholder="Field">
     <p>
-    <label class="small">Count</label><br>
-    <input ng-model="querySrv.list[id].size" type="number">
+      <label class="small">Field</label><br>
+      <input ng-model="querySrv.list[id].field" type="text" bs-typeahead="fields.list" placeholder="Field">
     <p>
-    <label class="small">Union</label><br>
-      <select class="input-small" ng-model="querySrv.list[id].union">
-      <option ng-repeat="mode in ['none','AND','OR']">{{mode}}</option>
-    </select>
+      <label class="small">Count</label><br>
+      <input ng-model="querySrv.list[id].size" type="number">
+    </p>
+    <p>
+      <label class="small">Union</label><br>
+        <select class="input-small" ng-model="querySrv.list[id].union">
+        <option ng-repeat="mode in ['none','AND','OR']">{{mode}}</option>
+      </select>
+    </p>
+    <p class="checkbox">
+      <label class="small">
+        <input ng-model="querySrv.list[id].other" type="checkbox"> Other values
+      </label>
+    </p>
   </fieldset>

@@ -56,7 +56,8 @@ function (angular, _, config, kbn) {
         query: "*",
         field: "_type",
         size: 5,
-        union: 'AND'
+        union: 'AND',
+        other: false
       }
     };
 
@@ -108,18 +109,35 @@ function (angular, _, config, kbn) {
           var results = request.doSearch();
           // Like the regex and lucene queries, this returns a promise
           return results.then(function(data) {
-            var _colors = kbn.colorSteps(q.color,data.facets.query.terms.length);
+            var _colors = kbn.colorSteps(q.color,data.facets.query.terms.length+1);
             var i = -1;
-            return _.map(data.facets.query.terms,function(t) {
+            var terms   = _.map(data.facets.query.terms,function(t) {
+              return t.term;
+            });
+
+            var queries = _.map(terms,function(term) {
               ++i;
               return self.defaults({
-                query  : q.field+':"'+kbn.addslashes(t.term)+'"'+suffix,
-                alias  : t.term + (q.alias ? " ("+q.alias+")" : ""),
+                query  : q.field+':"'+kbn.addslashes(term)+'"'+suffix,
+                alias  : term + (q.alias ? " ("+q.alias+")" : ""),
                 type   : 'lucene',
                 color  : _colors[i],
                 parent : q.id
               });
             });
+
+            if (q.other) {
+              ++i;
+              queries.push(self.defaults({
+                query  : q.field+':(NOT ("'+terms.map(kbn.addslashes).join('" OR "')+'"))'+suffix,
+                alias  : 'other' + (q.alias ? " ("+q.alias+")" : ""),
+                type   : 'lucene',
+                color  : _colors[i],
+                parent : q.id
+              }));
+            }
+
+            return queries;
           });
         }
       }
