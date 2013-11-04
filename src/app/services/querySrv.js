@@ -105,6 +105,10 @@ function (angular, _, config, kbn) {
                   filterSrv.getBoolFilter(filterSrv.ids)
                   )))).size(0);
 
+          function escapeSpecial(term) {
+            return term.replace(new RegExp('([\\+\\-\\&\\|\\!\\(\\)\\{\\}\\[\\]\\^"~\\*\\?\\:\\\\])', "g"), "\\$1");
+          }
+
           var results = request.doSearch();
           return results.then(function(data) {
             var _colors = kbn.colorSteps(q.color,data.facets.query.terms.length);
@@ -112,7 +116,7 @@ function (angular, _, config, kbn) {
             return _.map(data.facets.query.terms,function(t) {
               ++i;
               return self.defaults({
-                query  : q.field+':"'+t.term+'"'+suffix,
+                query  : q.field+':"'+escapeSpecial(t.term)+'"'+suffix,
                 alias  : t.term + (q.alias ? " ("+q.alias+")" : ""),
                 type   : 'lucene',
                 color  : _colors[i],
