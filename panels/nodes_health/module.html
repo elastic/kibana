@@ -1,0 +1,76 @@
+<div ng-controller='marvel.nodes_health' ng-init="init()">
+    <style>
+        .marvel-table {
+        vertical-align: middle;
+        }
+        .marvel-mean {
+        font-size: 20pt;
+        font-weight: 200;
+        display: inline-block;
+        vertical-align: middle;
+        }
+        .marvel-extended {
+        display: inline-block;
+        font-size:9pt;
+        margin-left: 5px;
+        vertical-align: middle;
+        }
+        .marvel-header .nodes{
+        font-size: 20pt;
+        font-weight: bold;
+        margin-left: 10px;
+        }
+        .marvel-nodes-health-chart {
+        margin-top: 5px;
+        display: inline-block;
+        height: 10px;
+        width: 50px;
+        }
+    </style>
+
+    <div class="pull-left marvel-header marvel-table" ng-show="nodes.length > 0">
+        <span class="nodes">{{nodes.length}} nodes</span> / Last 10m</span>
+    </div>
+    <div class="pull-right">
+        <a href="" ng-class="{strong:!panel.compact}" ng-click="panel.compact=false">Full</a> / <a href="" ng-class="{strong:panel.compact}"
+                                                                                                   ng-click="panel.compact=true">Compact</a>
+    </div>
+
+    <table class="table table-bordered" ng-if="!panel.compact">
+        <thead>
+        <th>node</th>
+        <th ng-repeat="metric in metrics" ng-class="alertClass(warnLevels['_global_'][metric.name])">{{metric.name}}</th>
+        </thead>
+        <tr ng-repeat="node in nodes">
+            <td>{{node}}</td>
+            <td ng-repeat="metric in metrics" ng-class="alertClass(warnLevels[node][metric.name])">
+                <div class="marvel-mean">
+                    {{data[node+"_"+metric.name].mean / metric.scale | number:metric.decimals}}<br>
+
+                    <div class="marvel-nodes-health-chart" series="data[node+'_'+metric.name+'_history']"></div>
+                </div>
+                <div class="marvel-extended">
+                    <span>min: {{data[node+"_"+metric.name].min / metric.scale | number:metric.decimals}}</span><br>
+                    <span>max: {{data[node+"_"+metric.name].max / metric.scale | number:metric.decimals}}</span>
+
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="table table-bordered table-condensed marvel-table" ng-if="panel.compact">
+        <thead>
+        <th>node</th>
+        <th ng-repeat="metric in metrics" ng-class="alertClass(warnLevels['_global_'][metric.name])">{{metric.name}}</th>
+        </thead>
+        <tr ng-repeat="node in nodes">
+            <td>{{node}}</td>
+            <td ng-repeat="metric in metrics" ng-class="alertClass(warnLevels[node][metric.name])">
+                <div>{{data[node+"_"+metric.name].mean / metric.scale | number:metric.decimals}}
+                    <div class="marvel-nodes-health-chart" series="data[node+'_'+metric.name+'_history']"></div>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+</div>
