@@ -184,6 +184,9 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
       // Set the current dashboard
       self.current = _.clone(dashboard);
 
+      // Set header to trace requests, encoding for non-ascii chars
+      $http.defaults.headers.common['kibana-dashboard'] = encodeURIComponent(self.current.title);
+
       // Ok, now that we've setup the current dashboard, we can inject our services
       querySrv = $injector.get('querySrv');
       filterSrv = $injector.get('filterSrv');
