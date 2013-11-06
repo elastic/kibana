@@ -167,7 +167,7 @@ function (angular, app, kbn, _, $) {
 
     $scope.compareLink = function() {
       var nodes = _.pluck(_.where($scope.nodes,{selected:true}),'name');
-      return "#/dashboard/script/node_stats.js?show=OS&nodes="+nodes.join(',');
+      return "#/dashboard/script/marvel.node_stats.js?show=OS&nodes="+nodes.join(',');
     };
 
     $scope.compareTip = function() {
