@@ -1111,7 +1111,7 @@
   "failover": false,
   "index": {
     "interval": "day",
-    "pattern": "[es_monitor-]YYYY.MM.DD",
+    "pattern": "[marvel-]YYYY.MM.DD",
     "default": "_all"
   },
   "style": "dark",
@@ -1127,13 +1127,13 @@
       "history": [
         "_type:shard_stats",
         "*",
-        "index:\"es_monitor-2013.10.21\"",
+        "index:\"marvel-2013.10.21\"",
         "index:\"index\"",
-        "index:\"es_monitor-2013.10.01\"",
+        "index:\"marvel-2013.10.01\"",
         "index:\"kibana-int\"",
-        "index:\"es_monitor-2013.10.17\"",
+        "index:\"marvel-2013.10.17\"",
         "index:\"index2\" AND (_type:shard_stats)",
-        "index:\"es_monitor-2013.10.16\" AND (_type:shard_stats)",
+        "index:\"marvel-2013.10.16\" AND (_type:shard_stats)",
         "index:\"kibana-int\" AND (_type:shard_stats)"
       ],
       "remember": 10

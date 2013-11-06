@@ -2038,7 +2038,7 @@
   "failover": false,
   "index": {
     "interval": "day",
-    "pattern": "[es_monitor-]YYYY.MM.DD",
+    "pattern": "[marvel-]YYYY.MM.DD",
     "default": "_all"
   },
   "style": "dark",
