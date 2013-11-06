@@ -46,8 +46,9 @@ if(!_.isUndefined(ARGS.nodes)) {
   queries = _.object(_.map(ARGS.nodes.split(','), function(v,k) {
     return [k,{
       query: 'node.transport_address:"'+v+'"',
-      id: parseInt(k,10),
-      alias: v
+      alias: v,
+      pin: true,
+      id: parseInt(k,10)
     }];
   }));
 } else {
@@ -65,7 +66,7 @@ var show = ARGS.show.split(',') || [];
 // Now populate the query service with our objects
 dashboard.services.query = {
   list : queries,
-  ids : _.map(_.keys(queries),function(v){return parseInt(v,10);})
+  ids : _.map(_.keys(queries),function(v){return parseInt(v,10);}),
 };
 
 // Lets also add a default time filter, the value of which can be specified by the user
@@ -89,12 +90,15 @@ var rows = [
   {
     name:'OS',
     charts: [{
+      title: 'CPU',
       field: 'os.cpu.user',
       derivative: false,
     },{
+      title: 'Memory',
       field: 'os.mem.used_percent',
       derivative: false
     },{
+      title: 'Swap',
       field: 'os.swap.used_in_bytes',
       derivative: true
     }]
@@ -102,12 +106,15 @@ var rows = [
   {
     name: 'JVM',
     charts: [{
+      title: 'New Generation GC Time',
       field: 'jvm.gc.collectors.ParNew.collection_time_in_millis',
       derivative: true
     },{
+      title: 'New Generation GC Count',
       field: 'jvm.gc.collectors.ParNew.collection_count',
       derivative: true
     },{
+      title: 'Old Generation GC Time',
       field: 'jvm.gc.collectors.ConcurrentMarkSweep.collection_time_in_millis',
       derivative: true
     }]
@@ -122,7 +129,7 @@ dashboard.rows = _.map(rows, function(r) {
     panels: _.map(r.charts,function(c) {
       // A bunch of histogram panels, with similar defaults
       return {
-        title: c.field,
+        title: c.title,
         type: 'histogram',
         span: 4,
         time_field: '@timestamp',
@@ -131,7 +138,8 @@ dashboard.rows = _.map(rows, function(r) {
         bars: false,
         lines: true,
         stack: false,
-        linewidth:2,
+        fill: 0,
+        linewidth: 2,
         mode: 'max', // Pretty sure we want max for all of these? No? Average for some?
         zoomlinks: false,
         options: false,
@@ -143,7 +151,7 @@ dashboard.rows = _.map(rows, function(r) {
 });
 
 // No pulldowns shown, and they can't be enabled.
-dashboard.pulldowns = [];
+dashboard.pulldowns = [{type:'query'}];
 
 // Now return the object and we're good!
 return dashboard;
