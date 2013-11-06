@@ -1,22 +1,13 @@
 /* global _ */
 
 /*
- * Complex scripted dashboard
- * This script generates a dashboard object that Kibana can load. It also takes a number of user
- * supplied URL parameters, none are required:
+ * Node statistics scripted dashboard
+ * This script generates a dashboard object that Kibana can load.
  *
- * index :: Which index to search? If this is specified, interval is set to 'none'
- * pattern :: Does nothing if index is specified. Set a timestamped index pattern. Default: [logstash-]YYYY.MM.DD
- * interval :: Sets the index interval (eg: day,week,month,year), Default: day
- *
- * split :: The character to split the queries on Default: ','
- * query :: By default, a comma seperated list of queries to run. Default: *
- *
- * from :: Search this amount of time back, eg 15m, 1h, 2d. Default: 15m
- * timefield :: The field containing the time to filter on, Default: @timestamp
- *
- * fields :: comma seperated list of fields to show in the table
- * sort :: comma seperated field to sort on, and direction, eg sort=@timestamp,desc
+ * Parameters (all optional)
+ * nodes :: By default, a comma seperated list of queries to run. Default: *
+ * show :: The names of the rows to expand
+ * from :: Search this amount of time back, eg 15m, 1h, 2d. Default: 1d
  *
  */
 
@@ -40,16 +31,16 @@ dashboard = {
 // Set a title
 dashboard.title = 'Node Statistics';
 
-
+// And the index options
 dashboard.failover = false;
 dashboard.index = {
-  default: ARGS.index||'ADD_A_TIME_FILTER',
-  pattern: ARGS.pattern||'[es_monitor-]YYYY.MM.DD',
-  interval: ARGS.interval||'day'
+  default: 'ADD_A_TIME_FILTER',
+  pattern: '[es_monitor-]YYYY.MM.DD',
+  interval: 'day'
 };
 
-// In this dashboard we let users pass queries as comma seperated list to the query parameter.
-// If query is defined, split it into a list of query objects
+// In this dashboard we let users pass nodes as comma seperated list to the query parameter.
+// If nodes are defined, split into a list of query objects, otherwise, show all
 // NOTE: ids must be integers, hence the parseInt()s
 if(!_.isUndefined(ARGS.nodes)) {
   queries = _.object(_.map(ARGS.nodes.split(','), function(v,k) {
@@ -83,7 +74,7 @@ dashboard.services.filter = {
     0: {
       from: "now-"+(ARGS.from||_d_timespan),
       to: "now",
-      field: ARGS.timefield||"@timestamp",
+      field: "@timestamp",
       type: "time",
       active: true,
       id: 0,
@@ -92,7 +83,8 @@ dashboard.services.filter = {
   ids: [0]
 };
 
-// Ok, lets make some rows. The Filters row is collapsed by default
+// Ok, lets make some rows. Since all of our panels are similar, we can abstract this.
+// Obviously this is a partial list, feel free to expand on this.
 var rows = [
   {
     name:'OS',
@@ -128,6 +120,7 @@ dashboard.rows = _.map(rows, function(r) {
     height: '150px',
     collapse: !_.contains(show,r.name),
     panels: _.map(r.charts,function(c) {
+      // A bunch of histogram panels, with similar defaults
       return {
         title: c.field,
         type: 'histogram',
@@ -139,17 +132,17 @@ dashboard.rows = _.map(rows, function(r) {
         lines: true,
         stack: false,
         linewidth:2,
-        mode: 'max',
+        mode: 'max', // Pretty sure we want max for all of these? No? Average for some?
         zoomlinks: false,
         options: false,
-        legend: false,
-        interactive: false
+        legend: false, // Might want to enable this, cleaner without it though
+        interactive: false // Because the filter pulldown is hidden
       };
     })
   };
 });
 
-// No pulldowns available, and they can't be enabled.
+// No pulldowns shown, and they can't be enabled.
 dashboard.pulldowns = [];
 
 // Now return the object and we're good!
