@@ -27,8 +27,6 @@ function (angular, app, kbn, _, $) {
     };
     _.defaults($scope.panel,_d);
 
-
-
     $scope.init = function () {
       $scope.warnLevels = [];
 
@@ -56,14 +54,20 @@ function (angular, app, kbn, _, $) {
       request = request
         .facet($scope.ejs.TermsFacet('terms')
           .field("node.transport_address")
-          .allTerms(true)
+          .size(9999999)
           .order('term')
           .facetFilter(filterSrv.getBoolFilter(filterSrv.ids))).size(0);
 
       results = request.doSearch();
 
       results.then(function(r) {
-        $scope.nodes = _.pluck(r.facets.terms.terms,'term');
+        var newNodes = _.difference(_.pluck(r.facets.terms.terms,'term'),_.pluck($scope.nodes,'name'));
+        $scope.nodes = _.map(newNodes, function(n) {
+          return {
+            name: n,
+            selected: false
+          };
+        });
         $scope.get_data();
       });
 
@@ -93,32 +97,32 @@ function (angular, app, kbn, _, $) {
           error: 10,
           decimals: 2
         },{
-        name: 'System Mem (%)',
-        field: 'os.mem.used_percent',
-        warning: 90,
-        error: 97,
-        decimals: 2
+          name: 'System Mem (%)',
+          field: 'os.mem.used_percent',
+          warning: 90,
+          error: 97,
+          decimals: 2
         },{
-        name: 'Jvm Mem (%)',
-        field: 'os.mem.used_percent',
-        warning: 95,
-        error: 98,
-        decimals: 2
-      },{
-        name: 'Free disk space (GB)',
-        field: 'fs.data.available_in_bytes',
-        scale: 1024 * 1024 * 1024,
-        warning: { threshold: 5, type: "lower_bound" },
-        error: { threshold: 2, type: "lower_bound" },
-        decimals: 2
-      }];
+          name: 'Jvm Mem (%)',
+          field: 'os.mem.used_percent',
+          warning: 95,
+          error: 98,
+          decimals: 2
+        },{
+          name: 'Free disk space (GB)',
+          field: 'fs.data.available_in_bytes',
+          scale: 1024 * 1024 * 1024,
+          warning: { threshold: 5, type: "lower_bound" },
+          error: { threshold: 2, type: "lower_bound" },
+          decimals: 2
+        }];
 
       _.each($scope.metrics, function (m) {
-        _.defaults(m, { scale : 1})
-        if (typeof m.error === 'number') {
+        _.defaults(m, {scale : 1});
+        if (_.isNumber(m.error)) {
           m.error = { threshold: m.error, type: "upper_bound"};
         }
-        if (typeof m.warning === 'number') {
+        if (_.isNumber(m.warning)) {
           m.warning = { threshold: m.warning, type: "upper_bound"};
         }
       });
@@ -128,7 +132,7 @@ function (angular, app, kbn, _, $) {
       var time = filterSrv.timeRange('last').to;
       time = kbn.parseDate(time).valueOf();
       // Terms mode
-      _.each($scope.nodes,function(n) {
+      _.each(_.pluck($scope.nodes,'name'),function(n) {
         var filter = $scope.ejs.BoolFilter()
           .must($scope.ejs.RangeFilter('@timestamp').from(time + '||-10m/m'))
           .must($scope.ejs.TermsFilter('node.transport_address',n));
@@ -152,17 +156,31 @@ function (angular, app, kbn, _, $) {
         $scope.panelMeta.loading = false;
         $scope.warnLevels = {};
         $scope.calculateWarnings();
-
       });
+    };
+
+    $scope.hasSelected = function(nodes) {
+      return _.some(nodes, function(n){
+        return n.selected;
+      });
+    };
+
+    $scope.compareLink = function() {
+      var nodes = _.pluck(_.where($scope.nodes,{selected:true}),'name');
+      return "#/dashboard/script/node_stats.js?show=OS&nodes="+nodes.join(',');
+    };
+
+    $scope.compareTip = function() {
+      return $scope.hasSelected($scope.nodes) ? false : 'Select nodes to compare';
     };
 
     $scope.calculateWarnings = function () {
       $scope.warnLevels = {_global_: {}};
       _.each($scope.metrics, function (metric) {
         $scope.warnLevels['_global_'][metric.name] = 0;
-        _.each($scope.nodes, function (node) {
+        _.each(_.pluck($scope.nodes,'name'), function (node) {
           var level = $scope.alertLevel(metric, $scope.data[node + '_' + metric.name].mean);
-          if (!$scope.warnLevels[node]) $scope.warnLevels[node] = {};
+          $scope.warnLevels[node] = $scope.warnLevels[node] || {};
           $scope.warnLevels[node][metric.name] = level;
           if (level > $scope.warnLevels['_global_'][metric.name]) {
             $scope.warnLevels['_global_'][metric.name] = level;
@@ -171,11 +189,13 @@ function (angular, app, kbn, _, $) {
       });
     };
 
-      $scope.alertLevel = function(metric,num) {
+    $scope.alertLevel = function(metric,num) {
       var level = 0;
 
       function testAlert(alert,num) {
-        if (!alert) return false;
+        if (!alert) {
+          return false;
+        }
         return alert.type === "upper_bound" ? num>alert.threshold : num<alert.threshold;
       }
 
@@ -233,7 +253,6 @@ function (angular, app, kbn, _, $) {
         // Function for rendering panel
         function render_panel() {
           // Populate element
-          //try {
           var options = {
             legend: { show: false },
             series: {
@@ -266,13 +285,9 @@ function (angular, app, kbn, _, $) {
               color : elem.css('color'),
             };
 
-
             $.plot(elem, [_d], options);
           }
 
-          //} catch(e) {
-          //  console.log(e);
-          //}
         }
       }
     };
