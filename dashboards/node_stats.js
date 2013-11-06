@@ -24,8 +24,8 @@ _d_timespan = '1d';
 
 // Intialize a skeleton with nothing but a rows array and service object
 dashboard = {
-  rows : [],
-  services : {}
+  rows: [],
+  services: {}
 };
 
 // Set a title
@@ -42,13 +42,13 @@ dashboard.index = {
 // In this dashboard we let users pass nodes as comma seperated list to the query parameter.
 // If nodes are defined, split into a list of query objects, otherwise, show all
 // NOTE: ids must be integers, hence the parseInt()s
-if(!_.isUndefined(ARGS.nodes)) {
-  queries = _.object(_.map(ARGS.nodes.split(','), function(v,k) {
-    return [k,{
-      query: 'node.transport_address:"'+v+'"',
+if (!_.isUndefined(ARGS.nodes)) {
+  queries = _.object(_.map(ARGS.nodes.split(','), function (v, k) {
+    return [k, {
+      query: 'node.transport_address:"' + v + '"',
       alias: v,
       pin: true,
-      id: parseInt(k,10)
+      id: parseInt(k, 10)
     }];
   }));
 } else {
@@ -65,15 +65,17 @@ var show = ARGS.show.split(',') || [];
 
 // Now populate the query service with our objects
 dashboard.services.query = {
-  list : queries,
-  ids : _.map(_.keys(queries),function(v){return parseInt(v,10);}),
+  list: queries,
+  ids: _.map(_.keys(queries), function (v) {
+    return parseInt(v, 10);
+  }),
 };
 
 // Lets also add a default time filter, the value of which can be specified by the user
 dashboard.services.filter = {
   list: {
     0: {
-      from: (ARGS.from||"now-" + _d_timespan),
+      from: (ARGS.from || "now-" + _d_timespan),
       to: "now",
       field: "@timestamp",
       type: "time",
@@ -88,8 +90,8 @@ dashboard.services.filter = {
       query: "_type:node_stats",
       id: 1
     }
-},
-  ids: [0,1]
+  },
+  ids: [0, 1]
 };
 
 
@@ -107,7 +109,7 @@ panel_defaults_by_type["histogram"] = {
   bars: false,
   lines: true,
   stack: false,
-  linewidth:2,
+  linewidth: 2,
   mode: 'max',
   zoomlinks: false,
   options: false,
@@ -333,12 +335,14 @@ var rows = [
 
 var showedSomething;
 
-dashboard.rows = _.map(rows, function(r) {
-  _.defaults(r,row_defaults);
+dashboard.rows = _.map(rows, function (r) {
+  _.defaults(r, row_defaults);
   _.each(r.panels, function (panel) {
-     if (!panel.type) panel.type = "histogram";
+    if (!panel.type) {
+      panel.type = "histogram";
+    }
     _.defaults(panel, panel_defaults_by_type[panel.type]);
-    if (_.contains(show,panel.value_field)) {
+    if (_.contains(show, panel.value_field)) {
       showedSomething = true;
       r.collapse = false;
     }
@@ -348,7 +352,8 @@ dashboard.rows = _.map(rows, function(r) {
 
 if (!showedSomething && dashboard.rows.length > 0) {
   dashboard.rows[0].collapse = false;
-};
+}
+
 
 dashboard.pulldowns = [
   {
