@@ -67,9 +67,7 @@
       "panels": [
         {
           "span": 4,
-          "editable": true,
           "type": "histogram",
-          "loadingEditor": false,
           "mode": "max",
           "time_field": "@timestamp",
           "queries": {
@@ -97,7 +95,7 @@
             "1y"
           ],
           "fill": 0,
-          "linewidth": 3,
+          "linewidth": 2,
           "timezone": "browser",
           "spyable": true,
           "zoomlinks": true,
@@ -187,6 +185,7 @@
           "interactive": true,
           "options": true,
           "derivative": true,
+          "scaleSeconds": true,
           "scale": 1,
           "tooltip": {
             "value_type": "cumulative",
@@ -259,6 +258,7 @@
           "interactive": true,
           "options": true,
           "derivative": true,
+          "scaleSeconds": true,
           "scale": 1,
           "tooltip": {
             "value_type": "cumulative",

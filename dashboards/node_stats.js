@@ -163,8 +163,7 @@ var rows = [
         "value_field": "os.swap.used_in_bytes",
         "title": "Used Swap"
       }
-    ],
-    "notice": false
+    ]
   },
   {
     "title": "JVM Memory",
@@ -177,12 +176,14 @@ var rows = [
       {
         "value_field": "jvm.gc.collectors.ParNew.collection_time_in_millis",
         "title": "GC Young Gen duration",
-        "derivative": true
+        "derivative": true,
+        "scaleSeconds": true
       },
       {
         "value_field": "jvm.gc.collectors.ParNew.collection_count",
         "title": "GC counts",
-        "derivative": true
+        "derivative": true,
+        "scaleSeconds": true
       }
     ]
   },
@@ -192,11 +193,13 @@ var rows = [
       {
         "value_field": "jvm.gc.collectors.ConcurrentMarkSweep.collection_time_in_millis",
         "derivative": true,
+        "scaleSeconds": true,
         "title": "GC Old Gen duration"
       },
       {
         "value_field": "jvm.gc.collectors.ConcurrentMarkSweep.collection_count",
         "derivative": true,
+        "scaleSeconds": true,
         "title": "GC Old Gen count"
       }
     ]
@@ -233,12 +236,14 @@ var rows = [
       {
         "value_field": "fs.data.disk_read_size_in_bytes",
         "title": "Disk reads (bytes)",
-        "derivative": true
+        "derivative": true,
+        "scaleSeconds": true
       },
       {
         "value_field": "fs.data.disk_write_size_in_bytes",
         "title": "Disk writes (bytes)",
-        "derivative": true
+        "derivative": true,
+        "scaleSeconds": true
       }
     ],
     "notice": false
@@ -253,7 +258,8 @@ var rows = [
       {
         "value_field": "http.total_opened",
         "title": "HTTP opened",
-        "derivative": true
+        "derivative": true,
+        "scaleSeconds": true
       }
     ]
   },
@@ -276,6 +282,7 @@ var rows = [
       {
         "value_field": "indices.indexing.index_total",
         "derivative": true,
+        "scaleSeconds": true,
         "title": "Indexing requests"
       },
       {
@@ -285,6 +292,7 @@ var rows = [
       {
         "value_field": "indices.refresh.total_time_in_millis",
         "derivative": true,
+        "scaleSeconds": true,
         "title": "Avg refresh time"
       }
     ]
@@ -305,11 +313,13 @@ var rows = [
       {
         "value_field": "indices.search.query_total",
         "derivative": true,
+        "scaleSeconds": true,
         "title": "Search requests"
       },
       {
         "value_field": "indices.get.total",
         "derivative": true,
+        "scaleSeconds": true,
         "title": "Get requests"
       }
     ]
