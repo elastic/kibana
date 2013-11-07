@@ -28,11 +28,11 @@ function (angular, app, kbn, _, $) {
     _.defaults($scope.panel,_d);
 
     $scope.init = function () {
-      $scope.warnLevels = [];
+      $scope.warnLevels = {};
+      $scope.nodes = [];
 
       $scope.$on('refresh',function(){
         $scope.get_nodes();
-        $scope.get_data();
       });
 
       $scope.get_nodes();
@@ -48,8 +48,6 @@ function (angular, app, kbn, _, $) {
         request,
         results;
 
-      $scope.nodes = [];
-
       request = $scope.ejs.Request().indices(dashboard.indices);
       request = request
         .facet($scope.ejs.TermsFacet('terms')
@@ -61,21 +59,28 @@ function (angular, app, kbn, _, $) {
       results = request.doSearch();
 
       results.then(function(r) {
-        var newNodes = _.difference(_.pluck(r.facets.terms.terms,'term'),_.pluck($scope.nodes,'name'));
-        $scope.nodes = _.map(newNodes, function(n) {
+        var newNodes = _.pluck(r.facets.terms.terms,'term');
+        newNodes = _.map(newNodes, function(n) {
           return {
             name: n,
             selected: false
           };
         });
-        $scope.get_data();
+        $scope.get_data(newNodes);
       });
 
     };
 
-    $scope.get_data = function() {
+    $scope.get_data = function(newNodes) {
       // Make sure we have everything for the request to complete
-      if(dashboard.indices.length === 0 || $scope.nodes.length === 0) {
+
+      if (typeof newNodes === "undefined") {
+        newNodes = $scope.nodes;
+
+      }
+
+      if(dashboard.indices.length === 0 || newNodes.length === 0) {
+        $scope.nodes = newNodes;
         return;
       }
 
@@ -132,7 +137,7 @@ function (angular, app, kbn, _, $) {
       var time = filterSrv.timeRange('last').to;
       time = kbn.parseDate(time).valueOf();
       // Terms mode
-      _.each(_.pluck($scope.nodes,'name'),function(n) {
+      _.each(_.pluck(newNodes,'name'),function(n) {
         var filter = $scope.ejs.BoolFilter()
           .must($scope.ejs.RangeFilter('@timestamp').from(time + '||-10m/m'))
           .must($scope.ejs.TermsFilter('node.transport_address',n));
@@ -152,6 +157,7 @@ function (angular, app, kbn, _, $) {
 
       // Populate scope when we have results
       results.then(function(results) {
+        $scope.nodes = newNodes;
         $scope.data = results.facets;
         $scope.panelMeta.loading = false;
         $scope.warnLevels = {};
