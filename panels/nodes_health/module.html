@@ -41,7 +41,7 @@
 
   <table class="table table-bordered" ng-if="!panel.compact">
     <thead>
-    <th>node <a ng-href="{{compareLink()}}" target="_blank" class="btn btn-mini btn-info" ng-disabled="!hasSelected(nodes)" bs-tooltip="compareTip()" data-placement="right">Compare</a></th>
+    <th>node <a ng-href="{{detailViewLink()}}" target="_blank" class="btn btn-mini btn-info" ng-disabled="!hasSelected(nodes)" bs-tooltip="detailViewTip()" data-placement="right">nodes dashboard</a></th>
     <th ng-repeat="metric in metrics" ng-class="alertClass(warnLevels['_global_'][metric.name])">{{metric.name}}</th>
     </thead>
     <tr ng-repeat="node in nodes">
@@ -70,7 +70,7 @@
 
   <table class="table table-bordered table-condensed marvel-table" ng-if="panel.compact">
     <thead>
-    <th>node <a ng-href="{{compareLink()}}" class="btn btn-mini btn-info" ng-disabled="!hasSelected(nodes)" bs-tooltip="compareTip()" data-placement="right">Compare</a></th>
+    <th>node <a ng-href="{{detailViewLink()}}" class="btn btn-mini btn-info" ng-disabled="!hasSelected(nodes)" bs-tooltip="detailViewTip()" data-placement="right">nodes dashboard</a></th>
     <th ng-repeat="metric in metrics" ng-class="alertClass(warnLevels['_global_'][metric.name])">{{metric.name}}</th>
     </thead>
     <tr ng-repeat="node in nodes">

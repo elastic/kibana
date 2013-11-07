@@ -171,13 +171,14 @@ function (angular, app, kbn, _, $) {
       });
     };
 
-    $scope.compareLink = function() {
+    $scope.detailViewLink = function() {
       var nodes = _.pluck(_.where($scope.nodes,{selected:true}),'name');
       return "#/dashboard/script/marvel.node_stats.js?show=OS&nodes="+nodes.join(',');
     };
 
-    $scope.compareTip = function() {
-      return $scope.hasSelected($scope.nodes) ? false : 'Select nodes to compare';
+    $scope.detailViewTip = function() {
+      return $scope.hasSelected($scope.nodes) ? 'Open nodes dashboard for selected nodes' :
+        'Select nodes and click top open the nodes dashboard';
     };
 
     $scope.calculateWarnings = function () {
