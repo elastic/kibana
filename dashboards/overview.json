@@ -1,5 +1,5 @@
 {
-  "title": "Overview",
+  "title": "Marvel - Overview",
   "services": {
     "query": {
       "idQueue": [
@@ -98,7 +98,7 @@
           "linewidth": 2,
           "timezone": "browser",
           "spyable": true,
-          "zoomlinks": true,
+          "zoomlinks": false,
           "bars": false,
           "stack": false,
           "points": false,
@@ -111,7 +111,7 @@
           "percentage": false,
           "zerofill": true,
           "interactive": true,
-          "options": true,
+          "options": false,
           "derivative": false,
           "scale": 1,
           "tooltip": {
@@ -167,10 +167,10 @@
             "1y"
           ],
           "fill": 0,
-          "linewidth": 3,
+          "linewidth": 2,
           "timezone": "browser",
           "spyable": true,
-          "zoomlinks": true,
+          "zoomlinks": false,
           "bars": false,
           "stack": false,
           "points": false,
@@ -183,7 +183,7 @@
           "percentage": false,
           "zerofill": true,
           "interactive": true,
-          "options": true,
+          "options": false,
           "derivative": true,
           "scaleSeconds": true,
           "scale": 1,
@@ -240,10 +240,10 @@
             "1y"
           ],
           "fill": 0,
-          "linewidth": 3,
+          "linewidth": 2,
           "timezone": "browser",
           "spyable": true,
-          "zoomlinks": true,
+          "zoomlinks": false,
           "bars": false,
           "stack": false,
           "points": false,
@@ -256,7 +256,7 @@
           "percentage": false,
           "zerofill": true,
           "interactive": true,
-          "options": true,
+          "options": false,
           "derivative": true,
           "scaleSeconds": true,
           "scale": 1,
@@ -316,7 +316,7 @@
   "pulldowns": [
     {
       "type": "query",
-      "collapse": false,
+      "collapse": true,
       "notice": false,
       "enable": true,
       "query": "*",

@@ -9,6 +9,9 @@
       display: inline-block;
       vertical-align: middle;
     }
+    .marvel-persistent-name {
+      font-size: 9pt;
+    }
     .marvel-extended {
       display: inline-block;
       font-size:9pt;
@@ -41,27 +44,28 @@
 
   <table class="table table-bordered" ng-if="!panel.compact">
     <thead>
-    <th>node <a ng-href="{{detailViewLink()}}" target="_blank" class="btn btn-mini btn-info" ng-disabled="!hasSelected(nodes)" bs-tooltip="detailViewTip()" data-placement="right">nodes dashboard</a></th>
+    <th>node <a id="detail_view_link" ng-href="{{detailViewLink()}}" target="_top" class="btn btn-mini btn-info" ng-disabled="!hasSelected(nodes)" bs-tooltip="detailViewTip()" data-placement="right">nodes dashboard</a></th>
     <th ng-repeat="metric in metrics" ng-class="alertClass(warnLevels['_global_'][metric.name])">{{metric.name}}</th>
     </thead>
     <tr ng-repeat="node in nodes">
       <td>
         <div class="checkbox">
           <label>
-            <input type="checkbox" ng-model="nodes[$index].selected" ng-checked="nodes[$index].selected">
-            {{node.name}}
+            <input type="checkbox" ng-model="node.selected" ng-checked="node.selected">
+            {{node.display_name}}
+            <div class="marvel-persistent-name">{{node.id}}</div>
           </label>
         </div>
       </td>
-      <td ng-repeat="metric in metrics" ng-class="alertClass(warnLevels[node][metric.name])">
-        <div class="marvel-mean">
-          {{data[node.name+"_"+metric.name].mean / metric.scale | number:metric.decimals}}<br>
+      <td ng-repeat="metric in metrics" ng-class="alertClass(warnLevels[node.id][metric.name])">
+        <div class="marvel-mean pointer" ng-click="metricClick(node,metric)">
+          {{data[node.id+"_"+metric.name].mean / metric.scale | number:metric.decimals}}<br>
 
-          <div class="marvel-nodes-health-chart" series="data[node.name+'_'+metric.name+'_history']"></div>
+          <div class="marvel-nodes-health-chart" series="data[node.id+'_'+metric.name+'_history']"></div>
         </div>
-        <div class="marvel-extended">
-          <span>min: {{data[node.name+"_"+metric.name].min / metric.scale | number:metric.decimals}}</span><br>
-          <span>max: {{data[node.name+"_"+metric.name].max / metric.scale | number:metric.decimals}}</span>
+        <div class="marvel-extended pointer" ng-click="metricClick(node,metric)">
+          <span>min: {{data[node.id+"_"+metric.name].min / metric.scale | number:metric.decimals}}</span><br>
+          <span>max: {{data[node.id+"_"+metric.name].max / metric.scale | number:metric.decimals}}</span>
 
         </div>
       </td>
@@ -77,14 +81,14 @@
       <td>
         <div class="checkbox">
           <label>
-            <input type="checkbox" ng-model="nodes[$index].selected" ng-checked="nodes[$index].selected">
-            {{node.name}}
+            <input type="checkbox" ng-model="node.selected" ng-checked="node.selected">
           </label>
+          {{ node.display_name }}
         </div>
       </td>
-      <td ng-repeat="metric in metrics" ng-class="alertClass(warnLevels[node.name][metric.name])">
-        <div>{{data[node.name+"_"+metric.name].mean / metric.scale | number:metric.decimals}}
-          <div class="marvel-nodes-health-chart" series="data[node.name+'_'+metric.name+'_history']"></div>
+      <td ng-repeat="metric in metrics" ng-class="alertClass(warnLevels[node.id][metric.name])">
+        <div class="pointer" ng-click="metricClick(node,metric)">{{data[node.id+"_"+metric.name].mean / metric.scale | number:metric.decimals}}
+          <div class="marvel-nodes-health-chart pointer" ng-click="metricClick(node,metric)" series="data[node.id+'_'+metric.name+'_history']"></div>
         </div>
       </td>
     </tr>

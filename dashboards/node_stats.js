@@ -29,24 +29,24 @@ dashboard = {
 };
 
 // Set a title
-dashboard.title = 'Node Statistics';
+dashboard.title = 'Marvel - Node Statistics';
 
 // And the index options
 dashboard.failover = false;
 dashboard.index = {
-  default: 'ADD_A_TIME_FILTER',
-  pattern: '[marvel-]YYYY.MM.DD',
-  interval: 'day'
+  'default': 'ADD_A_TIME_FILTER',
+  'pattern': '[marvel-]YYYY.MM.DD',
+  'interval': 'day'
 };
 
 // In this dashboard we let users pass nodes as comma seperated list to the query parameter.
 // If nodes are defined, split into a list of query objects, otherwise, show all
 // NOTE: ids must be integers, hence the parseInt()s
 if (!_.isUndefined(ARGS.nodes)) {
-  queries = _.object(_.map(ARGS.nodes.split(','), function (v, k) {
+  queries = _.object(_.map(JSON.parse(ARGS.nodes), function (v, k) {
     return [k, {
-      query: 'node.transport_address:"' + v + '"',
-      alias: v,
+      query: v.q,
+      alias: v.a || v.q,
       pin: true,
       id: parseInt(k, 10)
     }];
@@ -61,22 +61,22 @@ if (!_.isUndefined(ARGS.nodes)) {
   };
 }
 
-var show = ARGS.show.split(',') || [];
+var show = (ARGS.show || "").split(',');
 
 // Now populate the query service with our objects
 dashboard.services.query = {
   list: queries,
   ids: _.map(_.keys(queries), function (v) {
     return parseInt(v, 10);
-  }),
+  })
 };
 
 // Lets also add a default time filter, the value of which can be specified by the user
 dashboard.services.filter = {
   list: {
     0: {
-      from: (ARGS.from || "now-" + _d_timespan),
-      to: "now",
+      from: ARGS.from || "now-" + _d_timespan,
+      to: ARGS.to || "now",
       field: "@timestamp",
       type: "time",
       active: true,
@@ -128,16 +128,6 @@ var rows = [
         "grid": {
           "max": 100,
           "min": 0
-        },
-        "annotate": {
-          "enable": false,
-          "query": "*",
-          "size": 20,
-          "field": "_type",
-          "sort": [
-            "_score",
-            "desc"
-          ]
         }
 
       },
@@ -171,7 +161,17 @@ var rows = [
       {
         "time_field": "@timestamp",
         "value_field": "jvm.mem.heap_used_in_bytes",
-        "title": "Heap"
+        "title": "Heap",
+        "annotate": {
+          "enable": true,
+          "query": "_type:shard_event",
+          "size": 100,
+          "field": "message",
+          "sort": [
+            "_score",
+            "desc"
+          ]
+        }
       },
       {
         "value_field": "jvm.gc.collectors.ParNew.collection_time_in_millis",
@@ -231,7 +231,7 @@ var rows = [
     ]
   },
   {
-    "title": "Disk IO",
+    "title": "Disk",
     "panels": [
       {
         "value_field": "fs.data.disk_read_size_in_bytes",
@@ -244,6 +244,10 @@ var rows = [
         "title": "Disk writes (bytes)",
         "derivative": true,
         "scaleSeconds": true
+      },
+      {
+        "value_field": "fs.data.available_in_bytes",
+        "title": "Disk Free space (bytes)"
       }
     ],
     "notice": false
@@ -370,7 +374,7 @@ dashboard.pulldowns = [
     "type": "query",
     "collapse": false,
     "notice": false,
-    "enable": true,
+    "enable": true
   },
   {
     "type": "filtering",
