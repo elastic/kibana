@@ -25,10 +25,62 @@ define([
       var _d = {
         compact: false,
         node_display_field: "node.name", // used as primary display string for a node.
-        node_persistent_field: "node.transport_address" // used as node identity - i.e., search queries, facets etc.
-
+        node_persistent_field: "node.transport_address", // used as node identity - i.e., search queries, facets etc.
+        metrics: [
+          {
+            name: 'CPU (%)',
+            field: 'process.cpu.percent',
+            warning: 60,
+            error: 90,
+            decimals: 2
+          },
+          {
+            name: 'Load (1m)',
+            field: 'os.load_average.1m',
+            warning: 8,
+            error: 10,
+            decimals: 2
+          },
+          {
+            name: 'System Mem (%)',
+            field: 'os.mem.used_percent',
+            warning: 90,
+            error: 97,
+            decimals: 2
+          },
+          {
+            name: 'Jvm Mem (%)',
+            field: 'os.mem.used_percent',
+            warning: 95,
+            error: 98,
+            decimals: 2
+          },
+          {
+            name: 'Free disk space (GB)',
+            field: 'fs.data.available_in_bytes',
+            scale: 1024 * 1024 * 1024,
+            warning: { threshold: 5, type: "lower_bound" },
+            error: { threshold: 2, type: "lower_bound" },
+            decimals: 2
+          }
+        ]
       };
       _.defaults($scope.panel, _d);
+
+
+      $scope.editedMetricIndex = -1;
+
+      var _metric_defaults = {name: "", decimals: 2, scale: 1};
+
+      _.each($scope.panel.metrics, function (m) {
+        _.defaults(m, _metric_defaults);
+        if (_.isNumber(m.error)) {
+          m.error = { threshold: m.error, type: "upper_bound"};
+        }
+        if (_.isNumber(m.warning)) {
+          m.warning = { threshold: m.warning, type: "upper_bound"};
+        }
+      });
 
       $scope.init = function () {
         $scope.warnLevels = {};
@@ -127,55 +179,6 @@ define([
           request,
           results;
 
-        $scope.metrics = [
-          {
-            name: 'CPU (%)',
-            field: 'process.cpu.percent',
-            warning: 60,
-            error: 90,
-            decimals: 2
-          },
-          {
-            name: 'Load (1m)',
-            field: 'os.load_average.1m',
-            warning: 8,
-            error: 10,
-            decimals: 2
-          },
-          {
-            name: 'System Mem (%)',
-            field: 'os.mem.used_percent',
-            warning: 90,
-            error: 97,
-            decimals: 2
-          },
-          {
-            name: 'Jvm Mem (%)',
-            field: 'os.mem.used_percent',
-            warning: 95,
-            error: 98,
-            decimals: 2
-          },
-          {
-            name: 'Free disk space (GB)',
-            field: 'fs.data.available_in_bytes',
-            scale: 1024 * 1024 * 1024,
-            warning: { threshold: 5, type: "lower_bound" },
-            error: { threshold: 2, type: "lower_bound" },
-            decimals: 2
-          }
-        ];
-
-        _.each($scope.metrics, function (m) {
-          _.defaults(m, {scale: 1});
-          if (_.isNumber(m.error)) {
-            m.error = { threshold: m.error, type: "upper_bound"};
-          }
-          if (_.isNumber(m.warning)) {
-            m.warning = { threshold: m.warning, type: "upper_bound"};
-          }
-        });
-
         request = $scope.ejs.Request().indices(dashboard.indices);
 
         var time = filterSrv.timeRange('last').to;
@@ -186,7 +189,7 @@ define([
             .must($scope.ejs.RangeFilter('@timestamp').from(time + '||-10m/m'))
             .must($scope.ejs.TermsFilter($scope.panel.node_persistent_field, id));
 
-          _.each($scope.metrics, function (m) {
+          _.each($scope.panel.metrics, function (m) {
             request = request
               .facet($scope.ejs.StatisticalFacet(id + "_" + m.name)
                 .field(m.field || m.name)
@@ -225,6 +228,13 @@ define([
         window.location = current;
       };
 
+      $scope.formatAlert = function (a) {
+        if (!a) {
+          return "";
+        }
+        return (a.type === "upper_bound" ? ">" : "<") + a.threshold;
+      };
+
       $scope.detailViewLink = function (nodes, fields) {
         if (nodes === undefined) {
           nodes = _.where($scope.nodes, {selected: true});
@@ -254,10 +264,10 @@ define([
 
       $scope.calculateWarnings = function () {
         $scope.warnLevels = {_global_: {}};
-        _.each($scope.metrics, function (metric) {
+        _.each($scope.panel.metrics, function (metric) {
           $scope.warnLevels._global_[metric.name] = 0;
           _.each(_.pluck($scope.nodes, 'id'), function (nodeID) {
-            var level = $scope.alertLevel(metric, $scope.data[nodeID + '_' + metric.name].mean);
+            var level = $scope.alertLevel(metric, ($scope.data[nodeID + '_' + metric.name] || {}).mean);
             $scope.warnLevels[nodeID] = $scope.warnLevels[nodeID] || {};
             $scope.warnLevels[nodeID][metric.name] = level;
             if (level > $scope.warnLevels._global_[metric.name]) {
@@ -306,6 +316,61 @@ define([
         return [];
       };
 
+
+      $scope.parseAlert = function (s) {
+        if (!s) {
+          return null;
+        }
+        var ret = { type: "upper_bound"};
+        if (s[0] === '<') {
+          ret.type = "lower_bound";
+          s = s.substr(1);
+        } else if (s[0] === '>') {
+          s = s.substr(1);
+        }
+
+        ret.threshold = parseFloat(s);
+        if (isNaN(ret.threshold)) {
+          return null;
+        }
+        return ret;
+
+      };
+
+
+      $scope.addMetric = function () {
+        $scope.panel.metrics.push(_.defaults({}, _metric_defaults));
+        $scope.editedMetricIndex = $scope.panel.metrics.length - 1;
+      };
+
+      $scope.deleteMetric = function (index) {
+        $scope.panel.metrics = _.without($scope.panel.metrics, $scope.panel.metrics[index]);
+        $scope.editedMetricIndex = -1;
+      };
+
+
+    });
+
+    module.directive('alertValue', function () {
+      return {
+        require: 'ngModel',
+        link: function (scope, elm, attrs, ctrl) {
+          ctrl.$parsers.unshift(function (viewValue) {
+            if (/(<>)?\d+(.\d+)?/.test(viewValue)) {
+              // it is valid
+              ctrl.$setValidity('alertValue', true);
+              return scope.parseAlert(viewValue);
+            } else {
+              // it is invalid, return undefined (no model update)
+              ctrl.$setValidity('alertValue', false);
+              return undefined;
+            }
+          });
+          ctrl.$formatters.unshift(function (modelValue) {
+            return scope.formatAlert(modelValue);
+          });
+        }
+      };
     });
 
     module.directive('marvelNodesHealthChart', function () {

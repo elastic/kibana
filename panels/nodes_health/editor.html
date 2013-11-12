@@ -1,2 +1,66 @@
+<h5>General</h5>
 <div class="row-fluid">
+  <div class="span6">
+    <label class="small">Persistent id field
+      <i class="icon-question-sign" bs-tooltip="'choose a field that doesn't change on node restart'"></i></label>
+    <input type="text" bs-typeahead="fields.list" class="input-large" ng-model="panel.node_persistent_field"/>
+  </div>
+</div>
+<div class="row-fluid">
+  <div class="span6">
+    <label class="small">Display field
+      <i class="icon-question-sign" bs-tooltip="'will be used as the name of each row'"></i></label>
+    <input type="text" bs-typeahead="fields.list" class="input-large" ng-model="panel.node_display_field"/>
+  </div>
+</div>
+<h5>Metrics</h5>
+<div class="row-fluid">
+  <div class="span12">
+    <table class="table table-condensed table-striped">
+      <thead>
+      <th>Name</th>
+      <th>Field</th>
+      <th>Warning</th>
+      <th>Error</th>
+      <th>Prec.</th>
+      <th/>
+      <th/>
+      </thead>
+      <tr ng-repeat="metric in panel.metrics">
+        <td ng-show="editedMetricIndex != $index">{{metric.name}}</td>
+        <td ng-show="editedMetricIndex != $index">{{metric.field}}</td>
+        <td ng-show="editedMetricIndex != $index">{{formatAlert(metric.warning)}}</td>
+        <td ng-show="editedMetricIndex != $index">{{formatAlert(metric.error)}}</td>
+        <td ng-show="editedMetricIndex != $index">{{metric.decimals}}</td>
+        <td ng-show="editedMetricIndex != $index">
+          <i ng-show="editedMetricIndex < 0" ng-click="editedMetricIndex=$index" class="pointer icon-edit"></i></td>
+        <td ng-show="editedMetricIndex != $index">
+          <i ng-show="editedMetricIndex < 0 && !$first" ng-click="_.move(panel.metrics,$index,$index-1)" class="pointer icon-arrow-up"></i>
+        </td>
+        <td ng-show="editedMetricIndex != $index">
+          <i ng-show="editedMetricIndex < 0 && !$last" ng-click="_.move(panel.metrics,$index,$index+1)" class="pointer icon-arrow-down"></i>
+        </td>
+        <td ng-show="editedMetricIndex == $index">
+          <input type="text" class="input-medium" ng-model="metric.name" ng-required/></td>
+        <td ng-show="editedMetricIndex == $index">
+          <input type="text" ng-model="metric.field" bs-typeahead="fields.list" ng-required/>
+        </td>
+        <td ng-show="editedMetricIndex == $index">
+          <input type="text" style="width: 30px;" alert-value ng-model="metric.warning"/>
+        </td>
+        <td ng-show="editedMetricIndex == $index">
+          <input type="text" style="width: 30px;" alert-value ng-model="metric.error"></td>
+        <td ng-show="editedMetricIndex == $index">
+          <input type="text" style="width: 30px;" ng-model="metric.decimals" value="2" ng-required/></td>
+        <td ng-show="editedMetricIndex == $index">
+          <i class="pointer icon-check" ng-click="editedMetricIndex=-1"></i>
+        </td>
+        <td ng-show="editedMetricIndex == $index">
+          <i ng-click="deleteMetric($index)" class="pointer icon-remove"></i>
+        <td ng-show="editedMetricIndex == $index">
+          <i class="icon"></i></td>
+      </tr>
+    </table>
+    <button ng-hide="editedMetric.index >= 0" type='button' ng-click="addMetric()" class="btn btn-success">Add Metric</button>
+  </div>
 </div>
