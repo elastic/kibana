@@ -10,3 +10,5 @@
 /.settings
 /config
 /lib
+/kibana
+/node_modules

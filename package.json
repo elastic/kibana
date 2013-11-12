@@ -1,0 +1,23 @@
+{
+  "author": {
+    "name": "Elasticsearch",
+    "company": "Elasticsearch BV"
+  },
+  "name": "elasticsearch-marvel",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/elasticsearch/elasticsearch-marvel.git"
+  },
+  "devDependencies": {
+    "rjs-build-analysis": "0.0.3",
+    "grunt": "~0.4.1",
+    "grunt-contrib": "~0.8.0",
+    "grunt-contrib-copy": "~0.4.1",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-string-replace": "~0.2.4",
+    "grunt-contrib-compress": "~0.5.2",
+    "grunt-git": "~0.1.6"
+  },
+  "license": "Apache License"
+}
