@@ -30,7 +30,9 @@
           <input ng-show="metricEditor.index == $index" type="text" class="input-medium" ng-model="metric.name" ng-required/></td>
         </td>
         <td>
-          <span>{{metric.field}}</span>
+          <span ng-show="metricEditor.index != $index">{{metric.field}}</span>
+          <input ng-show="metricEditor.index == $index"  placeholder="field name"
+                 type="text" bs-typeahead="fields.list" class="input-medium" ng-model="metric.field" ng-required/></td>
         </td>
         <td>
           <span ng-show="metricEditor.index != $index">{{formatAlert(metric.warning)}}</span>
@@ -66,12 +68,12 @@
     </table>
     <form class="form-inline">
       <select ng-model="metricEditor.add">
-        <option ng-repeat="(field,metric) in availableMetrics"
-          value="{{field}}">
-          {{availableMetrics[field]['name']}}
+        <option ng-repeat="metric in addMetricOptions()"
+          value="{{metric.field}}">
+          {{metric.name}}
         </option>
       </select>
-      <button class="btn btn-success" ng-click="addMetric(metricEditor.add);metricEditor.add=undefined" ng-disabled="!metricEditor.add">
+      <button class="btn btn-success" ng-click="addMetric(metricEditor.add);metricEditor.add=undefined" ng-disabled="metricEditor.add === undefined">
         Add Metric</button>
     </form>
   </div>

@@ -26,53 +26,70 @@ define([
         compact: false,
         node_display_field: "node.name", // used as primary display string for a node.
         node_persistent_field: "node.transport_address", // used as node identity - i.e., search queries, facets etc.
-        metrics: [
-          {field: 'process.cpu.percent'},
-          {field: 'os.load_average.1m'},
-          {field: 'os.mem.used_percent'},
-          {field: 'fs.data.available_in_bytes'}
-        ]
+        metrics: [ 'process.cpu.percent', 'os.load_average.1m', 'os.mem.used_percent', 'fs.data.available_in_bytes' ]
       };
       _.defaults($scope.panel, _d);
 
       // editedMetricIndex was not working because the ng-repeat was creating a new scope.
       // By using metricEditor.index we pass the index property by reference.
       $scope.metricEditor = {
-        index : -1,
-        add : undefined
+        index: -1,
+        add: undefined
       };
 
       // The allowed metrics and their defaults, from which we can create a select list
-      $scope.availableMetrics = {
-        'process.cpu.percent': {
+      $scope.availableMetrics = [
+        {
           name: 'CPU (%)',
+          field: 'process.cpu.percent',
           warning: 60,
-          error: 90,
+          error: 90
         },
-        'os.load_average.1m' : {
+        {
           name: 'Load (1m)',
+          field: 'os.load_average.1m',
           warning: 8,
-          error: 10,
+          error: 10
         },
-        'os.mem.used_percent': {
+        {
           name: 'Jvm Mem (%)',
+          field: 'os.mem.used_percent',
           warning: 95,
-          error: 98,
-        },
-        'fs.data.available_in_bytes' : {
-          name: 'Free disk space (GB)',
-          warning: { threshold: 5, type: "lower_bound" },
-          error: { threshold: 2, type: "lower_bound" },
-          scale: 1024 * 1024 * 1024,
+          error: 98
         }
-      };
+        ,
+        {
+          name: 'Free disk space (GB)',
+          field: 'fs.data.available_in_bytes',
+          warning: {
+            threshold: 5,
+            type: "lower_bound"
+          },
+          error: {
+            threshold: 2,
+            type: "lower_bound"
+          },
+          scale: 1024 * 1024 * 1024
+        },
+        {
+          name: 'Field data size (MB)',
+          field: 'indices.fielddata.memory_size_in_bytes',
+          scale: 1024 * 1024
+        },
+        {
+          // allow people to add a new, not-predefined metric.
+          name: 'Custom',
+          field: ''
+        }
+      ];
+
 
       $scope.init = function () {
         $scope.warnLevels = {};
         $scope.nodes = [];
 
-        _.each($scope.panel.metrics, function (m) {
-          m = metricDefaults(m);
+        $scope.panel.metrics = _.map($scope.panel.metrics, function (m) {
+          return metricDefaults(m);
         });
 
         $scope.$on('refresh', function () {
@@ -180,11 +197,11 @@ define([
 
           _.each($scope.panel.metrics, function (m) {
             request = request
-              .facet($scope.ejs.StatisticalFacet(id + "_" + m.name)
-                .field(m.field || m.name)
+              .facet($scope.ejs.StatisticalFacet(id + "_" + m.field)
+                .field(m.field)
                 .facetFilter(filter));
-            request = request.facet($scope.ejs.DateHistogramFacet(id + "_" + m.name + "_history")
-              .keyField('@timestamp').valueField(m.field || m.name).interval('1m')
+            request = request.facet($scope.ejs.DateHistogramFacet(id + "_" + m.field + "_history")
+              .keyField('@timestamp').valueField(m.field).interval('1m')
               .facetFilter(filter)).size(0);
           });
         });
@@ -253,13 +270,13 @@ define([
       $scope.calculateWarnings = function () {
         $scope.warnLevels = {_global_: {}};
         _.each($scope.panel.metrics, function (metric) {
-          $scope.warnLevels._global_[metric.name] = 0;
+          $scope.warnLevels._global_[metric.field] = 0;
           _.each(_.pluck($scope.nodes, 'id'), function (nodeID) {
-            var level = $scope.alertLevel(metric, ($scope.data[nodeID + '_' + metric.name] || {}).mean);
+            var level = $scope.alertLevel(metric, ($scope.data[nodeID + '_' + metric.field] || {}).mean);
             $scope.warnLevels[nodeID] = $scope.warnLevels[nodeID] || {};
-            $scope.warnLevels[nodeID][metric.name] = level;
-            if (level > $scope.warnLevels._global_[metric.name]) {
-              $scope.warnLevels._global_[metric.name] = level;
+            $scope.warnLevels[nodeID][metric.field] = level;
+            if (level > $scope.warnLevels._global_[metric.field]) {
+              $scope.warnLevels._global_[metric.field] = level;
             }
           });
         });
@@ -325,9 +342,13 @@ define([
 
       };
 
-      var metricDefaults = function(m) {
-        var _metric_defaults = {name: "", decimals: 2, scale: 1};
-        m = _.defaults({field:m},$scope.availableMetrics[m]);
+      var metricDefaults = function (m) {
+        if (typeof m === "string") {
+          m = { "field": m };
+        }
+        m = _.defaults(m, _.findWhere($scope.availableMetrics, { "field": m.field }));
+
+        var _metric_defaults = {field: "", decimals: 2, scale: 1};
         m = _.defaults(m, _metric_defaults);
 
         if (_.isNumber(m.error)) {
@@ -343,11 +364,22 @@ define([
       $scope.addMetric = function (metric) {
         metric = metricDefaults(metric);
         $scope.panel.metrics.push(metric);
+        if (!metric.field) {
+          // no field defined, got into edit mode..
+          $scope.metricEditor.index = $scope.panel.metrics.length - 1;
+        }
       };
 
-      $scope.close_edit = function() {
+      $scope.addMetricOptions = function () {
+        var fields = _.pluck($scope.panel.metrics, 'field');
+        return _.filter($scope.availableMetrics, function (value) {
+          return !_.contains(fields, value.field);
+        });
+      };
+
+      $scope.close_edit = function () {
         $scope.metricEditor = {
-          index : -1
+          index: -1
         };
       };
 
@@ -445,4 +477,5 @@ define([
     });
 
 
-  });
+  })
+;

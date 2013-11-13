@@ -45,10 +45,10 @@
   <table class="table table-bordered" ng-if="!panel.compact">
     <thead>
 
-    <th ng-if="hasSelected(nodes)">node <a id="detail_view_link" ng-href="{{detailViewLink()}}" target="_blank" class="btn btn-mini btn-info"  bs-tooltip="detailViewTip()" data-placement="right">nodes dashboard</a></th>
+    <th ng-if="hasSelected(nodes)">node <a id="detail_view_link" ng-href="{{detailViewLink()}}" class="btn btn-mini btn-info"  bs-tooltip="detailViewTip()" data-placement="right">nodes dashboard</a></th>
     <th ng-if="!hasSelected(nodes)">node <a id="detail_view_link" disabled class="btn btn-mini btn-info"  bs-tooltip="detailViewTip()" data-placement="right">nodes dashboard</a></th>
 
-    <th ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels['_global_'][metric.name])">{{metric.name}}</th>
+    <th ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels['_global_'][metric.field])">{{metric.name}}</th>
     </thead>
     <tr ng-repeat="node in nodes">
       <td>
@@ -60,15 +60,15 @@
           </label>
         </div>
       </td>
-      <td ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels[node.id][metric.name])">
+      <td ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels[node.id][metric.field])">
         <div class="marvel-mean pointer" ng-click="metricClick(node,metric)">
-          {{data[node.id+"_"+metric.name].mean / metric.scale | number:metric.decimals}}<br>
+          {{data[node.id+"_"+metric.field].mean / metric.scale | number:metric.decimals}}<br>
 
-          <div class="marvel-nodes-health-chart" series="data[node.id+'_'+metric.name+'_history']"></div>
+          <div class="marvel-nodes-health-chart" series="data[node.id+'_'+metric.field+'_history']"></div>
         </div>
         <div class="marvel-extended pointer" ng-click="metricClick(node,metric)">
-          <span>min: {{data[node.id+"_"+metric.name].min / metric.scale | number:metric.decimals}}</span><br>
-          <span>max: {{data[node.id+"_"+metric.name].max / metric.scale | number:metric.decimals}}</span>
+          <span>min: {{data[node.id+"_"+metric.field].min / metric.scale | number:metric.decimals}}</span><br>
+          <span>max: {{data[node.id+"_"+metric.field].max / metric.scale | number:metric.decimals}}</span>
         </div>
       </td>
     </tr>
@@ -77,7 +77,7 @@
   <table class="table table-bordered table-condensed marvel-table" ng-if="panel.compact">
     <thead>
     <th>node <a ng-href="{{detailViewLink()}}" class="btn btn-mini btn-info" ng-disabled="!hasSelected(nodes)" bs-tooltip="detailViewTip()" data-placement="right">nodes dashboard</a></th>
-    <th ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels['_global_'][metric.name])">{{metric.name}}</th>
+    <th ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels['_global_'][metric.field])">{{metric.name}}</th>
     </thead>
     <tr ng-repeat="node in nodes">
       <td>
@@ -88,9 +88,9 @@
           {{ node.display_name }}
         </div>
       </td>
-      <td ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels[node.id][metric.name])">
-        <div class="pointer" ng-click="metricClick(node,metric)">{{data[node.id+"_"+metric.name].mean / metric.scale | number:metric.decimals}}
-          <div class="marvel-nodes-health-chart pointer" ng-click="metricClick(node,metric)" series="data[node.id+'_'+metric.name+'_history']"></div>
+      <td ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels[node.id][metric.field])">
+        <div class="pointer" ng-click="metricClick(node,metric)">{{data[node.id+"_"+metric.field].mean / metric.scale | number:metric.decimals}}
+          <div class="marvel-nodes-health-chart pointer" ng-click="metricClick(node,metric)" series="data[node.id+'_'+metric.field+'_history']"></div>
         </div>
       </td>
     </tr>
