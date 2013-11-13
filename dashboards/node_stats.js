@@ -177,12 +177,14 @@ var rows = [
         "value_field": "jvm.gc.collectors.ParNew.collection_time_in_millis",
         "title": "GC Young Gen duration",
         "derivative": true,
+        "mode": "min",
         "scaleSeconds": true
       },
       {
         "value_field": "jvm.gc.collectors.ParNew.collection_count",
         "title": "GC counts",
         "derivative": true,
+        "mode": "min",
         "scaleSeconds": true
       }
     ]
@@ -194,12 +196,14 @@ var rows = [
         "value_field": "jvm.gc.collectors.ConcurrentMarkSweep.collection_time_in_millis",
         "derivative": true,
         "scaleSeconds": true,
+        "mode": "min",
         "title": "GC Old Gen duration"
       },
       {
         "value_field": "jvm.gc.collectors.ConcurrentMarkSweep.collection_count",
         "derivative": true,
         "scaleSeconds": true,
+        "mode": "min",
         "title": "GC Old Gen count"
       }
     ]
@@ -237,17 +241,20 @@ var rows = [
         "value_field": "fs.data.disk_read_size_in_bytes",
         "title": "Disk reads (bytes)",
         "derivative": true,
+        "mode": "min",
         "scaleSeconds": true
       },
       {
         "value_field": "fs.data.disk_write_size_in_bytes",
         "title": "Disk writes (bytes)",
         "derivative": true,
+        "mode": "min",
         "scaleSeconds": true
       },
       {
         "value_field": "fs.data.available_in_bytes",
-        "title": "Disk Free space (bytes)"
+        "title": "Disk Free space (bytes)",
+        "mode": "min"
       }
     ],
     "notice": false
@@ -263,6 +270,7 @@ var rows = [
         "value_field": "http.total_opened",
         "title": "HTTP opened",
         "derivative": true,
+        "mode": "min",
         "scaleSeconds": true
       }
     ]
@@ -296,6 +304,7 @@ var rows = [
       {
         "value_field": "indices.refresh.total_time_in_millis",
         "derivative": true,
+        "mode": "min",
         "scaleSeconds": true,
         "title": "Avg refresh time"
       }
@@ -307,6 +316,7 @@ var rows = [
       {
         "value_field": "indices.flush.total",
         "derivative": true,
+        "mode": "min",
         "title": "Flush count"
       }
     ]
@@ -317,12 +327,14 @@ var rows = [
       {
         "value_field": "indices.search.query_total",
         "derivative": true,
+        "mode": "min",
         "scaleSeconds": true,
         "title": "Search requests"
       },
       {
         "value_field": "indices.get.total",
         "derivative": true,
+        "mode": "min",
         "scaleSeconds": true,
         "title": "Get requests"
       }
@@ -341,7 +353,7 @@ var rows = [
       },
       {
         "value_field": "process.open_file_descriptors",
-        "title": "File descriptiors"
+        "title": "File descriptors"
       }
     ]
   }

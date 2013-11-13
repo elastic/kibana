@@ -9,8 +9,8 @@
       ],
       "list": {
         "0": {
-          "query": "*",
-          "alias": "all cluster",
+          "query": "_type:indices_stats",
+          "alias": "All Indices",
           "color": "#7EB26D",
           "id": 0,
           "pin": true,
@@ -76,7 +76,7 @@
               0
             ]
           },
-          "value_field": "indices_stats.primaries.docs.count",
+          "value_field": "primaries.docs.count",
           "auto_int": true,
           "resolution": 30,
           "interval": "1m",
@@ -123,16 +123,6 @@
             "min": 0
           },
           "title": "Document Count",
-          "annotate": {
-            "enable": false,
-            "query": "*",
-            "size": 20,
-            "field": "_type",
-            "sort": [
-              "_score",
-              "desc"
-            ]
-          },
           "pointradius": 5
         },
         {
@@ -140,7 +130,6 @@
           "editable": true,
           "type": "histogram",
           "loadingEditor": false,
-          "mode": "max",
           "time_field": "@timestamp",
           "queries": {
             "mode": "selected",
@@ -148,7 +137,7 @@
               0
             ]
           },
-          "value_field": "indices_stats.total.search.query_total",
+          "value_field": "total.search.query_total",
           "auto_int": true,
           "resolution": 30,
           "interval": "1m",
@@ -185,6 +174,7 @@
           "interactive": true,
           "options": false,
           "derivative": true,
+          "mode": "min",
           "scaleSeconds": true,
           "scale": 1,
           "tooltip": {
@@ -196,16 +186,6 @@
             "min": 0
           },
           "title": "Search requests",
-          "annotate": {
-            "enable": false,
-            "query": "*",
-            "size": 20,
-            "field": "_type",
-            "sort": [
-              "_score",
-              "desc"
-            ]
-          },
           "pointradius": 5
         },
         {
@@ -213,7 +193,6 @@
           "editable": true,
           "type": "histogram",
           "loadingEditor": false,
-          "mode": "max",
           "time_field": "@timestamp",
           "queries": {
             "mode": "selected",
@@ -221,7 +200,7 @@
               0
             ]
           },
-          "value_field": "indices_stats.primaries.indexing.index_total",
+          "value_field": "primaries.indexing.index_total",
           "auto_int": true,
           "resolution": 30,
           "interval": "1m",
@@ -258,6 +237,7 @@
           "interactive": true,
           "options": false,
           "derivative": true,
+          "mode": "min",
           "scaleSeconds": true,
           "scale": 1,
           "tooltip": {
