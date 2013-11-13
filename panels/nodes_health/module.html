@@ -44,7 +44,10 @@
 
   <table class="table table-bordered" ng-if="!panel.compact">
     <thead>
-    <th>node <a id="detail_view_link" ng-href="{{detailViewLink()}}" target="_top" class="btn btn-mini btn-info" ng-disabled="!hasSelected(nodes)" bs-tooltip="detailViewTip()" data-placement="right">nodes dashboard</a></th>
+
+    <th ng-if="hasSelected(nodes)">node <a id="detail_view_link" ng-href="{{detailViewLink()}}" target="_blank" class="btn btn-mini btn-info"  bs-tooltip="detailViewTip()" data-placement="right">nodes dashboard</a></th>
+    <th ng-if="!hasSelected(nodes)">node <a id="detail_view_link" disabled class="btn btn-mini btn-info"  bs-tooltip="detailViewTip()" data-placement="right">nodes dashboard</a></th>
+
     <th ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels['_global_'][metric.name])">{{metric.name}}</th>
     </thead>
     <tr ng-repeat="node in nodes">

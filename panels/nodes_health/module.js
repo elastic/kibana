@@ -27,64 +27,53 @@ define([
         node_display_field: "node.name", // used as primary display string for a node.
         node_persistent_field: "node.transport_address", // used as node identity - i.e., search queries, facets etc.
         metrics: [
-          {
-            name: 'CPU (%)',
-            field: 'process.cpu.percent',
-            warning: 60,
-            error: 90,
-            decimals: 2
-          },
-          {
-            name: 'Load (1m)',
-            field: 'os.load_average.1m',
-            warning: 8,
-            error: 10,
-            decimals: 2
-          },
-          {
-            name: 'System Mem (%)',
-            field: 'os.mem.used_percent',
-            warning: 90,
-            error: 97,
-            decimals: 2
-          },
-          {
-            name: 'Jvm Mem (%)',
-            field: 'os.mem.used_percent',
-            warning: 95,
-            error: 98,
-            decimals: 2
-          },
-          {
-            name: 'Free disk space (GB)',
-            field: 'fs.data.available_in_bytes',
-            scale: 1024 * 1024 * 1024,
-            warning: { threshold: 5, type: "lower_bound" },
-            error: { threshold: 2, type: "lower_bound" },
-            decimals: 2
-          }
+          {field: 'process.cpu.percent'},
+          {field: 'os.load_average.1m'},
+          {field: 'os.mem.used_percent'},
+          {field: 'fs.data.available_in_bytes'}
         ]
       };
       _.defaults($scope.panel, _d);
 
+      // editedMetricIndex was not working because the ng-repeat was creating a new scope.
+      // By using metricEditor.index we pass the index property by reference.
+      $scope.metricEditor = {
+        index : -1,
+        add : undefined
+      };
 
-      $scope.editedMetricIndex = -1;
-
-      var _metric_defaults = {name: "", decimals: 2, scale: 1};
-
-      _.each($scope.panel.metrics, function (m) {
-        _.defaults(m, _metric_defaults);
-        if (_.isNumber(m.error)) {
-          m.error = { threshold: m.error, type: "upper_bound"};
+      // The allowed metrics and their defaults, from which we can create a select list
+      $scope.availableMetrics = {
+        'process.cpu.percent': {
+          name: 'CPU (%)',
+          warning: 60,
+          error: 90,
+        },
+        'os.load_average.1m' : {
+          name: 'Load (1m)',
+          warning: 8,
+          error: 10,
+        },
+        'os.mem.used_percent': {
+          name: 'Jvm Mem (%)',
+          warning: 95,
+          error: 98,
+        },
+        'fs.data.available_in_bytes' : {
+          name: 'Free disk space (GB)',
+          warning: { threshold: 5, type: "lower_bound" },
+          error: { threshold: 2, type: "lower_bound" },
+          scale: 1024 * 1024 * 1024,
         }
-        if (_.isNumber(m.warning)) {
-          m.warning = { threshold: m.warning, type: "upper_bound"};
-        }
-      });
+      };
 
       $scope.init = function () {
         $scope.warnLevels = {};
         $scope.nodes = [];
+
+        _.each($scope.panel.metrics, function (m) {
+          m = metricDefaults(m);
+        });
 
         $scope.$on('refresh', function () {
           $scope.get_nodes();
@@ -93,6 +82,7 @@ define([
         $scope.get_nodes();
 
       };
+
 
       $scope.get_nodes = function () {
         if (dashboard.indices.length === 0) {
@@ -183,7 +173,6 @@ define([
 
         var time = filterSrv.timeRange('last').to;
         time = kbn.parseDate(time).valueOf();
-        // Terms mode
         _.each(_.pluck(newNodes, 'id'), function (id) {
           var filter = $scope.ejs.BoolFilter()
             .must($scope.ejs.RangeFilter('@timestamp').from(time + '||-10m/m'))
@@ -229,14 +218,12 @@ define([
       };
 
       $scope.formatAlert = function (a) {
-        if (!a) {
-          return "";
-        }
-        return (a.type === "upper_bound" ? ">" : "<") + a.threshold;
+        return !a ? "" : (a.type === "upper_bound" ? ">" : "<") + a.threshold;
       };
 
+
       $scope.detailViewLink = function (nodes, fields) {
-        if (nodes === undefined) {
+        if (_.isUndefined(nodes)) {
           nodes = _.where($scope.nodes, {selected: true});
         }
         nodes = _.map(nodes, function (node) {
@@ -249,12 +236,13 @@ define([
         nodes = JSON.stringify(nodes);
         var time = filterSrv.timeRange(false);
         var show;
-        if (fields !== undefined) {
+        if (!_.isUndefined(fields)) {
           show = "&show=" + fields.join(",");
         } else {
           show = "";
         }
-        return "#/dashboard/script/marvel.node_stats.js?nodes=" + encodeURI(nodes) + "&from=" + time.from + "&to=" + time.to + show;
+        return "#/dashboard/script/marvel.node_stats.js?nodes=" + encodeURI(nodes) + "&from=" +
+          time.from + "&to=" + time.to + show;
       };
 
       $scope.detailViewTip = function () {
@@ -337,15 +325,34 @@ define([
 
       };
 
+      var metricDefaults = function(m) {
+        var _metric_defaults = {name: "", decimals: 2, scale: 1};
+        m = _.defaults({field:m},$scope.availableMetrics[m]);
+        m = _.defaults(m, _metric_defaults);
 
-      $scope.addMetric = function () {
-        $scope.panel.metrics.push(_.defaults({}, _metric_defaults));
-        $scope.editedMetricIndex = $scope.panel.metrics.length - 1;
+        if (_.isNumber(m.error)) {
+          m.error = { threshold: m.error, type: "upper_bound"};
+        }
+        if (_.isNumber(m.warning)) {
+          m.warning = { threshold: m.warning, type: "upper_bound"};
+        }
+
+        return m;
+      };
+
+      $scope.addMetric = function (metric) {
+        metric = metricDefaults(metric);
+        $scope.panel.metrics.push(metric);
+      };
+
+      $scope.close_edit = function() {
+        $scope.metricEditor = {
+          index : -1
+        };
       };
 
       $scope.deleteMetric = function (index) {
         $scope.panel.metrics = _.without($scope.panel.metrics, $scope.panel.metrics[index]);
-        $scope.editedMetricIndex = -1;
       };
 
 
