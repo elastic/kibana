@@ -2,12 +2,8 @@
 <div class="editor-row">
   <div class="section">
     <div class="editor-option">
-      <label class="small">Persistent id field <tip>choose a field that does not change on node restart</tip></label>
-      <input type="text" bs-typeahead="fields.list" class="input-large" ng-model="panel.node_persistent_field"/>
-    </div>
-    <div class="editor-option" ng-show="panel.mode != 'count'">
-      <label class="small">Display field <tip>will be used as the name of each row</tip></label>
-      <input type="text" bs-typeahead="fields.list" class="input-large" ng-model="panel.node_display_field"/>
+      <label class="small">Mode</label>
+      <select class="input-small" ng-model="panel.mode" ng-options="f for f in ['nodes','indices']"></select>
     </div>
   </div>
 </div>
@@ -68,7 +64,7 @@
     </table>
     <form class="form-inline">
       <select ng-model="metricEditor.add">
-        <option ng-repeat="metric in addMetricOptions()"
+        <option ng-repeat="metric in addMetricOptions(panel.mode)"
           value="{{metric.field}}">
           {{metric.name}}
         </option>

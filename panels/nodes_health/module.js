@@ -24,8 +24,9 @@ define([
       // Set and populate defaults
       var _d = {
         compact: false,
-        node_display_field: "node.name", // used as primary display string for a node.
-        node_persistent_field: "node.transport_address", // used as node identity - i.e., search queries, facets etc.
+        mode: 'nodes',
+        display_field: "node.name", // used as primary display string for a node.
+        persistent_field: "node.transport_address", // used as node identity - i.e., search queries, facets etc.
         metrics: [ 'process.cpu.percent', 'os.load_average.1m', 'os.mem.used_percent', 'fs.data.available_in_bytes' ]
       };
       _.defaults($scope.panel, _d);
@@ -37,71 +38,137 @@ define([
         add: undefined
       };
 
-      // The allowed metrics and their defaults, from which we can create a select list
-      $scope.availableMetrics = [
-        {
-          name: 'CPU (%)',
-          field: 'process.cpu.percent',
-          warning: 60,
-          error: 90
-        },
-        {
-          name: 'Load (1m)',
-          field: 'os.load_average.1m',
-          warning: 8,
-          error: 10
-        },
-        {
-          name: 'Jvm Mem (%)',
-          field: 'os.mem.used_percent',
-          warning: 95,
-          error: 98
-        }
-        ,
-        {
-          name: 'Free disk space (GB)',
-          field: 'fs.data.available_in_bytes',
-          warning: {
-            threshold: 5,
-            type: "lower_bound"
+      $scope.modeInfo = {
+        nodes: {
+          defaults: {
+            persistent_name: "node.name",
+            persistent_field: "node.transport_address",
+            metrics: [ 'process.cpu.percent', 'os.load_average.1m', 'os.mem.used_percent', 'fs.data.available_in_bytes' ]
           },
-          error: {
-            threshold: 2,
-            type: "lower_bound"
+          availableMetrics: [
+            {
+              name: 'CPU (%)',
+              field: 'process.cpu.percent',
+              warning: 60,
+              error: 90
+            },
+            {
+              name: 'Load (1m)',
+              field: 'os.load_average.1m',
+              warning: 8,
+              error: 10
+            },
+            {
+              name: 'Jvm Mem (%)',
+              field: 'os.mem.used_percent',
+              warning: 95,
+              error: 98
+            },
+            {
+              name: 'Free disk space (GB)',
+              field: 'fs.data.available_in_bytes',
+              warning: {
+                threshold: 5,
+                type: "lower_bound"
+              },
+              error: {
+                threshold: 2,
+                type: "lower_bound"
+              },
+              scale: 1024 * 1024 * 1024
+            },
+            /* Dropping this until we have error handling for fields that don't exist
+            {
+              // allow people to add a new, not-predefined metric.
+              name: 'Custom',
+              field: ''
+            }
+            */
+          ]
+        },
+        indices: {
+          defaults: {
+            persistent_name: 'index',
+            persistent_field: 'index',
+            metrics: [ 'primaries.docs.count', 'primaries.indexing.index_total', 'total.search.query_total', 'total.merges.current' ]
           },
-          scale: 1024 * 1024 * 1024
-        },
-        {
-          name: 'Field data size (MB)',
-          field: 'indices.fielddata.memory_size_in_bytes',
-          scale: 1024 * 1024
-        },
-        {
-          // allow people to add a new, not-predefined metric.
-          name: 'Custom',
-          field: ''
+          availableMetrics: [
+            {
+              name: 'Documents',
+              field: 'primaries.docs.count',
+            },
+            {
+              name: 'Index Rate',
+              field: 'primaries.indexing.index_total',
+              rate: true
+            },
+            {
+              name: 'Search Rate',
+              field: 'total.search.query_total',
+              rate: true,
+            },
+            {
+              name: 'Merges',
+              field: 'total.merges.current',
+            },
+            /* Dropping this until we have error handling for fields that don't exist
+            {
+              // allow people to add a new, not-predefined metric.
+              name: 'Custom',
+              field: ''
+            }
+            */
+          ]
         }
-      ];
+      };
 
+      var metricDefaults = function (m) {
+        if(_.isUndefined($scope.modeInfo[$scope.panel.mode])) {
+          return [];
+        }
+        if (_.isString(m)) {
+          m = { "field": m };
+        }
+        m = _.defaults(m, _.findWhere($scope.modeInfo[$scope.panel.mode].availableMetrics, { "field": m.field }));
+
+        var _metric_defaults = {field: "", decimals: 2, scale: 1};
+        m = _.defaults(m, _metric_defaults);
+
+        if (_.isNumber(m.error)) {
+          m.error = { threshold: m.error, type: "upper_bound"};
+        }
+        if (_.isNumber(m.warning)) {
+          m.warning = { threshold: m.warning, type: "upper_bound"};
+        }
+
+        return m;
+      };
+
+      $scope.panel.metrics = _.map($scope.panel.metrics, function (m) {
+        return metricDefaults(m);
+      });
+
+      $scope.$watch('panel.mode',function(m) {
+        if(_.isUndefined(m)) {
+          return;
+        }
+        $scope.panel.display_field = $scope.modeInfo[m].defaults.display_field;
+        $scope.panel.persistent_field = $scope.modeInfo[m].defaults.persistent_field;
+        $scope.panel.metrics = _.map($scope.modeInfo[m].defaults.metrics, function (m) {
+          return metricDefaults(m);
+        });
+        _.throttle($scope.get_rows(),500);
+      });
 
       $scope.init = function () {
         $scope.warnLevels = {};
-        $scope.nodes = [];
-
-        $scope.panel.metrics = _.map($scope.panel.metrics, function (m) {
-          return metricDefaults(m);
-        });
-
+        $scope.rows = [];
         $scope.$on('refresh', function () {
-          $scope.get_nodes();
+          $scope.get_rows();
         });
-
-        $scope.get_nodes();
-
       };
 
-
-      $scope.get_nodes = function () {
+      $scope.get_rows = function () {
         if (dashboard.indices.length === 0) {
           return;
         }
@@ -116,7 +183,7 @@ define([
         request = $scope.ejs.Request().indices(dashboard.indices).size(0).searchType("count");
         request.facet(
           $scope.ejs.TermsFacet('terms')
-            .field($scope.panel.node_persistent_field)
+            .field($scope.panel.persistent_field)
             .size(9999999)
             .order('term')
             .facetFilter(filter)
@@ -125,59 +192,67 @@ define([
         results = request.doSearch();
 
         results.then(function (r) {
-          var newPersistentIds = _.pluck(r.facets.terms.terms, 'term');
+          var newPersistentIds = _.pluck(r.facets.terms.terms, 'term'),
+            mrequest;
 
           if (newPersistentIds.length === 0) {
-            $scope.get_data([]);
+            // This seems more obvious if this is the point
+            $scope.rows = [];
+            // $scope.get_data([]);
             return;
           }
 
-          var mrequest = $scope.ejs.MultiSearchRequest().indices(dashboard.indices);
+          mrequest = $scope.ejs.MultiSearchRequest().indices(dashboard.indices);
 
           _.each(newPersistentIds, function (persistentId) {
-            var nodeReqeust = $scope.ejs.Request().filter(filter);
-            nodeReqeust.query(
+            var rowRequest = $scope.ejs.Request().filter(filter);
+            rowRequest.query(
               $scope.ejs.ConstantScoreQuery().query(
-                $scope.ejs.TermQuery($scope.panel.node_persistent_field, persistentId)
+                $scope.ejs.TermQuery($scope.panel.persistent_field, persistentId)
               )
             );
-            nodeReqeust.size(1).fields([ $scope.panel.node_display_field, $scope.panel.node_persistent_field]);
-            nodeReqeust.sort("@timestamp", "desc");
-            mrequest.requests(nodeReqeust);
+            rowRequest.size(1).fields([ $scope.panel.display_field, $scope.panel.persistent_field]);
+            rowRequest.sort("@timestamp", "desc");
+            mrequest.requests(rowRequest);
           });
 
           mrequest.doSearch(function (r) {
-            var newNodes = [];
-            _.each(r.responses, function (nodeResponse) {
-              if (nodeResponse.hits.hits.length === 0) {
+            var newRows = [],
+              hit,
+              display_name,
+              persistent_name;
+
+            _.each(r.responses, function (response) {
+              if (response.hits.hits.length === 0) {
                 return;
               }
 
-              var hit = nodeResponse.hits.hits[0];
-              var display_name = hit.fields[$scope.panel.node_display_field];
-              var persistent_name = hit.fields[$scope.panel.node_persistent_field];
-              newNodes.push({
+              hit = response.hits.hits[0];
+              display_name = hit.fields[$scope.panel.display_field];
+              persistent_name = hit.fields[$scope.panel.persistent_field];
+
+              newRows.push({
                 display_name: display_name || persistent_name,
                 id: persistent_name,
-                selected: ($scope.nodes[persistent_name] || {}).selected
+                selected: ($scope.rows[persistent_name] || {}).selected
               });
             });
 
-            $scope.get_data(newNodes);
+            $scope.get_data(newRows);
           });
         });
 
       };
 
-      $scope.get_data = function (newNodes) {
+      $scope.get_data = function (newRows) {
         // Make sure we have everything for the request to complete
 
-        if (newNodes === undefined) {
-          newNodes = $scope.nodes;
+        if (_.isUndefined(newRows)) {
+          newRows = $scope.rows;
         }
 
-        if (dashboard.indices.length === 0 || newNodes.length === 0) {
-          $scope.nodes = newNodes;
+        if (dashboard.indices.length === 0 || newRows.length === 0) {
+          $scope.rows = newRows;
           return;
         }
 
@@ -190,10 +265,10 @@ define([
 
         var time = filterSrv.timeRange('last').to;
         time = kbn.parseDate(time).valueOf();
-        _.each(_.pluck(newNodes, 'id'), function (id) {
+        _.each(_.pluck(newRows, 'id'), function (id) {
           var filter = $scope.ejs.BoolFilter()
-            .must($scope.ejs.RangeFilter('@timestamp').from(time + '||-10m/m'))
-            .must($scope.ejs.TermsFilter($scope.panel.node_persistent_field, id));
+            .must($scope.ejs.RangeFilter('@timestamp').from(time + '||-10m'))
+            .must($scope.ejs.TermsFilter($scope.panel.persistent_field, id));
 
           _.each($scope.panel.metrics, function (m) {
             request = request
@@ -210,7 +285,7 @@ define([
 
         // Populate scope when we have results
         results.then(function (results) {
-          $scope.nodes = newNodes;
+          $scope.rows = newRows;
           $scope.data = results.facets;
           $scope.panelMeta.loading = false;
           $scope.warnLevels = {};
@@ -241,10 +316,10 @@ define([
 
       $scope.detailViewLink = function (nodes, fields) {
         if (_.isUndefined(nodes)) {
-          nodes = _.where($scope.nodes, {selected: true});
+          nodes = _.where($scope.rows, {selected: true});
         }
         nodes = _.map(nodes, function (node) {
-          var query = $scope.panel.node_persistent_field + ':"' + node.id + '"';
+          var query = $scope.panel.persistent_field + ':"' + node.id + '"';
           return {
             q: query,
             a: node.display_name
@@ -258,12 +333,12 @@ define([
         } else {
           show = "";
         }
-        return "#/dashboard/script/marvel.node_stats.js?nodes=" + encodeURI(nodes) + "&from=" +
+        return "#/dashboard/script/marvel."+$scope.panel.mode+"_stats.js?ids=" + encodeURI(nodes) + "&from=" +
           time.from + "&to=" + time.to + show;
       };
 
       $scope.detailViewTip = function () {
-        return $scope.hasSelected($scope.nodes) ? 'Open nodes dashboard for selected nodes' :
+        return $scope.hasSelected($scope.rows) ? 'Open nodes dashboard for selected nodes' :
           'Select nodes and click top open the nodes dashboard';
       };
 
@@ -271,10 +346,16 @@ define([
         $scope.warnLevels = {_global_: {}};
         _.each($scope.panel.metrics, function (metric) {
           $scope.warnLevels._global_[metric.field] = 0;
-          _.each(_.pluck($scope.nodes, 'id'), function (nodeID) {
-            var level = $scope.alertLevel(metric, ($scope.data[nodeID + '_' + metric.field] || {}).mean);
-            $scope.warnLevels[nodeID] = $scope.warnLevels[nodeID] || {};
-            $scope.warnLevels[nodeID][metric.field] = level;
+          _.each(_.pluck($scope.rows, 'id'), function (id) {
+            var num, level;
+            if(metric.rate) {
+              num = ($scope.data[id + '_' + metric.field].max - $scope.data[id + '_' + metric.field].max)/600;
+            } else {
+              num = $scope.data[id + '_' + metric.field].mean;
+            }
+            level = $scope.alertLevel(metric, num);
+            $scope.warnLevels[id] = $scope.warnLevels[id] || {};
+            $scope.warnLevels[id][metric.field] = level;
             if (level > $scope.warnLevels._global_[metric.field]) {
               $scope.warnLevels._global_[metric.field] = level;
             }
@@ -342,25 +423,6 @@ define([
 
       };
 
-      var metricDefaults = function (m) {
-        if (typeof m === "string") {
-          m = { "field": m };
-        }
-        m = _.defaults(m, _.findWhere($scope.availableMetrics, { "field": m.field }));
-
-        var _metric_defaults = {field: "", decimals: 2, scale: 1};
-        m = _.defaults(m, _metric_defaults);
-
-        if (_.isNumber(m.error)) {
-          m.error = { threshold: m.error, type: "upper_bound"};
-        }
-        if (_.isNumber(m.warning)) {
-          m.warning = { threshold: m.warning, type: "upper_bound"};
-        }
-
-        return m;
-      };
-
       $scope.addMetric = function (metric) {
         metric = metricDefaults(metric);
         $scope.panel.metrics.push(metric);
@@ -370,9 +432,13 @@ define([
         }
       };
 
-      $scope.addMetricOptions = function () {
+      // This is expensive, it would be better to populate a scope object
+      $scope.addMetricOptions = function (m) {
+        if(_.isUndefined($scope.modeInfo[m])) {
+          return [];
+        }
         var fields = _.pluck($scope.panel.metrics, 'field');
-        return _.filter($scope.availableMetrics, function (value) {
+        return _.filter($scope.modeInfo[m].availableMetrics, function (value) {
           return !_.contains(fields, value.field);
         });
       };
@@ -417,7 +483,8 @@ define([
         restrict: 'C',
         scope: {
           series: '=',
-          panel: '='
+          panel: '=',
+          field: '='
         },
         template: '<div></div>',
         link: function (scope, elem) {
@@ -450,9 +517,14 @@ define([
             };
 
             if (!_.isUndefined(scope.series)) {
+              var metric = _.findWhere(scope.panel.metrics, { "field": scope.field });
               var _d = {
                 data: _.map(scope.series.entries, function (p) {
-                  return [p.time, p.mean];
+                  if(metric.rate) {
+                    return [p.time, (p.max-p.min)];
+                  } else {
+                    return [p.time, p.mean];
+                  }
                 }),
                 color: elem.css('color')
               };
