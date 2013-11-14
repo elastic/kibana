@@ -267,12 +267,16 @@ define([
 
         request = $scope.ejs.Request().indices(dashboard.indices);
 
-        var time = filterSrv.timeRange('last').to;
-        time = kbn.parseDate(time).valueOf();
+        var to = filterSrv.timeRange('last').to;
+        var from = new Date(to);
+        from.setMinutes(from.getMinutes()-10,0,0);
+        to = kbn.parseDate(to).valueOf();
+        from = kbn.parseDate(from).valueOf();
         _.each(_.pluck(newRows, 'id'), function (id) {
           var filter = $scope.ejs.BoolFilter()
-            .must($scope.ejs.RangeFilter('@timestamp').from(time + '||-10m'))
-            .must($scope.ejs.TermsFilter($scope.panel.persistent_field, id));
+            .must($scope.ejs.RangeFilter('@timestamp').from(from).to(to))
+            .must($scope.ejs.TermsFilter($scope.panel.persistent_field, id))
+            .must($scope.get_mode_filter());
 
           _.each($scope.panel.metrics, function (m) {
             request = request
