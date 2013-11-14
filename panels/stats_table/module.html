@@ -56,7 +56,7 @@
           <label>
             <input type="checkbox" ng-model="row.selected" ng-checked="row.selected">
             {{row.display_name}}
-            <div class="marvel-persistent-name">{{row.id}}</div>
+            <div class="marvel-persistent-name" ng-hide="row.id == row.display_name" ng-click="metricClick(row)">{{row.id}}</div>
           </label>
         </div>
       </td>

@@ -5,6 +5,15 @@
       <label class="small">Mode</label>
       <select class="input-small" ng-model="panel.mode" ng-options="f for f in ['nodes','indices']"></select>
     </div>
+  <div class="section" ng-show="panel.mode == 'nodes'">
+    <div class="editor-option">
+      <label class="small">Persistent id field <tip>choose a field that does not change on node restart</tip></label>
+      <input type="text" bs-typeahead="fields.list" class="input-large" ng-model="panel.persistent_field"/>
+    </div>
+    <div class="editor-option" ng-show="panel.mode != 'count'">
+      <label class="small">Display field <tip>will be used as the name of each row</tip></label>
+      <input type="text" bs-typeahead="fields.list" class="input-large" ng-model="panel.display_field"/>
+    </div>
   </div>
 </div>
 

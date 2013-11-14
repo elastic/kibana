@@ -265,7 +265,7 @@
       "notice": false
     },
     {
-      "title": "Nodes health",
+      "title": "Nodes overview",
       "height": "150px",
       "editable": true,
       "collapse": false,
@@ -275,10 +275,31 @@
           "error": false,
           "span": 12,
           "editable": true,
-          "type": "marvel.nodes_health",
+          "type": "marvel.stats_table",
+          "mode": "nodes",
           "loadingEditor": false,
           "compact": false,
-          "title": "Nodes health"
+          "title": "Nodes"
+        }
+      ],
+      "notice": false
+    },
+    {
+      "title": "Indices overview",
+      "height": "150px",
+      "editable": true,
+      "collapse": false,
+      "collapsable": true,
+      "panels": [
+        {
+          "error": false,
+          "span": 12,
+          "editable": true,
+          "type": "marvel.stats_table",
+          "mode": "indices",
+          "loadingEditor": false,
+          "compact": false,
+          "title": "Indices"
         }
       ],
       "notice": false

@@ -42,8 +42,8 @@ dashboard.index = {
 // In this dashboard we let users pass nodes as comma seperated list to the query parameter.
 // If nodes are defined, split into a list of query objects, otherwise, show all
 // NOTE: ids must be integers, hence the parseInt()s
-if (!_.isUndefined(ARGS.nodes)) {
-  queries = _.object(_.map(JSON.parse(ARGS.nodes), function (v, k) {
+if (!_.isUndefined(ARGS.queries)) {
+  queries = _.object(_.map(JSON.parse(ARGS.queries), function (v, k) {
     return [k, {
       query: v.q,
       alias: v.a || v.q,

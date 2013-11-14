@@ -25,9 +25,6 @@ define([
       var _d = {
         compact: false,
         mode: 'nodes',
-        display_field: "node.name", // used as primary display string for a node.
-        persistent_field: "node.transport_address", // used as node identity - i.e., search queries, facets etc.
-        metrics: [ 'process.cpu.percent', 'os.load_average.1m', 'os.mem.used_percent', 'fs.data.available_in_bytes' ]
       };
       _.defaults($scope.panel, _d);
 
@@ -41,7 +38,7 @@ define([
       $scope.modeInfo = {
         nodes: {
           defaults: {
-            persistent_name: "node.name",
+            display_field: "node.name",
             persistent_field: "node.transport_address",
             metrics: [ 'process.cpu.percent', 'os.load_average.1m', 'os.mem.used_percent', 'fs.data.available_in_bytes' ]
           },
@@ -88,7 +85,7 @@ define([
         },
         indices: {
           defaults: {
-            persistent_name: 'index',
+            display_field: null,
             persistent_field: 'index',
             metrics: [ 'primaries.docs.count', 'primaries.indexing.index_total', 'total.search.query_total', 'total.merges.current' ]
           },
@@ -168,6 +165,10 @@ define([
         });
       };
 
+      $scope.get_mode_filter = function ()  {
+        return $scope.ejs.TermFilter("_type", $scope.panel.mode === "nodes" ? "node_stats" : "index_stats");
+      };
+
       $scope.get_rows = function () {
         if (dashboard.indices.length === 0) {
           return;
@@ -179,6 +180,7 @@ define([
           results;
 
         filter = filterSrv.getBoolFilter(filterSrv.ids);
+        filter.must($scope.get_mode_filter());
 
         request = $scope.ejs.Request().indices(dashboard.indices).size(0).searchType("count");
         request.facet(
@@ -196,9 +198,8 @@ define([
             mrequest;
 
           if (newPersistentIds.length === 0) {
-            // This seems more obvious if this is the point
-            $scope.rows = [];
-            // $scope.get_data([]);
+            // call the get data function so it will clear out all other data related objects.
+            $scope.get_data([]);
             return;
           }
 
@@ -253,6 +254,9 @@ define([
 
         if (dashboard.indices.length === 0 || newRows.length === 0) {
           $scope.rows = newRows;
+          $scope.data = {};
+          $scope.panelMeta.loading = false;
+          $scope.calculateWarnings();
           return;
         }
 
@@ -288,7 +292,6 @@ define([
           $scope.rows = newRows;
           $scope.data = results.facets;
           $scope.panelMeta.loading = false;
-          $scope.warnLevels = {};
           $scope.calculateWarnings();
         });
       };
@@ -299,13 +302,13 @@ define([
         });
       };
 
-      $scope.metricClick = function (node, metric) {
+      $scope.metricClick = function (row, metric) {
         var current = window.location.href;
         var i = current.indexOf('#');
         if (i > 0) {
           current = current.substr(0, i);
         }
-        current += $scope.detailViewLink([node], [metric.field]);
+        current += $scope.detailViewLink([row], [metric.field]);
         window.location = current;
       };
 
@@ -314,18 +317,18 @@ define([
       };
 
 
-      $scope.detailViewLink = function (nodes, fields) {
-        if (_.isUndefined(nodes)) {
-          nodes = _.where($scope.rows, {selected: true});
+      $scope.detailViewLink = function (rows, fields) {
+        if (_.isUndefined(rows)) {
+          rows = _.where($scope.rows, {selected: true});
         }
-        nodes = _.map(nodes, function (node) {
-          var query = $scope.panel.persistent_field + ':"' + node.id + '"';
+        rows = _.map(rows, function (row) {
+          var query = $scope.panel.persistent_field + ':"' + row.id + '"';
           return {
             q: query,
-            a: node.display_name
+            a: row.display_name
           };
         });
-        nodes = JSON.stringify(nodes);
+        rows = JSON.stringify(rows);
         var time = filterSrv.timeRange(false);
         var show;
         if (!_.isUndefined(fields)) {
@@ -333,7 +336,7 @@ define([
         } else {
           show = "";
         }
-        return "#/dashboard/script/marvel."+$scope.panel.mode+"_stats.js?ids=" + encodeURI(nodes) + "&from=" +
+        return "#/dashboard/script/marvel."+$scope.panel.mode+"_stats.js?queries=" + encodeURI(rows) + "&from=" +
           time.from + "&to=" + time.to + show;
       };
 
