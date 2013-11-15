@@ -17,7 +17,20 @@
     "grunt-contrib-clean": "~0.5.0",
     "grunt-string-replace": "~0.2.4",
     "grunt-contrib-compress": "~0.5.2",
-    "grunt-git": "~0.1.6"
+    "grunt-git": "~0.1.6",
+    "grunt-s3": "~0.2.0-alpha.2",
+    "grunt-ngmin": "0.0.3",
+    "grunt-contrib": "~0.8.0",
+    "grunt-contrib-less": "~0.7.0",
+    "grunt-git-describe": "~2.3.2",
+    "grunt-contrib-cssmin": "~0.6.1",
+    "grunt-contrib-jshint": "~0.6.0",
+    "grunt-contrib-htmlmin": "~0.1.3",
+    "grunt-contrib-requirejs": "~0.4.1",
+    "grunt-angular-templates": "~0.3.12",
+    "grunt-contrib-uglify": "~0.2.4",
+    "load-grunt-tasks": "~0.2.0",
+    "glob": "~3.2.7"
   },
   "license": "Apache License"
 }
