@@ -279,6 +279,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
         $scope.panelMeta.loading = false;
         if(segment === 0) {
           $scope.hits = 0;
+          $scope.total = 0;
           $scope.data = [];
           $scope.annotations = [];
           query_id = $scope.query_id = new Date().getTime();
@@ -295,7 +296,8 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
 
           var i = 0,
             time_series,
-            hits;
+            hits,
+            total;
 
           _.each(queries, function(q) {
             var query_results = results.facets[q.id];
@@ -310,9 +312,11 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
               };
               time_series = new timeSeries.ZeroFilled(tsOpts);
               hits = 0;
+              total = 0;
             } else {
               time_series = $scope.data[i].time_series;
               hits = $scope.data[i].hits;
+              total = $scope.data[i].total;
             }
 
             // push each entry into the time series, while incrementing counters
@@ -320,11 +324,17 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
               time_series.addValue(entry.time, entry[$scope.panel.mode]);
               hits += entry.count; // The series level hits counter
               $scope.hits += entry.count; // Entire dataset level hits counter
+
+              if($scope.panel.mode === 'total') {
+                $scope.total += entry[$scope.panel.mode];
+                total += entry[$scope.panel.mode];
+              }
             });
             $scope.data[i] = {
               info: q,
               time_series: time_series,
-              hits: hits
+              hits: hits,
+              total: total
             };
 
             i++;
