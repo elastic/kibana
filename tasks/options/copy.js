@@ -4,7 +4,7 @@ module.exports = function(config) {
     marvel_config: {
       cwd: '.',
       src: ['config.js'],
-      dest: '<%= kibanaDir %>/src/'
+      dest: '<%= baseDir %>/src/'
     }
   };
 };

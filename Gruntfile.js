@@ -20,7 +20,8 @@ module.exports = function (grunt) {
   function loadConfig(config,path) {
     require('glob').sync('*', {cwd: path}).forEach(function(option) {
       var key = option.replace(/\.js$/,'');
-      // If key already exists, extend it. It is your responsibility to avoid naming collisions
+      // Merge duplicate plugin configs. It is your responsibility to avoid naming collisions
+      // in tasks
       config[key] = config[key] || {};
       grunt.util._.extend(config[key], require(path + option)(config));
     });
@@ -31,9 +32,9 @@ module.exports = function (grunt) {
   // Merge that object with what with whatever we have here
   loadConfig(config,'./tasks/options/');
 
-  if (grunt.file.exists('kibana')) {
-    grunt.loadTasks('kibana/tasks');
-    loadConfig(config,'./kibana/tasks/options/');
+  if (grunt.file.exists(config.baseDir)) {
+    grunt.loadTasks(config.baseDir+'/tasks');
+    loadConfig(config,config.baseDir+'/tasks/options/');
   }
 
   // pass the config to grunt

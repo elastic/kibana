@@ -2,6 +2,6 @@ module.exports = function(config) {
   return {
     on_start: ['<%= destDir %>', '<%= tempDir %>'],
     temp: ['<%= tempDir %>'],
-    setup: ['<%= kibanaDir %>']
+    setup: ['<%= baseDir %>']
   };
 };
