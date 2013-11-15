@@ -10,10 +10,10 @@ define([
   function (angular, app, kbn, _, $) {
     'use strict';
 
-    var module = angular.module('kibana.panels.marvel.nodes_health', []);
+    var module = angular.module('kibana.panels.marvel.stats_table', []);
     app.useModule(module);
 
-    module.controller('marvel.nodes_health', function ($scope, dashboard, filterSrv) {
+    module.controller('marvel.stats_table', function ($scope, dashboard, filterSrv) {
       $scope.panelMeta = {
         modals: [],
         editorTabs: [],
@@ -75,12 +75,12 @@ define([
               scale: 1024 * 1024 * 1024
             },
             /* Dropping this until we have error handling for fields that don't exist
-            {
-              // allow people to add a new, not-predefined metric.
-              name: 'Custom',
-              field: ''
-            }
-            */
+             {
+             // allow people to add a new, not-predefined metric.
+             name: 'Custom',
+             field: ''
+             }
+             */
           ]
         },
         indices: {
@@ -97,30 +97,30 @@ define([
             {
               name: 'Index Rate',
               field: 'primaries.indexing.index_total',
-              rate: true
+              derivative: true
             },
             {
               name: 'Search Rate',
               field: 'total.search.query_total',
-              rate: true,
+              derivative: true,
             },
             {
               name: 'Merges',
               field: 'total.merges.current',
             },
             /* Dropping this until we have error handling for fields that don't exist
-            {
-              // allow people to add a new, not-predefined metric.
-              name: 'Custom',
-              field: ''
-            }
-            */
+             {
+             // allow people to add a new, not-predefined metric.
+             name: 'Custom',
+             field: ''
+             }
+             */
           ]
         }
       };
 
       var metricDefaults = function (m) {
-        if(_.isUndefined($scope.modeInfo[$scope.panel.mode])) {
+        if (_.isUndefined($scope.modeInfo[$scope.panel.mode])) {
           return [];
         }
         if (_.isString(m)) {
@@ -145,8 +145,8 @@ define([
         return metricDefaults(m);
       });
 
-      $scope.$watch('panel.mode',function(m) {
-        if(_.isUndefined(m)) {
+      $scope.$watch('panel.mode', function (m) {
+        if (_.isUndefined(m)) {
           return;
         }
         $scope.panel.display_field = $scope.modeInfo[m].defaults.display_field;
@@ -154,7 +154,7 @@ define([
         $scope.panel.metrics = _.map($scope.modeInfo[m].defaults.metrics, function (m) {
           return metricDefaults(m);
         });
-        _.throttle($scope.get_rows(),500);
+        _.throttle($scope.get_rows(), 500);
       });
 
       $scope.init = function () {
@@ -165,7 +165,7 @@ define([
         });
       };
 
-      $scope.get_mode_filter = function ()  {
+      $scope.get_mode_filter = function () {
         return $scope.ejs.TermFilter("_type", $scope.panel.mode === "nodes" ? "node_stats" : "index_stats");
       };
 
@@ -267,14 +267,15 @@ define([
 
         request = $scope.ejs.Request().indices(dashboard.indices);
 
-        var to = filterSrv.timeRange('last').to;
-        var from = new Date(to);
-        from.setMinutes(from.getMinutes()-10,0,0);
-        to = kbn.parseDate(to).valueOf();
-        from = kbn.parseDate(from).valueOf();
+        var to = filterSrv.timeRange(false).to;
+        if (to !== "now") {
+          to = kbn.parseDate(to).valueOf() + "||";
+        }
+
+        //to = kbn.parseDate(to).valueOf();
         _.each(_.pluck(newRows, 'id'), function (id) {
           var filter = $scope.ejs.BoolFilter()
-            .must($scope.ejs.RangeFilter('@timestamp').from(from).to(to))
+            .must($scope.ejs.RangeFilter('@timestamp').from(to + "-10m/m").to(to + "/m"))
             .must($scope.ejs.TermsFilter($scope.panel.persistent_field, id))
             .must($scope.get_mode_filter());
 
@@ -294,10 +295,71 @@ define([
         // Populate scope when we have results
         results.then(function (results) {
           $scope.rows = newRows;
-          $scope.data = results.facets;
+          $scope.data = normalizeFacetResults(results.facets, newRows, $scope.panel.metrics);
           $scope.panelMeta.loading = false;
           $scope.calculateWarnings();
         });
+      };
+
+      var normalizeFacetResults = function (facets, rows, metrics) {
+        _.each(metrics, function (m) {
+          _.each(_.pluck(rows, 'id'), function (id) {
+            var summary_key = id + "_" + m.field;
+            var history_key = id + "_" + m.field + "_history";
+            var summary = facets[summary_key];
+            var series_data = _.pluck(facets[history_key].entries, m.derivative ? 'min' : 'mean');
+            var series_time = _.pluck(facets[history_key].entries, 'time');
+
+            if (m.scale !== 1) {
+              series_data = _.map(series_data, function (v) {
+                return v / m.scale;
+              });
+              summary.mean /= m.scale;
+              summary.max /= m.scale;
+              summary.max /= m.scale;
+            }
+
+            if (m.derivative) {
+
+              var _l = series_data.length - 1;
+              if (_l <= 0) {
+                summary.mean = null;
+              }
+              else {
+                var avg_time = (series_time[_l] - series_time[0]) / 1000;
+                summary.mean = (series_data[_l] - series_data[0]) / avg_time;
+              }
+
+              series_data = _.map(series_data, function (p, i) {
+
+                var _v;
+                if (i === 0) {
+                  _v = null;
+                } else {
+                  var _t = ((series_time[i] - series_time[i - 1]) / 1000); // milliseconds -> seconds.
+                  _v = (p - series_data[i - 1]) / _t;
+                }
+                return _v;
+              });
+
+              summary.max = _.reduce(series_data, function (m, v) {
+                return m < v && v != null ? v : m;
+              }, Number.NEGATIVE_INFINITY);
+              summary.min = _.reduce(series_data, function (m, v) {
+                return m > v && v != null ? v : m;
+              }, Number.POSITIVE_INFINITY);
+
+            }
+
+            var series = _.zip(series_time, series_data);
+
+            facets[summary_key] = summary;
+            facets[history_key].series = series;
+
+          });
+        });
+
+        return facets;
       };
 
       $scope.hasSelected = function (nodes) {
@@ -321,6 +383,7 @@ define([
       };
 
 
+
       $scope.detailViewLink = function (rows, fields) {
         if (_.isUndefined(rows)) {
           rows = _.where($scope.rows, {selected: true});
@@ -340,9 +403,18 @@ define([
         } else {
           show = "";
         }
-        return "#/dashboard/script/marvel."+$scope.panel.mode+"_stats.js?queries=" + encodeURI(rows) + "&from=" +
+        return "#/dashboard/script/marvel." + $scope.panel.mode + "_stats.js?queries=" + encodeUriSegment(rows) + "&from=" +
           time.from + "&to=" + time.to + show;
       };
+
+      // stolen from anuglar to have exactly the same url structure and thus no reloads.
+      function encodeUriSegment(val) {
+        return encodeURIComponent(val).
+          replace(/%40/gi, '@').
+          replace(/%3A/gi, ':').
+          replace(/%24/g, '$').
+          replace(/%2C/gi, ',');
+      }
 
       $scope.detailViewTip = function () {
         return $scope.hasSelected($scope.rows) ? 'Open nodes dashboard for selected nodes' :
@@ -355,11 +427,7 @@ define([
           $scope.warnLevels._global_[metric.field] = 0;
           _.each(_.pluck($scope.rows, 'id'), function (id) {
             var num, level;
-            if(metric.rate) {
-              num = ($scope.data[id + '_' + metric.field].max - $scope.data[id + '_' + metric.field].max)/600;
-            } else {
-              num = $scope.data[id + '_' + metric.field].mean;
-            }
+            num = $scope.data[id + '_' + metric.field].mean;
             level = $scope.alertLevel(metric, num);
             $scope.warnLevels[id] = $scope.warnLevels[id] || {};
             $scope.warnLevels[id][metric.field] = level;
@@ -441,7 +509,7 @@ define([
 
       // This is expensive, it would be better to populate a scope object
       $scope.addMetricOptions = function (m) {
-        if(_.isUndefined($scope.modeInfo[m])) {
+        if (_.isUndefined($scope.modeInfo[m])) {
           return [];
         }
         var fields = _.pluck($scope.panel.metrics, 'field');
@@ -524,15 +592,8 @@ define([
             };
 
             if (!_.isUndefined(scope.series)) {
-              var metric = _.findWhere(scope.panel.metrics, { "field": scope.field });
               var _d = {
-                data: _.map(scope.series.entries, function (p) {
-                  if(metric.rate) {
-                    return [p.time, (p.max-p.min)];
-                  } else {
-                    return [p.time, p.mean];
-                  }
-                }),
+                data: scope.series,
                 color: elem.css('color')
               };
 

@@ -1,4 +1,4 @@
-<div ng-controller='marvel.nodes_health' ng-init="init()">
+<div ng-controller='marvel.stats_table' ng-init="init()">
   <style>
     .marvel-table {
       vertical-align: middle;
@@ -62,16 +62,15 @@
       </td>
       <td ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels[row.id][metric.field])">
         <div class="marvel-mean pointer" ng-click="metricClick(row,metric)">
-          <span ng-hide="metric.rate">{{data[row.id+"_"+metric.field].mean / metric.scale | number:metric.decimals}}</span>
-          <span ng-show="metric.rate">{{(data[row.id+"_"+metric.field].max-data[row.id+"_"+metric.field].min) / 600 / metric.scale | number:metric.decimals}}</span>
+          <span>{{data[row.id+"_"+metric.field].mean | number:metric.decimals}}</span>
 
           <br>
 
-          <div class="marvel-nodes-health-chart" panel='panel' field="metric.field" series="data[row.id+'_'+metric.field+'_history']"></div>
+          <div class="marvel-nodes-health-chart" panel='panel' field="metric.field" series="data[row.id+'_'+metric.field+'_history'].series"></div>
         </div>
-        <div class="marvel-extended pointer" ng-click="metricClick(row,metric)" ng-hide="metric.rate">
-          <span>min: {{data[row.id+"_"+metric.field].min / metric.scale | number:metric.decimals}}</span><br>
-          <span>max: {{data[row.id+"_"+metric.field].max / metric.scale | number:metric.decimals}}</span>
+        <div class="marvel-extended pointer" ng-click="metricClick(row,metric)">
+          <span>min: {{data[row.id+"_"+metric.field].min | number:metric.decimals}}</span><br>
+          <span>max: {{data[row.id+"_"+metric.field].max | number:metric.decimals}}</span>
         </div>
       </td>
     </tr>
@@ -93,10 +92,9 @@
       </td>
       <td ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels[row.id][metric.field])">
         <div class="pointer" ng-click="metricClick(row,metric)">
-          <span ng-hide="metric.rate">{{data[row.id+"_"+metric.field].mean / metric.scale | number:metric.decimals}}</span>
-          <span ng-show="metric.rate">{{(data[row.id+"_"+metric.field].max-data[row.id+"_"+metric.field].min) / 600 / metric.scale | number:metric.decimals}}</span>
+          <span>{{data[row.id+"_"+metric.field].mean | number:metric.decimals}}</span>
 
-          <div class="marvel-nodes-health-chart pointer" ng-click="metricClick(row,metric)" panel='panel' field="metric.field" series="data[row.id+'_'+metric.field+'_history']"></div>
+          <div class="marvel-nodes-health-chart pointer" ng-click="metricClick(row,metric)" panel='panel' field="metric.field" series="data[row.id+'_'+metric.field+'_history'].series"></div>
         </div>
       </td>
     </tr>
