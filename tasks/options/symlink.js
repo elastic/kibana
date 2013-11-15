@@ -10,6 +10,10 @@ module.exports = function(config) {
         src: 'dashboards',
         dest: '<%= baseDir %>/src/app/dashboards/marvel'
       },
+      {
+        src: 'dashboards/overview.json',
+        dest: '<%= baseDir %>/src/app/dashboards/default.json'
+      }
       ]
     }
   };

@@ -1,10 +1,10 @@
 module.exports = function(config) {
   return {
-    // copy source to temp, we will minify in place for the dist build
-    marvel_config: {
-      cwd: '.',
-      src: ['config.js'],
-      dest: '<%= baseDir %>/src/'
+    plugin_to_marvel: {
+      cwd: 'target',
+      expand: true,
+      src: ['<%= pkg.name %>-<%= pkg.version %>.jar'],
+      dest: '<%= buildDir %>'
     }
   };
 };

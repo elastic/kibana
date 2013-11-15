@@ -1,7 +1,7 @@
 module.exports = function(config) {
   return {
-    on_start: ['<%= destDir %>', '<%= tempDir %>'],
-    temp: ['<%= tempDir %>'],
-    setup: ['<%= baseDir %>']
+    setup: ['<%= destDir %>','<%= baseDir %>','<%= buildDir %>'],
+    default_dashboard: ['<%= srcDir %>/app/dashboards/default.json'],
+    dist: ['<%= destDir %>']
   };
 };

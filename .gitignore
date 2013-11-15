@@ -12,4 +12,6 @@
 /lib
 /kibana
 /node_modules
-/dist
+/build
+/packages
+/.aws-config.json

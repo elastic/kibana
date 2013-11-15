@@ -4,7 +4,7 @@
  */
 define(['settings'],
 function (Settings) {
-  "use strict";
+  
 
   return new Settings({
 
@@ -18,7 +18,7 @@ function (Settings) {
      * elasticsearch host
      * @type {String}
      */
-    elasticsearch: "http://"+window.location.hostname+(window.location.port !== '' ? ':'+window.location.port : ''),
+    elasticsearch: "http://"+window.location.hostname+":"+@@port,
 
     /**
      * The default ES index to use for storing Kibana specific object
@@ -34,14 +34,22 @@ function (Settings) {
      */
     panel_names: [
       'histogram',
+      'map',
+      'pie',
       'table',
       'filtering',
       'timepicker',
       'text',
+      'fields',
       'hits',
       'dashcontrol',
+      'column',
+      'derivequeries',
       'trends',
-      'query'
+      'bettermap',
+      'query',
+      'terms',
+      'sparklines'
     ]
   });
 });
