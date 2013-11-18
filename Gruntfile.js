@@ -36,7 +36,6 @@ module.exports = function (grunt) {
 
   // load plugins
   require('load-grunt-tasks')(grunt);
-  grunt.loadNpmTasks('grunt-connect-rewrite');
 
   // Load Marvel tasks. Identical task names will override kibana tasks
   grunt.loadTasks('tasks');
