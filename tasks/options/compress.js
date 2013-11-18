@@ -1,14 +1,20 @@
-module.exports = function(config) {
+module.exports = function (config) {
   return {
     zip: {
       options: {
         archive: '<%= packageDir %>/<%= pkg.name %>-<%= pkg.version %>.zip'
       },
-      files : [
+      files: [
+        {
+          expand: true,
+          cwd: '<%= buildMergeDir %>/dist',
+          src: ['**/*'],
+          dest: '_site'
+        },
         {
           expand: true,
           cwd: '<%= buildDir %>',
-          src: ['**/*'],
+          src: ['*.jar'],
           dest: ''
         }
       ]
@@ -17,11 +23,17 @@ module.exports = function(config) {
       options: {
         archive: '<%= packageDir %>/<%= pkg.name %>-<%= pkg.version %>.tar.gz'
       },
-      files : [
+      files: [
+        {
+          expand: true,
+          cwd: '<%= buildMergeDir %>/dist',
+          src: ['**/*'],
+          dest: '_site'
+        },
         {
           expand: true,
           cwd: '<%= buildDir %>',
-          src: ['**/*'],
+          src: ['*.jar'],
           dest: ''
         }
       ]

@@ -33,7 +33,8 @@
     "grunt-replace": "~0.5.1",
     "grunt-string-replace": "~0.2.4",
     "grunt-shell": "~0.6.0",
-    "grunt-contrib-connect": "~0.5.0"
+    "grunt-contrib-connect": "~0.5.0",
+    "grunt-connect-rewrite": "~0.1.1"
   },
   "license": "Apache License"
 }

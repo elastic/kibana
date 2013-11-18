@@ -1,4 +1,4 @@
-module.exports = function(config) {
+module.exports = function (config) {
   return {
     // copy source to temp, we will minify in place for the dist build
     dev_marvel_config: {
@@ -6,12 +6,12 @@ module.exports = function(config) {
         patterns: [
           {
             match: 'port',
-            replacement: '<%= port.dev %>',
+            replacement: '<%= esPort.dev %>',
           }
         ]
       },
       files: [
-        {expand: true, flatten: true, src: ['./config.js'], dest: 'src/'}
+        {expand: true, flatten: true, src: ['./config.js'], dest: '<%= buildMergeDir %>'}
       ]
     },
     dist_marvel_config: {
@@ -19,12 +19,12 @@ module.exports = function(config) {
         patterns: [
           {
             match: 'port',
-            replacement: '<%= port.dist %>',
+            replacement: '<%= esPort.dist %>',
           }
         ]
       },
       files: [
-        {expand: true, flatten: true, src: ['./config.js'], dest: 'src/'}
+        {expand: true, flatten: true, src: ['./config.js'], dest: '<%= buildMergeDir %>'}
       ]
     }
   };

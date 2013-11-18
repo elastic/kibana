@@ -1,7 +1,7 @@
-module.exports = function(config) {
+module.exports = function (config) {
   return {
-    setup: ['<%= destDir %>','<%= baseDir %>','<%= buildDir %>'],
-    default_dashboard: ['<%= srcDir %>/app/dashboards/default.json'],
-    dist: ['<%= destDir %>']
+    setup: [ '<%= kibanaCheckoutDir %>', '<%= buildDir %>' ],
+    build: [ '<%= buildDir %>' ],
+    package: ['<%= packageDir %>']
   };
 };
