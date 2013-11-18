@@ -77,7 +77,7 @@ function (angular, app, _, $, kbn) {
 
     $scope.get_sorts = function () {
       var sorts = ['count', 'term', 'reverse_count', 'reverse_term'];
-      if ($scope.panel.mode != 'count') {
+      if ($scope.panel.mode !== 'count') {
         sorts.push('total', 'reverse_total', 'min', 'reverse_min', 'max', 'reverse_max', 'mean', 'reverse_mean');
       }
       return sorts;
