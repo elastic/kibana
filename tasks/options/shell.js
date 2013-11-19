@@ -2,12 +2,12 @@ module.exports = function (config) {
   return {
     maven_clean: {
       command: 'mvn clean',
-      cwd: '<%= shipperDir %>',
+      cwd: '<%= exporterDir %>',
       options: {
         stdout: true,
         failOnError: true,
         execOptions: {
-          cwd: '<%= shipperDir %>',
+          cwd: '<%= exporterDir %>',
         }
       },
     },
@@ -17,7 +17,7 @@ module.exports = function (config) {
         stdout: true,
         failOnError: true,
         execOptions: {
-          cwd: '<%= shipperDir %>',
+          cwd: '<%= exporterDir %>',
         }
       },
     },

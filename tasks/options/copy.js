@@ -1,7 +1,7 @@
 module.exports = function (config) {
   return {
     plugin_to_marvel: {
-      cwd: '<%= shipperDir %>/target',
+      cwd: '<%= exporterDir %>/target',
       expand: true,
       src: ['<%= pkg.name %>-<%= pkg.version %>.jar'],
       dest: '<%= buildDir %>'
