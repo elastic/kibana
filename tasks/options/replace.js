@@ -11,7 +11,7 @@ module.exports = function (config) {
         ]
       },
       files: [
-        {expand: true, flatten: true, src: ['./config.js'], dest: '<%= buildMergeDir %>'}
+        {expand: true, flatten: true, src: ['./config.js'], dest: '<%= buildTempDir %>'}
       ]
     },
     dist_marvel_config: {
@@ -24,7 +24,7 @@ module.exports = function (config) {
         ]
       },
       files: [
-        {expand: true, flatten: true, src: ['./config.js'], dest: '<%= buildMergeDir %>'}
+        {expand: true, flatten: true, src: ['./config.js'], dest: '<%= buildTempDir %>'}
       ]
     }
   };

@@ -7,8 +7,9 @@ module.exports = function (grunt) {
     'copy:merge_kibana',
     'copy:merge_marvel',
     'replace:dist_marvel_config',
-    'symlink:build_npm',
     'shell:build_kibana',
-    'copy:plugin_to_marvel',
+    'copy:kibana_build',
+    'copy:exporter_build',
+    'clean:build_tmp'
   ]);
 };

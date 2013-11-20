@@ -8,7 +8,6 @@ module.exports = function (grunt) {
     exporterDir: 'exporter',
     buildDir: 'build',
     packageDir: 'packages',
-    tempDir: 'tmp',
     esPort: {
       dev: '"9200"',
       dist: "(window.location.port !== '' ? ':'+window.location.port : '')"
@@ -19,7 +18,7 @@ module.exports = function (grunt) {
   };
 
   // more detailed config
-  config['buildMergeDir'] = config['buildDir'] + '/merge'; // kibana and custom panels will be merged here
+  config['buildTempDir'] = config['buildDir'] + '/tmp'; // kibana and custom panels will be merged here
   config['buildSiteDir'] = config['buildDir'] + '/_site';  // compressed minified marvel site will be outputted here
 
   // Utility function to load plugin settings into the above config object

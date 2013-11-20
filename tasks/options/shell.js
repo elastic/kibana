@@ -22,12 +22,12 @@ module.exports = function (config) {
       },
     },
     build_kibana: {
-      command: [ 'npm install', 'grunt build'].join("&&"),
+      command: [ 'npm install', 'grunt build' ].join("&&"),
       options: {
         stdout: true,
         failOnError: true,
         execOptions: {
-          cwd: '<%= buildMergeDir %>',
+          cwd: '<%= buildTempDir %>',
         }
       }
     }

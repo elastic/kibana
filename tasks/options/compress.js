@@ -7,14 +7,8 @@ module.exports = function (config) {
       files: [
         {
           expand: true,
-          cwd: '<%= buildMergeDir %>/dist',
-          src: ['**/*'],
-          dest: '_site'
-        },
-        {
-          expand: true,
           cwd: '<%= buildDir %>',
-          src: ['*.jar'],
+          src: ['**/*'],
           dest: ''
         }
       ]
@@ -26,14 +20,8 @@ module.exports = function (config) {
       files: [
         {
           expand: true,
-          cwd: '<%= buildMergeDir %>/dist',
-          src: ['**/*'],
-          dest: '_site'
-        },
-        {
-          expand: true,
           cwd: '<%= buildDir %>',
-          src: ['*.jar'],
+          src: ['**/*'],
           dest: ''
         }
       ]
