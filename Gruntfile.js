@@ -10,10 +10,10 @@ module.exports = function (grunt) {
     buildDir: 'build',
     packageDir: 'packages',
     esPort: {
-      dev: '"9200"',
+      dev: '"'+ (grunt.option('es_port') ||  9200) +'"',
       dist: "(window.location.port !== '' ? ':'+window.location.port : '')"
     },
-    kibanaPort: 5601,
+    kibanaPort: grunt.option('port') ||  5601,
     kibanaHost: 'localhost'
 
   };
