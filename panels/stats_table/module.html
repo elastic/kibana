@@ -26,7 +26,7 @@
       font-weight: bold;
       margin-left: 10px;
     }
-    .marvel-nodes-health-chart {
+    .marvel-stats-sparkline {
       margin-top: 5px;
       display: inline-block;
       height: 10px;
@@ -44,13 +44,22 @@
 
   <table class="table table-bordered" ng-if="!panel.compact">
     <thead>
+      <th>
+        <span class="pointer" ng-click="set_sort('__name__')">
+          {{panel.mode}}
+          <i ng-show='"__name__" == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
+        </span>
+        <a ng-disabled="!hasSelected(rows)" id="detail_view_link" ng-href="{{detailViewLink()}}" class="btn btn-mini btn-info pull-right"  bs-tooltip="detailViewTip()" data-placement="right">Dashboard</a>
+      </th>
 
-    <th ng-if="hasSelected(rows)">{{panel.mode}} <a id="detail_view_link" ng-href="{{detailViewLink()}}" class="btn btn-mini btn-info"  bs-tooltip="detailViewTip()" data-placement="right">Dashboard</a></th>
-    <th ng-if="!hasSelected(rows)">{{panel.mode}} <a id="detail_view_link" disabled class="btn btn-mini btn-info"  bs-tooltip="detailViewTip()" data-placement="right">Dashboard</a></th>
-
-    <th ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels['_global_'][metric.field])">{{metric.name}}</th>
+      <th ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels['_global_'][metric.field])">
+        <span class="pointer" ng-click="set_sort(metric.field)">
+          {{metric.name}}
+          <i ng-show='metric.field == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
+        </span>
+      </th>
     </thead>
-    <tr ng-repeat="row in rows">
+    <tr ng-repeat="row in rows | orderBy:get_sort_value:panel.sort[1]=='desc'">
       <td>
         <div class="checkbox">
           <label>
@@ -66,7 +75,7 @@
 
           <br>
 
-          <div class="marvel-nodes-health-chart" panel='panel' field="metric.field" series="data[row.id+'_'+metric.field+'_history'].series"></div>
+          <div class="marvel-stats-sparkline" panel='panel' field="metric.field" series="data[row.id+'_'+metric.field+'_history'].series"></div>
         </div>
         <div class="marvel-extended pointer" ng-click="rowClick(row,metric)">
           <span>min: {{data[row.id+"_"+metric.field].min | number:metric.decimals}}</span><br>
@@ -78,10 +87,22 @@
 
   <table class="table table-bordered table-condensed marvel-table" ng-if="panel.compact">
     <thead>
-    <th>{{panel.mode}} <a ng-href="{{detailViewLink()}}" class="btn btn-mini btn-info" ng-disabled="!hasSelected(rows)" bs-tooltip="detailViewTip()" data-placement="right">Dashboard</a></th>
-    <th ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels['_global_'][metric.field])">{{metric.name}}</th>
+      <th>
+          <span class="pointer" ng-click="set_sort('__name__')">
+            {{panel.mode}}
+            <i ng-show='"__name__" == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
+          </span>
+        <a ng-disabled="!hasSelected(rows)" id="detail_view_link" ng-href="{{detailViewLink()}}" class="btn btn-mini btn-info pull-right"  bs-tooltip="detailViewTip()" data-placement="right">Dashboard</a>
+      </th>
+
+      <th ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels['_global_'][metric.field])">
+          <span class="pointer" ng-click="set_sort(metric.field)">
+            {{metric.name}}
+            <i ng-show='metric.field == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
+          </span>
+      </th>
     </thead>
-    <tr ng-repeat="row in rows">
+    <tr ng-repeat="row in rows | orderBy:get_sort_value:panel.sort[1]=='desc'">
       <td>
         <div class="checkbox">
           <label>
@@ -94,7 +115,7 @@
         <div class="pointer" ng-click="rowClick(row,metric)">
           <span>{{data[row.id+"_"+metric.field].mean | number:metric.decimals}}</span>
 
-          <div class="marvel-nodes-health-chart pointer" ng-click="rowClick(row,metric)" panel='panel' field="metric.field" series="data[row.id+'_'+metric.field+'_history'].series"></div>
+          <div class="marvel-stats-sparkline pointer" ng-click="rowClick(row,metric)" panel='panel' field="metric.field" series="data[row.id+'_'+metric.field+'_history'].series"></div>
         </div>
       </td>
     </tr>

@@ -25,6 +25,7 @@ define([
       var _d = {
         compact: false,
         mode: 'nodes',
+        sort: ['__name__', 'asc']
       };
       _.defaults($scope.panel, _d);
 
@@ -368,6 +369,20 @@ define([
         });
       };
 
+      $scope.get_sort_value = function (row) {
+        if ($scope.panel.sort[0] === '__name__') return row.display_name;
+        return $scope.data[row.id + '_' + $scope.panel.sort[0]].mean;
+      };
+
+      $scope.set_sort = function (field) {
+        if ($scope.panel.sort && $scope.panel.sort[0] === field) {
+          $scope.panel.sort[1] = $scope.panel.sort[1] === "asc" ? "desc" : "asc";
+        }
+        else {
+          $scope.panel.sort = [field, 'asc'];
+        }
+      };
+
       $scope.rowClick = function (row, metric) {
         var current = window.location.href;
         var i = current.indexOf('#');
@@ -381,7 +396,6 @@ define([
       $scope.formatAlert = function (a) {
         return !a ? "" : (a.type === "upper_bound" ? ">" : "<") + a.threshold;
       };
-
 
 
       $scope.detailViewLink = function (rows, fields) {
