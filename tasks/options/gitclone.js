@@ -2,7 +2,7 @@ module.exports = function (config) {
   return {
     kibana: {
       options: {
-        repository: 'https://github.com/elasticsearch/kibana.git',
+        repository: 'git://github.com/elasticsearch/kibana.git',
         directory: '<%= kibanaCheckoutDir %>'
       }
     }

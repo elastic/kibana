@@ -16,7 +16,6 @@
     "grunt-contrib-copy": "~0.4.1",
     "grunt-contrib-clean": "~0.5.0",
     "grunt-contrib-compress": "~0.5.2",
-    "grunt-git": "~0.1.6",
     "grunt-s3": "~0.2.0-alpha.2",
     "grunt-ngmin": "0.0.3",
     "grunt-contrib-less": "~0.7.0",
