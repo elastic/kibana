@@ -44,19 +44,15 @@
 
   <table class="table table-bordered" ng-if="!panel.compact">
     <thead>
-      <th>
-        <span class="pointer" ng-click="set_sort('__name__')">
-          {{panel.mode}}
-          <i ng-show='"__name__" == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
-        </span>
+      <th class="pointer" ng-click="set_sort('__name__')">
+        {{panel.mode}}
+        <i ng-show='"__name__" == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
         <a ng-disabled="!hasSelected(rows)" id="detail_view_link" ng-href="{{detailViewLink()}}" class="btn btn-mini btn-info pull-right"  bs-tooltip="detailViewTip()" data-placement="right">Dashboard</a>
       </th>
 
-      <th ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels['_global_'][metric.field])">
-        <span class="pointer" ng-click="set_sort(metric.field)">
-          {{metric.name}}
-          <i ng-show='metric.field == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
-        </span>
+      <th ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels['_global_'][metric.field])" class="pointer" ng-click="set_sort(metric.field)">
+        {{metric.name}}
+        <i ng-show='metric.field == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
       </th>
     </thead>
     <tr ng-repeat="row in rows | orderBy:get_sort_value:panel.sort[1]=='desc'">
@@ -87,19 +83,15 @@
 
   <table class="table table-bordered table-condensed marvel-table" ng-if="panel.compact">
     <thead>
-      <th>
-          <span class="pointer" ng-click="set_sort('__name__')">
-            {{panel.mode}}
-            <i ng-show='"__name__" == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
-          </span>
+      <th class="pointer" ng-click="set_sort('__name__')">
+        {{panel.mode}}
+        <i ng-show='"__name__" == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
         <a ng-disabled="!hasSelected(rows)" id="detail_view_link" ng-href="{{detailViewLink()}}" class="btn btn-mini btn-info pull-right"  bs-tooltip="detailViewTip()" data-placement="right">Dashboard</a>
       </th>
 
-      <th ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels['_global_'][metric.field])">
-          <span class="pointer" ng-click="set_sort(metric.field)">
-            {{metric.name}}
-            <i ng-show='metric.field == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
-          </span>
+      <th ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels['_global_'][metric.field])" class="pointer" ng-click="set_sort(metric.field)">
+          {{metric.name}}
+          <i ng-show='metric.field == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
       </th>
     </thead>
     <tr ng-repeat="row in rows | orderBy:get_sort_value:panel.sort[1]=='desc'">
