@@ -36,7 +36,7 @@ public class Plugin extends AbstractPlugin {
 
     @Override
     public String name() {
-        return "Elasticsearch marvel - monitor";
+        return "marvel - stats exporter";
     }
 
     @Override
