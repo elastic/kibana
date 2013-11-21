@@ -368,13 +368,13 @@ define([
         });
       };
 
-      $scope.metricClick = function (row, metric) {
+      $scope.rowClick = function (row, metric) {
         var current = window.location.href;
         var i = current.indexOf('#');
         if (i > 0) {
           current = current.substr(0, i);
         }
-        current += $scope.detailViewLink([row], [metric.field]);
+        current += $scope.detailViewLink([row], metric ? [metric.field] : undefined);
         window.location = current;
       };
 

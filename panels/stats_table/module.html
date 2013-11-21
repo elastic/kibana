@@ -55,20 +55,20 @@
         <div class="checkbox">
           <label>
             <input type="checkbox" ng-model="row.selected" ng-checked="row.selected">
-            {{row.display_name}}
-            <div class="marvel-persistent-name" ng-hide="row.id == row.display_name" ng-click="metricClick(row)">{{row.id}}</div>
+            <span class="pointer" ng-click="rowClick(row)">{{row.display_name}}</span>
+            <div class="marvel-persistent-name pointer" ng-hide="row.id == row.display_name" ng-click="rowClick(row)">{{row.id}}</div>
           </label>
         </div>
       </td>
       <td ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels[row.id][metric.field])">
-        <div class="marvel-mean pointer" ng-click="metricClick(row,metric)">
+        <div class="marvel-mean pointer" ng-click="rowClick(row,metric)">
           <span>{{data[row.id+"_"+metric.field].mean | number:metric.decimals}}</span>
 
           <br>
 
           <div class="marvel-nodes-health-chart" panel='panel' field="metric.field" series="data[row.id+'_'+metric.field+'_history'].series"></div>
         </div>
-        <div class="marvel-extended pointer" ng-click="metricClick(row,metric)">
+        <div class="marvel-extended pointer" ng-click="rowClick(row,metric)">
           <span>min: {{data[row.id+"_"+metric.field].min | number:metric.decimals}}</span><br>
           <span>max: {{data[row.id+"_"+metric.field].max | number:metric.decimals}}</span>
         </div>
@@ -87,14 +87,14 @@
           <label>
             <input type="checkbox" ng-model="row.selected" ng-checked="row.selected">
           </label>
-          {{ row.display_name }}
+          <span class="pointer" ng-click="rowClick(row)">{{ row.display_name }}</span>
         </div>
       </td>
       <td ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels[row.id][metric.field])">
-        <div class="pointer" ng-click="metricClick(row,metric)">
+        <div class="pointer" ng-click="rowClick(row,metric)">
           <span>{{data[row.id+"_"+metric.field].mean | number:metric.decimals}}</span>
 
-          <div class="marvel-nodes-health-chart pointer" ng-click="metricClick(row,metric)" panel='panel' field="metric.field" series="data[row.id+'_'+metric.field+'_history'].series"></div>
+          <div class="marvel-nodes-health-chart pointer" ng-click="rowClick(row,metric)" panel='panel' field="metric.field" series="data[row.id+'_'+metric.field+'_history'].series"></div>
         </div>
       </td>
     </tr>
