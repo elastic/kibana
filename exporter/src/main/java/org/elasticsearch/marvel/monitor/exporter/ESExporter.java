@@ -64,9 +64,6 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     final Discovery discovery;
     final String hostname;
 
-    // TODO: logger name is not good now. Figure out why.
-    final ESLogger logger = ESLoggerFactory.getLogger(ESExporter.class.getName());
-
     public final static DateTimeFormatter defaultDatePrinter = Joda.forPattern("date_time").printer();
 
     boolean checkedForIndexTemplate = false;
