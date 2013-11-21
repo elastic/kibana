@@ -1111,7 +1111,7 @@
   "failover": false,
   "index": {
     "interval": "day",
-    "pattern": "[marvel-]YYYY.MM.DD",
+    "pattern": "[.marvel-]YYYY.MM.DD",
     "default": "_all"
   },
   "style": "dark",

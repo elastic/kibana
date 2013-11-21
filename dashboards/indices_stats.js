@@ -35,7 +35,7 @@ dashboard.title = 'Marvel - Index Statistics';
 dashboard.failover = false;
 dashboard.index = {
   'default': 'ADD_A_TIME_FILTER',
-  'pattern': '[marvel-]YYYY.MM.DD',
+  'pattern': '[.marvel-]YYYY.MM.DD',
   'interval': 'day'
 };
 
