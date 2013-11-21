@@ -18,7 +18,7 @@ define([
         modals: [],
         editorTabs: [],
         status: "Experimental",
-        description: "An overview of cluster health, by node."
+        description: "A stats table for nodes or nodes"
       };
 
       // Set and populate defaults
@@ -41,7 +41,8 @@ define([
           defaults: {
             display_field: "node.name",
             persistent_field: "node.transport_address",
-            metrics: [ 'process.cpu.percent', 'os.load_average.1m', 'os.mem.used_percent', 'fs.data.available_in_bytes' ]
+            metrics: [ 'process.cpu.percent', 'os.load_average.1m', 'os.mem.used_percent', 'fs.data.available_in_bytes' ],
+            show_hidden: true
           },
           availableMetrics: [
             {
@@ -88,7 +89,8 @@ define([
           defaults: {
             display_field: null,
             persistent_field: 'index',
-            metrics: [ 'primaries.docs.count', 'primaries.indexing.index_total', 'total.search.query_total', 'total.merges.current' ]
+            metrics: [ 'primaries.docs.count', 'primaries.indexing.index_total', 'total.search.query_total', 'total.merges.current' ],
+            show_hidden: false
           },
           availableMetrics: [
             {
@@ -142,9 +144,13 @@ define([
         return m;
       };
 
+      _.defaults($scope.panel, $scope.modeInfo[$scope.panel.mode].defaults);
+
+
       $scope.panel.metrics = _.map($scope.panel.metrics, function (m) {
         return metricDefaults(m);
       });
+
 
       $scope.$watch('panel.mode', function (m) {
         if (_.isUndefined(m)) {
@@ -155,6 +161,10 @@ define([
         $scope.panel.metrics = _.map($scope.modeInfo[m].defaults.metrics, function (m) {
           return metricDefaults(m);
         });
+        _.throttle($scope.get_rows(), 500);
+      });
+
+      $scope.$watch('panel.show_hidden', function () {
         _.throttle($scope.get_rows(), 500);
       });
 
@@ -178,19 +188,24 @@ define([
         var
           request,
           filter,
-          results;
+          results,
+          facet;
 
         filter = filterSrv.getBoolFilter(filterSrv.ids);
         filter.must($scope.get_mode_filter());
 
         request = $scope.ejs.Request().indices(dashboard.indices).size(0).searchType("count");
-        request.facet(
-          $scope.ejs.TermsFacet('terms')
-            .field($scope.panel.persistent_field)
-            .size(9999999)
-            .order('term')
-            .facetFilter(filter)
-        );
+        facet = $scope.ejs.TermsFacet('terms')
+          .field($scope.panel.persistent_field)
+          .size(9999999)
+          .order('term')
+          .facetFilter(filter);
+
+        if (!$scope.panel.show_hidden) {
+          facet.regex("[^.].*");
+        }
+
+        request.facet(facet);
 
         results = request.doSearch();
 
@@ -370,7 +385,9 @@ define([
       };
 
       $scope.get_sort_value = function (row) {
-        if ($scope.panel.sort[0] === '__name__') return row.display_name;
+        if ($scope.panel.sort[0] === '__name__') {
+          return row.display_name;
+        }
         return $scope.data[row.id + '_' + $scope.panel.sort[0]].mean;
       };
 
