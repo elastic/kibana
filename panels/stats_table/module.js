@@ -584,7 +584,7 @@ define([
       };
     });
 
-    module.directive('marvelNodesHealthChart', function () {
+    module.directive('marvelStatsSparkline', function () {
       return {
         restrict: 'C',
         scope: {
