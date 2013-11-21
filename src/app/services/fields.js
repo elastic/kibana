@@ -8,7 +8,7 @@ function (angular, _, config) {
 
   var module = angular.module('kibana.services');
 
-  module.service('fields', function(dashboard, $rootScope, $http, alertSrv) {
+  module.service('fields', function(dashboard, $rootScope, $http, alertSrv, ejsResource) {
     // Save a reference to this
     var self = this;
 
@@ -32,6 +32,8 @@ function (angular, _, config) {
       }
     });
 
+    var ejs = ejsResource(config.elasticsearch);
+
     var mapFields = function (m) {
       var fields = [];
       _.each(m, function(types) {
@@ -43,19 +45,17 @@ function (angular, _, config) {
     };
 
     this.map = function(indices) {
-      var request = $http({
-        url: config.elasticsearch + "/" + indices.join(',') + "/_mapping",
-        method: "GET"
-      }).error(function(data, status) {
-        if(status === 0) {
-          alertSrv.set('Error',"Could not contact Elasticsearch at "+config.elasticsearch+
-            ". Please ensure that Elasticsearch is reachable from your system." ,'error');
-        } else {
-          alertSrv.set('Error',"No index found at "+config.elasticsearch+"/" +
-            indices.join(',')+"/_mapping. Please create at least one index."  +
-            "If you're using a proxy ensure it is configured correctly.",'error');
-        }
-      });
+      var request = ejs.client.get('/' + indices.join(',') + "/_mapping",
+        undefined, undefined, function(data, status) {
+          if(status === 0) {
+            alertSrv.set('Error',"Could not contact Elasticsearch at "+ejs.config.server+
+              ". Please ensure that Elasticsearch is reachable from your system." ,'error');
+          } else {
+            alertSrv.set('Error',"No index found at "+ejs.config.server+"/" +
+              indices.join(',')+"/_mapping. Please create at least one index."  +
+              "If you're using a proxy ensure it is configured correctly.",'error');
+          }
+        });
 
       return request.then(function(p) {
         var mapping = {};

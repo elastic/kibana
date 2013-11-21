@@ -8,7 +8,7 @@ function (angular, _, config) {
 
   var module = angular.module('kibana.services');
 
-  module.service('esVersion', function($http, alertSrv) {
+  module.service('esVersion', function($http, alertSrv, ejsResource) {
 
     this.versions = [];
 
@@ -19,19 +19,19 @@ function (angular, _, config) {
       getVersions();
     };
 
+    var ejs = ejsResource(config.elasticsearch);
+
     var getVersions = function() {
-      var nodeInfo = $http({
-        url: config.elasticsearch + '/_nodes',
-        method: "GET"
-      }).error(function(data, status) {
-        if(status === 0) {
-          alertSrv.set('Error',"Could not contact Elasticsearch at "+config.elasticsearch+
-            ". Please ensure that Elasticsearch is reachable from your system." ,'error');
-        } else {
-          alertSrv.set('Error',"Could not reach "+config.elasticsearch+"/_nodes. If you"+
-          " are using a proxy, ensure it is configured correctly",'error');
-        }
-      });
+      var nodeInfo = ejs.client.get('/_nodes',
+        undefined, undefined, function(data, status) {
+          if(status === 0) {
+            alertSrv.set('Error',"Could not contact Elasticsearch at "+ejs.config.server+
+              ". Please ensure that Elasticsearch is reachable from your system." ,'error');
+          } else {
+            alertSrv.set('Error',"Could not reach "+ejs.config.server+"/_nodes. If you"+
+            " are using a proxy, ensure it is configured correctly",'error');
+          }
+        });
 
       return nodeInfo.then(function(p) {
         _.each(p.data.nodes, function(v) {
