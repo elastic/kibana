@@ -24,10 +24,13 @@ import org.elasticsearch.action.admin.cluster.node.stats.NodeStats;
 import org.elasticsearch.action.admin.indices.stats.CommonStatsFlags;
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.ShardStats;
+import org.elasticsearch.action.support.IgnoreIndices;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.ClusterService;
 import org.elasticsearch.common.Nullable;
+import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.collect.ImmutableSet;
+import org.elasticsearch.common.collect.Lists;
 import org.elasticsearch.common.component.AbstractLifecycleComponent;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
@@ -35,21 +38,22 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.util.concurrent.ConcurrentCollections;
 import org.elasticsearch.common.util.concurrent.EsExecutors;
 import org.elasticsearch.discovery.Discovery;
+import org.elasticsearch.index.service.IndexService;
 import org.elasticsearch.index.shard.ShardId;
 import org.elasticsearch.index.shard.service.IndexShard;
 import org.elasticsearch.indices.IndicesLifecycle;
+import org.elasticsearch.indices.IndicesService;
+import org.elasticsearch.indices.InternalIndicesService;
 import org.elasticsearch.marvel.monitor.annotation.Annotation;
 import org.elasticsearch.marvel.monitor.annotation.ShardEventAnnotation;
 import org.elasticsearch.marvel.monitor.exporter.ESExporter;
 import org.elasticsearch.marvel.monitor.exporter.StatsExporter;
-import org.elasticsearch.indices.IndicesService;
-import org.elasticsearch.indices.InternalIndicesService;
 import org.elasticsearch.node.service.NodeService;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 
 public class StatsExportersService extends AbstractLifecycleComponent<StatsExportersService> {
 
@@ -66,6 +70,8 @@ public class StatsExportersService extends AbstractLifecycleComponent<StatsExpor
 
     private Collection<StatsExporter> exporters;
 
+    private String[] indicesToExport = Strings.EMPTY_ARRAY;
+
     private final BlockingQueue<Annotation> pendingAnnotationsQueue;
 
     @Inject
@@ -78,6 +84,7 @@ public class StatsExportersService extends AbstractLifecycleComponent<StatsExpor
         this.clusterService = clusterService;
         this.nodeService = nodeService;
         this.interval = componentSettings.getAsTime("interval", TimeValue.timeValueSeconds(5));
+        this.indicesToExport = componentSettings.getAsArray("indices", this.indicesToExport, true);
         this.client = client;
 
         StatsExporter esExporter = new ESExporter(settings.getComponentSettings(ESExporter.class), discovery);
@@ -191,7 +198,23 @@ public class StatsExportersService extends AbstractLifecycleComponent<StatsExpor
 
         private void exportShardStats() {
             logger.debug("Collecting shard stats");
-            ShardStats[] shardStatsArray = indicesService.shardStats(CommonStatsFlags.ALL);
+            String[] indices = clusterService.state().metaData().concreteIndices(indicesToExport, IgnoreIndices.DEFAULT, true);
+
+            List<ShardStats> shardStats = Lists.newArrayList();
+            for (String index : indices) {
+                IndexService indexService = indicesService.indexService(index);
+                if (indexService == null) {
+                    continue; // something changed, move along
+                }
+                for (int shardId : indexService.shardIds()) {
+                    IndexShard indexShard = indexService.shard(shardId);
+                    if (indexShard == null) {
+                        continue;
+                    }
+                    shardStats.add(new ShardStats(indexShard, CommonStatsFlags.ALL));
+                }
+            }
+            ShardStats[] shardStatsArray = shardStats.toArray(new ShardStats[shardStats.size()]);
 
             logger.debug("Exporting shards stats");
             for (StatsExporter e : exporters) {

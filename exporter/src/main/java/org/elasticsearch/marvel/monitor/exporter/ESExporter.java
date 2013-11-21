@@ -85,12 +85,12 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         this.hostname = address == null ? null : address.getHostName();
 
 
-        hosts = settings.getAsArray("hosts", new String[]{"localhost:9200"});
-        indexPrefix = settings.get("index.prefix", ".marvel");
-        String indexTimeFormat = settings.get("index.timeformat", "YYYY.MM.dd");
+        hosts = settings.getAsArray("es.hosts", new String[]{"localhost:9200"});
+        indexPrefix = settings.get("es.index.prefix", ".marvel");
+        String indexTimeFormat = settings.get("es.index.timeformat", "YYYY.MM.dd");
         indexTimeFormatter = DateTimeFormat.forPattern(indexTimeFormat).withZoneUTC();
 
-        timeout = (int) settings.getAsTime("timeout", new TimeValue(6000)).seconds();
+        timeout = (int) settings.getAsTime("es.timeout", new TimeValue(6000)).seconds();
 
         nodeStatsRenderer = new NodeStatsRenderer();
         shardStatsRenderer = new ShardStatsRenderer();
@@ -98,12 +98,12 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         indicesStatsRenderer = new IndicesStatsRenderer();
         annotationsRenderer = new AnnotationsRenderer();
 
-        logger.info("ESExporter initialized. Targets: {}, index prefix [{}], index time format [{}]", hosts, indexPrefix, indexTimeFormat);
+        logger.info("Initialized with targets: {}, index prefix [{}], index time format [{}]", hosts, indexPrefix, indexTimeFormat);
     }
 
     @Override
     public String name() {
-        return "ESExporter";
+        return "es_exporter";
     }
 
 
@@ -265,7 +265,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         try {
 
 
-            String templateName = "marvel.monitor." + indexPrefix;
+            String templateName = "marvel.monitor.prefix-" + indexPrefix;
 
             logger.debug("checking of target has template [{}]", templateName);
             // DO HEAD REQUEST, when elasticsearch supports it
