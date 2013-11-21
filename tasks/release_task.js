@@ -1,6 +1,5 @@
 module.exports = function(grunt) {
   grunt.registerTask('release', [
-    'package',
     'release:load_s3_config',
     's3:release'
   ]);
