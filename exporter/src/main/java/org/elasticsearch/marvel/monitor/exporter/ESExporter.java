@@ -32,11 +32,7 @@ import org.elasticsearch.common.component.AbstractLifecycleComponent;
 import org.elasticsearch.common.joda.Joda;
 import org.elasticsearch.common.joda.time.format.DateTimeFormat;
 import org.elasticsearch.common.joda.time.format.DateTimeFormatter;
-import org.elasticsearch.common.logging.ESLogger;
-import org.elasticsearch.common.logging.ESLoggerFactory;
-import org.elasticsearch.common.network.NetworkUtils;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
@@ -44,13 +40,13 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.common.xcontent.smile.SmileXContent;
 import org.elasticsearch.discovery.Discovery;
-import org.elasticsearch.marvel.monitor.annotation.Annotation;
+import org.elasticsearch.marvel.monitor.Utils;
+import org.elasticsearch.marvel.monitor.event.Event;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
 import java.net.URL;
 import java.util.Map;
 
@@ -62,7 +58,6 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     final int timeout;
 
     final Discovery discovery;
-    final String hostname;
 
     public final static DateTimeFormatter defaultDatePrinter = Joda.forPattern("date_time").printer();
 
@@ -72,15 +67,12 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     final ShardStatsRenderer shardStatsRenderer;
     final IndexStatsRenderer indexStatsRenderer;
     final IndicesStatsRenderer indicesStatsRenderer;
-    final AnnotationsRenderer annotationsRenderer;
+    final EventsRenderer eventsRenderer;
 
     public ESExporter(Settings settings, Discovery discovery) {
         super(settings);
 
         this.discovery = discovery;
-        InetAddress address = NetworkUtils.getLocalAddress();
-        this.hostname = address == null ? null : address.getHostName();
-
 
         hosts = settings.getAsArray("es.hosts", new String[]{"localhost:9200"});
         indexPrefix = settings.get("es.index.prefix", ".marvel");
@@ -93,7 +85,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         shardStatsRenderer = new ShardStatsRenderer();
         indexStatsRenderer = new IndexStatsRenderer();
         indicesStatsRenderer = new IndicesStatsRenderer();
-        annotationsRenderer = new AnnotationsRenderer();
+        eventsRenderer = new EventsRenderer();
 
         logger.info("Initialized with targets: {}, index prefix [{}], index time format [{}]", hosts, indexPrefix, indexTimeFormat);
     }
@@ -137,9 +129,9 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     }
 
     @Override
-    public void exportAnnotations(Annotation[] annotations) {
-        annotationsRenderer.reset(annotations);
-        exportXContent(annotationsRenderer);
+    public void exportEvents(Event[] events) {
+        eventsRenderer.reset(events);
+        exportXContent(eventsRenderer);
     }
 
 
@@ -334,29 +326,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     private void addNodeInfo(XContentBuilder builder, String fieldname) throws IOException {
         builder.startObject(fieldname);
         DiscoveryNode node = discovery.localNode();
-        builder.field("id", node.id());
-        builder.field("name", node.name());
-        builder.field("transport_address", node.address());
-
-        if (node.address().uniqueAddressTypeId() == 1) { // InetSocket
-            InetSocketTransportAddress address = (InetSocketTransportAddress) node.address();
-            InetAddress inetAddress = address.address().getAddress();
-            if (inetAddress != null) {
-                builder.field("ip", inetAddress.getHostAddress());
-            }
-        }
-
-        if (hostname != null) {
-            builder.field("hostname", hostname);
-        }
-
-        if (!node.attributes().isEmpty()) {
-            builder.startObject("attributes");
-            for (Map.Entry<String, String> attr : node.attributes().entrySet()) {
-                builder.field(attr.getKey(), attr.getValue());
-            }
-            builder.endObject();
-        }
+        Utils.NodeToXContent(node, builder);
         builder.endObject();
     }
 
@@ -505,31 +475,31 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     }
 
 
-    class AnnotationsRenderer implements MultiXContentRenderer {
+    class EventsRenderer implements MultiXContentRenderer {
 
-        Annotation[] annotations;
+        Event[] events;
         ToXContent.Params xContentParams = ToXContent.EMPTY_PARAMS;
 
-        public void reset(Annotation[] annotations) {
-            this.annotations = annotations;
+        public void reset(Event[] events) {
+            this.events = events;
         }
 
         @Override
         public int length() {
-            return annotations == null ? 0 : annotations.length;
+            return events == null ? 0 : events.length;
         }
 
         @Override
         public String type(int i) {
-            return annotations[i].type();
+            return events[i].type();
         }
 
 
         @Override
         public void render(int index, XContentBuilder builder) throws IOException {
             builder.startObject();
-            addNodeInfo(builder, "node");
-            annotations[index].addXContentBody(builder, xContentParams);
+            addNodeInfo(builder, "_source_node");
+            events[index].addXContentBody(builder, xContentParams);
             builder.endObject();
         }
     }

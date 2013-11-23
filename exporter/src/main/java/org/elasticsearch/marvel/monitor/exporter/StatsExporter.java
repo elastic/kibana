@@ -20,14 +20,10 @@ package org.elasticsearch.marvel.monitor.exporter;
 
 
 import org.elasticsearch.action.admin.cluster.node.stats.NodeStats;
-import org.elasticsearch.action.admin.indices.stats.CommonStats;
-import org.elasticsearch.action.admin.indices.stats.IndexStats;
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.ShardStats;
 import org.elasticsearch.common.component.LifecycleComponent;
-import org.elasticsearch.marvel.monitor.annotation.Annotation;
-
-import java.util.Map;
+import org.elasticsearch.marvel.monitor.event.Event;
 
 public interface StatsExporter<T> extends LifecycleComponent<T> {
 
@@ -39,5 +35,5 @@ public interface StatsExporter<T> extends LifecycleComponent<T> {
 
     void exportIndicesStats(IndicesStatsResponse indicesStats);
 
-    void exportAnnotations(Annotation[] annotations);
+    void exportEvents(Event[] events);
 }

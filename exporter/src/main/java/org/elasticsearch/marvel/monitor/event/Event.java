@@ -1,4 +1,4 @@
-package org.elasticsearch.marvel.monitor.annotation;
+package org.elasticsearch.marvel.monitor.event;
 /*
  * Licensed to ElasticSearch under one
  * or more contributor license agreements.  See the NOTICE file
@@ -26,13 +26,13 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.IOException;
 
-public abstract class Annotation {
+public abstract class Event {
 
     public final static DateTimeFormatter datePrinter = Joda.forPattern("date_time").printer();
 
     protected long timestamp;
 
-    public Annotation(long timestamp) {
+    public Event(long timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -41,18 +41,18 @@ public abstract class Annotation {
     }
 
     /**
-     * @return annotation's type as a short string without spaces
+     * @return event's type as a short string without spaces
      */
     public abstract String type();
 
     /**
-     * should return a short string based description of the annotation
+     * should return a short string based description of the event
      */
     abstract String conciseDescription();
 
     @Override
     public String toString() {
-        return "[" + type() + "] annotation: [" + conciseDescription() + "]";
+        return "[" + type() + "] event: [" + conciseDescription() + "]";
     }
 
     public XContentBuilder addXContentBody(XContentBuilder builder, ToXContent.Params params) throws IOException {

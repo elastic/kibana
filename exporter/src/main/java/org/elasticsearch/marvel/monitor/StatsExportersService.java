@@ -26,11 +26,13 @@ import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.ShardStats;
 import org.elasticsearch.action.support.IgnoreIndices;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.cluster.ClusterChangedEvent;
 import org.elasticsearch.cluster.ClusterService;
+import org.elasticsearch.cluster.block.ClusterBlock;
+import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.Nullable;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.collect.ImmutableSet;
-import org.elasticsearch.common.collect.Lists;
 import org.elasticsearch.common.component.AbstractLifecycleComponent;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
@@ -44,8 +46,10 @@ import org.elasticsearch.index.shard.service.IndexShard;
 import org.elasticsearch.indices.IndicesLifecycle;
 import org.elasticsearch.indices.IndicesService;
 import org.elasticsearch.indices.InternalIndicesService;
-import org.elasticsearch.marvel.monitor.annotation.Annotation;
-import org.elasticsearch.marvel.monitor.annotation.ShardEventAnnotation;
+import org.elasticsearch.marvel.monitor.event.Event;
+import org.elasticsearch.marvel.monitor.event.ClusterEvent;
+import org.elasticsearch.marvel.monitor.event.IndexEvent;
+import org.elasticsearch.marvel.monitor.event.ShardEvent;
 import org.elasticsearch.marvel.monitor.exporter.ESExporter;
 import org.elasticsearch.marvel.monitor.exporter.StatsExporter;
 import org.elasticsearch.node.service.NodeService;
@@ -55,6 +59,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
+import static org.elasticsearch.common.collect.Lists.newArrayList;
+
 public class StatsExportersService extends AbstractLifecycleComponent<StatsExportersService> {
 
     private final InternalIndicesService indicesService;
@@ -63,6 +69,7 @@ public class StatsExportersService extends AbstractLifecycleComponent<StatsExpor
     private final Client client;
 
     private final IndicesLifecycle.Listener indicesLifeCycleListener;
+    private final ClusterStateListener clusterStateEventListener;
 
     private volatile ExportingWorker exp;
     private volatile Thread thread;
@@ -72,7 +79,7 @@ public class StatsExportersService extends AbstractLifecycleComponent<StatsExpor
 
     private String[] indicesToExport = Strings.EMPTY_ARRAY;
 
-    private final BlockingQueue<Annotation> pendingAnnotationsQueue;
+    private final BlockingQueue<Event> pendingEventsQueue;
 
     @Inject
     public StatsExportersService(Settings settings, IndicesService indicesService,
@@ -91,7 +98,8 @@ public class StatsExportersService extends AbstractLifecycleComponent<StatsExpor
         this.exporters = ImmutableSet.of(esExporter);
 
         indicesLifeCycleListener = new IndicesLifeCycleListener();
-        pendingAnnotationsQueue = ConcurrentCollections.newBlockingQueue();
+        clusterStateEventListener = new ClusterStateListener();
+        pendingEventsQueue = ConcurrentCollections.newBlockingQueue();
     }
 
     @Override
@@ -105,6 +113,7 @@ public class StatsExportersService extends AbstractLifecycleComponent<StatsExpor
         this.thread.start();
 
         indicesService.indicesLifecycle().addListener(indicesLifeCycleListener);
+        clusterService.addLast(clusterStateEventListener);
     }
 
     @Override
@@ -120,6 +129,7 @@ public class StatsExportersService extends AbstractLifecycleComponent<StatsExpor
             e.stop();
 
         indicesService.indicesLifecycle().removeListener(indicesLifeCycleListener);
+        clusterService.remove(clusterStateEventListener);
 
     }
 
@@ -149,7 +159,7 @@ public class StatsExportersService extends AbstractLifecycleComponent<StatsExpor
 
                     exportShardStats();
 
-                    exportAnnotations();
+                    exportEvents();
 
                     if (clusterService.state().nodes().localNodeMaster()) {
                         exportIndicesStats();
@@ -160,8 +170,8 @@ public class StatsExportersService extends AbstractLifecycleComponent<StatsExpor
 
             }
 
-            logger.debug("shutting down worker, exporting pending annotation");
-            exportAnnotations();
+            logger.debug("shutting down worker, exporting pending event");
+            exportEvents();
 
             logger.debug("worker shutdown");
         }
@@ -180,16 +190,16 @@ public class StatsExportersService extends AbstractLifecycleComponent<StatsExpor
             }
         }
 
-        private void exportAnnotations() {
-            logger.debug("Exporting annotations");
-            ArrayList<Annotation> annotationsList = new ArrayList<Annotation>(pendingAnnotationsQueue.size());
-            pendingAnnotationsQueue.drainTo(annotationsList);
-            Annotation[] annotations = new Annotation[annotationsList.size()];
-            annotationsList.toArray(annotations);
+        private void exportEvents() {
+            logger.debug("Exporting events");
+            ArrayList<Event> eventList = new ArrayList<Event>(pendingEventsQueue.size());
+            pendingEventsQueue.drainTo(eventList);
+            Event[] events = new Event[eventList.size()];
+            eventList.toArray(events);
 
             for (StatsExporter e : exporters) {
                 try {
-                    e.exportAnnotations(annotations);
+                    e.exportEvents(events);
                 } catch (Throwable t) {
                     logger.error("StatsExporter [{}] has thrown an exception:", t, e.name());
                 }
@@ -200,7 +210,7 @@ public class StatsExportersService extends AbstractLifecycleComponent<StatsExpor
             logger.debug("Collecting shard stats");
             String[] indices = clusterService.state().metaData().concreteIndices(indicesToExport, IgnoreIndices.DEFAULT, true);
 
-            List<ShardStats> shardStats = Lists.newArrayList();
+            List<ShardStats> shardStats = newArrayList();
             for (String index : indices) {
                 IndexService indexService = indicesService.indexService(index);
                 if (indexService == null) {
@@ -241,24 +251,82 @@ public class StatsExportersService extends AbstractLifecycleComponent<StatsExpor
         }
     }
 
+    class ClusterStateListener implements org.elasticsearch.cluster.ClusterStateListener {
+
+        @Override
+        public void clusterChanged(ClusterChangedEvent event) {
+            if (event.localNodeMaster()) {
+                // only collect if i'm master.
+                long timestamp = System.currentTimeMillis();
+                if (!event.previousState().nodes().localNodeMaster()) {
+                    pendingEventsQueue.add(new ClusterEvent.ElectedAsMaster(timestamp, event.state().nodes().localNode(), event.source()));
+                }
+
+                for (DiscoveryNode node : event.nodesDelta().addedNodes()) {
+                    pendingEventsQueue.add(new ClusterEvent.NodeJoinLeave(timestamp, node, true, event.source()));
+                }
+
+                for (DiscoveryNode node : event.nodesDelta().removedNodes()) {
+                    pendingEventsQueue.add(new ClusterEvent.NodeJoinLeave(timestamp, node, false, event.source()));
+                }
+
+                if (event.blocksChanged()) {
+                    // TODO: Add index blocks
+                    List<ClusterBlock> removed = newArrayList();
+                    List<ClusterBlock> added = newArrayList();
+                    ImmutableSet<ClusterBlock> currentBlocks = event.state().blocks().global();
+                    ImmutableSet<ClusterBlock> previousBlocks = event.previousState().blocks().global();
+
+                    for (ClusterBlock block : previousBlocks) {
+                        if (!currentBlocks.contains(block)) {
+                            removed.add(block);
+                        }
+                    }
+                    for (ClusterBlock block : currentBlocks) {
+                        if (!previousBlocks.contains(block)) {
+                            added.add(block);
+                        }
+                    }
+
+                    for (ClusterBlock block : added) {
+                        pendingEventsQueue.add(new ClusterEvent.ClusterBlock(timestamp, block, true, event.source()));
+                    }
+
+                    for (ClusterBlock block : removed) {
+                        pendingEventsQueue.add(new ClusterEvent.ClusterBlock(timestamp, block, false, event.source()));
+                    }
+                }
+
+                for (String index : event.indicesCreated()) {
+                    pendingEventsQueue.add(new IndexEvent.IndexCreateDelete(timestamp, index, true, event.source()));
+                }
+
+                for (String index : event.indicesDeleted()) {
+                    pendingEventsQueue.add(new IndexEvent.IndexCreateDelete(timestamp, index, false, event.source()));
+                }
+
+            }
+        }
+    }
+
 
     class IndicesLifeCycleListener extends IndicesLifecycle.Listener {
         @Override
         public void afterIndexShardStarted(IndexShard indexShard) {
-            pendingAnnotationsQueue.add(new ShardEventAnnotation(System.currentTimeMillis(), ShardEventAnnotation.EventType.STARTED,
+            pendingEventsQueue.add(new ShardEvent(System.currentTimeMillis(), ShardEvent.EventType.STARTED,
                     indexShard.shardId(), indexShard.routingEntry()));
 
         }
 
         @Override
         public void beforeIndexShardCreated(ShardId shardId) {
-            pendingAnnotationsQueue.add(new ShardEventAnnotation(System.currentTimeMillis(), ShardEventAnnotation.EventType.CREATED,
+            pendingEventsQueue.add(new ShardEvent(System.currentTimeMillis(), ShardEvent.EventType.CREATED,
                     shardId, null));
         }
 
         @Override
         public void beforeIndexShardClosed(ShardId shardId, @Nullable IndexShard indexShard) {
-            pendingAnnotationsQueue.add(new ShardEventAnnotation(System.currentTimeMillis(), ShardEventAnnotation.EventType.CLOSED,
+            pendingEventsQueue.add(new ShardEvent(System.currentTimeMillis(), ShardEvent.EventType.CLOSED,
                     indexShard.shardId(), indexShard.routingEntry()));
 
         }

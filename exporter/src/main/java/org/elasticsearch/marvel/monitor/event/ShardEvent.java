@@ -1,4 +1,4 @@
-package org.elasticsearch.marvel.monitor.annotation;
+package org.elasticsearch.marvel.monitor.event;
 /*
  * Licensed to ElasticSearch under one
  * or more contributor license agreements.  See the NOTICE file
@@ -25,8 +25,9 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.shard.ShardId;
 
 import java.io.IOException;
+import java.util.Locale;
 
-public class ShardEventAnnotation extends Annotation {
+public class ShardEvent extends Event {
 
     private final ShardRouting shardRouting;
     private final ShardId shardId;
@@ -39,7 +40,7 @@ public class ShardEventAnnotation extends Annotation {
     }
 
 
-    public ShardEventAnnotation(long timestamp, EventType event, ShardId shardId, ShardRouting shardRouting) {
+    public ShardEvent(long timestamp, EventType event, ShardId shardId, ShardRouting shardRouting) {
         super(timestamp);
         this.event = event;
         this.shardId = shardId;
@@ -53,13 +54,13 @@ public class ShardEventAnnotation extends Annotation {
 
     @Override
     String conciseDescription() {
-        return "[" + event + "]" + (shardRouting != null ? shardRouting : shardId);
+        return "[" + event.toString().toLowerCase(Locale.ROOT) + "]" + (shardRouting != null ? shardRouting : shardId);
     }
 
     @Override
     public XContentBuilder addXContentBody(XContentBuilder builder, ToXContent.Params params) throws IOException {
         super.addXContentBody(builder, params);
-        builder.field("event", event);
+        builder.field("event", event.toString().toLowerCase(Locale.ROOT));
         builder.field("index", shardId.index());
         builder.field("shard_id", shardId.id());
         if (shardRouting != null) {
