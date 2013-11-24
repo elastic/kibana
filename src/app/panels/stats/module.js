@@ -56,28 +56,38 @@ define(function (require) {
       }
 
       $scope.panelMeta.loading = true;
+      
+      var request,
+        results,
+        boolQuery,
+        queries;
 
-      var request = $scope.ejs.Request().indices(dashboard.indices);
-      var queries = querySrv.getQueryObjs($scope.panel.queries.ids);
-     
-      var boolQuery = $scope.ejs.BoolQuery();
+      request = $scope.ejs.Request().indices(dashboard.indices);
+
+      $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
+      queries = querySrv.getQueryObjs($scope.panel.queries.ids);
+
+      // This could probably be changed to a BoolFilter
+      boolQuery = $scope.ejs.BoolQuery();
       _.each(queries,function(q) {
         boolQuery = boolQuery.should(querySrv.toEjsObj(q));
       });
 
-      var filteredQuery = $scope.ejs
-          .FilteredQuery(boolQuery, filterSrv.getBoolFilter(filterSrv.ids))
 
-      var queryFilter = $scope.ejs.QueryFilter(filteredQuery);
-     
-      var facet = $scope.ejs.StatisticalFacet('stats');
-      facet.field($scope.panel.field)
-      facet.facetFilter(queryFilter)
-      request.facet(facet).size(0);
-      
+      request = request
+        .facet($scope.ejs.StatisticalFacet('stats')
+          .field($scope.panel.field)
+          .facetFilter($scope.ejs.QueryFilter(
+            $scope.ejs.FilteredQuery(
+              boolQuery,
+              filterSrv.getBoolFilter(filterSrv.ids)
+              )))).size(0);
+
+      // Populate the inspector panel
       $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
 
       results = request.doSearch();
+
       results.then(function(results) {
         $scope.panelMeta.loading = false;
         var value = results.facets.stats[$scope.panel.mode]; 
