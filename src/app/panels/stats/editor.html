@@ -1,17 +1,18 @@
 <div class="row-fluid">
-    <h5>Values</h5>
+    <h5>Details</h5>
     <div class="editor-option">
       <label class="small">Function</label>
       <select ng-change="set_refresh(true)" class="input-small" ng-model="panel.mode" ng-options="f for f in ['count','min','mean','max','total']"></select>
     </div>
     <div class="editor-option">
-      <label class="small">Value Field <tip>This field must contain a numeric value</tip></label>
+      <label class="small">Field <tip>This field must contain a numeric value</tip></label>
         <input ng-change="set_refresh(true)" placeholder="Start typing" bs-typeahead="fields.list" type="text" class="input-large" ng-model="panel.field">
     </div>
     <div class="editor-option">
       <label class="small">Unit</label>
         <input type="text" class="input-large" ng-model="panel.unit">
     </div>
+    <h5>Formating</h5>
     <div class="editor-option">
       <label class="small">Format</label>
       <select ng-change="set_refresh(true)" class="input-small" ng-model="panel.format" ng-options="f for f in ['number','float','money','bytes']"></select>
