@@ -45,7 +45,7 @@
     </thead>
     <tr ng-repeat="term in data" ng-show="showMeta(term)">
       <td>{{term.label}}</td>
-      <td>{{term.data[0][1]}}</td>
+      <td>{{term.data[0][1] | numberFormat}}</td>
       <td>
         <span ng-hide="term.meta == 'other'">
           <i class='icon-search pointer' ng-click="build_search(term)"></i>
