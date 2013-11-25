@@ -71,6 +71,12 @@ function (angular, app, _) {
         };
       };
 
+      $scope.tabs = [
+       { title:"General", active: true },
+       { title:"Panels", active: false },
+       { title:"Add Panel", active: false },
+      ];
+
       $scope.init();
 
     }
