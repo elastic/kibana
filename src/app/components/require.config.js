@@ -41,7 +41,7 @@ require.config({
 
 
     modernizr:                '../vendor/modernizr-2.6.1',
-    numeral:                '../vendor/numeral.min',
+    numeral:                '../vendor/numeral',
     elasticjs:                '../vendor/elasticjs/elastic-angular-client',
   },
   shim: {
