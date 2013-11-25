@@ -31,7 +31,9 @@ function (angular, _, config, kbn) {
 
     // For convenience
     var ejs = ejsResource(config.elasticsearch);
-    var _q = dashboard.current.services.query;
+    var _q = function() {
+      return dashboard.current.services.query;
+    };
 
     // Holds all actual queries, including all resolved abstract queries
     var resolvedQueries = [];
@@ -176,8 +178,8 @@ function (angular, _, config, kbn) {
         delete self.list[id];
         // This must happen on the full path also since _.without returns a copy
         self.ids = dashboard.current.services.query.ids = _.without(self.ids,id);
-        _q.idQueue.unshift(id);
-        _q.idQueue.sort(function(v,k){
+        _q().idQueue.unshift(id);
+        _q().idQueue.sort(function(v,k){
           return v-k;
         });
         return true;
@@ -246,11 +248,24 @@ function (angular, _, config, kbn) {
     };
 
     var nextId = function() {
-      if(_q.idQueue.length > 0) {
-        return _q.idQueue.shift();
-      } else {
-        return self.ids.length;
+      // idQueue can be inconsistent with self.ids.
+      // auto heal here
+      var potentialId;
+      // Purge from all broken ids we find
+      while(_q().idQueue.length > 0) {
+        potentialId = _q().idQueue.shift();
+        if(!_.contains(self.ids, potentialId)) {
+          return potentialId;
+        }
       }
+      // No more queued ids, find the first available
+      for(potentialId=0; potentialId< self.ids.length; potentialId++) {
+        if(!_.contains(self.ids, potentialId)) {
+          return potentialId;
+        }
+      }
+      // Array is compact, return array size;
+      return self.ids.length;
     };
 
     var colorAt = function(id) {
