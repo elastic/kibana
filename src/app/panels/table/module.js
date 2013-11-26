@@ -156,6 +156,7 @@ function (angular, app, _, kbn, moment) {
       $scope.get_data();
     };
 
+
     $scope.toggle_field = function(field) {
       if (_.indexOf($scope.panel.fields,field) > -1) {
         $scope.panel.fields = _.without($scope.panel.fields,field);
@@ -202,7 +203,34 @@ function (angular, app, _, kbn, moment) {
       filterSrv.set({type:'exists',field:field,mandate:mandate});
     };
 
-    $scope.get_data = function(segment,query_id) {
+    $scope.compute_fields = function(state) {
+      $scope.panelMeta.loading = true;
+
+      var cb = function(results) {
+        $scope.panelMeta.loading = false;
+
+        // Check for error and abort if found
+        if(!(_.isUndefined(results.error))) {
+          $scope.panel.error = $scope.parse_error(results.error);
+          return;
+        }
+        $scope.update_current_fields(results.hits.hits);
+        // thank you, good bye
+      };
+
+      $scope.do_search($scope.segment,  $scope.query_id, cb);
+
+      return state;
+    };
+
+    $scope.update_current_fields = function(hits) {
+      _.each(hits, function(hit) {
+        $scope.current_fields = $scope.current_fields.concat(_.keys(kbn.flatten_json(hit._source)));
+      });
+      $scope.current_fields = _.uniq($scope.current_fields);
+    };
+
+    $scope.do_search = function(segment, query_id, cb) {
       var
         _segment,
         request,
@@ -248,12 +276,15 @@ function (angular, app, _, kbn, moment) {
       $scope.populate_modal(request);
 
       results = request.doSearch();
+      results.then(cb);
+    };
 
-      // Populate scope when we have results
-      results.then(function(results) {
+
+    $scope.get_data = function(segment, query_id) {
+      var cb = function(results) {
         $scope.panelMeta.loading = false;
 
-        if(_segment === 0) {
+        if($scope.segment === 0) {
           $scope.hits = 0;
           $scope.data = [];
           $scope.current_fields = [];
@@ -268,6 +299,10 @@ function (angular, app, _, kbn, moment) {
 
         // Check that we're still on the same query, if not stop
         if($scope.query_id === query_id) {
+          // Update field list immediately if visible
+          if($scope.panel.field_list && $scope.current_fields !== []) {
+            $scope.update_current_fields(results.hits.hits);
+          }
 
           // This is exceptionally expensive, especially on events with a large number of fields
           $scope.data = $scope.data.concat(_.map(results.hits.hits, function(hit) {
@@ -277,17 +312,13 @@ function (angular, app, _, kbn, moment) {
 
             // _source is kind of a lie here, never display it, only select values from it
             _h.kibana = {
-              _source : _.extend(kbn.flatten_json(hit._source),_p),
+              _source : _.extend(hit._source,_p),
               highlight : kbn.flatten_json(hit.highlight||{})
             };
-
-            // Kind of cheating with the _.map here, but this is faster than kbn.get_all_fields
-            $scope.current_fields = $scope.current_fields.concat(_.keys(_h.kibana._source));
 
             return _h;
           }));
 
-          $scope.current_fields = _.uniq($scope.current_fields);
           $scope.hits += results.hits.total;
 
           // Sort the data
@@ -316,11 +347,13 @@ function (angular, app, _, kbn, moment) {
         // Otherwise, only get size*pages results then stop querying
         if (($scope.data.length < $scope.panel.size*$scope.panel.pages ||
           !((_.contains(filterSrv.timeField(),$scope.panel.sort[0])) && $scope.panel.sort[1] === 'desc')) &&
-          _segment+1 < dashboard.indices.length) {
-          $scope.get_data(_segment+1,$scope.query_id);
+          $scope.segment+1 < dashboard.indices.length) {
+          $scope.get_data($scope.segment+1,$scope.query_id);
         }
 
-      });
+      };
+
+      $scope.do_search(segment, query_id, cb);
     };
 
     $scope.populate_modal = function(request) {
@@ -361,6 +394,33 @@ function (angular, app, _, kbn, moment) {
 
   });
 
+  module.filter('fromSources', function() {
+    return function(fieldName, source1, source2) {
+      var findField = function(segments, into) {
+        var where = into;
+        var found = true;
+        var segment;
+
+        for(var seg in segments ) {
+          segment = segments[seg];
+          if(where[segment]) {
+            where = where[segment];
+          } else {
+            found = false;
+            break;
+          }
+        }
+        if(found) {
+          return where;
+        }
+        return null;
+      };
+      var segments = fieldName.split(/\./);
+
+      return findField(segments, source1) || findField(segments, source2);
+    };
+  });
+
   // This also escapes some xml sequences
   module.filter('tableHighlight', function() {
     return function(text) {
@@ -385,8 +445,6 @@ function (angular, app, _, kbn, moment) {
       return '';
     };
   });
-
-
 
   module.filter('tableJson', function() {
     var json;
