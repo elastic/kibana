@@ -58,7 +58,7 @@ define([
               error: 10
             },
             {
-              name: 'Jvm Mem (%)',
+              name: 'JVM Mem (%)',
               field: 'os.mem.used_percent',
               warning: 95,
               error: 98
