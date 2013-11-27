@@ -143,7 +143,6 @@
           "overflow": "min-height",
           "fields": [
             "@timestamp",
-            "_source_node.name",
             "_type",
             "event",
             "message"
