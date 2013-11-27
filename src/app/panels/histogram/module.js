@@ -233,6 +233,10 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
           return;
         }
 
+        if (results.timed_out) {
+          $scope.panel.error = "Query timed out; only partial results being shown.  Reduce your query time range or complexity";
+        }
+
         // Convert facet ids to numbers
         var facetIds = _.map(_.keys(results.facets),function(k){return parseInt(k, 10);});
 
