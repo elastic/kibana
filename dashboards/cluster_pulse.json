@@ -4,8 +4,8 @@
     "query": {
       "list": {
         "0": {
-          "query": "_type:cluster_event",
-          "alias": "Cluster events",
+          "query": "_type:node_event",
+          "alias": "Node events",
           "color": "#7EB26D",
           "id": 0,
           "pin": true,
@@ -15,20 +15,20 @@
         "1": {
           "id": 1,
           "color": "#EAB839",
-          "alias": "Index events",
+          "alias": "Index metadata events",
           "pin": true,
           "type": "lucene",
           "enable": true,
-          "query": "_type:index_event"
+          "query": "_type:index_metadata_event"
         },
         "2": {
           "id": 2,
           "color": "#6ED0E0",
-          "alias": "Shard events",
+          "alias": "Routing events",
           "pin": true,
           "type": "lucene",
           "enable": true,
-          "query": "_type:shard_event"
+          "query": "_type:routing_event"
         }
       },
       "ids": [
@@ -117,7 +117,7 @@
       "panels": [
         {
           "error": false,
-          "span": 10,
+          "span": 9,
           "editable": true,
           "type": "table",
           "loadingEditor": false,
@@ -160,7 +160,7 @@
         },
         {
           "error": false,
-          "span": 2,
+          "span": 3,
           "editable": true,
           "type": "terms",
           "loadingEditor": false,

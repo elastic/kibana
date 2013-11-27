@@ -26,18 +26,18 @@ import org.elasticsearch.marvel.monitor.Utils;
 
 import java.io.IOException;
 
-public abstract class IndexEvent extends Event {
+public abstract class NodeEvent extends Event {
 
     protected final String event_source;
 
-    public IndexEvent(long timestamp, String event_source) {
+    public NodeEvent(long timestamp, String event_source) {
         super(timestamp);
         this.event_source = event_source;
     }
 
     @Override
     public String type() {
-        return "index_event";
+        return "node_event";
     }
 
     protected abstract String event();
@@ -50,32 +50,58 @@ public abstract class IndexEvent extends Event {
         return builder;
     }
 
-    public static class IndexCreateDelete extends IndexEvent {
+    public static class ElectedAsMaster extends NodeEvent {
 
-        private final String index;
-        private boolean created;
 
-        public IndexCreateDelete(long timestamp, String index, boolean created, String event_source) {
+        private final DiscoveryNode node;
+
+        public ElectedAsMaster(long timestamp, DiscoveryNode node, String event_source) {
             super(timestamp, event_source);
-            this.index = index;
-            this.created = created;
+            this.node = node;
         }
 
         @Override
         protected String event() {
-            return (created ? "index_created" : "index_deleted");
+            return "elected_as_master";
         }
 
         @Override
         String conciseDescription() {
-            return "[" + index + "] " + (created ? " created" : " deleted");
+            return node.toString() + " became master";
+        }
+
+        // no need to render node as XContent as it will be done by the exporter.
+    }
+
+    public static class NodeJoinLeave extends NodeEvent {
+
+        private final DiscoveryNode node;
+        private boolean joined;
+
+        public NodeJoinLeave(long timestamp, DiscoveryNode node, boolean joined, String event_source) {
+            super(timestamp, event_source);
+            this.node = node;
+            this.joined = joined;
+        }
+
+        @Override
+        protected String event() {
+            return (joined ? "node_joined" : "node_left");
+        }
+
+        @Override
+        String conciseDescription() {
+            return node.toString() + (joined ? " joined" : " left");
         }
 
         @Override
         public XContentBuilder addXContentBody(XContentBuilder builder, ToXContent.Params params) throws IOException {
             super.addXContentBody(builder, params);
-            builder.field("index", index);
+            builder.startObject("node");
+            Utils.NodeToXContent(node, builder);
+            builder.endObject();
             return builder;
         }
     }
+
 }

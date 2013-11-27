@@ -30,6 +30,7 @@ import org.elasticsearch.cluster.ClusterChangedEvent;
 import org.elasticsearch.cluster.ClusterService;
 import org.elasticsearch.cluster.block.ClusterBlock;
 import org.elasticsearch.cluster.node.DiscoveryNode;
+import org.elasticsearch.cluster.routing.*;
 import org.elasticsearch.common.Nullable;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.collect.ImmutableSet;
@@ -46,10 +47,7 @@ import org.elasticsearch.index.shard.service.IndexShard;
 import org.elasticsearch.indices.IndicesLifecycle;
 import org.elasticsearch.indices.IndicesService;
 import org.elasticsearch.indices.InternalIndicesService;
-import org.elasticsearch.marvel.monitor.event.Event;
-import org.elasticsearch.marvel.monitor.event.ClusterEvent;
-import org.elasticsearch.marvel.monitor.event.IndexEvent;
-import org.elasticsearch.marvel.monitor.event.ShardEvent;
+import org.elasticsearch.marvel.monitor.event.*;
 import org.elasticsearch.marvel.monitor.exporter.ESExporter;
 import org.elasticsearch.marvel.monitor.exporter.StatsExporter;
 import org.elasticsearch.node.service.NodeService;
@@ -61,7 +59,7 @@ import java.util.concurrent.BlockingQueue;
 
 import static org.elasticsearch.common.collect.Lists.newArrayList;
 
-public class StatsExportersService extends AbstractLifecycleComponent<StatsExportersService> {
+public class ExportersService extends AbstractLifecycleComponent<ExportersService> {
 
     private final InternalIndicesService indicesService;
     private final NodeService nodeService;
@@ -82,10 +80,10 @@ public class StatsExportersService extends AbstractLifecycleComponent<StatsExpor
     private final BlockingQueue<Event> pendingEventsQueue;
 
     @Inject
-    public StatsExportersService(Settings settings, IndicesService indicesService,
-                                 NodeService nodeService, ClusterService clusterService,
-                                 Client client,
-                                 Discovery discovery) {
+    public ExportersService(Settings settings, IndicesService indicesService,
+                            NodeService nodeService, ClusterService clusterService,
+                            Client client,
+                            Discovery discovery) {
         super(settings);
         this.indicesService = (InternalIndicesService) indicesService;
         this.clusterService = clusterService;
@@ -259,15 +257,53 @@ public class StatsExportersService extends AbstractLifecycleComponent<StatsExpor
                 // only collect if i'm master.
                 long timestamp = System.currentTimeMillis();
                 if (!event.previousState().nodes().localNodeMaster()) {
-                    pendingEventsQueue.add(new ClusterEvent.ElectedAsMaster(timestamp, event.state().nodes().localNode(), event.source()));
+                    pendingEventsQueue.add(new NodeEvent.ElectedAsMaster(timestamp, event.state().nodes().localNode(), event.source()));
                 }
 
                 for (DiscoveryNode node : event.nodesDelta().addedNodes()) {
-                    pendingEventsQueue.add(new ClusterEvent.NodeJoinLeave(timestamp, node, true, event.source()));
+                    pendingEventsQueue.add(new NodeEvent.NodeJoinLeave(timestamp, node, true, event.source()));
                 }
 
                 for (DiscoveryNode node : event.nodesDelta().removedNodes()) {
-                    pendingEventsQueue.add(new ClusterEvent.NodeJoinLeave(timestamp, node, false, event.source()));
+                    pendingEventsQueue.add(new NodeEvent.NodeJoinLeave(timestamp, node, false, event.source()));
+                }
+
+                if (event.routingTableChanged()) {
+                    // hunt for initializing shards
+                    RoutingNodes previousRoutingNodes = event.previousState().routingNodes();
+                    for (ShardRouting shardRouting : event.state().routingNodes().shardsWithState(ShardRoutingState.INITIALIZING)) {
+                        RoutingNode oldRoutingNode = previousRoutingNodes.node(shardRouting.currentNodeId());
+                        boolean changed = true;
+                        if (oldRoutingNode != null) {
+                            for (ShardRouting oldShardRouting : oldRoutingNode.shards()) {
+                                if (oldShardRouting.equals(shardRouting)) {
+                                    changed = false;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!changed) {
+                            continue; // no event.
+                        }
+
+                        if (shardRouting.relocatingNodeId() != null) {
+                            // if relocating node is not null, this shard is initializing due to a relocation
+                            ShardRouting tmpShardRouting = new MutableShardRouting(
+                                    shardRouting.index(), shardRouting.id(), shardRouting.relocatingNodeId(),
+                                    shardRouting.currentNodeId(), shardRouting.primary(),
+                                    ShardRoutingState.RELOCATING, shardRouting.version());
+
+                            pendingEventsQueue.add(new RoutingEvent.ShardRelocating(timestamp, tmpShardRouting,
+                                    clusterService.state().nodes().get(tmpShardRouting.relocatingNodeId()),
+                                    clusterService.state().nodes().get(tmpShardRouting.currentNodeId())
+                            ));
+                        } else {
+                            pendingEventsQueue.add(new RoutingEvent.ShardInitializing(timestamp, shardRouting,
+                                    clusterService.state().nodes().get(shardRouting.currentNodeId())
+                            ));
+                        }
+
+                    }
                 }
 
                 if (event.blocksChanged()) {
@@ -298,11 +334,11 @@ public class StatsExportersService extends AbstractLifecycleComponent<StatsExpor
                 }
 
                 for (String index : event.indicesCreated()) {
-                    pendingEventsQueue.add(new IndexEvent.IndexCreateDelete(timestamp, index, true, event.source()));
+                    pendingEventsQueue.add(new IndexMetaDataEvent.IndexCreateDelete(timestamp, index, true, event.source()));
                 }
 
                 for (String index : event.indicesDeleted()) {
-                    pendingEventsQueue.add(new IndexEvent.IndexCreateDelete(timestamp, index, false, event.source()));
+                    pendingEventsQueue.add(new IndexMetaDataEvent.IndexCreateDelete(timestamp, index, false, event.source()));
                 }
 
             }

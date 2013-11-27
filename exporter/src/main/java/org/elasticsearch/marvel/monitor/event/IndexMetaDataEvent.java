@@ -24,18 +24,18 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.IOException;
 
-public abstract class ClusterEvent extends Event {
+public abstract class IndexMetaDataEvent extends Event {
 
     protected final String event_source;
 
-    public ClusterEvent(long timestamp, String event_source) {
+    public IndexMetaDataEvent(long timestamp, String event_source) {
         super(timestamp);
         this.event_source = event_source;
     }
 
     @Override
     public String type() {
-        return "cluster_event";
+        return "index_metadata_event";
     }
 
     protected abstract String event();
@@ -48,32 +48,31 @@ public abstract class ClusterEvent extends Event {
         return builder;
     }
 
-    public static class ClusterBlock extends ClusterEvent {
-        private final org.elasticsearch.cluster.block.ClusterBlock block;
-        private boolean added;
+    public static class IndexCreateDelete extends IndexMetaDataEvent {
 
-        public ClusterBlock(long timestamp, org.elasticsearch.cluster.block.ClusterBlock block, boolean added, String event_source) {
+        private final String index;
+        private boolean created;
+
+        public IndexCreateDelete(long timestamp, String index, boolean created, String event_source) {
             super(timestamp, event_source);
-            this.block = block;
-            this.added = added;
+            this.index = index;
+            this.created = created;
         }
 
         @Override
         protected String event() {
-            return (added ? "block_added" : "block_removed");
+            return (created ? "index_created" : "index_deleted");
         }
 
         @Override
         String conciseDescription() {
-            return (added ? "added" : "removed") + ": [" + block.toString() + "]";
+            return "[" + index + "] " + (created ? " created" : " deleted");
         }
 
         @Override
         public XContentBuilder addXContentBody(XContentBuilder builder, ToXContent.Params params) throws IOException {
             super.addXContentBody(builder, params);
-            builder.startObject("block");
-            block.toXContent(builder, ToXContent.EMPTY_PARAMS);
-            builder.endObject();
+            builder.field("index", index);
             return builder;
         }
     }

@@ -50,7 +50,7 @@ public class Plugin extends AbstractPlugin {
 
             @Override
             protected void configure() {
-                bind(StatsExportersService.class).asEagerSingleton();
+                bind(ExportersService.class).asEagerSingleton();
             }
         };
         return ImmutableList.of(m);
@@ -59,7 +59,7 @@ public class Plugin extends AbstractPlugin {
     @Override
     public Collection<Class<? extends LifecycleComponent>> services() {
         Collection<Class<? extends LifecycleComponent>> l = new ArrayList<Class<? extends LifecycleComponent>>();
-        l.add(StatsExportersService.class);
+        l.add(ExportersService.class);
         return l;
     }
 }
