@@ -110,10 +110,17 @@ function (angular, app, _, $, kbn) {
       // Populate the inspector panel
       $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
 
+      delete $scope.panel.error
+
       results = request.doSearch();
 
       // Populate scope when we have results
       results.then(function(results) {
+
+        if (results.timed_out) {
+          $scope.panel.error = "Query timed out; only partial results being shown.  Reduce your query time range or complexity";
+        }
+
         var k = 0;
         $scope.panelMeta.loading = false;
         $scope.hits = results.hits.total;
