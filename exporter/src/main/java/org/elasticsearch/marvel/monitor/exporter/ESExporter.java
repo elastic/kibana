@@ -325,8 +325,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
     private void addNodeInfo(XContentBuilder builder, String fieldname) throws IOException {
         builder.startObject(fieldname);
-        DiscoveryNode node = discovery.localNode();
-        Utils.NodeToXContent(node, builder);
+        Utils.NodeToXContent(discovery.localNode(), builder);
         builder.endObject();
     }
 

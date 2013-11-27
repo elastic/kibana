@@ -91,7 +91,7 @@ public abstract class ClusterEvent extends Event {
 
         @Override
         String conciseDescription() {
-            return node.toString() + (joined ? "joined" : "left");
+            return node.toString() + (joined ? " joined" : " left");
         }
 
         @Override

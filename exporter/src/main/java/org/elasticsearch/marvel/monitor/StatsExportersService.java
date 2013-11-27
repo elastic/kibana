@@ -311,23 +311,32 @@ public class StatsExportersService extends AbstractLifecycleComponent<StatsExpor
 
 
     class IndicesLifeCycleListener extends IndicesLifecycle.Listener {
+
         @Override
         public void afterIndexShardStarted(IndexShard indexShard) {
+            DiscoveryNode relocatedFrom = null;
+            if (indexShard.routingEntry().relocatingNodeId() != null) {
+                relocatedFrom = clusterService.state().nodes().get(indexShard.routingEntry().relocatingNodeId());
+            }
             pendingEventsQueue.add(new ShardEvent(System.currentTimeMillis(), ShardEvent.EventType.STARTED,
-                    indexShard.shardId(), indexShard.routingEntry()));
+                    indexShard.shardId(), clusterService.localNode(), relocatedFrom, indexShard.routingEntry()));
 
         }
 
         @Override
         public void beforeIndexShardCreated(ShardId shardId) {
             pendingEventsQueue.add(new ShardEvent(System.currentTimeMillis(), ShardEvent.EventType.CREATED,
-                    shardId, null));
+                    shardId, clusterService.localNode(), null, null));
         }
 
         @Override
         public void beforeIndexShardClosed(ShardId shardId, @Nullable IndexShard indexShard) {
+            DiscoveryNode relocatedTo = null;
+            if (indexShard.routingEntry().relocating()) {
+                relocatedTo = clusterService.state().nodes().get(indexShard.routingEntry().relocatingNodeId());
+            }
             pendingEventsQueue.add(new ShardEvent(System.currentTimeMillis(), ShardEvent.EventType.CLOSED,
-                    indexShard.shardId(), indexShard.routingEntry()));
+                    indexShard.shardId(), clusterService.localNode(), relocatedTo, indexShard.routingEntry()));
 
         }
     }

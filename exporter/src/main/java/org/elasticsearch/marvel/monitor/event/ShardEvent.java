@@ -19,10 +19,13 @@ package org.elasticsearch.marvel.monitor.event;
  */
 
 
+import org.elasticsearch.ElasticSearchException;
+import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.cluster.routing.ShardRouting;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.shard.ShardId;
+import org.elasticsearch.marvel.monitor.Utils;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -31,6 +34,8 @@ public class ShardEvent extends Event {
 
     private final ShardRouting shardRouting;
     private final ShardId shardId;
+    private final DiscoveryNode node;
+    private final DiscoveryNode relocatingNode; // either relocating from or relocating to (depending on event)
     private EventType event;
 
     public enum EventType {
@@ -40,10 +45,14 @@ public class ShardEvent extends Event {
     }
 
 
-    public ShardEvent(long timestamp, EventType event, ShardId shardId, ShardRouting shardRouting) {
+    public ShardEvent(long timestamp, EventType event, ShardId shardId, DiscoveryNode node,
+                      DiscoveryNode reloactingNode,
+                      ShardRouting shardRouting) {
         super(timestamp);
         this.event = event;
         this.shardId = shardId;
+        this.node = node;
+        this.relocatingNode = reloactingNode;
         this.shardRouting = shardRouting;
     }
 
@@ -54,7 +63,26 @@ public class ShardEvent extends Event {
 
     @Override
     String conciseDescription() {
-        return "[" + event.toString().toLowerCase(Locale.ROOT) + "]" + (shardRouting != null ? shardRouting : shardId);
+        switch (event) {
+            case CREATED:
+                // no shard routing
+                return shardId + " created on" + node;
+            case STARTED:
+                if (relocatingNode != null) {
+                    return shardId + " started on " + node + ", relocated from " + relocatingNode;
+                } else {
+                    return shardId + " started on " + node;
+                }
+            case CLOSED:
+                if (relocatingNode != null) {
+                    return shardId + " closed on " + node + ", relocated to " + relocatingNode;
+                } else {
+                    return shardId + " closed on " + node;
+                }
+            default:
+                throw new ElasticSearchException("unmapped event type [" + event + "]");
+
+        }
     }
 
     @Override
@@ -63,11 +91,18 @@ public class ShardEvent extends Event {
         builder.field("event", event.toString().toLowerCase(Locale.ROOT));
         builder.field("index", shardId.index());
         builder.field("shard_id", shardId.id());
+        builder.startObject("node");
+        Utils.NodeToXContent(node, builder);
+        builder.endObject();
         if (shardRouting != null) {
             builder.field("routing");
             shardRouting.toXContent(builder, params);
         }
-
+        if (relocatingNode != null) {
+            builder.startObject(event == EventType.STARTED ? "relocated_from" : "relocated_to");
+            Utils.NodeToXContent(relocatingNode, builder);
+            builder.endObject();
+        }
         return builder;
     }
 }

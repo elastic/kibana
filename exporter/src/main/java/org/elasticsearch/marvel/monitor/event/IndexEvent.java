@@ -68,7 +68,7 @@ public abstract class IndexEvent extends Event {
 
         @Override
         String conciseDescription() {
-            return "[" + index + "] " + (created ? "created" : "deleted");
+            return "[" + index + "] " + (created ? " created" : " deleted");
         }
 
         @Override
