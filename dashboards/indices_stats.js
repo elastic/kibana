@@ -112,6 +112,7 @@ panel_defaults_by_type["histogram"] = {
   linewidth: 2,
   mode: 'max',
   zoomlinks: false,
+  legend_counts: false,
   options: false,
   legend: true,
   resolution: 20
@@ -129,6 +130,7 @@ var rows = [
       {
         "value_field": "total.store.size_in_bytes",
         "title": "Index size",
+        "y_as_bytes": true
       },
       {
         "value_field": "primaries.docs.deleted",

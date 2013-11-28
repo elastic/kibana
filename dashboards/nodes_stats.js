@@ -110,6 +110,7 @@ panel_defaults_by_type["histogram"] = {
   lines: true,
   stack: false,
   linewidth: 2,
+  legend_counts: false,
   mode: 'max',
   zoomlinks: false,
   options: false,
@@ -151,7 +152,8 @@ var rows = [
       {
         "time_field": "@timestamp",
         "value_field": "os.swap.used_in_bytes",
-        "title": "Used Swap"
+        "title": "Used Swap",
+        "y_as_bytes": true
       }
     ]
   },
@@ -162,6 +164,7 @@ var rows = [
         "time_field": "@timestamp",
         "value_field": "jvm.mem.heap_used_in_bytes",
         "title": "Heap",
+        "y_as_bytes": true,
         "annotate": {
           "enable": true,
           "query": "_type:shard_event",
@@ -213,15 +216,18 @@ var rows = [
     "panels": [
       {
         "value_field": "indices.fielddata.memory_size_in_bytes",
-        "title": "Field Data"
+        "title": "Field Data",
+        "y_as_bytes": true
       },
       {
         "value_field": "indices.filter_cache.memory_size_in_bytes",
-        "title": "Filter cache"
+        "title": "Filter cache",
+        "y_as_bytes": true
       },
       {
         "value_field": "indices.id_cache.memory_size_in_bytes",
-        "title": "Id cache"
+        "title": "Id cache",
+        "y_as_bytes": true
       }
     ]
   },
@@ -230,7 +236,8 @@ var rows = [
     "panels": [
       {
         "value_field": "indices.completion.size_in_bytes",
-        "title": "Completion size"
+        "title": "Completion size",
+        "y_as_bytes": true
       }
     ]
   },
@@ -239,22 +246,26 @@ var rows = [
     "panels": [
       {
         "value_field": "fs.data.disk_read_size_in_bytes",
-        "title": "Disk reads (bytes)",
+        "title": "Disk reads per sec.",
         "derivative": true,
         "mode": "min",
-        "scaleSeconds": true
+        "scaleSeconds": true,
+        "y_as_bytes": true
+
       },
       {
         "value_field": "fs.data.disk_write_size_in_bytes",
-        "title": "Disk writes (bytes)",
+        "title": "Disk writes per sec.",
         "derivative": true,
+        "y_as_bytes": true,
         "mode": "min",
         "scaleSeconds": true
       },
       {
         "value_field": "fs.data.available_in_bytes",
-        "title": "Disk Free space (bytes)",
-        "mode": "min"
+        "title": "Disk Free space",
+        "mode": "min",
+        "y_as_bytes": true
       }
     ],
     "notice": false
@@ -284,7 +295,8 @@ var rows = [
       },
       {
         "value_field": "indices.store.size_in_bytes",
-        "title": "Size"
+        "title": "Size",
+        "y_as_bytes": true
       }
     ]
   },
@@ -299,7 +311,8 @@ var rows = [
       },
       {
         "value_field": "indices.merges.current_size_in_bytes",
-        "title": "Merges (bytes)"
+        "title": "Merges size",
+        "y_as_bytes": true
       },
       {
         "value_field": "indices.refresh.total_time_in_millis",
