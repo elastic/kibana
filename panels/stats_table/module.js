@@ -75,7 +75,7 @@ define([
                 type: "lower_bound"
               },
               scale: 1024 * 1024 * 1024
-            },
+            }
             /* Dropping this until we have error handling for fields that don't exist
              {
              // allow people to add a new, not-predefined metric.
@@ -228,7 +228,7 @@ define([
                 $scope.ejs.TermQuery($scope.panel.persistent_field, persistentId)
               )
             );
-            rowRequest.size(1).fields([ $scope.panel.display_field, $scope.panel.persistent_field]);
+            rowRequest.size(1).fields(_.unique([ $scope.panel.display_field, $scope.panel.persistent_field]));
             rowRequest.sort("@timestamp", "desc");
             mrequest.requests(rowRequest);
           });
@@ -318,11 +318,16 @@ define([
       };
 
       var normalizeFacetResults = function (facets, rows, metrics) {
+        facets = facets || {}; // deal better with no data.
         _.each(metrics, function (m) {
           _.each(_.pluck(rows, 'id'), function (id) {
             var summary_key = id + "_" + m.field;
             var history_key = id + "_" + m.field + "_history";
             var summary = facets[summary_key];
+            if (!summary) {
+              // no data for this chart.
+              return;
+            }
             var series_data = _.pluck(facets[history_key].entries, m.derivative ? 'min' : 'mean');
             var series_time = _.pluck(facets[history_key].entries, 'time');
 
@@ -457,10 +462,16 @@ define([
         _.each($scope.panel.metrics, function (metric) {
           $scope.warnLevels._global_[metric.field] = 0;
           _.each(_.pluck($scope.rows, 'id'), function (id) {
-            var num, level;
-            num = $scope.data[id + '_' + metric.field].mean;
-            level = $scope.alertLevel(metric, num);
+            var num, level, summary;
+
             $scope.warnLevels[id] = $scope.warnLevels[id] || {};
+
+            summary = $scope.data[id + '_' + metric.field];
+            if (!summary) {
+              return; // no data
+            }
+            num = summary.mean;
+            level = $scope.alertLevel(metric, num);
             $scope.warnLevels[id][metric.field] = level;
             if (level > $scope.warnLevels._global_[metric.field]) {
               $scope.warnLevels._global_[metric.field] = level;
@@ -530,6 +541,7 @@ define([
       };
 
       $scope.addMetric = function (metric) {
+        metric = metric || {};
         metric = metricDefaults(metric);
         $scope.panel.metrics.push(metric);
         if (!metric.field) {
@@ -559,6 +571,17 @@ define([
         $scope.panel.metrics = _.without($scope.panel.metrics, $scope.panel.metrics[index]);
       };
 
+      $scope.set_refresh = function (state) {
+        $scope.refresh = state;
+      };
+
+      $scope.close_edit = function () {
+        if ($scope.refresh) {
+          $scope.get_rows();
+        }
+        $scope.refresh = false;
+        $scope.$emit('render');
+      };
 
     });
 
