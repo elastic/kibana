@@ -92,16 +92,24 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
         this.indicesToExport = componentSettings.getAsArray("indices", this.indicesToExport, true);
         this.client = client;
 
-        StatsExporter esExporter = new ESExporter(settings.getComponentSettings(ESExporter.class), discovery);
-        this.exporters = ImmutableSet.of(esExporter);
-
         indicesLifeCycleListener = new IndicesLifeCycleListener();
         clusterStateEventListener = new ClusterStateListener();
         pendingEventsQueue = ConcurrentCollections.newBlockingQueue();
+
+        if (componentSettings.getAsBoolean("enabled", true)) {
+            StatsExporter esExporter = new ESExporter(settings.getComponentSettings(ESExporter.class), discovery);
+            this.exporters = ImmutableSet.of(esExporter);
+        } else {
+            this.exporters = ImmutableSet.of();
+            logger.info("monitoring disabled by settings");
+        }
     }
 
     @Override
     protected void doStart() throws ElasticSearchException {
+        if (exporters.size() == 0) {
+            return;
+        }
         for (StatsExporter e : exporters)
             e.start();
 
@@ -116,6 +124,9 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
 
     @Override
     protected void doStop() throws ElasticSearchException {
+        if (exporters.size() == 0) {
+            return;
+        }
         this.exp.closed = true;
         this.thread.interrupt();
         try {
@@ -267,6 +278,7 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
                 for (DiscoveryNode node : event.nodesDelta().removedNodes()) {
                     pendingEventsQueue.add(new NodeEvent.NodeJoinLeave(timestamp, node, false, event.source()));
                 }
+
 
                 if (event.routingTableChanged()) {
                     // hunt for initializing shards
