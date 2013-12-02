@@ -381,5 +381,5 @@
     "load_local": true,
     "hide": false
   },
-  "refresh": false
+  "refresh": "30s"
 }
