@@ -180,10 +180,15 @@ var rows = [
       },
       {
         "value_field": "jvm.gc.collectors.ParNew.collection_time_in_millis",
-        "title": "GC Young Gen duration",
+        "title": "GC Young Gen duration (time %)",
         "derivative": true,
         "mode": "min",
-        "scaleSeconds": true
+        "scaleSeconds": true,
+        "scale": 0.001 * 100,
+        "grid": {
+          "max": 100,
+          "min": 0
+        }
       },
       {
         "value_field": "jvm.gc.collectors.ParNew.collection_count",
@@ -200,9 +205,14 @@ var rows = [
       {
         "value_field": "jvm.gc.collectors.ConcurrentMarkSweep.collection_time_in_millis",
         "derivative": true,
-        "scaleSeconds": true,
         "mode": "min",
-        "title": "GC Old Gen duration"
+        "title": "GC Old Gen duration (time %)",
+        "scaleSeconds": true,
+        "scale": 0.001 * 100,
+        "grid": {
+          "max": 100,
+          "min": 0
+        }
       },
       {
         "value_field": "jvm.gc.collectors.ConcurrentMarkSweep.collection_count",
