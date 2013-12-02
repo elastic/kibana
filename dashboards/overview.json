@@ -185,7 +185,7 @@
             "max": null,
             "min": 0
           },
-          "title": "Search requests",
+          "title": "Search request rate",
           "pointradius": 5
         },
         {
@@ -248,7 +248,7 @@
             "max": null,
             "min": 0
           },
-          "title": "Indexing requests",
+          "title": "Indexing request rate",
           "annotate": {
             "enable": false,
             "query": "*",
