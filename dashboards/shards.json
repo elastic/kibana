@@ -118,7 +118,19 @@
           "grid": {
             "max": null,
             "min": 0
-          }
+          },
+          "annotate": {
+            "enable": false,
+            "query": "*",
+            "size": 20,
+            "field": "_type",
+            "sort": [
+              "_score",
+              "desc"
+            ]
+          },
+          "pointradius": 5,
+          "y_as_bytes": false
         },
         {
           "span": 4,
@@ -181,7 +193,19 @@
           "grid": {
             "max": null,
             "min": 0
-          }
+          },
+          "annotate": {
+            "enable": false,
+            "query": "*",
+            "size": 20,
+            "field": "_type",
+            "sort": [
+              "_score",
+              "desc"
+            ]
+          },
+          "pointradius": 5,
+          "y_as_bytes": false
         },
         {
           "span": 4,
@@ -244,7 +268,19 @@
           "grid": {
             "max": null,
             "min": 0
-          }
+          },
+          "annotate": {
+            "enable": false,
+            "query": "*",
+            "size": 20,
+            "field": "_type",
+            "sort": [
+              "_score",
+              "desc"
+            ]
+          },
+          "pointradius": 5,
+          "y_as_bytes": false
         }
       ],
       "notice": false
@@ -912,6 +948,89 @@
       "notice": false
     },
     {
+      "title": "Segments",
+      "height": "150px",
+      "editable": true,
+      "collapse": false,
+      "collapsable": true,
+      "panels": [
+        {
+          "span": 4,
+          "editable": true,
+          "type": "histogram",
+          "loadingEditor": false,
+          "mode": "max",
+          "time_field": "@timestamp",
+          "queries": {
+            "mode": "all",
+            "ids": [
+              0
+            ]
+          },
+          "annotate": {
+            "enable": false,
+            "query": "*",
+            "size": 20,
+            "field": "_type",
+            "sort": [
+              "_score",
+              "desc"
+            ]
+          },
+          "value_field": "segments.count",
+          "auto_int": true,
+          "resolution": 30,
+          "interval": "1m",
+          "intervals": [
+            "auto",
+            "1s",
+            "1m",
+            "5m",
+            "10m",
+            "30m",
+            "1h",
+            "3h",
+            "12h",
+            "1d",
+            "1w",
+            "1y"
+          ],
+          "fill": 0,
+          "linewidth": 3,
+          "pointradius": 5,
+          "timezone": "browser",
+          "spyable": true,
+          "zoomlinks": true,
+          "bars": false,
+          "stack": false,
+          "points": false,
+          "lines": true,
+          "legend": true,
+          "show_query": true,
+          "legend_counts": false,
+          "x-axis": true,
+          "y-axis": true,
+          "percentage": false,
+          "zerofill": true,
+          "interactive": true,
+          "options": true,
+          "derivative": false,
+          "scale": 1,
+          "y_as_bytes": false,
+          "tooltip": {
+            "value_type": "cumulative",
+            "query_as_alias": true
+          },
+          "grid": {
+            "max": null,
+            "min": 0
+          },
+          "title": "Segment count"
+        }
+      ],
+      "notice": false
+    },
+    {
       "title": "Memory",
       "height": "150px",
       "editable": true,
@@ -1140,8 +1259,8 @@
     },
     {
       "type": "filtering",
-      "collapse": false,
-      "notice": true,
+      "collapse": true,
+      "notice": false,
       "enable": true
     }
   ],

@@ -299,20 +299,6 @@ var rows = [
     ]
   },
   {
-    "title": "Data",
-    "panels": [
-      {
-        "value_field": "indices.docs.count",
-        "title": "Documents"
-      },
-      {
-        "value_field": "indices.store.size_in_bytes",
-        "title": "Size",
-        "y_as_bytes": true
-      }
-    ]
-  },
-  {
     "title": "Indexing",
     "panels": [
       {
@@ -362,6 +348,29 @@ var rows = [
         "mode": "min",
         "scaleSeconds": true,
         "title": "Get requests"
+      }
+    ]
+  },
+  {
+    "title": "Data",
+    "panels": [
+      {
+        "value_field": "indices.docs.count",
+        "title": "Documents"
+      },
+      {
+        "value_field": "indices.store.size_in_bytes",
+        "title": "Size",
+        "y_as_bytes": true
+      }
+    ]
+  },
+  {
+    "title": "Segments",
+    "panels": [
+      {
+        "value_field": "indices.segments.count",
+        "title": "Segment no."
       }
     ]
   },

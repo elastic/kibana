@@ -143,6 +143,16 @@ var rows = [
     "notice": false
   },
   {
+    "title": "Segments",
+    "panels": [
+      {
+        "value_field": "total.segments.count",
+        "title": "Avg Shard Segment Count*",
+      }
+    ],
+    "notice": false
+  },
+  {
     "title": "Indexing",
     "panels": [
       {
