@@ -14,7 +14,7 @@
 'use strict';
 
 // Setup some variables
-var dashboard, queries, _d_timespan;
+var dashboard, queries, _d_timespan, marker_query;
 
 // All url parameters are available via the ARGS object
 var ARGS;
@@ -53,6 +53,7 @@ if (!_.isUndefined(ARGS.queries)) {
       id: parseInt(k, 10)
     }];
   }));
+  marker_query = "(" + _.pluck(queries,"query").join(") OR (") + ")";
 } else {
   // No queries passed? Initialize a single query to match everything
   queries = {
@@ -61,6 +62,23 @@ if (!_.isUndefined(ARGS.queries)) {
       id: 0
     }
   };
+}
+
+var annotate_config;
+
+if (marker_query) {
+  annotate_config = {
+    "enable": true,
+    "query": "_type:shard_event AND (" + marker_query + ")",
+    "size": 100,
+    "field": "message",
+    "sort": [
+      "@timestamp",
+      "desc"
+    ]
+  };
+} else {
+  annotate_config = {};
 }
 
 var show = (ARGS.show || "").split(',');
@@ -117,7 +135,8 @@ panel_defaults_by_type["histogram"] = {
   zoomlinks: false,
   options: false,
   legend: true,
-  resolution: 20
+  resolution: 20,
+  annotate: annotate_config
 };
 
 
@@ -166,17 +185,7 @@ var rows = [
         "time_field": "@timestamp",
         "value_field": "jvm.mem.heap_used_in_bytes",
         "title": "Heap",
-        "y_as_bytes": true,
-        "annotate": {
-          "enable": true,
-          "query": "_type:shard_event",
-          "size": 100,
-          "field": "message",
-          "sort": [
-            "_score",
-            "desc"
-          ]
-        }
+        "y_as_bytes": true
       },
       {
         "value_field": "jvm.gc.collectors.ParNew.collection_time_in_millis",
