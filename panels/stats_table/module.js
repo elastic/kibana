@@ -96,6 +96,7 @@ define([
             {
               name: 'Documents',
               field: 'primaries.docs.count',
+              decimals: 0
             },
             {
               name: 'Index Rate',
