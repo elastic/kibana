@@ -194,9 +194,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
 
       // If there's an interval set, the indices have not been calculated yet,
       // so there is no data. Call refresh to calculate the indices and notify the panels.
-      if(dashboard.index.interval !== 'none') {
-        self.refresh();
-      }
+      self.refresh();
 
       if(dashboard.refresh) {
         self.set_interval(dashboard.refresh);
@@ -274,7 +272,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
 
     this.file_load = function(file) {
       return $http({
-        url: "app/dashboards/"+file+'?' + new Date().getTime(),
+        url: "app/dashboards/"+file.replace(/\.(?!json)/,"/")+'?' + new Date().getTime(),
         method: "GET",
         transformResponse: function(response) {
           return renderTemplate(response,$routeParams);
@@ -293,7 +291,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
 
     this.elasticsearch_load = function(type,id) {
       return $http({
-        url: config.elasticsearch + "/" + config.kibana_index + "/"+type+"/"+id,
+        url: config.elasticsearch + "/" + config.kibana_index + "/"+type+"/"+id+'?' + new Date().getTime(),
         method: "GET",
         transformResponse: function(response) {
           return renderTemplate(angular.fromJson(response)._source.dashboard, $routeParams);
@@ -314,7 +312,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
 
     this.script_load = function(file) {
       return $http({
-        url: "app/dashboards/"+file,
+        url: "app/dashboards/"+file.replace(/\.(?!js)/,"/"),
         method: "GET",
         transformResponse: function(response) {
           /*jshint -W054 */

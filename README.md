@@ -4,19 +4,6 @@ __NOTE__: You have reached the Kibana 3 repository.
 Kibana 3 is a completely new version of Kibana written entirely in HTML and Javascript. You can find
 the Kibana 2 repository at [https://github.com/rashidkpc/Kibana](https://github.com/rashidkpc/Kibana)
 
-### Important!
-The dashboard storage format has changed in Kibana 3 milestone 3. Existing dashboards are unfortunately not backward compatible. However there are some great new features:
-* Every panel supports multi-query
-* Customizable query colors and labels
-* Queries, labels and colors are synced across panels at all times
-* Queries can be assigned explicitly to panels, they can also be pinned and unpinned
-* New filtering functionality
-* Filters can be toggled, removed and edited
-* Drill down won't overwrite your queries, labels or colors
-* Confusing group functionality has been removed
-* Index configuration has been moved from the timepicker, to the main dashboard editor
-* The stringquery panel has been replaced with a more polished 'query' panel
-
 More information about Kibana 3 can be found at [http://www.elasticsearch.org/overview/kibana/](http://www.elasticsearch.org/overview/kibana/)
 
 ## Overview
@@ -44,15 +31,21 @@ configuration the included Kibana logstash interface should work nicely.
 
 ### FAQ
 __Q__: Why doesnt it work? I have http://localhost:9200 in my config.js, my webserver and elasticsearch
-server are on the same machine
+server are on the same machine  
 __A__: Kibana 3 does not work like previous versions of Kibana. To ease deployment, the server side
 component has been eliminated. Thus __the browser connects directly to Elasticsearch__. The default
 config.js setup works for the webserver+Elasticsearch on the same machine scenario. Do not set it
 to http://localhost:9200 unless your browser and elasticsearch are on the same machine
 
-__Q__: How do I secure this? I don't want to leave 9200 open.
+__Q__: How do I secure this? I don't want to leave 9200 open.  
 __A__: A simple nginx virtual host and proxy configuration can be found in the sample/nginx.conf
 
 ### Support
 
 If you have questions or comments the best place to reach me is #logstash or #elasticsearch on irc.freenode.net
+
+### Contributing
+
+Please see [CONTRIBUTING.md](https://github.com/elasticsearch/kibana/blob/master/CONTRIBUTING.md). 
+If you have a bugfix or new feature that you would like to contribute to Kibana, **please find or open an issue 
+about it first.** 

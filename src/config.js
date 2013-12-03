@@ -49,6 +49,7 @@ function (Settings) {
       'bettermap',
       'query',
       'terms',
+      'sparklines',
       'stats'
     ]
   });

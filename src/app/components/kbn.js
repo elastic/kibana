@@ -465,7 +465,7 @@ function($, _, moment) {
 
   kbn.colorSteps = function(col,steps) {
 
-    var _d = steps > 5 ? 1.6/steps : 0.3, // distance between steps
+    var _d = steps > 5 ? 1.6/steps : 0.25, // distance between steps
       _p = []; // adjustment percentage
 
     // Create a range of numbers between -0.8 and 0.8
@@ -477,6 +477,68 @@ function($, _, moment) {
     return _.map(_p.sort(function(a,b){return a-b;}),function(v) {
       return v<0 ? Chromath.darken(col,v*-1).toString() : Chromath.lighten(col,v).toString();
     });
+  };
+
+  // Find the smallest missing number in an array
+  kbn.smallestMissing = function(arr,start,end) {
+    start = start || 0;
+    end = end || arr.length-1;
+
+    if(start > end) {
+      return end + 1;
+    }
+    if(start !== arr[start]) {
+      return start;
+    }
+    var middle = Math.floor((start + end) / 2);
+
+    if (arr[middle] > middle) {
+      return kbn.smallestMissing(arr, start, middle);
+    } else {
+      return kbn.smallestMissing(arr, middle + 1, end);
+    }
+  };
+
+  kbn.byteFormat = function(size, decimals) {
+    var ext, steps = 0;
+    decimals = decimals || 2;
+
+    while (Math.abs(size) >= 1024) {
+      steps++;
+      size /= 1024;
+    }
+
+    switch (steps) {
+    case 0:
+      ext = " B";
+      break;
+    case 1:
+      ext = " KB";
+      break;
+    case 2:
+      ext = " MB";
+      break;
+    case 3:
+      ext = " GB";
+      break;
+    case 4:
+      ext = " TB";
+      break;
+    case 5:
+      ext = " PB";
+      break;
+    case 6:
+      ext = " EB";
+      break;
+    case 7:
+      ext = " ZB";
+      break;
+    case 8:
+      ext = " YB";
+      break;
+    }
+
+    return (size.toFixed(decimals) + ext);
   };
 
   return kbn;
