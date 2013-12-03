@@ -58,12 +58,17 @@ function (angular, _, config, kbn) {
       }
     };
 
+		// Save a reference to this
+		var self = this;
+
     // query type meta data that is not stored on the dashboard object
     this.queryTypes = {
       lucene: {
         require:">=0.17.0",
         icon: "icon-circle",
         resolve: function(query) {
+					query.transforms = self.queryTransforms(query);
+
           // Simply returns itself
           var p = $q.defer();
           p.resolve(_.extend(query,{parent:query.id}));
@@ -123,9 +128,6 @@ function (angular, _, config, kbn) {
       }
     };
 
-    // Save a reference to this
-    var self = this;
-
     this.init = function() {
       self.list = dashboard.current.services.query.list;
       self.ids = dashboard.current.services.query.ids;
@@ -161,6 +163,29 @@ function (angular, _, config, kbn) {
         return query.id;
       }
     };
+
+		this.queryTransforms = function(query) {
+			var parts = query.query.split('|'),
+				transforms = [];
+
+			query.query = parts.shift().trim();
+
+			_.each(parts, function(part) {
+				part = part.trim();
+
+				var command = part.split('(', 1)[0],
+					regex = new RegExp('^'+command),
+					commandArgsString = part.replace(regex, '').trim(),
+					commandArgs = eval(commandArgsString.replace(/^\((.*)\)$/, "[\$1]"));
+
+				transforms.push({
+					command: command,
+					args: commandArgs
+				})
+			});
+
+			return transforms;
+		};
 
     this.defaults = function(query) {
       _.defaults(query,_query);
