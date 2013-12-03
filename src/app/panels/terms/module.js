@@ -43,7 +43,9 @@ function (angular, app, _, $, kbn) {
 
     // Set and populate defaults
     var _d = {
-      queries     : {
+      mode: 'count',
+      value_field: null,
+      queries: {
         mode        : 'all',
         ids         : []
       },
@@ -71,7 +73,14 @@ function (angular, app, _, $, kbn) {
         $scope.get_data();
       });
       $scope.get_data();
+    };
 
+    $scope.get_sorts = function () {
+      var sorts = ['count', 'term', 'reverse_count', 'reverse_term'];
+      if ($scope.panel.mode !== 'count') {
+        sorts.push('total', 'reverse_total', 'min', 'reverse_min', 'max', 'reverse_max', 'mean', 'reverse_mean');
+      }
+      return sorts;
     };
 
     $scope.get_data = function() {
@@ -97,19 +106,30 @@ function (angular, app, _, $, kbn) {
         boolQuery = boolQuery.should(querySrv.toEjsObj(q));
       });
 
-
-      // Terms mode
-      request = request
-        .facet($scope.ejs.TermsFacet('terms')
+      var facet;
+      if ($scope.panel.mode === 'count') {
+        facet = $scope.ejs.TermsFacet('terms')
           .field($scope.panel.field)
           .size($scope.panel.size)
           .order($scope.panel.order)
-          .exclude($scope.panel.exclude)
-          .facetFilter($scope.ejs.QueryFilter(
-            $scope.ejs.FilteredQuery(
-              boolQuery,
-              filterSrv.getBoolFilter(filterSrv.ids)
-              )))).size(0);
+          .exclude($scope.panel.exclude);
+      } else {
+        if (_.isNull($scope.panel.value_field)) {
+          $scope.panel.error = "In " + $scope.panel.mode + " mode a field must be specified";
+          return;
+        }
+        facet = $scope.ejs.TermStatsFacet('terms').keyField($scope.panel.field).valueField($scope.panel.value_field).global(true);
+      }
+
+      facet.facetFilter($scope.ejs.QueryFilter(
+          $scope.ejs.FilteredQuery(
+            boolQuery,
+            filterSrv.getBoolFilter(filterSrv.ids)
+          ))).size($scope.panel.size)
+        .order($scope.panel.order);
+
+      // Terms mode
+      request = request.facet(facet).size(0);
 
       // Populate the inspector panel
       $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
@@ -123,7 +143,10 @@ function (angular, app, _, $, kbn) {
         $scope.hits = results.hits.total;
         $scope.data = [];
         _.each(results.facets.terms.terms, function(v) {
-          var slice = { label : v.term, data : [[k,v.count]], actions: true};
+          var value = v[$scope.panel.mode];
+          var slice = { label: v.term, data: [
+            [k, value]
+          ], actions: true};
           $scope.data.push(slice);
           k = k + 1;
         });
