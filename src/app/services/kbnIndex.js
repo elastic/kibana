@@ -9,7 +9,7 @@ function (angular, _, config, moment) {
 
   var module = angular.module('kibana.services');
 
-  module.service('kbnIndex', function($http, alertSrv) {
+  module.service('kbnIndex', function($http, alertSrv, ejsResource) {
     // returns a promise containing an array of all indices matching the index
     // pattern that exist in a given range
     this.indices = function(from,to,pattern,interval) {
@@ -25,21 +25,21 @@ function (angular, _, config, moment) {
       });
     };
 
+    var ejs = ejsResource(config.elasticsearch);
+
     // returns a promise containing an array of all indices in an elasticsearch
     // cluster
     function all_indices() {
-      var something = $http({
-        url: config.elasticsearch + "/_aliases",
-        method: "GET"
-      }).error(function(data, status) {
-        if(status === 0) {
-          alertSrv.set('Error',"Could not contact Elasticsearch at "+config.elasticsearch+
-            ". Please ensure that Elasticsearch is reachable from your system." ,'error');
-        } else {
-          alertSrv.set('Error',"Could not reach "+config.elasticsearch+"/_aliases. If you"+
-          " are using a proxy, ensure it is configured correctly",'error');
-        }
-      });
+      var something = ejs.client.get('/_aliases',
+        undefined, undefined, function(data, status) {
+          if(status === 0) {
+            alertSrv.set('Error',"Could not contact Elasticsearch at "+ejs.config.server+
+              ". Please ensure that Elasticsearch is reachable from your system." ,'error');
+          } else {
+            alertSrv.set('Error',"Could not reach "+ejs.config.server+"/_aliases. If you"+
+            " are using a proxy, ensure it is configured correctly",'error');
+          }
+        });
 
       return something.then(function(p) {
         var indices = [];

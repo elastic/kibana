@@ -292,24 +292,24 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
     };
 
     this.elasticsearch_load = function(type,id) {
-      return $http({
-        url: config.elasticsearch + "/" + config.kibana_index + "/"+type+"/"+id+'?' + new Date().getTime(),
-        method: "GET",
-        transformResponse: function(response) {
-          return renderTemplate(angular.fromJson(response)._source.dashboard, $routeParams);
-        }
-      }).error(function(data, status) {
+      var successcb = function(data) {
+        var response = renderTemplate(angular.fromJson(data)._source.dashboard, $routeParams);
+        self.dash_load(response);
+      };
+      var errorcb = function(data, status) {
         if(status === 0) {
-          alertSrv.set('Error',"Could not contact Elasticsearch at "+config.elasticsearch+
+          alertSrv.set('Error',"Could not contact Elasticsearch at "+ejs.config.server+
             ". Please ensure that Elasticsearch is reachable from your system." ,'error');
         } else {
           alertSrv.set('Error',"Could not find "+id+". If you"+
             " are using a proxy, ensure it is configured correctly",'error');
         }
         return false;
-      }).success(function(data) {
-        self.dash_load(data);
-      });
+      };
+
+      ejs.client.get(
+        "/" + config.kibana_index + "/"+type+"/"+id+'?' + new Date().getTime(),
+        null, successcb, errorcb);
     };
 
     this.script_load = function(file) {
