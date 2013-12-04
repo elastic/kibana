@@ -9,13 +9,13 @@ function (angular, _, config, kbn) {
 
   var module = angular.module('kibana.services');
 
-  module.service('querySrv', function(dashboard, ejsResource, filterSrv, $q) {
+  module.service('querySrv', function(dashboard, ejsResource, filterSrv, $q, dataTransform) {
 
     // Create an object to hold our service state on the dashboard
     dashboard.current.services.query = dashboard.current.services.query || {};
     _.defaults(dashboard.current.services.query,{
       list : {},
-      ids : [],
+      ids : []
     });
 
     this.colors = [
@@ -241,6 +241,10 @@ function (angular, _, config, kbn) {
       });
     };
 
+    this.transform = function(queries, results) {
+      dataTransform.transform(queries, results);
+    };
+
     var nextId = function() {
       var idCount = dashboard.current.services.query.ids.length;
       if(idCount > 0) {
@@ -257,28 +261,27 @@ function (angular, _, config, kbn) {
       return self.colors[id % self.colors.length];
     };
 
+    var queryTransforms = function(query) {
+      var parts = query.query.split('|');
+
+      query.query = parts.shift().trim();
+      query.transforms = [];
+
+      _.each(parts, function(part) {
+        part = part.trim();
+
+        var command = part.split('(', 1)[0],
+          regex = new RegExp('^'+command),
+          commandArgsString = part.replace(regex, '').trim(),
+          commandArgs = eval(commandArgsString.replace(/^\((.*)\)$/, "[\$1]"));
+
+        query.transforms.push({
+          command: command,
+          args: commandArgs
+        })
+      });
+    };
+
     self.init();
   });
-
-  var queryTransforms = function(query) {
-    var parts = query.query.split('|');
-
-    query.query = parts.shift().trim();
-    query.transforms = [];
-
-    _.each(parts, function(part) {
-      part = part.trim();
-
-      var command = part.split('(', 1)[0],
-        regex = new RegExp('^'+command),
-        commandArgsString = part.replace(regex, '').trim(),
-        commandArgs = eval(commandArgsString.replace(/^\((.*)\)$/, "[\$1]"));
-
-      query.transforms.push({
-        command: command,
-        args: commandArgs
-      })
-    });
-  };
-
 });

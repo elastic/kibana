@@ -7,6 +7,10 @@ define([
   './querySrv',
   './timer',
   './panelMove',
-  './esVersion'
+  './esVersion',
+
+  './dataTransform',
+  './dataTransforms/replaceTransform',
+  './dataTransforms/countTransform',
 ],
 function () {});

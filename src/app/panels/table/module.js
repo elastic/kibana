@@ -254,66 +254,11 @@ function (angular, app, _, kbn, moment) {
 
       $scope.populate_modal(request);
 
-      results = request.doSearch(function(results) {
-        _.forEach(queries, function(query) {
-          if (query.transforms) {
-            _.forEach(query.transforms, function(transform) {
-              switch (transform.command) {
-                case 'replace':
-                  var regex = new RegExp(transform.args[0], 'g');
-                  // TODO: generic-alize this!
-                  _.forEach(results.hits.hits, function(hit) {
-                    hit._source['@message'] = hit._source['@message'].replace(regex, transform.args[1]);
-                  });
-                  break;
-                case 'stats_count':
-                  var newHits = [];
-                  var hitDict = {};
-                  var countBy = transform.args[0];
-                  var asc = transform.args[1] || false;
-
-                  _.forEach(results.hits.hits, function(hit) {
-                    var key = hit._source[countBy];
-
-                    if (key in hitDict) {
-                      ++hitDict[key].count;
-                    } else {
-                      hitDict[key] = {
-                        'count': 1
-                      };
-                    }
-                  });
-
-                  _.forEach(hitDict, function(data, key) {
-                    var hit = {
-                      _source: {
-                        count: data.count
-                      }
-                    };
-                    hit._source[countBy] = key;
-
-                    newHits.push(hit)
-                  });
-
-                  newHits.sort(function(a, b) {
-                    if (asc) {
-                      return a._source['count'] < b._source['count'] ? 1 : -1;
-                    } else {
-                      return a._source['count'] < b._source['count'] ? -1 : 1;
-                    }
-
-                  });
-
-                  results.hits.hits = newHits;
-              }
-
-            });
-          }
-        });
-			});
+      results = request.doSearch();
 
       // Populate scope when we have results
       results.then(function(results) {
+        querySrv.transform(queries, results);
         $scope.panelMeta.loading = false;
 
         if(_segment === 0) {
