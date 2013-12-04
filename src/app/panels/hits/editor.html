@@ -12,6 +12,10 @@
       <label class="small">Number filter</label>
       <select class="input-medium" ng-model="panel.filter" ng-options="f for f in ['','number','metric','binary']" ng-change="set_refresh(true)"></select></span>
     </div>
+    <div class="span2">
+      <label class="small">Unit</label>
+        <input type="text" class="input-small" ng-model="panel.unit">
+    </div>
     <div class="span3" ng-show="panel.chart == 'bar' || panel.chart == 'pie'">
       <label class="small">Legend</label>
       <select class="input-small" ng-model="panel.counter_pos" ng-options="f for f in ['above','below','none']"></select></span>

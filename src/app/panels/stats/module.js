@@ -44,6 +44,7 @@ define([
       style   : { "font-size": '10pt'},
       field   : null,
       filter  : null,
+      unit    : null,
       count          : true,
       total          : true,
       min            : true,

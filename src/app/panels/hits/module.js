@@ -58,7 +58,8 @@ define([
       tilt    : false,
       labels  : true,
       spyable : true,
-      filter  : null
+      filter  : null,
+      unit    : null
     };
     _.defaults($scope.panel,_d);
 
