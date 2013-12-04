@@ -12,7 +12,7 @@ define([
   'underscore',
   'jquery',
   'kbn',
-], function (angular, app, _, $, kbn) {
+], function (angular, app, _) {
   'use strict';
 
   var module = angular.module('kibana.panels.stats', []);
@@ -67,51 +67,52 @@ define([
 
     };
 
-    $scope.get_data = function(segment,query_id) {
-      delete $scope.panel.error;
-      $scope.panelMeta.loading = true;
-
+    $scope.get_data = function() {
       // Make sure we have everything for the request to complete
       if(dashboard.indices.length === 0) {
         return;
       }
 
+      $scope.panelMeta.loading = true;
       var request,
         results,
-        boolQuery;
+        boolQuery,
+        queries;
 
-        
-      $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
-      
       request = $scope.ejs.Request().indices(dashboard.indices);
+      
+      $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
+      queries = querySrv.getQueryObjs($scope.panel.queries.ids);
+      
+      // This could probably be changed to a BoolFilter
       boolQuery = $scope.ejs.BoolQuery();
-      _.each($scope.panel.queries.ids,function(id) {
-        boolQuery = boolQuery.should(querySrv.getEjsObj(id));
+      _.each(queries,function(q) {
+        boolQuery = boolQuery.should(querySrv.toEjsObj(q));
       });
       
-      
-      var facet = $scope.ejs.StatisticalFacet('stats');
       if(_.isNull($scope.panel.field)) {
-      	  $scope.panel.error = "A field must be specified";
-      	  return;
+        $scope.panel.error = "A field must be specified";
+        return;
       }
-      facet.field($scope.panel.field);
-      request = request.facet(facet).size(0);
-      request.query(
-          boolQuery,
-          filterSrv.getBoolFilter(filterSrv.ids)
-        );
-
-   
+      
+      // Terms mode
+      request = request
+        .facet($scope.ejs.StatisticalFacet('stats')
+          .field($scope.panel.field)
+          .facetFilter($scope.ejs.QueryFilter(
+            $scope.ejs.FilteredQuery(
+              boolQuery,
+              filterSrv.getBoolFilter(filterSrv.ids)
+              )))).size(0);
+         
       // Populate the inspector panel
       $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
 
       // Then run it
-      var results = request.doSearch();
+      results = request.doSearch();
 
       // Populate scope when we have results
       results.then(function(results) {
-        var k = 0;
         $scope.panelMeta.loading = false;
         $scope.count = results.facets.stats.count;
         $scope.total = results.facets.stats.total;
@@ -121,7 +122,6 @@ define([
         $scope.sum_of_squares  = results.facets.stats.sum_of_squares;
         $scope.variance        = results.facets.stats.variance;
         $scope.std_deviation   = results.facets.stats.std_deviation;
-        $scope.$emit('render');
       });
     };
 
@@ -134,7 +134,6 @@ define([
         $scope.get_data();
       }
       $scope.refresh =  false;
-      $scope.$emit('render');
     };
   });
 });

@@ -138,39 +138,50 @@ function (angular, $, _, appLevelRequire) {
   });
   
   app.filter('metric', function() {
-	return function(bytes, precision) {
-		if (isNaN(parseFloat(bytes)) || !isFinite(bytes)) return '-';
-		if (typeof precision === 'undefined') precision = 1;
-		var units = ['', 'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'],
-			number = Math.floor(Math.log(bytes) / Math.log(1000));
-		return (bytes / Math.pow(1000, Math.floor(number))).toFixed(precision) +  ' ' + units[number];
-	}
-  });
+      return function(bytes, precision) {
+        if (isNaN(parseFloat(bytes)) || !isFinite(bytes)) {
+          return '-';
+        }
+        if (typeof precision === 'undefined') { 
+          precision = 1;
+        }
+        var units = ['', 'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'],
+        number = Math.floor(Math.log(bytes) / Math.log(1000));
+        return (bytes / Math.pow(1000, Math.floor(number))).toFixed(precision) +  ' ' + units[number];
+      };
+    }
+   );
   
   app.filter('binary', function() {
-	return function(bytes, precision) {
-		if (isNaN(parseFloat(bytes)) || !isFinite(bytes)) return '-';
-		if (typeof precision === 'undefined') precision = 1;
-		var units = ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi', 'Yi'],
-			number = Math.floor(Math.log(bytes) / Math.log(1024));
-		return (bytes / Math.pow(1024, Math.floor(number))).toFixed(precision) +  ' ' + units[number];
-	}
-  });
+      return function(bytes, precision) {
+        if (isNaN(parseFloat(bytes)) || !isFinite(bytes)) { 
+          return '-';
+        }
+        if (typeof precision === 'undefined') {
+          precision = 1;
+        }
+        var units = ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi', 'Yi'],
+        number = Math.floor(Math.log(bytes) / Math.log(1024));
+        return (bytes / Math.pow(1024, Math.floor(number))).toFixed(precision) +  ' ' + units[number];
+      };
+    }
+  );
   
   app.filter('number_format', function($filter) {
-  		  return function(n,type,precision) {
-  		  	  switch(type) {
-  		  	 	case 'number':
-  		  	 		  return $filter('number')(n,precision)
-  		  	 	case 'metric':
-  		  	 		  return $filter('metric')(n,precision)
-  		  	 	case 'binary':
-  		  	 		  return $filter('binary')(n,precision)
-  		  	 	default:
-  		  	 		  return n;
-  		  	  }
-  		  }
-  });
-
+      return function(n,type,precision) {
+        switch(type) {
+        case 'number':
+          return $filter('number')(n,precision);
+        case 'metric':
+          return $filter('metric')(n,precision);
+        case 'binary':
+          return $filter('binary')(n,precision);
+        default:
+          return n;
+        }
+      };
+    }
+   );
+  
   return app;
 });
