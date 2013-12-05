@@ -39,7 +39,7 @@ dashboard.index = {
   'interval': 'day'
 };
 
-dashboard.refresh="30s";
+dashboard.refresh="5s";
 
 // In this dashboard we let users pass nodes as comma seperated list to the query parameter.
 // If nodes are defined, split into a list of query objects, otherwise, show all
