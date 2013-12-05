@@ -4,9 +4,8 @@ define([
 ],
   function(ng, _) {
     ng.module('kibana.services').service('countTransform', function(dataTransform) {
-      this.transform = function(hits, countBy, sortAsc, keepFields) {
+      this.transform = function(hits, countBy, keepFields) {
         var hitDict = {},
-          sortAsc = sortAsc || false,
           keepFields = keepFields || [];
 
         _.forEach(hits, function(hit) {
@@ -38,7 +37,7 @@ define([
 
         dataTransform.sort(hits, function(obj) {
           return obj._source.count;
-        }, sortAsc);
+        });
 
         return hits;
       };
