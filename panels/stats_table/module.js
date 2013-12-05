@@ -132,7 +132,7 @@ define([
         }
         m = _.defaults(m, _.findWhere($scope.modeInfo[$scope.panel.mode].availableMetrics, { "field": m.field }));
 
-        var _metric_defaults = {field: "", decimals: 2, scale: 1};
+        var _metric_defaults = {field: "", decimals: 1, scale: 1};
         m = _.defaults(m, _metric_defaults);
 
         if (_.isNumber(m.error)) {
