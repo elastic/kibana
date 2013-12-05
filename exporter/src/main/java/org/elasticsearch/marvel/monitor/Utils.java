@@ -25,6 +25,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.Map;
 
 public class Utils {
@@ -36,10 +37,12 @@ public class Utils {
 
         if (node.address().uniqueAddressTypeId() == 1) { // InetSocket
             InetSocketTransportAddress address = (InetSocketTransportAddress) node.address();
-            InetAddress inetAddress = address.address().getAddress();
+            InetSocketAddress inetSocketAddress = address.address();
+            InetAddress inetAddress = inetSocketAddress.getAddress();
             if (inetAddress != null) {
                 builder.field("ip", inetAddress.getHostAddress());
                 builder.field("hostname", inetAddress.getHostName());
+                builder.field("ip_port", inetAddress.getHostAddress() + ":" + inetSocketAddress.getPort());
             }
         }
 

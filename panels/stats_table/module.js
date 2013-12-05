@@ -40,7 +40,7 @@ define([
         nodes: {
           defaults: {
             display_field: "node.name",
-            persistent_field: "node.transport_address",
+            persistent_field: "node.ip_port",
             metrics: [ 'process.cpu.percent', 'os.load_average.1m', 'os.mem.used_percent', 'fs.data.available_in_bytes' ],
             show_hidden: true
           },
