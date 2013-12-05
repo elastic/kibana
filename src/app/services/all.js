@@ -10,7 +10,8 @@ define([
   './esVersion',
 
   './dataTransform',
-  './dataTransforms/replaceTransform',
   './dataTransforms/countTransform',
+  './dataTransforms/fieldTransform',
+  './dataTransforms/replaceTransform'
 ],
 function () {});

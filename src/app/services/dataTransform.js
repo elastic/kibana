@@ -7,8 +7,9 @@ define([
 
     ng.module('kibana.services').service('dataTransform', function($injector) {
       var validTransforms = [
-        'replace',
-        'count'
+        'count',
+        'field',
+        'replace'
       ];
 
       this.transform = function(queries, results) {
@@ -43,6 +44,14 @@ define([
         }
 
         return result;
+      };
+
+      this.parseRegex = function(param) {
+        if (_.isString(param)) {
+          return new RegExp(param, 'g');
+        }
+
+        return param;
       };
 
       this.sort = function(list, getter, sortAsc) {
