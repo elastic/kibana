@@ -81,7 +81,6 @@ public class ShardEvent extends Event {
                 }
             default:
                 throw new ElasticSearchException("unmapped event type [" + event + "]");
-
         }
     }
 
@@ -92,7 +91,7 @@ public class ShardEvent extends Event {
         builder.field("index", shardId.index());
         builder.field("shard_id", shardId.id());
         builder.startObject("node");
-        Utils.NodeToXContent(node, builder);
+        Utils.nodeToXContent(node, builder);
         builder.endObject();
         if (shardRouting != null) {
             builder.field("routing");
@@ -100,7 +99,7 @@ public class ShardEvent extends Event {
         }
         if (relocatingNode != null) {
             builder.startObject(event == EventType.STARTED ? "relocated_from" : "relocated_to");
-            Utils.NodeToXContent(relocatingNode, builder);
+            Utils.nodeToXContent(relocatingNode, builder);
             builder.endObject();
         }
         return builder;

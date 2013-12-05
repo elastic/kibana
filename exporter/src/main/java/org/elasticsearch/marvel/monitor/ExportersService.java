@@ -194,8 +194,6 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
                 } catch (Throwable t) {
                     logger.error("StatsExporter [{}] has thrown an exception:", t, e.name());
                 }
-
-
             }
         }
 
@@ -264,97 +262,101 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
 
         @Override
         public void clusterChanged(ClusterChangedEvent event) {
-            if (event.localNodeMaster()) {
-                // only collect if i'm master.
-                long timestamp = System.currentTimeMillis();
-                if (!event.previousState().nodes().localNodeMaster()) {
-                    pendingEventsQueue.add(new NodeEvent.ElectedAsMaster(timestamp, event.state().nodes().localNode(), event.source()));
-                }
+            if (!event.localNodeMaster()) {
+                return;
+            }
+            // only collect if i'm master.
+            long timestamp = System.currentTimeMillis();
+            if (!event.previousState().nodes().localNodeMaster()) {
+                pendingEventsQueue.add(new NodeEvent.ElectedAsMaster(timestamp, event.state().nodes().localNode(), event.source()));
+            }
 
-                for (DiscoveryNode node : event.nodesDelta().addedNodes()) {
-                    pendingEventsQueue.add(new NodeEvent.NodeJoinLeave(timestamp, node, true, event.source()));
-                }
+            for (DiscoveryNode node : event.nodesDelta().addedNodes()) {
+                pendingEventsQueue.add(new NodeEvent.NodeJoinLeave(timestamp, node, true, event.source()));
+            }
 
-                for (DiscoveryNode node : event.nodesDelta().removedNodes()) {
-                    pendingEventsQueue.add(new NodeEvent.NodeJoinLeave(timestamp, node, false, event.source()));
-                }
+            for (DiscoveryNode node : event.nodesDelta().removedNodes()) {
+                pendingEventsQueue.add(new NodeEvent.NodeJoinLeave(timestamp, node, false, event.source()));
+            }
 
 
-                if (event.routingTableChanged()) {
-                    // hunt for initializing shards
-                    RoutingNodes previousRoutingNodes = event.previousState().routingNodes();
-                    for (ShardRouting shardRouting : event.state().routingNodes().shardsWithState(ShardRoutingState.INITIALIZING)) {
-                        RoutingNode oldRoutingNode = previousRoutingNodes.node(shardRouting.currentNodeId());
-                        boolean changed = true;
-                        if (oldRoutingNode != null) {
-                            for (ShardRouting oldShardRouting : oldRoutingNode.shards()) {
-                                if (oldShardRouting.equals(shardRouting)) {
-                                    changed = false;
-                                    break;
-                                }
+            if (event.routingTableChanged()) {
+                // hunt for initializing shards
+                RoutingNodes previousRoutingNodes = event.previousState().routingNodes();
+                for (ShardRouting shardRouting : event.state().routingNodes().shardsWithState(ShardRoutingState.INITIALIZING)) {
+                    RoutingNode oldRoutingNode = previousRoutingNodes.node(shardRouting.currentNodeId());
+                    boolean changed = true;
+                    if (oldRoutingNode != null) {
+                        for (ShardRouting oldShardRouting : oldRoutingNode.shards()) {
+                            if (oldShardRouting.equals(shardRouting)) {
+                                changed = false;
+                                break;
                             }
                         }
-                        if (!changed) {
-                            continue; // no event.
+                    }
+                    if (!changed) {
+                        continue; // no event.
+                    }
+
+                    if (shardRouting.relocatingNodeId() != null) {
+                        // if relocating node is not null, this shard is initializing due to a relocation
+                        ShardRouting tmpShardRouting = new MutableShardRouting(
+                                shardRouting.index(), shardRouting.id(), shardRouting.relocatingNodeId(),
+                                shardRouting.currentNodeId(), shardRouting.primary(),
+                                ShardRoutingState.RELOCATING, shardRouting.version());
+                        DiscoveryNode relocatingTo = null;
+                        if (tmpShardRouting.relocatingNodeId() != null) {
+                            relocatingTo = event.state().nodes().get(tmpShardRouting.relocatingNodeId());
                         }
-
-                        if (shardRouting.relocatingNodeId() != null) {
-                            // if relocating node is not null, this shard is initializing due to a relocation
-                            ShardRouting tmpShardRouting = new MutableShardRouting(
-                                    shardRouting.index(), shardRouting.id(), shardRouting.relocatingNodeId(),
-                                    shardRouting.currentNodeId(), shardRouting.primary(),
-                                    ShardRoutingState.RELOCATING, shardRouting.version());
-
-                            pendingEventsQueue.add(new RoutingEvent.ShardRelocating(timestamp, tmpShardRouting,
-                                    clusterService.state().nodes().get(tmpShardRouting.relocatingNodeId()),
-                                    clusterService.state().nodes().get(tmpShardRouting.currentNodeId())
-                            ));
-                        } else {
-                            pendingEventsQueue.add(new RoutingEvent.ShardInitializing(timestamp, shardRouting,
-                                    clusterService.state().nodes().get(shardRouting.currentNodeId())
-                            ));
-                        }
-
+                        pendingEventsQueue.add(new RoutingEvent.ShardRelocating(timestamp, tmpShardRouting,
+                                relocatingTo, event.state().nodes().get(tmpShardRouting.currentNodeId())
+                        ));
+                    } else {
+                        pendingEventsQueue.add(new RoutingEvent.ShardInitializing(timestamp, shardRouting,
+                                event.state().nodes().get(shardRouting.currentNodeId())
+                        ));
                     }
+
                 }
-
-                if (event.blocksChanged()) {
-                    // TODO: Add index blocks
-                    List<ClusterBlock> removed = newArrayList();
-                    List<ClusterBlock> added = newArrayList();
-                    ImmutableSet<ClusterBlock> currentBlocks = event.state().blocks().global();
-                    ImmutableSet<ClusterBlock> previousBlocks = event.previousState().blocks().global();
-
-                    for (ClusterBlock block : previousBlocks) {
-                        if (!currentBlocks.contains(block)) {
-                            removed.add(block);
-                        }
-                    }
-                    for (ClusterBlock block : currentBlocks) {
-                        if (!previousBlocks.contains(block)) {
-                            added.add(block);
-                        }
-                    }
-
-                    for (ClusterBlock block : added) {
-                        pendingEventsQueue.add(new ClusterEvent.ClusterBlock(timestamp, block, true, event.source()));
-                    }
-
-                    for (ClusterBlock block : removed) {
-                        pendingEventsQueue.add(new ClusterEvent.ClusterBlock(timestamp, block, false, event.source()));
-                    }
-                }
-
-                for (String index : event.indicesCreated()) {
-                    pendingEventsQueue.add(new IndexMetaDataEvent.IndexCreateDelete(timestamp, index, true, event.source()));
-                }
-
-                for (String index : event.indicesDeleted()) {
-                    pendingEventsQueue.add(new IndexMetaDataEvent.IndexCreateDelete(timestamp, index, false, event.source()));
-                }
-
             }
+
+            if (event.blocksChanged()) {
+                // TODO: Add index blocks
+                List<ClusterBlock> removed = newArrayList();
+                List<ClusterBlock> added = newArrayList();
+                ImmutableSet<ClusterBlock> currentBlocks = event.state().blocks().global();
+                ImmutableSet<ClusterBlock> previousBlocks = event.previousState().blocks().global();
+
+                for (ClusterBlock block : previousBlocks) {
+                    if (!currentBlocks.contains(block)) {
+                        removed.add(block);
+                    }
+                }
+                for (ClusterBlock block : currentBlocks) {
+                    if (!previousBlocks.contains(block)) {
+                        added.add(block);
+                    }
+                }
+
+                for (ClusterBlock block : added) {
+                    pendingEventsQueue.add(new ClusterEvent.ClusterBlock(timestamp, block, true, event.source()));
+                }
+
+                for (ClusterBlock block : removed) {
+                    pendingEventsQueue.add(new ClusterEvent.ClusterBlock(timestamp, block, false, event.source()));
+                }
+            }
+
+            for (String index : event.indicesCreated()) {
+                pendingEventsQueue.add(new IndexMetaDataEvent.IndexCreateDelete(timestamp, index, true, event.source()));
+            }
+
+            for (String index : event.indicesDeleted()) {
+                pendingEventsQueue.add(new IndexMetaDataEvent.IndexCreateDelete(timestamp, index, false, event.source()));
+            }
+
         }
+
     }
 
 
@@ -380,11 +382,11 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
         @Override
         public void beforeIndexShardClosed(ShardId shardId, @Nullable IndexShard indexShard) {
             DiscoveryNode relocatedTo = null;
-            if (indexShard.routingEntry().relocating()) {
+            if (indexShard != null && indexShard.routingEntry().relocating()) {
                 relocatedTo = clusterService.state().nodes().get(indexShard.routingEntry().relocatingNodeId());
             }
             pendingEventsQueue.add(new ShardEvent(System.currentTimeMillis(), ShardEvent.EventType.CLOSED,
-                    indexShard.shardId(), clusterService.localNode(), relocatedTo, indexShard.routingEntry()));
+                    shardId, clusterService.localNode(), relocatedTo, indexShard != null ? indexShard.routingEntry() : null));
 
         }
     }

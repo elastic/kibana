@@ -65,7 +65,7 @@ public abstract class RoutingEvent extends Event {
             builder.field("index", shardRouting.index());
             builder.field("shard_id", shardRouting.id());
             builder.startObject("node");
-            Utils.NodeToXContent(node, builder);
+            Utils.nodeToXContent(node, builder);
             builder.endObject();
             builder.field("routing"); // shard routing opens it's own object.
             shardRouting.toXContent(builder, params);
@@ -106,16 +106,21 @@ public abstract class RoutingEvent extends Event {
 
         @Override
         String conciseDescription() {
-            return shardRouting.shardId() + "[" + (shardRouting.primary() ? "P" : "R") + "] set to relocate to "
-                    + relocatingTo + " from " + node;
+            String s = shardRouting.shardId() + "[" + (shardRouting.primary() ? "P" : "R") + "] set to relocate";
+            if (relocatingTo != null) {
+                s += " to " + relocatingTo;
+            }
+            return s + " from " + node;
         }
 
         @Override
         public XContentBuilder addXContentBody(XContentBuilder builder, ToXContent.Params params) throws IOException {
             super.addXContentBody(builder, params);
-            builder.startObject("relocated_to");
-            Utils.NodeToXContent(relocatingTo, builder);
-            builder.endObject();
+            if (relocatingTo != null) {
+                builder.startObject("relocated_to");
+                Utils.nodeToXContent(relocatingTo, builder);
+                builder.endObject();
+            }
             return builder;
         }
     }

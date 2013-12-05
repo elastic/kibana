@@ -36,12 +36,12 @@ public class Plugin extends AbstractPlugin {
 
     @Override
     public String name() {
-        return "marvel - stats exporter";
+        return "marvel";
     }
 
     @Override
     public String description() {
-        return "Monitoring with an elastic sauce";
+        return "Elasticsearch Management & Monitoring";
     }
 
     @Override

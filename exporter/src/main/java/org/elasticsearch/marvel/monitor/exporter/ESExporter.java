@@ -25,7 +25,6 @@ import org.elasticsearch.action.admin.indices.stats.CommonStats;
 import org.elasticsearch.action.admin.indices.stats.IndexStats;
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.ShardStats;
-import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.cluster.routing.ShardRouting;
 import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.component.AbstractLifecycleComponent;
@@ -87,7 +86,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         indicesStatsRenderer = new IndicesStatsRenderer();
         eventsRenderer = new EventsRenderer();
 
-        logger.info("Initialized with targets: {}, index prefix [{}], index time format [{}]", hosts, indexPrefix, indexTimeFormat);
+        logger.debug("Initialized with targets: {}, index prefix [{}], index time format [{}]", hosts, indexPrefix, indexTimeFormat);
     }
 
     @Override
@@ -158,7 +157,9 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         for (int i = 0; i < renderer.length(); i++) {
             XContentBuilder builder = XContentFactory.smileBuilder(os);
             builder.startObject().startObject("index")
-                    .field("_index", getIndexName()).field("_type", renderer.type(i)).endObject().endObject();
+                    .field("_index", getIndexName())
+                    .field("_type", renderer.type(i))
+                    .endObject().endObject();
             builder.flush();
             os.write(SmileXContent.smileXContent.streamSeparator());
 
@@ -252,9 +253,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
     private boolean checkForIndexTemplate() {
         try {
-
-
-            String templateName = "marvel.monitor.prefix-" + indexPrefix;
+            String templateName = "marvel";
 
             logger.debug("checking of target has template [{}]", templateName);
             // DO HEAD REQUEST, when elasticsearch supports it
@@ -273,7 +272,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
                 OutputStream os = conn.getOutputStream();
                 XContentBuilder builder = XContentFactory.smileBuilder(os);
                 builder.startObject();
-                builder.field("template", indexPrefix + "*");
+                builder.field("template", ".marvel*");
                 builder.startObject("mappings").startObject("_default_");
                 builder.startArray("dynamic_templates").startObject().startObject("string_fields")
                         .field("match", "*")
@@ -325,7 +324,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
     private void addNodeInfo(XContentBuilder builder, String fieldname) throws IOException {
         builder.startObject(fieldname);
-        Utils.NodeToXContent(discovery.localNode(), builder);
+        Utils.nodeToXContent(discovery.localNode(), builder);
         builder.endObject();
     }
 

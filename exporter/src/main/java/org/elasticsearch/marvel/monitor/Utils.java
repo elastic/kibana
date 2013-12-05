@@ -29,7 +29,7 @@ import java.util.Map;
 
 public class Utils {
 
-    public static XContentBuilder NodeToXContent(DiscoveryNode node, XContentBuilder builder) throws IOException {
+    public static XContentBuilder nodeToXContent(DiscoveryNode node, XContentBuilder builder) throws IOException {
         builder.field("id", node.id());
         builder.field("name", node.name());
         builder.field("transport_address", node.address());

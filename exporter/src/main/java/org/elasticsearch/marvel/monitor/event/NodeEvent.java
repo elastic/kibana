@@ -98,7 +98,7 @@ public abstract class NodeEvent extends Event {
         public XContentBuilder addXContentBody(XContentBuilder builder, ToXContent.Params params) throws IOException {
             super.addXContentBody(builder, params);
             builder.startObject("node");
-            Utils.NodeToXContent(node, builder);
+            Utils.nodeToXContent(node, builder);
             builder.endObject();
             return builder;
         }
