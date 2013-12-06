@@ -23,6 +23,10 @@
   box-sizing: border-box;         /* Opera/IE 8+ */
 }
 
+.panel-query.selected-query {
+  height: 85px !important;
+}
+
 .query-disabled {
   opacity: 0.3;
 }

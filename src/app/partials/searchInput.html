@@ -1,0 +1,9 @@
+<textarea class="search-query panel-query"
+          ng-disabled="!querySrv.list[id].enable"
+          ng-class="{ 'input-block-level': unPinnedQueries.length==1, 'last-query': $last, 'has-remove': querySrv.ids.length > 1 }"
+          bs-typeahead="panel.history"
+          data-min-length=0
+          data-items=100
+          ng-model="querySrv.list[id].query"
+          ng-transclude>
+</textarea>

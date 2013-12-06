@@ -7,7 +7,7 @@
         <i class="icon-remove-sign pointer remove-query" ng-show="querySrv.ids.length > 1" ng-click="querySrv.remove(id);refresh()"></i>
       </span>
       <span>
-        <input class="search-query panel-query" ng-disabled="!querySrv.list[id].enable" ng-class="{ 'input-block-level': unPinnedQueries.length==1, 'last-query': $last, 'has-remove': querySrv.ids.length > 1 }" bs-typeahead="panel.history" data-min-length=0 data-items=100 type="text" ng-model="querySrv.list[id].query" />
+        <search-input></search-input>
       </span>
       <span class="end-query">
         <i class="icon-search pointer" ng-click="refresh()" ng-show="$last"></i>
