@@ -50,7 +50,10 @@ define([
         mode        : 'all',
         ids         : []
       },
-      style   : { "font-size": '10pt'},
+      style   : {
+        "font-size": '10pt',
+        "text-align": 'center'
+      },
       arrangement : 'horizontal',
       chart       : 'bar',
       counter_pos : 'above',
