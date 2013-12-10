@@ -34,7 +34,7 @@
   </div>
 
   <div ng-show="panel.chart == 'total'">
-    <div hits-total ng-style="panel.style" style="line-height:{{panel.style['font-size']}}">{{hits}}</div>
+    <div hits-total ng-style="panel.style" style="line-height:{{panel.style['font-size']}}"><span style="color:{{panel.style['color']}};">{{hits}}</span></div>
   </div>
 
   <span ng-show="panel.chart == 'list'">

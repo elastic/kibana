@@ -62,7 +62,11 @@ define([
       tilt    : false,
       labels  : true,
       spyable : true,
-      clickGoTo: '-1'
+      clickGoTo: '-1',
+      threshold: {
+        warning: 0,
+        critical: 0
+      }
     };
     _.defaults($scope.panel,_d);
 
@@ -143,6 +147,7 @@ define([
 
             i++;
           });
+          setColor();
           $scope.$emit('render');
           if(_segment < dashboard.indices.length-1) {
             $scope.get_data(_segment+1,query_id);
@@ -172,6 +177,28 @@ define([
       }
       $scope.refresh =  false;
       $scope.$emit('render');
+    };
+
+    var setColor = function() {
+      var colors = {
+        ok: 'darkgreen',
+        warning: 'orange',
+        critical: 'red'
+      };
+
+      if ($scope.panel.threshold.warning != 0 || $scope.panel.threshold.critical != 0) {
+        var targetColor = colors.ok;
+
+        if ($scope.panel.threshold.warning != 0 && $scope.hits > $scope.panel.threshold.warning) {
+          targetColor = colors.warning;
+        }
+
+        if ($scope.panel.threshold.critical != 0 && $scope.hits > $scope.panel.threshold.critical) {
+          targetColor = colors.critical;
+        }
+
+        $scope.panel.style.color = targetColor;
+      }
     };
   });
 

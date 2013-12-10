@@ -14,7 +14,13 @@
     </div>
     <div class="span2" ng-show="panel.chart == 'total'">
       <label class="small">On Click</label>
-      <select class="input-large" ng-model="panel.clickGoTo" ng-options="key as value for (key, value) in getRows()"></select>
+      <select class="input-small" ng-model="panel.clickGoTo" ng-options="key as value for (key, value) in getRows()"></select>
+    </div>
+    <div class="span2" ng-show="panel.chart == 'total'">
+      <label class="small">Warning</label>
+      <input class="input-smaller" type="number" ng-model="panel.threshold.warning" />
+      <label class="small">Critical</label>
+      <input class="input-smaller" type="number" ng-model="panel.threshold.critical" />
     </div>
     <div class="span3" ng-show="panel.chart == 'bar' || panel.chart == 'pie'">
       <label class="small">Legend</label>
