@@ -18,7 +18,7 @@ function (Settings) {
      * elasticsearch host
      * @type {String}
      */
-    elasticsearch: "http://search.kibana.nelson.wikia-dev.com",
+    elasticsearch: "http://datalog-s1.prod.wikia.net:9200/",
 
     /**
      * The default ES index to use for storing Kibana specific object
