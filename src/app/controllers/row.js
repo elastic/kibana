@@ -8,7 +8,7 @@ function (angular, app, _) {
 
   var module = angular.module('kibana.controllers');
 
-  module.controller('RowCtrl', function($scope, $rootScope, $timeout,ejsResource, querySrv) {
+  module.controller('RowCtrl', function($scope, $rootScope, $timeout,ejsResource, querySrv, rowService) {
       var _d = {
         title: "Row",
         height: "150px",
@@ -16,7 +16,8 @@ function (angular, app, _) {
         collapsable: true,
         editable: true,
         panels: [],
-        notice: false
+        notice: false,
+        id: null
       };
 
       _.defaults($scope.row,_d);
@@ -24,20 +25,14 @@ function (angular, app, _) {
       $scope.init = function() {
         $scope.querySrv = querySrv;
         $scope.reset_panel();
+
+        if ($scope.row.id == null) {
+          $scope.row.id = rowService.generateId();
+        }
       };
 
       $scope.toggle_row = function(row) {
-        if(!row.collapsable) {
-          return;
-        }
-        row.collapse = row.collapse ? false : true;
-        if (!row.collapse) {
-          $timeout(function() {
-            $scope.$broadcast('render');
-          });
-        } else {
-          row.notice = false;
-        }
+        rowService.toggle(row, $scope);
       };
 
       $scope.rowSpan = function(row) {
@@ -75,5 +70,14 @@ function (angular, app, _) {
 
     }
   );
+
+  module.directive('rowController', function(rowService) {
+    return {
+      restrict: 'A',
+      link: function(scope, e) {
+        e.attr('id', rowService.idPrefix() + scope.row.id);
+      }
+    }
+  });
 
 });

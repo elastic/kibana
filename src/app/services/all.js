@@ -5,6 +5,7 @@ define([
   './filterSrv',
   './kbnIndex',
   './querySrv',
+  './row',
   './timer',
   './panelMove',
   './esVersion',

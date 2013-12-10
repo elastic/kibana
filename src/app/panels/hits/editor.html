@@ -8,9 +8,13 @@
       <label class="small">Font Size</label>
       <select class="input-mini" ng-model="panel.style['font-size']" ng-options="f for f in ['7pt','8pt','9pt','10pt','12pt','14pt','16pt','18pt','20pt','24pt','28pt','32pt','36pt','42pt','48pt','52pt','60pt','72pt']"></select></span>
     </div>
-    <div class="span3" ng-show="panel.chart == 'total'">
+    <div class="span2" ng-show="panel.chart == 'total'">
       <label class="small">Text Align</label>
-      <select class="input-small" ng-model="panel.style['text-align']" ng-options="f for f in ['center']"></select></span>
+      <select class="input-small" ng-model="panel.style['text-align']" ng-options="f for f in ['center']"></select>
+    </div>
+    <div class="span2" ng-show="panel.chart == 'total'">
+      <label class="small">On Click</label>
+      <select class="input-large" ng-model="panel.clickGoTo" ng-options="key as value for (key, value) in getRows()"></select>
     </div>
     <div class="span3" ng-show="panel.chart == 'bar' || panel.chart == 'pie'">
       <label class="small">Legend</label>

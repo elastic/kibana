@@ -19,7 +19,8 @@ define([
   'kbn',
 
   'jquery.flot',
-  'jquery.flot.pie'
+  'jquery.flot.pie',
+  'jquery.scrollTo'
 ], function (angular, app, _, $, kbn) {
   'use strict';
 
@@ -60,7 +61,8 @@ define([
       donut   : false,
       tilt    : false,
       labels  : true,
-      spyable : true
+      spyable : true,
+      clickGoTo: '-1'
     };
     _.defaults($scope.panel,_d);
 
@@ -148,6 +150,16 @@ define([
 
         }
       });
+    };
+
+    $scope.getRows = function() {
+      var list = {'-1': 'None'};
+
+      _.forEach(dashboard.current.rows, function(row) {
+        list[row.id] = row.title;
+      });
+
+      return list;
     };
 
     $scope.set_refresh = function (state) {
@@ -267,4 +279,34 @@ define([
       }
     };
   });
+
+  module.directive('hitsTotal', function(dashboard, rowService) {
+    return {
+      restrict: 'A',
+      link: function(scope, e) {
+        e.click(function() {
+          if (scope.panel.clickGoTo == -1) {
+            return;
+          }
+
+          _.forEach(dashboard.current.rows, function(row) {
+            if (row.id != scope.panel.clickGoTo) {
+              return;
+            }
+
+            var cb = function() {
+              $.scrollTo($('#'+rowService.idPrefix()+row.id));
+            };
+
+            if (rowService.show(row, scope)) {
+              cb();
+              setTimeout(cb, 250);
+            } else {
+              cb();
+            }
+          });
+        });
+      }
+    }
+  })
 });

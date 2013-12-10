@@ -39,10 +39,11 @@ require.config({
     'jquery.flot.stackpercent':'../vendor/jquery/jquery.flot.stackpercent',
     'jquery.flot.time':       '../vendor/jquery/jquery.flot.time',
     'jquery.flot.byte':       '../vendor/jquery/jquery.flot.byte',
+    'jquery.scrollTo':        '../vendor/jquery/jquery.scrollTo.min',
 
 
     modernizr:                '../vendor/modernizr-2.6.1',
-    elasticjs:                '../vendor/elasticjs/elastic-angular-client',
+    elasticjs:                '../vendor/elasticjs/elastic-angular-client'
   },
   shim: {
     underscore: {
@@ -76,6 +77,7 @@ require.config({
     'jquery.flot.stack':    ['jquery', 'jquery.flot'],
     'jquery.flot.stackpercent':['jquery', 'jquery.flot'],
     'jquery.flot.time':     ['jquery', 'jquery.flot'],
+    'jquery.scrollTo':      ['jquery'],
 
     'angular-sanitize':     ['angular'],
     'angular-cookies':      ['angular'],
