@@ -658,8 +658,7 @@ define([
           }
 
           // Receive render events
-          scope.$watch('series', function (series) {
-            console.log(series.length);
+          scope.$watch('series', function () {
             render_panel();
           });
 
