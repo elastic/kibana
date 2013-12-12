@@ -658,12 +658,8 @@ define([
           }
 
           // Receive render events
-          scope.$watch('series', function () {
-            render_panel();
-          });
-
-          // Re-render if the window is resized
-          angular.element(window).bind('resize', function () {
+          scope.$watch('series', function (series) {
+            console.log(series.length);
             render_panel();
           });
 
