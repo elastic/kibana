@@ -42,7 +42,7 @@ import org.elasticsearch.common.util.concurrent.ConcurrentCollections;
 import org.elasticsearch.common.util.concurrent.EsExecutors;
 import org.elasticsearch.discovery.Discovery;
 import org.elasticsearch.index.service.IndexService;
-import org.elasticsearch.index.shard.ShardId;
+import org.elasticsearch.index.shard.IndexShardState;
 import org.elasticsearch.index.shard.service.IndexShard;
 import org.elasticsearch.indices.IndicesLifecycle;
 import org.elasticsearch.indices.IndicesService;
@@ -356,38 +356,23 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
             }
 
         }
-
     }
 
 
     class IndicesLifeCycleListener extends IndicesLifecycle.Listener {
 
         @Override
-        public void afterIndexShardStarted(IndexShard indexShard) {
-            DiscoveryNode relocatedFrom = null;
-            if (indexShard.routingEntry().relocatingNodeId() != null) {
-                relocatedFrom = clusterService.state().nodes().get(indexShard.routingEntry().relocatingNodeId());
+        public void indexShardStateChanged(IndexShard indexShard, @Nullable IndexShardState previousState, IndexShardState newState, @Nullable String reason) {
+
+            DiscoveryNode relocatingNode = null;
+            if (indexShard.routingEntry() != null) {
+                if (indexShard.routingEntry().relocatingNodeId() != null) {
+                    relocatingNode = clusterService.state().nodes().get(indexShard.routingEntry().relocatingNodeId());
+                }
             }
-            pendingEventsQueue.add(new ShardEvent(System.currentTimeMillis(), ShardEvent.EventType.STARTED,
-                    indexShard.shardId(), clusterService.localNode(), relocatedFrom, indexShard.routingEntry()));
 
-        }
-
-        @Override
-        public void beforeIndexShardCreated(ShardId shardId) {
-            pendingEventsQueue.add(new ShardEvent(System.currentTimeMillis(), ShardEvent.EventType.CREATED,
-                    shardId, clusterService.localNode(), null, null));
-        }
-
-        @Override
-        public void beforeIndexShardClosed(ShardId shardId, @Nullable IndexShard indexShard) {
-            DiscoveryNode relocatedTo = null;
-            if (indexShard != null && indexShard.routingEntry().relocating()) {
-                relocatedTo = clusterService.state().nodes().get(indexShard.routingEntry().relocatingNodeId());
-            }
-            pendingEventsQueue.add(new ShardEvent(System.currentTimeMillis(), ShardEvent.EventType.CLOSED,
-                    shardId, clusterService.localNode(), relocatedTo, indexShard != null ? indexShard.routingEntry() : null));
-
+            pendingEventsQueue.add(new ShardEvent(System.currentTimeMillis(), newState,
+                    indexShard.shardId(), clusterService.localNode(), relocatingNode, indexShard.routingEntry(), reason));
         }
     }
 }
