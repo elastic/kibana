@@ -36,7 +36,8 @@ dashboard.failover = false;
 dashboard.index = {
   'default': 'ADD_A_TIME_FILTER',
   'pattern': '[.marvel-]YYYY.MM.DD',
-  'interval': 'day'
+  'interval': 'day',
+  'warm_fields': false
 };
 
 dashboard.refresh="5s";
@@ -118,7 +119,8 @@ panel_defaults_by_type["histogram"] = {
   legend_counts: false,
   options: false,
   legend: true,
-  resolution: 20
+  resolution: 20,
+  y_format: "short"
 };
 
 
@@ -133,7 +135,7 @@ var rows = [
       {
         "value_field": "total.store.size_in_bytes",
         "title": "Index size",
-        "y_as_bytes": true
+        "y_format": "bytes"
       },
       {
         "value_field": "primaries.docs.deleted",
