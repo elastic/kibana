@@ -19,7 +19,14 @@ function (angular, _, config, moment) {
       });
 
       return all_indices().then(function(p) {
-        var indices = _.intersection(possible,p);
+        // support regexp inside the escaped part of moment.js pattern
+        var indices = [];
+        _.each(possible, function(patt){
+          _.each(p, function(idx){
+            var result = new RegExp(patt).exec(idx);
+            if(result !== null)indices.push(idx);
+          });
+        });
         indices.reverse();
         return indices;
       });
