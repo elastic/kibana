@@ -17,6 +17,7 @@ module.exports = function (config) {
       '^/app/dashboards/marvel/(.*)$': '/dashboards/$1',
       '^/app/panels/marvel/(.*)$': '/panels/$1',
       '^/config.js$': '/<%= buildTempDir %>/config.js',
+      '^/sense(.*)$': '/sense$1',
       '^(.*)$': '<%= kibanaCheckoutDir %>/src/$1'
     }
   };

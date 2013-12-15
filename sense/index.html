@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <title>Sense - a JSON aware interface to ElasticSearch</title>
+    <link id="bootstrapThemeCss" href="lib/bootstrap/css/bootstrap.light.min.css" type="text/css" rel="stylesheet"/>
+    <link href="lib/font-awesome/css/font-awesome.min.css" type="text/css" rel="stylesheet"/>
+    <link href="lib/jqueryui/jquery-ui-1.9.2.custom.min.css" type="text/css" rel="stylesheet"/>
+    <link href="css/sense.css" rel="stylesheet" type="text/css"/>
+    <link id="senseThemeCss" href="css/sense.light.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<div class="navbar navbar-static-top">
+    <div class="navbar-inner">
+        <div class="container-fluid">
+            <span class="brand" id="server_label">Server</span>
+
+            <form class="navbar-form pull-left">
+                <input id="es_server" type="text" class="span5" value="localhost:9200"/>
+            </form>
+              <span class="pull-left btn btn-link">
+                  <span id="notification" style="visibility: hidden"
+                                                   class="label label-info"></span></span>
+            <ul class="nav pull-right">
+                <li id="history_btn" data-toggle="modal" data-target="#history_popup">
+                    <a title="History" href="#" data-placement="bottom"><i class="fa fa-clock-o"></i></a>
+                </li>
+                <li id="settings_btn" data-toggle="modal" data-target="#settings_popup">
+                    <a title="Settings" href="#" data-placement="bottom"><i class="fa fa-cog"></i></a>
+                </li>
+                <li id="help_btn" data-toggle="modal" data-target="#help_popup">
+                    <a title="Help" href="#" data-placement="bottom"><i class="fa fa-question-circle"></i></a>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+<div id="main" class="container-fluid">
+    <div id="editor" class="editor_position">GET _search
+        {
+        "query": { "match_all": {} }
+        }
+    </div>
+    <div id="output">{}</div>
+    <div id="editor_actions">
+        <ul>
+            <a id="send" href="#" data-toggle="tooltip" title="click to send request"><i
+                    class="fa fa-play"></i></a>
+            <a id="request_wrench" data-toggle="dropdown" href="#"><i
+                    class="fa fa-wrench"></i></a>
+            <ul class="dropdown-menu">
+                <li><a id="copy_as_curl" tabindex="-1" href="#">Copy as cURL</a></li>
+                <li><a id="auto_indent" tabindex="-1" href="#">Auto indent</a></li>
+            </ul>
+        </ul>
+    </div>
+    <ul id="autocomplete" style="left: -1000px;"></ul>
+</div>
+
+
+<div id="help_popup" class="modal hide fade" data-keyboard="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Help</h3>
+    </div>
+    <div class="modal-body">
+        <h4>Request format</h4>
+
+        <div id="help_requests">
+            You can type one or more requests in the white editor. Sense understands requests in a compact format:
+            <div id="example_editor_container">
+            </div>
+        </div>
+        <h4>Keyboard tips</h4>
+        <dl class="dl-horizontal">
+            <dt></dt>
+            <dd><strong>General editing</strong></dd>
+            <dt>Ctrl/Cmd + I</dt>
+            <dd>Auto indent current request</dd>
+            <dt>Ctrl + Space</dt>
+            <dd>Open Auto complete (even if not typing)</dd>
+            <dt>Ctrl/Cmd + Enter</dt>
+            <dd>Submit request</dd>
+            <dt>Ctrl/Cmd + Shift + C</dt>
+            <dd>Copy request in cURL format</dd>
+            <dt>Ctrl/Cmd + Up/Down</dt>
+            <dd>Jump to the previous/next request start or end.</dd>
+            <dt>Ctrl/Cmd + Alt + L</dt>
+            <dd>Collapse/expand current scope.</dd>
+        </dl>
+        <dl class="dl-horizontal">
+            <dt></dt>
+            <dd><strong>When auto-complete is visible</strong></dd>
+            <dt>Down arrow</dt>
+            <dd>Switch focus to auto-complete menu. Use arrows to further select a term</dd>
+            <dt>Enter/Tab</dt>
+            <dd>Select the currently selected or the top most term in auto-complete menu</dd>
+            <dt>Esc</dt>
+            <dd>Close auto-complete menu</dd>
+        </dl>
+
+    </div>
+    <div class="modal-footer">
+        <a href="#" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Got it</a>
+    </div>
+</div>
+<div id="history_popup" class="modal hide fade" data-keyboard="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>History</h3>
+    </div>
+    <div class="modal-body">
+        <ul class="nav nav-list">
+            <!--<li><a href="#"><i class="icon-chevron-right"></i><span></span></a></li>-->
+        </ul>
+    </div>
+    <div class="modal-footer">
+        <a href="#" class="btn pull-left" id="hist_clear">Clear</a>
+
+        <a href="#" class="btn" data-dismiss="modal">Cancel</a>
+        <a href="#" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Apply</a>
+    </div>
+</div>
+
+
+<div id="settings_popup" class="modal hide fade" data-keyboard="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Settings</h3>
+    </div>
+    <div class="modal-body">
+        <form class="form-horizontal">
+            <div class="control-group">
+                <div class="controls">
+                    <h5>Editor & Output pane settings</h5>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="font_size">Font Size</label>
+                <div class="controls">
+                    <input type="number" id="font_size">
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="controls">
+                    <label class="checkbox">
+                        <input id="wrap_mode" type="checkbox"> Wrap long lines </input>
+                    </label>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="font_size">Theme</label>
+                <div class="controls">
+                    <select id="theme">
+                        <option value="dark">Dark</option>
+                        <option value="light">Light</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <a href="#" class="btn" data-dismiss="modal">Cancel</a>
+        <a id="accept_settings" href="#" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Save</a>
+    </div>
+</div>
+
+
+<div id="welcome_popup" class="modal hide fade" data-keyboard="true" data-remote="welcome.html">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Welcome to Sense</h3>
+    </div>
+    <div class="modal-body">
+    </div>
+    <div class="modal-footer">
+        <a href="#" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Get to work</a>
+    </div>
+</div>
+
+<textarea class="out_of_screen" id="clipboardStaging"> </textarea>
+
+</body>
+<script src="lib/jquery-1.8.3.min.js" type="text/javascript"></script>
+<script src="lib/jqueryui/jquery-ui-1.9.2.custom.min.js" type="text/javascript"></script>
+<script src="lib/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="lib/moment.min.js" type="text/javascript"></script>
+<script src="lib/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="src/utils.js" type="text/javascript" charset="utf-8"></script>
+<script src="src/kb.js" type="text/javascript" charset="utf-8"></script>
+<script src="kb/aliases.js" type="text/javascript" charset="utf-8"></script>
+<script src="kb/cluster.js" type="text/javascript" charset="utf-8"></script>
+<script src="kb/filter.js" type="text/javascript" charset="utf-8"></script>
+<script src="kb/facets.js" type="text/javascript" charset="utf-8"></script>
+<script src="kb/globals.js" type="text/javascript" charset="utf-8"></script>
+<script src="kb/indices.js" type="text/javascript" charset="utf-8"></script>
+<script src="kb/query.js" type="text/javascript" charset="utf-8"></script>
+<script src="kb/search.js" type="text/javascript" charset="utf-8"></script>
+<script src="kb/settings.js" type="text/javascript" charset="utf-8"></script>
+<script src="kb/templates.js" type="text/javascript" charset="utf-8"></script>
+<script src="kb/warmers.js" type="text/javascript" charset="utf-8"></script>
+<script src="kb/mappings.js" type="text/javascript" charset="utf-8"></script>
+<script src="kb/misc.js" type="text/javascript" charset="utf-8"></script>
+<script src="src/curl.js" type="text/javascript" charset="utf-8"></script>
+<script src="src/settings.js" type="text/javascript" charset="utf-8"></script>
+<script src="src/base.js" type="text/javascript" charset="utf-8"></script>
+<script src="src/mappings.js" type="text/javascript" charset="utf-8"></script>
+<script src="src/history.js" type="text/javascript" charset="utf-8"></script>
+<script src="src/autocomplete.js" type="text/javascript" charset="utf-8"></script>
+</html>
