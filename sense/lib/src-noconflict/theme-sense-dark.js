@@ -34,14 +34,16 @@ exports.isDark = true;
 exports.cssClass = "ace-sense-dark";
 exports.cssText = ".ace-sense-dark .ace_gutter {\
 background: #2e3236;\
-color: #grey\
+color: #bbbfc2;\
 }\
 .ace-sense-dark .ace_print-margin {\
 width: 1px;\
 background: #555651\
 }\
 .ace-sense-dark .ace_scroller {\
-background-color: #202328\
+background-color: #202328;\
+}\
+.ace-sense-dark .ace_content {\
 }\
 .ace-sense-dark .ace_text-layer {\
 color: #F8F8F2\

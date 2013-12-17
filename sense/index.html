@@ -19,7 +19,7 @@
             </form>
               <span class="pull-left btn btn-link">
                   <span id="notification" style="visibility: hidden"
-                                                   class="label label-info"></span></span>
+                        class="label label-info"></span></span>
             <ul class="nav pull-right">
                 <li id="history_btn" data-toggle="modal" data-target="#history_popup">
                     <a title="History" href="#" data-placement="bottom"><i class="fa fa-clock-o"></i></a>
@@ -43,15 +43,13 @@
     </div>
     <div id="output">{}</div>
     <div id="editor_actions">
-        <ul>
-            <a id="send" href="#" data-toggle="tooltip" title="click to send request"><i
-                    class="fa fa-play"></i></a>
-            <a id="request_wrench" data-toggle="dropdown" href="#"><i
-                    class="fa fa-wrench"></i></a>
-            <ul class="dropdown-menu">
-                <li><a id="copy_as_curl" tabindex="-1" href="#">Copy as cURL</a></li>
-                <li><a id="auto_indent" tabindex="-1" href="#">Auto indent</a></li>
-            </ul>
+        <a id="send" href="#" data-toggle="tooltip" title="click to send request"><i
+                class="fa fa-play"></i></a>
+        <a id="request_wrench" data-toggle="dropdown" href="#"><i
+                class="fa fa-wrench"></i></a>
+        <ul class="dropdown-menu">
+            <li><a id="copy_as_curl" tabindex="-1" href="#">Copy as cURL</a></li>
+            <li><a id="auto_indent" tabindex="-1" href="#">Auto indent</a></li>
         </ul>
     </div>
     <ul id="autocomplete" style="left: -1000px;"></ul>
@@ -137,6 +135,7 @@
             </div>
             <div class="control-group">
                 <label class="control-label" for="font_size">Font Size</label>
+
                 <div class="controls">
                     <input type="number" id="font_size">
                 </div>
@@ -150,6 +149,7 @@
             </div>
             <div class="control-group">
                 <label class="control-label" for="font_size">Theme</label>
+
                 <div class="controls">
                     <select id="theme">
                         <option value="dark">Dark</option>

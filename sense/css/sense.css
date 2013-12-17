@@ -20,8 +20,10 @@ body {
     position: absolute;
     top: 47px;
     right: 100%;
+    line-height: 1;
     margin-right: -468px;
     z-index: 100;
+    margin-top: 6px; /* compensate for being outside editor */
 }
 
 #editor_actions > .btn-group > a {
@@ -36,7 +38,7 @@ body {
 .editor_position {
     position: absolute;
     top: 50px;
-    bottom: 0;
+    bottom: 5px;
     left: 5px;
     width: 468px;
 }
@@ -50,10 +52,22 @@ body {
 #output {
     position: absolute;
     top: 50px;
-    bottom: 0;
+    bottom: 5px;
     left: 488px;
     right: 5px;
     min-width: 700px;
+}
+
+#output, #editor {
+  padding-top: 5px;
+}
+
+.ace_gutter {
+  margin-top: 6px;
+}
+
+.ace_scroller {
+  padding-top: 5px;
 }
 
 #autocomplete {
@@ -182,6 +196,10 @@ body {
     height: 1px;
     overflow: hidden;
     margin-left: -1000px;
+}
+
+.ace_layer.ace_marker-layer {
+  overflow: visible;
 }
 
 .ace_snippet-marker {

@@ -2,6 +2,7 @@
 #editor, #output {
   outline: 1px solid #101214;
   border-top: 1px solid #3e444c;
+  background-color: #2e3236;
 }
 
 .ace_url {
@@ -22,15 +23,14 @@
 
 .ace_snippet-marker {
   background: rgba(194, 193, 208, 0.05);
-  /*border: 1px dotted rgba(211, 208, 235, 0.62); */
-}
-
-.ace_snippet-marker.ace_start {
   border-top: dotted 1px rgba(194, 193, 208, 0.30);
+  border-bottom: dotted 1px rgba(194, 193, 208, 0.30);
+  margin-top: -1px; /* compensate for background */
 }
 
-.ace_snippet-marker.ace_start + .ace_snippet-marker {
-  border-bottom: dotted 1px rgba(194, 193, 208, 0.30);
+.ace_scroller {
+  border-top: 1px solid #101214;
+  border-left: 1px solid #101214;
 }
 
 #editor .ace_active-line {
@@ -53,11 +53,15 @@
 .ui-menu {
   background-color: #3a3f44;
   border: 1px solid rgba(0,0,0,0.2);
-  color: #7a8288;
+  color: #bbbfc2;
 }
 
 .ui-menu .ui-menu-item {
-  color:   #7a8288;
+  color:   #bbbfc2;
+}
+
+.ui-menu .ui-menu-item a {
+  color:   #bbbfc2;
 }
 
 .ui-menu .ui-state-focus {

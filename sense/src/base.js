@@ -252,7 +252,7 @@ function updateEditorActionsBar() {
             if (row > 0) row--; else row++;
         }
         var screen_pos = sense.editor.renderer.textToScreenCoordinates(row, column);
-        offset += screen_pos.pageY - 3;
+        offset += screen_pos.pageY;
         var end_offset = sense.editor.renderer.textToScreenCoordinates(CURRENT_REQ_RANGE.end.row,
             CURRENT_REQ_RANGE.end.column).pageY;
 
@@ -295,7 +295,7 @@ function highlighCurrentRequestAndUpdateActionBar() {
 
     CURRENT_REQ_RANGE = new_current_req_range;
     if (CURRENT_REQ_RANGE) {
-        CURRENT_REQ_RANGE.marker_id = session.addMarker(CURRENT_REQ_RANGE, "ace_snippet-marker", "text");
+        CURRENT_REQ_RANGE.marker_id = session.addMarker(CURRENT_REQ_RANGE, "ace_snippet-marker", "fullLine");
     }
     updateEditorActionsBar();
 }
