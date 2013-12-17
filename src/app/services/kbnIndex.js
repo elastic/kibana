@@ -23,8 +23,8 @@ function (angular, _, config, moment) {
         var indices = [];
         _.each(possible, function(patt){
           _.each(p, function(idx){
-            var result = new RegExp(patt).exec(idx);
-            if(result !== null)indices.push(idx);
+            var result = new RegExp(patt).test(idx);
+            if(result == true)indices.push(idx);
           });
         });
         indices.reverse();
