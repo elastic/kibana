@@ -21,7 +21,7 @@ function (Settings) {
      * elasticsearch installed on. You probably want to set it to the FQDN of your
      * elasticsearch host
      */
-    elasticsearch: "https://"+window.location.hostname,
+    elasticsearch: window.location.protocol + "://" + window.location.hostname,
 
     /** @scratch /configuration/config.js/5
      * ==== default_route
