@@ -21,6 +21,7 @@ package org.elasticsearch.marvel.monitor;
 
 import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.action.admin.cluster.node.stats.NodeStats;
+import org.elasticsearch.action.admin.cluster.stats.ClusterStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.CommonStatsFlags;
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.ShardStats;
@@ -165,13 +166,12 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
                 // do the actual export..., go over the actual exporters list and...
                 try {
                     exportNodeStats();
-
                     exportShardStats();
-
                     exportEvents();
 
                     if (clusterService.state().nodes().localNodeMaster()) {
                         exportIndicesStats();
+                        exportClusterStats();
                     }
                 } catch (Throwable t) {
                     logger.error("Background thread had an uncaught exception:", t);
@@ -186,11 +186,23 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
         }
 
         private void exportIndicesStats() {
-            logger.debug("local node is master, exporting aggregated stats");
+            logger.debug("local node is master, exporting indices stats");
             IndicesStatsResponse indicesStatsResponse = client.admin().indices().prepareStats().all().get();
             for (StatsExporter e : exporters) {
                 try {
                     e.exportIndicesStats(indicesStatsResponse);
+                } catch (Throwable t) {
+                    logger.error("StatsExporter [{}] has thrown an exception:", t, e.name());
+                }
+            }
+        }
+
+        private void exportClusterStats() {
+            logger.debug("local node is master, exporting cluster stats");
+            ClusterStatsResponse stats = client.admin().cluster().prepareClusterStats().get();
+            for (StatsExporter e : exporters) {
+                try {
+                    e.exportClusterStats(stats);
                 } catch (Throwable t) {
                     logger.error("StatsExporter [{}] has thrown an exception:", t, e.name());
                 }

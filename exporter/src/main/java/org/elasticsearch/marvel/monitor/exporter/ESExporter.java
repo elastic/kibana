@@ -21,6 +21,7 @@ package org.elasticsearch.marvel.monitor.exporter;
 
 import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.action.admin.cluster.node.stats.NodeStats;
+import org.elasticsearch.action.admin.cluster.stats.ClusterStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.CommonStats;
 import org.elasticsearch.action.admin.indices.stats.IndexStats;
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse;
@@ -66,6 +67,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     final ShardStatsRenderer shardStatsRenderer;
     final IndexStatsRenderer indexStatsRenderer;
     final IndicesStatsRenderer indicesStatsRenderer;
+    final ClusterStatsRenderer clusterStatsRenderer;
     final EventsRenderer eventsRenderer;
 
     public ESExporter(Settings settings, Discovery discovery) {
@@ -84,6 +86,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         shardStatsRenderer = new ShardStatsRenderer();
         indexStatsRenderer = new IndexStatsRenderer();
         indicesStatsRenderer = new IndicesStatsRenderer();
+        clusterStatsRenderer = new ClusterStatsRenderer();
         eventsRenderer = new EventsRenderer();
 
         logger.debug("Initialized with targets: {}, index prefix [{}], index time format [{}]", hosts, indexPrefix, indexTimeFormat);
@@ -131,6 +134,12 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     public void exportEvents(Event[] events) {
         eventsRenderer.reset(events);
         exportXContent(eventsRenderer);
+    }
+
+    @Override
+    public void exportClusterStats(ClusterStatsResponse clusterStats) {
+        clusterStatsRenderer.reset(clusterStats);
+        exportXContent(clusterStatsRenderer);
     }
 
 
@@ -498,6 +507,36 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             builder.startObject();
             addNodeInfo(builder, "_source_node");
             events[index].addXContentBody(builder, xContentParams);
+            builder.endObject();
+        }
+    }
+
+    class ClusterStatsRenderer implements MultiXContentRenderer {
+
+        ClusterStatsResponse stats;
+        ToXContent.MapParams xContentParams = new ToXContent.MapParams(
+                ImmutableMap.of("output_uuid", "true"));
+
+        public void reset(ClusterStatsResponse stats) {
+            this.stats = stats;
+        }
+
+        @Override
+        public int length() {
+            return 1;
+        }
+
+        @Override
+        public String type(int i) {
+            return "cluster_stats";
+        }
+
+        @Override
+        public void render(int index, XContentBuilder builder) throws IOException {
+            builder.startObject();
+            builder.field("@timestamp", defaultDatePrinter.print(stats.getTimestamp()));
+            addNodeInfo(builder);
+            stats.toXContent(builder, xContentParams);
             builder.endObject();
         }
     }
