@@ -55,4 +55,18 @@ public class Utils {
         }
         return builder;
     }
+
+    public static String nodeDescription(DiscoveryNode node) {
+        StringBuilder builder = new StringBuilder().append("[").append(node.name()).append("]");
+        if (node.address().uniqueAddressTypeId() == 1) { // InetSocket
+            InetSocketTransportAddress address = (InetSocketTransportAddress) node.address();
+            InetSocketAddress inetSocketAddress = address.address();
+            InetAddress inetAddress = inetSocketAddress.getAddress();
+            if (inetAddress != null) {
+                builder.append("[").append(inetAddress.getHostAddress()).append(":").append(inetSocketAddress.getPort()).append("]");
+            }
+        }
+        return builder.toString();
+    }
+
 }

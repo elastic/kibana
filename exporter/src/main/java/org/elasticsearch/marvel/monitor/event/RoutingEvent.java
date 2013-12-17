@@ -47,6 +47,9 @@ public abstract class RoutingEvent extends Event {
         return builder;
     }
 
+    private static String shardDescription(ShardRouting shardRouting) {
+        return shardRouting.shardId() + "[" + (shardRouting.primary() ? "P" : "R") + "]";
+    }
 
     static abstract class RoutingShardEvent extends RoutingEvent {
 
@@ -86,7 +89,7 @@ public abstract class RoutingEvent extends Event {
 
         @Override
         String conciseDescription() {
-            return shardRouting.shardId() + "[" + (shardRouting.primary() ? "P" : "R") + "] set to initializing on " + node;
+            return shardDescription(shardRouting) + " set to initializing on " + Utils.nodeDescription(node);
         }
     }
 
@@ -106,11 +109,11 @@ public abstract class RoutingEvent extends Event {
 
         @Override
         String conciseDescription() {
-            String s = shardRouting.shardId() + "[" + (shardRouting.primary() ? "P" : "R") + "] set to relocate";
+            String s = shardDescription(shardRouting) + " set to relocate";
             if (relocatingTo != null) {
                 s += " to " + relocatingTo;
             }
-            return s + " from " + node;
+            return s + " from " + Utils.nodeDescription(node);
         }
 
         @Override

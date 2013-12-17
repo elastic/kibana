@@ -172,7 +172,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     }
 
     private void sendCloseExportingConnection(HttpURLConnection conn) throws IOException {
-        logger.trace("sending exporting content");
+        logger.trace("sending content");
         OutputStream os = conn.getOutputStream();
         os.close();
 

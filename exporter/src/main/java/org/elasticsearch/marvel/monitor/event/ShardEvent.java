@@ -64,15 +64,15 @@ public class ShardEvent extends Event {
                 // no shard routing
                 return new DescriptionBuilder(shardId, "created", node).build();
             case RECOVERING:
-                return new DescriptionBuilder(shardId, "entered recovery", node).relocatedFrom(relocatingNode).build();
+                return new DescriptionBuilder(shardRouting, "entered recovery", node).relocatedFrom(relocatingNode).build();
             case POST_RECOVERY:
-                return new DescriptionBuilder(shardId, "entered post_recovery", node).relocatedFrom(relocatingNode).build();
+                return new DescriptionBuilder(shardRouting, "entered post_recovery", node).relocatedFrom(relocatingNode).build();
             case STARTED:
-                return new DescriptionBuilder(shardId, "started", node).relocatedFrom(relocatingNode).build();
+                return new DescriptionBuilder(shardRouting, "started", node).relocatedFrom(relocatingNode).build();
             case RELOCATED:
-                return new DescriptionBuilder(shardId, "relocated", node).relocatedTo(relocatingNode).build();
+                return new DescriptionBuilder(shardRouting, "relocated", node).relocatedTo(relocatingNode).build();
             case CLOSED:
-                return new DescriptionBuilder(shardId, "closed", node).relocatedTo(relocatingNode).build();
+                return new DescriptionBuilder(shardRouting, "closed", node).relocatedTo(relocatingNode).build();
             default:
                 throw new ElasticSearchException("unmapped shard event type [" + shardState + "]");
         }
@@ -108,20 +108,32 @@ public class ShardEvent extends Event {
 
         private final StringBuilder description = new StringBuilder();
 
-        DescriptionBuilder (ShardId shardId, String changeDescription, DiscoveryNode node) {
-            description.append(shardId).append(' ').append(changeDescription).append(" on ").append(node);
+        DescriptionBuilder(ShardId shardId, String changeDescription, DiscoveryNode node) {
+            description.append(shardId).append(' ').append(changeDescription).append(" on ")
+                    .append(Utils.nodeDescription(node));
+        }
+
+        DescriptionBuilder(ShardRouting shardRouting, String changeDescription, DiscoveryNode node) {
+            description.append(shardRouting.shardId());
+            if (shardRouting.primary()) {
+                description.append("[P]");
+            } else {
+                description.append("[R]");
+            }
+            description.append(' ').append(changeDescription).append(" on ")
+                    .append(Utils.nodeDescription(node));
         }
 
         DescriptionBuilder relocatedFrom(DiscoveryNode node) {
             if (node != null) {
-                description.append(", relocated from ").append(node);
+                description.append(", relocated from ").append(Utils.nodeDescription(node));
             }
             return this;
         }
 
         DescriptionBuilder relocatedTo(DiscoveryNode node) {
             if (node != null) {
-                description.append(", relocated to ").append(node);
+                description.append(", relocated to ").append(Utils.nodeDescription(node));
             }
             return this;
         }

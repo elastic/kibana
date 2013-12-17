@@ -225,7 +225,7 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
                 }
                 for (int shardId : indexService.shardIds()) {
                     IndexShard indexShard = indexService.shard(shardId);
-                    if (indexShard == null) {
+                    if (indexShard == null || indexShard.state() != IndexShardState.STARTED) {
                         continue;
                     }
                     shardStats.add(new ShardStats(indexShard, CommonStatsFlags.ALL));

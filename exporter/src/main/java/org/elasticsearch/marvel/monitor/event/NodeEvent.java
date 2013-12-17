@@ -91,7 +91,7 @@ public abstract class NodeEvent extends Event {
 
         @Override
         String conciseDescription() {
-            return node.toString() + (joined ? " joined" : " left");
+            return Utils.nodeDescription(node) + (joined ? " joined" : " left");
         }
 
         @Override
