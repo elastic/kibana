@@ -287,7 +287,7 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
                     RoutingNode oldRoutingNode = previousRoutingNodes.node(shardRouting.currentNodeId());
                     boolean changed = true;
                     if (oldRoutingNode != null) {
-                        for (ShardRouting oldShardRouting : oldRoutingNode.shards()) {
+                        for (ShardRouting oldShardRouting : oldRoutingNode) {
                             if (oldShardRouting.equals(shardRouting)) {
                                 changed = false;
                                 break;
@@ -362,7 +362,7 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
     class IndicesLifeCycleListener extends IndicesLifecycle.Listener {
 
         @Override
-        public void indexShardStateChanged(IndexShard indexShard, @Nullable IndexShardState previousState, IndexShardState newState, @Nullable String reason) {
+        public void indexShardStateChanged(IndexShard indexShard, @Nullable IndexShardState previousState, IndexShardState currentState, @Nullable String reason) {
 
             DiscoveryNode relocatingNode = null;
             if (indexShard.routingEntry() != null) {
@@ -371,7 +371,7 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
                 }
             }
 
-            pendingEventsQueue.add(new ShardEvent(System.currentTimeMillis(), newState,
+            pendingEventsQueue.add(new ShardEvent(System.currentTimeMillis(), currentState,
                     indexShard.shardId(), clusterService.localNode(), relocatingNode, indexShard.routingEntry(), reason));
         }
     }
