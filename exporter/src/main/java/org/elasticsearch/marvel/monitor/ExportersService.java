@@ -28,6 +28,7 @@ import org.elasticsearch.action.admin.indices.stats.ShardStats;
 import org.elasticsearch.action.support.IgnoreIndices;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.ClusterChangedEvent;
+import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.ClusterService;
 import org.elasticsearch.cluster.block.ClusterBlock;
 import org.elasticsearch.cluster.node.DiscoveryNode;
@@ -83,8 +84,7 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
     @Inject
     public ExportersService(Settings settings, IndicesService indicesService,
                             NodeService nodeService, ClusterService clusterService,
-                            Client client,
-                            Discovery discovery) {
+                            Client client, Discovery discovery, ClusterName clusterName) {
         super(settings);
         this.indicesService = (InternalIndicesService) indicesService;
         this.clusterService = clusterService;
@@ -98,7 +98,7 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
         pendingEventsQueue = ConcurrentCollections.newBlockingQueue();
 
         if (componentSettings.getAsBoolean("enabled", true)) {
-            StatsExporter esExporter = new ESExporter(settings.getComponentSettings(ESExporter.class), discovery);
+            StatsExporter esExporter = new ESExporter(settings.getComponentSettings(ESExporter.class), discovery, clusterName);
             this.exporters = ImmutableSet.of(esExporter);
         } else {
             this.exporters = ImmutableSet.of();

@@ -26,6 +26,7 @@ import org.elasticsearch.action.admin.indices.stats.CommonStats;
 import org.elasticsearch.action.admin.indices.stats.IndexStats;
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.ShardStats;
+import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.routing.ShardRouting;
 import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.component.AbstractLifecycleComponent;
@@ -58,6 +59,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     final int timeout;
 
     final Discovery discovery;
+    final ClusterName clusterName;
 
     public final static DateTimeFormatter defaultDatePrinter = Joda.forPattern("date_time").printer();
 
@@ -70,10 +72,11 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     final ClusterStatsRenderer clusterStatsRenderer;
     final EventsRenderer eventsRenderer;
 
-    public ESExporter(Settings settings, Discovery discovery) {
+    public ESExporter(Settings settings, Discovery discovery, ClusterName clusterName) {
         super(settings);
 
         this.discovery = discovery;
+        this.clusterName = clusterName;
 
         hosts = settings.getAsArray("es.hosts", new String[]{"localhost:9200"});
         indexPrefix = settings.get("es.index.prefix", ".marvel");
@@ -362,6 +365,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         public void render(int index, XContentBuilder builder) throws IOException {
             builder.startObject();
             builder.field("@timestamp", defaultDatePrinter.print(stats.getTimestamp()));
+            builder.field("cluster_name", clusterName.value());
             addNodeInfo(builder);
             stats.toXContent(builder, xContentParams);
             builder.endObject();
@@ -393,6 +397,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         public void render(int index, XContentBuilder builder) throws IOException {
             builder.startObject();
             builder.field("@timestamp", defaultDatePrinter.print(collectionTime));
+            builder.field("cluster_name", clusterName.value());
             ShardRouting shardRouting = stats[index].getShardRouting();
             builder.field("index", shardRouting.index());
             builder.field("shard_id", shardRouting.id());
@@ -429,6 +434,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         public void render(int index, XContentBuilder builder) throws IOException {
             builder.startObject();
             builder.field("@timestamp", defaultDatePrinter.print(collectionTime));
+            builder.field("cluster_name", clusterName.value());
             IndexStats indexStats = stats[index];
             builder.field("index", indexStats.getIndex());
             addNodeInfo(builder, "_source_node");
@@ -470,6 +476,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             assert index == 0;
             builder.startObject();
             builder.field("@timestamp", defaultDatePrinter.print(collectionTime));
+            builder.field("cluster_name", clusterName.value());
             addNodeInfo(builder, "_source_node");
             builder.startObject("primaries");
             primariesStats.toXContent(builder, xContentParams);
@@ -505,6 +512,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         @Override
         public void render(int index, XContentBuilder builder) throws IOException {
             builder.startObject();
+            builder.field("cluster_name", clusterName.value());
             addNodeInfo(builder, "_source_node");
             events[index].addXContentBody(builder, xContentParams);
             builder.endObject();
