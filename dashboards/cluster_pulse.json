@@ -15,11 +15,11 @@
         "1": {
           "id": 1,
           "color": "#EAB839",
-          "alias": "Index metadata events",
+          "alias": "Index events",
           "pin": true,
           "type": "lucene",
           "enable": true,
-          "query": "_type:index_metadata_event"
+          "query": "_type:index_event"
         },
         "2": {
           "id": 2,

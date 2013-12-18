@@ -360,11 +360,11 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
             }
 
             for (String index : event.indicesCreated()) {
-                pendingEventsQueue.add(new IndexMetaDataEvent.IndexCreateDelete(timestamp, index, true, event.source()));
+                pendingEventsQueue.add(new IndexEvent.IndexCreateDelete(timestamp, index, true, event.source()));
             }
 
             for (String index : event.indicesDeleted()) {
-                pendingEventsQueue.add(new IndexMetaDataEvent.IndexCreateDelete(timestamp, index, false, event.source()));
+                pendingEventsQueue.add(new IndexEvent.IndexCreateDelete(timestamp, index, false, event.source()));
             }
 
         }

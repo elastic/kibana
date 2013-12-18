@@ -24,18 +24,18 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.IOException;
 
-public abstract class IndexMetaDataEvent extends Event {
+public abstract class IndexEvent extends Event {
 
     protected final String event_source;
 
-    public IndexMetaDataEvent(long timestamp, String event_source) {
+    public IndexEvent(long timestamp, String event_source) {
         super(timestamp);
         this.event_source = event_source;
     }
 
     @Override
     public String type() {
-        return "index_metadata_event";
+        return "index_event";
     }
 
     protected abstract String event();
@@ -48,7 +48,7 @@ public abstract class IndexMetaDataEvent extends Event {
         return builder;
     }
 
-    public static class IndexCreateDelete extends IndexMetaDataEvent {
+    public static class IndexCreateDelete extends IndexEvent {
 
         private final String index;
         private boolean created;
