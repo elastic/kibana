@@ -41,9 +41,9 @@ public class ShardEvent extends Event {
     private IndexShardState shardState;
 
 
-    public ShardEvent(long timestamp, IndexShardState shardState, ShardId shardId, DiscoveryNode node,
+    public ShardEvent(long timestamp, String clusterName, IndexShardState shardState, ShardId shardId, DiscoveryNode node,
                       DiscoveryNode relocatingNode, ShardRouting shardRouting, String reason) {
-        super(timestamp);
+        super(timestamp, clusterName);
         this.shardState = shardState;
         this.shardId = shardId;
         this.reason = reason;

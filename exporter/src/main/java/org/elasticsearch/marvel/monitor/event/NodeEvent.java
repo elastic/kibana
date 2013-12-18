@@ -30,8 +30,8 @@ public abstract class NodeEvent extends Event {
 
     protected final String event_source;
 
-    public NodeEvent(long timestamp, String event_source) {
-        super(timestamp);
+    public NodeEvent(long timestamp, String clusterName, String event_source) {
+        super(timestamp, clusterName);
         this.event_source = event_source;
     }
 
@@ -55,8 +55,8 @@ public abstract class NodeEvent extends Event {
 
         private final DiscoveryNode node;
 
-        public ElectedAsMaster(long timestamp, DiscoveryNode node, String event_source) {
-            super(timestamp, event_source);
+        public ElectedAsMaster(long timestamp, String clusterName, DiscoveryNode node, String event_source) {
+            super(timestamp, clusterName, event_source);
             this.node = node;
         }
 
@@ -67,7 +67,7 @@ public abstract class NodeEvent extends Event {
 
         @Override
         String conciseDescription() {
-            return node.toString() + " became master";
+            return Utils.nodeDescription(node) + " became master";
         }
 
         // no need to render node as XContent as it will be done by the exporter.
@@ -78,8 +78,8 @@ public abstract class NodeEvent extends Event {
         private final DiscoveryNode node;
         private boolean joined;
 
-        public NodeJoinLeave(long timestamp, DiscoveryNode node, boolean joined, String event_source) {
-            super(timestamp, event_source);
+        public NodeJoinLeave(long timestamp, String clusterName, DiscoveryNode node, boolean joined, String event_source) {
+            super(timestamp, clusterName, event_source);
             this.node = node;
             this.joined = joined;
         }

@@ -19,6 +19,8 @@ package org.elasticsearch.marvel.monitor.event;
  */
 
 
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
+import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
@@ -28,8 +30,8 @@ public abstract class ClusterEvent extends Event {
 
     protected final String event_source;
 
-    public ClusterEvent(long timestamp, String event_source) {
-        super(timestamp);
+    public ClusterEvent(long timestamp, String clusterName, String event_source) {
+        super(timestamp, clusterName);
         this.event_source = event_source;
     }
 
@@ -52,8 +54,8 @@ public abstract class ClusterEvent extends Event {
         private final org.elasticsearch.cluster.block.ClusterBlock block;
         private boolean added;
 
-        public ClusterBlock(long timestamp, org.elasticsearch.cluster.block.ClusterBlock block, boolean added, String event_source) {
-            super(timestamp, event_source);
+        public ClusterBlock(long timestamp, String clusterName, org.elasticsearch.cluster.block.ClusterBlock block, boolean added, String event_source) {
+            super(timestamp, clusterName, event_source);
             this.block = block;
             this.added = added;
         }
@@ -75,6 +77,34 @@ public abstract class ClusterEvent extends Event {
             block.toXContent(builder, ToXContent.EMPTY_PARAMS);
             builder.endObject();
             return builder;
+        }
+    }
+
+    public static class ClusterStatus extends ClusterEvent {
+
+        ClusterHealthResponse clusterHealth;
+
+        public ClusterStatus(long timestamp, String clusterName, String event_source, ClusterHealthResponse clusterHealth) {
+            super(timestamp, clusterName, event_source);
+            this.clusterHealth = clusterHealth;
+        }
+
+        @Override
+        protected String event() {
+            return "cluster_status";
+        }
+
+        @Override
+        String conciseDescription() {
+            return "cluster status is " + clusterHealth.getStatus().name();
+        }
+
+        @Override
+        public XContentBuilder addXContentBody(XContentBuilder builder, ToXContent.Params params) throws IOException {
+            // disable parent outputting of cluster name, it's part of the cluster health.
+            ToXContent.Params p = new ToXContent.DelegatingMapParams(ImmutableMap.of("output_cluster_name", "false"), params);
+            super.addXContentBody(builder, p);
+            return clusterHealth.toXContent(builder, params);
         }
     }
 }

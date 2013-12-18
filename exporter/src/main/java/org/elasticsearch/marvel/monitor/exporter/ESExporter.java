@@ -512,7 +512,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         @Override
         public void render(int index, XContentBuilder builder) throws IOException {
             builder.startObject();
-            builder.field("cluster_name", clusterName.value());
+            // events output cluster name.
             addNodeInfo(builder, "_source_node");
             events[index].addXContentBody(builder, xContentParams);
             builder.endObject();

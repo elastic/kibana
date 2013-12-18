@@ -29,8 +29,8 @@ import java.io.IOException;
 
 public abstract class RoutingEvent extends Event {
 
-    public RoutingEvent(long timestamp) {
-        super(timestamp);
+    public RoutingEvent(long timestamp, String clusterName) {
+        super(timestamp, clusterName);
     }
 
     @Override
@@ -56,8 +56,8 @@ public abstract class RoutingEvent extends Event {
         protected final ShardRouting shardRouting;
         protected final DiscoveryNode node;
 
-        public RoutingShardEvent(long timestamp, ShardRouting shardRouting, DiscoveryNode node) {
-            super(timestamp);
+        public RoutingShardEvent(long timestamp, String clusterName, ShardRouting shardRouting, DiscoveryNode node) {
+            super(timestamp, clusterName);
             this.node = node;
             this.shardRouting = shardRouting;
         }
@@ -78,8 +78,8 @@ public abstract class RoutingEvent extends Event {
 
     public static class ShardInitializing extends RoutingShardEvent {
 
-        public ShardInitializing(long timestamp, ShardRouting shardRouting, DiscoveryNode node) {
-            super(timestamp, shardRouting, node);
+        public ShardInitializing(long timestamp, String clusterName, ShardRouting shardRouting, DiscoveryNode node) {
+            super(timestamp, clusterName, shardRouting, node);
         }
 
         @Override
@@ -97,8 +97,9 @@ public abstract class RoutingEvent extends Event {
 
         final DiscoveryNode relocatingTo;
 
-        public ShardRelocating(long timestamp, ShardRouting shardRouting, DiscoveryNode node, DiscoveryNode relocatingTo) {
-            super(timestamp, shardRouting, node);
+        public ShardRelocating(long timestamp, String clusterName, ShardRouting shardRouting,
+                               DiscoveryNode node, DiscoveryNode relocatingTo) {
+            super(timestamp, clusterName, shardRouting, node);
             this.relocatingTo = relocatingTo;
         }
 

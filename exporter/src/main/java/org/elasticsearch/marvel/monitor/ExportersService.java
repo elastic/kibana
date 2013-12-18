@@ -20,6 +20,8 @@ package org.elasticsearch.marvel.monitor;
 
 
 import org.elasticsearch.ElasticSearchException;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
+import org.elasticsearch.action.admin.cluster.health.ClusterIndexHealth;
 import org.elasticsearch.action.admin.cluster.node.stats.NodeStats;
 import org.elasticsearch.action.admin.cluster.stats.ClusterStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.CommonStatsFlags;
@@ -67,6 +69,7 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
     private final NodeService nodeService;
     private final ClusterService clusterService;
     private final Client client;
+    private final String clusterName;
 
     private final IndicesLifecycle.Listener indicesLifeCycleListener;
     private final ClusterStateListener clusterStateEventListener;
@@ -92,6 +95,7 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
         this.interval = componentSettings.getAsTime("interval", TimeValue.timeValueSeconds(5));
         this.indicesToExport = componentSettings.getAsArray("indices", this.indicesToExport, true);
         this.client = client;
+        this.clusterName = clusterName.value();
 
         indicesLifeCycleListener = new IndicesLifeCycleListener();
         clusterStateEventListener = new ClusterStateListener();
@@ -279,20 +283,76 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
             }
             // only collect if i'm master.
             long timestamp = System.currentTimeMillis();
-            if (!event.previousState().nodes().localNodeMaster()) {
-                pendingEventsQueue.add(new NodeEvent.ElectedAsMaster(timestamp, event.state().nodes().localNode(), event.source()));
-            }
 
             for (DiscoveryNode node : event.nodesDelta().addedNodes()) {
-                pendingEventsQueue.add(new NodeEvent.NodeJoinLeave(timestamp, node, true, event.source()));
+                pendingEventsQueue.add(new NodeEvent.NodeJoinLeave(timestamp, clusterName, node, true, event.source()));
             }
 
             for (DiscoveryNode node : event.nodesDelta().removedNodes()) {
-                pendingEventsQueue.add(new NodeEvent.NodeJoinLeave(timestamp, node, false, event.source()));
+                pendingEventsQueue.add(new NodeEvent.NodeJoinLeave(timestamp, clusterName, node, false, event.source()));
+            }
+
+            if (!event.previousState().nodes().localNodeMaster()) {
+                pendingEventsQueue.add(new NodeEvent.ElectedAsMaster(timestamp, clusterName, event.state().nodes().localNode(),
+                        event.source()));
+            }
+
+            if (event.blocksChanged()) {
+                // TODO: Add index blocks
+                List<ClusterBlock> removed = newArrayList();
+                List<ClusterBlock> added = newArrayList();
+                ImmutableSet<ClusterBlock> currentBlocks = event.state().blocks().global();
+                ImmutableSet<ClusterBlock> previousBlocks = event.previousState().blocks().global();
+
+                for (ClusterBlock block : previousBlocks) {
+                    if (!currentBlocks.contains(block)) {
+                        removed.add(block);
+                    }
+                }
+                for (ClusterBlock block : currentBlocks) {
+                    if (!previousBlocks.contains(block)) {
+                        added.add(block);
+                    }
+                }
+
+                for (ClusterBlock block : added) {
+                    pendingEventsQueue.add(new ClusterEvent.ClusterBlock(timestamp, clusterName, block, true, event.source()));
+                }
+
+                for (ClusterBlock block : removed) {
+                    pendingEventsQueue.add(new ClusterEvent.ClusterBlock(timestamp, clusterName, block, false, event.source()));
+                }
+            }
+
+            for (String index : event.indicesCreated()) {
+                pendingEventsQueue.add(new IndexEvent.IndexCreateDelete(timestamp, clusterName, index, true, event.source()));
+            }
+
+            for (String index : event.indicesDeleted()) {
+                pendingEventsQueue.add(new IndexEvent.IndexCreateDelete(timestamp, clusterName, index, false, event.source()));
+            }
+
+            // check for index & cluster status changes
+            ClusterHealthResponse prevHealth = new ClusterHealthResponse(clusterName, event.previousState().metaData().concreteAllIndices()
+                    , event.previousState());
+            ClusterHealthResponse curHealth = new ClusterHealthResponse(clusterName, event.state().metaData().concreteAllIndices(), event.state());
+
+            if (prevHealth.getStatus() != curHealth.getStatus()) {
+                pendingEventsQueue.add(new ClusterEvent.ClusterStatus(timestamp, clusterName, event.source(), curHealth));
+            }
+
+            for (ClusterIndexHealth indexHealth : curHealth) {
+                ClusterIndexHealth prevIndexHealth = prevHealth.getIndices().get(indexHealth.getIndex());
+                if (prevIndexHealth != null && prevIndexHealth.getStatus() == indexHealth.getStatus()) {
+                    continue;
+                }
+
+                pendingEventsQueue.add(new IndexEvent.IndexStatus(timestamp, clusterName, event.source(), indexHealth));
             }
 
 
             if (event.routingTableChanged()) {
+
                 // hunt for initializing shards
                 RoutingNodes previousRoutingNodes = event.previousState().routingNodes();
                 for (ShardRouting shardRouting : event.state().routingNodes().shardsWithState(ShardRoutingState.INITIALIZING)) {
@@ -320,11 +380,11 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
                         if (tmpShardRouting.relocatingNodeId() != null) {
                             relocatingTo = event.state().nodes().get(tmpShardRouting.relocatingNodeId());
                         }
-                        pendingEventsQueue.add(new RoutingEvent.ShardRelocating(timestamp, tmpShardRouting,
+                        pendingEventsQueue.add(new RoutingEvent.ShardRelocating(timestamp, clusterName, tmpShardRouting,
                                 relocatingTo, event.state().nodes().get(tmpShardRouting.currentNodeId())
                         ));
                     } else {
-                        pendingEventsQueue.add(new RoutingEvent.ShardInitializing(timestamp, shardRouting,
+                        pendingEventsQueue.add(new RoutingEvent.ShardInitializing(timestamp, clusterName, shardRouting,
                                 event.state().nodes().get(shardRouting.currentNodeId())
                         ));
                     }
@@ -332,42 +392,8 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
                 }
             }
 
-            if (event.blocksChanged()) {
-                // TODO: Add index blocks
-                List<ClusterBlock> removed = newArrayList();
-                List<ClusterBlock> added = newArrayList();
-                ImmutableSet<ClusterBlock> currentBlocks = event.state().blocks().global();
-                ImmutableSet<ClusterBlock> previousBlocks = event.previousState().blocks().global();
-
-                for (ClusterBlock block : previousBlocks) {
-                    if (!currentBlocks.contains(block)) {
-                        removed.add(block);
-                    }
-                }
-                for (ClusterBlock block : currentBlocks) {
-                    if (!previousBlocks.contains(block)) {
-                        added.add(block);
-                    }
-                }
-
-                for (ClusterBlock block : added) {
-                    pendingEventsQueue.add(new ClusterEvent.ClusterBlock(timestamp, block, true, event.source()));
-                }
-
-                for (ClusterBlock block : removed) {
-                    pendingEventsQueue.add(new ClusterEvent.ClusterBlock(timestamp, block, false, event.source()));
-                }
-            }
-
-            for (String index : event.indicesCreated()) {
-                pendingEventsQueue.add(new IndexEvent.IndexCreateDelete(timestamp, index, true, event.source()));
-            }
-
-            for (String index : event.indicesDeleted()) {
-                pendingEventsQueue.add(new IndexEvent.IndexCreateDelete(timestamp, index, false, event.source()));
-            }
-
         }
+
     }
 
 
@@ -383,7 +409,7 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
                 }
             }
 
-            pendingEventsQueue.add(new ShardEvent(System.currentTimeMillis(), currentState,
+            pendingEventsQueue.add(new ShardEvent(System.currentTimeMillis(), clusterName, currentState,
                     indexShard.shardId(), clusterService.localNode(), relocatingNode, indexShard.routingEntry(), reason));
         }
     }

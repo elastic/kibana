@@ -19,17 +19,20 @@ package org.elasticsearch.marvel.monitor.event;
  */
 
 
+import org.elasticsearch.action.admin.cluster.health.ClusterIndexHealth;
+import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.IOException;
+import java.util.Map;
 
 public abstract class IndexEvent extends Event {
 
     protected final String event_source;
 
-    public IndexEvent(long timestamp, String event_source) {
-        super(timestamp);
+    public IndexEvent(long timestamp, String clusterName, String event_source) {
+        super(timestamp, clusterName);
         this.event_source = event_source;
     }
 
@@ -53,8 +56,8 @@ public abstract class IndexEvent extends Event {
         private final String index;
         private boolean created;
 
-        public IndexCreateDelete(long timestamp, String index, boolean created, String event_source) {
-            super(timestamp, event_source);
+        public IndexCreateDelete(long timestamp, String clusterName, String index, boolean created, String event_source) {
+            super(timestamp, clusterName, event_source);
             this.index = index;
             this.created = created;
         }
@@ -74,6 +77,35 @@ public abstract class IndexEvent extends Event {
             super.addXContentBody(builder, params);
             builder.field("index", index);
             return builder;
+        }
+    }
+
+    public static class IndexStatus extends IndexEvent {
+
+        ClusterIndexHealth indexHealth;
+
+        Map<String, String> SHARD_LEVEL_MAP = ImmutableMap.of("level", "shards");
+
+        public IndexStatus(long timestamp, String clusterName, String event_source, ClusterIndexHealth indexHealth) {
+            super(timestamp, clusterName, event_source);
+            this.indexHealth = indexHealth;
+        }
+
+        @Override
+        protected String event() {
+            return "index_status";
+        }
+
+        @Override
+        String conciseDescription() {
+            return "[" + indexHealth.getIndex() + "] status is " + indexHealth.getStatus().name();
+        }
+
+        @Override
+        public XContentBuilder addXContentBody(XContentBuilder builder, ToXContent.Params params) throws IOException {
+            super.addXContentBody(builder, params);
+            builder.field("index", indexHealth.getIndex());
+            return indexHealth.toXContent(builder, new ToXContent.DelegatingMapParams(SHARD_LEVEL_MAP, params));
         }
     }
 }

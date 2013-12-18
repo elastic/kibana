@@ -31,13 +31,19 @@ public abstract class Event {
     public final static DateTimeFormatter datePrinter = Joda.forPattern("date_time").printer();
 
     protected long timestamp;
+    protected String clusterName;
 
-    public Event(long timestamp) {
+    public Event(long timestamp, String clusterName) {
         this.timestamp = timestamp;
+        this.clusterName = clusterName;
     }
 
     public long timestamp() {
         return timestamp;
+    }
+
+    public String clusterName() {
+        return clusterName;
     }
 
     /**
@@ -57,6 +63,9 @@ public abstract class Event {
 
     public XContentBuilder addXContentBody(XContentBuilder builder, ToXContent.Params params) throws IOException {
         builder.field("@timestamp", datePrinter.print(timestamp));
+        if (params.paramAsBoolean("output_cluster_name", true)) {
+            builder.field("cluster_name", clusterName);
+        }
         builder.field("message", conciseDescription());
         return builder;
     }
