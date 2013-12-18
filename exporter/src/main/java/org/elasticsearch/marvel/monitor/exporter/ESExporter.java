@@ -543,7 +543,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         public void render(int index, XContentBuilder builder) throws IOException {
             builder.startObject();
             builder.field("@timestamp", defaultDatePrinter.print(stats.getTimestamp()));
-            addNodeInfo(builder);
+            // no node info here - we send this document home and we don't want IPs in it.
             stats.toXContent(builder, xContentParams);
             builder.endObject();
         }
