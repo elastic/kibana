@@ -23,7 +23,6 @@ body {
     line-height: 1;
     margin-right: -468px;
     z-index: 100;
-    margin-top: 6px; /* compensate for being outside editor */
 }
 
 #editor_actions > .btn-group > a {
@@ -59,15 +58,10 @@ body {
 }
 
 #output, #editor {
-  padding-top: 5px;
 }
 
 .ace_gutter {
-  margin-top: 6px;
-}
-
-.ace_scroller {
-  padding-top: 5px;
+  margin-top: 1px;
 }
 
 #autocomplete {
