@@ -50,7 +50,7 @@ function (Settings) {
       'query',
       'terms',
       'sparklines',
-      'marvel/stats_table'
+      'marvel.stats_table'
     ]
   });
 });
