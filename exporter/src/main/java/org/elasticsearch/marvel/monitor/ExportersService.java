@@ -32,9 +32,12 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.ClusterChangedEvent;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.ClusterService;
+import org.elasticsearch.cluster.ClusterState;
 import org.elasticsearch.cluster.block.ClusterBlock;
 import org.elasticsearch.cluster.node.DiscoveryNode;
-import org.elasticsearch.cluster.routing.*;
+import org.elasticsearch.cluster.routing.IndexRoutingTable;
+import org.elasticsearch.cluster.routing.IndexShardRoutingTable;
+import org.elasticsearch.cluster.routing.ShardRouting;
 import org.elasticsearch.common.Nullable;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.collect.ImmutableSet;
@@ -332,6 +335,41 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
                 pendingEventsQueue.add(new IndexEvent.IndexCreateDelete(timestamp, clusterName, index, false, event.source()));
             }
 
+
+            if (event.routingTableChanged()) {
+
+                for (ShardRoutingDelta changedShard : getAssignedShardRoutingDelta(event.previousState(), event.state())) {
+                    ShardRouting current = changedShard.current;
+                    if (changedShard.previous == null) {
+                        pendingEventsQueue.add(new RoutingEvent.ShardInitializing(timestamp, clusterName, current,
+                                event.state().nodes().get(current.currentNodeId())
+                        ));
+                    } else if (current.state() != changedShard.previous.state()) {
+                        // state change - remember these are only assigned shard
+                        switch (current.state()) {
+                            case STARTED:
+                                pendingEventsQueue.add(new RoutingEvent.ShardStarted(timestamp, clusterName, current,
+                                        event.state().nodes().get(current.currentNodeId())
+                                ));
+                                break;
+                            case RELOCATING:
+                                pendingEventsQueue.add(new RoutingEvent.ShardRelocating(timestamp, clusterName, changedShard.current,
+                                        event.state().nodes().get(current.currentNodeId()),
+                                        event.state().nodes().get(current.relocatingNodeId()))
+                                );
+                                break;
+                            default:
+                                // we shouldn't get here as INITIALIZING will not have a previous and UNASSIGNED will not be in the change list.
+                                assert false : "changed shard has an unexpected state [" + current.state() + "]";
+                        }
+                    } else if (current.primary() && !changedShard.previous.primary()) {
+                        pendingEventsQueue.add(new RoutingEvent.ShardPromotedToPrimary(timestamp, clusterName, current,
+                                event.state().nodes().get(current.currentNodeId())
+                        ));
+                    }
+                }
+            }
+
             // check for index & cluster status changes
             ClusterHealthResponse prevHealth = new ClusterHealthResponse(clusterName, event.previousState().metaData().concreteAllIndices()
                     , event.previousState());
@@ -350,52 +388,68 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
                 pendingEventsQueue.add(new IndexEvent.IndexStatus(timestamp, clusterName, event.source(), indexHealth));
             }
 
+        }
 
-            if (event.routingTableChanged()) {
+    }
 
-                // hunt for initializing shards
-                RoutingNodes previousRoutingNodes = event.previousState().routingNodes();
-                for (ShardRouting shardRouting : event.state().routingNodes().shardsWithState(ShardRoutingState.INITIALIZING)) {
-                    RoutingNode oldRoutingNode = previousRoutingNodes.node(shardRouting.currentNodeId());
-                    boolean changed = true;
-                    if (oldRoutingNode != null) {
-                        for (ShardRouting oldShardRouting : oldRoutingNode) {
-                            if (oldShardRouting.equals(shardRouting)) {
-                                changed = false;
-                                break;
-                            }
+    static class ShardRoutingDelta {
+        @Nullable
+        final public ShardRouting previous;
+
+        final public ShardRouting current;
+
+        public ShardRoutingDelta(@Nullable ShardRouting previous, ShardRouting current) {
+            this.previous = previous;
+            this.current = current;
+        }
+    }
+
+    protected List<ShardRoutingDelta> getAssignedShardRoutingDelta(ClusterState previousState, ClusterState currentState) {
+        List<ShardRoutingDelta> changedShards = new ArrayList<ShardRoutingDelta>();
+
+        for (IndexRoutingTable indexRoutingTable : currentState.routingTable()) {
+            IndexRoutingTable prevIndexRoutingTable = previousState.routingTable().getIndicesRouting().get(indexRoutingTable.index());
+            if (prevIndexRoutingTable == null) {
+                for (IndexShardRoutingTable shardRoutingTable : indexRoutingTable) {
+                    for (ShardRouting shardRouting : shardRoutingTable.assignedShards()) {
+                        changedShards.add(new ShardRoutingDelta(null, shardRouting));
+                    }
+                }
+                continue;
+            }
+            for (IndexShardRoutingTable shardRoutingTable : indexRoutingTable) {
+                IndexShardRoutingTable prevShardRoutingTable = prevIndexRoutingTable.shard(shardRoutingTable.shardId().id());
+                if (prevShardRoutingTable == null) {
+                    for (ShardRouting shardRouting : shardRoutingTable.assignedShards()) {
+                        changedShards.add(new ShardRoutingDelta(null, shardRouting));
+                    }
+                    continue;
+                }
+                for (ShardRouting shardRouting : shardRoutingTable.getAssignedShards()) {
+
+                    ShardRouting prevShardRouting = null;
+                    for (ShardRouting candidate : prevShardRoutingTable.assignedShards()) {
+                        if (candidate.currentNodeId().equals(shardRouting.currentNodeId())) {
+                            prevShardRouting = candidate;
+                            break;
+                        } else if (shardRouting.currentNodeId().equals(candidate.relocatingNodeId())) {
+                            // the shard relocated here
+                            prevShardRouting = candidate;
+                            break;
                         }
                     }
-                    if (!changed) {
-                        continue; // no event.
+                    if (prevShardRouting != null && prevShardRouting.equals(shardRouting)) {
+                        continue; // nothing changed.
                     }
 
-                    if (shardRouting.relocatingNodeId() != null) {
-                        // if relocating node is not null, this shard is initializing due to a relocation
-                        ShardRouting tmpShardRouting = new MutableShardRouting(
-                                shardRouting.index(), shardRouting.id(), shardRouting.relocatingNodeId(),
-                                shardRouting.currentNodeId(), shardRouting.primary(),
-                                ShardRoutingState.RELOCATING, shardRouting.version());
-                        DiscoveryNode relocatingTo = null;
-                        if (tmpShardRouting.relocatingNodeId() != null) {
-                            relocatingTo = event.state().nodes().get(tmpShardRouting.relocatingNodeId());
-                        }
-                        pendingEventsQueue.add(new RoutingEvent.ShardRelocating(timestamp, clusterName, tmpShardRouting,
-                                relocatingTo, event.state().nodes().get(tmpShardRouting.currentNodeId())
-                        ));
-                    } else {
-                        pendingEventsQueue.add(new RoutingEvent.ShardInitializing(timestamp, clusterName, shardRouting,
-                                event.state().nodes().get(shardRouting.currentNodeId())
-                        ));
-                    }
-
+                    changedShards.add(new ShardRoutingDelta(prevShardRouting, shardRouting));
                 }
             }
 
         }
 
+        return changedShards;
     }
-
 
     class IndicesLifeCycleListener extends IndicesLifecycle.Listener {
 

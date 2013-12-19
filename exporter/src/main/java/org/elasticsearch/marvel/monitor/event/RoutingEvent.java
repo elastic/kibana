@@ -89,7 +89,41 @@ public abstract class RoutingEvent extends Event {
 
         @Override
         String conciseDescription() {
-            return shardDescription(shardRouting) + " set to initializing on " + Utils.nodeDescription(node);
+            return shardDescription(shardRouting) + " initializing on " + Utils.nodeDescription(node);
+        }
+    }
+
+    public static class ShardStarted extends RoutingShardEvent {
+
+        public ShardStarted(long timestamp, String clusterName, ShardRouting shardRouting, DiscoveryNode node) {
+            super(timestamp, clusterName, shardRouting, node);
+        }
+
+        @Override
+        public String event() {
+            return "shard_started";
+        }
+
+        @Override
+        String conciseDescription() {
+            return shardDescription(shardRouting) + " started on " + Utils.nodeDescription(node);
+        }
+    }
+
+    public static class ShardPromotedToPrimary extends RoutingShardEvent {
+
+        public ShardPromotedToPrimary(long timestamp, String clusterName, ShardRouting shardRouting, DiscoveryNode node) {
+            super(timestamp, clusterName, shardRouting, node);
+        }
+
+        @Override
+        public String event() {
+            return "shard_promoted";
+        }
+
+        @Override
+        String conciseDescription() {
+            return shardRouting.shardId() + " promoted to primary on " + Utils.nodeDescription(node);
         }
     }
 
@@ -110,11 +144,8 @@ public abstract class RoutingEvent extends Event {
 
         @Override
         String conciseDescription() {
-            String s = shardDescription(shardRouting) + " set to relocate";
-            if (relocatingTo != null) {
-                s += " to " + relocatingTo;
-            }
-            return s + " from " + Utils.nodeDescription(node);
+            return shardDescription(shardRouting) + " relocating to " + Utils.nodeDescription(relocatingTo) +
+                    " from " + Utils.nodeDescription(node);
         }
 
         @Override
