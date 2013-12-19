@@ -1,10 +1,29 @@
-define(function (require) {
-  var angular = require('angular');
-  var app     = require('app');
-  var _       = require('underscore');
-  var $       = require('jquery');
-  var kbn     = require('kbn');
-  var numeral = require('numeral');
+/*
+
+  ## Stats Module
+
+  ### Parameters
+  * format :: The format of the value returned. (Default: number)
+  * style :: The font size of the main number to be displayed.
+  * mode :: The aggergate value to use for display
+  * spyable ::  Dislay the 'eye' icon that show the last elasticsearch query
+
+*/
+define([
+  'angular',
+  'app',
+  'underscore',
+  'jquery',
+  'kbn',
+  'numeral'
+], function (
+  angular,
+  app,
+  _,
+  $,
+  kbn,
+  numeral
+) {
 
   'use strict';
 
@@ -25,9 +44,10 @@ define(function (require) {
       editorTabs : [
         {title:'Queries', src:'app/partials/querySelect.html'}
       ],
-      status: 'Experimental',
-      description: 'A statatics panel'
+      status: 'Beta',
+      description: 'A statatics panel for displaying aggergations using the Elastic Search statistical facet query.'
     };
+
 
     var defaults = {
       queries     : {
@@ -37,6 +57,7 @@ define(function (require) {
       style   : { "font-size": '24pt'},
       format: 'number',
       mode: 'count',
+      display_breakdown: 'yes',
       spyable     : true
     };
 
@@ -67,12 +88,13 @@ define(function (require) {
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
       queries = querySrv.getQueryObjs($scope.panel.queries.ids);
 
+      console.log('queries', queries);
+
       // This could probably be changed to a BoolFilter
       boolQuery = $scope.ejs.BoolQuery();
       _.each(queries,function(q) {
         boolQuery = boolQuery.should(querySrv.toEjsObj(q));
       });
-
 
       request = request
         .facet($scope.ejs.StatisticalFacet('stats')
@@ -83,30 +105,62 @@ define(function (require) {
               filterSrv.getBoolFilter(filterSrv.ids)
               )))).size(0);
 
+      _.each(queries, function (q) {
+        var alias = q.alias || q.query;
+        var query = $scope.ejs.BoolQuery(); 
+        query.should(querySrv.toEjsObj(q));
+        request.facet($scope.ejs.StatisticalFacet('stats_'+alias)
+          .field($scope.panel.field)
+          .facetFilter($scope.ejs.QueryFilter(
+            $scope.ejs.FilteredQuery(
+              query,
+              filterSrv.getBoolFilter(filterSrv.ids)
+            )
+          ))
+        );
+      });
+
       // Populate the inspector panel
       $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
 
       results = request.doSearch();
 
+      var format = function (format, value) {
+        switch (format) {
+        case 'money':
+          value = numeral(value).format('$0,0.00');
+          break;
+        case 'bytes':
+          value = numeral(value).format('0.00b');
+          break;
+        case 'float':
+          value = numeral(value).format('0.000');
+          break;
+        default:
+          value = numeral(value).format('0,0');
+        }
+        return value;
+      };
+
       results.then(function(results) {
         $scope.panelMeta.loading = false;
         var value = results.facets.stats[$scope.panel.mode]; 
-        switch ($scope.panel.format) {
-          case 'money':
-            value = numeral(value).format('$0,0.00');
-            break;
-          case 'bytes':
-            value = numeral(value).format('0.00b');
-            break;
-          case 'float':
-            value = numeral(value).format('0.000');
-            break;
-          default:
-            value = numeral(value).format('0,0');
-        }
+
+        var rows = queries.map(function (q) {
+          var alias = q.alias || q.query;
+          var obj = _.clone(q);
+          obj.label = alias;
+          obj.value = format($scope.panel.format,results.facets['stats_'+alias][$scope.panel.mode]);
+          return obj;
+        });
+
         $scope.data = {
-          value: value 
+          value: format($scope.panel.format, value),
+          rows: rows
         };
+
+        console.log($scope.data);
+
         $scope.$emit('render');
       });
     };
