@@ -1,4 +1,7 @@
 <div ng-controller='terms' ng-init="init()">
+  <style>
+    .pieLabel { pointer-events: none }
+  </style>
   <div class="small" ng-show="panel.tmode == 'terms_stats'">
     <span>showing</span>
     <span class="strong">{{ panel.valuefield }}</span>

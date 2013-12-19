@@ -57,7 +57,8 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
       index: {
         interval: 'none',
         pattern: '_all',
-        default: 'INDEX_MISSING'
+        default: 'INDEX_MISSING',
+        warm_fields: true
       },
       refresh: false
     };
@@ -100,22 +101,31 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
         case('script'):
           self.script_load(_id);
           break;
+        case('local'):
+          self.local_load();
+          break;
         default:
-          self.file_load('default.json');
+          $location.path(config.default_route);
         }
-
       // No dashboard in the URL
       } else {
-        // Check if browser supports localstorage, and if there's a dashboard
-        if (Modernizr.localstorage &&
-          !(_.isUndefined(window.localStorage['dashboard'])) &&
-          window.localStorage['dashboard'] !== ''
-        ) {
-          var dashboard = JSON.parse(window.localStorage['dashboard']);
-          self.dash_load(dashboard);
-        // No? Ok, grab default.json, its all we have now
+        // Check if browser supports localstorage, and if there's an old dashboard. If there is,
+        // inform the user that they should save their dashboard to Elasticsearch and then set that
+        // as their default
+        if (Modernizr.localstorage) {
+          if(!(_.isUndefined(window.localStorage['dashboard'])) && window.localStorage['dashboard'] !== '') {
+            console.log(window.localStorage['dashboard']);
+            $location.path(config.default_route);
+            alertSrv.set('Saving to browser storage has been replaced',' with saving to Elasticsearch.'+
+              ' Click <a href="#/dashboard/local/deprecated">here</a> to load your old dashboard anyway.');
+          } else if(!(_.isUndefined(window.localStorage.kibanaDashboardDefault))) {
+            $location.path(window.localStorage.kibanaDashboardDefault);
+          } else {
+            $location.path(config.default_route);
+          }
+        // No? Ok, grab the default route, its all we have now
         } else {
-          self.file_load('default.json');
+          $location.path(config.default_route);
         }
       }
     };
@@ -124,6 +134,9 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
     // here before telling the panels to refresh
     this.refresh = function() {
       if(self.current.index.interval !== 'none') {
+        if(_.isUndefined(filterSrv)) {
+          return;
+        }
         if(filterSrv.idsByType('time').length > 0) {
           var _range = filterSrv.timeRange('last');
           kbnIndex.indices(_range.from,_range.to,
@@ -184,26 +197,30 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
       // Set the current dashboard
       self.current = _.clone(dashboard);
 
-      // Ok, now that we've setup the current dashboard, we can inject our services
-      querySrv = $injector.get('querySrv');
-      filterSrv = $injector.get('filterSrv');
+      // Delay this until we're sure that querySrv and filterSrv are ready
+      $timeout(function() {
+        // Ok, now that we've setup the current dashboard, we can inject our services
+        querySrv = $injector.get('querySrv');
+        filterSrv = $injector.get('filterSrv');
 
-      // Make sure these re-init
-      querySrv.init();
-      filterSrv.init();
-
-      // If there's an interval set, the indices have not been calculated yet,
-      // so there is no data. Call refresh to calculate the indices and notify the panels.
-      if(dashboard.index.interval !== 'none') {
+        // Make sure these re-init
+        querySrv.init();
+        filterSrv.init();
+      },0).then(function() {
+        // Call refresh to calculate the indices and notify the panels that we're ready to roll
         self.refresh();
-      }
+      });
 
       if(dashboard.refresh) {
         self.set_interval(dashboard.refresh);
       }
 
+      // Set the available panels for the "Add Panel" drop down
       self.availablePanels = _.difference(config.panel_names,
         _.pluck(_.union(self.current.nav,self.current.pulldowns),'type'));
+
+      // Take out any that we're not allowed to add from the gui.
+      self.availablePanels = _.difference(self.availablePanels,config.hidden_panels);
 
       return true;
     };
@@ -229,10 +246,14 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
       return true;
     };
 
-    this.set_default = function(dashboard) {
+    this.set_default = function(route) {
+      console.log(route);
       if (Modernizr.localstorage) {
-        window.localStorage['dashboard'] = angular.toJson(dashboard || self.current);
-        $location.path('/dashboard');
+        // Purge any old dashboards
+        if(!_.isUndefined(window.localStorage['dashboard'])) {
+          delete window.localStorage['dashboard'];
+        }
+        window.localStorage.kibanaDashboardDefault = route;
         return true;
       } else {
         return false;
@@ -241,7 +262,12 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
 
     this.purge_default = function() {
       if (Modernizr.localstorage) {
-        window.localStorage['dashboard'] = '';
+        // Purge any old dashboards
+        if(!_.isUndefined(window.localStorage['dashboard'])) {
+
+          delete window.localStorage['dashboard'];
+        }
+        delete window.localStorage.kibanaDashboardDefault;
         return true;
       } else {
         return false;
@@ -272,9 +298,34 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
       return _r;
     };
 
+    this.local_load = function() {
+      var dashboard = JSON.parse(window.localStorage['dashboard']);
+      dashboard.rows.unshift({
+        height: "30",
+        title: "Deprecation Notice",
+        panels: [
+          {
+            title: 'WARNING: Legacy dashboard',
+            type: 'text',
+            span: 12,
+            mode: 'html',
+            content: 'This dashboard has been loaded from the browsers local cache. If you use '+
+            'another brower or computer you will not be able to access it! '+
+            '\n\n  <h4>Good news!</h4> Kibana'+
+            ' now stores saved dashboards in Elasticsearch. Click the <i class="icon-save"></i> '+
+            'button in the top left to save this dashboard. Then select "Set as Home" from'+
+            ' the "advanced" sub menu to automatically use the stored dashboard as your Kibana '+
+            'landing page afterwards'+
+            '<br><br><strong>Tip:</strong> You may with to remove this row before saving!'
+          }
+        ]
+      });
+      self.dash_load(dashboard);
+    };
+
     this.file_load = function(file) {
       return $http({
-        url: "app/dashboards/"+file+'?' + new Date().getTime(),
+        url: "app/dashboards/"+file.replace(/\.(?!json)/,"/")+'?' + new Date().getTime(),
         method: "GET",
         transformResponse: function(response) {
           return renderTemplate(response,$routeParams);
@@ -314,7 +365,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
 
     this.script_load = function(file) {
       return $http({
-        url: "app/dashboards/"+file,
+        url: "app/dashboards/"+file.replace(/\.(?!js)/,"/"),
         method: "GET",
         transformResponse: function(response) {
           /*jshint -W054 */
