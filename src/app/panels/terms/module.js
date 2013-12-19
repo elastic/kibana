@@ -67,7 +67,9 @@ function (angular, app, _, $, kbn) {
        */
       size    : 10,
       /** @scratch /panels/terms/5
-       * order:: count, term, reverse_count or reverse_term
+       * order:: In terms mode: count, term, reverse_count or reverse_term,
+       * in terms_stats mode: term, reverse_term, count, reverse_count,
+       * total, reverse_total, min, reverse_min, max, reverse_max, mean or reverse_mean
        */
       order   : 'count',
       style   : { "font-size": '10pt'},
@@ -109,9 +111,17 @@ function (angular, app, _, $, kbn) {
         mode        : 'all',
         ids         : []
       },
-
+      /** @scratch /panels/terms/5
+       * tmode:: Facet mode: terms or terms_stats
+       */
       tmode       : 'terms',
+      /** @scratch /panels/terms/5
+       * tstat:: Terms_stats facet stats field
+       */
       tstat       : 'total',
+      /** @scratch /panels/terms/5
+       * valuefield:: Terms_stats facet value field
+       */
       valuefield  : ''
     };
 
@@ -169,11 +179,11 @@ function (angular, app, _, $, kbn) {
       }
       if($scope.panel.tmode === 'terms_stats') {
         request = request
-          .facet($scope.ejs.TermsFacet('terms')
+          .facet($scope.ejs.TermStatsFacet('terms')
           .valueField($scope.panel.valuefield)
           .keyField($scope.panel.field)
           .size($scope.panel.size)
-          .order('total')
+          .order($scope.panel.order)
           .facetFilter($scope.ejs.QueryFilter(
             $scope.ejs.FilteredQuery(
               boolQuery,
@@ -271,7 +281,7 @@ function (angular, app, _, $, kbn) {
           scope.data.push({label:'Missing field',
             data:[[k,scope.results.facets.terms.missing]],meta:"missing",color:'#aaa',opacity:0});
 
-          if(scope.panel.tmode == 'terms') {
+          if(scope.panel.tmode === 'terms') {
             scope.data.push({label:'Other values',
               data:[[k+1,scope.results.facets.terms.other]],meta:"other",color:'#444'});
           }
