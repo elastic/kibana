@@ -4,7 +4,7 @@
     <tbody>
       <tr ng-repeat="item in data.rows">
         <td><i class="icon-circle" ng-style="{color:item.color}"></i> {{item.label}}</td>
-        <td style="text-align: right;">{{item.value}}</td>
+        <td style="text-align: right;">{{item.value}} {{panel.unit}}</td>
       </tr>
     </tbody>
   </table>
