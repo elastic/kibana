@@ -88,7 +88,6 @@ define([
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
       queries = querySrv.getQueryObjs($scope.panel.queries.ids);
 
-      console.log('queries', queries);
 
       // This could probably be changed to a BoolFilter
       boolQuery = $scope.ejs.BoolQuery();
@@ -158,8 +157,6 @@ define([
           value: format($scope.panel.format, value),
           rows: rows
         };
-
-        console.log($scope.data);
 
         $scope.$emit('render');
       });
