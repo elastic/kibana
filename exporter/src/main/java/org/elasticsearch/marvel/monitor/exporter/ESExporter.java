@@ -53,7 +53,7 @@ import java.util.Map;
 
 public class ESExporter extends AbstractLifecycleComponent<ESExporter> implements StatsExporter<ESExporter> {
 
-    final String[] hosts;
+    volatile String[] hosts;
     final String indexPrefix;
     final DateTimeFormatter indexTimeFormatter;
     final int timeout;
@@ -239,24 +239,37 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     }
 
     private HttpURLConnection openConnection(String method, String uri, String contentType) {
-        for (String host : hosts) {
-            try {
-                URL templateUrl = new URL("http://" + host + uri);
-                HttpURLConnection conn = (HttpURLConnection) templateUrl.openConnection();
-                conn.setRequestMethod(method);
-                conn.setConnectTimeout(timeout);
-                if (contentType != null) {
-                    conn.setRequestProperty("Content-Type", XContentType.SMILE.restContentType());
-                }
-                conn.setUseCaches(false);
-                if (method.equalsIgnoreCase("POST") || method.equalsIgnoreCase("PUT")) {
-                    conn.setDoOutput(true);
-                }
-                conn.connect();
+        int hostIndex = 0;
+        try {
+            for (; hostIndex < hosts.length; hostIndex++) {
+                String host = hosts[hostIndex];
+                try {
+                    URL templateUrl = new URL("http://" + host + uri);
+                    HttpURLConnection conn = (HttpURLConnection) templateUrl.openConnection();
+                    conn.setRequestMethod(method);
+                    conn.setConnectTimeout(timeout);
+                    if (contentType != null) {
+                        conn.setRequestProperty("Content-Type", XContentType.SMILE.restContentType());
+                    }
+                    conn.setUseCaches(false);
+                    if (method.equalsIgnoreCase("POST") || method.equalsIgnoreCase("PUT")) {
+                        conn.setDoOutput(true);
+                    }
+                    conn.connect();
 
-                return conn;
-            } catch (IOException e) {
-                logger.error("error connecting to [{}]", e, host);
+                    return conn;
+                } catch (IOException e) {
+                    logger.error("error connecting to [{}]", e, host);
+                }
+            }
+        } finally {
+            if (hostIndex > 0 && hostIndex < hosts.length) {
+                logger.debug("moving [{}] failed hosts to the end of the list", hostIndex + 1);
+                String[] newHosts = new String[hosts.length];
+                System.arraycopy(hosts, hostIndex, newHosts, 0, hosts.length - hostIndex);
+                System.arraycopy(hosts, 0, newHosts, hosts.length - hostIndex - 1, hostIndex + 1);
+                hosts = newHosts;
+                logger.debug("preferred target host is now [{}]", hosts[0]);
             }
         }
 
