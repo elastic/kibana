@@ -19,10 +19,13 @@
 
 package org.elasticsearch.marvel.monitor;
 
+import org.elasticsearch.Version;
 import org.elasticsearch.common.collect.ImmutableList;
 import org.elasticsearch.common.component.LifecycleComponent;
 import org.elasticsearch.common.inject.AbstractModule;
 import org.elasticsearch.common.inject.Module;
+import org.elasticsearch.common.logging.ESLogger;
+import org.elasticsearch.common.logging.Loggers;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.plugins.AbstractPlugin;
 
@@ -31,7 +34,20 @@ import java.util.Collection;
 
 public class Plugin extends AbstractPlugin {
 
+    final ESLogger logger = Loggers.getLogger(getClass());
+
+    // copied here because we can't depend on it available
+    public static final int V_0_90_8_ID = /*00*/900899;
+
+    public final boolean enabled;
+
     public Plugin() {
+        if (Version.CURRENT.id < V_0_90_8_ID) {
+            logger.warn("Elasticsearch version [{}] is too old. Marvel is disabled (requires version 0.90.8 or higher)", Version.CURRENT);
+            enabled = false;
+        } else {
+            enabled = true;
+        }
     }
 
     @Override
@@ -46,6 +62,9 @@ public class Plugin extends AbstractPlugin {
 
     @Override
     public Collection<Module> modules(Settings settings) {
+        if (!enabled) {
+            return ImmutableList.of();
+        }
         Module m = new AbstractModule() {
 
             @Override
@@ -59,7 +78,9 @@ public class Plugin extends AbstractPlugin {
     @Override
     public Collection<Class<? extends LifecycleComponent>> services() {
         Collection<Class<? extends LifecycleComponent>> l = new ArrayList<Class<? extends LifecycleComponent>>();
-        l.add(ExportersService.class);
+        if (enabled) {
+            l.add(ExportersService.class);
+        }
         return l;
     }
 }
