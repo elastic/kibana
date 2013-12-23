@@ -7,6 +7,10 @@ module.exports = function (config) {
           {
             match: 'port',
             replacement: '<%= esPort.dev %>',
+          },
+          {
+            match: 'default_route',
+            replacement: '<%= defaultRoute.dev %>',
           }
         ]
       },
@@ -20,6 +24,10 @@ module.exports = function (config) {
           {
             match: 'port',
             replacement: '<%= esPort.dist %>',
+          },
+          {
+            match: 'default_route',
+            replacement: '<%= defaultRoute.dist %>',
           }
         ]
       },

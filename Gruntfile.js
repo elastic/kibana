@@ -13,6 +13,10 @@ module.exports = function (grunt) {
       dev: '"'+ (grunt.option('es_port') ||  9200) +'"',
       dist: "(window.location.port !== '' ? ':'+window.location.port : '')"
     },
+    defaultRoute: {
+      dev: '/dashboard/file/marvel.overview.json',
+      dist: '/dashboard/elasticsearch/Marvel%20-%20Overview'
+    },
     kibanaPort: grunt.option('port') ||  5601,
     kibanaHost: 'localhost'
 
