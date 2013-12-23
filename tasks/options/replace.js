@@ -32,7 +32,7 @@ module.exports = function (config) {
         ]
       },
       files: [
-        {expand: true, flatten: true, src: ['./config.js'], dest: '<%= buildTempDir %>'}
+        {expand: true, flatten: true, src: ['./config.js'], dest: '<%= buildTempDir %>/src/'}
       ]
     }
   };

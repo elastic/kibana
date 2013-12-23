@@ -8,9 +8,9 @@ module.exports = function (grunt) {
     kibanaRevision: 'master',
     exporterDir: 'exporter',
     buildDir: 'build',
-    packageDir: 'packages',
+    packageDir: 'build/packages',
     esPort: {
-      dev: '"'+ (grunt.option('es_port') ||  9200) +'"',
+      dev: '":'+ (grunt.option('es_port') ||  9200) +'"',
       dist: "(window.location.port !== '' ? ':'+window.location.port : '')"
     },
     defaultRoute: {

@@ -21,7 +21,7 @@ define(['settings'],
        * kibana installed on. You probably want to set it to the FQDN of your
        * elasticsearch host
        */
-      elasticsearch: "http://"+window.location.hostname+":"+@@port,
+      elasticsearch: "http://"+window.location.hostname+@@port,
 
       /** @scratch /configuration/config.js/5
        * ==== default_route
