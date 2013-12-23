@@ -432,6 +432,9 @@ define([
             a: row.display_name
           };
         });
+        if (rows.length == 0 ) {
+          return "javascript:;";
+        }
         rows = JSON.stringify(rows);
         var time = filterSrv.timeRange(false);
         var show;
