@@ -147,13 +147,12 @@ var rows = [
     "title": "Server",
     "panels": [
       {
-        "value_field": "os.cpu.user",
-        "title": "CPU (user)",
+        "value_field": "os.cpu.usage",
+        "title": "CPU",
         "grid": {
           "max": 100,
           "min": 0
         }
-
       },
       {
         "value_field": "os.mem.used_percent",
@@ -172,6 +171,14 @@ var rows = [
   {
     "title": "Server 2",
     "panels": [
+      {
+        "value_field": "os.cpu.stolen",
+        "title": "CPU steal",
+        "grid": {
+          "max": 100,
+          "min": 0
+        }
+      },
       {
         "time_field": "@timestamp",
         "value_field": "os.swap.used_in_bytes",
