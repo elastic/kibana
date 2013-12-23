@@ -32,6 +32,8 @@
       <th>Warning</th>
       <th>Error</th>
       <th>Prec.</th>
+      <th>Format</th>
+      <th>Derivative</th>
       <th/>
       <th/>
       </thead>
@@ -46,16 +48,23 @@
                  type="text" bs-typeahead="fields.list" class="input-medium" ng-model="metric.field" ng-required/></td>
         </td>
         <td>
-          <span ng-show="metricEditor.index != $index">{{formatAlert(metric.warning)}}</span>
+          <span ng-show="metricEditor.index != $index">{{formatAlert(metric.warning, metric)}}</span>
           <input ng-show="metricEditor.index == $index" type="text" class="input-mini" alert-value ng-model="metric.warning" ng-required/></td>
         </td>
         <td>
-          <span ng-show="metricEditor.index != $index">{{formatAlert(metric.error)}}</span>
+          <span ng-show="metricEditor.index != $index">{{formatAlert(metric.error, metric)}}</span>
           <input ng-show="metricEditor.index == $index" type="text" class="input-mini" alert-value ng-model="metric.error" ng-required/></td>
         </td>
         <td>
           <span ng-show="metricEditor.index != $index">{{metric.decimals}}</span>
           <input ng-show="metricEditor.index == $index" type="number" class="input-mini" ng-model="metric.decimals" ng-required/></td>
+        </td>
+        <td>
+            <span ng-show="metricEditor.index != $index">{{metric.y_format}}</span>
+            <select ng-show="metricEditor.index == $index" class="input-mini" ng-model="metric.y_format" ng-options="f for f in ['none','short','bytes']"></select>
+        </td>
+        <td>
+          <input ng-disabled="metricEditor.index != $index" type="checkbox" ng-model="metric.derivative" ng-checked="metric.derivative"/>
         </td>
 
 

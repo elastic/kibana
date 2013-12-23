@@ -13,6 +13,20 @@ define([
     var module = angular.module('kibana.panels.marvel.stats_table', []);
     app.useModule(module);
 
+    var y_format_metric_value = function (value, metric) {
+      if (metric.y_format === 'bytes') {
+        return kbn.byteFormat(value, metric.decimals);
+      }
+      if (metric.y_format === 'short') {
+        return kbn.shortFormat(value, metric.decimals);
+      }
+      if (typeof value !== 'number') {
+        return value;
+      }
+      return value.toFixed(metric.decimals);
+    };
+
+
     module.controller('marvel.stats_table', function ($scope, dashboard, filterSrv) {
       $scope.panelMeta = {
         modals: [],
@@ -41,7 +55,9 @@ define([
           defaults: {
             display_field: "node.name",
             persistent_field: "node.ip_port",
-            metrics: [ 'os.cpu.usage', 'os.load_average.1m', 'jvm.mem.heap_used_percent', 'fs.total.available_in_bytes', 'fs.total.disk_io_op'],
+            metrics: [ 'os.cpu.usage', 'os.load_average.1m', 'jvm.mem.heap_used_percent', 'fs.total.available_in_bytes',
+              'fs.total.disk_io_op'
+            ],
             show_hidden: true
           },
           availableMetrics: [
@@ -64,19 +80,20 @@ define([
               error: 98
             },
             {
-              name: 'Free (GB)',
+              name: 'Free',
               field: 'fs.total.available_in_bytes',
               warning: {
-                threshold: 5,
+                threshold: 5 * 1024 * 1024 * 1024,
                 type: "lower_bound"
               },
               error: {
-                threshold: 2,
+                threshold: 2 * 1024 * 1024 * 1024,
                 type: "lower_bound"
               },
-              scale: 1024 * 1024 * 1024
+              y_format: "bytes"
             }
-            ,{
+            ,
+            {
               name: 'IOps',
               field: 'fs.total.disk_io_op',
               derivative: true
@@ -87,28 +104,40 @@ define([
           defaults: {
             display_field: null,
             persistent_field: 'index',
-            metrics: [ 'primaries.docs.count', 'primaries.indexing.index_total', 'total.search.query_total', 'total.merges.current' ],
+            metrics: [ 'primaries.docs.count', 'primaries.indexing.index_total', 'total.search.query_total',
+              'total.merges.total_size_in_bytes', 'total.fielddata.memory_size_in_bytes'
+            ],
             show_hidden: false
           },
           availableMetrics: [
             {
               name: 'Documents',
               field: 'primaries.docs.count',
-              decimals: 0
+              decimals: 0,
+              y_format: "short"
             },
             {
               name: 'Index Rate',
               field: 'primaries.indexing.index_total',
-              derivative: true
+              derivative: true,
+              y_format: "short"
             },
             {
               name: 'Search Rate',
               field: 'total.search.query_total',
-              derivative: true
+              derivative: true,
+              y_format: "short"
             },
             {
-              name: 'Merges',
-              field: 'total.merges.current'
+              name: 'Merge rate',
+              field: 'total.merges.total_size_in_bytes',
+              derivative: true,
+              y_format: "bytes"
+            },
+            {
+              name: 'Field data',
+              field: 'total.fielddata.memory_size_in_bytes',
+              y_format: "bytes"
             },
             /* Dropping this until we have error handling for fields that don't exist
              {
@@ -130,7 +159,7 @@ define([
         }
         m = _.defaults(m, _.findWhere($scope.modeInfo[$scope.panel.mode].availableMetrics, { "field": m.field }));
 
-        var _metric_defaults = {field: "", decimals: 1, scale: 1};
+        var _metric_defaults = {field: "", decimals: 1, y_format: "none", derivative: false};
         m = _.defaults(m, _metric_defaults);
 
         if (_.isNumber(m.error)) {
@@ -330,7 +359,7 @@ define([
             var series_data = _.pluck(facets[history_key].entries, m.derivative ? 'min' : 'mean');
             var series_time = _.pluck(facets[history_key].entries, 'time');
 
-            if (m.scale !== 1) {
+            if (m.scale && m.scale !== 1) {
               series_data = _.map(series_data, function (v) {
                 return v / m.scale;
               });
@@ -414,8 +443,8 @@ define([
         window.location = current;
       };
 
-      $scope.formatAlert = function (a) {
-        return !a ? "" : (a.type === "upper_bound" ? ">" : "<") + a.threshold;
+      $scope.formatAlert = function (a, metric) {
+        return !a ? "" : (a.type === "upper_bound" ? ">" : "<") + y_format_metric_value(a.threshold, metric);
       };
 
 
@@ -430,7 +459,8 @@ define([
             a: row.display_name
           };
         });
-        if (rows.length == 0 ) {
+        if (rows.length === 0) {
+          /*jshint -W107 */
           return "javascript:;";
         }
         rows = JSON.stringify(rows);
@@ -492,7 +522,9 @@ define([
           return alert.type === "upper_bound" ? num > alert.threshold : num < alert.threshold;
         }
 
-        num /= metric.scale;
+        if (metric.scale) {
+          num /= metric.scale;
+        }
         if (testAlert(metric.error, num)) {
           level = 2;
         } else if (testAlert(metric.warning, num)) {
@@ -587,6 +619,11 @@ define([
 
     });
 
+    module.filter('metric_format', function () {
+      return y_format_metric_value;
+    });
+
+
     module.directive('alertValue', function () {
       return {
         require: 'ngModel',
@@ -603,7 +640,7 @@ define([
             }
           });
           ctrl.$formatters.unshift(function (modelValue) {
-            return scope.formatAlert(modelValue);
+            return scope.formatAlert(modelValue, scope);
           });
         }
       };
