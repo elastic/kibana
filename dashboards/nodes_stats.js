@@ -268,8 +268,8 @@ var rows = [
     "title": "Disk",
     "panels": [
       {
-        "value_field": "fs.data.disk_read_size_in_bytes",
-        "title": "Disk reads per sec.",
+        "value_field": "fs.total.disk_read_size_in_bytes",
+        "title": "Disk read rate (bytes)",
         "derivative": true,
         "mode": "min",
         "scaleSeconds": true,
@@ -277,19 +277,49 @@ var rows = [
 
       },
       {
-        "value_field": "fs.data.disk_write_size_in_bytes",
-        "title": "Disk writes per sec.",
+        "value_field": "fs.total.disk_write_size_in_bytes",
+        "title": "Disk write per (bytes)",
         "derivative": true,
         "y_format": "bytes",
         "mode": "min",
         "scaleSeconds": true
       },
       {
-        "value_field": "fs.data.available_in_bytes",
+        "value_field": "fs.total.available_in_bytes",
         "title": "Disk Free space",
         "mode": "min",
         "y_format": "bytes"
       }
+    ],
+    "notice": false
+  },
+  {
+    "title": "Disk 2",
+    "panels": [
+      {
+        "value_field": "fs.total.disk_io_op",
+        "title": "Disk IOps",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "y_format": "short"
+      },
+      {
+        "value_field": "fs.total.disk_reads",
+        "title": "Disk Read IOps",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "y_format": "short"
+      },
+      {
+        "value_field": "fs.total.disk_writes",
+        "title": "Disk Write IOps",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "y_format": "short"
+      },
     ],
     "notice": false
   },

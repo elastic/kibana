@@ -41,13 +41,13 @@ define([
           defaults: {
             display_field: "node.name",
             persistent_field: "node.ip_port",
-            metrics: [ 'process.cpu.percent', 'os.load_average.1m', 'os.mem.used_percent', 'fs.data.available_in_bytes' ],
+            metrics: [ 'os.cpu.usage', 'os.load_average.1m', 'jvm.mem.heap_used_percent', 'fs.total.available_in_bytes', 'fs.total.disk_io_op'],
             show_hidden: true
           },
           availableMetrics: [
             {
               name: 'CPU (%)',
-              field: 'process.cpu.percent',
+              field: 'os.cpu.usage',
               warning: 60,
               error: 90
             },
@@ -59,13 +59,13 @@ define([
             },
             {
               name: 'JVM Mem (%)',
-              field: 'os.mem.used_percent',
+              field: 'jvm.mem.heap_used_percent',
               warning: 95,
               error: 98
             },
             {
-              name: 'Free disk space (GB)',
-              field: 'fs.data.available_in_bytes',
+              name: 'Free (GB)',
+              field: 'fs.total.available_in_bytes',
               warning: {
                 threshold: 5,
                 type: "lower_bound"
@@ -76,13 +76,11 @@ define([
               },
               scale: 1024 * 1024 * 1024
             }
-            /* Dropping this until we have error handling for fields that don't exist
-             {
-             // allow people to add a new, not-predefined metric.
-             name: 'Custom',
-             field: ''
-             }
-             */
+            ,{
+              name: 'IOps',
+              field: 'fs.total.disk_io_op',
+              derivative: true
+            }
           ]
         },
         indices: {
@@ -106,11 +104,11 @@ define([
             {
               name: 'Search Rate',
               field: 'total.search.query_total',
-              derivative: true,
+              derivative: true
             },
             {
               name: 'Merges',
-              field: 'total.merges.current',
+              field: 'total.merges.current'
             },
             /* Dropping this until we have error handling for fields that don't exist
              {
