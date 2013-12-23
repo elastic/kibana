@@ -83,11 +83,11 @@ define([
               name: 'Free',
               field: 'fs.total.available_in_bytes',
               warning: {
-                threshold: 5 * 1024 * 1024 * 1024,
+                threshold: 50 * 1024 * 1024 * 1024,
                 type: "lower_bound"
               },
               error: {
-                threshold: 2 * 1024 * 1024 * 1024,
+                threshold: 20 * 1024 * 1024 * 1024,
                 type: "lower_bound"
               },
               y_format: "bytes"
