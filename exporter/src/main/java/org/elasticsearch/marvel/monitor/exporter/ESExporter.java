@@ -317,6 +317,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     }
 
     private boolean checkAndUploadDashboard(String path) {
+        logger.debug("checking/uploading [{}]", path);
         File dashboardFile = new File(path);
         if (!dashboardFile.exists()) {
             logger.warn("can't upload dashboard [{}] - file doesn't exist", path);
