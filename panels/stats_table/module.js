@@ -338,7 +338,7 @@ define([
               });
               summary.mean /= m.scale;
               summary.max /= m.scale;
-              summary.max /= m.scale;
+              summary.min /= m.scale;
             }
 
             if (m.derivative) {
