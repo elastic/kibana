@@ -124,7 +124,17 @@
             "min": 0
           },
           "title": "Document Count",
-          "pointradius": 5
+          "pointradius": 5,
+          "annotate": {
+            "enable": true,
+            "query": "_type:cluster_event",
+            "size": 100,
+            "field": "message",
+            "sort": [
+              "@timestamp",
+              "desc"
+            ]
+          }
         },
         {
           "span": 4,
@@ -187,7 +197,17 @@
             "min": 0
           },
           "title": "Search request rate",
-          "pointradius": 5
+          "pointradius": 5,
+          "annotate": {
+            "enable": true,
+            "query": "_type:cluster_event",
+            "size": 100,
+            "field": "message",
+            "sort": [
+              "@timestamp",
+              "desc"
+            ]
+          }
         },
         {
           "span": 4,
@@ -250,17 +270,17 @@
             "min": 0
           },
           "title": "Indexing request rate",
+          "pointradius": 5,
           "annotate": {
-            "enable": false,
-            "query": "*",
-            "size": 20,
-            "field": "_type",
+            "enable": true,
+            "query": "_type:cluster_event",
+            "size": 100,
+            "field": "message",
             "sort": [
-              "_score",
+              "@timestamp",
               "desc"
             ]
-          },
-          "pointradius": 5
+          }
         }
       ],
       "notice": false
