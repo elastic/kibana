@@ -36,6 +36,7 @@ import org.elasticsearch.common.joda.time.format.DateTimeFormat;
 import org.elasticsearch.common.joda.time.format.DateTimeFormatter;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.common.util.concurrent.EsExecutors;
 import org.elasticsearch.common.xcontent.*;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.common.xcontent.smile.SmileXContent;
@@ -68,7 +69,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
     public final static DateTimeFormatter defaultDatePrinter = Joda.forPattern("date_time").printer();
 
-    boolean checkedAndUploadedAllResources = false;
+    volatile boolean checkedAndUploadedAllResources = false;
 
     final NodeStatsRenderer nodeStatsRenderer;
     final ShardStatsRenderer shardStatsRenderer;
@@ -76,6 +77,9 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     final IndicesStatsRenderer indicesStatsRenderer;
     final ClusterStatsRenderer clusterStatsRenderer;
     final EventsRenderer eventsRenderer;
+
+    ConnectionKeepAliveWorker keepAliveWorker;
+    Thread keepAliveThread;
 
     public ESExporter(Settings settings, Discovery discovery, ClusterName clusterName, Environment environment, Plugin marvelPlugin) {
         super(settings);
@@ -169,8 +173,19 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         exportXContent(clusterStatsRenderer);
     }
 
+    protected void initKeepAliveWorker() {
+        keepAliveWorker = new ConnectionKeepAliveWorker();
+        keepAliveThread = new Thread(keepAliveWorker, EsExecutors.threadName(settings, "keep_alive"));
+        keepAliveThread.setDaemon(true);
+        keepAliveThread.start();
+    }
 
     private HttpURLConnection openExportingConnection() {
+        if (keepAliveWorker == null) {
+            // delayed initialization of keep alive worker, to allow ES to start up in
+            // the case we send metrics to our own ES
+            initKeepAliveWorker();
+        }
         if (!checkedAndUploadedAllResources) {
             try {
                 checkedAndUploadedAllResources = checkAndUploadAllResources();
@@ -245,11 +260,23 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
     @Override
     protected void doStart() throws ElasticSearchException {
+        // not initializing keep alive worker here but rather upon first exporting.
+        // In the case we are sending metrics to the same ES as where the plugin is hosted
+        // we want to give it some time to start.
     }
 
 
     @Override
     protected void doStop() throws ElasticSearchException {
+        if (keepAliveWorker != null) {
+            keepAliveWorker.closed = true;
+            keepAliveThread.interrupt();
+            try {
+                keepAliveThread.join(6000);
+            } catch (InterruptedException e) {
+                // don't care.
+            }
+        }
     }
 
     @Override
@@ -406,6 +433,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         }
 
         boolean hasDoc = conn.getResponseCode() == 200;
+        conn.getInputStream().close(); // close and release to connection pool.
 
         // nothing there, lets create it
         if (!hasDoc) {
@@ -685,5 +713,33 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         }
     }
 
+    /**
+     * Sadly we need to make sure we keep the connection open to the target ES a
+     * Java's connection pooling closes connections if idle for 5sec.
+     */
+    class ConnectionKeepAliveWorker implements Runnable {
+        volatile boolean closed = false;
+
+        @Override
+        public void run() {
+            while (!closed) {
+                try {
+                    Thread.sleep(1000);
+                    if (closed) {
+                        return;
+                    }
+                    logger.trace("pinging target es");
+                    HttpURLConnection conn = openConnection("GET", "");
+                    if (conn != null) {
+                        conn.getInputStream().close(); // close and release to connection pool.
+                    }
+                } catch (InterruptedException e) {
+                    // ignore, if closed, good....
+                } catch (Throwable t) {
+                    logger.debug("error in keep alive thread", t);
+                }
+            }
+        }
+    }
 }
 

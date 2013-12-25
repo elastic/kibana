@@ -168,12 +168,11 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
                 // sleep first to allow node to complete initialization before collecting the first start
                 try {
                     Thread.sleep(interval.millis());
-                } catch (InterruptedException e) {
-                    // ignore, if closed, good....
-                }
+                    if (closed) {
+                        continue;
+                    }
 
-                // do the actual export..., go over the actual exporters list and...
-                try {
+                    // do the actual export..., go over the actual exporters list and...
                     exportNodeStats();
                     exportShardStats();
                     exportEvents();
@@ -182,6 +181,9 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
                         exportIndicesStats();
                         exportClusterStats();
                     }
+                } catch (InterruptedException e) {
+                    // ignore, if closed, good....
+
                 } catch (Throwable t) {
                     logger.error("Background thread had an uncaught exception:", t);
                 }
