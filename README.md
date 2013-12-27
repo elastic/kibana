@@ -40,6 +40,9 @@ to http://localhost:9200 unless your browser and elasticsearch are on the same m
 __Q__: How do I secure this? I don't want to leave 9200 open.  
 __A__: A simple nginx virtual host and proxy configuration can be found in the sample/nginx.conf
 
+__Q__: How to run the grunt build process.  
+__A__: run npm install grunt@VERSION inside project folder, http://gruntjs.com/installing-grunt
+
 ### Support
 
 If you have questions or comments the best place to reach me is #logstash or #elasticsearch on irc.freenode.net
