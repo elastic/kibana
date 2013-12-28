@@ -1,32 +1,16 @@
-/*
+/** @scratch /panels/5
+ * include::panels/histogram.asciidoc[]
+ */
 
-  ## Histogram
-
-  ### Parameters
-  * auto_int :: Auto calculate data point interval?
-  * resolution ::  If auto_int is enables, shoot for this many data points, rounding to
-                    sane intervals
-  * interval :: Datapoint interval in elasticsearch date math format (eg 1d, 1w, 1y, 5y)
-  * fill :: Only applies to line charts. Level of area shading from 0-10
-  * linewidth ::  Only applies to line charts. How thick the line should be in pixels
-                  While the editor only exposes 0-10, this can be any numeric value.
-                  Set to 0 and you'll get something like a scatter plot
-  * timezone :: This isn't totally functional yet. Currently only supports browser and utc.
-                browser will adjust the x-axis labels to match the timezone of the user's
-                browser
-  * spyable ::  Dislay the 'eye' icon that show the last elasticsearch query
-  * zoomlinks :: Show the zoom links?
-  * bars :: Show bars in the chart
-  * stack :: Stack multiple queries. This generally a crappy way to represent things.
-             You probably should just use a line chart without stacking
-  * points :: Should circles at the data points on the chart
-  * lines :: Line chart? Sweet.
-  * legend :: Show the legend?
-  * x-axis :: Show x-axis labels and grid lines
-  * y-axis :: Show y-axis labels and grid lines
-  * interactive :: Allow drag to select time range
-
-*/
+/** @scratch /panels/histogram/0
+ * == Histogram
+ * Status: *Stable*
+ *
+ * The histogram panel allow for the display of time charts. It includes several modes and tranformations
+ * to display event counts, mean, min, max and total of numeric fields, and derivatives of counter
+ * fields.
+ *
+ */
 define([
   'angular',
   'app',
@@ -39,6 +23,7 @@ define([
   'jquery.flot.events',
   'jquery.flot.selection',
   'jquery.flot.time',
+  'jquery.flot.byte',
   'jquery.flot.stack',
   'jquery.flot.stackpercent'
 ],
@@ -84,12 +69,66 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
 
     // Set and populate defaults
     var _d = {
+      /** @scratch /panels/histogram/3
+       * === Parameters
+       * ==== Axis options
+       * mode:: Value to use for the y-axis. For all modes other than count, +value_field+ must be
+       * defined. Possible values: count, mean, max, min, total.
+       */
       mode          : 'count',
+      /** @scratch /panels/histogram/3
+       * time_field:: x-axis field. This must be defined as a date type in Elasticsearch.
+       */
       time_field    : '@timestamp',
-      queries       : {
-        mode          : 'all',
-        ids           : []
+      /** @scratch /panels/histogram/3
+       * value_field:: y-axis field if +mode+ is set to mean, max, min or total. Must be numeric.
+       */
+      value_field   : null,
+      /** @scratch /panels/histogram/3
+       * x-axis:: Show the x-axis
+       */
+      'x-axis'      : true,
+      /** @scratch /panels/histogram/3
+       * y-axis:: Show the y-axis
+       */
+      'y-axis'      : true,
+      /** @scratch /panels/histogram/3
+       * scale:: Scale the y-axis by this factor
+       */
+      scale         : 1,
+      /** @scratch /panels/histogram/3
+       * y_format:: 'none','bytes','short '
+       */
+      y_format    : 'none',
+      /** @scratch /panels/histogram/5
+       * grid object:: Min and max y-axis values
+       * grid.min::: Minimum y-axis value
+       * grid.max::: Maximum y-axis value
+       */
+      grid          : {
+        max: null,
+        min: 0
       },
+      /** @scratch /panels/histogram/5
+       * ==== Queries
+       * queries object:: This object describes the queries to use on this panel.
+       * queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
+       * queries.ids::: In +selected+ mode, which query ids are selected.
+       */
+      queries     : {
+        mode        : 'all',
+        ids         : []
+      },
+      /** @scratch /panels/histogram/3
+       * ==== Annotations
+       * annotate object:: A query can be specified, the results of which will be displayed as markers on
+       * the chart. For example, for noting code deploys.
+       * annotate.enable::: Should annotations, aka markers, be shown?
+       * annotate.query::: Lucene query_string syntax query to use for markers.
+       * annotate.size::: Max number of markers to show
+       * annotate.field::: Field from documents to show
+       * annotate.sort::: Sort array in format [field,order], For example [`@timestamp',`desc']
+       */
       annotate      : {
         enable      : false,
         query       : "*",
@@ -97,39 +136,106 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
         field       : '_type',
         sort        : ['_score','desc']
       },
-      value_field   : null,
+      /** @scratch /panels/histogram/3
+       * ==== Interval options
+       * auto_int:: Automatically scale intervals?
+       */
       auto_int      : true,
+      /** @scratch /panels/histogram/3
+       * resolution:: If auto_int is true, shoot for this many bars.
+       */
       resolution    : 100,
+      /** @scratch /panels/histogram/3
+       * interval:: If auto_int is set to false, use this as the interval.
+       */
       interval      : '5m',
+      /** @scratch /panels/histogram/3
+       * interval:: Array of possible intervals in the *View* selector. Example [`auto',`1s',`5m',`3h']
+       */
       intervals     : ['auto','1s','1m','5m','10m','30m','1h','3h','12h','1d','1w','1y'],
-      fill          : 0,
-      linewidth     : 3,
-      pointradius   : 5,
-      timezone      : 'browser', // browser, utc or a standard timezone
-      spyable       : true,
-      zoomlinks     : true,
-      bars          : true,
-      stack         : true,
-      points        : false,
+      /** @scratch /panels/histogram/3
+       * ==== Drawing options
+       * lines:: Show line chart
+       */
       lines         : false,
-      legend        : true,
-      show_query    : true,
-      legend_counts : true,
-      'x-axis'      : true,
-      'y-axis'      : true,
-      percentage    : false,
-      zerofill      : true,
-      interactive   : true,
+      /** @scratch /panels/histogram/3
+       * fill:: Area fill factor for line charts, 1-10
+       */
+      fill          : 0,
+      /** @scratch /panels/histogram/3
+       * linewidth:: Weight of lines in pixels
+       */
+      linewidth     : 3,
+      /** @scratch /panels/histogram/3
+       * points:: Show points on chart
+       */
+      points        : false,
+      /** @scratch /panels/histogram/3
+       * pointradius:: Size of points in pixels
+       */
+      pointradius   : 5,
+      /** @scratch /panels/histogram/3
+       * bars:: Show bars on chart
+       */
+      bars          : true,
+      /** @scratch /panels/histogram/3
+       * stack:: Stack multiple series
+       */
+      stack         : true,
+      /** @scratch /panels/histogram/3
+       * spyable:: Show inspect icon
+       */
+      spyable       : true,
+      /** @scratch /panels/histogram/3
+       * zoomlinks:: Show `Zoom Out' link
+       */
+      zoomlinks     : true,
+      /** @scratch /panels/histogram/3
+       * options:: Show quick view options section
+       */
       options       : true,
+      /** @scratch /panels/histogram/3
+       * legend:: Display the legond
+       */
+      legend        : true,
+      /** @scratch /panels/histogram/3
+       * show_query:: If no alias is set, should the query be displayed?
+       */
+      show_query    : true,
+      /** @scratch /panels/histogram/3
+       * interactive:: Enable click-and-drag to zoom functionality
+       */
+      interactive   : true,
+      /** @scratch /panels/histogram/3
+       * legend_counts:: Show counts in legend
+       */
+      legend_counts : true,
+      /** @scratch /panels/histogram/3
+       * ==== Transformations
+       * timezone:: Correct for browser timezone?. Valid values: browser, utc
+       */
+      timezone      : 'browser', // browser or utc
+      /** @scratch /panels/histogram/3
+       * percentage:: Show the y-axis as a percentage of the axis total. Only makes sense for multiple
+       * queries
+       */
+      percentage    : false,
+      /** @scratch /panels/histogram/3
+       * zerofill:: Improves the accuracy of line charts at a small performance cost.
+       */
+      zerofill      : true,
+      /** @scratch /panels/histogram/3
+       * derivative:: Show each point on the x-axis as the change from the previous point
+       */
       derivative    : false,
-      scale         : 1,
+      /** @scratch /panels/histogram/3
+       * tooltip object::
+       * tooltip.value_type::: Individual or cumulative controls how tooltips are display on stacked charts
+       * tooltip.query_as_alias::: If no alias is set, should the query be displayed?
+       */
       tooltip       : {
         value_type: 'cumulative',
         query_as_alias: true
-      },
-      grid          : {
-        max: null,
-        min: 0
       }
     };
 
@@ -143,9 +249,6 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
     $scope.init = function() {
       // Hide view options by default
       $scope.options = false;
-      $scope.$on('refresh',function(){
-        $scope.get_data();
-      });
 
       // Always show the query if an alias isn't set. Users can set an alias if the query is too
       // long
@@ -204,7 +307,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
      * @param {number} query_id  The id of the query, generated on the first run and passed back when
      *                            this call is made recursively for more segments
      */
-    $scope.get_data = function(segment, query_id) {
+    $scope.get_data = function(data, segment, query_id) {
       var
         _range,
         _interval,
@@ -281,12 +384,12 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
       results = request.doSearch();
 
       // Populate scope when we have results
-      results.then(function(results) {
-
+      return results.then(function(results) {
         $scope.panelMeta.loading = false;
         if(segment === 0) {
+          $scope.legend = [];
           $scope.hits = 0;
-          $scope.data = [];
+          data = [];
           $scope.annotations = [];
           query_id = $scope.query_id = new Date().getTime();
         }
@@ -308,7 +411,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
             var query_results = results.facets[q.id];
             // we need to initialize the data variable on the first run,
             // and when we are working on the first segment of the data.
-            if(_.isUndefined($scope.data[i]) || segment === 0) {
+            if(_.isUndefined(data[i]) || segment === 0) {
               var tsOpts = {
                 interval: _interval,
                 start_date: _range && _range.from,
@@ -318,8 +421,8 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
               time_series = new timeSeries.ZeroFilled(tsOpts);
               hits = 0;
             } else {
-              time_series = $scope.data[i].time_series;
-              hits = $scope.data[i].hits;
+              time_series = data[i].time_series;
+              hits = data[i].hits;
             }
 
             // push each entry into the time series, while incrementing counters
@@ -328,7 +431,10 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
               hits += entry.count; // The series level hits counter
               $scope.hits += entry.count; // Entire dataset level hits counter
             });
-            $scope.data[i] = {
+
+            $scope.legend[i] = {query:q,hits:hits};
+
+            data[i] = {
               info: q,
               time_series: time_series,
               hits: hits
@@ -362,11 +468,11 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
           }
 
           // Tell the histogram directive to render.
-          $scope.$emit('render');
+          $scope.$emit('render', data);
 
           // If we still have segments left, get them
           if(segment < dashboard.indices.length-1) {
-            $scope.get_data(segment+1,query_id);
+            $scope.get_data(data,segment+1,query_id);
           }
         }
       });
@@ -475,20 +581,32 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
       restrict: 'A',
       template: '<div></div>',
       link: function(scope, elem) {
+        var data, plot;
+
+        scope.$on('refresh',function(){
+          scope.get_data();
+        });
 
         // Receive render events
-        scope.$on('render',function(){
-          render_panel();
+        scope.$on('render',function(event,d){
+          data = d || data;
+          render_panel(data);
         });
 
         // Re-render if the window is resized
         angular.element(window).bind('resize', function(){
-          render_panel();
+          render_panel(data);
         });
 
         var scale = function(series,factor) {
           return _.map(series,function(p) {
             return [p[0],p[1]*factor];
+          });
+        };
+
+        var scaleSeconds = function(series,interval) {
+          return _.map(series,function(p) {
+            return [p[0],p[1]/kbn.interval_to_seconds(interval)];
           });
         };
 
@@ -505,13 +623,13 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
         };
 
         // Function for rendering panel
-        function render_panel() {
+        function render_panel(data) {
           // IE doesn't work without this
           elem.css({height:scope.panel.height || scope.row.height});
 
           // Populate from the query service
           try {
-            _.each(scope.data, function(series) {
+            _.each(data, function(series) {
               series.label = series.info.alias;
               series.color = series.info.color;
             });
@@ -554,7 +672,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
               yaxis: {
                 show: scope.panel['y-axis'],
                 min: scope.panel.grid.min,
-                max: scope.panel.percentage && scope.panel.stack ? 100 : scope.panel.grid.max,
+                max: scope.panel.percentage && scope.panel.stack ? 100 : scope.panel.grid.max
               },
               xaxis: {
                 timezone: scope.panel.timezone,
@@ -573,6 +691,16 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
                 color: '#c8c8c8'
               }
             };
+
+            if(scope.panel.y_format === 'bytes') {
+              options.yaxis.mode = "byte";
+            }
+
+            if(scope.panel.y_format === 'short') {
+              options.yaxis.tickFormatter = function(val) {
+                return kbn.shortFormat(val,0);
+              };
+            }
 
             if(scope.panel.annotate.enable) {
               options.events = {
@@ -600,8 +728,8 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
             // when rendering stacked bars, we need to ensure each point that has data is zero-filled
             // so that the stacking happens in the proper order
             var required_times = [];
-            if (scope.data.length > 1) {
-              required_times = Array.prototype.concat.apply([], _.map(scope.data, function (query) {
+            if (data.length > 1) {
+              required_times = Array.prototype.concat.apply([], _.map(data, function (query) {
                 return query.time_series.getOrderedTimes();
               }));
               required_times = _.uniq(required_times.sort(function (a, b) {
@@ -611,18 +739,21 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
             }
 
 
-            for (var i = 0; i < scope.data.length; i++) {
-              var _d = scope.data[i].time_series.getFlotPairs(required_times);
+            for (var i = 0; i < data.length; i++) {
+              var _d = data[i].time_series.getFlotPairs(required_times);
               if(scope.panel.derivative) {
                 _d = derivative(_d);
               }
               if(scope.panel.scale !== 1) {
                 _d = scale(_d,scope.panel.scale);
               }
-              scope.data[i].data = _d;
+              if(scope.panel.scaleSeconds) {
+                _d = scaleSeconds(_d,scope.panel.interval);
+              }
+              data[i].data = _d;
             }
 
-            scope.plot = $.plot(elem, scope.data, options);
+            plot = $.plot(elem, data, options);
 
           } catch(e) {
             // Nothing to do here
@@ -659,6 +790,12 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
             value = (scope.panel.stack && scope.panel.tooltip.value_type === 'individual') ?
               item.datapoint[1] - item.datapoint[2] :
               item.datapoint[1];
+            if(scope.panel.y_format === 'bytes') {
+              value = kbn.byteFormat(value,2);
+            }
+            if(scope.panel.y_format === 'short') {
+              value = kbn.shortFormat(value,2);
+            }
             timestamp = scope.panel.timezone === 'browser' ?
               moment(item.datapoint[0]).format('YYYY-MM-DD HH:mm:ss') :
               moment.utc(item.datapoint[0]).format('YYYY-MM-DD HH:mm:ss');

@@ -14,7 +14,6 @@ function (angular, _, config, kbn) {
     // Create an object to hold our service state on the dashboard
     dashboard.current.services.query = dashboard.current.services.query || {};
     _.defaults(dashboard.current.services.query,{
-      idQueue : [],
       list : {},
       ids : [],
     });
@@ -31,7 +30,6 @@ function (angular, _, config, kbn) {
 
     // For convenience
     var ejs = ejsResource(config.elasticsearch);
-    var _q = dashboard.current.services.query;
 
     // Holds all actual queries, including all resolved abstract queries
     var resolvedQueries = [];
@@ -113,7 +111,7 @@ function (angular, _, config, kbn) {
             return _.map(data.facets.query.terms,function(t) {
               ++i;
               return self.defaults({
-                query  : q.field+':"'+kbn.addslashes(t.term)+'"'+suffix,
+                query  : q.field+':"'+kbn.addslashes('' + t.term)+'"'+suffix,
                 alias  : t.term + (q.alias ? " ("+q.alias+")" : ""),
                 type   : 'lucene',
                 color  : _colors[i],
@@ -129,15 +127,12 @@ function (angular, _, config, kbn) {
     var self = this;
 
     this.init = function() {
-      _q = dashboard.current.services.query;
-
       self.list = dashboard.current.services.query.list;
       self.ids = dashboard.current.services.query.ids;
 
       // Check each query object, populate its defaults
       _.each(self.list,function(query) {
         query = self.defaults(query);
-        console.log(query);
       });
 
       if (self.ids.length === 0) {
@@ -179,10 +174,6 @@ function (angular, _, config, kbn) {
         delete self.list[id];
         // This must happen on the full path also since _.without returns a copy
         self.ids = dashboard.current.services.query.ids = _.without(self.ids,id);
-        _q.idQueue.unshift(id);
-        _q.idQueue.sort(function(v,k){
-          return v-k;
-        });
         return true;
       } else {
         return false;
@@ -249,10 +240,14 @@ function (angular, _, config, kbn) {
     };
 
     var nextId = function() {
-      if(_q.idQueue.length > 0) {
-        return _q.idQueue.shift();
+      var idCount = dashboard.current.services.query.ids.length;
+      if(idCount > 0) {
+        // Make a sorted copy of the ids array
+        var ids = _.clone(dashboard.current.services.query.ids).sort();
+        return kbn.smallestMissing(ids);
       } else {
-        return self.ids.length;
+        // No ids currently in list
+        return 0;
       }
     };
 

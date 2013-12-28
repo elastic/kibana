@@ -13,7 +13,6 @@ function (angular) {
 
         '<div class="row-fluid panel-extra"><div class="panel-extra-container">' +
 
-
           '<span class="extra row-button" ng-show="panel.editable != false">' +
             '<span confirm-click="row.panels = _.without(row.panels,panel)" '+
             'confirmation="Are you sure you want to remove this {{panel.type}} panel?" class="pointer">'+
@@ -37,7 +36,7 @@ function (angular) {
           '</span>' +
 
           '<span class="row-button extra" ng-show="panel.editable != false">' +
-            '<span bs-modal="\'app/partials/paneleditor.html\'" class="pointer">'+
+            '<span config-modal class="pointer">'+
             '<i class="icon-cog pointer" bs-tooltip="\'Configure\'"></i></span>'+
           '</span>' +
 
@@ -62,22 +61,30 @@ function (angular) {
         link: function($scope, elem, attr) {
           // once we have the template, scan it for controllers and
           // load the module.js if we have any
+          var newScope = $scope.$new();
 
           // compile the module and uncloack. We're done
           function loadModule($module) {
             $module.appendTo(elem);
             elem.wrap(container);
             /* jshint indent:false */
-            $compile(elem.contents())($scope);
+            $compile(elem.contents())(newScope);
             elem.removeClass("ng-cloak");
           }
+
+          newScope.$on('$destroy',function(){
+            elem.unbind();
+            elem.remove();
+          });
 
           $scope.$watch(attr.type, function (name) {
             elem.addClass("ng-cloak");
             // load the panels module file, then render it in the dom.
+            var nameAsPath = name.replace(".", "/");
             $scope.require([
               'jquery',
-              'text!panels/'+name+'/module.html'
+              'text!panels/'+nameAsPath+'/module.html',
+              'text!panels/'+nameAsPath+'/editor.html'
             ], function ($, moduleTemplate) {
               var $module = $(moduleTemplate);
               // top level controllers
@@ -88,7 +95,7 @@ function (angular) {
               if ($controllers.length) {
                 $controllers.first().prepend(editorTemplate);
                 $scope.require([
-                  'panels/'+name+'/module'
+                  'panels/'+nameAsPath+'/module'
                 ], function() {
                   loadModule($module);
                 });

@@ -1,15 +1,14 @@
-/*
-  ## Terms
+/** @scratch /panels/5
+ * include::panels/terms.asciidoc[]
+ */
 
-  ### Parameters
-  * style :: A hash of css styles
-  * size :: top N
-  * arrangement :: How should I arrange the query results? 'horizontal' or 'vertical'
-  * chart :: Show a chart? 'none', 'bar', 'pie'
-  * donut :: Only applies to 'pie' charts. Punches a hole in the chart for some reason
-  * tilt :: Only 'pie' charts. Janky 3D effect. Looks terrible 90% of the time.
-  * lables :: Only 'pie' charts. Labels on the pie?
-*/
+/** @scratch /panels/terms/0
+ * == terms
+ * Status: *Stable*
+ *
+ * A table, bar chart or pie chart based on the results of an Elasticsearch terms facet.
+ *
+ */
 define([
   'angular',
   'app',
@@ -23,7 +22,7 @@ function (angular, app, _, $, kbn) {
   var module = angular.module('kibana.panels.terms', []);
   app.useModule(module);
 
-  module.controller('terms', function($scope, querySrv, dashboard, filterSrv) {
+  module.controller('terms', function($scope, querySrv, dashboard, filterSrv, fields) {
     $scope.panelMeta = {
       modals : [
         {
@@ -50,24 +49,73 @@ function (angular, app, _, $, kbn) {
 
     // Set and populate defaults
     var _d = {
+      /** @scratch /panels/terms/5
+       * === Parameters
+       *
+       * field:: The field on which to computer the facet
+       */
+      field   : '_type',
+      /** @scratch /panels/terms/5
+       * exclude:: terms to exclude from the results
+       */
+      exclude : [],
+      /** @scratch /panels/terms/5
+       * missing:: Set to false to disable the display of a counter showing how much results are
+       * missing the field
+       */
+      missing : true,
+      /** @scratch /panels/terms/5
+       * other:: Set to false to disable the display of a counter representing the aggregate of all
+       * values outside of the scope of your +size+ property
+       */
+      other   : true,
+      /** @scratch /panels/terms/5
+       * size:: Show this many terms
+       */
+      size    : 10,
+      /** @scratch /panels/terms/5
+       * order:: count, term, reverse_count or reverse_term
+       */
+      order   : 'count',
+      style   : { "font-size": '10pt'},
+      /** @scratch /panels/terms/5
+       * donut:: In pie chart mode, draw a hole in the middle of the pie to make a tasty donut.
+       */
+      donut   : false,
+      /** @scratch /panels/terms/5
+       * tilt:: In pie chart mode, tilt the chart back to appear as more of an oval shape
+       */
+      tilt    : false,
+      /** @scratch /panels/terms/5
+       * lables:: In pie chart mode, draw labels in the pie slices
+       */
+      labels  : true,
+      /** @scratch /panels/terms/5
+       * arrangement:: In bar or pie mode, arrangement of the legend. horizontal or vertical
+       */
+      arrangement : 'horizontal',
+      /** @scratch /panels/terms/5
+       * chart:: table, bar or pie
+       */
+      chart       : 'bar',
+      /** @scratch /panels/terms/5
+       * counter_pos:: The location of the legend in respect to the chart, above or below.
+       */
+      counter_pos : 'above',
+      /** @scratch /panels/terms/5
+       * spyable:: Set spyable to false to disable the inspect button
+       */
+      spyable     : true,
+      /** @scratch /panels/terms/5
+       * ==== Queries
+       * queries object:: This object describes the queries to use on this panel.
+       * queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
+       * queries.ids::: In +selected+ mode, which query ids are selected.
+       */
       queries     : {
         mode        : 'all',
         ids         : []
       },
-      field   : '_type',
-      exclude : [],
-      missing : true,
-      other   : true,
-      size    : 10,
-      order   : 'count',
-      style   : { "font-size": '10pt'},
-      donut   : false,
-      tilt    : false,
-      labels  : true,
-      arrangement : 'horizontal',
-      chart       : 'bar',
-      counter_pos : 'above',
-      spyable     : true
     };
     _.defaults($scope.panel,_d);
 
@@ -93,6 +141,9 @@ function (angular, app, _, $, kbn) {
         boolQuery,
         queries;
 
+      $scope.field = _.contains(fields.list,$scope.panel.field+'.raw') ?
+        $scope.panel.field+'.raw' : $scope.panel.field;
+
       request = $scope.ejs.Request().indices(dashboard.indices);
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
@@ -104,11 +155,10 @@ function (angular, app, _, $, kbn) {
         boolQuery = boolQuery.should(querySrv.toEjsObj(q));
       });
 
-
       // Terms mode
       request = request
         .facet($scope.ejs.TermsFacet('terms')
-          .field($scope.panel.field)
+          .field($scope.field)
           .size($scope.panel.size)
           .order($scope.panel.order)
           .exclude($scope.panel.exclude)
@@ -146,10 +196,10 @@ function (angular, app, _, $, kbn) {
 
     $scope.build_search = function(term,negate) {
       if(_.isUndefined(term.meta)) {
-        filterSrv.set({type:'terms',field:$scope.panel.field,value:term.label,
+        filterSrv.set({type:'terms',field:$scope.field,value:term.label,
           mandate:(negate ? 'mustNot':'must')});
       } else if(term.meta === 'missing') {
-        filterSrv.set({type:'exists',field:$scope.panel.field,
+        filterSrv.set({type:'exists',field:$scope.field,
           mandate:(negate ? 'must':'mustNot')});
       } else {
         return;
