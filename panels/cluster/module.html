@@ -1,0 +1,26 @@
+<div ng-controller='marvel.cluster' ng-init='init()'>
+  <style>
+   .marvel-cluster-health {
+      padding: 0px 5px;
+   }
+  </style>
+
+  <ul class="inline" ng-if="!_.isUndefined(panel.optin)">
+    <li><strong>Name:</strong> {{data.cluster_name}}</li>
+    <li><strong>Status:</strong> <span ng-class="healthClass(data.status)">{{data.status}}</span></li>
+    <li><strong>Nodes:</strong> {{data.nodes.count.total}}</li>
+    <li><strong>Indices:</strong> {{data.indices.count}}</li>
+    <li><strong>Shards:</strong> {{data.indices.shards.total}}</li>
+    <li><strong>Data Size:</strong> {{data.indices.store.size_in_bytes|marvelBytes}}</li>
+
+    <li>
+      <span class="strong" ng-show="data.nodes.versions.length == 1">Version:</span>
+      <span class="strong" ng-show="data.nodes.versions.length > 1">Versions:</span>
+
+      <span ng-repeat='version in data.nodes.versions'>
+        {{version}}<span ng-hide='$last'>, </span>
+      </span>
+    </li>
+  </ul>
+
+</div>
