@@ -15,7 +15,8 @@ define([
 
     var y_format_metric_value = function (value, metric) {
       // If this isn't a number, change nothing
-      if(!_.isNaN(value) || !_.isFinite(value)) {
+      if(_.isNaN(value) || !_.isFinite(value)) {
+        console.log(value);
         return value;
       }
       if (metric.y_format === 'bytes') {
