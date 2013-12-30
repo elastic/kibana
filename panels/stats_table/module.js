@@ -14,14 +14,15 @@ define([
     app.useModule(module);
 
     var y_format_metric_value = function (value, metric) {
+      // If this isn't a number, change nothing
+      if(!_.isNaN(value) || !_.isFinite(value)) {
+        return value;
+      }
       if (metric.y_format === 'bytes') {
         return kbn.byteFormat(value, metric.decimals);
       }
       if (metric.y_format === 'short') {
         return kbn.shortFormat(value, metric.decimals);
-      }
-      if (typeof value !== 'number') {
-        return value;
       }
       return value.toFixed(metric.decimals);
     };
@@ -168,7 +169,6 @@ define([
         if (_.isNumber(m.warning)) {
           m.warning = { threshold: m.warning, type: "upper_bound"};
         }
-
         return m;
       };
 
@@ -279,10 +279,10 @@ define([
               newRows.push({
                 display_name: display_name || persistent_name,
                 id: persistent_name,
-                selected: ($scope.rows[persistent_name] || {}).selected
+                // using findWhere here, though its not very efficient
+                selected: (_.findWhere($scope.rows,{id:persistent_name}) || {}).selected
               });
             });
-
             $scope.get_data(newRows);
           });
         });
