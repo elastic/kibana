@@ -62,6 +62,7 @@ function (Settings) {
       'bettermap',
       'query',
       'terms',
+      'stats',
       'sparklines'
     ]
   });
