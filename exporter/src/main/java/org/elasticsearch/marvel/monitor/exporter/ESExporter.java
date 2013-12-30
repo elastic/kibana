@@ -432,8 +432,8 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             return false;
         }
 
-        boolean hasDoc = conn.getResponseCode() == 200;
-        conn.getInputStream().close(); // close and release to connection pool.
+        boolean hasDoc;
+        hasDoc = conn.getResponseCode() == 200;
 
         // nothing there, lets create it
         if (!hasDoc) {
@@ -464,8 +464,8 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         try {
             return checkAndUpload("_template/marvel", template);
         } catch (IOException e) {
-            logger.error("error when checking/adding index template", e);
-            return false;
+            // if we're not sure of the template, we can't send data... re-raise exception.
+            throw new ElasticSearchException("failed to load/verify index template", e);
         }
     }
 
