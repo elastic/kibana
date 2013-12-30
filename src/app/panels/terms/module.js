@@ -67,7 +67,9 @@ function (angular, app, _, $, kbn) {
        */
       size    : 10,
       /** @scratch /panels/terms/5
-       * order:: count, term, reverse_count or reverse_term
+       * order:: In terms mode: count, term, reverse_count or reverse_term,
+       * in terms_stats mode: term, reverse_term, count, reverse_count,
+       * total, reverse_total, min, reverse_min, max, reverse_max, mean or reverse_mean
        */
       order   : 'count',
       style   : { "font-size": '10pt'},
@@ -109,7 +111,20 @@ function (angular, app, _, $, kbn) {
         mode        : 'all',
         ids         : []
       },
+      /** @scratch /panels/terms/5
+       * tmode:: Facet mode: terms or terms_stats
+       */
+      tmode       : 'terms',
+      /** @scratch /panels/terms/5
+       * tstat:: Terms_stats facet stats field
+       */
+      tstat       : 'total',
+      /** @scratch /panels/terms/5
+       * valuefield:: Terms_stats facet value field
+       */
+      valuefield  : ''
     };
+
     _.defaults($scope.panel,_d);
 
     $scope.init = function () {
@@ -149,9 +164,10 @@ function (angular, app, _, $, kbn) {
       });
 
       // Terms mode
-      request = request
-        .facet($scope.ejs.TermsFacet('terms')
-          .field($scope.field)
+      if($scope.panel.tmode === 'terms') {
+        request = request
+          .facet($scope.ejs.TermsFacet('terms')
+          .field($scope.panel.field)
           .size($scope.panel.size)
           .order($scope.panel.order)
           .exclude($scope.panel.exclude)
@@ -159,7 +175,21 @@ function (angular, app, _, $, kbn) {
             $scope.ejs.FilteredQuery(
               boolQuery,
               filterSrv.getBoolFilter(filterSrv.ids)
-              )))).size(0);
+            )))).size(0);
+      }
+      if($scope.panel.tmode === 'terms_stats') {
+        request = request
+          .facet($scope.ejs.TermStatsFacet('terms')
+          .valueField($scope.panel.valuefield)
+          .keyField($scope.panel.field)
+          .size($scope.panel.size)
+          .order($scope.panel.order)
+          .facetFilter($scope.ejs.QueryFilter(
+            $scope.ejs.FilteredQuery(
+              boolQuery,
+              filterSrv.getBoolFilter(filterSrv.ids)
+            )))).size(0);
+      }
 
       // Populate the inspector panel
       $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
@@ -168,20 +198,12 @@ function (angular, app, _, $, kbn) {
 
       // Populate scope when we have results
       results.then(function(results) {
-        var k = 0;
         $scope.panelMeta.loading = false;
-        $scope.hits = results.hits.total;
-        $scope.data = [];
-        _.each(results.facets.terms.terms, function(v) {
-          var slice = { label : v.term, data : [[k,v.count]], actions: true};
-          $scope.data.push(slice);
-          k = k + 1;
-        });
+        if($scope.panel.tmode === 'terms') {
+          $scope.hits = results.hits.total;
+        }
 
-        $scope.data.push({label:'Missing field',
-          data:[[k,results.facets.terms.missing]],meta:"missing",color:'#aaa',opacity:0});
-        $scope.data.push({label:'Other values',
-          data:[[k+1,results.facets.terms.other]],meta:"other",color:'#444'});
+        $scope.results = results;
 
         $scope.$emit('render');
       });
@@ -241,9 +263,35 @@ function (angular, app, _, $, kbn) {
           render_panel();
         });
 
+        function build_results() {
+          var k = 0;
+          scope.data = [];
+          _.each(scope.results.facets.terms.terms, function(v) {
+            var slice;
+            if(scope.panel.tmode === 'terms') {
+              slice = { label : v.term, data : [[k,v.count]], actions: true};
+            }
+            if(scope.panel.tmode === 'terms_stats') {
+              slice = { label : v.term, data : [[k,v[scope.panel.tstat]]], actions: true};
+            }
+            scope.data.push(slice);
+            k = k + 1;
+          });
+
+          scope.data.push({label:'Missing field',
+            data:[[k,scope.results.facets.terms.missing]],meta:"missing",color:'#aaa',opacity:0});
+
+          if(scope.panel.tmode === 'terms') {
+            scope.data.push({label:'Other values',
+              data:[[k+1,scope.results.facets.terms.other]],meta:"other",color:'#444'});
+          }
+        }
+
         // Function for rendering panel
         function render_panel() {
           var plot, chartData;
+
+          build_results();
 
           // IE doesn't work without this
           elem.css({height:scope.panel.height||scope.row.height});
