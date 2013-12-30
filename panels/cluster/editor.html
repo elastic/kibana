@@ -1,5 +1,20 @@
-  <div class="row-fluid">
-    <div class="section">
-      No options available.
+<div class="editor-row">
+  <h4>Help us improve elasticsearch!</h4>
+  Would you like to help us improve Elasticsearch by reporting <strong>anonymous</strong>
+  cluster statistics including information about
+  the size and performance of your cluster. Data is sent once daily and is under 1 kilobyte. To
+  see a sample report click <span class="link" ng-click="showSample=true">here</span>
+</div>
+<br>
+<div class="editor-row">
+  <div class="section">
+    <div class="editor-option">
+      <label class="small">Usage Data <tip>Help make Elasticsearch better by sharing anonymous usage data.</tip></label>
+      <input type="checkbox" ng-model="panel.optin"/>
     </div>
   </div>
+</div>
+<div ng-show="showSample">
+  <h4>Sample Statistics</h4>
+  <pre>{{ data | json }}</pre>
+</div>
