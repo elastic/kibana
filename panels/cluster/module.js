@@ -62,8 +62,6 @@ function (angular, app, _, kbn) {
 
       request = $scope.ejs.Request().indices(dashboard.indices[_segment]);
 
-      console.log($scope.$id);
-
       request = request.query(
         $scope.ejs.FilteredQuery(
           $scope.ejs.QueryStringQuery('_type:cluster_stats'),
@@ -76,7 +74,6 @@ function (angular, app, _, kbn) {
 
       // Populate scope when we have results
       request.doSearch().then(function(results) {
-        console.log(results);
         $scope.panelMeta.loading = false;
 
         if(_segment === 0) {
