@@ -46,14 +46,15 @@ function (angular, _, config) {
 
     this.map = function(indices) {
       var request = $http({
-        url: config.elasticsearch + "/" + indices.join(',') + "/_mapping",
-        method: "GET"
+        url: config.elasticsearch.server + "/" + indices.join(',') + "/_mapping",
+        method: "GET",
+        withCredentials: config.elasticsearch.withCredentials
       }).error(function(data, status) {
         if(status === 0) {
-          alertSrv.set('Error',"Could not contact Elasticsearch at "+config.elasticsearch+
+          alertSrv.set('Error',"Could not contact Elasticsearch at "+config.elasticsearch.server+
             ". Please ensure that Elasticsearch is reachable from your system." ,'error');
         } else {
-          alertSrv.set('Error',"No index found at "+config.elasticsearch+"/" +
+          alertSrv.set('Error',"No index found at "+config.elasticsearch.server+"/" +
             indices.join(',')+"/_mapping. Please create at least one index."  +
             "If you're using a proxy ensure it is configured correctly.",'error');
         }

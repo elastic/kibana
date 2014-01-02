@@ -21,14 +21,15 @@ function (angular, _, config) {
 
     var getVersions = function() {
       var nodeInfo = $http({
-        url: config.elasticsearch + '/_nodes',
-        method: "GET"
+        url: config.elasticsearch.server + '/_nodes',
+        method: "GET",
+        withCredentials: config.elasticsearch.withCredentials
       }).error(function(data, status) {
         if(status === 0) {
-          alertSrv.set('Error',"Could not contact Elasticsearch at "+config.elasticsearch+
+          alertSrv.set('Error',"Could not contact Elasticsearch at "+config.elasticsearch.server+
             ". Please ensure that Elasticsearch is reachable from your system." ,'error');
         } else {
-          alertSrv.set('Error',"Could not reach "+config.elasticsearch+"/_nodes. If you"+
+          alertSrv.set('Error',"Could not reach "+config.elasticsearch.server+"/_nodes. If you"+
           " are using a proxy, ensure it is configured correctly",'error');
         }
       });

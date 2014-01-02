@@ -29,14 +29,15 @@ function (angular, _, config, moment) {
     // cluster
     function all_indices() {
       var something = $http({
-        url: config.elasticsearch + "/_aliases",
-        method: "GET"
+        url: config.elasticsearch.server + "/_aliases",
+        method: "GET",
+        withCredentials: config.elasticsearch.withCredentials
       }).error(function(data, status) {
         if(status === 0) {
-          alertSrv.set('Error',"Could not contact Elasticsearch at "+config.elasticsearch+
+          alertSrv.set('Error',"Could not contact Elasticsearch at "+config.elasticsearch.server+
             ". Please ensure that Elasticsearch is reachable from your system." ,'error');
         } else {
-          alertSrv.set('Error',"Could not reach "+config.elasticsearch+"/_aliases. If you"+
+          alertSrv.set('Error',"Could not reach "+config.elasticsearch.server+"/_aliases. If you"+
           " are using a proxy, ensure it is configured correctly",'error');
         }
       });
