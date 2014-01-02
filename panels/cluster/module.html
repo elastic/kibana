@@ -5,7 +5,7 @@
    }
   </style>
 
-  <ul class="inline" ng-if="!_.isUndefined(panel.optin)">
+  <ul class="inline">
     <li><strong>Name:</strong> {{data.cluster_name}}</li>
     <li><strong>Status:</strong> <span ng-class="healthClass(data.status)">{{data.status}}</span></li>
     <li><strong>Nodes:</strong> {{data.nodes.count.total}}</li>

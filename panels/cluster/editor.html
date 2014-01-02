@@ -12,7 +12,11 @@
     <div class="section">
       <div class="editor-option">
         <label class="small">Usage Data <tip>Help make Elasticsearch better by sharing anonymous usage data.</tip></label>
-        <input type="checkbox" ng-model="panel.optin"/>
+        <input type="checkbox" ng-model="cookies.marvelOptIn" ng-true-value="IN" ng-false-value="OUT" />
+      </div>
+      <div ng-show="kbnVersion == '@REV@'" class="editor-option">
+        <label class="small">Clear Marvel Cookies <tip>Only shown in unbuilt versions, clear optin and version cookies</tip></label>
+        <button class="btn btn-danger" ng-click="clearMarvelCookies()">Clear</button>
       </div>
     </div>
   </div>

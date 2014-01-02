@@ -21,7 +21,8 @@ function (angular, app, _, kbn) {
   var module = angular.module('kibana.panels.marvel.cluster', []);
   app.useModule(module);
 
-  module.controller('marvel.cluster', function($scope, $modal, $q, querySrv, dashboard, filterSrv) {
+  module.controller('marvel.cluster', function($scope, $modal, $q, $cookies, $http,
+    querySrv, dashboard, filterSrv, kbnVersion) {
     $scope.panelMeta = {
       modals : [],
       editorTabs : [],
@@ -32,13 +33,18 @@ function (angular, app, _, kbn) {
     // Set and populate defaults
     var _d = {
       title: 'Cluster Status',
-      optin: undefined,
     };
     _.defaults($scope.panel,_d);
 
+    var reportInterval = 10000;
+
     $scope.init = function () {
+      // So we can access the cookies object from the view
+      $scope.cookies = $cookies;
+      $scope.kbnVersion = kbnVersion;
+
       // If the user hasn't opted in or out, ask them to.
-      if(_.isUndefined($scope.panel.optin)) {
+      if(_.isUndefined($cookies.marvelOptIn) || $cookies.marvelVersion !== kbnVersion) {
         $scope.optInModal();
       }
 
@@ -92,6 +98,10 @@ function (angular, app, _, kbn) {
 
         $scope.data = _.isArray(results.hits.hits) ? results.hits.hits[0]._source : undefined;
 
+        if(checkReport()) {
+          sendReport($scope.data);
+        }
+
         // Did we find anything in that index? No? Try the next one.
         if (_.isUndefined($scope.data) && _segment+1 < dashboard.indices.length) {
           $scope.get_data(_segment+1,$scope.query_id);
@@ -119,7 +129,14 @@ function (angular, app, _, kbn) {
     };
 
     $scope.setOptIn = function(c) {
-      $scope.panel.optin = c;
+      $cookies.marvelVersion = kbnVersion;
+      $cookies.marvelOptIn = c;
+    };
+
+    $scope.clearMarvelCookies = function() {
+      delete $cookies.marvelOptIn;
+      delete $cookies.marvelVersion;
+      delete $cookies.marvelLastReport;
     };
 
     $scope.optInModal = function() {
@@ -137,9 +154,37 @@ function (angular, app, _, kbn) {
       });
     };
 
+    // Checks if we should send a report
+    var checkReport = function() {
+      if($cookies.marvelOptIn === 'IN') {
+        if(_.isUndefined($cookies.marvelLastReport)) {
+          console.log('undefined');
+          return true;
+        } else if (new Date().getTime() - parseInt($cookies.marvelLastReport,10) > reportInterval) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    };
+
+    var sendReport = function(data) {
+      var thisReport = new Date().getTime().toString();
+
+      // TODO: Replace this URL with the actual data sink
+      $http.post(
+        $scope.config.elasticsearch+'/'+$scope.config.kibana_index+'/report/'+thisReport,
+        data
+      ).success(function() {
+        console.log('reported');
+        $cookies.marvelLastReport = thisReport;
+      });
+    };
+
   });
 
-  // WIP
   module.filter('marvelBytes', function(){
     return function(text) {
       if(_.isUndefined(text)) {
