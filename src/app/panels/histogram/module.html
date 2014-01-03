@@ -39,7 +39,7 @@
         View <i ng-show="!options" class="icon-caret-right"></i><i ng-show="options" class="icon-caret-down"></i>
       </a> |&nbsp
     </span>
-    <span ng-show='panel.zoomlinks && data'>
+    <span ng-show='panel.zoomlinks && !_.isUndefinted(data)'>
       <!--<a class='small' ng-click='zoom(0.5)'><i class='icon-zoom-in'></i> Zoom In</a>-->
       <a class='small' ng-click='zoom(2)'><i class='icon-zoom-out'></i> Zoom Out</a> |&nbsp
     </span>
