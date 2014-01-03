@@ -408,6 +408,10 @@ function (angular, app, _, kbn, moment) {
       if($scope.refresh) {
         $scope.get_data();
       }
+      $scope.columns = [];
+      _.each($scope.panel.fields,function(field) {
+        $scope.columns[field] = true;
+      });
       $scope.refresh =  false;
     };
 
