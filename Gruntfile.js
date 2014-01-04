@@ -9,18 +9,19 @@ module.exports = function (grunt) {
     exporterDir: 'exporter',
     buildDir: 'build',
     packageDir: 'packages',
+    senseDir: './sense',
     esPort: {
       dev: '"'+ (grunt.option('es_port') ||  9200) +'"',
       dist: "(window.location.port !== '' ? ':'+window.location.port : '')"
     },
     kibanaPort: grunt.option('port') ||  5601,
     kibanaHost: 'localhost'
-
   };
 
   // more detailed config
   config['buildTempDir'] = config['buildDir'] + '/tmp'; // kibana and custom panels will be merged here
-  config['buildSiteDir'] = config['buildDir'] + '/_site';  // compressed minified marvel site will be outputted here
+  config['buildSiteDir'] = config['buildDir'] + '/_site';  // compressed minified marvel site will be output here
+  config['buildSenseDir'] = config['buildSiteDir'] + '/sense';  // compressed minified sense site will be here
 
   // Utility function to load plugin settings into the above config object
   function loadConfig(config, path) {

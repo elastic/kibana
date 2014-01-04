@@ -1,0 +1,16 @@
+{
+  "extends": "../.jshintrc",
+  "globals": {
+    "SENSE_VERSION": true,
+    "define": false,
+    "require": false,
+    "module": false,
+    "deepEqual": false,
+    "test": false,
+    "ok": false,
+    "asyncTest": false,
+    "start": false,
+    "stop": false,
+    "equal": false
+  }
+}

@@ -3,7 +3,7 @@ module.exports = function (config) {
     release: {
       bucket: 'download.elasticsearch.org',
       access: 'private',
-      //debug: true, // uncommment to prevent actual upload
+      // debug: true, // uncommment to prevent actual upload
       upload: [
         {
           src: '<%= packageDir %>/<%= pkg.name %>-<%= pkg.version %>.zip',

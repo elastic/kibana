@@ -1,37 +1,70 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>Sense unittests</title>
-    <link rel="stylesheet" href="lib/qunit-1.10.0.css">
-    <style type="text/css">
-        #editor {
-            position: absolute;
-            top: 20px;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            z-index: 200;
-        }
-    </style>
+  <meta charset="utf-8">
+  <title>Sense unittests</title>
+  <link rel="stylesheet" href="lib/qunit-1.10.0.css">
+  <style type="text/css">
+    #editor {
+      display: none;
+      position: absolute;
+      top: 20px;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      z-index: 200;
+      border: 1px solid #333;
+    }
+    #output {
+      display: none;
+      position: absolute;
+      height: 250px;
+      width: 350px;
+      bottom: 20px;
+      right: 20px;
+      z-index: 201;
+      border: 1px solid #333;
+    }
+   </style>
 </head>
 <body>
 <div id="qunit"></div>
-<script src="../lib/jquery-1.8.3.min.js" type="text/javascript"></script>
-<script src="../lib/jqueryui/jquery-ui-1.9.2.custom.min.js" type="text/javascript"></script>
-<script src="../lib/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
-<script src="../src/utils.js" type="text/javascript" charset="utf-8"></script>
-<script src="../src/curl.js" type="text/javascript" charset="utf-8"></script>
-<script src="../src/kb.js" type="text/javascript" charset="utf-8"></script>
-<script src="../src/autocomplete.js" type="text/javascript" charset="utf-8"></script>
-<script src="../src/mappings.js" type="text/javascript" charset="utf-8"></script>
-<script src="lib/qunit-1.10.0.js" type="text/javascript" charset="utf-8"></script>
-<script src="src/curl_tests.js" type="text/javascript" charset="utf-8"></script>
-<script src="src/kb_tests.js" type="text/javascript" charset="utf-8"></script>
-<script src="src/mapping_tests.js" type="text/javascript" charset="utf-8"></script>
-<script src="src/utils_tests.js" type="text/javascript" charset="utf-8"></script>
-<script src="src/autocomplete_tests.js" type="text/javascript" charset="utf-8"></script>
-<script src="src/tokenization_tests.js" type="text/javascript" charset="utf-8"></script>
-<script src="src/integration_tests.js" type="text/javascript" charset="utf-8"></script>
+<div id="editor"></div>
+<div id="output"></div>
+<script src="lib/qunit-1.10.0.js"></script>
+<script src="../vendor/require/require.js"></script>
+<script src="../app/require.config.js"></script>
+<script>
+var SENSE_VERSION = '0.9.0';
+require.config({
+  baseUrl: '../app'
+});
+(function () {
+  'use strict';
+
+  /* global QUnit */
+  QUnit.config.autostart = false;
+  
+  var tests = [
+    '../tests/src/curl_tests.js',
+    '../tests/src/kb_tests.js',
+    '../tests/src/mapping_tests.js',
+    '../tests/src/editor_tests.js',
+    '../tests/src/tokenization_tests.js',
+    '../tests/src/integration_tests.js'
+  ];
+
+  // load the tests in series
+  (function next(){
+    if (tests.length) {
+      require(tests.splice(0, 1), next);
+    } else {
+      QUnit.start();
+      console.log('all tests loaded');
+    }
+  }());
+
+}());
+</script>
 </body>
 </html>
