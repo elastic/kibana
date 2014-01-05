@@ -15,6 +15,7 @@ require.config({
     filesaver:                '../vendor/filesaver',
     chromath:                 '../vendor/chromath',
     angular:                  '../vendor/angular/angular',
+    'angular-cookies':        '../vendor/angular/angular-cookies',
     'angular-dragdrop':       '../vendor/angular/angular-dragdrop',
     'angular-strap':          '../vendor/angular/angular-strap',
     'angular-sanitize':       '../vendor/angular/angular-sanitize',
@@ -42,6 +43,7 @@ require.config({
 
 
     modernizr:                '../vendor/modernizr-2.6.1',
+    numeral:                '../vendor/numeral',
     elasticjs:                '../vendor/elasticjs/elastic-angular-client',
   },
   shim: {

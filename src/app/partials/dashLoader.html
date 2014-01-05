@@ -21,9 +21,9 @@
       <h6 ng-hide="elasticsearch.dashboards.length">No dashboards matching your query found</h6>
       <table class="table table-condensed table-striped">
         <tr bindonce ng-repeat="row in elasticsearch.dashboards | orderBy:['_id']">
-          <td><a ng-click="elasticsearch_delete(row._id)"><i class="icon-remove"></i></a></td>
+          <td><a confirm-click="elasticsearch_delete(row._id)" confirmation="Are you sure you want to delete the {{row._id}} dashboard"><i class="icon-remove"></i></a></td>
           <td><a href="#/dashboard/elasticsearch/{{row._id}}" bo-text="row._id"></a></td>
-          <td><a><i class="icon-share" ng-click="share = dashboard.share_link(row._id,'elasticsearch',row._id)" bs-modal="'app/panels/dashcontrol/share.html'"></i></a></td>
+          <td><a><i class="icon-share" ng-click="share = dashboard.share_link(row._id,'elasticsearch',row._id)" bs-modal="'app/partials/dashLoaderShare.html'"></i></a></td>
         </tr>
       </table>
     </li>
@@ -68,7 +68,7 @@
 
     <li ng-show="dashboard.current.loader.save_elasticsearch">
       <form class="input-prepend nomargin">
-        <button style="margin-top:-1px" class="btn" ng-click="elasticsearch_save('dashboard')"><i class="icon-save"></i></button>
+        <button class="btn" ng-click="elasticsearch_save('dashboard')"><i class="icon-save"></i></button>
         <input class='input-medium' ng-model="dashboard.current.title" type="text" ng-model="elasticsearch.title"/>
       </form>
     </li>
