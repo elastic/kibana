@@ -15,7 +15,7 @@ module.exports = function (grunt) {
     },
     statsReportUrl: {
       dev: '"http://" + window.location.hostname + ":'+ (grunt.option('es_port') ||  9200) +'/.marvel_cluster_report/report"',
-      dist: "TODO_INSERT_SYNC"
+      dist: '""' //TODO: INSERT URL
     },
     defaultRoute: {
       dev: '/dashboard/file/marvel.overview.json',
