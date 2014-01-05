@@ -11,6 +11,10 @@ module.exports = function (config) {
           {
             match: 'default_route',
             replacement: '<%= defaultRoute.dev %>',
+          },
+          {
+            match: 'stats_report_url',
+            replacement: '<%= statsReportUrl.dev %>',
           }
         ]
       },
@@ -28,6 +32,10 @@ module.exports = function (config) {
           {
             match: 'default_route',
             replacement: '<%= defaultRoute.dist %>',
+          },
+          {
+            match: 'report_url',
+            replacement: '<%= reportUrl.dist %>',
           }
         ]
       },

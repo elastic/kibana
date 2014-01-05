@@ -171,11 +171,15 @@ function (angular, app, _, kbn) {
     };
 
     var sendReport = function(data) {
+      if (!$scope.config.report_url) {
+        return;
+      }
+
       var thisReport = new Date().getTime().toString();
 
       // TODO: Replace this URL with the actual data sink
       $http.post(
-        $scope.config.elasticsearch+'/'+$scope.config.kibana_index+'/report/'+thisReport,
+        $scope.config.stats_report_url,
         data
       ).success(function() {
         console.log('reported');

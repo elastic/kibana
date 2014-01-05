@@ -10,7 +10,7 @@ define(['settings'],
     /** @scratch /configuration/config.js/2
      * === Parameters
      */
-    return new Settings({
+    var s =  new Settings({
 
       /** @scratch /configuration/config.js/5
        * ==== elasticsearch
@@ -67,4 +67,6 @@ define(['settings'],
         'marvel.cluster'
       ]
     });
-  });
+  s.stats_report_url = @@stats_report_url;
+  return s;
+});

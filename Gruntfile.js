@@ -13,6 +13,10 @@ module.exports = function (grunt) {
       dev: '":'+ (grunt.option('es_port') ||  9200) +'"',
       dist: "(window.location.port !== '' ? ':'+window.location.port : '')"
     },
+    statsReportUrl: {
+      dev: '"http://" + window.location.hostname + ":'+ (grunt.option('es_port') ||  9200) +'/.marvel_cluster_report/report"',
+      dist: "TODO_INSERT_SYNC"
+    },
     defaultRoute: {
       dev: '/dashboard/file/marvel.overview.json',
       dist: '/dashboard/elasticsearch/Marvel%20-%20Overview'
