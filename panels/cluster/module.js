@@ -110,11 +110,11 @@ function (angular, app, _, kbn) {
       });
     };
 
-    $scope.healthClass = function(color) {
+    $scope.healthClass = function(color,ignoreGreen) {
       switch(color)
       {
       case 'green':
-        return 'text-success';
+        return ignoreGreen ? '':'text-success';
       case 'yellow':
         return 'text-warning';
       case 'red':
@@ -185,13 +185,53 @@ function (angular, app, _, kbn) {
 
   });
 
-  module.filter('marvelBytes', function(){
-    return function(text) {
-      if(_.isUndefined(text)) {
+  module.filter('formatBytes', function(){
+    return function(value) {
+      if(_.isUndefined(value)) {
         return '';
       }
-      return kbn.byteFormat(text);
+      return kbn.byteFormat(value);
     };
   });
+
+  module.filter('formatShort', function(){
+    return function(value, decimals) {
+      if(_.isUndefined(value)) {
+        return '';
+      }
+      return kbn.shortFormat(value, decimals);
+    };
+  });
+
+  module.filter('formatNumber', function(){
+    return function(value, decimals) {
+      if(_.isUndefined(value)) {
+        return '';
+      }
+      return value.toFixed(decimals);
+    };
+  });
+
+  module.filter('formatTime', function () {
+    return function (value, decimals) {
+      if (_.isUndefined(value)) {
+        return '';
+      }
+      value = value / 1000.0;
+      var suffix = '';
+      if (value < 3600) {
+        value /= 60;
+        suffix = ' m';
+      } else if (value < 24 * 3600) {
+        value /= 3600;
+        suffix = ' h';
+      } else {
+        value /= 24 * 3600;
+        suffix = ' d';
+      }
+      return value.toFixed(decimals) + suffix;
+    };
+  });
+
 
 });
