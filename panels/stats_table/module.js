@@ -13,7 +13,7 @@ define([
     var module = angular.module('kibana.panels.marvel.stats_table', []);
     app.useModule(module);
 
-    var y_format_metric_value = function (value, metric) {
+    function y_format_metric_value(value, metric) {
       // If this isn't a number, change nothing
       if(_.isNaN(value) || !_.isFinite(value)) {
         return value;
@@ -25,8 +25,11 @@ define([
         return kbn.shortFormat(value, metric.decimals);
       }
       return value.toFixed(metric.decimals);
-    };
+    }
 
+    function stripRaw(fieldName) {
+      return fieldName.replace(/\.raw$/,'');
+    }
 
     module.controller('marvel.stats_table', function ($scope, dashboard, filterSrv) {
       $scope.panelMeta = {
@@ -55,7 +58,7 @@ define([
         nodes: {
           defaults: {
             display_field: "node.name",
-            persistent_field: "node.ip_port",
+            persistent_field: "node.ip_port.raw",
             metrics: [ 'os.cpu.usage', 'os.load_average.1m', 'jvm.mem.heap_used_percent', 'fs.total.available_in_bytes',
               'fs.total.disk_io_op'
             ],
@@ -103,8 +106,8 @@ define([
         },
         indices: {
           defaults: {
-            display_field: null,
-            persistent_field: 'index',
+            display_field: 'index',
+            persistent_field: 'index.raw',
             metrics: [ 'primaries.docs.count', 'primaries.indexing.index_total', 'total.search.query_total',
               'total.merges.total_size_in_bytes', 'total.fielddata.memory_size_in_bytes'
             ],
@@ -256,7 +259,7 @@ define([
                 $scope.ejs.TermQuery($scope.panel.persistent_field, persistentId)
               )
             );
-            rowRequest.size(1).fields(_.unique([ $scope.panel.display_field, $scope.panel.persistent_field]));
+            rowRequest.size(1).fields(_.unique([ stripRaw($scope.panel.display_field), stripRaw($scope.panel.persistent_field)]));
             rowRequest.sort("@timestamp", "desc");
             mrequest.requests(rowRequest);
           });
@@ -273,8 +276,8 @@ define([
               }
 
               hit = response.hits.hits[0];
-              display_name = hit.fields[$scope.panel.display_field];
-              persistent_name = hit.fields[$scope.panel.persistent_field];
+              display_name = hit.fields[stripRaw($scope.panel.display_field)];
+              persistent_name = hit.fields[stripRaw($scope.panel.persistent_field)];
 
               newRows.push({
                 display_name: display_name || persistent_name,
