@@ -1,0 +1,67 @@
+== terms
+Status: *Stable*
+
+A table, bar chart or pie chart based on the results of an Elasticsearch terms facet.
+
+// src/app/panels/terms/module.js:5
+
+=== Parameters
+
+field:: The field on which to computer the facet
+// src/app/panels/terms/module.js:45
+
+exclude:: terms to exclude from the results
+// src/app/panels/terms/module.js:51
+
+missing:: Set to false to disable the display of a counter showing how much results are
+missing the field
+// src/app/panels/terms/module.js:55
+
+other:: Set to false to disable the display of a counter representing the aggregate of all
+values outside of the scope of your +size+ property
+// src/app/panels/terms/module.js:60
+
+size:: Show this many terms
+// src/app/panels/terms/module.js:65
+
+order:: In terms mode: count, term, reverse_count or reverse_term,
+in terms_stats mode: term, reverse_term, count, reverse_count,
+total, reverse_total, min, reverse_min, max, reverse_max, mean or reverse_mean
+// src/app/panels/terms/module.js:69
+
+donut:: In pie chart mode, draw a hole in the middle of the pie to make a tasty donut.
+// src/app/panels/terms/module.js:76
+
+tilt:: In pie chart mode, tilt the chart back to appear as more of an oval shape
+// src/app/panels/terms/module.js:80
+
+lables:: In pie chart mode, draw labels in the pie slices
+// src/app/panels/terms/module.js:84
+
+arrangement:: In bar or pie mode, arrangement of the legend. horizontal or vertical
+// src/app/panels/terms/module.js:88
+
+chart:: table, bar or pie
+// src/app/panels/terms/module.js:92
+
+counter_pos:: The location of the legend in respect to the chart, above or below.
+// src/app/panels/terms/module.js:96
+
+spyable:: Set spyable to false to disable the inspect button
+// src/app/panels/terms/module.js:100
+
+==== Queries
+queries object:: This object describes the queries to use on this panel.
+queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
+queries.ids::: In +selected+ mode, which query ids are selected.
+// src/app/panels/terms/module.js:104
+
+tmode:: Facet mode: terms or terms_stats
+// src/app/panels/terms/module.js:114
+
+tstat:: Terms_stats facet stats field
+// src/app/panels/terms/module.js:118
+
+valuefield:: Terms_stats facet value field
+// src/app/panels/terms/module.js:122
+

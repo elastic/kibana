@@ -15,11 +15,13 @@ require.config({
     filesaver:                '../vendor/filesaver',
     chromath:                 '../vendor/chromath',
     angular:                  '../vendor/angular/angular',
+    'angular-cookies':        '../vendor/angular/angular-cookies',
     'angular-dragdrop':       '../vendor/angular/angular-dragdrop',
     'angular-strap':          '../vendor/angular/angular-strap',
     'angular-sanitize':       '../vendor/angular/angular-sanitize',
     timepicker:               '../vendor/angular/timepicker',
     datepicker:               '../vendor/angular/datepicker',
+    bindonce:                 '../vendor/angular/bindonce',
 
     underscore:               'components/underscore.extended',
     'underscore-src':         '../vendor/underscore',
@@ -37,8 +39,11 @@ require.config({
     'jquery.flot.stack':      '../vendor/jquery/jquery.flot.stack',
     'jquery.flot.stackpercent':'../vendor/jquery/jquery.flot.stackpercent',
     'jquery.flot.time':       '../vendor/jquery/jquery.flot.time',
+    'jquery.flot.byte':       '../vendor/jquery/jquery.flot.byte',
+
 
     modernizr:                '../vendor/modernizr-2.6.1',
+    numeral:                '../vendor/numeral',
     elasticjs:                '../vendor/elasticjs/elastic-angular-client',
   },
   shim: {
@@ -47,7 +52,7 @@ require.config({
     },
 
     angular: {
-      deps: ['jquery'],
+      deps: ['jquery','config'],
       exports: 'angular'
     },
 
@@ -64,8 +69,10 @@ require.config({
     },
 
     // simple dependency declaration
+    //
     'jquery-ui':            ['jquery'],
     'jquery.flot':          ['jquery'],
+    'jquery.flot.byte':     ['jquery', 'jquery.flot'],
     'jquery.flot.pie':      ['jquery', 'jquery.flot'],
     'jquery.flot.events':   ['jquery', 'jquery.flot'],
     'jquery.flot.selection':['jquery', 'jquery.flot'],
@@ -81,7 +88,7 @@ require.config({
     'angular-resource':     ['angular'],
     'angular-route':        ['angular'],
     'angular-touch':        ['angular'],
-
+    'bindonce':             ['angular'],
     'angular-strap':        ['angular', 'bootstrap','timepicker', 'datepicker'],
 
     timepicker:             ['jquery', 'bootstrap'],

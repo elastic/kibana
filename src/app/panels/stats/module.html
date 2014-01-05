@@ -1,0 +1,11 @@
+<div ng-controller="stats" ng-init="init()">
+  <h1 ng-style="panel.style" style="text-align: center; line-height: .6em">{{data.value}} <small style="font-size: .5em; line-height: 0;">{{panel.unit}}</small></h1>
+  <table ng-show="panel.display_breakdown == 'yes'" cellspacing="0" class="table-hover table table-condensed" style="margin-top: 38px;">
+    <tbody>
+      <tr ng-repeat="item in data.rows">
+        <td><i class="icon-circle" ng-style="{color:item.color}"></i> {{item.label}}</td>
+        <td style="text-align: right;">{{item.value}} {{panel.unit}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

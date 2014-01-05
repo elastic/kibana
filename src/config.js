@@ -1,36 +1,52 @@
-/**
- * These is the app's configuration, If you need to configure
- * the default dashboard, please see dashboards/default
+/** @scratch /configuration/config.js/1
+ * == Configuration
+ * config.js is where you will find the core Kibana configuration. This file contains parameter that
+ * must be set before kibana is run for the first time.
  */
 define(['settings'],
 function (Settings) {
   "use strict";
 
+  /** @scratch /configuration/config.js/2
+   * === Parameters
+   */
   return new Settings({
 
-    /**
-     * URL to your elasticsearch server. You almost certainly don't
-     * want 'http://localhost:9200' here. Even if Kibana and ES are on
-     * the same host
+    /** @scratch /configuration/config.js/5
+     * ==== elasticsearch
      *
-     * By default this will attempt to reach ES at the same host you have
-     * elasticsearch installed on. You probably want to set it to the FQDN of your
+     * The URL to your elasticsearch server. You almost certainly don't
+     * want +http://localhost:9200+ here. Even if Kibana and Elasticsearch are on
+     * the same host. By default this will attempt to reach ES at the same host you have
+     * kibana installed on. You probably want to set it to the FQDN of your
      * elasticsearch host
-     * @type {String}
      */
     elasticsearch: "http://"+window.location.hostname+":9200",
 
-    /**
+    /** @scratch /configuration/config.js/5
+     * ==== default_route
+     *
+     * This is the default landing page when you don't specify a dashboard to load. You can specify
+     * files, scripts or saved dashboards here. For example, if you had saved a dashboard called
+     * `WebLogs' to elasticsearch you might use:
+     *
+     * +default_route: '/dashboard/elasticsearch/WebLogs',+
+     */
+    default_route     : '/dashboard/file/default.json',
+
+    /** @scratch /configuration/config.js/5
+     * ==== kibana-int
+     *
      * The default ES index to use for storing Kibana specific object
      * such as stored dashboards
-     * @type {String}
      */
     kibana_index: "kibana-int",
 
-    /**
-     * Panel modules available. Panels will only be loaded when they are defined in the
+    /** @scratch /configuration/config.js/5
+     * ==== panel_name
+     *
+     * An array of panel modules available. Panels will only be loaded when they are defined in the
      * dashboard, but this list is used in the "add panel" interface.
-     * @type {Array}
      */
     panel_names: [
       'histogram',
@@ -40,15 +56,13 @@ function (Settings) {
       'filtering',
       'timepicker',
       'text',
-      'fields',
       'hits',
-      'dashcontrol',
       'column',
-      'derivequeries',
       'trends',
       'bettermap',
       'query',
       'terms',
+      'stats',
       'sparklines'
     ]
   });

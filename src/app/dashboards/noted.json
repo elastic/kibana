@@ -2,12 +2,6 @@
   "title": "A few notes",
   "services": {
     "query": {
-      "idQueue": [
-        1,
-        2,
-        3,
-        4
-      ],
       "list": {
         "0": {
           "query": "*",
@@ -23,11 +17,6 @@
       ]
     },
     "filter": {
-      "idQueue": [
-        0,
-        1,
-        2
-      ],
       "list": {},
       "ids": []
     }
@@ -100,7 +89,8 @@
   "index": {
     "interval": "none",
     "pattern": "[logstash-]YYYY.MM.DD",
-    "default": "_all"
+    "default": "_all",
+    "warm_fields": false
   },
   "style": "dark",
   "failover": false,
