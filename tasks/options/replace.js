@@ -34,8 +34,8 @@ module.exports = function (config) {
             replacement: '<%= defaultRoute.dist %>',
           },
           {
-            match: 'report_url',
-            replacement: '<%= reportUrl.dist %>',
+            match: 'stats_report_url',
+            replacement: '<%= statsReportUrl.dist %>',
           }
         ]
       },
