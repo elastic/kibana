@@ -560,10 +560,10 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
           rows = {};
           csv = [];
 
-          headers.push("time");
+          headers.push('"time"');
 
           _.each(data, function(series) {
-            headers.push(series.info.alias || series.info.query);
+            headers.push('"' + (series.info.alias || series.info.query) + '"');
             _.each(series.data, function(point, row) {
               if (!rows[row]) {
                 rows[row] = {
@@ -584,7 +584,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
           _.each(rows, function(row) {
             var values = [];
 
-            values.push(moment(row.time).format('YYYY-MM-DDTHH:mm:ss'));
+            values.push(moment(row.time).format('"YYYY-MM-DDTHH:mm:ss"'));
             _.each(row.values, function(value) {
               values.push(value);
             });

@@ -257,7 +257,7 @@ function (angular, app, _, $, kbn) {
       var csv = [];
 
       _.each($scope.data, function(series) {
-        csv.push([series.label, series.data[0][1]].join(","));
+        csv.push(['"' + series.label + '"', series.data[0][1]].join(","));
       });
 
       return csv.join("\n") + "\n";
