@@ -121,7 +121,7 @@
           "stack": false,
           "points": false,
           "lines": true,
-          "legend": true,
+          "legend": false,
           "show_query": true,
           "legend_counts": false,
           "x-axis": true,
@@ -193,7 +193,7 @@
           "stack": false,
           "points": false,
           "lines": true,
-          "legend": true,
+          "legend": false,
           "show_query": true,
           "legend_counts": false,
           "x-axis": true,
@@ -266,7 +266,7 @@
           "stack": false,
           "points": false,
           "lines": true,
-          "legend": true,
+          "legend": false,
           "show_query": true,
           "legend_counts": false,
           "x-axis": true,
@@ -421,5 +421,5 @@
     "load_local": true,
     "hide": false
   },
-  "refresh": "5s"
+  "refresh": "1m"
 }

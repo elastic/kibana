@@ -118,7 +118,7 @@ panel_defaults_by_type["histogram"] = {
   zoomlinks: false,
   legend_counts: false,
   options: false,
-  legend: true,
+  legend: false,
   resolution: 20,
   y_format: "short"
 };

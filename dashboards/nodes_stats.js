@@ -135,7 +135,7 @@ panel_defaults_by_type["histogram"] = {
   mode: 'max',
   zoomlinks: false,
   options: false,
-  legend: true,
+  legend: false,
   resolution: 20,
   annotate: annotate_config,
   y_format: "short"
