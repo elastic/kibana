@@ -272,5 +272,5 @@
     "load_local": false,
     "hide": false
   },
-  "refresh": "5s"
+  "refresh": "1m"
 }
