@@ -1,202 +1,333 @@
+                          Software License Agreement
 
-                                 Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
+READ THIS AGREEMENT CAREFULLY, WHICH CONSITUTES A LEGALLY BINIDNG AGREEMENT AND
+GOVERNS YOUR USE OF THE ELASTICSEARCH SOFTWARE. BY DOWNLOADING, INSTALLING 
+AND/OR USING THE ELASTICSEARCH SOFTWARE, YOU ARE INDICATING THAT YOU AGREE TO 
+THE TERMS AND CONDITIONS SET FORTH IN THIS AGREEMENT.  IF YOU DO NOT AGREE WITH
+SUCH TERMS AND CONDITIONS, YOU MAY NOT DOWNLOAD, INSTALL OR USE THE 
+ELASTICSEARCH SOFTWARE, AND YOU MAY RETURN THE ELASTICSEARCH SOFTWARE FOR A 
+REFUND OF ANY LICENSE FEES YOU HAVE PAID, PROVIDED THAT YOU HAVE NOT INSTALLED 
+OR USED SUCH ELASTICSEARCH SOFTWARE.
 
-   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+This Software License Agreement (this “Agreement") is entered into by and 
+between the applicable Elasticsearch entity referred to in Attachment 1 below 
+(“Elasticsearch”) and the person or entity (“You”) that has downloaded the 
+Elasticsearch software to which this Agreement is attached 
+(“Elasticsearch Software”), and is effective as of the date you download the 
+Elasticsearch Software (the “Effective Date”). 
 
-   1. Definitions.
 
-      "License" shall mean the terms and conditions for use, reproduction,
-      and distribution as defined by Sections 1 through 9 of this document.
+1. Software License and Restrictions
 
-      "Licensor" shall mean the copyright owner or entity authorized by
-      the copyright owner that is granting the License.
+1.1. License Grants.  Subject to the terms and conditions of this Agreement and
+complete payment of any and all applicable license fees (provided that no
+license fee shall be required for use of the Elasticsearch Software for purely
+development purposes), Elasticsearch agrees to grant, and does hereby grant to
+You during the term and for the restricted scope of this Agreement, solely for
+Your internal business operations, a limited, non-exclusive, non-transferable
+right and license (without the right to grant or authorize sublicenses) to: (i)
+install and use the object code version of the Elasticsearch Software, subject
+to any applicable quantitative limitations set forth in any order form executed
+by Elasticsearch and You (“Order Form”); (ii) use, and distribute internally a
+reasonable number of copies of the documentation, if any, provided with the
+Elasticsearch Software (“Documentation”), provided that You must include on such
+copies all Elasticsearch trademarks, trade names, logos and notices present on
+the Documentation as originally provided to You by Elasticsearch; (iii) permit
+third party contractors performing services on Your behalf to use the
+Elasticsearch Software and Documentation as set forth in (i) and (ii) above,
+provided that such use must be solely for Your benefit, and You shall be
+responsible for all acts and omissions of such contractors in connection with
+their use of the Elasticsearch Software.
 
-      "Legal Entity" shall mean the union of the acting entity and all
-      other entities that control, are controlled by, or are under common
-      control with that entity. For the purposes of this definition,
-      "control" means (i) the power, direct or indirect, to cause the
-      direction or management of such entity, whether by contract or
-      otherwise, or (ii) ownership of fifty percent (50%) or more of the
-      outstanding shares, or (iii) beneficial ownership of such entity.
+1.2. Reservation of Rights; Restrictions. As between Elasticsearch and You,
+Elasticsearch owns all right title and interest in and to the Elasticsearch
+Software and any derivative works thereof, and except as expressly set forth in
+Section 1.1 above, no other license to the Elasticsearch Software is granted to
+You by implication, estoppel or otherwise.  You agree not to: (i) prepare
+derivative works from, modify, copy or use the Elasticsearch Software in any
+manner except as expressly permitted in this Agreement or applicable law; (ii)
+transfer, sell, rent, lease, distribute, sublicense, loan or otherwise transfer
+the Elasticsearch Software in whole or in part to any third party; (iii) use the
+Elasticsearch Software for providing time-sharing services, any software-
+as-a-service offering (“SaaS”), service bureau services or as part of an
+application services provider or other service offering; (iv) alter or remove
+any proprietary notices in the Elasticsearch Software; or (v) make available to
+any third party any analysis of the results of operation of the Elasticsearch
+Software, including benchmarking results, without the prior written consent of
+Elasticsearch.
 
-      "You" (or "Your") shall mean an individual or Legal Entity
-      exercising permissions granted by this License.
+2. Term and Termination
 
-      "Source" form shall mean the preferred form for making modifications,
-      including but not limited to software source code, documentation
-      source, and configuration files.
+2.1 Term. This Agreement shall commence on the Effective Date, and shall
+continue in force for the license term set forth in the applicable Order Form,
+unless earlier terminated under Section 2.2 below.
 
-      "Object" form shall mean any form resulting from mechanical
-      transformation or translation of a Source form, including but
-      not limited to compiled object code, generated documentation,
-      and conversions to other media types.
+2.2 Termination. Either party may, upon written notice to the other party,
+terminate this Agreement for material breach by the other party automatically
+and without any other formality, if such party has failed to cure such material
+breach within thirty (30) days of receiving written notice of such material
+breach from the non-breaching party. Notwithstanding the foregoing, this
+Agreement shall automatically terminate in the event that You intentionally
+breach the scope of the license granted in Section 1.1 of this Agreement.
 
-      "Work" shall mean the work of authorship, whether in Source or
-      Object form, made available under the License, as indicated by a
-      copyright notice that is included in or attached to the work
-      (an example is provided in the Appendix below).
+2.3 Post Termination or Expiration. Upon termination or expiration of this
+Agreement, for any reason, You shall promptly cease the use of the Elasticsearch
+Software and Documentation and destroy (and certify to Elasticsearch in writing
+the fact of such destruction), or return to Elasticsearch, all copies of the
+Elasticsearch Software and Documentation then in Your possession or under Your
+control.
 
-      "Derivative Works" shall mean any work, whether in Source or Object
-      form, that is based on (or derived from) the Work and for which the
-      editorial revisions, annotations, elaborations, or other modifications
-      represent, as a whole, an original work of authorship. For the purposes
-      of this License, Derivative Works shall not include works that remain
-      separable from, or merely link (or bind by name) to the interfaces of,
-      the Work and Derivative Works thereof.
+2.4 Survival.
 
-      "Contribution" shall mean any work of authorship, including
-      the original version of the Work and any modifications or additions
-      to that Work or Derivative Works thereof, that is intentionally
-      submitted to Licensor for inclusion in the Work by the copyright owner
-      or by an individual or Legal Entity authorized to submit on behalf of
-      the copyright owner. For the purposes of this definition, "submitted"
-      means any form of electronic, verbal, or written communication sent
-      to the Licensor or its representatives, including but not limited to
-      communication on electronic mailing lists, source code control systems,
-      and issue tracking systems that are managed by, or on behalf of, the
-      Licensor for the purpose of discussing and improving the Work, but
-      excluding communication that is conspicuously marked or otherwise
-      designated in writing by the copyright owner as "Not a Contribution."
+Sections 2.3, 3, 4 and 5, as well as any payment obligations under this
+Agreement and/or the Order Form, shall survive any termination or expiration of
+this Agreement.
 
-      "Contributor" shall mean Licensor and any individual or Legal Entity
-      on behalf of whom a Contribution has been received by Licensor and
-      subsequently incorporated within the Work.
+3. Disclaimer of Warranties
 
-   2. Grant of Copyright License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
+TO THE MAXIMUM EXTENT PERMITTED UNDER APPLICABLE LAW, THE ELASTICSEARCH SOFTWARE
+IS PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, AND ELASTICSEARCH AND ITS
+LICENSORS MAKE NO WARRANTIES WHETHER EXPRESSED, IMPLIED OR STATUTORY REGARDING
+OR RELATING TO THE ELASTICSEARCH SOFTWARE OR DOCUMENTATION.  TO THE MAXIMUM
+EXTENT PERMITTED UNDER APPLICABLE LAW, ELASTICSEARCH AND ITS LICENSORS
+SPECIFICALLY DISCLAIM ALL IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NON-INFRINGMENT WITH RESPECT TO THE ELASTICSEARCH
+SOFTWARE AND DOCUMENTATION, AND WITH RESPECT TO THE USE OF THE FOREGOING.
+FURTHER, ELASTICSEARCH DOES NOT WARRANT RESULTS OF USE OR THAT THE ELASTICSEARCH
+SOFTWARE WILL BE ERROR FREE OR THAT THE USE OF THE ELASTICSEARCH SOFTWARE WILL
+BE UNINTERRUPTED.
 
-   3. Grant of Patent License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      (except as stated in this section) patent license to make, have made,
-      use, offer to sell, sell, import, and otherwise transfer the Work,
-      where such license applies only to those patent claims licensable
-      by such Contributor that are necessarily infringed by their
-      Contribution(s) alone or by combination of their Contribution(s)
-      with the Work to which such Contribution(s) was submitted. If You
-      institute patent litigation against any entity (including a
-      cross-claim or counterclaim in a lawsuit) alleging that the Work
-      or a Contribution incorporated within the Work constitutes direct
-      or contributory patent infringement, then any patent licenses
-      granted to You under this License for that Work shall terminate
-      as of the date such litigation is filed.
+4. Limitation of Liability
 
-   4. Redistribution. You may reproduce and distribute copies of the
-      Work or Derivative Works thereof in any medium, with or without
-      modifications, and in Source or Object form, provided that You
-      meet the following conditions:
+4.1. Disclaimer of Certain Damages.  IN NO EVENT SHALL YOU OR ELASTICSEARCH OR
+ITS LICENSORS BE LIABLE FOR ANY LOSS OF PROFITS, LOSS OF USE, BUSINESS
+INTERRUPTION, LOSS OF DATA, COST OF SUBSTITUTE GOODS OR SERVICES, OR FOR ANY
+INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OF ANY KIND IN CONNECTION
+WITH OR ARISING OUT OF THE USE OR INABILITY TO USE THE ELASTICSEARCH SOFTWARE,
+OR THE PERFORMANCE OF OR FAILURE TO PERFORM THIS AGREEMENT, WHETHER ALLEGED AS A
+BREACH OF CONTRACT OR TORTIOUS CONDUCT, INCLUDING NEGLIGENCE, EVEN IF THE
+RESPONSIBLE PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. THE
+LIMITATIONS OF LIABILITY SET FORTH IN THIS SECTION 4.1 SHALL NOT APPLY TO A
+BREACH THROUGH GROSS NEGLIGENCE OR INTENTIONAL MISCONDUCT BY YOU OF THE SCOPE OF
+THE LICENSE GRANTED IN SECTION 1.1 OR TO ANY OTHER LIABILITY THAT CANNOT BE
+EXCLUDED OR LIMITED UNDER APPLICABLE LAW.
 
-      (a) You must give any other recipients of the Work or
-          Derivative Works a copy of this License; and
+4.2. Damages Cap. IN NO EVENT SHALL ELASTICSEARCH’S OR ITS LICENSORS’ AGGREGATE,
+CUMULATIVE LIABILITY UNDER THIS AGREEMENT EXCEED THE AMOUNTS YOU WERE REQUIRED
+TO PAY ELASTICSEARCH IN RELATION TO THIS AGREEMENT FOR THE ELASTICSEARCH
+SOFTWARE GIVING RISE TO SUCH LIABILITY, IN THE TWELVE (12) MONTHS IMMEDIATELY
+PRIOR TO THE EVENT GIVING RISE TO LIABILITY.
 
-      (b) You must cause any modified files to carry prominent notices
-          stating that You changed the files; and
+4.3. YOU AGREE THAT THE FOREGOING LIMITATIONS, EXCLUSIONS AND DISCLAIMERS ARE A
+REASONABLE ALLOCATION OF THE RISK BETWEEN THE PARTIES AND WILL APPLY TO THE
+MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, EVEN IF ANY REMEDY FAILS IN ITS
+ESSENTIAL PURPOSE.
 
-      (c) You must retain, in the Source form of any Derivative Works
-          that You distribute, all copyright, patent, trademark, and
-          attribution notices from the Source form of the Work,
-          excluding those notices that do not pertain to any part of
-          the Derivative Works; and
+5. Miscellaneous 
 
-      (d) If the Work includes a "NOTICE" text file as part of its
-          distribution, then any Derivative Works that You distribute must
-          include a readable copy of the attribution notices contained
-          within such NOTICE file, excluding those notices that do not
-          pertain to any part of the Derivative Works, in at least one
-          of the following places: within a NOTICE text file distributed
-          as part of the Derivative Works; within the Source form or
-          documentation, if provided along with the Derivative Works; or,
-          within a display generated by the Derivative Works, if and
-          wherever such third-party notices normally appear. The contents
-          of the NOTICE file are for informational purposes only and
-          do not modify the License. You may add Your own attribution
-          notices within Derivative Works that You distribute, alongside
-          or as an addendum to the NOTICE text from the Work, provided
-          that such additional attribution notices cannot be construed
-          as modifying the License.
+This Agreement, including Attachment 1 hereto, which is hereby incorporated
+herein by this reference, completely and exclusively states the entire agreement
+of the parties regarding the subject matter herein, and it supersedes, and its
+terms govern, all prior proposals, agreements, or other communications between
+the parties, oral or written, regarding such subject matter.  For the avoidance
+of doubt, the parties hereby expressly acknowledge and agree that if You issue
+any purchase order or similar document in connection with its purchase of a
+license to the Elasticsearch Software, You will do so only for Your internal,
+administrative purposes and not with the intent to provide any contractual
+terms. This Agreement may not be modified except by a subsequently dated,
+written amendment that expressly amends this Agreement and which is signed on
+behalf of Elasticsearch and You, by duly authorized representatives. If any
+provision(s) hereof is held unenforceable, this Agreement will continue without
+said provision and be interpreted to reflect the original intent of the parties.
 
-      You may add Your own copyright statement to Your modifications and
-      may provide additional or different license terms and conditions
-      for use, reproduction, or distribution of Your modifications, or
-      for any such Derivative Works as a whole, provided Your use,
-      reproduction, and distribution of the Work otherwise complies with
-      the conditions stated in this License.
 
-   5. Submission of Contributions. Unless You explicitly state otherwise,
-      any Contribution intentionally submitted for inclusion in the Work
-      by You to the Licensor shall be under the terms and conditions of
-      this License, without any additional terms or conditions.
-      Notwithstanding the above, nothing herein shall supersede or modify
-      the terms of any separate license agreement you may have executed
-      with Licensor regarding such Contributions.
 
-   6. Trademarks. This License does not grant permission to use the trade
-      names, trademarks, service marks, or product names of the Licensor,
-      except as required for reasonable and customary use in describing the
-      origin of the Work and reproducing the content of the NOTICE file.
+								ATTACHMENT 1
+					ADDITIONAL TERMS AND CONDITIONS
 
-   7. Disclaimer of Warranty. Unless required by applicable law or
-      agreed to in writing, Licensor provides the Work (and each
-      Contributor provides its Contributions) on an "AS IS" BASIS,
-      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-      implied, including, without limitation, any warranties or conditions
-      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
-      PARTICULAR PURPOSE. You are solely responsible for determining the
-      appropriateness of using or redistributing the Work and assume any
-      risks associated with Your exercise of permissions under this License.
+A  The following additional terms and conditions apply to all Customers with
+principal offices in North America:
 
-   8. Limitation of Liability. In no event and under no legal theory,
-      whether in tort (including negligence), contract, or otherwise,
-      unless required by applicable law (such as deliberate and grossly
-      negligent acts) or agreed to in writing, shall any Contributor be
-      liable to You for damages, including any direct, indirect, special,
-      incidental, or consequential damages of any character arising as a
-      result of this License or out of the use or inability to use the
-      Work (including but not limited to damages for loss of goodwill,
-      work stoppage, computer failure or malfunction, or any and all
-      other commercial damages or losses), even if such Contributor
-      has been advised of the possibility of such damages.
+Applicable Elasticsearch Entity. The entity providing the license is
+Elasticsearch, Inc., a Delaware Corporation.
 
-   9. Accepting Warranty or Additional Liability. While redistributing
-      the Work or Derivative Works thereof, You may choose to offer,
-      and charge a fee for, acceptance of support, warranty, indemnity,
-      or other liability obligations and/or rights consistent with this
-      License. However, in accepting such obligations, You may act only
-      on Your own behalf and on Your sole responsibility, not on behalf
-      of any other Contributor, and only if You agree to indemnify,
-      defend, and hold each Contributor harmless for any liability
-      incurred by, or claims asserted against, such Contributor by reason
-      of your accepting any such warranty or additional liability.
+Government Rights.  The Elasticsearch Software product is "Commercial Computer
+Software," as that term is defined in 48 C.F.R. 2.101, and as the term is used
+in 48 C.F.R. Part 12, and is a Commercial Item comprised of "commercial computer
+software" and "commercial computer software documentation".  If acquired by or
+on behalf of a civilian agency, the U.S. Government acquires this commercial
+computer software and/or commercial computer software documentation subject to
+the terms of this Agreement, as specified in 48 C.F.R. 12.212 (Computer
+Software) and 12.211 (Technical Data) of the Federal Acquisition Regulation
+("FAR") and its successors.  If acquired by or on behalf of any agency within
+the Department of Defense ("DOD"), the U.S. Government acquires this commercial
+computer software and/or commercial computer software documentation subject to
+the terms of the Elasticsearch Software License and Services Agreement as
+specified in 48 C.F.R. 227.7202-3 and 48 C.F.R. 227.7202-4 of the DOD FAR
+Supplement ("DFARS") and its successors, and consistent with 48 C.F.R. 227.7202.
+This U.S. Government Rights clause, consistent with 48 C.F.R. 12.212 and 48
+C.F.R. 227.7202 is in lieu of, and supersedes, any other FAR, DFARS, or other
+clause or provision that addresses Government rights in computer software,
+computer software documentation or technical data related to the Elasticsearch
+Software under this Agreement and in any Subcontract under which this commercial
+computer software and commercial computer software documentation is acquired or
+licensed.
 
-   END OF TERMS AND CONDITIONS
+Export Control. You acknowledge that the goods, software and technology acquired
+from Elasticsearch are subject to U.S. export control laws and regulations,
+including but not limited to the International Traffic In Arms Regulations
+(“ITAR”) (22 C.F.R. Parts 120-130 (2010)); the Export Administration Regulations
+("EAR") (15 C.F.R. Parts 730-774 (2010)); the U.S. antiboycott regulations in
+the EAR and U.S. Department of the Treasury regulations; the economic sanctions
+regulations and guidelines of the U.S. Department of the Treasury, Office of
+Foreign Assets Control, and the USA Patriot Act (Title III of Pub. L. 107-56,
+signed into law October 26, 2001), as amended.  You are now and will remain in
+the future compliant with all such export control laws and regulations, and will
+not export, re-export, otherwise transfer any Elasticsearch goods, software or
+technology or disclose any Elasticsearch software or technology to any person
+contrary to such laws or regulations.  You acknowledge that remote access to
+Elasticsearch Software may in certain circumstances be considered a re-export of
+Elasticsearch Software, and accordingly, may not be granted in contravention of
+U.S. export control laws and regulations. Governing Law.  This Agreement will be
+governed by the laws of the State of California, without regard to its conflict
+of laws principles. This Agreement shall not be governed by the 1980 UN
+Convention on Contracts for the International Sale of Goods. All suits hereunder
+will be brought solely in Federal Court for the Northern District of California,
+or if that court lacks subject matter jurisdiction, in any California State
+Court located in Santa Clara County.  The parties hereby irrevocably waive any
+and all claims and defenses either might otherwise have in any such action or
+proceeding in any of such courts based upon any alleged lack of personal
+jurisdiction, improper venue, forum non conveniens or any similar claim or
+defense.
 
-   APPENDIX: How to apply the Apache License to your work.
 
-      To apply the Apache License to your work, attach the following
-      boilerplate notice, with the fields enclosed by brackets "[]"
-      replaced with your own identifying information. (Don't include
-      the brackets!)  The text should be enclosed in the appropriate
-      comment syntax for the file format. We also recommend that a
-      file or class name and description of purpose be included on the
-      same "printed page" as the copyright notice for easier
-      identification within third-party archives.
+B The following additional terms and conditions apply to all Customers with
+principal offices outside of North America:
 
-   Copyright [yyyy] [name of copyright owner]
+(1)  Applicable Elasticsearch Entity. The entity providing the license in
+(Germany is Elasticsearch Gmbh; in France is Elasticsearch SARL, in the United
+(Kingdom is Elasticsearch Ltd, and in all other countries is Elasticsearch BV.
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
+(2)  Choice of Law.  This Agreement shall be governed by and construed in
+(accordance with the laws of the State of New York, without reference to or
+(application of choice of law rules or principles. Notwithstanding any choice of
+(law provision or otherwise, the Uniform Computer Information Transactions Act
+(UCITA) and the United Nations Convention on the International Sale of Goods
+(shall not apply.
 
-       http://www.apache.org/licenses/LICENSE-2.0
+(3)  Arbitration.  Any dispute, claim or controversy arising out of or relating
+(to this Agreement or the existence, breach, termination, enforcement,
+(interpretation or validity thereof, including the determination of the scope or
+(applicability of this agreement to arbitrate, each, a “Dispute”) shall be
+(referred to and finally resolved by arbitration under the rules and at the
+(location identified below.  The arbitral panel shall consist of three 3)
+(arbitrators, selected as follows: each party shall appoint one 1) arbitrator;
+(and those two 2) arbitrators shall discuss and select a chairman. If the two
+(party-appointed arbitrators are unable to agree on the chairman, the chairman
+(shall be selected in accordance with the applicable rules of the arbitration
+(body. Each arbitrator shall be independent of each of the parties.  The
+(arbitrators shall have the authority to grant specific performance and to
+(allocate between the parties the costs of arbitration including service fees,
+(arbitrator fees and all other fees related to the arbitration) in such
+(equitable manner as the arbitrators may determine.  The prevailing party in any
+(arbitration shall be entitled to receive reimbursement of its reasonable
+(expenses incurred in connection therewith.  Judgment upon the award so rendered
+(may be entered in a court having jurisdiction or application may be made to
+(such court for judicial acceptance of any award and an order of enforcement, as
+(the case may be.  Notwithstanding the forgoing, Elasticsearch shall have the
+(right to institute an action in a court of proper jurisdiction for preliminary
+(injunctive relief pending a final decision by the arbitrator, provided that a
+(permanent injunction and damages shall only be awarded by the arbitrator.  The
+(language to be used in the arbitral proceedings shall be English.
 
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+(3.a) In addition, the following terms only apply to Customers with principal
+(offices within Europe, the Middle East or Africa EMEA):
+
+Arbitration Rules and Location. Any Dispute shall be referred to and finally
+resolved by arbitration under the London Court of International Arbitration
+(“LCIA”) Rules (which Rules are deemed to be incorporated by reference into this
+clause) on the basis that the governing law is the law of the State of New York,
+USA.  The seat, or legal place, of arbitration shall be London, England.
+
+(3.b) In addition, the following terms only apply to Customers with principal
+(offices within Asia Pacific, Australia & New Zealand:
+
+Arbitration Rules and Location.  Any Dispute shall be referred to and finally
+resolved by arbitration under the Rules of Conciliation and Arbitration of the
+International Chamber of Commerce (“ICC”) in force on the date when the notice
+of arbitration is submitted in accordance with such Rules (which Rules are
+deemed to be incorporated by reference into this clause) on the basis that the
+governing law is the law of the State of New York, USA.  The seat, or legal
+place, of arbitration shall be Singapore.
+
+(3.c) In addition, the following terms only apply to Customers with principal
+(offices within the Americas excluding North America):
+
+Arbitration Rules and Location. Any Dispute shall be referred to and finally
+resolved by arbitration under International Dispute Resolution Procedures of the
+American Arbitration Association (“AAA”) in force on the date when the notice of
+arbitration is submitted in accordance with such Procedures (which Procedures
+are deemed to be incorporated by reference into this clause) on the basis that
+the governing law is the law of the State of New York, USA.  The seat, or legal
+place, of arbitration shall be New York, New York, USA.
+
+(4)  In addition, for Customers with principal offices within the UK, the
+(following new sentence is added to the end of Section 4.1:
+
+Nothing in this Agreement shall have effect so as to limit or exclude a party’s
+liability for death or personal injury caused by negligence or for fraud
+including fraudulent misrepresentation and this Section 4.1 shall take effect
+subject to this provision.
+
+(5) In addition, for Customers with principal offices within France, Sections
+1.2, 3 and 4.1 of the Agreement are deleted and replaced with the following new
+Sections 1.2, 3 and 4.1: 1.2 Reservation of Rights; Restrictions. Elasticsearch
+owns all right title and interest in and to the Elasticsearch Software and any
+derivative works thereof, and except as expressly set forth in Section 1.1
+above, no other license to the Elasticsearch Software is granted to You by
+implication, or otherwise. You agree not to prepare derivative works from,
+modify, copy or use the Elasticsearch Software in any manner except as expressly
+permitted in this Agreement; provided that You may copy the Elasticsearch
+Software for archival purposes, only where such software is provided on a non-
+durable medium; and You may decompile the Elasticsearch Software, where
+necessary for interoperability purposes and where necessary for the correction
+of errors making the software unfit for its intended purpose, if such right is
+not reserved by Elasticsearch as editor of the Elasticsearch Software.  Pursuant
+to article L122-6-1 of the French intellectual property code, Elasticsearch
+reserves the right to correct any bugs as necessary for the Elasticsearch
+Software to serve its intended purpose. You agree not to: (i) transfer, sell,
+rent, lease, distribute, sublicense, loan or otherwise transfer the
+Elasticsearch Software in whole or in part to any third party; (ii) use the
+Elasticsearch Software for providing time-sharing services, any software-
+as-a-service offering (“SaaS”), service bureau services or as part of an
+application services provider or other service offering; (iii) alter or remove
+any proprietary notices in the Elasticsearch Software; or (iv) make available to
+any third party any analysis of the results of operation of the Elasticsearch
+Software, including benchmarking results, without the prior written consent of
+Elasticsearch.
+
+	3. Disclaimer of Warranties 
+	TO THE MAXIMUM EXTENT PERMITTED UNDER APPLICABLE LAW, THE ELASTICSEARCH 
+	SOFTWARE IS PROVIDED “AS IS” WITHOUT WARRANTY OF ANY
+	KIND, AND ELASTICSEARCH AND ITS LICENSORS MAKE NO WARRANTIES WHETHER
+	EXPRESSED, IMPLIED OR STATUTORY REGARDING OR RELATING TO THE ELASTICSEARCH
+	SOFTWARE OR DOCUMENTATION.  TO THE MAXIMUM EXTENT PERMITTED UNDER APPLICABLE
+	LAW, ELASTICSEARCH AND ITS LICENSORS SPECIFICALLY DISCLAIM ALL IMPLIED
+	WARRANTIES OF FITNESS FOR A PARTICULAR PURPOSE WITH RESPECT TO THE
+	ELASTICSEARCH SOFTWARE AND DOCUMENTATION, AND WITH RESPECT TO THE USE OF THE
+	FOREGOING.  FURTHER, ELASTICSEARCH DOES NOT WARRANT RESULTS OF USE OR THAT
+	THE ELASTICSEARCH SOFTWARE WILL BE ERROR FREE OR THAT THE USE OF THE
+	ELASTICSEARCH SOFTWARE WILL BE UNINTERRUPTED.
+
+	4.1 Disclaimer of Certain Damages. 
+	IN NO EVENT SHALL YOU OR ELASTICSEARCH OR ITS LICENSORS BE LIABLE FOR ANY 
+	LOSS OF PROFITS, LOSS OF USE, BUSINESS
+	INTERRUPTION, LOSS OF DATA, COST OF SUBSTITUTE GOODS OR SERVICES, OR FOR ANY
+	INDIRECT OR UNFORESEEABLE DAMAGES OF ANY KIND IN CONNECTION WITH OR ARISING
+	OUT OF THE USE OR INABILITY TO USE THE ELASTICSEARCH SOFTWARE, OR THE
+	PERFORMANCE OF OR FAILURE TO PERFORM THIS AGREEMENT, WHETHER ALLEGED AS A
+	BREACH OF CONTRACT OR TORTIOUS CONDUCT, INCLUDING NEGLIGENCE. THE
+	LIMITATIONS OF LIABILITY SET FORTH IN THIS SECTION 4.1 SHALL NOT APPLY TO A
+	BREACH, THROUGH GROSS NEGLIGENCE OR INTENTIONAL MISCONDUCT BY YOU, OF THE
+	SCOPE OF THE LICENSE GRANTED IN SECTION 1.1, OR IN CASE OF DEATH OR PERSONAL
+	INJURY.
