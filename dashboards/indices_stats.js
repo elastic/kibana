@@ -40,7 +40,7 @@ dashboard.index = {
   'warm_fields': false
 };
 
-dashboard.refresh="1m";
+dashboard.refresh="1s";
 
 
 // In this dashboard we let users pass nodes as comma seperated list to the query parameter.
