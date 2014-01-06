@@ -170,7 +170,7 @@ function (angular, app, _, kbn) {
     };
 
     var sendReport = function(data) {
-      if (!$scope.config.report_url) {
+      if (!$scope.config.stats_report_url) {
         return;
       }
 
