@@ -223,7 +223,13 @@ define([
           facet;
 
         filter = filterSrv.getBoolFilter(filterSrv.ids);
-        filter.must($scope.get_mode_filter());
+
+        var to = filterSrv.timeRange(false).to;
+        if (to !== "now") {
+          to = kbn.parseDate(to).valueOf() + "||";
+        }
+
+        filter.must($scope.get_mode_filter()).must($scope.ejs.RangeFilter('@timestamp').from(to + "-10m/m").to(to + "/m"));
 
         request = $scope.ejs.Request().indices(dashboard.indices).size(0).searchType("count");
         facet = $scope.ejs.TermsFacet('terms')
