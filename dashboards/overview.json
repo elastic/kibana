@@ -144,7 +144,7 @@
           "title": "Document Count",
           "pointradius": 5,
           "annotate": {
-            "enable": true,
+            "enable": false,
             "query": "_type:cluster_event",
             "size": 100,
             "field": "message",
@@ -217,7 +217,7 @@
           "title": "Search request rate",
           "pointradius": 5,
           "annotate": {
-            "enable": true,
+            "enable": false,
             "query": "_type:cluster_event",
             "size": 100,
             "field": "message",
@@ -290,7 +290,7 @@
           "title": "Indexing request rate",
           "pointradius": 5,
           "annotate": {
-            "enable": true,
+            "enable": false,
             "query": "_type:cluster_event",
             "size": 100,
             "field": "message",

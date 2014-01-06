@@ -69,7 +69,7 @@ var annotate_config;
 
 if (marker_query) {
   annotate_config = {
-    "enable": true,
+    "enable": false,
     "query": "_type:shard_event AND (" + marker_query + ")",
     "size": 100,
     "field": "message",

@@ -37,12 +37,12 @@
   <div class="pull-left marvel-header marvel-table" ng-show="rows.length > 0">
     <span class="count">{{rows.length}} {{panel.mode}}</span> / Last 10m </span>
   </div>
-  <div class="pull-right">
+  <!--<div class="pull-right">
     <a href="" ng-class="{strong:!panel.compact}" ng-click="panel.compact=false">Full</a> /
     <a href="" ng-class="{strong:panel.compact}" ng-click="panel.compact=true">Compact</a>
-  </div>
+  </div>-->
 
-  <table bindonce class="table table-bordered" ng-if="!panel.compact">
+  <table bindonce class="table table-bordered" ng-if="rows.length < 10">
     <thead>
       <th class="pointer" ng-click="set_sort('__name__')">
         {{panel.mode}}
@@ -80,7 +80,7 @@
     </tr>
   </table>
 
-  <table bindonce class="table table-bordered table-condensed marvel-table" ng-if="panel.compact">
+  <table bindonce class="table table-bordered table-condensed marvel-table" ng-if="rows.length >= 10">
     <thead>
       <th class="pointer" ng-click="set_sort('__name__')">
         {{panel.mode}}
