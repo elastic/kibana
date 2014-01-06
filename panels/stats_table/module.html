@@ -70,7 +70,7 @@
           <span bo-text="data[row.id+'_'+metric.field].mean | metric_format:metric"></span>
           <br>
 
-          <!--<div class="marvel-stats-sparkline" panel='panel' field="metric.field" series="data[row.id+'_'+metric.field+'_history'].series"></div>-->
+          <div class="marvel-stats-sparkline" panel='panel' field="metric.field" series="data[row.id+'_'+metric.field+'_history'].series"></div>
         </div>
         <div class="marvel-extended pointer" ng-click="rowClick(row,metric)">
           <span>min: <span bo-text="data[row.id+'_'+metric.field].min | metric_format:metric"></span></span><br>
@@ -106,7 +106,7 @@
         <div class="pointer" ng-click="rowClick(row,metric)">
           <span bo-text='data[row.id+"_"+metric.field].mean | metric_format:metric'></span>
 
-          <!--<div class="marvel-stats-sparkline pointer" ng-click="rowClick(row,metric)" panel='panel' field="metric.field" series="data[row.id+'_'+metric.field+'_history'].series"></div>-->
+          <div class="marvel-stats-sparkline pointer" ng-click="rowClick(row,metric)" panel='panel' field="metric.field" series="data[row.id+'_'+metric.field+'_history'].series"></div>
         </div>
       </td>
     </tr>
