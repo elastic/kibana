@@ -1,13 +1,21 @@
   <div class="modal-body">
     <h2>Welcome to Elasticsearch Marvel</h2>
     <div>
-      <h4>Help us improve elasticsearch!</h4>
-      Would you like to help us improve Elasticsearch by reporting <strong>anonymous</strong>
-      cluster statistics including information about
-      the size and performance of your cluster. Data is sent once daily and is under 1 kilobyte. To
-      see a sample report click <span class="link" ng-click="showSample=true">here</span>
+
+      You're all set up! In case you need some help you can always visit
+      TODO: ADD URL HERE
+
+      <br/>
+
+      <h5>Cluster statistics</h5>
+
+      Help improve Elasticsearch by reporting <strong>anonymous</strong>
+      cluster statistics, including information about the size and performance of your cluster.
+      Data is sent once daily and is under 1 kilobyte. To
+      see a sample report click <span class="link" ng-click="showSample=true">here</span>. The data will only
+      be used by Elasticsearch and will never be transmitted to a third party.
       <div ng-show="showSample">
-        <h4>Sample Statistics</h4>
+        <h5>Sample Statistics</h5>
         <pre>{{ data | json }}</pre>
       </div>
     </div>

@@ -1,17 +1,20 @@
 
 <div ng-show="!_.isUndefined(panel.optin)" >
   <div class="editor-row">
-    <h4>Help us improve elasticsearch!</h4>
-    Would you like to help us improve Elasticsearch by reporting <strong>anonymous</strong>
-    cluster statistics including information about
-    the size and performance of your cluster. Data is sent once daily and is under 1 kilobyte. To
-    see a sample report click <span class="link" ng-click="showSample=true">here</span>
+
+    <h4>Cluster statistics</h4>
+
+    Help improve Elasticsearch by reporting <strong>anonymous</strong>
+    cluster statistics, including information about the size and performance of your cluster.
+    Data is sent once daily and is under 1 kilobyte. To
+    see a sample report click <span class="link" ng-click="showSample=true">here</span>. The data will only
+    be used by Elasticsearch and will never be transmitted to a third party.
   </div>
   <br>
   <div class="editor-row">
     <div class="section">
       <div class="editor-option">
-        <label class="small">Usage Data <tip>Help make Elasticsearch better by sharing anonymous usage data.</tip></label>
+        <label class="small">Send statistics<tip>Help make Elasticsearch better by sharing anonymous usage data.</tip></label>
         <input type="checkbox" ng-model="cookies.marvelOptIn" ng-true-value="IN" ng-false-value="OUT" />
       </div>
       <div ng-show="kbnVersion == '@REV@'" class="editor-option">
