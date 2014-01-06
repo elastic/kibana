@@ -25,4 +25,11 @@
       <label class="small">Display Breakdowns</label>
       <select class="input-mini" ng-model="panel.display_breakdown" ng-options="f for f in ['yes', 'no']"></select></span>
     </div>
+    <div class="editor-option">
+     <label class="small">Sort</label>
+     <select class="input-small" ng-model="panel.sort_field" ng-options="f for f in ['', 'Label', 'Value']"></select>
+    </div>
+    <div class="editor-option">
+     <label class="small">Reverse</label><input type="checkbox" ng-model="panel.sort_reverse" ng-checked="panel.sort_reverse">
+    </div>
 </div>

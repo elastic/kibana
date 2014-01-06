@@ -45,7 +45,7 @@ define([
         {title:'Queries', src:'app/partials/querySelect.html'}
       ],
       status: 'Beta',
-      description: 'A statatics panel for displaying aggergations using the Elastic Search statistical facet query.'
+      description: 'A statistical panel for displaying aggregations using the Elastic Search statistical facet query.'
     };
 
 
@@ -58,6 +58,8 @@ define([
       format: 'number',
       mode: 'count',
       display_breakdown: 'yes',
+      sort_field: '',
+      sort_reverse: false,
       spyable     : true
     };
 
@@ -149,7 +151,9 @@ define([
           var alias = q.alias || q.query;
           var obj = _.clone(q);
           obj.label = alias;
+          obj.Label = alias.toLowerCase(); //sort field
           obj.value = format($scope.panel.format,results.facets['stats_'+alias][$scope.panel.mode]);
+          obj.Value = results.facets['stats_'+alias][$scope.panel.mode]; //sort field
           return obj;
         });
 
