@@ -177,6 +177,7 @@
         };
 
         var _showTooltip = function(x, y, event){
+            $('#tooltip').remove();
             /*
             var tooltip = $('<div id="tooltip" class=""></div>').appendTo('body').fadeIn(200);
 
