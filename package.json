@@ -4,7 +4,7 @@
     "company": "Elasticsearch BV"
   },
   "name": "marvel",
-  "version": "1.0.0.beta1-SNAPSHOT",
+  "version": "1.0.0.Beta1-SNAPSHOT",
   "repository": {
     "type": "git",
     "url": "http://github.com/elasticsearch/elasticsearch-marvel.git"
