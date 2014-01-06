@@ -158,7 +158,6 @@ function (angular, app, _, kbn) {
     var checkReport = function() {
       if($cookies.marvelOptIn === 'IN') {
         if(_.isUndefined($cookies.marvelLastReport)) {
-          console.log('undefined');
           return true;
         } else if (new Date().getTime() - parseInt($cookies.marvelLastReport,10) > reportInterval) {
           return true;
@@ -182,7 +181,6 @@ function (angular, app, _, kbn) {
         $scope.config.stats_report_url,
         data
       ).success(function() {
-        console.log('reported');
         $cookies.marvelLastReport = thisReport;
       });
     };
