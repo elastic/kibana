@@ -159,6 +159,7 @@ var rows = [
     "panels": [
       {
         "value_field": "primaries.indexing.index_total",
+        "title": "Indexing request rate",
         "derivative": true,
         "mode": "min",
         "scaleSeconds": true
