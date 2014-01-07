@@ -23,6 +23,7 @@ function (angular, app, _, $, kbn) {
   app.useModule(module);
 
   module.controller('terms', function($scope, querySrv, dashboard, filterSrv, fields) {
+    
     $scope.panelMeta = {
       modals : [
         {
@@ -271,7 +272,7 @@ function (angular, app, _, $, kbn) {
             if(scope.panel.tmode === 'terms') {
               var data = [
                 k,
-                formater.format(scope.panel.format, v.count)
+                 v.count
               ];
               
               slice = { label : v.term, data : [data], actions: true};
@@ -321,7 +322,14 @@ function (angular, app, _, $, kbn) {
                     bars:   { show: true,  fill: 1, barWidth: 0.8, horizontal: false },
                     shadowSize: 1
                   },
-                  yaxis: { show: true, min: 0, color: "#c8c8c8" },
+                  yaxis: { 
+                    show: true, 
+                    min: 0, 
+                    color: "#c8c8c8",
+                    tickFormatter: function(val) {
+                      return formater.format(scope.panel.format, val);
+                    }  
+                  },
                   xaxis: { show: false },
                   grid: {
                     borderWidth: 0,
@@ -333,6 +341,8 @@ function (angular, app, _, $, kbn) {
                   colors: querySrv.colors
                 });
               }
+
+
               if(scope.panel.chart === 'pie') {
                 var labelFormat = function(label, series){
                   return '<div ng-click="build_search(panel.field,\''+label+'\')'+
@@ -356,7 +366,7 @@ function (angular, app, _, $, kbn) {
                         width: 0
                       },
                       label: {
-                        show: scope.panel.labels,
+                        show: scope.panel.  labels,
                         radius: 2/3,
                         formatter: labelFormat,
                         threshold: 0.1
@@ -398,7 +408,9 @@ function (angular, app, _, $, kbn) {
             $tooltip
               .html(
                 kbn.query_color_dot(item.series.color, 20) + ' ' +
-                item.series.label + " (" + value.toFixed(0)+")"
+                item.series.label + " (" + 
+                  formater.format(scope.panel.format, value)
+                + ")"
               )
               .place_tt(pos.pageX, pos.pageY);
           } else {
@@ -406,6 +418,7 @@ function (angular, app, _, $, kbn) {
           }
         });
 
+        scope.format = formater.format
       }
     };
   });

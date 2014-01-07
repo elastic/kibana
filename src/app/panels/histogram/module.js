@@ -34,7 +34,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
   var module = angular.module('kibana.panels.histogram', []);
   app.useModule(module);
 
-  module.controller('histogram', function($scope, querySrv, dashboard, filterSrv) {
+  module.controller('histogram', function($scope, querySrv, dashboard, filterSrv, formater) {
     $scope.panelMeta = {
       modals : [
         {
@@ -425,7 +425,12 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
               $scope.hits += entry.count; // Entire dataset level hits counter
             });
 
-            $scope.legend[i] = {query:q,hits:hits};
+            $scope.hits = formater.format($scope.panel.y_format, $scope.hits)
+
+            $scope.legend[i] = {
+              query:q,
+              hits:formater.format($scope.panel.y_format, hits)
+            };
 
             data[i] = {
               info: q,
