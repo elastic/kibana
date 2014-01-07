@@ -20,8 +20,7 @@ define([
   app,
   _,
   $,
-  kbn,
-  numeral
+  kbn
 ) {
 
   'use strict';

@@ -15,7 +15,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
 
   module.service('dashboard', function(
     $routeParams, $http, $rootScope, $injector, $location, $timeout,
-    ejsResource, timer, kbnIndex, alertSrv
+    ejsResource, timer, kbnIndex, alertSrv, formatter
   ) {
     // A hash of defaults to use when loading a dashboard
 
@@ -60,7 +60,8 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
         default: 'INDEX_MISSING',
         warm_fields: true
       },
-      refresh: false
+      refresh: false,
+      lang: ''
     };
 
     // An elasticJS client to use
@@ -220,6 +221,8 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
 
       // Take out any that we're not allowed to add from the gui.
       self.availablePanels = _.difference(self.availablePanels,config.hidden_panels);
+
+      formatter.language(dashboard.lang)
 
       return true;
     };

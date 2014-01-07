@@ -1,6 +1,7 @@
 define([
   'angular',
-  'numeral'
+  'numeral',
+  'numeral.languages'
 ],
 function (angular) {
   'use strict';
@@ -10,6 +11,10 @@ function (angular) {
   module.service('formatter', function() {
     // Save a reference to this
     var self = this;
+
+    this.language = function(lang) {
+      numeral.language(lang);
+    };
 
     this.format = function(format, value) {
        switch (format) {

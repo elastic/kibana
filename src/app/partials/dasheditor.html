@@ -18,10 +18,17 @@
           <label class="small">Style</label><select class="input-small" ng-model="dashboard.current.style" ng-options="f for f in ['dark','light']"></select>
         </div>
         <div class="editor-option">
-          <label class="small"> Editable </label><input type="checkbox" ng-model="dashboard.current.editable" ng-checked="dashboard.current.editable" />
+          <label class="small">Editable</label><input type="checkbox" ng-model="dashboard.current.editable" ng-checked="dashboard.current.editable" />
         </div>
         <div class="editor-option">
-          <label class="small"> Hints <tip>Show 'Add panel' hints in empty spaces</tip></label><input type="checkbox" ng-model="dashboard.current.panel_hints" ng-checked="dashboard.current.panel_hints" />
+          <label class="small">Hints<tip>Show 'Add panel' hints in empty spaces</tip></label><input type="checkbox" ng-model="dashboard.current.panel_hints" ng-checked="dashboard.current.panel_hints" />
+        </div>
+      </div>
+    </div>
+    <div class="editor-row">
+      <div class="section">
+        <div class="editor-option">
+          <label class="small">Locale<tip>Locale used in the number formats</tip></label><select class="input-small" ng-model="dashboard.current.lang" ng-options="f for f in ['be-nl', 'chs', 'cs', 'da-dk ', 'de-ch', 'de', 'en-gb', 'es-ES', 'es', 'et', 'fi', 'fr-CA', 'fr-ch', 'fr', 'hu', 'it', 'ja', 'nl-nl', 'pl', 'pt-br', 'pt-pt', 'ru-UA', 'ru', 'sk', 'th', 'tr', 'uk-UA']"></select>
         </div>
       </div>
     </div>
