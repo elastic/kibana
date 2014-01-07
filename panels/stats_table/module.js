@@ -182,7 +182,6 @@ define([
         return metricDefaults(m);
       });
 
-
       $scope.$watch('panel.mode', function (m) {
         if (_.isUndefined(m)) {
           return;
@@ -195,11 +194,26 @@ define([
         _.throttle($scope.get_rows(), 500);
       });
 
+      $scope.$watch('(rows|filter:panel.rowFilter).length', function(l) {
+        //Compute view based on number of rows
+        if(l > 5 && kbn.interval_to_seconds(dashboard.current.refresh) < 120) {
+          $scope.panel.compact = true;
+          $scope.sparkLines = false;
+          $scope.viewSelect = false;
+        } else {
+          $scope.viewSelect = true;
+          $scope.sparkLines = true;
+        }
+      });
+
       $scope.$watch('panel.show_hidden', function () {
         _.throttle($scope.get_rows(), 500);
       });
 
       $scope.init = function () {
+        $scope.sparkLines = true;
+        $scope.viewSelect = true;
+
         $scope.warnLevels = {};
         $scope.rows = [];
         $scope.$on('refresh', function () {
@@ -439,6 +453,14 @@ define([
         }
         else {
           $scope.panel.sort = [field, 'asc'];
+        }
+      };
+
+      $scope.showFullTable = function() {
+        if($scope.panel.compact) {
+          return false;
+        } else {
+          return true;
         }
       };
 

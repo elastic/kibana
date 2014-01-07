@@ -35,14 +35,15 @@
   </style>
 
   <div class="pull-left marvel-header marvel-table" ng-show="rows.length > 0">
-    <span class="count">{{rows.length}} {{panel.mode}}</span> / Last 10m </span>
+    <input type="text" class="input-medium" placeholder="Filter {{panel.mode}}..." ng-model="panel.rowFilter"> <span class="count">{{(rows|filter:panel.rowFilter).length}} {{panel.mode}}</span> / Last 10m </span>
   </div>
-  <!--<div class="pull-right">
+  <div class="pull-right" ng-if="viewSelect">
     <a href="" ng-class="{strong:!panel.compact}" ng-click="panel.compact=false">Full</a> /
     <a href="" ng-class="{strong:panel.compact}" ng-click="panel.compact=true">Compact</a>
-  </div>-->
+  </div>
 
-  <table bindonce class="table table-bordered" ng-if="rows.length < 10">
+  <!-- full view -->
+  <table bindonce class="table table-bordered" ng-if="!panel.compact">
     <thead>
       <th class="pointer" ng-click="set_sort('__name__')">
         {{panel.mode}}
@@ -55,7 +56,7 @@
         <i ng-show='metric.field == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
       </th>
     </thead>
-    <tr ng-repeat="row in rows | orderBy:get_sort_value:panel.sort[1]=='desc'">
+    <tr ng-repeat="row in rows | filter:panel.rowFilter | orderBy:get_sort_value:panel.sort[1]=='desc'">
       <td>
         <div class="checkbox">
           <label>
@@ -80,7 +81,8 @@
     </tr>
   </table>
 
-  <table bindonce class="table table-bordered table-condensed marvel-table" ng-if="rows.length >= 10">
+  <!-- compact view -->
+  <table bindonce class="table table-bordered table-condensed marvel-table" ng-if="panel.compact">
     <thead>
       <th class="pointer" ng-click="set_sort('__name__')">
         {{panel.mode}}
@@ -93,7 +95,7 @@
           <i ng-show='metric.field == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
       </th>
     </thead>
-    <tr ng-repeat="row in rows | orderBy:get_sort_value:panel.sort[1]=='desc'">
+    <tr ng-repeat="row in rows | filter:panel.rowFilter | orderBy:get_sort_value:panel.sort[1]=='desc'">
       <td>
         <div class="checkbox">
           <label>
@@ -106,7 +108,7 @@
         <div class="pointer" ng-click="rowClick(row,metric)">
           <span bo-text='data[row.id+"_"+metric.field].mean | metric_format:metric'></span>
 
-          <!--<div class="marvel-stats-sparkline pointer" ng-click="rowClick(row,metric)" panel='panel' field="metric.field" series="data[row.id+'_'+metric.field+'_history'].series"></div>-->
+          <div ng-if="sparkLines" class="marvel-stats-sparkline pointer" ng-click="rowClick(row,metric)" panel='panel' field="metric.field" series="data[row.id+'_'+metric.field+'_history'].series"></div>
         </div>
       </td>
     </tr>
