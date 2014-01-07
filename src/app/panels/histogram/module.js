@@ -34,7 +34,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
   var module = angular.module('kibana.panels.histogram', []);
   app.useModule(module);
 
-  module.controller('histogram', function($scope, querySrv, dashboard, filterSrv, formater) {
+  module.controller('histogram', function($scope, querySrv, dashboard, filterSrv, formatter) {
     $scope.panelMeta = {
       modals : [
         {
@@ -425,11 +425,11 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
               $scope.hits += entry.count; // Entire dataset level hits counter
             });
 
-            $scope.hits = formater.format($scope.panel.y_format, $scope.hits)
+            $scope.hits = formatter.format($scope.panel.y_format, $scope.hits)
 
             $scope.legend[i] = {
               query:q,
-              hits:formater.format($scope.panel.y_format, hits)
+              hits:formatter.format($scope.panel.y_format, hits)
             };
 
             data[i] = {
@@ -527,7 +527,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
 
   });
 
-  module.directive('histogramChart', function(dashboard, filterSrv, formater) {
+  module.directive('histogramChart', function(dashboard, filterSrv, formatter) {
     return {
       restrict: 'A',
       template: '<div></div>',
@@ -644,7 +644,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
             };
 
             options.yaxis.tickFormatter = function(val) {
-                return formater.format(scope.panel.y_format, val);
+                return formatter.format(scope.panel.y_format, val);
             };
       
 
@@ -737,7 +737,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
               item.datapoint[1] - item.datapoint[2] :
               item.datapoint[1];
     
-            value = formater.format(scope.panel.y_format, value);
+            value = formatter.format(scope.panel.y_format, value);
             
             timestamp = scope.panel.timezone === 'browser' ?
               moment(item.datapoint[0]).format('YYYY-MM-DD HH:mm:ss') :

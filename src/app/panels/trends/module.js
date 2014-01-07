@@ -23,7 +23,7 @@ function (angular, app, _, kbn) {
   var module = angular.module('kibana.panels.trends', []);
   app.useModule(module);
 
-  module.controller('trends', function($scope, kbnIndex, querySrv, dashboard, filterSrv) {
+  module.controller('trends', function($scope, kbnIndex, querySrv, dashboard, filterSrv, formatter) {
 
     $scope.panelMeta = {
       modals : [
@@ -247,5 +247,6 @@ function (angular, app, _, kbn) {
       $scope.$emit('render');
     };
 
+    $scope.format = formatter.format
   });
 });

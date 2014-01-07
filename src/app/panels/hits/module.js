@@ -189,7 +189,7 @@ define([
   });
 
 
-  module.directive('hitsChart', function(querySrv) {
+  module.directive('hitsChart', function(querySrv, formatter) {
     return {
       restrict: 'A',
       link: function(scope, elem) {
@@ -227,7 +227,14 @@ define([
                   bars:   { show: true,  fill: 1, barWidth: 0.8, horizontal: false },
                   shadowSize: 1
                 },
-                yaxis: { show: true, min: 0, color: "#c8c8c8" },
+                yaxis: { 
+                  show: true, 
+                  min: 0, 
+                  color: "#c8c8c8",
+                  tickFormatter: function(val) {
+                    return formatter.format(scope.panel.format, val);
+                  }
+                },
                 xaxis: { show: false },
                 grid: {
                   borderWidth: 0,
@@ -282,13 +289,18 @@ define([
             var value = scope.panel.chart === 'bar' ?
               item.datapoint[1] : item.datapoint[1][0][1];
             $tooltip
-              .html(kbn.query_color_dot(item.series.color, 20) + ' ' + value.toFixed(0))
+              .html(
+                kbn.query_color_dot(item.series.color, 20) + ' ' +
+                item.series.label + " (" + 
+                  formatter.format(scope.panel.format, value)
+                + ")")
               .place_tt(pos.pageX, pos.pageY);
           } else {
             $tooltip.remove();
           }
         });
 
+        scope.format = formatter.format
       }
     };
   });

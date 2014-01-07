@@ -25,5 +25,10 @@
     <div class="editor-option" ng-show="panel.chart == 'pie'">
       <label class="small">Labels</label><input type="checkbox" ng-model="panel.labels" ng-checked="panel.labels">
     </div>
+    <div class="editor-option">
+      <label class="small">Format <tip>Field formatting</tip></label>
+      <select class="input-small" ng-model="panel.format" ng-include src="'app/partials/format.html'">
+      </select>      
+    </div>
   </div>
 </div>

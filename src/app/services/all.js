@@ -8,6 +8,6 @@ define([
   './timer',
   './panelMove',
   './esVersion',
-  './formater'
+  './formatter'
 ],
 function () {});

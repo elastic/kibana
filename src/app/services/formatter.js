@@ -7,7 +7,7 @@ function (angular) {
 
   var module = angular.module('kibana.services');
 
-  module.service('formater', function() {
+  module.service('formatter', function() {
     // Save a reference to this
     var self = this;
 

@@ -249,7 +249,7 @@ function (angular, app, _, $, kbn) {
 
   });
 
-  module.directive('termsChart', function(querySrv, formater) {
+  module.directive('termsChart', function(querySrv, formatter) {
     return {
       restrict: 'A',
       link: function(scope, elem) {
@@ -327,7 +327,7 @@ function (angular, app, _, $, kbn) {
                     min: 0, 
                     color: "#c8c8c8",
                     tickFormatter: function(val) {
-                      return formater.format(scope.panel.format, val);
+                      return formatter.format(scope.panel.format, val);
                     }  
                   },
                   xaxis: { show: false },
@@ -409,7 +409,7 @@ function (angular, app, _, $, kbn) {
               .html(
                 kbn.query_color_dot(item.series.color, 20) + ' ' +
                 item.series.label + " (" + 
-                  formater.format(scope.panel.format, value)
+                  formatter.format(scope.panel.format, value)
                 + ")"
               )
               .place_tt(pos.pageX, pos.pageY);
@@ -418,7 +418,7 @@ function (angular, app, _, $, kbn) {
           }
         });
 
-        scope.format = formater.format
+        scope.format = formatter.format
       }
     };
   });
