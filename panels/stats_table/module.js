@@ -211,6 +211,8 @@ define([
       });
 
       $scope.init = function () {
+        $scope.rowLimit = 20;
+
         $scope.sparkLines = true;
         $scope.viewSelect = true;
 

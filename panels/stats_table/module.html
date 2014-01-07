@@ -35,7 +35,7 @@
   </style>
 
   <div class="pull-left marvel-header marvel-table" ng-show="rows.length > 0">
-    <input type="text" class="input-medium" placeholder="Filter {{panel.mode}}..." ng-model="panel.rowFilter"> <span class="count">{{(rows|filter:panel.rowFilter).length}} {{panel.mode}}</span> / Last 10m </span>
+    <input type="text" class="input-medium" placeholder="Filter {{panel.mode}}..." ng-model="panel.rowFilter"> <span class="count">{{(rows|filter:panel.rowFilter|limitTo:rowLimit).length}} of {{rows.length}} {{panel.mode}}</span> / {{(rows|filter:{'selected':true}).length}} selected / Last 10m </span>
     <br>
     <span class="small muted pull-right" ng-show="!viewSelect"> <i class="icon-warning"></i> Compact view. Filter nodes to 5 or less, or set the page refresh rate to 2m or greater for more options.</span>
   </div>
@@ -58,7 +58,7 @@
         <i ng-show='metric.field == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
       </th>
     </thead>
-    <tr ng-repeat="row in rows | filter:panel.rowFilter | orderBy:get_sort_value:panel.sort[1]=='desc'">
+    <tr ng-repeat="row in rows | filter:panel.rowFilter | orderBy:get_sort_value:panel.sort[1]=='desc'|limitTo:rowLimit">
       <td>
         <div class="checkbox">
           <label>
@@ -97,7 +97,7 @@
           <i ng-show='metric.field == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
       </th>
     </thead>
-    <tr ng-repeat="row in rows | filter:panel.rowFilter | orderBy:get_sort_value:panel.sort[1]=='desc'">
+    <tr ng-repeat="row in rows | filter:panel.rowFilter | orderBy:get_sort_value:panel.sort[1]=='desc'|limitTo:rowLimit">
       <td>
         <div class="checkbox">
           <label>
