@@ -41,7 +41,7 @@ define([
       return fieldName.replace(/\.raw$/, '');
     }
 
-    module.controller('marvel.stats_table', function ($scope, dashboard, filterSrv, $filter, alertSrv) {
+    module.controller('marvel.stats_table', function ($scope, dashboard, filterSrv, esVersion, $filter, alertSrv) {
       $scope.panelMeta = {
         modals: [],
         editorTabs: [],
@@ -397,9 +397,14 @@ define([
               }
 
               hit = response.hits.hits[0];
-              display_name = hit.fields[stripRaw($scope.panel.display_field)];
-              persistent_name = hit.fields[stripRaw($scope.panel.persistent_field)];
-
+              if (esVersion.gte("1.0.0.RC1")) {
+                display_name = (hit.fields[stripRaw($scope.panel.display_field)] || [ undefined ])[0];
+                persistent_name = (hit.fields[stripRaw($scope.panel.persistent_field)] || [ undefined] )[0];
+              }
+              else {
+                display_name = hit.fields[stripRaw($scope.panel.display_field)];
+                persistent_name = hit.fields[stripRaw($scope.panel.persistent_field)];
+              }
               newRows.push({
                 display_name: display_name || persistent_name,
                 id: persistent_name,
