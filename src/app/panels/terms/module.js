@@ -248,7 +248,7 @@ function (angular, app, _, $, kbn) {
 
   });
 
-  module.directive('termsChart', function(querySrv) {
+  module.directive('termsChart', function(querySrv, formater) {
     return {
       restrict: 'A',
       link: function(scope, elem) {
@@ -269,7 +269,12 @@ function (angular, app, _, $, kbn) {
           _.each(scope.results.facets.terms.terms, function(v) {
             var slice;
             if(scope.panel.tmode === 'terms') {
-              slice = { label : v.term, data : [[k,v.count]], actions: true};
+              var data = [
+                k,
+                formater.format(scope.panel.format, v.count)
+              ];
+              
+              slice = { label : v.term, data : [data], actions: true};
             }
             if(scope.panel.tmode === 'terms_stats') {
               slice = { label : v.term, data : [[k,v[scope.panel.tstat]]], actions: true};

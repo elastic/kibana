@@ -522,7 +522,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
 
   });
 
-  module.directive('histogramChart', function(dashboard, filterSrv) {
+  module.directive('histogramChart', function(dashboard, filterSrv, formater) {
     return {
       restrict: 'A',
       template: '<div></div>',
@@ -638,15 +638,10 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
               }
             };
 
-            if(scope.panel.y_format === 'bytes') {
-              options.yaxis.mode = "byte";
-            }
-
-            if(scope.panel.y_format === 'short') {
-              options.yaxis.tickFormatter = function(val) {
-                return kbn.shortFormat(val,0);
-              };
-            }
+            options.yaxis.tickFormatter = function(val) {
+                return formater.format(scope.panel.y_format, val);
+            };
+      
 
             if(scope.panel.annotate.enable) {
               options.events = {
@@ -736,12 +731,9 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
             value = (scope.panel.stack && scope.panel.tooltip.value_type === 'individual') ?
               item.datapoint[1] - item.datapoint[2] :
               item.datapoint[1];
-            if(scope.panel.y_format === 'bytes') {
-              value = kbn.byteFormat(value,2);
-            }
-            if(scope.panel.y_format === 'short') {
-              value = kbn.shortFormat(value,2);
-            }
+    
+            value = formater.format(scope.panel.y_format, value);
+            
             timestamp = scope.panel.timezone === 'browser' ?
               moment(item.datapoint[0]).format('YYYY-MM-DD HH:mm:ss') :
               moment.utc(item.datapoint[0]).format('YYYY-MM-DD HH:mm:ss');

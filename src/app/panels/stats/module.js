@@ -14,8 +14,7 @@ define([
   'app',
   'underscore',
   'jquery',
-  'kbn',
-  'numeral'
+  'kbn'
 ], function (
   angular,
   app,
@@ -30,7 +29,7 @@ define([
   var module = angular.module('kibana.panels.stats', []);
   app.useModule(module);
 
-  module.controller('stats', function ($scope, querySrv, dashboard, filterSrv) {
+  module.controller('stats', function ($scope, querySrv, dashboard, filterSrv, formater) {
 
     $scope.panelMeta = {
       modals : [
@@ -124,23 +123,6 @@ define([
 
       results = request.doSearch();
 
-      var format = function (format, value) {
-        switch (format) {
-        case 'money':
-          value = numeral(value).format('$0,0.00');
-          break;
-        case 'bytes':
-          value = numeral(value).format('0.00b');
-          break;
-        case 'float':
-          value = numeral(value).format('0.000');
-          break;
-        default:
-          value = numeral(value).format('0,0');
-        }
-        return value;
-      };
-
       results.then(function(results) {
         $scope.panelMeta.loading = false;
         var value = results.facets.stats[$scope.panel.mode]; 
@@ -149,12 +131,12 @@ define([
           var alias = q.alias || q.query;
           var obj = _.clone(q);
           obj.label = alias;
-          obj.value = format($scope.panel.format,results.facets['stats_'+alias][$scope.panel.mode]);
+          obj.value = formater.format($scope.panel.format,results.facets['stats_'+alias][$scope.panel.mode]);
           return obj;
         });
 
         $scope.data = {
-          value: format($scope.panel.format, value),
+          value: formater.format($scope.panel.format, value),
           rows: rows
         };
 
