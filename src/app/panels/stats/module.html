@@ -4,7 +4,7 @@
     <tbody>
       <tr>
        <th><a href="" ng-click="set_sort('Label')" ng-class="{'icon-chevron-up': panel.sort_field == 'Label' && panel.sort_reverse == true, 'icon-chevron-down': panel.sort_field == 'Label' && panel.sort_reverse == false}">{{panel.label_name}}</a></th>
-       <th><a href="" ng-click="set_sort('Value')" ng-class="{'icon-chevron-up': panel.sort_field == 'Value' && panel.sort_reverse == true, 'icon-chevron-down': panel.sort_field == 'Value' && panel.sort_reverse == false}" style="text-align: right;">{{panel.value_name}}</a></th>
+       <th style="text-align: right;"><a href="" ng-click="set_sort('Value')" ng-class="{'icon-chevron-up': panel.sort_field == 'Value' && panel.sort_reverse == true, 'icon-chevron-down': panel.sort_field == 'Value' && panel.sort_reverse == false}">{{panel.value_name}}</a></th>
       </tr>
       <tr ng-repeat="item in data.rows | orderBy:panel.sort_field:panel.sort_reverse">
         <td><i class="icon-circle" ng-style="{color:item.color}"></i> {{item.label}}</td>
