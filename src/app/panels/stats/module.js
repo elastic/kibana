@@ -60,6 +60,8 @@ define([
       display_breakdown: 'yes',
       sort_field: '',
       sort_reverse: false,
+      label_name: 'Label',
+      value_name: 'Value',
       spyable     : true
     };
 
@@ -71,6 +73,18 @@ define([
         $scope.get_data();
       });
       $scope.get_data();
+    };
+    
+    $scope.set_sort = function(field) {
+      if($scope.panel.sort_field === field && $scope.panel.sort_reverse === false) {
+        $scope.panel.sort_reverse = true;
+      } else if($scope.panel.sort_field === field && $scope.panel.sort_reverse === true) {
+        $scope.panel.sort_field = '';
+        $scope.panel.sort_reverse = false;  
+      } else {
+        $scope.panel.sort_field = field;
+        $scope.panel.sort_reverse = false;
+      }
     };
 
     $scope.get_data = function () {
