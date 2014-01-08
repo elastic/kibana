@@ -10,7 +10,7 @@
   <div ng-class="{'trends-horizontal':panel.arrangement == 'horizontal'}" ng-style="panel.style" style="line-height:{{panel.style['font-size']}};" ng-repeat="query in trends">
     <i class="icon-circle" style="color:{{query.info.color}}"></i>
     <span 
-      bs-tooltip="'Then: '+format(panel.format, query.hits.old)+', Now: '+format(panel.format, query.hits.new)"  
+      bs-tooltip="'Then: '+ query.hits.old|format:panel.format +', Now: '+ query.hits.new|format:panel.format"  
       ng-class="{'text-success': query.hits.new >= query.hits.old, 'text-error': query.hits.old > query.hits.new}" 
       class='pointer strong'>
       <i class='large' ng-class="{'icon-caret-up': query.hits.new >= query.hits.old, 'icon-caret-down': query.hits.old > query.hits.new}"></i> {{query.percent}}%

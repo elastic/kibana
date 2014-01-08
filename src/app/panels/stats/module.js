@@ -28,7 +28,7 @@ define([
   var module = angular.module('kibana.panels.stats', []);
   app.useModule(module);
 
-  module.controller('stats', function ($scope, querySrv, dashboard, filterSrv, formatter) {
+  module.controller('stats', function ($scope, querySrv, dashboard, filterSrv) {
 
     $scope.panelMeta = {
       modals : [
@@ -130,12 +130,12 @@ define([
           var alias = q.alias || q.query;
           var obj = _.clone(q);
           obj.label = alias;
-          obj.value = formatter.format($scope.panel.format,results.facets['stats_'+alias][$scope.panel.mode]);
+          obj.value = kbn.format(results.facets['stats_'+alias][$scope.panel.mode], $scope.panel.format);
           return obj;
         });
 
         $scope.data = {
-          value: formatter.format($scope.panel.format, value),
+          value: kbn.format(value, $scope.panel.format),
           rows: rows
         };
 

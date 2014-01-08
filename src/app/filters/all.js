@@ -1,4 +1,10 @@
-define(['angular', 'jquery', 'underscore', 'moment'], function (angular, $, _, moment) {
+define([
+  'angular', 
+  'jquery', 
+  'underscore', 
+  'moment', 
+  'kbn'
+], function (angular, $, _, moment, kbn) {
   'use strict';
 
   var module = angular.module('kibana.filters');
@@ -127,6 +133,10 @@ define(['angular', 'jquery', 'underscore', 'moment'], function (angular, $, _, m
         }
       }
     };
+  });
+
+  module.filter('format', function() {
+    return kbn.format;
   });
 
 });

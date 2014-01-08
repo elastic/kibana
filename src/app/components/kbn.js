@@ -1,4 +1,10 @@
-define(['jquery','underscore','moment','chromath'],
+define([
+  'jquery',
+  'underscore',
+  'moment',
+  'chromath',  
+  'numeral' /*global numeral */
+],
 function($, _, moment) {
   'use strict';
 
@@ -499,98 +505,28 @@ function($, _, moment) {
     }
   };
 
-  kbn.byteFormat = function(size, decimals) {
-    var ext, steps = 0;
-
-    if(_.isUndefined(decimals)) {
-      decimals = 2;
-    } else if (decimals === 0) {
-      decimals = undefined;
+  // Format any given number
+  kbn.format = function(value,format) {
+    switch (format) {
+    case 'money':
+      value = numeral(value).format('$0,0.00');
+      break;
+    case 'bytes':
+      value = numeral(value).format('0.00b');
+      break;
+    case 'short':
+      value = numeral(value).format('0.0a');
+      break;
+    case 'float':
+      value = numeral(value).format('0.000');
+      break;
+    case 'none':
+      break;
+    default:
+      value = numeral(value).format('0,0');
     }
 
-    while (Math.abs(size) >= 1024) {
-      steps++;
-      size /= 1024;
-    }
-
-    switch (steps) {
-    case 0:
-      ext = " B";
-      break;
-    case 1:
-      ext = " KB";
-      break;
-    case 2:
-      ext = " MB";
-      break;
-    case 3:
-      ext = " GB";
-      break;
-    case 4:
-      ext = " TB";
-      break;
-    case 5:
-      ext = " PB";
-      break;
-    case 6:
-      ext = " EB";
-      break;
-    case 7:
-      ext = " ZB";
-      break;
-    case 8:
-      ext = " YB";
-      break;
-    }
-
-    return (size.toFixed(decimals) + ext);
-  };
-
-  kbn.shortFormat = function(size, decimals) {
-    var ext, steps = 0;
-
-    if(_.isUndefined(decimals)) {
-      decimals = 2;
-    } else if (decimals === 0) {
-      decimals = undefined;
-    }
-
-    while (Math.abs(size) >= 1000) {
-      steps++;
-      size /= 1000;
-    }
-
-    switch (steps) {
-    case 0:
-      ext = "";
-      break;
-    case 1:
-      ext = " K";
-      break;
-    case 2:
-      ext = " Mil";
-      break;
-    case 3:
-      ext = " Bil";
-      break;
-    case 4:
-      ext = " Tri";
-      break;
-    case 5:
-      ext = " Quadr";
-      break;
-    case 6:
-      ext = " Quint";
-      break;
-    case 7:
-      ext = " Sext";
-      break;
-    case 8:
-      ext = " Sept";
-      break;
-    }
-
-    return (size.toFixed(decimals) + ext);
+    return value;
   };
 
   return kbn;

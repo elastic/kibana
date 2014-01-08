@@ -19,6 +19,11 @@
         <input class="input-mini" type="number" ng-model="panel.size" ng-change="set_refresh(true)">
       </div>
       <div class="editor-option">
+        <label class="small">Format <tip>Field formatting</tip></label>
+        <select class="input-small" ng-model="panel.format" ng-include src="'app/partials/format.html'">
+        </select>      
+      </div>
+      <div class="editor-option">
         <label class="small">Exclude Terms(s) (comma seperated)</label>
         <input array-join type="text" ng-model='panel.exclude'></input>
       </div>

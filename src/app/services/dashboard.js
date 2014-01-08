@@ -6,7 +6,9 @@ define([
   'config',
   'moment',
   'modernizr',
-  'filesaver'
+  'filesaver',
+  'numeral', /*global numeral */
+  'numeral.languages'
 ],
 function (angular, $, kbn, _, config, moment, Modernizr) {
   'use strict';
@@ -15,7 +17,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
 
   module.service('dashboard', function(
     $routeParams, $http, $rootScope, $injector, $location, $timeout,
-    ejsResource, timer, kbnIndex, alertSrv, formatter
+    ejsResource, timer, kbnIndex, alertSrv
   ) {
     // A hash of defaults to use when loading a dashboard
 
@@ -222,7 +224,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
       // Take out any that we're not allowed to add from the gui.
       self.availablePanels = _.difference(self.availablePanels,config.hidden_panels);
 
-      formatter.language(dashboard.lang)
+      numeral.language(dashboard.lang);
 
       return true;
     };

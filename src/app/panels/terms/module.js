@@ -249,7 +249,7 @@ function (angular, app, _, $, kbn) {
 
   });
 
-  module.directive('termsChart', function(querySrv, formatter) {
+  module.directive('termsChart', function(querySrv) {
     return {
       restrict: 'A',
       link: function(scope, elem) {
@@ -269,13 +269,8 @@ function (angular, app, _, $, kbn) {
           scope.data = [];
           _.each(scope.results.facets.terms.terms, function(v) {
             var slice;
-            if(scope.panel.tmode === 'terms') {
-              var data = [
-                k,
-                 v.count
-              ];
-              
-              slice = { label : v.term, data : [data], actions: true};
+            if(scope.panel.tmode === 'terms') {              
+              slice = { label : v.term, data : [[k, v.count]], actions: true};
             }
             if(scope.panel.tmode === 'terms_stats') {
               slice = { label : v.term, data : [[k,v[scope.panel.tstat]]], actions: true};
@@ -327,7 +322,7 @@ function (angular, app, _, $, kbn) {
                     min: 0, 
                     color: "#c8c8c8",
                     tickFormatter: function(val) {
-                      return formatter.format(scope.panel.format, val);
+                      return kbn.format(val, scope.panel.format);
                     }  
                   },
                   xaxis: { show: false },
@@ -409,7 +404,7 @@ function (angular, app, _, $, kbn) {
               .html(
                 kbn.query_color_dot(item.series.color, 20) + ' ' +
                 item.series.label + " (" + 
-                  formatter.format(scope.panel.format, value)
+                  kbn.format(value, scope.panel.format)
                 + ")"
               )
               .place_tt(pos.pageX, pos.pageY);
@@ -418,7 +413,6 @@ function (angular, app, _, $, kbn) {
           }
         });
 
-        scope.format = formatter.format
       }
     };
   });

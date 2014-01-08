@@ -213,7 +213,7 @@ define([
 
   });
 
-  module.directive('pie', function(querySrv, filterSrv, formatter) {
+  module.directive('pie', function(querySrv, filterSrv) {
     return {
       restrict: 'A',
       link: function(scope, elem) {
@@ -328,7 +328,6 @@ define([
           }
         });
 
-        scope.format = formatter.format
       }
     };
   });

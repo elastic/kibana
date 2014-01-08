@@ -34,7 +34,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
   var module = angular.module('kibana.panels.histogram', []);
   app.useModule(module);
 
-  module.controller('histogram', function($scope, querySrv, dashboard, filterSrv, formatter) {
+  module.controller('histogram', function($scope, querySrv, dashboard, filterSrv) {
     $scope.panelMeta = {
       modals : [
         {
@@ -425,11 +425,9 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
               $scope.hits += entry.count; // Entire dataset level hits counter
             });
 
-            $scope.hits = formatter.format($scope.panel.y_format, $scope.hits)
-
             $scope.legend[i] = {
               query:q,
-              hits:formatter.format($scope.panel.y_format, hits)
+              hits:hits
             };
 
             data[i] = {
@@ -527,7 +525,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
 
   });
 
-  module.directive('histogramChart', function(dashboard, filterSrv, formatter) {
+  module.directive('histogramChart', function(dashboard, filterSrv) {
     return {
       restrict: 'A',
       template: '<div></div>',
@@ -644,8 +642,8 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
             };
 
             options.yaxis.tickFormatter = function(val) {
-                return formatter.format(scope.panel.y_format, val);
-            };
+                return kbn.format(val, scope.panel.y_format);
+              };
       
 
             if(scope.panel.annotate.enable) {
@@ -707,6 +705,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
         }
 
         function time_format(interval) {
+          console.log(interval)
           var _int = kbn.interval_to_seconds(interval);
           if(_int >= 2628000) {
             return "%Y-%m";
@@ -737,7 +736,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
               item.datapoint[1] - item.datapoint[2] :
               item.datapoint[1];
     
-            value = formatter.format(scope.panel.y_format, value);
+            value = kbn.format(value, scope.panel.y_format);
             
             timestamp = scope.panel.timezone === 'browser' ?
               moment(item.datapoint[0]).format('YYYY-MM-DD HH:mm:ss') :

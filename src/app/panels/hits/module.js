@@ -189,7 +189,7 @@ define([
   });
 
 
-  module.directive('hitsChart', function(querySrv, formatter) {
+  module.directive('hitsChart', function(querySrv) {
     return {
       restrict: 'A',
       link: function(scope, elem) {
@@ -232,7 +232,7 @@ define([
                   min: 0, 
                   color: "#c8c8c8",
                   tickFormatter: function(val) {
-                    return formatter.format(scope.panel.format, val);
+                    return kbn.format(val, scope.panel.format);
                   }
                 },
                 xaxis: { show: false },
@@ -292,7 +292,7 @@ define([
               .html(
                 kbn.query_color_dot(item.series.color, 20) + ' ' +
                 item.series.label + " (" + 
-                  formatter.format(scope.panel.format, value)
+                  kbn.format(value, scope.panel.format)
                 + ")")
               .place_tt(pos.pageX, pos.pageY);
           } else {
@@ -300,7 +300,6 @@ define([
           }
         });
 
-        scope.format = formatter.format
       }
     };
   });
