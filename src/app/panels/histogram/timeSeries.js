@@ -63,7 +63,11 @@ function (_, Interval) {
       time = base10Int(time);
     }
     if (!isNaN(time)) {
-      this._data[time] = (_.isUndefined(value) ? 0 : value);
+      if(_.isUndefined(this._data[time])) {
+        this._data[time] = (_.isUndefined(value) ? 0 : value);
+      } else {
+        this._data[time] += (_.isUndefined(value) ? 0 : value);
+      }
     }
     this._cached_times = null;
   };
