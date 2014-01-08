@@ -641,13 +641,16 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
               }
             };
 
-            if(scope.panel.y_format === 'bytes') {
+            if (scope.panel.y_format === 'bytes') {
               options.yaxis.mode = "byte";
+              options.yaxis.tickFormatter = function (val, axis) {
+                return kbn.byteFormat(val, 0, axis.tickSize);
+              };
             }
 
-            if(scope.panel.y_format === 'short') {
-              options.yaxis.tickFormatter = function(val) {
-                return kbn.shortFormat(val,0);
+            if (scope.panel.y_format === 'short') {
+              options.yaxis.tickFormatter = function (val, axis) {
+                return kbn.shortFormat(val, 0, axis.tickSize);
               };
             }
 
