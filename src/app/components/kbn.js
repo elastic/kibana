@@ -238,6 +238,22 @@ function($, _, moment) {
     return info.sec * info.count;
   };
 
+  kbn.intervalToDateFormat = function (interval) {
+    var format = "HH:mm<br>MM-DD";
+    var _int = kbn.interval_to_seconds(interval);
+    if(_int >= 2628000) {
+      format = "YYYY-MM-DD<br>MMMM";
+    }
+    else if(_int >= 604800) {
+      format = 'YYYY-MM-DD<br>Wo [week]';
+    }
+    else if(_int >= 86400) {
+      format = 'YYYY-MM-DD<br>dddd';
+    }
+
+    return format;
+  };
+
   // This should go away, moment.js can do this
   kbn.time_ago = function(string) {
     return new Date(new Date().getTime() - (kbn.interval_to_ms(string)));

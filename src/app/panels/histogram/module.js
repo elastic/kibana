@@ -568,6 +568,18 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
           });
         };
 
+        var timeFormat = function(val, stripHTML) {
+          var format = kbn.intervalToDateFormat(scope.panel.interval);
+
+          if (stripHTML === true) {
+            format = format.replace(/<(?:.|\n)*?>/gm, ' ');
+          }
+
+          return scope.panel.timezone === 'browser' ?
+          moment(val).format(format) :
+          moment.utc(val).format(format);
+        };
+
         // Function for rendering panel
         function render_panel(data) {
           // IE doesn't work without this
@@ -626,7 +638,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
                 mode: "time",
                 min: _.isUndefined(scope.range.from) ? null : scope.range.from.getTime(),
                 max: _.isUndefined(scope.range.to) ? null : scope.range.to.getTime(),
-                timeformat: time_format(scope.panel.interval),
+                tickFormatter: timeFormat,
                 label: "Datetime",
                 ticks: elem.width()/100
               },
@@ -706,24 +718,9 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
           }
         }
 
-        function time_format(interval) {
-          var _int = kbn.interval_to_seconds(interval);
-          if(_int >= 2628000) {
-            return "%Y-%m";
-          }
-          if(_int >= 86400) {
-            return "%Y-%m-%d";
-          }
-          if(_int >= 60) {
-            return "%H:%M<br>%m-%d";
-          }
-
-          return "%H:%M:%S";
-        }
-
         var $tooltip = $('<div>');
         elem.bind("plothover", function (event, pos, item) {
-          var group, value, timestamp;
+          var group, value;
           if (item) {
             if (item.series.info.alias || scope.panel.tooltip.query_as_alias) {
               group = '<small style="font-size:0.9em;">' +
@@ -742,12 +739,10 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
             if(scope.panel.y_format === 'short') {
               value = kbn.shortFormat(value,2);
             }
-            timestamp = scope.panel.timezone === 'browser' ?
-              moment(item.datapoint[0]).format('YYYY-MM-DD HH:mm:ss') :
-              moment.utc(item.datapoint[0]).format('YYYY-MM-DD HH:mm:ss');
+           
             $tooltip
               .html(
-                group + value + " @ " + timestamp
+                group + value + " @ " + timeFormat(item.datapoint[0], true)
               )
               .place_tt(pos.pageX, pos.pageY);
           } else {
