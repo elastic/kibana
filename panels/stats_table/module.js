@@ -15,7 +15,7 @@ define([
 
     function y_format_metric_value(value, metric) {
       // If this isn't a number, change nothing
-      if(_.isNaN(value) || !_.isFinite(value)) {
+      if (_.isNaN(value) || !_.isFinite(value)) {
         return value;
       }
       if (metric.y_format === 'bytes') {
@@ -28,7 +28,7 @@ define([
     }
 
     function stripRaw(fieldName) {
-      return fieldName.replace(/\.raw$/,'');
+      return fieldName.replace(/\.raw$/, '');
     }
 
     module.controller('marvel.stats_table', function ($scope, dashboard, filterSrv, $filter) {
@@ -66,7 +66,7 @@ define([
           },
           availableMetrics: [
             {
-              name: 'CPU (%)',
+              name: 'OS CPU (%)',
               field: 'os.cpu.usage',
               warning: 60,
               error: 90
@@ -84,7 +84,7 @@ define([
               error: 98
             },
             {
-              name: 'Free',
+              name: 'Disk Free Space',
               field: 'fs.total.available_in_bytes',
               warning: {
                 threshold: 50 * 1024 * 1024 * 1024,
@@ -95,8 +95,7 @@ define([
                 type: "lower_bound"
               },
               y_format: "bytes"
-            }
-            ,
+            },
             {
               name: 'IOps',
               field: 'fs.total.disk_io_op',
@@ -106,7 +105,7 @@ define([
         },
         indices: {
           defaults: {
-            display_field: 'index',
+            display_field: null,// identical to index.raw
             persistent_field: 'index.raw',
             metrics: [ 'primaries.docs.count', 'primaries.indexing.index_total', 'total.search.query_total',
               'total.merges.total_size_in_bytes', 'total.fielddata.memory_size_in_bytes'
@@ -133,7 +132,7 @@ define([
               y_format: "short"
             },
             {
-              name: 'Merge rate',
+              name: 'Merge Rate',
               field: 'total.merges.total_size_in_bytes',
               derivative: true,
               y_format: "bytes"
@@ -194,7 +193,7 @@ define([
         _.throttle($scope.get_rows(), 500);
       });
 
-      $scope.$watch('(rows|filter:panel.rowFilter).length', function(l) {
+      $scope.$watch('(rows|filter:panel.rowFilter).length', function (l) {
         //Compute view based on number of rows
         rowsVsRefresh(l);
       });
@@ -282,6 +281,19 @@ define([
             return;
           }
 
+          if (!$scope.panel.display_field || $scope.panel.display_field === $scope.panel.persistent_field) {
+            $scope.get_data(_.map(newPersistentIds, function (id) {
+              return {
+                display_name: id,
+                id: id,
+                // using findWhere here, though its not very efficient
+                selected: (_.findWhere($scope.rows, {id: id}) || {}).selected
+              };
+            }));
+            return;
+          }
+
+          // go get display names.
           mrequest = $scope.ejs.MultiSearchRequest().indices(dashboard.indices);
 
           _.each(newPersistentIds, function (persistentId) {
@@ -315,7 +327,7 @@ define([
                 display_name: display_name || persistent_name,
                 id: persistent_name,
                 // using findWhere here, though its not very efficient
-                selected: (_.findWhere($scope.rows,{id:persistent_name}) || {}).selected
+                selected: (_.findWhere($scope.rows, {id: persistent_name}) || {}).selected
               });
             });
             $scope.get_data(newRows);
@@ -468,8 +480,8 @@ define([
         }
       };
 
-      $scope.showFullTable = function() {
-        if($scope.panel.compact) {
+      $scope.showFullTable = function () {
+        if ($scope.panel.compact) {
           return false;
         } else {
           return true;

@@ -40,7 +40,7 @@ dashboard.index = {
   'warm_fields': false
 };
 
-dashboard.refresh="5s";
+dashboard.refresh="1m";
 
 
 // In this dashboard we let users pass nodes as comma seperated list to the query parameter.
@@ -159,6 +159,7 @@ var rows = [
     "panels": [
       {
         "value_field": "primaries.indexing.index_total",
+        "title": "Indexing request rate",
         "derivative": true,
         "mode": "min",
         "scaleSeconds": true

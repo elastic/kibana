@@ -27,6 +27,13 @@
                     }
                 }
             } ]
+        },
+        "node_stats": {
+            "properties": {
+                "indices.percolate.size_in_bytes": { "type": "long"},
+                "jvm.buffer_pools.direct.used_in_bytes": { "type": "long" },
+                "jvm.buffer_pools.mapped.used_in_bytes": { "type": "long" }
+            }
         }
     }
 }

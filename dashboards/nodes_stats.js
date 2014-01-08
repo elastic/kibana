@@ -40,7 +40,7 @@ dashboard.index = {
   'warm_fields': false
 };
 
-dashboard.refresh="5s";
+dashboard.refresh="1m";
 
 // In this dashboard we let users pass nodes as comma seperated list to the query parameter.
 // If nodes are defined, split into a list of query objects, otherwise, show all
@@ -144,19 +144,19 @@ panel_defaults_by_type["histogram"] = {
 
 var rows = [
   {
-    "title": "Server",
+    "title": "Essentials",
     "panels": [
       {
         "value_field": "os.cpu.usage",
-        "title": "CPU",
+        "title": "OS CPU",
         "grid": {
           "max": 100,
           "min": 0
         }
       },
       {
-        "value_field": "os.mem.used_percent",
-        "title": "Memory usage (%)",
+        "value_field": "jvm.mem.heap_used_percent",
+        "title": "JVM Heap usage (%)",
         "grid": {
           "max": 100,
           "min": 0
@@ -169,11 +169,44 @@ var rows = [
     ]
   },
   {
-    "title": "Server 2",
+    "title": "OS",
     "panels": [
       {
+        "value_field": "os.cpu.usage",
+        "title": "OS CPU",
+        "grid": {
+          "max": 100,
+          "min": 0
+        }
+      },
+      {
+        "value_field": "os.mem.used_percent",
+        "title": "OS Memory usage (%)",
+        "grid": {
+          "max": 100,
+          "min": 0
+        }
+      },
+      {
+        "value_field": "os.load_average.1m",
+        "title": "OS Load (1m)"
+      }
+    ]
+  },
+  {
+    "title": "OS Extended",
+    "panels": [
+      {
+        "value_field": "os.cpu.sys",
+        "title": "OS CPU Sys",
+        "grid": {
+          "max": 100,
+          "min": 0
+        }
+      },
+      {
         "value_field": "os.cpu.stolen",
-        "title": "CPU steal",
+        "title": "OS CPU Steal",
         "grid": {
           "max": 100,
           "min": 0
@@ -182,23 +215,39 @@ var rows = [
       {
         "time_field": "@timestamp",
         "value_field": "os.swap.used_in_bytes",
-        "title": "Used Swap",
+        "title": "OS Swap Used",
         "y_format": "bytes"
       }
     ]
-  },
-  {
+  },{
     "title": "JVM Memory",
     "panels": [
       {
         "time_field": "@timestamp",
         "value_field": "jvm.mem.heap_used_in_bytes",
-        "title": "Heap",
+        "title": "JVM Heap Used",
         "y_format": "bytes"
       },
       {
+        "time_field": "@timestamp",
+        "value_field": "jvm.mem.pools.Par Eden Space.used_in_bytes",
+        "title": "JVM Young Gen usage",
+        "y_format": "bytes"
+      },
+      {
+        "time_field": "@timestamp",
+        "value_field": "jvm.mem.pools.CMS Old Gen.used_in_bytes",
+        "title": "JVM Old Gen usage",
+        "y_format": "bytes"
+      }
+    ]
+  },
+  {
+    "title": "JVM GC Young",
+    "panels": [
+      {
         "value_field": "jvm.gc.collectors.ParNew.collection_time_in_millis",
-        "title": "GC Young Gen duration (time %)",
+        "title": "GC Young Duration (time %)",
         "derivative": true,
         "mode": "min",
         "scaleSeconds": true,
@@ -206,68 +255,216 @@ var rows = [
         "grid": {
           "max": 100,
           "min": 0
-        }
+        },
+        "span": 6,
+        "resolution": 20
       },
       {
         "value_field": "jvm.gc.collectors.ParNew.collection_count",
-        "title": "GC counts",
+        "title": "GC Young Counts",
         "derivative": true,
         "mode": "min",
-        "scaleSeconds": true
+        "scaleSeconds": false,
+        "span": 6,
+        "resolution": 20
       }
     ]
   },
   {
-    "title": "JVM Memory 2",
+    "title": "JVM GC Old",
     "panels": [
       {
         "value_field": "jvm.gc.collectors.ConcurrentMarkSweep.collection_time_in_millis",
+        "title": "GC Old Duration (time %)",
         "derivative": true,
         "mode": "min",
-        "title": "GC Old Gen duration (time %)",
         "scaleSeconds": true,
         "scale": 0.001 * 100,
         "grid": {
           "max": 100,
           "min": 0
-        }
+        },
+        "span": 6,
+        "resolution": 20
       },
       {
         "value_field": "jvm.gc.collectors.ConcurrentMarkSweep.collection_count",
+        "title": "GC Old Counts",
         "derivative": true,
-        "scaleSeconds": true,
         "mode": "min",
-        "title": "GC Old Gen count"
+        "scaleSeconds": false,
+        "span": 6,
+        "resolution": 20
       }
     ]
   },
   {
-    "title": "Caches",
+    "title": "Indices Memory",
     "panels": [
       {
         "value_field": "indices.fielddata.memory_size_in_bytes",
-        "title": "Field Data",
+        "title": "Indices Field Data",
         "y_format": "bytes"
       },
       {
         "value_field": "indices.filter_cache.memory_size_in_bytes",
-        "title": "Filter cache",
+        "title": "Indices Filter cache",
         "y_format": "bytes"
       },
       {
         "value_field": "indices.id_cache.memory_size_in_bytes",
-        "title": "Id cache",
+        "title": "Indices Id Cache",
         "y_format": "bytes"
       }
     ]
   },
   {
-    "title": "Caches 2",
+    "title": "Indices Memory Extended",
     "panels": [
       {
-        "value_field": "indices.completion.size_in_bytes",
-        "title": "Completion size",
+        "value_field": "indices.percolate.size_in_bytes",
+        "title": "Indices Percolation size",
         "y_format": "bytes"
+      },
+      {
+        "value_field": "indices.completion.size_in_bytes",
+        "title": "Indices Completion size",
+        "y_format": "bytes"
+      }
+    ]
+  },
+  {
+    "title": "Indices Search Requests Query",
+    "panels": [
+      {
+        "value_field": "indices.search.query_total",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "title": "Indices Search Query Rate"
+      },
+      {
+        "value_field": "indices.search.query_time_in_millis",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "scale": 0.001,
+        "title": "Indices Total Search Query Time"
+      }
+    ]
+  },
+  {
+    "title": "Indices Search Requests Fetch",
+    "panels": [
+      {
+        "value_field": "indices.search.fetch_total",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "title": "Indices Search Fetch Rate"
+      },
+      {
+        "value_field": "indices.search.fetch_time_in_millis",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "scale": 0.001,
+        "title": "Indices Total Search Fetch Time"
+      }
+    ]
+  },
+  {
+    "title": "Indices Indexing Requests",
+    "panels": [
+      {
+        "value_field": "indices.indexing.index_total",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "title": "Indices Indexing Rate"
+      },
+      {
+        "value_field": "indices.indexing.index_time_in_millis",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "scale": 0.001,
+        "title": "Indices Total Indexing Time"
+      },
+      {
+        "value_field": "indices.indexing.delete_total",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "title": "Indices Delete Rate"
+      }
+    ]
+  },
+  {
+    "title": "Indices Get Requests",
+    "panels": [
+      {
+        "value_field": "indices.get.total",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "title": "Indices Get Requests Rate"
+      },
+      {
+        "value_field": "indices.get.time_in_millis",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "scale": 0.001,
+        "title": "Indices Total Get Time"
+      }
+    ]
+  },
+  {
+    "title": "Indices Management",
+    "panels": [
+      {
+        "value_field": "indices.merges.current_size_in_bytes",
+        "mode": "max",
+        "y_format": "bytes",
+        "title": "Indices Current Merges"
+      },
+      {
+        "value_field": "indices.refresh.total_time_in_millis",
+        "derivative": true,
+        "mode": "min",
+        "scale": 0.001,
+        "scaleSeconds": true,
+        "title": "Indices Total Refresh Time"
+      },
+      {
+        "value_field": "indices.flush.total",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "title": "Indices Flush count"
+      }
+    ]
+  },
+  {
+    "title": "Indices Management Extended",
+    "panels": [
+      {
+        "value_field": "indices.search.open_contexts",
+        "mode": "max",
+        "title": "Indices Open Search Contexts"
+      },
+      {
+        "value_field": "indices.warmer.total_time_in_millis",
+        "derivative": true,
+        "mode": "min",
+        "scale": 0.001,
+        "scaleSeconds": true,
+        "title": "Indices Total Warmer Time"
+      },
+      {
+        "value_field": "indices.segments.count",
+        "title": "Indices Segment Count"
       }
     ]
   },
@@ -343,59 +540,6 @@ var rows = [
         "derivative": true,
         "mode": "min",
         "scaleSeconds": true
-      }
-    ]
-  },
-  {
-    "title": "Indexing",
-    "panels": [
-      {
-        "value_field": "indices.indexing.index_total",
-        "derivative": true,
-        "scaleSeconds": true,
-        "title": "Indexing requests"
-      },
-      {
-        "value_field": "indices.merges.current_size_in_bytes",
-        "title": "Merges size",
-        "y_format": "bytes"
-      },
-      {
-        "value_field": "indices.refresh.total_time_in_millis",
-        "derivative": true,
-        "mode": "min",
-        "scaleSeconds": true,
-        "title": "Avg refresh time"
-      }
-    ]
-  },
-  {
-    "title": "Indexing 2",
-    "panels": [
-      {
-        "value_field": "indices.flush.total",
-        "derivative": true,
-        "mode": "min",
-        "title": "Flush count"
-      }
-    ]
-  },
-  {
-    "title": "Search & Get",
-    "panels": [
-      {
-        "value_field": "indices.search.query_total",
-        "derivative": true,
-        "mode": "min",
-        "scaleSeconds": true,
-        "title": "Search requests"
-      },
-      {
-        "value_field": "indices.get.total",
-        "derivative": true,
-        "mode": "min",
-        "scaleSeconds": true,
-        "title": "Get requests"
       }
     ]
   },
