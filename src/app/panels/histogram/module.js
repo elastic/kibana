@@ -327,6 +327,9 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
 
       $scope.panelMeta.loading = true;
       request = $scope.ejs.Request().indices(dashboard.indices[segment]);
+      if (!$scope.panel.annotate.enable) {
+        request.searchType("count");
+      }
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
 
