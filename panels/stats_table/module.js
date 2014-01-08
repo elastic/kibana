@@ -31,7 +31,7 @@ define([
       return fieldName.replace(/\.raw$/,'');
     }
 
-    module.controller('marvel.stats_table', function ($scope, dashboard, filterSrv) {
+    module.controller('marvel.stats_table', function ($scope, dashboard, filterSrv, $filter) {
       $scope.panelMeta = {
         modals: [],
         editorTabs: [],
@@ -196,7 +196,20 @@ define([
 
       $scope.$watch('(rows|filter:panel.rowFilter).length', function(l) {
         //Compute view based on number of rows
-        if(l > 5 && kbn.interval_to_seconds(dashboard.current.refresh) < 120) {
+        rowsVsRefresh(l);
+      });
+
+      $scope.$watch('dashboard.current.refresh',function() {
+        var l = $filter('filter')($scope.rows, $scope.panel.rowFilter).length;
+        rowsVsRefresh(l);
+      });
+
+      $scope.$watch('panel.show_hidden', function () {
+        _.throttle($scope.get_rows(), 500);
+      });
+
+      var rowsVsRefresh = function(l) {
+        if(l > 5 && kbn.interval_to_seconds(dashboard.current.refresh || '1y') < 120) {
           $scope.panel.compact = true;
           $scope.sparkLines = false;
           $scope.viewSelect = false;
@@ -204,13 +217,10 @@ define([
           $scope.viewSelect = true;
           $scope.sparkLines = true;
         }
-      });
-
-      $scope.$watch('panel.show_hidden', function () {
-        _.throttle($scope.get_rows(), 500);
-      });
+      };
 
       $scope.init = function () {
+        $scope.dashboard = dashboard;
         $scope.rowLimit = 20;
 
         $scope.sparkLines = true;
