@@ -518,33 +518,33 @@ function($, _, moment) {
     }
 
     switch (steps) {
-      case 0:
-        ext = " B";
-        break;
-      case 1:
-        ext = " KB";
-        break;
-      case 2:
-        ext = " MB";
-        break;
-      case 3:
-        ext = " GB";
-        break;
-      case 4:
-        ext = " TB";
-        break;
-      case 5:
-        ext = " PB";
-        break;
-      case 6:
-        ext = " EB";
-        break;
-      case 7:
-        ext = " ZB";
-        break;
-      case 8:
-        ext = " YB";
-        break;
+    case 0:
+      ext = " B";
+      break;
+    case 1:
+      ext = " KB";
+      break;
+    case 2:
+      ext = " MB";
+      break;
+    case 3:
+      ext = " GB";
+      break;
+    case 4:
+      ext = " TB";
+      break;
+    case 5:
+      ext = " PB";
+      break;
+    case 6:
+      ext = " EB";
+      break;
+    case 7:
+      ext = " ZB";
+      break;
+    case 8:
+      ext = " YB";
+      break;
     }
 
     if (min_resolution) {
@@ -579,33 +579,33 @@ function($, _, moment) {
     }
 
     switch (steps) {
-      case 0:
-        ext = "";
-        break;
-      case 1:
-        ext = " K";
-        break;
-      case 2:
-        ext = " Mil";
-        break;
-      case 3:
-        ext = " Bil";
-        break;
-      case 4:
-        ext = " Tri";
-        break;
-      case 5:
-        ext = " Quadr";
-        break;
-      case 6:
-        ext = " Quint";
-        break;
-      case 7:
-        ext = " Sext";
-        break;
-      case 8:
-        ext = " Sept";
-        break;
+    case 0:
+      ext = "";
+      break;
+    case 1:
+      ext = " K";
+      break;
+    case 2:
+      ext = " Mil";
+      break;
+    case 3:
+      ext = " Bil";
+      break;
+    case 4:
+      ext = " Tri";
+      break;
+    case 5:
+      ext = " Quadr";
+      break;
+    case 6:
+      ext = " Quint";
+      break;
+    case 7:
+      ext = " Sext";
+      break;
+    case 8:
+      ext = " Sept";
+      break;
     }
 
     if (min_resolution) {
