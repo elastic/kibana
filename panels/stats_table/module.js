@@ -216,13 +216,13 @@ define([
       var rowsVsRefresh = function (l) {
         if (l > 5 && kbn.interval_to_seconds(dashboard.current.refresh || '1y') < 120) {
           $scope.panel.compact = true;
-          $scope.sparkLines = false;
+          $scope.sparkLines = true;
           $scope.viewSelect = false;
           if(l > 100 && kbn.interval_to_seconds(dashboard.current.refresh || '1y') < 300) {
             dashboard.set_interval('2m');
             alertSrv.set('Refresh rate',
               'Due to the large size of your cluster, the refresh rate has been adjusted to 2m',
-              'info',10000);
+              'info',30000);
           }
         } else {
           $scope.viewSelect = true;
