@@ -60,7 +60,7 @@ define([
       display_breakdown: 'yes',
       sort_field: '',
       sort_reverse: false,
-      label_name: 'Label',
+      label_name: 'Query',
       value_name: 'Value',
       spyable     : true
     };
@@ -74,13 +74,13 @@ define([
       });
       $scope.get_data();
     };
-    
+
     $scope.set_sort = function(field) {
       if($scope.panel.sort_field === field && $scope.panel.sort_reverse === false) {
         $scope.panel.sort_reverse = true;
       } else if($scope.panel.sort_field === field && $scope.panel.sort_reverse === true) {
         $scope.panel.sort_field = '';
-        $scope.panel.sort_reverse = false;  
+        $scope.panel.sort_reverse = false;
       } else {
         $scope.panel.sort_field = field;
         $scope.panel.sort_reverse = false;
@@ -93,7 +93,7 @@ define([
       }
 
       $scope.panelMeta.loading = true;
-      
+
       var request,
         results,
         boolQuery,
@@ -122,7 +122,7 @@ define([
 
       _.each(queries, function (q) {
         var alias = q.alias || q.query;
-        var query = $scope.ejs.BoolQuery(); 
+        var query = $scope.ejs.BoolQuery();
         query.should(querySrv.toEjsObj(q));
         request.facet($scope.ejs.StatisticalFacet('stats_'+alias)
           .field($scope.panel.field)
@@ -159,7 +159,7 @@ define([
 
       results.then(function(results) {
         $scope.panelMeta.loading = false;
-        var value = results.facets.stats[$scope.panel.mode]; 
+        var value = results.facets.stats[$scope.panel.mode];
 
         var rows = queries.map(function (q) {
           var alias = q.alias || q.query;
