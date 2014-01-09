@@ -13,6 +13,16 @@ define([
     var module = angular.module('kibana.panels.marvel.stats_table', []);
     app.useModule(module);
 
+    var log_debug;
+    if (false) {
+      log_debug = function (msg) {
+        console.log(msg);
+      };
+    } else {
+      log_debug = function () {
+      };
+    }
+
     function y_format_metric_value(value, metric) {
       // If this isn't a number, change nothing
       if (_.isNaN(value) || !_.isFinite(value)) {
@@ -190,7 +200,6 @@ define([
         $scope.panel.metrics = _.map($scope.modeInfo[m].defaults.metrics, function (m) {
           return metricDefaults(m);
         });
-        _.throttle($scope.get_rows(), 500);
       });
 
       $scope.$watch('(rows|filter:panel.rowFilter).length', function (l) {
@@ -198,17 +207,14 @@ define([
         rowsVsRefresh(l);
       });
 
-      $scope.$watch('dashboard.current.refresh',function() {
+      $scope.$watch('dashboard.current.refresh', function () {
         var l = $filter('filter')($scope.rows, $scope.panel.rowFilter).length;
         rowsVsRefresh(l);
       });
 
-      $scope.$watch('panel.show_hidden', function () {
-        _.throttle($scope.get_rows(), 500);
-      });
 
-      var rowsVsRefresh = function(l) {
-        if(l > 5 && kbn.interval_to_seconds(dashboard.current.refresh || '1y') < 120) {
+      var rowsVsRefresh = function (l) {
+        if (l > 5 && kbn.interval_to_seconds(dashboard.current.refresh || '1y') < 120) {
           $scope.panel.compact = true;
           $scope.sparkLines = false;
           $scope.viewSelect = false;
@@ -230,14 +236,78 @@ define([
         $scope.$on('refresh', function () {
           $scope.get_rows();
         });
+        $scope.get_rows();
       };
 
       $scope.get_mode_filter = function () {
         return $scope.ejs.TermFilter("_type", $scope.panel.mode === "nodes" ? "node_stats" : "index_stats");
       };
 
+
+      /*
+       marks the start of data retrieval. returns true if retrieval should continue
+       or false if not. May schedule future retrival if needed.
+       */
+
+      $scope._register_data_start = function () {
+        var now = new Date();
+        if (!$scope._ongoing_data_retrieval) {
+          $scope._ongoing_data_retrieval = now; // mark start.
+          log_debug("marking data start for " + now);
+          return true;
+        }
+        if (now - $scope._ongoing_data_retrieval > 60000) {
+          console.log("previous data retrieval didn't finish within 1m. executing current request (previous: "
+            + $scope._ongoing_data_retrieval + ")");
+          $scope._ongoing_data_retrieval = now; // mark start.
+          return true;
+        }
+
+        if (!$scope._pending_data_retrieval) {
+          // queue up, in case this is caused by something important, like an editor change.
+          log_debug("queueing data start for " + now);
+          $scope._pending_data_retrieval = now;
+          // safe guard time out to make sure it happens
+          setTimeout(function () {
+            if ($scope._pending_data_retrieval === now) {
+              // somehow this was not picked up... retry
+              console.log("Retrying call from " + now);
+              $scope._pending_data_retrieval = null;
+              $scope.get_rows();
+            }
+          }, 20000);
+        }
+
+        return false;
+      };
+
+      $scope._register_data_end = function () {
+        log_debug("end of data retrieval " + $scope._ongoing_data_retrieval);
+        if ($scope._pending_data_retrieval) {
+          var pending = $scope._pending_data_retrieval;
+          setTimeout(function () {
+            $scope._ongoing_data_retrieval = null;
+            if (pending !== $scope._pending_data_retrieval) {
+              log_debug("firing pending retrieval canceled as it was picked up: " + pending);
+              return;
+            }
+            log_debug("firing pending retrieval " + $scope._pending_data_retrieval);
+            $scope._pending_data_retrieval = null;
+            $scope.get_rows();
+          }, 5000); // leave 5 second of some breathing air
+        } else {
+          $scope._ongoing_data_retrieval = null;
+
+        }
+      };
+
+
       $scope.get_rows = function () {
         if (dashboard.indices.length === 0) {
+          return;
+        }
+
+        if (!$scope._register_data_start()) {
           return;
         }
 
@@ -272,6 +342,7 @@ define([
         results = request.doSearch();
 
         results.then(function (r) {
+
           var newPersistentIds = _.pluck(r.facets.terms.terms, 'term'),
             mrequest;
 
@@ -331,8 +402,8 @@ define([
               });
             });
             $scope.get_data(newRows);
-          });
-        });
+          }, $scope._register_data_end);
+        }, $scope._register_data_end);
 
       };
 
@@ -348,6 +419,7 @@ define([
           $scope.data = {};
           $scope.panelMeta.loading = false;
           $scope.calculateWarnings();
+          $scope._register_data_end();
           return;
         }
 
@@ -385,11 +457,14 @@ define([
 
         // Populate scope when we have results
         results.then(function (results) {
-          $scope.rows = newRows;
-          $scope.data = normalizeFacetResults(results.facets, newRows, $scope.panel.metrics);
-          $scope.panelMeta.loading = false;
-          $scope.calculateWarnings();
-        });
+            $scope.rows = newRows;
+            $scope.data = normalizeFacetResults(results.facets, newRows, $scope.panel.metrics);
+            $scope.panelMeta.loading = false;
+            $scope.calculateWarnings();
+            $scope._register_data_end();
+          },
+          $scope._register_data_end
+        );
       };
 
       var normalizeFacetResults = function (facets, rows, metrics) {
@@ -650,27 +725,28 @@ define([
         });
       };
 
+      $scope.needs_refresh = function (value) {
+        if (_.isUndefined(value)) {
+          value = true;
+        }
+        $scope.needs_refresh = value;
+      };
+
       $scope.close_edit = function () {
         $scope.metricEditor = {
           index: -1
         };
+        if ($scope.needs_refresh) {
+          $scope.get_rows();
+        }
+        $scope.needs_refresh = false;
+        $scope.$emit('render');
       };
 
       $scope.deleteMetric = function (index) {
         $scope.panel.metrics = _.without($scope.panel.metrics, $scope.panel.metrics[index]);
       };
 
-      $scope.set_refresh = function (state) {
-        $scope.refresh = state;
-      };
-
-      $scope.close_edit = function () {
-        if ($scope.refresh) {
-          $scope.get_rows();
-        }
-        $scope.refresh = false;
-        $scope.$emit('render');
-      };
 
     });
 

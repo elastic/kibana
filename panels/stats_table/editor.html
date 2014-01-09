@@ -3,22 +3,22 @@
   <div class="section">
     <div class="editor-option">
       <label class="small">Mode</label>
-      <select class="input-small" ng-model="panel.mode" ng-options="f for f in ['nodes','indices']"></select>
+      <select ng-change="needs_refresh()" class="input-small" ng-model="panel.mode" ng-options="f for f in ['nodes','indices']"></select>
     </div>
   <div class="section" ng-show="panel.mode == 'nodes'">
     <div class="editor-option">
       <label class="small">Persistent id field <tip>choose a field that does not change on node restart</tip></label>
-      <input type="text" bs-typeahead="fields.list" ng-change="set_refresh(true)" class="input-large" ng-model="panel.persistent_field"/>
+      <input type="text" bs-typeahead="fields.list" ng-change="needs_refresh()" class="input-large" ng-model="panel.persistent_field"/>
     </div>
     <div class="editor-option">
       <label class="small">Display field <tip>will be used as the name of each row</tip></label>
-      <input type="text" bs-typeahead="fields.list" class="input-large" ng-change="set_refresh(true)" ng-model="panel.display_field"/>
+      <input type="text" bs-typeahead="fields.list" class="input-large" ng-change="needs_refresh()" ng-model="panel.display_field"/>
     </div>
   </div>
   <div class="section" ng-show="panel.mode == 'indices'">
     <div class="editor-option">
       <label class="small">Show hidden indices <tip>indices whose name starts with a dot (`.`) are considered hidden</tip></label>
-      <input type="checkbox" ng-model="panel.show_hidden" ng-change="set_refresh(true)"/>
+      <input type="checkbox" ng-model="panel.show_hidden" ng-change="needs_refresh()"/>
     </div>
   </div>
 </div>
@@ -69,7 +69,7 @@
 
 
         <td ng-show="metricEditor.index != $index">
-          <i ng-show="metricEditor.index < 0" ng-click="set_refresh(true); metricEditor.index=$index;" class="pointer icon-edit"></i></td>
+          <i ng-show="metricEditor.index < 0" ng-click="needs_refresh(); metricEditor.index=$index;" class="pointer icon-edit"></i></td>
         <td ng-show="metricEditor.index != $index">
           <i ng-show="metricEditor.index < 0 && !$first" ng-click="_.move(panel.metrics,$index,$index-1)" class="pointer icon-arrow-up"></i>
         </td>
@@ -87,7 +87,7 @@
       </tr>
     </table>
     <form class="form-inline">
-      <button class="btn btn-success" ng-click="set_refresh(true); addMetric()">Add Metric</button>
+      <button class="btn btn-success" ng-click="needs_refresh(); addMetric()">Add Metric</button>
     </form>
   </div>
 </div>
