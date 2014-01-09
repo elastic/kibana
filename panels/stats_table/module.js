@@ -735,17 +735,17 @@ define([
         if (_.isUndefined(value)) {
           value = true;
         }
-        $scope.needs_refresh = value;
+        $scope._needs_refresh = value;
       };
 
       $scope.close_edit = function () {
         $scope.metricEditor = {
           index: -1
         };
-        if ($scope.needs_refresh) {
+        if ($scope._needs_refresh) {
           $scope.get_rows();
         }
-        $scope.needs_refresh = false;
+        $scope._needs_refresh = false;
         $scope.$emit('render');
       };
 
