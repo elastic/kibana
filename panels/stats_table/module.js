@@ -41,7 +41,7 @@ define([
       return fieldName.replace(/\.raw$/, '');
     }
 
-    module.controller('marvel.stats_table', function ($scope, dashboard, filterSrv, $filter) {
+    module.controller('marvel.stats_table', function ($scope, dashboard, filterSrv, $filter, alertSrv) {
       $scope.panelMeta = {
         modals: [],
         editorTabs: [],
@@ -218,6 +218,12 @@ define([
           $scope.panel.compact = true;
           $scope.sparkLines = false;
           $scope.viewSelect = false;
+          if(l > 100 && kbn.interval_to_seconds(dashboard.current.refresh || '1y') < 300) {
+            dashboard.set_interval('2m');
+            alertSrv.set('Refresh rate',
+              'Due to the large size of your cluster, the refresh rate has been adjusted to 2m',
+              'info',10000);
+          }
         } else {
           $scope.viewSelect = true;
           $scope.sparkLines = true;
