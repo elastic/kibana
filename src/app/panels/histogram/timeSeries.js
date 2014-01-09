@@ -46,6 +46,8 @@ function (_, Interval) {
 
     // will keep all values here, keyed by their time
     this._data = {};
+    // For each bucket in _data, store a corresponding counter of how many times it was written to.
+    this._counters = {};
     this.start_time = opts.start_date && getDatesTime(opts.start_date);
     this.end_time = opts.end_date && getDatesTime(opts.end_date);
     this.opts = opts;
@@ -57,17 +59,14 @@ function (_, Interval) {
    * @param {any}  value The value at this time
    */
   ts.ZeroFilled.prototype.addValue = function (time, value) {
+    this._counters[time] = (this._counters[time] || 0) + 1;
     if (time instanceof Date) {
       time = getDatesTime(time);
     } else {
       time = base10Int(time);
     }
     if (!isNaN(time)) {
-      if(_.isUndefined(this._data[time])) {
-        this._data[time] = (_.isUndefined(value) ? 0 : value);
-      } else {
-        this._data[time] += (_.isUndefined(value) ? 0 : value);
-      }
+      this._data[time] = (_.isUndefined(value) ? 0 : value);
     }
     this._cached_times = null;
   };
