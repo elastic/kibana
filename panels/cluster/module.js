@@ -36,7 +36,8 @@ function (angular, app, _, kbn) {
     };
     _.defaults($scope.panel,_d);
 
-    var reportInterval = 10000;
+    var reportInterval = 86400000;
+    //var reportInterval = 30000;
 
     $scope.init = function () {
       // So we can access the cookies object from the view
