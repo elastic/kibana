@@ -43,7 +43,7 @@ define([
         {title:'Queries', src:'app/partials/querySelect.html'}
       ],
       status: 'Beta',
-      description: 'A statatics panel for displaying aggergations using the Elastic Search statistical facet query.'
+      description: 'A statistical panel for displaying aggregations using the Elastic Search statistical facet query.'
     };
 
 
@@ -56,6 +56,10 @@ define([
       format: 'number',
       mode: 'count',
       display_breakdown: 'yes',
+      sort_field: '',
+      sort_reverse: false,
+      label_name: 'Query',
+      value_name: 'Value',
       spyable     : true
     };
 
@@ -69,13 +73,25 @@ define([
       $scope.get_data();
     };
 
+    $scope.set_sort = function(field) {
+      if($scope.panel.sort_field === field && $scope.panel.sort_reverse === false) {
+        $scope.panel.sort_reverse = true;
+      } else if($scope.panel.sort_field === field && $scope.panel.sort_reverse === true) {
+        $scope.panel.sort_field = '';
+        $scope.panel.sort_reverse = false;
+      } else {
+        $scope.panel.sort_field = field;
+        $scope.panel.sort_reverse = false;
+      }
+    };
+
     $scope.get_data = function () {
       if(dashboard.indices.length === 0) {
         return;
       }
 
       $scope.panelMeta.loading = true;
-      
+
       var request,
         results,
         boolQuery,
@@ -104,7 +120,7 @@ define([
 
       _.each(queries, function (q) {
         var alias = q.alias || q.query;
-        var query = $scope.ejs.BoolQuery(); 
+        var query = $scope.ejs.BoolQuery();
         query.should(querySrv.toEjsObj(q));
         request.facet($scope.ejs.StatisticalFacet('stats_'+alias)
           .field($scope.panel.field)
@@ -124,13 +140,15 @@ define([
 
       results.then(function(results) {
         $scope.panelMeta.loading = false;
-        var value = results.facets.stats[$scope.panel.mode]; 
+        var value = results.facets.stats[$scope.panel.mode];
 
         var rows = queries.map(function (q) {
           var alias = q.alias || q.query;
           var obj = _.clone(q);
           obj.label = alias;
+          obj.Label = alias.toLowerCase(); //sort field
           obj.value = kbn.format(results.facets['stats_'+alias][$scope.panel.mode], $scope.panel.format);
+          obj.Value = results.facets['stats_'+alias][$scope.panel.mode]; //sort field
           return obj;
         });
 

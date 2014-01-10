@@ -121,10 +121,11 @@ function (angular, _, config) {
       var b = required.split('.');
       var i;
 
-      for (i = 0; i < a.length; ++i) {
+      // leave suffixes as is ("RC1 or -SNAPSHOT")
+      for (i = 0; i < Math.min(a.length, 3); ++i) {
         a[i] = Number(a[i]);
       }
-      for (i = 0; i < b.length; ++i) {
+      for (i = 0; i < Math.min(b.length, 3); ++i) {
         b[i] = Number(b[i]);
       }
       if (a.length === 2) {
@@ -139,6 +140,18 @@ function (angular, _, config) {
 
       if (a[2] > b[2]){return true;}
       if (a[2] < b[2]){return false;}
+
+      if (a.length > 3) {
+        // rc/beta suffix
+        if (b.length <= 3) {
+          return false;
+        } // no suffix on b -> a<b
+        return a[3] >= b[3];
+      }
+      if (b.length > 3) {
+        // b has a suffix but a not -> a>b
+        return true;
+      }
 
       return true;
     };
