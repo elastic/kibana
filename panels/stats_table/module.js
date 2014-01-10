@@ -163,7 +163,7 @@ define([
         }
       };
 
-      var metricDefaults = function (m) {
+      $scope.metricDefaults = function (m) {
         if (_.isUndefined($scope.modeInfo[$scope.panel.mode])) {
           return [];
         }
@@ -188,7 +188,7 @@ define([
 
 
       $scope.panel.metrics = _.map($scope.panel.metrics, function (m) {
-        return metricDefaults(m);
+        return $scope.metricDefaults(m);
       });
 
       $scope.$watch('panel.mode', function (m) {
@@ -198,7 +198,7 @@ define([
         $scope.panel.display_field = $scope.modeInfo[m].defaults.display_field;
         $scope.panel.persistent_field = $scope.modeInfo[m].defaults.persistent_field;
         $scope.panel.metrics = _.map($scope.modeInfo[m].defaults.metrics, function (m) {
-          return metricDefaults(m);
+          return $scope.metricDefaults(m);
         });
       });
 
@@ -708,16 +708,6 @@ define([
         }
         return ret;
 
-      };
-
-      $scope.addMetric = function (metric) {
-        metric = metric || {};
-        metric = metricDefaults(metric);
-        $scope.panel.metrics.push(metric);
-        if (!metric.field) {
-          // no field defined, got into edit mode..
-          $scope.metricEditor.index = $scope.panel.metrics.length - 1;
-        }
       };
 
       // This is expensive, it would be better to populate a scope object

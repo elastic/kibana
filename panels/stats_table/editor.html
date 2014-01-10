@@ -87,7 +87,8 @@
       </tr>
     </table>
     <form class="form-inline">
-      <button class="btn btn-success" ng-click="needs_refresh(); addMetric()">Add Metric</button>
+      <!-- Not a big fan of this ng-click -->
+      <button class="btn btn-success" ng-click="needs_refresh(); panel.metrics.push(metricDefaults({})); metricEditor.index = panel.metrics.length-1">Add Metric</button>
     </form>
   </div>
 </div>
