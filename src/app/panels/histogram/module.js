@@ -441,10 +441,18 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
                 // divided by the total hits
                 value = (((time_series._data[entry.time] || 0)*(counters[entry.time]-entry.count)) +
                   entry.mean*entry.count)/(counters[entry.time]);
-              } else if ($scope.panel.mode === 'min '){
-                value = (time_series._data[entry.time] || 0) < entry.count ? (time_series._data[entry.time] || 0) : entry.min;
+              } else if ($scope.panel.mode === 'min'){
+                if(_.isUndefined(time_series._data[entry.time])) {
+                  value = entry.min;
+                } else {
+                  value = time_series._data[entry.time] < entry.min ? time_series._data[entry.time] : entry.min;
+                }
               } else if ($scope.panel.mode === 'max'){
-                value = (time_series._data[entry.time] || 0) > entry.count ? (time_series._data[entry.time] || 0) : entry.max;
+                if(_.isUndefined(time_series._data[entry.time])) {
+                  value = entry.max;
+                } else {
+                  value = time_series._data[entry.time] > entry.max ? time_series._data[entry.time] : entry.max;
+                }
               } else if ($scope.panel.mode === 'total'){
                 value = (time_series._data[entry.time] || 0) + entry.total;
               }
