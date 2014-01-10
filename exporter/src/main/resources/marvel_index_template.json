@@ -32,8 +32,25 @@
             "properties": {
                 "indices.percolate.size_in_bytes": { "type": "long"},
                 "jvm.buffer_pools.direct.used_in_bytes": { "type": "long" },
-                "jvm.buffer_pools.mapped.used_in_bytes": { "type": "long" }
+                "jvm.buffer_pools.mapped.used_in_bytes": { "type": "long" },
+                "jvm.gc.collectors.young.collection_count": { "type": "long" },
+                "jvm.gc.collectors.young.collection_time_in_millis": { "type": "long" },
+                "jvm.gc.collectors.old.collection_count": { "type": "long" },
+                "jvm.gc.collectors.old.collection_time_in_millis": { "type": "long" },
+                "indices.percolate.total": { "type": "long" },
+                "indices.percolate.time_in_millis": { "type": "long" },
+                "indices.percolate.queries": { "type": "long" },
+                "indices.percolate.memory_size_in_bytes": { "type": "long"}
+            }
+        },
+        "index_stats": {
+            "properties": {
+                "total.percolate.memory_size_in_bytes": { "type": "long" },
+                "total.percolate.time_in_millis": { "type": "long" },
+                "total.percolate.queries": { "type": "long" },
+                "total.percolate.total": { "type": "long" }
             }
         }
+
     }
 }

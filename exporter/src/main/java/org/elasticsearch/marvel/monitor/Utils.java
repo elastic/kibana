@@ -41,7 +41,7 @@ public class Utils {
             InetAddress inetAddress = inetSocketAddress.getAddress();
             if (inetAddress != null) {
                 builder.field("ip", inetAddress.getHostAddress());
-                builder.field("hostname", inetAddress.getHostName());
+                builder.field("host", inetAddress.getHostName());
                 builder.field("ip_port", inetAddress.getHostAddress() + ":" + inetSocketAddress.getPort());
             }
         }
