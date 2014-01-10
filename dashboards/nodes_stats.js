@@ -40,7 +40,7 @@ dashboard.index = {
   'warm_fields': false
 };
 
-dashboard.refresh="1m";
+dashboard.refresh = "1m";
 
 // In this dashboard we let users pass nodes as comma seperated list to the query parameter.
 // If nodes are defined, split into a list of query objects, otherwise, show all
@@ -54,7 +54,7 @@ if (!_.isUndefined(ARGS.queries)) {
       id: parseInt(k, 10)
     }];
   }));
-  marker_query = "(" + _.pluck(queries,"query").join(") OR (") + ")";
+  marker_query = "(" + _.pluck(queries, "query").join(") OR (") + ")";
 } else {
   // No queries passed? Initialize a single query to match everything
   queries = {
@@ -142,6 +142,32 @@ panel_defaults_by_type["histogram"] = {
 };
 
 
+function threadPoolRow(name) {
+  var field_prefix = "thread_pool." + name.toLowerCase() + ".",
+    name_prefix = name + " Thread Pool ";
+  return {
+    "title": "Thread Pools - " + name,
+    "panels": [
+      {
+        "value_field": field_prefix + "threads",
+        "title": name_prefix + "Thread Count"
+      },
+      {
+        "value_field": field_prefix + "rejected",
+        "title": name_prefix + "Rejected"
+      },
+      {
+        "value_field": field_prefix + "completed",
+        "title": name_prefix + "Ops Per Sec",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "y_format": "short"
+      }
+    ]
+  }
+}
+
 var rows = [
   {
     "title": "Essentials",
@@ -219,7 +245,8 @@ var rows = [
         "y_format": "bytes"
       }
     ]
-  },{
+  },
+  {
     "title": "JVM Memory",
     "panels": [
       {
@@ -229,16 +256,28 @@ var rows = [
         "y_format": "bytes"
       },
       {
-        "time_field": "@timestamp",
-        "value_field": "jvm.mem.pools.Par Eden Space.used_in_bytes",
-        "title": "JVM Young Gen usage",
-        "y_format": "bytes"
+        "value_field": "jvm.gc.collectors.young.collection_time_in_millis",
+        "title": "JVM GC Young Duration (time %)",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "scale": 0.001 * 100,
+        "grid": {
+          "max": 100,
+          "min": 0
+        }
       },
       {
-        "time_field": "@timestamp",
-        "value_field": "jvm.mem.pools.CMS Old Gen.used_in_bytes",
-        "title": "JVM Old Gen usage",
-        "y_format": "bytes"
+        "value_field": "jvm.gc.collectors.old.collection_time_in_millis",
+        "title": "JVM GC Old Duration (time %)",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "scale": 0.001 * 100,
+        "grid": {
+          "max": 100,
+          "min": 0
+        }
       }
     ]
   },
@@ -246,7 +285,7 @@ var rows = [
     "title": "JVM GC Young",
     "panels": [
       {
-        "value_field": "jvm.gc.collectors.ParNew.collection_time_in_millis",
+        "value_field": "jvm.gc.collectors.young.collection_time_in_millis",
         "title": "GC Young Duration (time %)",
         "derivative": true,
         "mode": "min",
@@ -255,18 +294,14 @@ var rows = [
         "grid": {
           "max": 100,
           "min": 0
-        },
-        "span": 6,
-        "resolution": 20
+        }
       },
       {
-        "value_field": "jvm.gc.collectors.ParNew.collection_count",
-        "title": "GC Young Counts",
+        "value_field": "jvm.gc.collectors.young.collection_count",
+        "title": "JVM GC Young Counts",
         "derivative": true,
         "mode": "min",
-        "scaleSeconds": false,
-        "span": 6,
-        "resolution": 20
+        "scaleSeconds": false
       }
     ]
   },
@@ -274,8 +309,8 @@ var rows = [
     "title": "JVM GC Old",
     "panels": [
       {
-        "value_field": "jvm.gc.collectors.ConcurrentMarkSweep.collection_time_in_millis",
-        "title": "GC Old Duration (time %)",
+        "value_field": "jvm.gc.collectors.old.collection_time_in_millis",
+        "title": "JVM GC Old Duration (time %)",
         "derivative": true,
         "mode": "min",
         "scaleSeconds": true,
@@ -283,53 +318,14 @@ var rows = [
         "grid": {
           "max": 100,
           "min": 0
-        },
-        "span": 6,
-        "resolution": 20
+        }
       },
       {
-        "value_field": "jvm.gc.collectors.ConcurrentMarkSweep.collection_count",
-        "title": "GC Old Counts",
+        "value_field": "jvm.gc.collectors.old.collection_count",
+        "title": "JVM GC Old Counts",
         "derivative": true,
         "mode": "min",
-        "scaleSeconds": false,
-        "span": 6,
-        "resolution": 20
-      }
-    ]
-  },
-  {
-    "title": "Indices Memory",
-    "panels": [
-      {
-        "value_field": "indices.fielddata.memory_size_in_bytes",
-        "title": "Indices Field Data",
-        "y_format": "bytes"
-      },
-      {
-        "value_field": "indices.filter_cache.memory_size_in_bytes",
-        "title": "Indices Filter cache",
-        "y_format": "bytes"
-      },
-      {
-        "value_field": "indices.id_cache.memory_size_in_bytes",
-        "title": "Indices Id Cache",
-        "y_format": "bytes"
-      }
-    ]
-  },
-  {
-    "title": "Indices Memory Extended",
-    "panels": [
-      {
-        "value_field": "indices.percolate.size_in_bytes",
-        "title": "Indices Percolation size",
-        "y_format": "bytes"
-      },
-      {
-        "value_field": "indices.completion.size_in_bytes",
-        "title": "Indices Completion size",
-        "y_format": "bytes"
+        "scaleSeconds": false
       }
     ]
   },
@@ -341,7 +337,7 @@ var rows = [
         "derivative": true,
         "mode": "min",
         "scaleSeconds": true,
-        "title": "Indices Search Query Rate"
+        "title": "Indices Search Shard Query Rate"
       },
       {
         "value_field": "indices.search.query_time_in_millis",
@@ -349,7 +345,7 @@ var rows = [
         "mode": "min",
         "scaleSeconds": true,
         "scale": 0.001,
-        "title": "Indices Total Search Query Time"
+        "title": "Indices Total Shard Search Query Time"
       }
     ]
   },
@@ -361,7 +357,7 @@ var rows = [
         "derivative": true,
         "mode": "min",
         "scaleSeconds": true,
-        "title": "Indices Search Fetch Rate"
+        "title": "Indices Search Shard Fetch Rate"
       },
       {
         "value_field": "indices.search.fetch_time_in_millis",
@@ -369,7 +365,7 @@ var rows = [
         "mode": "min",
         "scaleSeconds": true,
         "scale": 0.001,
-        "title": "Indices Total Search Fetch Time"
+        "title": "Indices Total Search Shard Fetch Time"
       }
     ]
   },
@@ -417,6 +413,88 @@ var rows = [
         "scaleSeconds": true,
         "scale": 0.001,
         "title": "Indices Total Get Time"
+      }
+    ]
+  },
+  {
+    "title": "Indices Percolate Requests",
+    "panels": [
+      {
+        "value_field": "indices.percolate.total",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "title": "Indices Percolate Requests Rate"
+      },
+      {
+        "value_field": "indices.percolate.time_in_millis",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "scale": 0.001,
+        "title": "Indices Total Percolate Time"
+      },
+      {
+        "value_field": "indices.percolate.queries",
+        "title": "Indices Percolate Queries"
+      }
+    ]
+  },
+  {
+    "title": "Indices Store",
+    "panels": [
+      {
+        "value_field": "indices.docs.count",
+        "title": "Documents"
+      },
+      {
+        "value_field": "indices.store.size_in_bytes",
+        "title": "Size",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "indices.docs.deleted",
+        "title": "Deleted Documents"
+      }
+    ]
+  },
+  {
+    "title": "Indices Memory",
+    "panels": [
+      {
+        "value_field": "indices.fielddata.memory_size_in_bytes",
+        "title": "Indices Field Data",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "indices.filter_cache.memory_size_in_bytes",
+        "title": "Indices Filter cache",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "indices.segments.memory_in_bytes",
+        "title": "Indices Lucene Memory",
+        "y_format": "bytes"
+      }
+    ]
+  },
+  {
+    "title": "Indices Memory Extended",
+    "panels": [
+      {
+        "value_field": "indices.id_cache.memory_size_in_bytes",
+        "title": "Indices Id Cache",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "indices.percolate.memory_size_in_bytes",
+        "title": "Indices Percolation size",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "indices.completion.size_in_bytes",
+        "title": "Indices Completion size",
+        "y_format": "bytes"
       }
     ]
   },
@@ -469,6 +547,31 @@ var rows = [
     ]
   },
   {
+    "title": "Process",
+    "panels": [
+      {
+        "value_field": "process.cpu.percent",
+        "title": "Process CPU"
+      },
+      {
+        "value_field": "process.open_file_descriptors",
+        "title": "Process Open File descriptors"
+      },
+      {
+        "value_field": "jvm.threads.count",
+        "title": "Process Thread Count"
+      }
+    ]
+  },
+  threadPoolRow("Search"),
+  threadPoolRow("Index"),
+  threadPoolRow("Bulk"),
+  threadPoolRow("Get"),
+  threadPoolRow("Suggest"),
+  threadPoolRow("Percolate"),
+  threadPoolRow("Refresh"),
+  threadPoolRow("Optimize"),
+  {
     "title": "Disk",
     "panels": [
       {
@@ -498,7 +601,7 @@ var rows = [
     "notice": false
   },
   {
-    "title": "Disk 2",
+    "title": "Disk IOPS",
     "panels": [
       {
         "value_field": "fs.total.disk_io_op",
@@ -523,7 +626,7 @@ var rows = [
         "mode": "min",
         "scaleSeconds": true,
         "y_format": "short"
-      },
+      }
     ],
     "notice": false
   },
@@ -531,55 +634,27 @@ var rows = [
     "title": "Network",
     "panels": [
       {
-        "value_field": "http.current_open",
-        "title": "HTTP currently open"
-      },
-      {
         "value_field": "http.total_opened",
-        "title": "HTTP opened",
+        "title": "Network HTTP Connection Opened (per sec)",
         "derivative": true,
         "mode": "min",
         "scaleSeconds": true
-      }
-    ]
-  },
-  {
-    "title": "Data",
-    "panels": [
-      {
-        "value_field": "indices.docs.count",
-        "title": "Documents"
       },
       {
-        "value_field": "indices.store.size_in_bytes",
-        "title": "Size",
+        "value_field": "transport.tx_size_in_bytes",
+        "title": "Network Transport Bytes Sent (per sec)",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
         "y_format": "bytes"
-      }
-    ]
-  },
-  {
-    "title": "Segments",
-    "panels": [
-      {
-        "value_field": "indices.segments.count",
-        "title": "Segment no."
-      }
-    ]
-  },
-  {
-    "title": "Process",
-    "panels": [
-      {
-        "value_field": "process.cpu.percent",
-        "title": "Process CPU"
       },
       {
-        "value_field": "jvm.threads.count",
-        "title": "Threads"
-      },
-      {
-        "value_field": "process.open_file_descriptors",
-        "title": "File descriptors"
+        "value_field": "transport.tx_size_in_bytes",
+        "title": "Network Transport Bytes Received (per sec)",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "y_format": "bytes"
       }
     ]
   }
@@ -597,6 +672,7 @@ dashboard.rows = _.map(rows, function (r) {
     if (_.contains(show, panel.value_field)) {
       showedSomething = true;
       r.collapse = false;
+      show = _.without(show, panel.value_field);
     }
   });
   return r;

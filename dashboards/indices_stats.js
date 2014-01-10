@@ -126,92 +126,244 @@ panel_defaults_by_type["histogram"] = {
 
 var rows = [
   {
-    "title": "Data",
+    "title": "Essentials",
     "panels": [
       {
         "value_field": "primaries.docs.count",
-        "title": "Documents",
+        "title": "Documents"
+      },
+      {
+        "value_field": "total.indexing.index_total",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "title": "Indexing Rate Primaries"
+      },
+      {
+        "value_field": "total.search.query_total",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "title": "Search Shard Query Rate"
+      }
+    ]
+  },
+  {
+    "title": "Search Requests Query",
+    "panels": [
+      {
+        "value_field": "total.search.query_total",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "title": "Search Shard Query Rate"
+      },
+      {
+        "value_field": "total.search.query_time_in_millis",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "scale": 0.001,
+        "title": "Total Shard Search Query Time"
+      }
+    ]
+  },
+  {
+    "title": "Search Requests Fetch",
+    "panels": [
+      {
+        "value_field": "total.search.fetch_total",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "title": "Search Shard Fetch Rate"
+      },
+      {
+        "value_field": "total.search.fetch_time_in_millis",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "scale": 0.001,
+        "title": "Total Search Shard Fetch Time"
+      }
+    ]
+  },
+  {
+    "title": "Indexing Requests",
+    "panels": [
+      {
+        "value_field": "total.indexing.index_total",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "title": "Indexing Rate Total"
+      },
+      {
+        "value_field": "total.indexing.index_time_in_millis",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "scale": 0.001,
+        "title": "Total Indexing Time"
+      },
+      {
+        "value_field": "total.indexing.delete_total",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "title": "Delete Rate"
+      }
+    ]
+  },
+  {
+    "title": "Get Requests",
+    "panels": [
+      {
+        "value_field": "total.get.total",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "title": "Get Requests Rate"
+      },
+      {
+        "value_field": "total.get.time_in_millis",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "scale": 0.001,
+        "title": "Total Get Time"
+      }
+    ]
+  },
+  {
+    "title": "Percolate Requests",
+    "panels": [
+      {
+        "value_field": "total.percolate.total",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "title": "Percolate Requests Rate"
+      },
+      {
+        "value_field": "total.percolate.time_in_millis",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "scale": 0.001,
+        "title": "Total Percolate Time"
+      },
+      {
+        "value_field": "total.percolate.queries",
+        "title": "Percolate Queries"
+      }
+    ]
+  },
+  {
+    "title": "Store",
+    "panels": [
+      {
+        "value_field": "primaries.docs.count",
+        "title": "Documents"
       },
       {
         "value_field": "total.store.size_in_bytes",
-        "title": "Index size",
+        "title": "Size",
         "y_format": "bytes"
       },
       {
         "value_field": "primaries.docs.deleted",
-        "title": "Deleted docs",
-      }
-    ],
-    "notice": false
-  },
-  {
-    "title": "Segments",
-    "panels": [
-      {
-        "value_field": "total.segments.count",
-        "title": "Avg Shard Segment Count*",
-      }
-    ],
-    "notice": false
-  },
-  {
-    "title": "Indexing",
-    "panels": [
-      {
-        "value_field": "primaries.indexing.index_total",
-        "title": "Indexing request rate",
-        "derivative": true,
-        "mode": "min",
-        "scaleSeconds": true
-      },
-      {
-        "value_field": "total.indexing.index_time_in_millis",
-        "title": "Indexing time",
-        "derivative": true,
-        "mode": "min",
-        "scaleSeconds": true
+        "title": "Deleted Documents"
       }
     ]
   },
   {
-    "title": "Indexing 2",
+    "title": "Memory",
     "panels": [
+      {
+        "value_field": "total.fielddata.memory_size_in_bytes",
+        "title": "Field Data",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "total.filter_cache.memory_size_in_bytes",
+        "title": "Filter cache",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "total.segments.memory_in_bytes",
+        "title": "Lucene Memory",
+        "y_format": "bytes"
+      }
+    ]
+  },
+  {
+    "title": "Memory Extended",
+    "panels": [
+      {
+        "value_field": "total.id_cache.memory_size_in_bytes",
+        "title": "Id Cache",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "total.percolate.memory_size_in_bytes",
+        "title": "Percolation size",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "total.completion.size_in_bytes",
+        "title": "Completion size",
+        "y_format": "bytes"
+      }
+    ]
+  },
+  {
+    "title": "Management",
+    "panels": [
+      {
+        "value_field": "total.merges.current_size_in_bytes",
+        "mode": "max",
+        "y_format": "bytes",
+        "title": "Current Merges"
+      },
       {
         "value_field": "total.refresh.total_time_in_millis",
-        "title": "Avg Refresh time",
         "derivative": true,
         "mode": "min",
-        "scaleSeconds": true
-      }
-    ]
-  },
-  {
-    "title": "Search requests",
-    "panels": [
-      {
-        "value_field": "total.search.query_total",
-        "title": "Search requests",
-        "derivative": true,
-        "mode": "min",
-        "scaleSeconds": true
+        "scale": 0.001,
+        "scaleSeconds": true,
+        "title": "Total Refresh Time"
       },
       {
-        "value_field": "total.search.open_contexts",
-        "title": "Open search contexts",
+        "value_field": "total.flush.total",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "title": "Flush count"
       }
     ]
   },
   {
-    "title": "Get requests",
+    "title": "Management Extended",
     "panels": [
       {
-        "value_field": "total.get.total",
-        "title": "Get requests",
+        "value_field": "total.search.open_contexts",
+        "mode": "max",
+        "title": "Open Search Contexts"
+      },
+      {
+        "value_field": "total.warmer.total_time_in_millis",
         "derivative": true,
         "mode": "min",
-        "scaleSeconds": true
+        "scale": 0.001,
+        "scaleSeconds": true,
+        "title": "Total Warmer Time"
+      },
+      {
+        "value_field": "total.segments.count",
+        "title": "Segment Count"
       }
-    ],
+    ]
   }
 ];
 
@@ -227,6 +379,7 @@ dashboard.rows = _.map(rows, function (r) {
     if (_.contains(show, panel.value_field)) {
       showedSomething = true;
       r.collapse = false;
+      show = _.without(show, panel.value_field);
     }
   });
   return r;
