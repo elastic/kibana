@@ -218,7 +218,7 @@ define([
           $scope.panel.compact = true;
           $scope.sparkLines = true;
           $scope.viewSelect = false;
-          if(l > 100 && kbn.interval_to_seconds(dashboard.current.refresh || '1y') < 300) {
+          if(l > 50 && kbn.interval_to_seconds(dashboard.current.refresh || '1y') < 120) {
             dashboard.set_interval('2m');
             alertSrv.set('Refresh rate',
               'Due to the large size of your cluster, the refresh rate has been adjusted to 2m',
