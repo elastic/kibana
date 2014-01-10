@@ -71,11 +71,8 @@ function (angular, $, _, appLevelRequire) {
       .when('/dashboard', {
         templateUrl: 'app/partials/dashboard.html',
       })
-      .when('/dashboard/:kbnType/:kbnId', {
+      .when('/dashboard/:kbnType/*kbnId', {
         templateUrl: 'app/partials/dashboard.html',
-      })
-      .when('/dashboard/:kbnType/:kbnId/:params', {
-        templateUrl: 'app/partials/dashboard.html'
       })
       .otherwise({
         redirectTo: 'dashboard'
