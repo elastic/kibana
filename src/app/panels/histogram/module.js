@@ -19,6 +19,7 @@ define([
   'kbn',
   'moment',
   './timeSeries',
+  'numeral',
   'jquery.flot',
   'jquery.flot.events',
   'jquery.flot.selection',
@@ -27,7 +28,7 @@ define([
   'jquery.flot.stack',
   'jquery.flot.stackpercent'
 ],
-function (angular, app, $, _, kbn, moment, timeSeries) {
+function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
 
   'use strict';
 
@@ -761,7 +762,8 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
 
         var $tooltip = $('<div>');
         elem.bind("plothover", function (event, pos, item) {
-          var group, value, timestamp;
+          var group, value, timestamp, interval;
+          interval = scope.panel.legend ? "" : " per " + scope.panel.interval;
           if (item) {
             if (item.series.info.alias || scope.panel.tooltip.query_as_alias) {
               group = '<small style="font-size:0.9em;">' +
@@ -779,13 +781,15 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
             }
             if(scope.panel.y_format === 'short') {
               value = kbn.shortFormat(value,2);
+            } else {
+              value = numeral(value).format('0,0[.]000');
             }
             timestamp = scope.panel.timezone === 'browser' ?
               moment(item.datapoint[0]).format('YYYY-MM-DD HH:mm:ss') :
               moment.utc(item.datapoint[0]).format('YYYY-MM-DD HH:mm:ss');
             $tooltip
               .html(
-                group + value + " @ " + timestamp
+                group + value + interval + " @ " + timestamp
               )
               .place_tt(pos.pageX, pos.pageY);
           } else {
