@@ -165,7 +165,7 @@ function threadPoolRow(name) {
         "y_format": "short"
       }
     ]
-  }
+  };
 }
 
 var rows = [
