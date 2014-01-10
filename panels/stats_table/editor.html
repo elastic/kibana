@@ -81,14 +81,13 @@
           <i class="pointer icon-check" ng-click="metricEditor.index=-1"></i>
         </td>
         <td ng-show="metricEditor.index == $index">
-          <i ng-click="deleteMetric($index); metricEditor.index = -1;" class="pointer icon-trash"></i>
+          <i ng-click="deleteMetric(panel,$index); metricEditor.index = -1;" class="pointer icon-trash"></i>
         <td ng-show="metricEditor.index == $index">
           <i class="icon"></i></td>
       </tr>
     </table>
     <form class="form-inline">
-      <!-- Not a big fan of this ng-click -->
-      <button class="btn btn-success" ng-click="needs_refresh(); panel.metrics.push(metricDefaults({})); metricEditor.index = panel.metrics.length-1">Add Metric</button>
+      <button class="btn btn-success" ng-click="needs_refresh(); addMetric(panel)">Add Metric</button>
     </form>
   </div>
 </div>
