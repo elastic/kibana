@@ -3,13 +3,15 @@ define([
   'sense_editor/editor',
   'analytics',
   'jquery',
-  'moment'
+  'moment',
+  'settings'
 ], function (_, SenseEditor, _gaq, $, moment) {
   'use strict';
 
   function History() {
     var $historyPopup = $("#history_popup");
     var historyViewer;
+    var self = this;
     function restoreNotImplemented() {
       // default method for history.restoreFromHistory
       // replace externally to do something when the user chooses
@@ -88,18 +90,12 @@ define([
     }
 
     $historyPopup.on('show', function () {
-      $historyPopup.find(".modal-body").append('<div id="history_viewer">No history available</div>');
+      $historyPopup.find("#history_viewer").append('<div id="history_viewer_editor">No history available</div>');
 
-      historyViewer = new SenseEditor($("#history_viewer"));
+      historyViewer = new SenseEditor($("#history_viewer_editor"));
       historyViewer.setReadOnly(true);
       historyViewer.renderer.setShowPrintMargin(false);
-      // historyViewer.setTheme("ace/theme/monokai");
-
-      (function setupHistoryViewerSession(session) {
-        session.setMode("ace/mode/sense");
-        session.setFoldStyle('markbeginend');
-        session.setUseWrapMode(true);
-      }(historyViewer.getSession()));
+      require('settings').applyCurrentSettings(historyViewer);
 
       $.each(getHistory(), function (i, hist_elem) {
         var li = $('<li><a href="#"><i class="icon-chevron-right"></i><span/></a></li>');
@@ -134,7 +130,7 @@ define([
 
         li.bind('apply', function () {
           _gaq.push(['_trackEvent', "history", 'applied']);
-          this.restoreFromHistory(hist_elem);
+          self.restoreFromHistory(hist_elem);
         });
 
         li.appendTo($historyPopup.find(".modal-body .nav"));

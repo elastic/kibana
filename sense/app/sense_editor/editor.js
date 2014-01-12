@@ -5,8 +5,9 @@ define([
   'curl',
   'jquery',
   'sense_editor/row_parser',
+  'sense_editor/mode/sense',
   'utils'
-], function (_, ace, _gaq, curl, $, RowParser, utils) {
+], function (_, ace, _gaq, curl, $, RowParser, SenseMode, utils) {
   'use strict';
 
   function isInt(x) {
@@ -18,7 +19,8 @@ define([
 
     // we must create a custom class for each instance, so that the prototype
     // can be the unique aceEditor it extends
-    var CustomSenseEditor = function () {};
+    var CustomSenseEditor = function () {
+    };
     CustomSenseEditor.prototype = {};
 
     function bindProp(key) {
@@ -74,7 +76,7 @@ define([
           timer = clearTimeout(timer);
         }
 
-        setTimeout(function check () {
+        setTimeout(function check() {
           if (session.bgTokenizer.running) {
             timer = setTimeout(check, checkInterval);
           } else {
@@ -82,16 +84,15 @@ define([
           }
         });
       };
-    }
+    };
 
-    ace.require("ace/mode/sense");
     editor.setShowPrintMargin(false);
     (function (session) {
-      session.setMode("ace/mode/sense");
+      session.setMode(new SenseMode.Mode());
       session.setFoldStyle('markbeginend');
       session.setTabSize(2);
       session.setUseWrapMode(true);
-    })(editor.getSession())
+    })(editor.getSession());
 
     editor.prevRequestStart = function (pos) {
       pos = pos || editor.getCursorPosition();
@@ -118,23 +119,24 @@ define([
           }
         });
       });
-    });
+    }, true);
 
     editor.update = function (data, callback) {
       callback = typeof callback === 'function' ? callback : null;
       var session = editor.getSession();
 
+      session.setValue(data);
       if (callback) {
-        session.on('tokenizerUpdate', function onTokenizerUpdate() {
-          session.removeListener('tokenizerUpdate', onTokenizerUpdate);
-          if (session.bgTokenizer.running) {
-            setTimeout(onTokenizerUpdate, 50); // poll until done
-            return;
+        // force update of tokens, but not on this thread to allow for ace rendering.
+        setTimeout(function () {
+          var i;
+          for (i = 0; i < session.getLength(); i++) {
+            session.getTokens(i);
           }
           callback();
         });
       }
-      session.setValue(data);
+
     };
 
     editor.replaceRequestRange = function (newRequest, requestRange) {
@@ -204,10 +206,10 @@ define([
         var dataEndPos;
         while (bodyStartRow < currentReqRange.end.row
           || (
-            bodyStartRow == currentReqRange.end.row
+          bodyStartRow == currentReqRange.end.row
             && bodyStartColumn < currentReqRange.end.column
           )
-        ) {
+          ) {
           dataEndPos = editor.nextDataDocEnd({ row: bodyStartRow, column: bodyStartColumn});
           var bodyRange = new (ace.require("ace/range").Range)(
             bodyStartRow, bodyStartColumn,

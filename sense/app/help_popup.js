@@ -1,10 +1,10 @@
 define([
-  'ace',
+  'sense_editor/editor',
   'analytics',
   'jquery',
 
   'bootstrap'
-], function (ace, _gaq, $) {
+], function (SenseEditor, _gaq, $) {
   'use strict';
 
   var $helpPopup = $("#help_popup");
@@ -23,11 +23,8 @@ define([
   $helpPopup.on('shown', function () {
     _gaq.push(['_trackEvent', "help", 'shown']);
     $(html).appendTo("#help_example_container");
-    var example_editor = ace.edit("help_example_editor");
-    example_editor.getSession().setMode("ace/mode/sense");
-    example_editor.getSession().setFoldStyle('markbeginend');
+    var example_editor = new SenseEditor($("#help_example_editor"));
     example_editor.setReadOnly(true);
-    example_editor.renderer.setShowPrintMargin(false);
   });
 
   $helpPopup.on('hidden', function () {

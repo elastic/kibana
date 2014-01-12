@@ -5,12 +5,16 @@ define([
 ], function (ace, input, $) {
   'use strict';
 
+  var aceRange = ace.require("ace/range");
+
   module("Editor", {
     setup: function () {
       input.$el.show();
+      input.autocomplete._test.removeChangeListener();
     },
     teardown: function () {
       input.$el.hide();
+      input.autocomplete._test.addChangeListener();
     }
   });
 
@@ -62,7 +66,7 @@ define([
 
   utils_test("simple request range", simple_request.prefix, simple_request.data, function () {
     input.getCurrentRequestRange(function (range) {
-      var expected = new (ace.require("ace/range").Range)(
+      var expected = new aceRange.Range(
         0, 0,
         3, 1
       );
@@ -86,7 +90,7 @@ define([
 
   utils_test("single line request range", single_line_request.prefix, single_line_request.data, function () {
     input.getCurrentRequestRange(function (range) {
-      var expected = new (ace.require("ace/range").Range)(
+      var expected = new aceRange.Range(
         0, 0,
         1, 32
       );
@@ -110,7 +114,7 @@ define([
 
   utils_test("request with no data followed by a new line", get_request_no_data.prefix, "\n", function () {
     input.getCurrentRequestRange(function (range) {
-      var expected = new (ace.require("ace/range").Range)(
+      var expected = new aceRange.Range(
         0, 0,
         0, 10
       );
@@ -135,7 +139,7 @@ define([
 
   utils_test("request with no data", get_request_no_data.prefix, get_request_no_data.data, function () {
     input.getCurrentRequestRange(function (range) {
-      var expected = new (ace.require("ace/range").Range)(
+      var expected = new aceRange.Range(
         0, 0,
         0, 10
       );
@@ -159,7 +163,7 @@ define([
 
   utils_test("multi doc request range", multi_doc_request.prefix, multi_doc_request.data, function () {
     input.getCurrentRequestRange(function (range) {
-      var expected = new (ace.require("ace/range").Range)(
+      var expected = new aceRange.Range(
         0, 0,
         2, 14
       );

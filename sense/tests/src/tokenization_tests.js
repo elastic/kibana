@@ -5,17 +5,21 @@ define([
 ], function (ace, input, $) {
   'use strict';
 
+  var token_iterator = ace.require("ace/token_iterator");
+
   module("Tokenization", {
     setup: function () {
       input.$el.show();
+      input.autocomplete._test.removeChangeListener();
     },
     teardown: function () {
       input.$el.hide();
+      input.autocomplete._test.addChangeListener();
     }
   });
 
   function tokensAsList() {
-    var iter = new (ace.require("ace/token_iterator").TokenIterator)(input.getSession(), 0, 0);
+    var iter = new token_iterator.TokenIterator(input.getSession(), 0, 0);
     var ret = [];
     var t = iter.getCurrentToken();
     if (input.parser.isEmptyToken(t)) t = input.parser.nextNonEmptyToken(iter);
@@ -187,6 +191,18 @@ define([
       '}'
   );
 
+  token_test(
+    [ "method", "POST", "url.endpoint", "_search", "paren.lparen", "{", "variable", '"q"', "punctuation.colon", ":",
+      "paren.lparen", "{",  "variable", '"s"', "punctuation.colon", ":", "paren.lparen", "{", "paren.rparen", "}",
+      "paren.rparen", "}", "paren.rparen", "}"
+    ],
+    'POST _search\n' +
+      '{\n' +
+      '  "q": { "s": {}}\n' +
+      '  \n' +
+      '}'
+  );
+
   function statesAsList() {
     var ret = [];
     var session = input.getSession();
@@ -215,18 +231,22 @@ define([
   }
 
 
-  function n(name) {
-    return { name: name};
-  }
-  function nd(name, depth) {
-    return { name: name, depth: depth };
-  }
-
   states_test(
-    [n("start"), nd("json", 1), nd("json", 1), nd("start", 0) ],
+    ["start", "json", "json", "start" ],
     'POST _search\n' +
       '{\n' +
       '  "query": { "match_all": {} }\n' +
       '}'
   );
-})
+
+  states_test(
+    ["start", "json", ["json", "json"], ["json", "json"], "json", "start" ],
+    'POST _search\n' +
+      '{\n' +
+      '  "query": { \n' +
+      '  "match_all": {} \n' +
+      '  }\n' +
+      '}'
+  );
+
+});

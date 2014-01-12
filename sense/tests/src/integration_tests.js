@@ -7,11 +7,13 @@ define([
   'use strict';
 
   module("Integration", {
-    editor: function () {
-      input.$el.show();
+    setup: function () {
+      $("#editor_container").show();
+      input.autocomplete._test.removeChangeListener();
     },
     teardown: function () {
-      input.$el.hide();
+      $("#editor_container").hide();
+      input.autocomplete._test.addChangeListener();
     }
   });
 
@@ -29,6 +31,8 @@ define([
         }
       }
 
+      test.cursor.row += rowOffset;
+
       mappings.clear();
       mappings.loadMappings(mapping);
 
@@ -45,63 +49,78 @@ define([
       }
 
       input.update(editorValue, function () {
-        input.moveCursorTo(test.cursor.row + rowOffset, test.cursor.column);
+        input.moveCursorTo(test.cursor.row, test.cursor.column);
+
+        // allow ace rendering to move cursor so it will be seen during test - handy for debugging.
+        setTimeout(function () {
+          input.completer = {}; // mimic auto complete
+          input.autocomplete.completer.getCompletions(input, input.getSession(), test.cursor, "",
+          function (err, terms) {
+
+          if (test.no_context) {
+            ok(!terms || terms.length === 0, "Expected no context bug got terms.");
+          }
+          else {
+            ok(terms && terms.length > 0, "failed to extract terms ...");
+          }
+
+          if (!terms || terms.length === 0) {
+            start();
+            return;
+          }
 
 
-        var context = input.autocomplete._test.getAutoCompleteContext();
 
-        if (test.no_context) {
-          ok(!context, "Expected no context bug got one.");
-        }
-        else {
-          ok(context, "failed to have a context ...");
-        }
+            if (test["autoCompleteSet"]) {
+              var expected_terms = _.map(test["autoCompleteSet"], function (t) {
+                if (typeof t !== "object") {
+                  t = { "name": t };
+                }
+                return t;
+              });
+              if (terms.length != expected_terms.length) {
+                equal(_.pluck(terms, 'name'), _.pluck(expected_terms, 'name'), "list of completion terms is not of equal size");
+              } else {
+                var filtered_actual_terms = _.map(terms, function (actual_term,i) {
+                  var expected_term = expected_terms[i];
+                  var filtered_term = {};
+                  _.each(expected_term, function (v,p) { filtered_term[p] = actual_term[p]; });
+                  return filtered_term;
+                });
+                deepEqual(filtered_actual_terms, expected_terms);
+              }
+            }
 
-        if (!context) {
+          var context = terms[0].context;
+          input.autocomplete._test.addReplacementInfoToContext(context, test.cursor, terms[0].value);
+
+            function ac(prop, prop_test) {
+              if (typeof test[prop] != "undefined")
+                if (prop_test)
+                  prop_test(context[prop], test[prop], prop);
+                else
+                  deepEqual(context[prop], test[prop], 'context.' + prop + ' should equal ' + JSON.stringify(test[prop]));
+            }
+
+            function pos_compare(actual, expected, name) {
+            equal(actual.row, expected.row + rowOffset, "row of " + name + " position is not as expected");
+            equal(actual.column, expected.column, "column of " + name + " position is not as expected");
+          }
+
+          function range_compare(actual, expected, name) {
+            pos_compare(actual.start, expected.start, name + ".start");
+            pos_compare(actual.end, expected.end, name + ".end");
+          }
+
+          ac("prefixToAdd");
+          ac("suffixToAdd");
+          ac("addTemplate");
+          ac("textBoxPosition", pos_compare);
+          ac("rangeToReplace", range_compare);
+
           start();
-          return;
-        }
-
-        context.initialValue = input.autocomplete._test.getAutoCompleteValueFromToken(context.updatedForToken);
-
-
-        function ac(prop, prop_test) {
-          if (typeof test[prop] != "undefined")
-            if (prop_test)
-              prop_test(context[prop], test[prop], prop);
-            else
-              deepEqual(context[prop], test[prop], 'context.' + prop + ' should equal ' + JSON.stringify(test[prop]));
-        }
-
-        function pos_compare(actual, expected, name) {
-          equal(actual.row, expected.row + rowOffset, "row of " + name + " position is not as expected");
-          equal(actual.column, expected.column, "column of " + name + " position is not as expected");
-        }
-
-        function range_compare(actual, expected, name) {
-          pos_compare(actual.start, expected.start, name + ".start");
-          pos_compare(actual.end, expected.end, name + ".end");
-        }
-
-        function autocompleteset_compare(actual, expected, name) {
-          if (typeof expected.completionTerms != "undefined")
-            deepEqual(actual.completionTerms, expected.completionTerms,
-              name + ".completionTerms are not equal");
-          if (typeof expected.templateByTerm != "undefined")
-            deepEqual(actual.templateByTerm, expected.templateByTerm,
-              name + ".templateByTerm are not equal");
-
-        }
-
-        ac("initialValue");
-        ac("prefixToAdd");
-        ac("suffixToAdd");
-        ac("addTemplate");
-        ac("textBoxPosition", pos_compare);
-        ac("rangeToReplace", range_compare);
-        ac("autoCompleteSet", autocompleteset_compare);
-
-        start();
+          });
+        });
       });
 
     })
@@ -159,7 +178,7 @@ define([
         prefixToAdd: "",
         suffixToAdd: "",
         rangeToReplace: { start: { row: 0, column: 1 }, end: { row: 0, column: 1 }},
-        autoCompleteSet: { completionTerms: ["facets", "query", "size"]}
+        autoCompleteSet: ["facets", "query", "size"]
       }
     ]
   );
@@ -198,7 +217,7 @@ define([
         prefixToAdd: "",
         suffixToAdd: "",
         rangeToReplace: { start: { row: 1, column: 3 }, end: { row: 1, column: 10 }},
-        autoCompleteSet: { completionTerms: ["facets", "query", "size"]}
+        autoCompleteSet: ["facets", "query", "size"]
       },
       {
         name: "existing inner dictionary key",
@@ -208,7 +227,7 @@ define([
         prefixToAdd: "",
         suffixToAdd: "",
         rangeToReplace: { start: { row: 2, column: 6}, end: { row: 2, column: 13 }},
-        autoCompleteSet: { completionTerms: ["match_all", "term"]}
+        autoCompleteSet: ["match_all", "term"]
       },
       {
         name: "existing dictionary key, yes template",
@@ -218,7 +237,7 @@ define([
         prefixToAdd: "",
         suffixToAdd: "",
         rangeToReplace: { start: { row: 4, column: 3 }, end: { row: 4, column: 15 }},
-        autoCompleteSet: { completionTerms: ["facets", "query", "size"]}
+        autoCompleteSet: ["facets", "query", "size"]
       }
     ]
   );
@@ -237,13 +256,13 @@ define([
     [
       {
         name: "trailing comma, end of line",
-        cursor: { row: 4, column: 18},
+        cursor: { row: 4, column: 16},
         initialValue: "",
         addTemplate: true,
         prefixToAdd: "",
         suffixToAdd: ", ",
         rangeToReplace: { start: { row: 4, column: 16 }, end: { row: 4, column: 16 }},
-        autoCompleteSet: { completionTerms: ["facets", "query", "size"]}
+        autoCompleteSet: ["facets", "query", "size"]
       },
       {
         name: "trailing comma, beginning of line",
@@ -253,7 +272,7 @@ define([
         prefixToAdd: "",
         suffixToAdd: ", ",
         rangeToReplace: { start: { row: 5, column: 1 }, end: { row: 5, column: 1 }},
-        autoCompleteSet: { completionTerms: ["facets", "query", "size"]}
+        autoCompleteSet: ["facets", "query", "size"]
       },
       {
         name: "prefix comma, beginning of line",
@@ -263,7 +282,7 @@ define([
         prefixToAdd: ", ",
         suffixToAdd: "",
         rangeToReplace: { start: { row: 6, column: 0 }, end: { row: 6, column: 0 }},
-        autoCompleteSet: { completionTerms: ["facets", "query", "size"]}
+        autoCompleteSet: ["facets", "query", "size"]
       },
       {
         name: "prefix comma, end of line",
@@ -273,7 +292,7 @@ define([
         prefixToAdd: ", ",
         suffixToAdd: "",
         rangeToReplace: { start: { row: 5, column: 14 }, end: { row: 5, column: 14 }},
-        autoCompleteSet: { completionTerms: ["facets", "query", "size"]}
+        autoCompleteSet: ["facets", "query", "size"]
       }
 
     ]
@@ -305,25 +324,25 @@ define([
         name: "not matching object when { is not opened",
         cursor: { row: 1, column: 12},
         initialValue: "",
-        autoCompleteSet: { completionTerms: ["{"] }
+        autoCompleteSet: ["{"]
       },
       {
         name: "not matching array when [ is not opened",
         cursor: { row: 2, column: 12},
         initialValue: "",
-        autoCompleteSet: { completionTerms: ["["] }
+        autoCompleteSet: ["["]
       },
       {
         name: "matching value with one_of",
         cursor: { row: 3, column: 19},
         initialValue: "",
-        autoCompleteSet: { completionTerms: [ 1, 2] }
+        autoCompleteSet: [ 1, 2]
       },
       {
         name: "matching value",
         cursor: { row: 4, column: 12},
         initialValue: "",
-        autoCompleteSet: { completionTerms: [ 3 ] }
+        autoCompleteSet: [ 3 ]
       }
     ]
   );
@@ -343,25 +362,15 @@ define([
     "POST _search",
     [
       {
-        name: "$FIELD$ matching",
+        name: "* matching everything",
         cursor: { row: 5, column: 15},
         initialValue: "",
         addTemplate: true,
         prefixToAdd: "",
         suffixToAdd: "",
         rangeToReplace: { start: { row: 5, column: 15 }, end: { row: 5, column: 15 }},
-        autoCompleteSet: { completionTerms: ["terms"] }
+        autoCompleteSet: [{ name: "terms", meta: "API" }]
       }
-  //    , made redundent by inline auto complete. Still need to find a solution for templates
-  //    {
-  //     name: "$FIELD$ options",
-  //     cursor: { row: 5, column: 7},
-  //     initialValue: "name",
-  //     addTemplate: true,
-  //     prefixToAdd: "",
-  //     suffixToAdd: "",
-  //     autoCompleteSet: { completionTerms: [] }
-  //    }
     ]
   );
 
@@ -384,10 +393,14 @@ define([
       {
         name: "$INDEX$ matching",
         cursor: { row: 1, column: 15},
-        autoCompleteSet: { completionTerms: ["index1", "index2"] }
+        autoCompleteSet: [{ name: "index1", meta: "index"}, { name: "index2", meta: "index"}]
       }
     ]
   );
+
+  function tt(term, template) {
+    return { name: term, template: template };
+  }
 
   context_tests(
     {
@@ -415,15 +428,14 @@ define([
       {
         name: "Templates 1",
         cursor: { row: 1, column: 0},
-        autoCompleteSet: { completionTerms: ["array", "fixed", "number", "object", "oneof"],
-          templateByTerm: { array: [ "a" ], number: 1, object: {}, fixed: { a: 1}, oneof: "o1" }}
+        autoCompleteSet: [
+          tt("array", [ "a" ]), tt("fixed", { a: 1 }), tt("number",1), tt("object", {}), tt("oneof", "o1")
+        ]
       },
       {
         name: "Templates - one off",
         cursor: { row: 4, column: 12},
-        autoCompleteSet: { completionTerms: ["o1", "o2"],
-          templateByTerm: { }
-        }
+        autoCompleteSet: [tt("o1"), tt("o2")]
       }
     ]
   );
@@ -461,31 +473,22 @@ define([
       {
         name: "Any of - templates",
         cursor: { row: 1, column: 0},
-        autoCompleteSet: {
-          completionTerms: ["any_of_numbers", "any_of_obj"],
-          templateByTerm: {
-            any_of_numbers: [ 1, 2 ],
-            any_of_obj: [
-              { c: 1}
-            ]
-          }
-        }
+        autoCompleteSet: [
+            tt("any_of_numbers", [ 1, 2 ]),
+            tt("any_of_obj", [ { c: 1} ])
+          ]
       },
       {
         name: "Any of - numbers",
         cursor: { row: 2, column: 2},
-        autoCompleteSet: {
-          completionTerms: [1, 2, 3],
-          templateByTerm: { }
-        }
+        autoCompleteSet: [1, 2, 3]
       },
       {
         name: "Any of - object",
         cursor: { row: 6, column: 2},
-        autoCompleteSet: {
-          completionTerms: ["a", "b"],
-          templateByTerm: { a: 1, b: 2 }
-        }
+        autoCompleteSet: [
+          tt("a", 1),tt("b", 2 )
+        ]
       }
     ]
   );
@@ -507,10 +510,7 @@ define([
       {
         name: "Empty string as default",
         cursor: { row: 0, column: 1},
-        autoCompleteSet: {
-          completionTerms: ["query"],
-          templateByTerm: { query: ""}
-        }
+        autoCompleteSet: [tt("query","")]
       }
     ]
   );
@@ -574,33 +574,29 @@ define([
       {
         name: "Relative scope link test",
         cursor: { row: 2, column: 12},
-        autoCompleteSet: { completionTerms: ["b", "c", "d", "e", "f"],
-          templateByTerm: { b: {}, c: {}, d: {}, e: {}, f: [{}] }
-        }
+        autoCompleteSet:[
+          tt("b", {}), tt("c", {}), tt("d", {}), tt("e", {}), tt("f", [ {} ])
+        ]
       },
       {
         name: "External scope link test",
         cursor: { row: 3, column: 12},
-        autoCompleteSet: { completionTerms: ["t2"],
-          templateByTerm: { t2: 1}}
+        autoCompleteSet: [tt("t2", 1)]
       },
       {
         name: "Global scope link test",
         cursor: { row: 4, column: 12},
-        autoCompleteSet: { completionTerms: ["t1"],
-          templateByTerm: { t1: 2}}
+        autoCompleteSet: [tt("t1", 2)]
       },
       {
         name: "Entire endpoint scope link test",
         cursor: { row: 5, column: 12},
-        autoCompleteSet: { completionTerms: ["target"],
-          templateByTerm: { target: {}}}
+        autoCompleteSet: [tt("target", {})]
       },
       {
         name: "A scope link within an array",
         cursor: { row: 7, column: 10},
-        autoCompleteSet: { completionTerms: ["t2"],
-          templateByTerm: { t2: 1}}
+        autoCompleteSet: [tt("t2", 1)]
       }
     ]
   );
@@ -625,7 +621,7 @@ define([
       {
         name: "Path after empty object",
         cursor: { row: 1, column: 10},
-        autoCompleteSet: { completionTerms: ["a", "b"] }
+        autoCompleteSet: ["a", "b"]
       }
     ]
   );
@@ -671,14 +667,14 @@ define([
       {
         name: "List of objects - internal autocomplete",
         cursor: { row: 3, column: 10},
-        autoCompleteSet: { completionTerms: ["b"] }
+        autoCompleteSet: ["b"]
       },
       {
         name: "List of objects - external template",
         cursor: { row: 0, column: 1},
-        autoCompleteSet: { completionTerms: ["a"], templateByTerm: { a: [
+        autoCompleteSet: [tt("a", [
           {}
-        ]} }
+        ])]
       }
     ]
   );
@@ -706,12 +702,12 @@ define([
       {
         name: "Field completion as scope",
         cursor: { row: 3, column: 10},
-        autoCompleteSet: { completionTerms: ["field1.1.1", "field1.1.2"]}
+        autoCompleteSet: ["field1.1.1", "field1.1.2"]
       },
       {
         name: "Field completion as value",
         cursor: { row: 9, column: 23},
-        autoCompleteSet: { completionTerms: ["field1.1.1", "field1.1.2"]}
+        autoCompleteSet: ["field1.1.1", "field1.1.2"]
       }
     ]
   );
@@ -726,7 +722,7 @@ define([
       {
         name: "initial doc start",
         cursor: { row: 1, column: 0},
-        autoCompleteSet: { completionTerms: ["{"]},
+        autoCompleteSet: ["{"],
         prefixToAdd: "",
         suffixToAdd: ""
       }
@@ -747,10 +743,8 @@ define([
       {
         name: "Cursor rows after request end",
         cursor: { row: 4, column: 0},
-        autoCompleteSet: {
-          completionTerms: [ "GET", "PUT", "POST", "DELETE", "HEAD" ]
-        },
-        prefixToAdd: "", 
+        autoCompleteSet: [ "GET", "PUT", "POST", "DELETE", "HEAD" ],
+        prefixToAdd: "",
         suffixToAdd: " "
       },
       {
@@ -790,7 +784,7 @@ define([
       {
         name: "Endpoints with slashes - no slash",
         cursor: { row: 0, column: 8},
-        autoCompleteSet: { completionTerms: [ "_search", "_cluster/stats", "_cluster/nodes/stats" ]},
+        autoCompleteSet: [ "_cluster/nodes/stats", "_cluster/stats", "_search"],
         prefixToAdd: "",
         suffixToAdd: ""
       }
@@ -806,14 +800,14 @@ define([
       {
         name: "Endpoints with slashes - before slash",
         cursor: { row: 0, column: 8},
-        autoCompleteSet: { completionTerms: [ "_search", "_cluster/stats", "_cluster/nodes/stats" ]},
+        autoCompleteSet: [ "_cluster/nodes/stats", "_cluster/stats", "_search"],
         prefixToAdd: "",
         suffixToAdd: ""
       },
       {
         name: "Endpoints with slashes - on slash",
         cursor: { row: 0, column: 13},
-        autoCompleteSet: { completionTerms: [ "_search", "_cluster/stats", "_cluster/nodes/stats" ]},
+        autoCompleteSet: [ "_cluster/nodes/stats", "_cluster/stats", "_search"],
         prefixToAdd: "",
         suffixToAdd: ""
       }
@@ -829,7 +823,7 @@ define([
       {
         name: "Endpoints with slashes - after slash",
         cursor: { row: 0, column: 15},
-        autoCompleteSet: { completionTerms: [ "stats", "nodes/stats" ]},
+        autoCompleteSet: [ { name: "nodes/stats", meta: "endpoint" } , { name: "stats", meta: "endpoint" } ],
         prefixToAdd: "",
         suffixToAdd: "",
         initialValue: "no"
@@ -846,7 +840,7 @@ define([
       {
         name: "Endpoints with two slashes",
         cursor: { row: 0, column: 21},
-        autoCompleteSet: { completionTerms: ["stats" ]},
+        autoCompleteSet: ["stats" ],
         prefixToAdd: "",
         suffixToAdd: "",
         initialValue: "st"
@@ -862,9 +856,15 @@ define([
     [
       {
         name: "Endpoints by subpart",
-        cursor: { row: 0, column: 14},
-        autoCompleteSet: { completionTerms: [ "index1", "index2", "_search", "_cluster/stats", "_cluster/nodes/stats" ]},
-        prefixToAdd: "", 
+        cursor: { row: 0, column: 7},
+        autoCompleteSet: [
+          { name: "_cluster/nodes/stats", meta: "endpoint" },
+          { name: "_cluster/stats", meta: "endpoint" },
+          { name: "_search", meta: "endpoint" },
+          { name: "index1", meta: "index" },
+          { name: "index2", meta: "index" }
+        ],
+        prefixToAdd: "",
         suffixToAdd: "",
         initialValue: "cl"
       }

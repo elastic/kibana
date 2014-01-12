@@ -1,26 +1,37 @@
 define([
+  'ace',
   'analytics',
   'autocomplete',
   'jquery',
   'mappings',
   'output',
-  'require',
   'sense_editor/editor',
+  'settings',
+  'require',
   'utils',
-  'zeroclip'
-], function (_gaq, Autocomplete, $, mappings, output, require, SenseEditor, utils, ZeroClipboard) {
+  'zeroclip',
+  'ace_ext_language_tools'
+], function (ace, _gaq, Autocomplete, $, mappings, output, SenseEditor, settings, require, utils, ZeroClipboard) {
   'use strict';
 
-  var input = new SenseEditor($('#editor'));
-  input.autocomplete = new Autocomplete(input);
-
-  input.commands.addCommand({
-    name: 'autocomplete',
-    bindKey: {win: 'Ctrl-Space', mac: 'Ctrl-Space'},
-    exec: function () {
-      input.autocomplete.show();
+  // disable standard context based autocompletion.
+  ace.define('ace/autocomplete/text_completer', ['require', 'exports', 'module'], function(require, exports, module) {
+    exports.getCompletions = function(editor, session, pos, prefix, callback) {
+      callback(null, []);
     }
   });
+
+
+  ace.require('ace/ext/language_tools');
+  var input = new SenseEditor($('#editor'));
+  input.setOptions({
+    enableBasicAutocompletion: true
+  });
+
+  input.autocomplete = new Autocomplete(input);
+
+  ace.require('ace/ext/language_tools').addCompleter(input.autocomplete.completer);
+
   input.commands.addCommand({
     name: 'auto indent request',
     bindKey: {win: 'Ctrl-I', mac: 'Command-I'},
@@ -112,9 +123,12 @@ define([
   /**
    * Init the editor
    */
+  if (settings) {
+    settings.applyCurrentSettings(input);
+  }
   input.focus();
   input.highlightCurrentRequestAndUpdateActionBar();
   input.updateActionsBar();
 
   return input;
-})
+});

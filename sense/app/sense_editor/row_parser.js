@@ -9,12 +9,11 @@ define([], function () {
 
       var session = editor.getSession();
       if (row >= session.getLength()) return RowParser.MODE_BETWEEN_REQUESTS;
-      var mode = (session.getState(row) || {}).name;
+      var mode = session.getState(row);
       if (!mode)
         return RowParser.MODE_BETWEEN_REQUESTS; // shouldn't really happen
 
-
-      if (mode != "start") return RowParser.MODE_IN_REQUEST;
+      if (mode !== "start") return RowParser.MODE_IN_REQUEST;
       var line = (session.getLine(row) || "").trim();
       if (!line || line[0] === '#') return RowParser.MODE_BETWEEN_REQUESTS; // empty line or a comment waiting for a new req to start
 

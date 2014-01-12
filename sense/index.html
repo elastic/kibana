@@ -35,12 +35,16 @@
   </div>
 </div>
 <div id="main" class="container-fluid">
-  <div id="editor" class="editor_position">GET _search
-{
+  <div id="editor_container">
+    <div id="editor">GET _search
+      {
   "query": { "match_all": {} }
 }
+    </div>
   </div>
-  <div id="output">{}</div>
+  <div id="output_container">
+    <div id="output">{}</div>
+  </div>
   <div id="editor_actions">
     <a id="send" href="#" data-toggle="tooltip" title="click to send request"><i
         class="fa fa-play"></i></a>
@@ -110,6 +114,9 @@
     <ul class="nav nav-list">
       <!--<li><a href="#"><i class="icon-chevron-right"></i><span></span></a></li>-->
     </ul>
+    <div id="history_viewer">
+
+    </div>
   </div>
   <div class="modal-footer">
     <a href="#" class="btn pull-left" id="hist_clear">Clear</a>
@@ -181,8 +188,9 @@
 <script src="vendor/require/require.js"></script>
 <script src="app/require.config.js"></script>
 <script>
-var SENSE_VERSION = '0.9.0';
-require(['app'], function () {});
+var SENSE_VERSION = '1.0.0';
+// make sure all of ace is loaded first.
+require(['require','ace'], function (require) { require(['app'], function () {})});
 </script>
 
 </body>

@@ -1,7 +1,6 @@
 define([
-  'ace',
   'jquery'
-], function (ace, $) {
+], function ($) {
   'use strict';
 
   var utils = {};
@@ -21,13 +20,17 @@ define([
     return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
   };
 
+  utils.jsonToString = function(data, indent) {
+    return JSON.stringify(data, null, indent ? 2 : 0);
+  };
+
   utils.reformatData = function (data, indent) {
     var changed = false;
     var formatted_data = [];
     for (var i = 0; i < data.length; i++) {
       var cur_doc = data[i];
       try {
-        var new_doc = JSON.stringify(JSON.parse(cur_doc), null, indent ? 2 : 0);
+        var new_doc = utils.jsonToString(JSON.parse(cur_doc), indent ? 2 : 0);
         changed = changed || new_doc != cur_doc;
         formatted_data.push(new_doc);
       }
@@ -41,7 +44,7 @@ define([
       changed: changed,
       data: formatted_data
     };
-  }
+  };
 
   utils.callES = function (server, url, method, data, successCallback, completeCallback) {
     url = utils.constructESUrl(server, url);

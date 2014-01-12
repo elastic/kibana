@@ -1,89 +1,48 @@
 define([
-  'ace',
   'history',
   'kb/index',
   'mappings',
+  'ace',
   'jquery',
   'utils',
-  
+  '_',
   'jquery-ui'
-], function (ace, history, kb, mappings, $, utils) {
+], function (history, kb, mappings, ace, $, utils, _) {
   'use strict';
 
-  var MODE_INACTIVE = 0, MODE_VISIBLE = 1, MODE_APPLYING_TERM = 2, MODE_FORCED_CLOSE = 3;
-  var MODE = MODE_INACTIVE;
-  var ACTIVE_MENU = null;
-  var ACTIVE_CONTEXT = null;
+  var AceRange = ace.require('ace/range').Range;
+
   var LAST_EVALUATED_TOKEN = null;
 
   function Autocomplete(editor) {
 
     function getAutoCompleteValueFromToken(token) {
       switch ((token || {}).type) {
-      case "variable":
-      case "string":
-      case "text":
-      case "constant.numeric":
-      case "constant.language.boolean":
-        return token.value.replace(/"/g, '');
-      case "method":
-      case "url.index":
-      case "url.type":
-      case "url.part":
-      case "url.endpoint":
-        return token.value;
-      default:
-        // standing on white space, quotes or another punctuation - no replacing
-        return "";
+        case "variable":
+        case "string":
+        case "text":
+        case "constant.numeric":
+        case "constant.language.boolean":
+          return token.value.replace(/"/g, '');
+        case "method":
+        case "url.index":
+        case "url.type":
+        case "url.part":
+        case "url.endpoint":
+          return token.value;
+        default:
+          // standing on white space, quotes or another punctuation - no replacing
+          return "";
       }
     }
 
-    var visibleMenuAceCMDS = [
-      {
-        name: "golinedown",
-        exec: function () {
-          ACTIVE_MENU.focus();
-        },
-        bindKey: "Down"
-      },
-      {
-        name: "select_autocomplete",
-        exec: function () {
-          ACTIVE_MENU.menu("focus", null, ACTIVE_MENU.find(".ui-menu-item:first"));
-          ACTIVE_MENU.menu("select");
-          return true;
-        },
-        bindKey: "Enter"
-      },
-      {
-        name: "indent",
-        exec: function () {
-          ACTIVE_MENU.menu("focus", null, ACTIVE_MENU.find(".ui-menu-item:first"));
-          ACTIVE_MENU.menu("select");
-          return true;
-        },
-        bindKey: "Tab"
-      },
-      {
-        name: "singleSelection",
-        exec: function () {
-          hideAutoComplete();
-          MODE = MODE_FORCED_CLOSE;
-          return true;
-        },
-        bindKey: "Esc"
-      }
-    ];
-
-    var _cached_cmds_to_restore = [];
-
-
-    function hideAutoComplete() {
-      if (MODE != MODE_VISIBLE) return;
-      editor.commands.removeCommands(visibleMenuAceCMDS);
-      editor.commands.addCommands(_cached_cmds_to_restore);
-      ACTIVE_MENU.css("left", "-1000px");
-      MODE = MODE_INACTIVE;
+    function addMetaToTermsList(list, meta, template) {
+      return _.map(list, function (t) {
+        if (typeof t !== "object") {
+          t = { name: t};
+        }
+        return _.defaults(t, { meta: meta, template: template });
+      });
     }
 
     function termToFilterRegex(term, prefix, suffix) {
@@ -93,109 +52,27 @@ define([
       return new RegExp(prefix + term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + suffix, 'i');
     }
 
-    function updateAutoComplete(hideIfSingleItemAndEqualToTerm) {
-
-      var pos = editor.getCursorPosition();
-      var token = editor.getSession().getTokenAt(pos.row, pos.column);
-      var term = getAutoCompleteValueFromToken(token);
-      console.log("Updating autocomplete for " + term);
-      ACTIVE_CONTEXT.updatedForToken = token || { row: pos.row, start: pos.column };
-
-      var term_filter = termToFilterRegex(term);
-      var term_filter_prefix = termToFilterRegex(term, "^_?");
-
-      var possible_terms = ACTIVE_CONTEXT.autoCompleteSet.completionTerms;
-      ACTIVE_MENU.children().remove();
-      var lastPrefixMatch = null;
-      var menuCount = 0, lastTerm = null;
-      for (var i = 0; i < possible_terms.length; i++) {
-        var term_as_string = possible_terms[i] + "";
-        if (term_as_string.match(term_filter_prefix)) {
-          menuCount++;
-          lastTerm = possible_terms[i];
-          if (lastPrefixMatch) {
-            lastPrefixMatch = $('<li></li>').insertAfter(lastPrefixMatch).append($('<a tabindex="-1" href="#"></a>').
-              text(possible_terms[i])).data("term_id", i);
-          }
-          else {
-            lastPrefixMatch = $('<li></li>').prependTo(ACTIVE_MENU).append($('<a tabindex="-1" href="#"></a>').
-              text(possible_terms[i])).data("term_id", i);
-          }
-          continue;
-        }
-        if (term_as_string.match(term_filter)) {
-          menuCount++;
-          lastTerm = possible_terms[i];
-          $('<li></li>').appendTo(ACTIVE_MENU)
-            .append($('<a tabindex="-1" href="#"></a>').text(possible_terms[i])).data("term_id", i);
-        }
-
-      }
-
-      if (hideIfSingleItemAndEqualToTerm && lastTerm == term) menuCount--;
-
-      ACTIVE_MENU.menu("refresh");
-      if (menuCount > 0) {
-        return true;
-      } else {
-        hideAutoComplete();
-        return false;
-      }
-    }
-
-    function showAutoComplete(force) {
-      hideAutoComplete();
-
-
-      var context = getAutoCompleteContext();
-      ACTIVE_CONTEXT = context;
-      if (!context) return; // nothing to do
-
-      var screen_pos = editor.renderer.textToScreenCoordinates(context.textBoxPosition.row,
-        context.textBoxPosition.column);
-
-      ACTIVE_MENU.css('visibility', 'visible');
-      _cached_cmds_to_restore = $.map(visibleMenuAceCMDS, function (cmd) {
-        return  editor.commands.commands[cmd.name];
-      });
-
-
-      editor.commands.addCommands(visibleMenuAceCMDS);
-
-
-      MODE = MODE_VISIBLE;
-
-      if (!updateAutoComplete(!force)) return; // update has hid the menu
-
-      ACTIVE_MENU.css("left", screen_pos.pageX);
-      ACTIVE_MENU.css("top", screen_pos.pageY);
-    }
-
     function applyTerm(term) {
       var session = editor.getSession();
 
-      var context = ACTIVE_CONTEXT;
-
-      hideAutoComplete();
-
-      MODE = MODE_APPLYING_TERM;
+      var context = term.context;
 
       // make sure we get up to date replacement info.
-      addReplacementInfoToContext(context, term);
+      addReplacementInfoToContext(context, editor.getCursorPosition(), term.value);
 
       var termAsString;
       if (context.autoCompleteType == "body") {
-        termAsString = typeof term == "string" ? '"' + term + '"' : term + "";
-        if (term == "[" || term == "{") termAsString = "";
+        termAsString = typeof term.value == "string" ? '"' + term.value + '"' : term.value + "";
+        if (term.value === "[" || term.value === "{") termAsString = "";
       }
       else {
-        termAsString = term + "";
+        termAsString = term.value + "";
       }
 
       var valueToInsert = termAsString;
       var templateInserted = false;
-      if (context.addTemplate && typeof context.autoCompleteSet.templateByTerm[term] != "undefined") {
-        var indentedTemplateLines = JSON.stringify(context.autoCompleteSet.templateByTerm[term], null, 3).split("\n");
+      if (context.addTemplate && typeof term.template != "undefined") {
+        var indentedTemplateLines = utils.jsonToString(term.template, true).split("\n");
         var currentIndentation = session.getLine(context.rangeToReplace.start.row);
         currentIndentation = currentIndentation.match(/^\s*/)[0];
         for (var i = 1; i < indentedTemplateLines.length; i++) // skip first line
@@ -205,8 +82,8 @@ define([
         templateInserted = true;
       } else {
         templateInserted = true;
-        if (term == "[") valueToInsert += "[]";
-        else if (term == "{") valueToInsert += "{}";
+        if (term.value === "[") valueToInsert += "[]";
+        else if (term.value == "{") valueToInsert += "{}";
         else {
           templateInserted = false;
         }
@@ -214,6 +91,8 @@ define([
 
       valueToInsert = context.prefixToAdd + valueToInsert + context.suffixToAdd;
 
+      // disable listening to the changes we are making.
+      removeChangeListener();
 
       if (context.rangeToReplace.start.column != context.rangeToReplace.end.column)
         session.replace(context.rangeToReplace, valueToInsert);
@@ -229,102 +108,87 @@ define([
           + (templateInserted ? 0 : context.suffixToAdd.length)
       };
 
-      var tokenIter = new (ace.require("ace/token_iterator").TokenIterator)(editor.getSession(),
-        newPos.row, newPos.column);
+      var tokenIter = editor.iterForPosition(newPos.row, newPos.column);
 
       // look for the next place stand, just after a comma, {
       var nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
       switch (nonEmptyToken ? nonEmptyToken.type : "NOTOKEN") {
-      case "paren.rparen":
-        newPos = { row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn() };
-        break;
-      case "punctuation.colon":
-        nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
-        if ((nonEmptyToken || {}).type == "paren.lparen") {
-          nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
+        case "paren.rparen":
           newPos = { row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn() };
-          if (nonEmptyToken && nonEmptyToken.value.indexOf('"') === 0) newPos.column++; // don't stand on "
-        }
-        break;
-      case "paren.lparen":
-      case "punctuation.comma":
-        tokenIter.stepForward();
-        newPos = { row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn() };
-        break;
+          break;
+        case "punctuation.colon":
+          nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
+          if ((nonEmptyToken || {}).type == "paren.lparen") {
+            nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
+            newPos = { row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn() };
+            if (nonEmptyToken && nonEmptyToken.value.indexOf('"') === 0) newPos.column++; // don't stand on "
+          }
+          break;
+        case "paren.lparen":
+        case "punctuation.comma":
+          tokenIter.stepForward();
+          newPos = { row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn() };
+          break;
       }
 
 
       editor.moveCursorToPosition(newPos);
 
-
-      MODE = MODE_INACTIVE;
-
-      editor.focus();
+      // re-enable listening to typing
+      addChangeListener();
     }
 
-    function getAutoCompleteContext() {
+    function getAutoCompleteContext(editor, session, pos) {
       // deduces all the parameters need to position and insert the auto complete
       var context = {
-        updatedForToken: null,
-        prefixToAdd: "",
-        suffixToAdd: "",
-        addTemplate: false,
-        textBoxPosition: null, // ace position to place the left side of the input box
-        rangeToReplace: null, // ace range to replace with the auto complete
         autoCompleteSet: null, // instructions for what can be here
-        replacingToken: false,
         endpoint: null,
         urlPath: null,
         method: null,
         activeScheme: null
       };
 
-      var pos = editor.getCursorPosition();
-      var session = editor.getSession();
-      context.updatedForToken = session.getTokenAt(pos.row, pos.column);
+//      context.updatedForToken = session.getTokenAt(pos.row, pos.column);
+//
+//      if (!context.updatedForToken)
+//        context.updatedForToken = { value: "", start: pos.column }; // empty line
+//
+//      context.updatedForToken.row = pos.row; // extend
 
-      if (!context.updatedForToken)
-        context.updatedForToken = { value: "", start: pos.column }; // empty line
-
-      context.updatedForToken.row = pos.row; // extend
-
-      context.autoCompleteType = getAutoCompleteType();
+      context.autoCompleteType = getAutoCompleteType(pos);
       switch (context.autoCompleteType) {
-      case "type":
-        addTypeAutoCompleteSetToContext(context);
-        break;
-      case "index":
-        addIndexAutoCompleteSetToContext(context);
-        break;
-      case "endpoint":
-        addEndpointAutoCompleteSetToContext(context);
-        break;
-      case "method":
-        addMethodAutoCompleteSetToContext(context);
-        break;
-      case "body":
-        addBodyAutoCompleteSetToContext(context);
-        break;
-      default:
-        return null;
+        case "type":
+          addTypeAutoCompleteSetToContext(context, pos);
+          break;
+        case "index":
+          addIndexAutoCompleteSetToContext(context, pos);
+          break;
+        case "endpoint":
+          addEndpointAutoCompleteSetToContext(context, pos);
+          break;
+        case "method":
+          addMethodAutoCompleteSetToContext(context, pos);
+          break;
+        case "body":
+          addBodyAutoCompleteSetToContext(context, pos);
+          break;
+        default:
+          return null;
       }
 
 
-      if (!context.autoCompleteSet
-        || !context.autoCompleteSet.completionTerms
-        || context.autoCompleteSet.completionTerms.length === 0
-      ) {
+      if (!context.autoCompleteSet) {
         return null; // nothing to do..
       }
 
-      addReplacementInfoToContext(context);
+      addReplacementInfoToContext(context, pos);
 
       return context;
     }
 
-    function getAutoCompleteType() {
+    function getAutoCompleteType(pos) {
       // return "method", "index", "type" ,"id" or "body" to determine auto complete type.
-      var tokenIter = editor.iterForCurrentLoc();
+      var tokenIter = editor.iterForPosition(pos.row, pos.column);
       var startRow = tokenIter.getCurrentTokenRow();
       var t = tokenIter.getCurrentToken();
 
@@ -356,50 +220,50 @@ define([
       if (t.type == "url.comma") t = tokenIter.stepBackward();
 
       switch (t.type) {
-      case "comment":
-        return null;
-      case "url.type":
-        return "type";
-      case "url.index":
-        return "index";
-      case "url.id":
-        return "id";
-      case "url.part":
-      case "url.endpoint":
-        return "endpoint";
-      case "method":
-        return "method";
-      case "url.slash":
-        t = tokenIter.stepBackward();
-        switch ((t || {}).type) {
-        case "url.type":
-          return "id";
-        case "url.index":
-          return "type";
-        case "url.endpoint":
-        case "url.part":
-          return "endpoint";
-        case "whitespace":
-          return "index";
-        default:
+        case "comment":
           return null;
-        }
+        case "url.type":
+          return "type";
+        case "url.index":
+          return "index";
+        case "url.id":
+          return "id";
+        case "url.part":
+        case "url.endpoint":
+          return "endpoint";
+        case "method":
+          return "method";
+        case "url.slash":
+          t = tokenIter.stepBackward();
+          switch ((t || {}).type) {
+            case "url.type":
+              return "id";
+            case "url.index":
+              return "type";
+            case "url.endpoint":
+            case "url.part":
+              return "endpoint";
+            case "whitespace":
+              return "index";
+            default:
+              return null;
+          }
         /* falls through */
-      default:
-        if (t.type.indexOf("url") === 0) return null;
+        default:
+          if (t.type.indexOf("url") === 0) return null;
 
-        // check if we are beyond the body and should start a new request
-        // but only we have a new line between current pos and the body.
-        t = editor.parser.prevNonEmptyToken(tokenIter);
-        if (t && tokenIter.getCurrentTokenRow() < startRow) {
-          return checkIfStandingAfterBody();
-        }
+          // check if we are beyond the body and should start a new request
+          // but only we have a new line between current pos and the body.
+          t = editor.parser.prevNonEmptyToken(tokenIter);
+          if (t && tokenIter.getCurrentTokenRow() < startRow) {
+            return checkIfStandingAfterBody();
+          }
 
-        return "body";
+          return "body";
       }
     }
 
-    function addReplacementInfoToContext(context, replacingTerm) {
+    function addReplacementInfoToContext(context, pos, replacingTerm) {
       // extract the initial value, rangeToReplace & textBoxPosition
 
       // Scenarios for current token:
@@ -409,7 +273,6 @@ define([
       //   - Broken scenario { , bla|
       //   - Nice token, broken before: {, "bla"
 
-      var pos = editor.getCursorPosition();
       var session = editor.getSession();
       var insertingRelativeToToken;
 
@@ -419,62 +282,62 @@ define([
 
 
       switch (context.updatedForToken.type) {
-      case "variable":
-      case "string":
-      case "text":
-      case "constant.numeric":
-      case "constant.language.boolean":
-      case "method":
-      case "url.index":
-      case "url.type":
-      case "url.id":
-      case "url.method":
-      case "url.endpoint":
-      case "url.part":
-        insertingRelativeToToken = 0;
-        context.rangeToReplace = new (ace.require("ace/range").Range)(
-          pos.row, context.updatedForToken.start, pos.row,
-          context.updatedForToken.start + context.updatedForToken.value.length
-        );
-        context.replacingToken = true;
-        break;
-      default:
-        if (replacingTerm && context.updatedForToken.value == replacingTerm) {
+        case "variable":
+        case "string":
+        case "text":
+        case "constant.numeric":
+        case "constant.language.boolean":
+        case "method":
+        case "url.index":
+        case "url.type":
+        case "url.id":
+        case "url.method":
+        case "url.endpoint":
+        case "url.part":
           insertingRelativeToToken = 0;
-          context.rangeToReplace = new (ace.require("ace/range").Range)(
+          context.rangeToReplace = new AceRange(
             pos.row, context.updatedForToken.start, pos.row,
             context.updatedForToken.start + context.updatedForToken.value.length
           );
           context.replacingToken = true;
-        }
-        else {
-          // standing on white space, quotes or another punctuation - no replacing
-          context.rangeToReplace = new (ace.require("ace/range").Range)(
-            pos.row, pos.column, pos.row, pos.column
-          );
-          context.replacingToken = false;
-        }
-        break;
+          break;
+        default:
+          if (replacingTerm && context.updatedForToken.value == replacingTerm) {
+            insertingRelativeToToken = 0;
+            context.rangeToReplace = new AceRange(
+              pos.row, context.updatedForToken.start, pos.row,
+              context.updatedForToken.start + context.updatedForToken.value.length
+            );
+            context.replacingToken = true;
+          }
+          else {
+            // standing on white space, quotes or another punctuation - no replacing
+            context.rangeToReplace = new AceRange(
+              pos.row, pos.column, pos.row, pos.column
+            );
+            context.replacingToken = false;
+          }
+          break;
       }
 
       context.textBoxPosition = { row: context.rangeToReplace.start.row, column: context.rangeToReplace.start.column};
 
       switch (context.autoCompleteType) {
-      case "type":
-        addTypePrefixSuffixToContext(context);
-        break;
-      case "index":
-        addIndexPrefixSuffixToContext(context);
-        break;
-      case "endpoint":
-        addEndpointPrefixSuffixToContext(context);
-        break;
-      case "method":
-        addMethodPrefixSuffixToContext(context);
-        break;
-      case "body":
-        addBodyPrefixSuffixToContext(context);
-        break;
+        case "type":
+          addTypePrefixSuffixToContext(context);
+          break;
+        case "index":
+          addIndexPrefixSuffixToContext(context);
+          break;
+        case "endpoint":
+          addEndpointPrefixSuffixToContext(context);
+          break;
+        case "method":
+          addMethodPrefixSuffixToContext(context);
+          break;
+        case "body":
+          addBodyPrefixSuffixToContext(context);
+          break;
       }
     }
 
@@ -490,42 +353,42 @@ define([
       var tokenIter = editor.iterForCurrentLoc();
       var nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
       switch (nonEmptyToken ? nonEmptyToken.type : "NOTOKEN") {
-      case "NOTOKEN":
-      case "paren.lparen":
-      case "paren.rparen":
-      case "punctuation.comma":
-        context.addTemplate = true;
-        break;
-      case "punctuation.colon":
-        // test if there is an empty object - if so we replace it
-        context.addTemplate = false;
-
-        nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
-        if (!(nonEmptyToken && nonEmptyToken.value == "{")) break;
-        nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
-        if (!(nonEmptyToken && nonEmptyToken.value == "}")) break;
-        context.addTemplate = true;
-        // extend range to replace to include all up to token
-        context.rangeToReplace.end.row = tokenIter.getCurrentTokenRow();
-        context.rangeToReplace.end.column = tokenIter.getCurrentTokenColumn() + nonEmptyToken.value.length;
-
-        // move one more time to check if we need a trailing comma
-        nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
-        switch (nonEmptyToken ? nonEmptyToken.type : "NOTOKEN") {
         case "NOTOKEN":
+        case "paren.lparen":
         case "paren.rparen":
         case "punctuation.comma":
+          context.addTemplate = true;
+          break;
         case "punctuation.colon":
+          // test if there is an empty object - if so we replace it
+          context.addTemplate = false;
+
+          nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
+          if (!(nonEmptyToken && nonEmptyToken.value == "{")) break;
+          nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
+          if (!(nonEmptyToken && nonEmptyToken.value == "}")) break;
+          context.addTemplate = true;
+          // extend range to replace to include all up to token
+          context.rangeToReplace.end.row = tokenIter.getCurrentTokenRow();
+          context.rangeToReplace.end.column = tokenIter.getCurrentTokenColumn() + nonEmptyToken.value.length;
+
+          // move one more time to check if we need a trailing comma
+          nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
+          switch (nonEmptyToken ? nonEmptyToken.type : "NOTOKEN") {
+            case "NOTOKEN":
+            case "paren.rparen":
+            case "punctuation.comma":
+            case "punctuation.colon":
+              break;
+            default:
+              context.suffixToAdd = ", "
+          }
+
           break;
         default:
-          context.suffixToAdd = ", "
-        }
-
-        break;
-      default:
-        context.addTemplate = true;
-        context.suffixToAdd = ", ";
-        break; // for now play safe and do nothing. May be made smarter.
+          context.addTemplate = true;
+          context.suffixToAdd = ", ";
+          break; // for now play safe and do nothing. May be made smarter.
       }
 
 
@@ -553,15 +416,15 @@ define([
 
 
       switch (nonEmptyToken ? nonEmptyToken.type : "NOTOKEN") {
-      case "NOTOKEN":
-      case "paren.lparen":
-      case "punctuation.comma":
-      case "punctuation.colon":
-      case "method":
-        break;
-      default:
-        if (!nonEmptyToken || !nonEmptyToken.type.indexOf("url") === 0)
-          context.prefixToAdd = ", "
+        case "NOTOKEN":
+        case "paren.lparen":
+        case "punctuation.comma":
+        case "punctuation.colon":
+        case "method":
+          break;
+        default:
+          if (nonEmptyToken && nonEmptyToken.type.indexOf("url") < 0)
+            context.prefixToAdd = ", "
       }
 
       return context;
@@ -595,30 +458,35 @@ define([
       context.suffixToAdd = "";
     }
 
-    function addMethodAutoCompleteSetToContext(context) {
-      context.autoCompleteSet = { templateByTerm: {}, completionTerms: [ "GET", "PUT", "POST", "DELETE", "HEAD" ]}
+    function addMethodAutoCompleteSetToContext(context, pos) {
+      context.autoCompleteSet = _.map([ "GET", "PUT", "POST", "DELETE", "HEAD" ], function (m, i) {
+        return { name: m, score: -i, meta: "method"}
+      })
     }
 
-    function addEndpointAutoCompleteSetToContext(context) {
+    function addEndpointAutoCompleteSetToContext(context, pos) {
       var completionTerms = [];
-      var methodAndIndices = getCurrentMethodEndpointAndTokenPath();
+      var methodAndIndices = getCurrentMethodEndpointAndTokenPath(pos);
       completionTerms.push.apply(completionTerms, kb.getEndpointAutocomplete(methodAndIndices.indices,
         methodAndIndices.types, methodAndIndices.id));
 
       if (methodAndIndices.endpoint) {
         // we already have a part, zoom in
         var filter = termToFilterRegex(methodAndIndices.endpoint + "/", "^");
-        completionTerms = $.map(completionTerms, function (term) {
-          if ((term + "").match(filter)) return term.substring(methodAndIndices.endpoint.length + 1);
+        var filtered = [];
+        _.each(completionTerms, function (term) {
+          if ((term + "").match(filter))
+            filtered.push(term.substring(methodAndIndices.endpoint.length + 1));
         });
+        completionTerms = filtered;
       }
 
-      context.autoCompleteSet = { completionTerms: completionTerms}
+
+      context.autoCompleteSet = addMetaToTermsList(completionTerms, "endpoint");
     }
 
-
-    function addTypeAutoCompleteSetToContext(context) {
-      var iterToken = editor.iterForCurrentLoc();
+    function addTypeAutoCompleteSetToContext(context, pos) {
+      var iterToken = editor.iterForPosition(pos.row, pos.column);
       var addEndpoints = false;
       var t = iterToken.getCurrentToken();
       if (t && (t.type == "whitespace" || t.type == "url.slash")) {
@@ -630,18 +498,22 @@ define([
           addEndpoints = true;
         }
       }
-      var methodAndIndices = getCurrentMethodEndpointAndTokenPath();
+      var methodAndIndices = getCurrentMethodEndpointAndTokenPath(pos);
       var completionTerms = mappings.getTypes(methodAndIndices.indices) || [];
+      completionTerms = addMetaToTermsList(completionTerms, "type");
       if (addEndpoints) {
-        completionTerms.push.apply(completionTerms, kb.getEndpointAutocomplete(methodAndIndices.indices,
-          methodAndIndices.types, methodAndIndices.id));
+        completionTerms.push.apply(completionTerms,
+          addMetaToTermsList(kb.getEndpointAutocomplete(methodAndIndices.indices,
+            methodAndIndices.types, methodAndIndices.id),
+            "endpoint"
+          ));
       }
 
-      context.autoCompleteSet = { templateByTerm: {}, completionTerms: completionTerms}
+      context.autoCompleteSet = completionTerms;
     }
 
-    function addIndexAutoCompleteSetToContext(context) {
-      var iterToken = editor.iterForCurrentLoc();
+    function addIndexAutoCompleteSetToContext(context, pos) {
+      var iterToken = editor.iterForPosition(pos.row, pos.column);
       var addEndpoints = false;
       var t = iterToken.getCurrentToken();
       if (t && (t.type == "whitespace" || t.type == "url.slash")) {
@@ -654,17 +526,21 @@ define([
         }
       }
       var completionTerms = mappings.getIndices(true) || [];
+      completionTerms = addMetaToTermsList(completionTerms, "index");
       if (addEndpoints) {
-        var methodAndIndices = getCurrentMethodEndpointAndTokenPath();
-        completionTerms.push.apply(completionTerms, kb.getEndpointAutocomplete(methodAndIndices.indices,
-          methodAndIndices.types, methodAndIndices.id));
+        var methodAndIndices = getCurrentMethodEndpointAndTokenPath(pos);
+        completionTerms.push.apply(completionTerms,
+          addMetaToTermsList(kb.getEndpointAutocomplete(methodAndIndices.indices,
+            methodAndIndices.types, methodAndIndices.id),
+            "endpoint"
+          ));
       }
 
-      context.autoCompleteSet = { templateByTerm: {}, completionTerms: completionTerms}
+      context.autoCompleteSet = completionTerms;
     }
 
-    function addBodyAutoCompleteSetToContext(context) {
-      var autocompleteSet = { templateByTerm: {}, completionTerms: [] };
+    function addBodyAutoCompleteSetToContext(context, pos) {
+      var autocompleteSet = [];
 
       function RuleWalker(initialRules, scopeRules) {
         // scopeRules are the rules used to resolve relative scope links
@@ -870,13 +746,13 @@ define([
 
       function expandTerm(term, activeScheme) {
         if (term == "$INDEX$") {
-          return mappings.getIndices();
+          return addMetaToTermsList(mappings.getIndices(), "index");
         }
         else if (term == "$TYPE$") {
-          return mappings.getTypes(activeScheme.indices);
+          return addMetaToTermsList(mappings.getTypes(activeScheme.indices), "type");
         }
         else if (term == "$FIELD$") {
-          return mappings.getFields(activeScheme.indices, activeScheme.types);
+          return addMetaToTermsList(mappings.getFields(activeScheme.indices, activeScheme.types), "field");
         }
         return [ term ]
       }
@@ -890,22 +766,22 @@ define([
         var term;
         if (rules) {
           if (typeof rules == "string") {
-            $.merge(autocompleteSet.completionTerms, expandTerm(rules, activeScheme));
+            $.merge(autocompleteSet, expandTerm(rules, activeScheme));
           }
           else if (rules instanceof Array) {
             if (rules.length > 0 && typeof rules[0] != "object") {// not an array of objects
               $.map(rules, function (t) {
-                $.merge(autocompleteSet.completionTerms, expandTerm(t, activeScheme));
+                $.merge(autocompleteSet, expandTerm(t, activeScheme));
               });
             }
           }
           else if (rules.__one_of) {
             if (rules.__one_of.length > 0 && typeof rules.__one_of[0] != "object")
-              $.merge(autocompleteSet.completionTerms, rules.__one_of);
+              $.merge(autocompleteSet, rules.__one_of);
           }
           else if (rules.__any_of) {
             if (rules.__any_of.length > 0 && typeof rules.__any_of[0] != "object")
-              $.merge(autocompleteSet.completionTerms, rules.__any_of);
+              $.merge(autocompleteSet, rules.__any_of);
           }
           else if (typeof rules == "object") {
             for (term in rules) {
@@ -913,25 +789,7 @@ define([
               if (typeof term == "string" && term.match(/^__|^\*$/))
                 continue; // meta term
 
-              switch (term) {
-                case "$INDEX$":
-                  if (activeScheme.indices)
-                    $.merge(autocompleteSet.completionTerms, activeScheme.indices);
-                  break;
-                case "$TYPE$":
-                  $.merge(autocompleteSet.completionTerms,
-                    mappings.getTypes(activeScheme.indices));
-                  break;
-                case "$FIELD$":
-                  $.merge(autocompleteSet.completionTerms,
-                    mappings.getFields(activeScheme.indices, activeScheme.types));
-                  break;
-                default:
-                  autocompleteSet.completionTerms.push(term);
-                  break;
-              }
-
-              var rules_for_term = rules[term];
+              var rules_for_term = rules[term], template_for_term;
 
               // following linked scope until we find the right template
               while (typeof rules_for_term.__template == "undefined" &&
@@ -941,38 +799,35 @@ define([
               }
 
               if (typeof rules_for_term.__template != "undefined")
-                autocompleteSet.templateByTerm[term] = rules_for_term.__template;
+                template_for_term = rules_for_term.__template;
               else if (rules_for_term instanceof Array) {
-                var template = [];
+                template_for_term = [];
                 if (rules_for_term.length) {
                   if (rules_for_term[0] instanceof  Array) {
-                    template = [
+                    template_for_term = [
                       []
                     ];
                   }
                   else if (typeof rules_for_term[0] == "object") {
-                    template = [
+                    template_for_term = [
                       {}
                     ];
                   }
                   else {
-                    template = [rules_for_term[0]];
+                    template_for_term = [rules_for_term[0]];
                   }
                 }
-
-                autocompleteSet.templateByTerm[term] = template;
-              }
-              else if (typeof rules_for_term == "object") {
+              } else if (typeof rules_for_term == "object") {
                 if (rules_for_term.__one_of)
-                  autocompleteSet.templateByTerm[term] = rules_for_term.__one_of[0];
+                  template_for_term = rules_for_term.__one_of[0];
                 else if ($.isEmptyObject(rules_for_term))
                 // term sub rules object. Check if has actual or just meta stuff (like __one_of
-                  autocompleteSet.templateByTerm[term] = {};
+                  template_for_term = {};
                 else {
                   for (var sub_rule in rules_for_term) {
                     if (!(typeof sub_rule == "string" && sub_rule.substring(0, 2) == "__")) {
                       // found a real sub element, it's an object.
-                      autocompleteSet.templateByTerm[term] = {};
+                      template_for_term = {};
                       break;
                     }
                   }
@@ -980,17 +835,36 @@ define([
               }
               else {
                 // just add what ever the value is -> default
-                autocompleteSet.templateByTerm[term] = rules_for_term;
+                template_for_term = rules_for_term;
+              }
+
+              switch (term) {
+                case "$INDEX$":
+                  if (activeScheme.indices)
+                    $.merge(autocompleteSet,
+                      addMetaToTermsList(activeScheme.indices, "index", template_for_term));
+                  break;
+                case "$TYPE$":
+                  $.merge(autocompleteSet,
+                    addMetaToTermsList(mappings.getTypes(activeScheme.indices), "type", template_for_term));
+                  break;
+                case "$FIELD$":
+                  $.merge(autocompleteSet,
+                    addMetaToTermsList(mappings.getFields(activeScheme.indices, activeScheme.types), "field", template_for_term));
+                  break;
+                default:
+                  autocompleteSet.push({ name: term, template: template_for_term });
+                  break;
               }
             }
           }
-          else autocompleteSet.completionTerms.push(rules);
+          else autocompleteSet.push(rules);
         }
 
         return rules ? true : false;
       }
 
-      var ret = getCurrentMethodEndpointAndTokenPath();
+      var ret = getCurrentMethodEndpointAndTokenPath(pos);
       context.method = ret.method;
       context.endpoint = ret.endpoint;
       context.urlPath = ret.urlPath;
@@ -1017,23 +891,23 @@ define([
       var pathAsString = tokenPath.join(",");
       extractOptionsForPath((context.activeScheme.scheme || {}).data_autocomplete_rules, tokenPath, context.activeScheme);
 
-      if (autocompleteSet.completionTerms) {
-        $.unique(autocompleteSet.completionTerms);
-        autocompleteSet.completionTerms.sort();
-
+      if (autocompleteSet) {
+        _.uniq(autocompleteSet, false, function (t) {
+          return t.name ? t.name : t
+        });
       }
 
 
-      console.log("Resolved token path " + pathAsString + " to " + autocompleteSet.completionTerms +
+      console.log("Resolved token path " + pathAsString + " to ", autocompleteSet,
         " (endpoint: " + context.endpoint + " scheme: " + (context.activeScheme.scheme || {})._id + " )"
       );
-      context.autoCompleteSet = autocompleteSet.completionTerms ? autocompleteSet : null;
+      context.autoCompleteSet = autocompleteSet;
       return context;
     }
 
-    function getCurrentMethodEndpointAndTokenPath() {
-      var tokenIter = editor.iterForCurrentLoc();
-      var startPos = editor.getCursorPosition();
+    function getCurrentMethodEndpointAndTokenPath(pos) {
+      var tokenIter = editor.iterForPosition(pos.row, pos.column);
+      var startPos = pos;
       var tokenPath = [], last_var = "", first_scope = true;
 
       var STATES = { looking_for_key: 0, // looking for a key but without jumping over anything but white space and colon.
@@ -1188,122 +1062,143 @@ define([
       return ret;
     }
 
-    function checkCurrentTokenLocIsSameAsActiveContext(currentToken, cursorPos) {
-      if (!currentToken || !currentToken.type || editor.parser.isEmptyToken(currentToken)) {
-        // check whether the cursor position is the same as the previous token start -> it may have been deleted.
-        return cursorPos.row == ACTIVE_CONTEXT.updatedForToken.row &&
-          cursorPos.column == ACTIVE_CONTEXT.updatedForToken.start
-      }
 
-      return cursorPos.row == ACTIVE_CONTEXT.updatedForToken.row &&
-        currentToken.start == ACTIVE_CONTEXT.updatedForToken.start
-    }
-
-    function evaluateCurrentTokenAfterAChange() {
-      var pos = editor.getCursorPosition();
+    var evaluateCurrentTokenAfterAChange = _.debounce(function evaluateCurrentTokenAfterAChange(pos) {
       var session = editor.getSession();
       var currentToken = session.getTokenAt(pos.row, pos.column);
       console.log("Evaluating current token: " + (currentToken || {}).value +
-        " last examined: " + ((ACTIVE_CONTEXT || {}).updatedForToken || {}).value);
+        " last examined: " + (LAST_EVALUATED_TOKEN || {}).value);
 
       if (!currentToken) {
         if (pos.row == 0) {
-          hideAutoComplete();
           LAST_EVALUATED_TOKEN = null;
-          ACTIVE_CONTEXT = null;
           return;
         }
-        currentToken = { start: 0}; // empty row
+        currentToken = { start: 0, value: ""}; // empty row
       }
 
       currentToken.row = pos.row; // extend token with row. Ace doesn't supply it by default
-
-      if (ACTIVE_CONTEXT != null && checkCurrentTokenLocIsSameAsActiveContext(currentToken, pos)) {
-
-        if (MODE == MODE_FORCED_CLOSE) {
-          // menu was explicitly closed with esc. ignore
-          return;
+      if (editor.parser.isEmptyToken(currentToken)) {
+        // empty token. check what's coming next
+        var nextToken = session.getTokenAt(pos.row, pos.column+1);
+        if (editor.parser.isEmptyToken(nextToken)) {
+          // Empty line, or we're not on the edge of current token. Save the current position as base
+          currentToken.start = pos.column;
+          LAST_EVALUATED_TOKEN = currentToken;
+        } else {
+          nextToken.row = pos.row;
+          LAST_EVALUATED_TOKEN = nextToken;
         }
+        return;
+      }
 
 
-        if (ACTIVE_CONTEXT.updatedForToken.value == currentToken.value)
-          return; // nothing changed
+      if (!LAST_EVALUATED_TOKEN) {
+        LAST_EVALUATED_TOKEN = currentToken;
+        return; // wait for the next typing.
+      }
 
-        if (MODE == MODE_VISIBLE) updateAutoComplete(); else showAutoComplete();
+      if (LAST_EVALUATED_TOKEN.start != currentToken.start || LAST_EVALUATED_TOKEN.row != currentToken.row
+          || LAST_EVALUATED_TOKEN.value === currentToken.value) {
+        // not on the same place or nothing changed, cache and wait for the next time
+        LAST_EVALUATED_TOKEN = currentToken;
         return;
       }
 
       // don't automatically open the auto complete if some just hit enter (new line) or open a parentheses
-      if (!currentToken.type || editor.parser.isEmptyToken(currentToken)) return;
-      switch (currentToken.type) {
+      switch (currentToken.type || "UNKNOWN") {
         case "paren.lparen":
         case "paren.rparen":
         case "punctuation.colon":
         case "punctuation.comma":
+        case "UNKOWN":
           return;
       }
 
-      // show menu (if we have something)
-      showAutoComplete();
-    }
+      LAST_EVALUATED_TOKEN = currentToken;
+      editor.execCommand("startAutocomplete");
+    }, 100);
 
-    // initialize endpoint auto complete
-    ACTIVE_MENU = $("#autocomplete");
-    ACTIVE_MENU.menu({
-      select: function (event, ui) {
-        applyTerm(ACTIVE_CONTEXT.autoCompleteSet.completionTerms[ui.item.data("term_id")]);
-      }
-    });
-
-    ACTIVE_MENU.keydown(function (event) {
-      console.log("got: " + event.which);
-      switch (event.which) {
-        case $.ui.keyCode.ESCAPE:
-          hideAutoComplete();
-          editor.focus();
-          break;
-        case $.ui.keyCode.TAB:
-          ACTIVE_MENU.menu("select"); // select current item.
-          return false;
-      }
-      return true;
-    });
-
-    editor.getSession().selection.on('changeCursor', function (event) {
-      console.log("updateCursor communicated by editor");
-      if (MODE != MODE_VISIBLE) return;
-      setTimeout(function () {
-        if (MODE != MODE_VISIBLE) return;
-        var pos = editor.getCursorPosition();
-        if (ACTIVE_CONTEXT.updatedForToken.row != pos.row) {
-          hideAutoComplete(); // we moved away
-          return;
-        }
-        var session = editor.getSession();
-        var currentToken = session.getTokenAt(pos.row, pos.column);
-        if (!checkCurrentTokenLocIsSameAsActiveContext(currentToken, pos)) {
-          hideAutoComplete(); // we moved away
-        }
-      }, 100);
-
-    });
-
-    editor.getSession().on("change", function (e) {
-      console.log("Document change communicated by editor");
-      if (MODE == MODE_APPLYING_TERM) {
-        console.log("Ignoring, triggered by our change");
+    function editorChangeListener(e) {
+      var cursor = editor.selection.lead;
+      if (editor.__ace.completer && editor.__ace.completer.activated) {
         return;
       }
-      setTimeout(evaluateCurrentTokenAfterAChange, 100)
-    });
+      evaluateCurrentTokenAfterAChange(cursor);
+    }
+
+    function addChangeListener() {
+      editor.on("changeSelection", editorChangeListener);
+    }
+
+    function removeChangeListener() {
+      editor.off("changeSelection", editorChangeListener)
+    }
+
+
+    function getCompletions(editor, session, pos, prefix, callback) {
+      // this is hacky, but there is at the moment no settings/way to do it differently
+      editor.completer.autoInsert = false;
+
+      var context = getAutoCompleteContext(editor, session, pos);
+      if (!context) {
+        callback(null, []);
+      } else {
+        var terms = _.map(context.autoCompleteSet, function (term) {
+          if (typeof term !== "object") {
+            term = {
+              name: term
+            }
+          }
+
+          return _.defaults(term, {
+            value: term.name,
+            meta: "API",
+            score: 0,
+            context: context,
+            completer: {
+              insertMatch: function () {
+                applyTerm(term);
+              }
+            }
+          });
+        });
+
+        terms.sort(function (t1, t2) {
+          /* score sorts from high to low */
+          if (t1.score > t2.score) {
+            return -1;
+          }
+          if (t1.score < t2.score) {
+            return 1;
+          }
+          /* names sort from low to high */
+          if (t1.name < t2.name) {
+            return -1;
+          }
+          if (t1.name === t2.name) {
+            return 0;
+          }
+          return 1;
+        });
+
+        callback(null, _.map(terms, function (t, i) {
+          t.score = -i;
+          return t;
+        }));
+      }
+    }
+
+    addChangeListener();
 
     return {
-      show: function editorAutocompleteCommand() {
-        return showAutoComplete(true);
+      completer: {
+        getCompletions: getCompletions
       },
       _test: {
-        getAutoCompleteValueFromToken: getAutoCompleteValueFromToken,
-        getAutoCompleteContext: getAutoCompleteContext
+        addReplacementInfoToContext: addReplacementInfoToContext,
+        addChangeListener: addChangeListener,
+        removeChangeListener: removeChangeListener
       }
     }
   }

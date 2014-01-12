@@ -1,10 +1,10 @@
 define([
-  'ace',
+  'sense_editor/editor',
   'analytics',
   'jquery',
 
   'bootstrap'
-], function (ace, _gaq, $) {
+], function (SenseEditor, _gaq, $) {
   'use strict';
 
   var $welcomePopup = $("#welcome_popup");
@@ -20,17 +20,14 @@ define([
     '# and get it ... ',
     'GET index/type/1</div>'
   ].join('\n');
-  
+
   $welcomePopup.modal();
   $welcomePopup.on('shown', function () {
     $example = $(html)
       .appendTo("#welcome_example_container");
 
-    var editor = ace.edit("welcome_example_editor");
-    editor.getSession().setMode("ace/mode/sense");
-    editor.getSession().setFoldStyle('markbeginend');
+    var editor = new SenseEditor($("#welcome_example_editor"));
     editor.setReadOnly(true);
-    editor.renderer.setShowPrintMargin(false);
   });
 
   $welcomePopup.on('hidden', function () {
