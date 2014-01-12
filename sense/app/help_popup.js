@@ -10,13 +10,14 @@ define([
   var $helpPopup = $("#help_popup");
 
   var html = [
-    '<div id="help_example_editor">PUT index/type/1',
+    '<div id="help_example_editor"># index a doc',
+    'PUT index/type/1',
     '{',
     '   "body": "here"',
     '}',
     '',
-    'GET index/type/1',
-    '</div>'
+    '# and get it ... ',
+    'GET index/type/1</div>'
   ].join('\n');
 
   $helpPopup.on('shown', function () {
