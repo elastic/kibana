@@ -373,6 +373,7 @@
 
                 _showTooltip(pos.left + $(this).width() / 2, pos.top, $(this).data("event"));
 
+                /* This interferes with the drag to select, and isn't needed
                 if (event.min != event.max) {
                     plot.setSelection({
                         xaxis: {
@@ -385,6 +386,7 @@
                         }
                     });
                 }
+                */
             },
             // mouseleave
             function(){
