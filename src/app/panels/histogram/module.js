@@ -714,7 +714,10 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
 
         function time_format(interval) {
           var _int = kbn.interval_to_seconds(interval);
-          if(_int >= 2628000) {
+          if(_int >= 31535000 ) {
+            return "%Y";
+          }
+          if(interval == '1M') {
             return "%Y-%m";
           }
           if(_int >= 86400) {
@@ -725,6 +728,20 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
           }
 
           return "%H:%M:%S";
+        }
+
+        function time_format2(interval) {
+          var _int = kbn.interval_to_seconds(interval);
+          if(_int >= 31535000 ) {
+            return "YYYY";
+          }
+          if(interval == '1M') {
+            return "YYYY-MM";
+          }
+          if(_int >= 86400) {
+            return "YYYY-MM-DD";
+          }
+          return "YYYY-MM-DD HH:mm:ss";
         }
 
         var $tooltip = $('<div>');
@@ -749,8 +766,8 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
               value = kbn.shortFormat(value,2);
             }
             timestamp = scope.panel.timezone === 'browser' ?
-              moment(item.datapoint[0]).format('YYYY-MM-DD HH:mm:ss') :
-              moment.utc(item.datapoint[0]).format('YYYY-MM-DD HH:mm:ss');
+              moment(item.datapoint[0]).format( time_format2( scope.panel.interval ) ) :
+              moment.utc(item.datapoint[0]).format( time_format2( scope.panel.interval ) );
             $tooltip
               .html(
                 group + value + " @ " + timestamp
