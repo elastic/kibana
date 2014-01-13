@@ -19,7 +19,6 @@ package org.elasticsearch.marvel.monitor.event;
  */
 
 
-import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.cluster.routing.ShardRouting;
 import org.elasticsearch.common.xcontent.ToXContent;
@@ -74,7 +73,7 @@ public class ShardEvent extends Event {
             case CLOSED:
                 return new DescriptionBuilder(shardRouting, "closed", node).relocatedTo(relocatingNode).build();
             default:
-                throw new ElasticSearchException("unmapped shard event type [" + shardState + "]");
+                throw new RuntimeException("unmapped shard event type [" + shardState + "]");
         }
     }
 

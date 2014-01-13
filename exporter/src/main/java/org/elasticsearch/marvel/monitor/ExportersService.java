@@ -19,7 +19,6 @@ package org.elasticsearch.marvel.monitor;
  */
 
 
-import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.action.admin.cluster.health.ClusterIndexHealth;
 import org.elasticsearch.action.admin.cluster.node.stats.NodeStats;
@@ -27,7 +26,6 @@ import org.elasticsearch.action.admin.cluster.stats.ClusterStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.CommonStatsFlags;
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.ShardStats;
-import org.elasticsearch.action.support.IgnoreIndices;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.ClusterChangedEvent;
 import org.elasticsearch.cluster.ClusterName;
@@ -116,7 +114,7 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
     }
 
     @Override
-    protected void doStart() throws ElasticSearchException {
+    protected void doStart() {
         if (exporters.size() == 0) {
             return;
         }
@@ -133,7 +131,7 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
     }
 
     @Override
-    protected void doStop() throws ElasticSearchException {
+    protected void doStop() {
         if (exporters.size() == 0) {
             return;
         }
@@ -153,7 +151,7 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
     }
 
     @Override
-    protected void doClose() throws ElasticSearchException {
+    protected void doClose() {
         for (StatsExporter e : exporters)
             e.close();
     }
@@ -238,7 +236,7 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
 
         private void exportShardStats() {
             logger.debug("Collecting shard stats");
-            String[] indices = clusterService.state().metaData().concreteIndices(indicesToExport, IgnoreIndices.DEFAULT, true);
+            String[] indices = clusterService.state().metaData().concreteIndices(indicesToExport);
 
             List<ShardStats> shardStats = newArrayList();
             for (String index : indices) {

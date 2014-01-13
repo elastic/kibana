@@ -19,7 +19,6 @@ package org.elasticsearch.marvel.monitor.exporter;
  */
 
 
-import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.action.admin.cluster.node.stats.NodeStats;
 import org.elasticsearch.action.admin.cluster.stats.ClusterStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.CommonStats;
@@ -189,7 +188,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         if (!checkedAndUploadedAllResources) {
             try {
                 checkedAndUploadedAllResources = checkAndUploadAllResources();
-            } catch (ElasticSearchException e) {
+            } catch (RuntimeException e) {
                 logger.error("failed to upload critical resources, stopping export", e);
                 return null;
             }
@@ -259,7 +258,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     }
 
     @Override
-    protected void doStart() throws ElasticSearchException {
+    protected void doStart() {
         // not initializing keep alive worker here but rather upon first exporting.
         // In the case we are sending metrics to the same ES as where the plugin is hosted
         // we want to give it some time to start.
@@ -267,7 +266,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
 
     @Override
-    protected void doStop() throws ElasticSearchException {
+    protected void doStop() {
         if (keepAliveWorker != null) {
             keepAliveWorker.closed = true;
             keepAliveThread.interrupt();
@@ -280,7 +279,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     }
 
     @Override
-    protected void doClose() throws ElasticSearchException {
+    protected void doClose() {
     }
 
 
@@ -404,7 +403,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         try {
             return URLEncoder.encode(s, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            throw new ElasticSearchException("failed to url encode [" + s + "]", e);
+            throw new RuntimeException("failed to url encode [" + s + "]", e);
         }
     }
 
@@ -459,13 +458,13 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         } catch (IOException e) {
             // throwing an exception to stop exporting process - we don't want to send data unless
             // we put in the template for it.
-            throw new ElasticSearchException("failed to load marvel_index_template.json", e);
+            throw new RuntimeException("failed to load marvel_index_template.json", e);
         }
         try {
             return checkAndUpload("_template/marvel", template);
         } catch (IOException e) {
             // if we're not sure of the template, we can't send data... re-raise exception.
-            throw new ElasticSearchException("failed to load/verify index template", e);
+            throw new RuntimeException("failed to load/verify index template", e);
         }
     }
 
