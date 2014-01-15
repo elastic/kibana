@@ -22,7 +22,7 @@ function (angular) {
         '<div class="row-fluid panel-extra">' +
           '<div class="panel-extra-container">' +
 
-            '<span class="extra row-button" ng-show="panel.editable != false">' +
+            '<span class="extra row-button" ng-show="panel.editable != false && panel.removable != false">' +
               '<span confirm-click="row.panels = _.without(row.panels,panel)" '+
               'confirmation="Are you sure you want to remove this {{panel.type}} panel?" class="pointer">'+
               '<i class="icon-remove pointer" bs-tooltip="\'Remove\'"></i></span>'+
@@ -58,7 +58,7 @@ function (angular) {
             '</span>' +
 
             '<span class="panel-text panel-title">' +
-              '{{$index+1}}. {{panel.title?panel.title:panel.type}}' +
+              '{{panel.title?panel.title:panel.type}}' +
             '</span>'+
 
           '</div>'+
