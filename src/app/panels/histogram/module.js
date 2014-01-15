@@ -611,7 +611,9 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
         // Function for rendering panel
         function render_panel(data) {
           // IE doesn't work without this
-          elem.css({height:scope.panel.height || scope.row.height});
+          try {
+            elem.css({height:scope.panel.height || scope.row.height});
+          } catch(e) {return;}
 
           // Populate from the query service
           try {
