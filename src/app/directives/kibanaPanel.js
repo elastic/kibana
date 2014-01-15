@@ -1,7 +1,8 @@
 define([
-  'angular'
+  'angular',
+  'jquery'
 ],
-function (angular) {
+function (angular,$) {
   'use strict';
 
   angular
@@ -30,7 +31,7 @@ function (angular) {
 
             '<span class="extra row-button" ng-hide="panel.draggable == false">' +
               '<span class="pointer" bs-tooltip="\'Drag here to move\'"' +
-              'data-drag=true data-jqyoui-options="{revert: \'invalid\',helper:\'clone\'}"'+
+              'data-drag=true data-jqyoui-options="kbnJqUiDraggableOptions"'+
               ' jqyoui-draggable="'+
               '{'+
                 'animate:false,'+
@@ -70,6 +71,15 @@ function (angular) {
           // once we have the template, scan it for controllers and
           // load the module.js if we have any
           var newScope = $scope.$new();
+
+          $scope.kbnJqUiDraggableOptions = {
+            revert: 'invalid',
+            helper: function(event) {
+              console.log(event);
+              return $('<div style="width:200px;height:100px;background: rgba(100,100,100,0.50);"/>');
+            },
+            placeholder: 'keep'
+          };
 
           // compile the module and uncloack. We're done
           function loadModule($module) {
