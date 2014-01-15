@@ -7,7 +7,7 @@ function (angular) {
   angular
     .module('kibana.directives')
     .directive('kibanaPanel', function($compile) {
-      var container = '<div class="panel-container"></div>';
+      var container = '<div class="panel-container" ng-style="{\'min-height\':row.height}""></div>';
       var content = '<div class="panel-content"></div>';
 
       var panelHeader =
@@ -42,7 +42,7 @@ function (angular) {
             '</span>' +
 
             '<span class="row-button extra" ng-show="panel.editable != false">' +
-              '<span config-modal class="pointer">'+
+              '<span config-modal="./app/partials/paneleditor.html" kbn-model="panel" class="pointer">'+
               '<i class="icon-cog pointer" bs-tooltip="\'Configure\'"></i></span>'+
             '</span>' +
 
@@ -57,8 +57,8 @@ function (angular) {
               '</span>'+
             '</span>' +
 
-            '<span class="panel-text panel-title" ng-show="panel.title">' +
-              '{{panel.title}}' +
+            '<span class="panel-text panel-title">' +
+              '{{$index+1}}. {{panel.title?panel.title:panel.type}}' +
             '</span>'+
 
           '</div>'+

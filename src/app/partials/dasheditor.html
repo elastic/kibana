@@ -90,7 +90,7 @@
             <td><i ng-click="_.move(dashboard.current.rows,$index,$index-1)" ng-hide="$first" class="pointer icon-arrow-up"></i></td>
             <td><i ng-click="_.move(dashboard.current.rows,$index,$index+1)" ng-hide="$last" class="pointer icon-arrow-down"></i></td>
             <td><i ng-click="dashboard.current.rows = _.without(dashboard.current.rows,row)" class="pointer icon-remove"></i></td>
-            <td>{{row.title}}</td>
+            <td>{{row.title||'Untitled'}}</td>
           </tr>
         </table>
       </div>
@@ -177,6 +177,7 @@
 </div>
 
 <div class="modal-footer">
-  <button ng-click="add_row(dashboard.current,row); reset_row();" class="btn btn-success" ng-show="editor.index == 2">Create Row</button>
-  <button type="button" class="btn btn-danger" ng-click="editor.index=0;dismiss();reset_panel();dashboard.refresh()">Close</button>
+  <button type="button" ng-click="add_row(dashboard.current,row); reset_row();" class="btn btn-info" ng-show="editor.index == 2">Create Row</button>
+  <button type="button" class="btn btn-success" ng-click="editor.index=0;editSave(dashboard);dismiss();reset_panel();dashboard.refresh()">Save</button>
+  <button type="button" class="btn btn-danger" ng-click="editor.index=0;dismiss();reset_panel();dashboard.refresh()">Cancel</button>
 </div>

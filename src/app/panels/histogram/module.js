@@ -575,6 +575,10 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
           render_panel(data);
         });
 
+        scope.$watch('panel.span', function(){
+          render_panel(data);
+        });
+
         // Re-render if the window is resized
         angular.element(window).bind('resize', function(){
           render_panel(data);
