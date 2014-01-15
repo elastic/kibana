@@ -122,7 +122,8 @@ function (angular, app, _, $, kbn) {
       /** @scratch /panels/terms/5
        * valuefield:: Terms_stats facet value field
        */
-      valuefield  : ''
+      valuefield  : '',
+      format      : 'number'
     };
 
     _.defaults($scope.panel,_d);
@@ -263,6 +264,7 @@ function (angular, app, _, $, kbn) {
           render_panel();
         });
 
+
         function build_results() {
           var k = 0;
           scope.data = [];
@@ -364,10 +366,30 @@ function (angular, app, _, $, kbn) {
                 });
               }
 
+              var format = function (format, value) {
+              switch (format) {
+                case 'money':
+                  value = numeral(value).format('$0,0.00');
+                  break;
+                case 'bytes':
+                  value = numeral(value).format('0.00b');
+                  break;
+                case 'float':
+                  value = numeral(value).format('0.00');
+                  break;
+                default:
+                  value = numeral(value).format('0,0');
+                }
+                return value;
+              };
+
               // Populate legend
               if(elem.is(":visible")){
                 setTimeout(function(){
                   scope.legend = plot.getData();
+                  for(var i = 0; i < scope.legend.length; i++) {
+                    scope.legend[i].data[0][1] = format(scope.panel.format,scope.legend[i].data[0][1]);
+                  }
                   if(!scope.$$phase) {
                     scope.$apply();
                   }

@@ -51,6 +51,10 @@
         <label class="small" >Legend Format</label>
         <select class="input-small" ng-model="panel.arrangement" ng-options="f for f in ['horizontal','vertical']"></select></span>
       </div>
+      <div class="editor-option" ng-show="panel.chart != 'table' && panel.tmode == 'terms_stats'">
+	<label class="small">Legend Value Format</label>
+	<select class="input-small" ng-model="panel.format" ng-options="f for f in ['number','float','money','bytes']"></select>
+      </div>
       <div class="editor-option">
         <label class="small">Missing</label><input type="checkbox" ng-model="panel.missing" ng-checked="panel.missing">
       </div>
