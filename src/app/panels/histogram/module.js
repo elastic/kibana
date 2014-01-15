@@ -345,8 +345,19 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
 
         var facet = $scope.ejs.DateHistogramFacet(q.id);
 
+        if($scope.panel.mode === 'weighted mean') {
+          var facetbis = $scope.ejs.DateHistogramFacet('_'+q.id);
+        }
+     
         if($scope.panel.mode === 'count') {
           facet = facet.field($scope.panel.time_field).global(true);
+        } else if($scope.panel.mode === 'weighted mean') {
+          if((_.isNull($scope.panel.weight_field)) || (_.isNull($scope.panel.quantity_field))){
+            $scope.panel.error = "In " + $scope.panel.mode + " mode a weight field and a quantity field must be specified";
+            return;
+          }
+          facet = facet.keyField($scope.panel.time_field).valueField($scope.panel.weight_field);
+          facetbis = facetbis.keyField($scope.panel.time_field).valueField($scope.panel.quantity_field);
         } else {
           if(_.isNull($scope.panel.value_field)) {
             $scope.panel.error = "In " + $scope.panel.mode + " mode a field must be specified";
@@ -357,6 +368,11 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
         facet = facet.interval(_interval).facetFilter($scope.ejs.QueryFilter(query));
         request = request.facet(facet)
           .size($scope.panel.annotate.enable ? $scope.panel.annotate.size : 0);
+        if($scope.panel.mode === 'weighted mean') {
+          facetbis = facetbis.interval($scope.panel.interval).facetFilter($scope.ejs.QueryFilter(query));
+          request = request.facet(facetbis)
+            .size($scope.panel.annotate.enable ? $scope.panel.annotate.size : 0);
+        }
       });
 
       if($scope.panel.annotate.enable) {
@@ -405,6 +421,16 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
 
           _.each(queries, function(q) {
             var query_results = results.facets[q.id];
+            if ($scope.panel.mode === 'weighted mean') {
+              var query_results_bis = results.facets['_'+q.id];
+              _.each(query_results.entries, function(entry, id) {
+                if ((typeof query_results_bis.entries[id]['total'] !== 'undefined') && (query_results_bis.entries[id]['total'] !== 0)) {
+                  entry.weighted_mean = entry['total'] / query_results_bis.entries[id]['total'];
+                } else {
+                  entry.weighted_mean = null;
+                }
+              });
+            }
             // we need to initialize the data variable on the first run,
             // and when we are working on the first segment of the data.
             if(_.isUndefined(data[i]) || segment === 0) {
@@ -440,6 +466,8 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
                 // divided by the total hits
                 value = (((time_series._data[entry.time] || 0)*(counters[entry.time]-entry.count)) +
                   entry.mean*entry.count)/(counters[entry.time]);
+              } else if ($scope.panel.mode === 'weighted mean') {
+                value = entry.weighted_mean;
               } else if ($scope.panel.mode === 'min'){
                 if(_.isUndefined(time_series._data[entry.time])) {
                   value = entry.min;
