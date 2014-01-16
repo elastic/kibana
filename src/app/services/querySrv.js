@@ -263,7 +263,7 @@ function (angular, _, config, kbn) {
 
     var queryTransforms = function(query) {
       query.query = query.query.replace(/^\/\/(.*)/g, '').trim();
-      var parts = query.query.split('|');
+      var parts = query.query.split(' || ');
 
       query.query = parts.shift().trim();
       query.transforms = [];
