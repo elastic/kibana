@@ -62,8 +62,8 @@ code, pre {
 .panel-container {
   padding: 0px 0px 0px 0px;
   background: @kibanaPanelBackground;
-  margin: 5px;
   border: 1px solid rgba(100, 100, 100, 0.50);
+  margin: 5px;
 }
 
 .panel-content {
@@ -101,6 +101,15 @@ code, pre {
 .panel-error {
   color: @white;
   padding: 3px 10px 0px 10px;
+}
+
+.ui-draggable-dragging {
+  display: block;
+  z-index: 9999;
+}
+
+.dragInProgress .panel-container {
+  border: 3px solid rgba(100,100,100,0.50);
 }
 
 // ---------------------------
@@ -269,17 +278,7 @@ form input.ng-invalid {
   border-top: 0px;
 }
 
-.ui-draggable-dragging {
-  display: block;
-  visibility: visible;
-  opacity: 1;
-  z-index: 9999;
-}
 
-.dragInProgress {
-  background-color: rgba(100,100,100,0.50);
-  margin: 5px;
-}
 
 .link {
   color: @linkColor;

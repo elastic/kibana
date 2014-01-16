@@ -8,7 +8,7 @@ function (angular,$) {
   angular
     .module('kibana.directives')
     .directive('kibanaPanel', function($compile) {
-      var container = '<div class="panel-container" ng-style="{\'min-height\':row.height}""></div>';
+      var container = '<div class="panel-container" ng-style="{\'min-height\':row.height}"></div>';
       var content = '<div class="panel-content"></div>';
 
       var panelHeader =
