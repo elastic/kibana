@@ -447,6 +447,7 @@
             //TODO: support custom types
             var groups, clusters = [], newEvents = [];
 
+
             // split into same evenType groups
             groups = _groupEvents(events);
 

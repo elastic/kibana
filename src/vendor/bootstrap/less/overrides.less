@@ -52,13 +52,70 @@ code, pre {
   background-color: @grayLighter;
 }
 
-// KIBANA
-.panelCont {
-  padding: 0px 10px 10px 10px;
+// --------- Panels ---------
+
+.panel {
+  display: inline-table;
+  vertical-align: top;
+}
+
+.panel-container {
+  padding: 0px 0px 0px 0px;
   background: @kibanaPanelBackground;
-  //box-shadow: 0px 0px 8px rgba(30, 30, 30, 0.75);
-  margin: 0px;
-  border: 1px solid rgba(100, 100, 100, 0.25);
+  border: 1px solid rgba(100, 100, 100, 0.50);
+  margin: 5px;
+}
+
+.panel-content {
+  padding: 0px 10px 10px 10px;
+}
+
+.panel-title {
+  padding-left: 10px;
+  border: 0px;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.panel-loading {
+  position:absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 800;
+}
+
+.panel div.panel-extra div.panel-extra-container {
+  margin-right: 0px;
+  margin-top: 7px;
+}
+
+.panel div.panel-extra {
+  font-size: 0.9em;
+  margin-bottom: 10px;
+}
+
+.panel div.panel-extra .extra {
+  float:right !important;
+}
+
+.panel-error {
+  color: @white;
+  padding: 3px 10px 0px 10px;
+}
+
+.ui-draggable-dragging {
+  display: block;
+  z-index: 9999;
+}
+
+.dragInProgress .panel-container {
+  border: 3px solid rgba(100,100,100,0.50);
+}
+
+// ---------------------------
+
+.row-add-button {
+  margin: 5px;
 }
 
 div.editor-row {
@@ -140,7 +197,7 @@ form input.ng-invalid {
 }
 
 .kibana-row {
-  margin-bottom: 10px;
+  margin-bottom: 0px;
 }
 
 .row-tab {
@@ -169,10 +226,11 @@ form input.ng-invalid {
 
 .row-close {
   padding: 0px;
-  margin: 0px;
+  margin: 5px;
   min-height: 30px !important;
   line-height: 30px;
   background: @kibanaPanelBackground;
+  border: 1px solid rgba(100, 100, 100, 0.50);
 }
 
 .top-row-open {
@@ -190,6 +248,7 @@ form input.ng-invalid {
 }
 
 .row-open {
+  margin-top: 5px;
   left:-34px;
   position: absolute;
   z-index: 100;
@@ -219,45 +278,7 @@ form input.ng-invalid {
   border-top: 0px;
 }
 
-.panel-loading {
-  position:absolute;
-  top: 0px;
-  left: 0px;
-  z-index: 800;
-}
 
-.ui-draggable-dragging {
-  display: block;
-  visibility: visible;
-  opacity: 1;
-  z-index: 9999;
-}
-
-.panel-title {
-  border: 0px;
-  text-transform: uppercase;
-  font-weight: bold;
-}
-
-.panel div.panel-extra div.panel-extra-container {
-  margin-right: 0px;
-  margin-top: 7px;
-}
-
-.panel div.panel-extra {
-  font-size: 0.9em;
-  margin-bottom: 10px;
-}
-
-.panel div.panel-extra .extra {
-  float:right !important;
-  //border-bottom: 1px solid lighten(@bodyBackground, 5%);
-}
-
-.dragInProgress {
-  background-color: darken(@bodyBackground,1%);
-  border: 1px solid @tableBorder;
-}
 
 .link {
   color: @linkColor;
@@ -350,10 +371,6 @@ div.flot-text {
   color: @white;
 }
 
-.panel-error {
-  color: @white;
-  padding: 3px 10px 0px 10px;
-}
 
 .alert-warning {
   background-color: @warningBackground;
