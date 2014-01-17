@@ -37,14 +37,6 @@ define([
         self.set(f,f.id,true);
       });
 
-      // Date filters hold strings now, not dates
-      /*
-      _.each(self.getByType('time',true),function(time) {
-        self.list[time.id].from = new Date(time.from);
-        self.list[time.id].to = new Date(time.to);
-      });
-      */
-
     };
 
     // This is used both for adding filters and modifying them.
@@ -88,6 +80,8 @@ define([
           dashboard.refresh();
         },0);
       }
+      self.ids = dashboard.current.services.filter.ids =
+        _.intersection(_.map(self.list,function(v,k){return parseInt(k,10);}),self.ids);
       $rootScope.$broadcast('filter');
       return _r;
     };
