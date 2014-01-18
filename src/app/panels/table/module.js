@@ -256,7 +256,7 @@ function (angular, app, _, kbn, moment) {
         query = angular.toJson(value);
       }
       $scope.panel.offset = 0;
-      filterSrv.set({type:'field',field:field,query:query,mandate:(negate ? 'mustNot':'must')});
+      filterSrv.set({type:'querystring',query:field+":"+query,mandate:(negate ? 'mustNot':'must')});
     };
 
     $scope.fieldExists = function(field,mandate) {
