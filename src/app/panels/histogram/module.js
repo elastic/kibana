@@ -19,6 +19,7 @@ define([
   'kbn',
   'moment',
   './timeSeries',
+  'numeral',
   'jquery.flot',
   'jquery.flot.events',
   'jquery.flot.selection',
@@ -27,7 +28,7 @@ define([
   'jquery.flot.stack',
   'jquery.flot.stackpercent'
 ],
-function (angular, app, $, _, kbn, moment, timeSeries) {
+function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
 
   'use strict';
 
@@ -334,6 +335,9 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
 
       $scope.panelMeta.loading = true;
       request = $scope.ejs.Request().indices(dashboard.indices[segment]);
+      if (!$scope.panel.annotate.enable) {
+        request.searchType("count");
+      }
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
 
@@ -405,7 +409,8 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
 
           var i = 0,
             time_series,
-            hits;
+            hits,
+            counters; // Stores the bucketed hit counts.
 
           _.each(queries, function(q) {
             var query_results = results.facets[q.id];
@@ -420,16 +425,46 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
               };
               time_series = new timeSeries.ZeroFilled(tsOpts);
               hits = 0;
+              counters = {};
             } else {
               time_series = data[i].time_series;
               hits = data[i].hits;
+              counters = data[i].counters;
             }
 
             // push each entry into the time series, while incrementing counters
             _.each(query_results.entries, function(entry) {
-              time_series.addValue(entry.time, entry[$scope.panel.mode]);
+              var value;
+
               hits += entry.count; // The series level hits counter
               $scope.hits += entry.count; // Entire dataset level hits counter
+              counters[entry.time] = (counters[entry.time] || 0) + entry.count;
+
+              if($scope.panel.mode === 'count') {
+                value = (time_series._data[entry.time] || 0) + entry.count;
+              } else if ($scope.panel.mode === 'mean') {
+                // Compute the ongoing mean by
+                // multiplying the existing mean by the existing hits
+                // plus the new mean multiplied by the new hits
+                // divided by the total hits
+                value = (((time_series._data[entry.time] || 0)*(counters[entry.time]-entry.count)) +
+                  entry.mean*entry.count)/(counters[entry.time]);
+              } else if ($scope.panel.mode === 'min'){
+                if(_.isUndefined(time_series._data[entry.time])) {
+                  value = entry.min;
+                } else {
+                  value = time_series._data[entry.time] < entry.min ? time_series._data[entry.time] : entry.min;
+                }
+              } else if ($scope.panel.mode === 'max'){
+                if(_.isUndefined(time_series._data[entry.time])) {
+                  value = entry.max;
+                } else {
+                  value = time_series._data[entry.time] > entry.max ? time_series._data[entry.time] : entry.max;
+                }
+              } else if ($scope.panel.mode === 'total'){
+                value = (time_series._data[entry.time] || 0) + entry.total;
+              }
+              time_series.addValue(entry.time, value);
             });
 
             $scope.legend[i] = {query:q,hits:hits};
@@ -437,7 +472,8 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
             data[i] = {
               info: q,
               time_series: time_series,
-              hits: hits
+              hits: hits,
+              counters: counters
             };
 
             i++;
@@ -595,6 +631,10 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
           return csv.join("\n") + "\n";
         };
 
+        scope.$watch('panel.span', function(){
+          render_panel(data);
+        });
+
         // Re-render if the window is resized
         angular.element(window).bind('resize', function(){
           render_panel(data);
@@ -627,7 +667,9 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
         // Function for rendering panel
         function render_panel(data) {
           // IE doesn't work without this
-          elem.css({height:scope.panel.height || scope.row.height});
+          try {
+            elem.css({height:scope.panel.height || scope.row.height});
+          } catch(e) {return;}
 
           // Populate from the query service
           try {
@@ -694,18 +736,22 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
               }
             };
 
-            if(scope.panel.y_format === 'bytes') {
+            if (scope.panel.y_format === 'bytes') {
               options.yaxis.mode = "byte";
+              options.yaxis.tickFormatter = function (val, axis) {
+                return kbn.byteFormat(val, 0, axis.tickSize);
+              };
             }
 
-            if(scope.panel.y_format === 'short') {
-              options.yaxis.tickFormatter = function(val) {
-                return kbn.shortFormat(val,0);
+            if (scope.panel.y_format === 'short') {
+              options.yaxis.tickFormatter = function (val, axis) {
+                return kbn.shortFormat(val, 0, axis.tickSize);
               };
             }
 
             if(scope.panel.annotate.enable) {
               options.events = {
+                clustering: true,
                 levels: 1,
                 data: scope.annotations,
                 types: {
@@ -779,7 +825,9 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
 
         var $tooltip = $('<div>');
         elem.bind("plothover", function (event, pos, item) {
-          var group, value, timestamp;
+          var group, value, timestamp, interval;
+          interval = scope.panel.legend ?
+            "" : " per " + (scope.panel.scaleSeconds ? '1s' : scope.panel.interval);
           if (item) {
             if (item.series.info.alias || scope.panel.tooltip.query_as_alias) {
               group = '<small style="font-size:0.9em;">' +
@@ -797,13 +845,15 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
             }
             if(scope.panel.y_format === 'short') {
               value = kbn.shortFormat(value,2);
+            } else {
+              value = numeral(value).format('0,0[.]000');
             }
             timestamp = scope.panel.timezone === 'browser' ?
               moment(item.datapoint[0]).format('YYYY-MM-DD HH:mm:ss') :
               moment.utc(item.datapoint[0]).format('YYYY-MM-DD HH:mm:ss');
             $tooltip
               .html(
-                group + value + " @ " + timestamp
+                group + value + interval + " @ " + timestamp
               )
               .place_tt(pos.pageX, pos.pageY);
           } else {
