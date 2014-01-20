@@ -31,6 +31,13 @@ function (angular, app, _, kbn, moment) {
           icon: "icon-info-sign",
           partial: "app/partials/inspector.html",
           show: $scope.panel.spyable
+        },
+        {
+          description: "Csv",
+          icon: "icon-table",
+          partial: "app/partials/csv.html",
+          show: true,
+          click: function() { $scope.csv_data = $scope.to_csv(); }
         }
       ],
       editorTabs : [
@@ -429,6 +436,50 @@ function (angular, app, _, kbn, moment) {
       return obj;
     };
 
+    $scope.to_csv = function() {
+      var headers, rows, csv, fields;
+
+      headers = [];
+      rows = [];
+      csv = [];
+
+      if ($scope.panel.fields.length == 0) {
+        fields = $scope.fields.list;
+      } else {
+        fields = $scope.panel.fields;
+      }
+
+      _.each(fields, function(field) {
+        headers.push('"' + field + '"');
+      });
+
+      rows.push(headers);
+
+      _.each($scope.data, function(event) {
+        rows.push(_.map(fields, function(field) {
+          var value = event.kibana._source[field];
+
+          if (_.isUndefined(value)) {
+            return "";
+          } else {
+            return '"' + value + '"';
+          }
+        }));
+      });
+
+      _.each(rows, function(row) {
+        csv.push(row.join(","));
+      });
+
+      return csv.join("\n") + "\n";
+    };
+
+    $scope.download_csv = function() {
+      var blob = new Blob([$scope.csv_data], { type: "text/csv" });
+      // from filesaver.js
+      window.saveAs(blob, $scope.panel.title + ".csv");
+      return true;
+    };
 
   });
 
