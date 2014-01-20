@@ -2,12 +2,20 @@ module.exports = function (config) {
   return {
     // just lint the source dir
     source: {
-      files: {
-        src: ['Gruntfile.js', 'panels/**/*.js', 'dashboards/**/*.js']
+      src: [
+        'Gruntfile.js',
+        'panels/**/*.js',
+        'dashboards/**/*.js'
+      ],
+      options: {
+        jshintrc: '.jshintrc'
       }
     },
-    options: {
-      jshintrc: '.jshintrc'
+    sense: {
+      src: '<%= senseDir %>/app/**/*.js',
+      options: {
+        jshintrc: true
+      }
     }
   };
 };

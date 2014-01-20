@@ -1,0 +1,41 @@
+{
+  "white": false,
+  "curly": false,
+  "eqeqeq": false,
+  "unused": false,
+  "noempty": false,
+  "asi": true,
+  "-W021": true,
+  "-W018": true,
+  "-W041": true,
+  "-W027": true,
+  "-W044": true,
+  "-W043": true,
+  
+  "browser": true,
+  "bitwise":false,
+  "eqnull": true,
+  "strict": true,
+  "devel": true,
+  "forin": false,
+  "immed": true,
+  "supernew": true,
+  "expr": true,
+  "indent": 2,
+  "latedef": true,
+  "newcap": true,
+  "noarg": true,
+  "undef": true,
+  "boss": true,
+  "trailing": false,
+  "laxbreak": true,
+  "laxcomma": true,
+  "sub": true,
+  "maxlen": 140,
+
+  "globals": {
+    "define": false,
+    "require": false,
+    "SENSE_VERSION": true
+  }
+}

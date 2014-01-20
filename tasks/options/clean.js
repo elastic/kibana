@@ -3,6 +3,7 @@ module.exports = function (config) {
     setup: [ '<%= kibanaCheckoutDir %>', '<%= buildDir %>' ],
     build: [ '<%= buildDir %>' ],
     build_tmp: [ '<%= buildTempDir %>' ],
-    package: ['<%= packageDir %>']
+    package: ['<%= packageDir %>'],
+    sense_build_tests: ['<%= buildSenseDir %>/tests']
   };
 };
