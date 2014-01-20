@@ -39,6 +39,13 @@ define([
           icon: "icon-info-sign",
           partial: "app/partials/inspector.html",
           show: $scope.panel.spyable
+        },
+        {
+          description: "Csv",
+          icon: "icon-table",
+          partial: "app/partials/csv.html",
+          show: true,
+          click: function() { $scope.csv_data = $scope.to_csv(); }
         }
       ],
       editorTabs : [
@@ -190,6 +197,23 @@ define([
       }
       $scope.refresh =  false;
       $scope.$emit('render');
+    };
+
+    $scope.to_csv = function() {
+      var rows = [];
+
+      _.each($scope.data.rows, function(row) {
+        rows.push('"' + row.Label + '"' + "," + row.Value);
+      });
+
+      return rows.join("\n") + "\n";
+    };
+
+    $scope.download_csv = function() {
+      var blob = new Blob([$scope.csv_data], { type: "text/csv" });
+      // from filesaver.js
+      window.saveAs(blob, $scope.panel.title + ".csv");
+      return true;
     };
 
   });
