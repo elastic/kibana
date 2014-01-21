@@ -590,11 +590,18 @@ define([
 
 
       $scope.detailViewLink = function (rows, fields) {
+        var
+        query,
+        time,
+        show,
+        from,
+        to;
+
         if (_.isUndefined(rows)) {
           rows = _.where($scope.rows, {selected: true});
         }
         rows = _.map(rows, function (row) {
-          var query = $scope.panel.persistent_field + ':"' + row.id + '"';
+          query = $scope.panel.persistent_field + ':"' + row.id + '"';
           return {
             q: query,
             a: row.display_name
@@ -605,15 +612,19 @@ define([
           return "javascript:;";
         }
         rows = JSON.stringify(rows);
-        var time = filterSrv.timeRange(false);
-        var show;
+        time = filterSrv.timeRange(false);
+        show;
         if (!_.isUndefined(fields)) {
           show = "&show=" + fields.join(",");
         } else {
           show = "";
         }
+
+        from = _.isDate(time.from) ? time.from.toISOString() : time.from;
+        to = _.isDate(time.to) ? time.to.toISOString() : time.to;
+
         return "#/dashboard/script/marvel." + $scope.panel.mode + "_stats.js?queries=" + encodeUriSegment(rows) + "&from=" +
-          time.from + "&to=" + time.to + show;
+          from + "&to=" + to + show;
       };
 
       // stolen from anuglar to have exactly the same url structure and thus no reloads.
