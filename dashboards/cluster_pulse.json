@@ -256,6 +256,11 @@
       "timefield": "@timestamp",
       "now": true,
       "filter_id": 0
+    },
+    {
+      "type": "marvel.navigation",
+      "source": "url",
+      "url": "app/panels/marvel/navigation/marvelLinks.json"
     }
   ],
   "loader": {

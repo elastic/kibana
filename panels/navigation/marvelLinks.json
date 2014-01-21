@@ -1,0 +1,12 @@
+{
+  "links": [
+    {
+      "name": "Google",
+      "url": "http://google.com"
+    },
+    {
+      "name": "Yahoo",
+      "url": "http://yahoo.com"
+    }
+  ]
+}

@@ -378,7 +378,6 @@
       "collapse": false,
       "notice": false,
       "enable": true,
-      "status": "Stable",
       "time_options": [
         "5m",
         "15m",
@@ -405,6 +404,11 @@
       "timefield": "@timestamp",
       "now": true,
       "filter_id": 0
+    },
+    {
+      "type": "marvel.navigation",
+      "source": "url",
+      "url": "app/panels/marvel/navigation/marvelLinks.json"
     }
   ],
   "loader": {

@@ -42,6 +42,18 @@ dashboard.index = {
 
 dashboard.refresh = "1m";
 
+dashboard.nav = [
+  {
+    type:'timepicker'
+  },
+  {
+    type: "marvel.navigation",
+    source: "url",
+    url: "app/panels/marvel/navigation/marvelLinks.json"
+  }
+];
+
+
 // In this dashboard we let users pass nodes as comma seperated list to the query parameter.
 // If nodes are defined, split into a list of query objects, otherwise, show all
 // NOTE: ids must be integers, hence the parseInt()s

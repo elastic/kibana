@@ -2,11 +2,31 @@
     <h2>Welcome to Elasticsearch Marvel</h2>
     <div>
 
-      You're all set up! In case you need some help you can always visit
+      <p>
+      You're all set up! If you need a bit of help you can always visit
       TODO: ADD URL HERE
 
-      <br/>
+      <p/>
 
+      <h5>A humble request</h5>
+      <p>The dev team humbly asks for your help in making Elasticsearch even better.<p>
+
+      <p>You can make a valuable contribution to improving Elasticsearch by periodically sharing cluster statistics with us. The information is 100% anonymous and we will never share your stats reports with any third parties.
+      To view a sample report, <span class="link" ng-click="showSample=true">click here</span>.</p>
+
+      <p>Your help is very much appreciated and makes all the difference to us.</p>
+
+      <p>Enjoy Marvel!</p>
+
+      <p>Many thanks,<br>
+      @Kimchy & The Elasticsearch Dev Team</p>
+
+      <div ng-show="showSample">
+        <h5>Sample Statistics</h5>
+        <pre>{{ data | json }}</pre>
+      </div>
+
+<!--
       <h5>Cluster statistics</h5>
 
       Help improve Elasticsearch by reporting <strong>anonymous</strong>
@@ -19,6 +39,7 @@
         <pre>{{ data | json }}</pre>
       </div>
     </div>
+-->
   </div>
 
   <div class="modal-footer">
