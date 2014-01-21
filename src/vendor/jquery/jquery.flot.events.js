@@ -514,7 +514,7 @@
         var _varianceAlgorithm = function(events, sens, space) {
             var cluster, clusters = [], sum = 0, avg, density;
 
-            events.sort(sortEvents).reverse();
+            events.sort(sortEvents);
 
             // find the average x delta
             for (var i = 1; i < events.length - 1; i++) {
@@ -619,8 +619,8 @@
     };
 
     function sortEvents(a,b) {
-        if (a.min > b.min) return 1;
-        if (a.min < b.min) return -1;
+        if (a.min < b.min) return 1;
+        if (a.min > b.min) return -1;
         return 0;
     };
 
