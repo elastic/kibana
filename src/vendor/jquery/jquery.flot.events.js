@@ -178,19 +178,6 @@
 
         var _showTooltip = function(x, y, event){
             $('#tooltip').remove();
-            /*
-            var tooltip = $('<div id="tooltip" class=""></div>').appendTo('body').fadeIn(200);
-
-            $('<div id="title">' + event.title + '</div>').appendTo(tooltip);
-            $('<div id="type">Type: ' + event.eventType + '</div>').appendTo(tooltip);
-            $('<div id="description">' + event.description + '</div>').appendTo(tooltip);
-
-            tooltip.css({
-                top: y - tooltip.height() - 5,
-                left: x
-            });
-            console.log(tooltip);
-            */
 
             // @rashidkpc - hack to work with our normal tooltip placer
             var $tooltip = $('<div id="tooltip">');
@@ -527,9 +514,11 @@
         var _varianceAlgorithm = function(events, sens, space) {
             var cluster, clusters = [], sum = 0, avg, density;
 
+            events.sort(sortEvents).reverse();
+
             // find the average x delta
             for (var i = 1; i < events.length - 1; i++) {
-                sum += events[i].min - events[i - 1].min;
+                sum += events[i].min - events[i-1].min;
             }
             avg = sum / (events.length - 2);
 
@@ -628,4 +617,12 @@
         if (ao.min < bo.min) return -1;
         return 0;
     };
+
+    function sortEvents(a,b) {
+        if (a.min > b.min) return 1;
+        if (a.min < b.min) return -1;
+        return 0;
+    };
+
+
 })(jQuery);
