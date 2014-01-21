@@ -1,4 +1,4 @@
-package org.elasticsearch.marvel.monitor;
+package org.elasticsearch.marvel.collector;
 /*
  * Licensed to ElasticSearch under one
  * or more contributor license agreements.  See the NOTICE file
@@ -53,9 +53,9 @@ import org.elasticsearch.index.shard.service.IndexShard;
 import org.elasticsearch.indices.IndicesLifecycle;
 import org.elasticsearch.indices.IndicesService;
 import org.elasticsearch.indices.InternalIndicesService;
-import org.elasticsearch.marvel.monitor.event.*;
-import org.elasticsearch.marvel.monitor.exporter.ESExporter;
-import org.elasticsearch.marvel.monitor.exporter.StatsExporter;
+import org.elasticsearch.marvel.collector.event.*;
+import org.elasticsearch.marvel.collector.exporter.ESExporter;
+import org.elasticsearch.marvel.collector.exporter.Exporter;
 import org.elasticsearch.node.service.NodeService;
 
 import java.util.ArrayList;
@@ -65,7 +65,7 @@ import java.util.concurrent.BlockingQueue;
 
 import static org.elasticsearch.common.collect.Lists.newArrayList;
 
-public class ExportersService extends AbstractLifecycleComponent<ExportersService> {
+public class CollectorService extends AbstractLifecycleComponent<CollectorService> {
 
     private final InternalIndicesService indicesService;
     private final NodeService nodeService;
@@ -80,14 +80,14 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
     private volatile Thread thread;
     private final TimeValue interval;
 
-    private Collection<StatsExporter> exporters;
+    private Collection<Exporter> exporters;
 
     private String[] indicesToExport = Strings.EMPTY_ARRAY;
 
     private final BlockingQueue<Event> pendingEventsQueue;
 
     @Inject
-    public ExportersService(Settings settings, IndicesService indicesService,
+    public CollectorService(Settings settings, IndicesService indicesService,
                             NodeService nodeService, ClusterService clusterService,
                             Client client, Discovery discovery, ClusterName clusterName,
                             Environment environment, Plugin marvelPlugin) {
@@ -105,11 +105,11 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
         pendingEventsQueue = ConcurrentCollections.newBlockingQueue();
 
         if (componentSettings.getAsBoolean("enabled", true)) {
-            StatsExporter esExporter = new ESExporter(settings.getComponentSettings(ESExporter.class), discovery, clusterName, environment, marvelPlugin);
+            Exporter esExporter = new ESExporter(settings.getComponentSettings(ESExporter.class), discovery, clusterName, environment, marvelPlugin);
             this.exporters = ImmutableSet.of(esExporter);
         } else {
             this.exporters = ImmutableSet.of();
-            logger.info("monitoring disabled by settings");
+            logger.info("collecting disabled by settings");
         }
     }
 
@@ -118,11 +118,11 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
         if (exporters.size() == 0) {
             return;
         }
-        for (StatsExporter e : exporters)
+        for (Exporter e : exporters)
             e.start();
 
         this.exp = new ExportingWorker();
-        this.thread = new Thread(exp, EsExecutors.threadName(settings, "monitor"));
+        this.thread = new Thread(exp, EsExecutors.threadName(settings, "collector"));
         this.thread.setDaemon(true);
         this.thread.start();
 
@@ -142,7 +142,7 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
         } catch (InterruptedException e) {
             // we don't care...
         }
-        for (StatsExporter e : exporters)
+        for (Exporter e : exporters)
             e.stop();
 
         indicesService.indicesLifecycle().removeListener(indicesLifeCycleListener);
@@ -152,7 +152,7 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
 
     @Override
     protected void doClose() {
-        for (StatsExporter e : exporters)
+        for (Exporter e : exporters)
             e.close();
     }
 
@@ -197,11 +197,11 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
         private void exportIndicesStats() {
             logger.debug("local node is master, exporting indices stats");
             IndicesStatsResponse indicesStatsResponse = client.admin().indices().prepareStats().all().get();
-            for (StatsExporter e : exporters) {
+            for (Exporter e : exporters) {
                 try {
                     e.exportIndicesStats(indicesStatsResponse);
                 } catch (Throwable t) {
-                    logger.error("StatsExporter [{}] has thrown an exception:", t, e.name());
+                    logger.error("Exporter [{}] has thrown an exception:", t, e.name());
                 }
             }
         }
@@ -209,11 +209,11 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
         private void exportClusterStats() {
             logger.debug("local node is master, exporting cluster stats");
             ClusterStatsResponse stats = client.admin().cluster().prepareClusterStats().get();
-            for (StatsExporter e : exporters) {
+            for (Exporter e : exporters) {
                 try {
                     e.exportClusterStats(stats);
                 } catch (Throwable t) {
-                    logger.error("StatsExporter [{}] has thrown an exception:", t, e.name());
+                    logger.error("Exporter [{}] has thrown an exception:", t, e.name());
                 }
             }
         }
@@ -225,11 +225,11 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
             Event[] events = new Event[eventList.size()];
             eventList.toArray(events);
 
-            for (StatsExporter e : exporters) {
+            for (Exporter e : exporters) {
                 try {
                     e.exportEvents(events);
                 } catch (Throwable t) {
-                    logger.error("StatsExporter [{}] has thrown an exception:", t, e.name());
+                    logger.error("Exporter [{}] has thrown an exception:", t, e.name());
                 }
             }
         }
@@ -255,11 +255,11 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
             ShardStats[] shardStatsArray = shardStats.toArray(new ShardStats[shardStats.size()]);
 
             logger.debug("Exporting shards stats");
-            for (StatsExporter e : exporters) {
+            for (Exporter e : exporters) {
                 try {
                     e.exportShardStats(shardStatsArray);
                 } catch (Throwable t) {
-                    logger.error("StatsExporter [{}] has thrown an exception:", t, e.name());
+                    logger.error("exporter [{}] has thrown an exception:", t, e.name());
                 }
             }
         }
@@ -269,11 +269,11 @@ public class ExportersService extends AbstractLifecycleComponent<ExportersServic
             NodeStats nodeStats = nodeService.stats();
 
             logger.debug("Exporting node stats");
-            for (StatsExporter e : exporters) {
+            for (Exporter e : exporters) {
                 try {
                     e.exportNodeStats(nodeStats);
                 } catch (Throwable t) {
-                    logger.error("StatsExporter [{}] has thrown an exception:", t, e.name());
+                    logger.error("exporter [{}] has thrown an exception:", t, e.name());
                 }
             }
         }

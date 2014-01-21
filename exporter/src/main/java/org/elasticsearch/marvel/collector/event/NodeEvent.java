@@ -1,4 +1,4 @@
-package org.elasticsearch.marvel.monitor.event;
+package org.elasticsearch.marvel.collector.event;
 /*
  * Licensed to ElasticSearch under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,7 +22,7 @@ package org.elasticsearch.marvel.monitor.event;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.marvel.monitor.Utils;
+import org.elasticsearch.marvel.collector.Utils;
 
 import java.io.IOException;
 

@@ -1,4 +1,4 @@
-package org.elasticsearch.marvel.monitor.event;
+package org.elasticsearch.marvel.collector.event;
 /*
  * Licensed to ElasticSearch under one
  * or more contributor license agreements.  See the NOTICE file

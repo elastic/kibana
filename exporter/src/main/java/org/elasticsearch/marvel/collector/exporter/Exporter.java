@@ -1,4 +1,4 @@
-package org.elasticsearch.marvel.monitor.exporter;
+package org.elasticsearch.marvel.collector.exporter;
 /*
  * Licensed to ElasticSearch under one
  * or more contributor license agreements.  See the NOTICE file
@@ -24,9 +24,9 @@ import org.elasticsearch.action.admin.cluster.stats.ClusterStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.ShardStats;
 import org.elasticsearch.common.component.LifecycleComponent;
-import org.elasticsearch.marvel.monitor.event.Event;
+import org.elasticsearch.marvel.collector.event.Event;
 
-public interface StatsExporter<T> extends LifecycleComponent<T> {
+public interface Exporter<T> extends LifecycleComponent<T> {
 
     String name();
 

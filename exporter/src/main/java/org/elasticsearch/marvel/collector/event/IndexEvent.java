@@ -1,4 +1,4 @@
-package org.elasticsearch.marvel.monitor.event;
+package org.elasticsearch.marvel.collector.event;
 /*
  * Licensed to ElasticSearch under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,25 +19,26 @@ package org.elasticsearch.marvel.monitor.event;
  */
 
 
-import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
+import org.elasticsearch.action.admin.cluster.health.ClusterIndexHealth;
 import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.IOException;
+import java.util.Map;
 
-public abstract class ClusterEvent extends Event {
+public abstract class IndexEvent extends Event {
 
     protected final String event_source;
 
-    public ClusterEvent(long timestamp, String clusterName, String event_source) {
+    public IndexEvent(long timestamp, String clusterName, String event_source) {
         super(timestamp, clusterName);
         this.event_source = event_source;
     }
 
     @Override
     public String type() {
-        return "cluster_event";
+        return "index_event";
     }
 
     protected abstract String event();
@@ -50,61 +51,61 @@ public abstract class ClusterEvent extends Event {
         return builder;
     }
 
-    public static class ClusterBlock extends ClusterEvent {
-        private final org.elasticsearch.cluster.block.ClusterBlock block;
-        private boolean added;
+    public static class IndexCreateDelete extends IndexEvent {
 
-        public ClusterBlock(long timestamp, String clusterName, org.elasticsearch.cluster.block.ClusterBlock block, boolean added, String event_source) {
+        private final String index;
+        private boolean created;
+
+        public IndexCreateDelete(long timestamp, String clusterName, String index, boolean created, String event_source) {
             super(timestamp, clusterName, event_source);
-            this.block = block;
-            this.added = added;
+            this.index = index;
+            this.created = created;
         }
 
         @Override
         protected String event() {
-            return (added ? "block_added" : "block_removed");
+            return (created ? "index_created" : "index_deleted");
         }
 
         @Override
         String conciseDescription() {
-            return (added ? "added" : "removed") + ": [" + block.toString() + "]";
+            return "[" + index + "] " + (created ? " created" : " deleted");
         }
 
         @Override
         public XContentBuilder addXContentBody(XContentBuilder builder, ToXContent.Params params) throws IOException {
             super.addXContentBody(builder, params);
-            builder.startObject("block");
-            block.toXContent(builder, ToXContent.EMPTY_PARAMS);
-            builder.endObject();
+            builder.field("index", index);
             return builder;
         }
     }
 
-    public static class ClusterStatus extends ClusterEvent {
+    public static class IndexStatus extends IndexEvent {
 
-        ClusterHealthResponse clusterHealth;
+        ClusterIndexHealth indexHealth;
 
-        public ClusterStatus(long timestamp, String clusterName, String event_source, ClusterHealthResponse clusterHealth) {
+        Map<String, String> SHARD_LEVEL_MAP = ImmutableMap.of("level", "shards");
+
+        public IndexStatus(long timestamp, String clusterName, String event_source, ClusterIndexHealth indexHealth) {
             super(timestamp, clusterName, event_source);
-            this.clusterHealth = clusterHealth;
+            this.indexHealth = indexHealth;
         }
 
         @Override
         protected String event() {
-            return "cluster_status";
+            return "index_status";
         }
 
         @Override
         String conciseDescription() {
-            return "cluster status is " + clusterHealth.getStatus().name();
+            return "[" + indexHealth.getIndex() + "] status is " + indexHealth.getStatus().name();
         }
 
         @Override
         public XContentBuilder addXContentBody(XContentBuilder builder, ToXContent.Params params) throws IOException {
-            // disable parent outputting of cluster name, it's part of the cluster health.
-            ToXContent.Params p = new ToXContent.DelegatingMapParams(ImmutableMap.of("output_cluster_name", "false"), params);
-            super.addXContentBody(builder, p);
-            return clusterHealth.toXContent(builder, params);
+            super.addXContentBody(builder, params);
+            builder.field("index", indexHealth.getIndex());
+            return indexHealth.toXContent(builder, new ToXContent.DelegatingMapParams(SHARD_LEVEL_MAP, params));
         }
     }
 }

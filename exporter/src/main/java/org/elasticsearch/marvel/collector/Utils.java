@@ -1,4 +1,4 @@
-package org.elasticsearch.marvel.monitor;
+package org.elasticsearch.marvel.collector;
 /*
  * Licensed to ElasticSearch under one
  * or more contributor license agreements.  See the NOTICE file

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.elasticsearch.marvel.monitor;
+package org.elasticsearch.marvel.collector;
 
 import org.elasticsearch.Version;
 import org.elasticsearch.common.collect.ImmutableList;
@@ -69,7 +69,7 @@ public class Plugin extends AbstractPlugin {
 
             @Override
             protected void configure() {
-                bind(ExportersService.class).asEagerSingleton();
+                bind(CollectorService.class).asEagerSingleton();
             }
         };
         return ImmutableList.of(m);
@@ -79,7 +79,7 @@ public class Plugin extends AbstractPlugin {
     public Collection<Class<? extends LifecycleComponent>> services() {
         Collection<Class<? extends LifecycleComponent>> l = new ArrayList<Class<? extends LifecycleComponent>>();
         if (enabled) {
-            l.add(ExportersService.class);
+            l.add(CollectorService.class);
         }
         return l;
     }

@@ -1,4 +1,4 @@
-package org.elasticsearch.marvel.monitor.event;
+package org.elasticsearch.marvel.collector.event;
 /*
  * Licensed to ElasticSearch under one
  * or more contributor license agreements.  See the NOTICE file
@@ -25,7 +25,7 @@ import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.shard.IndexShardState;
 import org.elasticsearch.index.shard.ShardId;
-import org.elasticsearch.marvel.monitor.Utils;
+import org.elasticsearch.marvel.collector.Utils;
 
 import java.io.IOException;
 import java.util.Locale;
