@@ -146,7 +146,7 @@
           "annotate": {
             "enable": true,
             "query": "_type:cluster_event",
-            "size": 5,
+            "size": 50,
             "field": "message",
             "sort": [
               "@timestamp",
@@ -219,7 +219,7 @@
           "annotate": {
             "enable": true,
             "query": "_type:cluster_event",
-            "size": 5,
+            "size": 50,
             "field": "message",
             "sort": [
               "@timestamp",
@@ -292,7 +292,7 @@
           "annotate": {
             "enable": true,
             "query": "_type:cluster_event",
-            "size": 5,
+            "size": 50,
             "field": "message",
             "sort": [
               "@timestamp",
