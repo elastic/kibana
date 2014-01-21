@@ -10,7 +10,7 @@
 /exporter/.settings
 /exporter/config
 /exporter/lib
-/vendor/kibana
+/kibana/vendor/kibana
 /node_modules
 /build
 /.aws-config.json

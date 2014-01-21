@@ -1,20 +1,20 @@
 module.exports = function (config) {
   return {
     // just lint the source dir
-    source: {
+    kibana: {
       src: [
         'Gruntfile.js',
-        'panels/**/*.js',
-        'dashboards/**/*.js'
+        'kibana/panels/**/*.js',
+        'kibana/dashboards/**/*.js'
       ],
       options: {
-        jshintrc: '.jshintrc'
+        jshintrc: 'kibana/.jshintrc'
       }
     },
     sense: {
       src: '<%= senseDir %>/app/**/*.js',
       options: {
-        jshintrc: true
+        jshintrc: 'sense/.jshintrc'
       }
     }
   };

@@ -22,7 +22,7 @@ module.exports = function (grunt) {
         mainConfigFile: '<%= senseDir %>/app/require.config.js',
         optimize: 'uglify2',
         optimizeAllPluginResources: true,
-        preserveLicenseComments: false,
+        preserveLicenseComments: true,
         generateSourceMaps: true,
 
         uglify2: {

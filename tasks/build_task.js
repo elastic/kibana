@@ -5,6 +5,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', [
     'shell:verify_kibana_status',
+    'jshint:kibana',
     'clean:build',
     'shell:maven_clean',
     'shell:maven_package',

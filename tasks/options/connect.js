@@ -14,11 +14,11 @@ module.exports = function (config) {
       }
     },
     rules: {
-      '^/app/dashboards/marvel/(.*)$': '/dashboards/$1',
-      '^/app/panels/marvel/(.*)$': '/panels/$1',
-      '^/config.js$': '/<%= buildTempDir %>/config.js',
-      '^/sense(.*)$': '/sense$1',
-      '^(.*)$': '<%= kibanaCheckoutDir %>/src/$1'
+      '^/kibana/app/dashboards/marvel/(.*)$': '/kibana/dashboards/$1',
+      '^/kibana/app/panels/marvel/(.*)$': '/kibana/panels/$1',
+      '^/kibana/config.js$': '/<%= buildTempDir %>/config.js',
+      '^/kibana(.*)$': '<%= kibanaCheckoutDir %>/src$1',
+      '^/sense(.*)$': '/sense$1'
     }
   };
 };
