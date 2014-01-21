@@ -447,7 +447,6 @@
             //TODO: support custom types
             var groups, clusters = [], newEvents = [];
 
-
             // split into same evenType groups
             groups = _groupEvents(events);
 
@@ -539,11 +538,13 @@
 
             // middle points
             for (var i = 1; i < events.length; i++) {
-                var leftDiff = events[i].min - events[i - 1].min;
+                var leftDiff = events[i - 1].min - events[i].min;
 
                 density = leftDiff / space;
 
-                if (leftDiff > avg * sens && density > 0.05) {
+                var avgSens = avg * sens
+
+                if (leftDiff > avgSens && density > 0.05) {
                     clusters.push(cluster);
                     cluster = [ events[i] ];
                 } else {
