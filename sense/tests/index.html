@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Sense unittests</title>
+  <link rel="stylesheet" href="lib/qunit-1.10.0.css">
+  <style type="text/css">
+    #editor_container {
+      display: none;
+      position: absolute;
+      top: 20px;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      z-index: 200;
+      border: 1px solid #333;
+    }
+    #output_container {
+      display: none;
+      position: absolute;
+      height: 250px;
+      width: 350px;
+      bottom: 20px;
+      right: 20px;
+      z-index: 201;
+      border: 1px solid #333;
+    }
+    #editor, #output {
+      height: 100%;
+      width: 100%;
+      position: relative;
+    }
+   </style>
+</head>
+<body>
+<div id="qunit"></div>
+<div id="editor_container"><div id="editor"></div></div>
+<div id="output_container"><div id="output"></div></div>
+<script src="../vendor/require/require.js"></script>
+<script src="../app/require.config.js"></script>
+<script src="lib/qunit-1.10.0.js"></script>
+<script>
+/* global QUnit */
+QUnit.config.autostart = false;
+
+  var SENSE_VERSION = '0.9.0';
+require.config({
+  baseUrl: '../app'
+});
+require(["require","ace"], function (require) {
+
+  'use strict';
+
+
+  var tests = [
+    '../tests/src/curl_tests.js',
+    '../tests/src/kb_tests.js',
+    '../tests/src/mapping_tests.js',
+    '../tests/src/editor_tests.js',
+    '../tests/src/tokenization_tests.js',
+    '../tests/src/integration_tests.js'
+  ];
+
+  // load the tests in series
+  (function next(){
+    if (tests.length) {
+      require(tests.splice(0, 1), next);
+    } else {
+      console.log('all tests loaded');
+      QUnit.start();
+    }
+  }());
+
+});
+</script>
+</body>
+</html>

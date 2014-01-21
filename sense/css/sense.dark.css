@@ -1,0 +1,78 @@
+
+#editor, #output {
+  outline: 1px solid #101214;
+  border-top: 1px solid #3e444c;
+  background-color: #2e3236;
+}
+
+.ace_url {
+  color: #66D9EF;
+}
+
+.ace_url.ace_param {
+  color: #AE81FF;
+}
+
+.ace_url.ace_value {
+  color: #AE81FF;
+}
+
+.ace_method {
+  color: #F92672;
+}
+
+.ace_snippet-marker {
+  background: rgba(194, 193, 208, 0.05);
+  border-top: dotted 1px rgba(194, 193, 208, 0.30);
+  border-bottom: dotted 1px rgba(194, 193, 208, 0.30);
+  margin-top: -1px; /* compensate for background */
+}
+
+.ace_scroller {
+  border-left: 1px solid #101214;
+}
+
+#editor .ace_active-line {
+  background-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+#output .ace_active-line {
+  background-color: transparent !important;
+}
+
+#request_wrench i {
+  color: #c8c8c8;
+}
+
+#send i {
+  color: #7EB26D;
+}
+
+
+.ui-menu {
+  background-color: #3a3f44;
+  border: 1px solid rgba(0,0,0,0.2);
+  color: #bbbfc2;
+}
+
+.ui-menu .ui-menu-item {
+  color:   #bbbfc2;
+}
+
+.ui-menu .ui-menu-item a {
+  color:   #bbbfc2;
+}
+
+.ui-menu .ui-state-focus {
+  color: white;
+  background-color: #202328;
+}
+
+/* fix for mismatch with light theme */
+input.span5 {
+  width: 366px;
+}
+.container-fluid {
+  padding-left: 20px;
+  padding-right: 20px;
+}
