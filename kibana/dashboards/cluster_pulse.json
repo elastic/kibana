@@ -56,6 +56,24 @@
     }
   },
   "rows": [
+    { "title": "Cluster Summary",
+      "height": "75px",
+      "editable": true,
+      "panels": [
+        {
+          "error": false,
+          "span": 12,
+          "editable": true,
+          "type": "marvel.cluster",
+          "mode": "nodes",
+          "loadingEditor": false,
+          "compact": false,
+          "title": "Cluster Summary",
+          "optin": true
+        }
+      ],
+      "notice": false
+    },
     {
       "title": "Timeline",
       "height": "100px",
