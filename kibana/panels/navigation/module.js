@@ -15,8 +15,9 @@ define([
   'angular',
   'app',
   'underscore',
+  'jquery'
 ],
-function (angular, app, _) {
+function (angular, app, _, $) {
   'use strict';
 
   var module = angular.module('kibana.panels.marvel.navigation', []);
@@ -58,7 +59,7 @@ function (angular, app, _) {
       /** @scratch /panels/marvel.navigation/5
        * icon:: A font-awesome icon to use for this list of links
        */
-      icon: "icon-globe",
+      icon: "icon-caret-down",
     };
 
     _.defaults($scope.panel,_d);
@@ -71,7 +72,12 @@ function (angular, app, _) {
       if($scope.panel.source === 'url') {
         $http.get($scope.panel.url).then(function(response) {
           console.log(response);
-          $scope.links = response.data.links;
+          var a = $('<a />');
+
+          $scope.links = _.filter(response.data.links, function (link)  {
+            a.attr("href", link.url);
+            return a[0].href != window.location.href;
+          });
         });
       }
     };
