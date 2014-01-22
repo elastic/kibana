@@ -641,7 +641,7 @@ define([
 
       $scope.detailViewTip = function () {
         return $scope.hasSelected($scope.rows) ? 'Open nodes dashboard for selected nodes' :
-          'Select nodes and click top open the nodes dashboard';
+          'Select nodes and click to open the nodes dashboard';
       };
 
       $scope.calculateWarnings = function () {
