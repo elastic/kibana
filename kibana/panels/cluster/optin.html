@@ -1,49 +1,33 @@
   <div class="modal-body">
     <h2>Welcome to Elasticsearch Marvel</h2>
-    <div>
+    <div style="max-width: 600px;">
 
       <p>
       You're all set up! If you need a bit of help you can always visit
-      TODO: ADD URL HERE
+      <a href="http://www.elasticsearch.org/overview/marvel/" target="_blank">Marvel's web page</a>
 
       <p/>
+      <h5>A friendly request</h5>
 
-      <h5>A humble request</h5>
-      <p>The dev team humbly asks for your help in making Elasticsearch even better.<p>
-
-      <p>You can make a valuable contribution to improving Elasticsearch by periodically sharing cluster statistics with us. The information is 100% anonymous and we will never share your stats reports with any third parties.
-      To view a sample report, <span class="link" ng-click="showSample=true">click here</span>.</p>
-
-      <p>Your help is very much appreciated and makes all the difference to us.</p>
-
-      <p>Enjoy Marvel!</p>
-
-      <p>Many thanks,<br>
-      @Kimchy & The Elasticsearch Dev Team</p>
+      <p>
+      Help us make Elasticsearch better by sharing your cluster statistics with us.
+      Totally <strong>anonymous</strong> and <strong>never</strong> shared with anyone. Not ever.
+      Curious what we see? <span class="link" ng-click="showSample=true">View report here</span>
+      </p>
+      <p>
+      Thx,<br>
+      The Elasticsearch Dev Team
+      </p>
 
       <div ng-show="showSample">
         <h5>Sample Statistics</h5>
         <pre>{{ data | json }}</pre>
       </div>
 
-<!--
-      <h5>Cluster statistics</h5>
-
-      Help improve Elasticsearch by reporting <strong>anonymous</strong>
-      cluster statistics, including information about the size and performance of your cluster.
-      Data is sent once daily and is under 1 kilobyte. To
-      see a sample report click <span class="link" ng-click="showSample=true">here</span>. The data will only
-      be used by Elasticsearch and will never be transmitted to a third party.
-      <div ng-show="showSample">
-        <h5>Sample Statistics</h5>
-        <pre>{{ data | json }}</pre>
-      </div>
+  </div>
+    <div class="modal-footer">
+      <!-- these set strings since cookies don't deal with boolean -->
+      <button ng-click="setOptIn('IN');dismiss();" class="btn btn-success">Count me in!</button>
+      <span ng-click="setOptIn('OUT');dismiss();" class="pointer small">No Thanks</span>
     </div>
--->
-  </div>
 
-  <div class="modal-footer">
-    <!-- these set strings since cookies don't deal with boolean -->
-    <button ng-click="setOptIn('IN');dismiss();" class="btn btn-success">Sure!</button>
-    <span ng-click="setOptIn('OUT');dismiss();" class="pointer small">No Thanks</span>
-  </div>
