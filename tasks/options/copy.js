@@ -4,7 +4,7 @@ module.exports = function (config) {
       files: [
         {
           // agent jar
-          cwd: '<%= exporterDir %>/target',
+          cwd: '<%= agentDir %>/target',
           expand: true,
           src: ['<%= pkg.name %>-<%= pkg.version %>.jar'],
           dest: '<%= buildDir %>'
@@ -19,7 +19,7 @@ module.exports = function (config) {
         {
           cwd: '.',
           expand: true,
-          src: ['index.html', 'common'],
+          src: ['index.html', './common/**'],
           dest: '<%= buildSiteDir %>'
         }
       ]},
@@ -33,13 +33,13 @@ module.exports = function (config) {
         },
         {
           expand: true,
-          cwd: 'dashboards',
+          cwd: 'kibana/dashboards',
           src: '**',
           dest: '<%= buildTempDir %>/src/app/dashboards/marvel'
         },
         {
           expand: true,
-          cwd: 'panels',
+          cwd: 'kibana/panels',
           src: '**',
           dest: '<%= buildTempDir %>/src/app/panels/marvel'
         }

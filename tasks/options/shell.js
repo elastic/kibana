@@ -2,12 +2,12 @@ module.exports = function (config) {
   return {
     maven_clean: {
       command: 'mvn clean',
-      cwd: '<%= exporterDir %>',
+      cwd: '<%= agentDir %>',
       options: {
         stdout: true,
         failOnError: true,
         execOptions: {
-          cwd: '<%= exporterDir %>',
+          cwd: '<%= agentDir %>',
         }
       },
     },
@@ -17,7 +17,7 @@ module.exports = function (config) {
         stdout: true,
         failOnError: true,
         execOptions: {
-          cwd: '<%= exporterDir %>',
+          cwd: '<%= agentDir %>',
         }
       },
     },
