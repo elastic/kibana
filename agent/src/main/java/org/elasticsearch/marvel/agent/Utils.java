@@ -1,4 +1,4 @@
-package org.elasticsearch.marvel.collector;
+package org.elasticsearch.marvel.agent;
 /*
  * Licensed to ElasticSearch under one
  * or more contributor license agreements.  See the NOTICE file

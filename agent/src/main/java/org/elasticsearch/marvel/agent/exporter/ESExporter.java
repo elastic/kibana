@@ -1,4 +1,4 @@
-package org.elasticsearch.marvel.collector.exporter;
+package org.elasticsearch.marvel.agent.exporter;
 /*
  * Licensed to ElasticSearch under one
  * or more contributor license agreements.  See the NOTICE file
@@ -41,9 +41,9 @@ import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.common.xcontent.smile.SmileXContent;
 import org.elasticsearch.discovery.Discovery;
 import org.elasticsearch.env.Environment;
-import org.elasticsearch.marvel.collector.Plugin;
-import org.elasticsearch.marvel.collector.Utils;
-import org.elasticsearch.marvel.collector.event.Event;
+import org.elasticsearch.marvel.agent.Plugin;
+import org.elasticsearch.marvel.agent.Utils;
+import org.elasticsearch.marvel.agent.event.Event;
 
 import java.io.*;
 import java.net.HttpURLConnection;

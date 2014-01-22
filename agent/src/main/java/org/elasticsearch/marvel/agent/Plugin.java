@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.elasticsearch.marvel.collector;
+package org.elasticsearch.marvel.agent;
 
 import org.elasticsearch.Version;
 import org.elasticsearch.common.collect.ImmutableList;
@@ -69,7 +69,7 @@ public class Plugin extends AbstractPlugin {
 
             @Override
             protected void configure() {
-                bind(CollectorService.class).asEagerSingleton();
+                bind(AgentService.class).asEagerSingleton();
             }
         };
         return ImmutableList.of(m);
@@ -79,7 +79,7 @@ public class Plugin extends AbstractPlugin {
     public Collection<Class<? extends LifecycleComponent>> services() {
         Collection<Class<? extends LifecycleComponent>> l = new ArrayList<Class<? extends LifecycleComponent>>();
         if (enabled) {
-            l.add(CollectorService.class);
+            l.add(AgentService.class);
         }
         return l;
     }

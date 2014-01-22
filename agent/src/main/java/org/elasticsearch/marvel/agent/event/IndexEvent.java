@@ -1,4 +1,4 @@
-package org.elasticsearch.marvel.collector.event;
+package org.elasticsearch.marvel.agent.event;
 /*
  * Licensed to ElasticSearch under one
  * or more contributor license agreements.  See the NOTICE file
@@ -19,25 +19,26 @@ package org.elasticsearch.marvel.collector.event;
  */
 
 
-import org.elasticsearch.cluster.node.DiscoveryNode;
+import org.elasticsearch.action.admin.cluster.health.ClusterIndexHealth;
+import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.marvel.collector.Utils;
 
 import java.io.IOException;
+import java.util.Map;
 
-public abstract class NodeEvent extends Event {
+public abstract class IndexEvent extends Event {
 
     protected final String event_source;
 
-    public NodeEvent(long timestamp, String clusterName, String event_source) {
+    public IndexEvent(long timestamp, String clusterName, String event_source) {
         super(timestamp, clusterName);
         this.event_source = event_source;
     }
 
     @Override
     public String type() {
-        return "node_event";
+        return "index_event";
     }
 
     protected abstract String event();
@@ -50,58 +51,61 @@ public abstract class NodeEvent extends Event {
         return builder;
     }
 
-    public static class ElectedAsMaster extends NodeEvent {
+    public static class IndexCreateDelete extends IndexEvent {
 
+        private final String index;
+        private boolean created;
 
-        private final DiscoveryNode node;
-
-        public ElectedAsMaster(long timestamp, String clusterName, DiscoveryNode node, String event_source) {
+        public IndexCreateDelete(long timestamp, String clusterName, String index, boolean created, String event_source) {
             super(timestamp, clusterName, event_source);
-            this.node = node;
+            this.index = index;
+            this.created = created;
         }
 
         @Override
         protected String event() {
-            return "elected_as_master";
+            return (created ? "index_created" : "index_deleted");
         }
 
         @Override
         String conciseDescription() {
-            return Utils.nodeDescription(node) + " became master";
-        }
-
-        // no need to render node as XContent as it will be done by the exporter.
-    }
-
-    public static class NodeJoinLeave extends NodeEvent {
-
-        private final DiscoveryNode node;
-        private boolean joined;
-
-        public NodeJoinLeave(long timestamp, String clusterName, DiscoveryNode node, boolean joined, String event_source) {
-            super(timestamp, clusterName, event_source);
-            this.node = node;
-            this.joined = joined;
-        }
-
-        @Override
-        protected String event() {
-            return (joined ? "node_joined" : "node_left");
-        }
-
-        @Override
-        String conciseDescription() {
-            return Utils.nodeDescription(node) + (joined ? " joined" : " left");
+            return "[" + index + "] " + (created ? " created" : " deleted");
         }
 
         @Override
         public XContentBuilder addXContentBody(XContentBuilder builder, ToXContent.Params params) throws IOException {
             super.addXContentBody(builder, params);
-            builder.startObject("node");
-            Utils.nodeToXContent(node, builder);
-            builder.endObject();
+            builder.field("index", index);
             return builder;
         }
     }
 
+    public static class IndexStatus extends IndexEvent {
+
+        ClusterIndexHealth indexHealth;
+
+        Map<String, String> SHARD_LEVEL_MAP = ImmutableMap.of("level", "shards");
+
+        public IndexStatus(long timestamp, String clusterName, String event_source, ClusterIndexHealth indexHealth) {
+            super(timestamp, clusterName, event_source);
+            this.indexHealth = indexHealth;
+        }
+
+        @Override
+        protected String event() {
+            return "index_status";
+        }
+
+        @Override
+        String conciseDescription() {
+            return "[" + indexHealth.getIndex() + "] status is " + indexHealth.getStatus().name();
+        }
+
+        @Override
+        public XContentBuilder addXContentBody(XContentBuilder builder, ToXContent.Params params) throws IOException {
+            super.addXContentBody(builder, params);
+            builder.field("index", indexHealth.getIndex());
+            return indexHealth.toXContent(builder, new ToXContent.DelegatingMapParams(SHARD_LEVEL_MAP, params));
+        }
+    }
 }

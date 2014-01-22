@@ -1,4 +1,4 @@
-package org.elasticsearch.marvel.collector;
+package org.elasticsearch.marvel.agent;
 /*
  * Licensed to ElasticSearch under one
  * or more contributor license agreements.  See the NOTICE file
@@ -53,9 +53,9 @@ import org.elasticsearch.index.shard.service.IndexShard;
 import org.elasticsearch.indices.IndicesLifecycle;
 import org.elasticsearch.indices.IndicesService;
 import org.elasticsearch.indices.InternalIndicesService;
-import org.elasticsearch.marvel.collector.event.*;
-import org.elasticsearch.marvel.collector.exporter.ESExporter;
-import org.elasticsearch.marvel.collector.exporter.Exporter;
+import org.elasticsearch.marvel.agent.event.*;
+import org.elasticsearch.marvel.agent.exporter.ESExporter;
+import org.elasticsearch.marvel.agent.exporter.Exporter;
 import org.elasticsearch.node.service.NodeService;
 
 import java.util.ArrayList;
@@ -65,7 +65,7 @@ import java.util.concurrent.BlockingQueue;
 
 import static org.elasticsearch.common.collect.Lists.newArrayList;
 
-public class CollectorService extends AbstractLifecycleComponent<CollectorService> {
+public class AgentService extends AbstractLifecycleComponent<AgentService> {
 
     private final InternalIndicesService indicesService;
     private final NodeService nodeService;
@@ -87,10 +87,10 @@ public class CollectorService extends AbstractLifecycleComponent<CollectorServic
     private final BlockingQueue<Event> pendingEventsQueue;
 
     @Inject
-    public CollectorService(Settings settings, IndicesService indicesService,
-                            NodeService nodeService, ClusterService clusterService,
-                            Client client, Discovery discovery, ClusterName clusterName,
-                            Environment environment, Plugin marvelPlugin) {
+    public AgentService(Settings settings, IndicesService indicesService,
+                        NodeService nodeService, ClusterService clusterService,
+                        Client client, Discovery discovery, ClusterName clusterName,
+                        Environment environment, Plugin marvelPlugin) {
         super(settings);
         this.indicesService = (InternalIndicesService) indicesService;
         this.clusterService = clusterService;
@@ -122,7 +122,7 @@ public class CollectorService extends AbstractLifecycleComponent<CollectorServic
             e.start();
 
         this.exp = new ExportingWorker();
-        this.thread = new Thread(exp, EsExecutors.threadName(settings, "collector"));
+        this.thread = new Thread(exp, EsExecutors.threadName(settings, "marvel.exporters"));
         this.thread.setDaemon(true);
         this.thread.start();
 
@@ -213,13 +213,13 @@ public class CollectorService extends AbstractLifecycleComponent<CollectorServic
                 try {
                     e.exportClusterStats(stats);
                 } catch (Throwable t) {
-                    logger.error("Exporter [{}] has thrown an exception:", t, e.name());
+                    logger.error("exporter [{}] has thrown an exception:", t, e.name());
                 }
             }
         }
 
         private void exportEvents() {
-            logger.debug("Exporting events");
+            logger.debug("exporting events");
             ArrayList<Event> eventList = new ArrayList<Event>(pendingEventsQueue.size());
             pendingEventsQueue.drainTo(eventList);
             Event[] events = new Event[eventList.size()];
@@ -229,7 +229,7 @@ public class CollectorService extends AbstractLifecycleComponent<CollectorServic
                 try {
                     e.exportEvents(events);
                 } catch (Throwable t) {
-                    logger.error("Exporter [{}] has thrown an exception:", t, e.name());
+                    logger.error("exporter [{}] has thrown an exception:", t, e.name());
                 }
             }
         }
