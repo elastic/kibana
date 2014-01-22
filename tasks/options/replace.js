@@ -9,10 +9,6 @@ module.exports = function (config) {
             replacement: '<%= esPort.dev %>',
           },
           {
-            match: 'default_route',
-            replacement: '<%= defaultRoute.dev %>',
-          },
-          {
             match: 'stats_report_url',
             replacement: '<%= statsReportUrl.dev %>',
           }
@@ -28,10 +24,6 @@ module.exports = function (config) {
           {
             match: 'port',
             replacement: '<%= esPort.dist %>',
-          },
-          {
-            match: 'default_route',
-            replacement: '<%= defaultRoute.dist %>',
           },
           {
             match: 'stats_report_url',

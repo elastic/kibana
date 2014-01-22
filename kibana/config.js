@@ -32,7 +32,7 @@ define(['settings'],
        *
        * +default_route: '/dashboard/elasticsearch/WebLogs',+
        */
-      default_route     : '@@default_route',
+      default_route     : '/dashboard/file/marvel.overview.json',
 
       /** @scratch /configuration/config.js/5
        * ==== kibana-int
