@@ -103,7 +103,7 @@
           <label>
             <input type="checkbox" ng-model="row.selected" ng-checked="row.selected">
           </label>
-          <span class="pointer" ng-click="rowClick(row)">{{ row.display_name }}</span>
+          <span class="pointer" ng-click="rowClick(row)">{{ row.id }}</span>
         </div>
       </td>
       <td ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels[row.id][metric.field])">

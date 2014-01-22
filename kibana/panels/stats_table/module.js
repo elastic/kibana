@@ -358,7 +358,10 @@ define([
             return;
           }
 
-          if (!$scope.panel.display_field || $scope.panel.display_field === $scope.panel.persistent_field) {
+          // in all this cases we don't need the display name, short cut it.
+          if (!$scope.panel.display_field || $scope.panel.display_field === $scope.panel.persistent_field ||
+              $scope.panel.compact
+            ) {
             $scope.get_data(_.map(newPersistentIds, function (id) {
               return {
                 display_name: id,
