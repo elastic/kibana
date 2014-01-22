@@ -16,6 +16,24 @@ define([
 
   function Autocomplete(editor) {
 
+    function isSeparatorToken(token) {
+      switch ((token || {}).type) {
+        case "url.slash":
+        case "url.comma":
+        case "url.questionmark":
+        case "url.endpoint":
+        case "paren.lparen":
+        case "paren.rparen":
+        case "punctuation.colon":
+        case "punctuation.comma":
+        case "whitespace":
+          return true;
+        default:
+          // standing on white space, quotes or another punctuation - no replacing
+          return false;
+      }
+    }
+
     function getAutoCompleteValueFromToken(token) {
       switch ((token || {}).type) {
         case "variable":
@@ -110,29 +128,29 @@ define([
 
       var tokenIter = editor.iterForPosition(newPos.row, newPos.column);
 
-      // look for the next place stand, just after a comma, {
-      var nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
-      switch (nonEmptyToken ? nonEmptyToken.type : "NOTOKEN") {
-        case "paren.rparen":
-          newPos = { row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn() };
-          break;
-        case "punctuation.colon":
-          nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
-          if ((nonEmptyToken || {}).type == "paren.lparen") {
-            nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
+      if (context.autoCompleteType === "body") {
+        // look for the next place stand, just after a comma, {
+        var nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
+        switch (nonEmptyToken ? nonEmptyToken.type : "NOTOKEN") {
+          case "paren.rparen":
             newPos = { row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn() };
-            if (nonEmptyToken && nonEmptyToken.value.indexOf('"') === 0) newPos.column++; // don't stand on "
-          }
-          break;
-        case "paren.lparen":
-        case "punctuation.comma":
-          tokenIter.stepForward();
-          newPos = { row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn() };
-          break;
+            break;
+          case "punctuation.colon":
+            nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
+            if ((nonEmptyToken || {}).type == "paren.lparen") {
+              nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
+              newPos = { row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn() };
+              if (nonEmptyToken && nonEmptyToken.value.indexOf('"') === 0) newPos.column++; // don't stand on "
+            }
+            break;
+          case "paren.lparen":
+          case "punctuation.comma":
+            tokenIter.stepForward();
+            newPos = { row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn() };
+            break;
+        }
+        editor.moveCursorToPosition(newPos);
       }
-
-
-      editor.moveCursorToPosition(newPos);
 
       // re-enable listening to typing
       addChangeListener();
@@ -1145,16 +1163,15 @@ define([
       // this is hacky, but there is at the moment no settings/way to do it differently
       aceEditor.completer.autoInsert = false;
       var token = aceEditor.getSession().getTokenAt(pos.row, pos.column);
-      if (!editor.parser.isEmptyToken(token)) {
+      var updatePrefix = false;
+      if (!editor.parser.isEmptyToken(token) && !isSeparatorToken(token)) {
         // Ace doesn't care about tokenization when calculating prefix. It will thus stop on . in keys names.
         if (token.value.indexOf('"') == 0) {
           aceEditor.completer.base.column = token.start+1;
         } else {
           aceEditor.completer.base.column = token.start;
         }
-
-        // we have to trigger a render update to make the new prefix take affect.
-        setTimeout(function () { aceEditor.completer.changeListener(); }, 0);
+        updatePrefix = true;
       }
 
 
@@ -1200,6 +1217,13 @@ define([
           }
           return 1;
         });
+
+        if (updatePrefix && terms && terms.length) {
+          // we have to trigger a render update to make the new prefix take affect.
+          setTimeout(function () {
+            aceEditor.completer.changeListener();
+          }, 50);
+        }
 
         callback(null, _.map(terms, function (t, i) {
           t.score = -i;
