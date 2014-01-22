@@ -1,25 +1,36 @@
 module.exports = function (config) {
   return {
-    exporter_build: {
-      cwd: '<%= exporterDir %>/target',
-      expand: true,
-      src: ['<%= pkg.name %>-<%= pkg.version %>.jar'],
-      dest: '<%= buildDir %>'
-    },
-    kibana_build: {
-      cwd: '<%= buildTempDir %>/dist',
-      expand: true,
-      src: ['**'],
-      dest: '<%= buildSiteDir %>'
-    },
-    merge_kibana: {
-      expand: true,
-      cwd: '<%= kibanaCheckoutDir %>',
-      src: [ '**', '.jshintrc'],
-      dest: '<%= buildTempDir %>'
-    },
-    merge_marvel: {
+    artifacts_to_build: {
       files: [
+        {
+          // agent jar
+          cwd: '<%= exporterDir %>/target',
+          expand: true,
+          src: ['<%= pkg.name %>-<%= pkg.version %>.jar'],
+          dest: '<%= buildDir %>'
+        },
+        {
+          // merged kibana
+          cwd: '<%= buildTempDir %>/dist',
+          expand: true,
+          src: ['**'],
+          dest: '<%= buildKibanaDir %>'
+        },
+        {
+          cwd: '.',
+          expand: true,
+          src: ['index.html'],
+          dest: '<%= buildSiteDir %>'
+        }
+      ]},
+    merge_marvel_kibana: {
+      files: [
+        {
+          expand: true,
+          cwd: '<%= kibanaCheckoutDir %>',
+          src: [ '**', '.jshintrc'],
+          dest: '<%= buildTempDir %>'
+        },
         {
           expand: true,
           cwd: 'dashboards',

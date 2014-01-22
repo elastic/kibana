@@ -70,3 +70,9 @@ define(['settings'],
   s.stats_report_url = @@stats_report_url;
   return s;
 });
+
+/**
+ * Built on:
+ *    marvel commit: @@MARVEL_REVISION
+ *    kibana commit: @@KIBANA_REVISION
+ */

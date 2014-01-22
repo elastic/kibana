@@ -28,8 +28,9 @@ module.exports = function (grunt) {
 
   // more detailed config
   config['buildTempDir'] = config['buildDir'] + '/tmp'; // kibana and custom panels will be merged here
-  config['buildSiteDir'] = config['buildDir'] + '/_site';  // compressed minified marvel site will be output here
+  config['buildSiteDir'] = config['buildDir'] + '/_site';
   config['buildSenseDir'] = config['buildSiteDir'] + '/sense';  // compressed minified sense site will be here
+  config['buildKibanaDir'] = config['buildSiteDir'] + '/kibana';  // compressed minified marvel's kibana site will be output here
 
   // Utility function to load plugin settings into the above config object
   function loadConfig(config, path) {

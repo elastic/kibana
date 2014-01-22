@@ -42,6 +42,25 @@ module.exports = function (config) {
       files: [
         {expand: true, flatten: true, src: ['./kibana/config.js'], dest: '<%= buildTempDir %>/src/'}
       ]
+    },
+    git_commits: {
+      options: {
+        patterns: [
+          {
+            match: 'MARVEL_REVISION',
+            replacement: '<%= marvelCommit %>'
+          },
+          {
+            match: 'KIBANA_REVISION',
+            replacement: '<%= kibanaCommit %>'
+          }
+        ]
+      },
+      files: [
+        {
+          cwd: '<%= buildSiteDir %>',
+          expand: true,  src: ['**/*'], dest: '<%= buildSiteDir %>/'}
+      ]
     }
-  };
+  }
 };

@@ -23,7 +23,7 @@ module.exports = function (grunt) {
         optimize: 'uglify2',
         optimizeAllPluginResources: true,
         preserveLicenseComments: true,
-        generateSourceMaps: true,
+        generateSourceMaps: false,
 
         uglify2: {
           max_line_len: 100

@@ -5,23 +5,33 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', [
     'shell:verify_kibana_status',
-    'jshint:kibana',
+    'jshint',
     'clean:build',
+    'build:load_git_versions',
     'shell:maven_clean',
     'shell:maven_package',
-    'copy:merge_kibana',
-    'copy:merge_marvel',
+    'copy:merge_marvel_kibana',
     'replace:dist_marvel_config',
     'shell:build_kibana',
-    'copy:kibana_build',
     'build_sense',
-    'copy:exporter_build',
-    'clean:build_tmp'
+    'copy:artifacts_to_build',
+    'clean:build_tmp',
+    'replace:git_commits'
   ]);
 
   grunt.registerTask('build_sense', [
-    'jshint:sense',
     'requirejs:build_sense',
     'clean:sense_build_tests'
   ]);
+
+  grunt.registerTask('build:load_git_versions', function () {
+      grunt.event.once('git-describe', function (desc) {
+        grunt.config.set('kibanaCommit', desc.object);
+        grunt.event.once('git-describe', function (desc) {
+          grunt.config.set('marvelCommit', desc.object);
+        });
+        grunt.task.run('git-describe:marvel');
+      });
+      grunt.task.run('git-describe:kibana');
+  });
 };
