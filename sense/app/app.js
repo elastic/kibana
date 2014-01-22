@@ -1,5 +1,4 @@
 define([
-  'analytics',
   'curl',
   'help_popup',
   'history',
@@ -10,7 +9,7 @@ define([
   'misc_inputs',
   'utils'
   ],
-  function (_gaq, curl, $helpPopup, history, input, $, mappings, output, miscInputs, utils) {
+  function (curl, $helpPopup, history, input, $, mappings, output, miscInputs, utils) {
     'use strict';
 
     $(document.body).removeClass('fouc');
@@ -58,8 +57,6 @@ define([
           }
         );
         saveCurrentState();
-
-        _gaq.push(['_trackEvent', "elasticsearch", 'query']);
       });
     }
 

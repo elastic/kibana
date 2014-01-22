@@ -1,10 +1,8 @@
 define([
   'sense_editor/editor',
-  'analytics',
   'jquery',
-
   'bootstrap'
-], function (SenseEditor, _gaq, $) {
+], function (SenseEditor, $) {
   'use strict';
 
   var $helpPopup = $("#help_popup");
@@ -21,7 +19,6 @@ define([
   ].join('\n');
 
   $helpPopup.on('shown', function () {
-    _gaq.push(['_trackEvent', "help", 'shown']);
     $(html).appendTo("#help_example_container");
     var example_editor = new SenseEditor($("#help_example_editor"));
     example_editor.setReadOnly(true);

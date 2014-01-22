@@ -1,6 +1,5 @@
 define([
   'ace',
-  'analytics',
   'autocomplete',
   'jquery',
   'mappings',
@@ -11,7 +10,7 @@ define([
   'utils',
   'zeroclip',
   'ace_ext_language_tools'
-], function (ace, _gaq, Autocomplete, $, mappings, output, SenseEditor, settings, require, utils, ZeroClipboard) {
+], function (ace, Autocomplete, $, mappings, output, SenseEditor, settings, require, utils, ZeroClipboard) {
   'use strict';
 
   // disable standard context based autocompletion.
@@ -113,7 +112,6 @@ define([
     })
 
     zc.on('complete', function () {
-      _gaq.push(['_trackEvent', "curl", 'copied']);
       $copyAsCURL.click();
     });
 

@@ -1,10 +1,9 @@
 define([
   'sense_editor/editor',
-  'analytics',
   'jquery',
 
   'bootstrap'
-], function (SenseEditor, _gaq, $) {
+], function (SenseEditor, $) {
   'use strict';
 
   var $welcomePopup = $("#welcome_popup");

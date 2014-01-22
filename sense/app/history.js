@@ -1,11 +1,10 @@
 define([
   '_',
   'sense_editor/editor',
-  'analytics',
   'jquery',
   'moment',
   'settings'
-], function (_, SenseEditor, _gaq, $, moment) {
+], function (_, SenseEditor, $, moment) {
   'use strict';
 
   function History() {
@@ -129,7 +128,6 @@ define([
         });
 
         li.bind('apply', function () {
-          _gaq.push(['_trackEvent', "history", 'applied']);
           self.restoreFromHistory(hist_elem);
         });
 

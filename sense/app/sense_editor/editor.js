@@ -1,13 +1,12 @@
 define([
   '_',
   'ace',
-  'analytics',
   'curl',
   'jquery',
   'sense_editor/row_parser',
   'sense_editor/mode/sense',
   'utils'
-], function (_, ace, _gaq, curl, $, RowParser, SenseMode, utils) {
+], function (_, ace, curl, $, RowParser, SenseMode, utils) {
   'use strict';
 
   function isInt(x) {
@@ -286,7 +285,6 @@ define([
     };
 
     editor.handleCURLPaste = function (text) {
-      _gaq.push(['_trackEvent', "curl", 'pasted']);
       var curlInput = curl.parseCURL(text);
       if ($("#es_server").val()) curlInput.server = null; // do not override server
 
