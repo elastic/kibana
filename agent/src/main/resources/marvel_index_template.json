@@ -10,7 +10,8 @@
                     "stopwords": "_none_"
                 }
             }
-        }
+        },
+        "marvel.index_format": 1
     },
     "mappings": {
         "_default_": {
