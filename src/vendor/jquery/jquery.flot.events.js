@@ -447,12 +447,13 @@
                 // each cluser of each event type
                 $.each(eventType, function(index, cluster) {
 
-                    var description = "<h5>"+(cluster.length>5?"Top 5 of ":"") + cluster.length + " events</h5>";
+                    var description = "<strong>"+(cluster.length>5?"Top 5 of ":"") + cluster.length + " events</strong>";
                     $.each(cluster,function(i,c) {
                         if(i > 5) {
                             return;
                         }
-                        description += '<div class="'+(i%2?'odd':'')+'" style="padding-bottom:0px">'+c.description + "</div>";
+                        description += '<div style="'+(i%2?'background-color:#444;':'')+
+                            '" style="padding-bottom:0px">'+c.description + "</div>";
                     });
 
                     var newEvent = {
