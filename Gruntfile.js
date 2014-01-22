@@ -16,7 +16,7 @@ module.exports = function (grunt) {
     },
     statsReportUrl: {
       dev: '"http://" + window.location.hostname + ":'+ (grunt.option('es_port') ||  9200) +'/.marvel_cluster_report/report"',
-      dist: '"http://stats.marvel.elasticsearch.com/"'
+      dist: '"https://marvel-stats.elasticsearch.com/"'
     },
     kibanaPort: grunt.option('port') ||  5601,
     kibanaHost: 'localhost'
