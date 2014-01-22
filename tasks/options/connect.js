@@ -18,7 +18,8 @@ module.exports = function (config) {
       '^/kibana/app/panels/marvel/(.*)$': '/kibana/panels/$1',
       '^/kibana/config.js$': '/<%= buildTempDir %>/config.js',
       '^/kibana(.*)$': '<%= kibanaCheckoutDir %>/src$1',
-      '^/sense(.*)$': '/sense$1'
+      '^/sense(.*)$': '/sense$1',
+      '^/common(.*)$': '/common$1'
     }
   };
 };

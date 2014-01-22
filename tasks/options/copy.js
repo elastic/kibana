@@ -19,7 +19,7 @@ module.exports = function (config) {
         {
           cwd: '.',
           expand: true,
-          src: ['index.html'],
+          src: ['index.html', 'common'],
           dest: '<%= buildSiteDir %>'
         }
       ]},

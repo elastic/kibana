@@ -9,7 +9,7 @@ define([
   'output',
   'misc_inputs',
   'utils'
-],
+  ],
   function (_gaq, curl, $helpPopup, history, input, $, mappings, output, miscInputs, utils) {
     'use strict';
 
@@ -198,9 +198,6 @@ define([
       }
     });
 
-    /**
-     *
-     */
     $send.click(function () {
       submitCurrentRequestToES(function (resp) {
         output.update(resp);
@@ -208,6 +205,21 @@ define([
       return false;
     });
 
+    /*
+     * initialize navigation menu
+     */
+
+    $.get('../common/marvelLinks.json', function(marvelLinks) {
+      var linkMenu = $("#nav_btn ul");
+      _.map(marvelLinks.links, function (link) {
+        var li =$('<li><a></a></li>');
+        var a = li.find('a');
+        a.attr('href', link.url);
+        a.text(link.name);
+        if (a[0].href != window.location.href)
+          li.appendTo(linkMenu);
+      });
+    });
 
     /**
      * Display the welcome popul if it has not been shown yet
@@ -220,4 +232,5 @@ define([
         $welcomePopup.modal('show');
       });
     }
+
   });

@@ -41,17 +41,21 @@ define([
   function setTheme(mode) {
     localStorage.setItem("theme", mode);
 
-    $("#bootstrapThemeCss").attr("href", "vendor/bootstrap/css/bootstrap." + mode + ".min.css");
-    $("#senseThemeCss").attr("href", "css/sense." + mode + ".css");
-
     applyCurrentSettings();
     return true;
+  }
+
+  function applyThemeToBody() {
+    var theme= getTheme();
+    $("#bootstrapThemeCss").attr("href", "vendor/bootstrap/css/bootstrap." + theme + ".min.css");
+    $("#senseThemeCss").attr("href", "css/sense." + theme + ".css");
   }
 
   function applyCurrentSettings(editor) {
     if (typeof editor === "undefined") {
       applyCurrentSettings(require('input'));
       applyCurrentSettings(require('output'));
+      applyThemeToBody();
     }
     if (editor) {
       editor.setTheme(getAceTheme());
@@ -76,7 +80,7 @@ define([
   var theme_ctl = settings_popup.find("#theme");
   var theme = getTheme();
   theme_ctl.val(theme);
-  //setTheme(theme);
+  applyThemeToBody();
 
   function save() {
     if (!setFontSize(font_size_ctl.val())) font_size_ctl.val(getFontSize());

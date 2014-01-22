@@ -1,0 +1,16 @@
+{
+  "links": [
+    {
+      "name": "Cluster Overview",
+      "url": "#/dashboard/file/marvel.overview.json"
+    },
+    {
+      "name": "Cluster Pulse",
+      "url": "#/dashboard/file/marvel.cluster_pulse.json"
+    },
+    {
+      "name": "Sense",
+      "url": "/sense/index.html"
+    }
+  ]
+}

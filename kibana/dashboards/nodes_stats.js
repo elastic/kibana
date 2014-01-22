@@ -49,7 +49,7 @@ dashboard.nav = [
   {
     type: "marvel.navigation",
     source: "url",
-    url: "app/panels/marvel/navigation/marvelLinks.json"
+    url: "../common/marvelLinks.json"
   }
 ];
 
