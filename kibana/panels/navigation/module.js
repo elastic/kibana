@@ -76,7 +76,7 @@ function (angular, app, _, $) {
 
           $scope.links = _.filter(response.data.links, function (link)  {
             a.attr("href", link.url);
-            return a[0].href != window.location.href;
+            return a[0].href !== window.location.href;
           });
         });
       }

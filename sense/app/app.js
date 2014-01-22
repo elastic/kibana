@@ -7,9 +7,10 @@ define([
   'mappings',
   'output',
   'misc_inputs',
-  'utils'
-  ],
-  function (curl, $helpPopup, history, input, $, mappings, output, miscInputs, utils) {
+  'utils',
+  '_'
+],
+  function (curl, $helpPopup, history, input, $, mappings, output, miscInputs, utils, _) {
     'use strict';
 
     $(document.body).removeClass('fouc');
@@ -206,10 +207,10 @@ define([
      * initialize navigation menu
      */
 
-    $.get('../common/marvelLinks.json', function(marvelLinks) {
+    $.get('../common/marvelLinks.json', function (marvelLinks) {
       var linkMenu = $("#nav_btn ul");
       _.map(marvelLinks.links, function (link) {
-        var li =$('<li><a></a></li>');
+        var li = $('<li><a></a></li>');
         var a = li.find('a');
         a.attr('href', link.url);
         a.text(link.name);
