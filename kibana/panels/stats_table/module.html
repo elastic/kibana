@@ -70,14 +70,14 @@
       </td>
       <td ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels[row.id][metric.field])">
         <div class="marvel-mean pointer" ng-click="rowClick(row,metric)">
-          <span bo-text="(_.isNull(data[row.id+"_"+metric.field].mean)?0:data[row.id+"_"+metric.field].mean) | metric_format:metric"></span>
+          <span bo-text="(_.isNull(data[row.id+'_'+metric.field].mean)?0:data[row.id+'_'+metric.field].mean) | metric_format:metric"></span>
           <br>
 
           <div class="marvel-stats-sparkline" panel='panel' field="metric.field" series="data[row.id+'_'+metric.field+'_history'].series"></div>
         </div>
         <div class="marvel-extended pointer" ng-click="rowClick(row,metric)">
-          <span>min: <span bo-text="(_.isNull(data[row.id+"_"+metric.field].min)?0:data[row.id+"_"+metric.field].min) | metric_format:metric"></span></span><br>
-          <span>max: <span bo-text="(_.isNull(data[row.id+"_"+metric.field].max)?0:data[row.id+"_"+metric.field].max) | metric_format:metric"></span></span>
+          <span>min: <span bo-text="(_.isNull(data[row.id+'_'+metric.field].min)?0:data[row.id+'_'+metric.field].min) | metric_format:metric"></span></span><br>
+          <span>max: <span bo-text="(_.isNull(data[row.id+'_'+metric.field].max)?0:data[row.id+'_'+metric.field].max) | metric_format:metric"></span></span>
         </div>
       </td>
     </tr>
@@ -108,7 +108,7 @@
       </td>
       <td ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels[row.id][metric.field])">
         <div class="pointer" ng-click="rowClick(row,metric)">
-          <span bo-text='(_.isNull(data[row.id+"_"+metric.field].mean)?0:data[row.id+"_"+metric.field].mean) | metric_format:metric'></span>
+          <span bo-text="(_.isNull(data[row.id+'_'+metric.field].mean)?0:data[row.id+'_'+metric.field].mean) | metric_format:metric"></span>
 
           <div ng-if="sparkLines" class="marvel-stats-sparkline pointer" ng-click="rowClick(row,metric)" panel='panel' field="metric.field" series="data[row.id+'_'+metric.field+'_history'].series"></div>
         </div>
