@@ -752,7 +752,9 @@ define([
           return addMetaToTermsList(mappings.getTypes(activeScheme.indices), "type");
         }
         else if (term == "$FIELD$") {
-          return addMetaToTermsList(mappings.getFields(activeScheme.indices, activeScheme.types), "field");
+          return _.map(mappings.getFields(activeScheme.indices, activeScheme.types), function (f) {
+            return { name: f.name, meta: f.type };
+          });
         }
         return [ term ]
       }
@@ -849,8 +851,11 @@ define([
                     addMetaToTermsList(mappings.getTypes(activeScheme.indices), "type", template_for_term));
                   break;
                 case "$FIELD$":
+                  /* jshint -W083 */
                   $.merge(autocompleteSet,
-                    addMetaToTermsList(mappings.getFields(activeScheme.indices, activeScheme.types), "field", template_for_term));
+                    _.map(mappings.getFields(activeScheme.indices, activeScheme.types), function (f) {
+                      return { name: f.name, meta: f.type, template: template_for_term };
+                    }));
                   break;
                 default:
                   autocompleteSet.push({ name: term, template: template_for_term });

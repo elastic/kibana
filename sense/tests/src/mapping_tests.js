@@ -3,6 +3,25 @@ define([
 ], function (mappings) {
   'use strict';
 
+  module("Mappings", {
+    setup: function () {
+      mappings.clear();
+    },
+    teardown: function () {
+      mappings.clear();
+    }
+  });
+
+  function fc(f1, f2) {
+    if (f1.name < f2.name) return -1;
+    if (f1.name > f2.name) return 1;
+    return 0;
+  }
+
+  function f(name, type) {
+    return { name: name, type: type || "string"};
+  }
+
   test("Multi fields", function () {
     mappings.loadMappings({
       "index": {
@@ -29,7 +48,8 @@ define([
       }
     });
 
-    deepEqual(mappings.getFields("index").sort(), ["any_name", "first_name", "last_name" ]);
+    deepEqual(mappings.getFields("index").sort(fc), [
+      f("any_name", "string"), f("first_name", "string"), f("last_name", "string")]);
   });
 
   test("Simple fields", function () {
@@ -48,7 +68,7 @@ define([
       }
     });
 
-    deepEqual(mappings.getFields("index").sort(), ["number", "str" ]);
+    deepEqual(mappings.getFields("index").sort(fc), [f("number", "int"), f("str", "string") ]);
   });
 
 
@@ -75,8 +95,8 @@ define([
       }
     });
 
-    deepEqual(mappings.getFields("index", ["tweet"]).sort(),
-        ["message", "person.name.first_name", "person.name.last_name", "person.sid" ]);
+    deepEqual(mappings.getFields("index", ["tweet"]).sort(fc),
+      [f("message"), f("person.name.first_name"), f("person.name.last_name"), f("person.sid")]);
   });
 
   test("Enabled fields", function () {
@@ -100,8 +120,8 @@ define([
       }
     });
 
-    deepEqual(mappings.getFields("index", ["tweet"]).sort(),
-        ["message", "person.sid" ]);
+    deepEqual(mappings.getFields("index", ["tweet"]).sort(fc),
+      [f("message"), f("person.sid") ]);
   });
 
 
@@ -131,8 +151,8 @@ define([
       }
     });
 
-    deepEqual(mappings.getFields().sort(),
-        ["first1", "i_last_1", "name2.first2", "name2.i_last_2" ]);
+    deepEqual(mappings.getFields().sort(fc),
+      [f("first1"), f("i_last_1"), f("name2.first2"), f("name2.i_last_2") ]);
   });
 
   test("Use index_name tests", function () {
@@ -146,8 +166,8 @@ define([
       }
     });
 
-    deepEqual(mappings.getFields().sort(),
-        [ "i_last_1" ]);
+    deepEqual(mappings.getFields().sort(fc),
+      [f("i_last_1")]);
   });
 
   test("Aliases", function () {

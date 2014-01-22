@@ -1,7 +1,8 @@
 define([
   'jquery',
-  'utils'
-], function ($, utils) {
+  'utils',
+  '_'
+], function ($, utils, _) {
   'use strict';
 
   var currentServer;
@@ -62,7 +63,9 @@ define([
       ret = [].concat.apply([], ret);
     }
 
-    return ret;
+    return _.uniq(ret, function (f) {
+      return f.name + ":" + f.type
+    });
   }
 
   function getTypes(indices) {
@@ -87,9 +90,7 @@ define([
       ret = [].concat.apply([], ret);
     }
 
-    return ret.filter(function (v, i, a) {
-      return a.indexOf(v) == i
-    }); // dedupe array;
+    return _.uniq(ret);
 
   }
 
@@ -115,7 +116,8 @@ define([
       var path_type = field_mapping['path'] || "full";
       if (path_type == "full") {
         return $.map(nested_field_names, function (f) {
-          return field_name + "." + f;
+          f.name = field_name + "." + f.name;
+          return f;
         });
       }
       return nested_field_names;
@@ -127,7 +129,9 @@ define([
       return applyPathSettings(nested_fields);
     }
 
-    if (field_mapping['type'] == 'multi_field') {
+    var field_type = field_mapping['type'];
+
+    if (field_type === 'multi_field') {
       nested_fields = $.map(field_mapping['fields'], function (field_mapping, field_name) {
         return getFieldNamesFromFieldMapping(field_name, field_mapping);
       });
@@ -135,9 +139,11 @@ define([
       return applyPathSettings(nested_fields);
     }
 
-    if (field_mapping["index_name"]) return [field_mapping["index_name"]];
+    var ret = { name: field_name, type: field_type };
 
-    return [field_name];
+    if (field_mapping["index_name"])  ret.name = field_mapping["index_name"];
+
+    return [ret];
   }
 
   function getFieldNamesFromTypeMapping(type_mapping) {
@@ -147,12 +153,8 @@ define([
       });
 
     // deduping
-    var last;
-    field_list.sort();
-    return $.map(field_list, function (f) {
-      var r = (f === last) ? null : f;
-      last = f;
-      return r;
+    return _.uniq(field_list, function (f) {
+      return f.name + ":" + f.type
     });
   }
 
