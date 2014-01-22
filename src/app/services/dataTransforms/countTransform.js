@@ -9,7 +9,7 @@ define([
           keepFields = keepFields || [];
 
         _.forEach(hits, function(hit) {
-          var key = hit._source[countBy];
+          var key = dataTransform.getField(hit, countBy);
 
           if (key in hitDict) {
             ++hitDict[key].count;
