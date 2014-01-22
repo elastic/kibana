@@ -29,7 +29,7 @@ border-left: 0px;\
 border-bottom: 1px solid #F8F8F0\
 }\
 .ace-sense-dark .ace_marker-layer .ace_selection {\
-background: #49483E\
+background: #222\
 }\
 .ace-sense-dark.ace_multiselect .ace_selection.ace_start {\
 box-shadow: 0 0 3px 0px #272822;\

@@ -4,6 +4,21 @@
   border-top: 1px solid #3e444c;
   background-color: #2e3236;
 }
+/* sadly ace doesn't carry the theme over to the auto complete popup */
+.ace_autocomplete {
+  background-color: #2e3236 !important;
+  color: #bbbfc2 !important;
+
+}
+
+.ace_autocomplete .ace_completion-highlight {
+  color: #AE81FF !important;
+}
+
+.ace_selected {
+  background: #222 !important;
+}
+/* end of theming for auto complete- remove when issue in ace is fixed. */
 
 .ace_url {
   color: #66D9EF;
