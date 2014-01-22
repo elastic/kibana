@@ -106,7 +106,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             );
         }
         ArrayList<String> dashboardPaths = new ArrayList<String>();
-        for (String d : settings.getAsArray("es.upload.dashboards", new String[]{"overview.json", "cluster_pulse.json"})) {
+        for (String d : settings.getAsArray("es.upload.dashboards", new String[]{})) {
             dashboardPaths.add(new File(dashboardsBase, d).getAbsolutePath());
         }
 
