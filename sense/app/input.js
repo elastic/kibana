@@ -96,20 +96,21 @@ define([
         }
       });
 
-      input.commands.addCommand({
-        name: 'copy as cUrl',
-        bindKey: {win: 'Ctrl-Shift-C', mac: 'Command-Shift-C'},
-        exec: function () {
-          input.$actions.find('[data-toggle=dropdown]:not(.open)').click();
-          setupCopyButton();
-          var toggles = 5;
-          (function toggle () {
-            $copyAsCURL.toggleClass('zeroclipboard-is-hover', toggles % 1);
-            if (--toggles) setTimeout(toggle, 125);
-          }());
-        }
-      });
-    })
+// sadly this is blocked by browsers. Removed.
+//      input.commands.addCommand({
+//        name: 'copy as cUrl',
+//        bindKey: {win: 'Ctrl-Shift-C', mac: 'Command-Shift-C'},
+//        exec: function () {
+//          input.$actions.find('[data-toggle=dropdown]:not(.open)').click();
+//          setupCopyButton();
+//          var toggles = 5;
+//          (function toggle () {
+//            $copyAsCURL.toggleClass('zeroclipboard-is-hover', toggles % 1);
+//            if (--toggles) setTimeout(toggle, 125);
+//          }());
+//        }
+//      });
+    });
 
     zc.on('complete', function () {
       $copyAsCURL.click();
