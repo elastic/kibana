@@ -1,7 +1,6 @@
 {
   "extends": "../.jshintrc",
   "globals": {
-    "SENSE_VERSION": true,
     "define": false,
     "require": false,
     "module": false,

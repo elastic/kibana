@@ -220,12 +220,12 @@ define([
     });
 
     /**
-     * Display the welcome popul if it has not been shown yet
+     * Display the welcome popup if it has not been shown yet
      */
     if (!localStorage.getItem("version_welcome_shown")) {
       require(['welcome_popup'], function ($welcomePopup) {
         $welcomePopup.one('shown', function () {
-          localStorage.setItem("version_welcome_shown", SENSE_VERSION);
+          localStorage.setItem("version_welcome_shown", '@@MARVEL_REVISION');
         });
         $welcomePopup.modal('show');
       });

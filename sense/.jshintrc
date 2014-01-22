@@ -35,7 +35,6 @@
 
   "globals": {
     "define": false,
-    "require": false,
-    "SENSE_VERSION": true
+    "require": false
   }
 }
