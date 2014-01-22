@@ -49,7 +49,7 @@
     <thead>
       <th class="pointer" ng-click="set_sort('__name__')">
         {{panel.mode}}
-        <i ng-show='"__name__" == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
+        <i ng-show="'__name__' == panel.sort[0]" class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
         <a ng-disabled="!hasSelected(rows)" id="detail_view_link" ng-href="{{detailViewLink()}}" class="btn btn-mini btn-info pull-right"  bs-tooltip="detailViewTip()" data-placement="right">Dashboard</a>
       </th>
 
@@ -88,7 +88,7 @@
     <thead>
       <th class="pointer" ng-click="set_sort('__name__')">
         {{panel.mode}}
-        <i ng-show='"__name__" == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
+        <i ng-show="'__name__' == panel.sort[0]" class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
         <a ng-disabled="!hasSelected(rows)" id="detail_view_link" ng-href="{{detailViewLink()}}" class="btn btn-mini btn-info pull-right"  bs-tooltip="detailViewTip()" data-placement="right">Dashboard</a>
       </th>
 
