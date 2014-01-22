@@ -53,7 +53,10 @@ define([
 
         // allow ace rendering to move cursor so it will be seen during test - handy for debugging.
         setTimeout(function () {
-          input.completer = {}; // mimic auto complete
+          input.completer = {
+            base: {},
+            changeListener : function () {}
+          }; // mimic auto complete
           input.autocomplete.completer.getCompletions(input, input.getSession(), test.cursor, "",
           function (err, terms) {
 

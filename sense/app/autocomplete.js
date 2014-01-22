@@ -1141,11 +1141,25 @@ define([
     }
 
 
-    function getCompletions(editor, session, pos, prefix, callback) {
+    function getCompletions(aceEditor, session, pos, prefix, callback) {
       // this is hacky, but there is at the moment no settings/way to do it differently
-      editor.completer.autoInsert = false;
+      aceEditor.completer.autoInsert = false;
+      var token = aceEditor.getSession().getTokenAt(pos.row, pos.column);
+      if (!editor.parser.isEmptyToken(token)) {
+        // Ace doesn't care about tokenization when calculating prefix. It will thus stop on . in keys names.
+        if (token.value.indexOf('"') == 0) {
+          aceEditor.completer.base.column = token.start+1;
+        } else {
+          aceEditor.completer.base.column = token.start;
+        }
 
-      var context = getAutoCompleteContext(editor, session, pos);
+        // we have to trigger a render update to make the new prefix take affect.
+        setTimeout(function () { aceEditor.completer.changeListener(); }, 0);
+      }
+
+
+
+      var context = getAutoCompleteContext(aceEditor, session, pos);
       if (!context) {
         callback(null, []);
       } else {
