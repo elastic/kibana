@@ -5,11 +5,15 @@ define(function () {
 
   filters.and = {
     __template: {
-      filters: [{}]
+      filters: [
+        {}
+      ]
     },
-    filters: [{
-      __scope_link: '.filter'
-    }],
+    filters: [
+      {
+        __scope_link: '.filter'
+      }
+    ],
     _cache: {
       __one_of: [false, true]
     }
@@ -17,15 +21,21 @@ define(function () {
 
 
   filters.bool = {
-    must: [{
-      __scope_link: '.filter'
-    }],
-    must_not: [{
-      __scope_link: '.filter'
-    }],
-    should: [{
-      __scope_link: '.filter'
-    }],
+    must: [
+      {
+        __scope_link: '.filter'
+      }
+    ],
+    must_not: [
+      {
+        __scope_link: '.filter'
+      }
+    ],
+    should: [
+      {
+        __scope_link: '.filter'
+      }
+    ],
     _cache: {
       __one_of: [false, true]
     }
@@ -166,20 +176,25 @@ define(function () {
   filters.geo_polygon = {
     __template: {
       'FIELD': {
-        'points': [{
-          lat: 40.73,
-          lon: -74.1
-        }, {
-          lat: 40.83,
-          lon: -75.1
-        }]
+        'points': [
+          {
+            lat: 40.73,
+            lon: -74.1
+          },
+          {
+            lat: 40.83,
+            lon: -75.1
+          }
+        ]
       }
     },
     '$FIELD$': {
-      points: [{
-        lat: 40.73,
-        lon: -74.1
-      }]
+      points: [
+        {
+          lat: 40.73,
+          lon: -74.1
+        }
+      ]
     },
     _cache: {
       __one_of: [false, true]
@@ -240,7 +255,7 @@ define(function () {
   };
 
 
-  filters.m =       filters.missing = {
+  filters.m = filters.missing = {
     __template: {
       field: 'FIELD'
     },
@@ -274,24 +289,30 @@ define(function () {
         to: 20
       }
     },
-    from: 1,
-    to: 20,
-    include_lower: {
-      __one_of: [true, false]
-    },
-    include_upper: {
-      __one_of: [true, false]
+    "$FIELD$": {
+      from: 1,
+      to: 20,
+      include_lower: {
+        __one_of: [true, false]
+      },
+      include_upper: {
+        __one_of: [true, false]
+      }
     }
   };
 
 
   filters.or = {
     __template: {
-      filters: [{}]
+      filters: [
+        {}
+      ]
     },
-    filters: [{
-      __scope_link: '.filter'
-    }],
+    filters: [
+      {
+        __scope_link: '.filter'
+      }
+    ],
     _cache: {
       __one_of: [false, true]
     }
@@ -335,16 +356,18 @@ define(function () {
         to: 20
       }
     },
-    from: 1,
-    to: 20,
-    include_lower: {
-      __one_of: [true, false]
-    },
-    include_upper: {
-      __one_of: [true, false]
-    },
-    _cache: {
-      __one_of: [false, true]
+    "$FIELD$": {
+      from: 1,
+      to: 20,
+      include_lower: {
+        __one_of: [true, false]
+      },
+      include_upper: {
+        __one_of: [true, false]
+      },
+      _cache: {
+        __one_of: [false, true]
+      }
     }
   };
 
