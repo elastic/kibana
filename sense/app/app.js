@@ -193,11 +193,18 @@ define([
         }
       }
 
-      $(window).resize(function () {
-        if (!delay) delay = setTimeout(update, 25);
-      });
+      // update at key moments in the loading process
+      $(update);
+      $(window).load(update);
 
-      update();
+      // and when the window resizes (once every 30 ms)
+      $(window)
+        .resize(function (event) {
+          if (!delay && event.target === window) {
+            delay = setTimeout(update, 30);
+          }
+        });
+
     }());
 
     /**
