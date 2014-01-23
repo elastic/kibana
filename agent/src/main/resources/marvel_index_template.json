@@ -73,6 +73,15 @@
                 },
                 "indices.percolate.memory_size_in_bytes": {
                     "type": "long"
+                },
+                "os.load_average.1m": {
+                    "type": "long"
+                },
+                "os.load_average.5m": {
+                    "type": "long"
+                },
+                "os.load_average.15m": {
+                    "type": "long"
                 }
             }
         },
