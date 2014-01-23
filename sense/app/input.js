@@ -9,7 +9,8 @@ define([
   'require',
   'utils',
   'zeroclip',
-  'ace_ext_language_tools'
+  'ace_ext_language_tools',
+  'ace_ext_searchbox'
 ], function (ace, Autocomplete, $, mappings, output, SenseEditor, settings, require, utils, ZeroClipboard) {
   'use strict';
 
