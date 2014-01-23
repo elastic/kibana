@@ -53,6 +53,21 @@ module.exports = function (config) {
           cwd: '<%= buildSiteDir %>',
           expand: true,  src: ['**/*'], dest: '<%= buildSiteDir %>/'}
       ]
+    },
+    kibana_replace_title: {
+      options: {
+        patterns: [
+          {
+            match: /<title>.*?<\/title>/,
+            replacement: '<title>{{dashboard.current.title ? dashboard.current.title : "Marvel"}}</title>'
+          }
+        ]
+      },
+      files: [
+        {
+          cwd: '<%= buildSiteDir %>',
+          expand: true,  src: ['kibana/index.html'], dest: '<%= buildSiteDir %>/'}
+      ]
     }
   }
 };

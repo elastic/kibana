@@ -16,7 +16,8 @@ module.exports = function (grunt) {
     'build_sense',
     'copy:artifacts_to_build',
     'clean:build_tmp',
-    'replace:git_commits'
+    'replace:git_commits',
+    'replace:kibana_replace_title'
   ]);
 
   grunt.registerTask('build_sense', [
