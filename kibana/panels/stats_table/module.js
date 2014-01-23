@@ -591,7 +591,6 @@ define([
         return !a ? "" : (a.type === "upper_bound" ? ">" : "<") + y_format_metric_value(a.threshold, metric);
       };
 
-
       $scope.detailViewLink = function (rows, fields) {
         var
         query,
@@ -611,12 +610,11 @@ define([
           };
         });
         if (rows.length === 0) {
-          /*jshint -W107 */
-          return "javascript:;";
+          return null;
         }
         rows = JSON.stringify(rows);
         time = filterSrv.timeRange(false);
-        show;
+
         if (!_.isUndefined(fields)) {
           show = "&show=" + fields.join(",");
         } else {
