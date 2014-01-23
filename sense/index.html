@@ -46,21 +46,20 @@
     <div id="editor">GET _search
       {
   "query": { "match_all": {} }
-}
+}</div>
+    <div id="editor_actions">
+      <a id="send" href="#" data-toggle="tooltip" title="click to send request"><i
+          class="fa fa-play"></i></a>
+      <a id="request_wrench" data-toggle="dropdown" href="#"><i
+          class="fa fa-wrench"></i></a>
+      <ul class="dropdown-menu">
+        <li><a id="copy_as_curl" tabindex="-1" href="#">Copy as cURL</a></li>
+        <li><a id="auto_indent" tabindex="-1" href="#">Auto indent</a></li>
+      </ul>
     </div>
   </div>
   <div id="output_container">
     <div id="output">{}</div>
-  </div>
-  <div id="editor_actions">
-    <a id="send" href="#" data-toggle="tooltip" title="click to send request"><i
-        class="fa fa-play"></i></a>
-    <a id="request_wrench" data-toggle="dropdown" href="#"><i
-        class="fa fa-wrench"></i></a>
-    <ul class="dropdown-menu">
-      <li><a id="copy_as_curl" tabindex="-1" href="#">Copy as cURL</a></li>
-      <li><a id="auto_indent" tabindex="-1" href="#">Auto indent</a></li>
-    </ul>
   </div>
   <ul id="autocomplete" style="left: -1000px;"></ul>
 </div>
