@@ -42,6 +42,8 @@ body.fouc {
   right: 0;
   line-height: 1;
   padding: 1px 3px 0 0;
+  /* by pass any other element in ace and resize bar  */
+  z-index: 2000;
 }
 
 #editor_actions > .btn-group > a {
