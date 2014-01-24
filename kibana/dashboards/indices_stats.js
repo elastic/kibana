@@ -129,7 +129,7 @@ panel_defaults_by_type["histogram"] = {
   legend_counts: false,
   options: false,
   legend: false,
-  resolution: 20,
+  resolution: 22,
   y_format: "short"
 };
 

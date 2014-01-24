@@ -148,7 +148,7 @@ panel_defaults_by_type["histogram"] = {
   zoomlinks: false,
   options: false,
   legend: false,
-  resolution: 20,
+  resolution: 22,
   annotate: annotate_config,
   y_format: "short"
 };
