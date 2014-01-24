@@ -75,7 +75,7 @@ define([
     zc.on('wrongflash noflash', function () {
       if (!localStorage.getItem('flash_warning_shown')) {
         alert('Sense needs flash version 10.0 or greater in order to provide "Copy as cURL" functionality');
-        localStorage.setItem('flash_warning_shown');
+        localStorage.setItem('flash_warning_shown', 'true');
       }
       $copyAsCURL.hide();
     });
