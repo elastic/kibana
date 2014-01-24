@@ -26,8 +26,7 @@
 
   </div>
     <div class="modal-footer">
-      <!-- these set strings since cookies don't deal with boolean -->
-      <button ng-click="setOptIn('IN');dismiss();" class="btn btn-success">Count me in!</button>
-      <span ng-click="setOptIn('OUT');dismiss();" class="pointer small">No Thanks</span>
+      <button ng-click="setOptIn(true);dismiss();" class="btn btn-success">Count me in!</button>
+      <span ng-click="setOptIn(false);dismiss();" class="pointer small">No Thanks</span>
     </div>
 
