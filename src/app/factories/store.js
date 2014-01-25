@@ -7,14 +7,19 @@ function (angular, _) {
 
   var module = angular.module('kibana.factories');
   module.factory('storeFactory', function() {
+
     return function storeFactory($scope, name, defaults) {
-      if (!$scope.$watch) {
-        throw new TypeError('storeFactory\'s first arg must be a scope.');
+      if (!_.isFunction($scope.$watch)) {
+        throw new TypeError('Invalid scope.');
+      }
+      if (!_.isString(name)) {
+        throw new TypeError('Invalid name, expected a string that the is unique to this store.');
+      }
+      if (defaults && !_.isPlainObject(defaults)) {
+        throw new TypeError('Invalid defaults, expected a simple object or nothing');
       }
 
-      if (!_.isString(name)) {
-        throw new TypeError('storeFactory\'s second arg must be a unique name for this store (string).');
-      }
+      defaults = defaults || {};
 
       // get the current value, parse if it exists
       var current = localStorage.getItem(name);
@@ -27,30 +32,24 @@ function (angular, _) {
       }
 
       if (current == null) {
-        current = defaults || {};
-      }
-
-      if (_.isPlainObject(current)) {
+        current = _.clone(defaults);
+      } else if (_.isPlainObject(current)) {
         _.defaults(current, defaults);
       } else {
         throw new TypeError('Invalid store value' + current);
       }
 
-      if ('defineProperty' in Object) {
-        Object.defineProperty($scope, name, {
-          enumerable: true,
-          configurable: true,
-          writable: false,
-          value: current
-        });
-      } else {
-        $scope[name] = current;
-      }
+      $scope[name] = current;
 
-      // listen for changes and store them in localStorage,
-      // unless it is set to undefined then it will be removed
+      // listen for changes and store them in localStorage.
+      // delete the value to reset to the defaults, ie. `delete $scope[name]` -> digest cycle -> `$scope[name] == defaults`
       $scope.$watch(name, function (val) {
-        localStorage.setItem(name, JSON.stringify(val));
+        if (val === void 0) {
+          localStorage.removeItem(name);
+          $scope[name] = _.clone(defaults);
+        } else {
+          localStorage.setItem(name, JSON.stringify(val));
+        }
       }, true);
 
       return current;
