@@ -16,7 +16,7 @@ define([
   };
 
   output.$el = $el;
-  output.getSession().setMode("ace/mode/json");
+  output.getSession().setMode("ace/mode/text");
   output.getSession().setFoldStyle('markbeginend');
   output.getSession().setUseWrapMode(true);
   output.setShowPrintMargin(false);

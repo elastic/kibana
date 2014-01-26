@@ -216,6 +216,7 @@ define([
       exec: function () {
         output.update('');
         submitCurrentRequestToES(function (resp) {
+          output.getSession().setMode("ace/mode/json");
           output.update(resp);
         });
       }
@@ -223,6 +224,7 @@ define([
 
     $send.click(function () {
       submitCurrentRequestToES(function (resp) {
+        output.getSession().setMode("ace/mode/json");
         output.update(resp);
       });
       return false;
