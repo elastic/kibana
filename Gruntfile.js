@@ -8,7 +8,9 @@ module.exports = function (grunt) {
     srcDir: 'src',
     destDir: 'dist',
     tempDir: 'tmp',
-    docsDir: 'docs/'
+    docsDir: 'docs/',
+    unitTests: 'test/unit/specs/**/*.js',
+    unitTestDir: 'test/unit/'
   };
 
   // load plugins
