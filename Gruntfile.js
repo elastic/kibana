@@ -19,7 +19,7 @@ module.exports = function (grunt) {
       dist: '"https://marvel-stats.elasticsearch.com/"'
     },
     kibanaPort: grunt.option('port') ||  5601,
-    kibanaHost: 'localhost'
+    kibanaHost: grunt.option('host') ||'localhost'
   };
 
   // more detailed config
