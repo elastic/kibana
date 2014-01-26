@@ -148,7 +148,7 @@ define([
               y_format: "bytes"
             },
             {
-              name: 'Field data',
+              name: 'Field Data',
               field: 'total.fielddata.memory_size_in_bytes',
               y_format: "bytes"
             },
