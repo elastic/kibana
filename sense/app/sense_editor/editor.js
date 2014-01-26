@@ -192,6 +192,10 @@ define([
         var pos = currentReqRange.start;
         var tokenIter = editor.iterForPosition(pos.row, pos.column, editor);
         var t = tokenIter.getCurrentToken();
+        if (editor.parser.isEmptyToken(t)) {
+          // if the row starts with some spaces, skip them.
+          t = editor.parser.nextNonEmptyToken(tokenIter);
+        }
         request.method = t.value;
         t = editor.parser.nextNonEmptyToken(tokenIter);
         if (!t || t.type == "method") return null;
