@@ -1655,8 +1655,15 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
     multi_request = function () {
       while (ch && ch != '') {
         white();
+        if (!ch) {
+          continue;
+        }
         try {
           comment();
+          white();
+          if (!ch) {
+            continue;
+          }
           request();
           white();
         }
