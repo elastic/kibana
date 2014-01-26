@@ -616,7 +616,7 @@ define([
           newRowsIds = newRowsIds.slice(0, $scope.rowLimit);
           // sort again for visual effect
           // sort again for visual placement
-          newRowsIds.sort(compareIdByName);
+          newRowsIds.sort(concatSorting(compareIdByAlert, compareIdByName));
         }
 
 
