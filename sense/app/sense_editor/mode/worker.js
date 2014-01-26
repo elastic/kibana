@@ -1628,9 +1628,6 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
       newLine();
       strictWhite();
       if (ch == '{') {
-        if (meth == "GET") {
-          annotate("warning", "Browsers do not support " + meth + " requests with a body. This will be executed as a POST.");
-        }
         object();
       }
       // multi doc request
