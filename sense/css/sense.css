@@ -42,8 +42,8 @@ body.fouc {
   right: 0;
   line-height: 1;
   padding: 1px 3px 0 0;
-  /* by pass any other element in ace and resize bar  */
-  z-index: 2000;
+  /* by pass any other element in ace and resize bar, but not modal popups  */
+  z-index: 1005;
 }
 
 #editor_actions > .btn-group > a {
@@ -73,7 +73,8 @@ body.fouc {
 #autocomplete {
   visibility: hidden;
   position: absolute;
-  z-index: 1000;
+  /* by pass any other element in ace and resize bar, but not modal popups  */
+  z-index: 1003;
   margin-top: 22px;
   /*font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;*/
   /*font-size: 12px;*/

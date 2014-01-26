@@ -55,7 +55,8 @@ define([
     var CURRENT_REQ_RANGE = null;
 
     editor.$el = $el;
-    editor.$actions = $("#editor_actions");
+    // place holder for an action bar, needs to be set externally.
+    editor.$actions = null;
 
     // mixin the RowParser
     editor.parser = new RowParser(editor);
@@ -371,6 +372,9 @@ define([
       };
 
       return function () {
+        if (!editor.$actions) {
+          return;
+        }
         if (CURRENT_REQ_RANGE) {
           // elements are positioned relative to the editor's container
           // pageY is relative to page, so subtract the offset

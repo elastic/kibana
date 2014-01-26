@@ -30,6 +30,9 @@ define([
 
   input.autocomplete = new Autocomplete(input);
 
+  input.$actions = $("#editor_actions");
+
+
   ace.require('ace/ext/language_tools').addCompleter(input.autocomplete.completer);
 
   input.commands.addCommand({
