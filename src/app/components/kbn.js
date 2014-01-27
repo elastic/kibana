@@ -623,5 +623,20 @@ function($, _, moment) {
     return (size.toFixed(decimals) + ext);
   };
 
+  kbn.durationFormat = function (size/*, decimals, min_resolution*/) {
+    var d = moment.duration(size);
+    var intervals = ['d', 'h', 'm', 's'];
+    var s = '';
+    for (var i = 0; i < intervals.length; i++) {
+      if (d.as(intervals[i]) >= 1) {
+        var n = d.get(intervals[i]);
+        if (n < 10) { s += '0'; }
+        s += n + intervals[i];
+      }
+    }
+    if (s.length === 0) { s = '0s'; }
+    return s;
+  };
+
   return kbn;
 });

@@ -91,7 +91,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
        */
       scale         : 1,
       /** @scratch /panels/histogram/3
-       * y_format:: 'none','bytes','short '
+       * y_format:: 'none','bytes','short','duration'
        */
       y_format    : 'none',
       /** @scratch /panels/histogram/5
@@ -685,11 +685,13 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
               options.yaxis.tickFormatter = function (val, axis) {
                 return kbn.byteFormat(val, 0, axis.tickSize);
               };
-            }
-
-            if (scope.panel.y_format === 'short') {
+            } else if (scope.panel.y_format === 'short') {
               options.yaxis.tickFormatter = function (val, axis) {
                 return kbn.shortFormat(val, 0, axis.tickSize);
+              };
+            } else if (scope.panel.y_format === 'duration') {                
+              options.yaxis.tickFormatter = function (val, axis) {
+                return kbn.durationFormat(val, 0, axis.tickSize);
               };
             }
 
@@ -784,11 +786,12 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
             value = (scope.panel.stack && scope.panel.tooltip.value_type === 'individual') ?
               item.datapoint[1] - item.datapoint[2] :
               item.datapoint[1];
-            if(scope.panel.y_format === 'bytes') {
+            if (scope.panel.y_format === 'bytes') {
               value = kbn.byteFormat(value,2);
-            }
-            if(scope.panel.y_format === 'short') {
+            } else if (scope.panel.y_format === 'short') {
               value = kbn.shortFormat(value,2);
+            } else if (scope.panel.y_format === 'duration') {
+              value = kbn.durationFormat(value, 2);
             } else {
               value = numeral(value).format('0,0[.]000');
             }
