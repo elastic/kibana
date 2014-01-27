@@ -61,6 +61,7 @@ define([
       url: url,
       data: method == "GET" ? null : data,
       password: password,
+      cache: false,
       username: uname,
       crossDomain: true,
       type: method,
