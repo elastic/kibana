@@ -68,13 +68,8 @@ if (!_.isUndefined(ARGS.queries)) {
   }));
   marker_query = "(" + _.pluck(queries, "query").join(") OR (") + ")";
 } else {
-  // No queries passed? Initialize a single query to match everything
-  queries = {
-    0: {
-      query: '*',
-      id: 0
-    }
-  };
+  // No queries passed
+  queries = {};
 }
 
 var annotate_config;
@@ -690,7 +685,8 @@ dashboard.rows = _.map(rows, function (r) {
   return r;
 });
 
-if (!showedSomething && dashboard.rows.length > 0) {
+// open the first row if nothing was opened and we have queries (o.w. it's meaningless)
+if (!showedSomething && dashboard.rows.length > 0 && _.size(queries) > 0) {
   dashboard.rows[0].collapse = false;
 }
 
