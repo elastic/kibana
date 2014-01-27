@@ -529,8 +529,15 @@ define([
         // decide what rows we're showing...
         newRowsIds = [];
         if ($scope.panel.rowFilter) {
+          var lcFilter = $scope.panel.rowFilter.toLowerCase();
           _.each(newData, function (s) {
-            if (s.id.indexOf($scope.panel.rowFilter) >= 0) {
+            var data = s.id.toLowerCase();
+            if (data.indexOf(lcFilter) >= 0) {
+              newRowsIds.push(s.id);
+              return;
+            }
+            data = s.display_name.toLowerCase();
+            if (data.indexOf(lcFilter) >= 0) {
               newRowsIds.push(s.id);
             }
           });
