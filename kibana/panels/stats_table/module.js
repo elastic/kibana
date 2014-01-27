@@ -199,8 +199,8 @@ define([
         return metricDefaults(m);
       });
 
-      $scope.$watch('panel.mode', function (m) {
-        if (_.isUndefined(m)) {
+      $scope.$watch('panel.mode', function (m, prev) {
+        if (m === prev || _.isUndefined(m)) {
           return;
         }
         $scope.panel.display_field = $scope.modeInfo[m].defaults.display_field;
