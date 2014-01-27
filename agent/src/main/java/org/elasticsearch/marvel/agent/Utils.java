@@ -44,6 +44,8 @@ public class Utils {
                 builder.field("host", inetAddress.getHostName());
                 builder.field("ip_port", inetAddress.getHostAddress() + ":" + inetSocketAddress.getPort());
             }
+        } else if (node.address().uniqueAddressTypeId() == 2) {  // local transport
+            builder.field("ip_port", "_" + node.address()); // will end up being "_local[ID]"
         }
 
         if (!node.attributes().isEmpty()) {
