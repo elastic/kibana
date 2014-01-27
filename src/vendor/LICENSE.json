@@ -71,9 +71,9 @@
     "version":"2010",
     "license":"Apache 2"
   },
-  "underscore": {
-    "version":"1.5.1",
-    "license":"MIT"
+  "lodash": {
+    "version":"2.4.1",
+    "license":"https://github.com/lodash/lodash/blob/2.4.1/LICENSE.txt"
   },
   "leaflet": {
     "version":"0.6",

@@ -20,7 +20,7 @@
 define([
   'angular',
   'config',
-  'underscore',
+  'lodash',
   'services/all'
 ],
 function (angular, config, _) {
@@ -48,7 +48,7 @@ function (angular, config, _) {
     $scope.init = function() {
       $scope.config = config;
       $scope.kbnVersion = kbnVersion;
-      // Make stuff, including underscore.js available to views
+      // Make stuff, including lodash available to views
       $scope._ = _;
       $scope.dashboard = dashboard;
       $scope.dashAlerts = alertSrv;

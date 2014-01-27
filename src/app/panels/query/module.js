@@ -10,7 +10,7 @@
 define([
   'angular',
   'app',
-  'underscore',
+  'lodash',
 
   'css!./query.css'
 ], function (angular, app, _) {
