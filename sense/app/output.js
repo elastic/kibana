@@ -8,9 +8,15 @@ define([
   var $el = $("#output");
   var output = ace.require('ace/ace').edit($el[0]);
 
-  output.update = function (val, cb) {
+  output.update = function (val, mode, cb) {
+    if (typeof mode === 'function') {
+      cb = mode;
+      mode = void 0;
+    }
+
     var session = output.getSession();
-    session.setMode(val ? 'ace/mode/json' : 'ace/mode/text');
+
+    session.setMode(val ? (mode || 'ace/mode/json') : 'ace/mode/text');
     session.setValue(val);
     if (typeof cb === 'function') {
       setTimeout(cb);
