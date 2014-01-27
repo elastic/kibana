@@ -12,17 +12,18 @@
 define([
   'angular',
   'app',
-  'underscore',
-  'kbn'
+  'kbn',
+  'lodash',
+  'factories/store'
 ],
-function (angular, app, _, kbn) {
+function (angular, app, kbn, _) {
   'use strict';
 
   var module = angular.module('kibana.panels.marvel.cluster', []);
   app.useModule(module);
 
   module.controller('marvel.cluster', function($scope, $modal, $q, $http,
-    querySrv, dashboard, filterSrv, kbnVersion) {
+    querySrv, dashboard, filterSrv, kbnVersion, storeFactory) {
     $scope.panelMeta = {
       modals : [],
       editorTabs : [],
@@ -38,36 +39,12 @@ function (angular, app, _, kbn) {
 
     var reportInterval = 86400000;
 
-    function store(expression) {
-      // get the current value, parse if it exists
-      var current = localStorage.getItem(expression);
-      if (current != null) {
-        try {
-          current = JSON.parse(current);
-        } catch (e) {
-          current = null;
-        }
-      }
-
-      // listen for changes and store them in localStorage,
-      // unless it is set to undefined then it will be removed
-      $scope.$watch(expression, function (val) {
-        if (_.isUndefined(val)) {
-          localStorage.removeItem(expression);
-        } else {
-          localStorage.setItem(expression, JSON.stringify(val));
-        }
-      });
-
-      return current;
-    }
-
     // setup the optIn and version values
-    var marvelOpts = $scope.marvelOpts = {
-      report: store('marvelOpts.report'),
-      version: store('marvelOpts.version'),
-      lastReport: store('marvelOpts.lastReport')
-    };
+    var marvelOpts = storeFactory($scope, 'marvelOpts', {
+      report: null,
+      version: null,
+      lastReport: null
+    });
 
     $scope.init = function () {
       $scope.kbnVersion = kbnVersion;
