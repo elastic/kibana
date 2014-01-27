@@ -2,7 +2,7 @@ define([
   'angular',
   'app',
   'kbn',
-  'underscore',
+  'lodash',
   'jquery',
   'jquery.flot',
   'jquery.flot.time'

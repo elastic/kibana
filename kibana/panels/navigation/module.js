@@ -14,10 +14,10 @@
 define([
   'angular',
   'app',
-  'underscore',
-  'jquery'
+  'jquery',
+  'lodash',
 ],
-function (angular, app, _, $) {
+function (angular, app, $, _) {
   'use strict';
 
   var module = angular.module('kibana.panels.marvel.navigation', []);
