@@ -216,14 +216,14 @@ define([
       exec: function () {
         output.update('');
         submitCurrentRequestToES(function (resp) {
-          output.update(resp);
+          output.update(resp, 'ace/mode/json');
         });
       }
     });
 
     $send.click(function () {
       submitCurrentRequestToES(function (resp) {
-        output.update(resp);
+        output.update(resp, 'ace/mode/json');
       });
       return false;
     });
