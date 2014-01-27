@@ -98,8 +98,8 @@ define([
             {
               name: 'JVM Mem (%)',
               field: 'jvm.mem.heap_used_percent',
-              warning: 95,
-              error: 98
+              warning: 90,
+              error: 95
             },
             {
               name: 'Disk Free Space',
