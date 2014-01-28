@@ -55,7 +55,7 @@ For each node in the monitoring cluster:
 marvel.agent.enabled: false
 ------------------------
 +
-to disable transmission of data from this cluster.
+to disable the collection of data from this cluster, as it is not the one we want to monitor.
 
 2. Install the plug-in. From the Elasticsearch home directory run 
 +
