@@ -1,9 +1,12 @@
 = Marvel Documentation
 
+:ref: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current
 
-== What is Marvel?
-
-Marvel is a management and monitoring product for Elasticsearch. Marvels aggregates cluster wide statistics and events and offers a single interface to view and analyze them. Marvel is free for development use but does require a license to run in production. For more details, please see the http://www.elasticsearch.com/marvel[Marvel product page].
+Marvel is a management and monitoring product for Elasticsearch. Marvel
+aggregates cluster wide statistics and events and offers a single interface to
+view and analyze them. Marvel is free for development use but does require a
+license to run in production. For more details, please see the
+http://www.elasticsearch.com/marvel[Marvel product page].
 
 
 include::dashboards.asciidoc[]
@@ -15,6 +18,8 @@ include::configuration.asciidoc[]
 
 == System Requirements
 
+[horizontal]
 Elasticsearch:: 0.90.9 or above
-Browser:: The latest version of Chrome, Firefox or Safari is recommended. Internet Explorer 9 and above is also supported.
+Browser::       The latest version of Chrome, Firefox or Safari is
+                recommended. Internet Explorer 9 and above is also supported.
 

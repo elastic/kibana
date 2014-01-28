@@ -4,25 +4,32 @@
 
 === Statistics exporting
 
-`marvel.agent.exporter.es.hosts`:: A lists of "hostname:port" combinations 
-	to whom statistics and events will be sent. The data will be intially sent to the first host in the list with a fail-over to the rest. 
-	Defaults to ["localhost:9200"]
+`marvel.agent.exporter.es.hosts`::
 
-`marvel.agent.enabled`:: set this to `false` to disable all exporting of data. 
-	This is handy to set on a dedicated monitoring cluster which is used to 
-	recieve and analyze data from production.
+A list of hosts in `hostname:port` format to which statistics  and events will
+be sent. Data will be sent to the first host, but will failover to the next
+host(s) if the first is not reachable. Defaults to `["localhost:9200"]`.
+
+`marvel.agent.enabled`::
+
+Set this to `false` to disable all exporting of data. Set this on the
+monitoring cluster, which is used to receive and analyze data from production,
+to avoid collecting data from the monitoring cluster itself.
 
 
-`marvel.agent.indices`:: controls which indices to export data for. 
-	Uses simple `test1,test2,test3` notation (or `_all` for all indices). It also support 
-	wildcards, for example: `test*`, and the ability to "add" (`+`) and "remove" (`-`), 
-	for example: `+test*,-test3`.
-	Defaults to `*`
+`marvel.agent.indices`::
 
-`marvel.agent.exporter.es.index.timeformat`:: controls the time component in the index name to 
-	which data is exported. Defaults to `"YYYY.MM.dd"` (index name ex.: `".marvel-2014.01.28"`). 
-	Supports formatting as explained http://joda-time.sourceforge.net/api-release/org/joda/time/format/DateTimeFormat.html[here].
+Controls which indices to export data for.  Uses simple `test1,test2,test3`
+notation (or `_all` for all indices). It also supports  wildcards, for
+example: `test*`, and the ability to "add" (`+`) and "remove" (`-`),  for
+example: `+test*,-test3`. Defaults to `*`
 
+`marvel.agent.exporter.es.index.timeformat`::
+
+Controls the time component in the index name to  which data is exported.
+Defaults to `"YYYY.MM.dd"`, which produces index names like:
+`.marvel-2014.01.28`. Supports date formats as explained
+http://joda-time.sourceforge.net/api-release/org/joda/time/format/DateTimeFormat.html[here].
 
 
 === Marvel indices
@@ -32,15 +39,27 @@ an index per day, with one shard and one replica. We expect this to be a good
 default which will fit most use cases. You may need to change it for very big
 installations.
 
-==== The marvel index template
+==== The Marvel index template
 
-Marvel uses an http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/indices-templates.html[index template] 
-to set the settings for new indices created. You can change it by calling `GET _template/marvel` to get the standard one, 
-change or add settings and update it using `PUT _template/marvel`. We recommend you only change the
-`settings` section as other changes are important for the correct operation of
-the dashboards.
+Marvel uses an {ref}/indices-templates.html[index template] to preconfigure newly created indices. You can retrieve it with:
 
-Here are the `settings` used by default:
+[source,sh]
+----------------------------------
+GET /_template/marvel
+----------------------------------
+
+... make changes, then update it with:
+
+[source,json]
+----------------------------------
+PUT /_template/marvel
+{ ... new template }
+----------------------------------
+
+IMPORTANT: We recommend only changing the `settings` section as other changes are
+important for the correct operation of the dashboards.
+
+Here are the default `settings`:
 
 [source,json]
 ----------------------------------
@@ -65,11 +84,14 @@ Here are the `settings` used by default:
 
 === Other relevant Elasticsearch settings
 
-Marvel relies on Elasticsearch's capability to automatically create indices when indexing documents. Some people like to disable this feature to better protect against mistakes in production clusters. To do so and still allow the creation of Marvel indices you set the following:
+Marvel relies on Elasticsearch's apability to automatically create new indices
+when indexing documents. Some people like to disable this feature to better
+protect against mistakes in production clusters. To do so but still allow the
+creation of Marvel indices you need to set the following:
 
 [source,yaml]
 ----------------------
 action.auto_create_index: .marvel-*
 ----------------------
 
-For more information available http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/docs-index_.html#index-creation[here]
+More information is available {ref}/docs-index_.html#index-creation[here]
