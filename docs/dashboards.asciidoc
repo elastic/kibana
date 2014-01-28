@@ -23,7 +23,7 @@ thread pool rejection.
 
 image:images/node_stats_thumb.png["Node Statistics Dashboard",link="images/node_stats.png"]
 
-The _Index Statistics_ dashboard is very similar to the Node Satistics
+The _Index Statistics_ dashboard is very similar to the _Node Statistics_
 dashboard, but it shows you all the metrics from the perspective of one or
 more indices. The metrics are per index, with data aggregated from all of the
 nodes in the cluster. For example, the ''store size'' chart shows the total
