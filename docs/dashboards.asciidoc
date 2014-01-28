@@ -31,6 +31,14 @@ size of the index data across the whole cluster.
 
 image:images/index_stats_thumb.png["Index Statistics Dashboard",link="images/index_stats.png"]
 
+=== Cluster Pulse
+
+The Cluster Pulse Dashboard allows you to see any event of interest in the cluster. Typical
+events include nodes joining or leaving, master election, index creation, shard (re)allocation
+and more.
+
+image:images/cluster_pulse_thumb.png["Index Statistics Dashboard",link="images/cluster_pulse.png"]
+
 === Sense
 
 _Sense_ is a lightweight developer console. The console is handy when you want
