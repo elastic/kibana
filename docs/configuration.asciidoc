@@ -84,7 +84,7 @@ Here are the default `settings`:
 
 === Other relevant Elasticsearch settings
 
-Marvel relies on Elasticsearch's apability to automatically create new indices
+Marvel relies on Elasticsearch's capability to automatically create new indices
 when indexing documents. Some people like to disable this feature to better
 protect against mistakes in production clusters. To do so but still allow the
 creation of Marvel indices you need to set the following:
