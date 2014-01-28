@@ -39,6 +39,6 @@ developer console understands both JSON and the Elasticsearch API, offering
 suggestions and autocompletion. It is very useful for prototyping queries,
 researching your data or any other administrative work with the API.
 
-image::sense_thumb.png["Developer Console",link="sense.png"]
+image::images/sense_thumb.png["Developer Console",link="sense.png"]
 
 
