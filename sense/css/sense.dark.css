@@ -7,7 +7,7 @@
 /* sadly ace doesn't carry the theme over to the auto complete popup */
 .ace_autocomplete {
   background-color: #2e3236 !important;
-  color: #bbbfc2 !important;
+  color: rgb(233, 233, 233) !important;
 
 }
 
@@ -15,9 +15,14 @@
   color: #AE81FF !important;
 }
 
-.ace_selected {
-  background: #222 !important;
+.ace_selection {
+  background: #575858 !important;
 }
+
+.ace_selected {
+  background: #575858 !important;
+}
+
 /* end of theming for auto complete- remove when issue in ace is fixed. */
 
 .ace_url {
