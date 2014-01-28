@@ -48,7 +48,7 @@ Marvel uses an {ref}/indices-templates.html[index template] to preconfigure newl
 GET /_template/marvel
 ----------------------------------
 
-... make changes, then update it with:
+then make changes, and update it with:
 
 [source,json]
 ----------------------------------
