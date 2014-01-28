@@ -1,0 +1,95 @@
+== Installation
+
+Marvel is installed as an Elasticsearch plug-in. The plug-in must be installed
+on every node in the cluster. By default, the plug-in will store data in the
+same Elasticsearch cluster that it is monitoring. If you are monitoring a
+production cluster we recommend that you send this data to another cluster
+that will serve as a "monitoring cluster". This is better as it will help to
+prevent a problem in one cluster from impacting the other cluster. For
+example, when your production cluster is having trouble you would like to make
+sure you can view the Marvel data easily.
+
+
+=== Simple install
+
+This is simplest way to install and use Marvel. Marvel data will be stored on
+the same cluster as the one being monitored and you will be able to access the
+Marvel UI from every node. You have to repeat the bellow procedure on every
+node:
+
+1. From the Elasticsearch home directory, run:
++
+[source,sh]
+----------------
+bin/plugin -i elasticsearch/marvel/latest
+----------------
+  
+2. Restart your Elasticsearch node
+
+
+Once the plugin was installed on all nodes, you can access the Marvel UI by
+viewing http://any-server-in-cluster:9200/_plugin/marvel/ with any modern
+browser. If you're quick, it may take a minute for the initial data to appear.
+
+A couple of points to consider:
+
+* Since this requires to restart the nodes of your cluster, you might want to 
+temporarily http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/modules-cluster.html[disable allocations]
+
+* If you run your cluster using a non-standard port, you need to change the `marvel.agent.exporter.es.nosts` settings. See <<configuration>>.
+
+
+=== Installing with a secondary Monitoring Cluster
+
+First, prepare the cluster you would use to store and analyze Marvel's data (we'll call it the Monitoring Cluster). For this example, we will assume two hosts, es-mon-1 and es- mon-2, are in the monitoring cluster.
+
+==== Preparing the monitoring cluster
+
+For each node in the monitoring cluster:
+
+
+1. Edit Elasticsearch.yml and insert
++
+[source,yaml]
+------------------------
+marvel.agent.enabled: false
+------------------------
++
+to disable transmission of data from this cluster.
+
+2. Install the plug-in. From the Elasticsearch home directory run 
++
+[source,sh]
+----------------
+bin/plugin -i elasticsearch/marvel/latest
+----------------
+
+3. Restart Elasticsearch
+
+
+==== Installing marvel on the production cluster
+
+1. Edit Elasticsearch.yml and insert
++
+[source,yaml]
+------------------------
+marvel.agent.es.exporter.hosts: ["es-mon-1:9200","es-mon-2:9200"]
+------------------------
++
+	This line adds two hosts of your monitoring cluster to receive the data, a primary and a backup.
+
+2. Install the plug-in. From the Elasticsearch home directory run 
++
+[source,sh]
+------------------------
+bin/plugin -i elasticsearch/marvel/latest
+------------------------
+
+3. Restart Elasticsearch
+
+
+
+Once the plugin was installed on all nodes, you can access the Marvel UI by viewing http://any-server-in-monitoring-cluster:9200/_plugin/marvel/ with any modern browser. If you're quick, it may take a minute or two for data to appear.
+
+*Note*: You may want to temporarily http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/modules-cluster.html[disable allocation] before you do this to avoid unnecessary shard reallocations during the install
+

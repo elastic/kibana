@@ -1,0 +1,75 @@
+[[configuration]]
+== Configuration Options
+
+
+=== Statistics exporting
+
+`marvel.agent.exporter.es.hosts`:: A lists of "hostname:port" combinations 
+	to whom statistics and events will be sent. The data will be intially sent to the first host in the list with a fail-over to the rest. 
+	Defaults to ["localhost:9200"]
+
+`marvel.agent.enabled`:: set this to `false` to disable all exporting of data. 
+	This is handy to set on a dedicated monitoring cluster which is used to 
+	recieve and analyze data from production.
+
+
+`marvel.agent.indices`:: controls which indices to export data for. 
+	Uses simple `test1,test2,test3` notation (or `_all` for all indices). It also support 
+	wildcards, for example: `test*`, and the ability to "add" (`+`) and "remove" (`-`), 
+	for example: `+test*,-test3`.
+	Defaults to `*`
+
+`marvel.agent.exporter.es.index.timeformat`:: controls the time component in the index name to 
+	which data is exported. Defaults to `"YYYY.MM.dd"` (index name ex.: `".marvel-2014.01.28"`). 
+	Supports formatting as explained http://joda-time.sourceforge.net/api-release/org/joda/time/format/DateTimeFormat.html[here].
+
+
+
+=== Marvel indices
+
+Marvel stores it's data using time based indices. By default, Marvel generates
+an index per day, with one shard and one replica. We expect this to be a good
+default which will fit most use cases. You may need to change it for very big
+installations.
+
+==== The marvel index template
+
+Marvel uses an http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/indices-templates.html[index template] 
+to set the settings for new indices created. You can change it by calling `GET _template/marvel` to get the standard one, 
+change or add settings and update it using `PUT _template/marvel`. We recommend you only change the
+`settings` section as other changes are important for the correct operation of
+the dashboards.
+
+Here are the `settings` used by default:
+
+[source,json]
+----------------------------------
+{
+    "template": ".marvel*",
+    "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 1,
+        "analysis": {
+            "analyzer": {
+                "default": {
+                    "type": "standard",
+                    "stopwords": "_none_"
+                }
+            }
+        },
+        "marvel.index_format": 1
+    }
+    .....
+}
+----------------------------------
+
+=== Other relevant Elasticsearch settings
+
+Marvel relies on Elasticsearch's capability to automatically create indices when indexing documents. Some people like to disable this feature to better protect against mistakes in production clusters. To do so and still allow the creation of Marvel indices you set the following:
+
+[source,yaml]
+----------------------
+action.auto_create_index: .marvel-*
+----------------------
+
+For more information available http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/docs-index_.html#index-creation[here]

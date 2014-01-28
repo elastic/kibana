@@ -1,0 +1,26 @@
+== Marvel's Dashboards
+
+
+=== Overview Dashboard
+
+The overview dashboard is the Marvel’s main page. The dashboard displays the essentials metrics you need to know that your cluster is healthy. The dashboard also provides an overview of your nodes and indices, displayed in two clean tables along with the relevant key metrics. If some value needs your attention, it will be highlighted in yellow or red. The nodes and indices tables also serve as an entry point to more details on the Node Statistics and Index Statistics dashboards. 
+
+IMAGE
+
+=== Node & Index Statistics
+
+The Node Statistics dashboard displays metric charts from the perspective of one or more nodes. Metrics include hardware level metrics (like load & CPU usage), process & JVM metrics (memory usage, GC), node level Elasticsearch metrics (field data usage, search requests rate & thread pool rejection).
+
+IMAGE
+
+The Index Statistics dashboard is very similar to the Node Satistics dashboard and shows you all the metrics from a perspective of one or more indices. The metrics are an per index cluster wide aggregation. For example, the store size chart shows you the total size of the index data across all the cluster
+
+IMAGE
+
+=== Sense
+
+Sense is a lightweight developer console. The console is handy when you want to make an extra API call to check something or perhaps tweak a setting. The developer console understands both JSON and the Elasticsearch API, offering suggestions and auto-completes. It is quite handy for prototyping queries, researching your data or any other administrative work with the API.
+
+IMAGE
+
+
