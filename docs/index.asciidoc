@@ -11,15 +11,15 @@ http://www.elasticsearch.com/marvel[Marvel product page].
 
 include::dashboards.asciidoc[]
 
-include::install.asciidoc[]
-
-include::configuration.asciidoc[]
-
-
 == System Requirements
 
 [horizontal]
 Elasticsearch:: 0.90.9 or above
 Browser::       The latest version of Chrome, Firefox or Safari is
                 recommended. Internet Explorer 9 and above is also supported.
+
+
+include::install.asciidoc[]
+
+include::configuration.asciidoc[]
 
