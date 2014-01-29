@@ -78,7 +78,7 @@ bin/plugin -i elasticsearch/marvel/latest
 +
 [source,yaml]
 ------------------------
-marvel.agent.es.exporter.hosts: ["es-mon-1:9200","es-mon-2:9200"]
+marvel.agent.exporter.es.hosts: ["es-mon-1:9200","es-mon-2:9200"]
 ------------------------
 +
 This line adds two hosts of your monitoring cluster to receive the data, a
