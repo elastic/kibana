@@ -41,16 +41,16 @@ function (angular, app, kbn, _) {
 
     // setup the optIn and version values
     var marvelOpts = storeFactory($scope, 'marvelOpts', {
-      report: null,
-      version: null,
-      lastReport: null
+      report: void 0,
+      version: void 0,
+      lastReport: void 0
     });
 
     $scope.init = function () {
       $scope.kbnVersion = kbnVersion;
 
       // If the user hasn't opted in or out, ask them to.
-      if(_.isUndefined(marvelOpts.version) || marvelOpts.version !== kbnVersion) {
+      if(marvelOpts.version == null || marvelOpts.version !== kbnVersion) {
         $scope.optInModal();
       }
 
@@ -163,7 +163,7 @@ function (angular, app, kbn, _) {
     // Checks if we should send a report
     var checkReport = function() {
       if(marvelOpts.report) {
-        if(_.isUndefined(marvelOpts.lastReport)) {
+        if(marvelOpts.lastReport == null) {
           return true;
         } else if (new Date().getTime() - parseInt(marvelOpts.lastReport,10) > reportInterval) {
           return true;
