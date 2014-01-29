@@ -14,7 +14,7 @@
 define([
   'angular',
   'app',
-  'underscore',
+  'lodash',
   'kbn'
 ],
 function (angular, app, _, kbn) {

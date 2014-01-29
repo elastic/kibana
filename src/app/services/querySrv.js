@@ -1,6 +1,6 @@
 define([
   'angular',
-  'underscore',
+  'lodash',
   'config',
   'kbn'
 ],
@@ -129,6 +129,9 @@ function (angular, _, config, kbn) {
     this.init = function() {
       self.list = dashboard.current.services.query.list;
       self.ids = dashboard.current.services.query.ids;
+
+      self.ids = dashboard.current.services.query.ids =
+        _.intersection(_.map(self.list,function(v,k){return parseInt(k,10);}),self.ids);
 
       // Check each query object, populate its defaults
       _.each(self.list,function(query) {

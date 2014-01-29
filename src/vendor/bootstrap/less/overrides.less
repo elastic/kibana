@@ -1,3 +1,14 @@
+// Media queries
+// ---------------------
+@media (max-width: 767px) {
+  div.panel {
+    width: 100% !important;
+    padding: 0px !important;
+  }
+}
+
+// ---------------------
+
 // Containers
 // ---------------------
 .container-fluid {
@@ -5,6 +16,12 @@
   padding-right: 0px;
 }
 
+.container.kibana-container {
+  padding: 5px 10px;
+  width: 100%;
+  box-sizing: border-box;
+   -moz-box-sizing: border-box;
+}
 
 // Backgrounds
 // ---------------------
@@ -222,6 +239,7 @@ form input.ng-invalid {
   font-weight: bold;
   font-size: 0.9em;
   margin: 0px 10px;
+  text-align: left;
 }
 
 .row-close {
@@ -249,7 +267,7 @@ form input.ng-invalid {
 
 .row-open {
   margin-top: 5px;
-  left:-34px;
+  left:-30px;
   position: absolute;
   z-index: 100;
   transition: .10s left;
@@ -258,7 +276,7 @@ form input.ng-invalid {
 }
 
 .row-open:hover {
-  left:-12px;
+  left:-10px;
 }
 
 .odd {
@@ -376,6 +394,20 @@ div.flot-text {
   background-color: @warningBackground;
   border-color: @warningBorder;
   color: @warningText;
+}
+
+.dropdown-menu,
+.tooltip-inner,
+.nav-pills > li > a
+{
+  -webkit-border-radius: 0 !important;
+  -moz-border-radius: 0 !important;
+  border-radius: 0 !important;
+}
+
+.nav-pills > li.open > a {
+  border-color: transparent !important;
+  border-color: rgba(51, 181, 229, 0.4) !important;
 }
 
 /* ===================================================

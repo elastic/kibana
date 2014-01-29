@@ -14,7 +14,7 @@ define([
   'angular',
   'app',
   'jquery',
-  'underscore',
+  'lodash',
   'kbn',
   'moment',
   './timeSeries',

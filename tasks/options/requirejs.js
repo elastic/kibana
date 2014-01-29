@@ -50,7 +50,7 @@ module.exports = function(config,grunt) {
         'elasticjs',
         'timepicker',
         'datepicker',
-        'underscore',
+        'lodash',
         'filters/all',
         'jquery.flot',
         'services/all',
