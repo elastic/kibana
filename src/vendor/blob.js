@@ -1,6 +1,6 @@
 /* Blob.js
  * A Blob implementation.
- * 2013-12-27
+ * 2013-06-20
  * 
  * By Eli Grey, http://eligrey.com
  * By Devin Samarin, https://github.com/eboyjr
@@ -14,8 +14,8 @@
 
 /*! @source http://purl.eligrey.com/github/Blob.js/blob/master/Blob.js */
 
-if (!(typeof Blob === "function" || typeof Blob === "object") || typeof URL === "undefined")
-if ((typeof Blob === "function" || typeof Blob === "object") && typeof webkitURL !== "undefined") self.URL = webkitURL;
+if (typeof Blob !== "function" || typeof URL === "undefined")
+if (typeof Blob === "function" && typeof webkitURL !== "undefined") var URL = webkitURL;
 else var Blob = (function (view) {
 	"use strict";
 
@@ -50,6 +50,10 @@ else var Blob = (function (view) {
 			, URL = real_URL
 			, btoa = view.btoa
 			, atob = view.atob
+			, can_apply_typed_arrays = false
+			, can_apply_typed_arrays_test = function(pass) {
+				can_apply_typed_arrays = !pass;
+			}
 			
 			, ArrayBuffer = view.ArrayBuffer
 			, Uint8Array = view.Uint8Array
@@ -58,6 +62,11 @@ else var Blob = (function (view) {
 		while (file_ex_code--) {
 			FileException.prototype[file_ex_codes[file_ex_code]] = file_ex_code + 1;
 		}
+		try {
+			if (Uint8Array) {
+				can_apply_typed_arrays_test.apply(0, new Uint8Array(1));
+			}
+		} catch (ex) {}
 		if (!real_URL.createObjectURL) {
 			URL = view.URL = {};
 		}
@@ -93,16 +102,19 @@ else var Blob = (function (view) {
 			var bb = this.data;
 			// decode data to a binary string
 			if (Uint8Array && (data instanceof ArrayBuffer || data instanceof Uint8Array)) {
-				var
-					  str = ""
-					, buf = new Uint8Array(data)
-					, i = 0
-					, buf_len = buf.length
-				;
-				for (; i < buf_len; i++) {
-					str += String.fromCharCode(buf[i]);
+				if (can_apply_typed_arrays) {
+					bb.push(String.fromCharCode.apply(String, new Uint8Array(data)));
+				} else {
+					var
+						  str = ""
+						, buf = new Uint8Array(data)
+						, i = 0
+						, buf_len = buf.length
+					;
+					for (; i < buf_len; i++) {
+						str += String.fromCharCode(buf[i]);
+					}
 				}
-				bb.push(str);
 			} else if (get_class(data) === "Blob" || get_class(data) === "File") {
 				if (FileReaderSync) {
 					var fr = new FileReaderSync;
@@ -163,4 +175,4 @@ else var Blob = (function (view) {
 		}
 		return builder.getBlob(type);
 	};
-}(typeof self !== "undefined" && self || typeof window !== "undefined" && window || this.content || this));
+}(self));
