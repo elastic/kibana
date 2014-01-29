@@ -1,7 +1,7 @@
 /* Blob.js
  * A Blob implementation.
  * 2013-06-20
- * 
+ *
  * By Eli Grey, http://eligrey.com
  * By Devin Samarin, https://github.com/eboyjr
  * License: X11/MIT
@@ -54,7 +54,7 @@ else var Blob = (function (view) {
 			, can_apply_typed_arrays_test = function(pass) {
 				can_apply_typed_arrays = !pass;
 			}
-			
+
 			, ArrayBuffer = view.ArrayBuffer
 			, Uint8Array = view.Uint8Array
 		;
