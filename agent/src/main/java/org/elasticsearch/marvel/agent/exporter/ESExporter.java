@@ -119,7 +119,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         clusterStatsRenderer = new ClusterStatsRenderer();
         eventsRenderer = new EventsRenderer();
 
-        logger.debug("Initialized with targets: {}, index prefix [{}], index time format [{}]", hosts, indexPrefix, indexTimeFormat);
+        logger.debug("initialized with targets: {}, index prefix [{}], index time format [{}]", hosts, indexPrefix, indexTimeFormat);
     }
 
     @Override
@@ -145,7 +145,6 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         Map<String, IndexStats> perIndexStats = indicesStats.getIndices();
         indexStatsRenderer.reset(perIndexStats.values().toArray(new IndexStats[perIndexStats.size()]));
         indicesStatsRenderer.reset(indicesStats.getTotal(), indicesStats.getPrimaries());
-        logger.debug("exporting index_stats + indices_stats");
         HttpURLConnection conn = openExportingConnection();
         if (conn == null) {
             return;
@@ -427,7 +426,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
         HttpURLConnection conn = openConnection("HEAD", path);
         if (conn == null) {
-            logger.error("Could not connect to any configured elasticsearch instances: [{}]", hosts);
+            logger.error("could not connect to any configured elasticsearch instances: [{}]", hosts);
             return false;
         }
 
@@ -727,7 +726,6 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
                     if (closed) {
                         return;
                     }
-                    logger.trace("pinging target es");
                     HttpURLConnection conn = openConnection("GET", "");
                     if (conn != null) {
                         conn.getInputStream().close(); // close and release to connection pool.

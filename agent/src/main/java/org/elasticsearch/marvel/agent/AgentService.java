@@ -195,7 +195,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
         }
 
         private void exportIndicesStats() {
-            logger.debug("local node is master, exporting indices stats");
+            logger.trace("local node is master, exporting indices stats");
             IndicesStatsResponse indicesStatsResponse = client.admin().indices().prepareStats().all().get();
             for (Exporter e : exporters) {
                 try {
@@ -207,7 +207,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
         }
 
         private void exportClusterStats() {
-            logger.debug("local node is master, exporting cluster stats");
+            logger.trace("local node is master, exporting cluster stats");
             ClusterStatsResponse stats = client.admin().cluster().prepareClusterStats().get();
             for (Exporter e : exporters) {
                 try {
@@ -219,7 +219,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
         }
 
         private void exportEvents() {
-            logger.debug("exporting events");
+            logger.trace("exporting events");
             ArrayList<Event> eventList = new ArrayList<Event>(pendingEventsQueue.size());
             pendingEventsQueue.drainTo(eventList);
             Event[] events = new Event[eventList.size()];
@@ -235,7 +235,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
         }
 
         private void exportShardStats() {
-            logger.debug("Collecting shard stats");
+            logger.trace("Collecting shard stats");
             String[] indices = clusterService.state().metaData().concreteIndices(indicesToExport);
 
             List<ShardStats> shardStats = newArrayList();
@@ -254,7 +254,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
             }
             ShardStats[] shardStatsArray = shardStats.toArray(new ShardStats[shardStats.size()]);
 
-            logger.debug("Exporting shards stats");
+            logger.trace("Exporting shards stats");
             for (Exporter e : exporters) {
                 try {
                     e.exportShardStats(shardStatsArray);
@@ -265,10 +265,10 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
         }
 
         private void exportNodeStats() {
-            logger.debug("Collecting node stats");
+            logger.trace("Collecting node stats");
             NodeStats nodeStats = nodeService.stats();
 
-            logger.debug("Exporting node stats");
+            logger.trace("Exporting node stats");
             for (Exporter e : exporters) {
                 try {
                     e.exportNodeStats(nodeStats);
