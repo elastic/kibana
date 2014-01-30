@@ -39,7 +39,7 @@ A couple of points to consider:
   to temporarily {ref}/modules-cluster.html[disable allocations].
 
 * If you run your cluster using a non-standard port, you need to change the
-  `marvel.agent.exporter.es.nosts` settings. See <<configuration>>.
+  `marvel.agent.exporter.es.hosts` settings. See <<configuration>>.
 
 
 === Installing a secondary Monitoring Cluster
