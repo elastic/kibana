@@ -105,7 +105,7 @@ function (angular, app, _, L, localRequire) {
     };
 
     $scope.get_data = function(segment,query_id) {
-      $scope.require(['./leaflet/plugins'], function () {
+      $scope.require(['./geohash/geohash', './leaflet/plugins'], function (geohash) {
         $scope.panel.error =  false;
 
         // Make sure we have everything for the request to complete
@@ -152,6 +152,19 @@ function (angular, app, _, L, localRequire) {
 
         $scope.populate_modal(request);
 
+        // extract coordinates from field.
+        // First is checked for a lat/lon array and otherwise a geohash is assumed
+        // Extend this method for support with other types.
+        // http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/mapping-geo-point-type.html
+        function extractCoordinates(field) {
+          if (field instanceof Array) {
+            return  new L.LatLng(field[1], field[0]);
+          }
+          // assume geohash
+          var coordinates = geohash.decodeGeoHash(field);
+          return new L.LatLng(coordinates.latitude, coordinates.longitude);
+        }
+
         var results = request.doSearch();
 
         // Populate scope when we have results
@@ -175,8 +188,9 @@ function (angular, app, _, L, localRequire) {
 
             // Keep only what we need for the set
             $scope.data = $scope.data.slice(0,$scope.panel.size).concat(_.map(results.hits.hits, function(hit) {
+
               return {
-                coordinates : new L.LatLng(hit.fields[$scope.panel.field][1],hit.fields[$scope.panel.field][0]),
+                coordinates : extractCoordinates(hit.fields[$scope.panel.field]),
                 tooltip : hit.fields[$scope.panel.tooltip]
               };
             }));
