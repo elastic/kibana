@@ -1,7 +1,7 @@
 [[configuration]]
 == Configuration Options
 
-
+[[stats-export]]
 === Statistics exporting
 
 `marvel.agent.exporter.es.hosts`::
@@ -31,7 +31,7 @@ Defaults to `"YYYY.MM.dd"`, which produces index names like:
 `.marvel-2014.01.28`. Supports date formats as explained
 http://joda-time.sourceforge.net/api-release/org/joda/time/format/DateTimeFormat.html[here].
 
-
+[[marvel-indices]]
 === Marvel indices
 
 Marvel stores it's data using time based indices. By default, Marvel generates
@@ -39,6 +39,7 @@ an index per day, with one shard and one replica. We expect this to be a good
 default which will fit most use cases. You may need to change it for very big
 installations.
 
+[[config-marvel-indices]]
 ==== Configuring Marvel's indices
 
 Marvel uses an {ref}/indices-templates.html[index template] to preconfigure newly created indices. You can retrieve it with:
@@ -90,6 +91,7 @@ For reference, here is the `settings` section of the default template:
 }
 ----------------------------------
 
+[[relevant-settings]]
 === Other relevant Elasticsearch settings
 
 Marvel relies on Elasticsearch's capability to automatically create new indices
