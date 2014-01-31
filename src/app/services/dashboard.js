@@ -15,7 +15,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
 
   module.service('dashboard', function(
     $routeParams, $http, $rootScope, $injector, $location, $timeout,
-    ejsResource, timer, kbnIndex, alertSrv
+    ejsResource, timer, kbnIndex, alertSrv, esVersion, esMinVersion
   ) {
     // A hash of defaults to use when loading a dashboard
 
@@ -79,7 +79,14 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
       // Clear the current dashboard to prevent reloading
       self.current = {};
       self.indices = [];
-      route();
+      esVersion.isMinimum().then(function(isMinimum) {
+        if(isMinimum) {
+          route();
+        } else {
+          alertSrv.set('Upgrade Required',"Your version of Elasticsearch is too old. Kibana requires" +
+            " Elasticsearch " + esMinVersion + " or above.", "error");
+        }
+      });
     });
 
     var route = function() {

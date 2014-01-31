@@ -8,7 +8,7 @@ function (angular, _, config) {
 
   var module = angular.module('kibana.services');
 
-  module.service('esVersion', function($http, alertSrv, $q) {
+  module.service('esVersion', function($http, alertSrv, esMinVersion, $q) {
 
     this.versions = [];
 
@@ -96,6 +96,10 @@ function (angular, _, config) {
       }
 
       return _cf;
+    };
+
+    this.isMinimum = function() {
+      return self.gte(esMinVersion);
     };
 
     // check if lowest version in cluster = `version`
