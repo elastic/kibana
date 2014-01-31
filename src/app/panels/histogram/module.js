@@ -343,10 +343,11 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
           filterSrv.getBoolFilter(filterSrv.ids)
         );
 
-        var facet = $scope.ejs.DateHistogramFacet(q.id);
+        var facet = $scope.ejs.DateHistogramFacet(q.id),
+          facetbis;
 
         if($scope.panel.mode === 'weighted mean') {
-          var facetbis = $scope.ejs.DateHistogramFacet('_'+q.id);
+          facetbis = $scope.ejs.DateHistogramFacet('_'+q.id);
         }
      
         if($scope.panel.mode === 'count') {
