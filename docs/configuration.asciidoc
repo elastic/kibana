@@ -39,7 +39,7 @@ an index per day, with one shard and one replica. We expect this to be a good
 default which will fit most use cases. You may need to change it for very big
 installations.
 
-==== The Marvel index template
+==== Configuring Marvel's indices
 
 Marvel uses an {ref}/indices-templates.html[index template] to preconfigure newly created indices. You can retrieve it with:
 
@@ -48,18 +48,26 @@ Marvel uses an {ref}/indices-templates.html[index template] to preconfigure newl
 GET /_template/marvel
 ----------------------------------
 
-then make changes, and update it with:
+To change the default settings, you may add your own template to override it. Make sure your template uses
+the `.marvel-*` matching pattern and has an order of 1 or higher. For example, this template will increase the
+number of shards to 5:
 
 [source,json]
 ----------------------------------
-PUT /_template/marvel
-{ ... new template }
+PUT /_template/custom_marvel
+{
+    "template": ".marvel*",
+    "order": 1
+    "settings": {
+        "number_of_shards": 5
+    }
+}
 ----------------------------------
 
 IMPORTANT: We recommend only changing the `settings` section. Other sections are
 important for the correct operation of the dashboards.
 
-Here are the default `settings`:
+For reference, here is the `settings` section of the default template:
 
 [source,json]
 ----------------------------------
