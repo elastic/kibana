@@ -8,7 +8,8 @@ function (angular, _, config) {
 
   var module = angular.module('kibana.services');
 
-  module.service('fields', function(dashboard, $rootScope, $http, alertSrv) {
+  module.service('fields', function(dashboard, $rootScope, $http, esVersion, alertSrv) {
+
     // Save a reference to this
     var self = this;
 
@@ -36,7 +37,8 @@ function (angular, _, config) {
       var fields = [];
       _.each(m, function(types) {
         _.each(types, function(type) {
-          fields = _.without(_.union(fields,_.keys(type)),'_all','_source');
+          fields = _.difference(_.union(fields,_.keys(type)),
+            ['_parent','_routing','_size','_ttl','_all','_uid','_version','_boost','_source']);
         });
       });
       return fields;
@@ -44,7 +46,7 @@ function (angular, _, config) {
 
     this.map = function(indices) {
       var request = $http({
-        url: config.elasticsearch + "/" + indices.join(',') + "/_mapping",
+        url: config.elasticsearch + "/" + indices.join(',') + "/_mapping/field/*",
         method: "GET"
       }).error(function(data, status) {
         if(status === 0) {
@@ -60,41 +62,16 @@ function (angular, _, config) {
       // Flatten the mapping of each index into dot notated keys.
       return request.then(function(p) {
         var mapping = {};
-        _.each(p.data, function(type,index) {
-          mapping[index] = {};
-          _.each(type, function (fields,typename) {
-            mapping[index][typename] = flatten(fields);
+        return esVersion.gte('1.0.0.RC1').then(function(version) {
+          _.each(p.data, function(indexMap,index) {
+            mapping[index] = {};
+            _.each((version ? indexMap.mappings : indexMap), function (typeMap,type) {
+              mapping[index][type] = typeMap;
+            });
           });
+          return mapping;
         });
-        return mapping;
       });
-    };
-
-    var flatten = function(obj,prefix) {
-      var propName = (prefix) ? prefix :  '',
-        dot = (prefix) ? '.':'',
-        ret = {};
-      for(var attr in obj){
-        if(attr === 'dynamic_templates' || attr === '_default_') {
-          continue;
-        }
-        // For now only support multi field on the top level
-        // and if there is a default field set.
-        if(obj[attr]['type'] === 'multi_field') {
-          ret[attr] = obj[attr]['fields'][attr] || obj[attr];
-          var keys = _.without(_.keys(obj[attr]['fields']),attr);
-          for(var key in keys) {
-            ret[attr+'.'+keys[key]] = obj[attr]['fields'][keys[key]];
-          }
-        } else if (attr === 'properties') {
-          _.extend(ret,flatten(obj[attr], propName));
-        } else if(typeof obj[attr] === 'object'){
-          _.extend(ret,flatten(obj[attr], propName + dot + attr));
-        } else {
-          ret[propName] = obj;
-        }
-      }
-      return ret;
     };
 
   });

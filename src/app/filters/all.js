@@ -29,18 +29,6 @@ define([
     };
   });
 
-  /*
-    Filter an array of objects by elasticsearch version requirements
-  */
-  module.filter('esVersion', function(esVersion) {
-    return function(items, require) {
-      var ret = _.filter(items,function(qt) {
-        return esVersion.is(qt[require]) ? true : false;
-      });
-      return ret;
-    };
-  });
-
   module.filter('slice', function() {
     return function(arr, start, end) {
       if(!_.isUndefined(arr)) {
