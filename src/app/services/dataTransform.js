@@ -6,27 +6,59 @@ define([
     'use strict';
 
     ng.module('kibana.services').service('dataTransform', function($injector) {
-      var validTransforms = [
-        'count',
-        'field',
-        'replace'
-      ];
+      var validTransforms = {
+        count: {
+
+        },
+        field: {
+
+        },
+        replace: {
+
+        },
+        sum: {
+          type: 'calc'
+        }
+      };
 
       this.transform = function(queries, results) {
+        var transformNames = _.keys(validTransforms);
+
         _.forEach(queries, function(query) {
           if (query.transforms) {
             _.forEach(query.transforms, function(transform) {
-              if (validTransforms.indexOf(transform.command) == -1) {
+              if (transformNames.indexOf(transform.command) == -1) {
                 throw "invalid transform "+transform.command;
               }
 
               var service = $injector.get(transform.command+'Transform'),
-                args = [results.hits.hits].concat(transform.args);
+                args = [results.hits].concat(transform.args);
 
+              results.hits.calc = results.hits.calc || {};
               results.hits.hits = service.transform.apply(null, args);
             });
           }
         });
+      };
+
+      this.listTransforms = function(searchTypes) {
+        if (_.isUndefined(searchTypes)) {
+          searchTypes = 'all';
+        }
+
+        if (!_.isArray(searchTypes)) {
+          searchTypes = [searchTypes];
+        }
+
+        var transforms = [];
+        _.each(validTransforms, function(obj, name) {
+          var transformType = obj.type || 'all';
+          if (_.indexOf(searchTypes, transformType) != -1) {
+            transforms.push(name);
+          }
+        });
+
+        return transforms;
       };
 
       this.getField = function(hit, field) {

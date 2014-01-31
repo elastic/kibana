@@ -13,8 +13,10 @@
       <select class="input-small" ng-model="panel.style['text-align']" ng-options="f for f in ['center']"></select>
     </div>
     <div class="span2" ng-show="panel.chart == 'total'">
-      <label class="small">On Click</label>
-      <select class="input-small" ng-model="panel.clickGoTo" ng-options="key as value for (key, value) in getRows()"></select>
+      <label class="small">Pair With</label>
+      <select class="input-small" ng-model="panel.pairedWith" ng-options="key as value for (key, value) in getRows()"></select>
+      <label class="small" ng-show="panel.pairedWith != -1">Show Calculation</label>
+      <select class="input-small" ng-show="panel.pairedWith != -1" ng-model="panel.displayCalc" ng-options="key as value for (key, value) in getCalcs()"></select>
     </div>
     <div class="span2" ng-show="panel.chart == 'total'">
       <label class="small">Warning</label>

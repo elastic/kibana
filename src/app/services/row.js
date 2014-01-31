@@ -59,6 +59,18 @@ define([
       this.idPrefix = function() {
         return 'row-controller-';
       };
+
+      this.getRow = function(searchId) {
+        for (var i = 0; i < dashboard.current.rows.length; ++i) {
+          if (searchId != dashboard.current.rows[i].id) {
+            continue;
+          }
+
+          return dashboard.current.rows[i];
+        }
+
+        return null;
+      };
     });
   }
 );

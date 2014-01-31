@@ -13,6 +13,7 @@ define([
   './dataTransform',
   './dataTransforms/countTransform',
   './dataTransforms/fieldTransform',
-  './dataTransforms/replaceTransform'
+  './dataTransforms/replaceTransform',
+  './dataTransforms/sumTransform'
 ],
 function () {});

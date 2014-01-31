@@ -4,11 +4,11 @@ define([
 ],
   function(ng, _) {
     ng.module('kibana.services').service('countTransform', function(dataTransform) {
-      this.transform = function(hits, countBy, keepFields) {
+      this.transform = function(results, countBy, keepFields) {
         var hitDict = {},
           keepFields = keepFields || [];
 
-        _.forEach(hits, function(hit) {
+        _.forEach(results.hits, function(hit) {
           var key = dataTransform.getField(hit, countBy);
 
           if (key in hitDict) {
@@ -22,7 +22,7 @@ define([
           recordFields(hit, keepFields, hitDict[key]);
         });
 
-        hits = [];
+        var hits = [];
         _.forEach(hitDict, function(data, key) {
           var hit = {
             _source: {

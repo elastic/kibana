@@ -27,7 +27,7 @@ define([
   var module = angular.module('kibana.panels.hits', []);
   app.useModule(module);
 
-  module.controller('hits', function($scope, querySrv, dashboard, filterSrv) {
+  module.controller('hits', function($scope, querySrv, dashboard, filterSrv, rowService) {
     $scope.panelMeta = {
       modals : [
         {
@@ -62,11 +62,12 @@ define([
       tilt    : false,
       labels  : true,
       spyable : true,
-      clickGoTo: '-1',
+      pairedWith: '-1',
       threshold: {
         warning: 0,
         critical: 0
-      }
+      },
+      displayCalc: '-1'
     };
     _.defaults($scope.panel,_d);
 
@@ -91,21 +92,23 @@ define([
 
       var _segment = _.isUndefined(segment) ? 0 : segment;
       var request = $scope.ejs.Request().indices(dashboard.indices[_segment]);
+      var requestGenerator, resultProcessor;
+
+      if ($scope.panel.pairedWith != -1 && $scope.panel.displayCalc != -1) {
+        requestGenerator = getCalcReq;
+        resultProcessor = getCalcProcessor;
+      } else {
+        requestGenerator = getFacetReq;
+        resultProcessor = getFacetProcessor;
+      }
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
       var queries = querySrv.getQueryObjs($scope.panel.queries.ids);
 
-      // Build the question part of the query
-      _.each(queries, function(q) {
-        var _q = $scope.ejs.FilteredQuery(
-          querySrv.toEjsObj(q),
-          filterSrv.getBoolFilter(filterSrv.ids));
+      request = requestGenerator(request, queries);
 
-        request = request
-          .facet($scope.ejs.QueryFacet(q.id)
-            .query(_q)
-          ).size(0);
-      });
+      // Build the question part of the query
+
 
       // Populate the inspector panel
       $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
@@ -130,23 +133,7 @@ define([
 
         // Make sure we're still on the same query/queries
         if($scope.query_id === query_id) {
-          var i = 0;
-          _.each(queries, function(q) {
-            var v = results.facets[q.id];
-            var hits = _.isUndefined($scope.data[i]) || _segment === 0 ?
-              v.count : $scope.data[i].hits+v.count;
-            $scope.hits += v.count;
-
-            // Create series
-            $scope.data[i] = {
-              info: q,
-              id: q.id,
-              hits: hits,
-              data: [[i,hits]]
-            };
-
-            i++;
-          });
+          resultProcessor(results, queries, _segment);
           setColor();
           $scope.$emit('render');
           if(_segment < dashboard.indices.length-1) {
@@ -160,8 +147,23 @@ define([
     $scope.getRows = function() {
       var list = {'-1': 'None'};
 
-      _.forEach(dashboard.current.rows, function(row) {
-        list[row.id] = row.title;
+      _.each(dashboard.current.rows, function(row) {
+        _.each(row.panels, function(panel, i) {
+          var id = row.id+"."+i;
+          var title = row.title+" > "+panel.title;
+
+          list[id] = title;
+        });
+      });
+
+      return list;
+    };
+
+    $scope.getCalcs = function() {
+      var list = { '-1': 'None' };
+
+      _.each(querySrv.listTransforms('calc'), function(row) {
+        list[row] = row;
       });
 
       return list;
@@ -198,6 +200,68 @@ define([
         }
 
         $scope.panel.style.color = targetColor;
+      }
+    };
+
+    var getFacetReq = function(request, queries) {
+      _.each(queries, function(q) {
+        var _q = $scope.ejs.FilteredQuery(
+          querySrv.toEjsObj(q),
+          filterSrv.getBoolFilter(filterSrv.ids));
+
+        request = request
+          .facet($scope.ejs.QueryFacet(q.id)
+            .query(_q)
+          ).size(0);
+      });
+
+      return request;
+    };
+
+    var getCalcReq = function(request, queries) {
+      var boolQuery = $scope.ejs.BoolQuery(),
+        pairedParts = $scope.panel.pairedWith.split('.'),
+        row = rowService.getRow(pairedParts[0]),
+        panel = row.panels[pairedParts[1]],
+        size = panel.type == 'table' ? panel.size*panel.pages : 50;
+
+      _.each(queries, function(q) {
+        boolQuery = boolQuery.should(querySrv.toEjsObj(q));
+      });
+
+      return request
+        .query($scope.ejs.FilteredQuery(boolQuery, filterSrv.getBoolFilter(filterSrv.ids)))
+        .size(size)
+    };
+
+    var getFacetProcessor = function(results, queries, segment) {
+      var i = 0;
+      _.each(queries, function(q) {
+        var v = results.facets[q.id];
+        var hits = _.isUndefined($scope.data[i]) || segment === 0 ?
+          v.count : $scope.data[i].hits+v.count;
+        $scope.hits += v.count;
+
+        // Create series
+        $scope.data[i] = {
+          info: q,
+          id: q.id,
+          hits: hits,
+          data: [[i,hits]]
+        };
+
+        i++;
+      });
+    };
+
+    var getCalcProcessor = function(results, queries) {
+      querySrv.transform(queries, results);
+
+      if (_.has(results.hits, 'calc') && _.has(results.hits.calc, $scope.panel.displayCalc)) {
+        $scope.hits = results.hits.calc[$scope.panel.displayCalc];
+      } else {
+        $scope.panel.error = "Unknown Calculation: "+$scope.panel.displayCalc;
+        $scope.hits = 0;
       }
     };
   });
@@ -312,17 +376,16 @@ define([
       restrict: 'A',
       link: function(scope, e) {
         e.click(function() {
-          if (scope.panel.clickGoTo == -1) {
+          if (scope.panel.pairedWith == -1) {
             return;
           }
 
-          _.forEach(dashboard.current.rows, function(row) {
-            if (row.id != scope.panel.clickGoTo) {
-              return;
-            }
+          var pairedRowId = scope.panel.pairedWith.split('.')[0];
+          var row = rowService.getRow(pairedRowId);
 
+          if (row != null) {
             var cb = function() {
-              $.scrollTo($('#'+rowService.idPrefix()+row.id));
+              $.scrollTo($('#'+rowService.idPrefix()+pairedRowId));
             };
 
             if (rowService.show(row, scope)) {
@@ -331,7 +394,7 @@ define([
             } else {
               cb();
             }
-          });
+          }
         });
       }
     }

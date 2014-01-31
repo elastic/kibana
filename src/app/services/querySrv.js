@@ -245,6 +245,10 @@ function (angular, _, config, kbn) {
       dataTransform.transform(queries, results);
     };
 
+    this.listTransforms = function(types) {
+      return dataTransform.listTransforms(types);
+    };
+
     var nextId = function() {
       var idCount = dashboard.current.services.query.ids.length;
       if(idCount > 0) {
