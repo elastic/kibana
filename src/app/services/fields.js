@@ -10,8 +10,6 @@ function (angular, _, config) {
 
   module.service('fields', function(dashboard, $rootScope, $http, esVersion, alertSrv) {
 
-    console.log("fields");
-
     // Save a reference to this
     var self = this;
 
