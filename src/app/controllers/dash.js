@@ -31,7 +31,7 @@ function (angular, config, _) {
   module.controller('DashCtrl', function(
     $scope, $route, ejsResource, fields, dashboard, alertSrv, panelMove, esVersion, kbnVersion) {
 
-    $scope.requiredElasticSearchVersion = ">=0.90.3";
+    $scope.requiredElasticSearchVersion = ">=0.90.9";
 
     $scope.editor = {
       index: 0

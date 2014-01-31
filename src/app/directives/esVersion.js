@@ -15,6 +15,8 @@ function (angular) {
       return {
         restrict: 'A',
         link: function(scope, elem, attr) {
+
+          console.log(esVersion.is(attr.esVersion));
           if(!esVersion.is(attr.esVersion)) {
             elem.hide();
           }
