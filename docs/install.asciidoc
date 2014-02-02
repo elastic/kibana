@@ -41,6 +41,9 @@ A couple of points to consider:
 * If you run your cluster using a non-standard port, you need to change the
   `marvel.agent.exporter.es.hosts` settings. See <<configuration>>.
 
+* If your server doesn't have direct internet access see <<manual_download>>
+  for an alternative way to get the Marvel binaries.
+
 
 === Installing a secondary Monitoring Cluster
 
@@ -103,5 +106,22 @@ It may take a minute or two for data to appear.
 
 TIP: You may want to temporarily {ref}/modules-cluster.html[disable shard
 allocation] before you restart your nodes to avoid unnecessary shard
-reallocations during the install process.
+reallocation during the install process.
 
+
+[[manual_download]]
+==== Manual download
+
+Elasticsearch's `bin/plugin` script requires direct internet access for downloading
+and installing Marvel. If your server doesn't have internet access, you can download
+the Marvel binaries from the following link: https://download.elasticsearch.org/elasticsearch/marvel/marvel-latest.zip
+
+Once you have transferred the zip file to your server, you can use the `bin/plugin`
+script to install it:
+
+[source,sh]
+----------------
+bin/plugin -i marvel -u file://PATH_TO_MARVEL_ZIP_FILE
+----------------
+
+After the script has finish, continue according to the standard installation procedure.
