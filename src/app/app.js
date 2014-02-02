@@ -69,8 +69,7 @@ function (angular, $, _, appLevelRequire) {
     }
   };
 
-  app.config(function ($routeProvider, $controllerProvider, $compileProvider, $filterProvider, $provide) {
-
+  app.config(function ($routeProvider, $controllerProvider, $compileProvider, $filterProvider, $provide, $httpProvider) {
     $routeProvider
       .when('/dashboard', {
         templateUrl: 'app/partials/dashboard.html',
@@ -91,6 +90,9 @@ function (angular, $, _, appLevelRequire) {
     register_fns.factory    = $provide.factory;
     register_fns.service    = $provide.service;
     register_fns.filter     = $filterProvider.register;
+    
+    // this allow ajax requests to work with basic http auth
+    $httpProvider.defaults.withCredentials = true;
   });
 
   var apps_deps = [
