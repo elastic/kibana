@@ -85,6 +85,7 @@ For reference, here is the `settings` section of the default template:
                 }
             }
         },
+        "mapper.dynamic": true,
         "marvel.index_format": 1
     }
     .....

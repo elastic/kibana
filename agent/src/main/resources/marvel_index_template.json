@@ -11,6 +11,7 @@
                 }
             }
         },
+        "mapper.dynamic": true,
         "marvel.index_format": 1
     },
     "mappings": {
