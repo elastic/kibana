@@ -58,7 +58,7 @@ number of shards to 5:
 PUT /_template/custom_marvel
 {
     "template": ".marvel*",
-    "order": 1
+    "order": 1,
     "settings": {
         "number_of_shards": 5
     }
