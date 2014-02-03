@@ -42,6 +42,32 @@
         },
         "node_stats": {
             "properties": {
+                "fs": {
+                    "properties": {
+                        "total": {
+                            "properties": {
+                                "disk_io_op": {
+                                    "type": "long"
+                                },
+                                "disk_reads": {
+                                    "type": "long"
+                                },
+                                "disk_writes": {
+                                    "type": "long"
+                                },
+                                "disk_io_size_in_bytes": {
+                                    "type": "long"
+                                },
+                                "disk_read_size_in_bytes": {
+                                    "type": "long"
+                                },
+                                "disk_write_size_in_bytes": {
+                                    "type": "long"
+                                }
+                            }
+                        }
+                    }
+                },
                 "indices": {
                     "properties": {
                         "percolate": {
