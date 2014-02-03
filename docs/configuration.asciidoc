@@ -9,6 +9,10 @@
 A list of hosts in `hostname:port` format to which statistics  and events will
 be sent. Data will be sent to the first host, but will failover to the next
 host(s) if the first is not reachable. Defaults to `["localhost:9200"]`.
++
+added[1.0.2] - HTTP Basic authentication credentials can be specified as part of the host name,
+ i.e., ["user:pwd@host:9200"]
+
 
 `marvel.agent.enabled`::
 

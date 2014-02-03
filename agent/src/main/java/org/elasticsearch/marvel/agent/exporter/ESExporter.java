@@ -27,6 +27,7 @@ import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.ShardStats;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.routing.ShardRouting;
+import org.elasticsearch.common.Base64;
 import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.component.AbstractLifecycleComponent;
 import org.elasticsearch.common.io.Streams;
@@ -288,22 +289,26 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     }
 
 
-    private HttpURLConnection openConnection(String method, String uri) {
-        return openConnection(method, uri, null);
+    private HttpURLConnection openConnection(String method, String path) {
+        return openConnection(method, path, null);
     }
 
-    private HttpURLConnection openConnection(String method, String uri, String contentType) {
+    private HttpURLConnection openConnection(String method, String path, String contentType) {
         int hostIndex = 0;
         try {
             for (; hostIndex < hosts.length; hostIndex++) {
                 String host = hosts[hostIndex];
                 try {
-                    URL templateUrl = new URL("http://" + host + "/" + uri);
-                    HttpURLConnection conn = (HttpURLConnection) templateUrl.openConnection();
+                    URL url = new URL("http://" + host + "/" + path);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod(method);
                     conn.setConnectTimeout(timeout);
                     if (contentType != null) {
                         conn.setRequestProperty("Content-Type", XContentType.SMILE.restContentType());
+                    }
+                    if (url.getUserInfo() != null) {
+                        String basicAuth = "Basic " + Base64.encodeBytes(url.getUserInfo().getBytes("ISO-8859-1"));
+                        conn.setRequestProperty("Authorization", basicAuth);
                     }
                     conn.setUseCaches(false);
                     if (method.equalsIgnoreCase("POST") || method.equalsIgnoreCase("PUT")) {
