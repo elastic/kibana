@@ -27,7 +27,7 @@ define([
   var module = angular.module('kibana.panels.hits', []);
   app.useModule(module);
 
-  module.controller('hits', function($scope, querySrv, dashboard, filterSrv, rowService) {
+  module.controller('hits', function($scope, querySrv, dashboard, filterSrv, rowService, dataTransform) {
     $scope.panelMeta = {
       modals : [
         {
@@ -67,7 +67,10 @@ define([
         warning: 0,
         critical: 0
       },
-      displayCalc: '-1'
+      calc: {
+        display: '-1',
+        sample_size: 500
+      }
     };
     _.defaults($scope.panel,_d);
 
@@ -94,7 +97,7 @@ define([
       var request = $scope.ejs.Request().indices(dashboard.indices[_segment]);
       var requestGenerator, resultProcessor;
 
-      if ($scope.panel.pairedWith != -1 && $scope.panel.displayCalc != -1) {
+      if ($scope.panel.calc.display!= -1) {
         requestGenerator = getCalcReq;
         resultProcessor = getCalcProcessor;
       } else {
@@ -160,10 +163,18 @@ define([
     };
 
     $scope.getCalcs = function() {
-      var list = { '-1': 'None' };
+      var list = { '-1': 'None' },
+        queries = querySrv.getQueryObjs(querySrv.idsByMode($scope.panel.queries)),
+        validTransforms = querySrv.listTransforms('calc'),
+        key, args;
 
-      _.each(querySrv.listTransforms('calc'), function(row) {
-        list[row] = row;
+      _.each(queries, function(query) {
+        _.each(query.transforms, function(transform) {
+          if (_.indexOf(validTransforms, transform.command) != -1) {
+            key = dataTransform.transformToString(transform);
+            list[key] = key;
+          }
+        });
       });
 
       return list;
@@ -219,11 +230,7 @@ define([
     };
 
     var getCalcReq = function(request, queries) {
-      var boolQuery = $scope.ejs.BoolQuery(),
-        pairedParts = $scope.panel.pairedWith.split('.'),
-        row = rowService.getRow(pairedParts[0]),
-        panel = row.panels[pairedParts[1]],
-        size = panel.type == 'table' ? panel.size*panel.pages : 50;
+      var boolQuery = $scope.ejs.BoolQuery();
 
       _.each(queries, function(q) {
         boolQuery = boolQuery.should(querySrv.toEjsObj(q));
@@ -231,7 +238,7 @@ define([
 
       return request
         .query($scope.ejs.FilteredQuery(boolQuery, filterSrv.getBoolFilter(filterSrv.ids)))
-        .size(size)
+        .size($scope.panel.calc.sample_size);
     };
 
     var getFacetProcessor = function(results, queries, segment) {
@@ -255,12 +262,11 @@ define([
     };
 
     var getCalcProcessor = function(results, queries) {
-      querySrv.transform(queries, results);
+      dataTransform.transform(queries, results);
 
-      if (_.has(results.hits, 'calc') && _.has(results.hits.calc, $scope.panel.displayCalc)) {
-        $scope.hits = results.hits.calc[$scope.panel.displayCalc];
+      if (_.has(results.hits, 'calc') && _.has(results.hits.calc, $scope.panel.calc.display)) {
+        $scope.hits = results.hits.calc[$scope.panel.calc.display].value;
       } else {
-        $scope.panel.error = "Unknown Calculation: "+$scope.panel.displayCalc;
         $scope.hits = 0;
       }
     };

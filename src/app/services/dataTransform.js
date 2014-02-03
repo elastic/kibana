@@ -19,7 +19,8 @@ define([
         sum: {
           type: 'calc'
         }
-      };
+      },
+      self = this;
 
       this.transform = function(queries, results) {
         var transformNames = _.keys(validTransforms);
@@ -32,10 +33,25 @@ define([
               }
 
               var service = $injector.get(transform.command+'Transform'),
-                args = [results.hits].concat(transform.args);
+                args = [results.hits].concat(transform.args),
+                type = self.transformType(transform);
 
-              results.hits.calc = results.hits.calc || {};
-              results.hits.hits = service.transform.apply(null, args);
+              switch (type) {
+                case 'all':
+                  results.hits.hits = service.transform.apply(null, args);
+                  break;
+                case 'calc':
+                  var calc = service.transform.apply(null, args),
+                    key = self.transformToString(transform),
+                    result = {
+                      alias: _.isArray(calc) ? calc[0] : null,
+                      value: _.isArray(calc) ? calc[1] : calc
+                    };
+
+                  results.hits.calc = results.hits.calc || {};
+                  results.hits.calc[key] = result;
+                  break;
+              }
             });
           }
         });
@@ -76,6 +92,18 @@ define([
         }
 
         return result;
+      };
+
+      this.getCalc = function(calcs, search) {
+        search = search.split("@calc.")[1];
+
+        for (var key in calcs) {
+          if (key == search || calcs[key].alias == search) {
+            return calcs[key].value;
+          }
+        }
+
+        return 0;
       };
 
       this.parseRegex = function(param) {
@@ -120,6 +148,19 @@ define([
         });
 
         return result;
+      };
+
+      this.transformToString = function(transform) {
+        var string = transform.command+'(',
+          args = _.map(transform.args, function(arg) {
+            return arg.toString();
+          });
+
+        return string+args.join(',')+')';
+      };
+
+      this.transformType = function(transform) {
+        return validTransforms[transform.command].type || 'all';
       }
     });
   });

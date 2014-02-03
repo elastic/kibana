@@ -1,6 +1,6 @@
 <div>
   <div class="row-fluid">
-    <div class="span3">
+    <div class="span2">
       <label class="small">Style</label>
       <select class="input-small" ng-model="panel.chart" ng-options="f for f in ['bar','pie','list','total']"></select></span>
     </div>
@@ -13,10 +13,14 @@
       <select class="input-small" ng-model="panel.style['text-align']" ng-options="f for f in ['center']"></select>
     </div>
     <div class="span2" ng-show="panel.chart == 'total'">
-      <label class="small">Pair With</label>
+      <label class="small">On Click</label>
       <select class="input-small" ng-model="panel.pairedWith" ng-options="key as value for (key, value) in getRows()"></select>
-      <label class="small" ng-show="panel.pairedWith != -1">Show Calculation</label>
-      <select class="input-small" ng-show="panel.pairedWith != -1" ng-model="panel.displayCalc" ng-options="key as value for (key, value) in getCalcs()"></select>
+    </div>
+    <div class="span2" ng-show="panel.chart == 'total'">
+      <label class="small">Show Calculation</label>
+      <select class="input-small" ng-model="panel.calc.display" ng-options="key as value for (key, value) in getCalcs()"></select>
+      <label class="small">Sample Size</label>
+      <input class="input-smaller" type="number" ng-model="panel.calc.sample_size" />
     </div>
     <div class="span2" ng-show="panel.chart == 'total'">
       <label class="small">Warning</label>
