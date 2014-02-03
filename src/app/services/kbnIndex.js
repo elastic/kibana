@@ -20,8 +20,13 @@ function (angular, _, config, moment) {
 
       return resolve_indices(possible).then(function(p) {
         // an extra intersection
-        var indices = _.intersection(possible,p);
+        var indices = _.uniq(_.flatten(_.map(possible,function(possibleIndex) {
+          return _.intersection(possibleIndex.split(','),p);
+        })));
+
         indices.reverse();
+        console.log(indices);
+
         return indices;
       });
     };
