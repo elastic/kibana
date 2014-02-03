@@ -23,10 +23,7 @@ function (angular, _, config, moment) {
         var indices = _.uniq(_.flatten(_.map(possible,function(possibleIndex) {
           return _.intersection(possibleIndex.split(','),p);
         })));
-
         indices.reverse();
-        console.log(indices);
-
         return indices;
       });
     };
