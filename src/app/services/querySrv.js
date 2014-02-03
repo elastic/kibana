@@ -74,7 +74,7 @@ function (angular, _, config, kbn) {
         }
       },
       regex: {
-        require:">=0.90.12",
+        require:">=0.90.3",
         icon: "icon-circle",
         resolve: function(query) {
           // Simply returns itself
