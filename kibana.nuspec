@@ -4,10 +4,10 @@
     <id>Kibana</id>
     <version>1.0.0</version>
     <authors>elasticsearch</authors>
-    <description>kibana fork specific for mvno</description>
+    <description>kibana fork for use within Mvno</description>
     <language>en-US</language>
     <projectUrl>http://www.elasticsearch.org/overview/kibana/</projectUrl>
-    <licenseUrl>http://www.elasticsearch.org/overview/kibana/</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
   </metadata>
   <files>
     <file src="src\**\*" target="lib" />
