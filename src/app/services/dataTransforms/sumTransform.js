@@ -9,7 +9,7 @@ define([
         _.forEach(results.hits, function(hit) {
           var field = parseFloat(dataTransform.getField(hit, fieldName));
 
-          if (!_.isNaN(field)) {
+          if (_.isNumber(field)) {
             sum += field;
           }
         });
