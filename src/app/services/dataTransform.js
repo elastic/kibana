@@ -18,6 +18,9 @@ define([
         },
         sum: {
           type: 'calc'
+        },
+        mean: {
+          type: 'calc'
         }
       },
       self = this;
