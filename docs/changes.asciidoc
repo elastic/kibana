@@ -1,3 +1,4 @@
+[[change_list]]
 == Change list
 
 === 1.0.2
