@@ -15,6 +15,8 @@ define([
   './dataTransforms/fieldTransform',
   './dataTransforms/replaceTransform',
   './dataTransforms/sumTransform',
-  './dataTransforms/meanTransform'
+  './dataTransforms/meanTransform',
+  './dataTransforms/stddevTransform',
+  './dataTransforms/divideTransform'
 ],
 function () {});

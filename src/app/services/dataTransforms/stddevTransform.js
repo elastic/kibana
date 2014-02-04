@@ -3,9 +3,9 @@ define([
   'underscore'
 ],
   function(ng, _) {
-    ng.module('kibana.services').service('meanTransform', function(dataTransform) {
+    ng.module('kibana.services').service('stddevTransform', function(dataTransform) {
       this.transform = function(results, fieldName, upperBound, lowerBound, precision, as) {
-        var i, sum = 0, mean, sortedData = _.clone(results.hits),
+        var i, sum = 0, mean, stddev, sortedData = _.clone(results.hits),
           dataLength = sortedData.length, upperBound = upperBound || 1,
           lowerBound = lowerBound || 0, precision = precision || 0, as = as || null;
 
@@ -25,10 +25,23 @@ define([
           }
         }
 
-        precision = Math.pow(10, precision);
-        mean = Math.round((sum / (upperBound - lowerBound)) * precision) / precision;
+        mean = sum / (upperBound - lowerBound);
 
-        return [as, mean];
+        sum = 0;
+        for (i = lowerBound; i < upperBound; i++) {
+          var field = parseFloat(dataTransform.getField(sortedData[i], fieldName));
+
+          if (_.isNumber(field)) {
+            sum += Math.pow(field - mean, 2);
+          }
+        }
+
+        stddev = Math.sqrt(sum / (upperBound - lowerBound));
+
+        precision = Math.pow(10, precision);
+        stddev = Math.round(stddev * precision) / precision;
+
+        return [as, stddev];
       };
     });
   }
