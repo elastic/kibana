@@ -64,7 +64,7 @@
           <label>
             <input type="checkbox" ng-model="row.selected" ng-checked="row.selected">
             <span class="pointer" ng-click="rowClick(row)">{{row.display_name}}</span>
-            <div class="marvel-persistent-name pointer" ng-hide="row.id == row.display_name" ng-click="rowClick(row)">{{row.id}}</div>
+            <div class="marvel-persistent-name pointer" ng-hide="row.id == row.display_name" ng-click="rowClick(row)">{{row.id}} <i bs-tooltip="'No report has been received for more than '+staleSeconds+' seconds'" ng-show="!isCurrent(data[row.id+'_@timestamp'].max,staleSeconds*1000)" class="icon-exclamation-sign"></i></div>
           </label>
         </div>
       </td>

@@ -2,7 +2,7 @@ define([
   'angular',
   'app',
   'kbn',
-  'underscore',
+  'lodash',
   'jquery',
   'jquery.flot',
   'jquery.flot.time'
@@ -63,6 +63,8 @@ define([
         index: -1,
         add: undefined
       };
+
+      $scope.staleSeconds = 60;
 
       $scope.modeInfo = {
         nodes: {
@@ -389,33 +391,38 @@ define([
           });
 
           mrequest.doSearch(function (r) {
-            var newRows = [],
-              hit,
-              display_name,
-              persistent_name;
 
-            _.each(r.responses, function (response) {
-              if (response.hits.hits.length === 0) {
-                return;
-              }
+            esVersion.is(">=1.0.0.RC1").then(function(version) {
 
-              hit = response.hits.hits[0];
-              if (esVersion.gte("1.0.0.RC1")) {
-                display_name = (hit.fields[stripRaw($scope.panel.display_field)] || [ undefined ])[0];
-                persistent_name = (hit.fields[stripRaw($scope.panel.persistent_field)] || [ undefined] )[0];
-              }
-              else {
-                display_name = hit.fields[stripRaw($scope.panel.display_field)];
-                persistent_name = hit.fields[stripRaw($scope.panel.persistent_field)];
-              }
-              newRows.push({
-                display_name: display_name || persistent_name,
-                id: persistent_name,
-                // using findWhere here, though its not very efficient
-                selected: (_.findWhere($scope.rows, {id: persistent_name}) || {}).selected
+              var newRows = [],
+                hit,
+                display_name,
+                persistent_name;
+
+              _.each(r.responses, function (response) {
+                if (response.hits.hits.length === 0) {
+                  return;
+                }
+
+                hit = response.hits.hits[0];
+                if (version) {
+                  display_name = (hit.fields[stripRaw($scope.panel.display_field)] || [ undefined ])[0];
+                  persistent_name = (hit.fields[stripRaw($scope.panel.persistent_field)] || [ undefined] )[0];
+                } else {
+                  display_name = hit.fields[stripRaw($scope.panel.display_field)];
+                  persistent_name = hit.fields[stripRaw($scope.panel.persistent_field)];
+                }
+
+                newRows.push({
+                  display_name: display_name || persistent_name,
+                  id: persistent_name,
+                  // using findWhere here, though its not very efficient
+                  selected: (_.findWhere($scope.rows, {id: persistent_name}) || {}).selected
+                });
               });
+              $scope.get_data(newRows);
+
             });
-            $scope.get_data(newRows);
           }, $scope._register_data_end);
         }, $scope._register_data_end);
 
@@ -465,6 +472,13 @@ define([
               .keyField('@timestamp').valueField(m.field).interval('1m')
               .facetFilter(filter)).size(0);
           });
+
+          // Get the max of timestamp to figure out the last time the node reported
+          request = request
+            .facet($scope.ejs.StatisticalFacet(id + "_@timestamp")
+              .field("@timestamp")
+              .facetFilter(filter));
+
         });
 
         results = request.doSearch();
@@ -479,6 +493,10 @@ define([
           },
           $scope._register_data_end
         );
+      };
+
+      $scope.isCurrent = function(time,allowed) {
+        return (new Date().getTime() - time > allowed) ? false : true;
       };
 
       var normalizeFacetResults = function (facets, rows, metrics) {

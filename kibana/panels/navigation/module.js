@@ -14,7 +14,7 @@
 define([
   'angular',
   'app',
-  'underscore',
+  'lodash',
   'jquery'
 ],
 function (angular, app, _, $) {
@@ -71,7 +71,6 @@ function (angular, app, _, $) {
 
       if($scope.panel.source === 'url') {
         $http.get($scope.panel.url).then(function(response) {
-          console.log(response);
           var a = $('<a />');
 
           $scope.links = _.filter(response.data.links, function (link)  {
