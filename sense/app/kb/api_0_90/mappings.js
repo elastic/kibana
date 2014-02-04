@@ -1,8 +1,8 @@
 define(function () {
   'use strict';
 
-  return function init(kb) {
-    kb.addEndpointDescription('_mapping', {
+  return function init(api) {
+    api.addEndpointDescription('_mapping', {
       def_method: 'GET',
       methods: ['GET', 'PUT'],
       indices_mode: 'multi',

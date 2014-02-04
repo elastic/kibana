@@ -423,7 +423,7 @@ define(function () {
     _name: ''
   };
 
-  return function init(kb) {
-    kb.addGlobalAutocompleteRules('filter', filters);
+  return function init(api) {
+    api.addGlobalAutocompleteRules('filter', filters);
   };
 });

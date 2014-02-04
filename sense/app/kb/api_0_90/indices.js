@@ -1,8 +1,8 @@
 define(function () {
   'use strict';
 
-  return function init(kb) {
-    kb.addEndpointDescription('_refresh', {
+  return function init(api) {
+    api.addEndpointDescription('_refresh', {
       def_method: 'POST',
       methods: ['POST'],
       endpoint_autocomplete: [
@@ -11,7 +11,7 @@ define(function () {
       indices_mode: 'multi'
     });
 
-    kb.addEndpointDescription('_stats', {
+    api.addEndpointDescription('_stats', {
       def_method: 'GET',
       methods: ['GET'],
       endpoint_autocomplete: [
@@ -20,7 +20,7 @@ define(function () {
       indices_mode: 'multi'
     });
 
-    kb.addEndpointDescription('_segments', {
+    api.addEndpointDescription('_segments', {
       def_method: 'GET',
       methods: ['GET'],
       endpoint_autocomplete: [
@@ -29,7 +29,7 @@ define(function () {
       indices_mode: 'multi'
     });
 
-    kb.addEndpointDescription('__create_index__', {
+    api.addEndpointDescription('__create_index__', {
       methods: ['PUT', 'DELETE'],
       indices_mode: 'single',
       types_mode: 'none',

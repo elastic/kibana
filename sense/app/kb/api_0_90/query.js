@@ -20,8 +20,8 @@ define(function () {
     }
   };
 
-  return function init(kb) {
-    kb.addGlobalAutocompleteRules('query', {
+  return function init(api) {
+    api.addGlobalAutocompleteRules('query', {
       match: {
         __template: {
           'FIELD': 'TEXT'

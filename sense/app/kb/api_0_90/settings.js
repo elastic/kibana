@@ -1,8 +1,8 @@
 define(function () {
   'use strict';
 
-  return function init(kb) {
-    kb.addEndpointDescription('_settings', {
+  return function init(api) {
+    api.addEndpointDescription('_settings', {
       match: /_settings/,
       methods: ['GET', 'PUT'],
       endpoint_autocomplete: ['_settings'],

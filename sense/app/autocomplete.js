@@ -1,6 +1,6 @@
 define([
   'history',
-  'kb/index',
+  'kb',
   'mappings',
   'ace',
   'jquery',

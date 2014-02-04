@@ -1,8 +1,8 @@
 define(function () {
   'use strict';
 
-  return function init(kb) {
-    kb.addEndpointDescription('_search', {
+  return function init(api) {
+    api.addEndpointDescription('_search', {
       def_method: 'POST',
       methods: ['GET', 'POST'],
       endpoint_autocomplete: [
