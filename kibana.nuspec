@@ -10,6 +10,6 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
   </metadata>
   <files>
-    <file src="src\**\*" target="lib" />
+    <file src="src\**\*" target="content" />
   </files>
 </package>
