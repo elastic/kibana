@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>sample</id>
+    <version>1.0.0.0</version>
+    <authors>elasticsearch</authors>
+    <description>kibana fork specific for mvno</description>
+    <language>en-US</language>
+    <projectUrl>http://www.elasticsearch.org/overview/kibana/</projectUrl>
+    <licenseUrl>http://www.elasticsearch.org/overview/kibana/</licenseUrl>
+  </metadata>
+  <files>
+    <file src="src\**\*" target="lib" />
+  </files>
+</package>
