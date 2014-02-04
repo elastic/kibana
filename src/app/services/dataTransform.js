@@ -18,6 +18,15 @@ define([
         },
         sum: {
           type: 'calc'
+        },
+        mean: {
+          type: 'calc'
+        },
+        stddev: {
+          type: 'calc'
+        },
+        divide: {
+          type: 'calc'
         }
       },
       self = this;
