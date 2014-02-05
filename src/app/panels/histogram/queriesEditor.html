@@ -36,6 +36,10 @@
     <input type="number" class="input-mini" ng-model="panel.annotate.size" ng-change="set_refresh(true)"/>
   </div>
   <div class="editor-option" ng-show="panel.annotate.enable">
+    <label class="small">Clustering <tip>Should multiple tags be collapsed into a single tag?</tip></label>
+    <input type="checkbox" ng-change="set_refresh(true)" ng-model="panel.annotate.clustering" ng-checked="panel.annotate.clustering">
+  </div>
+  <div class="editor-option" ng-show="panel.annotate.enable">
     <label class="small">Sort <tip>Determine the most relevant markers using this field</tip></label>
     <input type="text" class="input-small" bs-typeahead="fields.list" ng-model="panel.annotate.sort[0]" ng-change="set_refresh(true)" />
     <i ng-click="panel.annotate.sort[1] = _.toggle(panel.annotate.sort[1],'desc','asc');set_refresh(true)" ng-class="{'icon-chevron-up': panel.annotate.sort[1] == 'asc','icon-chevron-down': panel.annotate.sort[1] == 'desc'}"></i>

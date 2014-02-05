@@ -122,13 +122,15 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
        * annotate.size::: Max number of markers to show
        * annotate.field::: Field from documents to show
        * annotate.sort::: Sort array in format [field,order], For example [`@timestamp',`desc']
+       * annotate.clustering::: Should annotations be clustered?
        */
       annotate      : {
         enable      : false,
         query       : "*",
         size        : 20,
         field       : '_type',
-        sort        : ['_score','desc']
+        sort        : ['_score','desc'],
+        clustering  : true
       },
       /** @scratch /panels/histogram/3
        * ==== Interval options
@@ -695,7 +697,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
 
             if(scope.panel.annotate.enable) {
               options.events = {
-                clustering: true,
+                clustering: scope.panel.annotate.clustering,
                 levels: 1,
                 data: scope.annotations,
                 types: {
