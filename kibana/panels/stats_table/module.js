@@ -325,6 +325,7 @@ define([
         }
       };
 
+
       $scope.get_data = function () {
         if (dashboard.indices.length === 0) {
           return;
@@ -371,6 +372,7 @@ define([
         results.then(function (r) {
 
           var mrequest, newData;
+
 
           // populate the summary data based on the other facets
           newData = {};
@@ -659,7 +661,6 @@ define([
             );
 
           });
-
         });
 
         if (!request.facet() || request.facet().length === 0) {
