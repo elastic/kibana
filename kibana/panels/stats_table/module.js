@@ -18,14 +18,15 @@ define([
       log_debug = function (msg) {
         console.log(msg);
       };
-    } else {
+    }
+    else {
       log_debug = function () {
       };
     }
 
     function y_format_metric_value(value, metric) {
       // If this isn't a number, change nothing
-      if (_.isNaN(value) || !_.isFinite(value)) {
+      if (_.isNaN(value) || !_.isFinite(value) || !_.isNumber(value)) {
         return value;
       }
       if (metric.y_format === 'bytes') {
@@ -53,7 +54,14 @@ define([
       var _d = {
         compact: false,
         mode: 'nodes',
-        sort: ['__name__', 'asc']
+        sort: null,
+        // if you have more rows than this number, full view will be disabled
+        full_view_row_limit_on_high_refresh: 5,
+        // if you have more nodes/indices than this number, refresh rate will be capped at 2,
+        data_limit_for_high_refresh: 50,
+        // disable display names if more than this number of nodes/indices.
+        data_limit_for_display_names: 50
+        //
       };
       _.defaults($scope.panel, _d);
 
@@ -64,7 +72,7 @@ define([
         add: undefined
       };
 
-      $scope.staleSeconds = 60;
+      $scope.staleSeconds = 20;
 
       $scope.modeInfo = {
         nodes: {
@@ -92,8 +100,8 @@ define([
             {
               name: 'JVM Mem (%)',
               field: 'jvm.mem.heap_used_percent',
-              warning: 95,
-              error: 98
+              warning: 90,
+              error: 95
             },
             {
               name: 'Disk Free Space',
@@ -150,7 +158,7 @@ define([
               y_format: "bytes"
             },
             {
-              name: 'Field data',
+              name: 'Field Data',
               field: 'total.fielddata.memory_size_in_bytes',
               y_format: "bytes"
             },
@@ -193,8 +201,8 @@ define([
         return metricDefaults(m);
       });
 
-      $scope.$watch('panel.mode', function (m) {
-        if (_.isUndefined(m)) {
+      $scope.$watch('panel.mode', function (m, prev) {
+        if (m === prev || _.isUndefined(m)) {
           return;
         }
         $scope.panel.display_field = $scope.modeInfo[m].defaults.display_field;
@@ -204,32 +212,31 @@ define([
         });
       });
 
-      $scope.$watch('(rows|filter:panel.rowFilter).length', function (l) {
-        //Compute view based on number of rows
-        rowsVsRefresh(l);
-      });
-
       $scope.$watch('dashboard.current.refresh', function () {
-        var l = $filter('filter')($scope.rows, $scope.panel.rowFilter).length;
-        rowsVsRefresh(l);
+        $scope.updateUIFeaturesBasedOnData();
       });
 
 
-      var rowsVsRefresh = function (l) {
-        if (l > 5 && kbn.interval_to_seconds(dashboard.current.refresh || '1y') < 120) {
+      $scope.updateUIFeaturesBasedOnData = function () {
+        var l = $scope.rows.length;
+        if (l > $scope.panel.full_view_row_limit_on_high_refresh
+          && kbn.interval_to_seconds(dashboard.current.refresh || '1y') < 120) {
           $scope.panel.compact = true;
           $scope.sparkLines = true;
           $scope.viewSelect = false;
-          if(l > 50 && kbn.interval_to_seconds(dashboard.current.refresh || '1y') < 120) {
-            dashboard.set_interval('2m');
-            alertSrv.set('Refresh rate',
-              'Due to the large size of your cluster, the refresh rate has been adjusted to 2m',
-              'info',30000);
-          }
-        } else {
+        }
+        else {
           $scope.viewSelect = true;
           $scope.sparkLines = true;
         }
+        if (_.size($scope.data) > $scope.panel.data_limit_for_high_refresh
+          && kbn.interval_to_seconds(dashboard.current.refresh || '1y') < 120) {
+          dashboard.set_interval('2m');
+          alertSrv.set('Refresh rate',
+            'Due to the large size of your cluster, the refresh rate has been adjusted to 2m',
+            'info', 30000);
+        }
+
       };
 
       $scope.init = function () {
@@ -241,20 +248,28 @@ define([
 
         $scope.warnLevels = {};
         $scope.rows = [];
+        $scope.data = {};
         $scope.$on('refresh', function () {
-          $scope.get_rows();
+          $scope.get_data();
         });
-        $scope.get_rows();
+        $scope.get_data();
       };
 
       $scope.get_mode_filter = function () {
         return $scope.ejs.TermFilter("_type", $scope.panel.mode === "nodes" ? "node_stats" : "index_stats");
       };
 
+      $scope.get_summary_key = function (id, m) {
+        return id + "_" + m.field;
+      };
+
+      $scope.get_history_key = function (id, m) {
+        return id + "_" + m.field + "_history";
+      };
 
       /*
        marks the start of data retrieval. returns true if retrieval should continue
-       or false if not. May schedule future retrival if needed.
+       or false if not. May schedule future retrieval if needed.
        */
 
       $scope._register_data_start = function () {
@@ -281,7 +296,7 @@ define([
               // somehow this was not picked up... retry
               console.log("Retrying call from " + now);
               $scope._pending_data_retrieval = null;
-              $scope.get_rows();
+              $scope.get_data();
             }
           }, 20000);
         }
@@ -301,16 +316,16 @@ define([
             }
             log_debug("firing pending retrieval " + $scope._pending_data_retrieval);
             $scope._pending_data_retrieval = null;
-            $scope.get_rows();
+            $scope.get_data();
           }, 5000); // leave 5 second of some breathing air
-        } else {
+        }
+        else {
           $scope._ongoing_data_retrieval = null;
 
         }
       };
 
-
-      $scope.get_rows = function () {
+      $scope.get_data = function () {
         if (dashboard.indices.length === 0) {
           return;
         }
@@ -322,8 +337,7 @@ define([
         var
           request,
           filter,
-          results,
-          facet;
+          results;
 
         filter = filterSrv.getBoolFilter(filterSrv.ids);
 
@@ -335,54 +349,122 @@ define([
         filter.must($scope.get_mode_filter()).must($scope.ejs.RangeFilter('@timestamp').from(to + "-10m/m").to(to + "/m"));
 
         request = $scope.ejs.Request().indices(dashboard.indices).size(0).searchType("count");
-        facet = $scope.ejs.TermsFacet('terms')
-          .field($scope.panel.persistent_field)
-          .size(9999999)
+        request.query($scope.ejs.FilteredQuery($scope.ejs.MatchAllQuery(), filter));
+
+
+        // timestamp facet to give us the proper time ranges for each node
+        request.facet($scope.ejs.TermStatsFacet("timestamp")
+          .keyField($scope.panel.persistent_field).valueField("@timestamp")
           .order('term')
-          .facetFilter(filter);
+          .size(2000));
 
-        if (!$scope.panel.show_hidden) {
-          facet.regex("[^.].*");
-        }
 
-        request.facet(facet);
+        _.each($scope.panel.metrics, function (m) {
+          request.facet($scope.ejs.TermStatsFacet(m.field)
+            .keyField($scope.panel.persistent_field).valueField(m.field)
+            .order('term')
+            .size(2000));
+        });
 
         results = request.doSearch();
 
         results.then(function (r) {
 
-          var newPersistentIds = _.pluck(r.facets.terms.terms, 'term'),
-            mrequest;
+          var mrequest, newData;
 
-          if (newPersistentIds.length === 0) {
+          // populate the summary data based on the other facets
+          newData = {};
+
+          _.each(r.facets['timestamp'].terms, function (f) {
+            if (!$scope.panel.show_hidden && f.term[0] === ".") {
+              return;
+            }
+            newData[f.term] = {
+              id: f.term,
+              time_span: (f.max - f.min) / 1000,
+              alive: (new Date().getTime() - f.max > $scope.staleSeconds*1000) ? false : true,
+              selected: ($scope.data[f.term] || {}).selected,
+              alert_level: 0
+            };
+          });
+
+
+          _.each($scope.panel.metrics, function (m) {
+            _.each(r.facets[m.field].terms, function (f) {
+              var summary = newData[f.term];
+              if (!summary) {
+                return; // filtered
+              }
+              var m_summary = {
+                mean: null,
+                max: null,
+                min: null
+              };
+
+              if (m.derivative) {
+                // no min max, but we can do avg, if we have a timestamp
+                if (!summary.time_span) {
+                  summary[m.field] = m_summary;
+                  return;
+                }
+                m_summary.mean = (f.max - f.min) / summary.time_span;
+                if (m.scale && m.scale !== 1) {
+                  m_summary.mean /= m.scale;
+                }
+              }
+              else {
+                m_summary.min = f.min;
+                m_summary.max = f.max;
+                m_summary.mean = f.mean;
+                if (m.scale && m.scale !== 1) {
+                  m_summary.mean /= m.scale;
+                  m_summary.max /= m.scale;
+                  m_summary.min /= m.scale;
+                }
+              }
+              summary[m.field] = m_summary;
+              m_summary.alert_level = $scope.alertLevel(m, m_summary.mean);
+//              if (f.term === "index_t_200" && m.field === "primaries.docs.count") {
+//                m_summary.alert_level = 1;
+//              }
+//              if (f.term === "index_t_300" && m.field === "primaries.indexing.index_total") {
+//                m_summary.alert_level = 2;
+//              }
+              if (m_summary.alert_level > summary.alert_level) {
+                summary.alert_level = m_summary.alert_level;
+              }
+            });
+          });
+
+
+          if (_.isEmpty(newData)) {
             // call the get data function so it will clear out all other data related objects.
-            $scope.get_data([]);
+            $scope._register_data_end();
+            $scope.select_display_data_and_enrich(newData);
             return;
           }
 
           // in all this cases we don't need the display name, short cut it.
           if (!$scope.panel.display_field || $scope.panel.display_field === $scope.panel.persistent_field ||
-              $scope.panel.compact
+            _.size(newData) > $scope.panel.data_limit_for_display_names
             ) {
-            $scope.get_data(_.map(newPersistentIds, function (id) {
-              return {
-                display_name: id,
-                id: id,
-                // using findWhere here, though its not very efficient
-                selected: (_.findWhere($scope.rows, {id: id}) || {}).selected
-              };
-            }));
+            _.each(newData, function (s) {
+              s.display_name = s.id;
+            });
+            $scope._register_data_end();
+
+            $scope.select_display_data_and_enrich(newData);
             return;
           }
 
           // go get display names.
           mrequest = $scope.ejs.MultiSearchRequest().indices(dashboard.indices);
 
-          _.each(newPersistentIds, function (persistentId) {
+          _.each(newData, function (s) {
             var rowRequest = $scope.ejs.Request().filter(filter);
             rowRequest.query(
               $scope.ejs.ConstantScoreQuery().query(
-                $scope.ejs.TermQuery($scope.panel.persistent_field, persistentId)
+                $scope.ejs.TermQuery($scope.panel.persistent_field, s.id)
               )
             );
             rowRequest.size(1).fields(_.unique([ stripRaw($scope.panel.display_field), stripRaw($scope.panel.persistent_field)]));
@@ -391,10 +473,8 @@ define([
           });
 
           mrequest.doSearch(function (r) {
-
-            esVersion.is(">=1.0.0.RC1").then(function(version) {
-
-              var newRows = [],
+            esVersion.is('>=1.0.0.RC1').then(function(version) {
+              var
                 hit,
                 display_name,
                 persistent_name;
@@ -408,90 +488,192 @@ define([
                 if (version) {
                   display_name = (hit.fields[stripRaw($scope.panel.display_field)] || [ undefined ])[0];
                   persistent_name = (hit.fields[stripRaw($scope.panel.persistent_field)] || [ undefined] )[0];
-                } else {
+                }
+                else {
                   display_name = hit.fields[stripRaw($scope.panel.display_field)];
                   persistent_name = hit.fields[stripRaw($scope.panel.persistent_field)];
                 }
-
-                newRows.push({
-                  display_name: display_name || persistent_name,
-                  id: persistent_name,
-                  // using findWhere here, though its not very efficient
-                  selected: (_.findWhere($scope.rows, {id: persistent_name}) || {}).selected
-                });
+                (newData[persistent_name] || {}).display_name = display_name;
               });
-              $scope.get_data(newRows);
-
+              $scope._register_data_end();
+              $scope.select_display_data_and_enrich(newData);
             });
           }, $scope._register_data_end);
         }, $scope._register_data_end);
 
       };
 
-      $scope.get_data = function (newRows) {
+      function applyNewData(rows, data) {
+        $scope.rows = rows;
+        $scope.data = data;
+        $scope.updateUIFeaturesBasedOnData();
+        $scope.panelMeta.loading = false;
+        $scope.calculateWarnings();
+      }
+
+      $scope.select_display_data_and_enrich = function (newData) {
         // Make sure we have everything for the request to complete
 
-        if (_.isUndefined(newRows)) {
-          newRows = $scope.rows;
+        if (_.isUndefined(newData)) {
+          newData = $scope.data;
         }
 
-        if (dashboard.indices.length === 0 || newRows.length === 0) {
-          $scope.rows = newRows;
-          $scope.data = {};
-          $scope.panelMeta.loading = false;
-          $scope.calculateWarnings();
-          $scope._register_data_end();
+        if (dashboard.indices.length === 0 || _.isEmpty(newData)) {
+          applyNewData([], {});
           return;
         }
 
         $scope.panelMeta.loading = true;
         var
           request,
-          results;
+          results,
+          newRows, newRowsIds;
+
+        // decide what rows we're showing...
+        newRowsIds = [];
+        if ($scope.panel.rowFilter) {
+          var lcFilter = $scope.panel.rowFilter.toLowerCase();
+          _.each(newData, function (s) {
+            var data = s.id.toLowerCase();
+            if (data.indexOf(lcFilter) >= 0) {
+              newRowsIds.push(s.id);
+              return;
+            }
+            data = s.display_name.toLowerCase();
+            if (data.indexOf(lcFilter) >= 0) {
+              newRowsIds.push(s.id);
+            }
+          });
+        }
+        else {
+          _.each(newData, function (s) {
+              newRowsIds.push(s.id);
+            }
+          );
+        }
+
+
+        function compareIdBySelection(id1, id2) {
+          var s1 = newData[id1], s2 = newData[id2];
+          if (s1.selected && !s2.selected) {
+            return -1;
+          }
+          if (!s1.selected && s2.selected) {
+            return 1;
+          }
+          return 0;
+        }
+
+        function compareIdByAlert(id1, id2) {
+          var s1 = newData[id1], s2 = newData[id2];
+          if (s1.alert_level > s2.alert_level) {
+            return -1;
+          }
+          if (s1.alert_level < s2.alert_level) {
+            return 1;
+          }
+          return 0;
+        }
+
+        function compareIdByName(id1, id2) {
+          var s1 = newData[id1], s2 = newData[id2];
+          if (s1.display_name < s2.display_name) {
+            return -1;
+          }
+          if (s1.display_name > s2.display_name) {
+            return 1;
+          }
+          return 0;
+        }
+
+        function compareIdByPanelSort(id1, id2) {
+          var v1 = $scope.get_sort_value(id1, newData),
+            v2 = $scope.get_sort_value(id2, newData),
+            r = 0;
+          if (v1 < v2) {
+            r = -1;
+          }
+          else if (v1 > v2) {
+            r = 1;
+          }
+
+          if ($scope.panel.sort[1] === "desc") {
+            r *= -1;
+          }
+          return r;
+        }
+
+        function concatSorting() {
+          var funcs = arguments;
+          return function (d1, d2) {
+            for (var i = 0; i < funcs.length; i++) {
+              var r = funcs[i].call(this, d1, d2);
+              if (r !== 0) {
+                return r;
+              }
+            }
+            return 0;
+          };
+        }
+
+        if ($scope.panel.sort) {
+          newRowsIds.sort(concatSorting(compareIdByPanelSort, compareIdByAlert, compareIdBySelection));
+          newRowsIds = newRowsIds.slice(0, $scope.rowLimit);
+
+        }
+        else {
+          newRowsIds.sort(concatSorting(compareIdBySelection, compareIdByAlert, compareIdByName));
+          newRowsIds = newRowsIds.slice(0, $scope.rowLimit);
+          // sort again for visual effect
+          // sort again for visual placement
+          newRowsIds.sort(concatSorting(compareIdByAlert, compareIdByName));
+        }
+
+
+        newRows = _.map(newRowsIds, function (id) {
+          return newData[id];
+        });
+
+        // now that we have selections, sort by name (if
+
 
         request = $scope.ejs.Request().indices(dashboard.indices);
-
         var to = filterSrv.timeRange(false).to;
         if (to !== "now") {
           to = kbn.parseDate(to).valueOf() + "||";
         }
+        var filter = $scope.ejs.BoolFilter()
+          .must($scope.ejs.RangeFilter('@timestamp').from(to + "-10m/m").to(to + "/m"))
+          .must($scope.get_mode_filter());
+        request.query($scope.ejs.FilteredQuery($scope.ejs.MatchAllQuery(), filter)).size(0);
 
-        //to = kbn.parseDate(to).valueOf();
-        _.each(_.pluck(newRows, 'id'), function (id) {
-          var filter = $scope.ejs.BoolFilter()
-            .must($scope.ejs.RangeFilter('@timestamp').from(to + "-10m/m").to(to + "/m"))
-            .must($scope.ejs.TermsFilter($scope.panel.persistent_field, id))
-            .must($scope.get_mode_filter());
-
+        _.each(newRows, function (row) {
           _.each($scope.panel.metrics, function (m) {
-            request = request
-              .facet($scope.ejs.StatisticalFacet(id + "_" + m.field)
-                .field(m.field)
-                .facetFilter(filter));
-            request = request.facet($scope.ejs.DateHistogramFacet(id + "_" + m.field + "_history")
+            if (!row[m.field] || row[m.field].series) {
+              // already have it or the field was not present in the first iteration. Ignore for now.
+              return;
+            }
+            request.facet($scope.ejs.DateHistogramFacet($scope.get_history_key(row.id, m))
               .keyField('@timestamp').valueField(m.field).interval('1m')
-              .facetFilter(filter)).size(0);
+              .facetFilter($scope.ejs.TermFilter($scope.panel.persistent_field, row.id))
+            );
+
           });
 
-          // Get the max of timestamp to figure out the last time the node reported
-          request = request
-            .facet($scope.ejs.StatisticalFacet(id + "_@timestamp")
-              .field("@timestamp")
-              .facetFilter(filter));
-
         });
+
+        if (!request.facet() || request.facet().length === 0) {
+          applyNewData(newRows, newData);
+          return;
+        }
 
         results = request.doSearch();
 
         // Populate scope when we have results
         results.then(function (results) {
-            $scope.rows = newRows;
-            $scope.data = normalizeFacetResults(results.facets, newRows, $scope.panel.metrics);
-            $scope.panelMeta.loading = false;
-            $scope.calculateWarnings();
-            $scope._register_data_end();
-          },
-          $scope._register_data_end
+            addHistoryFacetResults(results.facets, newRows, newData, $scope.panel.metrics);
+            applyNewData(newRows, newData);
+          }
         );
       };
 
@@ -499,30 +681,29 @@ define([
         return (new Date().getTime() - time > allowed) ? false : true;
       };
 
-      var normalizeFacetResults = function (facets, rows, metrics) {
-        facets = facets || {}; // deal better with no data.
+      var addHistoryFacetResults = function (facets, rows, data, metrics) {
         _.each(metrics, function (m) {
-          _.each(_.pluck(rows, 'id'), function (id) {
-            var summary_key = id + "_" + m.field;
-            var history_key = id + "_" + m.field + "_history";
-            var summary = facets[summary_key];
-            if (!summary) {
+          _.each(rows, function (row) {
+            var history_key = $scope.get_history_key(row.id, m);
+            var history_facet = facets[history_key];
+            if (!history_facet) {
               // no data for this chart.
               return;
             }
-            var series_data = _.pluck(facets[history_key].entries, m.derivative ? 'min' : 'mean');
-            var series_time = _.pluck(facets[history_key].entries, 'time');
+            var series_data = _.pluck(history_facet.entries, m.derivative ? 'min' : 'mean');
+            var series_time = _.pluck(history_facet.entries, 'time');
+            var summary = row[m.field];
 
             if (m.scale && m.scale !== 1) {
               series_data = _.map(series_data, function (v) {
                 return v / m.scale;
               });
-              summary.mean /= m.scale;
-              summary.max /= m.scale;
-              summary.min /= m.scale;
             }
 
             if (m.derivative) {
+
+              // update mean to match min & max. Mean is calculated using the entire period's min/max
+              // this can be different than the calculation here that is based of the min of every small bucket
 
               var _l = series_data.length - 1;
               if (_l <= 0) {
@@ -533,12 +714,14 @@ define([
                 summary.mean = (series_data[_l] - series_data[0]) / avg_time;
               }
 
+
               series_data = _.map(series_data, function (p, i) {
 
                 var _v;
                 if (i === 0) {
                   _v = null;
-                } else {
+                }
+                else {
                   var _t = ((series_time[i] - series_time[i - 1]) / 1000); // milliseconds -> seconds.
                   _v = (p - series_data[i - 1]) / _t;
                 }
@@ -551,13 +734,16 @@ define([
               summary.min = _.reduce(series_data, function (m, v) {
                 return m > v && v != null ? v : m;
               }, Number.POSITIVE_INFINITY);
+              if (summary.max === Number.NEGATIVE_INFINITY) {
+                summary.max = null;
+              }
+              if (summary.min === Number.POSITIVE_INFINITY) {
+                summary.min = null;
+              }
 
             }
 
-            var series = _.zip(series_time, series_data);
-
-            facets[summary_key] = summary;
-            facets[history_key].series = series;
+            summary.series = _.zip(series_time, series_data);
 
           });
         });
@@ -565,32 +751,53 @@ define([
         return facets;
       };
 
-      $scope.hasSelected = function (nodes) {
-        return _.some(nodes, function (n) {
+      $scope.hasSelected = function (rows) {
+        return _.some(rows || $scope.data, function (n) {
           return n.selected;
         });
       };
 
-      $scope.get_sort_value = function (row) {
-        if ($scope.panel.sort[0] === '__name__') {
-          return row.display_name;
+      $scope.selectedData = function (data) {
+        return _.filter(data || $scope.data, function (d) {
+          return d.selected;
+        });
+      };
+
+      $scope.get_sort_value = function (id, data) {
+        if (!data) {
+          data = $scope.data;
         }
-        return $scope.data[row.id + '_' + $scope.panel.sort[0]].mean;
+        id = data[id];
+        if ($scope.panel.sort[0] === '__name__') {
+          return id.display_name;
+        }
+        return id[$scope.panel.sort[0]].mean;
       };
 
       $scope.set_sort = function (field) {
         if ($scope.panel.sort && $scope.panel.sort[0] === field) {
-          $scope.panel.sort[1] = $scope.panel.sort[1] === "asc" ? "desc" : "asc";
+          if ($scope.panel.sort[1] === "asc") {
+            $scope.panel.sort[1] = "desc";
+          }
+          else if ($scope.panel.sort[1] === "desc") {
+            $scope.panel.sort = null;
+          }
+          else {
+            // shouldn't happen, but whatever
+            $scope.panel.sort[1] = "asc";
+          }
         }
         else {
           $scope.panel.sort = [field, 'asc'];
         }
+        $scope.select_display_data_and_enrich();
       };
 
       $scope.showFullTable = function () {
         if ($scope.panel.compact) {
           return false;
-        } else {
+        }
+        else {
           return true;
         }
       };
@@ -609,17 +816,16 @@ define([
         return !a ? "" : (a.type === "upper_bound" ? ">" : "<") + y_format_metric_value(a.threshold, metric);
       };
 
-
       $scope.detailViewLink = function (rows, fields) {
         var
-        query,
-        time,
-        show,
-        from,
-        to;
+          query,
+          time,
+          show,
+          from,
+          to;
 
         if (_.isUndefined(rows)) {
-          rows = _.where($scope.rows, {selected: true});
+          rows = $scope.selectedData();
         }
         rows = _.map(rows, function (row) {
           query = $scope.panel.persistent_field + ':"' + row.id + '"';
@@ -629,15 +835,15 @@ define([
           };
         });
         if (rows.length === 0) {
-          /*jshint -W107 */
-          return "javascript:;";
+          return null;
         }
         rows = JSON.stringify(rows);
         time = filterSrv.timeRange(false);
-        show;
+
         if (!_.isUndefined(fields)) {
           show = "&show=" + fields.join(",");
-        } else {
+        }
+        else {
           show = "";
         }
 
@@ -663,23 +869,13 @@ define([
       };
 
       $scope.calculateWarnings = function () {
-        $scope.warnLevels = {_global_: {}};
+        $scope.warnLevels = {};
         _.each($scope.panel.metrics, function (metric) {
-          $scope.warnLevels._global_[metric.field] = 0;
-          _.each(_.pluck($scope.rows, 'id'), function (id) {
-            var num, level, summary;
-
-            $scope.warnLevels[id] = $scope.warnLevels[id] || {};
-
-            summary = $scope.data[id + '_' + metric.field];
-            if (!summary) {
-              return; // no data
-            }
-            num = summary.mean;
-            level = $scope.alertLevel(metric, num);
-            $scope.warnLevels[id][metric.field] = level;
-            if (level > $scope.warnLevels._global_[metric.field]) {
-              $scope.warnLevels._global_[metric.field] = level;
+          $scope.warnLevels[metric.field] = 0;
+          _.each($scope.data, function (s) {
+            var level = (s[metric.field] || {}).alert_level;
+            if (!_.isUndefined(level) && level > $scope.warnLevels[metric.field]) {
+              $scope.warnLevels[metric.field] = level;
             }
           });
         });
@@ -700,7 +896,8 @@ define([
         }
         if (testAlert(metric.error, num)) {
           level = 2;
-        } else if (testAlert(metric.warning, num)) {
+        }
+        else if (testAlert(metric.warning, num)) {
           level = 1;
         }
 
@@ -708,7 +905,8 @@ define([
           var r = Math.random();
           if (r > 0.9) {
             level = 2;
-          } else if (r > 0.8) {
+          }
+          else if (r > 0.8) {
             level = 1;
           }
 
@@ -735,7 +933,8 @@ define([
         if (s[0] === '<') {
           ret.type = "lower_bound";
           s = s.substr(1);
-        } else if (s[0] === '>') {
+        }
+        else if (s[0] === '>') {
           s = s.substr(1);
         }
 
@@ -747,7 +946,7 @@ define([
 
       };
 
-      $scope.addMetric = function (panel,metric) {
+      $scope.addMetric = function (panel, metric) {
         metric = metric || {};
         metric = metricDefaults(metric);
         panel.metrics.push(metric);
@@ -780,16 +979,21 @@ define([
           index: -1
         };
         if ($scope._needs_refresh) {
-          $scope.get_rows();
+          $scope.get_data();
         }
         $scope._needs_refresh = false;
         $scope.$emit('render');
       };
 
-      $scope.deleteMetric = function (panel,index) {
+      $scope.deleteMetric = function (panel, index) {
         panel.metrics = _.without(panel.metrics, panel.metrics[index]);
       };
 
+      $scope.onRowFilterChange = _.debounce(function () {
+        $scope.$apply(function (scope) {
+          $scope.select_display_data_and_enrich(scope.data);
+        });
+      }, 500);
 
     });
 
@@ -807,7 +1011,8 @@ define([
               // it is valid
               ctrl.$setValidity('alertValue', true);
               return scope.parseAlert(viewValue);
-            } else {
+            }
+            else {
               // it is invalid, return undefined (no model update)
               ctrl.$setValidity('alertValue', false);
               return undefined;

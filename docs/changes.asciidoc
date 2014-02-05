@@ -1,0 +1,11 @@
+[[change_list]]
+== Change list
+
+=== 1.0.2
+  - Kibana uses `window.location.protocol` (http or https) to make ES calls.
+  - Added support for basic authentication when sending data from agent. See <<configuration>>.
+  - Reduced DEBUG logging verbosity.
+
+=== 1.0.1
+  - fixed an issue with usage statistics report.
+  - improve logging message when running on old Elasticsearch versions.

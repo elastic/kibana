@@ -9,7 +9,8 @@ define([
   'require',
   'utils',
   'zeroclip',
-  'ace_ext_language_tools'
+  'ace_ext_language_tools',
+  'ace_ext_searchbox'
 ], function (ace, Autocomplete, $, mappings, output, SenseEditor, settings, require, utils, ZeroClipboard) {
   'use strict';
 
@@ -28,6 +29,9 @@ define([
   });
 
   input.autocomplete = new Autocomplete(input);
+
+  input.$actions = $("#editor_actions");
+
 
   ace.require('ace/ext/language_tools').addCompleter(input.autocomplete.completer);
 
@@ -74,7 +78,7 @@ define([
     zc.on('wrongflash noflash', function () {
       if (!localStorage.getItem('flash_warning_shown')) {
         alert('Sense needs flash version 10.0 or greater in order to provide "Copy as cURL" functionality');
-        localStorage.setItem('flash_warning_shown');
+        localStorage.setItem('flash_warning_shown', 'true');
       }
       $copyAsCURL.hide();
     });

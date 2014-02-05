@@ -37,13 +37,19 @@ public class Plugin extends AbstractPlugin {
     final ESLogger logger = Loggers.getLogger(getClass());
 
     // copied here because we can't depend on it available
-    public static final int V_0_90_8_ID = /*00*/900899;
+    public static final int V_0_90_9_ID = /*00*/900999;
+    public static final int V_1_0_0_Beta1_ID = 1000001;
+    public static final int V_1_0_0_Beta2_ID = 1000002;
+
 
     public final boolean enabled;
 
     public Plugin() {
-        if (Version.CURRENT.id < V_0_90_8_ID) {
-            logger.warn("Elasticsearch version [{}] is too old. Marvel is disabled (requires version 0.90.8 or higher)", Version.CURRENT);
+        if (Version.CURRENT.id == V_1_0_0_Beta1_ID || Version.CURRENT.id == V_1_0_0_Beta2_ID) {
+            logger.warn("Elasticsearch version [{}] is incompatible with Marvel. Please upgrade to version 1.0.0.RC1 or higher.", Version.CURRENT);
+            enabled = false;
+        } else if (Version.CURRENT.id < V_0_90_9_ID) {
+            logger.warn("Elasticsearch version [{}] is too old. Marvel is disabled (requires version 0.90.9 or higher).", Version.CURRENT);
             enabled = false;
         } else {
             enabled = true;

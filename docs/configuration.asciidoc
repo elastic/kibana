@@ -1,0 +1,112 @@
+[[configuration]]
+== Configuration Options
+
+[[stats-export]]
+=== Statistics exporting
+
+`marvel.agent.exporter.es.hosts`::
+
+A list of hosts in `hostname:port` format to which statistics  and events will
+be sent. Data will be sent to the first host, but will failover to the next
+host(s) if the first is not reachable. Defaults to `["localhost:9200"]`.
++
+added[1.0.2] - HTTP Basic authentication credentials can be specified as part of the host name,
+ i.e., ["user:pwd@host:9200"]
+
+
+`marvel.agent.enabled`::
+
+Set this to `false` to disable all exporting of data. Set this on the
+monitoring cluster, which is used to receive and analyze data from production,
+to avoid collecting data from the monitoring cluster itself.
+
+
+`marvel.agent.indices`::
+
+Controls which indices to export data for.  Uses simple `test1,test2,test3`
+notation (or `_all` for all indices). It also supports  wildcards, for
+example: `test*`, and the ability to "add" (`+`) and "remove" (`-`),  for
+example: `+test*,-test3`. Defaults to `*`
+
+`marvel.agent.exporter.es.index.timeformat`::
+
+Controls the time component in the index name to  which data is exported.
+Defaults to `"YYYY.MM.dd"`, which produces index names like:
+`.marvel-2014.01.28`. Supports date formats as explained
+http://joda-time.sourceforge.net/api-release/org/joda/time/format/DateTimeFormat.html[here].
+
+[[marvel-indices]]
+=== Marvel indices
+
+Marvel stores it's data using time based indices. By default, Marvel generates
+an index per day, with one shard and one replica. We expect this to be a good
+default which will fit most use cases. You may need to change it for very big
+installations.
+
+[[config-marvel-indices]]
+==== Configuring Marvel's indices
+
+Marvel uses an {ref}/indices-templates.html[index template] to preconfigure newly created indices. You can retrieve it with:
+
+[source,sh]
+----------------------------------
+GET /_template/marvel
+----------------------------------
+
+To change the default settings, you may add your own template to override it. Make sure your template uses
+the `.marvel-*` matching pattern and has an order of 1 or higher. For example, this template will increase the
+number of shards to 5:
+
+[source,json]
+----------------------------------
+PUT /_template/custom_marvel
+{
+    "template": ".marvel*",
+    "order": 1,
+    "settings": {
+        "number_of_shards": 5
+    }
+}
+----------------------------------
+
+IMPORTANT: We recommend only changing the `settings` section. Other sections are
+important for the correct operation of the dashboards.
+
+For reference, here is the `settings` section of the default template:
+
+[source,json]
+----------------------------------
+{
+    "template": ".marvel*",
+    "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 1,
+        "analysis": {
+            "analyzer": {
+                "default": {
+                    "type": "standard",
+                    "stopwords": "_none_"
+                }
+            }
+        },
+        "mapper.dynamic": true,
+        "marvel.index_format": 1
+    }
+    .....
+}
+----------------------------------
+
+[[relevant-settings]]
+=== Other relevant Elasticsearch settings
+
+Marvel relies on Elasticsearch's capability to automatically create new indices
+when indexing documents. Some people like to disable this feature to better
+protect against mistakes in production clusters. To do so but still allow the
+creation of Marvel indices you need to set the following:
+
+[source,yaml]
+----------------------
+action.auto_create_index: .marvel-*
+----------------------
+
+More information is available {ref}/docs-index_.html#index-creation[here]

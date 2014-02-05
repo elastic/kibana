@@ -71,6 +71,26 @@ define([
     deepEqual(mappings.getFields("index").sort(fc), [f("number", "int"), f("str", "string") ]);
   });
 
+  test("Simple fields - 1.0 style", function () {
+    mappings.loadMappings({
+      "index": {
+        "mappings": {
+          "tweet": {
+            "properties": {
+              "str": {
+                "type": "string"
+              },
+              "number": {
+                "type": "int"
+              }
+            }
+          }
+        }
+      }
+    });
+
+    deepEqual(mappings.getFields("index").sort(fc), [f("number", "int"), f("str", "string") ]);
+  });
 
   test("Nested fields", function () {
     mappings.loadMappings({
@@ -208,13 +228,13 @@ define([
     });
 
     deepEqual(mappings.getIndices().sort(),
-       [ "_all", "alias1", "alias2", "test_index1", "test_index2" ]
+      [ "_all", "alias1", "alias2", "test_index1", "test_index2" ]
     );
     deepEqual(mappings.getIndices(false).sort(),
-        ["test_index1", "test_index2" ]
+      ["test_index1", "test_index2" ]
     );
     deepEqual(mappings.expandAliases(["alias1", "test_index2"]).sort(),
-        ["test_index1", "test_index2" ]
+      ["test_index1", "test_index2" ]
     );
     deepEqual(mappings.expandAliases("alias2"), "test_index2");
   });

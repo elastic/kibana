@@ -11,6 +11,7 @@
                 }
             }
         },
+        "mapper.dynamic": true,
         "marvel.index_format": 1
     },
     "mappings": {
@@ -41,57 +42,156 @@
         },
         "node_stats": {
             "properties": {
-                "indices.percolate.size_in_bytes": {
-                    "type": "long"
+                "fs": {
+                    "properties": {
+                        "total": {
+                            "properties": {
+                                "disk_io_op": {
+                                    "type": "long"
+                                },
+                                "disk_reads": {
+                                    "type": "long"
+                                },
+                                "disk_writes": {
+                                    "type": "long"
+                                },
+                                "disk_io_size_in_bytes": {
+                                    "type": "long"
+                                },
+                                "disk_read_size_in_bytes": {
+                                    "type": "long"
+                                },
+                                "disk_write_size_in_bytes": {
+                                    "type": "long"
+                                }
+                            }
+                        }
+                    }
                 },
-                "jvm.buffer_pools.direct.used_in_bytes": {
-                    "type": "long"
+                "indices": {
+                    "properties": {
+                        "percolate": {
+                            "properties": {
+                                "size_in_bytes": {
+                                    "type": "long"
+                                }
+                            }
+                        }
+                    }
                 },
-                "jvm.buffer_pools.mapped.used_in_bytes": {
-                    "type": "long"
+                "jvm": {
+                    "properties": {
+                        "buffer_pools": {
+                            "properties": {
+                                "direct": {
+                                    "properties": {
+                                        "used_in_bytes": {
+                                            "type": "long"
+                                        }
+                                    }
+                                },
+                                "mapped": {
+                                    "properties": {
+                                        "used_in_bytes": {
+                                            "type": "long"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "gc": {
+                            "properties": {
+                                "collectors": {
+                                    "properties": {
+                                        "young": {
+                                            "properties": {
+                                                "collection_count": {
+                                                    "type": "long"
+                                                },
+                                                "collection_time_in_millis": {
+                                                    "type": "long"
+                                                }
+                                            }
+                                        },
+                                        "old": {
+                                            "properties": {
+                                                "collection_count": {
+                                                    "type": "long"
+                                                },
+                                                "collection_time_in_millis": {
+                                                    "type": "long"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 },
-                "jvm.gc.collectors.young.collection_count": {
-                    "type": "long"
+                "indices": {
+                    "properties": {
+                        "percolate": {
+                            "properties": {
+                                "total": {
+                                    "type": "long"
+                                },
+                                "time_in_millis": {
+                                    "type": "long"
+                                },
+                                "queries": {
+                                    "type": "long"
+                                },
+                                "memory_size_in_bytes": {
+                                    "type": "long"
+                                }
+                            }
+                        }
+                    }
                 },
-                "jvm.gc.collectors.young.collection_time_in_millis": {
-                    "type": "long"
-                },
-                "jvm.gc.collectors.old.collection_count": {
-                    "type": "long"
-                },
-                "jvm.gc.collectors.old.collection_time_in_millis": {
-                    "type": "long"
-                },
-                "indices.percolate.total": {
-                    "type": "long"
-                },
-                "indices.percolate.time_in_millis": {
-                    "type": "long"
-                },
-                "indices.percolate.queries": {
-                    "type": "long"
-                },
-                "indices.percolate.memory_size_in_bytes": {
-                    "type": "long"
+                "os": {
+                    "properties": {
+                        "load_average": {
+                            "properties": {
+                                "1m": {
+                                    "type": "float"
+                                },
+                                "5m": {
+                                    "type": "float"
+                                },
+                                "15m": {
+                                    "type": "float"
+                                }
+                            }
+                        }
+                    }
                 }
             }
         },
         "index_stats": {
             "properties": {
-                "total.percolate.memory_size_in_bytes": {
-                    "type": "long"
-                },
-                "total.percolate.time_in_millis": {
-                    "type": "long"
-                },
-                "total.percolate.queries": {
-                    "type": "long"
-                },
-                "total.percolate.total": {
-                    "type": "long"
+                "total": {
+                    "properties": {
+
+                        "percolate": {
+                            "properties": {
+                                "total": {
+                                    "type": "long"
+                                },
+                                "time_in_millis": {
+                                    "type": "long"
+                                },
+                                "queries": {
+                                    "type": "long"
+                                },
+                                "memory_size_in_bytes": {
+                                    "type": "long"
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
-
     }
 }

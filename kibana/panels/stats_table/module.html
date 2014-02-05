@@ -32,10 +32,11 @@
       height: 10px;
       width: 50px;
     }
+
   </style>
 
-  <div class="pull-left marvel-header marvel-table" ng-show="rows.length > 0">
-    <input type="text" class="input-medium" placeholder="Filter {{panel.mode}}..." ng-model="panel.rowFilter"> <span class="count">{{(rows|filter:panel.rowFilter|limitTo:rowLimit).length}} of {{rows.length}} {{panel.mode}}</span> / {{(rows|filter:{'selected':true}).length}} selected / Last 10m </span>
+  <div class="pull-left marvel-header marvel-table" ng-show="rows.length > 0 || panel.rowFilter">
+    <input type="text" class="input-medium" placeholder="Filter {{panel.mode}}..." ng-model="panel.rowFilter" ng-change="onRowFilterChange()"> <span class="count">{{rows.length}} of {{_.size(data)}} {{panel.mode}}</span> / {{selectedData().length}} selected / Last 10m </span>
     <br>
     <span class="small muted pull-right" ng-show="!viewSelect"> <i class="icon-warning"></i> Compact view. Filter {{panel.mode}} to 5 or less, or set the page refresh rate to 2m or greater for more options.</span>
   </div>
@@ -50,34 +51,34 @@
       <th class="pointer" ng-click="set_sort('__name__')">
         {{panel.mode}}
         <i ng-show="'__name__' == panel.sort[0]" class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
-        <a ng-disabled="!hasSelected(rows)" id="detail_view_link" ng-href="{{detailViewLink()}}" class="btn btn-mini btn-info pull-right"  bs-tooltip="detailViewTip()" data-placement="right">Dashboard</a>
+        <a ng-disabled="!hasSelected()" id="detail_view_link" ng-href="{{detailViewLink()}}" class="btn btn-mini btn-info pull-right"  bs-tooltip="detailViewTip()" data-placement="right">Dashboard</a>
       </th>
 
-      <th ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels['_global_'][metric.field])" class="pointer" ng-click="set_sort(metric.field)">
+      <th ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels[metric.field])" class="pointer" ng-click="set_sort(metric.field)">
         {{metric.name}}
         <i ng-show='metric.field == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
       </th>
     </thead>
-    <tr ng-repeat="row in rows | filter:panel.rowFilter | orderBy:get_sort_value:panel.sort[1]=='desc'|limitTo:rowLimit">
+    <tr ng-repeat="row in rows" >
       <td>
-        <div class="checkbox">
-          <label>
+        <div>
+          <label class="checkbox" ng-class="{'text-warning':!row.alive}">
             <input type="checkbox" ng-model="row.selected" ng-checked="row.selected">
-            <span class="pointer" ng-click="rowClick(row)">{{row.display_name}}</span>
-            <div class="marvel-persistent-name pointer" ng-hide="row.id == row.display_name" ng-click="rowClick(row)">{{row.id}} <i bs-tooltip="'No report has been received for more than '+staleSeconds+' seconds'" ng-show="!isCurrent(data[row.id+'_@timestamp'].max,staleSeconds*1000)" class="icon-exclamation-sign"></i></div>
+            <span class="pointer" ng-click="rowClick(row)">{{row.display_name}} <i bs-tooltip="'No report has been received for more than '+staleSeconds+' seconds'" ng-show="!row.alive" class="icon-exclamation-sign"></i></span>
+            <div class="marvel-persistent-name pointer" ng-hide="row.id == row.display_name" ng-click="rowClick(row)">{{row.id}}</div>
           </label>
         </div>
       </td>
-      <td ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels[row.id][metric.field])">
+      <td ng-repeat="metric in panel.metrics" ng-class="alertClass(row[metric.field].alert_level)">
         <div class="marvel-mean pointer" ng-click="rowClick(row,metric)">
-          <span bo-text="(_.isNull(data[row.id+'_'+metric.field].mean)?0:data[row.id+'_'+metric.field].mean) | metric_format:metric"></span>
+          <span bo-text="(_.isNull(row[metric.field].mean)?'n/a':row[metric.field].mean) | metric_format:metric"></span>
           <br>
 
-          <div class="marvel-stats-sparkline" panel='panel' field="metric.field" series="data[row.id+'_'+metric.field+'_history'].series"></div>
+          <div class="marvel-stats-sparkline" panel='panel' field="metric.field" series="row[metric.field].series"></div>
         </div>
         <div class="marvel-extended pointer" ng-click="rowClick(row,metric)">
-          <span>min: <span bo-text="(_.isNull(data[row.id+'_'+metric.field].min)?0:data[row.id+'_'+metric.field].min) | metric_format:metric"></span></span><br>
-          <span>max: <span bo-text="(_.isNull(data[row.id+'_'+metric.field].max)?0:data[row.id+'_'+metric.field].max) | metric_format:metric"></span></span>
+          <span>min: <span bo-text="(_.isNull(row[metric.field].min)?'n/a':row[metric.field].min) | metric_format:metric"></span></span><br>
+          <span>max: <span bo-text="(_.isNull(row[metric.field].max)?'n/a':row[metric.field].max) | metric_format:metric"></span></span>
         </div>
       </td>
     </tr>
@@ -89,15 +90,15 @@
       <th class="pointer" ng-click="set_sort('__name__')">
         {{panel.mode}}
         <i ng-show="'__name__' == panel.sort[0]" class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
-        <a ng-disabled="!hasSelected(rows)" id="detail_view_link" ng-href="{{detailViewLink()}}" class="btn btn-mini btn-info pull-right"  bs-tooltip="detailViewTip()" data-placement="right">Dashboard</a>
+        <a ng-disabled="!hasSelected()" id="detail_view_link" ng-href="{{detailViewLink()}}" class="btn btn-mini btn-info pull-right"  bs-tooltip="detailViewTip()" data-placement="right">Dashboard</a>
       </th>
 
-      <th ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels['_global_'][metric.field])" class="pointer" ng-click="set_sort(metric.field)">
+      <th ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels[metric.field])" class="pointer" ng-click="set_sort(metric.field)">
           {{metric.name}}
           <i ng-show='metric.field == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
       </th>
     </thead>
-    <tr ng-repeat="row in rows | filter:panel.rowFilter | orderBy:get_sort_value:panel.sort[1]=='desc'|limitTo:rowLimit">
+    <tr ng-repeat="row in rows">
       <td>
         <div class="checkbox">
           <label>
@@ -106,11 +107,11 @@
           <span class="pointer" ng-click="rowClick(row)">{{ row.id }}</span>
         </div>
       </td>
-      <td ng-repeat="metric in panel.metrics" ng-class="alertClass(warnLevels[row.id][metric.field])">
+      <td ng-repeat="metric in panel.metrics" ng-class="alertClass(row[metric.field].alert_level)">
         <div class="pointer" ng-click="rowClick(row,metric)">
-          <span bo-text="(_.isNull(data[row.id+'_'+metric.field].mean)?0:data[row.id+'_'+metric.field].mean) | metric_format:metric"></span>
+          <span bo-text="(_.isNull(row[metric.field].mean)?'n/a':row[metric.field].mean) | metric_format:metric"></span>
 
-          <div ng-if="sparkLines" class="marvel-stats-sparkline pointer" ng-click="rowClick(row,metric)" panel='panel' field="metric.field" series="data[row.id+'_'+metric.field+'_history'].series"></div>
+          <div ng-if="sparkLines" class="marvel-stats-sparkline pointer" ng-click="rowClick(row,metric)" panel='panel' field="metric.field" series="row[metric.field].series"></div>
         </div>
       </td>
     </tr>

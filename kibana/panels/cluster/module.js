@@ -12,17 +12,18 @@
 define([
   'angular',
   'app',
+  'kbn',
   'lodash',
-  'kbn'
+  'factories/store'
 ],
-function (angular, app, _, kbn) {
+function (angular, app, kbn, _) {
   'use strict';
 
   var module = angular.module('kibana.panels.marvel.cluster', []);
   app.useModule(module);
 
-  module.controller('marvel.cluster', function($scope, $modal, $q, $cookies, $http,
-    querySrv, dashboard, filterSrv, kbnVersion) {
+  module.controller('marvel.cluster', function($scope, $modal, $q, $http,
+    querySrv, dashboard, filterSrv, kbnVersion, storeFactory) {
     $scope.panelMeta = {
       modals : [],
       editorTabs : [],
@@ -37,15 +38,19 @@ function (angular, app, _, kbn) {
     _.defaults($scope.panel,_d);
 
     var reportInterval = 86400000;
-    //var reportInterval = 30000;
+
+    // setup the optIn and version values
+    var marvelOpts = storeFactory($scope, 'marvelOpts', {
+      report: void 0,
+      version: void 0,
+      lastReport: void 0
+    });
 
     $scope.init = function () {
-      // So we can access the cookies object from the view
-      $scope.cookies = $cookies;
       $scope.kbnVersion = kbnVersion;
 
       // If the user hasn't opted in or out, ask them to.
-      if(_.isUndefined($cookies.marvelOptIn) || $cookies.marvelVersion !== kbnVersion) {
+      if(marvelOpts.version == null || marvelOpts.version !== kbnVersion) {
         $scope.optInModal();
       }
 
@@ -129,15 +134,15 @@ function (angular, app, _, kbn) {
       $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
     };
 
-    $scope.setOptIn = function(c) {
-      $cookies.marvelVersion = kbnVersion;
-      $cookies.marvelOptIn = c;
+    $scope.setOptIn = function(val) {
+      marvelOpts.version = kbnVersion;
+      marvelOpts.report = val;
     };
 
-    $scope.clearMarvelCookies = function() {
-      delete $cookies.marvelOptIn;
-      delete $cookies.marvelVersion;
-      delete $cookies.marvelLastReport;
+    $scope.clearMarvelStorage = function() {
+      marvelOpts.report = void 0;
+      marvelOpts.version = void 0;
+      marvelOpts.lastReport = void 0;
     };
 
     $scope.optInModal = function() {
@@ -157,10 +162,10 @@ function (angular, app, _, kbn) {
 
     // Checks if we should send a report
     var checkReport = function() {
-      if($cookies.marvelOptIn === 'IN') {
-        if(_.isUndefined($cookies.marvelLastReport)) {
+      if(marvelOpts.report) {
+        if(marvelOpts.lastReport == null) {
           return true;
-        } else if (new Date().getTime() - parseInt($cookies.marvelLastReport,10) > reportInterval) {
+        } else if (new Date().getTime() - parseInt(marvelOpts.lastReport,10) > reportInterval) {
           return true;
         } else {
           return false;
@@ -182,7 +187,7 @@ function (angular, app, _, kbn) {
         $scope.config.stats_report_url,
         data
       ).success(function() {
-        $cookies.marvelLastReport = thisReport;
+        marvelOpts.lastReport = thisReport;
       });
     };
 

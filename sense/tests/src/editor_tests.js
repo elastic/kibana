@@ -88,6 +88,31 @@ define([
     });
   });
 
+  utils_test("simple request range, prefixed with spaces", "   " + simple_request.prefix, simple_request.data, function () {
+    input.getCurrentRequestRange(function (range) {
+      var expected = new aceRange.Range(
+        0, 0,
+        3, 1
+      );
+      deepEqual(range, expected);
+      start();
+    });
+  });
+
+  utils_test("simple request data, prefixed with spaces", "    " + simple_request.prefix, simple_request.data, function () {
+    input.getCurrentRequest(function (request) {
+      var expected = {
+        method: "POST",
+        url: "_search",
+        data: [simple_request.data]
+      };
+
+      deepEqual(request, expected);
+      start();
+    });
+  });
+
+
   utils_test("single line request range", single_line_request.prefix, single_line_request.data, function () {
     input.getCurrentRequestRange(function (range) {
       var expected = new aceRange.Range(

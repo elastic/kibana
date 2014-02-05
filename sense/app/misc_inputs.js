@@ -3,10 +3,11 @@ define([
   'history',
   'input',
   'mappings',
-  
+  'output',
+
   'bootstrap',
   'jquery-ui'
-], function ($, history, input, mappings) {
+], function ($, history, input, mappings, output) {
   'use strict';
 
   var $esServer = $("#es_server");
@@ -32,9 +33,36 @@ define([
     e.preventDefault();
   });
 
+  var $header = $('.navbar.navbar-static-top');
+
+  // containers for the two editors
+  var $left = input.$el.parent();
+  var $right = output.$el.parent();
+
+  $left.resizable({
+    autoHide: false,
+    handles: 'e',
+    start: function () {
+      $resizer.addClass('active');
+    },
+    resize: function () {
+      $right.css('left', $left.outerWidth() + 20);
+    },
+    stop: function () {
+      $resizer.removeClass('active');
+      $left.css('height', 'auto'); // $.resizeable sets the height which prevents it from reshaping later
+      input.resize(true);
+      output.resize(true);
+    }
+  });
+
+  var $resizer = input.$el.siblings('.ui-resizable-e');
+
   return {
     $esServer: $esServer,
     $send: $send,
-    $autoIndent: $autoIndent
+    $autoIndent: $autoIndent,
+    $header: $header,
+    $resizer: $resizer
   };
 })

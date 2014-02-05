@@ -20,13 +20,30 @@ body.fouc {
   width: 100px;
 }
 
+#editor_container {
+  position: absolute;
+  top: 50px;
+  bottom: 5px;
+  left: 5px;
+  width: 468px;
+}
+
+#output_container {
+  position: absolute;
+  top: 50px;
+  bottom: 5px;
+  left: 488px;
+  right: 5px;
+}
+
 #editor_actions {
   position: absolute;
-  top: 47px;
-  right: 100%;
+  top: 0;
+  right: 0;
   line-height: 1;
-  margin-right: -468px;
-  z-index: 100;
+  padding: 1px 3px 0 0;
+  /* by pass any other element in ace and resize bar, but not modal popups  */
+  z-index: 1005;
 }
 
 #editor_actions > .btn-group > a {
@@ -44,25 +61,9 @@ body.fouc {
   z-index: 100;
 }
 
-#editor_container {
-  position: absolute;
-  top: 50px;
-  bottom: 5px;
-  left: 5px;
-  width: 468px;
-}
-
-#output_container {
-  position: absolute;
-  top: 50px;
-  bottom: 5px;
-  left: 488px;
-  right: 5px;
-  min-width: 700px;
-}
-
 #output, #editor {
   height: 100%;
+  width: 100%;
 }
 
 .ace_gutter {
@@ -72,7 +73,8 @@ body.fouc {
 #autocomplete {
   visibility: hidden;
   position: absolute;
-  z-index: 1000;
+  /* by pass any other element in ace and resize bar, but not modal popups  */
+  z-index: 1003;
   margin-top: 22px;
   /*font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;*/
   /*font-size: 12px;*/
@@ -217,17 +219,16 @@ body.fouc {
 
 .ui-resizable-e {
   cursor: ew-resize;
-  width: 10px;
-  right: -5px;
-  top: 0;
-  bottom: 0;
+  width: 13px;
+  right: -14px;
+  top: -1px;
+  bottom: -2px;
   background-color: transparent;
   position: absolute;
-  z-index: 50 !important;
 }
 
 .ui-resizable-e:hover {
-  background-color: rgba(194, 193, 208, 0.80);
+  background-color: #DCDCDC;
 }
 
 .ui-resizable-e.active {

@@ -5,7 +5,7 @@ module.exports = function (grunt) {
   var config = {
     pkg: grunt.file.readJSON('package.json'),
     kibanaCheckoutDir: './kibana/vendor/kibana',
-    kibanaRevision: 'master',
+    kibanaRevision: 'marvel',
     agentDir: 'agent',
     buildDir: 'build',
     packageDir: 'build/packages',
@@ -19,7 +19,7 @@ module.exports = function (grunt) {
       dist: '"https://marvel-stats.elasticsearch.com/"'
     },
     kibanaPort: grunt.option('port') ||  5601,
-    kibanaHost: 'localhost'
+    kibanaHost: grunt.option('host') ||'localhost'
   };
 
   // more detailed config

@@ -27,6 +27,7 @@ import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.ShardStats;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.routing.ShardRouting;
+import org.elasticsearch.common.Base64;
 import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.component.AbstractLifecycleComponent;
 import org.elasticsearch.common.io.Streams;
@@ -119,7 +120,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         clusterStatsRenderer = new ClusterStatsRenderer();
         eventsRenderer = new EventsRenderer();
 
-        logger.debug("Initialized with targets: {}, index prefix [{}], index time format [{}]", hosts, indexPrefix, indexTimeFormat);
+        logger.debug("initialized with targets: {}, index prefix [{}], index time format [{}]", hosts, indexPrefix, indexTimeFormat);
     }
 
     @Override
@@ -145,7 +146,6 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         Map<String, IndexStats> perIndexStats = indicesStats.getIndices();
         indexStatsRenderer.reset(perIndexStats.values().toArray(new IndexStats[perIndexStats.size()]));
         indicesStatsRenderer.reset(indicesStats.getTotal(), indicesStats.getPrimaries());
-        logger.debug("exporting index_stats + indices_stats");
         HttpURLConnection conn = openExportingConnection();
         if (conn == null) {
             return;
@@ -289,22 +289,26 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     }
 
 
-    private HttpURLConnection openConnection(String method, String uri) {
-        return openConnection(method, uri, null);
+    private HttpURLConnection openConnection(String method, String path) {
+        return openConnection(method, path, null);
     }
 
-    private HttpURLConnection openConnection(String method, String uri, String contentType) {
+    private HttpURLConnection openConnection(String method, String path, String contentType) {
         int hostIndex = 0;
         try {
             for (; hostIndex < hosts.length; hostIndex++) {
                 String host = hosts[hostIndex];
                 try {
-                    URL templateUrl = new URL("http://" + host + "/" + uri);
-                    HttpURLConnection conn = (HttpURLConnection) templateUrl.openConnection();
+                    URL url = new URL("http://" + host + "/" + path);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod(method);
                     conn.setConnectTimeout(timeout);
                     if (contentType != null) {
                         conn.setRequestProperty("Content-Type", XContentType.SMILE.restContentType());
+                    }
+                    if (url.getUserInfo() != null) {
+                        String basicAuth = "Basic " + Base64.encodeBytes(url.getUserInfo().getBytes("ISO-8859-1"));
+                        conn.setRequestProperty("Authorization", basicAuth);
                     }
                     conn.setUseCaches(false);
                     if (method.equalsIgnoreCase("POST") || method.equalsIgnoreCase("PUT")) {
@@ -427,7 +431,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
         HttpURLConnection conn = openConnection("HEAD", path);
         if (conn == null) {
-            logger.error("Could not connect to any configured elasticsearch instances: [{}]", hosts);
+            logger.error("could not connect to any configured elasticsearch instances: [{}]", hosts);
             return false;
         }
 
@@ -727,7 +731,6 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
                     if (closed) {
                         return;
                     }
-                    logger.trace("pinging target es");
                     HttpURLConnection conn = openConnection("GET", "");
                     if (conn != null) {
                         conn.getInputStream().close(); // close and release to connection pool.

@@ -25,7 +25,7 @@ define([
   });
 
   $helpPopup.on('hidden', function () {
-    $('#example_editor').remove();
+    $('#help_example_editor').remove();
   });
 
   return $helpPopup;

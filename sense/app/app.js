@@ -162,25 +162,50 @@ define([
       input.focus();
     };
 
-    /**
-     * Make the editor resizeable
-     */
-    input.$el.resizable({
-      autoHide: false,
-      handles: 'e',
-      start: function (e, ui) {
-        $(".ui-resizable-e").addClass("active");
-      },
-      stop: function (e, ui) {
-        $(".ui-resizable-e").removeClass("active");
-        var parent = ui.element.parent();
-        var editorSize = ui.element.outerWidth();
-        output.$el.css("left", editorSize + 20);
-        input.$actions.css("margin-right", -editorSize + 3);
-        input.resize(true);
-        output.resize(true);
+    (function stuffThatsTooHardWithCSS() {
+      var $editors = input.$el.parent().add(output.$el.parent());
+      var $resizer = miscInputs.$resizer;
+      var $header = miscInputs.$header;
+
+      var delay;
+      var headerHeight;
+      var resizerHeight;
+
+      $resizer
+        .html('&#xFE19;') // vertical elipses
+        .css('vertical-align', 'middle');
+
+      function update() {
+        var newHeight;
+
+        delay = clearTimeout(delay);
+
+        newHeight = $header.outerHeight();
+        if (headerHeight != newHeight) {
+          headerHeight = newHeight;
+          $editors.css('top', newHeight + 10);
+        }
+
+        newHeight = $resizer.height();
+        if (resizerHeight != newHeight) {
+          resizerHeight = newHeight;
+          $resizer.css('line-height', newHeight + 'px');
+        }
       }
-    });
+
+      // update at key moments in the loading process
+      $(update);
+      $(window).load(update);
+
+      // and when the window resizes (once every 30 ms)
+      $(window)
+        .resize(function (event) {
+          if (!delay && event.target === window) {
+            delay = setTimeout(update, 30);
+          }
+        });
+
+    }());
 
     /**
      * Setup the "send" shortcut
@@ -191,14 +216,14 @@ define([
       exec: function () {
         output.update('');
         submitCurrentRequestToES(function (resp) {
-          output.update(resp);
+          output.update(resp, 'ace/mode/json');
         });
       }
     });
 
     $send.click(function () {
       submitCurrentRequestToES(function (resp) {
-        output.update(resp);
+        output.update(resp, 'ace/mode/json');
       });
       return false;
     });
@@ -206,7 +231,6 @@ define([
     /*
      * initialize navigation menu
      */
-
     $.get('../common/marvelLinks.json', function (marvelLinks) {
       var linkMenu = $("#nav_btn ul");
       _.map(marvelLinks.links, function (link) {

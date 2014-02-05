@@ -55,7 +55,8 @@ define([
     var CURRENT_REQ_RANGE = null;
 
     editor.$el = $el;
-    editor.$actions = $("#editor_actions");
+    // place holder for an action bar, needs to be set externally.
+    editor.$actions = null;
 
     // mixin the RowParser
     editor.parser = new RowParser(editor);
@@ -191,6 +192,10 @@ define([
         var pos = currentReqRange.start;
         var tokenIter = editor.iterForPosition(pos.row, pos.column, editor);
         var t = tokenIter.getCurrentToken();
+        if (editor.parser.isEmptyToken(t)) {
+          // if the row starts with some spaces, skip them.
+          t = editor.parser.nextNonEmptyToken(tokenIter);
+        }
         request.method = t.value;
         t = editor.parser.nextNonEmptyToken(tokenIter);
         if (!t || t.type == "method") return null;
@@ -354,39 +359,54 @@ define([
       editor.highlightCurrentRequestAndUpdateActionBar();
     });
 
-    editor.updateActionsBar = function () {
-      var editor_actions = $("#editor_actions");
+    editor.updateActionsBar = (function () {
+      var set = function (top) {
+        if (top == null) {
+          editor.$actions.css('visibility', 'hidden');
+        } else {
+          editor.$actions.css({
+            top: top,
+            visibility: 'visible'
+          });
+        }
+      };
 
-      if (CURRENT_REQ_RANGE) {
-        var row = CURRENT_REQ_RANGE.start.row;
-        var column = CURRENT_REQ_RANGE.start.column;
-        var session = editor.session;
-        var firstLine = session.getLine(row);
-        var offset = 0;
-        if (firstLine.length > session.getScreenWidth() - 5) {
-          // overlap first row
-          if (row > 0) row--; else row++;
-        }
-        var screen_pos = editor.renderer.textToScreenCoordinates(row, column);
-        offset += screen_pos.pageY;
-        var end_offset = editor.renderer.textToScreenCoordinates(CURRENT_REQ_RANGE.end.row,
-          CURRENT_REQ_RANGE.end.column).pageY;
+      var hide = function () {
+        set();
+      };
 
-        offset = Math.min(end_offset, Math.max(offset, 47));
-        if (offset >= 47) {
-          editor_actions.css("top", Math.max(offset, 47));
-          editor_actions.css('visibility', 'visible');
+      return function () {
+        if (!editor.$actions) {
+          return;
         }
-        else {
-          editor_actions.css("top", 0);
-          editor_actions.css('visibility', 'hidden');
+        if (CURRENT_REQ_RANGE) {
+          // elements are positioned relative to the editor's container
+          // pageY is relative to page, so subtract the offset
+          // from pageY to get the new top value
+          var offsetFromPage = editor.$el.offset().top;
+
+          var topOfReq = editor.renderer.textToScreenCoordinates(
+            CURRENT_REQ_RANGE.start.row,
+            CURRENT_REQ_RANGE.start.column
+          ).pageY - offsetFromPage;
+
+          if (topOfReq >= 0) {
+            return set(topOfReq);
+          }
+
+          var bottomOfReq = editor.renderer.textToScreenCoordinates(
+            CURRENT_REQ_RANGE.end.row,
+            CURRENT_REQ_RANGE.end.column
+          ).pageY - offsetFromPage;
+
+          if (bottomOfReq >= 0) {
+            return set(0);
+          }
         }
+
+        hide();
       }
-      else {
-        editor_actions.css("top", 0);
-        editor_actions.css('visibility', 'hidden');
-      }
-    };
+    }());
 
     editor.getSession().on("changeScrollTop", editor.updateActionsBar);
 

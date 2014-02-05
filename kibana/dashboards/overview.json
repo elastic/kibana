@@ -145,7 +145,7 @@
           "pointradius": 5,
           "annotate": {
             "enable": true,
-            "query": "_type:cluster_event",
+            "query": "_type:cluster_event OR _type:node_event",
             "size": 50,
             "field": "message",
             "sort": [
@@ -218,7 +218,7 @@
           "pointradius": 5,
           "annotate": {
             "enable": true,
-            "query": "_type:cluster_event",
+            "query": "_type:cluster_event OR _type:node_event",
             "size": 50,
             "field": "message",
             "sort": [
@@ -291,7 +291,7 @@
           "pointradius": 5,
           "annotate": {
             "enable": true,
-            "query": "_type:cluster_event",
+            "query": "_type:cluster_event OR _type:node_event",
             "size": 50,
             "field": "message",
             "sort": [

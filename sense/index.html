@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
-  <title>Sense - a JSON aware interface to ElasticSearch</title>
+  <title>Marvel - Sense</title>
   <link id="bootstrapThemeCss" href="vendor/bootstrap/css/bootstrap.light.min.css" type="text/css" rel="stylesheet"/>
   <link href="vendor/font-awesome/css/font-awesome.min.css" type="text/css" rel="stylesheet"/>
   <link id="senseThemeCss" href="css/sense.light.css" rel="stylesheet" type="text/css"/>
@@ -46,21 +46,20 @@
     <div id="editor">GET _search
       {
   "query": { "match_all": {} }
-}
+}</div>
+    <div id="editor_actions">
+      <a id="send" href="#" data-toggle="tooltip" title="click to send request"><i
+          class="fa fa-play"></i></a>
+      <a id="request_wrench" data-toggle="dropdown" href="#"><i
+          class="fa fa-wrench"></i></a>
+      <ul class="dropdown-menu">
+        <li><a id="copy_as_curl" tabindex="-1" href="#">Copy as cURL</a></li>
+        <li><a id="auto_indent" tabindex="-1" href="#">Auto indent</a></li>
+      </ul>
     </div>
   </div>
   <div id="output_container">
     <div id="output">{}</div>
-  </div>
-  <div id="editor_actions">
-    <a id="send" href="#" data-toggle="tooltip" title="click to send request"><i
-        class="fa fa-play"></i></a>
-    <a id="request_wrench" data-toggle="dropdown" href="#"><i
-        class="fa fa-wrench"></i></a>
-    <ul class="dropdown-menu">
-      <li><a id="copy_as_curl" tabindex="-1" href="#">Copy as cURL</a></li>
-      <li><a id="auto_indent" tabindex="-1" href="#">Auto indent</a></li>
-    </ul>
   </div>
   <ul id="autocomplete" style="left: -1000px;"></ul>
 </div>
@@ -177,12 +176,35 @@
 </div>
 
 
-<div id="welcome_popup" class="modal hide fade" data-keyboard="true" data-remote="app/welcome.html">
+<div id="welcome_popup" class="modal hide fade" data-keyboard="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
     <h3>Welcome to Sense</h3>
   </div>
   <div class="modal-body">
+    <h4>Quick intro to the UI</h4>
+
+    <p>Sense is split into two panes: an editor pane (white) and a response pane (black).
+      Use the editor to type requests and submit them to Elasticsearch. The results will be displayed in
+      the response pane on the right side.
+    </p>
+
+    <p>Sense understands requests in a compact format, similar to cURL:
+    <div id="welcome_example_container"></div>
+
+    <p>While typing a request, Sense will make suggestions which you can than accept by hitting Enter/Tab.
+      These suggestions are made based on the request structure <i>as well as</i> your indices and types.
+    </p>
+
+
+    <h4>A few quick tips, while I have your attention</h4>
+    <ul>
+      <li>Submit requests to ES using the green triangle button.</li>
+      <li>Use the wrench menu for other useful things.</li>
+      <li>You can paste requests in cURL format and they will be translated to the Sense syntax.</li>
+      <li>You can resize the editor and output panes by dragging the separator between them.</li>
+      <li>Study the keyboard shortcuts under the Help button. Good stuff in there!</li>
+    </ul>
   </div>
   <div class="modal-footer">
     <a href="#" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Get to work</a>

@@ -1,0 +1,127 @@
+== Installation
+
+Marvel is installed as an Elasticsearch plugin. The plugin must be installed
+on *every node in the cluster*. By default, the plugin will store data in the
+same Elasticsearch cluster that it is monitoring.
+
+[TIP]
+====
+If you are monitoring a production cluster we recommend that you send this
+data to another cluster that will serve as a _monitoring cluster_.
+
+This will help to prevent a problem in one cluster from impacting the other
+cluster. For example, when your production cluster is having trouble you would
+like to make sure you can view the Marvel data easily.
+====
+
+=== Simple install
+
+This is simplest way to install and use Marvel. Marvel data will be stored on
+the same cluster as the one being monitored and you will be able to access the
+Marvel UI from every node. Follow these steps on every node in the cluster:
+
+1. From the Elasticsearch home directory, run:
++
+[source,sh]
+----------------
+bin/plugin -i elasticsearch/marvel/latest
+----------------
+
+2. Restart your Elasticsearch node
+
+Once the plugin is installed on all nodes, you can access the Marvel UI by
+viewing http://any-server-in-cluster:9200/_plugin/marvel/ with any modern
+browser. It may take a minute for the initial data to appear.
+
+A couple of points to consider:
+
+* Since this requires to restart the nodes of your cluster, you might want
+  to temporarily {ref}/modules-cluster.html[disable allocations].
+
+* If you run your cluster using a non-standard port, you need to change the
+  `marvel.agent.exporter.es.hosts` settings. See <<configuration>>.
+
+* If your server doesn't have direct internet access see <<manual_download>>
+  for an alternative way to get the Marvel binaries.
+
+
+=== Installing a secondary Monitoring Cluster
+
+First, prepare the _monitoring cluster_ -- the cluster you will use to store
+and analyze Marvel's data. For this example, we will assume two hosts,
+`es-mon-1` and `es-mon-2`, are in the monitoring cluster.
+
+==== The monitoring cluster
+
+For each node in the monitoring cluster:
+
+
+1. Prevent the nodes in the monitoring cluster from generating their own stats,
+   by adding the following line to `config/elasticsearch.yml`:
++
+[source,yaml]
+------------------------
+marvel.agent.enabled: false
+------------------------
+
+2. Install the plugin. From the Elasticsearch home directory run
++
+[source,sh]
+----------------
+bin/plugin -i elasticsearch/marvel/latest
+----------------
+
+3. Restart Elasticsearch
+
+
+==== The production cluster
+
+1. Tell each node where to send its stats by adding this line to
+    `config/elasticsearch.yml:
++
+[source,yaml]
+------------------------
+marvel.agent.exporter.es.hosts: ["es-mon-1:9200","es-mon-2:9200"]
+------------------------
++
+This line adds two hosts of your monitoring cluster to receive the data, a
+primary and a backup.
+
+2. Install the plugin. From the Elasticsearch home directory run
++
+[source,sh]
+------------------------
+bin/plugin -i elasticsearch/marvel/latest
+------------------------
+
+3. Restart Elasticsearch
+
+
+Once the plugin is installed on all nodes, you can access the Marvel UI by
+opening this link with any modern browser.
+
+    http://any-server-in-monitoring-cluster:9200/_plugin/marvel/
+
+It may take a minute or two for data to appear.
+
+TIP: You may want to temporarily {ref}/modules-cluster.html[disable shard
+allocation] before you restart your nodes to avoid unnecessary shard
+reallocation during the install process.
+
+
+[[manual_download]]
+==== Manual download
+
+Elasticsearch's `bin/plugin` script requires direct internet access for downloading
+and installing Marvel. If your server doesn't have internet access, you can download
+the Marvel binaries from the following link: https://download.elasticsearch.org/elasticsearch/marvel/marvel-latest.zip
+
+Once you have transferred the zip file to your server, you can use the `bin/plugin`
+script to install it:
+
+[source,sh]
+----------------
+bin/plugin -i marvel -u file://PATH_TO_MARVEL_ZIP_FILE
+----------------
+
+After the script has finish, continue according to the standard installation procedure.
