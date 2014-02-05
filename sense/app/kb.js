@@ -3,15 +3,16 @@ define([
   'exports',
   'mappings',
   'es',
-  'kb/api_0_90',
-  'kb/api_1_0'
-], function (_, exports, mappings, es, api_0_90, api_1_0) {
-  'use strict';
+  'kb/api',
+  'require'
+],
+  function (_, exports, mappings, es, api, require) {
+    'use strict';
 
-  var ACTIVE_API = api_0_90;
+    var ACTIVE_API = new api.Api("empty");
 
 
-  function expandAliases(indices) {
+    function expandAliases(indices) {
     if (indices && indices.length > 0) {
       indices = mappings.expandAliases(indices);
     }
@@ -46,13 +47,13 @@ define([
   es.addServerChangeListener(function () {
     var version = es.getVersion();
     if (!version || version.length == 0) {
-      setActiveApi(api_0_90);
+      require(["kb/api_0_90"], setActiveApi);
     }
     else if (version[0] === "1") {
-      setActiveApi(api_1_0);
+      require(["kb/api_1_0"], setActiveApi);
     }
     else {
-      setActiveApi(api_0_90);
+      require(["kb/api_0_90"], setActiveApi);
     }
   });
 
