@@ -11,5 +11,6 @@
   </metadata>
   <files>
     <file src="src\**\*" target="" />
+    <file src="deploy_scripts\**\*" target="" />
   </files>
 </package>
