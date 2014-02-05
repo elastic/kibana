@@ -866,7 +866,7 @@ define([
 
       $scope.detailViewTip = function () {
         if ($scope.panel.mode === "nodes") {
-        return $scope.hasSelected($scope.rows) ? 'Open node statistics dashboard for selected nodes' :
+          return $scope.hasSelected($scope.rows) ? 'Open node statistics dashboard for selected nodes' :
           'Select nodes and click to open the node statistics dashboard';
         } else {
           return $scope.hasSelected($scope.rows) ? 'Open index stats dashboard for selected indices' :
