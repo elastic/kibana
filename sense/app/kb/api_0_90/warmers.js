@@ -1,8 +1,8 @@
 define(function () {
   'use strict';
 
-  return function init(kb) {
-    kb.addEndpointDescription('_warmer', {
+  return function init(api) {
+    api.addEndpointDescription('_warmer', {
       match: /_warmer/,
       def_method: 'PUT',
       methods: ['GET', 'PUT', 'DELETE'],

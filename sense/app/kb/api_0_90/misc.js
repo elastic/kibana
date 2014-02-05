@@ -1,8 +1,8 @@
 define(function () {
   'use strict';
 
-  return function init(kb) {
-    kb.addEndpointDescription('_stats', {
+  return function init(api) {
+    api.addEndpointDescription('_stats', {
       methods: ['GET'],
       endpoint_autocomplete: ['_stats'],
       indices_mode: 'multi',
@@ -10,7 +10,7 @@ define(function () {
       doc_id_mode: 'none'
     });
 
-    kb.addEndpointDescription('_cache/clear', {
+    api.addEndpointDescription('_cache/clear', {
       methods: ['GET'],
       endpoint_autocomplete: ['_cache/clear'],
       indices_mode: 'multi',
@@ -18,7 +18,7 @@ define(function () {
       doc_id_mode: 'none'
     });
 
-    kb.addEndpointDescription('_status', {
+    api.addEndpointDescription('_status', {
       methods: ['GET'],
       indices_mode: 'multi',
       types_mode: 'none',

@@ -1,8 +1,8 @@
 define(function () {
   'use strict';
 
-  return function init(kb) {
-    kb.addGlobalAutocompleteRules('facets', {
+  return function init(api) {
+    api.addGlobalAutocompleteRules('facets', {
       '*': {
         terms: {
           __template: {

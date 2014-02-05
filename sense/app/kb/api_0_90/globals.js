@@ -1,8 +1,8 @@
 define(function () {
   'use strict';
 
-  return function init(kb) {
-    kb.addGlobalAutocompleteRules('highlight', {
+  return function init(api) {
+    api.addGlobalAutocompleteRules('highlight', {
       pre_tags: {},
       post_tags: {},
       tags_schema: {},
@@ -15,7 +15,7 @@ define(function () {
     });
 
     // only used with scope links as there is no common name for scripts
-    kb.addGlobalAutocompleteRules('SCRIPT_ENV', {
+    api.addGlobalAutocompleteRules('SCRIPT_ENV', {
       __template: { 'script': ''},
       script: '',
       lang: '',

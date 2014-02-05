@@ -31,6 +31,10 @@ import java.util.Map;
 public class Utils {
 
     public static XContentBuilder nodeToXContent(DiscoveryNode node, XContentBuilder builder) throws IOException {
+        return nodeToXContent(node, null, builder);
+    }
+
+    public static XContentBuilder nodeToXContent(DiscoveryNode node, Boolean isMasterNode, XContentBuilder builder) throws IOException {
         builder.field("id", node.id());
         builder.field("name", node.name());
         builder.field("transport_address", node.address());
@@ -46,6 +50,12 @@ public class Utils {
             }
         } else if (node.address().uniqueAddressTypeId() == 2) {  // local transport
             builder.field("ip_port", "_" + node.address()); // will end up being "_local[ID]"
+        }
+
+        builder.field("master_node", node.isMasterNode());
+        builder.field("data_node", node.isDataNode());
+        if (isMasterNode != null) {
+            builder.field("master", isMasterNode.booleanValue());
         }
 
         if (!node.attributes().isEmpty()) {

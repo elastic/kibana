@@ -1,8 +1,8 @@
 define(function () {
   'use strict';
 
-  return function init(kb) {
-    kb.addEndpointDescription('_template', {
+  return function init(api) {
+    api.addEndpointDescription('_template', {
       match: /\/?_template/,
       def_method: 'PUT',
       methods: ['GET', 'PUT', 'DELETE'],

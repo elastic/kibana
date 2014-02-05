@@ -45,7 +45,6 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.util.concurrent.ConcurrentCollections;
 import org.elasticsearch.common.util.concurrent.EsExecutors;
-import org.elasticsearch.discovery.Discovery;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.index.service.IndexService;
 import org.elasticsearch.index.shard.IndexShardState;
@@ -89,7 +88,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
     @Inject
     public AgentService(Settings settings, IndicesService indicesService,
                         NodeService nodeService, ClusterService clusterService,
-                        Client client, Discovery discovery, ClusterName clusterName,
+                        Client client, ClusterName clusterName,
                         Environment environment, Plugin marvelPlugin) {
         super(settings);
         this.indicesService = (InternalIndicesService) indicesService;
@@ -105,7 +104,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
         pendingEventsQueue = ConcurrentCollections.newBlockingQueue();
 
         if (componentSettings.getAsBoolean("enabled", true)) {
-            Exporter esExporter = new ESExporter(settings.getComponentSettings(ESExporter.class), discovery, clusterName, environment, marvelPlugin);
+            Exporter esExporter = new ESExporter(settings.getComponentSettings(ESExporter.class), clusterService, clusterName, environment, marvelPlugin);
             this.exporters = ImmutableSet.of(esExporter);
         } else {
             this.exporters = ImmutableSet.of();

@@ -26,6 +26,7 @@ import org.elasticsearch.action.admin.indices.stats.IndexStats;
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.ShardStats;
 import org.elasticsearch.cluster.ClusterName;
+import org.elasticsearch.cluster.ClusterService;
 import org.elasticsearch.cluster.routing.ShardRouting;
 import org.elasticsearch.common.Base64;
 import org.elasticsearch.common.collect.ImmutableMap;
@@ -40,7 +41,6 @@ import org.elasticsearch.common.util.concurrent.EsExecutors;
 import org.elasticsearch.common.xcontent.*;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.common.xcontent.smile.SmileXContent;
-import org.elasticsearch.discovery.Discovery;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.marvel.agent.Plugin;
 import org.elasticsearch.marvel.agent.Utils;
@@ -64,7 +64,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     final String kibanaIndex;
     final String[] dashboardPathsToUpload;
 
-    final Discovery discovery;
+    final ClusterService clusterService;
     final ClusterName clusterName;
 
     public final static DateTimeFormatter defaultDatePrinter = Joda.forPattern("date_time").printer();
@@ -81,10 +81,11 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     ConnectionKeepAliveWorker keepAliveWorker;
     Thread keepAliveThread;
 
-    public ESExporter(Settings settings, Discovery discovery, ClusterName clusterName, Environment environment, Plugin marvelPlugin) {
+    public ESExporter(Settings settings, ClusterService clusterService, ClusterName clusterName, Environment environment, Plugin marvelPlugin) {
         super(settings);
 
-        this.discovery = discovery;
+        this.clusterService = clusterService;
+
         this.clusterName = clusterName;
 
         hosts = settings.getAsArray("es.hosts", new String[]{"localhost:9200"});
@@ -503,7 +504,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
     private void addNodeInfo(XContentBuilder builder, String fieldname) throws IOException {
         builder.startObject(fieldname);
-        Utils.nodeToXContent(discovery.localNode(), builder);
+        Utils.nodeToXContent(clusterService.localNode(), clusterService.state().nodes().localNodeMaster(), builder);
         builder.endObject();
     }
 

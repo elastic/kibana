@@ -1,9 +1,10 @@
 define([
   'input',
   'jquery',
-  'kb/index',
+  'kb',
+  'kb/api',
   'mappings'
-], function (input, $, kb, mappings) {
+], function (input, $, kb, api, mappings) {
   'use strict';
 
   module("Integration", {
@@ -35,18 +36,18 @@ define([
 
       mappings.clear();
       mappings.loadMappings(mapping);
-
-      kb.clear();
+      var test_api = new api.Api();
       if (kb_schemes) {
         if (kb_schemes.globals)
           $.each(kb_schemes.globals, function (parent, rules) {
-            kb.addGlobalAutocompleteRules(parent, rules);
+            test_api.addGlobalAutocompleteRules(parent, rules);
           });
         if (kb_schemes.endpoints)
           $.each(kb_schemes.endpoints, function (endpoint, scheme) {
-            kb.addEndpointDescription(endpoint, scheme);
+            test_api.addEndpointDescription(endpoint, scheme);
           });
       }
+      kb.setActiveApi(test_api);
 
       input.update(editorValue, function () {
         input.moveCursorTo(test.cursor.row, test.cursor.column);
