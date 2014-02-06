@@ -1,0 +1,23 @@
+<div class="editor-row">
+  <div class="section">
+    <div class="editor-option">
+      <label class="small">Initial View Mode</label>
+      <select ng-model="panel.view" ng-change="switchView(panel.view)">
+        <option value="nodes">Nodes</option>
+        <option value="indices">Indices</option>
+      </select>
+    </div>
+  </div>
+  <div class="section">
+    <div class="editor-option">
+      <label class="small">Initial Filter</label>
+      <input type="text" ng-model="panel.filter" />
+    </div>
+  </div>
+  <div class="section">
+    <div class="editor-option">
+      <label class="small">Show hidden indices <tip>indices whose name starts with a dot (`.`) are considered hidden</tip></label>
+      <input type="checkbox" ng-model="panel.show_hidden"/>
+    </div>
+  </div>
+</div>

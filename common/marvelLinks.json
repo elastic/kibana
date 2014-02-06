@@ -1,12 +1,16 @@
 {
   "links": [
     {
-      "name": "Cluster Overview",
+      "name": "Overview",
       "url": "../kibana/index.html#/dashboard/file/marvel.overview.json"
     },
     {
       "name": "Cluster Pulse",
       "url": "../kibana/index.html#/dashboard/file/marvel.cluster_pulse.json"
+    },
+    {
+      "name": "Shard Allocation",
+      "url": "../kibana/index.html#/dashboard/file/marvel.shard_allocation.json"
     },
     {
       "name": "Sense",

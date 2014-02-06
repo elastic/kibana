@@ -10,6 +10,7 @@ module.exports = function (grunt) {
     buildDir: 'build',
     packageDir: 'build/packages',
     senseDir: './sense',
+    testDir: './test',
     esPort: {
       dev: '":'+ (grunt.option('es_port') ||  9200) +'"',
       dist: "(window.location.port !== '' ? ':'+window.location.port : '')"

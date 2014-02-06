@@ -1,0 +1,22 @@
+{
+  "name": "grunt-blanket-mocha-test",
+  "description": "Test for grunt-blanket-mocha.",
+  "version": "0.5.1",
+  "homepage": "https://github.com/ModelN/grunt-blanket-mocha",
+  "author": {
+    "name": "Dave Cadwallader",
+    "email": "dcadwallader@gmail.com"
+  },
+  "main": "Gruntfile.js",
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "devDependencies": {
+    "grunt-blanket-mocha": "~0.4.0",
+    "grunt": "0.4.1",
+    "mocha": "1.17.1",
+    "chai": "1.8.1",
+    "blanket": "1.1.5",
+    "requirejs": "2.1.10"
+  }
+}

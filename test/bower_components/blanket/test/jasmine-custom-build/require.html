@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <title>Jasmine Spec Runner</title>
+
+  <link rel="stylesheet" type="text/css" href="../vendor/jasmine.css">
+  <script type="text/javascript" src="../vendor/jasmine.js"></script>
+  <script type="text/javascript" src="../vendor/jasmine-html.js"></script>
+<script type="text/javascript"  src="../../src/lib/require.js"></script>
+  
+  <script type="text/javascript" data-cover-only="source/"  src="../../dist/jasmine/blanket_jasmine.js"> </script>
+  
+  
+  <script type="text/javascript"  src="../helpers/console_runner.js"></script>
+
+ <script>
+ 
+  require({
+       baseUrl: "./"
+   }, [
+       "spec/SpecHelper",
+       "spec/require_PlayerSpec",
+       "spec/require_SongSpec"
+       
+   ], function () {
+       window.blanketTestJasmineExpected=2;
+      var jasmineEnv = jasmine.getEnv();
+      jasmineEnv.updateInterval = 1000;
+
+      var htmlReporter = new jasmine.HtmlReporter();
+
+      jasmineEnv.addReporter(htmlReporter);
+      /* this is just for our automated tests */
+      window.jasmine_phantom_reporter = new jasmine.ConsoleReporter;
+      jasmineEnv.addReporter(jasmine_phantom_reporter);
+      /*   */
+
+      jasmineEnv.specFilter = function(spec) {
+        return htmlReporter.specFilter(spec);
+      };
+
+      
+
+        jasmineEnv.execute();
+      
+      
+  });  
+</script>
+
+
+</head>
+
+<body>
+</body>
+</html>

@@ -1,0 +1,467 @@
+.marvel-cluster-view .children {
+  vertical-align: middle !important;
+}
+.marvel-cluster-view .children.unassigned {
+  width: 150px;
+}
+.marvel-cluster-view .head .bold {
+  font-weight: bold;
+}
+.marvel-cluster-view .head .title {
+  font-size: 20pt;
+  font-weight: bold;
+  margin-left: 10px;
+}
+.marvel-cluster-view .head .error {
+  color: #F00;
+}
+.marvel-cluster-view .parentName {
+  font-size: 14px;
+}
+.marvel-cluster-view .parentName a {
+  color: #FFF;
+}
+.marvel-cluster-view .parentName.text-error a {
+  color: #b84a48;
+}
+.marvel-cluster-view .details {
+  font-size: 12px;
+}
+.marvel-cluster-view .child {
+  float: left;
+  display: inline-block;
+  padding: 3px 6px;
+  -webkit-border-radius: 2px;
+  -webkit-background-clip: padding-box;
+  -moz-border-radius: 2px;
+  -moz-background-clip: padding;
+  border-radius: 2px;
+  background-clip: padding-box;
+  background: #444;
+  color: #FFF;
+  margin: 3px;
+}
+.marvel-cluster-view .child .title {
+  float: left;
+  font-size: 12px;
+  margin-right: 5px;
+}
+.marvel-cluster-view .child .title a {
+  color: #FFF;
+}
+.marvel-cluster-view .child.unassigned .title {
+  color: #999;
+  display: none;
+}
+.marvel-cluster-view td:first-child {
+  width: 200px;
+}
+.marvel-cluster-view .shards {
+  float: left;
+}
+.marvel-cluster-view .shards .tooltip.top .tooltip-arrow {
+  border-top-color: #FFF;
+}
+.marvel-cluster-view .shards .tooltip.bottom .tooltip-arrow {
+  border-bottom-color: #FFF;
+}
+.marvel-cluster-view .shards .tooltip-inner {
+  background-color: #FFF;
+  color: #333;
+}
+.marvel-cluster-view .shard {
+  float: left;
+  background-color: #7CE655;
+  font: 10px sans-serif;
+  border: solid 1px #666;
+  padding: 3px 5px;
+  color: rgba(0, 0, 0, 0.8);
+  -webkit-border-radius: 2px;
+  -webkit-background-clip: padding-box;
+  -moz-border-radius: 2px;
+  -moz-background-clip: padding;
+  border-radius: 2px;
+  background-clip: padding-box;
+}
+.marvel-cluster-view .shard.replica {
+  background-color: #B8F2A2;
+  background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.6) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 255, 255, 0.6) 75%, transparent 75%, transparent);
+  background-size: 10px 10px;
+}
+.marvel-cluster-view .shard.unassigned {
+  background-color: #CCC !important;
+  -webkit-opacity: 0.5;
+  -moz-opacity: 0.5;
+  opacity: 0.5;
+}
+.marvel-cluster-view .shard.emergency {
+  background-color: #ff7878 !important;
+  -webkit-opacity: 1;
+  -moz-opacity: 1;
+  opacity: 1;
+}
+.marvel-cluster-view .shard.recovering {
+  background-color: #ff9d00;
+  background-image: linear-gradient(-45deg, rgba(255, 255, 255, 0.6) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 255, 255, 0.6) 75%, transparent 75%, transparent) !important;
+  background-size: 10px 10px;
+}
+.marvel-cluster-view .shard.new {
+  background-color: #ffdd00;
+  background-image: linear-gradient(-45deg, rgba(255, 255, 255, 0.6) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 255, 255, 0.6) 75%, transparent 75%, transparent) !important;
+  background-size: 10px 10px;
+}
+.marvel-cluster-view .shard.relocating {
+  background-color: #d894ff;
+  background-image: linear-gradient(-45deg, rgba(255, 255, 255, 0.6) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 255, 255, 0.6) 75%, transparent 75%, transparent) !important;
+  background-size: 10px 10px;
+}
+.marvel-cluster-view .shard.initializing {
+  background-color: #2bd8ff;
+  background-image: linear-gradient(-45deg, rgba(255, 255, 255, 0.6) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 255, 255, 0.6) 75%, transparent 75%, transparent) !important;
+  background-size: 10px 10px;
+}
+.marvel-cluster-view .legend {
+  font-size: 12px;
+  border-top: 1px solid #333;
+  background-color: #333;
+  color: #FFF;
+  padding: 5px;
+}
+.marvel-cluster-view .legend .title {
+  margin-left: 5px;
+  font-weight: bold;
+}
+.marvel-cluster-view .legend span.shard {
+  float: none;
+  display: inline-block;
+  margin: 0 5px 0 10px;
+  padding: 0 4px;
+}
+.marvel-cluster-view .player {
+  background-color: #000;
+  font-size: 12px;
+  height: 20px;
+  padding: 27px 0 0;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.marvel-cluster-view .player .current {
+  color: #999;
+}
+.marvel-cluster-view .player .disabled {
+  color: #666;
+}
+.marvel-cluster-view .player .display {
+  position: relative;
+  top: -5px;
+  width: 175px;
+  color: #999;
+  padding-left: 5px;
+}
+.marvel-cluster-view .player .display.playing {
+  color: #1A9C00;
+}
+.marvel-cluster-view .player .display div {
+  padding: 0 10px;
+}
+.marvel-cluster-view .player .control {
+  position: relative;
+  top: -6px;
+  width: 180px;
+  text-align: center;
+}
+.marvel-cluster-view .player .control div {
+  padding: 0 10px;
+}
+.marvel-cluster-view .player .control i {
+  cursor: pointer;
+}
+.marvel-cluster-view .player .control .rate {
+  border-left: 1px solid #333;
+  cursor: pointer;
+  width: 50px;
+}
+.marvel-cluster-view .player .timeline {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  position: relative;
+  margin: 0 175px 0 180px;
+}
+.marvel-cluster-view .player .timeline .head {
+  position: absolute;
+  z-index: 202;
+  top: 0;
+  left: 50px;
+  bottom: 0;
+  width: 2px;
+  height: 8px;
+  background-color: #FFF;
+}
+.marvel-cluster-view .player .timeline .head .arrow-down {
+  position: absolute;
+  z-index: 360;
+  top: -11px;
+  width: 0;
+  height: 0;
+  border-right: 10px solid transparent;
+  border-top: 10px solid #333333;
+}
+.marvel-cluster-view .player .timeline .head .head-display {
+  position: absolute;
+  z-index: 350;
+  -webkit-border-radius: 5px;
+  -webkit-background-clip: padding-box;
+  -moz-border-radius: 5px;
+  -moz-background-clip: padding;
+  border-radius: 5px;
+  background-clip: padding-box;
+  left: -6px;
+  bottom: 19px;
+  min-width: 200px;
+  font-size: 12px;
+  color: #ffffff;
+  background-color: #333333;
+  -webkit-box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.marvel-cluster-view .player .timeline .head .head-display .message {
+  padding: 8px;
+}
+.marvel-cluster-view .player .timeline .head .head-display .time {
+  -webkit-border-radius: 5px 5px 0 0;
+  -webkit-background-clip: padding-box;
+  -moz-border-radius: 5px 5px 0 0;
+  -moz-background-clip: padding;
+  border-radius: 5px 5px 0 0;
+  background-clip: padding-box;
+  padding: 8px;
+  font-weight: bold;
+  color: #fff;
+  text-align: center;
+}
+.marvel-cluster-view .player .timeline .head.yellow .time {
+  background-color: #b39200;
+}
+.marvel-cluster-view .player .timeline .head.red .time {
+  background-color: #853030;
+}
+.marvel-cluster-view .player .timeline .head.green .time {
+  background-color: #309600;
+}
+.marvel-cluster-view .player .timeline .marker {
+  position: absolute;
+  z-index: 201;
+  top: 0;
+  left: 50px;
+  bottom: 0;
+  width: 1px;
+  height: 8px;
+  background-color: #cccccc;
+}
+.marvel-cluster-view .player .timeline .marker .arrow-down {
+  position: absolute;
+  z-index: 100;
+  top: -6px;
+  width: 0;
+  height: 0;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #cccccc;
+}
+.marvel-cluster-view .player .timeline .marker .marker-display {
+  z-index: 50;
+  -webkit-box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+  position: absolute;
+  border: 1px solid #333;
+  text-align: center;
+  -webkit-border-radius: 3px;
+  -webkit-background-clip: padding-box;
+  -moz-border-radius: 3px;
+  -moz-background-clip: padding;
+  border-radius: 3px;
+  background-clip: padding-box;
+  font-weight: bold;
+  top: -20px;
+  left: -6px;
+  padding: 0 4px;
+  font-size: 9px;
+  line-height: 0;
+  height: 15px;
+  padding-top: 7px;
+  color: rgba(0, 0, 0, 0.7);
+  background-color: #cccccc;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.marvel-cluster-view .player .timeline .bar {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  position: absolute;
+  z-index: 200;
+  top: 0;
+  left: 0;
+  right: 0px;
+  bottom: 0;
+  height: 8px;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+.marvel-cluster-view .player .timeline .bar.playing {
+  background-color: #1A9C00;
+}
+.marvel-cluster-view .player .timeline .cover {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  position: absolute;
+  z-index: 300;
+  top: -20px;
+  left: 0;
+  right: 0px;
+  bottom: 0;
+  height: 36px;
+}
+.marvel-cluster-view .player .timeline .timeline-colors {
+  position: absolute;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #888;
+  height: 8px;
+  cursor: pointer;
+  overflow: hidden;
+}
+.marvel-cluster-view .player .timeline .timeline-colors .segment {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+  display: block;
+  height: 8px;
+  background-color: #999;
+}
+.marvel-cluster-view .player .timeline .timeline-colors .segment.playing {
+  background-color: #1A9C00;
+}
+.marvel-cluster-view .player .timeline .timeline-colors .segment.yellow {
+  background-color: #b39200;
+}
+.marvel-cluster-view .player .timeline .timeline-colors .segment.red {
+  background-color: #853030;
+}
+.marvel-cluster-view .player .timeline .timeline-colors .segment.green {
+  background-color: #309600;
+}
+.marvel-cluster-view.light .parentName a {
+  color: #333;
+}
+.marvel-cluster-view.light .parentName.text-error a {
+  color: #b84a48;
+}
+.marvel-cluster-view.light .child {
+  background: #EEE;
+  color: #333;
+  border: solid 1px #DDD;
+}
+.marvel-cluster-view.light .child .title a {
+  color: #333;
+}
+.marvel-cluster-view.light .shards .tooltip.top .tooltip-arrow {
+  border-top-color: #333;
+}
+.marvel-cluster-view.light .shards .tooltip.bottom .tooltip-arrow {
+  border-bottom-color: #333;
+}
+.marvel-cluster-view.light .shards .tooltip-inner {
+  background-color: #333;
+  color: #FFF;
+}
+.marvel-cluster-view.light .shard {
+  border: solid 1px #CCC;
+}
+.marvel-cluster-view.light .shard.unassigned {
+  background-color: #EDEDED;
+  -webkit-opacity: 1;
+  -moz-opacity: 1;
+  opacity: 1;
+}
+.marvel-cluster-view.light .legend {
+  border-top: 1px solid #EEE;
+  background-color: #EEE;
+  color: #333;
+}
+.marvel-cluster-view.light .player {
+  background-color: #DDD;
+  border-left: 1px solid #DDD;
+  border-right: 1px solid #DDD;
+}
+.marvel-cluster-view.light .player .current {
+  color: #333;
+}
+.marvel-cluster-view.light .player .disabled {
+  color: #999;
+}
+.marvel-cluster-view.light .player .timeline .head .head-display {
+  color: #333;
+  background-color: #FFF;
+}
+.marvel-cluster-view.light .player .timeline .head .arrow-down {
+  border-top: 10px solid #FFF;
+}
+.marvel-cluster-view.light .player .timeline .head.yellow .time {
+  background-color: #ffdd00;
+  color: #333;
+}
+.marvel-cluster-view.light .player .timeline .head.red .time {
+  background-color: #ff7878;
+  color: #333;
+}
+.marvel-cluster-view.light .player .timeline .head.green .time {
+  background-color: #7ce655;
+  color: #333;
+}
+.marvel-cluster-view.light .player .timeline .marker .marker-display {
+  color: #000;
+  background-color: #FFF;
+  border: none;
+  font-weight: normal;
+}
+.marvel-cluster-view.light .player .timeline .marker .arrow-down {
+  border-top: 5px solid #FFF;
+}
+.marvel-cluster-view.light .player .timeline .bar {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+.marvel-cluster-view.light .player .timeline .timeline-colors {
+  border: 1px solid #999;
+  background-color: #CCC;
+}
+.marvel-cluster-view.light .player .timeline .timeline-colors .segment {
+  background-color: #999;
+}
+.marvel-cluster-view.light .player .timeline .timeline-colors .segment.yellow {
+  background-color: #ffdd00;
+}
+.marvel-cluster-view.light .player .timeline .timeline-colors .segment.red {
+  background-color: #ff7878;
+}
+.marvel-cluster-view.light .player .timeline .timeline-colors .segment.green {
+  background-color: #7ce655;
+}

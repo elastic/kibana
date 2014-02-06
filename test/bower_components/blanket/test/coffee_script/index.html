@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>QUnit Example</title>
+  <!-- QUNIT, we don't touch -->
+  <link rel="stylesheet" href="../vendor/qunit.css">
+  <script src="../vendor/qunit.js"></script>
+  <script type="text/javascript"  src="../../node_modules/requirejs/require.js"></script>
+  <script data-cover-flags="debug" data-cover-only="sample" src="../../dist/qunit/blanket.js" data-cover-loader="../../src/loaders/blanket_cs.js"></script>
+  <script>
+  window.blanketTestQUnitExpected = 1;
+ QUnit.config.autostart = false;
+  require({
+       baseUrl: "./",
+       paths: {
+        'coffee-script': "../vendor/coffee-script",
+        cs: "../vendor/cs"
+       }
+   }, [
+       "test"
+   ], function () {
+      QUnit.start();
+      
+  });  
+</script>
+</head>
+<body>
+  <div id="qunit"></div>
+  
+  
+</body>
+</html>

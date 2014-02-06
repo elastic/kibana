@@ -1,0 +1,53 @@
+{
+    "name": "grunt-blanket-mocha",
+    "description": "Headless Blanket.js code coverage and Mocha testing via PhantomJS",
+    "version": "0.4.0",
+    "homepage": "https://github.com/ModelN/grunt-blanket-mocha",
+    "author": {
+        "name": "Dave Cadwallader",
+        "email": "dcadwallader@gmail.com",
+        "url": "http://geekdave.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/ModelN/grunt-blanket-mocha.git"
+    },
+    "bugs": {
+        "url": "https://github.com/ModelN/grunt-blanket-mocha/issues"
+    },
+    "licenses": [
+        {
+            "type": "MIT",
+            "url": "https://github.com/ModelN/grunt-blanket-mocha/blob/master/LICENSE-MIT"
+        }
+    ],
+    "main": "Gruntfile.js",
+    "engines": {
+        "node": ">= 0.8.0"
+    },
+    "scripts": {
+        "test": "./node_modules/.bin/grunt test"
+    },
+    "dependencies": {
+        "grunt-lib-phantomjs": "~0.4.0",
+        "mocha": "~1.14.0",
+        "lodash": "~2.3.0"
+    },
+    "peerDependencies": {
+        "grunt": "~0.4"
+    },
+    "devDependencies": {
+        "grunt": "~0.4.1",
+        "grunt-contrib-connect": "~0.5.0",
+        "grunt-contrib-jshint": "~0.7.1"
+    },
+    "keywords": [
+        "gruntplugin",
+        "blanket",
+        "blanketjs",
+        "coverage",
+        "mocha",
+        "test",
+        "phantomjs"
+    ]
+}

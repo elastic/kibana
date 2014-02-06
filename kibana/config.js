@@ -64,7 +64,8 @@ define(['settings'],
         'terms',
         'sparklines',
         'marvel.stats_table',
-        'marvel.cluster'
+        'marvel.cluster',
+        'marvel.shard_allocation'
       ]
     });
   s.stats_report_url = @@stats_report_url;

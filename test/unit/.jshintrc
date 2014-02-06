@@ -1,0 +1,18 @@
+{
+  "extends": "../../kibana/.jshintrc",
+  "strict": false,
+  "globals": {
+    "define": true,
+    "expect": true,
+    "require": true,
+    "Chromath": false,
+    "describe": true,
+    "it": true,
+    "before": true,
+    "beforeEach": true,
+    "after": true,
+    "afterEach": true,
+    "inject": true,
+    "sinon": true
+  }
+}

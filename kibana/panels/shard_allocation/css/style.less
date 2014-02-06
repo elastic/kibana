@@ -1,0 +1,495 @@
+@import './lesshat.less';
+.marvel-cluster-view {
+  .children {
+    vertical-align: middle !important;
+    &.unassigned {
+      width: 150px;
+    }
+  }
+  .head {
+    .bold {
+      font-weight: bold;
+    }
+    .title {
+      font-size: 20pt;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    .error {
+      color: #F00;
+    }
+  }
+  .parentName {
+    font-size: 14px;
+    a {
+      color: #FFF;
+    }
+    &.text-error {
+      a {
+        color: #b84a48;
+      }
+    }
+  }
+  .details {
+    font-size: 12px;
+  }
+  .child {
+    float: left;
+    display: inline-block;
+    .title {
+      float: left;
+      font-size: 12px;
+      margin-right: 5px;
+      a {
+        color: #FFF;
+      }
+    }
+    &.unassigned {
+      .title {
+        color: #999;
+        display: none;
+      }
+    }
+    padding: 3px 6px;
+    .border-radius(2px);
+    background: #444;
+    color: #FFF;
+    margin: 3px;
+  }
+
+  td:first-child {
+    width: 200px;
+  }
+
+  .shards {
+    float: left;
+    .tooltip.top .tooltip-arrow {
+      border-top-color: #FFF;
+    }
+    .tooltip.bottom .tooltip-arrow {
+      border-bottom-color: #FFF;
+    }
+    .tooltip-inner {
+      background-color: #FFF;
+      color: #333;
+    }
+  }
+
+  .shard {
+    float: left;
+    background-color: #7CE655;
+    font: 10px sans-serif;
+    border: solid 1px #666;
+    padding: 3px 5px;
+    color: rgba(0, 0, 0, .8);
+    .border-radius(2px);
+
+    &.replica {
+      background-color: #B8F2A2;
+      background-image: linear-gradient(45deg, rgba(255, 255, 255, .6) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .6) 50%, rgba(255, 255, 255, .6) 75%, transparent 75%, transparent);
+      background-size: 10px 10px;
+    }
+
+    &.unassigned {
+      background-color: #CCC !important;
+      .opacity(.5);
+    }
+
+
+    &.emergency {
+      // .animation(emergencypulse 1s linear infinite);
+      background-color: rgba(255,120,120, 1) !important;
+      .opacity(1);
+    }
+    // .keyframes(~'emergencypulse, 0% { background-color: rgba(255,120,120, 1); } 50% { background-color: rgba(255,255,255, 1); } 100% { background-color: rgba(255,120,120, 1); }');
+
+    &.recovering {
+      // .animation( recoveringpulse 1s linear infinite );
+      background-color: rgba(255, 157, 0, 1);
+      background-image: linear-gradient(-45deg, rgba(255, 255, 255, .6) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .6) 50%, rgba(255, 255, 255, .6) 75%, transparent 75%, transparent) !important;
+      background-size: 10px 10px;
+    }
+
+    // .keyframes(~'recoveringpulse, 0% { background-position: 0 0; } 100% { background-position: 10px 10px; }');
+
+    &.new {
+      // .animation( newpulse 1s linear infinite );
+      background-color: rgba(255,221,0, 1);
+      background-image: linear-gradient(-45deg, rgba(255, 255, 255, .6) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .6) 50%, rgba(255, 255, 255, .6) 75%, transparent 75%, transparent) !important;
+      background-size: 10px 10px;
+    }
+
+    // .keyframes(~'newpulse, 0% { background-position: 0 0; } 100% { background-position: 10px 10px; }');
+
+    &.relocating {
+      // .animation( relocatingpulse 1s linear infinite );
+      background-color: rgba(216,148,255, 1);
+      background-image: linear-gradient(-45deg, rgba(255, 255, 255, .6) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .6) 50%, rgba(255, 255, 255, .6) 75%, transparent 75%, transparent) !important;
+      background-size: 10px 10px;
+    }
+
+    // .keyframes(~'relocatingpulse, 0% { background-position: 0 0; } 100% { background-position: 10px 10px; }');
+
+    &.initializing {
+      // .animation( initpulse 1s linear infinite );
+      background-color: rgba(43, 216, 255, 1);
+      background-image: linear-gradient(-45deg, rgba(255, 255, 255, .6) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .6) 50%, rgba(255, 255, 255, .6) 75%, transparent 75%, transparent) !important;
+      background-size: 10px 10px;
+    }
+
+    // .keyframes(~'initpulse, 0% { background-position: 0 0; } 100% { background-position: 10px 10px; }');
+
+  }
+
+  .legend {
+    font-size: 12px;
+    border-top: 1px solid #333;
+    background-color: #333;
+    .title { 
+      margin-left: 5px;
+      font-weight: bold; 
+    }
+    color: #FFF;
+    padding: 5px;
+    span.shard {
+      float: none;
+      display: inline-block;
+      margin: 0 5px 0 10px;
+      padding: 0 4px;
+    }
+  }
+
+  @displaySize: 175px;
+  @controlSize: 180px;
+
+  @statusGreen: #309600; 
+  @statusYellow: #B39200;
+  @statusRed: #853030;
+
+  @lightStatusGreen: #7CE655; 
+  @lightStatusYellow: rgba(255,221,0, 1);
+  @lightStatusRed: rgba(255,120,120, 1);
+
+  .player {
+    background-color: #000;
+    font-size: 12px;
+    height: 20px;
+    padding: 27px 0 0;
+    .user-select(none);
+    .current {
+      color: #999;
+    }
+
+    .disabled {
+      color: #666;
+    }
+    .display {
+      position: relative;
+      top: -5px;
+      width: @displaySize;
+      color: #999;
+      padding-left: 5px;
+      &.playing { color: #1A9C00; }
+      div {
+        padding: 0 10px;
+      }
+    }
+    .control {
+      position: relative;
+      top: -6px;
+      width: @controlSize;
+      text-align: center;
+      div {
+        padding: 0 10px;
+      }
+      i {
+        cursor: pointer;
+      }
+      .rate {
+        border-left: 1px solid #333;
+        cursor: pointer;
+        width: 50px;
+      }
+    }
+    .timeline {
+      .box-sizing(border-box);
+      position: relative; 
+      margin: 0 @displaySize 0 @controlSize;
+      .head {
+
+        @headColor: #333; 
+        @headTextColor: rgba(255,255,255,1);
+        position: absolute;
+        z-index: 202; 
+        top: 0;
+        left: 50px;
+        bottom: 0;
+        width: 2px;
+        height: 8px;
+        background-color: #FFF;
+        .arrow-down {
+          position: absolute;
+          z-index: 360;
+          top: -11px;
+          width: 0; 
+          height: 0; 
+          border-right: 10px solid transparent;
+          border-top: 10px solid @headColor;
+        }
+        .head-display {
+          position: absolute;
+          z-index: 350;
+          // border: 1px solid #333;
+          .border-radius(5px);
+          left: -6px;
+          bottom: 19px;
+          min-width: 200px;
+          font-size: 12px;  
+          color: @headTextColor;
+          background-color: @headColor;
+          .box-shadow(0px 5px 10px rgba(0,0,0,0.2));
+          .message {
+            padding: 8px;
+          }
+          .time {
+            .border-radius(5px 5px 0 0);
+            padding: 8px;
+            font-weight: bold;
+            color: #fff;
+            text-align: center;
+          }
+          .box-sizing(border-box);
+        }
+        &.yellow {
+          .time {
+            background-color: @statusYellow;
+          }
+        }
+        &.red {
+          .time {
+            background-color: @statusRed;
+          }
+        }
+        &.green { 
+          .time {
+            background-color: @statusGreen;
+          }
+        }
+      }
+      .marker{
+        @markerColor: #CCC; 
+        @markerTextColor: rgba(0,0,0,0.7);
+        .arrow-down {
+          position: absolute;
+          z-index: 100;
+          top: -6px;
+          width: 0; 
+          height: 0; 
+          border-right: 5px solid transparent;
+          border-top: 5px solid @markerColor;
+        } 
+        position: absolute;
+        z-index: 201; 
+        top: 0;
+        left: 50px;
+        bottom: 0;
+        width: 1px;
+        height: 8px;
+        background-color: @markerColor;
+        .marker-display {
+          z-index: 50;
+          .box-shadow(0px 5px 10px rgba(0,0,0,0.2));
+          position: absolute;
+          border: 1px solid #333;
+          text-align: center;
+          .border-radius(3px);
+          font-weight: bold;
+          top: -20px;
+          left: -6px;
+          padding: 0 4px;
+          font-size: 9px;  
+          line-height: 0;
+          height: 15px;
+          padding-top: 7px;
+          color: @markerTextColor;
+          background-color: @markerColor;
+          .box-sizing(border-box);
+        }
+      }
+      .bar {
+        .box-sizing(border-box);
+        position: absolute;
+        z-index: 200; 
+        top: 0;
+        left: 0;
+        right: 0px;
+        bottom: 0;
+        height: 8px;
+        &.playing { background-color: #1A9C00; }
+        background-color: rgba(0,0,0,0.5);
+        // border-left: 1px solid #000;
+      }
+      .cover {
+        .box-sizing(border-box);
+        position: absolute;
+        z-index: 300;
+        top: -20px;
+        left: 0;
+        right: 0px;
+        bottom: 0;
+        height: 36px;
+      }
+      .timeline-colors {
+        position: absolute;
+        .box-sizing(border-box);
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: #888;  
+        height: 8px;
+        cursor: pointer;
+        overflow: hidden;
+        .segment {
+        .box-sizing(border-box);
+          position: absolute;
+          top: 0;
+          left: 0;
+          bottom: 0;
+          z-index: 100;display: block;
+          &.playing { background-color: #1A9C00; }
+          height: 8px;
+          background-color: #999;
+          &.yellow {
+            background-color: @statusYellow;
+          }
+          &.red {
+            background-color: @statusRed;
+          }
+          &.green { 
+            background-color: @statusGreen;
+          }
+        }
+      }
+
+    }
+  }
+
+  // all the color overides for light
+  &.light {
+    .parentName {
+      a { color: #333; }
+      &.text-error { a { color: #b84a48; } }
+    }
+
+    .child {
+      background: #EEE;
+      color: #333;
+      .title { a { color: #333; } }  
+      border: solid 1px #DDD;
+    }
+
+    .shards {
+      .tooltip.top .tooltip-arrow {
+        border-top-color: #333;
+      }
+      .tooltip.bottom .tooltip-arrow {
+        border-bottom-color: #333;
+      }
+      .tooltip-inner {
+        background-color: #333;
+        color: #FFF;
+      }
+    }
+
+    .shard {
+      border: solid 1px #CCC;
+      &.unassigned {
+        background-color: #EDEDED;
+        .opacity(1);
+      } 
+    }
+
+    .legend {
+      border-top: 1px solid #EEE;
+      background-color: #EEE;
+      color: #333;
+    }
+
+    .player {
+      background-color: #DDD;
+      border-left: 1px solid #DDD;
+      border-right: 1px solid #DDD;
+
+      .current {
+        color: #333;
+      }
+
+      .disabled {
+        color: #999;
+      }
+
+      .timeline {
+        .head {
+          .head-display {
+            color: #333;
+            background-color: #FFF;
+          } 
+          .arrow-down {
+            border-top: 10px solid #FFF;
+          }
+          &.yellow {
+            .time {
+              background-color: @lightStatusYellow;
+              color: #333;
+            }
+          }
+          &.red {
+            .time {
+              background-color: @lightStatusRed;
+              color: #333;
+            }
+          }
+          &.green { 
+            .time {
+              background-color: @lightStatusGreen;
+              color: #333;
+            }
+          }
+        }
+        .marker {
+          .marker-display {
+            color: #000;
+            background-color: #FFF;
+            border: none;
+            font-weight: normal;
+          } 
+          .arrow-down {
+            border-top: 5px solid #FFF;
+          }
+        }
+        .bar {
+          background-color: rgba(0,0,0,0.3);
+        }
+        .timeline-colors {
+          border: 1px solid #999;
+          background-color: #CCC;  
+          .segment {
+            background-color: #999;
+            &.yellow {
+              background-color: @lightStatusYellow;
+            }
+            &.red {
+              background-color: @lightStatusRed;
+            }
+            &.green { 
+              background-color: @lightStatusGreen;
+            }
+          }
+        }
+      }
+    }
+
+
+  }
+}

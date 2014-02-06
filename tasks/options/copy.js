@@ -1,4 +1,8 @@
 module.exports = function (config) {
+  function notAnalytics (src) {
+    return !(/analytics/.test(src));
+  }
+
   return {
     artifacts_to_build: {
       files: [
@@ -19,8 +23,9 @@ module.exports = function (config) {
         {
           cwd: '.',
           expand: true,
-          src: ['index.html', './common/**/*.json'],
-          dest: '<%= buildSiteDir %>'
+          src: ['index.html', './common/**/*'],
+          dest: '<%= buildSiteDir %>',
+          filter: notAnalytics
         }
       ]},
     merge_marvel_kibana: {
@@ -42,6 +47,31 @@ module.exports = function (config) {
           cwd: 'kibana/panels',
           src: '**',
           dest: '<%= buildTempDir %>/src/app/panels/marvel'
+        },
+        {
+          expand: true,
+          cwd: 'kibana/services',
+          src: '**',
+          dest: '<%= buildTempDir %>/src/app/services/marvel'
+        },
+        {
+          expand: true,
+          cwd: 'kibana/lib',
+          src: '**',
+          dest: '<%= buildTempDir %>/src/app/lib'
+        },
+        {
+          src: 'kibana/vendor/react/react.js',
+          dest: '<%= buildTempDir %>/src/vendor/marvel/react/react.js'
+        },
+        {
+          expand: true,
+          cwd: 'kibana/vendor',
+          src: '**',
+          dest: '<%= buildTempDir %>/src/vendor/marvel',
+          filter: function (src) {
+            return !/vendor\/(kibana|react)/.test(src);
+          }
         }
       ]
     }

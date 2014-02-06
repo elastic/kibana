@@ -23,6 +23,7 @@
   "laxcomma": true,
   "sub": true,
   "unused": true,
+  "newcap": false,
 
   "maxlen": 140,
 

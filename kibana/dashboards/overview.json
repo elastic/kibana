@@ -338,7 +338,8 @@
           "mode": "indices",
           "loadingEditor": false,
           "compact": false,
-          "title": "Indices"
+          "title": "Indices",
+          "show_hidden": true
         }
       ],
       "notice": false

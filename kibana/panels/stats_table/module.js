@@ -78,7 +78,9 @@ define([
         // if you have more nodes/indices than this number, refresh rate will be capped at 2,
         data_limit_for_high_refresh: 50,
         // disable display names if more than this number of nodes/indices.
-        data_limit_for_display_names: 50
+        data_limit_for_display_names: 50,
+        // Show hidden indices
+        show_hidden: true
         //
       };
       _.defaults($scope.panel, _d);

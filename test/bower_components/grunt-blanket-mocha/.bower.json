@@ -1,0 +1,15 @@
+{
+  "name": "grunt-blanket-mocha",
+  "homepage": "https://github.com/ModelN/grunt-blanket-mocha",
+  "version": "0.4.0",
+  "_release": "0.4.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.4.0",
+    "commit": "3690938e1c811b1c4c2fca8c0033eb5f43e3ba7f"
+  },
+  "_source": "git://github.com/ModelN/grunt-blanket-mocha.git",
+  "_target": "~0.4.0",
+  "_originalSource": "grunt-blanket-mocha",
+  "_direct": true
+}

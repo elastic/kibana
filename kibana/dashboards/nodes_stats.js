@@ -99,6 +99,7 @@ dashboard.services.query = {
   })
 };
 
+
 // Lets also add a default time filter, the value of which can be specified by the user
 dashboard.services.filter = {
   list: {
@@ -147,6 +148,16 @@ panel_defaults_by_type["histogram"] = {
   annotate: annotate_config,
   y_format: "short"
 };
+
+function clusterViewFilter (query) {
+  if (query.length !==0) {
+    var filter = _.map(query, function (row) {
+      return row.query.replace(/node.ip_port.raw:"([^"]+)"/, '$1'); 
+    });
+    return '('+filter.join('|')+')';
+  }
+  return '';
+}
 
 
 function threadPoolRow(name) {
@@ -502,6 +513,23 @@ var rows = [
         "value_field": "indices.completion.size_in_bytes",
         "title": "Indices Completion size",
         "y_format": "bytes"
+      }
+    ]
+  },
+  {
+    "title": "Indices Allocated",
+    "panels": [
+      {
+        "span": 12,
+        "editable": true,
+        "type": "marvel.shard_allocation",
+        "loadingEditor": false,
+        "show_hidden": true,
+        "showPlayer": false,
+        "view": "nodes",
+        "title": "Indices Allocated",
+        "filter": clusterViewFilter(dashboard.services.query.list),
+        "embeded": true 
       }
     ]
   },

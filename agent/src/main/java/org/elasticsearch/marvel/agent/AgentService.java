@@ -20,6 +20,7 @@ package org.elasticsearch.marvel.agent;
 
 
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus;
 import org.elasticsearch.action.admin.cluster.health.ClusterIndexHealth;
 import org.elasticsearch.action.admin.cluster.node.stats.NodeStats;
 import org.elasticsearch.action.admin.cluster.stats.ClusterStatsResponse;
@@ -83,6 +84,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
     private final ClusterStateListener clusterStateEventListener;
 
     private volatile ExportingWorker exportingWorker;
+
     private volatile Thread workerThread;
     private volatile long samplingInterval;
     volatile private String[] indicesToExport = Strings.EMPTY_ARRAY;
@@ -175,6 +177,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
             } catch (InterruptedException e) {
                 // we don't care...
             }
+
         }
         for (Exporter e : exporters)
             e.stop();
@@ -217,6 +220,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
 
         @Override
         public void run() {
+            int stateExportingCountDown = 0;
             while (!closed) {
                 // sleep first to allow node to complete initialization before collecting the first start
                 try {
@@ -232,9 +236,19 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
                     }
                     exportEvents();
 
-                    if (clusterService.state().nodes().localNodeMaster()) {
+                    ClusterState clusterState = clusterService.state();
+
+                    if (clusterState.nodes().localNodeMaster()) {
                         exportIndicesStats();
                         exportClusterStats();
+                        if (--stateExportingCountDown <= 0) {
+                            ClusterHealthResponse health = new ClusterHealthResponse(clusterName,
+                                    clusterState.metaData().concreteAllIndices(), clusterState);
+
+                            pendingEventsQueue.add(new ClusterEvent.ClusterStateChange(System.currentTimeMillis(), clusterState,
+                                    "periodic sample", health.getStatus(), clusterName, "heartbeat"));
+                            stateExportingCountDown = 3600 / 5;
+                        }
                     }
                 } catch (InterruptedException e) {
                     // ignore, if closed, good....
@@ -349,23 +363,35 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
                 return;
             }
 
-            // only collect if i'm master.
+            // will be set to non empty value if cluster state needs to be exported
+            StringBuilder stateExportDescription = new StringBuilder();
+
             long timestamp = System.currentTimeMillis();
 
+            if (event.nodesDelta().added()) {
+                stateExportDescription.append(", nodes joined");
+            }
             for (DiscoveryNode node : event.nodesDelta().addedNodes()) {
                 pendingEventsQueue.add(new NodeEvent.NodeJoinLeave(timestamp, clusterName, node, true, event.source()));
             }
 
+            if (event.nodesDelta().removed()) {
+                stateExportDescription.append(", nodes left");
+            }
             for (DiscoveryNode node : event.nodesDelta().removedNodes()) {
                 pendingEventsQueue.add(new NodeEvent.NodeJoinLeave(timestamp, clusterName, node, false, event.source()));
             }
 
+
             if (!event.previousState().nodes().localNodeMaster()) {
+                stateExportDescription.append(", master elected");
                 pendingEventsQueue.add(new NodeEvent.ElectedAsMaster(timestamp, clusterName, event.state().nodes().localNode(),
                         event.source()));
             }
 
             if (event.blocksChanged()) {
+                stateExportDescription.append(", blocks changed");
+
                 // TODO: Add index blocks
                 List<ClusterBlock> removed = newArrayList();
                 List<ClusterBlock> added = newArrayList();
@@ -392,16 +418,23 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
                 }
             }
 
-            for (String index : event.indicesCreated()) {
-                pendingEventsQueue.add(new IndexEvent.IndexCreateDelete(timestamp, clusterName, index, true, event.source()));
+            if (!event.indicesCreated().isEmpty()) {
+                stateExportDescription.append(", indices created");
+                for (String index : event.indicesCreated()) {
+                    pendingEventsQueue.add(new IndexEvent.IndexCreateDelete(timestamp, clusterName, index, true, event.source()));
+                }
             }
 
-            for (String index : event.indicesDeleted()) {
-                pendingEventsQueue.add(new IndexEvent.IndexCreateDelete(timestamp, clusterName, index, false, event.source()));
+            if (!event.indicesDeleted().isEmpty()) {
+                stateExportDescription.append(", indices deleted");
+                for (String index : event.indicesDeleted()) {
+                    pendingEventsQueue.add(new IndexEvent.IndexCreateDelete(timestamp, clusterName, index, false, event.source()));
+                }
             }
 
 
             if (event.routingTableChanged()) {
+                stateExportDescription.append(", routing change");
 
                 for (ShardRoutingDelta changedShard : getAssignedShardRoutingDelta(event.previousState(), event.state())) {
                     ShardRouting current = changedShard.current;
@@ -419,8 +452,8 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
                                 break;
                             case RELOCATING:
                                 pendingEventsQueue.add(new RoutingEvent.ShardRelocating(timestamp, clusterName, changedShard.current,
-                                        event.state().nodes().get(current.currentNodeId()),
-                                        event.state().nodes().get(current.relocatingNodeId()))
+                                                event.state().nodes().get(current.currentNodeId()),
+                                                event.state().nodes().get(current.relocatingNodeId()))
                                 );
                                 break;
                             default:
@@ -440,6 +473,8 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
                     , event.previousState());
             ClusterHealthResponse curHealth = new ClusterHealthResponse(clusterName, event.state().metaData().concreteAllIndices(), event.state());
 
+            ClusterHealthStatus clusterHealthStatus = curHealth.getStatus();
+
             if (prevHealth.getStatus() != curHealth.getStatus()) {
                 pendingEventsQueue.add(new ClusterEvent.ClusterStatus(timestamp, clusterName, event.source(), curHealth));
             }
@@ -453,6 +488,14 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
                 pendingEventsQueue.add(new IndexEvent.IndexStatus(timestamp, clusterName, event.source(), indexHealth));
             }
 
+            if (stateExportDescription.length() != 0) {
+                String s = stateExportDescription.substring(2); // remove initial ", "
+                pendingEventsQueue.add(
+                        new ClusterEvent.ClusterStateChange(
+                                timestamp, event.state(), s, clusterHealthStatus,
+                                clusterName, event.source())
+                );
+            }
         }
 
     }

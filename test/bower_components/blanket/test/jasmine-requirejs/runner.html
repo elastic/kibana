@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+  <!--
+
+From the Chutzpah test suite: http://chutzpah.codeplex.com/
+
+
+-->
+    <title>Jasmine Spec Runner</title>
+    <link rel="stylesheet" type="text/css" href="../vendor/jasmine.css">
+  <script type="text/javascript" src="../vendor/jasmine.js"></script>
+  <script type="text/javascript" src="../vendor/jasmine-html.js"></script>
+   <script type="text/javascript"  src="../helpers/console_runner.js"></script>
+    <script type="text/javascript"  src="../../node_modules/requirejs/require.js"></script>
+   <script type="text/javascript" 
+    data-cover-only="code/" 
+    data-cover-never="['all.tests','code/tests']" 
+    src="../../dist/qunit/blanket.js"> </script>
+  <script type="text/javascript" src="../../src/adapters/jasmine-blanket.js"></script>
+    
+
+    <script type="text/javascript">
+        if (window.require && typeof (window.require.config) === 'function') {
+            require.config({
+                baseUrl: './code'
+            });
+        }
+    </script>
+    <script type="text/javascript" src="code/all.tests.jasmine.js"></script>
+
+    <script type="text/javascript">
+        (function () {
+            window.blanketTestJasmineExpected=2;
+
+            var jasmineEnv = jasmine.getEnv();
+            jasmineEnv.updateInterval = 1000;
+            
+            var htmlReporter = new jasmine.HtmlReporter();
+            var oldResult = htmlReporter.reportRunnerResults;
+              
+            jasmineEnv.addReporter(htmlReporter);
+
+             /* this is just for our automated tests */
+              window.jasmine_phantom_reporter = new jasmine.ConsoleReporter;
+              
+              jasmineEnv.addReporter(jasmine_phantom_reporter);
+              /*   */
+
+            jasmineEnv.specFilter = function (spec) {
+                return htmlReporter.specFilter(spec);
+            };
+
+            var currentWindowOnload = window.onload;
+             window.onload = function() {
+                if (currentWindowOnload) {
+                  currentWindowOnload();
+                }
+                execJasmine();
+
+
+              };
+
+              function execJasmine() {
+                jasmineEnv.execute();
+              }
+
+        })();
+    </script>
+</head>
+<body>
+</body>
+</html>

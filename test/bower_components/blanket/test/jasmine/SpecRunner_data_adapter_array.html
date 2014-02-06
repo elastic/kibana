@@ -1,0 +1,63 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <title>Jasmine Spec Runner</title>
+
+  <link rel="stylesheet" type="text/css" href="../vendor/jasmine.css">
+  <script type="text/javascript" src="../vendor/jasmine.js"></script>
+  <script type="text/javascript" src="../vendor/jasmine-html.js"></script>
+
+  <script type="text/javascript" data-cover-only="[source/]"  src="../../dist/qunit/blanket.min.js" data-cover-adapter="../../src/adapters/jasmine-blanket.js"></script>
+  
+  <script type="text/javascript"  src="../helpers/console_runner.js"></script>
+
+  <!-- include source files here... -->
+  <script type="text/javascript" src="spec/SpecHelper.js"></script>
+  <script type="text/javascript" src="spec/PlayerSpec.js"></script>
+  <script type="text/javascript" src="spec/SongSpec.js"></script>
+
+  <!-- include spec files here... -->
+  <script type="text/javascript" src="source/Player.js" ></script>
+  <script type="text/javascript" src="source/Song.js" ></script>
+
+  <script type="text/javascript">
+    (function() {
+       window.blanketTestJasmineExpected=2;
+      var jasmineEnv = jasmine.getEnv();
+      jasmineEnv.updateInterval = 1000;
+
+      var htmlReporter = new jasmine.HtmlReporter();
+
+      jasmineEnv.addReporter(htmlReporter);
+      /* this is just for our automated tests */
+      window.jasmine_phantom_reporter = new jasmine.ConsoleReporter;
+      jasmineEnv.addReporter(jasmine_phantom_reporter);
+      /*   */
+
+
+      jasmineEnv.specFilter = function(spec) {
+        return htmlReporter.specFilter(spec);
+      };
+
+      var currentWindowOnload = window.onload;
+
+      window.onload = function() {
+        if (currentWindowOnload) {
+          currentWindowOnload();
+        }
+        execJasmine();
+      };
+
+      function execJasmine() {
+        jasmineEnv.execute();
+      }
+
+    })();
+  </script>
+
+</head>
+
+<body>
+</body>
+</html>

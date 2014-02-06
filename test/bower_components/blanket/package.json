@@ -1,0 +1,58 @@
+{
+  "name": "blanket",
+  "description": "seamless js code coverage",
+  "version": "1.1.5",
+  "homepage": "https://github.com/alex-seville/blanket",
+  "author": {
+    "name": "Alex-Seville",
+    "email": "hi@alexanderseville.com",
+    "url": "http://blanketjs.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/alex-seville/blanket.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alex-seville/blanket/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/alex-seville/blanket/blob/master/LICENSE-MIT"
+    }
+  ],
+  "main": "src/index.js",
+  "engines": {
+    "node": "0.10.7"
+  },
+  "dependencies": {
+    "esprima": "~1.0.2",
+    "falafel": "~0.1.6",
+    "xtend": "~2.0.3"
+  },
+  "devDependencies": {
+    "phantomjs": "1.8.2-0",
+    "coffee-script": "1.4.0",
+    "mocha": "1.7.4",
+    "requirejs": "~2.1.4",
+    "travis-cov": "*",
+    "grunt": "0.3.17"
+  },
+  "scripts": {
+    "test": "grunt --verbose blanketTest",
+    "travis-cov": {
+      "threshold": 70,
+      "removeKey": "branchFcn"
+    },
+    "blanket": {
+      "pattern": "test",
+      "data-cover-flags": {
+        "debug": false
+      },
+      "loader": "./node-loaders/coffee-script"
+    }
+  },
+  "keywords": [
+    "coverage"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "phantom": {
+    "qunit": "test/helpers/phantom_qunit_runner.js",
+    "qunit_old": "test/helpers/phantom_qunit_old_runner.js",
+    "jasmine": "test/helpers/phantom_jasmine_runner.js",
+    "mocha": "test/helpers/phantom_mocha_runner.js"
+  },
+  "reporters": {
+    "qunit": "node_modules/travis-cov/phantom_runner.js",
+    "jasmine": "node_modules/travis-cov/phantom_jasmine_runner.js",
+    "mocha": {
+        "browser": "node_modules/travis-cov/phantom_mocha_runner.js",
+        "node": "travis-cov"
+    }
+  },
+  "runners": {
+    "node": "test/test-node/testrunner.js",
+    "nodeCS": "test/test-node/testrunner_cs.js",
+    "browser" :"test/lib-tests/runner.html?coverage=true",
+    "browserRequire" :"test/requirejs/require_runner.html?coverage=true",
+    "browserBackbone" :"test/backbone-koans/index.html?coverage=true",
+    "browserReporter" :"test/custom-reporter/index.html?coverage=true",
+    "browserJasmine" :"test/jasmine/SpecRunner.html",
+    "browserJasmineBuild" :"test/jasmine-custom-build/SpecRunner.html",
+    "browserJasmineAdapter" :"test/jasmine/SpecRunner_data_adapter.html",
+    "browserJasmineAdapterArray" :"test/jasmine/SpecRunner_data_adapter_array.html",
+    "browserJasmineAdapterRegex" :"test/jasmine/SpecRunner_data_adapter_regex.html",
+    "browserMochaAdapter" :"test/mocha-browser/adapter.html",
+    "browserBootstrap" :"test/bootstrap/tests/index.html",
+    "browserCoffeeScript" :"test/coffee_script/index.html?coverage=true",
+    "browserJasmineRequire" :"test/jasmine-requirejs/runner.html",
+    "browserChutzpah" :"test/requirejs/chutzpah.html?coverage=true",
+    "browserCommonjs" :"test/commonjs/runner.html?coverage=true"
+  },
+  "cmds": {
+    "phantom": "./node_modules/phantomjs/bin/phantomjs",
+    "mocha": "./node_modules/mocha/bin/mocha",
+    "mochaCS": "./node_modules/mocha/bin/mocha --compilers coffee:coffee-script"
+  }
+}

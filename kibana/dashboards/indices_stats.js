@@ -103,6 +103,16 @@ dashboard.services.filter = {
   ids: [0, 1]
 };
 
+function clusterViewFilter (query) {
+  if (query.length !==0) {
+    var filter = _.map(query, function (row) {
+      return row.alias; 
+    });
+    return '('+filter.join('|')+')';
+  }
+  return '';
+}
+
 
 var row_defaults = {
   height: "150px",
@@ -319,6 +329,23 @@ var rows = [
         "value_field": "total.completion.size_in_bytes",
         "title": "Completion size",
         "y_format": "bytes"
+      }
+    ]
+  },
+  {
+    "title": "Nodes Allocated",
+    "panels": [
+      {
+        "span": 12,
+        "editable": true,
+        "type": "marvel.shard_allocation",
+        "loadingEditor": false,
+        "show_hidden": true,
+        "showPlayer": false,
+        "view": "indices",
+        "title": "Nodes Allocated",
+        "filter": clusterViewFilter(dashboard.services.query.list),
+        "embeded": true 
       }
     ]
   },

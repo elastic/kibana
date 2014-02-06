@@ -20,6 +20,8 @@ package org.elasticsearch.marvel.agent.event;
 
 
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus;
+import org.elasticsearch.cluster.ClusterState;
 import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
@@ -30,9 +32,9 @@ public abstract class ClusterEvent extends Event {
 
     protected final String event_source;
 
-    public ClusterEvent(long timestamp, String clusterName, String event_source) {
+    public ClusterEvent(long timestamp, String clusterName, String eventSource) {
         super(timestamp, clusterName);
-        this.event_source = event_source;
+        this.event_source = eventSource;
     }
 
     @Override
@@ -54,8 +56,8 @@ public abstract class ClusterEvent extends Event {
         private final org.elasticsearch.cluster.block.ClusterBlock block;
         private boolean added;
 
-        public ClusterBlock(long timestamp, String clusterName, org.elasticsearch.cluster.block.ClusterBlock block, boolean added, String event_source) {
-            super(timestamp, clusterName, event_source);
+        public ClusterBlock(long timestamp, String clusterName, org.elasticsearch.cluster.block.ClusterBlock block, boolean added, String eventSource) {
+            super(timestamp, clusterName, eventSource);
             this.block = block;
             this.added = added;
         }
@@ -105,6 +107,47 @@ public abstract class ClusterEvent extends Event {
             ToXContent.Params p = new ToXContent.DelegatingMapParams(ImmutableMap.of("output_cluster_name", "false"), params);
             super.addXContentBody(builder, p);
             return clusterHealth.toXContent(builder, params);
+        }
+    }
+
+    public static class ClusterStateChange extends ClusterEvent {
+        static ToXContent.MapParams xContentParams = new ToXContent.MapParams(
+                ImmutableMap.of("filter_metadata", "true",  //0.90.X options
+                        "metric", "version,master_node,nodes,blocks,routing_table")); // 1.0 options
+
+        ClusterState state;
+        private String description;
+        private ClusterHealthStatus clusterStatus;
+
+        public ClusterStateChange(long timestamp, ClusterState state, String description, ClusterHealthStatus clusterStatus,
+                                  String clusterName, String event_source) {
+            super(timestamp, clusterName, event_source);
+            this.state = state;
+            this.description = description;
+            this.clusterStatus = clusterStatus;
+        }
+
+        @Override
+        public String type() {
+            return "cluster_state";
+        }
+
+        @Override
+        protected String event() {
+            return "cluster_state";
+        }
+
+        @Override
+        String conciseDescription() {
+            return description;
+        }
+
+        @Override
+        public XContentBuilder addXContentBody(XContentBuilder builder, ToXContent.Params params) throws IOException {
+            super.addXContentBody(builder, params);
+            builder.field("status", clusterStatus.name().toLowerCase());
+            state.toXContent(builder, xContentParams);
+            return builder;
         }
     }
 }

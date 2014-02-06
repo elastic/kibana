@@ -1,0 +1,23 @@
+<html>
+  <head>
+    <title>Mocha</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="../vendor/mocha.css" />
+    <script src="../vendor/mocha.js"></script>
+
+    <script src="src/aSource.js"></script>
+    <script type="text/javascript" data-cover-only="src/"  src="../../dist/qunit/blanket.min.js"> </script>
+    <script type="text/javascript" src="../../src/adapters/mocha-blanket.js"></script>
+ 
+    <script>mocha.setup('bdd')</script>
+    <script>
+      function assert(expr, msg) {
+        if (!expr) throw new Error(msg || 'failed');
+      }
+    </script>
+    <script src="adapter.js"></script>
+  </head>
+  <body>
+    <div id="mocha"></div>
+  </body>
+</html>

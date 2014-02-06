@@ -15,6 +15,7 @@ define([
   'kbn',
   'lodash',
   '../../../../../common/analytics',
+  'services/marvel/index',
   'factories/store'
 ],
 function (angular, app, kbn, _, ga) {
@@ -24,7 +25,7 @@ function (angular, app, kbn, _, ga) {
   app.useModule(module);
 
   module.controller('marvel.cluster', function($scope, $modal, $q, $http,
-    querySrv, dashboard, filterSrv, kbnVersion, storeFactory, cacheBust) {
+    dashboard, filterSrv, kbnVersion, storeFactory, cacheBust) {
     $scope.panelMeta = {
       modals : [],
       editorTabs : [],

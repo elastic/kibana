@@ -1,0 +1,39 @@
+doctype html
+html
+  head
+    title Marvel Tests
+    link(rel="stylesheet", href="/test/bower_components/mocha/mocha.css")
+  body
+    #mocha
+    script(src="/test/bower_components/chai/chai.js")
+    script(type="text/javascript").
+      window.expect = window.chai.expect;
+    script(src="/test/bower_components/mocha/mocha.js")
+    script(src="/test/bower_components/sinon/sinon-1.9.0.js")
+    script(type="text/javascript").
+      mocha.setup('bdd');
+    script(src="/test/bower_components/angular-1.1.5.js")
+    script(src="/test/bower_components/angular-mocks/angular-mocks.js")
+    script(src="/test/bower_components/requirejs/require.js")
+    script(src="/kibana/app/components/require.config.js")
+    script(src="/test/bower_components/blanket/dist/qunit/blanket.js", data-cover-only="['kibana/app/panels','kibana/app/lib']", data-cover-adapter="/test/bower_components/grunt-blanket-mocha/support/mocha-blanket.js")
+    script(type="text/javascript").
+      if (window.PHANTOMJS) {
+        blanket.options("reporter", "../node_modules/grunt-blanket-mocha/support/grunt-reporter.js");
+      }
+
+    script(type="text/javascript").
+      require.config({
+        baseUrl: '../kibana/app'
+      });
+      require(!{tests}, function () {
+        setTimeout(function () {
+          window.mochaRunner = mocha.run();
+          if (window.mochaRunner) {
+            window.mochaRunner.on('end', function () {
+              window.mochaResults = this.stats;
+            });
+          }
+        }, 100);
+      });
+    script(src="//localhost:35729/livereload.js")

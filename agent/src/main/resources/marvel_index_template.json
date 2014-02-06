@@ -12,7 +12,7 @@
             }
         },
         "mapper.dynamic": true,
-        "marvel.index_format": 1
+        "marvel.index_format": 2
     },
     "mappings": {
         "_default_": {
@@ -190,6 +190,26 @@
                             }
                         }
                     }
+                }
+            }
+        },
+        "cluster_state": {
+            "properties": {
+                "blocks": {
+                    "type": "object",
+                    "enabled": false
+                },
+                "nodes": {
+                    "type": "object",
+                    "enabled": false
+                },
+                "routing_nodes": {
+                    "type": "object",
+                    "enabled": false
+                },
+                "routing_table": {
+                    "type": "object",
+                    "enabled": false
                 }
             }
         }

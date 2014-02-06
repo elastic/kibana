@@ -1,0 +1,79 @@
+<lazy-style href="/kibana/app/panels/marvel/shard_allocation/css/style.css"></lazy-style>
+<div class="marvel-cluster-view" ng-controller="marvel.shard_allocation" ng-init="init()" ng-class="style">
+  <div class="head" ng-if="panel.embeded !== true">
+    <div class="pull-right">
+      <div>
+        <a ng-click="switchView('indices')" ng-class="{ bold: panel.view ==='indices' }">By Indices</a> / <a ng-click="switchView('nodes')"  ng-class="{ bold: panel.view === 'nodes' }">By Nodes</a>
+      </div>
+    </div>
+    <form ng-submit="filterResults(panel.filter)">
+      <input type="text" ng-model="panel.filter" placeholder="Filter {{ panel.view }}..." class="input-medium" />
+    <span class="title">{{ viewCount }} of {{ totalCount }} {{ panel.view }}</span>
+    </form>
+  </div>
+  <div class="legend">
+    <div class="pull-right" style="padding-right: 10px;">
+      <a ng-click="panel.showPlayer=!(panel.showPlayer); player.current = player.total;">Replay History <i class="icon-angle-down" ng-show="!panel.showPlayer"></i><i class="icon-angle-up" ng-show="panel.showPlayer"></i></a>
+    </div>
+    <div>
+      <span class="title">Legend</span>
+      <span class="shard">&nbsp;</span>
+      <span class="shard-label">Primary</span>
+      <span class="shard replica">&nbsp;</span>
+      <span class="shard-label">Replica</span>
+      <span class="shard relocating">&nbsp;</span>
+      <span class="shard-label">Relocating</span>
+      <span class="shard initializing">&nbsp;</span>
+      <span class="shard-label">Initializing</span>
+      <span class="shard emergency">&nbsp;</span>
+      <span class="shard-label">Unassigned Primary</span>
+      <span class="shard unassigned replica">&nbsp;</span>
+      <span class="shard-label">Unassigned Replica</span>
+    </div>
+  </div>
+  <div class="player" ng-show="panel.showPlayer">
+    <div class="display pull-right">
+      <div class="current pull-left">{{ current }}</div>
+
+      
+    </div>
+    <div class="control pull-left">
+      <div class="pull-left">
+        <i class="icon-fast-backward" ng-click="rewind($event);" ng-class="{ disabled: player.fastBackward === false }"></i>
+        <i class="icon-backward" ng-click="backward($event);" ng-class="{ disabled: player.backward === false }"></i>
+        <i class="icon-play" ng-click="play($event);" ng-show="player.paused"></i>
+        <i class="icon-pause" ng-show="player.paused === false" ng-click="pause($event);"></i>
+        <i class="icon-forward" ng-click="forward($event);" ng-class="{ disabled: player.forward === false }"></i>
+        <i class="icon-fast-forward" ng-click="fastForward($event);" ng-class="{ disabled: player.fastForward === false }"></i> 
+      </div>
+      <div class="rate pull-left dropdown" ng-class="{ playing: (!player.paused && (player.current !== player.total) ) }">
+        <span bs-tooltip="'Event Rate'" class="dropdown-toggle" data-toggle="dropdown">{{ (panel.rate/1000)|number:1 }} s <i class="icon-caret-down"></i></span>
+        <ul class="dropdown-menu">
+          <li>
+            <a ng-click="panel.rate = 500">0.5s per event</a>
+            <a ng-click="panel.rate = 1000">1.0s per event</a>
+            <a ng-click="panel.rate = 2500">2.5s per event</a>
+            <a ng-click="panel.rate = 5000">5.0s per event</a>
+            <a ng-click="panel.rate = 10000">10s per event</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="timeline">
+      <div ng-mouseenter="showHead = true" ng-mouseleave="showHead = false;" ng-mousemove="head($event);" class="cover" ng-click="jump($event);"></div>
+      <div class="marker" ng-repeat="marker in timelineMarkers" ng-style="{ left: ((marker.count/total)*100)+'%' }"><div class="arrow-down"></div><div class="marker-display">{{ marker.display }}</div></div>
+      <div ng-show="showHead" class="head" ng-style="{ left: headX+'px' }" ng-class="headStatus|lowercase">
+        <div class="head-display">
+          <div class="time">{{ headTime }}</div>
+          <div class="message">{{ headMessage }}</div>
+        </div>
+        <div class="arrow-down"></div>
+      </div>
+      <div class="bar" ng-style="{ left: barX+'%' }"></div>
+      <div class="timeline-colors">
+        <div ng-repeat="item in colors" class="segment" ng-class="item.status|lowercase" ng-style="{ left: item.left+'%', width: item.width+'%' }"></div>
+      </div>
+    </div>
+  </div>
+  <cluster-view labels="panel.labels" showing="showing"></cluster-view>
+</div>

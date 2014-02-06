@@ -3,7 +3,8 @@ module.exports = function (grunt) {
     grunt.task.run([
       'replace:dev_marvel_config',
       'configureRewriteRules',
-      'connect'
+      'less',
+      'connect:server'
     ]);
   });
 };

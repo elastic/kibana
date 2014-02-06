@@ -1,0 +1,16 @@
+<div ng-if="!unassigned">
+  <div class="child" ng-repeat="child in groups" ng-class="calculateClass(child)">
+    <div class="title"><span ng-show="child.master" class="icon-star"></span>{{ child.name }}</div>
+    <div class="shards">
+      <div class="shard" ng-repeat="shard in child.children" ng-class="calculateClass(shard)">
+        {{ shard.shard }}
+      </div>
+    </div>
+  </div>
+</div>
+<div ng-if="unassigned">
+  <div class="shard" ng-repeat="shard in unassigned[0].children" ng-class="calculateClass(shard)">
+    {{ shard.shard }}
+  </div>
+</div>
+

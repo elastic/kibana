@@ -1,0 +1,11 @@
+language: node_js
+node_js:
+  - 0.8
+
+branches:
+  only:
+    - master
+    - development
+
+notifications:
+    email: "hi@alexanderseville.com"

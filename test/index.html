@@ -1,0 +1,16 @@
+<!DOCTYPE html><html><head><title>Marvel Tests</title><link rel="stylesheet" href="/test/bower_components/mocha/mocha.css"></head><body><div id="mocha"></div><script src="/test/bower_components/chai/chai.js"></script><script type="text/javascript">window.expect = window.chai.expect;</script><script src="/test/bower_components/mocha/mocha.js"></script><script src="/test/bower_components/sinon/sinon-1.9.0.js"></script><script type="text/javascript">mocha.setup('bdd');</script><script src="/test/bower_components/angular-1.1.5.js"></script><script src="/test/bower_components/angular-mocks/angular-mocks.js"></script><script src="/test/bower_components/requirejs/require.js"></script><script src="/kibana/app/components/require.config.js"></script><script src="/test/bower_components/blanket/dist/qunit/blanket.js" data-cover-only="['kibana/app/panels','kibana/app/lib']" data-cover-adapter="/test/bower_components/grunt-blanket-mocha/support/mocha-blanket.js"></script><script type="text/javascript">if (window.PHANTOMJS) {
+  blanket.options("reporter", "../node_modules/grunt-blanket-mocha/support/grunt-reporter.js");
+}
+</script><script type="text/javascript">require.config({
+  baseUrl: '../kibana/app'
+});
+require(["/test/unit/lib/ClusterState/explain.js","/test/unit/lib/ClusterState/explainStatus.js","/test/unit/lib/ClusterState/filterShards.js","/test/unit/lib/ClusterState/getIndices.js","/test/unit/lib/ClusterState/getState.js","/test/unit/lib/ClusterState/incrementIndexShardStatusCount.js","/test/unit/lib/ClusterState/popFirstIndexAndReturnEndpoint.js","/test/unit/lib/ClusterState/refreshState.js","/test/unit/shard_allocation/calculateClass.js","/test/unit/shard_allocation/countChildren.js","/test/unit/shard_allocation/extractIp.js","/test/unit/shard_allocation/extractMarkers.js","/test/unit/shard_allocation/extractShards.js","/test/unit/shard_allocation/filterByName.js","/test/unit/shard_allocation/filterHiddenIndices.js","/test/unit/shard_allocation/generateQueryAndLink.js","/test/unit/shard_allocation/getStateSource.js","/test/unit/shard_allocation/getTimelineData.js","/test/unit/shard_allocation/hasUnassigned.js","/test/unit/shard_allocation/hasUnassignedPrimaries.js","/test/unit/shard_allocation/updateColors.js","/test/unit/shard_allocation/vents.js"], function () {
+  setTimeout(function () {
+    window.mochaRunner = mocha.run();
+    if (window.mochaRunner) {
+      window.mochaRunner.on('end', function () {
+        window.mochaResults = this.stats;
+      });
+    }
+  }, 100);
+});</script><script src="//localhost:35729/livereload.js"></script></body></html>
