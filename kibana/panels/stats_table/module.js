@@ -349,16 +349,14 @@ define([
 
         filter.must($scope.get_mode_filter()).must($scope.ejs.RangeFilter('@timestamp').from(to + "-10m/m").to(to + "/m"));
 
-        request = $scope.ejs.Request().indices(dashboard.indices).size(0).searchType("count");
+        request = $scope.ejs.Request().indices(dashboard.indices).size(10);
         request.query($scope.ejs.FilteredQuery($scope.ejs.MatchAllQuery(), filter));
-
 
         // timestamp facet to give us the proper time ranges for each node
         request.facet($scope.ejs.TermStatsFacet("timestamp")
           .keyField($scope.panel.persistent_field).valueField("@timestamp")
           .order('term')
           .size(2000));
-
 
         _.each($scope.panel.metrics, function (m) {
           request.facet($scope.ejs.TermStatsFacet(m.field)
@@ -469,17 +467,23 @@ define([
                 $scope.ejs.TermQuery($scope.panel.persistent_field, s.id)
               )
             );
-            rowRequest.size(1).fields(_.unique([ stripRaw($scope.panel.display_field), stripRaw($scope.panel.persistent_field)]));
+            rowRequest.size(1).fields(_.unique(
+              [ stripRaw($scope.panel.display_field), stripRaw($scope.panel.persistent_field),'node.master']
+            ));
+
             rowRequest.sort("@timestamp", "desc");
+
             mrequest.requests(rowRequest);
           });
 
           mrequest.doSearch(function (r) {
+
             esVersion.is('>=1.0.0.RC1').then(function(version) {
               var
                 hit,
                 display_name,
-                persistent_name;
+                persistent_name,
+                master;
 
               _.each(r.responses, function (response) {
                 if (response.hits.hits.length === 0) {
@@ -490,22 +494,36 @@ define([
                 if (version) {
                   display_name = (hit.fields[stripRaw($scope.panel.display_field)] || [ undefined ])[0];
                   persistent_name = (hit.fields[stripRaw($scope.panel.persistent_field)] || [ undefined] )[0];
+                  master = (hit.fields['node.master'] || [ undefined ])[0];
                 }
                 else {
                   display_name = hit.fields[stripRaw($scope.panel.display_field)];
                   persistent_name = hit.fields[stripRaw($scope.panel.persistent_field)];
+                  master = hit.fields['node.master'];
                 }
                 (newData[persistent_name] || {}).display_name = display_name;
+                newData[persistent_name].master = master;
               });
               $scope._register_data_end();
               $scope.select_display_data_and_enrich(newData);
             });
+
+            /*
+            newData.marvelMeta = {
+              masterCount: _.filter(newData,'master').length
+            };
+            */
+
           }, $scope._register_data_end);
         }, $scope._register_data_end);
 
       };
 
       function applyNewData(rows, data) {
+        $scope.meta = {
+          masterCount: _.filter(data,'master').length
+        };
+
         $scope.rows = rows;
         $scope.data = data;
         $scope.updateUIFeaturesBasedOnData();
