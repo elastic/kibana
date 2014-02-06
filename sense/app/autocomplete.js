@@ -64,8 +64,12 @@ define([
     }
 
     function termToFilterRegex(term, prefix, suffix) {
-      if (!prefix) prefix = "";
-      if (!suffix) suffix = "";
+      if (!prefix) {
+        prefix = "";
+      }
+      if (!suffix) {
+        suffix = "";
+      }
 
       return new RegExp(prefix + term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + suffix, 'i');
     }
@@ -76,15 +80,17 @@ define([
       var context = term.context;
 
       // make sure we get up to date replacement info.
-      addReplacementInfoToContext(context, editor.getCursorPosition(), term.value);
+      addReplacementInfoToContext(context, editor.getCursorPosition(), term.insert_value);
 
       var termAsString;
       if (context.autoCompleteType == "body") {
-        termAsString = typeof term.value == "string" ? '"' + term.value + '"' : term.value + "";
-        if (term.value === "[" || term.value === "{") termAsString = "";
+        termAsString = typeof term.insert_value == "string" ? '"' + term.insert_value + '"' : term.insert_value + "";
+        if (term.insert_value === "[" || term.insert_value === "{") {
+          termAsString = "";
+        }
       }
       else {
-        termAsString = term.value + "";
+        termAsString = term.insert_value + "";
       }
 
       var valueToInsert = termAsString;
@@ -98,10 +104,15 @@ define([
 
         valueToInsert += ": " + indentedTemplateLines.join("\n");
         templateInserted = true;
-      } else {
+      }
+      else {
         templateInserted = true;
-        if (term.value === "[") valueToInsert += "[]";
-        else if (term.value == "{") valueToInsert += "{}";
+        if (term.value === "[") {
+          valueToInsert += "[]";
+        }
+        else if (term.value == "{") {
+          valueToInsert += "{}";
+        }
         else {
           templateInserted = false;
         }
@@ -112,10 +123,12 @@ define([
       // disable listening to the changes we are making.
       removeChangeListener();
 
-      if (context.rangeToReplace.start.column != context.rangeToReplace.end.column)
+      if (context.rangeToReplace.start.column != context.rangeToReplace.end.column) {
         session.replace(context.rangeToReplace, valueToInsert);
-      else
+      }
+      else {
         editor.insert(valueToInsert);
+      }
 
       editor.clearSelection(); // for some reason the above changes selection
 
@@ -140,7 +153,9 @@ define([
             if ((nonEmptyToken || {}).type == "paren.lparen") {
               nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
               newPos = { row: tokenIter.getCurrentTokenRow(), column: tokenIter.getCurrentTokenColumn() };
-              if (nonEmptyToken && nonEmptyToken.value.indexOf('"') === 0) newPos.column++; // don't stand on "
+              if (nonEmptyToken && nonEmptyToken.value.indexOf('"') === 0) {
+                newPos.column++;
+              } // don't stand on "
             }
             break;
           case "paren.lparen":
@@ -211,19 +226,31 @@ define([
       var t = tokenIter.getCurrentToken();
 
       function checkIfStandingAfterBody() {
-        if (!t) return "method"; // there is really nothing
-        if (t.type != "paren.rparen") return "body"; // if we don't encounter a } where are not after the body
+        if (!t) {
+          return "method";
+        } // there is really nothing
+        if (t.type != "paren.rparen") {
+          return "body";
+        } // if we don't encounter a } where are not after the body
         // too bad , have to count parentheses..
         var openParam = 1;
         while (openParam > 0 && (t = editor.parser.prevNonEmptyToken(tokenIter)) && !editor.parser.isUrlOrMethodToken(t)) {
-          if (t.type == "paren.rparen") openParam++;
-          else if (t.type == "paren.lparen") openParam--;
+          if (t.type == "paren.rparen") {
+            openParam++;
+          }
+          else if (t.type == "paren.lparen") {
+            openParam--;
+          }
         }
-        if (openParam > 0) return "body"; // parens didn't match up. We are in body land.
+        if (openParam > 0) {
+          return "body";
+        } // parens didn't match up. We are in body land.
 
         // what do we have before if it is the url -> we skipped the whole body
         t = editor.parser.prevNonEmptyToken(tokenIter);
-        if (t && editor.parser.isUrlOrMethodToken(t)) return "method";
+        if (t && editor.parser.isUrlOrMethodToken(t)) {
+          return "method";
+        }
 
         return "body"; // we are halfway the body somewhere...
       }
@@ -235,7 +262,9 @@ define([
       }
 
 
-      if (t.type == "url.comma") t = tokenIter.stepBackward();
+      if (t.type == "url.comma") {
+        t = tokenIter.stepBackward();
+      }
 
       switch (t.type) {
         case "comment":
@@ -268,7 +297,9 @@ define([
           }
         /* falls through */
         default:
-          if (t.type.indexOf("url") === 0) return null;
+          if (t.type.indexOf("url") === 0) {
+            return null;
+          }
 
           // check if we are beyond the body and should start a new request
           // but only we have a new line between current pos and the body.
@@ -295,8 +326,9 @@ define([
       var insertingRelativeToToken;
 
       context.updatedForToken = session.getTokenAt(pos.row, pos.column);
-      if (!context.updatedForToken)
-        context.updatedForToken = { value: "", start: pos.column }; // empty line
+      if (!context.updatedForToken) {
+        context.updatedForToken = { value: "", start: pos.column };
+      } // empty line
 
 
       switch (context.updatedForToken.type) {
@@ -382,9 +414,13 @@ define([
           context.addTemplate = false;
 
           nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
-          if (!(nonEmptyToken && nonEmptyToken.value == "{")) break;
+          if (!(nonEmptyToken && nonEmptyToken.value == "{")) {
+            break;
+          }
           nonEmptyToken = editor.parser.nextNonEmptyToken(tokenIter);
-          if (!(nonEmptyToken && nonEmptyToken.value == "}")) break;
+          if (!(nonEmptyToken && nonEmptyToken.value == "}")) {
+            break;
+          }
           context.addTemplate = true;
           // extend range to replace to include all up to token
           context.rangeToReplace.end.row = tokenIter.getCurrentTokenRow();
@@ -419,12 +455,15 @@ define([
       }
       else {
         var pos = editor.getCursorPosition();
-        if (pos.column == context.updatedForToken.start)
+        if (pos.column == context.updatedForToken.start) {
           insertingRelativeToToken = -1;
-        else if (pos.column < context.updatedForToken.start + context.updatedForToken.value.length)
+        }
+        else if (pos.column < context.updatedForToken.start + context.updatedForToken.value.length) {
           insertingRelativeToToken = 0;
-        else
+        }
+        else {
           insertingRelativeToToken = 1;
+        }
 
       }
       // we should actually look at what's happening before this token
@@ -441,8 +480,9 @@ define([
         case "method":
           break;
         default:
-          if (nonEmptyToken && nonEmptyToken.type.indexOf("url") < 0)
+          if (nonEmptyToken && nonEmptyToken.type.indexOf("url") < 0) {
             context.prefixToAdd = ", "
+          }
       }
 
       return context;
@@ -493,8 +533,9 @@ define([
         var filter = termToFilterRegex(methodAndIndices.endpoint + "/", "^");
         var filtered = [];
         _.each(completionTerms, function (term) {
-          if ((term + "").match(filter))
+          if ((term + "").match(filter)) {
             filtered.push(term.substring(methodAndIndices.endpoint.length + 1));
+          }
         });
         completionTerms = filtered;
       }
@@ -562,14 +603,24 @@ define([
 
       function RuleWalker(initialRules, scopeRules) {
         // scopeRules are the rules used to resolve relative scope links
-        if (typeof scopeRules == "undefined") scopeRules = initialRules;
+        if (typeof scopeRules == "undefined") {
+          scopeRules = initialRules;
+        }
         var WALKER_MODE_EXPECTS_KEY = 1, WALKER_MODE_EXPECTS_CONTAINER = 2, WALKER_MODE_DONE = 3;
 
         function getRulesType(rules) {
-          if (rules == null || typeof rules == undefined) return "null";
-          if (rules.__any_of || rules instanceof Array) return "list";
-          if (rules.__one_of) return getRulesType(rules.__one_of[0]);
-          if (typeof rules == "object") return "object";
+          if (rules == null || typeof rules == undefined) {
+            return "null";
+          }
+          if (rules.__any_of || rules instanceof Array) {
+            return "list";
+          }
+          if (rules.__one_of) {
+            return getRulesType(rules.__one_of[0]);
+          }
+          if (typeof rules == "object") {
+            return "object";
+          }
           return "value";
         }
 
@@ -602,7 +653,8 @@ define([
 
               this._rules = new_rules;
               return new_rules;
-            } else if (this._mode == WALKER_MODE_EXPECTS_CONTAINER) {
+            }
+            else if (this._mode == WALKER_MODE_EXPECTS_CONTAINER) {
               var rulesType = getRulesType(this._rules);
 
               if (token == "{") {
@@ -612,12 +664,15 @@ define([
                 }
                 this._mode = WALKER_MODE_EXPECTS_KEY;
                 return this._rules;
-              } else if (token == "[") {
+              }
+              else if (token == "[") {
                 if (this._rules.__any_of) {
                   new_rules = this._rules.__any_of;
-                } else if (this._rules instanceof Array) {
+                }
+                else if (this._rules instanceof Array) {
                   new_rules = this._rules;
-                } else {
+                }
+                else {
                   this._mode = WALKER_MODE_DONE;
                   return this._rules = null;
                 }
@@ -626,7 +681,8 @@ define([
                 if (new_rules.length == 0) {
                   this._mode = WALKER_MODE_DONE;
                   return this._rules = null;
-                } else {
+                }
+                else {
                   if (new_rules[0] && new_rules[0].__scope_link) {
                     new_rules = [ getLinkedRules(new_rules[0].__scope_link, scopeRules) ];
                   }
@@ -660,7 +716,9 @@ define([
           },
 
           walkTokenPath: function (tokenPath) {
-            if (tokenPath.length == 0) return;
+            if (tokenPath.length == 0) {
+              return;
+            }
             tokenPath = $.merge([], tokenPath);
             var t;
             do {
@@ -697,11 +755,13 @@ define([
         }
         else if (scheme_id) {
           linked_rules = kb.getEndpointDescriptionByEndpoint(scheme_id);
-          if (!linked_rules)
+          if (!linked_rules) {
             throw "Failed to resolve linked scheme: " + scheme_id;
+          }
           linked_rules = linked_rules.data_autocomplete_rules;
-          if (!linked_rules)
+          if (!linked_rules) {
             throw "No autocomplete rules defined in linked scheme: " + scheme_id;
+          }
 
         }
 
@@ -711,7 +771,9 @@ define([
         }); // inject { before every step
         walker.walkTokenPath(normalized_path);
         var rules = walker.getRules();
-        if (!rules) throw "Failed to resolve rules by link: " + link;
+        if (!rules) {
+          throw "Failed to resolve rules by link: " + link;
+        }
         return rules;
       }
 
@@ -723,17 +785,22 @@ define([
 
 
         tokenPath = $.merge([], tokenPath);
-        if (!rules)
+        if (!rules) {
           return null;
+        }
 
-        if (typeof scopeRules == "undefined") scopeRules = rules;
+        if (typeof scopeRules == "undefined") {
+          scopeRules = rules;
+        }
         var t;
         // find the right rule set for current path
         while (tokenPath.length && rules) {
           t = tokenPath.shift();
           switch (t) {
             case "{":
-              if (typeof rules != "object") rules = null;
+              if (typeof rules != "object") {
+                rules = null;
+              }
               break;
             case "[":
               if (rules.__any_of || rules instanceof Array) {
@@ -742,14 +809,18 @@ define([
                   // we need to go on, try
                   for (var i = 0; i < norm_rules.length; i++) {
                     var possible_rules = getRulesForPath(norm_rules[i], tokenPath, scopeRules);
-                    if (possible_rules) return possible_rules;
+                    if (possible_rules) {
+                      return possible_rules;
+                    }
                   }
                 }
-                else
+                else {
                   rules = norm_rules;
+                }
               }
-              else
+              else {
                 rules = null;
+              }
               break;
             default:
               rules = rules[t] || rules["*"] || rules["$FIELD$"] || rules["$TYPE$"]; // we accept anything for a field.
@@ -758,7 +829,9 @@ define([
             rules = getLinkedRules(rules.__scope_link, scopeRules);
           }
         }
-        if (tokenPath.length) return null; // didn't find anything.
+        if (tokenPath.length) {
+          return null;
+        } // didn't find anything.
         return rules;
       }
 
@@ -796,18 +869,21 @@ define([
             }
           }
           else if (rules.__one_of) {
-            if (rules.__one_of.length > 0 && typeof rules.__one_of[0] != "object")
+            if (rules.__one_of.length > 0 && typeof rules.__one_of[0] != "object") {
               $.merge(autocompleteSet, rules.__one_of);
+            }
           }
           else if (rules.__any_of) {
-            if (rules.__any_of.length > 0 && typeof rules.__any_of[0] != "object")
+            if (rules.__any_of.length > 0 && typeof rules.__any_of[0] != "object") {
               $.merge(autocompleteSet, rules.__any_of);
+            }
           }
           else if (typeof rules == "object") {
             for (term in rules) {
 
-              if (typeof term == "string" && term.match(/^__|^\*$/))
-                continue; // meta term
+              if (typeof term == "string" && term.match(/^__|^\*$/)) {
+                continue;
+              } // meta term
 
               var rules_for_term = rules[term], template_for_term;
 
@@ -818,8 +894,9 @@ define([
                 rules_for_term = getLinkedRules(rules_for_term.__scope_link, initialRules);
               }
 
-              if (typeof rules_for_term.__template != "undefined")
+              if (typeof rules_for_term.__template != "undefined") {
                 template_for_term = rules_for_term.__template;
+              }
               else if (rules_for_term instanceof Array) {
                 template_for_term = [];
                 if (rules_for_term.length) {
@@ -837,12 +914,16 @@ define([
                     template_for_term = [rules_for_term[0]];
                   }
                 }
-              } else if (typeof rules_for_term == "object") {
-                if (rules_for_term.__one_of)
+              }
+              else if (typeof rules_for_term == "object") {
+                if (rules_for_term.__one_of) {
                   template_for_term = rules_for_term.__one_of[0];
+                }
                 else if ($.isEmptyObject(rules_for_term))
                 // term sub rules object. Check if has actual or just meta stuff (like __one_of
+                {
                   template_for_term = {};
+                }
                 else {
                   for (var sub_rule in rules_for_term) {
                     if (!(typeof sub_rule == "string" && sub_rule.substring(0, 2) == "__")) {
@@ -860,9 +941,10 @@ define([
 
               switch (term) {
                 case "$INDEX$":
-                  if (activeScheme.indices)
+                  if (activeScheme.indices) {
                     $.merge(autocompleteSet,
                       addMetaToTermsList(activeScheme.indices, "index", template_for_term));
+                  }
                   break;
                 case "$TYPE$":
                   $.merge(autocompleteSet,
@@ -881,7 +963,9 @@ define([
               }
             }
           }
-          else autocompleteSet.push(rules);
+          else {
+            autocompleteSet.push(rules);
+          }
         }
 
         return rules ? true : false;
@@ -909,7 +993,9 @@ define([
       // start with one before end as to not to resolve just "{" -> empty path
       for (var i = ret.tokenPath.length - 2; i >= 0; i--) {
         var subPath = tokenPath.slice(i);
-        if (extractOptionsForPath(kb.getGlobalAutocompleteRules(), subPath, context.activeScheme)) break;
+        if (extractOptionsForPath(kb.getGlobalAutocompleteRules(), subPath, context.activeScheme)) {
+          break;
+        }
       }
       var pathAsString = tokenPath.join(",");
       extractOptionsForPath((context.activeScheme.scheme || {}).data_autocomplete_rules, tokenPath, context.activeScheme);
@@ -963,12 +1049,15 @@ define([
       // climb one scope at a time and get the scope key
       for (; t && t.type.indexOf("url") == -1 && t.type != "method"; t = tokenIter.stepBackward()) {
 
-        if (t.type != "whitespace") walkedSomeBody = true; // marks we saw something
+        if (t.type != "whitespace") {
+          walkedSomeBody = true;
+        } // marks we saw something
 
         switch (t.type) {
           case "variable":
-            if (state == STATES.looking_for_key)
+            if (state == STATES.looking_for_key) {
               tokenPath.unshift(t.value.trim().replace(/"/g, ''));
+            }
             state = STATES.looking_for_scope_start; // skip everything until the beginning of this scope
             break;
 
@@ -995,10 +1084,14 @@ define([
                   parenCount++;
                   break;
               }
-              if (parenCount > 0) t = tokenIter.stepBackward();
+              if (parenCount > 0) {
+                t = tokenIter.stepBackward();
+              }
             }
             if (!t) // oops we run out.. we don't know what's up return null;
+            {
               return {};
+            }
             continue;
           case "string":
           case "constant.numeric" :
@@ -1055,10 +1148,12 @@ define([
             break;
           case "url.endpoint":
           case "url.part":
-            if (ret.endpoint)
+            if (ret.endpoint) {
               ret.endpoint = "/" + ret.endpoint;
-            else
+            }
+            else {
               ret.endpoint = "";
+            }
 
             ret.endpoint = t.value + ret.endpoint;
             ret.urlPath = t.value + ret.urlPath;
@@ -1103,12 +1198,13 @@ define([
       currentToken.row = pos.row; // extend token with row. Ace doesn't supply it by default
       if (editor.parser.isEmptyToken(currentToken)) {
         // empty token. check what's coming next
-        var nextToken = session.getTokenAt(pos.row, pos.column+1);
+        var nextToken = session.getTokenAt(pos.row, pos.column + 1);
         if (editor.parser.isEmptyToken(nextToken)) {
           // Empty line, or we're not on the edge of current token. Save the current position as base
           currentToken.start = pos.column;
           LAST_EVALUATED_TOKEN = currentToken;
-        } else {
+        }
+        else {
           nextToken.row = pos.row;
           LAST_EVALUATED_TOKEN = nextToken;
         }
@@ -1122,7 +1218,7 @@ define([
       }
 
       if (LAST_EVALUATED_TOKEN.start != currentToken.start || LAST_EVALUATED_TOKEN.row != currentToken.row
-          || LAST_EVALUATED_TOKEN.value === currentToken.value) {
+        || LAST_EVALUATED_TOKEN.value === currentToken.value) {
         // not on the same place or nothing changed, cache and wait for the next time
         LAST_EVALUATED_TOKEN = currentToken;
         return;
@@ -1167,19 +1263,20 @@ define([
       if (!editor.parser.isEmptyToken(token) && !isSeparatorToken(token)) {
         // Ace doesn't care about tokenization when calculating prefix. It will thus stop on . in keys names.
         if (token.value.indexOf('"') == 0) {
-          aceEditor.completer.base.column = token.start+1;
-        } else {
+          aceEditor.completer.base.column = token.start + 1;
+        }
+        else {
           aceEditor.completer.base.column = token.start;
         }
         updatePrefix = true;
       }
 
 
-
       var context = getAutoCompleteContext(aceEditor, session, pos);
       if (!context) {
         callback(null, []);
-      } else {
+      }
+      else {
         var terms = _.map(context.autoCompleteSet, function (term) {
           if (typeof term !== "object") {
             term = {
@@ -1226,6 +1323,8 @@ define([
         }
 
         callback(null, _.map(terms, function (t, i) {
+          t.insert_value = t.value;
+          t.value = '' + t.value; // normalize to strings
           t.score = -i;
           return t;
         }));

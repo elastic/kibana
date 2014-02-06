@@ -307,7 +307,8 @@ define([
       "object": 1,
       "array": 1,
       "value_one_of": 1,
-      "value": 2
+      "value": 2,
+      "something_else": 5
     },
     MAPPING,
     {
@@ -317,7 +318,8 @@ define([
             object: { bla: 1 },
             array: [ 1 ],
             value_one_of: { __one_of: [ 1, 2]},
-            value: 3
+            value: 3,
+            "*": { __one_of: [ 4, 5]}
           }
         }
       }
@@ -347,7 +349,13 @@ define([
         cursor: { row: 4, column: 12},
         initialValue: "",
         autoCompleteSet: [ 3 ]
-      }
+      },
+      {
+        name: "matching any value with one_of",
+        cursor: { row: 5, column: 21},
+        initialValue: "",
+        autoCompleteSet: [ 4, 5]
+      },
     ]
   );
 

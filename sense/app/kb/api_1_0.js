@@ -4,6 +4,7 @@ define([
   './api_1_0/aliases',
   './api_1_0/cluster',
   './api_1_0/facets',
+  './api_1_0/aggregations',
   './api_1_0/filter',
   './api_1_0/globals',
   './api_1_0/indices',

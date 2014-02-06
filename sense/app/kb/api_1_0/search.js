@@ -23,6 +23,12 @@ define(function () {
           }
           // populated by a global rule
         },
+        aggs: {
+          'NAME': {
+            'TYPE': {}
+          }
+        },
+
         filter: {
           // added by global rules.
         },
