@@ -1,6 +1,5 @@
 define([
   '_',
-  'exports',
   './api',
   './api_0_90/aliases',
   './api_0_90/cluster',
@@ -15,15 +14,14 @@ define([
   './api_0_90/settings',
   './api_0_90/templates',
   './api_0_90/warmers'
-], function (_, exports, api) {
+], function (_, api) {
   'use strict';
 
-  var api_0_90 = new api.Api();
+  var api_0_90 = new api.Api("api_0_90");
 
   _(arguments).rest(3).each(function (apiSection) {
     apiSection(api_0_90);
   });
 
-  exports.api = api_0_90;
-  return exports;
+  return api_0_90;
 });

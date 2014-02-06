@@ -4,16 +4,16 @@ define([
   'input',
   'mappings',
   'output',
-
+  'es',
   'bootstrap',
   'jquery-ui'
-], function ($, history, input, mappings, output) {
+], function ($, history, input, mappings, output, es) {
   'use strict';
 
   var $esServer = $("#es_server");
 
   $esServer.blur(function () {
-    mappings.notifyServerChange($esServer.val());
+    es.setBaseUrl($esServer.val());
   });
 
   // initialize auto complete
@@ -57,7 +57,7 @@ define([
   });
 
   var $resizer = input.$el.siblings('.ui-resizable-e');
-
+  es.setBaseUrl($esServer.val());
   return {
     $esServer: $esServer,
     $send: $send,
@@ -65,4 +65,4 @@ define([
     $header: $header,
     $resizer: $resizer
   };
-})
+});
