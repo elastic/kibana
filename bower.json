@@ -1,0 +1,28 @@
+{
+  "name": "kibana",
+  "version": "0.0.0",
+  "authors": [
+    "Spencer Alger <spencer@spenceralger.com>"
+  ],
+  "description": "Browser based analytics and search interface to Logstash and other timestamped data sets stored in ElasticSearch",
+  "main": "src/index.html",
+  "keywords": [
+    "kibana",
+    "elasticsearch"
+  ],
+  "license": "Apache 2.0",
+  "homepage": "http://www.elasticsearch.org/overview/kibana/",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "requirejs": "~2.1.10",
+    "elasticsearch": "~1.4.0",
+    "angular": "~1.2.10",
+    "lodash": "~2.4.1"
+  }
+}

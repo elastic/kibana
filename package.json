@@ -1,0 +1,25 @@
+{
+  "name": "kibana4",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Kibana TNG",
+  "main": "Gulpfile.js",
+  "dependencies": {
+    "connect": "~2.12.0",
+    "gulp": "~3.5.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "gulp test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:elasticsearch/kibana4.git"
+  },
+  "author": "",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/elasticsearch/kibana4/issues"
+  },
+  "homepage": "https://github.com/elasticsearch/kibana4"
+}
