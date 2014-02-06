@@ -2,9 +2,10 @@ define([ '_', 'exports'],
   function (_, exports) {
     'use strict';
 
-    function Api() {
+    function Api(name) {
       this.global_rules = {};
       this.endpoints = {};
+      this.name = name;
     }
 
     function escapeRegex(text) {

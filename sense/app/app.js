@@ -7,10 +7,11 @@ define([
   'mappings',
   'output',
   'misc_inputs',
+  'es',
   'utils',
   '_'
 ],
-  function (curl, $helpPopup, history, input, $, mappings, output, miscInputs, utils, _) {
+  function (curl, $helpPopup, history, input, $, mappings, output, miscInputs, es, utils, _) {
     'use strict';
 
     $(document.body).removeClass('fouc');
@@ -26,20 +27,19 @@ define([
 
         $("#notification").text("Calling ES....").css("visibility", "visible");
 
-        var es_server = $esServer.val();
-        var es_url = req.url;
+        var es_path = req.url;
         var es_method = req.method;
         var es_data = req.data.join("\n");
         if (es_data) es_data += "\n"; //append a new line for bulk requests.
 
-        utils.callES(es_server, es_url, es_method, es_data, null, function (xhr, status) {
+        es.send(es_method, es_path, es_data, null, function (xhr, status) {
             $("#notification").text("").css("visibility", "hidden");
             if (typeof xhr.status == "number" &&
               ((xhr.status >= 400 && xhr.status < 600) ||
                 (xhr.status >= 200 && xhr.status < 300)
                 )) {
               // we have someone on the other side. Add to history
-              history.addToHistory(es_server, es_url, es_method, es_data);
+              history.addToHistory(es.getBaseUrl(), es_path, es_method, es_data);
 
 
               var value = xhr.responseText;
@@ -64,8 +64,7 @@ define([
     // set the value of the server and/or the input and clear the output
     function resetToValues(server, content) {
       if (server != null) {
-        $esServer.val(server);
-        mappings.notifyServerChange(server);
+        es.setBaseUrl(server);
       }
       if (content != null) {
         input.update(content);
@@ -254,5 +253,7 @@ define([
         $welcomePopup.modal('show');
       });
     }
+
+    mappings.onInitComplete();
 
   });

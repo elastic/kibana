@@ -1,11 +1,11 @@
 define([
   'jquery',
   'utils',
+  'es',
   '_'
-], function ($, utils, _) {
+], function ($, utils, es, _) {
   'use strict';
 
-  var currentServer;
   var per_index_types = {};
   var per_alias_indexes = [];
 
@@ -197,22 +197,13 @@ define([
   }
 
   function retrieveMappingFromServer() {
-    if (!currentServer) return;
-    utils.callES(currentServer, "_mapping", "GET", null, function (data, status, xhr) {
+    es.send("GET", "_mapping", null, function (data, status, xhr) {
       loadMappings(data);
     });
-    utils.callES(currentServer, "_aliases", "GET", null, function (data, status, xhr) {
+    es.send("GET", "_aliases", null, function (data, status, xhr) {
       loadAliases(data);
     });
 
-  }
-
-  function notifyServerChange(newServer) {
-    if (newServer.indexOf("://") < 0) newServer = "http://" + newServer;
-    newServer = newServer.trim("/");
-    if (newServer === currentServer) return; // already have it.
-    currentServer = newServer;
-    retrieveMappingFromServer();
   }
 
   function mapping_retriever() {
@@ -222,7 +213,11 @@ define([
     }, 60000);
   }
 
-  mapping_retriever();
+  es.addServerChangeListener(retrieveMappingFromServer);
+
+  function onInitComplete() {
+    mapping_retriever();
+  }
 
   return {
     getFields: getFields,
@@ -232,7 +227,7 @@ define([
     loadAliases: loadAliases,
     expandAliases: expandAliases,
     clear: clear,
-    notifyServerChange: notifyServerChange
+    onInitComplete: onInitComplete
   };
 
 });
