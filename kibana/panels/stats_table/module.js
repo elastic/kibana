@@ -507,13 +507,6 @@ define([
               $scope._register_data_end();
               $scope.select_display_data_and_enrich(newData);
             });
-
-            /*
-            newData.marvelMeta = {
-              masterCount: _.filter(newData,'master').length
-            };
-            */
-
           }, $scope._register_data_end);
         }, $scope._register_data_end);
 
@@ -521,7 +514,7 @@ define([
 
       function applyNewData(rows, data) {
         $scope.meta = {
-          masterCount: _.filter(data,'master').length
+          masterCount: _.filter(data,{master:true,alive:true}).length
         };
 
         $scope.rows = rows;
