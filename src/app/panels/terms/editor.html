@@ -21,7 +21,7 @@
         <label class="small">Size<tip>How many top terms should be returned out of the overall terms list</tip></label>
         <input class="input-small" type="number" ng-model="panel.size" ng-change="set_refresh(true)">
       </div>
-      <div class="editor-option">
+      <div class="editor-option" ng-show="panel.tmode == 'terms_stats'">
         <label class="small">Accuracy<tip>Increase accuracy on high cardinality fields (and the more expensive the overall facet computation will be)</tip></label>
         <input class="input-small" type="number" ng-model="panel.shardsize" ng-change="set_refresh(true)">
       </div>
