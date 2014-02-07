@@ -2797,6 +2797,27 @@
         facet[name].terms_stats.size = facetSize;
         return this;
       },
+      
+      /**
+        	One can also set shard_size (in addition to size) which will determine how many 
+        	term entries will be requested from each shard. When dealing with field with 
+        	high cardinality (at least higher than the requested size) The greater shard_size 
+        	is - the more accurate the result will be (and the more expensive the overall 
+        	facet computation will be). shard_size is there to enable you to increase 
+        	accuracy yet still avoid returning too many terms_stats entries back to the client.
+
+            @member ejs.TermStatsFacet
+            @param {Integer} shardSize The numer of term entries will be requested from each shard.
+            @returns {Object} returns <code>this</code> so that calls can be chained.
+       		*/
+      shardSize: function (shardSize) {
+          if (shardSize == null) {
+            return this;
+          }
+
+          facet[name].terms_stats.shard_size = shardSize;
+          return this;
+        },
 
       /**
             Sets the type of ordering that will be performed on the date

@@ -183,6 +183,7 @@ function (angular, app, _, $, kbn) {
           .valueField($scope.panel.valuefield)
           .keyField($scope.panel.field)
           .size($scope.panel.size)
+          .shardSize($scope.panel.shardsize)
           .order($scope.panel.order)
           .facetFilter($scope.ejs.QueryFilter(
             $scope.ejs.FilteredQuery(
