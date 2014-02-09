@@ -1,26 +1,20 @@
 define(function () {
   'use strict';
 
+  function addSimple(endpoint, api) {
+    api.addEndpointDescription(endpoint, {
+      def_method: 'GET',
+      methods: ['GET' ],
+      indices_mode: 'none',
+    });
+  }
+
+
   return function init(api) {
-    api.addEndpointDescription('_cluster/nodes/stats', {
-      methods: ['GET'],
-      indices_mode: 'none',
-      types_mode: 'none'
-    });
-
-    api.addEndpointDescription('_cluster/state', {
-      methods: ['GET'],
-      endpoint_autocomplete: ['_cluster/state'],
-      indices_mode: 'none',
-      types_mode: 'none'
-    });
-
-    api.addEndpointDescription('_cluster/health', {
-      methods: ['GET'],
-      endpoint_autocomplete: ['_cluster/health'],
-      indices_mode: 'none',
-      types_mode: 'none'
-    });
+    addSimple('_cluster/nodes/stats', api);
+    addSimple('_cluster/state', api);
+    addSimple('_cluster/health', api);
+    addSimple('_cluster/pending_tasks', api);
 
     api.addEndpointDescription('_cluster/settings', {
       methods: ['GET', 'PUT'],
