@@ -38,7 +38,7 @@
                 <i bs-tooltip="'Configure row'" data-placement="right"  class="icon-cog pointer"></i>
                 <br>
               </div>
-              <div class="bgSuccess row-tab" ng-click="editor.index = 2" config-modal="app/partials/roweditor.html" kbn-model="row">
+               <div config-modal="app/partials/roweditor.html" kbn-model="row" class="row-tab bgSuccess" ng-show="row.editable" ng-click="editor.index = 2">
                 <i class="icon-plus-sign" bs-tooltip="'Add Panel'" data-placement="right"></i>
                 <br>
               </div>
