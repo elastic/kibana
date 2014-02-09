@@ -9,31 +9,15 @@ define([
   'require',
   'utils',
   'zeroclip',
-  'ace_ext_language_tools',
   'ace_ext_searchbox'
 ], function (ace, Autocomplete, $, mappings, output, SenseEditor, settings, require, utils, ZeroClipboard) {
   'use strict';
 
-  // disable standard context based autocompletion.
-  ace.define('ace/autocomplete/text_completer', ['require', 'exports', 'module'], function(require, exports, module) {
-    exports.getCompletions = function(editor, session, pos, prefix, callback) {
-      callback(null, []);
-    }
-  });
-
-
-  ace.require('ace/ext/language_tools');
   var input = new SenseEditor($('#editor'));
-  input.setOptions({
-    enableBasicAutocompletion: true
-  });
 
   input.autocomplete = new Autocomplete(input);
 
   input.$actions = $("#editor_actions");
-
-
-  ace.require('ace/ext/language_tools').addCompleter(input.autocomplete.completer);
 
   input.commands.addCommand({
     name: 'auto indent request',
@@ -84,7 +68,7 @@ define([
     });
 
     zc.on('load', function () {
-      function setupCopyButton (cb) {
+      function setupCopyButton(cb) {
         cb = typeof cb === 'function' ? cb : $.noop;
         $copyAsCURL.css('visibility', 'hidden');
         input.getCurrentRequestAsCURL(function (curl) {

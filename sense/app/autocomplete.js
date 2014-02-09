@@ -6,7 +6,8 @@ define([
   'jquery',
   'utils',
   '_',
-  'jquery-ui'
+  'jquery-ui',
+  'ace_ext_language_tools'
 ], function (history, kb, mappings, ace, $, utils, _) {
   'use strict';
 
@@ -1256,20 +1257,6 @@ define([
 
 
     function getCompletions(aceEditor, session, pos, prefix, callback) {
-      // this is hacky, but there is at the moment no settings/way to do it differently
-      aceEditor.completer.autoInsert = false;
-      var token = aceEditor.getSession().getTokenAt(pos.row, pos.column);
-      var updatePrefix = false;
-      if (!editor.parser.isEmptyToken(token) && !isSeparatorToken(token)) {
-        // Ace doesn't care about tokenization when calculating prefix. It will thus stop on . in keys names.
-        if (token.value.indexOf('"') == 0) {
-          aceEditor.completer.base.column = token.start + 1;
-        }
-        else {
-          aceEditor.completer.base.column = token.start;
-        }
-        updatePrefix = true;
-      }
 
 
       var context = getAutoCompleteContext(aceEditor, session, pos);
@@ -1315,13 +1302,6 @@ define([
           return 1;
         });
 
-        if (updatePrefix && terms && terms.length) {
-          // we have to trigger a render update to make the new prefix take affect.
-          setTimeout(function () {
-            aceEditor.completer.changeListener();
-          }, 50);
-        }
-
         callback(null, _.map(terms, function (t, i) {
           t.insert_value = t.value;
           t.value = '' + t.value; // normalize to strings
@@ -1333,11 +1313,74 @@ define([
 
     addChangeListener();
 
+    // Hook into Ace
+
+    // disable standard context based autocompletion.
+    ace.define('ace/autocomplete/text_completer', ['require', 'exports', 'module'], function (require, exports, module) {
+      exports.getCompletions = function (editor, session, pos, prefix, callback) {
+        callback(null, []);
+      }
+    });
+
+    var langTools = ace.require('ace/ext/language_tools'),
+      aceUtils = ace.require('ace/autocomplete/util'),
+      aceAutoComplete = ace.require('ace/autocomplete');
+
+    langTools.addCompleter({
+      getCompletions: getCompletions
+    });
+
+    editor.setOptions({
+      enableBasicAutocompletion: true
+    });
+
+    // Ace doesn't care about tokenization when calculating prefix. It will thus stop on . in keys names.
+    // we patch this behavior.
+    // CHECK ON ACE UPDATE
+    var aceAutoCompleteInstance = new aceAutoComplete.Autocomplete();
+    aceAutoCompleteInstance.autoInsert = false;
+    aceAutoCompleteInstance.gatherCompletions = function (ace_editor, callback) {
+      var session = ace_editor.getSession();
+      var pos = ace_editor.getCursorPosition();
+      var prefix;
+      // change starts here
+      var token = session.getTokenAt(pos.row, pos.column);
+      this.base = _.clone(pos);
+      if (!editor.parser.isEmptyToken(token) && !isSeparatorToken(token)) {
+        if (token.value.indexOf('"') == 0) {
+          prefix = token.value.substr(1);
+          this.base.column = token.start + 1;
+        }
+        else {
+          prefix = token.value;
+          this.base.column = token.start;
+        }
+      }
+
+
+      var matches = [];
+      aceUtils.parForEach(ace_editor.completers, function (completer, next) {
+        completer.getCompletions(ace_editor, session, pos, prefix, function (err, results) {
+          if (!err) {
+            matches = matches.concat(results);
+          }
+          next();
+        });
+      }, function () {
+        callback(null, {
+          prefix: prefix,
+          matches: matches
+        });
+      });
+      return true;
+    };
+
+    editor.__ace.completer = aceAutoCompleteInstance;
+
+
     return {
-      completer: {
-        getCompletions: getCompletions
-      },
       _test: {
+        getCompletions: getCompletions,
         addReplacementInfoToContext: addReplacementInfoToContext,
         addChangeListener: addChangeListener,
         removeChangeListener: removeChangeListener

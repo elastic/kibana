@@ -58,8 +58,8 @@ define([
             base: {},
             changeListener : function () {}
           }; // mimic auto complete
-          input.autocomplete.completer.getCompletions(input, input.getSession(), test.cursor, "",
-          function (err, terms) {
+          input.autocomplete._test.getCompletions(input, input.getSession(), test.cursor, "",
+            function (err, terms) {
 
           if (test.no_context) {
             ok(!terms || terms.length === 0, "Expected no context bug got terms.");
