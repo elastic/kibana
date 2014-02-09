@@ -55,7 +55,7 @@ define([
                 mode = "ace/mode/text";
               }
               else if (contentType.indexOf("application/yaml") >= 0) {
-                mode = "ace/mode/text"
+                mode = "ace/mode/yaml"
               }
               else {
                 // assume json - auto pretty
