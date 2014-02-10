@@ -15,6 +15,7 @@
       z-index: 200;
       border: 1px solid #333;
     }
+
     #output_container {
       display: none;
       position: absolute;
@@ -25,52 +26,59 @@
       z-index: 201;
       border: 1px solid #333;
     }
+
     #editor, #output {
       height: 100%;
       width: 100%;
       position: relative;
     }
-   </style>
+  </style>
 </head>
 <body>
 <div id="qunit"></div>
-<div id="editor_container"><div id="editor"></div></div>
-<div id="output_container"><div id="output"></div></div>
+<div id="editor_container">
+  <div id="editor"></div>
+</div>
+<div id="output_container">
+  <div id="output"></div>
+</div>
 <script src="../vendor/require/require.js"></script>
 <script src="../app/require.config.js"></script>
 <script src="lib/qunit-1.10.0.js"></script>
 <script>
-/* global QUnit */
-QUnit.config.autostart = false;
+  /* global QUnit */
+  QUnit.config.autostart = false;
 
-require.config({
-  baseUrl: '../app'
-});
-require(["require","ace"], function (require) {
+  require.config({
+    baseUrl: '../app'
+  });
+  require(["require", "ace"], function (require) {
 
-  'use strict';
+    'use strict';
 
 
-  var tests = [
-    '../tests/src/curl_tests.js',
-    '../tests/src/kb_tests.js',
-    '../tests/src/mapping_tests.js',
-    '../tests/src/editor_tests.js',
-    '../tests/src/tokenization_tests.js',
-    '../tests/src/integration_tests.js'
-  ];
+    var tests = [
+      '../tests/src/url_autocomplete_tests.js',
+      '../tests/src/curl_tests.js',
+      '../tests/src/kb_tests.js',
+      '../tests/src/mapping_tests.js',
+      '../tests/src/editor_tests.js',
+      '../tests/src/tokenization_tests.js',
+      '../tests/src/integration_tests.js'
+    ];
 
-  // load the tests in series
-  (function next(){
-    if (tests.length) {
-      require(tests.splice(0, 1), next);
-    } else {
-      console.log('all tests loaded');
-      QUnit.start();
-    }
-  }());
+    // load the tests in series
+    (function next() {
+      if (tests.length) {
+        require(tests.splice(0, 1), next);
+      }
+      else {
+        console.log('all tests loaded');
+        QUnit.start();
+      }
+    }());
 
-});
+  });
 </script>
 </body>
 </html>

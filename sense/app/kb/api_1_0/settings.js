@@ -2,13 +2,18 @@ define(function () {
   'use strict';
 
   return function init(api) {
-    api.addEndpointDescription('_settings', {
-      match: /_settings/,
-      methods: ['GET', 'PUT'],
-      endpoint_autocomplete: ['_settings'],
-      indices_mode: 'multi',
-      types_mode: 'none',
-      doc_id_mode: 'none',
+    api.addEndpointDescription('_get_settings', {
+      patterns: [
+        "{indices}/_settings",
+        "_settings"
+      ]
+    });
+    api.addEndpointDescription('_put_settings', {
+      methods: ['PUT'],
+      patterns: [
+        "{indices}/_settings",
+        "_settings"
+      ],
       data_autocomplete_rules: {
         index: {
           refresh_interval: '1s',

@@ -4,6 +4,7 @@ define([
   './api_1_0/aliases',
   './api_1_0/cat',
   './api_1_0/cluster',
+  './api_1_0/document',
   './api_1_0/facets',
   './api_1_0/aggregations',
   './api_1_0/filter',
@@ -19,12 +20,17 @@ define([
 ], function (_, api) {
   'use strict';
 
-  var api_1_0 = new api.Api("api_1_0");
+  var parts = _(arguments).rest(3);
 
+  function Api_1_0(globalSharedComponentFactories) {
+    api.Api.call(this, "api_1_0", globalSharedComponentFactories);
+    parts.each(function (apiSection) {
+      apiSection(this);
+    }, this);
+  }
 
-  _(arguments).rest(3).each(function (apiSection) {
-    apiSection(api_1_0);
-  });
+  Api_1_0.prototype = _.create(api.Api.prototype, { 'constructor': Api_1_0  });
 
-  return api_1_0;
+  return Api_1_0;
+
 });

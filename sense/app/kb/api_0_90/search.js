@@ -3,14 +3,13 @@ define(function () {
 
   return function init(api) {
     api.addEndpointDescription('_search', {
-      def_method: 'POST',
       methods: ['GET', 'POST'],
-      endpoint_autocomplete: [
-        '_search'
+      priority: 10, // collides with get doc by id
+      patterns: [
+        "{indices}/{types}/_search",
+        "{indices}/_search",
+        "_search"
       ],
-      indices_mode: 'multi',
-      types_mode: 'multi',
-      doc_id_mode: 'none',
       data_autocomplete_rules: {
         query: {
           // populated by a global rule

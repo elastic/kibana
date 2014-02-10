@@ -1,8 +1,9 @@
 define([
   'kb',
   'mappings',
-  'kb/api'
-], function (kb, mappings, api) {
+  'kb/api',
+  'autocomplete/url_path_autocomplete'
+], function (kb, mappings, api, url_path_autocomplete) {
   'use strict';
 
   module("Knowledge base", {
@@ -16,102 +17,160 @@ define([
     }
   });
 
+  var MAPPING = {
+    "index1": {
+      "type1.1": {
+        "properties": {
+          "field1.1.1": { "type": "string" },
+          "field1.1.2": { "type": "string" }
+        }
+      },
+      "type1.2": {
+        "properties": {
+        }
+      }
+    },
+    "index2": {
+      "type2.1": {
+        "properties": {
+          "field2.1.1": { "type": "string" },
+          "field2.1.2": { "type": "string" }
+        }
+      }
+    }
+  };
 
-  test("Index mode filters", function () {
-    var test_api = new api.Api();
-    test_api.addEndpointDescription("_multi_indices", {
-      indices_mode: "multi"
+  function testContext(tokenPath, otherTokenValues, expectedContext) {
+
+    if (expectedContext.autoCompleteSet) {
+      expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function (t) {
+        if (_.isString(t)) {
+          t = { name: t}
+        }
+        return t;
+      })
+    }
+
+    var context = { otherTokenValues: otherTokenValues};
+    url_path_autocomplete.populateContext(tokenPath, context, null,
+      expectedContext.autoCompleteSet, kb.getTopLevelUrlCompleteComponents()
+    );
+
+    // override context to just check on id
+    if (context.endpoint) {
+      context.endpoint = context.endpoint.id;
+    }
+
+    delete context.otherTokenValues;
+
+    function norm(t) {
+      if (_.isString(t)) {
+        return { name: t };
+      }
+      return t;
+    }
+
+    if (context.autoCompleteSet) {
+      context.autoCompleteSet = _.sortBy(_.map(context.autoCompleteSet, norm), 'name');
+    }
+    if (expectedContext.autoCompleteSet) {
+      expectedContext.autoCompleteSet = _.sortBy(_.map(expectedContext.autoCompleteSet, norm), 'name');
+    }
+
+    deepEqual(context, expectedContext);
+  }
+
+  function t(term) {
+    return { name: term, meta: "type"};
+  }
+
+  function i(term) {
+    return { name: term, meta: "index"};
+  }
+
+  function index_test(name, tokenPath, otherTokenValues, expectedContext) {
+    test(name, function () {
+      var test_api = new api.Api("text", kb._test.globalUrlComponentFactories);
+      test_api.addEndpointDescription("_multi_indices", {
+        patterns: ["{indices}/_multi_indices"]
+      });
+      test_api.addEndpointDescription("_single_index", {
+        patterns: ["{index}/_single_index"]
+      });
+      test_api.addEndpointDescription("_no_index", {
+        // testing default patterns
+        //  patterns: ["_no_index"]
+      });
+      kb.setActiveApi(test_api);
+
+      mappings.loadMappings(MAPPING);
+      testContext(tokenPath, otherTokenValues, expectedContext);
     });
-    test_api.addEndpointDescription("_one_or_more_indices", {
-      indices_mode: "required_multi"
-    });
-    test_api.addEndpointDescription("_single_index", {
-      match: "_single_index",
-      endpoint_autocomplete: [
-        "_single_index"
-      ],
-      indices_mode: "single"
-    });
-    test_api.addEndpointDescription("_no_index", {
-      indices_mode: "none"
-    });
-    kb.setActiveApi(test_api);
+  }
 
-    deepEqual(kb.getEndpointAutocomplete([], [], null).sort(), ["_multi_indices", "_no_index" ]);
-    deepEqual(kb.getEndpointAutocomplete(["index"], [], null).sort(), ["_multi_indices", "_one_or_more_indices", "_single_index"]);
-    deepEqual(kb.getEndpointAutocomplete(["index1", "index2"], [], null).sort(), ["_multi_indices", "_one_or_more_indices"]);
-    deepEqual(kb.getEndpointAutocomplete(["index1", "index2"], ["type"], null).sort(), ["_multi_indices", "_one_or_more_indices"]);
-  });
+  index_test("Index integration 1", [], [],
+    { autoCompleteSet: ["_no_index", i("index1"), i("index2")]}
+  );
 
-  test("Type mode filters", function () {
-    var test_api = new api.Api();
+  index_test("Index integration 2", [], ["index1"],
+    // still return _no_index as index1 is not committed to yet.
+    { autoCompleteSet: ["_no_index", i("index2")]}
+  );
 
-    test_api.addEndpointDescription("_multi_types", {
-      indices_mode: "single",
-      types_mode: "multi"
-    });
-    test_api.addEndpointDescription("_single_type", {
-      endpoint_autocomplete: [
-        "_single_type"
-      ],
-      indices_mode: "single",
-      types_mode: "single"
-    });
-    test_api.addEndpointDescription("_no_types", {
-      indices_mode: "single",
-      types_mode: "none"
+  index_test("Index integration 2", ["index1"], [],
+    { indices: ["index1"], autoCompleteSet: ["_multi_indices", "_single_index"]}
+  );
 
-    });
-    kb.setActiveApi(test_api);
+  index_test("Index integration 2", [
+    ["index1", "index2"]
+  ], [],
+    { indices: ["index1", "index2"], autoCompleteSet: ["_multi_indices"]}
+  );
 
+  function type_test(name, tokenPath, otherTokenValues, expectedContext) {
+    test(name, function () {
+      var test_api = new api.Api("type_test", kb._test.globalUrlComponentFactories);
 
-    deepEqual(kb.getEndpointAutocomplete(["index"], [], null).sort(), ["_multi_types", "_no_types" ]);
-    deepEqual(kb.getEndpointAutocomplete(["index"], ["type"], null).sort(), ["_multi_types", "_single_type"]);
-    deepEqual(kb.getEndpointAutocomplete(["index"], ["type", "type1"], null).sort(), ["_multi_types"]);
-  });
+      test_api.addEndpointDescription("_multi_types", {
+        patterns: ["{indices}/{types}/_multi_types"]
+      });
+      test_api.addEndpointDescription("_single_type", {
+        patterns: ["{indices}/{type}/_single_type"]
+      });
+      test_api.addEndpointDescription("_no_types", {
+        patterns: ["{indices}/_no_types"]
+      });
+      kb.setActiveApi(test_api);
 
-  test("Id mode filters", function () {
-    var test_api = new api.Api();
+      mappings.loadMappings(MAPPING);
 
-    test_api.addEndpointDescription("_single_id", {
-      indices_mode: "single",
-      types_mode: "single",
-      doc_id_mode: "required_single"
-    });
-    test_api.addEndpointDescription("_no_id", {
-      indices_mode: "single",
-      types_mode: "single",
-      doc_id_mode: "none"
+      testContext(tokenPath, otherTokenValues, expectedContext);
 
     });
-    kb.setActiveApi(test_api);
+  }
 
+  type_test("Type integration 1", ["index1"], [],
+    { indices: ["index1"], autoCompleteSet: ["_no_types", t("type1.1"), t("type1.2")]}
+  );
+  type_test("Type integration 2", ["index1"], ["type1.2"],
+    // we are not yet comitted to type1.2, so _no_types is returned
+    { indices: ["index1"], autoCompleteSet: ["_no_types", t("type1.1")]}
+  );
 
-    deepEqual(kb.getEndpointAutocomplete(["index"], ["type"], null).sort(), ["_no_id"].sort());
-    deepEqual(kb.getEndpointAutocomplete(["index"], ["type"], "123").sort(), ["_single_id"].sort());
-  });
+  type_test("Type integration 3", ["index2"], [],
+    { indices: ["index2"], autoCompleteSet: ["_no_types", t("type2.1")]}
+  );
 
-  test("Get active scheme by doc id", function () {
-    var test_api = new api.Api();
+  type_test("Type integration 4", ["index1", "type1.2"], [],
+    { indices: ["index1"], types: ["type1.2"], autoCompleteSet: ["_multi_types", "_single_type"]}
+  );
 
-    test_api.addEndpointDescription("_single_id", {
-      match: ".*",
-      indices_mode: "single",
-      types_mode: "single",
-      doc_id_mode: "required_single"
-    });
-    test_api.addEndpointDescription("_no_id", {
-      match: ".*",
-      indices_mode: "single",
-      types_mode: "single",
-      doc_id_mode: "none"
+  type_test("Type integration 5", [
+    ["index1", "index2"],
+    ["type1.2", "type1.1"]
+  ], [],
+    { indices: ["index1", "index2"], types: ["type1.2", "type1.1"], autoCompleteSet: ["_multi_types"]}
+  );
 
-    });
-    kb.setActiveApi(test_api);
-
-
-    deepEqual(kb.getEndpointDescriptionByPath("bla", ["index"], ["type"], null).doc_id_mode, "none");
-    deepEqual(kb.getEndpointDescriptionByPath("bla", ["index"], ["type"], "123").doc_id_mode, "required_single");
-  });
 
 });

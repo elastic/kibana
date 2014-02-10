@@ -148,7 +148,7 @@ define([
       if (requestRange) {
         var pos = editor.getCursorPosition();
         editor.getSession().replace(requestRange, text);
-        var max_row = Math.max(requestRange.start.row + text.split('\n').length -1 , 0);
+        var max_row = Math.max(requestRange.start.row + text.split('\n').length - 1, 0);
         pos.row = Math.min(pos.row, max_row);
         editor.moveCursorToPosition(pos);
         // ACE UPGRADE - check if needed - at the moment the above may trigger a selection.
@@ -267,10 +267,10 @@ define([
       var maxLines = session.getLength();
       for (; curRow < maxLines - 1; curRow++) {
         var curRowMode = editor.parser.getRowParseMode(curRow, editor);
-        if ((curRowMode & RowParser.MODE_REQUEST_END) > 0) {
+        if ((curRowMode & editor.parser.MODE.REQUEST_END) > 0) {
           break;
         }
-        if (curRow != pos.row && (curRowMode & RowParser.MODE_REQUEST_START) > 0) {
+        if (curRow != pos.row && (curRowMode & editor.parser.MODE.REQUEST_START) > 0) {
           break;
         }
       }
@@ -290,10 +290,10 @@ define([
         if ((curRowMode & RowParser.REQUEST_END) > 0) {
           break;
         }
-        if ((curRowMode & RowParser.MODE_MULTI_DOC_CUR_DOC_END) > 0) {
+        if ((curRowMode & editor.parser.MODE.MULTI_DOC_CUR_DOC_END) > 0) {
           break;
         }
-        if (curRow != pos.row && (curRowMode & RowParser.MODE_REQUEST_START) > 0) {
+        if (curRow != pos.row && (curRowMode & editor.parser.MODE.REQUEST_START) > 0) {
           break;
         }
       }

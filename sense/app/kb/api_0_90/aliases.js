@@ -3,15 +3,12 @@ define(function () {
 
   return function init(api) {
     api.addEndpointDescription('_aliases', {
-      match: /_aliases/,
       def_method: 'GET',
       methods: ['GET', 'POST'],
-      endpoint_autocomplete: [
-        '_aliases'
+      patterns: [
+        "{indices}/_aliases",
+        "_aliases",
       ],
-      indices_mode: 'multi',
-      types_mode: 'none',
-      doc_id_mode: 'none',
       data_autocomplete_rules: {
         'actions': {
           __template: [

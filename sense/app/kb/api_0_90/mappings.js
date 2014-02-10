@@ -2,11 +2,22 @@ define(function () {
   'use strict';
 
   return function init(api) {
-    api.addEndpointDescription('_mapping', {
-      def_method: 'GET',
-      methods: ['GET', 'PUT'],
-      indices_mode: 'multi',
-      types_mode: 'multi',
+    api.addEndpointDescription('_get_mapping', {
+      methods: ['GET'],
+      priority: 10, // collides with get doc by id
+      patterns: [
+        "{indices}/_mapping",
+        "{indices}/{types}/_mapping",
+        "_mapping"
+      ]
+    });
+    api.addEndpointDescription('_put_mapping', {
+      methods: ['PUT'],
+      patterns: [
+        "{indices}/_mapping",
+        "{indices}/{type}/_mapping",
+      ],
+      priority: 10, // collides with put doc by id
       data_autocomplete_rules: {
         '$TYPE$': {
           __template: {
@@ -106,7 +117,7 @@ define(function () {
 
               // objects
               properties: {
-                __scope_link: '_mapping.$TYPE$.properties'
+                __scope_link: '_put_mapping.$TYPE$.properties'
               },
 
               // multi_field
@@ -115,7 +126,7 @@ define(function () {
               },
               fields: {
                 '*': {
-                  __scope_link: '_mapping.$TYPE$.properties.$FIELD$'
+                  __scope_link: '_put_mapping.$TYPE$.properties.$FIELD$'
                 }
               }
             }

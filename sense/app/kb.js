@@ -4,12 +4,116 @@ define([
   'mappings',
   'es',
   'kb/api',
+  'kb/url_pattern_matcher',
   'require'
 ],
-  function (_, exports, mappings, es, api, require) {
+  function (_, exports, mappings, es, api, url_pattern_matcher, require) {
     'use strict';
 
     var ACTIVE_API = new api.Api("empty");
+
+    function nonValidIndexType(token) {
+      return !(token === "_all" || token[0] !== "_");
+    }
+
+    function IndexUrlComponent(name, parent, multi_valued) {
+      url_pattern_matcher.ListComponent.call(this, name, mappings.getIndices, parent, multi_valued);
+    }
+
+    IndexUrlComponent.prototype = _.create(
+      url_pattern_matcher.ListComponent.prototype,
+      { 'constructor': IndexUrlComponent  });
+
+    (function (cls) {
+      cls.validateToken = function (token) {
+        if (!this.multi_valued && token.length > 1) {
+          return false;
+        }
+        return !_.find(token, nonValidIndexType);
+      };
+
+      cls.getDefaultTermMeta = function () {
+        return "index"
+      };
+
+      cls.getContextKey = function () {
+        return "indices";
+      };
+    })(IndexUrlComponent.prototype);
+
+
+    function TypeGenerator(context) {
+      return mappings.getTypes(context.indices);
+    }
+
+    function TypeUrlComponent(name, parent, multi_valued) {
+      url_pattern_matcher.ListComponent.call(this, name, TypeGenerator, parent, multi_valued);
+    }
+
+    TypeUrlComponent.prototype = _.create(
+      url_pattern_matcher.ListComponent.prototype,
+      { 'constructor': TypeUrlComponent  });
+
+    (function (cls) {
+      cls.validateToken = function (token) {
+        if (!this.multi_valued && token.length > 1) {
+          return false;
+        }
+
+        return !_.find(token, nonValidIndexType);
+      };
+
+      cls.getDefaultTermMeta = function () {
+        return "type"
+      };
+
+      cls.getContextKey = function () {
+        return "types";
+      };
+    })(TypeUrlComponent.prototype);
+
+
+    function IdUrlComponent(name, parent) {
+      url_pattern_matcher.SharedComponent.call(this, name, parent);
+    }
+
+    IdUrlComponent.prototype = _.create(
+      url_pattern_matcher.SharedComponent.prototype,
+      { 'constructor': IdUrlComponent  });
+
+    (function (cls) {
+      cls.match = function (token, context, editor) {
+        if (_.isArray(token) || !token) {
+          return null;
+        }
+        if (token.match(/[\/,]/)) {
+          return null;
+        }
+        var r = Object.getPrototypeOf(cls).match.call(this, token, context, editor);
+        r.context_values = r.context_values || {};
+        r.context_values['id'] = token;
+        return r;
+      };
+    })(IdUrlComponent.prototype);
+
+    var globalUrlComponentFactories = {
+
+      'index': function (part, parent, endpoint) {
+        return new IndexUrlComponent(part, parent, false);
+      },
+      'indices': function (part, parent, endpoint) {
+        return new IndexUrlComponent(part, parent, true);
+      },
+      'type': function (part, parent, endpoint) {
+        return new TypeUrlComponent(part, parent, false);
+      },
+      'types': function (part, parent, endpoint) {
+        return new TypeUrlComponent(part, parent, true);
+      },
+      'id': function (part, parent, endpoint) {
+        return new IdUrlComponent(part, parent);
+      }
+    };
 
 
     function expandAliases(indices) {
@@ -23,16 +127,8 @@ define([
       return ACTIVE_API.getEndpointDescriptionByEndpoint(endpoint)
     }
 
-    function getEndpointsForIndicesTypesAndId(indices, types, id) {
-      return ACTIVE_API.getEndpointsForIndicesTypesAndId(expandAliases(indices), types, id);
-    }
-
-    function getEndpointDescriptionByPath(path, indices, types, id) {
-      return ACTIVE_API.getEndpointDescriptionByPath(path, expandAliases(indices), types, id);
-    }
-
-    function getEndpointAutocomplete(indices, types, id) {
-      return ACTIVE_API.getEndpointAutocomplete(expandAliases(indices), types, id);
+    function getTopLevelUrlCompleteComponents() {
+      return ACTIVE_API.getTopLevelUrlCompleteComponents();
     }
 
     function getGlobalAutocompleteRules() {
@@ -40,32 +136,48 @@ define([
     }
 
     function setActiveApi(api) {
+      if (_.isString(api)) {
+        require([api], setActiveApi);
+        return;
+      }
+      if (_.isFunction(api)) {
+        /* jshint -W055 */
+        setActiveApi(new api(globalUrlComponentFactories));
+        return;
+      }
       ACTIVE_API = api;
       console.log("setting api to " + api.name);
     }
 
     es.addServerChangeListener(function () {
-      var version = es.getVersion();
+      var version = es.getVersion(), api;
       if (!version || version.length == 0) {
-        require(["kb/api_0_90"], setActiveApi);
+        api = "kb/api_0_90";
       }
       else if (version[0] === "1") {
-        require(["kb/api_1_0"], setActiveApi);
+        api = "kb/api_1_0";
       }
       else if (version[0] === "2") {
-        require(["kb/api_1_0"], setActiveApi);
+        api = "kb/api_1_0";
       }
       else {
-        require(["kb/api_0_90"], setActiveApi);
+        api = "kb/api_0_90";
       }
+
+      if (api) {
+        setActiveApi(api);
+      }
+
     });
 
     exports.setActiveApi = setActiveApi;
     exports.getGlobalAutocompleteRules = getGlobalAutocompleteRules;
-    exports.getEndpointAutocomplete = getEndpointAutocomplete;
-    exports.getEndpointDescriptionByPath = getEndpointDescriptionByPath;
     exports.getEndpointDescriptionByEndpoint = getEndpointDescriptionByEndpoint;
-    exports.getEndpointsForIndicesTypesAndId = getEndpointsForIndicesTypesAndId;
+    exports.getTopLevelUrlCompleteComponents = getTopLevelUrlCompleteComponents;
+
+    exports._test = {
+      globalUrlComponentFactories: globalUrlComponentFactories
+    };
 
     return exports;
   });

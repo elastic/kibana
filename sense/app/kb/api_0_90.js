@@ -3,6 +3,7 @@ define([
   './api',
   './api_0_90/aliases',
   './api_0_90/cluster',
+  './api_0_90/document',
   './api_0_90/facets',
   './api_0_90/filter',
   './api_0_90/globals',
@@ -17,11 +18,16 @@ define([
 ], function (_, api) {
   'use strict';
 
-  var api_0_90 = new api.Api("api_0_90");
+  var parts = _(arguments).rest(3);
 
-  _(arguments).rest(3).each(function (apiSection) {
-    apiSection(api_0_90);
-  });
+  function Api_0_90(globalSharedComponentFactories) {
+    api.Api.call(this, "api_0_90", globalSharedComponentFactories);
+    parts.each(function (apiSection) {
+      apiSection(this);
+    }, this);
+  }
 
-  return api_0_90;
+  Api_0_90.prototype = _.create(api.Api.prototype, { 'constructor': Api_0_90  });
+
+  return Api_0_90;
 });

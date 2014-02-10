@@ -3,48 +3,43 @@ define(function () {
 
   return function init(api) {
     api.addEndpointDescription('_refresh', {
-      def_method: 'POST',
-      methods: ['POST'],
-      endpoint_autocomplete: [
-        '_refresh'
-      ],
-      indices_mode: 'multi'
+      methods: ['POST']
     });
 
     api.addEndpointDescription('_stats', {
-      def_method: 'GET',
-      methods: ['GET'],
-      endpoint_autocomplete: [
-        '_stats'
-      ],
-      indices_mode: 'multi'
+      patterns: [
+        "{indices}/_stats",
+        "_stats"
+      ]
     });
 
     api.addEndpointDescription('_segments', {
-      def_method: 'GET',
-      methods: ['GET'],
-      endpoint_autocomplete: [
-        '_segments'
-      ],
-      indices_mode: 'multi'
+      patterns: [
+        "{indices}/_segments",
+        "_segments"
+      ]
     });
 
     api.addEndpointDescription('__create_index__', {
-      methods: ['PUT', 'DELETE'],
-      indices_mode: 'single',
-      types_mode: 'none',
-      match: '^/?$',
-      endpoint_autocomplete: [
-        ''
+      methods: ['PUT'],
+      patterns: [
+        "{index}"
       ],
       data_autocomplete_rules: {
         mappings: {
-          __scope_link: '_mapping'
+          __scope_link: '_put_mapping'
         },
         settings: {
-          __scope_link: '_settings.index'
+          __scope_link: '_put_settings.index'
         }
       }
+    });
+
+    api.addEndpointDescription('__delete_indices__', {
+      methods: ['DELETE'],
+      patterns: [
+        "{indices}"
+      ]
     });
   };
 
