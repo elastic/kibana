@@ -138,7 +138,7 @@ var rows = [
         "title": "Documents"
       },
       {
-        "value_field": "total.indexing.index_total",
+        "value_field": "primaries.indexing.index_total",
         "derivative": true,
         "mode": "min",
         "scaleSeconds": true,
