@@ -22,7 +22,6 @@ define([
         case "url.slash":
         case "url.comma":
         case "url.questionmark":
-        case "url.endpoint":
         case "paren.lparen":
         case "paren.rparen":
         case "punctuation.colon":
@@ -1342,19 +1341,19 @@ define([
     aceAutoCompleteInstance.gatherCompletions = function (ace_editor, callback) {
       var session = ace_editor.getSession();
       var pos = ace_editor.getCursorPosition();
-      var prefix;
+      var prefix = "";
       // change starts here
       var token = session.getTokenAt(pos.row, pos.column);
       this.base = _.clone(pos);
       if (!editor.parser.isEmptyToken(token) && !isSeparatorToken(token)) {
         if (token.value.indexOf('"') == 0) {
-          prefix = token.value.substr(1);
           this.base.column = token.start + 1;
         }
         else {
-          prefix = token.value;
           this.base.column = token.start;
         }
+
+        prefix = getAutoCompleteValueFromToken(token);
       }
 
 
