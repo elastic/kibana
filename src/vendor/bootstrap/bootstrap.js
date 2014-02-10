@@ -1908,6 +1908,7 @@
   , select: function () {
     // CHANGE (rashidkpc) If nothing is selected, use existing value
       var val = this.$menu.find('.active').attr('data-value') || this.$element.val();
+      val = $('<div />').html(val).text()
       this.$element
         .val(this.updater(val))
         .change()
@@ -1968,6 +1969,10 @@
         return this.shown ? this.hide() : this
       }
 
+      items = $.map(items,function(v,k){
+        return $('<div />').text(v).html()
+      })
+
       return this.render(items.slice(0, this.options.items)).show()
     }
 
@@ -1993,7 +1998,7 @@
   , highlighter: function (item) {
       var query = this.query.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\$&')
       return item.replace(new RegExp('(' + query + ')', 'ig'), function ($1, match) {
-        return '<strong>' + match + '</strong>'
+        return match.length > 0 ? '<strong>' + match + '</strong>' : match
       })
     }
 
