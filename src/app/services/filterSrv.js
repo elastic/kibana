@@ -185,7 +185,7 @@ define([
           .unit(filter.unit)
           .point(ejs.GeoPoint([parseFloat(filter.lat), parseFloat(filter.lon)]));
       case 'field':
-        return ejs.QueryFilter(ejs.FieldQuery(filter.field,filter.query)).cache(true);
+        return ejs.QueryFilter(ejs.QueryStringQuery(filter.field+":("+filter.query+")")).cache(true);
       case 'terms':
         return ejs.TermsFilter(filter.field,filter.value);
       case 'exists':
