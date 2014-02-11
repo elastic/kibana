@@ -1,9 +1,0 @@
-{
-	"name": "eventEmitter",
-	"repo": "Wolfy87/EventEmitter",
-	"description": "Event based JavaScript for the browser.",
-	"version": "4.2.7",
-	"scripts": ["EventEmitter.js"],
-	"main": "EventEmitter.js",
-	"license": "MIT"
-}
