@@ -146,7 +146,13 @@ define([
     editor.replaceRequestRange = function (newRequest, requestRange) {
       var text = utils.textFromRequest(newRequest);
       if (requestRange) {
+        var pos = editor.getCursorPosition();
         editor.getSession().replace(requestRange, text);
+        var max_row = Math.max(requestRange.start.row + text.split('\n').length -1 , 0);
+        pos.row = Math.min(pos.row, max_row);
+        editor.moveCursorToPosition(pos);
+        // ACE UPGRADE - check if needed - at the moment the above may trigger a selection.
+        editor.clearSelection();
       }
       else {
         // just insert where we are
