@@ -2,64 +2,74 @@ define(function (require) {
 
   var DataSource = require('courier/data_source');
   var _ = require('lodash');
+  var angular = require('angular');
 
-  var optionNames = [
-    'fetchInterval',
-    'client'
-  ];
+  require('courier/data_source');
+  require('courier/mapper');
 
-  function Courier(config) {
-    config = config || {};
+  var module = angular.module('kbn.services.courier', []);
 
-    var opts = {};
-    var fetchTimer;
-    var activeRequest;
+  module.directive('courierTest', function (Courier) {
+    var courier = Courier();
+  });
 
-    var sources = [];
+  module.factory('Courier', function (es) {
+    var optionNames = [
+      'fetchInterval',
+      'client'
+    ];
 
-    var mergeInheritance = function (source) {
+    var mergeProp = function (state, filters, val, key) {
+      switch (key) {
+      case 'inherits':
+        // ignore
+        break;
+      case 'filter':
+        filters.push(val);
+        break;
+      case 'index':
+      case 'type':
+        if (key && state[key] == null) {
+          state[key] = val;
+        }
+        break;
+      default:
+        if (key && state.body[key] == null) {
+          state.body[key] = val;
+        }
+        break;
+      }
+    };
+
+    var flattenDataSource = function (source) {
       var state = {
         body: {}
       };
 
-      // all of the filters from the source chain,
-      // no particular order
+      // all of the filters from the source chain
       var filters = [];
 
-      var mergeProp = function (val, key) {
-        switch (key) {
-        case 'filters':
-          filters.push(val);
-          break;
-        case 'index':
-        case 'type':
-          if (key && state[key] == null) {
-            state[key] = val;
-          }
-          break;
-        default:
-          if (key && state.body[key] == null) {
-            state.body[key] = val;
-          }
-          break;
-        }
-      };
+      var collectProp = _.partial(mergeProp, state, filters);
 
       // walk the chain and merge each property
       var current = source;
+      var currentState;
       while (current) {
-        _.forOwn(current, mergeProp);
-        current = current.inherits;
+        currentState = current._state();
+        _.forOwn(currentState, collectProp);
+        current = currentState.inherits;
       }
 
+      // defaults for the query
       _.forOwn({
         query: {
-          match_all: {}
+          'match_all': {}
         },
         index: '_all',
         type: '_all'
-      }, mergeProp);
+      }, collectProp);
 
+      // switch to filtered query if there are filters
       if (filters.length) {
         state.body.query = {
           filtered: {
@@ -76,99 +86,120 @@ define(function (require) {
       return state;
     };
 
-    var writeSourceRequest = function (source) {
-      var state = mergeInheritance(source.state());
-      return JSON.stringify({
-          index: state.index,
-          type: state.type
-        }) +
-        '\n' +
-        JSON.stringify(state.body);
-    };
+    function Courier(config) {
+      var opts = {};
+      var fetchTimer;
+      var activeRequest;
 
-    var onSourceUpdate = _.bind(function (source) {
-      var existing = _.find(sources, { source: source });
-      if (!existing) {
-        this.stopFetchingSource(source);
-      }
-      existing.req = writeSourceRequest(source);
-    }, this);
+      var sources = [];
 
-    var setFetchTimeout = function () {
-      clearTimeout(fetchTimer);
-      if (opts.fetchInterval) {
-        fetchTimer = setTimeout(onFetch, opts.fetchInterval);
-      } else {
-        fetchTimer = null;
-      }
-    };
-
-    var stopFetching = function () {
-      clearTimeout(fetchTimer);
-      return this;
-    };
-
-    var onFetch = _.bind(function () {
-      if (!opts.client) {
-        throw new Error('Courier does not have a client yet, unable to fetch queries');
-      }
-
-      var requests = _.pluck(sources, 'req');
-
-      activeRequest = opts.client.msearch({
-        body: requests
-      });
-    }, this);
-
-    var startFetchingSource = function (source) {
-      var existing = _.find(sources, { source: source });
-      if (existing) return false;
-
-      sources.push({
-        source: source,
-        req: writeSourceRequest(source)
-      });
-      source.on('change', onSourceUpdate);
-
-      return this;
-    };
-
-    var stopFetchingSource = function (source) {
-      source.removeListener('change', onSourceUpdate);
-      _.remove(sources, { source: source });
-      if (sources.length === 0) clearTimeout(fetchTimer);
-    };
-
-    // public api
-    this.start = setFetchTimeout;
-    this.startFetchingSource = startFetchingSource;
-    this.stop = stopFetching;
-    this.stopFetchingSource = stopFetchingSource;
-    this.close = _.partial(_.each, sources, stopFetchingSource);
-    this.define = function (state) {
-      return new DataSource(this, state);
-    };
-
-    // chainable settings/getters for state stuff
-    optionNames.forEach(function chainableOptions(name) {
-      this[name] = function (val) {
-        if (val === void 0) {
-          return opts[name];
+      var onFetch = _.bind(function () {
+        if (!opts.client) {
+          throw new Error('Courier does not have a client yet, unable to fetch queries');
         }
-        opts[name] = val;
-        switch (name) {
-        case 'fetchInterval':
-          if (fetchTimer) setFetchTimeout();
+
+        var all = [];
+        var body = '';
+        _.each(sources, function (source) {
+          all.push(source);
+
+          var state = flattenDataSource(source);
+          var header = JSON.stringify({
+            index: state.index,
+            type: state.type
+          });
+          var body = JSON.stringify(state.body);
+
+          body += header + '\n' + body + '\n';
+        });
+
+        if (activeRequest) {
+          activeRequest.abort();
         }
+
+        activeRequest = opts.client.msearch({
+          body: body
+        }).then(function (resp) {
+          _.each(resp.responses, function (resp, i) {
+            sources[i].emit('results', resp);
+          });
+        }, function (err) {
+          console.error(err);
+        });
+      }, this);
+
+      var setFetchTimeout = function () {
+        clearTimeout(fetchTimer);
+        if (opts.fetchInterval) {
+          fetchTimer = setTimeout(onFetch, opts.fetchInterval);
+        } else {
+          fetchTimer = null;
+        }
+      };
+
+      var stopFetching = function () {
+        clearTimeout(fetchTimer);
         return this;
       };
-    }, this);
 
-    // private api, exposed for testing
-    this._state = function () { return opts; };
-    this._writeSourceRequest = writeSourceRequest;
-  }
+      var startFetchingSource = function (source) {
+        var existing = _.find(sources, { source: source });
+        if (existing) return false;
 
+        sources.push(source);
 
-  return Courier;
+        return this;
+      };
+
+      var stopFetchingSource = function (source) {
+        var i = sources.indexOf(source);
+        if (i !== -1) {
+          sources.slice(i, 1);
+        }
+        if (sources.length === 0) stopFetching();
+      };
+
+      // public api
+      this.start = setFetchTimeout;
+      this.startFetchingSource = startFetchingSource;
+      this.stop = stopFetching;
+      this.stopFetchingSource = stopFetchingSource;
+      this.close = _.partial(_.each, sources, stopFetchingSource);
+      this.define = function (state) {
+        return new DataSource(this, state);
+      };
+      this.isStarted = function () {
+        return !!fetchTimer;
+      };
+
+      // chainable settings/getters for state stuff
+      optionNames.forEach(function chainableOptions(name) {
+        this[name] = function (val) {
+          if (val === void 0) {
+            return opts[name];
+          }
+          opts[name] = val;
+          switch (name) {
+          case 'fetchInterval':
+            if (fetchTimer) setFetchTimeout();
+          }
+          return this;
+        };
+      }, this);
+
+      // private api, exposed for testing
+      this._flattenDataSource = flattenDataSource;
+      this._getQueryForSource = function (source) {
+        var existing = _.find(sources, { source: source });
+        if (existing) return existing.req;
+      };
+
+      _.each(config || {}, function (val, key) {
+        if (typeof this[key] !== 'function') throw new TypeError('invalid config "' + key + '"');
+        this[key](val);
+      }, this);
+    }
+
+    return Courier;
+  });
 });

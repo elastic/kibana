@@ -1,12 +1,21 @@
 define(function (require) {
   /**
-   * Fetches mappings from elasticsearch and casts result objects
-   * based on those mappings
+   * - Resolves index patterns
+   * - Fetches mappings from elasticsearch
+   * - casts result object fields using mappings
    *
    * @class Mapper
    */
-  function Mapper() {
+  function Mapper(index, type) {
+    this.indices = function () {
+      return new Promise(function (resolve, reject) {
 
+      });
+    };
+
+    this.getFields = function () {
+
+    };
   }
 
   return Mapper;

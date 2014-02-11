@@ -5,9 +5,11 @@
 
   "globals": {
     "define": true,
-    "require": true
+    "require": true,
+    "console": true
   },
 
+  "camelcase": true,
   "white": true,
   "bitwise": false,
   "eqnull": true,
@@ -17,7 +19,7 @@
   "expr": true,
   "indent": 2,
   "latedef": "nofunc",
-  "newcap": true,
+  "newcap": false,
   "noarg": true,
   "noempty": true,
   "undef": true,

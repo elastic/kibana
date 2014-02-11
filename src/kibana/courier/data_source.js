@@ -33,7 +33,7 @@ define(function (require) {
     if (initialState) {
       // state can be serialized as JSON, and passed back in to restore
       if (typeof initialState === 'string') {
-        state = JSON.parse(state);
+        state = JSON.parse(initialState);
       } else {
         state = _.cloneDeep(initialState);
       }
@@ -43,21 +43,22 @@ define(function (require) {
 
     var mapper = new Mapper();
 
-    var makeActive = _.bind(function () {
-      if (listenerCount(this, 'results') === 0) return;
+    var onNewListener = _.bind(function (name) {
+      // new newListener is emitted before it is added, count will be 0
+      if (name !== 'results' || listenerCount(this, 'results') !== 0) return;
       courier.startFetchingSource(this);
-      this.removeListener('newListener', makeActive);
-      this.on('removeListener', makeInactive);
+      this.removeListener('newListener', onNewListener);
+      this.on('removeListener', onRemoveListener);
     }, this);
 
-    var makeInactive = _.bind(function () {
+    var onRemoveListener = _.bind(function () {
       if (listenerCount(this, 'results') > 0) return;
       courier.stopFetchingSource(this);
-      this.removeListener('removeListener', makeInactive);
-      this.on('newListener', makeActive);
+      this.removeListener('removeListener', onRemoveListener);
+      this.on('newListener', onNewListener);
     }, this);
 
-    this.on('newListener', makeActive);
+    this.on('newListener', onNewListener);
 
     /**
      * Used to flatten a chain of DataSources
@@ -70,9 +71,11 @@ define(function (require) {
 
     // public api
     this.toJSON = function () {
-      return JSON.stringify(_.omit(state, 'inherits'));
+      return _.omit(state, 'inherits');
     };
-
+    this.toString = function () {
+      return JSON.stringify(this.toJSON());
+    };
     this.getFieldNames = function (cb) {
       mapper.getMapping(state.index, state.type, function (mapping) {
         return _.keys(mapping);
@@ -85,10 +88,7 @@ define(function (require) {
         if (val === void 0) {
           return state[name];
         }
-        if (state[name] !== val) {
-          state[name] = val;
-          this.emit('change', this, name);
-        }
+        state[name] = val;
         return this;
       };
     }, this);

@@ -1,15 +1,7 @@
 (function () {
-  function bower(p) { return '../bower_components/' + p; }
-
-  require.config({
+  var config = {
     baseUrl: 'kibana',
-    paths: {
-      d3: bower('d3/d3'),
-      lodash: bower('lodash/dist/lodash'),
-      jquery: bower('jquery/jquery'),
-      angular: bower('angular/angular'),
-      'utils/event_emitter': bower('eventEmitter/EventEmitter')
-    },
+    paths: {},
     shim: {
       angular: {
         deps: ['jquery'],
@@ -17,5 +9,33 @@
       }
     },
     waitSeconds: 60
+  };
+
+  var bowerComponents = [
+    'd3',
+    ['lodash', 'dist/lodash'],
+    'jquery',
+    'angular',
+    'angular-route',
+    'elasticsearch'
+  ];
+
+  bowerComponents.forEach(function (name) {
+    var path = '../bower_components/';
+    if (typeof name === 'object') {
+      path += name[0] + '/' + name[1];
+      name = name[0];
+    } else {
+      path += name + '/' + name;
+    }
+    config.paths[name] = path;
+
+    if (name.match(/^angular-/)) {
+      config.shim[name] = {
+        deps: ['angular']
+      };
+    }
   });
+
+  require.config(config);
 }());
