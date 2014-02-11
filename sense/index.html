@@ -15,7 +15,7 @@
       <span class="brand" id="server_label">Server</span>
 
       <form class="navbar-form pull-left">
-        <input id="es_server" type="text" class="span5" value="localhost:9200"/>
+        <input id="es_server" type="text" class="span5" value=""/>
       </form>
         <span class="pull-left btn btn-link"><span id="notification" style="visibility: hidden"
             class="label label-info"></span></span>
@@ -44,7 +44,7 @@
 <div id="main" class="container-fluid">
   <div id="editor_container">
     <div id="editor">GET _search
-      {
+{
   "query": { "match_all": {} }
 }</div>
     <div id="editor_actions">

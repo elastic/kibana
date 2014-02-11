@@ -57,7 +57,11 @@ define([
   });
 
   var $resizer = input.$el.siblings('.ui-resizable-e');
-  es.setBaseUrl($esServer.val());
+
+  es.addServerChangeListener(function (server) {
+    $esServer.val(server);
+  });
+
   return {
     $esServer: $esServer,
     $send: $send,

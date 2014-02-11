@@ -100,6 +100,7 @@ define([
           resetToValues(previousSaveState.server, previousSaveState.content);
         }
         else {
+          resetToValues("localhost:9200");
           input.autoIndent();
         }
       }
@@ -112,7 +113,10 @@ define([
       }
       else if (previousSaveState) {
         resetToValues(previousSaveState.server);
+      } else {
+        resetToValues("localhost:9200")
       }
+
 
       if (document.location.pathname && document.location.pathname.indexOf("_plugin") == 1) {
         // running as an ES plugin. Always assume we are using that elasticsearch
