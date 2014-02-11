@@ -19,7 +19,7 @@ function (Settings) {
      * @type {String}
      */
     elasticsearch: {
-      server: "http://search.kibana.datalog-s1.prod.wikia.net",
+      server: "https://elastic-kibana.wikia-inc.com",
       withCredentials: true
     },
 
