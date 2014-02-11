@@ -24,7 +24,7 @@
                 <i bs-tooltip="'Configure row'" data-placement="right" ng-show="row.editable" class="icon-cog pointer"></i>
               </span>
               <span class="row-button bgPrimary" ng-click="toggle_row(row)" ng-show="row.collapsable">
-                <i bs-tooltip="'Expand row'" data-placement="right" ng-show="row.editable" class="icon-caret-left pointer" ></i>
+                <i bs-tooltip="'Expand row'" data-placement="right" ng-show="row.collapsable" class="icon-caret-left pointer" ></i>
               </span>
               <span class="row-button row-text" ng-click="toggle_row(row)" ng-class="{'pointer':row.collapsable}">{{row.title || 'Row '+$index}}</span>
             </div>
@@ -38,7 +38,7 @@
                 <i bs-tooltip="'Configure row'" data-placement="right"  class="icon-cog pointer"></i>
                 <br>
               </div>
-              <div class="bgSuccess row-tab" ng-click="editor.index = 2" config-modal="app/partials/roweditor.html" kbn-model="row">
+              <div class="bgSuccess row-tab" ng-click="editor.index = 2" config-modal="app/partials/roweditor.html" kbn-model="row" ng-show="row.editable">
                 <i class="icon-plus-sign" bs-tooltip="'Add Panel'" data-placement="right"></i>
                 <br>
               </div>
