@@ -48,7 +48,6 @@ define([
       description: 'A statistical panel for displaying aggregations using the Elastic Search statistical facet query.'
     };
 
-    $scope.modes = ['count','min','max','mean','total','variance','std_deviation','sum_of_squares'];
 
     var defaults = {
       queries     : {
@@ -63,17 +62,7 @@ define([
       sort_reverse: false,
       label_name: 'Query',
       value_name: 'Value',
-      spyable     : true,
-      show: {
-        count: true,
-        min: true,
-        max: true,
-        mean: true,
-        std_deviation: true,
-        sum_of_squares: true,
-        total: true,
-        variance: true
-      }
+      spyable     : true
     };
 
     _.defaults($scope.panel, defaults);
@@ -87,7 +76,6 @@ define([
     };
 
     $scope.set_sort = function(field) {
-      console.log(field);
       if($scope.panel.sort_field === field && $scope.panel.sort_reverse === false) {
         $scope.panel.sort_reverse = true;
       } else if($scope.panel.sort_field === field && $scope.panel.sort_reverse === true) {
@@ -129,7 +117,7 @@ define([
           .facetFilter($scope.ejs.QueryFilter(
             $scope.ejs.FilteredQuery(
               boolQuery,
-              filterSrv.getBoolFilter(filterSrv.ids())
+              filterSrv.getBoolFilter(filterSrv.ids)
               )))).size(0);
 
       _.each(queries, function (q) {
@@ -141,7 +129,7 @@ define([
           .facetFilter($scope.ejs.QueryFilter(
             $scope.ejs.FilteredQuery(
               query,
-              filterSrv.getBoolFilter(filterSrv.ids())
+              filterSrv.getBoolFilter(filterSrv.ids)
             )
           ))
         );
@@ -161,8 +149,8 @@ define([
           var obj = _.clone(q);
           obj.label = alias;
           obj.Label = alias.toLowerCase(); //sort field
-          obj.value = results.facets['stats_'+alias];
-          obj.Value = results.facets['stats_'+alias]; //sort field
+          obj.value = results.facets['stats_'+alias][$scope.panel.mode];
+          obj.Value = results.facets['stats_'+alias][$scope.panel.mode]; //sort field
           return obj;
         });
 
@@ -170,8 +158,6 @@ define([
           value: value,
           rows: rows
         };
-
-        console.log($scope.data);
 
         $scope.$emit('render');
       });
