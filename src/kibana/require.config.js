@@ -1,7 +1,9 @@
 (function () {
   var config = {
     baseUrl: 'kibana',
-    paths: {},
+    paths: {
+      courier: '../courier'
+    },
     shim: {
       angular: {
         deps: ['jquery'],
@@ -17,7 +19,7 @@
     'jquery',
     'angular',
     'angular-route',
-    'elasticsearch'
+    ['elasticsearch', 'elasticsearch.angular']
   ];
 
   bowerComponents.forEach(function (name) {
@@ -30,7 +32,7 @@
     }
     config.paths[name] = path;
 
-    if (name.match(/^angular-/)) {
+    if (path.match(/angular/) && name !== 'angular') {
       config.shim[name] = {
         deps: ['angular']
       };

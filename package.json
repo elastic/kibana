@@ -6,22 +6,18 @@
   "main": "Gulpfile.js",
   "dependencies": {},
   "devDependencies": {
-    "connect": "~2.12.0",
-    "gulp": "~3.5.2",
     "lodash": "~2.4.1",
     "expect.js": "~0.2.0",
-    "gulp-jshint": "git://github.com/spenceralger/gulp-jshint.git#relative_jshintrc",
-    "jshint-stylish": "~0.1.5",
     "grunt": "~0.4.2",
     "grunt-contrib-connect": "~0.6.0",
     "grunt-contrib-jshint": "~0.8.0",
-    "mocha": "~1.17.1",
+    "grunt-mocha": "~0.4.10",
     "load-grunt-config": "~0.7.0",
-    "grunt-mocha": "~0.4.10"
+    "mocha": "~1.17.1"
   },
   "scripts": {
-    "test": "gulp test",
-    "server": "gulp server"
+    "test": "grunt test",
+    "server": "grunt server"
   },
   "repository": {
     "type": "git",

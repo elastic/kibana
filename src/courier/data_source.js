@@ -24,6 +24,7 @@ define(function (require) {
     'aggs',
     'from',
     'size',
+    'source',
     'inherits'
   ];
 
@@ -81,13 +82,13 @@ define(function (require) {
         return _.keys(mapping);
       });
     };
+    this.extend = function () {
+      return courier.createSource().inherits(this);
+    };
 
     // get/set internal state values
-    optionNames.forEach(function chainableOptions(name) {
+    optionNames.forEach(function (name) {
       this[name] = function (val) {
-        if (val === void 0) {
-          return state[name];
-        }
         state[name] = val;
         return this;
       };

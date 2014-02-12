@@ -68,7 +68,7 @@ define(function (require) {
         source.on('results', _.noop);
         source.index('the index name');
 
-        expect(courier._getQueryForSource(source)).to.match(/the index name/);
+        expect(Courier._flattenDataSource(source).index).to.eql('the index name');
       });
     });
 
@@ -96,25 +96,22 @@ define(function (require) {
             })
             .on('results', _.noop);
 
-          expect(courier._writeQueryForSource(math))
-            .to.eql(JSON.stringify({
-              index: 'people',
-              type: 'students'
-            }) + '\n' +
-            JSON.stringify({
-              query: {
-                filtered: {
-                  query: { match_all: {} },
-                  filter: { bool: {
-                    must: [
-                      { terms: { classes: ['algebra', 'calculus', 'geometry'], execution: 'or' } },
-                      { term: { school: 'high school' } }
-                    ]
-                  } }
-                }
+          var query = Courier._flattenDataSource(math);
+          expect(query.index).to.eql('people');
+          expect(query.type).to.eql('students');
+          expect(query.body).to.eql({
+            query: {
+              filtered: {
+                query: { 'match_all': {} },
+                filter: { bool: {
+                  must: [
+                    { terms: { classes: ['algebra', 'calculus', 'geometry'], execution: 'or' } },
+                    { term: { school: 'high school' } }
+                  ]
+                } }
               }
-            })
-          );
+            }
+          });
         });
       });
     });

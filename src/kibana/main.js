@@ -11,13 +11,6 @@ define(function (require) {
   require('elasticsearch');
   require('angular-route');
 
-  var dependencies = [
-    'kibana',
-    'ngRoute'
-  ];
-
-  var app = angular.module('kibana', dependencies);
-
   // keep a reference to each module defined before boot, so that
   // after boot it can define new features. Also serves as a flag.
   var preBootModules = [];
@@ -25,6 +18,21 @@ define(function (require) {
   // the functions needed to register different
   // features defined after boot
   var registerFns = {};
+
+  var dependencies = [
+    'elasticsearch',
+    'kibana',
+    'ngRoute'
+  ];
+
+  _('controllers directives factories services filters'.split(' '))
+    .map(function (type) { return 'kibana/' + type; })
+    .each(function (name) {
+      preBootModules.push(angular.module(name, []));
+      dependencies.push(name);
+    });
+
+  var app = angular.module('kibana', dependencies);
 
   // This stores the Kibana revision number, @REV@ is replaced by grunt.
   app.constant('kbnVersion', '@REV@');
@@ -49,10 +57,9 @@ define(function (require) {
   };
 
   app.config(function ($routeProvider, $controllerProvider, $compileProvider, $filterProvider, $provide) {
-
     $routeProvider
       .when('/courier-test', {
-        templateUrl: 'kibana/partials/courier-test.html',
+        templateUrl: 'courier/test.html',
       })
       .otherwise({
         redirectTo: 'courier-test'
@@ -68,17 +75,10 @@ define(function (require) {
 
   // load the core components
   require([
-    'courier/courier'
+    'services/courier',
+    'services/es',
+    'controllers/kibana'
   ], function () {
-
-    var dependencies = [];
-
-    _('controllers directives factories services filters'.split(' '))
-      .map(function (type) { return 'kibana.' + type; })
-      .each(function (name) {
-        app.useModule(angular.module(name, []));
-        dependencies.push(name);
-      });
 
     // bootstrap the app
     $(function () {
