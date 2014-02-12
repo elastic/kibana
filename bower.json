@@ -21,7 +21,7 @@
   ],
   "dependencies": {
     "requirejs": "~2.1.10",
-    "elasticsearch": "~1.4.0",
+    "elasticsearch": "*",
     "angular": "~1.2.10",
     "lodash": "~2.4.1",
     "d3": "~3.4.1",

@@ -1,4 +1,4 @@
-/*! elasticsearch - v1.4.0 - 2014-01-30
+/*! elasticsearch - v1.5.4 - 2014-02-11
  * http://www.elasticsearch.org/guide/en/elasticsearch/client/javascript-api/current/index.html
  * Copyright (c) 2014 Elasticsearch BV; Licensed Apache 2.0 */
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.elasticsearch=e():"undefined"!=typeof global?global.elasticsearch=e():"undefined"!=typeof self&&(self.elasticsearch=e())}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -6215,6960 +6215,9503 @@ process.chdir = function (dir) {
 };
 
 },{}],14:[function(require,module,exports){
-var global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};/**
- * @license
- * Lo-Dash 2.3.0 (Custom Build) <http://lodash.com/>
- * Build: `lodash -o ./dist/lodash.compat.js`
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
  * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-;(function() {
 
-  /** Used as a safe reference for `undefined` in pre ES5 environments */
-  var undefined;
+module.exports = {
+  'compact': require('./arrays/compact'),
+  'difference': require('./arrays/difference'),
+  'drop': require('./arrays/rest'),
+  'findIndex': require('./arrays/findIndex'),
+  'findLastIndex': require('./arrays/findLastIndex'),
+  'first': require('./arrays/first'),
+  'flatten': require('./arrays/flatten'),
+  'head': require('./arrays/first'),
+  'indexOf': require('./arrays/indexOf'),
+  'initial': require('./arrays/initial'),
+  'intersection': require('./arrays/intersection'),
+  'last': require('./arrays/last'),
+  'lastIndexOf': require('./arrays/lastIndexOf'),
+  'object': require('./arrays/zipObject'),
+  'pull': require('./arrays/pull'),
+  'range': require('./arrays/range'),
+  'remove': require('./arrays/remove'),
+  'rest': require('./arrays/rest'),
+  'sortedIndex': require('./arrays/sortedIndex'),
+  'tail': require('./arrays/rest'),
+  'take': require('./arrays/first'),
+  'union': require('./arrays/union'),
+  'uniq': require('./arrays/uniq'),
+  'unique': require('./arrays/uniq'),
+  'unzip': require('./arrays/zip'),
+  'without': require('./arrays/without'),
+  'xor': require('./arrays/xor'),
+  'zip': require('./arrays/zip'),
+  'zipObject': require('./arrays/zipObject')
+};
 
-  /** Used to pool arrays and objects used internally */
-  var arrayPool = [],
-      objectPool = [];
+},{"./arrays/compact":15,"./arrays/difference":16,"./arrays/findIndex":17,"./arrays/findLastIndex":18,"./arrays/first":19,"./arrays/flatten":20,"./arrays/indexOf":21,"./arrays/initial":22,"./arrays/intersection":23,"./arrays/last":24,"./arrays/lastIndexOf":25,"./arrays/pull":26,"./arrays/range":27,"./arrays/remove":28,"./arrays/rest":29,"./arrays/sortedIndex":30,"./arrays/union":31,"./arrays/uniq":32,"./arrays/without":33,"./arrays/xor":34,"./arrays/zip":35,"./arrays/zipObject":36}],15:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
 
-  /** Used to generate unique IDs */
-  var idCounter = 0;
+/**
+ * Creates an array with all falsey values removed. The values `false`, `null`,
+ * `0`, `""`, `undefined`, and `NaN` are all falsey.
+ *
+ * @static
+ * @memberOf _
+ * @category Arrays
+ * @param {Array} array The array to compact.
+ * @returns {Array} Returns a new array of filtered values.
+ * @example
+ *
+ * _.compact([0, 1, false, 2, '', 3]);
+ * // => [1, 2, 3]
+ */
+function compact(array) {
+  var index = -1,
+      length = array ? array.length : 0,
+      result = [];
 
-  /** Used internally to indicate various things */
-  var indicatorObject = {};
-
-  /** Used to prefix keys to avoid issues with `__proto__` and properties on `Object.prototype` */
-  var keyPrefix = +new Date + '';
-
-  /** Used as the size when optimizations are enabled for large arrays */
-  var largeArraySize = 75;
-
-  /** Used as the max size of the `arrayPool` and `objectPool` */
-  var maxPoolSize = 40;
-
-  /** Used to detect and test whitespace */
-  var whitespace = (
-    // whitespace
-    ' \t\x0B\f\xA0\ufeff' +
-
-    // line terminators
-    '\n\r\u2028\u2029' +
-
-    // unicode category "Zs" space separators
-    '\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000'
-  );
-
-  /** Used to match empty string literals in compiled template source */
-  var reEmptyStringLeading = /\b__p \+= '';/g,
-      reEmptyStringMiddle = /\b(__p \+=) '' \+/g,
-      reEmptyStringTrailing = /(__e\(.*?\)|\b__t\)) \+\n'';/g;
-
-  /**
-   * Used to match ES6 template delimiters
-   * http://people.mozilla.org/~jorendorff/es6-draft.html#sec-7.8.6
-   */
-  var reEsTemplate = /\$\{([^\\}]*(?:\\.[^\\}]*)*)\}/g;
-
-  /** Used to match regexp flags from their coerced string values */
-  var reFlags = /\w*$/;
-
-  /** Used to detected named functions */
-  var reFuncName = /^\s*function[ \n\r\t]+\w/;
-
-  /** Used to match "interpolate" template delimiters */
-  var reInterpolate = /<%=([\s\S]+?)%>/g;
-
-  /** Used to match leading whitespace and zeros to be removed */
-  var reLeadingSpacesAndZeros = RegExp('^[' + whitespace + ']*0+(?=.$)');
-
-  /** Used to ensure capturing order of template delimiters */
-  var reNoMatch = /($^)/;
-
-  /** Used to detect functions containing a `this` reference */
-  var reThis = /\bthis\b/;
-
-  /** Used to match unescaped characters in compiled string literals */
-  var reUnescapedString = /['\n\r\t\u2028\u2029\\]/g;
-
-  /** Used to assign default `context` object properties */
-  var contextProps = [
-    'Array', 'Boolean', 'Date', 'Error', 'Function', 'Math', 'Number', 'Object',
-    'RegExp', 'String', '_', 'attachEvent', 'clearTimeout', 'isFinite', 'isNaN',
-    'parseInt', 'setImmediate', 'setTimeout'
-  ];
-
-  /** Used to fix the JScript [[DontEnum]] bug */
-  var shadowedProps = [
-    'constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable',
-    'toLocaleString', 'toString', 'valueOf'
-  ];
-
-  /** Used to make template sourceURLs easier to identify */
-  var templateCounter = 0;
-
-  /** `Object#toString` result shortcuts */
-  var argsClass = '[object Arguments]',
-      arrayClass = '[object Array]',
-      boolClass = '[object Boolean]',
-      dateClass = '[object Date]',
-      errorClass = '[object Error]',
-      funcClass = '[object Function]',
-      numberClass = '[object Number]',
-      objectClass = '[object Object]',
-      regexpClass = '[object RegExp]',
-      stringClass = '[object String]';
-
-  /** Used to identify object classifications that `_.clone` supports */
-  var cloneableClasses = {};
-  cloneableClasses[funcClass] = false;
-  cloneableClasses[argsClass] = cloneableClasses[arrayClass] =
-  cloneableClasses[boolClass] = cloneableClasses[dateClass] =
-  cloneableClasses[numberClass] = cloneableClasses[objectClass] =
-  cloneableClasses[regexpClass] = cloneableClasses[stringClass] = true;
-
-  /** Used as an internal `_.debounce` options object */
-  var debounceOptions = {
-    'leading': false,
-    'maxWait': 0,
-    'trailing': false
-  };
-
-  /** Used as the property descriptor for `__bindData__` */
-  var descriptor = {
-    'configurable': false,
-    'enumerable': false,
-    'value': null,
-    'writable': false
-  };
-
-  /** Used as the data object for `iteratorTemplate` */
-  var iteratorData = {
-    'args': '',
-    'array': null,
-    'bottom': '',
-    'firstArg': '',
-    'init': '',
-    'keys': null,
-    'loop': '',
-    'shadowedProps': null,
-    'support': null,
-    'top': '',
-    'useHas': false
-  };
-
-  /** Used to determine if values are of the language type Object */
-  var objectTypes = {
-    'boolean': false,
-    'function': true,
-    'object': true,
-    'number': false,
-    'string': false,
-    'undefined': false
-  };
-
-  /** Used to escape characters for inclusion in compiled string literals */
-  var stringEscapes = {
-    '\\': '\\',
-    "'": "'",
-    '\n': 'n',
-    '\r': 'r',
-    '\t': 't',
-    '\u2028': 'u2028',
-    '\u2029': 'u2029'
-  };
-
-  /** Used as a reference to the global object */
-  var root = (objectTypes[typeof window] && window) || this;
-
-  /** Detect free variable `exports` */
-  var freeExports = objectTypes[typeof exports] && exports && !exports.nodeType && exports;
-
-  /** Detect free variable `module` */
-  var freeModule = objectTypes[typeof module] && module && !module.nodeType && module;
-
-  /** Detect the popular CommonJS extension `module.exports` */
-  var moduleExports = freeModule && freeModule.exports === freeExports && freeExports;
-
-  /** Detect free variable `global` from Node.js or Browserified code and use it as `root` */
-  var freeGlobal = objectTypes[typeof global] && global;
-  if (freeGlobal && (freeGlobal.global === freeGlobal || freeGlobal.window === freeGlobal)) {
-    root = freeGlobal;
+  while (++index < length) {
+    var value = array[index];
+    if (value) {
+      result.push(value);
+    }
   }
+  return result;
+}
 
-  /*--------------------------------------------------------------------------*/
+module.exports = compact;
 
-  /**
-   * The base implementation of `_.indexOf` without support for binary searches
-   * or `fromIndex` constraints.
-   *
-   * @private
-   * @param {Array} array The array to search.
-   * @param {*} value The value to search for.
-   * @param {number} [fromIndex=0] The index to search from.
-   * @returns {number} Returns the index of the matched value or `-1`.
-   */
-  function baseIndexOf(array, value, fromIndex) {
-    var index = (fromIndex || 0) - 1,
-        length = array ? array.length : 0;
+},{}],16:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseDifference = require('../internals/baseDifference'),
+    baseFlatten = require('../internals/baseFlatten');
 
-    while (++index < length) {
-      if (array[index] === value) {
-        return index;
+/**
+ * Creates an array excluding all values of the provided arrays using strict
+ * equality for comparisons, i.e. `===`.
+ *
+ * @static
+ * @memberOf _
+ * @category Arrays
+ * @param {Array} array The array to process.
+ * @param {...Array} [values] The arrays of values to exclude.
+ * @returns {Array} Returns a new array of filtered values.
+ * @example
+ *
+ * _.difference([1, 2, 3, 4, 5], [5, 2, 10]);
+ * // => [1, 3, 4]
+ */
+function difference(array) {
+  return baseDifference(array, baseFlatten(arguments, true, true, 1));
+}
+
+module.exports = difference;
+
+},{"../internals/baseDifference":94,"../internals/baseFlatten":95}],17:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createCallback = require('../functions/createCallback');
+
+/**
+ * This method is like `_.find` except that it returns the index of the first
+ * element that passes the callback check, instead of the element itself.
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @category Arrays
+ * @param {Array} array The array to search.
+ * @param {Function|Object|string} [callback=identity] The function called
+ *  per iteration. If a property name or object is provided it will be used
+ *  to create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {number} Returns the index of the found element, else `-1`.
+ * @example
+ *
+ * var characters = [
+ *   { 'name': 'barney',  'age': 36, 'blocked': false },
+ *   { 'name': 'fred',    'age': 40, 'blocked': true },
+ *   { 'name': 'pebbles', 'age': 1,  'blocked': false }
+ * ];
+ *
+ * _.findIndex(characters, function(chr) {
+ *   return chr.age < 20;
+ * });
+ * // => 2
+ *
+ * // using "_.where" callback shorthand
+ * _.findIndex(characters, { 'age': 36 });
+ * // => 0
+ *
+ * // using "_.pluck" callback shorthand
+ * _.findIndex(characters, 'blocked');
+ * // => 1
+ */
+function findIndex(array, callback, thisArg) {
+  var index = -1,
+      length = array ? array.length : 0;
+
+  callback = createCallback(callback, thisArg, 3);
+  while (++index < length) {
+    if (callback(array[index], index, array)) {
+      return index;
+    }
+  }
+  return -1;
+}
+
+module.exports = findIndex;
+
+},{"../functions/createCallback":76}],18:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createCallback = require('../functions/createCallback');
+
+/**
+ * This method is like `_.findIndex` except that it iterates over elements
+ * of a `collection` from right to left.
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @category Arrays
+ * @param {Array} array The array to search.
+ * @param {Function|Object|string} [callback=identity] The function called
+ *  per iteration. If a property name or object is provided it will be used
+ *  to create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {number} Returns the index of the found element, else `-1`.
+ * @example
+ *
+ * var characters = [
+ *   { 'name': 'barney',  'age': 36, 'blocked': true },
+ *   { 'name': 'fred',    'age': 40, 'blocked': false },
+ *   { 'name': 'pebbles', 'age': 1,  'blocked': true }
+ * ];
+ *
+ * _.findLastIndex(characters, function(chr) {
+ *   return chr.age > 30;
+ * });
+ * // => 1
+ *
+ * // using "_.where" callback shorthand
+ * _.findLastIndex(characters, { 'age': 36 });
+ * // => 0
+ *
+ * // using "_.pluck" callback shorthand
+ * _.findLastIndex(characters, 'blocked');
+ * // => 2
+ */
+function findLastIndex(array, callback, thisArg) {
+  var length = array ? array.length : 0;
+  callback = createCallback(callback, thisArg, 3);
+  while (length--) {
+    if (callback(array[length], length, array)) {
+      return length;
+    }
+  }
+  return -1;
+}
+
+module.exports = findLastIndex;
+
+},{"../functions/createCallback":76}],19:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createCallback = require('../functions/createCallback'),
+    slice = require('../internals/slice');
+
+/* Native method shortcuts for methods with the same name as other `lodash` methods */
+var nativeMax = Math.max,
+    nativeMin = Math.min;
+
+/**
+ * Gets the first element or first `n` elements of an array. If a callback
+ * is provided elements at the beginning of the array are returned as long
+ * as the callback returns truey. The callback is bound to `thisArg` and
+ * invoked with three arguments; (value, index, array).
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @alias head, take
+ * @category Arrays
+ * @param {Array} array The array to query.
+ * @param {Function|Object|number|string} [callback] The function called
+ *  per element or the number of elements to return. If a property name or
+ *  object is provided it will be used to create a "_.pluck" or "_.where"
+ *  style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {*} Returns the first element(s) of `array`.
+ * @example
+ *
+ * _.first([1, 2, 3]);
+ * // => 1
+ *
+ * _.first([1, 2, 3], 2);
+ * // => [1, 2]
+ *
+ * _.first([1, 2, 3], function(num) {
+ *   return num < 3;
+ * });
+ * // => [1, 2]
+ *
+ * var characters = [
+ *   { 'name': 'barney',  'blocked': true,  'employer': 'slate' },
+ *   { 'name': 'fred',    'blocked': false, 'employer': 'slate' },
+ *   { 'name': 'pebbles', 'blocked': true,  'employer': 'na' }
+ * ];
+ *
+ * // using "_.pluck" callback shorthand
+ * _.first(characters, 'blocked');
+ * // => [{ 'name': 'barney', 'blocked': true, 'employer': 'slate' }]
+ *
+ * // using "_.where" callback shorthand
+ * _.pluck(_.first(characters, { 'employer': 'slate' }), 'name');
+ * // => ['barney', 'fred']
+ */
+function first(array, callback, thisArg) {
+  var n = 0,
+      length = array ? array.length : 0;
+
+  if (typeof callback != 'number' && callback != null) {
+    var index = -1;
+    callback = createCallback(callback, thisArg, 3);
+    while (++index < length && callback(array[index], index, array)) {
+      n++;
+    }
+  } else {
+    n = callback;
+    if (n == null || thisArg) {
+      return array ? array[0] : undefined;
+    }
+  }
+  return slice(array, 0, nativeMin(nativeMax(0, n), length));
+}
+
+module.exports = first;
+
+},{"../functions/createCallback":76,"../internals/slice":129}],20:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseFlatten = require('../internals/baseFlatten'),
+    map = require('../collections/map');
+
+/**
+ * Flattens a nested array (the nesting can be to any depth). If `isShallow`
+ * is truey, the array will only be flattened a single level. If a callback
+ * is provided each element of the array is passed through the callback before
+ * flattening. The callback is bound to `thisArg` and invoked with three
+ * arguments; (value, index, array).
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @category Arrays
+ * @param {Array} array The array to flatten.
+ * @param {boolean} [isShallow=false] A flag to restrict flattening to a single level.
+ * @param {Function|Object|string} [callback=identity] The function called
+ *  per iteration. If a property name or object is provided it will be used
+ *  to create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Array} Returns a new flattened array.
+ * @example
+ *
+ * _.flatten([1, [2], [3, [[4]]]]);
+ * // => [1, 2, 3, 4];
+ *
+ * _.flatten([1, [2], [3, [[4]]]], true);
+ * // => [1, 2, 3, [[4]]];
+ *
+ * var characters = [
+ *   { 'name': 'barney', 'age': 30, 'pets': ['hoppy'] },
+ *   { 'name': 'fred',   'age': 40, 'pets': ['baby puss', 'dino'] }
+ * ];
+ *
+ * // using "_.pluck" callback shorthand
+ * _.flatten(characters, 'pets');
+ * // => ['hoppy', 'baby puss', 'dino']
+ */
+function flatten(array, isShallow, callback, thisArg) {
+  // juggle arguments
+  if (typeof isShallow != 'boolean' && isShallow != null) {
+    thisArg = callback;
+    callback = (typeof isShallow != 'function' && thisArg && thisArg[isShallow] === array) ? null : isShallow;
+    isShallow = false;
+  }
+  if (callback != null) {
+    array = map(array, callback, thisArg);
+  }
+  return baseFlatten(array, isShallow);
+}
+
+module.exports = flatten;
+
+},{"../collections/map":56,"../internals/baseFlatten":95}],21:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseIndexOf = require('../internals/baseIndexOf'),
+    sortedIndex = require('./sortedIndex');
+
+/* Native method shortcuts for methods with the same name as other `lodash` methods */
+var nativeMax = Math.max;
+
+/**
+ * Gets the index at which the first occurrence of `value` is found using
+ * strict equality for comparisons, i.e. `===`. If the array is already sorted
+ * providing `true` for `fromIndex` will run a faster binary search.
+ *
+ * @static
+ * @memberOf _
+ * @category Arrays
+ * @param {Array} array The array to search.
+ * @param {*} value The value to search for.
+ * @param {boolean|number} [fromIndex=0] The index to search from or `true`
+ *  to perform a binary search on a sorted array.
+ * @returns {number} Returns the index of the matched value or `-1`.
+ * @example
+ *
+ * _.indexOf([1, 2, 3, 1, 2, 3], 2);
+ * // => 1
+ *
+ * _.indexOf([1, 2, 3, 1, 2, 3], 2, 3);
+ * // => 4
+ *
+ * _.indexOf([1, 1, 2, 2, 3, 3], 2, true);
+ * // => 2
+ */
+function indexOf(array, value, fromIndex) {
+  if (typeof fromIndex == 'number') {
+    var length = array ? array.length : 0;
+    fromIndex = (fromIndex < 0 ? nativeMax(0, length + fromIndex) : fromIndex || 0);
+  } else if (fromIndex) {
+    var index = sortedIndex(array, value);
+    return array[index] === value ? index : -1;
+  }
+  return baseIndexOf(array, value, fromIndex);
+}
+
+module.exports = indexOf;
+
+},{"../internals/baseIndexOf":96,"./sortedIndex":30}],22:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createCallback = require('../functions/createCallback'),
+    slice = require('../internals/slice');
+
+/* Native method shortcuts for methods with the same name as other `lodash` methods */
+var nativeMax = Math.max,
+    nativeMin = Math.min;
+
+/**
+ * Gets all but the last element or last `n` elements of an array. If a
+ * callback is provided elements at the end of the array are excluded from
+ * the result as long as the callback returns truey. The callback is bound
+ * to `thisArg` and invoked with three arguments; (value, index, array).
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @category Arrays
+ * @param {Array} array The array to query.
+ * @param {Function|Object|number|string} [callback=1] The function called
+ *  per element or the number of elements to exclude. If a property name or
+ *  object is provided it will be used to create a "_.pluck" or "_.where"
+ *  style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Array} Returns a slice of `array`.
+ * @example
+ *
+ * _.initial([1, 2, 3]);
+ * // => [1, 2]
+ *
+ * _.initial([1, 2, 3], 2);
+ * // => [1]
+ *
+ * _.initial([1, 2, 3], function(num) {
+ *   return num > 1;
+ * });
+ * // => [1]
+ *
+ * var characters = [
+ *   { 'name': 'barney',  'blocked': false, 'employer': 'slate' },
+ *   { 'name': 'fred',    'blocked': true,  'employer': 'slate' },
+ *   { 'name': 'pebbles', 'blocked': true,  'employer': 'na' }
+ * ];
+ *
+ * // using "_.pluck" callback shorthand
+ * _.initial(characters, 'blocked');
+ * // => [{ 'name': 'barney',  'blocked': false, 'employer': 'slate' }]
+ *
+ * // using "_.where" callback shorthand
+ * _.pluck(_.initial(characters, { 'employer': 'na' }), 'name');
+ * // => ['barney', 'fred']
+ */
+function initial(array, callback, thisArg) {
+  var n = 0,
+      length = array ? array.length : 0;
+
+  if (typeof callback != 'number' && callback != null) {
+    var index = length;
+    callback = createCallback(callback, thisArg, 3);
+    while (index-- && callback(array[index], index, array)) {
+      n++;
+    }
+  } else {
+    n = (callback == null || thisArg) ? 1 : callback || n;
+  }
+  return slice(array, 0, nativeMin(nativeMax(0, length - n), length));
+}
+
+module.exports = initial;
+
+},{"../functions/createCallback":76,"../internals/slice":129}],23:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseIndexOf = require('../internals/baseIndexOf'),
+    cacheIndexOf = require('../internals/cacheIndexOf'),
+    createCache = require('../internals/createCache'),
+    getArray = require('../internals/getArray'),
+    isArguments = require('../objects/isArguments'),
+    isArray = require('../objects/isArray'),
+    largeArraySize = require('../internals/largeArraySize'),
+    releaseArray = require('../internals/releaseArray'),
+    releaseObject = require('../internals/releaseObject');
+
+/**
+ * Creates an array of unique values present in all provided arrays using
+ * strict equality for comparisons, i.e. `===`.
+ *
+ * @static
+ * @memberOf _
+ * @category Arrays
+ * @param {...Array} [array] The arrays to inspect.
+ * @returns {Array} Returns an array of shared values.
+ * @example
+ *
+ * _.intersection([1, 2, 3], [5, 2, 1, 4], [2, 1]);
+ * // => [1, 2]
+ */
+function intersection() {
+  var args = [],
+      argsIndex = -1,
+      argsLength = arguments.length,
+      caches = getArray(),
+      indexOf = baseIndexOf,
+      trustIndexOf = indexOf === baseIndexOf,
+      seen = getArray();
+
+  while (++argsIndex < argsLength) {
+    var value = arguments[argsIndex];
+    if (isArray(value) || isArguments(value)) {
+      args.push(value);
+      caches.push(trustIndexOf && value.length >= largeArraySize &&
+        createCache(argsIndex ? args[argsIndex] : seen));
+    }
+  }
+  var array = args[0],
+      index = -1,
+      length = array ? array.length : 0,
+      result = [];
+
+  outer:
+  while (++index < length) {
+    var cache = caches[0];
+    value = array[index];
+
+    if ((cache ? cacheIndexOf(cache, value) : indexOf(seen, value)) < 0) {
+      argsIndex = argsLength;
+      (cache || seen).push(value);
+      while (--argsIndex) {
+        cache = caches[argsIndex];
+        if ((cache ? cacheIndexOf(cache, value) : indexOf(args[argsIndex], value)) < 0) {
+          continue outer;
+        }
       }
-    }
-    return -1;
-  }
-
-  /**
-   * An implementation of `_.contains` for cache objects that mimics the return
-   * signature of `_.indexOf` by returning `0` if the value is found, else `-1`.
-   *
-   * @private
-   * @param {Object} cache The cache object to inspect.
-   * @param {*} value The value to search for.
-   * @returns {number} Returns `0` if `value` is found, else `-1`.
-   */
-  function cacheIndexOf(cache, value) {
-    var type = typeof value;
-    cache = cache.cache;
-
-    if (type == 'boolean' || value == null) {
-      return cache[value] ? 0 : -1;
-    }
-    if (type != 'number' && type != 'string') {
-      type = 'object';
-    }
-    var key = type == 'number' ? value : keyPrefix + value;
-    cache = (cache = cache[type]) && cache[key];
-
-    return type == 'object'
-      ? (cache && baseIndexOf(cache, value) > -1 ? 0 : -1)
-      : (cache ? 0 : -1);
-  }
-
-  /**
-   * Adds a given value to the corresponding cache object.
-   *
-   * @private
-   * @param {*} value The value to add to the cache.
-   */
-  function cachePush(value) {
-    var cache = this.cache,
-        type = typeof value;
-
-    if (type == 'boolean' || value == null) {
-      cache[value] = true;
-    } else {
-      if (type != 'number' && type != 'string') {
-        type = 'object';
-      }
-      var key = type == 'number' ? value : keyPrefix + value,
-          typeCache = cache[type] || (cache[type] = {});
-
-      if (type == 'object') {
-        (typeCache[key] || (typeCache[key] = [])).push(value);
-      } else {
-        typeCache[key] = true;
-      }
+      result.push(value);
     }
   }
-
-  /**
-   * Used by `_.max` and `_.min` as the default callback when a given
-   * collection is a string value.
-   *
-   * @private
-   * @param {string} value The character to inspect.
-   * @returns {number} Returns the code unit of given character.
-   */
-  function charAtCallback(value) {
-    return value.charCodeAt(0);
-  }
-
-  /**
-   * Used by `sortBy` to compare transformed `collection` elements, stable sorting
-   * them in ascending order.
-   *
-   * @private
-   * @param {Object} a The object to compare to `b`.
-   * @param {Object} b The object to compare to `a`.
-   * @returns {number} Returns the sort order indicator of `1` or `-1`.
-   */
-  function compareAscending(a, b) {
-    var ac = a.criteria,
-        bc = b.criteria;
-
-    // ensure a stable sort in V8 and other engines
-    // http://code.google.com/p/v8/issues/detail?id=90
-    if (ac !== bc) {
-      if (ac > bc || typeof ac == 'undefined') {
-        return 1;
-      }
-      if (ac < bc || typeof bc == 'undefined') {
-        return -1;
-      }
-    }
-    // The JS engine embedded in Adobe applications like InDesign has a buggy
-    // `Array#sort` implementation that causes it, under certain circumstances,
-    // to return the same value for `a` and `b`.
-    // See https://github.com/jashkenas/underscore/pull/1247
-    return a.index - b.index;
-  }
-
-  /**
-   * Creates a cache object to optimize linear searches of large arrays.
-   *
-   * @private
-   * @param {Array} [array=[]] The array to search.
-   * @returns {null|Object} Returns the cache object or `null` if caching should not be used.
-   */
-  function createCache(array) {
-    var index = -1,
-        length = array.length,
-        first = array[0],
-        mid = array[(length / 2) | 0],
-        last = array[length - 1];
-
-    if (first && typeof first == 'object' &&
-        mid && typeof mid == 'object' && last && typeof last == 'object') {
-      return false;
-    }
-    var cache = getObject();
-    cache['false'] = cache['null'] = cache['true'] = cache['undefined'] = false;
-
-    var result = getObject();
-    result.array = array;
-    result.cache = cache;
-    result.push = cachePush;
-
-    while (++index < length) {
-      result.push(array[index]);
-    }
-    return result;
-  }
-
-  /**
-   * Used by `template` to escape characters for inclusion in compiled
-   * string literals.
-   *
-   * @private
-   * @param {string} match The matched character to escape.
-   * @returns {string} Returns the escaped character.
-   */
-  function escapeStringChar(match) {
-    return '\\' + stringEscapes[match];
-  }
-
-  /**
-   * Gets an array from the array pool or creates a new one if the pool is empty.
-   *
-   * @private
-   * @returns {Array} The array from the pool.
-   */
-  function getArray() {
-    return arrayPool.pop() || [];
-  }
-
-  /**
-   * Gets an object from the object pool or creates a new one if the pool is empty.
-   *
-   * @private
-   * @returns {Object} The object from the pool.
-   */
-  function getObject() {
-    return objectPool.pop() || {
-      'array': null,
-      'cache': null,
-      'criteria': null,
-      'false': false,
-      'index': 0,
-      'null': false,
-      'number': null,
-      'object': null,
-      'push': null,
-      'string': null,
-      'true': false,
-      'undefined': false,
-      'value': null
-    };
-  }
-
-  /**
-   * Checks if `value` is a DOM node in IE < 9.
-   *
-   * @private
-   * @param {*} value The value to check.
-   * @returns {boolean} Returns `true` if the `value` is a DOM node, else `false`.
-   */
-  function isNode(value) {
-    // IE < 9 presents DOM nodes as `Object` objects except they have `toString`
-    // methods that are `typeof` "string" and still can coerce nodes to strings
-    return typeof value.toString != 'function' && typeof (value + '') == 'string';
-  }
-
-  /**
-   * Releases the given array back to the array pool.
-   *
-   * @private
-   * @param {Array} [array] The array to release.
-   */
-  function releaseArray(array) {
-    array.length = 0;
-    if (arrayPool.length < maxPoolSize) {
-      arrayPool.push(array);
-    }
-  }
-
-  /**
-   * Releases the given object back to the object pool.
-   *
-   * @private
-   * @param {Object} [object] The object to release.
-   */
-  function releaseObject(object) {
-    var cache = object.cache;
+  while (argsLength--) {
+    cache = caches[argsLength];
     if (cache) {
       releaseObject(cache);
     }
-    object.array = object.cache = object.criteria = object.object = object.number = object.string = object.value = null;
-    if (objectPool.length < maxPoolSize) {
-      objectPool.push(object);
+  }
+  releaseArray(caches);
+  releaseArray(seen);
+  return result;
+}
+
+module.exports = intersection;
+
+},{"../internals/baseIndexOf":96,"../internals/cacheIndexOf":101,"../internals/createCache":106,"../internals/getArray":110,"../internals/largeArraySize":116,"../internals/releaseArray":124,"../internals/releaseObject":125,"../objects/isArguments":146,"../objects/isArray":147}],24:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createCallback = require('../functions/createCallback'),
+    slice = require('../internals/slice');
+
+/* Native method shortcuts for methods with the same name as other `lodash` methods */
+var nativeMax = Math.max;
+
+/**
+ * Gets the last element or last `n` elements of an array. If a callback is
+ * provided elements at the end of the array are returned as long as the
+ * callback returns truey. The callback is bound to `thisArg` and invoked
+ * with three arguments; (value, index, array).
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @category Arrays
+ * @param {Array} array The array to query.
+ * @param {Function|Object|number|string} [callback] The function called
+ *  per element or the number of elements to return. If a property name or
+ *  object is provided it will be used to create a "_.pluck" or "_.where"
+ *  style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {*} Returns the last element(s) of `array`.
+ * @example
+ *
+ * _.last([1, 2, 3]);
+ * // => 3
+ *
+ * _.last([1, 2, 3], 2);
+ * // => [2, 3]
+ *
+ * _.last([1, 2, 3], function(num) {
+ *   return num > 1;
+ * });
+ * // => [2, 3]
+ *
+ * var characters = [
+ *   { 'name': 'barney',  'blocked': false, 'employer': 'slate' },
+ *   { 'name': 'fred',    'blocked': true,  'employer': 'slate' },
+ *   { 'name': 'pebbles', 'blocked': true,  'employer': 'na' }
+ * ];
+ *
+ * // using "_.pluck" callback shorthand
+ * _.pluck(_.last(characters, 'blocked'), 'name');
+ * // => ['fred', 'pebbles']
+ *
+ * // using "_.where" callback shorthand
+ * _.last(characters, { 'employer': 'na' });
+ * // => [{ 'name': 'pebbles', 'blocked': true, 'employer': 'na' }]
+ */
+function last(array, callback, thisArg) {
+  var n = 0,
+      length = array ? array.length : 0;
+
+  if (typeof callback != 'number' && callback != null) {
+    var index = length;
+    callback = createCallback(callback, thisArg, 3);
+    while (index-- && callback(array[index], index, array)) {
+      n++;
+    }
+  } else {
+    n = callback;
+    if (n == null || thisArg) {
+      return array ? array[length - 1] : undefined;
     }
   }
+  return slice(array, nativeMax(0, length - n));
+}
 
-  /**
-   * Slices the `collection` from the `start` index up to, but not including,
-   * the `end` index.
-   *
-   * Note: This function is used instead of `Array#slice` to support node lists
-   * in IE < 9 and to ensure dense arrays are returned.
-   *
-   * @private
-   * @param {Array|Object|string} collection The collection to slice.
-   * @param {number} start The start index.
-   * @param {number} end The end index.
-   * @returns {Array} Returns the new array.
-   */
-  function slice(array, start, end) {
-    start || (start = 0);
-    if (typeof end == 'undefined') {
-      end = array ? array.length : 0;
+module.exports = last;
+
+},{"../functions/createCallback":76,"../internals/slice":129}],25:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/* Native method shortcuts for methods with the same name as other `lodash` methods */
+var nativeMax = Math.max,
+    nativeMin = Math.min;
+
+/**
+ * Gets the index at which the last occurrence of `value` is found using strict
+ * equality for comparisons, i.e. `===`. If `fromIndex` is negative, it is used
+ * as the offset from the end of the collection.
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @category Arrays
+ * @param {Array} array The array to search.
+ * @param {*} value The value to search for.
+ * @param {number} [fromIndex=array.length-1] The index to search from.
+ * @returns {number} Returns the index of the matched value or `-1`.
+ * @example
+ *
+ * _.lastIndexOf([1, 2, 3, 1, 2, 3], 2);
+ * // => 4
+ *
+ * _.lastIndexOf([1, 2, 3, 1, 2, 3], 2, 3);
+ * // => 1
+ */
+function lastIndexOf(array, value, fromIndex) {
+  var index = array ? array.length : 0;
+  if (typeof fromIndex == 'number') {
+    index = (fromIndex < 0 ? nativeMax(0, index + fromIndex) : nativeMin(fromIndex, index - 1)) + 1;
+  }
+  while (index--) {
+    if (array[index] === value) {
+      return index;
     }
+  }
+  return -1;
+}
+
+module.exports = lastIndexOf;
+
+},{}],26:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/**
+ * Used for `Array` method references.
+ *
+ * Normally `Array.prototype` would suffice, however, using an array literal
+ * avoids issues in Narwhal.
+ */
+var arrayRef = [];
+
+/** Native method shortcuts */
+var splice = arrayRef.splice;
+
+/**
+ * Removes all provided values from the given array using strict equality for
+ * comparisons, i.e. `===`.
+ *
+ * @static
+ * @memberOf _
+ * @category Arrays
+ * @param {Array} array The array to modify.
+ * @param {...*} [value] The values to remove.
+ * @returns {Array} Returns `array`.
+ * @example
+ *
+ * var array = [1, 2, 3, 1, 2, 3];
+ * _.pull(array, 2, 3);
+ * console.log(array);
+ * // => [1, 1]
+ */
+function pull(array) {
+  var args = arguments,
+      argsIndex = 0,
+      argsLength = args.length,
+      length = array ? array.length : 0;
+
+  while (++argsIndex < argsLength) {
     var index = -1,
-        length = end - start || 0,
-        result = Array(length < 0 ? 0 : length);
-
+        value = args[argsIndex];
     while (++index < length) {
-      result[index] = array[start + index];
+      if (array[index] === value) {
+        splice.call(array, index--, 1);
+        length--;
+      }
     }
-    return result;
   }
+  return array;
+}
 
-  /*--------------------------------------------------------------------------*/
+module.exports = pull;
 
-  /**
-   * Create a new `lodash` function using the given context object.
-   *
-   * @static
-   * @memberOf _
-   * @category Utilities
-   * @param {Object} [context=root] The context object.
-   * @returns {Function} Returns the `lodash` function.
-   */
-  function runInContext(context) {
-    // Avoid issues with some ES3 environments that attempt to use values, named
-    // after built-in constructors like `Object`, for the creation of literals.
-    // ES5 clears this up by stating that literals must use built-in constructors.
-    // See http://es5.github.io/#x11.1.5.
-    context = context ? _.defaults(root.Object(), context, _.pick(root, contextProps)) : root;
+},{}],27:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
 
-    /** Native constructor references */
-    var Array = context.Array,
-        Boolean = context.Boolean,
-        Date = context.Date,
-        Error = context.Error,
-        Function = context.Function,
-        Math = context.Math,
-        Number = context.Number,
-        Object = context.Object,
-        RegExp = context.RegExp,
-        String = context.String,
-        TypeError = context.TypeError;
+/** Native method shortcuts */
+var ceil = Math.ceil;
 
-    /**
-     * Used for `Array` method references.
-     *
-     * Normally `Array.prototype` would suffice, however, using an array literal
-     * avoids issues in Narwhal.
-     */
-    var arrayRef = [];
+/* Native method shortcuts for methods with the same name as other `lodash` methods */
+var nativeMax = Math.max;
 
-    /** Used for native method references */
-    var errorProto = Error.prototype,
-        objectProto = Object.prototype,
-        stringProto = String.prototype;
+/**
+ * Creates an array of numbers (positive and/or negative) progressing from
+ * `start` up to but not including `end`. If `start` is less than `stop` a
+ * zero-length range is created unless a negative `step` is specified.
+ *
+ * @static
+ * @memberOf _
+ * @category Arrays
+ * @param {number} [start=0] The start of the range.
+ * @param {number} end The end of the range.
+ * @param {number} [step=1] The value to increment or decrement by.
+ * @returns {Array} Returns a new range array.
+ * @example
+ *
+ * _.range(4);
+ * // => [0, 1, 2, 3]
+ *
+ * _.range(1, 5);
+ * // => [1, 2, 3, 4]
+ *
+ * _.range(0, 20, 5);
+ * // => [0, 5, 10, 15]
+ *
+ * _.range(0, -4, -1);
+ * // => [0, -1, -2, -3]
+ *
+ * _.range(1, 4, 0);
+ * // => [1, 1, 1]
+ *
+ * _.range(0);
+ * // => []
+ */
+function range(start, end, step) {
+  start = +start || 0;
+  step = typeof step == 'number' ? step : (+step || 1);
 
-    /** Used to restore the original `_` reference in `noConflict` */
-    var oldDash = context._;
+  if (end == null) {
+    end = start;
+    start = 0;
+  }
+  // use `Array(length)` so engines like Chakra and V8 avoid slower modes
+  // http://youtu.be/XAqIpGU8ZZk#t=17m25s
+  var index = -1,
+      length = nativeMax(0, ceil((end - start) / (step || 1))),
+      result = Array(length);
 
-    /** Used to resolve the internal [[Class]] of values */
-    var toString = objectProto.toString;
+  while (++index < length) {
+    result[index] = start;
+    start += step;
+  }
+  return result;
+}
 
-    /** Used to detect if a method is native */
-    var reNative = RegExp('^' +
-      String(toString)
-        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        .replace(/toString| for [^\]]+/g, '.*?') + '$'
-    );
+module.exports = range;
 
-    /** Native method shortcuts */
-    var ceil = Math.ceil,
-        clearTimeout = context.clearTimeout,
-        floor = Math.floor,
-        fnToString = Function.prototype.toString,
-        getPrototypeOf = reNative.test(getPrototypeOf = Object.getPrototypeOf) && getPrototypeOf,
-        hasOwnProperty = objectProto.hasOwnProperty,
-        now = reNative.test(now = Date.now) && now || function() { return +new Date; },
-        push = arrayRef.push,
-        propertyIsEnumerable = objectProto.propertyIsEnumerable,
-        setTimeout = context.setTimeout,
-        splice = arrayRef.splice;
+},{}],28:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createCallback = require('../functions/createCallback');
 
-    /** Used to detect `setImmediate` in Node.js */
-    var setImmediate = typeof (setImmediate = freeGlobal && moduleExports && freeGlobal.setImmediate) == 'function' &&
-      !reNative.test(setImmediate) && setImmediate;
+/**
+ * Used for `Array` method references.
+ *
+ * Normally `Array.prototype` would suffice, however, using an array literal
+ * avoids issues in Narwhal.
+ */
+var arrayRef = [];
 
-    /** Used to set meta data on functions */
-    var defineProperty = (function() {
-      // IE 8 only accepts DOM elements
-      try {
-        var o = {},
-            func = reNative.test(func = Object.defineProperty) && func,
-            result = func(o, o, o) && func;
-      } catch(e) { }
-      return result;
-    }());
+/** Native method shortcuts */
+var splice = arrayRef.splice;
 
-    /* Native method shortcuts for methods with the same name as other `lodash` methods */
-    var nativeCreate = reNative.test(nativeCreate = Object.create) && nativeCreate,
-        nativeIsArray = reNative.test(nativeIsArray = Array.isArray) && nativeIsArray,
-        nativeIsFinite = context.isFinite,
-        nativeIsNaN = context.isNaN,
-        nativeKeys = reNative.test(nativeKeys = Object.keys) && nativeKeys,
-        nativeMax = Math.max,
-        nativeMin = Math.min,
-        nativeParseInt = context.parseInt,
-        nativeRandom = Math.random;
+/**
+ * Removes all elements from an array that the callback returns truey for
+ * and returns an array of removed elements. The callback is bound to `thisArg`
+ * and invoked with three arguments; (value, index, array).
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @category Arrays
+ * @param {Array} array The array to modify.
+ * @param {Function|Object|string} [callback=identity] The function called
+ *  per iteration. If a property name or object is provided it will be used
+ *  to create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Array} Returns a new array of removed elements.
+ * @example
+ *
+ * var array = [1, 2, 3, 4, 5, 6];
+ * var evens = _.remove(array, function(num) { return num % 2 == 0; });
+ *
+ * console.log(array);
+ * // => [1, 3, 5]
+ *
+ * console.log(evens);
+ * // => [2, 4, 6]
+ */
+function remove(array, callback, thisArg) {
+  var index = -1,
+      length = array ? array.length : 0,
+      result = [];
 
-    /** Used to lookup a built-in constructor by [[Class]] */
-    var ctorByClass = {};
-    ctorByClass[arrayClass] = Array;
-    ctorByClass[boolClass] = Boolean;
-    ctorByClass[dateClass] = Date;
-    ctorByClass[funcClass] = Function;
-    ctorByClass[objectClass] = Object;
-    ctorByClass[numberClass] = Number;
-    ctorByClass[regexpClass] = RegExp;
-    ctorByClass[stringClass] = String;
-
-    /** Used to avoid iterating non-enumerable properties in IE < 9 */
-    var nonEnumProps = {};
-    nonEnumProps[arrayClass] = nonEnumProps[dateClass] = nonEnumProps[numberClass] = { 'constructor': true, 'toLocaleString': true, 'toString': true, 'valueOf': true };
-    nonEnumProps[boolClass] = nonEnumProps[stringClass] = { 'constructor': true, 'toString': true, 'valueOf': true };
-    nonEnumProps[errorClass] = nonEnumProps[funcClass] = nonEnumProps[regexpClass] = { 'constructor': true, 'toString': true };
-    nonEnumProps[objectClass] = { 'constructor': true };
-
-    (function() {
-      var length = shadowedProps.length;
-      while (length--) {
-        var key = shadowedProps[length];
-        for (var className in nonEnumProps) {
-          if (hasOwnProperty.call(nonEnumProps, className) && !hasOwnProperty.call(nonEnumProps[className], key)) {
-            nonEnumProps[className][key] = false;
-          }
-        }
-      }
-    }());
-
-    /*--------------------------------------------------------------------------*/
-
-    /**
-     * Creates a `lodash` object which wraps the given value to enable intuitive
-     * method chaining.
-     *
-     * In addition to Lo-Dash methods, wrappers also have the following `Array` methods:
-     * `concat`, `join`, `pop`, `push`, `reverse`, `shift`, `slice`, `sort`, `splice`,
-     * and `unshift`
-     *
-     * Chaining is supported in custom builds as long as the `value` method is
-     * implicitly or explicitly included in the build.
-     *
-     * The chainable wrapper functions are:
-     * `after`, `assign`, `bind`, `bindAll`, `bindKey`, `chain`, `compact`,
-     * `compose`, `concat`, `countBy`, `create`, `createCallback`, `curry`,
-     * `debounce`, `defaults`, `defer`, `delay`, `difference`, `filter`, `flatten`,
-     * `forEach`, `forEachRight`, `forIn`, `forInRight`, `forOwn`, `forOwnRight`,
-     * `functions`, `groupBy`, `indexBy`, `initial`, `intersection`, `invert`,
-     * `invoke`, `keys`, `map`, `max`, `memoize`, `merge`, `min`, `object`, `omit`,
-     * `once`, `pairs`, `partial`, `partialRight`, `pick`, `pluck`, `pull`, `push`,
-     * `range`, `reject`, `remove`, `rest`, `reverse`, `shuffle`, `slice`, `sort`,
-     * `sortBy`, `splice`, `tap`, `throttle`, `times`, `toArray`, `transform`,
-     * `union`, `uniq`, `unshift`, `unzip`, `values`, `where`, `without`, `wrap`,
-     * and `zip`
-     *
-     * The non-chainable wrapper functions are:
-     * `clone`, `cloneDeep`, `contains`, `escape`, `every`, `find`, `findIndex`,
-     * `findKey`, `findLast`, `findLastIndex`, `findLastKey`, `has`, `identity`,
-     * `indexOf`, `isArguments`, `isArray`, `isBoolean`, `isDate`, `isElement`,
-     * `isEmpty`, `isEqual`, `isFinite`, `isFunction`, `isNaN`, `isNull`, `isNumber`,
-     * `isObject`, `isPlainObject`, `isRegExp`, `isString`, `isUndefined`, `join`,
-     * `lastIndexOf`, `mixin`, `noConflict`, `parseInt`, `pop`, `random`, `reduce`,
-     * `reduceRight`, `result`, `shift`, `size`, `some`, `sortedIndex`, `runInContext`,
-     * `template`, `unescape`, `uniqueId`, and `value`
-     *
-     * The wrapper functions `first` and `last` return wrapped values when `n` is
-     * provided, otherwise they return unwrapped values.
-     *
-     * Explicit chaining can be enabled by using the `_.chain` method.
-     *
-     * @name _
-     * @constructor
-     * @category Chaining
-     * @param {*} value The value to wrap in a `lodash` instance.
-     * @returns {Object} Returns a `lodash` instance.
-     * @example
-     *
-     * var wrapped = _([1, 2, 3]);
-     *
-     * // returns an unwrapped value
-     * wrapped.reduce(function(sum, num) {
-     *   return sum + num;
-     * });
-     * // => 6
-     *
-     * // returns a wrapped value
-     * var squares = wrapped.map(function(num) {
-     *   return num * num;
-     * });
-     *
-     * _.isArray(squares);
-     * // => false
-     *
-     * _.isArray(squares.value());
-     * // => true
-     */
-    function lodash(value) {
-      // don't wrap if already wrapped, even if wrapped by a different `lodash` constructor
-      return (value && typeof value == 'object' && !isArray(value) && hasOwnProperty.call(value, '__wrapped__'))
-       ? value
-       : new lodashWrapper(value);
+  callback = createCallback(callback, thisArg, 3);
+  while (++index < length) {
+    var value = array[index];
+    if (callback(value, index, array)) {
+      result.push(value);
+      splice.call(array, index--, 1);
+      length--;
     }
+  }
+  return result;
+}
 
-    /**
-     * A fast path for creating `lodash` wrapper objects.
-     *
-     * @private
-     * @param {*} value The value to wrap in a `lodash` instance.
-     * @param {boolean} chainAll A flag to enable chaining for all methods
-     * @returns {Object} Returns a `lodash` instance.
-     */
-    function lodashWrapper(value, chainAll) {
-      this.__chain__ = !!chainAll;
-      this.__wrapped__ = value;
+module.exports = remove;
+
+},{"../functions/createCallback":76}],29:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createCallback = require('../functions/createCallback'),
+    slice = require('../internals/slice');
+
+/* Native method shortcuts for methods with the same name as other `lodash` methods */
+var nativeMax = Math.max;
+
+/**
+ * The opposite of `_.initial` this method gets all but the first element or
+ * first `n` elements of an array. If a callback function is provided elements
+ * at the beginning of the array are excluded from the result as long as the
+ * callback returns truey. The callback is bound to `thisArg` and invoked
+ * with three arguments; (value, index, array).
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @alias drop, tail
+ * @category Arrays
+ * @param {Array} array The array to query.
+ * @param {Function|Object|number|string} [callback=1] The function called
+ *  per element or the number of elements to exclude. If a property name or
+ *  object is provided it will be used to create a "_.pluck" or "_.where"
+ *  style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Array} Returns a slice of `array`.
+ * @example
+ *
+ * _.rest([1, 2, 3]);
+ * // => [2, 3]
+ *
+ * _.rest([1, 2, 3], 2);
+ * // => [3]
+ *
+ * _.rest([1, 2, 3], function(num) {
+ *   return num < 3;
+ * });
+ * // => [3]
+ *
+ * var characters = [
+ *   { 'name': 'barney',  'blocked': true,  'employer': 'slate' },
+ *   { 'name': 'fred',    'blocked': false,  'employer': 'slate' },
+ *   { 'name': 'pebbles', 'blocked': true, 'employer': 'na' }
+ * ];
+ *
+ * // using "_.pluck" callback shorthand
+ * _.pluck(_.rest(characters, 'blocked'), 'name');
+ * // => ['fred', 'pebbles']
+ *
+ * // using "_.where" callback shorthand
+ * _.rest(characters, { 'employer': 'slate' });
+ * // => [{ 'name': 'pebbles', 'blocked': true, 'employer': 'na' }]
+ */
+function rest(array, callback, thisArg) {
+  if (typeof callback != 'number' && callback != null) {
+    var n = 0,
+        index = -1,
+        length = array ? array.length : 0;
+
+    callback = createCallback(callback, thisArg, 3);
+    while (++index < length && callback(array[index], index, array)) {
+      n++;
     }
-    // ensure `new lodashWrapper` is an instance of `lodash`
-    lodashWrapper.prototype = lodash.prototype;
+  } else {
+    n = (callback == null || thisArg) ? 1 : nativeMax(0, callback);
+  }
+  return slice(array, n);
+}
 
-    /**
-     * An object used to flag environments features.
-     *
-     * @static
-     * @memberOf _
-     * @type Object
-     */
-    var support = lodash.support = {};
+module.exports = rest;
 
-    (function() {
-      var ctor = function() { this.x = 1; },
-          object = { '0': 1, 'length': 1 },
-          props = [];
+},{"../functions/createCallback":76,"../internals/slice":129}],30:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createCallback = require('../functions/createCallback'),
+    identity = require('../utilities/identity');
 
-      ctor.prototype = { 'valueOf': 1, 'y': 1 };
-      for (var key in new ctor) { props.push(key); }
-      for (key in arguments) { }
+/**
+ * Uses a binary search to determine the smallest index at which a value
+ * should be inserted into a given sorted array in order to maintain the sort
+ * order of the array. If a callback is provided it will be executed for
+ * `value` and each element of `array` to compute their sort ranking. The
+ * callback is bound to `thisArg` and invoked with one argument; (value).
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @category Arrays
+ * @param {Array} array The array to inspect.
+ * @param {*} value The value to evaluate.
+ * @param {Function|Object|string} [callback=identity] The function called
+ *  per iteration. If a property name or object is provided it will be used
+ *  to create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {number} Returns the index at which `value` should be inserted
+ *  into `array`.
+ * @example
+ *
+ * _.sortedIndex([20, 30, 50], 40);
+ * // => 2
+ *
+ * // using "_.pluck" callback shorthand
+ * _.sortedIndex([{ 'x': 20 }, { 'x': 30 }, { 'x': 50 }], { 'x': 40 }, 'x');
+ * // => 2
+ *
+ * var dict = {
+ *   'wordToNumber': { 'twenty': 20, 'thirty': 30, 'fourty': 40, 'fifty': 50 }
+ * };
+ *
+ * _.sortedIndex(['twenty', 'thirty', 'fifty'], 'fourty', function(word) {
+ *   return dict.wordToNumber[word];
+ * });
+ * // => 2
+ *
+ * _.sortedIndex(['twenty', 'thirty', 'fifty'], 'fourty', function(word) {
+ *   return this.wordToNumber[word];
+ * }, dict);
+ * // => 2
+ */
+function sortedIndex(array, value, callback, thisArg) {
+  var low = 0,
+      high = array ? array.length : low;
 
-      /**
-       * Detect if an `arguments` object's [[Class]] is resolvable (all but Firefox < 4, IE < 9).
-       *
-       * @memberOf _.support
-       * @type boolean
-       */
-      support.argsClass = toString.call(arguments) == argsClass;
+  // explicitly reference `identity` for better inlining in Firefox
+  callback = callback ? createCallback(callback, thisArg, 1) : identity;
+  value = callback(value);
 
-      /**
-       * Detect if `arguments` objects are `Object` objects (all but Narwhal and Opera < 10.5).
-       *
-       * @memberOf _.support
-       * @type boolean
-       */
-      support.argsObject = arguments.constructor == Object && !(arguments instanceof Array);
+  while (low < high) {
+    var mid = (low + high) >>> 1;
+    (callback(array[mid]) < value)
+      ? low = mid + 1
+      : high = mid;
+  }
+  return low;
+}
 
-      /**
-       * Detect if `name` or `message` properties of `Error.prototype` are
-       * enumerable by default. (IE < 9, Safari < 5.1)
-       *
-       * @memberOf _.support
-       * @type boolean
-       */
-      support.enumErrorProps = propertyIsEnumerable.call(errorProto, 'message') || propertyIsEnumerable.call(errorProto, 'name');
+module.exports = sortedIndex;
 
-      /**
-       * Detect if `prototype` properties are enumerable by default.
-       *
-       * Firefox < 3.6, Opera > 9.50 - Opera < 11.60, and Safari < 5.1
-       * (if the prototype or a property on the prototype has been set)
-       * incorrectly sets a function's `prototype` property [[Enumerable]]
-       * value to `true`.
-       *
-       * @memberOf _.support
-       * @type boolean
-       */
-      support.enumPrototypes = propertyIsEnumerable.call(ctor, 'prototype');
+},{"../functions/createCallback":76,"../utilities/identity":175}],31:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseFlatten = require('../internals/baseFlatten'),
+    baseUniq = require('../internals/baseUniq');
 
-      /**
-       * Detect if functions can be decompiled by `Function#toString`
-       * (all but PS3 and older Opera mobile browsers & avoided in Windows 8 apps).
-       *
-       * @memberOf _.support
-       * @type boolean
-       */
-      support.funcDecomp = !reNative.test(context.WinRTError) && reThis.test(runInContext);
+/**
+ * Creates an array of unique values, in order, of the provided arrays using
+ * strict equality for comparisons, i.e. `===`.
+ *
+ * @static
+ * @memberOf _
+ * @category Arrays
+ * @param {...Array} [array] The arrays to inspect.
+ * @returns {Array} Returns an array of combined values.
+ * @example
+ *
+ * _.union([1, 2, 3], [5, 2, 1, 4], [2, 1]);
+ * // => [1, 2, 3, 5, 4]
+ */
+function union() {
+  return baseUniq(baseFlatten(arguments, true, true));
+}
 
-      /**
-       * Detect if `Function#name` is supported (all but IE).
-       *
-       * @memberOf _.support
-       * @type boolean
-       */
-      support.funcNames = typeof Function.name == 'string';
+module.exports = union;
 
-      /**
-       * Detect if `arguments` object indexes are non-enumerable
-       * (Firefox < 4, IE < 9, PhantomJS, Safari < 5.1).
-       *
-       * @memberOf _.support
-       * @type boolean
-       */
-      support.nonEnumArgs = key != 0;
+},{"../internals/baseFlatten":95,"../internals/baseUniq":100}],32:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseUniq = require('../internals/baseUniq'),
+    createCallback = require('../functions/createCallback');
 
-      /**
-       * Detect if properties shadowing those on `Object.prototype` are non-enumerable.
-       *
-       * In IE < 9 an objects own properties, shadowing non-enumerable ones, are
-       * made non-enumerable as well (a.k.a the JScript [[DontEnum]] bug).
-       *
-       * @memberOf _.support
-       * @type boolean
-       */
-      support.nonEnumShadows = !/valueOf/.test(props);
+/**
+ * Creates a duplicate-value-free version of an array using strict equality
+ * for comparisons, i.e. `===`. If the array is sorted, providing
+ * `true` for `isSorted` will use a faster algorithm. If a callback is provided
+ * each element of `array` is passed through the callback before uniqueness
+ * is computed. The callback is bound to `thisArg` and invoked with three
+ * arguments; (value, index, array).
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @alias unique
+ * @category Arrays
+ * @param {Array} array The array to process.
+ * @param {boolean} [isSorted=false] A flag to indicate that `array` is sorted.
+ * @param {Function|Object|string} [callback=identity] The function called
+ *  per iteration. If a property name or object is provided it will be used
+ *  to create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Array} Returns a duplicate-value-free array.
+ * @example
+ *
+ * _.uniq([1, 2, 1, 3, 1]);
+ * // => [1, 2, 3]
+ *
+ * _.uniq([1, 1, 2, 2, 3], true);
+ * // => [1, 2, 3]
+ *
+ * _.uniq(['A', 'b', 'C', 'a', 'B', 'c'], function(letter) { return letter.toLowerCase(); });
+ * // => ['A', 'b', 'C']
+ *
+ * _.uniq([1, 2.5, 3, 1.5, 2, 3.5], function(num) { return this.floor(num); }, Math);
+ * // => [1, 2.5, 3]
+ *
+ * // using "_.pluck" callback shorthand
+ * _.uniq([{ 'x': 1 }, { 'x': 2 }, { 'x': 1 }], 'x');
+ * // => [{ 'x': 1 }, { 'x': 2 }]
+ */
+function uniq(array, isSorted, callback, thisArg) {
+  // juggle arguments
+  if (typeof isSorted != 'boolean' && isSorted != null) {
+    thisArg = callback;
+    callback = (typeof isSorted != 'function' && thisArg && thisArg[isSorted] === array) ? null : isSorted;
+    isSorted = false;
+  }
+  if (callback != null) {
+    callback = createCallback(callback, thisArg, 3);
+  }
+  return baseUniq(array, isSorted, callback);
+}
 
-      /**
-       * Detect if own properties are iterated after inherited properties (all but IE < 9).
-       *
-       * @memberOf _.support
-       * @type boolean
-       */
-      support.ownLast = props[0] != 'x';
+module.exports = uniq;
 
-      /**
-       * Detect if `Array#shift` and `Array#splice` augment array-like objects correctly.
-       *
-       * Firefox < 10, IE compatibility mode, and IE < 9 have buggy Array `shift()`
-       * and `splice()` functions that fail to remove the last element, `value[0]`,
-       * of array-like objects even though the `length` property is set to `0`.
-       * The `shift()` method is buggy in IE 8 compatibility mode, while `splice()`
-       * is buggy regardless of mode in IE < 9 and buggy in compatibility mode in IE 9.
-       *
-       * @memberOf _.support
-       * @type boolean
-       */
-      support.spliceObjects = (arrayRef.splice.call(object, 0, 1), !object[0]);
+},{"../functions/createCallback":76,"../internals/baseUniq":100}],33:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseDifference = require('../internals/baseDifference'),
+    slice = require('../internals/slice');
 
-      /**
-       * Detect lack of support for accessing string characters by index.
-       *
-       * IE < 8 can't access characters by index and IE 8 can only access
-       * characters by index on string literals.
-       *
-       * @memberOf _.support
-       * @type boolean
-       */
-      support.unindexedChars = ('x'[0] + Object('x')[0]) != 'xx';
+/**
+ * Creates an array excluding all provided values using strict equality for
+ * comparisons, i.e. `===`.
+ *
+ * @static
+ * @memberOf _
+ * @category Arrays
+ * @param {Array} array The array to filter.
+ * @param {...*} [value] The values to exclude.
+ * @returns {Array} Returns a new array of filtered values.
+ * @example
+ *
+ * _.without([1, 2, 1, 0, 3, 1, 4], 0, 1);
+ * // => [2, 3, 4]
+ */
+function without(array) {
+  return baseDifference(array, slice(arguments, 1));
+}
 
-      /**
-       * Detect if a DOM node's [[Class]] is resolvable (all but IE < 9)
-       * and that the JS engine errors when attempting to coerce an object to
-       * a string without a `toString` function.
-       *
-       * @memberOf _.support
-       * @type boolean
-       */
-      try {
-        support.nodeClass = !(toString.call(document) == objectClass && !({ 'toString': 0 } + ''));
-      } catch(e) {
-        support.nodeClass = true;
-      }
-    }(1));
+module.exports = without;
 
-    /**
-     * By default, the template delimiters used by Lo-Dash are similar to those in
-     * embedded Ruby (ERB). Change the following template settings to use alternative
-     * delimiters.
-     *
-     * @static
-     * @memberOf _
-     * @type Object
-     */
-    lodash.templateSettings = {
+},{"../internals/baseDifference":94,"../internals/slice":129}],34:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseDifference = require('../internals/baseDifference'),
+    baseUniq = require('../internals/baseUniq'),
+    isArguments = require('../objects/isArguments'),
+    isArray = require('../objects/isArray');
 
-      /**
-       * Used to detect `data` property values to be HTML-escaped.
-       *
-       * @memberOf _.templateSettings
-       * @type RegExp
-       */
-      'escape': /<%-([\s\S]+?)%>/g,
+/**
+ * Creates an array that is the symmetric difference of the provided arrays.
+ * See http://en.wikipedia.org/wiki/Symmetric_difference.
+ *
+ * @static
+ * @memberOf _
+ * @category Arrays
+ * @param {...Array} [array] The arrays to inspect.
+ * @returns {Array} Returns an array of values.
+ * @example
+ *
+ * _.xor([1, 2, 3], [5, 2, 1, 4]);
+ * // => [3, 5, 4]
+ *
+ * _.xor([1, 2, 5], [2, 3, 5], [3, 4, 5]);
+ * // => [1, 4, 5]
+ */
+function xor() {
+  var index = -1,
+      length = arguments.length;
 
-      /**
-       * Used to detect code to be evaluated.
-       *
-       * @memberOf _.templateSettings
-       * @type RegExp
-       */
-      'evaluate': /<%([\s\S]+?)%>/g,
-
-      /**
-       * Used to detect `data` property values to inject.
-       *
-       * @memberOf _.templateSettings
-       * @type RegExp
-       */
-      'interpolate': reInterpolate,
-
-      /**
-       * Used to reference the data object in the template text.
-       *
-       * @memberOf _.templateSettings
-       * @type string
-       */
-      'variable': '',
-
-      /**
-       * Used to import variables into the compiled template.
-       *
-       * @memberOf _.templateSettings
-       * @type Object
-       */
-      'imports': {
-
-        /**
-         * A reference to the `lodash` function.
-         *
-         * @memberOf _.templateSettings.imports
-         * @type Function
-         */
-        '_': lodash
-      }
-    };
-
-    /*--------------------------------------------------------------------------*/
-
-    /**
-     * The template used to create iterator functions.
-     *
-     * @private
-     * @param {Object} data The data object used to populate the text.
-     * @returns {string} Returns the interpolated text.
-     */
-    var iteratorTemplate = function(obj) {
-
-      var __p = 'var index, iterable = ' +
-      (obj.firstArg) +
-      ', result = ' +
-      (obj.init) +
-      ';\nif (!iterable) return result;\n' +
-      (obj.top) +
-      ';';
-       if (obj.array) {
-      __p += '\nvar length = iterable.length; index = -1;\nif (' +
-      (obj.array) +
-      ') {  ';
-       if (support.unindexedChars) {
-      __p += '\n  if (isString(iterable)) {\n    iterable = iterable.split(\'\')\n  }  ';
-       }
-      __p += '\n  while (++index < length) {\n    ' +
-      (obj.loop) +
-      ';\n  }\n}\nelse {  ';
-       } else if (support.nonEnumArgs) {
-      __p += '\n  var length = iterable.length; index = -1;\n  if (length && isArguments(iterable)) {\n    while (++index < length) {\n      index += \'\';\n      ' +
-      (obj.loop) +
-      ';\n    }\n  } else {  ';
-       }
-
-       if (support.enumPrototypes) {
-      __p += '\n  var skipProto = typeof iterable == \'function\';\n  ';
-       }
-
-       if (support.enumErrorProps) {
-      __p += '\n  var skipErrorProps = iterable === errorProto || iterable instanceof Error;\n  ';
-       }
-
-          var conditions = [];    if (support.enumPrototypes) { conditions.push('!(skipProto && index == "prototype")'); }    if (support.enumErrorProps)  { conditions.push('!(skipErrorProps && (index == "message" || index == "name"))'); }
-
-       if (obj.useHas && obj.keys) {
-      __p += '\n  var ownIndex = -1,\n      ownProps = objectTypes[typeof iterable] && keys(iterable),\n      length = ownProps ? ownProps.length : 0;\n\n  while (++ownIndex < length) {\n    index = ownProps[ownIndex];\n';
-          if (conditions.length) {
-      __p += '    if (' +
-      (conditions.join(' && ')) +
-      ') {\n  ';
-       }
-      __p +=
-      (obj.loop) +
-      ';    ';
-       if (conditions.length) {
-      __p += '\n    }';
-       }
-      __p += '\n  }  ';
-       } else {
-      __p += '\n  for (index in iterable) {\n';
-          if (obj.useHas) { conditions.push("hasOwnProperty.call(iterable, index)"); }    if (conditions.length) {
-      __p += '    if (' +
-      (conditions.join(' && ')) +
-      ') {\n  ';
-       }
-      __p +=
-      (obj.loop) +
-      ';    ';
-       if (conditions.length) {
-      __p += '\n    }';
-       }
-      __p += '\n  }    ';
-       if (support.nonEnumShadows) {
-      __p += '\n\n  if (iterable !== objectProto) {\n    var ctor = iterable.constructor,\n        isProto = iterable === (ctor && ctor.prototype),\n        className = iterable === stringProto ? stringClass : iterable === errorProto ? errorClass : toString.call(iterable),\n        nonEnum = nonEnumProps[className];\n      ';
-       for (k = 0; k < 7; k++) {
-      __p += '\n    index = \'' +
-      (obj.shadowedProps[k]) +
-      '\';\n    if ((!(isProto && nonEnum[index]) && hasOwnProperty.call(iterable, index))';
-              if (!obj.useHas) {
-      __p += ' || (!nonEnum[index] && iterable[index] !== objectProto[index])';
-       }
-      __p += ') {\n      ' +
-      (obj.loop) +
-      ';\n    }      ';
-       }
-      __p += '\n  }    ';
-       }
-
-       }
-
-       if (obj.array || support.nonEnumArgs) {
-      __p += '\n}';
-       }
-      __p +=
-      (obj.bottom) +
-      ';\nreturn result';
-
-      return __p
-    };
-
-    /*--------------------------------------------------------------------------*/
-
-    /**
-     * The base implementation of `_.bind` that creates the bound function and
-     * sets its meta data.
-     *
-     * @private
-     * @param {Array} bindData The bind data array.
-     * @returns {Function} Returns the new bound function.
-     */
-    function baseBind(bindData) {
-      var func = bindData[0],
-          partialArgs = bindData[2],
-          thisArg = bindData[4];
-
-      function bound() {
-        // `Function#bind` spec
-        // http://es5.github.io/#x15.3.4.5
-        if (partialArgs) {
-          var args = partialArgs.slice();
-          push.apply(args, arguments);
-        }
-        // mimic the constructor's `return` behavior
-        // http://es5.github.io/#x13.2.2
-        if (this instanceof bound) {
-          // ensure `new bound` is an instance of `func`
-          var thisBinding = baseCreate(func.prototype),
-              result = func.apply(thisBinding, args || arguments);
-          return isObject(result) ? result : thisBinding;
-        }
-        return func.apply(thisArg, args || arguments);
-      }
-      setBindData(bound, bindData);
-      return bound;
+  while (++index < length) {
+    var array = arguments[index];
+    if (isArray(array) || isArguments(array)) {
+      var result = result
+        ? baseUniq(baseDifference(result, array).concat(baseDifference(array, result)))
+        : array;
     }
+  }
+  return result || [];
+}
 
-    /**
-     * The base implementation of `_.clone` without argument juggling or support
-     * for `thisArg` binding.
-     *
-     * @private
-     * @param {*} value The value to clone.
-     * @param {boolean} [isDeep=false] Specify a deep clone.
-     * @param {Function} [callback] The function to customize cloning values.
-     * @param {Array} [stackA=[]] Tracks traversed source objects.
-     * @param {Array} [stackB=[]] Associates clones with source counterparts.
-     * @returns {*} Returns the cloned value.
-     */
-    function baseClone(value, isDeep, callback, stackA, stackB) {
-      if (callback) {
-        var result = callback(value);
-        if (typeof result != 'undefined') {
-          return result;
-        }
+module.exports = xor;
+
+},{"../internals/baseDifference":94,"../internals/baseUniq":100,"../objects/isArguments":146,"../objects/isArray":147}],35:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var max = require('../collections/max'),
+    pluck = require('../collections/pluck');
+
+/**
+ * Creates an array of grouped elements, the first of which contains the first
+ * elements of the given arrays, the second of which contains the second
+ * elements of the given arrays, and so on.
+ *
+ * @static
+ * @memberOf _
+ * @alias unzip
+ * @category Arrays
+ * @param {...Array} [array] Arrays to process.
+ * @returns {Array} Returns a new array of grouped elements.
+ * @example
+ *
+ * _.zip(['fred', 'barney'], [30, 40], [true, false]);
+ * // => [['fred', 30, true], ['barney', 40, false]]
+ */
+function zip() {
+  var array = arguments.length > 1 ? arguments : arguments[0],
+      index = -1,
+      length = array ? max(pluck(array, 'length')) : 0,
+      result = Array(length < 0 ? 0 : length);
+
+  while (++index < length) {
+    result[index] = pluck(array, index);
+  }
+  return result;
+}
+
+module.exports = zip;
+
+},{"../collections/max":57,"../collections/pluck":59}],36:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var isArray = require('../objects/isArray');
+
+/**
+ * Creates an object composed from arrays of `keys` and `values`. Provide
+ * either a single two dimensional array, i.e. `[[key1, value1], [key2, value2]]`
+ * or two arrays, one of `keys` and one of corresponding `values`.
+ *
+ * @static
+ * @memberOf _
+ * @alias object
+ * @category Arrays
+ * @param {Array} keys The array of keys.
+ * @param {Array} [values=[]] The array of values.
+ * @returns {Object} Returns an object composed of the given keys and
+ *  corresponding values.
+ * @example
+ *
+ * _.zipObject(['fred', 'barney'], [30, 40]);
+ * // => { 'fred': 30, 'barney': 40 }
+ */
+function zipObject(keys, values) {
+  var index = -1,
+      length = keys ? keys.length : 0,
+      result = {};
+
+  if (!values && length && !isArray(keys[0])) {
+    values = [];
+  }
+  while (++index < length) {
+    var key = keys[index];
+    if (values) {
+      result[key] = values[index];
+    } else if (key) {
+      result[key[0]] = key[1];
+    }
+  }
+  return result;
+}
+
+module.exports = zipObject;
+
+},{"../objects/isArray":147}],37:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+module.exports = {
+  'chain': require('./chaining/chain'),
+  'tap': require('./chaining/tap'),
+  'value': require('./chaining/wrapperValueOf'),
+  'wrapperChain': require('./chaining/wrapperChain'),
+  'wrapperToString': require('./chaining/wrapperToString'),
+  'wrapperValueOf': require('./chaining/wrapperValueOf')
+};
+
+},{"./chaining/chain":38,"./chaining/tap":39,"./chaining/wrapperChain":40,"./chaining/wrapperToString":41,"./chaining/wrapperValueOf":42}],38:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var lodashWrapper = require('../internals/lodashWrapper');
+
+/**
+ * Creates a `lodash` object that wraps the given value with explicit
+ * method chaining enabled.
+ *
+ * @static
+ * @memberOf _
+ * @category Chaining
+ * @param {*} value The value to wrap.
+ * @returns {Object} Returns the wrapper object.
+ * @example
+ *
+ * var characters = [
+ *   { 'name': 'barney',  'age': 36 },
+ *   { 'name': 'fred',    'age': 40 },
+ *   { 'name': 'pebbles', 'age': 1 }
+ * ];
+ *
+ * var youngest = _.chain(characters)
+ *     .sortBy('age')
+ *     .map(function(chr) { return chr.name + ' is ' + chr.age; })
+ *     .first()
+ *     .value();
+ * // => 'pebbles is 1'
+ */
+function chain(value) {
+  value = new lodashWrapper(value);
+  value.__chain__ = true;
+  return value;
+}
+
+module.exports = chain;
+
+},{"../internals/lodashWrapper":117}],39:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/**
+ * Invokes `interceptor` with the `value` as the first argument and then
+ * returns `value`. The purpose of this method is to "tap into" a method
+ * chain in order to perform operations on intermediate results within
+ * the chain.
+ *
+ * @static
+ * @memberOf _
+ * @category Chaining
+ * @param {*} value The value to provide to `interceptor`.
+ * @param {Function} interceptor The function to invoke.
+ * @returns {*} Returns `value`.
+ * @example
+ *
+ * _([1, 2, 3, 4])
+ *  .tap(function(array) { array.pop(); })
+ *  .reverse()
+ *  .value();
+ * // => [3, 2, 1]
+ */
+function tap(value, interceptor) {
+  interceptor(value);
+  return value;
+}
+
+module.exports = tap;
+
+},{}],40:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/**
+ * Enables explicit method chaining on the wrapper object.
+ *
+ * @name chain
+ * @memberOf _
+ * @category Chaining
+ * @returns {*} Returns the wrapper object.
+ * @example
+ *
+ * var characters = [
+ *   { 'name': 'barney', 'age': 36 },
+ *   { 'name': 'fred',   'age': 40 }
+ * ];
+ *
+ * // without explicit chaining
+ * _(characters).first();
+ * // => { 'name': 'barney', 'age': 36 }
+ *
+ * // with explicit chaining
+ * _(characters).chain()
+ *   .first()
+ *   .pick('age')
+ *   .value();
+ * // => { 'age': 36 }
+ */
+function wrapperChain() {
+  this.__chain__ = true;
+  return this;
+}
+
+module.exports = wrapperChain;
+
+},{}],41:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/**
+ * Produces the `toString` result of the wrapped value.
+ *
+ * @name toString
+ * @memberOf _
+ * @category Chaining
+ * @returns {string} Returns the string result.
+ * @example
+ *
+ * _([1, 2, 3]).toString();
+ * // => '1,2,3'
+ */
+function wrapperToString() {
+  return String(this.__wrapped__);
+}
+
+module.exports = wrapperToString;
+
+},{}],42:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var forEach = require('../collections/forEach'),
+    support = require('../support');
+
+/**
+ * Extracts the wrapped value.
+ *
+ * @name valueOf
+ * @memberOf _
+ * @alias value
+ * @category Chaining
+ * @returns {*} Returns the wrapped value.
+ * @example
+ *
+ * _([1, 2, 3]).valueOf();
+ * // => [1, 2, 3]
+ */
+function wrapperValueOf() {
+  return this.__wrapped__;
+}
+
+module.exports = wrapperValueOf;
+
+},{"../collections/forEach":51,"../support":171}],43:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+module.exports = {
+  'all': require('./collections/every'),
+  'any': require('./collections/some'),
+  'at': require('./collections/at'),
+  'collect': require('./collections/map'),
+  'contains': require('./collections/contains'),
+  'countBy': require('./collections/countBy'),
+  'detect': require('./collections/find'),
+  'each': require('./collections/forEach'),
+  'eachRight': require('./collections/forEachRight'),
+  'every': require('./collections/every'),
+  'filter': require('./collections/filter'),
+  'find': require('./collections/find'),
+  'findLast': require('./collections/findLast'),
+  'findWhere': require('./collections/find'),
+  'foldl': require('./collections/reduce'),
+  'foldr': require('./collections/reduceRight'),
+  'forEach': require('./collections/forEach'),
+  'forEachRight': require('./collections/forEachRight'),
+  'groupBy': require('./collections/groupBy'),
+  'include': require('./collections/contains'),
+  'indexBy': require('./collections/indexBy'),
+  'inject': require('./collections/reduce'),
+  'invoke': require('./collections/invoke'),
+  'map': require('./collections/map'),
+  'max': require('./collections/max'),
+  'min': require('./collections/min'),
+  'pluck': require('./collections/pluck'),
+  'reduce': require('./collections/reduce'),
+  'reduceRight': require('./collections/reduceRight'),
+  'reject': require('./collections/reject'),
+  'sample': require('./collections/sample'),
+  'select': require('./collections/filter'),
+  'shuffle': require('./collections/shuffle'),
+  'size': require('./collections/size'),
+  'some': require('./collections/some'),
+  'sortBy': require('./collections/sortBy'),
+  'toArray': require('./collections/toArray'),
+  'where': require('./collections/where')
+};
+
+},{"./collections/at":44,"./collections/contains":45,"./collections/countBy":46,"./collections/every":47,"./collections/filter":48,"./collections/find":49,"./collections/findLast":50,"./collections/forEach":51,"./collections/forEachRight":52,"./collections/groupBy":53,"./collections/indexBy":54,"./collections/invoke":55,"./collections/map":56,"./collections/max":57,"./collections/min":58,"./collections/pluck":59,"./collections/reduce":60,"./collections/reduceRight":61,"./collections/reject":62,"./collections/sample":63,"./collections/shuffle":64,"./collections/size":65,"./collections/some":66,"./collections/sortBy":67,"./collections/toArray":68,"./collections/where":69}],44:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseFlatten = require('../internals/baseFlatten'),
+    isString = require('../objects/isString');
+
+/**
+ * Creates an array of elements from the specified indexes, or keys, of the
+ * `collection`. Indexes may be specified as individual arguments or as arrays
+ * of indexes.
+ *
+ * @static
+ * @memberOf _
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {...(number|number[]|string|string[])} [index] The indexes of `collection`
+ *   to retrieve, specified as individual indexes or arrays of indexes.
+ * @returns {Array} Returns a new array of elements corresponding to the
+ *  provided indexes.
+ * @example
+ *
+ * _.at(['a', 'b', 'c', 'd', 'e'], [0, 2, 4]);
+ * // => ['a', 'c', 'e']
+ *
+ * _.at(['fred', 'barney', 'pebbles'], 0, 2);
+ * // => ['fred', 'pebbles']
+ */
+function at(collection) {
+  var args = arguments,
+      index = -1,
+      props = baseFlatten(args, true, false, 1),
+      length = (args[2] && args[2][args[1]] === collection) ? 1 : props.length,
+      result = Array(length);
+
+  while(++index < length) {
+    result[index] = collection[props[index]];
+  }
+  return result;
+}
+
+module.exports = at;
+
+},{"../internals/baseFlatten":95,"../objects/isString":161}],45:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseIndexOf = require('../internals/baseIndexOf'),
+    forOwn = require('../objects/forOwn'),
+    isArray = require('../objects/isArray'),
+    isString = require('../objects/isString');
+
+/* Native method shortcuts for methods with the same name as other `lodash` methods */
+var nativeMax = Math.max;
+
+/**
+ * Checks if a given value is present in a collection using strict equality
+ * for comparisons, i.e. `===`. If `fromIndex` is negative, it is used as the
+ * offset from the end of the collection.
+ *
+ * @static
+ * @memberOf _
+ * @alias include
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {*} target The value to check for.
+ * @param {number} [fromIndex=0] The index to search from.
+ * @returns {boolean} Returns `true` if the `target` element is found, else `false`.
+ * @example
+ *
+ * _.contains([1, 2, 3], 1);
+ * // => true
+ *
+ * _.contains([1, 2, 3], 1, 2);
+ * // => false
+ *
+ * _.contains({ 'name': 'fred', 'age': 40 }, 'fred');
+ * // => true
+ *
+ * _.contains('pebbles', 'eb');
+ * // => true
+ */
+function contains(collection, target, fromIndex) {
+  var index = -1,
+      indexOf = baseIndexOf,
+      length = collection ? collection.length : 0,
+      result = false;
+
+  fromIndex = (fromIndex < 0 ? nativeMax(0, length + fromIndex) : fromIndex) || 0;
+  if (isArray(collection)) {
+    result = indexOf(collection, target, fromIndex) > -1;
+  } else if (typeof length == 'number') {
+    result = (isString(collection) ? collection.indexOf(target, fromIndex) : indexOf(collection, target, fromIndex)) > -1;
+  } else {
+    forOwn(collection, function(value) {
+      if (++index >= fromIndex) {
+        return !(result = value === target);
       }
-      // inspect [[Class]]
-      var isObj = isObject(value);
-      if (isObj) {
-        var className = toString.call(value);
-        if (!cloneableClasses[className] || (!support.nodeClass && isNode(value))) {
-          return value;
-        }
-        var ctor = ctorByClass[className];
-        switch (className) {
-          case boolClass:
-          case dateClass:
-            return new ctor(+value);
+    });
+  }
+  return result;
+}
 
-          case numberClass:
-          case stringClass:
-            return new ctor(value);
+module.exports = contains;
 
-          case regexpClass:
-            result = ctor(value.source, reFlags.exec(value));
-            result.lastIndex = value.lastIndex;
-            return result;
-        }
-      } else {
+},{"../internals/baseIndexOf":96,"../objects/forOwn":141,"../objects/isArray":147,"../objects/isString":161}],46:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createAggregator = require('../internals/createAggregator');
+
+/** Used for native method references */
+var objectProto = Object.prototype;
+
+/** Native method shortcuts */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * Creates an object composed of keys generated from the results of running
+ * each element of `collection` through the callback. The corresponding value
+ * of each key is the number of times the key was returned by the callback.
+ * The callback is bound to `thisArg` and invoked with three arguments;
+ * (value, index|key, collection).
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Function|Object|string} [callback=identity] The function called
+ *  per iteration. If a property name or object is provided it will be used
+ *  to create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Object} Returns the composed aggregate object.
+ * @example
+ *
+ * _.countBy([4.3, 6.1, 6.4], function(num) { return Math.floor(num); });
+ * // => { '4': 1, '6': 2 }
+ *
+ * _.countBy([4.3, 6.1, 6.4], function(num) { return this.floor(num); }, Math);
+ * // => { '4': 1, '6': 2 }
+ *
+ * _.countBy(['one', 'two', 'three'], 'length');
+ * // => { '3': 2, '5': 1 }
+ */
+var countBy = createAggregator(function(result, value, key) {
+  (hasOwnProperty.call(result, key) ? result[key]++ : result[key] = 1);
+});
+
+module.exports = countBy;
+
+},{"../internals/createAggregator":105}],47:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createCallback = require('../functions/createCallback'),
+    forOwn = require('../objects/forOwn');
+
+/**
+ * Checks if the given callback returns truey value for **all** elements of
+ * a collection. The callback is bound to `thisArg` and invoked with three
+ * arguments; (value, index|key, collection).
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @alias all
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Function|Object|string} [callback=identity] The function called
+ *  per iteration. If a property name or object is provided it will be used
+ *  to create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {boolean} Returns `true` if all elements passed the callback check,
+ *  else `false`.
+ * @example
+ *
+ * _.every([true, 1, null, 'yes']);
+ * // => false
+ *
+ * var characters = [
+ *   { 'name': 'barney', 'age': 36 },
+ *   { 'name': 'fred',   'age': 40 }
+ * ];
+ *
+ * // using "_.pluck" callback shorthand
+ * _.every(characters, 'age');
+ * // => true
+ *
+ * // using "_.where" callback shorthand
+ * _.every(characters, { 'age': 36 });
+ * // => false
+ */
+function every(collection, callback, thisArg) {
+  var result = true;
+  callback = createCallback(callback, thisArg, 3);
+
+  var index = -1,
+      length = collection ? collection.length : 0;
+
+  if (typeof length == 'number') {
+    while (++index < length) {
+      if (!(result = !!callback(collection[index], index, collection))) {
+        break;
+      }
+    }
+  } else {
+    forOwn(collection, function(value, index, collection) {
+      return (result = !!callback(value, index, collection));
+    });
+  }
+  return result;
+}
+
+module.exports = every;
+
+},{"../functions/createCallback":76,"../objects/forOwn":141}],48:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createCallback = require('../functions/createCallback'),
+    forOwn = require('../objects/forOwn');
+
+/**
+ * Iterates over elements of a collection, returning an array of all elements
+ * the callback returns truey for. The callback is bound to `thisArg` and
+ * invoked with three arguments; (value, index|key, collection).
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @alias select
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Function|Object|string} [callback=identity] The function called
+ *  per iteration. If a property name or object is provided it will be used
+ *  to create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Array} Returns a new array of elements that passed the callback check.
+ * @example
+ *
+ * var evens = _.filter([1, 2, 3, 4, 5, 6], function(num) { return num % 2 == 0; });
+ * // => [2, 4, 6]
+ *
+ * var characters = [
+ *   { 'name': 'barney', 'age': 36, 'blocked': false },
+ *   { 'name': 'fred',   'age': 40, 'blocked': true }
+ * ];
+ *
+ * // using "_.pluck" callback shorthand
+ * _.filter(characters, 'blocked');
+ * // => [{ 'name': 'fred', 'age': 40, 'blocked': true }]
+ *
+ * // using "_.where" callback shorthand
+ * _.filter(characters, { 'age': 36 });
+ * // => [{ 'name': 'barney', 'age': 36, 'blocked': false }]
+ */
+function filter(collection, callback, thisArg) {
+  var result = [];
+  callback = createCallback(callback, thisArg, 3);
+
+  var index = -1,
+      length = collection ? collection.length : 0;
+
+  if (typeof length == 'number') {
+    while (++index < length) {
+      var value = collection[index];
+      if (callback(value, index, collection)) {
+        result.push(value);
+      }
+    }
+  } else {
+    forOwn(collection, function(value, index, collection) {
+      if (callback(value, index, collection)) {
+        result.push(value);
+      }
+    });
+  }
+  return result;
+}
+
+module.exports = filter;
+
+},{"../functions/createCallback":76,"../objects/forOwn":141}],49:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createCallback = require('../functions/createCallback'),
+    forOwn = require('../objects/forOwn');
+
+/**
+ * Iterates over elements of a collection, returning the first element that
+ * the callback returns truey for. The callback is bound to `thisArg` and
+ * invoked with three arguments; (value, index|key, collection).
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @alias detect, findWhere
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Function|Object|string} [callback=identity] The function called
+ *  per iteration. If a property name or object is provided it will be used
+ *  to create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {*} Returns the found element, else `undefined`.
+ * @example
+ *
+ * var characters = [
+ *   { 'name': 'barney',  'age': 36, 'blocked': false },
+ *   { 'name': 'fred',    'age': 40, 'blocked': true },
+ *   { 'name': 'pebbles', 'age': 1,  'blocked': false }
+ * ];
+ *
+ * _.find(characters, function(chr) {
+ *   return chr.age < 40;
+ * });
+ * // => { 'name': 'barney', 'age': 36, 'blocked': false }
+ *
+ * // using "_.where" callback shorthand
+ * _.find(characters, { 'age': 1 });
+ * // =>  { 'name': 'pebbles', 'age': 1, 'blocked': false }
+ *
+ * // using "_.pluck" callback shorthand
+ * _.find(characters, 'blocked');
+ * // => { 'name': 'fred', 'age': 40, 'blocked': true }
+ */
+function find(collection, callback, thisArg) {
+  callback = createCallback(callback, thisArg, 3);
+
+  var index = -1,
+      length = collection ? collection.length : 0;
+
+  if (typeof length == 'number') {
+    while (++index < length) {
+      var value = collection[index];
+      if (callback(value, index, collection)) {
         return value;
       }
-      var isArr = isArray(value);
-      if (isDeep) {
-        // check for circular references and return corresponding clone
-        var initedStack = !stackA;
-        stackA || (stackA = getArray());
-        stackB || (stackB = getArray());
-
-        var length = stackA.length;
-        while (length--) {
-          if (stackA[length] == value) {
-            return stackB[length];
-          }
-        }
-        result = isArr ? ctor(value.length) : {};
-      }
-      else {
-        result = isArr ? slice(value) : assign({}, value);
-      }
-      // add array properties assigned by `RegExp#exec`
-      if (isArr) {
-        if (hasOwnProperty.call(value, 'index')) {
-          result.index = value.index;
-        }
-        if (hasOwnProperty.call(value, 'input')) {
-          result.input = value.input;
-        }
-      }
-      // exit for shallow clone
-      if (!isDeep) {
-        return result;
-      }
-      // add the source value to the stack of traversed objects
-      // and associate it with its clone
-      stackA.push(value);
-      stackB.push(result);
-
-      // recursively populate clone (susceptible to call stack limits)
-      (isArr ? baseEach : forOwn)(value, function(objValue, key) {
-        result[key] = baseClone(objValue, isDeep, callback, stackA, stackB);
-      });
-
-      if (initedStack) {
-        releaseArray(stackA);
-        releaseArray(stackB);
-      }
-      return result;
     }
-
-    /**
-     * The base implementation of `_.create` without support for assigning
-     * properties to the created object.
-     *
-     * @private
-     * @param {Object} prototype The object to inherit from.
-     * @returns {Object} Returns the new object.
-     */
-    function baseCreate(prototype, properties) {
-      return isObject(prototype) ? nativeCreate(prototype) : {};
-    }
-    // fallback for browsers without `Object.create`
-    if (!nativeCreate) {
-      baseCreate = (function() {
-        function Object() {}
-        return function(prototype) {
-          if (isObject(prototype)) {
-            Object.prototype = prototype;
-            var result = new Object;
-            Object.prototype = null;
-          }
-          return result || context.Object();
-        };
-      }());
-    }
-
-    /**
-     * The base implementation of `_.createCallback` without support for creating
-     * "_.pluck" or "_.where" style callbacks.
-     *
-     * @private
-     * @param {*} [func=identity] The value to convert to a callback.
-     * @param {*} [thisArg] The `this` binding of the created callback.
-     * @param {number} [argCount] The number of arguments the callback accepts.
-     * @returns {Function} Returns a callback function.
-     */
-    function baseCreateCallback(func, thisArg, argCount) {
-      if (typeof func != 'function') {
-        return identity;
-      }
-      // exit early for no `thisArg` or already bound by `Function#bind`
-      if (typeof thisArg == 'undefined' || !('prototype' in func)) {
-        return func;
-      }
-      var bindData = func.__bindData__;
-      if (typeof bindData == 'undefined') {
-        if (support.funcNames) {
-          bindData = !func.name;
-        }
-        bindData = bindData || !support.funcDecomp;
-        if (!bindData) {
-          var source = fnToString.call(func);
-          if (!support.funcNames) {
-            bindData = !reFuncName.test(source);
-          }
-          if (!bindData) {
-            // checks if `func` references the `this` keyword and stores the result
-            bindData = reThis.test(source);
-            setBindData(func, bindData);
-          }
-        }
-      }
-      // exit early if there are no `this` references or `func` is bound
-      if (bindData === false || (bindData !== true && bindData[1] & 1)) {
-        return func;
-      }
-      switch (argCount) {
-        case 1: return function(value) {
-          return func.call(thisArg, value);
-        };
-        case 2: return function(a, b) {
-          return func.call(thisArg, a, b);
-        };
-        case 3: return function(value, index, collection) {
-          return func.call(thisArg, value, index, collection);
-        };
-        case 4: return function(accumulator, value, index, collection) {
-          return func.call(thisArg, accumulator, value, index, collection);
-        };
-      }
-      return bind(func, thisArg);
-    }
-
-    /**
-     * The base implementation of `createWrapper` that creates the wrapper and
-     * sets its meta data.
-     *
-     * @private
-     * @param {Array} bindData The bind data array.
-     * @returns {Function} Returns the new function.
-     */
-    function baseCreateWrapper(bindData) {
-      var func = bindData[0],
-          bitmask = bindData[1],
-          partialArgs = bindData[2],
-          partialRightArgs = bindData[3],
-          thisArg = bindData[4],
-          arity = bindData[5];
-
-      var isBind = bitmask & 1,
-          isBindKey = bitmask & 2,
-          isCurry = bitmask & 4,
-          isCurryBound = bitmask & 8,
-          key = func;
-
-      function bound() {
-        var thisBinding = isBind ? thisArg : this;
-        if (partialArgs) {
-          var args = partialArgs.slice();
-          push.apply(args, arguments);
-        }
-        if (partialRightArgs || isCurry) {
-          args || (args = slice(arguments));
-          if (partialRightArgs) {
-            push.apply(args, partialRightArgs);
-          }
-          if (isCurry && args.length < arity) {
-            bitmask |= 16 & ~32;
-            return baseCreateWrapper([func, (isCurryBound ? bitmask : bitmask & ~3), args, null, thisArg, arity]);
-          }
-        }
-        args || (args = arguments);
-        if (isBindKey) {
-          func = thisBinding[key];
-        }
-        if (this instanceof bound) {
-          thisBinding = baseCreate(func.prototype);
-          var result = func.apply(thisBinding, args);
-          return isObject(result) ? result : thisBinding;
-        }
-        return func.apply(thisBinding, args);
-      }
-      setBindData(bound, bindData);
-      return bound;
-    }
-
-    /**
-     * The base implementation of `_.difference` that accepts a single array
-     * of values to exclude.
-     *
-     * @private
-     * @param {Array} array The array to process.
-     * @param {Array} [values] The array of values to exclude.
-     * @returns {Array} Returns a new array of filtered values.
-     */
-    function baseDifference(array, values) {
-      var index = -1,
-          indexOf = getIndexOf(),
-          length = array ? array.length : 0,
-          isLarge = length >= largeArraySize && indexOf === baseIndexOf,
-          result = [];
-
-      if (isLarge) {
-        var cache = createCache(values);
-        if (cache) {
-          indexOf = cacheIndexOf;
-          values = cache;
-        } else {
-          isLarge = false;
-        }
-      }
-      while (++index < length) {
-        var value = array[index];
-        if (indexOf(values, value) < 0) {
-          result.push(value);
-        }
-      }
-      if (isLarge) {
-        releaseObject(values);
-      }
-      return result;
-    }
-
-    /**
-     * The base implementation of `_.flatten` without support for callback
-     * shorthands or `thisArg` binding.
-     *
-     * @private
-     * @param {Array} array The array to flatten.
-     * @param {boolean} [isShallow=false] A flag to restrict flattening to a single level.
-     * @param {boolean} [isStrict=false] A flag to restrict flattening to arrays and `arguments` objects.
-     * @param {number} [fromIndex=0] The index to start from.
-     * @returns {Array} Returns a new flattened array.
-     */
-    function baseFlatten(array, isShallow, isStrict, fromIndex) {
-      var index = (fromIndex || 0) - 1,
-          length = array ? array.length : 0,
-          result = [];
-
-      while (++index < length) {
-        var value = array[index];
-
-        if (value && typeof value == 'object' && typeof value.length == 'number'
-            && (isArray(value) || isArguments(value))) {
-          // recursively flatten arrays (susceptible to call stack limits)
-          if (!isShallow) {
-            value = baseFlatten(value, isShallow, isStrict);
-          }
-          var valIndex = -1,
-              valLength = value.length,
-              resIndex = result.length;
-
-          result.length += valLength;
-          while (++valIndex < valLength) {
-            result[resIndex++] = value[valIndex];
-          }
-        } else if (!isStrict) {
-          result.push(value);
-        }
-      }
-      return result;
-    }
-
-    /**
-     * The base implementation of `_.isEqual`, without support for `thisArg` binding,
-     * that allows partial "_.where" style comparisons.
-     *
-     * @private
-     * @param {*} a The value to compare.
-     * @param {*} b The other value to compare.
-     * @param {Function} [callback] The function to customize comparing values.
-     * @param {Function} [isWhere=false] A flag to indicate performing partial comparisons.
-     * @param {Array} [stackA=[]] Tracks traversed `a` objects.
-     * @param {Array} [stackB=[]] Tracks traversed `b` objects.
-     * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
-     */
-    function baseIsEqual(a, b, callback, isWhere, stackA, stackB) {
-      // used to indicate that when comparing objects, `a` has at least the properties of `b`
-      if (callback) {
-        var result = callback(a, b);
-        if (typeof result != 'undefined') {
-          return !!result;
-        }
-      }
-      // exit early for identical values
-      if (a === b) {
-        // treat `+0` vs. `-0` as not equal
-        return a !== 0 || (1 / a == 1 / b);
-      }
-      var type = typeof a,
-          otherType = typeof b;
-
-      // exit early for unlike primitive values
-      if (a === a &&
-          !(a && objectTypes[type]) &&
-          !(b && objectTypes[otherType])) {
+  } else {
+    var result;
+    forOwn(collection, function(value, index, collection) {
+      if (callback(value, index, collection)) {
+        result = value;
         return false;
       }
-      // exit early for `null` and `undefined` avoiding ES3's Function#call behavior
-      // http://es5.github.io/#x15.3.4.4
-      if (a == null || b == null) {
-        return a === b;
-      }
-      // compare [[Class]] names
-      var className = toString.call(a),
-          otherClass = toString.call(b);
+    });
+    return result;
+  }
+}
 
-      if (className == argsClass) {
-        className = objectClass;
-      }
-      if (otherClass == argsClass) {
-        otherClass = objectClass;
-      }
-      if (className != otherClass) {
-        return false;
-      }
-      switch (className) {
-        case boolClass:
-        case dateClass:
-          // coerce dates and booleans to numbers, dates to milliseconds and booleans
-          // to `1` or `0` treating invalid dates coerced to `NaN` as not equal
-          return +a == +b;
+module.exports = find;
 
-        case numberClass:
-          // treat `NaN` vs. `NaN` as equal
-          return (a != +a)
-            ? b != +b
-            // but treat `+0` vs. `-0` as not equal
-            : (a == 0 ? (1 / a == 1 / b) : a == +b);
+},{"../functions/createCallback":76,"../objects/forOwn":141}],50:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createCallback = require('../functions/createCallback'),
+    forEachRight = require('./forEachRight');
 
-        case regexpClass:
-        case stringClass:
-          // coerce regexes to strings (http://es5.github.io/#x15.10.6.4)
-          // treat string primitives and their corresponding object instances as equal
-          return a == String(b);
+/**
+ * This method is like `_.find` except that it iterates over elements
+ * of a `collection` from right to left.
+ *
+ * @static
+ * @memberOf _
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Function|Object|string} [callback=identity] The function called
+ *  per iteration. If a property name or object is provided it will be used
+ *  to create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {*} Returns the found element, else `undefined`.
+ * @example
+ *
+ * _.findLast([1, 2, 3, 4], function(num) {
+ *   return num % 2 == 1;
+ * });
+ * // => 3
+ */
+function findLast(collection, callback, thisArg) {
+  var result;
+  callback = createCallback(callback, thisArg, 3);
+  forEachRight(collection, function(value, index, collection) {
+    if (callback(value, index, collection)) {
+      result = value;
+      return false;
+    }
+  });
+  return result;
+}
+
+module.exports = findLast;
+
+},{"../functions/createCallback":76,"./forEachRight":52}],51:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseCreateCallback = require('../internals/baseCreateCallback'),
+    forOwn = require('../objects/forOwn');
+
+/**
+ * Iterates over elements of a collection, executing the callback for each
+ * element. The callback is bound to `thisArg` and invoked with three arguments;
+ * (value, index|key, collection). Callbacks may exit iteration early by
+ * explicitly returning `false`.
+ *
+ * Note: As with other "Collections" methods, objects with a `length` property
+ * are iterated like arrays. To avoid this behavior `_.forIn` or `_.forOwn`
+ * may be used for object iteration.
+ *
+ * @static
+ * @memberOf _
+ * @alias each
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Function} [callback=identity] The function called per iteration.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Array|Object|string} Returns `collection`.
+ * @example
+ *
+ * _([1, 2, 3]).forEach(function(num) { console.log(num); }).join(',');
+ * // => logs each number and returns '1,2,3'
+ *
+ * _.forEach({ 'one': 1, 'two': 2, 'three': 3 }, function(num) { console.log(num); });
+ * // => logs each number and returns the object (property order is not guaranteed across environments)
+ */
+function forEach(collection, callback, thisArg) {
+  var index = -1,
+      length = collection ? collection.length : 0;
+
+  callback = callback && typeof thisArg == 'undefined' ? callback : baseCreateCallback(callback, thisArg, 3);
+  if (typeof length == 'number') {
+    while (++index < length) {
+      if (callback(collection[index], index, collection) === false) {
+        break;
       }
-      var isArr = className == arrayClass;
-      if (!isArr) {
-        // unwrap any `lodash` wrapped values
-        var aWrapped = hasOwnProperty.call(a, '__wrapped__'),
-            bWrapped = hasOwnProperty.call(b, '__wrapped__');
+    }
+  } else {
+    forOwn(collection, callback);
+  }
+  return collection;
+}
 
-        if (aWrapped || bWrapped) {
-          return baseIsEqual(aWrapped ? a.__wrapped__ : a, bWrapped ? b.__wrapped__ : b, callback, isWhere, stackA, stackB);
+module.exports = forEach;
+
+},{"../internals/baseCreateCallback":92,"../objects/forOwn":141}],52:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseCreateCallback = require('../internals/baseCreateCallback'),
+    forOwn = require('../objects/forOwn'),
+    isArray = require('../objects/isArray'),
+    isString = require('../objects/isString'),
+    keys = require('../objects/keys');
+
+/**
+ * This method is like `_.forEach` except that it iterates over elements
+ * of a `collection` from right to left.
+ *
+ * @static
+ * @memberOf _
+ * @alias eachRight
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Function} [callback=identity] The function called per iteration.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Array|Object|string} Returns `collection`.
+ * @example
+ *
+ * _([1, 2, 3]).forEachRight(function(num) { console.log(num); }).join(',');
+ * // => logs each number from right to left and returns '3,2,1'
+ */
+function forEachRight(collection, callback, thisArg) {
+  var length = collection ? collection.length : 0;
+  callback = callback && typeof thisArg == 'undefined' ? callback : baseCreateCallback(callback, thisArg, 3);
+  if (typeof length == 'number') {
+    while (length--) {
+      if (callback(collection[length], length, collection) === false) {
+        break;
+      }
+    }
+  } else {
+    var props = keys(collection);
+    length = props.length;
+    forOwn(collection, function(value, key, collection) {
+      key = props ? props[--length] : --length;
+      return callback(collection[key], key, collection);
+    });
+  }
+  return collection;
+}
+
+module.exports = forEachRight;
+
+},{"../internals/baseCreateCallback":92,"../objects/forOwn":141,"../objects/isArray":147,"../objects/isString":161,"../objects/keys":163}],53:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createAggregator = require('../internals/createAggregator');
+
+/** Used for native method references */
+var objectProto = Object.prototype;
+
+/** Native method shortcuts */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * Creates an object composed of keys generated from the results of running
+ * each element of a collection through the callback. The corresponding value
+ * of each key is an array of the elements responsible for generating the key.
+ * The callback is bound to `thisArg` and invoked with three arguments;
+ * (value, index|key, collection).
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`
+ *
+ * @static
+ * @memberOf _
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Function|Object|string} [callback=identity] The function called
+ *  per iteration. If a property name or object is provided it will be used
+ *  to create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Object} Returns the composed aggregate object.
+ * @example
+ *
+ * _.groupBy([4.2, 6.1, 6.4], function(num) { return Math.floor(num); });
+ * // => { '4': [4.2], '6': [6.1, 6.4] }
+ *
+ * _.groupBy([4.2, 6.1, 6.4], function(num) { return this.floor(num); }, Math);
+ * // => { '4': [4.2], '6': [6.1, 6.4] }
+ *
+ * // using "_.pluck" callback shorthand
+ * _.groupBy(['one', 'two', 'three'], 'length');
+ * // => { '3': ['one', 'two'], '5': ['three'] }
+ */
+var groupBy = createAggregator(function(result, value, key) {
+  (hasOwnProperty.call(result, key) ? result[key] : result[key] = []).push(value);
+});
+
+module.exports = groupBy;
+
+},{"../internals/createAggregator":105}],54:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createAggregator = require('../internals/createAggregator');
+
+/**
+ * Creates an object composed of keys generated from the results of running
+ * each element of the collection through the given callback. The corresponding
+ * value of each key is the last element responsible for generating the key.
+ * The callback is bound to `thisArg` and invoked with three arguments;
+ * (value, index|key, collection).
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Function|Object|string} [callback=identity] The function called
+ *  per iteration. If a property name or object is provided it will be used
+ *  to create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Object} Returns the composed aggregate object.
+ * @example
+ *
+ * var keys = [
+ *   { 'dir': 'left', 'code': 97 },
+ *   { 'dir': 'right', 'code': 100 }
+ * ];
+ *
+ * _.indexBy(keys, 'dir');
+ * // => { 'left': { 'dir': 'left', 'code': 97 }, 'right': { 'dir': 'right', 'code': 100 } }
+ *
+ * _.indexBy(keys, function(key) { return String.fromCharCode(key.code); });
+ * // => { 'a': { 'dir': 'left', 'code': 97 }, 'd': { 'dir': 'right', 'code': 100 } }
+ *
+ * _.indexBy(characters, function(key) { this.fromCharCode(key.code); }, String);
+ * // => { 'a': { 'dir': 'left', 'code': 97 }, 'd': { 'dir': 'right', 'code': 100 } }
+ */
+var indexBy = createAggregator(function(result, value, key) {
+  result[key] = value;
+});
+
+module.exports = indexBy;
+
+},{"../internals/createAggregator":105}],55:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var forEach = require('./forEach'),
+    slice = require('../internals/slice');
+
+/**
+ * Invokes the method named by `methodName` on each element in the `collection`
+ * returning an array of the results of each invoked method. Additional arguments
+ * will be provided to each invoked method. If `methodName` is a function it
+ * will be invoked for, and `this` bound to, each element in the `collection`.
+ *
+ * @static
+ * @memberOf _
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Function|string} methodName The name of the method to invoke or
+ *  the function invoked per iteration.
+ * @param {...*} [arg] Arguments to invoke the method with.
+ * @returns {Array} Returns a new array of the results of each invoked method.
+ * @example
+ *
+ * _.invoke([[5, 1, 7], [3, 2, 1]], 'sort');
+ * // => [[1, 5, 7], [1, 2, 3]]
+ *
+ * _.invoke([123, 456], String.prototype.split, '');
+ * // => [['1', '2', '3'], ['4', '5', '6']]
+ */
+function invoke(collection, methodName) {
+  var args = slice(arguments, 2),
+      index = -1,
+      isFunc = typeof methodName == 'function',
+      length = collection ? collection.length : 0,
+      result = Array(typeof length == 'number' ? length : 0);
+
+  forEach(collection, function(value) {
+    result[++index] = (isFunc ? methodName : value[methodName]).apply(value, args);
+  });
+  return result;
+}
+
+module.exports = invoke;
+
+},{"../internals/slice":129,"./forEach":51}],56:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createCallback = require('../functions/createCallback'),
+    forOwn = require('../objects/forOwn');
+
+/**
+ * Creates an array of values by running each element in the collection
+ * through the callback. The callback is bound to `thisArg` and invoked with
+ * three arguments; (value, index|key, collection).
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @alias collect
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Function|Object|string} [callback=identity] The function called
+ *  per iteration. If a property name or object is provided it will be used
+ *  to create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Array} Returns a new array of the results of each `callback` execution.
+ * @example
+ *
+ * _.map([1, 2, 3], function(num) { return num * 3; });
+ * // => [3, 6, 9]
+ *
+ * _.map({ 'one': 1, 'two': 2, 'three': 3 }, function(num) { return num * 3; });
+ * // => [3, 6, 9] (property order is not guaranteed across environments)
+ *
+ * var characters = [
+ *   { 'name': 'barney', 'age': 36 },
+ *   { 'name': 'fred',   'age': 40 }
+ * ];
+ *
+ * // using "_.pluck" callback shorthand
+ * _.map(characters, 'name');
+ * // => ['barney', 'fred']
+ */
+function map(collection, callback, thisArg) {
+  var index = -1,
+      length = collection ? collection.length : 0;
+
+  callback = createCallback(callback, thisArg, 3);
+  if (typeof length == 'number') {
+    var result = Array(length);
+    while (++index < length) {
+      result[index] = callback(collection[index], index, collection);
+    }
+  } else {
+    result = [];
+    forOwn(collection, function(value, key, collection) {
+      result[++index] = callback(value, key, collection);
+    });
+  }
+  return result;
+}
+
+module.exports = map;
+
+},{"../functions/createCallback":76,"../objects/forOwn":141}],57:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var charAtCallback = require('../internals/charAtCallback'),
+    createCallback = require('../functions/createCallback'),
+    forEach = require('./forEach'),
+    forOwn = require('../objects/forOwn'),
+    isArray = require('../objects/isArray'),
+    isString = require('../objects/isString');
+
+/**
+ * Retrieves the maximum value of a collection. If the collection is empty or
+ * falsey `-Infinity` is returned. If a callback is provided it will be executed
+ * for each value in the collection to generate the criterion by which the value
+ * is ranked. The callback is bound to `thisArg` and invoked with three
+ * arguments; (value, index, collection).
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Function|Object|string} [callback=identity] The function called
+ *  per iteration. If a property name or object is provided it will be used
+ *  to create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {*} Returns the maximum value.
+ * @example
+ *
+ * _.max([4, 2, 8, 6]);
+ * // => 8
+ *
+ * var characters = [
+ *   { 'name': 'barney', 'age': 36 },
+ *   { 'name': 'fred',   'age': 40 }
+ * ];
+ *
+ * _.max(characters, function(chr) { return chr.age; });
+ * // => { 'name': 'fred', 'age': 40 };
+ *
+ * // using "_.pluck" callback shorthand
+ * _.max(characters, 'age');
+ * // => { 'name': 'fred', 'age': 40 };
+ */
+function max(collection, callback, thisArg) {
+  var computed = -Infinity,
+      result = computed;
+
+  // allows working with functions like `_.map` without using
+  // their `index` argument as a callback
+  if (typeof callback != 'function' && thisArg && thisArg[callback] === collection) {
+    callback = null;
+  }
+  if (callback == null && isArray(collection)) {
+    var index = -1,
+        length = collection.length;
+
+    while (++index < length) {
+      var value = collection[index];
+      if (value > result) {
+        result = value;
+      }
+    }
+  } else {
+    callback = (callback == null && isString(collection))
+      ? charAtCallback
+      : createCallback(callback, thisArg, 3);
+
+    forEach(collection, function(value, index, collection) {
+      var current = callback(value, index, collection);
+      if (current > computed) {
+        computed = current;
+        result = value;
+      }
+    });
+  }
+  return result;
+}
+
+module.exports = max;
+
+},{"../functions/createCallback":76,"../internals/charAtCallback":103,"../objects/forOwn":141,"../objects/isArray":147,"../objects/isString":161,"./forEach":51}],58:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var charAtCallback = require('../internals/charAtCallback'),
+    createCallback = require('../functions/createCallback'),
+    forEach = require('./forEach'),
+    forOwn = require('../objects/forOwn'),
+    isArray = require('../objects/isArray'),
+    isString = require('../objects/isString');
+
+/**
+ * Retrieves the minimum value of a collection. If the collection is empty or
+ * falsey `Infinity` is returned. If a callback is provided it will be executed
+ * for each value in the collection to generate the criterion by which the value
+ * is ranked. The callback is bound to `thisArg` and invoked with three
+ * arguments; (value, index, collection).
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Function|Object|string} [callback=identity] The function called
+ *  per iteration. If a property name or object is provided it will be used
+ *  to create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {*} Returns the minimum value.
+ * @example
+ *
+ * _.min([4, 2, 8, 6]);
+ * // => 2
+ *
+ * var characters = [
+ *   { 'name': 'barney', 'age': 36 },
+ *   { 'name': 'fred',   'age': 40 }
+ * ];
+ *
+ * _.min(characters, function(chr) { return chr.age; });
+ * // => { 'name': 'barney', 'age': 36 };
+ *
+ * // using "_.pluck" callback shorthand
+ * _.min(characters, 'age');
+ * // => { 'name': 'barney', 'age': 36 };
+ */
+function min(collection, callback, thisArg) {
+  var computed = Infinity,
+      result = computed;
+
+  // allows working with functions like `_.map` without using
+  // their `index` argument as a callback
+  if (typeof callback != 'function' && thisArg && thisArg[callback] === collection) {
+    callback = null;
+  }
+  if (callback == null && isArray(collection)) {
+    var index = -1,
+        length = collection.length;
+
+    while (++index < length) {
+      var value = collection[index];
+      if (value < result) {
+        result = value;
+      }
+    }
+  } else {
+    callback = (callback == null && isString(collection))
+      ? charAtCallback
+      : createCallback(callback, thisArg, 3);
+
+    forEach(collection, function(value, index, collection) {
+      var current = callback(value, index, collection);
+      if (current < computed) {
+        computed = current;
+        result = value;
+      }
+    });
+  }
+  return result;
+}
+
+module.exports = min;
+
+},{"../functions/createCallback":76,"../internals/charAtCallback":103,"../objects/forOwn":141,"../objects/isArray":147,"../objects/isString":161,"./forEach":51}],59:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var map = require('./map');
+
+/**
+ * Retrieves the value of a specified property from all elements in the collection.
+ *
+ * @static
+ * @memberOf _
+ * @type Function
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {string} property The name of the property to pluck.
+ * @returns {Array} Returns a new array of property values.
+ * @example
+ *
+ * var characters = [
+ *   { 'name': 'barney', 'age': 36 },
+ *   { 'name': 'fred',   'age': 40 }
+ * ];
+ *
+ * _.pluck(characters, 'name');
+ * // => ['barney', 'fred']
+ */
+var pluck = map;
+
+module.exports = pluck;
+
+},{"./map":56}],60:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createCallback = require('../functions/createCallback'),
+    forOwn = require('../objects/forOwn');
+
+/**
+ * Reduces a collection to a value which is the accumulated result of running
+ * each element in the collection through the callback, where each successive
+ * callback execution consumes the return value of the previous execution. If
+ * `accumulator` is not provided the first element of the collection will be
+ * used as the initial `accumulator` value. The callback is bound to `thisArg`
+ * and invoked with four arguments; (accumulator, value, index|key, collection).
+ *
+ * @static
+ * @memberOf _
+ * @alias foldl, inject
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Function} [callback=identity] The function called per iteration.
+ * @param {*} [accumulator] Initial value of the accumulator.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {*} Returns the accumulated value.
+ * @example
+ *
+ * var sum = _.reduce([1, 2, 3], function(sum, num) {
+ *   return sum + num;
+ * });
+ * // => 6
+ *
+ * var mapped = _.reduce({ 'a': 1, 'b': 2, 'c': 3 }, function(result, num, key) {
+ *   result[key] = num * 3;
+ *   return result;
+ * }, {});
+ * // => { 'a': 3, 'b': 6, 'c': 9 }
+ */
+function reduce(collection, callback, accumulator, thisArg) {
+  if (!collection) return accumulator;
+  var noaccum = arguments.length < 3;
+  callback = createCallback(callback, thisArg, 4);
+
+  var index = -1,
+      length = collection.length;
+
+  if (typeof length == 'number') {
+    if (noaccum) {
+      accumulator = collection[++index];
+    }
+    while (++index < length) {
+      accumulator = callback(accumulator, collection[index], index, collection);
+    }
+  } else {
+    forOwn(collection, function(value, index, collection) {
+      accumulator = noaccum
+        ? (noaccum = false, value)
+        : callback(accumulator, value, index, collection)
+    });
+  }
+  return accumulator;
+}
+
+module.exports = reduce;
+
+},{"../functions/createCallback":76,"../objects/forOwn":141}],61:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createCallback = require('../functions/createCallback'),
+    forEachRight = require('./forEachRight');
+
+/**
+ * This method is like `_.reduce` except that it iterates over elements
+ * of a `collection` from right to left.
+ *
+ * @static
+ * @memberOf _
+ * @alias foldr
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Function} [callback=identity] The function called per iteration.
+ * @param {*} [accumulator] Initial value of the accumulator.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {*} Returns the accumulated value.
+ * @example
+ *
+ * var list = [[0, 1], [2, 3], [4, 5]];
+ * var flat = _.reduceRight(list, function(a, b) { return a.concat(b); }, []);
+ * // => [4, 5, 2, 3, 0, 1]
+ */
+function reduceRight(collection, callback, accumulator, thisArg) {
+  var noaccum = arguments.length < 3;
+  callback = createCallback(callback, thisArg, 4);
+  forEachRight(collection, function(value, index, collection) {
+    accumulator = noaccum
+      ? (noaccum = false, value)
+      : callback(accumulator, value, index, collection);
+  });
+  return accumulator;
+}
+
+module.exports = reduceRight;
+
+},{"../functions/createCallback":76,"./forEachRight":52}],62:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createCallback = require('../functions/createCallback'),
+    filter = require('./filter');
+
+/**
+ * The opposite of `_.filter` this method returns the elements of a
+ * collection that the callback does **not** return truey for.
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Function|Object|string} [callback=identity] The function called
+ *  per iteration. If a property name or object is provided it will be used
+ *  to create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Array} Returns a new array of elements that failed the callback check.
+ * @example
+ *
+ * var odds = _.reject([1, 2, 3, 4, 5, 6], function(num) { return num % 2 == 0; });
+ * // => [1, 3, 5]
+ *
+ * var characters = [
+ *   { 'name': 'barney', 'age': 36, 'blocked': false },
+ *   { 'name': 'fred',   'age': 40, 'blocked': true }
+ * ];
+ *
+ * // using "_.pluck" callback shorthand
+ * _.reject(characters, 'blocked');
+ * // => [{ 'name': 'barney', 'age': 36, 'blocked': false }]
+ *
+ * // using "_.where" callback shorthand
+ * _.reject(characters, { 'age': 36 });
+ * // => [{ 'name': 'fred', 'age': 40, 'blocked': true }]
+ */
+function reject(collection, callback, thisArg) {
+  callback = createCallback(callback, thisArg, 3);
+  return filter(collection, function(value, index, collection) {
+    return !callback(value, index, collection);
+  });
+}
+
+module.exports = reject;
+
+},{"../functions/createCallback":76,"./filter":48}],63:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseRandom = require('../internals/baseRandom'),
+    isString = require('../objects/isString'),
+    shuffle = require('./shuffle'),
+    values = require('../objects/values');
+
+/* Native method shortcuts for methods with the same name as other `lodash` methods */
+var nativeMax = Math.max,
+    nativeMin = Math.min;
+
+/**
+ * Retrieves a random element or `n` random elements from a collection.
+ *
+ * @static
+ * @memberOf _
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to sample.
+ * @param {number} [n] The number of elements to sample.
+ * @param- {Object} [guard] Allows working with functions like `_.map`
+ *  without using their `index` arguments as `n`.
+ * @returns {Array} Returns the random sample(s) of `collection`.
+ * @example
+ *
+ * _.sample([1, 2, 3, 4]);
+ * // => 2
+ *
+ * _.sample([1, 2, 3, 4], 2);
+ * // => [3, 1]
+ */
+function sample(collection, n, guard) {
+  if (collection && typeof collection.length != 'number') {
+    collection = values(collection);
+  }
+  if (n == null || guard) {
+    return collection ? collection[baseRandom(0, collection.length - 1)] : undefined;
+  }
+  var result = shuffle(collection);
+  result.length = nativeMin(nativeMax(0, n), result.length);
+  return result;
+}
+
+module.exports = sample;
+
+},{"../internals/baseRandom":99,"../objects/isString":161,"../objects/values":170,"./shuffle":64}],64:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseRandom = require('../internals/baseRandom'),
+    forEach = require('./forEach');
+
+/**
+ * Creates an array of shuffled values, using a version of the Fisher-Yates
+ * shuffle. See http://en.wikipedia.org/wiki/Fisher-Yates_shuffle.
+ *
+ * @static
+ * @memberOf _
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to shuffle.
+ * @returns {Array} Returns a new shuffled collection.
+ * @example
+ *
+ * _.shuffle([1, 2, 3, 4, 5, 6]);
+ * // => [4, 1, 6, 3, 5, 2]
+ */
+function shuffle(collection) {
+  var index = -1,
+      length = collection ? collection.length : 0,
+      result = Array(typeof length == 'number' ? length : 0);
+
+  forEach(collection, function(value) {
+    var rand = baseRandom(0, ++index);
+    result[index] = result[rand];
+    result[rand] = value;
+  });
+  return result;
+}
+
+module.exports = shuffle;
+
+},{"../internals/baseRandom":99,"./forEach":51}],65:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var keys = require('../objects/keys');
+
+/**
+ * Gets the size of the `collection` by returning `collection.length` for arrays
+ * and array-like objects or the number of own enumerable properties for objects.
+ *
+ * @static
+ * @memberOf _
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to inspect.
+ * @returns {number} Returns `collection.length` or number of own enumerable properties.
+ * @example
+ *
+ * _.size([1, 2]);
+ * // => 2
+ *
+ * _.size({ 'one': 1, 'two': 2, 'three': 3 });
+ * // => 3
+ *
+ * _.size('pebbles');
+ * // => 7
+ */
+function size(collection) {
+  var length = collection ? collection.length : 0;
+  return typeof length == 'number' ? length : keys(collection).length;
+}
+
+module.exports = size;
+
+},{"../objects/keys":163}],66:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createCallback = require('../functions/createCallback'),
+    forOwn = require('../objects/forOwn'),
+    isArray = require('../objects/isArray');
+
+/**
+ * Checks if the callback returns a truey value for **any** element of a
+ * collection. The function returns as soon as it finds a passing value and
+ * does not iterate over the entire collection. The callback is bound to
+ * `thisArg` and invoked with three arguments; (value, index|key, collection).
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @alias any
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Function|Object|string} [callback=identity] The function called
+ *  per iteration. If a property name or object is provided it will be used
+ *  to create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {boolean} Returns `true` if any element passed the callback check,
+ *  else `false`.
+ * @example
+ *
+ * _.some([null, 0, 'yes', false], Boolean);
+ * // => true
+ *
+ * var characters = [
+ *   { 'name': 'barney', 'age': 36, 'blocked': false },
+ *   { 'name': 'fred',   'age': 40, 'blocked': true }
+ * ];
+ *
+ * // using "_.pluck" callback shorthand
+ * _.some(characters, 'blocked');
+ * // => true
+ *
+ * // using "_.where" callback shorthand
+ * _.some(characters, { 'age': 1 });
+ * // => false
+ */
+function some(collection, callback, thisArg) {
+  var result;
+  callback = createCallback(callback, thisArg, 3);
+
+  var index = -1,
+      length = collection ? collection.length : 0;
+
+  if (typeof length == 'number') {
+    while (++index < length) {
+      if ((result = callback(collection[index], index, collection))) {
+        break;
+      }
+    }
+  } else {
+    forOwn(collection, function(value, index, collection) {
+      return !(result = callback(value, index, collection));
+    });
+  }
+  return !!result;
+}
+
+module.exports = some;
+
+},{"../functions/createCallback":76,"../objects/forOwn":141,"../objects/isArray":147}],67:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var compareAscending = require('../internals/compareAscending'),
+    createCallback = require('../functions/createCallback'),
+    forEach = require('./forEach'),
+    getArray = require('../internals/getArray'),
+    getObject = require('../internals/getObject'),
+    isArray = require('../objects/isArray'),
+    map = require('./map'),
+    releaseArray = require('../internals/releaseArray'),
+    releaseObject = require('../internals/releaseObject');
+
+/**
+ * Creates an array of elements, sorted in ascending order by the results of
+ * running each element in a collection through the callback. This method
+ * performs a stable sort, that is, it will preserve the original sort order
+ * of equal elements. The callback is bound to `thisArg` and invoked with
+ * three arguments; (value, index|key, collection).
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an array of property names is provided for `callback` the collection
+ * will be sorted by each property value.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Array|Function|Object|string} [callback=identity] The function called
+ *  per iteration. If a property name or object is provided it will be used
+ *  to create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Array} Returns a new array of sorted elements.
+ * @example
+ *
+ * _.sortBy([1, 2, 3], function(num) { return Math.sin(num); });
+ * // => [3, 1, 2]
+ *
+ * _.sortBy([1, 2, 3], function(num) { return this.sin(num); }, Math);
+ * // => [3, 1, 2]
+ *
+ * var characters = [
+ *   { 'name': 'barney',  'age': 36 },
+ *   { 'name': 'fred',    'age': 40 },
+ *   { 'name': 'barney',  'age': 26 },
+ *   { 'name': 'fred',    'age': 30 }
+ * ];
+ *
+ * // using "_.pluck" callback shorthand
+ * _.map(_.sortBy(characters, 'age'), _.values);
+ * // => [['barney', 26], ['fred', 30], ['barney', 36], ['fred', 40]]
+ *
+ * // sorting by multiple properties
+ * _.map(_.sortBy(characters, ['name', 'age']), _.values);
+ * // = > [['barney', 26], ['barney', 36], ['fred', 30], ['fred', 40]]
+ */
+function sortBy(collection, callback, thisArg) {
+  var index = -1,
+      isArr = isArray(callback),
+      length = collection ? collection.length : 0,
+      result = Array(typeof length == 'number' ? length : 0);
+
+  if (!isArr) {
+    callback = createCallback(callback, thisArg, 3);
+  }
+  forEach(collection, function(value, key, collection) {
+    var object = result[++index] = getObject();
+    if (isArr) {
+      object.criteria = map(callback, function(key) { return value[key]; });
+    } else {
+      (object.criteria = getArray())[0] = callback(value, key, collection);
+    }
+    object.index = index;
+    object.value = value;
+  });
+
+  length = result.length;
+  result.sort(compareAscending);
+  while (length--) {
+    var object = result[length];
+    result[length] = object.value;
+    if (!isArr) {
+      releaseArray(object.criteria);
+    }
+    releaseObject(object);
+  }
+  return result;
+}
+
+module.exports = sortBy;
+
+},{"../functions/createCallback":76,"../internals/compareAscending":104,"../internals/getArray":110,"../internals/getObject":111,"../internals/releaseArray":124,"../internals/releaseObject":125,"../objects/isArray":147,"./forEach":51,"./map":56}],68:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var isString = require('../objects/isString'),
+    slice = require('../internals/slice'),
+    values = require('../objects/values');
+
+/**
+ * Converts the `collection` to an array.
+ *
+ * @static
+ * @memberOf _
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to convert.
+ * @returns {Array} Returns the new converted array.
+ * @example
+ *
+ * (function() { return _.toArray(arguments).slice(1); })(1, 2, 3, 4);
+ * // => [2, 3, 4]
+ */
+function toArray(collection) {
+  if (collection && typeof collection.length == 'number') {
+    return slice(collection);
+  }
+  return values(collection);
+}
+
+module.exports = toArray;
+
+},{"../internals/slice":129,"../objects/isString":161,"../objects/values":170}],69:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var filter = require('./filter');
+
+/**
+ * Performs a deep comparison of each element in a `collection` to the given
+ * `properties` object, returning an array of all elements that have equivalent
+ * property values.
+ *
+ * @static
+ * @memberOf _
+ * @type Function
+ * @category Collections
+ * @param {Array|Object|string} collection The collection to iterate over.
+ * @param {Object} props The object of property values to filter by.
+ * @returns {Array} Returns a new array of elements that have the given properties.
+ * @example
+ *
+ * var characters = [
+ *   { 'name': 'barney', 'age': 36, 'pets': ['hoppy'] },
+ *   { 'name': 'fred',   'age': 40, 'pets': ['baby puss', 'dino'] }
+ * ];
+ *
+ * _.where(characters, { 'age': 36 });
+ * // => [{ 'name': 'barney', 'age': 36, 'pets': ['hoppy'] }]
+ *
+ * _.where(characters, { 'pets': ['dino'] });
+ * // => [{ 'name': 'fred', 'age': 40, 'pets': ['baby puss', 'dino'] }]
+ */
+var where = filter;
+
+module.exports = where;
+
+},{"./filter":48}],70:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+module.exports = {
+  'after': require('./functions/after'),
+  'bind': require('./functions/bind'),
+  'bindAll': require('./functions/bindAll'),
+  'bindKey': require('./functions/bindKey'),
+  'compose': require('./functions/compose'),
+  'createCallback': require('./functions/createCallback'),
+  'curry': require('./functions/curry'),
+  'debounce': require('./functions/debounce'),
+  'defer': require('./functions/defer'),
+  'delay': require('./functions/delay'),
+  'memoize': require('./functions/memoize'),
+  'once': require('./functions/once'),
+  'partial': require('./functions/partial'),
+  'partialRight': require('./functions/partialRight'),
+  'throttle': require('./functions/throttle'),
+  'wrap': require('./functions/wrap')
+};
+
+},{"./functions/after":71,"./functions/bind":72,"./functions/bindAll":73,"./functions/bindKey":74,"./functions/compose":75,"./functions/createCallback":76,"./functions/curry":77,"./functions/debounce":78,"./functions/defer":79,"./functions/delay":80,"./functions/memoize":81,"./functions/once":82,"./functions/partial":83,"./functions/partialRight":84,"./functions/throttle":85,"./functions/wrap":86}],71:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var isFunction = require('../objects/isFunction');
+
+/**
+ * Creates a function that executes `func`, with  the `this` binding and
+ * arguments of the created function, only after being called `n` times.
+ *
+ * @static
+ * @memberOf _
+ * @category Functions
+ * @param {number} n The number of times the function must be called before
+ *  `func` is executed.
+ * @param {Function} func The function to restrict.
+ * @returns {Function} Returns the new restricted function.
+ * @example
+ *
+ * var saves = ['profile', 'settings'];
+ *
+ * var done = _.after(saves.length, function() {
+ *   console.log('Done saving!');
+ * });
+ *
+ * _.forEach(saves, function(type) {
+ *   asyncSave({ 'type': type, 'complete': done });
+ * });
+ * // => logs 'Done saving!', after all saves have completed
+ */
+function after(n, func) {
+  if (!isFunction(func)) {
+    throw new TypeError;
+  }
+  return function() {
+    if (--n < 1) {
+      return func.apply(this, arguments);
+    }
+  };
+}
+
+module.exports = after;
+
+},{"../objects/isFunction":154}],72:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createWrapper = require('../internals/createWrapper'),
+    slice = require('../internals/slice');
+
+/**
+ * Creates a function that, when called, invokes `func` with the `this`
+ * binding of `thisArg` and prepends any additional `bind` arguments to those
+ * provided to the bound function.
+ *
+ * @static
+ * @memberOf _
+ * @category Functions
+ * @param {Function} func The function to bind.
+ * @param {*} [thisArg] The `this` binding of `func`.
+ * @param {...*} [arg] Arguments to be partially applied.
+ * @returns {Function} Returns the new bound function.
+ * @example
+ *
+ * var func = function(greeting) {
+ *   return greeting + ' ' + this.name;
+ * };
+ *
+ * func = _.bind(func, { 'name': 'fred' }, 'hi');
+ * func();
+ * // => 'hi fred'
+ */
+function bind(func, thisArg) {
+  return arguments.length > 2
+    ? createWrapper(func, 17, slice(arguments, 2), null, thisArg)
+    : createWrapper(func, 1, null, null, thisArg);
+}
+
+module.exports = bind;
+
+},{"../internals/createWrapper":107,"../internals/slice":129}],73:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseFlatten = require('../internals/baseFlatten'),
+    createWrapper = require('../internals/createWrapper'),
+    functions = require('../objects/functions');
+
+/**
+ * Binds methods of an object to the object itself, overwriting the existing
+ * method. Method names may be specified as individual arguments or as arrays
+ * of method names. If no method names are provided all the function properties
+ * of `object` will be bound.
+ *
+ * @static
+ * @memberOf _
+ * @category Functions
+ * @param {Object} object The object to bind and assign the bound methods to.
+ * @param {...string} [methodName] The object method names to
+ *  bind, specified as individual method names or arrays of method names.
+ * @returns {Object} Returns `object`.
+ * @example
+ *
+ * var view = {
+ *   'label': 'docs',
+ *   'onClick': function() { console.log('clicked ' + this.label); }
+ * };
+ *
+ * _.bindAll(view);
+ * jQuery('#docs').on('click', view.onClick);
+ * // => logs 'clicked docs', when the button is clicked
+ */
+function bindAll(object) {
+  var funcs = arguments.length > 1 ? baseFlatten(arguments, true, false, 1) : functions(object),
+      index = -1,
+      length = funcs.length;
+
+  while (++index < length) {
+    var key = funcs[index];
+    object[key] = createWrapper(object[key], 1, null, null, object);
+  }
+  return object;
+}
+
+module.exports = bindAll;
+
+},{"../internals/baseFlatten":95,"../internals/createWrapper":107,"../objects/functions":143}],74:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createWrapper = require('../internals/createWrapper'),
+    slice = require('../internals/slice');
+
+/**
+ * Creates a function that, when called, invokes the method at `object[key]`
+ * and prepends any additional `bindKey` arguments to those provided to the bound
+ * function. This method differs from `_.bind` by allowing bound functions to
+ * reference methods that will be redefined or don't yet exist.
+ * See http://michaux.ca/articles/lazy-function-definition-pattern.
+ *
+ * @static
+ * @memberOf _
+ * @category Functions
+ * @param {Object} object The object the method belongs to.
+ * @param {string} key The key of the method.
+ * @param {...*} [arg] Arguments to be partially applied.
+ * @returns {Function} Returns the new bound function.
+ * @example
+ *
+ * var object = {
+ *   'name': 'fred',
+ *   'greet': function(greeting) {
+ *     return greeting + ' ' + this.name;
+ *   }
+ * };
+ *
+ * var func = _.bindKey(object, 'greet', 'hi');
+ * func();
+ * // => 'hi fred'
+ *
+ * object.greet = function(greeting) {
+ *   return greeting + 'ya ' + this.name + '!';
+ * };
+ *
+ * func();
+ * // => 'hiya fred!'
+ */
+function bindKey(object, key) {
+  return arguments.length > 2
+    ? createWrapper(key, 19, slice(arguments, 2), null, object)
+    : createWrapper(key, 3, null, null, object);
+}
+
+module.exports = bindKey;
+
+},{"../internals/createWrapper":107,"../internals/slice":129}],75:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var isFunction = require('../objects/isFunction');
+
+/**
+ * Creates a function that is the composition of the provided functions,
+ * where each function consumes the return value of the function that follows.
+ * For example, composing the functions `f()`, `g()`, and `h()` produces `f(g(h()))`.
+ * Each function is executed with the `this` binding of the composed function.
+ *
+ * @static
+ * @memberOf _
+ * @category Functions
+ * @param {...Function} [func] Functions to compose.
+ * @returns {Function} Returns the new composed function.
+ * @example
+ *
+ * var realNameMap = {
+ *   'pebbles': 'penelope'
+ * };
+ *
+ * var format = function(name) {
+ *   name = realNameMap[name.toLowerCase()] || name;
+ *   return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+ * };
+ *
+ * var greet = function(formatted) {
+ *   return 'Hiya ' + formatted + '!';
+ * };
+ *
+ * var welcome = _.compose(greet, format);
+ * welcome('pebbles');
+ * // => 'Hiya Penelope!'
+ */
+function compose() {
+  var funcs = arguments,
+      length = funcs.length;
+
+  while (length--) {
+    if (!isFunction(funcs[length])) {
+      throw new TypeError;
+    }
+  }
+  return function() {
+    var args = arguments,
+        length = funcs.length;
+
+    while (length--) {
+      args = [funcs[length].apply(this, args)];
+    }
+    return args[0];
+  };
+}
+
+module.exports = compose;
+
+},{"../objects/isFunction":154}],76:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseCreateCallback = require('../internals/baseCreateCallback'),
+    baseIsEqual = require('../internals/baseIsEqual'),
+    isObject = require('../objects/isObject'),
+    keys = require('../objects/keys'),
+    property = require('../utilities/property');
+
+/**
+ * Produces a callback bound to an optional `thisArg`. If `func` is a property
+ * name the created callback will return the property value for a given element.
+ * If `func` is an object the created callback will return `true` for elements
+ * that contain the equivalent object properties, otherwise it will return `false`.
+ *
+ * @static
+ * @memberOf _
+ * @category Utilities
+ * @param {*} [func=identity] The value to convert to a callback.
+ * @param {*} [thisArg] The `this` binding of the created callback.
+ * @param {number} [argCount] The number of arguments the callback accepts.
+ * @returns {Function} Returns a callback function.
+ * @example
+ *
+ * var characters = [
+ *   { 'name': 'barney', 'age': 36 },
+ *   { 'name': 'fred',   'age': 40 }
+ * ];
+ *
+ * // wrap to create custom callback shorthands
+ * _.createCallback = _.wrap(_.createCallback, function(func, callback, thisArg) {
+ *   var match = /^(.+?)__([gl]t)(.+)$/.exec(callback);
+ *   return !match ? func(callback, thisArg) : function(object) {
+ *     return match[2] == 'gt' ? object[match[1]] > match[3] : object[match[1]] < match[3];
+ *   };
+ * });
+ *
+ * _.filter(characters, 'age__gt38');
+ * // => [{ 'name': 'fred', 'age': 40 }]
+ */
+function createCallback(func, thisArg, argCount) {
+  var type = typeof func;
+  if (func == null || type == 'function') {
+    return baseCreateCallback(func, thisArg, argCount);
+  }
+  // handle "_.pluck" style callback shorthands
+  if (type != 'object') {
+    return property(func);
+  }
+  var props = keys(func),
+      key = props[0],
+      a = func[key];
+
+  // handle "_.where" style callback shorthands
+  if (props.length == 1 && a === a && !isObject(a)) {
+    // fast path the common case of providing an object with a single
+    // property containing a primitive value
+    return function(object) {
+      var b = object[key];
+      return a === b && (a !== 0 || (1 / a == 1 / b));
+    };
+  }
+  return function(object) {
+    var length = props.length,
+        result = false;
+
+    while (length--) {
+      if (!(result = baseIsEqual(object[props[length]], func[props[length]], null, true))) {
+        break;
+      }
+    }
+    return result;
+  };
+}
+
+module.exports = createCallback;
+
+},{"../internals/baseCreateCallback":92,"../internals/baseIsEqual":97,"../objects/isObject":158,"../objects/keys":163,"../utilities/property":181}],77:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createWrapper = require('../internals/createWrapper');
+
+/**
+ * Creates a function which accepts one or more arguments of `func` that when
+ * invoked either executes `func` returning its result, if all `func` arguments
+ * have been provided, or returns a function that accepts one or more of the
+ * remaining `func` arguments, and so on. The arity of `func` can be specified
+ * if `func.length` is not sufficient.
+ *
+ * @static
+ * @memberOf _
+ * @category Functions
+ * @param {Function} func The function to curry.
+ * @param {number} [arity=func.length] The arity of `func`.
+ * @returns {Function} Returns the new curried function.
+ * @example
+ *
+ * var curried = _.curry(function(a, b, c) {
+ *   console.log(a + b + c);
+ * });
+ *
+ * curried(1)(2)(3);
+ * // => 6
+ *
+ * curried(1, 2)(3);
+ * // => 6
+ *
+ * curried(1, 2, 3);
+ * // => 6
+ */
+function curry(func, arity) {
+  arity = typeof arity == 'number' ? arity : (+arity || func.length);
+  return createWrapper(func, 4, null, null, null, arity);
+}
+
+module.exports = curry;
+
+},{"../internals/createWrapper":107}],78:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var isFunction = require('../objects/isFunction'),
+    isObject = require('../objects/isObject'),
+    now = require('../utilities/now');
+
+/* Native method shortcuts for methods with the same name as other `lodash` methods */
+var nativeMax = Math.max;
+
+/**
+ * Creates a function that will delay the execution of `func` until after
+ * `wait` milliseconds have elapsed since the last time it was invoked.
+ * Provide an options object to indicate that `func` should be invoked on
+ * the leading and/or trailing edge of the `wait` timeout. Subsequent calls
+ * to the debounced function will return the result of the last `func` call.
+ *
+ * Note: If `leading` and `trailing` options are `true` `func` will be called
+ * on the trailing edge of the timeout only if the the debounced function is
+ * invoked more than once during the `wait` timeout.
+ *
+ * @static
+ * @memberOf _
+ * @category Functions
+ * @param {Function} func The function to debounce.
+ * @param {number} wait The number of milliseconds to delay.
+ * @param {Object} [options] The options object.
+ * @param {boolean} [options.leading=false] Specify execution on the leading edge of the timeout.
+ * @param {number} [options.maxWait] The maximum time `func` is allowed to be delayed before it's called.
+ * @param {boolean} [options.trailing=true] Specify execution on the trailing edge of the timeout.
+ * @returns {Function} Returns the new debounced function.
+ * @example
+ *
+ * // avoid costly calculations while the window size is in flux
+ * var lazyLayout = _.debounce(calculateLayout, 150);
+ * jQuery(window).on('resize', lazyLayout);
+ *
+ * // execute `sendMail` when the click event is fired, debouncing subsequent calls
+ * jQuery('#postbox').on('click', _.debounce(sendMail, 300, {
+ *   'leading': true,
+ *   'trailing': false
+ * });
+ *
+ * // ensure `batchLog` is executed once after 1 second of debounced calls
+ * var source = new EventSource('/stream');
+ * source.addEventListener('message', _.debounce(batchLog, 250, {
+ *   'maxWait': 1000
+ * }, false);
+ */
+function debounce(func, wait, options) {
+  var args,
+      maxTimeoutId,
+      result,
+      stamp,
+      thisArg,
+      timeoutId,
+      trailingCall,
+      lastCalled = 0,
+      maxWait = false,
+      trailing = true;
+
+  if (!isFunction(func)) {
+    throw new TypeError;
+  }
+  wait = nativeMax(0, wait) || 0;
+  if (options === true) {
+    var leading = true;
+    trailing = false;
+  } else if (isObject(options)) {
+    leading = options.leading;
+    maxWait = 'maxWait' in options && (nativeMax(wait, options.maxWait) || 0);
+    trailing = 'trailing' in options ? options.trailing : trailing;
+  }
+  var delayed = function() {
+    var remaining = wait - (now() - stamp);
+    if (remaining <= 0) {
+      if (maxTimeoutId) {
+        clearTimeout(maxTimeoutId);
+      }
+      var isCalled = trailingCall;
+      maxTimeoutId = timeoutId = trailingCall = undefined;
+      if (isCalled) {
+        lastCalled = now();
+        result = func.apply(thisArg, args);
+        if (!timeoutId && !maxTimeoutId) {
+          args = thisArg = null;
         }
-        // exit for functions and DOM nodes
-        if (className != objectClass || (!support.nodeClass && (isNode(a) || isNode(b)))) {
-          return false;
-        }
-        // in older versions of Opera, `arguments` objects have `Array` constructors
-        var ctorA = !support.argsObject && isArguments(a) ? Object : a.constructor,
-            ctorB = !support.argsObject && isArguments(b) ? Object : b.constructor;
-
-        // non `Object` object instances with different constructors are not equal
-        if (ctorA != ctorB &&
-              !(isFunction(ctorA) && ctorA instanceof ctorA && isFunction(ctorB) && ctorB instanceof ctorB) &&
-              ('constructor' in a && 'constructor' in b)
-            ) {
-          return false;
-        }
       }
-      // assume cyclic structures are equal
-      // the algorithm for detecting cyclic structures is adapted from ES 5.1
-      // section 15.12.3, abstract operation `JO` (http://es5.github.io/#x15.12.3)
-      var initedStack = !stackA;
-      stackA || (stackA = getArray());
-      stackB || (stackB = getArray());
+    } else {
+      timeoutId = setTimeout(delayed, remaining);
+    }
+  };
 
-      var length = stackA.length;
-      while (length--) {
-        if (stackA[length] == a) {
-          return stackB[length] == b;
-        }
+  var maxDelayed = function() {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    maxTimeoutId = timeoutId = trailingCall = undefined;
+    if (trailing || (maxWait !== wait)) {
+      lastCalled = now();
+      result = func.apply(thisArg, args);
+      if (!timeoutId && !maxTimeoutId) {
+        args = thisArg = null;
       }
-      var size = 0;
-      result = true;
+    }
+  };
 
-      // add `a` and `b` to the stack of traversed objects
-      stackA.push(a);
-      stackB.push(b);
+  return function() {
+    args = arguments;
+    stamp = now();
+    thisArg = this;
+    trailingCall = trailing && (timeoutId || !leading);
 
-      // recursively compare objects and arrays (susceptible to call stack limits)
-      if (isArr) {
-        length = a.length;
-        size = b.length;
-
-        // compare lengths to determine if a deep comparison is necessary
-        result = size == a.length;
-        if (!result && !isWhere) {
-          return result;
-        }
-        // deep compare the contents, ignoring non-numeric properties
-        while (size--) {
-          var index = length,
-              value = b[size];
-
-          if (isWhere) {
-            while (index--) {
-              if ((result = baseIsEqual(a[index], value, callback, isWhere, stackA, stackB))) {
-                break;
-              }
-            }
-          } else if (!(result = baseIsEqual(a[size], value, callback, isWhere, stackA, stackB))) {
-            break;
-          }
-        }
-        return result;
+    if (maxWait === false) {
+      var leadingCall = leading && !timeoutId;
+    } else {
+      if (!maxTimeoutId && !leading) {
+        lastCalled = stamp;
       }
-      // deep compare objects using `forIn`, instead of `forOwn`, to avoid `Object.keys`
-      // which, in this case, is more costly
-      forIn(b, function(value, key, b) {
-        if (hasOwnProperty.call(b, key)) {
-          // count the number of properties.
-          size++;
-          // deep compare each property value.
-          return (result = hasOwnProperty.call(a, key) && baseIsEqual(a[key], value, callback, isWhere, stackA, stackB));
-        }
-      });
+      var remaining = maxWait - (stamp - lastCalled),
+          isCalled = remaining <= 0;
 
-      if (result && !isWhere) {
-        // ensure both objects have the same number of properties
-        forIn(a, function(value, key, a) {
-          if (hasOwnProperty.call(a, key)) {
-            // `size` will be `-1` if `a` has more properties than `b`
-            return (result = --size > -1);
-          }
-        });
+      if (isCalled) {
+        if (maxTimeoutId) {
+          maxTimeoutId = clearTimeout(maxTimeoutId);
+        }
+        lastCalled = stamp;
+        result = func.apply(thisArg, args);
       }
-      if (initedStack) {
-        releaseArray(stackA);
-        releaseArray(stackB);
+      else if (!maxTimeoutId) {
+        maxTimeoutId = setTimeout(maxDelayed, remaining);
       }
+    }
+    if (isCalled && timeoutId) {
+      timeoutId = clearTimeout(timeoutId);
+    }
+    else if (!timeoutId && wait !== maxWait) {
+      timeoutId = setTimeout(delayed, wait);
+    }
+    if (leadingCall) {
+      isCalled = true;
+      result = func.apply(thisArg, args);
+    }
+    if (isCalled && !timeoutId && !maxTimeoutId) {
+      args = thisArg = null;
+    }
+    return result;
+  };
+}
+
+module.exports = debounce;
+
+},{"../objects/isFunction":154,"../objects/isObject":158,"../utilities/now":179}],79:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var isFunction = require('../objects/isFunction'),
+    slice = require('../internals/slice');
+
+/**
+ * Defers executing the `func` function until the current call stack has cleared.
+ * Additional arguments will be provided to `func` when it is invoked.
+ *
+ * @static
+ * @memberOf _
+ * @category Functions
+ * @param {Function} func The function to defer.
+ * @param {...*} [arg] Arguments to invoke the function with.
+ * @returns {number} Returns the timer id.
+ * @example
+ *
+ * _.defer(function(text) { console.log(text); }, 'deferred');
+ * // logs 'deferred' after one or more milliseconds
+ */
+function defer(func) {
+  if (!isFunction(func)) {
+    throw new TypeError;
+  }
+  var args = slice(arguments, 1);
+  return setTimeout(function() { func.apply(undefined, args); }, 1);
+}
+
+module.exports = defer;
+
+},{"../internals/slice":129,"../objects/isFunction":154}],80:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var isFunction = require('../objects/isFunction'),
+    slice = require('../internals/slice');
+
+/**
+ * Executes the `func` function after `wait` milliseconds. Additional arguments
+ * will be provided to `func` when it is invoked.
+ *
+ * @static
+ * @memberOf _
+ * @category Functions
+ * @param {Function} func The function to delay.
+ * @param {number} wait The number of milliseconds to delay execution.
+ * @param {...*} [arg] Arguments to invoke the function with.
+ * @returns {number} Returns the timer id.
+ * @example
+ *
+ * _.delay(function(text) { console.log(text); }, 1000, 'later');
+ * // => logs 'later' after one second
+ */
+function delay(func, wait) {
+  if (!isFunction(func)) {
+    throw new TypeError;
+  }
+  var args = slice(arguments, 2);
+  return setTimeout(function() { func.apply(undefined, args); }, wait);
+}
+
+module.exports = delay;
+
+},{"../internals/slice":129,"../objects/isFunction":154}],81:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var isFunction = require('../objects/isFunction'),
+    keyPrefix = require('../internals/keyPrefix');
+
+/** Used for native method references */
+var objectProto = Object.prototype;
+
+/** Native method shortcuts */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * Creates a function that memoizes the result of `func`. If `resolver` is
+ * provided it will be used to determine the cache key for storing the result
+ * based on the arguments provided to the memoized function. By default, the
+ * first argument provided to the memoized function is used as the cache key.
+ * The `func` is executed with the `this` binding of the memoized function.
+ * The result cache is exposed as the `cache` property on the memoized function.
+ *
+ * @static
+ * @memberOf _
+ * @category Functions
+ * @param {Function} func The function to have its output memoized.
+ * @param {Function} [resolver] A function used to resolve the cache key.
+ * @returns {Function} Returns the new memoizing function.
+ * @example
+ *
+ * var fibonacci = _.memoize(function(n) {
+ *   return n < 2 ? n : fibonacci(n - 1) + fibonacci(n - 2);
+ * });
+ *
+ * fibonacci(9)
+ * // => 34
+ *
+ * var data = {
+ *   'fred': { 'name': 'fred', 'age': 40 },
+ *   'pebbles': { 'name': 'pebbles', 'age': 1 }
+ * };
+ *
+ * // modifying the result cache
+ * var get = _.memoize(function(name) { return data[name]; }, _.identity);
+ * get('pebbles');
+ * // => { 'name': 'pebbles', 'age': 1 }
+ *
+ * get.cache.pebbles.name = 'penelope';
+ * get('pebbles');
+ * // => { 'name': 'penelope', 'age': 1 }
+ */
+function memoize(func, resolver) {
+  if (!isFunction(func)) {
+    throw new TypeError;
+  }
+  var memoized = function() {
+    var cache = memoized.cache,
+        key = resolver ? resolver.apply(this, arguments) : keyPrefix + arguments[0];
+
+    return hasOwnProperty.call(cache, key)
+      ? cache[key]
+      : (cache[key] = func.apply(this, arguments));
+  }
+  memoized.cache = {};
+  return memoized;
+}
+
+module.exports = memoize;
+
+},{"../internals/keyPrefix":115,"../objects/isFunction":154}],82:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var isFunction = require('../objects/isFunction');
+
+/**
+ * Creates a function that is restricted to execute `func` once. Repeat calls to
+ * the function will return the value of the first call. The `func` is executed
+ * with the `this` binding of the created function.
+ *
+ * @static
+ * @memberOf _
+ * @category Functions
+ * @param {Function} func The function to restrict.
+ * @returns {Function} Returns the new restricted function.
+ * @example
+ *
+ * var initialize = _.once(createApplication);
+ * initialize();
+ * initialize();
+ * // `initialize` executes `createApplication` once
+ */
+function once(func) {
+  var ran,
+      result;
+
+  if (!isFunction(func)) {
+    throw new TypeError;
+  }
+  return function() {
+    if (ran) {
       return result;
     }
+    ran = true;
+    result = func.apply(this, arguments);
 
-    /**
-     * The base implementation of `_.merge` without argument juggling or support
-     * for `thisArg` binding.
-     *
-     * @private
-     * @param {Object} object The destination object.
-     * @param {Object} source The source object.
-     * @param {Function} [callback] The function to customize merging properties.
-     * @param {Array} [stackA=[]] Tracks traversed source objects.
-     * @param {Array} [stackB=[]] Associates values with source counterparts.
-     */
-    function baseMerge(object, source, callback, stackA, stackB) {
-      (isArray(source) ? forEach : forOwn)(source, function(source, key) {
-        var found,
-            isArr,
-            result = source,
-            value = object[key];
+    // clear the `func` variable so the function may be garbage collected
+    func = null;
+    return result;
+  };
+}
 
-        if (source && ((isArr = isArray(source)) || isPlainObject(source))) {
-          // avoid merging previously merged cyclic sources
-          var stackLength = stackA.length;
-          while (stackLength--) {
-            if ((found = stackA[stackLength] == source)) {
-              value = stackB[stackLength];
+module.exports = once;
+
+},{"../objects/isFunction":154}],83:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createWrapper = require('../internals/createWrapper'),
+    slice = require('../internals/slice');
+
+/**
+ * Creates a function that, when called, invokes `func` with any additional
+ * `partial` arguments prepended to those provided to the new function. This
+ * method is similar to `_.bind` except it does **not** alter the `this` binding.
+ *
+ * @static
+ * @memberOf _
+ * @category Functions
+ * @param {Function} func The function to partially apply arguments to.
+ * @param {...*} [arg] Arguments to be partially applied.
+ * @returns {Function} Returns the new partially applied function.
+ * @example
+ *
+ * var greet = function(greeting, name) { return greeting + ' ' + name; };
+ * var hi = _.partial(greet, 'hi');
+ * hi('fred');
+ * // => 'hi fred'
+ */
+function partial(func) {
+  return createWrapper(func, 16, slice(arguments, 1));
+}
+
+module.exports = partial;
+
+},{"../internals/createWrapper":107,"../internals/slice":129}],84:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createWrapper = require('../internals/createWrapper'),
+    slice = require('../internals/slice');
+
+/**
+ * This method is like `_.partial` except that `partial` arguments are
+ * appended to those provided to the new function.
+ *
+ * @static
+ * @memberOf _
+ * @category Functions
+ * @param {Function} func The function to partially apply arguments to.
+ * @param {...*} [arg] Arguments to be partially applied.
+ * @returns {Function} Returns the new partially applied function.
+ * @example
+ *
+ * var defaultsDeep = _.partialRight(_.merge, _.defaults);
+ *
+ * var options = {
+ *   'variable': 'data',
+ *   'imports': { 'jq': $ }
+ * };
+ *
+ * defaultsDeep(options, _.templateSettings);
+ *
+ * options.variable
+ * // => 'data'
+ *
+ * options.imports
+ * // => { '_': _, 'jq': $ }
+ */
+function partialRight(func) {
+  return createWrapper(func, 32, null, slice(arguments, 1));
+}
+
+module.exports = partialRight;
+
+},{"../internals/createWrapper":107,"../internals/slice":129}],85:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var debounce = require('./debounce'),
+    isFunction = require('../objects/isFunction'),
+    isObject = require('../objects/isObject');
+
+/** Used as an internal `_.debounce` options object */
+var debounceOptions = {
+  'leading': false,
+  'maxWait': 0,
+  'trailing': false
+};
+
+/**
+ * Creates a function that, when executed, will only call the `func` function
+ * at most once per every `wait` milliseconds. Provide an options object to
+ * indicate that `func` should be invoked on the leading and/or trailing edge
+ * of the `wait` timeout. Subsequent calls to the throttled function will
+ * return the result of the last `func` call.
+ *
+ * Note: If `leading` and `trailing` options are `true` `func` will be called
+ * on the trailing edge of the timeout only if the the throttled function is
+ * invoked more than once during the `wait` timeout.
+ *
+ * @static
+ * @memberOf _
+ * @category Functions
+ * @param {Function} func The function to throttle.
+ * @param {number} wait The number of milliseconds to throttle executions to.
+ * @param {Object} [options] The options object.
+ * @param {boolean} [options.leading=true] Specify execution on the leading edge of the timeout.
+ * @param {boolean} [options.trailing=true] Specify execution on the trailing edge of the timeout.
+ * @returns {Function} Returns the new throttled function.
+ * @example
+ *
+ * // avoid excessively updating the position while scrolling
+ * var throttled = _.throttle(updatePosition, 100);
+ * jQuery(window).on('scroll', throttled);
+ *
+ * // execute `renewToken` when the click event is fired, but not more than once every 5 minutes
+ * jQuery('.interactive').on('click', _.throttle(renewToken, 300000, {
+ *   'trailing': false
+ * }));
+ */
+function throttle(func, wait, options) {
+  var leading = true,
+      trailing = true;
+
+  if (!isFunction(func)) {
+    throw new TypeError;
+  }
+  if (options === false) {
+    leading = false;
+  } else if (isObject(options)) {
+    leading = 'leading' in options ? options.leading : leading;
+    trailing = 'trailing' in options ? options.trailing : trailing;
+  }
+  debounceOptions.leading = leading;
+  debounceOptions.maxWait = wait;
+  debounceOptions.trailing = trailing;
+
+  return debounce(func, wait, debounceOptions);
+}
+
+module.exports = throttle;
+
+},{"../objects/isFunction":154,"../objects/isObject":158,"./debounce":78}],86:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createWrapper = require('../internals/createWrapper');
+
+/**
+ * Creates a function that provides `value` to the wrapper function as its
+ * first argument. Additional arguments provided to the function are appended
+ * to those provided to the wrapper function. The wrapper is executed with
+ * the `this` binding of the created function.
+ *
+ * @static
+ * @memberOf _
+ * @category Functions
+ * @param {*} value The value to wrap.
+ * @param {Function} wrapper The wrapper function.
+ * @returns {Function} Returns the new function.
+ * @example
+ *
+ * var p = _.wrap(_.escape, function(func, text) {
+ *   return '<p>' + func(text) + '</p>';
+ * });
+ *
+ * p('Fred, Wilma, & Pebbles');
+ * // => '<p>Fred, Wilma, &amp; Pebbles</p>'
+ */
+function wrap(value, wrapper) {
+  return createWrapper(wrapper, 16, [value]);
+}
+
+module.exports = wrap;
+
+},{"../internals/createWrapper":107}],87:[function(require,module,exports){
+/**
+ * @license
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var arrays = require('./arrays'),
+    chaining = require('./chaining'),
+    collections = require('./collections'),
+    functions = require('./functions'),
+    objects = require('./objects'),
+    utilities = require('./utilities'),
+    forEach = require('./collections/forEach'),
+    forOwn = require('./objects/forOwn'),
+    isArray = require('./objects/isArray'),
+    lodashWrapper = require('./internals/lodashWrapper'),
+    mixin = require('./utilities/mixin'),
+    support = require('./support'),
+    templateSettings = require('./utilities/templateSettings');
+
+/**
+ * Used for `Array` method references.
+ *
+ * Normally `Array.prototype` would suffice, however, using an array literal
+ * avoids issues in Narwhal.
+ */
+var arrayRef = [];
+
+/** Used for native method references */
+var objectProto = Object.prototype;
+
+/** Native method shortcuts */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * Creates a `lodash` object which wraps the given value to enable intuitive
+ * method chaining.
+ *
+ * In addition to Lo-Dash methods, wrappers also have the following `Array` methods:
+ * `concat`, `join`, `pop`, `push`, `reverse`, `shift`, `slice`, `sort`, `splice`,
+ * and `unshift`
+ *
+ * Chaining is supported in custom builds as long as the `value` method is
+ * implicitly or explicitly included in the build.
+ *
+ * The chainable wrapper functions are:
+ * `after`, `assign`, `bind`, `bindAll`, `bindKey`, `chain`, `compact`,
+ * `compose`, `concat`, `countBy`, `create`, `createCallback`, `curry`,
+ * `debounce`, `defaults`, `defer`, `delay`, `difference`, `filter`, `flatten`,
+ * `forEach`, `forEachRight`, `forIn`, `forInRight`, `forOwn`, `forOwnRight`,
+ * `functions`, `groupBy`, `indexBy`, `initial`, `intersection`, `invert`,
+ * `invoke`, `keys`, `map`, `max`, `memoize`, `merge`, `min`, `object`, `omit`,
+ * `once`, `pairs`, `partial`, `partialRight`, `pick`, `pluck`, `pull`, `push`,
+ * `range`, `reject`, `remove`, `rest`, `reverse`, `shuffle`, `slice`, `sort`,
+ * `sortBy`, `splice`, `tap`, `throttle`, `times`, `toArray`, `transform`,
+ * `union`, `uniq`, `unshift`, `unzip`, `values`, `where`, `without`, `wrap`,
+ * and `zip`
+ *
+ * The non-chainable wrapper functions are:
+ * `clone`, `cloneDeep`, `contains`, `escape`, `every`, `find`, `findIndex`,
+ * `findKey`, `findLast`, `findLastIndex`, `findLastKey`, `has`, `identity`,
+ * `indexOf`, `isArguments`, `isArray`, `isBoolean`, `isDate`, `isElement`,
+ * `isEmpty`, `isEqual`, `isFinite`, `isFunction`, `isNaN`, `isNull`, `isNumber`,
+ * `isObject`, `isPlainObject`, `isRegExp`, `isString`, `isUndefined`, `join`,
+ * `lastIndexOf`, `mixin`, `noConflict`, `parseInt`, `pop`, `random`, `reduce`,
+ * `reduceRight`, `result`, `shift`, `size`, `some`, `sortedIndex`, `runInContext`,
+ * `template`, `unescape`, `uniqueId`, and `value`
+ *
+ * The wrapper functions `first` and `last` return wrapped values when `n` is
+ * provided, otherwise they return unwrapped values.
+ *
+ * Explicit chaining can be enabled by using the `_.chain` method.
+ *
+ * @name _
+ * @constructor
+ * @category Chaining
+ * @param {*} value The value to wrap in a `lodash` instance.
+ * @returns {Object} Returns a `lodash` instance.
+ * @example
+ *
+ * var wrapped = _([1, 2, 3]);
+ *
+ * // returns an unwrapped value
+ * wrapped.reduce(function(sum, num) {
+ *   return sum + num;
+ * });
+ * // => 6
+ *
+ * // returns a wrapped value
+ * var squares = wrapped.map(function(num) {
+ *   return num * num;
+ * });
+ *
+ * _.isArray(squares);
+ * // => false
+ *
+ * _.isArray(squares.value());
+ * // => true
+ */
+function lodash(value) {
+  // don't wrap if already wrapped, even if wrapped by a different `lodash` constructor
+  return (value && typeof value == 'object' && !isArray(value) && hasOwnProperty.call(value, '__wrapped__'))
+   ? value
+   : new lodashWrapper(value);
+}
+// ensure `new lodashWrapper` is an instance of `lodash`
+lodashWrapper.prototype = lodash.prototype;
+
+// wrap `_.mixin` so it works when provided only one argument
+mixin = (function(fn) {
+  var functions = objects.functions;
+  return function(object, source, options) {
+    if (!source || (!options && !functions(source).length)) {
+      if (options == null) {
+        options = source;
+      }
+      source = object;
+      object = lodash;
+    }
+    return fn(object, source, options);
+  };
+}(mixin));
+
+// add functions that return wrapped values when chaining
+lodash.after = functions.after;
+lodash.assign = objects.assign;
+lodash.at = collections.at;
+lodash.bind = functions.bind;
+lodash.bindAll = functions.bindAll;
+lodash.bindKey = functions.bindKey;
+lodash.chain = chaining.chain;
+lodash.compact = arrays.compact;
+lodash.compose = functions.compose;
+lodash.constant = utilities.constant;
+lodash.countBy = collections.countBy;
+lodash.create = objects.create;
+lodash.createCallback = functions.createCallback;
+lodash.curry = functions.curry;
+lodash.debounce = functions.debounce;
+lodash.defaults = objects.defaults;
+lodash.defer = functions.defer;
+lodash.delay = functions.delay;
+lodash.difference = arrays.difference;
+lodash.filter = collections.filter;
+lodash.flatten = arrays.flatten;
+lodash.forEach = forEach;
+lodash.forEachRight = collections.forEachRight;
+lodash.forIn = objects.forIn;
+lodash.forInRight = objects.forInRight;
+lodash.forOwn = forOwn;
+lodash.forOwnRight = objects.forOwnRight;
+lodash.functions = objects.functions;
+lodash.groupBy = collections.groupBy;
+lodash.indexBy = collections.indexBy;
+lodash.initial = arrays.initial;
+lodash.intersection = arrays.intersection;
+lodash.invert = objects.invert;
+lodash.invoke = collections.invoke;
+lodash.keys = objects.keys;
+lodash.map = collections.map;
+lodash.mapValues = objects.mapValues;
+lodash.max = collections.max;
+lodash.memoize = functions.memoize;
+lodash.merge = objects.merge;
+lodash.min = collections.min;
+lodash.omit = objects.omit;
+lodash.once = functions.once;
+lodash.pairs = objects.pairs;
+lodash.partial = functions.partial;
+lodash.partialRight = functions.partialRight;
+lodash.pick = objects.pick;
+lodash.pluck = collections.pluck;
+lodash.property = utilities.property;
+lodash.pull = arrays.pull;
+lodash.range = arrays.range;
+lodash.reject = collections.reject;
+lodash.remove = arrays.remove;
+lodash.rest = arrays.rest;
+lodash.shuffle = collections.shuffle;
+lodash.sortBy = collections.sortBy;
+lodash.tap = chaining.tap;
+lodash.throttle = functions.throttle;
+lodash.times = utilities.times;
+lodash.toArray = collections.toArray;
+lodash.transform = objects.transform;
+lodash.union = arrays.union;
+lodash.uniq = arrays.uniq;
+lodash.values = objects.values;
+lodash.where = collections.where;
+lodash.without = arrays.without;
+lodash.wrap = functions.wrap;
+lodash.xor = arrays.xor;
+lodash.zip = arrays.zip;
+lodash.zipObject = arrays.zipObject;
+
+// add aliases
+lodash.collect = collections.map;
+lodash.drop = arrays.rest;
+lodash.each = forEach;
+lodash.eachRight = collections.forEachRight;
+lodash.extend = objects.assign;
+lodash.methods = objects.functions;
+lodash.object = arrays.zipObject;
+lodash.select = collections.filter;
+lodash.tail = arrays.rest;
+lodash.unique = arrays.uniq;
+lodash.unzip = arrays.zip;
+
+// add functions to `lodash.prototype`
+mixin(lodash);
+
+// add functions that return unwrapped values when chaining
+lodash.clone = objects.clone;
+lodash.cloneDeep = objects.cloneDeep;
+lodash.contains = collections.contains;
+lodash.escape = utilities.escape;
+lodash.every = collections.every;
+lodash.find = collections.find;
+lodash.findIndex = arrays.findIndex;
+lodash.findKey = objects.findKey;
+lodash.findLast = collections.findLast;
+lodash.findLastIndex = arrays.findLastIndex;
+lodash.findLastKey = objects.findLastKey;
+lodash.has = objects.has;
+lodash.identity = utilities.identity;
+lodash.indexOf = arrays.indexOf;
+lodash.isArguments = objects.isArguments;
+lodash.isArray = isArray;
+lodash.isBoolean = objects.isBoolean;
+lodash.isDate = objects.isDate;
+lodash.isElement = objects.isElement;
+lodash.isEmpty = objects.isEmpty;
+lodash.isEqual = objects.isEqual;
+lodash.isFinite = objects.isFinite;
+lodash.isFunction = objects.isFunction;
+lodash.isNaN = objects.isNaN;
+lodash.isNull = objects.isNull;
+lodash.isNumber = objects.isNumber;
+lodash.isObject = objects.isObject;
+lodash.isPlainObject = objects.isPlainObject;
+lodash.isRegExp = objects.isRegExp;
+lodash.isString = objects.isString;
+lodash.isUndefined = objects.isUndefined;
+lodash.lastIndexOf = arrays.lastIndexOf;
+lodash.mixin = mixin;
+lodash.noConflict = utilities.noConflict;
+lodash.noop = utilities.noop;
+lodash.now = utilities.now;
+lodash.parseInt = utilities.parseInt;
+lodash.random = utilities.random;
+lodash.reduce = collections.reduce;
+lodash.reduceRight = collections.reduceRight;
+lodash.result = utilities.result;
+lodash.size = collections.size;
+lodash.some = collections.some;
+lodash.sortedIndex = arrays.sortedIndex;
+lodash.template = utilities.template;
+lodash.unescape = utilities.unescape;
+lodash.uniqueId = utilities.uniqueId;
+
+// add aliases
+lodash.all = collections.every;
+lodash.any = collections.some;
+lodash.detect = collections.find;
+lodash.findWhere = collections.find;
+lodash.foldl = collections.reduce;
+lodash.foldr = collections.reduceRight;
+lodash.include = collections.contains;
+lodash.inject = collections.reduce;
+
+mixin(function() {
+  var source = {}
+  forOwn(lodash, function(func, methodName) {
+    if (!lodash.prototype[methodName]) {
+      source[methodName] = func;
+    }
+  });
+  return source;
+}(), false);
+
+// add functions capable of returning wrapped and unwrapped values when chaining
+lodash.first = arrays.first;
+lodash.last = arrays.last;
+lodash.sample = collections.sample;
+
+// add aliases
+lodash.take = arrays.first;
+lodash.head = arrays.first;
+
+forOwn(lodash, function(func, methodName) {
+  var callbackable = methodName !== 'sample';
+  if (!lodash.prototype[methodName]) {
+    lodash.prototype[methodName]= function(n, guard) {
+      var chainAll = this.__chain__,
+          result = func(this.__wrapped__, n, guard);
+
+      return !chainAll && (n == null || (guard && !(callbackable && typeof n == 'function')))
+        ? result
+        : new lodashWrapper(result, chainAll);
+    };
+  }
+});
+
+/**
+ * The semantic version number.
+ *
+ * @static
+ * @memberOf _
+ * @type string
+ */
+lodash.VERSION = '2.4.1';
+
+// add "Chaining" functions to the wrapper
+lodash.prototype.chain = chaining.wrapperChain;
+lodash.prototype.toString = chaining.wrapperToString;
+lodash.prototype.value = chaining.wrapperValueOf;
+lodash.prototype.valueOf = chaining.wrapperValueOf;
+
+// add `Array` functions that return unwrapped values
+forEach(['join', 'pop', 'shift'], function(methodName) {
+  var func = arrayRef[methodName];
+  lodash.prototype[methodName] = function() {
+    var chainAll = this.__chain__,
+        result = func.apply(this.__wrapped__, arguments);
+
+    return chainAll
+      ? new lodashWrapper(result, chainAll)
+      : result;
+  };
+});
+
+// add `Array` functions that return the existing wrapped value
+forEach(['push', 'reverse', 'sort', 'unshift'], function(methodName) {
+  var func = arrayRef[methodName];
+  lodash.prototype[methodName] = function() {
+    func.apply(this.__wrapped__, arguments);
+    return this;
+  };
+});
+
+// add `Array` functions that return new wrapped values
+forEach(['concat', 'slice', 'splice'], function(methodName) {
+  var func = arrayRef[methodName];
+  lodash.prototype[methodName] = function() {
+    return new lodashWrapper(func.apply(this.__wrapped__, arguments), this.__chain__);
+  };
+});
+
+lodash.support = support;
+(lodash.templateSettings = utilities.templateSettings).imports._ = lodash;
+module.exports = lodash;
+
+},{"./arrays":14,"./chaining":37,"./collections":43,"./collections/forEach":51,"./functions":70,"./internals/lodashWrapper":117,"./objects":131,"./objects/forOwn":141,"./objects/isArray":147,"./support":171,"./utilities":172,"./utilities/mixin":176,"./utilities/templateSettings":185}],88:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/** Used to pool arrays and objects used internally */
+var arrayPool = [];
+
+module.exports = arrayPool;
+
+},{}],89:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseCreate = require('./baseCreate'),
+    isObject = require('../objects/isObject'),
+    setBindData = require('./setBindData'),
+    slice = require('./slice');
+
+/**
+ * Used for `Array` method references.
+ *
+ * Normally `Array.prototype` would suffice, however, using an array literal
+ * avoids issues in Narwhal.
+ */
+var arrayRef = [];
+
+/** Native method shortcuts */
+var push = arrayRef.push;
+
+/**
+ * The base implementation of `_.bind` that creates the bound function and
+ * sets its meta data.
+ *
+ * @private
+ * @param {Array} bindData The bind data array.
+ * @returns {Function} Returns the new bound function.
+ */
+function baseBind(bindData) {
+  var func = bindData[0],
+      partialArgs = bindData[2],
+      thisArg = bindData[4];
+
+  function bound() {
+    // `Function#bind` spec
+    // http://es5.github.io/#x15.3.4.5
+    if (partialArgs) {
+      // avoid `arguments` object deoptimizations by using `slice` instead
+      // of `Array.prototype.slice.call` and not assigning `arguments` to a
+      // variable as a ternary expression
+      var args = slice(partialArgs);
+      push.apply(args, arguments);
+    }
+    // mimic the constructor's `return` behavior
+    // http://es5.github.io/#x13.2.2
+    if (this instanceof bound) {
+      // ensure `new bound` is an instance of `func`
+      var thisBinding = baseCreate(func.prototype),
+          result = func.apply(thisBinding, args || arguments);
+      return isObject(result) ? result : thisBinding;
+    }
+    return func.apply(thisArg, args || arguments);
+  }
+  setBindData(bound, bindData);
+  return bound;
+}
+
+module.exports = baseBind;
+
+},{"../objects/isObject":158,"./baseCreate":91,"./setBindData":126,"./slice":129}],90:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var assign = require('../objects/assign'),
+    forEach = require('../collections/forEach'),
+    forOwn = require('../objects/forOwn'),
+    getArray = require('./getArray'),
+    isArray = require('../objects/isArray'),
+    isObject = require('../objects/isObject'),
+    releaseArray = require('./releaseArray'),
+    slice = require('./slice');
+
+/** Used to match regexp flags from their coerced string values */
+var reFlags = /\w*$/;
+
+/** `Object#toString` result shortcuts */
+var argsClass = '[object Arguments]',
+    arrayClass = '[object Array]',
+    boolClass = '[object Boolean]',
+    dateClass = '[object Date]',
+    funcClass = '[object Function]',
+    numberClass = '[object Number]',
+    objectClass = '[object Object]',
+    regexpClass = '[object RegExp]',
+    stringClass = '[object String]';
+
+/** Used to identify object classifications that `_.clone` supports */
+var cloneableClasses = {};
+cloneableClasses[funcClass] = false;
+cloneableClasses[argsClass] = cloneableClasses[arrayClass] =
+cloneableClasses[boolClass] = cloneableClasses[dateClass] =
+cloneableClasses[numberClass] = cloneableClasses[objectClass] =
+cloneableClasses[regexpClass] = cloneableClasses[stringClass] = true;
+
+/** Used for native method references */
+var objectProto = Object.prototype;
+
+/** Used to resolve the internal [[Class]] of values */
+var toString = objectProto.toString;
+
+/** Native method shortcuts */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/** Used to lookup a built-in constructor by [[Class]] */
+var ctorByClass = {};
+ctorByClass[arrayClass] = Array;
+ctorByClass[boolClass] = Boolean;
+ctorByClass[dateClass] = Date;
+ctorByClass[funcClass] = Function;
+ctorByClass[objectClass] = Object;
+ctorByClass[numberClass] = Number;
+ctorByClass[regexpClass] = RegExp;
+ctorByClass[stringClass] = String;
+
+/**
+ * The base implementation of `_.clone` without argument juggling or support
+ * for `thisArg` binding.
+ *
+ * @private
+ * @param {*} value The value to clone.
+ * @param {boolean} [isDeep=false] Specify a deep clone.
+ * @param {Function} [callback] The function to customize cloning values.
+ * @param {Array} [stackA=[]] Tracks traversed source objects.
+ * @param {Array} [stackB=[]] Associates clones with source counterparts.
+ * @returns {*} Returns the cloned value.
+ */
+function baseClone(value, isDeep, callback, stackA, stackB) {
+  if (callback) {
+    var result = callback(value);
+    if (typeof result != 'undefined') {
+      return result;
+    }
+  }
+  // inspect [[Class]]
+  var isObj = isObject(value);
+  if (isObj) {
+    var className = toString.call(value);
+    if (!cloneableClasses[className]) {
+      return value;
+    }
+    var ctor = ctorByClass[className];
+    switch (className) {
+      case boolClass:
+      case dateClass:
+        return new ctor(+value);
+
+      case numberClass:
+      case stringClass:
+        return new ctor(value);
+
+      case regexpClass:
+        result = ctor(value.source, reFlags.exec(value));
+        result.lastIndex = value.lastIndex;
+        return result;
+    }
+  } else {
+    return value;
+  }
+  var isArr = isArray(value);
+  if (isDeep) {
+    // check for circular references and return corresponding clone
+    var initedStack = !stackA;
+    stackA || (stackA = getArray());
+    stackB || (stackB = getArray());
+
+    var length = stackA.length;
+    while (length--) {
+      if (stackA[length] == value) {
+        return stackB[length];
+      }
+    }
+    result = isArr ? ctor(value.length) : {};
+  }
+  else {
+    result = isArr ? slice(value) : assign({}, value);
+  }
+  // add array properties assigned by `RegExp#exec`
+  if (isArr) {
+    if (hasOwnProperty.call(value, 'index')) {
+      result.index = value.index;
+    }
+    if (hasOwnProperty.call(value, 'input')) {
+      result.input = value.input;
+    }
+  }
+  // exit for shallow clone
+  if (!isDeep) {
+    return result;
+  }
+  // add the source value to the stack of traversed objects
+  // and associate it with its clone
+  stackA.push(value);
+  stackB.push(result);
+
+  // recursively populate clone (susceptible to call stack limits)
+  (isArr ? forEach : forOwn)(value, function(objValue, key) {
+    result[key] = baseClone(objValue, isDeep, callback, stackA, stackB);
+  });
+
+  if (initedStack) {
+    releaseArray(stackA);
+    releaseArray(stackB);
+  }
+  return result;
+}
+
+module.exports = baseClone;
+
+},{"../collections/forEach":51,"../objects/assign":132,"../objects/forOwn":141,"../objects/isArray":147,"../objects/isObject":158,"./getArray":110,"./releaseArray":124,"./slice":129}],91:[function(require,module,exports){
+var global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var isNative = require('./isNative'),
+    isObject = require('../objects/isObject'),
+    noop = require('../utilities/noop');
+
+/* Native method shortcuts for methods with the same name as other `lodash` methods */
+var nativeCreate = isNative(nativeCreate = Object.create) && nativeCreate;
+
+/**
+ * The base implementation of `_.create` without support for assigning
+ * properties to the created object.
+ *
+ * @private
+ * @param {Object} prototype The object to inherit from.
+ * @returns {Object} Returns the new object.
+ */
+function baseCreate(prototype, properties) {
+  return isObject(prototype) ? nativeCreate(prototype) : {};
+}
+// fallback for browsers without `Object.create`
+if (!nativeCreate) {
+  baseCreate = (function() {
+    function Object() {}
+    return function(prototype) {
+      if (isObject(prototype)) {
+        Object.prototype = prototype;
+        var result = new Object;
+        Object.prototype = null;
+      }
+      return result || global.Object();
+    };
+  }());
+}
+
+module.exports = baseCreate;
+
+},{"../objects/isObject":158,"../utilities/noop":178,"./isNative":114}],92:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var bind = require('../functions/bind'),
+    identity = require('../utilities/identity'),
+    setBindData = require('./setBindData'),
+    support = require('../support');
+
+/** Used to detected named functions */
+var reFuncName = /^\s*function[ \n\r\t]+\w/;
+
+/** Used to detect functions containing a `this` reference */
+var reThis = /\bthis\b/;
+
+/** Native method shortcuts */
+var fnToString = Function.prototype.toString;
+
+/**
+ * The base implementation of `_.createCallback` without support for creating
+ * "_.pluck" or "_.where" style callbacks.
+ *
+ * @private
+ * @param {*} [func=identity] The value to convert to a callback.
+ * @param {*} [thisArg] The `this` binding of the created callback.
+ * @param {number} [argCount] The number of arguments the callback accepts.
+ * @returns {Function} Returns a callback function.
+ */
+function baseCreateCallback(func, thisArg, argCount) {
+  if (typeof func != 'function') {
+    return identity;
+  }
+  // exit early for no `thisArg` or already bound by `Function#bind`
+  if (typeof thisArg == 'undefined' || !('prototype' in func)) {
+    return func;
+  }
+  var bindData = func.__bindData__;
+  if (typeof bindData == 'undefined') {
+    if (support.funcNames) {
+      bindData = !func.name;
+    }
+    bindData = bindData || !support.funcDecomp;
+    if (!bindData) {
+      var source = fnToString.call(func);
+      if (!support.funcNames) {
+        bindData = !reFuncName.test(source);
+      }
+      if (!bindData) {
+        // checks if `func` references the `this` keyword and stores the result
+        bindData = reThis.test(source);
+        setBindData(func, bindData);
+      }
+    }
+  }
+  // exit early if there are no `this` references or `func` is bound
+  if (bindData === false || (bindData !== true && bindData[1] & 1)) {
+    return func;
+  }
+  switch (argCount) {
+    case 1: return function(value) {
+      return func.call(thisArg, value);
+    };
+    case 2: return function(a, b) {
+      return func.call(thisArg, a, b);
+    };
+    case 3: return function(value, index, collection) {
+      return func.call(thisArg, value, index, collection);
+    };
+    case 4: return function(accumulator, value, index, collection) {
+      return func.call(thisArg, accumulator, value, index, collection);
+    };
+  }
+  return bind(func, thisArg);
+}
+
+module.exports = baseCreateCallback;
+
+},{"../functions/bind":72,"../support":171,"../utilities/identity":175,"./setBindData":126}],93:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseCreate = require('./baseCreate'),
+    isObject = require('../objects/isObject'),
+    setBindData = require('./setBindData'),
+    slice = require('./slice');
+
+/**
+ * Used for `Array` method references.
+ *
+ * Normally `Array.prototype` would suffice, however, using an array literal
+ * avoids issues in Narwhal.
+ */
+var arrayRef = [];
+
+/** Native method shortcuts */
+var push = arrayRef.push;
+
+/**
+ * The base implementation of `createWrapper` that creates the wrapper and
+ * sets its meta data.
+ *
+ * @private
+ * @param {Array} bindData The bind data array.
+ * @returns {Function} Returns the new function.
+ */
+function baseCreateWrapper(bindData) {
+  var func = bindData[0],
+      bitmask = bindData[1],
+      partialArgs = bindData[2],
+      partialRightArgs = bindData[3],
+      thisArg = bindData[4],
+      arity = bindData[5];
+
+  var isBind = bitmask & 1,
+      isBindKey = bitmask & 2,
+      isCurry = bitmask & 4,
+      isCurryBound = bitmask & 8,
+      key = func;
+
+  function bound() {
+    var thisBinding = isBind ? thisArg : this;
+    if (partialArgs) {
+      var args = slice(partialArgs);
+      push.apply(args, arguments);
+    }
+    if (partialRightArgs || isCurry) {
+      args || (args = slice(arguments));
+      if (partialRightArgs) {
+        push.apply(args, partialRightArgs);
+      }
+      if (isCurry && args.length < arity) {
+        bitmask |= 16 & ~32;
+        return baseCreateWrapper([func, (isCurryBound ? bitmask : bitmask & ~3), args, null, thisArg, arity]);
+      }
+    }
+    args || (args = arguments);
+    if (isBindKey) {
+      func = thisBinding[key];
+    }
+    if (this instanceof bound) {
+      thisBinding = baseCreate(func.prototype);
+      var result = func.apply(thisBinding, args);
+      return isObject(result) ? result : thisBinding;
+    }
+    return func.apply(thisBinding, args);
+  }
+  setBindData(bound, bindData);
+  return bound;
+}
+
+module.exports = baseCreateWrapper;
+
+},{"../objects/isObject":158,"./baseCreate":91,"./setBindData":126,"./slice":129}],94:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseIndexOf = require('./baseIndexOf'),
+    cacheIndexOf = require('./cacheIndexOf'),
+    createCache = require('./createCache'),
+    largeArraySize = require('./largeArraySize'),
+    releaseObject = require('./releaseObject');
+
+/**
+ * The base implementation of `_.difference` that accepts a single array
+ * of values to exclude.
+ *
+ * @private
+ * @param {Array} array The array to process.
+ * @param {Array} [values] The array of values to exclude.
+ * @returns {Array} Returns a new array of filtered values.
+ */
+function baseDifference(array, values) {
+  var index = -1,
+      indexOf = baseIndexOf,
+      length = array ? array.length : 0,
+      isLarge = length >= largeArraySize,
+      result = [];
+
+  if (isLarge) {
+    var cache = createCache(values);
+    if (cache) {
+      indexOf = cacheIndexOf;
+      values = cache;
+    } else {
+      isLarge = false;
+    }
+  }
+  while (++index < length) {
+    var value = array[index];
+    if (indexOf(values, value) < 0) {
+      result.push(value);
+    }
+  }
+  if (isLarge) {
+    releaseObject(values);
+  }
+  return result;
+}
+
+module.exports = baseDifference;
+
+},{"./baseIndexOf":96,"./cacheIndexOf":101,"./createCache":106,"./largeArraySize":116,"./releaseObject":125}],95:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var isArguments = require('../objects/isArguments'),
+    isArray = require('../objects/isArray');
+
+/**
+ * The base implementation of `_.flatten` without support for callback
+ * shorthands or `thisArg` binding.
+ *
+ * @private
+ * @param {Array} array The array to flatten.
+ * @param {boolean} [isShallow=false] A flag to restrict flattening to a single level.
+ * @param {boolean} [isStrict=false] A flag to restrict flattening to arrays and `arguments` objects.
+ * @param {number} [fromIndex=0] The index to start from.
+ * @returns {Array} Returns a new flattened array.
+ */
+function baseFlatten(array, isShallow, isStrict, fromIndex) {
+  var index = (fromIndex || 0) - 1,
+      length = array ? array.length : 0,
+      result = [];
+
+  while (++index < length) {
+    var value = array[index];
+
+    if (value && typeof value == 'object' && typeof value.length == 'number'
+        && (isArray(value) || isArguments(value))) {
+      // recursively flatten arrays (susceptible to call stack limits)
+      if (!isShallow) {
+        value = baseFlatten(value, isShallow, isStrict);
+      }
+      var valIndex = -1,
+          valLength = value.length,
+          resIndex = result.length;
+
+      result.length += valLength;
+      while (++valIndex < valLength) {
+        result[resIndex++] = value[valIndex];
+      }
+    } else if (!isStrict) {
+      result.push(value);
+    }
+  }
+  return result;
+}
+
+module.exports = baseFlatten;
+
+},{"../objects/isArguments":146,"../objects/isArray":147}],96:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/**
+ * The base implementation of `_.indexOf` without support for binary searches
+ * or `fromIndex` constraints.
+ *
+ * @private
+ * @param {Array} array The array to search.
+ * @param {*} value The value to search for.
+ * @param {number} [fromIndex=0] The index to search from.
+ * @returns {number} Returns the index of the matched value or `-1`.
+ */
+function baseIndexOf(array, value, fromIndex) {
+  var index = (fromIndex || 0) - 1,
+      length = array ? array.length : 0;
+
+  while (++index < length) {
+    if (array[index] === value) {
+      return index;
+    }
+  }
+  return -1;
+}
+
+module.exports = baseIndexOf;
+
+},{}],97:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var forIn = require('../objects/forIn'),
+    getArray = require('./getArray'),
+    isFunction = require('../objects/isFunction'),
+    objectTypes = require('./objectTypes'),
+    releaseArray = require('./releaseArray');
+
+/** `Object#toString` result shortcuts */
+var argsClass = '[object Arguments]',
+    arrayClass = '[object Array]',
+    boolClass = '[object Boolean]',
+    dateClass = '[object Date]',
+    numberClass = '[object Number]',
+    objectClass = '[object Object]',
+    regexpClass = '[object RegExp]',
+    stringClass = '[object String]';
+
+/** Used for native method references */
+var objectProto = Object.prototype;
+
+/** Used to resolve the internal [[Class]] of values */
+var toString = objectProto.toString;
+
+/** Native method shortcuts */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * The base implementation of `_.isEqual`, without support for `thisArg` binding,
+ * that allows partial "_.where" style comparisons.
+ *
+ * @private
+ * @param {*} a The value to compare.
+ * @param {*} b The other value to compare.
+ * @param {Function} [callback] The function to customize comparing values.
+ * @param {Function} [isWhere=false] A flag to indicate performing partial comparisons.
+ * @param {Array} [stackA=[]] Tracks traversed `a` objects.
+ * @param {Array} [stackB=[]] Tracks traversed `b` objects.
+ * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
+ */
+function baseIsEqual(a, b, callback, isWhere, stackA, stackB) {
+  // used to indicate that when comparing objects, `a` has at least the properties of `b`
+  if (callback) {
+    var result = callback(a, b);
+    if (typeof result != 'undefined') {
+      return !!result;
+    }
+  }
+  // exit early for identical values
+  if (a === b) {
+    // treat `+0` vs. `-0` as not equal
+    return a !== 0 || (1 / a == 1 / b);
+  }
+  var type = typeof a,
+      otherType = typeof b;
+
+  // exit early for unlike primitive values
+  if (a === a &&
+      !(a && objectTypes[type]) &&
+      !(b && objectTypes[otherType])) {
+    return false;
+  }
+  // exit early for `null` and `undefined` avoiding ES3's Function#call behavior
+  // http://es5.github.io/#x15.3.4.4
+  if (a == null || b == null) {
+    return a === b;
+  }
+  // compare [[Class]] names
+  var className = toString.call(a),
+      otherClass = toString.call(b);
+
+  if (className == argsClass) {
+    className = objectClass;
+  }
+  if (otherClass == argsClass) {
+    otherClass = objectClass;
+  }
+  if (className != otherClass) {
+    return false;
+  }
+  switch (className) {
+    case boolClass:
+    case dateClass:
+      // coerce dates and booleans to numbers, dates to milliseconds and booleans
+      // to `1` or `0` treating invalid dates coerced to `NaN` as not equal
+      return +a == +b;
+
+    case numberClass:
+      // treat `NaN` vs. `NaN` as equal
+      return (a != +a)
+        ? b != +b
+        // but treat `+0` vs. `-0` as not equal
+        : (a == 0 ? (1 / a == 1 / b) : a == +b);
+
+    case regexpClass:
+    case stringClass:
+      // coerce regexes to strings (http://es5.github.io/#x15.10.6.4)
+      // treat string primitives and their corresponding object instances as equal
+      return a == String(b);
+  }
+  var isArr = className == arrayClass;
+  if (!isArr) {
+    // unwrap any `lodash` wrapped values
+    var aWrapped = hasOwnProperty.call(a, '__wrapped__'),
+        bWrapped = hasOwnProperty.call(b, '__wrapped__');
+
+    if (aWrapped || bWrapped) {
+      return baseIsEqual(aWrapped ? a.__wrapped__ : a, bWrapped ? b.__wrapped__ : b, callback, isWhere, stackA, stackB);
+    }
+    // exit for functions and DOM nodes
+    if (className != objectClass) {
+      return false;
+    }
+    // in older versions of Opera, `arguments` objects have `Array` constructors
+    var ctorA = a.constructor,
+        ctorB = b.constructor;
+
+    // non `Object` object instances with different constructors are not equal
+    if (ctorA != ctorB &&
+          !(isFunction(ctorA) && ctorA instanceof ctorA && isFunction(ctorB) && ctorB instanceof ctorB) &&
+          ('constructor' in a && 'constructor' in b)
+        ) {
+      return false;
+    }
+  }
+  // assume cyclic structures are equal
+  // the algorithm for detecting cyclic structures is adapted from ES 5.1
+  // section 15.12.3, abstract operation `JO` (http://es5.github.io/#x15.12.3)
+  var initedStack = !stackA;
+  stackA || (stackA = getArray());
+  stackB || (stackB = getArray());
+
+  var length = stackA.length;
+  while (length--) {
+    if (stackA[length] == a) {
+      return stackB[length] == b;
+    }
+  }
+  var size = 0;
+  result = true;
+
+  // add `a` and `b` to the stack of traversed objects
+  stackA.push(a);
+  stackB.push(b);
+
+  // recursively compare objects and arrays (susceptible to call stack limits)
+  if (isArr) {
+    // compare lengths to determine if a deep comparison is necessary
+    length = a.length;
+    size = b.length;
+    result = size == length;
+
+    if (result || isWhere) {
+      // deep compare the contents, ignoring non-numeric properties
+      while (size--) {
+        var index = length,
+            value = b[size];
+
+        if (isWhere) {
+          while (index--) {
+            if ((result = baseIsEqual(a[index], value, callback, isWhere, stackA, stackB))) {
               break;
             }
           }
-          if (!found) {
-            var isShallow;
-            if (callback) {
-              result = callback(value, source);
-              if ((isShallow = typeof result != 'undefined')) {
-                value = result;
-              }
-            }
-            if (!isShallow) {
-              value = isArr
-                ? (isArray(value) ? value : [])
-                : (isPlainObject(value) ? value : {});
-            }
-            // add `source` and associated `value` to the stack of traversed objects
-            stackA.push(source);
-            stackB.push(value);
-
-            // recursively merge objects and arrays (susceptible to call stack limits)
-            if (!isShallow) {
-              baseMerge(value, source, callback, stackA, stackB);
-            }
-          }
-        }
-        else {
-          if (callback) {
-            result = callback(value, source);
-            if (typeof result == 'undefined') {
-              result = source;
-            }
-          }
-          if (typeof result != 'undefined') {
-            value = result;
-          }
-        }
-        object[key] = value;
-      });
-    }
-
-    /**
-     * The base implementation of `_.random` without argument juggling or support
-     * for returning floating-point numbers.
-     *
-     * @private
-     * @param {number} min The minimum possible value.
-     * @param {number} max The maximum possible value.
-     * @returns {number} Returns a random number.
-     */
-    function baseRandom(min, max) {
-      return min + floor(nativeRandom() * (max - min + 1));
-    }
-
-    /**
-     * The base implementation of `_.uniq` without support for callback shorthands
-     * or `thisArg` binding.
-     *
-     * @private
-     * @param {Array} array The array to process.
-     * @param {boolean} [isSorted=false] A flag to indicate that `array` is sorted.
-     * @param {Function} [callback] The function called per iteration.
-     * @returns {Array} Returns a duplicate-value-free array.
-     */
-    function baseUniq(array, isSorted, callback) {
-      var index = -1,
-          indexOf = getIndexOf(),
-          length = array ? array.length : 0,
-          result = [];
-
-      var isLarge = !isSorted && length >= largeArraySize && indexOf === baseIndexOf,
-          seen = (callback || isLarge) ? getArray() : result;
-
-      if (isLarge) {
-        var cache = createCache(seen);
-        if (cache) {
-          indexOf = cacheIndexOf;
-          seen = cache;
-        } else {
-          isLarge = false;
-          seen = callback ? seen : (releaseArray(seen), result);
-        }
-      }
-      while (++index < length) {
-        var value = array[index],
-            computed = callback ? callback(value, index, array) : value;
-
-        if (isSorted
-              ? !index || seen[seen.length - 1] !== computed
-              : indexOf(seen, computed) < 0
-            ) {
-          if (callback || isLarge) {
-            seen.push(computed);
-          }
-          result.push(value);
-        }
-      }
-      if (isLarge) {
-        releaseArray(seen.array);
-        releaseObject(seen);
-      } else if (callback) {
-        releaseArray(seen);
-      }
-      return result;
-    }
-
-    /**
-     * Creates a function that aggregates a collection, creating an object composed
-     * of keys generated from the results of running each element of the collection
-     * through a callback. The given `setter` function sets the keys and values
-     * of the composed object.
-     *
-     * @private
-     * @param {Function} setter The setter function.
-     * @returns {Function} Returns the new aggregator function.
-     */
-    function createAggregator(setter) {
-      return function(collection, callback, thisArg) {
-        var result = {};
-        callback = lodash.createCallback(callback, thisArg, 3);
-
-        if (isArray(collection)) {
-          var index = -1,
-              length = collection.length;
-
-          while (++index < length) {
-            var value = collection[index];
-            setter(result, value, callback(value, index, collection), collection);
-          }
-        } else {
-          baseEach(collection, function(value, key, collection) {
-            setter(result, value, callback(value, key, collection), collection);
-          });
-        }
-        return result;
-      };
-    }
-
-    /**
-     * Creates a function that, when called, either curries or invokes `func`
-     * with an optional `this` binding and partially applied arguments.
-     *
-     * @private
-     * @param {Function|string} func The function or method name to reference.
-     * @param {number} bitmask The bitmask of method flags to compose.
-     *  The bitmask may be composed of the following flags:
-     *  1 - `_.bind`
-     *  2 - `_.bindKey`
-     *  4 - `_.curry`
-     *  8 - `_.curry` (bound)
-     *  16 - `_.partial`
-     *  32 - `_.partialRight`
-     * @param {Array} [partialArgs] An array of arguments to prepend to those
-     *  provided to the new function.
-     * @param {Array} [partialRightArgs] An array of arguments to append to those
-     *  provided to the new function.
-     * @param {*} [thisArg] The `this` binding of `func`.
-     * @param {number} [arity] The arity of `func`.
-     * @returns {Function} Returns the new function.
-     */
-    function createWrapper(func, bitmask, partialArgs, partialRightArgs, thisArg, arity) {
-      var isBind = bitmask & 1,
-          isBindKey = bitmask & 2,
-          isCurry = bitmask & 4,
-          isCurryBound = bitmask & 8,
-          isPartial = bitmask & 16,
-          isPartialRight = bitmask & 32;
-
-      if (!isBindKey && !isFunction(func)) {
-        throw new TypeError;
-      }
-      if (isPartial && !partialArgs.length) {
-        bitmask &= ~16;
-        isPartial = partialArgs = false;
-      }
-      if (isPartialRight && !partialRightArgs.length) {
-        bitmask &= ~32;
-        isPartialRight = partialRightArgs = false;
-      }
-      var bindData = func && func.__bindData__;
-      if (bindData && bindData !== true) {
-        bindData = bindData.slice();
-
-        // set `thisBinding` is not previously bound
-        if (isBind && !(bindData[1] & 1)) {
-          bindData[4] = thisArg;
-        }
-        // set if previously bound but not currently (subsequent curried functions)
-        if (!isBind && bindData[1] & 1) {
-          bitmask |= 8;
-        }
-        // set curried arity if not yet set
-        if (isCurry && !(bindData[1] & 4)) {
-          bindData[5] = arity;
-        }
-        // append partial left arguments
-        if (isPartial) {
-          push.apply(bindData[2] || (bindData[2] = []), partialArgs);
-        }
-        // append partial right arguments
-        if (isPartialRight) {
-          push.apply(bindData[3] || (bindData[3] = []), partialRightArgs);
-        }
-        // merge flags
-        bindData[1] |= bitmask;
-        return createWrapper.apply(null, bindData);
-      }
-      // fast path for `_.bind`
-      var creater = (bitmask == 1 || bitmask === 17) ? baseBind : baseCreateWrapper;
-      return creater([func, bitmask, partialArgs, partialRightArgs, thisArg, arity]);
-    }
-
-    /**
-     * Creates compiled iteration functions.
-     *
-     * @private
-     * @param {...Object} [options] The compile options object(s).
-     * @param {string} [options.array] Code to determine if the iterable is an array or array-like.
-     * @param {boolean} [options.useHas] Specify using `hasOwnProperty` checks in the object loop.
-     * @param {Function} [options.keys] A reference to `_.keys` for use in own property iteration.
-     * @param {string} [options.args] A comma separated string of iteration function arguments.
-     * @param {string} [options.top] Code to execute before the iteration branches.
-     * @param {string} [options.loop] Code to execute in the object loop.
-     * @param {string} [options.bottom] Code to execute after the iteration branches.
-     * @returns {Function} Returns the compiled function.
-     */
-    function createIterator() {
-      // data properties
-      iteratorData.shadowedProps = shadowedProps;
-
-      // iterator options
-      iteratorData.array = iteratorData.bottom = iteratorData.loop = iteratorData.top = '';
-      iteratorData.init = 'iterable';
-      iteratorData.useHas = true;
-
-      // merge options into a template data object
-      for (var object, index = 0; object = arguments[index]; index++) {
-        for (var key in object) {
-          iteratorData[key] = object[key];
-        }
-      }
-      var args = iteratorData.args;
-      iteratorData.firstArg = /^[^,]+/.exec(args)[0];
-
-      // create the function factory
-      var factory = Function(
-          'baseCreateCallback, errorClass, errorProto, hasOwnProperty, ' +
-          'indicatorObject, isArguments, isArray, isString, keys, objectProto, ' +
-          'objectTypes, nonEnumProps, stringClass, stringProto, toString',
-        'return function(' + args + ') {\n' + iteratorTemplate(iteratorData) + '\n}'
-      );
-
-      // return the compiled function
-      return factory(
-        baseCreateCallback, errorClass, errorProto, hasOwnProperty,
-        indicatorObject, isArguments, isArray, isString, iteratorData.keys, objectProto,
-        objectTypes, nonEnumProps, stringClass, stringProto, toString
-      );
-    }
-
-    /**
-     * Used by `escape` to convert characters to HTML entities.
-     *
-     * @private
-     * @param {string} match The matched character to escape.
-     * @returns {string} Returns the escaped character.
-     */
-    function escapeHtmlChar(match) {
-      return htmlEscapes[match];
-    }
-
-    /**
-     * Gets the appropriate "indexOf" function. If the `_.indexOf` method is
-     * customized, this method returns the custom method, otherwise it returns
-     * the `baseIndexOf` function.
-     *
-     * @private
-     * @returns {Function} Returns the "indexOf" function.
-     */
-    function getIndexOf() {
-      var result = (result = lodash.indexOf) === indexOf ? baseIndexOf : result;
-      return result;
-    }
-
-    /**
-     * Sets `this` binding data on a given function.
-     *
-     * @private
-     * @param {Function} func The function to set data on.
-     * @param {Array} value The data array to set.
-     */
-    var setBindData = !defineProperty ? noop : function(func, value) {
-      descriptor.value = value;
-      defineProperty(func, '__bindData__', descriptor);
-    };
-
-    /**
-     * A fallback implementation of `isPlainObject` which checks if a given value
-     * is an object created by the `Object` constructor, assuming objects created
-     * by the `Object` constructor have no inherited enumerable properties and that
-     * there are no `Object.prototype` extensions.
-     *
-     * @private
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is a plain object, else `false`.
-     */
-    function shimIsPlainObject(value) {
-      var ctor,
-          result;
-
-      // avoid non Object objects, `arguments` objects, and DOM elements
-      if (!(value && toString.call(value) == objectClass) ||
-          (ctor = value.constructor, isFunction(ctor) && !(ctor instanceof ctor)) ||
-          (!support.argsClass && isArguments(value)) ||
-          (!support.nodeClass && isNode(value))) {
-        return false;
-      }
-      // IE < 9 iterates inherited properties before own properties. If the first
-      // iterated property is an object's own property then there are no inherited
-      // enumerable properties.
-      if (support.ownLast) {
-        forIn(value, function(value, key, object) {
-          result = hasOwnProperty.call(object, key);
-          return false;
-        });
-        return result !== false;
-      }
-      // In most environments an object's own properties are iterated before
-      // its inherited properties. If the last iterated property is an object's
-      // own property then there are no inherited enumerable properties.
-      forIn(value, function(value, key) {
-        result = key;
-      });
-      return typeof result == 'undefined' || hasOwnProperty.call(value, result);
-    }
-
-    /**
-     * Used by `unescape` to convert HTML entities to characters.
-     *
-     * @private
-     * @param {string} match The matched character to unescape.
-     * @returns {string} Returns the unescaped character.
-     */
-    function unescapeHtmlChar(match) {
-      return htmlUnescapes[match];
-    }
-
-    /*--------------------------------------------------------------------------*/
-
-    /**
-     * Checks if `value` is an `arguments` object.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if the `value` is an `arguments` object, else `false`.
-     * @example
-     *
-     * (function() { return _.isArguments(arguments); })(1, 2, 3);
-     * // => true
-     *
-     * _.isArguments([1, 2, 3]);
-     * // => false
-     */
-    function isArguments(value) {
-      return value && typeof value == 'object' && typeof value.length == 'number' &&
-        toString.call(value) == argsClass || false;
-    }
-    // fallback for browsers that can't detect `arguments` objects by [[Class]]
-    if (!support.argsClass) {
-      isArguments = function(value) {
-        return value && typeof value == 'object' && typeof value.length == 'number' &&
-          hasOwnProperty.call(value, 'callee') && !propertyIsEnumerable.call(value, 'callee') || false;
-      };
-    }
-
-    /**
-     * Checks if `value` is an array.
-     *
-     * @static
-     * @memberOf _
-     * @type Function
-     * @category Objects
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if the `value` is an array, else `false`.
-     * @example
-     *
-     * (function() { return _.isArray(arguments); })();
-     * // => false
-     *
-     * _.isArray([1, 2, 3]);
-     * // => true
-     */
-    var isArray = nativeIsArray || function(value) {
-      return value && typeof value == 'object' && typeof value.length == 'number' &&
-        toString.call(value) == arrayClass || false;
-    };
-
-    /**
-     * A fallback implementation of `Object.keys` which produces an array of the
-     * given object's own enumerable property names.
-     *
-     * @private
-     * @type Function
-     * @param {Object} object The object to inspect.
-     * @returns {Array} Returns an array of property names.
-     */
-    var shimKeys = createIterator({
-      'args': 'object',
-      'init': '[]',
-      'top': 'if (!(objectTypes[typeof object])) return result',
-      'loop': 'result.push(index)'
-    });
-
-    /**
-     * Creates an array composed of the own enumerable property names of an object.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {Object} object The object to inspect.
-     * @returns {Array} Returns an array of property names.
-     * @example
-     *
-     * _.keys({ 'one': 1, 'two': 2, 'three': 3 });
-     * // => ['one', 'two', 'three'] (property order is not guaranteed across environments)
-     */
-    var keys = !nativeKeys ? shimKeys : function(object) {
-      if (!isObject(object)) {
-        return [];
-      }
-      if ((support.enumPrototypes && typeof object == 'function') ||
-          (support.nonEnumArgs && object.length && isArguments(object))) {
-        return shimKeys(object);
-      }
-      return nativeKeys(object);
-    };
-
-    /** Reusable iterator options shared by `each`, `forIn`, and `forOwn` */
-    var eachIteratorOptions = {
-      'args': 'collection, callback, thisArg',
-      'top': "callback = callback && typeof thisArg == 'undefined' ? callback : baseCreateCallback(callback, thisArg, 3)",
-      'array': "typeof length == 'number'",
-      'keys': keys,
-      'loop': 'if (callback(iterable[index], index, collection) === false) return result'
-    };
-
-    /** Reusable iterator options for `assign` and `defaults` */
-    var defaultsIteratorOptions = {
-      'args': 'object, source, guard',
-      'top':
-        'var args = arguments,\n' +
-        '    argsIndex = 0,\n' +
-        "    argsLength = typeof guard == 'number' ? 2 : args.length;\n" +
-        'while (++argsIndex < argsLength) {\n' +
-        '  iterable = args[argsIndex];\n' +
-        '  if (iterable && objectTypes[typeof iterable]) {',
-      'keys': keys,
-      'loop': "if (typeof result[index] == 'undefined') result[index] = iterable[index]",
-      'bottom': '  }\n}'
-    };
-
-    /** Reusable iterator options for `forIn` and `forOwn` */
-    var forOwnIteratorOptions = {
-      'top': 'if (!objectTypes[typeof iterable]) return result;\n' + eachIteratorOptions.top,
-      'array': false
-    };
-
-    /**
-     * Used to convert characters to HTML entities:
-     *
-     * Though the `>` character is escaped for symmetry, characters like `>` and `/`
-     * don't require escaping in HTML and have no special meaning unless they're part
-     * of a tag or an unquoted attribute value.
-     * http://mathiasbynens.be/notes/ambiguous-ampersands (under "semi-related fun fact")
-     */
-    var htmlEscapes = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;'
-    };
-
-    /** Used to convert HTML entities to characters */
-    var htmlUnescapes = invert(htmlEscapes);
-
-    /** Used to match HTML entities and HTML characters */
-    var reEscapedHtml = RegExp('(' + keys(htmlUnescapes).join('|') + ')', 'g'),
-        reUnescapedHtml = RegExp('[' + keys(htmlEscapes).join('') + ']', 'g');
-
-    /**
-     * A function compiled to iterate `arguments` objects, arrays, objects, and
-     * strings consistenly across environments, executing the callback for each
-     * element in the collection. The callback is bound to `thisArg` and invoked
-     * with three arguments; (value, index|key, collection). Callbacks may exit
-     * iteration early by explicitly returning `false`.
-     *
-     * @private
-     * @type Function
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function} [callback=identity] The function called per iteration.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Array|Object|string} Returns `collection`.
-     */
-    var baseEach = createIterator(eachIteratorOptions);
-
-    /*--------------------------------------------------------------------------*/
-
-    /**
-     * Assigns own enumerable properties of source object(s) to the destination
-     * object. Subsequent sources will overwrite property assignments of previous
-     * sources. If a callback is provided it will be executed to produce the
-     * assigned values. The callback is bound to `thisArg` and invoked with two
-     * arguments; (objectValue, sourceValue).
-     *
-     * @static
-     * @memberOf _
-     * @type Function
-     * @alias extend
-     * @category Objects
-     * @param {Object} object The destination object.
-     * @param {...Object} [source] The source objects.
-     * @param {Function} [callback] The function to customize assigning values.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Object} Returns the destination object.
-     * @example
-     *
-     * _.assign({ 'name': 'fred' }, { 'employer': 'slate' });
-     * // => { 'name': 'fred', 'employer': 'slate' }
-     *
-     * var defaults = _.partialRight(_.assign, function(a, b) {
-     *   return typeof a == 'undefined' ? b : a;
-     * });
-     *
-     * var object = { 'name': 'barney' };
-     * defaults(object, { 'name': 'fred', 'employer': 'slate' });
-     * // => { 'name': 'barney', 'employer': 'slate' }
-     */
-    var assign = createIterator(defaultsIteratorOptions, {
-      'top':
-        defaultsIteratorOptions.top.replace(';',
-          ';\n' +
-          "if (argsLength > 3 && typeof args[argsLength - 2] == 'function') {\n" +
-          '  var callback = baseCreateCallback(args[--argsLength - 1], args[argsLength--], 2);\n' +
-          "} else if (argsLength > 2 && typeof args[argsLength - 1] == 'function') {\n" +
-          '  callback = args[--argsLength];\n' +
-          '}'
-        ),
-      'loop': 'result[index] = callback ? callback(result[index], iterable[index]) : iterable[index]'
-    });
-
-    /**
-     * Creates a clone of `value`. If `isDeep` is `true` nested objects will also
-     * be cloned, otherwise they will be assigned by reference. If a callback
-     * is provided it will be executed to produce the cloned values. If the
-     * callback returns `undefined` cloning will be handled by the method instead.
-     * The callback is bound to `thisArg` and invoked with one argument; (value).
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {*} value The value to clone.
-     * @param {boolean} [isDeep=false] Specify a deep clone.
-     * @param {Function} [callback] The function to customize cloning values.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {*} Returns the cloned value.
-     * @example
-     *
-     * var characters = [
-     *   { 'name': 'barney', 'age': 36 },
-     *   { 'name': 'fred',   'age': 40 }
-     * ];
-     *
-     * var shallow = _.clone(characters);
-     * shallow[0] === characters[0];
-     * // => true
-     *
-     * var deep = _.clone(characters, true);
-     * deep[0] === characters[0];
-     * // => false
-     *
-     * _.mixin({
-     *   'clone': _.partialRight(_.clone, function(value) {
-     *     return _.isElement(value) ? value.cloneNode(false) : undefined;
-     *   })
-     * });
-     *
-     * var clone = _.clone(document.body);
-     * clone.childNodes.length;
-     * // => 0
-     */
-    function clone(value, isDeep, callback, thisArg) {
-      // allows working with "Collections" methods without using their `index`
-      // and `collection` arguments for `isDeep` and `callback`
-      if (typeof isDeep != 'boolean' && isDeep != null) {
-        thisArg = callback;
-        callback = isDeep;
-        isDeep = false;
-      }
-      return baseClone(value, isDeep, typeof callback == 'function' && baseCreateCallback(callback, thisArg, 1));
-    }
-
-    /**
-     * Creates a deep clone of `value`. If a callback is provided it will be
-     * executed to produce the cloned values. If the callback returns `undefined`
-     * cloning will be handled by the method instead. The callback is bound to
-     * `thisArg` and invoked with one argument; (value).
-     *
-     * Note: This method is loosely based on the structured clone algorithm. Functions
-     * and DOM nodes are **not** cloned. The enumerable properties of `arguments` objects and
-     * objects created by constructors other than `Object` are cloned to plain `Object` objects.
-     * See http://www.w3.org/TR/html5/infrastructure.html#internal-structured-cloning-algorithm.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {*} value The value to deep clone.
-     * @param {Function} [callback] The function to customize cloning values.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {*} Returns the deep cloned value.
-     * @example
-     *
-     * var characters = [
-     *   { 'name': 'barney', 'age': 36 },
-     *   { 'name': 'fred',   'age': 40 }
-     * ];
-     *
-     * var deep = _.cloneDeep(characters);
-     * deep[0] === characters[0];
-     * // => false
-     *
-     * var view = {
-     *   'label': 'docs',
-     *   'node': element
-     * };
-     *
-     * var clone = _.cloneDeep(view, function(value) {
-     *   return _.isElement(value) ? value.cloneNode(true) : undefined;
-     * });
-     *
-     * clone.node == view.node;
-     * // => false
-     */
-    function cloneDeep(value, callback, thisArg) {
-      return baseClone(value, true, typeof callback == 'function' && baseCreateCallback(callback, thisArg, 1));
-    }
-
-    /**
-     * Creates an object that inherits from the given `prototype` object. If a
-     * `properties` object is provided its own enumerable properties are assigned
-     * to the created object.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {Object} prototype The object to inherit from.
-     * @param {Object} [properties] The properties to assign to the object.
-     * @returns {Object} Returns the new object.
-     * @example
-     *
-     * function Shape() {
-     *   this.x = 0;
-     *   this.y = 0;
-     * }
-     *
-     * function Circle() {
-     *   Shape.call(this);
-     * }
-     *
-     * Circle.prototype = _.create(Shape.prototype, { 'constructor': Circle });
-     *
-     * var circle = new Circle;
-     * circle instanceof Circle;
-     * // => true
-     *
-     * circle instanceof Shape;
-     * // => true
-     */
-    function create(prototype, properties) {
-      var result = baseCreate(prototype);
-      return properties ? assign(result, properties) : result;
-    }
-
-    /**
-     * Assigns own enumerable properties of source object(s) to the destination
-     * object for all destination properties that resolve to `undefined`. Once a
-     * property is set, additional defaults of the same property will be ignored.
-     *
-     * @static
-     * @memberOf _
-     * @type Function
-     * @category Objects
-     * @param {Object} object The destination object.
-     * @param {...Object} [source] The source objects.
-     * @param- {Object} [guard] Allows working with `_.reduce` without using its
-     *  `key` and `object` arguments as sources.
-     * @returns {Object} Returns the destination object.
-     * @example
-     *
-     * var object = { 'name': 'barney' };
-     * _.defaults(object, { 'name': 'fred', 'employer': 'slate' });
-     * // => { 'name': 'barney', 'employer': 'slate' }
-     */
-    var defaults = createIterator(defaultsIteratorOptions);
-
-    /**
-     * This method is like `_.findIndex` except that it returns the key of the
-     * first element that passes the callback check, instead of the element itself.
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {Object} object The object to search.
-     * @param {Function|Object|string} [callback=identity] The function called per
-     *  iteration. If a property name or object is provided it will be used to
-     *  create a "_.pluck" or "_.where" style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {string|undefined} Returns the key of the found element, else `undefined`.
-     * @example
-     *
-     * var characters = {
-     *   'barney': {  'age': 36, 'blocked': false },
-     *   'fred': {    'age': 40, 'blocked': true },
-     *   'pebbles': { 'age': 1,  'blocked': false }
-     * };
-     *
-     * _.findKey(characters, function(chr) {
-     *   return chr.age < 40;
-     * });
-     * // => 'barney' (property order is not guaranteed across environments)
-     *
-     * // using "_.where" callback shorthand
-     * _.findKey(characters, { 'age': 1 });
-     * // => 'pebbles'
-     *
-     * // using "_.pluck" callback shorthand
-     * _.findKey(characters, 'blocked');
-     * // => 'fred'
-     */
-    function findKey(object, callback, thisArg) {
-      var result;
-      callback = lodash.createCallback(callback, thisArg, 3);
-      forOwn(object, function(value, key, object) {
-        if (callback(value, key, object)) {
-          result = key;
-          return false;
-        }
-      });
-      return result;
-    }
-
-    /**
-     * This method is like `_.findKey` except that it iterates over elements
-     * of a `collection` in the opposite order.
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {Object} object The object to search.
-     * @param {Function|Object|string} [callback=identity] The function called per
-     *  iteration. If a property name or object is provided it will be used to
-     *  create a "_.pluck" or "_.where" style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {string|undefined} Returns the key of the found element, else `undefined`.
-     * @example
-     *
-     * var characters = {
-     *   'barney': {  'age': 36, 'blocked': true },
-     *   'fred': {    'age': 40, 'blocked': false },
-     *   'pebbles': { 'age': 1,  'blocked': true }
-     * };
-     *
-     * _.findLastKey(characters, function(chr) {
-     *   return chr.age < 40;
-     * });
-     * // => returns `pebbles`, assuming `_.findKey` returns `barney`
-     *
-     * // using "_.where" callback shorthand
-     * _.findLastKey(characters, { 'age': 40 });
-     * // => 'fred'
-     *
-     * // using "_.pluck" callback shorthand
-     * _.findLastKey(characters, 'blocked');
-     * // => 'pebbles'
-     */
-    function findLastKey(object, callback, thisArg) {
-      var result;
-      callback = lodash.createCallback(callback, thisArg, 3);
-      forOwnRight(object, function(value, key, object) {
-        if (callback(value, key, object)) {
-          result = key;
-          return false;
-        }
-      });
-      return result;
-    }
-
-    /**
-     * Iterates over own and inherited enumerable properties of an object,
-     * executing the callback for each property. The callback is bound to `thisArg`
-     * and invoked with three arguments; (value, key, object). Callbacks may exit
-     * iteration early by explicitly returning `false`.
-     *
-     * @static
-     * @memberOf _
-     * @type Function
-     * @category Objects
-     * @param {Object} object The object to iterate over.
-     * @param {Function} [callback=identity] The function called per iteration.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Object} Returns `object`.
-     * @example
-     *
-     * function Shape() {
-     *   this.x = 0;
-     *   this.y = 0;
-     * }
-     *
-     * Shape.prototype.move = function(x, y) {
-     *   this.x += x;
-     *   this.y += y;
-     * };
-     *
-     * _.forIn(new Shape, function(value, key) {
-     *   console.log(key);
-     * });
-     * // => logs 'x', 'y', and 'move' (property order is not guaranteed across environments)
-     */
-    var forIn = createIterator(eachIteratorOptions, forOwnIteratorOptions, {
-      'useHas': false
-    });
-
-    /**
-     * This method is like `_.forIn` except that it iterates over elements
-     * of a `collection` in the opposite order.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {Object} object The object to iterate over.
-     * @param {Function} [callback=identity] The function called per iteration.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Object} Returns `object`.
-     * @example
-     *
-     * function Shape() {
-     *   this.x = 0;
-     *   this.y = 0;
-     * }
-     *
-     * Shape.prototype.move = function(x, y) {
-     *   this.x += x;
-     *   this.y += y;
-     * };
-     *
-     * _.forInRight(new Shape, function(value, key) {
-     *   console.log(key);
-     * });
-     * // => logs 'move', 'y', and 'x' assuming `_.forIn ` logs 'x', 'y', and 'move'
-     */
-    function forInRight(object, callback, thisArg) {
-      var pairs = [];
-
-      forIn(object, function(value, key) {
-        pairs.push(key, value);
-      });
-
-      var length = pairs.length;
-      callback = baseCreateCallback(callback, thisArg, 3);
-      while (length--) {
-        if (callback(pairs[length--], pairs[length], object) === false) {
+        } else if (!(result = baseIsEqual(a[size], value, callback, isWhere, stackA, stackB))) {
           break;
         }
       }
-      return object;
-    }
-
-    /**
-     * Iterates over own enumerable properties of an object, executing the callback
-     * for each property. The callback is bound to `thisArg` and invoked with three
-     * arguments; (value, key, object). Callbacks may exit iteration early by
-     * explicitly returning `false`.
-     *
-     * @static
-     * @memberOf _
-     * @type Function
-     * @category Objects
-     * @param {Object} object The object to iterate over.
-     * @param {Function} [callback=identity] The function called per iteration.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Object} Returns `object`.
-     * @example
-     *
-     * _.forOwn({ '0': 'zero', '1': 'one', 'length': 2 }, function(num, key) {
-     *   console.log(key);
-     * });
-     * // => logs '0', '1', and 'length' (property order is not guaranteed across environments)
-     */
-    var forOwn = createIterator(eachIteratorOptions, forOwnIteratorOptions);
-
-    /**
-     * This method is like `_.forOwn` except that it iterates over elements
-     * of a `collection` in the opposite order.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {Object} object The object to iterate over.
-     * @param {Function} [callback=identity] The function called per iteration.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Object} Returns `object`.
-     * @example
-     *
-     * _.forOwnRight({ '0': 'zero', '1': 'one', 'length': 2 }, function(num, key) {
-     *   console.log(key);
-     * });
-     * // => logs 'length', '1', and '0' assuming `_.forOwn` logs '0', '1', and 'length'
-     */
-    function forOwnRight(object, callback, thisArg) {
-      var props = keys(object),
-          length = props.length;
-
-      callback = baseCreateCallback(callback, thisArg, 3);
-      while (length--) {
-        var key = props[length];
-        if (callback(object[key], key, object) === false) {
-          break;
-        }
-      }
-      return object;
-    }
-
-    /**
-     * Creates a sorted array of property names of all enumerable properties,
-     * own and inherited, of `object` that have function values.
-     *
-     * @static
-     * @memberOf _
-     * @alias methods
-     * @category Objects
-     * @param {Object} object The object to inspect.
-     * @returns {Array} Returns an array of property names that have function values.
-     * @example
-     *
-     * _.functions(_);
-     * // => ['all', 'any', 'bind', 'bindAll', 'clone', 'compact', 'compose', ...]
-     */
-    function functions(object) {
-      var result = [];
-      forIn(object, function(value, key) {
-        if (isFunction(value)) {
-          result.push(key);
-        }
-      });
-      return result.sort();
-    }
-
-    /**
-     * Checks if the specified object `property` exists and is a direct property,
-     * instead of an inherited property.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {Object} object The object to check.
-     * @param {string} property The property to check for.
-     * @returns {boolean} Returns `true` if key is a direct property, else `false`.
-     * @example
-     *
-     * _.has({ 'a': 1, 'b': 2, 'c': 3 }, 'b');
-     * // => true
-     */
-    function has(object, property) {
-      return object ? hasOwnProperty.call(object, property) : false;
-    }
-
-    /**
-     * Creates an object composed of the inverted keys and values of the given object.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {Object} object The object to invert.
-     * @returns {Object} Returns the created inverted object.
-     * @example
-     *
-     *  _.invert({ 'first': 'fred', 'second': 'barney' });
-     * // => { 'fred': 'first', 'barney': 'second' }
-     */
-    function invert(object) {
-      var index = -1,
-          props = keys(object),
-          length = props.length,
-          result = {};
-
-      while (++index < length) {
-        var key = props[index];
-        result[object[key]] = key;
-      }
-      return result;
-    }
-
-    /**
-     * Checks if `value` is a boolean value.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if the `value` is a boolean value, else `false`.
-     * @example
-     *
-     * _.isBoolean(null);
-     * // => false
-     */
-    function isBoolean(value) {
-      return value === true || value === false ||
-        value && typeof value == 'object' && toString.call(value) == boolClass || false;
-    }
-
-    /**
-     * Checks if `value` is a date.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if the `value` is a date, else `false`.
-     * @example
-     *
-     * _.isDate(new Date);
-     * // => true
-     */
-    function isDate(value) {
-      return value && typeof value == 'object' && toString.call(value) == dateClass || false;
-    }
-
-    /**
-     * Checks if `value` is a DOM element.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if the `value` is a DOM element, else `false`.
-     * @example
-     *
-     * _.isElement(document.body);
-     * // => true
-     */
-    function isElement(value) {
-      return value && value.nodeType === 1 || false;
-    }
-
-    /**
-     * Checks if `value` is empty. Arrays, strings, or `arguments` objects with a
-     * length of `0` and objects with no own enumerable properties are considered
-     * "empty".
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {Array|Object|string} value The value to inspect.
-     * @returns {boolean} Returns `true` if the `value` is empty, else `false`.
-     * @example
-     *
-     * _.isEmpty([1, 2, 3]);
-     * // => false
-     *
-     * _.isEmpty({});
-     * // => true
-     *
-     * _.isEmpty('');
-     * // => true
-     */
-    function isEmpty(value) {
-      var result = true;
-      if (!value) {
-        return result;
-      }
-      var className = toString.call(value),
-          length = value.length;
-
-      if ((className == arrayClass || className == stringClass ||
-          (support.argsClass ? className == argsClass : isArguments(value))) ||
-          (className == objectClass && typeof length == 'number' && isFunction(value.splice))) {
-        return !length;
-      }
-      forOwn(value, function() {
-        return (result = false);
-      });
-      return result;
-    }
-
-    /**
-     * Performs a deep comparison between two values to determine if they are
-     * equivalent to each other. If a callback is provided it will be executed
-     * to compare values. If the callback returns `undefined` comparisons will
-     * be handled by the method instead. The callback is bound to `thisArg` and
-     * invoked with two arguments; (a, b).
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {*} a The value to compare.
-     * @param {*} b The other value to compare.
-     * @param {Function} [callback] The function to customize comparing values.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
-     * @example
-     *
-     * var object = { 'name': 'fred' };
-     * var copy = { 'name': 'fred' };
-     *
-     * object == copy;
-     * // => false
-     *
-     * _.isEqual(object, copy);
-     * // => true
-     *
-     * var words = ['hello', 'goodbye'];
-     * var otherWords = ['hi', 'goodbye'];
-     *
-     * _.isEqual(words, otherWords, function(a, b) {
-     *   var reGreet = /^(?:hello|hi)$/i,
-     *       aGreet = _.isString(a) && reGreet.test(a),
-     *       bGreet = _.isString(b) && reGreet.test(b);
-     *
-     *   return (aGreet || bGreet) ? (aGreet == bGreet) : undefined;
-     * });
-     * // => true
-     */
-    function isEqual(a, b, callback, thisArg) {
-      return baseIsEqual(a, b, typeof callback == 'function' && baseCreateCallback(callback, thisArg, 2));
-    }
-
-    /**
-     * Checks if `value` is, or can be coerced to, a finite number.
-     *
-     * Note: This is not the same as native `isFinite` which will return true for
-     * booleans and empty strings. See http://es5.github.io/#x15.1.2.5.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if the `value` is finite, else `false`.
-     * @example
-     *
-     * _.isFinite(-101);
-     * // => true
-     *
-     * _.isFinite('10');
-     * // => true
-     *
-     * _.isFinite(true);
-     * // => false
-     *
-     * _.isFinite('');
-     * // => false
-     *
-     * _.isFinite(Infinity);
-     * // => false
-     */
-    function isFinite(value) {
-      return nativeIsFinite(value) && !nativeIsNaN(parseFloat(value));
-    }
-
-    /**
-     * Checks if `value` is a function.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if the `value` is a function, else `false`.
-     * @example
-     *
-     * _.isFunction(_);
-     * // => true
-     */
-    function isFunction(value) {
-      return typeof value == 'function';
-    }
-    // fallback for older versions of Chrome and Safari
-    if (isFunction(/x/)) {
-      isFunction = function(value) {
-        return typeof value == 'function' && toString.call(value) == funcClass;
-      };
-    }
-
-    /**
-     * Checks if `value` is the language type of Object.
-     * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if the `value` is an object, else `false`.
-     * @example
-     *
-     * _.isObject({});
-     * // => true
-     *
-     * _.isObject([1, 2, 3]);
-     * // => true
-     *
-     * _.isObject(1);
-     * // => false
-     */
-    function isObject(value) {
-      // check if the value is the ECMAScript language type of Object
-      // http://es5.github.io/#x8
-      // and avoid a V8 bug
-      // http://code.google.com/p/v8/issues/detail?id=2291
-      return !!(value && objectTypes[typeof value]);
-    }
-
-    /**
-     * Checks if `value` is `NaN`.
-     *
-     * Note: This is not the same as native `isNaN` which will return `true` for
-     * `undefined` and other non-numeric values. See http://es5.github.io/#x15.1.2.4.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if the `value` is `NaN`, else `false`.
-     * @example
-     *
-     * _.isNaN(NaN);
-     * // => true
-     *
-     * _.isNaN(new Number(NaN));
-     * // => true
-     *
-     * isNaN(undefined);
-     * // => true
-     *
-     * _.isNaN(undefined);
-     * // => false
-     */
-    function isNaN(value) {
-      // `NaN` as a primitive is the only value that is not equal to itself
-      // (perform the [[Class]] check first to avoid errors with some host objects in IE)
-      return isNumber(value) && value != +value;
-    }
-
-    /**
-     * Checks if `value` is `null`.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if the `value` is `null`, else `false`.
-     * @example
-     *
-     * _.isNull(null);
-     * // => true
-     *
-     * _.isNull(undefined);
-     * // => false
-     */
-    function isNull(value) {
-      return value === null;
-    }
-
-    /**
-     * Checks if `value` is a number.
-     *
-     * Note: `NaN` is considered a number. See http://es5.github.io/#x8.5.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if the `value` is a number, else `false`.
-     * @example
-     *
-     * _.isNumber(8.4 * 5);
-     * // => true
-     */
-    function isNumber(value) {
-      return typeof value == 'number' ||
-        value && typeof value == 'object' && toString.call(value) == numberClass || false;
-    }
-
-    /**
-     * Checks if `value` is an object created by the `Object` constructor.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is a plain object, else `false`.
-     * @example
-     *
-     * function Shape() {
-     *   this.x = 0;
-     *   this.y = 0;
-     * }
-     *
-     * _.isPlainObject(new Shape);
-     * // => false
-     *
-     * _.isPlainObject([1, 2, 3]);
-     * // => false
-     *
-     * _.isPlainObject({ 'x': 0, 'y': 0 });
-     * // => true
-     */
-    var isPlainObject = !getPrototypeOf ? shimIsPlainObject : function(value) {
-      if (!(value && toString.call(value) == objectClass) || (!support.argsClass && isArguments(value))) {
-        return false;
-      }
-      var valueOf = value.valueOf,
-          objProto = typeof valueOf == 'function' && (objProto = getPrototypeOf(valueOf)) && getPrototypeOf(objProto);
-
-      return objProto
-        ? (value == objProto || getPrototypeOf(value) == objProto)
-        : shimIsPlainObject(value);
-    };
-
-    /**
-     * Checks if `value` is a regular expression.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if the `value` is a regular expression, else `false`.
-     * @example
-     *
-     * _.isRegExp(/fred/);
-     * // => true
-     */
-    function isRegExp(value) {
-      return value && objectTypes[typeof value] && toString.call(value) == regexpClass || false;
-    }
-
-    /**
-     * Checks if `value` is a string.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if the `value` is a string, else `false`.
-     * @example
-     *
-     * _.isString('fred');
-     * // => true
-     */
-    function isString(value) {
-      return typeof value == 'string' ||
-        value && typeof value == 'object' && toString.call(value) == stringClass || false;
-    }
-
-    /**
-     * Checks if `value` is `undefined`.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if the `value` is `undefined`, else `false`.
-     * @example
-     *
-     * _.isUndefined(void 0);
-     * // => true
-     */
-    function isUndefined(value) {
-      return typeof value == 'undefined';
-    }
-
-    /**
-     * Recursively merges own enumerable properties of the source object(s), that
-     * don't resolve to `undefined` into the destination object. Subsequent sources
-     * will overwrite property assignments of previous sources. If a callback is
-     * provided it will be executed to produce the merged values of the destination
-     * and source properties. If the callback returns `undefined` merging will
-     * be handled by the method instead. The callback is bound to `thisArg` and
-     * invoked with two arguments; (objectValue, sourceValue).
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {Object} object The destination object.
-     * @param {...Object} [source] The source objects.
-     * @param {Function} [callback] The function to customize merging properties.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Object} Returns the destination object.
-     * @example
-     *
-     * var names = {
-     *   'characters': [
-     *     { 'name': 'barney' },
-     *     { 'name': 'fred' }
-     *   ]
-     * };
-     *
-     * var ages = {
-     *   'characters': [
-     *     { 'age': 36 },
-     *     { 'age': 40 }
-     *   ]
-     * };
-     *
-     * _.merge(names, ages);
-     * // => { 'characters': [{ 'name': 'barney', 'age': 36 }, { 'name': 'fred', 'age': 40 }] }
-     *
-     * var food = {
-     *   'fruits': ['apple'],
-     *   'vegetables': ['beet']
-     * };
-     *
-     * var otherFood = {
-     *   'fruits': ['banana'],
-     *   'vegetables': ['carrot']
-     * };
-     *
-     * _.merge(food, otherFood, function(a, b) {
-     *   return _.isArray(a) ? a.concat(b) : undefined;
-     * });
-     * // => { 'fruits': ['apple', 'banana'], 'vegetables': ['beet', 'carrot] }
-     */
-    function merge(object) {
-      var args = arguments,
-          length = 2;
-
-      if (!isObject(object)) {
-        return object;
-      }
-
-      // allows working with `_.reduce` and `_.reduceRight` without using
-      // their `index` and `collection` arguments
-      if (typeof args[2] != 'number') {
-        length = args.length;
-      }
-      if (length > 3 && typeof args[length - 2] == 'function') {
-        var callback = baseCreateCallback(args[--length - 1], args[length--], 2);
-      } else if (length > 2 && typeof args[length - 1] == 'function') {
-        callback = args[--length];
-      }
-      var sources = slice(arguments, 1, length),
-          index = -1,
-          stackA = getArray(),
-          stackB = getArray();
-
-      while (++index < length) {
-        baseMerge(object, sources[index], callback, stackA, stackB);
-      }
-      releaseArray(stackA);
-      releaseArray(stackB);
-      return object;
-    }
-
-    /**
-     * Creates a shallow clone of `object` excluding the specified properties.
-     * Property names may be specified as individual arguments or as arrays of
-     * property names. If a callback is provided it will be executed for each
-     * property of `object` omitting the properties the callback returns truey
-     * for. The callback is bound to `thisArg` and invoked with three arguments;
-     * (value, key, object).
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {Object} object The source object.
-     * @param {Function|...string|string[]} [callback] The properties to omit or the
-     *  function called per iteration.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Object} Returns an object without the omitted properties.
-     * @example
-     *
-     * _.omit({ 'name': 'fred', 'age': 40 }, 'age');
-     * // => { 'name': 'fred' }
-     *
-     * _.omit({ 'name': 'fred', 'age': 40 }, function(value) {
-     *   return typeof value == 'number';
-     * });
-     * // => { 'name': 'fred' }
-     */
-    function omit(object, callback, thisArg) {
-      var result = {};
-      if (typeof callback != 'function') {
-        var props = [];
-        forIn(object, function(value, key) {
-          props.push(key);
-        });
-        props = baseDifference(props, baseFlatten(arguments, true, false, 1));
-
-        var index = -1,
-            length = props.length;
-
-        while (++index < length) {
-          var key = props[index];
-          result[key] = object[key];
-        }
-      } else {
-        callback = lodash.createCallback(callback, thisArg, 3);
-        forIn(object, function(value, key, object) {
-          if (!callback(value, key, object)) {
-            result[key] = value;
-          }
-        });
-      }
-      return result;
-    }
-
-    /**
-     * Creates a two dimensional array of an object's key-value pairs,
-     * i.e. `[[key1, value1], [key2, value2]]`.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {Object} object The object to inspect.
-     * @returns {Array} Returns new array of key-value pairs.
-     * @example
-     *
-     * _.pairs({ 'barney': 36, 'fred': 40 });
-     * // => [['barney', 36], ['fred', 40]] (property order is not guaranteed across environments)
-     */
-    function pairs(object) {
-      var index = -1,
-          props = keys(object),
-          length = props.length,
-          result = Array(length);
-
-      while (++index < length) {
-        var key = props[index];
-        result[index] = [key, object[key]];
-      }
-      return result;
-    }
-
-    /**
-     * Creates a shallow clone of `object` composed of the specified properties.
-     * Property names may be specified as individual arguments or as arrays of
-     * property names. If a callback is provided it will be executed for each
-     * property of `object` picking the properties the callback returns truey
-     * for. The callback is bound to `thisArg` and invoked with three arguments;
-     * (value, key, object).
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {Object} object The source object.
-     * @param {Function|...string|string[]} [callback] The function called per
-     *  iteration or property names to pick, specified as individual property
-     *  names or arrays of property names.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Object} Returns an object composed of the picked properties.
-     * @example
-     *
-     * _.pick({ 'name': 'fred', '_userid': 'fred1' }, 'name');
-     * // => { 'name': 'fred' }
-     *
-     * _.pick({ 'name': 'fred', '_userid': 'fred1' }, function(value, key) {
-     *   return key.charAt(0) != '_';
-     * });
-     * // => { 'name': 'fred' }
-     */
-    function pick(object, callback, thisArg) {
-      var result = {};
-      if (typeof callback != 'function') {
-        var index = -1,
-            props = baseFlatten(arguments, true, false, 1),
-            length = isObject(object) ? props.length : 0;
-
-        while (++index < length) {
-          var key = props[index];
-          if (key in object) {
-            result[key] = object[key];
-          }
-        }
-      } else {
-        callback = lodash.createCallback(callback, thisArg, 3);
-        forIn(object, function(value, key, object) {
-          if (callback(value, key, object)) {
-            result[key] = value;
-          }
-        });
-      }
-      return result;
-    }
-
-    /**
-     * An alternative to `_.reduce` this method transforms `object` to a new
-     * `accumulator` object which is the result of running each of its elements
-     * through a callback, with each callback execution potentially mutating
-     * the `accumulator` object. The callback is bound to `thisArg` and invoked
-     * with four arguments; (accumulator, value, key, object). Callbacks may exit
-     * iteration early by explicitly returning `false`.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {Array|Object} object The object to iterate over.
-     * @param {Function} [callback=identity] The function called per iteration.
-     * @param {*} [accumulator] The custom accumulator value.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {*} Returns the accumulated value.
-     * @example
-     *
-     * var squares = _.transform([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], function(result, num) {
-     *   num *= num;
-     *   if (num % 2) {
-     *     return result.push(num) < 3;
-     *   }
-     * });
-     * // => [1, 9, 25]
-     *
-     * var mapped = _.transform({ 'a': 1, 'b': 2, 'c': 3 }, function(result, num, key) {
-     *   result[key] = num * 3;
-     * });
-     * // => { 'a': 3, 'b': 6, 'c': 9 }
-     */
-    function transform(object, callback, accumulator, thisArg) {
-      var isArr = isArray(object);
-      if (accumulator == null) {
-        if (isArr) {
-          accumulator = [];
-        } else {
-          var ctor = object && object.constructor,
-              proto = ctor && ctor.prototype;
-
-          accumulator = baseCreate(proto);
-        }
-      }
-      if (callback) {
-        callback = lodash.createCallback(callback, thisArg, 4);
-        (isArr ? baseEach : forOwn)(object, function(value, index, object) {
-          return callback(accumulator, value, index, object);
-        });
-      }
-      return accumulator;
-    }
-
-    /**
-     * Creates an array composed of the own enumerable property values of `object`.
-     *
-     * @static
-     * @memberOf _
-     * @category Objects
-     * @param {Object} object The object to inspect.
-     * @returns {Array} Returns an array of property values.
-     * @example
-     *
-     * _.values({ 'one': 1, 'two': 2, 'three': 3 });
-     * // => [1, 2, 3] (property order is not guaranteed across environments)
-     */
-    function values(object) {
-      var index = -1,
-          props = keys(object),
-          length = props.length,
-          result = Array(length);
-
-      while (++index < length) {
-        result[index] = object[props[index]];
-      }
-      return result;
-    }
-
-    /*--------------------------------------------------------------------------*/
-
-    /**
-     * Creates an array of elements from the specified indexes, or keys, of the
-     * `collection`. Indexes may be specified as individual arguments or as arrays
-     * of indexes.
-     *
-     * @static
-     * @memberOf _
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {...(number|number[]|string|string[])} [index] The indexes of `collection`
-     *   to retrieve, specified as individual indexes or arrays of indexes.
-     * @returns {Array} Returns a new array of elements corresponding to the
-     *  provided indexes.
-     * @example
-     *
-     * _.at(['a', 'b', 'c', 'd', 'e'], [0, 2, 4]);
-     * // => ['a', 'c', 'e']
-     *
-     * _.at(['fred', 'barney', 'pebbles'], 0, 2);
-     * // => ['fred', 'pebbles']
-     */
-    function at(collection) {
-      var args = arguments,
-          index = -1,
-          props = baseFlatten(args, true, false, 1),
-          length = (args[2] && args[2][args[1]] === collection) ? 1 : props.length,
-          result = Array(length);
-
-      if (support.unindexedChars && isString(collection)) {
-        collection = collection.split('');
-      }
-      while(++index < length) {
-        result[index] = collection[props[index]];
-      }
-      return result;
-    }
-
-    /**
-     * Checks if a given value is present in a collection using strict equality
-     * for comparisons, i.e. `===`. If `fromIndex` is negative, it is used as the
-     * offset from the end of the collection.
-     *
-     * @static
-     * @memberOf _
-     * @alias include
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {*} target The value to check for.
-     * @param {number} [fromIndex=0] The index to search from.
-     * @returns {boolean} Returns `true` if the `target` element is found, else `false`.
-     * @example
-     *
-     * _.contains([1, 2, 3], 1);
-     * // => true
-     *
-     * _.contains([1, 2, 3], 1, 2);
-     * // => false
-     *
-     * _.contains({ 'name': 'fred', 'age': 40 }, 'fred');
-     * // => true
-     *
-     * _.contains('pebbles', 'eb');
-     * // => true
-     */
-    function contains(collection, target, fromIndex) {
-      var index = -1,
-          indexOf = getIndexOf(),
-          length = collection ? collection.length : 0,
-          result = false;
-
-      fromIndex = (fromIndex < 0 ? nativeMax(0, length + fromIndex) : fromIndex) || 0;
-      if (isArray(collection)) {
-        result = indexOf(collection, target, fromIndex) > -1;
-      } else if (typeof length == 'number') {
-        result = (isString(collection) ? collection.indexOf(target, fromIndex) : indexOf(collection, target, fromIndex)) > -1;
-      } else {
-        baseEach(collection, function(value) {
-          if (++index >= fromIndex) {
-            return !(result = value === target);
-          }
-        });
-      }
-      return result;
-    }
-
-    /**
-     * Creates an object composed of keys generated from the results of running
-     * each element of `collection` through the callback. The corresponding value
-     * of each key is the number of times the key was returned by the callback.
-     * The callback is bound to `thisArg` and invoked with three arguments;
-     * (value, index|key, collection).
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function|Object|string} [callback=identity] The function called
-     *  per iteration. If a property name or object is provided it will be used
-     *  to create a "_.pluck" or "_.where" style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Object} Returns the composed aggregate object.
-     * @example
-     *
-     * _.countBy([4.3, 6.1, 6.4], function(num) { return Math.floor(num); });
-     * // => { '4': 1, '6': 2 }
-     *
-     * _.countBy([4.3, 6.1, 6.4], function(num) { return this.floor(num); }, Math);
-     * // => { '4': 1, '6': 2 }
-     *
-     * _.countBy(['one', 'two', 'three'], 'length');
-     * // => { '3': 2, '5': 1 }
-     */
-    var countBy = createAggregator(function(result, value, key) {
-      (hasOwnProperty.call(result, key) ? result[key]++ : result[key] = 1);
-    });
-
-    /**
-     * Checks if the given callback returns truey value for **all** elements of
-     * a collection. The callback is bound to `thisArg` and invoked with three
-     * arguments; (value, index|key, collection).
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @alias all
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function|Object|string} [callback=identity] The function called
-     *  per iteration. If a property name or object is provided it will be used
-     *  to create a "_.pluck" or "_.where" style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {boolean} Returns `true` if all elements passed the callback check,
-     *  else `false`.
-     * @example
-     *
-     * _.every([true, 1, null, 'yes']);
-     * // => false
-     *
-     * var characters = [
-     *   { 'name': 'barney', 'age': 36 },
-     *   { 'name': 'fred',   'age': 40 }
-     * ];
-     *
-     * // using "_.pluck" callback shorthand
-     * _.every(characters, 'age');
-     * // => true
-     *
-     * // using "_.where" callback shorthand
-     * _.every(characters, { 'age': 36 });
-     * // => false
-     */
-    function every(collection, callback, thisArg) {
-      var result = true;
-      callback = lodash.createCallback(callback, thisArg, 3);
-
-      if (isArray(collection)) {
-        var index = -1,
-            length = collection.length;
-
-        while (++index < length) {
-          if (!(result = !!callback(collection[index], index, collection))) {
-            break;
-          }
-        }
-      } else {
-        baseEach(collection, function(value, index, collection) {
-          return (result = !!callback(value, index, collection));
-        });
-      }
-      return result;
-    }
-
-    /**
-     * Iterates over elements of a collection, returning an array of all elements
-     * the callback returns truey for. The callback is bound to `thisArg` and
-     * invoked with three arguments; (value, index|key, collection).
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @alias select
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function|Object|string} [callback=identity] The function called
-     *  per iteration. If a property name or object is provided it will be used
-     *  to create a "_.pluck" or "_.where" style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Array} Returns a new array of elements that passed the callback check.
-     * @example
-     *
-     * var evens = _.filter([1, 2, 3, 4, 5, 6], function(num) { return num % 2 == 0; });
-     * // => [2, 4, 6]
-     *
-     * var characters = [
-     *   { 'name': 'barney', 'age': 36, 'blocked': false },
-     *   { 'name': 'fred',   'age': 40, 'blocked': true }
-     * ];
-     *
-     * // using "_.pluck" callback shorthand
-     * _.filter(characters, 'blocked');
-     * // => [{ 'name': 'fred', 'age': 40, 'blocked': true }]
-     *
-     * // using "_.where" callback shorthand
-     * _.filter(characters, { 'age': 36 });
-     * // => [{ 'name': 'barney', 'age': 36, 'blocked': false }]
-     */
-    function filter(collection, callback, thisArg) {
-      var result = [];
-      callback = lodash.createCallback(callback, thisArg, 3);
-
-      if (isArray(collection)) {
-        var index = -1,
-            length = collection.length;
-
-        while (++index < length) {
-          var value = collection[index];
-          if (callback(value, index, collection)) {
-            result.push(value);
-          }
-        }
-      } else {
-        baseEach(collection, function(value, index, collection) {
-          if (callback(value, index, collection)) {
-            result.push(value);
-          }
-        });
-      }
-      return result;
-    }
-
-    /**
-     * Iterates over elements of a collection, returning the first element that
-     * the callback returns truey for. The callback is bound to `thisArg` and
-     * invoked with three arguments; (value, index|key, collection).
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @alias detect, findWhere
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function|Object|string} [callback=identity] The function called
-     *  per iteration. If a property name or object is provided it will be used
-     *  to create a "_.pluck" or "_.where" style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {*} Returns the found element, else `undefined`.
-     * @example
-     *
-     * var characters = [
-     *   { 'name': 'barney',  'age': 36, 'blocked': false },
-     *   { 'name': 'fred',    'age': 40, 'blocked': true },
-     *   { 'name': 'pebbles', 'age': 1,  'blocked': false }
-     * ];
-     *
-     * _.find(characters, function(chr) {
-     *   return chr.age < 40;
-     * });
-     * // => { 'name': 'barney', 'age': 36, 'blocked': false }
-     *
-     * // using "_.where" callback shorthand
-     * _.find(characters, { 'age': 1 });
-     * // =>  { 'name': 'pebbles', 'age': 1, 'blocked': false }
-     *
-     * // using "_.pluck" callback shorthand
-     * _.find(characters, 'blocked');
-     * // => { 'name': 'fred', 'age': 40, 'blocked': true }
-     */
-    function find(collection, callback, thisArg) {
-      callback = lodash.createCallback(callback, thisArg, 3);
-
-      if (isArray(collection)) {
-        var index = -1,
-            length = collection.length;
-
-        while (++index < length) {
-          var value = collection[index];
-          if (callback(value, index, collection)) {
-            return value;
-          }
-        }
-      } else {
-        var result;
-        baseEach(collection, function(value, index, collection) {
-          if (callback(value, index, collection)) {
-            result = value;
-            return false;
-          }
-        });
-        return result;
-      }
-    }
-
-    /**
-     * This method is like `_.find` except that it iterates over elements
-     * of a `collection` from right to left.
-     *
-     * @static
-     * @memberOf _
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function|Object|string} [callback=identity] The function called
-     *  per iteration. If a property name or object is provided it will be used
-     *  to create a "_.pluck" or "_.where" style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {*} Returns the found element, else `undefined`.
-     * @example
-     *
-     * _.findLast([1, 2, 3, 4], function(num) {
-     *   return num % 2 == 1;
-     * });
-     * // => 3
-     */
-    function findLast(collection, callback, thisArg) {
-      var result;
-      callback = lodash.createCallback(callback, thisArg, 3);
-      forEachRight(collection, function(value, index, collection) {
-        if (callback(value, index, collection)) {
-          result = value;
-          return false;
-        }
-      });
-      return result;
-    }
-
-    /**
-     * Iterates over elements of a collection, executing the callback for each
-     * element. The callback is bound to `thisArg` and invoked with three arguments;
-     * (value, index|key, collection). Callbacks may exit iteration early by
-     * explicitly returning `false`.
-     *
-     * Note: As with other "Collections" methods, objects with a `length` property
-     * are iterated like arrays. To avoid this behavior `_.forIn` or `_.forOwn`
-     * may be used for object iteration.
-     *
-     * @static
-     * @memberOf _
-     * @alias each
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function} [callback=identity] The function called per iteration.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Array|Object|string} Returns `collection`.
-     * @example
-     *
-     * _([1, 2, 3]).forEach(function(num) { console.log(num); }).join(',');
-     * // => logs each number and returns '1,2,3'
-     *
-     * _.forEach({ 'one': 1, 'two': 2, 'three': 3 }, function(num) { console.log(num); });
-     * // => logs each number and returns the object (property order is not guaranteed across environments)
-     */
-    function forEach(collection, callback, thisArg) {
-      if (callback && typeof thisArg == 'undefined' && isArray(collection)) {
-        var index = -1,
-            length = collection.length;
-
-        while (++index < length) {
-          if (callback(collection[index], index, collection) === false) {
-            break;
-          }
-        }
-      } else {
-        baseEach(collection, callback, thisArg);
-      }
-      return collection;
-    }
-
-    /**
-     * This method is like `_.forEach` except that it iterates over elements
-     * of a `collection` from right to left.
-     *
-     * @static
-     * @memberOf _
-     * @alias eachRight
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function} [callback=identity] The function called per iteration.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Array|Object|string} Returns `collection`.
-     * @example
-     *
-     * _([1, 2, 3]).forEachRight(function(num) { console.log(num); }).join(',');
-     * // => logs each number from right to left and returns '3,2,1'
-     */
-    function forEachRight(collection, callback, thisArg) {
-      var iterable = collection,
-          length = collection ? collection.length : 0;
-
-      callback = callback && typeof thisArg == 'undefined' ? callback : baseCreateCallback(callback, thisArg, 3);
-      if (isArray(collection)) {
-        while (length--) {
-          if (callback(collection[length], length, collection) === false) {
-            break;
-          }
-        }
-      } else {
-        if (typeof length != 'number') {
-          var props = keys(collection);
-          length = props.length;
-        } else if (support.unindexedChars && isString(collection)) {
-          iterable = collection.split('');
-        }
-        baseEach(collection, function(value, key, collection) {
-          key = props ? props[--length] : --length;
-          return callback(iterable[key], key, collection);
-        });
-      }
-      return collection;
-    }
-
-    /**
-     * Creates an object composed of keys generated from the results of running
-     * each element of a collection through the callback. The corresponding value
-     * of each key is an array of the elements responsible for generating the key.
-     * The callback is bound to `thisArg` and invoked with three arguments;
-     * (value, index|key, collection).
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`
-     *
-     * @static
-     * @memberOf _
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function|Object|string} [callback=identity] The function called
-     *  per iteration. If a property name or object is provided it will be used
-     *  to create a "_.pluck" or "_.where" style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Object} Returns the composed aggregate object.
-     * @example
-     *
-     * _.groupBy([4.2, 6.1, 6.4], function(num) { return Math.floor(num); });
-     * // => { '4': [4.2], '6': [6.1, 6.4] }
-     *
-     * _.groupBy([4.2, 6.1, 6.4], function(num) { return this.floor(num); }, Math);
-     * // => { '4': [4.2], '6': [6.1, 6.4] }
-     *
-     * // using "_.pluck" callback shorthand
-     * _.groupBy(['one', 'two', 'three'], 'length');
-     * // => { '3': ['one', 'two'], '5': ['three'] }
-     */
-    var groupBy = createAggregator(function(result, value, key) {
-      (hasOwnProperty.call(result, key) ? result[key] : result[key] = []).push(value);
-    });
-
-    /**
-     * Creates an object composed of keys generated from the results of running
-     * each element of the collection through the given callback. The corresponding
-     * value of each key is the last element responsible for generating the key.
-     * The callback is bound to `thisArg` and invoked with three arguments;
-     * (value, index|key, collection).
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function|Object|string} [callback=identity] The function called
-     *  per iteration. If a property name or object is provided it will be used
-     *  to create a "_.pluck" or "_.where" style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Object} Returns the composed aggregate object.
-     * @example
-     *
-     * var keys = [
-     *   { 'dir': 'left', 'code': 97 },
-     *   { 'dir': 'right', 'code': 100 }
-     * ];
-     *
-     * _.indexBy(keys, 'dir');
-     * // => { 'left': { 'dir': 'left', 'code': 97 }, 'right': { 'dir': 'right', 'code': 100 } }
-     *
-     * _.indexBy(keys, function(key) { return String.fromCharCode(key.code); });
-     * // => { 'a': { 'dir': 'left', 'code': 97 }, 'd': { 'dir': 'right', 'code': 100 } }
-     *
-     * _.indexBy(characters, function(key) { this.fromCharCode(key.code); }, String);
-     * // => { 'a': { 'dir': 'left', 'code': 97 }, 'd': { 'dir': 'right', 'code': 100 } }
-     */
-    var indexBy = createAggregator(function(result, value, key) {
-      result[key] = value;
-    });
-
-    /**
-     * Invokes the method named by `methodName` on each element in the `collection`
-     * returning an array of the results of each invoked method. Additional arguments
-     * will be provided to each invoked method. If `methodName` is a function it
-     * will be invoked for, and `this` bound to, each element in the `collection`.
-     *
-     * @static
-     * @memberOf _
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function|string} methodName The name of the method to invoke or
-     *  the function invoked per iteration.
-     * @param {...*} [arg] Arguments to invoke the method with.
-     * @returns {Array} Returns a new array of the results of each invoked method.
-     * @example
-     *
-     * _.invoke([[5, 1, 7], [3, 2, 1]], 'sort');
-     * // => [[1, 5, 7], [1, 2, 3]]
-     *
-     * _.invoke([123, 456], String.prototype.split, '');
-     * // => [['1', '2', '3'], ['4', '5', '6']]
-     */
-    function invoke(collection, methodName) {
-      var args = slice(arguments, 2),
-          index = -1,
-          isFunc = typeof methodName == 'function',
-          length = collection ? collection.length : 0,
-          result = Array(typeof length == 'number' ? length : 0);
-
-      forEach(collection, function(value) {
-        result[++index] = (isFunc ? methodName : value[methodName]).apply(value, args);
-      });
-      return result;
-    }
-
-    /**
-     * Creates an array of values by running each element in the collection
-     * through the callback. The callback is bound to `thisArg` and invoked with
-     * three arguments; (value, index|key, collection).
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @alias collect
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function|Object|string} [callback=identity] The function called
-     *  per iteration. If a property name or object is provided it will be used
-     *  to create a "_.pluck" or "_.where" style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Array} Returns a new array of the results of each `callback` execution.
-     * @example
-     *
-     * _.map([1, 2, 3], function(num) { return num * 3; });
-     * // => [3, 6, 9]
-     *
-     * _.map({ 'one': 1, 'two': 2, 'three': 3 }, function(num) { return num * 3; });
-     * // => [3, 6, 9] (property order is not guaranteed across environments)
-     *
-     * var characters = [
-     *   { 'name': 'barney', 'age': 36 },
-     *   { 'name': 'fred',   'age': 40 }
-     * ];
-     *
-     * // using "_.pluck" callback shorthand
-     * _.map(characters, 'name');
-     * // => ['barney', 'fred']
-     */
-    function map(collection, callback, thisArg) {
-      var index = -1,
-          length = collection ? collection.length : 0,
-          result = Array(typeof length == 'number' ? length : 0);
-
-      callback = lodash.createCallback(callback, thisArg, 3);
-      if (isArray(collection)) {
-        while (++index < length) {
-          result[index] = callback(collection[index], index, collection);
-        }
-      } else {
-        baseEach(collection, function(value, key, collection) {
-          result[++index] = callback(value, key, collection);
-        });
-      }
-      return result;
-    }
-
-    /**
-     * Retrieves the maximum value of a collection. If the collection is empty or
-     * falsey `-Infinity` is returned. If a callback is provided it will be executed
-     * for each value in the collection to generate the criterion by which the value
-     * is ranked. The callback is bound to `thisArg` and invoked with three
-     * arguments; (value, index, collection).
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function|Object|string} [callback=identity] The function called
-     *  per iteration. If a property name or object is provided it will be used
-     *  to create a "_.pluck" or "_.where" style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {*} Returns the maximum value.
-     * @example
-     *
-     * _.max([4, 2, 8, 6]);
-     * // => 8
-     *
-     * var characters = [
-     *   { 'name': 'barney', 'age': 36 },
-     *   { 'name': 'fred',   'age': 40 }
-     * ];
-     *
-     * _.max(characters, function(chr) { return chr.age; });
-     * // => { 'name': 'fred', 'age': 40 };
-     *
-     * // using "_.pluck" callback shorthand
-     * _.max(characters, 'age');
-     * // => { 'name': 'fred', 'age': 40 };
-     */
-    function max(collection, callback, thisArg) {
-      var computed = -Infinity,
-          result = computed;
-
-      // allows working with functions like `_.map` without using
-      // their `index` argument as a callback
-      if (typeof callback != 'function' && thisArg && thisArg[callback] === collection) {
-        callback = null;
-      }
-      if (callback == null && isArray(collection)) {
-        var index = -1,
-            length = collection.length;
-
-        while (++index < length) {
-          var value = collection[index];
-          if (value > result) {
-            result = value;
-          }
-        }
-      } else {
-        callback = (callback == null && isString(collection))
-          ? charAtCallback
-          : lodash.createCallback(callback, thisArg, 3);
-
-        baseEach(collection, function(value, index, collection) {
-          var current = callback(value, index, collection);
-          if (current > computed) {
-            computed = current;
-            result = value;
-          }
-        });
-      }
-      return result;
-    }
-
-    /**
-     * Retrieves the minimum value of a collection. If the collection is empty or
-     * falsey `Infinity` is returned. If a callback is provided it will be executed
-     * for each value in the collection to generate the criterion by which the value
-     * is ranked. The callback is bound to `thisArg` and invoked with three
-     * arguments; (value, index, collection).
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function|Object|string} [callback=identity] The function called
-     *  per iteration. If a property name or object is provided it will be used
-     *  to create a "_.pluck" or "_.where" style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {*} Returns the minimum value.
-     * @example
-     *
-     * _.min([4, 2, 8, 6]);
-     * // => 2
-     *
-     * var characters = [
-     *   { 'name': 'barney', 'age': 36 },
-     *   { 'name': 'fred',   'age': 40 }
-     * ];
-     *
-     * _.min(characters, function(chr) { return chr.age; });
-     * // => { 'name': 'barney', 'age': 36 };
-     *
-     * // using "_.pluck" callback shorthand
-     * _.min(characters, 'age');
-     * // => { 'name': 'barney', 'age': 36 };
-     */
-    function min(collection, callback, thisArg) {
-      var computed = Infinity,
-          result = computed;
-
-      // allows working with functions like `_.map` without using
-      // their `index` argument as a callback
-      if (typeof callback != 'function' && thisArg && thisArg[callback] === collection) {
-        callback = null;
-      }
-      if (callback == null && isArray(collection)) {
-        var index = -1,
-            length = collection.length;
-
-        while (++index < length) {
-          var value = collection[index];
-          if (value < result) {
-            result = value;
-          }
-        }
-      } else {
-        callback = (callback == null && isString(collection))
-          ? charAtCallback
-          : lodash.createCallback(callback, thisArg, 3);
-
-        baseEach(collection, function(value, index, collection) {
-          var current = callback(value, index, collection);
-          if (current < computed) {
-            computed = current;
-            result = value;
-          }
-        });
-      }
-      return result;
-    }
-
-    /**
-     * Retrieves the value of a specified property from all elements in the collection.
-     *
-     * @static
-     * @memberOf _
-     * @type Function
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {string} property The property to pluck.
-     * @returns {Array} Returns a new array of property values.
-     * @example
-     *
-     * var characters = [
-     *   { 'name': 'barney', 'age': 36 },
-     *   { 'name': 'fred',   'age': 40 }
-     * ];
-     *
-     * _.pluck(characters, 'name');
-     * // => ['barney', 'fred']
-     */
-    var pluck = map;
-
-    /**
-     * Reduces a collection to a value which is the accumulated result of running
-     * each element in the collection through the callback, where each successive
-     * callback execution consumes the return value of the previous execution. If
-     * `accumulator` is not provided the first element of the collection will be
-     * used as the initial `accumulator` value. The callback is bound to `thisArg`
-     * and invoked with four arguments; (accumulator, value, index|key, collection).
-     *
-     * @static
-     * @memberOf _
-     * @alias foldl, inject
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function} [callback=identity] The function called per iteration.
-     * @param {*} [accumulator] Initial value of the accumulator.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {*} Returns the accumulated value.
-     * @example
-     *
-     * var sum = _.reduce([1, 2, 3], function(sum, num) {
-     *   return sum + num;
-     * });
-     * // => 6
-     *
-     * var mapped = _.reduce({ 'a': 1, 'b': 2, 'c': 3 }, function(result, num, key) {
-     *   result[key] = num * 3;
-     *   return result;
-     * }, {});
-     * // => { 'a': 3, 'b': 6, 'c': 9 }
-     */
-    function reduce(collection, callback, accumulator, thisArg) {
-      var noaccum = arguments.length < 3;
-      callback = lodash.createCallback(callback, thisArg, 4);
-
-      if (isArray(collection)) {
-        var index = -1,
-            length = collection.length;
-
-        if (noaccum) {
-          accumulator = collection[++index];
-        }
-        while (++index < length) {
-          accumulator = callback(accumulator, collection[index], index, collection);
-        }
-      } else {
-        baseEach(collection, function(value, index, collection) {
-          accumulator = noaccum
-            ? (noaccum = false, value)
-            : callback(accumulator, value, index, collection)
-        });
-      }
-      return accumulator;
-    }
-
-    /**
-     * This method is like `_.reduce` except that it iterates over elements
-     * of a `collection` from right to left.
-     *
-     * @static
-     * @memberOf _
-     * @alias foldr
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function} [callback=identity] The function called per iteration.
-     * @param {*} [accumulator] Initial value of the accumulator.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {*} Returns the accumulated value.
-     * @example
-     *
-     * var list = [[0, 1], [2, 3], [4, 5]];
-     * var flat = _.reduceRight(list, function(a, b) { return a.concat(b); }, []);
-     * // => [4, 5, 2, 3, 0, 1]
-     */
-    function reduceRight(collection, callback, accumulator, thisArg) {
-      var noaccum = arguments.length < 3;
-      callback = lodash.createCallback(callback, thisArg, 4);
-      forEachRight(collection, function(value, index, collection) {
-        accumulator = noaccum
-          ? (noaccum = false, value)
-          : callback(accumulator, value, index, collection);
-      });
-      return accumulator;
-    }
-
-    /**
-     * The opposite of `_.filter` this method returns the elements of a
-     * collection that the callback does **not** return truey for.
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function|Object|string} [callback=identity] The function called
-     *  per iteration. If a property name or object is provided it will be used
-     *  to create a "_.pluck" or "_.where" style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Array} Returns a new array of elements that failed the callback check.
-     * @example
-     *
-     * var odds = _.reject([1, 2, 3, 4, 5, 6], function(num) { return num % 2 == 0; });
-     * // => [1, 3, 5]
-     *
-     * var characters = [
-     *   { 'name': 'barney', 'age': 36, 'blocked': false },
-     *   { 'name': 'fred',   'age': 40, 'blocked': true }
-     * ];
-     *
-     * // using "_.pluck" callback shorthand
-     * _.reject(characters, 'blocked');
-     * // => [{ 'name': 'barney', 'age': 36, 'blocked': false }]
-     *
-     * // using "_.where" callback shorthand
-     * _.reject(characters, { 'age': 36 });
-     * // => [{ 'name': 'fred', 'age': 40, 'blocked': true }]
-     */
-    function reject(collection, callback, thisArg) {
-      callback = lodash.createCallback(callback, thisArg, 3);
-      return filter(collection, function(value, index, collection) {
-        return !callback(value, index, collection);
-      });
-    }
-
-    /**
-     * Retrieves a random element or `n` random elements from a collection.
-     *
-     * @static
-     * @memberOf _
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to sample.
-     * @param {number} [n] The number of elements to sample.
-     * @param- {Object} [guard] Allows working with functions like `_.map`
-     *  without using their `index` arguments as `n`.
-     * @returns {Array} Returns the random sample(s) of `collection`.
-     * @example
-     *
-     * _.sample([1, 2, 3, 4]);
-     * // => 2
-     *
-     * _.sample([1, 2, 3, 4], 2);
-     * // => [3, 1]
-     */
-    function sample(collection, n, guard) {
-      if (collection && typeof collection.length != 'number') {
-        collection = values(collection);
-      } else if (support.unindexedChars && isString(collection)) {
-        collection = collection.split('');
-      }
-      if (n == null || guard) {
-        return collection ? collection[baseRandom(0, collection.length - 1)] : undefined;
-      }
-      var result = shuffle(collection);
-      result.length = nativeMin(nativeMax(0, n), result.length);
-      return result;
-    }
-
-    /**
-     * Creates an array of shuffled values, using a version of the Fisher-Yates
-     * shuffle. See http://en.wikipedia.org/wiki/Fisher-Yates_shuffle.
-     *
-     * @static
-     * @memberOf _
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to shuffle.
-     * @returns {Array} Returns a new shuffled collection.
-     * @example
-     *
-     * _.shuffle([1, 2, 3, 4, 5, 6]);
-     * // => [4, 1, 6, 3, 5, 2]
-     */
-    function shuffle(collection) {
-      var index = -1,
-          length = collection ? collection.length : 0,
-          result = Array(typeof length == 'number' ? length : 0);
-
-      forEach(collection, function(value) {
-        var rand = baseRandom(0, ++index);
-        result[index] = result[rand];
-        result[rand] = value;
-      });
-      return result;
-    }
-
-    /**
-     * Gets the size of the `collection` by returning `collection.length` for arrays
-     * and array-like objects or the number of own enumerable properties for objects.
-     *
-     * @static
-     * @memberOf _
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to inspect.
-     * @returns {number} Returns `collection.length` or number of own enumerable properties.
-     * @example
-     *
-     * _.size([1, 2]);
-     * // => 2
-     *
-     * _.size({ 'one': 1, 'two': 2, 'three': 3 });
-     * // => 3
-     *
-     * _.size('pebbles');
-     * // => 5
-     */
-    function size(collection) {
-      var length = collection ? collection.length : 0;
-      return typeof length == 'number' ? length : keys(collection).length;
-    }
-
-    /**
-     * Checks if the callback returns a truey value for **any** element of a
-     * collection. The function returns as soon as it finds a passing value and
-     * does not iterate over the entire collection. The callback is bound to
-     * `thisArg` and invoked with three arguments; (value, index|key, collection).
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @alias any
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function|Object|string} [callback=identity] The function called
-     *  per iteration. If a property name or object is provided it will be used
-     *  to create a "_.pluck" or "_.where" style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {boolean} Returns `true` if any element passed the callback check,
-     *  else `false`.
-     * @example
-     *
-     * _.some([null, 0, 'yes', false], Boolean);
-     * // => true
-     *
-     * var characters = [
-     *   { 'name': 'barney', 'age': 36, 'blocked': false },
-     *   { 'name': 'fred',   'age': 40, 'blocked': true }
-     * ];
-     *
-     * // using "_.pluck" callback shorthand
-     * _.some(characters, 'blocked');
-     * // => true
-     *
-     * // using "_.where" callback shorthand
-     * _.some(characters, { 'age': 1 });
-     * // => false
-     */
-    function some(collection, callback, thisArg) {
-      var result;
-      callback = lodash.createCallback(callback, thisArg, 3);
-
-      if (isArray(collection)) {
-        var index = -1,
-            length = collection.length;
-
-        while (++index < length) {
-          if ((result = callback(collection[index], index, collection))) {
-            break;
-          }
-        }
-      } else {
-        baseEach(collection, function(value, index, collection) {
-          return !(result = callback(value, index, collection));
-        });
-      }
-      return !!result;
-    }
-
-    /**
-     * Creates an array of elements, sorted in ascending order by the results of
-     * running each element in a collection through the callback. This method
-     * performs a stable sort, that is, it will preserve the original sort order
-     * of equal elements. The callback is bound to `thisArg` and invoked with
-     * three arguments; (value, index|key, collection).
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function|Object|string} [callback=identity] The function called
-     *  per iteration. If a property name or object is provided it will be used
-     *  to create a "_.pluck" or "_.where" style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Array} Returns a new array of sorted elements.
-     * @example
-     *
-     * _.sortBy([1, 2, 3], function(num) { return Math.sin(num); });
-     * // => [3, 1, 2]
-     *
-     * _.sortBy([1, 2, 3], function(num) { return this.sin(num); }, Math);
-     * // => [3, 1, 2]
-     *
-     * // using "_.pluck" callback shorthand
-     * _.sortBy(['banana', 'strawberry', 'apple'], 'length');
-     * // => ['apple', 'banana', 'strawberry']
-     */
-    function sortBy(collection, callback, thisArg) {
-      var index = -1,
-          length = collection ? collection.length : 0,
-          result = Array(typeof length == 'number' ? length : 0);
-
-      callback = lodash.createCallback(callback, thisArg, 3);
-      forEach(collection, function(value, key, collection) {
-        var object = result[++index] = getObject();
-        object.criteria = callback(value, key, collection);
-        object.index = index;
-        object.value = value;
-      });
-
-      length = result.length;
-      result.sort(compareAscending);
-      while (length--) {
-        var object = result[length];
-        result[length] = object.value;
-        releaseObject(object);
-      }
-      return result;
-    }
-
-    /**
-     * Converts the `collection` to an array.
-     *
-     * @static
-     * @memberOf _
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to convert.
-     * @returns {Array} Returns the new converted array.
-     * @example
-     *
-     * (function() { return _.toArray(arguments).slice(1); })(1, 2, 3, 4);
-     * // => [2, 3, 4]
-     */
-    function toArray(collection) {
-      if (collection && typeof collection.length == 'number') {
-        return (support.unindexedChars && isString(collection))
-          ? collection.split('')
-          : slice(collection);
-      }
-      return values(collection);
-    }
-
-    /**
-     * Performs a deep comparison of each element in a `collection` to the given
-     * `properties` object, returning an array of all elements that have equivalent
-     * property values.
-     *
-     * @static
-     * @memberOf _
-     * @type Function
-     * @category Collections
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Object} properties The object of property values to filter by.
-     * @returns {Array} Returns a new array of elements that have the given properties.
-     * @example
-     *
-     * var characters = [
-     *   { 'name': 'barney', 'age': 36, 'pets': ['hoppy'] },
-     *   { 'name': 'fred',   'age': 40, 'pets': ['baby puss', 'dino'] }
-     * ];
-     *
-     * _.where(characters, { 'age': 36 });
-     * // => [{ 'name': 'barney', 'age': 36, 'pets': ['hoppy'] }]
-     *
-     * _.where(characters, { 'pets': ['dino'] });
-     * // => [{ 'name': 'fred', 'age': 40, 'pets': ['baby puss', 'dino'] }]
-     */
-    var where = filter;
-
-    /*--------------------------------------------------------------------------*/
-
-    /**
-     * Creates an array with all falsey values removed. The values `false`, `null`,
-     * `0`, `""`, `undefined`, and `NaN` are all falsey.
-     *
-     * @static
-     * @memberOf _
-     * @category Arrays
-     * @param {Array} array The array to compact.
-     * @returns {Array} Returns a new array of filtered values.
-     * @example
-     *
-     * _.compact([0, 1, false, 2, '', 3]);
-     * // => [1, 2, 3]
-     */
-    function compact(array) {
-      var index = -1,
-          length = array ? array.length : 0,
-          result = [];
-
-      while (++index < length) {
-        var value = array[index];
-        if (value) {
-          result.push(value);
-        }
-      }
-      return result;
-    }
-
-    /**
-     * Creates an array excluding all values of the provided arrays using strict
-     * equality for comparisons, i.e. `===`.
-     *
-     * @static
-     * @memberOf _
-     * @category Arrays
-     * @param {Array} array The array to process.
-     * @param {...Array} [values] The arrays of values to exclude.
-     * @returns {Array} Returns a new array of filtered values.
-     * @example
-     *
-     * _.difference([1, 2, 3, 4, 5], [5, 2, 10]);
-     * // => [1, 3, 4]
-     */
-    function difference(array) {
-      return baseDifference(array, baseFlatten(arguments, true, true, 1));
-    }
-
-    /**
-     * This method is like `_.find` except that it returns the index of the first
-     * element that passes the callback check, instead of the element itself.
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @category Arrays
-     * @param {Array} array The array to search.
-     * @param {Function|Object|string} [callback=identity] The function called
-     *  per iteration. If a property name or object is provided it will be used
-     *  to create a "_.pluck" or "_.where" style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {number} Returns the index of the found element, else `-1`.
-     * @example
-     *
-     * var characters = [
-     *   { 'name': 'barney',  'age': 36, 'blocked': false },
-     *   { 'name': 'fred',    'age': 40, 'blocked': true },
-     *   { 'name': 'pebbles', 'age': 1,  'blocked': false }
-     * ];
-     *
-     * _.findIndex(characters, function(chr) {
-     *   return chr.age < 20;
-     * });
-     * // => 2
-     *
-     * // using "_.where" callback shorthand
-     * _.findIndex(characters, { 'age': 36 });
-     * // => 0
-     *
-     * // using "_.pluck" callback shorthand
-     * _.findIndex(characters, 'blocked');
-     * // => 1
-     */
-    function findIndex(array, callback, thisArg) {
-      var index = -1,
-          length = array ? array.length : 0;
-
-      callback = lodash.createCallback(callback, thisArg, 3);
-      while (++index < length) {
-        if (callback(array[index], index, array)) {
-          return index;
-        }
-      }
-      return -1;
-    }
-
-    /**
-     * This method is like `_.findIndex` except that it iterates over elements
-     * of a `collection` from right to left.
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @category Arrays
-     * @param {Array} array The array to search.
-     * @param {Function|Object|string} [callback=identity] The function called
-     *  per iteration. If a property name or object is provided it will be used
-     *  to create a "_.pluck" or "_.where" style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {number} Returns the index of the found element, else `-1`.
-     * @example
-     *
-     * var characters = [
-     *   { 'name': 'barney',  'age': 36, 'blocked': true },
-     *   { 'name': 'fred',    'age': 40, 'blocked': false },
-     *   { 'name': 'pebbles', 'age': 1,  'blocked': true }
-     * ];
-     *
-     * _.findLastIndex(characters, function(chr) {
-     *   return chr.age > 30;
-     * });
-     * // => 1
-     *
-     * // using "_.where" callback shorthand
-     * _.findLastIndex(characters, { 'age': 36 });
-     * // => 0
-     *
-     * // using "_.pluck" callback shorthand
-     * _.findLastIndex(characters, 'blocked');
-     * // => 2
-     */
-    function findLastIndex(array, callback, thisArg) {
-      var length = array ? array.length : 0;
-      callback = lodash.createCallback(callback, thisArg, 3);
-      while (length--) {
-        if (callback(array[length], length, array)) {
-          return length;
-        }
-      }
-      return -1;
-    }
-
-    /**
-     * Gets the first element or first `n` elements of an array. If a callback
-     * is provided elements at the beginning of the array are returned as long
-     * as the callback returns truey. The callback is bound to `thisArg` and
-     * invoked with three arguments; (value, index, array).
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @alias head, take
-     * @category Arrays
-     * @param {Array} array The array to query.
-     * @param {Function|Object|number|string} [callback] The function called
-     *  per element or the number of elements to return. If a property name or
-     *  object is provided it will be used to create a "_.pluck" or "_.where"
-     *  style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {*} Returns the first element(s) of `array`.
-     * @example
-     *
-     * _.first([1, 2, 3]);
-     * // => 1
-     *
-     * _.first([1, 2, 3], 2);
-     * // => [1, 2]
-     *
-     * _.first([1, 2, 3], function(num) {
-     *   return num < 3;
-     * });
-     * // => [1, 2]
-     *
-     * var characters = [
-     *   { 'name': 'barney',  'blocked': true,  'employer': 'slate' },
-     *   { 'name': 'fred',    'blocked': false, 'employer': 'slate' },
-     *   { 'name': 'pebbles', 'blocked': true,  'employer': 'na' }
-     * ];
-     *
-     * // using "_.pluck" callback shorthand
-     * _.first(characters, 'blocked');
-     * // => [{ 'name': 'barney', 'blocked': true, 'employer': 'slate' }]
-     *
-     * // using "_.where" callback shorthand
-     * _.pluck(_.first(characters, { 'employer': 'slate' }), 'name');
-     * // => ['barney', 'fred']
-     */
-    function first(array, callback, thisArg) {
-      var n = 0,
-          length = array ? array.length : 0;
-
-      if (typeof callback != 'number' && callback != null) {
-        var index = -1;
-        callback = lodash.createCallback(callback, thisArg, 3);
-        while (++index < length && callback(array[index], index, array)) {
-          n++;
-        }
-      } else {
-        n = callback;
-        if (n == null || thisArg) {
-          return array ? array[0] : undefined;
-        }
-      }
-      return slice(array, 0, nativeMin(nativeMax(0, n), length));
-    }
-
-    /**
-     * Flattens a nested array (the nesting can be to any depth). If `isShallow`
-     * is truey, the array will only be flattened a single level. If a callback
-     * is provided each element of the array is passed through the callback before
-     * flattening. The callback is bound to `thisArg` and invoked with three
-     * arguments; (value, index, array).
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @category Arrays
-     * @param {Array} array The array to flatten.
-     * @param {boolean} [isShallow=false] A flag to restrict flattening to a single level.
-     * @param {Function|Object|string} [callback=identity] The function called
-     *  per iteration. If a property name or object is provided it will be used
-     *  to create a "_.pluck" or "_.where" style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Array} Returns a new flattened array.
-     * @example
-     *
-     * _.flatten([1, [2], [3, [[4]]]]);
-     * // => [1, 2, 3, 4];
-     *
-     * _.flatten([1, [2], [3, [[4]]]], true);
-     * // => [1, 2, 3, [[4]]];
-     *
-     * var characters = [
-     *   { 'name': 'barney', 'age': 30, 'pets': ['hoppy'] },
-     *   { 'name': 'fred',   'age': 40, 'pets': ['baby puss', 'dino'] }
-     * ];
-     *
-     * // using "_.pluck" callback shorthand
-     * _.flatten(characters, 'pets');
-     * // => ['hoppy', 'baby puss', 'dino']
-     */
-    function flatten(array, isShallow, callback, thisArg) {
-      // juggle arguments
-      if (typeof isShallow != 'boolean' && isShallow != null) {
-        thisArg = callback;
-        callback = (typeof isShallow != 'function' && thisArg && thisArg[isShallow] === array) ? null : isShallow;
-        isShallow = false;
-      }
-      if (callback != null) {
-        array = map(array, callback, thisArg);
-      }
-      return baseFlatten(array, isShallow);
-    }
-
-    /**
-     * Gets the index at which the first occurrence of `value` is found using
-     * strict equality for comparisons, i.e. `===`. If the array is already sorted
-     * providing `true` for `fromIndex` will run a faster binary search.
-     *
-     * @static
-     * @memberOf _
-     * @category Arrays
-     * @param {Array} array The array to search.
-     * @param {*} value The value to search for.
-     * @param {boolean|number} [fromIndex=0] The index to search from or `true`
-     *  to perform a binary search on a sorted array.
-     * @returns {number} Returns the index of the matched value or `-1`.
-     * @example
-     *
-     * _.indexOf([1, 2, 3, 1, 2, 3], 2);
-     * // => 1
-     *
-     * _.indexOf([1, 2, 3, 1, 2, 3], 2, 3);
-     * // => 4
-     *
-     * _.indexOf([1, 1, 2, 2, 3, 3], 2, true);
-     * // => 2
-     */
-    function indexOf(array, value, fromIndex) {
-      if (typeof fromIndex == 'number') {
-        var length = array ? array.length : 0;
-        fromIndex = (fromIndex < 0 ? nativeMax(0, length + fromIndex) : fromIndex || 0);
-      } else if (fromIndex) {
-        var index = sortedIndex(array, value);
-        return array[index] === value ? index : -1;
-      }
-      return baseIndexOf(array, value, fromIndex);
-    }
-
-    /**
-     * Gets all but the last element or last `n` elements of an array. If a
-     * callback is provided elements at the end of the array are excluded from
-     * the result as long as the callback returns truey. The callback is bound
-     * to `thisArg` and invoked with three arguments; (value, index, array).
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @category Arrays
-     * @param {Array} array The array to query.
-     * @param {Function|Object|number|string} [callback=1] The function called
-     *  per element or the number of elements to exclude. If a property name or
-     *  object is provided it will be used to create a "_.pluck" or "_.where"
-     *  style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Array} Returns a slice of `array`.
-     * @example
-     *
-     * _.initial([1, 2, 3]);
-     * // => [1, 2]
-     *
-     * _.initial([1, 2, 3], 2);
-     * // => [1]
-     *
-     * _.initial([1, 2, 3], function(num) {
-     *   return num > 1;
-     * });
-     * // => [1]
-     *
-     * var characters = [
-     *   { 'name': 'barney',  'blocked': false, 'employer': 'slate' },
-     *   { 'name': 'fred',    'blocked': true,  'employer': 'slate' },
-     *   { 'name': 'pebbles', 'blocked': true,  'employer': 'na' }
-     * ];
-     *
-     * // using "_.pluck" callback shorthand
-     * _.initial(characters, 'blocked');
-     * // => [{ 'name': 'barney',  'blocked': false, 'employer': 'slate' }]
-     *
-     * // using "_.where" callback shorthand
-     * _.pluck(_.initial(characters, { 'employer': 'na' }), 'name');
-     * // => ['barney', 'fred']
-     */
-    function initial(array, callback, thisArg) {
-      var n = 0,
-          length = array ? array.length : 0;
-
-      if (typeof callback != 'number' && callback != null) {
-        var index = length;
-        callback = lodash.createCallback(callback, thisArg, 3);
-        while (index-- && callback(array[index], index, array)) {
-          n++;
-        }
-      } else {
-        n = (callback == null || thisArg) ? 1 : callback || n;
-      }
-      return slice(array, 0, nativeMin(nativeMax(0, length - n), length));
-    }
-
-    /**
-     * Creates an array of unique values present in all provided arrays using
-     * strict equality for comparisons, i.e. `===`.
-     *
-     * @static
-     * @memberOf _
-     * @category Arrays
-     * @param {...Array} [array] The arrays to inspect.
-     * @returns {Array} Returns an array of composite values.
-     * @example
-     *
-     * _.intersection([1, 2, 3], [101, 2, 1, 10], [2, 1]);
-     * // => [1, 2]
-     */
-    function intersection(array) {
-      var args = arguments,
-          argsLength = args.length,
-          argsIndex = -1,
-          caches = getArray(),
-          index = -1,
-          indexOf = getIndexOf(),
-          length = array ? array.length : 0,
-          result = [],
-          seen = getArray();
-
-      while (++argsIndex < argsLength) {
-        var value = args[argsIndex];
-        caches[argsIndex] = indexOf === baseIndexOf &&
-          (value ? value.length : 0) >= largeArraySize &&
-          createCache(argsIndex ? args[argsIndex] : seen);
-      }
-      outer:
-      while (++index < length) {
-        var cache = caches[0];
-        value = array[index];
-
-        if ((cache ? cacheIndexOf(cache, value) : indexOf(seen, value)) < 0) {
-          argsIndex = argsLength;
-          (cache || seen).push(value);
-          while (--argsIndex) {
-            cache = caches[argsIndex];
-            if ((cache ? cacheIndexOf(cache, value) : indexOf(args[argsIndex], value)) < 0) {
-              continue outer;
-            }
-          }
-          result.push(value);
-        }
-      }
-      while (argsLength--) {
-        cache = caches[argsLength];
-        if (cache) {
-          releaseObject(cache);
-        }
-      }
-      releaseArray(caches);
-      releaseArray(seen);
-      return result;
-    }
-
-    /**
-     * Gets the last element or last `n` elements of an array. If a callback is
-     * provided elements at the end of the array are returned as long as the
-     * callback returns truey. The callback is bound to `thisArg` and invoked
-     * with three arguments; (value, index, array).
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @category Arrays
-     * @param {Array} array The array to query.
-     * @param {Function|Object|number|string} [callback] The function called
-     *  per element or the number of elements to return. If a property name or
-     *  object is provided it will be used to create a "_.pluck" or "_.where"
-     *  style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {*} Returns the last element(s) of `array`.
-     * @example
-     *
-     * _.last([1, 2, 3]);
-     * // => 3
-     *
-     * _.last([1, 2, 3], 2);
-     * // => [2, 3]
-     *
-     * _.last([1, 2, 3], function(num) {
-     *   return num > 1;
-     * });
-     * // => [2, 3]
-     *
-     * var characters = [
-     *   { 'name': 'barney',  'blocked': false, 'employer': 'slate' },
-     *   { 'name': 'fred',    'blocked': true,  'employer': 'slate' },
-     *   { 'name': 'pebbles', 'blocked': true,  'employer': 'na' }
-     * ];
-     *
-     * // using "_.pluck" callback shorthand
-     * _.pluck(_.last(characters, 'blocked'), 'name');
-     * // => ['fred', 'pebbles']
-     *
-     * // using "_.where" callback shorthand
-     * _.last(characters, { 'employer': 'na' });
-     * // => [{ 'name': 'pebbles', 'blocked': true, 'employer': 'na' }]
-     */
-    function last(array, callback, thisArg) {
-      var n = 0,
-          length = array ? array.length : 0;
-
-      if (typeof callback != 'number' && callback != null) {
-        var index = length;
-        callback = lodash.createCallback(callback, thisArg, 3);
-        while (index-- && callback(array[index], index, array)) {
-          n++;
-        }
-      } else {
-        n = callback;
-        if (n == null || thisArg) {
-          return array ? array[length - 1] : undefined;
-        }
-      }
-      return slice(array, nativeMax(0, length - n));
-    }
-
-    /**
-     * Gets the index at which the last occurrence of `value` is found using strict
-     * equality for comparisons, i.e. `===`. If `fromIndex` is negative, it is used
-     * as the offset from the end of the collection.
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @category Arrays
-     * @param {Array} array The array to search.
-     * @param {*} value The value to search for.
-     * @param {number} [fromIndex=array.length-1] The index to search from.
-     * @returns {number} Returns the index of the matched value or `-1`.
-     * @example
-     *
-     * _.lastIndexOf([1, 2, 3, 1, 2, 3], 2);
-     * // => 4
-     *
-     * _.lastIndexOf([1, 2, 3, 1, 2, 3], 2, 3);
-     * // => 1
-     */
-    function lastIndexOf(array, value, fromIndex) {
-      var index = array ? array.length : 0;
-      if (typeof fromIndex == 'number') {
-        index = (fromIndex < 0 ? nativeMax(0, index + fromIndex) : nativeMin(fromIndex, index - 1)) + 1;
-      }
-      while (index--) {
-        if (array[index] === value) {
-          return index;
-        }
-      }
-      return -1;
-    }
-
-    /**
-     * Removes all provided values from the given array using strict equality for
-     * comparisons, i.e. `===`.
-     *
-     * @static
-     * @memberOf _
-     * @category Arrays
-     * @param {Array} array The array to modify.
-     * @param {...*} [value] The values to remove.
-     * @returns {Array} Returns `array`.
-     * @example
-     *
-     * var array = [1, 2, 3, 1, 2, 3];
-     * _.pull(array, 2, 3);
-     * console.log(array);
-     * // => [1, 1]
-     */
-    function pull(array) {
-      var args = arguments,
-          argsIndex = 0,
-          argsLength = args.length,
-          length = array ? array.length : 0;
-
-      while (++argsIndex < argsLength) {
-        var index = -1,
-            value = args[argsIndex];
-        while (++index < length) {
-          if (array[index] === value) {
-            splice.call(array, index--, 1);
-            length--;
-          }
-        }
-      }
-      return array;
-    }
-
-    /**
-     * Creates an array of numbers (positive and/or negative) progressing from
-     * `start` up to but not including `end`. If `start` is less than `stop` a
-     * zero-length range is created unless a negative `step` is specified.
-     *
-     * @static
-     * @memberOf _
-     * @category Arrays
-     * @param {number} [start=0] The start of the range.
-     * @param {number} end The end of the range.
-     * @param {number} [step=1] The value to increment or decrement by.
-     * @returns {Array} Returns a new range array.
-     * @example
-     *
-     * _.range(4);
-     * // => [0, 1, 2, 3]
-     *
-     * _.range(1, 5);
-     * // => [1, 2, 3, 4]
-     *
-     * _.range(0, 20, 5);
-     * // => [0, 5, 10, 15]
-     *
-     * _.range(0, -4, -1);
-     * // => [0, -1, -2, -3]
-     *
-     * _.range(1, 4, 0);
-     * // => [1, 1, 1]
-     *
-     * _.range(0);
-     * // => []
-     */
-    function range(start, end, step) {
-      start = +start || 0;
-      step = typeof step == 'number' ? step : (+step || 1);
-
-      if (end == null) {
-        end = start;
-        start = 0;
-      }
-      // use `Array(length)` so engines like Chakra and V8 avoid slower modes
-      // http://youtu.be/XAqIpGU8ZZk#t=17m25s
-      var index = -1,
-          length = nativeMax(0, ceil((end - start) / (step || 1))),
-          result = Array(length);
-
-      while (++index < length) {
-        result[index] = start;
-        start += step;
-      }
-      return result;
-    }
-
-    /**
-     * Removes all elements from an array that the callback returns truey for
-     * and returns an array of removed elements. The callback is bound to `thisArg`
-     * and invoked with three arguments; (value, index, array).
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @category Arrays
-     * @param {Array} array The array to modify.
-     * @param {Function|Object|string} [callback=identity] The function called
-     *  per iteration. If a property name or object is provided it will be used
-     *  to create a "_.pluck" or "_.where" style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Array} Returns a new array of removed elements.
-     * @example
-     *
-     * var array = [1, 2, 3, 4, 5, 6];
-     * var evens = _.remove(array, function(num) { return num % 2 == 0; });
-     *
-     * console.log(array);
-     * // => [1, 3, 5]
-     *
-     * console.log(evens);
-     * // => [2, 4, 6]
-     */
-    function remove(array, callback, thisArg) {
-      var index = -1,
-          length = array ? array.length : 0,
-          result = [];
-
-      callback = lodash.createCallback(callback, thisArg, 3);
-      while (++index < length) {
-        var value = array[index];
-        if (callback(value, index, array)) {
-          result.push(value);
-          splice.call(array, index--, 1);
-          length--;
-        }
-      }
-      return result;
-    }
-
-    /**
-     * The opposite of `_.initial` this method gets all but the first element or
-     * first `n` elements of an array. If a callback function is provided elements
-     * at the beginning of the array are excluded from the result as long as the
-     * callback returns truey. The callback is bound to `thisArg` and invoked
-     * with three arguments; (value, index, array).
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @alias drop, tail
-     * @category Arrays
-     * @param {Array} array The array to query.
-     * @param {Function|Object|number|string} [callback=1] The function called
-     *  per element or the number of elements to exclude. If a property name or
-     *  object is provided it will be used to create a "_.pluck" or "_.where"
-     *  style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Array} Returns a slice of `array`.
-     * @example
-     *
-     * _.rest([1, 2, 3]);
-     * // => [2, 3]
-     *
-     * _.rest([1, 2, 3], 2);
-     * // => [3]
-     *
-     * _.rest([1, 2, 3], function(num) {
-     *   return num < 3;
-     * });
-     * // => [3]
-     *
-     * var characters = [
-     *   { 'name': 'barney',  'blocked': true,  'employer': 'slate' },
-     *   { 'name': 'fred',    'blocked': false,  'employer': 'slate' },
-     *   { 'name': 'pebbles', 'blocked': true, 'employer': 'na' }
-     * ];
-     *
-     * // using "_.pluck" callback shorthand
-     * _.pluck(_.rest(characters, 'blocked'), 'name');
-     * // => ['fred', 'pebbles']
-     *
-     * // using "_.where" callback shorthand
-     * _.rest(characters, { 'employer': 'slate' });
-     * // => [{ 'name': 'pebbles', 'blocked': true, 'employer': 'na' }]
-     */
-    function rest(array, callback, thisArg) {
-      if (typeof callback != 'number' && callback != null) {
-        var n = 0,
-            index = -1,
-            length = array ? array.length : 0;
-
-        callback = lodash.createCallback(callback, thisArg, 3);
-        while (++index < length && callback(array[index], index, array)) {
-          n++;
-        }
-      } else {
-        n = (callback == null || thisArg) ? 1 : nativeMax(0, callback);
-      }
-      return slice(array, n);
-    }
-
-    /**
-     * Uses a binary search to determine the smallest index at which a value
-     * should be inserted into a given sorted array in order to maintain the sort
-     * order of the array. If a callback is provided it will be executed for
-     * `value` and each element of `array` to compute their sort ranking. The
-     * callback is bound to `thisArg` and invoked with one argument; (value).
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @category Arrays
-     * @param {Array} array The array to inspect.
-     * @param {*} value The value to evaluate.
-     * @param {Function|Object|string} [callback=identity] The function called
-     *  per iteration. If a property name or object is provided it will be used
-     *  to create a "_.pluck" or "_.where" style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {number} Returns the index at which `value` should be inserted
-     *  into `array`.
-     * @example
-     *
-     * _.sortedIndex([20, 30, 50], 40);
-     * // => 2
-     *
-     * // using "_.pluck" callback shorthand
-     * _.sortedIndex([{ 'x': 20 }, { 'x': 30 }, { 'x': 50 }], { 'x': 40 }, 'x');
-     * // => 2
-     *
-     * var dict = {
-     *   'wordToNumber': { 'twenty': 20, 'thirty': 30, 'fourty': 40, 'fifty': 50 }
-     * };
-     *
-     * _.sortedIndex(['twenty', 'thirty', 'fifty'], 'fourty', function(word) {
-     *   return dict.wordToNumber[word];
-     * });
-     * // => 2
-     *
-     * _.sortedIndex(['twenty', 'thirty', 'fifty'], 'fourty', function(word) {
-     *   return this.wordToNumber[word];
-     * }, dict);
-     * // => 2
-     */
-    function sortedIndex(array, value, callback, thisArg) {
-      var low = 0,
-          high = array ? array.length : low;
-
-      // explicitly reference `identity` for better inlining in Firefox
-      callback = callback ? lodash.createCallback(callback, thisArg, 1) : identity;
-      value = callback(value);
-
-      while (low < high) {
-        var mid = (low + high) >>> 1;
-        (callback(array[mid]) < value)
-          ? low = mid + 1
-          : high = mid;
-      }
-      return low;
-    }
-
-    /**
-     * Creates an array of unique values, in order, of the provided arrays using
-     * strict equality for comparisons, i.e. `===`.
-     *
-     * @static
-     * @memberOf _
-     * @category Arrays
-     * @param {...Array} [array] The arrays to inspect.
-     * @returns {Array} Returns an array of composite values.
-     * @example
-     *
-     * _.union([1, 2, 3], [101, 2, 1, 10], [2, 1]);
-     * // => [1, 2, 3, 101, 10]
-     */
-    function union(array) {
-      return baseUniq(baseFlatten(arguments, true, true));
-    }
-
-    /**
-     * Creates a duplicate-value-free version of an array using strict equality
-     * for comparisons, i.e. `===`. If the array is sorted, providing
-     * `true` for `isSorted` will use a faster algorithm. If a callback is provided
-     * each element of `array` is passed through the callback before uniqueness
-     * is computed. The callback is bound to `thisArg` and invoked with three
-     * arguments; (value, index, array).
-     *
-     * If a property name is provided for `callback` the created "_.pluck" style
-     * callback will return the property value of the given element.
-     *
-     * If an object is provided for `callback` the created "_.where" style callback
-     * will return `true` for elements that have the properties of the given object,
-     * else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @alias unique
-     * @category Arrays
-     * @param {Array} array The array to process.
-     * @param {boolean} [isSorted=false] A flag to indicate that `array` is sorted.
-     * @param {Function|Object|string} [callback=identity] The function called
-     *  per iteration. If a property name or object is provided it will be used
-     *  to create a "_.pluck" or "_.where" style callback, respectively.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Array} Returns a duplicate-value-free array.
-     * @example
-     *
-     * _.uniq([1, 2, 1, 3, 1]);
-     * // => [1, 2, 3]
-     *
-     * _.uniq([1, 1, 2, 2, 3], true);
-     * // => [1, 2, 3]
-     *
-     * _.uniq(['A', 'b', 'C', 'a', 'B', 'c'], function(letter) { return letter.toLowerCase(); });
-     * // => ['A', 'b', 'C']
-     *
-     * _.uniq([1, 2.5, 3, 1.5, 2, 3.5], function(num) { return this.floor(num); }, Math);
-     * // => [1, 2.5, 3]
-     *
-     * // using "_.pluck" callback shorthand
-     * _.uniq([{ 'x': 1 }, { 'x': 2 }, { 'x': 1 }], 'x');
-     * // => [{ 'x': 1 }, { 'x': 2 }]
-     */
-    function uniq(array, isSorted, callback, thisArg) {
-      // juggle arguments
-      if (typeof isSorted != 'boolean' && isSorted != null) {
-        thisArg = callback;
-        callback = (typeof isSorted != 'function' && thisArg && thisArg[isSorted] === array) ? null : isSorted;
-        isSorted = false;
-      }
-      if (callback != null) {
-        callback = lodash.createCallback(callback, thisArg, 3);
-      }
-      return baseUniq(array, isSorted, callback);
-    }
-
-    /**
-     * Creates an array excluding all provided values using strict equality for
-     * comparisons, i.e. `===`.
-     *
-     * @static
-     * @memberOf _
-     * @category Arrays
-     * @param {Array} array The array to filter.
-     * @param {...*} [value] The values to exclude.
-     * @returns {Array} Returns a new array of filtered values.
-     * @example
-     *
-     * _.without([1, 2, 1, 0, 3, 1, 4], 0, 1);
-     * // => [2, 3, 4]
-     */
-    function without(array) {
-      return baseDifference(array, slice(arguments, 1));
-    }
-
-    /**
-     * Creates an array of grouped elements, the first of which contains the first
-     * elements of the given arrays, the second of which contains the second
-     * elements of the given arrays, and so on.
-     *
-     * @static
-     * @memberOf _
-     * @alias unzip
-     * @category Arrays
-     * @param {...Array} [array] Arrays to process.
-     * @returns {Array} Returns a new array of grouped elements.
-     * @example
-     *
-     * _.zip(['fred', 'barney'], [30, 40], [true, false]);
-     * // => [['fred', 30, true], ['barney', 40, false]]
-     */
-    function zip() {
-      var array = arguments.length > 1 ? arguments : arguments[0],
-          index = -1,
-          length = array ? max(pluck(array, 'length')) : 0,
-          result = Array(length < 0 ? 0 : length);
-
-      while (++index < length) {
-        result[index] = pluck(array, index);
-      }
-      return result;
-    }
-
-    /**
-     * Creates an object composed from arrays of `keys` and `values`. Provide
-     * either a single two dimensional array, i.e. `[[key1, value1], [key2, value2]]`
-     * or two arrays, one of `keys` and one of corresponding `values`.
-     *
-     * @static
-     * @memberOf _
-     * @alias object
-     * @category Arrays
-     * @param {Array} keys The array of keys.
-     * @param {Array} [values=[]] The array of values.
-     * @returns {Object} Returns an object composed of the given keys and
-     *  corresponding values.
-     * @example
-     *
-     * _.zipObject(['fred', 'barney'], [30, 40]);
-     * // => { 'fred': 30, 'barney': 40 }
-     */
-    function zipObject(keys, values) {
-      var index = -1,
-          length = keys ? keys.length : 0,
-          result = {};
-
-      while (++index < length) {
-        var key = keys[index];
-        if (values) {
-          result[key] = values[index];
-        } else if (key) {
-          result[key[0]] = key[1];
-        }
-      }
-      return result;
-    }
-
-    /*--------------------------------------------------------------------------*/
-
-    /**
-     * Creates a function that executes `func`, with  the `this` binding and
-     * arguments of the created function, only after being called `n` times.
-     *
-     * @static
-     * @memberOf _
-     * @category Functions
-     * @param {number} n The number of times the function must be called before
-     *  `func` is executed.
-     * @param {Function} func The function to restrict.
-     * @returns {Function} Returns the new restricted function.
-     * @example
-     *
-     * var saves = ['profile', 'settings'];
-     *
-     * var done = _.after(saves.length, function() {
-     *   console.log('Done saving!');
-     * });
-     *
-     * _.forEach(saves, function(type) {
-     *   asyncSave({ 'type': type, 'complete': done });
-     * });
-     * // => logs 'Done saving!', after all saves have completed
-     */
-    function after(n, func) {
-      if (!isFunction(func)) {
-        throw new TypeError;
-      }
-      return function() {
-        if (--n < 1) {
-          return func.apply(this, arguments);
-        }
-      };
-    }
-
-    /**
-     * Creates a function that, when called, invokes `func` with the `this`
-     * binding of `thisArg` and prepends any additional `bind` arguments to those
-     * provided to the bound function.
-     *
-     * @static
-     * @memberOf _
-     * @category Functions
-     * @param {Function} func The function to bind.
-     * @param {*} [thisArg] The `this` binding of `func`.
-     * @param {...*} [arg] Arguments to be partially applied.
-     * @returns {Function} Returns the new bound function.
-     * @example
-     *
-     * var func = function(greeting) {
-     *   return greeting + ' ' + this.name;
-     * };
-     *
-     * func = _.bind(func, { 'name': 'fred' }, 'hi');
-     * func();
-     * // => 'hi fred'
-     */
-    function bind(func, thisArg) {
-      return arguments.length > 2
-        ? createWrapper(func, 17, slice(arguments, 2), null, thisArg)
-        : createWrapper(func, 1, null, null, thisArg);
-    }
-
-    /**
-     * Binds methods of an object to the object itself, overwriting the existing
-     * method. Method names may be specified as individual arguments or as arrays
-     * of method names. If no method names are provided all the function properties
-     * of `object` will be bound.
-     *
-     * @static
-     * @memberOf _
-     * @category Functions
-     * @param {Object} object The object to bind and assign the bound methods to.
-     * @param {...string} [methodName] The object method names to
-     *  bind, specified as individual method names or arrays of method names.
-     * @returns {Object} Returns `object`.
-     * @example
-     *
-     * var view = {
-     *  'label': 'docs',
-     *  'onClick': function() { console.log('clicked ' + this.label); }
-     * };
-     *
-     * _.bindAll(view);
-     * jQuery('#docs').on('click', view.onClick);
-     * // => logs 'clicked docs', when the button is clicked
-     */
-    function bindAll(object) {
-      var funcs = arguments.length > 1 ? baseFlatten(arguments, true, false, 1) : functions(object),
-          index = -1,
-          length = funcs.length;
-
-      while (++index < length) {
-        var key = funcs[index];
-        object[key] = createWrapper(object[key], 1, null, null, object);
-      }
-      return object;
-    }
-
-    /**
-     * Creates a function that, when called, invokes the method at `object[key]`
-     * and prepends any additional `bindKey` arguments to those provided to the bound
-     * function. This method differs from `_.bind` by allowing bound functions to
-     * reference methods that will be redefined or don't yet exist.
-     * See http://michaux.ca/articles/lazy-function-definition-pattern.
-     *
-     * @static
-     * @memberOf _
-     * @category Functions
-     * @param {Object} object The object the method belongs to.
-     * @param {string} key The key of the method.
-     * @param {...*} [arg] Arguments to be partially applied.
-     * @returns {Function} Returns the new bound function.
-     * @example
-     *
-     * var object = {
-     *   'name': 'fred',
-     *   'greet': function(greeting) {
-     *     return greeting + ' ' + this.name;
-     *   }
-     * };
-     *
-     * var func = _.bindKey(object, 'greet', 'hi');
-     * func();
-     * // => 'hi fred'
-     *
-     * object.greet = function(greeting) {
-     *   return greeting + 'ya ' + this.name + '!';
-     * };
-     *
-     * func();
-     * // => 'hiya fred!'
-     */
-    function bindKey(object, key) {
-      return arguments.length > 2
-        ? createWrapper(key, 19, slice(arguments, 2), null, object)
-        : createWrapper(key, 3, null, null, object);
-    }
-
-    /**
-     * Creates a function that is the composition of the provided functions,
-     * where each function consumes the return value of the function that follows.
-     * For example, composing the functions `f()`, `g()`, and `h()` produces `f(g(h()))`.
-     * Each function is executed with the `this` binding of the composed function.
-     *
-     * @static
-     * @memberOf _
-     * @category Functions
-     * @param {...Function} [func] Functions to compose.
-     * @returns {Function} Returns the new composed function.
-     * @example
-     *
-     * var realNameMap = {
-     *   'pebbles': 'penelope'
-     * };
-     *
-     * var format = function(name) {
-     *   name = realNameMap[name.toLowerCase()] || name;
-     *   return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
-     * };
-     *
-     * var greet = function(formatted) {
-     *   return 'Hiya ' + formatted + '!';
-     * };
-     *
-     * var welcome = _.compose(greet, format);
-     * welcome('pebbles');
-     * // => 'Hiya Penelope!'
-     */
-    function compose() {
-      var funcs = arguments,
-          length = funcs.length;
-
-      while (length--) {
-        if (!isFunction(funcs[length])) {
-          throw new TypeError;
-        }
-      }
-      return function() {
-        var args = arguments,
-            length = funcs.length;
-
-        while (length--) {
-          args = [funcs[length].apply(this, args)];
-        }
-        return args[0];
-      };
-    }
-
-    /**
-     * Produces a callback bound to an optional `thisArg`. If `func` is a property
-     * name the created callback will return the property value for a given element.
-     * If `func` is an object the created callback will return `true` for elements
-     * that contain the equivalent object properties, otherwise it will return `false`.
-     *
-     * @static
-     * @memberOf _
-     * @category Functions
-     * @param {*} [func=identity] The value to convert to a callback.
-     * @param {*} [thisArg] The `this` binding of the created callback.
-     * @param {number} [argCount] The number of arguments the callback accepts.
-     * @returns {Function} Returns a callback function.
-     * @example
-     *
-     * var characters = [
-     *   { 'name': 'barney', 'age': 36 },
-     *   { 'name': 'fred',   'age': 40 }
-     * ];
-     *
-     * // wrap to create custom callback shorthands
-     * _.createCallback = _.wrap(_.createCallback, function(func, callback, thisArg) {
-     *   var match = /^(.+?)__([gl]t)(.+)$/.exec(callback);
-     *   return !match ? func(callback, thisArg) : function(object) {
-     *     return match[2] == 'gt' ? object[match[1]] > match[3] : object[match[1]] < match[3];
-     *   };
-     * });
-     *
-     * _.filter(characters, 'age__gt38');
-     * // => [{ 'name': 'fred', 'age': 40 }]
-     */
-    function createCallback(func, thisArg, argCount) {
-      var type = typeof func;
-      if (func == null || type == 'function') {
-        return baseCreateCallback(func, thisArg, argCount);
-      }
-      // handle "_.pluck" style callback shorthands
-      if (type != 'object') {
-        return function(object) {
-          return object[func];
-        };
-      }
-      var props = keys(func),
-          key = props[0],
-          a = func[key];
-
-      // handle "_.where" style callback shorthands
-      if (props.length == 1 && a === a && !isObject(a)) {
-        // fast path the common case of providing an object with a single
-        // property containing a primitive value
-        return function(object) {
-          var b = object[key];
-          return a === b && (a !== 0 || (1 / a == 1 / b));
-        };
-      }
-      return function(object) {
-        var length = props.length,
-            result = false;
-
-        while (length--) {
-          if (!(result = baseIsEqual(object[props[length]], func[props[length]], null, true))) {
-            break;
-          }
-        }
-        return result;
-      };
-    }
-
-    /**
-     * Creates a function which accepts one or more arguments of `func` that when
-     * invoked either executes `func` returning its result, if all `func` arguments
-     * have been provided, or returns a function that accepts one or more of the
-     * remaining `func` arguments, and so on. The arity of `func` can be specified
-     * if `func.length` is not sufficient.
-     *
-     * @static
-     * @memberOf _
-     * @category Functions
-     * @param {Function} func The function to curry.
-     * @param {number} [arity=func.length] The arity of `func`.
-     * @returns {Function} Returns the new curried function.
-     * @example
-     *
-     * var curried = _.curry(function(a, b, c) {
-     *   console.log(a + b + c);
-     * });
-     *
-     * curried(1)(2)(3);
-     * // => 6
-     *
-     * curried(1, 2)(3);
-     * // => 6
-     *
-     * curried(1, 2, 3);
-     * // => 6
-     */
-    function curry(func, arity) {
-      arity = typeof arity == 'number' ? arity : (+arity || func.length);
-      return createWrapper(func, 4, null, null, null, arity);
-    }
-
-    /**
-     * Creates a function that will delay the execution of `func` until after
-     * `wait` milliseconds have elapsed since the last time it was invoked.
-     * Provide an options object to indicate that `func` should be invoked on
-     * the leading and/or trailing edge of the `wait` timeout. Subsequent calls
-     * to the debounced function will return the result of the last `func` call.
-     *
-     * Note: If `leading` and `trailing` options are `true` `func` will be called
-     * on the trailing edge of the timeout only if the the debounced function is
-     * invoked more than once during the `wait` timeout.
-     *
-     * @static
-     * @memberOf _
-     * @category Functions
-     * @param {Function} func The function to debounce.
-     * @param {number} wait The number of milliseconds to delay.
-     * @param {Object} [options] The options object.
-     * @param {boolean} [options.leading=false] Specify execution on the leading edge of the timeout.
-     * @param {number} [options.maxWait] The maximum time `func` is allowed to be delayed before it's called.
-     * @param {boolean} [options.trailing=true] Specify execution on the trailing edge of the timeout.
-     * @returns {Function} Returns the new debounced function.
-     * @example
-     *
-     * // avoid costly calculations while the window size is in flux
-     * var lazyLayout = _.debounce(calculateLayout, 150);
-     * jQuery(window).on('resize', lazyLayout);
-     *
-     * // execute `sendMail` when the click event is fired, debouncing subsequent calls
-     * jQuery('#postbox').on('click', _.debounce(sendMail, 300, {
-     *   'leading': true,
-     *   'trailing': false
-     * });
-     *
-     * // ensure `batchLog` is executed once after 1 second of debounced calls
-     * var source = new EventSource('/stream');
-     * source.addEventListener('message', _.debounce(batchLog, 250, {
-     *   'maxWait': 1000
-     * }, false);
-     */
-    function debounce(func, wait, options) {
-      var args,
-          maxTimeoutId,
-          result,
-          stamp,
-          thisArg,
-          timeoutId,
-          trailingCall,
-          lastCalled = 0,
-          maxWait = false,
-          trailing = true;
-
-      if (!isFunction(func)) {
-        throw new TypeError;
-      }
-      wait = nativeMax(0, wait) || 0;
-      if (options === true) {
-        var leading = true;
-        trailing = false;
-      } else if (isObject(options)) {
-        leading = options.leading;
-        maxWait = 'maxWait' in options && (nativeMax(wait, options.maxWait) || 0);
-        trailing = 'trailing' in options ? options.trailing : trailing;
-      }
-      var delayed = function() {
-        var remaining = wait - (now() - stamp);
-        if (remaining <= 0) {
-          if (maxTimeoutId) {
-            clearTimeout(maxTimeoutId);
-          }
-          var isCalled = trailingCall;
-          maxTimeoutId = timeoutId = trailingCall = undefined;
-          if (isCalled) {
-            lastCalled = now();
-            result = func.apply(thisArg, args);
-            if (!timeoutId && !maxTimeoutId) {
-              args = thisArg = null;
-            }
-          }
-        } else {
-          timeoutId = setTimeout(delayed, remaining);
-        }
-      };
-
-      var maxDelayed = function() {
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
-        maxTimeoutId = timeoutId = trailingCall = undefined;
-        if (trailing || (maxWait !== wait)) {
-          lastCalled = now();
-          result = func.apply(thisArg, args);
-          if (!timeoutId && !maxTimeoutId) {
-            args = thisArg = null;
-          }
-        }
-      };
-
-      return function() {
-        args = arguments;
-        stamp = now();
-        thisArg = this;
-        trailingCall = trailing && (timeoutId || !leading);
-
-        if (maxWait === false) {
-          var leadingCall = leading && !timeoutId;
-        } else {
-          if (!maxTimeoutId && !leading) {
-            lastCalled = stamp;
-          }
-          var remaining = maxWait - (stamp - lastCalled),
-              isCalled = remaining <= 0;
-
-          if (isCalled) {
-            if (maxTimeoutId) {
-              maxTimeoutId = clearTimeout(maxTimeoutId);
-            }
-            lastCalled = stamp;
-            result = func.apply(thisArg, args);
-          }
-          else if (!maxTimeoutId) {
-            maxTimeoutId = setTimeout(maxDelayed, remaining);
-          }
-        }
-        if (isCalled && timeoutId) {
-          timeoutId = clearTimeout(timeoutId);
-        }
-        else if (!timeoutId && wait !== maxWait) {
-          timeoutId = setTimeout(delayed, wait);
-        }
-        if (leadingCall) {
-          isCalled = true;
-          result = func.apply(thisArg, args);
-        }
-        if (isCalled && !timeoutId && !maxTimeoutId) {
-          args = thisArg = null;
-        }
-        return result;
-      };
-    }
-
-    /**
-     * Defers executing the `func` function until the current call stack has cleared.
-     * Additional arguments will be provided to `func` when it is invoked.
-     *
-     * @static
-     * @memberOf _
-     * @category Functions
-     * @param {Function} func The function to defer.
-     * @param {...*} [arg] Arguments to invoke the function with.
-     * @returns {number} Returns the timer id.
-     * @example
-     *
-     * _.defer(function() { console.log('deferred'); });
-     * // returns from the function before 'deferred' is logged
-     */
-    function defer(func) {
-      if (!isFunction(func)) {
-        throw new TypeError;
-      }
-      var args = slice(arguments, 1);
-      return setTimeout(function() { func.apply(undefined, args); }, 1);
-    }
-    // use `setImmediate` if available in Node.js
-    if (setImmediate) {
-      defer = function(func) {
-        if (!isFunction(func)) {
-          throw new TypeError;
-        }
-        return setImmediate.apply(context, arguments);
-      };
-    }
-
-    /**
-     * Executes the `func` function after `wait` milliseconds. Additional arguments
-     * will be provided to `func` when it is invoked.
-     *
-     * @static
-     * @memberOf _
-     * @category Functions
-     * @param {Function} func The function to delay.
-     * @param {number} wait The number of milliseconds to delay execution.
-     * @param {...*} [arg] Arguments to invoke the function with.
-     * @returns {number} Returns the timer id.
-     * @example
-     *
-     * var log = _.bind(console.log, console);
-     * _.delay(log, 1000, 'logged later');
-     * // => 'logged later' (Appears after one second.)
-     */
-    function delay(func, wait) {
-      if (!isFunction(func)) {
-        throw new TypeError;
-      }
-      var args = slice(arguments, 2);
-      return setTimeout(function() { func.apply(undefined, args); }, wait);
-    }
-
-    /**
-     * Creates a function that memoizes the result of `func`. If `resolver` is
-     * provided it will be used to determine the cache key for storing the result
-     * based on the arguments provided to the memoized function. By default, the
-     * first argument provided to the memoized function is used as the cache key.
-     * The `func` is executed with the `this` binding of the memoized function.
-     * The result cache is exposed as the `cache` property on the memoized function.
-     *
-     * @static
-     * @memberOf _
-     * @category Functions
-     * @param {Function} func The function to have its output memoized.
-     * @param {Function} [resolver] A function used to resolve the cache key.
-     * @returns {Function} Returns the new memoizing function.
-     * @example
-     *
-     * var fibonacci = _.memoize(function(n) {
-     *   return n < 2 ? n : fibonacci(n - 1) + fibonacci(n - 2);
-     * });
-     *
-     * fibonacci(9)
-     * // => 34
-     *
-     * var data = {
-     *   'fred': { 'name': 'fred', 'age': 40 },
-     *   'pebbles': { 'name': 'pebbles', 'age': 1 }
-     * };
-     *
-     * // modifying the result cache
-     * var get = _.memoize(function(name) { return data[name]; }, _.identity);
-     * get('pebbles');
-     * // => { 'name': 'pebbles', 'age': 1 }
-     *
-     * get.cache.pebbles.name = 'penelope';
-     * get('pebbles');
-     * // => { 'name': 'penelope', 'age': 1 }
-     */
-    function memoize(func, resolver) {
-      if (!isFunction(func)) {
-        throw new TypeError;
-      }
-      var memoized = function() {
-        var cache = memoized.cache,
-            key = resolver ? resolver.apply(this, arguments) : keyPrefix + arguments[0];
-
-        return hasOwnProperty.call(cache, key)
-          ? cache[key]
-          : (cache[key] = func.apply(this, arguments));
-      }
-      memoized.cache = {};
-      return memoized;
-    }
-
-    /**
-     * Creates a function that is restricted to execute `func` once. Repeat calls to
-     * the function will return the value of the first call. The `func` is executed
-     * with the `this` binding of the created function.
-     *
-     * @static
-     * @memberOf _
-     * @category Functions
-     * @param {Function} func The function to restrict.
-     * @returns {Function} Returns the new restricted function.
-     * @example
-     *
-     * var initialize = _.once(createApplication);
-     * initialize();
-     * initialize();
-     * // `initialize` executes `createApplication` once
-     */
-    function once(func) {
-      var ran,
-          result;
-
-      if (!isFunction(func)) {
-        throw new TypeError;
-      }
-      return function() {
-        if (ran) {
-          return result;
-        }
-        ran = true;
-        result = func.apply(this, arguments);
-
-        // clear the `func` variable so the function may be garbage collected
-        func = null;
-        return result;
-      };
-    }
-
-    /**
-     * Creates a function that, when called, invokes `func` with any additional
-     * `partial` arguments prepended to those provided to the new function. This
-     * method is similar to `_.bind` except it does **not** alter the `this` binding.
-     *
-     * @static
-     * @memberOf _
-     * @category Functions
-     * @param {Function} func The function to partially apply arguments to.
-     * @param {...*} [arg] Arguments to be partially applied.
-     * @returns {Function} Returns the new partially applied function.
-     * @example
-     *
-     * var greet = function(greeting, name) { return greeting + ' ' + name; };
-     * var hi = _.partial(greet, 'hi');
-     * hi('fred');
-     * // => 'hi fred'
-     */
-    function partial(func) {
-      return createWrapper(func, 16, slice(arguments, 1));
-    }
-
-    /**
-     * This method is like `_.partial` except that `partial` arguments are
-     * appended to those provided to the new function.
-     *
-     * @static
-     * @memberOf _
-     * @category Functions
-     * @param {Function} func The function to partially apply arguments to.
-     * @param {...*} [arg] Arguments to be partially applied.
-     * @returns {Function} Returns the new partially applied function.
-     * @example
-     *
-     * var defaultsDeep = _.partialRight(_.merge, _.defaults);
-     *
-     * var options = {
-     *   'variable': 'data',
-     *   'imports': { 'jq': $ }
-     * };
-     *
-     * defaultsDeep(options, _.templateSettings);
-     *
-     * options.variable
-     * // => 'data'
-     *
-     * options.imports
-     * // => { '_': _, 'jq': $ }
-     */
-    function partialRight(func) {
-      return createWrapper(func, 32, null, slice(arguments, 1));
-    }
-
-    /**
-     * Creates a function that, when executed, will only call the `func` function
-     * at most once per every `wait` milliseconds. Provide an options object to
-     * indicate that `func` should be invoked on the leading and/or trailing edge
-     * of the `wait` timeout. Subsequent calls to the throttled function will
-     * return the result of the last `func` call.
-     *
-     * Note: If `leading` and `trailing` options are `true` `func` will be called
-     * on the trailing edge of the timeout only if the the throttled function is
-     * invoked more than once during the `wait` timeout.
-     *
-     * @static
-     * @memberOf _
-     * @category Functions
-     * @param {Function} func The function to throttle.
-     * @param {number} wait The number of milliseconds to throttle executions to.
-     * @param {Object} [options] The options object.
-     * @param {boolean} [options.leading=true] Specify execution on the leading edge of the timeout.
-     * @param {boolean} [options.trailing=true] Specify execution on the trailing edge of the timeout.
-     * @returns {Function} Returns the new throttled function.
-     * @example
-     *
-     * // avoid excessively updating the position while scrolling
-     * var throttled = _.throttle(updatePosition, 100);
-     * jQuery(window).on('scroll', throttled);
-     *
-     * // execute `renewToken` when the click event is fired, but not more than once every 5 minutes
-     * jQuery('.interactive').on('click', _.throttle(renewToken, 300000, {
-     *   'trailing': false
-     * }));
-     */
-    function throttle(func, wait, options) {
-      var leading = true,
-          trailing = true;
-
-      if (!isFunction(func)) {
-        throw new TypeError;
-      }
-      if (options === false) {
-        leading = false;
-      } else if (isObject(options)) {
-        leading = 'leading' in options ? options.leading : leading;
-        trailing = 'trailing' in options ? options.trailing : trailing;
-      }
-      debounceOptions.leading = leading;
-      debounceOptions.maxWait = wait;
-      debounceOptions.trailing = trailing;
-
-      return debounce(func, wait, debounceOptions);
-    }
-
-    /**
-     * Creates a function that provides `value` to the wrapper function as its
-     * first argument. Additional arguments provided to the function are appended
-     * to those provided to the wrapper function. The wrapper is executed with
-     * the `this` binding of the created function.
-     *
-     * @static
-     * @memberOf _
-     * @category Functions
-     * @param {*} value The value to wrap.
-     * @param {Function} wrapper The wrapper function.
-     * @returns {Function} Returns the new function.
-     * @example
-     *
-     * var p = _.wrap(_.escape, function(func, text) {
-     *   return '<p>' + func(text) + '</p>';
-     * });
-     *
-     * p('Fred, Wilma, & Pebbles');
-     * // => '<p>Fred, Wilma, &amp; Pebbles</p>'
-     */
-    function wrap(value, wrapper) {
-      return createWrapper(wrapper, 16, [value]);
-    }
-
-    /*--------------------------------------------------------------------------*/
-
-    /**
-     * Converts the characters `&`, `<`, `>`, `"`, and `'` in `string` to their
-     * corresponding HTML entities.
-     *
-     * @static
-     * @memberOf _
-     * @category Utilities
-     * @param {string} string The string to escape.
-     * @returns {string} Returns the escaped string.
-     * @example
-     *
-     * _.escape('Fred, Wilma, & Pebbles');
-     * // => 'Fred, Wilma, &amp; Pebbles'
-     */
-    function escape(string) {
-      return string == null ? '' : String(string).replace(reUnescapedHtml, escapeHtmlChar);
-    }
-
-    /**
-     * This method returns the first argument provided to it.
-     *
-     * @static
-     * @memberOf _
-     * @category Utilities
-     * @param {*} value Any value.
-     * @returns {*} Returns `value`.
-     * @example
-     *
-     * var object = { 'name': 'fred' };
-     * _.identity(object) === object;
-     * // => true
-     */
-    function identity(value) {
-      return value;
-    }
-
-    /**
-     * Adds function properties of a source object to the `lodash` function and
-     * chainable wrapper.
-     *
-     * @static
-     * @memberOf _
-     * @category Utilities
-     * @param {Object} object The object of function properties to add to `lodash`.
-     * @param {Object} object The object of function properties to add to `lodash`.
-     * @example
-     *
-     * _.mixin({
-     *   'capitalize': function(string) {
-     *     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-     *   }
-     * });
-     *
-     * _.capitalize('fred');
-     * // => 'Fred'
-     *
-     * _('fred').capitalize();
-     * // => 'Fred'
-     */
-    function mixin(object, source) {
-      var ctor = object,
-          isFunc = !source || isFunction(ctor);
-
-      if (!source) {
-        ctor = lodashWrapper;
-        source = object;
-        object = lodash;
-      }
-      forEach(functions(source), function(methodName) {
-        var func = object[methodName] = source[methodName];
-        if (isFunc) {
-          ctor.prototype[methodName] = function() {
-            var value = this.__wrapped__,
-                args = [value];
-
-            push.apply(args, arguments);
-            var result = func.apply(object, args);
-            if (value && typeof value == 'object' && value === result) {
-              return this;
-            }
-            result = new ctor(result);
-            result.__chain__ = this.__chain__;
-            return result;
-          };
-        }
-      });
-    }
-
-    /**
-     * Reverts the '_' variable to its previous value and returns a reference to
-     * the `lodash` function.
-     *
-     * @static
-     * @memberOf _
-     * @category Utilities
-     * @returns {Function} Returns the `lodash` function.
-     * @example
-     *
-     * var lodash = _.noConflict();
-     */
-    function noConflict() {
-      context._ = oldDash;
-      return this;
-    }
-
-    /**
-     * A no-operation function.
-     *
-     * @static
-     * @memberOf _
-     * @category Utilities
-     * @example
-     *
-     * var object = { 'name': 'fred' };
-     * _.noop(object) === undefined;
-     * // => true
-     */
-    function noop() {
-      // no operation performed
-    }
-
-    /**
-     * Converts the given value into an integer of the specified radix.
-     * If `radix` is `undefined` or `0` a `radix` of `10` is used unless the
-     * `value` is a hexadecimal, in which case a `radix` of `16` is used.
-     *
-     * Note: This method avoids differences in native ES3 and ES5 `parseInt`
-     * implementations. See http://es5.github.io/#E.
-     *
-     * @static
-     * @memberOf _
-     * @category Utilities
-     * @param {string} value The value to parse.
-     * @param {number} [radix] The radix used to interpret the value to parse.
-     * @returns {number} Returns the new integer value.
-     * @example
-     *
-     * _.parseInt('08');
-     * // => 8
-     */
-    var parseInt = nativeParseInt(whitespace + '08') == 8 ? nativeParseInt : function(value, radix) {
-      // Firefox < 21 and Opera < 15 follow the ES3 specified implementation of `parseInt`
-      return nativeParseInt(isString(value) ? value.replace(reLeadingSpacesAndZeros, '') : value, radix || 0);
-    };
-
-    /**
-     * Produces a random number between `min` and `max` (inclusive). If only one
-     * argument is provided a number between `0` and the given number will be
-     * returned. If `floating` is truey or either `min` or `max` are floats a
-     * floating-point number will be returned instead of an integer.
-     *
-     * @static
-     * @memberOf _
-     * @category Utilities
-     * @param {number} [min=0] The minimum possible value.
-     * @param {number} [max=1] The maximum possible value.
-     * @param {boolean} [floating=false] Specify returning a floating-point number.
-     * @returns {number} Returns a random number.
-     * @example
-     *
-     * _.random(0, 5);
-     * // => an integer between 0 and 5
-     *
-     * _.random(5);
-     * // => also an integer between 0 and 5
-     *
-     * _.random(5, true);
-     * // => a floating-point number between 0 and 5
-     *
-     * _.random(1.2, 5.2);
-     * // => a floating-point number between 1.2 and 5.2
-     */
-    function random(min, max, floating) {
-      var noMin = min == null,
-          noMax = max == null;
-
-      if (floating == null) {
-        if (typeof min == 'boolean' && noMax) {
-          floating = min;
-          min = 1;
-        }
-        else if (!noMax && typeof max == 'boolean') {
-          floating = max;
-          noMax = true;
-        }
-      }
-      if (noMin && noMax) {
-        max = 1;
-      }
-      min = +min || 0;
-      if (noMax) {
-        max = min;
-        min = 0;
-      } else {
-        max = +max || 0;
-      }
-      if (floating || min % 1 || max % 1) {
-        var rand = nativeRandom();
-        return nativeMin(min + (rand * (max - min + parseFloat('1e-' + ((rand +'').length - 1)))), max);
-      }
-      return baseRandom(min, max);
-    }
-
-    /**
-     * Resolves the value of `property` on `object`. If `property` is a function
-     * it will be invoked with the `this` binding of `object` and its result returned,
-     * else the property value is returned. If `object` is falsey then `undefined`
-     * is returned.
-     *
-     * @static
-     * @memberOf _
-     * @category Utilities
-     * @param {Object} object The object to inspect.
-     * @param {string} property The property to get the value of.
-     * @returns {*} Returns the resolved value.
-     * @example
-     *
-     * var object = {
-     *   'cheese': 'crumpets',
-     *   'stuff': function() {
-     *     return 'nonsense';
-     *   }
-     * };
-     *
-     * _.result(object, 'cheese');
-     * // => 'crumpets'
-     *
-     * _.result(object, 'stuff');
-     * // => 'nonsense'
-     */
-    function result(object, property) {
-      if (object) {
-        var value = object[property];
-        return isFunction(value) ? object[property]() : value;
-      }
-    }
-
-    /**
-     * A micro-templating method that handles arbitrary delimiters, preserves
-     * whitespace, and correctly escapes quotes within interpolated code.
-     *
-     * Note: In the development build, `_.template` utilizes sourceURLs for easier
-     * debugging. See http://www.html5rocks.com/en/tutorials/developertools/sourcemaps/#toc-sourceurl
-     *
-     * For more information on precompiling templates see:
-     * http://lodash.com/custom-builds
-     *
-     * For more information on Chrome extension sandboxes see:
-     * http://developer.chrome.com/stable/extensions/sandboxingEval.html
-     *
-     * @static
-     * @memberOf _
-     * @category Utilities
-     * @param {string} text The template text.
-     * @param {Object} data The data object used to populate the text.
-     * @param {Object} [options] The options object.
-     * @param {RegExp} [options.escape] The "escape" delimiter.
-     * @param {RegExp} [options.evaluate] The "evaluate" delimiter.
-     * @param {Object} [options.imports] An object to import into the template as local variables.
-     * @param {RegExp} [options.interpolate] The "interpolate" delimiter.
-     * @param {string} [sourceURL] The sourceURL of the template's compiled source.
-     * @param {string} [variable] The data object variable name.
-     * @returns {Function|string} Returns a compiled function when no `data` object
-     *  is given, else it returns the interpolated text.
-     * @example
-     *
-     * // using the "interpolate" delimiter to create a compiled template
-     * var compiled = _.template('hello <%= name %>');
-     * compiled({ 'name': 'fred' });
-     * // => 'hello fred'
-     *
-     * // using the "escape" delimiter to escape HTML in data property values
-     * _.template('<b><%- value %></b>', { 'value': '<script>' });
-     * // => '<b>&lt;script&gt;</b>'
-     *
-     * // using the "evaluate" delimiter to generate HTML
-     * var list = '<% _.forEach(people, function(name) { %><li><%- name %></li><% }); %>';
-     * _.template(list, { 'people': ['fred', 'barney'] });
-     * // => '<li>fred</li><li>barney</li>'
-     *
-     * // using the ES6 delimiter as an alternative to the default "interpolate" delimiter
-     * _.template('hello ${ name }', { 'name': 'pebbles' });
-     * // => 'hello pebbles'
-     *
-     * // using the internal `print` function in "evaluate" delimiters
-     * _.template('<% print("hello " + name); %>!', { 'name': 'barney' });
-     * // => 'hello barney!'
-     *
-     * // using a custom template delimiters
-     * _.templateSettings = {
-     *   'interpolate': /{{([\s\S]+?)}}/g
-     * };
-     *
-     * _.template('hello {{ name }}!', { 'name': 'mustache' });
-     * // => 'hello mustache!'
-     *
-     * // using the `imports` option to import jQuery
-     * var list = '<% $.each(people, function(name) { %><li><%- name %></li><% }); %>';
-     * _.template(list, { 'people': ['fred', 'barney'] }, { 'imports': { '$': jQuery } });
-     * // => '<li>fred</li><li>barney</li>'
-     *
-     * // using the `sourceURL` option to specify a custom sourceURL for the template
-     * var compiled = _.template('hello <%= name %>', null, { 'sourceURL': '/basic/greeting.jst' });
-     * compiled(data);
-     * // => find the source of "greeting.jst" under the Sources tab or Resources panel of the web inspector
-     *
-     * // using the `variable` option to ensure a with-statement isn't used in the compiled template
-     * var compiled = _.template('hi <%= data.name %>!', null, { 'variable': 'data' });
-     * compiled.source;
-     * // => function(data) {
-     *   var __t, __p = '', __e = _.escape;
-     *   __p += 'hi ' + ((__t = ( data.name )) == null ? '' : __t) + '!';
-     *   return __p;
-     * }
-     *
-     * // using the `source` property to inline compiled templates for meaningful
-     * // line numbers in error messages and a stack trace
-     * fs.writeFileSync(path.join(cwd, 'jst.js'), '\
-     *   var JST = {\
-     *     "main": ' + _.template(mainText).source + '\
-     *   };\
-     * ');
-     */
-    function template(text, data, options) {
-      // based on John Resig's `tmpl` implementation
-      // http://ejohn.org/blog/javascript-micro-templating/
-      // and Laura Doktorova's doT.js
-      // https://github.com/olado/doT
-      var settings = lodash.templateSettings;
-      text = String(text || '');
-
-      // avoid missing dependencies when `iteratorTemplate` is not defined
-      options = defaults({}, options, settings);
-
-      var imports = defaults({}, options.imports, settings.imports),
-          importsKeys = keys(imports),
-          importsValues = values(imports);
-
-      var isEvaluating,
-          index = 0,
-          interpolate = options.interpolate || reNoMatch,
-          source = "__p += '";
-
-      // compile the regexp to match each delimiter
-      var reDelimiters = RegExp(
-        (options.escape || reNoMatch).source + '|' +
-        interpolate.source + '|' +
-        (interpolate === reInterpolate ? reEsTemplate : reNoMatch).source + '|' +
-        (options.evaluate || reNoMatch).source + '|$'
-      , 'g');
-
-      text.replace(reDelimiters, function(match, escapeValue, interpolateValue, esTemplateValue, evaluateValue, offset) {
-        interpolateValue || (interpolateValue = esTemplateValue);
-
-        // escape characters that cannot be included in string literals
-        source += text.slice(index, offset).replace(reUnescapedString, escapeStringChar);
-
-        // replace delimiters with snippets
-        if (escapeValue) {
-          source += "' +\n__e(" + escapeValue + ") +\n'";
-        }
-        if (evaluateValue) {
-          isEvaluating = true;
-          source += "';\n" + evaluateValue + ";\n__p += '";
-        }
-        if (interpolateValue) {
-          source += "' +\n((__t = (" + interpolateValue + ")) == null ? '' : __t) +\n'";
-        }
-        index = offset + match.length;
-
-        // the JS engine embedded in Adobe products requires returning the `match`
-        // string in order to produce the correct `offset` value
-        return match;
-      });
-
-      source += "';\n";
-
-      // if `variable` is not specified, wrap a with-statement around the generated
-      // code to add the data object to the top of the scope chain
-      var variable = options.variable,
-          hasVariable = variable;
-
-      if (!hasVariable) {
-        variable = 'obj';
-        source = 'with (' + variable + ') {\n' + source + '\n}\n';
-      }
-      // cleanup code by stripping empty strings
-      source = (isEvaluating ? source.replace(reEmptyStringLeading, '') : source)
-        .replace(reEmptyStringMiddle, '$1')
-        .replace(reEmptyStringTrailing, '$1;');
-
-      // frame code as the function body
-      source = 'function(' + variable + ') {\n' +
-        (hasVariable ? '' : variable + ' || (' + variable + ' = {});\n') +
-        "var __t, __p = '', __e = _.escape" +
-        (isEvaluating
-          ? ', __j = Array.prototype.join;\n' +
-            "function print() { __p += __j.call(arguments, '') }\n"
-          : ';\n'
-        ) +
-        source +
-        'return __p\n}';
-
-      // Use a sourceURL for easier debugging.
-      // http://www.html5rocks.com/en/tutorials/developertools/sourcemaps/#toc-sourceurl
-      var sourceURL = '\n/*\n//# sourceURL=' + (options.sourceURL || '/lodash/template/source[' + (templateCounter++) + ']') + '\n*/';
-
-      try {
-        var result = Function(importsKeys, 'return ' + source + sourceURL).apply(undefined, importsValues);
-      } catch(e) {
-        e.source = source;
-        throw e;
-      }
-      if (data) {
-        return result(data);
-      }
-      // provide the compiled function's source by its `toString` method, in
-      // supported environments, or the `source` property as a convenience for
-      // inlining compiled templates during the build process
-      result.source = source;
-      return result;
-    }
-
-    /**
-     * Executes the callback `n` times, returning an array of the results
-     * of each callback execution. The callback is bound to `thisArg` and invoked
-     * with one argument; (index).
-     *
-     * @static
-     * @memberOf _
-     * @category Utilities
-     * @param {number} n The number of times to execute the callback.
-     * @param {Function} callback The function called per iteration.
-     * @param {*} [thisArg] The `this` binding of `callback`.
-     * @returns {Array} Returns an array of the results of each `callback` execution.
-     * @example
-     *
-     * var diceRolls = _.times(3, _.partial(_.random, 1, 6));
-     * // => [3, 6, 4]
-     *
-     * _.times(3, function(n) { mage.castSpell(n); });
-     * // => calls `mage.castSpell(n)` three times, passing `n` of `0`, `1`, and `2` respectively
-     *
-     * _.times(3, function(n) { this.cast(n); }, mage);
-     * // => also calls `mage.castSpell(n)` three times
-     */
-    function times(n, callback, thisArg) {
-      n = (n = +n) > -1 ? n : 0;
-      var index = -1,
-          result = Array(n);
-
-      callback = baseCreateCallback(callback, thisArg, 1);
-      while (++index < n) {
-        result[index] = callback(index);
-      }
-      return result;
-    }
-
-    /**
-     * The inverse of `_.escape` this method converts the HTML entities
-     * `&amp;`, `&lt;`, `&gt;`, `&quot;`, and `&#39;` in `string` to their
-     * corresponding characters.
-     *
-     * @static
-     * @memberOf _
-     * @category Utilities
-     * @param {string} string The string to unescape.
-     * @returns {string} Returns the unescaped string.
-     * @example
-     *
-     * _.unescape('Fred, Barney &amp; Pebbles');
-     * // => 'Fred, Barney & Pebbles'
-     */
-    function unescape(string) {
-      return string == null ? '' : String(string).replace(reEscapedHtml, unescapeHtmlChar);
-    }
-
-    /**
-     * Generates a unique ID. If `prefix` is provided the ID will be appended to it.
-     *
-     * @static
-     * @memberOf _
-     * @category Utilities
-     * @param {string} [prefix] The value to prefix the ID with.
-     * @returns {string} Returns the unique ID.
-     * @example
-     *
-     * _.uniqueId('contact_');
-     * // => 'contact_104'
-     *
-     * _.uniqueId();
-     * // => '105'
-     */
-    function uniqueId(prefix) {
-      var id = ++idCounter;
-      return String(prefix == null ? '' : prefix) + id;
-    }
-
-    /*--------------------------------------------------------------------------*/
-
-    /**
-     * Creates a `lodash` object that wraps the given value with explicit
-     * method chaining enabled.
-     *
-     * @static
-     * @memberOf _
-     * @category Chaining
-     * @param {*} value The value to wrap.
-     * @returns {Object} Returns the wrapper object.
-     * @example
-     *
-     * var characters = [
-     *   { 'name': 'barney',  'age': 36 },
-     *   { 'name': 'fred',    'age': 40 },
-     *   { 'name': 'pebbles', 'age': 1 }
-     * ];
-     *
-     * var youngest = _.chain(characters)
-     *     .sortBy('age')
-     *     .map(function(chr) { return chr.name + ' is ' + chr.age; })
-     *     .first()
-     *     .value();
-     * // => 'pebbles is 1'
-     */
-    function chain(value) {
-      value = new lodashWrapper(value);
-      value.__chain__ = true;
-      return value;
-    }
-
-    /**
-     * Invokes `interceptor` with the `value` as the first argument and then
-     * returns `value`. The purpose of this method is to "tap into" a method
-     * chain in order to perform operations on intermediate results within
-     * the chain.
-     *
-     * @static
-     * @memberOf _
-     * @category Chaining
-     * @param {*} value The value to provide to `interceptor`.
-     * @param {Function} interceptor The function to invoke.
-     * @returns {*} Returns `value`.
-     * @example
-     *
-     * _([1, 2, 3, 4])
-     *  .tap(function(array) { array.pop(); })
-     *  .reverse()
-     *  .value();
-     * // => [3, 2, 1]
-     */
-    function tap(value, interceptor) {
-      interceptor(value);
-      return value;
-    }
-
-    /**
-     * Enables explicit method chaining on the wrapper object.
-     *
-     * @name chain
-     * @memberOf _
-     * @category Chaining
-     * @returns {*} Returns the wrapper object.
-     * @example
-     *
-     * var characters = [
-     *   { 'name': 'barney', 'age': 36 },
-     *   { 'name': 'fred',   'age': 40 }
-     * ];
-     *
-     * // without explicit chaining
-     * _(characters).first();
-     * // => { 'name': 'barney', 'age': 36 }
-     *
-     * // with explicit chaining
-     * _(characters).chain()
-     *   .first()
-     *   .pick('age')
-     *   .value()
-     * // => { 'age': 36 }
-     */
-    function wrapperChain() {
-      this.__chain__ = true;
-      return this;
-    }
-
-    /**
-     * Produces the `toString` result of the wrapped value.
-     *
-     * @name toString
-     * @memberOf _
-     * @category Chaining
-     * @returns {string} Returns the string result.
-     * @example
-     *
-     * _([1, 2, 3]).toString();
-     * // => '1,2,3'
-     */
-    function wrapperToString() {
-      return String(this.__wrapped__);
-    }
-
-    /**
-     * Extracts the wrapped value.
-     *
-     * @name valueOf
-     * @memberOf _
-     * @alias value
-     * @category Chaining
-     * @returns {*} Returns the wrapped value.
-     * @example
-     *
-     * _([1, 2, 3]).valueOf();
-     * // => [1, 2, 3]
-     */
-    function wrapperValueOf() {
-      return this.__wrapped__;
-    }
-
-    /*--------------------------------------------------------------------------*/
-
-    // add functions that return wrapped values when chaining
-    lodash.after = after;
-    lodash.assign = assign;
-    lodash.at = at;
-    lodash.bind = bind;
-    lodash.bindAll = bindAll;
-    lodash.bindKey = bindKey;
-    lodash.chain = chain;
-    lodash.compact = compact;
-    lodash.compose = compose;
-    lodash.countBy = countBy;
-    lodash.create = create;
-    lodash.createCallback = createCallback;
-    lodash.curry = curry;
-    lodash.debounce = debounce;
-    lodash.defaults = defaults;
-    lodash.defer = defer;
-    lodash.delay = delay;
-    lodash.difference = difference;
-    lodash.filter = filter;
-    lodash.flatten = flatten;
-    lodash.forEach = forEach;
-    lodash.forEachRight = forEachRight;
-    lodash.forIn = forIn;
-    lodash.forInRight = forInRight;
-    lodash.forOwn = forOwn;
-    lodash.forOwnRight = forOwnRight;
-    lodash.functions = functions;
-    lodash.groupBy = groupBy;
-    lodash.indexBy = indexBy;
-    lodash.initial = initial;
-    lodash.intersection = intersection;
-    lodash.invert = invert;
-    lodash.invoke = invoke;
-    lodash.keys = keys;
-    lodash.map = map;
-    lodash.max = max;
-    lodash.memoize = memoize;
-    lodash.merge = merge;
-    lodash.min = min;
-    lodash.omit = omit;
-    lodash.once = once;
-    lodash.pairs = pairs;
-    lodash.partial = partial;
-    lodash.partialRight = partialRight;
-    lodash.pick = pick;
-    lodash.pluck = pluck;
-    lodash.pull = pull;
-    lodash.range = range;
-    lodash.reject = reject;
-    lodash.remove = remove;
-    lodash.rest = rest;
-    lodash.shuffle = shuffle;
-    lodash.sortBy = sortBy;
-    lodash.tap = tap;
-    lodash.throttle = throttle;
-    lodash.times = times;
-    lodash.toArray = toArray;
-    lodash.transform = transform;
-    lodash.union = union;
-    lodash.uniq = uniq;
-    lodash.values = values;
-    lodash.where = where;
-    lodash.without = without;
-    lodash.wrap = wrap;
-    lodash.zip = zip;
-    lodash.zipObject = zipObject;
-
-    // add aliases
-    lodash.collect = map;
-    lodash.drop = rest;
-    lodash.each = forEach;
-    lodash.eachRight = forEachRight;
-    lodash.extend = assign;
-    lodash.methods = functions;
-    lodash.object = zipObject;
-    lodash.select = filter;
-    lodash.tail = rest;
-    lodash.unique = uniq;
-    lodash.unzip = zip;
-
-    // add functions to `lodash.prototype`
-    mixin(lodash);
-
-    /*--------------------------------------------------------------------------*/
-
-    // add functions that return unwrapped values when chaining
-    lodash.clone = clone;
-    lodash.cloneDeep = cloneDeep;
-    lodash.contains = contains;
-    lodash.escape = escape;
-    lodash.every = every;
-    lodash.find = find;
-    lodash.findIndex = findIndex;
-    lodash.findKey = findKey;
-    lodash.findLast = findLast;
-    lodash.findLastIndex = findLastIndex;
-    lodash.findLastKey = findLastKey;
-    lodash.has = has;
-    lodash.identity = identity;
-    lodash.indexOf = indexOf;
-    lodash.isArguments = isArguments;
-    lodash.isArray = isArray;
-    lodash.isBoolean = isBoolean;
-    lodash.isDate = isDate;
-    lodash.isElement = isElement;
-    lodash.isEmpty = isEmpty;
-    lodash.isEqual = isEqual;
-    lodash.isFinite = isFinite;
-    lodash.isFunction = isFunction;
-    lodash.isNaN = isNaN;
-    lodash.isNull = isNull;
-    lodash.isNumber = isNumber;
-    lodash.isObject = isObject;
-    lodash.isPlainObject = isPlainObject;
-    lodash.isRegExp = isRegExp;
-    lodash.isString = isString;
-    lodash.isUndefined = isUndefined;
-    lodash.lastIndexOf = lastIndexOf;
-    lodash.mixin = mixin;
-    lodash.noConflict = noConflict;
-    lodash.noop = noop;
-    lodash.parseInt = parseInt;
-    lodash.random = random;
-    lodash.reduce = reduce;
-    lodash.reduceRight = reduceRight;
-    lodash.result = result;
-    lodash.runInContext = runInContext;
-    lodash.size = size;
-    lodash.some = some;
-    lodash.sortedIndex = sortedIndex;
-    lodash.template = template;
-    lodash.unescape = unescape;
-    lodash.uniqueId = uniqueId;
-
-    // add aliases
-    lodash.all = every;
-    lodash.any = some;
-    lodash.detect = find;
-    lodash.findWhere = find;
-    lodash.foldl = reduce;
-    lodash.foldr = reduceRight;
-    lodash.include = contains;
-    lodash.inject = reduce;
-
-    forOwn(lodash, function(func, methodName) {
-      if (!lodash.prototype[methodName]) {
-        lodash.prototype[methodName] = function() {
-          var args = [this.__wrapped__],
-              chainAll = this.__chain__;
-
-          push.apply(args, arguments);
-          var result = func.apply(lodash, args);
-          return chainAll
-            ? new lodashWrapper(result, chainAll)
-            : result;
-        };
-      }
-    });
-
-    /*--------------------------------------------------------------------------*/
-
-    // add functions capable of returning wrapped and unwrapped values when chaining
-    lodash.first = first;
-    lodash.last = last;
-    lodash.sample = sample;
-
-    // add aliases
-    lodash.take = first;
-    lodash.head = first;
-
-    forOwn(lodash, function(func, methodName) {
-      var callbackable = methodName !== 'sample';
-      if (!lodash.prototype[methodName]) {
-        lodash.prototype[methodName]= function(n, guard) {
-          var chainAll = this.__chain__,
-              result = func(this.__wrapped__, n, guard);
-
-          return !chainAll && (n == null || (guard && !(callbackable && typeof n == 'function')))
-            ? result
-            : new lodashWrapper(result, chainAll);
-        };
-      }
-    });
-
-    /*--------------------------------------------------------------------------*/
-
-    /**
-     * The semantic version number.
-     *
-     * @static
-     * @memberOf _
-     * @type string
-     */
-    lodash.VERSION = '2.3.0';
-
-    // add "Chaining" functions to the wrapper
-    lodash.prototype.chain = wrapperChain;
-    lodash.prototype.toString = wrapperToString;
-    lodash.prototype.value = wrapperValueOf;
-    lodash.prototype.valueOf = wrapperValueOf;
-
-    // add `Array` functions that return unwrapped values
-    baseEach(['join', 'pop', 'shift'], function(methodName) {
-      var func = arrayRef[methodName];
-      lodash.prototype[methodName] = function() {
-        var chainAll = this.__chain__,
-            result = func.apply(this.__wrapped__, arguments);
-
-        return chainAll
-          ? new lodashWrapper(result, chainAll)
-          : result;
-      };
-    });
-
-    // add `Array` functions that return the wrapped value
-    baseEach(['push', 'reverse', 'sort', 'unshift'], function(methodName) {
-      var func = arrayRef[methodName];
-      lodash.prototype[methodName] = function() {
-        func.apply(this.__wrapped__, arguments);
-        return this;
-      };
-    });
-
-    // add `Array` functions that return new wrapped values
-    baseEach(['concat', 'slice', 'splice'], function(methodName) {
-      var func = arrayRef[methodName];
-      lodash.prototype[methodName] = function() {
-        return new lodashWrapper(func.apply(this.__wrapped__, arguments), this.__chain__);
-      };
-    });
-
-    // avoid array-like object bugs with `Array#shift` and `Array#splice`
-    // in IE < 9, Firefox < 10, Narwhal, and RingoJS
-    if (!support.spliceObjects) {
-      baseEach(['pop', 'shift', 'splice'], function(methodName) {
-        var func = arrayRef[methodName],
-            isSplice = methodName == 'splice';
-
-        lodash.prototype[methodName] = function() {
-          var chainAll = this.__chain__,
-              value = this.__wrapped__,
-              result = func.apply(value, arguments);
-
-          if (value.length === 0) {
-            delete value[0];
-          }
-          return (chainAll || isSplice)
-            ? new lodashWrapper(result, chainAll)
-            : result;
-        };
-      });
-    }
-
-    return lodash;
-  }
-
-  /*--------------------------------------------------------------------------*/
-
-  // expose Lo-Dash
-  var _ = runInContext();
-
-  // some AMD build optimizers like r.js check for condition patterns like the following:
-  if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
-    // Expose Lo-Dash to the global object even when an AMD loader is present in
-    // case Lo-Dash was injected by a third-party script and not intended to be
-    // loaded as a module. The global assignment can be reverted in the Lo-Dash
-    // module by its `noConflict()` method.
-    root._ = _;
-
-    // define as an anonymous module so, through path mapping, it can be
-    // referenced as the "underscore" module
-    define(function() {
-      return _;
-    });
-  }
-  // check for `exports` after `define` in case a build optimizer adds an `exports` object
-  else if (freeExports && freeModule) {
-    // in Node.js or RingoJS
-    if (moduleExports) {
-      (freeModule.exports = _)._ = _;
-    }
-    // in Narwhal or Rhino -require
-    else {
-      freeExports._ = _;
     }
   }
   else {
-    // in a browser or Rhino
-    root._ = _;
-  }
-}.call(this));
+    // deep compare objects using `forIn`, instead of `forOwn`, to avoid `Object.keys`
+    // which, in this case, is more costly
+    forIn(b, function(value, key, b) {
+      if (hasOwnProperty.call(b, key)) {
+        // count the number of properties.
+        size++;
+        // deep compare each property value.
+        return (result = hasOwnProperty.call(a, key) && baseIsEqual(a[key], value, callback, isWhere, stackA, stackB));
+      }
+    });
 
-},{}],15:[function(require,module,exports){
+    if (result && !isWhere) {
+      // ensure both objects have the same number of properties
+      forIn(a, function(value, key, a) {
+        if (hasOwnProperty.call(a, key)) {
+          // `size` will be `-1` if `a` has more properties than `b`
+          return (result = --size > -1);
+        }
+      });
+    }
+  }
+  stackA.pop();
+  stackB.pop();
+
+  if (initedStack) {
+    releaseArray(stackA);
+    releaseArray(stackB);
+  }
+  return result;
+}
+
+module.exports = baseIsEqual;
+
+},{"../objects/forIn":139,"../objects/isFunction":154,"./getArray":110,"./objectTypes":120,"./releaseArray":124}],98:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var forEach = require('../collections/forEach'),
+    forOwn = require('../objects/forOwn'),
+    isArray = require('../objects/isArray'),
+    isPlainObject = require('../objects/isPlainObject');
+
+/**
+ * The base implementation of `_.merge` without argument juggling or support
+ * for `thisArg` binding.
+ *
+ * @private
+ * @param {Object} object The destination object.
+ * @param {Object} source The source object.
+ * @param {Function} [callback] The function to customize merging properties.
+ * @param {Array} [stackA=[]] Tracks traversed source objects.
+ * @param {Array} [stackB=[]] Associates values with source counterparts.
+ */
+function baseMerge(object, source, callback, stackA, stackB) {
+  (isArray(source) ? forEach : forOwn)(source, function(source, key) {
+    var found,
+        isArr,
+        result = source,
+        value = object[key];
+
+    if (source && ((isArr = isArray(source)) || isPlainObject(source))) {
+      // avoid merging previously merged cyclic sources
+      var stackLength = stackA.length;
+      while (stackLength--) {
+        if ((found = stackA[stackLength] == source)) {
+          value = stackB[stackLength];
+          break;
+        }
+      }
+      if (!found) {
+        var isShallow;
+        if (callback) {
+          result = callback(value, source);
+          if ((isShallow = typeof result != 'undefined')) {
+            value = result;
+          }
+        }
+        if (!isShallow) {
+          value = isArr
+            ? (isArray(value) ? value : [])
+            : (isPlainObject(value) ? value : {});
+        }
+        // add `source` and associated `value` to the stack of traversed objects
+        stackA.push(source);
+        stackB.push(value);
+
+        // recursively merge objects and arrays (susceptible to call stack limits)
+        if (!isShallow) {
+          baseMerge(value, source, callback, stackA, stackB);
+        }
+      }
+    }
+    else {
+      if (callback) {
+        result = callback(value, source);
+        if (typeof result == 'undefined') {
+          result = source;
+        }
+      }
+      if (typeof result != 'undefined') {
+        value = result;
+      }
+    }
+    object[key] = value;
+  });
+}
+
+module.exports = baseMerge;
+
+},{"../collections/forEach":51,"../objects/forOwn":141,"../objects/isArray":147,"../objects/isPlainObject":159}],99:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/** Native method shortcuts */
+var floor = Math.floor;
+
+/* Native method shortcuts for methods with the same name as other `lodash` methods */
+var nativeRandom = Math.random;
+
+/**
+ * The base implementation of `_.random` without argument juggling or support
+ * for returning floating-point numbers.
+ *
+ * @private
+ * @param {number} min The minimum possible value.
+ * @param {number} max The maximum possible value.
+ * @returns {number} Returns a random number.
+ */
+function baseRandom(min, max) {
+  return min + floor(nativeRandom() * (max - min + 1));
+}
+
+module.exports = baseRandom;
+
+},{}],100:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseIndexOf = require('./baseIndexOf'),
+    cacheIndexOf = require('./cacheIndexOf'),
+    createCache = require('./createCache'),
+    getArray = require('./getArray'),
+    largeArraySize = require('./largeArraySize'),
+    releaseArray = require('./releaseArray'),
+    releaseObject = require('./releaseObject');
+
+/**
+ * The base implementation of `_.uniq` without support for callback shorthands
+ * or `thisArg` binding.
+ *
+ * @private
+ * @param {Array} array The array to process.
+ * @param {boolean} [isSorted=false] A flag to indicate that `array` is sorted.
+ * @param {Function} [callback] The function called per iteration.
+ * @returns {Array} Returns a duplicate-value-free array.
+ */
+function baseUniq(array, isSorted, callback) {
+  var index = -1,
+      indexOf = baseIndexOf,
+      length = array ? array.length : 0,
+      result = [];
+
+  var isLarge = !isSorted && length >= largeArraySize,
+      seen = (callback || isLarge) ? getArray() : result;
+
+  if (isLarge) {
+    var cache = createCache(seen);
+    indexOf = cacheIndexOf;
+    seen = cache;
+  }
+  while (++index < length) {
+    var value = array[index],
+        computed = callback ? callback(value, index, array) : value;
+
+    if (isSorted
+          ? !index || seen[seen.length - 1] !== computed
+          : indexOf(seen, computed) < 0
+        ) {
+      if (callback || isLarge) {
+        seen.push(computed);
+      }
+      result.push(value);
+    }
+  }
+  if (isLarge) {
+    releaseArray(seen.array);
+    releaseObject(seen);
+  } else if (callback) {
+    releaseArray(seen);
+  }
+  return result;
+}
+
+module.exports = baseUniq;
+
+},{"./baseIndexOf":96,"./cacheIndexOf":101,"./createCache":106,"./getArray":110,"./largeArraySize":116,"./releaseArray":124,"./releaseObject":125}],101:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseIndexOf = require('./baseIndexOf'),
+    keyPrefix = require('./keyPrefix');
+
+/**
+ * An implementation of `_.contains` for cache objects that mimics the return
+ * signature of `_.indexOf` by returning `0` if the value is found, else `-1`.
+ *
+ * @private
+ * @param {Object} cache The cache object to inspect.
+ * @param {*} value The value to search for.
+ * @returns {number} Returns `0` if `value` is found, else `-1`.
+ */
+function cacheIndexOf(cache, value) {
+  var type = typeof value;
+  cache = cache.cache;
+
+  if (type == 'boolean' || value == null) {
+    return cache[value] ? 0 : -1;
+  }
+  if (type != 'number' && type != 'string') {
+    type = 'object';
+  }
+  var key = type == 'number' ? value : keyPrefix + value;
+  cache = (cache = cache[type]) && cache[key];
+
+  return type == 'object'
+    ? (cache && baseIndexOf(cache, value) > -1 ? 0 : -1)
+    : (cache ? 0 : -1);
+}
+
+module.exports = cacheIndexOf;
+
+},{"./baseIndexOf":96,"./keyPrefix":115}],102:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var keyPrefix = require('./keyPrefix');
+
+/**
+ * Adds a given value to the corresponding cache object.
+ *
+ * @private
+ * @param {*} value The value to add to the cache.
+ */
+function cachePush(value) {
+  var cache = this.cache,
+      type = typeof value;
+
+  if (type == 'boolean' || value == null) {
+    cache[value] = true;
+  } else {
+    if (type != 'number' && type != 'string') {
+      type = 'object';
+    }
+    var key = type == 'number' ? value : keyPrefix + value,
+        typeCache = cache[type] || (cache[type] = {});
+
+    if (type == 'object') {
+      (typeCache[key] || (typeCache[key] = [])).push(value);
+    } else {
+      typeCache[key] = true;
+    }
+  }
+}
+
+module.exports = cachePush;
+
+},{"./keyPrefix":115}],103:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/**
+ * Used by `_.max` and `_.min` as the default callback when a given
+ * collection is a string value.
+ *
+ * @private
+ * @param {string} value The character to inspect.
+ * @returns {number} Returns the code unit of given character.
+ */
+function charAtCallback(value) {
+  return value.charCodeAt(0);
+}
+
+module.exports = charAtCallback;
+
+},{}],104:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/**
+ * Used by `sortBy` to compare transformed `collection` elements, stable sorting
+ * them in ascending order.
+ *
+ * @private
+ * @param {Object} a The object to compare to `b`.
+ * @param {Object} b The object to compare to `a`.
+ * @returns {number} Returns the sort order indicator of `1` or `-1`.
+ */
+function compareAscending(a, b) {
+  var ac = a.criteria,
+      bc = b.criteria,
+      index = -1,
+      length = ac.length;
+
+  while (++index < length) {
+    var value = ac[index],
+        other = bc[index];
+
+    if (value !== other) {
+      if (value > other || typeof value == 'undefined') {
+        return 1;
+      }
+      if (value < other || typeof other == 'undefined') {
+        return -1;
+      }
+    }
+  }
+  // Fixes an `Array#sort` bug in the JS engine embedded in Adobe applications
+  // that causes it, under certain circumstances, to return the same value for
+  // `a` and `b`. See https://github.com/jashkenas/underscore/pull/1247
+  //
+  // This also ensures a stable sort in V8 and other engines.
+  // See http://code.google.com/p/v8/issues/detail?id=90
+  return a.index - b.index;
+}
+
+module.exports = compareAscending;
+
+},{}],105:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createCallback = require('../functions/createCallback'),
+    forOwn = require('../objects/forOwn'),
+    isArray = require('../objects/isArray');
+
+/**
+ * Creates a function that aggregates a collection, creating an object composed
+ * of keys generated from the results of running each element of the collection
+ * through a callback. The given `setter` function sets the keys and values
+ * of the composed object.
+ *
+ * @private
+ * @param {Function} setter The setter function.
+ * @returns {Function} Returns the new aggregator function.
+ */
+function createAggregator(setter) {
+  return function(collection, callback, thisArg) {
+    var result = {};
+    callback = createCallback(callback, thisArg, 3);
+
+    var index = -1,
+        length = collection ? collection.length : 0;
+
+    if (typeof length == 'number') {
+      while (++index < length) {
+        var value = collection[index];
+        setter(result, value, callback(value, index, collection), collection);
+      }
+    } else {
+      forOwn(collection, function(value, key, collection) {
+        setter(result, value, callback(value, key, collection), collection);
+      });
+    }
+    return result;
+  };
+}
+
+module.exports = createAggregator;
+
+},{"../functions/createCallback":76,"../objects/forOwn":141,"../objects/isArray":147}],106:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var cachePush = require('./cachePush'),
+    getObject = require('./getObject'),
+    releaseObject = require('./releaseObject');
+
+/**
+ * Creates a cache object to optimize linear searches of large arrays.
+ *
+ * @private
+ * @param {Array} [array=[]] The array to search.
+ * @returns {null|Object} Returns the cache object or `null` if caching should not be used.
+ */
+function createCache(array) {
+  var index = -1,
+      length = array.length,
+      first = array[0],
+      mid = array[(length / 2) | 0],
+      last = array[length - 1];
+
+  if (first && typeof first == 'object' &&
+      mid && typeof mid == 'object' && last && typeof last == 'object') {
+    return false;
+  }
+  var cache = getObject();
+  cache['false'] = cache['null'] = cache['true'] = cache['undefined'] = false;
+
+  var result = getObject();
+  result.array = array;
+  result.cache = cache;
+  result.push = cachePush;
+
+  while (++index < length) {
+    result.push(array[index]);
+  }
+  return result;
+}
+
+module.exports = createCache;
+
+},{"./cachePush":102,"./getObject":111,"./releaseObject":125}],107:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseBind = require('./baseBind'),
+    baseCreateWrapper = require('./baseCreateWrapper'),
+    isFunction = require('../objects/isFunction'),
+    slice = require('./slice');
+
+/**
+ * Used for `Array` method references.
+ *
+ * Normally `Array.prototype` would suffice, however, using an array literal
+ * avoids issues in Narwhal.
+ */
+var arrayRef = [];
+
+/** Native method shortcuts */
+var push = arrayRef.push,
+    unshift = arrayRef.unshift;
+
+/**
+ * Creates a function that, when called, either curries or invokes `func`
+ * with an optional `this` binding and partially applied arguments.
+ *
+ * @private
+ * @param {Function|string} func The function or method name to reference.
+ * @param {number} bitmask The bitmask of method flags to compose.
+ *  The bitmask may be composed of the following flags:
+ *  1 - `_.bind`
+ *  2 - `_.bindKey`
+ *  4 - `_.curry`
+ *  8 - `_.curry` (bound)
+ *  16 - `_.partial`
+ *  32 - `_.partialRight`
+ * @param {Array} [partialArgs] An array of arguments to prepend to those
+ *  provided to the new function.
+ * @param {Array} [partialRightArgs] An array of arguments to append to those
+ *  provided to the new function.
+ * @param {*} [thisArg] The `this` binding of `func`.
+ * @param {number} [arity] The arity of `func`.
+ * @returns {Function} Returns the new function.
+ */
+function createWrapper(func, bitmask, partialArgs, partialRightArgs, thisArg, arity) {
+  var isBind = bitmask & 1,
+      isBindKey = bitmask & 2,
+      isCurry = bitmask & 4,
+      isCurryBound = bitmask & 8,
+      isPartial = bitmask & 16,
+      isPartialRight = bitmask & 32;
+
+  if (!isBindKey && !isFunction(func)) {
+    throw new TypeError;
+  }
+  if (isPartial && !partialArgs.length) {
+    bitmask &= ~16;
+    isPartial = partialArgs = false;
+  }
+  if (isPartialRight && !partialRightArgs.length) {
+    bitmask &= ~32;
+    isPartialRight = partialRightArgs = false;
+  }
+  var bindData = func && func.__bindData__;
+  if (bindData && bindData !== true) {
+    // clone `bindData`
+    bindData = slice(bindData);
+    if (bindData[2]) {
+      bindData[2] = slice(bindData[2]);
+    }
+    if (bindData[3]) {
+      bindData[3] = slice(bindData[3]);
+    }
+    // set `thisBinding` is not previously bound
+    if (isBind && !(bindData[1] & 1)) {
+      bindData[4] = thisArg;
+    }
+    // set if previously bound but not currently (subsequent curried functions)
+    if (!isBind && bindData[1] & 1) {
+      bitmask |= 8;
+    }
+    // set curried arity if not yet set
+    if (isCurry && !(bindData[1] & 4)) {
+      bindData[5] = arity;
+    }
+    // append partial left arguments
+    if (isPartial) {
+      push.apply(bindData[2] || (bindData[2] = []), partialArgs);
+    }
+    // append partial right arguments
+    if (isPartialRight) {
+      unshift.apply(bindData[3] || (bindData[3] = []), partialRightArgs);
+    }
+    // merge flags
+    bindData[1] |= bitmask;
+    return createWrapper.apply(null, bindData);
+  }
+  // fast path for `_.bind`
+  var creater = (bitmask == 1 || bitmask === 17) ? baseBind : baseCreateWrapper;
+  return creater([func, bitmask, partialArgs, partialRightArgs, thisArg, arity]);
+}
+
+module.exports = createWrapper;
+
+},{"../objects/isFunction":154,"./baseBind":89,"./baseCreateWrapper":93,"./slice":129}],108:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var htmlEscapes = require('./htmlEscapes');
+
+/**
+ * Used by `escape` to convert characters to HTML entities.
+ *
+ * @private
+ * @param {string} match The matched character to escape.
+ * @returns {string} Returns the escaped character.
+ */
+function escapeHtmlChar(match) {
+  return htmlEscapes[match];
+}
+
+module.exports = escapeHtmlChar;
+
+},{"./htmlEscapes":112}],109:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/** Used to escape characters for inclusion in compiled string literals */
+var stringEscapes = {
+  '\\': '\\',
+  "'": "'",
+  '\n': 'n',
+  '\r': 'r',
+  '\t': 't',
+  '\u2028': 'u2028',
+  '\u2029': 'u2029'
+};
+
+/**
+ * Used by `template` to escape characters for inclusion in compiled
+ * string literals.
+ *
+ * @private
+ * @param {string} match The matched character to escape.
+ * @returns {string} Returns the escaped character.
+ */
+function escapeStringChar(match) {
+  return '\\' + stringEscapes[match];
+}
+
+module.exports = escapeStringChar;
+
+},{}],110:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var arrayPool = require('./arrayPool');
+
+/**
+ * Gets an array from the array pool or creates a new one if the pool is empty.
+ *
+ * @private
+ * @returns {Array} The array from the pool.
+ */
+function getArray() {
+  return arrayPool.pop() || [];
+}
+
+module.exports = getArray;
+
+},{"./arrayPool":88}],111:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var objectPool = require('./objectPool');
+
+/**
+ * Gets an object from the object pool or creates a new one if the pool is empty.
+ *
+ * @private
+ * @returns {Object} The object from the pool.
+ */
+function getObject() {
+  return objectPool.pop() || {
+    'array': null,
+    'cache': null,
+    'criteria': null,
+    'false': false,
+    'index': 0,
+    'null': false,
+    'number': null,
+    'object': null,
+    'push': null,
+    'string': null,
+    'true': false,
+    'undefined': false,
+    'value': null
+  };
+}
+
+module.exports = getObject;
+
+},{"./objectPool":119}],112:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/**
+ * Used to convert characters to HTML entities:
+ *
+ * Though the `>` character is escaped for symmetry, characters like `>` and `/`
+ * don't require escaping in HTML and have no special meaning unless they're part
+ * of a tag or an unquoted attribute value.
+ * http://mathiasbynens.be/notes/ambiguous-ampersands (under "semi-related fun fact")
+ */
+var htmlEscapes = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;'
+};
+
+module.exports = htmlEscapes;
+
+},{}],113:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var htmlEscapes = require('./htmlEscapes'),
+    invert = require('../objects/invert');
+
+/** Used to convert HTML entities to characters */
+var htmlUnescapes = invert(htmlEscapes);
+
+module.exports = htmlUnescapes;
+
+},{"../objects/invert":145,"./htmlEscapes":112}],114:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/** Used for native method references */
+var objectProto = Object.prototype;
+
+/** Used to resolve the internal [[Class]] of values */
+var toString = objectProto.toString;
+
+/** Used to detect if a method is native */
+var reNative = RegExp('^' +
+  String(toString)
+    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    .replace(/toString| for [^\]]+/g, '.*?') + '$'
+);
+
+/**
+ * Checks if `value` is a native function.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if the `value` is a native function, else `false`.
+ */
+function isNative(value) {
+  return typeof value == 'function' && reNative.test(value);
+}
+
+module.exports = isNative;
+
+},{}],115:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/** Used to prefix keys to avoid issues with `__proto__` and properties on `Object.prototype` */
+var keyPrefix = +new Date + '';
+
+module.exports = keyPrefix;
+
+},{}],116:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/** Used as the size when optimizations are enabled for large arrays */
+var largeArraySize = 75;
+
+module.exports = largeArraySize;
+
+},{}],117:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/**
+ * A fast path for creating `lodash` wrapper objects.
+ *
+ * @private
+ * @param {*} value The value to wrap in a `lodash` instance.
+ * @param {boolean} chainAll A flag to enable chaining for all methods
+ * @returns {Object} Returns a `lodash` instance.
+ */
+function lodashWrapper(value, chainAll) {
+  this.__chain__ = !!chainAll;
+  this.__wrapped__ = value;
+}
+
+module.exports = lodashWrapper;
+
+},{}],118:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/** Used as the max size of the `arrayPool` and `objectPool` */
+var maxPoolSize = 40;
+
+module.exports = maxPoolSize;
+
+},{}],119:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/** Used to pool arrays and objects used internally */
+var objectPool = [];
+
+module.exports = objectPool;
+
+},{}],120:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/** Used to determine if values are of the language type Object */
+var objectTypes = {
+  'boolean': false,
+  'function': true,
+  'object': true,
+  'number': false,
+  'string': false,
+  'undefined': false
+};
+
+module.exports = objectTypes;
+
+},{}],121:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var htmlUnescapes = require('./htmlUnescapes'),
+    keys = require('../objects/keys');
+
+/** Used to match HTML entities and HTML characters */
+var reEscapedHtml = RegExp('(' + keys(htmlUnescapes).join('|') + ')', 'g');
+
+module.exports = reEscapedHtml;
+
+},{"../objects/keys":163,"./htmlUnescapes":113}],122:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/** Used to match "interpolate" template delimiters */
+var reInterpolate = /<%=([\s\S]+?)%>/g;
+
+module.exports = reInterpolate;
+
+},{}],123:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var htmlEscapes = require('./htmlEscapes'),
+    keys = require('../objects/keys');
+
+/** Used to match HTML entities and HTML characters */
+var reUnescapedHtml = RegExp('[' + keys(htmlEscapes).join('') + ']', 'g');
+
+module.exports = reUnescapedHtml;
+
+},{"../objects/keys":163,"./htmlEscapes":112}],124:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var arrayPool = require('./arrayPool'),
+    maxPoolSize = require('./maxPoolSize');
+
+/**
+ * Releases the given array back to the array pool.
+ *
+ * @private
+ * @param {Array} [array] The array to release.
+ */
+function releaseArray(array) {
+  array.length = 0;
+  if (arrayPool.length < maxPoolSize) {
+    arrayPool.push(array);
+  }
+}
+
+module.exports = releaseArray;
+
+},{"./arrayPool":88,"./maxPoolSize":118}],125:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var maxPoolSize = require('./maxPoolSize'),
+    objectPool = require('./objectPool');
+
+/**
+ * Releases the given object back to the object pool.
+ *
+ * @private
+ * @param {Object} [object] The object to release.
+ */
+function releaseObject(object) {
+  var cache = object.cache;
+  if (cache) {
+    releaseObject(cache);
+  }
+  object.array = object.cache = object.criteria = object.object = object.number = object.string = object.value = null;
+  if (objectPool.length < maxPoolSize) {
+    objectPool.push(object);
+  }
+}
+
+module.exports = releaseObject;
+
+},{"./maxPoolSize":118,"./objectPool":119}],126:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var isNative = require('./isNative'),
+    noop = require('../utilities/noop');
+
+/** Used as the property descriptor for `__bindData__` */
+var descriptor = {
+  'configurable': false,
+  'enumerable': false,
+  'value': null,
+  'writable': false
+};
+
+/** Used to set meta data on functions */
+var defineProperty = (function() {
+  // IE 8 only accepts DOM elements
+  try {
+    var o = {},
+        func = isNative(func = Object.defineProperty) && func,
+        result = func(o, o, o) && func;
+  } catch(e) { }
+  return result;
+}());
+
+/**
+ * Sets `this` binding data on a given function.
+ *
+ * @private
+ * @param {Function} func The function to set data on.
+ * @param {Array} value The data array to set.
+ */
+var setBindData = !defineProperty ? noop : function(func, value) {
+  descriptor.value = value;
+  defineProperty(func, '__bindData__', descriptor);
+};
+
+module.exports = setBindData;
+
+},{"../utilities/noop":178,"./isNative":114}],127:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var forIn = require('../objects/forIn'),
+    isFunction = require('../objects/isFunction');
+
+/** `Object#toString` result shortcuts */
+var objectClass = '[object Object]';
+
+/** Used for native method references */
+var objectProto = Object.prototype;
+
+/** Used to resolve the internal [[Class]] of values */
+var toString = objectProto.toString;
+
+/** Native method shortcuts */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * A fallback implementation of `isPlainObject` which checks if a given value
+ * is an object created by the `Object` constructor, assuming objects created
+ * by the `Object` constructor have no inherited enumerable properties and that
+ * there are no `Object.prototype` extensions.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a plain object, else `false`.
+ */
+function shimIsPlainObject(value) {
+  var ctor,
+      result;
+
+  // avoid non Object objects, `arguments` objects, and DOM elements
+  if (!(value && toString.call(value) == objectClass) ||
+      (ctor = value.constructor, isFunction(ctor) && !(ctor instanceof ctor))) {
+    return false;
+  }
+  // In most environments an object's own properties are iterated before
+  // its inherited properties. If the last iterated property is an object's
+  // own property then there are no inherited enumerable properties.
+  forIn(value, function(value, key) {
+    result = key;
+  });
+  return typeof result == 'undefined' || hasOwnProperty.call(value, result);
+}
+
+module.exports = shimIsPlainObject;
+
+},{"../objects/forIn":139,"../objects/isFunction":154}],128:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var objectTypes = require('./objectTypes');
+
+/** Used for native method references */
+var objectProto = Object.prototype;
+
+/** Native method shortcuts */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * A fallback implementation of `Object.keys` which produces an array of the
+ * given object's own enumerable property names.
+ *
+ * @private
+ * @type Function
+ * @param {Object} object The object to inspect.
+ * @returns {Array} Returns an array of property names.
+ */
+var shimKeys = function(object) {
+  var index, iterable = object, result = [];
+  if (!iterable) return result;
+  if (!(objectTypes[typeof object])) return result;
+    for (index in iterable) {
+      if (hasOwnProperty.call(iterable, index)) {
+        result.push(index);
+      }
+    }
+  return result
+};
+
+module.exports = shimKeys;
+
+},{"./objectTypes":120}],129:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/**
+ * Slices the `collection` from the `start` index up to, but not including,
+ * the `end` index.
+ *
+ * Note: This function is used instead of `Array#slice` to support node lists
+ * in IE < 9 and to ensure dense arrays are returned.
+ *
+ * @private
+ * @param {Array|Object|string} collection The collection to slice.
+ * @param {number} start The start index.
+ * @param {number} end The end index.
+ * @returns {Array} Returns the new array.
+ */
+function slice(array, start, end) {
+  start || (start = 0);
+  if (typeof end == 'undefined') {
+    end = array ? array.length : 0;
+  }
+  var index = -1,
+      length = end - start || 0,
+      result = Array(length < 0 ? 0 : length);
+
+  while (++index < length) {
+    result[index] = array[start + index];
+  }
+  return result;
+}
+
+module.exports = slice;
+
+},{}],130:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var htmlUnescapes = require('./htmlUnescapes');
+
+/**
+ * Used by `unescape` to convert HTML entities to characters.
+ *
+ * @private
+ * @param {string} match The matched character to unescape.
+ * @returns {string} Returns the unescaped character.
+ */
+function unescapeHtmlChar(match) {
+  return htmlUnescapes[match];
+}
+
+module.exports = unescapeHtmlChar;
+
+},{"./htmlUnescapes":113}],131:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+module.exports = {
+  'assign': require('./objects/assign'),
+  'clone': require('./objects/clone'),
+  'cloneDeep': require('./objects/cloneDeep'),
+  'create': require('./objects/create'),
+  'defaults': require('./objects/defaults'),
+  'extend': require('./objects/assign'),
+  'findKey': require('./objects/findKey'),
+  'findLastKey': require('./objects/findLastKey'),
+  'forIn': require('./objects/forIn'),
+  'forInRight': require('./objects/forInRight'),
+  'forOwn': require('./objects/forOwn'),
+  'forOwnRight': require('./objects/forOwnRight'),
+  'functions': require('./objects/functions'),
+  'has': require('./objects/has'),
+  'invert': require('./objects/invert'),
+  'isArguments': require('./objects/isArguments'),
+  'isArray': require('./objects/isArray'),
+  'isBoolean': require('./objects/isBoolean'),
+  'isDate': require('./objects/isDate'),
+  'isElement': require('./objects/isElement'),
+  'isEmpty': require('./objects/isEmpty'),
+  'isEqual': require('./objects/isEqual'),
+  'isFinite': require('./objects/isFinite'),
+  'isFunction': require('./objects/isFunction'),
+  'isNaN': require('./objects/isNaN'),
+  'isNull': require('./objects/isNull'),
+  'isNumber': require('./objects/isNumber'),
+  'isObject': require('./objects/isObject'),
+  'isPlainObject': require('./objects/isPlainObject'),
+  'isRegExp': require('./objects/isRegExp'),
+  'isString': require('./objects/isString'),
+  'isUndefined': require('./objects/isUndefined'),
+  'keys': require('./objects/keys'),
+  'mapValues': require('./objects/mapValues'),
+  'merge': require('./objects/merge'),
+  'methods': require('./objects/functions'),
+  'omit': require('./objects/omit'),
+  'pairs': require('./objects/pairs'),
+  'pick': require('./objects/pick'),
+  'transform': require('./objects/transform'),
+  'values': require('./objects/values')
+};
+
+},{"./objects/assign":132,"./objects/clone":133,"./objects/cloneDeep":134,"./objects/create":135,"./objects/defaults":136,"./objects/findKey":137,"./objects/findLastKey":138,"./objects/forIn":139,"./objects/forInRight":140,"./objects/forOwn":141,"./objects/forOwnRight":142,"./objects/functions":143,"./objects/has":144,"./objects/invert":145,"./objects/isArguments":146,"./objects/isArray":147,"./objects/isBoolean":148,"./objects/isDate":149,"./objects/isElement":150,"./objects/isEmpty":151,"./objects/isEqual":152,"./objects/isFinite":153,"./objects/isFunction":154,"./objects/isNaN":155,"./objects/isNull":156,"./objects/isNumber":157,"./objects/isObject":158,"./objects/isPlainObject":159,"./objects/isRegExp":160,"./objects/isString":161,"./objects/isUndefined":162,"./objects/keys":163,"./objects/mapValues":164,"./objects/merge":165,"./objects/omit":166,"./objects/pairs":167,"./objects/pick":168,"./objects/transform":169,"./objects/values":170}],132:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseCreateCallback = require('../internals/baseCreateCallback'),
+    keys = require('./keys'),
+    objectTypes = require('../internals/objectTypes');
+
+/**
+ * Assigns own enumerable properties of source object(s) to the destination
+ * object. Subsequent sources will overwrite property assignments of previous
+ * sources. If a callback is provided it will be executed to produce the
+ * assigned values. The callback is bound to `thisArg` and invoked with two
+ * arguments; (objectValue, sourceValue).
+ *
+ * @static
+ * @memberOf _
+ * @type Function
+ * @alias extend
+ * @category Objects
+ * @param {Object} object The destination object.
+ * @param {...Object} [source] The source objects.
+ * @param {Function} [callback] The function to customize assigning values.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Object} Returns the destination object.
+ * @example
+ *
+ * _.assign({ 'name': 'fred' }, { 'employer': 'slate' });
+ * // => { 'name': 'fred', 'employer': 'slate' }
+ *
+ * var defaults = _.partialRight(_.assign, function(a, b) {
+ *   return typeof a == 'undefined' ? b : a;
+ * });
+ *
+ * var object = { 'name': 'barney' };
+ * defaults(object, { 'name': 'fred', 'employer': 'slate' });
+ * // => { 'name': 'barney', 'employer': 'slate' }
+ */
+var assign = function(object, source, guard) {
+  var index, iterable = object, result = iterable;
+  if (!iterable) return result;
+  var args = arguments,
+      argsIndex = 0,
+      argsLength = typeof guard == 'number' ? 2 : args.length;
+  if (argsLength > 3 && typeof args[argsLength - 2] == 'function') {
+    var callback = baseCreateCallback(args[--argsLength - 1], args[argsLength--], 2);
+  } else if (argsLength > 2 && typeof args[argsLength - 1] == 'function') {
+    callback = args[--argsLength];
+  }
+  while (++argsIndex < argsLength) {
+    iterable = args[argsIndex];
+    if (iterable && objectTypes[typeof iterable]) {
+    var ownIndex = -1,
+        ownProps = objectTypes[typeof iterable] && keys(iterable),
+        length = ownProps ? ownProps.length : 0;
+
+    while (++ownIndex < length) {
+      index = ownProps[ownIndex];
+      result[index] = callback ? callback(result[index], iterable[index]) : iterable[index];
+    }
+    }
+  }
+  return result
+};
+
+module.exports = assign;
+
+},{"../internals/baseCreateCallback":92,"../internals/objectTypes":120,"./keys":163}],133:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseClone = require('../internals/baseClone'),
+    baseCreateCallback = require('../internals/baseCreateCallback');
+
+/**
+ * Creates a clone of `value`. If `isDeep` is `true` nested objects will also
+ * be cloned, otherwise they will be assigned by reference. If a callback
+ * is provided it will be executed to produce the cloned values. If the
+ * callback returns `undefined` cloning will be handled by the method instead.
+ * The callback is bound to `thisArg` and invoked with one argument; (value).
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {*} value The value to clone.
+ * @param {boolean} [isDeep=false] Specify a deep clone.
+ * @param {Function} [callback] The function to customize cloning values.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {*} Returns the cloned value.
+ * @example
+ *
+ * var characters = [
+ *   { 'name': 'barney', 'age': 36 },
+ *   { 'name': 'fred',   'age': 40 }
+ * ];
+ *
+ * var shallow = _.clone(characters);
+ * shallow[0] === characters[0];
+ * // => true
+ *
+ * var deep = _.clone(characters, true);
+ * deep[0] === characters[0];
+ * // => false
+ *
+ * _.mixin({
+ *   'clone': _.partialRight(_.clone, function(value) {
+ *     return _.isElement(value) ? value.cloneNode(false) : undefined;
+ *   })
+ * });
+ *
+ * var clone = _.clone(document.body);
+ * clone.childNodes.length;
+ * // => 0
+ */
+function clone(value, isDeep, callback, thisArg) {
+  // allows working with "Collections" methods without using their `index`
+  // and `collection` arguments for `isDeep` and `callback`
+  if (typeof isDeep != 'boolean' && isDeep != null) {
+    thisArg = callback;
+    callback = isDeep;
+    isDeep = false;
+  }
+  return baseClone(value, isDeep, typeof callback == 'function' && baseCreateCallback(callback, thisArg, 1));
+}
+
+module.exports = clone;
+
+},{"../internals/baseClone":90,"../internals/baseCreateCallback":92}],134:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseClone = require('../internals/baseClone'),
+    baseCreateCallback = require('../internals/baseCreateCallback');
+
+/**
+ * Creates a deep clone of `value`. If a callback is provided it will be
+ * executed to produce the cloned values. If the callback returns `undefined`
+ * cloning will be handled by the method instead. The callback is bound to
+ * `thisArg` and invoked with one argument; (value).
+ *
+ * Note: This method is loosely based on the structured clone algorithm. Functions
+ * and DOM nodes are **not** cloned. The enumerable properties of `arguments` objects and
+ * objects created by constructors other than `Object` are cloned to plain `Object` objects.
+ * See http://www.w3.org/TR/html5/infrastructure.html#internal-structured-cloning-algorithm.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {*} value The value to deep clone.
+ * @param {Function} [callback] The function to customize cloning values.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {*} Returns the deep cloned value.
+ * @example
+ *
+ * var characters = [
+ *   { 'name': 'barney', 'age': 36 },
+ *   { 'name': 'fred',   'age': 40 }
+ * ];
+ *
+ * var deep = _.cloneDeep(characters);
+ * deep[0] === characters[0];
+ * // => false
+ *
+ * var view = {
+ *   'label': 'docs',
+ *   'node': element
+ * };
+ *
+ * var clone = _.cloneDeep(view, function(value) {
+ *   return _.isElement(value) ? value.cloneNode(true) : undefined;
+ * });
+ *
+ * clone.node == view.node;
+ * // => false
+ */
+function cloneDeep(value, callback, thisArg) {
+  return baseClone(value, true, typeof callback == 'function' && baseCreateCallback(callback, thisArg, 1));
+}
+
+module.exports = cloneDeep;
+
+},{"../internals/baseClone":90,"../internals/baseCreateCallback":92}],135:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var assign = require('./assign'),
+    baseCreate = require('../internals/baseCreate');
+
+/**
+ * Creates an object that inherits from the given `prototype` object. If a
+ * `properties` object is provided its own enumerable properties are assigned
+ * to the created object.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {Object} prototype The object to inherit from.
+ * @param {Object} [properties] The properties to assign to the object.
+ * @returns {Object} Returns the new object.
+ * @example
+ *
+ * function Shape() {
+ *   this.x = 0;
+ *   this.y = 0;
+ * }
+ *
+ * function Circle() {
+ *   Shape.call(this);
+ * }
+ *
+ * Circle.prototype = _.create(Shape.prototype, { 'constructor': Circle });
+ *
+ * var circle = new Circle;
+ * circle instanceof Circle;
+ * // => true
+ *
+ * circle instanceof Shape;
+ * // => true
+ */
+function create(prototype, properties) {
+  var result = baseCreate(prototype);
+  return properties ? assign(result, properties) : result;
+}
+
+module.exports = create;
+
+},{"../internals/baseCreate":91,"./assign":132}],136:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var keys = require('./keys'),
+    objectTypes = require('../internals/objectTypes');
+
+/**
+ * Assigns own enumerable properties of source object(s) to the destination
+ * object for all destination properties that resolve to `undefined`. Once a
+ * property is set, additional defaults of the same property will be ignored.
+ *
+ * @static
+ * @memberOf _
+ * @type Function
+ * @category Objects
+ * @param {Object} object The destination object.
+ * @param {...Object} [source] The source objects.
+ * @param- {Object} [guard] Allows working with `_.reduce` without using its
+ *  `key` and `object` arguments as sources.
+ * @returns {Object} Returns the destination object.
+ * @example
+ *
+ * var object = { 'name': 'barney' };
+ * _.defaults(object, { 'name': 'fred', 'employer': 'slate' });
+ * // => { 'name': 'barney', 'employer': 'slate' }
+ */
+var defaults = function(object, source, guard) {
+  var index, iterable = object, result = iterable;
+  if (!iterable) return result;
+  var args = arguments,
+      argsIndex = 0,
+      argsLength = typeof guard == 'number' ? 2 : args.length;
+  while (++argsIndex < argsLength) {
+    iterable = args[argsIndex];
+    if (iterable && objectTypes[typeof iterable]) {
+    var ownIndex = -1,
+        ownProps = objectTypes[typeof iterable] && keys(iterable),
+        length = ownProps ? ownProps.length : 0;
+
+    while (++ownIndex < length) {
+      index = ownProps[ownIndex];
+      if (typeof result[index] == 'undefined') result[index] = iterable[index];
+    }
+    }
+  }
+  return result
+};
+
+module.exports = defaults;
+
+},{"../internals/objectTypes":120,"./keys":163}],137:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createCallback = require('../functions/createCallback'),
+    forOwn = require('./forOwn');
+
+/**
+ * This method is like `_.findIndex` except that it returns the key of the
+ * first element that passes the callback check, instead of the element itself.
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {Object} object The object to search.
+ * @param {Function|Object|string} [callback=identity] The function called per
+ *  iteration. If a property name or object is provided it will be used to
+ *  create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {string|undefined} Returns the key of the found element, else `undefined`.
+ * @example
+ *
+ * var characters = {
+ *   'barney': {  'age': 36, 'blocked': false },
+ *   'fred': {    'age': 40, 'blocked': true },
+ *   'pebbles': { 'age': 1,  'blocked': false }
+ * };
+ *
+ * _.findKey(characters, function(chr) {
+ *   return chr.age < 40;
+ * });
+ * // => 'barney' (property order is not guaranteed across environments)
+ *
+ * // using "_.where" callback shorthand
+ * _.findKey(characters, { 'age': 1 });
+ * // => 'pebbles'
+ *
+ * // using "_.pluck" callback shorthand
+ * _.findKey(characters, 'blocked');
+ * // => 'fred'
+ */
+function findKey(object, callback, thisArg) {
+  var result;
+  callback = createCallback(callback, thisArg, 3);
+  forOwn(object, function(value, key, object) {
+    if (callback(value, key, object)) {
+      result = key;
+      return false;
+    }
+  });
+  return result;
+}
+
+module.exports = findKey;
+
+},{"../functions/createCallback":76,"./forOwn":141}],138:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createCallback = require('../functions/createCallback'),
+    forOwnRight = require('./forOwnRight');
+
+/**
+ * This method is like `_.findKey` except that it iterates over elements
+ * of a `collection` in the opposite order.
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {Object} object The object to search.
+ * @param {Function|Object|string} [callback=identity] The function called per
+ *  iteration. If a property name or object is provided it will be used to
+ *  create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {string|undefined} Returns the key of the found element, else `undefined`.
+ * @example
+ *
+ * var characters = {
+ *   'barney': {  'age': 36, 'blocked': true },
+ *   'fred': {    'age': 40, 'blocked': false },
+ *   'pebbles': { 'age': 1,  'blocked': true }
+ * };
+ *
+ * _.findLastKey(characters, function(chr) {
+ *   return chr.age < 40;
+ * });
+ * // => returns `pebbles`, assuming `_.findKey` returns `barney`
+ *
+ * // using "_.where" callback shorthand
+ * _.findLastKey(characters, { 'age': 40 });
+ * // => 'fred'
+ *
+ * // using "_.pluck" callback shorthand
+ * _.findLastKey(characters, 'blocked');
+ * // => 'pebbles'
+ */
+function findLastKey(object, callback, thisArg) {
+  var result;
+  callback = createCallback(callback, thisArg, 3);
+  forOwnRight(object, function(value, key, object) {
+    if (callback(value, key, object)) {
+      result = key;
+      return false;
+    }
+  });
+  return result;
+}
+
+module.exports = findLastKey;
+
+},{"../functions/createCallback":76,"./forOwnRight":142}],139:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseCreateCallback = require('../internals/baseCreateCallback'),
+    objectTypes = require('../internals/objectTypes');
+
+/**
+ * Iterates over own and inherited enumerable properties of an object,
+ * executing the callback for each property. The callback is bound to `thisArg`
+ * and invoked with three arguments; (value, key, object). Callbacks may exit
+ * iteration early by explicitly returning `false`.
+ *
+ * @static
+ * @memberOf _
+ * @type Function
+ * @category Objects
+ * @param {Object} object The object to iterate over.
+ * @param {Function} [callback=identity] The function called per iteration.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Object} Returns `object`.
+ * @example
+ *
+ * function Shape() {
+ *   this.x = 0;
+ *   this.y = 0;
+ * }
+ *
+ * Shape.prototype.move = function(x, y) {
+ *   this.x += x;
+ *   this.y += y;
+ * };
+ *
+ * _.forIn(new Shape, function(value, key) {
+ *   console.log(key);
+ * });
+ * // => logs 'x', 'y', and 'move' (property order is not guaranteed across environments)
+ */
+var forIn = function(collection, callback, thisArg) {
+  var index, iterable = collection, result = iterable;
+  if (!iterable) return result;
+  if (!objectTypes[typeof iterable]) return result;
+  callback = callback && typeof thisArg == 'undefined' ? callback : baseCreateCallback(callback, thisArg, 3);
+    for (index in iterable) {
+      if (callback(iterable[index], index, collection) === false) return result;
+    }
+  return result
+};
+
+module.exports = forIn;
+
+},{"../internals/baseCreateCallback":92,"../internals/objectTypes":120}],140:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseCreateCallback = require('../internals/baseCreateCallback'),
+    forIn = require('./forIn');
+
+/**
+ * This method is like `_.forIn` except that it iterates over elements
+ * of a `collection` in the opposite order.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {Object} object The object to iterate over.
+ * @param {Function} [callback=identity] The function called per iteration.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Object} Returns `object`.
+ * @example
+ *
+ * function Shape() {
+ *   this.x = 0;
+ *   this.y = 0;
+ * }
+ *
+ * Shape.prototype.move = function(x, y) {
+ *   this.x += x;
+ *   this.y += y;
+ * };
+ *
+ * _.forInRight(new Shape, function(value, key) {
+ *   console.log(key);
+ * });
+ * // => logs 'move', 'y', and 'x' assuming `_.forIn ` logs 'x', 'y', and 'move'
+ */
+function forInRight(object, callback, thisArg) {
+  var pairs = [];
+
+  forIn(object, function(value, key) {
+    pairs.push(key, value);
+  });
+
+  var length = pairs.length;
+  callback = baseCreateCallback(callback, thisArg, 3);
+  while (length--) {
+    if (callback(pairs[length--], pairs[length], object) === false) {
+      break;
+    }
+  }
+  return object;
+}
+
+module.exports = forInRight;
+
+},{"../internals/baseCreateCallback":92,"./forIn":139}],141:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseCreateCallback = require('../internals/baseCreateCallback'),
+    keys = require('./keys'),
+    objectTypes = require('../internals/objectTypes');
+
+/**
+ * Iterates over own enumerable properties of an object, executing the callback
+ * for each property. The callback is bound to `thisArg` and invoked with three
+ * arguments; (value, key, object). Callbacks may exit iteration early by
+ * explicitly returning `false`.
+ *
+ * @static
+ * @memberOf _
+ * @type Function
+ * @category Objects
+ * @param {Object} object The object to iterate over.
+ * @param {Function} [callback=identity] The function called per iteration.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Object} Returns `object`.
+ * @example
+ *
+ * _.forOwn({ '0': 'zero', '1': 'one', 'length': 2 }, function(num, key) {
+ *   console.log(key);
+ * });
+ * // => logs '0', '1', and 'length' (property order is not guaranteed across environments)
+ */
+var forOwn = function(collection, callback, thisArg) {
+  var index, iterable = collection, result = iterable;
+  if (!iterable) return result;
+  if (!objectTypes[typeof iterable]) return result;
+  callback = callback && typeof thisArg == 'undefined' ? callback : baseCreateCallback(callback, thisArg, 3);
+    var ownIndex = -1,
+        ownProps = objectTypes[typeof iterable] && keys(iterable),
+        length = ownProps ? ownProps.length : 0;
+
+    while (++ownIndex < length) {
+      index = ownProps[ownIndex];
+      if (callback(iterable[index], index, collection) === false) return result;
+    }
+  return result
+};
+
+module.exports = forOwn;
+
+},{"../internals/baseCreateCallback":92,"../internals/objectTypes":120,"./keys":163}],142:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseCreateCallback = require('../internals/baseCreateCallback'),
+    keys = require('./keys');
+
+/**
+ * This method is like `_.forOwn` except that it iterates over elements
+ * of a `collection` in the opposite order.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {Object} object The object to iterate over.
+ * @param {Function} [callback=identity] The function called per iteration.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Object} Returns `object`.
+ * @example
+ *
+ * _.forOwnRight({ '0': 'zero', '1': 'one', 'length': 2 }, function(num, key) {
+ *   console.log(key);
+ * });
+ * // => logs 'length', '1', and '0' assuming `_.forOwn` logs '0', '1', and 'length'
+ */
+function forOwnRight(object, callback, thisArg) {
+  var props = keys(object),
+      length = props.length;
+
+  callback = baseCreateCallback(callback, thisArg, 3);
+  while (length--) {
+    var key = props[length];
+    if (callback(object[key], key, object) === false) {
+      break;
+    }
+  }
+  return object;
+}
+
+module.exports = forOwnRight;
+
+},{"../internals/baseCreateCallback":92,"./keys":163}],143:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var forIn = require('./forIn'),
+    isFunction = require('./isFunction');
+
+/**
+ * Creates a sorted array of property names of all enumerable properties,
+ * own and inherited, of `object` that have function values.
+ *
+ * @static
+ * @memberOf _
+ * @alias methods
+ * @category Objects
+ * @param {Object} object The object to inspect.
+ * @returns {Array} Returns an array of property names that have function values.
+ * @example
+ *
+ * _.functions(_);
+ * // => ['all', 'any', 'bind', 'bindAll', 'clone', 'compact', 'compose', ...]
+ */
+function functions(object) {
+  var result = [];
+  forIn(object, function(value, key) {
+    if (isFunction(value)) {
+      result.push(key);
+    }
+  });
+  return result.sort();
+}
+
+module.exports = functions;
+
+},{"./forIn":139,"./isFunction":154}],144:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/** Used for native method references */
+var objectProto = Object.prototype;
+
+/** Native method shortcuts */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * Checks if the specified property name exists as a direct property of `object`,
+ * instead of an inherited property.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {Object} object The object to inspect.
+ * @param {string} key The name of the property to check.
+ * @returns {boolean} Returns `true` if key is a direct property, else `false`.
+ * @example
+ *
+ * _.has({ 'a': 1, 'b': 2, 'c': 3 }, 'b');
+ * // => true
+ */
+function has(object, key) {
+  return object ? hasOwnProperty.call(object, key) : false;
+}
+
+module.exports = has;
+
+},{}],145:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var keys = require('./keys');
+
+/**
+ * Creates an object composed of the inverted keys and values of the given object.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {Object} object The object to invert.
+ * @returns {Object} Returns the created inverted object.
+ * @example
+ *
+ * _.invert({ 'first': 'fred', 'second': 'barney' });
+ * // => { 'fred': 'first', 'barney': 'second' }
+ */
+function invert(object) {
+  var index = -1,
+      props = keys(object),
+      length = props.length,
+      result = {};
+
+  while (++index < length) {
+    var key = props[index];
+    result[object[key]] = key;
+  }
+  return result;
+}
+
+module.exports = invert;
+
+},{"./keys":163}],146:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/** `Object#toString` result shortcuts */
+var argsClass = '[object Arguments]';
+
+/** Used for native method references */
+var objectProto = Object.prototype;
+
+/** Used to resolve the internal [[Class]] of values */
+var toString = objectProto.toString;
+
+/**
+ * Checks if `value` is an `arguments` object.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if the `value` is an `arguments` object, else `false`.
+ * @example
+ *
+ * (function() { return _.isArguments(arguments); })(1, 2, 3);
+ * // => true
+ *
+ * _.isArguments([1, 2, 3]);
+ * // => false
+ */
+function isArguments(value) {
+  return value && typeof value == 'object' && typeof value.length == 'number' &&
+    toString.call(value) == argsClass || false;
+}
+
+module.exports = isArguments;
+
+},{}],147:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var isNative = require('../internals/isNative');
+
+/** `Object#toString` result shortcuts */
+var arrayClass = '[object Array]';
+
+/** Used for native method references */
+var objectProto = Object.prototype;
+
+/** Used to resolve the internal [[Class]] of values */
+var toString = objectProto.toString;
+
+/* Native method shortcuts for methods with the same name as other `lodash` methods */
+var nativeIsArray = isNative(nativeIsArray = Array.isArray) && nativeIsArray;
+
+/**
+ * Checks if `value` is an array.
+ *
+ * @static
+ * @memberOf _
+ * @type Function
+ * @category Objects
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if the `value` is an array, else `false`.
+ * @example
+ *
+ * (function() { return _.isArray(arguments); })();
+ * // => false
+ *
+ * _.isArray([1, 2, 3]);
+ * // => true
+ */
+var isArray = nativeIsArray || function(value) {
+  return value && typeof value == 'object' && typeof value.length == 'number' &&
+    toString.call(value) == arrayClass || false;
+};
+
+module.exports = isArray;
+
+},{"../internals/isNative":114}],148:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/** `Object#toString` result shortcuts */
+var boolClass = '[object Boolean]';
+
+/** Used for native method references */
+var objectProto = Object.prototype;
+
+/** Used to resolve the internal [[Class]] of values */
+var toString = objectProto.toString;
+
+/**
+ * Checks if `value` is a boolean value.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if the `value` is a boolean value, else `false`.
+ * @example
+ *
+ * _.isBoolean(null);
+ * // => false
+ */
+function isBoolean(value) {
+  return value === true || value === false ||
+    value && typeof value == 'object' && toString.call(value) == boolClass || false;
+}
+
+module.exports = isBoolean;
+
+},{}],149:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/** `Object#toString` result shortcuts */
+var dateClass = '[object Date]';
+
+/** Used for native method references */
+var objectProto = Object.prototype;
+
+/** Used to resolve the internal [[Class]] of values */
+var toString = objectProto.toString;
+
+/**
+ * Checks if `value` is a date.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if the `value` is a date, else `false`.
+ * @example
+ *
+ * _.isDate(new Date);
+ * // => true
+ */
+function isDate(value) {
+  return value && typeof value == 'object' && toString.call(value) == dateClass || false;
+}
+
+module.exports = isDate;
+
+},{}],150:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/**
+ * Checks if `value` is a DOM element.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if the `value` is a DOM element, else `false`.
+ * @example
+ *
+ * _.isElement(document.body);
+ * // => true
+ */
+function isElement(value) {
+  return value && value.nodeType === 1 || false;
+}
+
+module.exports = isElement;
+
+},{}],151:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var forOwn = require('./forOwn'),
+    isFunction = require('./isFunction');
+
+/** `Object#toString` result shortcuts */
+var argsClass = '[object Arguments]',
+    arrayClass = '[object Array]',
+    objectClass = '[object Object]',
+    stringClass = '[object String]';
+
+/** Used for native method references */
+var objectProto = Object.prototype;
+
+/** Used to resolve the internal [[Class]] of values */
+var toString = objectProto.toString;
+
+/**
+ * Checks if `value` is empty. Arrays, strings, or `arguments` objects with a
+ * length of `0` and objects with no own enumerable properties are considered
+ * "empty".
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {Array|Object|string} value The value to inspect.
+ * @returns {boolean} Returns `true` if the `value` is empty, else `false`.
+ * @example
+ *
+ * _.isEmpty([1, 2, 3]);
+ * // => false
+ *
+ * _.isEmpty({});
+ * // => true
+ *
+ * _.isEmpty('');
+ * // => true
+ */
+function isEmpty(value) {
+  var result = true;
+  if (!value) {
+    return result;
+  }
+  var className = toString.call(value),
+      length = value.length;
+
+  if ((className == arrayClass || className == stringClass || className == argsClass ) ||
+      (className == objectClass && typeof length == 'number' && isFunction(value.splice))) {
+    return !length;
+  }
+  forOwn(value, function() {
+    return (result = false);
+  });
+  return result;
+}
+
+module.exports = isEmpty;
+
+},{"./forOwn":141,"./isFunction":154}],152:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseCreateCallback = require('../internals/baseCreateCallback'),
+    baseIsEqual = require('../internals/baseIsEqual');
+
+/**
+ * Performs a deep comparison between two values to determine if they are
+ * equivalent to each other. If a callback is provided it will be executed
+ * to compare values. If the callback returns `undefined` comparisons will
+ * be handled by the method instead. The callback is bound to `thisArg` and
+ * invoked with two arguments; (a, b).
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {*} a The value to compare.
+ * @param {*} b The other value to compare.
+ * @param {Function} [callback] The function to customize comparing values.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
+ * @example
+ *
+ * var object = { 'name': 'fred' };
+ * var copy = { 'name': 'fred' };
+ *
+ * object == copy;
+ * // => false
+ *
+ * _.isEqual(object, copy);
+ * // => true
+ *
+ * var words = ['hello', 'goodbye'];
+ * var otherWords = ['hi', 'goodbye'];
+ *
+ * _.isEqual(words, otherWords, function(a, b) {
+ *   var reGreet = /^(?:hello|hi)$/i,
+ *       aGreet = _.isString(a) && reGreet.test(a),
+ *       bGreet = _.isString(b) && reGreet.test(b);
+ *
+ *   return (aGreet || bGreet) ? (aGreet == bGreet) : undefined;
+ * });
+ * // => true
+ */
+function isEqual(a, b, callback, thisArg) {
+  return baseIsEqual(a, b, typeof callback == 'function' && baseCreateCallback(callback, thisArg, 2));
+}
+
+module.exports = isEqual;
+
+},{"../internals/baseCreateCallback":92,"../internals/baseIsEqual":97}],153:[function(require,module,exports){
+var global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/* Native method shortcuts for methods with the same name as other `lodash` methods */
+var nativeIsFinite = global.isFinite,
+    nativeIsNaN = global.isNaN;
+
+/**
+ * Checks if `value` is, or can be coerced to, a finite number.
+ *
+ * Note: This is not the same as native `isFinite` which will return true for
+ * booleans and empty strings. See http://es5.github.io/#x15.1.2.5.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if the `value` is finite, else `false`.
+ * @example
+ *
+ * _.isFinite(-101);
+ * // => true
+ *
+ * _.isFinite('10');
+ * // => true
+ *
+ * _.isFinite(true);
+ * // => false
+ *
+ * _.isFinite('');
+ * // => false
+ *
+ * _.isFinite(Infinity);
+ * // => false
+ */
+function isFinite(value) {
+  return nativeIsFinite(value) && !nativeIsNaN(parseFloat(value));
+}
+
+module.exports = isFinite;
+
+},{}],154:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/**
+ * Checks if `value` is a function.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if the `value` is a function, else `false`.
+ * @example
+ *
+ * _.isFunction(_);
+ * // => true
+ */
+function isFunction(value) {
+  return typeof value == 'function';
+}
+
+module.exports = isFunction;
+
+},{}],155:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var isNumber = require('./isNumber');
+
+/**
+ * Checks if `value` is `NaN`.
+ *
+ * Note: This is not the same as native `isNaN` which will return `true` for
+ * `undefined` and other non-numeric values. See http://es5.github.io/#x15.1.2.4.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if the `value` is `NaN`, else `false`.
+ * @example
+ *
+ * _.isNaN(NaN);
+ * // => true
+ *
+ * _.isNaN(new Number(NaN));
+ * // => true
+ *
+ * isNaN(undefined);
+ * // => true
+ *
+ * _.isNaN(undefined);
+ * // => false
+ */
+function isNaN(value) {
+  // `NaN` as a primitive is the only value that is not equal to itself
+  // (perform the [[Class]] check first to avoid errors with some host objects in IE)
+  return isNumber(value) && value != +value;
+}
+
+module.exports = isNaN;
+
+},{"./isNumber":157}],156:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/**
+ * Checks if `value` is `null`.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if the `value` is `null`, else `false`.
+ * @example
+ *
+ * _.isNull(null);
+ * // => true
+ *
+ * _.isNull(undefined);
+ * // => false
+ */
+function isNull(value) {
+  return value === null;
+}
+
+module.exports = isNull;
+
+},{}],157:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/** `Object#toString` result shortcuts */
+var numberClass = '[object Number]';
+
+/** Used for native method references */
+var objectProto = Object.prototype;
+
+/** Used to resolve the internal [[Class]] of values */
+var toString = objectProto.toString;
+
+/**
+ * Checks if `value` is a number.
+ *
+ * Note: `NaN` is considered a number. See http://es5.github.io/#x8.5.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if the `value` is a number, else `false`.
+ * @example
+ *
+ * _.isNumber(8.4 * 5);
+ * // => true
+ */
+function isNumber(value) {
+  return typeof value == 'number' ||
+    value && typeof value == 'object' && toString.call(value) == numberClass || false;
+}
+
+module.exports = isNumber;
+
+},{}],158:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var objectTypes = require('../internals/objectTypes');
+
+/**
+ * Checks if `value` is the language type of Object.
+ * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if the `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(1);
+ * // => false
+ */
+function isObject(value) {
+  // check if the value is the ECMAScript language type of Object
+  // http://es5.github.io/#x8
+  // and avoid a V8 bug
+  // http://code.google.com/p/v8/issues/detail?id=2291
+  return !!(value && objectTypes[typeof value]);
+}
+
+module.exports = isObject;
+
+},{"../internals/objectTypes":120}],159:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var isNative = require('../internals/isNative'),
+    shimIsPlainObject = require('../internals/shimIsPlainObject');
+
+/** `Object#toString` result shortcuts */
+var objectClass = '[object Object]';
+
+/** Used for native method references */
+var objectProto = Object.prototype;
+
+/** Used to resolve the internal [[Class]] of values */
+var toString = objectProto.toString;
+
+/** Native method shortcuts */
+var getPrototypeOf = isNative(getPrototypeOf = Object.getPrototypeOf) && getPrototypeOf;
+
+/**
+ * Checks if `value` is an object created by the `Object` constructor.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a plain object, else `false`.
+ * @example
+ *
+ * function Shape() {
+ *   this.x = 0;
+ *   this.y = 0;
+ * }
+ *
+ * _.isPlainObject(new Shape);
+ * // => false
+ *
+ * _.isPlainObject([1, 2, 3]);
+ * // => false
+ *
+ * _.isPlainObject({ 'x': 0, 'y': 0 });
+ * // => true
+ */
+var isPlainObject = !getPrototypeOf ? shimIsPlainObject : function(value) {
+  if (!(value && toString.call(value) == objectClass)) {
+    return false;
+  }
+  var valueOf = value.valueOf,
+      objProto = isNative(valueOf) && (objProto = getPrototypeOf(valueOf)) && getPrototypeOf(objProto);
+
+  return objProto
+    ? (value == objProto || getPrototypeOf(value) == objProto)
+    : shimIsPlainObject(value);
+};
+
+module.exports = isPlainObject;
+
+},{"../internals/isNative":114,"../internals/shimIsPlainObject":127}],160:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/** `Object#toString` result shortcuts */
+var regexpClass = '[object RegExp]';
+
+/** Used for native method references */
+var objectProto = Object.prototype;
+
+/** Used to resolve the internal [[Class]] of values */
+var toString = objectProto.toString;
+
+/**
+ * Checks if `value` is a regular expression.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if the `value` is a regular expression, else `false`.
+ * @example
+ *
+ * _.isRegExp(/fred/);
+ * // => true
+ */
+function isRegExp(value) {
+  return value && typeof value == 'object' && toString.call(value) == regexpClass || false;
+}
+
+module.exports = isRegExp;
+
+},{}],161:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/** `Object#toString` result shortcuts */
+var stringClass = '[object String]';
+
+/** Used for native method references */
+var objectProto = Object.prototype;
+
+/** Used to resolve the internal [[Class]] of values */
+var toString = objectProto.toString;
+
+/**
+ * Checks if `value` is a string.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if the `value` is a string, else `false`.
+ * @example
+ *
+ * _.isString('fred');
+ * // => true
+ */
+function isString(value) {
+  return typeof value == 'string' ||
+    value && typeof value == 'object' && toString.call(value) == stringClass || false;
+}
+
+module.exports = isString;
+
+},{}],162:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/**
+ * Checks if `value` is `undefined`.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if the `value` is `undefined`, else `false`.
+ * @example
+ *
+ * _.isUndefined(void 0);
+ * // => true
+ */
+function isUndefined(value) {
+  return typeof value == 'undefined';
+}
+
+module.exports = isUndefined;
+
+},{}],163:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var isNative = require('../internals/isNative'),
+    isObject = require('./isObject'),
+    shimKeys = require('../internals/shimKeys');
+
+/* Native method shortcuts for methods with the same name as other `lodash` methods */
+var nativeKeys = isNative(nativeKeys = Object.keys) && nativeKeys;
+
+/**
+ * Creates an array composed of the own enumerable property names of an object.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {Object} object The object to inspect.
+ * @returns {Array} Returns an array of property names.
+ * @example
+ *
+ * _.keys({ 'one': 1, 'two': 2, 'three': 3 });
+ * // => ['one', 'two', 'three'] (property order is not guaranteed across environments)
+ */
+var keys = !nativeKeys ? shimKeys : function(object) {
+  if (!isObject(object)) {
+    return [];
+  }
+  return nativeKeys(object);
+};
+
+module.exports = keys;
+
+},{"../internals/isNative":114,"../internals/shimKeys":128,"./isObject":158}],164:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var createCallback = require('../functions/createCallback'),
+    forOwn = require('./forOwn');
+
+/**
+ * Creates an object with the same keys as `object` and values generated by
+ * running each own enumerable property of `object` through the callback.
+ * The callback is bound to `thisArg` and invoked with three arguments;
+ * (value, key, object).
+ *
+ * If a property name is provided for `callback` the created "_.pluck" style
+ * callback will return the property value of the given element.
+ *
+ * If an object is provided for `callback` the created "_.where" style callback
+ * will return `true` for elements that have the properties of the given object,
+ * else `false`.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {Object} object The object to iterate over.
+ * @param {Function|Object|string} [callback=identity] The function called
+ *  per iteration. If a property name or object is provided it will be used
+ *  to create a "_.pluck" or "_.where" style callback, respectively.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Array} Returns a new object with values of the results of each `callback` execution.
+ * @example
+ *
+ * _.mapValues({ 'a': 1, 'b': 2, 'c': 3} , function(num) { return num * 3; });
+ * // => { 'a': 3, 'b': 6, 'c': 9 }
+ *
+ * var characters = {
+ *   'fred': { 'name': 'fred', 'age': 40 },
+ *   'pebbles': { 'name': 'pebbles', 'age': 1 }
+ * };
+ *
+ * // using "_.pluck" callback shorthand
+ * _.mapValues(characters, 'age');
+ * // => { 'fred': 40, 'pebbles': 1 }
+ */
+function mapValues(object, callback, thisArg) {
+  var result = {};
+  callback = createCallback(callback, thisArg, 3);
+
+  forOwn(object, function(value, key, object) {
+    result[key] = callback(value, key, object);
+  });
+  return result;
+}
+
+module.exports = mapValues;
+
+},{"../functions/createCallback":76,"./forOwn":141}],165:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseCreateCallback = require('../internals/baseCreateCallback'),
+    baseMerge = require('../internals/baseMerge'),
+    getArray = require('../internals/getArray'),
+    isObject = require('./isObject'),
+    releaseArray = require('../internals/releaseArray'),
+    slice = require('../internals/slice');
+
+/**
+ * Recursively merges own enumerable properties of the source object(s), that
+ * don't resolve to `undefined` into the destination object. Subsequent sources
+ * will overwrite property assignments of previous sources. If a callback is
+ * provided it will be executed to produce the merged values of the destination
+ * and source properties. If the callback returns `undefined` merging will
+ * be handled by the method instead. The callback is bound to `thisArg` and
+ * invoked with two arguments; (objectValue, sourceValue).
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {Object} object The destination object.
+ * @param {...Object} [source] The source objects.
+ * @param {Function} [callback] The function to customize merging properties.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Object} Returns the destination object.
+ * @example
+ *
+ * var names = {
+ *   'characters': [
+ *     { 'name': 'barney' },
+ *     { 'name': 'fred' }
+ *   ]
+ * };
+ *
+ * var ages = {
+ *   'characters': [
+ *     { 'age': 36 },
+ *     { 'age': 40 }
+ *   ]
+ * };
+ *
+ * _.merge(names, ages);
+ * // => { 'characters': [{ 'name': 'barney', 'age': 36 }, { 'name': 'fred', 'age': 40 }] }
+ *
+ * var food = {
+ *   'fruits': ['apple'],
+ *   'vegetables': ['beet']
+ * };
+ *
+ * var otherFood = {
+ *   'fruits': ['banana'],
+ *   'vegetables': ['carrot']
+ * };
+ *
+ * _.merge(food, otherFood, function(a, b) {
+ *   return _.isArray(a) ? a.concat(b) : undefined;
+ * });
+ * // => { 'fruits': ['apple', 'banana'], 'vegetables': ['beet', 'carrot] }
+ */
+function merge(object) {
+  var args = arguments,
+      length = 2;
+
+  if (!isObject(object)) {
+    return object;
+  }
+  // allows working with `_.reduce` and `_.reduceRight` without using
+  // their `index` and `collection` arguments
+  if (typeof args[2] != 'number') {
+    length = args.length;
+  }
+  if (length > 3 && typeof args[length - 2] == 'function') {
+    var callback = baseCreateCallback(args[--length - 1], args[length--], 2);
+  } else if (length > 2 && typeof args[length - 1] == 'function') {
+    callback = args[--length];
+  }
+  var sources = slice(arguments, 1, length),
+      index = -1,
+      stackA = getArray(),
+      stackB = getArray();
+
+  while (++index < length) {
+    baseMerge(object, sources[index], callback, stackA, stackB);
+  }
+  releaseArray(stackA);
+  releaseArray(stackB);
+  return object;
+}
+
+module.exports = merge;
+
+},{"../internals/baseCreateCallback":92,"../internals/baseMerge":98,"../internals/getArray":110,"../internals/releaseArray":124,"../internals/slice":129,"./isObject":158}],166:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseDifference = require('../internals/baseDifference'),
+    baseFlatten = require('../internals/baseFlatten'),
+    createCallback = require('../functions/createCallback'),
+    forIn = require('./forIn');
+
+/**
+ * Creates a shallow clone of `object` excluding the specified properties.
+ * Property names may be specified as individual arguments or as arrays of
+ * property names. If a callback is provided it will be executed for each
+ * property of `object` omitting the properties the callback returns truey
+ * for. The callback is bound to `thisArg` and invoked with three arguments;
+ * (value, key, object).
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {Object} object The source object.
+ * @param {Function|...string|string[]} [callback] The properties to omit or the
+ *  function called per iteration.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Object} Returns an object without the omitted properties.
+ * @example
+ *
+ * _.omit({ 'name': 'fred', 'age': 40 }, 'age');
+ * // => { 'name': 'fred' }
+ *
+ * _.omit({ 'name': 'fred', 'age': 40 }, function(value) {
+ *   return typeof value == 'number';
+ * });
+ * // => { 'name': 'fred' }
+ */
+function omit(object, callback, thisArg) {
+  var result = {};
+  if (typeof callback != 'function') {
+    var props = [];
+    forIn(object, function(value, key) {
+      props.push(key);
+    });
+    props = baseDifference(props, baseFlatten(arguments, true, false, 1));
+
+    var index = -1,
+        length = props.length;
+
+    while (++index < length) {
+      var key = props[index];
+      result[key] = object[key];
+    }
+  } else {
+    callback = createCallback(callback, thisArg, 3);
+    forIn(object, function(value, key, object) {
+      if (!callback(value, key, object)) {
+        result[key] = value;
+      }
+    });
+  }
+  return result;
+}
+
+module.exports = omit;
+
+},{"../functions/createCallback":76,"../internals/baseDifference":94,"../internals/baseFlatten":95,"./forIn":139}],167:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var keys = require('./keys');
+
+/**
+ * Creates a two dimensional array of an object's key-value pairs,
+ * i.e. `[[key1, value1], [key2, value2]]`.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {Object} object The object to inspect.
+ * @returns {Array} Returns new array of key-value pairs.
+ * @example
+ *
+ * _.pairs({ 'barney': 36, 'fred': 40 });
+ * // => [['barney', 36], ['fred', 40]] (property order is not guaranteed across environments)
+ */
+function pairs(object) {
+  var index = -1,
+      props = keys(object),
+      length = props.length,
+      result = Array(length);
+
+  while (++index < length) {
+    var key = props[index];
+    result[index] = [key, object[key]];
+  }
+  return result;
+}
+
+module.exports = pairs;
+
+},{"./keys":163}],168:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseFlatten = require('../internals/baseFlatten'),
+    createCallback = require('../functions/createCallback'),
+    forIn = require('./forIn'),
+    isObject = require('./isObject');
+
+/**
+ * Creates a shallow clone of `object` composed of the specified properties.
+ * Property names may be specified as individual arguments or as arrays of
+ * property names. If a callback is provided it will be executed for each
+ * property of `object` picking the properties the callback returns truey
+ * for. The callback is bound to `thisArg` and invoked with three arguments;
+ * (value, key, object).
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {Object} object The source object.
+ * @param {Function|...string|string[]} [callback] The function called per
+ *  iteration or property names to pick, specified as individual property
+ *  names or arrays of property names.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Object} Returns an object composed of the picked properties.
+ * @example
+ *
+ * _.pick({ 'name': 'fred', '_userid': 'fred1' }, 'name');
+ * // => { 'name': 'fred' }
+ *
+ * _.pick({ 'name': 'fred', '_userid': 'fred1' }, function(value, key) {
+ *   return key.charAt(0) != '_';
+ * });
+ * // => { 'name': 'fred' }
+ */
+function pick(object, callback, thisArg) {
+  var result = {};
+  if (typeof callback != 'function') {
+    var index = -1,
+        props = baseFlatten(arguments, true, false, 1),
+        length = isObject(object) ? props.length : 0;
+
+    while (++index < length) {
+      var key = props[index];
+      if (key in object) {
+        result[key] = object[key];
+      }
+    }
+  } else {
+    callback = createCallback(callback, thisArg, 3);
+    forIn(object, function(value, key, object) {
+      if (callback(value, key, object)) {
+        result[key] = value;
+      }
+    });
+  }
+  return result;
+}
+
+module.exports = pick;
+
+},{"../functions/createCallback":76,"../internals/baseFlatten":95,"./forIn":139,"./isObject":158}],169:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseCreate = require('../internals/baseCreate'),
+    createCallback = require('../functions/createCallback'),
+    forEach = require('../collections/forEach'),
+    forOwn = require('./forOwn'),
+    isArray = require('./isArray');
+
+/**
+ * An alternative to `_.reduce` this method transforms `object` to a new
+ * `accumulator` object which is the result of running each of its own
+ * enumerable properties through a callback, with each callback execution
+ * potentially mutating the `accumulator` object. The callback is bound to
+ * `thisArg` and invoked with four arguments; (accumulator, value, key, object).
+ * Callbacks may exit iteration early by explicitly returning `false`.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {Array|Object} object The object to iterate over.
+ * @param {Function} [callback=identity] The function called per iteration.
+ * @param {*} [accumulator] The custom accumulator value.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {*} Returns the accumulated value.
+ * @example
+ *
+ * var squares = _.transform([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], function(result, num) {
+ *   num *= num;
+ *   if (num % 2) {
+ *     return result.push(num) < 3;
+ *   }
+ * });
+ * // => [1, 9, 25]
+ *
+ * var mapped = _.transform({ 'a': 1, 'b': 2, 'c': 3 }, function(result, num, key) {
+ *   result[key] = num * 3;
+ * });
+ * // => { 'a': 3, 'b': 6, 'c': 9 }
+ */
+function transform(object, callback, accumulator, thisArg) {
+  var isArr = isArray(object);
+  if (accumulator == null) {
+    if (isArr) {
+      accumulator = [];
+    } else {
+      var ctor = object && object.constructor,
+          proto = ctor && ctor.prototype;
+
+      accumulator = baseCreate(proto);
+    }
+  }
+  if (callback) {
+    callback = createCallback(callback, thisArg, 4);
+    (isArr ? forEach : forOwn)(object, function(value, index, object) {
+      return callback(accumulator, value, index, object);
+    });
+  }
+  return accumulator;
+}
+
+module.exports = transform;
+
+},{"../collections/forEach":51,"../functions/createCallback":76,"../internals/baseCreate":91,"./forOwn":141,"./isArray":147}],170:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var keys = require('./keys');
+
+/**
+ * Creates an array composed of the own enumerable property values of `object`.
+ *
+ * @static
+ * @memberOf _
+ * @category Objects
+ * @param {Object} object The object to inspect.
+ * @returns {Array} Returns an array of property values.
+ * @example
+ *
+ * _.values({ 'one': 1, 'two': 2, 'three': 3 });
+ * // => [1, 2, 3] (property order is not guaranteed across environments)
+ */
+function values(object) {
+  var index = -1,
+      props = keys(object),
+      length = props.length,
+      result = Array(length);
+
+  while (++index < length) {
+    result[index] = object[props[index]];
+  }
+  return result;
+}
+
+module.exports = values;
+
+},{"./keys":163}],171:[function(require,module,exports){
+var global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var isNative = require('./internals/isNative');
+
+/** Used to detect functions containing a `this` reference */
+var reThis = /\bthis\b/;
+
+/**
+ * An object used to flag environments features.
+ *
+ * @static
+ * @memberOf _
+ * @type Object
+ */
+var support = {};
+
+/**
+ * Detect if functions can be decompiled by `Function#toString`
+ * (all but PS3 and older Opera mobile browsers & avoided in Windows 8 apps).
+ *
+ * @memberOf _.support
+ * @type boolean
+ */
+support.funcDecomp = !isNative(global.WinRTError) && reThis.test(function() { return this; });
+
+/**
+ * Detect if `Function#name` is supported (all but IE).
+ *
+ * @memberOf _.support
+ * @type boolean
+ */
+support.funcNames = typeof Function.name == 'string';
+
+module.exports = support;
+
+},{"./internals/isNative":114}],172:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+module.exports = {
+  'constant': require('./utilities/constant'),
+  'createCallback': require('./functions/createCallback'),
+  'escape': require('./utilities/escape'),
+  'identity': require('./utilities/identity'),
+  'mixin': require('./utilities/mixin'),
+  'noConflict': require('./utilities/noConflict'),
+  'noop': require('./utilities/noop'),
+  'now': require('./utilities/now'),
+  'parseInt': require('./utilities/parseInt'),
+  'property': require('./utilities/property'),
+  'random': require('./utilities/random'),
+  'result': require('./utilities/result'),
+  'template': require('./utilities/template'),
+  'templateSettings': require('./utilities/templateSettings'),
+  'times': require('./utilities/times'),
+  'unescape': require('./utilities/unescape'),
+  'uniqueId': require('./utilities/uniqueId')
+};
+
+},{"./functions/createCallback":76,"./utilities/constant":173,"./utilities/escape":174,"./utilities/identity":175,"./utilities/mixin":176,"./utilities/noConflict":177,"./utilities/noop":178,"./utilities/now":179,"./utilities/parseInt":180,"./utilities/property":181,"./utilities/random":182,"./utilities/result":183,"./utilities/template":184,"./utilities/templateSettings":185,"./utilities/times":186,"./utilities/unescape":187,"./utilities/uniqueId":188}],173:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/**
+ * Creates a function that returns `value`.
+ *
+ * @static
+ * @memberOf _
+ * @category Utilities
+ * @param {*} value The value to return from the new function.
+ * @returns {Function} Returns the new function.
+ * @example
+ *
+ * var object = { 'name': 'fred' };
+ * var getter = _.constant(object);
+ * getter() === object;
+ * // => true
+ */
+function constant(value) {
+  return function() {
+    return value;
+  };
+}
+
+module.exports = constant;
+
+},{}],174:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var escapeHtmlChar = require('../internals/escapeHtmlChar'),
+    keys = require('../objects/keys'),
+    reUnescapedHtml = require('../internals/reUnescapedHtml');
+
+/**
+ * Converts the characters `&`, `<`, `>`, `"`, and `'` in `string` to their
+ * corresponding HTML entities.
+ *
+ * @static
+ * @memberOf _
+ * @category Utilities
+ * @param {string} string The string to escape.
+ * @returns {string} Returns the escaped string.
+ * @example
+ *
+ * _.escape('Fred, Wilma, & Pebbles');
+ * // => 'Fred, Wilma, &amp; Pebbles'
+ */
+function escape(string) {
+  return string == null ? '' : String(string).replace(reUnescapedHtml, escapeHtmlChar);
+}
+
+module.exports = escape;
+
+},{"../internals/escapeHtmlChar":108,"../internals/reUnescapedHtml":123,"../objects/keys":163}],175:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/**
+ * This method returns the first argument provided to it.
+ *
+ * @static
+ * @memberOf _
+ * @category Utilities
+ * @param {*} value Any value.
+ * @returns {*} Returns `value`.
+ * @example
+ *
+ * var object = { 'name': 'fred' };
+ * _.identity(object) === object;
+ * // => true
+ */
+function identity(value) {
+  return value;
+}
+
+module.exports = identity;
+
+},{}],176:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var forEach = require('../collections/forEach'),
+    functions = require('../objects/functions'),
+    isFunction = require('../objects/isFunction'),
+    isObject = require('../objects/isObject');
+
+/**
+ * Used for `Array` method references.
+ *
+ * Normally `Array.prototype` would suffice, however, using an array literal
+ * avoids issues in Narwhal.
+ */
+var arrayRef = [];
+
+/** Native method shortcuts */
+var push = arrayRef.push;
+
+/**
+ * Adds function properties of a source object to the destination object.
+ * If `object` is a function methods will be added to its prototype as well.
+ *
+ * @static
+ * @memberOf _
+ * @category Utilities
+ * @param {Function|Object} [object=lodash] object The destination object.
+ * @param {Object} source The object of functions to add.
+ * @param {Object} [options] The options object.
+ * @param {boolean} [options.chain=true] Specify whether the functions added are chainable.
+ * @example
+ *
+ * function capitalize(string) {
+ *   return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+ * }
+ *
+ * _.mixin({ 'capitalize': capitalize });
+ * _.capitalize('fred');
+ * // => 'Fred'
+ *
+ * _('fred').capitalize().value();
+ * // => 'Fred'
+ *
+ * _.mixin({ 'capitalize': capitalize }, { 'chain': false });
+ * _('fred').capitalize();
+ * // => 'Fred'
+ */
+function mixin(object, source, options) {
+  var chain = true,
+      methodNames = source && functions(source);
+
+  if (options === false) {
+    chain = false;
+  } else if (isObject(options) && 'chain' in options) {
+    chain = options.chain;
+  }
+  var ctor = object,
+      isFunc = isFunction(ctor);
+
+  forEach(methodNames, function(methodName) {
+    var func = object[methodName] = source[methodName];
+    if (isFunc) {
+      ctor.prototype[methodName] = function() {
+        var chainAll = this.__chain__,
+            value = this.__wrapped__,
+            args = [value];
+
+        push.apply(args, arguments);
+        var result = func.apply(object, args);
+        if (chain || chainAll) {
+          if (value === result && isObject(result)) {
+            return this;
+          }
+          result = new ctor(result);
+          result.__chain__ = chainAll;
+        }
+        return result;
+      };
+    }
+  });
+}
+
+module.exports = mixin;
+
+},{"../collections/forEach":51,"../objects/functions":143,"../objects/isFunction":154,"../objects/isObject":158}],177:[function(require,module,exports){
+var global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/** Used to restore the original `_` reference in `noConflict` */
+var oldDash = global._;
+
+/**
+ * Reverts the '_' variable to its previous value and returns a reference to
+ * the `lodash` function.
+ *
+ * @static
+ * @memberOf _
+ * @category Utilities
+ * @returns {Function} Returns the `lodash` function.
+ * @example
+ *
+ * var lodash = _.noConflict();
+ */
+function noConflict() {
+  global._ = oldDash;
+  return this;
+}
+
+module.exports = noConflict;
+
+},{}],178:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/**
+ * A no-operation function.
+ *
+ * @static
+ * @memberOf _
+ * @category Utilities
+ * @example
+ *
+ * var object = { 'name': 'fred' };
+ * _.noop(object) === undefined;
+ * // => true
+ */
+function noop() {
+  // no operation performed
+}
+
+module.exports = noop;
+
+},{}],179:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var isNative = require('../internals/isNative');
+
+/**
+ * Gets the number of milliseconds that have elapsed since the Unix epoch
+ * (1 January 1970 00:00:00 UTC).
+ *
+ * @static
+ * @memberOf _
+ * @category Utilities
+ * @example
+ *
+ * var stamp = _.now();
+ * _.defer(function() { console.log(_.now() - stamp); });
+ * // => logs the number of milliseconds it took for the deferred function to be called
+ */
+var now = isNative(now = Date.now) && now || function() {
+  return new Date().getTime();
+};
+
+module.exports = now;
+
+},{"../internals/isNative":114}],180:[function(require,module,exports){
+var global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var isString = require('../objects/isString');
+
+/** Used to detect and test whitespace */
+var whitespace = (
+  // whitespace
+  ' \t\x0B\f\xA0\ufeff' +
+
+  // line terminators
+  '\n\r\u2028\u2029' +
+
+  // unicode category "Zs" space separators
+  '\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000'
+);
+
+/** Used to match leading whitespace and zeros to be removed */
+var reLeadingSpacesAndZeros = RegExp('^[' + whitespace + ']*0+(?=.$)');
+
+/* Native method shortcuts for methods with the same name as other `lodash` methods */
+var nativeParseInt = global.parseInt;
+
+/**
+ * Converts the given value into an integer of the specified radix.
+ * If `radix` is `undefined` or `0` a `radix` of `10` is used unless the
+ * `value` is a hexadecimal, in which case a `radix` of `16` is used.
+ *
+ * Note: This method avoids differences in native ES3 and ES5 `parseInt`
+ * implementations. See http://es5.github.io/#E.
+ *
+ * @static
+ * @memberOf _
+ * @category Utilities
+ * @param {string} value The value to parse.
+ * @param {number} [radix] The radix used to interpret the value to parse.
+ * @returns {number} Returns the new integer value.
+ * @example
+ *
+ * _.parseInt('08');
+ * // => 8
+ */
+var parseInt = nativeParseInt(whitespace + '08') == 8 ? nativeParseInt : function(value, radix) {
+  // Firefox < 21 and Opera < 15 follow the ES3 specified implementation of `parseInt`
+  return nativeParseInt(isString(value) ? value.replace(reLeadingSpacesAndZeros, '') : value, radix || 0);
+};
+
+module.exports = parseInt;
+
+},{"../objects/isString":161}],181:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/**
+ * Creates a "_.pluck" style function, which returns the `key` value of a
+ * given object.
+ *
+ * @static
+ * @memberOf _
+ * @category Utilities
+ * @param {string} key The name of the property to retrieve.
+ * @returns {Function} Returns the new function.
+ * @example
+ *
+ * var characters = [
+ *   { 'name': 'fred',   'age': 40 },
+ *   { 'name': 'barney', 'age': 36 }
+ * ];
+ *
+ * var getName = _.property('name');
+ *
+ * _.map(characters, getName);
+ * // => ['barney', 'fred']
+ *
+ * _.sortBy(characters, getName);
+ * // => [{ 'name': 'barney', 'age': 36 }, { 'name': 'fred',   'age': 40 }]
+ */
+function property(key) {
+  return function(object) {
+    return object[key];
+  };
+}
+
+module.exports = property;
+
+},{}],182:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseRandom = require('../internals/baseRandom');
+
+/* Native method shortcuts for methods with the same name as other `lodash` methods */
+var nativeMin = Math.min,
+    nativeRandom = Math.random;
+
+/**
+ * Produces a random number between `min` and `max` (inclusive). If only one
+ * argument is provided a number between `0` and the given number will be
+ * returned. If `floating` is truey or either `min` or `max` are floats a
+ * floating-point number will be returned instead of an integer.
+ *
+ * @static
+ * @memberOf _
+ * @category Utilities
+ * @param {number} [min=0] The minimum possible value.
+ * @param {number} [max=1] The maximum possible value.
+ * @param {boolean} [floating=false] Specify returning a floating-point number.
+ * @returns {number} Returns a random number.
+ * @example
+ *
+ * _.random(0, 5);
+ * // => an integer between 0 and 5
+ *
+ * _.random(5);
+ * // => also an integer between 0 and 5
+ *
+ * _.random(5, true);
+ * // => a floating-point number between 0 and 5
+ *
+ * _.random(1.2, 5.2);
+ * // => a floating-point number between 1.2 and 5.2
+ */
+function random(min, max, floating) {
+  var noMin = min == null,
+      noMax = max == null;
+
+  if (floating == null) {
+    if (typeof min == 'boolean' && noMax) {
+      floating = min;
+      min = 1;
+    }
+    else if (!noMax && typeof max == 'boolean') {
+      floating = max;
+      noMax = true;
+    }
+  }
+  if (noMin && noMax) {
+    max = 1;
+  }
+  min = +min || 0;
+  if (noMax) {
+    max = min;
+    min = 0;
+  } else {
+    max = +max || 0;
+  }
+  if (floating || min % 1 || max % 1) {
+    var rand = nativeRandom();
+    return nativeMin(min + (rand * (max - min + parseFloat('1e-' + ((rand +'').length - 1)))), max);
+  }
+  return baseRandom(min, max);
+}
+
+module.exports = random;
+
+},{"../internals/baseRandom":99}],183:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var isFunction = require('../objects/isFunction');
+
+/**
+ * Resolves the value of property `key` on `object`. If `key` is a function
+ * it will be invoked with the `this` binding of `object` and its result returned,
+ * else the property value is returned. If `object` is falsey then `undefined`
+ * is returned.
+ *
+ * @static
+ * @memberOf _
+ * @category Utilities
+ * @param {Object} object The object to inspect.
+ * @param {string} key The name of the property to resolve.
+ * @returns {*} Returns the resolved value.
+ * @example
+ *
+ * var object = {
+ *   'cheese': 'crumpets',
+ *   'stuff': function() {
+ *     return 'nonsense';
+ *   }
+ * };
+ *
+ * _.result(object, 'cheese');
+ * // => 'crumpets'
+ *
+ * _.result(object, 'stuff');
+ * // => 'nonsense'
+ */
+function result(object, key) {
+  if (object) {
+    var value = object[key];
+    return isFunction(value) ? object[key]() : value;
+  }
+}
+
+module.exports = result;
+
+},{"../objects/isFunction":154}],184:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var defaults = require('../objects/defaults'),
+    escape = require('./escape'),
+    escapeStringChar = require('../internals/escapeStringChar'),
+    keys = require('../objects/keys'),
+    reInterpolate = require('../internals/reInterpolate'),
+    templateSettings = require('./templateSettings'),
+    values = require('../objects/values');
+
+/** Used to match empty string literals in compiled template source */
+var reEmptyStringLeading = /\b__p \+= '';/g,
+    reEmptyStringMiddle = /\b(__p \+=) '' \+/g,
+    reEmptyStringTrailing = /(__e\(.*?\)|\b__t\)) \+\n'';/g;
+
+/**
+ * Used to match ES6 template delimiters
+ * http://people.mozilla.org/~jorendorff/es6-draft.html#sec-literals-string-literals
+ */
+var reEsTemplate = /\$\{([^\\}]*(?:\\.[^\\}]*)*)\}/g;
+
+/** Used to ensure capturing order of template delimiters */
+var reNoMatch = /($^)/;
+
+/** Used to match unescaped characters in compiled string literals */
+var reUnescapedString = /['\n\r\t\u2028\u2029\\]/g;
+
+/**
+ * A micro-templating method that handles arbitrary delimiters, preserves
+ * whitespace, and correctly escapes quotes within interpolated code.
+ *
+ * Note: In the development build, `_.template` utilizes sourceURLs for easier
+ * debugging. See http://www.html5rocks.com/en/tutorials/developertools/sourcemaps/#toc-sourceurl
+ *
+ * For more information on precompiling templates see:
+ * http://lodash.com/custom-builds
+ *
+ * For more information on Chrome extension sandboxes see:
+ * http://developer.chrome.com/stable/extensions/sandboxingEval.html
+ *
+ * @static
+ * @memberOf _
+ * @category Utilities
+ * @param {string} text The template text.
+ * @param {Object} data The data object used to populate the text.
+ * @param {Object} [options] The options object.
+ * @param {RegExp} [options.escape] The "escape" delimiter.
+ * @param {RegExp} [options.evaluate] The "evaluate" delimiter.
+ * @param {Object} [options.imports] An object to import into the template as local variables.
+ * @param {RegExp} [options.interpolate] The "interpolate" delimiter.
+ * @param {string} [sourceURL] The sourceURL of the template's compiled source.
+ * @param {string} [variable] The data object variable name.
+ * @returns {Function|string} Returns a compiled function when no `data` object
+ *  is given, else it returns the interpolated text.
+ * @example
+ *
+ * // using the "interpolate" delimiter to create a compiled template
+ * var compiled = _.template('hello <%= name %>');
+ * compiled({ 'name': 'fred' });
+ * // => 'hello fred'
+ *
+ * // using the "escape" delimiter to escape HTML in data property values
+ * _.template('<b><%- value %></b>', { 'value': '<script>' });
+ * // => '<b>&lt;script&gt;</b>'
+ *
+ * // using the "evaluate" delimiter to generate HTML
+ * var list = '<% _.forEach(people, function(name) { %><li><%- name %></li><% }); %>';
+ * _.template(list, { 'people': ['fred', 'barney'] });
+ * // => '<li>fred</li><li>barney</li>'
+ *
+ * // using the ES6 delimiter as an alternative to the default "interpolate" delimiter
+ * _.template('hello ${ name }', { 'name': 'pebbles' });
+ * // => 'hello pebbles'
+ *
+ * // using the internal `print` function in "evaluate" delimiters
+ * _.template('<% print("hello " + name); %>!', { 'name': 'barney' });
+ * // => 'hello barney!'
+ *
+ * // using a custom template delimiters
+ * _.templateSettings = {
+ *   'interpolate': /{{([\s\S]+?)}}/g
+ * };
+ *
+ * _.template('hello {{ name }}!', { 'name': 'mustache' });
+ * // => 'hello mustache!'
+ *
+ * // using the `imports` option to import jQuery
+ * var list = '<% jq.each(people, function(name) { %><li><%- name %></li><% }); %>';
+ * _.template(list, { 'people': ['fred', 'barney'] }, { 'imports': { 'jq': jQuery } });
+ * // => '<li>fred</li><li>barney</li>'
+ *
+ * // using the `sourceURL` option to specify a custom sourceURL for the template
+ * var compiled = _.template('hello <%= name %>', null, { 'sourceURL': '/basic/greeting.jst' });
+ * compiled(data);
+ * // => find the source of "greeting.jst" under the Sources tab or Resources panel of the web inspector
+ *
+ * // using the `variable` option to ensure a with-statement isn't used in the compiled template
+ * var compiled = _.template('hi <%= data.name %>!', null, { 'variable': 'data' });
+ * compiled.source;
+ * // => function(data) {
+ *   var __t, __p = '', __e = _.escape;
+ *   __p += 'hi ' + ((__t = ( data.name )) == null ? '' : __t) + '!';
+ *   return __p;
+ * }
+ *
+ * // using the `source` property to inline compiled templates for meaningful
+ * // line numbers in error messages and a stack trace
+ * fs.writeFileSync(path.join(cwd, 'jst.js'), '\
+ *   var JST = {\
+ *     "main": ' + _.template(mainText).source + '\
+ *   };\
+ * ');
+ */
+function template(text, data, options) {
+  // based on John Resig's `tmpl` implementation
+  // http://ejohn.org/blog/javascript-micro-templating/
+  // and Laura Doktorova's doT.js
+  // https://github.com/olado/doT
+  var settings = templateSettings.imports._.templateSettings || templateSettings;
+  text = String(text || '');
+
+  // avoid missing dependencies when `iteratorTemplate` is not defined
+  options = defaults({}, options, settings);
+
+  var imports = defaults({}, options.imports, settings.imports),
+      importsKeys = keys(imports),
+      importsValues = values(imports);
+
+  var isEvaluating,
+      index = 0,
+      interpolate = options.interpolate || reNoMatch,
+      source = "__p += '";
+
+  // compile the regexp to match each delimiter
+  var reDelimiters = RegExp(
+    (options.escape || reNoMatch).source + '|' +
+    interpolate.source + '|' +
+    (interpolate === reInterpolate ? reEsTemplate : reNoMatch).source + '|' +
+    (options.evaluate || reNoMatch).source + '|$'
+  , 'g');
+
+  text.replace(reDelimiters, function(match, escapeValue, interpolateValue, esTemplateValue, evaluateValue, offset) {
+    interpolateValue || (interpolateValue = esTemplateValue);
+
+    // escape characters that cannot be included in string literals
+    source += text.slice(index, offset).replace(reUnescapedString, escapeStringChar);
+
+    // replace delimiters with snippets
+    if (escapeValue) {
+      source += "' +\n__e(" + escapeValue + ") +\n'";
+    }
+    if (evaluateValue) {
+      isEvaluating = true;
+      source += "';\n" + evaluateValue + ";\n__p += '";
+    }
+    if (interpolateValue) {
+      source += "' +\n((__t = (" + interpolateValue + ")) == null ? '' : __t) +\n'";
+    }
+    index = offset + match.length;
+
+    // the JS engine embedded in Adobe products requires returning the `match`
+    // string in order to produce the correct `offset` value
+    return match;
+  });
+
+  source += "';\n";
+
+  // if `variable` is not specified, wrap a with-statement around the generated
+  // code to add the data object to the top of the scope chain
+  var variable = options.variable,
+      hasVariable = variable;
+
+  if (!hasVariable) {
+    variable = 'obj';
+    source = 'with (' + variable + ') {\n' + source + '\n}\n';
+  }
+  // cleanup code by stripping empty strings
+  source = (isEvaluating ? source.replace(reEmptyStringLeading, '') : source)
+    .replace(reEmptyStringMiddle, '$1')
+    .replace(reEmptyStringTrailing, '$1;');
+
+  // frame code as the function body
+  source = 'function(' + variable + ') {\n' +
+    (hasVariable ? '' : variable + ' || (' + variable + ' = {});\n') +
+    "var __t, __p = '', __e = _.escape" +
+    (isEvaluating
+      ? ', __j = Array.prototype.join;\n' +
+        "function print() { __p += __j.call(arguments, '') }\n"
+      : ';\n'
+    ) +
+    source +
+    'return __p\n}';
+
+  try {
+    var result = Function(importsKeys, 'return ' + source ).apply(undefined, importsValues);
+  } catch(e) {
+    e.source = source;
+    throw e;
+  }
+  if (data) {
+    return result(data);
+  }
+  // provide the compiled function's source by its `toString` method, in
+  // supported environments, or the `source` property as a convenience for
+  // inlining compiled templates during the build process
+  result.source = source;
+  return result;
+}
+
+module.exports = template;
+
+},{"../internals/escapeStringChar":109,"../internals/reInterpolate":122,"../objects/defaults":136,"../objects/keys":163,"../objects/values":170,"./escape":174,"./templateSettings":185}],185:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var escape = require('./escape'),
+    reInterpolate = require('../internals/reInterpolate');
+
+/**
+ * By default, the template delimiters used by Lo-Dash are similar to those in
+ * embedded Ruby (ERB). Change the following template settings to use alternative
+ * delimiters.
+ *
+ * @static
+ * @memberOf _
+ * @type Object
+ */
+var templateSettings = {
+
+  /**
+   * Used to detect `data` property values to be HTML-escaped.
+   *
+   * @memberOf _.templateSettings
+   * @type RegExp
+   */
+  'escape': /<%-([\s\S]+?)%>/g,
+
+  /**
+   * Used to detect code to be evaluated.
+   *
+   * @memberOf _.templateSettings
+   * @type RegExp
+   */
+  'evaluate': /<%([\s\S]+?)%>/g,
+
+  /**
+   * Used to detect `data` property values to inject.
+   *
+   * @memberOf _.templateSettings
+   * @type RegExp
+   */
+  'interpolate': reInterpolate,
+
+  /**
+   * Used to reference the data object in the template text.
+   *
+   * @memberOf _.templateSettings
+   * @type string
+   */
+  'variable': '',
+
+  /**
+   * Used to import variables into the compiled template.
+   *
+   * @memberOf _.templateSettings
+   * @type Object
+   */
+  'imports': {
+
+    /**
+     * A reference to the `lodash` function.
+     *
+     * @memberOf _.templateSettings.imports
+     * @type Function
+     */
+    '_': { 'escape': escape }
+  }
+};
+
+module.exports = templateSettings;
+
+},{"../internals/reInterpolate":122,"./escape":174}],186:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var baseCreateCallback = require('../internals/baseCreateCallback');
+
+/**
+ * Executes the callback `n` times, returning an array of the results
+ * of each callback execution. The callback is bound to `thisArg` and invoked
+ * with one argument; (index).
+ *
+ * @static
+ * @memberOf _
+ * @category Utilities
+ * @param {number} n The number of times to execute the callback.
+ * @param {Function} callback The function called per iteration.
+ * @param {*} [thisArg] The `this` binding of `callback`.
+ * @returns {Array} Returns an array of the results of each `callback` execution.
+ * @example
+ *
+ * var diceRolls = _.times(3, _.partial(_.random, 1, 6));
+ * // => [3, 6, 4]
+ *
+ * _.times(3, function(n) { mage.castSpell(n); });
+ * // => calls `mage.castSpell(n)` three times, passing `n` of `0`, `1`, and `2` respectively
+ *
+ * _.times(3, function(n) { this.cast(n); }, mage);
+ * // => also calls `mage.castSpell(n)` three times
+ */
+function times(n, callback, thisArg) {
+  n = (n = +n) > -1 ? n : 0;
+  var index = -1,
+      result = Array(n);
+
+  callback = baseCreateCallback(callback, thisArg, 1);
+  while (++index < n) {
+    result[index] = callback(index);
+  }
+  return result;
+}
+
+module.exports = times;
+
+},{"../internals/baseCreateCallback":92}],187:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+var keys = require('../objects/keys'),
+    reEscapedHtml = require('../internals/reEscapedHtml'),
+    unescapeHtmlChar = require('../internals/unescapeHtmlChar');
+
+/**
+ * The inverse of `_.escape` this method converts the HTML entities
+ * `&amp;`, `&lt;`, `&gt;`, `&quot;`, and `&#39;` in `string` to their
+ * corresponding characters.
+ *
+ * @static
+ * @memberOf _
+ * @category Utilities
+ * @param {string} string The string to unescape.
+ * @returns {string} Returns the unescaped string.
+ * @example
+ *
+ * _.unescape('Fred, Barney &amp; Pebbles');
+ * // => 'Fred, Barney & Pebbles'
+ */
+function unescape(string) {
+  return string == null ? '' : String(string).replace(reEscapedHtml, unescapeHtmlChar);
+}
+
+module.exports = unescape;
+
+},{"../internals/reEscapedHtml":121,"../internals/unescapeHtmlChar":130,"../objects/keys":163}],188:[function(require,module,exports){
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="node" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+
+/** Used to generate unique IDs */
+var idCounter = 0;
+
+/**
+ * Generates a unique ID. If `prefix` is provided the ID will be appended to it.
+ *
+ * @static
+ * @memberOf _
+ * @category Utilities
+ * @param {string} [prefix] The value to prefix the ID with.
+ * @returns {string} Returns the unique ID.
+ * @example
+ *
+ * _.uniqueId('contact_');
+ * // => 'contact_104'
+ *
+ * _.uniqueId();
+ * // => '105'
+ */
+function uniqueId(prefix) {
+  var id = ++idCounter;
+  return String(prefix == null ? '' : prefix) + id;
+}
+
+module.exports = uniqueId;
+
+},{}],189:[function(require,module,exports){
 var process=require("__browserify_process");/** @license MIT License (c) copyright 2011-2013 original author or authors */
 
 /**
@@ -14122,7 +16665,7 @@ define(function (require) {
 });
 })(typeof define === 'function' && define.amd ? define : function (factory) { module.exports = factory(require); }, this);
 
-},{"__browserify_process":13}],16:[function(require,module,exports){
+},{"__browserify_process":13}],190:[function(require,module,exports){
 // In order to help people who were accidentally upgraded to this ES client,
 // throw an error when they try to instanciate the exported function.
 // previous "elasticsearch" module -> https://github.com/ncb000gt/node-es
@@ -14139,5122 +16682,10 @@ es.errors = require('./lib/errors');
 
 module.exports = es;
 
-},{"./lib/client":19,"./lib/connection_pool":22,"./lib/errors":25,"./lib/transport":36}],17:[function(require,module,exports){
+},{"./lib/client":194,"./lib/connection_pool":197,"./lib/errors":200,"./lib/transport":211}],191:[function(require,module,exports){
 /* jshint maxlen: false */
 
-var ca = require('./client_action');
-var api = module.exports = {};
-
-api._namespaces = ['cat', 'cluster', 'indices', 'nodes', 'snapshot'];
-
-/**
- * Perform a [bulk](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/docs-bulk.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String} params.consistency - Explicit write consistency setting for the operation
- * @param {Boolean} params.refresh - Refresh the index after performing the operation
- * @param {String} [params.replication=sync] - Explicitely set the replication type
- * @param {String} params.routing - Specific routing value
- * @param {Date, Number} params.timeout - Explicit operation timeout
- * @param {String} params.type - Default document type for items which don't provide one
- * @param {String} params.index - Default index for items which don't provide one
- */
-api.bulk = ca({
-  params: {
-    consistency: {
-      type: 'enum',
-      options: [
-        'one',
-        'quorum',
-        'all'
-      ]
-    },
-    refresh: {
-      type: 'boolean'
-    },
-    replication: {
-      type: 'enum',
-      'default': 'sync',
-      options: [
-        'sync',
-        'async'
-      ]
-    },
-    routing: {
-      type: 'string'
-    },
-    timeout: {
-      type: 'time'
-    },
-    type: {
-      type: 'string'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/<%=type%>/_bulk',
-      req: {
-        index: {
-          type: 'string'
-        },
-        type: {
-          type: 'string'
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/_bulk',
-      req: {
-        index: {
-          type: 'string'
-        }
-      }
-    },
-    {
-      fmt: '/_bulk'
-    }
-  ],
-  needBody: true,
-  bulkBody: true,
-  method: 'POST'
-});
-
-api.cat = function CatNS(transport) {
-  this.transport = transport;
-};
-
-/**
- * Perform a [cat.aliases](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cat.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
- * @param {String, String[], Boolean} params.h - Comma-separated list of column names to display
- * @param {Boolean} params.help - Return help information
- * @param {Boolean} params.v - Verbose mode. Display column headers
- * @param {String, String[], Boolean} params.name - A comma-separated list of alias names to return
- */
-api.cat.prototype.aliases = ca({
-  params: {
-    local: {
-      type: 'boolean'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    h: {
-      type: 'list'
-    },
-    help: {
-      type: 'boolean',
-      'default': false
-    },
-    v: {
-      type: 'boolean',
-      'default': false
-    }
-  },
-  urls: [
-    {
-      fmt: '/_cat/aliases/<%=name%>',
-      req: {
-        name: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_cat/aliases'
-    }
-  ]
-});
-
-/**
- * Perform a [cat.allocation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cat-allocation.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String} params.bytes - The unit in which to display byte values
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
- * @param {String, String[], Boolean} params.h - Comma-separated list of column names to display
- * @param {Boolean} params.help - Return help information
- * @param {Boolean} params.v - Verbose mode. Display column headers
- * @param {String, String[], Boolean} params.nodeId - A comma-separated list of node IDs or names to limit the returned information
- */
-api.cat.prototype.allocation = ca({
-  params: {
-    bytes: {
-      type: 'enum',
-      options: [
-        'b',
-        'k',
-        'm',
-        'g'
-      ]
-    },
-    local: {
-      type: 'boolean'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    h: {
-      type: 'list'
-    },
-    help: {
-      type: 'boolean',
-      'default': false
-    },
-    v: {
-      type: 'boolean',
-      'default': false
-    }
-  },
-  urls: [
-    {
-      fmt: '/_cat/allocation/<%=nodeId%>',
-      req: {
-        nodeId: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_cat/allocation'
-    }
-  ]
-});
-
-/**
- * Perform a [cat.count](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cat-count.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
- * @param {String, String[], Boolean} params.h - Comma-separated list of column names to display
- * @param {Boolean} params.help - Return help information
- * @param {Boolean} params.v - Verbose mode. Display column headers
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names to limit the returned information
- */
-api.cat.prototype.count = ca({
-  params: {
-    local: {
-      type: 'boolean'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    h: {
-      type: 'list'
-    },
-    help: {
-      type: 'boolean',
-      'default': false
-    },
-    v: {
-      type: 'boolean',
-      'default': false
-    }
-  },
-  urls: [
-    {
-      fmt: '/_cat/count/<%=index%>',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_cat/count'
-    }
-  ]
-});
-
-/**
- * Perform a [cat.health](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cat-health.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
- * @param {String, String[], Boolean} params.h - Comma-separated list of column names to display
- * @param {Boolean} params.help - Return help information
- * @param {Boolean} [params.ts=true] - Set to false to disable timestamping
- * @param {Boolean} params.v - Verbose mode. Display column headers
- */
-api.cat.prototype.health = ca({
-  params: {
-    local: {
-      type: 'boolean'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    h: {
-      type: 'list'
-    },
-    help: {
-      type: 'boolean',
-      'default': false
-    },
-    ts: {
-      type: 'boolean',
-      'default': true
-    },
-    v: {
-      type: 'boolean',
-      'default': false
-    }
-  },
-  url: {
-    fmt: '/_cat/health'
-  }
-});
-
-/**
- * Perform a [cat.help](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cat.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.help - Return help information
- */
-api.cat.prototype.help = ca({
-  params: {
-    help: {
-      type: 'boolean',
-      'default': false
-    }
-  },
-  url: {
-    fmt: '/_cat'
-  }
-});
-
-/**
- * Perform a [cat.indices](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cat-indices.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String} params.bytes - The unit in which to display byte values
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
- * @param {String, String[], Boolean} params.h - Comma-separated list of column names to display
- * @param {Boolean} params.help - Return help information
- * @param {Boolean} params.pri - Set to true to return stats only for primary shards
- * @param {Boolean} params.v - Verbose mode. Display column headers
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names to limit the returned information
- */
-api.cat.prototype.indices = ca({
-  params: {
-    bytes: {
-      type: 'enum',
-      options: [
-        'b',
-        'k',
-        'm',
-        'g'
-      ]
-    },
-    local: {
-      type: 'boolean'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    h: {
-      type: 'list'
-    },
-    help: {
-      type: 'boolean',
-      'default': false
-    },
-    pri: {
-      type: 'boolean',
-      'default': false
-    },
-    v: {
-      type: 'boolean',
-      'default': false
-    }
-  },
-  urls: [
-    {
-      fmt: '/_cat/indices/<%=index%>',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_cat/indices'
-    }
-  ]
-});
-
-/**
- * Perform a [cat.master](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cat-master.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
- * @param {String, String[], Boolean} params.h - Comma-separated list of column names to display
- * @param {Boolean} params.help - Return help information
- * @param {Boolean} params.v - Verbose mode. Display column headers
- */
-api.cat.prototype.master = ca({
-  params: {
-    local: {
-      type: 'boolean'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    h: {
-      type: 'list'
-    },
-    help: {
-      type: 'boolean',
-      'default': false
-    },
-    v: {
-      type: 'boolean',
-      'default': false
-    }
-  },
-  url: {
-    fmt: '/_cat/master'
-  }
-});
-
-/**
- * Perform a [cat.nodes](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cat-nodes.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
- * @param {String, String[], Boolean} params.h - Comma-separated list of column names to display
- * @param {Boolean} params.help - Return help information
- * @param {Boolean} params.v - Verbose mode. Display column headers
- */
-api.cat.prototype.nodes = ca({
-  params: {
-    local: {
-      type: 'boolean'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    h: {
-      type: 'list'
-    },
-    help: {
-      type: 'boolean',
-      'default': false
-    },
-    v: {
-      type: 'boolean',
-      'default': false
-    }
-  },
-  url: {
-    fmt: '/_cat/nodes'
-  }
-});
-
-/**
- * Perform a [cat.pendingTasks](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cat-pending-tasks.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
- * @param {String, String[], Boolean} params.h - Comma-separated list of column names to display
- * @param {Boolean} params.help - Return help information
- * @param {Boolean} params.v - Verbose mode. Display column headers
- */
-api.cat.prototype.pendingTasks = ca({
-  params: {
-    local: {
-      type: 'boolean'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    h: {
-      type: 'list'
-    },
-    help: {
-      type: 'boolean',
-      'default': false
-    },
-    v: {
-      type: 'boolean',
-      'default': false
-    }
-  },
-  url: {
-    fmt: '/_cat/pending_tasks'
-  }
-});
-
-/**
- * Perform a [cat.recovery](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cat-recovery.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String} params.bytes - The unit in which to display byte values
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
- * @param {String, String[], Boolean} params.h - Comma-separated list of column names to display
- * @param {Boolean} params.help - Return help information
- * @param {Boolean} params.v - Verbose mode. Display column headers
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names to limit the returned information
- */
-api.cat.prototype.recovery = ca({
-  params: {
-    bytes: {
-      type: 'enum',
-      options: [
-        'b',
-        'k',
-        'm',
-        'g'
-      ]
-    },
-    local: {
-      type: 'boolean'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    h: {
-      type: 'list'
-    },
-    help: {
-      type: 'boolean',
-      'default': false
-    },
-    v: {
-      type: 'boolean',
-      'default': false
-    }
-  },
-  urls: [
-    {
-      fmt: '/_cat/recovery/<%=index%>',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_cat/recovery'
-    }
-  ]
-});
-
-/**
- * Perform a [cat.shards](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cat-shards.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
- * @param {String, String[], Boolean} params.h - Comma-separated list of column names to display
- * @param {Boolean} params.help - Return help information
- * @param {Boolean} params.v - Verbose mode. Display column headers
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names to limit the returned information
- */
-api.cat.prototype.shards = ca({
-  params: {
-    local: {
-      type: 'boolean'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    h: {
-      type: 'list'
-    },
-    help: {
-      type: 'boolean',
-      'default': false
-    },
-    v: {
-      type: 'boolean',
-      'default': false
-    }
-  },
-  urls: [
-    {
-      fmt: '/_cat/shards/<%=index%>',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_cat/shards'
-    }
-  ]
-});
-
-/**
- * Perform a [clearScroll](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/search-request-scroll.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String, String[], Boolean} params.scrollId - A comma-separated list of scroll IDs to clear
- */
-api.clearScroll = ca({
-  url: {
-    fmt: '/_search/scroll/<%=scrollId%>',
-    req: {
-      scrollId: {
-        type: 'list'
-      }
-    }
-  },
-  method: 'DELETE'
-});
-
-api.cluster = function ClusterNS(transport) {
-  this.transport = transport;
-};
-
-/**
- * Perform a [cluster.getSettings](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cluster-update-settings.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.flatSettings - Return settings in flat format (default: false)
- * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
- * @param {Date, Number} params.timeout - Explicit operation timeout
- */
-api.cluster.prototype.getSettings = ca({
-  params: {
-    flatSettings: {
-      type: 'boolean',
-      name: 'flat_settings'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    timeout: {
-      type: 'time'
-    }
-  },
-  url: {
-    fmt: '/_cluster/settings'
-  }
-});
-
-/**
- * Perform a [cluster.health](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cluster-health.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String} [params.level=cluster] - Specify the level of detail for returned information
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
- * @param {Date, Number} params.timeout - Explicit operation timeout
- * @param {Number} params.waitForActiveShards - Wait until the specified number of shards is active
- * @param {String} params.waitForNodes - Wait until the specified number of nodes is available
- * @param {Number} params.waitForRelocatingShards - Wait until the specified number of relocating shards is finished
- * @param {String} params.waitForStatus - Wait until cluster is in a specific state
- * @param {String} params.index - Limit the information returned to a specific index
- */
-api.cluster.prototype.health = ca({
-  params: {
-    level: {
-      type: 'enum',
-      'default': 'cluster',
-      options: [
-        'cluster',
-        'indices',
-        'shards'
-      ]
-    },
-    local: {
-      type: 'boolean'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    timeout: {
-      type: 'time'
-    },
-    waitForActiveShards: {
-      type: 'number',
-      name: 'wait_for_active_shards'
-    },
-    waitForNodes: {
-      type: 'string',
-      name: 'wait_for_nodes'
-    },
-    waitForRelocatingShards: {
-      type: 'number',
-      name: 'wait_for_relocating_shards'
-    },
-    waitForStatus: {
-      type: 'enum',
-      'default': null,
-      options: [
-        'green',
-        'yellow',
-        'red'
-      ],
-      name: 'wait_for_status'
-    }
-  },
-  urls: [
-    {
-      fmt: '/_cluster/health/<%=index%>',
-      req: {
-        index: {
-          type: 'string'
-        }
-      }
-    },
-    {
-      fmt: '/_cluster/health'
-    }
-  ]
-});
-
-/**
- * Perform a [cluster.pendingTasks](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cluster-pending.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
- */
-api.cluster.prototype.pendingTasks = ca({
-  params: {
-    local: {
-      type: 'boolean'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    }
-  },
-  url: {
-    fmt: '/_cluster/pending_tasks'
-  }
-});
-
-/**
- * Perform a [cluster.putSettings](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cluster-update-settings.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.flatSettings - Return settings in flat format (default: false)
- */
-api.cluster.prototype.putSettings = ca({
-  params: {
-    flatSettings: {
-      type: 'boolean',
-      name: 'flat_settings'
-    }
-  },
-  url: {
-    fmt: '/_cluster/settings'
-  },
-  method: 'PUT'
-});
-
-/**
- * Perform a [cluster.reroute](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cluster-reroute.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.dryRun - Simulate the operation only and return the resulting state
- * @param {Boolean} params.filterMetadata - Don't return cluster state metadata (default: false)
- * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
- * @param {Date, Number} params.timeout - Explicit operation timeout
- */
-api.cluster.prototype.reroute = ca({
-  params: {
-    dryRun: {
-      type: 'boolean',
-      name: 'dry_run'
-    },
-    filterMetadata: {
-      type: 'boolean',
-      name: 'filter_metadata'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    timeout: {
-      type: 'time'
-    }
-  },
-  url: {
-    fmt: '/_cluster/reroute'
-  },
-  method: 'POST'
-});
-
-/**
- * Perform a [cluster.state](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cluster-state.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
- * @param {String, String[], Boolean} params.indexTemplates - A comma separated list to return specific index templates when returning metadata
- * @param {Boolean} params.flatSettings - Return settings in flat format (default: false)
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` or empty string to perform the operation on all indices
- * @param {String, String[], Boolean} params.metric - Limit the information returned to the specified metrics
- */
-api.cluster.prototype.state = ca({
-  params: {
-    local: {
-      type: 'boolean'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    indexTemplates: {
-      type: 'list',
-      name: 'index_templates'
-    },
-    flatSettings: {
-      type: 'boolean',
-      name: 'flat_settings'
-    }
-  },
-  urls: [
-    {
-      fmt: '/_cluster/state/<%=metric%>/<%=index%>',
-      req: {
-        metric: {
-          type: 'list',
-          options: [
-            '_all',
-            'blocks',
-            'metadata',
-            'nodes',
-            'routing_table'
-          ]
-        },
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_cluster/state/<%=metric%>',
-      req: {
-        metric: {
-          type: 'list',
-          options: [
-            '_all',
-            'blocks',
-            'metadata',
-            'nodes',
-            'routing_table'
-          ]
-        }
-      }
-    },
-    {
-      fmt: '/_cluster/state'
-    }
-  ]
-});
-
-/**
- * Perform a [cluster.stats](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cluster-stats.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.flatSettings - Return settings in flat format (default: false)
- * @param {Boolean} params.human - Whether to return time and byte values in human-readable format.
- * @param {String, String[], Boolean} params.nodeId - A comma-separated list of node IDs or names to limit the returned information; use `_local` to return information from the node you're connecting to, leave empty to get information from all nodes
- */
-api.cluster.prototype.stats = ca({
-  params: {
-    flatSettings: {
-      type: 'boolean',
-      name: 'flat_settings'
-    },
-    human: {
-      type: 'boolean',
-      'default': false
-    }
-  },
-  urls: [
-    {
-      fmt: '/_cluster/stats/nodes/<%=nodeId%>',
-      req: {
-        nodeId: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_cluster/stats'
-    }
-  ]
-});
-
-/**
- * Perform a [count](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/search-count.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {Number} params.minScore - Include only documents with a specific `_score` value in the result
- * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random)
- * @param {String} params.routing - Specific routing value
- * @param {String} params.source - The URL-encoded query definition (instead of using the request body)
- * @param {String, String[], Boolean} params.index - A comma-separated list of indices to restrict the results
- * @param {String, String[], Boolean} params.type - A comma-separated list of types to restrict the results
- */
-api.count = ca({
-  params: {
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    },
-    minScore: {
-      type: 'number',
-      name: 'min_score'
-    },
-    preference: {
-      type: 'string'
-    },
-    routing: {
-      type: 'string'
-    },
-    source: {
-      type: 'string'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/<%=type%>/_count',
-      req: {
-        index: {
-          type: 'list'
-        },
-        type: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/_count',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_count'
-    }
-  ],
-  method: 'POST'
-});
-
-/**
- * Perform a [countPercolate](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/search-percolate.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String, String[], Boolean} params.routing - A comma-separated list of specific routing values
- * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random)
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {String} params.percolateIndex - The index to count percolate the document into. Defaults to index.
- * @param {String} params.percolateType - The type to count percolate document into. Defaults to type.
- * @param {Number} params.version - Explicit version number for concurrency control
- * @param {String} params.versionType - Specific version type
- * @param {String} params.index - The index of the document being count percolated.
- * @param {String} params.type - The type of the document being count percolated.
- * @param {String} params.id - Substitute the document in the request body with a document that is known by the specified id. On top of the id, the index and type parameter will be used to retrieve the document from within the cluster.
- */
-api.countPercolate = ca({
-  params: {
-    routing: {
-      type: 'list'
-    },
-    preference: {
-      type: 'string'
-    },
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    },
-    percolateIndex: {
-      type: 'string',
-      name: 'percolate_index'
-    },
-    percolateType: {
-      type: 'string',
-      name: 'percolate_type'
-    },
-    version: {
-      type: 'number'
-    },
-    versionType: {
-      type: 'enum',
-      options: [
-        'internal',
-        'external'
-      ],
-      name: 'version_type'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/<%=type%>/<%=id%>/_percolate/count',
-      req: {
-        index: {
-          type: 'string'
-        },
-        type: {
-          type: 'string'
-        },
-        id: {
-          type: 'string'
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/<%=type%>/_percolate/count',
-      req: {
-        index: {
-          type: 'string'
-        },
-        type: {
-          type: 'string'
-        }
-      }
-    }
-  ],
-  method: 'POST'
-});
-
-/**
- * Perform a [delete](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/docs-delete.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String} params.consistency - Specific write consistency setting for the operation
- * @param {String} params.parent - ID of parent document
- * @param {Boolean} params.refresh - Refresh the index after performing the operation
- * @param {String} [params.replication=sync] - Specific replication type
- * @param {String} params.routing - Specific routing value
- * @param {Date, Number} params.timeout - Explicit operation timeout
- * @param {Number} params.version - Explicit version number for concurrency control
- * @param {String} params.versionType - Specific version type
- * @param {String} params.id - The document ID
- * @param {String} params.index - The name of the index
- * @param {String} params.type - The type of the document
- */
-api['delete'] = ca({
-  params: {
-    consistency: {
-      type: 'enum',
-      options: [
-        'one',
-        'quorum',
-        'all'
-      ]
-    },
-    parent: {
-      type: 'string'
-    },
-    refresh: {
-      type: 'boolean'
-    },
-    replication: {
-      type: 'enum',
-      'default': 'sync',
-      options: [
-        'sync',
-        'async'
-      ]
-    },
-    routing: {
-      type: 'string'
-    },
-    timeout: {
-      type: 'time'
-    },
-    version: {
-      type: 'number'
-    },
-    versionType: {
-      type: 'enum',
-      options: [
-        'internal',
-        'external'
-      ],
-      name: 'version_type'
-    }
-  },
-  url: {
-    fmt: '/<%=index%>/<%=type%>/<%=id%>',
-    req: {
-      index: {
-        type: 'string'
-      },
-      type: {
-        type: 'string'
-      },
-      id: {
-        type: 'string'
-      }
-    }
-  },
-  method: 'DELETE'
-});
-
-/**
- * Perform a [deleteByQuery](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/docs-delete-by-query.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String} params.analyzer - The analyzer to use for the query string
- * @param {String} params.consistency - Specific write consistency setting for the operation
- * @param {String} [params.defaultOperator=OR] - The default operator for query string query (AND or OR)
- * @param {String} params.df - The field to use as default where no field prefix is given in the query string
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {String} [params.replication=sync] - Specific replication type
- * @param {String} params.q - Query in the Lucene query string syntax
- * @param {String} params.routing - Specific routing value
- * @param {String} params.source - The URL-encoded query definition (instead of using the request body)
- * @param {Date, Number} params.timeout - Explicit operation timeout
- * @param {String, String[], Boolean} params.index - A comma-separated list of indices to restrict the operation; use `_all` to perform the operation on all indices
- * @param {String, String[], Boolean} params.type - A comma-separated list of types to restrict the operation
- */
-api.deleteByQuery = ca({
-  params: {
-    analyzer: {
-      type: 'string'
-    },
-    consistency: {
-      type: 'enum',
-      options: [
-        'one',
-        'quorum',
-        'all'
-      ]
-    },
-    defaultOperator: {
-      type: 'enum',
-      'default': 'OR',
-      options: [
-        'AND',
-        'OR'
-      ],
-      name: 'default_operator'
-    },
-    df: {
-      type: 'string'
-    },
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    },
-    replication: {
-      type: 'enum',
-      'default': 'sync',
-      options: [
-        'sync',
-        'async'
-      ]
-    },
-    q: {
-      type: 'string'
-    },
-    routing: {
-      type: 'string'
-    },
-    source: {
-      type: 'string'
-    },
-    timeout: {
-      type: 'time'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/<%=type%>/_query',
-      req: {
-        index: {
-          type: 'list'
-        },
-        type: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/_query',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    }
-  ],
-  method: 'DELETE'
-});
-
-/**
- * Perform a [exists](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/docs-get.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String} params.parent - The ID of the parent document
- * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random)
- * @param {Boolean} params.realtime - Specify whether to perform the operation in realtime or search mode
- * @param {Boolean} params.refresh - Refresh the shard containing the document before performing the operation
- * @param {String} params.routing - Specific routing value
- * @param {String} params.id - The document ID
- * @param {String} params.index - The name of the index
- * @param {String} params.type - The type of the document (use `_all` to fetch the first document matching the ID across all types)
- */
-api.exists = ca({
-  params: {
-    parent: {
-      type: 'string'
-    },
-    preference: {
-      type: 'string'
-    },
-    realtime: {
-      type: 'boolean'
-    },
-    refresh: {
-      type: 'boolean'
-    },
-    routing: {
-      type: 'string'
-    }
-  },
-  url: {
-    fmt: '/<%=index%>/<%=type%>/<%=id%>',
-    req: {
-      index: {
-        type: 'string'
-      },
-      type: {
-        type: 'string'
-      },
-      id: {
-        type: 'string'
-      }
-    }
-  },
-  method: 'HEAD'
-});
-
-/**
- * Perform a [explain](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/search-explain.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.analyzeWildcard - Specify whether wildcards and prefix queries in the query string query should be analyzed (default: false)
- * @param {String} params.analyzer - The analyzer for the query string query
- * @param {String} [params.defaultOperator=OR] - The default operator for query string query (AND or OR)
- * @param {String} params.df - The default field for query string query (default: _all)
- * @param {String, String[], Boolean} params.fields - A comma-separated list of fields to return in the response
- * @param {Boolean} params.lenient - Specify whether format-based query failures (such as providing text to a numeric field) should be ignored
- * @param {Boolean} params.lowercaseExpandedTerms - Specify whether query terms should be lowercased
- * @param {String} params.parent - The ID of the parent document
- * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random)
- * @param {String} params.q - Query in the Lucene query string syntax
- * @param {String} params.routing - Specific routing value
- * @param {String} params.source - The URL-encoded query definition (instead of using the request body)
- * @param {String, String[], Boolean} params._source - True or false to return the _source field or not, or a list of fields to return
- * @param {String, String[], Boolean} params._sourceExclude - A list of fields to exclude from the returned _source field
- * @param {String, String[], Boolean} params._sourceInclude - A list of fields to extract and return from the _source field
- * @param {String} params.id - The document ID
- * @param {String} params.index - The name of the index
- * @param {String} params.type - The type of the document
- */
-api.explain = ca({
-  params: {
-    analyzeWildcard: {
-      type: 'boolean',
-      name: 'analyze_wildcard'
-    },
-    analyzer: {
-      type: 'string'
-    },
-    defaultOperator: {
-      type: 'enum',
-      'default': 'OR',
-      options: [
-        'AND',
-        'OR'
-      ],
-      name: 'default_operator'
-    },
-    df: {
-      type: 'string'
-    },
-    fields: {
-      type: 'list'
-    },
-    lenient: {
-      type: 'boolean'
-    },
-    lowercaseExpandedTerms: {
-      type: 'boolean',
-      name: 'lowercase_expanded_terms'
-    },
-    parent: {
-      type: 'string'
-    },
-    preference: {
-      type: 'string'
-    },
-    q: {
-      type: 'string'
-    },
-    routing: {
-      type: 'string'
-    },
-    source: {
-      type: 'string'
-    },
-    _source: {
-      type: 'list'
-    },
-    _sourceExclude: {
-      type: 'list',
-      name: '_source_exclude'
-    },
-    _sourceInclude: {
-      type: 'list',
-      name: '_source_include'
-    }
-  },
-  url: {
-    fmt: '/<%=index%>/<%=type%>/<%=id%>/_explain',
-    req: {
-      index: {
-        type: 'string'
-      },
-      type: {
-        type: 'string'
-      },
-      id: {
-        type: 'string'
-      }
-    }
-  },
-  method: 'POST'
-});
-
-/**
- * Perform a [get](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/docs-get.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String, String[], Boolean} params.fields - A comma-separated list of fields to return in the response
- * @param {String} params.parent - The ID of the parent document
- * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random)
- * @param {Boolean} params.realtime - Specify whether to perform the operation in realtime or search mode
- * @param {Boolean} params.refresh - Refresh the shard containing the document before performing the operation
- * @param {String} params.routing - Specific routing value
- * @param {String, String[], Boolean} params._source - True or false to return the _source field or not, or a list of fields to return
- * @param {String, String[], Boolean} params._sourceExclude - A list of fields to exclude from the returned _source field
- * @param {String, String[], Boolean} params._sourceInclude - A list of fields to extract and return from the _source field
- * @param {Number} params.version - Explicit version number for concurrency control
- * @param {String} params.versionType - Specific version type
- * @param {String} params.id - The document ID
- * @param {String} params.index - The name of the index
- * @param {String} params.type - The type of the document (use `_all` to fetch the first document matching the ID across all types)
- */
-api.get = ca({
-  params: {
-    fields: {
-      type: 'list'
-    },
-    parent: {
-      type: 'string'
-    },
-    preference: {
-      type: 'string'
-    },
-    realtime: {
-      type: 'boolean'
-    },
-    refresh: {
-      type: 'boolean'
-    },
-    routing: {
-      type: 'string'
-    },
-    _source: {
-      type: 'list'
-    },
-    _sourceExclude: {
-      type: 'list',
-      name: '_source_exclude'
-    },
-    _sourceInclude: {
-      type: 'list',
-      name: '_source_include'
-    },
-    version: {
-      type: 'number'
-    },
-    versionType: {
-      type: 'enum',
-      options: [
-        'internal',
-        'external'
-      ],
-      name: 'version_type'
-    }
-  },
-  url: {
-    fmt: '/<%=index%>/<%=type%>/<%=id%>',
-    req: {
-      index: {
-        type: 'string'
-      },
-      type: {
-        type: 'string'
-      },
-      id: {
-        type: 'string'
-      }
-    }
-  }
-});
-
-/**
- * Perform a [getSource](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/docs-get.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String} params.parent - The ID of the parent document
- * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random)
- * @param {Boolean} params.realtime - Specify whether to perform the operation in realtime or search mode
- * @param {Boolean} params.refresh - Refresh the shard containing the document before performing the operation
- * @param {String} params.routing - Specific routing value
- * @param {String, String[], Boolean} params._source - True or false to return the _source field or not, or a list of fields to return
- * @param {String, String[], Boolean} params._sourceExclude - A list of fields to exclude from the returned _source field
- * @param {String, String[], Boolean} params._sourceInclude - A list of fields to extract and return from the _source field
- * @param {Number} params.version - Explicit version number for concurrency control
- * @param {String} params.versionType - Specific version type
- * @param {String} params.id - The document ID
- * @param {String} params.index - The name of the index
- * @param {String} params.type - The type of the document; use `_all` to fetch the first document matching the ID across all types
- */
-api.getSource = ca({
-  params: {
-    parent: {
-      type: 'string'
-    },
-    preference: {
-      type: 'string'
-    },
-    realtime: {
-      type: 'boolean'
-    },
-    refresh: {
-      type: 'boolean'
-    },
-    routing: {
-      type: 'string'
-    },
-    _source: {
-      type: 'list'
-    },
-    _sourceExclude: {
-      type: 'list',
-      name: '_source_exclude'
-    },
-    _sourceInclude: {
-      type: 'list',
-      name: '_source_include'
-    },
-    version: {
-      type: 'number'
-    },
-    versionType: {
-      type: 'enum',
-      options: [
-        'internal',
-        'external'
-      ],
-      name: 'version_type'
-    }
-  },
-  url: {
-    fmt: '/<%=index%>/<%=type%>/<%=id%>/_source',
-    req: {
-      index: {
-        type: 'string'
-      },
-      type: {
-        type: 'string'
-      },
-      id: {
-        type: 'string'
-      }
-    }
-  }
-});
-
-/**
- * Perform a [index](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/docs-index_.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String} params.consistency - Explicit write consistency setting for the operation
- * @param {String} params.parent - ID of the parent document
- * @param {Boolean} params.refresh - Refresh the index after performing the operation
- * @param {String} [params.replication=sync] - Specific replication type
- * @param {String} params.routing - Specific routing value
- * @param {Date, Number} params.timeout - Explicit operation timeout
- * @param {Date, Number} params.timestamp - Explicit timestamp for the document
- * @param {Duration} params.ttl - Expiration time for the document
- * @param {Number} params.version - Explicit version number for concurrency control
- * @param {String} params.versionType - Specific version type
- * @param {String} params.id - Document ID
- * @param {String} params.index - The name of the index
- * @param {String} params.type - The type of the document
- */
-api.index = ca({
-  params: {
-    consistency: {
-      type: 'enum',
-      options: [
-        'one',
-        'quorum',
-        'all'
-      ]
-    },
-    opType: {
-      type: 'enum',
-      'default': 'index',
-      options: [
-        'index',
-        'create'
-      ],
-      name: 'op_type'
-    },
-    parent: {
-      type: 'string'
-    },
-    refresh: {
-      type: 'boolean'
-    },
-    replication: {
-      type: 'enum',
-      'default': 'sync',
-      options: [
-        'sync',
-        'async'
-      ]
-    },
-    routing: {
-      type: 'string'
-    },
-    timeout: {
-      type: 'time'
-    },
-    timestamp: {
-      type: 'time'
-    },
-    ttl: {
-      type: 'duration'
-    },
-    version: {
-      type: 'number'
-    },
-    versionType: {
-      type: 'enum',
-      options: [
-        'internal',
-        'external'
-      ],
-      name: 'version_type'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/<%=type%>/<%=id%>',
-      req: {
-        index: {
-          type: 'string'
-        },
-        type: {
-          type: 'string'
-        },
-        id: {
-          type: 'string'
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/<%=type%>',
-      req: {
-        index: {
-          type: 'string'
-        },
-        type: {
-          type: 'string'
-        }
-      }
-    }
-  ],
-  needBody: true,
-  method: 'POST'
-});
-
-api.indices = function IndicesNS(transport) {
-  this.transport = transport;
-};
-
-/**
- * Perform a [indices.analyze](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-analyze.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String} params.analyzer - The name of the analyzer to use
- * @param {String} params.field - Use the analyzer configured for this field (instead of passing the analyzer name)
- * @param {String, String[], Boolean} params.filters - A comma-separated list of filters to use for the analysis
- * @param {String} params.index - The name of the index to scope the operation
- * @param {Boolean} params.preferLocal - With `true`, specify that a local shard should be used if available, with `false`, use a random shard (default: true)
- * @param {String} params.text - The text on which the analysis should be performed (when request body is not used)
- * @param {String} params.tokenizer - The name of the tokenizer to use for the analysis
- * @param {String} [params.format=detailed] - Format of the output
- */
-api.indices.prototype.analyze = ca({
-  params: {
-    analyzer: {
-      type: 'string'
-    },
-    field: {
-      type: 'string'
-    },
-    filters: {
-      type: 'list'
-    },
-    index: {
-      type: 'string'
-    },
-    preferLocal: {
-      type: 'boolean',
-      name: 'prefer_local'
-    },
-    text: {
-      type: 'string'
-    },
-    tokenizer: {
-      type: 'string'
-    },
-    format: {
-      type: 'enum',
-      'default': 'detailed',
-      options: [
-        'detailed',
-        'text'
-      ]
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/_analyze',
-      req: {
-        index: {
-          type: 'string'
-        }
-      }
-    },
-    {
-      fmt: '/_analyze'
-    }
-  ],
-  method: 'POST'
-});
-
-/**
- * Perform a [indices.clearCache](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-clearcache.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.fieldData - Clear field data
- * @param {Boolean} params.fielddata - Clear field data
- * @param {String, String[], Boolean} params.fields - A comma-separated list of fields to clear when using the `field_data` parameter (default: all)
- * @param {Boolean} params.filter - Clear filter caches
- * @param {Boolean} params.filterCache - Clear filter caches
- * @param {Boolean} params.filterKeys - A comma-separated list of keys to clear when using the `filter_cache` parameter (default: all)
- * @param {Boolean} params.id - Clear ID caches for parent/child
- * @param {Boolean} params.idCache - Clear ID caches for parent/child
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {String, String[], Boolean} params.index - A comma-separated list of index name to limit the operation
- * @param {Boolean} params.recycler - Clear the recycler cache
- */
-api.indices.prototype.clearCache = ca({
-  params: {
-    fieldData: {
-      type: 'boolean',
-      name: 'field_data'
-    },
-    fielddata: {
-      type: 'boolean'
-    },
-    fields: {
-      type: 'list'
-    },
-    filter: {
-      type: 'boolean'
-    },
-    filterCache: {
-      type: 'boolean',
-      name: 'filter_cache'
-    },
-    filterKeys: {
-      type: 'boolean',
-      name: 'filter_keys'
-    },
-    id: {
-      type: 'boolean'
-    },
-    idCache: {
-      type: 'boolean',
-      name: 'id_cache'
-    },
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    },
-    index: {
-      type: 'list'
-    },
-    recycler: {
-      type: 'boolean'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/_cache/clear',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_cache/clear'
-    }
-  ],
-  method: 'POST'
-});
-
-/**
- * Perform a [indices.close](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-open-close.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.timeout - Explicit operation timeout
- * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {String} params.index - The name of the index
- */
-api.indices.prototype.close = ca({
-  params: {
-    timeout: {
-      type: 'time'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    }
-  },
-  url: {
-    fmt: '/<%=index%>/_close',
-    req: {
-      index: {
-        type: 'string'
-      }
-    }
-  },
-  method: 'POST'
-});
-
-/**
- * Perform a [indices.create](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-create-index.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.timeout - Explicit operation timeout
- * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
- * @param {String} params.index - The name of the index
- */
-api.indices.prototype.create = ca({
-  params: {
-    timeout: {
-      type: 'time'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    }
-  },
-  url: {
-    fmt: '/<%=index%>',
-    req: {
-      index: {
-        type: 'string'
-      }
-    }
-  },
-  method: 'POST'
-});
-
-/**
- * Perform a [indices.delete](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-delete-index.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.timeout - Explicit operation timeout
- * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
- * @param {String, String[], Boolean} params.index - A comma-separated list of indices to delete; use `_all` or `*` string to delete all indices
- */
-api.indices.prototype['delete'] = ca({
-  params: {
-    timeout: {
-      type: 'time'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    }
-  },
-  url: {
-    fmt: '/<%=index%>',
-    req: {
-      index: {
-        type: 'list'
-      }
-    }
-  },
-  method: 'DELETE'
-});
-
-/**
- * Perform a [indices.deleteAlias](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-aliases.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.timeout - Explicit timestamp for the document
- * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names (supports wildcards); use `_all` for all indices
- * @param {String, String[], Boolean} params.name - A comma-separated list of aliases to delete (supports wildcards); use `_all` to delete all aliases for the specified indices.
- */
-api.indices.prototype.deleteAlias = ca({
-  params: {
-    timeout: {
-      type: 'time'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    }
-  },
-  url: {
-    fmt: '/<%=index%>/_alias/<%=name%>',
-    req: {
-      index: {
-        type: 'list'
-      },
-      name: {
-        type: 'list'
-      }
-    }
-  },
-  method: 'DELETE'
-});
-
-/**
- * Perform a [indices.deleteMapping](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-delete-mapping.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names (supports wildcards); use `_all` for all indices
- * @param {String, String[], Boolean} params.type - A comma-separated list of document types to delete (supports wildcards); use `_all` to delete all document types in the specified indices.
- */
-api.indices.prototype.deleteMapping = ca({
-  params: {
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    }
-  },
-  url: {
-    fmt: '/<%=index%>/<%=type%>/_mapping',
-    req: {
-      index: {
-        type: 'list'
-      },
-      type: {
-        type: 'list'
-      }
-    }
-  },
-  method: 'DELETE'
-});
-
-/**
- * Perform a [indices.deleteTemplate](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-templates.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.timeout - Explicit operation timeout
- * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
- * @param {String} params.name - The name of the template
- */
-api.indices.prototype.deleteTemplate = ca({
-  params: {
-    timeout: {
-      type: 'time'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    }
-  },
-  url: {
-    fmt: '/_template/<%=name%>',
-    req: {
-      name: {
-        type: 'string'
-      }
-    }
-  },
-  method: 'DELETE'
-});
-
-/**
- * Perform a [indices.deleteWarmer](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-warmers.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
- * @param {String, String[], Boolean} params.name - A comma-separated list of warmer names to delete (supports wildcards); use `_all` to delete all warmers in the specified indices. You must specify a name either in the uri or in the parameters.
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names to delete warmers from (supports wildcards); use `_all` to perform the operation on all indices.
- */
-api.indices.prototype.deleteWarmer = ca({
-  params: {
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    name: {
-      type: 'list'
-    }
-  },
-  url: {
-    fmt: '/<%=index%>/_warmer/<%=name%>',
-    req: {
-      index: {
-        type: 'list'
-      },
-      name: {
-        type: 'list'
-      }
-    }
-  },
-  method: 'DELETE'
-});
-
-/**
- * Perform a [indices.exists](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-get-settings.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {String, String[], Boolean} params.index - A comma-separated list of indices to check
- */
-api.indices.prototype.exists = ca({
-  params: {
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    },
-    local: {
-      type: 'boolean'
-    }
-  },
-  url: {
-    fmt: '/<%=index%>',
-    req: {
-      index: {
-        type: 'list'
-      }
-    }
-  },
-  method: 'HEAD'
-});
-
-/**
- * Perform a [indices.existsAlias](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-aliases.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open,closed] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names to filter aliases
- * @param {String, String[], Boolean} params.name - A comma-separated list of alias names to return
- */
-api.indices.prototype.existsAlias = ca({
-  params: {
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': [
-        'open',
-        'closed'
-      ],
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    },
-    local: {
-      type: 'boolean'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/_alias/<%=name%>',
-      req: {
-        index: {
-          type: 'list'
-        },
-        name: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_alias/<%=name%>',
-      req: {
-        name: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/_alias',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    }
-  ],
-  method: 'HEAD'
-});
-
-/**
- * Perform a [indices.existsTemplate](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-templates.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {String} params.name - The name of the template
- */
-api.indices.prototype.existsTemplate = ca({
-  params: {
-    local: {
-      type: 'boolean'
-    }
-  },
-  url: {
-    fmt: '/_template/<%=name%>',
-    req: {
-      name: {
-        type: 'string'
-      }
-    }
-  },
-  method: 'HEAD'
-});
-
-/**
- * Perform a [indices.existsType](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-types-exists.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` to check the types across all indices
- * @param {String, String[], Boolean} params.type - A comma-separated list of document types to check
- */
-api.indices.prototype.existsType = ca({
-  params: {
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    },
-    local: {
-      type: 'boolean'
-    }
-  },
-  url: {
-    fmt: '/<%=index%>/<%=type%>',
-    req: {
-      index: {
-        type: 'list'
-      },
-      type: {
-        type: 'list'
-      }
-    }
-  },
-  method: 'HEAD'
-});
-
-/**
- * Perform a [indices.flush](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-flush.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.force - Whether a flush should be forced even if it is not necessarily needed ie. if no changes will be committed to the index. This is useful if transaction log IDs should be incremented even if no uncommitted changes are present. (This setting can be considered as internal)
- * @param {Boolean} params.full - If set to true a new index writer is created and settings that have been changed related to the index writer will be refreshed. Note: if a full flush is required for a setting to take effect this will be part of the settings update process and it not required to be executed by the user. (This setting can be considered as internal)
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` or empty string for all indices
- */
-api.indices.prototype.flush = ca({
-  params: {
-    force: {
-      type: 'boolean'
-    },
-    full: {
-      type: 'boolean'
-    },
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/_flush',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_flush'
-    }
-  ],
-  method: 'POST'
-});
-
-/**
- * Perform a [indices.getAlias](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-aliases.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names to filter aliases
- * @param {String, String[], Boolean} params.name - A comma-separated list of alias names to return
- */
-api.indices.prototype.getAlias = ca({
-  params: {
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    },
-    local: {
-      type: 'boolean'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/_alias/<%=name%>',
-      req: {
-        index: {
-          type: 'list'
-        },
-        name: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_alias/<%=name%>',
-      req: {
-        name: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/_alias',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_alias'
-    }
-  ]
-});
-
-/**
- * Perform a [indices.getAliases](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-aliases.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.timeout - Explicit operation timeout
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names to filter aliases
- * @param {String, String[], Boolean} params.name - A comma-separated list of alias names to filter
- */
-api.indices.prototype.getAliases = ca({
-  params: {
-    timeout: {
-      type: 'time'
-    },
-    local: {
-      type: 'boolean'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/_aliases/<%=name%>',
-      req: {
-        index: {
-          type: 'list'
-        },
-        name: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/_aliases',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_aliases/<%=name%>',
-      req: {
-        name: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_aliases'
-    }
-  ]
-});
-
-/**
- * Perform a [indices.getFieldMapping](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-get-field-mapping.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.includeDefaults - Whether the default mapping values should be returned as well
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names
- * @param {String, String[], Boolean} params.type - A comma-separated list of document types
- * @param {String, String[], Boolean} params.field - A comma-separated list of fields
- */
-api.indices.prototype.getFieldMapping = ca({
-  params: {
-    includeDefaults: {
-      type: 'boolean',
-      name: 'include_defaults'
-    },
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    },
-    local: {
-      type: 'boolean'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/_mapping/<%=type%>/field/<%=field%>',
-      req: {
-        index: {
-          type: 'list'
-        },
-        type: {
-          type: 'list'
-        },
-        field: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/_mapping/field/<%=field%>',
-      req: {
-        index: {
-          type: 'list'
-        },
-        field: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_mapping/<%=type%>/field/<%=field%>',
-      req: {
-        type: {
-          type: 'list'
-        },
-        field: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_mapping/field/<%=field%>',
-      req: {
-        field: {
-          type: 'list'
-        }
-      }
-    }
-  ]
-});
-
-/**
- * Perform a [indices.getMapping](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-get-mapping.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names
- * @param {String, String[], Boolean} params.type - A comma-separated list of document types
- */
-api.indices.prototype.getMapping = ca({
-  params: {
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    },
-    local: {
-      type: 'boolean'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/_mapping/<%=type%>',
-      req: {
-        index: {
-          type: 'list'
-        },
-        type: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/_mapping',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_mapping/<%=type%>',
-      req: {
-        type: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_mapping'
-    }
-  ]
-});
-
-/**
- * Perform a [indices.getSettings](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-get-mapping.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open,closed] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {Boolean} params.flatSettings - Return settings in flat format (default: false)
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` or empty string to perform the operation on all indices
- * @param {String, String[], Boolean} params.name - The name of the settings that should be included
- */
-api.indices.prototype.getSettings = ca({
-  params: {
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': [
-        'open',
-        'closed'
-      ],
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    },
-    flatSettings: {
-      type: 'boolean',
-      name: 'flat_settings'
-    },
-    local: {
-      type: 'boolean'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/_settings/<%=name%>',
-      req: {
-        index: {
-          type: 'list'
-        },
-        name: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/_settings',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_settings/<%=name%>',
-      req: {
-        name: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_settings'
-    }
-  ]
-});
-
-/**
- * Perform a [indices.getTemplate](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-templates.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.flatSettings - Return settings in flat format (default: false)
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {String} params.name - The name of the template
- */
-api.indices.prototype.getTemplate = ca({
-  params: {
-    flatSettings: {
-      type: 'boolean',
-      name: 'flat_settings'
-    },
-    local: {
-      type: 'boolean'
-    }
-  },
-  urls: [
-    {
-      fmt: '/_template/<%=name%>',
-      req: {
-        name: {
-          type: 'string'
-        }
-      }
-    },
-    {
-      fmt: '/_template'
-    }
-  ]
-});
-
-/**
- * Perform a [indices.getWarmer](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-warmers.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names to restrict the operation; use `_all` to perform the operation on all indices
- * @param {String, String[], Boolean} params.name - The name of the warmer (supports wildcards); leave empty to get all warmers
- * @param {String, String[], Boolean} params.type - A comma-separated list of document types to restrict the operation; leave empty to perform the operation on all types
- */
-api.indices.prototype.getWarmer = ca({
-  params: {
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    },
-    local: {
-      type: 'boolean'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/<%=type%>/_warmer/<%=name%>',
-      req: {
-        index: {
-          type: 'list'
-        },
-        type: {
-          type: 'list'
-        },
-        name: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/_warmer/<%=name%>',
-      req: {
-        index: {
-          type: 'list'
-        },
-        name: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/_warmer',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_warmer/<%=name%>',
-      req: {
-        name: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_warmer'
-    }
-  ]
-});
-
-/**
- * Perform a [indices.open](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-open-close.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.timeout - Explicit operation timeout
- * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=closed] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {String} params.index - The name of the index
- */
-api.indices.prototype.open = ca({
-  params: {
-    timeout: {
-      type: 'time'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'closed',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    }
-  },
-  url: {
-    fmt: '/<%=index%>/_open',
-    req: {
-      index: {
-        type: 'string'
-      }
-    }
-  },
-  method: 'POST'
-});
-
-/**
- * Perform a [indices.optimize](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-optimize.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.flush - Specify whether the index should be flushed after performing the operation (default: true)
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {Number} params.maxNumSegments - The number of segments the index should be merged into (default: dynamic)
- * @param {Boolean} params.onlyExpungeDeletes - Specify whether the operation should only expunge deleted documents
- * @param {Anything} params.operationThreading - TODO: ?
- * @param {Boolean} params.waitForMerge - Specify whether the request should block until the merge process is finished (default: true)
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` or empty string to perform the operation on all indices
- */
-api.indices.prototype.optimize = ca({
-  params: {
-    flush: {
-      type: 'boolean'
-    },
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    },
-    maxNumSegments: {
-      type: 'number',
-      name: 'max_num_segments'
-    },
-    onlyExpungeDeletes: {
-      type: 'boolean',
-      name: 'only_expunge_deletes'
-    },
-    operationThreading: {
-      name: 'operation_threading'
-    },
-    waitForMerge: {
-      type: 'boolean',
-      name: 'wait_for_merge'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/_optimize',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_optimize'
-    }
-  ],
-  method: 'POST'
-});
-
-/**
- * Perform a [indices.putAlias](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-aliases.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.timeout - Explicit timestamp for the document
- * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names the alias should point to (supports wildcards); use `_all` or omit to perform the operation on all indices.
- * @param {String} params.name - The name of the alias to be created or updated
- */
-api.indices.prototype.putAlias = ca({
-  params: {
-    timeout: {
-      type: 'time'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/_alias/<%=name%>',
-      req: {
-        index: {
-          type: 'list'
-        },
-        name: {
-          type: 'string'
-        }
-      }
-    },
-    {
-      fmt: '/_alias/<%=name%>',
-      req: {
-        name: {
-          type: 'string'
-        }
-      }
-    }
-  ],
-  method: 'PUT'
-});
-
-/**
- * Perform a [indices.putMapping](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-put-mapping.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.ignoreConflicts - Specify whether to ignore conflicts while updating the mapping (default: false)
- * @param {Date, Number} params.timeout - Explicit operation timeout
- * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names the mapping should be added to (supports wildcards); use `_all` or omit to add the mapping on all indices.
- * @param {String} params.type - The name of the document type
- */
-api.indices.prototype.putMapping = ca({
-  params: {
-    ignoreConflicts: {
-      type: 'boolean',
-      name: 'ignore_conflicts'
-    },
-    timeout: {
-      type: 'time'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/_mapping/<%=type%>',
-      req: {
-        index: {
-          type: 'list'
-        },
-        type: {
-          type: 'string'
-        }
-      }
-    },
-    {
-      fmt: '/_mapping/<%=type%>',
-      req: {
-        type: {
-          type: 'string'
-        }
-      }
-    }
-  ],
-  needBody: true,
-  method: 'PUT'
-});
-
-/**
- * Perform a [indices.putSettings](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-update-settings.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {Boolean} params.flatSettings - Return settings in flat format (default: false)
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` or empty string to perform the operation on all indices
- */
-api.indices.prototype.putSettings = ca({
-  params: {
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    },
-    flatSettings: {
-      type: 'boolean',
-      name: 'flat_settings'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/_settings',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_settings'
-    }
-  ],
-  needBody: true,
-  method: 'PUT'
-});
-
-/**
- * Perform a [indices.putTemplate](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-templates.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Number} params.order - The order for this template when merging multiple matching ones (higher numbers are merged later, overriding the lower numbers)
- * @param {Date, Number} params.timeout - Explicit operation timeout
- * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
- * @param {Boolean} params.flatSettings - Return settings in flat format (default: false)
- * @param {String} params.name - The name of the template
- */
-api.indices.prototype.putTemplate = ca({
-  params: {
-    order: {
-      type: 'number'
-    },
-    timeout: {
-      type: 'time'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    flatSettings: {
-      type: 'boolean',
-      name: 'flat_settings'
-    }
-  },
-  url: {
-    fmt: '/_template/<%=name%>',
-    req: {
-      name: {
-        type: 'string'
-      }
-    }
-  },
-  needBody: true,
-  method: 'PUT'
-});
-
-/**
- * Perform a [indices.putWarmer](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-warmers.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed) in the search request to warm
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices in the search request to warm. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both, in the search request to warm.
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names to register the warmer for; use `_all` or omit to perform the operation on all indices
- * @param {String} params.name - The name of the warmer
- * @param {String, String[], Boolean} params.type - A comma-separated list of document types to register the warmer for; leave empty to perform the operation on all types
- */
-api.indices.prototype.putWarmer = ca({
-  params: {
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/<%=type%>/_warmer/<%=name%>',
-      req: {
-        index: {
-          type: 'list'
-        },
-        type: {
-          type: 'list'
-        },
-        name: {
-          type: 'string'
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/_warmer/<%=name%>',
-      req: {
-        index: {
-          type: 'list'
-        },
-        name: {
-          type: 'string'
-        }
-      }
-    },
-    {
-      fmt: '/_warmer/<%=name%>',
-      req: {
-        name: {
-          type: 'string'
-        }
-      }
-    }
-  ],
-  needBody: true,
-  method: 'PUT'
-});
-
-/**
- * Perform a [indices.refresh](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-refresh.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {Boolean} params.force - Force a refresh even if not required
- * @param {Anything} params.operationThreading - TODO: ?
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` or empty string to perform the operation on all indices
- */
-api.indices.prototype.refresh = ca({
-  params: {
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    },
-    force: {
-      type: 'boolean',
-      'default': false
-    },
-    operationThreading: {
-      name: 'operation_threading'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/_refresh',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_refresh'
-    }
-  ],
-  method: 'POST'
-});
-
-/**
- * Perform a [indices.segments](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-segments.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {Boolean} params.human - Whether to return time and byte values in human-readable format.
- * @param {Anything} params.operationThreading - TODO: ?
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` or empty string to perform the operation on all indices
- */
-api.indices.prototype.segments = ca({
-  params: {
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    },
-    human: {
-      type: 'boolean',
-      'default': false
-    },
-    operationThreading: {
-      name: 'operation_threading'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/_segments',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_segments'
-    }
-  ]
-});
-
-/**
- * Perform a [indices.snapshotIndex](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-gateway-snapshot.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` or empty string for all indices
- */
-api.indices.prototype.snapshotIndex = ca({
-  params: {
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/_gateway/snapshot',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_gateway/snapshot'
-    }
-  ],
-  method: 'POST'
-});
-
-/**
- * Perform a [indices.stats](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-stats.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String, String[], Boolean} params.completionFields - A comma-separated list of fields for `fielddata` and `suggest` index metric (supports wildcards)
- * @param {String, String[], Boolean} params.fielddataFields - A comma-separated list of fields for `fielddata` index metric (supports wildcards)
- * @param {String, String[], Boolean} params.fields - A comma-separated list of fields for `fielddata` and `completion` index metric (supports wildcards)
- * @param {Boolean} params.groups - A comma-separated list of search groups for `search` index metric
- * @param {Boolean} params.human - Whether to return time and byte values in human-readable format.
- * @param {String} [params.level=indices] - Return stats aggregated at cluster, index or shard level
- * @param {String, String[], Boolean} params.types - A comma-separated list of document types for the `indexing` index metric
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` or empty string to perform the operation on all indices
- * @param {String, String[], Boolean} params.metric - Limit the information returned the specific metrics.
- */
-api.indices.prototype.stats = ca({
-  params: {
-    completionFields: {
-      type: 'list',
-      name: 'completion_fields'
-    },
-    fielddataFields: {
-      type: 'list',
-      name: 'fielddata_fields'
-    },
-    fields: {
-      type: 'list'
-    },
-    groups: {
-      type: 'boolean'
-    },
-    human: {
-      type: 'boolean',
-      'default': false
-    },
-    level: {
-      type: 'enum',
-      'default': 'indices',
-      options: [
-        'cluster',
-        'indices',
-        'shards'
-      ]
-    },
-    types: {
-      type: 'list'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/_stats/<%=metric%>',
-      req: {
-        index: {
-          type: 'list'
-        },
-        metric: {
-          type: 'list',
-          options: [
-            '_all',
-            'completion',
-            'docs',
-            'fielddata',
-            'filter_cache',
-            'flush',
-            'get',
-            'id_cache',
-            'indexing',
-            'merge',
-            'percolate',
-            'refresh',
-            'search',
-            'segments',
-            'store',
-            'warmer'
-          ]
-        }
-      }
-    },
-    {
-      fmt: '/_stats/<%=metric%>',
-      req: {
-        metric: {
-          type: 'list',
-          options: [
-            '_all',
-            'completion',
-            'docs',
-            'fielddata',
-            'filter_cache',
-            'flush',
-            'get',
-            'id_cache',
-            'indexing',
-            'merge',
-            'percolate',
-            'refresh',
-            'search',
-            'segments',
-            'store',
-            'warmer'
-          ]
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/_stats',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_stats'
-    }
-  ]
-});
-
-/**
- * Perform a [indices.status](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-status.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {Boolean} params.human - Whether to return time and byte values in human-readable format.
- * @param {Anything} params.operationThreading - TODO: ?
- * @param {Boolean} params.recovery - Return information about shard recovery
- * @param {Boolean} params.snapshot - TODO: ?
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` or empty string to perform the operation on all indices
- */
-api.indices.prototype.status = ca({
-  params: {
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    },
-    human: {
-      type: 'boolean',
-      'default': false
-    },
-    operationThreading: {
-      name: 'operation_threading'
-    },
-    recovery: {
-      type: 'boolean'
-    },
-    snapshot: {
-      type: 'boolean'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/_status',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_status'
-    }
-  ]
-});
-
-/**
- * Perform a [indices.updateAliases](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/indices-aliases.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.timeout - Request timeout
- * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
- */
-api.indices.prototype.updateAliases = ca({
-  params: {
-    timeout: {
-      type: 'time'
-    },
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    }
-  },
-  url: {
-    fmt: '/_aliases'
-  },
-  needBody: true,
-  method: 'POST'
-});
-
-/**
- * Perform a [indices.validateQuery](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/search-validate.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.explain - Return detailed information about the error
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {Anything} params.operationThreading - TODO: ?
- * @param {String} params.source - The URL-encoded query definition (instead of using the request body)
- * @param {String} params.q - Query in the Lucene query string syntax
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names to restrict the operation; use `_all` or empty string to perform the operation on all indices
- * @param {String, String[], Boolean} params.type - A comma-separated list of document types to restrict the operation; leave empty to perform the operation on all types
- */
-api.indices.prototype.validateQuery = ca({
-  params: {
-    explain: {
-      type: 'boolean'
-    },
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    },
-    operationThreading: {
-      name: 'operation_threading'
-    },
-    source: {
-      type: 'string'
-    },
-    q: {
-      type: 'string'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/<%=type%>/_validate/query',
-      req: {
-        index: {
-          type: 'list'
-        },
-        type: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/_validate/query',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_validate/query'
-    }
-  ],
-  method: 'POST'
-});
-
-/**
- * Perform a [info](http://www.elasticsearch.org/guide/) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- */
-api.info = ca({
-  url: {
-    fmt: '/'
-  }
-});
-
-/**
- * Perform a [mget](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/docs-multi-get.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String, String[], Boolean} params.fields - A comma-separated list of fields to return in the response
- * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random)
- * @param {Boolean} params.realtime - Specify whether to perform the operation in realtime or search mode
- * @param {Boolean} params.refresh - Refresh the shard containing the document before performing the operation
- * @param {String, String[], Boolean} params._source - True or false to return the _source field or not, or a list of fields to return
- * @param {String, String[], Boolean} params._sourceExclude - A list of fields to exclude from the returned _source field
- * @param {String, String[], Boolean} params._sourceInclude - A list of fields to extract and return from the _source field
- * @param {String} params.index - The name of the index
- * @param {String} params.type - The type of the document
- */
-api.mget = ca({
-  params: {
-    fields: {
-      type: 'list'
-    },
-    preference: {
-      type: 'string'
-    },
-    realtime: {
-      type: 'boolean'
-    },
-    refresh: {
-      type: 'boolean'
-    },
-    _source: {
-      type: 'list'
-    },
-    _sourceExclude: {
-      type: 'list',
-      name: '_source_exclude'
-    },
-    _sourceInclude: {
-      type: 'list',
-      name: '_source_include'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/<%=type%>/_mget',
-      req: {
-        index: {
-          type: 'string'
-        },
-        type: {
-          type: 'string'
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/_mget',
-      req: {
-        index: {
-          type: 'string'
-        }
-      }
-    },
-    {
-      fmt: '/_mget'
-    }
-  ],
-  needBody: true,
-  method: 'POST'
-});
-
-/**
- * Perform a [mlt](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/search-more-like-this.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Number} params.boostTerms - The boost factor
- * @param {Number} params.maxDocFreq - The word occurrence frequency as count: words with higher occurrence in the corpus will be ignored
- * @param {Number} params.maxQueryTerms - The maximum query terms to be included in the generated query
- * @param {Number} params.maxWordLength - The minimum length of the word: longer words will be ignored
- * @param {Number} params.minDocFreq - The word occurrence frequency as count: words with lower occurrence in the corpus will be ignored
- * @param {Number} params.minTermFreq - The term frequency as percent: terms with lower occurence in the source document will be ignored
- * @param {Number} params.minWordLength - The minimum length of the word: shorter words will be ignored
- * @param {String, String[], Boolean} params.mltFields - Specific fields to perform the query against
- * @param {Number} params.percentTermsToMatch - How many terms have to match in order to consider the document a match (default: 0.3)
- * @param {String} params.routing - Specific routing value
- * @param {Number} params.searchFrom - The offset from which to return results
- * @param {String, String[], Boolean} params.searchIndices - A comma-separated list of indices to perform the query against (default: the index containing the document)
- * @param {String} params.searchQueryHint - The search query hint
- * @param {String} params.searchScroll - A scroll search request definition
- * @param {Number} params.searchSize - The number of documents to return (default: 10)
- * @param {String} params.searchSource - A specific search request definition (instead of using the request body)
- * @param {String} params.searchType - Specific search type (eg. `dfs_then_fetch`, `count`, etc)
- * @param {String, String[], Boolean} params.searchTypes - A comma-separated list of types to perform the query against (default: the same type as the document)
- * @param {String, String[], Boolean} params.stopWords - A list of stop words to be ignored
- * @param {String} params.id - The document ID
- * @param {String} params.index - The name of the index
- * @param {String} params.type - The type of the document (use `_all` to fetch the first document matching the ID across all types)
- */
-api.mlt = ca({
-  params: {
-    boostTerms: {
-      type: 'number',
-      name: 'boost_terms'
-    },
-    maxDocFreq: {
-      type: 'number',
-      name: 'max_doc_freq'
-    },
-    maxQueryTerms: {
-      type: 'number',
-      name: 'max_query_terms'
-    },
-    maxWordLength: {
-      type: 'number',
-      name: 'max_word_length'
-    },
-    minDocFreq: {
-      type: 'number',
-      name: 'min_doc_freq'
-    },
-    minTermFreq: {
-      type: 'number',
-      name: 'min_term_freq'
-    },
-    minWordLength: {
-      type: 'number',
-      name: 'min_word_length'
-    },
-    mltFields: {
-      type: 'list',
-      name: 'mlt_fields'
-    },
-    percentTermsToMatch: {
-      type: 'number',
-      name: 'percent_terms_to_match'
-    },
-    routing: {
-      type: 'string'
-    },
-    searchFrom: {
-      type: 'number',
-      name: 'search_from'
-    },
-    searchIndices: {
-      type: 'list',
-      name: 'search_indices'
-    },
-    searchQueryHint: {
-      type: 'string',
-      name: 'search_query_hint'
-    },
-    searchScroll: {
-      type: 'string',
-      name: 'search_scroll'
-    },
-    searchSize: {
-      type: 'number',
-      name: 'search_size'
-    },
-    searchSource: {
-      type: 'string',
-      name: 'search_source'
-    },
-    searchType: {
-      type: 'string',
-      name: 'search_type'
-    },
-    searchTypes: {
-      type: 'list',
-      name: 'search_types'
-    },
-    stopWords: {
-      type: 'list',
-      name: 'stop_words'
-    }
-  },
-  url: {
-    fmt: '/<%=index%>/<%=type%>/<%=id%>/_mlt',
-    req: {
-      index: {
-        type: 'string'
-      },
-      type: {
-        type: 'string'
-      },
-      id: {
-        type: 'string'
-      }
-    }
-  },
-  method: 'POST'
-});
-
-/**
- * Perform a [mpercolate](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/search-percolate.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {String} params.index - The index of the document being count percolated to use as default
- * @param {String} params.type - The type of the document being percolated to use as default.
- */
-api.mpercolate = ca({
-  params: {
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/<%=type%>/_mpercolate',
-      req: {
-        index: {
-          type: 'string'
-        },
-        type: {
-          type: 'string'
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/_mpercolate',
-      req: {
-        index: {
-          type: 'string'
-        }
-      }
-    },
-    {
-      fmt: '/_mpercolate'
-    }
-  ],
-  needBody: true,
-  bulkBody: true,
-  method: 'POST'
-});
-
-/**
- * Perform a [msearch](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/search-multi-search.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String} params.searchType - Search operation type
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names to use as default
- * @param {String, String[], Boolean} params.type - A comma-separated list of document types to use as default
- */
-api.msearch = ca({
-  params: {
-    searchType: {
-      type: 'enum',
-      options: [
-        'query_then_fetch',
-        'query_and_fetch',
-        'dfs_query_then_fetch',
-        'dfs_query_and_fetch',
-        'count',
-        'scan'
-      ],
-      name: 'search_type'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/<%=type%>/_msearch',
-      req: {
-        index: {
-          type: 'list'
-        },
-        type: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/_msearch',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_msearch'
-    }
-  ],
-  needBody: true,
-  bulkBody: true,
-  method: 'POST'
-});
-
-/**
- * Perform a [mtermvectors](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/docs-multi-termvectors.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String, String[], Boolean} params.ids - A comma-separated list of documents ids. You must define ids as parameter or set "ids" or "docs" in the request body
- * @param {Boolean} params.termStatistics - Specifies if total term frequency and document frequency should be returned. Applies to all returned documents unless otherwise specified in body "params" or "docs".
- * @param {Boolean} [params.fieldStatistics=true] - Specifies if document count, sum of document frequencies and sum of total term frequencies should be returned. Applies to all returned documents unless otherwise specified in body "params" or "docs".
- * @param {String, String[], Boolean} params.fields - A comma-separated list of fields to return. Applies to all returned documents unless otherwise specified in body "params" or "docs".
- * @param {Boolean} [params.offsets=true] - Specifies if term offsets should be returned. Applies to all returned documents unless otherwise specified in body "params" or "docs".
- * @param {Boolean} [params.positions=true] - Specifies if term positions should be returned. Applies to all returned documents unless otherwise specified in body "params" or "docs".
- * @param {Boolean} [params.payloads=true] - Specifies if term payloads should be returned. Applies to all returned documents unless otherwise specified in body "params" or "docs".
- * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random) .Applies to all returned documents unless otherwise specified in body "params" or "docs".
- * @param {String} params.routing - Specific routing value. Applies to all returned documents unless otherwise specified in body "params" or "docs".
- * @param {String} params.parent - Parent id of documents. Applies to all returned documents unless otherwise specified in body "params" or "docs".
- * @param {String} params.index - The index in which the document resides.
- * @param {String} params.type - The type of the document.
- * @param {String} params.id - The id of the document.
- */
-api.mtermvectors = ca({
-  params: {
-    ids: {
-      type: 'list',
-      required: false
-    },
-    termStatistics: {
-      type: 'boolean',
-      'default': false,
-      required: false,
-      name: 'term_statistics'
-    },
-    fieldStatistics: {
-      type: 'boolean',
-      'default': true,
-      required: false,
-      name: 'field_statistics'
-    },
-    fields: {
-      type: 'list',
-      required: false
-    },
-    offsets: {
-      type: 'boolean',
-      'default': true,
-      required: false
-    },
-    positions: {
-      type: 'boolean',
-      'default': true,
-      required: false
-    },
-    payloads: {
-      type: 'boolean',
-      'default': true,
-      required: false
-    },
-    preference: {
-      type: 'string',
-      required: false
-    },
-    routing: {
-      type: 'string',
-      required: false
-    },
-    parent: {
-      type: 'string',
-      required: false
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/<%=type%>/_mtermvectors',
-      req: {
-        index: {
-          type: 'string'
-        },
-        type: {
-          type: 'string'
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/_mtermvectors',
-      req: {
-        index: {
-          type: 'string'
-        }
-      }
-    },
-    {
-      fmt: '/_mtermvectors'
-    }
-  ],
-  method: 'POST'
-});
-
-api.nodes = function NodesNS(transport) {
-  this.transport = transport;
-};
-
-/**
- * Perform a [nodes.hotThreads](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cluster-nodes-hot-threads.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.interval - The interval for the second sampling of threads
- * @param {Number} params.snapshots - Number of samples of thread stacktrace (default: 10)
- * @param {Number} params.threads - Specify the number of threads to provide information for (default: 3)
- * @param {String} params.type - The type to sample (default: cpu)
- * @param {String, String[], Boolean} params.nodeId - A comma-separated list of node IDs or names to limit the returned information; use `_local` to return information from the node you're connecting to, leave empty to get information from all nodes
- */
-api.nodes.prototype.hotThreads = ca({
-  params: {
-    interval: {
-      type: 'time'
-    },
-    snapshots: {
-      type: 'number'
-    },
-    threads: {
-      type: 'number'
-    },
-    type: {
-      type: 'enum',
-      options: [
-        'cpu',
-        'wait',
-        'block'
-      ]
-    }
-  },
-  urls: [
-    {
-      fmt: '/_nodes/<%=nodeId%>/hotthreads',
-      req: {
-        nodeId: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_nodes/hotthreads'
-    }
-  ]
-});
-
-/**
- * Perform a [nodes.info](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cluster-nodes-info.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.flatSettings - Return settings in flat format (default: false)
- * @param {Boolean} params.human - Whether to return time and byte values in human-readable format.
- * @param {String, String[], Boolean} params.nodeId - A comma-separated list of node IDs or names to limit the returned information; use `_local` to return information from the node you're connecting to, leave empty to get information from all nodes
- * @param {String, String[], Boolean} params.metric - A comma-separated list of metrics you wish returned. Leave empty to return all.
- */
-api.nodes.prototype.info = ca({
-  params: {
-    flatSettings: {
-      type: 'boolean',
-      name: 'flat_settings'
-    },
-    human: {
-      type: 'boolean',
-      'default': false
-    }
-  },
-  urls: [
-    {
-      fmt: '/_nodes/<%=nodeId%>/<%=metric%>',
-      req: {
-        nodeId: {
-          type: 'list'
-        },
-        metric: {
-          type: 'list',
-          options: [
-            'settings',
-            'os',
-            'process',
-            'jvm',
-            'thread_pool',
-            'network',
-            'transport',
-            'http',
-            'plugin'
-          ]
-        }
-      }
-    },
-    {
-      fmt: '/_nodes/<%=nodeId%>',
-      req: {
-        nodeId: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_nodes/<%=metric%>',
-      req: {
-        metric: {
-          type: 'list',
-          options: [
-            'settings',
-            'os',
-            'process',
-            'jvm',
-            'thread_pool',
-            'network',
-            'transport',
-            'http',
-            'plugin'
-          ]
-        }
-      }
-    },
-    {
-      fmt: '/_nodes'
-    }
-  ]
-});
-
-/**
- * Perform a [nodes.shutdown](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cluster-nodes-shutdown.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.delay - Set the delay for the operation (default: 1s)
- * @param {Boolean} params.exit - Exit the JVM as well (default: true)
- * @param {String, String[], Boolean} params.nodeId - A comma-separated list of node IDs or names to perform the operation on; use `_local` to perform the operation on the node you're connected to, leave empty to perform the operation on all nodes
- */
-api.nodes.prototype.shutdown = ca({
-  params: {
-    delay: {
-      type: 'time'
-    },
-    exit: {
-      type: 'boolean'
-    }
-  },
-  urls: [
-    {
-      fmt: '/_cluster/nodes/<%=nodeId%>/_shutdown',
-      req: {
-        nodeId: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_shutdown'
-    }
-  ],
-  method: 'POST'
-});
-
-/**
- * Perform a [nodes.stats](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cluster-nodes-stats.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String, String[], Boolean} params.completionFields - A comma-separated list of fields for `fielddata` and `suggest` index metric (supports wildcards)
- * @param {String, String[], Boolean} params.fielddataFields - A comma-separated list of fields for `fielddata` index metric (supports wildcards)
- * @param {String, String[], Boolean} params.fields - A comma-separated list of fields for `fielddata` and `completion` index metric (supports wildcards)
- * @param {Boolean} params.groups - A comma-separated list of search groups for `search` index metric
- * @param {Boolean} params.human - Whether to return time and byte values in human-readable format.
- * @param {String} [params.level=node] - Return indices stats aggregated at node, index or shard level
- * @param {String, String[], Boolean} params.types - A comma-separated list of document types for the `indexing` index metric
- * @param {String, String[], Boolean} params.metric - Limit the information returned to the specified metrics
- * @param {String, String[], Boolean} params.indexMetric - Limit the information returned for `indices` metric to the specific index metrics. Isn't used if `indices` (or `all`) metric isn't specified.
- * @param {String, String[], Boolean} params.nodeId - A comma-separated list of node IDs or names to limit the returned information; use `_local` to return information from the node you're connecting to, leave empty to get information from all nodes
- */
-api.nodes.prototype.stats = ca({
-  params: {
-    completionFields: {
-      type: 'list',
-      name: 'completion_fields'
-    },
-    fielddataFields: {
-      type: 'list',
-      name: 'fielddata_fields'
-    },
-    fields: {
-      type: 'list'
-    },
-    groups: {
-      type: 'boolean'
-    },
-    human: {
-      type: 'boolean',
-      'default': false
-    },
-    level: {
-      type: 'enum',
-      'default': 'node',
-      options: [
-        'node',
-        'indices',
-        'shards'
-      ]
-    },
-    types: {
-      type: 'list'
-    }
-  },
-  urls: [
-    {
-      fmt: '/_nodes/<%=nodeId%>/stats/<%=metric%>/<%=indexMetric%>',
-      req: {
-        nodeId: {
-          type: 'list'
-        },
-        metric: {
-          type: 'list',
-          options: [
-            '_all',
-            'breaker',
-            'fs',
-            'http',
-            'indices',
-            'jvm',
-            'network',
-            'os',
-            'process',
-            'thread_pool',
-            'transport'
-          ]
-        },
-        indexMetric: {
-          type: 'list',
-          options: [
-            '_all',
-            'completion',
-            'docs',
-            'fielddata',
-            'filter_cache',
-            'flush',
-            'get',
-            'id_cache',
-            'indexing',
-            'merge',
-            'percolate',
-            'refresh',
-            'search',
-            'segments',
-            'store',
-            'warmer'
-          ]
-        }
-      }
-    },
-    {
-      fmt: '/_nodes/<%=nodeId%>/stats/<%=metric%>',
-      req: {
-        nodeId: {
-          type: 'list'
-        },
-        metric: {
-          type: 'list',
-          options: [
-            '_all',
-            'breaker',
-            'fs',
-            'http',
-            'indices',
-            'jvm',
-            'network',
-            'os',
-            'process',
-            'thread_pool',
-            'transport'
-          ]
-        }
-      }
-    },
-    {
-      fmt: '/_nodes/stats/<%=metric%>/<%=indexMetric%>',
-      req: {
-        metric: {
-          type: 'list',
-          options: [
-            '_all',
-            'breaker',
-            'fs',
-            'http',
-            'indices',
-            'jvm',
-            'network',
-            'os',
-            'process',
-            'thread_pool',
-            'transport'
-          ]
-        },
-        indexMetric: {
-          type: 'list',
-          options: [
-            '_all',
-            'completion',
-            'docs',
-            'fielddata',
-            'filter_cache',
-            'flush',
-            'get',
-            'id_cache',
-            'indexing',
-            'merge',
-            'percolate',
-            'refresh',
-            'search',
-            'segments',
-            'store',
-            'warmer'
-          ]
-        }
-      }
-    },
-    {
-      fmt: '/_nodes/<%=nodeId%>/stats',
-      req: {
-        nodeId: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_nodes/stats/<%=metric%>',
-      req: {
-        metric: {
-          type: 'list',
-          options: [
-            '_all',
-            'breaker',
-            'fs',
-            'http',
-            'indices',
-            'jvm',
-            'network',
-            'os',
-            'process',
-            'thread_pool',
-            'transport'
-          ]
-        }
-      }
-    },
-    {
-      fmt: '/_nodes/stats'
-    }
-  ]
-});
-
-/**
- * Perform a [percolate](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/search-percolate.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String, String[], Boolean} params.routing - A comma-separated list of specific routing values
- * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random)
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {String} params.percolateIndex - The index to percolate the document into. Defaults to index.
- * @param {String} params.percolateType - The type to percolate document into. Defaults to type.
- * @param {Number} params.version - Explicit version number for concurrency control
- * @param {String} params.versionType - Specific version type
- * @param {String} params.index - The index of the document being percolated.
- * @param {String} params.type - The type of the document being percolated.
- * @param {String} params.id - Substitute the document in the request body with a document that is known by the specified id. On top of the id, the index and type parameter will be used to retrieve the document from within the cluster.
- */
-api.percolate = ca({
-  params: {
-    routing: {
-      type: 'list'
-    },
-    preference: {
-      type: 'string'
-    },
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    },
-    percolateIndex: {
-      type: 'string',
-      name: 'percolate_index'
-    },
-    percolateType: {
-      type: 'string',
-      name: 'percolate_type'
-    },
-    version: {
-      type: 'number'
-    },
-    versionType: {
-      type: 'enum',
-      options: [
-        'internal',
-        'external'
-      ],
-      name: 'version_type'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/<%=type%>/<%=id%>/_percolate',
-      req: {
-        index: {
-          type: 'string'
-        },
-        type: {
-          type: 'string'
-        },
-        id: {
-          type: 'string'
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/<%=type%>/_percolate',
-      req: {
-        index: {
-          type: 'string'
-        },
-        type: {
-          type: 'string'
-        }
-      }
-    }
-  ],
-  method: 'POST'
-});
-
-/**
- * Perform a [ping](http://www.elasticsearch.org/guide/) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- */
-api.ping = ca({
-  url: {
-    fmt: '/'
-  },
-  method: 'HEAD'
-});
-
-/**
- * Perform a [scroll](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/search-request-scroll.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Duration} params.scroll - Specify how long a consistent view of the index should be maintained for scrolled search
- * @param {String} params.scrollId - The scroll ID
- */
-api.scroll = ca({
-  params: {
-    scroll: {
-      type: 'duration'
-    },
-    scrollId: {
-      type: 'string',
-      name: 'scroll_id'
-    }
-  },
-  urls: [
-    {
-      fmt: '/_search/scroll/<%=scrollId%>',
-      req: {
-        scrollId: {
-          type: 'string'
-        }
-      }
-    },
-    {
-      fmt: '/_search/scroll'
-    }
-  ],
-  method: 'POST'
-});
-
-/**
- * Perform a [search](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/search-search.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String} params.analyzer - The analyzer to use for the query string
- * @param {Boolean} params.analyzeWildcard - Specify whether wildcard and prefix queries should be analyzed (default: false)
- * @param {String} [params.defaultOperator=OR] - The default operator for query string query (AND or OR)
- * @param {String} params.df - The field to use as default where no field prefix is given in the query string
- * @param {Boolean} params.explain - Specify whether to return detailed information about score computation as part of a hit
- * @param {String, String[], Boolean} params.fields - A comma-separated list of fields to return as part of a hit
- * @param {Number} params.from - Starting offset (default: 0)
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {String, String[], Boolean} params.indicesBoost - Comma-separated list of index boosts
- * @param {Boolean} params.lenient - Specify whether format-based query failures (such as providing text to a numeric field) should be ignored
- * @param {Boolean} params.lowercaseExpandedTerms - Specify whether query terms should be lowercased
- * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random)
- * @param {String} params.q - Query in the Lucene query string syntax
- * @param {String, String[], Boolean} params.routing - A comma-separated list of specific routing values
- * @param {Duration} params.scroll - Specify how long a consistent view of the index should be maintained for scrolled search
- * @param {String} params.searchType - Search operation type
- * @param {Number} params.size - Number of hits to return (default: 10)
- * @param {String, String[], Boolean} params.sort - A comma-separated list of <field>:<direction> pairs
- * @param {String} params.source - The URL-encoded request definition using the Query DSL (instead of using request body)
- * @param {String, String[], Boolean} params._source - True or false to return the _source field or not, or a list of fields to return
- * @param {String, String[], Boolean} params._sourceExclude - A list of fields to exclude from the returned _source field
- * @param {String, String[], Boolean} params._sourceInclude - A list of fields to extract and return from the _source field
- * @param {String, String[], Boolean} params.stats - Specific 'tag' of the request for logging and statistical purposes
- * @param {String} params.suggestField - Specify which field to use for suggestions
- * @param {String} [params.suggestMode=missing] - Specify suggest mode
- * @param {Number} params.suggestSize - How many suggestions to return in response
- * @param {Text} params.suggestText - The source text for which the suggestions should be returned
- * @param {Date, Number} params.timeout - Explicit operation timeout
- * @param {Boolean} params.version - Specify whether to return document version as part of a hit
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names to search; use `_all` or empty string to perform the operation on all indices
- * @param {String, String[], Boolean} params.type - A comma-separated list of document types to search; leave empty to perform the operation on all types
- */
-api.search = ca({
-  params: {
-    analyzer: {
-      type: 'string'
-    },
-    analyzeWildcard: {
-      type: 'boolean',
-      name: 'analyze_wildcard'
-    },
-    defaultOperator: {
-      type: 'enum',
-      'default': 'OR',
-      options: [
-        'AND',
-        'OR'
-      ],
-      name: 'default_operator'
-    },
-    df: {
-      type: 'string'
-    },
-    explain: {
-      type: 'boolean'
-    },
-    fields: {
-      type: 'list'
-    },
-    from: {
-      type: 'number'
-    },
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    },
-    indicesBoost: {
-      type: 'list',
-      name: 'indices_boost'
-    },
-    lenient: {
-      type: 'boolean'
-    },
-    lowercaseExpandedTerms: {
-      type: 'boolean',
-      name: 'lowercase_expanded_terms'
-    },
-    preference: {
-      type: 'string'
-    },
-    q: {
-      type: 'string'
-    },
-    routing: {
-      type: 'list'
-    },
-    scroll: {
-      type: 'duration'
-    },
-    searchType: {
-      type: 'enum',
-      options: [
-        'query_then_fetch',
-        'query_and_fetch',
-        'dfs_query_then_fetch',
-        'dfs_query_and_fetch',
-        'count',
-        'scan'
-      ],
-      name: 'search_type'
-    },
-    size: {
-      type: 'number'
-    },
-    sort: {
-      type: 'list'
-    },
-    source: {
-      type: 'string'
-    },
-    _source: {
-      type: 'list'
-    },
-    _sourceExclude: {
-      type: 'list',
-      name: '_source_exclude'
-    },
-    _sourceInclude: {
-      type: 'list',
-      name: '_source_include'
-    },
-    stats: {
-      type: 'list'
-    },
-    suggestField: {
-      type: 'string',
-      name: 'suggest_field'
-    },
-    suggestMode: {
-      type: 'enum',
-      'default': 'missing',
-      options: [
-        'missing',
-        'popular',
-        'always'
-      ],
-      name: 'suggest_mode'
-    },
-    suggestSize: {
-      type: 'number',
-      name: 'suggest_size'
-    },
-    suggestText: {
-      type: 'text',
-      name: 'suggest_text'
-    },
-    timeout: {
-      type: 'time'
-    },
-    version: {
-      type: 'boolean'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/<%=type%>/_search',
-      req: {
-        index: {
-          type: 'list'
-        },
-        type: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/<%=index%>/_search',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_search'
-    }
-  ],
-  method: 'POST'
-});
-
-api.snapshot = function SnapshotNS(transport) {
-  this.transport = transport;
-};
-
-/**
- * Perform a [snapshot.create](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/modules-snapshots.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
- * @param {Boolean} params.waitForCompletion - Should this request wait until the operation has completed before returning
- * @param {String} params.repository - A repository name
- * @param {String} params.snapshot - A snapshot name
- */
-api.snapshot.prototype.create = ca({
-  params: {
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    waitForCompletion: {
-      type: 'boolean',
-      'default': false,
-      name: 'wait_for_completion'
-    }
-  },
-  url: {
-    fmt: '/_snapshot/<%=repository%>/<%=snapshot%>',
-    req: {
-      repository: {
-        type: 'string'
-      },
-      snapshot: {
-        type: 'string'
-      }
-    }
-  },
-  method: 'POST'
-});
-
-/**
- * Perform a [snapshot.createRepository](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/modules-snapshots.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
- * @param {Date, Number} params.timeout - Explicit operation timeout
- * @param {String} params.repository - A repository name
- */
-api.snapshot.prototype.createRepository = ca({
-  params: {
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    timeout: {
-      type: 'time'
-    }
-  },
-  url: {
-    fmt: '/_snapshot/<%=repository%>',
-    req: {
-      repository: {
-        type: 'string'
-      }
-    }
-  },
-  needBody: true,
-  method: 'POST'
-});
-
-/**
- * Perform a [snapshot.delete](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/modules-snapshots.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
- * @param {String} params.repository - A repository name
- * @param {String} params.snapshot - A snapshot name
- */
-api.snapshot.prototype['delete'] = ca({
-  params: {
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    }
-  },
-  url: {
-    fmt: '/_snapshot/<%=repository%>/<%=snapshot%>',
-    req: {
-      repository: {
-        type: 'string'
-      },
-      snapshot: {
-        type: 'string'
-      }
-    }
-  },
-  method: 'DELETE'
-});
-
-/**
- * Perform a [snapshot.deleteRepository](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/modules-snapshots.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
- * @param {Date, Number} params.timeout - Explicit operation timeout
- * @param {String, String[], Boolean} params.repository - A comma-separated list of repository names
- */
-api.snapshot.prototype.deleteRepository = ca({
-  params: {
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    timeout: {
-      type: 'time'
-    }
-  },
-  url: {
-    fmt: '/_snapshot/<%=repository%>',
-    req: {
-      repository: {
-        type: 'list'
-      }
-    }
-  },
-  method: 'DELETE'
-});
-
-/**
- * Perform a [snapshot.get](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/modules-snapshots.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
- * @param {String} params.repository - A repository name
- * @param {String, String[], Boolean} params.snapshot - A comma-separated list of snapshot names
- */
-api.snapshot.prototype.get = ca({
-  params: {
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    }
-  },
-  url: {
-    fmt: '/_snapshot/<%=repository%>/<%=snapshot%>',
-    req: {
-      repository: {
-        type: 'string'
-      },
-      snapshot: {
-        type: 'list'
-      }
-    }
-  }
-});
-
-/**
- * Perform a [snapshot.getRepository](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/modules-snapshots.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
- * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
- * @param {String, String[], Boolean} params.repository - A comma-separated list of repository names
- */
-api.snapshot.prototype.getRepository = ca({
-  params: {
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    local: {
-      type: 'boolean'
-    }
-  },
-  urls: [
-    {
-      fmt: '/_snapshot/<%=repository%>',
-      req: {
-        repository: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_snapshot'
-    }
-  ]
-});
-
-/**
- * Perform a [snapshot.restore](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/modules-snapshots.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
- * @param {Boolean} params.waitForCompletion - Should this request wait until the operation has completed before returning
- * @param {String} params.repository - A repository name
- * @param {String} params.snapshot - A snapshot name
- */
-api.snapshot.prototype.restore = ca({
-  params: {
-    masterTimeout: {
-      type: 'time',
-      name: 'master_timeout'
-    },
-    waitForCompletion: {
-      type: 'boolean',
-      'default': false,
-      name: 'wait_for_completion'
-    }
-  },
-  url: {
-    fmt: '/_snapshot/<%=repository%>/<%=snapshot%>/_restore',
-    req: {
-      repository: {
-        type: 'string'
-      },
-      snapshot: {
-        type: 'string'
-      }
-    }
-  },
-  method: 'POST'
-});
-
-/**
- * Perform a [suggest](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/search-search.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
- * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
- * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
- * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random)
- * @param {String} params.routing - Specific routing value
- * @param {String} params.source - The URL-encoded request definition (instead of using request body)
- * @param {String, String[], Boolean} params.index - A comma-separated list of index names to restrict the operation; use `_all` or empty string to perform the operation on all indices
- */
-api.suggest = ca({
-  params: {
-    ignoreUnavailable: {
-      type: 'boolean',
-      name: 'ignore_unavailable'
-    },
-    allowNoIndices: {
-      type: 'boolean',
-      name: 'allow_no_indices'
-    },
-    expandWildcards: {
-      type: 'enum',
-      'default': 'open',
-      options: [
-        'open',
-        'closed'
-      ],
-      name: 'expand_wildcards'
-    },
-    preference: {
-      type: 'string'
-    },
-    routing: {
-      type: 'string'
-    },
-    source: {
-      type: 'string'
-    }
-  },
-  urls: [
-    {
-      fmt: '/<%=index%>/_suggest',
-      req: {
-        index: {
-          type: 'list'
-        }
-      }
-    },
-    {
-      fmt: '/_suggest'
-    }
-  ],
-  needBody: true,
-  method: 'POST'
-});
-
-/**
- * Perform a [termvector](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/docs-termvectors.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {Boolean} params.termStatistics - Specifies if total term frequency and document frequency should be returned.
- * @param {Boolean} [params.fieldStatistics=true] - Specifies if document count, sum of document frequencies and sum of total term frequencies should be returned.
- * @param {String, String[], Boolean} params.fields - A comma-separated list of fields to return.
- * @param {Boolean} [params.offsets=true] - Specifies if term offsets should be returned.
- * @param {Boolean} [params.positions=true] - Specifies if term positions should be returned.
- * @param {Boolean} [params.payloads=true] - Specifies if term payloads should be returned.
- * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random).
- * @param {String} params.routing - Specific routing value.
- * @param {String} params.parent - Parent id of documents.
- * @param {String} params.index - The index in which the document resides.
- * @param {String} params.type - The type of the document.
- * @param {String} params.id - The id of the document.
- */
-api.termvector = ca({
-  params: {
-    termStatistics: {
-      type: 'boolean',
-      'default': false,
-      required: false,
-      name: 'term_statistics'
-    },
-    fieldStatistics: {
-      type: 'boolean',
-      'default': true,
-      required: false,
-      name: 'field_statistics'
-    },
-    fields: {
-      type: 'list',
-      required: false
-    },
-    offsets: {
-      type: 'boolean',
-      'default': true,
-      required: false
-    },
-    positions: {
-      type: 'boolean',
-      'default': true,
-      required: false
-    },
-    payloads: {
-      type: 'boolean',
-      'default': true,
-      required: false
-    },
-    preference: {
-      type: 'string',
-      required: false
-    },
-    routing: {
-      type: 'string',
-      required: false
-    },
-    parent: {
-      type: 'string',
-      required: false
-    }
-  },
-  url: {
-    fmt: '/<%=index%>/<%=type%>/<%=id%>/_termvector',
-    req: {
-      index: {
-        type: 'string'
-      },
-      type: {
-        type: 'string'
-      },
-      id: {
-        type: 'string'
-      }
-    }
-  },
-  method: 'POST'
-});
-
-/**
- * Perform a [update](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/docs-update.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String} params.consistency - Explicit write consistency setting for the operation
- * @param {String, String[], Boolean} params.fields - A comma-separated list of fields to return in the response
- * @param {String} params.lang - The script language (default: mvel)
- * @param {String} params.parent - ID of the parent document
- * @param {Boolean} params.refresh - Refresh the index after performing the operation
- * @param {String} [params.replication=sync] - Specific replication type
- * @param {Number} params.retryOnConflict - Specify how many times should the operation be retried when a conflict occurs (default: 0)
- * @param {String} params.routing - Specific routing value
- * @param {Anything} params.script - The URL-encoded script definition (instead of using request body)
- * @param {Date, Number} params.timeout - Explicit operation timeout
- * @param {Date, Number} params.timestamp - Explicit timestamp for the document
- * @param {Duration} params.ttl - Expiration time for the document
- * @param {Number} params.version - Explicit version number for concurrency control
- * @param {String} params.versionType - Specific version type
- * @param {String} params.id - Document ID
- * @param {String} params.index - The name of the index
- * @param {String} params.type - The type of the document
- */
-api.update = ca({
-  params: {
-    consistency: {
-      type: 'enum',
-      options: [
-        'one',
-        'quorum',
-        'all'
-      ]
-    },
-    fields: {
-      type: 'list'
-    },
-    lang: {
-      type: 'string'
-    },
-    parent: {
-      type: 'string'
-    },
-    refresh: {
-      type: 'boolean'
-    },
-    replication: {
-      type: 'enum',
-      'default': 'sync',
-      options: [
-        'sync',
-        'async'
-      ]
-    },
-    retryOnConflict: {
-      type: 'number',
-      name: 'retry_on_conflict'
-    },
-    routing: {
-      type: 'string'
-    },
-    script: {},
-    timeout: {
-      type: 'time'
-    },
-    timestamp: {
-      type: 'time'
-    },
-    ttl: {
-      type: 'duration'
-    },
-    version: {
-      type: 'number'
-    },
-    versionType: {
-      type: 'enum',
-      options: [
-        'internal',
-        'external'
-      ],
-      name: 'version_type'
-    }
-  },
-  url: {
-    fmt: '/<%=index%>/<%=type%>/<%=id%>/_update',
-    req: {
-      index: {
-        type: 'string'
-      },
-      type: {
-        type: 'string'
-      },
-      id: {
-        type: 'string'
-      }
-    }
-  },
-  method: 'POST'
-});
-
-/**
- * Perform a [create](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/docs-index_.html) request
- *
- * @param {Object} params - An object with parameters used to carry out this action
- * @param {String} params.consistency - Explicit write consistency setting for the operation
- * @param {String} params.parent - ID of the parent document
- * @param {Boolean} params.refresh - Refresh the index after performing the operation
- * @param {String} [params.replication=sync] - Specific replication type
- * @param {String} params.routing - Specific routing value
- * @param {Date, Number} params.timeout - Explicit operation timeout
- * @param {Date, Number} params.timestamp - Explicit timestamp for the document
- * @param {Duration} params.ttl - Expiration time for the document
- * @param {Number} params.version - Explicit version number for concurrency control
- * @param {String} params.versionType - Specific version type
- * @param {String} params.id - Document ID
- * @param {String} params.index - The name of the index
- * @param {String} params.type - The type of the document
- */
-api.create = ca.proxy(api.index, {
-  transform: function (params) {
-    params.op_type = 'create';
-  }
-});
-},{"./client_action":20}],18:[function(require,module,exports){
-/* jshint maxlen: false */
-
-var ca = require('./client_action');
+var ca = require('../client_action');
 var api = module.exports = {};
 
 api._namespaces = ['cluster', 'indices'];
@@ -22100,6 +19531,7 @@ api.ping = ca({
   url: {
     fmt: '/'
   },
+  requestTimeout: 100,
   method: 'HEAD'
 });
 
@@ -22495,7 +19927,5169 @@ api.create = ca.proxy(api.index, {
     params.op_type = 'create';
   }
 });
-},{"./client_action":20}],19:[function(require,module,exports){
+},{"../client_action":195}],192:[function(require,module,exports){
+/* jshint maxlen: false */
+
+var ca = require('../client_action');
+var api = module.exports = {};
+
+api._namespaces = ['cat', 'cluster', 'indices', 'nodes', 'snapshot'];
+
+/**
+ * Perform a [bulk](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/docs-bulk.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String} params.consistency - Explicit write consistency setting for the operation
+ * @param {Boolean} params.refresh - Refresh the index after performing the operation
+ * @param {String} [params.replication=sync] - Explicitely set the replication type
+ * @param {String} params.routing - Specific routing value
+ * @param {Date, Number} params.timeout - Explicit operation timeout
+ * @param {String} params.type - Default document type for items which don't provide one
+ * @param {String} params.index - Default index for items which don't provide one
+ */
+api.bulk = ca({
+  params: {
+    consistency: {
+      type: 'enum',
+      options: [
+        'one',
+        'quorum',
+        'all'
+      ]
+    },
+    refresh: {
+      type: 'boolean'
+    },
+    replication: {
+      type: 'enum',
+      'default': 'sync',
+      options: [
+        'sync',
+        'async'
+      ]
+    },
+    routing: {
+      type: 'string'
+    },
+    timeout: {
+      type: 'time'
+    },
+    type: {
+      type: 'string'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/<%=type%>/_bulk',
+      req: {
+        index: {
+          type: 'string'
+        },
+        type: {
+          type: 'string'
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/_bulk',
+      req: {
+        index: {
+          type: 'string'
+        }
+      }
+    },
+    {
+      fmt: '/_bulk'
+    }
+  ],
+  needBody: true,
+  bulkBody: true,
+  method: 'POST'
+});
+
+api.cat = function CatNS(transport) {
+  this.transport = transport;
+};
+
+/**
+ * Perform a [cat.aliases](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cat.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
+ * @param {String, String[], Boolean} params.h - Comma-separated list of column names to display
+ * @param {Boolean} params.help - Return help information
+ * @param {Boolean} params.v - Verbose mode. Display column headers
+ * @param {String, String[], Boolean} params.name - A comma-separated list of alias names to return
+ */
+api.cat.prototype.aliases = ca({
+  params: {
+    local: {
+      type: 'boolean'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    h: {
+      type: 'list'
+    },
+    help: {
+      type: 'boolean',
+      'default': false
+    },
+    v: {
+      type: 'boolean',
+      'default': false
+    }
+  },
+  urls: [
+    {
+      fmt: '/_cat/aliases/<%=name%>',
+      req: {
+        name: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_cat/aliases'
+    }
+  ]
+});
+
+/**
+ * Perform a [cat.allocation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/cat-allocation.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String} params.bytes - The unit in which to display byte values
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
+ * @param {String, String[], Boolean} params.h - Comma-separated list of column names to display
+ * @param {Boolean} params.help - Return help information
+ * @param {Boolean} params.v - Verbose mode. Display column headers
+ * @param {String, String[], Boolean} params.nodeId - A comma-separated list of node IDs or names to limit the returned information
+ */
+api.cat.prototype.allocation = ca({
+  params: {
+    bytes: {
+      type: 'enum',
+      options: [
+        'b',
+        'k',
+        'm',
+        'g'
+      ]
+    },
+    local: {
+      type: 'boolean'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    h: {
+      type: 'list'
+    },
+    help: {
+      type: 'boolean',
+      'default': false
+    },
+    v: {
+      type: 'boolean',
+      'default': false
+    }
+  },
+  urls: [
+    {
+      fmt: '/_cat/allocation/<%=nodeId%>',
+      req: {
+        nodeId: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_cat/allocation'
+    }
+  ]
+});
+
+/**
+ * Perform a [cat.count](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/cat-count.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
+ * @param {String, String[], Boolean} params.h - Comma-separated list of column names to display
+ * @param {Boolean} params.help - Return help information
+ * @param {Boolean} params.v - Verbose mode. Display column headers
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names to limit the returned information
+ */
+api.cat.prototype.count = ca({
+  params: {
+    local: {
+      type: 'boolean'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    h: {
+      type: 'list'
+    },
+    help: {
+      type: 'boolean',
+      'default': false
+    },
+    v: {
+      type: 'boolean',
+      'default': false
+    }
+  },
+  urls: [
+    {
+      fmt: '/_cat/count/<%=index%>',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_cat/count'
+    }
+  ]
+});
+
+/**
+ * Perform a [cat.health](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/cat-health.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
+ * @param {String, String[], Boolean} params.h - Comma-separated list of column names to display
+ * @param {Boolean} params.help - Return help information
+ * @param {Boolean} [params.ts=true] - Set to false to disable timestamping
+ * @param {Boolean} params.v - Verbose mode. Display column headers
+ */
+api.cat.prototype.health = ca({
+  params: {
+    local: {
+      type: 'boolean'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    h: {
+      type: 'list'
+    },
+    help: {
+      type: 'boolean',
+      'default': false
+    },
+    ts: {
+      type: 'boolean',
+      'default': true
+    },
+    v: {
+      type: 'boolean',
+      'default': false
+    }
+  },
+  url: {
+    fmt: '/_cat/health'
+  }
+});
+
+/**
+ * Perform a [cat.help](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/cat.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.help - Return help information
+ */
+api.cat.prototype.help = ca({
+  params: {
+    help: {
+      type: 'boolean',
+      'default': false
+    }
+  },
+  url: {
+    fmt: '/_cat'
+  }
+});
+
+/**
+ * Perform a [cat.indices](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/cat-indices.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String} params.bytes - The unit in which to display byte values
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
+ * @param {String, String[], Boolean} params.h - Comma-separated list of column names to display
+ * @param {Boolean} params.help - Return help information
+ * @param {Boolean} params.pri - Set to true to return stats only for primary shards
+ * @param {Boolean} params.v - Verbose mode. Display column headers
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names to limit the returned information
+ */
+api.cat.prototype.indices = ca({
+  params: {
+    bytes: {
+      type: 'enum',
+      options: [
+        'b',
+        'k',
+        'm',
+        'g'
+      ]
+    },
+    local: {
+      type: 'boolean'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    h: {
+      type: 'list'
+    },
+    help: {
+      type: 'boolean',
+      'default': false
+    },
+    pri: {
+      type: 'boolean',
+      'default': false
+    },
+    v: {
+      type: 'boolean',
+      'default': false
+    }
+  },
+  urls: [
+    {
+      fmt: '/_cat/indices/<%=index%>',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_cat/indices'
+    }
+  ]
+});
+
+/**
+ * Perform a [cat.master](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/cat-master.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
+ * @param {String, String[], Boolean} params.h - Comma-separated list of column names to display
+ * @param {Boolean} params.help - Return help information
+ * @param {Boolean} params.v - Verbose mode. Display column headers
+ */
+api.cat.prototype.master = ca({
+  params: {
+    local: {
+      type: 'boolean'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    h: {
+      type: 'list'
+    },
+    help: {
+      type: 'boolean',
+      'default': false
+    },
+    v: {
+      type: 'boolean',
+      'default': false
+    }
+  },
+  url: {
+    fmt: '/_cat/master'
+  }
+});
+
+/**
+ * Perform a [cat.nodes](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/cat-nodes.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
+ * @param {String, String[], Boolean} params.h - Comma-separated list of column names to display
+ * @param {Boolean} params.help - Return help information
+ * @param {Boolean} params.v - Verbose mode. Display column headers
+ */
+api.cat.prototype.nodes = ca({
+  params: {
+    local: {
+      type: 'boolean'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    h: {
+      type: 'list'
+    },
+    help: {
+      type: 'boolean',
+      'default': false
+    },
+    v: {
+      type: 'boolean',
+      'default': false
+    }
+  },
+  url: {
+    fmt: '/_cat/nodes'
+  }
+});
+
+/**
+ * Perform a [cat.pendingTasks](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/cat-pending-tasks.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
+ * @param {String, String[], Boolean} params.h - Comma-separated list of column names to display
+ * @param {Boolean} params.help - Return help information
+ * @param {Boolean} params.v - Verbose mode. Display column headers
+ */
+api.cat.prototype.pendingTasks = ca({
+  params: {
+    local: {
+      type: 'boolean'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    h: {
+      type: 'list'
+    },
+    help: {
+      type: 'boolean',
+      'default': false
+    },
+    v: {
+      type: 'boolean',
+      'default': false
+    }
+  },
+  url: {
+    fmt: '/_cat/pending_tasks'
+  }
+});
+
+/**
+ * Perform a [cat.recovery](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/cat-recovery.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String} params.bytes - The unit in which to display byte values
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
+ * @param {String, String[], Boolean} params.h - Comma-separated list of column names to display
+ * @param {Boolean} params.help - Return help information
+ * @param {Boolean} params.v - Verbose mode. Display column headers
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names to limit the returned information
+ */
+api.cat.prototype.recovery = ca({
+  params: {
+    bytes: {
+      type: 'enum',
+      options: [
+        'b',
+        'k',
+        'm',
+        'g'
+      ]
+    },
+    local: {
+      type: 'boolean'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    h: {
+      type: 'list'
+    },
+    help: {
+      type: 'boolean',
+      'default': false
+    },
+    v: {
+      type: 'boolean',
+      'default': false
+    }
+  },
+  urls: [
+    {
+      fmt: '/_cat/recovery/<%=index%>',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_cat/recovery'
+    }
+  ]
+});
+
+/**
+ * Perform a [cat.shards](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/cat-shards.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
+ * @param {String, String[], Boolean} params.h - Comma-separated list of column names to display
+ * @param {Boolean} params.help - Return help information
+ * @param {Boolean} params.v - Verbose mode. Display column headers
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names to limit the returned information
+ */
+api.cat.prototype.shards = ca({
+  params: {
+    local: {
+      type: 'boolean'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    h: {
+      type: 'list'
+    },
+    help: {
+      type: 'boolean',
+      'default': false
+    },
+    v: {
+      type: 'boolean',
+      'default': false
+    }
+  },
+  urls: [
+    {
+      fmt: '/_cat/shards/<%=index%>',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_cat/shards'
+    }
+  ]
+});
+
+/**
+ * Perform a [cat.threadPool](http://www.elasticsearch.org/guide/en/elasticsearch/reference/master/cat-thread-pool.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
+ * @param {String, String[], Boolean} params.h - Comma-separated list of column names to display
+ * @param {Boolean} params.help - Return help information
+ * @param {Boolean} params.v - Verbose mode. Display column headers
+ * @param {Boolean} params.fullId - Enables displaying the complete node ids
+ */
+api.cat.prototype.threadPool = ca({
+  params: {
+    local: {
+      type: 'boolean'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    h: {
+      type: 'list'
+    },
+    help: {
+      type: 'boolean',
+      'default': false
+    },
+    v: {
+      type: 'boolean',
+      'default': false
+    },
+    fullId: {
+      type: 'boolean',
+      'default': false,
+      name: 'full_id'
+    }
+  },
+  url: {
+    fmt: '/_cat/thread_pool'
+  }
+});
+
+/**
+ * Perform a [clearScroll](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-request-scroll.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String, String[], Boolean} params.scrollId - A comma-separated list of scroll IDs to clear
+ */
+api.clearScroll = ca({
+  url: {
+    fmt: '/_search/scroll/<%=scrollId%>',
+    req: {
+      scrollId: {
+        type: 'list'
+      }
+    }
+  },
+  method: 'DELETE'
+});
+
+api.cluster = function ClusterNS(transport) {
+  this.transport = transport;
+};
+
+/**
+ * Perform a [cluster.getSettings](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/cluster-update-settings.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.flatSettings - Return settings in flat format (default: false)
+ * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
+ * @param {Date, Number} params.timeout - Explicit operation timeout
+ */
+api.cluster.prototype.getSettings = ca({
+  params: {
+    flatSettings: {
+      type: 'boolean',
+      name: 'flat_settings'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    timeout: {
+      type: 'time'
+    }
+  },
+  url: {
+    fmt: '/_cluster/settings'
+  }
+});
+
+/**
+ * Perform a [cluster.health](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/cluster-health.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String} [params.level=cluster] - Specify the level of detail for returned information
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
+ * @param {Date, Number} params.timeout - Explicit operation timeout
+ * @param {Number} params.waitForActiveShards - Wait until the specified number of shards is active
+ * @param {String} params.waitForNodes - Wait until the specified number of nodes is available
+ * @param {Number} params.waitForRelocatingShards - Wait until the specified number of relocating shards is finished
+ * @param {String} params.waitForStatus - Wait until cluster is in a specific state
+ * @param {String} params.index - Limit the information returned to a specific index
+ */
+api.cluster.prototype.health = ca({
+  params: {
+    level: {
+      type: 'enum',
+      'default': 'cluster',
+      options: [
+        'cluster',
+        'indices',
+        'shards'
+      ]
+    },
+    local: {
+      type: 'boolean'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    timeout: {
+      type: 'time'
+    },
+    waitForActiveShards: {
+      type: 'number',
+      name: 'wait_for_active_shards'
+    },
+    waitForNodes: {
+      type: 'string',
+      name: 'wait_for_nodes'
+    },
+    waitForRelocatingShards: {
+      type: 'number',
+      name: 'wait_for_relocating_shards'
+    },
+    waitForStatus: {
+      type: 'enum',
+      'default': null,
+      options: [
+        'green',
+        'yellow',
+        'red'
+      ],
+      name: 'wait_for_status'
+    }
+  },
+  urls: [
+    {
+      fmt: '/_cluster/health/<%=index%>',
+      req: {
+        index: {
+          type: 'string'
+        }
+      }
+    },
+    {
+      fmt: '/_cluster/health'
+    }
+  ]
+});
+
+/**
+ * Perform a [cluster.pendingTasks](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/cluster-pending.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
+ */
+api.cluster.prototype.pendingTasks = ca({
+  params: {
+    local: {
+      type: 'boolean'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    }
+  },
+  url: {
+    fmt: '/_cluster/pending_tasks'
+  }
+});
+
+/**
+ * Perform a [cluster.putSettings](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/cluster-update-settings.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.flatSettings - Return settings in flat format (default: false)
+ */
+api.cluster.prototype.putSettings = ca({
+  params: {
+    flatSettings: {
+      type: 'boolean',
+      name: 'flat_settings'
+    }
+  },
+  url: {
+    fmt: '/_cluster/settings'
+  },
+  method: 'PUT'
+});
+
+/**
+ * Perform a [cluster.reroute](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/cluster-reroute.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.dryRun - Simulate the operation only and return the resulting state
+ * @param {Boolean} params.filterMetadata - Don't return cluster state metadata (default: false)
+ * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
+ * @param {Date, Number} params.timeout - Explicit operation timeout
+ */
+api.cluster.prototype.reroute = ca({
+  params: {
+    dryRun: {
+      type: 'boolean',
+      name: 'dry_run'
+    },
+    filterMetadata: {
+      type: 'boolean',
+      name: 'filter_metadata'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    timeout: {
+      type: 'time'
+    }
+  },
+  url: {
+    fmt: '/_cluster/reroute'
+  },
+  method: 'POST'
+});
+
+/**
+ * Perform a [cluster.state](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/cluster-state.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
+ * @param {String, String[], Boolean} params.indexTemplates - A comma separated list to return specific index templates when returning metadata
+ * @param {Boolean} params.flatSettings - Return settings in flat format (default: false)
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` or empty string to perform the operation on all indices
+ * @param {String, String[], Boolean} params.metric - Limit the information returned to the specified metrics
+ */
+api.cluster.prototype.state = ca({
+  params: {
+    local: {
+      type: 'boolean'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    indexTemplates: {
+      type: 'list',
+      name: 'index_templates'
+    },
+    flatSettings: {
+      type: 'boolean',
+      name: 'flat_settings'
+    }
+  },
+  urls: [
+    {
+      fmt: '/_cluster/state/<%=metric%>/<%=index%>',
+      req: {
+        metric: {
+          type: 'list',
+          options: [
+            '_all',
+            'blocks',
+            'metadata',
+            'nodes',
+            'routing_table'
+          ]
+        },
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_cluster/state/<%=metric%>',
+      req: {
+        metric: {
+          type: 'list',
+          options: [
+            '_all',
+            'blocks',
+            'metadata',
+            'nodes',
+            'routing_table'
+          ]
+        }
+      }
+    },
+    {
+      fmt: '/_cluster/state'
+    }
+  ]
+});
+
+/**
+ * Perform a [cluster.stats](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/cluster-stats.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.flatSettings - Return settings in flat format (default: false)
+ * @param {Boolean} params.human - Whether to return time and byte values in human-readable format.
+ * @param {String, String[], Boolean} params.nodeId - A comma-separated list of node IDs or names to limit the returned information; use `_local` to return information from the node you're connecting to, leave empty to get information from all nodes
+ */
+api.cluster.prototype.stats = ca({
+  params: {
+    flatSettings: {
+      type: 'boolean',
+      name: 'flat_settings'
+    },
+    human: {
+      type: 'boolean',
+      'default': false
+    }
+  },
+  urls: [
+    {
+      fmt: '/_cluster/stats/nodes/<%=nodeId%>',
+      req: {
+        nodeId: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_cluster/stats'
+    }
+  ]
+});
+
+/**
+ * Perform a [count](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-count.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {Number} params.minScore - Include only documents with a specific `_score` value in the result
+ * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random)
+ * @param {String} params.routing - Specific routing value
+ * @param {String} params.source - The URL-encoded query definition (instead of using the request body)
+ * @param {String, String[], Boolean} params.index - A comma-separated list of indices to restrict the results
+ * @param {String, String[], Boolean} params.type - A comma-separated list of types to restrict the results
+ */
+api.count = ca({
+  params: {
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    },
+    minScore: {
+      type: 'number',
+      name: 'min_score'
+    },
+    preference: {
+      type: 'string'
+    },
+    routing: {
+      type: 'string'
+    },
+    source: {
+      type: 'string'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/<%=type%>/_count',
+      req: {
+        index: {
+          type: 'list'
+        },
+        type: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/_count',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_count'
+    }
+  ],
+  method: 'POST'
+});
+
+/**
+ * Perform a [countPercolate](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-percolate.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String, String[], Boolean} params.routing - A comma-separated list of specific routing values
+ * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random)
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {String} params.percolateIndex - The index to count percolate the document into. Defaults to index.
+ * @param {String} params.percolateType - The type to count percolate document into. Defaults to type.
+ * @param {Number} params.version - Explicit version number for concurrency control
+ * @param {String} params.versionType - Specific version type
+ * @param {String} params.index - The index of the document being count percolated.
+ * @param {String} params.type - The type of the document being count percolated.
+ * @param {String} params.id - Substitute the document in the request body with a document that is known by the specified id. On top of the id, the index and type parameter will be used to retrieve the document from within the cluster.
+ */
+api.countPercolate = ca({
+  params: {
+    routing: {
+      type: 'list'
+    },
+    preference: {
+      type: 'string'
+    },
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    },
+    percolateIndex: {
+      type: 'string',
+      name: 'percolate_index'
+    },
+    percolateType: {
+      type: 'string',
+      name: 'percolate_type'
+    },
+    version: {
+      type: 'number'
+    },
+    versionType: {
+      type: 'enum',
+      options: [
+        'internal',
+        'external'
+      ],
+      name: 'version_type'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/<%=type%>/<%=id%>/_percolate/count',
+      req: {
+        index: {
+          type: 'string'
+        },
+        type: {
+          type: 'string'
+        },
+        id: {
+          type: 'string'
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/<%=type%>/_percolate/count',
+      req: {
+        index: {
+          type: 'string'
+        },
+        type: {
+          type: 'string'
+        }
+      }
+    }
+  ],
+  method: 'POST'
+});
+
+/**
+ * Perform a [delete](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/docs-delete.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String} params.consistency - Specific write consistency setting for the operation
+ * @param {String} params.parent - ID of parent document
+ * @param {Boolean} params.refresh - Refresh the index after performing the operation
+ * @param {String} [params.replication=sync] - Specific replication type
+ * @param {String} params.routing - Specific routing value
+ * @param {Date, Number} params.timeout - Explicit operation timeout
+ * @param {Number} params.version - Explicit version number for concurrency control
+ * @param {String} params.versionType - Specific version type
+ * @param {String} params.id - The document ID
+ * @param {String} params.index - The name of the index
+ * @param {String} params.type - The type of the document
+ */
+api['delete'] = ca({
+  params: {
+    consistency: {
+      type: 'enum',
+      options: [
+        'one',
+        'quorum',
+        'all'
+      ]
+    },
+    parent: {
+      type: 'string'
+    },
+    refresh: {
+      type: 'boolean'
+    },
+    replication: {
+      type: 'enum',
+      'default': 'sync',
+      options: [
+        'sync',
+        'async'
+      ]
+    },
+    routing: {
+      type: 'string'
+    },
+    timeout: {
+      type: 'time'
+    },
+    version: {
+      type: 'number'
+    },
+    versionType: {
+      type: 'enum',
+      options: [
+        'internal',
+        'external'
+      ],
+      name: 'version_type'
+    }
+  },
+  url: {
+    fmt: '/<%=index%>/<%=type%>/<%=id%>',
+    req: {
+      index: {
+        type: 'string'
+      },
+      type: {
+        type: 'string'
+      },
+      id: {
+        type: 'string'
+      }
+    }
+  },
+  method: 'DELETE'
+});
+
+/**
+ * Perform a [deleteByQuery](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/docs-delete-by-query.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String} params.analyzer - The analyzer to use for the query string
+ * @param {String} params.consistency - Specific write consistency setting for the operation
+ * @param {String} [params.defaultOperator=OR] - The default operator for query string query (AND or OR)
+ * @param {String} params.df - The field to use as default where no field prefix is given in the query string
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {String} [params.replication=sync] - Specific replication type
+ * @param {String} params.q - Query in the Lucene query string syntax
+ * @param {String} params.routing - Specific routing value
+ * @param {String} params.source - The URL-encoded query definition (instead of using the request body)
+ * @param {Date, Number} params.timeout - Explicit operation timeout
+ * @param {String, String[], Boolean} params.index - A comma-separated list of indices to restrict the operation; use `_all` to perform the operation on all indices
+ * @param {String, String[], Boolean} params.type - A comma-separated list of types to restrict the operation
+ */
+api.deleteByQuery = ca({
+  params: {
+    analyzer: {
+      type: 'string'
+    },
+    consistency: {
+      type: 'enum',
+      options: [
+        'one',
+        'quorum',
+        'all'
+      ]
+    },
+    defaultOperator: {
+      type: 'enum',
+      'default': 'OR',
+      options: [
+        'AND',
+        'OR'
+      ],
+      name: 'default_operator'
+    },
+    df: {
+      type: 'string'
+    },
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    },
+    replication: {
+      type: 'enum',
+      'default': 'sync',
+      options: [
+        'sync',
+        'async'
+      ]
+    },
+    q: {
+      type: 'string'
+    },
+    routing: {
+      type: 'string'
+    },
+    source: {
+      type: 'string'
+    },
+    timeout: {
+      type: 'time'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/<%=type%>/_query',
+      req: {
+        index: {
+          type: 'list'
+        },
+        type: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/_query',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    }
+  ],
+  method: 'DELETE'
+});
+
+/**
+ * Perform a [exists](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/docs-get.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String} params.parent - The ID of the parent document
+ * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random)
+ * @param {Boolean} params.realtime - Specify whether to perform the operation in realtime or search mode
+ * @param {Boolean} params.refresh - Refresh the shard containing the document before performing the operation
+ * @param {String} params.routing - Specific routing value
+ * @param {String} params.id - The document ID
+ * @param {String} params.index - The name of the index
+ * @param {String} params.type - The type of the document (use `_all` to fetch the first document matching the ID across all types)
+ */
+api.exists = ca({
+  params: {
+    parent: {
+      type: 'string'
+    },
+    preference: {
+      type: 'string'
+    },
+    realtime: {
+      type: 'boolean'
+    },
+    refresh: {
+      type: 'boolean'
+    },
+    routing: {
+      type: 'string'
+    }
+  },
+  url: {
+    fmt: '/<%=index%>/<%=type%>/<%=id%>',
+    req: {
+      index: {
+        type: 'string'
+      },
+      type: {
+        type: 'string'
+      },
+      id: {
+        type: 'string'
+      }
+    }
+  },
+  method: 'HEAD'
+});
+
+/**
+ * Perform a [explain](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-explain.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.analyzeWildcard - Specify whether wildcards and prefix queries in the query string query should be analyzed (default: false)
+ * @param {String} params.analyzer - The analyzer for the query string query
+ * @param {String} [params.defaultOperator=OR] - The default operator for query string query (AND or OR)
+ * @param {String} params.df - The default field for query string query (default: _all)
+ * @param {String, String[], Boolean} params.fields - A comma-separated list of fields to return in the response
+ * @param {Boolean} params.lenient - Specify whether format-based query failures (such as providing text to a numeric field) should be ignored
+ * @param {Boolean} params.lowercaseExpandedTerms - Specify whether query terms should be lowercased
+ * @param {String} params.parent - The ID of the parent document
+ * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random)
+ * @param {String} params.q - Query in the Lucene query string syntax
+ * @param {String} params.routing - Specific routing value
+ * @param {String} params.source - The URL-encoded query definition (instead of using the request body)
+ * @param {String, String[], Boolean} params._source - True or false to return the _source field or not, or a list of fields to return
+ * @param {String, String[], Boolean} params._sourceExclude - A list of fields to exclude from the returned _source field
+ * @param {String, String[], Boolean} params._sourceInclude - A list of fields to extract and return from the _source field
+ * @param {String} params.id - The document ID
+ * @param {String} params.index - The name of the index
+ * @param {String} params.type - The type of the document
+ */
+api.explain = ca({
+  params: {
+    analyzeWildcard: {
+      type: 'boolean',
+      name: 'analyze_wildcard'
+    },
+    analyzer: {
+      type: 'string'
+    },
+    defaultOperator: {
+      type: 'enum',
+      'default': 'OR',
+      options: [
+        'AND',
+        'OR'
+      ],
+      name: 'default_operator'
+    },
+    df: {
+      type: 'string'
+    },
+    fields: {
+      type: 'list'
+    },
+    lenient: {
+      type: 'boolean'
+    },
+    lowercaseExpandedTerms: {
+      type: 'boolean',
+      name: 'lowercase_expanded_terms'
+    },
+    parent: {
+      type: 'string'
+    },
+    preference: {
+      type: 'string'
+    },
+    q: {
+      type: 'string'
+    },
+    routing: {
+      type: 'string'
+    },
+    source: {
+      type: 'string'
+    },
+    _source: {
+      type: 'list'
+    },
+    _sourceExclude: {
+      type: 'list',
+      name: '_source_exclude'
+    },
+    _sourceInclude: {
+      type: 'list',
+      name: '_source_include'
+    }
+  },
+  url: {
+    fmt: '/<%=index%>/<%=type%>/<%=id%>/_explain',
+    req: {
+      index: {
+        type: 'string'
+      },
+      type: {
+        type: 'string'
+      },
+      id: {
+        type: 'string'
+      }
+    }
+  },
+  method: 'POST'
+});
+
+/**
+ * Perform a [get](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/docs-get.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String, String[], Boolean} params.fields - A comma-separated list of fields to return in the response
+ * @param {String} params.parent - The ID of the parent document
+ * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random)
+ * @param {Boolean} params.realtime - Specify whether to perform the operation in realtime or search mode
+ * @param {Boolean} params.refresh - Refresh the shard containing the document before performing the operation
+ * @param {String} params.routing - Specific routing value
+ * @param {String, String[], Boolean} params._source - True or false to return the _source field or not, or a list of fields to return
+ * @param {String, String[], Boolean} params._sourceExclude - A list of fields to exclude from the returned _source field
+ * @param {String, String[], Boolean} params._sourceInclude - A list of fields to extract and return from the _source field
+ * @param {Number} params.version - Explicit version number for concurrency control
+ * @param {String} params.versionType - Specific version type
+ * @param {String} params.id - The document ID
+ * @param {String} params.index - The name of the index
+ * @param {String} params.type - The type of the document (use `_all` to fetch the first document matching the ID across all types)
+ */
+api.get = ca({
+  params: {
+    fields: {
+      type: 'list'
+    },
+    parent: {
+      type: 'string'
+    },
+    preference: {
+      type: 'string'
+    },
+    realtime: {
+      type: 'boolean'
+    },
+    refresh: {
+      type: 'boolean'
+    },
+    routing: {
+      type: 'string'
+    },
+    _source: {
+      type: 'list'
+    },
+    _sourceExclude: {
+      type: 'list',
+      name: '_source_exclude'
+    },
+    _sourceInclude: {
+      type: 'list',
+      name: '_source_include'
+    },
+    version: {
+      type: 'number'
+    },
+    versionType: {
+      type: 'enum',
+      options: [
+        'internal',
+        'external'
+      ],
+      name: 'version_type'
+    }
+  },
+  url: {
+    fmt: '/<%=index%>/<%=type%>/<%=id%>',
+    req: {
+      index: {
+        type: 'string'
+      },
+      type: {
+        type: 'string'
+      },
+      id: {
+        type: 'string'
+      }
+    }
+  }
+});
+
+/**
+ * Perform a [getSource](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/docs-get.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String} params.parent - The ID of the parent document
+ * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random)
+ * @param {Boolean} params.realtime - Specify whether to perform the operation in realtime or search mode
+ * @param {Boolean} params.refresh - Refresh the shard containing the document before performing the operation
+ * @param {String} params.routing - Specific routing value
+ * @param {String, String[], Boolean} params._source - True or false to return the _source field or not, or a list of fields to return
+ * @param {String, String[], Boolean} params._sourceExclude - A list of fields to exclude from the returned _source field
+ * @param {String, String[], Boolean} params._sourceInclude - A list of fields to extract and return from the _source field
+ * @param {Number} params.version - Explicit version number for concurrency control
+ * @param {String} params.versionType - Specific version type
+ * @param {String} params.id - The document ID
+ * @param {String} params.index - The name of the index
+ * @param {String} params.type - The type of the document; use `_all` to fetch the first document matching the ID across all types
+ */
+api.getSource = ca({
+  params: {
+    parent: {
+      type: 'string'
+    },
+    preference: {
+      type: 'string'
+    },
+    realtime: {
+      type: 'boolean'
+    },
+    refresh: {
+      type: 'boolean'
+    },
+    routing: {
+      type: 'string'
+    },
+    _source: {
+      type: 'list'
+    },
+    _sourceExclude: {
+      type: 'list',
+      name: '_source_exclude'
+    },
+    _sourceInclude: {
+      type: 'list',
+      name: '_source_include'
+    },
+    version: {
+      type: 'number'
+    },
+    versionType: {
+      type: 'enum',
+      options: [
+        'internal',
+        'external'
+      ],
+      name: 'version_type'
+    }
+  },
+  url: {
+    fmt: '/<%=index%>/<%=type%>/<%=id%>/_source',
+    req: {
+      index: {
+        type: 'string'
+      },
+      type: {
+        type: 'string'
+      },
+      id: {
+        type: 'string'
+      }
+    }
+  }
+});
+
+/**
+ * Perform a [index](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/docs-index_.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String} params.consistency - Explicit write consistency setting for the operation
+ * @param {String} params.parent - ID of the parent document
+ * @param {Boolean} params.refresh - Refresh the index after performing the operation
+ * @param {String} [params.replication=sync] - Specific replication type
+ * @param {String} params.routing - Specific routing value
+ * @param {Date, Number} params.timeout - Explicit operation timeout
+ * @param {Date, Number} params.timestamp - Explicit timestamp for the document
+ * @param {Duration} params.ttl - Expiration time for the document
+ * @param {Number} params.version - Explicit version number for concurrency control
+ * @param {String} params.versionType - Specific version type
+ * @param {String} params.id - Document ID
+ * @param {String} params.index - The name of the index
+ * @param {String} params.type - The type of the document
+ */
+api.index = ca({
+  params: {
+    consistency: {
+      type: 'enum',
+      options: [
+        'one',
+        'quorum',
+        'all'
+      ]
+    },
+    opType: {
+      type: 'enum',
+      'default': 'index',
+      options: [
+        'index',
+        'create'
+      ],
+      name: 'op_type'
+    },
+    parent: {
+      type: 'string'
+    },
+    refresh: {
+      type: 'boolean'
+    },
+    replication: {
+      type: 'enum',
+      'default': 'sync',
+      options: [
+        'sync',
+        'async'
+      ]
+    },
+    routing: {
+      type: 'string'
+    },
+    timeout: {
+      type: 'time'
+    },
+    timestamp: {
+      type: 'time'
+    },
+    ttl: {
+      type: 'duration'
+    },
+    version: {
+      type: 'number'
+    },
+    versionType: {
+      type: 'enum',
+      options: [
+        'internal',
+        'external'
+      ],
+      name: 'version_type'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/<%=type%>/<%=id%>',
+      req: {
+        index: {
+          type: 'string'
+        },
+        type: {
+          type: 'string'
+        },
+        id: {
+          type: 'string'
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/<%=type%>',
+      req: {
+        index: {
+          type: 'string'
+        },
+        type: {
+          type: 'string'
+        }
+      }
+    }
+  ],
+  needBody: true,
+  method: 'POST'
+});
+
+api.indices = function IndicesNS(transport) {
+  this.transport = transport;
+};
+
+/**
+ * Perform a [indices.analyze](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-analyze.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String} params.analyzer - The name of the analyzer to use
+ * @param {String} params.field - Use the analyzer configured for this field (instead of passing the analyzer name)
+ * @param {String, String[], Boolean} params.filters - A comma-separated list of filters to use for the analysis
+ * @param {String} params.index - The name of the index to scope the operation
+ * @param {Boolean} params.preferLocal - With `true`, specify that a local shard should be used if available, with `false`, use a random shard (default: true)
+ * @param {String} params.text - The text on which the analysis should be performed (when request body is not used)
+ * @param {String} params.tokenizer - The name of the tokenizer to use for the analysis
+ * @param {String} [params.format=detailed] - Format of the output
+ */
+api.indices.prototype.analyze = ca({
+  params: {
+    analyzer: {
+      type: 'string'
+    },
+    field: {
+      type: 'string'
+    },
+    filters: {
+      type: 'list'
+    },
+    index: {
+      type: 'string'
+    },
+    preferLocal: {
+      type: 'boolean',
+      name: 'prefer_local'
+    },
+    text: {
+      type: 'string'
+    },
+    tokenizer: {
+      type: 'string'
+    },
+    format: {
+      type: 'enum',
+      'default': 'detailed',
+      options: [
+        'detailed',
+        'text'
+      ]
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/_analyze',
+      req: {
+        index: {
+          type: 'string'
+        }
+      }
+    },
+    {
+      fmt: '/_analyze'
+    }
+  ],
+  method: 'POST'
+});
+
+/**
+ * Perform a [indices.clearCache](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-clearcache.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.fieldData - Clear field data
+ * @param {Boolean} params.fielddata - Clear field data
+ * @param {String, String[], Boolean} params.fields - A comma-separated list of fields to clear when using the `field_data` parameter (default: all)
+ * @param {Boolean} params.filter - Clear filter caches
+ * @param {Boolean} params.filterCache - Clear filter caches
+ * @param {Boolean} params.filterKeys - A comma-separated list of keys to clear when using the `filter_cache` parameter (default: all)
+ * @param {Boolean} params.id - Clear ID caches for parent/child
+ * @param {Boolean} params.idCache - Clear ID caches for parent/child
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index name to limit the operation
+ * @param {Boolean} params.recycler - Clear the recycler cache
+ */
+api.indices.prototype.clearCache = ca({
+  params: {
+    fieldData: {
+      type: 'boolean',
+      name: 'field_data'
+    },
+    fielddata: {
+      type: 'boolean'
+    },
+    fields: {
+      type: 'list'
+    },
+    filter: {
+      type: 'boolean'
+    },
+    filterCache: {
+      type: 'boolean',
+      name: 'filter_cache'
+    },
+    filterKeys: {
+      type: 'boolean',
+      name: 'filter_keys'
+    },
+    id: {
+      type: 'boolean'
+    },
+    idCache: {
+      type: 'boolean',
+      name: 'id_cache'
+    },
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    },
+    index: {
+      type: 'list'
+    },
+    recycler: {
+      type: 'boolean'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/_cache/clear',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_cache/clear'
+    }
+  ],
+  method: 'POST'
+});
+
+/**
+ * Perform a [indices.close](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-open-close.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.timeout - Explicit operation timeout
+ * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {String} params.index - The name of the index
+ */
+api.indices.prototype.close = ca({
+  params: {
+    timeout: {
+      type: 'time'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    }
+  },
+  url: {
+    fmt: '/<%=index%>/_close',
+    req: {
+      index: {
+        type: 'string'
+      }
+    }
+  },
+  method: 'POST'
+});
+
+/**
+ * Perform a [indices.create](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-create-index.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.timeout - Explicit operation timeout
+ * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
+ * @param {String} params.index - The name of the index
+ */
+api.indices.prototype.create = ca({
+  params: {
+    timeout: {
+      type: 'time'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    }
+  },
+  url: {
+    fmt: '/<%=index%>',
+    req: {
+      index: {
+        type: 'string'
+      }
+    }
+  },
+  method: 'POST'
+});
+
+/**
+ * Perform a [indices.delete](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-delete-index.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.timeout - Explicit operation timeout
+ * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
+ * @param {String, String[], Boolean} params.index - A comma-separated list of indices to delete; use `_all` or `*` string to delete all indices
+ */
+api.indices.prototype['delete'] = ca({
+  params: {
+    timeout: {
+      type: 'time'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    }
+  },
+  url: {
+    fmt: '/<%=index%>',
+    req: {
+      index: {
+        type: 'list'
+      }
+    }
+  },
+  method: 'DELETE'
+});
+
+/**
+ * Perform a [indices.deleteAlias](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-aliases.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.timeout - Explicit timestamp for the document
+ * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names (supports wildcards); use `_all` for all indices
+ * @param {String, String[], Boolean} params.name - A comma-separated list of aliases to delete (supports wildcards); use `_all` to delete all aliases for the specified indices.
+ */
+api.indices.prototype.deleteAlias = ca({
+  params: {
+    timeout: {
+      type: 'time'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    }
+  },
+  url: {
+    fmt: '/<%=index%>/_alias/<%=name%>',
+    req: {
+      index: {
+        type: 'list'
+      },
+      name: {
+        type: 'list'
+      }
+    }
+  },
+  method: 'DELETE'
+});
+
+/**
+ * Perform a [indices.deleteMapping](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-delete-mapping.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names (supports wildcards); use `_all` for all indices
+ * @param {String, String[], Boolean} params.type - A comma-separated list of document types to delete (supports wildcards); use `_all` to delete all document types in the specified indices.
+ */
+api.indices.prototype.deleteMapping = ca({
+  params: {
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    }
+  },
+  url: {
+    fmt: '/<%=index%>/<%=type%>/_mapping',
+    req: {
+      index: {
+        type: 'list'
+      },
+      type: {
+        type: 'list'
+      }
+    }
+  },
+  method: 'DELETE'
+});
+
+/**
+ * Perform a [indices.deleteTemplate](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-templates.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.timeout - Explicit operation timeout
+ * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
+ * @param {String} params.name - The name of the template
+ */
+api.indices.prototype.deleteTemplate = ca({
+  params: {
+    timeout: {
+      type: 'time'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    }
+  },
+  url: {
+    fmt: '/_template/<%=name%>',
+    req: {
+      name: {
+        type: 'string'
+      }
+    }
+  },
+  method: 'DELETE'
+});
+
+/**
+ * Perform a [indices.deleteWarmer](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-warmers.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
+ * @param {String, String[], Boolean} params.name - A comma-separated list of warmer names to delete (supports wildcards); use `_all` to delete all warmers in the specified indices. You must specify a name either in the uri or in the parameters.
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names to delete warmers from (supports wildcards); use `_all` to perform the operation on all indices.
+ */
+api.indices.prototype.deleteWarmer = ca({
+  params: {
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    name: {
+      type: 'list'
+    }
+  },
+  url: {
+    fmt: '/<%=index%>/_warmer/<%=name%>',
+    req: {
+      index: {
+        type: 'list'
+      },
+      name: {
+        type: 'list'
+      }
+    }
+  },
+  method: 'DELETE'
+});
+
+/**
+ * Perform a [indices.exists](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-get-settings.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {String, String[], Boolean} params.index - A comma-separated list of indices to check
+ */
+api.indices.prototype.exists = ca({
+  params: {
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    },
+    local: {
+      type: 'boolean'
+    }
+  },
+  url: {
+    fmt: '/<%=index%>',
+    req: {
+      index: {
+        type: 'list'
+      }
+    }
+  },
+  method: 'HEAD'
+});
+
+/**
+ * Perform a [indices.existsAlias](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-aliases.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open,closed] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names to filter aliases
+ * @param {String, String[], Boolean} params.name - A comma-separated list of alias names to return
+ */
+api.indices.prototype.existsAlias = ca({
+  params: {
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': [
+        'open',
+        'closed'
+      ],
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    },
+    local: {
+      type: 'boolean'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/_alias/<%=name%>',
+      req: {
+        index: {
+          type: 'list'
+        },
+        name: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_alias/<%=name%>',
+      req: {
+        name: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/_alias',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    }
+  ],
+  method: 'HEAD'
+});
+
+/**
+ * Perform a [indices.existsTemplate](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-templates.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {String} params.name - The name of the template
+ */
+api.indices.prototype.existsTemplate = ca({
+  params: {
+    local: {
+      type: 'boolean'
+    }
+  },
+  url: {
+    fmt: '/_template/<%=name%>',
+    req: {
+      name: {
+        type: 'string'
+      }
+    }
+  },
+  method: 'HEAD'
+});
+
+/**
+ * Perform a [indices.existsType](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-types-exists.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` to check the types across all indices
+ * @param {String, String[], Boolean} params.type - A comma-separated list of document types to check
+ */
+api.indices.prototype.existsType = ca({
+  params: {
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    },
+    local: {
+      type: 'boolean'
+    }
+  },
+  url: {
+    fmt: '/<%=index%>/<%=type%>',
+    req: {
+      index: {
+        type: 'list'
+      },
+      type: {
+        type: 'list'
+      }
+    }
+  },
+  method: 'HEAD'
+});
+
+/**
+ * Perform a [indices.flush](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-flush.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.force - Whether a flush should be forced even if it is not necessarily needed ie. if no changes will be committed to the index. This is useful if transaction log IDs should be incremented even if no uncommitted changes are present. (This setting can be considered as internal)
+ * @param {Boolean} params.full - If set to true a new index writer is created and settings that have been changed related to the index writer will be refreshed. Note: if a full flush is required for a setting to take effect this will be part of the settings update process and it not required to be executed by the user. (This setting can be considered as internal)
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` or empty string for all indices
+ */
+api.indices.prototype.flush = ca({
+  params: {
+    force: {
+      type: 'boolean'
+    },
+    full: {
+      type: 'boolean'
+    },
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/_flush',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_flush'
+    }
+  ],
+  method: 'POST'
+});
+
+/**
+ * Perform a [indices.getAlias](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-aliases.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names to filter aliases
+ * @param {String, String[], Boolean} params.name - A comma-separated list of alias names to return
+ */
+api.indices.prototype.getAlias = ca({
+  params: {
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    },
+    local: {
+      type: 'boolean'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/_alias/<%=name%>',
+      req: {
+        index: {
+          type: 'list'
+        },
+        name: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_alias/<%=name%>',
+      req: {
+        name: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/_alias',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_alias'
+    }
+  ]
+});
+
+/**
+ * Perform a [indices.getAliases](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-aliases.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.timeout - Explicit operation timeout
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names to filter aliases
+ * @param {String, String[], Boolean} params.name - A comma-separated list of alias names to filter
+ */
+api.indices.prototype.getAliases = ca({
+  params: {
+    timeout: {
+      type: 'time'
+    },
+    local: {
+      type: 'boolean'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/_aliases/<%=name%>',
+      req: {
+        index: {
+          type: 'list'
+        },
+        name: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/_aliases',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_aliases/<%=name%>',
+      req: {
+        name: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_aliases'
+    }
+  ]
+});
+
+/**
+ * Perform a [indices.getFieldMapping](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-get-field-mapping.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.includeDefaults - Whether the default mapping values should be returned as well
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names
+ * @param {String, String[], Boolean} params.type - A comma-separated list of document types
+ * @param {String, String[], Boolean} params.field - A comma-separated list of fields
+ */
+api.indices.prototype.getFieldMapping = ca({
+  params: {
+    includeDefaults: {
+      type: 'boolean',
+      name: 'include_defaults'
+    },
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    },
+    local: {
+      type: 'boolean'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/_mapping/<%=type%>/field/<%=field%>',
+      req: {
+        index: {
+          type: 'list'
+        },
+        type: {
+          type: 'list'
+        },
+        field: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/_mapping/field/<%=field%>',
+      req: {
+        index: {
+          type: 'list'
+        },
+        field: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_mapping/<%=type%>/field/<%=field%>',
+      req: {
+        type: {
+          type: 'list'
+        },
+        field: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_mapping/field/<%=field%>',
+      req: {
+        field: {
+          type: 'list'
+        }
+      }
+    }
+  ]
+});
+
+/**
+ * Perform a [indices.getMapping](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-get-mapping.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names
+ * @param {String, String[], Boolean} params.type - A comma-separated list of document types
+ */
+api.indices.prototype.getMapping = ca({
+  params: {
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    },
+    local: {
+      type: 'boolean'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/_mapping/<%=type%>',
+      req: {
+        index: {
+          type: 'list'
+        },
+        type: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/_mapping',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_mapping/<%=type%>',
+      req: {
+        type: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_mapping'
+    }
+  ]
+});
+
+/**
+ * Perform a [indices.getSettings](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-get-mapping.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open,closed] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {Boolean} params.flatSettings - Return settings in flat format (default: false)
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` or empty string to perform the operation on all indices
+ * @param {String, String[], Boolean} params.name - The name of the settings that should be included
+ */
+api.indices.prototype.getSettings = ca({
+  params: {
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': [
+        'open',
+        'closed'
+      ],
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    },
+    flatSettings: {
+      type: 'boolean',
+      name: 'flat_settings'
+    },
+    local: {
+      type: 'boolean'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/_settings/<%=name%>',
+      req: {
+        index: {
+          type: 'list'
+        },
+        name: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/_settings',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_settings/<%=name%>',
+      req: {
+        name: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_settings'
+    }
+  ]
+});
+
+/**
+ * Perform a [indices.getTemplate](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-templates.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.flatSettings - Return settings in flat format (default: false)
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {String} params.name - The name of the template
+ */
+api.indices.prototype.getTemplate = ca({
+  params: {
+    flatSettings: {
+      type: 'boolean',
+      name: 'flat_settings'
+    },
+    local: {
+      type: 'boolean'
+    }
+  },
+  urls: [
+    {
+      fmt: '/_template/<%=name%>',
+      req: {
+        name: {
+          type: 'string'
+        }
+      }
+    },
+    {
+      fmt: '/_template'
+    }
+  ]
+});
+
+/**
+ * Perform a [indices.getWarmer](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-warmers.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names to restrict the operation; use `_all` to perform the operation on all indices
+ * @param {String, String[], Boolean} params.name - The name of the warmer (supports wildcards); leave empty to get all warmers
+ * @param {String, String[], Boolean} params.type - A comma-separated list of document types to restrict the operation; leave empty to perform the operation on all types
+ */
+api.indices.prototype.getWarmer = ca({
+  params: {
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    },
+    local: {
+      type: 'boolean'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/<%=type%>/_warmer/<%=name%>',
+      req: {
+        index: {
+          type: 'list'
+        },
+        type: {
+          type: 'list'
+        },
+        name: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/_warmer/<%=name%>',
+      req: {
+        index: {
+          type: 'list'
+        },
+        name: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/_warmer',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_warmer/<%=name%>',
+      req: {
+        name: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_warmer'
+    }
+  ]
+});
+
+/**
+ * Perform a [indices.open](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-open-close.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.timeout - Explicit operation timeout
+ * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=closed] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {String} params.index - The name of the index
+ */
+api.indices.prototype.open = ca({
+  params: {
+    timeout: {
+      type: 'time'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'closed',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    }
+  },
+  url: {
+    fmt: '/<%=index%>/_open',
+    req: {
+      index: {
+        type: 'string'
+      }
+    }
+  },
+  method: 'POST'
+});
+
+/**
+ * Perform a [indices.optimize](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-optimize.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.flush - Specify whether the index should be flushed after performing the operation (default: true)
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {Number} params.maxNumSegments - The number of segments the index should be merged into (default: dynamic)
+ * @param {Boolean} params.onlyExpungeDeletes - Specify whether the operation should only expunge deleted documents
+ * @param {Anything} params.operationThreading - TODO: ?
+ * @param {Boolean} params.waitForMerge - Specify whether the request should block until the merge process is finished (default: true)
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` or empty string to perform the operation on all indices
+ */
+api.indices.prototype.optimize = ca({
+  params: {
+    flush: {
+      type: 'boolean'
+    },
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    },
+    maxNumSegments: {
+      type: 'number',
+      name: 'max_num_segments'
+    },
+    onlyExpungeDeletes: {
+      type: 'boolean',
+      name: 'only_expunge_deletes'
+    },
+    operationThreading: {
+      name: 'operation_threading'
+    },
+    waitForMerge: {
+      type: 'boolean',
+      name: 'wait_for_merge'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/_optimize',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_optimize'
+    }
+  ],
+  method: 'POST'
+});
+
+/**
+ * Perform a [indices.putAlias](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-aliases.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.timeout - Explicit timestamp for the document
+ * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names the alias should point to (supports wildcards); use `_all` or omit to perform the operation on all indices.
+ * @param {String} params.name - The name of the alias to be created or updated
+ */
+api.indices.prototype.putAlias = ca({
+  params: {
+    timeout: {
+      type: 'time'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/_alias/<%=name%>',
+      req: {
+        index: {
+          type: 'list'
+        },
+        name: {
+          type: 'string'
+        }
+      }
+    },
+    {
+      fmt: '/_alias/<%=name%>',
+      req: {
+        name: {
+          type: 'string'
+        }
+      }
+    }
+  ],
+  method: 'PUT'
+});
+
+/**
+ * Perform a [indices.putMapping](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-put-mapping.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.ignoreConflicts - Specify whether to ignore conflicts while updating the mapping (default: false)
+ * @param {Date, Number} params.timeout - Explicit operation timeout
+ * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names the mapping should be added to (supports wildcards); use `_all` or omit to add the mapping on all indices.
+ * @param {String} params.type - The name of the document type
+ */
+api.indices.prototype.putMapping = ca({
+  params: {
+    ignoreConflicts: {
+      type: 'boolean',
+      name: 'ignore_conflicts'
+    },
+    timeout: {
+      type: 'time'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/_mapping/<%=type%>',
+      req: {
+        index: {
+          type: 'list'
+        },
+        type: {
+          type: 'string'
+        }
+      }
+    },
+    {
+      fmt: '/_mapping/<%=type%>',
+      req: {
+        type: {
+          type: 'string'
+        }
+      }
+    }
+  ],
+  needBody: true,
+  method: 'PUT'
+});
+
+/**
+ * Perform a [indices.putSettings](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-update-settings.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {Boolean} params.flatSettings - Return settings in flat format (default: false)
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` or empty string to perform the operation on all indices
+ */
+api.indices.prototype.putSettings = ca({
+  params: {
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    },
+    flatSettings: {
+      type: 'boolean',
+      name: 'flat_settings'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/_settings',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_settings'
+    }
+  ],
+  needBody: true,
+  method: 'PUT'
+});
+
+/**
+ * Perform a [indices.putTemplate](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-templates.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Number} params.order - The order for this template when merging multiple matching ones (higher numbers are merged later, overriding the lower numbers)
+ * @param {Date, Number} params.timeout - Explicit operation timeout
+ * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
+ * @param {Boolean} params.flatSettings - Return settings in flat format (default: false)
+ * @param {String} params.name - The name of the template
+ */
+api.indices.prototype.putTemplate = ca({
+  params: {
+    order: {
+      type: 'number'
+    },
+    timeout: {
+      type: 'time'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    flatSettings: {
+      type: 'boolean',
+      name: 'flat_settings'
+    }
+  },
+  url: {
+    fmt: '/_template/<%=name%>',
+    req: {
+      name: {
+        type: 'string'
+      }
+    }
+  },
+  needBody: true,
+  method: 'PUT'
+});
+
+/**
+ * Perform a [indices.putWarmer](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-warmers.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed) in the search request to warm
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices in the search request to warm. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both, in the search request to warm.
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names to register the warmer for; use `_all` or omit to perform the operation on all indices
+ * @param {String} params.name - The name of the warmer
+ * @param {String, String[], Boolean} params.type - A comma-separated list of document types to register the warmer for; leave empty to perform the operation on all types
+ */
+api.indices.prototype.putWarmer = ca({
+  params: {
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/<%=type%>/_warmer/<%=name%>',
+      req: {
+        index: {
+          type: 'list'
+        },
+        type: {
+          type: 'list'
+        },
+        name: {
+          type: 'string'
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/_warmer/<%=name%>',
+      req: {
+        index: {
+          type: 'list'
+        },
+        name: {
+          type: 'string'
+        }
+      }
+    },
+    {
+      fmt: '/_warmer/<%=name%>',
+      req: {
+        name: {
+          type: 'string'
+        }
+      }
+    }
+  ],
+  needBody: true,
+  method: 'PUT'
+});
+
+/**
+ * Perform a [indices.refresh](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-refresh.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {Boolean} params.force - Force a refresh even if not required
+ * @param {Anything} params.operationThreading - TODO: ?
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` or empty string to perform the operation on all indices
+ */
+api.indices.prototype.refresh = ca({
+  params: {
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    },
+    force: {
+      type: 'boolean',
+      'default': false
+    },
+    operationThreading: {
+      name: 'operation_threading'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/_refresh',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_refresh'
+    }
+  ],
+  method: 'POST'
+});
+
+/**
+ * Perform a [indices.segments](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-segments.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {Boolean} params.human - Whether to return time and byte values in human-readable format.
+ * @param {Anything} params.operationThreading - TODO: ?
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` or empty string to perform the operation on all indices
+ */
+api.indices.prototype.segments = ca({
+  params: {
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    },
+    human: {
+      type: 'boolean',
+      'default': false
+    },
+    operationThreading: {
+      name: 'operation_threading'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/_segments',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_segments'
+    }
+  ]
+});
+
+/**
+ * Perform a [indices.snapshotIndex](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-gateway-snapshot.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` or empty string for all indices
+ */
+api.indices.prototype.snapshotIndex = ca({
+  params: {
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/_gateway/snapshot',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_gateway/snapshot'
+    }
+  ],
+  method: 'POST'
+});
+
+/**
+ * Perform a [indices.stats](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-stats.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String, String[], Boolean} params.completionFields - A comma-separated list of fields for `fielddata` and `suggest` index metric (supports wildcards)
+ * @param {String, String[], Boolean} params.fielddataFields - A comma-separated list of fields for `fielddata` index metric (supports wildcards)
+ * @param {String, String[], Boolean} params.fields - A comma-separated list of fields for `fielddata` and `completion` index metric (supports wildcards)
+ * @param {Boolean} params.groups - A comma-separated list of search groups for `search` index metric
+ * @param {Boolean} params.human - Whether to return time and byte values in human-readable format.
+ * @param {String} [params.level=indices] - Return stats aggregated at cluster, index or shard level
+ * @param {String, String[], Boolean} params.types - A comma-separated list of document types for the `indexing` index metric
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` or empty string to perform the operation on all indices
+ * @param {String, String[], Boolean} params.metric - Limit the information returned the specific metrics.
+ */
+api.indices.prototype.stats = ca({
+  params: {
+    completionFields: {
+      type: 'list',
+      name: 'completion_fields'
+    },
+    fielddataFields: {
+      type: 'list',
+      name: 'fielddata_fields'
+    },
+    fields: {
+      type: 'list'
+    },
+    groups: {
+      type: 'boolean'
+    },
+    human: {
+      type: 'boolean',
+      'default': false
+    },
+    level: {
+      type: 'enum',
+      'default': 'indices',
+      options: [
+        'cluster',
+        'indices',
+        'shards'
+      ]
+    },
+    types: {
+      type: 'list'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/_stats/<%=metric%>',
+      req: {
+        index: {
+          type: 'list'
+        },
+        metric: {
+          type: 'list',
+          options: [
+            '_all',
+            'completion',
+            'docs',
+            'fielddata',
+            'filter_cache',
+            'flush',
+            'get',
+            'id_cache',
+            'indexing',
+            'merge',
+            'percolate',
+            'refresh',
+            'search',
+            'segments',
+            'store',
+            'warmer'
+          ]
+        }
+      }
+    },
+    {
+      fmt: '/_stats/<%=metric%>',
+      req: {
+        metric: {
+          type: 'list',
+          options: [
+            '_all',
+            'completion',
+            'docs',
+            'fielddata',
+            'filter_cache',
+            'flush',
+            'get',
+            'id_cache',
+            'indexing',
+            'merge',
+            'percolate',
+            'refresh',
+            'search',
+            'segments',
+            'store',
+            'warmer'
+          ]
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/_stats',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_stats'
+    }
+  ]
+});
+
+/**
+ * Perform a [indices.status](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-status.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {Boolean} params.human - Whether to return time and byte values in human-readable format.
+ * @param {Anything} params.operationThreading - TODO: ?
+ * @param {Boolean} params.recovery - Return information about shard recovery
+ * @param {Boolean} params.snapshot - TODO: ?
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names; use `_all` or empty string to perform the operation on all indices
+ */
+api.indices.prototype.status = ca({
+  params: {
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    },
+    human: {
+      type: 'boolean',
+      'default': false
+    },
+    operationThreading: {
+      name: 'operation_threading'
+    },
+    recovery: {
+      type: 'boolean'
+    },
+    snapshot: {
+      type: 'boolean'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/_status',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_status'
+    }
+  ]
+});
+
+/**
+ * Perform a [indices.updateAliases](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/indices-aliases.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.timeout - Request timeout
+ * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
+ */
+api.indices.prototype.updateAliases = ca({
+  params: {
+    timeout: {
+      type: 'time'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    }
+  },
+  url: {
+    fmt: '/_aliases'
+  },
+  needBody: true,
+  method: 'POST'
+});
+
+/**
+ * Perform a [indices.validateQuery](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-validate.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.explain - Return detailed information about the error
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {Anything} params.operationThreading - TODO: ?
+ * @param {String} params.source - The URL-encoded query definition (instead of using the request body)
+ * @param {String} params.q - Query in the Lucene query string syntax
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names to restrict the operation; use `_all` or empty string to perform the operation on all indices
+ * @param {String, String[], Boolean} params.type - A comma-separated list of document types to restrict the operation; leave empty to perform the operation on all types
+ */
+api.indices.prototype.validateQuery = ca({
+  params: {
+    explain: {
+      type: 'boolean'
+    },
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    },
+    operationThreading: {
+      name: 'operation_threading'
+    },
+    source: {
+      type: 'string'
+    },
+    q: {
+      type: 'string'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/<%=type%>/_validate/query',
+      req: {
+        index: {
+          type: 'list'
+        },
+        type: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/_validate/query',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_validate/query'
+    }
+  ],
+  method: 'POST'
+});
+
+/**
+ * Perform a [info](http://www.elasticsearch.org/guide/) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ */
+api.info = ca({
+  url: {
+    fmt: '/'
+  }
+});
+
+/**
+ * Perform a [mget](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/docs-multi-get.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String, String[], Boolean} params.fields - A comma-separated list of fields to return in the response
+ * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random)
+ * @param {Boolean} params.realtime - Specify whether to perform the operation in realtime or search mode
+ * @param {Boolean} params.refresh - Refresh the shard containing the document before performing the operation
+ * @param {String, String[], Boolean} params._source - True or false to return the _source field or not, or a list of fields to return
+ * @param {String, String[], Boolean} params._sourceExclude - A list of fields to exclude from the returned _source field
+ * @param {String, String[], Boolean} params._sourceInclude - A list of fields to extract and return from the _source field
+ * @param {String} params.index - The name of the index
+ * @param {String} params.type - The type of the document
+ */
+api.mget = ca({
+  params: {
+    fields: {
+      type: 'list'
+    },
+    preference: {
+      type: 'string'
+    },
+    realtime: {
+      type: 'boolean'
+    },
+    refresh: {
+      type: 'boolean'
+    },
+    _source: {
+      type: 'list'
+    },
+    _sourceExclude: {
+      type: 'list',
+      name: '_source_exclude'
+    },
+    _sourceInclude: {
+      type: 'list',
+      name: '_source_include'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/<%=type%>/_mget',
+      req: {
+        index: {
+          type: 'string'
+        },
+        type: {
+          type: 'string'
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/_mget',
+      req: {
+        index: {
+          type: 'string'
+        }
+      }
+    },
+    {
+      fmt: '/_mget'
+    }
+  ],
+  needBody: true,
+  method: 'POST'
+});
+
+/**
+ * Perform a [mlt](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-more-like-this.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Number} params.boostTerms - The boost factor
+ * @param {Number} params.maxDocFreq - The word occurrence frequency as count: words with higher occurrence in the corpus will be ignored
+ * @param {Number} params.maxQueryTerms - The maximum query terms to be included in the generated query
+ * @param {Number} params.maxWordLength - The minimum length of the word: longer words will be ignored
+ * @param {Number} params.minDocFreq - The word occurrence frequency as count: words with lower occurrence in the corpus will be ignored
+ * @param {Number} params.minTermFreq - The term frequency as percent: terms with lower occurence in the source document will be ignored
+ * @param {Number} params.minWordLength - The minimum length of the word: shorter words will be ignored
+ * @param {String, String[], Boolean} params.mltFields - Specific fields to perform the query against
+ * @param {Number} params.percentTermsToMatch - How many terms have to match in order to consider the document a match (default: 0.3)
+ * @param {String} params.routing - Specific routing value
+ * @param {Number} params.searchFrom - The offset from which to return results
+ * @param {String, String[], Boolean} params.searchIndices - A comma-separated list of indices to perform the query against (default: the index containing the document)
+ * @param {String} params.searchQueryHint - The search query hint
+ * @param {String} params.searchScroll - A scroll search request definition
+ * @param {Number} params.searchSize - The number of documents to return (default: 10)
+ * @param {String} params.searchSource - A specific search request definition (instead of using the request body)
+ * @param {String} params.searchType - Specific search type (eg. `dfs_then_fetch`, `count`, etc)
+ * @param {String, String[], Boolean} params.searchTypes - A comma-separated list of types to perform the query against (default: the same type as the document)
+ * @param {String, String[], Boolean} params.stopWords - A list of stop words to be ignored
+ * @param {String} params.id - The document ID
+ * @param {String} params.index - The name of the index
+ * @param {String} params.type - The type of the document (use `_all` to fetch the first document matching the ID across all types)
+ */
+api.mlt = ca({
+  params: {
+    boostTerms: {
+      type: 'number',
+      name: 'boost_terms'
+    },
+    maxDocFreq: {
+      type: 'number',
+      name: 'max_doc_freq'
+    },
+    maxQueryTerms: {
+      type: 'number',
+      name: 'max_query_terms'
+    },
+    maxWordLength: {
+      type: 'number',
+      name: 'max_word_length'
+    },
+    minDocFreq: {
+      type: 'number',
+      name: 'min_doc_freq'
+    },
+    minTermFreq: {
+      type: 'number',
+      name: 'min_term_freq'
+    },
+    minWordLength: {
+      type: 'number',
+      name: 'min_word_length'
+    },
+    mltFields: {
+      type: 'list',
+      name: 'mlt_fields'
+    },
+    percentTermsToMatch: {
+      type: 'number',
+      name: 'percent_terms_to_match'
+    },
+    routing: {
+      type: 'string'
+    },
+    searchFrom: {
+      type: 'number',
+      name: 'search_from'
+    },
+    searchIndices: {
+      type: 'list',
+      name: 'search_indices'
+    },
+    searchQueryHint: {
+      type: 'string',
+      name: 'search_query_hint'
+    },
+    searchScroll: {
+      type: 'string',
+      name: 'search_scroll'
+    },
+    searchSize: {
+      type: 'number',
+      name: 'search_size'
+    },
+    searchSource: {
+      type: 'string',
+      name: 'search_source'
+    },
+    searchType: {
+      type: 'string',
+      name: 'search_type'
+    },
+    searchTypes: {
+      type: 'list',
+      name: 'search_types'
+    },
+    stopWords: {
+      type: 'list',
+      name: 'stop_words'
+    }
+  },
+  url: {
+    fmt: '/<%=index%>/<%=type%>/<%=id%>/_mlt',
+    req: {
+      index: {
+        type: 'string'
+      },
+      type: {
+        type: 'string'
+      },
+      id: {
+        type: 'string'
+      }
+    }
+  },
+  method: 'POST'
+});
+
+/**
+ * Perform a [mpercolate](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-percolate.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {String} params.index - The index of the document being count percolated to use as default
+ * @param {String} params.type - The type of the document being percolated to use as default.
+ */
+api.mpercolate = ca({
+  params: {
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/<%=type%>/_mpercolate',
+      req: {
+        index: {
+          type: 'string'
+        },
+        type: {
+          type: 'string'
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/_mpercolate',
+      req: {
+        index: {
+          type: 'string'
+        }
+      }
+    },
+    {
+      fmt: '/_mpercolate'
+    }
+  ],
+  needBody: true,
+  bulkBody: true,
+  method: 'POST'
+});
+
+/**
+ * Perform a [msearch](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-multi-search.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String} params.searchType - Search operation type
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names to use as default
+ * @param {String, String[], Boolean} params.type - A comma-separated list of document types to use as default
+ */
+api.msearch = ca({
+  params: {
+    searchType: {
+      type: 'enum',
+      options: [
+        'query_then_fetch',
+        'query_and_fetch',
+        'dfs_query_then_fetch',
+        'dfs_query_and_fetch',
+        'count',
+        'scan'
+      ],
+      name: 'search_type'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/<%=type%>/_msearch',
+      req: {
+        index: {
+          type: 'list'
+        },
+        type: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/_msearch',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_msearch'
+    }
+  ],
+  needBody: true,
+  bulkBody: true,
+  method: 'POST'
+});
+
+/**
+ * Perform a [mtermvectors](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/docs-multi-termvectors.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String, String[], Boolean} params.ids - A comma-separated list of documents ids. You must define ids as parameter or set "ids" or "docs" in the request body
+ * @param {Boolean} params.termStatistics - Specifies if total term frequency and document frequency should be returned. Applies to all returned documents unless otherwise specified in body "params" or "docs".
+ * @param {Boolean} [params.fieldStatistics=true] - Specifies if document count, sum of document frequencies and sum of total term frequencies should be returned. Applies to all returned documents unless otherwise specified in body "params" or "docs".
+ * @param {String, String[], Boolean} params.fields - A comma-separated list of fields to return. Applies to all returned documents unless otherwise specified in body "params" or "docs".
+ * @param {Boolean} [params.offsets=true] - Specifies if term offsets should be returned. Applies to all returned documents unless otherwise specified in body "params" or "docs".
+ * @param {Boolean} [params.positions=true] - Specifies if term positions should be returned. Applies to all returned documents unless otherwise specified in body "params" or "docs".
+ * @param {Boolean} [params.payloads=true] - Specifies if term payloads should be returned. Applies to all returned documents unless otherwise specified in body "params" or "docs".
+ * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random) .Applies to all returned documents unless otherwise specified in body "params" or "docs".
+ * @param {String} params.routing - Specific routing value. Applies to all returned documents unless otherwise specified in body "params" or "docs".
+ * @param {String} params.parent - Parent id of documents. Applies to all returned documents unless otherwise specified in body "params" or "docs".
+ * @param {String} params.index - The index in which the document resides.
+ * @param {String} params.type - The type of the document.
+ * @param {String} params.id - The id of the document.
+ */
+api.mtermvectors = ca({
+  params: {
+    ids: {
+      type: 'list',
+      required: false
+    },
+    termStatistics: {
+      type: 'boolean',
+      'default': false,
+      required: false,
+      name: 'term_statistics'
+    },
+    fieldStatistics: {
+      type: 'boolean',
+      'default': true,
+      required: false,
+      name: 'field_statistics'
+    },
+    fields: {
+      type: 'list',
+      required: false
+    },
+    offsets: {
+      type: 'boolean',
+      'default': true,
+      required: false
+    },
+    positions: {
+      type: 'boolean',
+      'default': true,
+      required: false
+    },
+    payloads: {
+      type: 'boolean',
+      'default': true,
+      required: false
+    },
+    preference: {
+      type: 'string',
+      required: false
+    },
+    routing: {
+      type: 'string',
+      required: false
+    },
+    parent: {
+      type: 'string',
+      required: false
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/<%=type%>/_mtermvectors',
+      req: {
+        index: {
+          type: 'string'
+        },
+        type: {
+          type: 'string'
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/_mtermvectors',
+      req: {
+        index: {
+          type: 'string'
+        }
+      }
+    },
+    {
+      fmt: '/_mtermvectors'
+    }
+  ],
+  method: 'POST'
+});
+
+api.nodes = function NodesNS(transport) {
+  this.transport = transport;
+};
+
+/**
+ * Perform a [nodes.hotThreads](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/cluster-nodes-hot-threads.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.interval - The interval for the second sampling of threads
+ * @param {Number} params.snapshots - Number of samples of thread stacktrace (default: 10)
+ * @param {Number} params.threads - Specify the number of threads to provide information for (default: 3)
+ * @param {String} params.type - The type to sample (default: cpu)
+ * @param {String, String[], Boolean} params.nodeId - A comma-separated list of node IDs or names to limit the returned information; use `_local` to return information from the node you're connecting to, leave empty to get information from all nodes
+ */
+api.nodes.prototype.hotThreads = ca({
+  params: {
+    interval: {
+      type: 'time'
+    },
+    snapshots: {
+      type: 'number'
+    },
+    threads: {
+      type: 'number'
+    },
+    type: {
+      type: 'enum',
+      options: [
+        'cpu',
+        'wait',
+        'block'
+      ]
+    }
+  },
+  urls: [
+    {
+      fmt: '/_nodes/<%=nodeId%>/hotthreads',
+      req: {
+        nodeId: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_nodes/hotthreads'
+    }
+  ]
+});
+
+/**
+ * Perform a [nodes.info](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/cluster-nodes-info.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.flatSettings - Return settings in flat format (default: false)
+ * @param {Boolean} params.human - Whether to return time and byte values in human-readable format.
+ * @param {String, String[], Boolean} params.nodeId - A comma-separated list of node IDs or names to limit the returned information; use `_local` to return information from the node you're connecting to, leave empty to get information from all nodes
+ * @param {String, String[], Boolean} params.metric - A comma-separated list of metrics you wish returned. Leave empty to return all.
+ */
+api.nodes.prototype.info = ca({
+  params: {
+    flatSettings: {
+      type: 'boolean',
+      name: 'flat_settings'
+    },
+    human: {
+      type: 'boolean',
+      'default': false
+    }
+  },
+  urls: [
+    {
+      fmt: '/_nodes/<%=nodeId%>/<%=metric%>',
+      req: {
+        nodeId: {
+          type: 'list'
+        },
+        metric: {
+          type: 'list',
+          options: [
+            'settings',
+            'os',
+            'process',
+            'jvm',
+            'thread_pool',
+            'network',
+            'transport',
+            'http',
+            'plugin'
+          ]
+        }
+      }
+    },
+    {
+      fmt: '/_nodes/<%=nodeId%>',
+      req: {
+        nodeId: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_nodes/<%=metric%>',
+      req: {
+        metric: {
+          type: 'list',
+          options: [
+            'settings',
+            'os',
+            'process',
+            'jvm',
+            'thread_pool',
+            'network',
+            'transport',
+            'http',
+            'plugin'
+          ]
+        }
+      }
+    },
+    {
+      fmt: '/_nodes'
+    }
+  ]
+});
+
+/**
+ * Perform a [nodes.shutdown](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/cluster-nodes-shutdown.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.delay - Set the delay for the operation (default: 1s)
+ * @param {Boolean} params.exit - Exit the JVM as well (default: true)
+ * @param {String, String[], Boolean} params.nodeId - A comma-separated list of node IDs or names to perform the operation on; use `_local` to perform the operation on the node you're connected to, leave empty to perform the operation on all nodes
+ */
+api.nodes.prototype.shutdown = ca({
+  params: {
+    delay: {
+      type: 'time'
+    },
+    exit: {
+      type: 'boolean'
+    }
+  },
+  urls: [
+    {
+      fmt: '/_cluster/nodes/<%=nodeId%>/_shutdown',
+      req: {
+        nodeId: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_shutdown'
+    }
+  ],
+  method: 'POST'
+});
+
+/**
+ * Perform a [nodes.stats](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/cluster-nodes-stats.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String, String[], Boolean} params.completionFields - A comma-separated list of fields for `fielddata` and `suggest` index metric (supports wildcards)
+ * @param {String, String[], Boolean} params.fielddataFields - A comma-separated list of fields for `fielddata` index metric (supports wildcards)
+ * @param {String, String[], Boolean} params.fields - A comma-separated list of fields for `fielddata` and `completion` index metric (supports wildcards)
+ * @param {Boolean} params.groups - A comma-separated list of search groups for `search` index metric
+ * @param {Boolean} params.human - Whether to return time and byte values in human-readable format.
+ * @param {String} [params.level=node] - Return indices stats aggregated at node, index or shard level
+ * @param {String, String[], Boolean} params.types - A comma-separated list of document types for the `indexing` index metric
+ * @param {String, String[], Boolean} params.metric - Limit the information returned to the specified metrics
+ * @param {String, String[], Boolean} params.indexMetric - Limit the information returned for `indices` metric to the specific index metrics. Isn't used if `indices` (or `all`) metric isn't specified.
+ * @param {String, String[], Boolean} params.nodeId - A comma-separated list of node IDs or names to limit the returned information; use `_local` to return information from the node you're connecting to, leave empty to get information from all nodes
+ */
+api.nodes.prototype.stats = ca({
+  params: {
+    completionFields: {
+      type: 'list',
+      name: 'completion_fields'
+    },
+    fielddataFields: {
+      type: 'list',
+      name: 'fielddata_fields'
+    },
+    fields: {
+      type: 'list'
+    },
+    groups: {
+      type: 'boolean'
+    },
+    human: {
+      type: 'boolean',
+      'default': false
+    },
+    level: {
+      type: 'enum',
+      'default': 'node',
+      options: [
+        'node',
+        'indices',
+        'shards'
+      ]
+    },
+    types: {
+      type: 'list'
+    }
+  },
+  urls: [
+    {
+      fmt: '/_nodes/<%=nodeId%>/stats/<%=metric%>/<%=indexMetric%>',
+      req: {
+        nodeId: {
+          type: 'list'
+        },
+        metric: {
+          type: 'list',
+          options: [
+            '_all',
+            'breaker',
+            'fs',
+            'http',
+            'indices',
+            'jvm',
+            'network',
+            'os',
+            'process',
+            'thread_pool',
+            'transport'
+          ]
+        },
+        indexMetric: {
+          type: 'list',
+          options: [
+            '_all',
+            'completion',
+            'docs',
+            'fielddata',
+            'filter_cache',
+            'flush',
+            'get',
+            'id_cache',
+            'indexing',
+            'merge',
+            'percolate',
+            'refresh',
+            'search',
+            'segments',
+            'store',
+            'warmer'
+          ]
+        }
+      }
+    },
+    {
+      fmt: '/_nodes/<%=nodeId%>/stats/<%=metric%>',
+      req: {
+        nodeId: {
+          type: 'list'
+        },
+        metric: {
+          type: 'list',
+          options: [
+            '_all',
+            'breaker',
+            'fs',
+            'http',
+            'indices',
+            'jvm',
+            'network',
+            'os',
+            'process',
+            'thread_pool',
+            'transport'
+          ]
+        }
+      }
+    },
+    {
+      fmt: '/_nodes/stats/<%=metric%>/<%=indexMetric%>',
+      req: {
+        metric: {
+          type: 'list',
+          options: [
+            '_all',
+            'breaker',
+            'fs',
+            'http',
+            'indices',
+            'jvm',
+            'network',
+            'os',
+            'process',
+            'thread_pool',
+            'transport'
+          ]
+        },
+        indexMetric: {
+          type: 'list',
+          options: [
+            '_all',
+            'completion',
+            'docs',
+            'fielddata',
+            'filter_cache',
+            'flush',
+            'get',
+            'id_cache',
+            'indexing',
+            'merge',
+            'percolate',
+            'refresh',
+            'search',
+            'segments',
+            'store',
+            'warmer'
+          ]
+        }
+      }
+    },
+    {
+      fmt: '/_nodes/<%=nodeId%>/stats',
+      req: {
+        nodeId: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_nodes/stats/<%=metric%>',
+      req: {
+        metric: {
+          type: 'list',
+          options: [
+            '_all',
+            'breaker',
+            'fs',
+            'http',
+            'indices',
+            'jvm',
+            'network',
+            'os',
+            'process',
+            'thread_pool',
+            'transport'
+          ]
+        }
+      }
+    },
+    {
+      fmt: '/_nodes/stats'
+    }
+  ]
+});
+
+/**
+ * Perform a [percolate](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-percolate.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String, String[], Boolean} params.routing - A comma-separated list of specific routing values
+ * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random)
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {String} params.percolateIndex - The index to percolate the document into. Defaults to index.
+ * @param {String} params.percolateType - The type to percolate document into. Defaults to type.
+ * @param {Number} params.version - Explicit version number for concurrency control
+ * @param {String} params.versionType - Specific version type
+ * @param {String} params.index - The index of the document being percolated.
+ * @param {String} params.type - The type of the document being percolated.
+ * @param {String} params.id - Substitute the document in the request body with a document that is known by the specified id. On top of the id, the index and type parameter will be used to retrieve the document from within the cluster.
+ */
+api.percolate = ca({
+  params: {
+    routing: {
+      type: 'list'
+    },
+    preference: {
+      type: 'string'
+    },
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    },
+    percolateIndex: {
+      type: 'string',
+      name: 'percolate_index'
+    },
+    percolateType: {
+      type: 'string',
+      name: 'percolate_type'
+    },
+    version: {
+      type: 'number'
+    },
+    versionType: {
+      type: 'enum',
+      options: [
+        'internal',
+        'external'
+      ],
+      name: 'version_type'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/<%=type%>/<%=id%>/_percolate',
+      req: {
+        index: {
+          type: 'string'
+        },
+        type: {
+          type: 'string'
+        },
+        id: {
+          type: 'string'
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/<%=type%>/_percolate',
+      req: {
+        index: {
+          type: 'string'
+        },
+        type: {
+          type: 'string'
+        }
+      }
+    }
+  ],
+  method: 'POST'
+});
+
+/**
+ * Perform a [ping](http://www.elasticsearch.org/guide/) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ */
+api.ping = ca({
+  url: {
+    fmt: '/'
+  },
+  requestTimeout: 100,
+  method: 'HEAD'
+});
+
+/**
+ * Perform a [scroll](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-request-scroll.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Duration} params.scroll - Specify how long a consistent view of the index should be maintained for scrolled search
+ * @param {String} params.scrollId - The scroll ID
+ */
+api.scroll = ca({
+  params: {
+    scroll: {
+      type: 'duration'
+    },
+    scrollId: {
+      type: 'string',
+      name: 'scroll_id'
+    }
+  },
+  urls: [
+    {
+      fmt: '/_search/scroll/<%=scrollId%>',
+      req: {
+        scrollId: {
+          type: 'string'
+        }
+      }
+    },
+    {
+      fmt: '/_search/scroll'
+    }
+  ],
+  method: 'POST'
+});
+
+/**
+ * Perform a [search](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-search.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String} params.analyzer - The analyzer to use for the query string
+ * @param {Boolean} params.analyzeWildcard - Specify whether wildcard and prefix queries should be analyzed (default: false)
+ * @param {String} [params.defaultOperator=OR] - The default operator for query string query (AND or OR)
+ * @param {String} params.df - The field to use as default where no field prefix is given in the query string
+ * @param {Boolean} params.explain - Specify whether to return detailed information about score computation as part of a hit
+ * @param {String, String[], Boolean} params.fields - A comma-separated list of fields to return as part of a hit
+ * @param {Number} params.from - Starting offset (default: 0)
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {String, String[], Boolean} params.indicesBoost - Comma-separated list of index boosts
+ * @param {Boolean} params.lenient - Specify whether format-based query failures (such as providing text to a numeric field) should be ignored
+ * @param {Boolean} params.lowercaseExpandedTerms - Specify whether query terms should be lowercased
+ * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random)
+ * @param {String} params.q - Query in the Lucene query string syntax
+ * @param {String, String[], Boolean} params.routing - A comma-separated list of specific routing values
+ * @param {Duration} params.scroll - Specify how long a consistent view of the index should be maintained for scrolled search
+ * @param {String} params.searchType - Search operation type
+ * @param {Number} params.size - Number of hits to return (default: 10)
+ * @param {String, String[], Boolean} params.sort - A comma-separated list of <field>:<direction> pairs
+ * @param {String} params.source - The URL-encoded request definition using the Query DSL (instead of using request body)
+ * @param {String, String[], Boolean} params._source - True or false to return the _source field or not, or a list of fields to return
+ * @param {String, String[], Boolean} params._sourceExclude - A list of fields to exclude from the returned _source field
+ * @param {String, String[], Boolean} params._sourceInclude - A list of fields to extract and return from the _source field
+ * @param {String, String[], Boolean} params.stats - Specific 'tag' of the request for logging and statistical purposes
+ * @param {String} params.suggestField - Specify which field to use for suggestions
+ * @param {String} [params.suggestMode=missing] - Specify suggest mode
+ * @param {Number} params.suggestSize - How many suggestions to return in response
+ * @param {Text} params.suggestText - The source text for which the suggestions should be returned
+ * @param {Date, Number} params.timeout - Explicit operation timeout
+ * @param {Boolean} params.version - Specify whether to return document version as part of a hit
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names to search; use `_all` or empty string to perform the operation on all indices
+ * @param {String, String[], Boolean} params.type - A comma-separated list of document types to search; leave empty to perform the operation on all types
+ */
+api.search = ca({
+  params: {
+    analyzer: {
+      type: 'string'
+    },
+    analyzeWildcard: {
+      type: 'boolean',
+      name: 'analyze_wildcard'
+    },
+    defaultOperator: {
+      type: 'enum',
+      'default': 'OR',
+      options: [
+        'AND',
+        'OR'
+      ],
+      name: 'default_operator'
+    },
+    df: {
+      type: 'string'
+    },
+    explain: {
+      type: 'boolean'
+    },
+    fields: {
+      type: 'list'
+    },
+    from: {
+      type: 'number'
+    },
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    },
+    indicesBoost: {
+      type: 'list',
+      name: 'indices_boost'
+    },
+    lenient: {
+      type: 'boolean'
+    },
+    lowercaseExpandedTerms: {
+      type: 'boolean',
+      name: 'lowercase_expanded_terms'
+    },
+    preference: {
+      type: 'string'
+    },
+    q: {
+      type: 'string'
+    },
+    routing: {
+      type: 'list'
+    },
+    scroll: {
+      type: 'duration'
+    },
+    searchType: {
+      type: 'enum',
+      options: [
+        'query_then_fetch',
+        'query_and_fetch',
+        'dfs_query_then_fetch',
+        'dfs_query_and_fetch',
+        'count',
+        'scan'
+      ],
+      name: 'search_type'
+    },
+    size: {
+      type: 'number'
+    },
+    sort: {
+      type: 'list'
+    },
+    source: {
+      type: 'string'
+    },
+    _source: {
+      type: 'list'
+    },
+    _sourceExclude: {
+      type: 'list',
+      name: '_source_exclude'
+    },
+    _sourceInclude: {
+      type: 'list',
+      name: '_source_include'
+    },
+    stats: {
+      type: 'list'
+    },
+    suggestField: {
+      type: 'string',
+      name: 'suggest_field'
+    },
+    suggestMode: {
+      type: 'enum',
+      'default': 'missing',
+      options: [
+        'missing',
+        'popular',
+        'always'
+      ],
+      name: 'suggest_mode'
+    },
+    suggestSize: {
+      type: 'number',
+      name: 'suggest_size'
+    },
+    suggestText: {
+      type: 'text',
+      name: 'suggest_text'
+    },
+    timeout: {
+      type: 'time'
+    },
+    version: {
+      type: 'boolean'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/<%=type%>/_search',
+      req: {
+        index: {
+          type: 'list'
+        },
+        type: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/<%=index%>/_search',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_search'
+    }
+  ],
+  method: 'POST'
+});
+
+api.snapshot = function SnapshotNS(transport) {
+  this.transport = transport;
+};
+
+/**
+ * Perform a [snapshot.create](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/modules-snapshots.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
+ * @param {Boolean} params.waitForCompletion - Should this request wait until the operation has completed before returning
+ * @param {String} params.repository - A repository name
+ * @param {String} params.snapshot - A snapshot name
+ */
+api.snapshot.prototype.create = ca({
+  params: {
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    waitForCompletion: {
+      type: 'boolean',
+      'default': false,
+      name: 'wait_for_completion'
+    }
+  },
+  url: {
+    fmt: '/_snapshot/<%=repository%>/<%=snapshot%>',
+    req: {
+      repository: {
+        type: 'string'
+      },
+      snapshot: {
+        type: 'string'
+      }
+    }
+  },
+  method: 'POST'
+});
+
+/**
+ * Perform a [snapshot.createRepository](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/modules-snapshots.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
+ * @param {Date, Number} params.timeout - Explicit operation timeout
+ * @param {String} params.repository - A repository name
+ */
+api.snapshot.prototype.createRepository = ca({
+  params: {
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    timeout: {
+      type: 'time'
+    }
+  },
+  url: {
+    fmt: '/_snapshot/<%=repository%>',
+    req: {
+      repository: {
+        type: 'string'
+      }
+    }
+  },
+  needBody: true,
+  method: 'POST'
+});
+
+/**
+ * Perform a [snapshot.delete](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/modules-snapshots.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
+ * @param {String} params.repository - A repository name
+ * @param {String} params.snapshot - A snapshot name
+ */
+api.snapshot.prototype['delete'] = ca({
+  params: {
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    }
+  },
+  url: {
+    fmt: '/_snapshot/<%=repository%>/<%=snapshot%>',
+    req: {
+      repository: {
+        type: 'string'
+      },
+      snapshot: {
+        type: 'string'
+      }
+    }
+  },
+  method: 'DELETE'
+});
+
+/**
+ * Perform a [snapshot.deleteRepository](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/modules-snapshots.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
+ * @param {Date, Number} params.timeout - Explicit operation timeout
+ * @param {String, String[], Boolean} params.repository - A comma-separated list of repository names
+ */
+api.snapshot.prototype.deleteRepository = ca({
+  params: {
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    timeout: {
+      type: 'time'
+    }
+  },
+  url: {
+    fmt: '/_snapshot/<%=repository%>',
+    req: {
+      repository: {
+        type: 'list'
+      }
+    }
+  },
+  method: 'DELETE'
+});
+
+/**
+ * Perform a [snapshot.get](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/modules-snapshots.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
+ * @param {String} params.repository - A repository name
+ * @param {String, String[], Boolean} params.snapshot - A comma-separated list of snapshot names
+ */
+api.snapshot.prototype.get = ca({
+  params: {
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    }
+  },
+  url: {
+    fmt: '/_snapshot/<%=repository%>/<%=snapshot%>',
+    req: {
+      repository: {
+        type: 'string'
+      },
+      snapshot: {
+        type: 'list'
+      }
+    }
+  }
+});
+
+/**
+ * Perform a [snapshot.getRepository](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/modules-snapshots.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {String, String[], Boolean} params.repository - A comma-separated list of repository names
+ */
+api.snapshot.prototype.getRepository = ca({
+  params: {
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    local: {
+      type: 'boolean'
+    }
+  },
+  urls: [
+    {
+      fmt: '/_snapshot/<%=repository%>',
+      req: {
+        repository: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_snapshot'
+    }
+  ]
+});
+
+/**
+ * Perform a [snapshot.restore](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/modules-snapshots.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Date, Number} params.masterTimeout - Explicit operation timeout for connection to master node
+ * @param {Boolean} params.waitForCompletion - Should this request wait until the operation has completed before returning
+ * @param {String} params.repository - A repository name
+ * @param {String} params.snapshot - A snapshot name
+ */
+api.snapshot.prototype.restore = ca({
+  params: {
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    },
+    waitForCompletion: {
+      type: 'boolean',
+      'default': false,
+      name: 'wait_for_completion'
+    }
+  },
+  url: {
+    fmt: '/_snapshot/<%=repository%>/<%=snapshot%>/_restore',
+    req: {
+      repository: {
+        type: 'string'
+      },
+      snapshot: {
+        type: 'string'
+      }
+    }
+  },
+  method: 'POST'
+});
+
+/**
+ * Perform a [suggest](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-search.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.ignoreUnavailable - Whether specified concrete indices should be ignored when unavailable (missing or closed)
+ * @param {Boolean} params.allowNoIndices - Whether to ignore if a wildcard indices expression resolves into no concrete indices. (This includes `_all` string or when no indices have been specified)
+ * @param {String} [params.expandWildcards=open] - Whether to expand wildcard expression to concrete indices that are open, closed or both.
+ * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random)
+ * @param {String} params.routing - Specific routing value
+ * @param {String} params.source - The URL-encoded request definition (instead of using request body)
+ * @param {String, String[], Boolean} params.index - A comma-separated list of index names to restrict the operation; use `_all` or empty string to perform the operation on all indices
+ */
+api.suggest = ca({
+  params: {
+    ignoreUnavailable: {
+      type: 'boolean',
+      name: 'ignore_unavailable'
+    },
+    allowNoIndices: {
+      type: 'boolean',
+      name: 'allow_no_indices'
+    },
+    expandWildcards: {
+      type: 'enum',
+      'default': 'open',
+      options: [
+        'open',
+        'closed'
+      ],
+      name: 'expand_wildcards'
+    },
+    preference: {
+      type: 'string'
+    },
+    routing: {
+      type: 'string'
+    },
+    source: {
+      type: 'string'
+    }
+  },
+  urls: [
+    {
+      fmt: '/<%=index%>/_suggest',
+      req: {
+        index: {
+          type: 'list'
+        }
+      }
+    },
+    {
+      fmt: '/_suggest'
+    }
+  ],
+  needBody: true,
+  method: 'POST'
+});
+
+/**
+ * Perform a [termvector](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/docs-termvectors.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.termStatistics - Specifies if total term frequency and document frequency should be returned.
+ * @param {Boolean} [params.fieldStatistics=true] - Specifies if document count, sum of document frequencies and sum of total term frequencies should be returned.
+ * @param {String, String[], Boolean} params.fields - A comma-separated list of fields to return.
+ * @param {Boolean} [params.offsets=true] - Specifies if term offsets should be returned.
+ * @param {Boolean} [params.positions=true] - Specifies if term positions should be returned.
+ * @param {Boolean} [params.payloads=true] - Specifies if term payloads should be returned.
+ * @param {String} params.preference - Specify the node or shard the operation should be performed on (default: random).
+ * @param {String} params.routing - Specific routing value.
+ * @param {String} params.parent - Parent id of documents.
+ * @param {String} params.index - The index in which the document resides.
+ * @param {String} params.type - The type of the document.
+ * @param {String} params.id - The id of the document.
+ */
+api.termvector = ca({
+  params: {
+    termStatistics: {
+      type: 'boolean',
+      'default': false,
+      required: false,
+      name: 'term_statistics'
+    },
+    fieldStatistics: {
+      type: 'boolean',
+      'default': true,
+      required: false,
+      name: 'field_statistics'
+    },
+    fields: {
+      type: 'list',
+      required: false
+    },
+    offsets: {
+      type: 'boolean',
+      'default': true,
+      required: false
+    },
+    positions: {
+      type: 'boolean',
+      'default': true,
+      required: false
+    },
+    payloads: {
+      type: 'boolean',
+      'default': true,
+      required: false
+    },
+    preference: {
+      type: 'string',
+      required: false
+    },
+    routing: {
+      type: 'string',
+      required: false
+    },
+    parent: {
+      type: 'string',
+      required: false
+    }
+  },
+  url: {
+    fmt: '/<%=index%>/<%=type%>/<%=id%>/_termvector',
+    req: {
+      index: {
+        type: 'string'
+      },
+      type: {
+        type: 'string'
+      },
+      id: {
+        type: 'string'
+      }
+    }
+  },
+  method: 'POST'
+});
+
+/**
+ * Perform a [update](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/docs-update.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String} params.consistency - Explicit write consistency setting for the operation
+ * @param {String, String[], Boolean} params.fields - A comma-separated list of fields to return in the response
+ * @param {String} params.lang - The script language (default: mvel)
+ * @param {String} params.parent - ID of the parent document
+ * @param {Boolean} params.refresh - Refresh the index after performing the operation
+ * @param {String} [params.replication=sync] - Specific replication type
+ * @param {Number} params.retryOnConflict - Specify how many times should the operation be retried when a conflict occurs (default: 0)
+ * @param {String} params.routing - Specific routing value
+ * @param {Anything} params.script - The URL-encoded script definition (instead of using request body)
+ * @param {Date, Number} params.timeout - Explicit operation timeout
+ * @param {Date, Number} params.timestamp - Explicit timestamp for the document
+ * @param {Duration} params.ttl - Expiration time for the document
+ * @param {Number} params.version - Explicit version number for concurrency control
+ * @param {String} params.versionType - Specific version type
+ * @param {String} params.id - Document ID
+ * @param {String} params.index - The name of the index
+ * @param {String} params.type - The type of the document
+ */
+api.update = ca({
+  params: {
+    consistency: {
+      type: 'enum',
+      options: [
+        'one',
+        'quorum',
+        'all'
+      ]
+    },
+    fields: {
+      type: 'list'
+    },
+    lang: {
+      type: 'string'
+    },
+    parent: {
+      type: 'string'
+    },
+    refresh: {
+      type: 'boolean'
+    },
+    replication: {
+      type: 'enum',
+      'default': 'sync',
+      options: [
+        'sync',
+        'async'
+      ]
+    },
+    retryOnConflict: {
+      type: 'number',
+      name: 'retry_on_conflict'
+    },
+    routing: {
+      type: 'string'
+    },
+    script: {},
+    timeout: {
+      type: 'time'
+    },
+    timestamp: {
+      type: 'time'
+    },
+    ttl: {
+      type: 'duration'
+    },
+    version: {
+      type: 'number'
+    },
+    versionType: {
+      type: 'enum',
+      options: [
+        'internal',
+        'external'
+      ],
+      name: 'version_type'
+    }
+  },
+  url: {
+    fmt: '/<%=index%>/<%=type%>/<%=id%>/_update',
+    req: {
+      index: {
+        type: 'string'
+      },
+      type: {
+        type: 'string'
+      },
+      id: {
+        type: 'string'
+      }
+    }
+  },
+  method: 'POST'
+});
+
+/**
+ * Perform a [create](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/docs-index_.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {String} params.consistency - Explicit write consistency setting for the operation
+ * @param {String} params.parent - ID of the parent document
+ * @param {Boolean} params.refresh - Refresh the index after performing the operation
+ * @param {String} [params.replication=sync] - Specific replication type
+ * @param {String} params.routing - Specific routing value
+ * @param {Date, Number} params.timeout - Explicit operation timeout
+ * @param {Date, Number} params.timestamp - Explicit timestamp for the document
+ * @param {Duration} params.ttl - Expiration time for the document
+ * @param {Number} params.version - Explicit version number for concurrency control
+ * @param {String} params.versionType - Specific version type
+ * @param {String} params.id - Document ID
+ * @param {String} params.index - The name of the index
+ * @param {String} params.type - The type of the document
+ */
+api.create = ca.proxy(api.index, {
+  transform: function (params) {
+    params.op_type = 'create';
+  }
+});
+},{"../client_action":195}],193:[function(require,module,exports){
+module.exports = {
+  '1.0': require('./1_0'),
+  '0.90': require('./0_90'),
+  _default: '0.90'
+};
+
+},{"./0_90":191,"./1_0":192}],194:[function(require,module,exports){
 /**
  * A client that makes requests to Elasticsearch via a {{#crossLink "Transport"}}Transport{{/crossLink}}
  *
@@ -22530,7 +25124,7 @@ var _ = require('./utils');
 function Client(config) {
   config = config || {};
 
-  function EsApiClient(config) {
+  function EsApiClient() {
     // our client will log minimally by default
     if (!config.hasOwnProperty('log')) {
       config.log = 'warning';
@@ -22555,15 +25149,15 @@ function Client(config) {
   }
 
   EsApiClient.prototype = _.funcEnum(config, 'apiVersion', Client.apis, '0.90');
-  return new EsApiClient(config);
+  if (!config.sniffEndpoint && EsApiClient.prototype === Client.apis['0.90']) {
+    config.sniffEndpoint = '/_cluster/nodes';
+  }
+
+  return new EsApiClient();
 }
 
-Client.apis = {
-  'master': require('./api'),
-  '1.0': require('./api'),
-  '0.90': require('./api_0_90')
-};
-},{"./api":17,"./api_0_90":18,"./transport":36,"./utils":37}],20:[function(require,module,exports){
+Client.apis = require('./apis');
+},{"./apis":193,"./transport":211,"./utils":212}],195:[function(require,module,exports){
 /**
  * Constructs a function that can be called to make a request to ES
  * @type {[type]}
@@ -22869,7 +25463,7 @@ ClientAction.proxy = function (fn, spec) {
   };
 };
 
-},{"./utils":37,"when":15}],21:[function(require,module,exports){
+},{"./utils":212,"when":189}],196:[function(require,module,exports){
 module.exports = ConnectionAbstract;
 
 var _ = require('./utils');
@@ -22969,7 +25563,7 @@ ConnectionAbstract.prototype.setStatus = function (status) {
     this.removeAllListeners();
   }
 };
-},{"./errors":25,"./host":26,"./log":27,"./utils":37,"events":4}],22:[function(require,module,exports){
+},{"./errors":200,"./host":201,"./log":202,"./utils":212,"events":4}],197:[function(require,module,exports){
 var process=require("__browserify_process");/**
  * Manager of connections to a node(s), capable of ensuring that connections are clear and living
  * before providing them to the application
@@ -23302,7 +25896,7 @@ ConnectionPool.prototype.close = function () {
   this.setHosts([]);
 };
 ConnectionPool.prototype.empty = ConnectionPool.prototype.close;
-},{"./connectors":23,"./log":27,"./selectors":32,"./utils":37,"__browserify_process":13}],23:[function(require,module,exports){
+},{"./connectors":198,"./log":202,"./selectors":207,"./utils":212,"__browserify_process":13}],198:[function(require,module,exports){
 var opts = {
   xhr: require('./xhr'),
   jquery: require('./jquery'),
@@ -23328,7 +25922,7 @@ if (opts.xhr) {
 
 module.exports = opts;
 
-},{"../utils":37,"./angular":1,"./jquery":1,"./xhr":24}],24:[function(require,module,exports){
+},{"../utils":212,"./angular":1,"./jquery":1,"./xhr":199}],199:[function(require,module,exports){
 /**
  * Generic Transport for the browser, using the XmlHttpRequest object
  *
@@ -23407,7 +26001,7 @@ XhrConnector.prototype.request = function (params, cb) {
   };
 };
 
-},{"../connection":21,"../errors":25,"../utils":37}],25:[function(require,module,exports){
+},{"../connection":196,"../errors":200,"../utils":212}],200:[function(require,module,exports){
 var process=require("__browserify_process");var _ = require('./utils');
 var errors = module.exports;
 
@@ -23534,7 +26128,7 @@ _.each(statusCodes, function (name, status) {
   errors[status] = StatusCodeError;
 });
 
-},{"./utils":37,"__browserify_process":13}],26:[function(require,module,exports){
+},{"./utils":212,"__browserify_process":13}],201:[function(require,module,exports){
 /**
  * Class to wrap URLS, formatting them and maintaining their separate details
  * @type {[type]}
@@ -23683,7 +26277,7 @@ Host.prototype.toString = function () {
   return this.makeUrl();
 };
 
-},{"./utils":37,"querystring":6,"url":7}],27:[function(require,module,exports){
+},{"./utils":212,"querystring":6,"url":7}],202:[function(require,module,exports){
 var process=require("__browserify_process");var _ = require('./utils');
 var url = require('url');
 var EventEmitter = require('events').EventEmitter;
@@ -23985,7 +26579,7 @@ Log.normalizeTraceArgs = function (method, requestUrl, body, responseBody, respo
 
 module.exports = Log;
 
-},{"./loggers":29,"./utils":37,"__browserify_process":13,"events":4,"url":7}],28:[function(require,module,exports){
+},{"./loggers":204,"./utils":212,"__browserify_process":13,"events":4,"url":7}],203:[function(require,module,exports){
 var _ = require('./utils');
 
 /**
@@ -24167,12 +26761,12 @@ LoggerAbstract.prototype._prettyJson = function (body) {
 
 module.exports = LoggerAbstract;
 
-},{"./utils":37}],29:[function(require,module,exports){
+},{"./utils":212}],204:[function(require,module,exports){
 module.exports = {
   console: require('./console')
 };
 
-},{"./console":30}],30:[function(require,module,exports){
+},{"./console":205}],205:[function(require,module,exports){
 /**
  * Special version of the Stream logger, which logs errors and warnings to stderr and all other
  * levels to stdout.
@@ -24273,7 +26867,7 @@ Console.prototype.onTrace = _.handler(function (msg) {
   this.write('TRACE', this._formatTraceMessage(msg), 'log');
 });
 
-},{"../logger":28,"../utils":37}],31:[function(require,module,exports){
+},{"../logger":203,"../utils":212}],206:[function(require,module,exports){
 var _ = require('./utils');
 var extractHostPartsRE = /\[\/*([^:]+):(\d+)\]/;
 
@@ -24300,13 +26894,13 @@ function makeNodeParser(hostProp) {
 module.exports = makeNodeParser('http_address');
 module.exports.thrift = makeNodeParser('transport_address');
 
-},{"./utils":37}],32:[function(require,module,exports){
+},{"./utils":212}],207:[function(require,module,exports){
 module.exports = {
   random: require('./random'),
   roundRobin: require('./round_robin')
 };
 
-},{"./random":33,"./round_robin":34}],33:[function(require,module,exports){
+},{"./random":208,"./round_robin":209}],208:[function(require,module,exports){
 /**
  * Selects a connection randomly
  *
@@ -24319,7 +26913,7 @@ module.exports = function RandomSelector(connections) {
   return connections[Math.floor(Math.random() * connections.length)];
 };
 
-},{}],34:[function(require,module,exports){
+},{}],209:[function(require,module,exports){
 /**
  * Selects a connection the simplest way possible, Round Robin
  *
@@ -24334,7 +26928,7 @@ module.exports = function (connections) {
   return connection;
 };
 
-},{}],35:[function(require,module,exports){
+},{}],210:[function(require,module,exports){
 /**
  * Simple JSON serializer
  * @type {[type]}
@@ -24395,7 +26989,7 @@ Json.prototype.bulkBody = function (val) {
   return body;
 };
 
-},{"../utils":37}],36:[function(require,module,exports){
+},{"../utils":212}],211:[function(require,module,exports){
 /**
  * Class that manages making request, called by all of the API methods.
  * @type {[type]}
@@ -24427,6 +27021,9 @@ function Transport(config) {
 
   // setup max retries
   this.maxRetries = config.hasOwnProperty('maxRetries') ? config.maxRetries : 3;
+
+  // setup endpoint to use for sniffing
+  this.sniffEndpoint = config.hasOwnProperty('sniffEndpoint') ? config.sniffEndpoint : '/_nodes/_all/clear';
 
   // setup requestTimeout default
   this.requestTimeout = config.hasOwnProperty('requestTimeout') ? config.requestTimeout : 30000;
@@ -24469,9 +27066,9 @@ function Transport(config) {
   }
 
   if (config.sniffInterval) {
-    this._sniffTimeout = setTimeout(function doSniff() {
+    this._timeout(function doSniff() {
       self.sniff();
-      self._sniffTimeout = setTimeout(doSniff, config.sniffInterval);
+      self._timeout(doSniff, config.sniffInterval);
     }, config.sniffInterval);
   }
 
@@ -24594,7 +27191,7 @@ Transport.prototype.request = function (params, cb) {
       return;
     }
 
-    clearTimeout(requestTimeoutId);
+    self._timeout(requestTimeoutId);
     var parsedBody;
     var isJson = !headers || (headers['content-type'] && ~headers['content-type'].indexOf('application/json'));
 
@@ -24656,14 +27253,14 @@ Transport.prototype.request = function (params, cb) {
 
     aborted = true;
     remainingRetries = 0;
-    clearTimeout(requestTimeoutId);
+    self._timeout(requestTimeoutId);
     if (typeof requestAborter === 'function') {
       requestAborter();
     }
   }
 
   if (requestTimeout && requestTimeout !== Infinity) {
-    requestTimeoutId = setTimeout(function () {
+    requestTimeoutId = this._timeout(function () {
       respond(new errors.RequestTimeout('Request Timeout after ' + requestTimeout + 'ms'));
       abortRequest();
     }, requestTimeout);
@@ -24690,7 +27287,31 @@ Transport.prototype.request = function (params, cb) {
   return ret;
 };
 
+Transport.prototype._timeout = function (cb, delay) {
+  this._timers = this._timers || [];
+  var id;
 
+  if ('function' !== typeof cb) {
+    id = cb;
+    cb = void 0;
+  }
+
+  if (cb) {
+    // set the timer
+    id = setTimeout(cb, delay);
+    this._timers.push(id);
+    return id;
+  }
+
+  if (id) {
+    clearTimeout(id);
+
+    var i = this._timers.indexOf(id);
+    if (i !== -1) {
+      this._timers.splice(i, 1);
+    }
+  }
+};
 
 /**
  * Ask an ES node for a list of all the nodes, add/remove nodes from the connection
@@ -24706,7 +27327,7 @@ Transport.prototype.sniff = function (cb) {
   cb = typeof cb === 'function' ? cb : _.noop;
 
   this.request({
-    path: '/_cluster/nodes',
+    path: this.sniffEndpoint,
     method: 'GET'
   }, function (err, resp, status) {
     if (!err && resp && resp.nodes) {
@@ -24725,12 +27346,13 @@ Transport.prototype.sniff = function (cb) {
  */
 Transport.prototype.close = function () {
   this.log.close();
+  _.each(this._timers, clearTimeout);
   this.connectionPool.close();
 };
 
-},{"./connection_pool":22,"./errors":25,"./host":26,"./log":27,"./nodes_to_host":31,"./serializers/json":35,"./utils":37,"when":15}],37:[function(require,module,exports){
+},{"./connection_pool":197,"./errors":200,"./host":201,"./log":202,"./nodes_to_host":206,"./serializers/json":210,"./utils":212,"when":189}],212:[function(require,module,exports){
 var process=require("__browserify_process"),Buffer=require("__browserify_Buffer").Buffer;var path = require('path');
-var _ = require('lodash');
+var _ = require('lodash-node/modern');
 var nodeUtils = require('util');
 
 /**
@@ -25151,7 +27773,7 @@ _.getUnwrittenFromStream = function (stream) {
 
 module.exports = utils;
 
-},{"__browserify_Buffer":12,"__browserify_process":13,"lodash":14,"path":5,"util":8}]},{},[16])
-(16)
+},{"__browserify_Buffer":12,"__browserify_process":13,"lodash-node/modern":87,"path":5,"util":8}]},{},[190])
+(190)
 });
 ;
