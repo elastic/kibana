@@ -14,6 +14,7 @@ setup and start using (seriously). Kibana strives to be easy to get started with
 flexible and powerful
 
 ### Requirements
+* Elasticsearch 0.90.9 or above
 * A modern web browser. The latest version of Chrome, Safari and Firefox have all been tested to
 work. IE9 and greater should work. IE8 does not.
 * A webserver. No extensions are required, as long as it can serve plain html it will work

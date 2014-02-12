@@ -10,7 +10,7 @@
 define([
   'angular',
   'app',
-  'underscore',
+  'lodash',
 
   'css!./query.css'
 ], function (angular, app, _) {
@@ -38,12 +38,7 @@ define([
     $scope.querySrv = querySrv;
 
     // A list of query types for the query config popover
-    $scope.queryTypes = _.map(querySrv.queryTypes, function(v,k) {
-      return {
-        name:k,
-        require:v.require
-      };
-    });
+    $scope.queryTypes = querySrv.types;
 
     var queryHelpModal = $modal({
       template: './app/panels/query/helpModal.html',

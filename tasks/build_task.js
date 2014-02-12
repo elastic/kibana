@@ -5,7 +5,7 @@ module.exports = function(grunt) {
     'jshint:source',
     'clean:on_start',
     'less:dist',
-    'copy:everything_but_less_to_temp',
+    'copy:almost_everything_to_temp',
     'htmlmin:build',
     'cssmin:build',
     'ngmin:build',

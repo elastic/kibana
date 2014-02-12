@@ -38,8 +38,8 @@
       <h5>Hightlighted Fields</h5>
       <form class="input-append editor-option">
         <input bs-typeahead="fields.list" type="text" class="input-small" ng-model='newhighlight' ng-change="set_refresh(true)">
-        <button class="btn" ng-click="panel.fields = _.toggleInOut(panel.highlight,newhighlight);newhighlight=''"><i class="icon-plus"></i></button>
+        <button class="btn" ng-click="panel.highlight = _.toggleInOut(panel.highlight,newhighlight);newhighlight=''"><i class="icon-plus"></i></button>
       </form><br>
-      <span style="margin-left:3px" ng-repeat="field in panel.highlight" class="label">{{field}} <i class="pointer icon-remove-sign" ng-click="panel.fields = _.toggleInOut(panel.highlight,field);set_refresh(true)" ></i></span>
+      <span style="margin-left:3px" ng-repeat="field in panel.highlight" class="label">{{field}} <i class="pointer icon-remove-sign" ng-click="panel.highlight = _.toggleInOut(panel.highlight,field);set_refresh(true)" ></i></span>
     </div>
   </div>

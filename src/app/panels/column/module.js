@@ -14,7 +14,7 @@
 define([
   'angular',
   'app',
-  'underscore',
+  'lodash',
   'config'
 ],
 function (angular, app, _, config) {
