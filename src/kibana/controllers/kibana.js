@@ -4,9 +4,10 @@ define(function (require) {
   angular.module('kibana/controllers')
     .controller('Kibana', function (courier, $scope, $rootScope) {
       $rootScope.dataSource = courier.createSource()
-        .index('logstash-2014.02.13')
+        .index('logstash-2014.02.13', 'daily')
         .size(5);
 
+      // this should be triggered from within the controlling application
       setTimeout(courier.start, 15);
     });
 

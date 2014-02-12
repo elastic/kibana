@@ -3,6 +3,7 @@ define(function (require) {
   var _ = require('lodash');
   var EventEmitter = require('utils/event_emitter');
   var Mapper = require('courier/mapper');
+  var IndexPattern = require('courier/index_pattern');
 
   // polyfill for older versions of node
   function listenerCount(emitter, event) {
@@ -15,7 +16,6 @@ define(function (require) {
 
   var optionNames = [
     'index',
-    'indexPattern',
     'type',
     'query',
     'filter',
@@ -90,6 +90,9 @@ define(function (require) {
     optionNames.forEach(function (name) {
       this[name] = function (val) {
         state[name] = val;
+        if (name === 'index' && arguments[1]) {
+          state.index = new IndexPattern(val, arguments[1]);
+        }
         return this;
       };
     }, this);
