@@ -14,12 +14,12 @@
   };
 
   var bowerComponents = [
-    'd3',
-    ['lodash', 'dist/lodash'],
-    'jquery',
     'angular',
     'angular-route',
-    ['elasticsearch', 'elasticsearch.angular']
+    'd3',
+    ['elasticsearch', 'elasticsearch.angular'],
+    'jquery',
+    ['lodash', 'dist/lodash']
   ];
 
   bowerComponents.forEach(function (name) {

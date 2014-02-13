@@ -77,6 +77,7 @@ define(function (require) {
   require([
     'services/courier',
     'services/es',
+    'services/config',
     'controllers/kibana'
   ], function () {
 

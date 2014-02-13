@@ -1,6 +1,7 @@
 define(function (require) {
 
   var DataSource = require('courier/data_source');
+  var Docs = require('courier/docs');
   var EventEmitter = require('utils/event_emitter');
   var inherits = require('utils/inherits');
   var errors = require('courier/errors');
@@ -14,9 +15,18 @@ define(function (require) {
     };
   }
 
+  function emitError(source, courier, error) {
+    if (EventEmitter.listenerCount(source, 'error')) {
+      source.emit('error', error);
+    } else {
+      courier.emit('error', error);
+    }
+  }
+
   function mergeProp(state, filters, val, key) {
     switch (key) {
     case 'inherits':
+    case '_type':
       // ignore
       return;
     case 'filter':
@@ -45,7 +55,6 @@ define(function (require) {
 
     // all of the filters from the source chain
     var filters = [];
-
     var collectProp = _.partial(mergeProp, state, filters);
 
     // walk the chain and merge each property
@@ -81,7 +90,7 @@ define(function (require) {
     return state;
   }
 
-  function fetch(client, sources, cb) {
+  function fetchSearchResults(courier, client, sources, cb) {
     if (!client) {
       this.emit('error', new Error('Courier does not have a client yet, unable to fetch queries.'));
       return;
@@ -90,6 +99,9 @@ define(function (require) {
     var all = [];
     var body = '';
     _.each(sources, function (source) {
+      if (source.getType() !== 'search') {
+        return;
+      }
       all.push(source);
 
       var state = flattenDataSource(source);
@@ -106,11 +118,56 @@ define(function (require) {
       if (err) return cb(err);
 
       _.each(resp.responses, function (resp, i) {
-        sources[i].emit('results', resp);
+        var source = sources[i];
+        if (resp.error) return emitError(source, courier, resp);
+        source.emit('results', resp);
       });
 
       cb(err, resp);
     });
+  }
+
+  function fetchDocs(courier, client, sources, cb) {
+    if (!client) {
+      this.emit('error', new Error('Courier does not have a client yet, unable to fetch queries.'));
+      return;
+    }
+
+    var all = [];
+    var body = {
+      docs: []
+    };
+
+    _.each(sources, function (source) {
+      if (source.getType() !== 'get') {
+        return;
+      }
+
+      all.push(source);
+
+      var state = flattenDataSource(source);
+      body.docs.push({
+        index: state.index,
+        type: state.type,
+        id: state.id
+      });
+    });
+
+    return client.mget({ body: body }, function (err, resp) {
+      if (err) return cb(err);
+
+      _.each(resp.responses, function (resp, i) {
+        var source = sources[i];
+        if (resp.error) return emitError(source, courier, resp);
+        source.emit('results', resp);
+      });
+
+      cb(err, resp);
+    });
+  }
+
+  function saveUpdate(source, fields) {
+
   }
 
   /**
@@ -127,10 +184,13 @@ define(function (require) {
     };
     var fetchTimer;
     var activeRequest;
+    var courier = this;
+    var sources = {
+      search: [],
+      get: []
+    };
 
-    var sources = [];
-
-    function doFetch() {
+    function doSearch() {
       if (!opts.client) {
         this.emit('error', new Error('Courier does not have a client, pass it ' +
           'in to the constructor or set it with the .client() method'));
@@ -144,7 +204,7 @@ define(function (require) {
       }
 
       // we need to catch the original promise in order to keep it's abort method
-      activeRequest = fetch(opts.client, sources, function (err, resp) {
+      activeRequest = fetchSearchResults(courier, opts.client, sources.search, function (err, resp) {
         activeRequest = null;
         setFetchTimeout();
 
@@ -157,61 +217,59 @@ define(function (require) {
     function setFetchTimeout() {
       clearTimeout(fetchTimer);
       if (opts.fetchInterval) {
-        fetchTimer = setTimeout(doFetch, opts.fetchInterval);
+        fetchTimer = setTimeout(doSearch, opts.fetchInterval);
       } else {
         fetchTimer = null;
       }
     }
 
-    function stopFetching() {
+    function stopFetching(type) {
       clearTimeout(fetchTimer);
     }
 
-    function startFetchingSource(source) {
-      var existing = _.find(sources, { source: source });
-      if (existing) return false;
-
-      sources.push(source);
+    // start using a DataSource in fetches/updates
+    function openDataSource(source) {
+      var type = source.getType();
+      if (~sources[type].indexOf(source)) return false;
+      sources[type].push(source);
     }
 
-    function stopFetchingSource(source) {
-      var i = sources.indexOf(source);
-      if (i !== -1) {
-        sources.slice(i, 1);
-      }
-      if (sources.length === 0) stopFetching();
+    // stop using a DataSource in fetches/updates
+    function closeDataSource(source) {
+      var type = source.getType();
+      var i = sources[type].indexOf(source);
+      if (i === -1) return;
+      sources[type].slice(i, 1);
+      // only search DataSources get fetched automatically
+      if (type === 'search' && sources.search.length === 0) stopFetching();
     }
 
-    // is there a scheduled request?
-    function isStarted() {
+    // has the courier been started?
+    function isRunning() {
       return !!fetchTimer;
     }
 
     // chainable public api
-    this.isStarted = chain(this, isStarted);
-    this.start = chain(this, doFetch);
-    this.startFetchingSource = chain(this, startFetchingSource);
+    this.start = chain(this, doSearch);
+    this.running = chain(this, isRunning);
     this.stop = chain(this, stopFetching);
-    this.stopFetchingSource = chain(this, stopFetchingSource);
-    this.close = chain(this, function stopFetchingAllSources() {
-      _.each(sources, stopFetchingSource);
-    });
+    this.close = chain(this, function () { _(sources.search).each(closeDataSource); });
+    this.openDataSource = chain(this, openDataSource);
+    this.closeDataSource = chain(this, closeDataSource);
 
-    // setter
+    // setters
     this.client = chain(this, function (client) {
       opts.client = client;
     });
-
-    // setter/getter
     this.fetchInterval = function (val) {
       opts.fetchInterval = val;
-      if (isStarted()) setFetchTimeout();
+      if (isRunning()) setFetchTimeout();
       return this;
     };
 
     // factory
-    this.createSource = function (state) {
-      return new DataSource(this, state);
+    this.createSource = function (type, initialState) {
+      return new DataSource(this, type, initialState);
     };
 
     // apply the passed in config
@@ -220,10 +278,10 @@ define(function (require) {
       this[key](val);
     }, this);
   }
+  inherits(Courier, EventEmitter);
 
   // private api, exposed for testing
   Courier._flattenDataSource = flattenDataSource;
-  inherits(Courier, EventEmitter);
 
   return Courier;
 });

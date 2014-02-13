@@ -14,21 +14,30 @@ define(function (require) {
     }
   }
 
-  var optionNames = [
-    'index',
-    'type',
-    'query',
-    'filter',
-    'sort',
-    'highlight',
-    'aggs',
-    'from',
-    'size',
-    'source',
-    'inherits'
-  ];
+  var apiMethods = {
+    search: [
+      'index',
+      'type',
+      'query',
+      'filter',
+      'sort',
+      'highlight',
+      'aggs',
+      'from',
+      'size',
+      'source',
+      'inherits'
+    ],
+    get: [
+      'index',
+      'type',
+      'id',
+      'sourceInclude',
+      'sourceExclude'
+    ]
+  };
 
-  function DataSource(courier, initialState) {
+  function DataSource(courier, type, initialState) {
     var state;
 
     if (initialState) {
@@ -38,23 +47,36 @@ define(function (require) {
       } else {
         state = _.cloneDeep(initialState);
       }
+      if (state._type) {
+        if (type && type !== state._type) {
+          throw new Error('Initial state is not of the type specified for this DataSource');
+        } else {
+          type = state._type;
+        }
+      }
     } else {
       state = {};
     }
+
+    type = type || 'search';
+    if (!_.has(apiMethods, type)) {
+      throw new TypeError('Invalid DataSource type ' + type);
+    }
+    state._type = type;
 
     var mapper = new Mapper();
 
     var onNewListener = _.bind(function (name) {
       // new newListener is emitted before it is added, count will be 0
       if (name !== 'results' || listenerCount(this, 'results') !== 0) return;
-      courier.startFetchingSource(this);
+      courier.openDataSource(this);
       this.removeListener('newListener', onNewListener);
       this.on('removeListener', onRemoveListener);
     }, this);
 
     var onRemoveListener = _.bind(function () {
       if (listenerCount(this, 'results') > 0) return;
-      courier.stopFetchingSource(this);
+      courier.closeDataSource(this);
       this.removeListener('removeListener', onRemoveListener);
       this.on('newListener', onNewListener);
     }, this);
@@ -82,12 +104,15 @@ define(function (require) {
         return _.keys(mapping);
       });
     };
+    this.getType = function () {
+      return state._type;
+    };
     this.extend = function () {
-      return courier.createSource().inherits(this);
+      return courier.createSource(type).inherits(this);
     };
 
     // get/set internal state values
-    optionNames.forEach(function (name) {
+    apiMethods[type].forEach(function (name) {
       this[name] = function (val) {
         state[name] = val;
         if (name === 'index' && arguments[1]) {

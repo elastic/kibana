@@ -1,6 +1,7 @@
 define(function (require) {
   var Courier = require('courier/courier');
   var _ = require('lodash');
+  var sinon = require('sinon/sinon');
 
   describe('Courier Module', function () {
 
@@ -22,37 +23,51 @@ define(function (require) {
 
     describe('sync API', function () {
       var courier;
-      beforeEach(function () {
-        courier = new Courier();
-      });
 
       afterEach(function () {
-        courier.close();
+        if (courier) {
+          courier.close();
+        }
       });
 
       describe('#fetchInterval', function () {
-        it('sets the interval in milliseconds that queries will be fetched', function () {
-          courier.fetchInterval(1000);
-          expect(courier.fetchInterval()).to.eql(1000);
-        });
+        it('sets the interval in milliseconds that queries will be fetched');
+        it('resets the timer if the courier has been started');
       });
 
-      describe('#define', function () {
-        it('creates an empty (match all) DataSource object', function () {
-          var source = courier.define();
-          expect(source._state()).to.eql({});
+      describe('#createSource', function () {
+        it('creates an empty search DataSource object', function () {
+          courier = new Courier();
+          var source = courier.createSource();
+          expect(source._state()).to.eql({ _type: 'search' });
+        });
+        it('optionally accepts a type for the DataSource', function () {
+          var courier = new Courier();
+          expect(courier.createSource()._state()._type).to.eql('search');
+          expect(courier.createSource('search')._state()._type).to.eql('search');
+          expect(courier.createSource('get')._state()._type).to.eql('get');
+          expect(function () {
+            courier.createSource('invalid type');
+          }).to.throwError(TypeError);
         });
         it('optionally accepts a json object/string that will populate the DataSource object with settings', function () {
+          courier = new Courier();
           var savedState = JSON.stringify({
-            index: 'logstash-[YYYY-MM-DD]'
+            _type: 'get',
+            index: 'logstash-[YYYY-MM-DD]',
+            type: 'nginx',
+            id: '1'
           });
-          var source = courier.define(savedState);
+          var source = courier.createSource('get', savedState);
           expect(source + '').to.eql(savedState);
         });
       });
 
       describe('#start', function () {
-        it('triggers a fetch and begins the fetch cycle');
+        it('triggers a fetch and begins the fetch cycle', function () {
+          courier = new Courier();
+
+        });
       });
 
       describe('#stop', function () {
@@ -63,7 +78,7 @@ define(function (require) {
     describe('source req tracking', function () {
       it('updates the stored query when the data source is updated', function () {
         var courier = new Courier();
-        var source = courier.define();
+        var source = courier.createSource('search');
 
         source.on('results', _.noop);
         source.index('the index name');
@@ -77,7 +92,7 @@ define(function (require) {
         it('merges the state of one data source with it\'s parents', function () {
           var courier = new Courier();
 
-          var root = courier.define()
+          var root = courier.createSource('search')
             .index('people')
             .type('students')
             .filter({
@@ -86,7 +101,7 @@ define(function (require) {
               }
             });
 
-          var math = courier.define()
+          var math = courier.createSource('search')
             .inherits(root)
             .filter({
               terms: {
