@@ -4,7 +4,7 @@ define(function (require) {
   angular.module('kibana/controllers')
     .controller('Kibana', function (courier, $scope, $rootScope) {
       $rootScope.dataSource = courier.createSource()
-        .index('logstash-2014.02.13')
+        .index('_all')
         .size(5);
 
       setTimeout(courier.start, 15);

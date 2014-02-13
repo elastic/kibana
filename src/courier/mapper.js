@@ -8,13 +8,15 @@ define(function (require) {
    */
   function Mapper(index, type) {
     this.indices = function () {
-      return new Promise(function (resolve, reject) {
 
-      });
     };
 
     this.getFields = function () {
 
+    };
+
+    this.getFieldType = function (field, type) {
+      return field, type;
     };
   }
 
