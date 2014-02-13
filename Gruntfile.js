@@ -9,6 +9,7 @@ module.exports = function (grunt) {
       src: __dirname + '/src',
       app: __dirname + '/src/kibana',
       unitTestDir: __dirname + '/test/unit',
+      testUtilsDir: __dirname + '/test/utils',
       meta: {
         banner: '/*! <%= package.name %> - v<%= package.version %> - ' +
           '<%= grunt.template.today("yyyy-mm-dd") %>\n' +

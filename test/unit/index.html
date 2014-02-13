@@ -22,6 +22,19 @@
 
     <!-- tests -->
     <script>
+    require.config({
+      paths: {
+        sinon: '../sinon'
+      },
+      shim: {
+        'sinon/sinon': {
+          deps: [
+            'sinon/sinon-timers-1.8.2'
+          ],
+          exports: 'sinon'
+        }
+      }
+    })
     require([
       '/specs/courier.js',
       '/specs/data_source.js'
