@@ -20,7 +20,7 @@ define(function (require) {
           type: '@'
         },
         template: '<strong style="float:left">{{count}} :&nbsp;</strong><pre>{{json}}</pre>',
-        controller: function ($rootScope, $scope) {
+        controller: function ($rootScope, $scope, courier) {
           $scope.count = 0;
 
           var source = $rootScope.dataSource.extend()
@@ -32,6 +32,10 @@ define(function (require) {
               $scope.count ++;
               $scope.json = JSON.stringify(resp.hits, null, '  ');
             });
+
+          courier.mapper.getFields($rootScope.dataSource, function (data) {
+            $scope.json = data;
+          });
 
           $scope.$watch('type', source.type);
         }
