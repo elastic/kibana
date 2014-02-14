@@ -1,30 +1,20 @@
 define(function (require) {
   var Courier = require('courier/courier');
-  var DataSource = require('courier/data_source');
+  var DataSource = require('courier/data_source/data_source');
+  var DocSource = require('courier/data_source/doc');
+  var SearchSource = require('courier/data_source/search');
 
   describe('DataSource class', function () {
     var courier = new Courier();
     describe('::new', function () {
-      it('accepts and validates a type', function () {
-        var source = new DataSource(courier, 'get');
-        expect(source._state()._type).to.eql('get');
-
-        source = new DataSource(courier, 'search');
-        expect(source._state()._type).to.eql('search');
-
-        expect(function () {
-          source = new DataSource(courier, 'invalid Type');
-        }).to.throwError(TypeError);
-      });
-
       it('optionally accepts a json object/string that will populate the DataSource object with settings', function () {
         var savedState = JSON.stringify({
-          _type: 'get',
+          _type: 'doc',
           index: 'logstash-[YYYY-MM-DD]',
           type: 'nginx',
           id: '1'
         });
-        var source = new DataSource(courier, 'get', savedState);
+        var source = new DocSource(courier, savedState);
         expect(source + '').to.eql(savedState);
       });
     });
