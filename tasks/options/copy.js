@@ -28,7 +28,7 @@ module.exports = function (config) {
         {
           expand: true,
           cwd: '<%= kibanaCheckoutDir %>',
-          src: [ '**', '.jshintrc'],
+          src: [ '**', '.jshintrc', '.git/**'],
           dest: '<%= buildTempDir %>'
         },
         {
