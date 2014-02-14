@@ -12,7 +12,8 @@ module.exports = {
         '<%= src %>',
         '<%= root %>/node_modules/mocha',
         '<%= root %>/node_modules/expect.js'
-      ]
+      ],
+      port: 8001
     }
   }
 };
