@@ -2,6 +2,9 @@ define(function (require) {
   var Courier = require('courier/courier');
   var _ = require('lodash');
   var sinon = require('sinon/sinon');
+  var DataSource = require('courier/data_source/data_source');
+  var DocSource = require('courier/data_source/doc');
+  var SearchSource = require('courier/data_source/search');
 
   describe('Courier Module', function () {
 
@@ -39,13 +42,13 @@ define(function (require) {
         it('creates an empty search DataSource object', function () {
           courier = new Courier();
           var source = courier.createSource();
-          expect(source._state()).to.eql({ _type: 'search' });
+          expect(source._state).to.eql({});
         });
         it('optionally accepts a type for the DataSource', function () {
           var courier = new Courier();
-          expect(courier.createSource()._state()._type).to.eql('search');
-          expect(courier.createSource('search')._state()._type).to.eql('search');
-          expect(courier.createSource('get')._state()._type).to.eql('get');
+          expect(courier.createSource()).to.be.a(SearchSource);
+          expect(courier.createSource('search')).to.be.a(SearchSource);
+          expect(courier.createSource('doc')).to.be.a(DocSource);
           expect(function () {
             courier.createSource('invalid type');
           }).to.throwError(TypeError);
@@ -53,12 +56,12 @@ define(function (require) {
         it('optionally accepts a json object/string that will populate the DataSource object with settings', function () {
           courier = new Courier();
           var savedState = JSON.stringify({
-            _type: 'get',
+            _type: 'doc',
             index: 'logstash-[YYYY-MM-DD]',
             type: 'nginx',
             id: '1'
           });
-          var source = courier.createSource('get', savedState);
+          var source = courier.createSource('doc', savedState);
           expect(source + '').to.eql(savedState);
         });
       });
@@ -83,7 +86,7 @@ define(function (require) {
         source.on('results', _.noop);
         source.index('the index name');
 
-        expect(Courier._flattenDataSource(source).index).to.eql('the index name');
+        expect(source._flatten().index).to.eql('the index name');
       });
     });
 
@@ -111,7 +114,7 @@ define(function (require) {
             })
             .on('results', _.noop);
 
-          var query = Courier._flattenDataSource(math);
+          var query = math._flatten();
           expect(query.index).to.eql('people');
           expect(query.type).to.eql('students');
           expect(query.body).to.eql({
