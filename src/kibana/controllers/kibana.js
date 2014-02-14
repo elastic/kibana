@@ -18,15 +18,19 @@ define(function (require) {
         scope: {
           type: '@'
         },
-        controller: function ($rootScope, $scope) {
+        controller: function (courier, $rootScope, $scope) {
           var source = $rootScope.dataSource.extend()
             .type($scope.type)
             .source({
               include: 'country'
             })
             .on('results', function (resp) {
-              $scope.json = JSON.stringify(resp.hits, null, '  ');
+              //$scope.json = JSON.stringify(resp.hits, null, '  ');
             });
+
+          courier.mapper.getFields($rootScope.dataSource, function (data) {
+            $scope.json = data;
+          });
 
           $scope.$watch('type', source.type);
         },
