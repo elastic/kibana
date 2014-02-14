@@ -1,8 +1,9 @@
 define(function (require) {
-  var elasticsearch = require('elasticsearch');
+  var elasticsearch = require('../bower_components/elasticsearch/elasticsearch.js');
   var _ = require('lodash');
+  var Courier = require('courier/courier');
+  var DataSource = require('courier/data_source');
   var Mapper = require('courier/mapper');
-
   var client = new elasticsearch.Client({
     host: 'localhost:9200',
   });
@@ -14,9 +15,22 @@ define(function (require) {
       expect(mapper).to.be.a(Mapper);
     });
 
-    it('has a function call getFields that returns an empty object', function () {
-      var mapper = new Mapper(new Courier());
-      expect(mapper.getFields()).to.eql({
+    it('has a function called getFields that returns an object', function () {
+      var courier = new Courier({
+        client: client
+      });
+
+      var dataSource = courier.createSource('search')
+        .index('_all')
+        .size(5);
+
+      var mapper = new Mapper(client);
+
+      var callback = function(data) {
+        console.log(data);
+      };
+
+      expect(mapper.getFields(dataSource,callback)).to.eql({
         foo: {
           type: 'string'
         },
