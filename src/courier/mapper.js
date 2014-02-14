@@ -16,7 +16,6 @@ define(function (require) {
      * @return {Object} A hash containing fields and their related mapping
      */
     this.getFields = function (dataSource, callback, type) {
-      console.log(dataSource);
       client.indices.getFieldMapping({index: dataSource.index}, callback);
     };
 

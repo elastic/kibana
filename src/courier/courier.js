@@ -1,287 +1,257 @@
 define(function (require) {
 
-  var DataSource = require('courier/data_source');
-  var Docs = require('courier/docs');
   var EventEmitter = require('utils/event_emitter');
   var inherits = require('utils/inherits');
   var errors = require('courier/errors');
   var _ = require('lodash');
   var angular = require('angular');
 
-  function chain(cntx, method) {
-    return function () {
-      method.apply(cntx, arguments);
-      return this;
-    };
-  }
+  var DocSource = require('courier/data_source/doc');
+  var SearchSource = require('courier/data_source/search');
+  var HastyRefresh = require('courier/errors').HastyRefresh;
 
-  function emitError(source, courier, error) {
-    if (EventEmitter.listenerCount(source, 'error')) {
-      source.emit('error', error);
-    } else {
-      courier.emit('error', error);
-    }
-  }
+  // map constructors to type keywords
+  var sourceTypes = {
+    doc: DocSource,
+    search: SearchSource
+  };
 
-  function mergeProp(state, filters, val, key) {
-    switch (key) {
-    case 'inherits':
-    case '_type':
-      // ignore
-      return;
-    case 'filter':
-      filters.push(val);
-      return;
-    case 'index':
-    case 'type':
-      if (key && state[key] == null) {
-        state[key] = val;
+  // fetch process for the two source types
+  var onFetch = {
+    // execute a search right now
+    search: function (courier) {
+      if (courier._activeSearchRequest) {
+        return courier._error(new HastyRefresh());
       }
-      return;
-    case 'source':
-      key = '_source';
-      /* fall through */
-    }
+      courier._activeSearchRequest = SearchSource.fetch(
+        courier,
+        courier._refs.search,
+        function (err) {
+          if (err) return courier._error(err);
+        });
+    },
 
-    if (key && state.body[key] == null) {
-      state.body[key] = val;
-    }
-  }
-
-  function flattenDataSource(source) {
-    var state = {
-      body: {}
-    };
-
-    // all of the filters from the source chain
-    var filters = [];
-    var collectProp = _.partial(mergeProp, state, filters);
-
-    // walk the chain and merge each property
-    var current = source;
-    var currentState;
-    while (current) {
-      currentState = current._state();
-      _.forOwn(currentState, collectProp);
-      current = currentState.inherits;
-    }
-
-    // defaults for the query
-    _.forOwn({
-      query: {
-        'match_all': {}
-      }
-    }, collectProp);
-
-    // switch to filtered query if there are filters
-    if (filters.length) {
-      state.body.query = {
-        filtered: {
-          query: state.body.query,
-          filter: {
-            bool: {
-              must: filters
-            }
-          }
+    // validate that all of the DocSource objects are up to date
+    // then fetch the onces that are not
+    doc: function (courier) {
+      DocSource.validate(courier, courier._refs.doc, function (err, invalid) {
+        if (err) {
+          courier.stop();
+          return courier.emit('error', err);
         }
-      };
+
+        // if all of the docs are up to date we don't need to do anything else
+        if (invalid.length === 0) return;
+
+        DocSource.fetch(courier, invalid, function (err) {
+          if (err) return courier._error(err);
+        });
+      });
     }
+  };
 
-    return state;
-  }
-
-  function fetchSearchResults(courier, client, sources, cb) {
-    if (!client) {
-      this.emit('error', new Error('Courier does not have a client yet, unable to fetch queries.'));
-      return;
-    }
-
-    var all = [];
-    var body = '';
-    _.each(sources, function (source) {
-      if (source.getType() !== 'search') {
-        return;
-      }
-      all.push(source);
-
-      var state = flattenDataSource(source);
-      var header = JSON.stringify({
-        index: state.index,
-        type: state.type
-      });
-      var doc = JSON.stringify(state.body);
-
-      body += header + '\n' + doc + '\n';
-    });
-
-    return client.msearch({ body: body }, function (err, resp) {
-      if (err) return cb(err);
-
-      _.each(resp.responses, function (resp, i) {
-        var source = sources[i];
-        if (resp.error) return emitError(source, courier, resp);
-        source.emit('results', resp);
-      });
-
-      cb(err, resp);
-    });
-  }
-
-  function fetchDocs(courier, client, sources, cb) {
-    if (!client) {
-      this.emit('error', new Error('Courier does not have a client yet, unable to fetch queries.'));
-      return;
-    }
-
-    var all = [];
-    var body = {
-      docs: []
-    };
-
-    _.each(sources, function (source) {
-      if (source.getType() !== 'get') {
-        return;
-      }
-
-      all.push(source);
-
-      var state = flattenDataSource(source);
-      body.docs.push({
-        index: state.index,
-        type: state.type,
-        id: state.id
-      });
-    });
-
-    return client.mget({ body: body }, function (err, resp) {
-      if (err) return cb(err);
-
-      _.each(resp.responses, function (resp, i) {
-        var source = sources[i];
-        if (resp.error) return emitError(source, courier, resp);
-        source.emit('results', resp);
-      });
-
-      cb(err, resp);
-    });
-  }
-
-  function saveUpdate(source, fields) {
-
-  }
+  // default config values
+  var defaults = {
+    fetchInterval: 30000,
+    docInterval: 2500
+  };
 
   /**
-   * Federated query service, supports data sources that inherit properties
-   * from one another and automatically emit results.
+   * Federated query service, supports two data source types: doc and search.
+   *
+   *  search:
+   *    - inherits filters, and other query properties
+   *    - automatically emit results on a set interval
+   *  doc:
+   *    - tracks doc versions
+   *    - emits same results event when the doc is updated
+   *    - helps seperate versions of kibana running on the same machine stay in sync
+   *    - (NI) tracks version and uses it when new versions of a doc are reindexed
+   *    - (NI) helps deal with conflicts
+   *
    * @param {object} config
-   * @param {Client} config.client - The elasticsearch.js client to use for querying. Should be setup and ready to go.
-   * @param {integer} [config.fetchInterval=30000] - The amount in ms between each fetch (deafult is 30 seconds)
+   * @param {Client} config.client - The elasticsearch.js client to use for querying. Should be
+   *   setup and ready to go.
+   * @param {EsClient} [config.client] - The elasticsearch client that the courier should use
+   *   (can be set at a later time with the `.client()` method)
+   * @param {integer} [config.fetchInterval=30000] - The amount in ms between each fetch (deafult
+   *   is 30 seconds)
    */
   function Courier(config) {
     if (!(this instanceof Courier)) return new Courier(config);
-    var opts = {
-      fetchInterval: 30000
-    };
-    var fetchTimer;
-    var activeRequest;
-    var courier = this;
-    var sources = {
-      search: [],
-      get: []
-    };
 
-    function doSearch() {
-      if (!opts.client) {
-        this.emit('error', new Error('Courier does not have a client, pass it ' +
-          'in to the constructor or set it with the .client() method'));
-        return;
-      }
-      if (activeRequest) {
-        activeRequest.abort();
-        stopFetching();
-        this.emit('error', new errors.HastyRefresh());
-        return;
-      }
+    config = _.defaults(config || {}, defaults);
 
-      // we need to catch the original promise in order to keep it's abort method
-      activeRequest = fetchSearchResults(courier, opts.client, sources.search, function (err, resp) {
-        activeRequest = null;
-        setFetchTimeout();
+    this._client = config.client;
 
-        if (err) {
-          window.console && console.log(err);
-        }
-      });
-    }
-
-    function setFetchTimeout() {
-      clearTimeout(fetchTimer);
-      if (opts.fetchInterval) {
-        fetchTimer = setTimeout(doSearch, opts.fetchInterval);
-      } else {
-        fetchTimer = null;
-      }
-    }
-
-    function stopFetching(type) {
-      clearTimeout(fetchTimer);
-    }
-
-    // start using a DataSource in fetches/updates
-    function openDataSource(source) {
-      var type = source.getType();
-      if (~sources[type].indexOf(source)) return false;
-      sources[type].push(source);
-    }
-
-    // stop using a DataSource in fetches/updates
-    function closeDataSource(source) {
-      var type = source.getType();
-      var i = sources[type].indexOf(source);
-      if (i === -1) return;
-      sources[type].slice(i, 1);
-      // only search DataSources get fetched automatically
-      if (type === 'search' && sources.search.length === 0) stopFetching();
-    }
-
-    // has the courier been started?
-    function isRunning() {
-      return !!fetchTimer;
-    }
-
-    // chainable public api
-    this.start = chain(this, doSearch);
-    this.running = chain(this, isRunning);
-    this.stop = chain(this, stopFetching);
-    this.close = chain(this, function () { _(sources.search).each(closeDataSource); });
-    this.openDataSource = chain(this, openDataSource);
-    this.closeDataSource = chain(this, closeDataSource);
-
-    // setters
-    this.client = chain(this, function (client) {
-      opts.client = client;
+    // array's to store references to individual sources of each type
+    // wrapped in some metadata
+    this._refs = _.transform(sourceTypes, function (refs, fn, type) {
+      refs[type] = [];
     });
-    this.fetchInterval = function (val) {
-      opts.fetchInterval = val;
-      if (isRunning()) setFetchTimeout();
-      return this;
-    };
 
-    // factory
-    this.createSource = function (type, initialState) {
-      return new DataSource(this, type, initialState);
-    };
+    // stores all timer ids
+    this._timer = {};
 
-    // apply the passed in config
-    _.each(config || {}, function (val, key) {
-      if (typeof this[key] !== 'function') throw new TypeError('invalid config "' + key + '"');
-      this[key](val);
+    // interval times for each type
+    this._interval = {};
+
+    // interval hook/fn for each type
+    this._onInterval = {};
+
+    _.each(sourceTypes, function (fn, type) {
+      var courier = this;
+      // the name used outside of this module
+      var publicName;
+      if (type === 'search') {
+        publicName = 'fetchInterval';
+      } else {
+        publicName = type + 'Interval';
+      }
+
+      // store the config value passed in for this interval
+      this._interval[type] = config[publicName];
+
+      // store a quick "bound" method for triggering
+      this._onInterval[type] = function () {
+        onFetch[type](courier);
+        courier._schedule(type);
+      };
+
+      // create a public setter for this interval type
+      this[publicName] = function (val) {
+        courier._interval[type] = val;
+        courier._schedule(type);
+        return this;
+      };
     }, this);
   }
   inherits(Courier, EventEmitter);
 
-  // private api, exposed for testing
-  Courier._flattenDataSource = flattenDataSource;
+  /**
+   * PUBLIC API
+   */
+
+  // start fetching results on an interval
+  Courier.prototype.start = function () {
+    if (!this.running()) {
+      this._schedule('doc');
+      this._schedule('search');
+      this.fetch();
+    }
+    return this;
+  };
+
+  // is the courier currently running?
+  Courier.prototype.running = function () {
+    return !!this._fetchTimer;
+  };
+
+  // stop the courier from fetching more results
+  Courier.prototype.stop = function () {
+    this._clearScheduled('search');
+    this._clearScheduled('doc');
+  };
+
+  // close the courier, stopping it from refreshing and
+  // closing all of the sources
+  Courier.prototype.close = function () {
+    _.each(sourceTypes, function (fn, type) {
+      this._refs[type].forEach(function (ref) {
+        this._closeDataSource(ref.source);
+      }, this);
+    }, this);
+  };
+
+  // force a fetch of all datasources right now
+  Courier.prototype.fetch = function () {
+    _.forOwn(onFetch, function (method, type) {
+      method(this);
+    }, this);
+  };
+
+  // data source factory
+  Courier.prototype.createSource = function (type, initialState) {
+    type = type || 'search';
+    if ('function' !== typeof sourceTypes[type]) throw new TypeError(
+      'Invalid source type ' + type
+    );
+    var Constructor = sourceTypes[type];
+    return new Constructor(this, initialState);
+  };
+
+  /*****
+   * PRIVATE API
+   *****/
+
+  // handle errors in a standard way. The only errors that should make it here are
+  // - issues with msearch/mget syntax
+  // - unable to reach ES
+  // - HastyRefresh
+  Courier.prototype._error = function (err) {
+    this.stop();
+    return this.emit('error', err);
+  };
+
+  // every time a child object (DataSource, Mapper) needs the client, it should
+  // call _getClient
+  Courier.prototype._getClient = function () {
+    if (!this._client) throw new Error('Client is not set on the Courier yet.');
+    return this._client;
+  };
+
+  // start using a DocSource in fetches/updates
+  Courier.prototype._openDataSource = function (source) {
+    var refs = this._refs[source._getType()];
+    if (!_.find(refs, { source: source })) {
+      refs.push({
+        source: source
+      });
+    }
+  };
+
+  // stop using a DataSource in fetches/updates
+  Courier.prototype._closeDataSource = function (source) {
+    var type = source._getType();
+    var refs = this._refs[type];
+    _(refs).where({ source: source }).each(_.partial(_.pull, refs));
+    if (refs.length === 0) this._clearScheduled(type);
+  };
+
+  // schedule a fetch after fetchInterval
+  Courier.prototype._schedule = function (type) {
+    this._clearScheduled(type);
+    if (this._interval[type]) {
+      this._timer[type] = setTimeout(this._onInterval[type], this._interval[type]);
+    }
+  };
+
+  // properly clear scheduled fetches
+  Courier.prototype._clearScheduled = function (type) {
+    this._timer[type] = clearTimeout(this._timer[type]);
+  };
+
+  // alert the courior that a doc has been updated
+  // and that it should update matching docs
+  Courier.prototype._docUpdated = function (source) {
+    var updated = source._state;
+
+    _.each(this._refs.doc, function (ref) {
+      var state = ref.source._state;
+      if (
+        state === updated
+        || (
+          state.id === updated.id
+          && state.type === updated.type
+          && state.index === updated.index
+        )
+      ) {
+        delete ref.version;
+      }
+    });
+
+    onFetch.doc(this);
+  };
 
   return Courier;
 });

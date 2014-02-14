@@ -4,7 +4,7 @@ module.exports = {
       log: true,
       logErrors: true,
       urls: [
-        'http://localhost:8000/'
+        'http://localhost:8001/'
       ],
       run: false
     }

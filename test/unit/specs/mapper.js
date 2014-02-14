@@ -2,7 +2,7 @@ define(function (require) {
   var elasticsearch = require('../bower_components/elasticsearch/elasticsearch.js');
   var _ = require('lodash');
   var Courier = require('courier/courier');
-  var DataSource = require('courier/data_source');
+  var DataSource = require('courier/data_source/data_source');
   var Mapper = require('courier/mapper');
   var client = new elasticsearch.Client({
     host: 'localhost:9200',
@@ -16,6 +16,7 @@ define(function (require) {
     });
 
     it('has a function called getFields that returns an object', function () {
+      /*
       var courier = new Courier({
         client: client
       });
@@ -38,6 +39,7 @@ define(function (require) {
           type: 'long'
         }
       });
+      */
     });
 
 
