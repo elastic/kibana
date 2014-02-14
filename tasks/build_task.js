@@ -23,14 +23,11 @@ module.exports = function(grunt) {
           '<%= destDir %>/app/components/require.config.js': '<%= destDir %>/app/components/require.config.js',
           '<%= destDir %>/app/app.js': '<%= destDir %>/app/app.js'
         },
+
         options: {
           replacements: [
             {
-              pattern: /(?:^|\/\/)(.*)@REV@/,
-              replacement: '$1'+desc.object
-            },
-            {
-              pattern: /@REV@/,
+              pattern: /@REV@/g,
               replacement: desc.object
             }
           ]
