@@ -4,10 +4,10 @@ define([
   'mappings',
   'es',
   'kb/api',
-  'kb/url_pattern_matcher',
+  'autocomplete/engine',
   'require'
 ],
-  function (_, exports, mappings, es, api, url_pattern_matcher, require) {
+  function (_, exports, mappings, es, api, autocomplete_engine, require) {
     'use strict';
 
     var ACTIVE_API = new api.Api("empty");
@@ -17,11 +17,11 @@ define([
     }
 
     function IndexUrlComponent(name, parent, multi_valued) {
-      url_pattern_matcher.ListComponent.call(this, name, mappings.getIndices, parent, multi_valued);
+      autocomplete_engine.ListComponent.call(this, name, mappings.getIndices, parent, multi_valued);
     }
 
     IndexUrlComponent.prototype = _.create(
-      url_pattern_matcher.ListComponent.prototype,
+      autocomplete_engine.ListComponent.prototype,
       { 'constructor': IndexUrlComponent  });
 
     (function (cls) {
@@ -47,11 +47,11 @@ define([
     }
 
     function TypeUrlComponent(name, parent, multi_valued) {
-      url_pattern_matcher.ListComponent.call(this, name, TypeGenerator, parent, multi_valued);
+      autocomplete_engine.ListComponent.call(this, name, TypeGenerator, parent, multi_valued);
     }
 
     TypeUrlComponent.prototype = _.create(
-      url_pattern_matcher.ListComponent.prototype,
+      autocomplete_engine.ListComponent.prototype,
       { 'constructor': TypeUrlComponent  });
 
     (function (cls) {
@@ -74,11 +74,11 @@ define([
 
 
     function IdUrlComponent(name, parent) {
-      url_pattern_matcher.SharedComponent.call(this, name, parent);
+      autocomplete_engine.SharedComponent.call(this, name, parent);
     }
 
     IdUrlComponent.prototype = _.create(
-      url_pattern_matcher.SharedComponent.prototype,
+      autocomplete_engine.SharedComponent.prototype,
       { 'constructor': IdUrlComponent  });
 
     (function (cls) {

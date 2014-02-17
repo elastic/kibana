@@ -2,8 +2,8 @@ define([
   'kb',
   'mappings',
   'kb/api',
-  'autocomplete/url_path_autocomplete'
-], function (kb, mappings, api, url_path_autocomplete) {
+  'autocomplete/engine'
+], function (kb, mappings, api, autocomplete_engine) {
   'use strict';
 
   module("Knowledge base", {
@@ -52,7 +52,7 @@ define([
     }
 
     var context = { otherTokenValues: otherTokenValues};
-    url_path_autocomplete.populateContext(tokenPath, context, null,
+    autocomplete_engine.populateContext(tokenPath, context, null,
       expectedContext.autoCompleteSet, kb.getTopLevelUrlCompleteComponents()
     );
 

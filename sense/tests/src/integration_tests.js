@@ -814,6 +814,10 @@ define([
     endpoints: {
       "_search": {
         patterns: ["_search", "{indices}/{types}/_search", "{indices}/_search"],
+        url_params: {
+          "search_type": ["count", "query_then_fetch" ],
+          "scroll": "10m"
+        },
         data_autocomplete_rules: {
         }
       },
@@ -959,4 +963,137 @@ define([
       }
     ]
   );
+
+
+  context_tests(
+    null,
+    MAPPING,
+    CLUSTER_KB,
+    "GET _search?",
+    [
+      {
+        name: "Params just after ?",
+        cursor: { row: 0, column: 12},
+        autoCompleteSet: [
+          { name: "format", meta: "param", "insert_value": "format=" },
+          { name: "pretty", meta: "flag" },
+          { name: "scroll", meta: "param", "insert_value": "scroll="  },
+          { name: "search_type", meta: "param", "insert_value": "search_type=" },
+        ],
+        prefixToAdd: "",
+        suffixToAdd: ""
+      }
+    ]
+  );
+
+  context_tests(
+    null,
+    MAPPING,
+    CLUSTER_KB,
+    "GET _search?format=",
+    [
+      {
+        name: "Params values",
+        cursor: { row: 0, column: 19},
+        autoCompleteSet: [
+          { name: "json", meta: "format" },
+          { name: "yaml", meta: "format" }
+        ],
+        prefixToAdd: "",
+        suffixToAdd: ""
+      }
+    ]
+  );
+
+  context_tests(
+    null,
+    MAPPING,
+    CLUSTER_KB,
+    "GET _search?format=yaml&",
+    [
+      {
+        name: "Params after amp",
+        cursor: { row: 0, column: 24},
+        autoCompleteSet: [
+          { name: "format", meta: "param", "insert_value": "format=" },
+          { name: "pretty", meta: "flag" },
+          { name: "scroll", meta: "param", "insert_value": "scroll="  },
+          { name: "search_type", meta: "param", "insert_value": "search_type=" },
+        ],
+        prefixToAdd: "",
+        suffixToAdd: ""
+      }
+    ]
+  );
+
+  context_tests(
+    null,
+    MAPPING,
+    CLUSTER_KB,
+    "GET _search?format=yaml&search",
+    [
+      {
+        name: "Params on existing param",
+        cursor: { row: 0, column: 26},
+        rangeToReplace: {
+          start: { row: 0, column: 24},
+          end: { row: 0, column: 30}
+        },
+        autoCompleteSet: [
+          { name: "format", meta: "param", "insert_value": "format=" },
+          { name: "pretty", meta: "flag" },
+          { name: "scroll", meta: "param", "insert_value": "scroll="  },
+          { name: "search_type", meta: "param", "insert_value": "search_type=" },
+        ],
+        prefixToAdd: "",
+        suffixToAdd: ""
+      }
+    ]
+  );
+
+  context_tests(
+    null,
+    MAPPING,
+    CLUSTER_KB,
+    "GET _search?format=yaml&search_type=cou",
+    [
+      {
+        name: "Params on existing value",
+        cursor: { row: 0, column: 37},
+        rangeToReplace: {
+          start: { row: 0, column: 36},
+          end: { row: 0, column: 39}
+        },
+        autoCompleteSet: [
+          { name: "count", meta: "search_type" },
+          { name: "query_then_fetch", meta: "search_type" },
+        ],
+        prefixToAdd: "",
+        suffixToAdd: ""
+      }
+    ]
+  );
+  context_tests(
+    null,
+    MAPPING,
+    CLUSTER_KB,
+    "GET _search?format=yaml&search_type=cou",
+    [
+      {
+        name: "Params on just after = with existing value",
+        cursor: { row: 0, column: 36},
+        rangeToReplace: {
+          start: { row: 0, column: 36},
+          end: { row: 0, column: 36}
+        },
+        autoCompleteSet: [
+          { name: "count", meta: "search_type" },
+          { name: "query_then_fetch", meta: "search_type" },
+        ],
+        prefixToAdd: "",
+        suffixToAdd: ""
+      }
+    ]
+  );
+
 });

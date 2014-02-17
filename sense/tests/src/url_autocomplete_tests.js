@@ -1,8 +1,8 @@
 define([
   '_',
-  'kb/url_pattern_matcher',
-  'autocomplete/url_path_autocomplete'
-], function (_, url_pattern_matcher, url_path_autocomplete) {
+  'autocomplete/url_pattern_matcher',
+  'autocomplete/engine'
+], function (_, url_pattern_matcher, autocomplete_engine) {
   'use strict';
 
   module("Url autocomplete");
@@ -44,7 +44,7 @@ define([
       if (expectedContext.method) {
         context.method = expectedContext.method;
       }
-      url_path_autocomplete.populateContext(tokenPath, context, null,
+      autocomplete_engine.populateContext(tokenPath, context, null,
         expectedContext.autoCompleteSet, patternMatcher.getTopLevelComponents()
       );
 
@@ -60,6 +60,13 @@ define([
       deepEqual(context, expectedContext);
     });
 
+  }
+
+  function t(name, meta) {
+    if (meta) {
+      return {name: name, meta: meta};
+    }
+    return name;
   }
 
   (function () {
@@ -222,7 +229,7 @@ define([
     patterns_test("option testing - partial, with auto complete",
       endpoints,
       "a",
-      { autoCompleteSet: ["a", "b", "c"] }
+      { autoCompleteSet: [t("a", "p"), t("b", "p"), "c"] }
     );
 
     patterns_test("option testing - partial, without auto complete",
@@ -259,7 +266,7 @@ define([
     };
     var globalFactories = {
       "p": function (name, parent) {
-        return new url_pattern_matcher.ListComponent(name, ["g1", "g2"], parent);
+        return new autocomplete_engine.ListComponent(name, ["g1", "g2"], parent);
       }
     };
 
@@ -281,14 +288,14 @@ define([
     patterns_test("global parameters testing - partial, with auto complete",
       endpoints,
       "a",
-      { autoCompleteSet: ["a", "b"] },
+      { autoCompleteSet: [t("a", "p"), t("b", "p")] },
       globalFactories
     );
 
     patterns_test("global parameters testing - partial, with auto complete 2",
       endpoints,
       "b",
-      { autoCompleteSet: ["g1", "g2"] },
+      { autoCompleteSet: [t("g1", "p"), t("g2", "p")] },
       globalFactories
     );
 

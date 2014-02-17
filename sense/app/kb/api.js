@@ -1,5 +1,5 @@
-define([ '_', 'exports', './url_pattern_matcher'],
-  function (_, exports, url_pattern_matcher) {
+define([ '_', 'exports', 'autocomplete/url_pattern_matcher', 'autocomplete/url_params'],
+  function (_, exports, url_pattern_matcher, url_params) {
     'use strict';
 
     /**
@@ -37,6 +37,8 @@ define([ '_', 'exports', './url_pattern_matcher'],
       _.each(copiedDescription.patterns, function (p) {
         this.urlPatternMatcher.addEndpoint(p, copiedDescription);
       }, this);
+
+      copiedDescription.paramsAutocomplete = new url_params.UrlParams(copiedDescription.url_params);
 
       this.endpoints[endpoint] = copiedDescription;
     };

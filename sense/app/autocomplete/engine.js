@@ -9,11 +9,6 @@ define([
       this.name = name;
     };
 
-    exports.Matcher = function (name, next) {
-      this.name = name;
-      this.next = next;
-    };
-
     exports.AutocompleteComponent.prototype.getTerms = function (context, editor) {
       return [];
     };
@@ -35,6 +30,164 @@ define([
         next: this.next
       };
     };
+
+    function SharedComponent(name, parent) {
+      exports.AutocompleteComponent.call(this, name);
+      this._nextDict = {};
+      if (parent) {
+        parent.addComponent(this);
+      }
+      // for debugging purposes
+      this._parent = parent;
+    }
+
+    SharedComponent.prototype = _.create(
+      exports.AutocompleteComponent.prototype,
+      { 'constructor': SharedComponent  });
+
+    exports.SharedComponent = SharedComponent;
+
+    (function (cls) {
+      cls.getComponent = function (name) {
+        return this._nextDict[name];
+      };
+
+      cls.addComponent = function (c) {
+        this._nextDict[c.name] = c;
+        this.next = _.values(this._nextDict);
+      };
+
+    })(SharedComponent.prototype);
+
+    /** A component that suggests one of the give options, but accepts anything */
+    function ListComponent(name, list, parent, multi_valued) {
+      SharedComponent.call(this, name, parent);
+      this.listGenerator = _.isArray(list) ? function () {
+        return list
+      } : list;
+      this.multi_valued = _.isUndefined(multi_valued) ? true : multi_valued;
+    }
+
+    ListComponent.prototype = _.create(SharedComponent.prototype, { "constructor": ListComponent });
+    exports.ListComponent = ListComponent;
+
+
+    (function (cls) {
+      cls.getTerms = function (context, editor) {
+        if (!this.multi_valued && context.otherTokenValues) {
+          // already have a value -> no suggestions
+          return []
+        }
+        var already_set = context.otherTokenValues || [];
+        if (_.isString(already_set)) {
+          already_set = [already_set];
+        }
+        var ret = _.difference(this.listGenerator(context, editor), already_set);
+
+        if (this.getDefaultTermMeta()) {
+          var meta = this.getDefaultTermMeta();
+          ret = _.map(ret, function (t) {
+            if (_.isString(t)) {
+              t = { "name": t};
+            }
+            return _.defaults(t, { meta: meta });
+          });
+        }
+
+        return ret;
+      };
+
+      cls.validateToken = function (token, context, editor) {
+        if (!this.multi_valued && token.length > 1) {
+          return false;
+        }
+
+        // verify we have all tokens
+        var list = this.listGenerator();
+        var not_found = _.any(token, function (p) {
+          return list.indexOf(p) == -1;
+        });
+
+        if (not_found) {
+          return false;
+        }
+        return true;
+      };
+
+      cls.getContextKey = function (context, editor) {
+        return this.name;
+      };
+
+      cls.getDefaultTermMeta = function (context, editor) {
+        return this.name;
+      };
+
+      cls.match = function (token, context, editor) {
+        if (!_.isArray(token)) {
+          token = [ token ]
+        }
+        if (!this.validateToken(token, context, editor)) {
+          return null
+        }
+
+        var r = Object.getPrototypeOf(cls).match.call(this, token, context, editor);
+        r.context_values = r.context_values || {};
+        r.context_values[this.getContextKey()] = token;
+        return r;
+      }
+    })(ListComponent.prototype);
+
+    function SimpleParamComponent(name, parent) {
+      SharedComponent.call(this, name, parent);
+    }
+
+    SimpleParamComponent.prototype = _.create(SharedComponent.prototype, { "constructor": SimpleParamComponent });
+    exports.SimpleParamComponent = SimpleParamComponent;
+
+    (function (cls) {
+      cls.match = function (token, context, editor) {
+        var r = Object.getPrototypeOf(cls).match.call(this, token, context, editor);
+        r.context_values = r.context_values || {};
+        r.context_values[this.name] = token;
+        return r;
+      }
+
+    })(SimpleParamComponent.prototype);
+
+    function ConstantComponent(name, parent, options) {
+      SharedComponent.call(this, name, parent);
+      if (_.isString(options)) {
+        options = [options];
+      }
+      this.options = options || [name];
+    }
+
+    ConstantComponent.prototype = _.create(SharedComponent.prototype, { "constructor": ConstantComponent });
+    exports.ConstantComponent = ConstantComponent;
+
+    (function (cls) {
+      cls.getTerms = function () {
+        return this.options;
+      };
+
+      cls.addOption = function (options) {
+        if (!_.isArray(options)) {
+          options = [options];
+        }
+
+        [].push.apply(this.options, options);
+        this.options = _.uniq(this.options);
+      };
+      cls.match = function (token, context, editor) {
+        if (token !== this.name) {
+          return null;
+        }
+
+        return Object.getPrototypeOf(cls).match.call(this, token, context, editor);
+
+      }
+    })(ConstantComponent.prototype);
+
 
     function passThroughContext(context, extensionList) {
       function PTC() {

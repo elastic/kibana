@@ -6,12 +6,12 @@ define([
   'jquery',
   'utils',
   'autocomplete/json_body_autocomplete',
-  'autocomplete/url_path_autocomplete',
-  'kb/url_pattern_matcher',
+  'autocomplete/engine',
+  'autocomplete/url_pattern_matcher',
   '_',
   'jquery-ui',
   'ace_ext_language_tools'
-], function (history, kb, mappings, ace, $, utils, json_body_autocomplete, url_path_autocomplete, url_pattern_matcher, _) {
+], function (history, kb, mappings, ace, $, utils, json_body_autocomplete, autocomplete_engine, url_pattern_matcher, _) {
     'use strict';
 
     var AceRange = ace.require('ace/range').Range;
@@ -42,6 +42,19 @@ define([
           case "url.slash":
           case "url.comma":
           case "url.part":
+            return true;
+          default:
+            return false;
+        }
+      }
+
+      function isUrlParamsToken(token) {
+        switch ((token || {}).type) {
+          case "url.param":
+          case "url.equal":
+          case "url.value":
+          case "url.questionmark":
+          case "url.amp":
             return true;
           default:
             return false;
@@ -204,6 +217,9 @@ define([
           case "path":
             addPathAutoCompleteSetToContext(context, pos);
             break;
+          case "url_params":
+            addUrlParamsAutoCompleteSetToContext(context, pos);
+            break;
           case "method":
             addMethodAutoCompleteSetToContext(context, pos);
             break;
@@ -254,11 +270,23 @@ define([
                   return "path";
                   break;
                 default:
-                  return isUrlPathToken(t) ? "path" : null;
+                  if (isUrlPathToken(t)) {
+                    return "path";
+                  }
+                  if (isUrlParamsToken(t)) {
+                    return "url_params";
+                  }
+                  return null;
               }
               break;
             default:
-              return isUrlPathToken(t) ? "path" : null;
+              if (isUrlPathToken(t)) {
+                return "path";
+              }
+              if (isUrlParamsToken(t)) {
+                return "url_params";
+              }
+              return null;
           }
         }
 
@@ -315,6 +343,8 @@ define([
           case "url.method":
           case "url.endpoint":
           case "url.part":
+          case "url.param":
+          case "url.value":
             insertingRelativeToToken = 0;
             context.rangeToReplace = new AceRange(
               pos.row, context.updatedForToken.start, pos.row,
@@ -346,6 +376,9 @@ define([
         switch (context.autoCompleteType) {
           case "path":
             addPathPrefixSuffixToContext(context);
+            break;
+          case "url_params":
+            addUrlParamsPrefixSuffixToContext(context);
             break;
           case "method":
             addMethodPrefixSuffixToContext(context);
@@ -453,6 +486,11 @@ define([
         return context;
       }
 
+      function addUrlParamsPrefixSuffixToContext(context) {
+        context.prefixToAdd = "";
+        context.suffixToAdd = "";
+      }
+
       function addMethodPrefixSuffixToContext(context) {
         context.prefixToAdd = "";
         context.suffixToAdd = "";
@@ -482,10 +520,42 @@ define([
         context.method = ret.method;
         context.token = ret.token;
         context.urlTokenPath = ret.urlTokenPath;
-        url_path_autocomplete.populateContext(ret.urlTokenPath, context, editor, true, kb.getTopLevelUrlCompleteComponents());
+        autocomplete_engine.populateContext(ret.urlTokenPath, context, editor, true, kb.getTopLevelUrlCompleteComponents());
         context.autoCompleteSet = addMetaToTermsList(context.autoCompleteSet, "endpoint");
       }
 
+      function addUrlParamsAutoCompleteSetToContext(context, pos) {
+        var ret = getCurrentMethodAndTokenPaths(pos);
+        context.method = ret.method;
+        context.otherTokenValues = ret.otherTokenValues;
+        context.urlTokenPath = ret.urlTokenPath;
+        if (!ret.urlTokenPath) { // zero length tokenPath is true
+
+          console.log("Can't extract a valid url token path.");
+          return context;
+        }
+
+        autocomplete_engine.populateContext(ret.urlTokenPath, context, editor, false, kb.getTopLevelUrlCompleteComponents());
+
+        if (!context.endpoint) {
+          console.log("couldn't resolve an endpoint.");
+          return context;
+        }
+
+        if (!ret.urlParamsTokenPath) { // zero length tokenPath is true
+          console.log("Can't extract a valid urlParams token path.");
+          return context;
+        }
+        var tokenPath = [], currentParam = ret.urlParamsTokenPath.pop();
+        if (currentParam) {
+          tokenPath = Object.keys(currentParam); // single key object
+          context.otherTokenValues = currentParam[tokenPath[0]];
+        }
+
+        autocomplete_engine.populateContext(tokenPath, context, editor, true,
+          context.endpoint.paramsAutocomplete.getTopLevelComponents());
+        return context;
+      }
 
       function addBodyAutoCompleteSetToContext(context, pos) {
 
@@ -499,7 +569,7 @@ define([
           return context;
         }
 
-        url_path_autocomplete.populateContext(ret.urlTokenPath, context, editor, false, kb.getTopLevelUrlCompleteComponents());
+        autocomplete_engine.populateContext(ret.urlTokenPath, context, editor, false, kb.getTopLevelUrlCompleteComponents());
 
         context.bodyTokenPath = ret.bodyTokenPath;
         if (!ret.bodyTokenPath) { // zero length tokenPath is true
@@ -621,8 +691,8 @@ define([
         }
 
         if (tokenIter.getCurrentTokenRow() == startPos.row) {
-          if (t.type == "url.part") {
-            // we are on the same line as cursor and dealing with url on. Current token is not part of the context
+          if (t.type === "url.part" || t.type === "url.param" || t.type === "url.value") {
+            // we are on the same line as cursor and dealing with a url. Current token is not part of the context
             t = tokenIter.stepBackward();
           }
           bodyTokenPath = null; // no not on a body line.
@@ -630,8 +700,49 @@ define([
 
         ret.bodyTokenPath = bodyTokenPath;
         ret.urlTokenPath = [];
-
+        ret.urlParamsTokenPath = null;
         var curUrlPart;
+
+        while (t && isUrlParamsToken(t)) {
+          switch (t.type) {
+            case "url.value":
+              if (_.isArray(curUrlPart)) {
+                curUrlPart.unshift(t.value);
+              }
+              else if (curUrlPart) {
+                curUrlPart = [ t.value, curUrlPart ];
+              }
+              else {
+                curUrlPart = t.value;
+              }
+              break;
+            case "url.comma":
+              if (!curUrlPart) {
+                curUrlPart = [];
+              }
+              else if (!_.isArray(curUrlPart)) {
+                curUrlPart = [ curUrlPart ];
+              }
+              break;
+            case "url.param":
+              var v = curUrlPart;
+              curUrlPart = {};
+              curUrlPart[t.value] = v;
+              break;
+            case "url.amp":
+            case "url.questionmark":
+              if (!ret.urlParamsTokenPath) {
+                ret.urlParamsTokenPath = [];
+              }
+              ret.urlParamsTokenPath.unshift(curUrlPart || {});
+              curUrlPart = null;
+              break;
+          }
+          t = tokenIter.stepBackward();
+        }
+
+
+        curUrlPart = null;
         while (t && t.type.indexOf("url") != -1) {
           switch (t.type) {
             case "url.part":
@@ -665,7 +776,7 @@ define([
           ret.urlTokenPath.unshift(curUrlPart);
         }
 
-        if (!ret.bodyTokenPath) {
+        if (!ret.bodyTokenPath && !ret.urlParamsTokenPath) {
 
           if (ret.urlTokenPath.length > 0) {
             // started on the url, first token is current token
@@ -803,7 +914,7 @@ define([
           });
 
           callback(null, _.map(terms, function (t, i) {
-            t.insert_value = t.value;
+            t.insert_value = t.insert_value || t.value;
             t.value = '' + t.value; // normalize to strings
             t.score = -i;
             return t;
