@@ -72,7 +72,7 @@ define([
         add: undefined
       };
 
-      $scope.staleSeconds = 20;
+      $scope.staleIntervalCount = 5;
 
       $scope.modeInfo = {
         nodes: {
@@ -342,7 +342,9 @@ define([
 
         filter = filterSrv.getBoolFilter(filterSrv.ids);
 
-        var to = filterSrv.timeRange(false).to;
+        var maxFilterTime, to;
+        maxFilterTime = to = filterSrv.timeRange(false).to;
+        maxFilterTime = kbn.parseDate(maxFilterTime).getTime();
         if (to !== "now") {
           to = kbn.parseDate(to).valueOf() + "||";
         }
@@ -358,6 +360,15 @@ define([
           .order('term')
           .size(2000));
 
+        // master node detection
+        if ($scope.panel.mode === "nodes") {
+          request.facet($scope.ejs.TermStatsFacet("master_periods")
+            .keyField($scope.panel.persistent_field).valueField("@timestamp")
+            .order('term').facetFilter($scope.ejs.TermFilter("node.master", "true"))
+            .size(2000));
+
+        }
+
         _.each($scope.panel.metrics, function (m) {
           request.facet($scope.ejs.TermStatsFacet(m.field)
             .keyField($scope.panel.persistent_field).valueField(m.field)
@@ -371,23 +382,59 @@ define([
 
           var mrequest, newData;
 
-
           // populate the summary data based on the other facets
           newData = {};
+
 
           _.each(r.facets['timestamp'].terms, function (f) {
             if (!$scope.panel.show_hidden && f.term[0] === ".") {
               return;
             }
+            var t_interval = (f.max - f.min) / f.count;
+            if (t_interval <= 0) {
+              t_interval = 5000;
+            }
+            var alive = (maxFilterTime - f.max > $scope.staleIntervalCount * t_interval) ? false : true;
             newData[f.term] = {
               id: f.term,
               time_span: (f.max - f.min) / 1000,
-              alive: (new Date().getTime() - f.max > $scope.staleSeconds*1000) ? false : true,
+              reporting_interval: t_interval / 1000,
+              alive: alive,
               selected: ($scope.data[f.term] || {}).selected,
-              alert_level: 0
+              alert_level: alive ? 0 : 1,
+              id_alert_level: alive ? 0 : 1
             };
           });
 
+          if (r.facets['master_periods']) {
+            var most_recent_master = _.max(r.facets['master_periods'].terms, function (f) {
+              return f.max;
+            });
+            newData[most_recent_master.term].master = true;
+            // now check we have other active master within the same time frame
+            var other_masters = _.filter(r.facets['master_periods'].terms, function (t) {
+              if (t.term === most_recent_master.term) {
+                return false;
+              }
+              if (maxFilterTime - t.max > $scope.staleIntervalCount * newData[t.term].reporting_interval * 1000) {
+                // stale master info, we don't care.
+                return false;
+              }
+              // enough of overlap to not be a master swap
+              return (t.max - most_recent_master.min > $scope.staleIntervalCount * newData[t.term].reporting_interval * 1000);
+            });
+            _.each(other_masters, function (t) {
+              newData[t.term].master = true;
+            });
+            if (other_masters.length > 0) {
+              // mark all master nodes as alerting
+              _.each(newData, function (n) {
+                if (n.master) {
+                  n.alert_level = n.id_alert_level = 2;
+                }
+              });
+            }
+          }
 
           _.each($scope.panel.metrics, function (m) {
             _.each(r.facets[m.field].terms, function (f) {
@@ -424,12 +471,6 @@ define([
               }
               summary[m.field] = m_summary;
               m_summary.alert_level = $scope.alertLevel(m, m_summary.mean);
-//              if (f.term === "index_t_200" && m.field === "primaries.docs.count") {
-//                m_summary.alert_level = 1;
-//              }
-//              if (f.term === "index_t_300" && m.field === "primaries.indexing.index_total") {
-//                m_summary.alert_level = 2;
-//              }
               if (m_summary.alert_level > summary.alert_level) {
                 summary.alert_level = m_summary.alert_level;
               }
@@ -468,7 +509,7 @@ define([
               )
             );
             rowRequest.size(1).fields(_.unique(
-              [ stripRaw($scope.panel.display_field), stripRaw($scope.panel.persistent_field),'node.master']
+              [ stripRaw($scope.panel.display_field), stripRaw($scope.panel.persistent_field)]
             ));
 
             rowRequest.sort("@timestamp", "desc");
@@ -478,12 +519,11 @@ define([
 
           mrequest.doSearch(function (r) {
 
-            esVersion.is('>=1.0.0.RC1').then(function(version) {
+            esVersion.is('>=1.0.0.RC1').then(function (version) {
               var
                 hit,
                 display_name,
-                persistent_name,
-                master;
+                persistent_name;
 
               _.each(r.responses, function (response) {
                 if (response.hits.hits.length === 0) {
@@ -494,15 +534,12 @@ define([
                 if (version) {
                   display_name = (hit.fields[stripRaw($scope.panel.display_field)] || [ undefined ])[0];
                   persistent_name = (hit.fields[stripRaw($scope.panel.persistent_field)] || [ undefined] )[0];
-                  master = (hit.fields['node.master'] || [ undefined ])[0];
                 }
                 else {
                   display_name = hit.fields[stripRaw($scope.panel.display_field)];
                   persistent_name = hit.fields[stripRaw($scope.panel.persistent_field)];
-                  master = hit.fields['node.master'];
                 }
                 (newData[persistent_name] || {}).display_name = display_name;
-                newData[persistent_name].master = master;
               });
               $scope._register_data_end();
               $scope.select_display_data_and_enrich(newData);
@@ -514,7 +551,7 @@ define([
 
       function applyNewData(rows, data) {
         $scope.meta = {
-          masterCount: _.filter(data,{master:true,alive:true}).length
+          masterCount: _.filter(data, {master: true, alive: true}).length
         };
 
         $scope.rows = rows;
@@ -599,6 +636,17 @@ define([
           return 0;
         }
 
+        function compareIdByMasterRole(id1, id2) {
+          var s1 = newData[id1], s2 = newData[id2];
+          if (s1.master && !s2.master) {
+            return -1;
+          }
+          if (!s1.master && s2.master) {
+            return 1;
+          }
+          return 0;
+        }
+
         function compareIdByPanelSort(id1, id2) {
           var v1 = $scope.get_sort_value(id1, newData),
             v2 = $scope.get_sort_value(id2, newData),
@@ -630,12 +678,12 @@ define([
         }
 
         if ($scope.panel.sort) {
-          newRowsIds.sort(concatSorting(compareIdByPanelSort, compareIdByAlert, compareIdBySelection));
+          newRowsIds.sort(concatSorting(compareIdByPanelSort, compareIdByAlert, compareIdBySelection, compareIdByMasterRole));
           newRowsIds = newRowsIds.slice(0, $scope.rowLimit);
 
         }
         else {
-          newRowsIds.sort(concatSorting(compareIdBySelection, compareIdByAlert, compareIdByName));
+          newRowsIds.sort(concatSorting(compareIdBySelection, compareIdByAlert, compareIdByMasterRole, compareIdByName));
           newRowsIds = newRowsIds.slice(0, $scope.rowLimit);
           // sort again for visual effect
           // sort again for visual placement
@@ -646,8 +694,6 @@ define([
         newRows = _.map(newRowsIds, function (id) {
           return newData[id];
         });
-
-        // now that we have selections, sort by name (if
 
 
         request = $scope.ejs.Request().indices(dashboard.indices);
@@ -687,10 +733,6 @@ define([
             applyNewData(newRows, newData);
           }
         );
-      };
-
-      $scope.isCurrent = function(time,allowed) {
-        return (new Date().getTime() - time > allowed) ? false : true;
       };
 
       var addHistoryFacetResults = function (facets, rows, data, metrics) {
