@@ -32,10 +32,15 @@
       height: 10px;
       width: 50px;
     }
+    .marvel-muted .mutable {
+      opacity: 0.3;
+    }
   </style>
 
   <div class="pull-left marvel-header marvel-table" ng-show="rows.length > 0 || panel.rowFilter">
-    <input type="text" class="input-medium" placeholder="Filter {{panel.mode}}..." ng-model="panel.rowFilter" ng-change="onRowFilterChange()"> <span class="count">{{rows.length}} of {{_.size(data)}} {{panel.mode}}</span> / {{selectedData().length}} selected / Last 10m </span>
+    <input type="text" class="input-medium" placeholder="Filter {{panel.mode}}..." ng-model="panel.rowFilter" ng-change="onRowFilterChange()">
+    <span class="count">{{rows.length}} of {{_.size(data)}} {{panel.mode}}</span> / {{selectedData().length}} selected / Last 10m </span>
+    <span ng-show="meta.masterCount > 1"> / </span><span class="text-warning" ng-show="meta.masterCount > 1">Warning: Multiple masters. {{meta.masterCount}} nodes report master role</span></span>
     <br>
     <span class="small muted pull-right" ng-show="!viewSelect"> <i class="icon-warning"></i> Compact view. Filter {{panel.mode}} to 5 or less, or set the page refresh rate to 2m or greater for more options.</span>
   </div>
@@ -58,17 +63,21 @@
         <i ng-show='metric.field == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
       </th>
     </thead>
-    <tr ng-repeat="row in rows">
+    <tr ng-repeat="row in rows" ng-class="{'marvel-muted':!row.alive}">
       <td>
-        <div class="checkbox">
-          <label>
+        <div>
+          <label class="checkbox" ng-class="alertClass(row.id_alert_level)">
             <input type="checkbox" ng-model="row.selected" ng-checked="row.selected">
-            <span class="pointer" ng-click="rowClick(row)">{{row.display_name}}</span>
+            <span class="pointer" ng-click="rowClick(row)">
+              {{row.display_name}}
+              <i bs-tooltip="'No report has been received for more than '+staleSeconds+' seconds'" ng-show="!row.alive" class="icon-exclamation-sign"></i>
+              <i bs-tooltip="'This node is master'" ng-show="row.master" class="icon-star"></i>
+            </span>
             <div class="marvel-persistent-name pointer" ng-hide="row.id == row.display_name" ng-click="rowClick(row)">{{row.id}}</div>
           </label>
         </div>
       </td>
-      <td ng-repeat="metric in panel.metrics" ng-class="alertClass(row[metric.field].alert_level)">
+      <td ng-repeat="metric in panel.metrics" class="mutable" ng-class="alertClass(row[metric.field].alert_level)">
         <div class="marvel-mean pointer" ng-click="rowClick(row,metric)">
           <span bo-text="(_.isNull(row[metric.field].mean)?'n/a':row[metric.field].mean) | metric_format:metric"></span>
           <br>
@@ -97,16 +106,18 @@
           <i ng-show='metric.field == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
       </th>
     </thead>
-    <tr ng-repeat="row in rows">
+    <tr ng-repeat="row in rows" ng-class="{'marvel-muted':!row.alive}">
       <td>
-        <div class="checkbox">
+        <div class="checkbox" ng-class="alertClass(row.id_alert_level)">
           <label>
             <input type="checkbox" ng-model="row.selected" ng-checked="row.selected">
           </label>
           <span class="pointer" ng-click="rowClick(row)">{{ row.id }}</span>
+          <i bs-tooltip="'No report has been received for more than '+staleSeconds+' seconds'" ng-show="!row.alive" class="icon-exclamation-sign"></i>
+          <i bs-tooltip="'This node is master'" ng-show="row.master" class="icon-star"></i>
         </div>
       </td>
-      <td ng-repeat="metric in panel.metrics" ng-class="alertClass(row[metric.field].alert_level)">
+      <td ng-repeat="metric in panel.metrics" ng-class="alertClass(row[metric.field].alert_level)" class="mutable">
         <div class="pointer" ng-click="rowClick(row,metric)">
           <span bo-text="(_.isNull(row[metric.field].mean)?'n/a':row[metric.field].mean) | metric_format:metric"></span>
 
