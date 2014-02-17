@@ -51,8 +51,8 @@ define(function () {
           }
         },
 
-        filter: {
-          // added by global rules.
+        post_filter: {
+          __scope_link: 'GLOBAL.filter'
         },
         size: {
           __template: 20

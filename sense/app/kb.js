@@ -72,6 +72,38 @@ define([
       };
     })(TypeUrlComponent.prototype);
 
+    function FieldGenerator(context) {
+      return mappings.getFields(context.indices, context.types);
+    }
+
+    function FieldUrlComponent(name, parent, multi_valued) {
+      autocomplete_engine.ListComponent.call(this, name, FieldGenerator, parent, multi_valued);
+    }
+
+    FieldUrlComponent.prototype = _.create(
+      autocomplete_engine.ListComponent.prototype,
+      { 'constructor': FieldUrlComponent  });
+
+    (function (cls) {
+      cls.validateToken = function (token) {
+        if (!this.multi_valued && token.length > 1) {
+          return false;
+        }
+
+        return !_.find(token, function (t) {
+          return t.match(/[^\w.?*]/);
+        });
+      };
+
+      cls.getDefaultTermMeta = function () {
+        return "field"
+      };
+
+      cls.getContextKey = function () {
+        return "fields";
+      };
+    })(FieldUrlComponent.prototype);
+
 
     function IdUrlComponent(name, parent) {
       autocomplete_engine.SharedComponent.call(this, name, parent);
@@ -112,6 +144,13 @@ define([
       },
       'id': function (part, parent, endpoint) {
         return new IdUrlComponent(part, parent);
+      },
+      'fields': function (part, parent, endpoint) {
+        return new FieldUrlComponent(part, parent, true);
+      },
+      'nodes': function (part, parent, endpoint) {
+        return new autocomplete_engine.ListComponent(part, ["_local", "_master", "data:true", "data:false",
+          "master:true", "master:false"], parent)
       }
     };
 

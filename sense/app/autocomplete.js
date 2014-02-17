@@ -519,6 +519,7 @@ define([
         var ret = getCurrentMethodAndTokenPaths(pos);
         context.method = ret.method;
         context.token = ret.token;
+        context.otherTokenValues = ret.otherTokenValues;
         context.urlTokenPath = ret.urlTokenPath;
         autocomplete_engine.populateContext(ret.urlTokenPath, context, editor, true, kb.getTopLevelUrlCompleteComponents());
         context.autoCompleteSet = addMetaToTermsList(context.autoCompleteSet, "endpoint");
@@ -780,7 +781,7 @@ define([
 
           if (ret.urlTokenPath.length > 0) {
             // started on the url, first token is current token
-            ret.otherTokenValues = ret.urlTokenPath.splice(-1);
+            ret.otherTokenValues = ret.urlTokenPath.splice(-1)[0];
           }
         }
         else {

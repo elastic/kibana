@@ -8,9 +8,38 @@ define(function () {
 
     api.addEndpointDescription('_stats', {
       patterns: [
+        "_stats",
+        "_stats/{metrics}",
         "{indices}/_stats",
-        "_stats"
-      ]
+        "{indices}/_stats/{metrics}",
+      ],
+      url_components: {
+        "metrics": [
+          "docs",
+          "store",
+          "indexing",
+          "search",
+          "get",
+          "merge",
+          "refresh",
+          "flush",
+          "warmer",
+          "filter_cache",
+          "id_cache",
+          "percolate",
+          "segments",
+          "fielddata",
+          "completion",
+          "_all"
+        ]
+      },
+      url_params: {
+        "fields": [],
+        "types": [],
+        "completion_fields": [],
+        "fielddata_fields": []
+      }
+
     });
 
     api.addEndpointDescription('_segments', {

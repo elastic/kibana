@@ -2,7 +2,6 @@ define(function () {
   'use strict';
 
   return function init(api) {
-    api.addEndpointDescription('_cluster/nodes/stats');
 
     api.addEndpointDescription('_cluster/state');
 

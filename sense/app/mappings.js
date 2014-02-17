@@ -143,6 +143,15 @@ define([
 
     if (field_mapping["index_name"])  ret.name = field_mapping["index_name"];
 
+    if (field_mapping["fields"]) {
+      nested_fields = $.map(field_mapping['fields'], function (field_mapping, field_name) {
+        return getFieldNamesFromFieldMapping(field_name, field_mapping);
+      });
+      nested_fields = applyPathSettings(nested_fields);
+      nested_fields.unshift(ret);
+      return nested_fields;
+    }
+
     return [ret];
   }
 

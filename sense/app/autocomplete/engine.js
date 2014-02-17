@@ -60,12 +60,13 @@ define([
     })(SharedComponent.prototype);
 
     /** A component that suggests one of the give options, but accepts anything */
-    function ListComponent(name, list, parent, multi_valued) {
+    function ListComponent(name, list, parent, multi_valued, allow_non_valid_values) {
       SharedComponent.call(this, name, parent);
       this.listGenerator = _.isArray(list) ? function () {
         return list
       } : list;
       this.multi_valued = _.isUndefined(multi_valued) ? true : multi_valued;
+      this.allow_non_valid_values = _.isUndefined(allow_non_valid_values) ? false : allow_non_valid_values;
     }
 
     ListComponent.prototype = _.create(SharedComponent.prototype, { "constructor": ListComponent });
@@ -126,7 +127,7 @@ define([
         if (!_.isArray(token)) {
           token = [ token ]
         }
-        if (!this.validateToken(token, context, editor)) {
+        if (!this.allow_non_valid_values && !this.validateToken(token, context, editor)) {
           return null
         }
 

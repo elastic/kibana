@@ -262,6 +262,18 @@ define([
         patterns: [
           "b/{p}",
         ]
+      },
+      "3": {
+        patterns: [
+          "b/{l}/c",
+        ],
+        url_components: {
+          l: {
+            type: "list",
+            list: ["la", "lb"],
+            allow_non_valid: true
+          }
+        }
       }
     };
     var globalFactories = {
@@ -295,7 +307,20 @@ define([
     patterns_test("global parameters testing - partial, with auto complete 2",
       endpoints,
       "b",
-      { autoCompleteSet: [t("g1", "p"), t("g2", "p")] },
+      { autoCompleteSet: [t("g1", "p"), t("g2", "p"), t("la", "l"), t("lb", "l")] },
+      globalFactories
+    );
+
+    patterns_test("Non valid token acceptance - partial, with auto complete 1",
+      endpoints,
+      "b/la",
+      { autoCompleteSet: ["c"], "l": ["la"] },
+      globalFactories
+    );
+    patterns_test("Non valid token acceptance - partial, with auto complete 2",
+      endpoints,
+      "b/non_valid",
+      { autoCompleteSet: ["c"], "l": ["non_valid"] },
       globalFactories
     );
 
@@ -424,24 +449,24 @@ define([
       { method: "DELETE" }
     );
 
-    patterns_test("Competing endpoint - extention of another, complete 1, auto complete",
+    patterns_test("Competing endpoint - extension of another, complete 1, auto complete",
       endpoints,
       "a/b$",
       { method: "PUT", autoCompleteSet: []}
     );
 
-    patterns_test("Competing endpoint - extention of another, complete 1",
+    patterns_test("Competing endpoint - extension of another, complete 1",
       endpoints,
       "a/b$",
       { method: "GET", endpoint: "2_GET"}
     );
 
-    patterns_test("Competing endpoint - extention of another, complete 1",
+    patterns_test("Competing endpoint - extension of another, complete 1",
       endpoints,
       "a/b$",
       { method: "DELETE", endpoint: "2_DELETE"}
     );
-    patterns_test("Competing endpoint - extention of another, complete 1",
+    patterns_test("Competing endpoint - extension of another, complete 1",
       endpoints,
       "a/b$",
       { method: "PUT"}

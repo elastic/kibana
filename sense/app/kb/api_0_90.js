@@ -18,7 +18,7 @@ define([
 ], function (_, api) {
   'use strict';
 
-  var parts = _(arguments).rest(3);
+  var parts = _(arguments).rest(2);
 
   function Api_0_90(globalSharedComponentFactories) {
     api.Api.call(this, "api_0_90", globalSharedComponentFactories);

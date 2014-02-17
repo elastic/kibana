@@ -70,6 +70,9 @@ define([
             if (_.isArray(c)) {
               c = new engine.ListComponent(part, c, active_component);
             }
+            else if (_.isObject(c) && c.type === "list") {
+              c = new engine.ListComponent(part, c.list, active_component, c.multi_valued, c.allow_non_valid);
+            }
             else {
               console.warn("incorrectly configured url component ", part, " in endpoint", endpoint);
               c = new engine.SharedComponent(part);

@@ -964,6 +964,29 @@ define([
     ]
   );
 
+  context_tests(
+    null,
+    MAPPING,
+    CLUSTER_KB,
+    "POST cl",
+    [
+      {
+        name: "Endpoints by subpart",
+        cursor: { row: 0, column: 7},
+        autoCompleteSet: [
+          { name: "_cluster/nodes/stats", meta: "endpoint" },
+          { name: "_cluster/stats", meta: "endpoint" },
+          { name: "_search", meta: "endpoint" },
+          { name: "index1", meta: "index" },
+          { name: "index2", meta: "index" }
+        ],
+        prefixToAdd: "",
+        suffixToAdd: "",
+        initialValue: "cl"
+      }
+    ]
+  );
+
 
   context_tests(
     null,
