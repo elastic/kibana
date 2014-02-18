@@ -1,4 +1,4 @@
-/*! elasticsearch - v1.5.4 - 2014-02-11
+/*! elasticsearch - v1.5.8 - 2014-02-17
  * http://www.elasticsearch.org/guide/en/elasticsearch/client/javascript-api/current/index.html
  * Copyright (c) 2014 Elasticsearch BV; Licensed Apache 2.0 */
 ;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -16153,6 +16153,28 @@ api.cluster.prototype.nodeStats = ca({
 });
 
 /**
+ * Perform a [cluster.pendingTasks](http://www.elasticsearch.org/guide/en/elasticsearch/reference/0.90/cluster-pending.html) request
+ *
+ * @param {Object} params - An object with parameters used to carry out this action
+ * @param {Boolean} params.local - Return local information, do not retrieve the state from master node (default: false)
+ * @param {Date, Number} params.masterTimeout - Specify timeout for connection to master
+ */
+api.cluster.prototype.pendingTasks = ca({
+  params: {
+    local: {
+      type: 'boolean'
+    },
+    masterTimeout: {
+      type: 'time',
+      name: 'master_timeout'
+    }
+  },
+  url: {
+    fmt: '/_cluster/pending_tasks'
+  }
+});
+
+/**
  * Perform a [cluster.putSettings](http://www.elasticsearch.org/guide/en/elasticsearch/reference/0.90/cluster-update-settings.html) request
  *
  * @param {Object} params - An object with parameters used to carry out this action
@@ -18811,6 +18833,9 @@ api.search = ca({
           type: 'list'
         }
       }
+    },
+    {
+      fmt: '/_search'
     }
   ],
   method: 'POST'
@@ -24227,7 +24252,6 @@ Client.apis = require('./apis');
 module.exports = ClientAction;
 
 var _ = require('./utils');
-var when = require('when');
 
 function ClientAction(spec) {
   if (!_.isPlainObject(spec.params)) {
@@ -24248,12 +24272,14 @@ function ClientAction(spec) {
     }
 
     try {
-      return exec(this.transport, spec, params, cb);
+      return exec(this.transport, spec, _.clone(params), cb);
     } catch (e) {
       if (typeof cb === 'function') {
         _.nextTick(cb, e);
       } else {
-        return when.reject(e);
+        var def = this.transport.defer();
+        def.reject(e);
+        return def.promise;
       }
     }
   }
@@ -24525,7 +24551,7 @@ ClientAction.proxy = function (fn, spec) {
   };
 };
 
-},{"./utils":211,"when":1}],195:[function(require,module,exports){
+},{"./utils":211}],195:[function(require,module,exports){
 module.exports = ConnectionAbstract;
 
 var _ = require('./utils');
@@ -24959,7 +24985,7 @@ ConnectionPool.prototype.close = function () {
 };
 ConnectionPool.prototype.empty = ConnectionPool.prototype.close;
 },{"./connectors":198,"./log":201,"./selectors":206,"./utils":211,"__browserify_process":13}],197:[function(require,module,exports){
-/**
+var Buffer=require("__browserify_Buffer").Buffer;/**
  * Connection that registers a module with angular, using angular's $http service
  * to communicate with ES.
  *
@@ -24975,6 +25001,9 @@ function AngularConnector(host, config) {
   ConnectionAbstract.call(this, host, config);
   this.defer = config.defer;
   this.$http = config.$http;
+  if(this.host.auth) {
+    this.$http.defaults.headers.common.Authorization = 'Basic ' + Buffer(this.host.auth, 'utf8').toString('base64');
+  }
 }
 _.inherits(AngularConnector, ConnectionAbstract);
 
@@ -25002,7 +25031,7 @@ AngularConnector.prototype.request = function (params, cb) {
   };
 };
 
-},{"../connection":195,"../errors":199,"../utils":211}],198:[function(require,module,exports){
+},{"../connection":195,"../errors":199,"../utils":211,"__browserify_Buffer":12}],198:[function(require,module,exports){
 var opts = {
   xhr: require('./xhr'),
   jquery: require('./jquery'),
