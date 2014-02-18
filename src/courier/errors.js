@@ -1,5 +1,6 @@
-define(function (require, module, exports) {
+define(function (require) {
   var listenerCount = require('utils/event_emitter').listenerCount;
+  var errors = {};
 
   // caused by a refresh attempting to start before the prevous is done
   function HastyRefresh() {
@@ -8,7 +9,7 @@ define(function (require, module, exports) {
   }
   HastyRefresh.prototype = new Error();
   HastyRefresh.prototype.constructor = HastyRefresh;
-  exports.HastyRefresh = HastyRefresh;
+  errors.HastyRefresh = HastyRefresh;
 
   // a non-critical cache write to elasticseach failed
   function CacheWriteFailure() {
@@ -17,7 +18,7 @@ define(function (require, module, exports) {
   }
   CacheWriteFailure.prototype = new Error();
   CacheWriteFailure.prototype.constructor = CacheWriteFailure;
-  exports.CacheWriteFailure = CacheWriteFailure;
+  errors.CacheWriteFailure = CacheWriteFailure;
 
   // when a field mapping is requested for an unknown field
   function FieldNotFoundInCache(name) {
@@ -26,6 +27,27 @@ define(function (require, module, exports) {
   }
   FieldNotFoundInCache.prototype = new Error();
   FieldNotFoundInCache.prototype.constructor = FieldNotFoundInCache;
-  exports.FieldNotFoundInCache = FieldNotFoundInCache;
+  errors.FieldNotFoundInCache = FieldNotFoundInCache;
 
+  // where there is an error getting a doc
+  function DocFetchFailure(resp) {
+    this.name = 'DocFetchFailure';
+    this.resp = resp;
+    this.message = 'Failed to get the doc: ' + JSON.stringify(resp);
+  }
+  DocFetchFailure.prototype = new Error();
+  DocFetchFailure.prototype.constructor = DocFetchFailure;
+  errors.DocFetchFailure = DocFetchFailure;
+
+  // there was a conflict storing a doc
+  function VersionConflict(resp) {
+    this.name = 'VersionConflict';
+    this.resp = resp;
+    this.message = 'Failed to store document changes do to a version conflict.';
+  }
+  VersionConflict.prototype = new Error();
+  VersionConflict.prototype.constructor = VersionConflict;
+  errors.VersionConflict = VersionConflict;
+
+  return errors;
 });

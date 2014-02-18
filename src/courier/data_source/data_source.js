@@ -63,6 +63,14 @@ define(function (require) {
    *****/
 
   /**
+   * Get values from the state
+   * @param {string} name - The name of the property desired
+   */
+  DataSource.prototype.get = function (name) {
+    return this._state[name];
+  };
+
+  /**
    * fetch the field names for this DataSource
    * @param  {Function} cb
    * @callback {Error, Array} - calls cb with a possible error or an array of field names
@@ -102,7 +110,7 @@ define(function (require) {
     if (EventEmitter.listenerCount(this, 'error')) {
       this.emit('error', err);
     } else {
-      this._courier.emit('error', err);
+      this._courier._error(err);
     }
   };
 
@@ -154,6 +162,13 @@ define(function (require) {
     }
 
     return flatState;
+  };
+
+  DataSource.prototype._resolveIndexPattern = function (start, end) {
+    if (this._state.indexInterval) {
+      throw new Error('Not implemented');
+    }
+    return this._state.index;
   };
 
   return DataSource;

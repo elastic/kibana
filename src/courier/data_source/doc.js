@@ -2,6 +2,7 @@ define(function (require) {
   var DataSource = require('courier/data_source/data_source');
   var inherits = require('utils/inherits');
   var errors = require('courier/errors');
+  var listenerCount = require('utils/event_emitter').listenerCount;
   var _ = require('lodash');
 
   function DocSource(courier, initialState) {
@@ -41,8 +42,7 @@ define(function (require) {
         var ref = allRefs[i];
         var source = ref.source;
 
-        //if (resp.error) return this._error(resp);
-        if (resp.error) return false;
+        if (resp.error) return source._error(new errors.DocFetchFailure(resp));
         if (ref.version === resp._version) return; // no change
         ref.version = resp._version;
         source._storeVersion(resp._version);
@@ -62,7 +62,7 @@ define(function (require) {
    */
   DocSource.validate = function (courier, refs, cb) {
     var invalid = _.filter(refs, function (ref) {
-      var storedVersion = ref.source._getStoredVersion();
+      var storedVersion = ref.source._getVersion();
       if (ref.version !== storedVersion) return true;
     });
     setTimeout(function () {
@@ -92,7 +92,7 @@ define(function (require) {
    * @param  {Function} cb - Callback to know when the update is complete
    * @return {undefined}
    */
-  DocSource.prototype.update = function (fields, cb) {
+  DocSource.prototype.doUpdate = function (fields, cb) {
     var source = this;
     var courier = this._courier;
     var client = courier._getClient();
@@ -108,6 +108,43 @@ define(function (require) {
     }, function (err, resp) {
       if (err) return cb(err);
 
+      courier._docUpdated(source);
+      return cb();
+    });
+  };
+
+  /**
+   * Update the document stored
+   * @param  {[type]}   body [description]
+   * @param  {Function} cb   [description]
+   * @return {[type]}        [description]
+   */
+  DocSource.prototype.doIndex = function (body, cb) {
+    var source = this;
+    var courier = this._courier;
+    var client = courier._getClient();
+    var state = this._state;
+
+    client.index({
+      id: state.id,
+      type: state.type,
+      index: state.index,
+      version: source._getVersion(),
+      body: body,
+      ignore: [409]
+    }, function (err, resp) {
+      if (err) return cb(err);
+
+      if (resp && resp.status === 409) {
+        err = new errors.VersionConflict(resp);
+        if (listenerCount(source, 'conflict')) {
+          return source.emit('conflict', err);
+        } else {
+          return cb(err);
+        }
+      }
+
+      source._storeVersion(resp._version);
       courier._docUpdated(source);
       return cb();
     });
@@ -163,7 +200,7 @@ define(function (require) {
    * Fetches the stored version from localStorage
    * @return {number} - the version number, or NaN
    */
-  DocSource.prototype._getStoredVersion = function () {
+  DocSource.prototype._getVersion = function () {
     var id = this._versionKey();
     return _.parseInt(localStorage.getItem(id));
   };
