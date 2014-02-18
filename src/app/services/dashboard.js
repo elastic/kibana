@@ -160,6 +160,8 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
         self.indices = [self.current.index.default];
         querySrv.resolve().then(function(){$rootScope.$broadcast('refresh');});
       }
+
+      kbn.current_time(true); // force a reset of the current time
     };
 
     var dash_defaults = function(dashboard) {
