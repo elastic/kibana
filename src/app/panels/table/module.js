@@ -443,7 +443,7 @@ function (angular, app, _, kbn, moment) {
       rows = [];
       csv = [];
 
-      if ($scope.panel.fields.length == 0) {
+      if ($scope.panel.fields.length === 0) {
         fields = $scope.fields.list;
       } else {
         fields = $scope.panel.fields;
