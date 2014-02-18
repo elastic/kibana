@@ -12,18 +12,21 @@ define(function () {
         "routing": "",
         "parent": ""
       }
-
     });
     api.addEndpointDescription('_get_doc_source', {
       methods: ['GET'],
       patterns: [
         "{index}/{type}/{id}/_source"
-      ]
-    });
+      ],
+      url_params: {
+        "version": 1,
+        "routing": "",
+        "parent": ""
+      }    });
     api.addEndpointDescription('_delete_doc', {
       methods: ['DELETE'],
       patterns: [
-        "{index}/{type}/{id}/"
+        "{index}/{type}/{id}"
       ],
       url_params: {
         "version": 1,
