@@ -23,6 +23,7 @@ define(function (require) {
       if (courier._activeSearchRequest) {
         return courier._error(new HastyRefresh());
       }
+
       courier._activeSearchRequest = SearchSource.fetch(
         courier,
         courier._refs.search,
@@ -114,7 +115,7 @@ define(function (require) {
 
       // store a quick "bound" method for triggering
       this._onInterval[type] = function () {
-        onFetch[type](courier);
+        if (courier._refs[type].length) onFetch[type](courier);
         courier._schedule(type);
       };
 
@@ -165,8 +166,8 @@ define(function (require) {
 
   // force a fetch of all datasources right now
   Courier.prototype.fetch = function () {
-    _.forOwn(onFetch, function (method, type) {
-      method(this);
+    _.forOwn(onFetch, function (fn, type) {
+      if (this._refs[type].length) fn(this);
     }, this);
   };
 
