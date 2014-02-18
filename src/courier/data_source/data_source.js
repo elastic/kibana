@@ -102,7 +102,7 @@ define(function (require) {
     if (EventEmitter.listenerCount(this, 'error')) {
       this.emit('error', err);
     } else {
-      this._courier.emit('error', err);
+      this._courier._error(err);
     }
   };
 
