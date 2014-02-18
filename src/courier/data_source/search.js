@@ -64,6 +64,7 @@ define(function (require) {
    */
   SearchSource.prototype._methods = [
     'index',
+    'indexInterval', // monthly, daily, etc
     'type',
     'query',
     'filter',
