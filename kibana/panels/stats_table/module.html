@@ -79,7 +79,7 @@
       </td>
       <td ng-repeat="metric in panel.metrics" class="mutable" ng-class="alertClass(row[metric.field].alert_level)">
         <div class="marvel-mean pointer" ng-click="rowClick(row,metric)">
-          <span bo-text="(_.isNull(row[metric.field].mean)?'n/a':row[metric.field].mean) | metric_format:metric"></span>
+          <span bo-text="(_.isNull(row[metric.field].value)?'n/a':row[metric.field].value) | metric_format:metric"></span>
           <br>
 
           <div class="marvel-stats-sparkline" panel='panel' field="metric.field" series="row[metric.field].series"></div>
@@ -119,7 +119,7 @@
       </td>
       <td ng-repeat="metric in panel.metrics" ng-class="alertClass(row[metric.field].alert_level)" class="mutable">
         <div class="pointer" ng-click="rowClick(row,metric)">
-          <span bo-text="(_.isNull(row[metric.field].mean)?'n/a':row[metric.field].mean) | metric_format:metric"></span>
+          <span bo-text="(_.isNull(row[metric.field].value)?'n/a':row[metric.field].value) | metric_format:metric"></span>
 
           <div ng-if="sparkLines" class="marvel-stats-sparkline pointer" ng-click="rowClick(row,metric)" panel='panel' field="metric.field" series="row[metric.field].series"></div>
         </div>

@@ -391,12 +391,12 @@ define([
               return;
             }
             var t_interval = (f.max - f.min) / f.count / 1000.0,
-                data_age_in_seconds = (maxFilterTime - f.max)/1000.0;
+              data_age_in_seconds = (maxFilterTime - f.max) / 1000.0;
 
             if (t_interval <= 0) {
               t_interval = 5;
             }
-            var alive = data_age_in_seconds < Math.min(300*1000, $scope.staleIntervalCount * t_interval);
+            var alive = data_age_in_seconds < Math.min(300 * 1000, $scope.staleIntervalCount * t_interval);
             newData[f.term] = {
               id: f.term,
               time_span: (f.max - f.min) / 1000,
@@ -425,7 +425,8 @@ define([
                 return false;
               }
               // enough of overlap to not be a master swap
-              return (t.max - most_recent_master.min > Math.min(300*1000, $scope.staleIntervalCount * newData[t.term].reporting_interval * 1000));
+              return (t.max - most_recent_master.min >
+                Math.min(300 * 1000, $scope.staleIntervalCount * newData[t.term].reporting_interval * 1000));
             });
             _.each(other_masters, function (t) {
               newData[t.term].master = true;
@@ -458,23 +459,23 @@ define([
                   summary[m.field] = m_summary;
                   return;
                 }
-                m_summary.mean = (f.max - f.min) / summary.time_span;
+                m_summary.value = (f.max - f.min) / summary.time_span;
                 if (m.scale && m.scale !== 1) {
-                  m_summary.mean /= m.scale;
+                  m_summary.value /= m.scale;
                 }
               }
               else {
                 m_summary.min = f.min;
                 m_summary.max = f.max;
-                m_summary.mean = f.mean;
+                m_summary.value = f.mean;
                 if (m.scale && m.scale !== 1) {
-                  m_summary.mean /= m.scale;
+                  m_summary.value /= m.scale;
                   m_summary.max /= m.scale;
                   m_summary.min /= m.scale;
                 }
               }
               summary[m.field] = m_summary;
-              m_summary.alert_level = $scope.alertLevel(m, m_summary.mean);
+              m_summary.alert_level = $scope.alertLevel(m, m_summary.value);
               if (m_summary.alert_level > summary.alert_level) {
                 summary.alert_level = m_summary.alert_level;
               }
@@ -693,12 +694,14 @@ define([
         }
 
         if ($scope.panel.sort) {
-          newRowsIds.sort(concatSorting(compareIdByPanelSort, compareIdByAlert,compareIdByStaleness, compareIdBySelection, compareIdByMasterRole));
+          newRowsIds.sort(concatSorting(compareIdByPanelSort, compareIdByAlert, compareIdByStaleness,
+            compareIdBySelection, compareIdByMasterRole));
           newRowsIds = newRowsIds.slice(0, $scope.rowLimit);
 
         }
         else {
-          newRowsIds.sort(concatSorting(compareIdBySelection, compareIdByAlert, compareIdByStaleness, compareIdByMasterRole, compareIdByName));
+          newRowsIds.sort(concatSorting(compareIdBySelection, compareIdByAlert, compareIdByStaleness,
+            compareIdByMasterRole, compareIdByName));
           newRowsIds = newRowsIds.slice(0, $scope.rowLimit);
           // sort again for visual effect
           // sort again for visual placement
@@ -774,15 +777,6 @@ define([
               // update mean to match min & max. Mean is calculated using the entire period's min/max
               // this can be different than the calculation here that is based of the min of every small bucket
 
-              var _l = series_data.length - 1;
-              if (_l <= 0) {
-                summary.mean = null;
-              }
-              else {
-                var avg_time = (series_time[_l] - series_time[0]) / 1000;
-                summary.mean = (series_data[_l] - series_data[0]) / avg_time;
-              }
-
 
               series_data = _.map(series_data, function (p, i) {
 
@@ -794,7 +788,7 @@ define([
                   var _t = ((series_time[i] - series_time[i - 1]) / 1000); // milliseconds -> seconds.
                   _v = (p - series_data[i - 1]) / _t;
                 }
-                return _v;
+                return _v >= 0 ? _v : null; // we only derive increasing counters. Negative numbers mean reset.
               });
 
               summary.max = _.reduce(series_data, function (m, v) {
@@ -813,7 +807,7 @@ define([
             }
 
             summary.series = _.zip(series_time, series_data);
-
+            summary.value = series_data[series_data.length - 1]; // use the last data point as value
           });
         });
 
@@ -840,7 +834,7 @@ define([
         if ($scope.panel.sort[0] === '__name__') {
           return id.display_name;
         }
-        return id[$scope.panel.sort[0]].mean;
+        return id[$scope.panel.sort[0]].value;
       };
 
       $scope.set_sort = function (field) {
