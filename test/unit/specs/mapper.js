@@ -1,45 +1,44 @@
 define(function (require) {
   var elasticsearch = require('../bower_components/elasticsearch/elasticsearch.js');
   var _ = require('lodash');
+  var sinon = require('sinon/sinon');
   var Courier = require('courier/courier');
   var DataSource = require('courier/data_source/data_source');
   var Mapper = require('courier/mapper');
+
   var client = new elasticsearch.Client({
     host: 'localhost:9200',
   });
 
-  describe('Mapper Module', function () {
+  var courier = new Courier({
+    client: client
+  });
 
-    it('provides a constructor for the Mapper class', function () {
-      var mapper = new Mapper(client);
-      expect(mapper).to.be.a(Mapper);
+  describe('Mapper Module', function () {
+    var server, source, mapper;
+
+    beforeEach(function() {
+      source = courier.createSource('search')
+        .index('logs*')
+        .size(5);
+      mapper = new Mapper(courier);
+
     });
 
-    it('has a function called getFields that returns an object', function () {
-      /*
-      var courier = new Courier({
-        client: client
-      });
+    afterEach(function () {
+    });
 
-      var dataSource = courier.createSource('search')
-        .index('_all')
-        .size(5);
+    it('provides a constructor for the Mapper class', function (done) {
+      expect(mapper).to.be.a(Mapper);
+      done();
+    });
 
-      var mapper = new Mapper(client);
-
-      var callback = function(data) {
-        console.log(data);
-      };
-
-      expect(mapper.getFields(dataSource,callback)).to.eql({
-        foo: {
-          type: 'string'
-        },
-        "foo.bar": {
-          type: 'long'
-        }
-      });
-      */
+    it('has a function called getFieldsFromMapping that calls client.indices.getFieldMapping', function (done) {
+      sinon.spy(client.indices, 'getFieldMapping');
+      mapper.getFieldsFromMapping(source,function(){});
+      expect(client.indices.getFieldMapping.called).to.be(true);
+      client.indices.getFieldMapping.restore();
+      done();
     });
 
 

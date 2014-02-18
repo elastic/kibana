@@ -41,7 +41,8 @@ define(function (require) {
         var ref = allRefs[i];
         var source = ref.source;
 
-        if (resp.error) return this._error(resp);
+        //if (resp.error) return this._error(resp);
+        if (resp.error) return false;
         if (ref.version === resp._version) return; // no change
         ref.version = resp._version;
         source._storeVersion(resp._version);
