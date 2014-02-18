@@ -390,18 +390,22 @@ define([
             if (!$scope.panel.show_hidden && f.term[0] === ".") {
               return;
             }
-            var t_interval = (f.max - f.min) / f.count;
+            var t_interval = (f.max - f.min) / f.count / 1000.0,
+                data_age_in_seconds = (maxFilterTime - f.max)/1000.0;
+
             if (t_interval <= 0) {
-              t_interval = 5000;
+              t_interval = 5;
             }
-            var alive = (maxFilterTime - f.max > $scope.staleIntervalCount * t_interval) ? false : true;
+            var alive = data_age_in_seconds < Math.min(300*1000, $scope.staleIntervalCount * t_interval);
             newData[f.term] = {
               id: f.term,
               time_span: (f.max - f.min) / 1000,
               reporting_interval: t_interval / 1000,
+              data_age_in_seconds: data_age_in_seconds,
+              data_age_display: kbn.secondsToHms(data_age_in_seconds),
               alive: alive,
               selected: ($scope.data[f.term] || {}).selected,
-              alert_level: alive ? 0 : 1,
+              alert_level: 0,
               id_alert_level: alive ? 0 : 1
             };
           });
@@ -421,7 +425,7 @@ define([
                 return false;
               }
               // enough of overlap to not be a master swap
-              return (t.max - most_recent_master.min > $scope.staleIntervalCount * newData[t.term].reporting_interval * 1000);
+              return (t.max - most_recent_master.min > Math.min(300*1000, $scope.staleIntervalCount * newData[t.term].reporting_interval * 1000));
             });
             _.each(other_masters, function (t) {
               newData[t.term].master = true;
@@ -625,6 +629,17 @@ define([
           return 0;
         }
 
+        function compareIdByStaleness(id1, id2) {
+          var s1 = newData[id1], s2 = newData[id2];
+          if (!s1.alive && s2.alive) {
+            return -1;
+          }
+          if (s1.alive && !s2.alive) {
+            return 1;
+          }
+          return 0;
+        }
+
         function compareIdByName(id1, id2) {
           var s1 = newData[id1], s2 = newData[id2];
           if (s1.display_name < s2.display_name) {
@@ -678,12 +693,12 @@ define([
         }
 
         if ($scope.panel.sort) {
-          newRowsIds.sort(concatSorting(compareIdByPanelSort, compareIdByAlert, compareIdBySelection, compareIdByMasterRole));
+          newRowsIds.sort(concatSorting(compareIdByPanelSort, compareIdByAlert,compareIdByStaleness, compareIdBySelection, compareIdByMasterRole));
           newRowsIds = newRowsIds.slice(0, $scope.rowLimit);
 
         }
         else {
-          newRowsIds.sort(concatSorting(compareIdBySelection, compareIdByAlert, compareIdByMasterRole, compareIdByName));
+          newRowsIds.sort(concatSorting(compareIdBySelection, compareIdByAlert, compareIdByStaleness, compareIdByMasterRole, compareIdByName));
           newRowsIds = newRowsIds.slice(0, $scope.rowLimit);
           // sort again for visual effect
           // sort again for visual placement

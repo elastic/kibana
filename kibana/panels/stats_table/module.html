@@ -70,7 +70,7 @@
             <input type="checkbox" ng-model="row.selected" ng-checked="row.selected">
             <span class="pointer" ng-click="rowClick(row)">
               {{row.display_name}}
-              <i bs-tooltip="'No report has been received for more than '+staleSeconds+' seconds'" ng-show="!row.alive" class="icon-exclamation-sign"></i>
+              <i bs-tooltip="'No report has been received for more than '+row.data_age_display" ng-show="!row.alive" class="icon-exclamation-sign"></i>
               <i bs-tooltip="'This node is master'" ng-show="row.master" class="icon-star"></i>
             </span>
             <div class="marvel-persistent-name pointer" ng-hide="row.id == row.display_name" ng-click="rowClick(row)">{{row.id}}</div>
@@ -113,7 +113,7 @@
             <input type="checkbox" ng-model="row.selected" ng-checked="row.selected">
           </label>
           <span class="pointer" ng-click="rowClick(row)">{{ row.id }}</span>
-          <i bs-tooltip="'No report has been received for more than '+staleSeconds+' seconds'" ng-show="!row.alive" class="icon-exclamation-sign"></i>
+          <i bs-tooltip="'No report has been received for more than '+row.data_age_display" ng-show="!row.alive" class="icon-exclamation-sign"></i>
           <i bs-tooltip="'This node is master'" ng-show="row.master" class="icon-star"></i>
         </div>
       </td>
