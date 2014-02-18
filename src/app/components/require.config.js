@@ -12,6 +12,7 @@ require.config({
     css:                      '../vendor/require/css',
     text:                     '../vendor/require/text',
     moment:                   '../vendor/moment',
+    blob:                     '../vendor/blob',
     filesaver:                '../vendor/filesaver',
     chromath:                 '../vendor/chromath',
     angular:                  '../vendor/angular/angular',
@@ -23,8 +24,8 @@ require.config({
     datepicker:               '../vendor/angular/datepicker',
     bindonce:                 '../vendor/angular/bindonce',
 
-    underscore:               'components/underscore.extended',
-    'underscore-src':         '../vendor/underscore',
+    lodash:                   'components/lodash.extended',
+    'lodash-src':             '../vendor/lodash',
     bootstrap:                '../vendor/bootstrap/bootstrap',
 
     jquery:                   '../vendor/jquery/jquery-1.8.0',
@@ -47,10 +48,6 @@ require.config({
     elasticjs:                '../vendor/elasticjs/elastic-angular-client',
   },
   shim: {
-    underscore: {
-      exports: '_'
-    },
-
     angular: {
       deps: ['jquery','config'],
       exports: 'angular'

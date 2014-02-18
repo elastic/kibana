@@ -4,7 +4,7 @@
 define([
   'angular',
   'jquery',
-  'underscore',
+  'lodash',
   'require',
   'elasticjs',
   'bootstrap',
@@ -29,6 +29,9 @@ function (angular, $, _, appLevelRequire) {
 
   // This stores the Kibana revision number, @REV@ is replaced by grunt.
   app.constant('kbnVersion',"@REV@");
+
+  // The minimum version that must be in the cluster
+  app.constant('esMinVersion','0.90.9');
 
   // Use this for cache busting partials
   app.constant('cacheBust',"cache-bust="+Date.now());
@@ -126,7 +129,7 @@ function (angular, $, _, appLevelRequire) {
     angular
       .element(document)
       .ready(function() {
-        $('body').attr('ng-controller', 'DashCtrl');
+        $('html').attr('ng-controller', 'DashCtrl');
         angular.bootstrap(document, apps_deps)
           .invoke(['$rootScope', function ($rootScope) {
             _.each(pre_boot_modules, function (module) {

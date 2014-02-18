@@ -12,7 +12,7 @@
 define([
   'angular',
   'app',
-  'underscore',
+  'lodash',
   'jquery',
   'kbn'
 ],
@@ -174,7 +174,7 @@ function (angular, app, _, $, kbn) {
       if($scope.panel.tmode === 'terms') {
         request = request
           .facet($scope.ejs.TermsFacet('terms')
-          .field($scope.panel.field)
+          .field($scope.field)
           .size($scope.panel.size)
           .order($scope.panel.order)
           .exclude($scope.panel.exclude)
@@ -188,7 +188,7 @@ function (angular, app, _, $, kbn) {
         request = request
           .facet($scope.ejs.TermStatsFacet('terms')
           .valueField($scope.panel.valuefield)
-          .keyField($scope.panel.field)
+          .keyField($scope.field)
           .size($scope.panel.size)
           .order($scope.panel.order)
           .facetFilter($scope.ejs.QueryFilter(

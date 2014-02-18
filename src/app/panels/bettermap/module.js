@@ -19,7 +19,7 @@
 define([
   'angular',
   'app',
-  'underscore',
+  'lodash',
   './leaflet/leaflet-src',
   'require',
 

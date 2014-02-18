@@ -178,19 +178,6 @@
 
         var _showTooltip = function(x, y, event){
             $('#tooltip').remove();
-            /*
-            var tooltip = $('<div id="tooltip" class=""></div>').appendTo('body').fadeIn(200);
-
-            $('<div id="title">' + event.title + '</div>').appendTo(tooltip);
-            $('<div id="type">Type: ' + event.eventType + '</div>').appendTo(tooltip);
-            $('<div id="description">' + event.description + '</div>').appendTo(tooltip);
-
-            tooltip.css({
-                top: y - tooltip.height() - 5,
-                left: x
-            });
-            console.log(tooltip);
-            */
 
             // @rashidkpc - hack to work with our normal tooltip placer
             var $tooltip = $('<div id="tooltip">');
@@ -447,7 +434,6 @@
             //TODO: support custom types
             var groups, clusters = [], newEvents = [];
 
-
             // split into same evenType groups
             groups = _groupEvents(events);
 
@@ -461,12 +447,13 @@
                 // each cluser of each event type
                 $.each(eventType, function(index, cluster) {
 
-                    var description = "<h5>"+(cluster.length>5?"Top 5 of ":"") + cluster.length + " events</h5>";
+                    var description = "<strong>"+(cluster.length>5?"Top 5 of ":"") + cluster.length + " events</strong>";
                     $.each(cluster,function(i,c) {
                         if(i > 5) {
                             return;
                         }
-                        description += '<div class="'+(i%2?'odd':'')+'" style="padding-bottom:0px">'+c.description + "</div>";
+                        description += '<div style="'+(i%2?'background-color:#444;':'')+
+                            '" style="padding-bottom:0px">'+c.description + "</div>";
                     });
 
                     var newEvent = {
@@ -528,9 +515,11 @@
         var _varianceAlgorithm = function(events, sens, space) {
             var cluster, clusters = [], sum = 0, avg, density;
 
+            events.sort(sortEvents);
+
             // find the average x delta
             for (var i = 1; i < events.length - 1; i++) {
-                sum += events[i].min - events[i - 1].min;
+                sum += events[i].min - events[i-1].min;
             }
             avg = sum / (events.length - 2);
 
@@ -539,11 +528,13 @@
 
             // middle points
             for (var i = 1; i < events.length; i++) {
-                var leftDiff = events[i].min - events[i - 1].min;
+                var leftDiff = events[i - 1].min - events[i].min;
 
                 density = leftDiff / space;
 
-                if (leftDiff > avg * sens && density > 0.05) {
+                var avgSens = avg * sens
+
+                if (leftDiff > avgSens && density > 0.05) {
                     clusters.push(cluster);
                     cluster = [ events[i] ];
                 } else {
@@ -627,4 +618,12 @@
         if (ao.min < bo.min) return -1;
         return 0;
     };
+
+    function sortEvents(a,b) {
+        if (a.min < b.min) return 1;
+        if (a.min > b.min) return -1;
+        return 0;
+    };
+
+
 })(jQuery);

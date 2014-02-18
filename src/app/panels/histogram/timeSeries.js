@@ -1,8 +1,8 @@
 define([
-  'underscore',
-  './interval'
+  './interval',
+  'lodash'
 ],
-function (_, Interval) {
+function (Interval, _) {
   'use strict';
 
   var ts = {};
