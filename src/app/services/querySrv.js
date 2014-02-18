@@ -1,6 +1,6 @@
 define([
   'angular',
-  'underscore',
+  'lodash',
   'config',
   'kbn'
 ],
@@ -9,7 +9,10 @@ function (angular, _, config, kbn) {
 
   var module = angular.module('kibana.services');
 
-  module.service('querySrv', function(dashboard, ejsResource, filterSrv, $q) {
+  module.service('querySrv', function(dashboard, ejsResource, filterSrv, esVersion, $q) {
+
+    // Save a reference to this
+    var self = this;
 
     // Create an object to hold our service state on the dashboard
     dashboard.current.services.query = dashboard.current.services.query || {};
@@ -71,7 +74,7 @@ function (angular, _, config, kbn) {
         }
       },
       regex: {
-        require:">=0.90.3",
+        require:">=0.90.12",
         icon: "icon-circle",
         resolve: function(query) {
           // Simply returns itself
@@ -123,12 +126,21 @@ function (angular, _, config, kbn) {
       }
     };
 
-    // Save a reference to this
-    var self = this;
+    self.types = [];
+    _.each(self.queryTypes,function(type,name){
+      esVersion.is(type.require).then(function(is) {
+        if(is) {
+          self.types.push(name);
+        }
+      });
+    });
 
     this.init = function() {
       self.list = dashboard.current.services.query.list;
       self.ids = dashboard.current.services.query.ids;
+
+      self.ids = dashboard.current.services.query.ids =
+        _.intersection(_.map(self.list,function(v,k){return parseInt(k,10);}),self.ids);
 
       // Check each query object, populate its defaults
       _.each(self.list,function(query) {

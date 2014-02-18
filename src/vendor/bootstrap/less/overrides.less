@@ -1,3 +1,14 @@
+// Media queries
+// ---------------------
+@media (max-width: 767px) {
+  div.panel {
+    width: 100% !important;
+    padding: 0px !important;
+  }
+}
+
+// ---------------------
+
 // Containers
 // ---------------------
 .container-fluid {
@@ -5,6 +16,12 @@
   padding-right: 0px;
 }
 
+.container.kibana-container {
+  padding: 5px 10px;
+  width: 100%;
+  box-sizing: border-box;
+   -moz-box-sizing: border-box;
+}
 
 // Backgrounds
 // ---------------------
@@ -52,13 +69,70 @@ code, pre {
   background-color: @grayLighter;
 }
 
-// KIBANA
-.panelCont {
-  padding: 0px 10px 10px 10px;
+// --------- Panels ---------
+
+.panel {
+  display: inline-table;
+  vertical-align: top;
+}
+
+.panel-container {
+  padding: 0px 0px 0px 0px;
   background: @kibanaPanelBackground;
-  //box-shadow: 0px 0px 8px rgba(30, 30, 30, 0.75);
-  margin: 0px;
-  border: 1px solid rgba(100, 100, 100, 0.25);
+  border: 1px solid rgba(100, 100, 100, 0.50);
+  margin: 5px;
+}
+
+.panel-content {
+  padding: 0px 10px 10px 10px;
+}
+
+.panel-title {
+  padding-left: 10px;
+  border: 0px;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.panel-loading {
+  position:absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 800;
+}
+
+.panel div.panel-extra div.panel-extra-container {
+  margin-right: 0px;
+  margin-top: 7px;
+}
+
+.panel div.panel-extra {
+  font-size: 0.9em;
+  margin-bottom: 10px;
+}
+
+.panel div.panel-extra .extra {
+  float:right !important;
+}
+
+.panel-error {
+  color: @white;
+  padding: 3px 10px 0px 10px;
+}
+
+.ui-draggable-dragging {
+  display: block;
+  z-index: 9999;
+}
+
+.dragInProgress .panel-container {
+  border: 3px solid rgba(100,100,100,0.50);
+}
+
+// ---------------------------
+
+.row-add-button {
+  margin: 5px;
 }
 
 div.editor-row {
@@ -140,7 +214,7 @@ form input.ng-invalid {
 }
 
 .kibana-row {
-  margin-bottom: 10px;
+  margin-bottom: 0px;
 }
 
 .row-tab {
@@ -165,14 +239,16 @@ form input.ng-invalid {
   font-weight: bold;
   font-size: 0.9em;
   margin: 0px 10px;
+  text-align: left;
 }
 
 .row-close {
   padding: 0px;
-  margin: 0px;
+  margin: 5px;
   min-height: 30px !important;
   line-height: 30px;
   background: @kibanaPanelBackground;
+  border: 1px solid rgba(100, 100, 100, 0.50);
 }
 
 .top-row-open {
@@ -190,16 +266,17 @@ form input.ng-invalid {
 }
 
 .row-open {
-  left:-34px;
+  margin-top: 5px;
+  left:-30px;
   position: absolute;
   z-index: 100;
-  transition: .25s left;
-  transition-delay: .25s;
-  -webkit-transition-delay: .25s;
+  transition: .10s left;
+  transition-delay: .10s;
+  -webkit-transition-delay: .10s;
 }
 
 .row-open:hover {
-  left:-12px;
+  left:-10px;
 }
 
 .odd {
@@ -219,45 +296,7 @@ form input.ng-invalid {
   border-top: 0px;
 }
 
-.panel-loading {
-  position:absolute;
-  top: 0px;
-  left: 0px;
-  z-index: 800;
-}
 
-.ui-draggable-dragging {
-  display: block;
-  visibility: visible;
-  opacity: 1;
-  z-index: 9999;
-}
-
-.panel-title {
-  border: 0px;
-  text-transform: uppercase;
-  font-weight: bold;
-}
-
-.panel div.panel-extra div.panel-extra-container {
-  margin-right: 0px;
-  margin-top: 7px;
-}
-
-.panel div.panel-extra {
-  font-size: 0.9em;
-  margin-bottom: 10px;
-}
-
-.panel div.panel-extra .extra {
-  float:right !important;
-  //border-bottom: 1px solid lighten(@bodyBackground, 5%);
-}
-
-.dragInProgress {
-  background-color: darken(@bodyBackground,1%);
-  border: 1px solid @tableBorder;
-}
 
 .link {
   color: @linkColor;
@@ -350,15 +389,25 @@ div.flot-text {
   color: @white;
 }
 
-.panel-error {
-  color: @white;
-  padding: 3px 10px 0px 10px;
-}
 
 .alert-warning {
   background-color: @warningBackground;
   border-color: @warningBorder;
   color: @warningText;
+}
+
+.dropdown-menu,
+.tooltip-inner,
+.nav-pills > li > a
+{
+  -webkit-border-radius: 0 !important;
+  -moz-border-radius: 0 !important;
+  border-radius: 0 !important;
+}
+
+.nav-pills > li.open > a {
+  border-color: transparent !important;
+  border-color: rgba(51, 181, 229, 0.4) !important;
 }
 
 /* ===================================================

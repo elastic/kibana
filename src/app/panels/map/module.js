@@ -13,7 +13,7 @@
 define([
   'angular',
   'app',
-  'underscore',
+  'lodash',
   'jquery',
   'config',
   './lib/jquery.jvectormap.min'

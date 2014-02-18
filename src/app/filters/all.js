@@ -1,4 +1,9 @@
-define(['angular', 'jquery', 'underscore', 'moment'], function (angular, $, _, moment) {
+define([
+  'angular',
+  'jquery',
+  'lodash',
+  'moment'
+], function (angular, $, _, moment) {
   'use strict';
 
   var module = angular.module('kibana.filters');
@@ -19,18 +24,6 @@ define(['angular', 'jquery', 'underscore', 'moment'], function (angular, $, _, m
         if((_.isUndefined(v.pin) || v.pin === false) && pinned === false) {
           return true;
         }
-      });
-      return ret;
-    };
-  });
-
-  /*
-    Filter an array of objects by elasticsearch version requirements
-  */
-  module.filter('esVersion', function(esVersion) {
-    return function(items, require) {
-      var ret = _.filter(items,function(qt) {
-        return esVersion.is(qt[require]) ? true : false;
       });
       return ret;
     };

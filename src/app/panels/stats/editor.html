@@ -25,4 +25,12 @@
       <label class="small">Display Breakdowns</label>
       <select class="input-mini" ng-model="panel.display_breakdown" ng-options="f for f in ['yes', 'no']"></select></span>
     </div>
+    <div class="editor-option">
+      <label class="small">Label column name</label>
+        <input type="text" class="input-large" ng-model="panel.label_name">
+    </div>
+    <div class="editor-option">
+      <label class="small">Value column name</label>
+        <input type="text" class="input-large" ng-model="panel.value_name">
+    </div>
 </div>

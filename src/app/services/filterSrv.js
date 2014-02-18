@@ -1,6 +1,6 @@
 define([
   'angular',
-  'underscore',
+  'lodash',
   'config',
   'kbn'
 ], function (angular, _, config, kbn) {
@@ -36,14 +36,6 @@ define([
       _.each(self.list,function(f) {
         self.set(f,f.id,true);
       });
-
-      // Date filters hold strings now, not dates
-      /*
-      _.each(self.getByType('time',true),function(time) {
-        self.list[time.id].from = new Date(time.from);
-        self.list[time.id].to = new Date(time.to);
-      });
-      */
 
     };
 
@@ -88,6 +80,8 @@ define([
           dashboard.refresh();
         },0);
       }
+      self.ids = dashboard.current.services.filter.ids =
+        _.intersection(_.map(self.list,function(v,k){return parseInt(k,10);}),self.ids);
       $rootScope.$broadcast('filter');
       return _r;
     };
@@ -179,7 +173,7 @@ define([
       case 'querystring':
         return ejs.QueryFilter(ejs.QueryStringQuery(filter.query)).cache(true);
       case 'field':
-        return ejs.QueryFilter(ejs.FieldQuery(filter.field,filter.query)).cache(true);
+        return ejs.QueryFilter(ejs.QueryStringQuery(filter.field+":("+filter.query+")")).cache(true);
       case 'terms':
         return ejs.TermsFilter(filter.field,filter.value);
       case 'exists':

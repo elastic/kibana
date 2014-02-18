@@ -8,7 +8,7 @@
 
   <fieldset>
     <select class="input-small" ng-model="querySrv.list[id].type" ng-change="typeChange(querySrv.list[id])">
-      <option ng-repeat="type in queryTypes|esVersion:'require'">{{type.name}}</option>
+      <option ng-repeat="type in queryTypes">{{type}}</option>
     </select> &nbsp<a href="" class="small" ng-click="queryHelp(querySrv.list[id].type)"> About the {{querySrv.list[id].type}} query</a>
 
     <hr class="small">

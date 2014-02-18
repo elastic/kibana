@@ -2,11 +2,12 @@ define([
   'angular',
   'jquery',
   'kbn',
-  'underscore',
+  'lodash',
   'config',
   'moment',
   'modernizr',
-  'filesaver'
+  'filesaver',
+  'blob'
 ],
 function (angular, $, kbn, _, config, moment, Modernizr) {
   'use strict';
@@ -15,7 +16,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
 
   module.service('dashboard', function(
     $routeParams, $http, $rootScope, $injector, $location, $timeout,
-    ejsResource, timer, kbnIndex, alertSrv
+    ejsResource, timer, kbnIndex, alertSrv, esVersion, esMinVersion
   ) {
     // A hash of defaults to use when loading a dashboard
 
@@ -79,7 +80,14 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
       // Clear the current dashboard to prevent reloading
       self.current = {};
       self.indices = [];
-      route();
+      esVersion.isMinimum().then(function(isMinimum) {
+        if(isMinimum) {
+          route();
+        } else {
+          alertSrv.set('Upgrade Required',"Your version of Elasticsearch is too old. Kibana requires" +
+            " Elasticsearch " + esMinVersion + " or above.", "error");
+        }
+      });
     });
 
     var route = function() {
@@ -488,18 +496,25 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
       });
     };
 
+    this.start_scheduled_refresh = function (after_ms) {
+      timer.cancel(self.refresh_timer);
+      self.refresh_timer = timer.register($timeout(function () {
+        self.start_scheduled_refresh(after_ms);
+        self.refresh();
+      }, after_ms));
+    };
+
+    this.cancel_scheduled_refresh = function () {
+      timer.cancel(self.refresh_timer);
+    };
+
     this.set_interval = function (interval) {
       self.current.refresh = interval;
-      if(interval) {
+      if (interval) {
         var _i = kbn.interval_to_ms(interval);
-        timer.cancel(self.refresh_timer);
-        self.refresh_timer = timer.register($timeout(function() {
-          self.set_interval(interval);
-          self.refresh();
-        },_i));
-        self.refresh();
+        this.start_scheduled_refresh(_i);
       } else {
-        timer.cancel(self.refresh_timer);
+        this.cancel_scheduled_refresh();
       }
     };
 
