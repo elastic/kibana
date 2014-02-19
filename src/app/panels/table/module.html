@@ -75,9 +75,12 @@
         <tbody bindonce ng-repeat="event in data| slice:panel.offset:panel.offset+panel.size" ng-class-odd="'odd'">
           <tr ng-click="toggle_details(event)" class="pointer">
             <td ng-if="panel.fields.length<1" bo-text="event._source|stringify|tableTruncate:panel.trimFactor:1"></td>
-            <td ng-show="panel.fields.length>0" ng-repeat="field in panel.fields">
-              <span ng-if="!panel.localTime || panel.timeField != field" bo-html="(event.kibana.highlight[field]||event.kibana._source[field]) |tableHighlight | tableTruncate:panel.trimFactor:panel.fields.length"></span>
-              <span ng-if="panel.localTime && panel.timeField == field" bo-html="event.sort[1]|tableLocalTime:event"></span>
+            <td ng-show="panel.fields.length>0" ng-repeat="field in panel.fields" ng-init="has_link = has_link_template(field)">
+              <span ng-if="!has_link && (!panel.localTime || panel.timeField != field)" bo-html="(event.kibana.highlight[field]||event.kibana._source[field]) |tableHighlight | tableTruncate:panel.trimFactor:panel.fields.length"></span>
+              <span ng-if="!has_link && (panel.localTime && panel.timeField == field)" bo-html="event.sort[1]|tableLocalTime:event"></span>
+              <span ng-if="has_link">
+                <a href="{{generate_link(field, event.kibana._source[field])}}" target="{{field}}" bo-html="event.kibana._source[field] |tableHighlight | tableTruncate:panel.trimFactor:panel.fields.length"></a>
+              </span>
             </td>
           </tr>
           <tr ng-if="event.kibana.details">
@@ -103,7 +106,12 @@
                     <i class="pointer icon-th" ng-click="toggle_field(key)" bs-tooltip="'Toggle table column'"></i>
                   </td>
                   <!-- At some point we need to create a more efficient way of applying the filter pipeline -->
-                  <td style="white-space:pre-wrap" bo-html="value|noXml|urlLink|stringify"></td>
+                  <td ng-init="has_link = has_link_template(key)">
+                    <span ng-if="has_link">
+                      <a style="white-space:pre-wrap" href="{{generate_link(key, value)}}" target="{{field}}" bo-html="value|noXml|urlLink|stringify"></a>
+                    </span>
+                    <span ng-if="!has_link" style="white-space:pre-wrap" bo-html="value|noXml|urlLink|stringify"></span>
+                  </td>
                 </tr>
               </table>
               <pre style="white-space:pre-wrap"  bo-html="without_kibana(event)|tableJson:2" ng-switch-when="json"></pre>

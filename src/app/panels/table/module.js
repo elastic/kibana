@@ -131,6 +131,23 @@ function (angular, app, _, kbn, moment) {
         mode        : 'all',
         ids         : []
       },
+
+      /** @scratch /panels/table/5
+       * ==== Link Templates
+       * link_templates array:: Containing link templates for a field. With this feature it's possible to link 
+       * other resources like ticket systems, scripted dashboards etc.
+       * template.field::: The field name of which the value will be linked.
+       * template.link::: The template for the link. The special marker [[FIELD]] will be replaces by the 
+       *                  field name, the marker [[VALUE]] will be replaced by the value of the field.
+       * 
+       * example:
+       * { field : "ip", link : "#dashboard/file/trackUser.json?ip=[[VALUE]]" }
+       * will link the field ip to a scripted dashboard named trackUser.json with a parameter using the value 
+       * of the 'ip' field.
+       *
+       */
+      link_templates : [],
+      
       style   : {'font-size': '9pt'},
       normTimes : true,
     };
@@ -152,6 +169,40 @@ function (angular, app, _, kbn, moment) {
 
     // Create a percent function for the view
     $scope.percent = kbn.to_percent;
+
+    $scope.update_link_template = function(link_templates, fieldName, link) {
+      var template = _.findWhere(link_templates, { field: fieldName });
+
+      // delete template
+      if (_.isUndefined(link)) {
+        $scope.refresh = true;
+        return _.without(link_templates, template);
+      }
+
+      // add / update link
+      if (_.isUndefined(template)) {
+        template = { field : fieldName, link: link };
+        link_templates.push(template);
+      } else {
+        template.link = link;
+      }
+      $scope.refresh = true;
+      return link_templates;
+    };
+
+    $scope.generate_link = function(field, value) {
+      var template = _.findWhere($scope.panel.link_templates, { field : field });
+      if (!template) {
+        return value;
+      }
+      return template.link.replace(/\[\[FIELD\]\]/g, field).replace(/\[\[VALUE\]\]/g, value);
+    };
+
+    $scope.has_link_template = function(field) {
+      var template = _.findWhere($scope.panel.link_templates, { field: field });
+      var b = !_.isUndefined(template);
+      return b;
+    };
 
     $scope.termsModal = function(field,chart) {
       $scope.modalField = field;

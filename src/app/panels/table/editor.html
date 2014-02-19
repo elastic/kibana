@@ -41,5 +41,16 @@
         <button class="btn" ng-click="panel.highlight = _.toggleInOut(panel.highlight,newhighlight);newhighlight=''"><i class="icon-plus"></i></button>
       </form><br>
       <span style="margin-left:3px" ng-repeat="field in panel.highlight" class="label">{{field}} <i class="pointer icon-remove-sign" ng-click="panel.highlight = _.toggleInOut(panel.highlight,field);set_refresh(true)" ></i></span>
+      <h5>Field Link Template <tip>Add links to a field representation; '[[FIELD]]' and '[[VALUE]]' will be replaced.</tip></h5>
+      <form class="input-append editor-option">
+        <p ng-repeat="template in panel.link_templates">
+          <input bs-typeahead="fields.list" type="text" class="input-small" ng-model='template.field' ng-change="set_refresh(true)">
+          <input bs-typeahead="fields.list" type="text" class="input-xlarge" ng-model='template.link' ng-change="set_refresh(true)">
+          <button class="btn" ng-click="panel.link_templates = update_link_template(panel.link_templates, template.field);"><i class="icon-remove-sign"></i></button>
+        </p>
+        <input bs-typeahead="fields.list" type="text" class="input-small" ng-model='newLinkField' ng-change="set_refresh(true)">
+        <input type="text" class="input-xlarge" ng-model="newLinkValue" ng-change="set_refresh(true)">
+        <button class="btn" ng-click="panel.link_templates = update_link_template(panel.link_templates, newLinkField, newLinkValue); newLinkField=''; newLinkValue=''"><i class="icon-plus"></i></button>
+      </form>
     </div>
   </div>
