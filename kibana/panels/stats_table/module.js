@@ -402,7 +402,7 @@ define([
               time_span: (f.max - f.min) / 1000,
               reporting_interval: t_interval / 1000,
               data_age_in_seconds: data_age_in_seconds,
-              data_age_display: kbn.secondsToHms(data_age_in_seconds),
+              data_age_display: kbn.secondsToHms(Math.floor(data_age_in_seconds)),
               alive: alive,
               selected: ($scope.data[f.term] || {}).selected,
               alert_level: 0,
@@ -748,6 +748,19 @@ define([
         // Populate scope when we have results
         results.then(function (results) {
             addHistoryFacetResults(results.facets, newRows, newData, $scope.panel.metrics);
+
+            // sort again for visual correctness & because history facets may change current values.
+            var sf;
+            if ($scope.panel.sort) {
+              sf = concatSorting(compareIdByPanelSort, compareIdByAlert, compareIdByStaleness,
+                compareIdBySelection, compareIdByMasterRole);
+            }
+            else {
+              sf = concatSorting(compareIdByAlert, compareIdByName);
+            }
+            newRows.sort(function (r1, r2) {
+              return sf(r1.id, r2.id);
+            });
             applyNewData(newRows, newData);
           }
         );
