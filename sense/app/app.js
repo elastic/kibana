@@ -95,12 +95,18 @@ define([
       var sourceLocation = utils.getUrlParam('load_from') || "stored";
       var previousSaveState = history.getSavedEditorState();
 
+      var defaultHost = "localhost:9200";
+      if (document.location.pathname && document.location.pathname.indexOf("_plugin") == 1) {
+        // running as an ES plugin. Always assume we are using that elasticsearch
+        defaultHost = document.location.host;
+      }
+
       if (sourceLocation == "stored") {
         if (previousSaveState) {
           resetToValues(previousSaveState.server, previousSaveState.content);
         }
         else {
-          resetToValues("localhost:9200");
+          resetToValues(defaultHost);
           input.autoIndent();
         }
       }
@@ -114,14 +120,9 @@ define([
       else if (previousSaveState) {
         resetToValues(previousSaveState.server);
       } else {
-        resetToValues("localhost:9200")
+        resetToValues(defaultHost)
       }
 
-
-      if (document.location.pathname && document.location.pathname.indexOf("_plugin") == 1) {
-        // running as an ES plugin. Always assume we are using that elasticsearch
-        resetToValues(document.location.host);
-      }
     }());
 
     (function setupAutosave() {
