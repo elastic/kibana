@@ -32,7 +32,7 @@
   </div>
   <div class="editor-option">
     <label class="small">Time correction</label>
-    <select ng-model="panel.timezone" class='input-small' ng-options="f for f in ['browser','utc']"></select>
+    <select ng-model="panel.timezone" class='input-large' ng-options="f for f in ['Etc/GMT-8','Etc/GMT-5','utc','browser']" ng-change='set_refresh(true)'></select>
   </div>
   <div class="editor-option">
     <label class="small">Auto-interval</label><input type="checkbox" ng-model="panel.auto_int" ng-checked="panel.auto_int" />

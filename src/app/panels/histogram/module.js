@@ -25,7 +25,8 @@ define([
   'jquery.flot.time',
   'jquery.flot.byte',
   'jquery.flot.stack',
-  'jquery.flot.stackpercent'
+  'jquery.flot.stackpercent',
+  'timezone'
 ],
 function (angular, app, $, _, kbn, moment, timeSeries) {
 
@@ -145,7 +146,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
       /** @scratch /panels/histogram/3
        * interval:: Array of possible intervals in the *View* selector. Example [`auto',`1s',`5m',`3h']
        */
-      intervals     : ['auto','1s','1m','5m','10m','30m','1h','3h','12h','1d','1w','1y'],
+      intervals     : ['auto','1s','1m','5m','10m','30m','1h','3h','12h','1d','1w','1M','1y'],
       /** @scratch /panels/histogram/3
        * ==== Drawing options
        * lines:: Show line chart
@@ -207,7 +208,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
        * ==== Transformations
        * timezone:: Correct for browser timezone?. Valid values: browser, utc
        */
-      timezone      : 'browser', // browser or utc
+      timezone      : 'Etc/GMT-8', // browser or utc
       /** @scratch /panels/histogram/3
        * percentage:: Show the y-axis as a percentage of the axis total. Only makes sense for multiple
        * queries
@@ -240,6 +241,10 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
 
 
     $scope.init = function() {
+
+      // Tell timezoneJS where to find the timezone info files.
+      timezoneJS.timezone.zoneFileBasePath = 'vendor/tz';
+
       // Hide view options by default
       $scope.options = false;
 
@@ -248,7 +253,6 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
       $scope.panel.tooltip.query_as_alias = true;
 
       $scope.get_data();
-
     };
 
     $scope.set_interval = function(interval) {
@@ -340,6 +344,46 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
         );
 
         var facet = $scope.ejs.DateHistogramFacet(q.id);
+
+        // TODO: Move this initialization code somewhere else.
+        // timezoneJS.timezone.zoneFileBasePath = 'vendor/tz';
+
+        // If the timezone is *not* UTC, i.e. a specific timezone such
+        // as "America/Los_Angeles" or an offset such as "Etc/GMT-8"
+        // or just the browser's local timezone, then add clauses to
+        // the ElasticSeach query to apply the corresponding timezone
+        // adjustment to the search.
+        if ( $scope.panel.timezone !== 'utc' ) {
+            var d = new timezoneJS.Date();
+            var offset = 0;
+            if ( $scope.panel.timezone === 'browser' )
+              {
+                // If we use the browser's local timezone information,
+                // then the offset value returned from this method
+                // will be the opposite sign than what you expect.
+                // For instance, in San Francisco, we'd expect -8, but
+                // this method will return +8.  So, we flip the sign
+                // to make it match what we expect.
+                offset = -1 * d.getTimezoneOffset();
+              }
+            else
+              {
+                d.setTimezone( $scope.panel.timezone );
+                offset = d.getTimezoneOffset();
+              }
+
+            $scope.panel.zone = d
+
+            facet.preZone( offset / 60 );
+
+            // If the interval is less than 1 day, we also add a
+            // postZone clause so that the time values in the results
+            // are adjusted to the timezone.
+            if ( kbn.interval_to_seconds( $scope.panel.interval ) < 86400 )
+              {
+                facet.postZone( offset / 60 );
+              }
+        }
 
         if($scope.panel.mode === 'count') {
           facet = facet.field($scope.panel.time_field).global(true);
@@ -627,7 +671,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
                 max: scope.panel.percentage && scope.panel.stack ? 100 : scope.panel.grid.max
               },
               xaxis: {
-                timezone: scope.panel.timezone,
+                timezone: 'utc',
                 show: scope.panel['x-axis'],
                 mode: "time",
                 min: _.isUndefined(scope.range.from) ? null : scope.range.from.getTime(),
@@ -714,9 +758,9 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
 
         function time_format(interval) {
           var _int = kbn.interval_to_seconds(interval);
-          if(_int >= 31535000 ) {
-            return "%Y";
-          }
+	  if(_int >= 31535000 ) {
+	    return "%Y";
+	  }
           if(interval == '1M') {
             return "%Y-%m";
           }
@@ -730,11 +774,11 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
           return "%H:%M:%S";
         }
 
-        function time_format2(interval) {
+	function time_format2(interval) {
           var _int = kbn.interval_to_seconds(interval);
-          if(_int >= 31535000 ) {
-            return "YYYY";
-          }
+	  if(_int >= 31535000 ) {
+	    return "YYYY";
+	  }
           if(interval == '1M') {
             return "YYYY-MM";
           }
@@ -742,7 +786,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
             return "YYYY-MM-DD";
           }
           return "YYYY-MM-DD HH:mm:ss";
-        }
+	}
 
         var $tooltip = $('<div>');
         elem.bind("plothover", function (event, pos, item) {
@@ -765,9 +809,9 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
             if(scope.panel.y_format === 'short') {
               value = kbn.shortFormat(value,2);
             }
-            timestamp = scope.panel.timezone === 'browser' ?
-              moment(item.datapoint[0]).format( time_format2( scope.panel.interval ) ) :
-              moment.utc(item.datapoint[0]).format( time_format2( scope.panel.interval ) );
+
+            timestamp = moment.utc(item.datapoint[0]).format( time_format2( scope.panel.interval ) );
+
             $tooltip
               .html(
                 group + value + " @ " + timestamp

@@ -39,7 +39,7 @@ require.config({
     'jquery.flot.stackpercent':'../vendor/jquery/jquery.flot.stackpercent',
     'jquery.flot.time':       '../vendor/jquery/jquery.flot.time',
     'jquery.flot.byte':       '../vendor/jquery/jquery.flot.byte',
-
+    timezone:                 '../vendor/timezone',
 
     modernizr:                '../vendor/modernizr-2.6.1',
     elasticjs:                '../vendor/elasticjs/elastic-angular-client',
