@@ -3,14 +3,33 @@ define(function () {
 
   return function init(api) {
     api.addEndpointDescription('_search', {
-      def_method: 'POST',
       methods: ['GET', 'POST'],
-      endpoint_autocomplete: [
-        '_search'
+      priority: 10, // collides with get doc by id
+      patterns: [
+        "{indices}/{types}/_search",
+        "{indices}/_search",
+        "_search"
       ],
-      indices_mode: 'multi',
-      types_mode: 'multi',
-      doc_id_mode: 'none',
+      url_params: {
+        q: "",
+        df: "",
+        analyzer: "",
+        default_operator: ["AND", "OR"],
+        explain: "__flag__",
+        fields: [],
+        sort: "",
+        track_scores: "__flag__",
+        timeout: 1,
+        from: 0,
+        size: 10,
+        search_type: ["dfs_query_then_fetch", "dfs_query_and_fetch", "query_then_fetch", "query_and_fetch", "count", "scan"],
+        lowercase_expanded_terms: ["true", "false"],
+        analyze_wildcard: "__flag__",
+        preference: ["_primary", "_primary_first", "_local", "_only_node:xyz", "_prefer_node:xyz", "_shards:2,3"],
+        scroll: "5m",
+        scroll_id: "",
+        routing: ""
+      },
       data_autocomplete_rules: {
         query: {
           // populated by a global rule

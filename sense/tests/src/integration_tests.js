@@ -36,16 +36,19 @@ define([
 
       mappings.clear();
       mappings.loadMappings(mapping);
-      var test_api = new api.Api();
+      var test_api = new api.Api('test', kb._test.globalUrlComponentFactories);
       if (kb_schemes) {
-        if (kb_schemes.globals)
+        if (kb_schemes.globals) {
           $.each(kb_schemes.globals, function (parent, rules) {
             test_api.addGlobalAutocompleteRules(parent, rules);
           });
-        if (kb_schemes.endpoints)
+        }
+        if (kb_schemes.endpoints) {
           $.each(kb_schemes.endpoints, function (endpoint, scheme) {
+            _.defaults(scheme, { methods: null }); // disable method testing unless specified in test
             test_api.addEndpointDescription(endpoint, scheme);
           });
+        }
       }
       kb.setActiveApi(test_api);
 
@@ -56,74 +59,80 @@ define([
         setTimeout(function () {
           input.completer = {
             base: {},
-            changeListener : function () {}
+            changeListener: function () {
+            }
           }; // mimic auto complete
           input.autocomplete._test.getCompletions(input, input.getSession(), test.cursor, "",
             function (err, terms) {
 
-          if (test.no_context) {
-            ok(!terms || terms.length === 0, "Expected no context bug got terms.");
-          }
-          else {
-            ok(terms && terms.length > 0, "failed to extract terms ...");
-          }
-
-          if (!terms || terms.length === 0) {
-            start();
-            return;
-          }
-
-
-
-            if (test["autoCompleteSet"]) {
-              var expected_terms = _.map(test["autoCompleteSet"], function (t) {
-                if (typeof t !== "object") {
-                  t = { "name": t };
-                }
-                return t;
-              });
-              if (terms.length != expected_terms.length) {
-                equal(_.pluck(terms, 'name'), _.pluck(expected_terms, 'name'), "list of completion terms is not of equal size");
-              } else {
-                var filtered_actual_terms = _.map(terms, function (actual_term,i) {
-                  var expected_term = expected_terms[i];
-                  var filtered_term = {};
-                  _.each(expected_term, function (v,p) { filtered_term[p] = actual_term[p]; });
-                  return filtered_term;
-                });
-                deepEqual(filtered_actual_terms, expected_terms);
+              if (test.no_context) {
+                ok(!terms || terms.length === 0, "Expected no context bug got terms.");
               }
-            }
+              else {
+                ok(terms && terms.length > 0, "failed to extract terms ...");
+              }
 
-          var context = terms[0].context;
-          input.autocomplete._test.addReplacementInfoToContext(context, test.cursor, terms[0].value);
+              if (!terms || terms.length === 0) {
+                start();
+                return;
+              }
 
-            function ac(prop, prop_test) {
-              if (typeof test[prop] != "undefined")
-                if (prop_test)
-                  prop_test(context[prop], test[prop], prop);
-                else
-                  deepEqual(context[prop], test[prop], 'context.' + prop + ' should equal ' + JSON.stringify(test[prop]));
-            }
 
-            function pos_compare(actual, expected, name) {
-            equal(actual.row, expected.row + rowOffset, "row of " + name + " position is not as expected");
-            equal(actual.column, expected.column, "column of " + name + " position is not as expected");
-          }
+              if (test["autoCompleteSet"]) {
+                var expected_terms = _.map(test["autoCompleteSet"], function (t) {
+                  if (typeof t !== "object") {
+                    t = { "name": t };
+                  }
+                  return t;
+                });
+                if (terms.length != expected_terms.length) {
+                  equal(_.pluck(terms, 'name'), _.pluck(expected_terms, 'name'), "list of completion terms is not of equal size");
+                }
+                else {
+                  var filtered_actual_terms = _.map(terms, function (actual_term, i) {
+                    var expected_term = expected_terms[i];
+                    var filtered_term = {};
+                    _.each(expected_term, function (v, p) {
+                      filtered_term[p] = actual_term[p];
+                    });
+                    return filtered_term;
+                  });
+                  deepEqual(filtered_actual_terms, expected_terms);
+                }
+              }
 
-          function range_compare(actual, expected, name) {
-            pos_compare(actual.start, expected.start, name + ".start");
-            pos_compare(actual.end, expected.end, name + ".end");
-          }
+              var context = terms[0].context;
+              input.autocomplete._test.addReplacementInfoToContext(context, test.cursor, terms[0].value);
 
-          ac("prefixToAdd");
-          ac("suffixToAdd");
-          ac("addTemplate");
-          ac("textBoxPosition", pos_compare);
-          ac("rangeToReplace", range_compare);
+              function ac(prop, prop_test) {
+                if (typeof test[prop] != "undefined") {
+                  if (prop_test) {
+                    prop_test(context[prop], test[prop], prop);
+                  }
+                  else {
+                    deepEqual(context[prop], test[prop], 'context.' + prop + ' should equal ' + JSON.stringify(test[prop]));
+                  }
+                }
+              }
 
-          start();
-          });
+              function pos_compare(actual, expected, name) {
+                equal(actual.row, expected.row + rowOffset, "row of " + name + " position is not as expected");
+                equal(actual.column, expected.column, "column of " + name + " position is not as expected");
+              }
+
+              function range_compare(actual, expected, name) {
+                pos_compare(actual.start, expected.start, name + ".start");
+                pos_compare(actual.end, expected.end, name + ".end");
+              }
+
+              ac("prefixToAdd");
+              ac("suffixToAdd");
+              ac("addTemplate");
+              ac("textBoxPosition", pos_compare);
+              ac("rangeToReplace", range_compare);
+
+              start();
+            });
         });
       });
 
@@ -131,7 +140,9 @@ define([
   }
 
   function context_tests(data, mapping, kb_schemes, request_line, tests) {
-    if (data != null && typeof data != "string") data = JSON.stringify(data, null, 3);
+    if (data != null && typeof data != "string") {
+      data = JSON.stringify(data, null, 3);
+    }
     for (var t = 0; t < tests.length; t++) {
       process_context_test(data, mapping, kb_schemes, request_line, tests[t]);
     }
@@ -140,6 +151,11 @@ define([
   var SEARCH_KB = {
     endpoints: {
       _search: {
+        patterns: [
+          "{indices}/{types}/_search",
+          "{indices}/_search",
+          "_search"
+        ],
         data_autocomplete_rules: {
           query: { match_all: {}, term: { "$FIELD$": ""}},
           size: {},
@@ -314,6 +330,9 @@ define([
     {
       endpoints: {
         _test: {
+          patterns: [
+            "_test"
+          ],
           data_autocomplete_rules: {
             object: { bla: 1 },
             array: [ 1 ],
@@ -381,7 +400,9 @@ define([
         prefixToAdd: "",
         suffixToAdd: "",
         rangeToReplace: { start: { row: 5, column: 15 }, end: { row: 5, column: 15 }},
-        autoCompleteSet: [{ name: "terms", meta: "API" }]
+        autoCompleteSet: [
+          { name: "terms", meta: "API" }
+        ]
       }
     ]
   );
@@ -394,6 +415,9 @@ define([
     {
       endpoints: {
         _test: {
+          patterns: [
+            "_test"
+          ],
           data_autocomplete_rules: {
             index: "$INDEX$"
           }
@@ -405,7 +429,10 @@ define([
       {
         name: "$INDEX$ matching",
         cursor: { row: 1, column: 15},
-        autoCompleteSet: [{ name: "index1", meta: "index"}, { name: "index2", meta: "index"}]
+        autoCompleteSet: [
+          { name: "index1", meta: "index"},
+          { name: "index2", meta: "index"}
+        ]
       }
     ]
   );
@@ -425,6 +452,9 @@ define([
     {
       endpoints: {
         _endpoint: {
+          patterns: [
+            "_endpoint"
+          ],
           data_autocomplete_rules: {
             array: [ "a", "b"],
             number: 1,
@@ -441,7 +471,7 @@ define([
         name: "Templates 1",
         cursor: { row: 1, column: 0},
         autoCompleteSet: [
-          tt("array", [ "a" ]), tt("fixed", { a: 1 }), tt("number",1), tt("object", {}), tt("oneof", "o1")
+          tt("array", [ "a" ]), tt("fixed", { a: 1 }), tt("number", 1), tt("object", {}), tt("oneof", "o1")
         ]
       },
       {
@@ -468,6 +498,9 @@ define([
     {
       endpoints: {
         _endpoint: {
+          patterns: [
+            "_endpoint"
+          ],
           data_autocomplete_rules: {
             any_of_numbers: { __template: [1, 2], __any_of: [1, 2, 3]},
             any_of_obj: { __template: [
@@ -486,9 +519,11 @@ define([
         name: "Any of - templates",
         cursor: { row: 1, column: 0},
         autoCompleteSet: [
-            tt("any_of_numbers", [ 1, 2 ]),
-            tt("any_of_obj", [ { c: 1} ])
-          ]
+          tt("any_of_numbers", [ 1, 2 ]),
+          tt("any_of_obj", [
+            { c: 1}
+          ])
+        ]
       },
       {
         name: "Any of - numbers",
@@ -499,7 +534,7 @@ define([
         name: "Any of - object",
         cursor: { row: 6, column: 2},
         autoCompleteSet: [
-          tt("a", 1),tt("b", 2 )
+          tt("a", 1), tt("b", 2)
         ]
       }
     ]
@@ -511,6 +546,7 @@ define([
     {
       endpoints: {
         _endpoint: {
+          patterns: [ "_endpoint" ],
           data_autocomplete_rules: {
             "query": ""
           }
@@ -522,7 +558,7 @@ define([
       {
         name: "Empty string as default",
         cursor: { row: 0, column: 1},
-        autoCompleteSet: [tt("query","")]
+        autoCompleteSet: [tt("query", "")]
       }
     ]
   );
@@ -548,8 +584,8 @@ define([
       },
       endpoints: {
         _current: {
-
-          _id: "POST _current",
+          patterns: [ "_current" ],
+          id: "POST _current",
           data_autocomplete_rules: {
             "a": {
               "b": {
@@ -573,6 +609,7 @@ define([
           }
         },
         ext: {
+          patterns: [ "ext" ],
           data_autocomplete_rules: {
             target: {
               t2: 1
@@ -586,8 +623,10 @@ define([
       {
         name: "Relative scope link test",
         cursor: { row: 2, column: 12},
-        autoCompleteSet:[
-          tt("b", {}), tt("c", {}), tt("d", {}), tt("e", {}), tt("f", [ {} ])
+        autoCompleteSet: [
+          tt("b", {}), tt("c", {}), tt("d", {}), tt("e", {}), tt("f", [
+            {}
+          ])
         ]
       },
       {
@@ -621,6 +660,7 @@ define([
     {
       endpoints: {
         _endpoint: {
+          patterns: ["_endpoint"],
           data_autocomplete_rules: {
             "a": {},
             "b": {}
@@ -666,6 +706,7 @@ define([
     {
       endpoints: {
         _endpoint: {
+          patterns: ["_endpoint"],
           data_autocomplete_rules: {
             "a": [
               { b: 1}
@@ -726,10 +767,10 @@ define([
 
 
   context_tests(
-    "",
+    "POST _search",
     MAPPING,
     SEARCH_KB,
-    "POST _search",
+    null,
     [
       {
         name: "initial doc start",
@@ -772,15 +813,22 @@ define([
   var CLUSTER_KB = {
     endpoints: {
       "_search": {
+        patterns: ["_search", "{indices}/{types}/_search", "{indices}/_search"],
+        url_params: {
+          "search_type": ["count", "query_then_fetch" ],
+          "scroll": "10m"
+        },
         data_autocomplete_rules: {
         }
       },
       "_cluster/stats": {
+        patterns: ["_cluster/stats"],
         indices_mode: "none",
         data_autocomplete_rules: {
         }
       },
       "_cluster/nodes/stats": {
+        patterns: ["_cluster/nodes/stats"],
         data_autocomplete_rules: {
         }
       }
@@ -796,7 +844,7 @@ define([
       {
         name: "Endpoints with slashes - no slash",
         cursor: { row: 0, column: 8},
-        autoCompleteSet: [ "_cluster/nodes/stats", "_cluster/stats", "_search"],
+        autoCompleteSet: [ "_cluster/nodes/stats", "_cluster/stats", "_search", "index1", "index2"],
         prefixToAdd: "",
         suffixToAdd: ""
       }
@@ -812,14 +860,21 @@ define([
       {
         name: "Endpoints with slashes - before slash",
         cursor: { row: 0, column: 8},
-        autoCompleteSet: [ "_cluster/nodes/stats", "_cluster/stats", "_search"],
+        autoCompleteSet: [ "_cluster/nodes/stats", "_cluster/stats", "_search", "index1", "index2"],
         prefixToAdd: "",
         suffixToAdd: ""
       },
       {
         name: "Endpoints with slashes - on slash",
         cursor: { row: 0, column: 13},
-        autoCompleteSet: [ "_cluster/nodes/stats", "_cluster/stats", "_search"],
+        autoCompleteSet: [ "_cluster/nodes/stats", "_cluster/stats", "_search", "index1", "index2"],
+        prefixToAdd: "",
+        suffixToAdd: ""
+      },
+      {
+        name: "Endpoints with slashes - after slash",
+        cursor: { row: 0, column: 14},
+        autoCompleteSet: [ "nodes/stats", "stats"],
         prefixToAdd: "",
         suffixToAdd: ""
       }
@@ -835,7 +890,10 @@ define([
       {
         name: "Endpoints with slashes - after slash",
         cursor: { row: 0, column: 15},
-        autoCompleteSet: [ { name: "nodes/stats", meta: "endpoint" } , { name: "stats", meta: "endpoint" } ],
+        autoCompleteSet: [
+          { name: "nodes/stats", meta: "endpoint" } ,
+          { name: "stats", meta: "endpoint" }
+        ],
         prefixToAdd: "",
         suffixToAdd: "",
         initialValue: "no"
@@ -864,6 +922,29 @@ define([
     null,
     MAPPING,
     CLUSTER_KB,
+    "POST ",
+    [
+      {
+        name: "Immediately after space + method",
+        cursor: { row: 0, column: 5},
+        autoCompleteSet: [
+          { name: "_cluster/nodes/stats", meta: "endpoint" },
+          { name: "_cluster/stats", meta: "endpoint" },
+          { name: "_search", meta: "endpoint" },
+          { name: "index1", meta: "index" },
+          { name: "index2", meta: "index" }
+        ],
+        prefixToAdd: "",
+        suffixToAdd: "",
+        initialValue: ""
+      }
+    ]
+  );
+
+  context_tests(
+    null,
+    MAPPING,
+    CLUSTER_KB,
     "POST cl",
     [
       {
@@ -882,4 +963,160 @@ define([
       }
     ]
   );
+
+  context_tests(
+    null,
+    MAPPING,
+    CLUSTER_KB,
+    "POST cl",
+    [
+      {
+        name: "Endpoints by subpart",
+        cursor: { row: 0, column: 7},
+        autoCompleteSet: [
+          { name: "_cluster/nodes/stats", meta: "endpoint" },
+          { name: "_cluster/stats", meta: "endpoint" },
+          { name: "_search", meta: "endpoint" },
+          { name: "index1", meta: "index" },
+          { name: "index2", meta: "index" }
+        ],
+        prefixToAdd: "",
+        suffixToAdd: "",
+        initialValue: "cl"
+      }
+    ]
+  );
+
+
+  context_tests(
+    null,
+    MAPPING,
+    CLUSTER_KB,
+    "GET _search?",
+    [
+      {
+        name: "Params just after ?",
+        cursor: { row: 0, column: 12},
+        autoCompleteSet: [
+          { name: "format", meta: "param", "insert_value": "format=" },
+          { name: "pretty", meta: "flag" },
+          { name: "scroll", meta: "param", "insert_value": "scroll="  },
+          { name: "search_type", meta: "param", "insert_value": "search_type=" },
+        ],
+        prefixToAdd: "",
+        suffixToAdd: ""
+      }
+    ]
+  );
+
+  context_tests(
+    null,
+    MAPPING,
+    CLUSTER_KB,
+    "GET _search?format=",
+    [
+      {
+        name: "Params values",
+        cursor: { row: 0, column: 19},
+        autoCompleteSet: [
+          { name: "json", meta: "format" },
+          { name: "yaml", meta: "format" }
+        ],
+        prefixToAdd: "",
+        suffixToAdd: ""
+      }
+    ]
+  );
+
+  context_tests(
+    null,
+    MAPPING,
+    CLUSTER_KB,
+    "GET _search?format=yaml&",
+    [
+      {
+        name: "Params after amp",
+        cursor: { row: 0, column: 24},
+        autoCompleteSet: [
+          { name: "format", meta: "param", "insert_value": "format=" },
+          { name: "pretty", meta: "flag" },
+          { name: "scroll", meta: "param", "insert_value": "scroll="  },
+          { name: "search_type", meta: "param", "insert_value": "search_type=" },
+        ],
+        prefixToAdd: "",
+        suffixToAdd: ""
+      }
+    ]
+  );
+
+  context_tests(
+    null,
+    MAPPING,
+    CLUSTER_KB,
+    "GET _search?format=yaml&search",
+    [
+      {
+        name: "Params on existing param",
+        cursor: { row: 0, column: 26},
+        rangeToReplace: {
+          start: { row: 0, column: 24},
+          end: { row: 0, column: 30}
+        },
+        autoCompleteSet: [
+          { name: "format", meta: "param", "insert_value": "format=" },
+          { name: "pretty", meta: "flag" },
+          { name: "scroll", meta: "param", "insert_value": "scroll="  },
+          { name: "search_type", meta: "param", "insert_value": "search_type=" },
+        ],
+        prefixToAdd: "",
+        suffixToAdd: ""
+      }
+    ]
+  );
+
+  context_tests(
+    null,
+    MAPPING,
+    CLUSTER_KB,
+    "GET _search?format=yaml&search_type=cou",
+    [
+      {
+        name: "Params on existing value",
+        cursor: { row: 0, column: 37},
+        rangeToReplace: {
+          start: { row: 0, column: 36},
+          end: { row: 0, column: 39}
+        },
+        autoCompleteSet: [
+          { name: "count", meta: "search_type" },
+          { name: "query_then_fetch", meta: "search_type" },
+        ],
+        prefixToAdd: "",
+        suffixToAdd: ""
+      }
+    ]
+  );
+  context_tests(
+    null,
+    MAPPING,
+    CLUSTER_KB,
+    "GET _search?format=yaml&search_type=cou",
+    [
+      {
+        name: "Params on just after = with existing value",
+        cursor: { row: 0, column: 36},
+        rangeToReplace: {
+          start: { row: 0, column: 36},
+          end: { row: 0, column: 36}
+        },
+        autoCompleteSet: [
+          { name: "count", meta: "search_type" },
+          { name: "query_then_fetch", meta: "search_type" },
+        ],
+        prefixToAdd: "",
+        suffixToAdd: ""
+      }
+    ]
+  );
+
 });

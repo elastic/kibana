@@ -2,22 +2,33 @@ define(function () {
   'use strict';
 
   return function init(api) {
-    api.addEndpointDescription('_warmer', {
-      match: /_warmer/,
-      def_method: 'PUT',
-      methods: ['GET', 'PUT', 'DELETE'],
-      endpoint_autocomplete: [
-        '_warmer', '_warmer/WARMER_ID'
+    api.addEndpointDescription('_get_warmer', {
+      patterns: ["_warmer", "_warmer/{name}", "{indices}/_warmer", "{indices}/_warmer/{name}"]
+    });
+    api.addEndpointDescription('_delete_warmer', {
+      methods: ['DELETE'],
+      patterns: [
+        "{indices}/_warmer/{name}"
+      ]
+    });
+    api.addEndpointDescription('_put_warmer', {
+      methods: ['PUT'],
+      patterns: [
+        "{indices}/_warmer/{name}",
+        "{indices}/{types}/_warmer/{name}"
       ],
-      indices_mode: 'required_multi',
-      types_mode: 'none',
-      doc_id_mode: 'none',
       data_autocomplete_rules: {
         query: {
           // populated by a global rule
         },
         facets: {
           // populated by a global rule
+        },
+        aggs: {
+
+        },
+        sort: {
+          __scope_link: "_search.sort"
         }
       }
     });

@@ -1,28 +1,37 @@
-define(function () {
+define(["_"], function (_) {
   'use strict';
 
 
-  function addSimpleCat(endpoint, api) {
+  function addSimpleCat(endpoint, api, params, patterns) {
+    var url_params = { "help": "__flag__", "v": "__flag__", "bytes": ["b"]};
+    _.each(params || [], function (p) {
+      if (_.isString(p)) {
+        url_params[p] = "__flag__";
+      }
+      else {
+        var k = Object.keys(p)[0];
+        url_params[k] = p[k];
+      }
+    });
     api.addEndpointDescription(endpoint, {
       match: endpoint,
-      def_method: 'GET',
-      methods: ['GET' ],
-      endpoint_autocomplete: [
-        endpoint
-      ],
-      indices_mode: 'none',
-      types_mode: 'none',
-      doc_id_mode: 'none',
-      data_autocomplete_rules: {}
+      url_params: url_params,
+      patterns: patterns || [endpoint]
     });
   }
 
   return function init(api) {
     addSimpleCat('_cat/aliases', api);
-    addSimpleCat('_cat/allocation', api);
+    addSimpleCat('_cat/allocation', api, null, ['_cat/allocation', '_cat/allocation/{nodes}']);
     addSimpleCat('_cat/count', api);
-    addSimpleCat('_cat/health', api);
-    addSimpleCat('_cat/indices', api);
+    addSimpleCat('_cat/health', api, [
+      {"ts": ["false", "true"]}
+    ]);
+    addSimpleCat('_cat/indices', api, [
+      {h: []},
+      "pri",
+    ],
+      ['_cat/indices', '_cat/indices/{indices}']);
     addSimpleCat('_cat/master', api);
     addSimpleCat('_cat/nodes', api);
     addSimpleCat('_cat/pending_tasks', api);
