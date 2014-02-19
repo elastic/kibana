@@ -47,7 +47,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
       ],
       status  : "Experimental",
       description : "Sparklines are tiny, simple, time series charts, shown separately. Because "+
-        "sparklines are unclutted by grids, axis markers and colors, they are perfect for spotting"+
+        "sparklines are uncluttered by grids, axis markers and colors, they are perfect for spotting"+
         " change in a series"
     };
 
