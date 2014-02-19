@@ -13,7 +13,15 @@ define(function () {
   };
   var rules = {
     "*": {
-      "aggs": {},
+      "aggs": {
+        __template: {
+          "NAME": {
+            "AGG_TYPE": {
+
+            }
+          }
+        }
+      },
       "min": simple_metric,
       "max": simple_metric,
       "avg": simple_metric,

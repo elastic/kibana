@@ -46,8 +46,12 @@ define(function () {
           // populated by a global rule
         },
         aggs: {
-          'NAME': {
-            'TYPE': {}
+          __template: {
+            "NAME": {
+              "AGG_TYPE": {
+
+              }
+            }
           }
         },
 
