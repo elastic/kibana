@@ -808,6 +808,10 @@ define([
 
             summary.series = _.zip(series_time, series_data);
             summary.value = series_data[series_data.length - 1]; // use the last data point as value
+            summary.alert_level = $scope.alertLevel(m, summary.value);
+            if (summary.alert_level > row.alert_level) {
+              row.alert_level = summary.alert_level;
+            }
           });
         });
 
