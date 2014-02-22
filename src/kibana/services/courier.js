@@ -5,22 +5,27 @@ define(function (require) {
   var errors = require('courier/errors');
 
   require('services/promises');
+  require('services/es');
 
+  var courier; // share the courier amoungst all of the apps
   angular.module('kibana/services')
     .service('courier', function (es, promises) {
+      if (courier) return courier;
 
       promises.playNice(DocSource.prototype, [
         'doUpdate',
         'doIndex'
       ]);
 
-      var courier = new Courier({
+      courier = new Courier({
         fetchInterval: 15000,
         client: es,
         promises: promises
       });
 
       courier.errors = errors;
+
+      courier.rootSearchSource = courier.createSource('search');
 
       return courier;
     });

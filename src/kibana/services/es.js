@@ -1,8 +1,16 @@
 define(function (require) {
-  var angular = require('angular');
+  var configFile = require('../../config');
 
-  var module = angular.module('kibana/services');
-  module.service('es', function (esFactory) {
-    return esFactory();
-  });
+  var es; // share the client amoungst all apps
+  require('angular')
+    .module('kibana/services')
+    .service('es', function (esFactory, $q) {
+      if (es) return es;
+
+      es = esFactory({
+        host: configFile.elasticsearch
+      });
+
+      return es;
+    });
 });

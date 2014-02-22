@@ -16,6 +16,7 @@
   var bowerComponents = [
     'angular',
     'angular-route',
+    ['async', 'lib/async'],
     'd3',
     ['elasticsearch', 'elasticsearch.angular'],
     'jquery',
