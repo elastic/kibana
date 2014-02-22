@@ -1,6 +1,7 @@
 define(function (require) {
   var DataSource = require('courier/data_source/data_source');
   var inherits = require('utils/inherits');
+  var nextTick = require('utils/next_tick');
   var errors = require('courier/errors');
   var listenerCount = require('utils/event_emitter').listenerCount;
   var _ = require('lodash');
@@ -23,7 +24,7 @@ define(function (require) {
   DocSource.fetch = function (courier, refs, cb) {
     var client = courier._getClient();
     var allRefs = [];
-    var body = {
+    var getBody = {
       docs: []
     };
 
@@ -32,10 +33,10 @@ define(function (require) {
       if (source._getType() !== 'doc') return;
 
       allRefs.push(ref);
-      body.docs.push(source._flatten());
+      getBody.docs.push(source._flatten());
     });
 
-    return client.mget({ body: body }, function (err, resp) {
+    return client.mget({ body: getBody }, function (err, resp) {
       if (err) return cb(err);
 
       _.each(resp.docs, function (resp, i) {
@@ -43,9 +44,14 @@ define(function (require) {
         var source = ref.source;
 
         if (resp.error) return source._error(new errors.DocFetchFailure(resp));
-        if (ref.version === resp._version) return; // no change
-        ref.version = resp._version;
-        source._storeVersion(resp._version);
+        if (resp.found) {
+          if (ref.version === resp._version) return; // no change
+          ref.version = resp._version;
+          source._storeVersion(resp._version);
+        } else {
+          ref.version = void 0;
+          source._clearVersion();
+        }
         source.emit('results', resp);
       });
 
@@ -63,9 +69,10 @@ define(function (require) {
   DocSource.validate = function (courier, refs, cb) {
     var invalid = _.filter(refs, function (ref) {
       var storedVersion = ref.source._getVersion();
-      if (ref.version !== storedVersion) return true;
+      /* jshint eqeqeq: false */
+      return (!ref.fetchCount || ref.version != storedVersion);
     });
-    setTimeout(function () {
+    nextTick(function () {
       cb(void 0, invalid);
     });
   };
@@ -102,6 +109,7 @@ define(function (require) {
       id: state.id,
       type: state.type,
       index: state.index,
+      version: source._getVersion(),
       body: {
         doc: fields
       }
@@ -129,7 +137,6 @@ define(function (require) {
       id: state.id,
       type: state.type,
       index: state.index,
-      version: source._getVersion(),
       body: body,
       ignore: [409]
     }, function (err, resp) {
@@ -201,8 +208,8 @@ define(function (require) {
    * @return {number} - the version number, or NaN
    */
   DocSource.prototype._getVersion = function () {
-    var id = this._versionKey();
-    return _.parseInt(localStorage.getItem(id));
+    var v = localStorage.getItem(this._versionKey());
+    return v ? _.parseInt(v) : void 0;
   };
 
   /**
@@ -212,8 +219,17 @@ define(function (require) {
    */
   DocSource.prototype._storeVersion = function (version) {
     var id = this._versionKey();
-    localStorage.setItem(id, version);
+    if (version) {
+      localStorage.setItem(id, version);
+    } else {
+      localStorage.removeItem(id);
+    }
   };
+
+  /**
+   * Clears the stored version for a DocSource
+   */
+  DocSource.prototype._clearVersion = DocSource.prototype._storeVersion;
 
   return DocSource;
 });

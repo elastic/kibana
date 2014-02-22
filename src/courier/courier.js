@@ -9,6 +9,7 @@ define(function (require) {
   var DocSource = require('courier/data_source/doc');
   var SearchSource = require('courier/data_source/search');
   var HastyRefresh = require('courier/errors').HastyRefresh;
+  var nextTick = require('utils/next_tick');
 
   // map constructors to type keywords
   var sourceTypes = {
@@ -29,6 +30,7 @@ define(function (require) {
         courier._refs.search,
         function (err) {
           if (err) return courier._error(err);
+          courier._activeSearchRequest = null;
         });
     },
 
@@ -36,10 +38,7 @@ define(function (require) {
     // then fetch the onces that are not
     doc: function (courier) {
       DocSource.validate(courier, courier._refs.doc, function (err, invalid) {
-        if (err) {
-          courier.stop();
-          return courier.emit('error', err);
-        }
+        if (err) return courier._error(err);
 
         // if all of the docs are up to date we don't need to do anything else
         if (invalid.length === 0) return;
@@ -54,7 +53,7 @@ define(function (require) {
   // default config values
   var defaults = {
     fetchInterval: 30000,
-    docInterval: 2500
+    docInterval: 1500
   };
 
   /**
@@ -63,12 +62,13 @@ define(function (require) {
    *  search:
    *    - inherits filters, and other query properties
    *    - automatically emit results on a set interval
+   *
    *  doc:
    *    - tracks doc versions
    *    - emits same results event when the doc is updated
    *    - helps seperate versions of kibana running on the same machine stay in sync
-   *    - (NI) tracks version and uses it when new versions of a doc are reindexed
-   *    - (NI) helps deal with conflicts
+   *    - tracks version and uses it to verify that updates are safe to make
+   *    - emits conflict event when that happens
    *
    * @param {object} config
    * @param {Client} config.client - The elasticsearch.js client to use for querying. Should be
@@ -115,7 +115,7 @@ define(function (require) {
 
       // store a quick "bound" method for triggering
       this._onInterval[type] = function () {
-        if (courier._refs[type].length) onFetch[type](courier);
+        courier.fetch(type);
         courier._schedule(type);
       };
 
@@ -145,7 +145,7 @@ define(function (require) {
 
   // is the courier currently running?
   Courier.prototype.running = function () {
-    return !!this._fetchTimer;
+    return !!_.size(this._timer);
   };
 
   // stop the courier from fetching more results
@@ -164,11 +164,18 @@ define(function (require) {
     }, this);
   };
 
-  // force a fetch of all datasources right now
-  Courier.prototype.fetch = function () {
-    _.forOwn(onFetch, function (fn, type) {
-      if (this._refs[type].length) fn(this);
-    }, this);
+  // force a fetch of all datasources right now, optionally filter by type
+  Courier.prototype.fetch = function (onlyType) {
+    var courier = this;
+    nextTick(function () {
+      _.forOwn(onFetch, function (fn, type) {
+        if (onlyType && onlyType !== type) return;
+        if (courier._refs[type].length) fn(courier);
+        courier._refs[type].forEach(function (ref) {
+          ref.fetchCount ++;
+        });
+      });
+    });
   };
 
   // data source factory
@@ -180,6 +187,7 @@ define(function (require) {
     var Constructor = sourceTypes[type];
     return new Constructor(this, initialState);
   };
+
 
   /*****
    * PRIVATE API
@@ -206,7 +214,8 @@ define(function (require) {
     var refs = this._refs[source._getType()];
     if (!_.find(refs, { source: source })) {
       refs.push({
-        source: source
+        source: source,
+        fetchCount: 0
       });
     }
   };
@@ -240,18 +249,15 @@ define(function (require) {
     _.each(this._refs.doc, function (ref) {
       var state = ref.source._state;
       if (
-        state === updated
-        || (
-          state.id === updated.id
-          && state.type === updated.type
-          && state.index === updated.index
-        )
+        state.id === updated.id
+        && state.type === updated.type
+        && state.index === updated.index
       ) {
         delete ref.version;
       }
     });
 
-    onFetch.doc(this);
+    this.fetch('doc');
   };
 
   return Courier;
