@@ -43,11 +43,20 @@ define(function (require) {
   function VersionConflict(resp) {
     this.name = 'VersionConflict';
     this.resp = resp;
-    this.message = 'Failed to store document changes do to a version conflict.';
+    this.message = 'Failed to store document changes due to a version conflict.';
   }
   VersionConflict.prototype = new Error();
   VersionConflict.prototype.constructor = VersionConflict;
   errors.VersionConflict = VersionConflict;
+
+  // there was a conflict storing a doc
+  function MappingConflict(field) {
+    this.name = 'MappingConflict';
+    this.message = 'Field ' + field + ' is defined as at least two different types in indices matching the pattern';
+  }
+  MappingConflict.prototype = new Error();
+  MappingConflict.prototype.constructor = MappingConflict;
+  errors.MappingConflict = MappingConflict;
 
   return errors;
 });

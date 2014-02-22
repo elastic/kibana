@@ -123,8 +123,6 @@ define(function (require) {
      * @param {Function} callback A function to be executed with the results.
      */
     this.getFieldsFromMapping = function (dataSource, callback) {
-
-
       var params = {
         // TODO: Change index to be newest resolved index. Change _state.index to id().
         index: dataSource._state.index,
@@ -133,6 +131,7 @@ define(function (require) {
 
       // TODO: Add week/month check
       client.indices.getFieldMapping(params, function (err, response, status) {
+
         // TODO: Add error message
 
         var fields = {};
@@ -141,6 +140,8 @@ define(function (require) {
           _.each(index.mappings, function (type) {
             _.each(type, function (field, name) {
               if (_.isUndefined(field.mapping) || name[0] === '_') return;
+              if (!_.isUndefined(fields[name]) && fields[name] !== field.mapping[_.keys(field.mapping)[0]])
+                return courier._error(new Error.MappingConflict());
               fields[name] = field.mapping[_.keys(field.mapping)[0]];
             });
           });
@@ -182,7 +183,7 @@ define(function (require) {
      * @param {dataSource} dataSource
      * @param {Function} callback A function to be executed with the results.
      */
-    var clearCache = function (dataSource, callback) {
+    this.clearCache = function (dataSource, callback) {
       if (!_.isUndefined(mappings[dataSource._state.index])) {
         delete mappings[dataSource._state.index];
       }
@@ -195,12 +196,12 @@ define(function (require) {
 
 
     /**
-     * Sets a number of fields to be ignored in the mapping
+     * Sets a number of fields to be ignored in the mapping. Not sure this is a good idea?
      * @param {dataSource} dataSource
      * @param {Array} fields An array of fields to be ignored
      * @param {Function} callback A function to be executed with the results.
      */
-    var ignoreFields = function (dataSource, fields, callback) {
+    this.ignoreFields = function (dataSource, fields, callback) {
       if (!_.isArray(fields)) fields = [fields];
       var ignore = _.object(_.map(fields, function (field) {
         return [field, {type: 'ignore'}];

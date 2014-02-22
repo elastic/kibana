@@ -27,10 +27,10 @@ define(function (require) {
           $scope.mappedFields = {};
 
           var source = $rootScope.dataSource.extend()
-            .index('logstash-2014.02.14')
+            .index('logstash-*')
             .type($scope.type)
             .source({
-              include: 'country'
+              include: 'geo'
             })
             .on('results', function (resp) {
               $scope.count ++;
