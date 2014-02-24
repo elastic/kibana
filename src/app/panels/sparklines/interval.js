@@ -13,7 +13,7 @@ function (kbn) {
 
     var info = kbn.describe_interval(interval_string);
     this.type = info.type;
-    this.ms = info.sec * 1000 * info.count;
+    this.ms = Math.ceil(info.sec * 1000 * info.count);
 
     // does the length of the interval change based on the current time?
     if (this.type === 'y' || this.type === 'M') {
