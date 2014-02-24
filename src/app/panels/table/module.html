@@ -44,6 +44,9 @@
     .table-details-value {
     }
 
+    .table-field-value {
+      white-space: pre-wrap;
+    }
   </style>
 
   <div class="table-container">
@@ -120,8 +123,8 @@
           <tr ng-click="toggle_details(event)" class="pointer">
             <td ng-if="panel.fields.length<1" bo-text="event._source|stringify|tableTruncate:panel.trimFactor:1"></td>
             <td ng-show="panel.fields.length>0" ng-repeat="field in panel.fields">
-              <span ng-if="!panel.localTime || panel.timeField != field" bo-html="(event.kibana.highlight[field]||event.kibana._source[field]) |tableHighlight | tableTruncate:panel.trimFactor:panel.fields.length"></span>
-              <span ng-if="panel.localTime && panel.timeField == field" bo-html="event.sort[1]|tableLocalTime:event"></span>
+              <span ng-if="!panel.localTime || panel.timeField != field" bo-html="(event.kibana.highlight[field]||event.kibana._source[field]) |tableHighlight | tableTruncate:panel.trimFactor:panel.fields.length" class="table-field-value"></span>
+              <span ng-if="panel.localTime && panel.timeField == field" bo-html="event.sort[1]|tableLocalTime:event" class="table-field-value"></span>
             </td>
           </tr>
           <tr ng-if="event.kibana.details">
