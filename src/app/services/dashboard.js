@@ -66,7 +66,6 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
 
     // An elasticJS client to use
     var ejs = ejsResource(config.elasticsearch);
-
     var gist_pattern = /(^\d{5,}$)|(^[a-z0-9]{10,}$)|(gist.github.com(\/*.*)\/[a-z0-9]{5,}\/*$)/;
 
     // Store a reference to this
@@ -77,15 +76,11 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
     this.last = {};
     this.availablePanels = [];
 
-    $rootScope.$on('$routeChangeSuccess', function () {
+    $rootScope.$on('$routeChangeSuccess',function(){
       // Clear the current dashboard to prevent reloading
-      if ($location.path() === '/connectionFailed') { return; }
       self.current = {};
       self.indices = [];
       esVersion.isMinimum().then(function(isMinimum) {
-        if(_.isUndefined(isMinimum)) {
-          return;
-        }
         if(isMinimum) {
           route();
         } else {
@@ -191,7 +186,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
       _.defaults(dashboard,_dash);
       _.defaults(dashboard.index,_dash.index);
       _.defaults(dashboard.loader,_dash.loader);
-      return _.cloneDeep(dashboard);
+      return dashboard;
     };
 
     this.dash_load = function(dashboard) {
@@ -212,14 +207,12 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
       // Delay this until we're sure that querySrv and filterSrv are ready
       $timeout(function() {
         // Ok, now that we've setup the current dashboard, we can inject our services
-        if(!_.isUndefined(self.current.services.query)) {
-          querySrv = $injector.get('querySrv');
-          querySrv.init();
-        }
-        if(!_.isUndefined(self.current.services.filter)) {
-          filterSrv = $injector.get('filterSrv');
-          filterSrv.init();
-        }
+        querySrv = $injector.get('querySrv');
+        filterSrv = $injector.get('filterSrv');
+
+        // Make sure these re-init
+        querySrv.init();
+        filterSrv.init();
       },0).then(function() {
         // Call refresh to calculate the indices and notify the panels that we're ready to roll
         self.refresh();
@@ -290,10 +283,10 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
     // TOFIX: Pretty sure this breaks when you're on a saved dashboard already
     this.share_link = function(title,type,id) {
       return {
-        location  : window.location.href.substr(0, window.location.href.indexOf('#')),
+        location  : window.location.href.replace(window.location.hash,""),
         type      : type,
         id        : id,
-        link      : window.location.href.substr(0, window.location.href.indexOf('#'))+"#dashboard/"+type+"/"+encodeURIComponent(id),
+        link      : window.location.href.replace(window.location.hash,"")+"#dashboard/"+type+"/"+encodeURIComponent(id),
         title     : title
       };
     };
@@ -356,25 +349,24 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
     };
 
     this.elasticsearch_load = function(type,id) {
-      var successcb = function(data) {
-        var response = renderTemplate(angular.fromJson(data)._source.dashboard, $routeParams);
-        self.dash_load(response);
-      };
-      var errorcb = function(data, status) {
+      return $http({
+        url: config.elasticsearch + "/" + config.kibana_index + "/"+type+"/"+id+'?' + new Date().getTime(),
+        method: "GET",
+        transformResponse: function(response) {
+          return renderTemplate(angular.fromJson(response)._source.dashboard, $routeParams);
+        }
+      }).error(function(data, status) {
         if(status === 0) {
-          alertSrv.set('Error',"Could not contact Elasticsearch at "+ejs.config.server+
+          alertSrv.set('Error',"Could not contact Elasticsearch at "+config.elasticsearch+
             ". Please ensure that Elasticsearch is reachable from your system." ,'error');
         } else {
           alertSrv.set('Error',"Could not find "+id+". If you"+
             " are using a proxy, ensure it is configured correctly",'error');
         }
         return false;
-      };
-
-      ejs.client.get(
-        "/" + config.kibana_index + "/"+type+"/"+id+'?' + new Date().getTime(),
-        null, successcb, errorcb);
-
+      }).success(function(data) {
+        self.dash_load(data);
+      });
     };
 
     this.script_load = function(file) {
