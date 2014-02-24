@@ -11,6 +11,8 @@ define(function (require) {
   var HastyRefresh = require('courier/errors').HastyRefresh;
   var nextTick = require('utils/next_tick');
 
+  var Mapper = require('courier/mapper');
+
   // map constructors to type keywords
   var sourceTypes = {
     doc: DocSource,
@@ -53,7 +55,9 @@ define(function (require) {
   // default config values
   var defaults = {
     fetchInterval: 30000,
-    docInterval: 1500
+    docInterval: 1500,
+    internalIndex: 'kibana4-int',
+    mapperCacheType: 'mappings'
   };
 
   /**
@@ -99,6 +103,12 @@ define(function (require) {
 
     // interval hook/fn for each type
     this._onInterval = {};
+
+    // make the mapper accessable
+    this._mapper = new Mapper(this, {
+      cacheIndex: config.internalIndex,
+      cacheType: config.mapperCacheType
+    });
 
     _.each(sourceTypes, function (fn, type) {
       var courier = this;

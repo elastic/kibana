@@ -48,11 +48,14 @@ define(function (require) {
       .when('/config-test', {
         templateUrl: 'courier/tests/config.html',
       })
+      .when('/mapper-test', {
+        templateUrl: 'courier/tests/mapper.html',
+      })
       .when('/courier-test', {
         templateUrl: 'courier/tests/index.html',
       })
       .otherwise({
-        redirectTo: ''
+        redirectTo: '/'
       });
   });
 
@@ -61,8 +64,8 @@ define(function (require) {
 
     // load the elasticsearch service
     require([
+      'courier/tests/directives',
       'controllers/kibana',
-      'courier/test_directives',
       'constants/base'
     ], function () {
       // bootstrap the app

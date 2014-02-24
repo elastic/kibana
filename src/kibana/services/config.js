@@ -10,6 +10,7 @@ define(function (require) {
   // share doc and val cache between apps
   var doc;
   var vals = {};
+
   module.service('config', function ($q, $rootScope, courier, kbnVersion) {
     var watchers = {};
     var unwatchers = [];
@@ -21,8 +22,9 @@ define(function (require) {
         .id(kbnVersion);
     } else {
       // clean up after previous app
-      doc.removeAllListeners('results');
-      doc.courier(courier);
+      doc
+        .removeAllListeners('results')
+        .courier(courier);
     }
 
     doc.on('results', function (resp) {
@@ -128,9 +130,7 @@ define(function (require) {
     function _notify(fns, cur, prev) {
       if ($rootScope.$$phase) {
         // reschedule
-        nextTick(function () {
-          _notify(fns, cur, prev);
-        });
+        nextTick(_notify, fns, cur, prev);
         return;
       }
 

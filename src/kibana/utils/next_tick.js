@@ -15,13 +15,24 @@ define(function () {
         ev.stopPropagation();
         if (queue.length > 0) {
           var fn = queue.shift();
-          fn();
+          if (typeof fn === 'function') {
+            fn();
+          } else {
+            // partial args were supplied
+            var args = fn;
+            fn = args.shift();
+            fn.apply(null, args);
+          }
         }
       }
     }, true);
 
     return function nextTick(fn) {
-      queue.push(fn);
+      if (arguments.length > 1) {
+        queue.push([fn].concat([].slice.call(arguments, 1)));
+      } else {
+        queue.push(fn);
+      }
       window.postMessage('process-tick', '*');
     };
   }

@@ -36,6 +36,7 @@ define(function (require) {
   };
   inherits(errors.HastyRefresh, CourierError);
 
+
   /**
    * DocFetchFailure Error - where there is an error getting a doc
    * @param {String} [msg] - An error message that will probably end up in a log.
@@ -49,6 +50,7 @@ define(function (require) {
   };
   inherits(errors.DocFetchFailure, CourierError);
 
+
   /**
    * Connection Error
    * @param {String} [msg] - An error message that will probably end up in a log.
@@ -61,6 +63,39 @@ define(function (require) {
     this.resp = resp;
   };
   inherits(errors.VersionConflict, CourierError);
+
+
+  /**
+   * there was a conflict storing a doc
+   * @param {String} field - the fields which contains the conflict
+   */
+  errors.MappingConflict = function MappingConflict(field) {
+    CourierError.call(this,
+      'Field ' + field + ' is defined as at least two different types in indices matching the pattern',
+      errors.MappingConflict);
+  };
+  inherits(errors.MappingConflict, CourierError);
+
+  /**
+   * a non-critical cache write to elasticseach failed
+   */
+  errors.CacheWriteFailure = function CacheWriteFailure() {
+    CourierError.call(this,
+      'A Elasticsearch cache write has failed.',
+      errors.CacheWriteFailure);
+  };
+  inherits(errors.CacheWriteFailure, CourierError);
+
+  /**
+   * when a field mapping is requested for an unknown field
+   * @param {String} name - the field name
+   */
+  errors.FieldNotFoundInCache = function FieldNotFoundInCache(name) {
+    CourierError.call(this,
+      'The ' + name + ' field was not found in the cached mappings',
+      errors.FieldNotFoundInCache);
+  };
+  inherits(errors.FieldNotFoundInCache, CourierError);
 
   return errors;
 });

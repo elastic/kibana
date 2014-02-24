@@ -9,7 +9,7 @@
     "console": true
   },
 
-  "camelcase": true,
+  "camelcase": false,
   "white": true,
   "bitwise": false,
   "eqnull": true,

@@ -6,7 +6,8 @@ define(function (require) {
   require('services/config');
   require('services/courier');
 
-  angular.module('kibana/controllers')
+  angular
+    .module('kibana/controllers')
     .controller('kibana', function ($scope, courier) {
       setTimeout(function () {
         courier.start();
