@@ -27,6 +27,6 @@ define(function () {
      * The default ES index to use for storing Kibana specific object
      * such as stored dashboards
      */
-    kibanaIndex: 'kibana-int'
+    kibanaIndex: 'kibana4-int'
   };
 });

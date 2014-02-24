@@ -1,6 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var Error = require('courier/errors');
+  var nextTick = require('utils/next_tick');
 
   /**
    * - Resolves index patterns
@@ -9,7 +10,7 @@ define(function (require) {
    *
    * @class Mapper
    */
-  function Mapper(courier) {
+  function Mapper(courier, config) {
 
     var client = courier._getClient();
 
@@ -23,11 +24,6 @@ define(function (require) {
     // Save a reference to this
     var self = this;
 
-    // STUB Until we have another way to get the config object.
-    var config = {
-      index: 'kibana4-int'
-    };
-
     // Store mappings we've already loaded from Elasticsearch
     var mappings = {};
 
@@ -39,7 +35,7 @@ define(function (require) {
     this.getFields = function (dataSource, callback) {
       if (self.getFieldsFromObject(dataSource)) {
         // If we already have the fields in our object, use that.
-        setTimeout(callback(undefined, self.getFieldsFromObject(dataSource)), 0);
+        nextTick(callback, void 0, self.getFieldsFromObject(dataSource));
       } else {
         // Otherwise, try to get fields from Elasticsearch cache
         self.getFieldsFromCache(dataSource, function (err, fields) {
@@ -72,7 +68,7 @@ define(function (require) {
      */
     this.getFieldMapping = function (dataSource, field, callback) {
       self.getFields(dataSource, function (err, fields) {
-        if (_.isUndefined(fields[field])) return courier._error(new Error.FieldNotFoundInCache());
+        if (_.isUndefined(fields[field])) return courier._error(new Error.FieldNotFoundInCache(field));
         callback(err, fields[field]);
       });
     };
@@ -86,7 +82,7 @@ define(function (require) {
     this.getFieldsMapping = function (dataSource, fields, callback) {
       self.getFields(dataSource, function (err, fields) {
         var _mapping = _.object(_.map(fields, function (field) {
-          if (_.isUndefined(fields[field])) return courier._error(new Error.FieldNotFoundInCache());
+          if (_.isUndefined(fields[field])) return courier._error(new Error.FieldNotFoundInCache(field));
           return [field, fields[field]];
         }));
         callback(err, _mapping);
@@ -109,8 +105,8 @@ define(function (require) {
      */
     this.getFieldsFromCache = function (dataSource, callback) {
       var params = {
-        index: config.index,
-        type: 'mapping',
+        index: config.cacheIndex,
+        type: config.cacheType,
         id: dataSource._state.index,
       };
 
@@ -161,10 +157,10 @@ define(function (require) {
      */
     var cacheFieldsToElasticsearch = function (config, index, fields, callback) {
       client.index({
-        index : config.index,
-        type: 'mapping',
-        id : index,
-        body : fields
+        index: config.cacheIndex,
+        type: config.cacheType,
+        id: index,
+        body: fields
       }, callback);
     };
 
@@ -188,9 +184,9 @@ define(function (require) {
         delete mappings[dataSource._state.index];
       }
       client.delete({
-        index : config.index,
-        type: 'mapping',
-        id : dataSource._state.index
+        index: config.cacheIndex,
+        type: config.cacheType,
+        id: dataSource._state.index
       }, callback);
     };
 
