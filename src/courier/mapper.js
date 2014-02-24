@@ -12,8 +12,6 @@ define(function (require) {
    */
   function Mapper(courier, config) {
 
-    var client = courier._getClient();
-
     // Exclude anything wirh empty mapping except these
     var reservedFields = {
       '_id': { type: 'string' },
@@ -104,6 +102,7 @@ define(function (require) {
      * @param {Function} callback A function to be executed with the results.
      */
     this.getFieldsFromCache = function (dataSource, callback) {
+      var client = courier._getClient();
       var params = {
         index: config.cacheIndex,
         type: config.cacheType,
@@ -119,6 +118,7 @@ define(function (require) {
      * @param {Function} callback A function to be executed with the results.
      */
     this.getFieldsFromMapping = function (dataSource, callback) {
+      var client = courier._getClient();
       var params = {
         // TODO: Change index to be newest resolved index. Change _state.index to id().
         index: dataSource._state.index,
@@ -156,6 +156,8 @@ define(function (require) {
      * @param {Function} callback A function to be executed with the results.
      */
     var cacheFieldsToElasticsearch = function (config, index, fields, callback) {
+      var client = courier._getClient();
+
       client.index({
         index: config.cacheIndex,
         type: config.cacheType,
@@ -180,6 +182,8 @@ define(function (require) {
      * @param {Function} callback A function to be executed with the results.
      */
     this.clearCache = function (dataSource, callback) {
+      var client = courier._getClient();
+
       if (!_.isUndefined(mappings[dataSource._state.index])) {
         delete mappings[dataSource._state.index];
       }
