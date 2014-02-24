@@ -27,23 +27,26 @@ define(function (require) {
           'kibana/services',
           'kibana/constants'
         ]);
+
         var appEl = document.createElement('div');
         var kibanaIndexExists;
 
-        setup.run(function (es, config) {
-          // init the setup module
-          async.series([
-            async.apply(checkForKibanaIndex, es),
-            async.apply(createKibanaIndex, es),
-            async.apply(checkForCurrentConfigDoc, es),
-            async.apply(initConfig, config)
-          ], function (err) {
-            // ready to go, remove the appEl, close services and boot be done
-            appEl.remove();
-            console.log('booting application');
-            return done(err);
+        setup
+          .value('configFile', configFile)
+          .run(function (es, config) {
+            // init the setup module
+            async.series([
+              async.apply(checkForKibanaIndex, es),
+              async.apply(createKibanaIndex, es),
+              async.apply(checkForCurrentConfigDoc, es),
+              async.apply(initConfig, config)
+            ], function (err) {
+              // ready to go, remove the appEl, close services and boot be done
+              appEl.remove();
+              console.log('booting application');
+              return done(err);
+            });
           });
-        });
 
         angular.bootstrap(appEl, ['setup']);
 

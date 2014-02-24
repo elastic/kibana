@@ -2,6 +2,27 @@ define(function (require) {
   var angular = require('angular');
 
   angular
+    .module('kibana/controllers')
+    .controller('examples', function ($scope, $location, courier) {
+      $scope.examples = [
+        'config',
+        'mapper',
+        'courier'
+      ];
+
+      $scope.makeActive = function (example) {
+        $scope.active = example;
+        $scope.activeUrl = 'kibana/apps/examples/partials/' + example + '.html';
+      };
+
+      $scope.exampleLoaded = function () {
+        if ($scope.active !== 'config') {
+          courier.fetch();
+        }
+      };
+    });
+
+  angular
     .module('kibana/directives')
     .directive('configTest', function () {
       return {

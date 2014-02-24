@@ -22,6 +22,11 @@ define(function (require) {
     // Save a reference to this
     var self = this;
 
+    config = _.defaults(config || {}, {
+      cacheIndex: 'kibana4-int',
+      cacheType: 'mappings'
+    });
+
     // Store mappings we've already loaded from Elasticsearch
     var mappings = {};
 

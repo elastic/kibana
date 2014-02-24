@@ -27,6 +27,18 @@ define(function () {
      * The default ES index to use for storing Kibana specific object
      * such as stored dashboards
      */
-    kibanaIndex: 'kibana4-int'
+    kibanaIndex: 'kibana4-int',
+
+    /**
+     * A list of apps that can be loaded by Kibana. The id's need to match the
+     * directory name in which the app lives, ie. src/kibana/apps/{{id}}
+     * @type {Array}
+     */
+    apps: [
+      { id: 'discover', name: 'Discover' },
+      { id: 'visualize', name: 'Visualize' },
+      { id: 'dashboard', name: 'Dashboard' },
+      { id: 'examples', name: 'Examples' }
+    ]
   };
 });
