@@ -1,10 +1,8 @@
 /** @scratch /panels/5
- *
  * include::panels/map.asciidoc[]
  */
 
 /** @scratch /panels/map/0
- *
  * == Map
  * Status: *Stable*
  *
@@ -48,7 +46,6 @@ function (angular, app, _, $) {
     // Set and populate defaults
     var _d = {
       /** @scratch /panels/map/3
-       *
        * === Parameters
        *
        * map:: Map to display. world, usa, europe
@@ -72,7 +69,6 @@ function (angular, app, _, $) {
        */
       spyable : true,
       /** @scratch /panels/map/5
-       *
        * ==== Queries
        * queries object:: This object describes the queries to use on this panel.
        * queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
@@ -121,7 +117,7 @@ function (angular, app, _, $) {
           .facetFilter($scope.ejs.QueryFilter(
             $scope.ejs.FilteredQuery(
               boolQuery,
-              filterSrv.getBoolFilter(filterSrv.ids())
+              filterSrv.getBoolFilter(filterSrv.ids)
               )))).size(0);
 
       $scope.populate_modal(request);
@@ -145,8 +141,8 @@ function (angular, app, _, $) {
       $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
     };
 
-    $scope.build_search = function(field, value) {
-      filterSrv.set({type:'field', field:field, query:value, mandate:"must"});
+    $scope.build_search = function(field,value) {
+      filterSrv.set({type:'querystring',mandate:'must',query:field+":"+value});
     };
 
   });
@@ -161,16 +157,20 @@ function (angular, app, _, $) {
 
         // Receive render events
         scope.$on('render',function(){
-          slow();
+          render_panel();
         });
 
-        elem.closest('.panel').resize(function () {
-          elem.empty();
+        // Or if the window is resized
+        angular.element(window).bind('resize', function(){
+          render_panel();
         });
 
         function render_panel() {
-          elem.empty();
           elem.css({height:scope.panel.height||scope.row.height});
+
+          elem.text('');
+
+          console.log(elem.height());
           $('.jvectormap-zoomin,.jvectormap-zoomout,.jvectormap-label').remove();
           require(['./panels/map/lib/map.'+scope.panel.map], function () {
             elem.vectorMap({
@@ -191,7 +191,7 @@ function (angular, app, _, $) {
                 elem.children('.map-legend').text(label.text() + ": " + count);
               },
               onRegionOut: function() {
-                elem.children('.map-legend').hide();
+                $('.map-legend').hide();
               },
               onRegionClick: function(event, code) {
                 var count = _.isUndefined(scope.data[code]) ? 0 : scope.data[code];
@@ -202,11 +202,9 @@ function (angular, app, _, $) {
             });
             elem.prepend('<span class="map-legend"></span>');
 
-            elem.children('.map-legend').hide();
+            $('.map-legend').hide();
           });
         }
-
-        var slow = _.debounce(render_panel, 200);
       }
     };
   });
