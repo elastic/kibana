@@ -5,19 +5,18 @@ define(function (require) {
   describe('calculateIndices()', function () {
 
     describe('error checking', function() {
-
       it('should throw an error if start is > end', function () {
         expect(function () { calculateIndices(moment().add('day', 1), moment()); }).to.throwError();
       });
-
       it('should throw an error if interval is not [ hour, day, week, year ]', function () {
         expect(function () { calculateIndices(moment().subtract('day', 1), moment(), 'century' ); }).to.throwError();
       });
-      
+      it('should throw an error if pattern is not set', function () {
+        expect(function () { calculateIndices(moment().subtract('day', 1), moment(), 'hour' ); }).to.throwError();
+      });
     });
     
     describe('hourly interval', function() {
-
       beforeEach(function () {
         var date = '2014-01-15 04:30:10';
         this.start = moment(date).subtract('hours', 4);
@@ -31,16 +30,13 @@ define(function (require) {
           'logstash-2014.01.15.04'
         ]
       });
-
       it('should return a set of hourly indices', function () {
         expect(calculateIndices(this.start, this.end, this.interval, this.pattern))
                .to.eql(this.fixture);
       });
-      
     });
 
     describe('daily interval', function() {
-
       beforeEach(function () {
         var date = '2014-01-15 04:30:10';
         this.start = moment(date).subtract('days', 4);
@@ -54,16 +50,13 @@ define(function (require) {
           'logstash-2014.01.15'
         ]
       });
-
       it('should return a set of daily indices', function () {
         expect(calculateIndices(this.start, this.end, this.interval, this.pattern))
                .to.eql(this.fixture);
       });
-      
     });
 
     describe('weekly interval', function() {
-
       beforeEach(function () {
         var date = '2014-01-15 04:30:10';
         this.start = moment(date).subtract('week', 4);
@@ -77,16 +70,13 @@ define(function (require) {
           'logstash-2014.01.15'
         ]
       });
-
       it('should return a set of daily indices', function () {
         expect(calculateIndices(this.start, this.end, this.interval, this.pattern))
                .to.eql(this.fixture);
       });
-      
     });
 
     describe('yearly interval', function() {
-
       beforeEach(function () {
         var date = '2014-01-15 04:30:10';
         this.start = moment(date).subtract('years', 4);
@@ -100,14 +90,11 @@ define(function (require) {
           'logstash-2014.01.15'
         ]
       });
-
       it('should return a set of yearly indices', function () {
         expect(calculateIndices(this.start, this.end, this.interval, this.pattern))
                .to.eql(this.fixture);
       });
-      
     });
-
 
   });
 
