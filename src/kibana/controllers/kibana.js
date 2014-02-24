@@ -17,24 +17,38 @@ define(function (require) {
       return {
         restrict: 'E',
         scope: {
-          type: '@'
+          type: '@',
+          fields: '@'
         },
-        template: '<strong style="float:left">{{count}} :&nbsp;</strong><pre>{{json}}</pre>',
+        template: 'Mappings:<br><div ng-repeat="(name,mapping) in mappedFields">{{name}} = {{mapping.type}}</div><hr>' +
+          '<strong style="float:left">{{count}} :&nbsp;</strong><pre>{{json}}</pre>',
         controller: function ($rootScope, $scope, courier) {
           $scope.count = 0;
+          $scope.mappedFields = {};
 
           var source = $rootScope.dataSource.extend()
+            .index('logstash-*')
             .type($scope.type)
             .source({
-              include: 'country'
+              include: 'geo'
             })
             .on('results', function (resp) {
               $scope.count ++;
               $scope.json = JSON.stringify(resp.hits, null, '  ');
             });
 
-          courier.mapper.getFields($rootScope.dataSource, function (data) {
-            $scope.json = data;
+          var fields = $scope.fields.split(',');
+
+
+          _.each(fields, function (field) {
+            courier._mapper.getFieldMapping(source, field, function (err, mapping) {
+              $scope.mappedFields[field] = mapping;
+            });
+          });
+
+
+          courier._mapper.getFields(source, function (err, response, status) {
+            console.log(response);
           });
 
           $scope.$watch('type', source.type);
@@ -49,9 +63,12 @@ define(function (require) {
           type: '@',
           index: '@'
         },
-        template: '<strong style="float:left">{{count}} : <button ng-click="click()">reindex</button> :&nbsp;</strong><pre>{{json}}</pre>',
+        template: '<strong style="float:left">{{count}} : <button ng-click="click()">reindex</button> :&nbsp;</strong>' +
+          '<pre>{{json}} BEER</pre>',
         controller: function (courier, $scope) {
           $scope.count = 0;
+
+          console.log(courier);
 
           var currentSource;
           $scope.click = function () {
@@ -69,6 +86,7 @@ define(function (require) {
               $scope.count ++;
               $scope.json = JSON.stringify(doc, null, '  ');
             });
+
         }
       };
     });
