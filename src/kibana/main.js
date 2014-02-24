@@ -9,6 +9,7 @@ define(function (require) {
   var scopedRequire = require('require');
   var enableAsyncModules = require('utils/async_modules');
   var setup = require('./setup');
+  var configFile = require('../config');
 
   require('elasticsearch');
   require('angular-route');
@@ -39,24 +40,50 @@ define(function (require) {
   });
 
   app.requires = dependencies;
-
+  app.value('configFile', configFile);
   app.config(function ($routeProvider) {
     $routeProvider
-      .when('/', {
-        templateUrl: 'kibana/partials/index.html'
-      })
-      .when('/config-test', {
-        templateUrl: 'courier/tests/config.html',
-      })
-      .when('/mapper-test', {
-        templateUrl: 'courier/tests/mapper.html',
-      })
-      .when('/courier-test', {
-        templateUrl: 'courier/tests/index.html',
-      })
       .otherwise({
-        redirectTo: '/'
+        redirectTo: '/discover'
       });
+
+    configFile.apps.forEach(function (app) {
+      var deps = {};
+      deps['app/' + app.id] = function () {
+        return loadApp(app);
+      };
+
+      $routeProvider.when('/' + app.id, {
+        templateUrl: '/kibana/apps/' + app.id + '/index.html',
+        resolve: deps
+      });
+    });
+  });
+
+  var loadApp; // so dumb
+
+  app.run(function ($q) {
+    loadApp = function (app) {
+      var defer = $q.defer();
+
+      require([
+        'apps/' + app.id + '/index'
+      ], function () {
+        defer.resolve();
+        delete require.onError;
+      });
+
+      require.onError = function () {
+        defer.reject();
+      };
+
+      // optional dependencies
+      require([
+        'css!apps/' + app.id + '/index.css'
+      ]);
+
+      return defer.promise;
+    };
   });
 
   setup(app, function (err) {
@@ -64,7 +91,6 @@ define(function (require) {
 
     // load the elasticsearch service
     require([
-      'courier/tests/directives',
       'controllers/kibana',
       'constants/base'
     ], function () {

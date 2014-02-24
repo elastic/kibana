@@ -1,44 +1,27 @@
-(function () {
-  var config = {
-    baseUrl: 'kibana',
-    paths: {
-      courier: '../courier'
+require.config({
+  baseUrl: 'kibana',
+  paths: {
+    courier: '../courier',
+    angular: '../bower_components/angular/angular',
+    'angular-route': '../bower_components/angular-route/angular-route',
+    async: '../bower_components/async/lib/async',
+    css: '../bower_components/require-css/css',
+    d3: '../bower_components/d3/d3',
+    elasticsearch: '../bower_components/elasticsearch/elasticsearch.angular',
+    jquery: '../bower_components/jquery/jquery',
+    lodash: '../bower_components/lodash/dist/lodash'
+  },
+  shim: {
+    angular: {
+      deps: ['jquery'],
+      exports: 'angular'
     },
-    shim: {
-      angular: {
-        deps: ['jquery'],
-        exports: 'angular'
-      }
+    'angular-route': {
+      deps: ['angular']
     },
-    waitSeconds: 60
-  };
-
-  var bowerComponents = [
-    'angular',
-    'angular-route',
-    ['async', 'lib/async'],
-    'd3',
-    ['elasticsearch', 'elasticsearch.angular'],
-    'jquery',
-    ['lodash', 'dist/lodash']
-  ];
-
-  bowerComponents.forEach(function (name) {
-    var path = '../bower_components/';
-    if (typeof name === 'object') {
-      path += name[0] + '/' + name[1];
-      name = name[0];
-    } else {
-      path += name + '/' + name;
+    'elasticsearch': {
+      deps: ['angular']
     }
-    config.paths[name] = path;
-
-    if (path.match(/angular/) && name !== 'angular') {
-      config.shim[name] = {
-        deps: ['angular']
-      };
-    }
-  });
-
-  require.config(config);
-}());
+  },
+  waitSeconds: 60
+});
