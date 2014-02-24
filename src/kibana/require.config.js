@@ -20,7 +20,8 @@
     'd3',
     ['elasticsearch', 'elasticsearch.angular'],
     'jquery',
-    ['lodash', 'dist/lodash']
+    ['lodash', 'dist/lodash'],
+    'moment'
   ];
 
   bowerComponents.forEach(function (name) {
