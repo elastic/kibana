@@ -10,6 +10,8 @@ define(function (require) {
   var SearchSource = require('courier/data_source/search');
   var HastyRefresh = require('courier/errors').HastyRefresh;
 
+  var Mapper = require('courier/mapper.js');
+
   // map constructors to type keywords
   var sourceTypes = {
     doc: DocSource,
@@ -54,7 +56,8 @@ define(function (require) {
   // default config values
   var defaults = {
     fetchInterval: 30000,
-    docInterval: 2500
+    docInterval: 2500,
+    internalIndex: 'kibana4-int'
   };
 
   /**
@@ -99,6 +102,9 @@ define(function (require) {
 
     // interval hook/fn for each type
     this._onInterval = {};
+
+    // make the mapper accessable
+    this._mapper = new Mapper(this);
 
     _.each(sourceTypes, function (fn, type) {
       var courier = this;
