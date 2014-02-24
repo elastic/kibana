@@ -32,7 +32,7 @@ function (angular, _, config, moment) {
     // cluster
     function resolve_indices(indices) {
       var something;
-      indices = _.map(indices,  encodeURIComponent);
+      indices = _.uniq(_.map(indices,  encodeURIComponent));
       something = $http({
         url: config.elasticsearch + "/" + indices.join(",") + "/_aliases?ignore_missing=true",
         method: "GET"
