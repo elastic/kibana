@@ -16,6 +16,7 @@ define(function (require) {
     ];
 
     $scope.makeActive = function (example) {
+      $location.search({example: example});
       $scope.active = example;
       $scope.activeUrl = 'kibana/apps/examples/partials/' + example + '.html';
     };
@@ -25,6 +26,11 @@ define(function (require) {
         courier.fetch();
       }
     };
+
+    var initial = $location.search().example;
+    if (initial) {
+      $scope.makeActive(initial);
+    }
   });
 
   // verify that config can be used, that it is stored, and that changes to it can be seen across tabs
