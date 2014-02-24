@@ -3,6 +3,7 @@ define(function (require) {
   var Courier = require('courier/courier');
   var DocSource = require('courier/data_source/doc');
   var errors = require('courier/errors');
+  var configFile = require('../../config');
 
   require('services/promises');
   require('services/es');
@@ -20,7 +21,7 @@ define(function (require) {
       courier = new Courier({
         fetchInterval: 15000,
         client: es,
-        promises: promises
+        internalIndex: configFile.kibanaIndex
       });
 
       courier.errors = errors;
