@@ -89,7 +89,7 @@ define(function (require) {
       _notify(onChange, vals[key]);
     }
 
-    function bindToScope($scope, key, opts) {
+    function $bindToScope($scope, key, opts) {
       $watch(key, function (val) {
         if (opts && val === void 0) val = opts['default'];
         $scope[key] = val;
@@ -114,7 +114,7 @@ define(function (require) {
     this.close = close;
     this.get = get;
     this.set = set;
-    this.bind = bindToScope;
+    this.$bind = $bindToScope;
     this.$watch = $watch;
 
     /*******
