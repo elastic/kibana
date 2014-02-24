@@ -205,7 +205,7 @@ function (angular, app, _, L, localRequire) {
   module.directive('bettermap', function() {
     return {
       restrict: 'A',
-      link: function(scope, elem, attrs) {
+      link: function(scope, elem) {
         elem.html('<center><img src="img/load_big.gif"></center>');
 
         // Receive render events
