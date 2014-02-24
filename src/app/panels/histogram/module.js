@@ -354,7 +354,13 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
           }
           facet = facet.keyField($scope.panel.time_field).valueField($scope.panel.value_field).global(true);
         }
-        facet = facet.interval(_interval).facetFilter($scope.ejs.QueryFilter(query));
+	// Hack to translate "1M" into "month" for the request.
+        if (_interval === '1M') {
+          facet = facet.interval('month').facetFilter($scope.ejs.QueryFilter(query));
+        }
+        else {
+          facet = facet.interval(_interval).facetFilter($scope.ejs.QueryFilter(query));
+        }
         request = request.facet(facet)
           .size($scope.panel.annotate.enable ? $scope.panel.annotate.size : 0);
       });
