@@ -27,15 +27,15 @@ define(function (require) {
       sinon.stub(client.indices, 'getFieldMapping',function (params, callback) {
         if(params.index === 'valid') {
           setTimeout(callback(undefined,{
-            "test": {
-              "mappings": {
-                "testType": {
-                  "foo.bar": {
-                    "full_name": "foo.bar",
-                      "mapping": {
-                        "bar": {
-                          "type": "string"
-                        }}}}}}}
+            test: {
+              mappings: {
+                testType: {
+                  'foo.bar': {
+                    full_name: 'foo.bar',
+                    mapping: {
+                      bar: {
+                        type: 'string'
+                      } } } } } } }
           ),0);
         } else {
           setTimeout(callback('Error: Not Found',undefined));
@@ -44,7 +44,7 @@ define(function (require) {
 
       sinon.stub(client, 'getSource', function (params, callback) {
         if(params.id === 'valid') {
-          setTimeout(callback(undefined,{"foo.bar": {"type": "string"}}),0);
+          setTimeout(callback(undefined,{'foo.bar': {'type': 'string'}}),0);
         } else {
           setTimeout(callback('Error: Not Found',undefined),0);
         }

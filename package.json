@@ -13,7 +13,8 @@
     "grunt-contrib-jshint": "~0.8.0",
     "grunt-mocha": "~0.4.10",
     "load-grunt-config": "~0.7.0",
-    "mocha": "~1.17.1"
+    "mocha": "~1.17.1",
+    "less-middleware": "~0.1.15"
   },
   "scripts": {
     "test": "grunt test",
