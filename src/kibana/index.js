@@ -82,6 +82,7 @@ define(function (require) {
     // load the elasticsearch service
     require([
       'controllers/kibana',
+      'directives/kbn_view',
       'constants/base'
     ], function () {
       // bootstrap the app
