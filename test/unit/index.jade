@@ -1,0 +1,35 @@
+doctype html
+html
+  head
+    title Kibana4 Tests
+    link(rel="stylesheet", href="mocha.css")
+  body
+    #mocha
+    script(src="expect.js")
+    script(src="mocha.js")
+    script.
+      mocha.setup('bdd');
+      // sauce labs & selenium inject global variables that break this
+      // mocha.checkLeaks();
+      // mocha.globals(['mochaRunner', 'angular']);
+    script(src="bower_components/requirejs/require.js")
+    script(src="kibana/require.config.js")
+    script(type="text/javascript").
+      require.config({
+         paths: {
+           sinon: '../sinon' 
+         },
+         shim: {
+           'sinon/sinon': {
+             deps: [
+               'sinon/sinon-timers-1.8.2'
+             ],
+             exports: 'sinon'
+           } 
+         }
+      });
+      require(!{tests}, function () {
+        window.mochaRunner = mocha.run().on('end', function () {
+          window.mochaResults = this.stats;
+        });
+      });
