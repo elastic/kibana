@@ -9,7 +9,8 @@ require.config({
     d3: '../bower_components/d3/d3',
     elasticsearch: '../bower_components/elasticsearch/elasticsearch.angular',
     jquery: '../bower_components/jquery/jquery',
-    lodash: '../bower_components/lodash/dist/lodash'
+    lodash: '../bower_components/lodash/dist/lodash',
+    moment: '../bower_components/moment/moment'
   },
   shim: {
     angular: {

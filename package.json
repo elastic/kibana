@@ -14,7 +14,9 @@
     "grunt-mocha": "~0.4.10",
     "load-grunt-config": "~0.7.0",
     "mocha": "~1.17.1",
-    "less-middleware": "~0.1.15"
+    "less-middleware": "~0.1.15",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-contrib-jade": "~0.10.0"
   },
   "scripts": {
     "test": "grunt test",
