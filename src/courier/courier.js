@@ -248,7 +248,8 @@ define(function (require) {
 
   // properly clear scheduled fetches
   Courier.prototype._clearScheduled = function (type) {
-    this._timer[type] = clearTimeout(this._timer[type]);
+    clearTimeout(this._timer[type]);
+    delete this._timer[type];
   };
 
   // alert the courior that a doc has been updated
