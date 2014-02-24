@@ -1,18 +1,8 @@
-var lessMiddleware = require('less-middleware');
-
 module.exports = function (grunt) {
   return {
     dev: {
       options: {
-        middleware: function (connect, options, middlewares) {
-          var src = grunt.config.get('src');
-          return [
-            lessMiddleware({
-              src: src
-            }),
-            connect.static(src)
-          ];
-        }
+        base: '<%= src %>'
       }
     },
     test: {
