@@ -228,19 +228,19 @@ function($, _, moment) {
       return {
         sec: kbn.intervals_in_seconds[matches[2]],
         type: matches[2],
-        count: parseInt(matches[1], 10)
+        count: parseFloat(matches[1])
       };
     }
   };
 
   kbn.interval_to_ms = function(string) {
     var info = kbn.describe_interval(string);
-    return info.sec * 1000 * info.count;
+    return Math.ceil(info.sec * 1000 * info.count);
   };
 
   kbn.interval_to_seconds = function (string) {
     var info = kbn.describe_interval(string);
-    return info.sec * info.count;
+    return Math.ceil(info.sec * info.count);
   };
 
   // This should go away, moment.js can do this
