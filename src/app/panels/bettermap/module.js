@@ -206,7 +206,6 @@ function (angular, app, _, L, localRequire) {
     return {
       restrict: 'A',
       link: function(scope, elem, attrs) {
-
         elem.html('<center><img src="img/load_big.gif"></center>');
 
         // Receive render events
@@ -230,7 +229,7 @@ function (angular, app, _, L, localRequire) {
             scope.panelMeta.loading = false;
             L.Icon.Default.imagePath = 'app/panels/bettermap/leaflet/images';
             if(_.isUndefined(map)) {
-              map = L.map(attrs.id, {
+              map = L.map(scope.$id, {
                 scrollWheelZoom: false,
                 center: [40, -86],
                 zoom: 10
