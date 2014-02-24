@@ -67,12 +67,12 @@ define(function (require) {
             body: {
               settings: {
                 mappings: {
-                  type1: {
+                  mappings: {
                     _source: {
                       enabled: false
                     },
                     properties: {
-                      field1: {
+                      type: {
                         type: 'string',
                         index: 'not_analyzed'
                       }
