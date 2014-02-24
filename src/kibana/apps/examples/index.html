@@ -1,8 +1,8 @@
-<div ng-controller="examples">
+<div ng-controller="examples" id="examples">
   <ul class="nav nav-tabs">
     <li ng-repeat="example in examples" ng-class="{ active: active ===  example }">
       <a ng-click="makeActive(example)">{{example}}</a>
     </li>
   </ul>
-  <div ng-include="activeUrl" onload="exampleLoaded()" ></div>
+  <ng-include src="activeUrl" onload="exampleLoaded()" ></ng-include>
 </div>
