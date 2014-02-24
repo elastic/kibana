@@ -1,62 +1,101 @@
 define(function (require) {
   var listenerCount = require('utils/event_emitter').listenerCount;
+  var _ = require('lodash');
   var errors = {};
+  var inherits = require('utils/inherits');
 
-  // caused by a refresh attempting to start before the prevous is done
-  function HastyRefresh() {
-    this.name = 'HastyRefresh';
-    this.message = 'Courier attempted to start a query before the previous had finished.';
+  var canStack = (function () {
+    var err = new Error();
+    return !!err.stack;
+  }());
+
+  // abstract error class
+  function CourierError(msg, constructor) {
+    this.message = msg;
+
+    Error.call(this, this.message);
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, constructor || CourierError);
+    } else if (canStack) {
+      this.stack = (new Error()).stack;
+    } else {
+      this.stack = '';
+    }
   }
-  HastyRefresh.prototype = new Error();
-  HastyRefresh.prototype.constructor = HastyRefresh;
-  errors.HastyRefresh = HastyRefresh;
+  errors.CourierError = CourierError;
+  inherits(CourierError, Error);
 
-  // a non-critical cache write to elasticseach failed
-  function CacheWriteFailure() {
-    this.name = 'CacheWriteFailure';
-    this.message = 'A Elasticsearch cache write has failed.';
-  }
-  CacheWriteFailure.prototype = new Error();
-  CacheWriteFailure.prototype.constructor = CacheWriteFailure;
-  errors.CacheWriteFailure = CacheWriteFailure;
+  /**
+   * HastyRefresh error class
+   * @param {String} [msg] - An error message that will probably end up in a log.
+   */
+  errors.HastyRefresh = function HastyRefresh() {
+    CourierError.call(this,
+      'Courier attempted to start a query before the previous had finished.',
+      errors.HastyRefresh);
+  };
+  inherits(errors.HastyRefresh, CourierError);
 
-  // when a field mapping is requested for an unknown field
-  function FieldNotFoundInCache(name) {
-    this.name = 'FieldNotFoundInCache';
-    this.message = 'The ' + name + ' field was not found in the cached mappings';
-  }
-  FieldNotFoundInCache.prototype = new Error();
-  FieldNotFoundInCache.prototype.constructor = FieldNotFoundInCache;
-  errors.FieldNotFoundInCache = FieldNotFoundInCache;
 
-  // where there is an error getting a doc
-  function DocFetchFailure(resp) {
-    this.name = 'DocFetchFailure';
+  /**
+   * DocFetchFailure Error - where there is an error getting a doc
+   * @param {String} [msg] - An error message that will probably end up in a log.
+   */
+  errors.DocFetchFailure = function DocFetchFailure(resp) {
+    CourierError.call(this,
+      'Failed to get the doc: ' + JSON.stringify(resp),
+      errors.DocFetchFailure);
+
     this.resp = resp;
-    this.message = 'Failed to get the doc: ' + JSON.stringify(resp);
-  }
-  DocFetchFailure.prototype = new Error();
-  DocFetchFailure.prototype.constructor = DocFetchFailure;
-  errors.DocFetchFailure = DocFetchFailure;
+  };
+  inherits(errors.DocFetchFailure, CourierError);
 
-  // there was a conflict storing a doc
-  function VersionConflict(resp) {
-    this.name = 'VersionConflict';
+
+  /**
+   * Connection Error
+   * @param {String} [msg] - An error message that will probably end up in a log.
+   */
+  errors.VersionConflict = function VersionConflict(resp) {
+    CourierError.call(this,
+      'Failed to store document changes do to a version conflict.',
+      errors.VersionConflict);
+
     this.resp = resp;
-    this.message = 'Failed to store document changes due to a version conflict.';
-  }
-  VersionConflict.prototype = new Error();
-  VersionConflict.prototype.constructor = VersionConflict;
-  errors.VersionConflict = VersionConflict;
+  };
+  inherits(errors.VersionConflict, CourierError);
 
-  // there was a conflict storing a doc
-  function MappingConflict(field) {
-    this.name = 'MappingConflict';
-    this.message = 'Field ' + field + ' is defined as at least two different types in indices matching the pattern';
-  }
-  MappingConflict.prototype = new Error();
-  MappingConflict.prototype.constructor = MappingConflict;
-  errors.MappingConflict = MappingConflict;
+
+  /**
+   * there was a conflict storing a doc
+   * @param {String} field - the fields which contains the conflict
+   */
+  errors.MappingConflict = function MappingConflict(field) {
+    CourierError.call(this,
+      'Field ' + field + ' is defined as at least two different types in indices matching the pattern',
+      errors.MappingConflict);
+  };
+  inherits(errors.MappingConflict, CourierError);
+
+  /**
+   * a non-critical cache write to elasticseach failed
+   */
+  errors.CacheWriteFailure = function CacheWriteFailure() {
+    CourierError.call(this,
+      'A Elasticsearch cache write has failed.',
+      errors.CacheWriteFailure);
+  };
+  inherits(errors.CacheWriteFailure, CourierError);
+
+  /**
+   * when a field mapping is requested for an unknown field
+   * @param {String} name - the field name
+   */
+  errors.FieldNotFoundInCache = function FieldNotFoundInCache(name) {
+    CourierError.call(this,
+      'The ' + name + ' field was not found in the cached mappings',
+      errors.FieldNotFoundInCache);
+  };
+  inherits(errors.FieldNotFoundInCache, CourierError);
 
   return errors;
 });

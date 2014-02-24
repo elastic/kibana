@@ -45,6 +45,11 @@ define(function (require) {
       return courier.createSource(this._getType()).inherits(this);
     };
 
+    this.courier = function (newCourier) {
+      courier = this._courier = newCourier;
+      return this;
+    };
+
     // get/set internal state values
     this._methods.forEach(function (name) {
       this[name] = function (val) {
@@ -94,6 +99,50 @@ define(function (require) {
    */
   DataSource.prototype.toString = function () {
     return JSON.stringify(this.toJSON());
+  };
+
+  /**
+   * Set the $scope for a datasource, when a datasource is bound
+   * to a scope, it's event listeners will be wrapped in a call to that
+   * scope's $apply method (safely).
+   *
+   * This also binds the DataSource to the lifetime of the scope: when the scope
+   * is destroyed, the datasource is closed
+   *
+   * @param  {AngularScope} $scope - the scope where the event emitter "occurs",
+   *   helps angular determine where to start checking for changes
+   * @return {this} - chainable
+   */
+  DataSource.prototype.$scope = function ($scope) {
+    var emitter = this;
+
+    if (emitter._emitter$scope) {
+      emitter._emitter$scope = $scope;
+      return this;
+    }
+
+    emitter._emitter$scope = $scope;
+    var origOn = emitter.on;
+
+    emitter.on = function (event, listener) {
+      var wrapped = function () {
+        var args = arguments;
+        // always use the stored ref so that it can be updated if needed
+        var $scope = emitter._emitter$scope;
+        $scope[$scope.$$phase ? '$eval' : '$apply'](function () {
+          listener.apply(emitter, args);
+        });
+      };
+      wrapped.listener = listener;
+      return origOn.call(emitter, event, wrapped);
+    };
+
+    emitter.on.restore = function () {
+      delete emitter._emitter$scope;
+      emitter.on = origOn;
+    };
+
+    return this;
   };
 
   /*****
