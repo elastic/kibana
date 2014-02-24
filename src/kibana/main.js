@@ -14,8 +14,8 @@ define(function (require) {
   require('elasticsearch');
   require('angular-route');
 
-  var app = angular.module('kibana', []);
-  enableAsyncModules(app);
+  var kibana = angular.module('kibana', []);
+  enableAsyncModules(kibana);
 
   var dependencies = [
     'elasticsearch',
@@ -29,19 +29,16 @@ define(function (require) {
     'kibana/constants'
   ];
 
-  function isScope(obj) {
-    return obj && obj.$evalAsync && obj.$watch;
-  }
-
   dependencies.forEach(function (name) {
     if (name.indexOf('kibana/') === 0) {
-      app.useModule(angular.module(name, []));
+      kibana.useModule(angular.module(name, []));
     }
   });
 
-  app.requires = dependencies;
-  app.value('configFile', configFile);
-  app.config(function ($routeProvider) {
+  kibana.requires = dependencies;
+  kibana.value('configFile', configFile);
+
+  kibana.config(function ($routeProvider) {
     $routeProvider
       .otherwise({
         redirectTo: '/discover'
@@ -50,7 +47,7 @@ define(function (require) {
     configFile.apps.forEach(function (app) {
       var deps = {};
       deps['app/' + app.id] = function () {
-        return loadApp(app);
+        return kibana.loadChildApp(app);
       };
 
       $routeProvider.when('/' + app.id, {
@@ -60,10 +57,8 @@ define(function (require) {
     });
   });
 
-  var loadApp; // so dumb
-
-  app.run(function ($q) {
-    loadApp = function (app) {
+  kibana.run(function ($q) {
+    kibana.loadChildApp = function (app) {
       var defer = $q.defer();
 
       require([
@@ -77,16 +72,11 @@ define(function (require) {
         defer.reject();
       };
 
-      // optional dependencies
-      require([
-        'css!apps/' + app.id + '/index.css'
-      ]);
-
       return defer.promise;
     };
   });
 
-  setup(app, function (err) {
+  setup(kibana, function (err) {
     if (err) throw err;
 
     // load the elasticsearch service
@@ -102,5 +92,5 @@ define(function (require) {
     });
   });
 
-  return app;
+  return kibana;
 });
