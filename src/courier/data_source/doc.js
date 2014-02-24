@@ -69,8 +69,13 @@ define(function (require) {
   DocSource.validate = function (courier, refs, cb) {
     var invalid = _.filter(refs, function (ref) {
       var storedVersion = ref.source._getVersion();
+      if (!storedVersion && ref.version) {
+        // stored version was cleared, we need to clear our cached
+        delete ref.version;
+      }
+
       /* jshint eqeqeq: false */
-      return (!ref.fetchCount || ref.version != storedVersion);
+      return (!ref.fetchCount || !ref.version || ref.version != storedVersion);
     });
     nextTick(cb, void 0, invalid);
   };
