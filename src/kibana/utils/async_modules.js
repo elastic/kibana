@@ -1,8 +1,9 @@
 define(function (require) {
   var _ = require('lodash');
 
-  // TODO: this will probably fail to work when we have multiple apps. Might need to propogate
-  // registrations to multiple providers
+  /* TODO: this will probably fail to work when we have multiple apps.
+   * Might need to propogate registrations to multiple providers
+   */
   function enable(app) {
     // keep a reference to each module defined before boot, so that
     // after boot it can define new features. Also serves as a flag.

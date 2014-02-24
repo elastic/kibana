@@ -36,27 +36,27 @@ define(function (require) {
       getBody.docs.push(source._flatten());
     });
 
-    return client.mget({ body: getBody }, function (err, resp) {
-      if (err) return cb(err);
+    return client.mget({ body: getBody })
+      .then(function (resp) {
+        _.each(resp.docs, function (resp, i) {
+          var ref = allRefs[i];
+          var source = ref.source;
 
-      _.each(resp.docs, function (resp, i) {
-        var ref = allRefs[i];
-        var source = ref.source;
+          if (resp.error) return source._error(new errors.DocFetchFailure(resp));
+          if (resp.found) {
+            if (ref.version === resp._version) return; // no change
+            ref.version = resp._version;
+            source._storeVersion(resp._version);
+          } else {
+            ref.version = void 0;
+            source._clearVersion();
+          }
+          source.emit('results', resp);
+        });
 
-        if (resp.error) return source._error(new errors.DocFetchFailure(resp));
-        if (resp.found) {
-          if (ref.version === resp._version) return; // no change
-          ref.version = resp._version;
-          source._storeVersion(resp._version);
-        } else {
-          ref.version = void 0;
-          source._clearVersion();
-        }
-        source.emit('results', resp);
-      });
-
-      cb(err, resp);
-    });
+        cb(void 0, resp);
+      })
+      .catch(cb);
   };
 
   /**
@@ -72,9 +72,7 @@ define(function (require) {
       /* jshint eqeqeq: false */
       return (!ref.fetchCount || ref.version != storedVersion);
     });
-    nextTick(function () {
-      cb(void 0, invalid);
-    });
+    nextTick(cb, void 0, invalid);
   };
 
   /*****
