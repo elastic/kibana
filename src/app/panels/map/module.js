@@ -166,7 +166,11 @@ function (angular, app, _, $) {
         });
 
         function render_panel() {
+          elem.css({height:scope.panel.height||scope.row.height});
+
           elem.text('');
+
+          console.log(elem.height());
           $('.jvectormap-zoomin,.jvectormap-zoomout,.jvectormap-label').remove();
           require(['./panels/map/lib/map.'+scope.panel.map], function () {
             elem.vectorMap({
@@ -197,6 +201,7 @@ function (angular, app, _, $) {
               }
             });
             elem.prepend('<span class="map-legend"></span>');
+
             $('.map-legend').hide();
           });
         }
