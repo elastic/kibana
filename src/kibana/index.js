@@ -7,6 +7,7 @@ define(function (require) {
   var $ = require('jquery');
   var _ = require('lodash');
   var scopedRequire = require('require');
+  var enableAsyncModules = require('utils/async_modules');
   var setup = require('./setup');
   var configFile = require('../config');
 
@@ -14,8 +15,9 @@ define(function (require) {
   require('angular-route');
 
   var kibana = angular.module('kibana', []);
+  enableAsyncModules(kibana);
 
-  var requiredAgularModules = [
+  var dependencies = [
     'elasticsearch',
     'ngRoute',
     'kibana',
@@ -27,63 +29,68 @@ define(function (require) {
     'kibana/constants'
   ];
 
-  requiredAgularModules.forEach(function (name) {
-    if (name.indexOf('kibana/') === 0) angular.module(name, []);
+  dependencies.forEach(function (name) {
+    if (name.indexOf('kibana/') === 0) {
+      kibana.useModule(angular.module(name, []));
+    }
   });
 
-  kibana.requires = requiredAgularModules;
+  kibana.requires = dependencies;
   kibana.value('configFile', configFile);
 
   kibana.config(function ($routeProvider) {
     $routeProvider
       .otherwise({
-        redirectTo: '/' + configFile.defaultAppId
+        redirectTo: '/discover'
       });
 
     configFile.apps.forEach(function (app) {
+      var deps = {};
+      deps['app/' + app.id] = function () {
+        return kibana.loadChildApp(app);
+      };
+
       $routeProvider.when('/' + app.id, {
-        templateUrl: '/kibana/apps/' + app.id + '/index.html'
+        templateUrl: '/kibana/apps/' + app.id + '/index.html',
+        resolve: deps
       });
     });
+  });
+
+  kibana.run(function ($q) {
+    kibana.loadChildApp = function (app) {
+      var defer = $q.defer();
+
+      require([
+        'apps/' + app.id + '/index'
+      ], function () {
+        defer.resolve();
+        delete require.onError;
+      });
+
+      require.onError = function () {
+        defer.reject();
+      };
+
+      return defer.promise;
+    };
   });
 
   setup(kibana, function (err) {
     if (err) throw err;
 
-    // once all of the required modules are loaded, bootstrap angular
-    function bootstrap() {
-      $(function () {
-        angular.bootstrap(document, requiredAgularModules);
-      });
-    }
-
-    // do some requirejs loading in parallel, otherwise we
-    // would have to track everything in the r.js optimization
-    // config
-    var out = 0;
-    function loaded() {
-      out ++;
-      return function () {
-        out--;
-        if (!out) {
-          // all of the callbacks have been called
-          bootstrap();
-        }
-      };
-    }
-
-    // require global modules
+    // load the elasticsearch service
     require([
       'controllers/kibana',
+      'directives/kbn_view',
       'constants/base'
-    ], loaded());
-
-    // require each applications root module
-    // since these are created via .map the same operation
-    // must be done in the r.js optimizer config
-    require(configFile.apps.map(function (app) {
-      return 'apps/' + app.id + '/index';
-    }), loaded());
+    ], function () {
+      // bootstrap the app
+      $(function () {
+        angular
+          .bootstrap(document, dependencies);
+      });
+    });
   });
 
   return kibana;
