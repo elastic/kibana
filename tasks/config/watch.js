@@ -4,9 +4,20 @@ module.exports = function (grunt) {
       files: ['<%= unitTestDir %>/*.jade', '<%= unitTestDir %>/**/*.js'],
       tasks: ['jade:test', 'mocha:unit']
     },
-    src: {
-      files: ['<%= src %>'],
+    less: {
+      files: [
+        '<%= app %>/**/*.less',
+        '<%= src %>/courier/**/*.less'
+      ],
       tasks: ['less']
+    },
+    jade: {
+      files: [
+        '<%= app %>/**/*.jade',
+        '<%= src %>/courier/**/*.jade',
+        '!<%= unitTestDir %>/**/*.jade'
+      ],
+      tasks: ['jade']
     }
   };
 };

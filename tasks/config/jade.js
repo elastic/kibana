@@ -1,6 +1,13 @@
 module.exports = function (grunt) {
   return {
     test: {
+      src: [
+        '<%= unitTestDir %>/**/*.jade',
+        '<%= app %>/partials/**/*.jade',
+        '<%= app %>/apps/**/*.jade'
+      ],
+      expand: true,
+      ext: '.html',
       options: {
         data: function (src, dest) {
           var pattern = grunt.config.process('<%= unitTestDir %>/**/*.js');
@@ -10,9 +17,6 @@ module.exports = function (grunt) {
           return { tests: JSON.stringify(tests) };
         },
         client: false
-      },
-      files: {
-        '<%= unitTestDir %>/index.html': '<%= unitTestDir %>/index.jade'
       }
     }
   };
