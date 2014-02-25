@@ -26,11 +26,15 @@ include::panels/column.asciidoc[]
 
 include::panels/goal.asciidoc[]
 
+include::panels/goal.asciidoc[]
+// src/app/panels/goal/module.js:1
+
 include::panels/histogram.asciidoc[]
 
 include::panels/hits.asciidoc[]
 
 include::panels/map.asciidoc[]
+// src/app/panels/map/module.js:1
 
 include::panels/sparklines.asciidoc[]
 
