@@ -77,9 +77,17 @@ function (angular, app, _, moment, kbn) {
       $scope.input.$setValidity("dummy", true);
       $scope.temptime = cloneTime($scope.time);
 
-      // Date picker needs the date to be at the start of the day
+      //Date picker needs the date to be at the start of the day
       $scope.temptime.from.date.setHours(0,0,0,0);
       $scope.temptime.to.date.setHours(0,0,0,0);
+
+      console.log(new Date().getTimezoneOffset());
+
+      // This is an ugly hack, but works.
+      if(new Date().getTimezoneOffset() < 0) {
+        $scope.temptime.from.date = moment($scope.temptime.from.date).add('days',1).toDate();
+        $scope.temptime.to.date = moment($scope.temptime.to.date).add('days',1).toDate();
+      }
 
       $q.when(customTimeModal).then(function(modalEl) {
         modalEl.modal('show');
