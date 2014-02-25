@@ -5,7 +5,6 @@ define(function (require) {
   require('css!./styles/index.css');
 
   var app = angular.module('app/examples', []);
-  kibana.useModule(app);
 
   // main controller for the examples
   app.controller('examples', function ($scope, $location, courier) {
