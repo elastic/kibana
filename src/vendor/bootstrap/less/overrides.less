@@ -74,6 +74,8 @@ code, pre {
 .panel {
   display: inline-table;
   vertical-align: top;
+  // Work around for overflow issue.
+  margin-left: -1px;
 }
 
 .panel-container {
@@ -126,7 +128,7 @@ code, pre {
 }
 
 .dragInProgress .panel-container {
-  border: 3px solid rgba(100,100,100,0.50);
+  border: 1px solid @blue;
 }
 
 // ---------------------------
