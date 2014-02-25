@@ -15,12 +15,12 @@ define(function (require) {
         expect(function () { calculateIndices(moment().subtract('day', 1), moment(), 'hour' ); }).to.throwError();
       });
     });
-    
+
     describe('hourly interval', function() {
       beforeEach(function () {
         var date = '2014-01-15 04:30:10';
-        this.start = moment(date).subtract('hours', 4);
-        this.end = moment(date);
+        this.start = moment.utc(date).subtract('hours', 4);
+        this.end = moment.utc(date);
         this.interval = 'hour';
         this.pattern = '[logstash-]YYYY.MM.DD.HH';
         this.fixture = [
@@ -39,8 +39,8 @@ define(function (require) {
     describe('daily interval', function() {
       beforeEach(function () {
         var date = '2014-01-15 04:30:10';
-        this.start = moment(date).subtract('days', 4);
-        this.end = moment(date);
+        this.start = moment.utc(date).subtract('days', 4);
+        this.end = moment.utc(date);
         this.interval = 'day';
         this.pattern = '[logstash-]YYYY.MM.DD';
         this.fixture = [
@@ -59,8 +59,8 @@ define(function (require) {
     describe('weekly interval', function() {
       beforeEach(function () {
         var date = '2014-01-15 04:30:10';
-        this.start = moment(date).subtract('week', 4);
-        this.end = moment(date);
+        this.start = moment.utc(date).subtract('week', 4);
+        this.end = moment.utc(date);
         this.interval = 'week';
         this.pattern = '[logstash-]YYYY.MM.DD';
         this.fixture = [
@@ -79,8 +79,8 @@ define(function (require) {
     describe('yearly interval', function() {
       beforeEach(function () {
         var date = '2014-01-15 04:30:10';
-        this.start = moment(date).subtract('years', 4);
-        this.end = moment(date);
+        this.start = moment.utc(date).subtract('years', 4);
+        this.end = moment.utc(date);
         this.interval = 'year';
         this.pattern = '[logstash-]YYYY.MM.DD';
         this.fixture = [
