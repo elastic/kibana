@@ -77,6 +77,7 @@ define(function (require) {
       /* jshint eqeqeq: false */
       return (!ref.fetchCount || !ref.version || ref.version != storedVersion);
     });
+    // callbacks should always be called async
     nextTick(cb, void 0, invalid);
   };
 

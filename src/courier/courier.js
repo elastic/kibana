@@ -177,6 +177,9 @@ define(function (require) {
   // force a fetch of all datasources right now, optionally filter by type
   Courier.prototype.fetch = function (onlyType) {
     var courier = this;
+    // ensure that onFetch functions always run after the tick
+    // so that users can will be able to listen after or before the call to
+    // fetch and always get the same behavior (even if the onFetch runs synchronously)
     nextTick(function () {
       _.forOwn(onFetch, function (fn, type) {
         if (onlyType && onlyType !== type) return;

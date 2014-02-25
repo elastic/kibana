@@ -37,7 +37,8 @@ define(function (require) {
      */
     this.getFields = function (dataSource, callback) {
       if (self.getFieldsFromObject(dataSource)) {
-        // If we already have the fields in our object, use that.
+        // If we already have the fields in our object, use that, but
+        // make sure we stay async
         nextTick(callback, void 0, self.getFieldsFromObject(dataSource));
       } else {
         // Otherwise, try to get fields from Elasticsearch cache
