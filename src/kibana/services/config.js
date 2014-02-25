@@ -87,19 +87,39 @@ define(function (require) {
       if (!watchers[key]) watchers[key] = [];
       watchers[key].push(onChange);
       _notify(onChange, vals[key]);
+      return function un$watcher() {
+        _.pull(watchers[key], onChange);
+      };
     }
 
     function $bindToScope($scope, key, opts) {
-      $watch(key, function (val) {
+      var configWatcher = function (val) {
         if (opts && val === void 0) val = opts['default'];
         $scope[key] = val;
-      });
+      };
 
       var first = true;
-      unwatchers.push($scope.$watch(key, function (newVal) {
+      var scopeWatcher = function (newVal) {
         if (first) return first = false;
         set(key, newVal);
-      }));
+      };
+
+      // collect unwatch/listen functions and automatically
+      // run them when $scope is destroyed
+      var unwatchScope = $scope.$watch(key, scopeWatcher);
+      var unwatchConfig = $watch(key, configWatcher);
+      var unlisten = $scope.$on('$destroy', unwatch);
+
+      unwatchers.push(unwatch);
+      function unwatch() {
+        unwatchScope();
+        unwatchConfig();
+        unlisten();
+        _.pull(unwatchers, unwatch);
+      }
+
+      // return the unwatch function so users can unwatch manually
+      return unwatch;
     }
 
     function close() {
