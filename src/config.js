@@ -39,6 +39,8 @@ define(function () {
       { id: 'visualize', name: 'Visualize' },
       { id: 'dashboard', name: 'Dashboard' },
       { id: 'examples', name: 'Examples' }
-    ]
+    ],
+
+    defaultAppId: 'discover'
   };
 });
