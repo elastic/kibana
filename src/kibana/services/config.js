@@ -129,7 +129,7 @@ define(function (require) {
 
     function _notify(fns, cur, prev) {
       if ($rootScope.$$phase) {
-        // reschedule
+        // reschedule for next tick
         nextTick(_notify, fns, cur, prev);
         return;
       }

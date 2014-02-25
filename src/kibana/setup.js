@@ -91,6 +91,7 @@ define(function (require) {
         function checkForCurrentConfigDoc(es, done) {
           if (!kibanaIndexExists) return done();
           console.log('checking if migration is necessary: not implemented');
+          // callbacks should always be called async
           nextTick(done);
         }
 
