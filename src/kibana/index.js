@@ -7,7 +7,6 @@ define(function (require) {
   var $ = require('jquery');
   var _ = require('lodash');
   var scopedRequire = require('require');
-  var enableAsyncModules = require('utils/async_modules');
   var setup = require('./setup');
   var configFile = require('../config');
 
@@ -15,9 +14,8 @@ define(function (require) {
   require('angular-route');
 
   var kibana = angular.module('kibana', []);
-  enableAsyncModules(kibana);
 
-  var dependencies = [
+  var requiredAgularModules = [
     'elasticsearch',
     'ngRoute',
     'kibana',
@@ -27,70 +25,68 @@ define(function (require) {
     'kibana/services',
     'kibana/filters',
     'kibana/constants'
-  ];
+  ].concat(configFile.apps.map(function (app) {
+    return 'app/' + app.id;
+  }));
 
-  dependencies.forEach(function (name) {
-    if (name.indexOf('kibana/') === 0) {
-      kibana.useModule(angular.module(name, []));
-    }
+  requiredAgularModules.forEach(function (name) {
+    if (name.indexOf('kibana/') === 0) angular.module(name, []);
   });
 
-  kibana.requires = dependencies;
+  kibana.requires = requiredAgularModules;
   kibana.value('configFile', configFile);
 
   kibana.config(function ($routeProvider) {
     $routeProvider
       .otherwise({
-        redirectTo: '/discover'
+        redirectTo: '/' + configFile.defaultAppId
       });
 
     configFile.apps.forEach(function (app) {
-      var deps = {};
-      deps['app/' + app.id] = function () {
-        return kibana.loadChildApp(app);
-      };
-
       $routeProvider.when('/' + app.id, {
-        templateUrl: '/kibana/apps/' + app.id + '/index.html',
-        resolve: deps
+        templateUrl: '/kibana/apps/' + app.id + '/index.html'
       });
     });
-  });
-
-  kibana.run(function ($q) {
-    kibana.loadChildApp = function (app) {
-      var defer = $q.defer();
-
-      require([
-        'apps/' + app.id + '/index'
-      ], function () {
-        defer.resolve();
-        delete require.onError;
-      });
-
-      require.onError = function () {
-        defer.reject();
-      };
-
-      return defer.promise;
-    };
   });
 
   setup(kibana, function (err) {
     if (err) throw err;
 
-    // load the elasticsearch service
+    // once all of the required modules are loaded, bootstrap angular
+    function bootstrap() {
+      $(function () {
+        angular.bootstrap(document, requiredAgularModules);
+      });
+    }
+
+    // do some requirejs loading in parallel, otherwise we
+    // would have to track everything in the r.js optimization
+    // config
+    var out = 0;
+    function loaded() {
+      out ++;
+      return function () {
+        out--;
+        if (!out) {
+          // all of the callbacks have been called
+          bootstrap();
+        }
+      };
+    }
+
+    // require global modules
     require([
       'controllers/kibana',
       'directives/kbn_view',
       'constants/base'
-    ], function () {
-      // bootstrap the app
-      $(function () {
-        angular
-          .bootstrap(document, dependencies);
-      });
-    });
+    ], loaded());
+
+    // require each applications root module
+    // since these are created via .map the same operation
+    // must be done in the r.js optimizer config
+    require(configFile.apps.map(function (app) {
+      return 'apps/' + app.id + '/index';
+    }), loaded());
   });
 
   return kibana;
