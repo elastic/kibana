@@ -143,7 +143,6 @@ define([
           { label : 'Complete', data : complete, color: querySrv.colors[parseInt($scope.$id, 16)%8] },
           { data : remaining, color: Chromath.lighten(querySrv.colors[parseInt($scope.$id, 16)%8],0.70).toString() }
         ];
-        console.log(parseInt($scope.$id, 16)%8);
         $scope.$emit('render');
       });
     };
