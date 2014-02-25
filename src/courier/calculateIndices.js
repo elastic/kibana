@@ -5,7 +5,7 @@ define(function (require) {
       throw new Error('Start must begin before end.');
     }
 
-    if (!~['hour','day','week','year'].indexOf(interval)) {
+    if (!~['hour', 'day', 'week', 'year'].indexOf(interval)) {
       throw new Error('Interval must be hour, day, week, or year.');
     }
 
@@ -13,8 +13,8 @@ define(function (require) {
       throw new Error('Pattern can not be empty.');
     }
 
-    var data = [];  
-    while(start.isBefore(end)) {
+    var data = [];
+    while (start.isBefore(end)) {
       start.add(interval, '1');
       data.push(start.format(pattern));
     }
