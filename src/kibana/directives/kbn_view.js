@@ -3,6 +3,14 @@ define(function (require) {
 
   angular
     .module('kibana/directives')
+    /******
+     ****** COPIED directive from angular-router
+     ****** https://github.com/angular/angular.js/blob/6f0503514f/src/ngRoute/directive/ngView.js#L183
+     ******
+     ****** Modification made:
+     ******  - prevent the view from being recreated unnecessarily
+     ******
+     ******/
     .directive('kbnView', function modifiedNgViewFactory($route, $anchorScroll, $animate) {
       return {
         restrict: 'ECA',
@@ -31,6 +39,7 @@ define(function (require) {
           }
 
           function update() {
+            /****** START modification *******/
             if ($route.current) {
               if (currentTemplateUrl && $route.current.templateUrl === currentTemplateUrl) {
                 return;
@@ -38,6 +47,7 @@ define(function (require) {
                 currentTemplateUrl = $route.current.templateUrl;
               }
             }
+            /****** STOP modification *******/
 
             var locals = $route.current && $route.current.locals;
             var template = locals && locals.$template;
@@ -73,6 +83,14 @@ define(function (require) {
         }
       };
     })
+
+    /******
+     ****** COPIED directive from angular-router
+     ****** https://github.com/angular/angular.js/blob/6f0503514f/src/ngRoute/directive/ngView.js#L251
+     ******
+     ****** No Modifications made
+     ******
+     ******/
     .directive('kbnView', function modifiedNgViewFillContentFactory($compile, $controller, $route) {
       return {
         restrict: 'ECA',
