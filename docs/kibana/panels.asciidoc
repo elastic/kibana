@@ -35,6 +35,9 @@ include::panels/bettermap.asciidoc[]
 include::panels/column.asciidoc[]
 // src/app/panels/column/module.js:1
 
+include::panels/goal.asciidoc[]
+// src/app/panels/goal/module.js:1
+
 include::panels/histogram.asciidoc[]
 // src/app/panels/histogram/module.js:1
 
@@ -43,9 +46,6 @@ include::panels/hits.asciidoc[]
 
 include::panels/map.asciidoc[]
 // src/app/panels/map/module.js:1
-
-include::panels/pie.asciidoc[]
-// src/app/panels/pie/module.js:1
 
 include::panels/sparklines.asciidoc[]
 // src/app/panels/sparklines/module.js:1

@@ -1,30 +1,6 @@
-  <div class="editor-row" ng-switch="panel.mode">
+  <div class="editor-row">
 
     <div class="section">
-      <h5>Mode</h5>
-      <div class="editor-option">
-        <label class="small">Mode</label>
-        <select class="input-small" ng-change="set_mode(panel.mode);set_refresh(true)" ng-model="panel.mode" ng-options="f for f in ['terms','goal']"></select>
-      </div>
-    </div>
-
-    <div class="section" ng-switch-when="terms">
-      <h5>Parameters</h5>
-      <div class="editor-option">
-        <label class="small">Field</label>
-        <input type="text" class="input-small" bs-typeahead="fields.list" ng-model="panel.query.field" ng-change="set_refresh(true)">
-      </div>
-      <div class="editor-option">
-        <label class="small">Length</label>
-        <input class="input-mini" type="number" ng-model="panel.size" ng-change="set_refresh(true)">
-      </div>
-      <div class="editor-option">
-        <label class="small">Exclude Terms(s) (comma separated)</label>
-        <input array-join type="text" ng-model='panel.exclude'></input>
-      </div>
-    </div>
-
-    <div class="section" ng-switch-when="goal">
       <h5>Parameters</h5>
       <div class="editor-option">
         <form style="margin-bottom: 0px">
