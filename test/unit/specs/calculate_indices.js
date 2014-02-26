@@ -1,5 +1,5 @@
 define(function (require) {
-  var calculateIndices = require('courier/calculateIndices');
+  var calculateIndices = require('courier/calculate_indices');
   var moment = require('moment');
 
   describe('calculateIndices()', function () {
@@ -28,7 +28,7 @@ define(function (require) {
           'logstash-2014.01.15.02',
           'logstash-2014.01.15.03',
           'logstash-2014.01.15.04'
-        ]
+        ];
       });
       it('should return a set of hourly indices', function () {
         expect(calculateIndices(this.start, this.end, this.interval, this.pattern))
@@ -48,7 +48,7 @@ define(function (require) {
           'logstash-2014.01.13',
           'logstash-2014.01.14',
           'logstash-2014.01.15'
-        ]
+        ];
       });
       it('should return a set of daily indices', function () {
         expect(calculateIndices(this.start, this.end, this.interval, this.pattern))
@@ -68,7 +68,7 @@ define(function (require) {
           'logstash-2014.01.01',
           'logstash-2014.01.08',
           'logstash-2014.01.15'
-        ]
+        ];
       });
       it('should return a set of daily indices', function () {
         expect(calculateIndices(this.start, this.end, this.interval, this.pattern))
@@ -88,7 +88,7 @@ define(function (require) {
           'logstash-2012.01.15',
           'logstash-2013.01.15',
           'logstash-2014.01.15'
-        ]
+        ];
       });
       it('should return a set of yearly indices', function () {
         expect(calculateIndices(this.start, this.end, this.interval, this.pattern))
