@@ -1,5 +1,14 @@
 <div ng-controller="dashboard">
-  <div>
-    <ul dashboard-grid settings="gridSettings" panels="grid"></ul>
+  <nav class="navbar navbar-default navbar-fixed-top subnav">
+    <ul class="nav navbar-nav pull-right">
+      <li>
+        <a class="link" ng-click="serializeGrid()"><i class="fa fa-save"></i></a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="container-subnav">
+    <ul dashboard-grid></ul>
   </div>
+
 </div>

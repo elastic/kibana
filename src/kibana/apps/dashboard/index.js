@@ -15,7 +15,7 @@ define(function (require) {
 
     };
 
-    $scope.grid = [
+    $scope.panels = [
       {
         col: 1,
         row: 1,
@@ -65,24 +65,23 @@ define(function (require) {
         size_y: 1
       }
     ];
+
+    $scope.serializeGrid = function () {
+      console.log($scope.gridster.serialize());
+    };
   });
 
   app.directive('dashboardGrid', function () {
     return {
       restrict: 'A',
-      scope : {
-        panels: '=',
-        settings: '='
-      },
       link: function ($scope, elem) {
-        var width, gridster;
+        var width;
 
         elem.addClass('gridster');
-        elem.css({'list-style-type': 'none', width: '100%', display: 'block'});
 
         width = elem.width();
 
-        gridster = elem.gridster({
+        $scope.gridster = elem.gridster({
           widget_margins: [5, 5],
           widget_base_dimensions: [((width - 80) / 12), 100],
           min_cols: 12,
@@ -97,17 +96,10 @@ define(function (require) {
         }).data('gridster');
 
         _.each($scope.panels, function (panel, i) {
-          gridster.add_widget('<li><div class="content"><h1><center>' +
+          $scope.gridster.add_widget('<li><div class="content"><h1><center>' +
             i +
             '</center></h1></div></li>', panel.size_x, panel.size_y, panel.col, panel.row);
         });
-
-        elem.children('li.gs-w').css({
-          'padding' : '5px',
-          'border' : ($scope.settings.border || '1px solid #ddd'),
-          'background-color' : ($scope.settings.background || '#f4f4f4')
-        });
-
       }
     };
   });
