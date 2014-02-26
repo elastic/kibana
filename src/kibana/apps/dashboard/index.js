@@ -11,77 +11,104 @@ define(function (require) {
   var app = angular.module('app/dashboard', []);
 
   app.controller('dashboard', function ($scope) {
-    $scope.gridSettings = {
 
+    $scope.gridControl = {};
+
+    $scope.dashboard = {
+      title: 'Logstash Dashboard',
+      panels: [
+        {
+          col: 1,
+          row: 1,
+          size_x: 5,
+          size_y: 2,
+          params: { type: 'line' }
+        },
+        {
+          col: 6,
+          row: 1,
+          size_x: 4,
+          size_y: 2,
+          params: { type: 'bar' }
+        },
+        {
+          col: 10,
+          row: 1,
+          size_x: 3,
+          size_y: 1,
+          params: { type: 'table' }
+        },
+        {
+          col: 10,
+          row: 2,
+          size_x: 3,
+          size_y: 1,
+          params: { type: 'pie' }
+        },
+        {
+          col: 1,
+          row: 3,
+          size_x: 3,
+          size_y: 1,
+          params: { type: 'scatter' }
+        },
+        {
+          col: 4,
+          row: 3,
+          size_x: 3,
+          size_y: 1,
+          params: { type: 'map' }
+        },
+        {
+          col: 7,
+          row: 3,
+          size_x: 3,
+          size_y: 1,
+          params: { type: 'sparkline' }
+        },
+        {
+          col: 10,
+          row: 3,
+          size_x: 3,
+          size_y: 1,
+          params: { type: 'heatmap' }
+        }
+      ]
     };
 
-    $scope.panels = [
-      {
-        col: 1,
-        row: 1,
-        size_x: 5,
-        size_y: 2
-      },
-      {
-        col: 6,
-        row: 1,
-        size_x: 4,
-        size_y: 2
-      },
-      {
-        col: 10,
-        row: 1,
-        size_x: 3,
-        size_y: 1
-      },
-      {
-        col: 10,
-        row: 2,
-        size_x: 3,
-        size_y: 1
-      },
-      {
-        col: 1,
-        row: 3,
-        size_x: 3,
-        size_y: 1
-      },
-      {
-        col: 4,
-        row: 3,
-        size_x: 3,
-        size_y: 1
-      },
-      {
-        col: 7,
-        row: 3,
-        size_x: 3,
-        size_y: 1
-      },
-      {
-        col: 10,
-        row: 3,
-        size_x: 3,
-        size_y: 1
-      }
-    ];
 
-    $scope.serializeGrid = function () {
-      console.log($scope.gridster.serialize());
+  });
+
+  app.directive('dashboardPanel', function () {
+    return {
+      template: '<li />'
     };
   });
 
   app.directive('dashboardGrid', function () {
     return {
       restrict: 'A',
+      scope : {
+        grid: '=',
+        control: '='
+      },
       link: function ($scope, elem) {
-        var width;
+        var width, gridster;
 
         elem.addClass('gridster');
 
         width = elem.width();
 
-        $scope.gridster = elem.gridster({
+        $scope.control.serializeGrid = function () {
+          console.log(gridster.serialize());
+          return gridster.serialize();
+        };
+
+        $scope.control.addWidget = function () {
+          gridster.add_widget('<li><div class="content"></div></li>', 3, 2);
+        };
+
+        gridster = elem.gridster({
           widget_margins: [5, 5],
           widget_base_dimensions: [((width - 80) / 12), 100],
           min_cols: 12,
@@ -89,16 +116,31 @@ define(function (require) {
           resize: {
             enabled: true,
             stop: function (event, ui, widget) {
-              console.log(widget.height());
-              widget.children('.content').text('height: ' + widget.height() + ' / width: ' + widget.width());
+              console.log(widget.height(), widget.width());
             }
+          },
+          serialize_params: function (el, wgd) {
+            return {
+              col: wgd.col,
+              row: wgd.row,
+              size_x: wgd.size_x,
+              size_y: wgd.size_y,
+              params: el.data('params')
+            };
           }
         }).data('gridster');
 
-        _.each($scope.panels, function (panel, i) {
-          $scope.gridster.add_widget('<li><div class="content"><h1><center>' +
-            i +
-            '</center></h1></div></li>', panel.size_x, panel.size_y, panel.col, panel.row);
+        _.each($scope.grid, function (panel) {
+          console.log(panel);
+          var wgd = gridster.add_widget('<li />',
+            panel.size_x, panel.size_y, panel.col, panel.row);
+          wgd.html(panel.params.type + ' <i class="link pull-right fa fa-times remove" />');
+          wgd.data('params', panel.params);
+        });
+
+        elem.on('click', 'li i.remove', function (event) {
+          var target = event.target.parentNode;
+          gridster.remove_widget(event.target.parentNode);
         });
       }
     };
