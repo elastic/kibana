@@ -7,6 +7,7 @@ require.config({
     'angular-route': '../bower_components/angular-route/angular-route',
     async: '../bower_components/async/lib/async',
     css: '../bower_components/require-css/css',
+    text: '../bower_components/requirejs-text/text',
     d3: '../bower_components/d3/d3',
     elasticsearch: '../bower_components/elasticsearch/elasticsearch.angular',
     jquery: '../bower_components/jquery/jquery',
