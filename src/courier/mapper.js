@@ -133,17 +133,15 @@ define(function (require) {
 
       // TODO: Add week/month check
       client.indices.getFieldMapping(params, function (err, response, status) {
-
-        // TODO: Add error message
-
         var fields = {};
 
-        _.each(response, function (index) {
+        _.each(response, function (index, indexName) {
+          if (indexName === config.cacheIndex) return;
           _.each(index.mappings, function (type) {
             _.each(type, function (field, name) {
-              if (_.isUndefined(field.mapping) || name[0] === '_') return;
-              if (!_.isUndefined(fields[name]) && fields[name] !== field.mapping[_.keys(field.mapping)[0]])
-                return courier._error(new Error.MappingConflict());
+              if (_.size(field.mapping) === 0 || name[0] === '_') return;
+              if (!_.isUndefined(fields[name]) && fields[name].type !== field.mapping[_.keys(field.mapping)[0]].type)
+                return courier._error(new Error.MappingConflict(name));
               fields[name] = field.mapping[_.keys(field.mapping)[0]];
             });
           });

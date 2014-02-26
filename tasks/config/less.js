@@ -3,7 +3,7 @@ module.exports = {
     src: [
       '<%= app %>/styles/**/*.less',
       '<%= app %>/apps/**/*.less',
-      '!_*.less'
+      '!<%= src %>/**/_*.less'
     ],
     expand: true,
     ext: '.css',

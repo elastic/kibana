@@ -2,6 +2,7 @@ define(function (require) {
   var DataSource = require('courier/data_source/data_source');
   var inherits = require('utils/inherits');
   var errors = require('courier/errors');
+  var FetchFailure = require('courier/errors').FetchFailure;
   var _ = require('lodash');
 
   function SearchSource(courier, initialState) {
@@ -44,7 +45,7 @@ define(function (require) {
 
       _.each(resp.responses, function (resp, i) {
         var source = allRefs[i];
-        if (resp.error) return errors.emit(source, courier, resp);
+        if (resp.error) return source._error(new FetchFailure(resp));
         source.emit('results', resp);
       });
 

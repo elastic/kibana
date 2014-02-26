@@ -24,7 +24,11 @@ define(function (require) {
     // execute a search right now
     search: function (courier) {
       if (courier._activeSearchRequest) {
-        return courier._error(new HastyRefresh());
+        // ensure that this happens async, otherwise listeners
+        // might miss error events
+        return nextTick(function () {
+          courier._error(new HastyRefresh());
+        });
       }
 
       courier._activeSearchRequest = SearchSource.fetch(
@@ -174,19 +178,24 @@ define(function (require) {
     }, this);
   };
 
+  // be default, the courier will throw an error if a fetch
+  // occurs before a previous fetch finishes. To prevent this, you
+  // should call abort before calling .fetch()
+  Courier.prototype.abort = function () {
+    if (this._activeSearchRequest) {
+      this._activeSearchRequest.abort();
+      this._activeSearchRequest = null;
+    }
+  };
+
   // force a fetch of all datasources right now, optionally filter by type
   Courier.prototype.fetch = function (onlyType) {
     var courier = this;
-    // ensure that onFetch functions always run after the tick
-    // so that users can will be able to listen after or before the call to
-    // fetch and always get the same behavior (even if the onFetch runs synchronously)
-    nextTick(function () {
-      _.forOwn(onFetch, function (fn, type) {
-        if (onlyType && onlyType !== type) return;
-        if (courier._refs[type].length) fn(courier);
-        courier._refs[type].forEach(function (ref) {
-          ref.fetchCount ++;
-        });
+    _.forOwn(onFetch, function (fn, type) {
+      if (onlyType && onlyType !== type) return;
+      if (courier._refs[type].length) fn(courier);
+      courier._refs[type].forEach(function (ref) {
+        ref.fetchCount ++;
       });
     });
   };
