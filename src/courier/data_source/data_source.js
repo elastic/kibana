@@ -3,7 +3,6 @@ define(function (require) {
   var _ = require('lodash');
   var EventEmitter = require('utils/event_emitter');
   var Mapper = require('courier/mapper');
-  var IndexPattern = require('courier/index_pattern');
 
   function DataSource(courier, initialState) {
     var state;
@@ -54,9 +53,6 @@ define(function (require) {
     this._methods.forEach(function (name) {
       this[name] = function (val) {
         state[name] = val;
-        if (name === 'index' && arguments[1]) {
-          state.index = new IndexPattern(val, arguments[1]);
-        }
         return this;
       };
     }, this);
@@ -81,8 +77,8 @@ define(function (require) {
    * @callback {Error, Array} - calls cb with a possible error or an array of field names
    * @todo
    */
-  DataSource.prototype.getFieldNames = function (cb) {
-    throw new Error('not implemented');
+  DataSource.prototype.getFields = function (cb) {
+    this._courier._mapper.getFields(this, this._wrapcb(cb));
   };
 
   /**
@@ -114,32 +110,33 @@ define(function (require) {
    * @return {this} - chainable
    */
   DataSource.prototype.$scope = function ($scope) {
-    var emitter = this;
+    var courier = this;
 
-    if (emitter._emitter$scope) {
-      emitter._emitter$scope = $scope;
+    if (courier._$scope) {
+      // simply change the scope that callbacks will point to
+      courier._$scope = $scope;
       return this;
     }
 
-    emitter._emitter$scope = $scope;
-    var origOn = emitter.on;
+    courier._$scope = $scope;
 
-    emitter.on = function (event, listener) {
-      var wrapped = function () {
-        var args = arguments;
-        // always use the stored ref so that it can be updated if needed
-        var $scope = emitter._emitter$scope;
-        $scope[$scope.$$phase ? '$eval' : '$apply'](function () {
-          listener.apply(emitter, args);
-        });
-      };
+    // wrap the 'on' method so that all listeners
+    // can be wrapped in calls to $scope.$apply
+    var origOn = courier.on;
+    courier.on = function (event, listener) {
+      var wrapped = courier._wrapcb(listener);
+      // set .listener so that it can be removed by
+      // .removeListener() using the original function
       wrapped.listener = listener;
-      return origOn.call(emitter, event, wrapped);
+      return origOn.call(courier, event, wrapped);
     };
 
-    emitter.on.restore = function () {
-      delete emitter._emitter$scope;
-      emitter.on = origOn;
+    // make sure the alias is still set
+    courier.addListener = courier.on;
+
+    courier.on.restore = function () {
+      delete courier._$scope;
+      courier.on = courier.addListener = origOn;
     };
 
     return this;
@@ -213,11 +210,22 @@ define(function (require) {
     return flatState;
   };
 
-  DataSource.prototype._resolveIndexPattern = function (start, end) {
-    if (this._state.indexInterval) {
-      throw new Error('Not implemented');
-    }
-    return this._state.index;
+  DataSource.prototype._wrapcb = function (cb) {
+    var courier = this;
+    var wrapped = function () {
+      var args = arguments;
+      // always use the stored ref so that it can be updated if needed
+      var $scope = courier._$scope;
+
+      // don't fall apart if we don't have a scope
+      if (!$scope) return cb.apply(courier, args);
+
+      // use angular's $apply or $eval functions for the given scope
+      $scope[$scope.$$phase ? '$eval' : '$apply'](function () {
+        cb.apply(courier, args);
+      });
+    };
+    return wrapped;
   };
 
   return DataSource;

@@ -38,17 +38,17 @@ define(function (require) {
 
 
   /**
-   * DocFetchFailure Error - where there is an error getting a doc
+   * FetchFailure Error - where there is an error getting a doc
    * @param {String} [msg] - An error message that will probably end up in a log.
    */
-  errors.DocFetchFailure = function DocFetchFailure(resp) {
+  errors.FetchFailure = function FetchFailure(resp) {
     CourierError.call(this,
       'Failed to get the doc: ' + JSON.stringify(resp),
-      errors.DocFetchFailure);
+      errors.FetchFailure);
 
     this.resp = resp;
   };
-  inherits(errors.DocFetchFailure, CourierError);
+  inherits(errors.FetchFailure, CourierError);
 
 
   /**
