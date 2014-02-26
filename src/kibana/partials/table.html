@@ -1,0 +1,12 @@
+<table class="table">
+  <thead>
+    <th ng-repeat="col in columns">{{col}}</th>
+  </thead>
+  <tbody>
+    <tr ng-repeat="row in rows">
+      <td ng-repeat="col in columns">
+        {{row._source[col] || row[col]}}
+      </td>
+    </tr>
+  </tbody>
+</table>

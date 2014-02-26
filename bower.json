@@ -27,7 +27,8 @@
     "d3": "~3.4.1",
     "angular-route": "~1.2.12",
     "gridster": "~0.5.0",
-    "font-awesome": "~4.0.3"
+    "font-awesome": "~4.0.3",
+    "requirejs-text": "~2.0.10"
   },
   "devDependencies": {}
 }

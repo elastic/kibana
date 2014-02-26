@@ -2,7 +2,8 @@ define(function (require) {
   var DataSource = require('courier/data_source/data_source');
   var inherits = require('utils/inherits');
   var nextTick = require('utils/next_tick');
-  var errors = require('courier/errors');
+  var VersionConflict = require('courier/errors').VersionConflict;
+  var FetchFailure = require('courier/errors').FetchFailure;
   var listenerCount = require('utils/event_emitter').listenerCount;
   var _ = require('lodash');
 
@@ -42,7 +43,7 @@ define(function (require) {
           var ref = allRefs[i];
           var source = ref.source;
 
-          if (resp.error) return source._error(new errors.DocFetchFailure(resp));
+          if (resp.error) return source._error(new FetchFailure(resp));
           if (resp.found) {
             if (ref.version === resp._version) return; // no change
             ref.version = resp._version;
@@ -147,7 +148,7 @@ define(function (require) {
       if (err) return cb(err);
 
       if (resp && resp.status === 409) {
-        err = new errors.VersionConflict(resp);
+        err = new VersionConflict(resp);
         if (listenerCount(source, 'conflict')) {
           return source.emit('conflict', err);
         } else {
