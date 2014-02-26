@@ -1,1 +1,43 @@
-<h1>Discover</h1>
+<div ng-controller="discover">
+  <h1>Discover</h1>
+  <div class="form-horizontal">
+    <div class="form-group">
+      <label class="control-label col-sm-2">Index</label>
+      <div class="col-sm-10">
+        <input class="form-control" ng-model="index">
+      </div>
+    </div>
+    <!-- <div class="form-group">
+      <label class="control-label col-sm-3">Repeat Interval</label>
+      <div class="col-sm-9">
+        <select
+          class="form-control"
+          ng-model="interval"
+          ng-options="i.display for i in intervalOptions">
+          </select>
+      </div>
+    </div> -->
+    <form class="form-group" ng-submit="reset()">
+      <label class="control-label col-sm-2">Query</label>
+      <div class="col-sm-10">
+        <div class="input-group">
+          <input class="form-control" ng-model="query" >
+          <span class="input-group-btn">
+            <button type="button" class="btn" ng-click="reset()">
+              <i class="glyphicon glyphicon-search"></i>
+            </button>
+          </span>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="input-group">
+    <label class="control-label col-sm-2">Limit</label>
+    <select
+      class="form-control"
+      ng-model="size"
+      ng-options="size.display for size in sizeOptions">
+      </select>
+  </div>
+  <kbn-table rows="rows" columns="columns"></kbn-table>
+</div>
