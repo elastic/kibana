@@ -25,7 +25,8 @@
     "angular": "~1.2.10",
     "lodash": "~2.4.1",
     "d3": "~3.4.1",
-    "angular-route": "~1.2.12"
+    "angular-route": "~1.2.12",
+    "gridster": "~0.5.0"
   },
   "devDependencies": {}
 }
