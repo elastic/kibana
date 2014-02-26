@@ -14,7 +14,7 @@
   </head>
   <body>
     <div ng-controller="kibana">
-      <nav class="navbar navbar-default">
+      <nav class="navbar navbar-inverse navbar-fixed-top">
         <ul class="nav navbar-nav">
           <li ng-repeat="app in apps" ng-class="{active: activeApp == app.id}">
             <a href="#/{{app.id}}">{{app.name}}</a>

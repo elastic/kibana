@@ -11,12 +11,16 @@ require.config({
     elasticsearch: '../bower_components/elasticsearch/elasticsearch.angular',
     jquery: '../bower_components/jquery/jquery',
     lodash: '../bower_components/lodash/dist/lodash',
-    moment: '../bower_components/moment/moment'
+    moment: '../bower_components/moment/moment',
+    gridster: '../bower_components/gridster/dist/jquery.gridster'
   },
   shim: {
     angular: {
       deps: ['jquery'],
       exports: 'angular'
+    },
+    gridster: {
+      deps: ['jquery']
     },
     'angular-route': {
       deps: ['angular']
