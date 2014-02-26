@@ -77,7 +77,7 @@ define(function (require) {
     // require global modules
     require([
       'controllers/kibana',
-      'directives/kbn_view',
+      'directives/view',
       'constants/base'
     ], loaded());
 
