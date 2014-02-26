@@ -1,14 +1,17 @@
 <div ng-controller="dashboard">
   <nav class="navbar navbar-default navbar-static-top">
+    <div class="navbar-brand">
+      {{dashboard.title}}
+    </div>
+
     <ul class="nav navbar-nav pull-right">
-      <li>
-        <a class="link" ng-click="serializeGrid()"><i class="fa fa-save"></i></a>
-      </li>
+      <li><a class="link" ng-click="gridControl.addWidget()"><i class="fa fa-plus"></i></a></li>
+      <li><a class="link" ng-click="gridControl.serializeGrid()"><i class="fa fa-save"></i></a></li>
     </ul>
   </nav>
 
   <div class="container-default">
-    <ul dashboard-grid></ul>
+    <ul dashboard-grid grid="dashboard.panels" control="gridControl"></ul>
   </div>
 
 </div>
