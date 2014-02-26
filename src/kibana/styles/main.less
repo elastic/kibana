@@ -2,5 +2,29 @@
 @import "../../bower_components/bootstrap/less/theme.less";
 
 body {
-  margin: 60px 10px;
+  margin: 15px 10px;
+}
+
+
+//== Subnav
+//
+// Use for adding a subnav to your app
+.subnav {
+  margin-top: @navbar-height;
+  min-height: 30px!important
+}
+
+.subnav .navbar-nav li a {
+  padding-top: 5px!important;
+  padding-bottom: 5px!important;
+  cursor: pointer;
+}
+
+// Container if you have a subnav
+.container-subnav {
+  margin-top: 81px;
+}
+
+.container-default {
+  margin-top: @navbar-height;
 }
