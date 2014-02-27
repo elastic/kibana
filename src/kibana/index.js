@@ -29,8 +29,9 @@ define(function (require) {
     return 'app/' + app.id;
   }));
 
+  // create empty modules for all of the kibana and app modules
   requiredAgularModules.forEach(function (name) {
-    if (name.indexOf('kibana/') === 0) angular.module(name, []);
+    if (/^(kibana|app)\//.test(name)) angular.module(name, []);
   });
 
   kibana.requires = requiredAgularModules;
