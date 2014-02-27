@@ -25,19 +25,24 @@ define(function (require) {
   DocSource.fetch = function (courier, refs, cb) {
     var client = courier._getClient();
     var allRefs = [];
-    var getBody = {
+    var body = {
       docs: []
     };
 
     _.each(refs, function (ref) {
       var source = ref.source;
-      if (source._getType() !== 'doc') return;
+
+      var state = source._flatten();
+      if (!state || !state._id) return;
 
       allRefs.push(ref);
-      getBody.docs.push(source._flatten());
+      body.docs.push(state);
     });
 
-    return client.mget({ body: getBody })
+    // always callback asynchronously
+    if (!allRefs.length) return nextTick(cb);
+
+    return client.mget({ body: body })
       .then(function (resp) {
         _.each(resp.docs, function (resp, i) {
           var ref = allRefs[i];
@@ -52,6 +57,7 @@ define(function (require) {
             ref.version = void 0;
             source._clearVersion();
           }
+          source._previousResult = resp;
           source.emit('results', resp);
         });
 
@@ -105,25 +111,8 @@ define(function (require) {
    * @return {undefined}
    */
   DocSource.prototype.doUpdate = function (fields, cb) {
-    var source = this;
-    var courier = this._courier;
-    var client = courier._getClient();
-    var state = this._state;
-
-    client.update({
-      id: state.id,
-      type: state.type,
-      index: state.index,
-      version: source._getVersion(),
-      body: {
-        doc: fields
-      }
-    }, function (err, resp) {
-      if (err) return cb(err);
-
-      courier._docUpdated(source);
-      return cb();
-    });
+    if (!this._state.id) return this.doIndex(fields, cb);
+    return this._sendToEs('update', true, { doc: fields }, cb);
   };
 
   /**
@@ -133,18 +122,26 @@ define(function (require) {
    * @return {[type]}        [description]
    */
   DocSource.prototype.doIndex = function (body, cb) {
+    return this._sendToEs('index', false, body, cb);
+  };
+
+  DocSource.prototype._sendToEs = function (method, validateVersion, body, cb) {
     var source = this;
     var courier = this._courier;
     var client = courier._getClient();
-    var state = this._state;
-
-    client.index({
-      id: state.id,
-      type: state.type,
-      index: state.index,
+    var params = {
+      id: this._state.id,
+      type: this._state.type,
+      index: this._state.index,
       body: body,
       ignore: [409]
-    }, function (err, resp) {
+    };
+
+    if (validateVersion) {
+      params.version = source._getVersion();
+    }
+
+    client[method](params, function (err, resp) {
       if (err) return cb(err);
 
       if (resp && resp.status === 409) {
@@ -158,9 +155,10 @@ define(function (require) {
 
       source._storeVersion(resp._version);
       courier._docUpdated(source);
-      return cb();
+      return cb(void 0, resp._id);
     });
   };
+
 
   /*****
    * PRIVATE API
@@ -223,18 +221,19 @@ define(function (require) {
    * @return {undefined}
    */
   DocSource.prototype._storeVersion = function (version) {
+    if (!version) return this._clearVersion();
+
     var id = this._versionKey();
-    if (version) {
-      localStorage.setItem(id, version);
-    } else {
-      localStorage.removeItem(id);
-    }
+    localStorage.setItem(id, version);
   };
 
   /**
    * Clears the stored version for a DocSource
    */
-  DocSource.prototype._clearVersion = DocSource.prototype._storeVersion;
+  DocSource.prototype._clearVersion = function () {
+    var id = this._versionKey();
+    localStorage.removeItem(id);
+  };
 
   return DocSource;
 });

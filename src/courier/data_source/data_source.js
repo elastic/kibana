@@ -3,6 +3,7 @@ define(function (require) {
   var _ = require('lodash');
   var EventEmitter = require('utils/event_emitter');
   var Mapper = require('courier/mapper');
+  var nextTick = require('utils/next_tick');
 
   function DataSource(courier, initialState) {
     var state;
@@ -23,25 +24,34 @@ define(function (require) {
     this._state = state;
     this._courier = courier;
 
-    var onNewListener = _.bind(function (name) {
-      // new newListener is emitted before it is added, count will be 0
-      if (name !== 'results' || EventEmitter.listenerCount(this, 'results') !== 0) return;
-      courier._openDataSource(this);
-      this.removeListener('newListener', onNewListener);
-      this.on('removeListener', onRemoveListener);
-    }, this);
+    this.on('newListener', function (name, listener) {
+      if (name !== 'results') return;
 
-    var onRemoveListener = _.bind(function () {
+      if (this._previousResult) {
+        // always call the listener async, to match normal "emit" behavior
+        var result = this._previousResult;
+        var self = this;
+        nextTick(function () {
+          listener.call(self, result);
+        });
+      }
+
+      // newListener is emitted before the listener is actually is added,
+      // so count should be 0 if this is the first
+      if (EventEmitter.listenerCount(this, 'results') === 0) {
+        courier._openDataSource(this);
+      }
+    });
+
+    this.on('removeListener', function onRemoveListener() {
       if (EventEmitter.listenerCount(this, 'results') > 0) return;
       courier._closeDataSource(this);
-      this.removeListener('removeListener', onRemoveListener);
-      this.on('newListener', onNewListener);
-    }, this);
-
-    this.on('newListener', onNewListener);
+    });
 
     this.extend = function () {
-      return courier.createSource(this._getType()).inherits(this);
+      return courier
+        .createSource(this._getType())
+        .inherits(this);
     };
 
     this.courier = function (newCourier) {
@@ -52,7 +62,12 @@ define(function (require) {
     // get/set internal state values
     this._methods.forEach(function (name) {
       this[name] = function (val) {
-        state[name] = val;
+        if (val == null) {
+          delete state[name];
+        } else {
+          state[name] = val;
+        }
+
         return this;
       };
     }, this);
@@ -72,21 +87,71 @@ define(function (require) {
   };
 
   /**
+   * Change the entire state of a DataSource
+   * @param {object|string} state - The DataSource's new state, or a
+   *   string of the state value to set
+   */
+  DataSource.prototype.set = function (state, val) {
+    if (typeof state === 'string') {
+      return this[state](val);
+    }
+
+    this._state = state;
+    return this;
+  };
+
+  /**
+   * Clear the disabled flag, you do not need to call this unless you
+   * explicitly disabled the DataSource
+   */
+  DataSource.prototype.enableFetch = function () {
+    delete this._fetchDisabled;
+    return this;
+  };
+
+  /**
+   * Disable the DataSource, preventing it or any of it's children from being searched
+   */
+  DataSource.prototype.disableFetch = function () {
+    this._fetchDisabled = true;
+    return this;
+  };
+
+  /**
+   * Attach a scope to this DataSource so that callbacks and event listeners
+   * can properly trigger it's $digest cycles
+   * @param {AngularScope} $scope
+   * @return {this} - chainable
+   */
+  DataSource.prototype.$scope = function ($scope) {
+    this._$scope = $scope;
+    return this;
+  };
+
+  /**
    * fetch the field names for this DataSource
    * @param  {Function} cb
    * @callback {Error, Array} - calls cb with a possible error or an array of field names
-   * @todo
    */
   DataSource.prototype.getFields = function (cb) {
     this._courier._mapper.getFields(this, this._wrapcb(cb));
   };
 
   /**
-   * flatten an object to a simple encodable object
+   * clear the field list cache
+   * @param  {Function} cb
+   * @callback {Error, Array} - calls cb with a possible error
+   */
+  DataSource.prototype.clearFieldCache = function (cb) {
+    this._courier._mapper.clearCache(this, this._wrapcb(cb));
+  };
+
+  /**
+   * return a simple, encodable object representing the state of the DataSource
    * @return {[type]} [description]
    */
   DataSource.prototype.toJSON = function () {
-    return _.omit(this._state, 'inherits');
+    return _.clone(this._state);
   };
 
   /**
@@ -98,49 +163,22 @@ define(function (require) {
   };
 
   /**
-   * Set the $scope for a datasource, when a datasource is bound
-   * to a scope, it's event listeners will be wrapped in a call to that
-   * scope's $apply method (safely).
+   * Custom on method wraps event listeners before
+   * adding them so that $digest is properly setup
    *
-   * This also binds the DataSource to the lifetime of the scope: when the scope
-   * is destroyed, the datasource is closed
-   *
-   * @param  {AngularScope} $scope - the scope where the event emitter "occurs",
-   *   helps angular determine where to start checking for changes
-   * @return {this} - chainable
+   * @param {string} event - the name of the event to listen for
+   * @param {function} listener - the function to call when the event is emitted
    */
-  DataSource.prototype.$scope = function ($scope) {
-    var courier = this;
+  DataSource.prototype.on = function (event, listener) {
+    var wrapped = this._wrapcb(listener);
 
-    if (courier._$scope) {
-      // simply change the scope that callbacks will point to
-      courier._$scope = $scope;
-      return this;
-    }
+    // set .listener so that this specific one can
+    // be removed by .removeListener()
+    wrapped.listener = listener;
 
-    courier._$scope = $scope;
-
-    // wrap the 'on' method so that all listeners
-    // can be wrapped in calls to $scope.$apply
-    var origOn = courier.on;
-    courier.on = function (event, listener) {
-      var wrapped = courier._wrapcb(listener);
-      // set .listener so that it can be removed by
-      // .removeListener() using the original function
-      wrapped.listener = listener;
-      return origOn.call(courier, event, wrapped);
-    };
-
-    // make sure the alias is still set
-    courier.addListener = courier.on;
-
-    courier.on.restore = function () {
-      delete courier._$scope;
-      courier.on = courier.addListener = origOn;
-    };
-
-    return this;
+    return EventEmitter.prototype.on.call(this, event, wrapped);
   };
+  DataSource.prototype.addListener = DataSource.prototype.on;
 
   /*****
    * PRIVATE API
@@ -174,12 +212,15 @@ define(function (require) {
 
     // walk the chain and merge each property
     var current = this;
-    var currentState;
     while (current) {
-      currentState = current._state;
-      _.forOwn(currentState, collectProp);
-      current = currentState.inherits;
+      // stop processing if this or one of it's parents is disabled
+      if (current._fetchDisabled) return;
+      // merge the properties from the state into the flattened copy
+      _.forOwn(current._state, collectProp);
+      // move to this sources parent
+      current = current._parent;
     }
+    current = null;
 
     if (type === 'search') {
       // defaults for the query
@@ -210,19 +251,27 @@ define(function (require) {
     return flatState;
   };
 
+  /**
+   * Wrap a function in $scope.$apply or $scope.$eval for the Source's
+   * current $scope
+   *
+   * @param  {Function} cb - the function to wrap
+   * @return {Function} - the wrapped function
+   */
   DataSource.prototype._wrapcb = function (cb) {
-    var courier = this;
+    var source = this;
+    cb = (typeof cb !== 'function') ? _.noop : cb;
     var wrapped = function () {
       var args = arguments;
       // always use the stored ref so that it can be updated if needed
-      var $scope = courier._$scope;
+      var $scope = source._$scope;
 
       // don't fall apart if we don't have a scope
-      if (!$scope) return cb.apply(courier, args);
+      if (!$scope) return cb.apply(source, args);
 
       // use angular's $apply or $eval functions for the given scope
       $scope[$scope.$$phase ? '$eval' : '$apply'](function () {
-        cb.apply(courier, args);
+        cb.apply(source, args);
       });
     };
     return wrapped;

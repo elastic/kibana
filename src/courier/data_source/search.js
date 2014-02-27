@@ -1,6 +1,7 @@
 define(function (require) {
   var DataSource = require('courier/data_source/data_source');
   var inherits = require('utils/inherits');
+  var nextTick = require('utils/next_tick');
   var errors = require('courier/errors');
   var FetchFailure = require('courier/errors').FetchFailure;
   var _ = require('lodash');
@@ -22,17 +23,19 @@ define(function (require) {
    */
   SearchSource.fetch = function (courier, refs, cb) {
     var client = courier._getClient();
-    var allRefs = [];
     var body = '';
+    cb = cb || _.noop;
+
+    // we must have refs in the same order to process the response
+    // so copy them here in the right order
+    var allRefs = [];
 
     _.each(refs, function (ref) {
       var source = ref.source;
-      if (source._getType() !== 'search') {
-        return;
-      }
-      allRefs.push(source);
-
       var state = source._flatten();
+      if (!state) return;
+
+      allRefs.push(ref);
       body +=
         JSON.stringify({ index: state.index, type: state.type })
         + '\n'
@@ -40,11 +43,14 @@ define(function (require) {
         + '\n';
     });
 
+    // always callback async
+    if (!allRefs.length) return nextTick(cb);
+
     return client.msearch({ body: body }, function (err, resp) {
       if (err) return cb(err);
 
       _.each(resp.responses, function (resp, i) {
-        var source = allRefs[i];
+        var source = allRefs[i].source;
         if (resp.error) return source._error(new FetchFailure(resp));
         source.emit('results', resp);
       });
@@ -74,9 +80,30 @@ define(function (require) {
     'aggs',
     'from',
     'size',
-    'source',
-    'inherits'
+    'source'
   ];
+
+  /**
+   * Set a searchSource that this source should inherit from
+   * @param  {SearchSource} searchSource - the parent searchSource
+   * @return {this} - chainable
+   */
+  SearchSource.prototype.inherits = function (parent) {
+    this._parent = parent;
+    return this;
+  };
+
+  /**
+   * Fetch just this source
+   * @param {Function} cb - callback
+   */
+  SearchSource.prototype.fetch = function (cb) {
+    var source = this;
+    var refs = this._courier._refs.search.filter(function (ref) {
+      return (ref.source === source);
+    });
+    SearchSource.fetch(this._courier, refs, cb);
+  };
 
   /******
    * PRIVATE APIS
@@ -101,10 +128,6 @@ define(function (require) {
    */
   SearchSource.prototype._mergeProp = function (state, val, key) {
     switch (key) {
-    case 'inherits':
-    case '_type':
-      // ignore
-      return;
     case 'filter':
       state.filters = state.filters || [];
       state.filters.push(val);
