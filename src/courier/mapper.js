@@ -54,11 +54,11 @@ define(function (require) {
               });
 
               cacheFieldsToObject(dataSource, fields);
-              callback(err, fields);
+              callback(err, self.getFieldsFromObject(dataSource));
             });
           } else {
             cacheFieldsToObject(dataSource, fields);
-            callback(err, fields);
+            callback(err, self.getFieldsFromObject(dataSource));
           }
         });
       }
@@ -141,8 +141,15 @@ define(function (require) {
           _.each(index.mappings, function (type) {
             _.each(type, function (field, name) {
               if (_.size(field.mapping) === 0 || name[0] === '_') return;
-              if (!_.isUndefined(fields[name]) && fields[name].type !== field.mapping[_.keys(field.mapping)[0]].type)
+
+              var mapping = field.mapping[_.keys(field.mapping)[0]];
+              mapping.type = castMappingType(mapping.type);
+
+              if (fields[name]) {
+                if (fields[name].type === mapping.type) return;
                 return courier._error(new Error.MappingConflict(name));
+              }
+
               fields[name] = field.mapping[_.keys(field.mapping)[0]];
             });
           });
@@ -179,6 +186,33 @@ define(function (require) {
     var cacheFieldsToObject = function (dataSource, fields) {
       mappings[dataSource._state.index] = fields;
       return !_.isUndefined(mappings[dataSource._state.index]) ? true : false;
+    };
+
+    /**
+     * Accepts a mapping type, and converts it into it's js equivilent
+     * @param  {String} type - the type from the mapping's 'type' field
+     * @return {String} - the most specific type that we care for
+     */
+    var castMappingType = function (type) {
+      switch (type) {
+      case 'float':
+      case 'double':
+      case 'integer':
+      case 'long':
+      case 'short':
+      case 'byte':
+      case 'token_count':
+        return 'number';
+      case 'date':
+      case 'boolean':
+      case 'ip':
+      case 'attachment':
+      case 'geo_point':
+      case 'geo_shape':
+        return type;
+      default: // including 'string'
+        return 'string';
+      }
     };
 
     /**

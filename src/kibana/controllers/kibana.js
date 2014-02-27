@@ -9,15 +9,11 @@ define(function (require) {
   angular
     .module('kibana/controllers')
     .controller('kibana', function ($scope, courier, configFile) {
-      setTimeout(function () {
-        courier.start();
-      }, 15);
-
       $scope.apps = configFile.apps;
       $scope.activeApp = '';
 
-      $scope.$on('$routeChangeSuccess', function () {
-        if (courier.running()) courier.fetch();
+      $scope.$on('application.load', function () {
+        courier.start();
       });
     });
 });
