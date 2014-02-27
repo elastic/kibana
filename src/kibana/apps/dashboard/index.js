@@ -16,7 +16,7 @@ define(function (require) {
 
     // Passed in the grid attr to the directive so we can access the directive's function from
     // the controller and view
-    $scope.gridControl = {};
+    $scope.gridControl = {foo: true};
 
     $scope.save = function (title) {
       var doc = courier.createSource('doc')
@@ -116,11 +116,18 @@ define(function (require) {
 
   app.directive('dashboardPanel', function () {
     return {
-      template: '<li />'
+      restrict: 'E',
+      scope: {
+        params: '@'
+      },
+      compile: function (elem, attrs) {
+        var params = JSON.parse(attrs.params);
+        elem.replaceWith(params.type + '<i class="link pull-right fa fa-times remove" />');
+      }
     };
   });
 
-  app.directive('dashboardGrid', function () {
+  app.directive('dashboardGrid', function ($compile) {
     return {
       restrict: 'A',
       scope : {
@@ -129,6 +136,10 @@ define(function (require) {
       },
       link: function ($scope, elem) {
         var width, gridster;
+
+        if (_.isUndefined($scope.control) || _.isUndefined($scope.grid)) {
+          return;
+        }
 
         elem.addClass('gridster');
 
@@ -159,24 +170,20 @@ define(function (require) {
 
           elem.on('click', 'li i.remove', function (event) {
             var target = event.target.parentNode;
-            gridster.remove_widget(event.target.parentNode.parentNode);
+            gridster.remove_widget(event.target.parentNode);
           });
 
           $scope.control.unserializeGrid($scope.grid);
         };
 
-        $scope.control.unserializeGrid = function (grid) {
-          _.each(grid, function (panel) {
-            var wgd = gridster.add_widget('<li><div class="content"></div></li>',
-              panel.size_x, panel.size_y, panel.col, panel.row);
-            wgd.children('.content').html('<beer></beer>');
-            //panel.params.type + ' <i class="link pull-right fa fa-times remove" />''
-            wgd.data('params', panel.params);
-          });
-        };
-
         $scope.control.clearGrid = function (cb) {
           gridster.remove_all_widgets(cb);
+        };
+
+        $scope.control.unserializeGrid = function (grid) {
+          _.each(grid, function (panel) {
+            $scope.control.addWidget(panel);
+          });
         };
 
         $scope.control.serializeGrid = function () {
@@ -184,8 +191,20 @@ define(function (require) {
           return gridster.serialize();
         };
 
-        $scope.control.addWidget = function (params) {
-          gridster.add_widget('<li><div class="content"></div></li>', 3, 2);
+        $scope.control.addWidget = function (panel) {
+          panel = panel || {};
+          _.defaults(panel, {
+            size_x: 3,
+            size_y: 2,
+            params: {
+              type: 'new'
+            }
+          });
+          var wgd = gridster.add_widget('<li />',
+              panel.size_x, panel.size_y, panel.col, panel.row);
+          wgd.append('<dashboard-panel params=\'' + JSON.stringify(panel.params) + '\' />');
+          wgd.data('params', panel.params);
+          $compile(wgd)($scope);
         };
 
         // Start the directive

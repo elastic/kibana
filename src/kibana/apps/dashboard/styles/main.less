@@ -12,19 +12,19 @@ div.application div.dashboard-container {
   background-color: @dashboard-background;
 }
 
-.gridster {
+[dashboard-grid].gridster {
   list-style-type: none;
   display: block;
   background-color: @dashboard-background;
-  padding-bottom:50px;
+  margin-bottom: 0;
 }
 
-.gridster .preview-holder {
+[dashboard-grid].gridster .preview-holder {
     border: none!important;
     background: @gray-light!important;
 }
 
-.gridster li.gs-w {
+[dashboard-grid].gridster li.gs-w {
   background: #fff;
   padding: 5px;
   color: @dashboard-background;
@@ -34,6 +34,6 @@ div.application div.dashboard-container {
   overflow: hidden;
 }
 
-ul.gridster {
-  margin-bottom: 0;
+[dashboard-grid] i.remove {
+  cursor: pointer;
 }
