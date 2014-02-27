@@ -147,13 +147,16 @@ define(function (require) {
    * PUBLIC API
    */
 
-  // start fetching results on an interval
+  // start fetching results on an interval, restart if already started
   Courier.prototype.start = function () {
-    if (!this.running()) {
-      this._schedule('doc');
-      this._schedule('search');
-      this.fetch();
+    if (this.running()) {
+      this.stop();
     }
+
+    this._schedule('doc');
+    this._schedule('search');
+    this.fetch();
+
     return this;
   };
 
@@ -193,7 +196,7 @@ define(function (require) {
     var courier = this;
     _.forOwn(onFetch, function (fn, type) {
       if (onlyType && onlyType !== type) return;
-      if (courier._refs[type].length) fn(courier);
+      fn(courier);
       courier._refs[type].forEach(function (ref) {
         ref.fetchCount ++;
       });

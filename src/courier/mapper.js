@@ -38,7 +38,7 @@ define(function (require) {
     this.getFields = function (dataSource, callback) {
       if (self.getFieldsFromObject(dataSource)) {
         // If we already have the fields in our object, use that, but
-        // make sure we stay async
+        // make sure we stay async and
         nextTick(callback, void 0, self.getFieldsFromObject(dataSource));
       } else {
         // Otherwise, try to get fields from Elasticsearch cache
@@ -99,7 +99,8 @@ define(function (require) {
      * @return {Object} An object containing fields with their mappings, or false if not found.
      */
     this.getFieldsFromObject = function (dataSource) {
-      return !_.isUndefined(mappings[dataSource._state.index]) ? mappings[dataSource._state.index] : false;
+      // don't pass pack our reference to truth, clone it
+      return !_.isUndefined(mappings[dataSource._state.index]) ? _.clone(mappings[dataSource._state.index]) : false;
     };
 
     /**
@@ -176,7 +177,7 @@ define(function (require) {
      * @param {Function} callback A function to be executed with the results.
      */
     var cacheFieldsToObject = function (dataSource, fields) {
-      mappings[dataSource._state.index] = _.clone(fields);
+      mappings[dataSource._state.index] = fields;
       return !_.isUndefined(mappings[dataSource._state.index]) ? true : false;
     };
 
