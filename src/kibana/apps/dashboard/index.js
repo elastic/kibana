@@ -11,9 +11,11 @@ define(function (require) {
   require('gridster');
 
 
-  var app = angular.module('app/dashboard', []);
+  var app = angular.module('app/dashboard');
 
   app.controller('dashboard', function ($scope, courier) {
+
+    $scope.$broadcast('application.load');
 
     // Passed in the grid attr to the directive so we can access the directive's function from
     // the controller and view
@@ -23,6 +25,9 @@ define(function (require) {
       $scope.configTemplate = 'kibana/apps/dashboard/partials/saveDashboard.html';
       $scope.configClose = function () {
         console.log('SAVE close');
+      };
+      $scope.configSubmit = function () {
+        $scope.save($scope.dashboard.title);
       };
     };
 
@@ -127,7 +132,7 @@ define(function (require) {
     };
 
     $scope.configurable = {
-      dashboard: $scope.dashboard
+      dashboard: $scope.dashboard,
     };
 
 

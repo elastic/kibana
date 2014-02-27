@@ -1,6 +1,6 @@
 <div class="config" ng-show="configTemplate">
   <i class="pull-right fa fa-times remove" ng-click="close()" />
-  <form role="form">
+  <form role="form" ng-submit="configSubmit()">
     <div ng-include="configTemplate" />
   </form>
 </div>
