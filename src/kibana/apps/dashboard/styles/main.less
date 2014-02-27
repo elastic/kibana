@@ -1,18 +1,39 @@
 @import "../../../../bower_components/bootstrap/less/variables.less";
 @import "../../../../bower_components/bootstrap/less/theme.less";
 
+@dashboard-background: #1E6D74;
+
+// Dashboard app container stretches to fill height. Required because gridster is not full height
+div.application div.dashboard-container {
+  position: absolute;
+  top: @navbar-height;
+  bottom: 0;
+  width: 100%;
+  background-color: @dashboard-background;
+}
+
+.gridster {
+  list-style-type: none;
+  display: block;
+  background-color: @dashboard-background;
+  padding-bottom:50px;
+}
+
 .gridster .preview-holder {
     border: none!important;
     background: @gray-light!important;
 }
 
 .gridster li.gs-w {
-  border: 1px solid @gray-light;
-  background: @gray-lighter;
+  background: #fff;
   padding: 5px;
+  color: @dashboard-background;
+  font-weight: bold;
+  font-size: 20px;
+  padding: 10px;
+  overflow: hidden;
 }
 
-.gridster {
-  list-style-type: none;
-  display: block;
+ul.gridster {
+  margin-bottom: 0;
 }

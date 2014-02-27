@@ -2,6 +2,8 @@ define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
   var $ = require('jquery');
+  var configFile = require('../../../config');
+
 
   require('css!./styles/main.css');
   require('css!../../../bower_components/gridster/dist/jquery.gridster.css');
@@ -10,9 +12,42 @@ define(function (require) {
 
   var app = angular.module('app/dashboard', []);
 
-  app.controller('dashboard', function ($scope) {
+  app.controller('dashboard', function ($scope, courier) {
 
+    // Passed in the grid attr to the directive so we can access the directive's function from
+    // the controller and view
     $scope.gridControl = {};
+
+    $scope.save = function (title) {
+      var doc = courier.createSource('doc')
+        .index(configFile.kibanaIndex)
+        .type('dashboard')
+        .id(title);
+
+      doc.doIndex({title: title, panels: $scope.gridControl.serializeGrid()}, function (err) {
+        if (_.isUndefined(err)) { return; }
+        else { throw new Error(err); }
+      });
+    };
+
+    $scope.load = function (title) {
+      var doc = courier.createSource('doc')
+        .index(configFile.kibanaIndex)
+        .type('dashboard')
+        .id(title);
+
+      doc.on('results', function loadDash(resp) {
+        console.log(resp);
+        if (resp.found) {
+          $scope.dashboard = resp._source;
+          $scope.$apply();
+        }
+        doc.removeListener('results', loadDash);
+      });
+
+      courier.fetch();
+
+    };
 
     $scope.dashboard = {
       title: 'Logstash Dashboard',
@@ -99,49 +134,62 @@ define(function (require) {
 
         width = elem.width();
 
+        var init = function () {
+          gridster = elem.gridster({
+            widget_margins: [5, 5],
+            widget_base_dimensions: [((width - 80) / 12), 100],
+            min_cols: 12,
+            max_cols: 12,
+            resize: {
+              enabled: true,
+              stop: function (event, ui, widget) {
+                console.log(widget.height(), widget.width());
+              }
+            },
+            serialize_params: function (el, wgd) {
+              return {
+                col: wgd.col,
+                row: wgd.row,
+                size_x: wgd.size_x,
+                size_y: wgd.size_y,
+                params: el.data('params')
+              };
+            }
+          }).data('gridster');
+
+          elem.on('click', 'li i.remove', function (event) {
+            var target = event.target.parentNode;
+            gridster.remove_widget(event.target.parentNode.parentNode);
+          });
+
+          $scope.control.unserializeGrid($scope.grid);
+        };
+
+        $scope.control.unserializeGrid = function (grid) {
+          _.each(grid, function (panel) {
+            var wgd = gridster.add_widget('<li><div class="content"></div></li>',
+              panel.size_x, panel.size_y, panel.col, panel.row);
+            wgd.children('.content').html('<beer></beer>');
+            //panel.params.type + ' <i class="link pull-right fa fa-times remove" />''
+            wgd.data('params', panel.params);
+          });
+        };
+
+        $scope.control.clearGrid = function (cb) {
+          gridster.remove_all_widgets(cb);
+        };
+
         $scope.control.serializeGrid = function () {
           console.log(gridster.serialize());
           return gridster.serialize();
         };
 
-        $scope.control.addWidget = function () {
+        $scope.control.addWidget = function (params) {
           gridster.add_widget('<li><div class="content"></div></li>', 3, 2);
         };
 
-        gridster = elem.gridster({
-          widget_margins: [5, 5],
-          widget_base_dimensions: [((width - 80) / 12), 100],
-          min_cols: 12,
-          max_cols: 12,
-          resize: {
-            enabled: true,
-            stop: function (event, ui, widget) {
-              console.log(widget.height(), widget.width());
-            }
-          },
-          serialize_params: function (el, wgd) {
-            return {
-              col: wgd.col,
-              row: wgd.row,
-              size_x: wgd.size_x,
-              size_y: wgd.size_y,
-              params: el.data('params')
-            };
-          }
-        }).data('gridster');
-
-        _.each($scope.grid, function (panel) {
-          console.log(panel);
-          var wgd = gridster.add_widget('<li />',
-            panel.size_x, panel.size_y, panel.col, panel.row);
-          wgd.html(panel.params.type + ' <i class="link pull-right fa fa-times remove" />');
-          wgd.data('params', panel.params);
-        });
-
-        elem.on('click', 'li i.remove', function (event) {
-          var target = event.target.parentNode;
-          gridster.remove_widget(event.target.parentNode);
-        });
+        // Start the directive
+        init();
       }
     };
   });

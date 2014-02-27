@@ -338,16 +338,32 @@
   -webkit-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 0 rgba(255, 255, 255, 0.1);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 0 rgba(255, 255, 255, 0.1);
 }
+div.application div.dashboard-container {
+  position: absolute;
+  top: 50px;
+  bottom: 0;
+  width: 100%;
+  background-color: #1e6d74;
+}
+.gridster {
+  list-style-type: none;
+  display: block;
+  background-color: #1e6d74;
+  padding-bottom: 50px;
+}
 .gridster .preview-holder {
   border: none!important;
   background: #999999 !important;
 }
 .gridster li.gs-w {
-  border: 1px solid #999999;
-  background: #eeeeee;
+  background: #fff;
   padding: 5px;
+  color: #1e6d74;
+  font-weight: bold;
+  font-size: 20px;
+  padding: 10px;
+  overflow: hidden;
 }
-.gridster {
-  list-style-type: none;
-  display: block;
+ul.gridster {
+  margin-bottom: 0;
 }

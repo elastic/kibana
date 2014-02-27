@@ -1,4 +1,4 @@
-<div ng-controller="dashboard">
+<div ng-controller="dashboard" class="dashboard-container">
   <nav class="navbar navbar-default navbar-static-top">
     <div class="navbar-brand">
       {{dashboard.title}}
@@ -6,7 +6,9 @@
 
     <ul class="nav navbar-nav pull-right">
       <li><a class="link" ng-click="gridControl.addWidget()"><i class="fa fa-plus"></i></a></li>
-      <li><a class="link" ng-click="gridControl.serializeGrid()"><i class="fa fa-save"></i></a></li>
+      <li><a class="link" ng-click="save(dashboard.title)"><i class="fa fa-save"></i></a></li>
+      <li><a class="link" ng-click="load(dashboard.title)"><i class="fa fa-folder-open"></i></a></li>
+
     </ul>
   </nav>
 
