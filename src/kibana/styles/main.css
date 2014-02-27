@@ -6115,6 +6115,12 @@ button.close {
 body {
   margin: 0px;
 }
+body div.content {
+  width: 100%;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
 .navbar-nav li a {
   cursor: pointer;
 }
