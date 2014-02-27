@@ -4,13 +4,13 @@
       {{dashboard.title}}
     </div>
 
-    <ul class="nav navbar-nav pull-right">
+    <ul class="nav navbar-nav">
       <li><a class="link" ng-click="gridControl.addWidget()"><i class="fa fa-plus"></i></a></li>
-      <li><a class="link" ng-click="save(dashboard.title)"><i class="fa fa-save"></i></a></li>
-      <li><a class="link" ng-click="load(dashboard.title)"><i class="fa fa-folder-open"></i></a></li>
-
+      <li><a class="link" ng-click="openSave()"><i class="fa fa-save"></i></a></li>
+      <li><a class="link" ng-click="openLoad()"><i class="fa fa-folder-open"></i></a></li>
     </ul>
   </nav>
+  <config config-template="configTemplate" config-object="configurable" config-close="configClose"></config>
 
   <div class="container-default">
     <ul dashboard-grid grid="dashboard.panels" control="gridControl"></ul>
