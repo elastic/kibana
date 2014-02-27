@@ -6121,6 +6121,10 @@ body div.content {
   top: 0;
   bottom: 0;
 }
+.footer-fixed {
+  position: absolute;
+  bottom: 0;
+}
 .navbar-nav li a {
   cursor: pointer;
 }
