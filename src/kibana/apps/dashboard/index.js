@@ -7,6 +7,7 @@ define(function (require) {
 
   require('css!./styles/main.css');
   require('css!../../../bower_components/gridster/dist/jquery.gridster.css');
+  require('directives/config');
   require('gridster');
 
 
@@ -17,6 +18,20 @@ define(function (require) {
     // Passed in the grid attr to the directive so we can access the directive's function from
     // the controller and view
     $scope.gridControl = {foo: true};
+
+    $scope.openSave = function () {
+      $scope.configTemplate = 'kibana/apps/dashboard/partials/saveDashboard.html';
+      $scope.configClose = function () {
+        console.log('SAVE close');
+      };
+    };
+
+    $scope.openLoad = function () {
+      $scope.configTemplate = 'kibana/apps/dashboard/partials/loadDashboard.html';
+      $scope.configClose = function () {
+        console.log('LOAD close');
+      };
+    };
 
     $scope.save = function (title) {
       var doc = courier.createSource('doc')
@@ -109,6 +124,10 @@ define(function (require) {
           params: { type: 'heatmap' }
         }
       ]
+    };
+
+    $scope.configurable = {
+      dashboard: $scope.dashboard
     };
 
 
