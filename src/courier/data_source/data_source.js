@@ -24,6 +24,12 @@ define(function (require) {
     this._state = state;
     this._courier = courier;
 
+    // before newListener to prevent unnecessary "emit" when added
+    this.on('removeListener', function onRemoveListener() {
+      if (EventEmitter.listenerCount(this, 'results') > 0) return;
+      courier._closeDataSource(this);
+    });
+
     this.on('newListener', function (name, listener) {
       if (name !== 'results') return;
 
@@ -41,11 +47,6 @@ define(function (require) {
       if (EventEmitter.listenerCount(this, 'results') === 0) {
         courier._openDataSource(this);
       }
-    });
-
-    this.on('removeListener', function onRemoveListener() {
-      if (EventEmitter.listenerCount(this, 'results') > 0) return;
-      courier._closeDataSource(this);
     });
 
     this.extend = function () {
