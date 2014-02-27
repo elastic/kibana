@@ -10,7 +10,7 @@ define(function (require) {
 
   var courier; // share the courier amoungst all of the apps
   angular.module('kibana/services')
-    .service('courier', function (es, promises) {
+    .service('courier', function (es, $rootScope, promises) {
       if (courier) return courier;
 
       promises.playNice(DocSource.prototype, [
@@ -26,7 +26,9 @@ define(function (require) {
 
       courier.errors = errors;
 
-      courier.rootSearchSource = courier.createSource('search');
+      courier.rootSearchSource = courier
+        .createSource('search')
+        .$scope($rootScope);
 
       return courier;
     });
