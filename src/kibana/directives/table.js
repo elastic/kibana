@@ -14,12 +14,6 @@ define(function (require) {
    * <kbn-table results="queryResult"></kbn-table>
    * ```
    */
-
-  var defaults = {
-    columns: [],
-    rows: []
-  };
-
   module.directive('kbnTable', function () {
     return {
       restrict: 'E',
@@ -28,23 +22,28 @@ define(function (require) {
         columns: '=',
         rows: '='
       },
-      controller: function ($scope) {
-        _.defaults($scope, defaults);
+      link: function (scope, element, attrs) {
+        scope.$watch('rows', render);
+        scope.$watch('columns', render);
 
-        $scope.makeRowHtml = function (row) {
-          var html = '<tr>';
-          _.each($scope.columns, function (col) {
-            html += '<td>';
-            if (row[col] !== void 0) {
-              html += row[col];
-            } else {
-              html += row._source[col];
-            }
-            html += '</td>';
+        function render() {
+          var $body = element.find('tbody').empty();
+
+          if (!scope.rows || scope.rows.length === 0) return;
+          if (!scope.columns || scope.columns.length === 0) return;
+
+          _.each(scope.rows, function (row) {
+            var tr = document.createElement('tr');
+
+            _.each(scope.columns, function (name) {
+              var td = document.createElement('td');
+              td.innerText = row._source[name] || row[name] || '';
+              tr.appendChild(td);
+            });
+
+            $body.append(tr);
           });
-          html += '</tr>';
-          return html;
-        };
+        }
       }
     };
   });
