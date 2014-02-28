@@ -34,7 +34,7 @@ define(function (require) {
       };
 
       $scope.configure = function () {
-        $scope.configureTemplateUrl = 'kibana/partials/global_config.html';
+        $scope.configureTemplateUrl = require('text!../partials/global_config.html');
       };
 
       /**

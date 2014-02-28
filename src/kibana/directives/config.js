@@ -14,7 +14,7 @@ define(function (require) {
    * ```
    */
 
-  module.directive('config', function () {
+  module.directive('config', function ($compile) {
     return {
       restrict: 'E',
       scope: {
@@ -25,12 +25,30 @@ define(function (require) {
       },
       link: function ($scope, element, attr) {
         $scope[attr.configObject] = $scope.configObject;
+
+        $scope.$watch('configTemplate', function (newTemplate, oldTemplate) {
+          if (_.isString($scope.configTemplate) && oldTemplate !== newTemplate) {
+
+            var template = '' +
+              '<div class="config" ng-show="configTemplate">' +
+              '  <form role="form" class="container-fluid" ng-submit="configSubmit()">' +
+                $scope.configTemplate +
+              '  </form>' +
+              '  <div class="config-close remove" ng-click="close()">' +
+              '    <i class="fa fa-chevron-up"></i>' +
+              '  </div>' +
+              '</div>' +
+              '';
+
+            element.html($compile(template)($scope));
+          }
+        });
+
         $scope.close = function () {
           if (_.isFunction($scope.configClose)) $scope.configClose();
           $scope.configTemplate = undefined;
         };
-      },
-      templateUrl: 'kibana/partials/nav_config.html'
+      }
     };
   });
 });
