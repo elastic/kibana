@@ -23,11 +23,18 @@ define(function (require) {
     // the controller and view
     $scope.gridControl = {};
 
-    $scope.openSave = function () {
-      var template = 'kibana/apps/dashboard/partials/save_dashboard.html';
-
+    var setConfigTemplate = function (template) {
       // Close if already open
-      $scope.configTemplate = $scope.configTemplate === template ? undefined : template;
+      if ($scope.configTemplate === template) {
+        delete $scope.configTemplate;
+        return;
+      } else {
+        $scope.configTemplate = template;
+      }
+    };
+
+    $scope.openSave = function () {
+      setConfigTemplate(require('text!./partials/save_dashboard.html'));
 
       $scope.configSubmit = function () {
         $scope.save($scope.dashboard.title);
@@ -35,10 +42,7 @@ define(function (require) {
     };
 
     $scope.openLoad = function () {
-      var template = 'kibana/apps/dashboard/partials/load_dashboard.html';
-
-      // Close if already open
-      $scope.configTemplate = $scope.configTemplate === template ? undefined : template;
+      setConfigTemplate(require('text!./partials/load_dashboard.html'));
 
       var search = courier.createSource('search')
         .index(configFile.kibanaIndex)
@@ -75,65 +79,8 @@ define(function (require) {
     };
 
     $scope.dashboard = {
-      title: 'Logstash Dashboard',
-      panels: [
-        {
-          col: 1,
-          row: 1,
-          size_x: 5,
-          size_y: 2,
-          params: { type: 'line' }
-        },
-        {
-          col: 6,
-          row: 1,
-          size_x: 4,
-          size_y: 2,
-          params: { type: 'bar' }
-        },
-        {
-          col: 10,
-          row: 1,
-          size_x: 3,
-          size_y: 1,
-          params: { type: 'table' }
-        },
-        {
-          col: 10,
-          row: 2,
-          size_x: 3,
-          size_y: 1,
-          params: { type: 'pie' }
-        },
-        {
-          col: 1,
-          row: 3,
-          size_x: 3,
-          size_y: 1,
-          params: { type: 'scatter' }
-        },
-        {
-          col: 4,
-          row: 3,
-          size_x: 3,
-          size_y: 1,
-          params: { type: 'map' }
-        },
-        {
-          col: 7,
-          row: 3,
-          size_x: 3,
-          size_y: 1,
-          params: { type: 'sparkline' }
-        },
-        {
-          col: 10,
-          row: 3,
-          size_x: 3,
-          size_y: 1,
-          params: { type: 'heatmap' }
-        }
-      ]
+      title: 'New Dashboard',
+      panels: []
     };
 
     $scope.configurable = {

@@ -31,8 +31,8 @@ define(function (require) {
         var init = function () {
           initGrid();
           elem.on('click', 'li i.remove', function (event) {
-            var target = event.target.parentNode;
-            gridster.remove_widget(event.target.parentNode);
+            var target = event.target.parentNode.parentNode;
+            gridster.remove_widget(target);
           });
 
           $scope.control.unserializeGrid($scope.grid);
@@ -75,7 +75,6 @@ define(function (require) {
         };
 
         $scope.control.serializeGrid = function () {
-          console.log(gridster.serialize());
           return gridster.serialize();
         };
 
@@ -90,10 +89,13 @@ define(function (require) {
           });
           var wgd = gridster.add_widget('<li />',
               panel.size_x, panel.size_y, panel.col, panel.row);
-          wgd.append('<dashboard-panel params=\'' + JSON.stringify(panel.params) + '\' />');
+
+          var template = '<dashboard-panel params=\'' + JSON.stringify(panel.params) + '\'></dashboard-panel>';
+
+          var element = $compile(template)($scope);
+          wgd.append(element);
           wgd.data('params', panel.params);
 
-          $compile(wgd)($scope);
         };
 
         // Start the directive

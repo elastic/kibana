@@ -11,7 +11,7 @@ define(function (require) {
       },
       compile: function (elem, attrs) {
         var params = JSON.parse(attrs.params);
-        elem.replaceWith(params.type + '<i class="link pull-right fa fa-times remove" />');
+        elem.html(params.type + '<i class="link pull-right fa fa-times remove" />');
       }
     };
   });
