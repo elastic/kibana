@@ -6981,8 +6981,8 @@ body div.content {
     border-radius: 0;
   }
 }
-.config .config-container {
-  padding: 10px 15px;
+.config .container-fluid {
+  padding: 10px 10px;
 }
 .config .config-close {
   width: 100%;
