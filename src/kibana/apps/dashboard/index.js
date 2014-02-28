@@ -17,11 +17,57 @@ define(function (require) {
 
   app.controller('dashboard', function ($scope, courier) {
 
-    $scope.$broadcast('application.load');
+    $scope.dashboard = {
+      title: 'New Dashboard',
+      panels: []
+    };
 
     // Passed in the grid attr to the directive so we can access the directive's function from
     // the controller and view
     $scope.gridControl = {};
+
+    $scope.input = {
+      search: ''
+    };
+
+    $scope.$watch('configurable.input.search', function (newVal) {
+      dashboardSearch(newVal);
+    });
+
+    var init = function () {
+      $scope.configurable = {
+        dashboard: $scope.dashboard,
+        load: $scope.load,
+        input: {
+          search: $scope.input.search
+        }
+      };
+    };
+
+    var dashboardSearch = function (query) {
+      var search;
+
+      if (_.isString(query) && query.length > 0) {
+
+        query = {match: {title: {query: query, type: 'phrase_prefix'}}};
+      } else {
+        query = {match_all: {}};
+      }
+
+      search = courier.createSource('search')
+        .index(configFile.kibanaIndex)
+        .type('dashboard')
+        .size(20)
+        .query(query)
+        .$scope($scope)
+        .inherits(courier.rootSearchSource)
+        .on('results', function (res) {
+          $scope.configurable.searchResults = res.hits.hits;
+        });
+
+      search.fetch();
+
+    };
 
     var setConfigTemplate = function (template) {
       // Close if already open
@@ -44,19 +90,7 @@ define(function (require) {
     $scope.openLoad = function () {
       setConfigTemplate(require('text!./partials/load_dashboard.html'));
 
-      var search = courier.createSource('search')
-        .index(configFile.kibanaIndex)
-        .type('dashboard')
-        .size(20)
-        .$scope($scope)
-        .inherits(courier.rootSearchSource)
-        .on('results', function (res) {
-          console.log(res.hits);
-          $scope.configurable.searchResults = res.hits.hits;
-        });
-
-      // TODO: Find out why results is fired twice
-      search.fetch();
+      if ($scope.configTemplate) dashboardSearch($scope.configurable.input.search);
     };
 
     $scope.save = function (title) {
@@ -78,15 +112,8 @@ define(function (require) {
       $scope.gridControl.unserializeGrid($scope.dashboard.panels);
     };
 
-    $scope.dashboard = {
-      title: 'New Dashboard',
-      panels: []
-    };
-
-    $scope.configurable = {
-      dashboard: $scope.dashboard,
-      load: $scope.load
-    };
+    init();
+    $scope.$broadcast('application.load');
 
   });
 });

@@ -42,7 +42,7 @@ define(function (require) {
           gridster = elem.gridster({
             autogenerate_stylesheet: false,
             widget_margins: [5, 5],
-            widget_base_dimensions: [((width - 80) / 12), 100],
+            widget_base_dimensions: [((width - 100) / 12), 100],
             min_cols: 12,
             max_cols: 12,
             resize: {
