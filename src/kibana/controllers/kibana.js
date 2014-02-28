@@ -13,6 +13,10 @@ define(function (require) {
       $scope.apps = configFile.apps;
       $scope.activeApp = '';
 
+      $scope.$on('$locationChangeSuccess', function (event, uri) {
+        $scope.activeApp = uri.split('#')[1].split('/')[1];
+      });
+
       $scope.opts = {
         activeFetchInterval: void 0,
         fetchIntervals: [

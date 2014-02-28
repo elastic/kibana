@@ -12,19 +12,21 @@
     <script>require(['kibana'], function () {});</script>
     <link rel="stylesheet" href="kibana/styles/main.css" >
   </head>
-  <body ng-controller="kibana">
+  <body ng-controller="kibana" ng-class="'application-'+activeApp">
     <div class="content">
       <nav class="navbar navbar-inverse navbar-static-top">
-        <ul class="nav navbar-nav">
-          <li ng-repeat="app in apps" ng-class="{active: activeApp == app.id}">
-            <a href="#/{{app.id}}">{{app.name}}</a>
-          </li>
-        </ul>
-        <ul class="nav navbar-nav pull-right">
-          <li>
-            <a ng-click="configure()"><i class="fa fa-gear"></i></a>
-          </li>
-        </ul>
+        <div class="container-fluid">
+          <ul class="nav navbar-nav">
+            <li ng-repeat="app in apps" ng-class="{active: activeApp == app.id}">
+              <a href="#/{{app.id}}">{{app.name}}</a>
+            </li>
+          </ul>
+          <ul class="nav navbar-nav pull-right">
+            <li>
+              <a ng-click="configure()"><i class="fa fa-gear"></i></a>
+            </li>
+          </ul>
+        </div>
       </nav>
       <config
         config-template="configureTemplateUrl"
@@ -33,8 +35,6 @@
       </config>
       <div class="application" kbn-view></div>
 
-      <!-- Required to be able to stretch the -->
-      <footer class="footer-fixed"></footer>
     </div>
   </body>
 </html>
