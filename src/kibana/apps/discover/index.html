@@ -5,13 +5,6 @@
       <input class="form-control" ng-model="index">
       <label class="control-label" for="size">Query</label>
       <input type="text" class="form-control" ng-model="query" placeholder="search">
-      <label class="control-label" for="size">Limit</label>
-      <select
-          class="form-control"
-          name="size"
-          ng-model="size"
-          ng-options="size.display for size in sizeOptions">
-          </select>
       <label class="control-label" for="sort">Sort</label>
       <select
           class="form-control"
@@ -24,16 +17,31 @@
       </button>
     </form>
   </nav>
-  <div class="row">
-    <div class="col-md-10">
-      <kbn-table rows="rows" columns="columns"></kbn-table>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-inline pull-right">
+          <label class="control-label" for="size">Display</label>
+          <select
+              class="form-control"
+              name="size"
+              ng-model="size"
+              ng-options="size.display for size in sizeOptions">
+              </select>
+        </div>
+      </div>
     </div>
-    <div class="col-md-2">
-      <disc-field-chooser
-        fields="fields"
-        toggle="toggleField"
-        refresh="refreshFieldList">
-        </disc-field-chooser>
+    <div class="row">
+      <div class="col-md-2">
+        <disc-field-chooser
+          fields="fields"
+          toggle="toggleField"
+          refresh="refreshFieldList">
+          </disc-field-chooser>
+      </div>
+      <div class="col-md-10">
+        <kbn-table rows="rows" columns="columns" ></kbn-table>
+      </div>
     </div>
   </div>
 </div>
