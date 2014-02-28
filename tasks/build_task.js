@@ -5,7 +5,7 @@ module.exports = function(grunt) {
     'jshint:source',
     'clean:on_start',
     'less:dist',
-    'copy:everything_but_less_to_temp',
+    'copy:almost_everything_to_temp',
     'htmlmin:build',
     'cssmin:build',
     'ngmin:build',
@@ -23,14 +23,11 @@ module.exports = function(grunt) {
           '<%= destDir %>/app/components/require.config.js': '<%= destDir %>/app/components/require.config.js',
           '<%= destDir %>/app/app.js': '<%= destDir %>/app/app.js'
         },
+
         options: {
           replacements: [
             {
-              pattern: /(?:^|\/\/)(.*)@REV@/,
-              replacement: '$1'+desc.object
-            },
-            {
-              pattern: /@REV@/,
+              pattern: /@REV@/g,
               replacement: desc.object
             }
           ]

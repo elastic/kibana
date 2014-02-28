@@ -14,7 +14,7 @@
 define([
   'angular',
   'app',
-  'underscore',
+  'lodash',
   'config'
 ],
 function (angular, app, _, config) {
@@ -59,8 +59,8 @@ function (angular, app, _, config) {
       $scope.$broadcast('render');
     };
 
-    $scope.add_panel = function(panel) {
-      $scope.panel.panels.push(panel);
+    $scope.add_panel = function(panel,newPanel) {
+      panel.panels.push(newPanel);
     };
 
     $scope.reset_panel = function(type) {
@@ -68,11 +68,12 @@ function (angular, app, _, config) {
         loading: false,
         error: false,
         sizeable: false,
-        span: 12,
+        draggable: false,
+        removable: false,
+        span: 10,
         height: "150px",
         editable: true,
-        type: type,
-        draggable: false
+        type: type
       };
     };
 

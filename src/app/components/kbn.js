@@ -1,4 +1,9 @@
-define(['jquery','underscore','moment','chromath'],
+define([
+  'jquery',
+  'lodash',
+  'moment',
+  'chromath'
+],
 function($, _, moment) {
   'use strict';
 
@@ -218,24 +223,24 @@ function($, _, moment) {
   kbn.describe_interval = function (string) {
     var matches = string.match(kbn.interval_regex);
     if (!matches || !_.has(kbn.intervals_in_seconds, matches[2])) {
-      throw new Error('Invalid interval string, expexcting a number followed by one of "Mwdhmsy"');
+      throw new Error('Invalid interval string, expecting a number followed by one of "Mwdhmsy"');
     } else {
       return {
         sec: kbn.intervals_in_seconds[matches[2]],
         type: matches[2],
-        count: parseInt(matches[1], 10)
+        count: parseFloat(matches[1])
       };
     }
   };
 
   kbn.interval_to_ms = function(string) {
     var info = kbn.describe_interval(string);
-    return info.sec * 1000 * info.count;
+    return Math.ceil(info.sec * 1000 * info.count);
   };
 
   kbn.interval_to_seconds = function (string) {
     var info = kbn.describe_interval(string);
-    return info.sec * info.count;
+    return Math.ceil(info.sec * info.count);
   };
 
   // This should go away, moment.js can do this
@@ -499,18 +504,22 @@ function($, _, moment) {
     }
   };
 
-  kbn.byteFormat = function(size, decimals) {
+  kbn.byteFormat = function (size, decimals, min_resolution) {
     var ext, steps = 0;
 
-    if(_.isUndefined(decimals)) {
+    if (_.isUndefined(decimals)) {
       decimals = 2;
-    } else if (decimals === 0) {
-      decimals = undefined;
     }
+
+    if (_.isUndefined(min_resolution)) {
+      min_resolution = 0;
+    }
+
 
     while (Math.abs(size) >= 1024) {
       steps++;
       size /= 1024;
+      min_resolution /= 1024;
     }
 
     switch (steps) {
@@ -543,21 +552,35 @@ function($, _, moment) {
       break;
     }
 
+    if (min_resolution) {
+      min_resolution *= Math.pow(10, decimals);
+      while (min_resolution % 1 !== 0) {
+        decimals++;
+        min_resolution *= 10;
+      }
+    }
+
+    if (decimals === 0) {
+      decimals = undefined;
+    }
+
     return (size.toFixed(decimals) + ext);
   };
 
-  kbn.shortFormat = function(size, decimals) {
+  kbn.shortFormat = function (size, decimals, min_resolution) {
     var ext, steps = 0;
 
-    if(_.isUndefined(decimals)) {
+    if (_.isUndefined(decimals)) {
       decimals = 2;
-    } else if (decimals === 0) {
-      decimals = undefined;
+    }
+    if (_.isUndefined(min_resolution)) {
+      min_resolution = 0;
     }
 
     while (Math.abs(size) >= 1000) {
       steps++;
       size /= 1000;
+      min_resolution /= 1000;
     }
 
     switch (steps) {
@@ -588,6 +611,18 @@ function($, _, moment) {
     case 8:
       ext = " Sept";
       break;
+    }
+
+    if (min_resolution) {
+      min_resolution *= Math.pow(10, decimals);
+      while (min_resolution % 1 !== 0) {
+        decimals++;
+        min_resolution *= 10;
+      }
+    }
+
+    if (decimals === 0) {
+      decimals = undefined;
     }
 
     return (size.toFixed(decimals) + ext);

@@ -107,12 +107,12 @@
                     }
 
                 } else {
-                    /*if (options.events.clustering) {
+                    if (options.events.clustering) {
                         _clearEvents();
                         var ed = _clusterEvents(options.events.types, options.events.data, xaxis.max - xaxis.min);
                         _types = ed.types;
                         _setupEvents(ed.data);
-                    }*/
+                    }
                     _updateEvents();
                 }
             }
@@ -177,19 +177,7 @@
         };
 
         var _showTooltip = function(x, y, event){
-            /*
-            var tooltip = $('<div id="tooltip" class=""></div>').appendTo('body').fadeIn(200);
-
-            $('<div id="title">' + event.title + '</div>').appendTo(tooltip);
-            $('<div id="type">Type: ' + event.eventType + '</div>').appendTo(tooltip);
-            $('<div id="description">' + event.description + '</div>').appendTo(tooltip);
-
-            tooltip.css({
-                top: y - tooltip.height() - 5,
-                left: x
-            });
-            console.log(tooltip);
-            */
+            $('#tooltip').remove();
 
             // @rashidkpc - hack to work with our normal tooltip placer
             var $tooltip = $('<div id="tooltip">');
@@ -313,19 +301,25 @@
             //var po = plot.pointOffset({ x: 450, y: 1});
             var container = plot.getPlaceholder(), o = plot.getPlotOffset(), yaxis,
             xaxis = plot.getXAxes()[plot.getOptions().events.xaxis - 1], axes = plot.getAxes();
-            var top, left, div, icon, level, drawableEvent;
+            var top, left, div, icon, level, drawableEvent, eventType;
 
             // determine the y axis used
             if (axes.yaxis && axes.yaxis.used) yaxis = axes.yaxis;
             if (axes.yaxis2 && axes.yaxis2.used) yaxis = axes.yaxis2;
 
+            if(event.eventType.split(',')[1] === 'cluster') {
+                eventType = event.eventType.split(',')[0]
+            } else {
+                eventType = event.eventType;
+            }
+
             // use the default icon and level
-            if (_types == null || !_types[event.eventType] || !_types[event.eventType].icon) {
+            if (_types == null || !_types[eventType] || !_types[eventType].icon) {
                 icon = DEFAULT_ICON;
                 level = 0;
             } else {
-                icon = _types[event.eventType].icon;
-                level = _types[event.eventType].level;
+                icon = _types[eventType].icon;
+                level = _types[eventType].level;
             }
 
             div = $('<i style="position:absolute" class="'+icon.icon+'"></i>').appendTo(container);
@@ -333,6 +327,7 @@
             top = o.top + plot.height() - icon.size + 1;
             left = xaxis.p2c(event.min) + o.left - icon.size / 2;
 
+            // Positions the marker
             div.css({
                 left: left + 'px',
                 top: top,
@@ -348,35 +343,7 @@
             // mouseenter
             function(){
                 var pos = $(this).offset();
-
-                /*// check if the mouse is not already over the event
-                if ($(this).data("bouncing") == false || $(this).data("bouncing") == undefined) {
-
-                    // check the div is not already bouncing
-                    if ($(this).position().top == $(this).data("top")) {
-                        $(this).effect("bounce", {
-                            times: 3
-                        }, 300);
-                    }
-
-                    $(this).data("bouncing", true);
-                    _showTooltip(pos.left + $(this).width() / 2, pos.top, $(this).data("event"));
-                }*/
-
                 _showTooltip(pos.left + $(this).width() / 2, pos.top, $(this).data("event"));
-
-                if (event.min != event.max) {
-                    plot.setSelection({
-                        xaxis: {
-                            from: event.min,
-                            to: event.max
-                        },
-                        yaxis: {
-                            from: yaxis.min,
-                            to: yaxis.max
-                        }
-                    });
-                }
             },
             // mouseleave
             function(){
@@ -480,12 +447,21 @@
                 // each cluser of each event type
                 $.each(eventType, function(index, cluster) {
 
+                    var description = "<strong>"+(cluster.length>5?"Top 5 of ":"") + cluster.length + " events</strong>";
+                    $.each(cluster,function(i,c) {
+                        if(i > 5) {
+                            return;
+                        }
+                        description += '<div style="'+(i%2?'background-color:#444;':'')+
+                            '" style="padding-bottom:0px">'+c.description + "</div>";
+                    });
+
                     var newEvent = {
                         min: cluster[0].min,
                         max: cluster[cluster.length - 1].min,    //TODO: needs to be max of end event if it exists
                         eventType: cluster[0].eventType + ",cluster",
                         title: "Cluster of: " + cluster[0].title,
-                        description: cluster[0].description + ", Number of events in the cluster: " + cluster.length
+                        description: description //+ ", Number of events in the cluster: " + cluster.length
                     };
 
                     newEvents.push(newEvent);
@@ -539,9 +515,11 @@
         var _varianceAlgorithm = function(events, sens, space) {
             var cluster, clusters = [], sum = 0, avg, density;
 
+            events.sort(sortEvents);
+
             // find the average x delta
             for (var i = 1; i < events.length - 1; i++) {
-                sum += events[i].min - events[i - 1].min;
+                sum += events[i].min - events[i-1].min;
             }
             avg = sum / (events.length - 2);
 
@@ -550,11 +528,13 @@
 
             // middle points
             for (var i = 1; i < events.length; i++) {
-                var leftDiff = events[i].min - events[i - 1].min;
+                var leftDiff = events[i - 1].min - events[i].min;
 
                 density = leftDiff / space;
 
-                if (leftDiff > avg * sens && density > 0.05) {
+                var avgSens = avg * sens
+
+                if (leftDiff > avgSens && density > 0.05) {
                     clusters.push(cluster);
                     cluster = [ events[i] ];
                 } else {
@@ -638,4 +618,12 @@
         if (ao.min < bo.min) return -1;
         return 0;
     };
+
+    function sortEvents(a,b) {
+        if (a.min < b.min) return 1;
+        if (a.min > b.min) return -1;
+        return 0;
+    };
+
+
 })(jQuery);

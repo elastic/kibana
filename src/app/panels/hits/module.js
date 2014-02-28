@@ -13,7 +13,7 @@
 define([
   'angular',
   'app',
-  'underscore',
+  'lodash',
   'jquery',
   'kbn',
 
@@ -282,7 +282,7 @@ define([
             var value = scope.panel.chart === 'bar' ?
               item.datapoint[1] : item.datapoint[1][0][1];
             $tooltip
-              .html(kbn.query_color_dot(item.series.color, 20) + ' ' + value.toFixed(0))
+              .html(kbn.query_color_dot(item.series.color, 20) + ' ' + item.series.label + " (" + value.toFixed(0) + ")")
               .place_tt(pos.pageX, pos.pageY);
           } else {
             $tooltip.remove();

@@ -14,7 +14,7 @@ define([
   'angular',
   'app',
   'jquery',
-  'underscore',
+  'lodash',
   'kbn',
   'moment',
   './timeSeries',
@@ -46,8 +46,8 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
         }
       ],
       status  : "Experimental",
-      description : "Sparklines are tiny, simple, time series charts, shown seperately. Because "+
-        "sparklines are unclutted by grids, axis markers and colors, they are perfect for spotting"+
+      description : "Sparklines are tiny, simple, time series charts, shown separately. Because "+
+        "sparklines are uncluttered by grids, axis markers and colors, they are perfect for spotting"+
         " change in a series"
     };
 

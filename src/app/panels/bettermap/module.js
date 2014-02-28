@@ -19,7 +19,7 @@
 define([
   'angular',
   'app',
-  'underscore',
+  'lodash',
   './leaflet/leaflet-src',
   'require',
 
@@ -205,8 +205,7 @@ function (angular, app, _, L, localRequire) {
   module.directive('bettermap', function() {
     return {
       restrict: 'A',
-      link: function(scope, elem, attrs) {
-
+      link: function(scope, elem) {
         elem.html('<center><img src="img/load_big.gif"></center>');
 
         // Receive render events
@@ -224,11 +223,13 @@ function (angular, app, _, L, localRequire) {
         var map, layerGroup;
 
         function render_panel() {
+          elem.css({height:scope.panel.height||scope.row.height});
+
           scope.require(['./leaflet/plugins'], function () {
             scope.panelMeta.loading = false;
             L.Icon.Default.imagePath = 'app/panels/bettermap/leaflet/images';
             if(_.isUndefined(map)) {
-              map = L.map(attrs.id, {
+              map = L.map(scope.$id, {
                 scrollWheelZoom: false,
                 center: [40, -86],
                 zoom: 10

@@ -2,11 +2,12 @@ define([
   'angular',
   'jquery',
   'kbn',
-  'underscore',
+  'lodash',
   'config',
   'moment',
   'modernizr',
-  'filesaver'
+  'filesaver',
+  'blob'
 ],
 function (angular, $, kbn, _, config, moment, Modernizr) {
   'use strict';
@@ -15,7 +16,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
 
   module.service('dashboard', function(
     $routeParams, $http, $rootScope, $injector, $location, $timeout,
-    ejsResource, timer, kbnIndex, alertSrv
+    ejsResource, timer, kbnIndex, alertSrv, esVersion, esMinVersion
   ) {
     // A hash of defaults to use when loading a dashboard
 
@@ -79,7 +80,14 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
       // Clear the current dashboard to prevent reloading
       self.current = {};
       self.indices = [];
-      route();
+      esVersion.isMinimum().then(function(isMinimum) {
+        if(isMinimum) {
+          route();
+        } else {
+          alertSrv.set('Upgrade Required',"Your version of Elasticsearch is too old. Kibana requires" +
+            " Elasticsearch " + esMinVersion + " or above.", "error");
+        }
+      });
     });
 
     var route = function() {
@@ -114,7 +122,6 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
         // as their default
         if (Modernizr.localstorage) {
           if(!(_.isUndefined(window.localStorage['dashboard'])) && window.localStorage['dashboard'] !== '') {
-            console.log(window.localStorage['dashboard']);
             $location.path(config.default_route);
             alertSrv.set('Saving to browser storage has been replaced',' with saving to Elasticsearch.'+
               ' Click <a href="#/dashboard/local/deprecated">here</a> to load your old dashboard anyway.');
@@ -247,7 +254,6 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
     };
 
     this.set_default = function(route) {
-      console.log(route);
       if (Modernizr.localstorage) {
         // Purge any old dashboards
         if(!_.isUndefined(window.localStorage['dashboard'])) {
@@ -280,7 +286,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
         location  : window.location.href.replace(window.location.hash,""),
         type      : type,
         id        : id,
-        link      : window.location.href.replace(window.location.hash,"")+"#dashboard/"+type+"/"+id,
+        link      : window.location.href.replace(window.location.hash,"")+"#dashboard/"+type+"/"+encodeURIComponent(id),
         title     : title
       };
     };
@@ -490,18 +496,25 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
       });
     };
 
+    this.start_scheduled_refresh = function (after_ms) {
+      timer.cancel(self.refresh_timer);
+      self.refresh_timer = timer.register($timeout(function () {
+        self.start_scheduled_refresh(after_ms);
+        self.refresh();
+      }, after_ms));
+    };
+
+    this.cancel_scheduled_refresh = function () {
+      timer.cancel(self.refresh_timer);
+    };
+
     this.set_interval = function (interval) {
       self.current.refresh = interval;
-      if(interval) {
+      if (interval) {
         var _i = kbn.interval_to_ms(interval);
-        timer.cancel(self.refresh_timer);
-        self.refresh_timer = timer.register($timeout(function() {
-          self.set_interval(interval);
-          self.refresh();
-        },_i));
-        self.refresh();
+        this.start_scheduled_refresh(_i);
       } else {
-        timer.cancel(self.refresh_timer);
+        this.cancel_scheduled_refresh();
       }
     };
 

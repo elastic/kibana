@@ -4,7 +4,7 @@
     "company": "Elasticsearch BV"
   },
   "name": "kibana",
-  "version": "3.0.0pre-milestone5",
+  "version": "3.0.0milestone5",
   "repository": {
     "type": "git",
     "url": "http://github.com/elasticsearch/kibana.git"
@@ -28,9 +28,11 @@
     "grunt-contrib-compress": "~0.5.2",
     "grunt-contrib-uglify": "~0.2.4",
     "load-grunt-tasks": "~0.2.0",
-    "glob": "~3.2.7",
     "grunt-contrib-connect": "~0.5.0",
-    "grunt-scratchy": "git://github.com/rashidkpc/grunt-scratchy.git"
+    "grunt-scratchy": "git://github.com/rashidkpc/grunt-scratchy.git",
+    "glob": "~3.2.8",
+    "kat": "~0.2.2",
+    "expect.js": "~0.2.0"
   },
   "license": "Apache License"
 }

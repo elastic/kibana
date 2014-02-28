@@ -2,8 +2,20 @@
     <div class="section">
       <h5>Parameters</h5>
       <div class="editor-option">
+        <label class="small">Terms mode</label>
+        <select class="input-medium" ng-model="panel.tmode" ng-options="f for f in ['terms','terms_stats']" ng-change="set_refresh(true)"></select>
+      </div>
+      <div class="editor-option" ng-show="panel.tmode == 'terms_stats'">
+        <label class="small">Stats type</label>
+        <select class="input-medium" ng-model="panel.tstat" ng-options="f for f in ['count', 'total_count', 'min', 'max', 'total', 'mean']"></select>
+      </div>
+      <div class="editor-option">
         <label class="small">Field</label>
         <input type="text" class="input-small" bs-typeahead="fields.list" ng-model="panel.field" ng-change="set_refresh(true)">
+      </div>
+      <div class="editor-option" ng-show="panel.tmode == 'terms_stats'">
+        <label class="small">Value field</label>
+        <input type="text" class="input-small" bs-typeahead="fields.list" ng-model="panel.valuefield" ng-change="set_refresh(true)">
       </div>
       <div class="editor-option">
         <label class="small">Length</label>
@@ -11,10 +23,11 @@
       </div>
       <div class="editor-option">
         <label class="small">Order</label>
-        <select class="input-medium" ng-model="panel.order" ng-options="f for f in ['count','term','reverse_count','reverse_term']" ng-change="set_refresh(true)"></select></span>
+        <select class="input-medium" ng-model="panel.order" ng-options="f for f in ['count','term','reverse_count','reverse_term']" ng-change="set_refresh(true)"  ng-show="panel.tmode == 'terms'"></select>
+        <select class="input-medium" ng-model="panel.order" ng-options="f for f in ['term', 'reverse_term', 'count', 'reverse_count', 'total', 'reverse_total', 'min', 'reverse_min', 'max', 'reverse_max', 'mean', 'reverse_mean']" ng-change="set_refresh(true)"  ng-show="panel.tmode == 'terms_stats'"></select>
       </div>
-      <div class="editor-option">
-        <label class="small">Exclude Terms(s) (comma seperated)</label>
+      <div class="editor-option" ng-show="panel.tmode == 'terms'">
+        <label class="small">Exclude Terms(s) (comma separated)</label>
         <input array-join type="text" ng-model='panel.exclude'></input>
       </div>
     </div>

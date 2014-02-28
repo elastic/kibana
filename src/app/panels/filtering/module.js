@@ -6,7 +6,7 @@
 define([
   'angular',
   'app',
-  'underscore'
+  'lodash'
 ],
 function (angular, app, _) {
   'use strict';
@@ -65,6 +65,24 @@ function (angular, app, _) {
 
     $scope.show_key = function(key) {
       return !_.contains(['type','id','alias','mandate','active','editing'],key);
+    };
+
+    $scope.getFilterClass = function(filter) {
+      if(filter.active !== true) {
+        return 'muted';
+      } else {
+        switch (filter.mandate)
+        {
+        case 'must':
+          return 'text-success';
+        case 'mustNot':
+          return 'text-error';
+        case 'either':
+          return 'text-warning';
+        default:
+          return 'text-info';
+        }
+      }
     };
 
     $scope.isEditable = function(filter) {
