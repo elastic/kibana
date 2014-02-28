@@ -1,5 +1,5 @@
-<div class="form-group">
-  <label for="exampleInputEmail1">Load</label>
-  <input type="text" ng-model="configObject.dashboard.title" class="form-control" placeholder="Dashboard title">
-</div>
-<button type="submit" class="btn btn-default">Load</button>
+<ul class="nav nav-pills">
+  <li ng-repeat="res in configObject.searchResults | orderBy:'_source.title'" ng-class="{active: configObject.dashboard.title == res._source.title}">
+    <a ng-click="configObject.load(res._source)">{{res._source.title}}</a>
+  </li>
+</ul>

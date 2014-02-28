@@ -1,14 +1,18 @@
 <div ng-controller="dashboard" class="dashboard-container">
   <nav class="navbar navbar-default navbar-static-top">
-    <div class="navbar-brand">
-      {{dashboard.title}}
-    </div>
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <span class="navbar-brand pull-left">
+          {{dashboard.title}}
+        </span>
+      </div>
 
-    <ul class="nav navbar-nav">
-      <li><a class="link" ng-click="gridControl.addWidget()"><i class="fa fa-plus"></i></a></li>
-      <li><a class="link" ng-click="openSave()"><i class="fa fa-save"></i></a></li>
-      <li><a class="link" ng-click="openLoad()"><i class="fa fa-folder-open"></i></a></li>
-    </ul>
+      <ul class="nav navbar-nav pull-left">
+        <li><a class="navbar-link" ng-click="openSave()"><i class="fa fa-save"></i></a></li>
+        <li><a class="navbar-link" ng-click="openLoad()"><i class="fa fa-folder-open"></i></a></li>
+        <li><a class="navbar-link" ng-click="gridControl.addWidget()"><i class="fa fa-plus"></i></a></li>
+      </ul>
+    </div>
   </nav>
   <config config-template="configTemplate" config-object="configurable" config-close="configClose" config-submit="configSubmit"></config>
 
