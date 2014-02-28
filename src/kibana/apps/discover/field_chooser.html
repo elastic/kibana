@@ -4,12 +4,12 @@
       <i
         class="fa"
         ng-class="{
-          'fa-check-square': !field.hidden,
-          'fa-square-o': field.hidden
+          'fa-check-square': field.display,
+          'fa-square-o': !field.display
         }">
       </i>
       {{field.name}}
     </span>
   </li>
 </ul>
-<small class="pull-right"><a ng-click="refresh()">refresh field list</a></small>
+<small><a ng-click="refresh()">refresh field list</a></small>
