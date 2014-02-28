@@ -1,0 +1,12 @@
+<div class="form-group">
+  <label class="control-label">Auto-Refresh</label>
+  <select
+    class="form-control"
+    name="fetchInterval"
+    ng-model="opts.activeFetchInterval"
+    ng-options="opt.display for opt in opts.fetchIntervals">
+  </select>
+</div>
+<button type="submit" class="btn btn-default">
+<i class="fa fa-save"></i> Save
+</button>
