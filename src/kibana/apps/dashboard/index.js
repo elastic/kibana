@@ -24,7 +24,7 @@ define(function (require) {
     $scope.gridControl = {};
 
     $scope.openSave = function () {
-      var template = 'kibana/apps/dashboard/partials/saveDashboard.html';
+      var template = 'kibana/apps/dashboard/partials/save_dashboard.html';
 
       // Close if already open
       $scope.configTemplate = $scope.configTemplate === template ? undefined : template;
@@ -35,7 +35,7 @@ define(function (require) {
     };
 
     $scope.openLoad = function () {
-      var template = 'kibana/apps/dashboard/partials/loadDashboard.html';
+      var template = 'kibana/apps/dashboard/partials/load_dashboard.html';
 
       // Close if already open
       $scope.configTemplate = $scope.configTemplate === template ? undefined : template;

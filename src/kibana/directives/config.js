@@ -30,7 +30,7 @@ define(function (require) {
           $scope.configTemplate = undefined;
         };
       },
-      templateUrl: 'kibana/partials/navConfig.html'
+      templateUrl: 'kibana/partials/nav_config.html'
     };
   });
 });
