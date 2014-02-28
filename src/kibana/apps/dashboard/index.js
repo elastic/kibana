@@ -4,11 +4,13 @@ define(function (require) {
   var $ = require('jquery');
   var configFile = require('../../../config');
 
-
   require('css!./styles/main.css');
-  require('css!../../../bower_components/gridster/dist/jquery.gridster.css');
   require('directives/config');
-  require('gridster');
+  require('apps/dashboard/directives/grid');
+  require('apps/dashboard/directives/panel');
+
+  //require('apps/dashboard/services/dashboard');
+
 
 
   var app = angular.module('app/dashboard');
@@ -19,23 +21,38 @@ define(function (require) {
 
     // Passed in the grid attr to the directive so we can access the directive's function from
     // the controller and view
-    $scope.gridControl = {foo: true};
+    $scope.gridControl = {};
 
     $scope.openSave = function () {
-      $scope.configTemplate = 'kibana/apps/dashboard/partials/saveDashboard.html';
-      $scope.configClose = function () {
-        console.log('SAVE close');
-      };
+      var template = 'kibana/apps/dashboard/partials/saveDashboard.html';
+
+      // Close if already open
+      $scope.configTemplate = $scope.configTemplate === template ? undefined : template;
+
       $scope.configSubmit = function () {
         $scope.save($scope.dashboard.title);
       };
     };
 
     $scope.openLoad = function () {
-      $scope.configTemplate = 'kibana/apps/dashboard/partials/loadDashboard.html';
-      $scope.configClose = function () {
-        console.log('LOAD close');
-      };
+      var template = 'kibana/apps/dashboard/partials/loadDashboard.html';
+
+      // Close if already open
+      $scope.configTemplate = $scope.configTemplate === template ? undefined : template;
+
+      var search = courier.createSource('search')
+        .index(configFile.kibanaIndex)
+        .type('dashboard')
+        .size(20)
+        .$scope($scope)
+        .inherits(courier.rootSearchSource)
+        .on('results', function (res) {
+          console.log(res.hits);
+          $scope.configurable.searchResults = res.hits.hits;
+        });
+
+      // TODO: Find out why results is fired twice
+      search.fetch();
     };
 
     $scope.save = function (title) {
@@ -50,23 +67,11 @@ define(function (require) {
       });
     };
 
-    $scope.load = function (title) {
-      var doc = courier.createSource('doc')
-        .index(configFile.kibanaIndex)
-        .type('dashboard')
-        .id(title);
+    $scope.load = function (schema) {
+      _.assign($scope.dashboard, schema);
 
-      doc.on('results', function loadDash(resp) {
-        console.log(resp);
-        if (resp.found) {
-          $scope.dashboard = resp._source;
-          $scope.$apply();
-        }
-        doc.removeListener('results', loadDash);
-      });
-
-      courier.fetch();
-
+      $scope.gridControl.clearGrid();
+      $scope.gridControl.unserializeGrid($scope.dashboard.panels);
     };
 
     $scope.dashboard = {
@@ -133,107 +138,8 @@ define(function (require) {
 
     $scope.configurable = {
       dashboard: $scope.dashboard,
+      load: $scope.load
     };
 
-
-  });
-
-  app.directive('dashboardPanel', function () {
-    return {
-      restrict: 'E',
-      scope: {
-        params: '@'
-      },
-      compile: function (elem, attrs) {
-        var params = JSON.parse(attrs.params);
-        elem.replaceWith(params.type + '<i class="link pull-right fa fa-times remove" />');
-      }
-    };
-  });
-
-  app.directive('dashboardGrid', function ($compile) {
-    return {
-      restrict: 'A',
-      scope : {
-        grid: '=',
-        control: '='
-      },
-      link: function ($scope, elem) {
-        var width, gridster;
-
-        if (_.isUndefined($scope.control) || _.isUndefined($scope.grid)) {
-          return;
-        }
-
-        elem.addClass('gridster');
-
-        width = elem.width();
-
-        var init = function () {
-          gridster = elem.gridster({
-            widget_margins: [5, 5],
-            widget_base_dimensions: [((width - 80) / 12), 100],
-            min_cols: 12,
-            max_cols: 12,
-            resize: {
-              enabled: true,
-              stop: function (event, ui, widget) {
-                console.log(widget.height(), widget.width());
-              }
-            },
-            serialize_params: function (el, wgd) {
-              return {
-                col: wgd.col,
-                row: wgd.row,
-                size_x: wgd.size_x,
-                size_y: wgd.size_y,
-                params: el.data('params')
-              };
-            }
-          }).data('gridster');
-
-          elem.on('click', 'li i.remove', function (event) {
-            var target = event.target.parentNode;
-            gridster.remove_widget(event.target.parentNode);
-          });
-
-          $scope.control.unserializeGrid($scope.grid);
-        };
-
-        $scope.control.clearGrid = function (cb) {
-          gridster.remove_all_widgets(cb);
-        };
-
-        $scope.control.unserializeGrid = function (grid) {
-          _.each(grid, function (panel) {
-            $scope.control.addWidget(panel);
-          });
-        };
-
-        $scope.control.serializeGrid = function () {
-          console.log(gridster.serialize());
-          return gridster.serialize();
-        };
-
-        $scope.control.addWidget = function (panel) {
-          panel = panel || {};
-          _.defaults(panel, {
-            size_x: 3,
-            size_y: 2,
-            params: {
-              type: 'new'
-            }
-          });
-          var wgd = gridster.add_widget('<li />',
-              panel.size_x, panel.size_y, panel.col, panel.row);
-          wgd.append('<dashboard-panel params=\'' + JSON.stringify(panel.params) + '\' />');
-          wgd.data('params', panel.params);
-          $compile(wgd)($scope);
-        };
-
-        // Start the directive
-        init();
-      }
-    };
   });
 });

@@ -5606,9 +5606,7 @@ button.close {
 .panel-body:before,
 .panel-body:after,
 .modal-footer:before,
-.modal-footer:after,
-.config:before,
-.config:after {
+.modal-footer:after {
   content: " ";
   display: table;
 }
@@ -5625,8 +5623,7 @@ button.close {
 .navbar-collapse:after,
 .pager:after,
 .panel-body:after,
-.modal-footer:after,
-.config:after {
+.modal-footer:after {
   clear: both;
 }
 .center-block {
@@ -6144,120 +6141,6 @@ div.application div.dashboard-container {
 [dashboard-grid] i.remove {
   cursor: pointer;
 }
-.config {
-  position: relative;
-  min-height: 50px;
-  margin-bottom: 20px;
-  border: 1px solid transparent;
-  background-color: #f8f8f8;
-  border-color: #e7e7e7;
-  background-image: -webkit-linear-gradient(top, #ffffff 0%, #f8f8f8 100%);
-  background-image: linear-gradient(to bottom, #ffffff 0%, #f8f8f8 100%);
-  background-repeat: repeat-x;
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#fff8f8f8', GradientType=0);
-  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
-  border-radius: 4px;
-  -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 1px 5px rgba(0, 0, 0, 0.075);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 1px 5px rgba(0, 0, 0, 0.075);
-  z-index: 1000;
-  border-width: 0 0 1px;
-  border-radius: 0;
-  padding: 10px 15px;
-}
-@media (min-width: 768px) {
-  .config {
-    border-radius: 4px;
-  }
-}
-.config .navbar-brand {
-  color: #777777;
-}
-.config .navbar-brand:hover,
-.config .navbar-brand:focus {
-  color: #5e5e5e;
-  background-color: transparent;
-}
-.config .navbar-text {
-  color: #777777;
-}
-.config .navbar-nav > li > a {
-  color: #777777;
-}
-.config .navbar-nav > li > a:hover,
-.config .navbar-nav > li > a:focus {
-  color: #333333;
-  background-color: transparent;
-}
-.config .navbar-nav > .active > a,
-.config .navbar-nav > .active > a:hover,
-.config .navbar-nav > .active > a:focus {
-  color: #555555;
-  background-color: #e7e7e7;
-}
-.config .navbar-nav > .disabled > a,
-.config .navbar-nav > .disabled > a:hover,
-.config .navbar-nav > .disabled > a:focus {
-  color: #cccccc;
-  background-color: transparent;
-}
-.config .navbar-toggle {
-  border-color: #dddddd;
-}
-.config .navbar-toggle:hover,
-.config .navbar-toggle:focus {
-  background-color: #dddddd;
-}
-.config .navbar-toggle .icon-bar {
-  background-color: #888888;
-}
-.config .navbar-collapse,
-.config .navbar-form {
-  border-color: #e7e7e7;
-}
-.config .navbar-nav > .open > a,
-.config .navbar-nav > .open > a:hover,
-.config .navbar-nav > .open > a:focus {
-  background-color: #e7e7e7;
-  color: #555555;
-}
-@media (max-width: 767px) {
-  .config .navbar-nav .open .dropdown-menu > li > a {
-    color: #777777;
-  }
-  .config .navbar-nav .open .dropdown-menu > li > a:hover,
-  .config .navbar-nav .open .dropdown-menu > li > a:focus {
-    color: #333333;
-    background-color: transparent;
-  }
-  .config .navbar-nav .open .dropdown-menu > .active > a,
-  .config .navbar-nav .open .dropdown-menu > .active > a:hover,
-  .config .navbar-nav .open .dropdown-menu > .active > a:focus {
-    color: #555555;
-    background-color: #e7e7e7;
-  }
-  .config .navbar-nav .open .dropdown-menu > .disabled > a,
-  .config .navbar-nav .open .dropdown-menu > .disabled > a:hover,
-  .config .navbar-nav .open .dropdown-menu > .disabled > a:focus {
-    color: #cccccc;
-    background-color: transparent;
-  }
-}
-.config .navbar-link {
-  color: #777777;
-}
-.config .navbar-link:hover {
-  color: #333333;
-}
-.config .navbar-nav > .active > a {
-  background-image: -webkit-linear-gradient(top, #ebebeb 0%, #f3f3f3 100%);
-  background-image: linear-gradient(to bottom, #ebebeb 0%, #f3f3f3 100%);
-  background-repeat: repeat-x;
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffebebeb', endColorstr='#fff3f3f3', GradientType=0);
-  -webkit-box-shadow: inset 0 3px 9px rgba(0, 0, 0, 0.075);
-  box-shadow: inset 0 3px 9px rgba(0, 0, 0, 0.075);
-}
-@media (min-width: 768px) {
-  .config {
-    border-radius: 0;
-  }
+.dashboard-load {
+  margin: 10px;
 }
