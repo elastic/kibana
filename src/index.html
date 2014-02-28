@@ -20,7 +20,17 @@
             <a href="#/{{app.id}}">{{app.name}}</a>
           </li>
         </ul>
+        <ul class="nav navbar-nav pull-right">
+          <li>
+            <a ng-click="configure()"><i class="fa fa-gear"></i></a>
+          </li>
+        </ul>
       </nav>
+      <config
+        config-template="configureTemplateUrl"
+        config-object="opts"
+        config-submit="saveOpts">
+      </config>
       <div class="application" kbn-view></div>
 
       <!-- Required to be able to stretch the -->
