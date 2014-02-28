@@ -40,3 +40,25 @@ body div.content {
 [ng-click] {
   cursor: pointer;
 }
+
+//== Config
+
+.config {
+  .navbar;
+  .navbar-default;
+  .navbar-static-top;
+}
+
+.config .config-container {
+  padding: 10px 15px;
+}
+
+.config .config-close {
+  width: 100%;
+  #gradient > .vertical(@start-color: lighten(@navbar-default-bg, 10%); @end-color: @navbar-default-bg);
+  .reset-filter(); // Remove gradient in IE<10 to fix bug where dropdowns don't get triggered
+  border-radius: @navbar-border-radius;
+  @shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 1px 5px rgba(0,0,0,.075);
+  .box-shadow(@shadow);
+  text-align: center;
+}
