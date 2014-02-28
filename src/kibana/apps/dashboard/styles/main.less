@@ -1,13 +1,14 @@
-@import "../../../../bower_components/bootstrap/less/bootstrap.less";
-@import "../../../../bower_components/bootstrap/less/theme.less";
+@import (reference) "../../../../bower_components/bootstrap/less/bootstrap.less";
+@import (reference) "../../../../bower_components/bootstrap/less/theme.less";
 
 @dashboard-background: #1E6D74;
 
+body.application-dashboard {
+  background-color: @dashboard-background;
+}
+
 // Dashboard app container stretches to fill height. Required because gridster is not full height
 div.application div.dashboard-container {
-  position: absolute;
-  top: @navbar-height;
-  bottom: 0;
   width: 100%;
   background-color: @dashboard-background;
 }
