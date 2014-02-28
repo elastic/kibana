@@ -23,7 +23,8 @@ define(function (require) {
         configSubmit: '=',
         configObject: '='
       },
-      link: function ($scope) {
+      link: function ($scope, element, attr) {
+        $scope[attr.configObject] = $scope.configObject;
         $scope.close = function () {
           if (_.isFunction($scope.configClose)) $scope.configClose();
           $scope.configTemplate = undefined;
