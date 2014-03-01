@@ -20,7 +20,9 @@ function (angular, _, config, moment) {
 
       return resolve_indices(possible).then(function(p) {
         // an extra intersection
-        var indices = _.intersection(possible,p);
+        var indices = _.uniq(_.flatten(_.map(possible,function(possibleIndex) {
+          return _.intersection(possibleIndex.split(','),p);
+        })));
         indices.reverse();
         return indices;
       });
@@ -30,7 +32,7 @@ function (angular, _, config, moment) {
     // cluster
     function resolve_indices(indices) {
       var something;
-      indices = _.map(indices,  encodeURIComponent);
+      indices = _.uniq(_.map(indices,  encodeURIComponent));
       something = $http({
         url: config.elasticsearch + "/" + indices.join(",") + "/_aliases?ignore_missing=true",
         method: "GET"

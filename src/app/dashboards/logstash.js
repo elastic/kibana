@@ -10,13 +10,13 @@
  * interval :: Sets the index interval (eg: day,week,month,year), Default: day
  *
  * split :: The character to split the queries on Default: ','
- * query :: By default, a comma seperated list of queries to run. Default: *
+ * query :: By default, a comma separated list of queries to run. Default: *
  *
  * from :: Search this amount of time back, eg 15m, 1h, 2d. Default: 15m
  * timefield :: The field containing the time to filter on, Default: @timestamp
  *
- * fields :: comma seperated list of fields to show in the table
- * sort :: comma seperated field to sort on, and direction, eg sort=@timestamp,desc
+ * fields :: comma separated list of fields to show in the table
+ * sort :: comma separated field to sort on, and direction, eg sort=@timestamp,desc
  *
  */
 
@@ -56,7 +56,7 @@ if(!_.isUndefined(ARGS.index)) {
   };
 }
 
-// In this dashboard we let users pass queries as comma seperated list to the query parameter.
+// In this dashboard we let users pass queries as comma separated list to the query parameter.
 // Or they can specify a split character using the split aparameter
 // If query is defined, split it into a list of query objects
 // NOTE: ids must be integers, hence the parseInt()s

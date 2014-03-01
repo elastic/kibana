@@ -39,7 +39,8 @@
               default logstash index pattern you might use
               <code>[logstash-]YYYY.MM.DD</code>. The [] in "[logstash-]" are
               important as they instruct Kibana not to treat those letters as a
-              pattern.
+              pattern. You may also specify multiple indices by seperating them with a comma(,).
+              For example <code>[web-]YYYY.MM.DD,[mail-]YYYY.MM.DD</code>
               Please also note that indices should rollover at midnight <strong>UTC</strong>.
             </p>
             <p class="small">

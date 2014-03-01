@@ -1,0 +1,18 @@
+{
+  "extends": "../../../.jshintrc",
+  "browser": true,
+  "node":    true,
+  "globalstrict": false,
+  "globals": {
+    "require": true,
+    "define": true,
+    "describe": true,
+    "it": true,
+    "before": true,
+    "beforeEach": true,
+    "after": true,
+    "afterEach": true,
+    "expect": true,
+    "angular": true
+  }
+}

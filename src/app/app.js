@@ -30,6 +30,9 @@ function (angular, $, _, appLevelRequire) {
   // This stores the Kibana revision number, @REV@ is replaced by grunt.
   app.constant('kbnVersion',"@REV@");
 
+  // The minimum version that must be in the cluster
+  app.constant('esMinVersion','0.90.9');
+
   // Use this for cache busting partials
   app.constant('cacheBust',"cache-bust="+Date.now());
 
