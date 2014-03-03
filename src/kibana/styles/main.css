@@ -6995,3 +6995,11 @@ kbn-table .table .table tr:first-child > td {
 kbn-table .table .table td.field-name {
   font-weight: bold;
 }
+kbn-table tr.even td {
+  background-color: #f1f1f1;
+}
+disc-field-chooser ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

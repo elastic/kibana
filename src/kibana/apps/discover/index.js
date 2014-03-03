@@ -8,7 +8,7 @@ define(function (require, module, exports) {
 
   var app = angular.module('app/discover');
 
-  var intervalOptions = [
+  var intervals = [
     { display: '', val: null },
     { display: 'Hourly', val: 'hourly' },
     { display: 'Daily', val: 'daily' },
@@ -25,6 +25,13 @@ define(function (require, module, exports) {
       source = savedSearches.create();
     }
 
+    $scope.opts = {
+      // number of records to fetch, then paginate through
+      sampleSize: 500,
+      // max length for summaries in the table
+      maxSummaryLength: 100
+    };
+
     // stores the complete list of fields
     $scope.fields = null;
 
@@ -32,8 +39,8 @@ define(function (require, module, exports) {
     $scope.columns = null;
 
     // index pattern interval options
-    $scope.intervalOptions = intervalOptions;
-    $scope.interval = $scope.intervalOptions[0];
+    $scope.intervals = intervals;
+    $scope.interval = $scope.intervals[0];
 
     // the index to use when they don't specify one
     config.$watch('discover.defaultIndex', function (val) {
@@ -56,7 +63,7 @@ define(function (require, module, exports) {
     $scope.fetch = function () {
       if (!$scope.fields) getFields();
       source
-        .size(500)
+        .size($scope.opts.sampleSize)
         .query(!$scope.query ? null : {
           query_string: {
             query: $scope.query
@@ -115,16 +122,12 @@ define(function (require, module, exports) {
             .each(function (name) {
               var field = fields[name];
               field.name = name;
-              _.defaults(field, currentState[name]);
 
-              if (field.display) $scope.columns.push(name);
+              _.defaults(field, currentState[name]);
               $scope.fields.push(field);
             });
 
-          if (!$scope.columns.length) {
-            $scope.columns.push('_source');
-          }
-
+          refreshColumns();
           defer.resolve();
         }, defer.reject);
 
@@ -139,14 +142,7 @@ define(function (require, module, exports) {
       // toggle the display property
       field.display = !field.display;
 
-      // collect column names for displayed fields and sort
-      $scope.columns = _.transform($scope.fields, function (cols, field) {
-        if (field.display) cols.push(field.name);
-      }, []).sort();
-
-      if (!$scope.columns.length) {
-        $scope.columns.push('_source');
-      }
+      refreshColumns();
     };
 
     $scope.refreshFieldList = function () {
@@ -156,6 +152,17 @@ define(function (require, module, exports) {
         });
       });
     };
+
+    function refreshColumns() {
+      // collect column names for displayed fields and sort
+      $scope.columns = _.transform($scope.fields, function (cols, field) {
+        if (field.display) cols.push(field.name);
+      }, []).sort();
+
+      if (!$scope.columns.length) {
+        $scope.columns.push('_source');
+      }
+    }
 
     $scope.$emit('application.load');
   });
