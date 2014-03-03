@@ -33,5 +33,6 @@
   "sub": true,
   "maxlen": 140,
   "-W084": true,
-  "maxerr": 10
+  "maxerr": 10,
+  "scripturl": true
 }

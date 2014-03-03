@@ -1,13 +1,13 @@
-module.exports = function(config) {
+module.exports = function (config) {
   return {
     // just lint the source dir
     source: {
       files: {
-        src: ['Gruntfile.js', '<%= root %>/src/**/*.js']
+        src: ['Gruntfile.js', '<%= src %>/**/*.js', '<%= unitTestDir %>/**/*.js', '<%= root %>/tasks/**/*.js']
       }
     },
     options: {
-      jshintrc: '<%= root %>/.jshintrc',
+      jshintrc: true,
       ignores: [
         'node_modules/*',
         'dist/*',
