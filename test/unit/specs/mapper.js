@@ -5,6 +5,7 @@ define(function (require) {
   var Courier = require('courier/courier');
   var DataSource = require('courier/data_source/data_source');
   var Mapper = require('courier/mapper');
+  var fieldMapping = require('../fixtures/field_mapping.js');
 
   var client = new elasticsearch.Client({
     host: 'localhost:9200',
@@ -26,17 +27,7 @@ define(function (require) {
       // Stub out a mini mapping response.
       sinon.stub(client.indices, 'getFieldMapping',function (params, callback) {
         if(params.index === 'valid') {
-          setTimeout(callback(undefined,{
-            test: {
-              mappings: {
-                testType: {
-                  'foo.bar': {
-                    full_name: 'foo.bar',
-                    mapping: {
-                      bar: {
-                        type: 'string'
-                      } } } } } } }
-          ),0);
+          setTimeout(callback(undefined, fieldMapping),0);
         } else {
           setTimeout(callback('Error: Not Found',undefined));
         }
