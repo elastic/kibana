@@ -9,32 +9,52 @@ define(function (require) {
   require('apps/dashboard/directives/grid');
   require('apps/dashboard/directives/panel');
 
-  //require('apps/dashboard/services/dashboard');
-
-
-
   var app = angular.module('app/dashboard');
 
-  app.controller('dashboard', function ($scope, courier) {
+  app.config(function ($routeProvider) {
+    $routeProvider
+      .when('/dashboard/:source/', {
+        redirectTo: '/dashboard'
+      })
+      .when('/dashboard/:source/:path', {
+        templateUrl: 'kibana/apps/dashboard/index.html'
+      })
+      .when('/dashboard/:source/:path/:params', {
+        templateUrl: 'kibana/apps/dashboard/index.html'
+      });
+  });
 
-    $scope.dashboard = {
-      title: 'New Dashboard',
-      panels: []
-    };
+  app.controller('dashboard', function ($scope, $routeParams, $rootScope, $location, courier) {
+    $scope.routeParams = $routeParams;
 
-    // Passed in the grid attr to the directive so we can access the directive's function from
-    // the controller and view
-    $scope.gridControl = {};
-
-    $scope.input = {
-      search: ''
-    };
+    $scope.$watch('routeParams.path', function (newVal) {
+      if ($routeParams.source === 'elasticsearch') {
+        getDashboardFromElasticsearch(newVal);
+      }
+    });
 
     $scope.$watch('configurable.input.search', function (newVal) {
       dashboardSearch(newVal);
     });
 
+
     var init = function () {
+      // Passed in the grid attr to the directive so we can access the directive's function from
+      // the controller and view
+      $scope.gridControl = {};
+
+      // This must be setup to pass to $scope.configurable, even if we will overwrite it immediately
+      $scope.dashboard = {
+        title: 'New Dashboard',
+        panels: []
+      };
+
+      // All inputs go here.
+      $scope.input = {
+        search: ''
+      };
+
+      // Setup configurable values for config directive, after objects are initialized
       $scope.configurable = {
         dashboard: $scope.dashboard,
         load: $scope.load,
@@ -42,13 +62,14 @@ define(function (require) {
           search: $scope.input.search
         }
       };
+
+      $scope.$broadcast('application.load');
     };
 
     var dashboardSearch = function (query) {
       var search;
 
       if (_.isString(query) && query.length > 0) {
-
         query = {match: {title: {query: query, type: 'phrase_prefix'}}};
       } else {
         query = {match_all: {}};
@@ -57,7 +78,7 @@ define(function (require) {
       search = courier.createSource('search')
         .index(configFile.kibanaIndex)
         .type('dashboard')
-        .size(20)
+        .size(10)
         .query(query)
         .$scope($scope)
         .inherits(courier.rootSearchSource)
@@ -97,23 +118,47 @@ define(function (require) {
       var doc = courier.createSource('doc')
         .index(configFile.kibanaIndex)
         .type('dashboard')
-        .id(title);
+        .id(title)
+        .$scope($scope);
+
+      doc.doIndex({title: title, panels: $scope.gridControl.serializeGrid()})
+        .then(function (res, err) {
+          if (_.isUndefined(err)) {
+            $location.url('/dashboard/elasticsearch/' + encodeURIComponent(title));
+            if (!$scope.$$phase) $scope.$apply();
+          }
+          else {
+            // TODO: Succcess/failure notifications
+            throw new Error(err);
+          }
+        });
 
       doc.doIndex({title: title, panels: $scope.gridControl.serializeGrid()}, function (err) {
-        if (_.isUndefined(err)) { return; }
-        else { throw new Error(err); }
+
       });
     };
 
     $scope.load = function (schema) {
       _.assign($scope.dashboard, schema);
-
       $scope.gridControl.clearGrid();
       $scope.gridControl.unserializeGrid($scope.dashboard.panels);
     };
 
+    var getDashboardFromElasticsearch = function (title) {
+      var doc = courier.createSource('doc')
+        .index(configFile.kibanaIndex)
+        .type('dashboard')
+        .id(title)
+        .on('results', function (doc) {
+          // TODO: Handle missing docs
+          if (!doc.found) console.log('Dashboard not found');
+
+          $scope.load(doc._source);
+        });
+      courier.fetch();
+    };
+
     init();
-    $scope.$broadcast('application.load');
 
   });
 });
