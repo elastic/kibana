@@ -8,16 +8,7 @@ define(function (require, module, exports) {
 
   var app = angular.module('app/discover');
 
-  var sizeOptions = [
-    { display: '30', val: 30 },
-    { display: '50', val: 50 },
-    { display: '80', val: 80 },
-    { display: '125', val: 125 },
-    { display: '250', val: 250 },
-    { display: '500', val: 500 }
-  ];
-
-  var intervalOptions = [
+  var intervals = [
     { display: '', val: null },
     { display: 'Hourly', val: 'hourly' },
     { display: 'Daily', val: 'daily' },
@@ -34,21 +25,24 @@ define(function (require, module, exports) {
       source = savedSearches.create();
     }
 
+    $scope.opts = {
+      // number of records to fetch, then paginate through
+      sampleSize: 500,
+      // max length for summaries in the table
+      maxSummaryLength: 100
+    };
+
     // stores the complete list of fields
     $scope.fields = null;
 
     // stores the fields we want to fetch
     $scope.columns = null;
 
-    // At what interval are your index patterns
-    $scope.intervalOptions = intervalOptions;
-    $scope.interval = $scope.intervalOptions[0];
+    // index pattern interval options
+    $scope.intervals = intervals;
+    $scope.interval = $scope.intervals[0];
 
-    // options to control the size of the queries
-    $scope.sizeOptions = sizeOptions;
-    $scope.size = $scope.sizeOptions[0];
-
-    // the index that will be
+    // the index to use when they don't specify one
     config.$watch('discover.defaultIndex', function (val) {
       if (!val) return config.set('discover.defaultIndex', '_all');
       if (!$scope.index) {
@@ -58,25 +52,22 @@ define(function (require, module, exports) {
     });
 
     source
-      .size(30)
       .$scope($scope)
       .inherits(courier.rootSearchSource)
       .on('results', function (res) {
         if (!$scope.fields) getFields();
+
         $scope.rows = res.hits.hits;
       });
 
     $scope.fetch = function () {
       if (!$scope.fields) getFields();
       source
-        .size($scope.size.val)
+        .size($scope.opts.sampleSize)
         .query(!$scope.query ? null : {
           query_string: {
             query: $scope.query
           }
-        })
-        .source(!$scope.columns ? null : {
-          include: $scope.columns
         });
 
       if ($scope.sort) {
@@ -115,7 +106,7 @@ define(function (require, module, exports) {
 
       var currentState = _.transform($scope.fields || [], function (current, field) {
         current[field.name] = {
-          hidden: field.hidden
+          display: field.display
         };
       }, {});
 
@@ -131,12 +122,12 @@ define(function (require, module, exports) {
             .each(function (name) {
               var field = fields[name];
               field.name = name;
-              _.defaults(field, currentState[name]);
 
-              if (!field.hidden) $scope.columns.push(name);
+              _.defaults(field, currentState[name]);
               $scope.fields.push(field);
             });
 
+          refreshColumns();
           defer.resolve();
         }, defer.reject);
 
@@ -148,18 +139,10 @@ define(function (require, module, exports) {
     $scope.toggleField = function (name) {
       var field = _.find($scope.fields, { name: name });
 
-      // toggle the hidden property
-      field.hidden = !field.hidden;
+      // toggle the display property
+      field.display = !field.display;
 
-      // collect column names for non-hidden fields and sort
-      $scope.columns = _.transform($scope.fields, function (cols, field) {
-        if (!field.hidden) cols.push(field.name);
-      }, []).sort();
-
-      // if we are just removing a field, no reason to refetch
-      if (!field.hidden) {
-        $scope.fetch();
-      }
+      refreshColumns();
     };
 
     $scope.refreshFieldList = function () {
@@ -169,6 +152,17 @@ define(function (require, module, exports) {
         });
       });
     };
+
+    function refreshColumns() {
+      // collect column names for displayed fields and sort
+      $scope.columns = _.transform($scope.fields, function (cols, field) {
+        if (field.display) cols.push(field.name);
+      }, []).sort();
+
+      if (!$scope.columns.length) {
+        $scope.columns.push('_source');
+      }
+    }
 
     $scope.$emit('application.load');
   });
