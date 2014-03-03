@@ -20,6 +20,5 @@
   },
   "_source": "git://github.com/guybedford/require-css.git",
   "_target": "~0.1.2",
-  "_originalSource": "require-css",
-  "_direct": true
+  "_originalSource": "require-css"
 }

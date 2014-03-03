@@ -1,4 +1,4 @@
-/*! elasticsearch - v1.5.8 - 2014-02-17
+/*! elasticsearch - v1.5.10 - 2014-03-03
  * http://www.elasticsearch.org/guide/en/elasticsearch/client/javascript-api/current/index.html
  * Copyright (c) 2014 Elasticsearch BV; Licensed Apache 2.0 */
 ;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -19867,7 +19867,9 @@ api.cluster.prototype.state = ca({
             'blocks',
             'metadata',
             'nodes',
-            'routing_table'
+            'routing_table',
+            'master_node',
+            'version'
           ]
         },
         index: {
@@ -19885,7 +19887,9 @@ api.cluster.prototype.state = ca({
             'blocks',
             'metadata',
             'nodes',
-            'routing_table'
+            'routing_table',
+            'master_node',
+            'version'
           ]
         }
       }
