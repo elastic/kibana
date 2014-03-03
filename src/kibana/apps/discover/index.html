@@ -3,15 +3,17 @@
     <form class="navbar-form navbar-left form-inline" role="search" ng-submit="fetch()">
       <label class="control-label">Index</label>
       <input class="form-control" ng-model="index">
-      <label class="control-label" for="size">Query</label>
+      <label class="control-label">Query</label>
       <input type="text" class="form-control" ng-model="query" placeholder="search">
-      <label class="control-label" for="sort">Sort</label>
+      <label class="control-label">Sort</label>
       <select
           class="form-control"
           name="sort"
           ng-model="sort"
           ng-options="field.name for field in fields">
           </select>
+      <label class="control-label">Max Summary Length</label>
+      <input type="number" name class="form-control" ng-model="opts.maxSummaryLength">
       <button type="submit" class="btn btn-default">
         <i class="fa fa-search"></i>
       </button>
@@ -19,28 +21,22 @@
   </nav>
   <div class="container-fluid">
     <div class="row">
-      <div class="col-md-12">
-        <div class="form-inline pull-right">
-          <label class="control-label" for="size">Display</label>
-          <select
-              class="form-control"
-              name="size"
-              ng-model="size"
-              ng-options="size.display for size in sizeOptions">
-              </select>
+      <div class="col-md-2">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h2 class="panel-title">Fields</h3>
+          </div>
+          <div class="panel-body">
+            <disc-field-chooser
+              fields="fields"
+              toggle="toggleField"
+              refresh="refreshFieldList">
+              </disc-field-chooser>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="row">
-      <div class="col-md-2">
-        <disc-field-chooser
-          fields="fields"
-          toggle="toggleField"
-          refresh="refreshFieldList">
-          </disc-field-chooser>
-      </div>
       <div class="col-md-10">
-        <kbn-table rows="rows" columns="columns" ></kbn-table>
+        <kbn-table rows="rows" columns="columns" max-length="opts.maxSummaryLength"></kbn-table>
       </div>
     </div>
   </div>

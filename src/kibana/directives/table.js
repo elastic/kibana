@@ -2,6 +2,8 @@ define(function (require) {
   var html = require('text!partials/table.html');
   var angular = require('angular');
   var _ = require('lodash');
+  var nextTick = require('utils/next_tick');
+  var $ = require('jquery');
 
   require('directives/truncated');
   require('directives/infinite_scroll');
@@ -21,12 +23,21 @@ define(function (require) {
     // base class for all dom nodes
     var DOMNode = window.Node;
 
+    function scheduleNextRenderTick(cb) {
+      if (typeof window.requestAnimationFrame === 'function') {
+        window.requestAnimationFrame(cb);
+      } else {
+        nextTick(cb);
+      }
+    }
+
     return {
       restrict: 'E',
       template: html,
       scope: {
         columns: '=',
-        rows: '='
+        rows: '=',
+        maxLength: '=?'
       },
       link: function ($scope, element, attrs) {
         // track a list of id's that are currently open, so that
@@ -39,9 +50,19 @@ define(function (require) {
         // the page size to load rows (out of the rows array, load 50 at a time)
         var pageSize = 50;
 
+        // rendering an entire page while the page is scrolling can cause a good
+        // bit of jank, lets only render a certain amount per "tick"
+        var rowsPerTick;
+
+        // set the maxLength for summaries
+        if ($scope.maxLength === void 0) {
+          $scope.maxLength = 250;
+        }
+
         // rerender when either is changed
         $scope.$watch('rows', render);
         $scope.$watch('columns', render);
+        $scope.$watch('maxLength', render);
 
         // the body of the table
         var $body = element.find('tbody');
@@ -56,21 +77,82 @@ define(function (require) {
           $scope.addRows = addRows;
         }
 
+        var renderRows = (function () {
+          // basic buffer that will be pulled from when we are adding rows.
+          var queue = [];
+          var rendering = false;
+
+          return function renderRows(rows) {
+            [].push.apply(queue, rows);
+            if (!rendering) {
+              onTick();
+            }
+          };
+
+          function forEachRow(row, i, currentChunk) {
+            var id = rowId(row);
+            var $summary = createSummaryRow(row, id);
+            var $details = createDetailsRow(row, id);
+            // cursor is the end of current selection, so
+            // subtract the remaining queue size, then the
+            // size of this chunk, and add the current i
+            var currentPosition = cursor - queue.length - currentChunk.length + i;
+            if (currentPosition % 2) {
+              $summary.addClass('even');
+              $details.addClass('even');
+            }
+
+            $body.append([
+              $summary,
+              $details
+            ]);
+          }
+
+          function onTick() {
+            // ensure that the rendering flag is set
+            rendering = true;
+            var performance = window.performance;
+            var timing;
+
+            if (
+              performance
+              && rowsPerTick === void 0
+              && typeof performance.now === 'function'
+            ) {
+              timing = performance.now();
+              rowsPerTick = 30;
+            }
+
+            queue
+              // grab the first n from the buffer
+              .splice(0, rowsPerTick)
+              // render each row
+              .forEach(forEachRow);
+
+            if (timing) {
+              var time = performance.now() - timing;
+              var rowsRendered = rowsPerTick;
+              var msPerRow = time / rowsPerTick;
+              // aim to fit the rendering into 5 milliseconds
+              rowsPerTick = Math.ceil(5 / msPerRow);
+              console.log('completed render of %d rows in %d milliseconds. rowsPerTick set to %d', rowsRendered, time, rowsPerTick);
+            }
+
+            if (queue.length) {
+              // the queue is not empty, draw again next tick
+              scheduleNextRenderTick(onTick);
+            } else {
+              // unset the rendering flag
+              rendering = false;
+            }
+          }
+        }());
+
         function addRows() {
           if (cursor > $scope.rows.length) {
             $scope.addRows = null;
           }
-
-          $scope.rows.slice(cursor, cursor += pageSize).forEach(function (row, i) {
-            var id = rowId(row);
-            var $summary = createSummaryRow(row, id);
-            if (i % 2) $summary.addClass('even');
-
-            $body.append([
-              $summary,
-              createDetailsRow(row, id)
-            ]);
-          });
+          renderRows($scope.rows.slice(cursor, cursor += pageSize));
         }
 
         // for now, rows are "tracked" by their index, but this could eventually
@@ -96,33 +178,43 @@ define(function (require) {
             opened.push(id);
           }
 
-          angular
-            .element(event.delegateTarget)
-            .next()
-            .replaceWith(createDetailsRow(row, id));
+          // rather than replace the entire row, just replace the
+          // children, this way we keep the "even" class on the row
+          appendDetailsToRow(
+            $(event.delegateTarget).next().empty(),
+            row,
+            id
+          );
         };
 
         var topLevelDetails = '_index _type _id'.split(' ');
         function createDetailsRow(row, id) {
-          var tr = document.createElement('tr');
+          var $tr = $(document.createElement('tr'));
+          return appendDetailsToRow($tr, row, id);
+        }
 
+        function appendDetailsToRow($tr, row, id) {
+          // we need a td to wrap the details table
           var containerTd = document.createElement('td');
           containerTd.setAttribute('colspan', $scope.columns.length);
-          tr.appendChild(containerTd);
+          $tr.append(containerTd);
 
-          if (!~opened.indexOf(id)) {
-            // short circuit if the row is hidden
-            tr.style.display = 'none';
-            return tr;
-          }
+          var open = !!~opened.indexOf(id);
+          $tr.toggle(open);
 
+          // it's closed, so no need to go any further
+          if (!open) return $tr;
+
+          // table that will hold details about the row
           var table = document.createElement('table');
           containerTd.appendChild(table);
           table.className = 'table';
 
+          // body of the table
           var tbody = document.createElement('tbody');
           table.appendChild(tbody);
 
+          // itterate each row and append it to the tbody
           _(row._source)
             .keys()
             .concat(topLevelDetails)
@@ -137,13 +229,13 @@ define(function (require) {
               tr.appendChild(fieldTd);
 
               var valTd = document.createElement('td');
-              _displayField(valTd, row, field);
+              _displayField(valTd, row, field, true);
               tr.appendChild(valTd);
 
               tbody.appendChild(tr);
             });
 
-          return tr;
+          return $tr;
         }
 
         // create a tr element that lists the value for each *column*
@@ -164,8 +256,8 @@ define(function (require) {
         /**
          * Fill an element with the value of a field
          */
-        function _displayField(el, row, field) {
-          var val = _getValForField(row, field);
+        function _displayField(el, row, field, truncate) {
+          var val = _getValForField(row, field, truncate);
           if (val instanceof DOMNode) {
             el.appendChild(val);
           } else {
@@ -179,10 +271,11 @@ define(function (require) {
          * and truncate it if necessary
          *
          * @param  {object} row - the row to pull the value from
-         * @param  {[type]} field - the name of the field (dot-seperated paths are accepted)
+         * @param  {string} field - the name of the field (dot-seperated paths are accepted)
+         * @param  {boolean} untruncate - Should truncated values have a "more" link to expand the text?
          * @return {[type]} a string, which should be inserted as text, or an element
          */
-        function _getValForField(row, field) {
+        function _getValForField(row, field, untruncate) {
           var val;
 
           // is field name a path?
@@ -208,12 +301,16 @@ define(function (require) {
           if (typeof val === 'object') val = JSON.stringify(val);
 
           // truncate
-          if (typeof val === 'string' && val.length > 150) {
-            var complete = val;
-            val = document.createElement('kbn-truncated');
-            val.setAttribute('orig', complete);
-            val.setAttribute('length', 150);
-            val = $compile(val)($scope)[0];// return the actual element
+          if (typeof val === 'string' && val.length > $scope.maxLength) {
+            if (untruncate) {
+              var complete = val;
+              val = document.createElement('kbn-truncated');
+              val.setAttribute('orig', complete);
+              val.setAttribute('length', $scope.maxLength);
+              val = $compile(val)($scope)[0];// return the actual element
+            } else {
+              val = val.substring(0, $scope.maxLength) + '...';
+            }
           }
 
           return val;

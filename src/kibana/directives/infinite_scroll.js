@@ -16,9 +16,9 @@ define(function (require) {
           if (!$scope.more) return;
 
           var winHeight = $window.height();
-          var windowBottom = winHeight + $window.scrollTop();
-          var elementBottom = $element.offset().top + $element.height();
-          var remaining = elementBottom - windowBottom;
+          var winBottom = winHeight + $window.scrollTop();
+          var elTop = $element.offset().top;
+          var remaining = elTop - winBottom;
 
           if (remaining <= winHeight * 0.50) {
             $scope[$scope.$$phase ? '$eval' : '$apply'](function () {
