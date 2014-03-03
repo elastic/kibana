@@ -1,18 +1,18 @@
 {
-  "name": "angular-route",
+  "name": "angular-mocks",
   "version": "1.2.15-build.2365+sha.d07101d",
-  "main": "./angular-route.js",
+  "main": "./angular-mocks.js",
   "dependencies": {
     "angular": "1.2.15-build.2365+sha.d07101d"
   },
-  "homepage": "https://github.com/angular/bower-angular-route",
+  "homepage": "https://github.com/angular/bower-angular-mocks",
   "_release": "1.2.15-build.2365+sha.d07101d",
   "_resolution": {
     "type": "version",
     "tag": "v1.2.15-build.2365+sha.d07101d",
-    "commit": "1a0136259f55788de38db0c95198abc8844a042f"
+    "commit": "1958c29e6e2e368adfce6c3923e9f39b6a9ef5b3"
   },
-  "_source": "git://github.com/angular/bower-angular-route.git",
+  "_source": "git://github.com/angular/bower-angular-mocks.git",
   "_target": "~1.2.14",
-  "_originalSource": "angular-route"
+  "_originalSource": "angular-mocks"
 }
