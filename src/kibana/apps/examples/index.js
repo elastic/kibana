@@ -38,6 +38,7 @@ define(function (require) {
       restrict: 'E',
       template: 'My favorite number is {{favoriteNum}} <button ng-click="click()">New Favorite</button>',
       controller: function ($scope, config) {
+        // automatically write the value to elasticsearch when it is changed
         config.$bind($scope, 'favoriteNum', {
           default: 0
         });

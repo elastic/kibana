@@ -6986,3 +6986,20 @@ body {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 1px 5px rgba(0, 0, 0, 0.075);
   text-align: center;
 }
+kbn-table .table .table {
+  margin-bottom: 0px;
+}
+kbn-table .table .table tr:first-child > td {
+  border-top: none;
+}
+kbn-table .table .table td.field-name {
+  font-weight: bold;
+}
+kbn-table tr.even td {
+  background-color: #f1f1f1;
+}
+disc-field-chooser ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

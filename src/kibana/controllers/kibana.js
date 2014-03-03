@@ -14,6 +14,7 @@ define(function (require) {
       $scope.activeApp = '';
 
       $scope.$on('$locationChangeSuccess', function (event, uri) {
+        if (!uri) return;
         $scope.activeApp = uri.split('#')[1].split('/')[1];
       });
 
