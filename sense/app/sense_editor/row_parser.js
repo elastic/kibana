@@ -1,21 +1,39 @@
 define([], function () {
   'use strict';
 
+  var MODE = {
+    REQUEST_START: 2,
+    IN_REQUEST: 4,
+    MULTI_DOC_CUR_DOC_END: 8,
+    REQUEST_END: 16,
+    BETWEEN_REQUESTS: 32
+
+  };
+
   function RowParser(editor) {
     var defaultEditor = editor;
 
     this.getRowParseMode = function (row) {
-      if (row == null || typeof row == "undefined") row = editor.getCursorPosition().row;
+      if (row == null || typeof row == "undefined") {
+        row = editor.getCursorPosition().row;
+      }
 
       var session = editor.getSession();
-      if (row >= session.getLength()) return RowParser.MODE_BETWEEN_REQUESTS;
+      if (row >= session.getLength() || row < 0) {
+        return MODE.BETWEEN_REQUESTS;
+      }
       var mode = session.getState(row);
-      if (!mode)
-        return RowParser.MODE_BETWEEN_REQUESTS; // shouldn't really happen
+      if (!mode) {
+        return MODE.BETWEEN_REQUESTS;
+      } // shouldn't really happen
 
-      if (mode !== "start") return RowParser.MODE_IN_REQUEST;
+      if (mode !== "start") {
+        return MODE.IN_REQUEST;
+      }
       var line = (session.getLine(row) || "").trim();
-      if (!line || line[0] === '#') return RowParser.MODE_BETWEEN_REQUESTS; // empty line or a comment waiting for a new req to start
+      if (!line || line[0] === '#') {
+        return MODE.BETWEEN_REQUESTS;
+      } // empty line or a comment waiting for a new req to start
 
       if (line.indexOf("}", line.length - 1) >= 0) {
         // check for a multi doc request (must start a new json doc immediately after this one end.
@@ -23,59 +41,59 @@ define([], function () {
         if (row < session.getLength()) {
           line = (session.getLine(row) || "").trim();
           if (line.indexOf("{") === 0) { // next line is another doc in a multi doc
-            return RowParser.MODE_MULTI_DOC_CUR_DOC_END | RowParser.MODE_IN_REQUEST;
+            return MODE.MULTI_DOC_CUR_DOC_END | MODE.IN_REQUEST;
           }
 
         }
-        return RowParser.MODE_REQUEST_END | RowParser.MODE_MULTI_DOC_CUR_DOC_END; // end of request
+        return MODE.REQUEST_END | MODE.MULTI_DOC_CUR_DOC_END; // end of request
       }
 
       // check for single line requests
       row++;
       if (row >= session.getLength()) {
-        return RowParser.MODE_REQUEST_START | RowParser.MODE_REQUEST_END;
+        return MODE.REQUEST_START | MODE.REQUEST_END;
       }
       line = (session.getLine(row) || "").trim();
       if (line.indexOf("{") !== 0) { // next line is another request
-        return RowParser.MODE_REQUEST_START | RowParser.MODE_REQUEST_END;
+        return MODE.REQUEST_START | MODE.REQUEST_END;
       }
 
-      return RowParser.MODE_REQUEST_START;
-    }
+      return MODE.REQUEST_START;
+    };
 
     this.rowPredicate = function (row, editor, value) {
       var mode = this.getRowParseMode(row, editor);
       return (mode & value) > 0;
-    }
+    };
 
     this.isEndRequestRow = function (row, _e) {
       var editor = _e || defaultEditor;
-      return this.rowPredicate(row, editor, RowParser.MODE_REQUEST_END);
+      return this.rowPredicate(row, editor, MODE.REQUEST_END);
     };
 
     this.isRequestEdge = function (row, _e) {
       var editor = _e || defaultEditor;
-      return this.rowPredicate(row, editor, RowParser.MODE_REQUEST_END | RowParser.MODE_REQUEST_START);
+      return this.rowPredicate(row, editor, MODE.REQUEST_END | MODE.REQUEST_START);
     };
 
     this.isStartRequestRow = function (row, _e) {
       var editor = _e || defaultEditor;
-      return this.rowPredicate(row, editor, RowParser.MODE_REQUEST_START);
+      return this.rowPredicate(row, editor, MODE.REQUEST_START);
     };
 
     this.isInBetweenRequestsRow = function (row, _e) {
       var editor = _e || defaultEditor;
-      return this.rowPredicate(row, editor, RowParser.MODE_BETWEEN_REQUESTS);
+      return this.rowPredicate(row, editor, MODE.BETWEEN_REQUESTS);
     };
 
     this.isInRequestsRow = function (row, _e) {
       var editor = _e || defaultEditor;
-      return this.rowPredicate(row, editor, RowParser.MODE_IN_REQUEST);
+      return this.rowPredicate(row, editor, MODE.IN_REQUEST);
     };
 
     this.isMultiDocDocEndRow = function (row, _e) {
       var editor = _e || defaultEditor;
-      return this.rowPredicate(row, editor, RowParser.MODE_MULTI_DOC_CUR_DOC_END);
+      return this.rowPredicate(row, editor, MODE.MULTI_DOC_CUR_DOC_END);
     };
 
     this.isEmptyToken = function (tokenOrTokenIter) {
@@ -103,11 +121,7 @@ define([], function () {
     };
   }
 
-  RowParser.MODE_REQUEST_START = 2;
-  RowParser.MODE_IN_REQUEST = 4;
-  RowParser.MODE_MULTI_DOC_CUR_DOC_END = 8;
-  RowParser.MODE_REQUEST_END = 16;
-  RowParser.MODE_BETWEEN_REQUESTS = 32;
+  RowParser.prototype.MODE = MODE;
 
   return RowParser;
-})
+});

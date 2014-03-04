@@ -7,10 +7,11 @@ define([
   'mappings',
   'output',
   'misc_inputs',
+  'es',
   'utils',
   '_'
 ],
-  function (curl, $helpPopup, history, input, $, mappings, output, miscInputs, utils, _) {
+  function (curl, $helpPopup, history, input, $, mappings, output, miscInputs, es, utils, _) {
     'use strict';
 
     $(document.body).removeClass('fouc');
@@ -22,37 +23,55 @@ define([
       cb = typeof cb === 'function' ? cb : $.noop;
 
       input.getCurrentRequest(function (req) {
-        if (!req) return;
+        output.update('');
+
+        if (!req) {
+          return;
+        }
 
         $("#notification").text("Calling ES....").css("visibility", "visible");
 
-        var es_server = $esServer.val();
-        var es_url = req.url;
+        var es_path = req.url;
         var es_method = req.method;
         var es_data = req.data.join("\n");
-        if (es_data) es_data += "\n"; //append a new line for bulk requests.
+        if (es_data) {
+          es_data += "\n";
+        } //append a new line for bulk requests.
 
-        utils.callES(es_server, es_url, es_method, es_data, null, function (xhr, status) {
+        es.send(es_method, es_path, es_data, null, function (xhr, status) {
             $("#notification").text("").css("visibility", "hidden");
             if (typeof xhr.status == "number" &&
               ((xhr.status >= 400 && xhr.status < 600) ||
                 (xhr.status >= 200 && xhr.status < 300)
                 )) {
               // we have someone on the other side. Add to history
-              history.addToHistory(es_server, es_url, es_method, es_data);
+              history.addToHistory(es.getBaseUrl(), es_path, es_method, es_data);
 
 
               var value = xhr.responseText;
-              try {
-                value = JSON.stringify(JSON.parse(value), null, 3);
+              var mode = "ace/mode/json";
+              var contentType = xhr.getAllResponseHeaders("Content-Type") || "";
+              if (contentType.indexOf("text/plain") >= 0) {
+                mode = "ace/mode/text";
               }
-              catch (e) {
+              else if (contentType.indexOf("application/yaml") >= 0) {
+                mode = "ace/mode/yaml"
+              }
+              else {
+                // assume json - auto pretty
+                try {
+                  value = JSON.stringify(JSON.parse(value), null, 3);
+                }
+                catch (e) {
 
+                }
               }
-              cb(value);
+
+              output.update(value, mode);
+
             }
             else {
-              cb("Request failed to get to the server (status code: " + xhr.status + "):" + xhr.responseText);
+              cb("Request failed to get to the server (status code: " + xhr.status + "):" + xhr.responseText, 'ace/mode/text');
             }
 
           }
@@ -64,8 +83,7 @@ define([
     // set the value of the server and/or the input and clear the output
     function resetToValues(server, content) {
       if (server != null) {
-        $esServer.val(server);
-        mappings.notifyServerChange(server);
+        es.setBaseUrl(server);
       }
       if (content != null) {
         input.update(content);
@@ -77,26 +95,34 @@ define([
       var sourceLocation = utils.getUrlParam('load_from') || "stored";
       var previousSaveState = history.getSavedEditorState();
 
+      var defaultHost = "localhost:9200";
+      if (document.location.pathname && document.location.pathname.indexOf("_plugin") == 1) {
+        // running as an ES plugin. Always assume we are using that elasticsearch
+        defaultHost = document.location.host;
+      }
+
       if (sourceLocation == "stored") {
         if (previousSaveState) {
           resetToValues(previousSaveState.server, previousSaveState.content);
-        } else {
+        }
+        else {
+          resetToValues(defaultHost);
           input.autoIndent();
         }
-      } else if (/^https?:\/\//.exec(sourceLocation)) {
+      }
+      else if (/^https?:\/\//.exec(sourceLocation)) {
         $.get(sourceLocation, null, function (data) {
           resetToValues(null, data);
           input.highlightCurrentRequestAndUpdateActionBar();
           input.updateActionsBar();
         });
-      } else if (previousSaveState) {
+      }
+      else if (previousSaveState) {
         resetToValues(previousSaveState.server);
+      } else {
+        resetToValues(defaultHost)
       }
 
-      if (document.location.pathname && document.location.pathname.indexOf("_plugin") == 1) {
-        // running as an ES plugin. Always assume we are using that elasticsearch
-        resetToValues(document.location.host);
-      }
     }());
 
     (function setupAutosave() {
@@ -152,7 +178,9 @@ define([
       }
 
       var s = prefix + req.method + " " + req.endpoint;
-      if (req.data) s += "\n" + req.data;
+      if (req.data) {
+        s += "\n" + req.data;
+      }
 
       s += suffix;
 
@@ -213,18 +241,11 @@ define([
     input.commands.addCommand({
       name: 'send to elasticsearch',
       bindKey: {win: 'Ctrl-Enter', mac: 'Command-Enter'},
-      exec: function () {
-        output.update('');
-        submitCurrentRequestToES(function (resp) {
-          output.update(resp, 'ace/mode/json');
-        });
-      }
+      exec: submitCurrentRequestToES
     });
 
     $send.click(function () {
-      submitCurrentRequestToES(function (resp) {
-        output.update(resp, 'ace/mode/json');
-      });
+      submitCurrentRequestToES();
       return false;
     });
 
@@ -238,8 +259,9 @@ define([
         var a = li.find('a');
         a.attr('href', link.url);
         a.text(link.name);
-        if (a[0].href != window.location.href)
+        if (a[0].href != window.location.href) {
           li.appendTo(linkMenu);
+        }
       });
     });
 
@@ -254,5 +276,7 @@ define([
         $welcomePopup.modal('show');
       });
     }
+
+    mappings.onInitComplete();
 
   });

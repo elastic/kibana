@@ -1,9 +1,9 @@
 define([
   '_',
-  'exports',
   './api',
   './api_0_90/aliases',
   './api_0_90/cluster',
+  './api_0_90/document',
   './api_0_90/facets',
   './api_0_90/filter',
   './api_0_90/globals',
@@ -15,15 +15,19 @@ define([
   './api_0_90/settings',
   './api_0_90/templates',
   './api_0_90/warmers'
-], function (_, exports, api) {
+], function (_, api) {
   'use strict';
 
-  var api_0_90 = new api.Api();
+  var parts = _(arguments).rest(2);
 
-  _(arguments).rest(3).each(function (apiSection) {
-    apiSection(api_0_90);
-  });
+  function Api_0_90(globalSharedComponentFactories) {
+    api.Api.call(this, "api_0_90", globalSharedComponentFactories);
+    parts.each(function (apiSection) {
+      apiSection(this);
+    }, this);
+  }
 
-  exports.api = api_0_90;
-  return exports;
+  Api_0_90.prototype = _.create(api.Api.prototype, { 'constructor': Api_0_90  });
+
+  return Api_0_90;
 });

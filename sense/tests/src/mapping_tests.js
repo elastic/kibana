@@ -52,6 +52,33 @@ define([
       f("any_name", "string"), f("first_name", "string"), f("last_name", "string")]);
   });
 
+  test("Multi fields 1.0 style", function () {
+    mappings.loadMappings({
+      "index": {
+        "tweet": {
+          "properties": {
+            "first_name": {
+              "type": "string", "index": "analyzed",
+              "path": "just_name",
+              "fields": {
+                "any_name": {"type": "string", "index": "analyzed"}
+              }
+            },
+            "last_name": {
+              "type": "string", "index": "no",
+              "fields": {
+                "raw": {"type": "string", "index": "analyzed"}
+              }
+            }
+          }
+        }
+      }
+    });
+
+    deepEqual(mappings.getFields("index").sort(fc), [
+      f("any_name", "string"), f("first_name", "string"), f("last_name", "string"), f("last_name.raw", "string")]);
+  });
+
   test("Simple fields", function () {
     mappings.loadMappings({
       "index": {

@@ -5,8 +5,9 @@ define([
   'jquery',
   'sense_editor/row_parser',
   'sense_editor/mode/sense',
-  'utils'
-], function (_, ace, curl, $, RowParser, SenseMode, utils) {
+  'utils',
+  'es'
+], function (_, ace, curl, $, RowParser, SenseMode, utils, es) {
   'use strict';
 
   function isInt(x) {
@@ -79,7 +80,8 @@ define([
         setTimeout(function check() {
           if (session.bgTokenizer.running) {
             timer = setTimeout(check, checkInterval);
-          } else {
+          }
+          else {
             func.apply(self, args);
           }
         });
@@ -104,7 +106,9 @@ define([
 
     editor.autoIndent = onceDoneTokenizing(function () {
       editor.getCurrentRequestRange(function (req_range) {
-        if (!req_range) return;
+        if (!req_range) {
+          return;
+        }
         editor.getCurrentRequest(function (parsed_req) {
           if (parsed_req.data && parsed_req.data.length > 0) {
             var indent = parsed_req.data.length == 1; // unindent multi docs by default
@@ -142,7 +146,13 @@ define([
     editor.replaceRequestRange = function (newRequest, requestRange) {
       var text = utils.textFromRequest(newRequest);
       if (requestRange) {
+        var pos = editor.getCursorPosition();
         editor.getSession().replace(requestRange, text);
+        var max_row = Math.max(requestRange.start.row + text.split('\n').length - 1, 0);
+        pos.row = Math.min(pos.row, max_row);
+        editor.moveCursorToPosition(pos);
+        // ACE UPGRADE - check if needed - at the moment the above may trigger a selection.
+        editor.clearSelection();
       }
       else {
         // just insert where we are
@@ -160,7 +170,9 @@ define([
     };
 
     editor.getCurrentRequestRange = onceDoneTokenizing(function (cb) {
-      if (typeof cb !== 'function') return;
+      if (typeof cb !== 'function') {
+        return;
+      }
 
       if (editor.parser.isInBetweenRequestsRow(null)) {
         cb(null);
@@ -176,7 +188,9 @@ define([
     });
 
     editor.getCurrentRequest = onceDoneTokenizing(function (cb) {
-      if (typeof cb !== 'function') return;
+      if (typeof cb !== 'function') {
+        return;
+      }
       if (editor.parser.isInBetweenRequestsRow(null)) {
         cb(null);
         return;
@@ -198,7 +212,9 @@ define([
         }
         request.method = t.value;
         t = editor.parser.nextNonEmptyToken(tokenIter);
-        if (!t || t.type == "method") return null;
+        if (!t || t.type == "method") {
+          return null;
+        }
         request.url = "";
         while (t && t.type && t.type.indexOf("url") == 0) {
           request.url += t.value;
@@ -251,8 +267,12 @@ define([
       var maxLines = session.getLength();
       for (; curRow < maxLines - 1; curRow++) {
         var curRowMode = editor.parser.getRowParseMode(curRow, editor);
-        if ((curRowMode & RowParser.MODE_REQUEST_END) > 0) break;
-        if (curRow != pos.row && (curRowMode & RowParser.MODE_REQUEST_START) > 0) break;
+        if ((curRowMode & editor.parser.MODE.REQUEST_END) > 0) {
+          break;
+        }
+        if (curRow != pos.row && (curRowMode & editor.parser.MODE.REQUEST_START) > 0) {
+          break;
+        }
       }
 
       var column = (session.getLine(curRow) || "").length;
@@ -270,8 +290,12 @@ define([
         if ((curRowMode & RowParser.REQUEST_END) > 0) {
           break;
         }
-        if ((curRowMode & RowParser.MODE_MULTI_DOC_CUR_DOC_END) > 0) break;
-        if (curRow != pos.row && (curRowMode & RowParser.MODE_REQUEST_START) > 0) break;
+        if ((curRowMode & editor.parser.MODE.MULTI_DOC_CUR_DOC_END) > 0) {
+          break;
+        }
+        if (curRow != pos.row && (curRowMode & editor.parser.MODE.REQUEST_START) > 0) {
+          break;
+        }
       }
 
       var column = (session.getLine(curRow) || "").length;
@@ -291,9 +315,13 @@ define([
 
     editor.handleCURLPaste = function (text) {
       var curlInput = curl.parseCURL(text);
-      if ($("#es_server").val()) curlInput.server = null; // do not override server
+      if ($("#es_server").val()) {
+        curlInput.server = null;
+      } // do not override server
 
-      if (!curlInput.method) curlInput.method = "GET";
+      if (!curlInput.method) {
+        curlInput.method = "GET";
+      }
 
       editor.insert(utils.textFromRequest(curlInput));
     };
@@ -301,7 +329,9 @@ define([
     editor.highlightCurrentRequestAndUpdateActionBar = onceDoneTokenizing(function () {
       var session = editor.getSession();
       editor.getCurrentRequestRange(function (new_current_req_range) {
-        if (new_current_req_range == null && CURRENT_REQ_RANGE == null) return;
+        if (new_current_req_range == null && CURRENT_REQ_RANGE == null) {
+          return;
+        }
         if (new_current_req_range != null && CURRENT_REQ_RANGE != null &&
           new_current_req_range.start.row == CURRENT_REQ_RANGE.start.row &&
           new_current_req_range.end.row == CURRENT_REQ_RANGE.end.row
@@ -329,21 +359,25 @@ define([
     editor.getCurrentRequestAsCURL = function (cb) {
       cb = typeof cb === 'function' ? cb : $.noop;
       editor.getCurrentRequest(function (req) {
-        if (!req) return;
+        if (!req) {
+          return;
+        }
 
-        var es_server = $("#es_server").val(),
-          es_url = req.url,
+        var
+          es_path = req.url,
           es_method = req.method,
           es_data = req.data;
 
-        var url = utils.constructESUrl(es_server, es_url);
+        var url = es.constructESUrl(es_path);
 
         var curl = 'curl -X' + es_method + ' "' + url + '"';
         if (es_data && es_data.length) {
           curl += " -d'\n";
           // since Sense doesn't allow single quote json string any single qoute is within a string.
           curl += es_data.join("\n").replace(/'/g, '\\"');
-          if (es_data.length > 1) curl += "\n"; // end with a new line
+          if (es_data.length > 1) {
+            curl += "\n";
+          } // end with a new line
           curl += "'";
         }
 
@@ -363,7 +397,8 @@ define([
       var set = function (top) {
         if (top == null) {
           editor.$actions.css('visibility', 'hidden');
-        } else {
+        }
+        else {
           editor.$actions.css({
             top: top,
             visibility: 'visible'

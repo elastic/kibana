@@ -13,7 +13,9 @@ define(['require', 'exports', 'module' , 'ace'], function (require, exports, mod
     }
 
     function addEOL(tokens, reg, nextIfEOL, normalNext) {
-      if (typeof reg == "object") reg = reg.source;
+      if (typeof reg == "object") {
+        reg = reg.source;
+      }
       return [
         { token: tokens.concat(["whitespace"]), regex: reg + "(\\s*)$", next: nextIfEOL },
         { token: tokens, regex: reg, next: normalNext }
@@ -41,33 +43,12 @@ define(['require', 'exports', 'module' , 'ace'], function (require, exports, mod
           }
         ]),
       "method_sep": mergeTokens(
-        addEOL(["whitespace", "url.slash"], /(\s+)(\/)/, "start", "indices"),
-        addEOL(["whitespace"], /(\s+)/, "start", "indices")
+        addEOL(["whitespace", "url.slash"], /(\s+)(\/)/, "start", "url"),
+        addEOL(["whitespace"], /(\s+)/, "start", "url")
       ),
-      "indices": mergeTokens(
-        addEOL(["url.scheme", "url.host", "url.slash"], /([^:]+:\/\/)([^?\/\s]*)(\/?)/, "start"),
-        addEOL(["url.index"], /(_all)/, "start"),
-        addEOL(["url.endpoint"], /(_[^\/?]+)/, "start", "urlRest"),
-        addEOL(["url.index"], /([^\/?,]+)/, "start"),
+      "url": mergeTokens(
+        addEOL(["url.part"], /([^?\/,]+)/, "start"),
         addEOL(["url.comma"], /(,)/, "start"),
-        addEOL(["url.slash"], /(\/)/, "start", "types"),
-        addEOL(["url.questionmark"], /(\?)/, "start", "urlParams")
-      ),
-      "types": mergeTokens(
-        addEOL(["url.endpoint"], /(_[^\/?]+)/, "start", "urlRest"),
-        addEOL(["url.type"], /([^\/?,]+)/, "start"),
-        addEOL(["url.comma"], /(,)/, "start"),
-        addEOL(["url.slash"], /(\/)/, "start", "id"),
-        addEOL(["url.questionmark"], /(\?)/, "start", "urlParams")
-      ),
-      "id": mergeTokens(
-        addEOL(["url.endpoint"], /(_[^\/?]+)/, "start", "urlRest"),
-        addEOL(["url.id"], /([^\/?]+)/, "start"),
-        addEOL(["url.slash"], /(\/)/, "start", "urlRest"),
-        addEOL(["url.questionmark"], /(\?)/, "start", "urlParams")
-      ),
-      "urlRest": mergeTokens(
-        addEOL(["url.part"], /([^?\/]+)/, "start"),
         addEOL(["url.slash"], /(\/)/, "start"),
         addEOL(["url.questionmark"], /(\?)/, "start", "urlParams")
       ),
@@ -165,8 +146,9 @@ define(['require', 'exports', 'module' , 'ace'], function (require, exports, mod
       ]
     }
 
-    if (this.constructor === SenseJsonHighlightRules)
+    if (this.constructor === SenseJsonHighlightRules) {
       this.normalizeRules();
+    }
   };
 
   oop.inherits(SenseJsonHighlightRules, TextHighlightRules);

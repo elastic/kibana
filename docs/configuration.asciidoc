@@ -39,6 +39,10 @@ Defaults to `"YYYY.MM.dd"`, which produces index names like:
 `.marvel-2014.01.28`. Supports date formats as explained
 http://joda-time.sourceforge.net/api-release/org/joda/time/format/DateTimeFormat.html[here].
 
+`marvel.agent.exporter.es.timeout`::
+
+Sets the connection timeout for sending data. Defaults to `6s`.
+
 
 [[marvel-indices]]
 === Marvel indices
