@@ -4,6 +4,9 @@
   "white": false,
 
   "globals": {
+    "module": false,
+    "inject": false,
+    "console": false,
     "describe": true,
     "it": true,
     "beforeEach": true,

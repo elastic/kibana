@@ -4,6 +4,7 @@ require.config({
     kibana: './index',
     courier: '../courier',
     angular: '../bower_components/angular/angular',
+    'angular-mocks': '../bower_components/angular-mocks/angular-mocks',
     'angular-route': '../bower_components/angular-route/angular-route',
     async: '../bower_components/async/lib/async',
     css: '../bower_components/require-css/css',
@@ -13,7 +14,8 @@ require.config({
     jquery: '../bower_components/jquery/dist/jquery',
     lodash: '../bower_components/lodash/dist/lodash',
     moment: '../bower_components/moment/moment',
-    gridster: '../bower_components/gridster/dist/jquery.gridster'
+    gridster: '../bower_components/gridster/dist/jquery.gridster',
+    config: '../config'
   },
   shim: {
     angular: {
@@ -24,6 +26,9 @@ require.config({
       deps: ['jquery']
     },
     'angular-route': {
+      deps: ['angular']
+    },
+    'angular-mocks': {
       deps: ['angular']
     },
     'elasticsearch': {
