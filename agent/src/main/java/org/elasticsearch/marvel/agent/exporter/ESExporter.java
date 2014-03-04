@@ -219,17 +219,30 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void sendCloseExportingConnection(HttpURLConnection conn) throws IOException {
         logger.trace("sending content");
         OutputStream os = conn.getOutputStream();
         os.close();
-
-        InputStream inputStream = conn.getInputStream();
-        while (inputStream.read() != -1) ;
-        inputStream.close();
-
         if (conn.getResponseCode() != 200) {
             logConnectionError("remote target didn't respond with 200 OK", conn);
+            return;
+        }
+
+        InputStream inputStream = conn.getInputStream();
+        XContentParser parser = XContentType.SMILE.xContent().createParser(inputStream);
+        Map<String, Object> response = parser.mapAndClose();
+        if (response.get("items") != null) {
+            ArrayList<Object> list = (ArrayList<Object>) response.get("items");
+            for (Object itemObject : list) {
+                Map<String, Object> actions = (Map<String, Object>) itemObject;
+                for (String actionKey : actions.keySet()) {
+                    Map<String, Object> action = (Map<String, Object>) actions.get(actionKey);
+                    if (action.get("error") != null) {
+                        logger.error("{} failure (index:[{}] type: [{}]): {}", actionKey, action.get("_index"), action.get("_type"), action.get("error"));
+                    }
+                }
+            }
         }
     }
 
@@ -501,7 +514,6 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         Utils.nodeToXContent(clusterService.localNode(), clusterService.state().nodes().localNodeMaster(), builder);
         builder.endObject();
     }
-
 
     class NodeStatsRenderer implements MultiXContentRenderer {
 
