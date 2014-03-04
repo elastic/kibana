@@ -42,6 +42,7 @@ function (angular, app, kbn, _) {
     // setup the optIn and version values
     var marvelOpts = storeFactory($scope, 'marvelOpts', {
       report: true,
+      version: void 0,
       lastReport: void 0
     });
 
