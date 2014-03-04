@@ -9,7 +9,7 @@
  * Status: *Stable*
  *
  * The histogram panel allow for the display of time charts. It includes several modes and tranformations
- * to display event counts, mean, min, max and total of numeric fields, and derivatives of counter
+ * to display event counts, mean, min, max and total of numeric fields, derivatives, and integrals of counter
  * fields.
  *
  */
@@ -229,6 +229,10 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
 
       derivative    : false,
       /** @scratch /panels/histogram/3
+       * integral:: Show each point on the x-axis as the sum with the previous point
+       */
+      integral      : false,
+      /** @scratch /panels/histogram/3
        * tooltip object::
        * tooltip.value_type::: Individual or cumulative controls how tooltips are display on stacked charts
        * tooltip.query_as_alias::: If no alias is set, should the query be displayed?
@@ -418,7 +422,8 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
                 interval: _interval,
                 start_date: _range && _range.from,
                 end_date: _range && _range.to,
-                fill_style: $scope.panel.derivative ? 'null' : $scope.panel.zerofill ? 'minimal' : 'no'
+                fill_style: $scope.panel.derivative ? 'null' : $scope.panel.zerofill ? 'minimal' : 
+                            ($scope.panel.integral ? 'all' : 'minimal')
               };
               time_series = new timeSeries.ZeroFilled(tsOpts);
               hits = 0;
@@ -597,9 +602,18 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
             if(i === 0 || p[1] === null) {
               _v = [p[0],null];
             } else {
-              _v = series[i-1][1] === null ? [p[0],null] : [p[0],p[1]-(series[i-1][1])];
+              _v = series[i-1][1] === null ? [p[0],null] : [p[0],p[1]-series[i-1][1]];
             }
             return _v;
+          });
+        };
+
+        var integral = function(series) {
+          var sum = 0;
+          return _.map(series, function(p) {
+            p[1] = p[1] || 0;
+            sum = sum + p[1];
+            return [p[0], sum];
           });
         };
 
@@ -729,6 +743,9 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
               var _d = data[i].time_series.getFlotPairs(required_times);
               if(scope.panel.derivative) {
                 _d = derivative(_d);
+              }
+              if(scope.panel.integral){
+                _d = integral(_d);
               }
               if(scope.panel.scale !== 1) {
                 _d = scale(_d,scope.panel.scale);
