@@ -1,7 +1,7 @@
 {
   "unused": false,
-  "browser": true,
-  "node": false,
+  "browser": false,
+  "node": true,
 
   "globals": {
     "define": true,
