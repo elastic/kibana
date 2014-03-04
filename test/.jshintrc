@@ -1,5 +1,5 @@
 {
-  "extends": "../.jshintrc",
+  "extends": "../src/.jshintrc",
 
   "white": false,
 
@@ -14,6 +14,7 @@
     "before": true,
     "after": true,
     "expect": true,
-    "define": true
+    "define": true,
+    "require": true
   }
 }
