@@ -39,6 +39,8 @@ define(function (require) {
 
 
     var init = function () {
+      $scope.editingTitle = false;
+
       // Passed in the grid attr to the directive so we can access the directive's function from
       // the controller and view
       $scope.gridControl = {};
