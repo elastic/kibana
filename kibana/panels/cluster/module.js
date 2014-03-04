@@ -41,13 +41,13 @@ function (angular, app, kbn, _) {
 
     // setup the optIn and version values
     var marvelOpts = storeFactory($scope, 'marvelOpts', {
-      report: void 0,
-      version: void 0,
+      report: true,
       lastReport: void 0
     });
 
     $scope.init = function () {
       $scope.kbnVersion = kbnVersion;
+      $scope.report = marvelOpts.report;
 
       // If the user hasn't opted in or out, ask them to.
       if(marvelOpts.version == null || marvelOpts.version !== kbnVersion) {
@@ -137,6 +137,7 @@ function (angular, app, kbn, _) {
     $scope.setOptIn = function(val) {
       marvelOpts.version = kbnVersion;
       marvelOpts.report = val;
+      $scope.report = val;
     };
 
     $scope.clearMarvelStorage = function() {
@@ -149,6 +150,7 @@ function (angular, app, kbn, _) {
       var panelModal = $modal({
         template: './app/panels/marvel/cluster/optin.html',
         persist: true,
+        backdrop: 'static',
         show: false,
         scope: $scope,
         keyboard: false

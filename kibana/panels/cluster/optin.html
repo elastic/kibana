@@ -4,12 +4,13 @@
   …or talk to us about our <a href="http://www.elasticsearch.com/support/" target="_BLANK">annual support packages</a> that include Marvel for free.</p>
   <p>
     <a href="http://www.elasticsearch.com/marvel/" target="_BLANK" class="btn btn-success">Buy Marvel Now</a>
-    <a class="btn btn-success" ng-click="setOptIn(true);dismiss();">Continue Free Trial</a>
+    <a class="btn btn-success" ng-click="setOptIn(report);dismiss();">Continue Free Trial</a>
   </p>
   <p>Sharing your cluster statistics with us to help us improve. Totally anonymous and never shared with <br/>
-  anyone. Not ever. Curious what we see? <a ng-click="showSample=true">View report here</a>. Not interested? <a ng-click="setOptIn(false);dismiss();">Opt out here</a></p>
+  anyone. Not ever. Curious what we see? <a ng-click="showSample=true">View report here</a>. <span ng-show="report">Not interested? <a ng-click="setOptIn(false);">Opt out here</a></span><span ng-hide="report">Opted Out? <a ng-click="setOptIn(true);">Click here to opt back in.</a></span></p>
   <div ng-show="showSample" style="text-align: left;">
     <h5>Sample Statistics</h5>
+    <span class="close" ng-click="showSample=false" style="margin: 10px 10px; font-size: 30px;">&times;</span>
     <pre>{{ data | json }}</pre>
   </div>
 </div>
