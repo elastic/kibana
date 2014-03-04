@@ -124,6 +124,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
         nodeSettingsService.addListener(this);
         dynamicSettings.addDynamicSetting(SETTINGS_INTERVAL);
         dynamicSettings.addDynamicSetting(SETTINGS_INDICES + ".*"); // array settings
+        dynamicSettings.addDynamicSetting(SETTINGS_SHARD_STATS_ENABLED);
     }
 
     protected void applyIntervalSettings() {
@@ -201,6 +202,12 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
         if (indices != null) {
             logger.info("sampling indices updated to [{}]", Strings.arrayToCommaDelimitedString(indices));
             indicesToExport = indices;
+        }
+
+        Boolean shardsExport = settings.getAsBoolean(SETTINGS_SHARD_STATS_ENABLED, null);
+        if (shardsExport != null) {
+            logger.info("updating " + SETTINGS_SHARD_STATS_ENABLED + " to [" + shardsExport + "]");
+            exportShardStats = shardsExport;
         }
     }
 
