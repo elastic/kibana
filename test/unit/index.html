@@ -14,7 +14,7 @@
      } 
    }
 });
-require(["/fixtures/field_mapping.js","/specs/calculate_indices.js","/specs/courier.js","/specs/data_source.js","/specs/mapper.js"], function () {
+require(["/fixtures/field_mapping.js","/specs/apps/dashboard/index.js","/specs/apps/dashboard/mocks/modules.js","/specs/calculate_indices.js","/specs/courier.js","/specs/data_source.js","/specs/mapper.js"], function () {
   window.mochaRunner = mocha.run().on('end', function () {
     window.mochaResults = this.stats;
   });
