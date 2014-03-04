@@ -121,6 +121,8 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         clusterStatsRenderer = new ClusterStatsRenderer();
         eventsRenderer = new EventsRenderer();
 
+        keepAliveWorker = new ConnectionKeepAliveWorker();
+
         logger.debug("initialized with targets: {}, index prefix [{}], index time format [{}]", hosts, indexPrefix, indexTimeFormat);
     }
 
@@ -173,19 +175,8 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         exportXContent(clusterStatsRenderer);
     }
 
-    protected void initKeepAliveWorker() {
-        keepAliveWorker = new ConnectionKeepAliveWorker();
-        keepAliveThread = new Thread(keepAliveWorker, EsExecutors.threadName(settings, "keep_alive"));
-        keepAliveThread.setDaemon(true);
-        keepAliveThread.start();
-    }
 
     private HttpURLConnection openExportingConnection() {
-        if (keepAliveWorker == null) {
-            // delayed initialization of keep alive worker, to allow ES to start up in
-            // the case we send metrics to our own ES
-            initKeepAliveWorker();
-        }
         if (!checkedAndUploadedAllResources) {
             try {
                 checkedAndUploadedAllResources = checkAndUploadAllResources();
@@ -199,6 +190,9 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         HttpURLConnection conn = openConnection("POST", "_bulk", XContentType.SMILE.restContentType());
         if (conn == null) {
             logger.error("could not connect to any configured elasticsearch instances: [{}]", hosts);
+        } else if (keepAliveThread == null || !keepAliveThread.isAlive()) {
+            // start keep alive upon successful connection if not there.
+            initKeepAliveThread();
         }
         return conn;
     }
@@ -268,7 +262,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
     @Override
     protected void doStop() {
-        if (keepAliveWorker != null) {
+        if (keepAliveWorker != null && keepAliveThread.isAlive()) {
             keepAliveWorker.closed = true;
             keepAliveThread.interrupt();
             try {
@@ -717,6 +711,12 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         }
     }
 
+    protected void initKeepAliveThread() {
+        keepAliveThread = new Thread(keepAliveWorker, EsExecutors.threadName(settings, "keep_alive"));
+        keepAliveThread.setDaemon(true);
+        keepAliveThread.start();
+    }
+
     /**
      * Sadly we need to make sure we keep the connection open to the target ES a
      * Java's connection pooling closes connections if idle for 5sec.
@@ -726,6 +726,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
         @Override
         public void run() {
+            logger.trace("starting keep alive thread");
             while (!closed) {
                 try {
                     Thread.sleep(1000);
@@ -739,7 +740,8 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
                 } catch (InterruptedException e) {
                     // ignore, if closed, good....
                 } catch (Throwable t) {
-                    logger.debug("error in keep alive thread", t);
+                    logger.debug("error in keep alive thread, shutting down (will be restarted after a successful connection has been made)", t);
+                    return;
                 }
             }
         }
