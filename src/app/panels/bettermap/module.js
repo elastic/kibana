@@ -80,6 +80,10 @@ function (angular, app, _, L, localRequire) {
        */
       tooltip : "_id",
       /** @scratch /panels/bettermap/5
+       * baseurl:: Base URL to use when downloading map tiles
+       */
+      baseurl : "https://ssl_tiles.cloudmade.com/57cbb6ca8cac418dbb1a402586df4528/22677/256/",
+      /** @scratch /panels/bettermap/5
        * ==== Queries
        * queries object:: This object describes the queries to use on this panel.
        * queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
@@ -236,7 +240,7 @@ function (angular, app, _, L, localRequire) {
               });
 
               // This could be made configurable?
-              L.tileLayer('https://ssl_tiles.cloudmade.com/57cbb6ca8cac418dbb1a402586df4528/22677/256/{z}/{x}/{y}.png', {
+              L.tileLayer(scope.panel.baseurl+"{z}/{x}/{y}.png", {
                 maxZoom: 18,
                 minZoom: 2
               }).addTo(map);
