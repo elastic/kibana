@@ -1,8 +1,7 @@
 module.exports = {
   src: {
     src: [
-      '<%= app %>/styles/**/*.less',
-      '<%= app %>/apps/**/*.less',
+      '<%= app %>/**/styles/**/*.less',
       '!<%= src %>/**/_*.less'
     ],
     expand: true,

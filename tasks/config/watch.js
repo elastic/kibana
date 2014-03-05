@@ -1,23 +1,29 @@
 module.exports = function (grunt) {
   return {
     test: {
-      files: ['<%= unitTestDir %>/**/*.js'],
+      files: [
+        '<%= unitTestDir %>/**/*.js'
+      ],
       tasks: ['mocha:unit']
     },
     less: {
       files: [
-        '<%= app %>/**/*.less',
-        '<%= src %>/courier/**/*.less'
+        '<%= app %>/**/styles/**/*.less',
+        '!<%= src %>/**/_*.less'
       ],
       tasks: ['less']
     },
     jade: {
       files: [
-        '<%= root %>/**/*.jade',
-        '!<%= root %>/node_modules/**/*',
-        '!<%= src %>/bower_components/**/*'
+        '<%= unitTestDir %>/index.jade'
       ],
-      tasks: ['jade']
+      tasks: ['jade:test']
+    },
+    clientside_jade: {
+      files: [
+        '<%= testUtilsDir %>/istanbul_reporter/report.clientside-jade'
+      ],
+      tasks: ['jade:clientside']
     }
   };
 };

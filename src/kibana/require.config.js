@@ -15,7 +15,8 @@ require.config({
     lodash: '../bower_components/lodash/dist/lodash',
     moment: '../bower_components/moment/moment',
     gridster: '../bower_components/gridster/dist/jquery.gridster',
-    config: '../config'
+    configFile: '../config',
+    bower_components: '../bower_components'
   },
   shim: {
     angular: {
