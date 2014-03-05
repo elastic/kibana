@@ -1,11 +1,11 @@
 define(function (require) {
-  var elasticsearch = require('../bower_components/elasticsearch/elasticsearch.js');
+  var elasticsearch = require('bower_components/elasticsearch/elasticsearch');
   var _ = require('lodash');
   var sinon = require('sinon/sinon');
   var Courier = require('courier/courier');
   var DataSource = require('courier/data_source/data_source');
   var Mapper = require('courier/mapper');
-  var fieldMapping = require('../fixtures/field_mapping.js');
+  var fieldMapping = require('../fixtures/field_mapping');
 
   var client = new elasticsearch.Client({
     host: 'localhost:9200',
@@ -18,30 +18,32 @@ define(function (require) {
   describe('Mapper', function () {
     var server, source, mapper;
 
-    beforeEach(function() {
+    beforeEach(function () {
       source = courier.createSource('search')
         .index('valid')
         .size(5);
       mapper = new Mapper(courier);
 
       // Stub out a mini mapping response.
-      sinon.stub(client.indices, 'getFieldMapping',function (params, callback) {
-        if(params.index === 'valid') {
-          setTimeout(callback(undefined, fieldMapping),0);
+      sinon.stub(client.indices, 'getFieldMapping', function (params, callback) {
+        if (params.index === 'valid') {
+          setTimeout(callback(undefined, fieldMapping), 0);
         } else {
-          setTimeout(callback('Error: Not Found',undefined));
+          setTimeout(callback('Error: Not Found', undefined));
         }
       });
 
       sinon.stub(client, 'getSource', function (params, callback) {
-        if(params.id === 'valid') {
-          setTimeout(callback(undefined,{'foo.bar': {'type': 'string'}}),0);
+        if (params.id === 'valid') {
+          setTimeout(callback(undefined, {'foo.bar': {'type': 'string'}}), 0);
         } else {
-          setTimeout(callback('Error: Not Found',undefined),0);
+          setTimeout(callback('Error: Not Found', undefined), 0);
         }
       });
 
-      sinon.stub(client, 'delete', function (params, callback) {callback(undefined,true);});
+      sinon.stub(client, 'delete', function (params, callback) {
+        callback(undefined, true);
+      });
     });
 
     afterEach(function () {
@@ -57,7 +59,7 @@ define(function (require) {
     });
 
     it('has getFieldsFromMapping function that returns a mapping', function (done) {
-      mapper.getFieldsFromMapping(source,function (err, mapping) {
+      mapper.getFieldsFromMapping(source, function (err, mapping) {
         expect(client.indices.getFieldMapping.called).to.be(true);
         expect(mapping['foo.bar'].type).to.be('string');
         done();
@@ -69,7 +71,7 @@ define(function (require) {
         .index('invalid')
         .size(5);
 
-      mapper.getFieldsFromCache(source,function (err, mapping) {
+      mapper.getFieldsFromCache(source, function (err, mapping) {
         expect(client.getSource.called).to.be(true);
         expect(err).to.be('Error: Not Found');
         done();
@@ -77,7 +79,7 @@ define(function (require) {
     });
 
     it('has getFieldsFromCache that returns a mapping', function (done) {
-      mapper.getFieldsFromCache(source,function (err, mapping) {
+      mapper.getFieldsFromCache(source, function (err, mapping) {
         expect(client.getSource.called).to.be(true);
         expect(mapping['foo.bar'].type).to.be('string');
         done();
