@@ -4,7 +4,7 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
   var sinon = require('sinon/sinon');
-  var configFile = require('../../../config.js');
+  var configFile = require('configFile');
 
   // Load the kibana app dependencies.
   require('angular-route');
@@ -19,13 +19,13 @@ define(function (require) {
   describe('Mapper', function () {
     var $scope;
 
-    beforeEach(function() {
+    beforeEach(function () {
 
       // Start the kibana module
       module('kibana');
 
       // Create the scope
-      inject(function($rootScope, $controller) {
+      inject(function ($rootScope, $controller) {
         $scope = $rootScope.$new();
         var dashCtrl = $controller('dashboard', {
           $scope: $scope
