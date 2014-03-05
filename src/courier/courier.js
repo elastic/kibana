@@ -286,5 +286,17 @@ define(function (require) {
     this.fetch('doc');
   };
 
+  // get the list of open data source objects
+  // primarily for testing purposes
+  Courier.prototype._openSources = function (type) {
+    if (!type) {
+      return _.transform(this._refs, function (open, refs) {
+        [].push.apply(open, refs);
+      }, []);
+    }
+
+    return this._refs[type] || [];
+  };
+
   return Courier;
 });
