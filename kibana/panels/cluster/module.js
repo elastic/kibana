@@ -48,7 +48,6 @@ function (angular, app, kbn, _) {
 
     $scope.init = function () {
       $scope.kbnVersion = kbnVersion;
-      $scope.report = marvelOpts.report;
 
       // If the user hasn't opted in or out, ask them to.
       if(marvelOpts.version == null || marvelOpts.version !== kbnVersion) {

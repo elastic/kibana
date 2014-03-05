@@ -9,15 +9,31 @@ define([
   'misc_inputs',
   'es',
   'utils',
-  '_'
+  '_',
+  'analytics'
 ],
-  function (curl, $helpPopup, history, input, $, mappings, output, miscInputs, es, utils, _) {
+  function (curl, $helpPopup, history, input, $, mappings, output, miscInputs, es, utils, _, ga) {
     'use strict';
 
     $(document.body).removeClass('fouc');
 
     var $esServer = miscInputs.$esServer;
     var $send = miscInputs.$send;
+
+    var marvelOpts = localStorage.getItem('marvelOpts');
+    if (marvelOpts) {
+      try {
+        marvelOpts = JSON.parse(marvelOpts);
+        if (marvelOpts.report) {
+          var options = {
+            cookieDomain: window.location.hostname,
+            page: window.location.pathname+window.location.hash,
+            location: window.location.href
+          };
+          ga('send', 'pageview', options);
+        }
+      } catch (e) { } // Meh! Who cares... 
+    }
 
     function submitCurrentRequestToES(cb) {
       cb = typeof cb === 'function' ? cb : $.noop;

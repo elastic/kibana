@@ -15,20 +15,24 @@ define([
   'angular',
   'app',
   'jquery',
-  'lodash'
+  'lodash',
+  './analytics',
+  'factories/store'
 ],
-function (angular, app, $, _) {
+function (angular, app, $, _, ga) {
   'use strict';
 
   var module = angular.module('kibana.panels.marvel.navigation', []);
   app.useModule(module);
 
-  module.controller('marvel.navigation', function($scope, $http) {
+  module.controller('marvel.navigation', function($scope, $http, storeFactory) {
     $scope.panelMeta = {
       status  : "Experimental",
       description : "A simple dropdown panel with a list of links"
     };
 
+    // Check to see if the user is opted in to reporting
+    var marvelOpts = storeFactory($scope, 'marvelOpts');
 
     // Set and populate defaults
     var _d = {
@@ -67,6 +71,14 @@ function (angular, app, $, _) {
     $scope.init = function() {
       if($scope.panel.source === 'panel') {
         $scope.links = $scope.panel.links;
+      }
+
+      if (marvelOpts.report) {
+        ga('send', 'pageview', {
+          cookieDomain: window.location.hostname,
+          page: window.location.pathname+window.location.hash,
+          location: window.location.href
+        });
       }
 
       if($scope.panel.source === 'url') {
