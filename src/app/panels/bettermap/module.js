@@ -80,6 +80,14 @@ function (angular, app, _, L, localRequire) {
        */
       tooltip : "_id",
       /** @scratch /panels/bettermap/5
+       * baseurl:: Base URL to use when downloading map tiles
+       */
+      baseurl : "http://otile1.mqcdn.com/tiles/1.0.0/map/",
+      /** @scratch /panels/bettermap/5
+       * attribution:: attribution required for the base url you set above.
+       */
+      attribution : 'Data, imagery and map information provided by MapQuest, OpenStreetMap <http://www.openstreetmap.org/copyright> and contributors, ODbL',
+      /** @scratch /panels/bettermap/5
        * ==== Queries
        * queries object:: This object describes the queries to use on this panel.
        * queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
@@ -236,9 +244,8 @@ function (angular, app, _, L, localRequire) {
               });
 
               // This could be made configurable?
-              L.tileLayer('http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg', {
-                attribution: '"Data, imagery and map information provided by MapQuest, '+
-                  'OpenStreetMap <http://www.openstreetmap.org/copyright> and contributors, ODbL',
+              L.tileLayer(scope.panel.baseurl+"{z}/{x}/{y}.png", {
+                attribution: scope.panel.attribution,
                 maxZoom: 18,
                 minZoom: 2
               }).addTo(map);
