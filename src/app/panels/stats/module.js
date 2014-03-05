@@ -140,23 +140,6 @@ define([
 
       results = request.doSearch();
 
-      var format = function (format, value) {
-        switch (format) {
-        case 'money':
-          value = numeral(value).format('$0,0.00');
-          break;
-        case 'bytes':
-          value = numeral(value).format('0.00b');
-          break;
-        case 'float':
-          value = numeral(value).format('0.000');
-          break;
-        default:
-          value = numeral(value).format('0,0');
-        }
-        return value;
-      };
-
       results.then(function(results) {
         $scope.panelMeta.loading = false;
         var value = results.facets.stats[$scope.panel.mode];
@@ -166,13 +149,13 @@ define([
           var obj = _.clone(q);
           obj.label = alias;
           obj.Label = alias.toLowerCase(); //sort field
-          obj.value = format($scope.panel.format,results.facets['stats_'+alias][$scope.panel.mode]);
+          obj.value = results.facets['stats_'+alias][$scope.panel.mode];
           obj.Value = results.facets['stats_'+alias][$scope.panel.mode]; //sort field
           return obj;
         });
 
         $scope.data = {
-          value: format($scope.panel.format, value),
+          value: value,
           rows: rows
         };
 
@@ -192,6 +175,25 @@ define([
       $scope.$emit('render');
     };
 
+  });
+
+  module.filter('formatstats', function(){
+    return function (value,format) {
+      switch (format) {
+      case 'money':
+        value = numeral(value).format('$0,0.00');
+        break;
+      case 'bytes':
+        value = numeral(value).format('0.00b');
+        break;
+      case 'float':
+        value = numeral(value).format('0.000');
+        break;
+      default:
+        value = numeral(value).format('0,0');
+      }
+      return value;
+    };
   });
 
 });

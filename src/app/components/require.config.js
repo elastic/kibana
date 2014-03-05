@@ -12,6 +12,7 @@ require.config({
     css:                      '../vendor/require/css',
     text:                     '../vendor/require/text',
     moment:                   '../vendor/moment',
+    blob:                     '../vendor/blob',
     filesaver:                '../vendor/filesaver',
     chromath:                 '../vendor/chromath',
     angular:                  '../vendor/angular/angular',
