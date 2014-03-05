@@ -51,6 +51,10 @@
     "version":"0.0.5",
     "license":"MIT"
   },
+  "blob": {
+    "version":"2013-06-20",
+    "license":"MIT"
+  },
   "filesaver": {
     "version":"2013-01-23",
     "license":"MIT"

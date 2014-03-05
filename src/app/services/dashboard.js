@@ -6,7 +6,8 @@ define([
   'config',
   'moment',
   'modernizr',
-  'filesaver'
+  'filesaver',
+  'blob'
 ],
 function (angular, $, kbn, _, config, moment, Modernizr) {
   'use strict';
@@ -285,7 +286,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
         location  : window.location.href.replace(window.location.hash,""),
         type      : type,
         id        : id,
-        link      : window.location.href.replace(window.location.hash,"")+"#dashboard/"+type+"/"+id,
+        link      : window.location.href.replace(window.location.hash,"")+"#dashboard/"+type+"/"+encodeURIComponent(id),
         title     : title
       };
     };

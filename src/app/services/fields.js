@@ -46,7 +46,7 @@ function (angular, _, config) {
 
     this.map = function(indices) {
       var request = $http({
-        url: config.elasticsearch + "/" + indices.join(',') + "/_mapping/field/*",
+        url: config.elasticsearch + "/" + indices.join(',') + "/_mapping",
         method: "GET"
       }).error(function(data, status) {
         if(status === 0) {
@@ -54,7 +54,7 @@ function (angular, _, config) {
             ". Please ensure that Elasticsearch is reachable from your system." ,'error');
         } else {
           alertSrv.set('Error',"No index found at "+config.elasticsearch+"/" +
-            indices.join(',')+"/_mapping/fields/*. Please create at least one index."  +
+            indices.join(',')+"/_mapping/field/*. Please create at least one index."  +
             "If you're using a proxy ensure it is configured correctly.",'error');
         }
       });
@@ -66,12 +66,43 @@ function (angular, _, config) {
           _.each(p.data, function(indexMap,index) {
             mapping[index] = {};
             _.each((version ? indexMap.mappings : indexMap), function (typeMap,type) {
-              mapping[index][type] = typeMap;
+              mapping[index][type] = flatten(typeMap);
             });
           });
           return mapping;
         });
       });
+    };
+
+    // This should understand both the 1.0 format and the 0.90 format for mappings. Ugly.
+    var flatten = function(obj,prefix) {
+      var propName = (prefix) ? prefix :  '',
+        dot = (prefix) ? '.':'',
+        ret = {};
+      for(var attr in obj){
+        if(attr === 'dynamic_templates' || attr === '_default_') {
+          continue;
+        }
+        // For now only support multi field on the top level
+        // and if there is a default field set.
+        if(obj[attr]['type'] === 'multi_field') {
+          ret[attr] = obj[attr]['fields'][attr] || obj[attr];
+          var keys = _.without(_.keys(obj[attr]['fields']),attr);
+          for(var key in keys) {
+            ret[attr+'.'+keys[key]] = obj[attr]['fields'][keys[key]];
+          }
+        } else if (attr === 'properties' || attr ==='fields') {
+          _.extend(ret,flatten(obj[attr], propName));
+        } else if(typeof obj[attr] === 'object' &&
+          (!_.isUndefined(obj[attr].type) || !_.isUndefined(obj[attr].properties))){
+          _.extend(ret,flatten(obj[attr], propName + dot + attr));
+        } else {
+          if(propName !== '') {
+            ret[propName] = obj;
+          }
+        }
+      }
+      return ret;
     };
 
   });

@@ -142,7 +142,7 @@ function (angular, app, _, $) {
     };
 
     $scope.build_search = function(field,value) {
-      filterSrv.set({type:'querystring',mandate:'must',query:field+":"+value});
+      filterSrv.set({type:'terms',field:field,value:value,mandate:"must"});
     };
 
   });
@@ -166,7 +166,10 @@ function (angular, app, _, $) {
         });
 
         function render_panel() {
+          elem.css({height:scope.panel.height||scope.row.height});
+
           elem.text('');
+
           $('.jvectormap-zoomin,.jvectormap-zoomout,.jvectormap-label').remove();
           require(['./panels/map/lib/map.'+scope.panel.map], function () {
             elem.vectorMap({
@@ -197,6 +200,7 @@ function (angular, app, _, $) {
               }
             });
             elem.prepend('<span class="map-legend"></span>');
+
             $('.map-legend').hide();
           });
         }
