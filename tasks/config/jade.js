@@ -2,15 +2,13 @@ module.exports = function (grunt) {
   var path = require('path');
 
   return {
-    all: {
-      src: [
-        '<%= app %>/partials/**/*.jade',
-        '<%= app %>/apps/**/*.jade',
-        '<%= root %>/test/**/*.jade',
-        '!<%= root %>/**/_*.jade'
-      ],
-      expand: true,
-      ext: '.html',
+    options: {
+      compileDebug: false
+    },
+    test: {
+      files: {
+        '<%= unitTestDir %>/index.html': '<%= unitTestDir %>/index.jade'
+      },
       options: {
         data: function (src, dest) {
           var unitTestDir = grunt.config.get('unitTestDir');
@@ -26,8 +24,17 @@ module.exports = function (grunt) {
               return path.relative(appdir, filename).replace(/\.js$/, '');
             })
           };
-        },
-        client: false
+        }
+      }
+    },
+    clientside: {
+      files: {
+        '<%= testUtilsDir %>/istanbul_reporter/report.jade.js': '<%= testUtilsDir %>/istanbul_reporter/report.clientside-jade'
+      },
+      options: {
+        client: true,
+        amd: true,
+        namespace: false // return the template directly in the amd wrapper
       }
     }
   };
