@@ -21,7 +21,7 @@ function (Settings) {
      * kibana installed on. You probably want to set it to the FQDN of your
      * elasticsearch host
      */
-    elasticsearch: "http://"+window.location.hostname+":9200",
+    elasticsearch: "http://10.0.16.98:9200",
 
     /** @scratch /configuration/config.js/5
      * ==== default_route
@@ -63,7 +63,8 @@ function (Settings) {
       'query',
       'terms',
       'stats',
-      'sparklines'
+      'sparklines',
+      'rawgraph'
     ]
   });
 });

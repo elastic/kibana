@@ -1,0 +1,61 @@
+<div class="editor-row">
+  <div class="row-fluid">
+    <div class="span6">
+      <table class="table table-striped">
+        <thead>
+          <th>Value Field</th>
+          <th>Delete</th>
+          <th>Move</th>
+          <th></th>
+          <th>Hide</th>
+        </thead>
+        <tr ng-repeat="serie in panel.series">
+          <form>
+            <td><input ng-change="set_refresh(true)" placeholder="Start typing" bs-typeahead="fields.list" type="text" class="input-small" ng-model="serie.value_field"></td>
+            <td><i ng-click="panel.series = _.without(panel.series,serie); set_refresh(true)" class="pointer icon-remove"></i></td>
+            <td><i ng-click="_.move(panel.series,$index,$index-1); set_refresh(true)" ng-hide="$first" class="pointer icon-arrow-up"></i></td>
+            <td><i ng-click="_.move(panel.series,$index,$index+1); set_refresh(true)" ng-hide="$last" class="pointer icon-arrow-down"></i></td>
+            <td><input ng-change="set_refresh(true)" type="checkbox" ng-model="serie.hide" ng-checked="series.hide"></td>
+          </form>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <div class="row-fluid">
+    <div class="span6">
+      <form>
+        <button ng-click="add_series();" class="btn btn-info ">Add <i class="icon-plus"></i></button>
+        <span class="small">Note : The value field <strong>must</strong> be a numeric type</span>
+      </form>
+    </div>
+  </div>
+  <div class="section">
+    <h5>Data limitations</h5>
+    <div class="editor-option">
+      <label class="small">Maximum entries to retrieve from elasticsearch <tip>500 points lead to a clear graph. 5000 should be a maximum.</tip></label>
+        <input type="text" class="input-mini" ng-model="panel.max_point">
+    </div>
+  </div>
+  <div class="section">
+  <h5>Time Options</h5>
+    <div class="editor-option">
+      <label class="small">Time Field <tip>The unique time field must exists for each series.</tip></label>
+        <input ng-change="set_refresh(true)" placeholder="Start typing" bs-typeahead="fields.list" type="text" class="input-small" ng-model="panel.time_field">
+    </div>
+    <div class="editor-option">
+      <label class="small">Time correction</label>
+      <select ng-model="panel.timezone" class='input-small' ng-options="f for f in ['browser','utc']"></select>
+    </div>
+    <div class="editor-option">
+      <label class="small">Auto-interval</label><input type="checkbox" ng-model="panel.auto_int" ng-checked="panel.auto_int" />
+    </div>
+    <div class="editor-option" ng-show='panel.auto_int'>
+      <label class="small">Resolution <tip>Shoot for this many data points, rounding to sane intervals</tip></label>
+      <input type="number" class='input-mini' ng-model="panel.resolution" ng-change='set_refresh(true)'/>
+    </div>
+    <div class="editor-option" ng-hide='panel.auto_int'>
+      <label class="small">Interval <tip>Use Elasticsearch date math format (eg 1m, 5m, 1d, 2w, 1y)</tip></label>
+      <input type="text" class='input-mini' ng-model="panel.interval" ng-change='set_refresh(true)'/>
+    </div>
+  </div>
+</div>
