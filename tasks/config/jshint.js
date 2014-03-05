@@ -3,7 +3,12 @@ module.exports = function (config) {
     // just lint the source dir
     source: {
       files: {
-        src: ['Gruntfile.js', '<%= src %>/**/*.js', '<%= unitTestDir %>/**/*.js', '<%= root %>/tasks/**/*.js']
+        src: [
+          'Gruntfile.js',
+          '<%= src %>/**/*.js',
+          '<%= unitTestDir %>/**/*.js',
+          '<%= root %>/tasks/**/*.js'
+        ]
       }
     },
     options: {
