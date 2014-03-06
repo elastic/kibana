@@ -216,7 +216,7 @@ define(function (require) {
       mapper.getFields(source, function (err, mapping) {
         mapper.getFieldMapping(source, 'foo.bar', function (err, field) {
           expect(field.type).to.be('string');
-          mapper.ignoreFields(source, 'foo.bar', function(err, mapping) {
+          mapper.ignoreFields(source, 'foo.bar', function (err, mapping) {
             expect(mapping['foo.bar'].type).to.be('ignore');
             done();
           });
