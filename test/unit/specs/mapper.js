@@ -1,7 +1,7 @@
 define(function (require) {
   var elasticsearch = require('bower_components/elasticsearch/elasticsearch');
   var _ = require('lodash');
-  var sinon = require('sinon/sinon');
+  var sinon = require('testUtils/auto_release_sinon');
   var Courier = require('courier/courier');
   var DataSource = require('courier/data_source/data_source');
   var Mapper = require('courier/mapper');
@@ -44,12 +44,6 @@ define(function (require) {
       sinon.stub(client, 'delete', function (params, callback) {
         callback(undefined, true);
       });
-    });
-
-    afterEach(function () {
-      client.indices.getFieldMapping.restore();
-      client.getSource.restore();
-      client.delete.restore();
     });
 
     it('provides a constructor for the Mapper class', function (done) {
