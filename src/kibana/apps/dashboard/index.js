@@ -1,15 +1,13 @@
 define(function (require) {
-  var angular = require('angular');
   var _ = require('lodash');
   var $ = require('jquery');
-  var configFile = require('../../../config');
 
   require('css!./styles/main.css');
   require('directives/config');
   require('apps/dashboard/directives/grid');
   require('apps/dashboard/directives/panel');
 
-  var app = angular.module('app/dashboard');
+  var app = require('modules').get('app/dashboard');
 
   app.config(function ($routeProvider) {
     $routeProvider
@@ -24,7 +22,7 @@ define(function (require) {
       });
   });
 
-  app.controller('dashboard', function ($scope, $routeParams, $rootScope, $location, courier) {
+  app.controller('dashboard', function ($scope, $routeParams, $rootScope, $location, courier, configFile) {
     $scope.routeParams = $routeParams;
 
     $scope.$watch('routeParams.path', function (newVal) {

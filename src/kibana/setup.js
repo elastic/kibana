@@ -9,7 +9,6 @@ define(function (require) {
    * Setup the kibana application, ensuring that the kibanaIndex exists,
    * and perform any migration of data that is required.
    *
-   * @param {Module} app - The Kibana module
    * @param {function} done - callback
    */
   return function SetupApp(app, done) {

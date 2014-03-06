@@ -1,17 +1,16 @@
 define(function (require) {
-  var angular = require('angular');
   var Courier = require('courier/courier');
   var DataSource = require('courier/data_source/data_source');
   var DocSource = require('courier/data_source/doc');
   var errors = require('courier/errors');
-  var configFile = require('../../config');
 
   require('services/promises');
   require('services/es');
 
   var courier; // share the courier amoungst all of the apps
-  angular.module('kibana/services')
-    .service('courier', function (es, $rootScope, promises) {
+  require('modules')
+    .get('kibana/services')
+    .service('courier', function (es, $rootScope, promises, configFile) {
       if (courier) return courier;
 
       promises.playNice(DataSource.prototype, [

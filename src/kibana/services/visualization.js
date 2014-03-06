@@ -1,8 +1,7 @@
 define(function (require) {
-  var angular = require('angular');
   var _ = require('lodash');
 
-  var module = angular.module('kibana/services');
+  var module = require('modules').get('kibana/services');
 
   module.service('visualizations', function (courier, es, config, visFactory, $q) {
     this.getOrCreate = function (reject, resolve, id) {

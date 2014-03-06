@@ -1,7 +1,5 @@
 define(function (require) {
-  var angular = require('angular');
-
-  var app = angular.module('app/dashboard');
+  var app = require('modules').get('app/dashboard');
 
   app.directive('dashboardPanel', function () {
     return {

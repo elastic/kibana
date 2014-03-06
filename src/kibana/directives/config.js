@@ -1,9 +1,8 @@
 define(function (require) {
   var html = require('text!partials/table.html');
-  var angular = require('angular');
   var _ = require('lodash');
 
-  var module = angular.module('kibana/directives');
+  var module = require('modules').get('kibana/directives');
 
   /**
    * config directive

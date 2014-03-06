@@ -1,8 +1,8 @@
 define(function (require, module, exports) {
   var _ = require('lodash');
-  var angular = require('angular');
 
-  angular.module('kibana/services')
+  require('modules')
+    .get('kibana/services')
     .service('promises', function ($q) {
 
       function playNice(fn, fns) {

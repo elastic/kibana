@@ -1,6 +1,5 @@
 define(function (require) {
   var html = require('text!partials/table.html');
-  var angular = require('angular');
   var _ = require('lodash');
   var nextTick = require('utils/next_tick');
   var $ = require('jquery');
@@ -8,7 +7,7 @@ define(function (require) {
   require('directives/truncated');
   require('directives/infinite_scroll');
 
-  var module = angular.module('kibana/directives');
+  var module = require('modules').get('kibana/directives');
 
   /**
    * kbnTable directive

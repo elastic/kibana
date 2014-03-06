@@ -1,10 +1,9 @@
 define(function (require) {
-  var angular = require('angular');
   var kibana = require('kibana');
 
   require('css!./styles/index.css');
 
-  var app = angular.module('app/examples', []);
+  var app = require('modules').get('app/examples');
 
   // main controller for the examples
   app.controller('examples', function ($scope, $location, courier) {

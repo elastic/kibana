@@ -6,6 +6,7 @@ define(function (require) {
 
   require('services/config');
   require('services/courier');
+  require('directives/view');
 
   angular
     .module('kibana/controllers')

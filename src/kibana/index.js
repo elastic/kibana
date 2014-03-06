@@ -13,81 +13,46 @@ define(function (require) {
   require('elasticsearch');
   require('angular-route');
 
-  var kibana = angular.module('kibana', []);
-
-  var requiredAgularModules = [
+  var kibana = angular.module('kibana', [
+    // external requirements
     'elasticsearch',
-    'ngRoute',
-    'kibana',
-    'kibana/controllers',
-    'kibana/directives',
-    'kibana/factories',
-    'kibana/services',
-    'kibana/filters',
-    'kibana/constants'
-  ].concat(configFile.apps.map(function (app) {
-    return 'app/' + app.id;
-  }));
+    'ngRoute'
+    // internale requirements are added by the modules.js util
+  ]);
 
-  // create empty modules for all of the kibana and app modules
-  requiredAgularModules.forEach(function (name) {
-    if (/^(kibana|app)\//.test(name)) angular.module(name, []);
-  });
+  // proceed once setup is complete
+  setup(function (err) {
+    kibana
+      // config.js in the root
+      .value('configFile', configFile)
+      // This stores the Kibana revision number, @REV@ is replaced by grunt.
+      .constant('kbnVersion', '@REV@')
+      // Use this for cache busting partials
+      .constant('cacheBust', 'cache-bust=' + Date.now())
+      // setup default routes
+      .config(function ($routeProvider) {
+        $routeProvider
+          .otherwise({
+            redirectTo: '/' + configFile.defaultAppId
+          });
 
-  kibana.requires = requiredAgularModules;
-  kibana.value('configFile', configFile);
-
-  kibana.config(function ($routeProvider) {
-    $routeProvider
-      .otherwise({
-        redirectTo: '/' + configFile.defaultAppId
+        configFile.apps.forEach(function (app) {
+          $routeProvider.when('/' + app.id, {
+            templateUrl: '/kibana/apps/' + app.id + '/index.html'
+          });
+        });
       });
 
-    configFile.apps.forEach(function (app) {
-      $routeProvider.when('/' + app.id, {
-        templateUrl: '/kibana/apps/' + app.id + '/index.html'
+    require([
+      'controllers/kibana'
+    ].concat(configFile.apps.map(function (app) {
+      return 'apps/' + app.id + '/index';
+    })), function bootstrap() {
+      $(function () {
+        angular.bootstrap(document, 'kibana');
       });
     });
-  });
 
-  setup(kibana, function (err) {
-    if (err) throw err;
-
-    // once all of the required modules are loaded, bootstrap angular
-    function bootstrap() {
-      $(function () {
-        angular.bootstrap(document, requiredAgularModules);
-      });
-    }
-
-    // do some requirejs loading in parallel, otherwise we
-    // would have to track everything in the r.js optimization
-    // config
-    var out = 0;
-    function loaded() {
-      out ++;
-      return function () {
-        out--;
-        if (!out) {
-          // all of the callbacks have been called
-          bootstrap();
-        }
-      };
-    }
-
-    // require global modules
-    require([
-      'controllers/kibana',
-      'directives/view',
-      'constants/base'
-    ], loaded());
-
-    // require each applications root module
-    // since these are created via .map the same operation
-    // must be done in the r.js optimizer config
-    require(configFile.apps.map(function (app) {
-      return 'apps/' + app.id + '/index';
-    }), loaded());
   });
 
   return kibana;
