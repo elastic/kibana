@@ -9,16 +9,19 @@ define(function (require) {
   var scopedRequire = require('require');
   var setup = require('./setup');
   var configFile = require('../config');
+  var modules = require('modules');
 
   require('elasticsearch');
   require('angular-route');
 
   var kibana = angular.module('kibana', [
-    // list external requirements here (modules created
-    // by the modules util are added automatically)
+    // list external requirements here
     'elasticsearch',
     'ngRoute'
   ]);
+
+  // tell the modules util to add it's modules as requirements for kibana
+  modules.link(kibana);
 
   // proceed once setup is complete
   setup(function (err) {
