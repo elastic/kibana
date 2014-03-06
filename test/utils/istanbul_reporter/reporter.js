@@ -74,9 +74,9 @@ define(function (require) {
 
       toSec(stats, 'create report');
       toSec(stats, 'duration');
+      console.log(JSON.stringify(stats, null, '  '));
 
       linkNav();
-      show(stats);
       if (gotoFile) {
         var header = document.getElementById(gotoFile.substring(1));
         if (header) {
@@ -216,23 +216,6 @@ define(function (require) {
 
   function toSec(stats, prop) {
     return stats[prop] = (stats[prop] / 1000).toFixed(2) + ' sec';
-  }
-
-  function show(info) {
-    var width = _(info).keys().sortBy('length').pop().length;
-
-    $('<pre>')
-      .addClass('coverage-stats')
-      .appendTo('#menu')
-      .text(
-        _.map(info, function (val, name) {
-          var row = val + ' - ' + name;
-          if (width - name.length) {
-            row += (new Array(width - name.length + 1)).join(' ');
-          }
-          return row;
-        }).join('\n')
-      );
   }
 
   return IstanbulReporter;

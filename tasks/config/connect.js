@@ -1,6 +1,6 @@
 module.exports = function (grunt) {
   var instrumentationMiddleware = require('../utils/instrumentation');
-  var amdWrapMiddleware = require('../utils/amd-wrapper');
+  var amdRapperMiddleware = require('../utils/amd-rapper');
 
   return {
     dev: {
@@ -33,16 +33,13 @@ module.exports = function (grunt) {
           }));
 
           // minimize code duplication (especially in the istanbul reporter)
-          // by allowing node_modules to be requested in an AMD wrapper
-          stack.push(amdWrapMiddleware({
+          // by allowing node_modules to be requested in an AMD rapper
+          stack.push(amdRapperMiddleware({
             root: root
           }));
 
           // standard static middleware reading from the root
           stack.push(connect.static(root));
-
-          // allow browsing directories
-          stack.push(connect.directory(root));
 
           // redirect requests for '/' to '/src/'
           stack.push(function (req, res, next) {
@@ -51,6 +48,16 @@ module.exports = function (grunt) {
             res.setHeader('Location', '/src/');
             res.end();
           });
+
+          // allow browsing directories
+          stack.push(
+            function (req, res, next) {
+              // prevent chrome's stupid "this page is in spanish"
+              res.setHeader('Content-Language', 'en');
+              next();
+            },
+            connect.directory(root)
+          );
 
           return stack;
         }

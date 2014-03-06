@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><title>Kibana4 Tests</title><link rel="stylesheet" href="/node_modules/mocha/mocha.css"></head><body><div id="mocha"></div><script src="/node_modules/expect.js/expect.js"></script><script src="/node_modules/mocha/mocha.js"></script><script src="/src/bower_components/requirejs/require.js"></script><script src="/src/kibana/require.config.js"></script><script type="text/javascript">window.COVERAGE = !!(/coverage=true/i.test(location.search));
+<!DOCTYPE html><html><head><title>Kibana4 Tests</title><link rel="stylesheet" href="/node_modules/mocha/mocha.css"></head><body><div id="mocha"></div><script src="/node_modules/expect.js/expect.js"></script><script src="/node_modules/mocha/mocha.js"></script><script src="/src/bower_components/requirejs/require.js"></script><script src="/src/kibana/require.config.js"></script><script type="text/javascript">window.COVERAGE = !!(/coverage/i.test(window.location.search));
 mocha.setup('bdd');
 
 require.config({
@@ -28,7 +28,7 @@ function setupCoverage(done) {
 }
 
 function runTests() {
-  require(["../../test/unit/specs/apps/dashboard/index","../../test/unit/specs/apps/dashboard/mocks/modules","../../test/unit/specs/calculate_indices","../../test/unit/specs/courier","../../test/unit/specs/data_source","../../test/unit/specs/mapper"], function () {
+  require(["../../test/unit/specs/apps/dashboard/index","../../test/unit/specs/calculate_indices","../../test/unit/specs/courier","../../test/unit/specs/data_source","../../test/unit/specs/mapper"], function () {
     window.mochaRunner = mocha.run().on('end', function () {
       window.mochaResults = this.stats;
     });

@@ -26,7 +26,7 @@ module.exports = function instrumentationMiddleware(opts) {
   var fileMap = {};
 
   function filenameForReq(req) {
-    if (!~req.url.indexOf('instrument=true')) return false;
+    if (req._parsedUrl.query && !~req._parsedUrl.query.indexOf('instrument')) return false;
 
     // expected absolute path to the file
     var filename = path.join(root, req._parsedUrl.pathname);
@@ -51,25 +51,34 @@ module.exports = function instrumentationMiddleware(opts) {
     // the file either doesn't exist of it was filtered out by opts.filter
     if (!filename) return next();
 
-    fs.readFile(filename, 'utf8', function (err, content) {
-      if (err) {
-        if (err.code !== 'ENOENT') {
-          // other issue, report!
-          return next(err);
-        }
+    fs.stat(filename, function (err, stat) {
+      if (err && err.code !== 'ENOENT') return next(err);
 
+      if (err || !stat.isFile()) {
         // file was deleted, clear cache and move on
         delete fileMap[filename];
         return next();
       }
 
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'application/javascript');
-      res.end(i.instrumentSync(
-        content,
-        // make file names easier to read
-        displayRoot ? path.relative(displayRoot, filename) : filename
-      ));
+      var etag = '"' + stat.size + '-' + Number(stat.mtime) + '"';
+      if (req.headers['if-none-match'] === etag) {
+        res.statusCode = 304;
+        res.end();
+        return;
+      }
+
+      fs.readFile(filename, 'utf8', function (err, content) {
+        if (err) return next(err);
+
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/javascript');
+        res.setHeader('ETag', etag);
+        res.end(i.instrumentSync(
+          content,
+          // make file names easier to read
+          displayRoot ? path.relative(displayRoot, filename) : filename
+        ));
+      });
     });
   };
 

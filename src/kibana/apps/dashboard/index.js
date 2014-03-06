@@ -4,10 +4,16 @@ define(function (require) {
 
   require('css!./styles/main.css');
   require('directives/config');
+  require('services/courier');
+  require('services/config');
   require('apps/dashboard/directives/grid');
   require('apps/dashboard/directives/panel');
 
-  var app = require('modules').get('app/dashboard');
+  var app = require('modules').get('app/dashboard', [
+    'elasticsearch',
+    'ngRoute',
+    'kibana/services'
+  ]);
 
   app.config(function ($routeProvider) {
     $routeProvider

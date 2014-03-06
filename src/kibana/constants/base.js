@@ -9,7 +9,5 @@ define(function (require) {
     .constant('kbnVersion', '@REV@')
 
     // Use this for cache busting partials
-    .constant('cacheBust', 'cache-bust=' + Date.now())
-
-    ;
+    .constant('cacheBust', 'cache-bust=' + Date.now());
 });
