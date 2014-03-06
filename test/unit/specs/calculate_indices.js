@@ -4,19 +4,19 @@ define(function (require) {
 
   describe('calculateIndices()', function () {
 
-    describe('error checking', function() {
+    describe('error checking', function () {
       it('should throw an error if start is > end', function () {
         expect(function () { calculateIndices(moment().add('day', 1), moment()); }).to.throwError();
       });
       it('should throw an error if interval is not [ hour, day, week, year ]', function () {
-        expect(function () { calculateIndices(moment().subtract('day', 1), moment(), 'century' ); }).to.throwError();
+        expect(function () { calculateIndices(moment().subtract('day', 1), moment(), 'century'); }).to.throwError();
       });
       it('should throw an error if pattern is not set', function () {
-        expect(function () { calculateIndices(moment().subtract('day', 1), moment(), 'hour' ); }).to.throwError();
+        expect(function () { calculateIndices(moment().subtract('day', 1), moment(), 'hour'); }).to.throwError();
       });
     });
 
-    describe('hourly interval', function() {
+    describe('hourly interval', function () {
       beforeEach(function () {
         var date = '2014-01-15 04:30:10';
         this.start = moment.utc(date).subtract('hours', 4);
@@ -36,7 +36,7 @@ define(function (require) {
       });
     });
 
-    describe('daily interval', function() {
+    describe('daily interval', function () {
       beforeEach(function () {
         var date = '2014-01-15 04:30:10';
         this.start = moment.utc(date).subtract('days', 4);
@@ -56,7 +56,7 @@ define(function (require) {
       });
     });
 
-    describe('weekly interval', function() {
+    describe('weekly interval', function () {
       beforeEach(function () {
         var date = '2014-01-15 04:30:10';
         this.start = moment.utc(date).subtract('week', 4);
@@ -76,7 +76,7 @@ define(function (require) {
       });
     });
 
-    describe('yearly interval', function() {
+    describe('yearly interval', function () {
       beforeEach(function () {
         var date = '2014-01-15 04:30:10';
         this.start = moment.utc(date).subtract('years', 4);
