@@ -10,23 +10,18 @@
           <th>Hide</th>
         </thead>
         <tr ng-repeat="serie in panel.series">
-          <form>
-            <td><input ng-change="set_refresh(true)" placeholder="Start typing" bs-typeahead="fields.list" type="text" class="input-small" ng-model="serie.value_field"></td>
-            <td><i ng-click="panel.series = _.without(panel.series,serie); set_refresh(true)" class="pointer icon-remove"></i></td>
-            <td><i ng-click="_.move(panel.series,$index,$index-1); set_refresh(true)" ng-hide="$first" class="pointer icon-arrow-up"></i></td>
-            <td><i ng-click="_.move(panel.series,$index,$index+1); set_refresh(true)" ng-hide="$last" class="pointer icon-arrow-down"></i></td>
-            <td><input ng-change="set_refresh(true)" type="checkbox" ng-model="serie.hide" ng-checked="series.hide"></td>
-          </form>
+          <td width="96%"><input ng-change="set_refresh(true)" placeholder="Start typing" bs-typeahead="fields.list" type="text" class="input-small" ng-model="serie.value_field"></td>
+          <td width="1%"><i ng-click="panel.series = _.without(panel.series,serie); set_refresh(true)" class="pointer icon-remove"></i></td>
+          <td width="1%"><i ng-click="_.move(panel.series,$index,$index-1); set_refresh(true)" ng-hide="$first" class="pointer icon-arrow-up"></i></td>
+          <td width="1%"><i ng-click="_.move(panel.series,$index,$index+1); set_refresh(true)" ng-hide="$last" class="pointer icon-arrow-down"></i></td>
+          <td width="1%"><input ng-change="set_refresh(true)" type="checkbox" ng-model="serie.hide" ng-checked="serie.hide"></td>
         </tr>
       </table>
     </div>
-  </div>
-  <div class="row-fluid">
-    <div class="span6">
-      <form>
-        <button ng-click="add_series();" class="btn btn-info ">Add <i class="icon-plus"></i></button>
-        <span class="small">Note : The value field <strong>must</strong> be a numeric type</span>
-      </form>
+    <div class="span4">
+      <h4>Add a serie</h4>
+      <button ng-click="add_series(value_field);" class="btn btn-info ">Add <i class="icon-plus"></i></button>
+      <label class="small">Value field (<strong>must</strong> be a numeric type)</label>
     </div>
   </div>
   <div class="section">

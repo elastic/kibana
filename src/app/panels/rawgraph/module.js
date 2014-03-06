@@ -404,7 +404,7 @@ function (angular, app, $, _, kbn, moment, numeral) {
         value_field: value,
         hide: false
       };
-      $scope.panel.series.push(new_series);
+      this.panel.series.push(new_series);
       $scope.refresh =  true;
     };
 
@@ -525,7 +525,7 @@ function (angular, app, $, _, kbn, moment, numeral) {
 
         var $tooltip = $('<div>');
         elem.bind("plothover", function (event, pos, item) {
-          var group, value, timestamp, interval;
+          var group, value, timestamp;
           if (item) {
             if (item.series.info.alias || scope.panel.tooltip.query_as_alias) {
               group = '<small style="font-size:0.9em;">' +
@@ -548,7 +548,7 @@ function (angular, app, $, _, kbn, moment, numeral) {
               moment.utc(item.datapoint[0]).format('YYYY-MM-DD HH:mm:ss');
             $tooltip
               .html(
-                group + value + interval + " @ " + timestamp
+                group + value + " @ " + timestamp
               )
               .place_tt(pos.pageX, pos.pageY);
           } else {
