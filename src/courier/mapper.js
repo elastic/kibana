@@ -1,7 +1,13 @@
 define(function (require) {
   var _ = require('lodash');
   var Error = require('courier/errors');
+
+  var CacheWriteFailure = require('courier/errors').CacheWriteFailure;
+  var MappingConflict = require('courier/errors').MappingConflict;
+
   var nextTick = require('utils/next_tick');
+
+  console.log(Error);
 
   /**
    * - Resolves index patterns
@@ -38,7 +44,7 @@ define(function (require) {
     this.getFields = function (dataSource, callback) {
       if (self.getFieldsFromObject(dataSource)) {
         // If we already have the fields in our object, use that, but
-        // make sure we stay async and
+        // make sure we stay async
         nextTick(callback, void 0, self.getFieldsFromObject(dataSource));
       } else {
         // Otherwise, try to get fields from Elasticsearch cache
@@ -50,7 +56,7 @@ define(function (require) {
 
               // And then cache them
               cacheFieldsToElasticsearch(config, dataSource._state.index, fields, function (err, response) {
-                if (err) return courier._error(new Error.CacheWriteError());
+                if (err) return courier._error(new CacheWriteFailure());
               });
 
               cacheFieldsToObject(dataSource, fields);
@@ -147,7 +153,7 @@ define(function (require) {
 
               if (fields[name]) {
                 if (fields[name].type === mapping.type) return;
-                return courier._error(new Error.MappingConflict(name));
+                return courier._error(new MappingConflict(name));
               }
 
               fields[name] = field.mapping[_.keys(field.mapping)[0]];
