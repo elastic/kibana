@@ -26,7 +26,7 @@ module.exports = function instrumentationMiddleware(opts) {
   var fileMap = {};
 
   function filenameForReq(req) {
-    if (req._parsedUrl.query && !~req._parsedUrl.query.indexOf('instrument')) return false;
+    if (!req._parsedUrl.query || !~req._parsedUrl.query.indexOf('instrument')) return false;
 
     // expected absolute path to the file
     var filename = path.join(root, req._parsedUrl.pathname);
