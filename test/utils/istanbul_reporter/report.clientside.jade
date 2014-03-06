@@ -44,19 +44,20 @@
                 th Source
             tbody
               for line, number in file.source
+                - id = file.filename + ':' + number;
                 if line.coverage > 0
-                  tr.hit
-                    td.line= number
+                  tr.hit(id=id)
+                    td.line: a(href='#' + id)= number
                     td.hits= line.coverage
                     td.source= line.source
                 else if 0 === line.coverage
-                  tr.miss
-                    td.line= number
+                  tr.miss(id=id)
+                    td.line: a(href='#' + id)= number
                     td.hits 0
                     td.source= line.source
                 else
-                  tr
-                    td.line= number
+                  tr(id=id)
+                    td.line: a(href='#' + id)= number
                     td.hits
                     td.source= line.source || ' '
 
@@ -367,8 +368,11 @@ style.
     width: 20px;
     background: #eaeaea;
     text-align: center;
-    font-size: 11px;
     padding: 0 10px;
+    font-size: 11px;
+  }
+
+  table td.line a {
     color: #949494;
   }
 
