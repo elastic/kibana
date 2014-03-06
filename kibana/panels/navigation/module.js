@@ -16,7 +16,7 @@ define([
   'app',
   'jquery',
   'lodash',
-  './analytics',
+  '/common/analytics.js',
   'factories/store'
 ],
 function (angular, app, $, _, ga) {
@@ -73,12 +73,8 @@ function (angular, app, $, _, ga) {
         $scope.links = $scope.panel.links;
       }
 
-      if (marvelOpts.report) {
-        ga('send', 'pageview', {
-          cookieDomain: window.location.hostname,
-          page: window.location.pathname+window.location.hash,
-          location: window.location.href
-        });
+      if (marvelOpts.version && marvelOpts.report) {
+        ga.pageview();
       }
 
       if($scope.panel.source === 'url') {

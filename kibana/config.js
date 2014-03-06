@@ -3,7 +3,7 @@
  * config.js is where you will find the core Kibana configuration. This file contains parameter that
  * must be set before kibana is run for the first time.
  */
-define(['settings'],
+define(['/kibana/app/components/settings.js'],
   function (Settings) {
     "use strict";
 
@@ -68,6 +68,7 @@ define(['settings'],
       ]
     });
   s.stats_report_url = @@stats_report_url;
+  s.ga_tracking_code = @@ga_tracking_code;
   return s;
 });
 

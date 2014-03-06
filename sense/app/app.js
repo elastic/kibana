@@ -24,13 +24,8 @@ define([
     if (marvelOpts) {
       try {
         marvelOpts = JSON.parse(marvelOpts);
-        if (marvelOpts.report) {
-          var options = {
-            cookieDomain: window.location.hostname,
-            page: window.location.pathname+window.location.hash,
-            location: window.location.href
-          };
-          ga('send', 'pageview', options);
+        if (marvelOpts.version && marvelOpts.report) {
+          ga.pageview();
         }
       } catch (e) { } // Meh! Who cares... 
     }

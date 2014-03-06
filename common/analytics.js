@@ -1,5 +1,7 @@
 define(function (require) {
   'use strict';
+  var config = require('/kibana/config.js');
+
   window.GoogleAnalyticsObject = 'ga';
 
   // create an initali ga function. queue commands so it's executed
@@ -19,8 +21,17 @@ define(function (require) {
   firstScript.parentNode.insertBefore(asyncTag, firstScript);
 
   // return the ga function
-  window.ga('create', 'UA-71701-3', 'auto');
-  return function () {
-    window.ga.apply(null, Array.prototype.slice.call(arguments));
-  };
+  window.ga('create', config.ga_tracking_code, 'auto');
+  return {
+    track: function () {
+      window.ga.apply(null, Array.prototype.slice.call(arguments));
+    },
+    pageview: function () {
+      window.ga('send', 'pageview', {
+        cookieDomain: window.location.hostname,
+        page: window.location.pathname+window.location.hash,
+        location: window.location.href
+      });
+    }
+  }
 });

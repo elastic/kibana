@@ -17,7 +17,8 @@
       'ace_mode_json': '../vendor/ace/mode-json',
       'ace_ext_language_tools': '../vendor/ace/ext-language_tools',
       'ace_ext_searchbox': '../vendor/ace/ext-searchbox',
-      'analytics': '../../kibana/app/panels/marvel/navigation/analytics'
+      'analytics': '/common/analytics',
+      'lodash': '/kibana/vendor/lodash'
     },
     map: {
       '*': {
