@@ -29,7 +29,7 @@ module.exports = function (grunt) {
     },
     clientside: {
       files: {
-        '<%= testUtilsDir %>/istanbul_reporter/report.jade.js': '<%= testUtilsDir %>/istanbul_reporter/report.clientside-jade'
+        '<%= testUtilsDir %>/istanbul_reporter/report.jade.js': '<%= testUtilsDir %>/istanbul_reporter/report.clientside.jade'
       },
       options: {
         client: true,

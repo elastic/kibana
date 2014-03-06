@@ -31,6 +31,8 @@ define(function (require) {
 
   var Base = window.Mocha.reporters.Base;
 
+  var covGrepQueryParamRE = /cov_grep=([^&]+)/;
+
   function IstanbulReporter(runner) {
     // "inherit" the base reporters characteristics
     Base.call(this, runner);
@@ -88,9 +90,20 @@ define(function (require) {
   }
 
   function createReport() {
-    var summary = objUtils.summarizeCoverage(window.__coverage__);
+    var covResults = window.__coverage__;
+    var grep = window.location.search.match(covGrepQueryParamRE);
+    if (grep) {
+      grep = decodeURIComponent(grep[1]);
+      covResults = _.transform(covResults, function (results, cov, filename) {
+        if (~filename.indexOf(grep)) {
+          results[filename] = cov;
+        }
+      });
+    }
 
-    var dirs = _(window.__coverage__)
+    var summary = objUtils.summarizeCoverage(covResults);
+
+    var dirs = _(covResults)
       .map(convertFile)
       .groupBy(function (file) {
         var dir = path.dirname(file.filename);
@@ -187,6 +200,7 @@ define(function (require) {
   function linkNav() {
     var headings = $('h2').toArray();
 
+    // when scrolling, highlight the related menu item
     $(window).scroll(function (e) {
       var heading = find(window.scrollY);
       if (!heading) return;
@@ -201,6 +215,7 @@ define(function (require) {
       }
     });
 
+    // find the file they are probably looking at
     function find(y) {
       var i = headings.length
         , heading;
@@ -212,6 +227,25 @@ define(function (require) {
         }
       }
     }
+
+    $('#menu').on('click', '.dirname .cov', function () {
+      var dir = $(this).parent()[0].childNodes[0].textContent;
+      var loc = window.location;
+      var proto = loc.protocol;
+      var host = loc.host;
+      var path = loc.pathname;
+      var search = loc.search;
+      var hash = loc.hash;
+
+      var grep = 'cov_grep=' + encodeURIComponent(dir);
+      if (search && search.match(covGrepQueryParamRE)) {
+        search = search.replace(covGrepQueryParamRE, grep);
+      } else {
+        search = (search ? search + '&' : '?') + grep;
+      }
+
+      window.location = path + search + hash;
+    });
   }
 
   function toSec(stats, prop) {
