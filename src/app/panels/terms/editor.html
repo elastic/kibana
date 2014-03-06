@@ -18,6 +18,10 @@
         <input type="text" class="input-small" bs-typeahead="fields.list" ng-model="panel.valuefield" ng-change="set_refresh(true)">
       </div>
       <div class="editor-option">
+          <label class="small">Raw</label>
+          <input type="checkbox" ng-model="panel.fieldraw" ng-checked="panel.fieldraw" ng-change="set_refresh(true)">
+      </div>
+      <div class="editor-option">
         <label class="small">Length</label>
         <input class="input-small" type="number" ng-model="panel.size" ng-change="set_refresh(true)">
       </div>
