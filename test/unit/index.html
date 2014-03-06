@@ -4,8 +4,8 @@ mocha.setup('bdd');
 require.config({
   baseUrl: '/src/kibana',
   paths: {
-    sinon: '../../test/utils/sinon',
-    istanbul_reporter: '../../test/utils/istanbul_reporter'
+    testUtils: '../../test/utils',
+    sinon: '../../test/utils/sinon'
   },
   shim: {
     'sinon/sinon': {
@@ -21,7 +21,9 @@ require.config({
 
 function setupCoverage(done) {
   document.title = document.title.replace('Tests', 'Coverage');
-  require(['istanbul_reporter/reporter'], function (IstanbulReporter) {
+  require([
+    'testUtils/istanbul_reporter/reporter'
+  ], function (IstanbulReporter) {
     mocha.reporter(IstanbulReporter);
     done();
   });

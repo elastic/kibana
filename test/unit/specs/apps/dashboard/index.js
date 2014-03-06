@@ -2,7 +2,6 @@ define(function (require) {
   var mocks = require('angular-mocks');
   var _ = require('lodash');
   var $ = require('jquery');
-  var sinon = require('sinon/sinon');
 
   // Load the kibana app dependencies.
   require('angular-route');
