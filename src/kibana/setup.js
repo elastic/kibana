@@ -11,28 +11,32 @@ define(function (require) {
    *
    * @param {function} done - callback
    */
-  return function SetupApp(app, done) {
+  return function prebootSetup(done) {
     // load angular deps
     require([
+      'kibana',
+
       'elasticsearch',
       'services/es',
       'services/config',
       'constants/base'
-    ], function () {
-      $(function () {
+    ], function (kibana) {
 
-        var setup = angular.module('setup', [
-          'elasticsearch',
-          'kibana/services',
-          'kibana/constants'
-        ]);
+      $(function () {
+        // create the setup module, it should require the same things
+        // that kibana currently requires, which should only include the
+        // loaded modules
+        var setup = angular.module('setup', kibana.requires);
 
         var appEl = document.createElement('div');
         var kibanaIndexExists;
 
         setup
-          .value('configFile', configFile)
-          .run(function (es, config) {
+          .value('configFile', configFile);
+
+        angular
+          .bootstrap(appEl, ['setup'])
+          .invoke(function (es, config) {
             // init the setup module
             async.series([
               async.apply(checkForKibanaIndex, es),
@@ -46,8 +50,6 @@ define(function (require) {
               return done(err);
             });
           });
-
-        angular.bootstrap(appEl, ['setup']);
 
         function checkForKibanaIndex(es, done) {
           console.log('look for kibana index');

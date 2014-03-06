@@ -1,8 +1,8 @@
 define(function (require) {
   var angular = require('angular');
 
-  angular
-    .module('kibana/directives')
+  require('modules')
+    .get('kibana/directives')
     /******
      ****** COPIED directive from angular-router
      ****** https://github.com/angular/angular.js/blob/6f0503514f/src/ngRoute/directive/ngView.js#L183

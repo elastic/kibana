@@ -1,5 +1,4 @@
 define(function (require) {
-  var angular = require('angular');
   var _ = require('lodash');
   var $ = require('jquery');
   var moment = require('moment');
@@ -8,15 +7,15 @@ define(function (require) {
   require('services/courier');
   require('directives/view');
 
-  angular
-    .module('kibana/controllers')
+  require('modules')
+    .get('kibana/controllers')
     .controller('kibana', function ($scope, courier, config, configFile) {
       $scope.apps = configFile.apps;
-      $scope.activeApp = '';
 
       $scope.$on('$locationChangeSuccess', function (event, uri) {
         if (!uri) return;
-        $scope.activeApp = uri.split('#')[1].split('/')[1];
+        var route = uri.split('#/').slice(1);
+        $scope.activeApp = route ? route[0] : null;
       });
 
       $scope.opts = {

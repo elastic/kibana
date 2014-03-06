@@ -14,10 +14,10 @@ define(function (require) {
   require('angular-route');
 
   var kibana = angular.module('kibana', [
-    // external requirements
+    // list external requirements here (modules created
+    // by the modules util are added automatically)
     'elasticsearch',
     'ngRoute'
-    // internale requirements are added by the modules.js util
   ]);
 
   // proceed once setup is complete
@@ -25,10 +25,6 @@ define(function (require) {
     kibana
       // config.js in the root
       .value('configFile', configFile)
-      // This stores the Kibana revision number, @REV@ is replaced by grunt.
-      .constant('kbnVersion', '@REV@')
-      // Use this for cache busting partials
-      .constant('cacheBust', 'cache-bust=' + Date.now())
       // setup default routes
       .config(function ($routeProvider) {
         $routeProvider
@@ -38,7 +34,7 @@ define(function (require) {
 
         configFile.apps.forEach(function (app) {
           $routeProvider.when('/' + app.id, {
-            templateUrl: '/kibana/apps/' + app.id + '/index.html'
+            templateUrl: 'kibana/apps/' + app.id + '/index.html'
           });
         });
       });
@@ -49,7 +45,7 @@ define(function (require) {
       return 'apps/' + app.id + '/index';
     })), function bootstrap() {
       $(function () {
-        angular.bootstrap(document, 'kibana');
+        angular.bootstrap(document, ['kibana']);
       });
     });
 
