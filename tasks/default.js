@@ -1,4 +1,4 @@
 // Lint and build CSS
 module.exports = function (grunt) {
-  grunt.registerTask('default', ['jshint:source', 'less', 'test']);
+  grunt.registerTask('default', ['jshint:source', 'less']);
 };
