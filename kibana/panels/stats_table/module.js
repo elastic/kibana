@@ -335,6 +335,8 @@ define([
           return;
         }
 
+        $scope.panel.error = false;
+
         var
           request,
           filter,
@@ -385,6 +387,11 @@ define([
           // populate the summary data based on the other facets
           newData = {};
 
+          // Check for error and abort if found
+          if(!(_.isUndefined(r.error))) {
+            $scope.panel.error = $scope.parse_error(r.error);
+            return;
+          }
 
           _.each(r.facets['timestamp'].terms, function (f) {
             if (!$scope.panel.show_hidden && f.term[0] === ".") {
