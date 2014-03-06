@@ -1,4 +1,6 @@
 define(function (require) {
+  require('elasticsearch');
+
   var es; // share the client amoungst all apps
   require('modules')
     .get('kibana/services')

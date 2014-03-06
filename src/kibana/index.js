@@ -23,8 +23,6 @@ define(function (require) {
   // proceed once setup is complete
   setup(function (err) {
     kibana
-      // config.js in the root
-      .value('configFile', configFile)
       // setup default routes
       .config(function ($routeProvider) {
         $routeProvider

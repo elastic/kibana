@@ -10,7 +10,7 @@ html
     script(src='/src/bower_components/requirejs/require.js')
     script(src='/src/kibana/require.config.js')
     script(type="text/javascript").
-      window.COVERAGE = !!(/coverage=true/i.test(location.search));
+      window.COVERAGE = !!(/coverage/i.test(window.location.search));
       mocha.setup('bdd');
 
       require.config({

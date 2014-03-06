@@ -1,10 +1,18 @@
-module.exports = function amdWrapMiddleware(opts) {
+module.exports = function amdRapMiddleware(opts) {
   opts = opts || {};
 
   var root = opts.root || '/';
   var path = require('path');
   var fs = require('fs');
+  var random = require('lodash').sample;
   var pathPrefix = opts.pathPrefix || '/amd-wrap/';
+
+  var rap = [
+    'yo yo yo',
+    'check it',
+    'yeeaahh!',
+    'grocery bag...'
+  ];
 
   return function (req, res, next) {
     // only allow prefixed requests
@@ -20,7 +28,11 @@ module.exports = function amdWrapMiddleware(opts) {
       // respond with the wrapped code
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/javascript');
-      res.end('define(function (require, exports, module) {\n' + contents + '\n});');
+      res.end([
+        'define(function (require, exports, module) { console.log("' + random(rap) + '");',
+        contents,
+        '\n});'
+      ].join('\n'));
     });
   };
 };

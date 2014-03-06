@@ -1,6 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var nextTick = require('utils/next_tick');
+  var configFile = require('../../config');
 
   require('services/courier');
 
@@ -10,6 +11,7 @@ define(function (require) {
 
   require('modules')
     .get('kibana/services')
+    .constant('configFile', configFile)
     .service('config', function ($q, $rootScope, courier, kbnVersion, configFile) {
       var watchers = {};
       var unwatchers = [];

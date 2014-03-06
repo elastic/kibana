@@ -1,5 +1,4 @@
 define(function (require) {
-  var angular = require('angular');
   var mocks = require('angular-mocks');
   var _ = require('lodash');
   var $ = require('jquery');
@@ -11,17 +10,11 @@ define(function (require) {
   // Load the code for the modules
   require('apps/dashboard/index');
 
-  // Create the kibana module
-  require('./mocks/modules.js');
-
-
   describe('Mapper', function () {
     var $scope;
 
     beforeEach(function () {
-
-      // Start the kibana module
-      module('kibana');
+      module('app/dashboard');
 
       // Create the scope
       inject(function ($rootScope, $controller) {
