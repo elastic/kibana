@@ -6,6 +6,7 @@ define(function (require) {
   var DataSource = require('courier/data_source/data_source');
   var Mapper = require('courier/mapper');
   var fieldMapping = require('../fixtures/field_mapping');
+  var fieldMappingWithDupes = require('../fixtures/mapping_with_dupes');
 
   var client = new elasticsearch.Client({
     host: 'localhost:9200',
@@ -28,6 +29,8 @@ define(function (require) {
       sinon.stub(client.indices, 'getFieldMapping', function (params, callback) {
         if (params.index === 'valid') {
           setTimeout(callback(undefined, fieldMapping), 0);
+        } else if (params.index === 'dupes') {
+          setTimeout(callback(undefined, fieldMappingWithDupes), 0);
         } else {
           setTimeout(callback('Error: Not Found', undefined));
         }
@@ -35,7 +38,7 @@ define(function (require) {
 
       sinon.stub(client, 'getSource', function (params, callback) {
         if (params.id === 'valid') {
-          setTimeout(callback(undefined, {'foo.bar': {'type': 'string'}}), 0);
+          setTimeout(callback(undefined, {'baz': {'type': 'long'}, 'foo.bar': {'type': 'string'}}), 0);
         } else {
           setTimeout(callback('Error: Not Found', undefined), 0);
         }
@@ -105,8 +108,6 @@ define(function (require) {
           done();
         });
       });
-
-      mapper.getFieldsFromObject.restore();
     });
 
     it('gets fields from the mapping if not already cached', function (done) {
@@ -122,9 +123,6 @@ define(function (require) {
 
         done();
       });
-
-      mapper.getFieldsFromCache.restore();
-      mapper.getFieldsFromMapping.restore();
     });
 
     it('throws an error if it is unable to cache to Elasticsearch', function (done) {
@@ -144,10 +142,6 @@ define(function (require) {
       });
 
       done();
-
-      mapper.getFieldsFromCache.restore();
-      client.index.restore();
-      courier._error.restore();
     });
 
     it('has getFields that throws an error for invalid indices', function (done) {
@@ -170,6 +164,63 @@ define(function (require) {
       mapper.clearCache(source, function () {
         expect(client.delete.called).to.be(true);
         done();
+      });
+    });
+
+    it('has a clearCache that clears the object cache', function (done) {
+      mapper.getFields(source, function (err, mapping) {
+        expect(mapper.getFieldsFromObject(source)).to.be.a(Object);
+        mapper.clearCache(source, function () {
+          expect(mapper.getFieldsFromObject(source)).to.be(false);
+          done();
+        });
+      });
+
+    });
+
+    it('has a getFieldMapping that returns the mapping for a field', function (done) {
+      mapper.getFieldMapping(source, 'foo.bar', function (err, field) {
+        expect(field).to.be.a(Object);
+        done();
+      });
+    });
+
+    it('has a getFieldMapping that returns the mapping for a field', function (done) {
+      mapper.getFieldMapping(source, 'foo.bar', function (err, field) {
+        expect(field.type).to.be('string');
+        done();
+      });
+    });
+
+    it('has a getFieldsMapping that returns the mapping for multiple fields', function (done) {
+      mapper.getFieldsMapping(source, ['foo.bar', 'baz'], function (err, mapping) {
+        expect(mapping['foo.bar'].type).to.be('string');
+        expect(mapping.baz.type).to.be('long');
+        done();
+      });
+    });
+
+    it('has a getFieldsFromMapping that throws an error if a field is defined differently in 2 indices', function (done) {
+      source = courier.createSource('search').index('dupes');
+
+      // TODO: Correctly test thrown errors.
+      sinon.stub(courier, '_error', function () { return; });
+
+      mapper.getFieldsFromMapping(source, function (err, mapping) {
+        expect(courier._error.calledOnce);
+        done();
+      });
+    });
+
+    it('has an ignoreFields that sets the type of a field to "ignore"', function (done) {
+      mapper.getFields(source, function (err, mapping) {
+        mapper.getFieldMapping(source, 'foo.bar', function (err, field) {
+          expect(field.type).to.be('string');
+          mapper.ignoreFields(source, 'foo.bar', function(err, mapping) {
+            expect(mapping['foo.bar'].type).to.be('ignore');
+            done();
+          });
+        });
       });
     });
 
