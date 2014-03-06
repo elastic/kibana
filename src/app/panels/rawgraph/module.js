@@ -45,11 +45,11 @@ function (angular, app, $, _, kbn, moment, numeral) {
       editorTabs : [
         {
           title:'Style',
-          src:'app/panels/histogram/styleEditor.html'
+          src:'app/panels/rawgraph/styleEditor.html'
         },
         {
           title:'Queries',
-          src:'app/panels/histogram/queriesEditor.html'
+          src:'app/panels/rawgraph/queriesEditor.html'
         },
       ],
       status  : "Alpha",
