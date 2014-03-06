@@ -83,7 +83,7 @@ define(function () {
           if (!type) {
             return {
               "type": {
-                __one_of: ["fs", "url"]
+                __one_of: ["fs", "url", "s3", "hdfs"]
               }
             }
           }
@@ -98,7 +98,7 @@ define(function () {
                     location: "path",
                     compress: { __one_of: [ true, false]},
                     concurrent_streams: 5,
-                    chunk_size: "1g",
+                    chunk_size: "10m",
                     max_restore_bytes_per_sec: "20mb",
                     max_snapshot_bytes_per_sec: "20mb"
                   },
@@ -108,6 +108,29 @@ define(function () {
                     },
                     url: "",
                     concurrent_streams: 5
+                  },
+                  s3: {
+                    __template: {
+                      bucket: ""
+                    },
+                    bucket: "",
+                    region: "",
+                    base_path: "",
+                    concurrent_streams: 5,
+                    chunk_size: "10m",
+                    compress: { __one_of: [ true, false]}
+                  },
+                  hdfs: {
+                    __template: {
+                      path: ""
+                    },
+                    uri: "",
+                    path: "some/path",
+                    load_defaults: { __one_of: [ true, false]},
+                    conf_location: "cfg.xml",
+                    concurrent_streams: 5,
+                    compress: { __one_of: [ true, false]},
+                    chunk_size: "10m"
                   }
                 };
 
