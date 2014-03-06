@@ -66,6 +66,11 @@ import static org.elasticsearch.common.collect.Lists.newArrayList;
 
 public class AgentService extends AbstractLifecycleComponent<AgentService> {
 
+    public static final String SETTINGS_INTERVAL = "interval";
+    public static final String SETTINGS_INDICES = "indices";
+    public static final String SETTINGS_ENABLED = "enabled";
+    public static final String SETTINGS_SHARD_STATS_ENABLED = "shard_stats.enabled";
+
     private final InternalIndicesService indicesService;
     private final NodeService nodeService;
     private final ClusterService clusterService;
@@ -82,6 +87,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
     private Collection<Exporter> exporters;
 
     private String[] indicesToExport = Strings.EMPTY_ARRAY;
+    volatile private boolean exportShardStats;
 
     private final BlockingQueue<Event> pendingEventsQueue;
 
@@ -94,8 +100,9 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
         this.indicesService = (InternalIndicesService) indicesService;
         this.clusterService = clusterService;
         this.nodeService = nodeService;
-        this.interval = componentSettings.getAsTime("interval", TimeValue.timeValueSeconds(10));
-        this.indicesToExport = componentSettings.getAsArray("indices", this.indicesToExport, true);
+        this.interval = componentSettings.getAsTime(SETTINGS_INTERVAL, TimeValue.timeValueSeconds(10));
+        this.indicesToExport = componentSettings.getAsArray(SETTINGS_INDICES, this.indicesToExport, true);
+        this.exportShardStats = componentSettings.getAsBoolean(SETTINGS_SHARD_STATS_ENABLED, false);
         this.client = client;
         this.clusterName = clusterName.value();
 
@@ -103,7 +110,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
         clusterStateEventListener = new ClusterStateListener();
         pendingEventsQueue = ConcurrentCollections.newBlockingQueue();
 
-        if (componentSettings.getAsBoolean("enabled", true)) {
+        if (componentSettings.getAsBoolean(SETTINGS_ENABLED, true)) {
             Exporter esExporter = new ESExporter(settings.getComponentSettings(ESExporter.class), clusterService, clusterName, environment, marvelPlugin);
             this.exporters = ImmutableSet.of(esExporter);
         } else {
@@ -171,7 +178,9 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
 
                     // do the actual export..., go over the actual exporters list and...
                     exportNodeStats();
-                    exportShardStats();
+                    if (exportShardStats) {
+                        exportShardStats();
+                    }
                     exportEvents();
 
                     if (clusterService.state().nodes().localNodeMaster()) {
