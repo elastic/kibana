@@ -7,8 +7,6 @@ define(function (require) {
 
   var nextTick = require('utils/next_tick');
 
-  console.log(Error);
-
   /**
    * - Resolves index patterns
    * - Fetches mappings from elasticsearch
@@ -90,10 +88,10 @@ define(function (require) {
      * @param {Function} callback A function to be executed with the results.
      */
     this.getFieldsMapping = function (dataSource, fields, callback) {
-      self.getFields(dataSource, function (err, fields) {
+      self.getFields(dataSource, function (err, map) {
         var _mapping = _.object(_.map(fields, function (field) {
-          if (_.isUndefined(fields[field])) return courier._error(new Error.FieldNotFoundInCache(field));
-          return [field, fields[field]];
+          if (_.isUndefined(map[field])) return courier._error(new Error.FieldNotFoundInCache(field));
+          return [field, map[field]];
         }));
         callback(err, _mapping);
       });
@@ -106,7 +104,7 @@ define(function (require) {
      */
     this.getFieldsFromObject = function (dataSource) {
       // don't pass pack our reference to truth, clone it
-      return !_.isUndefined(mappings[dataSource._state.index]) ? _.clone(mappings[dataSource._state.index]) : false;
+      return !_.isUndefined(mappings[dataSource.get('index')]) ? _.clone(mappings[dataSource.get('index')]) : false;
     };
 
     /**
