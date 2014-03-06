@@ -3,14 +3,20 @@ define(['_', 'kb', 'exports'], function (_, kb, exports) {
 
   var WALKER_MODE_EXPECTS_KEY = 1, WALKER_MODE_EXPECTS_CONTAINER = 2, WALKER_MODE_DONE = 3;
 
-  function RuleWalker(initialRules, scopeRules) {
+  function RuleWalker(initialRules, context, scopeRules) {
     // scopeRules are the rules used to resolve relative scope links
     if (typeof scopeRules == "undefined") {
       scopeRules = initialRules;
     }
 
+    if ((initialRules || {}).__scope_link) {
+      // normalize now
+      initialRules = getLinkedRules(initialRules.__scope_link, scopeRules, context);
+    }
+
     this._rules = initialRules;
     this._mode = WALKER_MODE_EXPECTS_CONTAINER;
+    this._context = context;
     this.scopeRules = scopeRules;
   }
 
@@ -30,7 +36,11 @@ define(['_', 'kb', 'exports'], function (_, kb, exports) {
     return "value";
   }
 
-  function getLinkedRules(link, currentRules) {
+  function getLinkedRules(link, currentRules, context) {
+    if (_.isFunction(link)) {
+      return link(context, currentRules)
+    }
+
     var link_path = link.split(".");
     var scheme_id = link_path.shift();
     var linked_rules = currentRules;
@@ -76,7 +86,7 @@ define(['_', 'kb', 'exports'], function (_, kb, exports) {
         new_rules = this._rules[token] || this._rules["*"]
           || this._rules["$FIELD$"] || this._rules["$TYPE$"]; // we accept anything for a field.
         if (new_rules && new_rules.__scope_link) {
-          new_rules = getLinkedRules(new_rules.__scope_link, this.scopeRules);
+          new_rules = getLinkedRules(new_rules.__scope_link, this.scopeRules, this._context);
         }
 
         switch (getRulesType(new_rules)) {

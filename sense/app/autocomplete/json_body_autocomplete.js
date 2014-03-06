@@ -21,9 +21,8 @@ define([
       });
     }
 
-    function getRulesForPath(rules, tokenPath, scopeRules) {
-      // scopeRules are the rules used to resolve relative scope links
-      var walker = new json_rule_walker.RuleWalker(rules, scopeRules);
+    function getRulesForPath(rules, tokenPath, context) {
+      var walker = new json_rule_walker.RuleWalker(rules, context);
       walker.walkTokenPath(tokenPath);
       return walker.getNormalizedRules();
 
@@ -47,7 +46,7 @@ define([
     function addAutocompleteForPath(autocompleteSet, rules, tokenPath, context) {
       // extracts the relevant parts of rules for tokenPath
       var initialRules = rules;
-      rules = getRulesForPath(rules, tokenPath);
+      rules = getRulesForPath(rules, tokenPath, context);
 
       // apply rule set
       var term;
@@ -85,7 +84,7 @@ define([
             while (typeof rules_for_term.__template == "undefined" &&
               typeof rules_for_term.__scope_link != "undefined"
               ) {
-              rules_for_term = json_rule_walker.getLinkedRules(rules_for_term.__scope_link, initialRules);
+              rules_for_term = json_rule_walker.getLinkedRules(rules_for_term.__scope_link, initialRules, context);
             }
 
             if (typeof rules_for_term.__template != "undefined") {

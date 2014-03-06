@@ -374,7 +374,7 @@ define([
         cursor: { row: 5, column: 21},
         initialValue: "",
         autoCompleteSet: [ 4, 5]
-      },
+      }
     ]
   );
 
@@ -572,7 +572,8 @@ define([
         "e": {},
         "f": [
           {}
-        ]
+        ],
+        "g": {}
       }
     },
     MAPPING,
@@ -604,7 +605,15 @@ define([
                 {
                   __scope_link: "ext.target"
                 }
-              ]
+              ],
+              "g": {
+                __scope_link: function () {
+                  return {
+                    "a": 1,
+                    "b": 2
+                  }
+                }
+              }
             }
           }
         },
@@ -626,7 +635,7 @@ define([
         autoCompleteSet: [
           tt("b", {}), tt("c", {}), tt("d", {}), tt("e", {}), tt("f", [
             {}
-          ])
+          ]), tt("g", {})
         ]
       },
       {
@@ -648,6 +657,44 @@ define([
         name: "A scope link within an array",
         cursor: { row: 7, column: 10},
         autoCompleteSet: [tt("t2", 1)]
+      },
+      {
+        name: "A function based scope link",
+        cursor: { row: 9, column: 12},
+        autoCompleteSet: [tt("a", 1), tt("b", 2)]
+      }
+    ]
+  );
+
+  context_tests(
+    {
+
+    },
+    MAPPING,
+    {
+      globals: {
+        gtarget: {
+          t1: 2
+        }
+      },
+      endpoints: {
+        _current: {
+          patterns: [ "_current" ],
+          id: "POST _current",
+          data_autocomplete_rules: {
+            __scope_link: "GLOBAL.gtarget"
+          }
+        }
+      }
+    },
+    "POST _current",
+    [
+      {
+        name: "Top level scope link",
+        cursor: { row: 0, column: 1},
+        autoCompleteSet: [
+          tt("t1", 2)
+        ]
       }
     ]
   );

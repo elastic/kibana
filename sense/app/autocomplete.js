@@ -202,7 +202,8 @@ define([
           endpoint: null,
           urlPath: null,
           method: null,
-          activeScheme: null
+          activeScheme: null,
+          editor: editor
         };
 
 //      context.updatedForToken = session.getTokenAt(pos.row, pos.column);
@@ -871,7 +872,7 @@ define([
       function getCompletions(aceEditor, session, pos, prefix, callback) {
 
 
-        var context = getAutoCompleteContext(aceEditor, session, pos);
+        var context = getAutoCompleteContext(editor, session, pos);
         if (!context) {
           callback(null, []);
         }

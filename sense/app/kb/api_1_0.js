@@ -14,6 +14,7 @@ define([
   './api_1_0/mappings',
   './api_1_0/misc',
   './api_1_0/query',
+  './api_1_0/snapshot_restore',
   './api_1_0/search',
   './api_1_0/settings',
   './api_1_0/templates',
