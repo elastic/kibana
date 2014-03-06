@@ -28,7 +28,10 @@ import org.elasticsearch.action.admin.indices.stats.ShardStats;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.ClusterService;
 import org.elasticsearch.cluster.routing.ShardRouting;
+import org.elasticsearch.cluster.settings.ClusterDynamicSettings;
+import org.elasticsearch.cluster.settings.DynamicSettings;
 import org.elasticsearch.common.Base64;
+import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.component.AbstractLifecycleComponent;
 import org.elasticsearch.common.inject.Inject;
@@ -40,37 +43,40 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.util.concurrent.EsExecutors;
 import org.elasticsearch.common.xcontent.*;
-import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.common.xcontent.smile.SmileXContent;
-import org.elasticsearch.env.Environment;
-import org.elasticsearch.marvel.agent.Plugin;
 import org.elasticsearch.marvel.agent.Utils;
 import org.elasticsearch.marvel.agent.event.Event;
+import org.elasticsearch.node.settings.NodeSettingsService;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class ESExporter extends AbstractLifecycleComponent<ESExporter> implements Exporter<ESExporter> {
+public class ESExporter extends AbstractLifecycleComponent<ESExporter> implements Exporter<ESExporter>, NodeSettingsService.Listener {
+
+    private static final String SETTINGS_PREFIX = "marvel.agent.exporter.es.";
+    public static final String SETTINGS_HOSTS = SETTINGS_PREFIX + "hosts";
+    public static final String SETTINGS_INDEX_PREFIX = SETTINGS_PREFIX + "index.prefix";
+    public static final String SETTINGS_INDEX_TIME_FORMAT = SETTINGS_PREFIX + "index.timeformat";
+    public static final String SETTINGS_TIMEOUT = SETTINGS_PREFIX + "timeout";
 
     volatile String[] hosts;
     final String indexPrefix;
     final DateTimeFormatter indexTimeFormatter;
-    final int timeout;
-
-    // index to upload dashboards into.
-    final String kibanaIndex;
-    final String[] dashboardPathsToUpload;
+    volatile int timeout;
 
     final ClusterService clusterService;
     final ClusterName clusterName;
 
     public final static DateTimeFormatter defaultDatePrinter = Joda.forPattern("date_time").printer();
 
-    volatile boolean checkedAndUploadedAllResources = false;
+    volatile boolean checkedAndUploadedIndexTemplate = false;
 
     final NodeStatsRenderer nodeStatsRenderer;
     final ShardStatsRenderer shardStatsRenderer;
@@ -83,38 +89,20 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     Thread keepAliveThread;
 
     @Inject
-    public ESExporter(Settings settings, ClusterService clusterService, ClusterName clusterName, Environment environment, Plugin marvelPlugin) {
+    public ESExporter(Settings settings, ClusterService clusterService, ClusterName clusterName,
+                      @ClusterDynamicSettings DynamicSettings dynamicSettings, NodeSettingsService nodeSettingsService) {
         super(settings);
 
         this.clusterService = clusterService;
 
         this.clusterName = clusterName;
 
-        hosts = componentSettings.getAsArray("es.hosts", new String[]{"localhost:9200"});
-        indexPrefix = componentSettings.get("es.index.prefix", ".marvel");
-        String indexTimeFormat = componentSettings.get("es.index.timeformat", "YYYY.MM.dd");
+        hosts = settings.getAsArray(SETTINGS_HOSTS, new String[]{"localhost:9200"});
+        indexPrefix = settings.get(SETTINGS_INDEX_PREFIX, ".marvel");
+        String indexTimeFormat = settings.get(SETTINGS_INDEX_TIME_FORMAT, "YYYY.MM.dd");
         indexTimeFormatter = DateTimeFormat.forPattern(indexTimeFormat).withZoneUTC();
 
-        timeout = (int) componentSettings.getAsTime("es.timeout", new TimeValue(6000)).seconds();
-
-        kibanaIndex = componentSettings.get("es.kibana_index", ".marvel-kibana");
-
-
-        String dashboardsBasePath = componentSettings.get("es.upload.dashboards.path");
-        File dashboardsBase;
-        if (dashboardsBasePath != null) {
-            dashboardsBase = new File(dashboardsBasePath);
-        } else {
-            dashboardsBase = new File(new File(environment.pluginsFile(), marvelPlugin.name()),
-                    "_site/app/dashboards/marvel".replace('/', File.separatorChar)
-            );
-        }
-        ArrayList<String> dashboardPaths = new ArrayList<String>();
-        for (String d : componentSettings.getAsArray("es.upload.dashboards", new String[]{})) {
-            dashboardPaths.add(new File(dashboardsBase, d).getAbsolutePath());
-        }
-
-        dashboardPathsToUpload = dashboardPaths.toArray(new String[dashboardPaths.size()]);
+        timeout = (int) settings.getAsTime(SETTINGS_TIMEOUT, new TimeValue(6000)).seconds();
 
         nodeStatsRenderer = new NodeStatsRenderer();
         shardStatsRenderer = new ShardStatsRenderer();
@@ -124,6 +112,10 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         eventsRenderer = new EventsRenderer();
 
         keepAliveWorker = new ConnectionKeepAliveWorker();
+
+        dynamicSettings.addDynamicSetting(SETTINGS_HOSTS + ".*");
+        dynamicSettings.addDynamicSetting(SETTINGS_TIMEOUT);
+        nodeSettingsService.addListener(this);
 
         logger.debug("initialized with targets: {}, index prefix [{}], index time format [{}]", hosts, indexPrefix, indexTimeFormat);
     }
@@ -179,11 +171,11 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
 
     private HttpURLConnection openExportingConnection() {
-        if (!checkedAndUploadedAllResources) {
+        if (!checkedAndUploadedIndexTemplate) {
             try {
-                checkedAndUploadedAllResources = checkAndUploadAllResources();
+                checkedAndUploadedIndexTemplate = checkAndUploadIndexTemplate();
             } catch (RuntimeException e) {
-                logger.error("failed to upload critical resources, stopping export", e);
+                logger.error("failed to upload index template, stopping export", e);
                 return null;
             }
         }
@@ -333,84 +325,16 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             }
         } finally {
             if (hostIndex > 0 && hostIndex < hosts.length) {
-                logger.debug("moving [{}] failed hosts to the end of the list", hostIndex + 1);
+                logger.debug("moving [{}] failed hosts to the end of the list", hostIndex);
                 String[] newHosts = new String[hosts.length];
                 System.arraycopy(hosts, hostIndex, newHosts, 0, hosts.length - hostIndex);
-                System.arraycopy(hosts, 0, newHosts, hosts.length - hostIndex - 1, hostIndex + 1);
+                System.arraycopy(hosts, 0, newHosts, hosts.length - hostIndex, hostIndex);
                 hosts = newHosts;
                 logger.debug("preferred target host is now [{}]", hosts[0]);
             }
         }
 
         return null;
-    }
-
-    /**
-     * Checks if resources such as index templates and dashboards already exist and if not uploads them/
-     * Any critical error that should prevent data exporting is communicated via an exception.
-     *
-     * @return true if all resources exist or are uploaded.
-     */
-    private boolean checkAndUploadAllResources() {
-        boolean ret = checkAndUploadIndexTemplate();
-        for (String dashPath : dashboardPathsToUpload) {
-            ret = checkAndUploadDashboard(dashPath) && ret;
-        }
-        return ret;
-    }
-
-    private boolean checkAndUploadDashboard(String path) {
-        logger.debug("checking/uploading [{}]", path);
-        File dashboardFile = new File(path);
-        if (!dashboardFile.exists()) {
-            logger.warn("can't upload dashboard [{}] - file doesn't exist", path);
-            return true;
-        }
-        try {
-            byte[] dashboardBytes = Streams.copyToByteArray(dashboardFile);
-            XContentParser parser = XContentHelper.createParser(dashboardBytes, 0, dashboardBytes.length);
-            XContentParser.Token token = parser.nextToken();
-            if (token == null) {
-                throw new IOException("no data");
-            }
-            if (token != XContentParser.Token.START_OBJECT) {
-                throw new IOException("should start with an object");
-            }
-            String dashboardTitle = null;
-            String currentFieldName = null;
-            while (dashboardTitle == null && (token = parser.nextToken()) != XContentParser.Token.END_OBJECT) {
-                switch (token) {
-                    case START_ARRAY:
-                        parser.skipChildren();
-                        break;
-                    case START_OBJECT:
-                        parser.skipChildren();
-                        break;
-                    case FIELD_NAME:
-                        currentFieldName = parser.currentName();
-                        break;
-                    case VALUE_STRING:
-                        if ("title".equals(currentFieldName)) {
-                            dashboardTitle = parser.text();
-                        }
-                        break;
-                }
-            }
-            if (dashboardTitle == null) {
-                throw new IOException("failed to find dashboard title");
-            }
-
-            XContentBuilder builder = JsonXContent.contentBuilder();
-            builder.startObject();
-            builder.field("title", dashboardTitle);
-            builder.field("dashboard", new String(dashboardBytes, "UTF-8"));
-            builder.endObject();
-
-            return checkAndUpload(kibanaIndex, "dashboard", dashboardTitle, builder.bytes().toBytes());
-        } catch (IOException e) {
-            logger.error("error while checking/uploading dashboard [{}]", path, e);
-            return false;
-        }
     }
 
     private String urlEncode(String s) {
@@ -465,6 +389,12 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         return hasDoc;
     }
 
+    /**
+     * Checks if the index templates already exist and if not uploads it
+     * Any critical error that should prevent data exporting is communicated via an exception.
+     *
+     * @return true if template exists or was uploaded.
+     */
     private boolean checkAndUploadIndexTemplate() {
         byte[] template;
         try {
@@ -494,6 +424,21 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             logger.error("{} response code [{} {}]. content: [{}]", msg, conn.getResponseCode(), conn.getResponseMessage(), err);
         } catch (IOException e) {
             logger.error("connection had an error while reporting the error. tough life.");
+        }
+    }
+
+    @Override
+    public void onRefreshSettings(Settings settings) {
+        TimeValue newTimeout = settings.getAsTime(SETTINGS_TIMEOUT, null);
+        if (newTimeout != null) {
+            logger.info("connection timeout set to [{}]", newTimeout);
+            timeout = (int) newTimeout.seconds();
+        }
+
+        String[] newHosts = settings.getAsArray(SETTINGS_HOSTS, null);
+        if (newHosts != null) {
+            logger.info("hosts set to [{}]", Strings.arrayToCommaDelimitedString(newHosts));
+            this.hosts = newHosts;
         }
     }
 
