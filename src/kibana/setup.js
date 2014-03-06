@@ -4,6 +4,7 @@ define(function (require) {
   var $ = require('jquery');
   var configFile = require('../config');
   var nextTick = require('utils/next_tick');
+  var modules = require('modules');
 
   /**
    * Setup the kibana application, ensuring that the kibanaIndex exists,
@@ -26,9 +27,7 @@ define(function (require) {
         // create the setup module, it should require the same things
         // that kibana currently requires, which should only include the
         // loaded modules
-        var setup = angular.module('setup');
-        var unlink = require('modules').link(setup);
-
+        var setup = modules.get('setup', ['elasticsearch']);
         var appEl = document.createElement('div');
         var kibanaIndexExists;
 
@@ -48,8 +47,8 @@ define(function (require) {
               // ready to go, remove the appEl, close services and boot be done
               angular.element(appEl).remove();
 
-              // stop adding modules to this one
-              unlink();
+              // linked modules should no longer depend on this module
+              setup.close();
 
               console.log('booting kibana');
               return done(err);
