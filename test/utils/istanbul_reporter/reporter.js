@@ -33,6 +33,8 @@ define(function (require) {
 
   var covGrepQueryParamRE = /cov_grep=([^&]+)/;
 
+  var afterDraw = window.requestAnimationFrame || function (cb) { setTimeout(cb, 500); };
+
   function IstanbulReporter(runner) {
     // "inherit" the base reporters characteristics
     Base.call(this, runner);
@@ -80,11 +82,9 @@ define(function (require) {
 
       linkNav();
       if (gotoFile) {
-        var header = document.getElementById(gotoFile.substring(1));
-        if (header) {
+        afterDraw(function () {
           window.location.hash = gotoFile;
-          document.body.scrollTop = header.offsetTop;
-        }
+        });
       }
     });
   }
