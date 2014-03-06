@@ -32,6 +32,10 @@ define(function (require) {
 
       return obj;
     };
+
+    _.forOwn(orig, function (val, name) {
+      sinon[method][name] = val;
+    });
   });
 
   afterEach(function () {
