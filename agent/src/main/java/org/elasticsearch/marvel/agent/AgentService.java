@@ -45,7 +45,6 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.util.concurrent.ConcurrentCollections;
 import org.elasticsearch.common.util.concurrent.EsExecutors;
-import org.elasticsearch.env.Environment;
 import org.elasticsearch.index.service.IndexService;
 import org.elasticsearch.index.shard.IndexShardState;
 import org.elasticsearch.index.shard.service.IndexShard;
@@ -53,13 +52,13 @@ import org.elasticsearch.indices.IndicesLifecycle;
 import org.elasticsearch.indices.IndicesService;
 import org.elasticsearch.indices.InternalIndicesService;
 import org.elasticsearch.marvel.agent.event.*;
-import org.elasticsearch.marvel.agent.exporter.ESExporter;
 import org.elasticsearch.marvel.agent.exporter.Exporter;
 import org.elasticsearch.node.service.NodeService;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
 import static org.elasticsearch.common.collect.Lists.newArrayList;
@@ -95,7 +94,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
     public AgentService(Settings settings, IndicesService indicesService,
                         NodeService nodeService, ClusterService clusterService,
                         Client client, ClusterName clusterName,
-                        Environment environment, Plugin marvelPlugin) {
+                        Set<Exporter> exporters) {
         super(settings);
         this.indicesService = (InternalIndicesService) indicesService;
         this.clusterService = clusterService;
@@ -111,8 +110,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
         pendingEventsQueue = ConcurrentCollections.newBlockingQueue();
 
         if (componentSettings.getAsBoolean(SETTINGS_ENABLED, true)) {
-            Exporter esExporter = new ESExporter(settings.getComponentSettings(ESExporter.class), clusterService, clusterName, environment, marvelPlugin);
-            this.exporters = ImmutableSet.of(esExporter);
+            this.exporters = ImmutableSet.copyOf(exporters);
         } else {
             this.exporters = ImmutableSet.of();
             logger.info("collecting disabled by settings");
