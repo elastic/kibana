@@ -26,7 +26,8 @@ define(function (require) {
         // create the setup module, it should require the same things
         // that kibana currently requires, which should only include the
         // loaded modules
-        var setup = angular.module('setup', kibana.requires);
+        var setup = angular.module('setup');
+        var unlink = require('modules').link(setup);
 
         var appEl = document.createElement('div');
         var kibanaIndexExists;
@@ -45,14 +46,17 @@ define(function (require) {
               async.apply(initConfig, config)
             ], function (err) {
               // ready to go, remove the appEl, close services and boot be done
-              appEl.remove();
-              console.log('booting application');
+              angular.element(appEl).remove();
+
+              // stop adding modules to this one
+              unlink();
+
+              console.log('booting kibana');
               return done(err);
             });
           });
 
         function checkForKibanaIndex(es, done) {
-          console.log('look for kibana index');
           es.indices.exists({
             index: configFile.kibanaIndex
           }, function (err, exists) {
