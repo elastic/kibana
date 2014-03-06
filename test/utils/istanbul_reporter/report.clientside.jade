@@ -7,7 +7,9 @@
         span.cov(class=coverageClass(cov.coverage)) #{cov.coverage | 0}
 
     for dir in cov.dirs
-      li.dirname= dir.name || '.'
+      li.dirname
+        | #{dir.name || '.'}
+        span.cov &#9733;
       for file in dir.files
         li
           span.cov(class=coverageClass(file.coverage)) #{file.coverage | 0}
@@ -262,7 +264,8 @@ style.
     color: white;
     opacity: .60;
     text-align: left;
-    padding: 15px 35px 0 20px;
+    margin: 15px 0px 0 20px;
+    padding: 0 40px 0 0;
   }
 
   #menu li .dirname {
@@ -288,6 +291,7 @@ style.
     border-radius: 10px;
     padding: 2px 3px;
     text-align: center;
+    cursor: pointer;
   }
 
   #stats:nth-child(2n) {
