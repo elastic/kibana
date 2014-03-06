@@ -1,21 +1,42 @@
-<!DOCTYPE html><html><head><title>Kibana4 Tests</title><link rel="stylesheet" href="mocha.css"></head><body><div id="mocha"></div><script src="expect.js"></script><script src="mocha.js"></script><script>mocha.setup('bdd');
-// sauce labs & selenium inject global variables that break this
-// mocha.checkLeaks();
-// mocha.globals(['mochaRunner', 'angular']);</script><script src="bower_components/requirejs/require.js"></script><script src="kibana/require.config.js"></script><script type="text/javascript">require.config({
-   paths: {
-     sinon: '../sinon' 
-   },
-   shim: {
-     'sinon/sinon': {
-       deps: [
-         'sinon/sinon-timers-1.8.2'
-       ],
-       exports: 'sinon'
-     } 
-   }
+<!DOCTYPE html><html><head><title>Kibana4 Tests</title><link rel="stylesheet" href="/node_modules/mocha/mocha.css"></head><body><div id="mocha"></div><script src="/node_modules/expect.js/expect.js"></script><script src="/node_modules/mocha/mocha.js"></script><script src="/src/bower_components/requirejs/require.js"></script><script src="/src/kibana/require.config.js"></script><script type="text/javascript">window.COVERAGE = !!(/coverage=true/i.test(location.search));
+mocha.setup('bdd');
+
+require.config({
+  baseUrl: '/src/kibana',
+  paths: {
+    sinon: '../../test/utils/sinon',
+    istanbul_reporter: '../../test/utils/istanbul_reporter'
+  },
+  shim: {
+    'sinon/sinon': {
+      deps: [
+        'sinon/sinon-timers-1.8.2'
+      ],
+      exports: 'sinon'
+    }
+  },
+  // mark all requested files with instrument query param
+  urlArgs: COVERAGE ? 'instrument=true' : void 0
 });
-require(["/fixtures/field_mapping.js","/specs/apps/dashboard/index.js","/specs/apps/dashboard/mocks/modules.js","/specs/calculate_indices.js","/specs/courier.js","/specs/data_source.js","/specs/mapper.js"], function () {
-  window.mochaRunner = mocha.run().on('end', function () {
-    window.mochaResults = this.stats;
+
+function setupCoverage(done) {
+  document.title = document.title.replace('Tests', 'Coverage');
+  require(['istanbul_reporter/reporter'], function (IstanbulReporter) {
+    mocha.reporter(IstanbulReporter);
+    done();
   });
-});</script></body></html>
+}
+
+function runTests() {
+  require(["../../test/unit/specs/apps/dashboard/index","../../test/unit/specs/apps/dashboard/mocks/modules","../../test/unit/specs/calculate_indices","../../test/unit/specs/courier","../../test/unit/specs/data_source","../../test/unit/specs/mapper"], function () {
+    window.mochaRunner = mocha.run().on('end', function () {
+      window.mochaResults = this.stats;
+    });
+  });
+}
+
+if (COVERAGE) {
+  setupCoverage(runTests);
+} else {
+  runTests();
+}</script></body></html>

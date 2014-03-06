@@ -1,12 +1,14 @@
 module.exports = {
+  options: {
+    log: true,
+    logErrors: true,
+    run: false
+  },
   unit: {
     options: {
-      log: true,
-      logErrors: true,
       urls: [
-        'http://localhost:8001/'
-      ],
-      run: false
+        'http://localhost:8000/test/unit/'
+      ]
     }
   }
 };

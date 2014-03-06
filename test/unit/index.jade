@@ -2,34 +2,53 @@ doctype html
 html
   head
     title Kibana4 Tests
-    link(rel="stylesheet", href="mocha.css")
+    link(rel="stylesheet", href='/node_modules/mocha/mocha.css')
   body
     #mocha
-    script(src="expect.js")
-    script(src="mocha.js")
-    script.
-      mocha.setup('bdd');
-      // sauce labs & selenium inject global variables that break this
-      // mocha.checkLeaks();
-      // mocha.globals(['mochaRunner', 'angular']);
-    script(src="bower_components/requirejs/require.js")
-    script(src="kibana/require.config.js")
+    script(src='/node_modules/expect.js/expect.js')
+    script(src='/node_modules/mocha/mocha.js')
+    script(src='/src/bower_components/requirejs/require.js')
+    script(src='/src/kibana/require.config.js')
     script(type="text/javascript").
+      window.COVERAGE = !!(/coverage=true/i.test(location.search));
+      mocha.setup('bdd');
+
       require.config({
-         paths: {
-           sinon: '../sinon' 
-         },
-         shim: {
-           'sinon/sinon': {
-             deps: [
-               'sinon/sinon-timers-1.8.2'
-             ],
-             exports: 'sinon'
-           } 
-         }
+        baseUrl: '/src/kibana',
+        paths: {
+          sinon: '../../test/utils/sinon',
+          istanbul_reporter: '../../test/utils/istanbul_reporter'
+        },
+        shim: {
+          'sinon/sinon': {
+            deps: [
+              'sinon/sinon-timers-1.8.2'
+            ],
+            exports: 'sinon'
+          }
+        },
+        // mark all requested files with instrument query param
+        urlArgs: COVERAGE ? 'instrument=true' : void 0
       });
-      require(!{tests}, function () {
-        window.mochaRunner = mocha.run().on('end', function () {
-          window.mochaResults = this.stats;
+
+      function setupCoverage(done) {
+        document.title = document.title.replace('Tests', 'Coverage');
+        require(['istanbul_reporter/reporter'], function (IstanbulReporter) {
+          mocha.reporter(IstanbulReporter);
+          done();
         });
-      });
+      }
+
+      function runTests() {
+        require(!{JSON.stringify(tests)}, function () {
+          window.mochaRunner = mocha.run().on('end', function () {
+            window.mochaResults = this.stats;
+          });
+        });
+      }
+
+      if (COVERAGE) {
+        setupCoverage(runTests);
+      } else {
+        runTests();
+      }

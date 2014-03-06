@@ -13,7 +13,18 @@ define(function (require) {
       expect(courier).to.be.a(Courier);
     });
 
-    it('knows when a DataSource object has event listeners for the results event');
+    it('knows when a DataSource object has event listeners for the results event', function () {
+      var courier = new Courier();
+      var ds = courier.createSource('doc');
+
+      expect(courier._openSources('doc')).to.have.length(0);
+      ds.on('results', function () {});
+      expect(courier._openSources('doc')).to.have.length(1);
+      ds.removeAllListeners('results');
+      expect(courier._openSources('doc')).to.have.length(0);
+    });
+
+
     it('executes queries on the interval for searches that have listeners for results');
 
     describe('events', function () {
