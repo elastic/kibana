@@ -1,5 +1,5 @@
 define(function (require) {
-  var module = require('angular').module('kibana/directives');
+  var module = require('modules').get('kibana/directives');
   var $ = require('jquery');
 
   module.directive('kbnInfiniteScroll', function () {

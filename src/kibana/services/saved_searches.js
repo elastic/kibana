@@ -1,6 +1,6 @@
 define(function (require) {
 
-  var module = require('angular').module('kibana/services');
+  var module = require('modules').get('kibana/services');
 
   module.service('savedSearches', function (courier, configFile, $q) {
     this.get = function (id) {
