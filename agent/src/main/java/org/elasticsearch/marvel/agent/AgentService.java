@@ -86,7 +86,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
 
     private Collection<Exporter> exporters;
 
-    private String[] indicesToExport = Strings.EMPTY_ARRAY;
+    volatile private String[] indicesToExport = Strings.EMPTY_ARRAY;
     volatile private boolean exportShardStats;
 
     private final BlockingQueue<Event> pendingEventsQueue;
@@ -204,7 +204,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
 
         private void exportIndicesStats() {
             logger.trace("local node is master, exporting indices stats");
-            IndicesStatsResponse indicesStatsResponse = client.admin().indices().prepareStats().all().get();
+            IndicesStatsResponse indicesStatsResponse = client.admin().indices().prepareStats().all().setIndices(indicesToExport).get();
             for (Exporter e : exporters) {
                 try {
                     e.exportIndicesStats(indicesStatsResponse);
