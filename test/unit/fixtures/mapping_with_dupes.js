@@ -21,6 +21,20 @@ define(function (require) {
           }
         }
       }
+    },
+    duplicates: {
+      mappings: {
+        testType: {
+          'baz': {
+            full_name: 'baz',
+            mapping: {
+              bar: {
+                type: 'date'
+              }
+            }
+          }
+        }
+      }
     }
   };
 });
