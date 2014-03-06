@@ -1,17 +1,15 @@
 define(function (require) {
-  var angular = require('angular');
   var _ = require('lodash');
-  var configFile = require('../../config');
   var nextTick = require('utils/next_tick');
 
   require('services/courier');
 
-  var module = angular.module('kibana/services');
+  var module = require('modules').get('kibana/services');
   // share doc and val cache between apps
   var doc;
   var vals = {};
 
-  module.service('config', function ($q, $rootScope, courier, kbnVersion) {
+  module.service('config', function ($q, $rootScope, courier, kbnVersion, configFile) {
     var watchers = {};
     var unwatchers = [];
 

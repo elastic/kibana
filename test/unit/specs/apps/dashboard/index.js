@@ -4,7 +4,6 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
   var sinon = require('sinon/sinon');
-  var configFile = require('configFile');
 
   // Load the kibana app dependencies.
   require('angular-route');

@@ -1,12 +1,11 @@
 define(function (require, module, exports) {
-  var angular = require('angular');
   var _ = require('lodash');
 
   require('directives/table');
   require('./field_chooser');
   require('services/saved_searches');
 
-  var app = angular.module('app/discover');
+  var app = require('modules').get('app/discover');
 
   var intervals = [
     { display: '', val: null },

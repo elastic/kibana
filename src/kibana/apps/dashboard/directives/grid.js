@@ -1,12 +1,11 @@
 define(function (require) {
-  var angular = require('angular');
   var _ = require('lodash');
   var $ = require('jquery');
 
   require('gridster');
   require('css!../../../../bower_components/gridster/dist/jquery.gridster.css');
 
-  var app = angular.module('app/dashboard');
+  var app = require('modules').get('app/dashboard');
 
   app.directive('dashboardGrid', function ($compile) {
     return {
