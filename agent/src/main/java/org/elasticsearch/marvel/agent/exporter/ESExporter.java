@@ -31,6 +31,7 @@ import org.elasticsearch.cluster.routing.ShardRouting;
 import org.elasticsearch.common.Base64;
 import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.component.AbstractLifecycleComponent;
+import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.io.Streams;
 import org.elasticsearch.common.joda.Joda;
 import org.elasticsearch.common.joda.time.format.DateTimeFormat;
@@ -81,6 +82,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     ConnectionKeepAliveWorker keepAliveWorker;
     Thread keepAliveThread;
 
+    @Inject
     public ESExporter(Settings settings, ClusterService clusterService, ClusterName clusterName, Environment environment, Plugin marvelPlugin) {
         super(settings);
 
@@ -88,17 +90,17 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
         this.clusterName = clusterName;
 
-        hosts = settings.getAsArray("es.hosts", new String[]{"localhost:9200"});
-        indexPrefix = settings.get("es.index.prefix", ".marvel");
-        String indexTimeFormat = settings.get("es.index.timeformat", "YYYY.MM.dd");
+        hosts = componentSettings.getAsArray("es.hosts", new String[]{"localhost:9200"});
+        indexPrefix = componentSettings.get("es.index.prefix", ".marvel");
+        String indexTimeFormat = componentSettings.get("es.index.timeformat", "YYYY.MM.dd");
         indexTimeFormatter = DateTimeFormat.forPattern(indexTimeFormat).withZoneUTC();
 
-        timeout = (int) settings.getAsTime("es.timeout", new TimeValue(6000)).seconds();
+        timeout = (int) componentSettings.getAsTime("es.timeout", new TimeValue(6000)).seconds();
 
-        kibanaIndex = settings.get("es.kibana_index", ".marvel-kibana");
+        kibanaIndex = componentSettings.get("es.kibana_index", ".marvel-kibana");
 
 
-        String dashboardsBasePath = settings.get("es.upload.dashboards.path");
+        String dashboardsBasePath = componentSettings.get("es.upload.dashboards.path");
         File dashboardsBase;
         if (dashboardsBasePath != null) {
             dashboardsBase = new File(dashboardsBasePath);
@@ -108,7 +110,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             );
         }
         ArrayList<String> dashboardPaths = new ArrayList<String>();
-        for (String d : settings.getAsArray("es.upload.dashboards", new String[]{})) {
+        for (String d : componentSettings.getAsArray("es.upload.dashboards", new String[]{})) {
             dashboardPaths.add(new File(dashboardsBase, d).getAbsolutePath());
         }
 
