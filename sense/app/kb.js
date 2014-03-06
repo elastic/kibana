@@ -191,7 +191,7 @@ define([
     es.addServerChangeListener(function () {
       var version = es.getVersion(), api;
       if (!version || version.length == 0) {
-        api = "kb/api_0_90";
+        api = "kb/api_1_0";
       }
       else if (version[0] === "1") {
         api = "kb/api_1_0";
