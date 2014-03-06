@@ -100,6 +100,62 @@ define(function (require) {
       });
     });
 
+
+    it('can get fields from a cached object if they have been retrieved before', function (done) {
+      sinon.spy(mapper, 'getFieldsFromObject');
+      mapper.getFields(source, function (err, mapping) {
+
+        mapper.getFields(source, function (err, mapping) {
+          expect(mapping['foo.bar'].type).to.be('string');
+          expect(mapper.getFieldsFromObject.calledOnce);
+          done();
+        });
+      });
+
+      mapper.getFieldsFromObject.restore();
+    });
+
+    it('gets fields from the mapping if not already cached', function (done) {
+      sinon.stub(mapper, 'getFieldsFromCache', function (source, callback) {
+        callback({error: 'Stubbed cache get failure'});
+      });
+
+      sinon.spy(mapper, 'getFieldsFromMapping');
+
+      mapper.getFields(source, function (err, mapping) {
+        expect(mapping['foo.bar'].type).to.be('string');
+        expect(mapper.getFieldsFromMapping.calledOnce);
+
+        done();
+      });
+
+      mapper.getFieldsFromCache.restore();
+      mapper.getFieldsFromMapping.restore();
+    });
+
+    it('throws an error if it is unable to cache to Elasticsearch', function (done) {
+      sinon.stub(mapper, 'getFieldsFromCache', function (source, callback) {
+        callback({error: 'Stubbed failure'});
+      });
+
+      sinon.stub(client, 'index', function (params, callback) {
+        callback({error: 'Stubbed cache write failure'});
+      });
+
+      // TODO: Correctly test thrown errors.
+      sinon.stub(courier, '_error', function () { return; });
+
+      mapper.getFields(source, function (err, mapping) {
+        expect(courier._error.calledOnce);
+      });
+
+      done();
+
+      mapper.getFieldsFromCache.restore();
+      client.index.restore();
+      courier._error.restore();
+    });
+
     it('has getFields that throws an error for invalid indices', function (done) {
       source = courier.createSource('search')
         .index('invalid')
