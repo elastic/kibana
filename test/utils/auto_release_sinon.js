@@ -28,6 +28,8 @@ define(function (require) {
       // after each test this list is cleared
       toRestore.push(obj);
 
+      if (typeof modify === 'function') modify(obj);
+
       return obj;
     };
   });
