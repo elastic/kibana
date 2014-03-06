@@ -464,8 +464,8 @@ function (angular, app, $, _, kbn, moment, numeral) {
           // Populate from the query service
           try {
             _.each(data,function(series) {
-              series.label = scope.plotseries.alias;
-              series.color = scope.plotseries.color;
+              series.label = series.info.alias;
+              series.color = series.info.color;
             });
           } catch(e) {
             elem.text("Something is wrong about alias series or color series");

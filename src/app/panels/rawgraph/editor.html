@@ -18,11 +18,11 @@
         </tr>
       </table>
     </div>
-    <div class="span4" ng-hide="panel.series.length>=10">
-      <h4>Add a serie {{_panel.series.length}}!</h4>
+    <div class="span4" ng-show="panel.series.length < 10">
+      <h4>Add a serie</h4>
       <button ng-click="add_series();" class="btn btn-info ">Add <i class="icon-plus"></i></button>
       <label class="small">Value field (<strong>must</strong> be a numeric type)</label>
-      <label class="small">Maximum 10 series</label>
+      <label class="small">Maximum: 10 series</label>
     </div>
   </div>
   <div class="section">
