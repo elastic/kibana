@@ -94,7 +94,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
         this.indicesService = (InternalIndicesService) indicesService;
         this.clusterService = clusterService;
         this.nodeService = nodeService;
-        this.interval = componentSettings.getAsTime("interval", TimeValue.timeValueSeconds(5));
+        this.interval = componentSettings.getAsTime("interval", TimeValue.timeValueSeconds(10));
         this.indicesToExport = componentSettings.getAsArray("indices", this.indicesToExport, true);
         this.client = client;
         this.clusterName = clusterName.value();
