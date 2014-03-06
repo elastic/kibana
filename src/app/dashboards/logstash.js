@@ -12,6 +12,8 @@
  * split :: The character to split the queries on Default: ','
  * query :: By default, a comma separated list of queries to run. Default: *
  *
+ * start :: Search time start from, eg 2014-03-02T14:00:00.000Z
+ * stop :: Search time until, eg 2014-03-02T14:00:00.000Z
  * from :: Search this amount of time back, eg 15m, 1h, 2d. Default: 15m
  * timefield :: The field containing the time to filter on, Default: @timestamp
  *
@@ -88,8 +90,8 @@ dashboard.services.query = {
 dashboard.services.filter = {
   list: {
     0: {
-      from: "now-"+(ARGS.from||_d_timespan),
-      to: "now",
+      from: (ARGS.start||"now-"+(ARGS.from||_d_timespan)),
+      to: (ARGS.stop||"now"),
       field: ARGS.timefield||"@timestamp",
       type: "time",
       active: true,
