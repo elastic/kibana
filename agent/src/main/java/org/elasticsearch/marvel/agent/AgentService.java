@@ -36,6 +36,8 @@ import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.cluster.routing.IndexRoutingTable;
 import org.elasticsearch.cluster.routing.IndexShardRoutingTable;
 import org.elasticsearch.cluster.routing.ShardRouting;
+import org.elasticsearch.cluster.settings.ClusterDynamicSettings;
+import org.elasticsearch.cluster.settings.DynamicSettings;
 import org.elasticsearch.common.Nullable;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.collect.ImmutableSet;
@@ -45,7 +47,6 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.util.concurrent.ConcurrentCollections;
 import org.elasticsearch.common.util.concurrent.EsExecutors;
-import org.elasticsearch.env.Environment;
 import org.elasticsearch.index.service.IndexService;
 import org.elasticsearch.index.shard.IndexShardState;
 import org.elasticsearch.index.shard.service.IndexShard;
@@ -53,18 +54,24 @@ import org.elasticsearch.indices.IndicesLifecycle;
 import org.elasticsearch.indices.IndicesService;
 import org.elasticsearch.indices.InternalIndicesService;
 import org.elasticsearch.marvel.agent.event.*;
-import org.elasticsearch.marvel.agent.exporter.ESExporter;
 import org.elasticsearch.marvel.agent.exporter.Exporter;
 import org.elasticsearch.node.service.NodeService;
+import org.elasticsearch.node.settings.NodeSettingsService;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
 import static org.elasticsearch.common.collect.Lists.newArrayList;
 
-public class AgentService extends AbstractLifecycleComponent<AgentService> {
+public class AgentService extends AbstractLifecycleComponent<AgentService> implements NodeSettingsService.Listener {
+
+    public static final String SETTINGS_INTERVAL = "marvel.agent.interval";
+    public static final String SETTINGS_INDICES = "marvel.agent.indices";
+    public static final String SETTINGS_ENABLED = "marvel.agent.enabled";
+    public static final String SETTINGS_SHARD_STATS_ENABLED = "marvel.agent.shard_stats.enabled";
 
     private final InternalIndicesService indicesService;
     private final NodeService nodeService;
@@ -75,13 +82,14 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
     private final IndicesLifecycle.Listener indicesLifeCycleListener;
     private final ClusterStateListener clusterStateEventListener;
 
-    private volatile ExportingWorker exp;
-    private volatile Thread thread;
-    private final TimeValue interval;
+    private volatile ExportingWorker exportingWorker;
+    private volatile Thread workerThread;
+    private volatile long samplingInterval;
+    volatile private String[] indicesToExport = Strings.EMPTY_ARRAY;
+    volatile private boolean exportShardStats;
 
     private Collection<Exporter> exporters;
 
-    private String[] indicesToExport = Strings.EMPTY_ARRAY;
 
     private final BlockingQueue<Event> pendingEventsQueue;
 
@@ -89,13 +97,16 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
     public AgentService(Settings settings, IndicesService indicesService,
                         NodeService nodeService, ClusterService clusterService,
                         Client client, ClusterName clusterName,
-                        Environment environment, Plugin marvelPlugin) {
+                        NodeSettingsService nodeSettingsService,
+                        @ClusterDynamicSettings DynamicSettings dynamicSettings,
+                        Set<Exporter> exporters) {
         super(settings);
         this.indicesService = (InternalIndicesService) indicesService;
         this.clusterService = clusterService;
         this.nodeService = nodeService;
-        this.interval = componentSettings.getAsTime("interval", TimeValue.timeValueSeconds(5));
-        this.indicesToExport = componentSettings.getAsArray("indices", this.indicesToExport, true);
+        this.samplingInterval = settings.getAsTime(SETTINGS_INTERVAL, TimeValue.timeValueSeconds(10)).millis();
+        this.indicesToExport = settings.getAsArray(SETTINGS_INDICES, this.indicesToExport, true);
+        this.exportShardStats = settings.getAsBoolean(SETTINGS_SHARD_STATS_ENABLED, false);
         this.client = client;
         this.clusterName = clusterName.value();
 
@@ -103,12 +114,36 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
         clusterStateEventListener = new ClusterStateListener();
         pendingEventsQueue = ConcurrentCollections.newBlockingQueue();
 
-        if (componentSettings.getAsBoolean("enabled", true)) {
-            Exporter esExporter = new ESExporter(settings.getComponentSettings(ESExporter.class), clusterService, clusterName, environment, marvelPlugin);
-            this.exporters = ImmutableSet.of(esExporter);
+        if (settings.getAsBoolean(SETTINGS_ENABLED, true)) {
+            this.exporters = ImmutableSet.copyOf(exporters);
         } else {
             this.exporters = ImmutableSet.of();
             logger.info("collecting disabled by settings");
+        }
+
+        nodeSettingsService.addListener(this);
+        dynamicSettings.addDynamicSetting(SETTINGS_INTERVAL);
+        dynamicSettings.addDynamicSetting(SETTINGS_INDICES + ".*"); // array settings
+    }
+
+    protected void applyIntervalSettings() {
+        if (samplingInterval <= 0) {
+            logger.info("data sampling is disabled due to interval settings [{}]", samplingInterval);
+            if (workerThread != null) {
+
+                // notify  worker to stop on its leisure, not to disturb an exporting operation
+                exportingWorker.closed = true;
+
+                exportingWorker = null;
+                workerThread = null;
+            }
+        } else if (workerThread == null || !workerThread.isAlive()) {
+
+            exportingWorker = new ExportingWorker();
+            workerThread = new Thread(exportingWorker, EsExecutors.threadName(settings, "marvel.exporters"));
+            workerThread.setDaemon(true);
+            workerThread.start();
+
         }
     }
 
@@ -120,13 +155,10 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
         for (Exporter e : exporters)
             e.start();
 
-        this.exp = new ExportingWorker();
-        this.thread = new Thread(exp, EsExecutors.threadName(settings, "marvel.exporters"));
-        this.thread.setDaemon(true);
-        this.thread.start();
-
         indicesService.indicesLifecycle().addListener(indicesLifeCycleListener);
         clusterService.addLast(clusterStateEventListener);
+
+        applyIntervalSettings();
     }
 
     @Override
@@ -134,19 +166,20 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
         if (exporters.size() == 0) {
             return;
         }
-        this.exp.closed = true;
-        this.thread.interrupt();
-        try {
-            this.thread.join(60000);
-        } catch (InterruptedException e) {
-            // we don't care...
+        if (workerThread != null && workerThread.isAlive()) {
+            exportingWorker.closed = true;
+            workerThread.interrupt();
+            try {
+                workerThread.join(60000);
+            } catch (InterruptedException e) {
+                // we don't care...
+            }
         }
         for (Exporter e : exporters)
             e.stop();
 
         indicesService.indicesLifecycle().removeListener(indicesLifeCycleListener);
         clusterService.remove(clusterStateEventListener);
-
     }
 
     @Override
@@ -155,23 +188,41 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
             e.close();
     }
 
+    @Override
+    public void onRefreshSettings(Settings settings) {
+        TimeValue newSamplingInterval = settings.getAsTime(SETTINGS_INTERVAL, null);
+        if (newSamplingInterval != null) {
+            logger.info("sampling interval updated to [{}]", newSamplingInterval);
+            samplingInterval = newSamplingInterval.millis();
+            applyIntervalSettings();
+        }
+
+        String[] indices = settings.getAsArray(SETTINGS_INDICES, null, true);
+        if (indices != null) {
+            logger.info("sampling indices updated to [{}]", Strings.arrayToCommaDelimitedString(indices));
+            indicesToExport = indices;
+        }
+    }
+
     class ExportingWorker implements Runnable {
 
-        volatile boolean closed;
+        volatile boolean closed = false;
 
         @Override
         public void run() {
             while (!closed) {
                 // sleep first to allow node to complete initialization before collecting the first start
                 try {
-                    Thread.sleep(interval.millis());
+                    Thread.sleep(samplingInterval);
                     if (closed) {
                         continue;
                     }
 
                     // do the actual export..., go over the actual exporters list and...
                     exportNodeStats();
-                    exportShardStats();
+                    if (exportShardStats) {
+                        exportShardStats();
+                    }
                     exportEvents();
 
                     if (clusterService.state().nodes().localNodeMaster()) {
@@ -195,7 +246,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
 
         private void exportIndicesStats() {
             logger.trace("local node is master, exporting indices stats");
-            IndicesStatsResponse indicesStatsResponse = client.admin().indices().prepareStats().all().get();
+            IndicesStatsResponse indicesStatsResponse = client.admin().indices().prepareStats().all().setIndices(indicesToExport).get();
             for (Exporter e : exporters) {
                 try {
                     e.exportIndicesStats(indicesStatsResponse);
@@ -282,9 +333,15 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
 
         @Override
         public void clusterChanged(ClusterChangedEvent event) {
+            if (samplingInterval <= 0) {
+                // ignore as we're not sampling
+                return;
+            }
+
             if (!event.localNodeMaster()) {
                 return;
             }
+
             // only collect if i'm master.
             long timestamp = System.currentTimeMillis();
 
@@ -456,7 +513,10 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> {
 
         @Override
         public void indexShardStateChanged(IndexShard indexShard, @Nullable IndexShardState previousState, IndexShardState currentState, @Nullable String reason) {
-
+            if (samplingInterval <= 0) {
+                // ignore as we're not sampling
+                return;
+            }
             DiscoveryNode relocatingNode = null;
             if (indexShard.routingEntry() != null) {
                 if (indexShard.routingEntry().relocatingNodeId() != null) {

@@ -22,7 +22,6 @@ package org.elasticsearch.marvel.agent;
 import org.elasticsearch.Version;
 import org.elasticsearch.common.collect.ImmutableList;
 import org.elasticsearch.common.component.LifecycleComponent;
-import org.elasticsearch.common.inject.AbstractModule;
 import org.elasticsearch.common.inject.Module;
 import org.elasticsearch.common.logging.ESLogger;
 import org.elasticsearch.common.logging.Loggers;
@@ -71,14 +70,7 @@ public class Plugin extends AbstractPlugin {
         if (!enabled) {
             return ImmutableList.of();
         }
-        Module m = new AbstractModule() {
-
-            @Override
-            protected void configure() {
-                bind(AgentService.class).asEagerSingleton();
-            }
-        };
-        return ImmutableList.of(m);
+        return ImmutableList.of((Module) new AgentModule());
     }
 
     @Override
