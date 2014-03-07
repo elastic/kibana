@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Kibana4 Tests</title>
+    <link rel="stylesheet" href="/node_modules/mocha/mocha.css" />
+    <script src="/node_modules/expect.js/expect.js"></script>
+    <script src="/node_modules/mocha/mocha.js"></script>
+    <script src="/src/bower_components/requirejs/require.js"></script>
+    <script src="/src/kibana/require.config.js"></script>
+    <script>(function () {
+      var COVERAGE = !!(/coverage/i.test(window.location.search));
+
+      mocha.setup({
+        ui: 'bdd',
+        reporter: 'html'
+      });
+
+      require.config({
+        baseUrl: '/src/kibana',
+        paths: {
+          test_utils: '../../test/utils',
+          fixtures: '../../test/unit/fixtures',
+          specs: '../../test/unit/specs',
+          sinon: '../../test/utils/sinon'
+        },
+        shim: {
+          'sinon/sinon': {
+            deps: [
+              'sinon/sinon-timers-1.8.2'
+            ],
+            exports: 'sinon'
+          }
+        },
+        // mark all requested files with instrument query param
+        urlArgs: COVERAGE ? 'instrument=true' : void 0
+      });
+
+      function setupCoverage(done) {
+        document.title = document.title.replace('Tests', 'Coverage');
+        require([
+          'test_utils/istanbul_reporter/reporter'
+        ], function (IstanbulReporter) {
+          mocha.reporter(IstanbulReporter);
+          done();
+        });
+      }
+
+      function runTests() {
+        require([
+          'sinon/sinon',
+          'specs/apps/dashboard/index',
+          'specs/courier/index'
+        ], function (sinon) {
+
+          var xhr = sinon.useFakeXMLHttpRequest();
+          xhr.onCreate = function () {
+            throw new Error('Tests should not be sending XHR requests');
+          };
+
+          window.mochaRunner = mocha.run().on('end', function () {
+            window.mochaResults = this.stats;
+            xhr.restore();
+          });
+        });
+      }
+
+      if (COVERAGE) {
+        setupCoverage(runTests);
+      } else {
+        runTests();
+      }
+
+    })();</script>
+  </head>
+  <body><div id="mocha"></div></body>
+</html>
