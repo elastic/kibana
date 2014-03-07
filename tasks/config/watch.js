@@ -1,5 +1,5 @@
 module.exports = function (grunt) {
-  return {
+  var config = {
     test: {
       files: [
         '<%= unitTestDir %>/**/*.js'
@@ -26,4 +26,11 @@ module.exports = function (grunt) {
       tasks: ['jade:clientside']
     }
   };
+
+  if (grunt.option('no-test-watcher')) {
+    // unset the test watcher
+    delete config.test;
+  }
+
+  return config;
 };
