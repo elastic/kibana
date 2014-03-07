@@ -41,6 +41,13 @@ module.exports = function (grunt) {
           // standard static middleware reading from the root
           stack.push(connect.static(root));
 
+          stack.push(function (req, res, next) {
+            if (req.method !== 'HEAD' || req.url !== '/') return next();
+            res.statusCode === 200;
+            res.setHeader('Pong', 'Kibana 4 Dev Server');
+            res.end();
+          });
+
           // redirect requests for '/' to '/src/'
           stack.push(function (req, res, next) {
             if (req.url !== '/') return next();

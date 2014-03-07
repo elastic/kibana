@@ -2,19 +2,19 @@ module.exports = function (grunt) {
   /* jshint scripturl:true */
   grunt.registerTask('test', [
     'jshint',
-    'connect:dev',
+    'maybe_start_server',
     'jade',
     'mocha:unit'
   ]);
 
   grunt.registerTask('coverage', [
     'blanket',
-    'connect:dev',
+    'maybe_start_server',
     'mocha:coverage'
   ]);
 
   grunt.registerTask('test:watch', [
-    'connect:dev',
+    'maybe_start_server',
     'watch:test'
   ]);
 };
