@@ -9,7 +9,7 @@ define(function (require) {
   // Load the code for the modules
   require('apps/dashboard/index');
 
-  describe('Mapper', function () {
+  describe('Dashboard app', function () {
     var $scope;
 
     beforeEach(function () {
