@@ -8,14 +8,16 @@ define(function (require) {
     var courier = new Courier();
     describe('::new', function () {
       it('optionally accepts a json object/string that will populate the DataSource object with settings', function () {
-        var savedState = JSON.stringify({
+        var initialState = {
           _type: 'doc',
           index: 'logstash-[YYYY-MM-DD]',
           type: 'nginx',
           id: '1'
-        });
-        var source = new DocSource(courier, savedState);
-        expect(source + '').to.eql(savedState);
+        };
+        expect((new DocSource(courier, initialState)).toJSON()).to.eql(initialState);
+
+        var savedState = JSON.stringify(initialState);
+        expect(String(new DocSource(courier, savedState))).to.eql(savedState);
       });
     });
 

@@ -42,28 +42,28 @@ define(function (require) {
     // always callback asynchronously
     if (!allRefs.length) return nextTick(cb);
 
-    return client.mget({ body: body })
-      .then(function (resp) {
-        _.each(resp.docs, function (resp, i) {
-          var ref = allRefs[i];
-          var source = ref.source;
+    return client.mget({ body: body }, function (err, resp) {
+      if (err) return cb(err);
 
-          if (resp.error) return source._error(new FetchFailure(resp));
-          if (resp.found) {
-            if (ref.version === resp._version) return; // no change
-            ref.version = resp._version;
-            source._storeVersion(resp._version);
-          } else {
-            ref.version = void 0;
-            source._clearVersion();
-          }
-          source._previousResult = resp;
-          source.emit('results', resp);
-        });
+      _.each(resp.docs, function (resp, i) {
+        var ref = allRefs[i];
+        var source = ref.source;
 
-        cb(void 0, resp);
-      })
-      .catch(cb);
+        if (resp.error) return source._error(new FetchFailure(resp));
+        if (resp.found) {
+          if (ref.version === resp._version) return; // no change
+          ref.version = resp._version;
+          source._storeVersion(resp._version);
+        } else {
+          ref.version = void 0;
+          source._clearVersion();
+        }
+        source._previousResult = resp;
+        source.emit('results', resp);
+      });
+
+      cb(void 0, resp);
+    });
   };
 
   /**
