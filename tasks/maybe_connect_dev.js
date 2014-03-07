@@ -11,7 +11,7 @@ module.exports = function (grunt) {
 
     function onResponse(res) {
       if (res.headers.pong === 'Kibana 4 Dev Server') {
-        grunt.log.write('server already started');
+        grunt.log.writeln('server already started');
       } else {
         grunt.log.error('another server is already running at localhost:8000!');
       }
