@@ -165,7 +165,7 @@ function (angular, app, kbn, _, ga) {
 
     // Checks if we should send a report
     var checkReport = function() {
-      if(marvelOpts.report) {
+      if(marvelOpts.version && marvelOpts.report) {
         if(marvelOpts.lastReport == null) {
           return true;
         } else if (new Date().getTime() - parseInt(marvelOpts.lastReport,10) > reportInterval) {
