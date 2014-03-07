@@ -21,7 +21,7 @@ module.exports = function (grunt) {
     },
     clientside_jade: {
       files: [
-        '<%= testUtilsDir %>/istanbul_reporter/report.clientside-jade'
+        '<%= testUtilsDir %>/istanbul_reporter/report.clientside.jade'
       ],
       tasks: ['jade:clientside']
     }
