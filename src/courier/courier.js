@@ -31,13 +31,19 @@ define(function (require) {
         });
       }
 
-      courier._activeSearchRequest = SearchSource.fetch(
+      var aborter = SearchSource.fetch(
         courier,
         courier._refs.search,
         function (err) {
           if (err) return courier._error(err);
           courier._activeSearchRequest = null;
-        });
+        }
+      );
+
+      // if there was an error, this might not be set, but
+      // we should still pretend for now that there is an active
+      // request to make behavior predictable
+      courier._activeSearchRequest = aborter || true;
     },
 
     // validate that all of the DocSource objects are up to date
@@ -133,10 +139,14 @@ define(function (require) {
         courier._schedule(type);
       };
 
-      // create a public setter for this interval type
+      // create a public getter/setter for this interval type
       this[publicName] = function (val) {
+        // getter
+        if (val === void 0) return courier._interval[type];
+
+        // setter
         courier._interval[type] = val;
-        courier._schedule(type);
+        if (courier.running()) courier._schedule(type);
         return this;
       };
     }, this);
@@ -186,7 +196,10 @@ define(function (require) {
   // should call abort before calling .fetch()
   Courier.prototype.abort = function () {
     if (this._activeSearchRequest) {
-      this._activeSearchRequest.abort();
+      // the .fetch method might not return a
+      if (typeof this._activeSearchRequest.abort === 'function') {
+        this._activeSearchRequest.abort();
+      }
       this._activeSearchRequest = null;
     }
   };
