@@ -42,9 +42,15 @@ html
       }
 
       function runTests() {
-        require(!{JSON.stringify(tests)}, function () {
+        require(['sinon/sinon'].concat(!{JSON.stringify(tests)}), function (sinon) {
+          var xhr = sinon.useFakeXMLHttpRequest();
+          xhr.onCreate = function () {
+            throw new Error('Tests should not be sending XHR requests');
+          };
+
           window.mochaRunner = mocha.run().on('end', function () {
             window.mochaResults = this.stats;
+            xhr.restore();
           });
         });
       }

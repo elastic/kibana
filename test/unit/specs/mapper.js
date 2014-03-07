@@ -18,7 +18,7 @@ define(function (require) {
   });
 
   describe('Mapper', function () {
-    var server, source, mapper;
+    var source, mapper;
 
     beforeEach(function () {
       source = courier.createSource('search')
@@ -46,7 +46,7 @@ define(function (require) {
       });
 
       sinon.stub(client, 'delete', function (params, callback) {
-        callback(undefined, true);
+        nextTick(callback, undefined, true);
       });
     });
 
@@ -116,6 +116,10 @@ define(function (require) {
         callback({error: 'Stubbed cache get failure'});
       });
 
+      sinon.stub(client, 'index', function (params, callback) {
+        nextTick(callback, null, {});
+      });
+
       sinon.spy(mapper, 'getFieldsFromMapping');
 
       mapper.getFields(source, function (err, mapping) {
@@ -149,16 +153,15 @@ define(function (require) {
       source = courier.createSource('search')
         .index('invalid')
         .size(5);
-      try {
-        mapper.getFields(source, function (err, mapping) {
-          // Should not be called
-          expect('the callback').to.be('not executed');
-          done();
-        });
-      } catch (e) {
-        expect(true).to.be(true);
+
+      sinon.stub(client, 'index', function (params, callback) {
+        nextTick(callback, undefined, {});
+      });
+
+      mapper.getFields(source, function (err, mapping) {
+        expect(err).to.be.ok();
         done();
-      }
+      });
     });
 
     it('has a clearCache that calls client.delete', function (done) {
