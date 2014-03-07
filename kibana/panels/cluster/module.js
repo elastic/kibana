@@ -14,9 +14,10 @@ define([
   'app',
   'kbn',
   'lodash',
+  '/common/analytics.js',
   'factories/store'
 ],
-function (angular, app, kbn, _) {
+function (angular, app, kbn, _, ga) {
   'use strict';
 
   var module = angular.module('kibana.panels.marvel.cluster', []);
@@ -48,7 +49,6 @@ function (angular, app, kbn, _) {
 
     $scope.init = function () {
       $scope.kbnVersion = kbnVersion;
-      $scope.report = marvelOpts.report;
 
       // If the user hasn't opted in or out, ask them to.
       if(marvelOpts.version == null || marvelOpts.version !== kbnVersion) {
@@ -138,7 +138,7 @@ function (angular, app, kbn, _) {
     $scope.setOptIn = function(val) {
       marvelOpts.version = kbnVersion;
       marvelOpts.report = val;
-      $scope.report = val;
+      if (val) ga.pageview();
     };
 
     $scope.clearMarvelStorage = function() {
@@ -165,7 +165,7 @@ function (angular, app, kbn, _) {
 
     // Checks if we should send a report
     var checkReport = function() {
-      if(marvelOpts.report) {
+      if(marvelOpts.version && marvelOpts.report) {
         if(marvelOpts.lastReport == null) {
           return true;
         } else if (new Date().getTime() - parseInt(marvelOpts.lastReport,10) > reportInterval) {
@@ -177,7 +177,7 @@ function (angular, app, kbn, _) {
         return false;
       }
     };
-
+    
     var sendReport = function(data) {
       if (!$scope.config.stats_report_url) {
         return;

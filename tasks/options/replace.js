@@ -11,6 +11,10 @@ module.exports = function (config) {
           {
             match: 'stats_report_url',
             replacement: '<%= statsReportUrl.dev %>',
+          },
+          {
+            match: 'ga_tracking_code',
+            replacement: '<%= ga_tracking_code.dev %>',
           }
         ]
       },
@@ -28,6 +32,10 @@ module.exports = function (config) {
           {
             match: 'stats_report_url',
             replacement: '<%= statsReportUrl.dist %>',
+          },
+          {
+            match: 'ga_tracking_code',
+            replacement: '<%= ga_tracking_code.dist %>',
           }
         ]
       },

@@ -14,6 +14,10 @@ module.exports = function (grunt) {
       dev: '":'+ (grunt.option('es_port') ||  9200) +'"',
       dist: "(window.location.port !== '' ? ':'+window.location.port : '')"
     },
+    ga_tracking_code: {
+      dev: '"UA-12395217-6"',
+      dist: '"UA-12395217-5"'
+    },
     statsReportUrl: {
       dev: '"http://" + window.location.hostname + ":'+ (grunt.option('es_port') ||  9200) +'/.marvel_cluster_report/report"',
       dist: '"https://marvel-stats.elasticsearch.com/"'
