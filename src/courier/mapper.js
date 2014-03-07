@@ -50,11 +50,11 @@ define(function (require) {
           if (err) {
             // If we are unable to get the fields from cache, get them from mapping
             self.getFieldsFromMapping(dataSource, function (err, fields) {
-              if (err) return courier._error(err);
+              if (err) return callback(err);
 
               // And then cache them
               cacheFieldsToElasticsearch(config, dataSource._state.index, fields, function (err, response) {
-                if (err) return courier._error(new CacheWriteFailure());
+                if (err) return callback(new CacheWriteFailure());
               });
 
               cacheFieldsToObject(dataSource, fields);
