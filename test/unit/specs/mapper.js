@@ -7,6 +7,7 @@ define(function (require) {
   var Mapper = require('courier/mapper');
   var fieldMapping = require('../fixtures/field_mapping');
   var fieldMappingWithDupes = require('../fixtures/mapping_with_dupes');
+  var nextTick = require('utils/next_tick');
 
   var client = new elasticsearch.Client({
     host: 'localhost:9200',
@@ -28,19 +29,19 @@ define(function (require) {
       // Stub out a mini mapping response.
       sinon.stub(client.indices, 'getFieldMapping', function (params, callback) {
         if (params.index === 'valid') {
-          setTimeout(callback(undefined, fieldMapping), 0);
+          nextTick(callback, undefined, fieldMapping);
         } else if (params.index === 'dupes') {
-          setTimeout(callback(undefined, fieldMappingWithDupes), 0);
+          nextTick(callback, undefined, fieldMappingWithDupes);
         } else {
-          setTimeout(callback('Error: Not Found', undefined));
+          nextTick(callback, new Error('Error: Not Found'), undefined);
         }
       });
 
       sinon.stub(client, 'getSource', function (params, callback) {
         if (params.id === 'valid') {
-          setTimeout(callback(undefined, {'baz': {'type': 'long'}, 'foo.bar': {'type': 'string'}}), 0);
+          nextTick(callback, undefined, {'baz': {'type': 'long'}, 'foo.bar': {'type': 'string'}});
         } else {
-          setTimeout(callback('Error: Not Found', undefined), 0);
+          nextTick(callback, new Error('Error: Not Found'), undefined);
         }
       });
 
@@ -70,7 +71,7 @@ define(function (require) {
 
       mapper.getFieldsFromCache(source, function (err, mapping) {
         expect(client.getSource.called).to.be(true);
-        expect(err).to.be('Error: Not Found');
+        expect(err.message).to.be('Error: Not Found');
         done();
       });
     });
