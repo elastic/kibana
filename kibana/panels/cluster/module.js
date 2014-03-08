@@ -14,7 +14,7 @@ define([
   'app',
   'kbn',
   'lodash',
-  '/common/analytics.js',
+  '../../../../../common/analytics',
   'factories/store'
 ],
 function (angular, app, kbn, _, ga) {
@@ -138,7 +138,9 @@ function (angular, app, kbn, _, ga) {
     $scope.setOptIn = function(val) {
       marvelOpts.version = kbnVersion;
       marvelOpts.report = val;
-      if (val) ga.pageview();
+      if (val) {
+        ga.pageview();
+      }
     };
 
     $scope.clearMarvelStorage = function() {

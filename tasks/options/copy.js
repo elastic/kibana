@@ -42,6 +42,13 @@ module.exports = function (config) {
           cwd: 'kibana/panels',
           src: '**',
           dest: '<%= buildTempDir %>/src/app/panels/marvel'
+        },
+        // Copy the common/analyitcs.js in for the build
+        {
+          cwd: '.',
+          expand: true,
+          src: ['./common/**/*.js'],
+          dest: '<%= buildTempDir %>'
         }
       ]
     }

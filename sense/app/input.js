@@ -5,7 +5,7 @@ define([
   'mappings',
   'output',
   'sense_editor/editor',
-  'settings',
+  'sense_settings',
   'require',
   'utils',
   'zeroclip',

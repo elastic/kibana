@@ -1,6 +1,6 @@
 define([
   'ace',
-  'settings',
+  'sense_settings',
   'jquery'
 ], function (ace, settings, $) {
   'use strict';
