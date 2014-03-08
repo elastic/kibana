@@ -1,6 +1,6 @@
 define(function (require) {
   'use strict';
-  var config = require('/kibana/config.js');
+  var config = require('config');
   var loaded = false;
 
   window.GoogleAnalyticsObject = 'ga';
@@ -16,7 +16,9 @@ define(function (require) {
 
   // create the async tag and inject it into the page.
   function load () {
-    if (loaded) return;
+    if (loaded) {
+      return void 0;
+    }
     var asyncTag = document.createElement('script');
     var firstScript = document.getElementsByTagName('script')[0];
     asyncTag.async = 1;

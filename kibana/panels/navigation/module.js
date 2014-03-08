@@ -16,7 +16,7 @@ define([
   'app',
   'jquery',
   'lodash',
-  '/common/analytics.js',
+  '../../../../../common/analytics',
   'factories/store'
 ],
 function (angular, app, $, _, ga) {

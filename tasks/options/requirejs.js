@@ -20,6 +20,17 @@ module.exports = function (grunt) {
         ],
 
         mainConfigFile: '<%= senseDir %>/app/require.config.js',
+        /**
+          Inject the Kibana config, settings and lodash so that the shared
+          analytics.js file will function properly. Since the build enviroment
+          doesn't match the runtime enviroment because of how everything is patched
+          together we need to do this injection to get things to build properly.
+        **/
+        paths: {
+          'config': __dirname+'/../../build/tmp/src/config',
+          'settings': __dirname+'/../../build/tmp/src/app/components/settings',
+          'lodash': __dirname+'/../../build/tmp/src/vendor/lodash'
+        },
         optimize: 'uglify2',
         optimizeAllPluginResources: true,
         preserveLicenseComments: true,
