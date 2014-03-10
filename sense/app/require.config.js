@@ -17,12 +17,7 @@
       'ace_mode_json': '../vendor/ace/mode-json',
       'ace_ext_language_tools': '../vendor/ace/ext-language_tools',
       'ace_ext_searchbox': '../vendor/ace/ext-searchbox',
-      // Adding config for the kibana dependencies
-      'config': '../../kibana/config',
-      'settings': '../../kibana/app/components/settings',
-      'sense_settings': './settings',
-      'analytics': '../../common/analytics',
-      'lodash': '../../kibana/vendor/lodash'
+      'analytics': '../../common/analytics'
     },
     map: {
       '*': {
