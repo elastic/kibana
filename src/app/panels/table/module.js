@@ -362,7 +362,7 @@ function (angular, app, _, kbn, moment) {
             if(!_.isUndefined(v.sort)) {
               return v.sort[0];
             } else {
-              return 0;
+              return v._score;
             }
           });
 

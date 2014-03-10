@@ -320,8 +320,8 @@ function (angular, app, _, $, kbn) {
                   xaxis: { show: false },
                   grid: {
                     borderWidth: 0,
-                    borderColor: '#eee',
-                    color: "#eee",
+                    borderColor: '#c8c8c8',
+                    color: "#c8c8c8",
                     hoverable: true,
                     clickable: true
                   },
@@ -359,7 +359,7 @@ function (angular, app, _, $, kbn) {
                     }
                   },
                   //grid: { hoverable: true, clickable: true },
-                  grid:   { hoverable: true, clickable: true },
+                  grid:   { hoverable: true, clickable: true, color: '#c8c8c8' },
                   colors: querySrv.colors
                 });
               }

@@ -167,7 +167,7 @@
           "pages": 5,
           "offset": 0,
           "sort": [
-            "_id",
+            "_score",
             "desc"
           ],
           "style": {
