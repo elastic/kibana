@@ -1,6 +1,5 @@
 define(function (require) {
   'use strict';
-  var config = require('config');
   var loaded = false;
 
   window.GoogleAnalyticsObject = 'ga';
@@ -28,7 +27,7 @@ define(function (require) {
   }
 
   // return the ga function
-  window.ga('create', config.ga_tracking_code, 'auto');
+  window.ga('create', '@@ga_tracking_code', 'auto');
   return {
     track: function () {
       load();
@@ -42,5 +41,5 @@ define(function (require) {
         location: window.location.href
       });
     }
-  }
+  };
 });

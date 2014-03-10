@@ -3,7 +3,7 @@ define([
   'sense_editor/editor',
   'jquery',
   'moment',
-  'sense_settings'
+  'settings'
 ], function (_, SenseEditor, $, moment) {
   'use strict';
 

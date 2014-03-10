@@ -19,7 +19,8 @@ module.exports = function (config) {
         ]
       },
       files: [
-        {expand: true, flatten: true, src: ['./kibana/config.js'], dest: '<%= buildTempDir %>'}
+        {expand: true, flatten: true, src: ['./kibana/config.js'], dest: '<%= buildTempDir %>'},
+        {expand: true, flatten: true, src: ['./common/analytics.js'], dest: '<%= buildTempDir %>/common/'}
       ]
     },
     dist_marvel_config: {
@@ -40,7 +41,8 @@ module.exports = function (config) {
         ]
       },
       files: [
-        {expand: true, flatten: true, src: ['./kibana/config.js'], dest: '<%= buildTempDir %>/src/'}
+        {expand: true, flatten: true, src: ['./kibana/config.js'], dest: '<%= buildTempDir %>/src/'},
+        {expand: true, flatten: true, src: ['./common/analytics.js'], dest: '<%= buildTempDir %>/common/'}
       ]
     },
     git_commits: {
