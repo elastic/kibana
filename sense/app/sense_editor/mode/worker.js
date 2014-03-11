@@ -1649,6 +1649,7 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
         while (ch && ch !== '\n') {
           next();
         }
+        white();
       }
     },
 
