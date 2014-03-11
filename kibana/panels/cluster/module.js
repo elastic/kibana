@@ -24,7 +24,7 @@ function (angular, app, kbn, _, ga) {
   app.useModule(module);
 
   module.controller('marvel.cluster', function($scope, $modal, $q, $http,
-    querySrv, dashboard, filterSrv, kbnVersion, storeFactory) {
+    querySrv, dashboard, filterSrv, kbnVersion, storeFactory, cacheBust) {
     $scope.panelMeta = {
       modals : [],
       editorTabs : [],
@@ -151,7 +151,7 @@ function (angular, app, kbn, _, ga) {
 
     $scope.optInModal = function() {
       var panelModal = $modal({
-        template: './app/panels/marvel/cluster/optin.html',
+        template: './app/panels/marvel/cluster/optin.html?'+cacheBust,
         persist: true,
         backdrop: 'static',
         show: false,
