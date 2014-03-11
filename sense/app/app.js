@@ -121,9 +121,13 @@ define([
           input.autoIndent();
         }
       }
-      else if (/^https?:\/\//.exec(sourceLocation)) {
-        $.get(sourceLocation, null, function (data) {
-          resetToValues(null, data);
+      else if (/^https?:\/\//.test(sourceLocation)) {
+        var loadFrom = { url: sourceLocation , dataType: "text" };
+        if (/https?:\/\/api.github.com/.test(sourceLocation)) {
+            loadFrom.headers = { Accept: "application/vnd.github.v3.raw" };
+        }
+        $.ajax(loadFrom).done( function (data) {
+          resetToValues(defaultHost, data);
           input.highlightCurrentRequestAndUpdateActionBar();
           input.updateActionsBar();
         });
@@ -131,7 +135,7 @@ define([
       else if (previousSaveState) {
         resetToValues(previousSaveState.server);
       } else {
-        resetToValues(defaultHost)
+        resetToValues(defaultHost);
       }
 
     }());
