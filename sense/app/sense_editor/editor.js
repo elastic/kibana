@@ -252,10 +252,13 @@ define([
       editor.moveCursorTo(pos.row, 0);
     });
 
-    editor.moveToNextRequestEdge = onceDoneTokenizing(function () {
+    editor.moveToNextRequestEdge = onceDoneTokenizing(function (moveOnlyIfNotOnEdge) {
       var pos = editor.getCursorPosition();
       var maxRow = editor.getSession().getLength();
-      for (pos.row++; pos.row < maxRow && !editor.parser.isRequestEdge(pos.row); pos.row++) {
+      if (!moveOnlyIfNotOnEdge) {
+        pos.row++;
+      }
+      for (; pos.row < maxRow && !editor.parser.isRequestEdge(pos.row); pos.row++) {
       }
       editor.moveCursorTo(pos.row, 0);
     });

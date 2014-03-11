@@ -129,6 +129,7 @@ define([
         }
         $.ajax(loadFrom).done(function (data) {
           resetToValues(defaultHost, data);
+          input.moveToNextRequestEdge(true);
           input.highlightCurrentRequestAndUpdateActionBar();
           input.updateActionsBar();
         });
@@ -139,7 +140,7 @@ define([
       else {
         resetToValues(defaultHost);
       }
-
+      input.moveToNextRequestEdge(true);
     }());
 
     (function setupAutosave() {
