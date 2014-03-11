@@ -4,7 +4,7 @@ define(function (require) {
 
   window.GoogleAnalyticsObject = 'ga';
 
-  // create an initali ga function. queue commands so it's executed
+  // create an initial ga function. queue commands so it's executed
   // once the analytics.js loads.
   window.ga = window.ga || function () {
     (window.ga.q = window.ga.q || []).push(arguments);
@@ -38,7 +38,8 @@ define(function (require) {
       window.ga('send', 'pageview', {
         cookieDomain: window.location.hostname,
         page: window.location.pathname+window.location.hash,
-        location: window.location.href
+        location: window.location.href,
+        dimension1: 'MARVEL_REVISION'
       });
     }
   };
