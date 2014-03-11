@@ -27,7 +27,8 @@ define([
         if (marvelOpts.version && marvelOpts.report) {
           ga.pageview();
         }
-      } catch (e) { } // Meh! Who cares... 
+      } catch (e) {
+      } // Meh! Who cares...
     }
 
     function submitCurrentRequestToES(cb) {
@@ -122,11 +123,11 @@ define([
         }
       }
       else if (/^https?:\/\//.test(sourceLocation)) {
-        var loadFrom = { url: sourceLocation , dataType: "text" };
+        var loadFrom = { url: sourceLocation, dataType: "text" };
         if (/https?:\/\/api.github.com/.test(sourceLocation)) {
-            loadFrom.headers = { Accept: "application/vnd.github.v3.raw" };
+          loadFrom.headers = { Accept: "application/vnd.github.v3.raw" };
         }
-        $.ajax(loadFrom).done( function (data) {
+        $.ajax(loadFrom).done(function (data) {
           resetToValues(defaultHost, data);
           input.highlightCurrentRequestAndUpdateActionBar();
           input.updateActionsBar();
@@ -134,7 +135,8 @@ define([
       }
       else if (previousSaveState) {
         resetToValues(previousSaveState.server);
-      } else {
+      }
+      else {
         resetToValues(defaultHost);
       }
 
