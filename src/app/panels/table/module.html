@@ -89,7 +89,7 @@
       </div>
     </div>
 
-    <div style="{{panel.overflow}}:{{panel.height || row.height}};" ng-class="{'table-main':panel.field_list,'span12':!panel.field_list}" class="table-doc-table">
+    <div style="{{panel.overflow}}:{{panel.height || row.height}};" ng-class="{'table-main':panel.field_list}" class="table-doc-table">
       <i class="pull-left icon-chevron-sign-right pointer" ng-click="panel.field_list = !panel.field_list" bs-tooltip="'Show field list'" ng-show="!panel.field_list"></i>
       <div class="row-fluid" ng-show="panel.paging">
         <div class="span1 offset1" style="text-align:right">
