@@ -39,7 +39,7 @@ define(function (require) {
         cookieDomain: window.location.hostname,
         page: window.location.pathname+window.location.hash,
         location: window.location.href,
-        dimension1: 'MARVEL_REVISION'
+        dimension1: '@@MARVEL_REVISION'
       });
     }
   };
