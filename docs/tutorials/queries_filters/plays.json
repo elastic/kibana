@@ -4,13 +4,13 @@
     "query": {
       "list": {
         "0": {
-          "query": "",
-          "alias": "",
-          "color": "#7EB26D",
           "id": 0,
+          "color": "#7EB26D",
+          "alias": "",
           "pin": false,
           "type": "lucene",
-          "enable": true
+          "enable": true,
+          "query": "*"
         }
       },
       "ids": [
@@ -31,7 +31,11 @@
       "query": "*",
       "pinned": true,
       "history": [
+        "*",
         "",
+        "\"not to be\"",
+        "\"to be\"",
+        "to be or not to be",
         "FALSTAFF",
         "play_name:\"Romeo and Juliet\"",
         "playname:\"Romeo and Juliet\"",
@@ -103,7 +107,7 @@
       "panels": [
         {
           "error": false,
-          "span": 12,
+          "span": 9,
           "editable": true,
           "type": "terms",
           "loadingEditor": false,
@@ -133,6 +137,28 @@
           "tstat": "total",
           "valuefield": "",
           "title": "Plays by Line Count"
+        },
+        {
+          "span": 3,
+          "editable": true,
+          "type": "hits",
+          "loadingEditor": false,
+          "style": {
+            "font-size": "10pt"
+          },
+          "arrangement": "horizontal",
+          "chart": "pie",
+          "counter_pos": "none",
+          "donut": false,
+          "tilt": false,
+          "labels": true,
+          "spyable": true,
+          "queries": {
+            "mode": "all",
+            "ids": [
+              0
+            ]
+          }
         }
       ],
       "notice": false
