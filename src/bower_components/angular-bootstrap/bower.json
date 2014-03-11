@@ -1,0 +1,11 @@
+{
+    "author": {
+        "name": "https://github.com/angular-ui/bootstrap/graphs/contributors"
+    },
+    "name": "angular-bootstrap",
+    "version": "0.10.0",
+    "main": ["./ui-bootstrap-tpls.js"],
+    "dependencies": {
+        "angular": ">=1"
+    }    
+}
