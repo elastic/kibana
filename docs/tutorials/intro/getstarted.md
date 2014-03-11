@@ -65,7 +65,7 @@ Below that you will see a long list of JSON formatted lines of shakespeare.
 Kibana allows you to search Elasticsearch data via the Lucene Query String syntax. Queries can be run via the query input at the top of the page
 ![Sample Dashboard](./query.png)
 
-This this in the query bar. Then check out the first few rows of the table.
+Try this in the query bar. Then check out the first few rows of the table.
 
 ```
 friends, romans, countrymen
