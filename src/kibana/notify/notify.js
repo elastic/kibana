@@ -10,12 +10,10 @@ define(function (require) {
 
   require('./directives');
 
-  module.service('notify', function () {
-    var service = this;
-    // modify the service to have bound proxies to the manager
-    _.forOwn(manager, function (val, key) {
-      service[key] = typeof val === 'function' ? _.bindKey(manager, key) : val;
-    });
+  module.factory('createNotifier', function () {
+    return function (opts) {
+      return new NotifyManager(opts);
+    };
   });
 
   /**
