@@ -109,8 +109,18 @@ allocation] before you restart your nodes to avoid unnecessary shard
 reallocation during the install process.
 
 
+[[previous_versions]]
+=== Installing previous versions
+
+Previously released versions of Marvel are available by specifying an exact version. For example:
+
+[source,sh]
+----------------
+bin/plugin -i elasticsearch/marvel/1.0.2
+----------------
+
 [[manual_download]]
-==== Manual download
+=== Manual download
 
 Elasticsearch's `bin/plugin` script requires direct internet access for downloading
 and installing Marvel. If your server doesn't have internet access, you can download

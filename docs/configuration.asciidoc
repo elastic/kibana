@@ -30,7 +30,7 @@ example: `+test*,-test3`. Defaults to `*`
 
 `marvel.agent.interval`::
 
-Controls the interval between data samples. Defaults to `5s`.
+Controls the interval between data samples. Defaults to `5s`. Set to `-1` to temporarily disable exporting.
 
 `marvel.agent.exporter.es.index.timeformat`::
 
@@ -43,6 +43,9 @@ http://joda-time.sourceforge.net/api-release/org/joda/time/format/DateTimeFormat
 
 Sets the connection timeout for sending data. Defaults to `6s`.
 
+`marvel.agent.shard_stats.enabled`::
+
+Enables or disable exporting of shard level statistics. Defaults to `false`.
 
 [[marvel-indices]]
 === Marvel indices
