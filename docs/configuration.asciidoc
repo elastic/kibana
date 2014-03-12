@@ -10,6 +10,8 @@ A list of hosts in `hostname:port` format to which statistics  and events will
 be sent. Data will be sent to the first host, but will failover to the next
 host(s) if the first is not reachable. Defaults to `["localhost:9200"]`.
 +
+This setting is update-able via the Cluster Update Settings API.
++
 added[1.0.2] - HTTP Basic authentication credentials can be specified as part of the host name,
  i.e., ["user:pwd@host:9200"]
 
@@ -26,11 +28,15 @@ to avoid collecting data from the monitoring cluster itself.
 Controls which indices to export data for.  Uses simple `test1,test2,test3`
 notation (or `_all` for all indices). It also supports  wildcards, for
 example: `test*`, and the ability to "add" (`+`) and "remove" (`-`),  for
-example: `+test*,-test3`. Defaults to `*`
+example: `+test*,-test3`. Defaults to `*`.
++
+This setting is update-able via the Cluster Update Settings API.
 
 `marvel.agent.interval`::
 
 Controls the interval between data samples. Defaults to `5s`. Set to `-1` to temporarily disable exporting.
++
+This setting is update-able via the Cluster Update Settings API.
 
 `marvel.agent.exporter.es.index.timeformat`::
 
@@ -42,10 +48,15 @@ http://joda-time.sourceforge.net/api-release/org/joda/time/format/DateTimeFormat
 `marvel.agent.exporter.es.timeout`::
 
 Sets the connection timeout for sending data. Defaults to `6s`.
++
+This setting is update-able via the Cluster Update Settings API.
 
 `marvel.agent.shard_stats.enabled`::
 
 Enables or disable exporting of shard level statistics. Defaults to `false`.
++
+This setting is update-able via the Cluster Update Settings API.
+
 
 [[marvel-indices]]
 === Marvel indices
