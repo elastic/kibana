@@ -18,7 +18,7 @@
   - Added a visual indication for the master node at the Nodes section of the Overview Dashboard
   - Node and Indices tables visually indicate stale data
   - Added error reporting to nodes and indices tables
-  - Made the following agent settings changeable in via the Cluster Update Settings API:
+  - Made the following agent settings changeable via the Cluster Update Settings API:
     * marvel.agent.interval  (also supports setting to -1 to disable exporting)
     * marvel.agent.exporter.es.hosts
     * marvel.agent.exporter.es.timeout
