@@ -1,0 +1,20 @@
+<!--
+!!!!
+  Since fatal error could prevent angular from starting
+  this template is just a simple lodash template
+!!!!
+-->
+<div class="panel panel-danger">
+  <div class="panel-heading">
+    <h1 class="panel-title">
+      <i class="fa fa-warning"></i> Fatal Error
+      <a class="pull-right" onclick="window.location.reload();" href="#">
+        Reload <i class="refresh fa fa-refresh"></i>
+      </a>
+    </h1>
+  </div>
+  <div class="panel-body"><%- msg %></div>
+  <% if (stack) { %>
+    <div class="panel-footer"><pre><%- stack %></pre></div>
+  <% } %>
+</div>

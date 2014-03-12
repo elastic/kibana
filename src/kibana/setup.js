@@ -2,6 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var async = require('async');
   var $ = require('jquery');
+  var _ = require('lodash');
   var configFile = require('../config');
   var nextTick = require('utils/next_tick');
   var modules = require('modules');
@@ -15,30 +16,31 @@ define(function (require) {
   return function prebootSetup(done) {
     // load angular deps
     require([
-      'kibana',
+      'notify/notify',
 
-      'elasticsearch',
       'services/es',
       'services/config',
       'constants/base'
-    ], function (kibana) {
+    ], function (notify) {
 
       $(function () {
         // create the setup module, it should require the same things
         // that kibana currently requires, which should only include the
         // loaded modules
-        var setup = modules.get('setup', ['elasticsearch']);
+        var setup = modules.get('setup');
         var appEl = document.createElement('div');
         var kibanaIndexExists;
 
+        modules.link(setup);
         setup
           .value('configFile', configFile);
 
         angular
           .bootstrap(appEl, ['setup'])
-          .invoke(function (es, config) {
+          .invoke(function (es, config, notify) {
             // init the setup module
             async.series([
+              async.apply(checkForES, es),
               async.apply(checkForKibanaIndex, es),
               async.apply(createKibanaIndex, es),
               async.apply(checkForCurrentConfigDoc, es),
@@ -50,25 +52,52 @@ define(function (require) {
               // linked modules should no longer depend on this module
               setup.close();
 
-              console.log('booting kibana');
+              if (err) throw err;
               return done(err);
             });
           });
 
+        function wrapError(err, tmpl) {
+          // if we pass a callback
+          if (typeof err === 'function') {
+            var cb = err; // wrap it
+            return function (err) {
+              cb(wrapError(err, tmpl));
+            };
+          }
+
+          // if an error didn't actually occur
+          if (!err) return void 0;
+
+          var err2 = new Error(_.template(tmpl, { configFile: configFile }));
+          err2.origError = err;
+          return err2;
+        }
+
+        function checkForES(es, done) {
+          notify.lifecycle('es check');
+          es.ping(function (err, alive) {
+            notify.lifecycle('es check', alive);
+            done(alive ? void 0 : new Error('Unable to connect to Elasticsearch at "' + configFile.elasticsearch + '"'));
+          });
+        }
+
         function checkForKibanaIndex(es, done) {
+          notify.lifecycle('kibana index check');
           es.indices.exists({
             index: configFile.kibanaIndex
           }, function (err, exists) {
-            console.log('kibana index does', (exists ? '' : 'not ') + 'exist');
+            notify.lifecycle('kibana index check', !!exists);
             kibanaIndexExists = exists;
-            return done(err);
+            done(wrapError(err, 'Unable to check for Kibana index "<%= configFile.kibanaIndex %>"'));
           });
         }
 
         // create the index if it doens't exist already
         function createKibanaIndex(es, done) {
           if (kibanaIndexExists) return done();
-          console.log('creating kibana index');
+
+          notify.lifecycle('create kibana index');
           es.indices.create({
             index: configFile.kibanaIndex,
             body: {
@@ -88,19 +117,20 @@ define(function (require) {
                 }
               }
             }
-          }, done);
+          }, function (err) {
+            notify.lifecycle('create kibana index', !err);
+            done(wrapError(err, 'Unable to create Kibana index "<%= configFile.kibanaIndex %>"'));
+          });
         }
 
         // if the index is brand new, no need to see if it is out of data
         function checkForCurrentConfigDoc(es, done) {
           if (!kibanaIndexExists) return done();
-          console.log('checking if migration is necessary: not implemented');
           // callbacks should always be called async
           nextTick(done);
         }
 
         function initConfig(config, done) {
-          console.log('initializing config service');
           config.init().then(function () { done(); }, done);
         }
       });

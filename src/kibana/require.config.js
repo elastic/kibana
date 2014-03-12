@@ -6,6 +6,7 @@ require.config({
     angular: '../bower_components/angular/angular',
     'angular-mocks': '../bower_components/angular-mocks/angular-mocks',
     'angular-route': '../bower_components/angular-route/angular-route',
+    'angular-bootstrap': '../bower_components/angular-bootstrap/ui-bootstrap-tpls',
     async: '../bower_components/async/lib/async',
     css: '../bower_components/require-css/css',
     text: '../bower_components/requirejs-text/text',
@@ -23,18 +24,11 @@ require.config({
       deps: ['jquery'],
       exports: 'angular'
     },
-    gridster: {
-      deps: ['jquery']
-    },
-    'angular-route': {
-      deps: ['angular']
-    },
-    'angular-mocks': {
-      deps: ['angular']
-    },
-    'elasticsearch': {
-      deps: ['angular']
-    }
+    gridster: ['jquery'],
+    'angular-route': ['angular'],
+    'angular-mocks': ['angular'],
+    'elasticsearch': ['angular'],
+    'angular-bootstrap': ['angular']
   },
   waitSeconds: 60
 });
