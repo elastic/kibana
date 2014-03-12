@@ -1,6 +1,29 @@
 [[change_list]]
 == Change list
 
+=== 1.1.0
+  - Improved Sense's autocomplete suggestions:
+    * Added Snapshot & Restore
+    * Added Aggregations
+    * Added support for url query string parameters
+    * Updated for breaking changes in Elasticsearch 1.0
+  - Updated welcome splash screen.
+  - Sense now uses the last used server when opened (previously used the hostname used to access it).
+  - The agent's keep-alive thread is now stopped upon errors to reduce log noise. It will be restarted
+    upon successful connection.
+  - Improved error reporting for failures of items in the agent's bulk requests.
+  - Index Statistics Dashboard: Indexing Rate Primaries chart was based on the wrong field.
+  - Introduced `marvel.agent.shard_stats.enabled` to control exporting of shard level statistics. Defaults to `false`.
+  - Changed agent's default sampling rate to 10s (was 5s)
+  - Added a visual indication for the master node at the Nodes section of the Overview Dashboard
+  - Node and Indices tables visually indicate stale data
+  - Added error reporting to nodes and indices tables
+  - Made the following agent settings changeable in via the Cluster Update Settings API:
+    * marvel.agent.interval  (also supports setting to -1 to disable exporting)
+    * marvel.agent.exporter.es.hosts
+    * marvel.agent.exporter.es.timeout
+    * marvel.agent.shard_stats.enabled
+
 === 1.0.2
   - Kibana uses `window.location.protocol` (http or https) to make ES calls.
   - Added support for basic authentication when sending data from agent. See <<configuration>>.
