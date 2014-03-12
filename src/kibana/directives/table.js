@@ -114,8 +114,8 @@ define(function (require) {
             var timing;
 
             if (
-              performance
-              && rowsPerTick === void 0
+              rowsPerTick === void 0
+              && typeof window.performance === 'object'
               && typeof performance.now === 'function'
             ) {
               timing = performance.now();
@@ -129,11 +129,12 @@ define(function (require) {
               .forEach(forEachRow);
 
             if (timing) {
+              // we know we have performance.now, because timing was set
               var time = performance.now() - timing;
               var rowsRendered = rowsPerTick;
               var msPerRow = time / rowsPerTick;
               // aim to fit the rendering into 5 milliseconds
-              rowsPerTick = Math.ceil(5 / msPerRow);
+              rowsPerTick = Math.ceil(15 / msPerRow);
               console.log('completed render of %d rows in %d milliseconds. rowsPerTick set to %d', rowsRendered, time, rowsPerTick);
             }
 
