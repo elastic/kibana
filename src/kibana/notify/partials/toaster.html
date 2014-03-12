@@ -1,0 +1,40 @@
+<ul class="toaster">
+  <li ng-repeat="notif in list" kbn-toast notif="notif">
+    <div class="alert" ng-class="'alert-' + notif.type">
+      <table><tr>
+        <td>
+            <i class="fa" ng-class="'fa-' + notif.icon" tooltip="{{notif.title}}"></i> {{ notif.content }}
+        </td>
+        <td>
+          <button
+            type="button"
+            ng-if="notif.report"
+            class="btn"
+            ng-class="'btn-' + notif.type"
+            data-dismiss="alert"
+            aria-hidden="true"
+            ng-click="notif.report()"
+            >Report</button>
+          <button
+            type="button"
+            ng-if="notif.accept"
+            class="btn"
+            ng-class="'btn-' + notif.type"
+            data-dismiss="alert"
+            aria-hidden="true"
+            ng-click="notif.accept()"
+            >OK</button>
+          <button
+            type="button"
+            ng-if="notif.address"
+            class="btn"
+            ng-class="'btn-' + notif.type"
+            data-dismiss="alert"
+            aria-hidden="true"
+            ng-click="notif.address()"
+            >Fix it</button>
+        </td>
+      </tr></table>
+    </div>
+  </li>
+</ul>

@@ -6842,6 +6842,21 @@ button.close {
 body {
   margin: 0px;
 }
+.content {
+  position: relative;
+  z-index: 0;
+}
+.content .navbar {
+  position: relative;
+  z-index: 1;
+}
+.content .application {
+  position: relative;
+  z-index: 0;
+}
+notifications {
+  z-index: 1;
+}
 .navbar-nav li a {
   cursor: pointer;
 }
@@ -6997,6 +7012,48 @@ kbn-table .table .table td.field-name {
 }
 kbn-table tr.even td {
   background-color: #f1f1f1;
+}
+#fatal-splash-screen {
+  margin: 15px;
+}
+.toaster-container {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 1;
+  visibility: hidden;
+  width: 85%;
+}
+.toaster-container .toaster {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.toaster-container .alert {
+  -webkit-box-shadow: 3px 0px 19px 0px rgba(50, 50, 50, 0.67);
+  -moz-box-shadow: 3px 0px 19px 0px rgba(50, 50, 50, 0.67);
+  box-shadow: 3px 0px 19px 0px rgba(50, 50, 50, 0.67);
+  padding: 0px 15px;
+  margin: 0 0 10px 0;
+  border: none;
+}
+.toaster-container .alert button.btn {
+  -webkit-border-radius: 0px;
+  -moz-border-radius: 0px;
+  border-radius: 0px;
+  border: none;
+}
+.toaster-container .alert table {
+  width: 100%;
+}
+.toaster-container .alert table td {
+  vertical-align: middle;
+  text-align: right;
+  width: 20%;
+}
+.toaster-container .alert table td:first-child {
+  text-align: left;
+  width: 80%;
 }
 disc-field-chooser ul {
   margin: 0;
