@@ -4,6 +4,7 @@ define(function (require) {
   var nextTick = require('utils/next_tick');
   var VersionConflict = require('courier/errors').VersionConflict;
   var FetchFailure = require('courier/errors').FetchFailure;
+  var RequestFailure = require('courier/errors').RequestFailure;
   var listenerCount = require('utils/event_emitter').listenerCount;
   var _ = require('lodash');
 
@@ -29,7 +30,7 @@ define(function (require) {
       docs: []
     };
 
-    _.each(refs, function (ref) {
+    refs.forEach(function (ref) {
       var source = ref.source;
 
       var state = source._flatten();
@@ -45,7 +46,7 @@ define(function (require) {
     return client.mget({ body: body }, function (err, resp) {
       if (err) return cb(err);
 
-      _.each(resp.docs, function (resp, i) {
+      resp.docs.forEach(function (resp, i) {
         var ref = allRefs[i];
         var source = ref.source;
 
@@ -125,41 +126,6 @@ define(function (require) {
     return this._sendToEs('index', false, body, cb);
   };
 
-  DocSource.prototype._sendToEs = function (method, validateVersion, body, cb) {
-    var source = this;
-    var courier = this._courier;
-    var client = courier._getClient();
-    var params = {
-      id: this._state.id,
-      type: this._state.type,
-      index: this._state.index,
-      body: body,
-      ignore: [409]
-    };
-
-    if (validateVersion) {
-      params.version = source._getVersion();
-    }
-
-    client[method](params, function (err, resp) {
-      if (err) return cb(err);
-
-      if (resp && resp.status === 409) {
-        err = new VersionConflict(resp);
-        if (listenerCount(source, 'conflict')) {
-          return source.emit('conflict', err);
-        } else {
-          return cb(err);
-        }
-      }
-
-      source._storeVersion(resp._version);
-      courier._docUpdated(source);
-      return cb(void 0, resp._id);
-    });
-  };
-
-
   /*****
    * PRIVATE API
    *****/
@@ -233,6 +199,48 @@ define(function (require) {
   DocSource.prototype._clearVersion = function () {
     var id = this._versionKey();
     localStorage.removeItem(id);
+  };
+
+  /**
+   * Backend for doUpdate and doIndex
+   * @param  {String} method - the client method to call
+   * @param  {Boolean} validateVersion - should our knowledge
+   *   of the the docs current version be sent to es?
+   * @param  {String} body - HTTP request body
+   * @param  {Function} cb - callback
+   */
+  DocSource.prototype._sendToEs = function (method, validateVersion, body, cb) {
+    var source = this;
+    var courier = this._courier;
+    var client = courier._getClient();
+    var params = {
+      id: this._state.id,
+      type: this._state.type,
+      index: this._state.index,
+      body: body,
+      ignore: [409]
+    };
+
+    if (validateVersion) {
+      params.version = source._getVersion();
+    }
+
+    client[method](params, function (err, resp) {
+      if (err) return cb(new RequestFailure(err, resp));
+
+      if (resp && resp.status === 409) {
+        err = new VersionConflict(resp);
+        if (listenerCount(source, 'conflict')) {
+          return source.emit('conflict', err);
+        } else {
+          return cb(err);
+        }
+      }
+
+      source._storeVersion(resp._version);
+      courier._docUpdated(source);
+      if (typeof cb === 'function') return cb(void 0, resp._id);
+    });
   };
 
   return DocSource;

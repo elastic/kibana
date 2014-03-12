@@ -204,9 +204,25 @@ define(function (require) {
     }
   };
 
-  // force a fetch of all datasources right now, optionally filter by type
-  Courier.prototype.fetch = function (onlyType) {
+  // force a fetch of all datasources right now
+  // optionally filter by type or pass a specific ref
+  Courier.prototype.fetch = function (refOrType) {
     var courier = this;
+    var onlyType = (typeof refOrType === 'string' && refOrType);
+    var onlyRef = (typeof refOrType === 'object' && refOrType);
+
+    if (onlyRef) {
+      // only want to fetch one ref
+      sourceTypes[onlyRef.source._getType()].fetch(
+        courier,
+        [onlyRef],
+        function (err) {
+          if (err) return courier._error(err);
+        }
+      );
+      return;
+    }
+
     _.forOwn(onFetch, function (fn, type) {
       if (onlyType && onlyType !== type) return;
       fn(courier);
@@ -247,11 +263,16 @@ define(function (require) {
     return this._client;
   };
 
+  Courier.prototype._getRefFor = function (source) {
+    return _.find(this._refs[source._getType()], function (ref) {
+      return (ref.source === source);
+    });
+  };
+
   // start using a DocSource in fetches/updates
   Courier.prototype._openDataSource = function (source) {
-    var refs = this._refs[source._getType()];
-    if (!_.find(refs, { source: source })) {
-      refs.push({
+    if (!this._getRefFor(source)) {
+      this._refs[source._getType()].push({
         source: source,
         fetchCount: 0
       });
@@ -285,7 +306,7 @@ define(function (require) {
   Courier.prototype._docUpdated = function (source) {
     var updated = source._state;
 
-    _.each(this._refs.doc, function (ref) {
+    this._refs.doc.forEach(function (ref) {
       var state = ref.source._state;
       if (
         state.id === updated.id

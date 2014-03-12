@@ -36,9 +36,24 @@ define(function (require) {
   };
   inherits(errors.HastyRefresh, CourierError);
 
+  /**
+   * Request Failure - When an entire mutli request fails
+   * @param {Error} err - the Error that came back
+   * @param {Object} resp - optional HTTP response
+   */
+  errors.RequestFailure = function RequestFailure(err, resp) {
+    CourierError.call(this,
+      'Request to Elasticsearch failed: ' + JSON.stringify(resp || err.message),
+      errors.RequestFailure);
+
+    this.origError = err;
+    this.resp = resp;
+  };
+  inherits(errors.RequestFailure, CourierError);
 
   /**
-   * FetchFailure Error - where there is an error getting a doc
+   * FetchFailure Error - when there is an error getting a doc or search within
+   *  a multi-response response body
    * @param {String} [msg] - An error message that will probably end up in a log.
    */
   errors.FetchFailure = function FetchFailure(resp) {
@@ -52,8 +67,8 @@ define(function (require) {
 
 
   /**
-   * Connection Error
-   * @param {String} [msg] - An error message that will probably end up in a log.
+   * A doc was re-indexed but it was out of date.
+   * @param {Object} resp - The response from es (one of the multi-response responses).
    */
   errors.VersionConflict = function VersionConflict(resp) {
     CourierError.call(this,
