@@ -6,13 +6,12 @@ define(function (require) {
     describe('events', function () {
       describe('error', function () {
         it('emits when the client fails', function (done) {
-          var err = new Error('Error!');
           var courier = createCourier({
-            client: stubbedClient(function (method, params, cb) { cb(err); })
+            client: stubbedClient(function (method, params, cb) { cb(new Error()); })
           });
 
           courier.on('error', function (emittedError) {
-            expect(emittedError).to.be(err);
+            expect(emittedError).to.be.an(Error);
             done();
           });
 
