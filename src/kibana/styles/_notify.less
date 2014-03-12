@@ -1,0 +1,50 @@
+#fatal-splash-screen {
+  margin: 15px;
+}
+
+.toaster-container {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 1;
+  visibility: hidden;
+  width: 85%;
+
+  .toaster {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .alert {
+    -webkit-box-shadow: 3px 0px 19px 0px rgba(50, 50, 50, 0.67);
+    -moz-box-shadow:    3px 0px 19px 0px rgba(50, 50, 50, 0.67);
+    box-shadow:         3px 0px 19px 0px rgba(50, 50, 50, 0.67);
+    padding: 0px 15px;
+    margin: 0 0 10px 0;
+    border: none;
+
+    button.btn {
+      -webkit-border-radius: 0px;
+      -moz-border-radius: 0px;
+      border-radius: 0px;
+      border: none;
+    }
+
+    table {
+      width: 100%;
+      td {
+        vertical-align: middle;
+
+        &:first-child {
+          text-align: left;
+          width: 80%;
+        }
+        // :not(:first-child)
+        text-align: right;
+        width: 20%;
+      }
+
+    }
+  }
+}

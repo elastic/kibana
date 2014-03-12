@@ -2,6 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var nextTick = require('utils/next_tick');
   var configFile = require('../../config');
+  var notify = require('notify/notify');
 
   require('services/courier');
 
@@ -40,17 +41,17 @@ define(function (require) {
        ******/
 
       function init() {
+        notify.lifecycle('config init');
         var defer = $q.defer();
-        courier.fetch();
+        doc.fetch();
         doc.on('results', function completeInit(resp) {
           // ONLY ACT IF !resp.found
           if (!resp.found) {
-            console.log('creating empty config doc');
             doc.doIndex({});
             return;
           }
 
-          console.log('fetched config doc');
+          notify.lifecycle('config init', !!resp);
           doc.removeListener('results', completeInit);
           defer.resolve();
         });
@@ -87,7 +88,7 @@ define(function (require) {
         // probably a horrible idea
         if (!watchers[key]) watchers[key] = [];
         watchers[key].push(onChange);
-        _notify(onChange, vals[key]);
+        triggerWatchers(onChange, vals[key]);
         return function un$watcher() {
           _.pull(watchers[key], onChange);
         };
@@ -143,15 +144,15 @@ define(function (require) {
        *******/
 
       function _change(key, val) {
-        _notify(watchers[key], val, vals[key]);
+        notify.lifecycle('config change: ' + key + ': ' + vals[key] + ' -> ' + val);
+        triggerWatchers(watchers[key], val, vals[key]);
         vals[key] = val;
-        console.log(key, 'is now', val);
       }
 
-      function _notify(fns, cur, prev) {
+      function triggerWatchers(fns, cur, prev) {
         if ($rootScope.$$phase) {
           // reschedule for next tick
-          nextTick(_notify, fns, cur, prev);
+          nextTick(triggerWatchers, fns, cur, prev);
           return;
         }
 
