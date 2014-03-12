@@ -48,10 +48,7 @@ import org.elasticsearch.marvel.agent.Utils;
 import org.elasticsearch.marvel.agent.event.Event;
 import org.elasticsearch.node.settings.NodeSettingsService;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -398,7 +395,11 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     private boolean checkAndUploadIndexTemplate() {
         byte[] template;
         try {
-            template = Streams.copyToBytesFromClasspath("/marvel_index_template.json");
+            InputStream is = ESExporter.class.getResourceAsStream("/marvel_index_template.json");
+            if (is == null) {
+                throw new FileNotFoundException("Resource [/marvel_index_template.json] not found in classpath");
+            }
+            template = Streams.copyToByteArray(is);
         } catch (IOException e) {
             // throwing an exception to stop exporting process - we don't want to send data unless
             // we put in the template for it.
