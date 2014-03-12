@@ -22,9 +22,12 @@
             </li>
           </ul>
           <ul class="nav navbar-nav pull-right">
-            <li>
-              <a ng-click="configure()"><i class="fa fa-gear"></i></a>
+            <li ng-repeat="level in levels">
+              <a ng-click="notifTest(level.name)" tooltip="{{level.name}}">
+                <i class="fa" ng-class="'fa-' + level.icon"></i>
+              </a>
             </li>
+            <li><a ng-click="configure()" tooltip="Configure Kibana"><i class="fa fa-gear"></i></a></li>
           </ul>
         </div>
       </nav>
@@ -34,7 +37,7 @@
         config-submit="saveOpts">
       </config>
       <div class="application" kbn-view></div>
-
     </div>
+    <div kbn-notifications list="notifList"></div>
   </body>
 </html>

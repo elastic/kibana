@@ -6,10 +6,19 @@ define(function (require) {
   require('services/config');
   require('services/courier');
   require('directives/view');
+  require('angular-bootstrap');
 
   require('modules')
-    .get('kibana/controllers')
-    .controller('kibana', function ($scope, courier, config, configFile) {
+    .get('kibana/controllers', ['ui.bootstrap'])
+    .config(function ($tooltipProvider) {
+      $tooltipProvider.options({
+        placement: 'bottom',
+        animation: true,
+        popupDelay: 150,
+        appendToBody: false
+      });
+    })
+    .controller('kibana', function ($scope, courier, config, configFile, notify, $timeout) {
       $scope.apps = configFile.apps;
 
       $scope.$on('$locationChangeSuccess', function (event, uri) {
@@ -37,6 +46,38 @@ define(function (require) {
       $scope.configure = function () {
         $scope.configureTemplateUrl = require('text!../partials/global_config.html');
       };
+
+      // expose the notification services list of notifs on the $scope so that the
+      // notification directive can show them on the screen
+      $scope.notifList = notify._notifs;
+      // provide alternate methods for setting timeouts, which will properly trigger digest cycles
+      notify._setTimerFns($timeout, $timeout.cancel);
+
+      (function TODO_REMOVE() {
+        // stuff for testing notifications
+        $scope.levels = [
+          { name: 'info', icon: 'info' },
+          { name: 'warning', icon: 'info-circle' },
+          { name: 'error', icon: 'warning' },
+          { name: 'fatal', icon: 'fire' },
+        ];
+        $scope.notifTest = function (type) {
+          var arg = 'Something happened, just thought you should know.';
+          var cb;
+          if (type === 'fatal' || type === 'error') {
+            arg = new Error('Ah fuck');
+          }
+          if (type === 'error') {
+            cb = function (resp) {
+              if (resp !== 'report') return;
+              $timeout(function () {
+                notify.info('Report sent, thank you for your help.');
+              }, 750);
+            };
+          }
+          notify[type](arg, cb);
+        };
+      }());
 
       /**
        * Persist current settings
@@ -71,6 +112,13 @@ define(function (require) {
       config.$watch('refreshInterval', $scope.setFetchInterval);
       $scope.$watch('opts.activeFetchInterval', $scope.setFetchInterval);
 
+
+      // setup the courier
+      courier.on('error', function (err) {
+        $scope[$scope.$$phase ? '$eval' : '$apply'](function () {
+          notify.error(err);
+        });
+      });
       $scope.$on('application.load', function () {
         courier.start();
       });

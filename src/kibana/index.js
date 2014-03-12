@@ -10,6 +10,7 @@ define(function (require) {
   var setup = require('./setup');
   var configFile = require('../config');
   var modules = require('modules');
+  var notify = require('notify/notify');
 
   require('elasticsearch');
   require('angular-route');
@@ -46,8 +47,14 @@ define(function (require) {
       return 'apps/' + app.id + '/index';
     })), function bootstrap() {
       $(function () {
-        angular.bootstrap(document, ['kibana']);
-        $(document.body).children().show();
+        notify.lifecycle('bootstrap');
+        angular
+          .bootstrap(document, ['kibana'])
+          .invoke(function (notify) {
+            notify.lifecycle('bootstrap', true);
+            $(document.body).children().show();
+          });
+
       });
     });
 
