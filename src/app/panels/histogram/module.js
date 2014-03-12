@@ -700,10 +700,9 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
                   'annotation': {
                     level: 1,
                     icon: {
-                      icon: "icon-tag icon-flip-vertical",
-                      size: 20,
-                      color: "#222",
-                      outline: "#bbb"
+                      width: 20,
+                      height: 21,
+                      icon: "histogram-marker"
                     }
                   }
                 }
