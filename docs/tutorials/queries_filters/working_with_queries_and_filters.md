@@ -92,5 +92,18 @@ Kibana will automatically determine a free color to use for your queries, but yo
 
 ### Filters
 
-Many Kibana charts are interactive and can be used to filter the view of your data. For example, click on the first bar of the 
+Many Kibana charts are interactive and can be used to filter the view of your data. For example, click on the first bar of the chart. You will end up with something like this. As you can see, the chart has become one big green bar. This is because a filter was added to match that term in the `play_name` field.
 
+![image](comedyoferrors.png)
+
+"But where" you say? 
+
+The answer lies in that little white star that appeared on the filtering tab. Give the tab a click and we can see that a filter has added to the *filtering* panel. From the *filtering* panel filters can be added, edited, toggled and removed. Many panels have the ability to add filters, including the table, histogram, map and others.
+
+![image](filteradded.png)
+
+Filters can also be added manually by clicking the **+**
+
+### Next steps
+
+Now that you have a solid handle on filters and queries you might be interested in how they're described in [the Kibana schema](http://linktotheschema). If you're interested in inserting queries or filters via URL parameters you might also take a look at [Templated and Scripted Dashboards](../templates_and_scripts/index.html)
