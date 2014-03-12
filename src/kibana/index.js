@@ -47,6 +47,7 @@ define(function (require) {
     })), function bootstrap() {
       $(function () {
         angular.bootstrap(document, ['kibana']);
+        $(document.body).children().show();
       });
     });
 
