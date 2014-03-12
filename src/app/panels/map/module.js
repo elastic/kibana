@@ -166,7 +166,7 @@ function (angular, app, _, $) {
         });
 
         function render_panel() {
-          elem.css({height:scope.panel.height||scope.row.height});
+          elem.css({height:scope.row.height});
 
           elem.text('');
 

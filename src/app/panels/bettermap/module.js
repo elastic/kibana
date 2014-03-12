@@ -223,7 +223,7 @@ function (angular, app, _, L, localRequire) {
         var map, layerGroup;
 
         function render_panel() {
-          elem.css({height:scope.panel.height||scope.row.height});
+          elem.css({height:scope.row.height});
 
           scope.require(['./leaflet/plugins'], function () {
             scope.panelMeta.loading = false;
