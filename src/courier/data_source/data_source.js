@@ -164,6 +164,14 @@ define(function (require) {
   };
 
   /**
+   * Fetch just this source
+   * @param {Function} cb - callback
+   */
+  DataSource.prototype.fetch = function (cb) {
+    this._courier.fetch(this._courier._getRefFor(this), cb);
+  };
+
+  /**
    * Custom on method wraps event listeners before
    * adding them so that $digest is properly setup
    *

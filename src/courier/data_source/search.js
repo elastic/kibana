@@ -4,6 +4,7 @@ define(function (require) {
   var nextTick = require('utils/next_tick');
   var errors = require('courier/errors');
   var FetchFailure = require('courier/errors').FetchFailure;
+  var RequestFailure = require('courier/errors').RequestFailure;
   var _ = require('lodash');
 
   function SearchSource(courier, initialState) {
@@ -30,7 +31,7 @@ define(function (require) {
     // so copy them here in the right order
     var allRefs = [];
 
-    _.each(refs, function (ref) {
+    refs.forEach(function (ref) {
       var source = ref.source;
       var state = source._flatten();
       if (!state) return;
@@ -47,7 +48,7 @@ define(function (require) {
     if (!allRefs.length) return nextTick(cb);
 
     return client.msearch({ body: body }, function (err, resp) {
-      if (err) return cb(err);
+      if (err) return cb(new RequestFailure(err, resp));
 
       _.each(resp.responses, function (resp, i) {
         var source = allRefs[i].source;
@@ -91,18 +92,6 @@ define(function (require) {
   SearchSource.prototype.inherits = function (parent) {
     this._parent = parent;
     return this;
-  };
-
-  /**
-   * Fetch just this source
-   * @param {Function} cb - callback
-   */
-  SearchSource.prototype.fetch = function (cb) {
-    var source = this;
-    var refs = this._courier._refs.search.filter(function (ref) {
-      return (ref.source === source);
-    });
-    SearchSource.fetch(this._courier, refs, cb);
   };
 
   /******
