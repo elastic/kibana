@@ -1,5 +1,6 @@
 [[templated-and-scripted-dashboards]]
-== Templates and Scripts
+== Templated and Scripted Dashboards
+
 Kibana has support for creating dashboards dynamically via templates,
 and more advanced scripts. This allows you to create a based dashboard,
 then influence it with parameters, such as inserting a new query or
@@ -8,7 +9,7 @@ filter via the URL.
 Templates and scripts must be stored on disk, storing them to
 Elasticsearch is not supported. They must also be created by editing or
 creating a schema. Because of this we highly recommend reading
-link:./_dashboard_schema.html[The Kibana Schema Explained]
+http://linktotheschema[The Kibana Schema Explained]
 
 [[the-dashboard-directory]]
 === The dashboard directory
@@ -19,6 +20,7 @@ files: `.json` files and `.js` files.
 
 [[templated-dashboards-.json]]
 === Templated Dashboards `(.json)`
+
 `.json` files are templated dashboards. An example of templating can be
 found on the query and filter objects of the `logstash.json` dashboard.
 Templates use handlebar syntax that allow you insert javascript clauses
@@ -27,7 +29,6 @@ example, a snippet from `logstash.json`'s
 https://github.com/elasticsearch/kibana/blob/master/src/app/dashboards/logstash.json[(on
 github)] query and filter services:
 
-[source,json]
 -----------------------------------------
   "0": {
     "query": "{{ARGS.query || '*'}}",
@@ -64,6 +65,7 @@ http://yourserver/index.html#/dashboard/file/logstash.json?query=status:200&from
 
 [[scripted-dashboards-.js]]
 === Scripted Dashboards `(.js)`
+
 Scripted dashboards are much more powerful than templated dashboards. Of
 course, with power comes responsibility, and scripted dashboards are
 more complex to build. The goal in a scripted dashboard is to build and
@@ -95,7 +97,6 @@ We can see this happening in `logstash.js`
 https://github.com/elasticsearch/kibana/blob/master/src/app/dashboards/logstash.js[(on
 github)] here:
 
-[source,javascript]
 ----------------------------------------------------------------------------------------------
 // In this dashboard we let users pass queries as comma separated list to the query parameter.
 // Or they can specify a split character using the split aparameter
