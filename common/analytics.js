@@ -35,12 +35,13 @@ define(function (require) {
     },
     pageview: function () {
       load();
-      window.ga('send', 'pageview', {
+      var options = {
         cookieDomain: window.location.hostname,
         page: window.location.pathname+window.location.hash,
-        location: window.location.href,
+        location: window.location.href.replace(/\?.+$/, ''),
         dimension1: '@@MARVEL_REVISION'
-      });
+      };
+      window.ga('send', 'pageview', options);
     }
   };
 });
