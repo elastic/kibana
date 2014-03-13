@@ -18,7 +18,10 @@ define(function (require) {
         appendToBody: false
       });
     })
-    .controller('kibana', function ($scope, courier, config, configFile, notify, $timeout) {
+    .controller('kibana', function ($scope, courier, config, configFile, createNotifier, $timeout) {
+      var notify = createNotifier({
+        location: 'Kibana Controller'
+      });
       $scope.apps = configFile.apps;
 
       $scope.$on('$locationChangeSuccess', function (event, uri) {

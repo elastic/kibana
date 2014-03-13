@@ -7033,7 +7033,7 @@ kbn-table tr.even td {
   -webkit-box-shadow: 3px 0px 19px 0px rgba(50, 50, 50, 0.67);
   -moz-box-shadow: 3px 0px 19px 0px rgba(50, 50, 50, 0.67);
   box-shadow: 3px 0px 19px 0px rgba(50, 50, 50, 0.67);
-  padding: 0px 15px;
+  padding: 0.00001px 15px;
   margin: 0 0 10px 0;
   border: none;
 }
@@ -7049,11 +7049,16 @@ kbn-table tr.even td {
 .toaster-container .alert table td {
   vertical-align: middle;
   text-align: right;
-  width: 20%;
 }
 .toaster-container .alert table td:first-child {
   text-align: left;
-  width: 80%;
+}
+.toaster-container .alert pre {
+  display: inline-block;
+  max-width: 100%;
+  margin: 10px 0;
+  word-break: normal;
+  word-wrap: normal;
 }
 disc-field-chooser ul {
   margin: 0;
