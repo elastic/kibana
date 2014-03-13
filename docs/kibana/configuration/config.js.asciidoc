@@ -21,7 +21,7 @@ This is the default landing page when you don't specify a dashboard to load. You
 files, scripts or saved dashboards here. For example, if you had saved a dashboard called
 `WebLogs' to elasticsearch you might use:
 
-+default_route: '/dashboard/elasticsearch/WebLogs',+
+default_route: '/dashboard/elasticsearch/WebLogs',
 // src/config.js:26
 
 ==== kibana-int

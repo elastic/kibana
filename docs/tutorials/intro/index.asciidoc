@@ -1,6 +1,5 @@
 [[using-kibana-for-the-first-time]]
-== Using Kibana for the first time
-
+== 10 Minute Walk Through
 Kibana is a great tool for real time data analytics and simply being on
 this page has put you on your way to making the most of it! If you have
 not downloaded Kibana yet, you can get it here:
@@ -37,6 +36,7 @@ on.
 
 Run in a terminal:
 
+[source,json]
 ----------------------------------------------------------------
 curl -XPUT http://localhost:9200/shakespeare -d '
 {
@@ -56,27 +56,26 @@ curl -XPUT http://localhost:9200/shakespeare -d '
 
 Great, we've created the index. Now we want to import the data. You can
 download the entire works of shakespeare in elasticsearch bulk import
-format here: link:./shakespeare.jsonIntr[shakespeare.json]
+format here: link:./shakespeare.json[shakespeare.json]
 
 Import it into your local elasticsearch instance the following command.
 This may take a few minutes. Shakespeare wrote a lot of stuff!
 
+[source,shell]
 ---------------------------------------------------------------
 curl -XPUT localhost:9200/_bulk --data-binary @shakespeare.json
 ---------------------------------------------------------------
 
 [[accessing-the-kibana-interface]]
 === Accessing the Kibana interface
-
-
 Now that you have data, let's do something with it. Point your browser
 at your local webserver, the one with Kibana already installed.
 
-image:./intro.png[Welcome Page] If you have Kibana extracted to your
+image:./tutorials/intro/intro.png[Welcome Page] If you have Kibana extracted to your
 document root you will be presented with this lovely welcome page. Click
 *Sample Dashboard*
 
-image:./sample_shakespeare.png[Sample Dashboard] And there you have your
+image:./tutorials/intro/sample_shakespeare.png[Sample Dashboard] And there you have your
 sample dashboard! Now if you started with a clean elasticsearch instance
 you'll see a very heavily weighted pie chart. This represents the type
 of documents in your index. As you can see, 99% them are lines for
@@ -87,54 +86,24 @@ shakespeare.
 
 [[the-first-search]]
 === The first search
-
 Kibana allows you to search Elasticsearch data via the Lucene Query
 String syntax. Queries can be run via the query input at the top of the
-page image:./query.png[Sample Dashboard]
+page image:./tutorials/intro/query.png[Sample Dashboard]
 
 This this in the query bar. Then check out the first few rows of the
 table.
 
+[source,shell]
 ---------------------------
 friends, romans, countrymen
 ---------------------------
 
-image:./firsttable.png[Sample Dashboard]
+image:./tutorials/intro/firsttable.png[Sample Dashboard]
 
-We can also match exact phrases, note the double quotes:
-
---------------------
-"to be or not to be"
---------------------
-
-Or in a specifc fields:
-
--------------
-line_id:86169
--------------
-
-We can express complex searches with AND/OR, note these words must be
-capitalized:
-
--------------
-food AND love
--------------
-
-Or parantheses:
-
-----------------------------------------
-("played upon" OR "every man") AND stage
-----------------------------------------
-
-Numeric ranges can also be easily searched:
-
-----------------------------------
-line_id:[30000 TO 80000] AND havoc
-----------------------------------
+For more information on queries see link:./working-with-queries-and-filters.html[Queries and Filters]
 
 [[configuring-another-index]]
 === Configuring another index
-
 Right now Kibana is pointing at the special Elasticsearch index `_all`.
 Think of `_all` as a composite index that points at all of your indices.
 Right now you only have one, `shakespeare`, but you might have more
@@ -143,16 +112,14 @@ only looking for your favorite line from Macbeth.
 
 To configure the the index click the configure icon in the top right:
 
-image:./configicon.png[Sample Dashboard]
+image:./tutorials/intro/configicon.png[Sample Dashboard]
 
 From here, you can set your index to `shakespeare` and ensure that
 Kibana only searches the `shakespeare` index
 
-image:./indexconfigure.png[Sample Dashboard]
+image:./tutorials/intro/indexconfigure.png[Sample Dashboard]
 
-[[next-steps]]
 === Next steps
-
 Congratulations, you've installed and configured kibana and dipped your
 toes in the water. Next, check out some of our videos and other
 tutorials for more advanced used, including sorting data, adding new

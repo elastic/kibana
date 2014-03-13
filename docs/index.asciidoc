@@ -10,9 +10,11 @@ it requires only a plain webserver, Kibana requires no fancy server side compone
 Kibana strives to be easy to get started with, while also being flexible and powerful, just like
 Elasticsearch.
 
-include::configuration/config.js.asciidoc[]
+include::./tutorials/tutorials.asciidoc[]
 
-include::panels.asciidoc[]
+include::./kibana/configuration/config.js.asciidoc[]
+
+include::./kibana/panels.asciidoc[]
 
 // src/app/controllers/dash.js:1
 

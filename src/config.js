@@ -30,7 +30,7 @@ function (Settings) {
      * files, scripts or saved dashboards here. For example, if you had saved a dashboard called
      * `WebLogs' to elasticsearch you might use:
      *
-     * +default_route: '/dashboard/elasticsearch/WebLogs',+
+     * default_route: '/dashboard/elasticsearch/WebLogs',
      */
     default_route     : '/dashboard/file/default.json',
 
