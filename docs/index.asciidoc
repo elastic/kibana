@@ -13,5 +13,3 @@ include::./tutorials/tutorials.asciidoc[]
 include::./kibana/configuration/config.js.asciidoc[]
 
 include::./kibana/panels.asciidoc[]
-
-// src/app/controllers/dash.js:1
