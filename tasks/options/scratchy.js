@@ -6,7 +6,7 @@ module.exports = function(config) {
       options: {
         unslash: true,
         extension: '.asciidoc',
-        annotate: '// '
+        //annotate: '// '
       }
     }
   }

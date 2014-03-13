@@ -1,8 +1,10 @@
 /** @scratch /panels/5
+ *
  * include::panels/histogram.asciidoc[]
  */
 
 /** @scratch /panels/histogram/0
+ *
  * == Histogram
  * Status: *Stable*
  *
@@ -64,6 +66,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
     // Set and populate defaults
     var _d = {
       /** @scratch /panels/histogram/3
+       *
        * === Parameters
        * ==== Axis options
        * mode:: Value to use for the y-axis. For all modes other than count, +value_field+ must be
@@ -104,6 +107,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
         min: 0
       },
       /** @scratch /panels/histogram/5
+       *
        * ==== Queries
        * queries object:: This object describes the queries to use on this panel.
        * queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
@@ -114,6 +118,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
         ids         : []
       },
       /** @scratch /panels/histogram/3
+       *
        * ==== Annotations
        * annotate object:: A query can be specified, the results of which will be displayed as markers on
        * the chart. For example, for noting code deploys.

@@ -1,8 +1,10 @@
 /** @scratch /panels/5
+ *
  * include::panels/terms.asciidoc[]
  */
 
 /** @scratch /panels/terms/0
+ *
  * == terms
  * Status: *Stable*
  *
@@ -102,6 +104,7 @@ function (angular, app, _, $, kbn) {
        */
       spyable     : true,
       /** @scratch /panels/terms/5
+       *
        * ==== Queries
        * queries object:: This object describes the queries to use on this panel.
        * queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+

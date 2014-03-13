@@ -1,4 +1,5 @@
 /** @scratch /panels/5
+ *
  * include::panels/text.asciidoc[]
  */
 
@@ -31,6 +32,7 @@ function (angular, app, _, require) {
     // Set and populate defaults
     var _d = {
       /** @scratch /panels/text/5
+       *
        * === Parameters
        *
        * mode:: `html', `markdown' or `text'
