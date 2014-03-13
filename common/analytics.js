@@ -37,8 +37,8 @@ define(function (require) {
       load();
       var options = {
         cookieDomain: window.location.hostname,
-        page: window.location.pathname+window.location.hash,
-        location: window.location.href.replace(/\?.+$/, ''),
+        page: window.location.pathname+window.location.hash.replace(/\?.+$/, ''),
+        location: window.location.href,
         dimension1: '@@MARVEL_REVISION'
       };
       window.ga('send', 'pageview', options);
