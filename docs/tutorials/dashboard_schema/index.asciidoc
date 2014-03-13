@@ -1,6 +1,4 @@
-[[the-dashboard-schema-explained]]
-== The Dashboard Schema Explained
-
+== Dashboard Schema
 Kibana dashboards can be easily created right in the browser, and in
 most cases, the browser is all you will need to build a powerful,
 informative, interface. When you need that extra little bit of tweaking,
@@ -10,7 +8,7 @@ Kibana allows for the editing of the dashboard schema.
 strict, a stray comma or missing brace will cause your dashboard not to
 load.
 
-image:./schema_dashboard.png[image]
+image:./tutorials/dashboard_schema/schema_dashboard.png[image]
 
 We will be using the above dashboard as an example. You can export the
 schema of any dashboard by clicking the *Save* icon in the top right,
@@ -26,7 +24,7 @@ it down into pieces for the purpose of instruction in this guide.
 
 [[services]]
 === Services
-
+[source,json]
 ---------------
   "services": {
 ---------------
@@ -40,8 +38,7 @@ omitted will be automatically populated with query and filter services.
 
 [[query]]
 ==== Query
-
-
+[source,json]
 ----------------------------------------------------
     "query": {
       "list": {
@@ -72,7 +69,7 @@ array is used for ordering the list for the purpose of display.
 
 [[filter]]
 ==== Filter
-
+[source,json]
 -----------------------------------
     "filter": {
       "list": {
@@ -99,8 +96,7 @@ behaves like their query counter part.
 
 [[pulldown]]
 === Pulldown
-
-
+[source,json]
 ----------------
   "pulldowns": [
 ----------------
@@ -111,8 +107,9 @@ panels in a row except they don't get a span, they're all full width.
 Also panels in pulldowns are not movable or editable by the user.
 They're greate for panels that take input. the `pulldown` property is an
 array that contains panel objects. For documentation for specific panels
-see link:../kibana/panels.html[Kibana Panels]
+see link:./panels.html[Kibana Panels]
 
+[source,json]
 -----------------------------------------
     {
       "type": "query",
@@ -148,11 +145,11 @@ user that something has changed in the panel.
 
 [[nav]]
 === Nav
-
 The `nav` property also contains a list of panels, however these panels
 need to be designed to fit into the nav bar at the top of the screen.
 The only currently support nav panel is the timepicker
 
+[source,json]
 -------------------------------
   "nav": [
     {
@@ -191,10 +188,10 @@ The only currently support nav panel is the timepicker
 
 [[loader]]
 === Loader
-
 The `loader` property describes the behavior of the save and load
 buttons at the top of the dashboard.
 
+[source,json]
 ----------------------------------
   "loader": {
     "save_gist": false,
@@ -212,12 +209,12 @@ buttons at the top of the dashboard.
   },
 ----------------------------------
 
-[[rows]]
-=== Rows
-
+[[rows-array]]
+=== Rows Array
 `rows` are where panels are usually placed, and the only place they can
 be added via the browser UI.
 
+[source,json]
 --------------------------
 "rows": [
     {
@@ -238,14 +235,14 @@ describing the row:
 * collapsable:true/false describing whether or not the user is allowed
 to collapse the row
 
-[[panels]]
-==== Panels
-
+[[panels-array]]
+==== Panels Array
 The `panels` array property of a row contains a list of panel objects in
 the order in which they appear in the row. For a list of common panel
 properties and documentation for specific panels see
-link:../kibana/panels.html[Kibana Panels]
+link:./panels.html[Kibana Panels]
 
+[source,json]
 ----------------------------------------
       "panels": [
         {
@@ -308,12 +305,12 @@ link:../kibana/panels.html[Kibana Panels]
   ],
 ----------------------------------------
 
-[[index]]
-=== Index
-
+[[index-settings]]
+=== Index Settings
 The index property contains information on the Elasticsearch index that
 Kibana communicates with.
 
+[source,json]
 ---------------------------------------
   "index": {
     "interval": "none",
@@ -336,9 +333,9 @@ fields
 
 [[the-rest]]
 === The Rest
-
 The following are top level dashboard settings
 
+[source,json]
 --------------------
   "failover": false,
   "editable": true,
@@ -358,7 +355,6 @@ panels to refresh their data.
 
 [[importing-schemas]]
 === Importing Schemas
-
 By default, importing of schemas is disabled. It can be re-enabled via
 the *Controls* tab of the dashboard settings screen by checking the
 *Local file* option. Schemas can be imported from the *Load* icon in the
