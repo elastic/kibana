@@ -1,0 +1,28 @@
+<html>
+  <head>
+    <title>Issue #27</title>
+    <script src="../../stacktrace.js"></script>
+    <script>
+      /*function printStackTraceOnError(msg, file, line) {
+       alert(printStackTrace().join('\n\n'));
+       }
+       if (window.addEventListener) {
+       window.addEventListener('error', printStackTraceOnError, false);
+       } else if (window.attachEvent) {
+       window.attachEvent('onerror', printStackTraceOnError);
+       } else {
+       window.onerror = printStackTraceOnError;
+       }*/
+      window.onerror = function(msg, file, line) {
+        alert(printStackTrace().join('\n\n'));
+      };
+
+      function test() {
+        x += 1;
+      }
+    </script>
+  </head>
+  <body onload="test();">
+    <button onclick="test();">test</button>
+  </body>
+</html>

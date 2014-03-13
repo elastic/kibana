@@ -1,0 +1,123 @@
+buildscript {
+	repositories {
+		mavenLocal()
+		mavenCentral()
+	}
+	dependencies {
+		classpath 'com.eriwen:gradle-js-plugin:1.1'
+	}
+}
+
+apply plugin: 'js'
+
+defaultTasks 'all'
+buildDir = 'target'
+
+def srcFile = 'stacktrace.js'
+def destFile = "${buildDir}/stacktrace-min.js"
+def testDir = 'test'
+
+repositories {
+	mavenRepo url: 'http://repository.springsource.com/maven/bundles/release'
+	mavenCentral()
+}
+
+task clean(type: Delete) {
+	delete buildDir
+}
+
+task init(type: Directory, dependsOn: 'clean', description: 'Creates artifact output directories') {
+	outputs.dir(buildDir)
+	doLast {
+		file(buildDir).mkdirs()
+	}
+}
+
+task wrapper(type: Wrapper) {
+	gradleVersion = '1.1'
+}
+
+task jshintz(dependsOn: 'init', description: 'runs jshint on all non-test and lib JS files') {
+	doLast {
+		def command = "jshint ${new File('stacktrace.js').canonicalPath} --config jshint.json --jslint-reporter"
+		new File("${buildDir}/jshint.xml").write(command.execute().text)
+	}
+}
+
+task jsduck(type: Exec, dependsOn: 'init', description: 'Generates jsduck documentation') {
+	inputs.file file(srcFile)
+	outputs.file file("${buildDir}/docs")
+
+	commandLine = ['jsduck', srcFile, '--output', "${buildDir}/docs"]
+	ignoreExitValue = true
+}
+
+minifyJs {
+	dependsOn << 'init'
+	source = file(srcFile)
+	dest = file(destFile)
+	closure {
+		warningLevel = 'QUIET'
+	}
+}
+
+gzipJs {
+	source = minifyJs
+	dest = file(destFile)
+}
+
+task test(dependsOn: 'init') << {
+	description = 'run QUnit tests and create JUnit test reports'
+	
+	def specs = []
+	new File(testDir).eachFile {
+		if (it.name.endsWith('.html')) {
+			specs << it
+		}
+	}
+
+	def phantomJsPath = "which phantomjs".execute().text.trim()
+	def startTime = new Date().time
+	def numFailures = 0
+	def testsFailed = false
+	specs.each { File spec ->
+		print "Running ${spec.name}..."
+		
+		def outputFile = "${buildDir}/TEST-${spec.name.replace('-', '').replace('.html', '.xml')}"
+		ant.exec(outputproperty: 'cmdOut', errorproperty: 'cmdErr',
+				resultproperty: 'exitCode', failonerror: 'false', executable: phantomJsPath) {
+			arg(value: 'test/lib/phantomjs-qunit-runner.js')
+			arg(value: spec.canonicalPath)
+		}
+		// Check exit code
+		if (ant.project.properties.exitCode != '0') {
+			testsFailed = true
+			numFailures++
+			println 'FAILED'
+		} else {
+			println 'PASSED'
+		}
+
+		new File(outputFile).write(ant.project.properties.cmdOut)
+	}
+	
+	println "QUnit tests completed in ${new Date().time - startTime}ms"
+	println "QUnit Tests ${testsFailed ? 'FAILED' : 'PASSED'} - view reports in ${buildDir}"
+	ant.fail(if: testsFailed, message: 'JS Tests Failed')
+}
+
+task jstd(type: Exec, dependsOn: 'init', description: 'runs JS tests through JsTestDriver') {
+	// Default to MacOS and check for other environments
+	def firefoxPath = '/Applications/Firefox.app/Contents/MacOS/firefox'
+	if ("uname".execute().text.trim() != 'Darwin') {
+		firefoxPath = "which firefox".execute().text.trim()
+	}
+
+	commandLine = ['/usr/bin/env', 'DISPLAY=:1', 'java', '-jar', "test/lib/JsTestDriver-1.3.3d.jar", '--config', "test/jsTestDriver.conf", '--port', '4224', '--browser', firefoxPath, '--tests', 'all', '--testOutput', buildDir]
+}
+
+task jsCoverage(type: Exec, dependsOn: 'jstd', description: 'JS code coverage with cobertura') {
+	commandLine = ['python', "${projectDir}/test/lib/lcov-to-cobertura-xml.py", '-e', 'test.lib', '-o', "${buildDir}/coverage.xml", "${buildDir}/jsTestDriver.conf-coverage.dat"]
+}
+
+task all(dependsOn: ['clean', 'jshintz', 'test', 'jsduck', 'minifyJs', 'gzipJs']) << {}

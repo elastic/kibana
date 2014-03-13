@@ -1,0 +1,29 @@
+<html>
+  <head>
+    <title>Issue #27</title>
+    <script src="../../stacktrace.js"></script>
+    <script>
+    window.onerror = function(errorMsg, url, lineNumber) {
+      alert(errorMsg + "\nURL: " + url + "\nLine number: " + lineNumber);
+      // Previous line gets executed
+      var trace;
+      try {
+        // Firefox enters printStackTrace. Leaves silently somewhere in there
+        trace = printStackTrace().join('\n\n');
+        // Execution does not arrive here (as evidenced in debugger)
+      } catch (e) {
+        // nothing gets thrown/caught in Firefox
+        // error console empty (the original uncaught exception is logged)
+      }
+      // Execution does not arrive here
+      // (as evidenced in debugger and actual browser window)
+      alert(trace);
+      return true;
+    };
+
+    // Somewhere error gets thrown
+    throw 'An error occurred';
+    </script>
+  </head>
+  <body></body>
+</html>

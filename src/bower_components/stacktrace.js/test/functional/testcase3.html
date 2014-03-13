@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>window.onerror test</title>
+    <script type="text/javascript" src="../../stacktrace.js"></script>
+    <script type="text/javascript" src="testCommon.js"></script>
+</head>
+<body>
+<div id="output"></div>
+<script type="text/javascript">
+    function bar(n) {
+        if (n < 2) {
+            window.abc();
+        }
+        bar(n - 1);
+    }
+
+    function foo() {
+        bar(2);
+    }
+
+    window.onerror = function(message, filename, lineno, colno, error) {
+        printTrace(window.printStackTrace());
+
+        var content = ["--------------Arguments:------------------", "message: " + message, "filename: " + filename, "lineno: " + lineno, "colno: " + colno, "error: " + error];
+        var output = document.getElementById("output");
+        output.innerHTML += (content.join("<br/>"));
+
+        return true;
+    };
+    expected = ["bar(1)", "bar(2)", "foo()"];
+    foo();
+</script>
+</body>
+</html>
