@@ -1,0 +1,10 @@
+{
+    "name": "stacktrace.js",
+    "version": "0.6.0",
+    "repo": "eriwen/javascript-stacktrace",
+    "main": "stacktrace.js",
+    "scripts": [
+      "stacktrace.js"
+    ],
+    "dependencies": {}
+}
