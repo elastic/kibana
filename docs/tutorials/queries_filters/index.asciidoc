@@ -19,7 +19,7 @@ tutorial.
 === Our Dashboard
 Our dashboard looks like this, we will be searching through lines of shakespeare.
 If you would like to follow along with the screenshots in this guide you
-can link:./plays.json[download the exported dashboard schema]
+can link:./snippets/plays.json[download the exported dashboard schema]
 
 image:./tutorials/queries_filters/plays.png[image]
 

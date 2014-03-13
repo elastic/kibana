@@ -1,7 +1,5 @@
 = Kibana
 
-// Why can't I have a preamble here?
-
 == Introduction
 
 Kibana is an open source (Apache Licensed), browser based analytics and search dashboard for
@@ -15,6 +13,3 @@ include::./tutorials/tutorials.asciidoc[]
 include::./kibana/configuration/config.js.asciidoc[]
 
 include::./kibana/panels.asciidoc[]
-
-// src/app/controllers/dash.js:1
-

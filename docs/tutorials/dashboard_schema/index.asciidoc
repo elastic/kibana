@@ -13,7 +13,7 @@ image:./tutorials/dashboard_schema/schema_dashboard.png[image]
 We will be using the above dashboard as an example. You can export the
 schema of any dashboard by clicking the *Save* icon in the top right,
 selecting advanced and choosing *Export Schema*. You can download this
-schema here: link:./schema.json[schema.json]
+schema here: link:./snippets/schema.json[schema.json]
 
 While the dashboard is made up of one large JSON document, we will break
 it down into pieces for the purpose of instruction in this guide.

@@ -1,8 +1,10 @@
 /** @scratch /panels/5
+ *
  * include::panels/column.asciidoc[]
  */
 
 /** @scratch /panels/column/0
+ *
  * == Column
  * Status: *Stable*
  *
@@ -34,6 +36,7 @@ function (angular, app, _, config) {
     // Set and populate defaults
     var _d = {
       /** @scratch /panels/column/3
+       *
        * === Parameters
        *
        * panel:: An array of panel objects
