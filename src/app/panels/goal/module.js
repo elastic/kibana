@@ -1,8 +1,10 @@
 /** @scratch /panels/5
+ *
  * include::panels/goal.asciidoc[]
  */
 
 /** @scratch /panels/goal/0
+ *
  * == Goal
  * Status: *Stable*
  *
@@ -44,6 +46,7 @@ define([
     // Set and populate defaults
     var _d = {
       /** @scratch /panels/goal/3
+       *
        * === Parameters
        * donut:: Draw a hole in the middle of the pie, creating a tasty donut.
        */
@@ -65,15 +68,15 @@ define([
        */
       spyable : true,
       /** @scratch /panels/goal/3
+       *
        * ==== Query
        *
-       * query object:: This confusingly named object has properties to set the terms mode field,
-       * and the fixed goal for the goal mode
-       * query.field::: the field to facet on in terms mode
+       * query object::
        * query.goal::: the fixed goal for goal mode
        */
       query   : {goal: 100},
       /** @scratch /panels/goal/5
+       *
        * ==== Queries
        *
        * queries object:: This object describes the queries to use on this panel.
