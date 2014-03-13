@@ -1,8 +1,10 @@
 /** @scratch /panels/5
+ *
  * include::panels/map.asciidoc[]
  */
 
 /** @scratch /panels/map/0
+ *
  * == Map
  * Status: *Stable*
  *
@@ -46,6 +48,7 @@ function (angular, app, _, $) {
     // Set and populate defaults
     var _d = {
       /** @scratch /panels/map/3
+       *
        * === Parameters
        *
        * map:: Map to display. world, usa, europe
@@ -69,6 +72,7 @@ function (angular, app, _, $) {
        */
       spyable : true,
       /** @scratch /panels/map/5
+       *
        * ==== Queries
        * queries object:: This object describes the queries to use on this panel.
        * queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+

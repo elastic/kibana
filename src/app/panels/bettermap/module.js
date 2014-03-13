@@ -1,8 +1,10 @@
 /** @scratch /panels/5
+ *
  * include::panels/bettermap.asciidoc[]
  */
 
 /** @scratch /panels/bettermap/0
+ *
  * == Bettermap
  * Status: *Experimental*
  *
@@ -60,6 +62,7 @@ function (angular, app, _, L, localRequire) {
     // Set and populate defaults
     var _d = {
       /** @scratch /panels/bettermap/3
+       *
        * === Parameters
        *
        * field:: The field that contains the coordinates, in geojson format. GeoJSON is
@@ -80,6 +83,7 @@ function (angular, app, _, L, localRequire) {
        */
       tooltip : "_id",
       /** @scratch /panels/bettermap/5
+       *
        * ==== Queries
        * queries object:: This object describes the queries to use on this panel.
        * queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+

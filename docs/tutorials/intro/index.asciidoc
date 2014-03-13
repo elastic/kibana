@@ -56,7 +56,7 @@ curl -XPUT http://localhost:9200/shakespeare -d '
 
 Great, we've created the index. Now we want to import the data. You can
 download the entire works of shakespeare in elasticsearch bulk import
-format here: link:./shakespeare.json[shakespeare.json]
+format here: link:./snippets/shakespeare.json[shakespeare.json]
 
 Import it into your local elasticsearch instance the following command.
 This may take a few minutes. Shakespeare wrote a lot of stuff!
@@ -122,5 +122,6 @@ image:./tutorials/intro/indexconfigure.png[Sample Dashboard]
 === Next steps
 Congratulations, you've installed and configured kibana and dipped your
 toes in the water. Next, check out some of our videos and other
-tutorials for more advanced used, including sorting data, adding new
-charts and using Kibana with Logstash.
+tutorials for more advanced usage. Now you can try adding your own panels
+to a blank dashboard. See For more information on queries see
+link:./rows-and-panels.html[Rows and Panels]
