@@ -37,7 +37,7 @@ define(function (require) {
 
         angular
           .bootstrap(appEl, ['setup'])
-          .invoke(function (es, config, notify) {
+          .invoke(function (es, config) {
             // init the setup module
             async.series([
               async.apply(checkForES, es),

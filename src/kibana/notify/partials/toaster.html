@@ -8,11 +8,16 @@
         <td>
           <button
             type="button"
+            ng-if="notif.stack && !notif.showStack"
+            class="btn"
+            ng-class="'btn-' + notif.type"
+            ng-click="notif.showStack = true"
+            >More Info</button>
+          <button
+            type="button"
             ng-if="notif.report"
             class="btn"
             ng-class="'btn-' + notif.type"
-            data-dismiss="alert"
-            aria-hidden="true"
             ng-click="notif.report()"
             >Report</button>
           <button
@@ -20,8 +25,6 @@
             ng-if="notif.accept"
             class="btn"
             ng-class="'btn-' + notif.type"
-            data-dismiss="alert"
-            aria-hidden="true"
             ng-click="notif.accept()"
             >OK</button>
           <button
@@ -29,12 +32,11 @@
             ng-if="notif.address"
             class="btn"
             ng-class="'btn-' + notif.type"
-            data-dismiss="alert"
-            aria-hidden="true"
             ng-click="notif.address()"
             >Fix it</button>
         </td>
       </tr></table>
+      <pre ng-if="notif.stack && notif.showStack" ng-bind="notif.stack"></pre>
     </div>
   </li>
 </ul>

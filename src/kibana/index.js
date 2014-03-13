@@ -2,7 +2,6 @@
  * main app level module
  */
 define(function (require) {
-
   var angular = require('angular');
   var $ = require('jquery');
   var _ = require('lodash');
@@ -50,7 +49,7 @@ define(function (require) {
         notify.lifecycle('bootstrap');
         angular
           .bootstrap(document, ['kibana'])
-          .invoke(function (notify) {
+          .invoke(function () {
             notify.lifecycle('bootstrap', true);
             $(document.body).children().show();
           });

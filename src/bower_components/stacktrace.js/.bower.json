@@ -1,0 +1,22 @@
+{
+  "name": "stacktrace.js",
+  "version": "0.6.0",
+  "main": "./stacktrace.js",
+  "dependencies": {},
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components"
+  ],
+  "homepage": "https://github.com/stacktracejs/stacktrace.js",
+  "_release": "0.6.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.6.0",
+    "commit": "02b5def17d157b5e56d2bb0e175e48c5c1272aaa"
+  },
+  "_source": "https://github.com/stacktracejs/stacktrace.js.git",
+  "_target": "~0.6.0",
+  "_originalSource": "https://github.com/stacktracejs/stacktrace.js.git",
+  "_direct": true
+}
