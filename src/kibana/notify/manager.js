@@ -1,6 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
+  var createStackTrace = require('stacktrace');
 
   var notifs = [];
   var setTO = setTimeout;
@@ -63,6 +64,16 @@ define(function (require) {
     return rtn;
   }
 
+  function formatStack(err) {
+    if (!err) return null;
+
+    var isError = (err instanceof Error);
+    var stack = createStackTrace({ e: isError ? err : void 0 });
+    var msg = isError ? err.message : err;
+
+    return msg + '\n' + stack.map(function (line) { return '  ' + line; }).join('\n');
+  }
+
   /**
    * Track application lifecycle events
    * @type {[type]}
@@ -112,7 +123,7 @@ define(function (require) {
   NotifyManager.prototype.fatal = function (err) {
     var html = fatalToastTemplate({
       msg: formatMsg(err, this.from),
-      stack: err.stack
+      stack: formatStack(err)
     });
 
     var $container = $('#fatal-splash-screen');
@@ -142,7 +153,8 @@ define(function (require) {
       icon: 'warning',
       title: 'Error',
       lifetime: Infinity,
-      actions: ['report', 'accept']
+      actions: ['report', 'accept'],
+      stack: formatStack(err)
     }, cb);
   };
 

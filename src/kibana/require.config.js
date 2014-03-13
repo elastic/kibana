@@ -16,6 +16,7 @@ require.config({
     lodash: '../bower_components/lodash/dist/lodash',
     moment: '../bower_components/moment/moment',
     gridster: '../bower_components/gridster/dist/jquery.gridster',
+    stacktrace: '../bower_components/stacktrace.js/stacktrace',
     modules: 'utils/modules',
     bower_components: '../bower_components'
   },

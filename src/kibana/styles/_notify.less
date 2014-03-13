@@ -20,7 +20,7 @@
     -webkit-box-shadow: 3px 0px 19px 0px rgba(50, 50, 50, 0.67);
     -moz-box-shadow:    3px 0px 19px 0px rgba(50, 50, 50, 0.67);
     box-shadow:         3px 0px 19px 0px rgba(50, 50, 50, 0.67);
-    padding: 0px 15px;
+    padding: 0.00001px 15px;
     margin: 0 0 10px 0;
     border: none;
 
@@ -36,15 +36,23 @@
       td {
         vertical-align: middle;
 
-        &:first-child {
-          text-align: left;
-          width: 80%;
-        }
         // :not(:first-child)
         text-align: right;
-        width: 20%;
+
+
+        &:first-child {
+          text-align: left;
+        }
       }
 
+    }
+
+    pre {
+      display: inline-block;
+      max-width: 100%;
+      margin: 10px 0;
+      word-break: normal;
+      word-wrap: normal;
     }
   }
 }
