@@ -37,7 +37,8 @@ define(function () {
         "fields": [],
         "types": [],
         "completion_fields": [],
-        "fielddata_fields": []
+        "fielddata_fields": [],
+        "level": ["cluster", "indices", "shards"]
       }
 
     });
