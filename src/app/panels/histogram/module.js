@@ -615,7 +615,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
         function render_panel(data) {
           // IE doesn't work without this
           try {
-            elem.css({height:scope.panel.height || scope.row.height});
+            elem.css({height:scope.row.height});
           } catch(e) {return;}
 
           // Populate from the query service
@@ -705,10 +705,9 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
                   'annotation': {
                     level: 1,
                     icon: {
-                      icon: "icon-tag icon-flip-vertical",
-                      size: 20,
-                      color: "#222",
-                      outline: "#bbb"
+                      width: 20,
+                      height: 21,
+                      icon: "histogram-marker"
                     }
                   }
                 }
