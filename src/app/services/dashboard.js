@@ -207,12 +207,14 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
       // Delay this until we're sure that querySrv and filterSrv are ready
       $timeout(function() {
         // Ok, now that we've setup the current dashboard, we can inject our services
-        querySrv = $injector.get('querySrv');
-        filterSrv = $injector.get('filterSrv');
-
-        // Make sure these re-init
-        querySrv.init();
-        filterSrv.init();
+        if(!_.isUndefined(self.current.services.query)) {
+          querySrv = $injector.get('querySrv');
+          querySrv.init();
+        }
+        if(!_.isUndefined(self.current.services.filter)) {
+          filterSrv = $injector.get('filterSrv');
+          filterSrv.init();
+        }
       },0).then(function() {
         // Call refresh to calculate the indices and notify the panels that we're ready to roll
         self.refresh();
