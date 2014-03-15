@@ -34,11 +34,11 @@ configuration the included Kibana logstash interface should work nicely.
 
 Run 
    
-   ./gradlew jettyRun
+    ./gradlew jettyRun
 
 and you should find a running kibana under
 
-   http://localhost:8080/kibana
+    http://localhost:8080/kibana
 
 ### FAQ
 __Q__: Why doesnt it work? I have http://localhost:9200 in my config.js, my webserver and elasticsearch
