@@ -30,6 +30,16 @@ The url entered here _must be reachable_ by your browser.
 3. Point your browser at your installation. If you're using Logstash with the default indexing
 configuration the included Kibana logstash interface should work nicely.
 
+### Test
+
+Run 
+   
+   ./gradlew jettyRun
+
+and you should find a running kibana under
+
+   http://localhost:8080/kibana
+
 ### FAQ
 __Q__: Why doesnt it work? I have http://localhost:9200 in my config.js, my webserver and elasticsearch
 server are on the same machine  
