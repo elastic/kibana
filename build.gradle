@@ -1,0 +1,11 @@
+apply plugin: "jetty"
+
+task wrapper(type: Wrapper) {
+    gradleVersion = "1.11"
+}
+
+jettyRun {
+    webAppSourceDirectory = new File("$projectDir/src")
+    contextPath = "kibana"
+    httpPort = 8080
+}
