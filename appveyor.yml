@@ -1,0 +1,8 @@
+os: Windows Server 2012
+
+build:
+  publish_nuget: true
+
+artifacts:
+  - path: *.nupkg
+

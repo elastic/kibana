@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Kibana</id>
+    <version>1.0.0</version>
+    <authors>elasticsearch</authors>
+    <description>kibana fork for use within Mvno</description>
+    <language>en-US</language>
+    <projectUrl>http://www.elasticsearch.org/overview/kibana/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+  </metadata>
+  <files>
+    <file src="src\**\*" target="" />
+    <file src="deploy_scripts\**\*" target="" />
+  </files>
+</package>
