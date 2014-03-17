@@ -40,7 +40,7 @@
 }
 .tooltip {
   &.top .tooltip-arrow {
-    bottom: 0;
+    bottom: 1px;
     left: 50%;
     margin-left: -@tooltipArrowWidth;
     border-width: @tooltipArrowWidth @tooltipArrowWidth 0;
@@ -48,20 +48,20 @@
   }
   &.right .tooltip-arrow {
     top: 50%;
-    left: 0;
+    left: 1px;
     margin-top: -@tooltipArrowWidth;
     border-width: @tooltipArrowWidth @tooltipArrowWidth @tooltipArrowWidth 0;
     border-right-color: @tooltipArrowColor;
   }
   &.left .tooltip-arrow {
     top: 50%;
-    right: 0;
+    right: 1px;
     margin-top: -@tooltipArrowWidth;
     border-width: @tooltipArrowWidth 0 @tooltipArrowWidth @tooltipArrowWidth;
     border-left-color: @tooltipArrowColor;
   }
   &.bottom .tooltip-arrow {
-    top: 0;
+    top: 1px;
     left: 50%;
     margin-left: -@tooltipArrowWidth;
     border-width: 0 @tooltipArrowWidth @tooltipArrowWidth;
