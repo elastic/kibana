@@ -4,5 +4,5 @@ build:
   publish_nuget: true
 
 artifacts:
-  - path: *.nupkg
+  - path: kibana*.nupkg
   
