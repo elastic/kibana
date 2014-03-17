@@ -28,7 +28,7 @@ module.exports = function(grunt) {
           replacements: [
             {
               pattern: /@REV@/g,
-              replacement: desc.object
+              replacement: grunt.config.data.pkg.version +"-"+ desc.object
             }
           ]
         }
