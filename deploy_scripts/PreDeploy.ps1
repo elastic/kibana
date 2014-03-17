@@ -5,7 +5,7 @@ function Add-ServerRole
   Write-Host "looking for server role: $roleToAdd"
   $searchResult = Get-WindowsFeature $roleToAdd
   
-  if($searchResult -eq $null)
+  if($searchResult.Installed -eq $false)
   {
 	Write-Host "Adding server role: $roleToAdd"
 	Add-WindowsFeature $roleToAdd
