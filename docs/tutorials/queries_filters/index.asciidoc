@@ -145,7 +145,7 @@ Filters can also be added manually by clicking the *+*
 
 === Next steps
 Now that you have a solid handle on filters and queries you might be
-interested in how they're described in http://linktotheschema[the Kibana
+interested in how they're described in link:./_dashboard_schema.html[the Kibana
 schema]. If you're interested in inserting queries or filters via URL
 parameters you might also take a look at
 link:./templated-and-scripted-dashboards.html[Templated and Scripted
