@@ -54,7 +54,7 @@ function (angular, _, config) {
             ". Please ensure that Elasticsearch is reachable from your system." ,'error');
         } else {
           alertSrv.set('Error',"No index found at "+config.elasticsearch+"/" +
-            indices.join(',')+"/_mapping/field/*. Please create at least one index."  +
+            indices.join(',')+"/_mapping. Please create at least one index."  +
             "If you're using a proxy ensure it is configured correctly.",'error');
         }
       });
