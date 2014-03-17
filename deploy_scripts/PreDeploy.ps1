@@ -1,3 +1,15 @@
+function Add-ServerRole
+{
+  param([string] $roleToAdd)
+  
+  $searchResult = Get-WindowsFeature $roleToAdd
+  
+  if($searchResult -eq $null)
+  {
+	Add-WindowsFeature $roleToAdd
+  }
+}
+
 function Add-IISMimeType
 {
   param(
@@ -19,5 +31,9 @@ function Add-IISMimeType
   }
 }
 
-Add-IISMimeType "application/json" ".json"
+Import-Module Servermanager
 
+Add-ServerRole Application-Server
+Add-ServerRole Web-Server
+
+Add-IISMimeType "application/json" ".json"
