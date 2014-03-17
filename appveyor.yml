@@ -1,7 +1,7 @@
 os: Windows Server 2012
 
 build_script:
-  nuget pack kibana.nuspec -Version %APPVEYOR_BUILD_NUMBER% -NoPackageAnalysis
+  nuget pack kibana.nuspec -Version %APPVEYOR_BUILD_VERSION% -NoPackageAnalysis
 
 artifacts:
   - path: kibana*.nupkg  
