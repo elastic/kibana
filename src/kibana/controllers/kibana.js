@@ -26,8 +26,8 @@ define(function (require) {
 
       $scope.$on('$locationChangeSuccess', function (event, uri) {
         if (!uri) return;
-        var route = uri.split('#/').slice(1);
-        $scope.activeApp = route ? route[0] : null;
+        var route = uri.match(/#\/([^\/]*)/);
+        $scope.activeApp = route ? route[1] : null;
       });
 
       $scope.opts = {
