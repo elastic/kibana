@@ -33,7 +33,7 @@
             overflow: visible;
           }
         </style>
-        <div bs-tooltip="percent(field[1],data.length)" class="bar" ng-class="micropanelColor($index)" ng-style="{width: percent(field[1],data.length)}"></div>
+        <div bs-tooltip="percent(field[1],data.length)" class="bar" ng-class="micropanelColor($index)" ng-style="{width: (field[1]/data.length) > 1 ? '100%' : percent(field[1],data.length)}"></div>
         <span style="position:absolute;right:20px;">{{field[1]}}</span>
       </td>
     </tr>
