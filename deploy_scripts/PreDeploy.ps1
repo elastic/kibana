@@ -2,10 +2,12 @@ function Add-ServerRole
 {
   param([string] $roleToAdd)
   
+  Write-Host "looking for server role: $roleToAdd"
   $searchResult = Get-WindowsFeature $roleToAdd
   
   if($searchResult -eq $null)
   {
+	Write-Host "Adding server role: $roleToAdd"
 	Add-WindowsFeature $roleToAdd
   }
 }
