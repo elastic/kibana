@@ -11,23 +11,32 @@
  *
  */
 
-define([
-  'angular',
-  'app',
-  'jquery',
-  'lodash',
-  '../../../../../common/analytics',
-  'factories/store'
-],
-function (angular, app, $, _, ga) {
+ 
+define(function (require) {
   'use strict';
+
+  var angular = require('angular');
+  var app = require('app');
+  var $ = require('jquery');
+  var _ = require('lodash');
+  var ga = require('../../../../../common/analytics');
+
+  var loadDashboards = require('./lib/loadDashboards');
+  var extractIds = require('./lib/extractIds');
+  var findDashboardById = require('./lib/findDashboardById');
+  var parseDashboard = require('./lib/parseDashboard');
+  var mergeLinksWithDashboards = require('./lib/mergeLinksWithDashboards');
+  var filterLinks = require('./lib/filterLinks');
+
+  require('factories/store');
+
 
   var module = angular.module('kibana.panels.marvel.navigation', []);
   app.useModule(module);
 
-  module.controller('marvel.navigation', function($scope, $http, storeFactory) {
+  module.controller('marvel.navigation', function($scope, $http, storeFactory, $q, dashboard, $location, $routeParams) {
     $scope.panelMeta = {
-      status  : "Experimental",
+      status  : "Stable",
       description : "A simple dropdown panel with a list of links"
     };
 
@@ -68,6 +77,9 @@ function (angular, app, $, _, ga) {
 
     _.defaults($scope.panel,_d);
 
+
+
+
     $scope.init = function() {
       if($scope.panel.source === 'panel') {
         $scope.links = $scope.panel.links;
@@ -78,15 +90,41 @@ function (angular, app, $, _, ga) {
       }
 
       if($scope.panel.source === 'url') {
-        $http.get($scope.panel.url).then(function(response) {
-          var a = $('<a />');
 
-          $scope.links = _.filter(response.data.links, function (link)  {
-            a.attr("href", link.url);
+        $http.get($scope.panel.url).then(function (response) {
+          var a = $('<a />');
+          var links = response.data.links;
+          var ids = links.filter(extractIds).map(extractIds);
+          loadDashboards($http, ids).then(function (dashboards) {
+
+            // Parse all the dashboards so we can check their base.id
+            dashboards = _.map(dashboards, parseDashboard);
+
+            // If the route is file based and the location matches a saved dashboard, 
+            // we need to redirect the browser to the saved dashboard.
+            if ($routeParams.kbnType === 'file') {
+
+              // Find out if there is an override for the the current dashboard.
+              var overrideDashboard  = _.find(dashboards, findDashboardById($routeParams.kbnId));
+
+              // Redirect the the override dashboard if it exists 
+              if (overrideDashboard) {
+                var href = '../kibana/index.html#/dashboard/elasticsearch/'+
+                  encodeURIComponent(overrideDashboard._id);
+                a.attr('href', href);
+                window.location = a[0].href;
+                return;
+              }
+            }
+
+            // Merge the links with the saved dashboards 
+            links = _.map(links, mergeLinksWithDashboards(dashboards));
+
+            // Filter the current dashboard out of the navigation links
             var current = window.location.href;
-            // remove parameters
             current = current.replace(/\?.*$/,'');
-            return a[0].href !== current;
+            $scope.links = _.filter(links, filterLinks(current));
+
           });
         });
       }

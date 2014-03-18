@@ -1306,6 +1306,7 @@
     }
   ],
   "loader": {
+    "show_home": false,
     "save_gist": true,
     "save_elasticsearch": true,
     "save_local": true,

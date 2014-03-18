@@ -704,5 +704,21 @@ dashboard.pulldowns = [
   }
 ];
 
+dashboard.loader = {
+  "show_home": false,
+  "save_gist": false,
+  "save_elasticsearch": false,
+  "save_local": false,
+  "save_default": false,
+  "save_temp": false,
+  "save_temp_ttl_enable": true,
+  "save_temp_ttl": "30d",
+  "load_gist": false,
+  "load_elasticsearch": false,
+  "load_elasticsearch_size": 20,
+  "load_local": false,
+  "hide": true 
+};
+
 // Now return the object and we're good!
 return dashboard;

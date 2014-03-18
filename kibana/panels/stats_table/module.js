@@ -46,7 +46,7 @@ define([
       $scope.panelMeta = {
         modals: [],
         editorTabs: [],
-        status: "Experimental",
+        status: "Stable",
         description: "A stats table for nodes or nodes"
       };
 

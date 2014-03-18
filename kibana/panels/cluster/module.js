@@ -28,7 +28,7 @@ function (angular, app, kbn, _, ga) {
     $scope.panelMeta = {
       modals : [],
       editorTabs : [],
-      status: "Experimental",
+      status: "Stable",
       description: "A simple view of cluster health<p>"
     };
 

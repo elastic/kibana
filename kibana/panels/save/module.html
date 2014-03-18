@@ -1,0 +1,20 @@
+<style type="text/css">
+  .navbar .nav>li>a.reset-menu {
+    display: inline-block;
+    padding: 0 0 11px 0;
+    margin: 18px 0 0 0;
+    float: right;
+  }
+  .navbar .nav>li>a.reset-menu:active {
+    background-color: none;
+  }
+</style>
+<div ng-controller='marvel.save' ng-init="init()">
+  <ul class="nav marvel-navigation-dropdown" style="margin: 0">
+    <li>
+      <a bs-tooltip="Save" ng-click="save()">
+        <i class="icon-save"></i>
+      </a>
+    </li>
+  </ul>
+</div>
