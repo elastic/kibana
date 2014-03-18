@@ -4,6 +4,7 @@ define(function (require, module, exports) {
   require('directives/table');
   require('./field_chooser');
   require('services/saved_searches');
+  require('utils/mixins');
 
   var app = require('modules').get('app/discover');
 
@@ -59,6 +60,20 @@ define(function (require, module, exports) {
         $scope.rows = res.hits.hits;
       });
 
+    $scope.sort = ['_score', 'desc'];
+
+    $scope.getSort = function () {
+      return $scope.sort;
+    };
+
+    $scope.setSort = function (field, order) {
+      var sort = {};
+      sort[field] = order;
+      source.sort([sort]);
+      $scope.sort = [field, order];
+      $scope.fetch();
+    };
+
     $scope.fetch = function () {
       if (!$scope.fields) getFields();
       source
@@ -69,16 +84,10 @@ define(function (require, module, exports) {
           }
         });
 
-      if ($scope.sort) {
-        var sort = {};
-        sort[$scope.sort.name] = 'asc';
-        source.sort(sort);
-      }
-
       if ($scope.index !== source.get('index')) {
         // set the index on the data source
         source.index($scope.index);
-        // clear the columns and fields, then refetch when we so a search
+        // clear the columns and fields, then refetch when we do a search
         $scope.columns = $scope.fields = null;
       }
 
@@ -109,7 +118,7 @@ define(function (require, module, exports) {
           if (!fields) return;
 
           $scope.fields = [];
-          $scope.columns = [];
+          $scope.columns = $scope.columns || [];
 
           _(fields)
             .keys()
@@ -137,6 +146,12 @@ define(function (require, module, exports) {
       // toggle the display property
       field.display = !field.display;
 
+      if ($scope.columns.length === 1 && $scope.columns[0] === '_source') {
+        $scope.columns = [name];
+      } else {
+        $scope.columns = _.toggleInOut($scope.columns, name);
+      }
+
       refreshColumns();
     };
 
@@ -149,11 +164,15 @@ define(function (require, module, exports) {
     };
 
     function refreshColumns() {
-      // collect column names for displayed fields and sort
-      $scope.columns = _.transform($scope.fields, function (cols, field) {
-        if (field.display) cols.push(field.name);
-      }, []).sort();
+      // Get all displayed field names;
+      var fields = _.pluck(_.filter($scope.fields, function (field) {
+        return field.display;
+      }), 'name');
 
+      // Make sure there are no columns added that aren't in the displayed field list.
+      $scope.columns = _.intersection($scope.columns, fields);
+
+      // If no columns remain, use _source
       if (!$scope.columns.length) {
         $scope.columns.push('_source');
       }

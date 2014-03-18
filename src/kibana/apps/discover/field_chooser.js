@@ -10,7 +10,19 @@ define(function (require) {
         toggle: '=',
         refresh: '='
       },
-      template: html
+      template: html,
+      controller: function ($scope) {
+        $scope.typeIcon = function (fieldType) {
+          switch (fieldType)
+          {
+          case 'string':
+            return 'fa-sort-alpha-asc';
+          case 'number':
+            return 'fa-sort-numeric-asc';
+          default:
+          }
+        };
+      }
     };
   });
 });

@@ -1,15 +1,8 @@
-<ul>
-  <li ng-repeat="field in fields">
-    <span ng-click="toggle(field.name)">
-      <i
-        class="fa"
-        ng-class="{
-          'fa-check-square': field.display,
-          'fa-square-o': !field.display
-        }">
-      </i>
-      {{field.name}}
-    </span>
+<ul class="nav nav-pills nav-stacked nav-condensed">
+  <li ng-repeat="field in fields track by $index" ng-class="{'active':field.display}">
+    <a ng-click="toggle(field.name)">
+      <i class="fa" ng-class="typeIcon(field.type)"></i> {{field.name}}
+    </a>
   </li>
+  <li><a ng-click="refresh()"><small>refresh field list</small></a></li>
 </ul>
-<small><a ng-click="refresh()">refresh field list</a></small>

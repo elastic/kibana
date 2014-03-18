@@ -7065,3 +7065,11 @@ disc-field-chooser ul {
   padding: 0;
   list-style: none;
 }
+.discovery-field-container {
+  padding-top: 20px;
+  padding-left: 0 !important;
+}
+.nav-condensed > li > a {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
