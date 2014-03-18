@@ -19,6 +19,7 @@ define(function () {
       }
     });
 
+
     api.addEndpointDescription('single_snapshot', {
       methods: ['GET', 'DELETE'],
       patterns: [
@@ -48,6 +49,16 @@ define(function () {
         partial: { __one_of: [ true, false] }
       }
     });
+
+    api.addEndpointDescription('_snapshot_status', {
+      methods: ['GET'],
+      patterns: [
+        '_snapshot/_status',
+        '_snapshot/{id}/_status',
+        '_snapshot/{id}/{ids}/_status'
+      ]
+    });
+
 
     function getRepositoryType(context) {
       var iter = context.editor.iterForCurrentLoc();

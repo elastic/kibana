@@ -105,8 +105,9 @@ define([
     })(FieldUrlComponent.prototype);
 
 
-    function IdUrlComponent(name, parent) {
+    function IdUrlComponent(name, parent, multi) {
       autocomplete_engine.SharedComponent.call(this, name, parent);
+      this.multi_match = multi
     }
 
     IdUrlComponent.prototype = _.create(
@@ -115,10 +116,16 @@ define([
 
     (function (cls) {
       cls.match = function (token, context, editor) {
-        if (_.isArray(token) || !token) {
+        if (!token) {
           return null;
         }
-        if (token.match(/[\/,]/)) {
+        if (!this.multi_match && _.isArray(token)) {
+          return null;
+        }
+        token = _.isArray(token) ? token : [token];
+        if (_.find(token, function (t) {
+          return t.match(/[\/,]/);
+        })) {
           return null;
         }
         var r = Object.getPrototypeOf(cls).match.call(this, token, context, editor);
@@ -144,6 +151,9 @@ define([
       },
       'id': function (part, parent, endpoint) {
         return new IdUrlComponent(part, parent);
+      },
+      'ids': function (part, parent, endpoint) {
+        return new IdUrlComponent(part, parent, true);
       },
       'fields': function (part, parent, endpoint) {
         return new FieldUrlComponent(part, parent, true);
