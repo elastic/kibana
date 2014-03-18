@@ -1,0 +1,364 @@
+== Dashboard Schema
+Kibana dashboards can be easily created right in the browser, and in
+most cases, the browser is all you will need to build a powerful,
+informative, interface. When you need that extra little bit of tweaking,
+Kibana allows for the editing of the dashboard schema.
+
+*NOTE*: This section is for advanced users only. JSON syntax is very
+strict, a stray comma or missing brace will cause your dashboard not to
+load.
+
+image:./tutorials/dashboard_schema/schema_dashboard.png[image]
+
+We will be using the above dashboard as an example. You can export the
+schema of any dashboard by clicking the *Save* icon in the top right,
+selecting advanced and choosing *Export Schema*. You can download this
+schema here: link:./snippets/schema.json[schema.json]
+
+While the dashboard is made up of one large JSON document, we will break
+it down into pieces for the purpose of instruction in this guide.
+
+Like any JSON document, we start with an opening brace.
+[source,json]
+-----
+{
+-----
+
+[[services]]
+=== Services
+[source,json]
+---------------
+  "services": {
+---------------
+
+Services are persisted objects that are used by mulitple panels. There
+are currently 2 services that attach to the dashboard object and if
+omitted will be automatically populated with query and filter services.
+
+* Query
+* Filter
+
+[[query]]
+==== Query
+[source,json]
+----------------------------------------------------
+    "query": {
+      "list": {
+        "0": {
+          "query": "play_name:\"Romeo and Juliet\"",
+          "alias": "",
+          "color": "#7EB26D",
+          "id": 0,
+          "pin": false,
+          "type": "lucene",
+          "enable": true
+        }
+      },
+      "ids": [
+        0
+      ]
+    },
+----------------------------------------------------
+
+The query service is controlled largely by the query dropdown at the top
+of the dashboard. It has 2 properties:
+
+* List: An object made of numericly keyed objects, each describing a
+query object. The query keys are fairly self explanitory and describe
+the look and behavior of the query input.
+* Ids: An array of IDs that must match the keys in the list. The ids
+array is used for ordering the list for the purpose of display.
+
+[[filter]]
+==== Filter
+[source,json]
+-----------------------------------
+    "filter": {
+      "list": {
+        "0": {
+          "type": "querystring",
+          "query": "speaker:ROMEO",
+          "mandate": "must",
+          "active": true,
+          "alias": "",
+          "id": 0
+        }
+      },
+      "ids": [
+        0
+      ]
+    }
+  },
+-----------------------------------
+
+Filters behave much like queries, but are not selectable on a panel
+level, they filter the entire dashboard view. Much like the query
+service, there are are two properties: list and ids. Each of these
+behaves like their query counter part.
+
+[[pulldown]]
+=== Pulldown
+[source,json]
+----------------
+  "pulldowns": [
+----------------
+
+Pulldowns are a special type of panel. Rather, they're a special place
+you can put panels. The panels in the `pulldown` section work just like
+panels in a row except they don't get a span, they're all full width.
+Also panels in pulldowns are not movable or editable by the user.
+They're greate for panels that take input. the `pulldown` property is an
+array that contains panel objects. For documentation for specific panels
+see link:./panels.html[Kibana Panels]
+
+[source,json]
+-----------------------------------------
+    {
+      "type": "query",
+      "collapse": false,
+      "notice": false,
+      "enable": true,
+      "query": "*",
+      "pinned": true,
+      "history": [
+        "play_name:\"Romeo and Juliet\"",
+        "playname:\"Romeo and Juliet\"",
+        "romeo"
+      ],
+      "remember": 10
+    },
+    {
+      "type": "filtering",
+      "collapse": false,
+      "notice": true,
+      "enable": true
+    }
+  ],
+-----------------------------------------
+
+Pulldown panels have 2 options that traditional row based panels do not
+have:
+
+* Collapse: Set to true or false, this describes whether the panel is
+collapsed or expanded.
+* Notice: This property can be set by the panel and controls a small
+star icon in the pulldown tab's title. It is usually used to notify the
+user that something has changed in the panel.
+
+[[nav]]
+=== Nav
+The `nav` property also contains a list of panels, however these panels
+need to be designed to fit into the nav bar at the top of the screen.
+The only currently support nav panel is the timepicker
+
+[source,json]
+-------------------------------
+  "nav": [
+    {
+      "type": "timepicker",
+      "collapse": false,
+      "notice": false,
+      "enable": true,
+      "status": "Stable",
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ],
+      "refresh_intervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ],
+      "timefield": "@timestamp"
+    }
+  ],
+-------------------------------
+
+[[loader]]
+=== Loader
+The `loader` property describes the behavior of the save and load
+buttons at the top of the dashboard.
+
+[source,json]
+----------------------------------
+  "loader": {
+    "save_gist": false,
+    "save_elasticsearch": true,
+    "save_local": true,
+    "save_default": true,
+    "save_temp": true,
+    "save_temp_ttl_enable": true,
+    "save_temp_ttl": "30d",
+    "load_gist": false,
+    "load_elasticsearch": true,
+    "load_elasticsearch_size": 20,
+    "load_local": false,
+    "hide": false
+  },
+----------------------------------
+
+[[rows-array]]
+=== Rows Array
+`rows` are where panels are usually placed, and the only place they can
+be added via the browser UI.
+
+[source,json]
+--------------------------
+"rows": [
+    {
+      "title": "Charts",
+      "height": "150px",
+      "editable": true,
+      "collapse": false,
+      "collapsable": true,
+--------------------------
+
+Row objects contain a panel array as well as several other properties
+describing the row:
+
+* title: The row title
+* height: The height of the row, in pixels, with the 'px' designation
+* editable: true/false describing whether or not the panel is editable
+* collapse: true/false describing whether or not the row is collapse
+* collapsable:true/false describing whether or not the user is allowed
+to collapse the row
+
+[[panels-array]]
+==== Panels Array
+The `panels` array property of a row contains a list of panel objects in
+the order in which they appear in the row. For a list of common panel
+properties and documentation for specific panels see
+link:./panels.html[Kibana Panels]
+
+[source,json]
+----------------------------------------
+      "panels": [
+        {
+          "error": false,
+          "span": 8,
+          "editable": true,
+          "type": "terms",
+          "loadingEditor": false,
+          "field": "speech_number",
+          "exclude": [],
+          "missing": false,
+          "other": false,
+          "size": 10,
+          "order": "count",
+          "style": {
+            "font-size": "10pt"
+          },
+          "donut": false,
+          "tilt": false,
+          "labels": true,
+          "arrangement": "horizontal",
+          "chart": "bar",
+          "counter_pos": "above",
+          "spyable": true,
+          "queries": {
+            "mode": "all",
+            "ids": [
+              0
+            ]
+          },
+          "tmode": "terms",
+          "tstat": "total",
+          "valuefield": "",
+          "title": "Longest Speeches"
+        },
+        {
+          "error": false,
+          "span": 4,
+          "editable": true,
+          "type": "goal",
+          "loadingEditor": false,
+          "donut": true,
+          "tilt": false,
+          "legend": "none",
+          "labels": true,
+          "spyable": true,
+          "query": {
+            "goal": 111397
+          },
+          "queries": {
+            "mode": "all",
+            "ids": [
+              0
+            ]
+          },
+          "title": "Percentage of Total"
+        }
+      ]
+    }
+  ],
+----------------------------------------
+
+[[index-settings]]
+=== Index Settings
+The index property contains information on the Elasticsearch index that
+Kibana communicates with.
+
+[source,json]
+---------------------------------------
+  "index": {
+    "interval": "none",
+    "default": "_all",
+    "pattern": "[logstash-]YYYY.MM.DD",
+    "warm_fields": false
+  },
+---------------------------------------
+
+* interval: none, hour, day, week, month. This property describes the
+timestamping pattern that the index follows.
+* default: The index to use if `interval` is set to none or the
+`failover` setting below is set to `true` and no indices match the
+pattern
+* pattern: If `interval` is set to anything other than 'none', parse
+this pattern, taking into consideration any time filters, to determine
+the indices to query.
+* warm_fields: If the mapping should be parsed to determine a list of
+fields
+
+[[the-rest]]
+=== The Rest
+The following are top level dashboard settings
+
+[source,json]
+--------------------
+  "failover": false,
+  "editable": true,
+  "style": "dark",
+  "refresh": false
+}
+--------------------
+
+* failover: true/false, whether or not we should use `index.default` if
+no indices match the index pattern
+* editable: true/false, whether or not to show the configure button for
+the dashboard
+* style: "light" or "dark"
+* refresh: False, or an elasticsearch date math (eg 10s, 1m, 1h)
+expression describing how often to issue a refresh event instructing
+panels to refresh their data.
+
+[[importing-schemas]]
+=== Importing Schemas
+By default, importing of schemas is disabled. It can be re-enabled via
+the *Controls* tab of the dashboard settings screen by checking the
+*Local file* option. Schemas can be imported from the *Load* icon in the
+top left of the dashboard by selecting *Advanced* and choosing a file to
+import.

@@ -1,0 +1,126 @@
+[[templated-and-scripted-dashboards]]
+== Templates and Scripts
+Kibana has support for creating dashboards dynamically via templates,
+and more advanced scripts. This allows you to create a based dashboard,
+then influence it with parameters, such as inserting a new query or
+filter via the URL.
+
+Templates and scripts must be stored on disk, storing them to
+Elasticsearch is not supported. They must also be created by editing or
+creating a schema. Because of this we highly recommend reading
+http://linktotheschema[The Kibana Schema Explained]
+
+[[the-dashboard-directory]]
+=== The dashboard directory
+
+Dashboards are stored in the `app/dashboards` directory within the
+Kibana installation directory. You will notice there are 2 types of
+files: `.json` files and `.js` files.
+
+[[templated-dashboards-.json]]
+=== Templated Dashboards `(.json)`
+`.json` files are templated dashboards. An example of templating can be
+found on the query and filter objects of the `logstash.json` dashboard.
+Templates use handlebar syntax that allow you insert javascript clauses
+into your json. URL parameters are available on the `ARGS` object. For
+example, a snippet from `logstash.json`'s
+https://github.com/elasticsearch/kibana/blob/master/src/app/dashboards/logstash.json[(on
+github)] query and filter services:
+
+[source,json]
+-----------------------------------------
+  "0": {
+    "query": "{{ARGS.query || '*'}}",
+    "alias": "",
+    "color": "#7EB26D",
+    "id": 0,
+    "pin": false
+  }
+
+  [...]
+
+  "0": {
+    "type": "time",
+    "field": "@timestamp",
+    "from": "now-{{ARGS.from || '24h'}}",
+    "to": "now",
+    "mandate": "must",
+    "active": true,
+    "alias": "",
+    "id": 0
+  }
+-----------------------------------------
+
+This allows us to set 2 parameters, `query` and `from` in the url. If
+they are not set, they will default to the value after the `||`. For
+example, this would search for `status:200` in the last 7 days:
+
+*Note*: Take careful note of the `file` part of
+`#/dashboard/file/logstash.json`
+
+-----------------------------------------------------------------------------------
+http://yourserver/index.html#/dashboard/file/logstash.json?query=status:200&from=7d
+-----------------------------------------------------------------------------------
+
+[[scripted-dashboards-.js]]
+=== Scripted Dashboards `(.js)`
+Scripted dashboards are much more powerful than templated dashboards. Of
+course, with power comes responsibility, and scripted dashboards are
+more complex to build. The goal in a scripted dashboard is to build and
+return a javascript object that describes the dashboard schema. A well
+commented example scripted dashboard can be found in
+`app/dashboards/logstash.js`
+https://github.com/elasticsearch/kibana/blob/master/src/app/dashboards/logstash.js[(on
+github)]. This file accomplishes the same goals as `logstash.json`, but
+with the added power of scripts we can do things like split queries on
+commas:
+
+*Note*: Take careful note of the `script` part of
+`#/dashboard/script/logstash.js`. This instructs kibana to treat this
+file as javascript.
+
+------------------------------------------------------------------------------------------------
+http://yourserver/index.html#/dashboard/script/logstash.json?query=status:403,status:404&from=7d
+------------------------------------------------------------------------------------------------
+
+This will create 2 query objects, `status:403` and `status:404` and
+chart them seperately. In fact this dashboard takes another parameter
+that describes the string by which to split the query on: `split`
+
+--------------------------------------------------------------------------------------------------------
+http://yourserver/index.html#/dashboard/script/logstash.json?query=status:403!status:404&from=7d&split=!
+--------------------------------------------------------------------------------------------------------
+
+We can see this happening in `logstash.js`
+https://github.com/elasticsearch/kibana/blob/master/src/app/dashboards/logstash.js[(on
+github)] here:
+
+[source,javascript]
+----------------------------------------------------------------------------------------------
+// In this dashboard we let users pass queries as comma separated list to the query parameter.
+// Or they can specify a split character using the split aparameter
+// If query is defined, split it into a list of query objects
+// NOTE: ids must be integers, hence the parseInt()s
+if(!_.isUndefined(ARGS.query)) {
+  queries = _.object(_.map(ARGS.query.split(ARGS.split||','), function(v,k) {
+    return [k,{
+      query: v,
+      id: parseInt(k,10),
+      alias: v
+    }];
+  }));
+} else {
+  // No queries passed? Initialize a single query to match everything
+  queries = {
+    0: {
+      query: '*',
+      id: 0,
+    }
+  };
+}
+----------------------------------------------------------------------------------------------
+
+This dashboard takes more parameters than this, all of which are
+described in the comments at the top of `logstash.js`
+https://github.com/elasticsearch/kibana/blob/master/src/app/dashboards/logstash.js[(on
+github)]

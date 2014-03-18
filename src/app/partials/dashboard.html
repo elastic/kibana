@@ -49,7 +49,7 @@
           <div style="padding-top:0px" ng-if="!row.collapse">
 
             <!-- Panels -->
-            <div ng-repeat="(name, panel) in row.panels|filter:isPanel" ng-hide="panel.hide" class="panel nospace" ng-style="{'width':!panel.span?'100%':(panel.span/1.2)*10+'%'}" data-drop="true" ng-model="row.panels" data-jqyoui-options jqyoui-droppable="{index:$index,mutate:false,onDrop:'panelMoveDrop',onOver:'panelMoveOver(true)',onOut:'panelMoveOut'}" ng-class="{'dragInProgress':dashboard.panelDragging}">
+            <div ng-repeat="(name, panel) in row.panels|filter:isPanel" ng-hide="panel.hide" class="panel nospace" ng-style="{'width':!panel.span?'100%':((panel.span/1.2)*10)+'%'}" data-drop="true" ng-model="row.panels" data-jqyoui-options jqyoui-droppable="{index:$index,mutate:false,onDrop:'panelMoveDrop',onOver:'panelMoveOver(true)',onOut:'panelMoveOut'}" ng-class="{'dragInProgress':dashboard.panelDragging}">
 
               <!-- Content Panel -->
               <div style="position:relative">
@@ -58,7 +58,9 @@
             </div>
 
 
-            <div ng-show="dashboard.panelDragging" class="panel" style="margin:5px;width:30%;background:rgba(100,100,100,0.50)" ng-class="{'dragInProgress':dashboard.panelDragging}" ng-style="{height:row.height}" data-drop="true" ng-model="row.panels" data-jqyoui-options jqyoui-droppable="{index:row.panels.length,mutate:false,onDrop:'panelMoveDrop',onOver:'panelMoveOver',onOut:'panelMoveOut'}">
+            <div ng-show="dashboard.panelDragging && row.panels.length == 0" class="panel panel-filler" style="" ng-class="{'dragInProgress':dashboard.panelDragging}" ng-style="{height:row.height}" data-drop="true" ng-model="row.panels" data-jqyoui-options jqyoui-droppable="{index:row.panels.length,mutate:false,onDrop:'panelMoveDrop',onOver:'panelMoveOver',onOut:'panelMoveOut'}">
+              <h1>Drop here to add to this row</h1>
+              Or drop on top of any other panel to insert in that row
             </div>
 
             <span config-modal="app/partials/roweditor.html" kbn-model="row" ng-show="row.editable && !dashboard.panelDragging">

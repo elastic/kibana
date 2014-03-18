@@ -1,8 +1,10 @@
 /** @scratch /panels/5
+ *
  * include::panels/hits.asciidoc[]
  */
 
 /** @scratch /panels/hits/0
+ *
  * == Hits
  * Status: *Stable*
  *
@@ -47,6 +49,7 @@ define([
     var _d = {
       style   : { "font-size": '10pt'},
       /** @scratch /panels/hits/3
+       *
        * === Parameters
        *
        * arrangement:: The arrangement of the legend. horizontal or vertical
@@ -77,6 +80,7 @@ define([
        */
       spyable : true,
       /** @scratch /panels/hits/5
+       *
        * ==== Queries
        * queries object:: This object describes the queries to use on this panel.
        * queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
@@ -207,7 +211,7 @@ define([
         // Function for rendering panel
         function render_panel() {
           // IE doesn't work without this
-          elem.css({height:scope.panel.height||scope.row.height});
+          elem.css({height:scope.row.height});
 
           try {
             _.each(scope.data,function(series) {
