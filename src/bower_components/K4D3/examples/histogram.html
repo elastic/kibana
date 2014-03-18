@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Histogram</title>
+        <style>
+            body {
+                font: 10px sans-serif;
+                fill: #444;
+                background: #f4f4f4;
+            }
+
+            .x.axis .minor {
+                /*stroke-opacity: .5;*/
+            }
+            .x.axis path {
+                display: none;
+            }
+
+            .y.axis line, .y.axis path {
+                fill: none;
+                stroke: #ccc;
+            }
+            rect {
+                fill: #fff;
+            }
+            rect.bordered {
+                stroke: rgba(0,0,0,0.3);
+                stroke-width:0.5px;
+            }
+            .block {
+                stroke: #444;
+                stroke-width:1px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="histogram1"></div>
+        <div id="histogram2"></div>
+
+        <script src="../lib/d3/d3.min.js"></script>
+        <script src="../k4.d3.js"></script>
+
+        <script>
+  
+        // tests 1 - random data
+        var data1 = [];
+        for (var i = 0; i < 20; i++) {
+            data1.push({ x: i, y: Math.random() });
+        }
+        var viz1 = k4.histogram()
+            .width(700)
+            .height(400)
+            .xValue(function(d) { return d.x; })
+            .yValue(function(d) { return d.y; });
+        d3.select("#histogram1")
+            .datum(data1)
+            .call(viz1);
+        
+        // tests 2 - random data
+        var data2 = [];
+        for (var i = 0; i < 120; i++) {
+            data2.push({ x: i, y: 1 + Math.sin(i/30) - 0.5});
+        }
+        console.log(data2);
+        var viz2 = k4.histogram()
+            .width(900)
+            .height(300)
+            .bargap(0.1)
+            .color("#ffa30f")
+            .xValue(function(d) { return d.x; })
+            .yValue(function(d) { return d.y; });
+        d3.select("#histogram2")
+            .datum(data2)
+            .call(viz2);
+            
+        </script>
+
+    </body>
+</html>

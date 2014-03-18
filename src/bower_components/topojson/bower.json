@@ -1,0 +1,20 @@
+{
+  "name": "topojson",
+  "version": "1.4.9",
+  "main": "topojson.js",
+  "scripts": [
+    "topojson.js"
+  ],
+  "ignore": [
+    ".DS_Store",
+    ".git",
+    "Makefile",
+    "bin",
+    "examples",
+    "index.js",
+    "lib",
+    "node_modules",
+    "package.json",
+    "test"
+  ]
+}
