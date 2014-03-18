@@ -1,8 +1,10 @@
 /** @scratch /panels/5
+ *
  * include::panels/table.asciidoc[]
  */
 
 /** @scratch /panels/table/0
+ *
  * == table
  * Status: *Stable*
  *
@@ -122,6 +124,7 @@ function (angular, app, _, kbn, moment) {
        */
       spyable : true,
       /** @scratch /panels/table/5
+       *
        * ==== Queries
        * queries object:: This object describes the queries to use on this panel.
        * queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
@@ -362,7 +365,7 @@ function (angular, app, _, kbn, moment) {
             if(!_.isUndefined(v.sort)) {
               return v.sort[0];
             } else {
-              return 0;
+              return v._score;
             }
           });
 

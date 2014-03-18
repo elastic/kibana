@@ -14,8 +14,8 @@ function (angular, _, config, moment) {
     // pattern that exist in a given range
     this.indices = function(from,to,pattern,interval) {
       var possible = [];
-      _.each(expand_range(fake_utc(from),fake_utc(to),interval),function(d){
-        possible.push(d.format(pattern));
+      _.each(expand_range(from,to,interval),function(d){
+        possible.push(d.utc().format(pattern));
       });
 
       return resolve_indices(possible).then(function(p) {
@@ -63,6 +63,7 @@ function (angular, _, config, moment) {
         });
     }
 
+    /*
     // this is stupid, but there is otherwise no good way to ensure that when
     // I extract the date from an object that I get the UTC date. Stupid js.
     // I die a little inside every time I call this function.
@@ -72,6 +73,7 @@ function (angular, _, config, moment) {
       date = moment(date).clone().toDate();
       return moment(new Date(date.getTime() + date.getTimezoneOffset() * 60000));
     }
+    */
 
     // Create an array of date objects by a given interval
     function expand_range(start, end, interval) {

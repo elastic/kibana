@@ -1,0 +1,152 @@
+[[working-with-queries-and-filters]]
+== Queries and Filters
+Charts and tables and maps oh my! But how do we constrain the data
+displayed on them. This is the role of queries and filters. Because
+Kibana is powered by Elasticsearch it supports the powerful Lucene Query
+String syntax, as well as making use of some of Elasticsearch's filter
+capabilities
+
+We will assume you have already:
+
+* Installed Elasticsearch on your workstation
+* Have webserver installed on your workstation and have the distribution
+extracted into the configured document root.
+* Have read link:./using-kibana-for-the-first-time.html[Using Kibana for the first time]
+and have the `shakespeare` index populated with the data from the
+tutorial.
+
+[[our-dashboard]]
+=== Our Dashboard
+Our dashboard looks like this, we will be searching through lines of shakespeare.
+If you would like to follow along with the screenshots in this guide you
+can link:./snippets/plays.json[download the exported dashboard schema]
+
+image:./tutorials/queries_filters/plays.png[image]
+
+[[queries]]
+=== Queries
+Type this very simple query into the search bar
+
+[source,shell]
+------------------
+to be or not to be
+------------------
+
+You will notice, in the table, your first hit is Hamlet as expected.
+However, look at the next line by Sir Andrew, it does not contain "to
+be", nor does it contain "not to be". The search we have actually
+performed is: `to OR be OR or OR not OR to OR be`.
+
+We can also match the entire phrase
+
+[source,shell]
+--------------------
+"to be or not to be"
+--------------------
+
+Or in a specifc fields:
+
+[source,shell]
+-------------
+line_id:86169
+-------------
+
+We can express complex searches with AND/OR, note these words must be
+capitalized:
+
+[source,shell]
+-------------
+food AND love
+-------------
+
+Or parantheses:
+
+[source,shell]
+----------------------------------------
+("played upon" OR "every man") AND stage
+----------------------------------------
+
+Numeric ranges can also be easily searched:
+
+[source,shell]
+----------------------------------
+line_id:[30000 TO 80000] AND havoc
+----------------------------------
+
+And of course to search everything:
+
+[source,shell]
+--------------
+*
+--------------
+
+[[multiple-queries]]
+=== Multiple queries
+
+In some cases, you might want to compare the results of two seperate queries.Kibana can handle multiple queries byjoining them with a logical
+`OR` and using the knowledge that they should be treated as seperate to
+influence visualizations.
+
+[[adding]]
+==== Adding
+Click the *+* to the right of the query input to add another query.
+
+image:./tutorials/queries_filters/Addquery.png[image]
+
+You should now have this
+
+image:./tutorials/queries_filters/split.png[image]
+
+In the lefthand, green input, type `"to be"` and in the right, yellow
+input, type `"not to be"`. This will search for every document that has
+`"to be"` OR `"not to be"` in it, and break that down on our hits pie
+chart. So we go from a big green circle to:
+
+image:./tutorials/queries_filters/pieslice.png[image]
+
+[[removing]]
+==== Removing
+To remove a query, click the *x* icon that appears when you mouse over
+the query input field
+
+image:./tutorials/queries_filters/remove.png[image]
+
+[[colors-and-legends]]
+=== Colors and Legends
+Kibana will automatically determine a free color to use for your
+queries, but you can set your color explicitly if you'd like by clicking
+the colored dot associated with the query to open the query settings
+drop down. From here you can change the color of the query, or set a new
+value for the legend
+
+image:./tutorials/queries_filters/settings.png[image]
+
+[[filters]]
+=== Filters
+Many Kibana charts are interactive and can be used to filter the view of
+your data. For example, click on the first bar of the chart. You will
+end up with something like this. As you can see, the chart has become
+one big green bar. This is because a filter was added to match that term
+in the `play_name` field.
+
+image:./tutorials/queries_filters/comedyoferrors.png[image]
+
+"But where" you say?
+
+The answer lies in that little white star that appeared on the filtering
+tab. Give the tab a click and we can see that a filter has added to the
+_filtering_ panel. From the _filtering_ panel filters can be added,
+edited, toggled and removed. Many panels have the ability to add
+filters, including the table, histogram, map and others.
+
+image:./tutorials/queries_filters/filteradded.png[image]
+
+Filters can also be added manually by clicking the *+*
+
+=== More reading
+Now that you have a solid handle on filters and queries you might be
+interested in how they're described in link:./_dashboard_schema.html[the Kibana
+schema]. If you're interested in inserting queries or filters via URL
+parameters you might also take a look at
+link:./templated-and-scripted-dashboards.html[Templated and Scripted
+Dashboards]

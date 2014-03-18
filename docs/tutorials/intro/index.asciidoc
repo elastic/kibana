@@ -1,0 +1,129 @@
+[[using-kibana-for-the-first-time]]
+== 10 Minute Walk Through
+Kibana is a great tool for real time data analytics and simply being on
+this page has put you on your way to making the most of it! If you have
+not downloaded Kibana yet, you can get it here:
+http://www.elasticsearch.org/overview/kibana/installation/[Download
+Kibana]. We recommend you start this tutorial with a clean Elasticsearch
+instance.
+
+By the end of this document you will have:
+
+* Imported some data
+* Tried out the sample dashboard
+* Searched your data
+* Configured Kibana to point only at your new index instead of all
+indices
+
+We will assume you have already:
+
+* Installed Elasticsearch on your workstation
+* Have webserver installed on your workstation and have the distribution
+extracted into the configured document root.
+* You are familiar with the UNIX command line and have used `curl`
+
+[[import-some-data]]
+=== Import some data
+
+
+We will be using the entire collected works of Shakespeare as our
+example data. In order to make the best use of Kibana you will likely
+want to apply a mapping to your new index. Let's create the shakespeare
+index with the following mapping. Our data with have more fields than
+this, but these are the ones we want to explicitly map. Specifically we
+do not want to analyze 'speaker' and 'play_name'. You'll see why later
+on.
+
+Run in a terminal:
+
+[source,json]
+----------------------------------------------------------------
+curl -XPUT http://localhost:9200/shakespeare -d '
+{
+ "mappings" : {
+  "_default_" : {
+   "properties" : {
+    "speaker" : {"type": "string", "index" : "not_analyzed" },
+    "play_name" : {"type": "string", "index" : "not_analyzed" },
+    "line_id" : { "type" : "integer" },
+    "speech_number" : { "type" : "integer" }
+   }
+  }
+ }
+}
+';
+----------------------------------------------------------------
+
+Great, we've created the index. Now we want to import the data. You can
+download the entire works of shakespeare in elasticsearch bulk import
+format here: link:./snippets/shakespeare.json[shakespeare.json]
+
+Import it into your local elasticsearch instance the following command.
+This may take a few minutes. Shakespeare wrote a lot of stuff!
+
+[source,shell]
+---------------------------------------------------------------
+curl -XPUT localhost:9200/_bulk --data-binary @shakespeare.json
+---------------------------------------------------------------
+
+[[accessing-the-kibana-interface]]
+=== Accessing the Kibana interface
+Now that you have data, let's do something with it. Point your browser
+at your local webserver, the one with Kibana already installed.
+
+image:./tutorials/intro/intro.png[Welcome Page]
+
+If you have Kibana extracted to your
+document root you will be presented with this lovely welcome page. Click
+*Sample Dashboard*
+
+image:./tutorials/intro/sample_shakespeare.png[Sample Dashboard] And there you have your
+sample dashboard! Now if you started with a clean elasticsearch instance
+you'll see a very heavily weighted pie chart. This represents the type
+of documents in your index. As you can see, 99% them are lines for
+characters, with only a few denoting acts and scenes.
+
+Below that you will see a long list of JSON formatted lines of
+shakespeare.
+
+[[the-first-search]]
+=== The first search
+Kibana allows you to search Elasticsearch data via the Lucene Query
+String syntax. Queries can be run via the query input at the top of the
+page image:./tutorials/intro/query.png[Sample Dashboard]
+
+Type this in the query bar. Then check out the first few rows of the
+table.
+
+[source,shell]
+---------------------------
+friends, romans, countrymen
+---------------------------
+
+image:./tutorials/intro/firsttable.png[Sample Dashboard]
+
+For more information on queries see link:./working-with-queries-and-filters.html[Queries and Filters]
+
+[[configuring-another-index]]
+=== Configuring another index
+Right now Kibana is pointing at the special Elasticsearch index `_all`.
+Think of `_all` as a composite index that points at all of your indices.
+Right now you only have one, `shakespeare`, but you might have more
+someday and we don't want Kibana searching all of that data if you're
+only looking for your favorite line from Macbeth.
+
+To configure the the index click the configure icon in the top right:
+
+image:./tutorials/intro/configicon.png[Sample Dashboard]
+
+From here, you can set your index to `shakespeare` and ensure that
+Kibana only searches the `shakespeare` index
+
+image:./tutorials/intro/indexconfigure.png[Sample Dashboard]
+
+=== Next steps
+Congratulations, you've installed and configured kibana and dipped your
+toes in the water. Next, check out some of our videos and other
+tutorials for more advanced usage. Now you can try adding your own panels
+to a blank dashboard. For more information on queries see
+link:./rows-and-panels.html[Rows and Panels]
