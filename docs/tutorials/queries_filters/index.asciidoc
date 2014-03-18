@@ -83,7 +83,7 @@ And of course to search everything:
 [[multiple-queries]]
 === Multiple queries
 
-Kibana can also handle multiple queries, joining them with a logical
+In some cases, you might want to compare the results of two seperate queries.Kibana can handle multiple queries byjoining them with a logical
 `OR` and using the knowledge that they should be treated as seperate to
 influence visualizations.
 
@@ -143,7 +143,7 @@ image:./tutorials/queries_filters/filteradded.png[image]
 
 Filters can also be added manually by clicking the *+*
 
-=== Next steps
+=== More reading
 Now that you have a solid handle on filters and queries you might be
 interested in how they're described in link:./_dashboard_schema.html[the Kibana
 schema]. If you're interested in inserting queries or filters via URL

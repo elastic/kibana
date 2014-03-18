@@ -18,9 +18,11 @@ schema here: link:./snippets/schema.json[schema.json]
 While the dashboard is made up of one large JSON document, we will break
 it down into pieces for the purpose of instruction in this guide.
 
--
+Like any JSON document, we start with an opening brace.
+[source,json]
+-----
 {
--
+-----
 
 [[services]]
 === Services
