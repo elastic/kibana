@@ -71,7 +71,9 @@ curl -XPUT localhost:9200/_bulk --data-binary @shakespeare.json
 Now that you have data, let's do something with it. Point your browser
 at your local webserver, the one with Kibana already installed.
 
-image:./tutorials/intro/intro.png[Welcome Page] If you have Kibana extracted to your
+image:./tutorials/intro/intro.png[Welcome Page]
+
+If you have Kibana extracted to your
 document root you will be presented with this lovely welcome page. Click
 *Sample Dashboard*
 
@@ -90,7 +92,7 @@ Kibana allows you to search Elasticsearch data via the Lucene Query
 String syntax. Queries can be run via the query input at the top of the
 page image:./tutorials/intro/query.png[Sample Dashboard]
 
-This this in the query bar. Then check out the first few rows of the
+Type this in the query bar. Then check out the first few rows of the
 table.
 
 [source,shell]
@@ -123,5 +125,5 @@ image:./tutorials/intro/indexconfigure.png[Sample Dashboard]
 Congratulations, you've installed and configured kibana and dipped your
 toes in the water. Next, check out some of our videos and other
 tutorials for more advanced usage. Now you can try adding your own panels
-to a blank dashboard. See For more information on queries see
+to a blank dashboard. For more information on queries see
 link:./rows-and-panels.html[Rows and Panels]

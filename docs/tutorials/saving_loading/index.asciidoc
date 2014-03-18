@@ -11,7 +11,8 @@ image:./tutorials/saving_loading/awesome_dashboard.png[image]
 === Saving your awesome dashboard
 Saving your flashy new interface is as easy as opening the save drop
 down by clicking the *Save* icon in the upper righthand corner. Give
-your new dashboard a name and hit _enter_.
+your new dashboard a name and hit _enter_. Now your dashboard has been
+saved to a special Elasticsearch index called `kibana-int`
 
 image:./tutorials/saving_loading/savebutton.png[image]
 

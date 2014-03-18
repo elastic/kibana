@@ -48,12 +48,12 @@ appear in the list of rows to the left. Click *Save*
 image:./tutorials/rows_panels/rowbuttons.png[Row buttons]
 
 Now that you have a row, you will notice a few new elements on your
-dashboard. Chiefly the 3 brightly colored rectanges to the left. Move
+dashboard. Chiefly the 3 brightly colored rectangles to the left. Move
 the mouse over them
 
 image:./tutorials/rows_panels/buttons_expanded.png[Row buttons]
 
-Ah hah! these buttons allow you to accomlish 3 things
+Ah hah! these buttons allow you to accomplish 3 things
 
 * Collapsing rows (blue)
 * Configuring rows (orange)
