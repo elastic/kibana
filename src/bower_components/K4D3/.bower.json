@@ -1,0 +1,45 @@
+{
+  "name": "K4D3",
+  "main": "core.js",
+  "scripts": [
+    "k4.d3.js"
+  ],
+  "homepage": "https://github.com/elasticsearch/K4D3",
+  "authors": [
+    "Shelby Sturgis",
+    "Juan Thomassie"
+  ],
+  "description": "D3 Charting Library for Kibana 4",
+  "keywords": [
+    "data",
+    "visualization",
+    "elasticsearch",
+    "kibana"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "d3": "~3.4.1",
+    "requirejs": "~2.1.11",
+    "queue-async": "~1.0.7",
+    "topojson": "~1.4.6"
+  },
+  "devDependencies": {},
+  "_release": "1a5f428a2b",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "1a5f428a2b4493e9a11934956a7ac8ad9328a5c8"
+  },
+  "_source": "git@github.com:elasticsearch/K4D3.git",
+  "_target": "*",
+  "_originalSource": "git@github.com:elasticsearch/K4D3.git",
+  "_direct": true
+}

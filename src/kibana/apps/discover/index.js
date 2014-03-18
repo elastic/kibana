@@ -90,12 +90,6 @@ define(function (require, module, exports) {
     function getFields() {
       var defer = $q.defer();
 
-      if (!source.get('index')) {
-        // Without an index there is nothing to do here.
-        defer.resolve();
-        return defer.promise;
-      }
-
       if (activeGetFields) {
         activeGetFields.then(function () {
           defer.resolve();
@@ -112,6 +106,8 @@ define(function (require, module, exports) {
       source
         .getFields()
         .then(function (fields) {
+          if (!fields) return;
+
           $scope.fields = [];
           $scope.columns = [];
 

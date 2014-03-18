@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Scatterplot</title>
+        <style>
+            body {
+                font: 10px sans-serif;
+                fill: #444;
+                background: #f4f4f4;
+            }
+            rect {
+                fill: #fff;
+            }
+            .axis path,
+            .axis line {
+                fill: none;
+                stroke: #ccc;
+                shape-rendering: crispEdges;
+            }
+            .dot {
+                stroke: #000;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="scatterplot1"></div>
+        <div id="scatterplot2"></div>
+
+        <script src="../lib/d3/d3.min.js"></script>
+        <script src="../k4.d3.js"></script>
+
+        <script>
+          
+        // tests 1 - random data
+        var data1 = [];
+        for (var i = 0; i < 150; i++) {
+            data1.push({
+                x: Math.floor(Math.random()*2000),
+                y: Math.floor(Math.random()*1000),
+                z: Math.floor(Math.random()*6)
+            });
+        }
+        var viz1 = k4.scatterplot()
+            .xValue(function(d) { return d.x; })
+            .yValue(function(d) { return d.y; })
+            .zValue(function(d) { return d.z; });
+
+        d3.select("#scatterplot1")
+            .datum(data1)
+            .call(viz1);
+            
+        // tests 2 - random data
+        var data2 = [];
+        for (var i = 0; i < 60; i++) {
+            data2.push({
+                x: Math.floor(Math.random()*200),
+                y: Math.floor(Math.random()*100),
+                z: Math.floor(Math.random()*3)
+            });
+        }
+        var viz2 = k4.scatterplot()
+            .xValue(function(d) { return d.x; })
+            .yValue(function(d) { return d.y; })
+            .zValue(function(d) { return d.z; })
+            .height(250)
+            .width(900);
+
+        d3.select("#scatterplot2")
+            .datum(data2)
+            .call(viz2);
+
+        </script>
+
+    </body>
+</html>
