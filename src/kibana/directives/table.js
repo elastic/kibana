@@ -9,6 +9,38 @@ define(function (require) {
 
   var module = require('modules').get('kibana/directives');
 
+  module.directive('kbnTableHeader', function () {
+    var headerHtml = require('text!partials/table_header.html');
+    return {
+      restrict: 'E',
+      scope: {
+        columns: '=',
+        getSort: '=',
+        setSort: '='
+      },
+      template: headerHtml,
+      controller: function ($scope) {
+
+        $scope.headerClass = function (column) {
+          //var sort = [0,0];
+          var sort = $scope.getSort();
+          if (column === sort[0]) {
+            return ['fa', sort[1] === 'asc' ? 'fa-chevron-up' : 'fa-chevron-down'];
+          } else {
+            return ['fa', ''];
+          }
+        };
+
+        $scope.set = function (column) {
+          var sort = $scope.getSort();
+          console.log('dir', sort);
+          $scope.setSort(column, sort[1] === 'asc' ? 'desc' : 'asc');
+        };
+
+      }
+    };
+  });
+
   /**
    * kbnTable directive
    *
@@ -36,6 +68,9 @@ define(function (require) {
       scope: {
         columns: '=',
         rows: '=',
+        refresh: '=',
+        getSort: '=',
+        setSort: '=',
         maxLength: '=?'
       },
       link: function ($scope, element, attrs) {

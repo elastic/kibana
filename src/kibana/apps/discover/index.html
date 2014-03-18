@@ -5,13 +5,7 @@
       <input class="form-control" ng-model="index">
       <label class="control-label">Query</label>
       <input type="text" class="form-control" ng-model="query" placeholder="search">
-      <label class="control-label">Sort</label>
-      <select
-          class="form-control"
-          name="sort"
-          ng-model="sort"
-          ng-options="field.name for field in fields">
-          </select>
+
       <label class="control-label">Max Summary Length</label>
       <input type="number" name class="form-control" ng-model="opts.maxSummaryLength">
       <button type="submit" class="btn btn-default">
@@ -21,22 +15,22 @@
   </nav>
   <div class="container-fluid">
     <div class="row">
-      <div class="col-md-2">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h2 class="panel-title">Fields</h3>
-          </div>
-          <div class="panel-body">
-            <disc-field-chooser
-              fields="fields"
-              toggle="toggleField"
-              refresh="refreshFieldList">
-              </disc-field-chooser>
-          </div>
-        </div>
+      <div class="col-md-2 discovery-field-container">
+        <disc-field-chooser
+          fields="fields"
+          toggle="toggleField"
+          refresh="refreshFieldList">
+        </disc-field-chooser>
       </div>
       <div class="col-md-10">
-        <kbn-table rows="rows" columns="columns" max-length="opts.maxSummaryLength"></kbn-table>
+        <kbn-table style="overflow-x:autp"
+          rows="rows"
+          columns="columns"
+          refresh="fetch"
+          max-length="opts.maxSummaryLength"
+          get-sort="getSort"
+          set-sort="setSort">
+        </kbn-table>
       </div>
     </div>
   </div>
