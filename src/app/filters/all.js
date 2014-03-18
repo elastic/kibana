@@ -110,6 +110,14 @@ define([
     };
   });
 
+  module.filter('editable', function () {
+    return function (data) {
+      return _.filter(data, function (item) {
+        return item.editable !== false;
+      });
+    };
+  });
+
   module.filter('gistid', function() {
     var gist_pattern = /(\d{5,})|([a-z0-9]{10,})|(gist.github.com(\/*.*)\/[a-z0-9]{5,}\/*$)/;
     return function(input) {
