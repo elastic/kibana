@@ -110,7 +110,7 @@ function (angular, app, _, $, kbn) {
       // Populate the inspector panel
       $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
 
-      delete $scope.panel.error
+      delete $scope.panel.error;
 
       results = request.doSearch();
 
