@@ -14,7 +14,8 @@ define(function (require) {
       if (courier) return courier;
 
       promises.playNice(DataSource.prototype, [
-        'getFields'
+        'getFields',
+        'clearFieldCache'
       ]);
 
       promises.playNice(DocSource.prototype, [

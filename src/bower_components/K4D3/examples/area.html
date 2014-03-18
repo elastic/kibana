@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Area Test</title>
+        <style>
+            body {
+                font: 10px sans-serif;
+                fill: #444;
+                background: #f4f4f4;
+            }
+
+            .axis path,
+            .axis line {
+                fill: none;
+                stroke: #ccc;
+                shape-rendering: crispEdges;
+            }
+
+            rect {
+                fill: #fff;
+            }
+
+            .area {
+                /* fill: rgba(113, 131, 255, .7); */
+            }
+
+            .line {
+                /*
+                stroke: #2a39ff;
+                stroke-width: 3.5px;
+                */
+            }
+
+            .tooltip {
+                position: absolute;
+                text-align: center;
+                width: 100px;
+                height: 100px;
+                padding: 5px;
+                font: 12px sans-serif;
+                background: black;
+                border: 0px;
+                border-radius: 8px;
+                pointer-events: none;
+                left: -120px;
+                top: 100px;
+                /*visibility: hidden;*/
+            }
+
+            .overlay {
+                fill: none;
+                pointer-events: all;
+            }
+        </style>
+    </head>
+    <body>
+
+        <div id="area-chart"></div>
+
+        <script src="../lib/d3/d3.min.js"></script>
+        <script src="../k4.d3.js"></script>
+        <script>
+            var formatDate = d3.time.format("%b %Y").parse,
+                data = [
+                    {x: "Jan 2013", y: 256},
+                    {x: "Feb 2013", y: 770},
+                    {x: "Mar 2013", y: 470},
+                    {x: "Apr 2013", y: 370},
+                    {x: "May 2013", y: 159},
+                    {x: "Jun 2013", y: 809},
+                    {x: "Jul 2013", y: 689},
+                    {x: "Aug 2013", y: 299},
+                    {x: "Sep 2013", y: 630},
+                    {x: "Oct 2013", y: 106},
+                    {x: "Nov 2013", y: 506},
+                    {x: "Dec 2013", y: 23}
+                ];
+
+            var viz = k4.area()
+                .height(500)
+                .width(960)
+                .interpolate("linear")
+                .x(function(d) { return formatDate(d.x); })
+                .y(function(d) { return d.y; });
+
+            d3.select("#area-chart")
+                .datum(data)
+                .call(viz);
+        </script>
+    </body>
+</html>

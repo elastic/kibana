@@ -18,6 +18,7 @@ require.config({
     gridster: '../bower_components/gridster/dist/jquery.gridster',
     stacktrace: '../bower_components/stacktrace.js/stacktrace',
     modules: 'utils/modules',
+    K4D3: '../bower_components/K4D3/k4.d3.js',
     bower_components: '../bower_components'
   },
   shim: {

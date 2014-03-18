@@ -40,10 +40,17 @@ define(function (require) {
      * @param {Function} callback A function to be executed with the results.
      */
     this.getFields = function (dataSource, callback) {
-      if (self.getFieldsFromObject(dataSource)) {
-        // If we already have the fields in our object, use that, but
-        // make sure we stay async
-        nextTick(callback, void 0, self.getFieldsFromObject(dataSource));
+      if (!dataSource.get('index')) {
+        // always callback async
+        nextTick(callback, new TypeError('dataSource must have an index before it\'s fields can be fetched'));
+        return;
+      }
+
+      // If we already have the fields in our object, use that
+      var cached = self.getFieldsFromObject(dataSource);
+      if (cached) {
+        // always callback async
+        nextTick(callback, void 0, cached);
       } else {
         // Otherwise, try to get fields from Elasticsearch cache
         self.getFieldsFromCache(dataSource, function (err, fields) {
@@ -53,12 +60,13 @@ define(function (require) {
               if (err) return callback(err);
 
               // And then cache them
-              cacheFieldsToElasticsearch(config, dataSource._state.index, fields, function (err, response) {
-                if (err) return callback(new CacheWriteFailure());
+              cacheFieldsToElasticsearch(config, dataSource.get('index'), fields, function (err, response) {
+                // non-critical error, should not interupt function completion
+                if (err) courier._error(new CacheWriteFailure());
               });
 
               cacheFieldsToObject(dataSource, fields);
-              callback(err, self.getFieldsFromObject(dataSource));
+              callback(err, fields);
             });
           } else {
             cacheFieldsToObject(dataSource, fields);
@@ -76,6 +84,7 @@ define(function (require) {
      */
     this.getFieldMapping = function (dataSource, field, callback) {
       self.getFields(dataSource, function (err, fields) {
+        // TODO: errors should probably be passed to the callback
         if (_.isUndefined(fields[field])) return courier._error(new Error.FieldNotFoundInCache(field));
         callback(err, fields[field]);
       });
@@ -89,7 +98,9 @@ define(function (require) {
      */
     this.getFieldsMapping = function (dataSource, fields, callback) {
       self.getFields(dataSource, function (err, map) {
+        // TODO: errors should probably be handled before _mapping is created
         var _mapping = _.object(_.map(fields, function (field) {
+          // TODO: errors should probably be passed to the callback
           if (_.isUndefined(map[field])) return courier._error(new Error.FieldNotFoundInCache(field));
           return [field, map[field]];
         }));
@@ -103,8 +114,8 @@ define(function (require) {
      * @return {Object} An object containing fields with their mappings, or false if not found.
      */
     this.getFieldsFromObject = function (dataSource) {
-      // don't pass pack our reference to truth, clone it
-      return !_.isUndefined(mappings[dataSource.get('index')]) ? _.clone(mappings[dataSource.get('index')]) : false;
+      // don't pass pack our reference to truth, cloneDeep it
+      return !_.isUndefined(mappings[dataSource.get('index')]) ? _.cloneDeep(mappings[dataSource.get('index')]) : false;
     };
 
     /**
@@ -117,7 +128,7 @@ define(function (require) {
       var params = {
         index: config.cacheIndex,
         type: config.cacheType,
-        id: dataSource._state.index,
+        id: dataSource.get('index'),
       };
 
       client.getSource(params, callback);
@@ -132,7 +143,7 @@ define(function (require) {
       var client = courier._getClient();
       var params = {
         // TODO: Change index to be newest resolved index. Change _state.index to id().
-        index: dataSource._state.index,
+        index: dataSource.get('index'),
         field: '*',
       };
 
@@ -151,6 +162,7 @@ define(function (require) {
 
               if (fields[name]) {
                 if (fields[name].type === mapping.type) return;
+                // TODO: errors should probably be passed to the callback
                 return courier._error(new MappingConflict(name));
               }
 
@@ -188,8 +200,8 @@ define(function (require) {
      * @param {Function} callback A function to be executed with the results.
      */
     var cacheFieldsToObject = function (dataSource, fields) {
-      mappings[dataSource._state.index] = fields;
-      return !_.isUndefined(mappings[dataSource._state.index]) ? true : false;
+      mappings[dataSource.get('index')] = _.cloneDeep(fields);
+      return !_.isUndefined(mappings[dataSource.get('index')]) ? true : false;
     };
 
     /**
@@ -227,13 +239,13 @@ define(function (require) {
     this.clearCache = function (dataSource, callback) {
       var client = courier._getClient();
 
-      if (!_.isUndefined(mappings[dataSource._state.index])) {
-        delete mappings[dataSource._state.index];
+      if (!_.isUndefined(mappings[dataSource.get('index')])) {
+        delete mappings[dataSource.get('index')];
       }
       client.delete({
         index: config.cacheIndex,
         type: config.cacheType,
-        id: dataSource._state.index
+        id: dataSource.get('index')
       }, callback);
     };
 
