@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Line Chart</title>
+    <style>
+        body {
+            font: 10px sans-serif;
+            fill: #444;
+            background: #f4f4f4;
+        }
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #ccc;
+            shape-rendering: crispEdges;
+        }
+
+        rect {
+            fill: #fff;
+        }
+
+        .line {
+            fill: none;
+            stroke: #2a39ff;
+            stroke-width: 3.5px;
+        }
+    </style>
+</head>
+<body>
+<div id="area-chart"></div>
+
+<script src="../lib/d3/d3.min.js"></script>
+<script src="../k4.d3.js"></script>
+<script>
+    var formatDate = d3.time.format("%b %Y").parse,
+        data = [
+                {x: "Jan 2013", y: 256, z: 'New York'},
+                {x: "Feb 2013", y: 770, z: 'New York'},
+                {x: "May 2013", y: 159, z: 'New York'},
+                {x: "Oct 2013", y: 106, z: 'New York'},
+                {x: "Jan 2013", y: 456, z: 'San Francisco'},
+                {x: "Feb 2013", y: 370, z: 'San Francisco'},
+                {x: "May 2013", y: 659, z: 'San Francisco'},
+                {x: "Oct 2013", y: 806, z: 'San Francisco'}
+        ];
+
+    var viz = k4.line()
+        .height(500)
+        .width(960)
+        .x(function(d) { return formatDate(d.x); })
+        .y(function(d) { return d.y; })
+        .z(function(d) { return d.z; });
+
+    d3.select("#area-chart")
+        .datum(data)
+        .call(viz);
+</script>
+
+</body>
+</html>

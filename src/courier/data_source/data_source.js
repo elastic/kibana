@@ -84,7 +84,11 @@ define(function (require) {
    * @param {string} name - The name of the property desired
    */
   DataSource.prototype.get = function (name) {
-    return this._state[name];
+    var current = this;
+    while (current) {
+      if (current._state[name] !== void 0) return current._state[name];
+      current = current._parent;
+    }
   };
 
   /**
@@ -96,7 +100,6 @@ define(function (require) {
     if (typeof state === 'string') {
       return this[state](val);
     }
-
     this._state = state;
     return this;
   };
@@ -135,6 +138,10 @@ define(function (require) {
    * @callback {Error, Array} - calls cb with a possible error or an array of field names
    */
   DataSource.prototype.getFields = function (cb) {
+    if (!this.get('index')) {
+      // Without an index there is nothing to do here.
+      return nextTick(cb);
+    }
     this._courier._mapper.getFields(this, this._wrapcb(cb));
   };
 
@@ -279,7 +286,7 @@ define(function (require) {
       if (!$scope) return cb.apply(source, args);
 
       // use angular's $apply or $eval functions for the given scope
-      $scope[$scope.$$phase ? '$eval' : '$apply'](function () {
+      $scope[$scope.$root.$$phase ? '$eval' : '$apply'](function () {
         cb.apply(source, args);
       });
     };

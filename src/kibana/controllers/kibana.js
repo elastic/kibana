@@ -5,7 +5,6 @@ define(function (require) {
 
   require('services/config');
   require('services/courier');
-  require('directives/view');
   require('angular-bootstrap');
 
   require('modules')
@@ -18,7 +17,7 @@ define(function (require) {
         appendToBody: false
       });
     })
-    .controller('kibana', function ($scope, courier, config, configFile, createNotifier, $timeout) {
+    .controller('kibana', function ($rootScope, $scope, courier, config, configFile, createNotifier, $timeout) {
       var notify = createNotifier({
         location: 'Kibana Controller'
       });
@@ -29,6 +28,9 @@ define(function (require) {
         var route = uri.match(/#\/([^\/]*)/);
         $scope.activeApp = route ? route[1] : null;
       });
+
+      $rootScope.rootDataSource = courier.createSource('search')
+        .index('_all');
 
       $scope.opts = {
         activeFetchInterval: void 0,

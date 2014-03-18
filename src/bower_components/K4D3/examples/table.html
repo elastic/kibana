@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Table</title>
+        <style>
+            body {
+                font: 10px sans-serif;
+                fill: #444;
+                background: #f4f4f4;
+            }
+
+            #data-table {
+                margin: 50px auto;
+            }
+        </style>
+
+        <!-- Twitter Bootstrap -->
+        <link rel="stylesheet" type="text/css" href="../lib/bootstrap/dist/css/bootstrap.min.css">
+    </head>
+    <body>
+        <div id="data-table" class="table-responsive"></div>
+
+        <script src="../lib/d3/d3.min.js"></script>
+        <script src="../k4.d3.js"></script>
+        <script>
+            var data = [
+                {"date": new Date("2014-01-15"), "downloads": 256, "type": "png" },
+                {"date": new Date("2014-01-16"), "downloads": 656, "type": "png" },
+                {"date": new Date("2014-01-17"), "downloads": 899, "type": "png" },
+                {"date": new Date("2014-01-18"), "downloads": 2560, "type": "png" },
+                {"date": new Date("2014-01-19"), "downloads": 25, "type": "png" },
+                {"date": new Date("2014-01-20"), "downloads": 568, "type": "png" },
+                {"date": new Date("2014-01-21"), "downloads": 996, "type": "png" },
+                {"date": new Date("2014-01-22"), "downloads": 906, "type": "png" },
+                {"date": new Date("2014-01-23"), "downloads": 1480, "type": "png" }
+            ];
+
+            var table = k4.table();
+
+            d3.select("#data-table")
+                    .datum(data)
+                    .call(table);
+        </script>
+
+    </body>
+</html>
