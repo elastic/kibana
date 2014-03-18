@@ -4,14 +4,32 @@ define([
   'kbn',
   'lodash',
   'jquery',
+  'numeral',
   'jquery.flot',
   'jquery.flot.time'
 ],
-  function (angular, app, kbn, _, $) {
+  function (angular, app, kbn, _, $, numeral) {
     'use strict';
 
     var module = angular.module('kibana.panels.marvel.stats_table', []);
     app.useModule(module);
+
+    // Customize the output of Numeral here.
+    numeral.language('en', {
+      delimiters: {
+        thousands: ',',
+        decimal: '.'
+      },
+      abbreviations: {
+        thousand: 'K',
+        million: 'M',
+        billion: 'B',
+        trillion: 'T'
+      },
+      currency: {
+        symbol: '$'  
+      }
+    });
 
     var log_debug;
     if (false) {
@@ -30,10 +48,10 @@ define([
         return value;
       }
       if (metric.y_format === 'bytes') {
-        return kbn.byteFormat(value, metric.decimals);
+        return numeral(value).format('0.0 b');
       }
       if (metric.y_format === 'short') {
-        return kbn.shortFormat(value, metric.decimals);
+        return numeral(value).format('0.0 a');
       }
       return value.toFixed(metric.decimals);
     }
@@ -900,7 +918,16 @@ define([
       };
 
       $scope.formatAlert = function (a, metric) {
-        return !a ? "" : (a.type === "upper_bound" ? ">" : "<") + y_format_metric_value(a.threshold, metric);
+        // If a is empty then return an empty string
+        if (!a) {
+          return ''; 
+        }
+
+        // Get the value for the metric
+        var value = y_format_metric_value(a.threshold, metric);
+        
+        // Return the value with the upper or lower bound
+        return (a.type === "upper_bound" ? ">" : "<") + value;
       };
 
       $scope.detailViewLink = function (rows, fields) {
@@ -1021,7 +1048,7 @@ define([
       };
 
 
-      $scope.parseAlert = function (s) {
+      $scope.parseAlert = function (s, metric) {
         if (!s) {
           return null;
         }
@@ -1032,6 +1059,18 @@ define([
         }
         else if (s[0] === '>') {
           s = s.substr(1);
+        }
+
+        if (metric.y_format === 'bytes') {
+          if (/\d+\s*[KkGgMmTt]?[bB]/.test(s)) {
+            s = numeral().unformat(s);
+          }
+        }
+
+        if (metric.y_format === 'short') {
+          if (/\d+\s*[KkBbMmTt]/.test(s)) {
+            s = numeral().unformat(s.toUpperCase());
+          }
         }
 
         ret.threshold = parseFloat(s);
@@ -1106,7 +1145,7 @@ define([
             if (/(<>)?\d+(.\d+)?/.test(viewValue)) {
               // it is valid
               ctrl.$setValidity('alertValue', true);
-              return scope.parseAlert(viewValue);
+              return scope.parseAlert(viewValue, scope.metric);
             }
             else {
               // it is invalid, return undefined (no model update)
@@ -1115,7 +1154,7 @@ define([
             }
           });
           ctrl.$formatters.unshift(function (modelValue) {
-            return scope.formatAlert(modelValue, scope);
+            return scope.formatAlert(modelValue, scope.metric);
           });
         }
       };
