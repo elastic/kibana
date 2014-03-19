@@ -6,6 +6,8 @@ define(function (require, module, exports) {
   require('services/saved_searches');
   require('utils/mixins');
 
+  require('./timechart');
+
   var app = require('modules').get('app/discover');
 
   var intervals = [
@@ -29,7 +31,10 @@ define(function (require, module, exports) {
       // number of records to fetch, then paginate through
       sampleSize: 500,
       // max length for summaries in the table
-      maxSummaryLength: 100
+      maxSummaryLength: 100,
+      // Index to match
+      index: '_all',
+      timefield: '@timestamp'
     };
 
     // stores the complete list of fields
@@ -45,8 +50,8 @@ define(function (require, module, exports) {
     // the index to use when they don't specify one
     config.$watch('discover.defaultIndex', function (val) {
       if (!val) return config.set('discover.defaultIndex', '_all');
-      if (!$scope.index) {
-        $scope.index = val;
+      if (!$scope.opts.index) {
+        $scope.opts.index = val;
         $scope.fetch();
       }
     });
@@ -59,6 +64,11 @@ define(function (require, module, exports) {
 
         $scope.rows = res.hits.hits;
       });
+
+
+    var init = function () {
+      $scope.fetch();
+    };
 
     $scope.sort = ['_score', 'desc'];
 
@@ -74,6 +84,26 @@ define(function (require, module, exports) {
       $scope.fetch();
     };
 
+    var setConfigTemplate = function (template) {
+      // Close if already open
+      if ($scope.configTemplate === template) {
+        delete $scope.configTemplate;
+        return;
+      } else {
+        $scope.configTemplate = template;
+      }
+    };
+
+    $scope.toggleConfig = function () {
+      setConfigTemplate(require('text!./partials/settings.html'));
+      /*
+      $scope.configSubmit = function () {
+        $scope.save($scope.dashboard.title);
+      };
+      */
+    };
+
+
     $scope.fetch = function () {
       if (!$scope.fields) getFields();
       source
@@ -84,9 +114,9 @@ define(function (require, module, exports) {
           }
         });
 
-      if ($scope.index !== source.get('index')) {
+      if ($scope.opts.index !== source.get('index')) {
         // set the index on the data source
-        source.index($scope.index);
+        source.index($scope.opts.index);
         // clear the columns and fields, then refetch when we do a search
         $scope.columns = $scope.fields = null;
       }
@@ -120,6 +150,9 @@ define(function (require, module, exports) {
           $scope.fields = [];
           $scope.columns = $scope.columns || [];
 
+          // Inject source into list;
+          $scope.fields.push({name: '_source', type: 'source', display: false});
+
           _(fields)
             .keys()
             .sort()
@@ -130,6 +163,7 @@ define(function (require, module, exports) {
               _.defaults(field, currentState[name]);
               $scope.fields.push(field);
             });
+
 
           refreshColumns();
           defer.resolve();
@@ -147,7 +181,10 @@ define(function (require, module, exports) {
       field.display = !field.display;
 
       if ($scope.columns.length === 1 && $scope.columns[0] === '_source') {
-        $scope.columns = [name];
+        $scope.columns = _.toggleInOut($scope.columns, name);
+        $scope.columns = _.toggleInOut($scope.columns, '_source');
+        _.find($scope.fields, {name: '_source'}).display = false;
+
       } else {
         $scope.columns = _.toggleInOut($scope.columns, name);
       }
@@ -174,9 +211,11 @@ define(function (require, module, exports) {
 
       // If no columns remain, use _source
       if (!$scope.columns.length) {
-        $scope.columns.push('_source');
+        $scope.toggleField('_source');
       }
     }
+
+    init();
 
     $scope.$emit('application.load');
   });

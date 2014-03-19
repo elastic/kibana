@@ -1,6 +1,6 @@
 define(function (require) {
   var app = require('modules').get('app/discover');
-  var html = require('text!./field_chooser.html');
+  var html = require('text!./partials/field_chooser.html');
 
   app.directive('discFieldChooser', function () {
     return {
@@ -13,9 +13,10 @@ define(function (require) {
       template: html,
       controller: function ($scope) {
         $scope.typeIcon = function (fieldType) {
-          console.log(fieldType);
           switch (fieldType)
           {
+          case 'source':
+            return 'fa-file-text-o';
           case 'string':
             return 'fa-sort-alpha-asc';
           case 'number':
