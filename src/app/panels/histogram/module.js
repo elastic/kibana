@@ -37,7 +37,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
   var module = angular.module('kibana.panels.histogram', []);
   app.useModule(module);
 
-  module.controller('histogram', function($scope, querySrv, dashboard, filterSrv) {
+  module.controller('histogram', function($scope, es, querySrv, dashboard, filterSrv) {
     $scope.panelMeta = {
       modals : [
         {
@@ -332,10 +332,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
       }
 
       $scope.panelMeta.loading = true;
-      request = $scope.ejs.Request().indices(dashboard.indices[segment]);
-      if (!$scope.panel.annotate.enable) {
-        request.searchType("count");
-      }
+      request = $scope.ejs.Request();
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
 
@@ -382,8 +379,19 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
       // Populate the inspector panel
       $scope.populate_modal(request);
 
+
+      // configure search request
+      var req = {
+        index: dashboard.indices[segment],
+        body: request
+      };
+
+      if (!$scope.panel.annotate.enable) {
+        req.searchType = 'count';
+      }
+
       // Then run it
-      results = request.doSearch();
+      results = es.search(req);
 
       // Populate scope when we have results
       return results.then(function(results) {
@@ -540,7 +548,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
 
     // I really don't like this function, too much dom manip. Break out into directive?
     $scope.populate_modal = function(request) {
-      $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
+      $scope.inspector = angular.toJson(request.toJSON(), true);
     };
 
     $scope.set_refresh = function (state) {

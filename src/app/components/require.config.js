@@ -44,8 +44,9 @@ require.config({
 
 
     modernizr:                '../vendor/modernizr-2.6.1',
-    numeral:                '../vendor/numeral',
-    elasticjs:                '../vendor/elasticjs/elastic-angular-client',
+    numeral:                  '../vendor/numeral',
+    elasticjs:                '../vendor/elasticjs/elastic',
+    elasticsearch:            '../vendor/elasticsearch/elasticsearch.angular',
   },
   shim: {
     angular: {
@@ -91,7 +92,8 @@ require.config({
     timepicker:             ['jquery', 'bootstrap'],
     datepicker:             ['jquery', 'bootstrap'],
 
-    elasticjs:              ['angular', '../vendor/elasticjs/elastic']
+    elasticsearch:          ['angular'],
+    elasticjs:              {deps: ['elasticsearch'], exports: 'ejs'}
   },
   waitSeconds: 60,
 });
