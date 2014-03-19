@@ -13,12 +13,17 @@ define(function (require) {
       template: html,
       controller: function ($scope) {
         $scope.typeIcon = function (fieldType) {
+          console.log(fieldType);
           switch (fieldType)
           {
           case 'string':
             return 'fa-sort-alpha-asc';
           case 'number':
             return 'fa-sort-numeric-asc';
+          case 'date':
+            return 'fa-clock-o';
+          case 'ip':
+            return 'fa-laptop';
           default:
           }
         };
