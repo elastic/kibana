@@ -6,7 +6,8 @@
   "globals": {
     "define": true,
     "require": true,
-    "console": true
+    "console": true,
+    "jsonPath": false
   },
 
   "camelcase": false,
@@ -34,5 +35,6 @@
   "maxlen": 140,
   "-W084": true,
   "maxerr": 10,
-  "scripturl": true
+  "scripturl": true,
+  "evil": true
 }
