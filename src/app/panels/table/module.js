@@ -27,7 +27,7 @@ function (angular, app, _, kbn, moment) {
   app.useModule(module);
 
   module.controller('table', function($rootScope, $scope, $modal, $q, $compile, $timeout,
-    fields, querySrv, dashboard, filterSrv) {
+    es, fields, querySrv, dashboard, filterSrv) {
     $scope.panelMeta = {
       modals : [
         {
@@ -325,7 +325,7 @@ function (angular, app, _, kbn, moment) {
       _segment = _.isUndefined(segment) ? 0 : segment;
       $scope.segment = _segment;
 
-      request = $scope.ejs.Request().indices(dashboard.indices[_segment]);
+      request = $scope.ejs.Request();
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
 
@@ -353,7 +353,10 @@ function (angular, app, _, kbn, moment) {
       $scope.populate_modal(request);
 
       // Populate scope when we have results
-      request.doSearch().then(function(results) {
+      es.search({
+        index: dashboard.indices[_segment],
+        body: request
+      }).then(function(results) {
         $scope.panelMeta.loading = false;
 
         if(_segment === 0) {
@@ -428,7 +431,7 @@ function (angular, app, _, kbn, moment) {
     };
 
     $scope.populate_modal = function(request) {
-      $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
+      $scope.inspector = angular.toJson(request.toJSON(), true);
     };
 
     $scope.without_kibana = function (row) {

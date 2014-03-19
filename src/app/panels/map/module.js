@@ -26,7 +26,7 @@ function (angular, app, _, $) {
   var module = angular.module('kibana.panels.map', []);
   app.useModule(module);
 
-  module.controller('map', function($scope, $rootScope, querySrv, dashboard, filterSrv) {
+  module.controller('map', function($scope, $rootScope, es, querySrv, dashboard, filterSrv) {
     $scope.panelMeta = {
       editorTabs : [
         {title:'Queries', src:'app/partials/querySelect.html'}
@@ -104,7 +104,7 @@ function (angular, app, _, $) {
         queries;
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
-      request = $scope.ejs.Request().indices(dashboard.indices);
+      request = $scope.ejs.Request();
       queries = querySrv.getQueryObjs($scope.panel.queries.ids);
 
       boolQuery = $scope.ejs.BoolQuery();
@@ -126,7 +126,10 @@ function (angular, app, _, $) {
 
       $scope.populate_modal(request);
 
-      var results = request.doSearch();
+      var results = es.search({
+        index: dashboard.indices,
+        body: request
+      });
 
       // Populate scope when we have results
       results.then(function(results) {
@@ -142,7 +145,7 @@ function (angular, app, _, $) {
 
     // I really don't like this function, too much dom manip. Break out into directive?
     $scope.populate_modal = function(request) {
-      $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
+      $scope.inspector = angular.toJson(request.toJSON(), true);
     };
 
     $scope.build_search = function(field, value) {

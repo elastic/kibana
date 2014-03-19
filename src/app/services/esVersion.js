@@ -8,12 +8,9 @@ function (angular, _, config) {
 
   var module = angular.module('kibana.services');
 
-  module.service('esVersion', function($http, alertSrv, esMinVersion, $q, ejsResource) {
+  module.service('esVersion', function($http, alertSrv, esMinVersion, $q, es) {
 
     this.versions = [];
-
-    var ejs = ejsResource(config.elasticsearch);
-
 
     // save a reference to this
     var self = this,
@@ -28,24 +25,20 @@ function (angular, _, config) {
         defer.resolve(self.versions);
         return defer.promise;
       } else {
-        var nodeInfo = ejs.client.get('/_nodes',
-          undefined, undefined, function(data, status) {
-          if(status === 0) {
-            alertSrv.set('Error',"Could not contact Elasticsearch at "+ejs.client.server()+
-              ". Please ensure that Elasticsearch is reachable from your system." ,'error');
-          } else {
-            alertSrv.set('Error',"Could not reach "+ejs.client.server()+"/_nodes. If you"+
-            " are using a proxy, ensure it is configured correctly",'error');
-          }
-          return;
-        });
-
-        return nodeInfo.then(function(p) {
+        return es.nodes.info().then(function(p) {
           _.each(p.nodes, function(v) {
             self.versions.push(v.version.split('-')[0]);
           });
           self.versions = sortVersions(_.uniq(self.versions));
           return self.versions;
+        },
+        function(err) {
+          if (err.status && err.status === 404) {
+            alertSrv.set('Error', "Could not get node info: " + err.message, 'error');
+          } else {
+            alertSrv.set('Error', "Error connecting to elasticsearch: " + err.message, 'error');
+          }
+          return;
         });
       }
 

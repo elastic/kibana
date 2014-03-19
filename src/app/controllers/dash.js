@@ -1,16 +1,17 @@
 define([
   'angular',
   'config',
+  'elasticjs',
   'lodash',
   'services/all'
 ],
-function (angular, config, _) {
+function (angular, config, ejs, _) {
   "use strict";
 
   var module = angular.module('kibana.controllers');
 
   module.controller('DashCtrl', function(
-    $scope, $route, ejsResource, fields, dashboard, alertSrv, panelMove, esVersion, kbnVersion) {
+    $scope, $route, es, fields, dashboard, alertSrv, panelMove, esVersion, kbnVersion) {
 
     $scope.Math = Math;
 
@@ -45,7 +46,7 @@ function (angular, config, _) {
       $scope.fields = fields;
       $scope.reset_row();
 
-      $scope.ejs = ejsResource(config.elasticsearch);
+      $scope.ejs = ejs;
     };
 
     $scope.isPanel = function(obj) {

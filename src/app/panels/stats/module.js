@@ -30,7 +30,7 @@ define([
   var module = angular.module('kibana.panels.stats', []);
   app.useModule(module);
 
-  module.controller('stats', function ($scope, querySrv, dashboard, filterSrv) {
+  module.controller('stats', function ($scope, es, querySrv, dashboard, filterSrv) {
 
     $scope.panelMeta = {
       modals : [
@@ -111,7 +111,7 @@ define([
         boolQuery,
         queries;
 
-      request = $scope.ejs.Request().indices(dashboard.indices);
+      request = $scope.ejs.Request();
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
       queries = querySrv.getQueryObjs($scope.panel.queries.ids);
@@ -148,9 +148,12 @@ define([
       });
 
       // Populate the inspector panel
-      $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
+      $scope.inspector = angular.toJson(request.toJSON(), true);
 
-      results = request.doSearch();
+      results = es.search({
+        index: dashboard.indices,
+        body: request
+      });
 
       results.then(function(results) {
         $scope.panelMeta.loading = false;

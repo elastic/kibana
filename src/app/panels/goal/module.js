@@ -25,7 +25,7 @@ define([
   var module = angular.module('kibana.panels.goal', []);
   app.useModule(module);
 
-  module.controller('goal', function($scope, $rootScope, querySrv, dashboard, filterSrv) {
+  module.controller('goal', function($scope, es, $rootScope, querySrv, dashboard, filterSrv) {
 
     $scope.panelMeta = {
       editorTabs : [
@@ -116,7 +116,7 @@ define([
 
 
       $scope.panelMeta.loading = true;
-      var request = $scope.ejs.Request().indices(dashboard.indices);
+      var request = $scope.ejs.Request();
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
       var queries = querySrv.getQueryObjs($scope.panel.queries.ids);
@@ -134,9 +134,12 @@ define([
         .filter(filterSrv.getBoolFilter(filterSrv.ids()))
         .size(0);
 
-      $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
+      $scope.inspector = angular.toJson(request.toJSON(), true);
 
-      results = request.doSearch();
+      results = es.search({
+        index: dashboard.indices,
+        body: request
+      });
 
       results.then(function(results) {
         $scope.panelMeta.loading = false;

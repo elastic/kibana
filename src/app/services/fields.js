@@ -8,13 +8,10 @@ function (angular, _, config) {
 
   var module = angular.module('kibana.services');
 
-  module.service('fields', function(dashboard, $rootScope, $http, esVersion, alertSrv, ejsResource) {
+  module.service('fields', function(dashboard, $rootScope, $http, esVersion, alertSrv, es) {
 
     // Save a reference to this
     var self = this;
-
-    var ejs = ejsResource(config.elasticsearch);
-
 
     this.list = ['_type'];
     this.indices = [];
@@ -48,20 +45,7 @@ function (angular, _, config) {
     };
 
     this.map = function(indices) {
-      var request = ejs.client.get('/' + indices.join(',') + "/_mapping",
-        undefined, undefined, function(data, status) {
-          if(status === 0) {
-            alertSrv.set('Error',"Could not contact Elasticsearch at "+ejs.config.server+
-              ". Please ensure that Elasticsearch is reachable from your system." ,'error');
-          } else {
-            alertSrv.set('Error',"No index found at "+ejs.config.server+"/" +
-              indices.join(',')+"/_mapping. Please create at least one index."  +
-              "If you're using a proxy ensure it is configured correctly.",'error');
-          }
-        });
-
-      // Flatten the mapping of each index into dot notated keys.
-      return request.then(function(p) {
+      return es.indices.getMapping({'index': indices.join(',')}).then(function(p) {
         var mapping = {};
         return esVersion.gte('1.0.0.RC1').then(function(version) {
           _.each(p, function(indexMap,index) {
@@ -72,6 +56,13 @@ function (angular, _, config) {
           });
           return mapping;
         });
+      }, 
+      function(err) {
+        if (err.status && err.status  === 404) {
+          alertSrv.set('Error',"No index found. Please create at least one index: " + err.message, 'error');
+        } else {
+          alertSrv.set('Error',"Error connecting to elasticsearch: " + err.message, 'error');
+        }
       });
     };
 

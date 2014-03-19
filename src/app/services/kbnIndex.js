@@ -9,7 +9,7 @@ function (angular, _, config, moment) {
 
   var module = angular.module('kibana.services');
 
-  module.service('kbnIndex', function($http, alertSrv, ejsResource) {
+  module.service('kbnIndex', function($http, alertSrv, es) {
     // returns a promise containing an array of all indices matching the index
     // pattern that exist in a given range
     this.indices = function(from,to,pattern,interval) {
@@ -28,31 +28,13 @@ function (angular, _, config, moment) {
       });
     };
 
-    var ejs = ejsResource(config.elasticsearch);
-
-
     // returns a promise containing an array of all indices in an elasticsearch
     // cluster
     function resolve_indices(indices) {
       var something;
       indices = _.uniq(_.map(indices,  encodeURIComponent));
 
-      something = ejs.client.get("/" + indices.join(",") + "/_aliases?ignore_missing=true",
-        undefined, undefined, function (data, p) {
-          if (p === 404) {
-            return [];
-          }
-          else if(p === 0) {
-            alertSrv.set('Error',"Could not contact Elasticsearch at "+ejs.config.server+
-              ". Please ensure that Elasticsearch is reachable from your system." ,'error');
-          } else {
-            alertSrv.set('Error',"Could not reach "+ejs.config.server+"/_aliases. If you"+
-              " are using a proxy, ensure it is configured correctly",'error');
-          }
-          return [];
-        });
-
-      return something.then(function(p) {
+      return es.indices.getAlias({'ignoreUnavailable': true, 'index': indices.join(",")}).then(function(p) {
 
         var indices = [];
         _.each(p, function(v,k) {
@@ -63,6 +45,16 @@ function (angular, _, config, moment) {
           });
         });
         return indices;
+      },
+      function (err) {
+          if (err.status && err.status === 404) {
+            return [];
+          } else if (err.status == null) {
+            alertSrv.set('Error',"Error connecting to elasticsearch: " + err.message, 'error');
+          } else {
+            alertSrv.set('Error',"Unable to fetch aliases: " + err.message, 'error');
+          }
+          return [];
       });
     }
 

@@ -2,13 +2,14 @@ define([
   'angular',
   'lodash',
   'config',
-  'kbn'
-], function (angular, _, config, kbn) {
+  'kbn',
+  'elasticjs'
+], function (angular, _, config, kbn, ejs) {
   'use strict';
 
   var module = angular.module('kibana.services');
 
-  module.service('filterSrv', function(dashboard, ejsResource, $rootScope, $timeout) {
+  module.service('filterSrv', function(dashboard, es, $rootScope, $timeout) {
     // Create an object to hold our service state on the dashboard
     dashboard.current.services.filter = dashboard.current.services.filter || {};
 
@@ -17,9 +18,6 @@ define([
       list : {},
       ids : []
     };
-
-    // For convenience
-    var ejs = ejsResource(config.elasticsearch);
 
     // Save a reference to this
     var self = this;

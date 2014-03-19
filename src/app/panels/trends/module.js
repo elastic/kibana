@@ -25,7 +25,7 @@ function (angular, app, _, kbn) {
   var module = angular.module('kibana.panels.trends', []);
   app.useModule(module);
 
-  module.controller('trends', function($scope, kbnIndex, querySrv, dashboard, filterSrv) {
+  module.controller('trends', function($scope, es, kbnIndex, querySrv, dashboard, filterSrv) {
 
     $scope.panelMeta = {
       modals : [
@@ -160,7 +160,7 @@ function (angular, app, _, kbn) {
 
 
       // Populate the inspector panel
-      $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
+      $scope.inspector = angular.toJson(request.toJSON(), true);
 
       // If we're on the first segment we need to get our indices
       if (_segment === 0) {
@@ -171,11 +171,10 @@ function (angular, app, _, kbn) {
           dashboard.current.index.interval
         ).then(function (p) {
           $scope.index = _.union(p,$scope.index);
-          request = request.indices($scope.index[_segment]);
-          process_results(request.doSearch(),_segment,query_id);
+          process_results(es.search({index: $scope.index[_segment], body: request}), _segment, query_id);
         });
       } else {
-        process_results(request.indices($scope.index[_segment]).doSearch(),_segment,query_id);
+        process_results(es.search({index: $scope.index[_segment], body: request}), _segment, query_id);
       }
 
     };

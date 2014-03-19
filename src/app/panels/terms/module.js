@@ -24,7 +24,7 @@ function (angular, app, _, $, kbn) {
   var module = angular.module('kibana.panels.terms', []);
   app.useModule(module);
 
-  module.controller('terms', function($scope, querySrv, dashboard, filterSrv, fields) {
+  module.controller('terms', function($scope, es, querySrv, dashboard, filterSrv, fields) {
     $scope.panelMeta = {
       modals : [
         {
@@ -155,7 +155,7 @@ function (angular, app, _, $, kbn) {
       $scope.field = _.contains(fields.list,$scope.panel.field+'.raw') ?
         $scope.panel.field+'.raw' : $scope.panel.field;
 
-      request = $scope.ejs.Request().indices(dashboard.indices);
+      request = $scope.ejs.Request();
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
       queries = querySrv.getQueryObjs($scope.panel.queries.ids);
@@ -195,12 +195,16 @@ function (angular, app, _, $, kbn) {
       }
 
       // Populate the inspector panel
-      $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
+      $scope.inspector = angular.toJson(request.toJSON(), true);
 
-      results = request.doSearch();
+      //
+      results = es.search({
+        index: dashboard.indices,
+        body: request
+      });
 
-      // Populate scope when we have results
       results.then(function(results) {
+        // Populate scope when we have results
         $scope.panelMeta.loading = false;
         if($scope.panel.tmode === 'terms') {
           $scope.hits = results.hits.total;
