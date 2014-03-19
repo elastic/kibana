@@ -4,19 +4,20 @@ define([
   'kbn',
   'lodash',
   'config',
+  'elasticjs',
   'moment',
   'modernizr',
   'filesaver',
   'blob'
 ],
-function (angular, $, kbn, _, config, moment, Modernizr) {
+function (angular, $, kbn, _, config, ejs, moment, Modernizr) {
   'use strict';
 
   var module = angular.module('kibana.services');
 
   module.service('dashboard', function(
     $routeParams, $http, $rootScope, $injector, $location, $timeout,
-    ejsResource, timer, kbnIndex, alertSrv, esVersion, esMinVersion
+    es, timer, kbnIndex, alertSrv, esVersion, esMinVersion
   ) {
     // A hash of defaults to use when loading a dashboard
 
@@ -64,8 +65,6 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
       refresh: false
     };
 
-    // An elasticJS client to use
-    var ejs = ejsResource(config.elasticsearch);
     var gist_pattern = /(^\d{5,}$)|(^[a-z0-9]{10,}$)|(gist.github.com(\/*.*)\/[a-z0-9]{5,}\/*$)/;
 
     // Store a reference to this
@@ -405,57 +404,73 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
       }
 
       // Create request with id as title. Rethink this.
-      var request = ejs.Document(config.kibana_index,type,id).source({
-        user: 'guest',
-        group: 'guest',
-        title: save.title,
-        dashboard: angular.toJson(save)
-      });
+      var request = {
+        index: config.kibana_index,
+        type: type,
+        id: id,
+        body: {
+          user: 'guest',
+          group: 'guest',
+          title: save.title,
+          dashboard: angular.toJson(save)
+        }
+      };
 
-      request = type === 'temp' && ttl ? request.ttl(ttl) : request;
+      if (type === 'temp' && ttl) {
+        request.ttl = ttl;
+      }
 
-      return request.doIndex(
-        // Success
+      return es.index(request).then(
         function(result) {
+          // Success
           if(type === 'dashboard') {
             $location.path('/dashboard/elasticsearch/'+title);
           }
           return result;
         },
-        // Failure
         function() {
+          // Failure
           return false;
         }
       );
     };
 
     this.elasticsearch_delete = function(id) {
-      return ejs.Document(config.kibana_index,'dashboard',id).doDelete(
-        // Success
+      return es.delete({
+        index: config.kibana_index,
+        type: 'dashboard',
+        id: id
+      }).then(
         function(result) {
+          // Success
           return result;
         },
-        // Failure
         function() {
+          // Failure
           return false;
         }
       );
     };
 
     this.elasticsearch_list = function(query,count) {
-      var request = ejs.Request().indices(config.kibana_index).types('dashboard');
-      return request.query(
-        ejs.QueryStringQuery(query || '*')
-        ).size(count).doSearch(
+      var request = ejs.Request()
+        .query(ejs.QueryStringQuery(query || '*'))
+        .size(count);
+
+      return es.search({
+        index: config.kibana_index,
+        type: 'dashboard',
+        body: request
+      }).then(
+        function(result) {
           // Success
-          function(result) {
-            return result;
-          },
+          return result;
+        },
+        function() {
           // Failure
-          function() {
-            return false;
-          }
-        );
+          return false;
+        }
+      );
     };
 
     this.save_gist = function(title,dashboard) {

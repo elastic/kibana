@@ -35,7 +35,7 @@ function (angular, app, _, L, localRequire) {
   var module = angular.module('kibana.panels.bettermap', []);
   app.useModule(module);
 
-  module.controller('bettermap', function($scope, querySrv, dashboard, filterSrv) {
+  module.controller('bettermap', function($scope, es, querySrv, dashboard, filterSrv) {
     $scope.panelMeta = {
       editorTabs : [
         {
@@ -142,7 +142,7 @@ function (angular, app, _, L, localRequire) {
           boolQuery = boolQuery.should(querySrv.toEjsObj(q));
         });
 
-        var request = $scope.ejs.Request().indices(dashboard.indices[_segment])
+        var request = $scope.ejs.Request()
           .query($scope.ejs.FilteredQuery(
             boolQuery,
             filterSrv.getBoolFilter(filterSrv.ids).must($scope.ejs.ExistsFilter($scope.panel.field))
@@ -156,7 +156,10 @@ function (angular, app, _, L, localRequire) {
 
         $scope.populate_modal(request);
 
-        var results = request.doSearch();
+        var results = es.search({
+          index: dashboard.indices[_segment],
+          body: request
+        });
 
         // Populate scope when we have results
         results.then(function(results) {
@@ -201,7 +204,7 @@ function (angular, app, _, L, localRequire) {
     };
 
     $scope.populate_modal = function(request) {
-      $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
+      $scope.inspector = angular.toJson(request.toJSON(), true);
     };
 
   });

@@ -31,7 +31,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
   var module = angular.module('kibana.panels.sparklines', []);
   app.useModule(module);
 
-  module.controller('sparklines', function($scope, querySrv, dashboard, filterSrv) {
+  module.controller('sparklines', function($scope, es, querySrv, dashboard, filterSrv) {
     $scope.panelMeta = {
       modals : [
         {
@@ -163,7 +163,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
       _interval = $scope.get_interval(_range);
 
       $scope.panelMeta.loading = true;
-      request = $scope.ejs.Request().indices(dashboard.indices[segment]);
+      request = $scope.ejs.Request();
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
 
@@ -196,7 +196,10 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
       $scope.populate_modal(request);
 
       // Then run it
-      results = request.doSearch();
+      results = es.search({
+        index: dashboard.indices[segment],
+        body: request
+      });
 
       // Populate scope when we have results
       results.then(function(results) {
@@ -265,7 +268,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
 
     // I really don't like this function, too much dom manip. Break out into directive?
     $scope.populate_modal = function(request) {
-      $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
+      $scope.inspector = angular.toJson(request.toJSON(), true);
     };
 
     $scope.set_refresh = function (state) {

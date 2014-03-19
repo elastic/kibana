@@ -2,14 +2,15 @@ define([
   'angular',
   'lodash',
   'config',
-  'kbn'
+  'kbn',
+  'elasticjs'
 ],
-function (angular, _, config, kbn) {
+function (angular, _, config, kbn, ejs) {
   'use strict';
 
   var module = angular.module('kibana.services');
 
-  module.service('querySrv', function(dashboard, ejsResource, filterSrv, esVersion, $q) {
+  module.service('querySrv', function(dashboard, es, filterSrv, esVersion, $q) {
 
     // Save a reference to this
     var self = this;
@@ -30,9 +31,6 @@ function (angular, _, config, kbn) {
       "#3F6833","#967302","#2F575E","#99440A","#58140C","#052B51","#511749","#3F2B5B", //6
       "#E0F9D7","#FCEACA","#CFFAFF","#F9E2D2","#FCE2DE","#BADFF4","#F9D9F9","#DEDAF7"  //7
     ];
-
-    // For convenience
-    var ejs = ejsResource(config.elasticsearch);
 
     // Holds all actual queries, including all resolved abstract queries
     var resolvedQueries = [];
@@ -94,7 +92,7 @@ function (angular, _, config, kbn) {
             suffix = ' OR (' + (q.query||'*') + ')';
           }
 
-          var request = ejs.Request().indices(dashboard.indices);
+          var request = ejs.Request();
           // Terms mode
           request = request
             .facet(ejs.TermsFacet('query')
@@ -106,7 +104,11 @@ function (angular, _, config, kbn) {
                   filterSrv.getBoolFilter(filterSrv.ids)
                   )))).size(0);
 
-          var results = request.doSearch();
+          var results = es.search({
+            index: dashboard.indices,
+            body: request
+          });
+
           // Like the regex and lucene queries, this returns a promise
           return results.then(function(data) {
             var _colors = kbn.colorSteps(q.color,data.facets.query.terms.length);
