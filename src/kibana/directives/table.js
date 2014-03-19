@@ -3,6 +3,7 @@ define(function (require) {
   var _ = require('lodash');
   var nextTick = require('utils/next_tick');
   var $ = require('jquery');
+  var jsonpath = require('jsonpath');
 
   require('directives/truncated');
   require('directives/infinite_scroll');
@@ -313,21 +314,8 @@ define(function (require) {
         function _getValForField(row, field, untruncate) {
           var val;
 
-          // is field name a path?
-          if (~field.indexOf('.')) {
-            var path = field.split('.');
-            // only check source for "paths"
-            var current = row._source;
-            var step;
-            while (step = path.shift() && current) {
-              // walk from the _source to the specified by the path
-              current = current[step];
-            }
-            val = current;
-          } else {
-            // simple, with a fallback to row
-            val = row._source[field] || row[field];
-          }
+          // Fall back to the root if not found in _source
+          val = jsonPath.eval(row, '$._source.' + field)[0] || row[field];
 
           // undefined and null should just be an empty string
           val = (val == null) ? '' : val;

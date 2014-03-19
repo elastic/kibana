@@ -18,6 +18,7 @@ require.config({
     gridster: '../bower_components/gridster/dist/jquery.gridster',
     stacktrace: '../bower_components/stacktrace.js/stacktrace',
     modules: 'utils/modules',
+    jsonpath: '../bower_components/jsonpath/lib/jsonpath',
     K4D3: '../bower_components/K4D3/k4.d3',
     bower_components: '../bower_components'
   },
@@ -25,6 +26,9 @@ require.config({
     angular: {
       deps: ['jquery'],
       exports: 'angular'
+    },
+    jsonpath: {
+      exports: 'jsonPath'
     },
     gridster: ['jquery'],
     'angular-route': ['angular'],
