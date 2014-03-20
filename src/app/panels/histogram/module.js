@@ -387,6 +387,11 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
 
       // Populate scope when we have results
       return results.then(function(results) {
+
+        if (results.timed_out) {
+          $scope.panel.error = "Query timed out; only partial results being shown.  Reduce your query time range or complexity";
+        }
+
         $scope.panelMeta.loading = false;
         if(segment === 0) {
           $scope.legend = [];
