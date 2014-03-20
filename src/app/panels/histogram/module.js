@@ -387,6 +387,11 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
 
       // Populate scope when we have results
       return results.then(function(results) {
+
+        if (results.timed_out) {
+          $scope.panel.error = "Query timed out; only partial results being shown.  Reduce your query time range or complexity";
+        }
+
         $scope.panelMeta.loading = false;
         if(segment === 0) {
           $scope.legend = [];
@@ -403,10 +408,6 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
         // Make sure we're still on the same query/queries
         else if($scope.query_id === query_id) {
 
-          if (results.timed_out) {
-            $scope.panel.error = "Query timed out; only partial results being shown.  Reduce your query time range or complexity";
-          }
-        
           var i = 0,
             time_series,
             hits,
