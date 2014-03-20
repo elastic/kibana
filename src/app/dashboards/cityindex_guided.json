@@ -65,7 +65,7 @@
       "panels": [
         {
           "error": false,
-          "span": 6,
+          "span": 4,
           "editable": true,
           "group": [
             "default"
@@ -79,7 +79,7 @@
         },
         {
           "error": false,
-          "span": 5,
+          "span": 4,
           "editable": true,
           "group": [
             "default"
@@ -90,6 +90,17 @@
           "content": "See the *Filters* bar above? Click it to expand the filters panel. Right now there is just a time filter. \n\nTo add a new filter; click on one of the Environment or Levels to filter the query results",
           "style": {},
           "title": "About filters"
+        },
+        {
+          "error": false,
+          "span": 3,
+          "editable": true,
+          "type": "text",
+          "loadingEditor": false,
+          "mode": "markdown",
+          "content": "Use the text panel to add comments and links to other dashboards:\n\n* [New Blank Dashboard](/#/dashboard/file/cityindex_blank.json)\n\nCreate a link in Markdown using `[{description}](/#/dashboard/elasticsearch/{dashboard name})`",
+          "style": {},
+          "title": "Text with links"
         }
       ],
       "notice": false
@@ -177,7 +188,6 @@
           "title": "Histogram: Logs over time"
         },
         {
-          "error": false,
           "span": 3,
           "editable": true,
           "group": [
@@ -214,7 +224,6 @@
           "valuefield": ""
         },
         {
-          "error": false,
           "span": 2,
           "editable": true,
           "type": "terms",

@@ -36,7 +36,7 @@ function (Settings) {
      *
      * default_route: '/dashboard/elasticsearch/WebLogs',
      */
-    default_route     : '/dashboard/file/guided_cityindex.json',
+    default_route     : '/dashboard/file/cityindex_guided.json',
 
     /** @scratch /configuration/config.js/5
      *
