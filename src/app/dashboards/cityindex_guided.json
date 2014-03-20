@@ -1,5 +1,5 @@
 {
-  "title": "cityindex_dashboard_guide",
+  "title": "Dashboards explained",
   "services": {
     "query": {
       "list": {
@@ -57,7 +57,7 @@
   },
   "rows": [
     {
-      "title": "Options",
+      "title": "Help",
       "height": "50px",
       "editable": true,
       "collapse": false,
@@ -65,7 +65,7 @@
       "panels": [
         {
           "error": false,
-          "span": 4,
+          "span": 5,
           "editable": true,
           "group": [
             "default"
@@ -73,7 +73,7 @@
           "type": "text",
           "status": "Stable",
           "mode": "markdown",
-          "content": "Kibana dashboards show the results of queries against the logs shipped into the system.  You can do simple full text queries; or queries against specific log fields as shown above.\n\nThe panels below visualise the results of these queries.",
+          "content": "See the *Query* bar above?  Queries let you perform one or more log searches, making the data available to be visualised by other the panels on the page.\n\nYou can do simple full text queries; or queries against specific log fields as shown above.\n\nSee the panels below for examples on how you can visualise the query results.",
           "style": {},
           "title": "About queries"
         },
@@ -87,7 +87,7 @@
           "type": "text",
           "status": "Stable",
           "mode": "markdown",
-          "content": "See the *Filters* bar above? Click it to expand the filters panel. Right now there is just a time filter. \n\nTo add a new filter; click on one of the Environment or Levels to filter the query results",
+          "content": "See the *Filtering* bar above? Filters let you restrict the results of all the queries.\n\nTo add a new filter; click on an a bar or segment link in one of the panels below.",
           "style": {},
           "title": "About filters"
         },
@@ -95,25 +95,28 @@
           "error": false,
           "span": 3,
           "editable": true,
+          "group": [
+            "default"
+          ],
           "type": "text",
-          "loadingEditor": false,
+          "status": "Stable",
           "mode": "markdown",
-          "content": "Use the text panel to add comments and links to other dashboards:\n\n* [New Blank Dashboard](/#/dashboard/file/cityindex_blank.json)\n\nCreate a link in Markdown using `[{description}](/#/dashboard/elasticsearch/{dashboard name})`",
+          "content": "See the *Rows and Panels* below? Panels let you visualise the query results in different ways\n\n* [Kibana help - rows and panels](http://www.elasticsearch.org/guide/en/kibana/current/rows-and-panels.html)\n* [The Histogram & Table panels (video)](http://www.elasticsearch.org/blog/kibana-3-0-0-ga-now-available/) - _scroll down to the bottom_",
           "style": {},
-          "title": "Text with links"
+          "title": "About panels"
         }
       ],
       "notice": false
     },
     {
-      "title": "Graph",
+      "title": "Panels",
       "height": "250px",
       "editable": true,
       "collapse": false,
       "collapsable": true,
       "panels": [
         {
-          "span": 6,
+          "span": 7,
           "editable": true,
           "type": "histogram",
           "loadingEditor": false,
@@ -215,7 +218,7 @@
           "tilt": false,
           "labels": true,
           "arrangement": "vertical",
-          "chart": "table",
+          "chart": "bar",
           "counter_pos": "below",
           "title": "Terms: @environment",
           "spyable": true,
@@ -261,7 +264,7 @@
       "notice": false
     },
     {
-      "title": "Events",
+      "title": "Panels 2",
       "height": "650px",
       "editable": true,
       "collapse": false,
@@ -362,7 +365,7 @@
     },
     {
       "type": "filtering",
-      "collapse": true,
+      "collapse": false,
       "notice": false,
       "enable": true
     }
