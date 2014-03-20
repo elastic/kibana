@@ -1,0 +1,35 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath group: 'org.cloudfoundry', name: 'cf-gradle-plugin', version: '1.0.2'
+        classpath 'com.moowork.gradle:gradle-grunt-plugin:0.5'
+    }
+}
+
+apply plugin: 'cloudfoundry'
+apply plugin: 'grunt'
+
+// makes sure on each build that grunt is installed
+grunt_build.dependsOn 'installGrunt'
+
+// processes your package.json before running grunt build
+grunt_build.dependsOn 'npmInstall'
+
+node {
+    // Version of node to use.
+    version = '0.10.22'
+
+    // Enabled the automatic download. False is the default (for now).
+    download = true
+}
+
+task build(dependsOn: 'grunt_build') << {
+    println 'Building...'
+}
+
+task release(dependsOn: 'build') << {
+    println 'Releasing...'
+}
