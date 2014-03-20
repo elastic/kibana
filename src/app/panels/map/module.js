@@ -1,8 +1,10 @@
 /** @scratch /panels/5
+ *
  * include::panels/map.asciidoc[]
  */
 
 /** @scratch /panels/map/0
+ *
  * == Map
  * Status: *Stable*
  *
@@ -46,6 +48,7 @@ function (angular, app, _, $) {
     // Set and populate defaults
     var _d = {
       /** @scratch /panels/map/3
+       *
        * === Parameters
        *
        * map:: Map to display. world, usa, europe
@@ -69,6 +72,7 @@ function (angular, app, _, $) {
        */
       spyable : true,
       /** @scratch /panels/map/5
+       *
        * ==== Queries
        * queries object:: This object describes the queries to use on this panel.
        * queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
@@ -142,7 +146,7 @@ function (angular, app, _, $) {
     };
 
     $scope.build_search = function(field,value) {
-      filterSrv.set({type:'querystring',mandate:'must',query:field+":"+value});
+      filterSrv.set({type:'terms',field:field,value:value,mandate:"must"});
     };
 
   });
@@ -166,7 +170,7 @@ function (angular, app, _, $) {
         });
 
         function render_panel() {
-          elem.css({height:scope.panel.height||scope.row.height});
+          elem.css({height:scope.row.height});
 
           elem.text('');
 

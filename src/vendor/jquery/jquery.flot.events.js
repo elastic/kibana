@@ -324,17 +324,23 @@
 
             div = $('<i style="position:absolute" class="'+icon.icon+'"></i>').appendTo(container);
 
-            top = o.top + plot.height() - icon.size + 1;
-            left = xaxis.p2c(event.min) + o.left - icon.size / 2;
+            var width = icon.size || icon.width;
+            var height = icon.size || icon.height;
+
+            top = o.top + plot.height() - height + 1;
+            left = xaxis.p2c(event.min) + o.left - width / 2;
 
             // Positions the marker
-            div.css({
+            var cssOptions = {
                 left: left + 'px',
-                top: top,
-                color: icon.color,
-                "text-shadow" : "1px 1px "+icon.outline+", -1px -1px "+icon.outline+", -1px 1px "+icon.outline+", 1px -1px "+icon.outline,
-                'font-size': icon['size']+'px',
-            });
+                top: top
+            };
+
+            if (icon.outline) cssOptions['text-shadow'] = "1px 1px "+icon.outline+", -1px -1px "+icon.outline+", -1px 1px "+icon.outline+", 1px -1px "+icon.outline;
+            if (icon.size) cssOptions['font-size'] = icon['size']+'px';
+            if (icon.color) cssOptions.color = icon.color;
+
+            div.css(cssOptions);
             div.hide();
             div.data({
                 "event": event
