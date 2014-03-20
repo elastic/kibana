@@ -1,38 +1,24 @@
+
 == Goal
 Status: *Stable*
 
 The goal panel display progress towards a fixed goal on a pie chart
 
-// src/app/panels/goal/module.js:5
 
 === Parameters
 donut:: Draw a hole in the middle of the pie, creating a tasty donut.
-// src/app/panels/goal/module.js:46
-
 tilt:: Tilt the pie back into an oval shape
-// src/app/panels/goal/module.js:51
-
 legend:: The location of the legend, above, below or none
-// src/app/panels/goal/module.js:55
-
 labels:: Set to false to disable drawing labels inside the pie slices
-// src/app/panels/goal/module.js:59
-
 spyable:: Set to false to disable the inspect function.
-// src/app/panels/goal/module.js:63
 
 ==== Query
 
-query object:: This confusingly named object has properties to set the terms mode field,
-and the fixed goal for the goal mode
-query.field::: the field to facet on in terms mode
+query object::
 query.goal::: the fixed goal for goal mode
-// src/app/panels/goal/module.js:67
 
 ==== Queries
 
 queries object:: This object describes the queries to use on this panel.
 queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
 queries.ids::: In +selected+ mode, which query ids are selected.
-// src/app/panels/goal/module.js:76
-

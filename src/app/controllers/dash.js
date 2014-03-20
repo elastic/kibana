@@ -1,22 +1,3 @@
-/** @scratch /index/0
- * = Kibana
- *
- * // Why can't I have a preamble here?
- *
- * == Introduction
- *
- * Kibana is an open source (Apache Licensed), browser based analytics and search dashboard for
- * ElasticSearch. Kibana is a snap to setup and start using. Written entirely in HTML and Javascript
- * it requires only a plain webserver, Kibana requires no fancy server side components.
- * Kibana strives to be easy to get started with, while also being flexible and powerful, just like
- * Elasticsearch.
- *
- * include::configuration/config.js.asciidoc[]
- *
- * include::panels.asciidoc[]
- *
- */
-
 define([
   'angular',
   'config',
@@ -30,6 +11,8 @@ function (angular, config, _) {
 
   module.controller('DashCtrl', function(
     $scope, $route, ejsResource, fields, dashboard, alertSrv, panelMove, esVersion, kbnVersion) {
+
+    $scope.Math = Math;
 
     $scope.editor = {
       index: 0

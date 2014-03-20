@@ -1,8 +1,10 @@
 /** @scratch /panels/5
+ *
  * include::panels/terms.asciidoc[]
  */
 
 /** @scratch /panels/terms/0
+ *
  * == terms
  * Status: *Stable*
  *
@@ -109,6 +111,7 @@ function (angular, app, _, $, kbn) {
        */
       spyable     : true,
       /** @scratch /panels/terms/5
+       *
        * ==== Queries
        * queries object:: This object describes the queries to use on this panel.
        * queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
@@ -318,7 +321,7 @@ function (angular, app, _, $, kbn) {
           build_results();
 
           // IE doesn't work without this
-          elem.css({height:scope.panel.height||scope.row.height});
+          elem.css({height:scope.row.height});
 
           // Make a clone we can operate on.
           chartData = _.clone(scope.data);
@@ -344,8 +347,8 @@ function (angular, app, _, $, kbn) {
                   xaxis: { show: false },
                   grid: {
                     borderWidth: 0,
-                    borderColor: '#eee',
-                    color: "#eee",
+                    borderColor: '#c8c8c8',
+                    color: "#c8c8c8",
                     hoverable: true,
                     clickable: true
                   },
@@ -383,7 +386,7 @@ function (angular, app, _, $, kbn) {
                     }
                   },
                   //grid: { hoverable: true, clickable: true },
-                  grid:   { hoverable: true, clickable: true },
+                  grid:   { hoverable: true, clickable: true, color: '#c8c8c8' },
                   colors: querySrv.colors
                 });
               }
