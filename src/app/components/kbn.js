@@ -1,4 +1,9 @@
-define(['jquery', 'underscore','moment'],
+define([
+  'jquery',
+  'lodash',
+  'moment',
+  'chromath'
+],
 function($, _, moment) {
   'use strict';
 
@@ -13,15 +18,10 @@ function($, _, moment) {
     return field_array.sort();
   };
 
-  kbn.get_all_fields = function(data) {
-    var _d = data;
-    var fields = [];
-    _.each(_d,function(hit) {
-      fields = _.uniq(fields.concat(_.keys(kbn.flatten_json(hit._source))));
-    });
-    // Remove stupid angular key
-    fields = _.without(fields,'$$hashKey');
-    return fields;
+  kbn.get_all_fields = function(data,flat) {
+    return _.uniq(_.without(_.reduce(data,function(memo,hit) {
+      return flat ? memo.concat(_.keys(kbn.flatten_json(hit._source))) : memo.concat(_.keys(hit._source));
+    },[]),'$$hashkey'));
   };
 
   kbn.has_field = function(obj,field) {
@@ -223,24 +223,24 @@ function($, _, moment) {
   kbn.describe_interval = function (string) {
     var matches = string.match(kbn.interval_regex);
     if (!matches || !_.has(kbn.intervals_in_seconds, matches[2])) {
-      throw new Error('Invalid interval string, expexcting a number followed by one of "Mwdhmsy"');
+      throw new Error('Invalid interval string, expecting a number followed by one of "Mwdhmsy"');
     } else {
       return {
         sec: kbn.intervals_in_seconds[matches[2]],
         type: matches[2],
-        count: parseInt(matches[1], 10)
+        count: parseFloat(matches[1])
       };
     }
   };
 
   kbn.interval_to_ms = function(string) {
     var info = kbn.describe_interval(string);
-    return info.sec * 1000 * info.count;
+    return Math.ceil(info.sec * 1000 * info.count);
   };
 
   kbn.interval_to_seconds = function (string) {
     var info = kbn.describe_interval(string);
-    return info.sec * info.count;
+    return Math.ceil(info.sec * info.count);
   };
 
   // This should go away, moment.js can do this
@@ -316,6 +316,15 @@ function($, _, moment) {
       }
       unit = mathString.charAt(i++);
       switch (unit) {
+      case 'y':
+        if (type === 0) {
+          roundUp ? dateTime.endOf('year') : dateTime.startOf('year');
+        } else if (type === 1) {
+          dateTime.add('years',num);
+        } else if (type === 2) {
+          dateTime.subtract('years',num);
+        }
+        break;
       case 'M':
         if (type === 0) {
           roundUp ? dateTime.endOf('month') : dateTime.startOf('month');
@@ -457,6 +466,166 @@ function($, _, moment) {
         'color:' + color,
         'font-size:' + diameter + 'px',
       ].join(';') + '"></div>';
+  };
+
+  kbn.colorSteps = function(col,steps) {
+
+    var _d = steps > 5 ? 1.6/steps : 0.25, // distance between steps
+      _p = []; // adjustment percentage
+
+    // Create a range of numbers between -0.8 and 0.8
+    for(var i = 1; i<steps+1; i+=1) {
+      _p.push(i%2 ? ((i-1)*_d*-1)/2 : i*_d/2);
+    }
+
+    // Create the color range
+    return _.map(_p.sort(function(a,b){return a-b;}),function(v) {
+      return v<0 ? Chromath.darken(col,v*-1).toString() : Chromath.lighten(col,v).toString();
+    });
+  };
+
+  // Find the smallest missing number in an array
+  kbn.smallestMissing = function(arr,start,end) {
+    start = start || 0;
+    end = end || arr.length-1;
+
+    if(start > end) {
+      return end + 1;
+    }
+    if(start !== arr[start]) {
+      return start;
+    }
+    var middle = Math.floor((start + end) / 2);
+
+    if (arr[middle] > middle) {
+      return kbn.smallestMissing(arr, start, middle);
+    } else {
+      return kbn.smallestMissing(arr, middle + 1, end);
+    }
+  };
+
+  kbn.byteFormat = function (size, decimals, min_resolution) {
+    var ext, steps = 0;
+
+    if (_.isUndefined(decimals)) {
+      decimals = 2;
+    }
+
+    if (_.isUndefined(min_resolution)) {
+      min_resolution = 0;
+    }
+
+
+    while (Math.abs(size) >= 1024) {
+      steps++;
+      size /= 1024;
+      min_resolution /= 1024;
+    }
+
+    switch (steps) {
+    case 0:
+      ext = " B";
+      break;
+    case 1:
+      ext = " KB";
+      break;
+    case 2:
+      ext = " MB";
+      break;
+    case 3:
+      ext = " GB";
+      break;
+    case 4:
+      ext = " TB";
+      break;
+    case 5:
+      ext = " PB";
+      break;
+    case 6:
+      ext = " EB";
+      break;
+    case 7:
+      ext = " ZB";
+      break;
+    case 8:
+      ext = " YB";
+      break;
+    }
+
+    if (min_resolution) {
+      min_resolution *= Math.pow(10, decimals);
+      while (min_resolution % 1 !== 0) {
+        decimals++;
+        min_resolution *= 10;
+      }
+    }
+
+    if (decimals === 0) {
+      decimals = undefined;
+    }
+
+    return (size.toFixed(decimals) + ext);
+  };
+
+  kbn.shortFormat = function (size, decimals, min_resolution) {
+    var ext, steps = 0;
+
+    if (_.isUndefined(decimals)) {
+      decimals = 2;
+    }
+    if (_.isUndefined(min_resolution)) {
+      min_resolution = 0;
+    }
+
+    while (Math.abs(size) >= 1000) {
+      steps++;
+      size /= 1000;
+      min_resolution /= 1000;
+    }
+
+    switch (steps) {
+    case 0:
+      ext = "";
+      break;
+    case 1:
+      ext = " K";
+      break;
+    case 2:
+      ext = " Mil";
+      break;
+    case 3:
+      ext = " Bil";
+      break;
+    case 4:
+      ext = " Tri";
+      break;
+    case 5:
+      ext = " Quadr";
+      break;
+    case 6:
+      ext = " Quint";
+      break;
+    case 7:
+      ext = " Sext";
+      break;
+    case 8:
+      ext = " Sept";
+      break;
+    }
+
+    if (min_resolution) {
+      min_resolution *= Math.pow(10, decimals);
+      while (min_resolution % 1 !== 0) {
+        decimals++;
+        min_resolution *= 10;
+      }
+    }
+
+    if (decimals === 0) {
+      decimals = undefined;
+    }
+
+    return (size.toFixed(decimals) + ext);
   };
 
   return kbn;

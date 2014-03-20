@@ -1,14 +1,20 @@
-/*
-  ## Text
-  ### Parameters
-  * mode :: 'text', 'html', 'markdown'
-  * content :: Content of the panel
-  * style :: Hash containing css properties
-*/
+/** @scratch /panels/5
+ *
+ * include::panels/text.asciidoc[]
+ */
+
+/** @scratch /panels/text/0
+ * == text
+ * Status: *Stable*
+ *
+ * The text panel is used for displaying static text formated as markdown, sanitized html or as plain
+ * text.
+ *
+ */
 define([
   'angular',
   'app',
-  'underscore',
+  'lodash',
   'require'
 ],
 function (angular, app, _, require) {
@@ -25,8 +31,16 @@ function (angular, app, _, require) {
 
     // Set and populate defaults
     var _d = {
-      status  : "Stable",
-      mode    : "markdown",
+      /** @scratch /panels/text/5
+       *
+       * === Parameters
+       *
+       * mode:: `html', `markdown' or `text'
+       */
+      mode    : "markdown", // 'html','markdown','text'
+      /** @scratch /panels/text/5
+       * content:: The content of your panel, written in the mark up specified in +mode+
+       */
       content : "",
       style: {},
     };

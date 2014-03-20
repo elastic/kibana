@@ -1,15 +1,22 @@
-/*
+/** @scratch /panels/5
+ *
+ * include::panels/column.asciidoc[]
+ */
 
-  ## Column
-
-  ### Parameters
-  * panels :: an array of panel objects. All of their spans should be set to 12
-
-*/
+/** @scratch /panels/column/0
+ *
+ * == Column
+ * Status: *Stable*
+ *
+ * A pseudo panel that lets you add other panels to be arranged in a column with defined heights.
+ * While the column panel is stable, it does have many limitations, including the inability to drag
+ * and drop panels within its borders. It may be removed in a future release.
+ *
+ */
 define([
   'angular',
   'app',
-  'underscore',
+  'lodash',
   'config'
 ],
 function (angular, app, _, config) {
@@ -28,6 +35,12 @@ function (angular, app, _, config) {
 
     // Set and populate defaults
     var _d = {
+      /** @scratch /panels/column/3
+       *
+       * === Parameters
+       *
+       * panel:: An array of panel objects
+       */
       panels : []
     };
     _.defaults($scope.panel,_d);
@@ -49,8 +62,8 @@ function (angular, app, _, config) {
       $scope.$broadcast('render');
     };
 
-    $scope.add_panel = function(panel) {
-      $scope.panel.panels.push(panel);
+    $scope.add_panel = function(panel,newPanel) {
+      panel.panels.push(newPanel);
     };
 
     $scope.reset_panel = function(type) {
@@ -58,11 +71,12 @@ function (angular, app, _, config) {
         loading: false,
         error: false,
         sizeable: false,
-        span: 12,
+        draggable: false,
+        removable: false,
+        span: 10,
         height: "150px",
         editable: true,
-        type: type,
-        draggable: false
+        type: type
       };
     };
 

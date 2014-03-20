@@ -1,0 +1,33 @@
+
+== terms
+Status: *Stable*
+
+A table, bar chart or pie chart based on the results of an Elasticsearch terms facet.
+
+=== Parameters
+
+field:: The field on which to computer the facet
+exclude:: terms to exclude from the results
+missing:: Set to false to disable the display of a counter showing how much results are
+missing the field
+other:: Set to false to disable the display of a counter representing the aggregate of all
+values outside of the scope of your +size+ property
+size:: Show this many terms
+order:: In terms mode: count, term, reverse_count or reverse_term,
+in terms_stats mode: term, reverse_term, count, reverse_count,
+total, reverse_total, min, reverse_min, max, reverse_max, mean or reverse_mean
+donut:: In pie chart mode, draw a hole in the middle of the pie to make a tasty donut.
+tilt:: In pie chart mode, tilt the chart back to appear as more of an oval shape
+lables:: In pie chart mode, draw labels in the pie slices
+arrangement:: In bar or pie mode, arrangement of the legend. horizontal or vertical
+chart:: table, bar or pie
+counter_pos:: The location of the legend in respect to the chart, above or below.
+spyable:: Set spyable to false to disable the inspect button
+
+==== Queries
+queries object:: This object describes the queries to use on this panel.
+queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
+queries.ids::: In +selected+ mode, which query ids are selected.
+tmode:: Facet mode: terms or terms_stats
+tstat:: Terms_stats facet stats field
+valuefield:: Terms_stats facet value field

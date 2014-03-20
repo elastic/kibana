@@ -1,23 +1,21 @@
-/*
+/** @scratch /panels/5
+ *
+ * include::panels/map.asciidoc[]
+ */
 
-  ## Map
-
-  ### Parameters
-  * map :: 'world', 'us' or 'europe'
-  * colors :: an array of colors to use for the regions of the map. If this is a 2
-              element array, jquerymap will generate shades between these colors
-  * size :: How big to make the facet. Higher = more countries
-  * exclude :: Exlude the array of counties
-  * spyable :: Show the 'eye' icon that reveals the last ES query
-  * index_limit :: This does nothing yet. Eventually will limit the query to the first
-                   N indices
-
-*/
-
+/** @scratch /panels/map/0
+ *
+ * == Map
+ * Status: *Stable*
+ *
+ * The map panel translates 2 letter country or state codes into shaded regions on a map. Currently
+ * available maps are world, usa and europe.
+ *
+ */
 define([
   'angular',
   'app',
-  'underscore',
+  'lodash',
   'jquery',
   'config',
   './lib/jquery.jvectormap.min'
@@ -49,16 +47,41 @@ function (angular, app, _, $) {
 
     // Set and populate defaults
     var _d = {
+      /** @scratch /panels/map/3
+       *
+       * === Parameters
+       *
+       * map:: Map to display. world, usa, europe
+       */
+      map     : "world",
+      /** @scratch /panels/map/3
+       * colors:: An array of colors to use to shade the map. If 2 colors are specified, shades
+       * between them will be used. For example [`#A0E2E2', `#265656']
+       */
+      colors  : ['#A0E2E2', '#265656'],
+      /** @scratch /panels/map/3
+       * size:: Max number of regions to shade
+       */
+      size    : 100,
+      /** @scratch /panels/map/3
+       * exclude:: exclude this array of regions. For example [`US',`BR',`IN']
+       */
+      exclude : [],
+      /** @scratch /panels/map/3
+       * spyable:: Setting spyable to false disables the inspect icon.
+       */
+      spyable : true,
+      /** @scratch /panels/map/5
+       *
+       * ==== Queries
+       * queries object:: This object describes the queries to use on this panel.
+       * queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
+       * queries.ids::: In +selected+ mode, which query ids are selected.
+       */
       queries     : {
         mode        : 'all',
         ids         : []
-      },
-      map     : "world",
-      colors  : ['#A0E2E2', '#265656'],
-      size    : 100,
-      exclude : [],
-      spyable : true,
-      index_limit : 0
+      }
     };
     _.defaults($scope.panel,_d);
 
@@ -76,14 +99,17 @@ function (angular, app, _, $) {
       $scope.panelMeta.loading = true;
 
 
-      var request;
-      request = $scope.ejs.Request().indices(dashboard.indices);
+      var request,
+        boolQuery,
+        queries;
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
-      // This could probably be changed to a BoolFilter
-      var boolQuery = $scope.ejs.BoolQuery();
-      _.each($scope.panel.queries.ids,function(id) {
-        boolQuery = boolQuery.should(querySrv.getEjsObj(id));
+      request = $scope.ejs.Request().indices(dashboard.indices);
+      queries = querySrv.getQueryObjs($scope.panel.queries.ids);
+
+      boolQuery = $scope.ejs.BoolQuery();
+      _.each(queries,function(q) {
+        boolQuery = boolQuery.should(querySrv.toEjsObj(q));
       });
 
       // Then the insert into facet and make the request
@@ -120,7 +146,7 @@ function (angular, app, _, $) {
     };
 
     $scope.build_search = function(field,value) {
-      filterSrv.set({type:'querystring',mandate:'must',query:field+":"+value});
+      filterSrv.set({type:'terms',field:field,value:value,mandate:"must"});
     };
 
   });
@@ -144,7 +170,10 @@ function (angular, app, _, $) {
         });
 
         function render_panel() {
+          elem.css({height:scope.row.height});
+
           elem.text('');
+
           $('.jvectormap-zoomin,.jvectormap-zoomout,.jvectormap-label').remove();
           require(['./panels/map/lib/map.'+scope.panel.map], function () {
             elem.vectorMap({
@@ -175,6 +204,7 @@ function (angular, app, _, $) {
               }
             });
             elem.prepend('<span class="map-legend"></span>');
+
             $('.map-legend').hide();
           });
         }

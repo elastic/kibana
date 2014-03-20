@@ -1,17 +1,27 @@
-/*
+/** @scratch /panels/5
+ *
+ * include::panels/bettermap.asciidoc[]
+ */
 
-  ## Better maps
-
-  ### Parameters
-  * size :: How many results to show, more results = slower
-  * field :: field containing a 2 element array in the format [lon,lat]
-  * tooltip :: field to extract the tool tip value from
-  * spyable :: Show the 'eye' icon that reveals the last ES query
-*/
+/** @scratch /panels/bettermap/0
+ *
+ * == Bettermap
+ * Status: *Experimental*
+ *
+ * Bettermap is called bettermap for lack of a better name. Bettermap uses geographic coordinates to
+ * create clusters of markers on map and shade them orange, yellow and green depending on the
+ * density of the cluster.
+ *
+ * To drill down, click on a cluster. The map will be zoomed and the cluster broken into smaller cluster.
+ * When it no longer makes visual sense to cluster, individual markers will be displayed. Hover over
+ * a marker to see the tooltip value/
+ *
+ * IMPORTANT: bettermap requires an internet connection to download its map panels.
+ */
 define([
   'angular',
   'app',
-  'underscore',
+  'lodash',
   './leaflet/leaflet-src',
   'require',
 
@@ -51,21 +61,45 @@ function (angular, app, _, L, localRequire) {
 
     // Set and populate defaults
     var _d = {
+      /** @scratch /panels/bettermap/3
+       *
+       * === Parameters
+       *
+       * field:: The field that contains the coordinates, in geojson format. GeoJSON is
+       * +[longitude,latitude]+ in an array. This is different from most implementations, which use
+       * latitude, longitude.
+       */
+      field   : null,
+      /** @scratch /panels/bettermap/5
+       * size:: The number of documents to use when drawing the map
+       */
+      size    : 1000,
+      /** @scratch /panels/bettermap/5
+       * spyable:: Should the `inspect` icon be shown?
+       */
+      spyable : true,
+      /** @scratch /panels/bettermap/5
+       * tooltip:: Which field to use for the tooltip when hovering over a marker
+       */
+      tooltip : "_id",
+      /** @scratch /panels/bettermap/5
+       *
+       * ==== Queries
+       * queries object:: This object describes the queries to use on this panel.
+       * queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
+       * queries.ids::: In +selected+ mode, which query ids are selected.
+       */
       queries     : {
         mode        : 'all',
         ids         : []
       },
-      size    : 1000,
-      spyable : true,
-      tooltip : "_id",
-      field   : null
     };
 
     _.defaults($scope.panel,_d);
-    $scope.requireContext = localRequire;
 
     // inorder to use relative paths in require calls, require needs a context to run. Without
     // setting this property the paths would be relative to the app not this context/file.
+    $scope.requireContext = localRequire;
 
     $scope.init = function() {
       $scope.$on('refresh',function(){
@@ -101,10 +135,11 @@ function (angular, app, _, L, localRequire) {
         var _segment = _.isUndefined(segment) ? 0 : segment;
 
         $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
-        // This could probably be changed to a BoolFilter
+        var queries = querySrv.getQueryObjs($scope.panel.queries.ids);
+
         var boolQuery = $scope.ejs.BoolQuery();
-        _.each($scope.panel.queries.ids,function(id) {
-          boolQuery = boolQuery.should(querySrv.getEjsObj(id));
+        _.each(queries,function(q) {
+          boolQuery = boolQuery.should(querySrv.toEjsObj(q));
         });
 
         var request = $scope.ejs.Request().indices(dashboard.indices[_segment])
@@ -174,8 +209,7 @@ function (angular, app, _, L, localRequire) {
   module.directive('bettermap', function() {
     return {
       restrict: 'A',
-      link: function(scope, elem, attrs) {
-
+      link: function(scope, elem) {
         elem.html('<center><img src="img/load_big.gif"></center>');
 
         // Receive render events
@@ -193,17 +227,22 @@ function (angular, app, _, L, localRequire) {
         var map, layerGroup;
 
         function render_panel() {
+          elem.css({height:scope.row.height});
+
           scope.require(['./leaflet/plugins'], function () {
             scope.panelMeta.loading = false;
             L.Icon.Default.imagePath = 'app/panels/bettermap/leaflet/images';
             if(_.isUndefined(map)) {
-              map = L.map(attrs.id, {
+              map = L.map(scope.$id, {
                 scrollWheelZoom: false,
                 center: [40, -86],
                 zoom: 10
               });
 
-              L.tileLayer('http://{s}.tile.cloudmade.com/57cbb6ca8cac418dbb1a402586df4528/22677/256/{z}/{x}/{y}.png', {
+              // This could be made configurable?
+              L.tileLayer('http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg', {
+                attribution: '"Data, imagery and map information provided by MapQuest, '+
+                  'OpenStreetMap <http://www.openstreetmap.org/copyright> and contributors, ODbL',
                 maxZoom: 18,
                 minZoom: 2
               }).addTo(map);
@@ -212,13 +251,17 @@ function (angular, app, _, L, localRequire) {
               layerGroup.clearLayers();
             }
 
+            var markerList = [];
+
             _.each(scope.data, function(p) {
               if(!_.isUndefined(p.tooltip) && p.tooltip !== '') {
-                layerGroup.addLayer(L.marker(p.coordinates).bindLabel(p.tooltip));
+                markerList.push(L.marker(p.coordinates).bindLabel(p.tooltip));
               } else {
-                layerGroup.addLayer(L.marker(p.coordinates));
+                markerList.push(L.marker(p.coordinates));
               }
             });
+
+            layerGroup.addLayers(markerList);
 
             layerGroup.addTo(map);
 

@@ -1,0 +1,30 @@
+  <div class="editor-row">
+
+    <div class="section">
+      <h5>Parameters</h5>
+      <div class="editor-option">
+        <form style="margin-bottom: 0px">
+          <label class="small">Goal</label>
+          <input type="number" style="width:90%" ng-model="panel.query.goal" ng-change="set_refresh(true)">
+        </form>
+      </div>
+    </div>
+
+    <div class="section">
+      <h5>View Options</h5>
+      <div class="editor-option">
+        <label class="small"> Donut </label><input type="checkbox" ng-model="panel.donut" ng-checked="panel.donut">
+      </div>
+      <div class="editor-option">
+        <label class="small"> Tilt </label><input type="checkbox" ng-model="panel.tilt" ng-checked="panel.tilt">
+      </div>
+      <div class="editor-option">
+        <label class="small"> Labels </label><input type="checkbox" ng-model="panel.labels" ng-checked="panel.labels">
+      </div>
+      <div class="editor-option">
+        <label class="small">Legend</label>
+        <select class="input-small" ng-model="panel.legend" ng-options="f for f in ['above','below','none']"></select></span>
+      </div>
+    </div>
+
+  </div>

@@ -1,0 +1,21 @@
+
+== Map
+Status: *Stable*
+
+The map panel translates 2 letter country or state codes into shaded regions on a map. Currently
+available maps are world, usa and europe.
+
+
+=== Parameters
+
+map:: Map to display. world, usa, europe
+colors:: An array of colors to use to shade the map. If 2 colors are specified, shades
+between them will be used. For example [`#A0E2E2', `#265656']
+size:: Max number of regions to shade
+exclude:: exclude this array of regions. For example [`US',`BR',`IN']
+spyable:: Setting spyable to false disables the inspect icon.
+
+==== Queries
+queries object:: This object describes the queries to use on this panel.
+queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
+queries.ids::: In +selected+ mode, which query ids are selected.

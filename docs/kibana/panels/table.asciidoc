@@ -1,0 +1,35 @@
+
+== table
+Status: *Stable*
+
+The table panel contains a sortable, pagable view of documents that. It can be arranged into
+defined columns and offers several interactions, such as performing adhoc terms aggregations.
+
+=== Parameters
+
+size:: The number of hits to show per page
+pages:: The number of pages available
+offset:: The current page
+sort:: An array describing the sort order of the table. For example [`@timestamp',`desc']
+overflow:: The css overflow property. `min-height' (expand) or `auto' (scroll)
+fields:: the fields used a columns of the table, in an array.
+highlight:: The fields on which to highlight, in an array
+sortable:: Set sortable to false to disable sorting
+header:: Set to false to hide the table column names
+paging:: Set to false to hide the paging controls of the table
+field_list:: Set to false to hide the list of fields. The user will be able to expand it,
+but it will be hidden by default
+all_fields:: Set to true to show all fields in the mapping, not just the current fields in
+the table.
+trimFactor:: The trim factor is the length at which to truncate fields takinging into
+consideration the number of columns in the table. For example, a trimFactor of 100, with 5
+columns in the table, would trim each column at 20 character. The entirety of the field is
+still available in the expanded view of the event.
+localTime:: Set to true to adjust the timeField to the browser's local time
+timeField:: If localTime is set to true, this field will be adjusted to the browsers local time
+spyable:: Set to false to disable the inspect icon
+
+==== Queries
+queries object:: This object describes the queries to use on this panel.
+queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
+queries.ids::: In +selected+ mode, which query ids are selected.

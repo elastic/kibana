@@ -1,6 +1,6 @@
 define([
   'angular',
-  'underscore',
+  'lodash',
   'config'
 ],
 function (angular, _, config) {
@@ -8,47 +8,55 @@ function (angular, _, config) {
 
   var module = angular.module('kibana.services');
 
-  module.service('esVersion', function($http, alertSrv) {
+  module.service('esVersion', function($http, alertSrv, esMinVersion, $q) {
 
     this.versions = [];
 
     // save a reference to this
-    var self = this;
+    var self = this,
+      defer = $q.defer();
 
     this.init = function() {
       getVersions();
     };
 
     var getVersions = function() {
-      var nodeInfo = $http({
-        url: config.elasticsearch + '/_nodes',
-        method: "GET"
-      }).error(function(data, status) {
-        if(status === 0) {
-          alertSrv.set('Error',"Could not contact Elasticsearch at "+config.elasticsearch+
-            ". Please ensure that Elasticsearch is reachable from your system." ,'error');
-        } else {
-          alertSrv.set('Error',"Could not reach "+config.elasticsearch+"/_nodes. If you"+
-          " are using a proxy, ensure it is configured correctly",'error');
-        }
-      });
-
-      return nodeInfo.then(function(p) {
-        _.each(p.data.nodes, function(v) {
-          self.versions.push(v.version.split('-')[0]);
+      if(self.versions.length !== 0) {
+        defer.resolve(self.versions);
+        return defer.promise;
+      } else {
+        var nodeInfo = $http({
+          url: config.elasticsearch + '/_nodes',
+          method: "GET",
+        }).error(function(data, status) {
+          if(status === 0) {
+            alertSrv.set('Error',"Could not contact Elasticsearch at "+config.elasticsearch+
+              ". Please ensure that Elasticsearch is reachable from your system." ,'error');
+          } else {
+            alertSrv.set('Error',"Could not reach "+config.elasticsearch+"/_nodes. If you"+
+            " are using a proxy, ensure it is configured correctly",'error');
+          }
         });
-        self.versions = sortVersions(_.uniq(self.versions));
-      });
+
+        return nodeInfo.then(function(p) {
+          _.each(p.data.nodes, function(v) {
+            self.versions.push(v.version.split('-')[0]);
+          });
+          self.versions = sortVersions(_.uniq(self.versions));
+          return self.versions;
+        });
+      }
+
     };
 
     // Get the max version in this cluster
-    this.max = function() {
-      return _.last(self.versions);
+    this.max = function(versions) {
+      return _.last(versions);
     };
 
     // Return the lowest version in the cluster
-    this.min = function() {
-      return _.first(self.versions);
+    this.min = function(versions) {
+      return _.first(versions);
     };
 
     // Sort versions from lowest to highest
@@ -90,29 +98,47 @@ function (angular, _, config) {
       return _cf;
     };
 
+    this.isMinimum = function() {
+      return self.gte(esMinVersion);
+    };
+
     // check if lowest version in cluster = `version`
     this.eq = function(version) {
-      return version === self.min() ? true : false;
+      return getVersions().then(function(v) {
+        return version === self.min(v) ? true : false;
+      });
+
     };
 
     // version > lowest version in cluster?
     this.gt = function(version) {
-      return version === self.min() ? false : self.gte(version);
+      return getVersions().then(function(v) {
+        return version === self.min(v) ? false : self.gte(version);
+      });
+
     };
 
     // version < highest version in cluster?
     this.lt = function(version) {
-      return version === self.max() ? false : self.lte(version);
+      return getVersions().then(function(v) {
+        return version === self.max(v) ? false : self.lte(version);
+      });
+
     };
 
     // Check if the lowest version in the cluster is >= to `version`
     this.gte = function(version) {
-      return self.compare(version,self.min());
+      return getVersions().then(function(v) {
+        return self.compare(version,self.min(v));
+      });
+
     };
 
     // Check if the highest version in the cluster is <= to `version`
     this.lte = function(version) {
-      return self.compare(self.max(),version);
+      return getVersions().then(function(v) {
+        return self.compare(self.max(v),version);
+      });
     };
 
     // Determine if a specific version is greater than or equal to another
@@ -121,10 +147,11 @@ function (angular, _, config) {
       var b = required.split('.');
       var i;
 
-      for (i = 0; i < a.length; ++i) {
+      // leave suffixes as is ("RC1 or -SNAPSHOT")
+      for (i = 0; i < Math.min(a.length, 3); ++i) {
         a[i] = Number(a[i]);
       }
-      for (i = 0; i < b.length; ++i) {
+      for (i = 0; i < Math.min(b.length, 3); ++i) {
         b[i] = Number(b[i]);
       }
       if (a.length === 2) {
@@ -139,6 +166,18 @@ function (angular, _, config) {
 
       if (a[2] > b[2]){return true;}
       if (a[2] < b[2]){return false;}
+
+      if (a.length > 3) {
+        // rc/beta suffix
+        if (b.length <= 3) {
+          return false;
+        } // no suffix on b -> a<b
+        return a[3] >= b[3];
+      }
+      if (b.length > 3) {
+        // b has a suffix but a not -> a>b
+        return true;
+      }
 
       return true;
     };

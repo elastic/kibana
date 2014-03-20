@@ -1,4 +1,8 @@
 <div ng-controller='terms' ng-init="init()">
+  <style>
+    .pieLabel { pointer-events: none }
+  </style>
+
   <!-- START Pie or bar chart -->
   <div ng-show="panel.counter_pos == 'above' && (panel.chart == 'bar' || panel.chart == 'pie')" id='{{$id}}-legend'>
     <!-- vertical legend above -->
@@ -9,9 +13,13 @@
     </table>
 
     <!-- horizontal legend above -->
-    <div class="small" ng-show="panel.arrangement == 'horizontal'" ng-repeat="term in legend" style="float:left;padding-left: 10px;">
+    <span class="small" ng-show="panel.arrangement == 'horizontal'" ng-repeat="term in legend" style="float:left;padding-left: 10px;">
      <span><i class="icon-circle" ng-style="{color:term.color}"></i> {{term.label}} ({{term.data[0][1]}}) </span>
-    </div><br>
+    </span>
+
+    <span class="small pull-left" ng-show="panel.tmode == 'terms_stats'">
+      &nbsp | {{ panel.tstat }} of <strong>{{ panel.valuefield }}</strong>
+    </span>
 
   </div>
 
@@ -29,16 +37,20 @@
     </table>
 
     <!-- horizontal legend below -->
-    <div class="small" ng-show="panel.arrangement == 'horizontal'" ng-repeat="term in legend" style="float:left;padding-left: 10px;">
+    <span class="small" ng-show="panel.arrangement == 'horizontal'" ng-repeat="term in legend" style="float:left;padding-left: 10px;">
      <span><i class="icon-circle" ng-style="{color:term.color}"></i></span> {{term.label}} ({{term.data[0][1]}}) </span>
-    </div><br>
+    </span>
+
+    <span class="small pull-left" ng-show="panel.tmode == 'terms_stats'">
+      &nbsp | {{ panel.tstat }} of <strong>{{ panel.valuefield }}</strong>
+    </span>
 
   </div>
   <!-- END Pie or Bar chart -->
 
   <table ng-style="panel.style" class="table table-striped table-condensed" ng-show="panel.chart == 'table'">
     <thead>
-      <th>Term</th> <th>Count</th> <th>Action</th>
+      <th>Term</th> <th>{{ panel.tmode == 'terms_stats' ? panel.tstat : 'Count' }}</th> <th>Action</th>
     </thead>
     <tr ng-repeat="term in data" ng-show="showMeta(term)">
       <td>{{term.label}}</td>

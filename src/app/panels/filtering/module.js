@@ -6,7 +6,7 @@
 define([
   'angular',
   'app',
-  'underscore'
+  'lodash'
 ],
 function (angular, app, _) {
   'use strict';
@@ -17,7 +17,7 @@ function (angular, app, _) {
   module.controller('filtering', function($scope, filterSrv, $rootScope, dashboard) {
 
     $scope.panelMeta = {
-      status  : "Beta",
+      status  : "Stable",
       description : "A controllable list of all filters currently applied to the dashboard. You "+
         "almost certainly want one of these on your dashboard somewhere."
     };
@@ -45,6 +45,16 @@ function (angular, app, _) {
       dashboard.refresh();
     };
 
+    $scope.add = function(query) {
+      query = query || '*';
+      filterSrv.set({
+        editing   : true,
+        type      : 'querystring',
+        query     : query,
+        mandate   : 'must'
+      },undefined,true);
+    };
+
     $scope.refresh = function() {
       dashboard.refresh();
     };
@@ -55,6 +65,24 @@ function (angular, app, _) {
 
     $scope.show_key = function(key) {
       return !_.contains(['type','id','alias','mandate','active','editing'],key);
+    };
+
+    $scope.getFilterClass = function(filter) {
+      if(filter.active !== true) {
+        return 'muted';
+      } else {
+        switch (filter.mandate)
+        {
+        case 'must':
+          return 'text-success';
+        case 'mustNot':
+          return 'text-error';
+        case 'either':
+          return 'text-warning';
+        default:
+          return 'text-info';
+        }
+      }
     };
 
     $scope.isEditable = function(filter) {

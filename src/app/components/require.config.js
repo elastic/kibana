@@ -12,17 +12,20 @@ require.config({
     css:                      '../vendor/require/css',
     text:                     '../vendor/require/text',
     moment:                   '../vendor/moment',
+    blob:                     '../vendor/blob',
     filesaver:                '../vendor/filesaver',
-
+    chromath:                 '../vendor/chromath',
     angular:                  '../vendor/angular/angular',
+    'angular-cookies':        '../vendor/angular/angular-cookies',
     'angular-dragdrop':       '../vendor/angular/angular-dragdrop',
     'angular-strap':          '../vendor/angular/angular-strap',
     'angular-sanitize':       '../vendor/angular/angular-sanitize',
     timepicker:               '../vendor/angular/timepicker',
     datepicker:               '../vendor/angular/datepicker',
+    bindonce:                 '../vendor/angular/bindonce',
 
-    underscore:               'components/underscore.extended',
-    'underscore-src':         '../vendor/underscore',
+    lodash:                   'components/lodash.extended',
+    'lodash-src':             '../vendor/lodash',
     bootstrap:                '../vendor/bootstrap/bootstrap',
 
     jquery:                   '../vendor/jquery/jquery-1.8.0',
@@ -32,21 +35,21 @@ require.config({
 
     'jquery.flot':            '../vendor/jquery/jquery.flot',
     'jquery.flot.pie':        '../vendor/jquery/jquery.flot.pie',
+    'jquery.flot.events':     '../vendor/jquery/jquery.flot.events',
     'jquery.flot.selection':  '../vendor/jquery/jquery.flot.selection',
     'jquery.flot.stack':      '../vendor/jquery/jquery.flot.stack',
     'jquery.flot.stackpercent':'../vendor/jquery/jquery.flot.stackpercent',
     'jquery.flot.time':       '../vendor/jquery/jquery.flot.time',
+    'jquery.flot.byte':       '../vendor/jquery/jquery.flot.byte',
+
 
     modernizr:                '../vendor/modernizr-2.6.1',
+    numeral:                '../vendor/numeral',
     elasticjs:                '../vendor/elasticjs/elastic-angular-client',
   },
   shim: {
-    underscore: {
-      exports: '_'
-    },
-
     angular: {
-      deps: ['jquery'],
+      deps: ['jquery','config'],
       exports: 'angular'
     },
 
@@ -63,9 +66,12 @@ require.config({
     },
 
     // simple dependency declaration
+    //
     'jquery-ui':            ['jquery'],
     'jquery.flot':          ['jquery'],
+    'jquery.flot.byte':     ['jquery', 'jquery.flot'],
     'jquery.flot.pie':      ['jquery', 'jquery.flot'],
+    'jquery.flot.events':   ['jquery', 'jquery.flot'],
     'jquery.flot.selection':['jquery', 'jquery.flot'],
     'jquery.flot.stack':    ['jquery', 'jquery.flot'],
     'jquery.flot.stackpercent':['jquery', 'jquery.flot'],
@@ -79,7 +85,7 @@ require.config({
     'angular-resource':     ['angular'],
     'angular-route':        ['angular'],
     'angular-touch':        ['angular'],
-
+    'bindonce':             ['angular'],
     'angular-strap':        ['angular', 'bootstrap','timepicker', 'datepicker'],
 
     timepicker:             ['jquery', 'bootstrap'],

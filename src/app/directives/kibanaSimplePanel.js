@@ -1,6 +1,6 @@
 define([
   'angular',
-  'underscore'
+  'lodash'
 ],
 function (angular, _) {
   'use strict';
@@ -32,10 +32,10 @@ function (angular, _) {
           function loadController(name) {
             elem.addClass("ng-cloak");
             // load the panels module file, then render it in the dom.
-
+            var nameAsPath = name.replace(".", "/");
             $scope.require([
               'jquery',
-              'text!panels/'+name+'/module.html'
+              'text!panels/'+nameAsPath+'/module.html'
             ], function ($, moduleTemplate) {
               var $module = $(moduleTemplate);
               // top level controllers
@@ -46,7 +46,7 @@ function (angular, _) {
               if ($controllers.length) {
                 $controllers.first().prepend(panelLoading);
                 $scope.require([
-                  'panels/'+name+'/module'
+                  'panels/'+nameAsPath+'/module'
                 ], function() {
                   loadModule($module);
                 });
@@ -60,14 +60,16 @@ function (angular, _) {
             loadController(name);
           });
 
-          $scope.$watch(attr.panel, function (panel) {
-            // If the panel attribute is specified, create a new scope. This ruins configuration
-            // so don't do it with anything that needs to use editor.html
-            if(!_.isUndefined(panel)) {
-              $scope = $scope.$new();
-              $scope.panel = angular.fromJson(panel);
-            }
-          });
+          if(attr.panel) {
+            $scope.$watch(attr.panel, function (panel) {
+              // If the panel attribute is specified, create a new scope. This ruins configuration
+              // so don't do it with anything that needs to use editor.html
+              if(!_.isUndefined(panel)) {
+                $scope = $scope.$new();
+                $scope.panel = angular.fromJson(panel);
+              }
+            });
+          }
         }
       };
     });

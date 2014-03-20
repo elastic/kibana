@@ -1,0 +1,65 @@
+
+== Histogram
+Status: *Stable*
+
+The histogram panel allow for the display of time charts. It includes several modes and tranformations
+to display event counts, mean, min, max and total of numeric fields, and derivatives of counter
+fields.
+
+
+=== Parameters
+==== Axis options
+mode:: Value to use for the y-axis. For all modes other than count, +value_field+ must be
+defined. Possible values: count, mean, max, min, total.
+time_field:: x-axis field. This must be defined as a date type in Elasticsearch.
+value_field:: y-axis field if +mode+ is set to mean, max, min or total. Must be numeric.
+x-axis:: Show the x-axis
+y-axis:: Show the y-axis
+scale:: Scale the y-axis by this factor
+y_format:: 'none','bytes','short '
+
+==== Annotations
+annotate object:: A query can be specified, the results of which will be displayed as markers on
+the chart. For example, for noting code deploys.
+annotate.enable::: Should annotations, aka markers, be shown?
+annotate.query::: Lucene query_string syntax query to use for markers.
+annotate.size::: Max number of markers to show
+annotate.field::: Field from documents to show
+annotate.sort::: Sort array in format [field,order], For example [`@timestamp',`desc']
+==== Interval options
+auto_int:: Automatically scale intervals?
+resolution:: If auto_int is true, shoot for this many bars.
+interval:: If auto_int is set to false, use this as the interval.
+interval:: Array of possible intervals in the *View* selector. Example [`auto',`1s',`5m',`3h']
+==== Drawing options
+lines:: Show line chart
+fill:: Area fill factor for line charts, 1-10
+linewidth:: Weight of lines in pixels
+points:: Show points on chart
+pointradius:: Size of points in pixels
+bars:: Show bars on chart
+stack:: Stack multiple series
+spyable:: Show inspect icon
+zoomlinks:: Show `Zoom Out' link
+options:: Show quick view options section
+legend:: Display the legond
+show_query:: If no alias is set, should the query be displayed?
+interactive:: Enable click-and-drag to zoom functionality
+legend_counts:: Show counts in legend
+==== Transformations
+timezone:: Correct for browser timezone?. Valid values: browser, utc
+percentage:: Show the y-axis as a percentage of the axis total. Only makes sense for multiple
+queries
+zerofill:: Improves the accuracy of line charts at a small performance cost.
+derivative:: Show each point on the x-axis as the change from the previous point
+tooltip object::
+tooltip.value_type::: Individual or cumulative controls how tooltips are display on stacked charts
+tooltip.query_as_alias::: If no alias is set, should the query be displayed?
+grid object:: Min and max y-axis values
+grid.min::: Minimum y-axis value
+grid.max::: Maximum y-axis value
+
+==== Queries
+queries object:: This object describes the queries to use on this panel.
+queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
+queries.ids::: In +selected+ mode, which query ids are selected.

@@ -1,8 +1,8 @@
 define([
-  'underscore',
-  './interval'
+  './interval',
+  'lodash'
 ],
-function (_, Interval) {
+function (Interval, _) {
   'use strict';
 
   var ts = {};
@@ -46,6 +46,8 @@ function (_, Interval) {
 
     // will keep all values here, keyed by their time
     this._data = {};
+    // For each bucket in _data, store a corresponding counter of how many times it was written to.
+    this._counters = {};
     this.start_time = opts.start_date && getDatesTime(opts.start_date);
     this.end_time = opts.end_date && getDatesTime(opts.end_date);
     this.opts = opts;
@@ -57,6 +59,7 @@ function (_, Interval) {
    * @param {any}  value The value at this time
    */
   ts.ZeroFilled.prototype.addValue = function (time, value) {
+    this._counters[time] = (this._counters[time] || 0) + 1;
     if (time instanceof Date) {
       time = getDatesTime(time);
     } else {
@@ -88,7 +91,7 @@ function (_, Interval) {
    * return the rows in the format:
    * [ [time, value], [time, value], ... ]
    *
-   * Heavy lifting is done by _get(Min|All)FlotPairs()
+   * Heavy lifting is done by _get(Min|Default|All)FlotPairs()
    * @param  {array} required_times  An array of timestamps that must be in the resulting pairs
    * @return {array}
    */
@@ -99,6 +102,10 @@ function (_, Interval) {
 
     if(this.opts.fill_style === 'all') {
       strategy = this._getAllFlotPairs;
+    } else if(this.opts.fill_style === 'null') {
+      strategy = this._getNullFlotPairs;
+    } else if(this.opts.fill_style === 'no') {
+      strategy = this._getNoZeroFlotPairs;
     } else {
       strategy = this._getMinFlotPairs;
     }
@@ -112,12 +119,15 @@ function (_, Interval) {
 
     // if the first or last pair is inside either the start or end time,
     // add those times to the series with null values so the graph will stretch to contain them.
+    // Removing, flot 0.8.1's max/min params satisfy this
+    /*
     if (this.start_time && (pairs.length === 0 || pairs[0][0] > this.start_time)) {
       pairs.unshift([this.start_time, null]);
     }
     if (this.end_time && (pairs.length === 0 || pairs[pairs.length - 1][0] < this.end_time)) {
       pairs.push([this.end_time, null]);
     }
+    */
 
     return pairs;
   };
@@ -141,7 +151,7 @@ function (_, Interval) {
     }
 
     // add the current time
-    result.push([ time, this._data[time] || 0 ]);
+    result.push([ time, this._data[time] || 0]);
 
     // check for next measurement
     if (times.length > i) {
@@ -174,6 +184,52 @@ function (_, Interval) {
     return result;
   };
 
+  /**
+   * ** called as a reduce stragegy in getFlotPairs() **
+   * Same as min, but fills with nulls
+   * @return {array}  An array of points to plot with flot
+   */
+  ts.ZeroFilled.prototype._getNullFlotPairs = function (result, time, i, times) {
+    var next, expected_next, prev, expected_prev;
+
+    // check for previous measurement
+    if (i > 0) {
+      prev = times[i - 1];
+      expected_prev = this.interval.before(time);
+      if (prev < expected_prev) {
+        result.push([expected_prev, null]);
+      }
+    }
+
+    // add the current time
+    result.push([ time, this._data[time] || null]);
+
+    // check for next measurement
+    if (times.length > i) {
+      next = times[i + 1];
+      expected_next = this.interval.after(time);
+      if (next > expected_next) {
+        result.push([expected_next, null]);
+      }
+    }
+
+    return result;
+  };
+
+  /**
+   * ** called as a reduce stragegy in getFlotPairs() **
+   * Not fill zero's on either side of the current time, only the current time
+   * @return {array}  An array of points to plot with flot
+   */
+  ts.ZeroFilled.prototype._getNoZeroFlotPairs = function (result, time) {
+
+    // add the current time
+    if(this._data[time]){
+      result.push([ time, this._data[time]]);
+    }
+
+    return result;
+  };
 
   return ts;
 });

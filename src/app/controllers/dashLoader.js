@@ -1,19 +1,16 @@
 define([
   'angular',
-  'underscore'
+  'lodash'
 ],
 function (angular, _) {
   'use strict';
 
   var module = angular.module('kibana.controllers');
 
-  module.controller('dashLoader', function($scope, $http, timer, dashboard, alertSrv) {
+  module.controller('dashLoader', function($scope, $http, timer, dashboard, alertSrv, $location) {
     $scope.loader = dashboard.current.loader;
 
     $scope.init = function() {
-      $scope.advancedLoad = false;
-      $scope.advancedSave = false;
-
       $scope.gist_pattern = /(^\d{5,}$)|(^[a-z0-9]{10,}$)|(gist.github.com(\/*.*)\/[a-z0-9]{5,}\/*$)/;
       $scope.gist = $scope.gist || {};
       $scope.elasticsearch = $scope.elasticsearch || {};
@@ -38,8 +35,8 @@ function (angular, _) {
     };
 
     $scope.set_default = function() {
-      if(dashboard.set_default()) {
-        alertSrv.set('Local Default Set',dashboard.current.title+' has been set as your local default','success',5000);
+      if(dashboard.set_default($location.path())) {
+        alertSrv.set('Home Set','This page has been set as your default Kibana dashboard','success',5000);
       } else {
         alertSrv.set('Incompatible Browser','Sorry, your browser is too old for this feature','error',5000);
       }
@@ -47,7 +44,8 @@ function (angular, _) {
 
     $scope.purge_default = function() {
       if(dashboard.purge_default()) {
-        alertSrv.set('Local Default Clear','Your local default dashboard has been cleared','success',5000);
+        alertSrv.set('Local Default Clear','Your Kibana default dashboard has been reset to the default',
+          'success',5000);
       } else {
         alertSrv.set('Incompatible Browser','Sorry, your browser is too old for this feature','error',5000);
       }

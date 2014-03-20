@@ -1,0 +1,43 @@
+[[panels]]
+= Panels
+
+[partintro]
+--
+*Kibana* dashboards are made up of blocks called +panels+. Panels are organized into rows
+and can serve many purposes, though most are designed to provide the results of a query or
+multiple queries as a visualization. Other panels may show collections of documents or
+allow you to insert instructions for your users.
+
+Panels can be configured easily via the Kibana web interface. For more advanced usage, such
+as templated or scripted dashboards, documentation of panel properties is available in this
+section. You may find settings here which are not exposed via the web interface.
+
+Each panel type has its own properties, hover there are several that are shared.
+
+span:: A number, 1-12, that describes the width of the panel.
+editable:: Enable or disable the edit button the the panel
+type:: The type of panel this object contains. Each panel type will require additional
+properties. See the panel types list to the right.
+--
+
+include::panels/bettermap.asciidoc[]
+
+include::panels/column.asciidoc[]
+
+include::panels/goal.asciidoc[]
+
+include::panels/histogram.asciidoc[]
+
+include::panels/hits.asciidoc[]
+
+include::panels/map.asciidoc[]
+
+include::panels/sparklines.asciidoc[]
+
+include::panels/table.asciidoc[]
+
+include::panels/terms.asciidoc[]
+
+include::panels/text.asciidoc[]
+
+include::panels/trends.asciidoc[]

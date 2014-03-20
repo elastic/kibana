@@ -1,33 +1,25 @@
 define([
   'angular',
-  'underscore',
-  'config'
+  'lodash',
+  'config',
+  'kbn'
 ],
-function (angular, _, config) {
+function (angular, _, config, kbn) {
   'use strict';
 
   var module = angular.module('kibana.services');
 
-  module.service('querySrv', function(dashboard, ejsResource) {
+  module.service('querySrv', function(dashboard, ejsResource, filterSrv, esVersion, $q) {
+
+    // Save a reference to this
+    var self = this;
+
     // Create an object to hold our service state on the dashboard
     dashboard.current.services.query = dashboard.current.services.query || {};
     _.defaults(dashboard.current.services.query,{
-      idQueue : [],
       list : {},
       ids : [],
     });
-
-    // Defaults for query objects
-    var _query = {
-      query: '*',
-      alias: '',
-      pin: false,
-      type: 'lucene'
-    };
-
-    // For convenience
-    var ejs = ejsResource(config.elasticsearch);
-    var _q = dashboard.current.services.query;
 
     this.colors = [
       "#7EB26D","#EAB839","#6ED0E0","#EF843C","#E24D42","#1F78C1","#BA43A9","#705DA0", //1
@@ -39,26 +31,120 @@ function (angular, _, config) {
       "#E0F9D7","#FCEACA","#CFFAFF","#F9E2D2","#FCE2DE","#BADFF4","#F9D9F9","#DEDAF7"  //7
     ];
 
-    // Define the query types and the version of elasticsearch they were first available in
-    this.queryTypes = [
-      {name:'lucene',require:">=0.17.0"},
-      {name:'regex',require:">=0.90.3"},
-      {name:'derive',require:">=2.0.0"}
-    ];
+    // For convenience
+    var ejs = ejsResource(config.elasticsearch);
 
+    // Holds all actual queries, including all resolved abstract queries
+    var resolvedQueries = [];
 
-    // Save a reference to this
-    var self = this;
+    // Defaults for generic query object
+    var _query = {
+      alias: '',
+      pin: false,
+      type: 'lucene',
+      enable: true
+    };
+
+    // Defaults for specific query types
+    var _dTypes = {
+      "lucene": {
+        query: "*"
+      },
+      "regex": {
+        query: ".*"
+      },
+      "topN": {
+        query: "*",
+        field: "_type",
+        size: 5,
+        union: 'AND'
+      }
+    };
+
+    // query type meta data that is not stored on the dashboard object
+    this.queryTypes = {
+      lucene: {
+        require:">=0.17.0",
+        icon: "icon-circle",
+        resolve: function(query) {
+          // Simply returns itself
+          var p = $q.defer();
+          p.resolve(_.extend(query,{parent:query.id}));
+          return p.promise;
+        }
+      },
+      regex: {
+        require:">=0.90.12",
+        icon: "icon-circle",
+        resolve: function(query) {
+          // Simply returns itself
+          var p = $q.defer();
+          p.resolve(_.extend(query,{parent:query.id}));
+          return p.promise;
+        }
+      },
+      topN : {
+        require:">=0.90.3",
+        icon: "icon-cog",
+        resolve: function(q) {
+          var suffix = '';
+          if (q.union === 'AND') {
+            suffix = ' AND (' + (q.query||'*') + ')';
+          } else if (q.union === 'OR') {
+            suffix = ' OR (' + (q.query||'*') + ')';
+          }
+
+          var request = ejs.Request().indices(dashboard.indices);
+          // Terms mode
+          request = request
+            .facet(ejs.TermsFacet('query')
+              .field(q.field)
+              .size(q.size)
+              .facetFilter(ejs.QueryFilter(
+                ejs.FilteredQuery(
+                  ejs.QueryStringQuery(q.query || '*'),
+                  filterSrv.getBoolFilter(filterSrv.ids)
+                  )))).size(0);
+
+          var results = request.doSearch();
+          // Like the regex and lucene queries, this returns a promise
+          return results.then(function(data) {
+            var _colors = kbn.colorSteps(q.color,data.facets.query.terms.length);
+            var i = -1;
+            return _.map(data.facets.query.terms,function(t) {
+              ++i;
+              return self.defaults({
+                query  : q.field+':"'+kbn.addslashes('' + t.term)+'"'+suffix,
+                alias  : t.term + (q.alias ? " ("+q.alias+")" : ""),
+                type   : 'lucene',
+                color  : _colors[i],
+                parent : q.id
+              });
+            });
+          });
+        }
+      }
+    };
+
+    self.types = [];
+    _.each(self.queryTypes,function(type,name){
+      esVersion.is(type.require).then(function(is) {
+        if(is) {
+          self.types.push(name);
+        }
+      });
+    });
 
     this.init = function() {
-      _q = dashboard.current.services.query;
       self.list = dashboard.current.services.query.list;
       self.ids = dashboard.current.services.query.ids;
 
+      self.ids = dashboard.current.services.query.ids =
+        _.intersection(_.map(self.list,function(v,k){return parseInt(k,10);}),self.ids);
+
       // Check each query object, populate its defaults
-      _.each(self.list,function(query,id) {
-        _.defaults(query,_query);
-        query.color = query.color || colorAt(id);
+      _.each(self.list,function(query) {
+        query = self.defaults(query);
       });
 
       if (self.ids.length === 0) {
@@ -66,7 +152,8 @@ function (angular, _, config) {
       }
     };
 
-    // This is used both for adding queries and modifying them. If an id is passed, the query at that id is updated
+    // This is used both for adding queries and modifying them. If an id is passed,
+    // the query at that id is updated
     this.set = function(query,id) {
       if(!_.isUndefined(id)) {
         if(!_.isUndefined(self.list[id])) {
@@ -76,15 +163,22 @@ function (angular, _, config) {
           return false;
         }
       } else {
-        var _id = query.id || nextId();
-        query.id = _id;
-        query.color = query.color || colorAt(_id);
-        _.defaults(query,_query);
-
-        self.list[_id] = query;
-        self.ids.push(_id);
-        return _id;
+        // Query must have an id and color already
+        query.id = _.isUndefined(query.id) ? nextId() : query.id;
+        query.color = query.color || colorAt(query.id);
+        // Then it can get defaults
+        query = self.defaults(query);
+        self.list[query.id] = query;
+        self.ids.push(query.id);
+        return query.id;
       }
+    };
+
+    this.defaults = function(query) {
+      _.defaults(query,_query);
+      _.defaults(query,_dTypes[query.type]);
+      query.color = query.color || colorAt(query.id);
+      return query;
     };
 
     this.remove = function(id) {
@@ -92,20 +186,14 @@ function (angular, _, config) {
         delete self.list[id];
         // This must happen on the full path also since _.without returns a copy
         self.ids = dashboard.current.services.query.ids = _.without(self.ids,id);
-        _q.idQueue.unshift(id);
-        _q.idQueue.sort(function(v,k){
-          return v-k;
-        });
         return true;
       } else {
         return false;
       }
     };
 
-    this.getEjsObj = function(id) {
-      return self.toEjsObj(self.list[id]);
-    };
 
+    // These are the only query types that can be returned by a compound query.
     this.toEjsObj = function (q) {
       switch(q.type)
       {
@@ -114,35 +202,66 @@ function (angular, _, config) {
       case 'regex':
         return ejs.RegexpQuery('_all',q.query);
       default:
-        return _.isUndefined(q.query) ? false : ejs.QueryStringQuery(q.query || '*');
+        return false;
       }
     };
 
-    this.findQuery = function(queryString) {
-      return _.findWhere(self.list,{query:queryString});
+    //
+    this.getQueryObjs = function(ids) {
+      if(_.isUndefined(ids)) {
+        return resolvedQueries;
+      } else {
+        return _.flatten(_.map(ids,function(id) {
+          return _.where(resolvedQueries,{parent:id});
+        }));
+      }
     };
 
+    // BROKEN
     this.idsByMode = function(config) {
       switch(config.mode)
       {
       case 'all':
-        return self.ids;
+        return _.pluck(_.where(self.list,{enable:true}),'id');
       case 'pinned':
-        return _.pluck(_.where(self.list,{pin:true}),'id');
+        return _.pluck(_.where(self.list,{pin:true,enable:true}),'id');
       case 'unpinned':
-        return _.difference(self.ids,_.pluck(_.where(self.list,{pin:true}),'id'));
+        return _.pluck(_.where(self.list,{pin:false,enable:true}),'id');
       case 'selected':
-        return _.intersection(self.ids,config.ids);
+        return _.intersection(_.pluck(_.where(self.list,{enable:true}),'id'),config.ids);
       default:
-        return self.ids;
+        return _.pluck(_.where(self.list,{enable:true}),'id');
       }
     };
 
+    // This populates the internal query list and returns a promise containing it
+    this.resolve = function() {
+      // Find ids of all abstract queries
+      // Get a list of resolvable ids, constrast with total list to get abstract ones
+      return $q.all(_.map(self.ids,function(q) {
+        return self.queryTypes[self.list[q].type].resolve(_.clone(self.list[q])).then(function(data){
+          return data;
+        });
+      })).then(function(data) {
+        resolvedQueries = _.flatten(data);
+        _.each(resolvedQueries,function(q,i) {
+          q.id = i;
+        });
+        return resolvedQueries;
+      });
+    };
+
     var nextId = function() {
-      if(_q.idQueue.length > 0) {
-        return _q.idQueue.shift();
+      var idCount = dashboard.current.services.query.ids.length;
+      if(idCount > 0) {
+        // Make a sorted copy of the ids array
+        var ids = _.sortBy(_.clone(dashboard.current.services.query.ids),function(num){
+          return num;
+        });
+        return kbn.smallestMissing(ids);
       } else {
-        return self.ids.length;
+        // No ids currently in list
+        return 0;
       }
     };
 
