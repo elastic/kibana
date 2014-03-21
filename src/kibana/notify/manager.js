@@ -7,6 +7,7 @@ define(function (require) {
   var setTO = setTimeout;
   var clearTO = clearTimeout;
   var log = (typeof KIBANA_DIST === 'undefined') ? _.bindKey(console, 'log') : _.noop;
+  var consoleGroups = ('group' in window.console) && ('groupCollapsed' in window.console) && ('groupEnd' in window.console);
 
   var fatalToastTemplate = (function lazyTemplate(tmpl) {
     var compiled;
@@ -75,14 +76,6 @@ define(function (require) {
   }
 
   /**
-   * Track application lifecycle events
-   * @type {[type]}
-   */
-  var lifecycleEvents = window.kibanaLifecycleEvents = {};
-
-  var applicationBooted;
-
-  /**
    * Functionality to check that
    */
   function NotifyManager(opts) {
@@ -95,26 +88,65 @@ define(function (require) {
     this._notifs = notifs;
   }
 
-  NotifyManager.prototype.lifecycle = function (name, success) {
-    var status;
-    if (name === 'bootstrap' && success === true) applicationBooted = true;
+  NotifyManager.prototype.log = log;
 
-    if (success === void 0) {
-      // start
-      lifecycleEvents[name] = now();
-    } else {
-      // end
-      if (success) {
-        lifecycleEvents[name] = now() - (lifecycleEvents[name] || 0);
-        status = lifecycleEvents[name].toFixed(2) + ' ms';
+  // general functionality used by .event() and .lifecycle()
+  function createGroupLogger(type, opts) {
+    // Track the groups managed by this logger
+    var groups = window[type + 'Groups'] = {};
+
+    return function (name, success) {
+      var status;
+      if (success === void 0) {
+        // start
+        groups[name] = now();
       } else {
-        lifecycleEvents[name] = false;
-        status = 'failure';
-      }
-    }
+        groups[name] = now() - (groups[name] || 0);
+        var time = ' in ' + groups[name].toFixed(2) + 'ms';
 
-    log('KBN: ' + name + (status ? ' - ' + status : ''));
-  };
+        // end
+        if (success) {
+          status = 'complete' + time;
+        } else {
+          groups[name] = false;
+          status = 'failure' + time;
+        }
+      }
+
+      if (consoleGroups) {
+        if (status) {
+          console.log(status);
+          console.groupEnd();
+        } else {
+          if (opts.open) {
+            console.group(name);
+          } else {
+            console.groupCollapsed(name);
+          }
+        }
+      } else {
+        log('KBN: ' + name + (status ? ' - ' + status : ''));
+      }
+    };
+  }
+
+  /**
+   * Log a sometimes redundant event
+   * @param {string} name - The name of the group
+   * @param {boolean} success - Simple flag stating whether the event succeeded
+   */
+  NotifyManager.prototype.event = createGroupLogger('event', {
+    open: false
+  });
+
+  /**
+   * Log a major, important, event in the lifecycle of the application
+   * @param {string} name - The name of the lifecycle event
+   * @param {boolean} success - Simple flag stating whether the lifecycle event succeeded
+   */
+  NotifyManager.prototype.lifecycle = createGroupLogger('lifecycle', {
+    open: true
+  });
 
   /**
    * Kill the page, and display an error

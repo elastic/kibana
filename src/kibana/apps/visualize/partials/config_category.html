@@ -1,0 +1,22 @@
+<div
+  class="panel panel-default"
+  ng-if="categoryName !== 'group' || vis.segment.configs.length > 0">
+  <div class="panel-heading" >
+    {{ category.label }}
+    <button
+      ng-if="category.configs.length < category.max"
+      ng-click="vis.addConfig(categoryName)"
+      class="btn btn-default" >
+      <i class="fa fa-plus"></i>
+    </button>
+  </div>
+  <div class="panel-body">
+    <div ng-repeat="config in category.configs">
+      <vis-config-editor
+        config="config"
+        vis="vis"
+        fields="fields">
+      </vis-config-editor>
+    </div>
+  </div>
+</div>
