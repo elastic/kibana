@@ -7,15 +7,15 @@ APP=${1:-cityindex-kibana}
 LIVE_URL_HOST=${2:-cityindex-kibana-live}
 LIVE_URL_DOMAIN=${3:-monitor-cloud.cityindextest5.co.uk}
 RUN_SMOKE_TESTS=${4:-$SCRIPT_PATH/run_smoke_tests.sh}
-DIST_FOLDER=${4:-dist/}
+DIST_FOLDER=${5:-dist/}
 
-CF_DOMAIN=${5:-monitor-cloud.cityindextest5.co.uk}
-CF_API=${6:-http://api.$CF_DOMAIN}
+CF_DOMAIN=${6:-monitor-cloud.cityindextest5.co.uk}
+CF_API=${7:-http://api.$CF_DOMAIN}
 CF_USER=${CF_USER:?"env CF_USER must be defined"}
 CF_PASSWD=${CF_PASSWD:?"env CF_PASSWD must be defined"}
 CF_ORG=${CF_ORG:?"env CF_ORG must be defined"}
 CF_SPACE=${CF_SPACE:?"env CF_SPACE must be defined"}
-CF_HOME=$(pwd)
+CF_HOME=$SCRIPT_PATH
 
 # sed -l basically makes sed replace and buffer through stdin to stdout
 # so you get updates while the command runs and dont wait for the end
