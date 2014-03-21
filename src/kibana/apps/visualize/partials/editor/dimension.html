@@ -1,0 +1,19 @@
+<div class="form-group">
+  <label for="field">
+    Field
+  </label>
+  <select
+    class="form-control"
+    name="field"
+    ng-model="config.field"
+    ng-options="field.name as field.name group by field.type for field in fields">
+  </select>
+</div>
+<div class="form-group" ng-show="availableAggs">
+  <select
+    name="agg"
+    ng-model="config.agg"
+    ng-options="agg.name as agg.display for agg in availableAggs">
+  </select>
+</div>
+<div class="agg-param-controls">
