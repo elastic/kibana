@@ -1,5 +1,5 @@
 #!/bin/bash -e
-DEPLOY_URL=${3:-http://kibana.cityindex.logsearch.io}
+DEPLOY_URL=${1:-http://kibana.cityindex.logsearch.io}
 
 echo "====> Running smoke tests against $DEPLOY_URL"
 
