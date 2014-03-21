@@ -1,0 +1,21 @@
+<div class="form-group">
+  <label for="stat">Stat</label>
+  <select
+    class="form-control"
+    name="stat"
+    ng-model="config.agg"
+    ng-options="agg.name as agg.name for agg in Aggs.metricAggs">
+  </select>
+</div>
+<div class="form-group" ng-if="config.agg && config.agg !== 'count'">
+  <label for="field">
+    Field to {{config.agg}}&nbsp;
+    <kbn-info placement="right" info="'Field to use for the ' + metric.label"></kbn-info>
+  </label>
+  <select
+    class="form-control"
+    name="field"
+    ng-model="config.field"
+    ng-options="field.name as field.name for field in fields | fieldType:'number'">
+  </select>
+</div>

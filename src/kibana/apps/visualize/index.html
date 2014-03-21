@@ -1,1 +1,22 @@
-<h1>Visualize</h1>
+<!-- <div class="container-fluid"> -->
+<div ng-controller="Visualize">
+  <div class="row">
+    <div class="col-md-3">
+      <form ng-submit="updateDataSource()">
+        <ul class="vis-config-panel">
+          <li ng-repeat="category in Vis.configCategories">
+            <vis-config-category
+              category-name="category.name"
+              vis="vis"
+              fields="fields">
+            </vis-config-category>
+          </li>
+        </ul>
+        <button type="submit" class="btn btn-primary">Update</button>
+      </form>
+    </div>
+    <div class="col-md-9 vis-canvas">
+      <visualization vis-canvas vis="vis"></visualization>
+    </div>
+  </div>
+</div>

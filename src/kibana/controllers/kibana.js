@@ -5,6 +5,7 @@ define(function (require) {
 
   require('services/config');
   require('services/courier');
+  require('directives/info');
   require('angular-bootstrap');
 
   require('modules')
@@ -30,7 +31,7 @@ define(function (require) {
       });
 
       $rootScope.rootDataSource = courier.createSource('search')
-        .index('_all');
+        .index('logstash-*');
 
       $scope.opts = {
         activeFetchInterval: void 0,

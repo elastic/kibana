@@ -1,0 +1,13 @@
+<div class="row">
+  <div class="col-sm-6">
+    <select
+      class="form-control"
+      name="order"
+      ng-model="config.order"
+      ng-options="opt.val as opt.display for opt in aggParams.order.options">
+    </select>
+  </div>
+  <div class="col-sm-6">
+    <input class="form-control" type="number" ng-model="config.size" name="size">
+  </div>
+</div>

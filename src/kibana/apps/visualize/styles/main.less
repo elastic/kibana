@@ -1,0 +1,40 @@
+.vis-config-panel {
+  padding: 0;
+
+  > li {
+    list-style: none;
+
+    .panel-heading {
+      position: relative;
+
+      button {
+        position: absolute;
+        top: 6px;
+        right: 7px;
+        padding: 3px 8px;
+      }
+    }
+  }
+
+  .agg-config-interval {
+    td {
+      padding-left: 10px;
+      &:first-child {
+        padding-left: 0px;
+      }
+    }
+  }
+}
+
+.vis-canvas {
+  padding: 15px 0;
+
+  visualization {
+    display: block;
+    background: black;
+    height: 800px;
+    width: 95%;
+    margin: 0 auto;
+    overflow: auto;
+  }
+}
