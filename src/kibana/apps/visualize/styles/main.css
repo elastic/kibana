@@ -1,0 +1,32 @@
+.vis-config-panel {
+  padding: 0;
+}
+.vis-config-panel > li {
+  list-style: none;
+}
+.vis-config-panel > li .panel-heading {
+  position: relative;
+}
+.vis-config-panel > li .panel-heading button {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  padding: 3px 8px;
+}
+.vis-config-panel .agg-config-interval td {
+  padding-left: 10px;
+}
+.vis-config-panel .agg-config-interval td:first-child {
+  padding-left: 0px;
+}
+.vis-canvas {
+  padding: 15px 0;
+}
+.vis-canvas visualization {
+  display: block;
+  background: black;
+  height: 800px;
+  width: 95%;
+  margin: 0 auto;
+  overflow: auto;
+}

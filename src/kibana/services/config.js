@@ -144,7 +144,7 @@ define(function (require) {
        *******/
 
       function _change(key, val) {
-        notify.lifecycle('config change: ' + key + ': ' + vals[key] + ' -> ' + val);
+        notify.log('config change: ' + key + ': ' + vals[key] + ' -> ' + val);
         triggerWatchers(watchers[key], val, vals[key]);
         vals[key] = val;
       }
