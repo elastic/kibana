@@ -1,0 +1,31 @@
+{
+  "name": "moment-timezone",
+  "version": "0.0.3",
+  "main": "index.js",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "tasks",
+    "component.json",
+    "composer.json",
+    "CONTRIBUTING.md",
+    "ender.js",
+    "Gruntfile.js",
+    "package.js",
+    "package.json"
+  ],
+  "homepage": "https://github.com/moment/moment-timezone",
+  "_release": "0.0.3",
+  "_resolution": {
+    "type": "version",
+    "tag": "0.0.3",
+    "commit": "27a88581c0d44c557d5122cde9946043fa1da94d"
+  },
+  "_source": "git://github.com/moment/moment-timezone.git",
+  "_target": "~0.0.3",
+  "_originalSource": "moment-timezone",
+  "_direct": true
+}

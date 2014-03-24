@@ -2,6 +2,7 @@ define(function (require) {
   var _ = require('utils/mixins');
 
   var settingsHtml = require('text!../partials/settings.html');
+  var timepickerHtml = require('text!partials/timepicker.html');
 
   var app = require('modules').get('app/discover');
 
@@ -97,6 +98,15 @@ define(function (require) {
         delete $scope.configTemplate;
       } else {
         $scope.configTemplate = settingsHtml;
+      }
+    };
+
+    $scope.toggleTimepicker = function () {
+      // Close if already open
+      if ($scope.configTemplate === timepickerHtml) {
+        delete $scope.configTemplate;
+      } else {
+        $scope.configTemplate = timepickerHtml;
       }
     };
 

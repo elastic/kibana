@@ -1,5 +1,4 @@
-<div class="kbn-timepicker container-fluid">
-
+<div class="kbn-timepicker">
   <style>
     .kbn-timepicker [kbn-time-input] {
       text-align: center;
@@ -7,24 +6,21 @@
   </style>
 
   <div class="row">
-    <form name="input">
+    <div class="timepicker-from col-xs-6 col-md-3">
+      <center>
+        <div ng-model="from">
+          <datepicker max="to" show-weeks="false"></datepicker>
+        </div>
+        <br>
+      </center>
+    </div>
 
-      <div class="timepicker-from col-xs-6 col-md-3">
-        <center>
-          <div ng-model="from">
-            <datepicker max="to" show-weeks="false"></datepicker>
-          </div>
-          <br>
-        </center>
-      </div>
-
-      <div class="timepicker-from col-xs-6 col-md-3">
-        <center>
-          <div ng-model="to">
-            <datepicker min="from" show-weeks="false"></datepicker>
-          </div>
-        </center>
-      </div>
-
-    </form>
+    <div class="timepicker-from col-xs-6 col-md-3">
+      <center>
+        <div ng-model="to">
+          <datepicker min="from" show-weeks="false"></datepicker>
+        </div>
+      </center>
+    </div>
+  </div>
 </div>
