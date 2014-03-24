@@ -33,9 +33,38 @@ function Add-IISMimeType
   }
 }
 
+function Remove-WebSite
+{
+	param([string] $webSite)
+
+	$site = dir IIS:\sites | Where-Object { $_.name -eq $webSite } | Select Name | Select-Object -first 1
+	$pool = dir IIS:\AppPools | Where-Object { $_.name -eq $webSite } | Select Name | Select-Object -first 1
+
+	if($site)
+	{
+		$siteName = $site.Name
+		Write-Host "  - Stopping site: $siteName"
+		Stop-WebSite -Name $siteName -ErrorAction:SilentlyContinue
+		Write-Host "  - Removing site: $siteName"
+		Remove-WebSite -Name $siteName
+	}
+
+	if($pool)
+	{
+		$poolName = $pool.Name
+		Write-Host "  - Stopping AppPool: $poolName"
+		Stop-WebAppPool -Name $poolName -ErrorAction:SilentlyContinue
+		Write-Host "  - Removing AppPool: $poolName"
+		Remove-WebAppPool -Name $poolName
+	}
+}
+
 Import-Module Servermanager
+Import-Module WebAdministration
 
 Add-ServerRole Application-Server
 Add-ServerRole Web-Server
+
+Remove-WebSite "Default Web Site"
 
 Add-IISMimeType "application/json" ".json"
