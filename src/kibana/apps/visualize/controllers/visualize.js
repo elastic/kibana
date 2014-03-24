@@ -10,54 +10,80 @@ define(function (require) {
       location: 'Visualize Controller'
     });
 
-    // the object detailing the visualization
     var vis = $scope.vis = window.vis = new Vis({
-      metric: {
-        label: 'Y-Axis',
-        min: 1,
-        max: 1
-      },
-      segment: {
-        label: 'X-Axis',
-        min: 1,
-        max: 1
-      },
-      group: {
-        label: 'Color',
-        max: 10
-      },
-      split: {
-        label: 'Rows & Columns',
-        max: 2
-      }
-    }, {
-      split: [
-        {
-          field: 'response',
-          size: 5,
-          agg: 'terms'
+      config: {
+        metric: {
+          label: 'Y-Axis',
+          min: 1,
+          max: 1
         },
-        {
-          field: '_type',
-          size: 5,
-          agg: 'terms'
+        segment: {
+          label: 'X-Axis',
+          min: 1,
+          max: 1
+        },
+        group: {
+          label: 'Color',
+          max: 1
+        },
+        split: {
+          label: 'Rows & Columns',
+          max: 2
         }
-      ],
-      segment: [
-        {
-          field: '@timestamp',
-          interval: 'week'
-        }
-      ],
-      group: [
-        {
-          field: 'extension',
-          size: 5,
-          agg: 'terms',
-          global: true
-        }
-      ]
+      }
     });
+
+    // the object detailing the visualization
+    // var vis = $scope.vis = window.vis = new Vis({
+    //   config: {
+    //     metric: {
+    //       label: 'Y-Axis',
+    //       min: 1,
+    //       max: 1
+    //     },
+    //     segment: {
+    //       label: 'X-Axis',
+    //       min: 1,
+    //       max: 1
+    //     },
+    //     group: {
+    //       label: 'Color',
+    //       max: 10
+    //     },
+    //     split: {
+    //       label: 'Rows & Columns',
+    //       max: 2
+    //     }
+    //   },
+    //   state: {
+    //     split: [
+    //       {
+    //         field: 'response',
+    //         size: 5,
+    //         agg: 'terms'
+    //       },
+    //       {
+    //         field: '_type',
+    //         size: 5,
+    //         agg: 'terms'
+    //       }
+    //     ],
+    //     segment: [
+    //       {
+    //         field: '@timestamp',
+    //         interval: 'week'
+    //       }
+    //     ],
+    //     group: [
+    //       {
+    //         field: 'extension',
+    //         size: 5,
+    //         agg: 'terms',
+    //         global: true
+    //       }
+    //     ]
+    //   }
+    // });
 
     vis.dataSource.$scope($scope);
 
