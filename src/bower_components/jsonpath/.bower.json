@@ -1,0 +1,13 @@
+{
+  "name": "jsonpath",
+  "homepage": "https://github.com/s3u/JSONPath",
+  "_release": "308ef21860",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "308ef21860ae21584c0f808d67cf63006101149a"
+  },
+  "_source": "git://github.com/s3u/JSONPath.git",
+  "_target": "*",
+  "_originalSource": "jsonpath"
+}
