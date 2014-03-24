@@ -6,22 +6,22 @@ define(function (require) {
   var nextTick = require('utils/next_tick');
 
   function DataSource(courier, initialState) {
-    var state;
-
     EventEmitter.call(this);
 
-    // state can be serialized as JSON, and passed back in to restore
-    if (initialState) {
-      if (typeof initialState === 'string') {
-        state = JSON.parse(initialState);
+    this._state = (function () {
+      // state can be serialized as JSON, and passed back in to restore
+      if (initialState) {
+        if (typeof initialState === 'string') {
+          return JSON.parse(initialState);
+        } else {
+          return _.cloneDeep(initialState);
+        }
       } else {
-        state = _.cloneDeep(initialState);
+        return {};
       }
-    } else {
-      state = {};
-    }
+    }());
 
-    this._state = state;
+    this._dynamicState = this._dynamicState || {};
     this._courier = courier;
 
     // before newListener to prevent unnecessary "emit" when added
@@ -64,9 +64,9 @@ define(function (require) {
     this._methods.forEach(function (name) {
       this[name] = function (val) {
         if (val == null) {
-          delete state[name];
+          delete this._state[name];
         } else {
-          state[name] = val;
+          this._state[name] = val;
         }
 
         return this;
@@ -87,6 +87,7 @@ define(function (require) {
     var current = this;
     while (current) {
       if (current._state[name] !== void 0) return current._state[name];
+      if (current._dynamicState[name] !== void 0) return current._dynamicState[name]();
       current = current._parent;
     }
   };
@@ -108,7 +109,7 @@ define(function (require) {
    * Clear the disabled flag, you do not need to call this unless you
    * explicitly disabled the DataSource
    */
-  DataSource.prototype.enableFetch = function () {
+  DataSource.prototype.enableAuthFetch = function () {
     delete this._fetchDisabled;
     return this;
   };
@@ -116,7 +117,7 @@ define(function (require) {
   /**
    * Disable the DataSource, preventing it or any of it's children from being searched
    */
-  DataSource.prototype.disableFetch = function () {
+  DataSource.prototype.disableAutoFetch = function () {
     this._fetchDisabled = true;
     return this;
   };
