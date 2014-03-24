@@ -92,7 +92,7 @@ define(function (require) {
 
           if (params.interval) {
             controlsHtml += ' ' + controlTemplates.interval;
-            if (!controlsHtml.match(/aggParams\.interval\.options/)) debugger;
+            if (!controlsHtml.match(/aggParams\.interval\.options/)); //debugger;
           }
 
           if ($scope.config.categoryName === 'group') {
