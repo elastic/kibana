@@ -22,6 +22,8 @@ define(function (require) {
           // only link if the dataSource isn't already linked
           vis.dataSource.$scope($scope);
         }
+
+        vis.dataSource.fetch();
       }
     };
   }
