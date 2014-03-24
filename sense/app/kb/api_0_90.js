@@ -10,6 +10,7 @@ define([
   './api_0_90/indices',
   './api_0_90/mappings',
   './api_0_90/misc',
+  './api_0_90/nodes',
   './api_0_90/query',
   './api_0_90/search',
   './api_0_90/settings',
