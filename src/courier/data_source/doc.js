@@ -210,7 +210,7 @@ define(function (require) {
    * @param  {Function} cb - callback
    */
   DocSource.prototype._sendToEs = function (method, validateVersion, body, cb) {
-    cb = this._wrapcb(cb)
+    cb = this._wrapcb(cb);
 
     var source = this;
     var courier = this._courier;
