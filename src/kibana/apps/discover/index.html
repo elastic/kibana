@@ -2,6 +2,7 @@
   <nav class="navbar navbar-default navbar-static-top subnav">
     <ul class="nav navbar-nav navbar-right">
       <li><a class="navbar-link" ng-click="toggleConfig()"><i class="fa fa-gear"></i></a></li>
+      <li><a class="navbar-link" ng-click="toggleTimepicker()"><i class="fa fa-clock-o"></i></a></li>
     </ul>
     <form class="navbar-form" ng-submit="fetch()">
       <div class="form-group" style="display:inline;">
@@ -24,7 +25,7 @@
       </div>
       <div class="col-md-10">
         <discover-timechart></discover-timechart>
-        <kbn-table style="overflow-x:auto"
+        <kbn-table style="overflow-x:auto" class="table table-condensed"
           rows="rows"
           columns="columns"
           refresh="fetch"
