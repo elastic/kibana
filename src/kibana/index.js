@@ -34,6 +34,7 @@ define(function (require) {
           });
 
         configFile.apps.forEach(function (app) {
+          if (app.id === 'discover') return;
           $routeProvider.when('/' + app.id, {
             templateUrl: 'kibana/apps/' + app.id + '/index.html'
           });

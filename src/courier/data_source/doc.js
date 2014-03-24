@@ -210,16 +210,16 @@ define(function (require) {
    * @param  {Function} cb - callback
    */
   DocSource.prototype._sendToEs = function (method, validateVersion, body, cb) {
+    cb = this._wrapcb(cb)
+
     var source = this;
     var courier = this._courier;
     var client = courier._getClient();
-    var params = {
-      id: this._state.id,
-      type: this._state.type,
-      index: this._state.index,
-      body: body,
-      ignore: [409]
-    };
+
+    // straight assignment will causes undefined values
+    var params = _.pick(this._state, 'id', 'type', 'index');
+    params.body = body;
+    params.ignore = [409];
 
     if (validateVersion) {
       params.version = source._getVersion();

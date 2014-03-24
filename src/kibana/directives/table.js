@@ -118,7 +118,8 @@ define(function (require) {
           var rendering = false;
 
           return function renderRows(rows) {
-            [].push.apply(queue, rows);
+            // overwrite the queue, don't keep old rows
+            queue = rows.slice(0);
             if (!rendering) {
               onTick();
             }
