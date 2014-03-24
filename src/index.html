@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="kibana/styles/main.css" >
   </head>
   <body ng-controller="kibana" ng-class="'application-'+activeApp">
+    <div kbn-notifications list="notifList"></div>
     <div class="content" style="display: none;">
       <nav class="navbar navbar-inverse navbar-static-top">
         <div class="container-fluid">
@@ -38,6 +39,5 @@
       </config>
       <div class="application" ng-view></div>
     </div>
-    <div kbn-notifications list="notifList"></div>
   </body>
 </html>
