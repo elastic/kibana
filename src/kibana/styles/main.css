@@ -7067,3 +7067,51 @@ disc-field-chooser ul {
   padding-top: 2px;
   padding-bottom: 2px;
 }
+.kbn-timepicker .btn-default {
+  background: transparent;
+  border: 0px;
+  box-shadow: none;
+  text-shadow: none;
+}
+.kbn-timepicker .btn-info {
+  color: #ffffff;
+  background-color: #5bc0de;
+  border-color: #46b8da;
+  text-shadow: none;
+}
+.kbn-timepicker .btn-info:hover,
+.kbn-timepicker .btn-info:focus,
+.kbn-timepicker .btn-info:active,
+.kbn-timepicker .btn-info.active,
+.open .dropdown-toggle.kbn-timepicker .btn-info {
+  color: #ffffff;
+  background-color: #39b3d7;
+  border-color: #269abc;
+}
+.kbn-timepicker .btn-info:active,
+.kbn-timepicker .btn-info.active,
+.open .dropdown-toggle.kbn-timepicker .btn-info {
+  background-image: none;
+}
+.kbn-timepicker .btn-info.disabled,
+.kbn-timepicker .btn-info[disabled],
+fieldset[disabled] .kbn-timepicker .btn-info,
+.kbn-timepicker .btn-info.disabled:hover,
+.kbn-timepicker .btn-info[disabled]:hover,
+fieldset[disabled] .kbn-timepicker .btn-info:hover,
+.kbn-timepicker .btn-info.disabled:focus,
+.kbn-timepicker .btn-info[disabled]:focus,
+fieldset[disabled] .kbn-timepicker .btn-info:focus,
+.kbn-timepicker .btn-info.disabled:active,
+.kbn-timepicker .btn-info[disabled]:active,
+fieldset[disabled] .kbn-timepicker .btn-info:active,
+.kbn-timepicker .btn-info.disabled.active,
+.kbn-timepicker .btn-info[disabled].active,
+fieldset[disabled] .kbn-timepicker .btn-info.active {
+  background-color: #5bc0de;
+  border-color: #46b8da;
+}
+.kbn-timepicker .btn-info .badge {
+  color: #5bc0de;
+  background-color: #ffffff;
+}

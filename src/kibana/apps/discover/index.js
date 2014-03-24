@@ -1,7 +1,10 @@
 define(function (require, module, exports) {
   var _ = require('lodash');
+  var moment = require('moment');
 
   require('directives/table');
+  require('directives/timepicker');
+
   require('./field_chooser');
   require('services/saved_searches');
   require('utils/mixins');
@@ -34,8 +37,14 @@ define(function (require, module, exports) {
       maxSummaryLength: 100,
       // Index to match
       index: '_all',
-      timefield: '@timestamp'
+      timefield: '@timestamp',
+      time: {
+        from: moment(),
+        to: moment()
+      }
     };
+
+    $scope.time =
 
     // stores the complete list of fields
     $scope.fields = null;
@@ -101,6 +110,10 @@ define(function (require, module, exports) {
         $scope.save($scope.dashboard.title);
       };
       */
+    };
+
+    $scope.toggleTimepicker = function () {
+      setConfigTemplate('<kbn-timepicker from="opts.time.from" to="opts.time.to"></kbn-timepicker>');
     };
 
 

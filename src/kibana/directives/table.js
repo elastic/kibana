@@ -13,7 +13,7 @@ define(function (require) {
   module.directive('kbnTableHeader', function () {
     var headerHtml = require('text!partials/table_header.html');
     return {
-      restrict: 'E',
+      restrict: 'A',
       scope: {
         columns: '=',
         getSort: '=',
@@ -26,13 +26,13 @@ define(function (require) {
           //var sort = [0,0];
           var sort = $scope.getSort();
           if (column === sort[0]) {
-            return ['fa', sort[1] === 'asc' ? 'fa-chevron-up' : 'fa-chevron-down'];
+            return ['fa', sort[1] === 'asc' ? 'fa-sort-up' : 'fa-sort-down'];
           } else {
-            return ['fa', ''];
+            return ['fa', 'fa-sort'];
           }
         };
 
-        $scope.set = function (column) {
+        $scope.sort = function (column) {
           var sort = $scope.getSort();
           console.log('dir', sort);
           $scope.setSort(column, sort[1] === 'asc' ? 'desc' : 'asc');
@@ -244,7 +244,7 @@ define(function (require) {
           // table that will hold details about the row
           var table = document.createElement('table');
           containerTd.appendChild(table);
-          table.className = 'table';
+          table.className = 'table table-condensed';
 
           // body of the table
           var tbody = document.createElement('tbody');
