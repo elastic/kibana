@@ -9,8 +9,10 @@ define(function (require) {
       location: 'Visualization'
     });
 
-    function Vis(config, state) {
-      config = config || {};
+    function Vis(opts) {
+      opts = opts || {};
+      var config = opts.config || {};
+      var state = opts.state || null;
 
       // the visualization type
       this.type = config.type || 'histogram';

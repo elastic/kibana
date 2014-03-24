@@ -1,7 +1,19 @@
-<label class="control-label">Index</label>
-<input class="form-control" ng-model="opts.index">
-
-<!--
-<label class="control-label">Max Summary Length</label>
-<input type="number" name class="form-control" ng-model="opts.maxSummaryLength">
--->
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-6">
+      <label class="control-label">Index</label>
+      <input class="form-control" ng-model="opts.index">
+    </div>
+    <div class="col-md-6">
+      <div class="form-group">
+        <label class="control-label">Name</label>
+        <input ng-model="opts.savedSearch.details.name" class="form-control">
+      </div>
+      <div class="form-group">
+        <button ng-click="opts.saveDataSource()" type="button" class="btn btn-primary">
+          {{opts.savedSearch.phantom ? 'Create' : 'Save'}}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
