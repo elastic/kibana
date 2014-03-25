@@ -42,7 +42,8 @@ function (angular, _, config, kbn) {
       alias: '',
       pin: false,
       type: 'lucene',
-      enable: true
+      enable: true,
+      join: 'should'
     };
 
     // Defaults for specific query types
