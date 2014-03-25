@@ -15,11 +15,11 @@
   <body ng-controller="kibana" ng-class="'application-'+activeApp">
     <kbn-notifications list="notifList"></kbn-notifications>
     <div class="content" style="display: none;">
-      <nav class="navbar navbar-inverse navbar-static-top">
+      <nav bindonce class="navbar navbar-inverse navbar-static-top">
         <div class="container-fluid">
           <ul class="nav navbar-nav">
             <li ng-repeat="app in apps" ng-class="{active: activeApp == app.id}">
-              <a href="#/{{app.id}}">{{app.name}}</a>
+              <a href="#/{{app.id}}" bo-text="app.name"></a>
             </li>
           </ul>
           <ul class="nav navbar-nav pull-right">

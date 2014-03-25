@@ -1,7 +1,7 @@
-<ul class="nav nav-pills nav-stacked nav-condensed">
+<ul bindonce class="nav nav-pills nav-stacked nav-condensed">
   <li ng-repeat="field in fields track by $index" ng-class="{'active':field.display}">
     <a ng-click="toggle(field.name)">
-      <i class="fa" ng-class="typeIcon(field.type)"></i> {{field.name}}
+      <i class="fa discovery-field-type" bo-class="typeIcon(field.type)"></i> <span bo-text="field.name"></span>
     </a>
   </li>
   <li><a ng-click="refresh()"><small>refresh field list</small></a></li>
