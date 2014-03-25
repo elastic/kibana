@@ -20,7 +20,10 @@ define(function (require) {
         var fullText = $scope.orig;
         var truncated = fullText.substring(0, $scope.length);
 
-        if (fullText === truncated) return;
+        if (fullText === truncated) {
+          $scope.text = fullText;
+          return;
+        }
 
         truncated += '...';
 
