@@ -110,17 +110,7 @@ define(function (require) {
       }
     };
 
-
-    $scope.fetch = function () {
-      if (!$scope.fields) getFields();
-      search
-        .size($scope.opts.sampleSize)
-        .query(!$scope.query ? null : {
-          query_string: {
-            query: $scope.query
-          }
-        });
-
+    function updateDataSource() {
       if ($scope.opts.index !== search.get('index')) {
         // set the index on the savedSearch
         search.index($scope.opts.index);
@@ -128,6 +118,19 @@ define(function (require) {
         $scope.columns = $scope.fields = null;
       }
 
+      if (!$scope.fields) getFields();
+
+      search
+        .size($scope.opts.sampleSize)
+        .query(!$scope.query ? null : {
+          query_string: {
+            query: $scope.query
+          }
+        });
+    }
+
+    $scope.fetch = function () {
+      updateDataSource();
       // fetch just this savedSearch
       search.fetch();
     };
@@ -222,6 +225,7 @@ define(function (require) {
       }
     }
 
+    updateDataSource();
     $scope.$emit('application.load');
   });
 });
