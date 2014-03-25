@@ -7,6 +7,7 @@ require.config({
     'angular-mocks': '../bower_components/angular-mocks/angular-mocks',
     'angular-route': '../bower_components/angular-route/angular-route',
     'angular-bootstrap': '../bower_components/angular-bootstrap/ui-bootstrap-tpls',
+    'angular-bindonce': '../bower_components/angular-bindonce/bindonce',
     async: '../bower_components/async/lib/async',
     css: '../bower_components/require-css/css',
     text: '../bower_components/requirejs-text/text',
@@ -34,7 +35,8 @@ require.config({
     'angular-route': ['angular'],
     'angular-mocks': ['angular'],
     'elasticsearch': ['angular'],
-    'angular-bootstrap': ['angular']
+    'angular-bootstrap': ['angular'],
+    'angular-bindonce': ['angular']
   },
   waitSeconds: 60
 });

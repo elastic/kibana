@@ -38,7 +38,8 @@
     "angular-bootstrap": "~0.10.0",
     "stacktrace.js": "https://github.com/stacktracejs/stacktrace.js.git#~0.6.0",
     "jsonpath": "*",
-    "moment-timezone": "~0.0.3"
+    "moment-timezone": "~0.0.3",
+    "angular-bindonce": "~0.3.1"
   },
   "devDependencies": {}
 }
