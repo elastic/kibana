@@ -19,10 +19,8 @@ define(function (require) {
       controller: function ($scope) {
 
         $scope.$watch('data', function () {
-          console.log('data change');
           _.each($scope.fields, function (field) {
             if (field.details) {
-              console.log('recomputing ', field.name);
               $scope.details(field, true);
             }
           });
@@ -36,7 +34,6 @@ define(function (require) {
               count: 5,
               grouped: true
             });
-            console.log(field.details);
           } else {
             delete field.details;
           }
