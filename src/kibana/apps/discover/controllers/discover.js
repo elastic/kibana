@@ -110,6 +110,11 @@ define(function (require) {
       }
     };
 
+    $scope.resetQuery = function () {
+      $scope.query = initialQuery ? initialQuery.query_string.query : '';
+      $scope.fetch();
+    };
+
     function updateDataSource() {
       if ($scope.opts.index !== search.get('index')) {
         // set the index on the savedSearch
@@ -171,7 +176,7 @@ define(function (require) {
               field.name = name;
 
               _.defaults(field, currentState[name]);
-              $scope.fields.push(field);
+              $scope.fields.push(_.defaults(field, {display: false}));
             });
 
 
@@ -183,6 +188,17 @@ define(function (require) {
         activeGetFields = null;
       });
     }
+
+    $scope.filterQuery = function (field, value, operation) {
+      value = _.isArray(value) ? value : [value];
+      operation = operation || '+';
+
+      _.each(value, function (clause) {
+        $scope.query = $scope.query + ' ' + operation + field + ':"' + addSlashes(clause) + '"';
+      });
+
+      $scope.fetch();
+    };
 
     $scope.toggleField = function (name) {
       var field = _.find($scope.fields, { name: name });
@@ -224,6 +240,14 @@ define(function (require) {
         $scope.toggleField('_source');
       }
     }
+
+    var addSlashes = function (str) {
+      str = str.replace(/\\/g, '\\\\');
+      str = str.replace(/\'/g, '\\\'');
+      str = str.replace(/\"/g, '\\"');
+      str = str.replace(/\0/g, '\\0');
+      return str;
+    };
 
     updateDataSource();
     $scope.$emit('application.load');
