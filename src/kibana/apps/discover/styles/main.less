@@ -1,21 +1,52 @@
-disc-field-chooser {
-  ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
+@import (reference) "../../../../bower_components/bootstrap/less/bootstrap.less";
+@import (reference) "../../../../bower_components/bootstrap/less/theme.less";
+
+.discover-field-list {
+  .discover-field-item .discover-field-add {
+    visibility:hidden;
   }
-}
 
-.discovery-field-container {
-  padding-top: 20px;
-  padding-left: 0 !important;
-}
+  .discover-field-item:hover .discover-field-add {
+    visibility:visible;
+  }
 
-.discovery-field-container li {
-  margin-top: 0px !important;
-  margin-bottom: 0px !important;
-}
+  .discover-field-name:hover {
+    text-decoration: none;
+    margin-left: 0;
+  }
 
-.discovery-field-container li a {
-  border-radius: 0 !important;
+  .discover-field-details {
+    font-size: @font-size-small;
+    margin-left: 15px;
+    padding: 5px;
+    background-color: @well-bg;
+    border-radius: @border-radius-base;
+    border: 1px solid @table-border-color;
+
+    .discover-field-details-item {
+      margin-top: 5px;
+    }
+
+    .discover-field-details-filter {
+      cursor: pointer;
+    }
+
+    .progress {
+      margin-bottom: 0px;
+
+      .progress-bar {
+        padding-left: 10px;
+        text-align: right;
+
+        span {
+          background-color: @gray;
+          padding: 3px;
+          border-radius: 4px;
+          font-size: 0.8em;
+          margin-left: 3px;
+          margin-right: 3px;
+        }
+      }
+    }
+  }
 }

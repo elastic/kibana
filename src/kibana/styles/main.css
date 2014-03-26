@@ -7047,21 +7047,44 @@ kbn-table tr.even td {
   word-break: normal;
   word-wrap: normal;
 }
-disc-field-chooser ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.discover-field-list .discover-field-item .discover-field-add {
+  visibility: hidden;
 }
-.discovery-field-container {
-  padding-top: 20px;
-  padding-left: 0 !important;
+.discover-field-list .discover-field-item:hover .discover-field-add {
+  visibility: visible;
 }
-.discovery-field-container li {
-  margin-top: 0px !important;
-  margin-bottom: 0px !important;
+.discover-field-list .discover-field-name:hover {
+  text-decoration: none;
+  margin-left: 0;
 }
-.discovery-field-container li a {
-  border-radius: 0 !important;
+.discover-field-list .discover-field-details {
+  font-size: 12px;
+  margin-left: 15px;
+  padding: 5px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  border: 1px solid #dddddd;
+}
+.discover-field-list .discover-field-details .discover-field-details-item {
+  margin-top: 5px;
+}
+.discover-field-list .discover-field-details .discover-field-details-filter {
+  cursor: pointer;
+}
+.discover-field-list .discover-field-details .progress {
+  margin-bottom: 0px;
+}
+.discover-field-list .discover-field-details .progress .progress-bar {
+  padding-left: 10px;
+  text-align: right;
+}
+.discover-field-list .discover-field-details .progress .progress-bar span {
+  background-color: #555555;
+  padding: 3px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  margin-left: 3px;
+  margin-right: 3px;
 }
 .nav-condensed > li > a {
   padding-top: 2px;

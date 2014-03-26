@@ -1,8 +1,63 @@
-<ul bindonce class="nav nav-pills nav-stacked nav-condensed">
-  <li ng-repeat="field in fields track by $index" ng-class="{'active':field.display}">
-    <a ng-click="toggle(field.name)">
-      <i class="fa discovery-field-type" bo-class="typeIcon(field.type)"></i> <span bo-text="field.name"></span>
-    </a>
-  </li>
-  <li><a ng-click="refresh()"><small>refresh field list</small></a></li>
-</ul>
+<div class="discover-field-list">
+  <h5>Selected</h5>
+  <ul bindonce class="list-unstyled">
+    <li ng-repeat="field in fields|filter:{display:true}" class="discover-field-item">
+      <a ng-click="toggle(field.name)" class="discover-field-add">
+        <i class="fa fa-minus-circle"></i>
+      </a>
+
+      <a ng-click="details(field)" class="discover-field-name"><i ng-click="clicked()" class="fa" bo-class="typeIcon(field.type)"></i> <span bo-text="field.name"></span></a>
+
+
+      <div class="discover-field-details" ng-if="field.details">
+        <div bo-if="field.details.error">{{field.details.error}}</div>
+
+        <div bo-if="!field.details.error">
+          <div ng-repeat="bucket in field.details.buckets" class="discover-field-details-item">
+            <div>
+              <i class="fa fa-search-minus pull-right discover-field-details-filter"
+                ng-click="filter(field, bucket.value, '-')"></i>
+              <i class="fa fa-search-plus pull-right discover-field-details-filter"
+                ng-click="filter(field, bucket.value, '+')"></i>
+              <div css-truncate css-truncate-expandable="true" class="discover-field-details-value">
+                {{bucket.value}}
+              </div>
+            </div>
+            <progressbar value="bucket.percent" max="100" animate="false"><span>{{bucket.percent}}%</span></progressbar>
+          </div>
+        </div>
+      <div>
+    </li>
+  </ul>
+
+  <h5>Available</h5>
+  <ul bindonce class="list-unstyled">
+    <li ng-repeat="field in fields|filter:{display:!true}" class="discover-field-item">
+      <a ng-click="toggle(field.name)" class="discover-field-add">
+        <i class="fa fa-minus-circle"></i>
+      </a>
+
+      <a ng-click="details(field)" class="discover-field-name"><i ng-click="clicked()" class="fa" bo-class="typeIcon(field.type)"></i> <span bo-text="field.name"></span></a>
+
+
+      <div class="discover-field-details" ng-if="field.details">
+        <div bo-if="field.details.error">{{field.details.error}}</div>
+
+        <div bo-if="!field.details.error">
+          <div ng-repeat="bucket in field.details.buckets" class="discover-field-details-item">
+            <div>
+              <i class="fa fa-search-minus pull-right discover-field-details-filter"
+                ng-click="filter(field, bucket.value, '-')"></i>
+              <i class="fa fa-search-plus pull-right discover-field-details-filter"
+                ng-click="filter(field, bucket.value, '+')"></i>
+              <div css-truncate css-truncate-expandable="true" class="discover-field-details-value">
+                {{bucket.value}}
+              </div>
+            </div>
+            <progressbar value="bucket.percent" max="100" animate="false"><span>{{bucket.percent}}%</span></progressbar>
+          </div>
+        </div>
+      <div>
+    </li>
+  </ul>
+</div>
