@@ -242,6 +242,7 @@ define(function (require) {
     }
 
     var addSlashes = function (str) {
+      if(!_.isString(str)) return str;
       str = str.replace(/\\/g, '\\\\');
       str = str.replace(/\'/g, '\\\'');
       str = str.replace(/\"/g, '\\"');
