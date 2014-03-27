@@ -295,6 +295,10 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
 
     var renderTemplate = function(json,params) {
       var _r;
+      json=json.replace(/"to":"([^"]+)"/, '"to": "{{ARGS.to || \'$1\'}}"');
+      json=json.replace(/"from":"([^"]+)"/, '"from": "{{ARGS.from || \'$1\'}}"');
+      json=json.replace(/"query":"([^"]+)"/, '"query": "{{ARGS.query || \'$1\'}}"');
+      json=json.replace(/"style":"([^"]+)"/, '"style": "{{ARGS.style || \'$1\'}}"');
       _.templateSettings = {interpolate : /\{\{(.+?)\}\}/g};
       var template = _.template(json);
       var rendered = template({ARGS:params});
