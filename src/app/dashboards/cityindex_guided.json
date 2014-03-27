@@ -87,7 +87,7 @@
           "type": "text",
           "status": "Stable",
           "mode": "markdown",
-          "content": "See the *Filtering* bar above? Filters let you restrict the results of all the queries.\n\nTo add a new filter; click on an a bar or segment link in one of the panels below.",
+          "content": "See the *Filtering* bar above? Filters let you restrict the results of all the queries.\n\nTo add a new filter; click on an a bar or segment link in one of the panels below.\n\n* [Overview of searching (video)](http://www.elasticsearch.org/videos/kibana-logstash/)",
           "style": {},
           "title": "About filters"
         },
@@ -101,7 +101,7 @@
           "type": "text",
           "status": "Stable",
           "mode": "markdown",
-          "content": "See the *Rows and Panels* below? Panels let you visualise the query results in different ways\n\n* [Kibana help - rows and panels](http://www.elasticsearch.org/guide/en/kibana/current/rows-and-panels.html)\n* [The Histogram & Table panels (video)](http://www.elasticsearch.org/blog/kibana-3-0-0-ga-now-available/) - _scroll down to the bottom_",
+          "content": "See the *Rows and Panels* below? Panels let you visualise the query results in different ways\n\n* [Kibana help - rows and panels](http://www.elasticsearch.org/guide/en/kibana/current/rows-and-panels.html)\n* [The Histogram & Table panels (video)](http://www.elasticsearch.org/videos/timeseries-histogram-kibana/)",
           "style": {},
           "title": "About panels"
         }
