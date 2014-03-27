@@ -11,6 +11,7 @@ define(function (require) {
   var modules = require('modules');
   var notify = require('notify/notify');
 
+  require('utils/rison');
   require('elasticsearch');
   require('angular-route');
   require('angular-bindonce');
@@ -29,7 +30,7 @@ define(function (require) {
   setup(function (err) {
     kibana
       // setup default routes
-      .config(function ($routeProvider) {
+      .config(function ($routeProvider, $provide) {
         $routeProvider
           .otherwise({
             redirectTo: '/' + configFile.defaultAppId
