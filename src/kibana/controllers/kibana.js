@@ -36,15 +36,8 @@ define(function (require) {
         $scope.activeApp = route ? route[1] : null;
       }
 
-      $scope.$on('$routeChangeSuccess', function (event, data) {
-        if (!data) return;
-        updateAppData();
-      });
-
-      $scope.$on('$routeUpdate', function (event, data) {
-        if (!data) return;
-        updateAppData();
-      });
+      $scope.$on('$routeChangeSuccess', updateAppData);
+      $scope.$on('$routeUpdate', updateAppData);
 
       $rootScope.rootDataSource = courier.createSource('search')
         .index('logstash-*');
