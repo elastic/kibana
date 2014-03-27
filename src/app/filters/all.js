@@ -115,7 +115,7 @@ define([
           var time = filterSrv.timeRange('min');
           var from = time.from.toISOString();
           // Since this event is most likely happening very near the value of to, let's add 1 minute of padding
-          var t = new Date(time.to.getTime() * 60000);
+          var t = new Date(time.to.getTime() + 60000);
           var to=t.toISOString();
           return($location.absUrl().replace(/(\?.*)?$/,'?from='+from+'&to='+to+'&query='+text));
       };
