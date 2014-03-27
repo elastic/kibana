@@ -19,7 +19,6 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
     ejsResource, timer, kbnIndex, alertSrv, esVersion, esMinVersion
   ) {
     // A hash of defaults to use when loading a dashboard
-
     var _dash = {
       title: "",
       style: "dark",
@@ -295,10 +294,13 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
 
     var renderTemplate = function(json,params) {
       var _r;
-      json=json.replace(/"to":"([^"]+)"/, '"to": "{{ARGS.to || \'$1\'}}"');
-      json=json.replace(/"from":"([^"]+)"/, '"from": "{{ARGS.from || \'$1\'}}"');
-      json=json.replace(/"query":"([^"]+)"/, '"query": "{{ARGS.query || \'$1\'}}"');
-      json=json.replace(/"style":"([^"]+)"/, '"style": "{{ARGS.style || \'$1\'}}"');
+      if(!json.match('ARGS')) {
+        json=json.replace(/"to"\s*:\s*"([^"]+)"/, '"to": "{{ARGS.to || \'$1\'}}"');
+        json=json.replace(/"from"\s*:\s*"([^"]+)"/, '"from": "{{ARGS.from || \'$1\'}}"');
+        json=json.replace(/"query"\s*:\s*"([^"]+)"/, '"query": "{{ARGS.query || \'$1\'}}"');
+        json=json.replace(/"style"\s*:\s*"([^"]+)"/, '"style": "{{ARGS.style || \'$1\'}}"');
+      }
+
       _.templateSettings = {interpolate : /\{\{(.+?)\}\}/g};
       var template = _.template(json);
       var rendered = template({ARGS:params});
