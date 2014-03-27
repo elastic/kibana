@@ -10,7 +10,7 @@
       <div class="form-group" style="display:inline;">
         <div class="input-group">
           <span class="input-group-addon"><span class="fa fa-search"></span></span>
-          <input placeholder="Search..." type="text" class="form-control" ng-model="query">
+          <input placeholder="Search..." type="text" class="form-control" ng-model="state.query">
         </div>
       </div>
     </form>
@@ -31,7 +31,7 @@
         <discover-timechart></discover-timechart>
         <kbn-table style="overflow-x:auto" class="table table-condensed"
           rows="rows"
-          columns="columns"
+          columns="state.columns"
           refresh="fetch"
           max-length="opts.maxSummaryLength"
           get-sort="getSort"

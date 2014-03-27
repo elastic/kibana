@@ -5,6 +5,13 @@ define(function (require) {
 
   var app = require('modules').get('app/examples');
 
+  app.config(function ($routeProvider) {
+    $routeProvider
+      .when('/examples', {
+        templateUrl: 'kibana/apps/examples/index.html'
+      });
+  });
+
   // main controller for the examples
   app.controller('examples', function ($scope, $location, courier) {
     $scope.examples = [

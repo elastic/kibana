@@ -34,7 +34,7 @@
   <ul bindonce class="list-unstyled">
     <li ng-repeat="field in fields|filter:{display:!true}" class="discover-field-item">
       <a ng-click="toggle(field.name)" class="discover-field-add">
-        <i class="fa fa-minus-circle"></i>
+        <i class="fa fa-plus-circle"></i>
       </a>
 
       <a ng-click="details(field)" class="discover-field-name"><i ng-click="clicked()" class="fa" bo-class="typeIcon(field.type)"></i> <span bo-text="field.name"></span></a>

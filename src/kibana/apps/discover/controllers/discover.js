@@ -23,6 +23,13 @@ define(function (require) {
     var search = $route.current.locals.search;
     if (!search) return notify.fatal('search failed to load');
 
+    $scope.state = {};
+
+    // Will need some watchers here to see if anything that implies a refresh changes
+    $scope.$on('$routeUpdate', function () {
+      $scope.state = $location.search();
+    });
+
     $scope.opts = {
       // number of records to fetch, then paginate through
       sampleSize: 500,
@@ -51,14 +58,15 @@ define(function (require) {
     $scope.fields = null;
 
     // stores the fields we want to fetch
-    $scope.columns = null;
+    $scope.state.columns = null;
 
     // index pattern interval options
     $scope.intervals = intervals;
     $scope.interval = intervals[0];
 
+    // TODO: URL arg should override this
     var initialQuery = search.get('query');
-    $scope.query = initialQuery ? initialQuery.query_string.query : '';
+    $scope.state.query = initialQuery ? initialQuery.query_string.query : '';
 
     // the index to use when they don't specify one
     config.$watch('discover.defaultIndex', function (val) {
@@ -78,17 +86,17 @@ define(function (require) {
         $scope.rows = res.hits.hits;
       });
 
-    $scope.sort = ['_score', 'desc'];
+    $scope.state.sort = ['_score', 'desc'];
 
     $scope.getSort = function () {
-      return $scope.sort;
+      return $scope.state.sort;
     };
 
     $scope.setSort = function (field, order) {
       var sort = {};
       sort[field] = order;
       search.sort([sort]);
-      $scope.sort = [field, order];
+      $scope.state.sort = [field, order];
       $scope.fetch();
     };
 
@@ -111,7 +119,7 @@ define(function (require) {
     };
 
     $scope.resetQuery = function () {
-      $scope.query = initialQuery ? initialQuery.query_string.query : '';
+      $scope.state.query = initialQuery ? initialQuery.query_string.query : '';
       $scope.fetch();
     };
 
@@ -120,16 +128,16 @@ define(function (require) {
         // set the index on the savedSearch
         search.index($scope.opts.index);
         // clear the columns and fields, then refetch when we do a search
-        $scope.columns = $scope.fields = null;
+        $scope.state.columns = $scope.fields = null;
       }
 
       if (!$scope.fields) getFields();
 
       search
         .size($scope.opts.sampleSize)
-        .query(!$scope.query ? null : {
+        .query(!$scope.state.query ? null : {
           query_string: {
-            query: $scope.query
+            query: $scope.state.query
           }
         });
     }
@@ -138,6 +146,10 @@ define(function (require) {
       updateDataSource();
       // fetch just this savedSearch
       search.fetch();
+    };
+
+    $scope.updateState = function () {
+      //$location.search($scope.state);
     };
 
     var activeGetFields;
@@ -163,7 +175,7 @@ define(function (require) {
           if (!fields) return;
 
           $scope.fields = [];
-          $scope.columns = $scope.columns || [];
+          $scope.state.columns = $scope.state.columns || [];
 
           // Inject source into list;
           $scope.fields.push({name: '_source', type: 'source', display: false});
@@ -189,30 +201,33 @@ define(function (require) {
       });
     }
 
+    // TODO: On array fields, negating does not negate the combination, rather all terms
     $scope.filterQuery = function (field, value, operation) {
       value = _.isArray(value) ? value : [value];
       operation = operation || '+';
 
       _.each(value, function (clause) {
-        $scope.query = $scope.query + ' ' + operation + field + ':"' + addSlashes(clause) + '"';
+        $scope.state.query = $scope.state.query + ' ' + operation + field + ':"' + addSlashes(clause) + '"';
       });
 
       $scope.fetch();
     };
 
     $scope.toggleField = function (name) {
+      console.log('toggling', name);
+
       var field = _.find($scope.fields, { name: name });
 
       // toggle the display property
       field.display = !field.display;
 
-      if ($scope.columns.length === 1 && $scope.columns[0] === '_source') {
-        $scope.columns = _.toggleInOut($scope.columns, name);
-        $scope.columns = _.toggleInOut($scope.columns, '_source');
+      if ($scope.state.columns.length === 1 && $scope.state.columns[0] === '_source') {
+        $scope.state.columns = _.toggleInOut($scope.state.columns, name);
+        $scope.state.columns = _.toggleInOut($scope.state.columns, '_source');
         _.find($scope.fields, {name: '_source'}).display = false;
 
       } else {
-        $scope.columns = _.toggleInOut($scope.columns, name);
+        $scope.state.columns = _.toggleInOut($scope.state.columns, name);
       }
 
       refreshColumns();
@@ -233,16 +248,18 @@ define(function (require) {
       }), 'name');
 
       // Make sure there are no columns added that aren't in the displayed field list.
-      $scope.columns = _.intersection($scope.columns, fields);
+      $scope.state.columns = _.intersection($scope.state.columns, fields);
 
       // If no columns remain, use _source
-      if (!$scope.columns.length) {
+      if (!$scope.state.columns.length) {
         $scope.toggleField('_source');
       }
+
+      $scope.updateState();
     }
 
     var addSlashes = function (str) {
-      if(!_.isString(str)) return str;
+      if (!_.isString(str)) return str;
       str = str.replace(/\\/g, '\\\\');
       str = str.replace(/\'/g, '\\\'');
       str = str.replace(/\"/g, '\\"');

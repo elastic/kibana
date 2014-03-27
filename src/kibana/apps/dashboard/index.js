@@ -17,7 +17,10 @@ define(function (require) {
 
   app.config(function ($routeProvider) {
     $routeProvider
-      .when('/dashboard/:source/', {
+      .when('/dashboard', {
+        templateUrl: 'kibana/apps/dashboard/index.html'
+      })
+      .when('/dashboard/:source', {
         redirectTo: '/dashboard'
       })
       .when('/dashboard/:source/:path', {
