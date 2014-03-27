@@ -6,6 +6,8 @@ define(function (require) {
 
   var app = require('modules').get('app/discover');
 
+  require('services/state');
+
   var intervals = [
     { display: '', val: null },
     { display: 'Hourly', val: 'hourly' },
@@ -15,7 +17,7 @@ define(function (require) {
     { display: 'Yearly', val: 'yearly' }
   ];
 
-  app.controller('discover', function ($scope, config, $q, $route, savedSearches, courier, createNotifier, $location) {
+  app.controller('discover', function ($scope, config, $q, $route, savedSearches, courier, createNotifier, $location, state) {
     var notify = createNotifier({
       location: 'Discover'
     });
@@ -23,12 +25,21 @@ define(function (require) {
     var search = $route.current.locals.search;
     if (!search) return notify.fatal('search failed to load');
 
-    $scope.state = {};
 
-    // Will need some watchers here to see if anything that implies a refresh changes
-    $scope.$on('$routeUpdate', function () {
-      $scope.state = $location.search();
-    });
+    /* Manage state & url state */
+
+    var initialQuery = search.get('query');
+
+    function loadState() {
+      $scope.state = state.get();
+      $scope.state = _.defaults($scope.state, {
+        query: initialQuery ? initialQuery.query_string.query : '',
+        columns: ['_source'],
+        sort: ['_score', 'desc']
+      });
+    }
+
+    loadState();
 
     $scope.opts = {
       // number of records to fetch, then paginate through
@@ -57,16 +68,9 @@ define(function (require) {
     // stores the complete list of fields
     $scope.fields = null;
 
-    // stores the fields we want to fetch
-    $scope.state.columns = null;
-
     // index pattern interval options
     $scope.intervals = intervals;
     $scope.interval = intervals[0];
-
-    // TODO: URL arg should override this
-    var initialQuery = search.get('query');
-    $scope.state.query = initialQuery ? initialQuery.query_string.query : '';
 
     // the index to use when they don't specify one
     config.$watch('discover.defaultIndex', function (val) {
@@ -86,7 +90,6 @@ define(function (require) {
         $scope.rows = res.hits.hits;
       });
 
-    $scope.state.sort = ['_score', 'desc'];
 
     $scope.getSort = function () {
       return $scope.state.sort;
@@ -128,7 +131,7 @@ define(function (require) {
         // set the index on the savedSearch
         search.index($scope.opts.index);
         // clear the columns and fields, then refetch when we do a search
-        $scope.state.columns = $scope.fields = null;
+        //$scope.state.columns = $scope.fields = null;
       }
 
       if (!$scope.fields) getFields();
@@ -145,12 +148,22 @@ define(function (require) {
     $scope.fetch = function () {
       updateDataSource();
       // fetch just this savedSearch
+      $scope.updateState();
       search.fetch();
     };
 
     $scope.updateState = function () {
-      //$location.search($scope.state);
+      state.set($scope.state);
     };
+
+    // This is a hacky optimization for comparing the contents of a large array to a short one.
+    function arrayToKeys(array, value) {
+      var obj = {};
+      _.each(array, function (key) {
+        obj[key] = value || true;
+      });
+      return obj;
+    }
 
     var activeGetFields;
     function getFields() {
@@ -174,6 +187,9 @@ define(function (require) {
         .then(function (fields) {
           if (!fields) return;
 
+
+          var columnObjects = arrayToKeys($scope.state.columns);
+
           $scope.fields = [];
           $scope.state.columns = $scope.state.columns || [];
 
@@ -188,11 +204,11 @@ define(function (require) {
               field.name = name;
 
               _.defaults(field, currentState[name]);
-              $scope.fields.push(_.defaults(field, {display: false}));
+              $scope.fields.push(_.defaults(field, {display: columnObjects[name] || false}));
             });
 
-
           refreshColumns();
+
           defer.resolve();
         }, defer.reject);
 
@@ -214,8 +230,6 @@ define(function (require) {
     };
 
     $scope.toggleField = function (name) {
-      console.log('toggling', name);
-
       var field = _.find($scope.fields, { name: name });
 
       // toggle the display property
@@ -235,13 +249,14 @@ define(function (require) {
 
     $scope.refreshFieldList = function () {
       search.clearFieldCache(function () {
-        getFields(function () {
+        getFields().then(function () {
           $scope.fetch();
         });
       });
     };
 
     function refreshColumns() {
+
       // Get all displayed field names;
       var fields = _.pluck(_.filter($scope.fields, function (field) {
         return field.display;

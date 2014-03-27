@@ -18,16 +18,32 @@ define(function (require) {
         appendToBody: false
       });
     })
-    .controller('kibana', function ($rootScope, $scope, courier, config, configFile, createNotifier, $timeout) {
+    .controller('kibana', function ($rootScope, $scope, courier, config, configFile, createNotifier, $timeout, $location) {
       var notify = createNotifier({
         location: 'Kibana Controller'
       });
       $scope.apps = configFile.apps;
 
-      $scope.$on('$locationChangeSuccess', function (event, uri) {
-        if (!uri) return;
-        var route = uri.match(/#\/([^\/]*)/);
+
+      function updateAppData() {
+        var route = $location.path().split(/\//);
+        var app = _.find($scope.apps, {id: route[1]});
+
+        // Record the last URL w/ state of the app, use for tab.
+        app.lastPath = $location.url().substring(1);
+
+        // Set class of container to application-<whateverApp>
         $scope.activeApp = route ? route[1] : null;
+      }
+
+      $scope.$on('$routeChangeSuccess', function (event, data) {
+        if (!data) return;
+        updateAppData();
+      });
+
+      $scope.$on('$routeUpdate', function (event, data) {
+        if (!data) return;
+        updateAppData();
       });
 
       $rootScope.rootDataSource = courier.createSource('search')

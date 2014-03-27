@@ -32,7 +32,7 @@ define(function (require) {
               data: $scope.data,
               field: field.name,
               count: 5,
-              grouped: true
+              grouped: false
             });
           } else {
             delete field.details;
