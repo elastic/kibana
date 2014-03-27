@@ -111,13 +111,11 @@ define([
   });
 
   module.filter('shareLink', function($location, filterSrv) {
-      return function(text) {
-          var time = filterSrv.timeRange('min');
-          var from = time.from.toISOString();
-          // Since this event is most likely happening very near the value of to, let's add 1 minute of padding
-          var t = new Date(time.to.getTime() + 60000);
-          var to=t.toISOString();
-          return($location.absUrl().replace(/(\?.*)?$/,'?from='+from+'&to='+to+'&query='+text));
+      return function(event) {
+          var from = new Date(Date.parse(event._source["@timestamp"])-60000);
+          var to = new Date(Date.parse(event._source["@timestamp"])+60000);
+          var text=event._id;
+          return($location.absUrl().replace(/(\?.*)?$/,'?from='+from.toISOString()+'&to='+to.toISOString()+'&query=_id:'+text));
       };
   });
 
