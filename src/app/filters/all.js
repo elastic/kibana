@@ -110,6 +110,18 @@ define([
     };
   });
 
+  module.filter('shareLink', function($location, filterSrv) {
+      return function(text) {
+          var time = filterSrv.timeRange('min');
+          var from = time.from.toISOString();
+          // Since this event is most likely happening very near the value of to, let's add 1 minute of padding
+          var t = new Date(time.to.getTime() * 60000);
+          var to=t.toISOString();
+          return($location.absUrl().replace(/(\?.*)?$/,'?from='+from+'&to='+to+'&query='+text));
+      };
+  });
+
+
   module.filter('gistid', function() {
     var gist_pattern = /(\d{5,})|([a-z0-9]{10,})|(gist.github.com(\/*.*)\/[a-z0-9]{5,}\/*$)/;
     return function(input) {
