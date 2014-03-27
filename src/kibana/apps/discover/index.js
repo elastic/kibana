@@ -10,6 +10,7 @@ define(function (require, module, exports) {
   app.config(function ($routeProvider) {
     $routeProvider.when('/discover/:id?', {
       templateUrl: 'kibana/apps/discover/index.html',
+      reloadOnSearch: false,
       resolve: {
         search: function (savedSearches, $route) {
           return savedSearches.get($route.current.params.id);

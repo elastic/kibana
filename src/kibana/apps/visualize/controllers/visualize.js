@@ -5,6 +5,13 @@ define(function (require) {
   require('../factories/vis');
   require('../services/aggs');
 
+  app.config(function ($routeProvider) {
+    $routeProvider
+      .when('/visualize', {
+        templateUrl: 'kibana/apps/visualize/index.html'
+      });
+  });
+
   app.controller('Visualize', function ($scope, courier, createNotifier, Vis, Aggs) {
     var notify = createNotifier({
       location: 'Visualize Controller'
