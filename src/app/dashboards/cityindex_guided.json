@@ -87,7 +87,7 @@
           "type": "text",
           "status": "Stable",
           "mode": "markdown",
-          "content": "See the *Filtering* bar above? Filters let you restrict the results of all the queries.\n\nTo add a new filter; click on an a bar or segment link in one of the panels below.\n * [Overview of searching (video)](http://www.elasticsearch.org/videos/kibana-logstash/)",
+          "content": "See the *Filtering* bar above? Filters let you restrict the results of all the queries.\n\nTo add a new filter; click on an a bar or segment link in one of the panels below.\n\n* [Overview of searching (video)](http://www.elasticsearch.org/videos/kibana-logstash/)",
           "style": {},
           "title": "About filters"
         },
