@@ -19,6 +19,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
     ejsResource, timer, kbnIndex, alertSrv, esVersion, esMinVersion
   ) {
     // A hash of defaults to use when loading a dashboard
+
     var _dash = {
       title: "",
       style: "dark",
