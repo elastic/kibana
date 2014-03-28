@@ -13,6 +13,11 @@ the same host. By default this will attempt to reach ES at the same host you hav
 kibana installed on. You probably want to set it to the FQDN of your
 elasticsearch host
 
+Note: this can also be an object if you want to pass options to the http client. For example:
+
+ +elasticsearch: {server: "http://localhost:9200", withCredentials: true}+
+
+
 ==== default_route
 
 This is the default landing page when you don't specify a dashboard to load. You can specify

@@ -23,6 +23,11 @@ function (Settings) {
      * the same host. By default this will attempt to reach ES at the same host you have
      * kibana installed on. You probably want to set it to the FQDN of your
      * elasticsearch host
+     *
+     * Note: this can also be an object if you want to pass options to the http client. For example:
+     *
+     *  +elasticsearch: {server: "http://localhost:9200", withCredentials: true}+
+     *
      */
     elasticsearch: "http://"+window.location.hostname+":9200",
 
