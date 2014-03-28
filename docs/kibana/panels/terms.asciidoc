@@ -21,7 +21,7 @@ tilt:: In pie chart mode, tilt the chart back to appear as more of an oval shape
 lables:: In pie chart mode, draw labels in the pie slices
 arrangement:: In bar or pie mode, arrangement of the legend. horizontal or vertical
 chart:: table, bar or pie
-counter_pos:: The location of the legend in respect to the chart, above or below.
+counter_pos:: The location of the legend in respect to the chart, above or none.
 spyable:: Set spyable to false to disable the inspect button
 
 ==== Queries
