@@ -255,7 +255,7 @@ function (angular, app, _, L, localRequire) {
 
             _.each(scope.data, function(p) {
               if(!_.isUndefined(p.tooltip) && p.tooltip !== '') {
-                markerList.push(L.marker(p.coordinates).bindLabel(p.tooltip));
+                markerList.push(L.marker(p.coordinates).bindLabel(_.isArray(p.tooltip) ? p.tooltip[0] : p.tooltip));
               } else {
                 markerList.push(L.marker(p.coordinates));
               }
