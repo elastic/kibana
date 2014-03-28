@@ -294,11 +294,18 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
 
     var renderTemplate = function(json,params) {
       var _r;
-      if(!json.match('ARGS')) {
-        json=json.replace(/"to"\s*:\s*"([^"]+)"/, '"to": "{{ARGS.to || \'$1\'}}"');
-        json=json.replace(/"from"\s*:\s*"([^"]+)"/, '"from": "{{ARGS.from || \'$1\'}}"');
-        json=json.replace(/"query"\s*:\s*"([^"]+)"/, '"query": "{{ARGS.query || \'$1\'}}"');
-        json=json.replace(/"style"\s*:\s*"([^"]+)"/, '"style": "{{ARGS.style || \'$1\'}}"');
+      var _json;
+      if(!json.match('ARGS\.(to|from|style|query)')) {
+        try {
+          _json = angular.fromJson(json);
+          _json.style = "{{ARGS.style || '" + _json.style + "'}}";
+          _json.services.filter.list[0].to = "{{ARGS.to || '" + _json.services.filter.list[0].to + "'}}";
+          _json.services.filter.list[0].from = "{{ARGS.from || '" + _json.services.filter.list[0].from + "'}}";
+          _json.services.query.list[0].query = "{{ARGS.query || '" + _json.services.query.list[0].query + "'}}";
+          json=angular.toJson(_json);
+        } catch(e) {
+          _json = false;
+        }
       }
 
       _.templateSettings = {interpolate : /\{\{(.+?)\}\}/g};
