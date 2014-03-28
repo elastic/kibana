@@ -61,9 +61,9 @@ function Remove-WebSite
 
 Import-Module Servermanager
 Add-ServerRole Application-Server
+Add-ServerRole Web-Server
 
 Import-Module WebAdministration
-Add-ServerRole Web-Server
 
 Remove-WebSite "Default Web Site"
 
