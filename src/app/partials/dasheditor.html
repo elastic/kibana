@@ -4,7 +4,7 @@
   <div ng-model="editor.index" bs-tabs style="text-transform:capitalize;">
     <div ng-repeat="tab in ['General','Index','Rows','Controls']" data-title="{{tab}}">
     </div>
-    <div ng-repeat="tab in dashboard.current.nav|editable" ng-if="tab.editable !== false" data-title="{{tab.title || tab.type}}">
+    <div ng-repeat="tab in dashboard.current.nav|editable" data-title="{{tab.title || tab.type}}">
     </div>
   </div>
 
