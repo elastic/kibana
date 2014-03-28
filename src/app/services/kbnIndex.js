@@ -9,7 +9,7 @@ function (angular, _, config, moment) {
 
   var module = angular.module('kibana.services');
 
-  module.service('kbnIndex', function($http, alertSrv) {
+  module.service('kbnIndex', function($http, alertSrv, ejsResource) {
     // returns a promise containing an array of all indices matching the index
     // pattern that exist in a given range
     this.indices = function(from,to,pattern,interval) {
@@ -28,19 +28,36 @@ function (angular, _, config, moment) {
       });
     };
 
+    var ejs = ejsResource(config.elasticsearch);
+
+
     // returns a promise containing an array of all indices in an elasticsearch
     // cluster
     function resolve_indices(indices) {
       var something;
       indices = _.uniq(_.map(indices,  encodeURIComponent));
-      something = $http({
-        url: config.elasticsearch + "/" + indices.join(",") + "/_aliases?ignore_missing=true",
-        method: "GET"
-      });
+
+      something = ejs.client.get("/" + indices.join(",") + "/_aliases?ignore_missing=true",
+        undefined, undefined, function (data, p) {
+          console.log(p);
+          if (p === 404) {
+            return [];
+          }
+          else if(p === 0) {
+            alertSrv.set('Error',"Could not contact Elasticsearch at "+ejs.config.server+
+              ". Please ensure that Elasticsearch is reachable from your system." ,'error');
+          } else {
+            alertSrv.set('Error',"Could not reach "+ejs.config.server+"/_aliases. If you"+
+              " are using a proxy, ensure it is configured correctly",'error');
+          }
+          return [];
+        });
 
       return something.then(function(p) {
+        console.log(p);
+
         var indices = [];
-        _.each(p.data, function(v,k) {
+        _.each(p, function(v,k) {
           indices.push(k);
           // Also add the aliases. Could be expensive on systems with a lot of them
           _.each(v.aliases, function(v, k) {
@@ -48,19 +65,7 @@ function (angular, _, config, moment) {
           });
         });
         return indices;
-      }, function (p) {
-          if (p.status === 404) {
-            return [];
-          }
-          else if(p.status === 0) {
-            alertSrv.set('Error',"Could not contact Elasticsearch at "+config.elasticsearch+
-              ". Please ensure that Elasticsearch is reachable from your system." ,'error');
-          } else {
-            alertSrv.set('Error',"Could not reach "+config.elasticsearch+"/_aliases. If you"+
-              " are using a proxy, ensure it is configured correctly",'error');
-          }
-          return [];
-        });
+      });
     }
 
     /*
