@@ -61,10 +61,6 @@ function (angular, app, _, kbn) {
        */
       arrangement : 'vertical',
       /** @scratch /panels/trends/5
-       * reverse:: true or false. If true, use red for positive, green for negative
-       */
-      reverse : false,
-      /** @scratch /panels/trends/5
        * spyable:: Set to false to disable the inspect icon
        */
       spyable: true,
@@ -134,7 +130,7 @@ function (angular, app, _, kbn) {
       _.each(queries, function(query) {
         var q = $scope.ejs.FilteredQuery(
           querySrv.toEjsObj(query),
-          filterSrv.getBoolFilter(filterSrv.ids()));
+          filterSrv.getBoolFilter(filterSrv.ids));
 
         request = request
           .facet($scope.ejs.QueryFacet(query.id)
@@ -177,6 +173,8 @@ function (angular, app, _, kbn) {
       } else {
         process_results(request.indices($scope.index[_segment]).doSearch(),_segment,query_id);
       }
+
+      console.log(request);
 
     };
 
