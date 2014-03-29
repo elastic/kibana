@@ -110,6 +110,14 @@ define([
     };
   });
 
+  module.filter('editable', function () {
+    return function (data) {
+      return _.filter(data, function (item) {
+        return item.editable !== false;
+      });
+    };
+  });
+
   module.filter('shareLink', function($location, filterSrv) {
       return function(event) {
           var from = new Date(Date.parse(event._source["@timestamp"])-60000);
@@ -118,7 +126,6 @@ define([
           return($location.absUrl().replace(/(\?.*)?$/,'?from='+from.toISOString()+'&to='+to.toISOString()+'&query=_id:'+text));
       };
   });
-
 
   module.filter('gistid', function() {
     var gist_pattern = /(\d{5,})|([a-z0-9]{10,})|(gist.github.com(\/*.*)\/[a-z0-9]{5,}\/*$)/;
