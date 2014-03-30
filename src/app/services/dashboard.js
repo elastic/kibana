@@ -187,7 +187,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
       _.defaults(dashboard,_dash);
       _.defaults(dashboard.index,_dash.index);
       _.defaults(dashboard.loader,_dash.loader);
-      return dashboard;
+      return _.cloneDeep(dashboard);
     };
 
     this.dash_load = function(dashboard) {
@@ -250,6 +250,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
     };
 
     this.to_file = function() {
+      console.log(self.current.services.filter.list);
       var blob = new Blob([angular.toJson(self.current,true)], {type: "application/json;charset=utf-8"});
       // from filesaver.js
       window.saveAs(blob, self.current.title+"-"+new Date().getTime());
