@@ -122,7 +122,7 @@ define([
       _.each(queries, function(q) {
         var _q = $scope.ejs.FilteredQuery(
           querySrv.toEjsObj(q),
-          filterSrv.getBoolFilter(filterSrv.ids));
+          filterSrv.getBoolFilter(filterSrv.ids()));
 
         request = request
           .facet($scope.ejs.QueryFacet(q.id)

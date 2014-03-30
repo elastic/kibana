@@ -173,7 +173,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
       _.each(queries, function(q) {
         var query = $scope.ejs.FilteredQuery(
           querySrv.toEjsObj(q),
-          filterSrv.getBoolFilter(filterSrv.ids)
+          filterSrv.getBoolFilter(filterSrv.ids())
         );
 
         var facet = $scope.ejs.DateHistogramFacet(q.id);

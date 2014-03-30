@@ -145,7 +145,7 @@ function (angular, app, _, L, localRequire) {
         var request = $scope.ejs.Request().indices(dashboard.indices[_segment])
           .query($scope.ejs.FilteredQuery(
             boolQuery,
-            filterSrv.getBoolFilter(filterSrv.ids).must($scope.ejs.ExistsFilter($scope.panel.field))
+            filterSrv.getBoolFilter(filterSrv.ids()).must($scope.ejs.ExistsFilter($scope.panel.field))
           ))
           .fields([$scope.panel.field,$scope.panel.tooltip])
           .size($scope.panel.size);

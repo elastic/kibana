@@ -27,6 +27,8 @@ function (angular, app, _) {
     };
     _.defaults($scope.panel,_d);
 
+    $scope.dashboard = dashboard;
+
     $scope.$on('filter', function() {
       $scope.row.notice = true;
     });
@@ -41,7 +43,7 @@ function (angular, app, _) {
 
     // This function should be moved to the service
     $scope.toggle = function(id) {
-      filterSrv.list[id].active = !filterSrv.list[id].active;
+      dashboard.current.services.filter.list[id].active = !dashboard.current.services.filter.list[id].active;
       dashboard.refresh();
     };
 
