@@ -174,8 +174,6 @@ function (angular, app, _, kbn) {
         process_results(request.indices($scope.index[_segment]).doSearch(),_segment,query_id);
       }
 
-      console.log(request);
-
     };
 
     // Populate scope when we have results
