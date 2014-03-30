@@ -121,7 +121,7 @@ function (angular, app, _, $) {
           .facetFilter($scope.ejs.QueryFilter(
             $scope.ejs.FilteredQuery(
               boolQuery,
-              filterSrv.getBoolFilter(filterSrv.ids)
+              filterSrv.getBoolFilter(filterSrv.ids())
               )))).size(0);
 
       $scope.populate_modal(request);
