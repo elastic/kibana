@@ -46,9 +46,6 @@ define([
     // This is used both for adding filters and modifying them.
     // If an id is passed, the filter at that id is updated
     this.set = function(filter,id,noRefresh) {
-      console.log(dashboard.current.services.filter.list);
-      console.log(dashboard.current.services.filter.list);
-
       var _r;
 
       _.defaults(filter,{
@@ -91,9 +88,6 @@ define([
         _.intersection(_.map(dashboard.current.services.filter.list,
           function(v,k){return parseInt(k,10);}),dashboard.current.services.filter.ids);
       $rootScope.$broadcast('filter');
-
-      console.log(dashboard.current.services.filter.list);
-      console.log(dashboard.current.services.filter.list);
 
       return _r;
     };
