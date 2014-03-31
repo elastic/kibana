@@ -39,7 +39,6 @@ function (angular, _, config, moment) {
 
       something = ejs.client.get("/" + indices.join(",") + "/_aliases?ignore_missing=true",
         undefined, undefined, function (data, p) {
-          console.log(p);
           if (p === 404) {
             return [];
           }
@@ -54,7 +53,6 @@ function (angular, _, config, moment) {
         });
 
       return something.then(function(p) {
-        console.log(p);
 
         var indices = [];
         _.each(p, function(v,k) {
