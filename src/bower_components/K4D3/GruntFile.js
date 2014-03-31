@@ -16,22 +16,9 @@ module.exports = function(grunt) {
                 src: [
                     'src/start.js',
                     'src/core.js',
-                    'src/modules/area.js',
-                    'src/modules/dendrogram.js',
-                    'src/modules/heatmap.js',
+                    'src/tooltip.js',
+                    'src/legend.js',
                     'src/modules/histogram.js',
-                    'src/modules/horizon.js',
-                    'src/modules/line.js',
-                    'src/modules/map.js',
-                    'src/modules/pie.js',
-                    'src/modules/scatterplot.js',
-                    'src/modules/sparkline.js',
-                    'src/modules/spider.js',
-                    'src/modules/sunburst.js',
-                    'src/modules/sortedTable.js',
-                    'src/modules/timeBars.js',
-                    'src/modules/treemap.js',
-                    'src/modules/table.js',
                     'src/end.js'
                 ],
                 dest: 'k4.d3.js'
@@ -65,7 +52,7 @@ module.exports = function(grunt) {
         copy: {
             css: {
                 files: [
-                    { src: 'style/k4.d3.css', dest: 'k4.d3.css' }
+                    { src: 'src/css/k4.d3.css', dest: 'k4.d3.css' }
                 ]
             }
         },

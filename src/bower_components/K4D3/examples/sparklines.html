@@ -51,7 +51,7 @@
     var viz = k4.sparkline()
             .height(100)
             .width(300)
-            .interpolate("basis")
+            .interpolate("cardinal")
             .x(function(d) { return formatDate(d.x); })
             .y(function(d) { return d.y; });
 

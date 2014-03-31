@@ -38,7 +38,7 @@
                 height: 100px;
                 padding: 5px;
                 font: 12px sans-serif;
-                background: black;
+                background: lightgray;
                 border: 0px;
                 border-radius: 8px;
                 pointer-events: none;
@@ -79,7 +79,7 @@
             var viz = k4.area()
                 .height(500)
                 .width(960)
-                .interpolate("linear")
+                .interpolate("cardinal")
                 .x(function(d) { return formatDate(d.x); })
                 .y(function(d) { return d.y; });
 

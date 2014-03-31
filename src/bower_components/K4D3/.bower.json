@@ -32,14 +32,13 @@
     "topojson": "~1.4.6"
   },
   "devDependencies": {},
-  "_release": "1a5f428a2b",
+  "_release": "482f0b6eaf",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "1a5f428a2b4493e9a11934956a7ac8ad9328a5c8"
+    "commit": "482f0b6eafa5996c835b45ba5df1d112c31ac071"
   },
   "_source": "git@github.com:elasticsearch/K4D3.git",
   "_target": "*",
-  "_originalSource": "git@github.com:elasticsearch/K4D3.git",
-  "_direct": true
+  "_originalSource": "git@github.com:elasticsearch/K4D3.git"
 }

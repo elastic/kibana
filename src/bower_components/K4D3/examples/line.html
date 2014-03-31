@@ -35,22 +35,38 @@
 <script>
     var formatDate = d3.time.format("%b %Y").parse,
         data = [
-                {x: "Jan 2013", y: 256, z: 'New York'},
-                {x: "Feb 2013", y: 770, z: 'New York'},
-                {x: "May 2013", y: 159, z: 'New York'},
-                {x: "Oct 2013", y: 106, z: 'New York'},
-                {x: "Jan 2013", y: 456, z: 'San Francisco'},
-                {x: "Feb 2013", y: 370, z: 'San Francisco'},
-                {x: "May 2013", y: 659, z: 'San Francisco'},
-                {x: "Oct 2013", y: 806, z: 'San Francisco'}
+            {
+                place: 'New York',
+                values: [
+                    { x:"Jan 2013", y: 256 },
+                    { x: "Feb 2013", y: 770 },
+                    { x: "May 2013", y: 159 },
+                    { x: "Oct 2013", y: 106 }
+                ]
+            },
+            {
+                place: 'San Francisco',
+                values: [
+                    { x: "Jan 2013", y: 456 },
+                    { x: "Feb 2013", y: 370 },
+                    {x: "May 2013", y: 659 },
+                    {x: "Oct 2013", y: 806 }
+                ]
+            },
+            {
+                place: 'Atlanta',
+                values: [
+                    { x: "Feb 2013", y: 456 },
+                    { x: "Mar 2013", y: 370 },
+                    {x: "Jun 2013", y: 659 },
+                    {x: "Dec 2013", y: 806 }
+                ]
+            }
         ];
 
     var viz = k4.line()
         .height(500)
-        .width(960)
-        .x(function(d) { return formatDate(d.x); })
-        .y(function(d) { return d.y; })
-        .z(function(d) { return d.z; });
+        .width(960);
 
     d3.select("#area-chart")
         .datum(data)

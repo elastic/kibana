@@ -6,73 +6,507 @@
             body {
                 font: 10px sans-serif;
                 fill: #444;
-                background: #f4f4f4;
-            }
-
-            .x.axis .minor {
-                /*stroke-opacity: .5;*/
-            }
-            .x.axis path {
-                display: none;
-            }
-
-            .y.axis line, .y.axis path {
-                fill: none;
-                stroke: #ccc;
-            }
-            rect {
-                fill: #fff;
-            }
-            rect.bordered {
-                stroke: rgba(0,0,0,0.3);
-                stroke-width:0.5px;
-            }
-            .block {
-                stroke: #444;
-                stroke-width:1px;
+                background: #e5e5e5;
+                padding-top: 70px;
             }
         </style>
+        <!-- k4.d3.css stylesheet -->
+        <link rel="stylesheet" href="../k4.d3.css">
     </head>
     <body>
-        <div id="histogram1"></div>
-        <div id="histogram2"></div>
+        <div id="element" style="height: 100%"></div>
 
+        <!-- javascript files -->
         <script src="../lib/d3/d3.min.js"></script>
         <script src="../k4.d3.js"></script>
+        <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 
         <script>
-  
-        // tests 1 - random data
-        var data1 = [];
-        for (var i = 0; i < 20; i++) {
-            data1.push({ x: i, y: Math.random() });
-        }
-        var viz1 = k4.histogram()
-            .width(700)
-            .height(400)
-            .xValue(function(d) { return d.x; })
-            .yValue(function(d) { return d.y; });
-        d3.select("#histogram1")
-            .datum(data1)
-            .call(viz1);
-        
-        // tests 2 - random data
-        var data2 = [];
-        for (var i = 0; i < 120; i++) {
-            data2.push({ x: i, y: 1 + Math.sin(i/30) - 0.5});
-        }
-        console.log(data2);
-        var viz2 = k4.histogram()
-            .width(900)
-            .height(300)
-            .bargap(0.1)
-            .color("#ffa30f")
-            .xValue(function(d) { return d.x; })
-            .yValue(function(d) { return d.y; });
-        d3.select("#histogram2")
-            .datum(data2)
-            .call(viz2);
-            
+            var data = {
+                "rows": [
+                    {
+                        "columns": [
+                            {
+                                "label": "200 requests",
+                                "xAxisLabel": "Date",
+                                "yAxisLabel": "Average Request Size in Bytes",
+                                "layers": [
+                                    {
+                                        "key": "jpg",
+                                        "values": [
+                                            {"x": "Jan", "y": 270},
+                                            {"x": "Feb", "y": 329},
+                                            {"x": "Mar", "y": 166},
+                                            {"x": "Apr", "y": 271},
+                                            {"x": "May", "y": 185},
+                                            {"x": "Jun", "y": 264}
+                                        ]
+                                    },
+                                    {
+                                        "key": "pct",
+                                        "values": [
+                                            {"x": "Jan", "y": 133},
+                                            {"x": "Feb", "y": 123},
+                                            {"x": "Mar", "y": 226},
+                                            {"x": "Apr", "y": 133},
+                                            {"x": "May", "y": 246},
+                                            {"x": "Jun", "y": 153}
+                                        ]
+                                    },
+                                    {
+                                        "key": "png",
+                                        "values": [
+                                            {"x": "Jan", "y": 128},
+                                            {"x": "Feb", "y": 119},
+                                            {"x": "Mar", "y": 122},
+                                            {"x": "Apr", "y": 230},
+                                            {"x": "May", "y": 133},
+                                            {"x": "Jun", "y": 137}
+                                        ]
+                                    },
+                                    {
+                                        "key": "gif",
+                                        "values": [
+                                            {"x": "Jan", "y": 218},
+                                            {"x": "Feb", "y": 110},
+                                            {"x": "Mar", "y": 112},
+                                            {"x": "Apr", "y": 96},
+                                            {"x": "May", "y": 123},
+                                            {"x": "Jun", "y": 87}
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "label": "300 requests",
+                                "xAxisLabel": "Date",
+                                "yAxisLabel": "Average Request Size in Bytes",
+                                "layers": [
+                                    {
+                                        "key": "jpg",
+                                        "values": [
+                                            {"x": "Jan", "y": 170},
+                                            {"x": "Feb", "y": 59},
+                                            {"x": "Mar", "y": 166},
+                                            {"x": "Apr", "y": 171},
+                                            {"x": "May", "y": 85},
+                                            {"x": "Jun", "y": 164}
+                                        ]
+                                    },
+                                    {
+                                        "key": "pct",
+                                        "values": [
+                                            {"x": "Jan", "y": 93},
+                                            {"x": "Feb", "y": 123},
+                                            {"x": "Mar", "y": 26},
+                                            {"x": "Apr", "y": 133},
+                                            {"x": "May", "y": 46},
+                                            {"x": "Jun", "y": 53}
+                                        ]
+                                    },
+                                    {
+                                        "key": "png",
+                                        "values": [
+                                            {"x": "Jan", "y": 68},
+                                            {"x": "Feb", "y": 119},
+                                            {"x": "Mar", "y": 22},
+                                            {"x": "Apr", "y": 130},
+                                            {"x": "May", "y": 93},
+                                            {"x": "Jun", "y": 37}
+                                        ]
+                                    },
+                                    {
+                                        "key": "gif",
+                                        "values": [
+                                            {"x": "Jan", "y": 118},
+                                            {"x": "Feb", "y": 70},
+                                            {"x": "Mar", "y": 62},
+                                            {"x": "Apr", "y": 16},
+                                            {"x": "May", "y": 123},
+                                            {"x": "Jun", "y": 67}
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "label": "400 requests",
+                                "xAxisLabel": "Date",
+                                "yAxisLabel": "Average Request Size in Bytes",
+                                "layers": [
+                                    {
+                                        "key": "jpg",
+                                        "values": [
+                                            {"x": "Jan", "y": 170},
+                                            {"x": "Feb", "y": 159},
+                                            {"x": "Mar", "y": 66},
+                                            {"x": "Apr", "y": 71},
+                                            {"x": "May", "y": 115},
+                                            {"x": "Jun", "y": 94}
+                                        ]
+                                    },
+                                    {
+                                        "key": "pct",
+                                        "values": [
+                                            {"x": "Jan", "y": 33},
+                                            {"x": "Feb", "y": 23},
+                                            {"x": "Mar", "y": 26},
+                                            {"x": "Apr", "y": 33},
+                                            {"x": "May", "y": 46},
+                                            {"x": "Jun", "y": 53}
+                                        ]
+                                    },
+                                    {
+                                        "key": "png",
+                                        "values": [
+                                            {"x": "Jan", "y": 28},
+                                            {"x": "Feb", "y": 19},
+                                            {"x": "Mar", "y": 22},
+                                            {"x": "Apr", "y": 30},
+                                            {"x": "May", "y": 33},
+                                            {"x": "Jun", "y": 47}
+                                        ]
+                                    },
+                                    {
+                                        "key": "gif",
+                                        "values": [
+                                            {"x": "Jan", "y": 18},
+                                            {"x": "Feb", "y": 30},
+                                            {"x": "Mar", "y": 12},
+                                            {"x": "Apr", "y": 16},
+                                            {"x": "May", "y": 33},
+                                            {"x": "Jun", "y": 17}
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "columns": [
+                            {
+                                "label": "200 requests",
+                                "xAxisLabel": "Date",
+                                "yAxisLabel": "Average Request Size in Bytes",
+                                "layers": [
+                                    {
+                                        "key": "jpg",
+                                        "values": [
+                                            {"x": "Jan", "y": 270},
+                                            {"x": "Feb", "y": 329},
+                                            {"x": "Mar", "y": 166},
+                                            {"x": "Apr", "y": 271},
+                                            {"x": "May", "y": 185},
+                                            {"x": "Jun", "y": 264}
+                                        ]
+                                    },
+                                    {
+                                        "key": "pct",
+                                        "values": [
+                                            {"x": "Jan", "y": 133},
+                                            {"x": "Feb", "y": 123},
+                                            {"x": "Mar", "y": 226},
+                                            {"x": "Apr", "y": 133},
+                                            {"x": "May", "y": 246},
+                                            {"x": "Jun", "y": 153}
+                                        ]
+                                    },
+                                    {
+                                        "key": "png",
+                                        "values": [
+                                            {"x": "Jan", "y": 128},
+                                            {"x": "Feb", "y": 119},
+                                            {"x": "Mar", "y": 122},
+                                            {"x": "Apr", "y": 230},
+                                            {"x": "May", "y": 133},
+                                            {"x": "Jun", "y": 137}
+                                        ]
+                                    },
+                                    {
+                                        "key": "gif",
+                                        "values": [
+                                            {"x": "Jan", "y": 218},
+                                            {"x": "Feb", "y": 110},
+                                            {"x": "Mar", "y": 112},
+                                            {"x": "Apr", "y": 96},
+                                            {"x": "May", "y": 123},
+                                            {"x": "Jun", "y": 87}
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "label": "300 requests",
+                                "xAxisLabel": "Date",
+                                "yAxisLabel": "Average Request Size in Bytes",
+                                "layers": [
+                                    {
+                                        "key": "jpg",
+                                        "values": [
+                                            {"x": "Jan", "y": 170},
+                                            {"x": "Feb", "y": 59},
+                                            {"x": "Mar", "y": 166},
+                                            {"x": "Apr", "y": 171},
+                                            {"x": "May", "y": 85},
+                                            {"x": "Jun", "y": 164}
+                                        ]
+                                    },
+                                    {
+                                        "key": "pct",
+                                        "values": [
+                                            {"x": "Jan", "y": 93},
+                                            {"x": "Feb", "y": 123},
+                                            {"x": "Mar", "y": 26},
+                                            {"x": "Apr", "y": 133},
+                                            {"x": "May", "y": 46},
+                                            {"x": "Jun", "y": 53}
+                                        ]
+                                    },
+                                    {
+                                        "key": "png",
+                                        "values": [
+                                            {"x": "Jan", "y": 68},
+                                            {"x": "Feb", "y": 119},
+                                            {"x": "Mar", "y": 22},
+                                            {"x": "Apr", "y": 130},
+                                            {"x": "May", "y": 93},
+                                            {"x": "Jun", "y": 37}
+                                        ]
+                                    },
+                                    {
+                                        "key": "gif",
+                                        "values": [
+                                            {"x": "Jan", "y": 118},
+                                            {"x": "Feb", "y": 70},
+                                            {"x": "Mar", "y": 62},
+                                            {"x": "Apr", "y": 16},
+                                            {"x": "May", "y": 123},
+                                            {"x": "Jun", "y": 67}
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "label": "400 requests",
+                                "xAxisLabel": "Date",
+                                "yAxisLabel": "Average Request Size in Bytes",
+                                "layers": [
+                                    {
+                                        "key": "jpg",
+                                        "values": [
+                                            {"x": "Jan", "y": 170},
+                                            {"x": "Feb", "y": 159},
+                                            {"x": "Mar", "y": 66},
+                                            {"x": "Apr", "y": 71},
+                                            {"x": "May", "y": 115},
+                                            {"x": "Jun", "y": 94}
+                                        ]
+                                    },
+                                    {
+                                        "key": "pct",
+                                        "values": [
+                                            {"x": "Jan", "y": 33},
+                                            {"x": "Feb", "y": 23},
+                                            {"x": "Mar", "y": 26},
+                                            {"x": "Apr", "y": 33},
+                                            {"x": "May", "y": 46},
+                                            {"x": "Jun", "y": 53}
+                                        ]
+                                    },
+                                    {
+                                        "key": "png",
+                                        "values": [
+                                            {"x": "Jan", "y": 28},
+                                            {"x": "Feb", "y": 19},
+                                            {"x": "Mar", "y": 22},
+                                            {"x": "Apr", "y": 30},
+                                            {"x": "May", "y": 33},
+                                            {"x": "Jun", "y": 47}
+                                        ]
+                                    },
+                                    {
+                                        "key": "gif",
+                                        "values": [
+                                            {"x": "Jan", "y": 18},
+                                            {"x": "Feb", "y": 30},
+                                            {"x": "Mar", "y": 12},
+                                            {"x": "Apr", "y": 16},
+                                            {"x": "May", "y": 33},
+                                            {"x": "Jun", "y": 17}
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "columns": [
+                            {
+                                "label": "200 requests",
+                                "xAxisLabel": "Date",
+                                "yAxisLabel": "Average Request Size in Bytes",
+                                "layers": [
+                                    {
+                                        "key": "jpg",
+                                        "values": [
+                                            {"x": "Jan", "y": 270},
+                                            {"x": "Feb", "y": 329},
+                                            {"x": "Mar", "y": 166},
+                                            {"x": "Apr", "y": 271},
+                                            {"x": "May", "y": 185},
+                                            {"x": "Jun", "y": 264}
+                                        ]
+                                    },
+                                    {
+                                        "key": "pct",
+                                        "values": [
+                                            {"x": "Jan", "y": 133},
+                                            {"x": "Feb", "y": 123},
+                                            {"x": "Mar", "y": 226},
+                                            {"x": "Apr", "y": 133},
+                                            {"x": "May", "y": 246},
+                                            {"x": "Jun", "y": 153}
+                                        ]
+                                    },
+                                    {
+                                        "key": "png",
+                                        "values": [
+                                            {"x": "Jan", "y": 128},
+                                            {"x": "Feb", "y": 119},
+                                            {"x": "Mar", "y": 122},
+                                            {"x": "Apr", "y": 230},
+                                            {"x": "May", "y": 133},
+                                            {"x": "Jun", "y": 137}
+                                        ]
+                                    },
+                                    {
+                                        "key": "gif",
+                                        "values": [
+                                            {"x": "Jan", "y": 218},
+                                            {"x": "Feb", "y": 110},
+                                            {"x": "Mar", "y": 112},
+                                            {"x": "Apr", "y": 96},
+                                            {"x": "May", "y": 123},
+                                            {"x": "Jun", "y": 87}
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "label": "300 requests",
+                                "xAxisLabel": "Date",
+                                "yAxisLabel": "Average Request Size in Bytes",
+                                "layers": [
+                                    {
+                                        "key": "jpg",
+                                        "values": [
+                                            {"x": "Jan", "y": 170},
+                                            {"x": "Feb", "y": 59},
+                                            {"x": "Mar", "y": 166},
+                                            {"x": "Apr", "y": 171},
+                                            {"x": "May", "y": 85},
+                                            {"x": "Jun", "y": 164}
+                                        ]
+                                    },
+                                    {
+                                        "key": "pct",
+                                        "values": [
+                                            {"x": "Jan", "y": 93},
+                                            {"x": "Feb", "y": 123},
+                                            {"x": "Mar", "y": 26},
+                                            {"x": "Apr", "y": 133},
+                                            {"x": "May", "y": 46},
+                                            {"x": "Jun", "y": 53}
+                                        ]
+                                    },
+                                    {
+                                        "key": "png",
+                                        "values": [
+                                            {"x": "Jan", "y": 68},
+                                            {"x": "Feb", "y": 119},
+                                            {"x": "Mar", "y": 22},
+                                            {"x": "Apr", "y": 130},
+                                            {"x": "May", "y": 93},
+                                            {"x": "Jun", "y": 37}
+                                        ]
+                                    },
+                                    {
+                                        "key": "gif",
+                                        "values": [
+                                            {"x": "Jan", "y": 118},
+                                            {"x": "Feb", "y": 70},
+                                            {"x": "Mar", "y": 62},
+                                            {"x": "Apr", "y": 16},
+                                            {"x": "May", "y": 123},
+                                            {"x": "Jun", "y": 67}
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "label": "400 requests",
+                                "xAxisLabel": "Date",
+                                "yAxisLabel": "Average Request Size in Bytes",
+                                "layers": [
+                                    {
+                                        "key": "jpg",
+                                        "values": [
+                                            {"x": "Jan", "y": 170},
+                                            {"x": "Feb", "y": 159},
+                                            {"x": "Mar", "y": 66},
+                                            {"x": "Apr", "y": 71},
+                                            {"x": "May", "y": 115},
+                                            {"x": "Jun", "y": 94}
+                                        ]
+                                    },
+                                    {
+                                        "key": "pct",
+                                        "values": [
+                                            {"x": "Jan", "y": 33},
+                                            {"x": "Feb", "y": 23},
+                                            {"x": "Mar", "y": 26},
+                                            {"x": "Apr", "y": 33},
+                                            {"x": "May", "y": 46},
+                                            {"x": "Jun", "y": 53}
+                                        ]
+                                    },
+                                    {
+                                        "key": "png",
+                                        "values": [
+                                            {"x": "Jan", "y": 28},
+                                            {"x": "Feb", "y": 19},
+                                            {"x": "Mar", "y": 22},
+                                            {"x": "Apr", "y": 30},
+                                            {"x": "May", "y": 33},
+                                            {"x": "Jun", "y": 47}
+                                        ]
+                                    },
+                                    {
+                                        "key": "gif",
+                                        "values": [
+                                            {"x": "Jan", "y": 18},
+                                            {"x": "Feb", "y": 30},
+                                            {"x": "Mar", "y": 12},
+                                            {"x": "Apr", "y": 16},
+                                            {"x": "May", "y": 33},
+                                            {"x": "Jun", "y": 17}
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            elem = $("#element")[0],
+            myChart;
+
+            $("#element").width("100%");
+            $("#element").height(0);
+            d3.select(elem).style("padding-bottom", "40%");
+
+            myChart = new k4.Chart(elem, { type: "histogram", stacktype: "expand", yGroup: true, color: ['#81dfe2','#0762b7'] });
+            myChart.render(data);
+            console.log(d3.select(elem).style("padding-bottom"));
         </script>
 
     </body>
