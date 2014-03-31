@@ -135,7 +135,8 @@ function (angular, app, _, kbn, moment) {
         ids         : []
       },
       style   : {'font-size': '9pt'},
-      normTimes : true,
+      normTimes : true,      
+      recordView : false,
     };
     _.defaults($scope.panel,_d);
 

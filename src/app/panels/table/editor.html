@@ -27,6 +27,10 @@
         <label class="small">Time Field</label>
         <input type="text" class="input-small" ng-model="panel.timeField" ng-change="set_refresh(true)" bs-typeahead="fields.list">
       </div>
+      <br>
+      <div class="editor-option">
+        <label class="small">Record view <tip>Show the table a field, value list (transpose the table)</tip></label><input type="checkbox" ng-change="set_refresh(true)" ng-model="panel.recordView" ng-checked="panel.recordView">
+      </div>  
     </div>
     <div class="section span6">
       <h5>Columns</h5>
