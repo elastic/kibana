@@ -29,19 +29,26 @@ define([
       // Populate defaults
       _.defaults(dashboard.current.services.filter,_d);
 
-      // Accessors
-      self.list = dashboard.current.services.filter.list;
-      self.ids = dashboard.current.services.filter.ids;
-
-      _.each(self.list,function(f) {
+      _.each(dashboard.current.services.filter.list,function(f) {
         self.set(f,f.id,true);
       });
 
     };
 
+    this.ids = function() {
+      return dashboard.current.services.filter.ids;
+    };
+
+    this.list = function() {
+      return dashboard.current.services.filter.list;
+    };
+
     // This is used both for adding filters and modifying them.
     // If an id is passed, the filter at that id is updated
     this.set = function(filter,id,noRefresh) {
+      console.log(dashboard.current.services.filter.list);
+      console.log(dashboard.current.services.filter.list);
+
       var _r;
 
       _.defaults(filter,{
@@ -50,8 +57,8 @@ define([
       });
 
       if(!_.isUndefined(id)) {
-        if(!_.isUndefined(self.list[id])) {
-          _.extend(self.list[id],filter);
+        if(!_.isUndefined(dashboard.current.services.filter.list[id])) {
+          _.extend(dashboard.current.services.filter.list[id],filter);
           _r = id;
         } else {
           _r = false;
@@ -67,8 +74,8 @@ define([
             mandate: 'must'
           };
           _.defaults(filter,_filter);
-          self.list[_id] = filter;
-          self.ids.push(_id);
+          dashboard.current.services.filter.list[_id] = filter;
+          dashboard.current.services.filter.ids.push(_id);
           _r = _id;
         }
       }
@@ -80,18 +87,23 @@ define([
           dashboard.refresh();
         },0);
       }
-      self.ids = dashboard.current.services.filter.ids =
-        _.intersection(_.map(self.list,function(v,k){return parseInt(k,10);}),self.ids);
+      dashboard.current.services.filter.ids = dashboard.current.services.filter.ids =
+        _.intersection(_.map(dashboard.current.services.filter.list,
+          function(v,k){return parseInt(k,10);}),dashboard.current.services.filter.ids);
       $rootScope.$broadcast('filter');
+
+      console.log(dashboard.current.services.filter.list);
+      console.log(dashboard.current.services.filter.list);
+
       return _r;
     };
 
     this.remove = function(id,noRefresh) {
       var _r;
-      if(!_.isUndefined(self.list[id])) {
-        delete self.list[id];
+      if(!_.isUndefined(dashboard.current.services.filter.list[id])) {
+        delete dashboard.current.services.filter.list[id];
         // This must happen on the full path also since _.without returns a copy
-        self.ids = dashboard.current.services.filter.ids = _.without(self.ids,id);
+        dashboard.current.services.filter.ids = dashboard.current.services.filter.ids = _.without(dashboard.current.services.filter.ids,id);
         _r = true;
       } else {
         _r = false;
@@ -127,10 +139,10 @@ define([
       var added_a_filter = false;
 
       _.each(ids,function(id) {
-        if(self.list[id].active) {
+        if(dashboard.current.services.filter.list[id].active) {
           added_a_filter = true;
 
-          switch(self.list[id].mandate)
+          switch(dashboard.current.services.filter.list[id].mandate)
           {
           case 'mustNot':
             bool.mustNot(self.getEjsObj(id));
@@ -151,7 +163,7 @@ define([
     };
 
     this.getEjsObj = function(id) {
-      return self.toEjsObj(self.list[id]);
+      return self.toEjsObj(dashboard.current.services.filter.list[id]);
     };
 
     this.toEjsObj = function (filter) {
@@ -186,12 +198,12 @@ define([
     };
 
     this.getByType = function(type,inactive) {
-      return _.pick(self.list,self.idsByType(type,inactive));
+      return _.pick(dashboard.current.services.filter.list,self.idsByType(type,inactive));
     };
 
     this.idsByType = function(type,inactive) {
       var _require = inactive ? {type:type} : {type:type,active:true};
-      return _.pluck(_.where(self.list,_require),'id');
+      return _.pluck(_.where(dashboard.current.services.filter.list,_require),'id');
     };
 
     // TOFIX: Error handling when there is more than one field
@@ -201,7 +213,7 @@ define([
 
     // Parse is used when you need to know about the raw filter
     this.timeRange = function(parse) {
-      var _t = _.last(_.where(self.list,{type:'time',active:true}));
+      var _t = _.last(_.where(dashboard.current.services.filter.list,{type:'time',active:true}));
       if(_.isUndefined(_t)) {
         return false;
       }
