@@ -1,165 +1,311 @@
 
-k4.histogram = function() {
+k4.histogram = function(elem, args) {
     'use strict';
 
+    var chart = {},
 
-    var margin = {top: 20, right: 20, bottom: 20, left: 50},
-        width = 500,
-        height = 500,
-        bargap = 0.2,
-        color = "#1191e0",
-        //color = d3.scale.category10(),
-        xValue = function(d) { return d[0]; }, // x axis point
-        yValue = function(d) { return d[1]; }, // y axis point
-        xScale = d3.scale.ordinal(),
-        yScale = d3.scale.linear(),
-        xAxis = d3.svg.axis()
-            .scale(xScale)
-            .orient('bottom')
-            .tickSize(-height)
-            .tickSubdivide(true)
-            .tickPadding(6)
-            .ticks(10),
-        yAxis = d3.svg.axis()
-            .scale(yScale)
-            .orient('left')
-            .tickSize(width)
-            .tickPadding(6)
-            .ticks(10);
+        /* ********** Sizing DOM Elements ************* */
+        // accessing the element width/height
+        elemWidth = parseInt(d3.select(elem).style("width"), 10),
+        elemHeight = parseInt(d3.select(elem).style("padding-bottom"), 10),
+        // number of rows
+        numRows = data.rows.length,
+        // number of charts
+        n = data.rows[0].columns.length,
+        // number of layers per chart
+        m = data.rows[0].columns[0].layers.length,
+        // row width
+        outerWidth = elemWidth,
+        // row height
+        outerHeight = elemHeight / numRows,
+        margin = {
+            top: outerHeight * 0.05,
+            right: outerWidth * 0.01,
+            bottom: outerHeight * 0.15,
+            left: outerWidth * 0.05
+        },
+        // svg width/height
+        width = outerWidth/n - margin.left - margin.right,
+        height = outerHeight - margin.top - margin.bottom,
+        /* ************************************************** */
 
-    function chart(selection) {
-        selection.each(function(data) {
-            // console.log(data);
+        /* ************* Data manipulation **************** */
+        // pulls out the x-axis key values
+        keys = data.rows[0].columns[0].layers[0].values.map(function(item) { return item.x; }),
+        // defines the stack.offset()
+        stacktype = args.stacktype || 'zero',       // 'zero', 'expand', 'group'
+        stack = d3.layout.stack().offset(stacktype).values(function(d) { return d.values; }),
+        // calculates the y-axis max value for all charts, i.e. grouped and stacked
+        yGroup = args.yGroup || false,
+        yGroupMax = d3.max(data.rows.map(function(data) {
+            return d3.max(data.columns, function(col) {
+                return d3.max(stack(col.layers), function(layer) {
+                    return d3.max(layer.values, function(d) {
+                        return d.y;
+                    });
+                });
+            });
+        })),
+        yStackMax = d3.max(data.rows.map(function(data) {
+            return d3.max(data.columns, function(col) {
+                return d3.max(stack(col.layers), function(layer) {
+                    return d3.max(layer.values, function(d) {
+                        return d.y0 + d.y;
+                    });
+                });
+            });
+        })),
+        /* **************************************************** */
 
-            var availableWidth = width - margin.left - margin.right,
-                availableHeight = height - margin.top - margin.bottom,
-                container = d3.select(this);
+        /* *************** D3 parameters ********************* */
+        xScale = d3.scale.ordinal().domain(keys).rangeRoundBands([0, width], 0.1),
+        yScale = d3.scale.linear().range([height, 0]).nice(),
+        xAxis = d3.svg.axis().scale(xScale).ticks(6).tickSize(3, 0).tickPadding(6).orient('bottom'),
+        yAxis = d3.svg.axis().scale(yScale).ticks(6).tickSize(-(width), 0).tickPadding(4).orient('left'),
+        color = d3.scale.linear().domain([0, m - 1]).range(args.color) ||
+            d3.scale.linear().domain([0, m - 1]).range(['#e24700', '#f9e593']),
+        toolTip = k4.tooltip().attr('class', 'k4-tip').html(function(d) {
+            if (d.y < 1) { return '<span>x: ' + d.x + '</span><br><span>y: ' + d.y.toFixed(2) * 100 + '%</span>'; }
+            return '<span>x: ' + d.x + '</span><br><span>y: ' + d.y + '</span>';
+        }).offset([-12, 0]),
+        svg, g, layer;
+        /* ******************************************************** */
 
-            data = data.map(function(d, i) {
-                return [xValue.call(data, d, i), yValue.call(data, d, i)];
+    chart.render = function(data) {
+
+        // append svg(s)
+        svg = getSvg(elem, data);
+
+        // render each chart
+        g = svg.append('g')
+            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+            .each(function(d) {
+                var g = d3.select(this);
+
+                var yMax = d3.max(d.layers, function(d) {
+                    return d3.max(d.values, function(e) {
+                        return e.y;
+                    });
+                });
+                console.log(yMax);
+                console.log(yGroupMax);
+
+                var yStack = d3.max(d.layers, function(d) {
+                    return d3.max(d.values, function(e) {
+                        return e.y0 + e.y;
+                    });
+                });
+
+                // Change y/xScale domain based on stacktype
+                if (stacktype === 'expand') { yScale.domain([0, 1]); }
+
+                if (stacktype === 'group' && yGroup) {
+                    xScale.rangeRoundBands([0, width], 0.2);
+                    yScale.domain([0, yGroupMax]);
+                } else {
+                    xScale.rangeRoundBands([0, width], 0.2);
+                    yScale.domain([0, yMax]);
+                }
+
+                if (stacktype === 'zero' && yGroup) {
+                    yScale.domain([0, yStackMax]);
+                } else {
+                    yScale.domain([0, yStack]);
+                }
+
+                // background rect
+                g.append('g')
+                    .append('rect')
+                    .attr('class', 'bkgd')
+                    .style('fill', '#fff')
+                    .style('opacity', 0.35)
+                    .attr('width', width)
+                    .attr('height', height);
+
+                // x axis
+                g.append('g')
+                    .attr('class', 'x axis')
+                    .attr('transform', 'translate(0,' + height + ')')
+                    .style('stroke-width', 0.5)
+                    .call(xAxis);
+
+                // y axis
+                g.append('g')
+                    .attr('class', 'y axis')
+                    .style('stroke-width', 0.5)
+                    .call(yAxis);
+
+                // layer of bars
+                layer = g.selectAll('.layer')
+                    .data(function(d) { return stack(d.layers); })
+                    .enter().append('g')
+                    .attr('class', 'layer')
+                    .style('fill', function(d, i) { return color(i); });
+
+                //Enter
+                // bars for stack, expand, group
+                layer.selectAll('rect')
+                    .data(function(d) { return d.values; })
+                    .enter().append('rect');
+
+                // Update
+                if (stacktype === 'group') {
+                    layer.selectAll('rect')
+                        .attr('x', function(d, i, j) { return xScale(d.x) + xScale.rangeBand() / m * j; })
+                        .attr('width', xScale.rangeBand() / m)
+                        .attr('y', function(d) { return yScale(d.y); })
+                        .attr('height', function(d) { return height - yScale(d.y); })
+                        .on('mouseover', toolTip.show)
+                        .on('mouseout', toolTip.hide);
+                } else {
+                    layer.selectAll('rect')
+                        .attr('width', xScale.rangeBand())
+                        .attr('x', function(d) { return xScale(d.x); })
+                        .attr('y', function(d) { return yScale(d.y0 + d.y); })
+                        .attr('height', function(d) { return yScale(d.y0) - yScale(d.y0 + d.y); })
+                        .on('mouseover', toolTip.show)
+                        .on('mouseout', toolTip.hide);
+                }
+
+                //Exit
+                layer.selectAll('rect').data(function(d) { return d.values; }).exit().remove();
             });
 
-            xScale
-                .domain( data.map(function(d) { return d[0]; }) )//.nice()
-                .rangeBands([0, availableWidth], bargap);
+        // Window resize
+        d3.select(window).on('resize', resize);
 
-            yScale
-                  .domain([0, d3.max(data, function(d) { return d[1]; })]).nice()
-                  .range([availableHeight, 0]);
+        // k4 tooltip function
+        g.call(toolTip);
 
-            var svg = d3.select(this).selectAll('svg').data([data]);
-            
-            var gEnter = svg.enter().append('svg').append('g').attr('class', 'inner');
-            gEnter.append('g').attr('class', 'bkgd');
-            gEnter.append('g').attr('class', 'x axis');
-            gEnter.append('g').attr('class', 'y axis');
-            gEnter.append('g').attr('class', 'bargroup');
+        return svg;
+    };
 
-            svg.attr('width', width)
-                .attr('height', height);
-            
-            var bars = gEnter.selectAll('g.bargroup')
-                .selectAll('.vertices')
-                .data(data);
+    // append layout divs to elem and bind layout data
+    function getSvg(elem, data) {
+        var rows, cols, svg;
 
-            bars.exit().remove();
+        rows = d3.select(elem).selectAll('div')
+            .data(data.rows)
+            .enter().append('div')
+            .attr('class', function(d, i) { return 'row r' + i; });
 
-            var barsEnter = bars.enter()
-                .append('rect')
-                .attr('x', function(d) { return xScale(d[0]); })
-                .attr('width', xScale.rangeBand())
-                .attr('y', function(d) { return yScale(d[1]); })
-                .attr('height', function(d) { return availableHeight - yScale(d[1]); });
+        cols = rows.selectAll('div')
+            .data(function(d) { return d.columns; })
+            .enter().append('div')
+            .attr('class', function(d,i){ return 'col c' + i; });
 
-            bars
-                .attr('class', function(d,i) {
-                    return yValue(d,i) < 0 ? 'bar negative' : 'bar positive';
-                })
-                .style("fill", function () {
-                    return color;
-                });
-                //.style("stroke", function (d) {
-                //    return color(0);
-                //});
+        svg = cols.append('svg')
+            .attr("width", outerWidth/n)
+            .attr("height", outerHeight);
 
-            var g = svg.select('g')
-              .attr('transform', 'translate(' + margin.left + ', ' + margin.top + ')');
+        return svg;
+    }
 
-            g.select('g.bkgd')
-                .append('rect')
-                .attr('width', availableWidth)
-                .attr('height', availableHeight);
-            
-            g.select('g.x.axis')
-                .attr('transform', 'translate(0,' + yScale.range()[0] + ')')
+    function resize() {
+        /* Update graph using new width and height */
+        var elemWidth = parseInt(d3.select(elem).style("width"), 10),
+            elemHeight = parseInt(d3.select(elem).style("padding-bottom"), 10),
+            outerWidth = elemWidth / n,
+            outerHeight = elemHeight / numRows,
+            width = outerWidth - margin.left - margin.right,
+            height = outerHeight - margin.top - margin.bottom;
+
+        d3.select(".row r").style("width", elemWidth).style("height", outerHeight);
+        d3.select(".col c").style ("width", outerWidth).style("height", outerHeight);
+        svg.attr("width", outerWidth).attr("height", outerHeight);
+
+        g.each(function(d) {
+            var g = d3.select(this);
+
+            var yMax = d3.max(d.layers, function(d) { return d3.max(d.values, function(e) { return e.y; }); });
+            var yStack = d3.max(d.layers, function(d) { return d3.max(d.values, function(e) { return e.y0 + e.y; }); });
+
+            // Change y/xScale domain based on stacktype
+            // Change y/xScale domain based on stacktype
+            if (stacktype === 'expand') { yScale.domain([0, 1]); }
+
+            if (stacktype === 'group' && yGroup) {
+                yScale.domain([0, yGroupMax]);
+                xScale.rangeRoundBands([0, width], 0.2);
+            } else {
+                yScale.domain([0, yMax]);
+                xScale.rangeRoundBands([0, width], 0.2);
+            }
+
+            if (stacktype === 'zero' && yGroup) {
+                yScale.domain([0, yStackMax]);
+            } else {
+                yScale.domain([0, yStack]);
+            }
+
+            /* Update the range of the scale with new width/height */
+            if (stacktype === "group") { xScale.rangeRoundBands([0, width], 0.4); }
+            else { xScale.rangeRoundBands([0, width], 0.1); }
+            yScale.range([height, 0]).nice();
+            xAxis.ticks(Math.max(width/50, 2));
+            yAxis.ticks(Math.max(height/20, 2)).tickSize(-(width), 0);
+
+            if (width < 300 && height < 80) {
+                g.select('.x.axis').style('display', 'none');
+            } else {
+                g.select('.x.axis').style('display', 'initial');
+                g.select('.y.axis').style('display', 'initial');
+            }
+
+            g.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            g.selectAll(".bkgd").attr("width", width).attr("height", height);
+
+            /* Update the axis with the new scale */
+            g.select('.x.axis')
+                .attr("transform", "translate(0," + height + ")")
                 .call(xAxis);
 
-            g.select('g.y.axis')
-                //.attr('transform', 'translate(-6,0)')
-                .call(yAxis.tickSize(-availableWidth));
+            g.select('.y.axis')
+                .call(yAxis);
 
+            /* Force D3 to recalculate and update the line */
+            if (stacktype === "group") {
+                layer.selectAll("rect")
+                    .attr( "x", function (d, i, j) { return xScale(d.x) + xScale.rangeBand() / n * j; })
+                    .attr("width", xScale.rangeBand() / n)
+                    .attr( "y", function (d) { return yScale(d.y); })
+                    .attr( "height", function (d) { return height - yScale(d.y); });
+            }
+
+            g.selectAll('rect')
+                .attr("width", xScale.rangeBand())
+                .attr("x", function(d) { return xScale(d.x); })
+                .attr("height", function(d) { return yScale(d.y0) - yScale(d.y0 + d.y); })
+                .attr("y", function(d) { return yScale(d.y0 + d.y); });
         });
     }
 
-    function X(d) {
-        return xScale(d[0]);
-    }
-
-    function Y(d) {
-        return yScale(d[1]);
-    }
-
-    chart.margin = function(_) {
-        if (!arguments.length) { return margin; }
-        margin.top    = typeof _.top    !== 'undefined' ? _.top    : margin.top;
-        margin.right  = typeof _.right  !== 'undefined' ? _.right  : margin.right;
-        margin.bottom = typeof _.bottom !== 'undefined' ? _.bottom : margin.bottom;
-        margin.left   = typeof _.left   !== 'undefined' ? _.left   : margin.left;
-        return chart;
+    chart.margin = function() {
+        if (!args.margin) { return margin; }
+        margin.top    = typeof args.margin.top    !== 'undefined' ? args.margin.top    : margin.top;
+        margin.right  = typeof args.margin.right  !== 'undefined' ? args.margin.right  : margin.right;
+        margin.bottom = typeof args.margin.bottom !== 'undefined' ? args.margin.bottom : margin.bottom;
+        margin.left   = typeof args.margin.left   !== 'undefined' ? args.margin.left   : margin.left;
+        return margin;
     };
 
-    chart.width = function(_) {
-        if (!arguments.length) { return width; }
-        width = _;
-        return chart;
+    chart.width = function() {
+        if (!args.width) { return width; }
+        width = args.width;
+        return width;
     };
 
-    chart.height = function(_) {
-        if (!arguments.length) { return height; }
-        height = _;
-        return chart;
+    chart.height = function() {
+        if (!args.height) { return height; }
+        height = args.height;
+        return height;
     };
 
-    chart.color = function(_) {
-        if (!arguments.length) { return color; }
-        bargap = _;
+    chart.color = function() {
+        if (!args.color) { return color; }
+        color = args.color;
         return color;
     };
 
-    chart.bargap = function(_) {
-        if (!arguments.length) { return bargap; }
-        bargap = _;
-        return chart;
-    };
-
-    chart.xValue = function(_) {
-        if (!arguments.length) { return xValue; }
-        xValue = _;
-        return chart;
-    };
-
-    chart.yValue = function(_) {
-        if (!arguments.length) { return yValue; }
-        yValue = _;
-        return chart;
-    };
-
-    chart.color = function(_) {
-        if (!arguments.length) { return color; }
-        color = _;
-        return chart;
-    };
-
     return chart;
-
 };

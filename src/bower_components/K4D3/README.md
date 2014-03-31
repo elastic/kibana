@@ -4,7 +4,7 @@ D3 Visualization Library for Kibana 4!
 ## Environment Setup
 1. Fork the repository. You will need node, npm, bower, and grunt installed.
 
-  a. Install node and npm.
+  a. Download and install <a href="http://nodejs.org/download">Node</a>.
 
   b. To install Bower, run:
 

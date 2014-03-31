@@ -28,6 +28,7 @@
     "angular-route": "~1.2.14",
     "gridster": "~0.5.0",
     "angular-mocks": "~1.2.14",
+    "K4D3": "git@github.com:elasticsearch/K4D3.git",
     "font-awesome": "~4.0.3",
     "requirejs-text": "~2.0.10",
     "async": "~0.2.10",

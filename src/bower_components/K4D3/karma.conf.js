@@ -10,7 +10,7 @@ module.exports = function(config) {
         files: [
             //{pattern: 'lib/**/*.js', included: false},
             {pattern: 'lib/d3/*.js', included: true},
-            {pattern: 'src/**/*.js', included: true},
+            {pattern: 'k4.d3.js', included: true},
             {pattern: 'test/*Spec.js', included: true},
             {pattern: 'test/**/*Spec.js', included: true}
         ],
