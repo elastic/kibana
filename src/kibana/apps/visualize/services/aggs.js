@@ -3,7 +3,9 @@ define(function (require) {
   require('utils/mixins');
   var _ = require('lodash');
 
-  function AggsService() {
+  var app = require('modules').get('app/visualize');
+
+  app.service('Aggs', function () {
     this.metricAggs = [
       {
         name: 'count',
@@ -29,23 +31,26 @@ define(function (require) {
     this.metricAggsByName = _.indexBy(this.metricAggs, 'name');
 
     this.bucketAggs = [
-      {
-        name: 'histogram',
-        display: 'Histogram',
-        params: {
-          size: {},
-          order: {
-            options: [
-              { display: 'Top', val: 'desc' },
-              { display: 'Bottom', val: 'asc' }
-            ],
-            default: 'desc',
-            toJSON: function (val) {
-              return { _count: val };
-            }
-          }
-        }
-      },
+      // {
+      //   name: 'histogram',
+      //   display: 'Histogram',
+      //   params: {
+      //     size: {},
+      //     order: {
+      //       options: [
+      //         { display: 'Top', val: 'desc' },
+      //         { display: 'Bottom', val: 'asc' }
+      //       ],
+      //       default: 'desc',
+      //       toJSON: function (val) {
+      //         return { _count: val };
+      //       }
+      //     }
+      //   },
+      //   makeLabel: function (params) {
+
+      //   }
+      // },
       {
         name: 'terms',
         display: 'Terms',
@@ -61,6 +66,10 @@ define(function (require) {
               return { _count: val };
             }
           }
+        },
+        makeLabel: function (params) {
+          var order = _.find(this.params.order.options, { val: params.order._count });
+          return order.display + ' ' + params.size + ' ' + params.field;
         }
       },
       {
@@ -78,6 +87,10 @@ define(function (require) {
             ],
             default: 'hour'
           },
+        },
+        makeLabel: function (params) {
+          var interval = _.find(this.params.interval.options, { val: params.interval });
+          return interval.display + ' ' + params.field;
         }
       }
     ];
@@ -87,7 +100,7 @@ define(function (require) {
 
     this.aggsByFieldType = {
       number: [
-        this.bucketAggsByName.histogram,
+        // this.bucketAggsByName.histogram,
         this.bucketAggsByName.terms,
         // 'range'
       ],
@@ -113,8 +126,5 @@ define(function (require) {
         // 'range'
       ]
     };
-  }
-
-  require('modules').get('app/visualize')
-    .service('Aggs', AggsService);
+  });
 });

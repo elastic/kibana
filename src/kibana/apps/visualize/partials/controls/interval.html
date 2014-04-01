@@ -1,23 +1,24 @@
-<table class="agg-config-interval">
-<tr>
-  <td>
-    <select
-      ng-model="config.interval"
-      ng-options="opt.val as opt.display for opt in aggParams.interval.options"
-      class="form-control"
-      name="interval">
-    </select>
-  </td>
-  <!-- <td ng-if="config.interval === 'customInterval'">
-    <input
-      ng-model="config.customInterval"
-      class="form-control"
-      type="number"
-      name="custom interval">
-  </td>
-  <td ng-if="config.interval === 'customInterval'">
-    <kbn-info info="'interval bewteen timestamp measurements, in milliseconds'"></kbn-info>
-  </td> -->
-</tr>
-</table>
+<div class="form-group">
+  <table class="agg-config-interval">
+  <tr>
+    <td>
+      <select
+        ng-model="config.interval"
+        ng-options="opt.val as opt.display for opt in aggParams.interval.options"
+        class="form-control"
+        name="interval">
+      </select>
+    </td>
+    <!-- <td ng-if="config.interval === 'customInterval'">
+      <input
+        ng-model="config.customInterval"
+        class="form-control"
+        type="number"
+        name="custom interval">
+    </td>
+    <td ng-if="config.interval === 'customInterval'">
+      <kbn-info info="'interval bewteen timestamp measurements, in milliseconds'"></kbn-info>
+    </td> -->
+  </tr>
+  </table>
 </div>

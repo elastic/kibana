@@ -1,0 +1,25 @@
+<div class="config-controls">
+  <button
+    ng-if="category.configs.length > 1"
+    ng-click="move(config, -1)"
+    type="button"
+    ng-disabled="category.configs.indexOf(config) < 1"
+    class="btn btn-default">
+    <i class="fa fa-caret-up"></i>
+  </button>
+  <button
+    ng-if="category.configs.length > 1"
+    ng-click="move(config, 1)"
+    type="button"
+    ng-disabled="category.configs.indexOf(config) >= category.configs.length - 1"
+    class="btn btn-default">
+    <i class="fa fa-caret-down"></i>
+  </button>
+  <button
+    ng-if="category.configs.length > category.min"
+    ng-click="move(config, false)"
+    type="button"
+    class="btn btn-danger">
+    <i class="fa fa-times"></i>
+  </button>
+</div>

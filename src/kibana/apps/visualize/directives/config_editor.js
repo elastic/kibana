@@ -6,6 +6,8 @@ define(function (require) {
   require('filters/field_type');
 
   app.directive('visConfigEditor', function ($compile, Vis, Aggs) {
+    var headerHtml = require('text!../partials/editor/header.html');
+
     var categoryOptions = {
       metric: {
         template: require('text!../partials/editor/metric.html')
@@ -24,7 +26,7 @@ define(function (require) {
       }
     };
 
-    var controlTemplates = {
+    var controlHtml = {
       orderAndSize: require('text!../partials/controls/order_and_size.html'),
       interval: require('text!../partials/controls/interval.html'),
       globalLocal: require('text!../partials/controls/global_local.html')
@@ -87,16 +89,16 @@ define(function (require) {
           });
 
           if (params.order && params.size) {
-            controlsHtml += ' ' + controlTemplates.orderAndSize;
+            controlsHtml += ' ' + controlHtml.orderAndSize;
           }
 
           if (params.interval) {
-            controlsHtml += ' ' + controlTemplates.interval;
+            controlsHtml += ' ' + controlHtml.interval;
             if (!controlsHtml.match(/aggParams\.interval\.options/)) ; //debugger;
           }
 
           if ($scope.config.categoryName === 'group') {
-            controlsHtml += ' ' + controlTemplates.globalLocal;
+            controlsHtml += ' ' + controlHtml.globalLocal;
           }
         }
 
@@ -108,8 +110,10 @@ define(function (require) {
       restrict: 'E',
       scope: {
         config: '=',
+        category: '=',
         fields: '=',
-        vis: '='
+        vis: '=',
+        move: '='
       },
       link: function ($scope, $el, attr) {
         var categoryName = $scope.config.categoryName;
@@ -119,7 +123,7 @@ define(function (require) {
         $scope.Vis = Vis;
 
         // attach a copy of the template to the scope and render
-        $el.html($compile(opts.template)($scope));
+        $el.html($compile(headerHtml + '\n' + opts.template)($scope));
 
         _.defaults($scope.val, opts.defVal || {});
         if (opts.setup) opts.setup($scope, $el);

@@ -20,12 +20,8 @@ define(function (require) {
       // the dataSource that will populate the
       this.dataSource = $rootScope.rootDataSource.extend().size(0);
 
-      // master list of configs, addConfig() writes here and to the list within each
-      // config category, removeConfig() does the inverse
-      this.configs = [];
-
       // setup each config category
-      Vis.configCategories.forEach(function (category) {
+      Vis.configCategoriesInFetchOrder.forEach(function (category) {
         var myCat = _.defaults(config[category.name] || {}, category.defaults);
         myCat.configs = [];
         this[category.name] = myCat;
@@ -42,6 +38,8 @@ define(function (require) {
     Vis.configCategories = [
       {
         name: 'segment',
+        displayOrder: 2,
+        fetchOrder: 1,
         defaults: {
           min: 0,
           max: Infinity
@@ -52,6 +50,8 @@ define(function (require) {
       },
       {
         name: 'metric',
+        displayOrder: 1,
+        fetchOrder: 2,
         defaults: {
           min: 0,
           max: 1
@@ -62,6 +62,8 @@ define(function (require) {
       },
       {
         name: 'group',
+        displayOrder: 3,
+        fetchOrder: 3,
         defaults: {
           min: 0,
           max: 1
@@ -73,15 +75,20 @@ define(function (require) {
       },
       {
         name: 'split',
+        displayOrder: 4,
+        fetchOrder: 4,
         defaults: {
           min: 0,
           max: 2
         },
         configDefaults: {
-          size: 5
+          size: 5,
+          row: true
         }
       }
     ];
+    Vis.configCategoriesInFetchOrder = _.sortBy(Vis.configCategories, 'fetchOrder');
+    Vis.configCategoriesInDisplayOrder = _.sortBy(Vis.configCategories, 'displayOrder');
     Vis.configCategoriesByName = _.indexBy(Vis.configCategories, 'name');
 
     Vis.prototype.addConfig = function (categoryName) {
@@ -89,7 +96,6 @@ define(function (require) {
       var config = _.defaults({}, category.configDefaults);
       config.categoryName = category.name;
 
-      this.configs.push(config);
       this[category.name].configs.push(config);
 
       return config;
@@ -98,20 +104,19 @@ define(function (require) {
     Vis.prototype.removeConfig = function (config) {
       if (!config) return;
 
-      _.pull(this.configs, config);
       _.pull(this[config.categoryName].configs, config);
     };
+
+    Vis.prototype.configCounts = {};
 
     Vis.prototype.setState = function (state) {
       var vis = this;
 
       vis.dataSource.getFields(function (fields) {
-        vis.configs = [];
-
         _.each(state, function (categoryStates, configCategoryName) {
           if (!vis[configCategoryName]) return;
 
-          vis[configCategoryName].configs = [];
+          vis[configCategoryName].configs.splice(0);
 
           categoryStates.forEach(function (configState) {
             var config = vis.addConfig(configCategoryName);
@@ -127,7 +132,7 @@ define(function (require) {
       var vis = this;
 
       // satify the min count for each category
-      Vis.configCategories.forEach(function (category) {
+      Vis.configCategoriesInFetchOrder.forEach(function (category) {
         var myCat = vis[category.name];
         if (myCat.configs.length < myCat.min) {
           _.times(myCat.min - myCat.configs.length, function () {
@@ -144,7 +149,8 @@ define(function (require) {
      * @return {Array} - The list of config objects
      */
     Vis.prototype.getConfig = function () {
-      var cats = {
+      var vis = this;
+      var positions = {
         split: [],
         global: [],
         segment: [],
@@ -152,43 +158,67 @@ define(function (require) {
         metric: []
       };
 
-      this.configs.forEach(function (config) {
-        var pos = config.categoryName;
-        if (pos === 'group') pos = config.global ? 'global' : 'local';
+      function moveValidatedParam(config, params, paramDef, name) {
+        if (!config[name]) return false;
+        if (!paramDef.custom && paramDef.options && !_.find(paramDef.options, { val: config[name] })) return false;
 
-        if (!config.field || !config.agg) return;
+        // copy over the param
+        params[name] = config[name];
 
+        // provide a hook to covert string values into more complex structures
+        if (paramDef.toJSON) {
+          params[name] = paramDef.toJSON(params[name]);
+        }
+
+        return true;
+      }
+
+      function readAndValidate(config) {
+        // filter out plain unusable configs
+        if (!config || !config.agg || !config.field) return;
+
+        // get the agg used by this config
         var agg = Aggs.aggsByName[config.agg];
         if (!agg || agg.name === 'count') return;
 
-        var params = {
-          categoryName: config.categoryName,
-          agg: config.agg,
-          aggParams: {
-            field: config.field
-          }
+        // copy parts of the config to the "validated" config object
+        var validated = _.pick(config, 'categoryName', 'agg');
+        validated.aggParams = {
+          field: config.field
         };
 
+        // copy over the row if this is a split
+        if (config.categoryName === 'split') {
+          validated.row = !!config.row;
+        }
+
+        // this function will move valus from config.* to validated.aggParams.* when they are
+        // needed for that aggregation, and return true or false based on if all requirements
+        // are meet
+        var moveToAggParams = _.partial(moveValidatedParam, config, validated.aggParams);
+
         // ensure that all of the declared params for the agg are declared on the config
-        var valid = _.every(agg.params, function (paramDef, name) {
-          if (!config[name]) return;
-          if (!paramDef.custom && paramDef.options && !_.find(paramDef.options, { val: config[name] })) return;
+        if (_.every(agg.params, moveToAggParams)) return validated;
+      }
 
-          // copy over the param
-          params.aggParams[name] = config[name];
+      // collect all of the configs from each category,
+      // validate them, filter the invalid ones, and put them into positions
+      Vis.configCategoriesInFetchOrder.forEach(function (category) {
+        var configs = vis[category.name].configs;
 
-          // allow provide a hook to covert string values into more complex structures
-          if (paramDef.toJSON) {
-            params.aggParams[name] = paramDef.toJSON(params.aggParams[name]);
-          }
+        configs = configs
+          .map(readAndValidate)
+          .filter(Boolean);
 
-          return true;
-        });
-
-        if (valid) cats[pos].push(params);
+        if (category.name === 'group') {
+          positions.global = _.where(configs, { global: true });
+          positions.local = _.where(configs, { global: false });
+        } else {
+          positions[category.name] = configs;
+        }
       });
 
-      return cats.split.concat(cats.global, cats.segment, cats.local, cats.metric);
+      return positions.split.concat(positions.global, positions.segment, positions.local, positions.metric);
     };
 
     /**
@@ -199,103 +229,155 @@ define(function (require) {
     Vis.prototype.buildChartDataFromResponse = function (resp) {
       notify.event('convert ES response');
 
-      function createGroup(bucket) {
-        var g = {};
-        if (bucket) g.key = bucket.key;
-        return g;
-      }
-
-      function finishRow(bucket) {
-        // collect the count and bail, free metric!!
-        level.rows.push(row.concat(bucket.value === void 0 ? bucket.doc_count : bucket.value));
-      }
-
       // all aggregations will be prefixed with:
       var aggKeyPrefix = '_agg_';
+
+      // this will transform our flattened rows and columns into the
+      // data structure expected for a visualization
       var converter = converters[this.type];
 
-      // as we move into the different aggs, shift configs
-      var childConfigs = this.getConfig();
-      var lastCol = childConfigs[childConfigs.length - 1];
+      // the list of configs that make up the aggs and eventually
+      // splits and columns, label added
+      var configs = this.getConfig().map(function (col) {
+        var agg = Aggs.aggsByName[col.agg];
+        if (!agg) {
+          col.label = col.agg;
+        } else if (agg.makeLabel) {
+          col.label = Aggs.aggsByName[col.agg].makeLabel(col.aggParams);
+        } else {
+          col.label = agg.display || agg.name;
+        }
+        return col;
+      });
 
-      // into stack, and then back when we leave a level
-      var stack = [];
-      var row = [];
+      var lastCol = configs[configs.length - 1];
 
-      var chartData = createGroup();
-      var level = chartData;
+      // column stack, when we are deap within recursion this
+      // will hold the previous columns
+      var colStack = [];
 
-      (function splitAndFlatten(bucket) {
-        var col = childConfigs.shift();
+      // row stack, similar to the colStack but tracks unfinished rows
+      var rowStack = [];
+
+      // all chart data will be written here or to child chartData
+      // formatted objects
+      var chartData = {};
+
+      var writeRow = function (rows, bucket) {
+        // collect the count and bail, free metric!!
+        rows.push(rowStack.concat(bucket.value === void 0 ? bucket.doc_count : bucket.value));
+      };
+
+      var writeChart = function (chart) {
+        var rows = chart.rows;
+        var cols = chart.columns;
+        delete chart.rows;
+        delete chart.columns;
+
+        converter(chart, cols, rows);
+      };
+
+      var getAggKey = function (bucket) {
+        return Object.keys(bucket)
+          .filter(function (key) {
+            return key.substr(0, aggKeyPrefix.length) === aggKeyPrefix;
+          })
+          .pop();
+      };
+
+      var splitAndFlatten = function (chartData, bucket) {
+        // pull the next column from the configs list
+        var col = configs.shift();
+
         // add it to the top of the stack
-        stack.unshift(col);
+        colStack.unshift(col);
 
-        _.forOwn(bucket, function (result, key) {
-          // filter out the non prefixed keys
-          if (key.substr(0, aggKeyPrefix.length) !== aggKeyPrefix) return;
+        // the actual results for the aggregation is under an _agg_* key
+        var result = bucket[getAggKey(bucket)];
 
-          if (col.categoryName === 'split') {
-            var parent = level;
-            result.buckets.forEach(function (bucket) {
-              var group = createGroup(bucket);
+        switch (col.categoryName) {
+        case 'split':
+          // pick the key for the split's groups
+          var groupsKey = col.row ? 'rows' : 'columns';
 
-              if (parent.groups) parent.groups.push(group);
-              else parent.groups = [group];
+          // the groups will be written here
+          chartData[groupsKey] = [];
 
-              level = group;
-              splitAndFlatten(bucket);
-              if (group.rows && group.columns) {
-                group.data = converter(group.columns, group.rows);
-                delete group.rows;
-                delete group.columns;
-              }
-            });
+          result.buckets.forEach(function (bucket) {
+            // create a new group for each bucket
+            var group = {
+              label: col.label
+            };
+            chartData[groupsKey].push(group);
 
-            level = parent;
-            return;
-          }
+            // down the rabbit hole
+            splitAndFlatten(group, bucket);
 
-          if (!level.columns || !level.rows) {
-            // setup this level to receive records
-            level.columns = [stack[0]].concat(childConfigs);
-            level.rows = [];
+            // flattening this bucket caused a chart to be created
+            // convert the rows and columns into a legit chart
+            if (group.rows && group.columns) writeChart(group);
+          });
+          break;
+        case 'group':
+        case 'segment':
+        case 'metric':
+          // this column represents actual chart data
+          if (!chartData.columns || !chartData.rows) {
+            // copy the current column and remaining columns into the column list
+            chartData.columns = [col].concat(configs);
 
-            // the columns might now end in a metric, but the rows will
-            if (childConfigs[childConfigs.length - 1].categoryName !== 'metric') {
-              level.columns.push({
+            // write rows here
+            chartData.rows = [];
+
+            // if the columns don't end in a metric then we will be
+            // pulling the count of the final bucket as the metric.
+            // Ensure that there is a column for this data
+            if (chartData.columns[chartData.columns.length - 1].categoryName !== 'metric') {
+              chartData.columns.push({
                 categoryName: 'metric',
-                agg: 'count'
+                agg: Aggs.aggsByName.count.name,
+                label: Aggs.aggsByName.count.display
               });
             }
           }
 
           if (col.categoryName === 'metric') {
-            // one row per bucket
-            finishRow(result);
+            // there are no buckets, just values to collect.
+            // Write the the row to the chartData
+            writeRow(chartData.rows, result);
           } else {
-            // keep digging
+            // non-metric aggs create buckets that we need to add
+            // to the rows
             result.buckets.forEach(function (bucket) {
-              // track this bucket's "value" in our temporary row
-              row.push(bucket.key);
+              rowStack.push(bucket.key);
 
               if (col === lastCol) {
-                // also grab the bucket's count
-                finishRow(bucket);
+                // since this is the last column, there is no metric (otherwise it
+                // would be last) so write the row into the chart data
+                writeRow(chartData.rows, bucket);
               } else {
-                splitAndFlatten(bucket);
+                // into the rabbit hole
+                splitAndFlatten(chartData, bucket);
               }
 
-              row.pop();
+              rowStack.pop();
             });
           }
-        });
+          break;
+        }
 
-        childConfigs.unshift(stack.shift());
-      })(resp.aggregations);
+        configs.unshift(colStack.shift());
+      };
+
+      if (resp.aggregations) {
+        splitAndFlatten(chartData, resp.aggregations);
+      }
+
+      // flattening the chart does not always result in a split,
+      // so we need to check for a chart before we return
+      if (chartData.rows && chartData.columns) writeChart(chartData);
 
       notify.event('convert ES response', true);
-
-
       return chartData;
     };
 
