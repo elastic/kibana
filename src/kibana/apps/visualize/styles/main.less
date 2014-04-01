@@ -1,19 +1,47 @@
+@import (reference) "../../../../bower_components/bootstrap/less/bootstrap.less";
+
 .vis-config-panel {
   padding: 0;
 
-  > li {
-    list-style: none;
+  .panel-heading {
+    position: relative;
 
-    .panel-heading {
-      position: relative;
+    button {
+      position: absolute;
+      top: 6px;
+      right: 7px;
+      padding: 3px 8px;
+    }
+  }
+
+  .panel-body {
+    padding: 10px 0;
+  }
+
+  vis-config-editor {
+    display: block;
+    border-top: 1px dashed @panel-inner-border;
+    padding: 10px 10px 0;
+
+    &:first-child {
+      border-top: none;
+    }
+
+    .config-controls {
+      float: right;
+      // just a tiny boost up
+      margin-top: -2px;
 
       button {
-        position: absolute;
-        top: 6px;
-        right: 7px;
-        padding: 3px 8px;
+        font-size: 10px;
+        padding: 2px 4px;
+        font-weight: 100;
       }
     }
+  }
+
+  > li {
+    list-style: none;
   }
 
   .agg-config-interval {

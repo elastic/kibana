@@ -17,30 +17,7 @@ define(function (require) {
       location: 'Visualize Controller'
     });
 
-    var vis = $scope.vis = window.vis = new Vis({
-      config: {
-        metric: {
-          label: 'Y-Axis',
-          min: 1,
-          max: 1
-        },
-        segment: {
-          label: 'X-Axis',
-          min: 1,
-          max: 1
-        },
-        group: {
-          label: 'Color',
-          max: 1
-        },
-        split: {
-          label: 'Rows & Columns',
-          max: 2
-        }
-      }
-    });
-
-    // the object detailing the visualization
+    // // the object detailing the visualization
     // var vis = $scope.vis = window.vis = new Vis({
     //   config: {
     //     metric: {
@@ -55,42 +32,67 @@ define(function (require) {
     //     },
     //     group: {
     //       label: 'Color',
-    //       max: 10
+    //       max: 1
     //     },
     //     split: {
     //       label: 'Rows & Columns',
     //       max: 2
     //     }
-    //   },
-    //   state: {
-    //     split: [
-    //       {
-    //         field: 'response',
-    //         size: 5,
-    //         agg: 'terms'
-    //       },
-    //       {
-    //         field: '_type',
-    //         size: 5,
-    //         agg: 'terms'
-    //       }
-    //     ],
-    //     segment: [
-    //       {
-    //         field: '@timestamp',
-    //         interval: 'week'
-    //       }
-    //     ],
-    //     group: [
-    //       {
-    //         field: 'extension',
-    //         size: 5,
-    //         agg: 'terms',
-    //         global: true
-    //       }
-    //     ]
     //   }
     // });
+
+    var vis = $scope.vis = window.vis = new Vis({
+      config: {
+        metric: {
+          label: 'Y-Axis',
+          min: 1,
+          max: 1
+        },
+        segment: {
+          label: 'X-Axis',
+          min: 1,
+          max: 1
+        },
+        group: {
+          label: 'Color',
+          max: 10
+        },
+        split: {
+          label: 'Rows & Columns',
+          max: Infinity
+        }
+      },
+      state: {
+        split: [
+          {
+            field: '_type',
+            size: 5,
+            agg: 'terms',
+            row: false
+          },
+          {
+            field: 'response',
+            size: 5,
+            agg: 'terms',
+            row: true
+          }
+        ],
+        segment: [
+          {
+            field: '@timestamp',
+            interval: 'day'
+          }
+        ],
+        group: [
+          {
+            field: 'extension',
+            size: 5,
+            agg: 'terms',
+            global: true
+          }
+        ]
+      }
+    });
 
     vis.dataSource.$scope($scope);
 
@@ -125,7 +127,10 @@ define(function (require) {
 
     $scope.updateDataSource = function () {
       notify.event('update data source');
-      var config = _.groupBy(vis.getConfig(), function (config) {
+
+      var config = vis.getConfig();
+
+      config = _.groupBy(config, function (config) {
         switch (config.categoryName) {
         case 'group':
         case 'segment':

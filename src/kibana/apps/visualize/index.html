@@ -4,7 +4,7 @@
     <div class="col-md-3">
       <form ng-submit="updateDataSource()">
         <ul class="vis-config-panel">
-          <li ng-repeat="category in Vis.configCategories">
+          <li ng-repeat="category in Vis.configCategoriesInDisplayOrder">
             <vis-config-category
               category-name="category.name"
               vis="vis"

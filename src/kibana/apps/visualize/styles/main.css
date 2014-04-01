@@ -1,17 +1,107 @@
+.thumbnail > img,
+.thumbnail a > img,
+.carousel-inner > .item > img,
+.carousel-inner > .item > a > img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.btn-group-lg > .btn {
+  padding: 10px 16px;
+  font-size: 18px;
+  line-height: 1.33;
+  border-radius: 6px;
+}
+.btn-group-sm > .btn {
+  padding: 5px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 3px;
+}
+.btn-group-xs > .btn {
+  padding: 1px 5px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 3px;
+}
+.container:before,
+.container:after,
+.container-fluid:before,
+.container-fluid:after,
+.row:before,
+.row:after,
+.form-horizontal .form-group:before,
+.form-horizontal .form-group:after,
+.btn-toolbar:before,
+.btn-toolbar:after,
+.btn-group-vertical > .btn-group:before,
+.btn-group-vertical > .btn-group:after,
+.nav:before,
+.nav:after,
+.navbar:before,
+.navbar:after,
+.navbar-header:before,
+.navbar-header:after,
+.navbar-collapse:before,
+.navbar-collapse:after,
+.pager:before,
+.pager:after,
+.panel-body:before,
+.panel-body:after,
+.modal-footer:before,
+.modal-footer:after {
+  content: " ";
+  display: table;
+}
+.container:after,
+.container-fluid:after,
+.row:after,
+.form-horizontal .form-group:after,
+.btn-toolbar:after,
+.btn-group-vertical > .btn-group:after,
+.nav:after,
+.navbar:after,
+.navbar-header:after,
+.navbar-collapse:after,
+.pager:after,
+.panel-body:after,
+.modal-footer:after {
+  clear: both;
+}
 .vis-config-panel {
   padding: 0;
 }
-.vis-config-panel > li {
-  list-style: none;
-}
-.vis-config-panel > li .panel-heading {
+.vis-config-panel .panel-heading {
   position: relative;
 }
-.vis-config-panel > li .panel-heading button {
+.vis-config-panel .panel-heading button {
   position: absolute;
   top: 6px;
   right: 7px;
   padding: 3px 8px;
+}
+.vis-config-panel .panel-body {
+  padding: 10px 0;
+}
+.vis-config-panel vis-config-editor {
+  display: block;
+  border-top: 1px dashed #dddddd;
+  padding: 10px 10px 0;
+}
+.vis-config-panel vis-config-editor:first-child {
+  border-top: none;
+}
+.vis-config-panel vis-config-editor .config-controls {
+  float: right;
+  margin-top: -2px;
+}
+.vis-config-panel vis-config-editor .config-controls button {
+  font-size: 10px;
+  padding: 2px 4px;
+  font-weight: 100;
+}
+.vis-config-panel > li {
+  list-style: none;
 }
 .vis-config-panel .agg-config-interval td {
   padding-left: 10px;

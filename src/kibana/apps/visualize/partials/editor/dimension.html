@@ -12,8 +12,27 @@
 <div class="form-group" ng-show="availableAggs">
   <select
     name="agg"
+    class="form-control"
     ng-model="config.agg"
     ng-options="agg.name as agg.display for agg in availableAggs">
   </select>
 </div>
-<div class="agg-param-controls">
+<div class="agg-param-controls"></div>
+<div ng-if="config.categoryName === 'split'" class="form-group">
+  <div class="btn-group">
+    <button
+      type="button"
+      class="btn btn-primary"
+      ng-model="config.row"
+      btn-radio="true">
+      Row
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      ng-model="config.row"
+      btn-radio="false">
+      Column
+    </button>
+  </div>
+</div>

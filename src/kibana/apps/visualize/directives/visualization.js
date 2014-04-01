@@ -15,15 +15,13 @@ define(function (require) {
         vis
           .dataSource
           .on('results', function (resp) {
-            $scope.results = vis.buildChartDataFromResponse(resp).groups;
+            $scope.results = vis.buildChartDataFromResponse(resp);
           });
 
         if (!vis.dataSource._$scope) {
           // only link if the dataSource isn't already linked
           vis.dataSource.$scope($scope);
         }
-
-        vis.dataSource.fetch();
       }
     };
   }

@@ -4,6 +4,7 @@
   <div class="panel-heading" >
     {{ category.label }}
     <button
+      type="button"
       ng-if="category.configs.length < category.max"
       ng-click="vis.addConfig(categoryName)"
       class="btn btn-default" >
@@ -11,12 +12,13 @@
     </button>
   </div>
   <div class="panel-body">
-    <div ng-repeat="config in category.configs">
-      <vis-config-editor
-        config="config"
-        vis="vis"
-        fields="fields">
-      </vis-config-editor>
-    </div>
+    <vis-config-editor
+      ng-repeat="config in category.configs"
+      config="config"
+      category="category"
+      vis="vis"
+      fields="fields"
+      move="moveHandler">
+    </vis-config-editor>
   </div>
 </div>
