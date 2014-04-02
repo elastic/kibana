@@ -1,5 +1,5 @@
 JS_FILES = \
-		src/start.js \
+		src/index.js \
 		src/core.js \
 		src/modules/area.js \
 		src/modules/dendrogram.js \

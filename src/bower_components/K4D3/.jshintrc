@@ -1,0 +1,37 @@
+/*
+ *   For an explanation of the different configuration
+ *   options listed here, please visit:
+ *   http://www.jshint.com/docs/options/
+ */
+{
+    "browser": true,
+    "node": false,
+    "undef": true,
+    "unused": true,
+    "globals": {
+        "d3": true,
+        "define": true,
+        "k4": true,
+        "window": true,
+        "require": true,
+        "console": true
+    },
+    "curly": true,
+    "eqeqeq": true,
+    "forin": true,
+    "freeze": true,
+    "indent": 4,
+    "latedef": "nofunc",
+    "newcap": true,
+    "noarg": true,
+    "nonbsp": true,
+    "nonew": true,
+    "plusplus": false,
+    "quotmark": "single",
+    "strict": true,
+    "trailing": true,
+    "maxparams": 3,
+    "maxlen": 140,
+    "devel": true,
+    "maxerr": 10
+}
