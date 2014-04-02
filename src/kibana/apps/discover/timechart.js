@@ -13,8 +13,7 @@ define(function (require) {
       },
       link: function ($scope, elem) {
 
-        elem.width(1000);
-        elem.height(300);
+        elem.css({width:1000,height:300});
 
         console.log($scope.data);
 
