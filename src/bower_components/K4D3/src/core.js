@@ -5,15 +5,21 @@
  * Returns the charting function.
  */
 
-k4.Chart = function(elem, args) {
-    'use strict';
+define(function(require) {
+    "use strict";
 
-    if (typeof(k4[args.type]) !== 'function') { throw args.type + " is not a supported k4 function."; }
+    var histogram = require('./modules/histogram');
 
-    var type = args.type,
-        chartFunc = k4[type](elem, args);
+    return function(elem, args) {
+        var type = args.type,
+            charts = {
+            'histogram': histogram
+        };
 
-    return chartFunc;
-};
+        if (typeof(charts[type]) !== 'function') { throw type + " is not a supported k4 function."; }
 
+        var chartFunc = charts[type](elem, args);
 
+        return chartFunc;
+    };
+});

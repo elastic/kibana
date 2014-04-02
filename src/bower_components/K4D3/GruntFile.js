@@ -14,12 +14,7 @@ module.exports = function(grunt) {
             },
             dist: {
                 src: [
-                    'src/start.js',
-                    'src/core.js',
-                    'src/tooltip.js',
-                    'src/legend.js',
-                    'src/modules/histogram.js',
-                    'src/end.js'
+                    'src/index.js'
                 ],
                 dest: 'k4.d3.js'
             }
