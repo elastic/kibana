@@ -28,16 +28,21 @@
           filter="filterQuery">
         </disc-field-chooser>
       </div>
-      <div class="col-md-10 discover-table">
-        <discover-timechart data="chart"></discover-timechart>
-        <kbn-table style="overflow-x:auto" class="table table-condensed"
-          rows="rows"
-          columns="state.columns"
-          refresh="fetch"
-          max-length="opts.maxSummaryLength"
-          get-sort="getSort"
-          set-sort="setSort">
-        </kbn-table>
+      <div class="col-md-10">
+        <!-- <discover-timechart data="chart"></discover-timechart> -->
+        <div class="discover-table"
+          fixed-scroll='table'
+          fixed-scroll-trigger="state.columns">
+
+          <kbn-table class="table table-condensed"
+            rows="rows"
+            columns="state.columns"
+            refresh="fetch"
+            max-length="opts.maxSummaryLength"
+            get-sort="getSort"
+            set-sort="setSort">
+          </kbn-table>
+        </div>
       </div>
     </div>
   </div>

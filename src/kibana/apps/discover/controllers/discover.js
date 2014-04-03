@@ -7,6 +7,8 @@ define(function (require) {
   var app = require('modules').get('app/discover');
 
   require('services/state');
+  require('directives/fixed_scroll');
+
 
   var intervals = [
     { display: '', val: null },

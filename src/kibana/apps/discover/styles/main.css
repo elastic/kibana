@@ -70,7 +70,10 @@
 }
 .discover-table {
   overflow-y: auto;
+  overflow-x: auto;
   margin-top: 10px;
+  padding-left: 0px !important;
+  padding-right: 0px !important;
 }
 .discover-field-list .discover-field-item {
   white-space: nowrap;
