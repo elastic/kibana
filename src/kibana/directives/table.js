@@ -72,7 +72,8 @@ define(function (require) {
         refresh: '=',
         getSort: '=',
         setSort: '=',
-        maxLength: '=?'
+        maxLength: '=?',
+        mapping: '=?'
       },
       link: function ($scope, element, attrs) {
         // track a list of id's that are currently open, so that
@@ -252,6 +253,7 @@ define(function (require) {
           table.appendChild(tbody);
 
           // itterate each row and append it to the tbody
+          // TODO: This doesn't work since _source is not flattened
           _(row._source)
             .keys()
             .concat(topLevelDetails)
