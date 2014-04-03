@@ -78,12 +78,8 @@
   text-overflow: ellipsis;
   font-size: 11px;
 }
-.discover-field-list .discover-field-item:hover {
+.discover-field-list .discover-field-item [field-name]:hover {
   color: #428bca;
-}
-.discover-field-list .discover-field-name:hover {
-  text-decoration: none;
-  margin-left: 0;
 }
 .discover-field-list .discover-field-details {
   padding: 5px;

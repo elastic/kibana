@@ -12,6 +12,7 @@ define(function(require) {
             stacktype = args.stacktype || 'zero', // 'zero', 'expand', 'group'
             yGroup = args.yGroup || false,
             colors = args.color,
+            //displayToolTip = args.displayToolTip || true,
             numRows, margin, svg, g, layer, n, m, width, height, outerWidth, outerHeight, keys, stack, toolTip,
             xScale, yScale, xAxis, yAxis, yStackMax, yGroupMax, color;
 
@@ -69,10 +70,12 @@ define(function(require) {
             xAxis = d3.svg.axis().scale(xScale).ticks(6).tickSize(3, 0).tickPadding(6).orient('bottom'),
             yAxis = d3.svg.axis().scale(yScale).ticks(6).tickSize(-(width), 0).tickPadding(4).orient('left'),
             color = d3.scale.linear().domain([0, m - 1]).range(['#e24700', '#f9e593']),
-            toolTip = tooltip().attr('class', 'k4-tip').html(function(d) {
+            /*
+            toolTip = !displayToolTip ? "undefined" : tooltip().attr('class', 'k4-tip').html(function(d) {
                 if (d.y < 1) { return '<span>x: ' + d.x + '</span><br><span>y: ' + d.y.toFixed(2) * 100 + '%</span>'; }
                 return '<span>x: ' + d.x + '</span><br><span>y: ' + d.y + '</span>';
             }).offset([-12, 0]);
+            */
             /* ******************************************************** */
 
             // append svg(s)
@@ -158,16 +161,16 @@ define(function(require) {
                             .attr('width', xScale.rangeBand() / m)
                             .attr('y', function(d) { return yScale(d.y); })
                             .attr('height', function(d) { return height - yScale(d.y); })
-                            .on('mouseover', toolTip.show)
-                            .on('mouseout', toolTip.hide);
+                            //.on('mouseover', toolTip.show)
+                            //.on('mouseout', toolTip.hide);
                     } else {
                         layer.selectAll('rect')
                             .attr('width', xScale.rangeBand())
                             .attr('x', function(d) { return xScale(d.x); })
                             .attr('y', function(d) { return yScale(d.y0 + d.y); })
                             .attr('height', function(d) { return yScale(d.y0) - yScale(d.y0 + d.y); })
-                            .on('mouseover', toolTip.show)
-                            .on('mouseout', toolTip.hide);
+                            //.on('mouseover', toolTip.show)
+                            //.on('mouseout', toolTip.hide);
                     }
 
                     //Exit
@@ -179,7 +182,7 @@ define(function(require) {
             d3.select(window).on('resize', resize);
 
             // k4 tooltip function
-            g.call(toolTip);
+            //if (displayToolTip) { g.call(toolTip); }
 
             return svg;
         };
@@ -298,6 +301,14 @@ define(function(require) {
             stacktype = _;
             return chart;
         };
+
+        /*
+        chart.tooltip = function(_) {
+            if (!arguments.length) { return tooltip; }
+            tooltip = _;
+            return chart;
+        }
+        */
 
         chart.width = function() {
             if (!args.width) { return width; }

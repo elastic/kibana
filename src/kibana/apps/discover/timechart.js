@@ -25,10 +25,9 @@ define(function (require) {
           });
 
           $scope.$watch('data', function (data) {
-            return;
-            //if (!_.isUndefined(data)) {
-            //  myChart.render(data);
-            //}
+            if (!_.isUndefined(data)) {
+              myChart.render(data);
+            }
           });
 
 

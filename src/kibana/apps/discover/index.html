@@ -9,13 +9,14 @@
     <form class="navbar-form" ng-submit="fetch()">
       <div class="form-group" style="display:inline;">
         <div class="input-group">
-          <span class="input-group-addon"><span class="fa fa-search"></span></span>
           <input placeholder="Search..." type="text" class="form-control" ng-model="state.query">
+          <span class="input-group-addon" ng-click="fetch()"><span class="fa fa-search"></span></span>
         </div>
       </div>
     </form>
   </nav>
   <config config-template="configTemplate" config-object="opts" config-close="configClose" config-submit="fetch"></config>
+
   <div class="container-fluid">
     <div class="row">
       <div class="col-md-2 discovery-field-container">
