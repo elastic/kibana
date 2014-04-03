@@ -68,6 +68,9 @@
 .modal-footer:after {
   clear: both;
 }
+.application-discover {
+  overflow-x: hidden;
+}
 .discover-table {
   overflow-y: auto;
   overflow-x: auto;

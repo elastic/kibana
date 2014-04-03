@@ -9,7 +9,6 @@ define(function (require) {
   require('services/state');
   require('directives/fixed_scroll');
 
-
   var intervals = [
     { display: '', val: null },
     { display: 'Hourly', val: 'hourly' },
@@ -103,9 +102,6 @@ define(function (require) {
             }
           ]
         }]}]};
-
-        console.log($scope.chart);
-
       });
 
 
@@ -283,7 +279,6 @@ define(function (require) {
     };
 
     function refreshColumns() {
-
       // Get all displayed field names;
       var fields = _.pluck(_.filter($scope.fields, function (field) {
         return field.display;

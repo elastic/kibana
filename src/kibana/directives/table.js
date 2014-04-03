@@ -28,8 +28,18 @@ define(function (require) {
           if (column === sort[0]) {
             return ['fa', sort[1] === 'asc' ? 'fa-sort-up' : 'fa-sort-down'];
           } else {
-            return ['fa', 'fa-sort'];
+            return ['fa', 'fa-sort', 'table-header-sortchange'];
           }
+        };
+
+        $scope.moveLeft = function (column) {
+          var index = _.indexOf($scope.columns, column);
+          _.move($scope.columns, index, --index);
+        };
+
+        $scope.moveRight = function (column) {
+          var index = _.indexOf($scope.columns, column);
+          _.move($scope.columns, index, ++index);
         };
 
         $scope.sort = function (column) {
@@ -97,7 +107,7 @@ define(function (require) {
 
         // rerender when either is changed
         $scope.$watch('rows', render);
-        $scope.$watch('columns', render);
+        $scope.$watchCollection('columns', render);
         $scope.$watch('maxLength', render);
 
         // the body of the table
@@ -105,6 +115,7 @@ define(function (require) {
 
         // itterate the columns and rows, rebuild the table's html
         function render() {
+
           $body.empty();
           if (!$scope.rows || $scope.rows.length === 0) return;
           if (!$scope.columns || $scope.columns.length === 0) return;

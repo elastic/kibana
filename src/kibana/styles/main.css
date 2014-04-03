@@ -7051,6 +7051,9 @@ kbn-table tr.even td {
   word-break: normal;
   word-wrap: normal;
 }
+.application-discover {
+  overflow-x: hidden;
+}
 .discover-table {
   overflow-y: auto;
   overflow-x: auto;
@@ -7156,4 +7159,15 @@ kbn-table {
 kbn-table th {
   white-space: nowrap;
   padding-right: 10px;
+}
+kbn-table th .table-header-move,
+kbn-table th .table-header-sortchange {
+  visibility: hidden;
+}
+kbn-table th .fa {
+  font-size: 1.1em;
+}
+kbn-table th:hover .table-header-move,
+kbn-table th:hover .table-header-sortchange {
+  visibility: visible;
 }

@@ -1,1 +1,7 @@
-<th draggable="true" ng-repeat="name in columns">{{name}} <i ng-click="sort(name)" ng-class="headerClass(name)"></i></th>
+<th ng-repeat="name in columns">
+  <span ng-click="sort(name)">{{name}} <i ng-class="headerClass(name)"></i> </span>
+  <span class="table-header-move">
+    <i ng-click="moveLeft(name)" class="fa fa-angle-double-left" ng-show="!$first"></i>
+    <i ng-click="moveRight(name)" class="fa fa-angle-double-right" ng-show="!$last"></i>
+  </span>
+</th>
