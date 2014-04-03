@@ -85,6 +85,9 @@ define(function (require) {
           return innerElem.outerWidth();
         };
 
+        // Watch window size
+        $(window).resize(recompute);
+
         // Watch the trigger if there is one
         $scope.$watch('trigger', function () {
           recompute();
@@ -95,8 +98,12 @@ define(function (require) {
           recompute();
         });
 
-        // Also watch window size
-        $(window).resize(recompute);
+        // Clean up listeners
+        $scope.$on('$destroy', function () {
+          $elem.unbind('scroll.fixedScroll');
+          fixedScroll.unbind('scroll.fixedScroll');
+        });
+
       }
     };
   });
