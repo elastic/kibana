@@ -88,6 +88,22 @@ define(function (require) {
         if (!$scope.fields) getFields();
 
         $scope.rows = res.hits.hits;
+        $scope.chart = {rows: [{columns: [{
+          label: 'Events over time',
+          xAxisLabel: 'DateTime',
+          yAxisLabel: 'Hits',
+          layers: [
+            {
+              key: 'somekey',
+              values: _.map(res.aggregations.events.buckets, function (bucket) {
+                return { y: bucket.doc_count, x: bucket.key_as_string };
+              })
+            }
+          ]
+        }]}]};
+
+        console.log($scope.chart);
+
       });
 
 
@@ -141,6 +157,15 @@ define(function (require) {
         .query(!$scope.state.query ? null : {
           query_string: {
             query: $scope.state.query
+          }
+        })
+        .aggs({
+          events: {
+            date_histogram: {
+              field: '@timestamp',
+              interval: '12h',
+              format: 'yyyy-MM-dd'
+            }
           }
         });
     }

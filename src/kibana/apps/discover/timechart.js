@@ -13,48 +13,26 @@ define(function (require) {
       },
       link: function ($scope, elem) {
 
-        elem.css({width:1000,height:300});
-
         console.log($scope.data);
-
-        var data = {
-          rows: [
-            {
-              columns: [
-                {
-                  label: 'Events',
-                  xAxisLabel: 'Month',
-                  yAxisLabel: 'Hits',
-                  layers: [
-                    {
-                      key: 'somekey',
-                      values: [
-                        {x: 'Jan', 'y': 270},
-                        {x: 'Feb', 'y': 329},
-                        {x: 'Mar', 'y': 166},
-                        {x: 'Apr', 'y': 271},
-                        {x: 'May', 'y': 185},
-                        {x: 'Jun', 'y': 264}
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        };
-
 
         var init = function () {
           // This elem should already have a height/width
           var myChart = new k4.Chart(elem[0], {
             type: 'histogram',
-            stacktype: 'expand',
+            stacktype: 'zero',
             yGroup: true,
             color: ['#81dfe2', '#0762b7']
           });
 
-          myChart.render(data);
+          $scope.$watch('data', function (data) {
+            return;
+            //if (!_.isUndefined(data)) {
+            //  myChart.render(data);
+            //}
+          });
+
+
+          elem.css({height: 100});
         };
 
         // Start the directive

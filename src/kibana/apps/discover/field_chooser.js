@@ -4,6 +4,8 @@ define(function (require) {
   var _ = require('lodash');
 
   require('directives/css_truncate');
+  require('directives/field_name');
+
 
   app.directive('discFieldChooser', function () {
     return {
