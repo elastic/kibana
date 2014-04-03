@@ -7047,23 +7047,32 @@ kbn-table tr.even td {
   word-break: normal;
   word-wrap: normal;
 }
-.discover-field-list .discover-field-item .discover-field-add {
-  visibility: hidden;
+.discover-table {
+  overflow-y: auto;
+  margin-top: 10px;
 }
-.discover-field-list .discover-field-item:hover .discover-field-add {
-  visibility: visible;
+.discover-field-list .discover-field-item {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 11px;
+}
+.discover-field-list .discover-field-item:hover {
+  color: #428bca;
 }
 .discover-field-list .discover-field-name:hover {
   text-decoration: none;
   margin-left: 0;
 }
 .discover-field-list .discover-field-details {
-  font-size: 12px;
-  margin-left: 15px;
   padding: 5px;
   background-color: #f5f5f5;
   border-radius: 4px;
   border: 1px solid #dddddd;
+  margin-bottom: 5px;
+}
+.discover-field-list .discover-field-details .discover-field-details-error {
+  margin-top: 5px;
 }
 .discover-field-list .discover-field-details .discover-field-details-item {
   margin-top: 5px;
@@ -7137,4 +7146,11 @@ fieldset[disabled] .kbn-timepicker .btn-info.active {
 .kbn-timepicker .btn-info .badge {
   color: #5bc0de;
   background-color: #ffffff;
+}
+kbn-table {
+  font-size: 11px;
+}
+kbn-table th {
+  white-space: nowrap;
+  padding-right: 10px;
 }
