@@ -24,7 +24,7 @@ define(function (require) {
       ]);
 
       courier = new Courier({
-        fetchInterval: 15000,
+        fetchInterval: 0,
         client: es,
         internalIndex: configFile.kibanaIndex
       });
