@@ -13,8 +13,6 @@ define(function (require) {
       },
       link: function ($scope, elem) {
 
-        console.log($scope.data);
-
         var init = function () {
           // This elem should already have a height/width
           var myChart = new k4.Chart(elem[0], {
@@ -29,9 +27,6 @@ define(function (require) {
               myChart.render(data);
             }
           });
-
-
-          elem.css({height: 100});
         };
 
         // Start the directive

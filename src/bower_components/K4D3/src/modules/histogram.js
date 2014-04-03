@@ -8,7 +8,7 @@ define(function(require) {
 
         var chart = {},
             elemWidth = parseInt(d3.select(elem.parentNode).style('width'), 10),
-            elemHeight = .80 * window.innerHeight, //parseInt(d3.select(elem.parentNode).style('height'), 10)  < 100 ? 400 : parseInt(d3.select(elem.parentNode).style('height'), 10),
+            elemHeight = d3.select(elem).attr('height'), //.80 * window.innerHeight, //parseInt(d3.select(elem.parentNode).style('height'), 10)  < 100 ? 400 : parseInt(d3.select(elem.parentNode).style('height'), 10),
             stacktype = args.stacktype || 'zero', // 'zero', 'expand', 'group'
             yGroup = args.yGroup || false,
             colors = args.color,
@@ -77,6 +77,9 @@ define(function(require) {
             }).offset([-12, 0]);
             */
             /* ******************************************************** */
+
+            // Removing items off the element
+            d3.select(elem).selectAll('*').remove();
 
             // append svg(s)
             svg = getSvg(elem, data);
@@ -211,7 +214,7 @@ define(function(require) {
         function resize() {
             /* Update graph using new width and height */
             var elemWidth = parseInt(d3.select(elem.parentNode).style('width'), 10),
-                elemHeight = .80 * window.innerHeight, //parseInt(d3.select(elem.parentNode).style('height'), 10),
+                elemHeight = d3.select(elem).attr('height'), //.80 * window.innerHeight, //parseInt(d3.select(elem.parentNode).style('height'), 10),
                 outerWidth = elemWidth / n,
                 outerHeight = elemHeight / numRows,
                 width = outerWidth - margin.left - margin.right,
