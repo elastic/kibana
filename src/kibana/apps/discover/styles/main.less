@@ -1,13 +1,23 @@
 @import (reference) "../../../../bower_components/bootstrap/less/bootstrap.less";
 @import (reference) "../../../../bower_components/bootstrap/less/theme.less";
+@import (reference) "../../../styles/_variables.less";
+
+.discover-table {
+  overflow-y: auto;
+  margin-top: 10px;
+}
 
 .discover-field-list {
-  .discover-field-item .discover-field-add {
-    visibility:hidden;
+
+  .discover-field-item {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: @font-size-smaller;
   }
 
-  .discover-field-item:hover .discover-field-add {
-    visibility:visible;
+  .discover-field-item:hover {
+    color: @link-color;
   }
 
   .discover-field-name:hover {
@@ -16,12 +26,15 @@
   }
 
   .discover-field-details {
-    font-size: @font-size-small;
-    margin-left: 15px;
     padding: 5px;
     background-color: @well-bg;
     border-radius: @border-radius-base;
     border: 1px solid @table-border-color;
+    margin-bottom: 5px;
+
+    .discover-field-details-error {
+      margin-top: 5px;
+    }
 
     .discover-field-details-item {
       margin-top: 5px;
