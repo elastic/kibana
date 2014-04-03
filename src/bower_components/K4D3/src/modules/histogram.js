@@ -1,14 +1,14 @@
 
 define(function(require) {
     'use strict';
-    var tooltip = require('../tooltip'),
+    var tooltip = require('bower_components/K4D3/src/tooltip'),
         d3 = require('d3');
 
     return function(elem, args) {
 
         var chart = {},
-            elemWidth = parseInt(d3.select(elem).style('width'), 10),
-            elemHeight = parseInt(d3.select(elem).style('padding-bottom'), 10),
+            elemWidth = parseInt(d3.select(elem.parentNode).style('width'), 10),
+            elemHeight = .80 * window.innerHeight, //parseInt(d3.select(elem.parentNode).style('height'), 10)  < 100 ? 400 : parseInt(d3.select(elem.parentNode).style('height'), 10),
             stacktype = args.stacktype || 'zero', // 'zero', 'expand', 'group'
             yGroup = args.yGroup || false,
             colors = args.color,
@@ -68,8 +68,7 @@ define(function(require) {
             yScale = d3.scale.linear().range([height, 0]).nice(),
             xAxis = d3.svg.axis().scale(xScale).ticks(6).tickSize(3, 0).tickPadding(6).orient('bottom'),
             yAxis = d3.svg.axis().scale(yScale).ticks(6).tickSize(-(width), 0).tickPadding(4).orient('left'),
-            color = d3.scale.linear().domain([0, m - 1]).range(colors) ||
-                d3.scale.linear().domain([0, m - 1]).range(['#e24700', '#f9e593']),
+            color = d3.scale.linear().domain([0, m - 1]).range(['#e24700', '#f9e593']),
             toolTip = tooltip().attr('class', 'k4-tip').html(function(d) {
                 if (d.y < 1) { return '<span>x: ' + d.x + '</span><br><span>y: ' + d.y.toFixed(2) * 100 + '%</span>'; }
                 return '<span>x: ' + d.x + '</span><br><span>y: ' + d.y + '</span>';
@@ -192,12 +191,14 @@ define(function(require) {
             rows = d3.select(elem).selectAll('div')
                 .data(data.rows)
                 .enter().append('div')
-                .attr('class', function(d, i) { return 'row r' + i; });
+                .attr('class', function(d, i) { return 'row r' + i; })
+                .style('display', 'block');
 
             cols = rows.selectAll('div')
                 .data(function(d) { return d.columns; })
                 .enter().append('div')
-                .attr('class', function(d,i){ return 'col c' + i; });
+                .attr('class', function(d,i){ return 'col c' + i; })
+                .style('display', 'inline-block');
 
             svg = cols.append('svg');
 
@@ -206,8 +207,8 @@ define(function(require) {
 
         function resize() {
             /* Update graph using new width and height */
-            var elemWidth = parseInt(d3.select(elem).style('width'), 10),
-                elemHeight = parseInt(d3.select(elem).style('padding-bottom'), 10),
+            var elemWidth = parseInt(d3.select(elem.parentNode).style('width'), 10),
+                elemHeight = .80 * window.innerHeight, //parseInt(d3.select(elem.parentNode).style('height'), 10),
                 outerWidth = elemWidth / n,
                 outerHeight = elemHeight / numRows,
                 width = outerWidth - margin.left - margin.right,
@@ -290,6 +291,12 @@ define(function(require) {
             margin.bottom = typeof args.margin.bottom !== 'undefined' ? args.margin.bottom : margin.bottom;
             margin.left   = typeof args.margin.left   !== 'undefined' ? args.margin.left   : margin.left;
             return margin;
+        };
+
+        chart.type = function(_) {
+            if (!arguments.length) { return stacktype; }
+            stacktype = _;
+            return chart;
         };
 
         chart.width = function() {
