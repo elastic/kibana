@@ -96,7 +96,7 @@ function (angular, app, _, $, kbn) {
        */
       chart       : 'bar',
       /** @scratch /panels/terms/5
-       * counter_pos:: The location of the legend in respect to the chart, above or below.
+       * counter_pos:: The location of the legend in respect to the chart, above or none.
        */
       counter_pos : 'above',
       /** @scratch /panels/terms/5
@@ -177,7 +177,7 @@ function (angular, app, _, $, kbn) {
           .facetFilter($scope.ejs.QueryFilter(
             $scope.ejs.FilteredQuery(
               boolQuery,
-              filterSrv.getBoolFilter(filterSrv.ids)
+              filterSrv.getBoolFilter(filterSrv.ids())
             )))).size(0);
       }
       if($scope.panel.tmode === 'terms_stats') {
@@ -190,7 +190,7 @@ function (angular, app, _, $, kbn) {
           .facetFilter($scope.ejs.QueryFilter(
             $scope.ejs.FilteredQuery(
               boolQuery,
-              filterSrv.getBoolFilter(filterSrv.ids)
+              filterSrv.getBoolFilter(filterSrv.ids())
             )))).size(0);
       }
 

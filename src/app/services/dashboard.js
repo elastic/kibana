@@ -187,7 +187,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
       _.defaults(dashboard,_dash);
       _.defaults(dashboard.index,_dash.index);
       _.defaults(dashboard.loader,_dash.loader);
-      return dashboard;
+      return _.cloneDeep(dashboard);
     };
 
     this.dash_load = function(dashboard) {
