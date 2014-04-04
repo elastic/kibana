@@ -69,16 +69,16 @@
   clear: both;
 }
 body.application-dashboard {
-  background-color: #1e6d74;
+  background-color: #18bc9c;
 }
 div.application div.dashboard-container {
   width: 100%;
-  background-color: #1e6d74;
+  background-color: #18bc9c;
 }
 [dashboard-grid].gridster {
   list-style-type: none;
   display: block;
-  background-color: #1e6d74;
+  background-color: #18bc9c;
   margin-bottom: 0;
 }
 [dashboard-grid].gridster .preview-holder {
@@ -88,7 +88,7 @@ div.application div.dashboard-container {
 [dashboard-grid].gridster li.gs-w {
   background: #fff;
   padding: 5px;
-  color: #1e6d74;
+  color: #18bc9c;
   font-weight: bold;
   font-size: 20px;
   padding: 10px;
