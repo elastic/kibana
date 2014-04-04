@@ -33,9 +33,10 @@ define(function (require) {
           '</ul>'
         );
 
-        // The element must be attached to the DOM for gridster to work
-        $elem.height(1).width(1).css('overflow', 'hidden');
+        // The element must be attached to the DOM for gridster to work.
+        $elem.hide();
         $elem.appendTo(document.body);
+
       });
 
     });
