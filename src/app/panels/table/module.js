@@ -314,6 +314,7 @@ function (angular, app, _, kbn, moment) {
           .preTags('@start-highlight@')
           .postTags('@end-highlight@')
         )
+        .fields(["_source", $scope.panel.fields])
         .size($scope.panel.size*$scope.panel.pages)
         .sort(sort);
 
@@ -349,7 +350,8 @@ function (angular, app, _, kbn, moment) {
             // _source is kind of a lie here, never display it, only select values from it
             _h.kibana = {
               _source : _.extend(kbn.flatten_json(hit._source),_p),
-              highlight : kbn.flatten_json(hit.highlight||{})
+              highlight : kbn.flatten_json(hit.highlight||{}),
+              fields : kbn.flatten_json(hit.fields||{})
             };
 
             // Kind of cheating with the _.map here, but this is faster than kbn.get_all_fields
