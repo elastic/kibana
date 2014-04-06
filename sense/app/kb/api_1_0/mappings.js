@@ -39,7 +39,7 @@ define(function () {
           __template: {
             'type': ''
           },
-          'type': '$TYPE$'
+          'type': '{type}'
         },
         'index_analyzer': 'standard',
         'search_analyzer': 'standard',
@@ -127,7 +127,7 @@ define(function () {
 
             // objects
             properties: {
-              __scope_link: '_put_mapping.$TYPE$.properties'
+              __scope_link: '_put_mapping.{type}.properties'
             },
 
             // multi_field
@@ -136,7 +136,7 @@ define(function () {
             },
             fields: {
               '*': {
-                __scope_link: '_put_mapping.$TYPE$.properties.$FIELD$'
+                __scope_link: '_put_mapping.type.properties.field'
               }
             }
           }
@@ -150,7 +150,7 @@ define(function () {
         "{indices}/_mapping",
       ],
       data_autocomplete_rules: {
-        '$TYPE$': {
+        '{type}': {
           __scope_link: '_put_type_mapping'
         }
       }

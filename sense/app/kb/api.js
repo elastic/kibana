@@ -1,61 +1,73 @@
-define([ '_', 'exports', 'autocomplete/url_pattern_matcher', 'autocomplete/url_params'],
-  function (_, exports, url_pattern_matcher, url_params) {
+define([ '_', 'exports', 'autocomplete/url_pattern_matcher', 'autocomplete/url_params', 'autocomplete/body_completer'],
+  function (_, exports, url_pattern_matcher, url_params, body_completer) {
     'use strict';
 
     /**
      *
      * @param name
-     * @param globalSharedComponentFactories a dictionary of factory functions
+     * @param urlParametrizedComponentFactories a dictionary of factory functions
      * that will be used as fallback for parametrized path part (i.e., {indices} )
      * see url_pattern_matcher.UrlPatternMatcher
      * @constructor
+     * @param bodyParametrizedComponentFactories same as urlParametrizedComponentFactories but used for body compilation
      */
-    function Api(name, globalSharedComponentFactories) {
+    function Api(name, urlParametrizedComponentFactories, bodyParametrizedComponentFactories) {
       this.globalRules = {};
       this.endpoints = {};
       this.name = name;
-      this.urlPatternMatcher = new url_pattern_matcher.UrlPatternMatcher(globalSharedComponentFactories);
+      this.urlPatternMatcher = new url_pattern_matcher.UrlPatternMatcher(urlParametrizedComponentFactories);
+      this.globalBodyComponentFactories = bodyParametrizedComponentFactories;
     }
 
-    Api.prototype.addGlobalAutocompleteRules = function (parentNode, rules) {
-      this.globalRules[parentNode] = rules;
-    };
+    (function (cls) {
+      cls.addGlobalAutocompleteRules = function (parentNode, rules) {
+        this.globalRules[parentNode] = body_completer.compileBodyDescription(
+            "GLOBAL." + parentNode, rules, this.globalBodyComponentFactories);
+      };
 
-    Api.prototype.getGlobalAutocompleteRules = function () {
-      return this.globalRules;
-    };
+      cls.getGlobalAutocompleteComponents = function (term) {
+        return this.globalRules[term];
+      };
 
-    Api.prototype.addEndpointDescription = function (endpoint, description) {
+      cls.addEndpointDescription = function (endpoint, description) {
 
-      var copiedDescription = {};
-      _.extend(copiedDescription, description || {});
-      _.defaults(copiedDescription, {
-        id: endpoint,
-        patterns: [endpoint],
-        methods: [ 'GET' ]
-      });
-      _.each(copiedDescription.patterns, function (p) {
-        this.urlPatternMatcher.addEndpoint(p, copiedDescription);
-      }, this);
+        var copiedDescription = {};
+        _.extend(copiedDescription, description || {});
+        _.defaults(copiedDescription, {
+          id: endpoint,
+          patterns: [endpoint],
+          methods: [ 'GET' ]
+        });
+        _.each(copiedDescription.patterns, function (p) {
+          this.urlPatternMatcher.addEndpoint(p, copiedDescription);
+        }, this);
 
-      copiedDescription.paramsAutocomplete = new url_params.UrlParams(copiedDescription.url_params);
+        copiedDescription.paramsAutocomplete = new url_params.UrlParams(copiedDescription.url_params);
+        copiedDescription.bodyAutocompleteRootComponents = body_completer.compileBodyDescription(
+          copiedDescription.id, copiedDescription.data_autocomplete_rules, this.globalBodyComponentFactories);
 
-      this.endpoints[endpoint] = copiedDescription;
-    };
+        this.endpoints[endpoint] = copiedDescription;
+      };
 
-    Api.prototype.getEndpointDescriptionByEndpoint = function (endpoint) {
-      return this.endpoints[endpoint];
-    };
+      cls.getEndpointDescriptionByEndpoint = function (endpoint) {
+        return this.endpoints[endpoint];
+      };
 
 
-    Api.prototype.getTopLevelUrlCompleteComponents = function () {
-      return this.urlPatternMatcher.getTopLevelComponents();
-    };
+      cls.getTopLevelUrlCompleteComponents = function () {
+        return this.urlPatternMatcher.getTopLevelComponents();
+      };
 
-    Api.prototype.clear = function () {
-      this.endpoints = {};
-      this.globalRules = {};
-    };
+      cls.getUnmatchedEndpointComponents = function () {
+        return body_completer.globalsOnlyAutocompleteComponents();
+      };
+
+      cls.clear = function () {
+        this.endpoints = {};
+        this.globalRules = {};
+      };
+    }(Api.prototype));
+
 
     exports.Api = Api;
     return exports;

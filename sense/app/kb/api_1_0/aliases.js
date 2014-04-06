@@ -15,7 +15,7 @@ define(function () {
           __any_of: [
             {
               add: {
-                index: '$INDEX$',
+                index: '{index}',
                 alias: '',
                 filter: {},
                 routing: '1',

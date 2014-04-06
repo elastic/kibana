@@ -20,6 +20,9 @@ define([
 
   function process_context_test(data, mapping, kb_schemes, request_line, test) {
     asyncTest(test.name, function () {
+
+      console.debug("starting test " + test.name);
+
       var rowOffset = 0; // add one for the extra method line
       var editorValue = data;
       if (request_line != null) {
@@ -36,7 +39,7 @@ define([
 
       mappings.clear();
       mappings.loadMappings(mapping);
-      var test_api = new api.Api('test', kb._test.globalUrlComponentFactories);
+      var test_api = new api.Api('test', kb._test.globalUrlComponentFactories, kb._test.globalBodyComponentFactories);
       if (kb_schemes) {
         if (kb_schemes.globals) {
           $.each(kb_schemes.globals, function (parent, rules) {
@@ -157,9 +160,9 @@ define([
           "_search"
         ],
         data_autocomplete_rules: {
-          query: { match_all: {}, term: { "$FIELD$": ""}},
+          query: { match_all: {}, term: { "{field}": { __template: { "f": 1}}}},
           size: {},
-          facets: { "*": { terms: { field: "$FIELD$" }}, __template: {}}
+          facets: { "*": { terms: { field: "{field}" }}, __template: {}}
         }
       }
     }
@@ -220,6 +223,32 @@ define([
   context_tests(
     {
       "query": {
+        "f": 1
+      }
+    },
+    MAPPING,
+    {
+      globals: {
+        query: {
+          t1: 2
+        }
+      },
+      endpoints: {
+      }
+    },
+    "POST _no_context",
+    [
+      {
+        name: "Missing KB - global auto complete",
+        cursor: { row: 2, column: 5},
+        autoCompleteSet: [ "t1"]
+      }
+    ]
+  );
+
+  context_tests(
+    {
+      "query": {
         "field": "something"
       },
       "facets": {},
@@ -263,7 +292,7 @@ define([
   );
 
   context_tests(
-    '{\n' +
+      '{\n' +
       '   "query": {\n' +
       '    "field": "something"\n' +
       '   },\n' +
@@ -419,7 +448,7 @@ define([
             "_test"
           ],
           data_autocomplete_rules: {
-            index: "$INDEX$"
+            index: "{index}"
           }
         }
       }
@@ -427,7 +456,7 @@ define([
     "POST _test",
     [
       {
-        name: "$INDEX$ matching",
+        name: "{index} matching",
         cursor: { row: 1, column: 15},
         autoCompleteSet: [
           { name: "index1", meta: "index"},
@@ -471,7 +500,7 @@ define([
         name: "Templates 1",
         cursor: { row: 1, column: 0},
         autoCompleteSet: [
-          tt("array", [ "a" ]), tt("fixed", { a: 1 }), tt("number", 1), tt("object", {}), tt("oneof", "o1")
+          tt("array", [ ]), tt("fixed", { a: 1 }), tt("number", 1), tt("object", {}), tt("oneof", "o1")
         ]
       },
       {
@@ -492,6 +521,12 @@ define([
         {
           "a": 1
         }
+      ],
+      "any_of_mixed": [
+        {
+          "a": 1
+        },
+        2
       ]
     },
     MAPPING,
@@ -508,7 +543,12 @@ define([
             ], __any_of: [
               { a: 1, b: 2 },
               {c: 1}
-            ]}
+            ]},
+            any_of_mixed: {
+              __any_of: [
+                {a: 1},
+                3
+              ]}
           }
         }
       }
@@ -519,6 +559,7 @@ define([
         name: "Any of - templates",
         cursor: { row: 1, column: 0},
         autoCompleteSet: [
+          tt("any_of_mixed", []),
           tt("any_of_numbers", [ 1, 2 ]),
           tt("any_of_obj", [
             { c: 1}
@@ -534,7 +575,21 @@ define([
         name: "Any of - object",
         cursor: { row: 6, column: 2},
         autoCompleteSet: [
-          tt("a", 1), tt("b", 2)
+          tt("a", 1), tt("b", 2), tt("c", 1)
+        ]
+      },
+      {
+        name: "Any of - mixed - obj",
+        cursor: { row: 11, column: 2},
+        autoCompleteSet: [
+          tt("a", 1)
+        ]
+      },
+      {
+        name: "Any of - mixed - both",
+        cursor: { row: 13, column: 2},
+        autoCompleteSet: [
+          tt("{"), tt(3)
         ]
       }
     ]
@@ -586,7 +641,6 @@ define([
       endpoints: {
         _current: {
           patterns: [ "_current" ],
-          id: "POST _current",
           data_autocomplete_rules: {
             "a": {
               "b": {
@@ -802,7 +856,7 @@ define([
       {
         name: "Field completion as scope",
         cursor: { row: 3, column: 10},
-        autoCompleteSet: ["field1.1.1", "field1.1.2"]
+        autoCompleteSet: [tt("field1.1.1", { "f": 1}), tt("field1.1.2", { "f": 1})]
       },
       {
         name: "Field completion as value",
@@ -831,7 +885,7 @@ define([
 
 
   context_tests(
-    '{\n' +
+      '{\n' +
       '   "query": {} \n' +
       '}\n' +
       '\n' +

@@ -1,17 +1,16 @@
 define([
-  'history',
-  'kb',
-  'mappings',
-  'ace',
-  'jquery',
-  'utils',
-  'autocomplete/json_body_autocomplete',
-  'autocomplete/engine',
-  'autocomplete/url_pattern_matcher',
-  '_',
-  'jquery-ui',
-  'ace_ext_language_tools'
-], function (history, kb, mappings, ace, $, utils, json_body_autocomplete, autocomplete_engine, url_pattern_matcher, _) {
+    'history',
+    'kb',
+    'mappings',
+    'ace',
+    'jquery',
+    'utils',
+    'autocomplete/engine',
+    'autocomplete/url_pattern_matcher',
+    '_',
+    'jquery-ui',
+    'ace_ext_language_tools'
+  ], function (history, kb, mappings, ace, $, utils, autocomplete_engine, url_pattern_matcher, _) {
     'use strict';
 
     var AceRange = ace.require('ace/range').Range;
@@ -119,7 +118,7 @@ define([
 
         var valueToInsert = termAsString;
         var templateInserted = false;
-        if (context.addTemplate && typeof term.template != "undefined") {
+        if (context.addTemplate && !_.isUndefined(term.template) && !_.isNull(term.template)) {
           var indentedTemplateLines = utils.jsonToString(term.template, true).split("\n");
           var currentIndentation = session.getLine(context.rangeToReplace.start.row);
           currentIndentation = currentIndentation.match(/^\s*/)[0];
@@ -349,7 +348,7 @@ define([
             insertingRelativeToToken = 0;
             context.rangeToReplace = new AceRange(
               pos.row, context.updatedForToken.start, pos.row,
-              context.updatedForToken.start + context.updatedForToken.value.length
+                context.updatedForToken.start + context.updatedForToken.value.length
             );
             context.replacingToken = true;
             break;
@@ -358,7 +357,7 @@ define([
               insertingRelativeToToken = 0;
               context.rangeToReplace = new AceRange(
                 pos.row, context.updatedForToken.start, pos.row,
-                context.updatedForToken.start + context.updatedForToken.value.length
+                  context.updatedForToken.start + context.updatedForToken.value.length
               );
               context.replacingToken = true;
             }
@@ -579,7 +578,20 @@ define([
           console.log("Can't extract a valid body token path.");
           return context;
         }
-        json_body_autocomplete.populateContext(ret.bodyTokenPath, context);
+
+
+        // needed for scope linking + global term resolving
+        context.endpointComponentResolver = kb.getEndpointBodyCompleteComponents;
+        context.globalComponentResolver = kb.getGlobalAutocompleteComponents;
+        var components;
+        if (context.endpoint) {
+          components = context.endpoint.bodyAutocompleteRootComponents;
+        }
+        else {
+          components = kb.getUnmatchedEndpointComponents();
+        }
+        autocomplete_engine.populateContext(ret.bodyTokenPath, context, editor, true, components);
+
         return context;
       }
 
@@ -1003,6 +1015,5 @@ define([
 
     return Autocomplete;
   }
-
 )
 ;

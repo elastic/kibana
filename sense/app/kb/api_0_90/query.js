@@ -26,7 +26,7 @@ define(function () {
         __template: {
           'FIELD': 'TEXT'
         },
-        '$FIELD$': {
+        '{field}': {
           'query': '',
           'operator': {
             __one_of: ['and', 'or']
@@ -44,7 +44,7 @@ define(function () {
         __template: {
           'FIELD': 'PHRASE'
         },
-        '$FIELD$': {
+        '{field}': {
           query: '',
           analyzer: ''
         }
@@ -53,7 +53,7 @@ define(function () {
         __template: {
           'FIELD': 'PREFIX'
         },
-        '$FIELD$': {
+        '{field}': {
           query: '',
           analyzer: '',
           max_expansions: 10,
@@ -67,7 +67,7 @@ define(function () {
           'fields': []
         },
         query: '',
-        fields: ['$FIELD$'],
+        fields: ['{field}'],
         use_dis_max: {
           __template: true,
           __one_of: [true, false]
@@ -75,15 +75,21 @@ define(function () {
         tie_breaker: 0.0
       },
       bool: {
-        must: [{
-          __scope_link: 'GLOBAL.query'
-        }],
-        must_not: [{
-          __scope_link: 'GLOBAL.query'
-        }],
-        should: [{
-          __scope_link: 'GLOBAL.query'
-        }],
+        must: [
+          {
+            __scope_link: 'GLOBAL.query'
+          }
+        ],
+        must_not: [
+          {
+            __scope_link: 'GLOBAL.query'
+          }
+        ],
+        should: [
+          {
+            __scope_link: 'GLOBAL.query'
+          }
+        ],
         minimum_number_should_match: 1,
         boost: 1.0
       },
@@ -135,12 +141,14 @@ define(function () {
         },
         tie_breaker: 0.7,
         boost: 1.2,
-        queries: [{
-          __scope_link: '.query'
-        }]
+        queries: [
+          {
+            __scope_link: '.query'
+          }
+        ]
       },
       field: {
-        '$FIELD$': {
+        '{field}': {
           query: '',
           boost: 2.0,
           enable_position_increments: {
@@ -166,7 +174,7 @@ define(function () {
         __scope_link: '.query.fuzzy_like_this'
       },
       fuzzy: {
-        '$FIELD$': {
+        '{field}': {
           'value': '',
           'boost': 1.0,
           'min_similarity': 0.5,
@@ -174,7 +182,7 @@ define(function () {
         }
       },
       has_child: {
-        'type': '$TYPE$',
+        'type': '{type}',
         'score_type': {
           __one_of: ['none', 'max', 'sum', 'avg']
         },
@@ -182,7 +190,7 @@ define(function () {
         'query': {}
       },
       has_parent: {
-        'parent_type': '$TYPE$',
+        'parent_type': '{type}',
         'score_type': {
           __one_of: ['none', 'score']
         },
@@ -197,7 +205,7 @@ define(function () {
           'min_term_freq': 1,
           'max_query_terms': 12
         },
-        fields: ['$FIELD$ '],
+        fields: ['{field} '],
         like_text: '',
         percent_terms_to_match: 0.3,
         min_term_freq: 2,
@@ -219,7 +227,7 @@ define(function () {
             'max_query_terms': 12
           }
         },
-        '$FIELD$': {
+        '{field}': {
           like_text: '',
           percent_terms_to_match: 0.3,
           min_term_freq: 2,
@@ -240,7 +248,7 @@ define(function () {
             'value': ''
           }
         },
-        '$FIELD$': {
+        '{field}': {
           value: '',
           boost: 1.0
         }
@@ -251,8 +259,8 @@ define(function () {
           'query': 'this AND that OR thus'
         },
         query: '',
-        default_field: '$FIELD$',
-        fields: ['$FIELD$'],
+        default_field: '{field}',
+        fields: ['{field}'],
         default_operator: {
           __one_of: ['OR', 'AND']
         },
@@ -293,7 +301,7 @@ define(function () {
             to: 20
           }
         },
-        '$FIELD$': {
+        '{field}': {
           __template: {
             from: 10,
             to: 20
@@ -322,13 +330,15 @@ define(function () {
       },
       span_near: {
         __template: {
-          'clauses': [{
-            span_term: {
-              'FIELD': {
-                'value': 'VALUE'
+          'clauses': [
+            {
+              span_term: {
+                'FIELD': {
+                  'value': 'VALUE'
+                }
               }
             }
-          }],
+          ],
           slop: 12,
           in_order: false
         },
@@ -349,7 +359,7 @@ define(function () {
             'value': 'VALUE'
           }
         },
-        '$FIELD$': {
+        '{field}': {
           value: '',
           boost: 2.0
         }
@@ -376,13 +386,15 @@ define(function () {
       },
       span_or: {
         __template: {
-          clauses: [{
-            span_term: {
-              'FIELD': {
-                'value': 'VALUE'
+          clauses: [
+            {
+              span_term: {
+                'FIELD': {
+                  'value': 'VALUE'
+                }
               }
             }
-          }]
+          ]
         },
         clauses: [
           SPAN_QUERIES
@@ -394,7 +406,7 @@ define(function () {
             value: 'VALUE'
           }
         },
-        '$FIELD$': {
+        '{field}': {
           value: '',
           boost: 2.0
         }
@@ -403,7 +415,7 @@ define(function () {
         __template: {
           'FIELD': ['VALUE1', 'VALUE2']
         },
-        '$FIELD$': [''],
+        '{field}': [''],
         minimum_match: 1
       },
       top_children: {
@@ -425,7 +437,7 @@ define(function () {
             value: 'VALUE'
           }
         },
-        '$FIELD$': {
+        '{field}': {
           value: '',
           boost: 2.0
         }
@@ -445,16 +457,20 @@ define(function () {
       custom_filters_score: {
         __template: {
           query: {},
-          filters: [{
-            filter: {}
-          }]
+          filters: [
+            {
+              filter: {}
+            }
+          ]
         },
         query: {},
-        filters: [{
-          filter: {},
-          boost: 2.0,
-          script: ''
-        }],
+        filters: [
+          {
+            filter: {},
+            boost: 2.0,
+            script: ''
+          }
+        ],
         score_mode: {
           __one_of: ['first', 'min', 'max', 'total', 'avg', 'multiply']
         },
@@ -467,7 +483,7 @@ define(function () {
           indices: ['INDEX1', 'INDEX2'],
           query: {}
         },
-        indices: ['$INDEX$'],
+        indices: ['{index}'],
         query: {},
         no_match_query: {
           __scope_link: '.query'

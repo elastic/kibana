@@ -24,8 +24,8 @@ define([
 
   var parts = _(arguments).rest(2);
 
-  function Api_1_0(globalSharedComponentFactories) {
-    api.Api.call(this, "api_1_0", globalSharedComponentFactories);
+  function Api_1_0(urlParametrizedComponentFactories, bodyParametrizedComponentFactories) {
+    api.Api.call(this, "api_1_0", urlParametrizedComponentFactories, bodyParametrizedComponentFactories);
     parts.each(function (apiSection) {
       apiSection(this);
     }, this);

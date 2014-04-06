@@ -2,14 +2,14 @@ define(function () {
   'use strict';
   var simple_metric = {
     __template: { field: ""},
-    field: "$FIELD$",
+    field: "{field}",
     script: "",
     params: {
     },
     lang: "mvel"
   }, field_metric = {
     __template: { field: ""},
-    field: "$FIELD$"
+    field: "{field}"
   };
   var rules = {
     "*": {
@@ -29,7 +29,7 @@ define(function () {
       "extended_stats": simple_metric,
       "value_count": {
         __template: { field: ""},
-        field: "$FIELD$"
+        field: "{field}"
       },
       "global": {},
       "filter": {},
@@ -45,7 +45,7 @@ define(function () {
           "field": "",
           "size": 10
         },
-        "field": "$FIELD$",
+        "field": "{field}",
         "size": 10,
         "shard_size": 10,
         "order": {
@@ -72,7 +72,7 @@ define(function () {
             { "from": 50, "to": 100 },
           ]
         },
-        "field": "$FIELD$",
+        "field": "{field}",
         "ranges": [
           { "to": 50, "from": 100, "key": "" }
         ],
@@ -88,7 +88,7 @@ define(function () {
             { "from": "now-10d/d", "to": "now" },
           ]
         },
-        "field": "$FIELD$",
+        "field": "{field}",
         "format": "MM-yyy",
         "ranges": [
           { "to": "", "from": "", "key": "" }
@@ -105,7 +105,7 @@ define(function () {
             { "from": "10.0.0.5", "to": "10.0.0.10" },
           ]
         },
-        "field": "$FIELD$",
+        "field": "{field}",
         "format": "MM-yyy",
         "ranges": [
           { "to": "", "from": "", "key": "", "mask": "10.0.0.127/25" }
@@ -120,7 +120,7 @@ define(function () {
           "field": "price",
           "interval": 50
         },
-        "field": "$FIELD$",
+        "field": "{field}",
         "interval": 50,
         "min_doc_count": 0,
         "order": {
@@ -139,7 +139,7 @@ define(function () {
           "field": "date",
           "interval": "month"
         },
-        "field": "$FIELD$",
+        "field": "{field}",
         "interval": { __one_of: [ "year", "quarter", "week", "day", "hour", "minute", "second"]},
         "min_doc_count": 0,
         "order": {
@@ -167,7 +167,7 @@ define(function () {
             { "from": 100, "to": 300 },
           ]
         },
-        "field": "$FIELD$",
+        "field": "{field}",
         "origin": { "lat": 0.0, "lon": 0.0 },
         "unit": { __one_of: ["mi", "km", "in", "yd", "m", "cm", "mm"]},
         "ranges": [

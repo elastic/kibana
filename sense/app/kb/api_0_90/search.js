@@ -50,25 +50,27 @@ define(function () {
         },
         from: {},
         sort: {
-          __template: [{
-            'FIELD': {
-              'order': 'desc'
+          __template: [
+            {
+              'FIELD': {
+                'order': 'desc'
+              }
             }
-          }],
+          ],
           __any_of: [
             {
-              '$FIELD$': {
+              '{field}': {
                 'order': {
                   __one_of: ['desc', 'asc']
                 }
               }
             },
-            '$FIELD$',
+            '{field}',
             '_score'
           ]
         },
         search_type: {},
-        fields: ['$FIELD$'],
+        fields: ['{field}'],
         script_fields: {
           __template: {
             'FIELD': {

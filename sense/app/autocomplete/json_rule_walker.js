@@ -45,7 +45,7 @@ define(['_', 'kb', 'exports'], function (_, kb, exports) {
     var scheme_id = link_path.shift();
     var linked_rules = currentRules;
     if (scheme_id == "GLOBAL") {
-      linked_rules = kb.getGlobalAutocompleteRules();
+      linked_rules = kb.getGlobalAutocompleteComponents();
     }
     else if (scheme_id) {
       linked_rules = kb.getEndpointDescriptionByEndpoint(scheme_id);
@@ -84,7 +84,7 @@ define(['_', 'kb', 'exports'], function (_, kb, exports) {
           return null;
         }
         new_rules = this._rules[token] || this._rules["*"]
-          || this._rules["$FIELD$"] || this._rules["$TYPE$"]; // we accept anything for a field.
+          || this._rules["{field}"] || this._rules["{type}"]; // we accept anything for a field.
         if (new_rules && new_rules.__scope_link) {
           new_rules = getLinkedRules(new_rules.__scope_link, this.scopeRules, this._context);
         }

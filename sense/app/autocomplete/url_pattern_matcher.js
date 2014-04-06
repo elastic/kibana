@@ -34,19 +34,19 @@ define([
 
 
   /**
-   * @param globalSharedComponentFactories a dict of the following structure
+   * @param parametrizedComponentFactories a dict of the following structure
    * that will be used as a fall back for pattern parameters (i.e.: {indices})
    * {
-   *   indices: function (part, parent, endpoint) {
+   *   indices: function (part, parent) {
    *      return new SharedComponent(part, parent)
    *   }
    * }
    * @constructor
    */
-  function UrlPatternMatcher(globalSharedComponentFactories) {
+  function UrlPatternMatcher(parametrizedComponentFactories) {
     // This is not really a component, just a handy container to make iteration logic simpler
     this.rootComponent = new engine.SharedComponent("ROOT");
-    this.globalSharedComponentFactories = globalSharedComponentFactories || {};
+    this.parametrizedComponentFactories = parametrizedComponentFactories || {};
   }
 
   (function (cls) {
@@ -78,9 +78,9 @@ define([
               c = new engine.SharedComponent(part);
             }
           }
-          else if ((c = this.globalSharedComponentFactories[part])) {
+          else if ((c = this.parametrizedComponentFactories[part])) {
             // c is a f
-            c = c(part, active_component, endpoint);
+            c = c(part, active_component);
           }
           else {
             // just accept whatever with not suggestions

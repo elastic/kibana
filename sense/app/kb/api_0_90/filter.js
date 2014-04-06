@@ -46,7 +46,7 @@ define(function () {
     __template: {
       'FIELD': 'VALUE'
     },
-    '$FIELD$': ''
+    '{field}': ''
   };
 
 
@@ -54,7 +54,7 @@ define(function () {
     __template: {
       'values': ['ID']
     },
-    'type': '$TYPE$',
+    'type': '{type}',
     'values': ['']
   };
 
@@ -71,7 +71,7 @@ define(function () {
     __template: {
       value: 'TYPE'
     },
-    value: '$TYPE$'
+    value: '{type}'
   };
 
 
@@ -89,7 +89,7 @@ define(function () {
       }
     },
 
-    '$FIELD$': {
+    '{field}': {
       top_left: {
         lat: 40.73,
         lon: -74.1
@@ -127,7 +127,7 @@ define(function () {
     optimize_bbox: {
       __one_of: ['memory', 'indexed', 'none']
     },
-    '$FIELD$': {
+    '{field}': {
       lat: 40.73,
       lon: -74.1
     },
@@ -163,7 +163,7 @@ define(function () {
       __one_of: [true, false]
     },
 
-    '$FIELD$': {
+    '{field}': {
       lat: 40.73,
       lon: -74.1
     },
@@ -188,7 +188,7 @@ define(function () {
         ]
       }
     },
-    '$FIELD$': {
+    '{field}': {
       points: [
         {
           lat: 40.73,
@@ -215,15 +215,15 @@ define(function () {
         'relation': 'within'
       }
     },
-    '$FIELD$': {
+    '{field}': {
       shape: {
         type: '',
         coordinates: []
       },
       indexed_shape: {
         id: '',
-        index: '$INDEX$',
-        type: '$TYPE$',
+        index: '{index}',
+        type: '{type}',
         shape_field_name: 'shape'
       },
       relation: {
@@ -238,7 +238,7 @@ define(function () {
       type: 'TYPE',
       query: {}
     },
-    type: '$TYPE$',
+    type: '{type}',
     query: {},
     _scope: ''
   };
@@ -249,7 +249,7 @@ define(function () {
       type: 'TYPE',
       query: {}
     },
-    type: '$TYPE$',
+    type: '{type}',
     query: {},
     _scope: ''
   };
@@ -265,7 +265,7 @@ define(function () {
     null_value: {
       __one_of: [true, false]
     },
-    field: '$FIELD$'
+    field: '{field}'
   };
 
 
@@ -289,7 +289,7 @@ define(function () {
         to: 20
       }
     },
-    "$FIELD$": {
+    "{field}": {
       from: 1,
       to: 20,
       include_lower: {
@@ -323,7 +323,7 @@ define(function () {
     __template: {
       'FIELD': 'VALUE'
     },
-    '$FIELD$': '',
+    '{field}': '',
     _cache: {
       __one_of: [true, false]
     }
@@ -356,7 +356,7 @@ define(function () {
         to: 20
       }
     },
-    "$FIELD$": {
+    "{field}": {
       from: 1,
       to: 20,
       include_lower: {
@@ -389,7 +389,7 @@ define(function () {
     __template: {
       'FIELD': 'VALUE'
     },
-    '$FIELD$': '',
+    '{field}': '',
     _cache: {
       __one_of: [false, true]
     }
@@ -400,7 +400,7 @@ define(function () {
     __template: {
       'FIELD': ['VALUE1', 'VALUE2']
     },
-    field: ['$FIELD$'],
+    field: ['{field}'],
     execution: {
       __one_of: ['plain', 'bool', 'and', 'or', 'bool_nocache', 'and_nocache', 'or_nocache']
     },

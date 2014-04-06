@@ -60,25 +60,25 @@ define(function () {
     });
 
 
-    function getRepositoryType(context) {
-      var iter = context.editor.iterForCurrentLoc();
+    function getRepositoryType(context, editor) {
+      var iter = editor.iterForCurrentLoc();
       // for now just iterate back to the first "type" key
       var t = iter.getCurrentToken();
       var type;
       while (t && t.type.indexOf("url") < 0) {
         if (t.type === 'variable' && t.value === '"type"') {
-          t = context.editor.parser.nextNonEmptyToken(iter);
+          t = editor.parser.nextNonEmptyToken(iter);
           if (!t || t.type !== "punctuation.colon") {
             // weird place to be in, but safe choice..
             break;
           }
-          t = context.editor.parser.nextNonEmptyToken(iter);
+          t = editor.parser.nextNonEmptyToken(iter);
           if (t && t.type === "string") {
             type = t.value.replace(/"/g, '');
           }
           break;
         }
-        t = context.editor.parser.prevNonEmptyToken(iter);
+        t = editor.parser.prevNonEmptyToken(iter);
       }
       return type;
     }
@@ -89,8 +89,8 @@ define(function () {
         '_snapshot/{id}'
       ],
       data_autocomplete_rules: {
-        __scope_link: function (context) {
-          var type = getRepositoryType(context);
+        __scope_link: function (context, editor) {
+          var type = getRepositoryType(context, editor);
           if (!type) {
             return {
               "type": {

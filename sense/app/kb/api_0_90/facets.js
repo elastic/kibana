@@ -9,8 +9,8 @@ define(function () {
             field: 'FIELD',
             size: 10
           },
-          field: '$FIELD$',
-          fields: ['$FIELD$'],
+          field: '{field}',
+          fields: ['{field}'],
           size: 10,
           script: '',
           script_field: '',
@@ -27,34 +27,41 @@ define(function () {
         range: {
           __template: {
             field: 'FIELD',
-            ranges: [{
-              'to': 50
-            }, {
-              'from': 20,
-              'to': 70
-            }, {
-              'from': 70,
-              'to': 120
-            }, {
-              'from': 150
-            }]
+            ranges: [
+              {
+                'to': 50
+              },
+              {
+                'from': 20,
+                'to': 70
+              },
+              {
+                'from': 70,
+                'to': 120
+              },
+              {
+                'from': 150
+              }
+            ]
           },
-          field: '$FIELD$',
-          ranges: [{
-            to: 10,
-            from: 20
-          }]
+          field: '{field}',
+          ranges: [
+            {
+              to: 10,
+              from: 20
+            }
+          ]
         },
         histogram: {
           __template: {
             field: 'FIELD',
             interval: 100
           },
-          field: '$FIELD$',
+          field: '{field}',
           interval: 100,
           time_interval: '1.5h',
-          key_field: '$FIELD$',
-          value_field: '$FIELD$',
+          key_field: '{field}',
+          value_field: '{field}',
           key_script: '',
           value_script: '',
           params: {}
@@ -64,7 +71,7 @@ define(function () {
             field: 'FIELD',
             'interval': 'day'
           },
-          field: '$FIELD$',
+          field: '{field}',
           interval: {
             __one_of: ['year', 'quarter', 'month', 'week', 'day', 'hour', 'minute', '1h', '1d', '1w']
           },
@@ -73,8 +80,8 @@ define(function () {
           factor: 1000,
           pre_offset: '1d',
           post_offset: '1d',
-          key_field: '$FIELD$',
-          value_field: '$FIELD$',
+          key_field: '{field}',
+          value_field: '{field}',
           value_script: ''
         },
         filter: {},
@@ -86,8 +93,8 @@ define(function () {
           __template: {
             field: 'FIELD'
           },
-          field: '$FIELD$',
-          fields: ['$FIELD$'],
+          field: '{field}',
+          fields: ['{field}'],
           script: ''
         },
         terms_stats: {
@@ -95,8 +102,8 @@ define(function () {
             key_field: 'FIELD',
             value_field: 'FIELD'
           },
-          key_field: '$FIELD$',
-          value_field: '$FIELD$',
+          key_field: '{field}',
+          value_field: '{field}',
           value_script: '',
           size: 10,
           order: {

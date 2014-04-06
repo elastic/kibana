@@ -7,7 +7,7 @@ define(function () {
       post_tags: {},
       tags_schema: {},
       fields: {
-        '$FIELD$': {
+        '{field}': {
           fragment_size: 20,
           number_of_fragments: 3
         }

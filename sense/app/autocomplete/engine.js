@@ -1,7 +1,7 @@
 define([
-  'exports',
-  '_'
-],
+    'exports',
+    '_'
+  ],
   function (exports, _) {
     "use strict";
 
@@ -24,8 +24,6 @@ define([
      }
      */
     exports.AutocompleteComponent.prototype.match = function (token, context, editor) {
-      var r = {};
-      r[this.name] = token;
       return {
         next: this.next
       };
@@ -48,13 +46,16 @@ define([
     exports.SharedComponent = SharedComponent;
 
     (function (cls) {
+      /* return the first component with a given name */
       cls.getComponent = function (name) {
-        return this._nextDict[name];
+        return (this._nextDict[name] || [undefined])[0];
       };
 
-      cls.addComponent = function (c) {
-        this._nextDict[c.name] = c;
-        this.next = _.values(this._nextDict);
+      cls.addComponent = function (component) {
+        var current = this._nextDict[component.name] || [];
+        current.push(component);
+        this._nextDict[component.name] = current;
+        this.next = [].concat.apply([], _.values(this._nextDict));
       };
 
     })(SharedComponent.prototype);
@@ -87,26 +88,26 @@ define([
 
         if (this.getDefaultTermMeta()) {
           var meta = this.getDefaultTermMeta();
-          ret = _.map(ret, function (t) {
-            if (_.isString(t)) {
-              t = { "name": t};
+          ret = _.map(ret, function (term) {
+            if (_.isString(term)) {
+              term = { "name": term};
             }
-            return _.defaults(t, { meta: meta });
+            return _.defaults(term, { meta: meta });
           });
         }
 
         return ret;
       };
 
-      cls.validateToken = function (token, context, editor) {
-        if (!this.multi_valued && token.length > 1) {
+      cls.validateTokens = function (tokens, context, editor) {
+        if (!this.multi_valued && tokens.length > 1) {
           return false;
         }
 
         // verify we have all tokens
         var list = this.listGenerator();
-        var not_found = _.any(token, function (p) {
-          return list.indexOf(p) == -1;
+        var not_found = _.any(tokens, function (token) {
+          return list.indexOf(token) == -1;
         });
 
         if (not_found) {
@@ -127,14 +128,14 @@ define([
         if (!_.isArray(token)) {
           token = [ token ]
         }
-        if (!this.allow_non_valid_values && !this.validateToken(token, context, editor)) {
+        if (!this.allow_non_valid_values && !this.validateTokens(token, context, editor)) {
           return null
         }
 
-        var r = Object.getPrototypeOf(cls).match.call(this, token, context, editor);
-        r.context_values = r.context_values || {};
-        r.context_values[this.getContextKey()] = token;
-        return r;
+        var result = Object.getPrototypeOf(cls).match.call(this, token, context, editor);
+        result.context_values = result.context_values || {};
+        result.context_values[this.getContextKey()] = token;
+        return result;
       }
     })(ListComponent.prototype);
 
@@ -147,10 +148,10 @@ define([
 
     (function (cls) {
       cls.match = function (token, context, editor) {
-        var r = Object.getPrototypeOf(cls).match.call(this, token, context, editor);
-        r.context_values = r.context_values || {};
-        r.context_values[this.name] = token;
-        return r;
+        var result = Object.getPrototypeOf(cls).match.call(this, token, context, editor);
+        result.context_values = result.context_values || {};
+        result.context_values[this.name] = token;
+        return result;
       }
 
     })(SimpleParamComponent.prototype);
@@ -189,6 +190,33 @@ define([
       }
     })(ConstantComponent.prototype);
 
+    exports.wrapComponentWithDefaults = function (component, defaults) {
+      function Wrapper() {
+
+      }
+
+      Wrapper.prototype = {};
+      for (var key in component) {
+        if (_.isFunction(component[key])) {
+          Wrapper.prototype[key] = _.bindKey(component, key);
+        }
+      }
+
+      Wrapper.prototype.getTerms = function (context, editor) {
+        var result = component.getTerms(context, editor);
+        if (!result) {
+          return result;
+        }
+        result = _.map(result, function (term) {
+          if (!_.isObject(term)) {
+            term = { name: term};
+          }
+          return _.defaults(term, defaults);
+        }, this);
+        return result;
+      };
+      return new Wrapper();
+    };
 
     function passThroughContext(context, extensionList) {
       function PTC() {
@@ -196,13 +224,13 @@ define([
       }
 
       PTC.prototype = context;
-      var r = new PTC();
+      var result = new PTC();
       if (extensionList) {
-        extensionList.unshift(r);
+        extensionList.unshift(result);
         _.assign.apply(_, extensionList);
         extensionList.shift();
       }
-      return r;
+      return result;
     }
 
     function WalkingState(parent_name, components, contextExtensionList, depth, priority) {
@@ -264,8 +292,14 @@ define([
         })
       }
 
-      return walkTokenPath(tokenPath.splice(1), nextWalkingStates, context, editor);
+      return walkTokenPath(tokenPath.slice(1), nextWalkingStates, context, editor);
     }
+
+    exports.resolvePathToComponents = function (tokenPath, context, editor, components) {
+      var walkStates = walkTokenPath(tokenPath, [new WalkingState("ROOT", components, [])], context, editor);
+      var result = [].concat.apply([], _.pluck(walkStates, 'components'));
+      return result;
+    };
 
     exports.populateContext = function (tokenPath, context, editor, includeAutoComplete, components) {
 
@@ -274,12 +308,12 @@ define([
         var autoCompleteSet = [];
         _.each(walkStates, function (ws) {
           var contextForState = passThroughContext(context, ws.contextExtensionList);
-          _.each(ws.components, function (c) {
-            _.each(c.getTerms(contextForState, editor), function (t) {
-              if (!_.isObject(t)) {
-                t = { name: t };
+          _.each(ws.components, function (component) {
+            _.each(component.getTerms(contextForState, editor), function (term) {
+              if (!_.isObject(term)) {
+                term = { name: term };
               }
-              autoCompleteSet.push(t);
+              autoCompleteSet.push(term);
             });
           })
         });
@@ -302,8 +336,8 @@ define([
         if (!wsToUse) {
           wsToUse = walkStates[0];
         }
-        _.each(wsToUse.contextExtensionList, function (e) {
-          _.assign(context, e);
+        _.each(wsToUse.contextExtensionList, function (extension) {
+          _.assign(context, extension);
         });
       }
 

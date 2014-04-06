@@ -1,12 +1,12 @@
 define([
-  '_',
-  'exports',
-  'mappings',
-  'es',
-  'kb/api',
-  'autocomplete/engine',
-  'require'
-],
+    '_',
+    'exports',
+    'mappings',
+    'es',
+    'kb/api',
+    'autocomplete/engine',
+    'require'
+  ],
   function (_, exports, mappings, es, api, autocomplete_engine, require) {
     'use strict';
 
@@ -16,20 +16,20 @@ define([
       return !(token === "_all" || token[0] !== "_");
     }
 
-    function IndexUrlComponent(name, parent, multi_valued) {
+    function IndexAutocompleteComponent(name, parent, multi_valued) {
       autocomplete_engine.ListComponent.call(this, name, mappings.getIndices, parent, multi_valued);
     }
 
-    IndexUrlComponent.prototype = _.create(
+    IndexAutocompleteComponent.prototype = _.create(
       autocomplete_engine.ListComponent.prototype,
-      { 'constructor': IndexUrlComponent  });
+      { 'constructor': IndexAutocompleteComponent  });
 
     (function (cls) {
-      cls.validateToken = function (token) {
-        if (!this.multi_valued && token.length > 1) {
+      cls.validateTokens = function (tokens) {
+        if (!this.multi_valued && tokens.length > 1) {
           return false;
         }
-        return !_.find(token, nonValidIndexType);
+        return !_.find(tokens, nonValidIndexType);
       };
 
       cls.getDefaultTermMeta = function () {
@@ -39,28 +39,28 @@ define([
       cls.getContextKey = function () {
         return "indices";
       };
-    })(IndexUrlComponent.prototype);
+    })(IndexAutocompleteComponent.prototype);
 
 
     function TypeGenerator(context) {
       return mappings.getTypes(context.indices);
     }
 
-    function TypeUrlComponent(name, parent, multi_valued) {
+    function TypeAutocompleteComponent(name, parent, multi_valued) {
       autocomplete_engine.ListComponent.call(this, name, TypeGenerator, parent, multi_valued);
     }
 
-    TypeUrlComponent.prototype = _.create(
+    TypeAutocompleteComponent.prototype = _.create(
       autocomplete_engine.ListComponent.prototype,
-      { 'constructor': TypeUrlComponent  });
+      { 'constructor': TypeAutocompleteComponent  });
 
     (function (cls) {
-      cls.validateToken = function (token) {
-        if (!this.multi_valued && token.length > 1) {
+      cls.validateTokens = function (tokens) {
+        if (!this.multi_valued && tokens.length > 1) {
           return false;
         }
 
-        return !_.find(token, nonValidIndexType);
+        return !_.find(tokens, nonValidIndexType);
       };
 
       cls.getDefaultTermMeta = function () {
@@ -70,28 +70,28 @@ define([
       cls.getContextKey = function () {
         return "types";
       };
-    })(TypeUrlComponent.prototype);
+    })(TypeAutocompleteComponent.prototype);
 
     function FieldGenerator(context) {
       return mappings.getFields(context.indices, context.types);
     }
 
-    function FieldUrlComponent(name, parent, multi_valued) {
+    function FieldAutocompleteComponent(name, parent, multi_valued) {
       autocomplete_engine.ListComponent.call(this, name, FieldGenerator, parent, multi_valued);
     }
 
-    FieldUrlComponent.prototype = _.create(
+    FieldAutocompleteComponent.prototype = _.create(
       autocomplete_engine.ListComponent.prototype,
-      { 'constructor': FieldUrlComponent  });
+      { 'constructor': FieldAutocompleteComponent  });
 
     (function (cls) {
-      cls.validateToken = function (token) {
-        if (!this.multi_valued && token.length > 1) {
+      cls.validateTokens = function (tokens) {
+        if (!this.multi_valued && tokens.length > 1) {
           return false;
         }
 
-        return !_.find(token, function (t) {
-          return t.match(/[^\w.?*]/);
+        return !_.find(tokens, function (token) {
+          return token.match(/[^\w.?*]/);
         });
       };
 
@@ -102,17 +102,17 @@ define([
       cls.getContextKey = function () {
         return "fields";
       };
-    })(FieldUrlComponent.prototype);
+    })(FieldAutocompleteComponent.prototype);
 
 
-    function IdUrlComponent(name, parent, multi) {
+    function IdAutocompleteComponent(name, parent, multi) {
       autocomplete_engine.SharedComponent.call(this, name, parent);
       this.multi_match = multi
     }
 
-    IdUrlComponent.prototype = _.create(
+    IdAutocompleteComponent.prototype = _.create(
       autocomplete_engine.SharedComponent.prototype,
-      { 'constructor': IdUrlComponent  });
+      { 'constructor': IdAutocompleteComponent  });
 
     (function (cls) {
       cls.match = function (token, context, editor) {
@@ -133,33 +133,36 @@ define([
         r.context_values['id'] = token;
         return r;
       };
-    })(IdUrlComponent.prototype);
+    })(IdAutocompleteComponent.prototype);
 
-    var globalUrlComponentFactories = {
+    var parametrizedComponentFactories = {
 
-      'index': function (part, parent, endpoint) {
-        return new IndexUrlComponent(part, parent, false);
+      'index': function (name, parent, endpoint) {
+        return new IndexAutocompleteComponent(name, parent, false);
       },
-      'indices': function (part, parent, endpoint) {
-        return new IndexUrlComponent(part, parent, true);
+      'indices': function (name, parent, endpoint) {
+        return new IndexAutocompleteComponent(name, parent, true);
       },
-      'type': function (part, parent, endpoint) {
-        return new TypeUrlComponent(part, parent, false);
+      'type': function (name, parent, endpoint) {
+        return new TypeAutocompleteComponent(name, parent, false);
       },
-      'types': function (part, parent, endpoint) {
-        return new TypeUrlComponent(part, parent, true);
+      'types': function (name, parent, endpoint) {
+        return new TypeAutocompleteComponent(name, parent, true);
       },
-      'id': function (part, parent, endpoint) {
-        return new IdUrlComponent(part, parent);
+      'id': function (name, parent, endpoint) {
+        return new IdAutocompleteComponent(name, parent);
       },
-      'ids': function (part, parent, endpoint) {
-        return new IdUrlComponent(part, parent, true);
+      'ids': function (name, parent, endpoint) {
+        return new IdAutocompleteComponent(name, parent, true);
       },
-      'fields': function (part, parent, endpoint) {
-        return new FieldUrlComponent(part, parent, true);
+      'fields': function (name, parent, endpoint) {
+        return new FieldAutocompleteComponent(name, parent, true);
       },
-      'nodes': function (part, parent, endpoint) {
-        return new autocomplete_engine.ListComponent(part, ["_local", "_master", "data:true", "data:false",
+      'field': function (name, parent, endpoint) {
+        return new FieldAutocompleteComponent(name, parent, false);
+      },
+      'nodes': function (name, parent, endpoint) {
+        return new autocomplete_engine.ListComponent(name, ["_local", "_master", "data:true", "data:false",
           "master:true", "master:false"], parent)
       }
     };
@@ -172,16 +175,28 @@ define([
       return indices;
     }
 
+    function getUnmatchedEndpointComponents() {
+      return ACTIVE_API.getUnmatchedEndpointComponents();
+    }
+
     function getEndpointDescriptionByEndpoint(endpoint) {
       return ACTIVE_API.getEndpointDescriptionByEndpoint(endpoint)
+    }
+
+    function getEndpointBodyCompleteComponents(endpoint) {
+      var desc = getEndpointDescriptionByEndpoint(endpoint);
+      if (!desc) {
+        throw new Error("failed to resolve endpoint ['" + endpoint + "']");
+      }
+      return desc.bodyAutocompleteRootComponents;
     }
 
     function getTopLevelUrlCompleteComponents() {
       return ACTIVE_API.getTopLevelUrlCompleteComponents();
     }
 
-    function getGlobalAutocompleteRules() {
-      return ACTIVE_API.getGlobalAutocompleteRules();
+    function getGlobalAutocompleteComponents(term) {
+      return ACTIVE_API.getGlobalAutocompleteComponents(term);
     }
 
     function setActiveApi(api) {
@@ -191,7 +206,7 @@ define([
       }
       if (_.isFunction(api)) {
         /* jshint -W055 */
-        setActiveApi(new api(globalUrlComponentFactories));
+        setActiveApi(new api(parametrizedComponentFactories, parametrizedComponentFactories));
         return;
       }
       ACTIVE_API = api;
@@ -220,12 +235,15 @@ define([
     });
 
     exports.setActiveApi = setActiveApi;
-    exports.getGlobalAutocompleteRules = getGlobalAutocompleteRules;
+    exports.getGlobalAutocompleteComponents = getGlobalAutocompleteComponents;
     exports.getEndpointDescriptionByEndpoint = getEndpointDescriptionByEndpoint;
+    exports.getEndpointBodyCompleteComponents = getEndpointBodyCompleteComponents;
     exports.getTopLevelUrlCompleteComponents = getTopLevelUrlCompleteComponents;
+    exports.getUnmatchedEndpointComponents = getUnmatchedEndpointComponents;
 
     exports._test = {
-      globalUrlComponentFactories: globalUrlComponentFactories
+      globalUrlComponentFactories: parametrizedComponentFactories,
+      globalBodyComponentFactories: parametrizedComponentFactories
     };
 
     return exports;
