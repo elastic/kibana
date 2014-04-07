@@ -67,7 +67,7 @@ define(function(require) {
             /* *************** D3 parameters ********************* */
             xScale = d3.scale.ordinal().domain(keys).rangeRoundBands([0, width], 0.1),
             yScale = d3.scale.linear().range([height, 0]).nice(),
-            xAxis = d3.svg.axis().scale(xScale).ticks(6).tickSize(3, 0).tickPadding(6).orient('bottom'),
+            xAxis = d3.svg.axis().scale(xScale).tickSize(3, 0).tickPadding(6).tickValues(xScale.domain().filter(function(d, i) { return (i % 5); })).orient('bottom'),
             yAxis = d3.svg.axis().scale(yScale).ticks(6).tickSize(-(width), 0).tickPadding(4).orient('left'),
             color = d3.scale.linear().domain([0, m - 1]).range(['#e24700', '#f9e593']),
             /*
@@ -252,7 +252,8 @@ define(function(require) {
                 /* Update the range of the scale with new width/height */
                 xScale.rangeRoundBands([0, width], 0.1);
                 yScale.range([height, 0]).nice();
-                xAxis.ticks(Math.max(width/50, 2));
+                xAxis.tickValues(xScale.domain().filter(function(d, i) { return (i % Math.min(width/80, 5)); }));
+                //xAxis.ticks(Math.max(width/50, 2));
                 yAxis.ticks(Math.max(height/20, 2)).tickSize(-(width), 0);
 
                 if (width < 300 && height < 80) {

@@ -14,25 +14,42 @@
   padding-right: 0px !important;
 }
 
+.discover-field-container {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+  background-color: @well-bg;
+  border-right: 1px solid @well-border;
+  border-bottom: 1px solid @well-border;
+}
+
 .discover-field-list {
+
+  h5 {
+    padding-left: 5px;
+  }
 
   .discover-field-item {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: @font-size-smaller;
+    border-top: 1px solid @well-border;
   }
 
-  .discover-field-item [field-name]:hover {
-    color: @link-color;
+  .discover-field-name {
+    padding: 5px 10px;
+  }
+
+  .discover-field-name:hover, .discover-field-name:hover .text-muted {
+    background-color: @component-active-bg;
+    color: @component-active-color;
   }
 
   .discover-field-details {
-    padding: 5px;
-    background-color: @well-bg;
-    border-radius: @border-radius-base;
-    border: 1px solid @table-border-color;
-    margin-bottom: 5px;
+    border-top: 1px solid @well-border;
+    padding: 5px 10px;
+    background-color: @body-bg;
+    color: @text-color;
 
     .discover-field-details-error {
       margin-top: 5px;
