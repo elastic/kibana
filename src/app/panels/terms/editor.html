@@ -66,5 +66,9 @@
       <div class="editor-option" ng-show="panel.chart == 'pie'">
         <label class="small">Labels</label><input type="checkbox" ng-model="panel.labels" ng-checked="panel.labels">
       </div>
+      <div class="editor-option" ng-show="panel.chart == 'pie'">
+        <label class="small">Percision</label>
+        <input class="input-small" type="number" ng-model="panel.percision" ng-change="set_refresh(true)">
+      </div>
     </div>
   </div>

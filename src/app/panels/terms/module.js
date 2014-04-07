@@ -125,7 +125,11 @@ function (angular, app, _, $, kbn) {
       /** @scratch /panels/terms/5
        * valuefield:: Terms_stats facet value field
        */
-      valuefield  : ''
+      valuefield  : '',
+      /** @scratch /panels/terms/5
+       * percision:: Set percent display percision
+       */
+      percision   : 1
     };
 
     _.defaults($scope.panel,_d);
@@ -335,7 +339,7 @@ function (angular, app, _, $, kbn) {
                 var labelFormat = function(label, series){
                   return '<div ng-click="build_search(panel.field,\''+label+'\')'+
                     ' "style="font-size:8pt;text-align:center;padding:2px;color:white;">'+
-                    label+'<br/>'+Math.round(series.percent)+'%</div>';
+                    label+'<br/>'+series.percent.toFixed(scope.panel.percision)+'%</div>';
                 };
 
                 plot = $.plot(elem, chartData, {
