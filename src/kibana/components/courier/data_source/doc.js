@@ -8,7 +8,7 @@ define(function (require) {
 
   var module = require('modules').get('kibana/courier');
 
-  module.factory('CouriersDocSource', function (couriersErrors, CouriersSourceAbstract, Promise) {
+  module.factory('CouriersDocSource', function (couriersErrors, CouriersSourceAbstract, Promise, es) {
     var VersionConflict = couriersErrors.VersionConflict;
     var RequestFailure = couriersErrors.RequestFailure;
 
@@ -153,7 +153,6 @@ define(function (require) {
     DocSource.prototype._sendToEs = function (method, validateVersion, body) {
       var source = this;
       var courier = this._courier;
-      var client = courier._getClient();
 
       // straight assignment will causes undefined values
       var params = _.pick(this._state, ['id', 'type', 'index']);
@@ -164,7 +163,7 @@ define(function (require) {
         params.version = source._getVersion();
       }
 
-      return client[method](params)
+      return es[method](params)
       .then(function (resp) {
         if (resp.status === 409) throw new VersionConflict(resp);
 
