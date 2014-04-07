@@ -1,4 +1,4 @@
-/*! elasticsearch - v1.5.9 - 2014-02-26
+/*! elasticsearch - v1.5.14 - 2014-03-18
  * http://www.elasticsearch.org/guide/en/elasticsearch/client/javascript-api/current/index.html
  * Copyright (c) 2014 Elasticsearch BV; Licensed Apache 2.0 */
 ;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -19867,7 +19867,9 @@ api.cluster.prototype.state = ca({
             'blocks',
             'metadata',
             'nodes',
-            'routing_table'
+            'routing_table',
+            'master_node',
+            'version'
           ]
         },
         index: {
@@ -19885,7 +19887,9 @@ api.cluster.prototype.state = ca({
             'blocks',
             'metadata',
             'nodes',
-            'routing_table'
+            'routing_table',
+            'master_node',
+            'version'
           ]
         }
       }
@@ -25941,9 +25945,17 @@ var extractHostPartsRE = /\[\/*([^:]+):(\d+)\]/;
 
 function makeNodeParser(hostProp) {
   return function (nodes) {
-    var hosts = [];
-    _.each(nodes, function (node, id) {
+    return _.transform(nodes, function (hosts, node, id) {
+      if (!node[hostProp]) {
+        return;
+      }
+
       var hostnameMatches = extractHostPartsRE.exec(node[hostProp]);
+      if (!hostnameMatches) {
+        throw new Error('node\'s ' + hostProp + ' property (' + JSON.stringify(node[hostProp]) +
+          ') does not match the expected pattern ' + extractHostPartsRE + '.');
+      }
+
       hosts.push({
         host: hostnameMatches[1],
         port: parseInt(hostnameMatches[2], 10),
@@ -25954,8 +25966,7 @@ function makeNodeParser(hostProp) {
           version: node.version
         }
       });
-    });
-    return hosts;
+    }, []);
   };
 }
 
@@ -26390,6 +26401,7 @@ Transport.prototype._timeout = function (cb, delay) {
 Transport.prototype.sniff = function (cb) {
   var connectionPool = this.connectionPool;
   var nodesToHostCallback = this.nodesToHostCallback;
+  var log = this.log;
 
   // make cb a function if it isn't
   cb = typeof cb === 'function' ? cb : _.noop;
@@ -26399,10 +26411,19 @@ Transport.prototype.sniff = function (cb) {
     method: 'GET'
   }, function (err, resp, status) {
     if (!err && resp && resp.nodes) {
-      var hosts = _.map(nodesToHostCallback(resp.nodes), function (hostConfig) {
+      var hostsConfigs;
+
+      try {
+        hostsConfigs = nodesToHostCallback(resp.nodes);
+      } catch (e) {
+        log.error(new Error('Unable to convert node list from ' + this.sniffEndpoint +
+          ' to hosts durring sniff. Encountered error:\n' + (e.stack || e.message)));
+        return;
+      }
+
+      connectionPool.setHosts(_.map(hostsConfigs, function (hostConfig) {
         return new Host(hostConfig);
-      });
-      connectionPool.setHosts(hosts);
+      }));
     }
     cb(err, resp, status);
   });

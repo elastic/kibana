@@ -14,17 +14,21 @@ define(function(require) {
             colors = args.color,
             //displayToolTip = args.displayToolTip || true,
             numRows, margin, svg, g, layer, n, m, width, height, outerWidth, outerHeight, keys, stack, toolTip,
-            xScale, yScale, xAxis, yAxis, yStackMax, yGroupMax, color;
+            xScale, yScale, xAxis, yAxis, yStackMax, yGroupMax, color,
+            k1 = 'rows', k2 = 'columns', k3 = 'layers', k4 = 'values';
+
 
         chart.render = function(data) {
 
-            /* ********** Sizing DOM Elements ************* */
+            /* ********** align x axis data / inject zeros ************* */
+            // align data and set structure params
+            data = alignXvals(data);
             // number of rows
-            numRows = data.rows.length,
+            numRows = data[k1].length;
             // number of charts
-            n = data.rows[0].columns.length,
+            n = data[k1][0][k2].length,
             // number of layers per chart
-            m = data.rows[0].columns[0].layers.length,
+            m = data[k1][0][k2][0][k3].length,
             // row width
             outerWidth = elemWidth,
             // row height
@@ -34,40 +38,49 @@ define(function(require) {
                 right: outerWidth * 0.01,
                 bottom: outerHeight * 0.15,
                 left: outerWidth * 0.05
-            },
+              },
             // svg width/height
-            width = outerWidth/n - margin.left - margin.right,
+            width = outerWidth / n - margin.left - margin.right,
             height = outerHeight - margin.top - margin.bottom,
-            /* ************************************************** */
 
-            /* ************* Data manipulation **************** */
-            // pulls out the x-axis key values
-            keys = data.rows[0].columns[0].layers[0].values.map(function(item) { return item.x; }),
-            stack = d3.layout.stack().offset(stacktype).values(function(d) { return d.values; }),
-            yGroupMax = d3.max(data.rows.map(function(data) {
-                return d3.max(data.columns, function(col) {
-                    return d3.max(stack(col.layers), function(layer) {
-                        return d3.max(layer.values, function(d) {
+            //console.log('numRows:', numRows, 'n:', n, 'm:', m, 'keys:', keys);
+            //console.log('outerWidth', outerWidth, 'outerHeight', outerHeight, 'width', width, 'height', height);
+ 
+            // stack layout and max values
+            stack = d3.layout.stack().offset(stacktype).values(function (d) { return d.values; }),
+ 
+            yGroupMax = d3.max(data[k1].map(function (a) {
+                return d3.max(a[k2], function (b) {
+                    return d3.max(stack(b.layers), function (c) {
+                        return d3.max(c.values, function (d) {
                             return d.y;
-                        });
-                    });
-                });
-            })),
-            yStackMax = d3.max(data.rows.map(function(data) {
-                return d3.max(data.columns, function(col) {
-                    return d3.max(stack(col.layers), function(layer) {
-                        return d3.max(layer.values, function(d) {
+                          });
+                      });
+                  });
+              })),
+ 
+            yStackMax = d3.max(data[k1].map(function (a) {
+                return d3.max(a[k2], function (b) {
+                    return d3.max(stack(b.layers), function (c) {
+                        return d3.max(c.values, function (d) {
                             return d.y0 + d.y;
-                        });
-                    });
-                });
-            })),
-            /* **************************************************** */
+                          });
+                      });
+                  });
+              })),
 
             /* *************** D3 parameters ********************* */
             xScale = d3.scale.ordinal().domain(keys).rangeRoundBands([0, width], 0.1),
             yScale = d3.scale.linear().range([height, 0]).nice(),
-            xAxis = d3.svg.axis().scale(xScale).tickSize(3, 0).tickPadding(6).tickValues(xScale.domain().filter(function(d, i) { return (i % 5); })).orient('bottom'),
+            xAxis = d3.svg.axis().scale(xScale).tickSize(4, 0).tickPadding(6)
+                .tickValues( xScale.domain().filter(function(d, i) { 
+                    //console.log( d, i, keys );
+                    //console.log( width / keys.length , xScale.rangeBand() );
+                    // first and last
+                    //if (i == 0 || i == keys.length-1) { return (d); }
+                    return d;
+                }) )
+                .orient('bottom'),
             yAxis = d3.svg.axis().scale(yScale).ticks(6).tickSize(-(width), 0).tickPadding(4).orient('left'),
             color = d3.scale.linear().domain([0, m - 1]).range(['#e24700', '#f9e593']),
             /*
@@ -136,7 +149,12 @@ define(function(require) {
                         .attr('class', 'x axis')
                         .attr('transform', 'translate(0,' + height + ')')
                         .style('stroke-width', 0.5)
-                        .call(xAxis);
+                        .call(xAxis)
+                        .selectAll('text')
+                        .attr('y', function(d,i) {
+                            var nth = Math.ceil( 1.1 * this.getComputedTextLength() / (width / keys.length) );
+                            if ( i % nth == 0 ) { return 7; } else { return 50; }
+                        });
 
                     // y axis
                     g.append('g')
@@ -252,8 +270,11 @@ define(function(require) {
                 /* Update the range of the scale with new width/height */
                 xScale.rangeRoundBands([0, width], 0.1);
                 yScale.range([height, 0]).nice();
-                xAxis.tickValues(xScale.domain().filter(function(d, i) { return (i % Math.min(width/80, 5)); }));
+                //xAxis.tickValues(xScale.domain().filter(function(d, i) { return (i % Math.min(width/80, 5)); }));
                 //xAxis.ticks(Math.max(width/50, 2));
+                xAxis = d3.svg.axis().scale(xScale).tickSize(3, 0).tickPadding(6)
+                    .tickValues( xScale.domain().filter(function(d) { return d; }) )
+                    .orient('bottom'),
                 yAxis.ticks(Math.max(height/20, 2)).tickSize(-(width), 0);
 
                 if (width < 300 && height < 80) {
@@ -269,7 +290,12 @@ define(function(require) {
                 /* Update the axis with the new scale */
                 g.select('.x.axis')
                     .attr('transform', 'translate(0,' + height + ')')
-                    .call(xAxis);
+                    .call(xAxis)
+                    .selectAll('text')
+                    .attr('y', function(d,i) {
+                        var nth = Math.ceil( 1.1 * this.getComputedTextLength() / (width / keys.length) );
+                        if ( i % nth == 0 ) { return 7; } else { return 50; }
+                    });
 
                 g.select('.y.axis')
                     .call(yAxis);
@@ -289,6 +315,52 @@ define(function(require) {
                         .attr('y', function(d) { return yScale(d.y0 + d.y); });
                 }
             });
+        }
+
+        // aligns x axis values and splices in zeros as needed
+        function alignXvals (data) {
+            //
+            k1 = 'rows', k2 = 'columns', k3 = 'layers', k4 = 'values';
+            var xKeys = [], i;
+            if (!data.rows) {
+                k1 = 'columns', k2 = 'rows';
+            }
+            if (!data[k1][0][k2][0].layers) {
+                k3 = 'series';
+            }
+            
+            data[k1].map(function (a) {
+                return a[k2].map(function (b) {
+                    return b[k3].map(function (c) {
+                        return c[k4].map(function (d) {
+                            xKeys.push(d.x);
+                        });
+                    })
+                })
+            });
+            // get uniques from list
+            xKeys = keys = d3.set(xKeys).values();
+            // add values in same order as uniques
+            data[k1].map(function (a) {
+                return a[k2].map(function (b) {
+                    return b[k3].map(function (c) {
+                        i = 0;
+                        xKeys.forEach(function (d) {
+                            if (!c[k4][i]) {
+                                // last value
+                                c[k4].push({x: d, y: 0});
+                            } else {
+                                // if not a match splice
+                                if ( String(c[k4][i].x) !== d ) {
+                                    c[k4].splice(i,0,{x: d, y:0});
+                                }
+                            }
+                            i++;
+                        });
+                    })
+                })
+            });
+            return data;
         }
 
         chart.margin = function() {
