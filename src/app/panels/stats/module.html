@@ -6,7 +6,7 @@
        <th><a href="" ng-click="set_sort('label')" ng-class="{'icon-chevron-down': panel.sort_field == 'label' && panel.sort_reverse == true, 'icon-chevron-up': panel.sort_field == 'label' && panel.sort_reverse == false}"> {{panel.label_name}} </a></th>
        <th style="text-align: right;"><a href="" ng-click="set_sort('value')" ng-class="{'icon-chevron-down': panel.sort_field == 'value' && panel.sort_reverse == true, 'icon-chevron-up': panel.sort_field == 'value' && panel.sort_reverse == false}"> {{panel.value_name}} </a></th>
       </tr>
-      <tr ng-repeat="item in data.rows | orderBy:panel.sort_field:panel.sort_reverse">
+      <tr ng-repeat="item in data.rows | orderBy:panel.sort_field:panel.sort_reverse" ng-class="{'pointer': panel.filter_field != '' }" ng-click="build_search(item)">
         <td><i class="icon-circle" ng-style="{color:item.color}"></i> {{item.label}}</td>
         <td style="text-align: right;">{{item.value|formatstats:panel.format}} {{panel.unit}}</td>
       </tr>

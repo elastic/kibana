@@ -58,11 +58,12 @@ define([
       format: 'number',
       mode: 'count',
       display_breakdown: 'yes',
+      filter_field: '',
       sort_field: '',
       sort_reverse: false,
       label_name: 'Query',
       value_name: 'Value',
-      spyable     : true
+      spyable     : true,
     };
 
     _.defaults($scope.panel, defaults);
@@ -161,6 +162,18 @@ define([
 
         $scope.$emit('render');
       });
+    };
+
+    $scope.build_search = function(item) {
+      if($scope.panel.filter_field) {
+        if(!$scope.filter_id){
+          $scope.filter_id = filterSrv.set({type:'terms',field:$scope.panel.filter_field,
+            value:item.label.split(' ')[0],mandate:'must'});
+        }else{
+          filterSrv.remove($scope.filter_id);
+          $scope.filter_id = undefined;
+        }
+      }
     };
 
     $scope.set_refresh = function (state) {

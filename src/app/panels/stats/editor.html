@@ -12,6 +12,10 @@
       <label class="small">Unit</label>
         <input type="text" class="input-large" ng-model="panel.unit">
     </div>
+    <div class="editor-option" ng-show="panel.display_breakdown">
+      <label class="small">Filter Field <tip>If given, clicking on a breakdown value will filter by this field.</tip></label>
+        <input ng-change="set_refresh(true)" placeholder="Start typing" bs-typeahead="fields.list" type="text" class="input-large" ng-model="panel.filter_field">
+    </div>
     <h5>Formating</h5>
     <div class="editor-option">
       <label class="small">Format</label>
