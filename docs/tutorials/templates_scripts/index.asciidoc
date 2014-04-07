@@ -8,7 +8,7 @@ filter via the URL.
 Templates and scripts must be stored on disk, storing them to
 Elasticsearch is not supported. They must also be created by editing or
 creating a schema. Because of this we highly recommend reading
-http://linktotheschema[The Kibana Schema Explained]
+link:./_dashboard_schema.html[The Kibana Schema Explained]
 
 [[the-dashboard-directory]]
 === The dashboard directory
