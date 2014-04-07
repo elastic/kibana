@@ -30,6 +30,10 @@ define(function (require) {
           });
         });
 
+        $scope.filter = function (field, value, operation) {
+          $scope.filterFunc(field.name, value, operation);
+        };
+
         $scope.details = function (field, recompute) {
           if (_.isUndefined(field.details) || recompute) {
             field.details = getFieldValueCounts({
@@ -41,10 +45,6 @@ define(function (require) {
           } else {
             delete field.details;
           }
-        };
-
-        $scope.filter = function (field, value, operation) {
-          $scope.filterFunc(field.name, value, operation);
         };
 
         var getFieldValues = function (data, field) {
@@ -122,6 +122,8 @@ define(function (require) {
             hasArrays : hasArrays,
           };
         };
+
+
       }
     };
   });

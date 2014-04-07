@@ -3,7 +3,7 @@
     <h5>Selected</h5>
   </div>
   <ul bindonce class="list-unstyled">
-    <discover-field field="field" ng-repeat="field in fields|filter:{display:true}">
+    <discover-field field="field" ng-repeat="field in fields|filter:{display:true}" data="data">
     </discover-field>
   </ul>
 
@@ -11,7 +11,7 @@
     <h5>Available</h5>
   </div>
   <ul bindonce class="list-unstyled">
-    <discover-field field="field" ng-repeat="field in fields|filter:{display:false}">
+    <discover-field field="field" ng-repeat="field in fields|filter:{display:false}" data="data">
     </discover-field>
   </ul>
 </div>
