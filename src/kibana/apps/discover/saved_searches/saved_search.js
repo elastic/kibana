@@ -21,7 +21,7 @@ define(function (require) {
         return doc.get('id');
       };
 
-      search.phantom = true;
+      search.unsaved = true;
       search.details = {
         name: '',
         hits: 0
@@ -33,7 +33,7 @@ define(function (require) {
         }
 
         if (!doc.get('id')) {
-          search.phantom = false;
+          search.unsaved = false;
           doc.set('id', resp._id);
         }
 

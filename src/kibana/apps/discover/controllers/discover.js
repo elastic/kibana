@@ -70,7 +70,6 @@ define(function (require) {
       .then(function () {
         notify.info('Saved Data Source "' + search.details.name + '"');
         if (searchIsUnsaved) {
-          searchIsUnsaved = false;
           $location.url('/discover/' + search.get('id'));
         }
       }, notify.error);
