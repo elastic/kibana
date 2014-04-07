@@ -50,6 +50,7 @@
   </style>
 
   <div class="table-container">
+
     <div bindonce ng-class="{'table-sidebar':panel.field_list}" ng-if="panel.field_list">
       <div class="sidebar-nav">
 
@@ -90,6 +91,12 @@
     </div>
 
     <div style="{{panel.overflow}}:{{panel.height || row.height}};" ng-class="{'table-main':panel.field_list}" class="table-doc-table">
+
+      <div class="table-facet" ng-if="modalField">
+        <h4><button class="btn btn-mini btn-danger" ng-click="closeFacet();">close</button> Top 10 terms in field {{modalField}}</h4>
+        <kibana-simple-panel type="'{{facetType}}'" panel='{{facetPanel}}' ng-cloak></kibana-simple-panel>
+      </div>
+
       <i class="pull-left icon-chevron-sign-right pointer" ng-click="panel.field_list = !panel.field_list" bs-tooltip="'Show field list'" ng-show="!panel.field_list"></i>
       <div class="row-fluid" ng-show="panel.paging">
         <div class="span1 offset1" style="text-align:right">
