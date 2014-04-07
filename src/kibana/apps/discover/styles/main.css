@@ -93,6 +93,11 @@
   border-top: 1px solid #e3e3e3;
   font-size: 11px;
 }
+.discover-field-list .discover-field-item .discover-field-details-close {
+  text-align: center;
+  border-top: 1px solid #e3e3e3;
+  background-color: #f5f5f5;
+}
 .discover-field-list .discover-field-name {
   padding: 5px 10px;
   white-space: nowrap;
