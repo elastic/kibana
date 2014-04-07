@@ -47,9 +47,21 @@ function (angular, app, _, $, kbn) {
       /** @scratch /panels/terms/5
        * === Parameters
        *
-       * field:: The field on which to computer the facet
+       * field:: The field on which to compute the facet, used when field_type is 'field'
        */
       field   : '_type',
+      /** @scratch /panels/terms/5
+       * fields:: The fields array on which to compute the facet, used when field_type is 'fields'
+       */
+      fields  : [],
+      /** @scratch /panels/terms/5
+       * script_field:: The field script on which to compute the facet, used when field_type is 'script_field'
+       */
+      script_field : '',
+      /** @scratch /panels/terms/5
+       * field_mode:: set field method for terms: field, fields or script_field
+       */
+      field_mode : 'field',
       /** @scratch /panels/terms/5
        * exclude:: terms to exclude from the results
        */
@@ -172,17 +184,43 @@ function (angular, app, _, $, kbn) {
 
       // Terms mode
       if($scope.panel.tmode === 'terms') {
-        request = request
-          .facet($scope.ejs.TermsFacet('terms')
-          .field($scope.field)
-          .size($scope.panel.size)
-          .order($scope.panel.order)
-          .exclude($scope.panel.exclude)
-          .facetFilter($scope.ejs.QueryFilter(
-            $scope.ejs.FilteredQuery(
-              boolQuery,
-              filterSrv.getBoolFilter(filterSrv.ids())
-            )))).size(0);
+        if($scope.panel.field_mode === 'field') {
+          request = request
+            .facet($scope.ejs.TermsFacet('terms')
+            .field($scope.panel.field)
+            .size($scope.panel.size)
+            .order($scope.panel.order)
+            .exclude($scope.panel.exclude)
+            .facetFilter($scope.ejs.QueryFilter(
+              $scope.ejs.FilteredQuery(
+                boolQuery,
+                filterSrv.getBoolFilter(filterSrv.ids())
+              )))).size(0);
+        } else if($scope.panel.field_mode === 'fields') {
+          request = request
+            .facet($scope.ejs.TermsFacet('terms')
+            .fields($scope.panel.fields)
+            .size($scope.panel.size)
+            .order($scope.panel.order)
+            .exclude($scope.panel.exclude)
+            .facetFilter($scope.ejs.QueryFilter(
+              $scope.ejs.FilteredQuery(
+                boolQuery,
+                filterSrv.getBoolFilter(filterSrv.ids())
+              )))).size(0);
+        } else if($scope.panel.field_mode === 'script_field') {
+          request = request
+            .facet($scope.ejs.TermsFacet('terms')
+            .scriptField($scope.panel.script_field)
+            .size($scope.panel.size)
+            .order($scope.panel.order)
+            .exclude($scope.panel.exclude)
+            .facetFilter($scope.ejs.QueryFilter(
+              $scope.ejs.FilteredQuery(
+                boolQuery,
+                filterSrv.getBoolFilter(filterSrv.ids())
+              )))).size(0);
+        }
       }
       if($scope.panel.tmode === 'terms_stats') {
         request = request
