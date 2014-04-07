@@ -1,8 +1,17 @@
 require.config({
   baseUrl: './kibana',
   paths: {
+    // components
     kibana: './index',
-    courier: '../courier',
+    courier: './components/courier',
+    config: './components/config',
+    notify: './components/notify',
+
+    // special utils
+    routes: 'utils/routes',
+    modules: 'utils/modules',
+
+    // bower_components
     angular: '../bower_components/angular/angular',
     'angular-mocks': '../bower_components/angular-mocks/angular-mocks',
     'angular-route': '../bower_components/angular-route/angular-route',
@@ -18,7 +27,6 @@ require.config({
     moment: '../bower_components/moment/moment',
     gridster: '../bower_components/gridster/dist/jquery.gridster',
     stacktrace: '../bower_components/stacktrace.js/stacktrace',
-    modules: 'utils/modules',
     jsonpath: '../bower_components/jsonpath/lib/jsonpath',
     K4D3: '../bower_components/K4D3/k4.d3',
     bower_components: '../bower_components'

@@ -4,12 +4,9 @@
 define(function (require) {
   var angular = require('angular');
   var $ = require('jquery');
-  var _ = require('lodash');
-  var scopedRequire = require('require');
-  var setup = require('./setup');
   var configFile = require('../config');
   var modules = require('modules');
-  var notify = require('notify/notify');
+  var routes = require('routes');
 
   require('utils/rison');
   require('elasticsearch');
@@ -23,37 +20,35 @@ define(function (require) {
     'ngRoute'
   ]);
 
+  kibana
+    // This stores the Kibana revision number, @REV@ is replaced by grunt.
+    .constant('kbnVersion', '@REV@')
+    // Use this for cache busting partials
+    .constant('cacheBust', 'cache-bust=' + Date.now())
+    // attach the route manager's known routes
+    .config(routes.config);
+
+  // setup routes
+  routes
+    .otherwise({
+      redirectTo: '/' + configFile.defaultAppId
+    });
+
   // tell the modules util to add it's modules as requirements for kibana
   modules.link(kibana);
 
-  // proceed once setup is complete
-  setup(function (err) {
-    kibana
-      // setup default routes
-      .config(function ($routeProvider, $provide) {
-        $routeProvider
-          .otherwise({
-            redirectTo: '/' + configFile.defaultAppId
-          });
-      });
-
-    require([
-      'controllers/kibana'
-    ].concat(configFile.apps.map(function (app) {
-      return 'apps/' + app.id + '/index';
-    })), function bootstrap() {
-      $(function () {
-        notify.lifecycle('bootstrap');
-        angular
-          .bootstrap(document, ['kibana'])
-          .invoke(function () {
-            notify.lifecycle('bootstrap', true);
-            $(document.body).children().show();
-          });
-
-      });
+  require([
+    'controllers/kibana'
+  ].concat(configFile.apps.map(function (app) {
+    return 'apps/' + app.id + '/index';
+  })), function bootstrap() {
+    $(function () {
+      angular
+        .bootstrap(document, ['kibana'])
+        .invoke(function ($rootScope, $route) {
+          $(document.body).children().show();
+        });
     });
-
   });
 
   return kibana;
