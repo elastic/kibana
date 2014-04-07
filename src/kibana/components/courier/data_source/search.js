@@ -4,7 +4,7 @@ define(function (require) {
 
   require('./abstract');
 
-  var module = require('modules').get('courier/data_sources');
+  var module = require('modules').get('kibana/courier');
 
   module.factory('CouriersSearchSource', function (couriersErrors, CouriersSourceAbstract) {
     var FetchFailure = couriersErrors.FetchFailure;

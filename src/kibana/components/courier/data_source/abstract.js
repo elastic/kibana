@@ -4,7 +4,7 @@ define(function (require) {
   var Mapper = require('courier/mapper');
   var nextTick = require('utils/next_tick');
 
-  var module = require('modules').get('courier/data_sources');
+  var module = require('modules').get('kibana/courier');
 
   module.factory('CouriersSourceAbstract', function (couriersFetch, Promise) {
 

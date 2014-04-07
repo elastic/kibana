@@ -1,5 +1,5 @@
 define(function (require) {
-  var module = require('modules').get('courier/localcache');
+  var module = require('modules').get('kibana/courier');
   var _ = require('lodash');
 
   module.factory('LocalCache', function () {

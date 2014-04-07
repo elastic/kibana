@@ -1,6 +1,6 @@
 define(function (require) {
 
-  var module = require('modules').get('courier/fetch');
+  var module = require('modules').get('kibana/courier');
   var _ = require('lodash');
 
   var docStrategy = require('./strategy/doc');

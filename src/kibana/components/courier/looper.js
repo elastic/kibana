@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  var module = require('modules').get('courier/looper');
+  var module = require('modules').get('kibana/courier');
 
   module.factory('Looper', function ($timeout) {
 

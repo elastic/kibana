@@ -3,15 +3,11 @@ define(function (require) {
   var DocSource = require('courier/data_source/doc');
   var nextTick = require('utils/next_tick');
   var sinon = require('test_utils/auto_release_sinon');
-  var createCourier = require('test_utils/create_courier');
-  var stubbedClient = require('test_utils/stubbed_client');
 
   return function extendCourierSuite() {
     describe('onFetch()', function () {
       it('defers to the "fetch" method on the SearchSource class to do the fetch', function () {
         sinon.stub(SearchSource, 'fetch');
-
-        var courier = createCourier();
 
         courier.fetch('search');
         expect(SearchSource.fetch.callCount).to.equal(1);

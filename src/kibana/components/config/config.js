@@ -12,7 +12,7 @@ define(function (require) {
     };
   }());
 
-  var module = require('modules').get('kibana/config', ['kibana']);
+  var module = require('modules').get('kibana/config');
 
   // allow the rest of the app to get the configFile easily
   module.constant('configFile', configFile);
