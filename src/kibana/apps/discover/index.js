@@ -1,8 +1,8 @@
 define(function (require, module, exports) {
   require('directives/table');
-  require('./field_chooser');
   require('./services/saved_searches');
-  require('./timechart');
+  require('./directives/timechart');
+  require('./directives/field_chooser');
   require('./controllers/discover');
 
   var app = require('modules').get('app/discover');

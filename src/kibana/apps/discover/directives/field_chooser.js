@@ -1,10 +1,12 @@
 define(function (require) {
   var app = require('modules').get('app/discover');
-  var html = require('text!./partials/field_chooser.html');
+  var html = require('text!../partials/field_chooser.html');
   var _ = require('lodash');
 
   require('directives/css_truncate');
   require('directives/field_name');
+  require('./discover_field');
+
 
 
   app.directive('discFieldChooser', function () {
@@ -43,23 +45,6 @@ define(function (require) {
 
         $scope.filter = function (field, value, operation) {
           $scope.filterFunc(field.name, value, operation);
-        };
-
-        $scope.typeIcon = function (fieldType) {
-          switch (fieldType)
-          {
-          case 'source':
-            return 'fa-file-text-o';
-          case 'string':
-            return 'fa-sort-alpha-asc';
-          case 'number':
-            return 'fa-sort-numeric-asc';
-          case 'date':
-            return 'fa-clock-o';
-          case 'ip':
-            return 'fa-laptop';
-          default:
-          }
         };
 
         var getFieldValues = function (data, field) {
