@@ -17,11 +17,10 @@
         <div id="element" style="height: 100%"></div>
 
         <!-- javascript files -->
-        <script src="../lib/d3/d3.min.js"></script>
-        <script src="../k4.d3.js"></script>
-        <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-
-        <script>
+        <script src="../lib/requirejs/require.js"></script>
+        <!-- <script src="../require.config.js"></script> -->
+        <!--
+        <script>require(['../src/index'], function(k4) {
             var data = {
                 "rows": [
                     {
@@ -500,14 +499,19 @@
             elem = $("#element")[0],
             myChart;
 
-            $("#element").width("100%");
-            $("#element").height(0);
+            $(elem).width("100%");
+            $(elem).height(0);
             d3.select(elem).style("padding-bottom", "40%");
 
-            myChart = new k4.Chart(elem, { type: "histogram", stacktype: "expand", yGroup: true, color: ['#81dfe2','#0762b7'] });
-            myChart.render(data);
-            console.log(d3.select(elem).style("padding-bottom"));
-        </script>
+            myChart = new k4.Chart(elem, {
+                type: "histogram",
+                stacktype: "group",
+                yGroup: true,
+                color: ['#81dfe2','#0762b7']
+            });
 
+            myChart.render(data);
+        })</script>
+        -->
     </body>
 </html>

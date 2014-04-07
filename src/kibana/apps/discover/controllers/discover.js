@@ -7,6 +7,7 @@ define(function (require) {
   var app = require('modules').get('app/discover');
 
   require('services/state');
+  require('directives/fixed_scroll');
 
   require('routes')
   .when('/discover/:id?', {
@@ -95,12 +96,26 @@ define(function (require) {
 
     search.onResults().then(function onResults(resp) {
       if (!$scope.fields) getFields();
+
       $scope.rows = resp.hits.hits;
+      $scope.chart = {rows: [{columns: [{
+        label: 'Events over time',
+        xAxisLabel: 'DateTime',
+        yAxisLabel: 'Hits',
+        layers: [
+          {
+            key: 'somekey',
+            values: _.map(resp.aggregations.events.buckets, function (bucket) {
+              return { y: bucket.doc_count, x: bucket.key_as_string };
+            })
+          }
+        ]
+      }]}]};
+
       return search.onResults(onResults);
     });
 
     $scope.$on('$destroy', _.bindKey(search, 'cancelPending'));
-
 
     $scope.getSort = function () {
       return $scope.state.sort;
@@ -152,6 +167,15 @@ define(function (require) {
         .query(!$scope.state.query ? null : {
           query_string: {
             query: $scope.state.query
+          }
+        })
+        .aggs({
+          events: {
+            date_histogram: {
+              field: '@timestamp',
+              interval: '12h',
+              format: 'yyyy-MM-dd'
+            }
           }
         });
     }
@@ -267,7 +291,6 @@ define(function (require) {
     };
 
     function refreshColumns() {
-
       // Get all displayed field names;
       var fields = _.pluck(_.filter($scope.fields, function (field) {
         return field.display;

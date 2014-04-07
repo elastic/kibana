@@ -9,16 +9,17 @@
     <form class="navbar-form" ng-submit="fetch()">
       <div class="form-group" style="display:inline;">
         <div class="input-group">
-          <span class="input-group-addon"><span class="fa fa-search"></span></span>
           <input placeholder="Search..." type="text" class="form-control" ng-model="state.query">
+          <span class="input-group-addon" ng-click="fetch()"><span class="fa fa-search"></span></span>
         </div>
       </div>
     </form>
   </nav>
   <config config-template="configTemplate" config-object="opts" config-close="configClose" config-submit="fetch"></config>
+
   <div class="container-fluid">
     <div class="row">
-      <div class="col-md-2 discovery-field-container">
+      <div class="col-md-2 discover-field-container">
         <disc-field-chooser
           fields="fields"
           toggle="toggleField"
@@ -28,15 +29,20 @@
         </disc-field-chooser>
       </div>
       <div class="col-md-10">
-        <discover-timechart></discover-timechart>
-        <kbn-table style="overflow-x:auto" class="table table-condensed"
-          rows="rows"
-          columns="state.columns"
-          refresh="fetch"
-          max-length="opts.maxSummaryLength"
-          get-sort="getSort"
-          set-sort="setSort">
-        </kbn-table>
+        <discover-timechart data="chart" height="150"></discover-timechart>
+        <div class="discover-table"
+          fixed-scroll='table'
+          fixed-scroll-trigger="state.columns">
+
+          <kbn-table class="table table-condensed"
+            rows="rows"
+            columns="state.columns"
+            refresh="fetch"
+            max-length="opts.maxSummaryLength"
+            get-sort="getSort"
+            set-sort="setSort">
+          </kbn-table>
+        </div>
       </div>
     </div>
   </div>

@@ -14,12 +14,7 @@ module.exports = function(grunt) {
             },
             dist: {
                 src: [
-                    'src/start.js',
-                    'src/core.js',
-                    'src/tooltip.js',
-                    'src/legend.js',
-                    'src/modules/histogram.js',
-                    'src/end.js'
+                    'src/index.js'
                 ],
                 dest: 'k4.d3.js'
             }
@@ -37,7 +32,7 @@ module.exports = function(grunt) {
         },
         jshint: {
             foo: {
-                src: "src/**/*.js"
+                src: 'src/**/*.js'
             },
             options: {
                 jshintrc: '.jshintrc'
@@ -45,7 +40,7 @@ module.exports = function(grunt) {
         },
         watch: {
             js: {
-                files: ["src/**/*.js"],
+                files: ['src/**/*.js'],
                 tasks: ['concat']
             }
         },
@@ -67,6 +62,7 @@ module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-karma');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-contrib-requirejs');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');

@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  require('utils/rison');
 
   require('modules')
     .get('kibana/services')

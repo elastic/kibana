@@ -45,10 +45,7 @@ define(function (require) {
             min_cols: 12,
             max_cols: 12,
             resize: {
-              enabled: true,
-              stop: function (event, ui, widget) {
-                console.log(widget.height(), widget.width());
-              }
+              enabled: true
             },
             serialize_params: function (el, wgd) {
               return {

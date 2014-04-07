@@ -1,7 +1,7 @@
 define(function (require, module, exports) {
   require('directives/table');
-  require('./field_chooser');
   require('./saved_searches/service');
-  require('./timechart');
+  require('./directives/timechart');
+  require('./directives/field_chooser');
   require('./controllers/discover');
 });
