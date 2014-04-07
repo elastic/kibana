@@ -1,6 +1,6 @@
 define(function (require) {
   var Courier = require('courier/courier');
-  var DataSource = require('courier/data_source/data_source');
+  var DataSource = require('courier/data_source/abstract');
   var DocSource = require('courier/data_source/doc');
   var SearchSource = require('courier/data_source/search');
 

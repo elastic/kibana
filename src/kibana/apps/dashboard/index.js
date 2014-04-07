@@ -4,8 +4,8 @@ define(function (require) {
 
   require('css!./styles/main.css');
   require('directives/config');
-  require('services/courier');
-  require('services/config');
+  require('courier/courier');
+  require('config/config');
   require('apps/dashboard/directives/grid');
   require('apps/dashboard/directives/panel');
 
@@ -15,20 +15,18 @@ define(function (require) {
     'kibana/services'
   ]);
 
-  app.config(function ($routeProvider) {
-    $routeProvider
-      .when('/dashboard', {
-        templateUrl: 'kibana/apps/dashboard/index.html'
-      })
-      .when('/dashboard/:source', {
-        redirectTo: '/dashboard'
-      })
-      .when('/dashboard/:source/:path', {
-        templateUrl: 'kibana/apps/dashboard/index.html'
-      })
-      .when('/dashboard/:source/:path/:params', {
-        templateUrl: 'kibana/apps/dashboard/index.html'
-      });
+  require('routes')
+  .when('/dashboard', {
+    templateUrl: 'kibana/apps/dashboard/index.html'
+  })
+  .when('/dashboard/:source', {
+    redirectTo: '/dashboard'
+  })
+  .when('/dashboard/:source/:path', {
+    templateUrl: 'kibana/apps/dashboard/index.html'
+  })
+  .when('/dashboard/:source/:path/:params', {
+    templateUrl: 'kibana/apps/dashboard/index.html'
   });
 
   app.controller('dashboard', function ($scope, $routeParams, $rootScope, $location, courier, configFile) {
@@ -44,36 +42,33 @@ define(function (require) {
       dashboardSearch(newVal);
     });
 
+    $scope.editingTitle = false;
 
-    var init = function () {
-      $scope.editingTitle = false;
+    // Passed in the grid attr to the directive so we can access the directive's function from
+    // the controller and view
+    $scope.gridControl = {};
 
-      // Passed in the grid attr to the directive so we can access the directive's function from
-      // the controller and view
-      $scope.gridControl = {};
-
-      // This must be setup to pass to $scope.configurable, even if we will overwrite it immediately
-      $scope.dashboard = {
-        title: 'New Dashboard',
-        panels: []
-      };
-
-      // All inputs go here.
-      $scope.input = {
-        search: ''
-      };
-
-      // Setup configurable values for config directive, after objects are initialized
-      $scope.configurable = {
-        dashboard: $scope.dashboard,
-        load: $scope.load,
-        input: {
-          search: $scope.input.search
-        }
-      };
-
-      $scope.$broadcast('application.load');
+    // This must be setup to pass to $scope.configurable, even if we will overwrite it immediately
+    $scope.dashboard = {
+      title: 'New Dashboard',
+      panels: []
     };
+
+    // All inputs go here.
+    $scope.input = {
+      search: ''
+    };
+
+    // Setup configurable values for config directive, after objects are initialized
+    $scope.configurable = {
+      dashboard: $scope.dashboard,
+      load: $scope.load,
+      input: {
+        search: $scope.input.search
+      }
+    };
+
+    $rootScope.$broadcast('application.load');
 
     var dashboardSearch = function (query) {
       var search;
@@ -89,14 +84,12 @@ define(function (require) {
         .type('dashboard')
         .size(10)
         .query(query)
-        .$scope($scope)
-        .inherits(courier.rootSearchSource)
-        .on('results', function (res) {
-          $scope.configurable.searchResults = res.hits.hits;
-        });
+        .inherits(courier.rootSearchSource);
 
-      search.fetch();
-
+      search.onResults().then(function onResults(res) {
+        $scope.configurable.searchResults = res.hits.hits;
+        search.onResults().then(onResults);
+      });
     };
 
     var setConfigTemplate = function (template) {
@@ -127,8 +120,7 @@ define(function (require) {
       var doc = courier.createSource('doc')
         .index(configFile.kibanaIndex)
         .type('dashboard')
-        .id(title)
-        .$scope($scope);
+        .id(title);
 
       doc.doIndex({title: title, panels: $scope.gridControl.serializeGrid()})
         .then(function (res, err) {
@@ -166,8 +158,6 @@ define(function (require) {
         });
       courier.fetch();
     };
-
-    init();
 
   });
 });

@@ -2,7 +2,7 @@ define(function (require) {
   var converters = require('../resp_converters/index');
   // var K4D3 = require('K4D3');
 
-  function VisualizationDirective() {
+  function VisualizationDirective(createNotifier) {
     return {
       restrict: 'E',
       template: '<div class="chart"><pre>{{ results | json }}</pre></div>',
@@ -12,16 +12,14 @@ define(function (require) {
       link: function ($scope, $el) {
         var vis = $scope.vis;
 
-        vis
-          .dataSource
-          .on('results', function (resp) {
-            $scope.results = vis.buildChartDataFromResponse(resp);
-          });
+        var notify = createNotifier({
+          location: vis.type + ' visualization'
+        });
 
-        if (!vis.dataSource._$scope) {
-          // only link if the dataSource isn't already linked
-          vis.dataSource.$scope($scope);
-        }
+        vis.dataSource.onResults().then(function onResults(resp) {
+          $scope.results = vis.buildChartDataFromResponse(resp);
+          return vis.dataSource.onResults(onResults);
+        }).catch(notify.fatal);
       }
     };
   }

@@ -8,6 +8,17 @@ define(function (require) {
 
   require('services/state');
 
+  require('routes')
+  .when('/discover/:id?', {
+    templateUrl: 'kibana/apps/discover/index.html',
+    reloadOnSearch: false,
+    resolve: {
+      search: function (savedSearches, $route) {
+        return savedSearches.get($route.current.params.id);
+      }
+    }
+  });
+
   var intervals = [
     { display: '', val: null },
     { display: 'Hourly', val: 'hourly' },
@@ -21,13 +32,12 @@ define(function (require) {
     var notify = createNotifier({
       location: 'Discover'
     });
+    var locals = $route.current.locals;
+    var search = locals.search;
 
-    var search = $route.current.locals.search;
     if (!search) return notify.fatal('search failed to load');
 
-
     /* Manage state & url state */
-
     var initialQuery = search.get('query');
 
     function loadState() {
@@ -53,13 +63,13 @@ define(function (require) {
     };
 
     // track the initial state of the search
-    var searchIsPhantom = search.phantom;
+    var searchIsUnsaved = search.unsaved;
     $scope.opts.saveDataSource = function () {
       search.save()
       .then(function () {
         notify.info('Saved Data Source "' + search.details.name + '"');
-        if (searchIsPhantom) {
-          searchIsPhantom = false;
+        if (searchIsUnsaved) {
+          searchIsUnsaved = false;
           $location.url('/discover/' + search.get('id'));
         }
       }, notify.error);
@@ -81,14 +91,15 @@ define(function (require) {
       }
     });
 
-    search
-      .$scope($scope)
-      .inherits(courier.rootSearchSource)
-      .on('results', function (res) {
-        if (!$scope.fields) getFields();
+    search.inherits(courier.rootSearchSource);
 
-        $scope.rows = res.hits.hits;
-      });
+    search.onResults().then(function onResults(resp) {
+      if (!$scope.fields) getFields();
+      $scope.rows = resp.hits.hits;
+      return search.onResults(onResults);
+    });
+
+    $scope.$on('$destroy', _.bindKey(search, 'cancelPending'));
 
 
     $scope.getSort = function () {
