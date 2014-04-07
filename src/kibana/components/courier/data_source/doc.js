@@ -6,7 +6,7 @@ define(function (require) {
 
   require('./abstract');
 
-  var module = require('modules').get('courier/data_sources');
+  var module = require('modules').get('kibana/courier');
 
   module.factory('CouriersDocSource', function (couriersErrors, CouriersSourceAbstract, Promise) {
     var VersionConflict = couriersErrors.VersionConflict;

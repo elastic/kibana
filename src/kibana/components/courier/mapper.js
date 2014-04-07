@@ -11,7 +11,7 @@ define(function (require) {
     _index: { type: 'string' }
   };
 
-  var module = require('modules').get('courier/mapper');
+  var module = require('modules').get('kibana/courier');
 
   module.factory('CouriersMapper', function (Promise, es, configFile, LocalCache, couriersErrors) {
     var CacheWriteFailure = couriersErrors.CacheWriteFailure;

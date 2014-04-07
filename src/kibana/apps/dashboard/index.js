@@ -12,6 +12,8 @@ define(function (require) {
   var app = require('modules').get('app/dashboard', [
     'elasticsearch',
     'ngRoute',
+    'kibana/courier',
+    'kibana/config',
     'kibana/services'
   ]);
 

@@ -9,7 +9,7 @@ define(function (require) {
   require('services/es');
   require('services/promises');
 
-  var module = require('modules').get('courier');
+  var module = require('modules').get('kibana/courier');
 
   module.service('courier', [
     'es',
@@ -101,6 +101,16 @@ define(function (require) {
             return new DocSource(courier);
           case 'search':
             return new SearchSource(courier);
+          }
+        };
+
+        courier.close = function () {
+          this._pendingRequests.splice(0).forEach(function (req) {
+            req.defer.reject(new errors.Abort());
+          });
+
+          if (this._pendingRequests.length) {
+            throw new Error('Aborting all pending requests failed.');
           }
         };
       }

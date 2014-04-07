@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  var module = require('modules').get('kibana/promises');
+  var module = require('modules').get('kibana/services');
 
   module.service('promises', function ($q) {
     function playNice(fn, fns) {
@@ -62,6 +62,11 @@ define(function (require) {
     };
     Promise.cast = $q.when;
     Promise.defer = $q.defer;
+    Promise.nodeify = function (promise, cb) {
+      promise.then(function (val) {
+        cb(void 0, val);
+      }, cb);
+    };
 
     return Promise;
   });

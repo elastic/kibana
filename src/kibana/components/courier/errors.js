@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var module = require('modules').get('courier/errors');
+  var module = require('modules').get('kibana/courier');
   var inherits = require('utils/inherits');
 
   var canStack = (function () {

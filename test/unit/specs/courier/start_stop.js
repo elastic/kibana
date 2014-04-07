@@ -2,10 +2,17 @@ define(function (require) {
   var createCourier = require('test_utils/create_courier');
   var sinon = require('test_utils/auto_release_sinon');
   var stubbedClient = require('test_utils/stubbed_client');
-  var HastyRefresh = require('courier/errors').HastyRefresh;
   var _ = require('lodash');
 
   return function extendCourierSuite() {
+    var HastyRefresh;
+
+    before(function () {
+      inject(function (couriersErrors) {
+        HastyRefresh = couriersErrors.HastyRefresh;
+      });
+    });
+
     describe('#start', function () {
       it('triggers a fetch and begins the fetch cycle', function (done) {
         var clock = sinon.useFakeTimers();
