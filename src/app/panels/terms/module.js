@@ -132,6 +132,7 @@ function (angular, app, _, $, kbn) {
 
     $scope.init = function () {
       $scope.hits = 0;
+      $scope.filter_ids = {};
 
       $scope.$on('refresh',function(){
         $scope.get_data();
@@ -213,12 +214,16 @@ function (angular, app, _, $, kbn) {
     };
 
     $scope.build_search = function(term,negate) {
-      if(_.isUndefined(term.meta)) {
-        filterSrv.set({type:'terms',field:$scope.field,value:term.label,
-          mandate:(negate ? 'mustNot':'must')});
+      if(term.label in $scope.filter_ids &&
+         $scope.filter_ids[term.label] in filterSrv.list){
+        filterSrv.remove($scope.filter_ids[term.label]);
+        delete $scope.filter_ids[term.label];
+      }else if(_.isUndefined(term.meta)) {
+        $scope.filter_ids[term.label] = filterSrv.set({type:'terms',
+          field:$scope.field,value:term.label,mandate:(negate ? 'mustNot':'must')});
       } else if(term.meta === 'missing') {
-        filterSrv.set({type:'exists',field:$scope.field,
-          mandate:(negate ? 'must':'mustNot')});
+        $scope.filter_ids[term.label] = filterSrv.set({type:'exists',
+          field:$scope.field,mandate:(negate ? 'must':'mustNot')});
       } else {
         return;
       }
