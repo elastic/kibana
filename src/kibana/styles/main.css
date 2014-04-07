@@ -6711,8 +6711,9 @@ kbn-table tr.even td {
   border-right: 1px solid #e3e3e3;
   border-bottom: 1px solid #e3e3e3;
 }
-.discover-field-list h5 {
-  padding-left: 5px;
+.discover-field-list .discover-field-list-header {
+  padding-left: 10px;
+  color: #777777;
 }
 .discover-field-list .discover-field-item {
   white-space: nowrap;

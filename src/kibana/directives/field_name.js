@@ -26,6 +26,7 @@ define(function (require) {
           case 'ip':
             return $('<i class="fa fa-laptop"></i> ');
           default:
+            return $('<i><strong>?</strong></i> ');
           }
         };
 
