@@ -151,14 +151,15 @@ define(function (require) {
       var doc = courier.createSource('doc')
         .index(configFile.kibanaIndex)
         .type('dashboard')
-        .id(title)
-        .on('results', function (doc) {
-          // TODO: Handle missing docs
-          if (!doc.found) console.log('Dashboard not found');
+        .id(title);
 
-          $scope.load(doc._source);
-        });
-      courier.fetch();
+      doc.fetch().then(function onResults(resp) {
+        // TODO: Handle missing docs
+        if (!resp.found) console.log('Dashboard not found');
+
+        $scope.load(resp._source);
+        doc.onUpdate().then(onResults);
+      });
     };
 
   });
