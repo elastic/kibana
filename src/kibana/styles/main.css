@@ -1,3 +1,4 @@
+@import "../../bower_components/K4D3/k4.d3.css";
 /*!
  *  Font Awesome 4.0.3 by @davegandy - http://fontawesome.io - @fontawesome
  *  License - http://fontawesome.io/license (Font: SIL OFL 1.1, CSS: MIT License)
@@ -6716,14 +6717,14 @@ kbn-table tr.even td {
   color: #777777;
 }
 .discover-field-list .discover-field-item {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 11px;
   border-top: 1px solid #e3e3e3;
+  font-size: 11px;
 }
 .discover-field-list .discover-field-name {
   padding: 5px 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .discover-field-list .discover-field-name:hover,
 .discover-field-list .discover-field-name:hover .text-muted {

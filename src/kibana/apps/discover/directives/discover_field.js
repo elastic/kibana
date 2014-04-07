@@ -11,7 +11,12 @@ define(function (require) {
     return {
       restrict: 'E',
       template: html,
-      replace: true
+      replace: true,
+      link: function ($scope) {
+        $scope.displayedClass = function (field) {
+          return field.display ? 'btn-danger' : '';
+        };
+      }
     };
   });
 });
