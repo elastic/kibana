@@ -68,23 +68,50 @@
 .modal-footer:after {
   clear: both;
 }
-.discover-field-list .discover-field-item .discover-field-add {
-  visibility: hidden;
+.application-discover {
+  overflow-x: hidden;
 }
-.discover-field-list .discover-field-item:hover .discover-field-add {
-  visibility: visible;
+.discover-table {
+  overflow-y: auto;
+  overflow-x: auto;
+  margin-top: 10px;
+  padding-left: 0px !important;
+  padding-right: 0px !important;
 }
-.discover-field-list .discover-field-name:hover {
-  text-decoration: none;
-  margin-left: 0;
+.discover-field-container {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+  background-color: #f5f5f5;
+  border-right: 1px solid #e3e3e3;
+  border-bottom: 1px solid #e3e3e3;
+}
+.discover-field-list .discover-field-list-header {
+  padding-left: 10px;
+  color: #777777;
+}
+.discover-field-list .discover-field-item {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 11px;
+  border-top: 1px solid #e3e3e3;
+}
+.discover-field-list .discover-field-name {
+  padding: 5px 10px;
+}
+.discover-field-list .discover-field-name:hover,
+.discover-field-list .discover-field-name:hover .text-muted {
+  background-color: #428bca;
+  color: #ffffff;
 }
 .discover-field-list .discover-field-details {
-  font-size: 12px;
-  margin-left: 15px;
-  padding: 5px;
-  background-color: #f5f5f5;
-  border-radius: 4px;
-  border: 1px solid #dddddd;
+  border-top: 1px solid #e3e3e3;
+  padding: 5px 10px;
+  background-color: #ffffff;
+  color: #333333;
+}
+.discover-field-list .discover-field-details .discover-field-details-error {
+  margin-top: 5px;
 }
 .discover-field-list .discover-field-details .discover-field-details-item {
   margin-top: 5px;

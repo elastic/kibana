@@ -23,6 +23,11 @@ body {
   }
 }
 
+.top-fixed {
+  position:fixed;
+  bottom:0px;
+}
+
 notifications {
   z-index: 1;
 }
@@ -91,4 +96,31 @@ notifications {
 .kbn-timepicker .btn-info {
   .button-variant(@btn-info-color; @btn-info-bg; @btn-info-border);
   text-shadow: none;
+}
+
+//== Table
+
+kbn-table {
+  font-size: @font-size-smaller;
+
+  th {
+    white-space: nowrap;
+    padding-right: 10px;
+
+    .table-header-move, .table-header-sortchange {
+      visibility: hidden;
+    }
+
+    .fa {
+      font-size: 1.1em;
+    }
+
+  }
+
+  th:hover {
+    .table-header-move, .table-header-sortchange {
+      visibility: visible;
+    }
+  }
+
 }

@@ -1,7 +1,10 @@
 @bs-less-dir: "../../bower_components/bootstrap/less";
 
 // Core variables and mixins
-@import "@{bs-less-dir}/variables.less";
+@import "theme/_variables.less";
+@import "theme/_theme.less";
+
+// Mixins
 @import "@{bs-less-dir}/mixins.less";
 
 // Reset
@@ -49,6 +52,3 @@
 // Utility classes
 @import "@{bs-less-dir}/utilities.less";
 @import "@{bs-less-dir}/responsive-utilities.less";
-
-// automatically include the theme file
-@import "@{bs-less-dir}/theme.less";

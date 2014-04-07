@@ -1,0 +1,37 @@
+
+    <li class="discover-field-item">
+      <div ng-click="details(field)" class="discover-field-name">
+        <span field-name="field.name" field-type="field.type"></span>
+      </div>
+
+
+      <div class="discover-field-details" ng-if="field.details">
+
+        <a ng-click="toggle(field.name)" class="pull-right btn btn-default btn-xs discover-field-toggle">
+          {{field.display ? 'Hide' : 'Show'}}
+        </a>
+
+        <span bo-if="!field.details.error">Present in {{field.details.exists}}/{{field.details.total}} records</span>
+
+
+
+        <div class="clearfix"></div>
+
+        <div bo-if="field.details.error" class="discover-field-details-error">{{field.details.error}}</div>
+
+        <div bo-if="!field.details.error">
+          <div ng-repeat="bucket in field.details.buckets" class="discover-field-details-item">
+            <div>
+              <i class="fa fa-search-minus pull-right discover-field-details-filter"
+                ng-click="filter(field, bucket.value, '-')"></i>
+              <i class="fa fa-search-plus pull-right discover-field-details-filter"
+                ng-click="filter(field, bucket.value, '+')"></i>
+              <div css-truncate css-truncate-expandable="true" class="discover-field-details-value">
+                {{bucket.value}}
+              </div>
+            </div>
+            <progressbar value="bucket.percent" max="100" animate="false"><span>{{bucket.percent}}%</span></progressbar>
+          </div>
+        </div>
+      <div>
+    </li>

@@ -14,16 +14,19 @@ define(function (require) {
       link: function ($scope, elem) {
 
         var init = function () {
-          /*
           // This elem should already have a height/width
-          var myChart = new k4.Chart(elem, {type: 'timechart', doSomething: true, draggable: false});
+          var myChart = new k4.Chart(elem[0], {
+            type: 'histogram',
+            stacktype: 'zero',
+            yGroup: true,
+            color: ['#81dfe2', '#0762b7']
+          });
 
-          myChart.on('hover', function (elem, event) {
-          })
-          */
-
-
-          //myChart.render($scope.data);
+          $scope.$watch('data', function (data) {
+            if (!_.isUndefined(data)) {
+              myChart.render(data);
+            }
+          });
         };
 
         // Start the directive
