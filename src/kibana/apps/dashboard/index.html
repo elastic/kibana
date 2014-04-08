@@ -3,11 +3,11 @@
     <div class="container-fluid">
       <div class="navbar-header">
         <span class="navbar-brand pull-left" ng-click="editingTitle = true" ng-hide="editingTitle">
-          {{dashboard.title}}
+          {{dash.details.title}}
         </span>
         <span class="pull-left" ng-show="editingTitle">
           <form class="navbar-form" ng-submit="editingTitle = false">
-            <input type="text" ng-model="dashboard.title" class="form-control"/>
+            <input type="text" ng-model="dash.details.title" class="form-control"/>
           </form>
         </span>
       </div>
@@ -22,7 +22,7 @@
   <config config-template="configTemplate" config-object="configurable" config-close="configClose" config-submit="configSubmit"></config>
 
   <div class="container-default">
-    <ul dashboard-grid grid="dashboard.panels" control="gridControl"></ul>
+    <ul dashboard-grid grid="dash.details.panels" control="gridControl"></ul>
   </div>
 
 </div>

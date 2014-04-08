@@ -4,6 +4,6 @@
 </div>
 <ul class="nav nav-pills">
   <li ng-repeat="res in configurable.searchResults | orderBy:'_source.title'" ng-class="{active: configurable.dashboard.title == res._source.title}">
-    <a ng-href="#/dashboard/elasticsearch/{{res._source.title}}">{{res._source.title}}</a>
+    <a ng-href="#/dashboard/{{res._id}}">{{res._source.title}}</a>
   </li>
 </ul>
