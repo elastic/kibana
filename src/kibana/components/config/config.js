@@ -4,6 +4,13 @@ define(function (require) {
   var configFile = require('../../../config');
   var defaults = require('./defaults');
 
+  require('notify/notify');
+
+  var module = require('modules').get('kibana/config', [
+    'kibana/notify',
+    'kibana/courier'
+  ]);
+
   // guid within this window
   var nextId = (function () {
     var i = 0;
@@ -11,8 +18,6 @@ define(function (require) {
       return ++i;
     };
   }());
-
-  var module = require('modules').get('kibana/config');
 
   // allow the rest of the app to get the configFile easily
   module.constant('configFile', configFile);

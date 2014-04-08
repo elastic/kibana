@@ -1,9 +1,13 @@
 define(function (require) {
-
-  var module = require('modules').get('discover/saved_searches');
   var _ = require('lodash');
 
   require('./saved_search');
+  require('notify/notify');
+
+  var module = require('modules').get('discover/saved_searches', [
+    'kibana/notify',
+    'kibana/courier'
+  ]);
 
   module.service('savedSearches', function (courier, configFile, createNotifier, SavedSearch) {
     var notify = createNotifier({

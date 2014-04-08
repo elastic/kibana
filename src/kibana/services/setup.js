@@ -2,7 +2,12 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
 
-  var module = require('modules').get('kibana/setup');
+  require('notify/notify');
+
+  var module = require('modules').get('kibana/setup', [
+    'kibana/notify',
+    'kibana/courier'
+  ]);
 
   module.service('setup', function (Promise, createNotifier, es, config, configFile) {
     var notify = createNotifier({
@@ -16,6 +21,7 @@ define(function (require) {
       function tmplError(err, tmpl) {
         var err2 = new Error(_.template(tmpl, { configFile: configFile }));
         err2.origError = err;
+        if (err.stack) err2.stack = err.stack;
         return err2;
       }
 

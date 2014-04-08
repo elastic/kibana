@@ -1,5 +1,5 @@
 define(function (require) {
-  var notify = require('modules').get('notify');
+  var notify = require('modules').get('kibana/notify');
 
   notify.directive('kbnNotifications', function () {
     return {

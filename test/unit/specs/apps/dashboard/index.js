@@ -13,20 +13,32 @@ define(function (require) {
 
   describe('Dashboard app', function () {
     var $scope,
-      location;
+      location,
+      currentDash;
 
-    beforeEach(function () {
+    beforeEach(function (done) {
       module('app/dashboard');
 
       // Create the scope
-      inject(function ($rootScope, $controller, $location) {
-        $scope = $rootScope.$new();
-        var dashCtrl = $controller('dashboard', {
-          $scope: $scope
-        });
-
-        location = $location;
-
+      inject(function (savedDashboards, $rootScope, $controller, $location) {
+        savedDashboards.get()
+        .then(function (dash) {
+          currentDash = dash;
+          $scope = $rootScope.$new();
+          var dashCtrl = $controller('dashboard', {
+            $scope: $scope,
+            $route: {
+              current: {
+                locals: {
+                  dash: dash
+                }
+              }
+            }
+          });
+          location = $location;
+          done();
+        }, done);
+        $rootScope.$apply();
       // $scope is now available in tests
       });
 
@@ -34,11 +46,6 @@ define(function (require) {
 
     afterEach(function () {
       $scope.$destroy();
-    });
-
-    it('should attach $routeParams to scope', function (done) {
-      expect($scope.routeParams).to.be.a(Object);
-      done();
     });
 
     it('should have called init and attached some properties', function (done) {
@@ -74,26 +81,8 @@ define(function (require) {
     });
 
     describe('loading', function () {
-      beforeEach(function () {
-        $scope.gridControl = {
-          clearGrid: function () {},
-          unserializeGrid: function () {},
-        };
-        _.each($scope.gridControl, function (value, key) {
-          sinon.spy($scope.gridControl, key);
-        });
-      });
-
-      it('should attach the schema to the dashboard object', function (done) {
-        $scope.load({foo: 'bar'});
-        expect($scope.dashboard.foo).to.be('bar');
-        done();
-      });
-
-      it('should clear the grid before loading a new one', function (done) {
-        $scope.load({foo: 'bar'});
-        expect($scope.gridControl.clearGrid.called).to.be(true);
-        expect($scope.gridControl.unserializeGrid.called).to.be(true);
+      it('should attach the dash to the $scope', function (done) {
+        expect($scope.dash).to.be(currentDash);
         done();
       });
     });

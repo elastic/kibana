@@ -6,6 +6,7 @@ define(function (require) {
   require('directives/config');
   require('courier/courier');
   require('config/config');
+  require('notify/notify');
 
   require('./directives/grid');
   require('./directives/panel');
@@ -16,6 +17,7 @@ define(function (require) {
     'ngRoute',
     'kibana/courier',
     'kibana/config',
+    'kibana/notify',
     'kibana/services'
   ]);
 
@@ -96,7 +98,7 @@ define(function (require) {
     var toggleConfigTemplate = function (name) {
       var html = configTemplates[name];
       // Close if already open
-      $scope.configTemplate = ($scope.configTemplate === html) ? null : html;
+      $scope.configTemplate = ($scope.configTemplate === html) ? void 0 : html;
       return !!$scope.configTemplate;
     };
 

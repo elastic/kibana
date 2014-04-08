@@ -1,9 +1,14 @@
 define(function (require) {
   var _ = require('lodash');
-  var app = require('modules').get('app/visualize');
 
   require('../factories/vis');
   require('../services/aggs');
+  require('notify/notify');
+
+  var app = require('modules').get('app/visualize', [
+    'kibana/notify',
+    'kibana/courier'
+  ]);
 
   require('routes')
   .when('/visualize', {

@@ -3,7 +3,7 @@ define(function (require) {
   var nextTick = require('utils/next_tick');
   var $ = require('jquery');
   var modules = require('modules');
-  var module = modules.get('notify');
+  var module = modules.get('kibana/notify');
   var errors = require('./errors');
   var NotifyManager = require('./manager');
   var manager = new NotifyManager();
