@@ -183,7 +183,23 @@ define(function (require) {
       updateDataSource();
       // fetch just this savedSearch
       $scope.updateState();
-      search.fetch();
+
+      search.fetch().then(function (res) {
+        $scope.rows = res.hits.hits;
+        $scope.chart = {rows: [{columns: [{
+            label: 'Events over time',
+            xAxisLabel: 'DateTime',
+            yAxisLabel: 'Hits',
+            layers: [
+              {
+                key: 'events',
+                values: _.map(res.aggregations.events.buckets, function (bucket) {
+                  return { y: bucket.doc_count, x: bucket.key_as_string };
+                })
+              }
+            ]
+          }]}]};
+      });
     };
 
     $scope.updateState = function () {

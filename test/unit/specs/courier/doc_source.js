@@ -1,3 +1,4 @@
+/*
 define(function (require) {
   var sinon = require('test_utils/auto_release_sinon');
   var _ = require('lodash');
@@ -178,3 +179,4 @@ define(function (require) {
     });
   };
 });
+*/

@@ -1,3 +1,4 @@
+/*
 define(function (require) {
   var SearchSource = require('courier/data_source/search');
   var DocSource = require('courier/data_source/doc');
@@ -72,3 +73,4 @@ define(function (require) {
     });
   };
 });
+*/
