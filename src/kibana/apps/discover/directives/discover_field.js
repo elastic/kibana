@@ -19,14 +19,15 @@ define(function (require) {
 
         var init = function () {
           if ($scope.field.details) {
-            // This is inherited from fieldChooser
             $scope.toggleDetails($scope.field, true);
           }
         };
 
         $scope.toggleDetails = function (field, recompute) {
           if (_.isUndefined(field.details) || recompute) {
+            // This is inherited from fieldChooser
             $scope.details(field, recompute);
+
             detailsElem = $(detailsHtml);
             $compile(detailsElem)($scope);
             $elem.append(detailsElem);
@@ -37,7 +38,6 @@ define(function (require) {
         };
 
         $scope.displayButton = function (field) {
-          console.log(field);
           return field.display ? 'btn-danger' : '';
         };
 
