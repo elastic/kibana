@@ -5,11 +5,9 @@ define(function (require) {
   require('../factories/vis');
   require('../services/aggs');
 
-  app.config(function ($routeProvider) {
-    $routeProvider
-      .when('/visualize', {
-        templateUrl: 'kibana/apps/visualize/index.html'
-      });
+  require('routes')
+  .when('/visualize', {
+    templateUrl: 'kibana/apps/visualize/index.html'
   });
 
   app.controller('Visualize', function ($scope, courier, createNotifier, Vis, Aggs) {
@@ -93,8 +91,6 @@ define(function (require) {
         ]
       }
     });
-
-    vis.dataSource.$scope($scope);
 
     $scope.refreshFields = function () {
       $scope.fields = null;

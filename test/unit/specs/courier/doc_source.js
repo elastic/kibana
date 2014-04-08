@@ -1,16 +1,20 @@
 define(function (require) {
-  var createCourier = require('test_utils/create_courier');
-  var stubbedClient = require('test_utils/stubbed_client');
   var sinon = require('test_utils/auto_release_sinon');
   var _ = require('lodash');
+  require('angular-mocks');
 
   return function extendCourierSuite() {
+    var courier, es, $httpBackend;
+
+    beforeEach(inject(function ($injector) {
+      courier = $injector.get('courier');
+      es = $injector.get('es');
+      $httpBackend = $injector.get('$httpBackend');
+    }));
+
     describe('DocSource class', function () {
       it('tracks the version of the document', function (done) {
         var version = 51;
-        var courier = createCourier(stubbedClient(function (method, params, cb) {
-          cb(void 0, stubbedClient.doc({ _version: version }));
-        }));
 
         var source = courier
           .createSource('doc').index('fake').type('fake').id('fake')
@@ -29,18 +33,17 @@ define(function (require) {
           var version = 0;
           var doc = { hi: 'fallacy' };
 
-          return stubbedClient({
+          return stubClient(es, {
             update: function (params, cb) {
               _.assign(doc, params.body.doc);
               version++;
               cb(void 0, { ok: true });
             },
             default: function (method, params, cb) {
-              cb(void 0, stubbedClient.doc({ _source: doc, _version: version }));
+              cb(void 0, stubClient.doc({ _source: doc, _version: version }));
             }
           });
         }());
-        var courier = createCourier(client);
 
         var update = { hi: 'truth' };
 
