@@ -42,7 +42,9 @@ define(function (require) {
       $scope.$on('$routeUpdate', updateAppData);
 
       // this is the only way to handle uncaught route.resolve errors
-      $scope.$on('$routeChangeError', notify.fatal);
+      $scope.$on('$routeChangeError', function (event, next, prev, err) {
+        notify.fatal(err);
+      });
 
       $scope.$on('application.load', function () {
         courier.start();

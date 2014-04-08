@@ -4,7 +4,12 @@ define(function (require) {
   var settingsHtml = require('text!../partials/settings.html');
   var timepickerHtml = require('text!partials/timepicker.html');
 
-  var app = require('modules').get('app/discover');
+  require('notify/notify');
+
+  var app = require('modules').get('app/discover', [
+    'kibana/notify',
+    'kibana/courier'
+  ]);
 
   require('services/state');
   require('directives/fixed_scroll');

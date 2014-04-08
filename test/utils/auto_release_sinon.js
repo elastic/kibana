@@ -26,7 +26,7 @@ define(function (require) {
       var obj = orig.apply(sinon, arguments);
 
       // after each test this list is cleared
-      toRestore.push(obj);
+      if (obj.restore) toRestore.push(obj);
 
       if (typeof modify === 'function') modify(obj);
 

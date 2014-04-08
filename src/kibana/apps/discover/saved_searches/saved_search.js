@@ -1,7 +1,13 @@
 define(function (require) {
-  var module = require('modules').get('discover/saved_searches');
   var _ = require('lodash');
   var inherits = require('utils/inherits');
+
+  require('notify/notify');
+
+  var module = require('modules').get('discover/saved_searches', [
+    'kibana/notify',
+    'kibana/courier'
+  ]);
 
   module.factory('SavedSearch', function (configFile, courier, Promise, createNotifier, CouriersSearchSource) {
     var notify = createNotifier({

@@ -68,6 +68,8 @@ define(function (require) {
   function formatStack(err) {
     if (!err) return null;
 
+    if (err.stack) return err.stack;
+
     var isError = (err instanceof Error);
     var stack = createStackTrace({ e: isError ? err : void 0 });
     var msg = isError ? err.message : err;
