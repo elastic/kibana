@@ -5,11 +5,9 @@ define(function (require) {
 
   var app = require('modules').get('app/examples');
 
-  app.config(function ($routeProvider) {
-    $routeProvider
-      .when('/examples', {
-        templateUrl: 'kibana/apps/examples/index.html'
-      });
+  require('routes')
+  .when('/examples', {
+    templateUrl: 'kibana/apps/examples/index.html'
   });
 
   // main controller for the examples
@@ -70,12 +68,13 @@ define(function (require) {
           .type($scope.type)
           .source({
             include: 'country'
-          })
-          .$scope($scope)
-          .on('results', function (resp) {
-            $scope.count ++;
-            $scope.json = JSON.stringify(resp.hits, null, '  ');
           });
+
+        source.onResults().then(function onResults(resp) {
+          $scope.count ++;
+          $scope.json = JSON.stringify(resp.hits, null, '  ');
+          return source.onResults().then(onResults);
+        });
       }
     };
   });
@@ -101,13 +100,14 @@ define(function (require) {
         var source = courier.createSource('doc')
           .id($scope.id)
           .type($scope.type)
-          .index($scope.index)
-          .$scope($scope)
-          .on('results', function (doc) {
-            currentSource = doc._source;
-            $scope.count ++;
-            $scope.json = JSON.stringify(doc, null, '  ');
-          });
+          .index($scope.index);
+
+        source.onResults().then(function onResults(doc) {
+          currentSource = doc._source;
+          $scope.count ++;
+          $scope.json = JSON.stringify(doc, null, '  ');
+          return source.onResults().then(onResults);
+        });
       }
     };
   });
@@ -131,12 +131,14 @@ define(function (require) {
           .type($scope.type)
           .source({
             include: 'geo'
-          })
-          .$scope($scope)
-          .on('results', function (resp) {
-            $scope.count ++;
-            $scope.json = JSON.stringify(resp.hits, null, '  ');
           });
+
+
+        source.onResults().then(function onResults(resp) {
+          $scope.count ++;
+          $scope.json = JSON.stringify(resp.hits, null, '  ');
+          return source.onResults().then(onResults);
+        });
 
         var fields = $scope.fields.split(',');
 

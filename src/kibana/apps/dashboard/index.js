@@ -4,170 +4,127 @@ define(function (require) {
 
   require('css!./styles/main.css');
   require('directives/config');
-  require('services/courier');
-  require('services/config');
-  require('apps/dashboard/directives/grid');
-  require('apps/dashboard/directives/panel');
+  require('courier/courier');
+  require('config/config');
+
+  require('./directives/grid');
+  require('./directives/panel');
+  require('./services/saved_dashboards');
 
   var app = require('modules').get('app/dashboard', [
     'elasticsearch',
     'ngRoute',
+    'kibana/courier',
+    'kibana/config',
     'kibana/services'
   ]);
 
-  app.config(function ($routeProvider) {
-    $routeProvider
-      .when('/dashboard', {
-        templateUrl: 'kibana/apps/dashboard/index.html'
-      })
-      .when('/dashboard/:source', {
-        redirectTo: '/dashboard'
-      })
-      .when('/dashboard/:source/:path', {
-        templateUrl: 'kibana/apps/dashboard/index.html'
-      })
-      .when('/dashboard/:source/:path/:params', {
-        templateUrl: 'kibana/apps/dashboard/index.html'
-      });
+  var configTemplates = {
+    save: require('text!./partials/save_dashboard.html'),
+    load: require('text!./partials/load_dashboard.html')
+  };
+
+  require('routes')
+  .when('/dashboard', {
+    templateUrl: 'kibana/apps/dashboard/index.html',
+    resolve: {
+      dash: function (savedDashboards) {
+        return savedDashboards.get();
+      }
+    }
+  })
+  .when('/dashboard/:id', {
+    templateUrl: 'kibana/apps/dashboard/index.html',
+    resolve: {
+      dash: function (savedDashboards, $route) {
+        return savedDashboards.get($route.current.params.id);
+      }
+    }
   });
 
-  app.controller('dashboard', function ($scope, $routeParams, $rootScope, $location, courier, configFile) {
-    $scope.routeParams = $routeParams;
-
-    $scope.$watch('routeParams.path', function (newVal) {
-      if ($routeParams.source === 'elasticsearch') {
-        getDashboardFromElasticsearch(newVal);
-      }
+  app.controller('dashboard', function ($scope, $route, $routeParams, $rootScope, $location, Promise, es, configFile, createNotifier) {
+    var notify = createNotifier({
+      location: 'Dashboard'
     });
 
-    $scope.$watch('configurable.input.search', function (newVal) {
-      dashboardSearch(newVal);
-    });
+    var dash = $scope.dash = $route.current.locals.dash;
 
+    $scope.editingTitle = false;
 
-    var init = function () {
-      $scope.editingTitle = false;
+    // Passed in the grid attr to the directive so we can access the directive's function from
+    // the controller and view
+    $scope.gridControl = {};
 
-      // Passed in the grid attr to the directive so we can access the directive's function from
-      // the controller and view
-      $scope.gridControl = {};
-
-      // This must be setup to pass to $scope.configurable, even if we will overwrite it immediately
-      $scope.dashboard = {
-        title: 'New Dashboard',
-        panels: []
-      };
-
-      // All inputs go here.
-      $scope.input = {
-        search: ''
-      };
-
-      // Setup configurable values for config directive, after objects are initialized
-      $scope.configurable = {
-        dashboard: $scope.dashboard,
-        load: $scope.load,
-        input: {
-          search: $scope.input.search
-        }
-      };
-
-      $scope.$broadcast('application.load');
+    // All inputs go here.
+    $scope.input = {
+      search: ''
     };
 
-    var dashboardSearch = function (query) {
-      var search;
+    // Setup configurable values for config directive, after objects are initialized
+    $scope.configurable = {
+      dashboard: dash.details,
+      input: $scope.input
+    };
 
-      if (_.isString(query) && query.length > 0) {
-        query = {match: {title: {query: query, type: 'phrase_prefix'}}};
-      } else {
-        query = {match_all: {}};
-      }
+    $scope.$on('$destroy', _.bindKey(dash, 'cancelPending'));
 
-      search = courier.createSource('search')
-        .index(configFile.kibanaIndex)
-        .type('dashboard')
-        .size(10)
-        .query(query)
-        .$scope($scope)
-        .inherits(courier.rootSearchSource)
-        .on('results', function (res) {
+    var dashboardSearch = function () {
+      //ignore first run, just the watcher getting initialized
+
+      dashboardSearch = function (query) {
+        if (_.isString(query) && query.length > 0) {
+          query = {match: {title: {query: query, type: 'phrase_prefix'}}};
+        } else {
+          query = {match_all: {}};
+        }
+
+        es.search({
+          index: configFile.kibanaIndex,
+          type: 'dashboard',
+          size: 10,
+          body: {
+            query: query
+          }
+        })
+        .then(function (res) {
           $scope.configurable.searchResults = res.hits.hits;
         });
-
-      search.fetch();
-
+      };
     };
+    $scope.$watch('configurable.input.search', dashboardSearch);
 
-    var setConfigTemplate = function (template) {
+    var toggleConfigTemplate = function (name) {
+      var html = configTemplates[name];
       // Close if already open
-      if ($scope.configTemplate === template) {
-        delete $scope.configTemplate;
-        return;
-      } else {
-        $scope.configTemplate = template;
-      }
+      $scope.configTemplate = ($scope.configTemplate === html) ? null : html;
+      return !!$scope.configTemplate;
     };
 
     $scope.openSave = function () {
-      setConfigTemplate(require('text!./partials/save_dashboard.html'));
-
-      $scope.configSubmit = function () {
-        $scope.save($scope.dashboard.title);
-      };
+      var open = toggleConfigTemplate('save');
+      $scope.configSubmit = $scope.save;
     };
 
     $scope.openLoad = function () {
-      setConfigTemplate(require('text!./partials/load_dashboard.html'));
-
-      if ($scope.configTemplate) dashboardSearch($scope.configurable.input.search);
+      var open = toggleConfigTemplate('load');
+      if (open) {
+        dashboardSearch($scope.configurable.input.search);
+        $scope.configSubmit = null;
+      }
     };
 
-    $scope.save = function (title) {
-      var doc = courier.createSource('doc')
-        .index(configFile.kibanaIndex)
-        .type('dashboard')
-        .id(title)
-        .$scope($scope);
+    $scope.save = function () {
+      var wasUnsaved = dash.unsaved;
+      dash.details.panels = $scope.gridControl.serializeGrid();
 
-      doc.doIndex({title: title, panels: $scope.gridControl.serializeGrid()})
-        .then(function (res, err) {
-          if (_.isUndefined(err)) {
-            $location.url('/dashboard/elasticsearch/' + encodeURIComponent(title));
-            if (!$scope.$$phase) $scope.$apply();
-          }
-          else {
-            // TODO: Succcess/failure notifications
-            throw new Error(err);
-          }
-        });
-
-      doc.doIndex({title: title, panels: $scope.gridControl.serializeGrid()}, function (err) {
-
-      });
+      return dash.save()
+      .then(function (res) {
+        if (wasUnsaved) $location.url('/dashboard/' + encodeURIComponent(dash.get('id')));
+        return true;
+      })
+      .catch(notify.fatal);
     };
 
-    $scope.load = function (schema) {
-      _.assign($scope.dashboard, schema);
-      $scope.gridControl.clearGrid();
-      $scope.gridControl.unserializeGrid($scope.dashboard.panels);
-    };
-
-    var getDashboardFromElasticsearch = function (title) {
-      var doc = courier.createSource('doc')
-        .index(configFile.kibanaIndex)
-        .type('dashboard')
-        .id(title)
-        .on('results', function (doc) {
-          // TODO: Handle missing docs
-          if (!doc.found) console.log('Dashboard not found');
-
-          $scope.load(doc._source);
-        });
-      courier.fetch();
-    };
-
-    init();
-
+    $rootScope.$broadcast('application.load');
   });
 });
