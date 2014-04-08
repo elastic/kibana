@@ -17,6 +17,11 @@
         <label class="small">Value field</label>
         <input type="text" class="input-small" bs-typeahead="fields.list" ng-model="panel.valuefield" ng-change="set_refresh(true)">
       </div>
+        <div class="editor-option" ng-show="panel.tmode == 'terms_stats'">
+            <label class="small">Having</label>
+            <input type="text" class="input-small" bs-typeahead="fields.list" ng-model="panel.havingfield" ng-change
+                    ="set_refresh(true)">
+        </div>
       <div class="editor-option">
         <label class="small">Length</label>
         <input class="input-small" type="number" ng-model="panel.size" ng-change="set_refresh(true)">
@@ -30,6 +35,10 @@
         <label class="small">Exclude Terms(s) (comma separated)</label>
         <input array-join type="text" ng-model='panel.exclude'></input>
       </div>
+        <div class="editor-option" ng-show="panel.chart == 'table'">
+            <label class="small">Table Column Label</label>
+            <input type="text" ng-model='panel.columnLabel' value="Terms">
+        </div>
     </div>
   </div>
   <div class="editor-row">
@@ -45,7 +54,7 @@
       </div>
       <div class="editor-option" ng-show="panel.chart == 'bar' || panel.chart == 'pie'">
         <label class="small">Legend</label>
-        <select class="input-small" ng-model="panel.counter_pos" ng-options="f for f in ['above','below','none']"></select></span>
+        <select class="input-small" ng-model="panel.counter_pos" ng-options="f for f in ['above','none']"></select></span>
       </div>
       <div class="editor-option" ng-show="panel.chart != 'table' && panel.counter_pos != 'none'">
         <label class="small" >Legend Format</label>
