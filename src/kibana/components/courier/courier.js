@@ -95,6 +95,15 @@ define(function (require) {
           return this;
         };
 
+        /**
+         * Process the pending request queue right now, returns
+         * a promise that resembles the success of the fetch completing,
+         * individual errors are routed to their respectiv requests.
+         */
+        courier.fetch = function () {
+          return processSearchRequests();
+        };
+
 
         /**
          * is the currior currently fetching search
