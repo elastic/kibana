@@ -71,7 +71,7 @@ define(function (require) {
 
       return doc.doUpdate(update)
         .then(function () {
-          config._change(key, val);
+          change(key, val);
           return true;
         });
     };
@@ -95,26 +95,5 @@ define(function (require) {
       $rootScope.$broadcast('change:config.' + key, val, vals[key]);
     };
 
-    var trackDocChanges = function () {
-      notify.log('tracking changes to the config doc source');
-      var config = this;
-
-      doc.onUpdate()
-      .then(function processUpdate(resp) {
-        // _change() will not emit changes unless they really changed
-        _.forOwn(resp._source, function (val, key) {
-          config._change(key, val);
-        });
-        return doc.onUpdate().then(processUpdate);
-      })
-      .catch(function (err) {
-        // filter out abort errors
-        if (!(err instanceof courier.errors.Abort)) {
-          notify.error(err);
-        } else {
-          notify.log('aborted change tracking for config doc source');
-        }
-      });
-    };
   });
 });
