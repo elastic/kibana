@@ -62,7 +62,7 @@ define(function (require) {
          * The Looper which will manage the doc fetch interval
          * @type {Looper}
          */
-        var docInterval = new Looper().fn(processDocRequests);
+        var docInterval = new Looper().fn(processDocRequests).start();
 
         /**
          * The Looper which will manage the doc fetch interval
