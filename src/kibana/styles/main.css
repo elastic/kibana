@@ -6695,51 +6695,6 @@ kbn-table tr.even td {
   word-break: normal;
   word-wrap: normal;
 }
-.application-discover {
-  overflow-x: hidden;
-}
-.discover-table {
-  overflow-y: auto;
-  overflow-x: auto;
-  margin-top: 10px;
-  padding-left: 0px !important;
-  padding-right: 0px !important;
-}
-.discover-field-details-close {
-  text-align: center;
-  border-top: 1px solid #e3e3e3;
-  background-color: #f5f5f5;
-}
-.discover-field-details {
-  border-top: 1px solid #e3e3e3;
-  padding: 5px 10px;
-  background-color: #ffffff;
-  color: #333333;
-}
-.discover-field-details .discover-field-details-error {
-  margin-top: 5px;
-}
-.discover-field-details .discover-field-details-item {
-  margin-top: 5px;
-}
-.discover-field-details .discover-field-details-filter {
-  cursor: pointer;
-}
-.discover-field-details .progress {
-  margin-bottom: 0px;
-}
-.discover-field-details .progress .progress-bar {
-  padding-left: 10px;
-  text-align: right;
-}
-.discover-field-details .progress .progress-bar span {
-  background-color: #555555;
-  padding: 3px;
-  border-radius: 4px;
-  font-size: 0.8em;
-  margin-left: 3px;
-  margin-right: 3px;
-}
 .nav-condensed > li > a {
   padding-top: 2px;
   padding-bottom: 2px;

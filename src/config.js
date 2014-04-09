@@ -38,7 +38,7 @@ define(function () {
       { id: 'discover', name: 'Discover' },
       { id: 'visualize', name: 'Visualize' },
       { id: 'dashboard', name: 'Dashboard' },
-      { id: 'examples', name: 'Examples' }
+      { id: 'settings', name: 'Settings' }
     ],
 
     defaultAppId: 'discover'

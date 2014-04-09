@@ -4,4 +4,5 @@ define(function (require, module, exports) {
   require('./directives/timechart');
   require('./directives/field_chooser');
   require('./controllers/discover');
+  require('css!./styles/main.css');
 });
