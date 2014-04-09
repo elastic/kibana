@@ -772,8 +772,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
         var $tooltip = $('<div>');
         elem.bind("plothover", function (event, pos, item) {
           var group, value, timestamp, interval;
-          interval = scope.panel.legend ?
-            "" : " per " + (scope.panel.scaleSeconds ? '1s' : scope.panel.interval);
+          interval = " per " + (scope.panel.scaleSeconds ? '1s' : scope.panel.interval);
           if (item) {
             if (item.series.info.alias || scope.panel.tooltip.query_as_alias) {
               group = '<small style="font-size:0.9em;">' +
