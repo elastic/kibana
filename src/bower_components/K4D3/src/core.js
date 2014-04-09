@@ -6,14 +6,11 @@
  */
 
 define(function(require) {
-    "use strict";
-
-    var histogram = require('bower_components/K4D3/src/modules/histogram');
 
     return function(elem, args) {
         var type = args.type,
             charts = {
-            'histogram': histogram
+            'histogram': require('src/modules/histogram')
         };
 
         if (typeof(charts[type]) !== 'function') { throw type + " is not a supported k4 function."; }

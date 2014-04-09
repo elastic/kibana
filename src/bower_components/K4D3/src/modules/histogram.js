@@ -1,24 +1,25 @@
 
-define(function(require) {
+define(function (require) {
     'use strict';
-    var tooltip = require('bower_components/K4D3/src/tooltip'),
-        d3 = require('d3');
+    var tip = require('src/tooltip'),
+        d3 = require('lib/d3/d3');
 
-    return function(elem, args) {
+    return function (elem, args) {
 
         var chart = {},
             elemWidth = parseInt(d3.select(elem.parentNode).style('width'), 10),
-            elemHeight = d3.select(elem).attr('height'), //.80 * window.innerHeight, //parseInt(d3.select(elem.parentNode).style('height'), 10)  < 100 ? 400 : parseInt(d3.select(elem.parentNode).style('height'), 10),
+            elemHeight = d3.select(elem).attr('height'),
             stacktype = args.stacktype || 'zero', // 'zero', 'expand', 'group'
             yGroup = args.yGroup || false,
             colors = args.color,
-            //displayToolTip = args.displayToolTip || true,
+            tooltip = args.tooltip !== undefined ? args.tooltip : true,
             numRows, margin, svg, g, layer, n, m, width, height, outerWidth, outerHeight, keys, stack, toolTip,
             xScale, yScale, xAxis, yAxis, yStackMax, yGroupMax, color,
             k1 = 'rows', k2 = 'columns', k3 = 'layers', k4 = 'values';
 
-
-        chart.render = function(data) {
+        chart.render = function (data) {
+            
+            console.log('raw data', data);
 
             /* ********** align x axis data / inject zeros ************* */
             // align data and set structure params
@@ -43,9 +44,9 @@ define(function(require) {
             width = outerWidth / n - margin.left - margin.right,
             height = outerHeight - margin.top - margin.bottom,
 
-            //console.log('numRows:', numRows, 'n:', n, 'm:', m, 'keys:', keys);
-            //console.log('outerWidth', outerWidth, 'outerHeight', outerHeight, 'width', width, 'height', height);
- 
+            // console.log('stacktype', stacktype, 'outerWidth', outerWidth, 'outerHeight', outerHeight, 'width', width, 'height', height);
+            // console.log('numRows:', numRows, 'n:', n, 'm:', m, 'keys:', keys.length, keys);
+            
             // stack layout and max values
             stack = d3.layout.stack().offset(stacktype).values(function (d) { return d.values; }),
  
@@ -72,23 +73,15 @@ define(function(require) {
             /* *************** D3 parameters ********************* */
             xScale = d3.scale.ordinal().domain(keys).rangeRoundBands([0, width], 0.1),
             yScale = d3.scale.linear().range([height, 0]).nice(),
-            xAxis = d3.svg.axis().scale(xScale).tickSize(4, 0).tickPadding(6)
-                .tickValues( xScale.domain().filter(function(d, i) { 
-                    //console.log( d, i, keys );
-                    //console.log( width / keys.length , xScale.rangeBand() );
-                    // first and last
-                    //if (i == 0 || i == keys.length-1) { return (d); }
-                    return d;
-                }) )
+            xAxis = d3.svg.axis().scale(xScale).tickSize(3, 0).tickPadding(6)
                 .orient('bottom'),
             yAxis = d3.svg.axis().scale(yScale).ticks(6).tickSize(-(width), 0).tickPadding(4).orient('left'),
             color = d3.scale.linear().domain([0, m - 1]).range(['#e24700', '#f9e593']),
-            /*
-            toolTip = !displayToolTip ? "undefined" : tooltip().attr('class', 'k4-tip').html(function(d) {
+            toolTip = typeof tooltip === 'boolean' && tooltip === false ? 'undefined' : typeof tooltip === 'function' ?
+                tip().attr('class', 'k4-tip').html(tooltip).offset([-12, 0]) : tip().attr('class', 'k4-tip').html(function(d) {
                 if (d.y < 1) { return '<span>x: ' + d.x + '</span><br><span>y: ' + d.y.toFixed(2) * 100 + '%</span>'; }
                 return '<span>x: ' + d.x + '</span><br><span>y: ' + d.y + '</span>';
             }).offset([-12, 0]);
-            */
             /* ******************************************************** */
 
             // Removing items off the element
@@ -96,25 +89,25 @@ define(function(require) {
 
             // append svg(s)
             svg = getSvg(elem, data);
-            svg.attr('width', outerWidth/n).attr('height', outerHeight);
+            svg.attr('width', outerWidth / n).attr('height', outerHeight);
 
             // render each chart
             g = svg.append('g')
                 .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-                .each(function(d) {
+                .each(function (d) {
                     var g = d3.select(this);
 
-                    var yMax = d3.max(d.layers, function(d) {
-                        return d3.max(d.values, function(e) {
+                    var yMax = d3.max(d.layers, function (d) {
+                        return d3.max(d.values, function (e) {
                             return e.y;
-                        });
-                    });
+                          });
+                      });
 
-                    var yStack = d3.max(d.layers, function(d) {
-                        return d3.max(d.values, function(e) {
+                    var yStack = d3.max(d.layers, function (d) {
+                        return d3.max(d.values, function (e) {
                             return e.y0 + e.y;
-                        });
-                    });
+                          });
+                      });
 
                     // Change y/xScale domain based on stacktype
                     if (stacktype === 'expand') { yScale.domain([0, 1]); }
@@ -166,7 +159,7 @@ define(function(require) {
                     layer = g.selectAll('.layer')
                         .data(function(d) { return stack(d.layers); })
                         .enter().append('g')
-                        .attr('class', 'layer')
+                        .attr('class', function(d, i) { return 'layer layer' + i; })
                         .style('fill', function(d, i) { return color(i); });
 
                     //Enter
@@ -178,20 +171,34 @@ define(function(require) {
                     // Update
                     if (stacktype === 'group') {
                         layer.selectAll('rect')
+                            .attr('class', function(d, i, j) { 
+                                //console.log(d, i, j); 
+                                return 'rect rect' + i; 
+                            })
                             .attr('x', function(d, i, j) { return xScale(d.x) + xScale.rangeBand() / m * j; })
                             .attr('width', xScale.rangeBand() / m)
                             .attr('y', function(d) { return yScale(d.y); })
                             .attr('height', function(d) { return height - yScale(d.y); })
                             //.on('mouseover', toolTip.show)
-                            //.on('mouseout', toolTip.hide);
+                            //.on('mouseout', toolTip.hide)
+                            .on('mouseover', mouseover)
+                            .on('mouseout', mouseout)
+                            .on('click', click);
                     } else {
                         layer.selectAll('rect')
+                            .attr('class', function(d, i, j) { 
+                                //console.log(d, i, j); 
+                                return 'rect rect' + i; 
+                            })
                             .attr('width', xScale.rangeBand())
                             .attr('x', function(d) { return xScale(d.x); })
                             .attr('y', function(d) { return yScale(d.y0 + d.y); })
                             .attr('height', function(d) { return yScale(d.y0) - yScale(d.y0 + d.y); })
                             //.on('mouseover', toolTip.show)
-                            //.on('mouseout', toolTip.hide);
+                            //.on('mouseout', toolTip.hide)
+                            .on('mouseover', mouseover)
+                            .on('mouseout', mouseout)
+                            .on('click', click);
                     }
 
                     //Exit
@@ -203,7 +210,7 @@ define(function(require) {
             d3.select(window).on('resize', resize);
 
             // k4 tooltip function
-            //if (displayToolTip) { g.call(toolTip); }
+            if (tooltip) { g.call(toolTip); }
 
             return svg;
         };
@@ -270,10 +277,7 @@ define(function(require) {
                 /* Update the range of the scale with new width/height */
                 xScale.rangeRoundBands([0, width], 0.1);
                 yScale.range([height, 0]).nice();
-                //xAxis.tickValues(xScale.domain().filter(function(d, i) { return (i % Math.min(width/80, 5)); }));
-                //xAxis.ticks(Math.max(width/50, 2));
-                xAxis = d3.svg.axis().scale(xScale).tickSize(3, 0).tickPadding(6)
-                    .tickValues( xScale.domain().filter(function(d) { return d; }) )
+                xAxis = d3.svg.axis().scale(xScale).tickSize(4, 0).tickPadding(6)
                     .orient('bottom'),
                 yAxis.ticks(Math.max(height/20, 2)).tickSize(-(width), 0);
 
@@ -357,12 +361,36 @@ define(function(require) {
                             }
                             i++;
                         });
-                    })
-                })
+                    });
+                });
             });
             return data;
         }
 
+        // event handlers
+        function mouseover(e) {
+            mouseHandler('mouseover', e, d3.mouse(this), this);
+            //toolTip.show();
+        }
+
+        function mouseout(e) {
+            mouseHandler('mouseout', e, d3.mouse(this), this);
+            //toolTip.hide();
+        }
+
+        function click(e) {
+            mouseHandler('click', e, d3.mouse(this), this);
+        }
+
+        function drag(e) {
+            //console.log('drag');
+        }
+
+        function mouseHandler(type, e, mouse, target) {
+            //console.log( type, e, mouse, target );
+        }
+
+        // getters
         chart.margin = function() {
             if (!args.margin) { return margin; }
             margin.top    = typeof args.margin.top    !== 'undefined' ? args.margin.top    : margin.top;
