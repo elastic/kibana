@@ -3,6 +3,24 @@ module.exports = function(grunt) {
     //Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
+        requirejs: {
+            compile: {
+                options: {
+                    baseUrl: '.',
+                    name: 'lib/almond/almond',
+                    include: ['src/index'],
+                    optimize: 'none',
+                    out: 'build/k4.d3.js',
+                    onBuildRead: function(moduleName, path, contents) {
+                        return contents.replace(/console.log(.*);/g, '');
+                    },
+                    wrap: {
+                        startFile: 'src/start.js',
+                        endFile: 'src/end.js'
+                    }
+                }
+            }
+        },
         karma: {
             unit: {
                 configFile: 'karma.conf.js'
@@ -13,10 +31,8 @@ module.exports = function(grunt) {
               separator: ''
             },
             dist: {
-                src: [
-                    'src/index.js'
-                ],
-                dest: 'k4.d3.js'
+                src: [],
+                dest: ''
             }
         },
         uglify: {
@@ -26,7 +42,7 @@ module.exports = function(grunt) {
             },
             js: {
                 files: {
-                    'k4.d3.min.js': ['k4.d3.js']
+                    'build/k4.d3.min.js': ['build/k4.d3.js']
                 }
             }
         },
@@ -41,7 +57,7 @@ module.exports = function(grunt) {
         watch: {
             js: {
                 files: ['src/**/*.js'],
-                tasks: ['concat']
+                tasks: ['requirejs']
             }
         },
         copy: {
@@ -69,8 +85,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
 
-    grunt.registerTask('default', ['concat', 'copy', 'watch']);
-    grunt.registerTask('production', ['concat', 'uglify', 'copy', 'cssmin']);
+    grunt.registerTask('default', ['requirejs', 'copy', 'watch']);
+    grunt.registerTask('production', ['requirejs', 'uglify', 'copy', 'cssmin']);
     grunt.registerTask('release', ['production']);
     grunt.registerTask('lint', ['jshint']);
     grunt.registerTask('unit-test', ['karma']);

@@ -18,9 +18,9 @@
 
         <!-- javascript files -->
         <script src="../lib/requirejs/require.js"></script>
-        <!-- <script src="../require.config.js"></script> -->
-        <!--
-        <script>require(['../src/index'], function(k4) {
+        <script src="../lib/jquery/dist/jquery.js"></script>
+        <!-- <script src="../build/k4.d3.min.js" charset="utf-8"></script> -->
+        <script>require(['../build/k4.d3'], function(k4) {
             var data = {
                 "rows": [
                     {
@@ -501,7 +501,7 @@
 
             $(elem).width("100%");
             $(elem).height(0);
-            d3.select(elem).style("padding-bottom", "40%");
+            //d3.select(elem).style("padding-bottom", "40%");
 
             myChart = new k4.Chart(elem, {
                 type: "histogram",
@@ -511,7 +511,7 @@
             });
 
             myChart.render(data);
-        })</script>
-        -->
+        });
+        </script>
     </body>
 </html>

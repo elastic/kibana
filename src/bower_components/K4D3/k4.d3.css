@@ -14,9 +14,6 @@ div.col {
     display: inline-block;
 }
 
-.axis text {
-    font: 10px sans-serif;
-}
 .axis line, .axis path {
     /*display: none;*/
     stroke: #aaa;
