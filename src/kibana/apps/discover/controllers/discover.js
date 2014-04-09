@@ -116,6 +116,8 @@ define(function (require) {
         ]
       }]}]};
 
+      console.log($scope.chart);
+
       return search.onResults(onResults);
     });
 
