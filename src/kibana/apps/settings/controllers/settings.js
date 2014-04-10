@@ -8,11 +8,14 @@ define(function (require) {
 
   var navHtml = require('text!../partials/nav.html');
 
-  // Make require grab the partials
+  // Grab the html and controllers for each section
   var sections = {
-    general: require('text!../partials/general.html'),
-    indices: require('text!../partials/indices.html'),
+    //general: require('text!../sections/general/index.html'),
+    indices: require('text!../sections/indices/index.html'),
   };
+  //require('../sections/general/index.js');
+  require('kibana/apps/settings/sections/indices/index.js');
+
 
   // Order them correctly in the nav
   var sectionList = ['general', 'indices'];
