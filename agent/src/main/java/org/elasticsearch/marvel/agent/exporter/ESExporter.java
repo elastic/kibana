@@ -19,6 +19,7 @@ package org.elasticsearch.marvel.agent.exporter;
  */
 
 
+import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.action.admin.cluster.node.stats.NodeStats;
 import org.elasticsearch.action.admin.cluster.stats.ClusterStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.CommonStats;
@@ -51,9 +52,10 @@ import org.elasticsearch.node.settings.NodeSettingsService;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ESExporter extends AbstractLifecycleComponent<ESExporter> implements Exporter<ESExporter>, NodeSettingsService.Listener {
 
@@ -235,6 +237,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
                 }
             }
         }
+        parser.close();
     }
 
     private void exportXContent(MultiXContentRenderer xContentRenderer) {
@@ -334,56 +337,14 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         return null;
     }
 
-    private String urlEncode(String s) {
-        try {
-            return URLEncoder.encode(s, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("failed to url encode [" + s + "]", e);
+    static int parseIndexVersionFromTemplate(byte[] template) throws UnsupportedEncodingException {
+        Pattern versionRegex = Pattern.compile("marvel.index_format\"\\s*:\\s*\"?(\\d+)\"?");
+        Matcher matcher = versionRegex.matcher(new String(template, "UTF-8"));
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group(1));
+        } else {
+            return -1;
         }
-    }
-
-    /**
-     * checks whether a documents already exists in ES and if not uploads it
-     *
-     * @return true if the document exists or has been successfully uploaded.
-     */
-    private boolean checkAndUpload(String index, String type, String id, byte[] bytes) throws IOException {
-        return checkAndUpload(urlEncode(index) + "/" + urlEncode(type) + "/" + urlEncode(id), bytes);
-    }
-
-    /**
-     * checks whether a documents already exists in ES and if not uploads it
-     *
-     * @return true if the document exists or has been successfully uploaded.
-     */
-    private boolean checkAndUpload(String path, byte[] bytes) throws IOException {
-
-        logger.debug("checking if target has [{}]", path);
-
-        HttpURLConnection conn = openConnection("HEAD", path);
-        if (conn == null) {
-            logger.error("could not connect to any configured elasticsearch instances: [{}]", hosts);
-            return false;
-        }
-
-        boolean hasDoc;
-        hasDoc = conn.getResponseCode() == 200;
-
-        // nothing there, lets create it
-        if (!hasDoc) {
-            logger.debug("no document found in elasticsearch for [{}]. Adding...", path);
-            conn = openConnection("PUT", path, XContentType.JSON.restContentType());
-            OutputStream os = conn.getOutputStream();
-            Streams.copy(bytes, os);
-            if (!(conn.getResponseCode() == 200 || conn.getResponseCode() == 201)) {
-                logConnectionError("error adding document to elasticsearch", conn);
-            } else {
-                hasDoc = true;
-            }
-            conn.getInputStream().close(); // close and release to connection pool.
-        }
-
-        return hasDoc;
     }
 
     /**
@@ -400,13 +361,59 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
                 throw new FileNotFoundException("Resource [/marvel_index_template.json] not found in classpath");
             }
             template = Streams.copyToByteArray(is);
+            is.close();
         } catch (IOException e) {
             // throwing an exception to stop exporting process - we don't want to send data unless
             // we put in the template for it.
             throw new RuntimeException("failed to load marvel_index_template.json", e);
         }
+
+
         try {
-            return checkAndUpload("_template/marvel", template);
+            int expectedVersion = parseIndexVersionFromTemplate(template);
+            if (expectedVersion < 0) {
+                throw new ElasticSearchException("failed to find an index version in pre-configured index template");
+            }
+
+            HttpURLConnection conn = openConnection("GET", "_template/marvel");
+            if (conn == null) {
+                logger.error("could not connect to any configured elasticsearch instances: [{}]", hosts);
+                return false;
+            }
+
+            boolean hasTemplate = false;
+            if (conn.getResponseCode() == 200) {
+                // verify content.
+                InputStream is = conn.getInputStream();
+                byte[] existingTemplate = Streams.copyToByteArray(is);
+                is.close();
+                int foundVersion = parseIndexVersionFromTemplate(existingTemplate);
+                if (foundVersion < 0) {
+                    logger.warn("found an existing index template but couldn't extract it's version. leaving it as is.");
+                    hasTemplate = true;
+                }
+                if (foundVersion >= expectedVersion) {
+                    logger.debug("accepting existing index template (version [{}], needed [{}])", foundVersion, expectedVersion);
+                    hasTemplate = true;
+                } else {
+                    logger.debug("replacing existing index template (version [{}], needed [{}])", foundVersion, expectedVersion);
+                }
+            }
+            // nothing there, lets create it
+            if (!hasTemplate) {
+                logger.debug("uploading index template");
+                conn = openConnection("PUT", "_template/marvel", XContentType.JSON.restContentType());
+                OutputStream os = conn.getOutputStream();
+                Streams.copy(template, os);
+                if (!(conn.getResponseCode() == 200 || conn.getResponseCode() == 201)) {
+                    logConnectionError("error adding document to elasticsearch", conn);
+                } else {
+                    hasTemplate = true;
+                }
+                conn.getInputStream().close(); // close and release to connection pool.
+            }
+
+            return hasTemplate;
         } catch (IOException e) {
             // if we're not sure of the template, we can't send data... re-raise exception.
             throw new RuntimeException("failed to load/verify index template", e);
