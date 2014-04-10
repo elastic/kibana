@@ -155,25 +155,6 @@ define(function (require) {
             throw new Error('Aborting all pending requests failed.');
           }
         };
-
-        courier._docUpdated = function (doc) {
-          var key = doc._versionKey();
-
-          // filter out the matching requests from the _pendingRequests queue
-          var pending = this._pendingRequests;
-          pending.splice(0).filter(function (req) {
-            var isDoc = req.source._getType() === 'doc';
-            var keyMatches = isDoc && req.source._versionKey() === key;
-
-            if (!keyMatches) {
-              // put it back into the pending queue
-              pending.push(req);
-              return false;
-            }
-
-            req.defer.resolve();
-          });
-        };
       }
 
       return new Courier();

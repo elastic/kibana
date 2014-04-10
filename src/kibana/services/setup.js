@@ -27,7 +27,7 @@ define(function (require) {
 
       function checkForES() {
         notify.lifecycle('es check');
-        return es.ping()
+        return es.ping({ requestTimeout: 2000 })
         .catch(function () {
           throw new Error('Unable to connect to Elasticsearch at "' + configFile.elasticsearch + '"');
         })
