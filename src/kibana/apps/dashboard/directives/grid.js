@@ -15,27 +15,26 @@ define(function (require) {
         control: '='
       },
       link: function ($scope, elem) {
-        var width,
-          gridster,
-          widgets;
+        var width = elem.width();
+        var gridster; // defined in init()
 
-        elem.addClass('gridster');
+        $scope.control = $scope.control || {};
 
-        width = elem.width();
+        $scope.$watch('grid', function (grid) {
+          if (grid === void 0) return; // wait until we have something
 
-        var init = function () {
+          init();
+          $scope.control.unserializeGrid(grid);
+        });
+
+        var init = _.once(function () {
+          elem.addClass('gridster');
+
           elem.on('click', 'li i.remove', function (event) {
             var target = event.target.parentNode.parentNode;
             gridster.remove_widget(target);
           });
 
-          $scope.$watch('grid', function () {
-            initGrid();
-            $scope.control.unserializeGrid($scope.grid);
-          });
-        };
-
-        var initGrid = _.once(function () {
           gridster = elem.gridster({
             autogenerate_stylesheet: false,
             widget_margins: [5, 5],
@@ -95,9 +94,6 @@ define(function (require) {
           wgd.data('params', panel.params);
 
         };
-
-        // Start the directive
-        init();
       }
     };
   });
