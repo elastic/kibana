@@ -14,79 +14,44 @@
   padding-right: 0px !important;
 }
 
-.discover-field-container {
-  padding-left: 0px !important;
-  padding-right: 0px !important;
+.discover-field-details-close {
+  text-align: center;
+  border-top: 1px solid @well-border;
   background-color: @well-bg;
-  border-right: 1px solid @well-border;
-  border-bottom: 1px solid @well-border;
 }
 
-.discover-field-list {
+.discover-field-details {
+  border-top: 1px solid @well-border;
+  padding: 5px 10px;
+  background-color: @body-bg;
+  color: @text-color;
 
-  .discover-field-list-header {
-    padding-left: 10px;
-    color: @navbar-default-color;
+  .discover-field-details-error {
+    margin-top: 5px;
   }
 
-
-  .discover-field-item {
-    border-top: 1px solid @well-border;
-    font-size: @font-size-smaller;
-
-    .discover-field-details-close {
-      text-align: center;
-      border-top: 1px solid @well-border;
-      background-color: @well-bg;
-    }
-
+  .discover-field-details-item {
+    margin-top: 5px;
   }
 
-  .discover-field-name {
-    padding: 5px 10px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .discover-field-details-filter {
+    cursor: pointer;
   }
 
-  .discover-field-name:hover, .discover-field-name:hover .text-muted {
-    background-color: @component-active-bg;
-    color: @component-active-color;
-  }
+  .progress {
+    margin-bottom: 0px;
 
-  .discover-field-details {
-    border-top: 1px solid @well-border;
-    padding: 5px 10px;
-    background-color: @body-bg;
-    color: @text-color;
+    .progress-bar {
+      padding-left: 10px;
+      text-align: right;
 
-    .discover-field-details-error {
-      margin-top: 5px;
-    }
-
-    .discover-field-details-item {
-      margin-top: 5px;
-    }
-
-    .discover-field-details-filter {
-      cursor: pointer;
-    }
-
-    .progress {
-      margin-bottom: 0px;
-
-      .progress-bar {
-        padding-left: 10px;
-        text-align: right;
-
-        span {
-          background-color: @gray;
-          padding: 3px;
-          border-radius: 4px;
-          font-size: 0.8em;
-          margin-left: 3px;
-          margin-right: 3px;
-        }
+      span {
+        background-color: @gray;
+        padding: 3px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        margin-left: 3px;
+        margin-right: 3px;
       }
     }
   }
