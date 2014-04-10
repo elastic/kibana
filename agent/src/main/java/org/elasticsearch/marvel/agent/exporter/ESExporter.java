@@ -19,7 +19,6 @@ package org.elasticsearch.marvel.agent.exporter;
  */
 
 
-import org.elasticsearch.ElasticSearchException;
 import org.elasticsearch.action.admin.cluster.node.stats.NodeStats;
 import org.elasticsearch.action.admin.cluster.stats.ClusterStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.CommonStats;
@@ -372,7 +371,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         try {
             int expectedVersion = parseIndexVersionFromTemplate(template);
             if (expectedVersion < 0) {
-                throw new ElasticSearchException("failed to find an index version in pre-configured index template");
+                throw new RuntimeException("failed to find an index version in pre-configured index template");
             }
 
             HttpURLConnection conn = openConnection("GET", "_template/marvel");
