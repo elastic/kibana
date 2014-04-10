@@ -1,8 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  return function (Promise, es, $injector) {
-    var docUpdated = $injector.invoke(require('./_doc_updated'));
+  return function (Promise, es) {
 
     /**
      * Backend for doUpdate and doIndex
@@ -27,8 +26,40 @@ define(function (require) {
         if (resp.status === 409) throw new courier.errors.VersionConflict(resp);
 
         doc._storeVersion(resp._version);
-        docUpdated(courier, doc, null);
         doc.id(resp._id);
+
+        // notify pending request for this same document that we have updates
+        Promise.cast(!body ? doc.fetch() : {
+          _id: resp._id,
+          _index: params.index,
+          _source: body,
+          _type: params.type,
+          _version: doc._getVersion(),
+          found: true
+        }).then(function (fetchResp) {
+          // use the key to compair sources
+          var key = doc._versionKey();
+
+          // filter out the matching requests from the _pendingRequests queue
+          var pending = courier._pendingRequests;
+
+          // clear the queue and filter out the removed items, pushing the
+          // unmatched ones back in.
+          pending.splice(0).filter(function (req) {
+            var isDoc = req.source._getType() === 'doc';
+            var keyMatches = isDoc && req.source._versionKey() === key;
+
+            if (keyMatches) {
+              // resolve the request with a copy of the response
+              req.defer.resolve(_.cloneDeep(fetchResp));
+              return;
+            }
+
+            // otherwise, put the request back into the queue
+            pending.push(req);
+          });
+        });
+
         return resp._id;
       })
       .catch(function (err) {
