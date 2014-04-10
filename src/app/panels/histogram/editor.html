@@ -22,6 +22,9 @@
     <div class="editor-option">
       <label class="small">Derivative <tip>Plot the change per interval in the series</tip></label><input type="checkbox" ng-model="panel.derivative" ng-checked="panel.derivative" ng-change="set_refresh(true)">
     </div>
+    <div class="editor-option">
+      <label class="small">Zero fill <tip>Fills zeros in gaps.</tip></label><input type="checkbox" ng-model="panel.zerofill" ng-checked="panel.zerofill" ng-change="set_refresh(true)">
+    </div>
   </div>
   <div class="section">
   <h5>Time Options</h5>
