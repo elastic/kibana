@@ -50,6 +50,14 @@ define(function (require) {
       return this;
     };
 
+    /**
+     * Get the parent of this SearchSource
+     * @return {SearchSource}
+     */
+    SearchSource.prototype.parent = function () {
+      return this._parent;
+    };
+
     /******
      * PRIVATE APIS
      ******/

@@ -19,25 +19,23 @@ define(function (require) {
           gridster,
           widgets;
 
-        if (_.isUndefined($scope.control) || _.isUndefined($scope.grid)) {
-          return;
-        }
-
         elem.addClass('gridster');
 
         width = elem.width();
 
         var init = function () {
-          initGrid();
           elem.on('click', 'li i.remove', function (event) {
             var target = event.target.parentNode.parentNode;
             gridster.remove_widget(target);
           });
 
-          $scope.control.unserializeGrid($scope.grid);
+          $scope.$watch('grid', function () {
+            initGrid();
+            $scope.control.unserializeGrid($scope.grid);
+          });
         };
 
-        var initGrid = function () {
+        var initGrid = _.once(function () {
           gridster = elem.gridster({
             autogenerate_stylesheet: false,
             widget_margins: [5, 5],
@@ -58,13 +56,17 @@ define(function (require) {
             }
           }).data('gridster');
           gridster.generate_stylesheet({namespace: '.gridster'});
-        };
+        });
 
         $scope.control.clearGrid = function (cb) {
           gridster.remove_all_widgets();
         };
 
         $scope.control.unserializeGrid = function (grid) {
+          if (typeof grid === 'string') {
+            grid = JSON.stringify(grid);
+          }
+          gridster.remove_all_widgets();
           _.each(grid, function (panel) {
             $scope.control.addWidget(panel);
           });

@@ -40,6 +40,8 @@ define(function (require) {
      * PUBLIC API
      ******/
 
+    config.file = configFile;
+
     /**
      * Executes once and returns a promise that is resolved once the
      * config has loaded for the first time.

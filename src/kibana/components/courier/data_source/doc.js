@@ -2,15 +2,15 @@ define(function (require) {
   var _ = require('lodash');
 
   var inherits = require('utils/inherits');
-  var listenerCount = require('utils/event_emitter').listenerCount;
 
   require('./abstract');
 
   var module = require('modules').get('kibana/courier');
 
-  module.factory('CouriersDocSource', function (couriersErrors, CouriersSourceAbstract, Promise, es) {
+  module.factory('CouriersDocSource', function (couriersErrors, CouriersSourceAbstract, Promise, es, $injector) {
     var VersionConflict = couriersErrors.VersionConflict;
     var RequestFailure = couriersErrors.RequestFailure;
+    var sendToEs = $injector.invoke(require('./_doc_send_to_es'));
 
     function DocSource(courier, initialState) {
       CouriersSourceAbstract.call(this, courier, initialState);
@@ -18,6 +18,8 @@ define(function (require) {
       // move onResults over to onUpdate, because that makes more sense
       this.onUpdate = this.onResults;
       this.onResults = void 0;
+
+      this._sendToEs = sendToEs;
     }
     inherits(DocSource, CouriersSourceAbstract);
 
@@ -44,7 +46,7 @@ define(function (require) {
      */
     DocSource.prototype.doUpdate = function (fields) {
       if (!this._state.id) return this.doIndex(fields);
-      return this._sendToEs('update', true, { doc: fields });
+      return this._sendToEs(this._courier, 'update', false, { doc: fields });
     };
 
     /**
@@ -53,7 +55,7 @@ define(function (require) {
      * @return {[type]}        [description]
      */
     DocSource.prototype.doIndex = function (body) {
-      return this._sendToEs('index', false, body);
+      return this._sendToEs(this._courier, 'index', true, body);
     };
 
     /*****
@@ -91,6 +93,8 @@ define(function (require) {
      */
     DocSource.prototype._versionKey = function () {
       var state = this._state;
+
+      if (!state.index || !state.type || !state.id) return;
       return 'DocVersion:' + (
         [
           state.index,
@@ -118,7 +122,10 @@ define(function (require) {
      * @return {[type]} [description]
      */
     DocSource.prototype._getStoredVersion = function () {
-      var v = localStorage.getItem(this._versionKey());
+      var key = this._versionKey();
+      if (!key) return;
+
+      var v = localStorage.getItem(key);
       this._version = v ? _.parseInt(v) : void 0;
       return this._version;
     };
@@ -131,50 +138,19 @@ define(function (require) {
     DocSource.prototype._storeVersion = function (version) {
       if (!version) return this._clearVersion();
 
-      var id = this._versionKey();
-      localStorage.setItem(id, version);
+      var key = this._versionKey();
+      if (!key) return;
+      this._version = version;
+      localStorage.setItem(key, version);
     };
 
     /**
      * Clears the stored version for a DocSource
      */
     DocSource.prototype._clearVersion = function () {
-      var id = this._versionKey();
-      localStorage.removeItem(id);
-    };
-
-    /**
-     * Backend for doUpdate and doIndex
-     * @param  {String} method - the client method to call
-     * @param  {Boolean} validateVersion - should our knowledge
-     *   of the the docs current version be sent to es?
-     * @param  {String} body - HTTP request body
-     */
-    DocSource.prototype._sendToEs = function (method, validateVersion, body) {
-      var source = this;
-      var courier = this._courier;
-
-      // straight assignment will causes undefined values
-      var params = _.pick(this._state, ['id', 'type', 'index']);
-      params.body = body;
-      params.ignore = [409];
-
-      if (validateVersion) {
-        params.version = source._getVersion();
-      }
-
-      return es[method](params)
-      .then(function (resp) {
-        if (resp.status === 409) throw new VersionConflict(resp);
-
-        source._storeVersion(resp._version);
-        courier._docUpdated(source);
-        return resp._id;
-      })
-      .catch(function (err) {
-        // cast the error
-        return new RequestFailure(err);
-      });
+      var key = this._versionKey();
+      if (!key) return;
+      localStorage.removeItem(key);
     };
 
     return DocSource;
