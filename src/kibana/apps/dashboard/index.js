@@ -44,7 +44,9 @@ define(function (require) {
     }
   });
 
-  app.controller('dashboard', function ($scope, $route, $routeParams, $rootScope, $location, Promise, es, configFile, createNotifier) {
+  app.controller('dashboard', function ($scope, $route, $routeParams, $rootScope, $location,
+    Promise, es, configFile, createNotifier) {
+
     var notify = createNotifier({
       location: 'Dashboard'
     });
