@@ -6810,3 +6810,33 @@ kbn-table th:hover .table-header-move,
 kbn-table th:hover .table-header-sortchange {
   visibility: visible;
 }
+.sidebar-container {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+  background-color: #f5f5f5;
+  border-right: 1px solid #e3e3e3;
+  border-bottom: 1px solid #e3e3e3;
+}
+.sidebar-container .sidebar-list ul {
+  list-style: none;
+  margin-bottom: 0px;
+}
+.sidebar-container .sidebar-list .sidebar-list-header {
+  padding-left: 10px;
+  color: #777777;
+}
+.sidebar-container .sidebar-list .sidebar-item {
+  border-top: 1px solid #e3e3e3;
+  font-size: 11px;
+}
+.sidebar-container .sidebar-list .sidebar-item .sidebar-item-title {
+  padding: 5px 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sidebar-container .sidebar-list .sidebar-item .sidebar-item-title:hover,
+.sidebar-container .sidebar-list .sidebar-item .sidebar-item-title:hover .text-muted {
+  background-color: #428bca;
+  color: #ffffff;
+}
