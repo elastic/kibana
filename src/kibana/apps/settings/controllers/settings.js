@@ -4,33 +4,38 @@ define(function (require) {
   var app = require('modules').get('app/settings');
 
   require('services/state');
+  require('../services/indices_pattern');
   require('directives/fixed_scroll');
 
   var navHtml = require('text!../partials/nav.html');
 
   // Grab the html and controllers for each section
   var sections = {
-    //general: require('text!../sections/general/index.html'),
-    indices: require('text!../sections/indices/index.html'),
+    indices: require('text!../partials/indices.html'),
   };
-  //require('../sections/general/index.js');
-  require('kibana/apps/settings/sections/indices/index.js');
-
 
   // Order them correctly in the nav
-  var sectionList = ['general', 'indices'];
+  var sectionList = ['indices'];
+
+  var template = function (params) {
+    return '' +
+        '<div ng-controller="settings">' +
+          navHtml +
+          sections[params] +
+        '</div>';
+  };
 
   require('routes')
   .when('/settings', {
     redirectTo: '/settings/general'
   })
-  .when('/settings/:section?', {
-    template: function (params) {
-      return '' +
-        '<div ng-controller="settings">' +
-          navHtml +
-          sections[params.section] +
-        '</div>';
+  .when('/settings/indices/:id?', {
+    template: template('indices'),
+    resolve: {
+      index: function (indexPattern, $route) {
+        console.log(indexPattern);
+        return indexPattern.get($route.current.params.id);
+      }
     },
     reloadOnSearch: false
   });
@@ -46,4 +51,6 @@ define(function (require) {
 
     $scope.$emit('application.load');
   });
+
+
 });
