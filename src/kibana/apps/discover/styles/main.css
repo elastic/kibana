@@ -78,60 +78,34 @@
   padding-left: 0px !important;
   padding-right: 0px !important;
 }
-.discover-field-container {
-  padding-left: 0px !important;
-  padding-right: 0px !important;
-  background-color: #f5f5f5;
-  border-right: 1px solid #e3e3e3;
-  border-bottom: 1px solid #e3e3e3;
-}
-.discover-field-list .discover-field-list-header {
-  padding-left: 10px;
-  color: #777777;
-}
-.discover-field-list .discover-field-item {
-  border-top: 1px solid #e3e3e3;
-  font-size: 11px;
-}
-.discover-field-list .discover-field-item .discover-field-details-close {
+.discover-field-details-close {
   text-align: center;
   border-top: 1px solid #e3e3e3;
   background-color: #f5f5f5;
 }
-.discover-field-list .discover-field-name {
-  padding: 5px 10px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.discover-field-list .discover-field-name:hover,
-.discover-field-list .discover-field-name:hover .text-muted {
-  background-color: #428bca;
-  color: #ffffff;
-}
-.discover-field-list .discover-field-details {
+.discover-field-details {
   border-top: 1px solid #e3e3e3;
   padding: 5px 10px;
   background-color: #ffffff;
   color: #333333;
 }
-.discover-field-list .discover-field-details .discover-field-details-error {
+.discover-field-details .discover-field-details-error {
   margin-top: 5px;
 }
-.discover-field-list .discover-field-details .discover-field-details-item {
+.discover-field-details .discover-field-details-item {
   margin-top: 5px;
 }
-.discover-field-list .discover-field-details .discover-field-details-filter {
+.discover-field-details .discover-field-details-filter {
   cursor: pointer;
 }
-.discover-field-list .discover-field-details .progress {
+.discover-field-details .progress {
   margin-bottom: 0px;
 }
-.discover-field-list .discover-field-details .progress .progress-bar {
+.discover-field-details .progress .progress-bar {
   padding-left: 10px;
   text-align: right;
 }
-.discover-field-list .discover-field-details .progress .progress-bar span {
+.discover-field-details .progress .progress-bar span {
   background-color: #555555;
   padding: 3px;
   border-radius: 4px;
