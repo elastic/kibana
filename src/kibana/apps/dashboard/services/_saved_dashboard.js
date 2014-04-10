@@ -1,5 +1,7 @@
 define(function (require) {
-  var module = require('modules').get('app/dashboard');
+  var module = require('modules').get('app/dashboard', [
+    'kibana/saved_object'
+  ]);
   var _ = require('lodash');
   var inherits = require('utils/inherits');
 
