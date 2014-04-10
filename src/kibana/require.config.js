@@ -6,6 +6,7 @@ require.config({
     courier: './components/courier',
     config: './components/config',
     notify: './components/notify',
+    saved_object: './components/saved_object',
 
     // special utils
     routes: 'utils/routes',
