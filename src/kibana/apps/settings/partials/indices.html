@@ -1,19 +1,88 @@
-<div>
+<div bindonce>
   <div class="col-md-2 sidebar-container">
     <div class="sidebar-list">
       <div class="sidebar-list-header">
-        <h5>Index Patterns</h5>
+        <h5>Index Patterns <a ng-show="indices.id" href="#/settings/indices" class="btn btn-primary btn-xs"><i class="fa fa-plus"></i> Add New</a></h5>
       </div>
-      <ul bindonce class="list-unstyled">
-        <li bindonce class="sidebar-item">
-          <div ng-click="loadIndex(field)" class="sidebar-item-title">
-            <span field-name="field.name" field-type="field.type"></span>
-          </div>
+      <ul class="list-unstyled">
+        <li class="sidebar-item" ng-repeat="pattern in indices.patterns">
+          <a ng-href="#/settings/indices/{{pattern}}">
+            <div class="sidebar-item-title" ng-class="{'active': pattern == indices.id}">
+              <span bo-text="pattern"></span>
+            </div>
+          </a>
         </li>
       </ul>
     </div>
   </div>
   <div class="col-md-10">
-  {{lol}}
+
+    <div class="container-fluid">
+
+      <div ng-show="!indices.id">
+        <div class="col-md-12">
+          <div class="page-header">
+            <h1>Configure an index pattern</h1>
+            In order to use Kibana you must configure at least one index pattern. Index patterns are
+            used to identify the Elasticsearch index to run search and analytics against. They are also
+            used to configure fields.
+          </div>
+          <form name="form" role="form" class="well">
+            <div class="form-group">
+              <label>Index Name <small>or pattern</small></label>
+              <input type="text" class="form-control" placeholder="Enter index name"
+                ng-model="indices.newIndex.pattern" required>
+            </div>
+            <button type="submit" class="btn btn-primary"
+              ng-disabled="form.$invalid"
+              ng-click="addPattern(indices.newIndex.pattern)">Create</button>
+          </form>
+        </div>
+      </div>
+
+      <div ng-show="indices.id">
+        <div class="col-md-12">
+          <div class="page-header">
+            <h1>
+              {{indices.id}}
+              <button class="btn btn-warning" ng-click="refreshFields(indices.id)">
+                <i class="fa fa-refresh"></i>
+              </button>
+              <button class="btn btn-danger" ng-click="removePattern(indices.id)">
+                <i class="fa fa-ban"></i>
+              </button>
+
+            </h1>
+            This page lists every field in the <strong>{{indices.id}}</strong> index and the field's
+            associated core type as recorded by Elasticsearch
+          </div>
+
+          <div ng-hide="tablePages() == 1">
+            <center>
+              <button class="btn btn-sm" ng-disabled="indices.table.page == 0" ng-click="indices.table.page=indices.table.page-1">
+                Previous
+              </button>
+              {{indices.table.page+1}}/{{tablePages()}}
+              <button class="btn btn-sm" ng-disabled="indices.table.page >= indices.mapping.length/indices.table.max - 1" ng-click="indices.table.page=indices.table.page+1">
+                Next
+              </button>
+            </center>
+          </div>
+
+          <table class="table">
+            <thead>
+              <th ng-click="setFieldSort('field')">field <i ng-class="sortClass('field')"></i></th>
+              <th ng-click="setFieldSort('mapping.type')">type <i ng-class="sortClass('mapping.type')"></i></th>
+            </thead>
+            <tr ng-repeat="field in indices.mapping | orderBy:indices.table.by:indices.table.reverse | startFrom:indices.table.page*indices.table.max | limitTo:indices.table.max">
+              <td bo-text="field.field"></td>
+              <td bo-text="field.mapping.type"></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
   </div>
 </div>

@@ -151,13 +151,21 @@ kbn-table {
       border-top: 1px solid @well-border;
       font-size: @font-size-smaller;
 
+      a {
+        color: @text-color;
+
+        &:hover {
+          text-decoration: none;
+        }
+      }
+
       .sidebar-item-title {
         padding: 5px 10px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      .sidebar-item-title:hover, .sidebar-item-title:hover .text-muted {
+      .sidebar-item-title:hover, .sidebar-item-title:hover .text-muted, .active {
         background-color: @component-active-bg;
         color: @component-active-color;
       }
