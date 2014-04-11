@@ -117,7 +117,7 @@ define(function (require) {
           }
         ]
       }]}]};
-      return search.onResults(onResults);
+      return search.onResults().then(onResults);
     }).catch(function (err) {
       console.log('An error');
     });

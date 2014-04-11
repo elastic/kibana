@@ -4,9 +4,8 @@
 </div>
 <ul class="nav nav-pills">
   <li
-    ng-repeat="res in configurable.searchResults | orderBy:'_source.fields.title'"
-    ng-class="{active: configurable.dashboard.title == res._source.fields.title}">
-    <pre>{{res}}</pre>
-    <a ng-href="#/dashboard/{{res._id}}">{{res._source.fields.title}}</a>
+    ng-repeat="res in configurable.searchResults | orderBy:'_source.title'"
+    ng-class="{active: configurable.dashboard.id == res._id}">
+    <a ng-href="#/dashboard/{{res._source.title}}">{{res._id}}</a>
   </li>
 </ul>
