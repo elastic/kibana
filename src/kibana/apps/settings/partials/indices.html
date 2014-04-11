@@ -51,13 +51,13 @@
           <div class="page-header">
             <h1>
               {{indices.id}}
-              <button class="btn btn-success" ng-click="setDefaultPattern(indices.id)">
+              <button class="btn btn-success" tooltip="Set as default index" ng-click="setDefaultPattern(indices.id)">
                 <i class="fa fa-star"></i>
               </button>
-              <button class="btn btn-warning" ng-click="refreshFields(indices.id)">
+              <button class="btn btn-warning" tooltip="Refresh field list" ng-click="refreshFields(indices.id)">
                 <i class="fa fa-refresh"></i>
               </button>
-              <button class="btn btn-danger" ng-click="removePattern(indices.id)">
+              <button class="btn btn-danger" tooltip="Remove index pattern" ng-click="removePattern(indices.id)">
                 <i class="fa fa-ban"></i>
               </button>
 
