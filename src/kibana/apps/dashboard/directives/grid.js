@@ -66,7 +66,7 @@ define(function (require) {
             grid = JSON.stringify(grid);
           }
           gridster.remove_all_widgets();
-          _.each(grid, function (panel) {
+          grid.forEach(function (panel) {
             $scope.control.addWidget(panel);
           });
         };
