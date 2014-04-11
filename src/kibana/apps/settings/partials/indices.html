@@ -27,15 +27,14 @@
             used to identify the Elasticsearch index to run search and analytics against. They are also
             used to configure fields.
           </div>
-          <form name="form" role="form" class="well">
+          <form name="form" role="form" class="well" ng-submit="addPattern(indices.newIndex.pattern)">
             <div class="form-group">
               <label>Index Name <small>or pattern</small></label>
               <input type="text" class="form-control" placeholder="Enter index name"
                 ng-model="indices.newIndex.pattern" required>
             </div>
             <button type="submit" class="btn btn-primary"
-              ng-disabled="form.$invalid"
-              ng-click="addPattern(indices.newIndex.pattern)">Create</button>
+              ng-disabled="form.$invalid">Create</button>
           </form>
         </div>
       </div>
