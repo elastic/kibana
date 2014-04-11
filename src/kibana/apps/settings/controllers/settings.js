@@ -131,7 +131,9 @@ define(function (require) {
     };
 
     $scope.setDefaultPattern = function (pattern) {
-      config.set('defaultIndex', pattern);
+      config.set('defaultIndex', pattern).then(function () {
+        $scope.indices.default = pattern;
+      });
     };
 
     $scope.setFieldSort = function (by) {
