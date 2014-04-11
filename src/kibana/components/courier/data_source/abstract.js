@@ -167,6 +167,14 @@ define(function (require) {
       _.pull.apply(_, [this._courier._pendingRequests].concat(pending));
     };
 
+    /**
+     * Completely destroy the SearchSource.
+     * @return {undefined}
+     */
+    SourceAbstract.prototype.destroy = function () {
+      this.cancelPending();
+    };
+
     /*****
      * PRIVATE API
      *****/
