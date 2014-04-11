@@ -32,7 +32,9 @@ define(function (require) {
       var mapping = config.mapping || {};
 
       // default field values, assigned when the source is loaded
-      var defaults = config.defaults;
+      var defaults = config.defaults || {};
+
+      var afterESResp = config.afterESResp || null;
 
       // optional search source which this object configures
       obj.searchSource = config.searchSource && courier.createSource('search');
@@ -100,7 +102,7 @@ define(function (require) {
 
           // fetch the object from ES
           return docSource.fetch()
-          .then(function applyDocSourceResp(resp) {
+          .then(function applyESResp(resp) {
             if (!resp.found) throw new Error('Unable to find that ' + type + '.');
 
             var meta = resp._source.kibanaSavedObjectMeta || {};
@@ -121,8 +123,11 @@ define(function (require) {
               obj.searchSource.set(state);
             }
 
-            // Any time obj is updated, re-call applyDocSourceResp
-            docSource.onUpdate().then(applyDocSourceResp, notify.fatal);
+            return Promise.cast(afterESResp && afterESResp.call(obj, resp))
+            .then(function () {
+              // Any time obj is updated, re-call applyESResp
+              docSource.onUpdate().then(applyESResp, notify.fatal);
+            });
           });
         })
         .then(function () {

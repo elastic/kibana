@@ -1,0 +1,24 @@
+<div class="container-fluid">
+  <div ng-controller="VisualizeEditor">
+    <div class="row">
+      <div class="col-md-3">
+        <form>
+          <ul class="vis-config-panel">
+            <li ng-repeat="category in visConfigCategories.displayOrder">
+              <vis-config-category
+                category-name="category.name"
+                vis="vis"
+                fields="fields">
+              </vis-config-category>
+            </li>
+          </ul>
+          <button type="button" ng-click="doVisualize()" class="btn btn-primary">Visualize</button>
+          <button type="button" ng-click="doSave()" class="btn btn-primary">Save</button>
+        </form>
+      </div>
+      <div class="col-md-9 vis-canvas">
+        <visualization vis-canvas vis="vis"></visualization>
+      </div>
+    </div>
+  </div>
+</div>
