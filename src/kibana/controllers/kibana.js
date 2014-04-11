@@ -24,9 +24,6 @@ define(function (require) {
       var notify = createNotifier();
       $scope.apps = configFile.apps;
 
-      $rootScope.rootDataSource = courier.createSource('search')
-        .index('logstash-*');
-
       function updateAppData() {
         var route = $location.path().split(/\//);
         var app = _.find($scope.apps, {id: route[1]});

@@ -2,7 +2,9 @@ define(function (require) {
   var module = require('modules').get('kibana/saved_object');
   var _ = require('lodash');
 
-  module.factory('SavedObject', function (courier, configFile, Promise, createNotifier, $injector) {
+  require('services/root_search');
+
+  module.factory('SavedObject', function (courier, configFile, rootSearch, Promise, createNotifier, $injector) {
 
     var mappingSetup = $injector.invoke(require('./_mapping_setup'));
 
@@ -30,7 +32,9 @@ define(function (require) {
       var mapping = config.mapping || {};
 
       // default field values, assigned when the source is loaded
-      var defaults = config.defaults;
+      var defaults = config.defaults || {};
+
+      var afterESResp = config.afterESResp || null;
 
       // optional search source which this object configures
       obj.searchSource = config.searchSource && courier.createSource('search');
@@ -54,6 +58,11 @@ define(function (require) {
           .index(configFile.kibanaIndex)
           .type(type)
           .id(obj.id);
+
+        // by default, the search source should inherit from the rootSearch
+        if (obj.searchSource) {
+          obj.searchSource.inherits(rootSearch);
+        }
 
         // check that the mapping for this type is defined
         return mappingSetup.isDefined(type)
@@ -93,7 +102,7 @@ define(function (require) {
 
           // fetch the object from ES
           return docSource.fetch()
-          .then(function applyDocSourceResp(resp) {
+          .then(function applyESResp(resp) {
             if (!resp.found) throw new Error('Unable to find that ' + type + '.');
 
             var meta = resp._source.kibanaSavedObjectMeta || {};
@@ -114,8 +123,11 @@ define(function (require) {
               obj.searchSource.set(state);
             }
 
-            // Any time obj is updated, re-call applyDocSourceResp
-            docSource.onUpdate().then(applyDocSourceResp, notify.fatal);
+            return Promise.cast(afterESResp && afterESResp.call(obj, resp))
+            .then(function () {
+              // Any time obj is updated, re-call applyESResp
+              docSource.onUpdate().then(applyESResp, notify.fatal);
+            });
           });
         })
         .then(function () {

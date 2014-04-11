@@ -5,8 +5,18 @@ define(function (require) {
 
   require('filters/field_type');
 
-  app.directive('visConfigEditor', function ($compile, Vis, Aggs) {
-    var headerHtml = require('text!../partials/editor/header.html');
+  var visConfigCategories = require('../saved_visualizations/_config_categories');
+  var aggs = require('../saved_visualizations/_aggs');
+
+  var headerHtml = require('text!../partials/editor/header.html');
+
+  var controlHtml = {
+    orderAndSize: require('text!../partials/controls/order_and_size.html'),
+    interval: require('text!../partials/controls/interval.html'),
+    globalLocal: require('text!../partials/controls/global_local.html')
+  };
+
+  app.directive('visConfigEditor', function ($compile) {
 
     var categoryOptions = {
       metric: {
@@ -26,12 +36,6 @@ define(function (require) {
       }
     };
 
-    var controlHtml = {
-      orderAndSize: require('text!../partials/controls/order_and_size.html'),
-      interval: require('text!../partials/controls/interval.html'),
-      globalLocal: require('text!../partials/controls/global_local.html')
-    };
-
     // generalized setup for group and segment
     function setupDimension($scope, $el) {
       var $controls = $el.find('.agg-param-controls');
@@ -44,26 +48,26 @@ define(function (require) {
         // clear the previous choices
         $scope.availableAggs = void 0;
         // get the new choices
-        var aggs = Aggs.aggsByFieldType[field.type];
+        var options = aggs.byFieldType[field.type];
 
-        if (!aggs || aggs.length === 0) {
+        if (!options || options.length === 0) {
           // init or invalid field type
           $scope.config.agg = void 0;
           return;
         }
 
-        if (aggs.length === 1) {
+        if (options.length === 1) {
           // only once choice, make it for the user
-          $scope.config.agg = aggs[0].name;
+          $scope.config.agg = options[0].name;
           return;
         }
 
         // set the new choices
-        $scope.availableAggs = aggs;
+        $scope.availableAggs = options;
 
         // update the agg only if it is not currently a valid option
-        if (!$scope.config.agg || !_.find(aggs, { name: $scope.config.agg })) {
-          $scope.config.agg = aggs[0].name;
+        if (!$scope.config.agg || !_.find(options, { name: $scope.config.agg })) {
+          $scope.config.agg = options[0].name;
           return;
         }
       }
@@ -73,7 +77,7 @@ define(function (require) {
       $scope.$watch('fields', getAvailableAggsForField);
 
       $scope.$watch('config.agg', function (aggName) {
-        var agg = Aggs.aggsByName[aggName];
+        var agg = aggs.byName[aggName];
         var controlsHtml = '';
 
         if (agg) {
@@ -119,8 +123,8 @@ define(function (require) {
         var categoryName = $scope.config.categoryName;
         var opts = categoryOptions[categoryName];
 
-        $scope.Aggs = Aggs;
-        $scope.Vis = Vis;
+        $scope.aggs = aggs;
+        $scope.visConfigCategories = visConfigCategories;
 
         // attach a copy of the template to the scope and render
         $el.html($compile(headerHtml + '\n' + opts.template)($scope));

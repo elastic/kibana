@@ -2,6 +2,7 @@ define(function (require) {
   var kibana = require('kibana');
 
   require('css!./styles/index.css');
+  require('services/root_search');
 
   var app = require('modules').get('app/examples');
 
@@ -62,9 +63,9 @@ define(function (require) {
         type: '@'
       },
       template: '<strong style="float:left">{{count}} :&nbsp;</strong><pre>{{json}}</pre>',
-      controller: function ($scope, courier) {
+      controller: function ($scope, courier, rootSearch) {
         $scope.count = 0;
-        var source = courier.rootSearchSource.extend()
+        var source = rootSearch.extend()
           .type($scope.type)
           .source({
             include: 'country'
@@ -122,11 +123,11 @@ define(function (require) {
       },
       template: 'Mappings:<br><div ng-repeat="(name,mapping) in mappedFields">{{name}} = {{mapping.type}}</div><hr>' +
         '<strong style="float:left">{{count}} :&nbsp;</strong><pre>{{json}}</pre>',
-      controller: function ($rootScope, $scope, courier) {
+      controller: function ($rootScope, $scope, courier, rootSearch) {
         $scope.count = 0;
         $scope.mappedFields = {};
 
-        var source = courier.rootSearchSource.extend()
+        var source = rootSearch.extend()
           .index('logstash-*')
           .type($scope.type)
           .source({
