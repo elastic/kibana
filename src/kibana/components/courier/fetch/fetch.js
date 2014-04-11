@@ -31,6 +31,7 @@ define(function (require) {
         all.forEach(function (req) {
           req.defer.reject(err);
         });
+        throw err;
       });
     };
 

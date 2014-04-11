@@ -98,6 +98,8 @@ define(function (require) {
 
     search.inherits(courier.rootSearchSource);
 
+    // Bind a result handler. Any time scope.fetch() is executed this gets called
+    // with the results
     search.onResults().then(function onResults(resp) {
       if (!$scope.fields) getFields();
 
@@ -115,8 +117,9 @@ define(function (require) {
           }
         ]
       }]}]};
-
       return search.onResults(onResults);
+    }).catch(function (err) {
+      console.log('An error');
     });
 
     $scope.$on('$destroy', _.bindKey(search, 'cancelPending'));
@@ -166,6 +169,9 @@ define(function (require) {
 
       if (!$scope.fields) getFields();
 
+      var sort = {};
+      sort[$scope.state.sort[0]] = $scope.state.sort[1];
+
       search
         .size($scope.opts.sampleSize)
         .query(!$scope.state.query ? null : {
@@ -173,6 +179,7 @@ define(function (require) {
             query: $scope.state.query
           }
         })
+        .sort([sort])
         .aggs({
           events: {
             date_histogram: {
@@ -188,23 +195,7 @@ define(function (require) {
       updateDataSource();
       // fetch just this savedSearch
       $scope.updateState();
-
-      search.fetch().then(function (res) {
-        $scope.rows = res.hits.hits;
-        $scope.chart = {rows: [{columns: [{
-            label: 'Events over time',
-            xAxisLabel: 'DateTime',
-            yAxisLabel: 'Hits',
-            layers: [
-              {
-                key: 'events',
-                values: _.map(res.aggregations.events.buckets, function (bucket) {
-                  return { y: bucket.doc_count, x: bucket.key_as_string };
-                })
-              }
-            ]
-          }]}]};
-      });
+      courier.fetch();
     };
 
     $scope.updateState = function () {

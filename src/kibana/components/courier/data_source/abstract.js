@@ -143,7 +143,19 @@ define(function (require) {
      * @param {Function} cb - callback
      */
     SourceAbstract.prototype.fetch = function () {
-      return couriersFetch[this._getType()](this);
+      var courier = this._courier;
+      var source = this;
+      return couriersFetch[this._getType()](this)
+      .then(function (res) {
+        courier._pendingRequests.splice(0).forEach(function (req) {
+          if (req.source === source) {
+            req.defer.resolve(_.cloneDeep(res));
+          } else {
+            courier._pendingRequests.push(req);
+          }
+        });
+        return res;
+      });
     };
 
     /**

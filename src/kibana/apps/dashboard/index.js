@@ -61,39 +61,41 @@ define(function (require) {
 
     // All inputs go here.
     $scope.input = {
-      search: ''
+      search: void 0
     };
 
     // Setup configurable values for config directive, after objects are initialized
     $scope.configurable = {
-      dashboard: dash.details,
+      dashboard: dash,
       input: $scope.input
     };
 
-    $scope.$on('$destroy', _.bindKey(dash, 'cancelPending'));
+    $scope.$on('$destroy', dash.destroy);
 
-    var dashboardSearch = function () {
-      //ignore first run, just the watcher getting initialized
+    $scope.$watch('dash.panelsJSON', function (val) {
+      $scope.panels = JSON.parse(val || '[]');
+    });
 
-      dashboardSearch = function (query) {
-        if (_.isString(query) && query.length > 0) {
-          query = {match: {title: {query: query, type: 'phrase_prefix'}}};
-        } else {
-          query = {match_all: {}};
+    var dashboardSearch = function (query) {
+      if (query === void 0) return;
+
+      if (_.isString(query) && query.length > 0) {
+        query = {match: {title: {query: query, type: 'phrase_prefix'}}};
+      } else {
+        query = {match_all: {}};
+      }
+
+      es.search({
+        index: configFile.kibanaIndex,
+        type: 'dashboard',
+        size: 10,
+        body: {
+          query: query
         }
-
-        es.search({
-          index: configFile.kibanaIndex,
-          type: 'dashboard',
-          size: 10,
-          body: {
-            query: query
-          }
-        })
-        .then(function (res) {
-          $scope.configurable.searchResults = res.hits.hits;
-        });
-      };
+      })
+      .then(function (res) {
+        $scope.configurable.searchResults = res.hits.hits;
+      });
     };
     $scope.$watch('configurable.input.search', dashboardSearch);
 
@@ -118,12 +120,13 @@ define(function (require) {
     };
 
     $scope.save = function () {
-      var wasUnsaved = dash.unsaved;
-      dash.details.panels = $scope.gridControl.serializeGrid();
+      dash.panelsJSON = JSON.stringify($scope.gridControl.serializeGrid() || []);
 
       return dash.save()
       .then(function (res) {
-        if (wasUnsaved) $location.url('/dashboard/' + encodeURIComponent(dash.get('id')));
+        if (dash.id !== $routeParams.id) {
+          $location.url('/dashboard/' + encodeURIComponent(dash.id));
+        }
         return true;
       })
       .catch(notify.fatal);

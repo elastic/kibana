@@ -23,7 +23,7 @@ define(function (require) {
   module.constant('configFile', configFile);
 
   // service for delivering config variables to everywhere else
-  module.service('config', function ($rootScope, createNotifier, courier, kbnVersion, configFile, Promise) {
+  module.service('config', function ($rootScope, createNotifier, courier, kbnVersion, configFile, Promise, setup) {
     var config = this;
     var notify = createNotifier({
       location: 'Config'
@@ -40,6 +40,8 @@ define(function (require) {
      * PUBLIC API
      ******/
 
+    config.file = configFile;
+
     /**
      * Executes once and returns a promise that is resolved once the
      * config has loaded for the first time.
@@ -48,9 +50,15 @@ define(function (require) {
      */
     config.init = _.once(function () {
       notify.lifecycle('config init');
-      return doc.fetch()
-      .then(function (resp) {
-        if (!resp.found) config._unsaved = true;
+      return setup.bootstrap().then(function () {
+        return doc.fetch();
+      })
+      .then(function useConfig(resp) {
+        if (!resp.found) {
+          config._unsaved = true;
+          return doc.doIndex({}).then(useConfig);
+        }
+
         vals = resp._source || vals;
 
         notify.lifecycle('config init', true);
