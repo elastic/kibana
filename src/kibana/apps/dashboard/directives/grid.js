@@ -15,29 +15,26 @@ define(function (require) {
         control: '='
       },
       link: function ($scope, elem) {
-        var width,
-          gridster,
-          widgets;
+        var width = elem.width();
+        var gridster; // defined in init()
 
-        if (_.isUndefined($scope.control) || _.isUndefined($scope.grid)) {
-          return;
-        }
+        $scope.control = $scope.control || {};
 
-        elem.addClass('gridster');
+        $scope.$watch('grid', function (grid) {
+          if (grid === void 0) return; // wait until we have something
 
-        width = elem.width();
+          init();
+          $scope.control.unserializeGrid(grid);
+        });
 
-        var init = function () {
-          initGrid();
+        var init = _.once(function () {
+          elem.addClass('gridster');
+
           elem.on('click', 'li i.remove', function (event) {
             var target = event.target.parentNode.parentNode;
             gridster.remove_widget(target);
           });
 
-          $scope.control.unserializeGrid($scope.grid);
-        };
-
-        var initGrid = function () {
           gridster = elem.gridster({
             autogenerate_stylesheet: false,
             widget_margins: [5, 5],
@@ -58,13 +55,17 @@ define(function (require) {
             }
           }).data('gridster');
           gridster.generate_stylesheet({namespace: '.gridster'});
-        };
+        });
 
         $scope.control.clearGrid = function (cb) {
           gridster.remove_all_widgets();
         };
 
         $scope.control.unserializeGrid = function (grid) {
+          if (typeof grid === 'string') {
+            grid = JSON.stringify(grid);
+          }
+          gridster.remove_all_widgets();
           _.each(grid, function (panel) {
             $scope.control.addWidget(panel);
           });
@@ -93,9 +94,6 @@ define(function (require) {
           wgd.data('params', panel.params);
 
         };
-
-        // Start the directive
-        init();
       }
     };
   });
