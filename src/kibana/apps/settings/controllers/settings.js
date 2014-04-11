@@ -4,7 +4,7 @@ define(function (require) {
   var app = require('modules').get('app/settings');
 
   require('services/state');
-  require('../services/indices_pattern');
+  //require('../services/indices_pattern');
   require('directives/fixed_scroll');
 
   var navHtml = require('text!../partials/nav.html');
@@ -34,7 +34,7 @@ define(function (require) {
     resolve: {
       index: function (indexPattern, $route) {
         console.log(indexPattern);
-        return indexPattern.get($route.current.params.id);
+        //return indexPattern.get($route.current.params.id);
       }
     },
     reloadOnSearch: false

@@ -9,7 +9,7 @@ define(function (require) {
     'kibana/courier'
   ]);
 
-  module.service('setup', function (Promise, createNotifier, es, config, configFile) {
+  module.service('setup', function (Promise, createNotifier, es, configFile) {
     var notify = createNotifier({
       location: 'Setup'
     });
@@ -88,7 +88,6 @@ define(function (require) {
       return checkForES()
       .then(checkForKibanaIndex)
       .then(createKibanaIndex)
-      .then(config.init)
       .finally(function () {
         notify.lifecycle('bootstrap', true);
       });
