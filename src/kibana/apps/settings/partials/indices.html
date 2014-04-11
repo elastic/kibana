@@ -14,6 +14,28 @@
     </div>
   </div>
   <div class="col-md-10">
-  {{lol}}
+
+    <div class="container-fluid">
+      <div class="page-header">
+        <h1>Configure an index pattern</h1>
+      </div>
+      <div class="col-md-6 well">
+
+        <div ng-show="indices.view == 'addPattern'">
+          <form name="form" role="form">
+            <div class="form-group">
+              <label>Index Name <small>or pattern</small></label>
+              <input type="text" class="form-control" placeholder="Enter index name"
+                ng-model="indices.newIndex.pattern" required>
+            </div>
+            <button type="submit" class="btn btn-primary"
+              ng-disabled="form.$invalid"
+              ng-click="addPattern(indices.newIndex.pattern)">Create</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 </div>
