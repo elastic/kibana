@@ -76,6 +76,10 @@ function (angular, app, _, kbn) {
         ids         : []
       },
       style   : { "font-size": '14pt'},
+      /** @scratch /panels/trends/5
+       * invertcolors:: true or false
+       */
+      invertcolors: false
     };
     _.defaults($scope.panel,_d);
 
