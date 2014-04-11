@@ -114,12 +114,13 @@ define(function (require) {
     $scope.openLoad = function () {
       var open = toggleConfigTemplate('load');
       if (open) {
-        dashboardSearch($scope.configurable.input.search);
+        dashboardSearch($scope.input.search || '');
         $scope.configSubmit = null;
       }
     };
 
     $scope.save = function () {
+      dash.id = dash.title;
       dash.panelsJSON = JSON.stringify($scope.gridControl.serializeGrid() || []);
 
       return dash.save()
