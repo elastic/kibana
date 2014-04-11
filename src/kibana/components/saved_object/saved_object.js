@@ -2,7 +2,9 @@ define(function (require) {
   var module = require('modules').get('kibana/saved_object');
   var _ = require('lodash');
 
-  module.factory('SavedObject', function (courier, configFile, Promise, createNotifier, $injector) {
+  require('services/root_search');
+
+  module.factory('SavedObject', function (courier, configFile, rootSearch, Promise, createNotifier, $injector) {
 
     var mappingSetup = $injector.invoke(require('./_mapping_setup'));
 
@@ -54,6 +56,11 @@ define(function (require) {
           .index(configFile.kibanaIndex)
           .type(type)
           .id(obj.id);
+
+        // by default, the search source should inherit from the rootSearch
+        if (obj.searchSource) {
+          obj.searchSource.inherits(rootSearch);
+        }
 
         // check that the mapping for this type is defined
         return mappingSetup.isDefined(type)

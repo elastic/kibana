@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  require('./saved_search');
+  require('./_saved_search');
   require('notify/notify');
 
   var module = require('modules').get('discover/saved_searches', [

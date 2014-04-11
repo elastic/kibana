@@ -34,7 +34,7 @@ define(function (require) {
       .type('config')
       .id(kbnVersion);
 
-    var vals = {};
+    var vals = null;
 
     /******
      * PUBLIC API
@@ -59,7 +59,7 @@ define(function (require) {
           return doc.doIndex({}).then(useConfig);
         }
 
-        vals = resp._source || vals;
+        vals = _.defaults({}, resp._source || {}, defaults);
 
         notify.lifecycle('config init', true);
       });
