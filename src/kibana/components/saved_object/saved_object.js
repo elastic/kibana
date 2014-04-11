@@ -55,7 +55,6 @@ define(function (require) {
           .type(type)
           .id(obj.id);
 
-
         // check that the mapping for this type is defined
         return mappingSetup.isDefined(type)
         .then(function (defined) {
@@ -63,21 +62,21 @@ define(function (require) {
           if (defined) return true;
 
           // we need to setup the mapping, flesh it out first
-          var mapping = {
+          var mapping = _.mapValues(mapping, function (val, prop) {
             // allow shortcuts for the field types, by just setting the value
             // to the type name
-            properties: _.mapValues(mapping, function (val, prop) {
-              if (typeof val !== 'string') return val;
-              return {
-                type: val
-              };
-            })
-          };
+            if (typeof val !== 'string') return val;
+            return {
+              type: val
+            };
+          });
 
-          mapping.properties.kibanaSavedObjectMeta = {
-            // setup the searchSource mapping, even if it is not used but this type yet
-            searchSourceJSON: {
-              type: 'string'
+          mapping.kibanaSavedObjectMeta = {
+            properties: {
+              // setup the searchSource mapping, even if it is not used but this type yet
+              searchSourceJSON: {
+                type: 'string'
+              }
             }
           };
 
