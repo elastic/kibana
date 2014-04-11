@@ -54,8 +54,7 @@ define(function (require) {
         // tell the docSource where to find the doc
         docSource
           .index(configFile.kibanaIndex)
-          .type(type)
-          .id(obj.id);
+          .type(type);
 
 
         // check that the mapping for this type is defined
@@ -148,6 +147,7 @@ define(function (require) {
           body.searchSourceJSON = JSON.stringify(obj.searchSource);
         }
 
+        docSource.id(obj.id);
         return docSource.doIndex(body).then(function (id) {
           obj.id = id;
           return id;
