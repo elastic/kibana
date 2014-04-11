@@ -63,7 +63,7 @@ define(function (require) {
 
     $scope.addPattern = function (pattern) {
       console.log('adding');
-      var source = courier.createSource('search').index(pattern);
+      var source = courier.createSource('search').index(pattern).getFields();
       console.log(source);
     };
 
