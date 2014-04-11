@@ -51,20 +51,36 @@ define(function (require) {
 
   app.controller('settings', function ($scope, config, courier, createNotifier, state, $route, $routeParams, es) {
 
-    console.log(config);
-    console.log(es);
+    var notify = createNotifier({
+      location: 'Index Settings'
+    });
 
     var init = function () {
       $scope.indices = {};
       if (!$routeParams.id) {
         $scope.indices.view = 'addPattern';
       }
+      $scope.getPatterns();
+    };
+
+    $scope.getPatterns = function (pattern) {
+      var source = '';
     };
 
     $scope.addPattern = function (pattern) {
       console.log('adding');
-      var source = courier.createSource('search').index(pattern).getFields();
-      console.log(source);
+      var source = courier.createSource('search').index(pattern);
+      var mapping = source.getFields();
+      mapping.then(function (mapping) {
+        // TODO: redirect user to the new pattern;
+        console.log('index found!');
+        source.destroy();
+      })
+      .catch(function (err) {
+        if (err.status === 404) {
+          notify.error('Could not locate any indices matching that pattern. Please add the index to Elasticsearch');
+        }
+      });
     };
 
     $scope.sectionList = sectionList;
