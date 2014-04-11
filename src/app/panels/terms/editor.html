@@ -10,8 +10,20 @@
         <select class="input-medium" ng-model="panel.tstat" ng-options="f for f in ['count', 'total_count', 'min', 'max', 'total', 'mean']"></select>
       </div>
       <div class="editor-option">
+        <label class="small">Terms field mode</label>
+        <select class="input-small" ng-model="panel.field_mode" ng-options="f for f in ['field','fields','script_field']" ng-change="set_refresh(true)" ng-show="panel.tmode == 'terms'"></select>
+      </div>
+      <div class="editor-option" ng-show="panel.field_mode == 'field'">
         <label class="small">Field</label>
-        <input type="text" class="input-small" bs-typeahead="fields.list" ng-model="panel.field" ng-change="set_refresh(true)">
+        <input type="text" class="input-medium" bs-typeahead="fields.list" ng-model="panel.field" ng-change="set_refresh(true)">
+      </div>
+      <div class="editor-option" ng-show="panel.field_mode == 'fields'">
+        <label class="small">Field(s) (comma separated)</label>
+        <input array-join type="text" ng-model='panel.fields' ng-change="set_refresh(true)">
+      </div>
+      <div class="editor-option" ng-show="panel.field_mode == 'script_field'">
+        <label class="small">Script field</label>
+        <input type="text" class="input-medium" ng-model="panel.script_field" ng-change="set_refresh(true)">
       </div>
       <div class="editor-option" ng-show="panel.tmode == 'terms_stats'">
         <label class="small">Value field</label>
@@ -65,6 +77,10 @@
       </div>
       <div class="editor-option" ng-show="panel.chart == 'pie'">
         <label class="small">Labels</label><input type="checkbox" ng-model="panel.labels" ng-checked="panel.labels">
+      </div>
+      <div class="editor-option" ng-show="panel.chart == 'pie'">
+        <label class="small">Percision</label>
+        <input class="input-small" type="number" ng-model="panel.percision" ng-change="set_refresh(true)">
       </div>
     </div>
   </div>
