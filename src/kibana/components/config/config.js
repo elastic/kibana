@@ -84,13 +84,6 @@ define(function (require) {
         });
     };
 
-    config.$watch = function (key, listener) {
-      config.init().then(function () {
-        $rootScope.$on('change:config.' + key, listener);
-        listener(config.get(key));
-      });
-    };
-
     config.close = function () {};
 
     /*****

@@ -10,8 +10,11 @@ define(function (require) {
     when: function (path, route) {
       if (route.resolve) {
         route.resolve = _.mapValues(route.resolve, function (expr, name) {
-          return function (setup, $injector) {
-            return setup.bootstrap()
+          return function ($q, setup, config, $injector) {
+            return $q.all([
+              setup.bootstrap(),
+              config.init()
+            ])
             .then(function () {
               return $injector[angular.isString(expr) ? 'get': 'invoke'](expr);
             });
@@ -19,8 +22,11 @@ define(function (require) {
         });
       } else if (!route.redirectTo) {
         route.resolve = {
-          bootstrap: function (setup) {
-            return setup.bootstrap();
+          bootstrap: function ($q, setup, config) {
+            return $q.all([
+              setup.bootstrap(),
+              config.init()
+            ]);
           }
         };
       }
