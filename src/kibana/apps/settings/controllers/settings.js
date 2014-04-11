@@ -37,7 +37,7 @@ define(function (require) {
   });
 
 
-  app.controller('settings', function ($scope, configFile, courier, createNotifier, $route, $routeParams, $location, es) {
+  app.controller('settings', function ($scope, configFile, courier, createNotifier, $route, $routeParams, $location, es, config) {
 
     var notify = createNotifier({
       location: 'Index Settings'
@@ -52,9 +52,9 @@ define(function (require) {
           reverse: false,
           page: 0,
           max: 20
-        }
+        },
+        default: config.get('defaultIndex')
       };
-      console.log($scope.indices);
 
       if (!!$scope.indices.id) {
         loadPattern($scope.indices.id);
@@ -114,7 +114,6 @@ define(function (require) {
     };
 
     $scope.addPattern = function (pattern) {
-      console.log('adding');
       var source = courier.createSource('search').index(pattern);
       var mapping = source.getFields();
       mapping.then(function (mapping) {
@@ -129,6 +128,10 @@ define(function (require) {
           notify.error('Could not locate any indices matching that pattern. Please add the index to Elasticsearch');
         }
       });
+    };
+
+    $scope.setDefaultPattern = function (pattern) {
+      config.set('defaultIndex', pattern);
     };
 
     $scope.setFieldSort = function (by) {

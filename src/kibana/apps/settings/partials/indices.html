@@ -5,7 +5,14 @@
         <h5>Index Patterns <a ng-show="indices.id" href="#/settings/indices" class="btn btn-primary btn-xs"><i class="fa fa-plus"></i> Add New</a></h5>
       </div>
       <ul class="list-unstyled">
-        <li class="sidebar-item" ng-repeat="pattern in indices.patterns">
+        <li class="sidebar-item" ng-repeat="pattern in indices.patterns | filter:indices.default">
+          <a ng-href="#/settings/indices/{{pattern}}">
+            <div class="sidebar-item-title" ng-class="{'active': pattern == indices.id}">
+              <i class="fa fa-star"></i> <span bo-text="pattern"></span>
+            </div>
+          </a>
+        </li>
+        <li class="sidebar-item" ng-repeat="pattern in indices.patterns | filter:'!'+indices.default">
           <a ng-href="#/settings/indices/{{pattern}}">
             <div class="sidebar-item-title" ng-class="{'active': pattern == indices.id}">
               <span bo-text="pattern"></span>
@@ -44,6 +51,9 @@
           <div class="page-header">
             <h1>
               {{indices.id}}
+              <button class="btn btn-success" ng-click="setDefaultPattern(indices.id)">
+                <i class="fa fa-star"></i>
+              </button>
               <button class="btn btn-warning" ng-click="refreshFields(indices.id)">
                 <i class="fa fa-refresh"></i>
               </button>
