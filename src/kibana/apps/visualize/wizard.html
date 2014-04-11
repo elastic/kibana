@@ -1,0 +1,23 @@
+<div ng-controller="VisualizeWizard">
+  <h1>
+    Create a new visualization
+  </h1>
+  <section>
+    <h2>
+      Choose a Saved Search
+    </h2>
+    <hr>
+    <find-saved-object service="savedSearches" on-choose="useSavedSearch"></find-saved-object>
+  </section>
+  <section>
+    <h2>
+      Choose a Visualization Type
+    </h2>
+    <ul class="vis-config-panel">
+      <li ng-repeat="category in typeDefs">
+        <vis-type-preview type="type"></vis-type-preview>
+      </li>
+    </ul>
+    <hr>
+  </section>
+</div>

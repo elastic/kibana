@@ -7,11 +7,11 @@
     <div class="col-md-6">
       <div class="form-group">
         <label class="control-label">Name</label>
-        <input ng-model="opts.savedSearch.details.name" class="form-control">
+        <input ng-model="opts.savedSearch.title" class="form-control">
       </div>
       <div class="form-group">
         <button ng-click="opts.saveDataSource()" type="button" class="btn btn-primary">
-          {{opts.savedSearch.unsaved ? 'Create' : 'Save'}}
+          {{opts.savedSearch.id ? 'Create' : 'Save'}}
         </button>
       </div>
     </div>

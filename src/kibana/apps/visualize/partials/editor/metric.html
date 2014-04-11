@@ -4,7 +4,7 @@
     class="form-control"
     name="stat"
     ng-model="config.agg"
-    ng-options="agg.name as agg.name for agg in Aggs.metricAggs">
+    ng-options="agg.name as agg.name for agg in aggs.metricAggs">
   </select>
 </div>
 <div class="form-group" ng-if="config.agg && config.agg !== 'count'">

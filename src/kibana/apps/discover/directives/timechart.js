@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
-  var k4 = require('K4D3');
+  var k4 = require('k4d3');
 
   var app = require('modules').get('app/discover');
 

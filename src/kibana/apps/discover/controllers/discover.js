@@ -19,7 +19,7 @@ define(function (require) {
     templateUrl: 'kibana/apps/discover/index.html',
     reloadOnSearch: false,
     resolve: {
-      search: function (savedSearches, $route) {
+      savedSearch: function (savedSearches, $route) {
         return savedSearches.get($route.current.params.id);
       }
     }
@@ -38,13 +38,14 @@ define(function (require) {
     var notify = createNotifier({
       location: 'Discover'
     });
-    var locals = $route.current.locals;
-    var search = locals.search;
 
-    if (!search) return notify.fatal('search failed to load');
+    // the saved savedSearch
+    var savedSearch = $route.current.locals.savedSearch;
+    // the actual courier.SearchSource
+    var searchSource = savedSearch.searchSource;
 
     /* Manage state & url state */
-    var initialQuery = search.get('query');
+    var initialQuery = searchSource.get('query');
 
     function loadState() {
       $scope.state = state.get();
@@ -65,17 +66,17 @@ define(function (require) {
       // Index to match
       index: 'logstash-*',
       timefield: '@timestamp',
-      savedSearch: search
+      savedSearch: savedSearch
     };
 
-    // track the initial state of the search
-    var searchIsUnsaved = search.unsaved;
     $scope.opts.saveDataSource = function () {
-      search.save()
+      savedSearch.id = savedSearch.title;
+
+      savedSearch.save()
       .then(function () {
-        notify.info('Saved Data Source "' + search.details.name + '"');
-        if (searchIsUnsaved) {
-          $location.url('/discover/' + search.get('id'));
+        notify.info('Saved Data Source "' + savedSearch.title + '"');
+        if (savedSearch.id !== $route.current.params.id) {
+          $location.url('/discover/' + savedSearch.id);
         }
       }, notify.error);
     };
@@ -96,11 +97,9 @@ define(function (require) {
       }
     });
 
-    search.inherits(courier.rootSearchSource);
-
     // Bind a result handler. Any time scope.fetch() is executed this gets called
     // with the results
-    search.onResults().then(function onResults(resp) {
+    searchSource.onResults().then(function onResults(resp) {
       if (!$scope.fields) getFields();
 
       $scope.rows = resp.hits.hits;
@@ -117,12 +116,12 @@ define(function (require) {
           }
         ]
       }]}]};
-      return search.onResults().then(onResults);
+      return searchSource.onResults().then(onResults);
     }).catch(function (err) {
       console.log('An error');
     });
 
-    $scope.$on('$destroy', _.bindKey(search, 'cancelPending'));
+    $scope.$on('$destroy', savedSearch.destroy);
 
     $scope.getSort = function () {
       return $scope.state.sort;
@@ -131,7 +130,7 @@ define(function (require) {
     $scope.setSort = function (field, order) {
       var sort = {};
       sort[field] = order;
-      search.sort([sort]);
+      searchSource.sort([sort]);
       $scope.state.sort = [field, order];
       $scope.fetch();
     };
@@ -160,10 +159,10 @@ define(function (require) {
     };
 
     function updateDataSource() {
-      if ($scope.opts.index !== search.get('index')) {
+      if ($scope.opts.index !== searchSource.get('index')) {
         // set the index on the savedSearch
-        search.index($scope.opts.index);
-        // clear the columns and fields, then refetch when we do a search
+        searchSource.index($scope.opts.index);
+        // clear the columns and fields, then refetch when we do a savedSearch
         //$scope.state.columns = $scope.fields = null;
       }
 
@@ -172,7 +171,7 @@ define(function (require) {
       var sort = {};
       sort[$scope.state.sort[0]] = $scope.state.sort[1];
 
-      search
+      searchSource
         .size($scope.opts.sampleSize)
         .query(!$scope.state.query ? null : {
           query_string: {
@@ -228,7 +227,7 @@ define(function (require) {
         };
       }, {});
 
-      search
+      searchSource
         .getFields()
         .then(function (fields) {
           if (!fields) return;
@@ -294,7 +293,7 @@ define(function (require) {
     };
 
     $scope.refreshFieldList = function () {
-      search.clearFieldCache(function () {
+      searchSource.clearFieldCache(function () {
         getFields().then(function () {
           $scope.fetch();
         });

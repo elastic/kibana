@@ -1,0 +1,10 @@
+<div>
+  <input ng-model="filter" type="text">
+  <hr>
+  <ul ng-repeat="hit in hits">
+    <li>
+      <h3 ng-bind="hit.title"></h3>
+      <p ng-bind="hit.description"></p>
+    </li>
+  </ul>
+</div>

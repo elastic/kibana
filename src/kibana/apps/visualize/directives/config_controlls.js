@@ -8,7 +8,7 @@ define(function (require) {
     globalLocal: require('text!../partials/controls/global_local.html')
   };
 
-  app.directive('visConfigControls', function ($compile, Vis, Aggs) {
+  app.directive('visConfigControls', function ($compile, visConfigCategories, aggs) {
     return {
       restrict: 'E',
       scope: {
@@ -18,7 +18,7 @@ define(function (require) {
         var $controls = $el.find('.agg-param-controls');
 
         $scope.$watch('config.agg', function (aggName) {
-          var agg = Aggs.aggsByName[aggName];
+          var agg = aggs.byName[aggName];
           var controlsHtml = '';
 
           if (agg) {
@@ -49,8 +49,8 @@ define(function (require) {
           $controls.html($compile(controlsHtml)($scope));
         });
 
-        $scope.Aggs = Aggs;
-        $scope.Vis = Vis;
+        $scope.aggs = aggs;
+        $scope.visConfigCategories = visConfigCategories;
       }
     };
   });
