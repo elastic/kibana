@@ -6784,6 +6784,12 @@ kbn-table th:hover .table-header-sortchange {
   border-top: 1px solid #e3e3e3;
   font-size: 11px;
 }
+.sidebar-container .sidebar-list .sidebar-item a {
+  color: #333333;
+}
+.sidebar-container .sidebar-list .sidebar-item a:hover {
+  text-decoration: none;
+}
 .sidebar-container .sidebar-list .sidebar-item .sidebar-item-title {
   padding: 5px 10px;
   white-space: nowrap;
@@ -6791,7 +6797,8 @@ kbn-table th:hover .table-header-sortchange {
   text-overflow: ellipsis;
 }
 .sidebar-container .sidebar-list .sidebar-item .sidebar-item-title:hover,
-.sidebar-container .sidebar-list .sidebar-item .sidebar-item-title:hover .text-muted {
+.sidebar-container .sidebar-list .sidebar-item .sidebar-item-title:hover .text-muted,
+.sidebar-container .sidebar-list .sidebar-item .active {
   background-color: #428bca;
   color: #ffffff;
 }
