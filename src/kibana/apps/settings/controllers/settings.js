@@ -3,17 +3,13 @@ define(function (require) {
 
   var app = require('modules').get('app/settings');
 
-  require('services/state');
-  require('../services/patterns');
-  require('directives/fixed_scroll');
+  require('filters/start_from');
 
   var navHtml = require('text!../partials/nav.html');
 
   // Grab the html and controllers for each section
   var sections = {
     indices: require('text!../partials/indices.html'),
-    newIndex: require('text!../partials/indices.html'),
-
   };
 
   // Order them correctly in the nav
@@ -22,7 +18,7 @@ define(function (require) {
   var template = function (params) {
     return '' +
         '<div ng-controller="settings">' +
-          navHtml +
+          //navHtml +
           sections[params] +
         '</div>';
   };
@@ -37,34 +33,84 @@ define(function (require) {
   })
   .when('/settings/indices/:id?', {
     template: template('indices'),
-    /*
-    resolve: {
-      index: function (indexPatterns, $route) {
-        console.log(indexPatterns);
-        return indexPatterns.get($route.current.params.id);
-      }
-    },
-    */
     reloadOnSearch: false
   });
 
 
-  app.controller('settings', function ($scope, config, courier, createNotifier, state, $route, $routeParams, es) {
+  app.controller('settings', function ($scope, configFile, courier, createNotifier, $route, $routeParams, $location, es) {
 
     var notify = createNotifier({
       location: 'Index Settings'
     });
 
     var init = function () {
-      $scope.indices = {};
-      if (!$routeParams.id) {
-        $scope.indices.view = 'addPattern';
-      }
       $scope.getPatterns();
+      $scope.indices = {
+        id: $routeParams.id,
+        table: {
+          by: 'field',
+          reverse: false,
+          page: 0,
+          max: 20
+        }
+      };
+      console.log($scope.indices);
+
+      if (!!$scope.indices.id) {
+        loadPattern($scope.indices.id);
+      }
+    };
+
+    var loadPattern = function (pattern) {
+      es.get({
+        index: configFile.kibanaIndex,
+        type: 'mapping',
+        id: pattern
+      })
+      .then(function (resp) {
+        $scope.indices.mapping = _.map(resp._source, function (v, k) {
+          return {field: k, mapping: v};
+        });
+      })
+      .catch(function (err) {
+        $location.path('/settings/indices');
+      });
     };
 
     $scope.getPatterns = function (pattern) {
-      var source = '';
+      var source = courier.createSource('search').index(configFile.kibanaIndex).type('mapping');
+      source.query({match_all: {}})
+        .fetch()
+        .then(function (resp) {
+          $scope.indices.patterns = _.map(resp.hits.hits, function (hit) {
+            return hit._id;
+          });
+        });
+      source.destroy();
+    };
+
+    $scope.refreshFields = function (pattern) {
+      var source = courier.createSource('search').index(pattern);
+      var mapping = source.clearFieldCache().then(function () {
+        $scope.addPattern(pattern);
+      });
+    };
+
+    $scope.removePattern = function (pattern) {
+      es.delete({
+        index: configFile.kibanaIndex,
+        type: 'mapping',
+        id: pattern
+      })
+      .then(function (resp) {
+        es.indices.refresh({index: configFile.kibanaIndex})
+        .then(function () {
+          $location.path('/settings/indices');
+        });
+      })
+      .catch(function (err) {
+        $location.path('/settings/indices');
+      });
     };
 
     $scope.addPattern = function (pattern) {
@@ -72,21 +118,35 @@ define(function (require) {
       var source = courier.createSource('search').index(pattern);
       var mapping = source.getFields();
       mapping.then(function (mapping) {
-        // TODO: redirect user to the new pattern;
-        console.log('index found!');
-        source.destroy();
+        es.indices.refresh({index: configFile.kibanaIndex})
+        .then(function () {
+          $location.path('/settings/indices/' + pattern);
+          source.destroy();
+        });
       })
       .catch(function (err) {
-        if (err.status === 404) {
+        if (err.status >= 400) {
           notify.error('Could not locate any indices matching that pattern. Please add the index to Elasticsearch');
         }
       });
     };
 
-    $scope.sectionList = sectionList;
-    $scope.activeTab = function (tabName) {
-      return false;
-      //return ($routeParams.section === tabName) ? 'active' : '';
+    $scope.setFieldSort = function (by) {
+      if ($scope.indices.table.by === by) {
+        $scope.indices.table.reverse = !$scope.indices.table.reverse;
+      } else {
+        $scope.indices.table.by = by;
+      }
+    };
+
+    $scope.sortClass = function (column) {
+      if ($scope.indices.table.by !== column) return;
+      return $scope.indices.table.reverse ? ['fa', 'fa-sort-asc'] : ['fa', 'fa-sort-desc'];
+    };
+
+    $scope.tablePages = function () {
+      if (!$scope.indices.mapping) return 0;
+      return Math.ceil($scope.indices.mapping.length / $scope.indices.table.max);
     };
 
     init();
