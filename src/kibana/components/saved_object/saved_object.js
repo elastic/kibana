@@ -3,6 +3,7 @@ define(function (require) {
   var _ = require('lodash');
 
   module.factory('SavedObject', function (courier, configFile, Promise, createNotifier, $injector) {
+
     var mappingSetup = $injector.invoke(require('./_mapping_setup'));
 
     function SavedObject(config) {
@@ -31,7 +32,7 @@ define(function (require) {
       var fieldMapping = config.mapping || {};
 
       // default field values, assigned when the source is loaded
-      var defaults =
+      var defaults = config.defaults;
 
       // optional search source which this object configures
       obj.searchSource = config.searchSource && courier.createSource('search');
