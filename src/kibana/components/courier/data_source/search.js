@@ -58,6 +58,15 @@ define(function (require) {
       return this._parent;
     };
 
+
+    /**
+     * Get the mapping for the index of this SearchSource
+     * @return {Promise}
+     */
+    SearchSource.prototype.getFields = function () {
+      return this._courier._mapper.getFields(this);
+    };
+
     /******
      * PRIVATE APIS
      ******/
