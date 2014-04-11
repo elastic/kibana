@@ -44,10 +44,7 @@ define(function (require) {
         return mapper.getCachedFieldsFor(dataSource)
         .catch(function () {
           // If we are unable to get the fields from cache, get them from mapping instead
-          return mapper.getFieldsFromEsFor(dataSource)
-          .then(function (fields) {
-            fieldCache.set(dataSource, fields);
-          });
+          return mapper.getFieldsFromEsFor(dataSource);
         });
       };
 
