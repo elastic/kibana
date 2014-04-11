@@ -36,10 +36,7 @@ define(function (require) {
           hits: 0,
           description: '',
           panelsJSON: '[]'
-        },
-
-        // should a search source be made available for this SavedObject
-        searchSource: false
+        }
       });
     }
 

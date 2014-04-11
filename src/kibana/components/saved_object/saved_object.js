@@ -26,10 +26,8 @@ define(function (require) {
         location: 'Saved ' + type
       });
 
-      // mapping definition for the fields that this object
-      // will expose, the actual mapping will place this under it's
-      // "fields:" propety definition.
-      var fieldMapping = config.mapping || {};
+      // mapping definition for the fields that this object will expose
+      var mapping = config.mapping || {};
 
       // default field values, assigned when the source is loaded
       var defaults = config.defaults;
@@ -66,19 +64,17 @@ define(function (require) {
 
           // we need to setup the mapping, flesh it out first
           var mapping = {
-            // wrap the mapping in a "fields" key, so that it won't collide
-            // with things we add, like "searchSource"
-            fields: {
-              // allow shortcuts for the field types, by just setting the value
-              // to the type name
-              properties: _.mapValues(mapping, function (val, prop) {
-                if (typeof val !== 'string') return val;
-                return {
-                  type: val
-                };
-              })
-            },
+            // allow shortcuts for the field types, by just setting the value
+            // to the type name
+            properties: _.mapValues(mapping, function (val, prop) {
+              if (typeof val !== 'string') return val;
+              return {
+                type: val
+              };
+            })
+          };
 
+          mapping.properties.kibanaSavedObjectMeta = {
             // setup the searchSource mapping, even if it is not used but this type yet
             searchSourceJSON: {
               type: 'string'
@@ -101,17 +97,20 @@ define(function (require) {
           .then(function applyDocSourceResp(resp) {
             if (!resp.found) throw new Error('Unable to find that ' + type + '.');
 
+            var meta = resp._source.kibanaSavedObjectMeta || {};
+            delete resp._source.kibanaSavedObjectMeta;
+
             // assign the defaults to the response
-            _.defaults(resp._source.fields, defaults);
+            _.defaults(resp._source, defaults);
 
             // Give obj all of the values in _source.fields
-            _.assign(obj, resp._source.fields);
+            _.assign(obj, resp._source);
 
             // if we have a searchSource, set it's state based on the searchSourceJSON field
             if (obj.searchSource) {
               var state = {};
               try {
-                state = JSON.parse(resp._source.searchSourceJSON);
+                state = JSON.parse(meta.searchSourceJSON);
               } catch (e) {}
               obj.searchSource.set(state);
             }
@@ -134,21 +133,26 @@ define(function (require) {
        * @resolved {String} - The id of the doc
        */
       this.save = function () {
-        var body = {
-          fields: {}
-        };
+        var body = {};
 
-        _.forOwn(fieldMapping, function (mapping, fieldName) {
+        _.forOwn(mapping, function (fieldMapping, fieldName) {
           if (obj[fieldName] != null) {
-            body.fields[fieldName] = obj[fieldName];
+            body[fieldName] = obj[fieldName];
           }
         });
 
         if (obj.searchSource) {
-          body.searchSourceJSON = JSON.stringify(obj.searchSource);
+          body.kibanaSavedObjectMeta = {
+            searchSourceJSON: JSON.stringify(obj.searchSource)
+          };
         }
 
+        // ensure that the docSource has the current obj.id
+        docSource.id(obj.id);
+
+        // index the document
         return docSource.doIndex(body).then(function (id) {
+          // ensure that the object has the potentially new id
           obj.id = id;
           return id;
         });
