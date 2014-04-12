@@ -19,20 +19,18 @@ define(function (require) {
     };
 
     this.find = function (searchString) {
-      var query = !searchString ? { match_all: {} } : {
-        fuzzy_like_this : {
-          fields: ['title', 'description'],
-          like_text: searchString,
-          fuzziness: 2,
-          max_query_terms: 12
-        }
-      };
-
       return es.search({
         index: configFile.kibanaIndex,
         type: 'search',
         body: {
-          query: query
+          query: {
+            multi_match: {
+              query: searchString || '',
+              type: 'phrase_prefix',
+              fields: ['title^3', 'description'],
+              zero_terms_query: 'all'
+            }
+          }
         }
       })
       .then(function (resp) {
