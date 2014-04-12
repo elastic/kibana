@@ -64,7 +64,7 @@ define(function (require) {
       // max length for summaries in the table
       maxSummaryLength: 100,
       // Index to match
-      index: 'logstash-*',
+      index: config.get('defaultIndex'),
       timefield: '@timestamp',
       savedSearch: savedSearch
     };
@@ -89,8 +89,7 @@ define(function (require) {
     $scope.interval = intervals[0];
 
     // the index to use when they don't specify one
-    config.$watch('discover.defaultIndex', function (val) {
-      if (!val) return config.set('discover.defaultIndex', '_all');
+    $scope.$on('change:config.defaultIndex', function (event, val) {
       if (!$scope.opts.index) {
         $scope.opts.index = val;
         $scope.fetch();
