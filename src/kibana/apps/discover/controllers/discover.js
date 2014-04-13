@@ -131,23 +131,19 @@ define(function (require) {
     // with the results
     searchSource.onResults().then(function onResults(resp) {
       $scope.rows = resp.hits.hits;
-      $scope.chart = {rows: [{columns: [{
+      $scope.chart = !!resp.aggregations ? {rows: [{columns: [{
         label: 'Events over time',
         xAxisLabel: 'DateTime',
         yAxisLabel: 'Hits',
-      }]}]};
-
-      if (!!resp.aggregations) {
-        $scope.chart.layers = [
+        layers: [
           {
-            key: 'time series chart',
+            key: 'somekey',
             values: _.map(resp.aggregations.events.buckets, function (bucket) {
               return { y: bucket.doc_count, x: bucket.key_as_string };
             })
           }
-        ];
-      }
-
+        ]
+      }]}]} : undefined;
       return searchSource.onResults().then(onResults);
     }).catch(function (err) {
       console.log('An error');
