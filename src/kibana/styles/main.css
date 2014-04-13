@@ -6796,6 +6796,15 @@ kbn-table th:hover .table-header-sortchange {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.sidebar-container .sidebar-list .sidebar-item .sidebar-item-title {
+  padding: 5px 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sidebar-container .sidebar-list .sidebar-item .sidebar-item-title.full-title {
+  white-space: normal;
+}
 .sidebar-container .sidebar-list .sidebar-item .sidebar-item-title:hover,
 .sidebar-container .sidebar-list .sidebar-item .sidebar-item-title:hover .text-muted,
 .sidebar-container .sidebar-list .sidebar-item .active {

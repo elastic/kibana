@@ -77,6 +77,7 @@ define(function (require) {
       });
     };
 
+    // TODO: Resolve this in the routes, otherwise the warning will show for a moment;
     $scope.getPatterns = function (pattern) {
       var source = courier.createSource('search').index(configFile.kibanaIndex).type('mapping');
       source.query({match_all: {}})
