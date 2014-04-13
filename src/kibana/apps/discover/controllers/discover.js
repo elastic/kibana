@@ -289,7 +289,11 @@ define(function (require) {
       operation = operation || '+';
 
       _.each(value, function (clause) {
-        $scope.state.query = $scope.state.query + ' ' + operation + field + ':"' + addSlashes(clause) + '"';
+        var filter = field + ':"' + addSlashes(clause) + '"';
+        var regex = '[\+-]' + regexEscape(filter) + '\\s*';
+
+        $scope.state.query = $scope.state.query.replace(new RegExp(regex), '') +
+          ' ' + operation + filter;
       });
 
       $scope.fetch();
@@ -328,6 +332,7 @@ define(function (require) {
       }
     }
 
+    // TODO: Move to utility class
     var addSlashes = function (str) {
       if (!_.isString(str)) return str;
       str = str.replace(/\\/g, '\\\\');
@@ -335,6 +340,12 @@ define(function (require) {
       str = str.replace(/\"/g, '\\"');
       str = str.replace(/\0/g, '\\0');
       return str;
+    };
+
+    // TODO: Move to utility class
+    // https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript
+    var regexEscape = function (str) {
+      return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     };
 
     init();
