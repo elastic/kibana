@@ -22,7 +22,7 @@ define(function (require) {
       savedSearch: function (savedSearches, $route) {
         return savedSearches.get($route.current.params.id);
       },
-      patternList: function (es, configFile) {
+      patternList: function (es, configFile, $location, $q) {
         // TODO: This is inefficient because it pulls down all of the cached mappings for every
         // configured pattern instead of only the currently selected one.
         return es.search({
@@ -64,10 +64,6 @@ define(function (require) {
     /* Manage state & url state */
     var initialQuery = searchSource.get('query');
 
-    function init() {
-      setFields(_.findLast($scope.opts.patternList, {_id: $scope.opts.index})._source);
-      updateDataSource();
-    }
 
     function loadState() {
       $scope.state = state.get();
@@ -80,6 +76,19 @@ define(function (require) {
     }
 
     loadState();
+
+    // Check that we have any index patterns before going further, and that index being requested
+    // exists.
+    if (!$route.current.locals.patternList.length ||
+      !_.find($route.current.locals.patternList, {_id: $scope.state.index})) {
+      $location.path('/settings/indices');
+      return;
+    }
+
+    function init() {
+      setFields();
+      updateDataSource();
+    }
 
     $scope.opts = {
       // number of records to fetch, then paginate through
@@ -195,7 +204,7 @@ define(function (require) {
         delete $scope.fields;
         delete $scope.columns;
 
-        setFields(_.findLast($scope.opts.patternList, {_id: $scope.opts.index})._source);
+        setFields();
 
         // clear the columns and fields, then refetch when we do a savedSearch
         //$scope.state.columns = $scope.fields = null;
@@ -242,7 +251,9 @@ define(function (require) {
       return obj;
     }
 
-    function setFields(fields) {
+    function setFields() {
+      var fields = _.findLast($scope.opts.patternList, {_id: $scope.opts.index})._source;
+
       var currentState = _.transform($scope.fields || [], function (current, field) {
         current[field.name] = {
           display: field.display

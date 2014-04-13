@@ -23,7 +23,7 @@ define(function (require) {
       controller: function ($scope) {
 
         $scope.headerClass = function (column) {
-          //var sort = [0,0];
+          if (!$scope.getSort) return [];
           var sort = $scope.getSort();
           if (column === sort[0]) {
             return ['fa', sort[1] === 'asc' ? 'fa-sort-up' : 'fa-sort-down'];
