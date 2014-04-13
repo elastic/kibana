@@ -74,7 +74,8 @@ define(function (require) {
       $scope.state = _.defaults($scope.state, {
         query: initialQuery ? initialQuery.query_string.query : '',
         columns: ['_source'],
-        sort: ['_score', 'desc']
+        sort: ['_score', 'desc'],
+        index: config.get('defaultIndex')
       });
     }
 
@@ -86,7 +87,7 @@ define(function (require) {
       // max length for summaries in the table
       maxSummaryLength: 100,
       // Index to match
-      index: config.get('defaultIndex'),
+      index: $scope.state.index,
       savedSearch: savedSearch,
       patternList: $route.current.locals.patternList
     };
@@ -123,6 +124,8 @@ define(function (require) {
       updateDataSource();
       $scope.fetch();
     });
+
+    $scope.$watchCollection('state', state.set);
 
     // Bind a result handler. Any time scope.fetch() is executed this gets called
     // with the results
@@ -187,6 +190,8 @@ define(function (require) {
       if ($scope.opts.index !== searchSource.get('index')) {
         // set the index on the savedSearch
         searchSource.index($scope.opts.index);
+
+        $scope.state.index = $scope.opts.index;
         delete $scope.fields;
         delete $scope.columns;
 
@@ -225,12 +230,7 @@ define(function (require) {
     $scope.fetch = function () {
       updateDataSource();
       // fetch just this savedSearch
-      $scope.updateState();
       courier.fetch();
-    };
-
-    $scope.updateState = function () {
-      state.set($scope.state);
     };
 
     // This is a hacky optimization for comparing the contents of a large array to a short one.
@@ -326,8 +326,6 @@ define(function (require) {
       if (!$scope.state.columns.length) {
         $scope.toggleField('_source');
       }
-
-      $scope.updateState();
     }
 
     var addSlashes = function (str) {
