@@ -21,6 +21,21 @@ define(function (require) {
     resolve: {
       savedSearch: function (savedSearches, $route) {
         return savedSearches.get($route.current.params.id);
+      },
+      patternList: function (es, configFile) {
+        // TODO: This is inefficient because it pulls down all of the cached mappings for every
+        // configured pattern instead of only the currently selected one.
+        return es.search({
+          index: configFile.kibanaIndex,
+          type: 'mapping',
+          size: 50000,
+          body: {
+            query: {match_all: {}},
+          }
+        })
+        .then(function (res) {
+          return res.hits.hits;
+        });
       }
     }
   });
@@ -34,18 +49,25 @@ define(function (require) {
     { display: 'Yearly', val: 'yearly' }
   ];
 
-  app.controller('discover', function ($scope, config, $q, $route, savedSearches, courier, createNotifier, $location, state) {
+  app.controller('discover', function ($scope, config, $q, $route, savedSearches, courier, createNotifier, $location,
+    state, es, configFile) {
     var notify = createNotifier({
       location: 'Discover'
     });
 
     // the saved savedSearch
     var savedSearch = $route.current.locals.savedSearch;
+
     // the actual courier.SearchSource
     var searchSource = savedSearch.searchSource;
 
     /* Manage state & url state */
     var initialQuery = searchSource.get('query');
+
+    function init() {
+      setFields(_.findLast($scope.opts.patternList, {_id: $scope.opts.index})._source);
+      updateDataSource();
+    }
 
     function loadState() {
       $scope.state = state.get();
@@ -65,8 +87,8 @@ define(function (require) {
       maxSummaryLength: 100,
       // Index to match
       index: config.get('defaultIndex'),
-      timefield: '@timestamp',
-      savedSearch: savedSearch
+      savedSearch: savedSearch,
+      patternList: $route.current.locals.patternList
     };
 
     $scope.opts.saveDataSource = function () {
@@ -95,12 +117,16 @@ define(function (require) {
         $scope.fetch();
       }
     });
+        // the index to use when they don't specify one
+    $scope.$watch('opts.index', function (val) {
+      if (!val) return;
+      updateDataSource();
+      $scope.fetch();
+    });
 
     // Bind a result handler. Any time scope.fetch() is executed this gets called
     // with the results
     searchSource.onResults().then(function onResults(resp) {
-      if (!$scope.fields) getFields();
-
       $scope.rows = resp.hits.hits;
       $scope.chart = {rows: [{columns: [{
         label: 'Events over time',
@@ -161,11 +187,14 @@ define(function (require) {
       if ($scope.opts.index !== searchSource.get('index')) {
         // set the index on the savedSearch
         searchSource.index($scope.opts.index);
+        delete $scope.fields;
+        delete $scope.columns;
+
+        setFields(_.findLast($scope.opts.patternList, {_id: $scope.opts.index})._source);
+
         // clear the columns and fields, then refetch when we do a savedSearch
         //$scope.state.columns = $scope.fields = null;
       }
-
-      if (!$scope.fields) getFields();
 
       var sort = {};
       sort[$scope.state.sort[0]] = $scope.state.sort[1];
@@ -177,16 +206,20 @@ define(function (require) {
             query: $scope.state.query
           }
         })
-        .sort([sort])
+        .sort([sort]);
+
+      if (!!$scope.opts.timefield) {
+        searchSource
         .aggs({
           events: {
             date_histogram: {
-              field: '@timestamp',
+              field: $scope.opts.timefield,
               interval: '12h',
               format: 'yyyy-MM-dd'
             }
           }
         });
+      }
     }
 
     $scope.fetch = function () {
@@ -209,56 +242,45 @@ define(function (require) {
       return obj;
     }
 
-    var activeGetFields;
-    function getFields() {
-      var defer = $q.defer();
-
-      if (activeGetFields) {
-        activeGetFields.then(function () {
-          defer.resolve();
-        });
-        return;
-      }
-
+    function setFields(fields) {
       var currentState = _.transform($scope.fields || [], function (current, field) {
         current[field.name] = {
           display: field.display
         };
       }, {});
 
-      searchSource
-        .getFields()
-        .then(function (fields) {
-          if (!fields) return;
+      if (!fields) return;
 
+      var columnObjects = arrayToKeys($scope.state.columns);
 
-          var columnObjects = arrayToKeys($scope.state.columns);
+      $scope.fields = [];
+      $scope.state.columns = $scope.state.columns || [];
 
-          $scope.fields = [];
-          $scope.state.columns = $scope.state.columns || [];
+      // Inject source into list;
+      $scope.fields.push({name: '_source', type: 'source', display: false});
 
-          // Inject source into list;
-          $scope.fields.push({name: '_source', type: 'source', display: false});
+      _(fields)
+        .keys()
+        .sort()
+        .each(function (name) {
+          var field = fields[name];
+          field.name = name;
 
-          _(fields)
-            .keys()
-            .sort()
-            .each(function (name) {
-              var field = fields[name];
-              field.name = name;
+          _.defaults(field, currentState[name]);
+          $scope.fields.push(_.defaults(field, {display: columnObjects[name] || false}));
+        });
 
-              _.defaults(field, currentState[name]);
-              $scope.fields.push(_.defaults(field, {display: columnObjects[name] || false}));
-            });
+      // TODO: timefield should be associated with the index pattern, this is a hack
+      // to pick the first date field and use it.
+      var timefields = _.find($scope.fields, {type: 'date'});
+      if (!!timefields) {
+        $scope.opts.timefield = timefields.name;
+      } else {
+        delete $scope.opts.timefield;
+      }
 
-          refreshColumns();
+      refreshColumns();
 
-          defer.resolve();
-        }, defer.reject);
-
-      return defer.promise.then(function () {
-        activeGetFields = null;
-      });
     }
 
     // TODO: On array fields, negating does not negate the combination, rather all terms
@@ -291,14 +313,6 @@ define(function (require) {
       refreshColumns();
     };
 
-    $scope.refreshFieldList = function () {
-      searchSource.clearFieldCache(function () {
-        getFields().then(function () {
-          $scope.fetch();
-        });
-      });
-    };
-
     function refreshColumns() {
       // Get all displayed field names;
       var fields = _.pluck(_.filter($scope.fields, function (field) {
@@ -325,7 +339,7 @@ define(function (require) {
       return str;
     };
 
-    updateDataSource();
+    init();
     $scope.$emit('application.load');
   });
 });
