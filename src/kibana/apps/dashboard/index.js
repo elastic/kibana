@@ -45,7 +45,7 @@ define(function (require) {
   });
 
   app.controller('dashboard', function ($scope, $route, $routeParams, $rootScope, $location,
-    Promise, es, configFile, createNotifier) {
+    Promise, es, configFile, createNotifier, courier) {
 
     var notify = createNotifier({
       location: 'Dashboard'
@@ -80,7 +80,7 @@ define(function (require) {
       if (query === void 0) return;
 
       if (_.isString(query) && query.length > 0) {
-        query = {match: {title: {query: query, type: 'phrase_prefix'}}};
+        query = {wildcard: {title: query + '*'}};
       } else {
         query = {match_all: {}};
       }
@@ -120,15 +120,21 @@ define(function (require) {
     };
 
     $scope.save = function () {
-      dash.id = dash.title;
-      dash.panelsJSON = JSON.stringify($scope.gridControl.serializeGrid() || []);
+      var doc = courier.createSource('doc')
+        .index(configFile.kibanaIndex)
+        .type('dashboard')
+        .id($scope.dash.title);
 
-      return dash.save()
-      .then(function (res) {
-        if (dash.id !== $routeParams.id) {
-          $location.url('/dashboard/' + encodeURIComponent(dash.id));
+      // TODO: If a dashboard is deleted from kibana4-int, and we try to save another dashboard with
+      // the same name later, it fails due to a version conflict.
+      doc.doIndex({
+        title: dash.title,
+        panelsJSON: JSON.stringify($scope.gridControl.serializeGrid())
+      })
+      .then(function () {
+        if ($scope.dash.title !== $routeParams.id) {
+          $location.url('/dashboard/' + encodeURIComponent($scope.dash.title));
         }
-        return true;
       })
       .catch(notify.fatal);
     };
