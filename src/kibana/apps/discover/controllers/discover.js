@@ -135,15 +135,19 @@ define(function (require) {
         label: 'Events over time',
         xAxisLabel: 'DateTime',
         yAxisLabel: 'Hits',
-        layers: [
+      }]}]};
+
+      if (!!resp.aggregations) {
+        $scope.chart.layers = [
           {
-            key: 'somekey',
+            key: 'time series chart',
             values: _.map(resp.aggregations.events.buckets, function (bucket) {
               return { y: bucket.doc_count, x: bucket.key_as_string };
             })
           }
-        ]
-      }]}]};
+        ];
+      }
+
       return searchSource.onResults().then(onResults);
     }).catch(function (err) {
       console.log('An error');
@@ -290,7 +294,7 @@ define(function (require) {
 
       _.each(value, function (clause) {
         var filter = field + ':"' + addSlashes(clause) + '"';
-        var regex = '[\+-]' + regexEscape(filter) + '\\s*';
+        var regex = '[\\+-]' + regexEscape(filter) + '\\s*';
 
         $scope.state.query = $scope.state.query.replace(new RegExp(regex), '') +
           ' ' + operation + filter;
