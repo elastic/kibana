@@ -50,18 +50,17 @@ define(function (require) {
      */
     config.init = _.once(function () {
       notify.lifecycle('config init');
-      return setup.bootstrap().then(function () {
-        return doc.fetch();
-      })
-      .then(function useConfig(resp) {
-        if (!resp.found) {
-          config._unsaved = true;
-          return doc.doIndex({}).then(useConfig);
-        }
+      return setup.bootstrap().then(function getDoc() {
+        return doc.fetch()
+        .then(function (resp) {
+          if (!resp.found) {
+            return doc.doIndex({}).then(getDoc);
+          }
 
-        vals = _.defaults({}, resp._source || {}, defaults);
+          vals = _.defaults({}, resp._source || {}, defaults);
 
-        notify.lifecycle('config init', true);
+          notify.lifecycle('config init', true);
+        });
       });
     });
 
