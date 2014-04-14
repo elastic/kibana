@@ -58,9 +58,10 @@ define(function (require) {
           }
 
           vals = _.defaults({}, resp._source || {}, defaults);
-
-          notify.lifecycle('config init', true);
         });
+      })
+      .finally(function () {
+        notify.lifecycle('config init', true);
       });
     });
 

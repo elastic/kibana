@@ -48,7 +48,7 @@ define(function (require) {
           throw tmplError(err, 'Unable to check for Kibana index "<%= configFile.kibanaIndex %>"');
         })
         .finally(function () {
-          notify.lifecycle('kibana index check', kibanaIndexExists);
+          notify.lifecycle('kibana index check', true);
         });
       }
 
@@ -79,6 +79,15 @@ define(function (require) {
         })
         .catch(function (err) {
           throw tmplError(err, 'Unable to create Kibana index "<%= configFile.kibanaIndex %>"');
+        })
+        .then(function () {
+          return es.cluster.health({
+            waitForStatus: 'yellow',
+            index: configFile.kibanaIndex
+          });
+        })
+        .catch(function (err) {
+          throw tmplError(err, 'Waiting for Kibana index "<%= configFile.kibanaIndex %>" to come online failed');
         })
         .finally(function () {
           notify.lifecycle('create kibana index', true);
