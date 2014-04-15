@@ -22,7 +22,9 @@ define(function (require) {
       }
       return array;
     },
-    flattenWith: function (dot, nestedObj) {
+    // NOTE: The flatten behavior here works if you don't need to keep a reference to the
+    // original value
+    flattenWith: function (dot, nestedObj, keepArrays) {
       var key; // original key
       var stack = []; // track key stack
       var flatObj = {};

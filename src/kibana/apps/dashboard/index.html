@@ -2,13 +2,8 @@
   <nav class="navbar navbar-default navbar-static-top">
     <div class="container-fluid">
       <div class="navbar-header">
-        <span class="navbar-brand pull-left" ng-click="editingTitle = true" ng-hide="editingTitle">
+        <span class="navbar-brand pull-left">
           {{dash.title}}
-        </span>
-        <span class="pull-left" ng-show="editingTitle">
-          <form class="navbar-form" ng-submit="editingTitle = false">
-            <input type="text" ng-model="dash.title" class="form-control"/>
-          </form>
         </span>
       </div>
 
