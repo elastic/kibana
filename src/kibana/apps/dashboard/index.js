@@ -1,12 +1,14 @@
 define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
+  var ConfigTemplate = require('utils/config_template');
 
   require('css!./styles/main.css');
   require('directives/config');
   require('courier/courier');
   require('config/config');
   require('notify/notify');
+
 
   require('./directives/grid');
   require('./directives/panel');
@@ -20,11 +22,6 @@ define(function (require) {
     'kibana/notify',
     'kibana/services'
   ]);
-
-  var configTemplates = {
-    save: require('text!./partials/save_dashboard.html'),
-    load: require('text!./partials/load_dashboard.html')
-  };
 
   require('routes')
   .when('/dashboard', {
@@ -99,21 +96,19 @@ define(function (require) {
     };
     $scope.$watch('configurable.input.search', dashboardSearch);
 
-    var toggleConfigTemplate = function (name) {
-      var html = configTemplates[name];
-      // Close if already open
-      $scope.configTemplate = ($scope.configTemplate === html) ? void 0 : html;
-      return !!$scope.configTemplate;
-    };
+    $scope.configTemplate = new ConfigTemplate({
+      save: require('text!./partials/save_dashboard.html'),
+      load: require('text!./partials/load_dashboard.html')
+    });
 
     $scope.openSave = function () {
-      var open = toggleConfigTemplate('save');
-      $scope.configSubmit = $scope.save;
+      if ($scope.configTemplate.toggle('save')) {
+        $scope.configSubmit = $scope.save;
+      }
     };
 
     $scope.openLoad = function () {
-      var open = toggleConfigTemplate('load');
-      if (open) {
+      if ($scope.configTemplate.toggle('load')) {
         dashboardSearch($scope.input.search || '');
         $scope.configSubmit = null;
       }
