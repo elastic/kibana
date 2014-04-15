@@ -1,6 +1,7 @@
 define(function (require) {
   var app = require('modules').get('app/visualize');
   var _ = require('lodash');
+  var aggs = require('../saved_visualizations/_aggs');
 
   var templates = {
     orderAndSize: require('text!../partials/controls/order_and_size.html'),
@@ -8,7 +9,7 @@ define(function (require) {
     globalLocal: require('text!../partials/controls/global_local.html')
   };
 
-  app.directive('visConfigControls', function ($compile, visConfigCategories, aggs) {
+  app.directive('visConfigControls', function ($compile, visConfigCategories) {
     return {
       restrict: 'E',
       scope: {

@@ -1,7 +1,6 @@
 define(function (require) {
   require('css!./styles/main.css');
 
-  require('./controllers/wizard');
   require('./controllers/editor');
 
   require('./directives/config_category');
@@ -10,13 +9,13 @@ define(function (require) {
 
   require('routes')
   .when('/visualize', {
-    template: require('text!./wizard.html')
+    redirectTo: '/visualize/histogram'
   })
   .when('/visualize/:type/:id?', {
-    template: require('text!./editor.html'),
+    template: require('text!./index.html'),
     resolve: {
-      vis: function ($route, savedVis) {
-        return savedVis.get($route.current.params.type, $route.current.params.id);
+      vis: function ($route, savedVisualizations) {
+        return savedVisualizations.get($route.current.params.type, $route.current.params.id);
       }
     }
   });

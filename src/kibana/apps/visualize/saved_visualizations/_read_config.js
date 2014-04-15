@@ -42,9 +42,14 @@ define(function (require) {
         field: config.field
       };
 
-      // copy over the row if this is a split
-      if (config.categoryName === 'split') {
+      // copy over other properties based ont he category
+      switch (config.categoryName) {
+      case 'split':
         validated.row = !!config.row;
+        break;
+      case 'group':
+        validated.global = !!config.global;
+        break;
       }
 
       // this function will move valus from config.* to validated.aggParams.* when they are

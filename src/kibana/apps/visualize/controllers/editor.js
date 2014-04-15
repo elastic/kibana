@@ -21,11 +21,11 @@ define(function (require) {
 
     $scope.refreshFields = function () {
       $scope.fields = null;
-      vis.dataSource.clearFieldCache().then(getFields, notify.error);
+      vis.searchSource.clearFieldCache().then(getFields, notify.error);
     };
 
     function getFields() {
-      return vis.dataSource.getFields()
+      return vis.searchSource.getFields()
       .then(function (fieldsHash) {
         // create a sorted list of the fields for display purposes
         $scope.fields = _(fieldsHash)
@@ -49,8 +49,8 @@ define(function (require) {
     $scope.visConfigCategories = visConfigCategories;
 
     $scope.$on('change:config.defaultIndex', function () {
-      if (!vis.dataSource.get('index')) {
-        vis.dataSource.index(config.get('defaultIndex'));
+      if (!vis.searchSource.get('index')) {
+        vis.searchSource.index(config.get('defaultIndex'));
         getFields();
       }
     });
@@ -73,7 +73,8 @@ define(function (require) {
       if (!config.dimension) {
         // use the global aggregation if we don't have any dimensions
         config.dimension = [{
-          agg: 'global'
+          agg: 'global',
+          aggParams: {}
         }];
       }
 
@@ -100,7 +101,7 @@ define(function (require) {
       notify.log('config', config);
       notify.log('aggs', dsl.aggs);
 
-      vis.dataSource.aggs(dsl.aggs);
+      vis.searchSource.aggs(dsl.aggs);
       notify.event('update data source', true);
     };
 
@@ -109,7 +110,7 @@ define(function (require) {
      *********/
     $scope.doVisualize = function () {
       updateDataSource();
-      vis.dataSource.fetch();
+      vis.searchSource.fetch();
     };
     $scope.doSave = function () {
       updateDataSource();
