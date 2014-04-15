@@ -17,7 +17,7 @@ define(function (require) {
       scope: {
         columns: '=',
         getSort: '=',
-        setSort: '='
+        setSort: '=',
       },
       template: headerHtml,
       controller: function ($scope) {
@@ -115,7 +115,10 @@ define(function (require) {
 
         // itterate the columns and rows, rebuild the table's html
         function render() {
+          // Close all rows
+          opened = [];
 
+          // Clear the body
           $body.empty();
           if (!$scope.rows || $scope.rows.length === 0) return;
           if (!$scope.columns || $scope.columns.length === 0) return;
@@ -140,7 +143,7 @@ define(function (require) {
           function forEachRow(row, i, currentChunk) {
             var id = rowId(row);
             var $summary = createSummaryRow(row, id);
-            var $details = createDetailsRow(row, id);
+            var $details = $('<tr></tr>');
             // cursor is the end of current selection, so
             // subtract the remaining queue size, then the
             // size of this chunk, and add the current i
@@ -236,13 +239,23 @@ define(function (require) {
           );
         };
 
-        var topLevelDetails = '_index _type _id'.split(' ');
         function createDetailsRow(row, id) {
           var $tr = $(document.createElement('tr'));
           return appendDetailsToRow($tr, row, id);
         }
 
         function appendDetailsToRow($tr, row, id) {
+          var topLevelDetails = ['_index', '_type', '_id'];
+
+          var rowFlat = _.flattenWith('.', row._source, true);
+          /*
+          _.each(topLevelDetails, function (field) {
+            rowFlat[field] = row[field];
+          });
+          */
+          console.log(rowFlat);
+
+
           // we need a td to wrap the details table
           var containerTd = document.createElement('td');
           containerTd.setAttribute('colspan', $scope.columns.length);
@@ -265,7 +278,7 @@ define(function (require) {
 
           // itterate each row and append it to the tbody
           // TODO: This doesn't work since _source is not flattened
-          _(row._source)
+          _(rowFlat)
             .keys()
             .concat(topLevelDetails)
             .sort()
