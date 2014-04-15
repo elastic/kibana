@@ -33,7 +33,7 @@ function Add-IISMimeType
   }
 }
 
-function Remove-WebSite
+function Remove-Site
 {
 	param([string] $webSite)
 
@@ -65,6 +65,6 @@ Add-ServerRole Web-Server
 
 Import-Module WebAdministration
 
-Remove-WebSite "Default Web Site"
+Remove-Site "Default Web Site"
 
 Add-IISMimeType "application/json" ".json"
