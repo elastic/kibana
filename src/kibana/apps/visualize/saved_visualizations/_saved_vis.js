@@ -4,13 +4,17 @@ define(function (require) {
 
   var configCats = require('./_config_categories');
   var aggs = require('./_aggs');
+  var typeDefs = require('./_type_defs');
 
   require('services/root_search');
 
   var module = require('modules').get('kibana/services');
 
-  module.factory('Vis', function (config, $injector, SavedObject, rootSearch, Promise, savedSearches) {
-    function Vis(id) {
+  module.factory('SavedVis', function (config, $injector, SavedObject, rootSearch, Promise, savedSearches) {
+    function SavedVis(type, id) {
+      var typeDef = typeDefs.byName[type];
+      if (!typeDef) throw new Error('Unknown visualization type: "' + type + '"');
+
       SavedObject.call(this, {
         type: 'visualization',
 
@@ -18,25 +22,29 @@ define(function (require) {
 
         mapping: {
           stateJSON: 'string',
-          savedSearchId: 'string'
+          savedSearchId: 'string',
+          typeName: 'string',
         },
 
         defaults: {
-          stateJSON: '[]'
+          stateJSON: '{}',
+          typeName: type,
         },
 
         searchSource: true,
 
-        afterESResp: function setVisState(resp) {
+        afterESResp: function setVisState() {
           var vis = this;
           var state = {};
 
           if (vis.stateJSON) try { state = JSON.parse(vis.stateJSON); } catch (e) {}
 
-          var parent = vis.savedSearch;
-          if (!parent || parent.id !== vis.savedSearchId) {
-            // returns a promise
-            parent = savedSearches.get(vis.savedSearchId);
+          var parent = rootSearch;
+          if (vis.savedSearchId) {
+            if (!vis.savedSearch || vis.savedSearch.id !== vis.savedSearchId) {
+              // returns a promise
+              parent = savedSearches.get(vis.savedSearchId);
+            }
           }
 
           configCats.forEach(function (category) {
@@ -53,7 +61,11 @@ define(function (require) {
           return Promise.cast(parent)
           .then(function (parent) {
             vis.savedSearch = parent;
-            vis.searchSource.inherits(vis.savedSearch);
+
+            vis.searchSource
+              .inherits(vis.savedSearch)
+              .size(0);
+
             vis._fillConfigsToMinimum();
             // get and cache the field list
             return vis.searchSource.getFields();
@@ -85,6 +97,14 @@ define(function (require) {
         // satify the min count for each category
         configCats.fetchOrder.forEach(function (category) {
           var myCat = vis[category.name];
+
+          if (!myCat) {
+
+            myCat = _.defaults(typeDef.config[category.name] || {}, category.defaults);
+            myCat.configs = [];
+            vis[category.name] = myCat;
+          }
+
           if (myCat.configs.length < myCat.min) {
             _.times(myCat.min - myCat.configs.length, function () {
               vis.addConfig(category.name);
@@ -107,8 +127,8 @@ define(function (require) {
        */
       this.buildChartDataFromResponse = $injector.invoke(require('./_build_chart_data'));
     }
-    inherits(Vis, SavedObject);
+    inherits(SavedVis, SavedObject);
 
-    return Vis;
+    return SavedVis;
   });
 });

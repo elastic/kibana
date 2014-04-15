@@ -34,7 +34,7 @@ define(function (require) {
       // default field values, assigned when the source is loaded
       var defaults = config.defaults || {};
 
-      var afterESResp = config.afterESResp || null;
+      var afterESResp = config.afterESResp || _.noop;
 
       // optional search source which this object configures
       obj.searchSource = config.searchSource && courier.createSource('search');
@@ -97,7 +97,7 @@ define(function (require) {
           if (!obj.id) {
             // just assign the defaults and be done
             _.assign(obj, defaults);
-            return false;
+            return afterESResp.call(obj);
           }
 
           // fetch the object from ES
@@ -123,7 +123,7 @@ define(function (require) {
               obj.searchSource.set(state);
             }
 
-            return Promise.cast(afterESResp && afterESResp.call(obj, resp))
+            return Promise.cast(afterESResp.call(obj, resp))
             .then(function () {
               // Any time obj is updated, re-call applyESResp
               docSource.onUpdate().then(applyESResp, notify.fatal);
