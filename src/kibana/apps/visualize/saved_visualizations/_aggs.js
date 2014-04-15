@@ -66,7 +66,8 @@ define(function (require) {
         }
       },
       makeLabel: function (params) {
-        var order = _.find(aggs.params.order.options, { val: params.order._count });
+        var agg = aggs.byName.terms;
+        var order = _.find(agg.params.order.options, { val: params.order._count });
         return order.display + ' ' + params.size + ' ' + params.field;
       }
     },
