@@ -21,6 +21,11 @@ work. IE9 and greater should work. IE8 does not.
 * A browser reachable Elasticsearch server. Port 9200 must be open, or a proxy configured to allow
 access to it.
 
+### Docs
+
+Documentation, panel options and tutorials can be found at 
+[http://www.elasticsearch.org/guide/en/kibana/current/](http://www.elasticsearch.org/guide/en/kibana/current/)
+
 ### Installation
 
 1. Download and extract [http://download.elasticsearch.org/kibana/kibana/kibana-latest.zip](http://download.elasticsearch.org/kibana/kibana/kibana-latest.zip) to your webserver.

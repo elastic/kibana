@@ -226,6 +226,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
       /** @scratch /panels/histogram/3
        * derivative:: Show each point on the x-axis as the change from the previous point
        */
+
       derivative    : false,
       /** @scratch /panels/histogram/3
        * tooltip object::
@@ -417,7 +418,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
                 interval: _interval,
                 start_date: _range && _range.from,
                 end_date: _range && _range.to,
-                fill_style: $scope.panel.derivative ? 'null' : 'minimal'
+                fill_style: $scope.panel.derivative ? 'null' : $scope.panel.zerofill ? 'minimal' : 'no'
               };
               time_series = new timeSeries.ZeroFilled(tsOpts);
               hits = 0;
@@ -772,8 +773,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
         var $tooltip = $('<div>');
         elem.bind("plothover", function (event, pos, item) {
           var group, value, timestamp, interval;
-          interval = scope.panel.legend ?
-            "" : " per " + (scope.panel.scaleSeconds ? '1s' : scope.panel.interval);
+          interval = " per " + (scope.panel.scaleSeconds ? '1s' : scope.panel.interval);
           if (item) {
             if (item.series.info.alias || scope.panel.tooltip.query_as_alias) {
               group = '<small style="font-size:0.9em;">' +
