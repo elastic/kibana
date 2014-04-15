@@ -140,7 +140,8 @@
                 View:
                 <a class="link" ng-class="{'strong':event.kibana.view == 'table'}" ng-click="event.kibana.view = 'table'">Table</a> /
                 <a class="link" ng-class="{'strong':event.kibana.view == 'json'}" ng-click="event.kibana.view = 'json'">JSON</a> /
-                <a class="link" ng-class="{'strong':event.kibana.view == 'raw'}" ng-click="event.kibana.view = 'raw'">Raw</a>
+                <a class="link" ng-class="{'strong':event.kibana.view == 'raw'}" ng-click="event.kibana.view = 'raw'">Raw</a> /
+                <a class="link" ng-href="{{event | shareLink}}">Share</a> 
                 <i class="link pull-right icon-chevron-up" ng-click="toggle_details(event)"></i>
               </span>
               <table class='table table-bordered table-condensed table-details' ng-switch-when="table">

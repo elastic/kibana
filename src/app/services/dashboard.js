@@ -296,6 +296,20 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
 
     var renderTemplate = function(json,params) {
       var _r;
+      var _json;
+      if(!json.match('ARGS\.(to|from|style|query)')) {
+        try {
+          _json = angular.fromJson(json);
+          _json.style = "{{ARGS.style || '" + _json.style + "'}}";
+          _json.services.filter.list[0].to = "{{ARGS.to || '" + _json.services.filter.list[0].to + "'}}";
+          _json.services.filter.list[0].from = "{{ARGS.from || '" + _json.services.filter.list[0].from + "'}}";
+          _json.services.query.list[0].query = "{{ARGS.query || '" + _json.services.query.list[0].query + "'}}";
+          json=angular.toJson(_json);
+        } catch(e) {
+          _json = false;
+        }
+      }
+
       _.templateSettings = {interpolate : /\{\{(.+?)\}\}/g};
       var template = _.template(json);
       var rendered = template({ARGS:params});
