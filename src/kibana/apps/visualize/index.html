@@ -1,6 +1,26 @@
-<div class="container-fluid">
-  <div ng-controller="VisualizeEditor">
-    <div class="row">
+ <div ng-controller="VisualizeEditor">
+  <nav class="navbar navbar-default navbar-static-top">
+    <div class="container-fluid">
+      <div class="navbar-header" ng-if="vis.title">
+        <span class="navbar-brand pull-left">
+          {{vis.title}}
+        </span>
+      </div>
+
+      <ul class="nav navbar-nav pull-left">
+        <li><a ng-click="startOver()" class="navbar-link"><i class="fa fa-file-o"></i></a></li>
+        <li><a ng-click="toggleSave()" class="navbar-link"><i class="fa fa-save"></i></a></li>
+        <li><a ng-click="toggleLoad()" class="navbar-link"><i class="fa fa-folder-open"></i></a></li>
+        <li><a class="navbar-link" ng-click="doVisualize()"><i class="fa fa-refresh"></i></a></li>
+      </ul>
+    </div>
+  </nav>
+  <config
+    config-template="configTemplate"
+    config-object="conf">
+  </config>
+  <div class="container-fluid">
+    <div class="row vis-content">
       <div class="col-md-3">
         <form>
           <ul class="vis-config-panel">
@@ -12,8 +32,6 @@
               </vis-config-category>
             </li>
           </ul>
-          <button type="button" ng-click="doVisualize()" class="btn btn-primary">Visualize</button>
-          <button type="button" ng-click="doSave()" class="btn btn-primary">Save</button>
         </form>
       </div>
       <div class="col-md-9 vis-canvas">

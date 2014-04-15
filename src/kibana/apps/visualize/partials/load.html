@@ -1,0 +1,20 @@
+<form ng-submit="false" role="form">
+  <div class="form-group">
+    <label for="loadVisFilter">Filter</label>
+    <input class="form-control" name="loadVisFilter" type="text" ng-model="conf.loadVis.filter">
+  </div>
+</form>
+<ng-switch on="conf.loadVis.list.length">
+  <ul ng-switch-default class="media-list vis-load-list">
+    <li ng-repeat="saved in conf.loadVis.list" class="media">
+      <a ng-href="#{{saved.url}}" class="pull-left">
+        <img ng-class="'media-object vis-preview-' + saved.typeName">
+      </a>
+      <div class="media-body">
+        <a ng-href="#{{saved.url}}"><h4 class="media-heading">{{saved.title}}</h4></a>
+        <p ng-if="saved.description">{{saved.description}}</p>
+      </div>
+    </li>
+  </ul>
+  <p ng-switch-when="0">No matching visualizations</p>
+</ul>
