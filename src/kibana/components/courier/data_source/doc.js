@@ -55,7 +55,7 @@ define(function (require) {
      * @return {[type]}        [description]
      */
     DocSource.prototype.doIndex = function (body) {
-      return this._sendToEs(this._courier, 'index', true, body);
+      return this._sendToEs(this._courier, 'index', false, body);
     };
 
     /*****
