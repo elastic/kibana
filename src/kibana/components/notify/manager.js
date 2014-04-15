@@ -203,7 +203,7 @@ define(function (require) {
       content: formatMsg(msg, this.from),
       icon: 'warning',
       title: 'Warning',
-      lifetime: Infinity,
+      lifetime: 10000,
       actions: ['accept']
     }, cb);
   };
@@ -219,7 +219,7 @@ define(function (require) {
       content: formatMsg(msg),
       icon: 'info-circle',
       title: 'Debug',
-      lifetime: Infinity,
+      lifetime: 5000,
       actions: ['accept']
     }, cb);
   };
