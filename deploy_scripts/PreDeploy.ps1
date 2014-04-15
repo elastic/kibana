@@ -44,18 +44,18 @@ function Remove-WebSite
 	{
 		$siteName = $site.Name
 		Write-Host "  - Stopping site: $siteName"
-		Stop-WebSite -Name $siteName -ErrorAction:SilentlyContinue
+		Stop-WebSite -Name "$siteName" -ErrorAction:SilentlyContinue
 		Write-Host "  - Removing site: $siteName"
-		Remove-WebSite -Name $siteName
+		Remove-WebSite -Name "$siteName"
 	}
 
 	if($pool)
 	{
 		$poolName = $pool.Name
 		Write-Host "  - Stopping AppPool: $poolName"
-		Stop-WebAppPool -Name $poolName -ErrorAction:SilentlyContinue
+		Stop-WebAppPool -Name "$poolName" -ErrorAction:SilentlyContinue
 		Write-Host "  - Removing AppPool: $poolName"
-		Remove-WebAppPool -Name $poolName
+		Remove-WebAppPool -Name "$poolName"
 	}
 }
 
