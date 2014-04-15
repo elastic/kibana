@@ -126,16 +126,16 @@ function (angular, app, _, $, kbn) {
        * valuefield:: Terms_stats facet value field
        */
       valuefield  : '',
-        /**
-         * @scratch /panels/terms/5
-         * havingfield:: A javascript expression that will be evaluated against the term counter in order to show the row
-          */
-        havingfield: '',
-        /**
-         * @scratch /panels/terms/5
-         * columnLabel:: The label used in the table in order to give context for the table data
-         */
-        columnLabel: "Terms"
+      /**
+       * @scratch /panels/terms/5
+       * havingfield:: A javascript expression that will be evaluated against the term counter in order to show the row
+       */
+      havingfield : '',
+      /**
+       * @scratch /panels/terms/5
+       * columnLabel:: The label used in the table in order to give context for the table data
+       */
+      columnLabel: "Terms"
     };
 
     _.defaults($scope.panel,_d);
@@ -285,34 +285,37 @@ function (angular, app, _, $, kbn) {
               slice = { label : v.term, data : [[k,v.count]], actions: true};
             }
             if(scope.panel.tmode === 'terms_stats') {
-              if (scope.panel.havingfield === undefined || scope.panel.havingfield=="") {
-                  slice = { label : v.term, data : [[k,v[scope.panel.tstat]]], actions: true};
+              if (scope.panel.havingfield === undefined || scope.panel.havingfield==="") {
+                slice = { label : v.term, data : [[k,v[scope.panel.tstat]]], actions: true};
               } else {
-                 var addrow = false;
-                 var havingfield = scope.panel.havingfield;
-                 var evaluate = "";
-                 if (havingfield.indexOf("&")) {
-                    havingfield.replace("&&","&");
-                    var andCondition = havingfield.split("&");
-                    for(var d=0;d<andCondition.length;d++)
-                        evaluate+= " "+v[scope.panel.tstat]+andCondition[d]+" &&";
-                     evaluate = evaluate.substr(0,evaluate.length-2);
-                    addrow = (eval(evaluate))
-                 } else if (havingfield.indexOf("||")) {
-                    var andCondition = havingfield.split("||");
-                    for(var d=0;d<andCondition.length;d++)
-                        evaluate+= " "+v[scope.panel.tstat]+andCondition[d]+" ||";
-                    evaluate = evaluate.substr(0,evaluate.length-2);
-                    addrow = (eval(evaluate))
-                 } else {
-                    evaluate = v[scope.panel.tstat]+ havingfield;
-                    addrow = (eval(evaluate))
+                var addRow = false;
+                var havingfield = scope.panel.havingfield;
+                var evaluate = "";
+                var andCondition = "";
+                var d = 0;
+                if (havingfield.indexOf("&")) {
+                  havingfield.replace("&&","&");
+                  andCondition = havingfield.split("&");
+                  for(d=0;d<andCondition.length;d++){
+                    evaluate+= " "+v[scope.panel.tstat]+andCondition[d]+" &&";
                   }
-                  if (addrow){
-                    slice = { label :v.term, data : [[k,v[scope.panel.tstat]]], actions: true};
-                  } else {
-                    return;
+                  evaluate = evaluate.substr(0,evaluate.length-2);
+                } else if (havingfield.indexOf("||")) {
+                  andCondition = havingfield.split("||");
+                  for(d=0;d<andCondition.length;d++){
+                    evaluate+= " "+v[scope.panel.tstat]+andCondition[d]+" ||";
                   }
+                  evaluate = evaluate.substr(0,evaluate.length-2);
+                } else {
+                  evaluate = v[scope.panel.tstat]+ havingfield;
+                }
+                /*jslint evil: true */
+                addRow = (eval(evaluate));
+                if (addRow){
+                  slice = { label :v.term, data : [[k,v[scope.panel.tstat]]], actions: true};
+                } else {
+                  return;
+                }
               }
             }
             scope.data.push(slice);
