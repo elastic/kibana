@@ -1,9 +1,10 @@
 define(function (require) {
 
   var converters = require('./resp_converters/index');
+  var aggs = require('./_aggs');
 
   // private functionality for Vis.buildChartDataFromResp()
-  return function (createNotifier, aggs) {
+  return function (createNotifier) {
     var notify = createNotifier();
 
     return function (resp) {
@@ -151,6 +152,13 @@ define(function (require) {
       };
 
       if (resp.aggregations) {
+        if (!configs.length) {
+          configs.push({
+            categoryName: 'metric',
+            agg: aggs.byName.count.name,
+            label: aggs.byName.count.display
+          });
+        }
         splitAndFlatten(chartData, resp.aggregations);
       }
 

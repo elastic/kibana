@@ -11,6 +11,13 @@ define(function (require) {
     // index of y-axis
     var iY = _.findIndex(columns, { categoryName: 'metric'});
 
+    // when we don't have an x-axis, just push everything into '_all'
+    if (iX === -1) {
+      iX = columns.push({
+        label: ''
+      }) - 1;
+    }
+
     chart.xAxisLabel = columns[iX].label;
     chart.yAxisLabel = columns[iY].label;
 
@@ -38,7 +45,7 @@ define(function (require) {
       }
 
       s.values.push({
-        x: row[iX],
+        x: row[iX] || '_all',
         y: row[iY === -1 ? row.length - 1 : iY] // y-axis value
       });
     });
