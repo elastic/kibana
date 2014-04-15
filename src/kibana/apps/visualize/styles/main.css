@@ -68,55 +68,63 @@
 .modal-footer:after {
   clear: both;
 }
-.vis-config-panel {
+.vis-content {
+  padding: 15px 0;
+}
+.vis-content .vis-config-panel {
   padding: 0;
 }
-.vis-config-panel .panel-heading {
+.vis-content .vis-config-panel .panel-heading {
   position: relative;
 }
-.vis-config-panel .panel-heading button {
+.vis-content .vis-config-panel .panel-heading button {
   position: absolute;
   top: 6px;
   right: 7px;
   padding: 3px 8px;
 }
-.vis-config-panel .panel-body {
+.vis-content .vis-config-panel .panel-body {
   padding: 10px 0;
 }
-.vis-config-panel vis-config-editor {
+.vis-content .vis-config-panel vis-config-editor {
   display: block;
   border-top: 1px dashed #dddddd;
   padding: 10px 10px 0;
 }
-.vis-config-panel vis-config-editor:first-child {
+.vis-content .vis-config-panel vis-config-editor:first-child {
   border-top: none;
 }
-.vis-config-panel vis-config-editor .config-controls {
+.vis-content .vis-config-panel vis-config-editor .config-controls {
   float: right;
   margin-top: -2px;
 }
-.vis-config-panel vis-config-editor .config-controls button {
+.vis-content .vis-config-panel vis-config-editor .config-controls button {
   font-size: 10px;
   padding: 2px 4px;
   font-weight: 100;
 }
-.vis-config-panel > li {
+.vis-content .vis-config-panel > li {
   list-style: none;
 }
-.vis-config-panel .agg-config-interval td {
+.vis-content .vis-config-panel .agg-config-interval td {
   padding-left: 10px;
 }
-.vis-config-panel .agg-config-interval td:first-child {
+.vis-content .vis-config-panel .agg-config-interval td:first-child {
   padding-left: 0px;
 }
-.vis-canvas {
-  padding: 15px 0;
-}
-.vis-canvas visualization {
+.vis-content .vis-canvas visualization {
   display: block;
   background: black;
   height: 800px;
   width: 95%;
   margin: 0 auto;
   overflow: auto;
+}
+.vis-load-list .media-object {
+  width: 65px;
+  height: 65px;
+}
+.vis-preview-histogram {
+  background-image: url(../imgs/histogram.jpg);
+  background-size: contain;
 }

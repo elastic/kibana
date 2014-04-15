@@ -26,7 +26,15 @@ define(function (require) {
       link: function ($scope, element, attr) {
         $scope[attr.configObject] = $scope.configObject;
 
-        $scope.$watch('configTemplate.current || configTemplate', function (newTemplate, oldTemplate) {
+        var wrapTmpl = function (tmpl) {
+          if ($scope.configSubmit) {
+            return '<form role="form" class="container-fluid" ng-submit="configSubmit()">' + tmpl + '</form>';
+          } else {
+            return '<div class="container-fluid">' + tmpl + '</div>';
+          }
+        };
+
+        var render = function (newTemplate, oldTemplate) {
           var tmpl = $scope.configTemplate;
           if (tmpl instanceof ConfigTemplate) {
             tmpl = tmpl.toString();
@@ -34,16 +42,17 @@ define(function (require) {
 
           element.html(!tmpl ? '' : $compile('' +
             '<div class="config" ng-show="configTemplate">' +
-            '  <form role="form" class="container-fluid" ng-submit="configSubmit()">' +
-              tmpl +
-            '  </form>' +
+              wrapTmpl(tmpl) +
             '  <div class="config-close remove" ng-click="close()">' +
             '    <i class="fa fa-chevron-up"></i>' +
             '  </div>' +
             '</div>' +
             ''
           )($scope));
-        });
+        };
+
+        $scope.$watch('configSubmit', render);
+        $scope.$watch('configTemplate.current || configTemplate', render);
 
         $scope.close = function () {
           if (_.isFunction($scope.configClose)) $scope.configClose();

@@ -21,12 +21,16 @@ define(function (require) {
         id: id,
 
         mapping: {
+          title: 'string',
+          description: 'string',
           stateJSON: 'string',
           savedSearchId: 'string',
           typeName: 'string',
         },
 
         defaults: {
+          title: '',
+          description: '',
           stateJSON: '{}',
           typeName: type,
         },
