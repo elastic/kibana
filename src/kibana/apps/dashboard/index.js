@@ -80,7 +80,7 @@ define(function (require) {
       if (query === void 0) return;
 
       if (_.isString(query) && query.length > 0) {
-        query = {wildcard: {title: query + '*'}};
+        query = {wildcard: {title: '*' + query + '*'}};
       } else {
         query = {match_all: {}};
       }
@@ -125,13 +125,12 @@ define(function (require) {
         .type('dashboard')
         .id($scope.dash.title);
 
-      // TODO: If a dashboard is deleted from kibana4-int, and we try to save another dashboard with
-      // the same name later, it fails due to a version conflict.
       doc.doIndex({
         title: dash.title,
         panelsJSON: JSON.stringify($scope.gridControl.serializeGrid())
       })
       .then(function () {
+        notify.info('Saved Dashboard as "' + $scope.dash.title + '"');
         if ($scope.dash.title !== $routeParams.id) {
           $location.url('/dashboard/' + encodeURIComponent($scope.dash.title));
         }

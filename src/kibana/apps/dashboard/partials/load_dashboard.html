@@ -2,7 +2,7 @@
   <label>Filter Dashboards</label>
   <input type="text" ng-model="configurable.input.search" class="form-control"/>
 </div>
-<ul class="nav nav-pills">
+<ul class="nav nav-pills container-fluid">
   <li
     ng-repeat="res in configurable.searchResults | orderBy:'_source.title'"
     ng-class="{active: configurable.dashboard.id == res._id}">
