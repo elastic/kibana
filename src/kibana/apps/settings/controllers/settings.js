@@ -4,6 +4,7 @@ define(function (require) {
   var app = require('modules').get('app/settings');
 
   require('filters/start_from');
+  require('../services/index_patterns');
 
   var navHtml = require('text!../partials/nav.html');
 
@@ -37,16 +38,16 @@ define(function (require) {
   });
 
 
-  app.controller('settings', function ($scope, configFile, courier, createNotifier, $route, $routeParams, $location, es, config) {
+  app.controller('settings', function ($scope, courier, Notifier, $route, $location, es, config, indexPatterns) {
 
-    var notify = createNotifier({
+    var notify = new Notifier({
       location: 'Index Settings'
     });
 
     var init = function () {
       $scope.getPatterns();
       $scope.indices = {
-        id: $routeParams.id,
+        id: $route.current.params.id,
         table: {
           by: 'field',
           reverse: false,
@@ -62,52 +63,34 @@ define(function (require) {
     };
 
     var loadPattern = function (pattern) {
-      es.get({
-        index: configFile.kibanaIndex,
-        type: 'mapping',
-        id: pattern
+      return indexPatterns.getFields(pattern)
+      .then(function (fields) {
+        $scope.indices.mapping = fields;
       })
-      .then(function (resp) {
-        $scope.indices.mapping = _.map(resp._source, function (v, k) {
-          return {field: k, mapping: v};
-        });
-      })
-      .catch(function (err) {
+      .catch(function () {
         $location.path('/settings/indices');
       });
     };
 
     // TODO: Resolve this in the routes, otherwise the warning will show for a moment;
     $scope.getPatterns = function (pattern) {
-      var source = courier.createSource('search').index(configFile.kibanaIndex).type('mapping');
-      source.query({match_all: {}})
-        .fetch()
-        .then(function (resp) {
-          $scope.indices.patterns = _.map(resp.hits.hits, function (hit) {
-            return hit._id;
-          });
-        });
-      source.destroy();
+      return indexPatterns.getIds()
+      .then(function (ids) {
+        $scope.indices.patterns = ids;
+      });
     };
 
     $scope.refreshFields = function (pattern) {
-      var source = courier.createSource('search').index(pattern);
-      var mapping = source.clearFieldCache().then(function () {
-        $scope.addPattern(pattern);
+      return indexPatterns.delete(pattern)
+      .then(function () {
+        return indexPatterns.create(pattern);
       });
     };
 
     $scope.removePattern = function (pattern) {
-      es.delete({
-        index: configFile.kibanaIndex,
-        type: 'mapping',
-        id: pattern
-      })
-      .then(function (resp) {
-        es.indices.refresh({index: configFile.kibanaIndex})
-        .then(function () {
-          $location.path('/settings/indices');
-        });
+      indexPatterns.delete(pattern)
+      .then(function () {
+        $location.path('/settings/indices');
       })
       .catch(function (err) {
         $location.path('/settings/indices');
@@ -115,14 +98,9 @@ define(function (require) {
     };
 
     $scope.addPattern = function (pattern) {
-      var source = courier.createSource('search').index(pattern);
-      var mapping = source.getFields();
-      mapping.then(function (mapping) {
-        es.indices.refresh({index: configFile.kibanaIndex})
-        .then(function () {
-          $location.path('/settings/indices/' + pattern);
-          source.destroy();
-        });
+      indexPatterns.create(pattern)
+      .then(function () {
+        $location.path('/settings/indices/' + pattern);
       })
       .catch(function (err) {
         if (err.status >= 400) {
@@ -132,7 +110,8 @@ define(function (require) {
     };
 
     $scope.setDefaultPattern = function (pattern) {
-      config.set('defaultIndex', pattern).then(function () {
+      config.set('defaultIndex', pattern)
+      .then(function () {
         $scope.indices.default = pattern;
       });
     };

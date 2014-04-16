@@ -5,15 +5,19 @@ define(function (require) {
   var modules = require('modules');
   var module = modules.get('kibana/notify');
   var errors = require('./errors');
-  var NotifyManager = require('./manager');
-  var manager = new NotifyManager();
+  var Notifier = require('./_notifier');
+  var rootNotifier = new Notifier();
 
   require('./directives');
 
   module.factory('createNotifier', function () {
     return function (opts) {
-      return new NotifyManager(opts);
+      return new Notifier(opts);
     };
+  });
+
+  module.factory('Notifier', function () {
+    return Notifier;
   });
 
   /**
@@ -23,7 +27,7 @@ define(function (require) {
     .get('exceptionOverride')
     .factory('$exceptionHandler', function () {
       return function (exception, cause) {
-        manager.fatal(exception, cause);
+        rootNotifier.fatal(exception, cause);
       };
     });
 
@@ -31,11 +35,11 @@ define(function (require) {
    * Global Require.js exception handler
    */
   window.requirejs.onError = function (err) {
-    manager.fatal(new errors.ScriptLoadFailure(err));
+    rootNotifier.fatal(new errors.ScriptLoadFailure(err));
   };
 
   window.onerror = function (err, url, line) {
-    manager.fatal(new Error(err + ' (' + url + ':' + line + ')'));
+    rootNotifier.fatal(new Error(err + ' (' + url + ':' + line + ')'));
     return true;
   };
 
@@ -86,6 +90,6 @@ define(function (require) {
   //   // log(focused ? 'welcome back' : 'good bye');
   // });
 
-  return manager;
+  return rootNotifier;
 
 });

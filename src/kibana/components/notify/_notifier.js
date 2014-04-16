@@ -80,7 +80,7 @@ define(function (require) {
   /**
    * Functionality to check that
    */
-  function NotifyManager(opts) {
+  function Notifier(opts) {
     opts = opts || {};
 
     // label type thing to say where notifications came from
@@ -90,7 +90,7 @@ define(function (require) {
     this._notifs = notifs;
   }
 
-  NotifyManager.prototype.log = log;
+  Notifier.prototype.log = log;
 
   // general functionality used by .event() and .lifecycle()
   function createGroupLogger(type, opts) {
@@ -137,7 +137,7 @@ define(function (require) {
    * @param {string} name - The name of the group
    * @param {boolean} success - Simple flag stating whether the event succeeded
    */
-  NotifyManager.prototype.event = createGroupLogger('event', {
+  Notifier.prototype.event = createGroupLogger('event', {
     open: false
   });
 
@@ -146,7 +146,7 @@ define(function (require) {
    * @param {string} name - The name of the lifecycle event
    * @param {boolean} success - Simple flag stating whether the lifecycle event succeeded
    */
-  NotifyManager.prototype.lifecycle = createGroupLogger('lifecycle', {
+  Notifier.prototype.lifecycle = createGroupLogger('lifecycle', {
     open: true
   });
 
@@ -154,7 +154,7 @@ define(function (require) {
    * Kill the page, and display an error
    * @param  {Error} err - The fatal error that occured
    */
-  NotifyManager.prototype.fatal = function (err) {
+  Notifier.prototype.fatal = function (err) {
     var html = fatalToastTemplate({
       msg: formatMsg(err, this.from),
       stack: formatStack(err)
@@ -180,7 +180,7 @@ define(function (require) {
    * Alert the user of an error that occured
    * @param  {Error|String} err
    */
-  NotifyManager.prototype.error = function (err, cb) {
+  Notifier.prototype.error = function (err, cb) {
     add({
       type: 'danger',
       content: formatMsg(err, this.from),
@@ -197,7 +197,7 @@ define(function (require) {
    * @param  {[type]} msg [description]
    * @return {[type]}     [description]
    */
-  NotifyManager.prototype.warning = function (msg, cb) {
+  Notifier.prototype.warning = function (msg, cb) {
     add({
       type: 'warning',
       content: formatMsg(msg, this.from),
@@ -213,7 +213,7 @@ define(function (require) {
    * @param  {String} msg [description]
    * @return {[type]}     [description]
    */
-  NotifyManager.prototype.info = function (msg, cb) {
+  Notifier.prototype.info = function (msg, cb) {
     add({
       type: 'info',
       content: formatMsg(msg),
@@ -225,10 +225,10 @@ define(function (require) {
   };
 
   // set the timer functions that all notification managers will use
-  NotifyManager.prototype._setTimerFns = function (set, clear) {
+  Notifier.prototype._setTimerFns = function (set, clear) {
     setTO = set;
     clearTO = clear;
   };
 
-  return NotifyManager;
+  return Notifier;
 });
