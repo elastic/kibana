@@ -121,6 +121,10 @@ define(function (require) {
      */
     $scope.doSave = function () {
       updateDataSource();
+
+      // serialize the current state
+      vis.stateJSON = JSON.stringify(vis.getState());
+
       vis.save()
       .then(function () {
         $location.url('/visualize/' + vis.typeName + '/' + vis.id);
