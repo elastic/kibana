@@ -5,7 +5,7 @@ define(function (require) {
   var typeDefs = [
     {
       name: 'histogram',
-      previewUrl: '',
+      previewUrl: 'kibana/apps/visualize/imgs/histogram.jpg',
       config: {
         metric: {
           label: 'Y-Axis',
