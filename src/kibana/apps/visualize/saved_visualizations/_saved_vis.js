@@ -12,10 +12,12 @@ define(function (require) {
 
   module.factory('SavedVis', function (config, $injector, SavedObject, rootSearch, Promise, savedSearches) {
     function SavedVis(type, id) {
+      var vis = this;
       var typeDef = typeDefs.byName[type];
+
       if (!typeDef) throw new Error('Unknown visualization type: "' + type + '"');
 
-      SavedObject.call(this, {
+      SavedObject.call(vis, {
         type: 'visualization',
 
         id: id,
@@ -38,11 +40,14 @@ define(function (require) {
         searchSource: true,
 
         afterESResp: function setVisState() {
-          var vis = this;
+          // get the saved state
           var state = {};
-
           if (vis.stateJSON) try { state = JSON.parse(vis.stateJSON); } catch (e) {}
 
+          // set the state on the vis
+          vis.setState(state);
+
+          // set/get the parent savedSearch
           var parent = rootSearch;
           if (vis.savedSearchId) {
             if (!vis.savedSearch || vis.savedSearch.id !== vis.savedSearchId) {
@@ -50,16 +55,6 @@ define(function (require) {
               parent = savedSearches.get(vis.savedSearchId);
             }
           }
-
-          configCats.forEach(function (category) {
-            var configStates = state[category.name];
-            if (_.isArray(configStates)) {
-              configStates.forEach(function (configState) {
-                var config = vis.addConfig(category.name);
-                _.assign(config, configState);
-              });
-            }
-          });
 
           // can be either a SavedSearch or a savedSearches.get() promise
           return Promise.cast(parent)
@@ -80,34 +75,33 @@ define(function (require) {
         }
       });
 
-      this.addConfig = function (categoryName) {
+      // initialize config categories
+      configCats.forEach(function (category) {
+        var cat = _.defaults(typeDef.config[category.name] || {}, category.defaults);
+        cat.configs = [];
+        vis[category.name] = cat;
+      });
+
+      vis.addConfig = function (categoryName) {
         var category = configCats.byName[categoryName];
         var config = _.defaults({}, category.configDefaults);
         config.categoryName = category.name;
 
-        this[category.name].configs.push(config);
+        vis[category.name].configs.push(config);
 
         return config;
       };
 
-      this.removeConfig = function (config) {
+      vis.removeConfig = function (config) {
         if (!config) return;
-        _.pull(this[config.categoryName].configs, config);
+        _.pull(vis[config.categoryName].configs, config);
       };
 
-      this._fillConfigsToMinimum = function () {
-        var vis = this;
+      vis._fillConfigsToMinimum = function () {
 
         // satify the min count for each category
         configCats.fetchOrder.forEach(function (category) {
           var myCat = vis[category.name];
-
-          if (!myCat) {
-
-            myCat = _.defaults(typeDef.config[category.name] || {}, category.defaults);
-            myCat.configs = [];
-            vis[category.name] = myCat;
-          }
 
           if (myCat.configs.length < myCat.min) {
             _.times(myCat.min - myCat.configs.length, function () {
@@ -117,19 +111,44 @@ define(function (require) {
         });
       };
 
+      vis.setState = function (state) {
+        configCats.forEach(function (category) {
+          var categoryStates = state[category.name] || [];
+          vis[category.name].configs.splice(0);
+          categoryStates.forEach(function (configState) {
+            var config = vis.addConfig(category.name);
+            _.assign(config, configState);
+          });
+        });
+
+        vis._fillConfigsToMinimum();
+      };
+
+      vis.getState = function () {
+        return _.transform(configCats, function (state, category) {
+          var configs = state[category.name] = [];
+
+          [].push.apply(configs, vis[category.name].configs.map(function (config) {
+            return _.pick(config, function (val, key) {
+              return key.substring(0, 2) !== '$$';
+            });
+          }));
+        }, {});
+      };
+
       /**
        * Create a list of config objects, which are ready to be turned into aggregations,
        * in the order which they should be executed.
        *
        * @return {Array} - The list of config objects
        */
-      this.getConfig = require('./_read_config');
+      vis.getConfig = require('./_read_config');
       /**
        * Transform an ES Response into data for this visualization
        * @param  {object} resp The elasticsearch response
        * @return {array} An array of flattened response rows
        */
-      this.buildChartDataFromResponse = $injector.invoke(require('./_build_chart_data'));
+      vis.buildChartDataFromResponse = $injector.invoke(require('./_build_chart_data'));
     }
     inherits(SavedVis, SavedObject);
 
