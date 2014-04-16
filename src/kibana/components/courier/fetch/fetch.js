@@ -25,7 +25,10 @@ define(function (require) {
         handler.defer.resolve(error);
         handlerCount++;
       });
-      if (!handlerCount) notify.fatal(new Error('unhandled error ' + (error.stack || error.message)));
+      if (!handlerCount) {
+        notify.fatal(new Error('unhandled error ' + (error.stack || error.message)));
+        this._courier.stop();
+      }
     };
 
     var fetchThese = function (strategy, requests, reqErrHandler) {
