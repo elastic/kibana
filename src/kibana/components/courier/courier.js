@@ -36,6 +36,13 @@ define(function (require) {
         courier._pendingRequests = [];
 
         /**
+         * Queue of pending error handlers, they are removed as
+         * they are resolved.
+         * @type {Array}
+         */
+        courier._errorHandlers = [];
+
+        /**
          * Fetch the docs
          * @type {function}
          */
@@ -147,7 +154,8 @@ define(function (require) {
          * @return {[type]} [description]
          */
         courier.close = function () {
-          this._pendingRequests.splice(0).forEach(function (req) {
+          [].concat(this._pendingRequests.splice(0), this._errorHandlers.splice(0))
+          .forEach(function (req) {
             req.defer.reject(new errors.Abort());
           });
 

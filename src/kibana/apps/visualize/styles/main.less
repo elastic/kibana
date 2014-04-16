@@ -1,69 +1,83 @@
 @import (reference) "../../../styles/_bootstrap.less";
 @import (reference) "../../../styles/theme/_theme.less";
 
-.vis-config-panel {
-  padding: 0;
+.vis-content {
+  padding: 15px 0;
 
-  .panel-heading {
-    position: relative;
+  .vis-config-panel {
+    padding: 0;
 
-    button {
-      position: absolute;
-      top: 6px;
-      right: 7px;
-      padding: 3px 8px;
-    }
-  }
-
-  .panel-body {
-    padding: 10px 0;
-  }
-
-  vis-config-editor {
-    display: block;
-    border-top: 1px dashed @panel-inner-border;
-    padding: 10px 10px 0;
-
-    &:first-child {
-      border-top: none;
-    }
-
-    .config-controls {
-      float: right;
-      // just a tiny boost up
-      margin-top: -2px;
+    .panel-heading {
+      position: relative;
 
       button {
-        font-size: 10px;
-        padding: 2px 4px;
-        font-weight: 100;
+        position: absolute;
+        top: 6px;
+        right: 7px;
+        padding: 3px 8px;
+      }
+    }
+
+    .panel-body {
+      padding: 10px 0;
+    }
+
+    vis-config-editor {
+      display: block;
+      border-top: 1px dashed @panel-inner-border;
+      padding: 10px 10px 0;
+
+      &:first-child {
+        border-top: none;
+      }
+
+      .config-controls {
+        float: right;
+        // just a tiny boost up
+        margin-top: -2px;
+
+        button {
+          font-size: 10px;
+          padding: 2px 4px;
+          font-weight: 100;
+        }
+      }
+    }
+
+    > li {
+      list-style: none;
+    }
+
+    .agg-config-interval {
+      td {
+        padding-left: 10px;
+        &:first-child {
+          padding-left: 0px;
+        }
       }
     }
   }
 
-  > li {
-    list-style: none;
-  }
-
-  .agg-config-interval {
-    td {
-      padding-left: 10px;
-      &:first-child {
-        padding-left: 0px;
-      }
+  .vis-canvas {
+    visualization {
+      display: block;
+      background: black;
+      height: 800px;
+      width: 95%;
+      margin: 0 auto;
+      overflow: auto;
     }
   }
 }
 
-.vis-canvas {
-  padding: 15px 0;
-
-  visualization {
-    display: block;
-    background: black;
-    height: 800px;
-    width: 95%;
-    margin: 0 auto;
-    overflow: auto;
+.vis-load-list {
+  .media-object {
+    width: 65px;
+    height: 65px;
   }
+}
+
+.vis-preview-histogram {
+  background-image: url(../imgs/histogram.jpg);
+  background-size: contain;
 }

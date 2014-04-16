@@ -127,11 +127,26 @@ define(function (require) {
     /**
      * Put a request in to the courier that this Source should
      * be fetched on the next run of the courier
-     * @return {[type]} [description]
+     * @return {Promise}
      */
     SourceAbstract.prototype.onResults = function () {
       var defer = Promise.defer();
       this._courier._pendingRequests.push({
+        source: this,
+        defer: defer
+      });
+      return defer.promise;
+    };
+
+    /**
+     * similar to onResults, but allows a seperate loopy code path
+     * for error handling.
+     *
+     * @return {Promise}
+     */
+    SourceAbstract.prototype.onError = function () {
+      var defer = Promise.defer();
+      this._courier._errorHandlers.push({
         source: this,
         defer: defer
       });
