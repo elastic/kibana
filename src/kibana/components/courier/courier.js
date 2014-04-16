@@ -154,7 +154,8 @@ define(function (require) {
          * @return {[type]} [description]
          */
         courier.close = function () {
-          this._pendingRequests.splice(0).forEach(function (req) {
+          [].concat(this._pendingRequests.splice(0), this._errorHandlers.splice(0))
+          .forEach(function (req) {
             req.defer.reject(new errors.Abort());
           });
 
