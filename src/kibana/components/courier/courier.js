@@ -36,6 +36,13 @@ define(function (require) {
         courier._pendingRequests = [];
 
         /**
+         * Queue of pending error handlers, they are removed as
+         * they are resolved.
+         * @type {Array}
+         */
+        courier._errorHandlers = [];
+
+        /**
          * Fetch the docs
          * @type {function}
          */
