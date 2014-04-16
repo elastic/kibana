@@ -2,7 +2,6 @@ define(function (require) {
   var _ = require('utils/mixins');
 
   var settingsHtml = require('text!../partials/settings.html');
-  var timepickerHtml = require('text!partials/timepicker.html');
 
   require('notify/notify');
 
@@ -11,8 +10,10 @@ define(function (require) {
     'kibana/courier'
   ]);
 
+  require('directives/timepicker');
   require('services/state');
   require('directives/fixed_scroll');
+  require('filters/moment');
 
   require('routes')
   .when('/discover/:id?', {
@@ -98,7 +99,8 @@ define(function (require) {
       // Index to match
       index: $scope.state.index,
       savedSearch: savedSearch,
-      patternList: $route.current.locals.patternList
+      patternList: $route.current.locals.patternList,
+      time: {}
     };
 
     $scope.opts.saveDataSource = function () {
@@ -182,6 +184,7 @@ define(function (require) {
     };
 
     $scope.toggleTimepicker = function () {
+      var timepickerHtml = '<kbn-timepicker from="opts.time.from" to="opts.time.to" mode="timepickerMode"></kbn-timepicker>';
       // Close if already open
       if ($scope.configTemplate === timepickerHtml) {
         delete $scope.configTemplate;

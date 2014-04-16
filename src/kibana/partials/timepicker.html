@@ -3,9 +3,131 @@
     .kbn-timepicker [kbn-time-input] {
       text-align: center;
     }
+
+    .kbn-timepicker-modes {
+      text-transform: capitalize;
+    }
+
+    .kbn-timepicker-section {
+      float: left;
+      padding: 0px 15px;
+    }
   </style>
 
   <div class="row">
+    <div class="col-md-2">
+      <ul class="nav nav-pills nav-stacked kbn-timepicker-modes">
+        <li ng-class="{active: mode=='quick'}"><a ng-click="setMode('quick')" >quick</a></li>
+        <li ng-class="{active: mode=='relative'}"><a ng-click="setMode('relative')" >relative</a></li>
+        <li ng-class="{active: mode=='absolute'}"><a ng-click="setMode('absolute')" >absolute</a></li>
+      </ul>
+    </div>
+
+    <div class="col-md-10">
+      <div ng-switch on="mode" class="container-fluid">
+        <div ng-switch-when="quick">
+
+          <div class="kbn-timepicker-section">
+            <ul class="list-unstyled">
+              <li><a ng-click="setQuick('now/d', 'now/d')">Today</a></li>
+              <li><a ng-click="setQuick('now/w', 'now/w')">This week</a></li>
+              <li><a ng-click="setQuick('now/M', 'now/M')">This month</a></li>
+              <li><a ng-click="setQuick('now/y', 'now/y')">This year</a></li>
+            </ul>
+          </div>
+
+          <div class="kbn-timepicker-section">
+            <ul class="list-unstyled">
+              <li><a ng-click="setQuick('now-1d/d', 'now-1d/d')">Yesterday</a></li>
+              <li><a ng-click="setQuick('now-2d/d', 'now-2d/d')">Day before yesterday</a></li>
+              <li><a ng-click="setQuick('now-7d/d', 'now-7d/d')">This day last week</a></li>
+              <li><a ng-click="setQuick('now-1w/w', 'now-1w/w')">Last week</a></li>
+              <li><a ng-click="setQuick('now-1M/M', 'now-1M/M')">Last month</a></li>
+              <li><a ng-click="setQuick('now-1y/y', 'now-1y/y')">Last year</a></li>
+            </ul>
+          </div>
+
+          <div class="kbn-timepicker-section">
+            <ul class="list-unstyled">
+              <li><a ng-click="setQuick('now-15m', 'now')">Last 15 minutes</a></li>
+              <li><a ng-click="setQuick('now-30m', 'now')">Last 30 minutes</a></li>
+              <li><a ng-click="setQuick('now-1h', 'now')">Last 1 hour</a></li>
+              <li><a ng-click="setQuick('now-4h', 'now')">Last 4 hours</a></li>
+              <li><a ng-click="setQuick('now-12h', 'now')">Last 12 hours</a></li>
+              <li><a ng-click="setQuick('now-24h', 'now')">Last 24 hours</a></li>
+              <li><a ng-click="setQuick('now-7d', 'now')">Last 7 days</a></li>
+              <li><a ng-click="setQuick('now-30d', 'now')">Last 30 days</a></li>
+            </ul>
+          </div>
+
+        </div>
+        <div ng-switch-when="relative">
+        
+          <div class="kbn-timepicker-section">
+            From: 
+            <span ng-show="relative.preview">{{relative.preview}}</span><span ng-hide="relative.preview"><i>Invalid Expression</i></span>
+            <form class="form-inline" role="form">
+              <div class="form-group">
+                <input type="number" class="form-control" 
+                  ng-model="relative.count" 
+                  ng-change="formatRelative()">
+              </div>
+              <div class="form-group">
+                <select class="form-control col-xs-2" 
+                  ng-model="relative.unit" 
+                  ng-options="opt.value as opt.text for opt in relativeOptions"
+                  ng-change="formatRelative()">
+                </select>
+              </div>
+              <br>
+              <div class="small">
+                <input type="checkbox" 
+                  ng-model="relative.round" 
+                  ng-checked="relative.round" 
+                  ng-change="formatRelative()"/> round to the {{units[relative.unit]}}
+              </div>
+            </form>
+           
+          </div>
+
+          <div class="kbn-timepicker-section">
+            To: 
+            <form class="form-inline" role="form">
+              <div class="form-group">
+                <input type="text" disabled class="form-control" value="Now">
+              </div> 
+              <div class="form-group">
+                <button class="btn btn-primary" ng-disabled="!relative.preview" ng-click="applyRelative()">Go</button>
+              </div>
+            </form>
+          </div>
+
+        </div>
+
+        <div ng-switch-when="absolute">
+          <div class="kbn-timepicker-section">
+            From: 
+            <form class="form-inline" role="form">
+              <div class="form-group">
+                <input type="text" class="form-control" 
+                  ng-model="absolute.from.date">
+              </div>
+              <div class="form-group">
+                <input type="text" class="form-control" 
+                  ng-model="absolute.from.time">
+              </div>
+            </form>
+          </div>
+
+        </div>
+      </div>  
+    </div>
+  
+  </div>
+</div>
+
+
+<!--  <div class="row">
     <div class="timepicker-from col-xs-6 col-md-3">
       <center>
         <div ng-model="from">
@@ -24,3 +146,4 @@
     </div>
   </div>
 </div>
+-->
