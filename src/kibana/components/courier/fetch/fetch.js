@@ -6,13 +6,30 @@ define(function (require) {
   var docStrategy = require('./strategy/doc');
   var searchStrategy = require('./strategy/search');
 
-  module.service('couriersFetch', function (es, Promise, couriersErrors) {
+  module.service('couriersFetch', function (es, Promise, couriersErrors, createNotifier) {
+    var notify = createNotifier({
+      location: 'Courier Fetch'
+    });
 
     var flattenRequest = function (req) {
       return req.source._flatten();
     };
 
-    var fetchThese = function (strategy, requests) {
+    function RequestErrorHandler(courier) { this._courier = courier; }
+    RequestErrorHandler.prototype.handle = function (req, error) {
+      if (!this._courier) return req.defer.reject(error);
+      this._courier._pendingRequests.push(req);
+      var handlerCount = 0;
+      this._courier._errorHandlers.splice(0).forEach(function (handler) {
+        if (handler.source !== req.source) return this._courier._pendingRequests.push(handler);
+        handler.defer.resolve(error);
+        handlerCount++;
+      });
+      if (!handlerCount) notify.fatal(new Error('unhandled error ' + (error.stack || error.message)));
+    };
+
+    var fetchThese = function (strategy, requests, reqErrHandler) {
+
       var all = requests.splice(0);
       return es[strategy.clientMethod]({
         body: strategy.requestStatesToBody(all.map(flattenRequest))
@@ -20,7 +37,7 @@ define(function (require) {
       .then(function (resp) {
         strategy.getResponses(resp).forEach(function (resp) {
           var req = all.shift();
-          if (resp.error) return req.defer.reject(new couriersErrors.FetchFailure(resp));
+          if (resp.error) return reqErrHandler.handle(req, new couriersErrors.FetchFailure(resp));
           else strategy.resolveRequest(req, resp);
         });
 
@@ -29,7 +46,7 @@ define(function (require) {
       })
       .catch(function (err) {
         all.forEach(function (req) {
-          req.defer.reject(err);
+          reqErrHandler.handle(req, err);
         });
         throw err;
       });
@@ -38,7 +55,7 @@ define(function (require) {
     var fetchPending = function (strategy, courier) {
       var requests = strategy.getPendingRequests(courier._pendingRequests);
       if (!requests.length) return Promise.resolved();
-      else return fetchThese(strategy, requests);
+      else return fetchThese(strategy, requests, new RequestErrorHandler(courier));
     };
 
     var fetchASource = function (strategy, source) {
@@ -48,7 +65,7 @@ define(function (require) {
           source: source,
           defer: defer
         }
-      ]);
+      ], new RequestErrorHandler());
       return defer.promise;
     };
 
