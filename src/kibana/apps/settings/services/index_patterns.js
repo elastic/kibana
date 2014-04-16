@@ -20,7 +20,7 @@ define(function (require) {
       return es.search({
         index: config.file.kibanaIndex,
         type: 'mapping',
-        _sourceExclude: '*',
+        fields: [],
         body: {
           query: { match_all: {} }
         }
