@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('utils/mixins');
+  var angular = require('angular');
 
   var settingsHtml = require('text!../partials/settings.html');
 
@@ -11,9 +12,10 @@ define(function (require) {
   ]);
 
   require('directives/timepicker');
-  require('services/state');
   require('directives/fixed_scroll');
   require('filters/moment');
+  require('apps/settings/services/index_patterns');
+  require('factories/synced_state');
 
   require('routes')
   .when('/discover/:id?', {
@@ -23,20 +25,8 @@ define(function (require) {
       savedSearch: function (savedSearches, $route) {
         return savedSearches.get($route.current.params.id);
       },
-      patternList: function (es, configFile, $location, $q) {
-        // TODO: This is inefficient because it pulls down all of the cached mappings for every
-        // configured pattern instead of only the currently selected one.
-        return es.search({
-          index: configFile.kibanaIndex,
-          type: 'mapping',
-          size: 50000,
-          body: {
-            query: {match_all: {}},
-          }
-        })
-        .then(function (res) {
-          return res.hits.hits;
-        });
+      indexPatternList: function (indexPatterns) {
+        return indexPatterns.getIds();
       }
     }
   });
@@ -50,14 +40,16 @@ define(function (require) {
     { display: 'Yearly', val: 'yearly' }
   ];
 
-  app.controller('discover', function ($scope, config, $q, $route, savedSearches, courier, createNotifier, $location,
-    state, es, configFile) {
-    var notify = createNotifier({
+  app.controller('discover', function ($scope, config, $route, savedSearches, Notifier, $location, SyncedState) {
+    var notify = new Notifier({
       location: 'Discover'
     });
 
     // the saved savedSearch
     var savedSearch = $route.current.locals.savedSearch;
+
+    // list of indexPattern id's
+    var indexPatternList = $route.current.locals.indexPatternList;
 
     // the actual courier.SearchSource
     var searchSource = savedSearch.searchSource;
@@ -65,30 +57,18 @@ define(function (require) {
     /* Manage state & url state */
     var initialQuery = searchSource.get('query');
 
-
-    function loadState() {
-      $scope.state = state.get();
-      $scope.state = _.defaults($scope.state, {
-        query: initialQuery ? initialQuery.query_string.query : '',
-        columns: ['_source'],
-        sort: ['_score', 'desc'],
-        index: config.get('defaultIndex')
-      });
-    }
-
-    loadState();
+    var $state = $scope.state = new SyncedState({
+      query: initialQuery ? initialQuery.query_string.query : '',
+      columns: ['_source'],
+      sort: ['_score', 'desc'],
+      index: config.get('defaultIndex')
+    });
 
     // Check that we have any index patterns before going further, and that index being requested
     // exists.
-    if (!$route.current.locals.patternList.length ||
-      !_.find($route.current.locals.patternList, {_id: $scope.state.index})) {
+    if (!indexPatternList || !_.contains(indexPatternList, $state.index)) {
       $location.path('/settings/indices');
       return;
-    }
-
-    function init() {
-      setFields();
-      updateDataSource();
     }
 
     $scope.opts = {
@@ -97,11 +77,32 @@ define(function (require) {
       // max length for summaries in the table
       maxSummaryLength: 100,
       // Index to match
-      index: $scope.state.index,
+      index: $state.index,
       savedSearch: savedSearch,
-      patternList: $route.current.locals.patternList,
+      indexPatternList: indexPatternList,
       time: {}
     };
+
+    var onStateChange = function () {
+      updateDataSource();
+      searchSource.fetch();
+    };
+
+    var init = _.once(function () {
+      return setFields()
+      .then(updateDataSource)
+      .then(function () {
+        // changes to state.columns don't require a refresh
+        var ignore = ['columns'];
+
+        $state.onUpdate().then(function filterStateUpdate(changed) {
+          if (_.difference(changed, ignore).length) onStateChange();
+          $state.onUpdate().then(filterStateUpdate);
+        });
+
+        $scope.$emit('application.load');
+      });
+    });
 
     $scope.opts.saveDataSource = function () {
       savedSearch.id = savedSearch.title;
@@ -124,32 +125,10 @@ define(function (require) {
 
     // the index to use when they don't specify one
     $scope.$on('change:config.defaultIndex', function (event, val) {
-      if (!$scope.opts.index) {
-        $scope.opts.index = val;
-        $scope.fetch();
-      }
+      if (!$state.index) $state.index = val;
     });
 
-    // If the URL changes, we re-fetch, no matter what changes.
-    $scope.$on('$locationChangeSuccess', function () {
-      $scope.state = state.get();
-
-      // We have no state, don't try to refresh until we do
-      if (_.isEmpty($scope.state)) return;
-
-      updateDataSource();
-      // TODO: fetch just this savedSearch
-      courier.fetch();
-    });
-
-        // the index to use when they don't specify one
-    $scope.$watch('opts.index', function (val) {
-      if (!val) return;
-      updateDataSource();
-      $scope.fetch();
-    });
-
-    // Bind a result handler. Any time scope.fetch() is executed this gets called
+    // Bind a result handler. Any time searchSource.fetch() is executed this gets called
     // with the results
     searchSource.onResults().then(function onResults(resp) {
       $scope.rows = resp.hits.hits;
@@ -171,19 +150,26 @@ define(function (require) {
       console.log('An error');
     });
 
-    $scope.$on('$destroy', savedSearch.destroy);
+    $scope.$on('$destroy', _.bindKey(searchSource, 'destroy'));
 
-    $scope.getSort = function () {
-      return $scope.state.sort;
+    $scope.fetch = function () {
+      var changed = $state.commit();
+      // when none of the fields updated, we need to call fetch ourselves
+      if (changed.length === 0) onStateChange();
     };
 
-    $scope.setSort = function (field, order) {
-      var sort = {};
-      sort[field] = order;
-      searchSource.sort([sort]);
-      $scope.state.sort = [field, order];
-      $scope.fetch();
-    };
+    // $scope.$watch('state.index', $scope.fetch);
+    // $scope.$watch('state.query', $scope.fetch);
+    $scope.$watch('state.sort', function (sort) {
+      if (!sort) return;
+
+      // get the current sort from {key: val} to ["key", "val"];
+      var currentSort = _.pairs(searchSource.get('sort')).pop();
+
+      // if the searchSource doesn't know, tell it so
+      if (!angular.equals(sort, currentSort)) onStateChange();
+    });
+    // $scope.$watch('state.columns', $scope.fetch);
 
     $scope.toggleConfig = function () {
       // Close if already open
@@ -205,7 +191,7 @@ define(function (require) {
     };
 
     $scope.resetQuery = function () {
-      $scope.state.query = initialQuery ? initialQuery.query_string.query : '';
+      $state.query = initialQuery ? initialQuery.query_string.query : '';
       $scope.fetch();
     };
 
@@ -214,7 +200,7 @@ define(function (require) {
         // set the index on the savedSearch
         searchSource.index($scope.opts.index);
 
-        $scope.state.index = $scope.opts.index;
+        $state.index = $scope.opts.index;
         delete $scope.fields;
         delete $scope.columns;
 
@@ -224,17 +210,14 @@ define(function (require) {
         //$scope.state.columns = $scope.fields = null;
       }
 
-      var sort = {};
-      sort[$scope.state.sort[0]] = $scope.state.sort[1];
-
       searchSource
         .size($scope.opts.sampleSize)
+        .sort(_.zipObject([$state.sort]))
         .query(!$scope.state.query ? null : {
           query_string: {
             query: $scope.state.query
           }
-        })
-        .sort([sort]);
+        });
 
       if (!!$scope.opts.timefield) {
         searchSource
@@ -250,11 +233,6 @@ define(function (require) {
       }
     }
 
-    $scope.fetch = function () {
-      // We only set the state on data refresh
-      state.set($scope.state);
-    };
-
     // This is a hacky optimization for comparing the contents of a large array to a short one.
     function arrayToKeys(array, value) {
       var obj = {};
@@ -265,46 +243,46 @@ define(function (require) {
     }
 
     function setFields() {
-      var fields = _.findLast($scope.opts.patternList, {_id: $scope.opts.index})._source;
+      return searchSource.getFields($scope.opts.index)
+      .then(function (fields) {
+        var currentState = _.transform($scope.fields || [], function (current, field) {
+          current[field.name] = {
+            display: field.display
+          };
+        }, {});
 
-      var currentState = _.transform($scope.fields || [], function (current, field) {
-        current[field.name] = {
-          display: field.display
-        };
-      }, {});
+        if (!fields) return;
 
-      if (!fields) return;
+        var columnObjects = arrayToKeys($scope.state.columns);
 
-      var columnObjects = arrayToKeys($scope.state.columns);
+        $scope.fields = [];
+        $scope.state.columns = $scope.state.columns || [];
 
-      $scope.fields = [];
-      $scope.state.columns = $scope.state.columns || [];
+        // Inject source into list;
+        $scope.fields.push({name: '_source', type: 'source', display: false});
 
-      // Inject source into list;
-      $scope.fields.push({name: '_source', type: 'source', display: false});
+        _(fields)
+          .keys()
+          .sort()
+          .each(function (name) {
+            var field = fields[name];
+            field.name = name;
 
-      _(fields)
-        .keys()
-        .sort()
-        .each(function (name) {
-          var field = fields[name];
-          field.name = name;
+            _.defaults(field, currentState[name]);
+            $scope.fields.push(_.defaults(field, {display: columnObjects[name] || false}));
+          });
 
-          _.defaults(field, currentState[name]);
-          $scope.fields.push(_.defaults(field, {display: columnObjects[name] || false}));
-        });
+        // TODO: timefield should be associated with the index pattern, this is a hack
+        // to pick the first date field and use it.
+        var timefields = _.find($scope.fields, {type: 'date'});
+        if (!!timefields) {
+          $scope.opts.timefield = timefields.name;
+        } else {
+          delete $scope.opts.timefield;
+        }
 
-      // TODO: timefield should be associated with the index pattern, this is a hack
-      // to pick the first date field and use it.
-      var timefields = _.find($scope.fields, {type: 'date'});
-      if (!!timefields) {
-        $scope.opts.timefield = timefields.name;
-      } else {
-        delete $scope.opts.timefield;
-      }
-
-      refreshColumns();
-
+        refreshColumns();
+      });
     }
 
     // TODO: On array fields, negating does not negate the combination, rather all terms
@@ -353,7 +331,10 @@ define(function (require) {
       // If no columns remain, use _source
       if (!$scope.state.columns.length) {
         $scope.toggleField('_source');
+        return;
       }
+
+      $state.commit();
     }
 
     // TODO: Move to utility class
@@ -373,6 +354,5 @@ define(function (require) {
     };
 
     init();
-    $scope.$emit('application.load');
   });
 });

@@ -45,7 +45,10 @@ require.config({
     'angular-mocks': ['angular'],
     'elasticsearch': ['angular'],
     'angular-bootstrap': ['angular'],
-    'angular-bindonce': ['angular']
+    'angular-bindonce': ['angular'],
+    'utils/rison': {
+      exports: 'rison'
+    }
   },
   waitSeconds: 60
 });

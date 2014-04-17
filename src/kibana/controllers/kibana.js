@@ -36,10 +36,12 @@ define(function (require) {
       var orig = Notifier.prototype.fatal;
       return function () {
         orig.apply(this, arguments);
-        $scope.$on('$routeChangeStart', function (event, next) {
+        function forceReload(event, next) {
           // reload using the current route, force re-get
           window.location.reload(false);
-        });
+        }
+        $scope.$on('$routeUpdate', forceReload);
+        $scope.$on('$routeChangeStart', forceReload);
         Notifier.prototype.fatal = orig;
       };
     }());
@@ -54,7 +56,17 @@ define(function (require) {
       config.init()
     ]).then(function () {
       $injector.invoke(function ($rootScope, courier, config, configFile, $timeout, $location) {
-        $scope.apps = configFile.apps;
+        // get/set last path for an app
+        var lastPathFor = function (app, path) {
+          var key = 'lastPath:' + app.id;
+          if (path === void 0) return localStorage.getItem(key);
+          else return localStorage.setItem(key, path);
+        };
+
+        $scope.apps = configFile.apps.map(function (app) {
+          app.lastPath = lastPathFor(app);
+          return app;
+        });
 
         function updateAppData() {
           var route = $location.path().split(/\//);
@@ -62,6 +74,7 @@ define(function (require) {
 
           // Record the last URL w/ state of the app, use for tab.
           app.lastPath = $location.url().substring(1);
+          lastPathFor(app, app.lastPath);
 
           // Set class of container to application-<whateverApp>
           $scope.activeApp = route ? route[1] : null;
