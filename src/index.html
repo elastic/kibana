@@ -25,6 +25,9 @@
               <a ng-href="#/{{app.lastPath || app.id}}" bo-text="app.name"></a>
             </li>
           </ul>
+          <ul class="nav navbar-nav pull-right">
+            <li ng-show="httpActive.length"><a href="#"><i class="fa fa-spinner fa-spin loading-spinner"></i></a></li>
+          </ul>
           <!-- TODO: Track app.lastPath in localStorage instead -->
           <!-- TODO: <ul class="nav navbar-nav pull-right">
             <li ng-repeat="level in levels">
