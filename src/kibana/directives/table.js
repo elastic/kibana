@@ -16,17 +16,17 @@ define(function (require) {
       restrict: 'A',
       scope: {
         columns: '=',
-        getSort: '=',
-        setSort: '=',
+        sorting: '='
       },
       template: headerHtml,
       controller: function ($scope) {
-
         $scope.headerClass = function (column) {
-          if (!$scope.getSort) return [];
-          var sort = $scope.getSort();
-          if (column === sort[0]) {
-            return ['fa', sort[1] === 'asc' ? 'fa-sort-up' : 'fa-sort-down'];
+          var sorting = $scope.sorting;
+
+          if (!sorting) return [];
+
+          if (column === sorting[0]) {
+            return ['fa', sorting[1] === 'asc' ? 'fa-sort-up' : 'fa-sort-down'];
           } else {
             return ['fa', 'fa-sort', 'table-header-sortchange'];
           }
@@ -43,9 +43,8 @@ define(function (require) {
         };
 
         $scope.sort = function (column) {
-          var sort = $scope.getSort();
-          console.log('dir', sort);
-          $scope.setSort(column, sort[1] === 'asc' ? 'desc' : 'asc');
+          var sorting = $scope.sorting || [];
+          $scope.sorting = [column, sorting[1] === 'asc' ? 'desc' : 'asc'];
         };
 
       }
@@ -79,9 +78,8 @@ define(function (require) {
       scope: {
         columns: '=',
         rows: '=',
+        sorting: '=',
         refresh: '=',
-        getSort: '=',
-        setSort: '=',
         maxLength: '=?',
         mapping: '=?'
       },

@@ -17,7 +17,7 @@
       <select
         class="form-control"
         ng-model="opts.index"
-        ng-options="obj._id as obj._id for obj in opts.patternList">
+        ng-options="id as id for id in opts.indexPatternList">
       </select>
       <small>
         Time field: <strong>{{opts.timefield || 'not configured'}}</strong>
