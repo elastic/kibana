@@ -1,11 +1,1 @@
-<div class="container-fluid">
-  <label>Filter Dashboards</label>
-  <input type="text" ng-model="configurable.input.search" class="form-control"/>
-</div>
-<ul class="nav nav-pills container-fluid">
-  <li
-    ng-repeat="res in configurable.searchResults | orderBy:'_source.title'"
-    ng-class="{active: configurable.dashboard.id == res._id}">
-    <a ng-href="#/dashboard/{{res._source.title}}">{{res._id}}</a>
-  </li>
-</ul>
+<saved-object-finder title="Load" type="dashboards"></saved-object-finder>
