@@ -2,4 +2,4 @@
   <label for="exampleInputEmail1">Save As</label>
   <input type="text" ng-model="configObject.dashboard.title" class="form-control" placeholder="Dashboard title">
 </div>
-<button type="submit" class="btn btn-primary">Save</button>
+<button type="submit" ng-disabled="!configObject.dashboard.title" class="btn btn-primary">Save</button>
