@@ -129,14 +129,25 @@ define(function (require) {
         $scope.fetch();
       }
     });
+
+    // If the URL changes, we re-fetch, no matter what changes.
+    $scope.$on('$locationChangeSuccess', function () {
+      $scope.state = state.get();
+
+      // We have no state, don't try to refresh until we do
+      if (_.isEmpty($scope.state)) return;
+
+      updateDataSource();
+      // TODO: fetch just this savedSearch
+      courier.fetch();
+    });
+
         // the index to use when they don't specify one
     $scope.$watch('opts.index', function (val) {
       if (!val) return;
       updateDataSource();
       $scope.fetch();
     });
-
-    $scope.$watchCollection('state', state.set);
 
     // Bind a result handler. Any time scope.fetch() is executed this gets called
     // with the results
@@ -240,9 +251,8 @@ define(function (require) {
     }
 
     $scope.fetch = function () {
-      updateDataSource();
-      // fetch just this savedSearch
-      courier.fetch();
+      // We only set the state on data refresh
+      state.set($scope.state);
     };
 
     // This is a hacky optimization for comparing the contents of a large array to a short one.
