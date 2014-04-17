@@ -66,7 +66,6 @@ define(function (require) {
 
     // Check that we have any index patterns before going further, and that index being requested
     // exists.
-    console.log(indexPatternList);
     if (!indexPatternList.length) {
       $location.path('/settings/indices');
       return;
