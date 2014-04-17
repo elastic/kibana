@@ -12,6 +12,10 @@
       float: left;
       padding: 0px 15px;
     }
+
+    .kbn-timepicket-alert {
+      width: 100px;
+    }
   </style>
 
   <div class="row">
@@ -64,9 +68,12 @@
         <div ng-switch-when="relative">
         
           <div class="kbn-timepicker-section">
-            From: 
-            <span ng-show="relative.preview">{{relative.preview}}</span><span ng-hide="relative.preview"><i>Invalid Expression</i></span>
+            
             <form class="form-inline" role="form">
+              <label>
+                From: 
+                <span ng-show="relative.preview">{{relative.preview}}</span><span ng-hide="relative.preview"><i>Invalid Expression</i></span>
+              </label><br>
               <div class="form-group">
                 <input type="number" class="form-control" 
                   ng-model="relative.count" 
@@ -91,11 +98,19 @@
           </div>
 
           <div class="kbn-timepicker-section">
-            To: 
             <form class="form-inline" role="form">
+              <label>
+                To: Now
+              </label><br>
               <div class="form-group">
                 <input type="text" disabled class="form-control" value="Now">
               </div> 
+            </form>
+          </div>
+
+          <div class="kbn-timepicker-section">
+            <form role="form">
+              <label>&nbsp</label>
               <div class="form-group">
                 <button class="btn btn-primary" ng-disabled="!relative.preview" ng-click="applyRelative()">Go</button>
               </div>
@@ -106,15 +121,35 @@
 
         <div ng-switch-when="absolute">
           <div class="kbn-timepicker-section">
-            From: 
-            <form class="form-inline" role="form">
-              <div class="form-group">
-                <input type="text" class="form-control" 
-                  ng-model="absolute.from.date">
+            <form role="form">
+              <div>
+                <label class="small">From: <span ng-show="!absolute.from"><i>Invalid Date</i></span></label>
+                <input type="text" class="form-control" input-datetime="{{format}}" ng-model="absolute.from">
               </div>
+              <div ng-model="absolute.from">
+                <datepicker max="absolute.to" show-weeks="false"></datepicker>
+              </div>
+            </form>
+          </div>
+
+          <div class="kbn-timepicker-section">
+            <form role="form">
+              <div>
+                <label class="small">To: <span ng-show="!absolute.to"><i>Invalid Date</i></span></label>
+                <input type="text" class="form-control" input-datetime="{{format}}" ng-model="absolute.to">
+              </div>
+              <div ng-model="absolute.to">
+                <datepicker min="absolute.from" show-weeks="false"></datepicker>
+              </div>
+            </form>
+          </div>
+
+          <div class="kbn-timepicker-section kbn-timepicker-alert">
+            <form role="form">
+              <label>&nbsp</label>
               <div class="form-group">
-                <input type="text" class="form-control" 
-                  ng-model="absolute.from.time">
+                <button class="btn btn-primary" ng-disabled="absolute.from > absolute.to || !absolute.from || !absolute.to" ng-click="applyAbsolute()">Go</button>
+                <span class="small" ng-show="absolute.from > absolute.to"><strong>From</strong> must occur before <strong>To</strong></span>
               </div>
             </form>
           </div>
