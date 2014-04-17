@@ -11,16 +11,23 @@ define(function (require) {
   var module = require('modules').get('kibana/services');
 
   module.factory('SavedVis', function (config, $injector, SavedObject, rootSearch, Promise, savedSearches) {
-    function SavedVis(type, id) {
+    function SavedVis(opts) {
       var vis = this;
-      var typeDef = typeDefs.byName[type];
+      opts = opts || {};
 
-      if (!typeDef) throw new Error('Unknown visualization type: "' + type + '"');
+      if (typeof opts !== 'object') {
+        opts = {
+          id: opts
+        };
+      }
+
+      var typeDef = typeDefs.byName[opts.type || 'histogram'];
+      if (!typeDef) throw new Error('Unknown visualization type: "' + opts.type + '"');
 
       SavedObject.call(vis, {
         type: 'visualization',
 
-        id: id,
+        id: opts.id,
 
         mapping: {
           title: 'string',
@@ -34,7 +41,7 @@ define(function (require) {
           title: '',
           description: '',
           stateJSON: '{}',
-          typeName: type,
+          typeName: opts.type,
         },
 
         searchSource: true,

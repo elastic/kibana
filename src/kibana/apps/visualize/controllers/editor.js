@@ -1,6 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var ConfigTemplate = require('utils/config_template');
+  var typeDefs = require('../saved_visualizations/_type_defs');
 
   require('../saved_visualizations/saved_visualizations');
   require('notify/notify');
@@ -12,6 +13,24 @@ define(function (require) {
 
   var aggs = require('../saved_visualizations/_aggs');
   var visConfigCategories = require('../saved_visualizations/_config_categories');
+
+  require('routes')
+  .when('/visualize/create', {
+    template: require('text!../editor.html'),
+    resolve: {
+      vis: function ($route, savedVisualizations) {
+        return savedVisualizations.get($route.current.params);
+      }
+    }
+  })
+  .when('/visualize/edit/:id', {
+    template: require('text!../editor.html'),
+    resolve: {
+      vis: function ($route, savedVisualizations) {
+        return savedVisualizations.get($route.current.params.id);
+      }
+    }
+  });
 
   app.controller('VisualizeEditor', function ($route, $scope, courier, createNotifier, config, $location, savedVisualizations) {
     var notify = createNotifier({

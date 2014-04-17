@@ -5,8 +5,8 @@ define(function (require) {
   require('./_saved_vis');
 
   app.service('savedVisualizations', function (es, config, courier, $q, $timeout, SavedVis) {
-    this.get = function (type, id) {
-      return (new SavedVis(type, id)).init();
+    this.get = function (id) {
+      return (new SavedVis(id)).init();
     };
 
     this.find = function (searchString) {
@@ -28,8 +28,9 @@ define(function (require) {
         return resp.hits.hits.map(function (hit) {
           var source = hit._source;
           source.id = hit._id;
-          source.url = '/visualize/' + source.typeName + '/' + hit._id;
+          source.url = '#/visualize/edit/' + hit._id;
           source.typeDef = typeDefs.byName[source.typeName];
+          source.previewUrl = source.typeDef.previewUrl;
           return source;
         });
       });

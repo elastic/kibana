@@ -43,53 +43,6 @@ define(function (require) {
     return true;
   };
 
-  // function onTabFocus(onChange) {
-  //   var current = true;
-  //   // bind each individually
-  //   var elem = window;
-  //   var focus = 'focus';
-  //   var blur = 'blur';
-
-  //   if (/*@cc_on!@*/false) { // check for Internet Explorer
-  //     elem = document;
-  //     focus = 'focusin';
-  //     blur = 'focusout';
-  //   }
-
-  //   function handler(event) {
-  //     var state;
-
-  //     if (event.type === focus) {
-  //       state = true;
-  //     } else if (event.type === blur) {
-  //       state = false;
-  //     } else {
-  //       return;
-  //     }
-
-  //     if (current !== state) {
-  //       current = state;
-  //       onChange(current);
-  //     }
-  //   }
-
-  //   elem.addEventListener(focus, handler);
-  //   elem.addEventListener(blur, handler);
-
-  //   // call the handler ASAP with the current status
-  //   nextTick(handler, current);
-
-  //   // function that the user can call to unbind this handler
-  //   return function unBind() {
-  //     elem.removeEventListener(focus, handler);
-  //     elem.removeEventListener(blur, handler);
-  //   };
-  // }
-
-  // onTabFocus(function (focused) {
-  //   // log(focused ? 'welcome back' : 'good bye');
-  // });
-
   return rootNotifier;
 
 });

@@ -30,8 +30,31 @@ define(function (require) {
       });
     };
 
-    this.find = function (pattern) {
-
+    this.find = function (searchString) {
+      return es.search({
+        index: config.file.kibanaIndex,
+        type: 'mapping',
+        fields: [],
+        body: {
+          query: {
+            multi_match: {
+              query: searchString || '',
+              type: 'phrase_prefix',
+              fields: ['_id'],
+              zero_terms_query: 'all'
+            }
+          }
+        }
+      })
+      .then(function (resp) {
+        return resp.hits.hits.map(function (hit) {
+          return {
+            id: hit._id,
+            title: hit._id,
+            url: '/settings/indices/' + hit._id
+          };
+        });
+      });
     };
 
     this.delete = function (pattern) {

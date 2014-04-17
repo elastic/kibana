@@ -21,8 +21,26 @@ define(function (require) {
     });
   });
 
-  modules.controller('kibana', function ($scope, createNotifier, $injector, $q, config, setup) {
-    var notify = createNotifier();
+  modules.controller('kibana', function ($scope, Notifier, $injector, $q, config, setup) {
+    var notify = new Notifier();
+
+    /**
+     * When Notifiers send their first fatal error, start listening
+     * for "$routeChangeStart" and force a refresh the first time it
+     * is fired. This prevents the back button from rendering content
+     * under the fatal error messages.
+     */
+    Notifier.prototype.fatal = (function () {
+      var orig = Notifier.prototype.fatal;
+      return function () {
+        orig.apply(this, arguments);
+        $scope.$on('$routeChangeStart', function (event, next) {
+          // reload using the current route, force re-get
+          window.location.reload(false);
+        });
+        Notifier.prototype.fatal = orig;
+      };
+    }());
 
     // this is the only way to handle uncaught route.resolve errors
     $scope.$on('$routeChangeError', function (event, next, prev, err) {
