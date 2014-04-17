@@ -21,8 +21,10 @@ define(function (require) {
     });
   });
 
-  modules.controller('kibana', function ($scope, Notifier, $injector, $q, config, setup) {
+  modules.controller('kibana', function ($scope, Notifier, $injector, $q, $http, config, setup) {
     var notify = new Notifier();
+
+    $scope.httpActive = $http.pendingRequests;
 
     /**
      * When Notifiers send their first fatal error, start listening

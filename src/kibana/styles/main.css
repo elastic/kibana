@@ -6700,6 +6700,10 @@ kbn-table tr.even td {
   padding-top: 2px;
   padding-bottom: 2px;
 }
+.loading-spinner {
+  color: #ffffff;
+  font-size: 18px;
+}
 .kbn-timepicker .btn-default {
   background: transparent;
   border: 0px;
