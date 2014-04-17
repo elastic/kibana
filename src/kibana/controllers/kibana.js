@@ -114,6 +114,16 @@ define(function (require) {
         // provide alternate methods for setting timeouts, which will properly trigger digest cycles
         notify._setTimerFns($timeout, $timeout.cancel);
 
+        $scope.toggleTimepicker = function () {
+          var timepickerHtml = '<kbn-timepicker from="opts.time.from" to="opts.time.to" mode="timepickerMode"></kbn-timepicker>';
+          // Close if already open
+          if ($scope.globalConfigTemplate === timepickerHtml) {
+            delete $scope.globalConfigTemplate;
+          } else {
+            $scope.globalConfigTemplate = timepickerHtml;
+          }
+        };
+
         /**
          * Persist current settings
          * @return {[type]} [description]
