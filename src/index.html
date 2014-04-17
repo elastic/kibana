@@ -27,7 +27,7 @@
           </ul>
           <ul class="nav navbar-nav pull-right">
             <li ng-show="httpActive.length"><a href="#"><i class="fa fa-spinner fa-spin loading-spinner"></i></a></li>
-            <li><a class="navbar-link" ng-click="toggleTimepicker()"><i class="fa fa-clock-o"></i></a></li>
+            <li><a class="navbar-link" ng-click="toggleTimepicker()">{{opts.time.from}} - {{opts.time.to}} <i class="fa fa-clock-o"></i></a></li>
           </ul>
         </div>
       </nav>
