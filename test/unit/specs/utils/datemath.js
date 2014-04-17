@@ -13,6 +13,10 @@ define(function (require) {
       clock;
 
     describe('errors', function () {
+      it('should return undefined if passed something falsy', function () {
+        expect(datemath.parse()).to.be(undefined);
+      });
+
       it('should return undefined if I pass an operator besides [+-/]', function () {
         expect(datemath.parse('now&1d')).to.be(undefined);
       });

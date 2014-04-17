@@ -6851,3 +6851,8 @@ saved-object-finder .finder-options > li.active a {
   width: 65px;
   height: 65px;
 }
+.input-datetime-format {
+  font-size: 12px;
+  color: #999999;
+  padding: 6px 12px;
+}

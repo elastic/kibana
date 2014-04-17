@@ -4,6 +4,7 @@ define(function (require) {
 
 /* This is a simplified version of elasticsearch's date parser */
   var parse = function (text, roundUp) {
+    if (!text) return undefined;
     if (moment.isMoment(text)) return text;
     if (_.isDate(text)) return moment(text);
 

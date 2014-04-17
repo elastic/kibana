@@ -5,6 +5,9 @@ define(function (require) {
   var datemath = require('utils/datemath');
   var moment = require('moment');
 
+  require('directives/input_datetime');
+
+
   module.directive('kbnTimepicker', function () {
     return {
       restrict: 'E',
@@ -30,6 +33,11 @@ define(function (require) {
           round: false
         };
 
+        $scope.absolute = {
+          from: moment(),
+          to: moment()
+        };
+
         $scope.units = {
           s: 'second',
           m: 'minute',
@@ -50,14 +58,22 @@ define(function (require) {
           {text: 'Years ago', value: 'y'},
         ];
 
-        if (_.isUndefined($scope.mode)) $scope.mode = 'quick';
+        if (_.isUndefined($scope.mode)) $scope.mode = 'absolute';
+
+        $scope.$watch('absolute.from', function (date) {
+          if (_.isDate(date)) $scope.absolute.from = moment(date);
+        });
+
+        $scope.$watch('absolute.to', function (date) {
+          if (_.isDate(date)) $scope.absolute.to = moment(date);
+        });
 
         $scope.setMode = function (thisMode) {
           switch (thisMode) {
           case 'quick':
             break;
           case 'relative':
-            var duration = moment.duration(moment().diff($scope.from));
+            var duration = moment.duration(moment().diff(datemath.parse($scope.from)));
             var units = _.pluck(_.clone($scope.relativeOptions).reverse(), 'value');
             for (var i = 0; i < units.length; i++) {
               var as = duration.as(units[i]);
@@ -69,6 +85,8 @@ define(function (require) {
             }
             break;
           case 'absolute':
+            $scope.absolute.from = datemath.parse($scope.from);
+            $scope.absolute.to = datemath.parse($scope.to, true);
             break;
           }
 
@@ -76,8 +94,8 @@ define(function (require) {
         };
 
         $scope.setQuick = function (from, to) {
-          $scope.from = datemath.parse(from);
-          $scope.to = datemath.parse(to, true);
+          $scope.from = from;
+          $scope.to = to;
         };
 
         $scope.formatRelative = function () {
@@ -88,8 +106,14 @@ define(function (require) {
         };
 
         $scope.applyRelative = function () {
-          $scope.from = $scope.formatRelative();
-          $scope.to = datemath.parse('now', $scope.relative.round);
+          $scope.from = 'now-' + $scope.relative.count + $scope.relative.unit +
+            ($scope.relative.round ? '/' + $scope.relative.unit : '');
+          $scope.to = 'now';
+        };
+
+        $scope.applyAbsolute = function () {
+          $scope.from = moment($scope.absolute.from);
+          $scope.to = moment($scope.absolute.to);
         };
 
         init();
