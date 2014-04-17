@@ -73,29 +73,6 @@ define(function (require) {
       $scope.panels = JSON.parse(val || '[]');
     });
 
-    var dashboardSearch = function (query) {
-      if (query === void 0) return;
-
-      if (_.isString(query) && query.length > 0) {
-        query = {wildcard: {title: '*' + query + '*'}};
-      } else {
-        query = {match_all: {}};
-      }
-
-      es.search({
-        index: configFile.kibanaIndex,
-        type: 'dashboard',
-        size: 10,
-        body: {
-          query: query
-        }
-      })
-      .then(function (res) {
-        $scope.configurable.searchResults = res.hits.hits;
-      });
-    };
-    $scope.$watch('configurable.input.search', dashboardSearch);
-
     $scope.configTemplate = new ConfigTemplate({
       save: require('text!./partials/save_dashboard.html'),
       load: require('text!./partials/load_dashboard.html')
@@ -109,7 +86,6 @@ define(function (require) {
 
     $scope.openLoad = function () {
       if ($scope.configTemplate.toggle('load')) {
-        dashboardSearch($scope.input.search || '');
         $scope.configSubmit = null;
       }
     };
