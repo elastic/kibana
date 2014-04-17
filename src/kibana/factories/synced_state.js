@@ -19,59 +19,82 @@ define(function (require) {
       // this will be used to store the state in local storage
       var routeName = $route.current.$$route.originalPath;
 
-      var set = function (obj) {
-        var changed = [];
+      var diffStates = function (a, b) {
+        var changes = {
+          update: b,
+
+          set: [],
+          remove: []
+        };
+
         // all the keys that the object will have at the end
-        var newKeys = Object.keys(obj).concat(baseKeys);
+        var newKeys = Object.keys(b).concat(baseKeys);
 
         // the keys that got removed
-        _.difference(Object.keys(state), newKeys).forEach(function (key) {
-          delete state[key];
-          changed.push(key);
+        _.difference(Object.keys(a), newKeys).forEach(function (key) {
+          changes.remove.push(key);
         });
 
         newKeys.forEach(function (key) {
           // don't overwrite object methods
           if (typeof state[key] !== 'function') {
-            if (!angular.equals(state[key], obj[key])) {
-              state[key] = obj[key];
-              changed.push(key);
+            if (!angular.equals(a[key], b[key])) {
+              changes.set.push(key);
             }
           }
         });
 
-        if (changed.length) {
-          updateHandlers.splice(0).forEach(function (handler, i, list) {
-            // micro optimizations!
-            handler(list.length > 1 ? _.clone(changed) : changed);
-          });
-        }
-
-        return changed;
+        return changes;
       };
 
-      var onPossibleUpdate = function (qs) {
+      var flattenDiff = function (diff) {
+        return [].concat(diff.set, diff.remove);
+      };
+
+      var apply = function (diff) {
+        diff.remove.forEach(function (key) {
+          delete state[key];
+        });
+
+        diff.set.forEach(function (key) {
+          state[key] = diff.update[key];
+        });
+
+        notify(diff);
+      };
+
+      var notify = function (diff) {
+        if (diff.set.length || diff.remove.length) {
+          abortHandlers.splice(0);
+          updateHandlers.splice(0).forEach(function (handler, i, list) {
+            // micro optimizations!
+            handler(flattenDiff(diff));
+          });
+        }
+      };
+
+      var onPossibleUpdate = function () {
         if (routeRegex.test($location.path())) {
-          qs = qs || $location.search();
+          var qs = $location.search();
 
           if (!qs._r) {
             qs._r = defaultRison;
             $location.search(qs);
           }
 
-          return set(rison.decode(qs._r));
+          apply(diffStates(state, rison.decode(qs._r)));
         }
       };
 
       var unwatch = [];
-      unwatch.push($rootScope.$on('$locationChangeSuccess', _.partial(onPossibleUpdate, null)));
-      unwatch.push($rootScope.$on('$locationUpdate', _.partial(onPossibleUpdate, null)));
+      unwatch.push($rootScope.$on('$locationChangeSuccess', onPossibleUpdate));
+      unwatch.push($rootScope.$on('$locationUpdate', onPossibleUpdate));
 
       this.onUpdate = function () {
         var defer = Promise.defer();
 
-        updateHandlers.push = defer.resolve;
-        abortHandlers.push = defer.reject;
+        updateHandlers.push(defer.resolve);
+        abortHandlers.push(defer.reject);
 
         return defer.promise;
       };
@@ -81,12 +104,16 @@ define(function (require) {
        */
       this.commit = function () {
         var qs = $location.search();
-        qs._r = rison.encode(this);
+        var prev = rison.decode(qs._r || '()');
+        qs._r = rison.encode(state);
         $location.search(qs);
-        return onPossibleUpdate(qs) || [];
+        var diff = diffStates(prev, state);
+        notify(diff);
+        return flattenDiff(diff);
       };
 
       this.destroy = function () {
+        updateHandlers.splice(0);
         unwatch.splice(0).concat(abortHandlers.splice(0)).forEach(function (fn) { fn(); });
       };
 

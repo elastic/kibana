@@ -40,7 +40,7 @@ define(function (require) {
     { display: 'Yearly', val: 'yearly' }
   ];
 
-  app.controller('discover', function ($scope, config, $route, savedSearches, Notifier, $location, SyncedState) {
+  app.controller('discover', function ($scope, config, courier, $route, savedSearches, Notifier, $location, SyncedState) {
     var notify = new Notifier({
       location: 'Discover'
     });
@@ -88,22 +88,69 @@ define(function (require) {
       time: {}
     };
 
-    var onStateChange = function () {
-      updateDataSource();
-      searchSource.fetch();
-    };
+    // stores the complete list of fields
+    $scope.fields = null;
+
+    // index pattern interval options
+    $scope.intervals = intervals;
+    $scope.interval = intervals[0];
 
     var init = _.once(function () {
       return setFields()
       .then(updateDataSource)
       .then(function () {
+        // the index to use when they don't specify one
+        $scope.$on('change:config.defaultIndex', function (event, val) {
+          if (!$state.index) $state.index = val;
+        });
+
         // changes to state.columns don't require a refresh
         var ignore = ['columns'];
 
+        // listen for changes, and relisten everytime something happens
         $state.onUpdate().then(function filterStateUpdate(changed) {
-          if (_.difference(changed, ignore).length) onStateChange();
+          // if we only have ignorable changed, do nothing
+          if (_.difference(changed, ignore).length) {
+            updateDataSource();
+            courier.fetch();
+          }
+
           $state.onUpdate().then(filterStateUpdate);
         });
+
+        $scope.$watch('state.sort', function (sort) {
+          if (!sort) return;
+
+          // get the current sort from {key: val} to ["key", "val"];
+          var currentSort = _.pairs(searchSource.get('sort')).pop();
+
+          // if the searchSource doesn't know, tell it so
+          if (!angular.equals(sort, currentSort)) $scope.fetch();
+        });
+
+        // Bind a result handler. Any time searchSource.fetch() is executed this gets called
+        // with the results
+        searchSource.onResults().then(function onResults(resp) {
+          $scope.rows = resp.hits.hits;
+          $scope.chart = !!resp.aggregations ? {rows: [{columns: [{
+            label: 'Events over time',
+            xAxisLabel: 'DateTime',
+            yAxisLabel: 'Hits',
+            layers: [
+              {
+                key: 'somekey',
+                values: _.map(resp.aggregations.events.buckets, function (bucket) {
+                  return { y: bucket.doc_count, x: bucket.key_as_string };
+                })
+              }
+            ]
+          }]}]} : undefined;
+          return searchSource.onResults().then(onResults);
+        }).catch(function (err) {
+          console.log('An error');
+        });
+
+        $scope.$on('$destroy', _.bindKey(searchSource, 'destroy'));
 
         $scope.$emit('application.load');
       });
@@ -121,59 +168,15 @@ define(function (require) {
       }, notify.error);
     };
 
-    // stores the complete list of fields
-    $scope.fields = null;
-
-    // index pattern interval options
-    $scope.intervals = intervals;
-    $scope.interval = intervals[0];
-
-    // the index to use when they don't specify one
-    $scope.$on('change:config.defaultIndex', function (event, val) {
-      if (!$state.index) $state.index = val;
-    });
-
-    // Bind a result handler. Any time searchSource.fetch() is executed this gets called
-    // with the results
-    searchSource.onResults().then(function onResults(resp) {
-      $scope.rows = resp.hits.hits;
-      $scope.chart = !!resp.aggregations ? {rows: [{columns: [{
-        label: 'Events over time',
-        xAxisLabel: 'DateTime',
-        yAxisLabel: 'Hits',
-        layers: [
-          {
-            key: 'somekey',
-            values: _.map(resp.aggregations.events.buckets, function (bucket) {
-              return { y: bucket.doc_count, x: bucket.key_as_string };
-            })
-          }
-        ]
-      }]}]} : undefined;
-      return searchSource.onResults().then(onResults);
-    }).catch(function (err) {
-      console.log('An error');
-    });
-
-    $scope.$on('$destroy', _.bindKey(searchSource, 'destroy'));
-
     $scope.fetch = function () {
       var changed = $state.commit();
       // when none of the fields updated, we need to call fetch ourselves
-      if (changed.length === 0) onStateChange();
+      if (changed.length === 0) courier.fetch();
     };
 
     // $scope.$watch('state.index', $scope.fetch);
     // $scope.$watch('state.query', $scope.fetch);
-    $scope.$watch('state.sort', function (sort) {
-      if (!sort) return;
 
-      // get the current sort from {key: val} to ["key", "val"];
-      var currentSort = _.pairs(searchSource.get('sort')).pop();
-
-      // if the searchSource doesn't know, tell it so
-      if (!angular.equals(sort, currentSort)) onStateChange();
-    });
     // $scope.$watch('state.columns', $scope.fetch);
 
     $scope.toggleConfig = function () {
