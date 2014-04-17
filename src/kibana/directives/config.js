@@ -24,6 +24,7 @@ define(function (require) {
         configObject: '='
       },
       link: function ($scope, element, attr) {
+        var tmpScope = $scope.$new();
         $scope[attr.configObject] = $scope.configObject;
 
         var wrapTmpl = function (tmpl) {
@@ -40,6 +41,9 @@ define(function (require) {
             tmpl = tmpl.toString();
           }
 
+          tmpScope.$destroy();
+          tmpScope = $scope.$new();
+
           element.html(!tmpl ? '' : $compile('' +
             '<div class="config" ng-show="configTemplate">' +
               wrapTmpl(tmpl) +
@@ -48,11 +52,12 @@ define(function (require) {
             '  </div>' +
             '</div>' +
             ''
-          )($scope));
+          )(tmpScope));
         };
 
         $scope.$watch('configSubmit', render);
         $scope.$watch('configTemplate.current || configTemplate', render);
+
 
         $scope.close = function () {
           if (_.isFunction($scope.configClose)) $scope.configClose();
