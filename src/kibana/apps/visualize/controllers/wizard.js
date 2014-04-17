@@ -30,12 +30,12 @@ define(function (require) {
 
   app.controller('VisualizeWizardStep1', function ($route, $scope, courier, config, $location, indexPatterns) {
     $scope.step2WithSearchUrl = function (hit) {
-      return '#/visualize/step/2?savedSearch=' + encodeURIComponent(hit.id);
+      return '#/visualize/step/2?savedSearchId=' + encodeURIComponent(hit.id);
     };
 
     $scope.indexPattern = {
       selection: null,
-      list: $route.current.params.indexPatternIds
+      list: $route.current.locals.indexPatternIds
     };
 
     $scope.$watch('indexPattern.selection', function (pattern) {
@@ -52,7 +52,7 @@ define(function (require) {
   });
 
   app.controller('VisualizeWizardStep2', function ($scope, $route, $location) {
-    var existing = _.pick($route.current.params, 'indexPattern', 'savedSearch');
+    var existing = _.pick($route.current.params, 'indexPattern', 'savedSearchId');
 
     $scope.visTypeDefs = typeDefs;
     $scope.typeUrl = function (type) {
