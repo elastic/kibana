@@ -14,6 +14,13 @@ define(function (require) {
       }
     };
 
+    this.close = function (name) {
+      var toClose = templates[name];
+      if (this.current === toClose) {
+        this.current = null;
+      }
+    };
+
     this.toString = function () {
       return this.current;
     };

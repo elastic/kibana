@@ -152,14 +152,17 @@ define(function (require) {
       };
 
       if (resp.aggregations) {
-        if (!configs.length) {
-          configs.push({
+        splitAndFlatten(chartData, resp.aggregations);
+      } else {
+        chartData.rows = [];
+        chartData.columns = [
+          {
             categoryName: 'metric',
             agg: aggs.byName.count.name,
             label: aggs.byName.count.display
-          });
-        }
-        splitAndFlatten(chartData, resp.aggregations);
+          }
+        ];
+        writeRow(chartData.rows, { value: resp.hits.total });
       }
 
       // flattening the chart does not always result in a split,

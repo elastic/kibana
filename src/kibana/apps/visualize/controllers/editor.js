@@ -68,55 +68,27 @@ define(function (require) {
     var updateDataSource = function () {
       notify.event('update data source');
 
-      // get the config objects form the visualization
-      var config = vis.getConfig();
-
-      // group the segments by their categoryName, but merge the segments and groups
-      config = _.groupBy(config, function (config) {
-        switch (config.categoryName) {
-        case 'group':
-        case 'segment':
-          return 'dimension';
-        default:
-          return config.categoryName;
-        }
-      });
-
-      // use the global aggregation if we don't have any dimensions
-      if (!config.dimension) {
-        config.dimension = [{
-          agg: 'global',
-          aggParams: {}
-        }];
-      }
-
       // stores the config objects in queryDsl
       var dsl = {};
       // counter to ensure unique agg names
       var i = 0;
+      // start at the root, but the current will move
+      var current = dsl;
 
       // continue to nest the aggs under each other
       // writes to the dsl object
-      var nest = (function () {
-        var current = dsl;
-        return function (config) {
-          current.aggs = {};
-          var key = '_agg_' + (i++);
+      vis.getConfig().forEach(function (config) {
+        current.aggs = {};
+        var key = '_agg_' + (i++);
 
-          var aggDsl = {};
-          aggDsl[config.agg] = config.aggParams;
+        var aggDsl = {};
+        aggDsl[config.agg] = config.aggParams;
 
-          current = current.aggs[key] = aggDsl;
-        };
-      }());
-
-      // nest each config type in order
-      config.split && config.split.forEach(nest);
-      config.dimension && config.dimension.forEach(nest);
-      config.metric && config.metric.forEach(nest);
+        current = current.aggs[key] = aggDsl;
+      });
 
       // set the dsl to the searchSource
-      vis.searchSource.aggs(dsl.aggs);
+      vis.searchSource.aggs(dsl.aggs || {});
       notify.event('update data source', true);
     };
 
@@ -146,7 +118,8 @@ define(function (require) {
 
       vis.save()
       .then(function () {
-        $location.url('/visualize/' + vis.typeName + '/' + vis.id);
+        $location.url('/visualize/edit/' + vis.id);
+        configTemplate.close('save');
       }, notify.fatal);
     };
 

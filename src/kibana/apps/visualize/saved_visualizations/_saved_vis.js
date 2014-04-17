@@ -31,17 +31,18 @@ define(function (require) {
 
         mapping: {
           title: 'string',
-          description: 'string',
-          stateJSON: 'string',
-          savedSearchId: 'string',
           typeName: 'string',
+          stateJSON: 'string',
+          description: 'string',
+          savedSearchId: 'string'
         },
 
         defaults: {
           title: '',
-          description: '',
-          stateJSON: '{}',
           typeName: opts.type,
+          stateJSON: '{}',
+          description: '',
+          savedSearchId: opts.savedSearchId,
         },
 
         searchSource: true,
@@ -54,8 +55,14 @@ define(function (require) {
           // set the state on the vis
           vis.setState(state);
 
+
+          // default parent is the rootSearch, mimic the
+          // searchSource prop from saved objects
+          var parent = {
+            searchSource: rootSearch
+          };
+
           // set/get the parent savedSearch
-          var parent = rootSearch;
           if (vis.savedSearchId) {
             if (!vis.savedSearch || vis.savedSearch.id !== vis.savedSearchId) {
               // returns a promise
@@ -69,7 +76,7 @@ define(function (require) {
             vis.savedSearch = parent;
 
             vis.searchSource
-              .inherits(vis.savedSearch)
+              .inherits(parent.searchSource)
               .size(0);
 
             vis._fillConfigsToMinimum();
