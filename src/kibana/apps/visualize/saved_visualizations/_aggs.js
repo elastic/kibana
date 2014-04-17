@@ -88,7 +88,8 @@ define(function (require) {
         },
       },
       makeLabel: function (params) {
-        var interval = _.find(aggs.params.interval.options, { val: params.interval });
+        var agg = aggs.byName.date_histogram;
+        var interval = _.find(agg.params.interval.options, { val: params.interval });
         return interval.display + ' ' + params.field;
       }
     }

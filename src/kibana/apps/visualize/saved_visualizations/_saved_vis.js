@@ -40,7 +40,7 @@ define(function (require) {
         defaults: {
           title: '',
           typeName: opts.type,
-          stateJSON: '{}',
+          stateJSON: null,
           description: '',
           savedSearchId: opts.savedSearchId,
         },
@@ -49,11 +49,11 @@ define(function (require) {
 
         afterESResp: function setVisState() {
           // get the saved state
-          var state = {};
+          var state;
           if (vis.stateJSON) try { state = JSON.parse(vis.stateJSON); } catch (e) {}
 
           // set the state on the vis
-          vis.setState(state);
+          if (state) vis.setState(state);
 
 
           // default parent is the rootSearch, mimic the
@@ -88,6 +88,10 @@ define(function (require) {
           });
         }
       });
+
+      if (opts.indexPattern) {
+        vis.searchSource.index(opts.indexPattern);
+      }
 
       // initialize config categories
       configCats.forEach(function (category) {
