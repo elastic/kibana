@@ -66,9 +66,15 @@ define(function (require) {
 
     // Check that we have any index patterns before going further, and that index being requested
     // exists.
-    if (!indexPatternList || !_.contains(indexPatternList, $state.index)) {
+    console.log(indexPatternList);
+    if (!indexPatternList.length) {
       $location.path('/settings/indices');
       return;
+    }
+
+    if (!_.contains(indexPatternList, $state.index)) {
+      notify.warning('The index specified in the URL is not a configured pattern. Using the default: ' + config.get('defaultIndex'));
+      $state.index = config.get('defaultIndex');
     }
 
     $scope.opts = {
