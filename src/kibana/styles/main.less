@@ -52,7 +52,7 @@ notifications {
   margin-bottom: 0px!important;
 }
 
-[ng-click] {
+[ng-click], [href] {
   cursor: pointer;
 }
 
@@ -183,4 +183,56 @@ kbn-table {
       }
     }
   }
+}
+
+
+//== SavedObjectFinder
+saved-object-finder {
+  .form-group {
+    margin-bottom: 0;
+    input {
+      .border-bottom-radius(0);
+    }
+  }
+  .finder-options {
+    max-height: 300px;
+    overflow: auto;
+    padding: 0;
+    .border-top-radius(0);
+
+    // replace the padding that was originally on the outer well
+    > * {
+      padding: @padding-base-vertical @padding-base-horizontal;
+      margin: 0;
+    }
+
+    // enable bigger backgrounds for "active" elements
+    > li {
+      margin-top: -ceil(@padding-base-vertical / 2);
+
+      &:first-child {
+        margin: 0;
+      }
+      &.active {
+        background-color: @component-active-bg;
+        color: @component-active-color;
+        a {
+          color: @component-active-color;
+        }
+      }
+    }
+  }
+}
+
+// when rendered within a config dropdown, don't use a bottom margin
+.config saved-object-finder .finder-options {
+  margin-bottom: 0;
+  background: @body-bg;
+}
+
+//== Generic Media List
+.media-object {
+  // image in result list
+  width: 65px;
+  height: 65px;
 }

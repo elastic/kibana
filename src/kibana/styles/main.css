@@ -6531,7 +6531,8 @@ notifications {
 .navbar {
   margin-bottom: 0px!important;
 }
-[ng-click] {
+[ng-click],
+[href] {
   cursor: pointer;
 }
 .config {
@@ -6810,4 +6811,43 @@ kbn-table th:hover .table-header-sortchange {
 .sidebar-container .sidebar-list .sidebar-item .active {
   background-color: #428bca;
   color: #ffffff;
+}
+saved-object-finder .form-group {
+  margin-bottom: 0;
+}
+saved-object-finder .form-group input {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+saved-object-finder .finder-options {
+  max-height: 300px;
+  overflow: auto;
+  padding: 0;
+  border-top-right-radius: 0;
+  border-top-left-radius: 0;
+}
+saved-object-finder .finder-options > * {
+  padding: 6px 12px;
+  margin: 0;
+}
+saved-object-finder .finder-options > li {
+  margin-top: -ceil(3px);
+}
+saved-object-finder .finder-options > li:first-child {
+  margin: 0;
+}
+saved-object-finder .finder-options > li.active {
+  background-color: #428bca;
+  color: #ffffff;
+}
+saved-object-finder .finder-options > li.active a {
+  color: #ffffff;
+}
+.config saved-object-finder .finder-options {
+  margin-bottom: 0;
+  background: #ffffff;
+}
+.media-object {
+  width: 65px;
+  height: 65px;
 }

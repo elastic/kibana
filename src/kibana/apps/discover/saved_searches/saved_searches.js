@@ -37,7 +37,7 @@ define(function (require) {
         return resp.hits.hits.map(function (hit) {
           var source = hit._source;
           source.id = hit._id;
-          source.url = '/discover/' + hit._id;
+          source.url = '#/discover/' + hit._id;
           return source;
         });
       });

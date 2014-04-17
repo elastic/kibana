@@ -166,8 +166,6 @@ define(function (require) {
       return;
     }
 
-    $container = $();
-
     // in case the app has not completed boot
     $(document.body)
       .removeAttr('ng-cloak')

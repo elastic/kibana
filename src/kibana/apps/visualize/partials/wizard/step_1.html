@@ -1,0 +1,30 @@
+<h1>Create a new visualization</h1>
+<p>
+  To create a new Visualization you must first select the data to visualize. This data can come from a Saved Search, or from an Index Pattern.
+</p>
+<hr>
+<saved-object-finder
+  title="Saved Searches"
+  type="searches"
+  make-url="step2WithSearchUrl">
+</saved-object-finder>
+<div class="form-group">
+  <label for="chooseIndexPattern">Index Patterns</label>
+  <select
+    class="form-control"
+    ng-model="indexPattern.selection"
+    ng-options="pattern as pattern for pattern in indexPattern.list">
+  </select>
+</div>
+
+
+
+<h1>Edit an existing visualization</h1>
+<p>
+  To edit an existing visualization search through the list below
+</p>
+<hr>
+<saved-object-finder
+  title="Saved Visualizations"
+  type="visualizations">
+</saved-object-finder>

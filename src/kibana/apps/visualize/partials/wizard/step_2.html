@@ -1,0 +1,14 @@
+<h1>
+  Choose a Visualization Type
+</h1>
+<ul class="media-list">
+  <li ng-repeat="type in visTypeDefs" class="media">
+    <a class="pull-left" ng-href="{{ typeUrl(type) }}">
+      <img class="media-object" ng-src="{{type.previewUrl}}">
+    </a>
+    <div class="media-body">
+      <div class="media-heading"><a ng-href="{{ typeUrl(type) }}">{{type.name}}</a></div>
+      <p ng-if="type.description">{{type.description}}</p>
+    </div>
+  </li>
+</ul>

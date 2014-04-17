@@ -68,51 +68,51 @@
 .modal-footer:after {
   clear: both;
 }
-.vis-content {
+.vis-editor-content {
   padding: 15px 0;
 }
-.vis-content .vis-config-panel {
+.vis-editor-content .vis-config-panel {
   padding: 0;
 }
-.vis-content .vis-config-panel .panel-heading {
+.vis-editor-content .vis-config-panel .panel-heading {
   position: relative;
 }
-.vis-content .vis-config-panel .panel-heading button {
+.vis-editor-content .vis-config-panel .panel-heading button {
   position: absolute;
   top: 6px;
   right: 7px;
   padding: 3px 8px;
 }
-.vis-content .vis-config-panel .panel-body {
+.vis-editor-content .vis-config-panel .panel-body {
   padding: 10px 0;
 }
-.vis-content .vis-config-panel vis-config-editor {
+.vis-editor-content .vis-config-panel vis-config-editor {
   display: block;
   border-top: 1px dashed #dddddd;
   padding: 10px 10px 0;
 }
-.vis-content .vis-config-panel vis-config-editor:first-child {
+.vis-editor-content .vis-config-panel vis-config-editor:first-child {
   border-top: none;
 }
-.vis-content .vis-config-panel vis-config-editor .config-controls {
+.vis-editor-content .vis-config-panel vis-config-editor .config-controls {
   float: right;
   margin-top: -2px;
 }
-.vis-content .vis-config-panel vis-config-editor .config-controls button {
+.vis-editor-content .vis-config-panel vis-config-editor .config-controls button {
   font-size: 10px;
   padding: 2px 4px;
   font-weight: 100;
 }
-.vis-content .vis-config-panel > li {
+.vis-editor-content .vis-config-panel > li {
   list-style: none;
 }
-.vis-content .vis-config-panel .agg-config-interval td {
+.vis-editor-content .vis-config-panel .agg-config-interval td {
   padding-left: 10px;
 }
-.vis-content .vis-config-panel .agg-config-interval td:first-child {
+.vis-editor-content .vis-config-panel .agg-config-interval td:first-child {
   padding-left: 0px;
 }
-.vis-content .vis-canvas visualization {
+.vis-editor-content .vis-canvas visualization {
   display: block;
   background: black;
   height: 800px;
@@ -120,11 +120,6 @@
   margin: 0 auto;
   overflow: auto;
 }
-.vis-load-list .media-object {
-  width: 65px;
-  height: 65px;
-}
-.vis-preview-histogram {
-  background-image: url(../imgs/histogram.jpg);
-  background-size: contain;
+.vis-wizard h1 {
+  margin-top: 45px;
 }
