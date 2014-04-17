@@ -27,8 +27,6 @@
         </disc-field-chooser>
       </div>
       <div class="col-md-10">
-        <center ng-show="opts.time.from && opts.time.to"><small>{{opts.time.from}} through {{opts.time.to}}</small></center>
-
         <discover-timechart data="chart" height="150" ng-if="opts.timefield"></discover-timechart>
         <div class="discover-table"
           fixed-scroll='table'

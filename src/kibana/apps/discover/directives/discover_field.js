@@ -16,6 +16,7 @@ define(function (require) {
       replace: true,
       link: function ($scope, $elem) {
         var detailsElem;
+        var detailScope = $scope.$new();
 
         var init = function () {
           if ($scope.field.details) {
@@ -28,8 +29,11 @@ define(function (require) {
             // This is inherited from fieldChooser
             $scope.details(field, recompute);
 
+            detailScope.$destroy();
+            detailScope = $scope.$new();
+
             detailsElem = $(detailsHtml);
-            $compile(detailsElem)($scope);
+            $compile(detailsElem)(detailScope);
             $elem.append(detailsElem);
           } else {
             delete field.details;

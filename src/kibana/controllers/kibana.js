@@ -88,6 +88,7 @@ define(function (require) {
         });
 
         $scope.opts = {
+          time: {},
           activeFetchInterval: void 0,
           fetchIntervals: [
             { display: 'none', val: null},
