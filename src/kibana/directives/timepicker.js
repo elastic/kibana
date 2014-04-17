@@ -25,6 +25,8 @@ define(function (require) {
 
         $scope.format = 'MMMM Do YYYY, HH:mm:ss.SSS';
         $scope.modes = ['quick', 'relative', 'absolute'];
+        if (_.isUndefined($scope.mode)) $scope.mode = 'quick';
+
 
         $scope.relative = {
           count: 1,
@@ -57,8 +59,6 @@ define(function (require) {
           {text: 'Months ago', value: 'M'},
           {text: 'Years ago', value: 'y'},
         ];
-
-        if (_.isUndefined($scope.mode)) $scope.mode = 'absolute';
 
         $scope.$watch('absolute.from', function (date) {
           if (_.isDate(date)) $scope.absolute.from = moment(date);
