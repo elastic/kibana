@@ -5,17 +5,17 @@ define(function (require) {
   var settingsHtml = require('text!../partials/settings.html');
 
   require('notify/notify');
-
-  var app = require('modules').get('app/discover', [
-    'kibana/notify',
-    'kibana/courier'
-  ]);
-
   require('directives/timepicker');
   require('directives/fixed_scroll');
   require('filters/moment');
   require('apps/settings/services/index_patterns');
   require('factories/synced_state');
+  require('services/timefilter');
+
+  var app = require('modules').get('app/discover', [
+    'kibana/notify',
+    'kibana/courier'
+  ]);
 
   require('routes')
   .when('/discover/:id?', {
@@ -40,7 +40,7 @@ define(function (require) {
     { display: 'Yearly', val: 'yearly' }
   ];
 
-  app.controller('discover', function ($scope, config, courier, $route, savedSearches, Notifier, $location, SyncedState) {
+  app.controller('discover', function ($scope, config, courier, $route, savedSearches, Notifier, $location, SyncedState, timefilter) {
     var notify = new Notifier({
       location: 'Discover'
     });
@@ -77,6 +77,7 @@ define(function (require) {
     }
 
     $scope.opts = {
+      time: timefilter,
       // number of records to fetch, then paginate through
       sampleSize: 500,
       // max length for summaries in the table
@@ -85,7 +86,6 @@ define(function (require) {
       index: $state.index,
       savedSearch: savedSearch,
       indexPatternList: indexPatternList,
-      time: {}
     };
 
     // stores the complete list of fields
@@ -228,12 +228,13 @@ define(function (require) {
         });
 
       if (!!$scope.opts.timefield) {
+        timefilter.enabled(true);
         searchSource
         .aggs({
           events: {
             date_histogram: {
               field: $scope.opts.timefield,
-              interval: '12h',
+              interval: '30m',
               format: 'yyyy-MM-dd'
             }
           }

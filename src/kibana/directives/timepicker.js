@@ -18,7 +18,6 @@ define(function (require) {
       },
       template: html,
       controller: function ($scope) {
-
         var init = function () {
           $scope.formatRelative();
         };
