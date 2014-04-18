@@ -6,7 +6,7 @@ define(function (require) {
   var docStrategy = require('./strategy/doc');
   var searchStrategy = require('./strategy/search');
 
-  module.service('couriersFetch', function (es, Promise, couriersErrors, createNotifier) {
+  module.service('couriersFetch', function (es, Promise, couriersErrors, createNotifier, $q) {
     var notify = createNotifier({
       location: 'Courier Fetch'
     });
@@ -32,10 +32,41 @@ define(function (require) {
     };
 
     var fetchThese = function (strategy, requests, reqErrHandler) {
+      var all, body;
 
-      var all = requests.splice(0);
+      all = requests.splice(0);
+
+      var allRequests = all.map(flattenRequest);
+
+      return $q.all(allRequests).then(function (reqs) {
+        body = strategy.requestStatesToBody(reqs);
+        
+        return es[strategy.clientMethod]({
+          body: body
+        })
+        .then(function (resp) {
+          strategy.getResponses(resp).forEach(function (resp) {
+            var req = all.shift();
+            if (resp.error) return reqErrHandler.handle(req, new couriersErrors.FetchFailure(resp));
+            else strategy.resolveRequest(req, resp);
+          });
+
+          // pass the response along to the next promise
+          return resp;
+        })
+        .catch(function (err) {
+          all.forEach(function (req) {
+            reqErrHandler.handle(req, err);
+          });
+          throw err;
+        });
+
+      });
+
+
+      /*
       return es[strategy.clientMethod]({
-        body: strategy.requestStatesToBody(all.map(flattenRequest))
+        body: body
       })
       .then(function (resp) {
         strategy.getResponses(resp).forEach(function (resp) {
@@ -53,6 +84,7 @@ define(function (require) {
         });
         throw err;
       });
+      */
     };
 
     var fetchPending = function (strategy, courier) {
