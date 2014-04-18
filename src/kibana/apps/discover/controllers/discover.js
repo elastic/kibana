@@ -147,7 +147,7 @@ define(function (require) {
           }]}]} : undefined;
           return searchSource.onResults().then(onResults);
         }).catch(function (err) {
-          console.log('An error');
+          console.log('An error', err);
         });
 
         $scope.$on('$destroy', _.bindKey(searchSource, 'destroy'));

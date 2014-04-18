@@ -90,19 +90,17 @@ define(function (require) {
       unwatch.push($rootScope.$on('$locationChangeSuccess', onPossibleUpdate));
       unwatch.push($rootScope.$on('$locationUpdate', onPossibleUpdate));
 
-      this.onUpdate = function () {
-        var defer = Promise.defer();
-
-        updateHandlers.push(defer.resolve);
-        abortHandlers.push(defer.reject);
-
-        return defer.promise;
+      state.onUpdate = function (handler) {
+        return new Promise.emitter(function (resolve, reject) {
+          updateHandlers.push(resolve);
+          abortHandlers.push(reject);
+        }, handler);
       };
 
       /**
        * Commit the state as a history item
        */
-      this.commit = function () {
+      state.commit = function () {
         var qs = $location.search();
         var prev = rison.decode(qs._r || '()');
         qs._r = rison.encode(state);
@@ -112,13 +110,13 @@ define(function (require) {
         return flattenDiff(diff);
       };
 
-      this.destroy = function () {
+      state.destroy = function () {
         updateHandlers.splice(0);
         unwatch.splice(0).concat(abortHandlers.splice(0)).forEach(function (fn) { fn(); });
       };
 
       // track the "known" keys that state objects have
-      var baseKeys = Object.keys(this);
+      var baseKeys = Object.keys(state);
 
       // set the defaults on state
       onPossibleUpdate();
