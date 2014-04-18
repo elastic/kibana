@@ -2,7 +2,7 @@ define(function (require) {
   var html = require('text!partials/table.html');
   var _ = require('lodash');
   var ConfigTemplate = require('utils/config_template');
-
+  var angular = require('angular');
   var module = require('modules').get('kibana/directives');
 
   /**
@@ -25,7 +25,10 @@ define(function (require) {
       },
       link: function ($scope, element, attr) {
         var tmpScope = $scope.$new();
-        $scope[attr.configObject] = $scope.configObject;
+
+        $scope.$watch('configObject', function (newVal) {
+          $scope[attr.configObject] = $scope.configObject;
+        });
 
         var wrapTmpl = function (tmpl) {
           if ($scope.configSubmit) {
