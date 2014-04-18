@@ -13,11 +13,11 @@ function (angular) {
         function file_selected(evt) {
           var files = evt.target.files; // FileList object
           var readerOnload = function() {
-            return function(e) {
+            return function(event) {
               try {
-                dashboard.dash_load(JSON.parse(e.target.result));
+                dashboard.dash_load(JSON.parse(event.target.result));
               }
-              catch (e)  {
+              catch (err)  {
                 alertSrv.set('Oops','The dashboard file you want to upload is malformed, please correct it and retry.','error');
               }
               scope.$apply();
