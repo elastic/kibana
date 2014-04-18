@@ -14,7 +14,12 @@ function (angular) {
           var files = evt.target.files; // FileList object
           var readerOnload = function() {
             return function(e) {
-              dashboard.dash_load(JSON.parse(e.target.result));
+              try {
+                dashboard.dash_load(JSON.parse(e.target.result));
+              }
+              catch (e)  {
+                alertSrv.set('Oops','The dashboard file you want to upload is malformed, please correct it and retry.','error');
+              }
               scope.$apply();
             };
           };
