@@ -118,13 +118,13 @@ define([
     };
   });
 
-  module.filter('shareLink', function($location, filterSrv) {
-      return function(event) {
-          var from = new Date(Date.parse(event._source[this.panel.timeField])-60000);
-          var to = new Date(Date.parse(event._source[this.panel.timeField])+60000);
-          var text=event._id;
-          return($location.absUrl().replace(/(\?.*)?$/,'?from='+from.toISOString()+'&to='+to.toISOString()+'&query=_id:'+text));
-      };
+  module.filter('shareLink', function($location) {
+    return function(event) {
+      var from = new Date(Date.parse(event._source[this.panel.timeField])-60000);
+      var to = new Date(Date.parse(event._source[this.panel.timeField])+60000);
+      var text=event._id;
+      return($location.absUrl().replace(/(\?.*)?$/,'?from='+from.toISOString()+'&to='+to.toISOString()+'&query=_id:'+text));
+     };
   });
 
   module.filter('gistid', function() {

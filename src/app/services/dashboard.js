@@ -297,7 +297,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
     var renderTemplate = function(json,params) {
       var _r;
       var _json;
-      if(!json.match('ARGS\.(to|from|style|query)')) {
+      if(!json.match(/ARGS\.(to|from|style|query)/)) {
         try {
           _json = angular.fromJson(json);
           _json.style = "{{ARGS.style || '" + _json.style + "'}}";
