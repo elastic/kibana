@@ -88,6 +88,22 @@ define(function (require) {
         // render can easily render in the same current state
         var opened = [];
 
+        // whenever we compile, we should create a child scope that we can then detroy
+        var childScopes = {};
+        var childScopeFor = function (id) {
+          if (childScopes[id]) return childScopes[id];
+
+          var $child = $scope.$new();
+          childScopes[id] = $child;
+          return $child;
+        };
+        var clearChildScopeFor = function (id) {
+          if (childScopes[id]) {
+            childScopes[id].$destroy();
+            delete childScopes[id];
+          }
+        };
+
         // the current position in the list of rows
         var cursor = 0;
 
@@ -118,6 +134,10 @@ define(function (require) {
 
           // Clear the body
           $body.empty();
+
+          // destroy all child scopes
+          Object.keys(childScopes).forEach(clearChildScopeFor);
+
           if (!$scope.rows || $scope.rows.length === 0) return;
           if (!$scope.columns || $scope.columns.length === 0) return;
           cursor = 0;
@@ -228,13 +248,17 @@ define(function (require) {
             opened.push(id);
           }
 
+          var $detailTr = $(event.delegateTarget).next();
+          // remove the element from the details row --
+          // it is already empty or going to be rendered empty
+          $detailTr.empty();
+          // if this row has a child scope, (for contained
+          // directives) kill it
+          clearChildScopeFor(id);
+
           // rather than replace the entire row, just replace the
           // children, this way we keep the "even" class on the row
-          appendDetailsToRow(
-            $(event.delegateTarget).next().empty(),
-            row,
-            id
-          );
+          appendDetailsToRow($detailTr, row, id);
         };
 
         function createDetailsRow(row, id) {
@@ -246,13 +270,6 @@ define(function (require) {
           var topLevelDetails = ['_index', '_type', '_id'];
 
           var rowFlat = _.flattenWith('.', row._source, true);
-          /*
-          _.each(topLevelDetails, function (field) {
-            rowFlat[field] = row[field];
-          });
-          */
-          console.log(rowFlat);
-
 
           // we need a td to wrap the details table
           var containerTd = document.createElement('td');
@@ -263,7 +280,10 @@ define(function (require) {
           $tr.toggle(open);
 
           // it's closed, so no need to go any further
-          if (!open) return $tr;
+          if (!open) {
+            clearChildScopeFor(id);
+            return $tr;
+          }
 
           // table that will hold details about the row
           var table = document.createElement('table');
@@ -355,7 +375,7 @@ define(function (require) {
               val = document.createElement('kbn-truncated');
               val.setAttribute('orig', complete);
               val.setAttribute('length', $scope.maxLength);
-              val = $compile(val)($scope)[0];// return the actual element
+              val = $compile(val)(childScopeFor(rowId(row)))[0];// return the actual element
             } else {
               val = val.substring(0, $scope.maxLength) + '...';
             }
