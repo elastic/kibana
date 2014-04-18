@@ -2,7 +2,7 @@
 
   <div ng-show="panel.searchbox">
     <form class="form-search" style="position:relative;margin:5px 0;" ng-submit="refresh()">
-      Filter terms: <input class="search-query panel-query" bs-typeahead="panel.history" data-min-length=0 data-items=100 type="text" ng-model="panel.filterQuery" />
+      <input class="search-query panel-query" placeholder="Filter terms..." bs-typeahead="panel.history" data-min-length=0 data-items=100 type="text" ng-model="panel.filterQuery" />
     </form>
   </div>
 
