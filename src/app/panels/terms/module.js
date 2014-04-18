@@ -125,7 +125,8 @@ function (angular, app, _, $, kbn) {
       /** @scratch /panels/terms/5
        * valuefield:: Terms_stats facet value field
        */
-      valuefield  : ''
+      valuefield  : '',
+      history     : []
     };
 
     _.defaults($scope.panel,_d);
@@ -138,6 +139,21 @@ function (angular, app, _, $, kbn) {
       });
       $scope.get_data();
 
+    };
+
+    $scope.refresh = function() {
+      update_history($scope.panel.filterQuery);
+      $scope.get_data();
+    };
+
+    var update_history = function(query) {
+      if($scope.panel.remember > 0) {
+        $scope.panel.history.push(query);
+        var _length = $scope.panel.history.length;
+        if(_length > $scope.panel.remember) {
+          $scope.panel.history = $scope.panel.history.slice(0,$scope.panel.remember);
+        }
+      }
     };
 
     $scope.get_data = function() {
@@ -165,6 +181,11 @@ function (angular, app, _, $, kbn) {
       _.each(queries,function(q) {
         boolQuery = boolQuery.should(querySrv.toEjsObj(q));
       });
+
+      if ($scope.panel.searchbox && !(_.isUndefined($scope.panel.filterQuery)) &&
+        !(_.isEmpty($scope.panel.filterQuery))) {
+        boolQuery.must($scope.ejs.PrefixQuery($scope.panel.field, $scope.panel.filterQuery));
+      }
 
       // Terms mode
       if($scope.panel.tmode === 'terms') {

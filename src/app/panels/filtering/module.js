@@ -65,6 +65,10 @@ function (angular, app, _) {
       $rootScope.$broadcast('render');
     };
 
+    $scope.show_type = function(type) {
+      return !_.contains(['geo_polygon'],type);
+    };
+
     $scope.show_key = function(key) {
       return !_.contains(['type','id','alias','mandate','active','editing'],key);
     };
