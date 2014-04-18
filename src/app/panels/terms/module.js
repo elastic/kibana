@@ -143,7 +143,7 @@ function (angular, app, _, $, kbn) {
 
     $scope.refresh = function() {
       update_history($scope.panel.filterQuery);
-      dashboard.refresh();
+      $scope.get_data();
     };
 
     var update_history = function(query) {
