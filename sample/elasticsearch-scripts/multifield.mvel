@@ -1,0 +1,7 @@
+val = '';
+
+for(f : fields) {
+  val = val + _doc[f].value + separator;
+}
+
+return val.substring(0, val.length() - separator.length());

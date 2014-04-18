@@ -193,6 +193,20 @@ function (angular, app, _, $, kbn) {
               filterSrv.getBoolFilter(filterSrv.ids())
             )))).size(0);
       }
+      if($scope.panel.tmode === 'terms_multifield') {
+        request = request
+          .facet($scope.ejs.TermsFacet('terms')
+          .scriptField('kibana_multifield')
+          .params({'fields': $scope.field, 'separator': ' '})
+          .size($scope.panel.size)
+          .order($scope.panel.order)
+          .exclude($scope.panel.exclude)
+          .facetFilter($scope.ejs.QueryFilter(
+            $scope.ejs.FilteredQuery(
+              boolQuery,
+              filterSrv.getBoolFilter(filterSrv.ids())
+            )))).size(0);
+      }
 
       // Populate the inspector panel
       $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
@@ -276,6 +290,9 @@ function (angular, app, _, $, kbn) {
             }
             if(scope.panel.tmode === 'terms_stats') {
               slice = { label : v.term, data : [[k,v[scope.panel.tstat]]], actions: true};
+            }
+            if(scope.panel.tmode === 'terms_multifield') {
+              slice = { label : v.term, data : [[k,v.count]], actions: true};
             }
             scope.data.push(slice);
             k = k + 1;
