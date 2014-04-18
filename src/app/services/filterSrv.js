@@ -186,9 +186,20 @@ define([
         return ejs.ExistsFilter(filter.field);
       case 'missing':
         return ejs.MissingFilter(filter.field);
+      case 'geo_polygon':
+        return ejs.GeoPolygonFilter(filter.field).points(this.getGeoPoints(filter.value));
       default:
         return false;
       }
+    };
+
+    this.getGeoPoints = function(latLonArray) {
+      var result = [];
+      _.each(latLonArray, function(latlon) {
+        // TODO: need to reverse lat/lon. Is this the right place?
+        result.push(new ejs.GeoPoint([latlon[1],latlon[0]]));
+      });
+      return result;
     };
 
     this.getByType = function(type,inactive) {

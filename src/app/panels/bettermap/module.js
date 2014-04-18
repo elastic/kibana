@@ -1,10 +1,8 @@
 /** @scratch /panels/5
- *
  * include::panels/bettermap.asciidoc[]
  */
 
 /** @scratch /panels/bettermap/0
- *
  * == Bettermap
  * Status: *Experimental*
  *
@@ -14,7 +12,11 @@
  *
  * To drill down, click on a cluster. The map will be zoomed and the cluster broken into smaller cluster.
  * When it no longer makes visual sense to cluster, individual markers will be displayed. Hover over
- * a marker to see the tooltip value/
+ * a marker to see the tooltip value.
+ *
+ * Bettermap also supports selection of one or more geo regions by drawing a polygon on the maps. The
+ * polygon will be added as a filter to the current filter set. Removing a polygon can be done both on
+ * the map and by removing the filter in the filter panel.
  *
  * IMPORTANT: bettermap requires an internet connection to download its map panels.
  */
@@ -22,12 +24,14 @@ define([
   'angular',
   'app',
   'lodash',
-  './leaflet/leaflet-src',
+  './leaflet/leaflet',
   'require',
 
   'css!./module.css',
   'css!./leaflet/leaflet.css',
-  'css!./leaflet/plugins.css'
+  'css!./leaflet/leaflet.draw.css',
+  'css!./leaflet/MarkerCluster.css',
+  'css!./leaflet/MarkerCluster.Default.css'
 ],
 function (angular, app, _, L, localRequire) {
   'use strict';
@@ -58,11 +62,10 @@ function (angular, app, _, L, localRequire) {
         " compute, while showing less actual data. If you have a time filter, it will attempt to"+
         " show to most recent points in your search, up to your defined limit"
     };
-
+    
     // Set and populate defaults
     var _d = {
       /** @scratch /panels/bettermap/3
-       *
        * === Parameters
        *
        * field:: The field that contains the coordinates, in geojson format. GeoJSON is
@@ -83,7 +86,6 @@ function (angular, app, _, L, localRequire) {
        */
       tooltip : "_id",
       /** @scratch /panels/bettermap/5
-       *
        * ==== Queries
        * queries object:: This object describes the queries to use on this panel.
        * queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
@@ -97,7 +99,7 @@ function (angular, app, _, L, localRequire) {
 
     _.defaults($scope.panel,_d);
 
-    // inorder to use relative paths in require calls, require needs a context to run. Without
+    // in order to use relative paths in require calls, require needs a context to run. Without
     // setting this property the paths would be relative to the app not this context/file.
     $scope.requireContext = localRequire;
 
@@ -107,9 +109,9 @@ function (angular, app, _, L, localRequire) {
       });
       $scope.get_data();
     };
-
+    
     $scope.get_data = function(segment,query_id) {
-      $scope.require(['./leaflet/plugins'], function () {
+      $scope.require(['./leaflet/leaflet.markercluster', './leaflet/leaflet.draw'], function () {
         $scope.panel.error =  false;
 
         // Make sure we have everything for the request to complete
@@ -206,7 +208,7 @@ function (angular, app, _, L, localRequire) {
 
   });
 
-  module.directive('bettermap', function() {
+  module.directive('bettermap', function(filterSrv) {
     return {
       restrict: 'A',
       link: function(scope, elem) {
@@ -224,49 +226,136 @@ function (angular, app, _, L, localRequire) {
           }
         });
 
-        var map, layerGroup;
+        var map, makersLayerGroup, currentLayersByFilterId;
 
         function render_panel() {
           elem.css({height:scope.row.height});
 
-          scope.require(['./leaflet/plugins'], function () {
+          scope.require(['./leaflet/leaflet.markercluster', './leaflet/leaflet.draw'], function () {
             scope.panelMeta.loading = false;
             L.Icon.Default.imagePath = 'app/panels/bettermap/leaflet/images';
             if(_.isUndefined(map)) {
-              map = L.map(scope.$id, {
-                scrollWheelZoom: false,
-                center: [40, -86],
-                zoom: 10
-              });
-
-              // This could be made configurable?
-              L.tileLayer('http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg', {
-                attribution: '"Data, imagery and map information provided by MapQuest, '+
-                  'OpenStreetMap <http://www.openstreetmap.org/copyright> and contributors, ODbL',
-                maxZoom: 18,
-                minZoom: 2
-              }).addTo(map);
-              layerGroup = new L.MarkerClusterGroup({maxClusterRadius:30});
+              createMap();
+              // The layer that will hold our markers
+              makersLayerGroup = new L.MarkerClusterGroup({maxClusterRadius:30});
+              // This will hold the list of current layers, mapped to their respective filter ids
+              currentLayersByFilterId = {};
             } else {
-              layerGroup.clearLayers();
+              makersLayerGroup.clearLayers();
             }
 
             var markerList = [];
 
             _.each(scope.data, function(p) {
               if(!_.isUndefined(p.tooltip) && p.tooltip !== '') {
-                markerList.push(L.marker(p.coordinates).bindLabel(_.isArray(p.tooltip) ? p.tooltip[0] : p.tooltip));
+                var title = p.tooltip;
+                var marker = L.marker(p.coordinates, { title: title});
+                markerList.push(marker.bindPopup(p.tooltip));
               } else {
                 markerList.push(L.marker(p.coordinates));
               }
             });
 
-            layerGroup.addLayers(markerList);
+            makersLayerGroup.addLayers(markerList);
 
-            layerGroup.addTo(map);
+            makersLayerGroup.addTo(map);
 
             map.fitBounds(_.pluck(scope.data,'coordinates'));
           });
+        }
+        
+        function createMap() {
+          map = L.map(scope.$id, {
+            scrollWheelZoom: true,
+            center: [40, -86],
+            zoom: 10
+          });
+
+          // Initialise the FeatureGroup to store editable layers
+          var drawnItems = new L.FeatureGroup();
+          map.addLayer(drawnItems);
+          
+          // Initialise the draw control and pass it the FeatureGroup of editable layers
+          var drawControl = new L.Control.Draw({
+            edit: {
+              featureGroup: drawnItems
+            },
+            draw: {
+              polyline: false,
+              marker: false,
+              circle: false
+            }
+          });
+
+          map.addControl(drawControl);
+          
+          // Watch for new polygons drawn on the map, and update filters accordingly
+          map.on('draw:created', function (e) {
+              var layer = e.layer;
+
+              var filterId = filterSrv.set(
+                {
+                  type : 'geo_polygon',
+                  field : scope.panel.field,
+                  value : layer.toGeoJSON().geometry.coordinates[0],
+                  mandate : ('either')
+                }
+              );
+              layer.filterId = filterId;
+              drawnItems.addLayer(layer);
+              currentLayersByFilterId[filterId] = layer;
+            }
+          );
+
+          // Watch for polygons deleted from the map, and update filters accordingly
+          map.on('draw:deleted', function (e) {
+            var layers = e.layers;
+            layers.eachLayer(function (layer) {
+              console.log("Polygon was removed, filter id " + layer.filterId);
+              filterSrv.remove(layer.filterId);
+            });
+            
+          });
+          
+          // Watch for polygons edited on the map, and update the existing accordingly
+          map.on('draw:edited', function (e) {
+              var layers = e.layers;
+              layers.eachLayer(
+                function (layer) {
+                  console.log("Polygon was edited, filter id " + layer.filterId);
+                  filterSrv.set(
+                    {
+                      type:'geo_polygon',
+                      field:scope.panel.field,
+                      value:layer.toGeoJSON().geometry.coordinates[0],
+                      mandate:('either')
+                    },
+                    layer.filterId);
+                }
+              );
+            }
+          );
+          
+          // Watch for changes in the list of filters, and remove filters from the map if needed to
+          // keep filter list consistent with the map
+          scope.$watch(function() { return filterSrv.ids; }, function(newValue, oldValue) {
+            if (_.isUndefined(newValue)) {
+              return;
+            }
+            
+            for (var id in currentLayersByFilterId) {
+              if ( !(_.contains(newValue, parseInt(id, 10))) ) {
+                map.removeLayer(currentLayersByFilterId[id]);
+              }
+            }
+          });
+          
+          L.tileLayer(scope.panel.osm_url, {
+            attribution: '"Data, imagery and map information provided by MapQuest, '+
+              'OpenStreetMap <http://www.openstreetmap.org/copyright> and contributors, ODbL',
+            maxZoom: 18,
+            minZoom: 2
+          }).addTo(map);
         }
       }
     };
