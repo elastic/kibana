@@ -130,12 +130,13 @@ define(function (require) {
      * @return {Promise}
      */
     SourceAbstract.prototype.onResults = function () {
-      var defer = Promise.defer();
-      this._courier._pendingRequests.push({
-        source: this,
-        defer: defer
+      var source = this;
+      return new Promise.emitter(function (resolve, reject, defer) {
+        source._courier._pendingRequests.push({
+          source: source,
+          defer: defer
+        });
       });
-      return defer.promise;
     };
 
     /**
