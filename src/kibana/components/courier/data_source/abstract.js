@@ -6,7 +6,7 @@ define(function (require) {
 
   var module = require('modules').get('kibana/courier');
 
-  module.factory('CouriersSourceAbstract', function (couriersFetch, Promise) {
+  module.factory('CouriersSourceAbstract', function (couriersFetch, Promise, timefilter, $q) {
 
     function SourceAbstract(courier, initialState) {
       this._state = (function () {
@@ -218,33 +218,50 @@ define(function (require) {
       }
       current = null;
 
-      if (type === 'search') {
-        // defaults for the query
-        _.forOwn({
-          query: {
-            'match_all': {}
-          }
-        }, collectProp);
 
-        // switch to filtered query if there are filters
-        if (flatState.filters) {
-          if (flatState.filters.length) {
-            flatState.body.query = {
-              filtered: {
-                query: flatState.body.query,
-                filter: {
-                  bool: {
-                    must: flatState.filters
+      // TODO: This is a hacky way of getting the timefield, this should be stored in mapping metadata
+      // and we should check if the data source is time based in the first place;
+      if (type === 'search') {
+
+        return this._courier._mapper.getCachedFieldsFor(this).then(function (indexPattern) {
+          // defaults for the query
+          _.forOwn({
+            query: {
+              'match_all': {}
+            }
+          }, collectProp);
+
+          var filter = timefilter.get(indexPattern);
+          if (!!filter) {
+            flatState.filters = flatState.filters || [];
+            flatState.filters.push(filter);
+          }
+
+          // switch to filtered query if there are filters
+          if (flatState.filters) {
+            if (flatState.filters.length) {
+              flatState.body.query = {
+                filtered: {
+                  query: flatState.body.query,
+                  filter: {
+                    bool: {
+                      must: flatState.filters
+                    }
                   }
                 }
-              }
-            };
+              };
+            }
+            delete flatState.filters;
           }
-          delete flatState.filters;
-        }
+
+          return flatState;
+        });
+      } else {
+        var p = $q.defer();
+        p.resolve(flatState);
+        return p.promise;
       }
 
-      return flatState;
     };
 
     return SourceAbstract;
