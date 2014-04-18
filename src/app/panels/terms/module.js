@@ -125,7 +125,8 @@ function (angular, app, _, $, kbn) {
       /** @scratch /panels/terms/5
        * valuefield:: Terms_stats facet value field
        */
-      valuefield  : ''
+      valuefield  : '',
+      history     : []
     };
 
     _.defaults($scope.panel,_d);
@@ -147,7 +148,7 @@ function (angular, app, _, $, kbn) {
 
     var update_history = function(query) {
       if($scope.panel.remember > 0) {
-        $scope.panel.history = _.union(query.reverse(),$scope.panel.history);
+        $scope.panel.history.push(query);
         var _length = $scope.panel.history.length;
         if(_length > $scope.panel.remember) {
           $scope.panel.history = $scope.panel.history.slice(0,$scope.panel.remember);
@@ -181,7 +182,8 @@ function (angular, app, _, $, kbn) {
         boolQuery = boolQuery.should(querySrv.toEjsObj(q));
       });
 
-      if (!(_.isUndefined($scope.panel.filterQuery)) && !(_.isEmpty($scope.panel.filterQuery))) {
+      if ($scope.panel.searchbox && !(_.isUndefined($scope.panel.filterQuery)) &&
+        !(_.isEmpty($scope.panel.filterQuery))) {
         boolQuery.must($scope.ejs.PrefixQuery($scope.panel.field, $scope.panel.filterQuery));
       }
 

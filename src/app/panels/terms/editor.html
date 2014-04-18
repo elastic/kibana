@@ -69,6 +69,9 @@
       <div class="editor-option">
         <label class="small">Add search box</label><input type="checkbox" ng-model="panel.searchbox" ng-checked="panel.searchbox">
       </div>
+      <div class="editor-option" ng-show="panel.searchbox">
+        <label class="small">Remember search history</label><input type="number" ng-model="panel.remember" ng-checked="panel.remember">
+      </div>
 
     </div>
   </div>
