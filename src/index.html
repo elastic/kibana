@@ -27,13 +27,17 @@
           </ul>
           <ul class="nav navbar-nav pull-right">
             <li ng-show="httpActive.length"><a href="#"><i class="fa fa-spinner fa-spin loading-spinner"></i></a></li>
-            <li><a class="navbar-link" ng-click="toggleTimepicker()">{{opts.time.from}} - {{opts.time.to}} <i class="fa fa-clock-o"></i></a></li>
+            <li ng-show="opts.timefilter.enabled()">
+              <a class="navbar-link" ng-click="toggleTimepicker()">
+                <span class="small">{{opts.timefilter.time.from | moment}} to {{opts.timefilter.time.to | moment}}</span>
+                <i class="fa fa-clock-o"></i>
+              </a>
+            </li>
           </ul>
         </div>
       </nav>
       <config
-        config-template="globalConfigTemplate"
-        config-object="opts">
+        config-template="globalConfigTemplate" config-object="opts">
       </config>
       <div class="application" ng-view></div>
     </div>

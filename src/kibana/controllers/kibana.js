@@ -55,7 +55,8 @@ define(function (require) {
       setup.bootstrap(),
       config.init()
     ]).then(function () {
-      $injector.invoke(function ($rootScope, courier, config, configFile, $timeout, $location) {
+      $injector.invoke(function ($rootScope, courier, config, configFile, $timeout, $location, timefilter) {
+
         // get/set last path for an app
         var lastPathFor = function (app, path) {
           var key = 'lastPath:' + app.id;
@@ -88,7 +89,7 @@ define(function (require) {
         });
 
         $scope.opts = {
-          time: {},
+          timefilter: timefilter,
           activeFetchInterval: void 0,
           fetchIntervals: [
             { display: 'none', val: null},
@@ -109,6 +110,11 @@ define(function (require) {
           $scope.configureTemplateUrl = require('text!../partials/global_config.html');
         };
 
+        // TODO: Switch this to watching timefilter.string when we implement it
+        $scope.$watchCollection('opts.timefilter.time', function () {
+          courier.fetch();
+        });
+
         // expose the notification services list of notifs on the $scope so that the
         // notification directive can show them on the screen
         $scope.notifList = notify._notifs;
@@ -116,7 +122,8 @@ define(function (require) {
         notify._setTimerFns($timeout, $timeout.cancel);
 
         $scope.toggleTimepicker = function () {
-          var timepickerHtml = '<kbn-timepicker from="opts.time.from" to="opts.time.to" mode="timepickerMode"></kbn-timepicker>';
+          var timepickerHtml = '<kbn-timepicker from="opts.timefilter.time.from"' +
+            ' to="opts.timefilter.time.to" mode="timepickerMode"></kbn-timepicker>';
           // Close if already open
           if ($scope.globalConfigTemplate === timepickerHtml) {
             delete $scope.globalConfigTemplate;
