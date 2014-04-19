@@ -59,7 +59,7 @@
 
       <div ng-hide="dashboard.current.services.filter.list[id].editing && isEditable(dashboard.current.services.filter.list[id])">
         <ul class="unstyled">
-          <li ng-repeat="(key,value) in dashboard.current.services.filter.list[id] track by $index" ng-show="show_key(key)">
+          <li ng-repeat="(key,value) in dashboard.current.services.filter.list[id] track by $index" ng-show="show_key(key) && show_type(dashboard.current.services.filter.list[id].type)">
             <strong>{{key}}</strong> : {{value}}
           </li>
         </ul>

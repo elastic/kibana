@@ -1,6 +1,14 @@
   <div class="editor-row">
     <div class="editor-option">
       <form>
+        <h6>OpenStreetMaps URL</h6>
+        <input type="text" class="input-large" ng-model="panel.osm_url">
+      </form>
+    </div>
+  </div>
+  <div class="editor-row">
+    <div class="editor-option">
+      <form>
         <h6>Coordinate Field <tip>geoJSON array! Long,Lat NOT Lat,Long</tip></h6>
         <input  bs-typeahead="fields.list" type="text" class="input-small" ng-model="panel.field">
       </form>
