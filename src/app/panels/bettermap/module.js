@@ -348,7 +348,12 @@ function (angular, app, _, L, localRequire) {
               }
             }
           });
-          
+
+          // set a default osm_url if there is none
+          if (_.isUndefined(scope.panel.osm_url) || _.isNull(scope.panel.osm_url)) {
+            scope.panel.osm_url = "http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg";
+          }
+
           L.tileLayer(scope.panel.osm_url, {
             attribution: '"Data, imagery and map information provided by MapQuest, '+
               'OpenStreetMap <http://www.openstreetmap.org/copyright> and contributors, ODbL',
