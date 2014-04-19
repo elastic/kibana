@@ -351,6 +351,10 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
 
         var facet = $scope.ejs.DateHistogramFacet(q.id);
 
+        if($scope.panel.timezone === "browser"){
+          facet.timeZone(-(new Date()).getTimezoneOffset()/60);
+        }
+
         if($scope.panel.mode === 'count') {
           facet = facet.field($scope.panel.time_field).global(true);
         } else {
