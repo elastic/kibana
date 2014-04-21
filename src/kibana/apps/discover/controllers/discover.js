@@ -125,6 +125,13 @@ define(function (require) {
           if (!angular.equals(sort, currentSort)) $scope.fetch();
         });
 
+        searchSource.onError().then(function searchError(err) {
+          console.log(err);
+          notify.error('An error occured with your request. Reset your inputs and try again.');
+
+          return searchSource.onError().then(searchError);
+        });
+
         // Bind a result handler. Any time searchSource.fetch() is executed this gets called
         // with the results
         searchSource.onResults().then(function onResults(resp) {
