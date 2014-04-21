@@ -24,11 +24,22 @@ define(function (require) {
         type: 'search',
         body: {
           query: {
-            multi_match: {
-              query: searchString || '',
-              type: 'phrase_prefix',
-              fields: ['title^3', 'description'],
-              zero_terms_query: 'all'
+            bool: {
+              should : [
+                {
+                  wildcard: {
+                    title: {
+                      value: searchString + '*',
+                      boost: 3
+                    }
+                  }
+                },
+                {
+                  wildcard: {
+                    description: searchString + '*'
+                  }
+                },
+              ],
             }
           }
         }
