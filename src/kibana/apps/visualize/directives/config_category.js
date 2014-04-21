@@ -9,14 +9,12 @@ define(function (require) {
       return {
         restrict: 'E',
         scope: {
-          categoryName: '=',
+          category: '=',
           vis: '=',
           fields: '='
         },
         template: html,
         link: function ($scope, $el) {
-          $scope.category = $scope.vis[$scope.categoryName];
-
           $scope.moveHandler = function (config, delta) {
             var configs = $scope.category.configs;
             var i = configs.indexOf(config);

@@ -77,6 +77,7 @@ define(function (require) {
       params: {
         interval: {
           options: [
+            { display: 'Minute', val: 'minute' },
             { display: 'Hourly', val: 'hour' },
             { display: 'Daily', val: 'day' },
             { display: 'Weekly', val: 'week' },

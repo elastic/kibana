@@ -101,7 +101,7 @@ define(function (require) {
             if (!controlsHtml.match(/aggParams\.interval\.options/)) ; //debugger;
           }
 
-          if ($scope.config.categoryName === 'group') {
+          if ($scope.category.name === 'group') {
             controlsHtml += ' ' + controlHtml.globalLocal;
           }
         }
@@ -120,7 +120,7 @@ define(function (require) {
         move: '='
       },
       link: function ($scope, $el, attr) {
-        var categoryName = $scope.config.categoryName;
+        var categoryName = $scope.category.name;
         var opts = categoryOptions[categoryName];
 
         $scope.aggs = aggs;

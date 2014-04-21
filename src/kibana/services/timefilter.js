@@ -4,18 +4,18 @@ define(function (require) {
   var datemath = require('utils/datemath');
   var module = require('modules').get('kibana/services');
 
-  module.service('timefilter', function () {
-    
+  module.service('timefilter', function (Promise, globalState) {
+
     var self = this;
 
     // TODO: This should be disabled on route change, apps need to enable it explicitly
     var enable = false;
-    
+
     // These can be date math strings or moments.
-    this.time = {
+    this.time = _.defaults(globalState.time || {}, {
       from: 'now-15m',
       to: 'now'
-    };
+    });
 
     this.enabled = function (state) {
       if (!_.isUndefined(state)) enable = state;

@@ -5,10 +5,8 @@ define(function (require) {
       name: 'segment',
       displayOrder: 2,
       fetchOrder: 1,
-      defaults: {
-        min: 0,
-        max: Infinity
-      },
+      min: 0,
+      max: Infinity,
       configDefaults: {
         size: 5
       }
@@ -17,10 +15,8 @@ define(function (require) {
       name: 'metric',
       displayOrder: 1,
       fetchOrder: 2,
-      defaults: {
-        min: 0,
-        max: 1
-      },
+      min: 0,
+      max: 1,
       configDefaults: {
         agg: 'count'
       }
@@ -29,10 +25,8 @@ define(function (require) {
       name: 'group',
       displayOrder: 3,
       fetchOrder: 3,
-      defaults: {
-        min: 0,
-        max: 1
-      },
+      min: 0,
+      max: 1,
       configDefaults: {
         global: true,
         size: 5
@@ -42,10 +36,8 @@ define(function (require) {
       name: 'split',
       displayOrder: 4,
       fetchOrder: 4,
-      defaults: {
-        min: 0,
-        max: 2
-      },
+      min: 0,
+      max: 2,
       configDefaults: {
         size: 5,
         row: true

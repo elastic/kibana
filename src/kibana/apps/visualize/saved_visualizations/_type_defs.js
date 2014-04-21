@@ -19,10 +19,12 @@ define(function (require) {
         },
         group: {
           label: 'Color',
+          min: 0,
           max: 1
         },
         split: {
           label: 'Rows & Columns',
+          min: 0,
           max: 2
         }
       }

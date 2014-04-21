@@ -14,7 +14,7 @@ define(function (require) {
   require('directives/fixed_scroll');
   require('filters/moment');
   require('apps/settings/services/index_patterns');
-  require('factories/synced_state');
+  require('state_management/app_state');
   require('services/timefilter');
 
   var app = require('modules').get('app/discover', [
@@ -36,7 +36,8 @@ define(function (require) {
     }
   });
 
-  app.controller('discover', function ($scope, config, courier, $route, savedSearches, Notifier, $location, SyncedState, timefilter) {
+
+  app.controller('discover', function ($scope, config, courier, $route, savedSearches, Notifier, $location, AppState, timefilter) {
     var notify = new Notifier({
       location: 'Discover'
     });
@@ -60,9 +61,7 @@ define(function (require) {
       index: config.get('defaultIndex'),
     };
 
-    console.log(stateDefaults);
-
-    var $state = $scope.state = new SyncedState(stateDefaults);
+    var $state = $scope.state = new AppState(stateDefaults);
 
     // Check that we have any index patterns before going further, and that index being requested
     // exists.
@@ -112,14 +111,12 @@ define(function (require) {
         var ignore = ['columns'];
 
         // listen for changes, and relisten everytime something happens
-        $state.onUpdate().then(function filterStateUpdate(changed) {
-          // if we only have ignorable changed, do nothing
+        $state.onUpdate(function (changed) {
+          // if we only have ignorable changes, do nothing
           if (_.difference(changed, ignore).length) {
             updateDataSource();
             courier.fetch();
           }
-
-          $state.onUpdate().then(filterStateUpdate);
         });
 
         $scope.$watch('state.sort', function (sort) {
@@ -181,9 +178,8 @@ define(function (require) {
     };
 
     $scope.fetch = function () {
-      var changed = $state.commit();
-      // when none of the fields updated, we need to call fetch ourselves
-      if (changed.length === 0) courier.fetch();
+      $state.commit();
+      courier.fetch();
     };
 
     $scope.toggleConfig = function () {

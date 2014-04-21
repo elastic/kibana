@@ -28,37 +28,42 @@ define(function (require) {
       return true;
     }
 
-    function readAndValidate(config) {
-      // filter out plain unusable configs
-      if (!config || !config.agg || !config.field) return;
+    function makeCategoryValidator(category) {
+      return function categoryValidator(config) {
+        // filter out plain unusable configs
+        if (!config || !config.agg || !config.field) return;
 
-      // get the agg used by this config
-      var agg = aggs.byName[config.agg];
-      if (!agg || agg.name === 'count') return;
+        // get the agg used by this config
+        var agg = aggs.byName[config.agg];
+        if (!agg || agg.name === 'count') return;
 
-      // copy parts of the config to the "validated" config object
-      var validated = _.pick(config, 'categoryName', 'agg');
-      validated.aggParams = {
-        field: config.field
+        // copy parts of the config to the "validated" config object
+        var validated = {
+          agg: config.agg,
+          aggParams: {
+            field: config.field
+          },
+          categoryName: category.name
+        };
+
+        // copy over other properties based on the category
+        switch (category.name) {
+        case 'split':
+          validated.row = !!config.row;
+          break;
+        case 'group':
+          validated.global = !!config.global;
+          break;
+        }
+
+        // this function will move valus from config.* to validated.aggParams.* when they are
+        // needed for that aggregation, and return true or false based on if all requirements
+        // are meet
+        var moveToAggParams = _.partial(moveValidatedParam, config, validated.aggParams);
+
+        // ensure that all of the declared params for the agg are declared on the config
+        if (_.every(agg.params, moveToAggParams)) return validated;
       };
-
-      // copy over other properties based ont he category
-      switch (config.categoryName) {
-      case 'split':
-        validated.row = !!config.row;
-        break;
-      case 'group':
-        validated.global = !!config.global;
-        break;
-      }
-
-      // this function will move valus from config.* to validated.aggParams.* when they are
-      // needed for that aggregation, and return true or false based on if all requirements
-      // are meet
-      var moveToAggParams = _.partial(moveValidatedParam, config, validated.aggParams);
-
-      // ensure that all of the declared params for the agg are declared on the config
-      if (_.every(agg.params, moveToAggParams)) return validated;
     }
 
     // collect all of the configs from each category,
@@ -67,7 +72,7 @@ define(function (require) {
       var configs = vis[category.name].configs;
 
       configs = configs
-        .map(readAndValidate)
+        .map(makeCategoryValidator(category))
         .filter(Boolean);
 
       if (category.name === 'group') {

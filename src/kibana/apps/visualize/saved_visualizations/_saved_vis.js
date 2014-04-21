@@ -95,15 +95,18 @@ define(function (require) {
 
       // initialize config categories
       configCats.forEach(function (category) {
-        var cat = _.defaults(typeDef.config[category.name] || {}, category.defaults);
+        var cat = {};
+        cat.configDefaults = _.clone(category.configDefaults);
         cat.configs = [];
+
+        _.defaults(cat, typeDef.config[category.name] || {}, category);
+
         vis[category.name] = cat;
       });
 
       vis.addConfig = function (categoryName) {
         var category = configCats.byName[categoryName];
         var config = _.defaults({}, category.configDefaults);
-        config.categoryName = category.name;
 
         vis[category.name].configs.push(config);
 
@@ -112,7 +115,9 @@ define(function (require) {
 
       vis.removeConfig = function (config) {
         if (!config) return;
-        _.pull(vis[config.categoryName].configs, config);
+        configCats.forEach(function (category) {
+          _.pull(vis[category.name].configs, config);
+        });
       };
 
       vis._fillConfigsToMinimum = function () {

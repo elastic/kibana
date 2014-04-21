@@ -3,6 +3,7 @@ define(function (require) {
   var $ = require('jquery');
   var moment = require('moment');
   var nextTick = require('utils/next_tick');
+  var qs = require('utils/query_string');
 
   require('config/config');
   require('courier/courier');
@@ -55,34 +56,68 @@ define(function (require) {
       setup.bootstrap(),
       config.init()
     ]).then(function () {
-      $injector.invoke(function ($rootScope, courier, config, configFile, $timeout, $location, timefilter) {
+      $injector.invoke(function ($rootScope, courier, config, configFile, $timeout, $location, timefilter, globalState) {
 
         // get/set last path for an app
         var lastPathFor = function (app, path) {
           var key = 'lastPath:' + app.id;
-          if (path === void 0) return localStorage.getItem(key);
-          else return localStorage.setItem(key, path);
+          if (path === void 0) {
+            app.lastPath = localStorage.getItem(key) || '/' + app.id;
+            return app.lastPath;
+          } else {
+            app.lastPath = path;
+            return localStorage.setItem(key, path);
+          }
         };
 
-        $scope.apps = configFile.apps.map(function (app) {
-          app.lastPath = lastPathFor(app);
-          return app;
-        });
+        $scope.apps = configFile.apps;
+        // initialize each apps lastPath (fetch it from localStorage)
+        $scope.apps.forEach(function (app) { lastPathFor(app); });
 
-        function updateAppData() {
+        function onRouteChange() {
           var route = $location.path().split(/\//);
           var app = _.find($scope.apps, {id: route[1]});
 
           // Record the last URL w/ state of the app, use for tab.
-          app.lastPath = $location.url().substring(1);
-          lastPathFor(app, app.lastPath);
+          lastPathFor(app, $location.url());
 
-          // Set class of container to application-<whateverApp>
+          // Set class of container to application-<appId>
           $scope.activeApp = route ? route[1] : null;
         }
 
-        $scope.$on('$routeChangeSuccess', updateAppData);
-        $scope.$on('$routeUpdate', updateAppData);
+        $scope.$on('$routeChangeSuccess', onRouteChange);
+        $scope.$on('$routeUpdate', onRouteChange);
+
+        var writeGlobalStateToLastPaths = function () {
+          var currentUrl = $location.url();
+          var _g = rison.encode(globalState);
+
+          $scope.apps.forEach(function (app) {
+            var url = lastPathFor(app);
+            if (!url || url === currentUrl) return;
+
+            var loc = qs.findInUrl(url);
+            var parsed = qs.decode(url.substring(loc.start + 1, loc.end));
+            parsed._g = _g;
+
+            var chars = url.split('');
+            chars.splice(loc.start, loc.end - loc.start, '?' + qs.encode(parsed));
+
+            lastPathFor(app, chars.join(''));
+          });
+        };
+
+        // watch the timefilter for changes, and write to globalState when it changes
+        $scope.$watchCollection('opts.timefilter.time', function writeToGlobalState() {
+          globalState.time = _.clone(timefilter.time);
+          globalState.commit();
+
+          writeGlobalStateToLastPaths();
+        });
+
+        globalState.onUpdate(function readFromGlobalState() {
+          _.assign(timefilter.time, globalState.time);
+        });
 
         $scope.$on('application.load', function () {
           courier.start();

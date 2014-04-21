@@ -28,10 +28,12 @@ define(function (require) {
     }
   });
 
-  app.controller('VisualizeWizardStep1', function ($route, $scope, courier, config, $location, indexPatterns) {
+  app.controller('VisualizeWizardStep1', function ($route, $scope, courier, config, $location, indexPatterns, timefilter) {
     $scope.step2WithSearchUrl = function (hit) {
       return '#/visualize/step/2?savedSearchId=' + encodeURIComponent(hit.id);
     };
+
+    timefilter.enabled(false);
 
     $scope.indexPattern = {
       selection: null,
@@ -51,8 +53,10 @@ define(function (require) {
     template: templateStep(2, require('text!../partials/wizard/step_2.html'))
   });
 
-  app.controller('VisualizeWizardStep2', function ($scope, $route, $location) {
+  app.controller('VisualizeWizardStep2', function ($scope, $route, $location, timefilter) {
     var existing = _.pick($route.current.params, 'indexPattern', 'savedSearchId');
+
+    timefilter.enabled(false);
 
     $scope.visTypeDefs = typeDefs;
     $scope.typeUrl = function (type) {
