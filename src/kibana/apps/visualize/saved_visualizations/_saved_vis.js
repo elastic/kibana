@@ -129,10 +129,10 @@ define(function (require) {
         });
       };
 
-      vis.setState = function (state) {
+      vis.setState = function (state, noWipe) {
         configCats.forEach(function (category) {
           var categoryStates = state[category.name] || [];
-          vis[category.name].configs.splice(0);
+          noWipe || vis[category.name].configs.splice(0);
           categoryStates.forEach(function (configState) {
             var config = vis.addConfig(category.name);
             _.assign(config, configState);
