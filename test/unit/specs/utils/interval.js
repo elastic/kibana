@@ -102,6 +102,12 @@ define(function (require) {
         expect(interval.calculate(_t, now, 100).interval).to.be(interval.toMS('1w'));
       });
 
+      it('should calculate an appropriate interval for 25y', function () {
+        var _t = then.subtract(25, 'years');
+        expect(interval.calculate(_t, now, 100).interval).to.be(interval.toMS('1M'));
+      });
+
+
       it('should calculate an appropriate interval for a 100y', function () {
         var _t = then.subtract(100, 'years');
         expect(interval.calculate(_t, now, 100).interval).to.be(interval.toMS('1y'));
