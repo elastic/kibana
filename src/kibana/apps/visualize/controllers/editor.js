@@ -14,60 +14,70 @@ define(function (require) {
   var aggs = require('../saved_visualizations/_aggs');
   var visConfigCategories = require('../saved_visualizations/_config_categories');
 
+  var getVisAndFieldsHash = function (using, savedVisualizations) {
+    return savedVisualizations.get(using)
+    .then(function (vis) {
+      // get the fields before we render, but return the vis
+      return vis.searchSource.getFields()
+      .then(function (fields) {
+        return [vis, fields];
+      });
+    });
+  };
+
   require('routes')
   .when('/visualize/create', {
     template: require('text!../editor.html'),
     resolve: {
-      vis: function ($route, savedVisualizations) {
-        return savedVisualizations.get($route.current.params);
+      visAndFieldsHash: function ($route, savedVisualizations) {
+        return getVisAndFieldsHash($route.current.params, savedVisualizations);
       }
     }
   })
   .when('/visualize/edit/:id', {
     template: require('text!../editor.html'),
     resolve: {
-      vis: function ($route, savedVisualizations) {
-        return savedVisualizations.get($route.current.params.id);
+      visAndFieldsHash: function ($route, savedVisualizations) {
+        return getVisAndFieldsHash($route.current.params.id, savedVisualizations);
       }
     }
   });
 
-  app.controller('VisualizeEditor', function ($route, $scope, courier, createNotifier, config, $location, savedVisualizations) {
-    var notify = createNotifier({
+  app.controller('VisualizeEditor', function ($scope, $route, Notifier, config, $location, savedVisualizations, SyncedState) {
+    var notify = new Notifier({
       location: 'Visualization Editor'
     });
 
     // get the vis loaded in from the routes
-    var vis = $route.current.locals.vis;
+    var vis = $route.current.locals.visAndFieldsHash[0];
+    var fieldsHash = $route.current.locals.visAndFieldsHash[1];
+
+    var $state = new SyncedState(vis.getState());
 
     // get the current field list
-    vis.searchSource.getFields()
-    .then(function (fieldsHash) {
-      // create a sorted list of the fields for display purposes
-      $scope.fields = _(fieldsHash)
-        .keys()
-        .sort()
-        .transform(function (fields, name) {
-          var field = fieldsHash[name];
-          field.name = name;
-          fields.push(field);
-        })
-        .value();
-
-      $scope.fields.byName = fieldsHash;
-    });
+    // create a sorted list of the fields for display purposes
+    $scope.fields = _(fieldsHash)
+      .keys()
+      .sort()
+      .transform(function (fields, name) {
+        var field = fieldsHash[name];
+        field.name = name;
+        fields.push(field);
+      })
+      .value();
+    $scope.fields.byName = fieldsHash;
 
     $scope.vis = vis;
     $scope.aggs = aggs;
     $scope.visConfigCategories = visConfigCategories;
+
+    var visConfigProperties = Object.keys(visConfigCategories.byName);
 
     /**
      * (Re)set the aggs key on the vis.searchSource based on the
      * current config
      */
     var updateDataSource = function () {
-      notify.event('update data source');
-
       // stores the config objects in queryDsl
       var dsl = {};
       // counter to ensure unique agg names
@@ -89,29 +99,57 @@ define(function (require) {
 
       // set the dsl to the searchSource
       vis.searchSource.aggs(dsl.aggs || {});
-      notify.event('update data source', true);
     };
 
     /**
-     * Refresh Visualization
+     * Write the latest changes made on the visualization to the $state. This
+     * will cause a fetch if there were changes
+     *
+     * @return {Array} - a list of the keys from state that were updated.
      */
-    $scope.doVisualize = function () {
+    var writeStateAndFetch = function () {
+      updateDataSource();
+      _.assign($state, vis.getState());
+      var changes = $state.commit();
+
+      // only fetch if the update didn't cause a $state change, otherwise a "change"
+      // will be triggered and the fetch will happen then.
+      if (!changes.length) vis.searchSource.fetch();
+    };
+
+    /**
+     * Pull the state into the vis, and then fetch the searchSource
+     * @return {undefined}
+     */
+    var readStateAndFetch = function () {
+      // update and commit the state, which will update the vis dataSource if there were new changes
+      vis.setState($state);
       updateDataSource();
       vis.searchSource.fetch();
     };
 
     /**
-     * Restart on a new visualization
+     * handler for updated coming from the state
+     */
+    $state.onUpdate(readStateAndFetch);
+
+    /**
+     * Click handler for the "refresh" button
+     */
+    $scope.doVisualize = writeStateAndFetch;
+
+    /**
+     * Click handler for the "new doc" button
      */
     $scope.startOver = function () {
       $location.url('/visualize');
     };
 
     /**
-     * Save the current vis state
+     * Do that actual save, click handler for the "save" button within the save config panel
      */
     $scope.doSave = function () {
-      updateDataSource();
+      writeStateAndFetch();
 
       // serialize the current state
       vis.stateJSON = JSON.stringify(vis.getState());
@@ -123,43 +161,26 @@ define(function (require) {
       }, notify.fatal);
     };
 
-    // templates that can be used in the config panel
+    // config panel templates
     var configTemplate = $scope.configTemplate = new ConfigTemplate({
       save: require('text!../partials/save.html'),
       load: require('text!../partials/load.html')
     });
 
     /**
-     * Toggle the save config panel
+     * Click handler for the "save" button.
      */
-    $scope.toggleSave = function () {
-      configTemplate.toggle('save');
-    };
-
-    // stash for vars related to loading a vis
-    var loadVis = $scope.loadVis = {
-      filter: '',
-      list: [],
-      setList: function (hits) {
-        $scope.loadVis.list = hits.filter(function (hit) {
-          return hit.id !== $scope.vis.id;
-        });
-      }
-    };
+    $scope.toggleSave = _.bindKey(configTemplate, 'toggle', 'save');
 
     /**
      * Toggle the load config panel
      */
-    $scope.toggleLoad = function () {
-      configTemplate.toggle('load') && savedVisualizations.find().then(loadVis.setList);
-    };
-
-    // when the filter changes, load in the new vis objects
-    $scope.$watch('loadVis.filter', function () {
-      savedVisualizations.find(loadVis.filter).then(loadVis.setList);
-    });
+    $scope.toggleLoad = _.bindKey(configTemplate, 'toggle', 'load');
 
     // objects to make available within the config panel's scope
-    $scope.conf = _.pick($scope, 'doSave', 'doLoad', 'loadVis', 'vis');
+    $scope.conf = _.pick($scope, 'doSave', 'vis');
+
+    // init
+    readStateAndFetch();
   });
 });

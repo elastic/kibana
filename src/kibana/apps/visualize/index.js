@@ -4,9 +4,9 @@ define(function (require) {
   require('./controllers/editor');
   require('./controllers/wizard');
 
-  require('./directives/config_category');
   require('./directives/canvas');
   require('./directives/visualization');
+  require('./directives/config_category');
 
   require('routes')
   .when('/visualize', {
