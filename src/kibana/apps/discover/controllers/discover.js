@@ -3,6 +3,8 @@ define(function (require) {
   var angular = require('angular');
   var moment = require('moment');
   var settingsHtml = require('text!../partials/settings.html');
+  var interval = require('utils/interval');
+  var datemath = require('utils/datemath');
 
   require('notify/notify');
   require('directives/timepicker');
@@ -78,11 +80,19 @@ define(function (require) {
       indexPatternList: indexPatternList,
     };
 
+    // So we can watch it.
+    $scope.time = timefilter.time;
+
+    // TODO: Switch this to watching time.string when we implement it
+    $scope.$watchCollection('time', function () {
+      updateDataSource();
+      $scope.fetch();
+    });
+
     // stores the complete list of fields
     $scope.fields = null;
 
     var init = _.once(function () {
-      console.log(moment.duration(7.5, 's').valueOf());
       return setFields()
       .then(updateDataSource)
       .then(function () {
@@ -132,7 +142,6 @@ define(function (require) {
               }
             ]
           }]}]} : undefined;
-          console.log($scope.chart);
 
           return searchSource.onResults().then(onResults);
         }).catch(function (err) {
@@ -183,6 +192,8 @@ define(function (require) {
     };
 
     function updateDataSource() {
+      var chartOptions;
+
       if ($scope.opts.index !== searchSource.get('index')) {
         // set the index on the savedSearch
         searchSource.index($scope.opts.index);
@@ -192,9 +203,6 @@ define(function (require) {
         delete $scope.columns;
 
         setFields();
-
-        // clear the columns and fields, then refetch when we do a savedSearch
-        //$scope.state.columns = $scope.fields = null;
       }
 
       searchSource
@@ -208,13 +216,20 @@ define(function (require) {
 
       if (!!$scope.opts.timefield) {
         timefilter.enabled(true);
+        chartOptions = interval.calculate(timefilter.time.from, timefilter.time.to, 100);
+
         searchSource
         .aggs({
           events: {
             date_histogram: {
               field: $scope.opts.timefield,
-              interval: '30m',
-              format: 'yyyy-MM-dd HH:mm'
+              interval: chartOptions.interval + 'ms',
+              format: chartOptions.format,
+              min_doc_count: 0,
+              extended_bounds: {
+                min: datemath.parse(timefilter.time.from).valueOf(),
+                max: datemath.parse(timefilter.time.to, true).valueOf()
+              }
             }
           }
         });

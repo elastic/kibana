@@ -110,11 +110,6 @@ define(function (require) {
           $scope.configureTemplateUrl = require('text!../partials/global_config.html');
         };
 
-        // TODO: Switch this to watching timefilter.string when we implement it
-        $scope.$watchCollection('opts.timefilter.time', function () {
-          courier.fetch();
-        });
-
         // expose the notification services list of notifs on the $scope so that the
         // notification directive can show them on the screen
         $scope.notifList = notify._notifs;
