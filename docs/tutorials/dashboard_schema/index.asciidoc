@@ -107,7 +107,7 @@ Pulldowns are a special type of panel. Rather, they're a special place
 you can put panels. The panels in the `pulldown` section work just like
 panels in a row except they don't get a span, they're all full width.
 Also panels in pulldowns are not movable or editable by the user.
-They're greate for panels that take input. the `pulldown` property is an
+They're great for panels that take input. the `pulldown` property is an
 array that contains panel objects. For documentation for specific panels
 see link:./panels.html[Kibana Panels]
 
