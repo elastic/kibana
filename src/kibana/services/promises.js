@@ -121,11 +121,11 @@ define(function (require) {
      * @return {Promise}
      */
     Promise.emitter = function (fn, handler) {
-      var prom = new Promise(fn);
+      var prom = Promise(fn);
 
       if (handler) {
-        prom.then(handler).then(function () {
-          return new Promise(fn).then(handler);
+        prom.then(handler).then(function recurse() {
+          return Promise(fn).then(handler).then(recurse);
         });
       }
 

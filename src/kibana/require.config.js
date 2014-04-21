@@ -7,6 +7,7 @@ require.config({
     config: './components/config',
     notify: './components/notify',
     saved_object: './components/saved_object',
+    state_management: './components/state_management',
 
     // special utils
     routes: 'utils/routes',

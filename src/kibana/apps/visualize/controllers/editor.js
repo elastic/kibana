@@ -43,7 +43,7 @@ define(function (require) {
     }
   });
 
-  app.controller('VisualizeEditor', function ($scope, $route, Notifier, config, $location, savedVisualizations, SyncedState) {
+  app.controller('VisualizeEditor', function ($scope, $route, Notifier, config, $location, savedVisualizations, AppState, timefilter) {
     var notify = new Notifier({
       location: 'Visualization Editor'
     });
@@ -52,7 +52,7 @@ define(function (require) {
     var vis = $route.current.locals.visAndFieldsHash[0];
     var fieldsHash = $route.current.locals.visAndFieldsHash[1];
 
-    var $state = new SyncedState(vis.getState());
+    var $state = new AppState(vis.getState());
 
     // get the current field list
     // create a sorted list of the fields for display purposes
@@ -111,10 +111,7 @@ define(function (require) {
       updateDataSource();
       _.assign($state, vis.getState());
       var changes = $state.commit();
-
-      // only fetch if the update didn't cause a $state change, otherwise a "change"
-      // will be triggered and the fetch will happen then.
-      if (!changes.length) vis.searchSource.fetch();
+      vis.searchSource.fetch();
     };
 
     /**
@@ -129,7 +126,7 @@ define(function (require) {
     };
 
     /**
-     * handler for updated coming from the state
+     * When something else updates the state, let us know
      */
     $state.onUpdate(readStateAndFetch);
 
@@ -160,6 +157,14 @@ define(function (require) {
         configTemplate.close('save');
       }, notify.fatal);
     };
+
+
+    /**
+     * Enable the timefilter, and tell Angular to
+     */
+    timefilter.enabled(true);
+    $scope.timefilter = timefilter;
+    $scope.$watchCollection('timefilter.time', $scope.doVisualize);
 
     // config panel templates
     var configTemplate = $scope.configTemplate = new ConfigTemplate({

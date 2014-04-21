@@ -22,7 +22,7 @@
         <div class="container-fluid">
           <ul class="nav navbar-nav">
             <li ng-repeat="app in apps" ng-class="{active: activeApp == app.id}">
-              <a ng-href="#/{{app.lastPath || app.id}}" bo-text="app.name"></a>
+              <a ng-href="#{{app.lastPath}}" bo-text="app.name"></a>
             </li>
           </ul>
           <ul class="nav navbar-nav pull-right">

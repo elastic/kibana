@@ -26,8 +26,8 @@
           <ul class="vis-config-panel">
             <li ng-repeat="category in visConfigCategories.displayOrder">
               <vis-config-category
-                category-name="category.name"
                 vis="vis"
+                category="vis[category.name]"
                 fields="fields">
               </vis-config-category>
             </li>
