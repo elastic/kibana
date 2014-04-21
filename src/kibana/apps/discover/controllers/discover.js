@@ -4,6 +4,8 @@ define(function (require) {
   var moment = require('moment');
   var settingsHtml = require('text!../partials/settings.html');
   var saveHtml = require('text!../partials/save_search.html');
+  var loadHtml = require('text!../partials/load_search.html');
+
   var interval = require('utils/interval');
   var datemath = require('utils/datemath');
 
@@ -57,6 +59,8 @@ define(function (require) {
       sort: ['_score', 'desc'],
       index: config.get('defaultIndex'),
     };
+
+    console.log(stateDefaults);
 
     var $state = $scope.state = new SyncedState(stateDefaults);
 
@@ -197,6 +201,15 @@ define(function (require) {
         delete $scope.configTemplate;
       } else {
         $scope.configTemplate = saveHtml;
+      }
+    };
+
+    $scope.toggleLoad = function () {
+      // Close if already open
+      if ($scope.configTemplate === loadHtml) {
+        delete $scope.configTemplate;
+      } else {
+        $scope.configTemplate = loadHtml;
       }
     };
 
