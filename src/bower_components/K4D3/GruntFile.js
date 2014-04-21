@@ -43,7 +43,8 @@ module.exports = function(grunt) {
             js: {
                 files: {
                     'build/k4.d3.min.js': ['build/k4.d3.js']
-                }
+                },
+                sourceMap: true
             }
         },
         jshint: {
@@ -63,14 +64,14 @@ module.exports = function(grunt) {
         copy: {
             css: {
                 files: [
-                    { src: 'src/css/k4.d3.css', dest: 'k4.d3.css' }
+                    { src: 'src/css/k4.d3.css', dest: 'build/k4.d3.css' }
                 ]
             }
         },
         cssmin: {
             dist: {
                 files: {
-                    'k4.d3.min.css' : ['k4.d3.css']
+                    'build/k4.d3.min.css' : ['build/k4.d3.css']
                 }
             }
         }

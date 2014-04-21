@@ -27,12 +27,18 @@
     "tests"
   ],
   "dependencies": {
-    "d3": "~3.4.1",
-    "requirejs": "~2.1.11",
-    "queue-async": "~1.0.7",
-    "topojson": "~1.4.6"
+    "d3": "~3.4.1"
   },
   "devDependencies": {
-    "almond": "~0.2.9"
+    "almond": "~0.2.9",
+    "requirejs": "~2.1.11",
+    "angular": "~1.2.16",
+    "angular-route": "~1.2.16",
+    "bootstrap": "~3.1.1",
+    "elasticsearch": "~2.1.2",
+    "jquery": "~2.1.0",
+    "lodash": "~2.4.1",
+    "queue-async": "~1.0.7",
+    "topojson": "~1.6.7"
   }
 }
