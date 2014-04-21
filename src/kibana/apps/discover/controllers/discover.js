@@ -3,6 +3,7 @@ define(function (require) {
   var angular = require('angular');
   var moment = require('moment');
   var settingsHtml = require('text!../partials/settings.html');
+  var saveHtml = require('text!../partials/save_search.html');
   var interval = require('utils/interval');
   var datemath = require('utils/datemath');
 
@@ -181,17 +182,21 @@ define(function (require) {
       if (changed.length === 0) courier.fetch();
     };
 
-    // $scope.$watch('state.index', $scope.fetch);
-    // $scope.$watch('state.query', $scope.fetch);
-
-    // $scope.$watch('state.columns', $scope.fetch);
-
     $scope.toggleConfig = function () {
       // Close if already open
       if ($scope.configTemplate === settingsHtml) {
         delete $scope.configTemplate;
       } else {
         $scope.configTemplate = settingsHtml;
+      }
+    };
+
+    $scope.toggleSave = function () {
+      // Close if already open
+      if ($scope.configTemplate === saveHtml) {
+        delete $scope.configTemplate;
+      } else {
+        $scope.configTemplate = saveHtml;
       }
     };
 
