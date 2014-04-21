@@ -2,48 +2,29 @@
 D3 Visualization Library for Kibana 4!
 
 ## Environment Setup
-1. Fork the repository. You will need node, npm, bower, and grunt installed.
-
-  a. Download and install <a href="http://nodejs.org/download">Node</a>.
-
-  b. To install Bower, run:
-
-  ```bash
-  npm install -g bower
-  ```
-
-  c. To install Grunt, run:
-
-  ```bash
-  npm install -g grunt cli
-  ```
-
+1. Fork the repository. You will need [node](http://nodejs.org/download) and npm installed.
 2. Change into the project's root directory.
 
-```bash
-npm install
-```
+  ```bash
+  npm install
+  ```
 
 Run Grunt with `grunt`. That's it!
 
 ## Directory Structure
-Despite the fact that this may be obvious, I always find a directory layout helpful.
+*Despite the fact that this may be obvious, I always find a directory layout helpful.*
 
-1. `docs/` - visualization library documentation.
-2. `examples/` - example code for creating charts.
-3. `lib/` - third party dependencies.
+1. `build` - K4D3 built files, e.g. k4.d3.min.js, etc.
+2. `docs/` - visualization library documentation.
+3. `examples/` - testing in html.
 4. `src/` - source code.
-5. `tests/` - unit tests.
+5. `test/` - unit tests.
 6. `.bowerrc` - bower configuration file.
 7. `.gitignore` - list of files/directories for git to ignore.
 8. `.jshintrc` - jshint configurations.
 9. `GruntFile.js` - Grunt configuration file.
-10. `bower.json` - bower dependencies list.
+10. `bower.json` - bower info and dependencies list.
 11. `index.html` - list of charting examples.
-12. `kd3.css` - concatenated css code.
-13. `kd3.min.css` - minified, concatenated css code.
-14. `k4.d3.js` - concatenated source code.
-15. `k4.d3.min.js` - minified, concatenated source code.
-16. `karma.conf.js` - Karma configuration file for testing.
-17. `package.json` - npm config file with (Grunt) development dependencies.
+12. `karma.conf.js` - Karma configuration file for testing.
+13. `package.json` - npm config file with (Grunt) development dependencies.
 

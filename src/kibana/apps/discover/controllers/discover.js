@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('utils/mixins');
   var angular = require('angular');
-
+  var moment = require('moment');
   var settingsHtml = require('text!../partials/settings.html');
 
   require('notify/notify');
@@ -31,15 +31,6 @@ define(function (require) {
     }
   });
 
-  var intervals = [
-    { display: '', val: null },
-    { display: 'Hourly', val: 'hourly' },
-    { display: 'Daily', val: 'daily' },
-    { display: 'Weekly', val: 'weekly' },
-    { display: 'Monthly', val: 'monthly' },
-    { display: 'Yearly', val: 'yearly' }
-  ];
-
   app.controller('discover', function ($scope, config, courier, $route, savedSearches, Notifier, $location, SyncedState, timefilter) {
     var notify = new Notifier({
       location: 'Discover'
@@ -61,7 +52,7 @@ define(function (require) {
       query: initialQuery ? initialQuery.query_string.query : '',
       columns: ['_source'],
       sort: ['_score', 'desc'],
-      index: config.get('defaultIndex')
+      index: config.get('defaultIndex'),
     });
 
     // Check that we have any index patterns before going further, and that index being requested
@@ -77,7 +68,6 @@ define(function (require) {
     }
 
     $scope.opts = {
-      time: timefilter,
       // number of records to fetch, then paginate through
       sampleSize: 500,
       // max length for summaries in the table
@@ -91,11 +81,8 @@ define(function (require) {
     // stores the complete list of fields
     $scope.fields = null;
 
-    // index pattern interval options
-    $scope.intervals = intervals;
-    $scope.interval = intervals[0];
-
     var init = _.once(function () {
+      console.log(moment.duration(7.5, 's').valueOf());
       return setFields()
       .then(updateDataSource)
       .then(function () {
@@ -145,6 +132,8 @@ define(function (require) {
               }
             ]
           }]}]} : undefined;
+          console.log($scope.chart);
+
           return searchSource.onResults().then(onResults);
         }).catch(function (err) {
           console.log('An error', err);
@@ -188,16 +177,6 @@ define(function (require) {
       }
     };
 
-    $scope.toggleTimepicker = function () {
-      var timepickerHtml = '<kbn-timepicker from="opts.time.from" to="opts.time.to" mode="timepickerMode"></kbn-timepicker>';
-      // Close if already open
-      if ($scope.configTemplate === timepickerHtml) {
-        delete $scope.configTemplate;
-      } else {
-        $scope.configTemplate = timepickerHtml;
-      }
-    };
-
     $scope.resetQuery = function () {
       $state.query = initialQuery ? initialQuery.query_string.query : '';
       $scope.fetch();
@@ -235,7 +214,7 @@ define(function (require) {
             date_histogram: {
               field: $scope.opts.timefield,
               interval: '30m',
-              format: 'yyyy-MM-dd'
+              format: 'yyyy-MM-dd HH:mm'
             }
           }
         });
