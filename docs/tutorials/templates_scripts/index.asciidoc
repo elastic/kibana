@@ -80,7 +80,7 @@ commas:
 file as javascript.
 
 ------------------------------------------------------------------------------------------------
-http://yourserver/index.html#/dashboard/script/logstash.json?query=status:403,status:404&from=7d
+http://yourserver/index.html#/dashboard/script/logstash.js?query=status:403,status:404&from=7d
 ------------------------------------------------------------------------------------------------
 
 This will create 2 query objects, `status:403` and `status:404` and
@@ -88,7 +88,7 @@ chart them seperately. In fact this dashboard takes another parameter
 that describes the string by which to split the query on: `split`
 
 --------------------------------------------------------------------------------------------------------
-http://yourserver/index.html#/dashboard/script/logstash.json?query=status:403!status:404&from=7d&split=!
+http://yourserver/index.html#/dashboard/script/logstash.js?query=status:403!status:404&from=7d&split=!
 --------------------------------------------------------------------------------------------------------
 
 We can see this happening in `logstash.js`
