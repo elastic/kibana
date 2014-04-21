@@ -1,6 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var moment = require('moment');
+  var datemath = require('utils/datemath');
 
   /**
     * Calculate a graph interval
@@ -13,8 +14,8 @@ define(function (require) {
     *
     */
   var calculate = function (from, to, target) {
-    from = from.valueOf();
-    to = to.valueOf();
+    from = datemath.parse(from).valueOf();
+    to = datemath.parse(to, true).valueOf();
     return roundInterval((to - from) / target);
   };
 
@@ -22,37 +23,37 @@ define(function (require) {
   var roundInterval = function (interval) {
     switch (true) {
     case (interval <=   toMS('500ms')):
-      return {interval: toMS('100ms'), format: 'HH:mm:ss.SSS'};
+      return {interval: toMS('100ms'), format: 'hh:mm:ss.SSS'};
     case (interval <=   toMS('5s')):
-      return {interval: toMS('1s'), format: 'HH:mm:ss'};
+      return {interval: toMS('1s'), format: 'hh:mm:ss'};
     case (interval <=   toMS('7.5s')):
-      return {interval: toMS('5s'), format: 'HH:mm:ss'};
+      return {interval: toMS('5s'), format: 'hh:mm:ss'};
     case (interval <=   toMS('15s')):
-      return {interval: toMS('10s'), format: 'HH:mm:ss'};
+      return {interval: toMS('10s'), format: 'hh:mm:ss'};
     case (interval <=   toMS('45s')):
-      return {interval: toMS('30s'), format: 'HH:mm:ss'};
+      return {interval: toMS('30s'), format: 'hh:mm:ss'};
     case (interval <=   toMS('3m')):
-      return {interval: toMS('1m'), format: 'HH:mm'};
+      return {interval: toMS('1m'), format: 'hh:mm'};
     case (interval <=   toMS('9m')):
-      return {interval: toMS('5m'), format: 'HH:mm'};
+      return {interval: toMS('5m'), format: 'hh:mm'};
     case (interval <=   toMS('20m')):
-      return {interval: toMS('10m'), format: 'HH:mm'};
+      return {interval: toMS('10m'), format: 'hh:mm'};
     case (interval <=   toMS('45m')):
-      return {interval: toMS('30m'), format: 'YYYY-MM-DD HH:mm'};
+      return {interval: toMS('30m'), format: 'yyyy-MM-dd hh:mm'};
     case (interval <=   toMS('2h')):
-      return {interval: toMS('1h'), format: 'YYYY-MM-DD HH:mm'};
+      return {interval: toMS('1h'), format: 'yyyy-MM-dd hh:mm'};
     case (interval <=   toMS('6h')):
-      return {interval: toMS('3h'), format: 'YYYY-MM-DD HH:mm'};
+      return {interval: toMS('3h'), format: 'yyyy-MM-dd hh:mm'};
     case (interval <=   toMS('24h')):
-      return {interval: toMS('12h'), format: 'YYYY-MM-DD HH:mm'};
+      return {interval: toMS('12h'), format: 'yyyy-MM-dd hh:mm'};
     case (interval <=   toMS('1w')):
-      return {interval: toMS('1d'), format: 'YYYY-MM-DD'};
+      return {interval: toMS('1d'), format: 'yyyy-MM-dd'};
     case (interval <=   toMS('3w')):
-      return {interval: toMS('1w'), format: 'YYYY-MM-DD'};
+      return {interval: toMS('1w'), format: 'yyyy-MM-dd'};
     case (interval <    toMS('1y')):
-      return {interval: toMS('1M'), format: 'YYYY-MM'};
+      return {interval: toMS('1M'), format: 'yyyy-MM'};
     default:
-      return {interval: toMS('1y'), format: 'YYYY'};
+      return {interval: toMS('1y'), format: 'yyyy'};
     }
   };
 
