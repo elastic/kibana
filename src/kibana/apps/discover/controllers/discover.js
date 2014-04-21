@@ -50,12 +50,14 @@ define(function (require) {
     /* Manage state & url state */
     var initialQuery = searchSource.get('query');
 
-    var $state = $scope.state = new SyncedState({
+    var stateDefaults = {
       query: initialQuery ? initialQuery.query_string.query : '',
       columns: ['_source'],
       sort: ['_score', 'desc'],
       index: config.get('defaultIndex'),
-    });
+    };
+
+    var $state = $scope.state = new SyncedState(stateDefaults);
 
     // Check that we have any index patterns before going further, and that index being requested
     // exists.
@@ -194,7 +196,9 @@ define(function (require) {
     };
 
     $scope.resetQuery = function () {
-      $state.query = initialQuery ? initialQuery.query_string.query : '';
+      $state.query = stateDefaults.query;
+      $state.sort = stateDefaults.sort;
+      $state.columns = stateDefaults.columns;
       $scope.fetch();
     };
 
