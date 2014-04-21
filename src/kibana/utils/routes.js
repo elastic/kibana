@@ -30,6 +30,11 @@ define(function (require) {
           }
         };
       }
+
+      if (!route.hasOwnProperty('reloadOnSearch')) {
+        route.reloadOnSearch = false;
+      }
+
       when[path] = route;
       return this;
     },

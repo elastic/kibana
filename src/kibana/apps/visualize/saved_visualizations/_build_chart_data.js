@@ -71,6 +71,8 @@ define(function (require) {
         // pull the next column from the configs list
         var col = configs.shift();
 
+        if (!col) throw new Error('Missing config in render');
+
         // add it to the top of the stack
         colStack.unshift(col);
 

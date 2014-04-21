@@ -21,15 +21,15 @@ define(function (require) {
   });
 
   /**
-   * Global Angular uncaught exception handler
+   * Global Angular exception handler (NOT JUST UNCAUGHT EXCEPTIONS)
    */
-  modules
-    .get('exceptionOverride')
-    .factory('$exceptionHandler', function () {
-      return function (exception, cause) {
-        rootNotifier.fatal(exception, cause);
-      };
-    });
+  // modules
+  //   .get('exceptionOverride')
+  //   .factory('$exceptionHandler', function () {
+  //     return function (exception, cause) {
+  //       rootNotifier.fatal(exception, cause);
+  //     };
+  //   });
 
   /**
    * Global Require.js exception handler
