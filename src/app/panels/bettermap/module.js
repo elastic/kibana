@@ -337,7 +337,7 @@ function (angular, app, _, L, localRequire) {
           
           // Watch for changes in the list of filters, and remove filters from the map if needed to
           // keep filter list consistent with the map
-          scope.$watch(filterSrv.ids, function(newValue, oldValue) {
+          scope.$watch(filterSrv.ids, function(newValue) {
             if (_.isUndefined(newValue)) {
               return;
             }
