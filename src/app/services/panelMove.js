@@ -28,7 +28,6 @@ function (angular, _) {
       Use our own drop logic. the $parent.$parent this is ugly.
     */
     this.onDrop = function(event,ui,data) {
-      console.log(data);
       var
         dragRow = data.draggableScope.$parent.$parent.row.panels,
         dropRow =  data.droppableScope.$parent.$parent.row.panels,
