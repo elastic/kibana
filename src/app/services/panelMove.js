@@ -28,14 +28,21 @@ function (angular, _) {
       Use our own drop logic. the $parent.$parent this is ugly.
     */
     this.onDrop = function(event,ui,data) {
+      console.log(data);
       var
         dragRow = data.draggableScope.$parent.$parent.row.panels,
         dropRow =  data.droppableScope.$parent.$parent.row.panels,
         dragIndex = data.dragSettings.index,
         dropIndex =  data.dropSettings.index;
 
+<<<<<<< HEAD
       // Remove panel from source row if the model we were passed is not a panel
       if(!data.dragSettings.embedded) {
+=======
+
+      // Remove panel from source row if the model we were passed is not a panel
+      if(_.isUndefined(data.dragItem.span)) {
+>>>>>>> Added drag/drop of terms chart in table.
         dragRow.splice(dragIndex,1);
       }
 

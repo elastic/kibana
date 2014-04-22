@@ -47,6 +47,11 @@
     .table-field-value {
       white-space: pre-wrap;
     }
+
+    .table-facet {
+      padding: 10px;
+      border: 1px solid #666;
+    }
   </style>
 
   <div class="table-container">
@@ -93,7 +98,21 @@
     <div style="{{panel.overflow}}:{{panel.height || row.height}};" ng-class="{'table-main':panel.field_list}" class="table-doc-table">
 
       <div class="table-facet" ng-if="modalField">
-        <h4><button class="btn btn-mini btn-danger" ng-click="closeFacet();">close</button> Top 10 terms in field {{modalField}}</h4>
+
+
+
+        <h4>
+          <button class="btn btn-mini btn-danger" ng-click="closeFacet();">close</button>
+          Top 10 terms in field {{modalField}}
+          <span class="pointer ng-scope ng-pristine ng-valid ui-draggable" bs-tooltip="'Drag to add to dashboard'"
+            data-drag="true"
+            data-jqyoui-options="kbnJqUiDraggableOptions"
+            jqyoui-draggable="{animate:false,mutate:false,onStart:'panelMoveStart',onStop:'panelMoveStop'}"
+            ng-model="adhocOpts"
+            data-original-title=""
+            title=""
+            aria-disabled="false" style="position: relative;"><i class="icon-move"></i></span>
+        </h4>
         <kibana-simple-panel type="'{{facetType}}'" panel='{{facetPanel}}' ng-cloak></kibana-simple-panel>
       </div>
 
