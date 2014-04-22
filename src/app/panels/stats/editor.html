@@ -1,8 +1,8 @@
 <div class="row-fluid">
     <h5>Details</h5>
     <div class="editor-option">
-      <label class="small">Function</label>
-      <select ng-change="set_refresh(true)" class="input-small" ng-model="panel.mode" ng-options="f for f in ['count','min','mean','max','total']"></select>
+      <label class="small">Featured Stat</label>
+      <select ng-change="set_refresh(true)" class="input-small" ng-model="panel.mode" ng-options="f for f in modes"></select>
     </div>
     <div class="editor-option">
       <label class="small">Field <tip>This field must contain a numeric value</tip></label>
@@ -12,6 +12,12 @@
       <label class="small">Unit</label>
         <input type="text" class="input-large" ng-model="panel.unit">
     </div>
+
+    <h5>Columns</h5>
+    <div class="editor-option" ng-repeat="stat in modes">
+      <label class="small">{{stat}}</label><input type="checkbox" ng-model="panel.show[stat]" ng-checked="panel.show[stat]">
+    </div>
+
     <h5>Formating</h5>
     <div class="editor-option">
       <label class="small">Format</label>
@@ -26,11 +32,7 @@
       <select class="input-mini" ng-model="panel.display_breakdown" ng-options="f for f in ['yes', 'no']"></select></span>
     </div>
     <div class="editor-option">
-      <label class="small">Label column name</label>
+      <label class="small">Query column name</label>
         <input type="text" class="input-large" ng-model="panel.label_name">
-    </div>
-    <div class="editor-option">
-      <label class="small">Value column name</label>
-        <input type="text" class="input-large" ng-model="panel.value_name">
     </div>
 </div>
