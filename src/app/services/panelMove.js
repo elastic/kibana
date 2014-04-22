@@ -28,6 +28,7 @@ function (angular, _) {
       Use our own drop logic. the $parent.$parent this is ugly.
     */
     this.onDrop = function(event,ui,data) {
+      console.log(data);
       var
         dragRow = data.draggableScope.$parent.$parent.row.panels,
         dropRow =  data.droppableScope.$parent.$parent.row.panels,
@@ -35,8 +36,10 @@ function (angular, _) {
         dropIndex =  data.dropSettings.index;
 
 
-      // Remove panel from source row
-      dragRow.splice(dragIndex,1);
+      // Remove panel from source row if the model we were passed is not a panel
+      if(_.isUndefined(data.dragItem.span)) {
+        dragRow.splice(dragIndex,1);
+      }
 
       // Add to destination row
       if(!_.isUndefined(dropRow)) {

@@ -167,8 +167,16 @@ function (angular, app, _, kbn, moment) {
       $scope.closeFacet();
       $timeout(function() {
         $scope.modalField = field;
+        $scope.adhocOpts = {
+          height: "200px",
+          chart: chart,
+          field: field,
+          span: $scope.panel.span,
+          type: 'terms',
+          title: 'Top 10 terms in field ' + field
+        };
         showModal(
-          '{"height":"200px","chart":"'+chart+'","field":"'+field+'"}','terms');
+          angular.toJson($scope.adhocOpts),'terms');
       },0);
     };
 
