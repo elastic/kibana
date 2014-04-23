@@ -5,7 +5,7 @@
 <span>
   <i class="pointer icon-search" ng-click="fieldExists(micropanel.field,'must');dismiss();" bs-tooltip="'Find events with this field'"></i>
   <i class="pointer icon-ban-circle" ng-click="fieldExists(micropanel.field,'mustNot');dismiss();" bs-tooltip="'Find events without this field'"></i>
-  <strong>Micro Analysis of {{micropanel.field}}</strong>
+  <strong>Micro Analysis of {{micropanel.field}} <span ng-if='micropanel.type'>({{micropanel.type}})</span></strong>
   <span ng-show="micropanel.hasArrays">
     as
     <a class="link" ng-class="{'strong':micropanel.grouped}" ng-click="toggle_micropanel(micropanel.field,true)">Groups</a> /
@@ -58,6 +58,11 @@
         <li><a ng-click="termsModal(field,'pie');dismiss();">Pie</a></li>
         <li><a ng-click="termsModal(field,'table');dismiss();">Table</a></li>
       </ul>
+    </div>
+    <div class="btn-group" ng-show="micropanel.hasStats">
+      <a class="btn dropdown-toggle pointer" ng-click="statsModal(field);dismiss();">
+        <i class="icon-list-ol"></i> Stats
+      </a>
     </div>
 
   </div>
