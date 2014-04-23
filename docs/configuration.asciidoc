@@ -34,7 +34,7 @@ This setting is update-able via the Cluster Update Settings API.
 
 `marvel.agent.interval`::
 
-Controls the interval between data samples. Defaults to `5s`. Set to `-1` to temporarily disable exporting.
+Controls the interval between data samples. Defaults to `10s`. Set to `-1` to temporarily disable exporting.
 +
 This setting is update-able via the Cluster Update Settings API.
 
