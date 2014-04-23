@@ -35,6 +35,7 @@ function (angular, _) {
         dropIndex =  data.dropSettings.index;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
       // Remove panel from source row if the model we were passed is not a panel
       if(!data.dragSettings.embedded) {
 =======
@@ -42,6 +43,10 @@ function (angular, _) {
       // Remove panel from source row if the model we were passed is not a panel
       if(_.isUndefined(data.dragItem.span)) {
 >>>>>>> Added drag/drop of terms chart in table.
+=======
+      // Remove panel from source row if the model we were passed is not a panel
+      if(!data.dragSettings.embedded) {
+>>>>>>> Add option to tell directive we're dragging an embedded panel, not removing something from a row
         dragRow.splice(dragIndex,1);
       }
 
