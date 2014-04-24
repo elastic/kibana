@@ -139,6 +139,11 @@ code, pre {
   border: 1px solid @blue;
 }
 
+.ui-resizable { position: relative;}
+.ui-resizable-handle { position: absolute;font-size: 0.1px; display: block; }
+.ui-resizable-disabled .ui-resizable-handle, .ui-resizable-autohide .ui-resizable-handle { display: none; }
+.ui-resizable-e { cursor: e-resize; width: 7px; right: 3px; top: 0; height: 100%; }
+.ui-resizable-w { cursor: w-resize; width: 7px; left: 3px; top: 0; height: 100%; }
 // ---------------------------
 
 .row-add-button {
