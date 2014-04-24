@@ -35,9 +35,13 @@ function (angular) {
           elem.resizable(getOpts());
           elem.resize(function (event, ui) {
 <<<<<<< HEAD
+<<<<<<< HEAD
             scope.panel.span = Math.round(((ui.size.width / elem.parent().width()) * 100) * 1.2 / 10);
 =======
             scope.panel.span = Math.round(((ui.size.width / elem.parent().width()) * 100) * 1.2) / 10;
+=======
+            scope.panel.span = Math.round(((ui.size.width / elem.parent().width()) * 100) * 1.2 / 10);
+>>>>>>> Fix for possibility of partial spans
             scope.$apply();
 >>>>>>> Add drag to resize panel widths. Closes #329
           });
