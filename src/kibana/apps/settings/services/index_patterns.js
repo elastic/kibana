@@ -4,6 +4,10 @@ define(function (require) {
 
   module.service('indexPatterns', function (config, es, courier) {
     this.getFields = function (id) {
+      if (typeof id === 'object' && typeof id.get === 'function') {
+        id = id.get('index');
+      }
+
       return es.get({
         index: config.file.kibanaIndex,
         type: 'mapping',

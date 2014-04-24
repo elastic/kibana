@@ -11,10 +11,6 @@ define(function (require) {
       location: 'Courier Fetch'
     });
 
-    var flattenRequest = function (req) {
-      return req.source._flatten();
-    };
-
     function RequestErrorHandler(courier) { this._courier = courier; }
     RequestErrorHandler.prototype.handle = function (req, error) {
       if (!this._courier) return req.defer.reject(error);
@@ -36,11 +32,12 @@ define(function (require) {
 
       all = requests.splice(0);
 
-      var allRequests = all.map(flattenRequest);
-
-      return $q.all(allRequests).then(function (reqs) {
+      return Promise.map(all, function (req) {
+        return req.source._flatten();
+      })
+      .then(function (reqs) {
         body = strategy.requestStatesToBody(reqs);
-        
+
         return es[strategy.clientMethod]({
           body: body
         })
@@ -60,31 +57,7 @@ define(function (require) {
           });
           throw err;
         });
-
-      });
-
-
-      /*
-      return es[strategy.clientMethod]({
-        body: body
-      })
-      .then(function (resp) {
-        strategy.getResponses(resp).forEach(function (resp) {
-          var req = all.shift();
-          if (resp.error) return reqErrHandler.handle(req, new couriersErrors.FetchFailure(resp));
-          else strategy.resolveRequest(req, resp);
-        });
-
-        // pass the response along to the next promise
-        return resp;
-      })
-      .catch(function (err) {
-        all.forEach(function (req) {
-          reqErrHandler.handle(req, err);
-        });
-        throw err;
-      });
-      */
+      }, notify.fatal);
     };
 
     var fetchPending = function (strategy, courier) {

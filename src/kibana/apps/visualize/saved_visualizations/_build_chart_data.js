@@ -2,6 +2,7 @@ define(function (require) {
 
   var converters = require('./resp_converters/index');
   var aggs = require('./_aggs');
+  var _ = require('lodash');
 
   // private functionality for Vis.buildChartDataFromResp()
   return function (createNotifier) {
@@ -20,17 +21,7 @@ define(function (require) {
 
       // the list of configs that make up the aggs and eventually
       // splits and columns, label added
-      var configs = vis.getConfig().map(function (col) {
-        var agg = aggs.byName[col.agg];
-        if (!agg) {
-          col.label = col.agg;
-        } else if (agg.makeLabel) {
-          col.label = aggs.byName[col.agg].makeLabel(col.aggParams);
-        } else {
-          col.label = agg.display || agg.name;
-        }
-        return col;
-      });
+      var configs = vis.getConfig();
 
       var lastCol = configs[configs.length - 1];
 
@@ -43,7 +34,25 @@ define(function (require) {
 
       // all chart data will be written here or to child chartData
       // formatted objects
-      var chartData = {};
+      var chartData = {
+        label: _.reduce(configs, function (label, col) {
+          var agg = aggs.byName[col.agg];
+
+          if (!agg) {
+            col.label = col.agg;
+          } else if (agg.makeLabel) {
+            col.label = aggs.byName[col.agg].makeLabel(col.aggParams);
+          } else {
+            col.label = agg.display || agg.name;
+          }
+
+          if (label) {
+            return label + ' > ' + col.label;
+          } else {
+            return col.label;
+          }
+        }, '')
+      };
 
       var writeRow = function (rows, bucket) {
         // collect the count and bail, free metric!!
@@ -84,13 +93,19 @@ define(function (require) {
           // pick the key for the split's groups
           var groupsKey = col.row ? 'rows' : 'columns';
 
+          // if (chartData.label) {
+          //   chartData.label = col.label + ' > ' + chartData.label;
+          // } else {
+          //   chartData.label = col.label;
+          // }
+
           // the groups will be written here
           chartData[groupsKey] = [];
 
           result.buckets.forEach(function (bucket) {
             // create a new group for each bucket
             var group = {
-              label: col.label
+              label: bucket.key
             };
             chartData[groupsKey].push(group);
 

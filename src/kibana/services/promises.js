@@ -67,6 +67,9 @@ define(function (require) {
         cb(void 0, val);
       }, cb);
     };
+    Promise.map = function (arr, fn) {
+      return Promise.all(arr.map(fn));
+    };
 
     /**
      * Create a promise that uses our "event" like pattern.
