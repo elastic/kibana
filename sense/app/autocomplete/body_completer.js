@@ -106,6 +106,11 @@ define([
     var objectC = new engine.ConstantComponent("{", parent);
     var constants = [], patterns = [];
     _.each(objDescription, function (desc, key) {
+      if (key.indexOf("__") == 0) {
+        // meta key
+        return;
+      }
+
       var options = getOptions(desc), component;
       if (/^\{.*\}$/.test(key)) {
         component = compileParametrizedValue(null, key, compilingContext, options.template)[0];

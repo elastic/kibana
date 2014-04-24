@@ -162,7 +162,14 @@ define([
         data_autocomplete_rules: {
           query: { match_all: {}, term: { "{field}": { __template: { "f": 1}}}},
           size: {},
-          facets: { "*": { terms: { field: "{field}" }}, __template: {}}
+          facets: {
+            __template: {
+              "FIELD": {
+
+              }
+            },
+            "*": { terms: { field: "{field}" }}
+          }
         }
       }
     }
@@ -287,6 +294,11 @@ define([
         suffixToAdd: "",
         rangeToReplace: { start: { row: 4, column: 3 }, end: { row: 4, column: 15 }},
         autoCompleteSet: ["facets", "query", "size"]
+      },
+      {
+        name: "ignoring meta keys",
+        cursor: { row: 4, column: 14},
+        no_context: true
       }
     ]
   );
