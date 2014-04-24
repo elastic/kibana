@@ -1,4 +1,4 @@
-define(function () {
+define(["_"], function (_) {
   'use strict';
 
   var SPAN_QUERIES = {
@@ -19,6 +19,50 @@ define(function () {
       __scope_link: '.query.span_term'
     }
   };
+
+  var DECAY_FUNC_DESC = {
+      __template: {
+        "FIELD": {
+          "origin": "",
+          "scale": ""
+        }
+      },
+      "{field}": {
+        "origin": "",
+        "scale": "",
+        "offset": "",
+        "decay": 0.5
+      }
+    },
+    SCORING_FUNCS = {
+      "script_score": {
+        __template: {
+          "script": "_score * doc['f'].value"
+        },
+        "script": "",
+        "lang": "mvel",
+        "params": {
+
+        }
+      },
+      "boost_factor": 2.0,
+      "random_score": {
+        "seed": 314159265359
+      },
+      "linear": DECAY_FUNC_DESC,
+      "exp": DECAY_FUNC_DESC,
+      "gauss": DECAY_FUNC_DESC,
+      "field_value_factor": {
+        __template: {
+          "field": ""
+        },
+        "field": "{field}",
+        "factor": 1.2,
+        "modifier": {
+          __one_of: ["none", "log", "log1p", "log2p", "ln", "ln1p", "ln2p", "square", "sqrt", "reciprocal"]
+        }
+      }
+    };
 
   return function init(api) {
     api.addGlobalAutocompleteRules('query', {
@@ -495,7 +539,31 @@ define(function () {
           relation: 'within'
         },
         __scope_link: '.filter.geo_shape'
-      }
+      },
+      function_score: _.defaults({
+        __template: {
+          query: {
+
+          },
+          functions: [
+            {}
+          ]
+        },
+        query: {},
+        filter: {},
+        functions: [
+          _.defaults(
+            {
+              filter: {}
+            },
+            SCORING_FUNCS
+          )
+        ],
+        boost: 1.0,
+        boost_mode: { __one_of: ["multiply", "replace", "sum", "avg", "max", "min"]},
+        score_mode: { __one_of: ["multiply", "sum", "first", "avg", "max", "min"]},
+        max_boost: 10
+      }, SCORING_FUNCS)
 
     });
   };
