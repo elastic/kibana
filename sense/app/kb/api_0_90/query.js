@@ -541,30 +541,35 @@ define(["_"], function (_) {
         },
         __scope_link: '.filter.geo_shape'
       },
-      function_score: _.defaults({
-        __template: {
-          query: {
+      // js hint gets confused here
+      /* jshint -W015 */
+      function_score: _.defaults(
+        {
+          __template: {
+            query: {
 
-          },
-          functions: [
-            {}
-          ]
-        },
-        query: {},
-        filter: {},
-        functions: [
-          _.defaults(
-            {
-              filter: {}
             },
-            SCORING_FUNCS
-          )
-        ],
-        boost: 1.0,
-        boost_mode: { __one_of: ["multiply", "replace", "sum", "avg", "max", "min"]},
-        score_mode: { __one_of: ["multiply", "sum", "first", "avg", "max", "min"]},
-        max_boost: 10
-      }, SCORING_FUNCS)
+            functions: [
+              {}
+            ]
+          },
+          query: {},
+          filter: {},
+          functions: [
+            _.defaults(
+              {
+                filter: {}
+              },
+              SCORING_FUNCS
+            )
+          ],
+          boost: 1.0,
+          boost_mode: { __one_of: ["multiply", "replace", "sum", "avg", "max", "min"]},
+          score_mode: { __one_of: ["multiply", "sum", "first", "avg", "max", "min"]},
+          max_boost: 10
+        },
+        SCORING_FUNCS
+      )
     });
   };
 });
