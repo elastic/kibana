@@ -22,7 +22,7 @@ define(function (require) {
 
     globalState._setApp = function (newAppState, defaults) {
       app.current = newAppState;
-      app.defaults = defaults;
+      app.defaults = _.cloneDeep(defaults);
       app.name = $route.current.$$route.originalPath;
       app.listeners = [];
 
