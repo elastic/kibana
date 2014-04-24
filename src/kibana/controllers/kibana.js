@@ -96,14 +96,7 @@ define(function (require) {
             var url = lastPathFor(app);
             if (!url || url === currentUrl) return;
 
-            var loc = qs.findInUrl(url);
-            var parsed = qs.decode(url.substring(loc.start + 1, loc.end));
-            parsed._g = _g;
-
-            var chars = url.split('');
-            chars.splice(loc.start, loc.end - loc.start, '?' + qs.encode(parsed));
-
-            lastPathFor(app, chars.join(''));
+            lastPathFor(app, qs.replaceParamInUrl(url, '_g', _g));
           });
         };
 
@@ -113,10 +106,6 @@ define(function (require) {
           globalState.commit();
 
           writeGlobalStateToLastPaths();
-        });
-
-        globalState.onUpdate(function readFromGlobalState() {
-          _.assign(timefilter.time, globalState.time);
         });
 
         $scope.$on('application.load', function () {
