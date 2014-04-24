@@ -10,12 +10,20 @@ function (angular) {
       return {
         restrict: 'A',
         link: function(scope, elem) {
+<<<<<<< HEAD
+=======
+          console.log('linked');
+>>>>>>> Add drag to resize panel widths. Closes #329
 
           var getOpts = function() {
             return {
               maxWidth: elem.parent().width(),
+<<<<<<< HEAD
               grid: elem.parent().width()/12,
               handles: 'e'
+=======
+              grid: elem.parent().width()/12
+>>>>>>> Add drag to resize panel widths. Closes #329
             };
           };
 
@@ -26,7 +34,12 @@ function (angular) {
 
           elem.resizable(getOpts());
           elem.resize(function (event, ui) {
+<<<<<<< HEAD
             scope.panel.span = Math.round(((ui.size.width / elem.parent().width()) * 100) * 1.2 / 10);
+=======
+            scope.panel.span = Math.round(((ui.size.width / elem.parent().width()) * 100) * 1.2) / 10;
+            scope.$apply();
+>>>>>>> Add drag to resize panel widths. Closes #329
           });
         }
       };
