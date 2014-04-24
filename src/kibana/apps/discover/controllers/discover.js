@@ -37,7 +37,9 @@ define(function (require) {
   });
 
 
-  app.controller('discover', function ($scope, config, courier, $route, savedSearches, Notifier, $location, AppState, timefilter) {
+  app.controller('discover', function ($scope, config, courier, $route, savedSearches,
+    Notifier, $location, globalState, AppState, timefilter) {
+
     var notify = new Notifier({
       location: 'Discover'
     });
@@ -90,33 +92,23 @@ define(function (require) {
     $scope.time = timefilter.time;
 
     // TODO: Switch this to watching time.string when we implement it
-    $scope.$watchCollection('time', function () {
-      updateDataSource();
-      $scope.fetch();
-    });
+    $scope.$watchCollection('time', _.bindKey($scope, 'fetch'));
 
     // stores the complete list of fields
     $scope.fields = null;
 
     var init = _.once(function () {
       return setFields()
-      .then(updateDataSource)
       .then(function () {
-        // the index to use when they don't specify one
-        $scope.$on('change:config.defaultIndex', function (event, val) {
-          if (!$state.index) $state.index = val;
-        });
+        updateDataSource();
 
-        // changes to state.columns don't require a refresh
-        var ignore = ['columns'];
+        // state fields that shouldn't trigger a fetch when changed
+        var ignoreStateChanges = ['columns'];
 
         // listen for changes, and relisten everytime something happens
         $state.onUpdate(function (changed) {
           // if we only have ignorable changes, do nothing
-          if (_.difference(changed, ignore).length) {
-            updateDataSource();
-            courier.fetch();
-          }
+          if (_.difference(changed, ignoreStateChanges).length) $scope.fetch();
         });
 
         $scope.$watch('state.sort', function (sort) {
@@ -166,18 +158,20 @@ define(function (require) {
     });
 
     $scope.opts.saveDataSource = function () {
+      updateDataSource();
       savedSearch.id = savedSearch.title;
 
       savedSearch.save()
       .then(function () {
         notify.info('Saved Data Source "' + savedSearch.title + '"');
         if (savedSearch.id !== $route.current.params.id) {
-          $location.url('/discover/' + savedSearch.id);
+          $location.url(globalState.writeToUrl('/discover/' + savedSearch.id));
         }
       }, notify.error);
     };
 
     $scope.fetch = function () {
+      updateDataSource();
       $state.commit();
       courier.fetch();
     };
@@ -241,19 +235,22 @@ define(function (require) {
 
       if (!!$scope.opts.timefield) {
         timefilter.enabled(true);
+
         chartOptions = interval.calculate(timefilter.time.from, timefilter.time.to, 100);
+        var bounds = timefilter.getBounds();
 
         searchSource
         .aggs({
           events: {
             date_histogram: {
-              field: $scope.opts.timefield,
               interval: chartOptions.interval + 'ms',
               format: chartOptions.format,
               min_doc_count: 0,
+
+              field: $scope.opts.timefield,
               extended_bounds: {
-                min: datemath.parse(timefilter.time.from).valueOf(),
-                max: datemath.parse(timefilter.time.to, true).valueOf()
+                min: bounds.min,
+                max: bounds.max
               }
             }
           }
@@ -362,7 +359,7 @@ define(function (require) {
         return;
       }
 
-      $state.commit();
+      $scope.fetch();
     }
 
     // TODO: Move to utility class

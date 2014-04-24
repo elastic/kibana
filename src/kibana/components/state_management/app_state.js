@@ -9,8 +9,7 @@ define(function (require) {
   module.factory('AppState', function (globalState, $route, $location, Promise) {
 
     function AppState(defaults) {
-      _.assign(this, defaults);
-      globalState._setApp(this);
+      globalState._setApp(this, defaults);
 
       this.onUpdate = function (handler) {
         return globalState.onAppUpdate(handler);

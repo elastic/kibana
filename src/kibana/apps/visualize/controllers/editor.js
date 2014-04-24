@@ -110,7 +110,7 @@ define(function (require) {
     var writeStateAndFetch = function () {
       updateDataSource();
       _.assign($state, vis.getState());
-      var changes = $state.commit();
+      $state.commit();
       vis.searchSource.fetch();
     };
 

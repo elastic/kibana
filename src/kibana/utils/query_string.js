@@ -108,5 +108,15 @@ define(function (require) {
     };
   };
 
+  qs.replaceParamInUrl = function (url, param, newVal) {
+    var loc = qs.findInUrl(url);
+    var parsed = qs.decode(url.substring(loc.start + 1, loc.end));
+    parsed[param] = newVal;
+
+    var chars = url.split('');
+    chars.splice(loc.start, loc.end - loc.start, '?' + qs.encode(parsed));
+    return chars.join('');
+  };
+
   return qs;
 });

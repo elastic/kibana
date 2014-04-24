@@ -17,24 +17,37 @@ define(function (require) {
       to: 'now'
     });
 
+    globalState.onUpdate(function readFromGlobalState() {
+      _.assign(self.time, globalState.time);
+    });
+
     this.enabled = function (state) {
       if (!_.isUndefined(state)) enable = state;
       return enable;
     };
 
-    this.get = function (indexPattern) {
+    this.get = function (fieldHash) {
       var timefield, filter;
       
       // TODO: time field should be stored in the pattern meta data. For now we just use the first date field we find
-      timefield = _.findKey(indexPattern, {type: 'date'});
+      timefield = _.findKey(fieldHash, {type: 'date'});
+      var bounds = this.getBounds();
+
       if (!!timefield) {
         filter = {range : {}};
         filter.range[timefield] = {
-          gte: datemath.parse(self.time.from).valueOf(),
-          lte: datemath.parse(self.time.to, true).valueOf()
+          gte: bounds.min,
+          lte: bounds.max
         };
       }
       return filter;
+    };
+
+    this.getBounds = function (timefield) {
+      return {
+        min: datemath.parse(self.time.from).valueOf(),
+        max: datemath.parse(self.time.to, true).valueOf()
+      };
     };
 
   });
