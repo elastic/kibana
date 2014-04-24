@@ -7,23 +7,38 @@ define(function (require) {
   aggs.metricAggs = [
     {
       name: 'count',
-      display: 'Count'
+      display: 'Count',
+      makeLabel: function (params) {
+        return 'Count of documents';
+      }
     },
     {
       name: 'avg',
-      display: 'Average'
+      display: 'Average',
+      makeLabel: function (params) {
+        return 'Average ' + params.field;
+      }
     },
     {
       name: 'sum',
-      display: 'Sum'
+      display: 'Sum',
+      makeLabel: function (params) {
+        return 'Sum of ' + params.field;
+      }
     },
     {
       name: 'min',
-      display: 'Min'
+      display: 'Min',
+      makeLabel: function (params) {
+        return 'Min ' + params.field;
+      }
     },
     {
       name: 'max',
-      display: 'Max'
+      display: 'Max',
+      makeLabel: function (params) {
+        return 'Max ' + params.field;
+      }
     }
   ];
   aggs.metricAggsByName = _.indexBy(aggs.metricAggs, 'name');

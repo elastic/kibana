@@ -6,7 +6,7 @@ define(function (require) {
 
   var module = require('modules').get('kibana/courier');
 
-  module.factory('CouriersSearchSource', function (couriersErrors, CouriersSourceAbstract) {
+  module.factory('CouriersSearchSource', function (couriersErrors, CouriersSourceAbstract, Promise) {
     var FetchFailure = couriersErrors.FetchFailure;
     var RequestFailure = couriersErrors.RequestFailure;
 
@@ -89,6 +89,15 @@ define(function (require) {
      * @return {undefined}
      */
     SearchSource.prototype._mergeProp = function (state, val, key) {
+      if (typeof val === 'function') {
+        var source = this;
+        return Promise.cast(val(source)).then(function (res) {
+          return source._mergeProp(state, res, key);
+        });
+      }
+
+      if (val == null) return;
+
       switch (key) {
       case 'filter':
         state.filters = state.filters || [];

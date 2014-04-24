@@ -6,7 +6,7 @@ define(function (require) {
 
   var module = require('modules').get('kibana/courier');
 
-  module.factory('CouriersSourceAbstract', function (couriersFetch, Promise, timefilter, $q) {
+  module.factory('CouriersSourceAbstract', function (couriersFetch, Promise, timefilter) {
 
     function SourceAbstract(courier, initialState) {
       this._state = (function () {
@@ -198,44 +198,47 @@ define(function (require) {
     /**
      * Walk the inheritance chain of a source and return it's
      * flat representaion (taking into account merging rules)
-     * @return {object} - the flat state of the SourceAbstract
+     * @returns {Promise}
+     * @resolved {Object|null} - the flat state of the SourceAbstract
      */
     SourceAbstract.prototype._flatten = function () {
       var type = this._getType();
+
       // the merged state of this dataSource and it's ancestors
       var flatState = {};
 
-      var collectProp = _.partial(this._mergeProp, flatState);
+      // function used to write each property from each state object in the chain to flat state
+      var root = this;
 
-      // walk the chain and merge each property
+      // start the chain at this source
       var current = this;
-      while (current) {
-        // stop processing if this or one of it's parents is disabled
-        if (current._fetchDisabled) return;
-        // merge the properties from the state into the flattened copy
-        _.forOwn(current._state, collectProp);
-        // move to this sources parent
-        current = current._parent;
-      }
-      current = null;
 
+      // call the ittr and return it's promise
+      return (function ittr(resolve, reject) {
 
-      // TODO: This is a hacky way of getting the timefield, this should be stored in mapping metadata
-      // and we should check if the data source is time based in the first place;
-      if (type === 'search') {
+        // stop processing if current is disabled, returns nothing
+        if (current._fetchDisabled) return Promise.resolved();
 
-        return this._courier._mapper.getCachedFieldsFor(this).then(function (indexPattern) {
+        // itterate the _state object (not array) and
+        // pass each key:value pair to collect prop.
+        return Promise.all(_.map(current._state, function (value, key) {
+          return root._mergeProp(flatState, value, key);
+        }))
+        .then(function () {
+          // move to this sources parent
+          current = current._parent;
+
+          // keep calling until we reach the top parent
+          if (current) return ittr();
+        });
+      }())
+      .then(function () {
+        if (type === 'search') {
           // defaults for the query
-          _.forOwn({
-            query: {
+          if (!flatState.body.query) {
+            flatState.body.query = {
               'match_all': {}
-            }
-          }, collectProp);
-
-          var filter = timefilter.get(indexPattern);
-          if (!!filter) {
-            flatState.filters = flatState.filters || [];
-            flatState.filters.push(filter);
+            };
           }
 
           // switch to filtered query if there are filters
@@ -254,15 +257,10 @@ define(function (require) {
             }
             delete flatState.filters;
           }
+        }
 
-          return flatState;
-        });
-      } else {
-        var p = $q.defer();
-        p.resolve(flatState);
-        return p.promise;
-      }
-
+        return flatState;
+      });
     };
 
     return SourceAbstract;
