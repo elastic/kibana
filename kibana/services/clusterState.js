@@ -6,18 +6,18 @@ define(function (require) {
   var getIndices = require('lib/ClusterState/getIndices');
   var refreshState = require('lib/ClusterState/refreshState');
   var explainStatus = require('lib/ClusterState/explainStatus');
-  var explain = require('lib/ClusterState/explain');
+  var groupIndicesByState = require('lib/ClusterState/groupIndicesByState');
 
   return function (module) {
 
     module.factory('$clusterState', function ($rootScope, $http, kbnIndex, dashboard) {
 
-      // Create a parital function for the client.
+      // Create a partial function for the client.
       var client = _.partial(getState, $http, config);
       var indices = _.partial(getIndices, kbnIndex, dashboard);
 
       // Create an isolated scope that we will return as the service object.
-      // Also initantiate the state and version.
+      // Also instantiate the state and version.
       var service = $rootScope.$new(true);
       service.state = false;
       service.version = 0;
@@ -33,8 +33,8 @@ define(function (require) {
       // Attach the explainStatus method
       service.explainStatus = explainStatus.bind(null, service);
 
-      // Attach the explainStatus method
-      service.explain = explain.bind(null, service);
+      // Attach the groupIndicesByState method
+      service.groupIndicesByState = groupIndicesByState.bind(null, service);
 
       // Return the service to the subscribers.
       return service;

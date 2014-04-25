@@ -4,6 +4,10 @@ define(function (require) {
 
   var extractShards = function (state) {
 
+    if (!state) {
+      return [];
+    }
+
     function setNodeName (shard) {
       var node = state.nodes[shard.node];
       shard.nodeName = ( node && node.name ) || null;

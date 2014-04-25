@@ -3,7 +3,6 @@ define(function () {
 
   return function refreshState(service, getState, getIndices) {
     return getIndices().then(function (indices) {
-      //
       var success = function (state) {
         // Check the state is valid and emit an update event
         if (state && state['@timestamp'] !== service.version) {

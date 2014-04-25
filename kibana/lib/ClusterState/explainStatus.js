@@ -1,56 +1,84 @@
 define(function (require) {
-  'use strict';
-  var explain = require('./explain');
-  var _ = require('lodash');
+    'use strict';
+    var groupIndicesByState = require('./groupIndicesByState');
+    var _ = require('lodash');
 
-  var singleTemplate = function (status, index, counts ) {
-    var message = '';
-    var locals = { status: status, index: index, counts: counts };
-    locals.type = (status === 'red') ? 'primary' : 'replica';
+    var singleTemplate = function (status, index, counts) {
+        // kibana messes up with this
+        var currentSettings = _.templateSettings;
+        _.templateSettings = {
+          escape: /<%-([\s\S]+?)%>/g,
+          evaluate: /<%([\s\S]+?)%>/g,
+          interpolate: /<%=([\s\S]+?)%>/g
+        };
 
-    message += _.template('<%- index %> has ', locals);
-    var types = [];
-    if (locals.counts.unassigned) {
-      types.push(_.template('<%= counts.unassigned %> unassigned', locals));
-    }
-    if (locals.counts.initializing) {
-      types.push(_.template('<%= counts.initializing %> initializing', locals));
-    }
-    locals.types = types.join(' and ');
-    message += _.template('<%- types %> <%- type %> shards.', locals);
-    return message;
-  };
 
-  var filter = function (subject) {
-    return function (row) {
-      return subject === row;
+        var message = '';
+        var locals = { status: status, index: index, counts: counts };
+        if (status === 'red') {
+          locals.type = { single: 'primary', multi: 'primaries' };
+        }
+        else {
+          locals.type = { single: 'replica', multi: 'replicas' };
+        }
+
+        message += '<%- index %> has ';
+
+        // index has 5 unassigned primaries
+        if (counts.unassigned) {
+          message += counts.unassigned == 1 ? "an unassigned <%- type.single %>" :
+            "<%= counts.unassigned %> unassigned <%- type.multi %>";
+        }
+        else {
+          message += counts.initializing == 1 ? "an initializing <%- type.single %>" :
+            "<%= counts.initializing %> initializing <%- type.multi %>";
+        }
+
+        message = _.template(message, locals);
+        _.templateSettings = currentSettings;
+        return message;
+      }
+      ;
+
+    var filter = function (subject) {
+      return function (row) {
+        return subject === row;
+      };
     };
-  };
 
-  return function (scope, index) {
-    var plan = explain(scope.state);
-    var yellowIndices = _.keys(plan.yellow);
-    var redIndices = _.keys(plan.red);
+    var hiddenLast = function (name) {
+      return [/^\./.test(name), name]; 
+    };
 
-    if (!_.isUndefined(index)) {
-      redIndices = _.filter(redIndices, filter(index));
-      yellowIndices = _.filter(yellowIndices, filter(index));
-    }
+    return function (service, index, indicesByState) {
+      if (!indicesByState) {
+        indicesByState = groupIndicesByState(service);
+      }
+      var yellowIndices = _(indicesByState.yellow).keys().sortBy(hiddenLast).value();
+      var redIndices = _(indicesByState.red).keys().sortBy(hiddenLast).value();
 
-    yellowIndices = _.difference(yellowIndices, redIndices);
+      if (!_.isUndefined(index)) {
+        redIndices = _.filter(redIndices, filter(index));
+        yellowIndices = _.filter(yellowIndices, filter(index));
+      }
 
-    var messages = [];
+      yellowIndices = _.difference(yellowIndices, redIndices);
 
-    _.each(redIndices, function (index) {
-      messages.push(singleTemplate('red', index, plan.red[index]));
-    });
+      var messages = [];
 
-    _.each(yellowIndices, function (index) {
-      messages.push(singleTemplate('yellow', index, plan.yellow[index]));
-    });
+      _.each(redIndices, function (index) {
+        messages.push(singleTemplate('red', index, indicesByState.red[index]));
+      });
 
-    return messages;
-    
-  };
+      _.each(yellowIndices, function (index) {
+        messages.push(singleTemplate('yellow', index, indicesByState.yellow[index]));
+      });
 
-});
+
+      return messages;
+
+    };
+
+  }
+)
+;

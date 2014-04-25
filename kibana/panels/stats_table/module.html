@@ -69,11 +69,14 @@
     <tr ng-repeat="row in rows" ng-class="{'marvel-muted':!row.alive}">
       <td>
         <div>
-          <label class="checkbox" ng-class="alertClass(row.id_alert_level)">
+          <label class="checkbox" ng-class="alertClassForId(row)">
             <input type="checkbox" ng-model="row.selected" ng-checked="row.selected">
             <span class="pointer" ng-click="rowClick(row)">
               {{row.display_name}}
               <i bs-tooltip="'No report has been received for more than '+row.data_age_display" ng-show="!row.alive" class="icon-exclamation-sign"></i>
+              <i data-placement="right" bs-popover="'index_health.html'"
+               ng-class="alertClassForIndexStatusInfo(row.status)"
+               data-trigger="hover" ng-show="row.status && row.status !== 'green'" class="icon-exclamation-sign"></i>
               <i bs-tooltip="'This node is master'" ng-show="row.master" class="icon-star"></i>
             </span>
             <div class="marvel-persistent-name pointer" ng-hide="row.id == row.display_name" ng-click="rowClick(row)">{{row.id}}</div>
@@ -111,12 +114,15 @@
     </thead>
     <tr ng-repeat="row in rows" ng-class="{'marvel-muted':!row.alive}">
       <td>
-        <div class="checkbox" ng-class="alertClass(row.id_alert_level)">
+        <div class="checkbox" ng-class="alertClassForId(row)">
           <label>
             <input type="checkbox" ng-model="row.selected" ng-checked="row.selected">
           </label>
           <span class="pointer" ng-click="rowClick(row)">{{ row.id }}</span>
           <i bs-tooltip="'No report has been received for more than '+row.data_age_display" ng-show="!row.alive" class="icon-exclamation-sign"></i>
+          <i data-placement="right" bs-popover="'index_health.html'"
+             ng-class="alertClassForIndexStatusInfo(row.status)"
+             data-trigger="hover" ng-show="row.status && row.status !== 'green'" class="icon-exclamation-sign"></i>
           <i bs-tooltip="'This node is master'" ng-show="row.master" class="icon-star"></i>
         </div>
       </td>
@@ -131,3 +137,8 @@
   </table>
 
 </div>
+
+<script type="text/ng-template" id="index_health.html">
+  <div class="text-normal" ng-repeat="msg in row.statusExplain|limitTo:5">{{ msg }}</div>
+  <div class="text-normal" ng-if="row.statusExplain.length > 5">...</div>
+</script>

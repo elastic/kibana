@@ -1,13 +1,14 @@
 define([
-  'angular',
-  'app',
-  'kbn',
-  'lodash',
-  'jquery',
-  'numeral',
-  'jquery.flot',
-  'jquery.flot.time'
-],
+    'angular',
+    'app',
+    'kbn',
+    'lodash',
+    'jquery',
+    'numeral',
+    'jquery.flot',
+    'jquery.flot.time',
+    'services/marvel/index'
+  ],
   function (angular, app, kbn, _, $, numeral) {
     'use strict';
 
@@ -27,7 +28,7 @@ define([
         trillion: 'T'
       },
       currency: {
-        symbol: '$'  
+        symbol: '$'
       }
     });
 
@@ -60,7 +61,8 @@ define([
       return fieldName.replace(/\.raw$/, '');
     }
 
-    module.controller('marvel.stats_table', function ($scope, dashboard, filterSrv, esVersion, $filter, alertSrv) {
+    module.controller('marvel.stats_table', function ($scope, dashboard, filterSrv, esVersion, $clusterState, $filter,
+                                                      alertSrv) {
       $scope.panelMeta = {
         modals: [],
         editorTabs: [],
@@ -408,7 +410,7 @@ define([
           newData = {};
 
           // Check for error and abort if found
-          if(!(_.isUndefined(r.error))) {
+          if (!(_.isUndefined(r.error))) {
             $scope.panel.error = $scope.parse_error(r.error);
             return;
           }
@@ -467,6 +469,35 @@ define([
               });
             }
           }
+
+          // integrate with the cluster state
+          if ($scope.panel.mode === "indices") {
+            if (!$clusterState.state && newData) {
+              // we have data, but no state yet, schedule retrieval
+              var turnListenerOff;
+              turnListenerOff = $clusterState.$on('update', function () {
+                turnListenerOff();
+                $scope.get_data();
+              });
+            }
+
+            var indicesByStatus = $clusterState.groupIndicesByState();
+            _.each(newData, function (index) {
+              if (indicesByStatus.red[index.id]) {
+                index.status = "red";
+              }
+              else if (indicesByStatus.yellow[index.id]) {
+                index.status = "yellow";
+              }
+              else {
+                index.status = "green";
+              }
+              if (index.status !== "green") {
+                index.statusExplain = $clusterState.explainStatus(index.id, indicesByStatus);
+              }
+            });
+          }
+
 
           _.each($scope.panel.metrics, function (m) {
             _.each(r.facets[m.field].terms, function (f) {
@@ -670,6 +701,13 @@ define([
 
         function compareIdByName(id1, id2) {
           var s1 = newData[id1], s2 = newData[id2];
+          // names who start with a . go down..
+          if (s1.display_name.charAt(0) === '.' && s2.display_name.charAt(0) !== ".") {
+            return 1;
+          }
+          if (s1.display_name.charAt(0) !== '.' && s2.display_name.charAt(0) === ".") {
+            return -1;
+          }
           if (s1.display_name < s2.display_name) {
             return -1;
           }
@@ -685,6 +723,23 @@ define([
             return -1;
           }
           if (!s1.master && s2.master) {
+            return 1;
+          }
+          return 0;
+        }
+
+        function compareIdByIndexStatus(id1, id2) {
+          var level = { red: 2, yellow: 1, green: 0 };
+          var s1 = newData[id1], s2 = newData[id2];
+          if (!s1.status) {
+            // nodes mode, no status
+            return 0;
+          }
+          var l1 = level[s1.status], l2 = level[s2.status];
+          if (l1 > l2) {
+            return -1;
+          }
+          if (l1 < l2) {
             return 1;
           }
           return 0;
@@ -721,18 +776,18 @@ define([
         }
 
         if ($scope.panel.sort) {
-          newRowsIds.sort(concatSorting(compareIdByPanelSort, compareIdByAlert, compareIdByStaleness,
+          newRowsIds.sort(concatSorting(compareIdByPanelSort, compareIdByIndexStatus, compareIdByAlert, compareIdByStaleness,
             compareIdBySelection, compareIdByMasterRole));
           newRowsIds = newRowsIds.slice(0, $scope.rowLimit);
 
         }
         else {
-          newRowsIds.sort(concatSorting(compareIdBySelection, compareIdByAlert, compareIdByStaleness,
+          newRowsIds.sort(concatSorting(compareIdBySelection, compareIdByIndexStatus, compareIdByAlert, compareIdByStaleness,
             compareIdByMasterRole, compareIdByName));
           newRowsIds = newRowsIds.slice(0, $scope.rowLimit);
           // sort again for visual effect
           // sort again for visual placement
-          newRowsIds.sort(concatSorting(compareIdByAlert, compareIdByName));
+          newRowsIds.sort(concatSorting(compareIdByIndexStatus, compareIdByAlert, compareIdByName));
         }
 
 
@@ -758,8 +813,8 @@ define([
               return;
             }
             request.facet($scope.ejs.DateHistogramFacet($scope.get_history_key(row.id, m))
-              .keyField('@timestamp').valueField(m.field).interval('1m')
-              .facetFilter($scope.ejs.TermFilter($scope.panel.persistent_field, row.id))
+                .keyField('@timestamp').valueField(m.field).interval('1m')
+                .facetFilter($scope.ejs.TermFilter($scope.panel.persistent_field, row.id))
             );
 
           });
@@ -779,11 +834,11 @@ define([
             // sort again for visual correctness & because history facets may change current values.
             var sf;
             if ($scope.panel.sort) {
-              sf = concatSorting(compareIdByPanelSort, compareIdByAlert, compareIdByStaleness,
+              sf = concatSorting(compareIdByPanelSort, compareIdByIndexStatus, compareIdByAlert, compareIdByStaleness,
                 compareIdBySelection, compareIdByMasterRole);
             }
             else {
-              sf = concatSorting(compareIdByAlert, compareIdByName);
+              sf = concatSorting(compareIdByIndexStatus, compareIdByAlert, compareIdByName);
             }
             newRows.sort(function (r1, r2) {
               return sf(r1.id, r2.id);
@@ -922,12 +977,12 @@ define([
       $scope.formatAlert = function (a, metric) {
         // If a is empty then return an empty string
         if (!a) {
-          return ''; 
+          return '';
         }
 
         // Get the value for the metric
         var value = y_format_metric_value(a.threshold, metric);
-        
+
         // Return the value with the upper or lower bound
         return (a.type === "upper_bound" ? ">" : "<") + value;
       };
@@ -1047,6 +1102,31 @@ define([
           return ['text-warning'];
         }
         return [];
+      };
+
+      $scope.alertClassForId = function (row) {
+        var level = row.id_alert_level;
+        if (row.status === "red") {
+          // red index
+          return ['text-error'];
+        }
+        if (level >= 2) {
+          return ['text-error'];
+        }
+        if (level >= 1) {
+          return ['text-warning'];
+        }
+        return [];
+      };
+
+      $scope.alertClassForIndexStatusInfo = function (status) {
+        if (status === "red") {
+          // red index
+          return ['text-error'];
+        }
+        if (status === "yellow") {
+          return ['text-warning'];
+        }
       };
 
 
