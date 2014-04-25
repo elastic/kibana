@@ -294,10 +294,10 @@ define(function (require) {
       return function (eventContext, newState) {
         var current = ($scope.player.current === $scope.player.total),
           data = $scope.timelineData;
-        if (data[data.length - 1].fields['@timestamp'] < newState['@timestamp']) {
+        if (getValue(data[data.length - 1].fields['@timestamp']) < getValue(newState['@timestamp'])) {
           // newer state, that what we have, go retrieve more
           // note: we can't just use the new state as it cause to miss some states
-          getTimeline(10, { from: data[data.length - 1].fields['@timestamp']}).then(
+          getTimeline(10, { from: getValue(data[data.length - 1].fields['@timestamp'])}).then(
             function (newData) {
               data.push.apply(data, newData);
               handleTimeline(data, current);
