@@ -63,6 +63,9 @@
 
   .shards {
     float: left;
+    .tooltip {
+      .opacity(1);
+    }
     .tooltip.top .tooltip-arrow {
       border-top-color: #FFF;
     }
@@ -177,7 +180,7 @@
     padding: 27px 0 0;
     .user-select(none);
     .current {
-      color: #999;
+      color: #FFF;
     }
 
     .disabled {
@@ -301,6 +304,7 @@
           .box-shadow(0px 5px 10px rgba(0,0,0,0.2));
           position: absolute;
           border: 1px solid #333;
+          white-space: nowrap;
           text-align: center;
           .border-radius(3px);
           font-weight: bold;

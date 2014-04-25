@@ -59,6 +59,11 @@
 .marvel-cluster-view .shards {
   float: left;
 }
+.marvel-cluster-view .shards .tooltip {
+  -webkit-opacity: 1;
+  -moz-opacity: 1;
+  opacity: 1;
+}
 .marvel-cluster-view .shards .tooltip.top .tooltip-arrow {
   border-top-color: #FFF;
 }
@@ -148,7 +153,7 @@
   user-select: none;
 }
 .marvel-cluster-view .player .current {
-  color: #999;
+  color: #FFF;
 }
 .marvel-cluster-view .player .disabled {
   color: #666;
@@ -281,6 +286,7 @@
   box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
   position: absolute;
   border: 1px solid #333;
+  white-space: nowrap;
   text-align: center;
   -webkit-border-radius: 3px;
   -webkit-background-clip: padding-box;
