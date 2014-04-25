@@ -48,8 +48,6 @@ define(function (require) {
           location: 'Dashboard'
         });
 
-        timefilter.enabled(true);
-
         var dash = $scope.dash = $route.current.locals.dash;
 
         var stateDefaults = {
@@ -71,6 +69,11 @@ define(function (require) {
         $scope.openLoad = _.partial($scope.configTemplate.toggle, 'load');
         $scope.openAdd = _.partial($scope.configTemplate.toggle, 'pickVis');
         $scope.refresh = _.bindKey(courier, 'fetch');
+
+
+        timefilter.enabled(true);
+        $scope.timefilter = timefilter;
+        $scope.$watchCollection('timefilter.time', $scope.refresh);
 
         $scope.save = function () {
           dash.title = $state.title;
