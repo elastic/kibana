@@ -237,6 +237,8 @@ function (angular, _, config, kbn) {
         return _.pluck(_.where(dashboard.current.services.query.list,{pin:false,enable:true}),'id');
       case 'selected':
         return _.intersection(_.pluck(_.where(dashboard.current.services.query.list,{enable:true}),'id'),config.ids);
+      case 'selected - allow disabled':
+        return _.intersection(_.pluck(dashboard.current.services.query.list, 'id'), config.ids);
       default:
         return _.pluck(_.where(dashboard.current.services.query.list,{enable:true}),'id');
       }
