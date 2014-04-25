@@ -6540,9 +6540,6 @@ notifications {
 .navbar-nav li a {
   cursor: pointer;
 }
-.container-default {
-  margin-top: 10px;
-}
 .navbar {
   margin-bottom: 0px!important;
 }

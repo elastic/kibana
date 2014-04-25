@@ -129,14 +129,14 @@ define(function (require) {
      * be fetched on the next run of the courier
      * @return {Promise}
      */
-    SourceAbstract.prototype.onResults = function () {
+    SourceAbstract.prototype.onResults = function (handler) {
       var source = this;
       return new Promise.emitter(function (resolve, reject, defer) {
         source._courier._pendingRequests.push({
           source: source,
           defer: defer
         });
-      });
+      }, handler);
     };
 
     /**

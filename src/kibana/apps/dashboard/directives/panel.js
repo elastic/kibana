@@ -1,15 +1,31 @@
 define(function (require) {
   var app = require('modules').get('app/dashboard');
+  var _ = require('lodash');
 
-  app.directive('dashboardPanel', function () {
+  require('apps/visualize/directives/visualize');
+
+  app.directive('dashboardPanel', function (savedVisualizations, Notifier) {
+    var notify = new Notifier();
     return {
       restrict: 'E',
-      scope: {
-        params: '@'
-      },
-      compile: function (elem, attrs) {
-        var params = JSON.parse(attrs.params);
-        elem.html(params.type + '<i class="link pull-right fa fa-times remove" />');
+      template: require('text!../partials/panel.html'),
+      requires: '^dashboardGrid',
+      link: function ($scope, $el) {
+        // receives panel object from the dashboard grid directive
+        $scope.$watch('visId', function (visId) {
+          delete $scope.vis;
+          if (!$scope.panel.visId) return;
+
+          savedVisualizations.get($scope.panel.visId)
+          .then(function (vis) {
+            $scope.vis = vis;
+          })
+          .catch(notify.fatal);
+        });
+
+        $scope.remove = function () {
+          _.pull($scope.panels, $scope.panel);
+        };
       }
     };
   });

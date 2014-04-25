@@ -5,7 +5,7 @@ define(function (require) {
   require('./controllers/wizard');
 
   require('./directives/canvas');
-  require('./directives/visualization');
+  require('./directives/visualize');
   require('./directives/config_category');
 
   require('routes')

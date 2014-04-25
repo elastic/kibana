@@ -71,31 +71,51 @@
 body.application-dashboard {
   background-color: #18bc9c;
 }
-div.application div.dashboard-container {
-  width: 100%;
-  background-color: #18bc9c;
+.gridster-container {
+  margin: 0;
+  padding: 5px;
 }
-[dashboard-grid].gridster {
+.gridster {
   list-style-type: none;
   display: block;
   background-color: #18bc9c;
-  margin-bottom: 0;
+  margin: 0;
+  padding: 0;
 }
-[dashboard-grid].gridster .preview-holder {
+.gridster .preview-holder {
   border: none!important;
   background: #999999 !important;
 }
-[dashboard-grid].gridster li.gs-w {
-  background: #fff;
-  padding: 5px;
+.gridster i.remove {
+  cursor: pointer;
+}
+.gridster dashboard-panel {
+  display: block;
+  height: 100%;
+  background: #ffffff;
   color: #18bc9c;
+  padding: 0;
   font-weight: bold;
   font-size: 20px;
-  padding: 10px;
   overflow: hidden;
+  position: relative;
 }
-[dashboard-grid] i.remove {
-  cursor: pointer;
+.gridster dashboard-panel .btn {
+  position: absolute;
+  color: #d9534f;
+  top: 0px;
+  right: 0px;
+  border: none;
+  background: none;
+  opacity: .25;
+  transition: opacity 0.25s ease-in-out;
+  -webkit-transition: opacity 0.25s ease-in-out;
+  -moz-transition: opacity 0.25s ease-in-out;
+  -ms-transition: opacity 0.25s ease-in-out;
+  -o-transition: opacity 0.25s ease-in-out;
+}
+.gridster dashboard-panel .btn:hover {
+  opacity: 1;
 }
 .dashboard-load {
   margin: 10px;

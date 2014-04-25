@@ -41,74 +41,79 @@ define(function (require) {
     }
   });
 
-  app.controller('dashboard', function ($scope, $route, $routeParams, $rootScope, $location,
-    Promise, es, configFile, createNotifier, courier) {
+  app.controller('dashboard', function ($scope, $route, $routeParams, $location, configFile, Notifier, courier,
+    savedVisualizations, AppState, timefilter) {
 
-    var notify = createNotifier({
+    var notify = new Notifier({
       location: 'Dashboard'
     });
 
+    timefilter.enabled(true);
+
     var dash = $scope.dash = $route.current.locals.dash;
 
-    $scope.editingTitle = false;
-
-    // Passed in the grid attr to the directive so we can access the directive's function from
-    // the controller and view
-    $scope.gridControl = {};
-
-    // All inputs go here.
-    $scope.input = {
-      search: void 0
+    var stateDefaults = {
+      title: dash.title,
+      panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : []
     };
 
-    // Setup configurable values for config directive, after objects are initialized
-    $scope.configurable = {
-      dashboard: dash,
-      input: $scope.input
-    };
+    var $state = $scope.$state = new AppState(stateDefaults);
 
     $scope.$on('$destroy', dash.destroy);
 
-    $scope.$watch('dash.panelsJSON', function (val) {
-      $scope.panels = JSON.parse(val || '[]');
-    });
-
     $scope.configTemplate = new ConfigTemplate({
       save: require('text!./partials/save_dashboard.html'),
-      load: require('text!./partials/load_dashboard.html')
+      load: require('text!./partials/load_dashboard.html'),
+      pickVis: require('text!./partials/pick_visualization.html')
     });
 
-    $scope.openSave = function () {
-      if ($scope.configTemplate.toggle('save')) {
-        $scope.configSubmit = $scope.save;
-      }
-    };
-
-    $scope.openLoad = function () {
-      if ($scope.configTemplate.toggle('load')) {
-        $scope.configSubmit = null;
-      }
-    };
+    $scope.openSave = _.partial($scope.configTemplate.toggle, 'save');
+    $scope.openLoad = _.partial($scope.configTemplate.toggle, 'load');
+    $scope.openAdd = _.partial($scope.configTemplate.toggle, 'pickVis');
+    $scope.refresh = _.bindKey(courier, 'fetch');
 
     $scope.save = function () {
-      var doc = courier.createSource('doc')
-        .index(configFile.kibanaIndex)
-        .type('dashboard')
-        .id($scope.dash.title);
+      dash.title = $state.title;
+      dash.panelsJSON = JSON.stringify($state.panels);
 
-      doc.doIndex({
-        title: dash.title,
-        panelsJSON: JSON.stringify($scope.gridControl.serializeGrid())
-      })
+      dash.save()
       .then(function () {
-        notify.info('Saved Dashboard as "' + $scope.dash.title + '"');
-        if ($scope.dash.title !== $routeParams.id) {
-          $location.url('/dashboard/' + encodeURIComponent($scope.dash.title));
+        notify.info('Saved Dashboard as "' + $state.title + '"');
+        if ($state.title !== $routeParams.id) {
+          $location.url('/dashboard/' + encodeURIComponent($state.title));
         }
       })
       .catch(notify.fatal);
     };
 
-    $rootScope.$broadcast('application.load');
+    var pendingVis = 0;
+    $scope.$on('ready:vis', function () {
+      if (pendingVis) pendingVis--;
+      if (pendingVis === 0) {
+        $state.commit();
+        courier.fetch();
+      }
+    });
+
+    // listen for notifications from the grid component that changes have
+    // been made, rather than watching the panels deeply
+    $scope.$on('change:vis', function () {
+      $state.commit();
+    });
+
+    // called by the saved-object-finder when a user clicks a vis
+    $scope.addVis = function (hit) {
+      pendingVis++;
+      $state.panels.push({ visId: hit.id });
+    };
+
+    // Setup configurable values for config directive, after objects are initialized
+    $scope.opts = {
+      dashboard: dash,
+      save: $scope.save,
+      addVis: $scope.addVis
+    };
+
+    $scope.$broadcast('application.load');
   });
 });
