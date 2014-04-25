@@ -48,16 +48,18 @@
           </div>
           <div style="padding-top:0px" ng-if="!row.collapse">
 
-            <!-- Panels -->
-            <div resizable ng-repeat="(name, panel) in row.panels|filter:isPanel" ng-hide="panel.hide" class="panel nospace" ng-style="{'width':!panel.span?'100%':((panel.span/1.2)*10)+'%'}" data-drop="true" ng-model="row.panels" data-jqyoui-options jqyoui-droppable="{index:$index,mutate:false,onDrop:'panelMoveDrop',onOver:'panelMoveOver(true)',onOut:'panelMoveOut'}" ng-class="{'dragInProgress':dashboard.panelDragging}">
-
-              <!-- Content Panel -->
-              <div style="position:relative">
-                <kibana-panel type="panel.type" ng-cloak></kibana-panel>
-              </div>
+            <!-- All the panels in the row -->
+            <div
+              ng-repeat="(name, panel) in row.panels|filter:isPanel"
+              ng-cloak ng-hide="panel.hide"
+              kibana-panel type='panel.type' resizable
+              class="panel nospace" ng-class="{'dragInProgress':dashboard.panelDragging}"
+              style="position:relative"  ng-style="{'width':!panel.span?'100%':((panel.span/1.2)*10)+'%'}"
+              data-drop="true" ng-model="row.panels" data-jqyoui-options
+              jqyoui-droppable="{index:$index,mutate:false,onDrop:'panelMoveDrop',onOver:'panelMoveOver(true)',onOut:'panelMoveOut'}">
             </div>
 
-
+            <!-- A suggestion filler panel that appears when a panel is being dragged, but there is no panels in the row to drop it on -->
             <div ng-show="dashboard.panelDragging && row.panels.length == 0" class="panel panel-filler" style="" ng-class="{'dragInProgress':dashboard.panelDragging}" ng-style="{height:row.height}" data-drop="true" ng-model="row.panels" data-jqyoui-options jqyoui-droppable="{index:row.panels.length,mutate:false,onDrop:'panelMoveDrop',onOver:'panelMoveOver',onOut:'panelMoveOut'}">
               <h1>Drop here to add to this row</h1>
               Or drop on top of any other panel to insert in that row
