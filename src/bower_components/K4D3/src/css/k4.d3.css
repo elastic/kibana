@@ -20,15 +20,6 @@ div.col {
     fill: none;
 }
 
-.layer {
-    cursor: pointer;
-}
-
-.brush .extent {
-    stroke: #fff;
-    fill-opacity: .125;
-    shape-rendering: crispEdges;
-}
 /*.y.axis line, .y.axis path {
     fill: none;
     stroke: #ccc;
