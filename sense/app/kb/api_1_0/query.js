@@ -150,24 +150,6 @@ define(["_"], function (_) {
         type: '',
         values: []
       },
-      custom_score: {
-        __template: {
-          query: {},
-          script: ''
-        },
-        query: {},
-        script: '',
-        params: {},
-        lang: 'mvel'
-      },
-      custom_boost_factor: {
-        __template: {
-          query: {},
-          boost_factor: 1.1
-        },
-        query: {},
-        boost_factor: 1.1
-      },
       constant_score: {
         __template: {
           filter: {},

@@ -28,8 +28,13 @@ define(function () {
       "stats": simple_metric,
       "extended_stats": simple_metric,
       "value_count": {
-        __template: { field: ""},
-        field: "{field}"
+        __template: {
+          "field": ""
+        },
+        "field": "{field}",
+        "script": "_value",
+        "params": {},
+        "lang": "mvel"
       },
       "global": {},
       "filter": {},
@@ -63,7 +68,19 @@ define(function () {
         // TODO: these also support regex - extend!
         "include": "*",
         "exclude": "*",
-        "execution_hint": { __one_of: ["asc", "desc"] }
+        "execution_hint": { __one_of: ["map", "ordinals", "global_ordinals"] }
+      },
+      "significant_terms": {
+        __template: {
+          "field": ""
+        },
+        "field": "{field}",
+        "size": 10,
+        "shard_size": 10,
+        "min_doc_count": 10,
+        "include": "*",
+        "exclude": "*",
+        "execution_hint": { __one_of: ["map", "ordinals", "global_ordinals"] }
       },
       "range": {
         __template: {
@@ -185,6 +202,27 @@ define(function () {
         "precision": { __one_of: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]},
         "size": 10,
         "shard_size": 10
+      },
+      "percentiles": {
+        __template: {
+          "field": ""
+        },
+        "field": "{field}",
+        "percents": [],
+        "script": "_value",
+        "params": {},
+        "lang": "mvel",
+        "compression": 100
+      },
+      "cardinality": {
+        __template: {
+          "field": ""
+        },
+        "precision_threshold": 100,
+        "rehash": true,
+        "script": "_value",
+        "params": {},
+        "lang": "mvel"
       }
 
     }

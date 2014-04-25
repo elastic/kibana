@@ -38,5 +38,7 @@ define(["_"], function (_) {
     addSimpleCat('_cat/recovery', api);
     addSimpleCat('_cat/thread_pool', api);
     addSimpleCat('_cat/shards', api);
+    addSimpleCat('_cat/plugins', api);
+    addSimpleCat('_cat/segments', api);
   };
 });
