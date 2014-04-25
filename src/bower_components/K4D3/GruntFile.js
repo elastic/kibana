@@ -9,14 +9,11 @@ module.exports = function(grunt) {
                     baseUrl: '.',
                     name: 'lib/almond/almond',
                     include: ['src/index'],
-                    exclude: ['lib/jquery/dist/jquery'],
                     optimize: 'none',
                     out: 'build/k4.d3.js',
-                    /*
                     onBuildRead: function(moduleName, path, contents) {
                         return contents.replace(/console.log(.*);/g, '');
                     },
-                    */
                     wrap: {
                         startFile: 'src/start.js',
                         endFile: 'src/end.js'
@@ -89,7 +86,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
 
-    grunt.registerTask('default', ['requirejs', 'copy', 'cssmin', 'watch']);
+    grunt.registerTask('default', ['requirejs', 'copy', 'watch']);
     grunt.registerTask('production', ['requirejs', 'uglify', 'copy', 'cssmin']);
     grunt.registerTask('release', ['production']);
     grunt.registerTask('lint', ['jshint']);

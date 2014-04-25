@@ -1,9 +1,10 @@
 define(function(require) {
-    'use strict';
+    "use strict";
 
     var d3 = require('lib/d3/d3');
 
     return function() {
+        'use strict';
 
         // Based on Justin Palmer's d3.tip() function
 
@@ -13,21 +14,12 @@ define(function(require) {
             node      = initNode(),
             svg       = null,
             point     = null,
-            target    = null,
+            target    = null;
 
-            // JT - add mouse
-            mouse     = null;
-
-        function tip (vis) {
-            //console.log('vis', vis);
+        function tip(vis) {
             svg = getSVGNode(vis);
             point = svg.createSVGPoint();
             document.body.appendChild(node);
-
-            // JT - add mouse listener
-            $(document).mousemove(function (e) {
-                mouse = { left: e.pageX, top: e.pageY};
-            });
         }
 
         // Public - show the tooltip on the screen
@@ -35,31 +27,25 @@ define(function(require) {
         // Returns a tip
         tip.show = function() {
             var args = Array.prototype.slice.call(arguments);
-            //console.log('args', args);
             if(args[args.length - 1] instanceof SVGElement) { target = args.pop(); }
 
             var content = html.apply(this, args),
                 poffset = offset.apply(this, args),
                 dir     = direction.apply(this, args),
                 nodel   = d3.select(node),
-                //i       = directions.length,
+                i       = directions.length,
                 coords;
 
             nodel.html(content)
                 .style({ opacity: 1, 'pointer-events': 'all' });
 
-            //while(i--) nodel.classed(directions[i], false);
-            //coords = direction_callbacks.get(dir).apply(this);
-            // nodel.classed(dir, true).style({
-            //     top: (coords.top +  poffset[0]) + 'px',
-            //     left: (coords.left + poffset[1]) + 'px'
-            // });
-            var w = nodel[0][0].scrollWidth;
-            var h = nodel[0][0].scrollHeight;
+            while(i--) nodel.classed(directions[i], false);
+            coords = direction_callbacks.get(dir).apply(this);
             nodel.classed(dir, true).style({
-                top: (mouse.top - h - 4) + 'px',
-                left: (mouse.left - w/2) + 'px'
+                top: (coords.top +  poffset[0]) + 'px',
+                left: (coords.left + poffset[1]) + 'px'
             });
+
             return tip;
         };
 
@@ -85,6 +71,7 @@ define(function(require) {
                 var args =  Array.prototype.slice.call(arguments);
                 d3.selection.prototype.attr.apply(d3.select(node), args);
             }
+
             return tip;
         };
 
@@ -96,11 +83,12 @@ define(function(require) {
         // Returns tip or style property value
         tip.style = function(n, v) {
             if (arguments.length < 2 && typeof n === 'string') {
-                return d3.select(node).style(n);
+                return d3.select(node).style(n)
             } else {
                 var args =  Array.prototype.slice.call(arguments);
                 d3.selection.prototype.style.apply(d3.select(node), args);
             }
+
             return tip;
         };
 
@@ -113,6 +101,7 @@ define(function(require) {
         tip.direction = function(v) {
             if (!arguments.length) { return direction; }
             direction = v === null ? v : d3.functor(v);
+
             return tip;
         };
 
@@ -124,6 +113,7 @@ define(function(require) {
         tip.offset = function(v) {
             if (!arguments.length) { return offset; }
             offset = v === null ? v : d3.functor(v);
+
             return tip;
         };
 
@@ -135,6 +125,7 @@ define(function(require) {
         tip.html = function(v) {
             if (!arguments.length) { return html; }
             html = v === null ? v : d3.functor(v);
+
             return tip;
         };
 
@@ -142,7 +133,6 @@ define(function(require) {
         function d3_tip_offset() { return [0, 0]; }
         function d3_tip_html() { return ' '; }
 
-        /*
         var direction_callbacks = d3.map({
                 n:  direction_n,
                 s:  direction_s,
@@ -219,8 +209,7 @@ define(function(require) {
                 left: bbox.e.x
             };
         }
-        */
-        
+
         function initNode() {
             var node = d3.select(document.createElement('div'));
             node.style({
@@ -233,12 +222,14 @@ define(function(require) {
 
             return node.node();
         }
+
         function getSVGNode(el) {
             el = el.node();
             if(el.tagName.toLowerCase() === 'svg') { return el; }
-            return el.ownerSVGElement;
+
+            return el.ownerSVGElement
         }
-        /*
+
         // Private - gets the screen coordinates of a shape
         //
         // Given a shape on the screen, will return an SVGPoint for the directions
@@ -261,10 +252,10 @@ define(function(require) {
                 height     = tbbox.height,
                 x          = tbbox.x,
                 y          = tbbox.y,
-                // scrollEl   = document.documentElement ? document.documentElement : document.body,
-                scrollEl   = $(document), // JT
-                scrollTop  = scrollEl.scrollTop(),
-                scrollLeft = scrollEl.scrollLeft();
+                scrollEl   = document.documentElement ? document.documentElement : document.body,
+                scrollTop  = scrollEl.scrollTop,
+                scrollLeft = scrollEl.scrollLeft;
+
 
             point.x = x + scrollLeft;
             point.y = y + scrollTop;
@@ -284,9 +275,9 @@ define(function(require) {
             bbox.n = point.matrixTransform(matrix);
             point.y += height;
             bbox.s = point.matrixTransform(matrix);
+
             return bbox;
         }
-        */
 
         return tip;
     };
