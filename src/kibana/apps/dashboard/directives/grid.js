@@ -71,7 +71,7 @@ define(function (require) {
             $window.off('destroy', safeLayout);
 
             if (!gridster) return;
-            gridster.$widgets.each(function (el) {
+            gridster.$widgets.each(function (i, el) {
               removePanel(getPanelFor(el));
             });
           });
@@ -102,11 +102,17 @@ define(function (require) {
 
         // tell gridster to remove the panel, and cleanup our metadata
         var removePanel = function (panel) {
-          gridster.remove_widget(panel.$el);
+          // remove from grister 'silently' (don't reorganize after)
+          gridster.remove_widget(panel.$el, true);
+
+          // stop any animations
+          panel.$el.stop();
+
+          // destroy the scope
           panel.$scope.$destroy();
 
           panel.$el.removeData('panel');
-          panel.$el.removeData('panel$scope');
+          panel.$el.removeData('$scope');
         };
 
         // tell gridster to add the panel, and create additional meatadata like $scope
@@ -126,10 +132,13 @@ define(function (require) {
 
           // tell gridster to use the widget
           gridster.add_widget(panel.$el, panel.size_x, panel.size_y, panel.col, panel.row);
+
           // update size/col/etc.
           refreshPanelStats(panel);
-          // stash the panel in the element's data
+
+          // stash the panel and it's scope in the element's data
           panel.$el.data('panel', panel);
+          panel.$el.data('$scope', panel.$scope);
         };
 
         // ensure that the panel object has the latest size/pos info

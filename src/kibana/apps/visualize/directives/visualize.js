@@ -26,6 +26,10 @@ define(function (require) {
 
           $scope.$root.$broadcast('ready:vis');
         });
+
+        $scope.$on('$destroy', function () {
+          if ($scope.vis) $scope.vis.destroy();
+        });
       }
     };
   });
