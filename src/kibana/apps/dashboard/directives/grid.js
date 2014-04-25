@@ -10,13 +10,15 @@ define(function (require) {
   app.directive('dashboardGrid', function ($compile) {
     return {
       restrict: 'A',
-      scope : {
-        panels: '='
-      },
+      require: '^dashboardApp', // must inherit from the dashboardApp
       link: function ($scope, $el) {
         var $container = $el.parent();
         var $window = $(window);
         var $body = $(document.body);
+
+        // appState from controller
+        var $state = $scope.$state;
+
         var gridster; // defined in init()
 
         // number of columns to render
@@ -44,7 +46,7 @@ define(function (require) {
           var safeLayout = _.debounce(layout, 200);
           $window.on('resize', safeLayout);
 
-          $scope.$watchCollection('panels', function (panels) {
+          $scope.$watchCollection('$state.panels', function (panels) {
             var currentPanels = gridster.$widgets.toArray().map(function (el) {
               return getPanelFor(el);
             });
@@ -59,7 +61,7 @@ define(function (require) {
             if (added.length) added.forEach(addPanel);
 
             // ensure that every panel can be serialized now that we are done
-            $scope.panels.forEach(makePanelSerializeable);
+            $state.panels.forEach(makePanelSerializeable);
 
             // alert interested parties that we have finished processing changes to the panels
             if (added.length || removed.length) $scope.$root.$broadcast('change:vis');
