@@ -1,6 +1,5 @@
 {
   "name": "K4D3",
-  "version": "0.1.0",
   "main": "core.js",
   "scripts": [
     "k4.d3.js"
@@ -41,5 +40,14 @@
     "lodash": "~2.4.1",
     "queue-async": "~1.0.7",
     "topojson": "~1.6.7"
-  }
+  },
+  "_release": "93636b6a3a",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "93636b6a3a3b85351cf88641d5100a1870afd21a"
+  },
+  "_source": "git@github.com:elasticsearch/K4D3.git",
+  "_target": "*",
+  "_originalSource": "git@github.com:elasticsearch/K4D3.git"
 }
