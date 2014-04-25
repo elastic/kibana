@@ -176,6 +176,7 @@ define(function (require) {
        */
       this.destroy = function () {
         docSource.cancelPending();
+        if (obj.searchSource) obj.searchSource.cancelPending();
       };
 
     }

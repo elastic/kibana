@@ -1,5 +1,7 @@
-<div class="form-group">
-  <label for="exampleInputEmail1">Save As</label>
-  <input type="text" ng-model="configObject.dashboard.title" class="form-control" placeholder="Dashboard title">
-</div>
-<button type="submit" ng-disabled="!configObject.dashboard.title" class="btn btn-primary">Save</button>
+<form ng-submit="opts.save()">
+  <div class="form-group">
+    <label for="exampleInputEmail1">Save As</label>
+    <input type="text" ng-model="opts.dashboard.title" class="form-control" placeholder="Dashboard title">
+  </div>
+  <button type="submit" ng-disabled="!opts.dashboard.title" class="btn btn-primary">Save</button>
+</form>

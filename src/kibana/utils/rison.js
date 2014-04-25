@@ -190,7 +190,8 @@ rison.quote = function(x) {
                 return "'" + x + "'";
             },
             undefined: function (x) {
-                throw new Error("rison can't encode the undefined value");
+                // ignore undefined just like JSON
+                // throw new Error("rison can't encode the undefined value");
             }
         };
 

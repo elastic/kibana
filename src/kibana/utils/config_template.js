@@ -1,28 +1,29 @@
 define(function (require) {
 
   function ConfigTemplate(templates) {
-    this.current = null;
+    var template = this;
+    template.current = null;
 
-    this.toggle = function (name) {
+    template.toggle = function (name) {
       var toSwitch = templates[name];
-      if (this.current === toSwitch) {
-        this.current = null;
+      if (template.current === toSwitch) {
+        template.current = null;
         return false;
       } else {
-        this.current = toSwitch;
+        template.current = toSwitch;
         return true;
       }
     };
 
-    this.close = function (name) {
+    template.close = function (name) {
       var toClose = templates[name];
-      if (this.current === toClose) {
-        this.current = null;
+      if (template.current === toClose) {
+        template.current = null;
       }
     };
 
-    this.toString = function () {
-      return this.current;
+    template.toString = function () {
+      return template.current;
     };
   }
 

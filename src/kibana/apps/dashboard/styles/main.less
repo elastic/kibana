@@ -1,5 +1,6 @@
 @import (reference) "../../../styles/_bootstrap.less";
 @import (reference) "../../../styles/theme/_theme.less";
+@import (reference) "../../../styles/_mixins.less";
 
 @dashboard-background: #18bc9c;
 
@@ -7,36 +8,53 @@ body.application-dashboard {
   background-color: @dashboard-background;
 }
 
-// Dashboard app container stretches to fill height. Required because gridster is not full height
-div.application div.dashboard-container {
-  width: 100%;
-  background-color: @dashboard-background;
+.gridster-container {
+  margin: 0;
+  padding: 5px;
 }
 
-[dashboard-grid].gridster {
+.gridster {
   list-style-type: none;
   display: block;
   background-color: @dashboard-background;
-  margin-bottom: 0;
-}
+  margin: 0;
+  padding: 0;
 
-[dashboard-grid].gridster .preview-holder {
-    border: none!important;
-    background: @gray-light!important;
-}
+  .preview-holder {
+      border: none!important;
+      background: @gray-light!important;
+  }
 
-[dashboard-grid].gridster li.gs-w {
-  background: #fff;
-  padding: 5px;
-  color: @dashboard-background;
-  font-weight: bold;
-  font-size: 20px;
-  padding: 10px;
-  overflow: hidden;
-}
+  i.remove {
+    cursor: pointer;
+  }
 
-[dashboard-grid] i.remove {
-  cursor: pointer;
+  dashboard-panel {
+    display: block;
+    height: 100%;
+    background: @panel-bg;
+    color: @dashboard-background;
+    padding: 0;
+    font-weight: bold;
+    font-size: 20px;
+    overflow: hidden;
+    position: relative;
+
+    .btn {
+      position: absolute;
+      color: @brand-danger;
+      top: 0px;
+      right: 0px;
+      border: none;
+      background: none;
+      opacity: .25;
+      .transition(opacity .25s ease-in-out);
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
 }
 
 .dashboard-load {

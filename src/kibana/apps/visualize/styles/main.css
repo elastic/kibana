@@ -112,7 +112,7 @@
 .vis-editor-content .vis-config-panel .agg-config-interval td:first-child {
   padding-left: 0px;
 }
-.vis-editor-content .vis-canvas visualization {
+.vis-editor-content vis-canvas {
   display: block;
   background: black;
   height: 800px;

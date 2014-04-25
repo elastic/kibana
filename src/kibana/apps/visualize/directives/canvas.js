@@ -5,7 +5,10 @@ define(function (require) {
 
   module.directive('visCanvas', function ($http) {
     return {
-      restrict: 'A',
+      restrict: 'E',
+      scope: {
+        vis: '='
+      },
       link: function ($scope, $el) {
         var $window = $(window);
         var $body = $(document.body);
