@@ -442,6 +442,7 @@
   background-color: #FFF;
   border: none;
   font-weight: normal;
+  white-space: nowrap;
 }
 .marvel-cluster-view.light .player .timeline .marker .arrow-down {
   border-top: 5px solid #FFF;

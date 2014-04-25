@@ -38,7 +38,7 @@ define(function (require) {
       });
 
       it('should set the display and format it to month/day', function () {
-        expect(results[0]).to.have.property('display', '1/1');
+        expect(results[0]).to.have.property('display', 'Jan 1');
       });
 
     });

@@ -2,7 +2,7 @@ define(function (require) {
   'use strict';
 
   // App-wide dependencies.
-  var angular = require('angular'); 
+  var angular = require('angular');
   var app = require('app');
   var _ = require('lodash');
   var config = require('config');
@@ -30,9 +30,9 @@ define(function (require) {
   shardGroups(module);
   clusterView(module);
   segments(module);
-  
-  module.controller('marvel.shard_allocation', function ($scope, $clusterState,
-                    $http, $timeout, $injector, dashboard, filterSrv, alertSrv) {
+
+  module.controller('marvel.shard_allocation', function ($scope, $clusterState, $http, $timeout, $injector, dashboard,
+                                                         filterSrv, alertSrv) {
 
     // Panel Metadata show in the Editor.
     $scope.panelMeta = {
@@ -42,8 +42,8 @@ define(function (require) {
 
     var handleConnectionError = function () {
       alertSrv.set('Error',
-       'The connection to Elasticsearch returned an error. Check your Elasticsearch instance.',
-       'error', 30000);
+        'The connection to Elasticsearch returned an error. Check your Elasticsearch instance.',
+        'error', 30000);
     };
 
     $scope.player = {
@@ -69,12 +69,12 @@ define(function (require) {
       view: 'nodes',
       labels: labels.nodes,
       rate: 500,
-      showPlayer: true 
+      showPlayer: true
     };
 
     // Set the defaults for the $scope.panel (this is side effecting)
     _.defaults($scope.panel, defaults);
-   
+
     // Change update the state of the ui based on the view
     $scope.$watch('panel.view', function () {
       changeData($scope);
@@ -115,7 +115,8 @@ define(function (require) {
         $scope.player.forward = false;
         $scope.player.fastForward = false;
         $scope.player.paused = true;
-      } else {
+      }
+      else {
         $scope.player.forward = true;
         $scope.player.fastForward = true;
       }
@@ -123,12 +124,13 @@ define(function (require) {
       if (($scope.player.current === 0) && ($scope.player.total !== 0)) {
         $scope.player.backward = false;
         $scope.player.fastBackward = false;
-      } else {
+      }
+      else {
         $scope.player.backward = true;
         $scope.player.fastBackward = true;
       }
 
-      $scope.barX = (($scope.player.current+1) / $scope.player.total)*100;
+      $scope.barX = (($scope.player.current + 1) / $scope.player.total) * 100;
       if ($scope.barX > 100) {
         $scope.barX = 100;
       }
@@ -139,7 +141,7 @@ define(function (require) {
       if ($scope.player.current === $scope.player.total) {
         docIndex--;
       }
-      
+
       var doc = $scope.timelineData[docIndex];
       if (doc) {
         getStateSource(doc).then(function (state) {
@@ -165,14 +167,14 @@ define(function (require) {
     };
 
     $scope.jump = function ($event) {
-      var position = $event.offsetX / $event.currentTarget.clientWidth; 
-      $scope.player.current = Math.floor(position*$scope.player.total);
+      var position = $event.offsetX / $event.currentTarget.clientWidth;
+      $scope.player.current = Math.floor(position * $scope.player.total);
       $scope.player.paused = true;
     };
 
     $scope.head = function ($event) {
       var position = $event.offsetX / $event.currentTarget.clientWidth;
-      var current = Math.floor(position*$scope.player.total);
+      var current = Math.floor(position * $scope.player.total);
       var timestamp = getValue($scope.timelineData[current].fields['@timestamp']);
       var message = getValue($scope.timelineData[current].fields.message);
       var status = getValue($scope.timelineData[current].fields.status);
@@ -185,7 +187,7 @@ define(function (require) {
 
     $scope.$watch('player.paused', function () {
       stop();
-      if($scope.player.paused === false) {
+      if ($scope.player.paused === false) {
         changePosition();
       }
     });
@@ -198,13 +200,14 @@ define(function (require) {
     $scope.play = function ($event) {
       $event.preventDefault();
       if ($scope.player.current === $scope.player.total) {
-        $scope.player.current = 0;  
+        $scope.player.current = 0;
         // We need to put the same amount of delay before we start the animation
         // otherwise it will feel like it's skipping the first frame.
         $timeout(function () {
           $scope.player.paused = false;
         }, $scope.panel.rate);
-      } else {
+      }
+      else {
         $scope.player.paused = false;
       }
     };
@@ -237,26 +240,34 @@ define(function (require) {
       $scope.player.paused = true;
     };
 
-    var handleTimeline = function (data) {
+    function clusterStateToDataFormat(state) {
+      return {
+        _index: state._index,
+        _type: state._type,
+        _id: state._id,
+        fields: {
+          '@timestamp': [ state['@timestamp'] ],
+          'status': [ state.status ],
+          'message': [ state.message ]
+        }
+      };
+    }
+
+    var handleTimeline = function (data, resetCurrentAndPaused) {
       // If we get nothing back we need to use the current state.
+      resetCurrentAndPaused = _.isUndefined(resetCurrentAndPaused) ? true : resetCurrentAndPaused;
+
       if (data.length === 0) {
-        data = [{
-          _index: $clusterState.state._index,
-          _type: $clusterState.state._type,
-          _id: $clusterState.state._id,
-          fields: {
-            '@timestamp': [ $clusterState.state['@timestamp'] ],
-            'status': [ $clusterState.state.status ],
-            'message': [ $clusterState.state.message ]
-          }
-        }] ;
+        data = [clusterStateToDataFormat($clusterState.state)];
       }
 
       $scope.timelineData = data;
       $scope.timelineMarkers = extractMarkers(data);
       $scope.player.total = (data.length > 0 && data.length) || 1;
-      $scope.player.current = $scope.player.total; 
-      $scope.paused = true;
+      if (resetCurrentAndPaused) {
+        $scope.player.current = $scope.player.total;
+        $scope.paused = true;
+      }
       updateColors($scope);
       $scope.total = $scope.player.total;
     };
@@ -271,7 +282,7 @@ define(function (require) {
 
       var timeRange = filterSrv.timeRange(false);
       var timeChanged = (timeRange.from !== $scope.timeRange.from ||
-                         timeRange.to   !== $scope.timeRange.to);
+        timeRange.to !== $scope.timeRange.to);
 
       if (timeChanged) {
         $scope.timeRange = timeRange;
@@ -280,10 +291,19 @@ define(function (require) {
     });
 
     var handleUpdatesFromClusterState = function ($scope) {
-      return function () {
-        var current = ($scope.player.current === $scope.player.total);
-        if ($scope.player.paused && current) {
-          getTimeline().then(handleTimeline, handleConnectionError);
+      return function (eventContext, newState) {
+        var current = ($scope.player.current === $scope.player.total),
+          data = $scope.timelineData;
+        if (data[data.length - 1].fields['@timestamp'] < newState['@timestamp']) {
+          // newer state, that what we have, go retrieve more
+          // note: we can't just use the new state as it cause to miss some states
+          getTimeline(10, { from: data[data.length - 1].fields['@timestamp']}).then(
+            function (newData) {
+              data.push.apply(data, newData);
+              handleTimeline(data, current);
+            },
+            handleConnectionError
+          );
         }
       };
     };

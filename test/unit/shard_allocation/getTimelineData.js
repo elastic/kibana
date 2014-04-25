@@ -38,7 +38,7 @@ define(function (require) {
         from: 0,
         fields: ['@timestamp', 'message', 'status'],
         sort: {
-          '@timestamp': { order: 'asc' }
+          '@timestamp': { order: 'desc' }
         },
         query: {
           filtered: {
@@ -95,7 +95,7 @@ define(function (require) {
             }
           }
         };
-        getTimeline(2, timeRange, initialData).then(function () {
+        getTimeline(2, timeRange, _.clone(initialData)).then(function () {
           sinon.assert.calledTwice(http.post);
           done();
         });
@@ -105,7 +105,7 @@ define(function (require) {
       });
 
       it('should http.post() with url and body', function (done) {
-        getTimeline(2, timeRange, initialData).then(function () {
+        getTimeline(2, timeRange, _.clone(initialData)).then(function () {
           sinon.assert.calledWith(http.post, url, body);
           done(); 
         }); 
@@ -114,10 +114,10 @@ define(function (require) {
       });
 
       it('should append results to data array', function (done) {
-        getTimeline(2, timeRange, initialData).then(function (data) {
-          expect(data).to.deep.equal([ 
-            { fields:{ '@timestamp': ['2014-01-01T23:00:00.000Z'] } },
-            { fields:{ '@timestamp': ['2014-01-01T12:00:00.000Z'] } }
+        getTimeline(2, timeRange, _.clone(initialData)).then(function (data) {
+          expect(data).to.deep.equal([
+            { fields:{ '@timestamp': ['2014-01-01T12:00:00.000Z'] } },
+            { fields:{ '@timestamp': ['2014-01-01T23:00:00.000Z'] } }
           ]);
           done(); 
         }); 

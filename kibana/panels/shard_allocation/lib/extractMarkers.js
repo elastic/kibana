@@ -1,37 +1,39 @@
 define(function (require) {
   'use strict';
-  var _ = require('lodash');  
+  var _ = require('lodash');
   var moment = require('moment');
   var getValue = require('./getValueFromArrayOrString');
+
+  function markerMaker(count, time, timestamp) {
+    return {
+      count: count,
+      time: time,
+      display: moment.utc(timestamp).startOf('day').format('MMM D')
+    };
+  }
+
   return function (data) {
+    // data has to be sorted by time and may contain duplicates
     var total = 0;
-    var previous = 0;
+    var currentMarker = null;
     var markers = _.reduce(data, function (memo, item) {
-      var display;
       var timestamp = getValue(item.fields['@timestamp']);
       var time = moment.utc(timestamp).startOf('day').format('YYYY-MM-DD');
-      var marker = _.find(memo, function (rec) {
-        // return rec.time.isSame(time); 
-        return rec.time === time; 
-      });
-      if (marker) {
-        marker.count = ++total;
-      } else {
-        display = moment.utc(timestamp).startOf('day').format('M/D');
-        marker = { count: ++total, time: time, display: display };
-        memo.push(marker);
+      if (!currentMarker) {
+        // first marker
+        currentMarker = markerMaker(0, time, timestamp);
       }
+      else if (currentMarker.time !== time) {
+        memo.push(currentMarker);
+        currentMarker = markerMaker(total, time, timestamp);
+      }
+      total++;
       return memo;
-    }, []); 
+    }, []);
 
-    // We need to set the count of the previous element to the current. So 
-    // the timeline will render correctly.
-    markers = _.map(markers, function (val) {
-      var current = val.count;
-      val.count = previous;
-      previous = current;
-      return val;
-    });
+    if (currentMarker) {
+      markers.push(currentMarker);
+    }
 
     return markers;
   };

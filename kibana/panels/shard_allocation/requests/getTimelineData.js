@@ -14,7 +14,7 @@ define(function (require) {
         from: 0,
         fields: ['@timestamp', 'message', 'status'],
         sort: {
-          '@timestamp': { order: 'asc' }
+          '@timestamp': { order: 'desc' }
         },
         query: {
           filtered: {
@@ -27,20 +27,19 @@ define(function (require) {
         }
       };
 
-      
-
       return $http.post(url, body).then(function (resp) {
         var nextTimeRange;
         var hits = resp.data.hits;
-        data = _.union(data, hits.hits);
+        data.push.apply(data, hits.hits);
         if (hits.total > size && hits.hits.length === size) {
           nextTimeRange = {
-            to: getValueFromArrayOrString(data[0].fields['@timestamp']),
+            to: getValueFromArrayOrString(hits.hits[size-1].fields['@timestamp']),
             from: timeRange.from
           };
           return getTimelineData(config, size, nextTimeRange, data); // call again
-        } 
-        return data;
+        }
+        // flip data back to normal order
+        return data.reverse();
       });
 
     };
