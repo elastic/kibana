@@ -73,6 +73,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
     public static final String SETTINGS_INDICES = "marvel.agent.indices";
     public static final String SETTINGS_ENABLED = "marvel.agent.enabled";
     public static final String SETTINGS_SHARD_STATS_ENABLED = "marvel.agent.shard_stats.enabled";
+    public static final String SETTINGS_CLUSTER_STATE_HEARTBEAT_INTERVAL = "marvel.agent.cluster_state.heartbeat";
 
     private final InternalIndicesService indicesService;
     private final NodeService nodeService;
@@ -87,6 +88,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
 
     private volatile Thread workerThread;
     private volatile long samplingInterval;
+    private volatile long clusterStateHeartbeatInterval;
     volatile private String[] indicesToExport = Strings.EMPTY_ARRAY;
     volatile private boolean exportShardStats;
 
@@ -107,6 +109,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
         this.clusterService = clusterService;
         this.nodeService = nodeService;
         this.samplingInterval = settings.getAsTime(SETTINGS_INTERVAL, TimeValue.timeValueSeconds(10)).millis();
+        this.clusterStateHeartbeatInterval = settings.getAsTime(SETTINGS_CLUSTER_STATE_HEARTBEAT_INTERVAL, TimeValue.timeValueMinutes(60)).millis();
         this.indicesToExport = settings.getAsArray(SETTINGS_INDICES, this.indicesToExport, true);
         this.exportShardStats = settings.getAsBoolean(SETTINGS_SHARD_STATS_ENABLED, false);
         this.client = client;
@@ -220,7 +223,7 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
 
         @Override
         public void run() {
-            int stateExportingCountDown = 0;
+            long lastClusterStateHeartbeat = 0;
             while (!closed) {
                 // sleep first to allow node to complete initialization before collecting the first start
                 try {
@@ -241,13 +244,14 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
                     if (clusterState.nodes().localNodeMaster()) {
                         exportIndicesStats();
                         exportClusterStats();
-                        if (--stateExportingCountDown <= 0) {
+                        if (clusterStateHeartbeatInterval >= 0 && System.currentTimeMillis() > lastClusterStateHeartbeat + clusterStateHeartbeatInterval) {
+                            logger.trace("exporting cluster state heartbeat");
                             ClusterHealthResponse health = new ClusterHealthResponse(clusterName,
                                     clusterState.metaData().concreteAllIndices(), clusterState);
 
                             pendingEventsQueue.add(new ClusterEvent.ClusterStateChange(System.currentTimeMillis(), clusterState,
                                     "periodic sample", health.getStatus(), clusterName, "heartbeat"));
-                            stateExportingCountDown = 3600 / 5;
+                            lastClusterStateHeartbeat = System.currentTimeMillis();
                         }
                     }
                 } catch (InterruptedException e) {
