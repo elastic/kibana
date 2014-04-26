@@ -11,6 +11,9 @@ define(function (require) {
       template: require('text!../partials/panel.html'),
       requires: '^dashboardGrid',
       link: function ($scope, $el) {
+        // using $scope inheritance, panels are available in AppState
+        var $state = $scope.$state;
+
         // receives panel object from the dashboard grid directive
         $scope.$watch('visId', function (visId) {
           delete $scope.vis;
@@ -24,7 +27,7 @@ define(function (require) {
         });
 
         $scope.remove = function () {
-          _.pull($scope.panels, $scope.panel);
+          _.pull($state.panels, $scope.panel);
         };
       }
     };
