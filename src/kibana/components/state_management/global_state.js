@@ -36,10 +36,6 @@ define(function (require) {
     // exposes sync.pull and sync.push
     var sync = setupSync(globalState, updateListeners, app);
 
-    $rootScope.$on('$locationChangeSuccess', function () {
-      sync.pull();
-    });
-
     $rootScope.$on('$locationUpdate', function () {
       sync.pull();
     });
