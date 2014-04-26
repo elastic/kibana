@@ -9,10 +9,12 @@ define(function (require) {
 
   app.directive('dashboardGrid', function ($compile) {
     return {
-      restrict: 'A',
+      restrict: 'E',
       require: '^dashboardApp', // must inherit from the dashboardApp
       link: function ($scope, $el) {
-        var $container = $el.parent();
+        var $container = $el;
+        $el = $('<ul>').appendTo($container);
+
         var $window = $(window);
         var $body = $(document.body);
 
@@ -25,6 +27,8 @@ define(function (require) {
         var COLS = 12;
         // number of pixed between each column/row
         var SPACER = 10;
+        // pixels used by all of the spacers (gridster puts have a spacer on the ends)
+        var spacerSize = SPACER * COLS;
 
         var init = function () {
           $el.addClass('gridster');
@@ -41,9 +45,8 @@ define(function (require) {
               stop: readGridsterChangeHandler
             }
           }).data('gridster');
+          reflowGridster();
 
-          layout();
-          var safeLayout = _.debounce(layout, 200);
           $window.on('resize', safeLayout);
 
           $scope.$watchCollection('$state.panels', function (panels) {
@@ -65,14 +68,20 @@ define(function (require) {
 
             // alert interested parties that we have finished processing changes to the panels
             if (added.length || removed.length) $scope.$root.$broadcast('change:vis');
+            stretchContainer();
           });
 
           $scope.$on('$destroy', function () {
-            $window.off('destroy', safeLayout);
+            $window.off('resize', safeLayout);
 
             if (!gridster) return;
             gridster.$widgets.each(function (i, el) {
-              removePanel(getPanelFor(el));
+              var panel = getPanelFor(el);
+              removePanel(panel);
+              // stop any animations
+              panel.$el.stop();
+              // not that we will, but lets be safe
+              makePanelSerializeable(panel);
             });
           });
         };
@@ -103,10 +112,7 @@ define(function (require) {
         // tell gridster to remove the panel, and cleanup our metadata
         var removePanel = function (panel) {
           // remove from grister 'silently' (don't reorganize after)
-          gridster.remove_widget(panel.$el, true);
-
-          // stop any animations
-          panel.$el.stop();
+          gridster.remove_widget(panel.$el);
 
           // destroy the scope
           panel.$scope.$destroy();
@@ -161,21 +167,35 @@ define(function (require) {
           });
         };
 
+        // standard jquery.offset().top does not factor in borders
+        var stretchContainer = function () {
+          var top = 0;
+          var $current, $from = $container;
+          while ($from.length) {
+            $current = $from.prev();
+            if ($current.length) top += $current.outerHeight(true);
+            else {
+              $current = $from.parent();
+              if ($current[0] === document.body) break;
+            }
+
+            $from = $current;
+          }
+
+          // vertical padding on the container
+          var vertPadding = parseInt($container.css('paddingTop'), 10) + parseInt($container.css('paddingBottom'), 10);
+          $container.height($window.height() - Math.max(top - $body.scrollTop(), 0) - vertPadding);
+        };
+
         // calculate the position and sizing of the gridster el, and the columns within it
         // then tell gridster to "reflow" -- which is definitely not supported.
         // we may need to consider using a different library
-        var layout = function () {
-          // pixels used by all of the spacers
-          var spacerSize = SPACER * (COLS - 1);
-          // horizontal padding on the container
-          var horizPadding = parseInt($container.css('paddingLeft'), 10) + parseInt($container.css('paddingRight'), 10);
-
+        var reflowGridster = function () {
           // https://github.com/gcphost/gridster-responsive/blob/97fe43d4b312b409696b1d702e1afb6fbd3bba71/jquery.gridster.js#L1208-L1235
-
           var g = gridster;
 
           g.options.widget_margins = [SPACER / 2, SPACER / 2];
-          g.options.widget_base_dimensions = [($container.width() - spacerSize - horizPadding) / COLS, 100];
+          g.options.widget_base_dimensions = [($container.width() - spacerSize) / COLS, 100];
           g.min_widget_width  = (g.options.widget_margins[0] * 2) + g.options.widget_base_dimensions[0];
           g.min_widget_height = (g.options.widget_margins[1] * 2) + g.options.widget_base_dimensions[1];
 
@@ -191,6 +211,9 @@ define(function (require) {
           g.set_dom_grid_height();
           g.drag_api.set_limits(COLS * g.min_widget_width);
         };
+
+        var layout = _.compose(reflowGridster, stretchContainer);
+        var safeLayout = _.debounce(layout, 200);
 
         init();
       }
