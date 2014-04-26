@@ -8,7 +8,6 @@ define(function (require) {
   var modules = require('modules');
   var routes = require('routes');
 
-  require('utils/rison');
   require('elasticsearch');
   require('angular-route');
   require('angular-bindonce');

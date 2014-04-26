@@ -6,9 +6,7 @@
   "globals": {
     "define": true,
     "require": true,
-    "console": true,
-    "jsonPath": false,
-    "rison": false
+    "console": true
   },
 
   "camelcase": false,
