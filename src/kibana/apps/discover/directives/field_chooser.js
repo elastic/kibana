@@ -2,6 +2,7 @@ define(function (require) {
   var app = require('modules').get('app/discover');
   var html = require('text!../partials/field_chooser.html');
   var _ = require('lodash');
+  var jsonPath = require('jsonpath');
 
   require('directives/css_truncate');
   require('directives/field_name');

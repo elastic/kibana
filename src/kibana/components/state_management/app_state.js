@@ -1,8 +1,5 @@
 define(function (require) {
   var module = require('modules').get('kibana/factories');
-  var angular = require('angular');
-  var _ = require('lodash');
-  var rison = require('utils/rison');
 
   require('./global_state');
 

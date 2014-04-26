@@ -4,6 +4,7 @@ define(function (require) {
   var moment = require('moment');
   var nextTick = require('utils/next_tick');
   var qs = require('utils/query_string');
+  var rison = require('utils/rison');
 
   require('config/config');
   require('courier/courier');
