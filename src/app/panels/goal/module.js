@@ -87,7 +87,20 @@ define([
         mode        : 'all',
         ids         : []
       },
+      /** @scratch /panels/goal/5
+       * gmode:: Facet mode: goal or goal_stats
+       */
+      gmode       : 'goal',
+      /** @scratch /panels/goal/5
+       * gstat:: Goal_stats facet stats field
+       */
+      gstat       : 'total',
+      /** @scratch /panels/goal/5
+       * valuefield:: Goal_stats facet value field
+       */
+      valuefield  : ''
     };
+
     _.defaults($scope.panel,_d);
 
     $scope.init = function() {
@@ -129,10 +142,24 @@ define([
 
       var results;
 
-      request = request
-        .query(boolQuery)
-        .filter(filterSrv.getBoolFilter(filterSrv.ids()))
-        .size(0);
+      if($scope.panel.gmode === 'goal') {
+        request = request
+          .query(boolQuery)
+          .filter(filterSrv.getBoolFilter(filterSrv.ids()))
+          .size(0);
+      }
+
+      if($scope.panel.gmode === 'goal_stats') {
+        request = request
+          .facet($scope.ejs.StatisticalFacet('stats')
+            .field($scope.panel.valuefield)
+            .facetFilter($scope.ejs.QueryFilter(
+              $scope.ejs.FilteredQuery(
+                boolQuery,
+                filterSrv.getBoolFilter(filterSrv.ids())
+                )))).size(0);
+      }
+
 
       $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
 
@@ -140,7 +167,13 @@ define([
 
       results.then(function(results) {
         $scope.panelMeta.loading = false;
-        var complete  = results.hits.total;
+        var complete;
+        if($scope.panel.gmode === 'goal') {
+          complete = results.hits.total;
+        }
+        if($scope.panel.gmode === 'goal_stats') {
+          complete = results.facets.stats[$scope.panel.gstat];
+        }
         var remaining = $scope.panel.query.goal - complete;
         $scope.data = [
           { label : 'Complete', data : complete, color: querySrv.colors[parseInt($scope.$id, 16)%8] },
