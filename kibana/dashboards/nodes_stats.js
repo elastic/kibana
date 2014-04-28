@@ -154,7 +154,7 @@ function clusterViewFilter (query) {
     var filter = _.map(query, function (row) {
       return row.query.replace(/node.ip_port.raw:"([^"]+)"/, '$1'); 
     });
-    return '('+filter.join('|')+')';
+    return '^('+filter.join('|')+')$';
   }
   return '';
 }

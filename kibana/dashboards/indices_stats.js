@@ -108,7 +108,7 @@ function clusterViewFilter (query) {
     var filter = _.map(query, function (row) {
       return row.alias; 
     });
-    return '('+filter.join('|')+')';
+    return '^('+filter.join('|')+')$';
   }
   return '';
 }
