@@ -145,8 +145,8 @@ function (angular, app, _, $) {
       $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
     };
 
-    $scope.build_search = function(field,value) {
-      filterSrv.set({type:'terms',field:field,value:value,mandate:"must"});
+    $scope.build_search = function(field, value) {
+      filterSrv.set({type:'field', field:field, query:value, mandate:"must"});
     };
 
   });
