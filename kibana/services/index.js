@@ -9,7 +9,7 @@ define(function (require) {
   var getIndices = require('lib/ClusterState/getIndices');
   var refreshState = require('lib/ClusterState/refreshState');
   var explainStatus = require('lib/ClusterState/explainStatus');
-  var explain = require('lib/ClusterState/explain');
+  var groupIndicesByState = require('lib/ClusterState/groupIndicesByState');
 
   var module = angular.module('marvel.services', []);
   app.useModule(module);
@@ -37,8 +37,7 @@ define(function (require) {
     // Attach the explainStatus method
     service.explainStatus = explainStatus.bind(null, service);
 
-    // Attach the explainStatus method
-    service.explain = explain.bind(null, service);
+    service.groupIndicesByState = groupIndicesByState.bind(null, service);
 
     // Return the service to the subscribers.
     return service;
