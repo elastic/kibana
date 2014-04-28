@@ -50,6 +50,8 @@ define(function (require) {
 
     // get the vis loaded in from the routes
     var vis = $route.current.locals.visAndFieldsHash[0];
+    // vis.destroy called by visualize directive
+
     var fieldsHash = $route.current.locals.visAndFieldsHash[1];
 
     var $state = new AppState(vis.getState());

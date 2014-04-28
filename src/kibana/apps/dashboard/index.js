@@ -49,6 +49,7 @@ define(function (require) {
         });
 
         var dash = $scope.dash = $route.current.locals.dash;
+        $scope.$on('$destroy', dash.destroy);
 
         var stateDefaults = {
           title: dash.title,
@@ -56,8 +57,6 @@ define(function (require) {
         };
 
         var $state = $scope.$state = new AppState(stateDefaults);
-
-        $scope.$on('$destroy', dash.destroy);
 
         $scope.configTemplate = new ConfigTemplate({
           save: require('text!./partials/save_dashboard.html'),

@@ -49,7 +49,7 @@ define(function (require) {
        * @return {Promise}
        * @resolved {SavedObject}
        */
-      this.init = _.once(function () {
+      obj.init = _.once(function () {
         // ensure that the type is defined
         if (!type) throw new Error('You must define a type name to use SavedObject objects.');
 
@@ -143,7 +143,7 @@ define(function (require) {
        * @return {Promise}
        * @resolved {String} - The id of the doc
        */
-      this.save = function () {
+      obj.save = function () {
         var body = {};
 
         _.forOwn(mapping, function (fieldMapping, fieldName) {
@@ -174,7 +174,7 @@ define(function (require) {
        *
        * @return {undefined}
        */
-      this.destroy = function () {
+      obj.destroy = function () {
         docSource.cancelPending();
         if (obj.searchSource) obj.searchSource.cancelPending();
       };

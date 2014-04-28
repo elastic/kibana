@@ -22,6 +22,7 @@ define(function (require) {
           savedVisualizations.get($scope.panel.visId)
           .then(function (vis) {
             $scope.vis = vis;
+            // .destroy() called by the visualize directive
           })
           .catch(notify.fatal);
         });
