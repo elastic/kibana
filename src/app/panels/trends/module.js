@@ -61,6 +61,12 @@ function (angular, app, _, kbn) {
        */
       arrangement : 'vertical',
       /** @scratch /panels/trends/5
+       * reverse:: true or false. 
+       * Set to true if you want to display trending informations in red if the variation is positive.
+       * Set to false if you want to display trending informations in green if the variation is positive.
+       */
+      reverse : false,
+      /** @scratch /panels/trends/5
        * spyable:: Set to false to disable the inspect icon
        */
       spyable: true,
