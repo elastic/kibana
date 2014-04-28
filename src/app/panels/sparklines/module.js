@@ -296,11 +296,6 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
           render_panel();
         });
 
-        // Re-render if the window is resized
-        angular.element(window).bind('resize', function(){
-          render_panel();
-        });
-
         var derivative = function(series) {
           return _.map(series, function(p,i) {
             var _v;
