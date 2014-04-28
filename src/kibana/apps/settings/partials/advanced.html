@@ -11,9 +11,12 @@
       <tr ng-repeat="conf in configs" ng-class="!conf.value ? 'default' : 'custom'">
         <td class="name">{{conf.name}}</td>
         <td class="value">
-          <form ng-if="conf.editting" ng-submit="save(conf)">
+          <form
+            ng-if="conf.editting"
+            ng-submit="save(conf)">
             <input
               ng-model="conf.unsavedValue"
+              ng-keyup="maybeCancel($event, conf)"
               placeholder="{{conf.defVal}}"
               type="text"
               class="form-control">

@@ -81,9 +81,9 @@ define(function (require) {
 
           dash.save()
           .then(function () {
-            notify.info('Saved Dashboard as "' + $state.title + '"');
-            if ($state.title !== $routeParams.id) {
-              $location.url('/dashboard/' + encodeURIComponent($state.title));
+            notify.info('Saved Dashboard as "' + dash.title + '"');
+            if (dash.id !== $routeParams.id) {
+              $location.url('/dashboard/' + encodeURIComponent(dash.id));
             }
           })
           .catch(notify.fatal);
