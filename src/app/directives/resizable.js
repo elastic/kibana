@@ -19,11 +19,16 @@ function (angular) {
             return {
               maxWidth: elem.parent().width(),
 <<<<<<< HEAD
+<<<<<<< HEAD
               grid: elem.parent().width()/12,
               handles: 'e'
 =======
               grid: elem.parent().width()/12
 >>>>>>> Add drag to resize panel widths. Closes #329
+=======
+              grid: elem.parent().width()/12,
+              handles: 'e'
+>>>>>>> Send render whenever window size changes or a panel is resized
             };
           };
 
