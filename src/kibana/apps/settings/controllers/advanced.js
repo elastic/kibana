@@ -50,6 +50,12 @@ define(function (require) {
       return conf;
     });
 
+    $scope.maybeCancel = function ($event, conf) {
+      if ($event.keyCode === 27) {
+        conf.editting = false;
+      }
+    };
+
     $scope.edit = function (conf) {
       $scope.configs.forEach(function (c) {
         c.editting = (c === conf);
