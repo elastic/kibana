@@ -66,7 +66,8 @@ function (angular,$) {
         '</div>\n'+
       '</div>';
       return {
-        restrict: 'E',
+        restrict: 'A',
+        replace: true,
         link: function($scope, elem, attr) {
           // once we have the template, scan it for controllers and
           // load the module.js if we have any
@@ -83,7 +84,7 @@ function (angular,$) {
           // compile the module and uncloack. We're done
           function loadModule($module) {
             $module.appendTo(elem);
-            elem.wrap(container);
+            elem.wrapInner(container);
             /* jshint indent:false */
             $compile(elem.contents())(newScope);
             elem.removeClass("ng-cloak");
