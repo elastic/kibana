@@ -2,7 +2,7 @@ define(function (require) {
   'use strict';
   var _ = require('lodash');  
 
-  return function (state) {
+  var extractShards = function (state) {
 
     function setNodeName (shard) {
       var node = state.nodes[shard.node];
@@ -26,5 +26,11 @@ define(function (require) {
 
     return data;
   };
+
+  var identity = function (state) {
+    return state._id;
+  };
+
+  return _.memoize(extractShards, identity);
 });
 
