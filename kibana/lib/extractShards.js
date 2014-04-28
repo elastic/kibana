@@ -3,7 +3,6 @@ define(function (require) {
   var _ = require('lodash');  
 
   var extractShards = function (state) {
-
     if (!state) {
       return [];
     }
@@ -32,7 +31,7 @@ define(function (require) {
   };
 
   var identity = function (state) {
-    return state._id;
+    return state && state._id;
   };
 
   return _.memoize(extractShards, identity);
