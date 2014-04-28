@@ -5,6 +5,7 @@ define(function (require) {
   require('css!../styles/visualization.css');
 
   var module = require('modules').get('kibana/directive');
+  var chart; // set in "vis" watcher
 
   module.directive('visualize', function (createNotifier) {
     return {
@@ -12,16 +13,19 @@ define(function (require) {
       link: function ($scope, $el) {
         $scope.$watch('vis', function (vis, prevVis) {
           if (prevVis) prevVis.destroy();
+          if (chart) chart.destroy();
           if (!vis) return;
 
           var notify = createNotifier({
             location: vis.type + ' visualization'
           });
 
+          chart = new k4d3.Chart($el, {
+            type: 'histogram'
+          });
+
           vis.searchSource.onResults(function onResults(resp) {
-            var $disp = $('<pre>');
-            $disp.text(JSON.stringify(vis.buildChartDataFromResponse(resp), null, '  '));
-            $el.html($disp);
+            chart.render(vis.buildChartDataFromResponse(resp));
           });
 
           $scope.$root.$broadcast('ready:vis');
