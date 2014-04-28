@@ -86,7 +86,7 @@ function (angular, _, config, moment) {
         // In case indexes are created in local timezone viewpoint, e.g. rsyslog's
         // omelasticsearch output module.
         // This adjustment covers all timezones and should be harmless.
-        end = moment(end).clone().add('hours',12);
+        // end = moment(end).clone().add('hours',12);
         range = [];
         while (start.isBefore(end)) {
           range.push(start.clone());
