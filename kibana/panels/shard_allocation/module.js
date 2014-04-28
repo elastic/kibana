@@ -31,7 +31,7 @@ define(function (require) {
   clusterView(module);
   segments(module);
 
-  module.controller('marvel.shard_allocation', function ($scope, $clusterState, $http, $timeout, $injector, dashboard,
+  module.controller('marvel.shard_allocation', function ($scope, $clusterState, $http, $timeout, dashboard,
                                                          filterSrv, alertSrv) {
 
     // Panel Metadata show in the Editor.
@@ -55,8 +55,8 @@ define(function (require) {
     };
 
     // Inject dependicies for the getTimelineData
-    var getTimeline = $injector.invoke(getTimelineDataGenerator);
-    var getStateSource = $injector.invoke(getStateSourceGenerator);
+    var getTimeline = getTimelineDataGenerator($http, dashboard, filterSrv);
+    var getStateSource = getStateSourceGenerator($http);
 
     // Create a partial with the config for the first argument
     getTimeline = _.partial(getTimeline, config);
