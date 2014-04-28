@@ -105,7 +105,7 @@ dashboard-grid {
   position: absolute;
   color: #d9534f;
   top: 0px;
-  right: 0px;
+  left: 0px;
   border: none;
   background: none;
   opacity: .25;

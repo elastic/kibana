@@ -67,6 +67,7 @@ define(function (require) {
             $state.panels.forEach(makePanelSerializeable);
 
             // alert interested parties that we have finished processing changes to the panels
+            // TODO: change this from event based to calling a method on dashboardApp
             if (added.length || removed.length) $scope.$root.$broadcast('change:vis');
             stretchContainer();
           });
