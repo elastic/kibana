@@ -68,9 +68,21 @@
 .modal-footer:after {
   clear: both;
 }
-.settings-container {
+.settings-section-container {
   margin-top: 10px;
 }
 .settings-nav {
   text-transform: capitalize;
+}
+.advanced-settings table {
+  width: 100%;
+}
+.advanced-settings table tr.default td.value {
+  color: #999999;
+}
+.advanced-settings table td {
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+.advanced-settings table td.actions {
+  width: 150px;
 }

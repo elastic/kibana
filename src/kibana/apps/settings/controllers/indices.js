@@ -1,45 +1,7 @@
 define(function (require) {
-  var _ = require('utils/mixins');
+  var module = require('modules').get('settings/controllers');
 
-  var app = require('modules').get('app/settings');
-
-  require('filters/start_from');
-  require('../services/index_patterns');
-
-  var navHtml = require('text!../partials/nav.html');
-
-  // Grab the html and controllers for each section
-  var sections = {
-    indices: require('text!../partials/indices.html'),
-  };
-
-  // Order them correctly in the nav
-  var sectionList = ['indices'];
-
-  var template = function (params) {
-    return '' +
-        '<div ng-controller="settings">' +
-          //navHtml +
-          sections[params] +
-        '</div>';
-  };
-
-  require('routes')
-  .when('/settings', {
-    redirectTo: '/settings/indices'
-  })
-  .when('/settings/indices', {
-    template: template('indices'),
-    reloadOnSearch: false
-  })
-  .when('/settings/indices/:id?', {
-    template: template('indices'),
-    reloadOnSearch: false
-  });
-
-
-  app.controller('settings', function ($scope, courier, Notifier, $route, $location, es, config, indexPatterns) {
-
+  module.controller('indexSettings', function ($scope, courier, Notifier, $route, $location, es, config, indexPatterns) {
     var notify = new Notifier({
       location: 'Index Settings'
     });
@@ -138,6 +100,4 @@ define(function (require) {
 
     $scope.$emit('application.load');
   });
-
-
 });
