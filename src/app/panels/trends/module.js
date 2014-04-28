@@ -61,9 +61,7 @@ function (angular, app, _, kbn) {
        */
       arrangement : 'vertical',
       /** @scratch /panels/trends/5
-       * reverse:: true or false. 
-       * Set to true if you want to display trending informations in red if the variation is positive.
-       * Set to false if you want to display trending informations in green if the variation is positive.
+       * reverse:: true or false. If true, use red for positive, green for negative
        */
       reverse : false,
       /** @scratch /panels/trends/5
