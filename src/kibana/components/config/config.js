@@ -57,7 +57,7 @@ define(function (require) {
             return doc.doIndex({}).then(getDoc);
           }
 
-          vals = _.defaults({}, resp._source || {}, defaults);
+          vals = _.cloneDeep(resp._source);
         });
       })
       .finally(function () {
@@ -66,7 +66,15 @@ define(function (require) {
     });
 
     config.get = function (key, defaultVal) {
-      return vals[key] == null ? vals[key] = _.cloneDeep(defaultVal) : vals[key];
+      if (vals[key] == null) {
+        if (defaultVal == null) {
+          return defaults[key];
+        } else {
+          return _.cloneDeep(defaultVal);
+        }
+      } else {
+        return vals[key];
+      }
     };
 
     config.set = function (key, val) {
@@ -84,6 +92,19 @@ define(function (require) {
         });
     };
 
+    config.clear = function (key) {
+      if (vals[key] == null) return Promise.resolved(true);
+
+      var newVals = _.cloneDeep(vals);
+      delete newVals[key];
+
+      return doc.doIndex(newVals)
+        .then(function () {
+          change(key, void 0);
+          return true;
+        });
+    };
+
     config.close = function () {};
 
     /*****
@@ -94,6 +115,10 @@ define(function (require) {
       notify.log('config change: ' + key + ': ' + vals[key] + ' -> ' + val);
       vals[key] = val;
       $rootScope.$broadcast('change:config.' + key, val, vals[key]);
+    };
+
+    config._vals = function () {
+      return _.cloneDeep(vals);
     };
 
   });

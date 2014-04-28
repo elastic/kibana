@@ -2,10 +2,28 @@
 @import (reference) "../../../styles/theme/_theme.less";
 @import (reference) "../../../styles/_variables.less";
 
-.settings-container {
+.settings-section-container {
   margin-top: 10px;
 }
 
 .settings-nav {
   text-transform: capitalize;
+}
+
+.advanced-settings {
+  table {
+    width: 100%;
+
+    tr.default td.value {
+      color: @input-color-placeholder;
+    }
+
+    td {
+      font-family: @font-family-monospace;
+
+      &.actions {
+        width: 150px;
+      }
+    }
+  }
 }
