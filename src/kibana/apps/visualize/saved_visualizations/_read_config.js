@@ -23,7 +23,10 @@ define(function (require) {
     };
 
     function moveValidatedParam(config, params, paramDef, name) {
-      if (!config[name]) return !paramDef.required;
+      if (!config[name]) {
+        if (paramDef.default != null) config[name] = _.cloneDeep(paramDef.default);
+        else return !paramDef.required;
+      }
       if (!paramDef.custom && paramDef.options && !_.find(paramDef.options, { val: config[name] })) return false;
 
       // copy over the param
