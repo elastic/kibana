@@ -226,7 +226,7 @@ function (angular, app, _, L, localRequire) {
           }
         });
 
-        var map, makersLayerGroup, currentLayersByFilterId;
+        var map, makersLayerGroup, currentFilterId, currentLayer;
 
         function render_panel() {
           elem.css({height:scope.row.height});
@@ -238,8 +238,6 @@ function (angular, app, _, L, localRequire) {
               createMap();
               // The layer that will hold our markers
               makersLayerGroup = new L.MarkerClusterGroup({maxClusterRadius:30});
-              // This will hold the list of current layers, mapped to their respective filter ids
-              currentLayersByFilterId = {};
             } else {
               makersLayerGroup.clearLayers();
             }
@@ -271,84 +269,6 @@ function (angular, app, _, L, localRequire) {
             zoom: 10
           });
 
-          // Initialise the FeatureGroup to store editable layers
-          var drawnItems = new L.FeatureGroup();
-          map.addLayer(drawnItems);
-          
-          // Initialise the draw control and pass it the FeatureGroup of editable layers
-          var drawControl = new L.Control.Draw({
-            edit: {
-              featureGroup: drawnItems
-            },
-            draw: {
-              polyline: false,
-              marker: false,
-              circle: false
-            }
-          });
-
-          map.addControl(drawControl);
-          
-          // Watch for new polygons drawn on the map, and update filters accordingly
-          map.on('draw:created', function (e) {
-              var layer = e.layer;
-
-              var filterId = filterSrv.set(
-                {
-                  type : 'geo_polygon',
-                  field : scope.panel.field,
-                  value : layer.toGeoJSON().geometry.coordinates[0],
-                  mandate : ('either')
-                }
-              );
-              layer.filterId = filterId;
-              drawnItems.addLayer(layer);
-              currentLayersByFilterId[filterId] = layer;
-            }
-          );
-
-          // Watch for polygons deleted from the map, and update filters accordingly
-          map.on('draw:deleted', function (e) {
-            var layers = e.layers;
-            layers.eachLayer(function (layer) {
-              filterSrv.remove(layer.filterId);
-            });
-            
-          });
-          
-          // Watch for polygons edited on the map, and update the existing accordingly
-          map.on('draw:edited', function (e) {
-              var layers = e.layers;
-              layers.eachLayer(
-                function (layer) {
-                  console.log("Polygon was edited, filter id " + layer.filterId);
-                  filterSrv.set(
-                    {
-                      type:'geo_polygon',
-                      field:scope.panel.field,
-                      value:layer.toGeoJSON().geometry.coordinates[0],
-                      mandate:('either')
-                    },
-                    layer.filterId);
-                }
-              );
-            }
-          );
-          
-          // Watch for changes in the list of filters, and remove filters from the map if needed to
-          // keep filter list consistent with the map
-          scope.$watch(filterSrv.ids, function(newValue) {
-            if (_.isUndefined(newValue)) {
-              return;
-            }
-            
-            for (var id in currentLayersByFilterId) {
-              if ( !(_.contains(newValue, parseInt(id, 10))) ) {
-                map.removeLayer(currentLayersByFilterId[id]);
-              }
-            }
-          });
-
           // set a default osm_url if there is none
           if (_.isUndefined(scope.panel.osm_url) || _.isNull(scope.panel.osm_url)) {
             scope.panel.osm_url = "http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg";
@@ -360,6 +280,70 @@ function (angular, app, _, L, localRequire) {
             maxZoom: 18,
             minZoom: 2
           }).addTo(map);
+
+          // Initialise the FeatureGroup to store editable layers
+          var drawnItems = new L.FeatureGroup();
+          map.addLayer(drawnItems);
+          
+          // Initialise the draw control and pass it the FeatureGroup of editable layers
+          var options = {
+            edit: {
+              featureGroup: drawnItems,
+              remove: false,
+              edit: false
+            },
+            draw: {
+              polyline: false,
+              marker: false,
+              circle: false,
+              polygon: {
+                allowIntersection: false,
+                drawError: {
+                  color: "#e1e100",
+                  message: "<strong>Outch!</strong> You can not draw intersections."
+                }
+              }
+            }
+          }
+          var drawControl = new L.Control.Draw(options);
+
+          map.addControl(drawControl);
+          
+          // Watch for new polygons drawn on the map, and update filters accordingly
+          map.on('draw:created', function (e) {
+              var layer = e.layer;
+
+              var filterOptions = {
+                type : 'geo_polygon',
+                  field : scope.panel.field,
+                value : layer.toGeoJSON().geometry.coordinates[0],
+                mandate: ('must')
+              };
+
+              // If a selection was made before, remove the old one and update the existing filter
+              if (!_.isUndefined(currentLayer)) {
+                map.removeLayer(currentLayer);
+                filterSrv.set(filterOptions, currentFilterId);
+              } else {
+                currentFilterId = filterSrv.set(filterOptions);
+              }
+              drawnItems.addLayer(layer);
+              currentLayer = layer;
+            }
+          );
+
+          // Watch for changes in the list of filters, and remove filters from the map if needed to
+          // keep filter list consistent with the map
+          scope.$watch(filterSrv.ids, function(newValue) {
+            if (_.isUndefined(newValue)) {
+              return;
+            }
+
+
+            if (!(_.contains(newValue, currentFilterId))) {
+              map.removeLayer(currentLayer);
+            }
+          });
         }
       }
     };
