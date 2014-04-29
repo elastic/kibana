@@ -29,16 +29,32 @@ define(function (require) {
   .when('/visualize/create', {
     template: require('text!../editor.html'),
     resolve: {
-      visAndFieldsHash: function ($route, savedVisualizations) {
-        return getVisAndFieldsHash($route.current.params, savedVisualizations);
+      visAndFieldsHash: function ($route, savedVisualizations, courier, Notifier, $location) {
+        return getVisAndFieldsHash($route.current.params, savedVisualizations).catch(function (e) {
+          if (e instanceof courier.errors.SavedObjectNotFound) {
+            new Notifier({location: 'Dashboard'}).error(e.message);
+            $location.path('/visualize');
+            return false;
+          } else {
+            throw e;
+          }
+        });
       }
     }
   })
   .when('/visualize/edit/:id', {
     template: require('text!../editor.html'),
     resolve: {
-      visAndFieldsHash: function ($route, savedVisualizations) {
-        return getVisAndFieldsHash($route.current.params.id, savedVisualizations);
+      visAndFieldsHash: function ($route, savedVisualizations, courier, Notifier, $location) {
+        return getVisAndFieldsHash($route.current.params.id, savedVisualizations).catch(function (e) {
+          if (e instanceof courier.errors.SavedObjectNotFound) {
+            new Notifier({location: 'Dashboard'}).error(e.message);
+            $location.path('/visualize');
+            return false;
+          } else {
+            throw e;
+          }
+        });
       }
     }
   });

@@ -27,8 +27,16 @@ define(function (require) {
     templateUrl: 'kibana/apps/discover/index.html',
     reloadOnSearch: false,
     resolve: {
-      savedSearch: function (savedSearches, $route) {
-        return savedSearches.get($route.current.params.id);
+      savedSearch: function (savedSearches, $route, $location, Notifier, courier) {
+        return savedSearches.get($route.current.params.id).catch(function (e) {
+          if (e instanceof courier.errors.SavedObjectNotFound) {
+            new Notifier({location: 'Dashboard'}).error(e.message);
+            $location.path('/discover');
+            return false;
+          } else {
+            throw e;
+          }
+        });
       },
       indexPatternList: function (indexPatterns) {
         return indexPatterns.getIds();
