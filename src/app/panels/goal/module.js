@@ -164,11 +164,6 @@ define([
           render_panel();
         });
 
-        // Or if the window is resized
-        angular.element(window).bind('resize', function(){
-          render_panel();
-        });
-
         // Function for rendering panel
         function render_panel() {
           // IE doesn't work without this

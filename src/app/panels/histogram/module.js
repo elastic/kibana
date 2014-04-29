@@ -375,8 +375,8 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
         // This is a hack proposed by @boaz to work around the fact that we can't get
         // to field data values directly, and we need timestamps as normalized longs
         request = request.sort([
-          $scope.ejs.Sort($scope.panel.annotate.sort[0]).order($scope.panel.annotate.sort[1]),
-          $scope.ejs.Sort($scope.panel.time_field).desc()
+          $scope.ejs.Sort($scope.panel.annotate.sort[0]).order($scope.panel.annotate.sort[1]).ignoreUnmapped(true),
+          $scope.ejs.Sort($scope.panel.time_field).desc().ignoreUnmapped(true)
         ]);
       }
 
@@ -576,15 +576,6 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
         // Receive render events
         scope.$on('render',function(event,d){
           data = d || data;
-          render_panel(data);
-        });
-
-        scope.$watch('panel.span', function(){
-          render_panel(data);
-        });
-
-        // Re-render if the window is resized
-        angular.element(window).bind('resize', function(){
           render_panel(data);
         });
 

@@ -34,13 +34,14 @@ function (angular, _) {
         dragIndex = data.dragSettings.index,
         dropIndex =  data.dropSettings.index;
 
-
-      // Remove panel from source row
-      dragRow.splice(dragIndex,1);
+      // Remove panel from source row if the model we were passed is not a panel
+      if(!data.dragSettings.embedded) {
+        dragRow.splice(dragIndex,1);
+      }
 
       // Add to destination row
       if(!_.isUndefined(dropRow)) {
-        dropRow.splice(dropIndex,0,data.dragItem);
+        dropRow.splice(dropIndex,0,angular.fromJson(angular.toJson(data.dragItem)));
       }
 
       dashboard.panelDragging = false;
