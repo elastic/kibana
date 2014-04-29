@@ -37,7 +37,7 @@ define(function (require) {
   });
 
 
-  app.controller('discover', function ($scope, config, courier, $route, savedSearches,
+  app.controller('discover', function ($scope, config, courier, $route, savedSearches, savedVisualizations,
     Notifier, $location, globalState, AppState, timefilter) {
 
     var notify = new Notifier({
@@ -94,6 +94,9 @@ define(function (require) {
 
     // TODO: Switch this to watching time.string when we implement it
     $scope.$watchCollection('time', _.bindKey($scope, 'fetch'));
+
+    // when we init the visualization, we re-run the fetch;
+    $scope.$on('ready:vis', _.bindKey($scope, 'fetch'));
 
     // stores the complete list of fields
     $scope.fields = null;
@@ -171,8 +174,13 @@ define(function (require) {
 
     $scope.fetch = function () {
       updateDataSource();
+
+      if ($scope.opts.timefield) timefilter.enabled(true);
+      if (!$scope.opts.timefield && $scope.vis) delete $scope.vis;
+      if ($scope.opts.timefield && !$scope.vis) setupVisualization();
+
       $state.commit();
-      courier.fetch();
+      if (courier.started()) courier.fetch();
     };
 
     $scope.toggleConfig = function () {
@@ -231,30 +239,6 @@ define(function (require) {
             query: $scope.state.query
           }
         });
-
-      if (!!$scope.opts.timefield) {
-        timefilter.enabled(true);
-
-        chartOptions = interval.calculate(timefilter.time.from, timefilter.time.to, 100);
-        var bounds = timefilter.getBounds();
-
-        searchSource
-        .aggs({
-          events: {
-            date_histogram: {
-              interval: chartOptions.interval + 'ms',
-              format: chartOptions.format,
-              min_doc_count: 0,
-
-              field: $scope.opts.timefield,
-              extended_bounds: {
-                min: bounds.min,
-                max: bounds.max
-              }
-            }
-          }
-        });
-      }
     }
 
     // This is a hacky optimization for comparing the contents of a large array to a short one.
@@ -375,6 +359,41 @@ define(function (require) {
     // https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript
     var regexEscape = function (str) {
       return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    };
+
+    var setupVisualization = function () {
+      if ($scope.vis) return;
+
+      searchSource.disable();
+      var prom = savedVisualizations.tempForDiscover(searchSource)
+      .then(function (vis) {
+        if ($scope.vis !== prom) return;
+
+        $scope.vis = vis;
+
+        var chartOptions = interval.calculate(timefilter.time.from, timefilter.time.to, 100);
+
+        var config = vis.segment.configs.pop() || {};
+        config.agg = 'date_histogram';
+        config.field = $scope.opts.timefield;
+        config.interval = chartOptions.interval + 'ms';
+        config.min_doc_count = 0;
+        config.format = chartOptions.format;
+        var bounds = timefilter.getBounds();
+        config.extended_bounds = {
+          min: bounds.min,
+          max: bounds.max
+        };
+
+        vis.segment.configs.push(config);
+        vis.writeAggs();
+        // enable the source, but wait for the visualization to be ready before running
+        searchSource.enable();
+      });
+
+      // set it to the promise, so that we don't try to fetch it again
+      $scope.vis = prom;
+      return prom;
     };
 
     init();

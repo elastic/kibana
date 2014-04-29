@@ -1,6 +1,7 @@
 define(function (require) {
   require('utils/mixins');
   var _ = require('lodash');
+  var moment = require('moment');
 
   var aggs = {};
 
@@ -68,8 +69,11 @@ define(function (require) {
       name: 'terms',
       display: 'Terms',
       params: {
-        size: {},
+        size: {
+          required: false,
+        },
         order: {
+          required: true,
           options: [
             { display: 'Top', val: 'desc' },
             { display: 'Bottom', val: 'asc' }
@@ -100,13 +104,25 @@ define(function (require) {
             { display: 'Quarterly', val: 'quarter' },
             { display: 'Yearly', val: 'year' }
           ],
+          required: true,
+          custom: true,
           default: 'hour'
         },
+        format: {
+          custom: true
+        },
+        min_doc_count: {
+          custom: true
+        },
+        extended_bounds: {
+          custom: true
+        }
       },
       makeLabel: function (params) {
         var agg = aggs.byName.date_histogram;
         var interval = _.find(agg.params.interval.options, { val: params.interval });
-        return interval.display + ' ' + params.field;
+        if (interval) return interval.display + ' ' + params.field;
+        else return params.field + '/' + moment.duration(params.interval).humanize();
       }
     }
   ];

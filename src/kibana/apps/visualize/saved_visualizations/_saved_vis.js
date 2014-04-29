@@ -21,8 +21,10 @@ define(function (require) {
         };
       }
 
-      var typeDef = typeDefs.byName[opts.type || 'histogram'];
+      var typeDef = typeDefs.byName[opts.type];
       if (!typeDef) throw new Error('Unknown visualization type: "' + opts.type + '"');
+
+      var parentSearch = opts.parentSearchSource || rootSearch;
 
       SavedObject.call(vis, {
         type: 'visualization',
@@ -56,10 +58,10 @@ define(function (require) {
           if (state) vis.setState(state);
 
 
-          // default parent is the rootSearch, mimic the
-          // searchSource prop from saved objects
+          // default parent is the rootSearch, can be overridden (like in discover)
+          // but we mimic the searchSource prop from saved objects here
           var parent = {
-            searchSource: rootSearch
+            searchSource: parentSearch
           };
 
           // set/get the parent savedSearch
@@ -157,6 +159,31 @@ define(function (require) {
             });
           }));
         }, {});
+      };
+
+      // reads the vis' config and write the agg to the searchSource
+      vis.writeAggs = function () {
+        // stores the config objects in queryDsl
+        var dsl = {};
+        // counter to ensure unique agg names
+        var i = 0;
+        // start at the root, but the current will move
+        var current = dsl;
+
+        // continue to nest the aggs under each other
+        // writes to the dsl object
+        vis.getConfig().forEach(function (config) {
+          current.aggs = {};
+          var key = '_agg_' + (i++);
+
+          var aggDsl = {};
+          aggDsl[config.agg] = config.aggParams;
+
+          current = current.aggs[key] = aggDsl;
+        });
+
+        // set the dsl to the searchSource
+        vis.searchSource.aggs(dsl.aggs || {});
       };
 
       /**
