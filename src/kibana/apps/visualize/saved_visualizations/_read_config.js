@@ -14,7 +14,7 @@ define(function (require) {
     };
 
     function moveValidatedParam(config, params, paramDef, name) {
-      if (!config[name]) return false;
+      if (!config[name]) return !paramDef.required;
       if (!paramDef.custom && paramDef.options && !_.find(paramDef.options, { val: config[name] })) return false;
 
       // copy over the param

@@ -36,6 +36,9 @@ define(function (require) {
         return req.source._flatten();
       })
       .then(function (reqs) {
+        // all requests must have been disabled
+        if (!reqs.length) return Promise.resolved();
+
         body = strategy.requestStatesToBody(reqs);
 
         return es[strategy.clientMethod]({

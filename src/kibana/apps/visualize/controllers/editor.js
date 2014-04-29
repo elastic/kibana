@@ -76,41 +76,13 @@ define(function (require) {
     var visConfigProperties = Object.keys(visConfigCategories.byName);
 
     /**
-     * (Re)set the aggs key on the vis.searchSource based on the
-     * current config
-     */
-    var updateDataSource = function () {
-      // stores the config objects in queryDsl
-      var dsl = {};
-      // counter to ensure unique agg names
-      var i = 0;
-      // start at the root, but the current will move
-      var current = dsl;
-
-      // continue to nest the aggs under each other
-      // writes to the dsl object
-      vis.getConfig().forEach(function (config) {
-        current.aggs = {};
-        var key = '_agg_' + (i++);
-
-        var aggDsl = {};
-        aggDsl[config.agg] = config.aggParams;
-
-        current = current.aggs[key] = aggDsl;
-      });
-
-      // set the dsl to the searchSource
-      vis.searchSource.aggs(dsl.aggs || {});
-    };
-
-    /**
      * Write the latest changes made on the visualization to the $state. This
      * will cause a fetch if there were changes
      *
      * @return {Array} - a list of the keys from state that were updated.
      */
     var writeStateAndFetch = function () {
-      updateDataSource();
+      vis.writeAggs();
       _.assign($state, vis.getState());
       $state.commit();
       vis.searchSource.fetch();
@@ -123,7 +95,7 @@ define(function (require) {
     var readStateAndFetch = function () {
       // update and commit the state, which will update the vis dataSource if there were new changes
       vis.setState($state);
-      updateDataSource();
+      vis.writeAggs();
       vis.searchSource.fetch();
     };
 
