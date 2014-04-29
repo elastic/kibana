@@ -332,13 +332,12 @@ function (angular, app, _, L, localRequire) {
             }
           );
 
-          // Watch for changes in the list of filters, and remove filters from the map if needed to
-          // keep filter list consistent with the map
+          // Watch for changes in the list of filters, and remove the layer from the map
+          // if needed to keep filter list consistent with the map
           scope.$watch(filterSrv.ids, function(newValue) {
-            if (_.isUndefined(newValue)) {
+            if (_.isUndefined(newValue) || _.isUndefined(map) || _.isUndefined(currentLayer)) {
               return;
             }
-
 
             if (!(_.contains(newValue, currentFilterId))) {
               map.removeLayer(currentLayer);
