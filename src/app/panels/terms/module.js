@@ -276,14 +276,10 @@ function (angular, app, _, $, kbn) {
     return {
       restrict: 'A',
       link: function(scope, elem) {
+        var plot;
 
         // Receive render events
         scope.$on('render',function(){
-          render_panel();
-        });
-
-        // Re-render if the window is resized
-        angular.element(window).bind('resize', function(){
           render_panel();
         });
 
@@ -313,7 +309,7 @@ function (angular, app, _, $, kbn) {
 
         // Function for rendering panel
         function render_panel() {
-          var plot, chartData;
+          var chartData;
 
           build_results();
 
