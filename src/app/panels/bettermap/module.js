@@ -341,6 +341,7 @@ function (angular, app, _, L, localRequire) {
 
             if (!(_.contains(newValue, currentFilterId))) {
               map.removeLayer(currentLayer);
+              currentLayer = undefined;
             }
           });
         }
