@@ -17,7 +17,7 @@
             <input
               ng-model="conf.unsavedValue"
               ng-keyup="maybeCancel($event, conf)"
-              placeholder="{{conf.defVal}}"
+              placeholder="{{conf.value || conf.defVal | json}}"
               type="text"
               class="form-control">
           </form>
