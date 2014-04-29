@@ -1,3 +1,4 @@
+@import url("//fonts.googleapis.com/css?family=Lato:400,700,400italic");
 .thumbnail > img,
 .thumbnail a > img,
 .carousel-inner > .item > img,
@@ -7,20 +8,20 @@
   height: auto;
 }
 .btn-group-lg > .btn {
-  padding: 10px 16px;
-  font-size: 18px;
+  padding: 18px 27px;
+  font-size: 19px;
   line-height: 1.33;
   border-radius: 6px;
 }
 .btn-group-sm > .btn {
-  padding: 5px 10px;
-  font-size: 12px;
+  padding: 6px 9px;
+  font-size: 13px;
   line-height: 1.5;
   border-radius: 3px;
 }
 .btn-group-xs > .btn {
   padding: 1px 5px;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
   border-radius: 3px;
 }
@@ -69,7 +70,7 @@
   clear: both;
 }
 body.application-dashboard {
-  background-color: #18bc9c;
+  background-color: #589cbc;
 }
 dashboard-grid {
   display: block;
@@ -79,13 +80,13 @@ dashboard-grid {
 .gridster {
   list-style-type: none;
   display: block;
-  background-color: #18bc9c;
+  background-color: #589cbc;
   margin: 0;
   padding: 0;
 }
 .gridster .preview-holder {
   border: none!important;
-  background: #999999 !important;
+  background: #b4bcc2 !important;
 }
 .gridster i.remove {
   cursor: pointer;
@@ -94,7 +95,7 @@ dashboard-grid {
   display: block;
   height: 100%;
   background: #ffffff;
-  color: #18bc9c;
+  color: #589cbc;
   padding: 0;
   font-weight: bold;
   font-size: 20px;
@@ -103,7 +104,7 @@ dashboard-grid {
 }
 .gridster dashboard-panel .btn {
   position: absolute;
-  color: #d9534f;
+  color: #e74c3c;
   top: 0px;
   left: 0px;
   border: none;
