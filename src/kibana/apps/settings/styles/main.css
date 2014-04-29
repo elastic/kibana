@@ -69,9 +69,6 @@
 .modal-footer:after {
   clear: both;
 }
-.settings-section-container {
-  margin-top: 10px;
-}
 .settings-nav {
   text-transform: capitalize;
 }
