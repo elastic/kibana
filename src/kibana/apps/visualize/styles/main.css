@@ -69,48 +69,26 @@
 .modal-footer:after {
   clear: both;
 }
-.vis-editor-content {
-  padding: 15px 0;
-}
-.vis-editor-content .vis-config-panel {
-  padding: 0;
-}
-.vis-editor-content .vis-config-panel .panel-heading {
-  position: relative;
-}
-.vis-editor-content .vis-config-panel .panel-heading button {
-  position: absolute;
-  top: 6px;
-  right: 7px;
-  padding: 3px 8px;
-}
-.vis-editor-content .vis-config-panel .panel-body {
-  padding: 10px 0;
-}
-.vis-editor-content .vis-config-panel vis-config-editor {
+.vis-editor-content vis-config-editor {
   display: block;
-  border-top: 1px dashed #ecf0f1;
-  padding: 10px 10px 0;
 }
-.vis-editor-content .vis-config-panel vis-config-editor:first-child {
-  border-top: none;
+.vis-editor-content .sidebar-item-title:hover {
+  color: inherit !important;
+  background-color: inherit !important;
 }
-.vis-editor-content .vis-config-panel vis-config-editor .config-controls {
-  float: right;
-  margin-top: -2px;
+.vis-editor-content .vis-config-details {
+  border-top: 1px solid transparent;
+  padding: 5px 10px;
+  background-color: #ffffff;
+  color: #46525d;
 }
-.vis-editor-content .vis-config-panel vis-config-editor .config-controls button {
-  font-size: 10px;
-  padding: 2px 4px;
-  font-weight: 100;
+.vis-editor-content .vis-config-details .config-controls {
+  margin-bottom: 5px;
 }
-.vis-editor-content .vis-config-panel > li {
-  list-style: none;
-}
-.vis-editor-content .vis-config-panel .agg-config-interval td {
+.vis-editor-content .agg-config-interval td {
   padding-left: 10px;
 }
-.vis-editor-content .vis-config-panel .agg-config-interval td:first-child {
+.vis-editor-content .agg-config-interval td:first-child {
   padding-left: 0px;
 }
 .vis-editor-content vis-canvas {
