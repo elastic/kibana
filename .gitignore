@@ -2,3 +2,5 @@ node_modules
 .aws-config.json
 dist
 .DS_Store
+.idea/*
+.gitignore

@@ -24,7 +24,7 @@ define([
   'angular',
   'app',
   'lodash',
-  './leaflet/leaflet',
+  './leaflet/leaflet-src',
   'require',
 
   'css!./module.css',
