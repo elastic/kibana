@@ -103,7 +103,7 @@ define(function (require) {
           // fetch the object from ES
           return docSource.fetch()
           .then(function applyESResp(resp) {
-            if (!resp.found) throw new Error('Unable to find that ' + type + '.');
+            if (!resp.found) throw new courier.errors.SavedObjectNotFound(type);
 
             var meta = resp._source.kibanaSavedObjectMeta || {};
             delete resp._source.kibanaSavedObjectMeta;
