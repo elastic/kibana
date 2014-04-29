@@ -46,6 +46,7 @@ define(function (require) {
 
     // the saved savedSearch
     var savedSearch = $route.current.locals.savedSearch;
+    $scope.$on('$destroy', savedSearch.destroy);
 
     // list of indexPattern id's
     var indexPatternList = $route.current.locals.indexPatternList;
@@ -150,8 +151,6 @@ define(function (require) {
         }).catch(function (err) {
           console.log('An error', err);
         });
-
-        $scope.$on('$destroy', _.bindKey(searchSource, 'destroy'));
 
         $scope.$emit('application.load');
       });

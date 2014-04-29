@@ -57,6 +57,7 @@ define(function (require) {
         });
 
         var dash = $scope.dash = $route.current.locals.dash;
+        $scope.$on('$destroy', dash.destroy);
 
         var stateDefaults = {
           title: dash.title,
@@ -64,8 +65,6 @@ define(function (require) {
         };
 
         var $state = $scope.$state = new AppState(stateDefaults);
-
-        $scope.$on('$destroy', dash.destroy);
 
         $scope.configTemplate = new ConfigTemplate({
           save: require('text!./partials/save_dashboard.html'),
@@ -84,14 +83,14 @@ define(function (require) {
         $scope.$watchCollection('timefilter.time', $scope.refresh);
 
         $scope.save = function () {
-          dash.title = $state.title;
+          dash.title = dash.id = $state.title;
           dash.panelsJSON = JSON.stringify($state.panels);
 
           dash.save()
           .then(function () {
-            notify.info('Saved Dashboard as "' + $state.title + '"');
-            if ($state.title !== $routeParams.id) {
-              $location.url('/dashboard/' + encodeURIComponent($state.title));
+            notify.info('Saved Dashboard as "' + dash.title + '"');
+            if (dash.id !== $routeParams.id) {
+              $location.url('/dashboard/' + encodeURIComponent(dash.id));
             }
           })
           .catch(notify.fatal);
