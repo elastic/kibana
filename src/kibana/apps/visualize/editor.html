@@ -21,10 +21,13 @@
   </config>
   <div class="container-fluid">
     <div class="row vis-editor-content">
-      <div class="col-md-3">
-        <form>
-          <ul class="vis-config-panel">
-            <li ng-repeat="category in visConfigCategories.displayOrder">
+      <div class="col-md-2 sidebar-container">
+        <form class="sidebar-list">
+          <div class="sidebar-list-header">
+            <h5>Dimensions</h5>
+          </div>
+          <ul class="list-unstyled">
+            <li ng-repeat="category in visConfigCategories.displayOrder" class="sidebar-item">
               <vis-config-category
                 vis="vis"
                 category="vis[category.name]"
@@ -34,7 +37,7 @@
           </ul>
         </form>
       </div>
-      <div class="col-md-9 vis-canvas">
+      <div class="col-md-10 vis-canvas">
         <vis-canvas><visualize vis="vis"></visualize></vis-canvas>
       </div>
     </div>

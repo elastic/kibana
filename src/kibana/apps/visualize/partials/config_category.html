@@ -1,24 +1,24 @@
 <div
-  class="panel panel-default"
+  class="sidebar-item-title"
   ng-if="category.name !== 'group' || vis.segment.configs.length > 0">
-  <div class="panel-heading" >
-    {{ category.label }}
+  <span>
     <button
       type="button"
       ng-if="category.configs.length < category.max"
       ng-click="vis.addConfig(category.name)"
-      class="btn btn-default" >
+      class="btn btn-xs btn-default" >
       <i class="fa fa-plus"></i>
     </button>
-  </div>
-  <div class="panel-body">
-    <vis-config-editor
-      ng-repeat="config in category.configs"
-      category="category"
-      config="config"
-      vis="vis"
-      fields="fields"
-      move="moveHandler">
-    </vis-config-editor>
-  </div>
+    {{ category.label }}
+  </span>
+</div>
+<div ng-if="category.configs.length > 0" class="vis-config-details">
+  <vis-config-editor
+    ng-repeat="config in category.configs"
+    category="category"
+    config="config"
+    vis="vis"
+    fields="fields"
+    move="moveHandler">
+  </vis-config-editor>
 </div>
