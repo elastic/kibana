@@ -67,6 +67,20 @@ define(function (require) {
       return this._courier._mapper.getFields(this);
     };
 
+    /**
+     * Temporarily prevent this Search from being fetched... not a fan but it's easy
+     */
+    SearchSource.prototype.disable = function () {
+      this._fetchDisabled = true;
+    };
+
+    /**
+     * Reverse of SourceAbstract#disable(), only need to call this if source was previously disabled
+     */
+    SearchSource.prototype.enable = function () {
+      this._fetchDisabled = false;
+    };
+
     /******
      * PRIVATE APIS
      ******/

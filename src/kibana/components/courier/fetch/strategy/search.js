@@ -50,7 +50,7 @@ define(function (require) {
     getPendingRequests: function (pendingRequests) {
       return pendingRequests.splice(0).filter(function (req) {
         // filter by type first
-        if (req.source._getType() === 'search') return true;
+        if (req.source._getType() === 'search' && !req.source._fetchDisabled) return true;
         else pendingRequests.push(req);
       });
     }

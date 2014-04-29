@@ -30,7 +30,9 @@
         </disc-field-chooser>
       </div>
       <div class="col-md-10">
-        <discover-timechart data="chart" ng-if="opts.timefield"></discover-timechart>
+        <div class="discover-timechart" ng-if="vis">
+          <visualize vis="vis"></visualize>
+        </div>
         <div class="discover-table"
           fixed-scroll='table'
           fixed-scroll-trigger="state.columns">
