@@ -57,6 +57,8 @@ define(function (require) {
     };
 
     $scope.edit = function (conf) {
+      console.log(conf);
+      conf.unsavedValue = conf.value;
       $scope.configs.forEach(function (c) {
         c.editting = (c === conf);
       });
