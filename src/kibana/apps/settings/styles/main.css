@@ -1,3 +1,4 @@
+@import url("//fonts.googleapis.com/css?family=Lato:400,700,400italic");
 .thumbnail > img,
 .thumbnail a > img,
 .carousel-inner > .item > img,
@@ -7,20 +8,20 @@
   height: auto;
 }
 .btn-group-lg > .btn {
-  padding: 10px 16px;
-  font-size: 18px;
+  padding: 18px 27px;
+  font-size: 19px;
   line-height: 1.33;
   border-radius: 6px;
 }
 .btn-group-sm > .btn {
-  padding: 5px 10px;
-  font-size: 12px;
+  padding: 6px 9px;
+  font-size: 13px;
   line-height: 1.5;
   border-radius: 3px;
 }
 .btn-group-xs > .btn {
   padding: 1px 5px;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
   border-radius: 3px;
 }
@@ -78,7 +79,7 @@
   width: 100%;
 }
 .advanced-settings table tr.default td.value {
-  color: #999999;
+  color: #acb6c0;
 }
 .advanced-settings table td {
   font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
