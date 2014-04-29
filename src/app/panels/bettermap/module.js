@@ -257,8 +257,10 @@ function (angular, app, _, L, localRequire) {
             makersLayerGroup.addLayers(markerList);
 
             makersLayerGroup.addTo(map);
-
-            map.fitBounds(_.pluck(scope.data,'coordinates'));
+            var geoList = _.pluck(scope.data,'coordinates');
+            if (geoList.length > 0) {
+              map.fitBounds(geoList);
+            }
           });
         }
         
