@@ -127,5 +127,17 @@ define(function (require) {
         errors.FieldNotFoundInCache);
     };
     inherits(errors.FieldNotFoundInCache, CourierError);
+
+    /**
+     * A saved object was not found
+     * @param {String} field - the fields which contains the conflict
+     */
+    errors.SavedObjectNotFound = function SavedObjectNotFound(type) {
+      CourierError.call(this,
+        'Could not locate that ' + type,
+        errors.SavedObjectNotFound);
+    };
+    inherits(errors.SavedObjectNotFound, CourierError);
+
   });
 });
