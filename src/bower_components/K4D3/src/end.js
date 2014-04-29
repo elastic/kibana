@@ -1,2 +1,0 @@
-    return require('src/index');
-}));
