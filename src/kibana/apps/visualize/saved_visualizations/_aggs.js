@@ -112,7 +112,8 @@ define(function (require) {
           custom: true
         },
         min_doc_count: {
-          custom: true
+          custom: true,
+          default: 0
         },
         extended_bounds: {
           custom: true
