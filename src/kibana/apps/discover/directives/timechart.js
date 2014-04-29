@@ -16,10 +16,7 @@ define(function (require) {
         var init = function () {
           // This elem should already have a height/width
           var myChart = new k4.Chart(elem[0], {
-            type: 'histogram',
-            stacktype: 'zero',
-            yGroup: true,
-            color: ['#81dfe2', '#0762b7']
+
           });
 
           $scope.$watch('data', function (data) {

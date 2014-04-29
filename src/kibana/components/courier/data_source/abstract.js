@@ -215,10 +215,6 @@ define(function (require) {
 
       // call the ittr and return it's promise
       return (function ittr(resolve, reject) {
-
-        // stop processing if current is disabled, returns nothing
-        if (current._fetchDisabled) return Promise.resolved();
-
         // itterate the _state object (not array) and
         // pass each key:value pair to collect prop.
         return Promise.all(_.map(current._state, function (value, key) {
