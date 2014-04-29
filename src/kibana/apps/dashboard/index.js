@@ -35,8 +35,16 @@ define(function (require) {
   .when('/dashboard/:id', {
     templateUrl: 'kibana/apps/dashboard/index.html',
     resolve: {
-      dash: function (savedDashboards, $route) {
-        return savedDashboards.get($route.current.params.id);
+      dash: function (savedDashboards, Notifier, $route, $location, courier) {
+        return savedDashboards.get($route.current.params.id).catch(function (e) {
+          if (e instanceof courier.errors.SavedObjectNotFound) {
+            new Notifier({location: 'Dashboard'}).error(e.message);
+            $location.path('/dashboard');
+            return false;
+          } else {
+            throw e;
+          }
+        });
       }
     }
   });
