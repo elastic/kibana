@@ -14,7 +14,7 @@ define(function (require) {
     ignoreIndices = ignoreIndices || {};
     return _.chain(shards)
       .filter(function (shard) {
-        return _.isUndefined(ignoreIndices[shard.index])
+        return _.isUndefined(ignoreIndices[shard.index]);
       })
       .filter(filterShards(state.toUpperCase(), primary))
       .reduce(incrementIndexShardStatusCount(state.toLowerCase()), plan[status])

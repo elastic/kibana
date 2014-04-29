@@ -26,11 +26,11 @@ define(function (require) {
 
         // index has 5 unassigned primaries
         if (counts.unassigned) {
-          message += counts.unassigned == 1 ? "an unassigned <%- type.single %>" :
+          message += counts.unassigned === 1 ? "an unassigned <%- type.single %>" :
             "<%= counts.unassigned %> unassigned <%- type.multi %>";
         }
         else {
-          message += counts.initializing == 1 ? "an initializing <%- type.single %>" :
+          message += counts.initializing === 1 ? "an initializing <%- type.single %>" :
             "<%= counts.initializing %> initializing <%- type.multi %>";
         }
 

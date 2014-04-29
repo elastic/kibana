@@ -125,14 +125,14 @@ define([
 
       $scope.healthClass = function (color, ignoreGreen) {
         switch (color) {
-          case 'green':
-            return ignoreGreen ? '' : 'text-success';
-          case 'yellow':
-            return 'text-warning';
-          case 'red':
-            return 'text-error';
-          default:
-            return '';
+        case 'green':
+          return ignoreGreen ? '' : 'text-success';
+        case 'yellow':
+          return 'text-warning';
+        case 'red':
+          return 'text-error';
+        default:
+          return '';
         }
       };
 
