@@ -1,4 +1,10 @@
 <div ng-controller="advancedSettings" class="container advanced-settings">
+  <div class="bs-callout bs-callout-warning">
+    <h4>Caution: You can break stuff here</h4>
+    Be careful in here, these setting are for very advanced users only. Tweaks you make here can break large poritions of Kibana.
+    Some of these settings may be undocumented, unsupported or experimental. Blanking a field will cause Kibana to use its internal
+    defaults which may be unacceptable given other configuration directives.
+  </div>
   <table class="table">
     <thead>
       <tr>
@@ -17,7 +23,7 @@
             <input
               ng-model="conf.unsavedValue"
               ng-keyup="maybeCancel($event, conf)"
-              placeholder="{{conf.defVal}}"
+              placeholder="{{conf.value || conf.defVal | json}}"
               type="text"
               class="form-control">
           </form>
