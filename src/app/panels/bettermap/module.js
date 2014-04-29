@@ -226,7 +226,7 @@ function (angular, app, _, L, localRequire) {
           }
         });
 
-        var map, makersLayerGroup, currentFilterId, currentLayer;
+        var map, makersLayerGroup, currentFilterId, currentLayer=null;
 
         function render_panel() {
           elem.css({height:scope.row.height});
@@ -321,7 +321,7 @@ function (angular, app, _, L, localRequire) {
               };
 
               // If a selection was made before, remove the old one and update the existing filter
-              if (!_.isUndefined(currentLayer)) {
+              if (!_.isNull(currentLayer)) {
                 map.removeLayer(currentLayer);
                 filterSrv.set(filterOptions, currentFilterId);
               } else {
@@ -335,13 +335,13 @@ function (angular, app, _, L, localRequire) {
           // Watch for changes in the list of filters, and remove the layer from the map
           // if needed to keep filter list consistent with the map
           scope.$watch(filterSrv.ids, function(newValue) {
-            if (_.isUndefined(newValue) || _.isUndefined(map) || _.isUndefined(currentLayer)) {
+            if (_.isUndefined(newValue) || _.isUndefined(map) || _.isNull(currentLayer)) {
               return;
             }
 
             if (!(_.contains(newValue, currentFilterId))) {
               map.removeLayer(currentLayer);
-              currentLayer = undefined;
+              currentLayer = null;
             }
           });
         }
