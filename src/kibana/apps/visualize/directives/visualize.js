@@ -20,7 +20,7 @@ define(function (require) {
             location: vis.type + ' visualization'
           });
 
-          chart = new k4d3.Chart($el, {
+          chart = new k4d3.Chart($el[0], {
             type: 'histogram'
           });
 
