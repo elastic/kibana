@@ -65,8 +65,13 @@ function (angular, app, _) {
       $rootScope.$broadcast('render');
     };
 
-    $scope.show_type = function(type) {
-      return !_.contains(['geo_polygon'],type);
+    $scope.show_keyvalue = function(key, type) {
+      // For a geo_polygon, we only show the "field" and not the value (which can be a huge list of geo coordinates)
+      if (_.contains(['geo_polygon'],type)) {
+        return key == "field";
+      } else {
+        return !_.contains(['type', 'id', 'alias', 'mandate', 'active', 'editing'], key);
+      }
     };
 
     $scope.show_key = function(key) {
