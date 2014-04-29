@@ -5,11 +5,20 @@ define(function (require) {
 
   return function () {
     var vis = this;
+
+    // these arrays represent the different sections used to create an aggregation, and when config objects are encountered
+    // the are pushed into these array's based on their properties. Array's are used to make the logic and the final
+    // combination simple. Many of these will be limited to a single value by the UI
     var positions = {
+      // used to create rows/columns
       split: [],
+      // global segments (eg. color, marked in the ui to be applied gloabally and the same values should be used across all charts)
       global: [],
+      // primary segments (eg. x-axis)
       segment: [],
+      // local segments (eg. color, marked in the ui that it should apply within each chart)
       local: [],
+      // metric is the root "measurement" (eg. y-axis)
       metric: []
     };
 
@@ -83,6 +92,7 @@ define(function (require) {
       }
     });
 
+    // join all of the different positions into a single array
     return positions.split.concat(positions.global, positions.segment, positions.local, positions.metric);
   };
 
