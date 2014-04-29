@@ -198,7 +198,7 @@ define(function () {
           "field": "",
           "precision": 3
         },
-        "field": "$FIELD#",
+        "field": "{field}",
         "precision": { __one_of: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]},
         "size": 10,
         "shard_size": 10
