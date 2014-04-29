@@ -430,7 +430,7 @@ define("lib/almond/almond", function(){});
 
 !function() {
   var d3 = {
-    version: "3.4.6"
+    version: "3.4.4"
   };
   if (!Date.now) Date.now = function() {
     return +new Date();
@@ -521,13 +521,13 @@ define("lib/almond/almond", function(){});
     return x != null && !isNaN(x);
   }
   d3.mean = function(array, f) {
-    var s = 0, n = array.length, a, i = -1, j = n;
+    var n = array.length, a, m = 0, i = -1, j = 0;
     if (arguments.length === 1) {
-      while (++i < n) if (d3_number(a = array[i])) s += a; else --j;
+      while (++i < n) if (d3_number(a = array[i])) m += (a - m) / ++j;
     } else {
-      while (++i < n) if (d3_number(a = f.call(array, array[i], i))) s += a; else --j;
+      while (++i < n) if (d3_number(a = f.call(array, array[i], i))) m += (a - m) / ++j;
     }
-    return j ? s / j : undefined;
+    return j ? m : undefined;
   };
   d3.quantile = function(values, p) {
     var H = (values.length - 1) * p + 1, h = Math.floor(H), v = +values[h - 1], e = H - h;
@@ -3105,7 +3105,7 @@ define("lib/almond/almond", function(){});
     return n ? (date.y = d3_time_expandYear(+n[0]), i + n[0].length) : -1;
   }
   function d3_time_parseZone(date, string, i) {
-    return /^[+-]\d{4}$/.test(string = string.substring(i, i + 5)) ? (date.Z = -string, 
+    return /^[+-]\d{4}$/.test(string = string.substring(i, i + 5)) ? (date.Z = +string, 
     i + 5) : -1;
   }
   function d3_time_expandYear(d) {
@@ -3654,6 +3654,7 @@ define("lib/almond/almond", function(){});
           clip.lineEnd = ringEnd;
           segments = [];
           polygon = [];
+          listener.polygonStart();
         },
         polygonEnd: function() {
           clip.point = point;
@@ -3662,15 +3663,13 @@ define("lib/almond/almond", function(){});
           segments = d3.merge(segments);
           var clipStartInside = d3_geo_pointInPolygon(rotatedClipStart, polygon);
           if (segments.length) {
-            if (!polygonStarted) listener.polygonStart(), polygonStarted = true;
             d3_geo_clipPolygon(segments, d3_geo_clipSort, clipStartInside, interpolate, listener);
           } else if (clipStartInside) {
-            if (!polygonStarted) listener.polygonStart(), polygonStarted = true;
             listener.lineStart();
             interpolate(null, null, 1, listener);
             listener.lineEnd();
           }
-          if (polygonStarted) listener.polygonEnd(), polygonStarted = false;
+          listener.polygonEnd();
           segments = polygon = null;
         },
         sphere: function() {
@@ -3698,7 +3697,7 @@ define("lib/almond/almond", function(){});
         line.lineEnd();
       }
       var segments;
-      var buffer = d3_geo_clipBufferListener(), ringListener = clipLine(buffer), polygonStarted = false, polygon, ring;
+      var buffer = d3_geo_clipBufferListener(), ringListener = clipLine(buffer), polygon, ring;
       function pointRing(λ, φ) {
         ring.push([ λ, φ ]);
         var point = rotate(λ, φ);
@@ -3719,12 +3718,9 @@ define("lib/almond/almond", function(){});
         if (clean & 1) {
           segment = ringSegments[0];
           var n = segment.length - 1, i = -1, point;
-          if (n > 0) {
-            if (!polygonStarted) listener.polygonStart(), polygonStarted = true;
-            listener.lineStart();
-            while (++i < n) listener.point((point = segment[i])[0], point[1]);
-            listener.lineEnd();
-          }
+          listener.lineStart();
+          while (++i < n) listener.point((point = segment[i])[0], point[1]);
+          listener.lineEnd();
           return;
         }
         if (n > 1 && clean & 2) ringSegments.push(ringSegments.pop().concat(ringSegments.shift()));
@@ -6051,38 +6047,71 @@ define("lib/almond/almond", function(){});
   }
   d3.interpolateString = d3_interpolateString;
   function d3_interpolateString(a, b) {
-    var bi = d3_interpolate_numberA.lastIndex = d3_interpolate_numberB.lastIndex = 0, am, bm, bs, i = -1, s = [], q = [];
+    var m, i, j, s0 = 0, s1 = 0, s = [], q = [], n, o;
     a = a + "", b = b + "";
-    while ((am = d3_interpolate_numberA.exec(a)) && (bm = d3_interpolate_numberB.exec(b))) {
-      if ((bs = bm.index) > bi) {
-        bs = b.substring(bi, bs);
-        if (s[i]) s[i] += bs; else s[++i] = bs;
-      }
-      if ((am = am[0]) === (bm = bm[0])) {
-        if (s[i]) s[i] += bm; else s[++i] = bm;
+    d3_interpolate_number.lastIndex = 0;
+    for (i = 0; m = d3_interpolate_number.exec(b); ++i) {
+      if (m.index) s.push(b.substring(s0, s1 = m.index));
+      q.push({
+        i: s.length,
+        x: m[0]
+      });
+      s.push(null);
+      s0 = d3_interpolate_number.lastIndex;
+    }
+    if (s0 < b.length) s.push(b.substring(s0));
+    for (i = 0, n = q.length; (m = d3_interpolate_number.exec(a)) && i < n; ++i) {
+      o = q[i];
+      if (o.x == m[0]) {
+        if (o.i) {
+          if (s[o.i + 1] == null) {
+            s[o.i - 1] += o.x;
+            s.splice(o.i, 1);
+            for (j = i + 1; j < n; ++j) q[j].i--;
+          } else {
+            s[o.i - 1] += o.x + s[o.i + 1];
+            s.splice(o.i, 2);
+            for (j = i + 1; j < n; ++j) q[j].i -= 2;
+          }
+        } else {
+          if (s[o.i + 1] == null) {
+            s[o.i] = o.x;
+          } else {
+            s[o.i] = o.x + s[o.i + 1];
+            s.splice(o.i + 1, 1);
+            for (j = i + 1; j < n; ++j) q[j].i--;
+          }
+        }
+        q.splice(i, 1);
+        n--;
+        i--;
       } else {
-        s[++i] = null;
-        q.push({
-          i: i,
-          x: d3_interpolateNumber(am, bm)
-        });
+        o.x = d3_interpolateNumber(parseFloat(m[0]), parseFloat(o.x));
       }
-      bi = d3_interpolate_numberB.lastIndex;
     }
-    if (bi < b.length) {
-      bs = b.substring(bi);
-      if (s[i]) s[i] += bs; else s[++i] = bs;
+    while (i < n) {
+      o = q.pop();
+      if (s[o.i + 1] == null) {
+        s[o.i] = o.x;
+      } else {
+        s[o.i] = o.x + s[o.i + 1];
+        s.splice(o.i + 1, 1);
+      }
+      n--;
     }
-    return s.length < 2 ? q[0] ? (b = q[0].x, function(t) {
-      return b(t) + "";
-    }) : function() {
-      return b;
-    } : (b = q.length, function(t) {
-      for (var i = 0, o; i < b; ++i) s[(o = q[i]).i] = o.x(t);
+    if (s.length === 1) {
+      return s[0] == null ? (o = q[0].x, function(t) {
+        return o(t) + "";
+      }) : function() {
+        return b;
+      };
+    }
+    return function(t) {
+      for (i = 0; i < n; ++i) s[(o = q[i]).i] = o.x(t);
       return s.join("");
-    });
+    };
   }
-  var d3_interpolate_numberA = /[-+]?(?:\d+\.?\d*|\.?\d+)(?:[eE][-+]?\d+)?/g, d3_interpolate_numberB = new RegExp(d3_interpolate_numberA.source, "g");
+  var d3_interpolate_number = /[-+]?(?:\d+\.?\d*|\.?\d+)(?:[eE][-+]?\d+)?/g;
   d3.interpolate = d3_interpolate;
   function d3_interpolate(a, b) {
     var i = d3.interpolators.length, f;
@@ -8133,7 +8162,9 @@ define("lib/almond/almond", function(){});
     }
     scale.domain = function(x) {
       if (!arguments.length) return domain;
-      domain = x.filter(d3_number).sort(d3_ascending);
+      domain = x.filter(function(d) {
+        return !isNaN(d);
+      }).sort(d3_ascending);
       return rescale();
     };
     scale.range = function(x) {
@@ -16854,7 +16885,7 @@ define('src/utils/zeroInjection',['require','lib/d3/d3','lib/lodash/dist/lodash'
 
         // Gets the unique x values values from the data set.
         d3.selectAll(selection).each(function(d) {
-            d.layers.forEach(function(e) {
+            d.series.forEach(function(e) {
                 e.values.forEach(function(f, i) {
                     if (uniqueXObjs[f.x]) {
                         if ( uniqueXObjs[f.x].i > i ) {
@@ -16877,7 +16908,7 @@ define('src/utils/zeroInjection',['require','lib/d3/d3','lib/lodash/dist/lodash'
             .value();
 
         d3.selectAll(selection).each(function(data) {
-            data.layers.forEach(function(series) {
+            data.series.forEach(function(series) {
                 uniqueXKeys.forEach(function(key, keyIndex) {
                     var val = series.values[keyIndex];
                     if (!val || val.x !== key) {
@@ -16907,12 +16938,13 @@ define('src/utils/selection',['require','lib/d3/d3','src/utils/zeroInjection'],f
         will be rendered.
      */
     function placeChart(elem, data) {
-        var $el = elem instanceof Array ? elem : d3.select(elem),
+        var $el = elem instanceof Array ? elem : d3.select(elem).datum(data),
             charts = [];
 
         if (data.rows) { addTo(charts, split(elem, 'height', 'width', data.rows, 'rows')); }
         else if (data.columns) { addTo(charts, split(elem, 'width', 'height', data.columns, 'columns')); }
         else {
+            console.log($el);
             addTo(charts, $el.append('div')
                 .attr('class', 'chart')
                 .style('width', '100%')
@@ -16959,6 +16991,7 @@ define('src/utils/selection',['require','lib/d3/d3','src/utils/zeroInjection'],f
     }
 
     return function(elem, data) {
+        console.log(data);
         return zeroInjection(placeChart(elem, data));
     };
 });
@@ -17000,6 +17033,8 @@ define('src/modules/histogram',['require','src/tooltip','lib/d3/d3','src/utils/s
         /* ***************************** */
 
         chart.render = function(data) {
+            // removes elements to redraw the chart on subsequent calls
+            d3.select(elem).selectAll('*').remove();
 
             if (destroyFlag || !elem) {
                 if (destroyFlag) { throw new Error('you destroyed this chart and then tried to use it again'); }
@@ -17013,9 +17048,6 @@ define('src/modules/histogram',['require','src/tooltip','lib/d3/d3','src/utils/s
                 //console.log(d, i, this);
                 viz = d3.select(this);
 
-                // removes elements to redraw the chart on subsequent calls
-                viz.selectAll('*').remove();
-
                 // width, height, margins
                 elemWidth = parseInt(d3.select(this).style('width'), 10);
                 elemHeight = parseInt(d3.select(this).style('height'), 10);
@@ -17025,7 +17057,7 @@ define('src/modules/histogram',['require','src/tooltip','lib/d3/d3','src/utils/s
                 // preparing the data and scales
                 stack = d3.layout.stack().values(function(d) { return d.values; });
                 stack.offset(offset);
-                layers = stack(d.layers);
+                layers = stack(d.series);
                 n = layers.length; // number of layers
                 yGroupMax = d3.max(layers, function (layer) { return d3.max(layer.values, function (d) { return d.y; }); });
                 yStackMax = d3.max(layers, function (layer) { return d3.max(layer.values, function (d) { return d.y0 + d.y; }); });
@@ -17075,15 +17107,15 @@ define('src/modules/histogram',['require','src/tooltip','lib/d3/d3','src/utils/s
 
                 // layers
                 layer = svg.selectAll('.layer')
-                    .data(function (d) { return d.layers; })
+                    .data(function (d) { return d.series; })
                     .enter().append('g')
                     .attr('class', function (d, i) { return 'layer ' + i; })
                     .style('fill', function (d, i) { return color(i); });
 
-                // enter
                 bars = layer.selectAll('rect')
                     .data(function (d) { return d.values; });
 
+                // enter
                 bars.enter().append('rect')
                     .attr('class', function (d, i) { return 'rect ' + i; })
                     /*
@@ -17137,7 +17169,7 @@ define('src/modules/histogram',['require','src/tooltip','lib/d3/d3','src/utils/s
             });
 
             // Window resize
-            d3.select(window).on('resize', resize);
+            //d3.select(window).on('resize', resize);
 
             return chart;
         };
@@ -17201,23 +17233,19 @@ define('src/modules/histogram',['require','src/tooltip','lib/d3/d3','src/utils/s
                 elemHeight = parseInt(d3.select(this).style('height'), 10);
                 width = elemWidth - margin.left - margin.right;
                 height = elemHeight - margin.top - margin.bottom;
-                console.log(elemWidth, elemHeight, width, height);
 
                 // axis components
                 xScale.rangeRoundBands([0, width], 0.1);
                 yScale.range([height, 0]).nice();
 
                 // preparing the data and scales
-                layers = stack(d.layers);
+                layers = stack(d.series);
                 yGroupMax = d3.max(layers, function (layer) { return d3.max(layer.values, function (d) { return d.y; }); });
                 yStackMax = d3.max(layers, function (layer) { return d3.max(layer.values, function (d) { return d.y0 + d.y; }); });
 
                 // setting the y scale domain
                 if (offset === 'group') { yScale.domain([0, yGroupMax]); }
                 else { yScale.domain([0, yStackMax]); }
-
-                // canvas
-                svg.attr('width', width + margin.left + margin.right).attr('height', height + margin.top + margin.bottom);
 
                 // background rect
                 svg.select('rect.bkgd').attr('width', width).attr('height', height);

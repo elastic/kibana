@@ -9,7 +9,7 @@ define(function(require) {
 
         // Gets the unique x values values from the data set.
         d3.selectAll(selection).each(function(d) {
-            d.layers.forEach(function(e) {
+            d.series.forEach(function(e) {
                 e.values.forEach(function(f, i) {
                     if (uniqueXObjs[f.x]) {
                         if ( uniqueXObjs[f.x].i > i ) {
@@ -32,7 +32,7 @@ define(function(require) {
             .value();
 
         d3.selectAll(selection).each(function(data) {
-            data.layers.forEach(function(series) {
+            data.series.forEach(function(series) {
                 uniqueXKeys.forEach(function(key, keyIndex) {
                     var val = series.values[keyIndex];
                     if (!val || val.x !== key) {

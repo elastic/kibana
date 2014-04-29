@@ -46,7 +46,7 @@
             "label": "200 requests",
             "xAxisLabel": "Date",
             "yAxisLabel": "Average Request Size in Bytes",
-            "layers": [
+            "series": [
             {
               "key": "jpg",
               "values": [
@@ -97,7 +97,7 @@
             "label": "300 requests",
             "xAxisLabel": "Date",
             "yAxisLabel": "Average Request Size in Bytes",
-            "layers": [
+            "series": [
             {
               "key": "jpg",
               "values": [
@@ -148,7 +148,7 @@
             "label": "400 requests",
             "xAxisLabel": "Date",
             "yAxisLabel": "Average Request Size in Bytes",
-            "layers": [
+            "series": [
             {
               "key": "jpg",
               "values": [
@@ -203,7 +203,7 @@
             "label": "200 requests",
             "xAxisLabel": "Date",
             "yAxisLabel": "Average Request Size in Bytes",
-            "layers": [
+            "series": [
             {
               "key": "jpg",
               "values": [
@@ -254,7 +254,7 @@
             "label": "300 requests",
             "xAxisLabel": "Date",
             "yAxisLabel": "Average Request Size in Bytes",
-            "layers": [
+            "series": [
             {
               "key": "jpg",
               "values": [
@@ -305,7 +305,7 @@
             "label": "400 requests",
             "xAxisLabel": "Date",
             "yAxisLabel": "Average Request Size in Bytes",
-            "layers": [
+            "series": [
             {
               "key": "jpg",
               "values": [
@@ -360,7 +360,7 @@
             "label": "200 requests",
             "xAxisLabel": "Date",
             "yAxisLabel": "Average Request Size in Bytes",
-            "layers": [
+            "series": [
             {
               "key": "jpg",
               "values": [
@@ -411,7 +411,7 @@
             "label": "300 requests",
             "xAxisLabel": "Date",
             "yAxisLabel": "Average Request Size in Bytes",
-            "layers": [
+            "series": [
             {
               "key": "jpg",
               "values": [
@@ -462,7 +462,7 @@
             "label": "400 requests",
             "xAxisLabel": "Date",
             "yAxisLabel": "Average Request Size in Bytes",
-            "layers": [
+            "series": [
             {
               "key": "jpg",
               "values": [
@@ -518,6 +518,7 @@
 
       myChart = new k4.Chart(elem, {
         type: "histogram",
+        offset: "zero",
         yGroup: true,
         shareYAxis: true,
         //color: ['#81dfe2','#0762b7']
@@ -529,7 +530,58 @@
       });
 
       myChart.render(data);
-      //myChart.destroy();
+      var dataset = {
+              "label": "200 requests",
+              "xAxisLabel": "Date",
+              "yAxisLabel": "Average Request Size in Bytes",
+              "series": [
+                  {
+                      "key": "jpg",
+                      "values": [
+                          //{"x": "Jan", "y": 270},
+                          //{"x": "Feb", "y": 329},
+                          //{"x": "Mar", "y": 166},
+                          {"x": "Apr", "y": 271},
+                          {"x": "May", "y": 185}
+                          //{"x": "Jun", "y": 264}
+                      ]
+                  },
+                  {
+                      "key": "pct",
+                      "values": [
+                          //{"x": "Jan", "y": 133},
+                          {"x": "Feb", "y": 123},
+                          //{"x": "Mar", "y": 226},
+                          //{"x": "Apr", "y": 133},
+                          {"x": "May", "y": 246},
+                          {"x": "Jun", "y": 153}
+                      ]
+                  },
+                  {
+                      "key": "png",
+                      "values": [
+                          //{"x": "Jan", "y": 128},
+                          {"x": "Feb", "y": 119},
+                          {"x": "Mar", "y": 122},
+                          {"x": "Apr", "y": 230},
+                          {"x": "May", "y": 133},
+                          {"x": "Jun", "y": 137}
+                      ]
+                  },
+                  {
+                      "key": "gif",
+                      "values": [
+                          //{"x": "Jan", "y": 218},
+                          {"x": "Feb", "y": 110},
+                          {"x": "Mar", "y": 112},
+                          //{"x": "Apr", "y": 96},
+                          //{"x": "May", "y": 123},
+                          {"x": "Jun", "y": 87}
+                      ]
+                  }
+              ]
+          };
+      myChart.render(dataset);
       //myChart.destroy(false).render(data);
     });
   </script>

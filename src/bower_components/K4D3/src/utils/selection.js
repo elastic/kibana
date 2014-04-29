@@ -15,12 +15,13 @@ define(function(require) {
         will be rendered.
      */
     function placeChart(elem, data) {
-        var $el = elem instanceof Array ? elem : d3.select(elem),
+        var $el = elem instanceof Array ? elem : d3.select(elem).datum(data),
             charts = [];
 
         if (data.rows) { addTo(charts, split(elem, 'height', 'width', data.rows, 'rows')); }
         else if (data.columns) { addTo(charts, split(elem, 'width', 'height', data.columns, 'columns')); }
         else {
+            console.log($el);
             addTo(charts, $el.append('div')
                 .attr('class', 'chart')
                 .style('width', '100%')
@@ -67,6 +68,7 @@ define(function(require) {
     }
 
     return function(elem, data) {
+        console.log(data);
         return zeroInjection(placeChart(elem, data));
     };
 });

@@ -35,6 +35,8 @@ define(function (require) {
         /* ***************************** */
 
         chart.render = function(data) {
+            // removes elements to redraw the chart on subsequent calls
+            d3.select(elem).selectAll('*').remove();
 
             if (destroyFlag || !elem) {
                 if (destroyFlag) { throw new Error('you destroyed this chart and then tried to use it again'); }
@@ -48,9 +50,6 @@ define(function (require) {
                 //console.log(d, i, this);
                 viz = d3.select(this);
 
-                // removes elements to redraw the chart on subsequent calls
-                viz.selectAll('*').remove();
-
                 // width, height, margins
                 elemWidth = parseInt(d3.select(this).style('width'), 10);
                 elemHeight = parseInt(d3.select(this).style('height'), 10);
@@ -60,7 +59,7 @@ define(function (require) {
                 // preparing the data and scales
                 stack = d3.layout.stack().values(function(d) { return d.values; });
                 stack.offset(offset);
-                layers = stack(d.layers);
+                layers = stack(d.series);
                 n = layers.length; // number of layers
                 yGroupMax = d3.max(layers, function (layer) { return d3.max(layer.values, function (d) { return d.y; }); });
                 yStackMax = d3.max(layers, function (layer) { return d3.max(layer.values, function (d) { return d.y0 + d.y; }); });
@@ -110,15 +109,15 @@ define(function (require) {
 
                 // layers
                 layer = svg.selectAll('.layer')
-                    .data(function (d) { return d.layers; })
+                    .data(function (d) { return d.series; })
                     .enter().append('g')
                     .attr('class', function (d, i) { return 'layer ' + i; })
                     .style('fill', function (d, i) { return color(i); });
 
-                // enter
                 bars = layer.selectAll('rect')
                     .data(function (d) { return d.values; });
 
+                // enter
                 bars.enter().append('rect')
                     .attr('class', function (d, i) { return 'rect ' + i; })
                     /*
@@ -172,7 +171,7 @@ define(function (require) {
             });
 
             // Window resize
-            d3.select(window).on('resize', resize);
+            //d3.select(window).on('resize', resize);
 
             return chart;
         };
@@ -236,23 +235,19 @@ define(function (require) {
                 elemHeight = parseInt(d3.select(this).style('height'), 10);
                 width = elemWidth - margin.left - margin.right;
                 height = elemHeight - margin.top - margin.bottom;
-                console.log(elemWidth, elemHeight, width, height);
 
                 // axis components
                 xScale.rangeRoundBands([0, width], 0.1);
                 yScale.range([height, 0]).nice();
 
                 // preparing the data and scales
-                layers = stack(d.layers);
+                layers = stack(d.series);
                 yGroupMax = d3.max(layers, function (layer) { return d3.max(layer.values, function (d) { return d.y; }); });
                 yStackMax = d3.max(layers, function (layer) { return d3.max(layer.values, function (d) { return d.y0 + d.y; }); });
 
                 // setting the y scale domain
                 if (offset === 'group') { yScale.domain([0, yGroupMax]); }
                 else { yScale.domain([0, yStackMax]); }
-
-                // canvas
-                svg.attr('width', width + margin.left + margin.right).attr('height', height + margin.top + margin.bottom);
 
                 // background rect
                 svg.select('rect.bkgd').attr('width', width).attr('height', height);
