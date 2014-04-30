@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'kibana';
-  src: url('../font/kibana.eot?98174718');
-  src: url('../font/kibana.eot?98174718#iefix') format('embedded-opentype'),
-       url('../font/kibana.woff?98174718') format('woff'),
-       url('../font/kibana.ttf?98174718') format('truetype'),
-       url('../font/kibana.svg?98174718#kibana') format('svg');
+  src: url('../font/kibana.eot?64021443');
+  src: url('../font/kibana.eot?64021443#iefix') format('embedded-opentype'),
+       url('../font/kibana.woff?64021443') format('woff'),
+       url('../font/kibana.ttf?64021443') format('truetype'),
+       url('../font/kibana.svg?64021443#kibana') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -14,7 +14,7 @@
 @media screen and (-webkit-min-device-pixel-ratio:0) {
   @font-face {
     font-family: 'kibana';
-    src: url('../font/kibana.svg?98174718#kibana') format('svg');
+    src: url('../font/kibana.svg?64021443#kibana') format('svg');
   }
 }
 */
@@ -50,4 +50,8 @@
   /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
 }
  
-.icon-bar:before { content: '\e800'; } /* '' */
+.icon-temperatire:before { content: '\e805'; } /* '' */
+.icon-chart:before { content: '\e801'; } /* '' */
+.icon-chart-alt:before { content: '\e802'; } /* '' */
+.icon-chart-bar:before { content: '\e803'; } /* '' */
+.icon-chart-pie:before { content: '\e804'; } /* '' */
