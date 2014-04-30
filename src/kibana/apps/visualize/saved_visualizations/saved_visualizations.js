@@ -37,7 +37,7 @@ define(function (require) {
           source.id = hit._id;
           source.url = '#/visualize/edit/' + hit._id;
           source.typeDef = typeDefs.byName[source.typeName];
-          source.previewUrl = source.typeDef.previewUrl;
+          source.icon = source.typeDef.icon;
           return source;
         });
       });

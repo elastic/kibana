@@ -1,0 +1,13 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg">
+<metadata>Copyright (C) 2014 by original authors @ fontello.com</metadata>
+<defs>
+<font id="kibana" horiz-adv-x="1000" >
+<font-face font-family="kibana" font-weight="400" font-stretch="normal" units-per-em="1000" ascent="850" descent="-150" />
+<missing-glyph horiz-adv-x="1000" />
+<glyph glyph-name="bar" unicode="&#xe800;" d="m106 75v857h157v-857h-157z m203 0v653h156v-653h-156z m202 0v409h157v-409h-157z m203 0v479h156v-479h-156z" horiz-adv-x="1000" />
+<glyph glyph-name="pie" unicode="&#xe801;" d="m127 396q-3 23-3 45 0 61 20 120 28 80 88 139l256-260-43 362q23 3 45 3 74-1 142-30 89-38 148-116t70-176q3-23 3-45 0-73-30-142-38-89-115-147t-176-71q-23-3-46-3-73 1-141 30-89 38-148 116t-70 175z" horiz-adv-x="1000" />
+</font>
+</defs>
+</svg>
