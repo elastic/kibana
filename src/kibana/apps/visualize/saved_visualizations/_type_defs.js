@@ -5,7 +5,7 @@ define(function (require) {
   var typeDefs = [
     {
       name: 'histogram',
-      icon: 'icon-bar',
+      icon: 'icon-chart-bar',
       config: {
         metric: {
           label: 'Y-Axis',
