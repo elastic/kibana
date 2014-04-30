@@ -25,7 +25,7 @@ define(function (require) {
         split: {
           label: 'Rows & Columns',
           min: 0,
-          max: 2
+          max: 1
         }
       }
     }
