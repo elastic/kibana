@@ -7037,15 +7037,14 @@ kbn-table tr.even td {
   padding-top: 2px;
   padding-bottom: 2px;
 }
-.loading-spinner {
-  color: #46525d;
-  font-size: 19px;
-  vertical-align: middle;
-}
-.navbar-timepicker-display {
+.navbar-static-top .navbar-right {
   font-size: 13px;
 }
-.navbar-timepicker-display .fa {
+.navbar-static-top .navbar-right .loading-spinner {
+  color: #46525d;
+  vertical-align: middle;
+}
+.navbar-static-top .navbar-right .fa {
   font-size: 19px;
   vertical-align: text-top;
 }
