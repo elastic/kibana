@@ -17,19 +17,19 @@ define(function (require) {
     };
 
     this.find = function (searchString) {
+      var body = searchString.length ? {
+          query: {
+            simple_query_string: {
+              query: searchString + '*',
+              fields: ['title^3', 'description'],
+              default_operator: 'AND'
+            }
+          }
+        }: { query: {match_all: {}}};
       return es.search({
         index: config.file.kibanaIndex,
         type: 'visualization',
-        body: {
-          query: {
-            multi_match: {
-              query: searchString || '',
-              type: 'phrase_prefix',
-              fields: ['title^3', 'description'],
-              zero_terms_query: 'all'
-            }
-          }
-        }
+        body: body
       })
       .then(function (resp) {
         return resp.hits.hits.map(function (hit) {

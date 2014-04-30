@@ -15,30 +15,19 @@ define(function (require) {
     };
 
     this.find = function (searchString) {
+      var body = searchString.length ? {
+          query: {
+            simple_query_string: {
+              query: searchString + '*',
+              fields: ['title^3', 'description'],
+              default_operator: 'AND'
+            }
+          }
+        }: { query: {match_all: {}}};
       return es.search({
         index: config.file.kibanaIndex,
         type: 'dashboard',
-        body: {
-          query: {
-            bool: {
-              should : [
-                {
-                  wildcard: {
-                    title: {
-                      value: searchString + '*',
-                      boost: 3
-                    }
-                  }
-                },
-                {
-                  wildcard: {
-                    description: searchString + '*'
-                  }
-                },
-              ],
-            }
-          }
-        }
+        body: body
       })
       .then(function (resp) {
         return resp.hits.hits.map(function (hit) {
