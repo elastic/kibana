@@ -83,7 +83,8 @@ define(function (require) {
         $scope.$watchCollection('timefilter.time', $scope.refresh);
 
         $scope.save = function () {
-          dash.title = dash.id = $state.title;
+          $state.title = dash.id = dash.title;
+          $state.commit();
           dash.panelsJSON = JSON.stringify($state.panels);
 
           dash.save()
