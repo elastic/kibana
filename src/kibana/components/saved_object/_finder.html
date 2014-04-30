@@ -10,12 +10,12 @@
   </div>
 </form>
 <ul class="media-list well well-sm finder-options">
-  <li ng-repeat="hit in hits" ng-class="hit.previewUrl || hit.description ? 'media' : ''">
-    <a class="pull-left" ng-if="hit.previewUrl" ng-href="{{ makeUrl(hit) }}" ng-click="onChoose(hit)">
-      <img class="media-object" ng-src="{{ hit.previewUrl }}">
+  <li ng-repeat="hit in hits" ng-class="hit.icon || hit.description ? 'media' : ''">
+    <a class="pull-left" ng-if="hit.icon" ng-href="{{ makeUrl(hit) }}" ng-click="onChoose(hit)">
+      <i ng-class="hit.icon"></i>
     </a>
-    <div ng-class="hit.previewUrl || hit.description ? 'media-body' : ''">
-      <div ng-class="hit.previewUrl || hit.description ? 'media-heading' : ''">
+    <div ng-class="hit.icon || hit.description ? 'media-body' : ''">
+      <div ng-class="hit.icon || hit.description ? 'media-heading' : ''">
         <a ng-href="{{makeUrl(hit)}}" ng-click="onChoose(hit)" ng-bind="hit.title"></a>
       </div>
       <p ng-if="hit.description" ng-bind="hit.description"></p>
