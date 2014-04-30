@@ -88,11 +88,6 @@ notifications {
 @import "./_notify.less";
 
 //== Nav tweaks
-//
-.navbar {
-  border-bottom: 0px;
-}
-
 .nav-condensed > li > a {
    padding-top: 2px;
    padding-bottom: 2px;
@@ -101,9 +96,17 @@ notifications {
 .loading-spinner {
   color: @navbar-inverse-brand-hover-color;
   font-size: @font-size-large;
+  vertical-align: middle;
 }
 
 // Date/time picker
+.navbar-timepicker-display {
+  font-size: @font-size-small;
+  .fa {
+    font-size: @font-size-large;
+    vertical-align: text-top;
+  }
+}
 .kbn-timepicker .btn-default {
   background: transparent;
   color: @text-color;

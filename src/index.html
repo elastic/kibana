@@ -25,15 +25,18 @@
               <a ng-href="#{{app.lastPath}}" bo-text="app.name"></a>
             </li>
           </ul>
-          <ul class="nav navbar-nav pull-right">
+
+          <ul class="nav navbar-nav navbar-right">
             <li ng-show="httpActive.length"><a href="#"><i class="fa fa-spinner fa-spin loading-spinner"></i></a></li>
-            <li ng-show="opts.timefilter.enabled()">
+            <li ng-show="opts.timefilter.enabled()" class="navbar-timepicker-display">
               <a ng-click="toggleTimepicker()">
-                <span class="small">{{opts.timefilter.time.from | moment}} to {{opts.timefilter.time.to | moment}}</span>
+                {{opts.timefilter.time.from | moment}} to {{opts.timefilter.time.to | moment}}
+                &nbsp;
                 <i class="fa fa-clock-o"></i>
               </a>
             </li>
           </ul>
+
         </div>
       </nav>
       <config

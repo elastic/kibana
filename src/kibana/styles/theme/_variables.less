@@ -327,7 +327,7 @@
 
 // Basics of a navbar
 @navbar-height:                    45px;
-@navbar-margin-bottom:             @line-height-computed;
+@navbar-margin-bottom:             0px;
 @navbar-border-radius:             @border-radius-base;
 @navbar-padding-horizontal:        floor((@grid-gutter-width / 2));
 @navbar-padding-vertical:          ((@navbar-height - @line-height-computed) / 2);
@@ -335,7 +335,7 @@
 
 @navbar-default-color:             #777;
 @navbar-default-bg:                @brand-primary;
-@navbar-default-border:            transparent;
+@navbar-default-border:            darken(@brand-primary, 10%);
 
 // Navbar links
 @navbar-default-link-color:                #fff;
@@ -361,7 +361,7 @@
 // Reset inverted navbar basics
 @navbar-inverse-color:                      #fff;
 @navbar-inverse-bg:                         @brand-success;
-@navbar-inverse-border:                     transparent;
+@navbar-inverse-border:                     darken(@brand-success, 10%);
 
 // Inverted navbar links
 @navbar-inverse-link-color:                 #fff;
@@ -468,19 +468,19 @@
 
 @state-success-text:             #fff;
 @state-success-bg:               @brand-success;
-@state-success-border:           @brand-success;
+@state-success-border:           darken(@brand-success, 10%);
 
 @state-info-text:                #fff;
 @state-info-bg:                  @brand-info;
-@state-info-border:              @brand-info;
+@state-info-border:              darken(@brand-info, 10%);
 
 @state-warning-text:             #fff;
 @state-warning-bg:               @brand-warning;
-@state-warning-border:           @brand-warning;
+@state-warning-border:           darken(@brand-warning, 10%);
 
 @state-danger-text:              #fff;
 @state-danger-bg:                @brand-danger;
-@state-danger-border:            @brand-danger;
+@state-danger-border:            darken(@brand-danger, 10%);
 
 
 //== Tooltips
