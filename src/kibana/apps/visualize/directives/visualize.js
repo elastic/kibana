@@ -17,16 +17,20 @@ define(function (require) {
           if (!vis) return;
 
           var notify = createNotifier({
-            location: vis.type + ' visualization'
+            location: vis.typeName + ' visualization'
           });
 
           chart = new k4d3.Chart($el[0], {
-            type: 'histogram'
+            type: vis.typeName
           });
 
           vis.searchSource.onResults(function onResults(resp) {
-            chart.render(vis.buildChartDataFromResponse(resp));
-          });
+            try {
+              chart.render(vis.buildChartDataFromResponse(resp));
+            } catch (e) {
+              notify.error(e);
+            }
+          }).catch(notify.fatal);
 
           $scope.$root.$broadcast('ready:vis');
         });

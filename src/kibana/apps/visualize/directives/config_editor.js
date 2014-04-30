@@ -120,20 +120,30 @@ define(function (require) {
         move: '='
       },
       link: function ($scope, $el, attr) {
-        var categoryName = $scope.category.name;
-        var opts = categoryOptions[categoryName];
-
         $scope.aggs = aggs;
         $scope.visConfigCategories = visConfigCategories;
 
-        // attach a copy of the template to the scope and render
-        $el.html($compile(headerHtml + '\n' + opts.template)($scope));
+        $scope.$watch('category', function (category, prevCategory) {
+          // clear out the previous state if necessary
+          if (prevCategory && !category) {
+            delete $scope[category.name];
+            $el.html('');
+            return;
+          }
+          // no work to be done yet
+          if (!category) return;
 
-        _.defaults($scope.val, opts.defVal || {});
-        if (opts.setup) opts.setup($scope, $el);
+          var opts = categoryOptions[category.name];
 
-        // rather than accessing vis.{{categoryName}} everywhere
-        $scope[categoryName] = $scope.vis[categoryName];
+          // attach a copy of the template to the scope and render
+          $el.html($compile(headerHtml + '\n' + opts.template)($scope));
+
+          _.defaults($scope.val, opts.defVal || {});
+          if (opts.setup) opts.setup($scope, $el);
+
+          // rather than accessing vis.{{categoryName}} everywhere
+          $scope[category.name] = $scope.vis[category.name];
+        });
       }
     };
   });

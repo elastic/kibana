@@ -22,8 +22,6 @@ define(function (require) {
       }
 
       var typeDef = typeDefs.byName[opts.type];
-      if (!typeDef) throw new Error('Unknown visualization type: "' + opts.type + '"');
-
       var parentSearch = opts.parentSearchSource || rootSearch;
 
       SavedObject.call(vis, {
@@ -41,7 +39,7 @@ define(function (require) {
 
         defaults: {
           title: '',
-          typeName: opts.type,
+          typeName: opts.type || 'histogram',
           stateJSON: null,
           description: '',
           savedSearchId: opts.savedSearchId,
@@ -49,7 +47,22 @@ define(function (require) {
 
         searchSource: true,
 
+        init: function () {
+          configCats.forEach(function (category) {
+            vis._initConfigCategory(category);
+          });
+        },
+
         afterESResp: function setVisState() {
+          if (!typeDef || vis.typeName !== typeDef.name) {
+            // refresh the typeDef
+            typeDef = typeDefs.byName[vis.typeName];
+            // refresh the defaults for all config categories
+            configCats.forEach(function (category) {
+              vis._initConfigCategory(category, vis[category.name]);
+            });
+          }
+
           // get the saved state
           var state;
           if (vis.stateJSON) try { state = JSON.parse(vis.stateJSON); } catch (e) {}
@@ -91,21 +104,6 @@ define(function (require) {
         }
       });
 
-      if (opts.indexPattern) {
-        vis.searchSource.index(opts.indexPattern);
-      }
-
-      // initialize config categories
-      configCats.forEach(function (category) {
-        var cat = {};
-        cat.configDefaults = _.clone(category.configDefaults);
-        cat.configs = [];
-
-        _.defaults(cat, typeDef.config[category.name] || {}, category);
-
-        vis[category.name] = cat;
-      });
-
       vis.addConfig = function (categoryName) {
         var category = configCats.byName[categoryName];
         var config = _.defaults({}, category.configDefaults);
@@ -134,6 +132,20 @@ define(function (require) {
             });
           }
         });
+      };
+
+      // init the config category, optionally pass in an existing category to refresh
+      // it's defaults based on the
+      vis._initConfigCategory = function (category, cat) {
+        cat = cat || {};
+
+        if (typeDef) _.assign(cat, category, typeDef.config[category.name]);
+        cat.configDefaults = _.clone(category.configDefaults),
+        cat.configs = cat.config || [];
+
+        vis[category.name] = cat;
+
+        return cat;
       };
 
       vis.setState = function (state) {

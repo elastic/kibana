@@ -35,6 +35,7 @@ define(function (require) {
       var defaults = config.defaults || {};
 
       var afterESResp = config.afterESResp || _.noop;
+      var customInit = config.init || _.noop;
 
       // optional search source which this object configures
       obj.searchSource = config.searchSource && courier.createSource('search');
@@ -50,6 +51,8 @@ define(function (require) {
        * @resolved {SavedObject}
        */
       obj.init = _.once(function () {
+        customInit();
+
         // ensure that the type is defined
         if (!type) throw new Error('You must define a type name to use SavedObject objects.');
 
