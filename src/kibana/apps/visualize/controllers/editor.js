@@ -138,6 +138,9 @@ define(function (require) {
     $scope.doSave = function () {
       writeStateAndFetch();
 
+      // use the title for the id
+      vis.id = vis.title;
+
       // serialize the current state
       vis.stateJSON = JSON.stringify(vis.getState());
 
