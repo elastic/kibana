@@ -4,7 +4,7 @@ define(function (require) {
   return function filterByName (name) {
     return function (row) {
       if (!_.isEmpty(name)) {
-        var regex = new RegExp(name);
+        var regex = new RegExp(name, 'i');
         return (row.ip_port && regex.test(row.ip_port)) || regex.test(row.name);
       }
       return true;
