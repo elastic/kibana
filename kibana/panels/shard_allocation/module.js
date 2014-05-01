@@ -54,6 +54,8 @@ define(function (require) {
       fastBackward: true
     };
 
+    $scope.timeRange = {};
+
     // Inject dependicies for the getTimelineData
     var getTimeline = getTimelineDataGenerator($http, dashboard, filterSrv);
     var getStateSource = getStateSourceGenerator($http);
@@ -288,7 +290,13 @@ define(function (require) {
 
       if (timeChanged) {
         $scope.timeRange = timeRange;
-        getTimeline().then(handleTimeline, handleConnectionError);
+        getTimeline().then(handleTimeline, handleConnectionError).then(function () {
+          // Don't start listening to updates till we finish initlaizing
+          if ($scope.startup) {
+            $clusterState.$on('update', handleUpdatesFromClusterState($scope));
+            $scope.startup = false;
+          }
+        });
       }
     });
 
@@ -311,14 +319,16 @@ define(function (require) {
     };
 
     $scope.init = function () {
-      $scope.timeRange = filterSrv.timeRange(false);
       $scope.style = dashboard.current.style;
       $scope.timelineData = [];
       $scope.showHead = false;
-      getTimeline().then(handleTimeline, handleConnectionError).then(function () {
-        // Don't start listening to updates till we finish initlaizing
-        $clusterState.$on('update', handleUpdatesFromClusterState($scope));
-      });
+      $scope.startup = true;
+
+      // if dashboard indices is not empty then we need to trigger a refresh
+      // incase we missed the inital load.
+      if (dashboard.indices.length !== 0) {
+        $scope.$broadcast('refresh');
+      }
     };
   });
 });
