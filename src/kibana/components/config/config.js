@@ -121,6 +121,7 @@ define(function (require) {
      *****/
 
     var change = function (key, val) {
+      debugger;
       notify.log('config change: ' + key + ': ' + vals[key] + ' -> ' + val);
       vals[key] = val;
       $rootScope.$broadcast('change:config.' + key, val, vals[key]);
