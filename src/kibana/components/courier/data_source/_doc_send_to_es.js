@@ -31,10 +31,10 @@ define(function (require) {
         doc.id(resp._id);
 
         // notify pending request for this same document that we have updates
-        Promise.cast(!body ? doc.fetch() : {
+        Promise.cast(!body || !body.doc ? doc.fetch() : {
           _id: resp._id,
           _index: params.index,
-          _source: body,
+          _source: body.doc,
           _type: params.type,
           _version: doc._getVersion(),
           found: true
