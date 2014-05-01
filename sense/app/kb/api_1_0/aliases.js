@@ -37,17 +37,20 @@ define(function () {
         "_aliases",
       ]
     });
+
+    var aliasRules = {
+      filter: {},
+      routing: '1',
+      search_routing: '1,2',
+      index_routing: '1'
+    };
+
     api.addEndpointDescription('_post_alias', {
       methods: ["POST", "PUT"],
       patterns: [
         "{indices}/_alias/{name}"
       ],
-      data_autocomplete_rules: {
-        filter: {},
-        routing: '1',
-        search_routing: '1,2',
-        index_routing: '1'
-      }
+      data_autocomplete_rules: aliasRules 
     });
     api.addEndpointDescription('_delete_alias', {
       methods: ["DELETE"],
@@ -63,6 +66,10 @@ define(function () {
         "{indices}/_alias/{name}",
         "_alias/{name}"
       ]
+    });
+
+    api.addGlobalAutocompleteRules('aliases', {
+      '*': aliasRules
     });
   };
 });

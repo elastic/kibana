@@ -55,7 +55,7 @@ define(function () {
           '*': {
             type: {
               __one_of: ['string', 'float', 'double', 'byte', 'short', 'integer', 'long', 'date', 'boolean',
-                'binary', 'object', 'nested', 'multi_field'
+                'binary', 'object', 'nested'
               ]
             },
 
@@ -138,7 +138,8 @@ define(function () {
               '*': {
                 __scope_link: '_put_mapping.type.properties.field'
               }
-            }
+            },
+            copy_to: { __one_of: ['{field}', ['{field}']] } 
           }
         }
       }

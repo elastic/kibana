@@ -115,6 +115,24 @@ define(function () {
 
       }
     });
+
+    api.addEndpointDescription('_search_template', {
+      methods: ['GET'],
+      patterns: ['_search/template'],
+      data_autocomplete_rules: {
+        template: {
+          __template: {
+            "query": {}
+          }
+        },
+        query: {
+
+        },
+        params: {
+
+        }
+      }
+    });
   };
 
 });

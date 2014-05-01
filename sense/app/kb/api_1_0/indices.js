@@ -61,6 +61,13 @@ define(function () {
         },
         settings: {
           __scope_link: '_put_settings.index'
+        },
+        aliases: {
+          __template: {
+            "NAME": {
+
+            }
+          }
         }
       }
     });

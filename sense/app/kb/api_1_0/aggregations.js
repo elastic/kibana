@@ -174,7 +174,8 @@ define(function () {
         "factor": 1000,
         "pre_offset": "1d",
         "post_offset": "1d",
-        "format": "yyyy-MM-dd"
+        "format": "yyyy-MM-dd",
+        "time_zone": "00:00"
       },
       "geo_distance": {
         __template: {
