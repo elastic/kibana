@@ -1,11 +1,7 @@
 define(function () {
-  var _ = require('lodash');
-
-  /**
-   * Create the mappingSetup module by passing in it's dependencies.
-   */
-  return function (configFile, es, courier) {
-    var mappingSetup = {};
+  return function MappingSetupService(configFile, es) {
+    var _ = require('lodash');
+    var mappingSetup = this;
 
     /**
      * Use to create the mappings, but that should only happen one at a time
@@ -81,8 +77,6 @@ define(function () {
       activeTypeCreations[type] = prom;
       return prom;
     };
-
-    return mappingSetup;
   };
 
 });

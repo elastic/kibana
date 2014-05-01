@@ -1,102 +1,100 @@
 define(function (require) {
   var module = require('modules').get('settings/controllers');
+  var _ = require('lodash');
 
-  module.controller('indexSettings', function ($scope, courier, Notifier, $route, $location, es, config, indexPatterns) {
+  require('courier/courier');
+
+  require('../sections').push({
+    order: 1,
+    name: 'indices',
+    display: 'Indices',
+    url: '#/settings/indices',
+    template: require('text!../partials/indices.html'),
+    resolve: {
+      indexPattern: function ($route, courier) {
+        return courier.indexPatterns.get($route.current.params.id);
+      },
+      indexPatternIds: function (courier) {
+        return courier.indexPatterns.getIds();
+      }
+    }
+  });
+
+  module.controller('indexSettings', function ($scope, courier, Notifier, $route, $location, es, config) {
     var notify = new Notifier({
       location: 'Index Settings'
     });
 
-    var init = function () {
-      $scope.getPatterns();
-      $scope.indices = {
-        id: $route.current.params.id,
-        table: {
-          by: 'field',
-          reverse: false,
-          page: 0,
-          max: 20
-        },
-        default: config.get('defaultIndex')
-      };
+    $scope.indexPattern = $route.current.locals.indexPattern;
+    $scope.indexPatternIds = $route.current.locals.indexPatternIds;
 
-      if (!!$scope.indices.id) {
-        loadPattern($scope.indices.id);
-      }
+    $scope.defaultIndex = config.get('defaultIndex');
+    $scope.$on('change:config.defaultIndex', function () {
+      $scope.defaultIndex = config.get('defaultIndex');
+    });
+
+    $scope.table = {
+      by: 'name',
+      reverse: false,
+      page: 0,
+      max: 20
     };
 
-    var loadPattern = function (pattern) {
-      return indexPatterns.getFields(pattern)
-      .then(function (fields) {
-        $scope.indices.mapping = fields;
+    $scope.refreshFields = function () {
+      $scope.indexPattern.refreshFields();
+    };
+
+    $scope.removePattern = function () {
+      courier.indexPatterns.delete($scope.indexPattern)
+      .then(refreshKibanaIndex)
+      .then(function () {
+        $location.path('/settings/indices');
       })
-      .catch(function () {
-        $location.path('/settings/indices');
-      });
+      .catch(notify.fatal);
     };
 
-    // TODO: Resolve this in the routes, otherwise the warning will show for a moment;
-    $scope.getPatterns = function (pattern) {
-      return indexPatterns.getIds()
-      .then(function (ids) {
-        $scope.indices.patterns = ids;
-      });
-    };
+    $scope.create = function () {
+      $scope.indexPattern.id = $scope.indexPattern.title;
 
-    $scope.refreshFields = function (pattern) {
-      return indexPatterns.delete(pattern)
+      // refresh the fields, to verify that the
+      $scope.indexPattern.refreshFields()
+      .then(refreshKibanaIndex)
       .then(function () {
-        return indexPatterns.create(pattern);
-      });
-    };
-
-    $scope.removePattern = function (pattern) {
-      indexPatterns.delete(pattern)
-      .then(function () {
-        $location.path('/settings/indices');
+        $location.path('/settings/indices/' + $scope.indexPattern.id);
       })
       .catch(function (err) {
-        $location.path('/settings/indices');
+        if (err.status >= 400) notify.error('Could not locate any indices matching that pattern. Please add the index to Elasticsearch');
+        else notify.fatal(err);
       });
     };
 
-    $scope.addPattern = function (pattern) {
-      indexPatterns.create(pattern)
-      .then(function () {
-        $location.path('/settings/indices/' + pattern);
-      })
-      .catch(function (err) {
-        if (err.status >= 400) {
-          notify.error('Could not locate any indices matching that pattern. Please add the index to Elasticsearch');
-        }
-      });
-    };
-
-    $scope.setDefaultPattern = function (pattern) {
-      config.set('defaultIndex', pattern)
-      .then(function () {
-        $scope.indices.default = pattern;
-      });
+    $scope.setDefaultPattern = function () {
+      config.set('defaultIndex', $scope.indexPattern.id);
     };
 
     $scope.setFieldSort = function (by) {
-      if ($scope.indices.table.by === by) {
-        $scope.indices.table.reverse = !$scope.indices.table.reverse;
+      if ($scope.table.by === by) {
+        $scope.table.reverse = !$scope.table.reverse;
       } else {
-        $scope.indices.table.by = by;
+        $scope.table.by = by;
       }
     };
 
     $scope.sortClass = function (column) {
-      if ($scope.indices.table.by !== column) return;
-      return $scope.indices.table.reverse ? ['fa', 'fa-sort-asc'] : ['fa', 'fa-sort-desc'];
+      if ($scope.table.by !== column) return;
+      return $scope.table.reverse ? ['fa', 'fa-sort-asc'] : ['fa', 'fa-sort-desc'];
     };
 
     $scope.tablePages = function () {
-      if (!$scope.indices.mapping) return 0;
-      return Math.ceil($scope.indices.mapping.length / $scope.indices.table.max);
+      if (!$scope.indexPattern.fields) return 0;
+      return Math.ceil($scope.indexPattern.fields.length / $scope.table.max);
     };
 
-    init();
+    var refreshKibanaIndex = function () {
+      return es.indices.refresh({
+        index: config.file.kibanaIndex
+      });
+    };
 
     $scope.$emit('application.load');
   });

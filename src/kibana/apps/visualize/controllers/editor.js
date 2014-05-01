@@ -14,12 +14,12 @@ define(function (require) {
   var aggs = require('../saved_visualizations/_aggs');
   var visConfigCategories = require('../saved_visualizations/_config_categories');
 
-  var getVisAndFieldsHash = function (savedVisualizations, courier, Notifier, $location, $route) {
+  var getVisAndFields = function (savedVisualizations, courier, Notifier, $location, $route) {
     return function (using) {
       return savedVisualizations.get(using)
       .then(function (vis) {
         // get the fields before we render, but return the vis
-        return vis.searchSource.getFields()
+        return courier.getFieldsFor(vis.searchSource)
         .then(function (fields) {
           return [vis, fields];
         });
@@ -40,16 +40,16 @@ define(function (require) {
   .when('/visualize/create', {
     template: require('text!../editor.html'),
     resolve: {
-      visAndFieldsHash: function ($injector, $route) {
-        return $injector.invoke(getVisAndFieldsHash)($route.current.params);
+      visAndFields: function ($injector, $route) {
+        return $injector.invoke(getVisAndFields)($route.current.params);
       }
     }
   })
   .when('/visualize/edit/:id', {
     template: require('text!../editor.html'),
     resolve: {
-      visAndFieldsHash: function ($injector, $route) {
-        return $injector.invoke(getVisAndFieldsHash)($route.current.params.id);
+      visAndFields: function ($injector, $route) {
+        return $injector.invoke(getVisAndFields)($route.current.params.id);
       }
     }
   });
@@ -60,25 +60,13 @@ define(function (require) {
     });
 
     // get the vis loaded in from the routes
-    var vis = $route.current.locals.visAndFieldsHash[0];
+    var vis = $route.current.locals.visAndFields[0];
     // vis.destroy called by visualize directive
 
-    var fieldsHash = $route.current.locals.visAndFieldsHash[1];
+    $scope.fields = _.sortBy($route.current.locals.visAndFields[1], 'name');
+    $scope.fields.byName = _.indexBy($scope.fields, 'name');
 
     var $state = new AppState(vis.getState());
-
-    // get the current field list
-    // create a sorted list of the fields for display purposes
-    $scope.fields = _(fieldsHash)
-      .keys()
-      .sort()
-      .transform(function (fields, name) {
-        var field = fieldsHash[name];
-        field.name = name;
-        fields.push(field);
-      })
-      .value();
-    $scope.fields.byName = fieldsHash;
 
     $scope.vis = vis;
     $scope.aggs = aggs;

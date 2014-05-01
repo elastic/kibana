@@ -3,6 +3,19 @@ define(function (require) {
   var _ = require('lodash');
   var configDefaults = require('config/defaults');
 
+  require('../sections').push({
+    order: 2,
+    name: 'advanced',
+    display: 'Advanced',
+    url: '#/settings/advanced',
+    template: require('text!../partials/advanced.html'),
+    resolve: {
+      noId: function ($route, $location) {
+        if ($route.current.params.id) $location.url('/settings/advanced');
+      }
+    }
+  });
+
   module.controller('advancedSettings', function ($scope, config, Notifier) {
     var notify = new Notifier();
     var configVals = config._vals();
