@@ -167,19 +167,21 @@ define(function (require) {
     };
 
     $scope.jump = function ($event) {
-      var position = $event.offsetX / $event.currentTarget.clientWidth;
+      var offsetX = _.isUndefined($event.offsetX) ? $event.originalEvent.layerX : $event.offsetX;
+      var position = offsetX / $event.currentTarget.clientWidth;
       $scope.player.current = Math.floor(position * $scope.player.total);
       $scope.player.paused = true;
     };
 
     $scope.head = function ($event) {
-      var position = $event.offsetX / $event.currentTarget.clientWidth;
+      var offsetX = _.isUndefined($event.offsetX) ? $event.originalEvent.layerX : $event.offsetX;
+      var position = offsetX / $event.currentTarget.clientWidth;
       var current = Math.floor(position * $scope.player.total);
       var timestamp = getValue($scope.timelineData[current].fields['@timestamp']);
       var message = getValue($scope.timelineData[current].fields.message);
       var status = getValue($scope.timelineData[current].fields.status);
 
-      $scope.headX = $event.offsetX;
+      $scope.headX = offsetX;
       $scope.headTime = timestamp;
       $scope.headMessage = message;
       $scope.headStatus = status;
