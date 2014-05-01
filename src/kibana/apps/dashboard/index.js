@@ -40,6 +40,7 @@ define(function (require) {
           if (e instanceof courier.errors.SavedObjectNotFound) {
             new Notifier({location: 'Dashboard'}).error(e.message);
             $location.path('/dashboard');
+            $route.reload(); // force $route to be recomputed and prevent the controller from being loaded.
             return false;
           } else {
             throw e;
