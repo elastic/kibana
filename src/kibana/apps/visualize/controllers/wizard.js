@@ -3,7 +3,7 @@ define(function (require) {
   var typeDefs = require('../saved_visualizations/_type_defs');
 
   require('../saved_visualizations/saved_visualizations');
-  require('saved_object/finder.directive');
+  require('directives/saved_object_finder');
   require('apps/discover/saved_searches/saved_searches');
 
   var app = require('modules').get('app/visualize', [
@@ -22,13 +22,13 @@ define(function (require) {
   routes.when('/visualize/step/1', {
     template: templateStep(1, require('text!../partials/wizard/step_1.html')),
     resolve: {
-      indexPatternIds: function (indexPatterns) {
-        return indexPatterns.getIds();
+      indexPatternIds: function (courier) {
+        return courier.indexPatterns.getIds();
       }
     }
   });
 
-  app.controller('VisualizeWizardStep1', function ($route, $scope, courier, config, $location, indexPatterns, timefilter) {
+  app.controller('VisualizeWizardStep1', function ($route, $scope, $location, timefilter) {
     $scope.step2WithSearchUrl = function (hit) {
       return '#/visualize/step/2?savedSearchId=' + encodeURIComponent(hit.id);
     };

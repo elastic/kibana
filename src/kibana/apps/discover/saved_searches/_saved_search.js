@@ -9,9 +9,9 @@ define(function (require) {
     'kibana/courier'
   ]);
 
-  module.factory('SavedSearch', function (configFile, courier, Promise, SavedObject) {
+  module.factory('SavedSearch', function (configFile, courier, Promise) {
     function SavedSearch(id) {
-      SavedObject.call(this, {
+      courier.SavedObject.call(this, {
         type: 'search',
 
         id: id,
@@ -28,10 +28,17 @@ define(function (require) {
           hits: 0
         },
 
-        searchSource: true
+        searchSource: true,
+
+        afterESResp: function () {
+          var index = this.searchSource.get('index');
+          if (typeof index === 'string') {
+            this.searchSource.index(courier.indexPatterns.get(index));
+          }
+        }
       });
     }
-    inherits(SavedSearch, SavedObject);
+    inherits(SavedSearch, courier.SavedObject);
     return SavedSearch;
   });
 });

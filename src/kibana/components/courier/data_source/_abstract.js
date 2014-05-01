@@ -1,14 +1,14 @@
 define(function (require) {
   var inherits = require('utils/inherits');
   var _ = require('lodash');
-  var Mapper = require('courier/mapper');
   var nextTick = require('utils/next_tick');
 
-  var module = require('modules').get('kibana/courier');
+  return function SourceAbstractFactory(Private, Promise, timefilter) {
+    var pendingRequests = Private(require('../_pending_requests'));
+    var errorHandlers = Private(require('../_error_handlers'));
+    var fetch = Private(require('../fetch/fetch'));
 
-  module.factory('CouriersSourceAbstract', function (couriersFetch, Promise, timefilter) {
-
-    function SourceAbstract(courier, initialState) {
+    function SourceAbstract(initialState) {
       this._state = (function () {
         // state can be serialized as JSON, and passed back in to restore
         if (initialState) {
@@ -23,7 +23,6 @@ define(function (require) {
       }());
 
       this._dynamicState = this._dynamicState || {};
-      this._courier = courier;
 
       // get/set internal state values
       this._methods.forEach(function (name) {
@@ -70,42 +69,12 @@ define(function (require) {
     };
 
     /**
-     * Set the courier for this dataSource
-     * @chainable
-     * @param  {Courier} newCourier
-     */
-    SourceAbstract.prototype.courier = function (newCourier) {
-      this._courier = newCourier;
-      return this;
-    };
-
-    /**
      * Create a new dataSource object of the same type
      * as this, which inherits this dataSource's properties
      * @return {SourceAbstract}
      */
     SourceAbstract.prototype.extend = function () {
-      return this._courier
-        .createSource(this._getType())
-        .inherits(this);
-    };
-
-    /**
-     * fetch the field names for this SourceAbstract
-     * @param  {Function} cb
-     * @callback {Error, Array} - calls cb with a possible error or an array of field names
-     */
-    SourceAbstract.prototype.getFields = function () {
-      return this._courier._mapper.getFields(this);
-    };
-
-    /**
-     * clear the field list cache
-     * @param  {Function} cb
-     * @callback {Error, Array} - calls cb with a possible error
-     */
-    SourceAbstract.prototype.clearFieldCache = function () {
-      return this._courier._mapper.clearCache(this);
+      return (new this.Class()).inherits(this);
     };
 
     /**
@@ -132,7 +101,7 @@ define(function (require) {
     SourceAbstract.prototype.onResults = function (handler) {
       var source = this;
       return new Promise.emitter(function (resolve, reject, defer) {
-        source._courier._pendingRequests.push({
+        pendingRequests.push({
           source: source,
           defer: defer
         });
@@ -147,7 +116,7 @@ define(function (require) {
      */
     SourceAbstract.prototype.onError = function () {
       var defer = Promise.defer();
-      this._courier._errorHandlers.push({
+      errorHandlers.push({
         source: this,
         defer: defer
       });
@@ -159,15 +128,14 @@ define(function (require) {
      * @param {Function} cb - callback
      */
     SourceAbstract.prototype.fetch = function () {
-      var courier = this._courier;
       var source = this;
-      return couriersFetch[this._getType()](this)
+      return fetch[this._getType()](this)
       .then(function (res) {
-        courier._pendingRequests.splice(0).forEach(function (req) {
+        pendingRequests.splice(0).forEach(function (req) {
           if (req.source === source) {
             req.defer.resolve(_.cloneDeep(res));
           } else {
-            courier._pendingRequests.push(req);
+            pendingRequests.push(req);
           }
         });
         return res;
@@ -179,8 +147,8 @@ define(function (require) {
      * @return {undefined}
      */
     SourceAbstract.prototype.cancelPending = function () {
-      var pending = _.where(this._courier._pendingRequests, { source: this});
-      _.pull.apply(_, [this._courier._pendingRequests].concat(pending));
+      var pending = _.where(pendingRequests, { source: this});
+      _.pull.apply(_, [pendingRequests].concat(pending));
     };
 
     /**
@@ -216,9 +184,17 @@ define(function (require) {
       // call the ittr and return it's promise
       return (function ittr(resolve, reject) {
         // itterate the _state object (not array) and
-        // pass each key:value pair to collect prop.
-        return Promise.all(_.map(current._state, function (value, key) {
-          return root._mergeProp(flatState, value, key);
+        // pass each key:value pair to source._mergeProp. if _mergeProp
+        // returns a promise, then wait for it to complete and call _mergeProp again
+        return Promise.all(_.map(current._state, function ittr(value, key) {
+          if (Promise.is(value)) {
+            return value.then(function (value) {
+              return ittr(value, key);
+            });
+          }
+
+          var prom = root._mergeProp(flatState, value, key);
+          return Promise.is(prom) ? prom : null;
         }))
         .then(function () {
           // move to this sources parent
@@ -261,5 +237,5 @@ define(function (require) {
 
     return SourceAbstract;
 
-  });
+  };
 });

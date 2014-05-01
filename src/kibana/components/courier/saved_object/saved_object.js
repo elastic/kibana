@@ -1,12 +1,21 @@
 define(function (require) {
-  var module = require('modules').get('kibana/saved_object');
   var _ = require('lodash');
 
-  require('services/root_search');
+  return function SavedObjectFactory(configFile, Promise, Private, Notifier) {
+    var DocSource = Private(require('../data_source/doc_source'));
+    var SearchSource = Private(require('../data_source/search_source'));
 
-  module.factory('SavedObject', function (courier, configFile, rootSearch, Promise, createNotifier, $injector) {
+    var errors = Private(require('../_errors'));
+    var mappingSetup = Private(require('./_mapping_setup'));
 
-    var mappingSetup = $injector.invoke(require('./_mapping_setup'));
+    var json = {
+      _serialize: function (val) {
+        if (val != null) return JSON.stringify(val);
+      },
+      _deserialize: function (val) {
+        if (val != null) return JSON.parse(val);
+      }
+    };
 
     function SavedObject(config) {
       if (!_.isObject(config)) config = {};
@@ -18,18 +27,30 @@ define(function (require) {
        * Initialize config vars
        ************/
       // the doc which is used to store this object
-      var docSource = courier.createSource('doc');
+      var docSource = new DocSource();
 
       // type name for this object, used as the ES-type
       var type = config.type;
 
       // Create a notifier for sending alerts
-      var notify = createNotifier({
+      var notify = new Notifier({
         location: 'Saved ' + type
       });
 
       // mapping definition for the fields that this object will expose
-      var mapping = config.mapping || {};
+      var mapping = _.mapValues(config.mapping || {}, function (val, prop) {
+        // allow shortcuts for the field types, by just setting the value
+        // to the type name
+        if (typeof val === 'string') val = { type: val };
+
+        if (val.type === 'json') {
+          val.type = 'string';
+          val._serialize = json._serialize;
+          val._deserialize = json._deserialize;
+        }
+
+        return val;
+      });
 
       // default field values, assigned when the source is loaded
       var defaults = config.defaults || {};
@@ -38,7 +59,7 @@ define(function (require) {
       var customInit = config.init || _.noop;
 
       // optional search source which this object configures
-      obj.searchSource = config.searchSource && courier.createSource('search');
+      obj.searchSource = config.searchSource && new SearchSource();
 
       // the id of the document
       obj.id = config.id || void 0;
@@ -51,8 +72,6 @@ define(function (require) {
        * @resolved {SavedObject}
        */
       obj.init = _.once(function () {
-        customInit();
-
         // ensure that the type is defined
         if (!type) throw new Error('You must define a type name to use SavedObject objects.');
 
@@ -64,7 +83,7 @@ define(function (require) {
 
         // by default, the search source should inherit from the rootSearch
         if (obj.searchSource) {
-          obj.searchSource.inherits(rootSearch);
+          obj.searchSource.inherits(SavedObject.rootSearch());
         }
 
         // check that the mapping for this type is defined
@@ -72,16 +91,6 @@ define(function (require) {
         .then(function (defined) {
           // if it is already defined skip this step
           if (defined) return true;
-
-          // we need to setup the mapping, flesh it out first
-          var mapping = _.mapValues(mapping, function (val, prop) {
-            // allow shortcuts for the field types, by just setting the value
-            // to the type name
-            if (typeof val !== 'string') return val;
-            return {
-              type: val
-            };
-          });
 
           mapping.kibanaSavedObjectMeta = {
             properties: {
@@ -106,13 +115,20 @@ define(function (require) {
           // fetch the object from ES
           return docSource.fetch()
           .then(function applyESResp(resp) {
-            if (!resp.found) throw new courier.errors.SavedObjectNotFound(type);
+            if (!resp.found) throw new errors.SavedObjectNotFound(type);
 
             var meta = resp._source.kibanaSavedObjectMeta || {};
             delete resp._source.kibanaSavedObjectMeta;
 
             // assign the defaults to the response
             _.defaults(resp._source, defaults);
+
+            // transform the source using _deserializers
+            _.forOwn(mapping, function ittr(fieldMapping, fieldName) {
+              if (fieldMapping._deserialize) {
+                resp._source[fieldName] = fieldMapping._deserialize(resp._source[fieldName], resp, fieldName, fieldMapping);
+              }
+            });
 
             // Give obj all of the values in _source.fields
             _.assign(obj, resp._source);
@@ -134,6 +150,9 @@ define(function (require) {
           });
         })
         .then(function () {
+          return customInit.call(obj);
+        })
+        .then(function () {
           // return our obj as the result of init()
           return obj;
         });
@@ -151,7 +170,9 @@ define(function (require) {
 
         _.forOwn(mapping, function (fieldMapping, fieldName) {
           if (obj[fieldName] != null) {
-            body[fieldName] = obj[fieldName];
+            body[fieldName] = (fieldMapping._serialize)
+              ? fieldMapping._serialize(obj[fieldName])
+              : obj[fieldName];
           }
         });
 
@@ -166,9 +187,11 @@ define(function (require) {
 
         // index the document
         return docSource.doIndex(body).then(function (id) {
-          // ensure that the object has the potentially new id
           obj.id = id;
-          return id;
+        })
+        .then(function () {
+          // ensure that the object has the potentially new id
+          return obj.id;
         });
       };
 
@@ -184,6 +207,12 @@ define(function (require) {
 
     }
 
+    SavedObject.rootSearch = function () {
+      var rootSearch = Private(require('./_root_search'))();
+      SavedObject.rootSearch = function () { return rootSearch; };
+      return rootSearch;
+    };
+
     return SavedObject;
-  });
+  };
 });

@@ -6,7 +6,10 @@ define(function (require, module, exports) {
   require('css!./styles/main.css');
 
   require('filters/start_from');
-  require('./services/index_patterns');
+
+  var sections = require('./sections');
+
+  // each controller will write it's section config to the sections module
   require('./controllers/advanced');
   require('./controllers/indices');
 
@@ -16,31 +19,28 @@ define(function (require, module, exports) {
   })
   .when('/settings/:section/:id?', {
     template: require('text!./index.html'),
-    reloadOnSearch: false
-  });
+    reloadOnSearch: false,
+    resolve: {
+      sectionLocals: function ($route, $location, $injector, Promise) {
+        var section = _.find(sections, { name: $route.current.params.section });
+        if (!section) return $location.url('/settings/');
 
-  var sections = [
-    {
-      name: 'indices',
-      display: 'Indices',
-      url: '#/settings/indices',
-      template: require('text!./partials/indices.html')
-    },
-    {
-      name: 'advanced',
-      display: 'Advanced',
-      url: '#/settings/advanced',
-      template: require('text!./partials/advanced.html')
+        return Promise.props(_.mapValues(section.resolve || {}, function (fn) {
+          return $injector.invoke(fn);
+        }));
+      }
     }
-  ];
+  });
 
   app.directive('settingsApp', function ($route, $location, $compile) {
     return {
       restrict: 'E',
       link: function ($scope, $el) {
-        $scope.sections = sections;
+        $scope.sections = _.sortBy(sections, 'order');
         $scope.section = _.find($scope.sections, { name: $route.current.params.section });
-        if (!$scope.section) return $location.url('/settings');
+
+        // reassign the sectionLocals to the locals object, so that the section's controller can use their own logic
+        _.unwrapProp($route.current.locals, 'sectionLocals');
 
         $scope.sections.forEach(function (section) {
           section.class = (section === $scope.section) ? 'active' : void 0;

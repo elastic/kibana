@@ -1,14 +1,13 @@
 define(function (require) {
   var _ = require('lodash');
-  var module = require('modules').get('kibana/courier');
   var inherits = require('utils/inherits');
 
   var canStack = (function () {
-      var err = new Error();
-      return !!err.stack;
-    }());
+    var err = new Error();
+    return !!err.stack;
+  }());
 
-  module.service('couriersErrors', function () {
+  return function () {
     var errors = this;
 
     // abstract error class
@@ -139,5 +138,15 @@ define(function (require) {
     };
     inherits(errors.SavedObjectNotFound, CourierError);
 
-  });
+    /**
+     * Tried to call a method that relies on SearchSource having an indexPattern assigned
+     */
+    errors.MissingIndexPattern = function MissingIndexPattern(type) {
+      CourierError.call(this,
+        'SearchSource expects index to be an indexPattern',
+        errors.MissingIndexPattern);
+    };
+    inherits(errors.MissingIndexPattern, CourierError);
+
+  };
 });

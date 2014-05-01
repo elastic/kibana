@@ -4,7 +4,7 @@ define(function (require) {
 
   require('./_saved_vis');
 
-  app.service('savedVisualizations', function (es, config, courier, $q, $timeout, SavedVis) {
+  app.service('savedVisualizations', function (es, config, SavedVis) {
     this.get = function (id) {
       return (new SavedVis(id)).init();
     };

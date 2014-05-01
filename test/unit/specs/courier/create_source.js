@@ -1,6 +1,6 @@
 define(function (require) {
-  var SearchSource = require('courier/data_source/search');
-  var DocSource = require('courier/data_source/doc');
+  var SearchSource = require('courier/data_source/search_source');
+  var DocSource = require('courier/data_source/doc_source');
 
   return function extendCourierSuite() {
     inject(function (courier) {
