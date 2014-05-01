@@ -14,47 +14,42 @@ define(function (require) {
   var aggs = require('../saved_visualizations/_aggs');
   var visConfigCategories = require('../saved_visualizations/_config_categories');
 
-  var getVisAndFieldsHash = function (using, savedVisualizations) {
-    return savedVisualizations.get(using)
-    .then(function (vis) {
-      // get the fields before we render, but return the vis
-      return vis.searchSource.getFields()
-      .then(function (fields) {
-        return [vis, fields];
+  var getVisAndFieldsHash = function (savedVisualizations, courier, Notifier, $location, $route) {
+    return function (using) {
+      return savedVisualizations.get(using)
+      .then(function (vis) {
+        // get the fields before we render, but return the vis
+        return vis.searchSource.getFields()
+        .then(function (fields) {
+          return [vis, fields];
+        });
+      })
+      .catch(function (e) {
+        if (e instanceof courier.errors.SavedObjectNotFound) {
+          new Notifier({location: 'Dashboard'}).error(e.message);
+          $location.path('/visualize');
+          $route.reload(); // force $route to be recomputed and prevent the controller from being loaded.
+        } else {
+          throw e;
+        }
       });
-    });
+    };
   };
 
   require('routes')
   .when('/visualize/create', {
     template: require('text!../editor.html'),
     resolve: {
-      visAndFieldsHash: function ($route, savedVisualizations, courier, Notifier, $location) {
-        return getVisAndFieldsHash($route.current.params, savedVisualizations).catch(function (e) {
-          if (e instanceof courier.errors.SavedObjectNotFound) {
-            new Notifier({location: 'Dashboard'}).error(e.message);
-            $location.path('/visualize');
-            return false;
-          } else {
-            throw e;
-          }
-        });
+      visAndFieldsHash: function ($injector, $route) {
+        return $injector.invoke(getVisAndFieldsHash)($route.current.params);
       }
     }
   })
   .when('/visualize/edit/:id', {
     template: require('text!../editor.html'),
     resolve: {
-      visAndFieldsHash: function ($route, savedVisualizations, courier, Notifier, $location) {
-        return getVisAndFieldsHash($route.current.params.id, savedVisualizations).catch(function (e) {
-          if (e instanceof courier.errors.SavedObjectNotFound) {
-            new Notifier({location: 'Dashboard'}).error(e.message);
-            $location.path('/visualize');
-            return false;
-          } else {
-            throw e;
-          }
-        });
+      visAndFieldsHash: function ($injector, $route) {
+        return $injector.invoke(getVisAndFieldsHash)($route.current.params.id);
       }
     }
   });

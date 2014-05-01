@@ -28,10 +28,12 @@ define(function (require) {
     reloadOnSearch: false,
     resolve: {
       savedSearch: function (savedSearches, $route, $location, Notifier, courier) {
-        return savedSearches.get($route.current.params.id).catch(function (e) {
+        return savedSearches.get($route.current.params.id)
+        .catch(function (e) {
           if (e instanceof courier.errors.SavedObjectNotFound) {
             new Notifier({location: 'Dashboard'}).error(e.message);
             $location.path('/discover');
+            $route.reload(); // force $route to be recomputed and prevent the controller from being loaded.
             return false;
           } else {
             throw e;
