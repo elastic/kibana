@@ -12,7 +12,7 @@
             }
         },
         "mapper.dynamic": true,
-        "marvel.index_format": 2
+      "marvel.index_format": 3
     },
     "mappings": {
         "_default_": {
@@ -193,6 +193,15 @@
                 }
             }
         },
+      "cluster_event": {},
+      "shard_event": {
+
+      },
+      "indices_stats": {},
+      "cluster_stats": {},
+      "index_event": {},
+      "node_event": {},
+      "routing_event": {},
         "cluster_state": {
             "properties": {
                 "blocks": {
