@@ -58,13 +58,21 @@ define(function (require) {
 
       // refresh the fields, to verify that the
       $scope.indexPattern.refreshFields()
-      .then(refreshKibanaIndex)
-      .then(function () {
-        $location.path('/settings/indices/' + $scope.indexPattern.id);
-      })
       .catch(function (err) {
-        if (err.status >= 400) notify.error('Could not locate any indices matching that pattern. Please add the index to Elasticsearch');
-        else notify.fatal(err);
+        notify.error(err);
+        delete $scope.indexPattern.id;
+        // rethrow to prevent second branch
+        throw err;
+      })
+      .then(function () {
+        refreshKibanaIndex()
+        .then(function () {
+          $location.path('/settings/indices/' + $scope.indexPattern.id);
+        })
+        .catch(function (err) {
+          if (err.status >= 400) notify.error('Could not locate any indices matching that pattern. Please add the index to Elasticsearch');
+          else notify.fatal(err);
+        });
       });
     };
 
