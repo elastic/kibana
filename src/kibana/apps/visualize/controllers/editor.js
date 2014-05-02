@@ -54,7 +54,7 @@ define(function (require) {
     }
   });
 
-  app.controller('VisualizeEditor', function ($scope, $route, Notifier, config, $location, savedVisualizations, AppState, timefilter) {
+  app.controller('VisualizeEditor', function ($scope, $route, Notifier, $location, globalState, AppState, timefilter) {
     var notify = new Notifier({
       location: 'Visualization Editor'
     });
@@ -129,7 +129,9 @@ define(function (require) {
 
       vis.save()
       .then(function () {
-        $location.url('/visualize/edit/' + vis.id);
+        if (vis.id !== $route.current.params.id) {
+          $location.url(globalState.writeToUrl('/visualize/edit/' + vis.id));
+        }
         configTemplate.close('save');
       }, notify.fatal);
     };
