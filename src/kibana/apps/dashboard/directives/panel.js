@@ -24,7 +24,9 @@ define(function (require) {
             $scope.vis = vis;
             // .destroy() called by the visualize directive
           })
-          .catch(notify.fatal);
+          .catch(function (e) {
+            console.log(e);
+          });
         });
 
         $scope.remove = function () {

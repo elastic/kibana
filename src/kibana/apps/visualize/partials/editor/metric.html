@@ -16,6 +16,6 @@
     class="form-control"
     name="field"
     ng-model="config.field"
-    ng-options="field.name as field.name for field in fields | fieldType:'number'">
+    ng-options="field.name as field.name for field in fields | fieldType:aggs.metricAggsByName[config.agg].types">
   </select>
 </div>

@@ -9,6 +9,7 @@ define(function (require) {
     {
       name: 'count',
       display: 'Count',
+      types: ['number'],
       makeLabel: function (params) {
         return 'Count of documents';
       }
@@ -16,6 +17,7 @@ define(function (require) {
     {
       name: 'avg',
       display: 'Average',
+      types: ['number'],
       makeLabel: function (params) {
         return 'Average ' + params.field;
       }
@@ -23,6 +25,7 @@ define(function (require) {
     {
       name: 'sum',
       display: 'Sum',
+      types: ['number'],
       makeLabel: function (params) {
         return 'Sum of ' + params.field;
       }
@@ -30,6 +33,7 @@ define(function (require) {
     {
       name: 'min',
       display: 'Min',
+      types: ['number'],
       makeLabel: function (params) {
         return 'Min ' + params.field;
       }
@@ -37,10 +41,19 @@ define(function (require) {
     {
       name: 'max',
       display: 'Max',
+      types: ['number'],
       makeLabel: function (params) {
         return 'Max ' + params.field;
       }
-    }
+    },
+    {
+      name: 'cardinality',
+      display: 'Unique count',
+      types: ['*'],
+      makeLabel: function (params) {
+        return 'Unique count of ' + params.field;
+      }
+    },
   ];
   aggs.metricAggsByName = _.indexBy(aggs.metricAggs, 'name');
 
