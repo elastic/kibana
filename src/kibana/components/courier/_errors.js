@@ -141,12 +141,12 @@ define(function (require) {
     /**
      * Tried to call a method that relies on SearchSource having an indexPattern assigned
      */
-    errors.MissingIndexPattern = function MissingIndexPattern(type) {
+    errors.IndexPatternMissingIndices = function IndexPatternMissingIndices(type) {
       CourierError.call(this,
-        'SearchSource expects index to be an indexPattern',
-        errors.MissingIndexPattern);
+        'IndexPattern\'s configured pattern does not match any indices',
+        errors.IndexPatternMissingIndices);
     };
-    inherits(errors.MissingIndexPattern, CourierError);
+    inherits(errors.IndexPatternMissingIndices, CourierError);
 
   };
 });

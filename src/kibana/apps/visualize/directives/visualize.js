@@ -12,6 +12,10 @@ define(function (require) {
       link: function ($scope, $el) {
         var chart; // set in "vis" watcher
 
+        function onHover(event) {
+          console.log(event);
+        }
+
         $scope.$watch('vis', function (vis, prevVis) {
           if (prevVis && prevVis.destroy) prevVis.destroy();
           if (chart) chart.destroy();
@@ -36,8 +40,14 @@ define(function (require) {
           $scope.$root.$broadcast('ready:vis');
         });
 
+        $el.on('hover', onHover);
+        $el.on('click', onHover);
+        // $el.on('hover', onHover);
+
         $scope.$on('$destroy', function () {
           if ($scope.vis) $scope.vis.destroy();
+          $el.off('hover', onHover);
+          $el.off('click', onHover);
         });
       }
     };

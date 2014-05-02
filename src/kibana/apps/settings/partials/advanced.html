@@ -1,60 +1,62 @@
-<div ng-controller="advancedSettings" class="container advanced-settings">
-  <div class="bs-callout bs-callout-warning">
-    <h4>Caution: You can break stuff here</h4>
-    Be careful in here, these setting are for very advanced users only. Tweaks you make here can break large poritions of Kibana.
-    Some of these settings may be undocumented, unsupported or experimental. Blanking a field will cause Kibana to use its internal
-    defaults which may be unacceptable given other configuration directives.
-  </div>
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Value</th>
-        <th>Actions <kbn-info info="'Edit or restore the default value.'"></kbn-info></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr ng-repeat="conf in configs" ng-class="!conf.value ? 'default' : 'custom'">
-        <td class="name">{{conf.name}}</td>
-        <td class="value">
-          <form
-            ng-if="conf.editting"
-            ng-submit="save(conf)">
-            <input
-              ng-model="conf.unsavedValue"
-              ng-keyup="maybeCancel($event, conf)"
-              placeholder="{{conf.value || conf.defVal | json}}"
-              type="text"
-              class="form-control">
-          </form>
-          <span ng-if="!conf.editting" ng-dblclick="edit(conf)">{{conf.value || conf.defVal | json}}</span>
-        </td>
-        <td class="actions">
-          <button
-            ng-if="!conf.editting"
-            ng-click="edit(conf)"
-            class="btn btn-primary"
-            ng-disabled="conf.tooComplex">
-            <i class="fa fa-pencil"></i>
-          </button>
+<kbn-settings-app section="advanced">
+  <kbn-settings-advanced class="container">
+    <div class="bs-callout bs-callout-warning">
+      <h4>Caution: You can break stuff here</h4>
+      Be careful in here, these setting are for very advanced users only. Tweaks you make here can break large poritions of Kibana.
+      Some of these settings may be undocumented, unsupported or experimental. Blanking a field will cause Kibana to use its internal
+      defaults which may be unacceptable given other configuration directives.
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Value</th>
+          <th>Actions <kbn-info info="'Edit or restore the default value.'"></kbn-info></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="conf in configs" ng-class="!conf.value ? 'default' : 'custom'">
+          <td class="name">{{conf.name}}</td>
+          <td class="value">
+            <form
+              ng-if="conf.editting"
+              ng-submit="save(conf)">
+              <input
+                ng-model="conf.unsavedValue"
+                ng-keyup="maybeCancel($event, conf)"
+                placeholder="{{conf.value || conf.defVal | json}}"
+                type="text"
+                class="form-control">
+            </form>
+            <span ng-if="!conf.editting" ng-dblclick="edit(conf)">{{conf.value || conf.defVal | json}}</span>
+          </td>
+          <td class="actions">
+            <button
+              ng-if="!conf.editting"
+              ng-click="edit(conf)"
+              class="btn btn-primary"
+              ng-disabled="conf.tooComplex">
+              <i class="fa fa-pencil"></i>
+            </button>
 
-          <button
-            ng-if="conf.editting"
-            ng-click="save(conf)"
-            class="btn btn-success"
-            ng-disabled="conf.loading || conf.tooComplex">
-            <i ng-if="!conf.loading" class="fa fa-save"></i>
-            <i ng-if="conf.loading" class="fa fa-spinner"></i>
-          </button>
+            <button
+              ng-if="conf.editting"
+              ng-click="save(conf)"
+              class="btn btn-success"
+              ng-disabled="conf.loading || conf.tooComplex">
+              <i ng-if="!conf.loading" class="fa fa-save"></i>
+              <i ng-if="conf.loading" class="fa fa-spinner"></i>
+            </button>
 
-          <button
-            ng-click="clear(conf)"
-            ng-disabled="!conf.value"
-            class="btn btn-danger">
-            <i class="fa fa-trash-o"></i>
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+            <button
+              ng-click="clear(conf)"
+              ng-disabled="!conf.value"
+              class="btn btn-danger">
+              <i class="fa fa-trash-o"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </kbn-settings-advanced>
+</kbn-settings-app>

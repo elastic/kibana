@@ -7114,6 +7114,9 @@ kbn-table th:hover .table-header-move,
 kbn-table th:hover .table-header-sortchange {
   visibility: visible;
 }
+table td .fa {
+  line-height: 1.42857143;
+}
 .sidebar-container {
   padding-left: 0px !important;
   padding-right: 0px !important;
@@ -7145,19 +7148,16 @@ kbn-table th:hover .table-header-sortchange {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.sidebar-container .sidebar-list .sidebar-item .sidebar-item-title {
-  padding: 5px 10px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 .sidebar-container .sidebar-list .sidebar-item .sidebar-item-title.full-title {
   white-space: normal;
 }
 .sidebar-container .sidebar-list .sidebar-item .sidebar-item-title:hover,
-.sidebar-container .sidebar-list .sidebar-item .sidebar-item-title:hover .text-muted,
+.sidebar-container .sidebar-list .sidebar-item .sidebar-item-title:hover .text-muted {
+  color: #46525d;
+  background-color: #cfd9db;
+}
 .sidebar-container .sidebar-list .sidebar-item .active {
-  background-color: #46525d;
+  background-color: #46525d !important;
   color: #ffffff;
 }
 saved-object-finder .form-group {

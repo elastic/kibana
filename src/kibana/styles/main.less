@@ -146,63 +146,17 @@ kbn-table {
 
 }
 
-//== Sidebar
-
-.sidebar-container {
-  padding-left: 0px !important;
-  padding-right: 0px !important;
-  background-color: @well-bg;
-  border-right: 1px solid @well-border;
-  border-bottom: 1px solid @well-border;
-
-  .sidebar-list {
-    ul {
-      list-style: none;
-      margin-bottom: 0px;
-    }
-
-    .sidebar-list-header {
-      padding-left: 10px;
-      color: @navbar-default-color;
-    }
-    .sidebar-item {
-      border-top: 1px solid @well-border;
-      font-size: @font-size-smaller;
-
-      a {
-        color: @text-color;
-
-        &:hover {
-          text-decoration: none;
-        }
-      }
-
-      .sidebar-item-title {
-        padding: 5px 10px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .sidebar-item-title {
-        padding: 5px 10px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-
-        &.full-title {
-          white-space: normal;
-        }
-      }
-
-      .sidebar-item-title:hover, .sidebar-item-title:hover .text-muted, .active {
-        background-color: @component-active-bg;
-        color: @component-active-color;
-      }
-    }
+//== Generic Table
+table {
+  td .fa {
+    // font-awesome's override of the line-height usually doesn't
+    // cauase problems, but in the table it pushes the icon to the
+    // top of the row
+    line-height: @line-height-base;
   }
 }
 
+@import "./_sidebar.less";
 
 //== SavedObjectFinder
 saved-object-finder {

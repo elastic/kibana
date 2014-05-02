@@ -2,41 +2,51 @@ define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
   var deferReady;
-  var when = {};
+  var when = [];
+  var additions = [];
   var otherwise;
   require('services/setup');
+
+  var prepWork = _.once(function ($q, setup, config) {
+    return $q.all([
+      setup.bootstrap(),
+      config.init()
+    ]);
+  });
+
+  var wrapResolvesWithPrepWork = function (resolves) {
+    return _.mapValues(resolves, function (expr, name) {
+      return function ($q, setup, config, $injector) {
+        return prepWork($q, setup, config).then(function () {
+          return $injector[angular.isString(expr) ? 'get': 'invoke'](expr);
+        });
+      };
+    });
+  };
 
   return {
     when: function (path, route) {
       if (route.resolve) {
-        route.resolve = _.mapValues(route.resolve, function (expr, name) {
-          return function ($q, setup, config, $injector) {
-            return $q.all([
-              setup.bootstrap(),
-              config.init()
-            ])
-            .then(function () {
-              return $injector[angular.isString(expr) ? 'get': 'invoke'](expr);
-            });
-          };
-        });
+        route.resolve = wrapResolvesWithPrepWork(route.resolve);
       } else if (!route.redirectTo) {
         route.resolve = {
-          bootstrap: function ($q, setup, config) {
-            return $q.all([
-              setup.bootstrap(),
-              config.init()
-            ]);
+          __prep__: function ($q, setup, config) {
+            return prepWork($q, setup, config);
           }
         };
       }
 
-      if (!route.hasOwnProperty('reloadOnSearch')) {
+      if (route.reloadOnSearch === void 0) {
         route.reloadOnSearch = false;
       }
 
-      when[path] = route;
+      when.push([path, route]);
       return this;
+    },
+    // before attaching the routes to the routeProvider, test the RE
+    // against the .when() path and add/override the resolves if there is a match
+    addResolves: function (RE, additionalResolves) {
+      additions.push([RE, wrapResolvesWithPrepWork(additionalResolves)]);
     },
     otherwise: function (route) {
       otherwise = route;
@@ -45,9 +55,22 @@ define(function (require) {
       return deferReady();
     },
     config: function ($routeProvider, $injector) {
-      _.forOwn(when, function (route, path) {
-        $routeProvider.when(path, route);
+      when.forEach(function (args) {
+        var path = args[0];
+        var route = args[1];
+
+        // currently, all "real" routes have resolves (even if not specifified by the owner)
+        // if they don't it is because they are a redirect
+        if (route.resolve) {
+          // merge in any additions
+          additions.forEach(function (addition) {
+            if (addition[0].test(path)) _.assign(route.resolve, addition[1]);
+          });
+        }
+
+        $routeProvider.when(args[0], args[1]);
       });
+
       if (otherwise) {
         $routeProvider.otherwise(otherwise);
       }

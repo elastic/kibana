@@ -8,7 +8,6 @@ define(function (require) {
 
     var FetchFailure = errors.FetchFailure;
     var RequestFailure = errors.RequestFailure;
-    var MissingIndexPattern = errors.MissingIndexPattern;
 
     function SearchSource(initialState) {
       SourceAbstract.call(this, initialState);

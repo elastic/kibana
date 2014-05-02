@@ -1,0 +1,81 @@
+<kbn-settings-app section="indices">
+  <kbn-settings-indices>
+    <div ng-controller="kbnSettingsIndicesEdit">
+      <div class="page-header">
+        <h1>
+          <i ng-if="defaultIndex === indexPattern.id" class="fa fa-star"></i>
+          {{indexPattern.id}}
+          <button
+            ng-click="setDefaultPattern()"
+            tooltip="Set as default index"
+            class="btn btn-success">
+            <i class="fa fa-star"></i>
+          </button>
+          <button
+            ng-click="indexPattern.refreshFields()"
+            tooltip="Refresh field list"
+            class="btn btn-warning">
+            <i class="fa fa-refresh"></i>
+          </button>
+          <button
+            ng-click="removePattern()"
+            tooltip="Remove index pattern"
+            class="btn btn-danger">
+            <i class="fa fa-ban"></i>
+          </button>
+
+        </h1>
+        This page lists every field in the <strong>{{indexPattern.id}}</strong>
+        index and the field's associated core type as recorded by Elasticsearch
+      </div>
+
+      <div ng-hide="tablePages() == 1">
+        <center>
+          <button
+            ng-disabled="table.page == 0"
+            ng-click="table.page=table.page-1"
+            class="btn btn-sm" >
+            Previous
+          </button>
+          {{table.page+1}}/{{tablePages()}}
+          <button
+            ng-disabled="table.page >= indexPattern.fields.length/table.max - 1"
+            ng-click="table.page=table.page+1"
+            class="btn btn-sm" >
+            Next
+          </button>
+        </center>
+      </div>
+
+      <table class="table" bindonce>
+        <thead>
+          <th ng-click="setFieldSort('name')">name <i ng-class="sortClass('name')"></i></th>
+          <th ng-click="setFieldSort('type')">type <i ng-class="sortClass('type')"></i></th>
+        </thead>
+        <tr
+          ng-repeat="field in indexPattern.fields
+          | orderBy:table.by:table.reverse
+          | startFrom:table.page*table.max
+          | limitTo:table.max">
+          <td bo-text="field.name"></td>
+          <td
+            ng-if="field.type != 'date'"
+            bo-text="field.type">
+          </td>
+          <td
+            ng-if="field.type === 'date'"
+            class="datefield">
+            {{field.type}}
+            <i
+              ng-click="setIndexPatternsTimeField(field)"
+              tooltip="Use this field as the time that event occured"
+              ng-class="{
+                'fa fa-clock-o pull-right': true,
+                'active': indexPattern.timeFieldName === field.name
+              }"></i>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </kbn-settings-indices>
+</kbn-settings-app>
