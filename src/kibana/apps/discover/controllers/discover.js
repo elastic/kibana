@@ -13,7 +13,7 @@ define(function (require) {
   require('directives/timepicker');
   require('directives/fixed_scroll');
   require('filters/moment');
-  require('apps/settings/services/index_patterns');
+  require('courier/courier');
   require('state_management/app_state');
   require('services/timefilter');
 
@@ -40,8 +40,8 @@ define(function (require) {
           }
         });
       },
-      indexPatternList: function (indexPatterns) {
-        return indexPatterns.getIds();
+      indexPatternList: function (courier) {
+        return courier.indexPatterns.getIds();
       }
     }
   });
@@ -261,15 +261,15 @@ define(function (require) {
     }
 
     function setFields() {
-      return searchSource.getFields($scope.opts.index)
-      .then(function (fields) {
+      return courier.getFieldsFor($scope.opts.index)
+      .then(function (rawFields) {
         var currentState = _.transform($scope.fields || [], function (current, field) {
           current[field.name] = {
             display: field.display
           };
         }, {});
 
-        if (!fields) return;
+        if (!rawFields) return;
 
         var columnObjects = arrayToKeys($scope.state.columns);
 
@@ -279,16 +279,10 @@ define(function (require) {
         // Inject source into list;
         $scope.fields.push({name: '_source', type: 'source', display: false});
 
-        _(fields)
-          .keys()
-          .sort()
-          .each(function (name) {
-            var field = fields[name];
-            field.name = name;
-
-            _.defaults(field, currentState[name]);
-            $scope.fields.push(_.defaults(field, {display: columnObjects[name] || false}));
-          });
+        _.sortBy(rawFields, 'name').forEach(function (field) {
+          _.defaults(field, currentState[field.name]);
+          $scope.fields.push(_.defaults(field, {display: columnObjects[name] || false}));
+        });
 
         // TODO: timefield should be associated with the index pattern, this is a hack
         // to pick the first date field and use it.

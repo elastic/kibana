@@ -1,31 +1,17 @@
 define(function (require) {
+  return function fetchService(Private, es, Promise, Notifier, $q) {
+    var _ = require('lodash');
 
-  var module = require('modules').get('kibana/courier');
-  var _ = require('lodash');
+    var docStrategy = require('./strategy/doc');
+    var searchStrategy = require('./strategy/search');
 
-  var docStrategy = require('./strategy/doc');
-  var searchStrategy = require('./strategy/search');
+    var errors = Private(require('../_errors'));
+    var RequestErrorHandler = Private(require('./_request_error_handler'));
+    var pendingRequests = Private(require('../_pending_requests'));
 
-  module.service('couriersFetch', function (es, Promise, couriersErrors, createNotifier, $q) {
-    var notify = createNotifier({
+    var notify = new Notifier({
       location: 'Courier Fetch'
     });
-
-    function RequestErrorHandler(courier) { this._courier = courier; }
-    RequestErrorHandler.prototype.handle = function (req, error) {
-      if (!this._courier) return req.defer.reject(error);
-      this._courier._pendingRequests.push(req);
-      var handlerCount = 0;
-      this._courier._errorHandlers.splice(0).forEach(function (handler) {
-        if (handler.source !== req.source) return this._courier._pendingRequests.push(handler);
-        handler.defer.resolve(error);
-        handlerCount++;
-      });
-      if (!handlerCount) {
-        notify.fatal(new Error('unhandled error ' + (error.stack || error.message)));
-        this._courier.stop();
-      }
-    };
 
     var fetchThese = function (strategy, requests, reqErrHandler) {
       var all, body;
@@ -47,7 +33,7 @@ define(function (require) {
         .then(function (resp) {
           strategy.getResponses(resp).forEach(function (resp) {
             var req = all.shift();
-            if (resp.error) return reqErrHandler.handle(req, new couriersErrors.FetchFailure(resp));
+            if (resp.error) return reqErrHandler.handle(req, new errors.FetchFailure(resp));
             else strategy.resolveRequest(req, resp);
           });
 
@@ -63,10 +49,10 @@ define(function (require) {
       }, notify.fatal);
     };
 
-    var fetchPending = function (strategy, courier) {
-      var requests = strategy.getPendingRequests(courier._pendingRequests);
+    var fetchPending = function (strategy) {
+      var requests = strategy.getPendingRequests(pendingRequests);
       if (!requests.length) return Promise.resolved();
-      else return fetchThese(strategy, requests, new RequestErrorHandler(courier));
+      else return fetchThese(strategy, requests, new RequestErrorHandler());
     };
 
     var fetchASource = function (strategy, source) {
@@ -109,5 +95,5 @@ define(function (require) {
      * @async
      */
     this.search = _.partial(fetchASource, searchStrategy);
-  });
+  };
 });

@@ -1,11 +1,10 @@
 define(function (require) {
-  var module = require('modules').get('kibana/courier');
   var _ = require('lodash');
 
-  module.factory('LocalCache', function () {
+  return function LocalCacheFactory() {
     function LocalCache(opts) {
-
-      var _id = opts.id || _.identity;
+      opts = opts || {};
+      var _id = opts.id || function (o) { return '' + o; };
       var _cache = {};
 
       this.get = function (obj) {
@@ -30,6 +29,8 @@ define(function (require) {
         delete _cache[id];
       };
     }
+
     return LocalCache;
-  });
+  };
+
 });

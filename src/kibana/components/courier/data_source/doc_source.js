@@ -3,25 +3,22 @@ define(function (require) {
 
   var inherits = require('utils/inherits');
 
-  require('./abstract');
+  return function DocSourceFactory(Private, Promise, es) {
+    var errors = Private(require('../_errors'));
+    var sendToEs = Private(require('./_doc_send_to_es'));
+    var SourceAbstract = Private(require('./_abstract'));
 
-  var module = require('modules').get('kibana/courier');
+    var VersionConflict = errors.VersionConflict;
+    var RequestFailure = errors.RequestFailure;
 
-  module.factory('CouriersDocSource', function (couriersErrors, CouriersSourceAbstract, Promise, es, $injector) {
-    var VersionConflict = couriersErrors.VersionConflict;
-    var RequestFailure = couriersErrors.RequestFailure;
-    var sendToEs = $injector.invoke(require('./_doc_send_to_es'));
-
-    function DocSource(courier, initialState) {
-      CouriersSourceAbstract.call(this, courier, initialState);
+    function DocSource(initialState) {
+      SourceAbstract.call(this, initialState);
 
       // move onResults over to onUpdate, because that makes more sense
       this.onUpdate = this.onResults;
       this.onResults = void 0;
-
-      this._sendToEs = sendToEs;
     }
-    inherits(DocSource, CouriersSourceAbstract);
+    inherits(DocSource, SourceAbstract);
 
     /*****
      * PUBLIC API
@@ -46,7 +43,7 @@ define(function (require) {
      */
     DocSource.prototype.doUpdate = function (fields) {
       if (!this._state.id) return this.doIndex(fields);
-      return this._sendToEs(this._courier, 'update', false, { doc: fields });
+      return sendToEs.call(this, 'update', false, { doc: fields });
     };
 
     /**
@@ -55,7 +52,7 @@ define(function (require) {
      * @return {[type]}        [description]
      */
     DocSource.prototype.doIndex = function (body) {
-      return this._sendToEs(this._courier, 'index', false, body);
+      return sendToEs.call(this, 'index', false, body);
     };
 
     /*****
@@ -154,5 +151,5 @@ define(function (require) {
     };
 
     return DocSource;
-  });
+  };
 });

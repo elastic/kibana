@@ -1,8 +1,8 @@
 define(function (require) {
-  var module = require('modules').get('kibana/saved_object');
+  var module = require('modules').get('kibana/directives');
   var _ = require('lodash');
 
-  module.directive('savedObjectFinder', function (savedSearches, savedVisualizations, savedDashboards, indexPatterns, $parse) {
+  module.directive('savedObjectFinder', function (savedSearches, savedVisualizations, savedDashboards) {
     var vars = {
       searches: {
         service: savedSearches,
@@ -16,11 +16,7 @@ define(function (require) {
       dashboards: {
         service: savedDashboards,
         noun: 'Dashboard'
-      },
-      indexPatterns: {
-        service: indexPatterns,
-        noun: 'Index Pattern'
-      },
+      }
     };
 
     return {
@@ -31,7 +27,7 @@ define(function (require) {
         makeUrl: '=?',
         onChoose: '=?'
       },
-      template: require('text!./_finder.html'),
+      template: require('text!../partials/saved_object_finder.html'),
       link: function ($scope, $el) {
         // the text input element
         var $input = $el.find('input[ng-model=filter]');
@@ -158,7 +154,9 @@ define(function (require) {
           };
         }()));
 
-        $scope.$on('$destroy', _.bindKey($input, 'off', 'keydown'));
+        $scope.$on('$destroy', function () {
+          $input.off('keydown');
+        });
 
         function filterResults() {
           if (!service) return;

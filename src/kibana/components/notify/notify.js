@@ -4,7 +4,7 @@ define(function (require) {
   var $ = require('jquery');
   var modules = require('modules');
   var module = modules.get('kibana/notify');
-  var errors = require('./errors');
+  var errors = require('./_errors');
   var Notifier = require('./_notifier');
   var rootNotifier = new Notifier();
 

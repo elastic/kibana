@@ -5,11 +5,10 @@ define(function (require) {
   require('notify/notify');
 
   var module = require('modules').get('discover/saved_searches', [
-    'kibana/notify',
-    'kibana/courier'
+    'kibana/notify'
   ]);
 
-  module.service('savedSearches', function (courier, configFile, es, createNotifier, SavedSearch) {
+  module.service('savedSearches', function (configFile, es, createNotifier, SavedSearch) {
     var notify = createNotifier({
       location: 'Saved Searches'
     });

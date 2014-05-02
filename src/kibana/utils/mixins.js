@@ -38,6 +38,13 @@ define(function (require) {
         });
       }(nestedObj));
       return flatObj;
+    },
+    // assign the properties of an object's subObject to the parent object.
+    // obj = { prop: { a: 1} } ===> obj = { a: 1 }
+    unwrapProp: function (obj, prop) {
+      var wrapped = obj[prop];
+      delete obj[prop];
+      _.assign(obj, wrapped);
     }
   });
 

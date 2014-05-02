@@ -49,7 +49,7 @@ define(function (require) {
       return defer.promise;
     }
 
-    Promise.all = $q.all;
+    Promise.all = Promise.props = $q.all;
     Promise.resolved = function (val) {
       var defer = $q.defer();
       defer.resolve(val);
@@ -69,6 +69,11 @@ define(function (require) {
     };
     Promise.map = function (arr, fn) {
       return Promise.all(arr.map(fn));
+    };
+    Promise.is = function (obj) {
+      // $q doesn't create instances of any constructor, promises are just objects with a then function
+      // https://github.com/angular/angular.js/blob/58f5da86645990ef984353418cd1ed83213b111e/src/ng/q.js#L335
+      return obj && typeof obj.then === 'function';
     };
 
     /**

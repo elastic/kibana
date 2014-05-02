@@ -6,11 +6,9 @@ define(function (require) {
   var aggs = require('./_aggs');
   var typeDefs = require('./_type_defs');
 
-  require('services/root_search');
-
   var module = require('modules').get('kibana/services');
 
-  module.factory('SavedVis', function (config, $injector, SavedObject, rootSearch, Promise, savedSearches) {
+  module.factory('SavedVis', function (config, $injector, courier, Promise, savedSearches) {
     function SavedVis(opts) {
       var vis = this;
       opts = opts || {};
@@ -21,10 +19,10 @@ define(function (require) {
         };
       }
 
-      var typeDef = typeDefs.byName[opts.type];
-      var parentSearch = opts.parentSearchSource || rootSearch;
+      var typeDef;
+      var parentSearch = opts.parentSearchSource || courier.SavedObject.rootSearch();
 
-      SavedObject.call(vis, {
+      courier.SavedObject.call(vis, {
         type: 'visualization',
 
         id: opts.id,
@@ -46,12 +44,6 @@ define(function (require) {
         },
 
         searchSource: true,
-
-        init: function () {
-          configCats.forEach(function (category) {
-            vis._initConfigCategory(category);
-          });
-        },
 
         afterESResp: function setVisState() {
           if (!typeDef || vis.typeName !== typeDef.name) {
@@ -96,7 +88,7 @@ define(function (require) {
 
             vis._fillConfigsToMinimum();
             // get and cache the field list
-            return vis.searchSource.getFields();
+            return courier.getFieldsFor(vis.searchSource.get('index'));
           })
           .then(function () {
             return vis;
@@ -212,7 +204,7 @@ define(function (require) {
        */
       vis.buildChartDataFromResponse = $injector.invoke(require('./_build_chart_data'));
     }
-    inherits(SavedVis, SavedObject);
+    inherits(SavedVis, courier.SavedObject);
 
     return SavedVis;
   });
