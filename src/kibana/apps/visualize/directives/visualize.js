@@ -5,12 +5,13 @@ define(function (require) {
   require('css!../styles/visualization.css');
 
   var module = require('modules').get('kibana/directive');
-  var chart; // set in "vis" watcher
 
   module.directive('visualize', function (createNotifier) {
     return {
       restrict: 'E',
       link: function ($scope, $el) {
+        var chart; // set in "vis" watcher
+
         $scope.$watch('vis', function (vis, prevVis) {
           if (prevVis) prevVis.destroy();
           if (chart) chart.destroy();
