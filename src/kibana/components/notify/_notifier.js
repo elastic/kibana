@@ -1,7 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
-  var createStackTrace = require('stacktrace');
 
   var notifs = [];
   var setTO = setTimeout;
@@ -63,18 +62,6 @@ define(function (require) {
     }
 
     return rtn;
-  }
-
-  function formatStack(err) {
-    if (!err) return null;
-
-    if (err.stack) return err.stack;
-
-    var isError = (err instanceof Error);
-    var stack = createStackTrace({ e: isError ? err : void 0 });
-    var msg = isError ? err.message : err;
-
-    return msg + '\n' + stack.map(function (line) { return '  ' + line; }).join('\n');
   }
 
   /**
@@ -157,7 +144,7 @@ define(function (require) {
   Notifier.prototype.fatal = function (err) {
     var html = fatalToastTemplate({
       msg: formatMsg(err, this.from),
-      stack: formatStack(err)
+      stack: err.stack
     });
 
     var $container = $('#fatal-splash-screen');
@@ -172,6 +159,8 @@ define(function (require) {
       .html('<div id="fatal-splash-screen" class="container-fuild">' + html + '</div>');
 
     console.error(err.stack);
+
+    throw err;
   };
 
   /**
@@ -186,7 +175,7 @@ define(function (require) {
       title: 'Error',
       lifetime: Infinity,
       actions: ['report', 'accept'],
-      stack: formatStack(err)
+      stack: err.stack
     }, cb);
   };
 

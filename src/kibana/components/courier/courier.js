@@ -1,32 +1,27 @@
 define(function (require) {
-  var _ = require('lodash');
-
   require('services/es');
   require('services/promises');
 
-  var module = require('modules').get('kibana/courier');
-
-  module.service('courier', function ($rootScope, Private, Promise) {
-    var DocSource = Private(require('./data_source/doc_source'));
-    var SearchSource = Private(require('./data_source/search_source'));
-
-    var SavedObject = Private(require('./saved_object/saved_object'));
-
-    var errors = Private(require('./_errors'));
-    var pendingRequests = Private(require('./_pending_requests'));
-    var searchLooper = Private(require('./looper/search'));
-    var docLooper = Private(require('./looper/doc'));
-    var indexPatterns = Private(require('./index_patterns/index_patterns'));
-
-    var HastyRefresh = errors.HastyRefresh;
-
+  require('modules').get('kibana/courier')
+  .service('courier', function ($rootScope, Private, Promise) {
     function Courier() {
       var courier = this;
 
+      var DocSource = Private(require('./data_source/doc_source'));
+      var SearchSource = Private(require('./data_source/search_source'));
+
+      var pendingRequests = Private(require('./_pending_requests'));
+      var searchLooper = Private(require('./looper/search'));
+      var docLooper = Private(require('./looper/doc'));
+
       // expose some internal modules
-      courier.errors = errors;
-      courier.SavedObject = SavedObject;
-      courier.indexPatterns = indexPatterns;
+      courier.errors = Private(require('./_errors'));
+      courier.SavedObject = Private(require('./saved_object/saved_object'));
+      courier.indexPatterns = Private(require('./index_patterns/index_patterns'));
+      courier.redirectWhenMissing = Private(require('./_redirect_when_missing'));
+
+      var HastyRefresh = courier.errors.HastyRefresh;
+      var Abort = courier.errors.Abort;
 
       /**
        * update the time between automatic search requests
@@ -95,17 +90,8 @@ define(function (require) {
       };
 
       courier.getFieldsFor = function (indexish) {
-        return indexPatterns.getFieldsFor(indexish);
+        return courier.indexPatterns.getFieldsFor(indexish);
       };
-
-      /**
-       * Creates an error handler that will redirect to a url when a SavedObjectNotFound
-       * error is thrown
-       *
-       * @param  {string} url - the url to redirect to
-       * @return {function} - the handler to pass to .catch()
-       */
-      courier.redirectWhenMissing = Private(require('./_redirect_when_missing'));
 
       /**
        * Abort all pending requests
@@ -117,7 +103,7 @@ define(function (require) {
 
         [].concat(pendingRequests.splice(0), this._errorHandlers.splice(0))
         .forEach(function (req) {
-          req.defer.reject(new errors.Abort());
+          req.defer.reject(new Abort());
         });
 
         if (pendingRequests.length) {
