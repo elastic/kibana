@@ -882,66 +882,72 @@ define([
 
 
       function getCompletions(aceEditor, session, pos, prefix, callback) {
+        try {
 
-
-        var context = getAutoCompleteContext(editor, session, pos);
-        if (!context) {
-          callback(null, []);
-        }
-        else {
-          var terms = _.map(context.autoCompleteSet, function (term) {
-            if (typeof term !== "object") {
-              term = {
-                name: term
-              }
-            }
-
-            return _.defaults(term, {
-              value: term.name,
-              meta: "API",
-              score: 0,
-              context: context,
-              completer: {
-                insertMatch: function () {
-                  applyTerm(term);
+          var context = getAutoCompleteContext(editor, session, pos);
+          if (!context) {
+            callback(null, []);
+          }
+          else {
+            var terms = _.map(context.autoCompleteSet, function (term) {
+              if (typeof term !== "object") {
+                term = {
+                  name: term
                 }
               }
+
+              return _.defaults(term, {
+                value: term.name,
+                meta: "API",
+                score: 0,
+                context: context,
+                completer: {
+                  insertMatch: function () {
+                    applyTerm(term);
+                  }
+                }
+              });
             });
-          });
 
-          terms.sort(function (t1, t2) {
-            /* score sorts from high to low */
-            if (t1.score > t2.score) {
-              return -1;
-            }
-            if (t1.score < t2.score) {
+            terms.sort(function (t1, t2) {
+              /* score sorts from high to low */
+              if (t1.score > t2.score) {
+                return -1;
+              }
+              if (t1.score < t2.score) {
+                return 1;
+              }
+              /* names sort from low to high */
+              if (t1.name < t2.name) {
+                return -1;
+              }
+              if (t1.name === t2.name) {
+                return 0;
+              }
               return 1;
-            }
-            /* names sort from low to high */
-            if (t1.name < t2.name) {
-              return -1;
-            }
-            if (t1.name === t2.name) {
-              return 0;
-            }
-            return 1;
-          });
+            });
 
-          callback(null, _.map(terms, function (t, i) {
-            t.insert_value = t.insert_value || t.value;
-            t.value = '' + t.value; // normalize to strings
-            t.score = -i;
-            return t;
-          }));
+            callback(null, _.map(terms, function (t, i) {
+              t.insert_value = t.insert_value || t.value;
+              t.value = '' + t.value; // normalize to strings
+              t.score = -i;
+              return t;
+            }));
+          }
+        }
+        catch (e) {
+          callback(e, null);
         }
       }
+
 
       addChangeListener();
 
       // Hook into Ace
 
       // disable standard context based autocompletion.
-      ace.define('ace/autocomplete/text_completer', ['require', 'exports', 'module'], function (require, exports, module) {
+      ace.define('ace/autocomplete/text_completer', ['require', 'exports', 'module'], function (require, exports,
+                                                                                                module) {
         exports.getCompletions = function (editor, session, pos, prefix, callback) {
           callback(null, []);
         }

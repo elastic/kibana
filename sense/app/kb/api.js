@@ -25,8 +25,12 @@ define([ '_', 'exports', 'autocomplete/url_pattern_matcher', 'autocomplete/url_p
             "GLOBAL." + parentNode, rules, this.globalBodyComponentFactories);
       };
 
-      cls.getGlobalAutocompleteComponents = function (term) {
-        return this.globalRules[term];
+      cls.getGlobalAutocompleteComponents = function (term, throwOnMissing) {
+        var result = this.globalRules[term];
+        if (_.isUndefined(result) && (throwOnMissing || _.isUndefined(throwOnMissing))) {
+          throw new Error("failed to resolve global components for  ['" + term + "']");
+        }
+        return result;
       };
 
       cls.addEndpointDescription = function (endpoint, description) {

@@ -179,7 +179,7 @@ define([
       });
 
       // try to link to GLOBAL rules
-      var globalRules = context.globalComponentResolver(token);
+      var globalRules = context.globalComponentResolver(token, false);
       if (globalRules) {
         result.next.push.apply(result.next, globalRules);
       }
@@ -214,7 +214,12 @@ define([
     engine.SharedComponent.call(this, "__scope_link", parent);
     if (_.isString(link) && link[0] === ".") {
       // relative link, inject current endpoint
-      link = compilingContext.endpoint_id + link;
+      if (link === ".") {
+        link = compilingContext.endpoint_id;
+      }
+      else {
+        link = compilingContext.endpoint_id + link;
+      }
     }
     this.link = link;
     this.compilingContext = compilingContext;
@@ -236,21 +241,26 @@ define([
         throw new Error("unsupported link format", this.link);
       }
 
-      var path = this.link.replace(".", "{").split(/(\{)/);
+      var path = this.link.replace(/\./g, "{").split(/(\{)/);
       var endpoint = path[0];
       var components;
-      if (endpoint === "GLOBAL") {
-        // global rules need an extra indirection
-        if (path.length < 3) {
-          throw new Error("missing term in global link: " + this.link);
+      try {
+        if (endpoint === "GLOBAL") {
+          // global rules need an extra indirection
+          if (path.length < 3) {
+            throw new Error("missing term in global link: " + this.link);
+          }
+          var term = path[2];
+          components = context.globalComponentResolver(term);
+          path = path.slice(3);
         }
-        var term = path[2];
-        components = context.globalComponentResolver(term);
-        path = path.slice(3);
+        else {
+          path = path.slice(1);
+          components = context.endpointComponentResolver(endpoint);
+        }
       }
-      else {
-        path = path.slice(1);
-        components = context.endpointComponentResolver(endpoint);
+      catch (e) {
+        throw new Error("failed to resolve link [" + this.link + "]: " + e);
       }
       return engine.resolvePathToComponents(path, context, editor, components);
     };
@@ -302,7 +312,7 @@ define([
       };
 
       // try to link to GLOBAL rules
-      var globalRules = context.globalComponentResolver(token);
+      var globalRules = context.globalComponentResolver(token, false);
       if (globalRules) {
         result.next.push.apply(result.next, globalRules);
       }

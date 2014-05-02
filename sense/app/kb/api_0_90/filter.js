@@ -331,7 +331,7 @@ define(function () {
 
 
   filters.query = {
-    __scope_link: '.query'
+    // global
   };
 
 
@@ -341,7 +341,7 @@ define(function () {
       _cache: true
     },
     query: {
-      __scope_link: '.query'
+      // global
     },
     _cache: {
       __one_of: [true, false]

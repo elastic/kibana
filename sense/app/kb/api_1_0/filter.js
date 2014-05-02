@@ -11,7 +11,7 @@ define(function () {
     },
     filters: [
       {
-        __scope_link: '.filter'
+        __scope_link: '.'
       }
     ],
     _cache: {
@@ -23,17 +23,17 @@ define(function () {
   filters.bool = {
     must: [
       {
-        __scope_link: '.filter'
+        __scope_link: '.'
       }
     ],
     must_not: [
       {
-        __scope_link: '.filter'
+        __scope_link: '.'
       }
     ],
     should: [
       {
-        __scope_link: '.filter'
+        __scope_link: '.'
       }
     ],
     _cache: {
@@ -274,7 +274,6 @@ define(function () {
       filter: {}
     },
     filter: {
-      __scope_link: '.filter'
     },
     _cache: {
       __one_of: [true, false]
@@ -310,7 +309,7 @@ define(function () {
     },
     filters: [
       {
-        __scope_link: '.filter'
+        __scope_link: '.'
       }
     ],
     _cache: {
@@ -331,7 +330,7 @@ define(function () {
 
 
   filters.query = {
-    __scope_link: '.query'
+    // global query
   };
 
 
@@ -341,7 +340,7 @@ define(function () {
       _cache: true
     },
     query: {
-      __scope_link: '.query'
+      //global query
     },
     _cache: {
       __one_of: [true, false]

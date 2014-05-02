@@ -195,8 +195,8 @@ define([
       return ACTIVE_API.getTopLevelUrlCompleteComponents();
     }
 
-    function getGlobalAutocompleteComponents(term) {
-      return ACTIVE_API.getGlobalAutocompleteComponents(term);
+    function getGlobalAutocompleteComponents(term, throwOnMissing) {
+      return ACTIVE_API.getGlobalAutocompleteComponents(term, throwOnMissing);
     }
 
     function setActiveApi(api) {

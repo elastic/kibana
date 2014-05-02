@@ -4,19 +4,19 @@ define(["_"], function (_) {
   var SPAN_QUERIES = {
     // TODO add one_of for objects
     span_first: {
-      __scope_link: '.query.span_first'
+      __scope_link: '.span_first'
     },
     span_near: {
-      __scope_link: '.query.span_near'
+      __scope_link: '.span_near'
     },
     span_or: {
-      __scope_link: '.query.span_or'
+      __scope_link: '.span_or'
     },
     span_not: {
-      __scope_link: '.query.span_not'
+      __scope_link: '.span_not'
     },
     span_term: {
-      __scope_link: '.query.span_term'
+      __scope_link: '.span_term'
     }
   };
 
@@ -122,17 +122,17 @@ define(["_"], function (_) {
       bool: {
         must: [
           {
-            __scope_link: 'GLOBAL.query'
+            __scope_link: '.'
           }
         ],
         must_not: [
           {
-            __scope_link: 'GLOBAL.query'
+            __scope_link: '.'
           }
         ],
         should: [
           {
-            __scope_link: 'GLOBAL.query'
+            __scope_link: '.'
           }
         ],
         minimum_number_should_match: 1,
@@ -140,10 +140,10 @@ define(["_"], function (_) {
       },
       boosting: {
         positive: {
-          __scope_link: '.query'
+          __scope_link: '.'
         },
         negative: {
-          __scope_link: '.query'
+          __scope_link: '.'
         },
         negative_boost: 0.2
       },
@@ -188,7 +188,7 @@ define(["_"], function (_) {
         boost: 1.2,
         queries: [
           {
-            __scope_link: '.query'
+            __scope_link: '.'
           }
         ]
       },
@@ -216,7 +216,7 @@ define(["_"], function (_) {
         max_query_terms: 12
       },
       flt: {
-        __scope_link: '.query.fuzzy_like_this'
+        __scope_link: '.fuzzy_like_this'
       },
       fuzzy: {
         '{field}': {
@@ -531,7 +531,7 @@ define(["_"], function (_) {
         indices: ['{index}'],
         query: {},
         no_match_query: {
-          __scope_link: '.query'
+          __scope_link: '.'
         }
       },
       geo_shape: {

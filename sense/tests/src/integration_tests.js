@@ -65,8 +65,20 @@ define([
             changeListener: function () {
             }
           }; // mimic auto complete
+
           input.autocomplete._test.getCompletions(input, input.getSession(), test.cursor, "",
             function (err, terms) {
+
+              if (test.assertThrows) {
+                ok(test.assertThrows.test("" + err), "failed to throw expected exception");
+                start();
+                return;
+              }
+
+              if (err) {
+                throw err;
+              }
+
 
               if (test.no_context) {
                 ok(!terms || terms.length === 0, "Expected no context bug got terms.");
@@ -635,19 +647,25 @@ define([
       "a": {
         "b": {},
         "c": {},
-        "d": {},
+        "d": {
+          t1a: {}
+        },
         "e": {},
         "f": [
           {}
         ],
-        "g": {}
+        "g": {},
+        "h": {}
       }
     },
     MAPPING,
     {
       globals: {
         gtarget: {
-          t1: 2
+          t1: 2,
+          t1a: {
+            __scope_link: "."
+          }
         }
       },
       endpoints: {
@@ -679,6 +697,9 @@ define([
                     "b": 2
                   }
                 }
+              },
+              "h": {
+                __scope_link: "GLOBAL.broken"
               }
             }
           }
@@ -701,7 +722,7 @@ define([
         autoCompleteSet: [
           tt("b", {}), tt("c", {}), tt("d", {}), tt("e", {}), tt("f", [
             {}
-          ]), tt("g", {})
+          ]), tt("g", {}), tt("h", {})
         ]
       },
       {
@@ -712,22 +733,33 @@ define([
       {
         name: "Global scope link test",
         cursor: { row: 4, column: 12},
-        autoCompleteSet: [tt("t1", 2)]
+        autoCompleteSet: [tt("t1", 2), tt("t1a", {})]
+      },
+      {
+        name: "Global scope link with an internal scope link",
+        cursor: { row: 5, column: 17},
+        autoCompleteSet: [tt("t1", 2), tt("t1a", {})]
       },
       {
         name: "Entire endpoint scope link test",
-        cursor: { row: 5, column: 12},
+        cursor: { row: 7, column: 12},
         autoCompleteSet: [tt("target", {})]
       },
       {
         name: "A scope link within an array",
-        cursor: { row: 7, column: 10},
+        cursor: { row: 9, column: 10},
         autoCompleteSet: [tt("t2", 1)]
       },
       {
         name: "A function based scope link",
-        cursor: { row: 9, column: 12},
+        cursor: { row: 11, column: 12},
         autoCompleteSet: [tt("a", 1), tt("b", 2)]
+      },
+      {
+        name: "A global scope link with wrong link",
+        cursor: { row: 12, column: 12},
+        assertThrows: /broken/
+
       }
     ]
   );
