@@ -317,7 +317,7 @@ define([
             });
           })
         });
-        _.uniq(autoCompleteSet, false);
+        autoCompleteSet = _.uniq(autoCompleteSet, false);
         context.autoCompleteSet = autoCompleteSet;
       }
 
