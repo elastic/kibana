@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "description": "Kibana TNG",
   "main": "Gulpfile.js",
-  "dependencies": {},
+  "dependencies": {
+    "elasticsearch": "git://github.com/elasticsearch/elasticsearch-js.git#master"
+  },
   "devDependencies": {
     "lodash": "~2.4.1",
     "expect.js": "~0.2.0",
