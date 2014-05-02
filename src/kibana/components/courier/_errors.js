@@ -87,7 +87,7 @@ define(function (require) {
      */
     errors.MappingConflict = function MappingConflict(field) {
       CourierError.call(this,
-        'Field ' + field + ' is defined as at least two different types in indices matching the pattern',
+        'Field "' + field + '" is defined with at least two different types in indices matching the pattern',
         errors.MappingConflict);
     };
     inherits(errors.MappingConflict, CourierError);
