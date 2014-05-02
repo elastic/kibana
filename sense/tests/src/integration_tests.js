@@ -490,8 +490,12 @@ define([
     ]
   );
 
-  function tt(term, template) {
-    return { name: term, template: template };
+  function tt(term, template, meta) {
+    var term = { name: term, template: template };
+    if (meta) {
+      term.meta = meta;
+    }
+    return term
   }
 
   context_tests(
@@ -900,12 +904,15 @@ define([
       {
         name: "Field completion as scope",
         cursor: { row: 3, column: 10},
-        autoCompleteSet: [tt("field1.1.1", { "f": 1}), tt("field1.1.2", { "f": 1})]
+        autoCompleteSet: [tt("field1.1.1", { "f": 1}, "string"), tt("field1.1.2", { "f": 1}, "string")]
       },
       {
         name: "Field completion as value",
         cursor: { row: 9, column: 23},
-        autoCompleteSet: ["field1.1.1", "field1.1.2"]
+        autoCompleteSet: [
+          { name: "field1.1.1", meta: "string" },
+          {name: "field1.1.2", meta: "string"}
+        ]
       }
     ]
   );

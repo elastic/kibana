@@ -22,7 +22,7 @@ define([
       "type1.1": {
         "properties": {
           "field1.1.1": { "type": "string" },
-          "field1.1.2": { "type": "string" }
+          "field1.1.2": { "type": "long" }
         }
       },
       "type1.2": {
@@ -40,7 +40,7 @@ define([
     }
   };
 
-  function testContext(tokenPath, otherTokenValues, expectedContext) {
+  function testUrlContext(tokenPath, otherTokenValues, expectedContext) {
 
     if (expectedContext.autoCompleteSet) {
       expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function (t) {
@@ -104,7 +104,7 @@ define([
       kb.setActiveApi(test_api);
 
       mappings.loadMappings(MAPPING);
-      testContext(tokenPath, otherTokenValues, expectedContext);
+      testUrlContext(tokenPath, otherTokenValues, expectedContext);
     });
   }
 
@@ -144,7 +144,7 @@ define([
 
       mappings.loadMappings(MAPPING);
 
-      testContext(tokenPath, otherTokenValues, expectedContext);
+      testUrlContext(tokenPath, otherTokenValues, expectedContext);
 
     });
   }

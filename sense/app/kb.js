@@ -73,7 +73,9 @@ define([
     })(TypeAutocompleteComponent.prototype);
 
     function FieldGenerator(context) {
-      return mappings.getFields(context.indices, context.types);
+      return _.map(mappings.getFields(context.indices, context.types), function (field) {
+        return { name: field.name, meta: field.type };
+      });
     }
 
     function FieldAutocompleteComponent(name, parent, multi_valued) {
