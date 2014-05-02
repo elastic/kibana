@@ -54,7 +54,7 @@ define(function (require) {
       notify.lifecycle('config init');
       return setup.bootstrap().then(function getDoc() {
         return doc.fetch().then(function initDoc(resp) {
-          if (!resp.found) return doc.doIndex({}).then(initDoc);
+          if (!resp.found) return doc.doIndex({}).then(getDoc);
           else {
             vals = _.cloneDeep(resp._source || {});
 
