@@ -11,7 +11,10 @@ define(function (require) {
     template: require('text!../partials/advanced.html'),
     resolve: {
       noId: function ($route, $location) {
-        if ($route.current.params.id) $location.url('/settings/advanced');
+        if ($route.current.params.id) {
+          $location.url('/settings/advanced');
+          $route.reload();
+        }
       }
     }
   });

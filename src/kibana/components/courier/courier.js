@@ -99,6 +99,15 @@ define(function (require) {
       };
 
       /**
+       * Creates an error handler that will redirect to a url when a SavedObjectNotFound
+       * error is thrown
+       *
+       * @param  {string} url - the url to redirect to
+       * @return {function} - the handler to pass to .catch()
+       */
+      courier.redirectWhenMissing = Private(require('./_redirect_when_missing'));
+
+      /**
        * Abort all pending requests
        * @return {[type]} [description]
        */
