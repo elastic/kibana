@@ -45,6 +45,16 @@ define(function (require) {
       var wrapped = obj[prop];
       delete obj[prop];
       _.assign(obj, wrapped);
+    },
+    optMemoize: function (fn) {
+      var memo = _.memoize(fn);
+      return function () {
+        if (arguments[0] == null) {
+          return fn.apply(this, arguments);
+        } else {
+          return memo.apply(this, arguments);
+        }
+      };
     }
   });
 

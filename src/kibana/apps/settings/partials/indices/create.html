@@ -1,0 +1,21 @@
+<kbn-settings-app section="indices">
+  <kbn-settings-indices>
+    <div ng-controller="kbnSettingsIndicesCreate">
+      <div class="page-header">
+        <h1>Configure an index pattern</h1>
+        In order to use Kibana you must configure at least one index pattern. Index patterns are
+        used to identify the Elasticsearch index to run search and analytics against. They are also
+        used to configure fields.
+      </div>
+      <form name="form" role="form" class="well" ng-submit="create()">
+        <div class="form-group">
+          <label>Index Name <small>or pattern</small></label>
+          <input type="text" class="form-control" placeholder="Enter index name"
+            ng-model="newIndexPattern" required>
+        </div>
+        <button type="submit" class="btn btn-primary"
+          ng-disabled="form.$invalid">Create</button>
+      </form>
+    </div>
+  </kbn-settings-indices>
+</kbn-settings-app>

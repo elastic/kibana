@@ -2,6 +2,14 @@
 @import (reference) "../../../styles/theme/_theme.less";
 @import (reference) "../../../styles/_variables.less";
 
+kibana-settings-app,
+kbn-settings-indices,
+kbn-settings-indices-edit,
+kbn-settings-indices-create,
+kbn-settings-advanced {
+  display: block;
+}
+
 .settings-nav {
   text-transform: capitalize;
 }
@@ -20,6 +28,17 @@
       &.actions {
         width: 150px;
       }
+    }
+  }
+}
+
+.indices-settings {
+  .datefield{
+    i {
+      color: @btn-link-disabled-color;
+    }
+    .active {
+      color: @btn-success-bg;
     }
   }
 }

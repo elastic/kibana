@@ -69,6 +69,13 @@
 .modal-footer:after {
   clear: both;
 }
+kibana-settings-app,
+kbn-settings-indices,
+kbn-settings-indices-edit,
+kbn-settings-indices-create,
+kbn-settings-advanced {
+  display: block;
+}
 .settings-nav {
   text-transform: capitalize;
 }
@@ -83,4 +90,10 @@
 }
 .advanced-settings table td.actions {
   width: 150px;
+}
+.indices-settings .datefield i {
+  color: #b4bcc2;
+}
+.indices-settings .datefield .active {
+  color: #31c471;
 }

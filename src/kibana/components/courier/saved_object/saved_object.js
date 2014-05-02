@@ -1,7 +1,8 @@
 define(function (require) {
-  var _ = require('lodash');
-
   return function SavedObjectFactory(configFile, Promise, Private, Notifier) {
+    var angular = require('angular');
+    var _ = require('lodash');
+
     var DocSource = Private(require('../data_source/doc_source'));
     var SearchSource = Private(require('../data_source/search_source'));
 
@@ -10,7 +11,7 @@ define(function (require) {
 
     var json = {
       _serialize: function (val) {
-        if (val != null) return JSON.stringify(val);
+        if (val != null) return angular.toJson(val);
       },
       _deserialize: function (val) {
         if (val != null) return JSON.parse(val);

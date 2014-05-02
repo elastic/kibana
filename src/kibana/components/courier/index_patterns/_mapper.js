@@ -2,16 +2,9 @@ define(function (require) {
   var _ = require('lodash');
 
   return function MapperService(Private, Promise, es, configFile) {
-    var errors = Private(require('../_errors'));
-
-    var CacheWriteFailure = errors.CacheWriteFailure;
-    var MappingConflict = errors.MappingConflict;
-    var RestrictedMapping = errors.RestrictedMapping;
-    var FieldNotFoundInCache = errors.FieldNotFoundInCache;
-
-    // private function
+    var IndexPatternMissingIndices = Private(require('../_errors')).IndexPatternMissingIndices;
     var transformMappingIntoFields = Private(require('./_transform_mapping_into_fields'));
-    // private factory
+
     var LocalCache = Private(require('./_local_cache'));
 
     function Mapper() {
@@ -36,6 +29,15 @@ define(function (require) {
           // TODO: Change index to be the resolved in some way, last three months, last hour, last year, whatever
           index: indexPattern,
           field: '*',
+        })
+        .catch(function (err) {
+          if (err.status >= 400) {
+            // transform specific error type
+            throw new IndexPatternMissingIndices();
+          } else {
+            // rethrow all others
+            throw err;
+          }
         })
         .then(transformMappingIntoFields)
         .then(function (fields) {

@@ -7,10 +7,11 @@ define(function (require) {
     var SourceAbstract = Private(require('../data_source/_abstract'));
 
     var mapper = Private(require('./_mapper'));
+    var errors = Private(require('../_errors'));
 
     var notify = new Notifier({ location: 'IndexPatterns Service'});
 
-    indexPatterns.get = _.memoize(function (id) {
+    indexPatterns.get = _.optMemoize(function (id) {
       return (new IndexPattern(id)).init();
     });
 
@@ -50,6 +51,10 @@ define(function (require) {
       .then(function (indexPattern) {
         return indexPattern.fields;
       });
+    };
+
+    indexPatterns.errors = {
+      MissingIndices: errors.IndexPatternMissingIndices
     };
   };
 });
