@@ -1,6 +1,0 @@
-Domain Public by Eric Wendelin http://eriwen.com/ (2008)
-                 Luke Smith http://lucassmith.name/ (2008)
-                 Loic Dachary <loic@dachary.org> (2008)
-                 Johan Euphrosine <proppy@aminche.com> (2008)
-                 Oyvind Sean Kinsey http://kinsey.no/blog (2010)
-                 Victor Homyakov <victor-homyakov@users.sourceforge.net> (2010)
