@@ -36,16 +36,8 @@ define(function (require) {
     templateUrl: 'kibana/apps/dashboard/index.html',
     resolve: {
       dash: function (savedDashboards, Notifier, $route, $location, courier) {
-        return savedDashboards.get($route.current.params.id).catch(function (e) {
-          if (e instanceof courier.errors.SavedObjectNotFound) {
-            new Notifier({location: 'Dashboard'}).error(e.message);
-            $location.path('/dashboard');
-            $route.reload(); // force $route to be recomputed and prevent the controller from being loaded.
-            return false;
-          } else {
-            throw e;
-          }
-        });
+        return savedDashboards.get($route.current.params.id)
+        .catch(courier.redirectWhenMissing('/dashboard'));
       }
     }
   });

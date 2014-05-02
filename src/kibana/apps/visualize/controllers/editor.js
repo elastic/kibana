@@ -17,21 +17,13 @@ define(function (require) {
   var getVisAndFields = function (savedVisualizations, courier, Notifier, $location, $route) {
     return function (using) {
       return savedVisualizations.get(using)
+      .catch(courier.redirectWhenMissing('/visualize'))
       .then(function (vis) {
         // get the fields before we render, but return the vis
         return courier.getFieldsFor(vis.searchSource)
         .then(function (fields) {
           return [vis, fields];
         });
-      })
-      .catch(function (e) {
-        if (e instanceof courier.errors.SavedObjectNotFound) {
-          new Notifier({location: 'Dashboard'}).error(e.message);
-          $location.path('/visualize');
-          $route.reload(); // force $route to be recomputed and prevent the controller from being loaded.
-        } else {
-          throw e;
-        }
       });
     };
   };
