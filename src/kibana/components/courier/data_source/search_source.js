@@ -2,19 +2,18 @@ define(function (require) {
   var inherits = require('utils/inherits');
   var _ = require('lodash');
 
-  require('./abstract');
+  return function SearchSourceFactory(Promise, Private) {
+    var errors = Private(require('../_errors'));
+    var SourceAbstract = Private(require('./_abstract'));
 
-  var module = require('modules').get('kibana/courier');
+    var FetchFailure = errors.FetchFailure;
+    var RequestFailure = errors.RequestFailure;
+    var MissingIndexPattern = errors.MissingIndexPattern;
 
-  module.factory('CouriersSearchSource', function (couriersErrors, CouriersSourceAbstract, Promise) {
-    var FetchFailure = couriersErrors.FetchFailure;
-    var RequestFailure = couriersErrors.RequestFailure;
-
-
-    function SearchSource(courier, initialState) {
-      CouriersSourceAbstract.call(this, courier, initialState);
+    function SearchSource(initialState) {
+      SourceAbstract.call(this, initialState);
     }
-    inherits(SearchSource, CouriersSourceAbstract);
+    inherits(SearchSource, SourceAbstract);
 
     /*****
      * PUBLIC API
@@ -40,6 +39,10 @@ define(function (require) {
       'source'
     ];
 
+    SearchSource.prototype.extend = function () {
+      return (new SearchSource()).inherits(this);
+    };
+
     /**
      * Set a searchSource that this source should inherit from
      * @param  {SearchSource} searchSource - the parent searchSource
@@ -56,15 +59,6 @@ define(function (require) {
      */
     SearchSource.prototype.parent = function () {
       return this._parent;
-    };
-
-
-    /**
-     * Get the mapping for the index of this SearchSource
-     * @return {Promise}
-     */
-    SearchSource.prototype.getFields = function () {
-      return this._courier._mapper.getFields(this);
     };
 
     /**
@@ -105,8 +99,9 @@ define(function (require) {
     SearchSource.prototype._mergeProp = function (state, val, key) {
       if (typeof val === 'function') {
         var source = this;
-        return Promise.cast(val(source)).then(function (res) {
-          return source._mergeProp(state, res, key);
+        return Promise.cast(val(this))
+        .then(function (newVal) {
+          return source._mergeProp(state, newVal, key);
         });
       }
 
@@ -136,5 +131,5 @@ define(function (require) {
     };
 
     return SearchSource;
-  });
+  };
 });

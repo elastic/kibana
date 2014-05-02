@@ -26,16 +26,16 @@ define(function (require) {
       return enable;
     };
 
-    this.get = function (fieldHash) {
+    this.get = function (indexPattern) {
       var timefield, filter;
       
       // TODO: time field should be stored in the pattern meta data. For now we just use the first date field we find
-      timefield = _.findKey(fieldHash, {type: 'date'});
+      timefield = _.find(indexPattern.fields, {type: 'date'});
       var bounds = this.getBounds();
 
       if (!!timefield) {
         filter = {range : {}};
-        filter.range[timefield] = {
+        filter.range[timefield.name] = {
           gte: bounds.min,
           lte: bounds.max
         };

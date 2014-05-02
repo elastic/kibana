@@ -1,9 +1,7 @@
 define(function (require) {
-  var _ = require('lodash');
-
-  var module = require('modules').get('kibana/courier');
-
-  module.factory('Looper', function ($timeout) {
+  return function LooperFactory($timeout, Notifier) {
+    var _ = require('lodash');
+    var notify = new Notifier();
 
     function Looper(ms, fn) {
       var _ms = ms === void 0 ? 1500 : ms;
@@ -108,8 +106,15 @@ define(function (require) {
 
         _timerId = _ms ? $timeout(looper._looperOver, _ms) : null;
       };
+
+      /**
+       * execute the _fn, and restart the timer
+       */
+      looper.run = function () {
+        looper.start();
+      };
     }
 
     return Looper;
-  });
+  };
 });

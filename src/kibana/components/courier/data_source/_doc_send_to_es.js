@@ -1,7 +1,9 @@
 define(function (require) {
   var _ = require('lodash');
 
-  return function (Promise, es) {
+  return function (Promise, Private, es) {
+    var errors = Private(require('../_errors'));
+    var pendingRequests = Private(require('../_pending_requests'));
 
     /**
      * Backend for doUpdate and doIndex
@@ -10,7 +12,7 @@ define(function (require) {
      *                                   of the the docs current version be sent to es?
      * @param  {String} body - HTTP request body
      */
-    return function (courier, method, validateVersion, body) {
+    return function (method, validateVersion, body) {
       var doc = this;
       // straight assignment will causes undefined values
       var params = _.pick(this._state, ['id', 'type', 'index']);
@@ -23,16 +25,16 @@ define(function (require) {
 
       return es[method](params)
       .then(function (resp) {
-        if (resp.status === 409) throw new courier.errors.VersionConflict(resp);
+        if (resp.status === 409) throw new errors.VersionConflict(resp);
 
         doc._storeVersion(resp._version);
         doc.id(resp._id);
 
         // notify pending request for this same document that we have updates
-        Promise.cast(!body ? doc.fetch() : {
+        Promise.cast(!body || !body.doc ? doc.fetch() : {
           _id: resp._id,
           _index: params.index,
-          _source: body,
+          _source: body.doc,
           _type: params.type,
           _version: doc._getVersion(),
           found: true
@@ -40,12 +42,9 @@ define(function (require) {
           // use the key to compair sources
           var key = doc._versionKey();
 
-          // filter out the matching requests from the _pendingRequests queue
-          var pending = courier._pendingRequests;
-
           // clear the queue and filter out the removed items, pushing the
           // unmatched ones back in.
-          pending.splice(0).filter(function (req) {
+          pendingRequests.splice(0).filter(function (req) {
             var isDoc = req.source._getType() === 'doc';
             var keyMatches = isDoc && req.source._versionKey() === key;
 
@@ -56,7 +55,7 @@ define(function (require) {
             }
 
             // otherwise, put the request back into the queue
-            pending.push(req);
+            pendingRequests.push(req);
           });
         });
 
@@ -64,7 +63,7 @@ define(function (require) {
       })
       .catch(function (err) {
         // cast the error
-        throw new courier.errors.RequestFailure(err);
+        throw new errors.RequestFailure(err);
       });
     };
   };

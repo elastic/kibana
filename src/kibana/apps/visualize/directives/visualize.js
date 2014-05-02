@@ -6,16 +6,16 @@ define(function (require) {
 
   var module = require('modules').get('kibana/directive');
 
-  module.directive('visualize', function (createNotifier) {
+  module.directive('visualize', function (createNotifier, SavedVis) {
     return {
       restrict: 'E',
       link: function ($scope, $el) {
         var chart; // set in "vis" watcher
 
         $scope.$watch('vis', function (vis, prevVis) {
-          if (prevVis) prevVis.destroy();
+          if (prevVis && prevVis.destroy) prevVis.destroy();
           if (chart) chart.destroy();
-          if (!vis) return;
+          if (!(vis instanceof SavedVis)) return;
 
           var notify = createNotifier({
             location: vis.typeName + ' visualization'

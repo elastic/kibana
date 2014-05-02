@@ -11,6 +11,7 @@ define(function (require) {
   require('notify/notify');
   require('directives/info');
   require('angular-bootstrap');
+  require('utils/private');
 
   var modules = require('modules').get('kibana/controllers', ['ui.bootstrap']);
 
