@@ -19,7 +19,7 @@ define(function (require) {
         mapping: {
           title: 'string',
           description: 'string',
-          hits: 'number'
+          hits: 'integer'
         },
 
         defaults: {
