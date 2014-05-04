@@ -100,6 +100,14 @@ function (angular, app, _, $, kbn) {
        */
       counter_pos : 'above',
       /** @scratch /panels/terms/5
+       * ignoreown:: Ignore the filters which we added to the filter panel.
+       */
+      ignoreown   : false,
+      /** @scratch /panels/terms/5
+       * radioselect:: Only allow one filter to be active at a time. Selecting a new filter will delete the old one.
+       */
+      radioselect : false,
+      /** @scratch /panels/terms/5
        * spyable:: Set spyable to false to disable the inspect button
        */
       spyable     : true,
@@ -151,7 +159,9 @@ function (angular, app, _, $, kbn) {
       var request,
         results,
         boolQuery,
-        queries;
+        queries,
+        panelFilterIds,
+        boolFilterIds;
 
       $scope.field = _.contains(fields.list,$scope.panel.field+'.raw') ?
         $scope.panel.field+'.raw' : $scope.panel.field;
@@ -167,6 +177,14 @@ function (angular, app, _, $, kbn) {
         boolQuery = boolQuery.should(querySrv.toEjsObj(q));
       });
 
+      // Build list of ids to pass to query depending on settings
+      if($scope.panel.ignoreown) {
+        panelFilterIds = _.map($scope.filter_ids, function(num, key){ return num; });
+        boolFilterIds = _.difference(filterSrv.ids, panelFilterIds);
+      } else {
+        boolFilterIds = filterSrv.ids;
+      }
+
       // Terms mode
       if($scope.panel.tmode === 'terms') {
         request = request
@@ -178,7 +196,7 @@ function (angular, app, _, $, kbn) {
           .facetFilter($scope.ejs.QueryFilter(
             $scope.ejs.FilteredQuery(
               boolQuery,
-              filterSrv.getBoolFilter(filterSrv.ids)
+              filterSrv.getBoolFilter(boolFilterIds)
             )))).size(0);
       }
       if($scope.panel.tmode === 'terms_stats') {
@@ -191,7 +209,7 @@ function (angular, app, _, $, kbn) {
           .facetFilter($scope.ejs.QueryFilter(
             $scope.ejs.FilteredQuery(
               boolQuery,
-              filterSrv.getBoolFilter(filterSrv.ids)
+              filterSrv.getBoolFilter(boolFilterIds)
             )))).size(0);
       }
 
@@ -218,7 +236,13 @@ function (angular, app, _, $, kbn) {
          $scope.filter_ids[term.label] in filterSrv.list){
         filterSrv.remove($scope.filter_ids[term.label]);
         delete $scope.filter_ids[term.label];
-      }else if(_.isUndefined(term.meta)) {
+      } else if(_.isUndefined(term.meta)) {
+        if($scope.panel.radioselect) { 
+          _.each($scope.filter_ids, function(value, key){
+              filterSrv.remove($scope.filter_ids[key]);
+              delete $scope.filter_ids[key];
+          });
+        }
         $scope.filter_ids[term.label] = filterSrv.set({type:'terms',
           field:$scope.field,value:term.label,mandate:(negate ? 'mustNot':'must')});
       } else if(term.meta === 'missing') {
@@ -281,6 +305,11 @@ function (angular, app, _, $, kbn) {
             }
             if(scope.panel.tmode === 'terms_stats') {
               slice = { label : v.term, data : [[k,v[scope.panel.tstat]]], actions: true};
+            }
+            if(scope.panel.ignoreown && _.size(scope.filter_ids) && !scope.filter_ids[v.term]) {
+              slice.color = "#aaa";
+            } else {
+              slice.color = querySrv.colors[k];
             }
             scope.data.push(slice);
             k = k + 1;

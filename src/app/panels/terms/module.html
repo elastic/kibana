@@ -53,7 +53,7 @@
       <th>Term</th> <th>{{ panel.tmode == 'terms_stats' ? panel.tstat : 'Count' }}</th> <th>Action</th>
     </thead>
     <tr ng-repeat="term in data" ng-show="showMeta(term)">
-      <td>{{term.label}}</td>
+      <td ng-style="{color: panel.ignoreown ? term.color : '' }">{{term.label}}</td>
       <td>{{term.data[0][1]}}</td>
       <td>
         <span ng-hide="term.meta == 'other'">
