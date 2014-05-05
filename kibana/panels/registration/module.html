@@ -1,0 +1,26 @@
+<style type="text/css">
+.marvel-registration {
+  display: none;
+}
+
+.marvel-registration.show {
+  display: block;
+}
+
+.marvel-registration > .nav > li {
+  padding: 18px 3px;
+}
+.marvel-registration > .nav > li > .label {
+  padding: 4px 10px;
+  font-weight: normal;
+}
+</style>
+<div ng-class="{ show: (purchased != null && !purchased) }" class="marvel-registration" ng-controller='marvel.registration' ng-init="init()">
+  <ul class="nav" style="margin: 0">
+    <li>
+    <div ng-show="!registered" class="label label-warning" ng-click="optInModal()">Development Trial</div> 
+    <div ng-show="registered" class="label label-warning" ng-click="optInModal()">Development Mode</div> 
+    </li>
+  </ul>
+</div>
+

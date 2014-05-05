@@ -28,7 +28,7 @@ define([
         method = "POST";
       }
 
-      $.ajax({
+      var options = {
         url: path,
         data: method == "GET" ? null : data,
         password: password,
@@ -36,10 +36,20 @@ define([
         username: uname,
         crossDomain: true,
         type: method,
-        dataType: "json",
-        complete: completeCallback,
-        success: successCallback
-      });
+        dataType: "json"
+      };
+
+      // If we provide callback then apply those to the options otherwise 
+      // we assume the user will use the promise interface
+      if (typeof(successCallback) === 'function') {
+        options.success = successCallback;
+      }
+      if (typeof(completeCallback) === 'function') {
+        options.complete= completeCallback;
+      }
+
+      // return the promise that other libraries can use them
+      return $.ajax(options);
     };
 
     exports.constructESUrl = function (server, path) {

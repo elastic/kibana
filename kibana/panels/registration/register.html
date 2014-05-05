@@ -1,0 +1,25 @@
+<div ng-show="!options.showRegistration && !options.showConfirmation" class="modal-body" style="text-align: center;">
+  <h2>Marvel is for Free in Development</h2>
+  <p class="lead">Like it? Then <a href="http://www.elasticsearch.com/_redirect/marvel/buynow" target="_BLANK">buy a license</a> for production or 
+  talk to us about our <a href="http://www.elasticsearch.com/_redirect/support" target="_BLANK">annual support packages</a> that include Marvel. <br/> 
+  If you're still trying it out after a 7 day period, we ask that you register to continue using Marvel for free in development mode.</p>
+  <p style="padding-bottom: 20px;">
+    <a href="http://www.elasticsearch.com/_redirect/marvel/buynow" target="_BLANK" class="btn btn-success">Buy Marvel Now</a>
+    <a class="btn btn-success" ng-click="options.showConfirmation = true">Already Have a License</a>
+    <a class="btn btn-success" ng-click="options.showRegistration = true">Continue Free Trial</a>
+  </p>
+</div>
+<purchase-confirmation
+  ng-show="options.showConfirmation"
+  options="options"
+  registration="registration"
+  dismiss="dismiss"
+  confirm-purchase="confirmPurchase"></purchase-confirmation>
+<registration
+  ng-show="options.showRegistration"
+  options="options"
+  registration="registration"
+  dismiss="dismiss"
+  register="register"
+  register-later="registerLater"
+  ></registration>

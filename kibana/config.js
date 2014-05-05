@@ -68,7 +68,7 @@ define(['settings'],
         'marvel.shard_allocation'
       ]
     });
-  s.stats_report_url = @@stats_report_url;
+  s.stats_report_url = '@@stats_report_url';
   s.ga_tracking_code = '@@ga_tracking_code';
   return s;
 });

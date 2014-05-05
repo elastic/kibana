@@ -14,18 +14,17 @@ define([
     'app',
     'kbn',
     'lodash',
-    '../../../../../common/analytics',
     'factories/store',
     'services/marvel/index'
   ],
-  function (angular, app, kbn, _, ga) {
+  function (angular, app, kbn, _) {
     'use strict';
 
     var module = angular.module('kibana.panels.marvel.cluster', ['marvel.services']);
     app.useModule(module);
 
     module.controller('marvel.cluster', function ($scope, $modal, $q, $http, $clusterState, dashboard, filterSrv,
-                                                  kbnVersion, storeFactory, cacheBust) {
+                                                  kbnVersion, cacheBust, $phoneHome) {
       $scope.panelMeta = {
         modals: [],
         editorTabs: [],
@@ -39,22 +38,8 @@ define([
       };
       _.defaults($scope.panel, _d);
 
-      var reportInterval = 86400000;
-
-      // setup the optIn and version values
-      var marvelOpts = storeFactory($scope, 'marvelOpts', {
-        report: true,
-        version: void 0,
-        lastReport: void 0
-      });
-
       $scope.init = function () {
         $scope.kbnVersion = kbnVersion;
-
-        // If the user hasn't opted in or out, ask them to.
-        if (marvelOpts.version == null || marvelOpts.version !== kbnVersion) {
-          $scope.optInModal();
-        }
 
         $scope.$on('refresh', function () {
           $scope.get_data();
@@ -111,9 +96,7 @@ define([
 
           $scope.data = _.isArray(results.hits.hits) ? results.hits.hits[0]._source : undefined;
 
-          if (checkReport()) {
-            sendReport($scope.data);
-          }
+          $phoneHome.set('data', $scope.data);
 
           // Did we find anything in that index? No? Try the next one.
           if (_.isUndefined($scope.data) && _segment + 1 < dashboard.indices.length) {
@@ -140,75 +123,12 @@ define([
         $scope.inspector = angular.toJson(JSON.parse(request.toString()), true);
       };
 
-      $scope.setOptIn = function (val) {
-        marvelOpts.version = kbnVersion;
-        marvelOpts.report = val;
-        if (val) {
-          ga.pageview();
-        }
-      };
-
-      $scope.clearMarvelStorage = function () {
-        marvelOpts.report = void 0;
-        marvelOpts.version = void 0;
-        marvelOpts.lastReport = void 0;
-      };
-
-      $scope.optInModal = function () {
-        var panelModal = $modal({
-          template: './app/panels/marvel/cluster/optin.html?' + cacheBust,
-          persist: true,
-          backdrop: 'static',
-          show: false,
-          scope: $scope,
-          keyboard: false
-        });
-
-        // and show it
-        $q.when(panelModal).then(function (modalEl) {
-          modalEl.modal('show');
-        });
-      };
-
-      // Checks if we should send a report
-      var checkReport = function () {
-        if (marvelOpts.version && marvelOpts.report) {
-          if (marvelOpts.lastReport == null) {
-            return true;
-          }
-          else if (new Date().getTime() - parseInt(marvelOpts.lastReport, 10) > reportInterval) {
-            return true;
-          }
-          else {
-            return false;
-          }
-        }
-        else {
-          return false;
-        }
-      };
 
       $scope.updateHealthStatusData = function () {
         $scope.healthStatusData = {
           updatedForStatus: $clusterState.state.status,
           explainMessages: $clusterState.explainStatus()
         };
-      };
-
-      var sendReport = function (data) {
-        if (!$scope.config.stats_report_url) {
-          return;
-        }
-
-        var thisReport = new Date().getTime().toString();
-
-        // TODO: Replace this URL with the actual data sink
-        $http.post(
-          $scope.config.stats_report_url,
-          data
-        ).success(function () {
-            marvelOpts.lastReport = thisReport;
-          });
       };
 
     });

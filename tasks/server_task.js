@@ -4,7 +4,8 @@ module.exports = function (grunt) {
       'replace:dev_marvel_config',
       'configureRewriteRules',
       'less',
-      'connect:server'
+      'connect:server',
+      'watch:common'
     ]);
   });
 };

@@ -24,7 +24,10 @@ html
 
     script(type="text/javascript").
       require.config({
-        baseUrl: '../kibana/app'
+        baseUrl: '../kibana/app',
+        paths: {
+          'common': '../../common'
+        }
       });
       require(!{tests}, function () {
         setTimeout(function () {

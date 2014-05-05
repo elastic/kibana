@@ -44,6 +44,11 @@ dashboard.refresh="1m";
 
 dashboard.nav = [
   {
+    "type": "marvel.registration",
+    "editable": true,
+    "title": "Registration"
+  },
+  {
     type:'timepicker'
   },
   {

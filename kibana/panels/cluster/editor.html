@@ -1,30 +1,4 @@
-
 <div ng-show="!_.isUndefined(panel.optin)" >
   <div class="editor-row">
-
-    <h4>Cluster statistics</h4>
-
-    Help improve Elasticsearch by reporting <strong>anonymous</strong>
-    cluster statistics, including information about the size and performance of your cluster.
-    Data is sent once daily and is under 1 kilobyte. To
-    see a sample report click <span class="link" ng-click="showSample=true">here</span>. The data will only
-    be used by Elasticsearch and will never be transmitted to a third party.
-  </div>
-  <br>
-  <div class="editor-row">
-    <div class="section">
-      <div class="editor-option">
-        <label class="small">Send statistics<tip>Help make Elasticsearch better by sharing anonymous usage data.</tip></label>
-        <input type="checkbox" ng-model="marvelOpts.report"/>
-      </div>
-      <div ng-show="kbnVersion == '@REV@'" class="editor-option">
-        <label class="small">Clear marvelOpts <tip>Only shown in unbuilt versions, clear stored optin and version data</tip></label>
-        <button class="btn btn-danger" ng-click="clearMarvelStorage()">Clear</button>
-      </div>
-    </div>
-  </div>
-  <div ng-show="showSample">
-    <h4>Sample Statistics</h4>
-    <pre>{{ data | json }}</pre>
   </div>
 </div>

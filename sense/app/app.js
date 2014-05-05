@@ -297,5 +297,6 @@ define([
     }
 
     mappings.onInitComplete();
+    // $(mappings).on('update', phone_home);
 
   });

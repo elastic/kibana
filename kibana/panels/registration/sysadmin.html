@@ -1,0 +1,10 @@
+<div class="modal-body" style="background-color: #600;">
+  <h2>Oops! Unable to Write to Your Marvel Instance.</h2>
+  <p>In order to complete your registration process we need to write some data to your Marvel instance. We have encountered and error while trying to write this data. Please have your administrator run the following command.</p>
+  <div>
+    <pre>curl -XPUT {{ sysadmin.host_port }}/.marvel-kibana/appdata/marvelOpts -d '{{ sysadmin.data | json }}'</pre>
+  </div>
+  <div style="text-align: right;">
+    <a ng-click="dismiss();" class="btn btn-default">Close</a>
+  </div>
+</div>

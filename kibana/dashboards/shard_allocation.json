@@ -99,6 +99,11 @@
   ],
   "nav": [
     {
+      "type": "marvel.registration",
+      "editable": true,
+      "title": "Registration"
+    },
+    {
       "type": "timepicker",
       "collapse": false,
       "notice": false,

@@ -9,6 +9,8 @@ define([
   var per_index_types = {};
   var per_alias_indexes = [];
 
+  var mappingObj = {};
+
   function expandAliases(indicesOrAliases) {
     // takes a list of indices or aliases or a string which may be either and returns a list of indices
     // returns a list for multiple values or a string for a single.
@@ -206,13 +208,13 @@ define([
   }
 
   function retrieveMappingFromServer() {
-    es.send("GET", "_mapping", null, function (data, status, xhr) {
-      loadMappings(data);
+    $.when(es.send("GET", "_mapping"), es.send("GET", "_aliases"))
+    .done(function (mappings, aliases) {
+      loadMappings(mappings[0]);
+      loadAliases(aliases[0]);
+      // Trigger an update event with the mappings and aliases
+      $(mappingObj).trigger('update', [mappings[0], aliases[0]]);
     });
-    es.send("GET", "_aliases", null, function (data, status, xhr) {
-      loadAliases(data);
-    });
-
   }
 
   function mapping_retriever() {
@@ -228,7 +230,7 @@ define([
     mapping_retriever();
   }
 
-  return {
+  return _.assign(mappingObj, {
     getFields: getFields,
     getIndices: getIndices,
     getTypes: getTypes,
@@ -237,6 +239,6 @@ define([
     expandAliases: expandAliases,
     clear: clear,
     onInitComplete: onInitComplete
-  };
+  });
 
 });

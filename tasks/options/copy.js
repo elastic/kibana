@@ -1,6 +1,6 @@
 module.exports = function (config) {
-  function notAnalytics (src) {
-    return !(/analytics/.test(src));
+  function exclude(src) {
+    return !(/(analytics|PhoneHome)/.test(src));
   }
 
   return {
@@ -25,7 +25,7 @@ module.exports = function (config) {
           expand: true,
           src: ['index.html', './common/**/*'],
           dest: '<%= buildSiteDir %>',
-          filter: notAnalytics
+          filter: exclude 
         }
       ]},
     merge_marvel_kibana: {

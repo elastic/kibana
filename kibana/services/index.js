@@ -10,6 +10,7 @@ define(function (require) {
   var refreshState = require('lib/ClusterState/refreshState');
   var explainStatus = require('lib/ClusterState/explainStatus');
   var groupIndicesByState = require('lib/ClusterState/groupIndicesByState');
+  var PhoneHome = require('../../../../common/PhoneHome');
 
   var module = angular.module('marvel.services', []);
   app.useModule(module);
@@ -42,6 +43,14 @@ define(function (require) {
     // Return the service to the subscribers.
     return service;
 
+  });
+
+  module.factory('$phoneHome', function ($http) {
+    return new PhoneHome({
+      client: $http,
+      baseUrl: config.elasticsearch,
+      index: config.kibana_index
+    });
   });
 
   return module;

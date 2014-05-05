@@ -18,7 +18,6 @@ define(function (require) {
   var app = require('app');
   var $ = require('jquery');
   var _ = require('lodash');
-  var ga = require('../../../../../common/analytics');
 
   var loadDashboards = require('./lib/loadDashboards');
   var extractIds = require('./lib/extractIds');
@@ -33,14 +32,11 @@ define(function (require) {
   var module = angular.module('kibana.panels.marvel.navigation', []);
   app.useModule(module);
 
-  module.controller('marvel.navigation', function($scope, $http, storeFactory, $q, dashboard, $location, $routeParams) {
+  module.controller('marvel.navigation', function($scope, $http, $q, dashboard, $location, $routeParams) {
     $scope.panelMeta = {
       status  : "Stable",
       description : "A simple dropdown panel with a list of links"
     };
-
-    // Check to see if the user is opted in to reporting
-    var marvelOpts = storeFactory($scope, 'marvelOpts');
 
     // Set and populate defaults
     var _d = {
@@ -82,10 +78,6 @@ define(function (require) {
     $scope.init = function() {
       if($scope.panel.source === 'panel') {
         $scope.links = $scope.panel.links;
-      }
-
-      if (marvelOpts.version && marvelOpts.report) {
-        ga.pageview();
       }
 
       if($scope.panel.source === 'url') {

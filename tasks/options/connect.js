@@ -21,6 +21,7 @@ module.exports = function (config) {
       '^/kibana/config.js$': './<%= buildTempDir %>/config.js',
       '^/kibana(.*)$': '<%= kibanaCheckoutDir %>/src$1',
       '^/common/analytics.js$': '/<%= buildTempDir %>/common/analytics.js',
+      '^/common/PhoneHome.js$': '/<%= buildTempDir %>/common/PhoneHome.js',
       '^/sense(.*)$': '/sense$1',
       '^/common(.*)$': '/common$1',
       '^/test/panels(.*)$': '/kibana/panels$1',
@@ -32,7 +33,7 @@ module.exports = function (config) {
         port: '<%= kibanaPort %>',
         hostname: '<%= kibanaHost %>',
         base: '.',
-        keepalive: true,
+        keepalive: false,
         middleware: middleware
       }
     },

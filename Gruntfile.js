@@ -20,8 +20,8 @@ module.exports = function (grunt) {
       dist: 'UA-12395217-5'
     },
     statsReportUrl: {
-      dev: '"http://" + window.location.hostname + ":'+ (grunt.option('es_port') ||  9200) +'/.marvel_cluster_report/report"',
-      dist: '"https://marvel-stats.elasticsearch.com/"'
+      dev: 'http://'+(grunt.option('host') || 'localhost')+':'+ (grunt.option('es_port') ||  9200) +'/.marvel_cluster_report/report',
+      dist: 'https://marvel-stats.elasticsearch.com/'
     },
     kibanaPort: grunt.option('port') ||  5601,
     kibanaHost: grunt.option('host') ||'localhost'

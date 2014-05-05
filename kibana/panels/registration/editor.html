@@ -1,0 +1,41 @@
+<style type="text/css" media="screen">
+em { color: #666; }
+.optout { font-size: 11px; padding-top: 10px; }
+</style>
+<div ng-controller="marvel.registration.editor" ng-init="init()">
+  <div class="row-fluid">
+    <div class="span4">
+      <h4>License</h4>
+      <div ng-if="purchased && registration">
+        <p>Thank You for Purchasing Marvel!</p>
+        <div>License: <strong>Production</strong></div>
+        <div>Name: <strong>{{ registration.first_name }} {{ registration.last_name }}</strong></div>
+        <div>Company: <strong>{{ registration.company }}</strong></div>
+      </div>
+      <div ng-if="registered && registration">
+        <p>Marvel is Free for Development Use. <br>
+        Like it? Then <a href="http://www.elasticsearch.com/_redirect/marvel/buynow" target="_BLANK">buy a license</a> for production.<p>
+        <div>License <strong>Development</strong></div>
+        <div>Name: <strong>{{ registration.first_name }} {{ registration.last_name }}</strong></div>
+        <div>Email: <strong>{{ registration.email}}</strong></div>
+        <div ng-if="registration.phone">Phone: <strong>{{ registration.phone}}</strong></div>
+        <div ng-if="registration.company">Company: <strong>{{ registration.company }}</strong></div>
+        <div ng-if="registration.state">State: <strong>{{ registration.state}}</strong></div>
+        <div>Country: <strong>{{ registration.country}}</strong></div>
+      </div>
+      <div ng-if="!registration">
+        <p>Marvel is Free for Development Use. <br>
+        Like it? Then <a href="http://www.elasticsearch.com/_redirect/marvel/buynow" target="_BLANK">buy a license</a> for production.<p>
+        <div>License: <strong>Development Trial</strong></div>
+        <em>This product not registered.</em>
+      </div>
+      <div class="optout"><input type="checkbox" ng-model="report" /> Send usage data</div>
+    </div>
+    <div class="span4">
+      <div ng-show="kbnVersion == '@REV@'" class="editor-option">
+        <label class="small">Clear marvelOpts <tip>Only shown in unbuilt versions, clear stored opt-in and version data</tip></label>
+        <button class="btn btn-danger" ng-click="clearMarvelStorage()">Clear</button>
+      </div>
+    </div>
+  </div>
+</div>

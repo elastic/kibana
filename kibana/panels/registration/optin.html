@@ -1,0 +1,25 @@
+  <div ng-show="!options.showRegistration && !options.showConfirmation" class="modal-body" style="text-align: center;">
+  <h2>Try Marvel for Free in Development</h2>
+  <p class="lead">Like it? Then <a href="http://www.elasticsearch.com/_redirect/marvel/buynow" target="_BLANK">buy a license</a> for production or 
+  talk to us about our <a href="http://www.elasticsearch.com/_redirect/support" target="_BLANK">annual support packages</a> that include Marvel. <br/> 
+  If you're still trying it out after a 7 day period, we ask that you register to continue using Marvel for free in development mode.</p>
+  <p>
+    <a href="http://www.elasticsearch.com/_redirect/marvel/buynow" target="_BLANK" class="btn btn-success">Buy Marvel Now</a>
+    <a class="btn btn-success" ng-click="options.showConfirmation = true">Already Have a License</a>
+    <a class="btn btn-success" ng-click="freeTrial();dismiss();">Continue Free Trial</a>
+  </p>
+  <p>Sharing your cluster statistics with us to help us improve. Your data is never shared with <br/>
+  anyone. Not ever. Curious what we see? <a ng-click="showSample=true">View report here</a>. <span ng-show="report">Not interested? <a ng-click="setOptIn(false);">Opt out here</a></span><span ng-hide="report">Opted Out? <a ng-click="setOptIn(true);">Click here to opt back in.</a></span></p>
+  <div ng-show="showSample" style="text-align: left;">
+    <h5>Sample Statistics</h5>
+    <span class="close" ng-click="showSample=false" style="margin: 10px 10px; font-size: 30px;">&times;</span>
+    <pre>{{ data | json }}</pre>
+  </div>
+</div>
+<purchase-confirmation
+  ng-show="options.showConfirmation"
+  options="options"
+  registration="registration"
+  dismiss="dismiss"
+  confirm-purchase="confirmPurchase"></purchase-confirmation>
+
