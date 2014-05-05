@@ -228,7 +228,7 @@ define(["_"], function (_) {
       },
       has_child: {
         'type': '{type}',
-        'score_type': {
+        'score_mode': {
           __one_of: ['none', 'max', 'sum', 'avg']
         },
         '_scope': '',
@@ -236,7 +236,7 @@ define(["_"], function (_) {
       },
       has_parent: {
         'parent_type': '{type}',
-        'score_type': {
+        'score_mode': {
           __one_of: ['none', 'score']
         },
         '_scope': '',
