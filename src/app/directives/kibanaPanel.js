@@ -7,9 +7,9 @@ function (angular,$) {
 
   angular
     .module('kibana.directives')
-    .directive('kibanaPanel', function($compile) {
-      var container = '<div class="panel-container" ng-style="{\'min-height\':row.height}"></div>';
-      var content = '<div class="panel-content"></div>';
+    .directive('kibanaPanel', function($compile, $rootScope) {
+      var container = '<div class="panel-container"></div>';
+      var content = '<div class="panel-content" ng-style="{\'min-height\':row.height}"></div>';
 
       var panelHeader =
       '<div class="panel-header">'+
@@ -66,11 +66,16 @@ function (angular,$) {
         '</div>\n'+
       '</div>';
       return {
-        restrict: 'E',
+        restrict: 'A',
+        replace: true,
         link: function($scope, elem, attr) {
           // once we have the template, scan it for controllers and
           // load the module.js if we have any
           var newScope = $scope.$new();
+
+          elem.parent().parent().parent().resize(function() {
+            $rootScope.$broadcast('render');
+          });
 
           $scope.kbnJqUiDraggableOptions = {
             revert: 'invalid',
@@ -83,7 +88,7 @@ function (angular,$) {
           // compile the module and uncloack. We're done
           function loadModule($module) {
             $module.appendTo(elem);
-            elem.wrap(container);
+            elem.wrapInner(container);
             /* jshint indent:false */
             $compile(elem.contents())(newScope);
             elem.removeClass("ng-cloak");

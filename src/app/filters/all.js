@@ -16,8 +16,8 @@ define([
 
   module.filter('pinnedQuery', function(querySrv) {
     return function( items, pinned) {
-      var ret = _.filter(querySrv.ids,function(id){
-        var v = querySrv.list[id];
+      var ret = _.filter(querySrv.ids(),function(id){
+        var v = querySrv.list()[id];
         if(!_.isUndefined(v.pin) && v.pin === true && pinned === true) {
           return true;
         }
@@ -107,6 +107,14 @@ define([
       return _.isArray(text)
         ? _.map(text, urlLink)
         : urlLink(text);
+    };
+  });
+
+  module.filter('editable', function () {
+    return function (data) {
+      return _.filter(data, function (item) {
+        return item.editable !== false;
+      });
     };
   });
 

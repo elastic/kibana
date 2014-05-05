@@ -4,7 +4,7 @@
   <div ng-model="editor.index" bs-tabs style="text-transform:capitalize;">
     <div ng-repeat="tab in ['General','Index','Rows','Controls']" data-title="{{tab}}">
     </div>
-    <div ng-repeat="tab in dashboard.current.nav" data-title="{{tab.type}}">
+    <div ng-repeat="tab in dashboard.current.nav|editable" data-title="{{tab.title || tab.type}}">
     </div>
   </div>
 
@@ -162,14 +162,14 @@
         <div class="editor-option" ng-repeat="pulldown in dashboard.current.pulldowns">
           <label class="small" style="text-transform:capitalize;">{{pulldown.type}}</label><input type="checkbox" ng-model="pulldown.enable" ng-checked="pulldown.enable">
         </div>
-        <div class="editor-option" ng-repeat="pulldown in dashboard.current.nav">
+        <div class="editor-option" ng-repeat="pulldown in dashboard.current.nav|editable">
           <label class="small" style="text-transform:capitalize;">{{pulldown.type}}</label><input type="checkbox" ng-model="pulldown.enable" ng-checked="pulldown.enable">
         </div>
       </div>
     </div>
   </div>
 
-  <div ng-repeat="pulldown in dashboard.current.nav" ng-controller="PulldownCtrl" ng-show="editor.index == 4+$index">
+  <div ng-repeat="pulldown in dashboard.current.nav|editable" ng-controller="PulldownCtrl" ng-show="editor.index == 4+$index">
     <ng-include ng-show="pulldown.enable" src="edit_path(pulldown.type)"></ng-include>
     <button ng-hide="pulldown.enable" class="btn" ng-click="pulldown.enable = true">Enable the {{pulldown.type}}</button>
   </div>

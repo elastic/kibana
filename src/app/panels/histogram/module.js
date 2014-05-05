@@ -233,6 +233,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
       /** @scratch /panels/histogram/3
        * derivative:: Show each point on the x-axis as the change from the previous point
        */
+
       derivative    : false,
       /** @scratch /panels/histogram/3
        * tooltip object::
@@ -352,7 +353,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
       _.each(queries, function(q) {
         var query = $scope.ejs.FilteredQuery(
           querySrv.toEjsObj(q),
-          filterSrv.getBoolFilter(filterSrv.ids)
+          filterSrv.getBoolFilter(filterSrv.ids())
         );
 
         var facet = $scope.ejs.DateHistogramFacet(q.id);
@@ -381,8 +382,8 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
         // This is a hack proposed by @boaz to work around the fact that we can't get
         // to field data values directly, and we need timestamps as normalized longs
         request = request.sort([
-          $scope.ejs.Sort($scope.panel.annotate.sort[0]).order($scope.panel.annotate.sort[1]),
-          $scope.ejs.Sort($scope.panel.time_field).desc()
+          $scope.ejs.Sort($scope.panel.annotate.sort[0]).order($scope.panel.annotate.sort[1]).ignoreUnmapped(true),
+          $scope.ejs.Sort($scope.panel.time_field).desc().ignoreUnmapped(true)
         ]);
       }
 
@@ -424,7 +425,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
                 interval: _interval,
                 start_date: _range && _range.from,
                 end_date: _range && _range.to,
-                fill_style: $scope.panel.derivative ? 'null' : 'minimal'
+                fill_style: $scope.panel.derivative ? 'null' : $scope.panel.zerofill ? 'minimal' : 'no'
               };
               time_series = new timeSeries.ZeroFilled(tsOpts);
               hits = 0;
@@ -828,8 +829,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
         var $tooltip = $('<div>');
         elem.bind("plothover", function (event, pos, item) {
           var group, value, timestamp, interval;
-          interval = scope.panel.legend ?
-            "" : " per " + (scope.panel.scaleSeconds ? '1s' : scope.panel.interval);
+          interval = " per " + (scope.panel.scaleSeconds ? '1s' : scope.panel.interval);
           if (item) {
             if (item.series.info.alias || scope.panel.tooltip.query_as_alias) {
               group = '<small style="font-size:0.9em;">' +

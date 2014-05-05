@@ -121,7 +121,7 @@ function (angular, app, _, $) {
           .facetFilter($scope.ejs.QueryFilter(
             $scope.ejs.FilteredQuery(
               boolQuery,
-              filterSrv.getBoolFilter(filterSrv.ids)
+              filterSrv.getBoolFilter(filterSrv.ids())
               )))).size(0);
 
       $scope.populate_modal(request);
@@ -145,8 +145,8 @@ function (angular, app, _, $) {
       $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
     };
 
-    $scope.build_search = function(field,value) {
-      filterSrv.set({type:'terms',field:field,value:value,mandate:"must"});
+    $scope.build_search = function(field, value) {
+      filterSrv.set({type:'field', field:field, query:value, mandate:"must"});
     };
 
   });
@@ -161,19 +161,16 @@ function (angular, app, _, $) {
 
         // Receive render events
         scope.$on('render',function(){
-          render_panel();
+          slow();
         });
 
-        // Or if the window is resized
-        angular.element(window).bind('resize', function(){
-          render_panel();
+        elem.closest('.panel').resize(function () {
+          elem.empty();
         });
 
         function render_panel() {
+          elem.empty();
           elem.css({height:scope.row.height});
-
-          elem.text('');
-
           $('.jvectormap-zoomin,.jvectormap-zoomout,.jvectormap-label').remove();
           require(['./panels/map/lib/map.'+scope.panel.map], function () {
             elem.vectorMap({
@@ -194,7 +191,7 @@ function (angular, app, _, $) {
                 elem.children('.map-legend').text(label.text() + ": " + count);
               },
               onRegionOut: function() {
-                $('.map-legend').hide();
+                elem.children('.map-legend').hide();
               },
               onRegionClick: function(event, code) {
                 var count = _.isUndefined(scope.data[code]) ? 0 : scope.data[code];
@@ -205,9 +202,11 @@ function (angular, app, _, $) {
             });
             elem.prepend('<span class="map-legend"></span>');
 
-            $('.map-legend').hide();
+            elem.children('.map-legend').hide();
           });
         }
+
+        var slow = _.debounce(render_panel, 200);
       }
     };
   });

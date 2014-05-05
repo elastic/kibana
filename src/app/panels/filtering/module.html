@@ -33,48 +33,48 @@
   </style>
 
   <div class='filtering-container'>
-    <span ng-show="filterSrv.ids.length == 0">
+    <span ng-show="dashboard.current.services.filter.ids.length == 0">
       <h5>No filters available</h5>
     </span>
-    <div ng-repeat="id in filterSrv.ids" class="small filter-panel-filter">
+    <div ng-repeat="id in dashboard.current.services.filter.ids" class="small filter-panel-filter">
       <div>
-        <strong>{{filterSrv.list[id].type}}</strong>
-        <span ng-show="!filterSrv.list[id].editing && isEditable(filterSrv.list[id])" class="filter-mandate" ng-click="filterSrv.list[id].editing = true">
-          {{filterSrv.list[id].mandate}}
+        <strong>{{dashboard.current.services.filter.list[id].type}}</strong>
+        <span ng-show="!dashboard.current.services.filter.list[id].editing && isEditable(dashboard.current.services.filter.list[id])" class="filter-mandate" ng-click="dashboard.current.services.filter.list[id].editing = true">
+          {{dashboard.current.services.filter.list[id].mandate}}
         </span>
-        <span ng-show="!isEditable(filterSrv.list[id])">
-          {{filterSrv.list[id].mandate}}
+        <span ng-show="!isEditable(dashboard.current.services.filter.list[id])">
+          {{dashboard.current.services.filter.list[id].mandate}}
         </span>
 
-        <i ng-class="getFilterClass(filterSrv.list[id])" class="icon-circle"></i>
+        <i ng-class="getFilterClass(dashboard.current.services.filter.list[id])" class="icon-circle"></i>
 
-        <span ng-show="filterSrv.list[id].editing">
-          <select class="input-small" ng-model="filterSrv.list[id].mandate" ng-options="f for f in ['must','mustNot','either']"></select>
+        <span ng-show="dashboard.current.services.filter.list[id].editing">
+          <select class="input-small" ng-model="dashboard.current.services.filter.list[id].mandate" ng-options="f for f in ['must','mustNot','either']"></select>
         </span>
 
         <i class="filter-action pointer icon-remove" bs-tooltip="'Remove'" ng-click="remove(id)"></i>
-        <i class="filter-action pointer" ng-class="{'icon-check': filterSrv.list[id].active,'icon-check-empty': !filterSrv.list[id].active}" bs-tooltip="'Toggle'" ng-click="toggle(id)"></i>
-        <i class="filter-action pointer icon-edit" ng-hide="filterSrv.list[id].editing || !isEditable(filterSrv.list[id])" bs-tooltip="'Edit'" ng-click="filterSrv.list[id].editing = true"></i>
+        <i class="filter-action pointer" ng-class="{'icon-check': dashboard.current.services.filter.list[id].active,'icon-check-empty': !dashboard.current.services.filter.list[id].active}" bs-tooltip="'Toggle'" ng-click="toggle(id)"></i>
+        <i class="filter-action pointer icon-edit" ng-hide="dashboard.current.services.filter.list[id].editing || !isEditable(dashboard.current.services.filter.list[id])" bs-tooltip="'Edit'" ng-click="dashboard.current.services.filter.list[id].editing = true"></i>
       </div>
 
-      <div ng-hide="filterSrv.list[id].editing && isEditable(filterSrv.list[id])">
+      <div ng-hide="dashboard.current.services.filter.list[id].editing && isEditable(dashboard.current.services.filter.list[id])">
         <ul class="unstyled">
-          <li ng-repeat="(key,value) in filterSrv.list[id] track by $index" ng-show="show_key(key)">
+          <li ng-repeat="(key,value) in dashboard.current.services.filter.list[id] track by $index" ng-show="show_key(key)">
             <strong>{{key}}</strong> : {{value}}
           </li>
         </ul>
       </div>
-      <form ng-show="filterSrv.list[id].editing && isEditable(filterSrv.list[id])">
+      <form ng-show="dashboard.current.services.filter.list[id].editing && isEditable(dashboard.current.services.filter.list[id])">
         <ul class="unstyled">
-          <li ng-repeat="key in _.keys(filterSrv.list[id])" ng-show="show_key(key)">
-            <strong>{{key}}</strong> : <input type='text' ng-model="filterSrv.list[id][key]">
+          <li ng-repeat="key in _.keys(dashboard.current.services.filter.list[id])" ng-show="show_key(key)">
+            <strong>{{key}}</strong> : <input type='text' ng-model="dashboard.current.services.filter.list[id][key]">
           </li>
         </ul>
         <div>
 
-          <button type="submit" ng-click="filterSrv.list[id].editing=undefined;refresh()" class="filter-apply btn btn-mini btn-success" bs-tooltip="'Save and refresh'">Apply</button>
+          <button type="submit" ng-click="dashboard.current.services.filter.list[id].editing=undefined;refresh()" class="filter-apply btn btn-mini btn-success" bs-tooltip="'Save and refresh'">Apply</button>
 
-          <button ng-click="filterSrv.list[id].editing=undefined" class="filter-apply btn-mini btn" bs-tooltip="'Save without refresh'">Save</button>
+          <button ng-click="dashboard.current.services.filter.list[id].editing=undefined" class="filter-apply btn-mini btn" bs-tooltip="'Save without refresh'">Save</button>
         </div>
       </form>
     </div>
