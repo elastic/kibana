@@ -122,7 +122,7 @@ define([
       _.each(queries, function(q) {
         var _q = $scope.ejs.FilteredQuery(
           querySrv.toEjsObj(q),
-          filterSrv.getBoolFilter(filterSrv.ids));
+          filterSrv.getBoolFilter(filterSrv.ids()));
 
         request = request
           .facet($scope.ejs.QueryFacet(q.id)
@@ -200,11 +200,6 @@ define([
 
         // Receive render events
         scope.$on('render',function(){
-          render_panel();
-        });
-
-        // Re-render if the window is resized
-        angular.element(window).bind('resize', function(){
           render_panel();
         });
 
