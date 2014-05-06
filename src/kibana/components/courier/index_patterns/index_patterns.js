@@ -43,11 +43,7 @@ define(function (require) {
         indexish = indexish.get('index');
       }
 
-      return Promise.cast(
-        (typeof indexish === 'object')
-          ? indexish
-          : indexPatterns.get(indexish)
-      )
+      return Promise.cast(_.isObject(indexish) ? indexish : indexPatterns.get(indexish))
       .then(function (indexPattern) {
         return indexPattern.fields;
       });
