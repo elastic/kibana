@@ -18,13 +18,14 @@
     "grunt-contrib-jade": "~0.10.0",
     "grunt-contrib-less": "~0.10.0",
     "grunt-cli": "~0.1.13",
-    "istanbul": "~0.2.4",
-    "elasticsearch": "git://github.com/elasticsearch/elasticsearch-js.git#master"
+    "istanbul": "~0.2.4"
   },
   "scripts": {
     "test": "grunt test",
     "server": "grunt server",
-    "update-esjs": "npm install elasticsearch && rm -rf src/bower_components/elasticsearch && cd ./node_modules/elasticsearch && npm install && grunt browser_clients:build && mv dist ../../src/bower_components/elasticsearch"
+    "update": "npm run update-esjs && npm run update-K4D3",
+    "update-esjs": "bower update elasticsearch && cd ./src/bower_components/elasticsearch && npm install && grunt browser_clients:build",
+    "update-K4D3": "bower update K4D3 && cd ./src/bower_components/K4D3 && npm install && grunt production"
   },
   "repository": {
     "type": "git",

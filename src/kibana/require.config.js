@@ -22,7 +22,7 @@ require.config({
     css: '../bower_components/require-css/css',
     text: '../bower_components/requirejs-text/text',
     d3: '../bower_components/d3/d3',
-    elasticsearch: '../bower_components/elasticsearch/elasticsearch.angular',
+    elasticsearch: '../bower_components/elasticsearch/dist/elasticsearch.angular',
     jquery: '../bower_components/jquery/dist/jquery',
     lodash: '../bower_components/lodash/dist/lodash',
     moment: '../bower_components/moment/moment',
