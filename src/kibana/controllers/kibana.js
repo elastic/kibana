@@ -24,7 +24,7 @@ define(function (require) {
     });
   });
 
-  modules.controller('kibana', function ($scope, Notifier, $injector, $q, $http, config, setup) {
+  modules.controller('kibana', function ($scope, Notifier, $injector, $q, $http, config, kbnSetup) {
     var notify = new Notifier();
 
     $scope.httpActive = $http.pendingRequests;
@@ -55,7 +55,7 @@ define(function (require) {
     });
 
     $q.all([
-      setup.bootstrap(),
+      kbnSetup(),
       config.init()
     ]).then(function () {
       $injector.invoke(function ($rootScope, courier, config, configFile, $timeout, $location, timefilter, globalState) {

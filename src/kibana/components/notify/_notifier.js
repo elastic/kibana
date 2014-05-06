@@ -84,11 +84,16 @@ define(function (require) {
     // Track the groups managed by this logger
     var groups = window[type + 'Groups'] = {};
 
-    return function (name, success) {
+    return function logger(name, success) {
       var status;
+      var ret;
+
       if (success === void 0) {
         // start
         groups[name] = now();
+        // function that can report on the success or failure of an op, and pass their value along
+        ret = function (val) { logger(name, true); return val; };
+        ret.failure = function (err) { logger(name, false); throw err; };
       } else {
         groups[name] = now() - (groups[name] || 0);
         var time = ' in ' + groups[name].toFixed(2) + 'ms';
@@ -116,6 +121,8 @@ define(function (require) {
       } else {
         log('KBN: ' + name + (status ? ' - ' + status : ''));
       }
+
+      return ret;
     };
   }
 

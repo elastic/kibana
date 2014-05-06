@@ -5,19 +5,20 @@ define(function (require) {
   var when = [];
   var additions = [];
   var otherwise;
-  require('services/setup');
 
-  var prepWork = _.once(function ($q, setup, config) {
+  require('setup/setup');
+
+  var prepWork = _.once(function ($q, kbnSetup, config) {
     return $q.all([
-      setup.bootstrap(),
+      kbnSetup(),
       config.init()
     ]);
   });
 
   var wrapResolvesWithPrepWork = function (resolves) {
     return _.mapValues(resolves, function (expr, name) {
-      return function ($q, setup, config, $injector) {
-        return prepWork($q, setup, config).then(function () {
+      return function ($q, kbnSetup, config, $injector) {
+        return prepWork($q, kbnSetup, config).then(function () {
           return $injector[angular.isString(expr) ? 'get': 'invoke'](expr);
         });
       };
@@ -30,8 +31,8 @@ define(function (require) {
         route.resolve = wrapResolvesWithPrepWork(route.resolve);
       } else if (!route.redirectTo) {
         route.resolve = {
-          __prep__: function ($q, setup, config) {
-            return prepWork($q, setup, config);
+          __prep__: function ($q, kbnSetup, config) {
+            return prepWork($q, kbnSetup, config);
           }
         };
       }
