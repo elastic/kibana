@@ -68,7 +68,7 @@ function (angular, app, _) {
     $scope.show_keyvalue = function(key, type) {
       // For a geo_polygon, we only show the "field" and not the value (which can be a huge list of geo coordinates)
       if (_.contains(['geo_polygon'],type)) {
-        return key == "field";
+        return key === "field";
       } else {
         return !_.contains(['type', 'id', 'alias', 'mandate', 'active', 'editing'], key);
       }
@@ -97,7 +97,7 @@ function (angular, app, _) {
     };
 
     $scope.isEditable = function(filter) {
-      var uneditable = ['time'];
+      var uneditable = ['time', 'geo_polygon'];
       if(_.contains(uneditable,filter.type)) {
         return false;
       } else {
