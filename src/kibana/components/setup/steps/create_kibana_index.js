@@ -33,10 +33,10 @@ define(function (require) {
         return es.cluster.health({
           waitForStatus: 'yellow',
           index: configFile.kibanaIndex
+        })
+        .catch(function (err) {
+          throw new SetupError('Waiting for Kibana index "<%= configFile.kibanaIndex %>" to come online failed', err);
         });
-      })
-      .catch(function (err) {
-        throw new SetupError('Waiting for Kibana index "<%= configFile.kibanaIndex %>" to come online failed', err);
       })
       .then(complete, complete.failure);
     };
