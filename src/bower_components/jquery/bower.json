@@ -1,6 +1,6 @@
 {
   "name": "jquery",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "main": "dist/jquery.js",
   "license": "MIT",
   "ignore": [
@@ -14,10 +14,10 @@
     "package.json"
   ],
   "devDependencies": {
-    "sizzle": "1.10.16",
-    "requirejs": "~2.1.8",
-    "qunit": "~1.12.0",
-    "sinon": "~1.7.3"
+    "sizzle": "1.10.19",
+    "requirejs": "2.1.10",
+    "qunit": "1.14.0",
+    "sinon": "1.8.1"
   },
   "keywords": [
     "jquery",

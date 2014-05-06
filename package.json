@@ -23,9 +23,8 @@
   "scripts": {
     "test": "grunt test",
     "server": "grunt server",
-    "update": "npm run update-esjs && npm run update-K4D3",
-    "update-esjs": "bower update elasticsearch && cd ./src/bower_components/elasticsearch && npm install && grunt browser_clients:build",
-    "update-K4D3": "bower update K4D3 && cd ./src/bower_components/K4D3 && npm install && grunt production"
+    "update": "bower update elasticsearch && bower update K4D3 && npm run rebuild-esjs",
+    "rebuild-esjs": "cd ./src/bower_components/elasticsearch && npm install && grunt browser_clients:build"
   },
   "repository": {
     "type": "git",

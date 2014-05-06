@@ -1,6 +1,6 @@
 {
   "name": "moment-timezone",
-  "version": "0.0.3",
+  "version": "0.0.6",
   "main": "index.js",
   "ignore": [
     "**/.*",
@@ -18,14 +18,13 @@
     "package.json"
   ],
   "homepage": "https://github.com/moment/moment-timezone",
-  "_release": "0.0.3",
+  "_release": "0.0.6",
   "_resolution": {
     "type": "version",
-    "tag": "0.0.3",
-    "commit": "27a88581c0d44c557d5122cde9946043fa1da94d"
+    "tag": "0.0.6",
+    "commit": "c7271cdeb904ade2f942ce7c3a92faaa82700a11"
   },
   "_source": "git://github.com/moment/moment-timezone.git",
   "_target": "~0.0.3",
-  "_originalSource": "moment-timezone",
-  "_direct": true
+  "_originalSource": "moment-timezone"
 }

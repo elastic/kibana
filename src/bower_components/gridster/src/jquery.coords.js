@@ -59,6 +59,9 @@
 
         var d = this.data;
 
+        typeof d.left === 'undefined' && (d.left = d.x1);
+        typeof d.top === 'undefined' && (d.top = d.y1);
+
         this.coords.x1 = d.left;
         this.coords.y1 = d.top;
         this.coords.x2 = d.left + d.width;
@@ -93,6 +96,10 @@
         return this.coords;
     };
 
+    fn.destroy = function() {
+        this.el.removeData('coords');
+        delete this.el;
+    };
 
     //jQuery adapter
     $.fn.coords = function() {

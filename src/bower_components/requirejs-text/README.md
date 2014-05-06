@@ -169,7 +169,7 @@ requirejs.config({
 The text plugin tries to detect what environment it is available for loading
 text resources, Node, XMLHttpRequest (XHR) or Rhino, but sometimes the
 Node or Rhino environment may have loaded a library that introduces an XHR
-implementation. You can foce the environment implementation to use by passing
+implementation. You can force the environment implementation to use by passing
 an "env" module config to the plugin:
 
 ```javascript

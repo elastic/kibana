@@ -1,3 +1,16 @@
+<a name="v0.5.1"></a>
+### v0.5.1 (2014-03-05)
+
+
+#### Features
+
+* **collision:** overlapping region as a config option ([720d487e](http://github.com/ducksboard/gridster.js/commit/720d487e3988593e2c60909c88aaff13fbd4f842))
+* **coords:**
+  * allow both (left/x1) and (top/y1) attr keys ([6f22217f](http://github.com/ducksboard/gridster.js/commit/6f22217f056e4fc52f6405f2af49596105aae150))
+  * add destroy method ([fdeee4f6](http://github.com/ducksboard/gridster.js/commit/fdeee4f636266c7a0579ced833f04fec013b6863))
+* **draggable:** keep container position prop if different than static ([04868a38](http://github.com/ducksboard/gridster.js/commit/04868a384d655d110f2d153d2fddb94b1c6d54a9))
+* **gridster:** destroy element's data and optionally remove from DOM ([dc09f191](http://github.com/ducksboard/gridster.js/commit/dc09f191d8503669cfa4737122c77cb0f5b9c3d2))
+
 <a name="v0.5.0"></a>
 ## v0.5.0 (2014-02-14)
 

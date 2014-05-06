@@ -1,4 +1,4 @@
-/*! gridster.js - v0.5.0 - 2014-02-14
+/*! gridster.js - v0.5.1 - 2014-03-05
 * http://gridster.net/
 * Copyright (c) 2014 ducksboard; Licensed MIT */
 
@@ -55,6 +55,9 @@
 
         var d = this.data;
 
+        typeof d.left === 'undefined' && (d.left = d.x1);
+        typeof d.top === 'undefined' && (d.top = d.y1);
+
         this.coords.x1 = d.left;
         this.coords.y1 = d.top;
         this.coords.x2 = d.left + d.width;
@@ -89,6 +92,10 @@
         return this.coords;
     };
 
+    fn.destroy = function() {
+        this.el.removeData('coords');
+        delete this.el;
+    };
 
     //jQuery adapter
     $.fn.coords = function() {
@@ -106,7 +113,8 @@
 ;(function($, window, document, undefined){
 
     var defaults = {
-        colliders_context: document.body
+        colliders_context: document.body,
+        overlapping_region: 'C'
         // ,on_overlap: function(collider_data){},
         // on_overlap_start : function(collider_data){},
         // on_overlap_stop : function(collider_data){}
@@ -124,6 +132,9 @@
     *  of HTMLElements or an Array of Coords instances.
     * @param {Object} [options] An Object with all options you want to
     *        overwrite:
+    *   @param {String} [options.overlapping_region] Determines when collision
+    *    is valid, depending on the overlapped area. Values can be: 'N', 'S',
+    *    'W', 'E', 'C' or 'all'. Default is 'C'.
     *   @param {Function} [options.on_overlap_start] Executes a function the first
     *    time each `collider ` is overlapped.
     *   @param {Function} [options.on_overlap_stop] Executes a function when a
@@ -223,6 +234,7 @@
 
     fn.find_collisions = function(player_data_coords){
         var self = this;
+        var overlapping_region = this.options.overlapping_region;
         var colliders_coords = [];
         var colliders_data = [];
         var $colliders = (this.colliders || this.$colliders);
@@ -246,7 +258,8 @@
               player_coords, collider_coords);
 
             //todo: make this an option
-            if (region === 'C'){
+            if (region === overlapping_region || overlapping_region === 'all') {
+
                 var area_coords = self.calculate_overlapped_area_coords(
                     player_coords, collider_coords);
                 var area = self.calculate_overlapped_area(area_coords);
@@ -464,8 +477,9 @@
     var fn = Draggable.prototype;
 
     fn.init = function() {
+        var pos = this.$container.css('position');
         this.calculate_dimensions();
-        this.$container.css('position', 'relative');
+        this.$container.css('position', pos === 'static' ? 'relative' : pos);
         this.disabled = false;
         this.events();
 
@@ -3820,9 +3834,12 @@
      * Destroy this gridster by removing any sign of its presence, making it easy to avoid memory leaks
      *
      * @method destroy
-     * @return {undefined}
+     * @param {Boolean} remove If true, remove gridster from DOM.
+     * @return {Object} Returns the instance of the Gridster class.
      */
-    fn.destroy = function(){
+    fn.destroy = function(remove) {
+        this.$el.removeData('gridster');
+
         // remove bound callback on window resize
         $(window).unbind('.gridster');
 
@@ -3832,10 +3849,7 @@
 
         this.remove_style_tags();
 
-        // lastly, remove gridster element
-        // this will additionally cause any data associated to this element to be removed, including this
-        // very gridster instance
-        this.$el.remove();
+        remove && this.$el.remove();
 
         return this;
     };
