@@ -32,7 +32,7 @@ define(function (require) {
         _.keys(obj).forEach(function (key) {
           stack.push(key);
           if (typeof keepArrays && _.isArray(obj[key])) flatObj[stack.join(dot)] = obj[key];
-          else if (typeof obj[key] === 'object') flattenObj(obj[key]);
+          else if (_.isObject(obj[key])) flattenObj(obj[key]);
           else flatObj[stack.join(dot)] = obj[key];
           stack.pop();
         });

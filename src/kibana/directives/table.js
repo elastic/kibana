@@ -185,8 +185,8 @@ define(function (require) {
 
             if (
               rowsPerTick === void 0
-              && typeof window.performance === 'object'
-              && typeof performance.now === 'function'
+              && window.performance
+              && typeof window.performance.now === 'function'
             ) {
               timing = performance.now();
               rowsPerTick = 30;
@@ -366,7 +366,7 @@ define(function (require) {
           val = (val == null) ? '' : val;
 
           // stringify array's and objects
-          if (typeof val === 'object') val = JSON.stringify(val);
+          if (_.isObject(val)) val = JSON.stringify(val);
 
           // truncate
           if (typeof val === 'string' && val.length > $scope.maxLength) {
