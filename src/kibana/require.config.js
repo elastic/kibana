@@ -5,6 +5,7 @@ require.config({
     kibana: './index',
     courier: './components/courier',
     config: './components/config',
+    setup: './components/setup',
     notify: './components/notify',
     state_management: './components/state_management',
 

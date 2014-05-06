@@ -23,7 +23,7 @@ define(function (require) {
   module.constant('configFile', configFile);
 
   // service for delivering config variables to everywhere else
-  module.service('config', function (Private, $rootScope, Notifier, kbnVersion, Promise, setup) {
+  module.service('config', function (Private, $rootScope, Notifier, kbnVersion, Promise, kbnSetup) {
     var config = this;
     var notify = new Notifier({
       location: 'Config'
@@ -52,7 +52,7 @@ define(function (require) {
      */
     config.init = _.once(function () {
       notify.lifecycle('config init');
-      return setup.bootstrap().then(function getDoc() {
+      return kbnSetup().then(function getDoc() {
         return doc.fetch().then(function initDoc(resp) {
           if (!resp.found) return doc.doIndex({}).then(getDoc);
           else {
