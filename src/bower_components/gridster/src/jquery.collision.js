@@ -9,7 +9,8 @@
 ;(function($, window, document, undefined){
 
     var defaults = {
-        colliders_context: document.body
+        colliders_context: document.body,
+        overlapping_region: 'C'
         // ,on_overlap: function(collider_data){},
         // on_overlap_start : function(collider_data){},
         // on_overlap_stop : function(collider_data){}
@@ -27,6 +28,9 @@
     *  of HTMLElements or an Array of Coords instances.
     * @param {Object} [options] An Object with all options you want to
     *        overwrite:
+    *   @param {String} [options.overlapping_region] Determines when collision
+    *    is valid, depending on the overlapped area. Values can be: 'N', 'S',
+    *    'W', 'E', 'C' or 'all'. Default is 'C'.
     *   @param {Function} [options.on_overlap_start] Executes a function the first
     *    time each `collider ` is overlapped.
     *   @param {Function} [options.on_overlap_stop] Executes a function when a
@@ -126,6 +130,7 @@
 
     fn.find_collisions = function(player_data_coords){
         var self = this;
+        var overlapping_region = this.options.overlapping_region;
         var colliders_coords = [];
         var colliders_data = [];
         var $colliders = (this.colliders || this.$colliders);
@@ -149,7 +154,8 @@
               player_coords, collider_coords);
 
             //todo: make this an option
-            if (region === 'C'){
+            if (region === overlapping_region || overlapping_region === 'all') {
+
                 var area_coords = self.calculate_overlapped_area_coords(
                     player_coords, collider_coords);
                 var area = self.calculate_overlapped_area(area_coords);

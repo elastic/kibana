@@ -3041,9 +3041,12 @@
      * Destroy this gridster by removing any sign of its presence, making it easy to avoid memory leaks
      *
      * @method destroy
-     * @return {undefined}
+     * @param {Boolean} remove If true, remove gridster from DOM.
+     * @return {Object} Returns the instance of the Gridster class.
      */
-    fn.destroy = function(){
+    fn.destroy = function(remove) {
+        this.$el.removeData('gridster');
+
         // remove bound callback on window resize
         $(window).unbind('.gridster');
 
@@ -3053,10 +3056,7 @@
 
         this.remove_style_tags();
 
-        // lastly, remove gridster element
-        // this will additionally cause any data associated to this element to be removed, including this
-        // very gridster instance
-        this.$el.remove();
+        remove && this.$el.remove();
 
         return this;
     };

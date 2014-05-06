@@ -2,7 +2,7 @@
   "name": "gridster",
   "title": "gridster.js",
   "description": "a drag-and-drop multi-column jQuery grid plugin",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "homepage": "http://gridster.net/",
   "author": {
     "name": "ducksboard",
