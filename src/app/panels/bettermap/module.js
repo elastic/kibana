@@ -306,7 +306,7 @@ function (angular, app, _, L, localRequire) {
                 }
               }
             }
-          }
+          };
           var drawControl = new L.Control.Draw(options);
 
           map.addControl(drawControl);
@@ -317,7 +317,7 @@ function (angular, app, _, L, localRequire) {
 
               var filterOptions = {
                 type : 'geo_polygon',
-                  field : scope.panel.field,
+                field : scope.panel.field,
                 value : layer.toGeoJSON().geometry.coordinates[0],
                 mandate: ('must')
               };
@@ -329,7 +329,8 @@ function (angular, app, _, L, localRequire) {
               } else {
                 currentFilterId = filterSrv.set(filterOptions);
               }
-              drawnItems.addLayer(layer);
+              // uncomment to keep the red selection box on the map
+              //drawnItems.addLayer(layer);
               currentLayer = layer;
             }
           );
@@ -342,7 +343,8 @@ function (angular, app, _, L, localRequire) {
             }
 
             if (!(_.contains(newValue, currentFilterId))) {
-              map.removeLayer(currentLayer);
+              // uncomment if you opted to keep the red selection box on the map
+              // map.removeLayer(currentLayer);
               currentLayer = null;
             }
           });
