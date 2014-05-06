@@ -5,6 +5,9 @@ module.exports = function(config) {
       cwd: '<%= tempDir %>',
       src: '**/*.css',
       dest: '<%= tempDir %>'
+    },
+    options: {
+      root: './tmp/'
     }
   };
 };
