@@ -269,8 +269,6 @@ define(function (require) {
         function appendDetailsToRow($tr, row, id) {
           var topLevelDetails = ['_index', '_type', '_id'];
 
-          var rowFlat = _.flattenWith('.', row._source, true);
-
           // we need a td to wrap the details table
           var containerTd = document.createElement('td');
           containerTd.setAttribute('colspan', $scope.columns.length);
@@ -295,8 +293,7 @@ define(function (require) {
           table.appendChild(tbody);
 
           // itterate each row and append it to the tbody
-          // TODO: This doesn't work since _source is not flattened
-          _(rowFlat)
+          _(row._source)
             .keys()
             .concat(topLevelDetails)
             .sort()

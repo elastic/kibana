@@ -1,15 +1,17 @@
 define(function (require) {
+  return function BuildChartDataFn(Notifier, Private, courier) {
+    var _ = require('lodash');
+    var aggs = require('./_aggs');
+    var converters = require('./resp_converters/index');
 
-  var converters = require('./resp_converters/index');
-  var aggs = require('./_aggs');
-  var _ = require('lodash');
+    var fieldTypes = Private(require('field_types/field_types'));
 
-  // private functionality for Vis.buildChartDataFromResp()
-  return function (createNotifier) {
-    var notify = createNotifier();
+    var notify = new Notifier();
 
-    return function (resp) {
+    return function (fields, resp) {
       notify.event('convert ES response');
+
+      var fieldsByName = _.indexBy(fields, 'name');
 
       // all aggregations will be prefixed with:
       var aggKeyPrefix = '_agg_';
@@ -21,7 +23,10 @@ define(function (require) {
 
       // the list of configs that make up the aggs and eventually
       // splits and columns, label added
-      var configs = vis.getConfig();
+      var configs = vis.getConfig().map(function (col) {
+        col.Type = fieldTypes[fieldsByName[col.aggParams.field].type];
+        return col;
+      });
 
       var lastCol = configs[configs.length - 1];
 
@@ -54,9 +59,18 @@ define(function (require) {
         }, '')
       };
 
-      var writeRow = function (rows, bucket) {
+      var finishRow = function (rows, col, bucket) {
         // collect the count and bail, free metric!!
-        rows.push(rowStack.concat(bucket.value === void 0 ? bucket.doc_count : bucket.value));
+        var val;
+        if (bucket.value === void 0) {
+          val = new fieldTypes.number(bucket.doc_count);
+        } else if (col.Type) {
+          val = new col.Type(bucket.value);
+        } else {
+          throw new TypeError('unable to determine the field/type for this bucket\'s value ' + JSON.stringify([col, bucket]));
+        }
+
+        rows.push(rowStack.concat(val));
       };
 
       var writeChart = function (chart) {
@@ -143,17 +157,17 @@ define(function (require) {
           if (col.categoryName === 'metric') {
             // there are no buckets, just values to collect.
             // Write the the row to the chartData
-            writeRow(chartData.rows, result);
+            finishRow(chartData.rows, col, result);
           } else {
             // non-metric aggs create buckets that we need to add
             // to the rows
             result.buckets.forEach(function (bucket) {
-              rowStack.push(bucket.key);
+              rowStack.push(new col.Type(bucket.key));
 
               if (col === lastCol) {
                 // since this is the last column, there is no metric (otherwise it
                 // would be last) so write the row into the chart data
-                writeRow(chartData.rows, bucket);
+                finishRow(chartData.rows, col, bucket);
               } else {
                 // into the rabbit hole
                 splitAndFlatten(chartData, bucket);
@@ -179,7 +193,7 @@ define(function (require) {
             label: aggs.byName.count.display
           }
         ];
-        writeRow(chartData.rows, { value: resp.hits.total });
+        finishRow(chartData.rows, null, { doc_count: resp.hits.total });
       }
 
       // flattening the chart does not always result in a split,

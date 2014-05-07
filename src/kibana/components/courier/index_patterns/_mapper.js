@@ -13,17 +13,33 @@ define(function (require) {
       var mapper = this;
 
       // proper-ish cache, keeps a clean copy of the object, only returns copies of it's copy
-      var fieldCache = new LocalCache();
+      var fieldCache = mapper.cache = new LocalCache();
 
       /**
        * Gets an object containing all fields with their mappings
        * @param {dataSource} dataSource
+       * @param {boolean} skipIndexPatternCache - should we ping the index-pattern obejcts? set to true by the indexPattern service
        * @returns {Promise}
        * @async
        */
-      mapper.getFieldsForIndexPattern = function (indexPattern) {
+      mapper.getFieldsForIndexPattern = function (indexPattern, skipIndexPatternCache) {
         var cache;
-        if (cache = fieldCache.get(indexPattern)) return Promise.resolved(cache);
+        if (cache = fieldCache.get(indexPattern)) return Promise.resolve(cache);
+
+        if (!skipIndexPatternCache) {
+          return es.get({
+            index: configFile.kibanaIndex,
+            type: 'index-pattern',
+            id: indexPattern,
+            _sourceInclude: ['fields']
+          })
+          .then(function (resp) {
+            if (resp.found && resp._source.fields) {
+              fieldCache.set(indexPattern, JSON.parse(resp._source.fields));
+            }
+            return mapper.getFieldsForIndexPattern(indexPattern, true);
+          });
+        }
 
         return es.indices.getFieldMapping({
           // TODO: Change index to be the resolved in some way, last three months, last hour, last year, whatever
@@ -54,7 +70,7 @@ define(function (require) {
        */
       mapper.clearCache = function (indexPattern) {
         fieldCache.clear(indexPattern);
-        return Promise.resolved();
+        return Promise.resolve();
       };
     }
 

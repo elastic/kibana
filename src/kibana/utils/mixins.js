@@ -24,14 +24,14 @@ define(function (require) {
     },
     // NOTE: The flatten behavior here works if you don't need to keep a reference to the
     // original value
-    flattenWith: function (dot, nestedObj, keepArrays) {
+    flattenWith: function (dot, nestedObj, flattenArrays) {
       var key; // original key
       var stack = []; // track key stack
       var flatObj = {};
       (function flattenObj(obj) {
         _.keys(obj).forEach(function (key) {
           stack.push(key);
-          if (typeof keepArrays && _.isArray(obj[key])) flatObj[stack.join(dot)] = obj[key];
+          if (!flattenArrays && _.isArray(obj[key])) flatObj[stack.join(dot)] = obj[key];
           else if (_.isObject(obj[key])) flattenObj(obj[key]);
           else flatObj[stack.join(dot)] = obj[key];
           stack.pop();

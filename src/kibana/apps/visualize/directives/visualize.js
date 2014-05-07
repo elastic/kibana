@@ -6,7 +6,7 @@ define(function (require) {
 
   var module = require('modules').get('kibana/directive');
 
-  module.directive('visualize', function (createNotifier, SavedVis) {
+  module.directive('visualize', function (createNotifier, SavedVis, courier) {
     return {
       restrict: 'E',
       link: function ($scope, $el) {
@@ -29,25 +29,24 @@ define(function (require) {
             type: vis.typeName
           });
 
+          chart.on('hover', onHover);
+          chart.on('click', onHover);
+
           vis.searchSource.onResults(function onResults(resp) {
-            try {
-              chart.render(vis.buildChartDataFromResponse(resp));
-            } catch (e) {
-              notify.error(e);
-            }
+            courier.getFieldsFor(vis.searchSource)
+            .then(function (fields) {
+              chart.render(vis.buildChartDataFromResponse(fields, resp));
+            })
+            .catch(notify.fatal);
           }).catch(notify.fatal);
+
+          vis.searchSource.onError(notify.error);
 
           $scope.$root.$broadcast('ready:vis');
         });
 
-        $el.on('hover', onHover);
-        $el.on('click', onHover);
-        // $el.on('hover', onHover);
-
         $scope.$on('$destroy', function () {
           if ($scope.vis) $scope.vis.destroy();
-          $el.off('hover', onHover);
-          $el.off('click', onHover);
         });
       }
     };
