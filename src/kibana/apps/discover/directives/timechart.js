@@ -20,7 +20,7 @@ define(function (require) {
           });
 
           $scope.$watch('data', function (data) {
-            if (!_.isUndefined(data)) {
+            if (data != null) {
               myChart.render(data);
             }
           });
