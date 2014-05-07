@@ -10,11 +10,28 @@ module.exports = function (repo, dir) {
         throw new Error(dir + ' needs to be removed so that we can replace it with a git-repo');
       }
 
-      return spawn('git', ['clone', repo, dir])();
+      return spawn('git', ['clone', repo, dir])()
+      .then(function () {
+        return true;
+      });
     } else {
-      return spawn('git', ['fetch', 'origin', 'master'], dir)();
+      var prevHash;
+      return spawn.silent('git', ['log', '-1', '--pretty=%H'], dir)()
+      .then(function (out) {
+        prevHash = out.trim();
+      })
+      .then(spawn('git', ['fetch', 'origin', 'master'], dir))
+      .then(spawn.silent('git', ['log', '-1', '--pretty=%H'], dir))
+      .then(function (out) {
+        var newHash = out.trim();
+        if (newHash !== prevHash) {
+          spawn('git', ['reset', '--hard', 'origin/master'], dir)()
+          .then(spawn('npm', ['install'], dir))
+          .then(function () {
+            return true;
+          });
+        }
+      });
     }
-  })
-  .then(spawn('git', ['reset', '--hard', 'origin/master'], dir))
-  .then(spawn('npm', ['install'], dir));
+  });
 };

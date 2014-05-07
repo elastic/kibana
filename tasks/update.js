@@ -13,7 +13,9 @@ module.exports = function (grunt) {
     var k4d3Dir = grunt.config('k4d3Dir');
 
     installOrUpdateRepo(grunt.config('k4d3Repo'), k4d3Dir)
-      .then(spawn('grunt', ['production'], k4d3Dir))
+      .then(function (updated) {
+        if (updated) return spawn('grunt', ['production'], k4d3Dir)();
+      })
       .nodeify(this.async());
   });
 
@@ -22,7 +24,9 @@ module.exports = function (grunt) {
     var esjsDir = grunt.config('esjsDir');
 
     installOrUpdateRepo(grunt.config('esjsRepo'), esjsDir)
-      .then(spawn('grunt', ['browser_clients:build'], esjsDir))
+      .then(function (updated) {
+        if (updated) return spawn('grunt', ['browser_clients:build'], esjsDir)();
+      })
       .nodeify(this.async());
   });
 };
