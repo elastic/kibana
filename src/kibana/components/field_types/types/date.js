@@ -1,8 +1,14 @@
 define(function (require) {
-  return function DateFieldType() {
+  return function DateFieldType(Private) {
+    var Abstract = Private(require('./_abstract'));
     var moment = require('moment');
-    return function (val) {
-      return moment(val);
-    };
+
+    function Date(val) {
+      this._val = moment(val);
+    }
+
+    Abstract.extend(Date);
+
+    return Date;
   };
 });
