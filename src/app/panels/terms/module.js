@@ -100,6 +100,10 @@ function (angular, app, _, $, kbn) {
        */
       counter_pos : 'above',
       /** @scratch /panels/terms/5
+       * fmode:: Set the mode to be applied to new filters when added to the filter panel.
+       */
+      fmode   : 'must',
+      /** @scratch /panels/terms/5
        * ignoreown:: Ignore the filters which we added to the filter panel.
        */
       ignoreown   : false,
@@ -243,11 +247,18 @@ function (angular, app, _, $, kbn) {
               delete $scope.filter_ids[key];
           });
         }
-        $scope.filter_ids[term.label] = filterSrv.set({type:'terms',
-          field:$scope.field,value:term.label,mandate:(negate ? 'mustNot':'must')});
+        $scope.filter_ids[term.label] = filterSrv.set({
+          type:'terms',
+          field:$scope.field, 
+          value:term.label, 
+          mandate:(negate ? 'mustNot' : $scope.panel.fmode)
+        });
       } else if(term.meta === 'missing') {
-        $scope.filter_ids[term.label] = filterSrv.set({type:'exists',
-          field:$scope.field,mandate:(negate ? 'must':'mustNot')});
+        $scope.filter_ids[term.label] = filterSrv.set({
+          type:'exists',
+          field:$scope.field, 
+          mandate:(negate ? $scope.panel.fmode : 'mustNot')
+        });
       } else {
         return;
       }
