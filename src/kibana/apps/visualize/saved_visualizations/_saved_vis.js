@@ -8,7 +8,7 @@ define(function (require) {
 
   var module = require('modules').get('kibana/services');
 
-  module.factory('SavedVis', function (config, $injector, courier, Promise, savedSearches) {
+  module.factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private) {
     function SavedVis(opts) {
       var vis = this;
       opts = opts || {};
@@ -196,13 +196,13 @@ define(function (require) {
        *
        * @return {Array} - The list of config objects
        */
-      vis.getConfig = require('./_read_config');
+      vis.getConfig = Private(require('./_read_config'));
       /**
        * Transform an ES Response into data for this visualization
        * @param  {object} resp The elasticsearch response
        * @return {array} An array of flattened response rows
        */
-      vis.buildChartDataFromResponse = $injector.invoke(require('./_build_chart_data'));
+      vis.buildChartDataFromResponse = Private(require('./_build_chart_data'));
     }
     inherits(SavedVis, courier.SavedObject);
 

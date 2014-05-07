@@ -89,7 +89,7 @@ define(function (require) {
     config.set = function (key, val) {
       // sets a value in the config
       // the es doc must be updated successfully for the update to reflect in the get api.
-      if (vals[key] === val) return Promise.resolved(true);
+      if (vals[key] === val) return Promise.resolve(true);
 
       var update = {};
       update[key] = val;
@@ -102,7 +102,7 @@ define(function (require) {
     };
 
     config.clear = function (key) {
-      if (vals[key] == null) return Promise.resolved(true);
+      if (vals[key] == null) return Promise.resolve(true);
 
       var newVals = _.cloneDeep(vals);
       delete newVals[key];

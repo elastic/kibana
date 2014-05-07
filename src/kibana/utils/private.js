@@ -1,14 +1,16 @@
 define(function (require) {
 
+  var name = function (construct) {
+    return construct.name || construct.toString().split('\n').shift();
+  };
+
   /**
    * create private services and factories that can still use angular deps
    * @type {[type]}
    */
   var privPath = [];
   var pathToString = function () {
-    return privPath.map(function (construct) {
-      return construct.name;
-    }).join(' -> ');
+    return privPath.map(name).join(' -> ');
   };
 
   var module = require('modules').get('kibana/utils');
@@ -19,8 +21,9 @@ define(function (require) {
       }
 
       var circular = !!(~privPath.indexOf(construct));
+      if (circular) throw new Error('Circluar refrence to "' + name(construct) + '" found while resolving private deps: ' + pathToString());
+
       privPath.push(construct);
-      if (circular) throw new Error('Circluar private deps found: ' + pathToString());
 
       if (!construct.$$instance) {
         var instance = {};

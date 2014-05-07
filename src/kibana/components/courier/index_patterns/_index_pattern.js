@@ -23,8 +23,9 @@ define(function (require) {
         },
 
         afterESResp: function () {
-          if (pattern.id && !pattern.fields) {
-            return pattern.refreshFields();
+          if (pattern.id) {
+            if (pattern.fields) mapper.cache.set(pattern.id, pattern.fields);
+            else return pattern.fetchFields();
           }
         },
 
@@ -34,8 +35,12 @@ define(function (require) {
       pattern.refreshFields = function () {
         return mapper.clearCache(pattern.id)
         .then(function () {
-          return mapper.getFieldsForIndexPattern(pattern.id);
-        })
+          return pattern.fetchFields();
+        });
+      };
+
+      pattern.fetchFields = function () {
+        return mapper.getFieldsForIndexPattern(pattern.id, true)
         .then(function (fields) {
           pattern.fields = fields;
           return pattern.save();

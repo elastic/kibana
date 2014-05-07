@@ -50,7 +50,7 @@ define(function (require) {
     }
 
     Promise.all = Promise.props = $q.all;
-    Promise.resolved = function (val) {
+    Promise.resolve = function (val) {
       var defer = $q.defer();
       defer.resolve(val);
       return defer.promise;

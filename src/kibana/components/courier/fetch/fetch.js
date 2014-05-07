@@ -2,8 +2,8 @@ define(function (require) {
   return function fetchService(Private, es, Promise, Notifier, $q) {
     var _ = require('lodash');
 
-    var docStrategy = require('./strategy/doc');
-    var searchStrategy = require('./strategy/search');
+    var docStrategy = Private(require('./strategy/doc'));
+    var searchStrategy = Private(require('./strategy/search'));
 
     var errors = Private(require('../_errors'));
     var RequestErrorHandler = Private(require('./_request_error_handler'));
@@ -23,7 +23,7 @@ define(function (require) {
       })
       .then(function (reqs) {
         // all requests must have been disabled
-        if (!reqs.length) return Promise.resolved();
+        if (!reqs.length) return Promise.resolve();
 
         body = strategy.requestStatesToBody(reqs);
 
@@ -51,7 +51,7 @@ define(function (require) {
 
     var fetchPending = function (strategy) {
       var requests = strategy.getPendingRequests(pendingRequests);
-      if (!requests.length) return Promise.resolved();
+      if (!requests.length) return Promise.resolve();
       else return fetchThese(strategy, requests, new RequestErrorHandler());
     };
 
