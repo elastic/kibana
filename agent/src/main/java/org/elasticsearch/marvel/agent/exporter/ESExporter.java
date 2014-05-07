@@ -67,7 +67,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     volatile String[] hosts;
     final String indexPrefix;
     final DateTimeFormatter indexTimeFormatter;
-    volatile int timeout;
+    volatile int timeoutInMillis;
 
     final ClusterService clusterService;
     final ClusterName clusterName;
@@ -100,7 +100,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         String indexTimeFormat = settings.get(SETTINGS_INDEX_TIME_FORMAT, "YYYY.MM.dd");
         indexTimeFormatter = DateTimeFormat.forPattern(indexTimeFormat).withZoneUTC();
 
-        timeout = (int) settings.getAsTime(SETTINGS_TIMEOUT, new TimeValue(6000)).seconds();
+        timeoutInMillis = (int) settings.getAsTime(SETTINGS_TIMEOUT, new TimeValue(6000)).millis();
 
         nodeStatsRenderer = new NodeStatsRenderer();
         shardStatsRenderer = new ShardStatsRenderer();
@@ -303,7 +303,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
                     URL url = new URL("http://" + host + "/" + path);
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod(method);
-                    conn.setConnectTimeout(timeout);
+                    conn.setConnectTimeout(timeoutInMillis);
                     if (contentType != null) {
                         conn.setRequestProperty("Content-Type", XContentType.SMILE.restContentType());
                     }
@@ -439,7 +439,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         TimeValue newTimeout = settings.getAsTime(SETTINGS_TIMEOUT, null);
         if (newTimeout != null) {
             logger.info("connection timeout set to [{}]", newTimeout);
-            timeout = (int) newTimeout.seconds();
+            timeoutInMillis = (int) newTimeout.millis();
         }
 
         String[] newHosts = settings.getAsArray(SETTINGS_HOSTS, null);
