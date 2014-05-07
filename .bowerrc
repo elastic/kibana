@@ -1,6 +1,3 @@
 {
-  "directory": "./src/bower_components",
-  "scripts": {
-    "postinstall": "grunt update"
-  }
+  "directory": "./src/bower_components"
 }
