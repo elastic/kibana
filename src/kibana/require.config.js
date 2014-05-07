@@ -47,7 +47,8 @@ require.config({
     'angular-mocks': ['angular'],
     'elasticsearch': ['angular'],
     'angular-bootstrap': ['angular'],
-    'angular-bindonce': ['angular']
+    'angular-bindonce': ['angular'],
+    'k4d3': ['field_types/field_types']
   },
   waitSeconds: 60
 });
