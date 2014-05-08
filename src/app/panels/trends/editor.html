@@ -1,20 +1,21 @@
 <div>
   <h4>Settings</h4>
   <div class="row-fluid">
-    <div class="span3" ng-hide='panel.auto_int'>
-      <label class="small">Use Elasticsearch date math format here (eg 1m, 5m, 1d, 2w, 1y)</label>
-    </div>
-    <div class="span3">
-       <label class="small">Time Ago</label>
+    <div class="editor-option">
+       <label class="small">Time Ago <tip>Elasticsearch date math format (eg 1m, 5m, 1d, 2w, 1y)</tip></label>
         <input type="text" class="input-small" ng-model="panel.ago" ng-change="set_refresh(true)">
     </div>
-    <div class="span2">
+    <div class="editor-option">
       <label class="small">Font Size</label>
-      <select class="input-small" ng-model="panel.style['font-size']" ng-options="f for f in ['7pt','8pt','9pt','10pt','12pt','14pt','16pt','18pt','20pt','24pt','28pt','32pt','36pt','42pt','48pt','52pt','60pt','72pt']"></select></span>
+      <select class="input-small" ng-model="panel.style['font-size']" ng-options="f for f in ['7pt','8pt','9pt','10pt','12pt','14pt','16pt','18pt','20pt','24pt','28pt','32pt','36pt','42pt','48pt','52pt','60pt','72pt']"></select>
     </div>
-    <div class="span3">
-      <label class="small" >List Format</label>
-      <select class="input-small" ng-model="panel.arrangement" ng-options="f for f in ['horizontal','vertical']"></select></span>
+    <div class="editor-option">
+      <label class="small">List Format</label>
+      <select class="input-small" ng-model="panel.arrangement" ng-options="f for f in ['horizontal','vertical']"></select>
+    </div>
+    <div class="editor-option">
+      <label class="small">Reverse Colors<tip>Use green for down, and red for up instead</tip></label>
+      <input type="checkbox" ng-model="panel.reverse" ng-checked="panel.reverse">
     </div>
   </div>
 </div>
