@@ -21,8 +21,8 @@ field_list:: Set to false to hide the list of fields. The user will be able to e
 but it will be hidden by default
 all_fields:: Set to true to show all fields in the mapping, not just the current fields in
 the table.
-trimFactor:: The trim factor is the length at which to truncate fields takinging into
-consideration the number of columns in the table. For example, a trimFactor of 100, with 5
+trimFactor:: The trim factor is the length at which to truncate fields taking the number of
+columns in the table into consideration. For example, a trimFactor of 100, with 5
 columns in the table, would trim each column at 20 character. The entirety of the field is
 still available in the expanded view of the event.
 localTime:: Set to true to adjust the timeField to the browser's local time
