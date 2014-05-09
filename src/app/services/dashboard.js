@@ -379,14 +379,18 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
         method: "GET",
         transformResponse: function(response) {
           /*jshint -W054 */
-          var _f = new Function('ARGS','kbn','_','moment','window','document','angular','require','define','$','jQuery',response);
-          return _f($routeParams,kbn,_,moment);
+          var _f = new Function('ARGS','kbn','_','moment','window','document','angular','require','define','$',response);
+          return _f($routeParams,kbn,_,moment,window,document,angular,require,define,$);
         }
       }).then(function(result) {
         if(!result) {
           return false;
         }
-        self.dash_load(dash_defaults(result.data));
+
+        $.when(result.data).then(function(data) {
+          self.dash_load(dash_defaults(data));
+        });
+
         return true;
       },function() {
         alertSrv.set('Error',
