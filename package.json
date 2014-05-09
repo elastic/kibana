@@ -19,7 +19,9 @@
     "istanbul": "~0.2.4",
     "load-grunt-config": "~0.7.0",
     "lodash": "~2.4.1",
-    "mocha": "~1.17.1"
+    "bluebird": "~1.2.4",
+    "mocha": "~1.17.1",
+    "event-stream": "~3.1.5"
   },
   "scripts": {
     "test": "grunt test",
