@@ -108,6 +108,8 @@ define(function (require) {
       display: 'Date Histogram',
       params: {
         interval: {
+          required: true,
+          default: 'hour',
           options: [
             { display: 'Minute', val: 'minute' },
             { display: 'Hourly', val: 'hour' },
@@ -117,9 +119,11 @@ define(function (require) {
             { display: 'Quarterly', val: 'quarter' },
             { display: 'Yearly', val: 'year' }
           ],
-          required: true,
-          custom: true,
-          default: 'hour'
+          toJSON: function (timefilter, val) {
+            var bounds = timefilter.getBounds();
+            var ms = bounds.max - bounds.min;
+            return (ms / val) + 'ms';
+          }
         },
         format: {
           custom: true
@@ -129,7 +133,14 @@ define(function (require) {
           default: 0
         },
         extended_bounds: {
-          custom: true
+          default: {},
+          toJSON: function (timefilter) {
+            var bounds = timefilter.getBounds();
+            return {
+              min: bounds.min,
+              max: bounds.max
+            };
+          }
         }
       },
       makeLabel: function (params) {

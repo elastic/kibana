@@ -23,13 +23,11 @@ require.config({
     async: '../bower_components/async/lib/async',
     css: '../bower_components/require-css/css',
     text: '../bower_components/requirejs-text/text',
-    d3: '../bower_components/d3/d3',
     elasticsearch: '../bower_components/elasticsearch/dist/elasticsearch.angular',
     jquery: '../bower_components/jquery/dist/jquery',
     lodash: '../bower_components/lodash/dist/lodash',
     moment: '../bower_components/moment/moment',
     gridster: '../bower_components/gridster/dist/jquery.gridster',
-    stacktrace: '../bower_components/stacktrace.js/stacktrace',
     jsonpath: '../bower_components/jsonpath/lib/jsonpath',
     k4d3: '../bower_components/K4D3/build/k4.d3',
     bower_components: '../bower_components'
