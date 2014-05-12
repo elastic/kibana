@@ -46,9 +46,12 @@ function (angular) {
             scope.panel.span = Math.round(((ui.size.width / elem.parent().width()) * 100) * 1.2) / 10;
 =======
             scope.panel.span = Math.round(((ui.size.width / elem.parent().width()) * 100) * 1.2 / 10);
+<<<<<<< HEAD
 >>>>>>> Fix for possibility of partial spans
             scope.$apply();
 >>>>>>> Add drag to resize panel widths. Closes #329
+=======
+>>>>>>> Remove apply, update version to 3.1.0
           });
         }
       };
