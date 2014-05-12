@@ -1,6 +1,9 @@
 [[change_list]]
 == Change list
 
+=== 1.1.1
+  - Fixed: agent did not interpret timeout settings correctly, causing potential connectivity errors when shipping data.
+
 === 1.1.0
   - Improved Sense's autocomplete suggestions:
     * Added Snapshot & Restore
