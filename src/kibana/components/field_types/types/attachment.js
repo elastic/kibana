@@ -3,14 +3,12 @@ define(function (require) {
     var Abstract = Private(require('./_abstract'));
 
     function Attachment(val) {
-      this._val = val;
+      throw new TypeError('Kibana does not support attachment type fields');
     }
 
     Abstract.extend(Attachment);
 
-    Attachment.prototype.toString = function () {
-      throw new TypeError('toString is not supported for Attachment type fields');
-    };
+    Attachment.prototype.toString = function () {};
 
     return Attachment;
   };
