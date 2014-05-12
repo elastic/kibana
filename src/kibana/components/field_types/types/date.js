@@ -3,29 +3,26 @@ define(function (require) {
     var Abstract = Private(require('./_abstract'));
     var moment = require('moment');
 
-    function Date(val) {
+    function KbnDate(val) {
       this._val = val;
     }
 
-    Abstract.extend(Date);
+    Abstract.extend(KbnDate);
 
-    Date.prototype._moment = function () {
+    KbnDate.prototype._moment = function () {
       // lazy eval the moment object
-      return this._m || (this._m = moment(this._val));
+      return this._m || (this._m = moment(this._val)).zone(0);
     };
 
-    Date.prototype.valueOf = function () {
+    KbnDate.prototype.toString = function () {
+      // eval and cache the string version of this date
+      return this._s || (this._s = this._moment().format('MM-DD-YYYY HH:mm'));
+    };
+
+    KbnDate.prototype.toJSON = function () {
       return this._val;
     };
 
-    Date.prototype.toString = function () {
-      return this._moment().format('YYYY-MM-DD HH:mm Z');
-    };
-
-    Date.prototype.toJSON = function () {
-      return this._val;
-    };
-
-    return Date;
+    return KbnDate;
   };
 });
