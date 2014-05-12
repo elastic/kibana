@@ -357,7 +357,7 @@ define(function (require) {
           var val;
 
           // Fall back to the root if not found in _source
-          val = jsonPath.eval(row, '$._source.' + field)[0] || row[field];
+          val = row._source[field] || row[field];
 
           // undefined and null should just be an empty string
           val = (val == null) ? '' : val;
