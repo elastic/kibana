@@ -1,8 +1,9 @@
 define(function (require) {
-  return function FetchStrategyForSearch(Private, Promise) {
+  return function FetchStrategyForSearch(Private, Promise, Notifier) {
     var _ = require('lodash');
     var mapper = Private(require('../../index_patterns/_mapper'));
     var fieldTypes = Private(require('field_types/field_types'));
+    var notify = new Notifier();
     return {
       clientMethod: 'msearch',
 
@@ -45,14 +46,30 @@ define(function (require) {
           return mapper.getFieldsForIndexPattern(id);
         })
         .then(function (fields) {
-          // itterate each hit to transform it's values into proper fieldTypes
-          resp.hits.hits.forEach(function (hit) {
-            var src = hit._source = _.flattenWith('.', hit._source);
-            fields.forEach(function (field) {
-              var val = src[field.name];
-              if (val != null) src[field.name] = new fieldTypes[field.type](val);
+          var complete = notify.event('type cast response fields');
+          var error;
+
+          try {
+            // itterate each hit to transform it's values into proper fieldTypes
+            resp.hits.hits.forEach(function (hit) {
+              var src = hit._source = _.flattenWith('.', hit._source);
+              fields.forEach(function (field) {
+                var val = src[field.name];
+                if (val == null) return;
+
+                var FieldType = fieldTypes[field.type];
+
+                src[field.name] = (Array.isArray(val))
+                  ? val.map(function (v) { return new FieldType(v); })
+                  : new FieldType(val);
+              });
             });
-          });
+          } catch (e) {
+            error = e;
+          } finally {
+            complete(error || true);
+          }
+
           return resp;
         })
         .then(function (convertedResp) {

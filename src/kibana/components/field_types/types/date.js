@@ -4,21 +4,26 @@ define(function (require) {
     var moment = require('moment');
 
     function Date(val) {
-      this._val = moment(val);
+      this._val = val;
     }
 
     Abstract.extend(Date);
 
+    Date.prototype._moment = function () {
+      // lazy eval the moment object
+      return this._m || (this._m = moment(this._val));
+    };
+
     Date.prototype.valueOf = function () {
-      return this._val.valueOf();
+      return this._val;
     };
 
     Date.prototype.toString = function () {
-      return this._val.format('YYYY-MM-DD HH:mm Z');
+      return this._moment().format('YYYY-MM-DD HH:mm Z');
     };
 
     Date.prototype.toJSON = function () {
-      return this.valueOf();
+      return this._val;
     };
 
     return Date;
