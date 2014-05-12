@@ -9,6 +9,18 @@ define(function (require) {
 
     Abstract.extend(Date);
 
+    Date.prototype.valueOf = function () {
+      return this._val.valueOf();
+    };
+
+    Date.prototype.toString = function () {
+      return this._val.format('YYYY-MM-DD HH:mm Z');
+    };
+
+    Date.prototype.toJSON = function () {
+      return this.valueOf();
+    };
+
     return Date;
   };
 });

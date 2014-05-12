@@ -1,4 +1,5 @@
 define(function (require) {
+  var angular = require('angular');
   var html = require('text!partials/table.html');
   var _ = require('lodash');
   var nextTick = require('utils/next_tick');
@@ -362,7 +363,16 @@ define(function (require) {
           val = (val == null) ? '' : val;
 
           // stringify array's and objects
-          if (_.isObject(val)) val = JSON.stringify(val);
+          var isComplex = _.isObject(val);
+
+          if (isComplex) {
+            var customToString = (
+              val.toString !== Object.prototype.toString &&
+              val.toString !== Array.prototype.toString
+            );
+
+            val = customToString ? val.toString() : angular.toJson(val);
+          }
 
           // truncate
           if (typeof val === 'string' && val.length > $scope.maxLength) {
