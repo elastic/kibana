@@ -3,7 +3,6 @@ define(function (require) {
   var _ = require('lodash');
   var nextTick = require('utils/next_tick');
   var $ = require('jquery');
-  var jsonPath = require('jsonpath');
 
   require('directives/truncated');
   require('directives/infinite_scroll');
