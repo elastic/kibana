@@ -110,6 +110,7 @@ define(function (require) {
         interval: {
           required: true,
           default: 'hour',
+          custom: true,
           options: [
             { display: 'Minute', val: 'minute' },
             { display: 'Hourly', val: 'hour' },
@@ -118,12 +119,7 @@ define(function (require) {
             { display: 'Monthly', val: 'month' },
             { display: 'Quarterly', val: 'quarter' },
             { display: 'Yearly', val: 'year' }
-          ],
-          toJSON: function (timefilter, val) {
-            var bounds = timefilter.getBounds();
-            var ms = bounds.max - bounds.min;
-            return (ms / val) + 'ms';
-          }
+          ]
         },
         format: {
           custom: true
