@@ -28,7 +28,6 @@ function (angular) {
           elem.resizable(getOpts());
           elem.resize(function (event, ui) {
             scope.panel.span = Math.round(((ui.size.width / elem.parent().width()) * 100) * 1.2 / 10);
-            scope.$apply();
           });
         }
       };
