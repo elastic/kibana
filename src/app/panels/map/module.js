@@ -170,7 +170,7 @@ function (angular, app, _, $) {
 
         function render_panel() {
           elem.empty();
-          elem.css({height:scope.row.height});
+          elem.css({height:scope.panel.height||scope.row.height});
           $('.jvectormap-zoomin,.jvectormap-zoomout,.jvectormap-label').remove();
           require(['./panels/map/lib/map.'+scope.panel.map], function () {
             elem.vectorMap({
