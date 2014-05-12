@@ -36,17 +36,22 @@ define(function (require) {
   // tell the modules util to add it's modules as requirements for kibana
   modules.link(kibana);
 
+  // list of modules that will require all possible applications
+  var appModules = configFile.apps.map(function (app) {
+    return 'apps/' + app.id + '/index';
+  });
+
   require([
     'controllers/kibana'
-  ].concat(configFile.apps.map(function (app) {
-    return 'apps/' + app.id + '/index';
-  })), function bootstrap() {
-    $(function () {
-      angular
-        .bootstrap(document, ['kibana'])
-        .invoke(function ($rootScope, $route) {
-          $(document.body).children().show();
-        });
+  ], function loadApps() {
+    require(appModules, function bootstrap() {
+      $(function () {
+        angular
+          .bootstrap(document, ['kibana'])
+          .invoke(function ($rootScope, $route) {
+            $(document.body).children().show();
+          });
+      });
     });
   });
 

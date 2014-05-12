@@ -18,7 +18,11 @@ define(function (require) {
 
         $scope.$watch('vis', function (vis, prevVis) {
           if (prevVis && prevVis.destroy) prevVis.destroy();
-          if (chart) chart.destroy();
+          if (chart) {
+            chart.off('hover');
+            chart.off('click');
+            chart.destroy();
+          }
           if (!(vis instanceof SavedVis)) return;
 
           var notify = createNotifier({

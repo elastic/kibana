@@ -383,11 +383,6 @@ define(function (require) {
         config.interval = chartOptions.interval + 'ms';
         config.min_doc_count = 0;
         config.format = chartOptions.format;
-        var bounds = timefilter.getBounds();
-        config.extended_bounds = {
-          min: bounds.min,
-          max: bounds.max
-        };
 
         vis.segment.configs.push(config);
         vis.writeAggs();

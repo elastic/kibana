@@ -1,5 +1,5 @@
 define(function (require) {
-  return function ReadConfigFn(Private) {
+  return function ReadConfigFn(Private, $injector) {
     var _ = require('lodash');
     var configCategories = require('./_config_categories');
     var Number = Private(require('field_types/field_types')).number;
@@ -37,7 +37,7 @@ define(function (require) {
 
         // provide a hook to covert string values into more complex structures
         if (paramDef.toJSON) {
-          params[name] = paramDef.toJSON(params[name]);
+          params[name] = $injector.invoke(paramDef.toJSON, paramDef, { val: params[name] });
         }
 
         return true;
