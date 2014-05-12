@@ -11,9 +11,12 @@ function (angular) {
         restrict: 'A',
         link: function(scope, elem) {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
           console.log('linked');
 >>>>>>> Add drag to resize panel widths. Closes #329
+=======
+>>>>>>> Removing console.log message
 
           var getOpts = function() {
             return {
