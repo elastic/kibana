@@ -1,9 +1,8 @@
 define(function (require) {
-  return function FetchStrategyForSearch(Private, Promise, Notifier) {
+  return function FetchStrategyForSearch(Private, Promise) {
     var _ = require('lodash');
-
-    var notify = new Notifier();
-
+    var mapper = Private(require('../../index_patterns/_mapper'));
+    var fieldTypes = Private(require('field_types/field_types'));
     return {
       clientMethod: 'msearch',
 
@@ -40,12 +39,25 @@ define(function (require) {
        * @return {Promise} - the promise created by responding to the request
        */
       resolveRequest: function (req, resp) {
-        if (resp && resp.hits) {
+        return Promise.resolve()
+        .then(function () {
+          var id = req.source.get('index');
+          return mapper.getFieldsForIndexPattern(id);
+        })
+        .then(function (fields) {
+          // itterate each hit to transform it's values into proper fieldTypes
           resp.hits.hits.forEach(function (hit) {
-            hit._source = _.flattenWith('.', hit._source);
+            var src = hit._source = _.flattenWith('.', hit._source);
+            fields.forEach(function (field) {
+              var val = src[field.name];
+              if (val != null) src[field.name] = new fieldTypes[field.type](val);
+            });
           });
-        }
-        req.defer.resolve(resp);
+          return resp;
+        })
+        .then(function (convertedResp) {
+          req.defer.resolve(convertedResp);
+        });
       },
 
       /**

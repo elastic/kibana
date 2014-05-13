@@ -19,10 +19,7 @@ define(function (require) {
     }
 
     chart.xAxisLabel = columns[iX].label;
-    chart.xAxisFormatter = columns[iX].field.format.fn;
-
     chart.yAxisLabel = columns[iY].label;
-    chart.yAxisFormatter = columns[iY].field && columns[iY].field.format.fn;
 
     var series = chart.series = [];
     var seriesByLabel = {};
