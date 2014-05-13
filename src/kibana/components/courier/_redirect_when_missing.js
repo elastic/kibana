@@ -8,13 +8,21 @@ define(function (require) {
      * Creates an error handler that will redirect to a url when a SavedObjectNotFound
      * error is thrown
      *
-     * @param  {string} url - the url to redirect to
+     * @param  {string|object} mapping - a mapping of url's to redirect to based on the saved object that
+     *                                 couldn't be found, or just a string that will be used for all types
      * @return {function} - the handler to pass to .catch()
      */
-    return function (url) {
+    return function (mapping) {
+      if (typeof mapping === 'string') {
+        mapping = { '*':  mapping };
+      }
+
       return function (err) {
         // if this error is not "404", rethrow
         if (!(err instanceof SavedObjectNotFound)) throw err;
+
+        var url = mapping[err.savedObjectType] || mapping['*'];
+        if (!url) url = '/';
 
         notify.error(err);
         $location.url(globalState.writeToUrl(url));
