@@ -23,7 +23,8 @@ define(function (require) {
     template: templateStep(1, require('text!../partials/wizard/step_1.html')),
     resolve: {
       indexPatternIds: function (courier) {
-        return courier.indexPatterns.getIds();
+        return courier.indexPatterns.getIds()
+        .then(courier.indexPatterns.ensureSome());
       }
     }
   });

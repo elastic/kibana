@@ -5,7 +5,6 @@ require.config({
     kibana: './index',
     courier: './components/courier',
     config: './components/config',
-    field_types: './components/field_types',
     setup: './components/setup',
     notify: './components/notify',
     state_management: './components/state_management',
@@ -45,8 +44,7 @@ require.config({
     'angular-mocks': ['angular'],
     'elasticsearch': ['angular'],
     'angular-bootstrap': ['angular'],
-    'angular-bindonce': ['angular'],
-    'k4d3': ['field_types/field_types']
+    'angular-bindonce': ['angular']
   },
   waitSeconds: 60
 });
