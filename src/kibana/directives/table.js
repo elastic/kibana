@@ -1,5 +1,4 @@
 define(function (require) {
-  var angular = require('angular');
   var html = require('text!partials/table.html');
   var _ = require('lodash');
   var nextTick = require('utils/next_tick');
@@ -356,11 +355,14 @@ define(function (require) {
         function _getValForField(row, field, untruncate) {
           var val;
 
-          // discover formats all of the values and puts them in _formatted for display
-          val = row._formatted[field] || row[field];
+          // Fall back to the root if not found in _source
+          val = row._source[field] || row[field];
 
           // undefined and null should just be an empty string
           val = (val == null) ? '' : val;
+
+          // stringify array's and objects
+          if (_.isObject(val)) val = JSON.stringify(val);
 
           // truncate
           if (typeof val === 'string' && val.length > $scope.maxLength) {

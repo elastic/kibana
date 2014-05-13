@@ -2,6 +2,7 @@ define(function (require) {
   return function ReadConfigFn(Private, $injector) {
     var _ = require('lodash');
     var configCategories = require('./_config_categories');
+    var Number = Private(require('field_types/field_types')).number;
     var aggs = require('./_aggs');
     var courier = require('courier/courier');
 

@@ -51,9 +51,8 @@ define(function (require) {
      * @return {Promise} - Resolved when the config loads initially
      */
     config.init = _.once(function () {
-      var complete = notify.lifecycle('config init');
-      return kbnSetup()
-      .then(function getDoc() {
+      notify.lifecycle('config init');
+      return kbnSetup().then(function getDoc() {
         return doc.fetch().then(function initDoc(resp) {
           if (!resp.found) return doc.doIndex({}).then(getDoc);
           else {
@@ -70,7 +69,9 @@ define(function (require) {
           }
         });
       })
-      .then(complete, complete.failure);
+      .finally(function () {
+        notify.lifecycle('config init', true);
+      });
     });
 
     config.get = function (key, defaultVal) {
