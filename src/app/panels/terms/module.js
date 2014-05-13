@@ -317,7 +317,7 @@ function (angular, app, _, $, kbn) {
           build_results();
 
           // IE doesn't work without this
-          elem.css({height:scope.row.height});
+          elem.css({height:scope.panel.height||scope.row.height});
 
           // Make a clone we can operate on.
           chartData = _.clone(scope.data);
