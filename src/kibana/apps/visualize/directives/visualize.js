@@ -48,9 +48,9 @@ define(function (require) {
           chart.on('click', onHover);
 
           vis.searchSource.onResults(function onResults(resp) {
-            courier.getFieldsFor(vis.searchSource)
-            .then(function (fields) {
-              chart.render(vis.buildChartDataFromResponse(fields, resp));
+            courier.indexPatterns.get(vis.searchSource.get('index'))
+            .then(function (indexPattern) {
+              chart.render(vis.buildChartDataFromResponse(indexPattern, resp));
             })
             .catch(notify.fatal);
           }).catch(notify.fatal);

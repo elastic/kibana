@@ -132,6 +132,7 @@ define(function (require) {
      * @param {String} field - the fields which contains the conflict
      */
     errors.SavedObjectNotFound = function SavedObjectNotFound(type) {
+      this.savedObjectType = type;
       CourierError.call(this,
         'Could not locate that ' + type,
         errors.SavedObjectNotFound);
@@ -147,6 +148,16 @@ define(function (require) {
         errors.IndexPatternMissingIndices);
     };
     inherits(errors.IndexPatternMissingIndices, CourierError);
+
+    /**
+     * Tried to call a method that relies on SearchSource having an indexPattern assigned
+     */
+    errors.NoDefinedIndexPatterns = function NoDefinedIndexPatterns(type) {
+      CourierError.call(this,
+        'Define your first index patterns to begin',
+        errors.NoDefinedIndexPatterns);
+    };
+    inherits(errors.NoDefinedIndexPatterns, CourierError);
 
   };
 });

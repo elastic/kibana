@@ -13,17 +13,19 @@ define(function (require) {
 
   var visConfigCategories = require('../saved_visualizations/_config_categories');
 
-  var getVisAndFields = function (savedVisualizations, courier, Notifier, $location, $route) {
+  var visAndIndexPattern = function (savedVisualizations, courier, Notifier, $location, $route) {
     return function (using) {
       return savedVisualizations.get(using)
-      .catch(courier.redirectWhenMissing('/visualize'))
       .then(function (vis) {
-        // get the fields before we render, but return the vis
-        return courier.getFieldsFor(vis.searchSource)
-        .then(function (fields) {
-          return [vis, fields];
+        return courier.indexPatterns.get(vis.searchSource.get('index'))
+        .then(function (indexPattern) {
+          return [vis, indexPattern];
         });
-      });
+      })
+      .catch(courier.redirectWhenMissing({
+        'index-pattern': '/settings',
+        '*': '/visualize'
+      }));
     };
   };
 
@@ -31,16 +33,16 @@ define(function (require) {
   .when('/visualize/create', {
     template: require('text!../editor.html'),
     resolve: {
-      visAndFields: function ($injector, $route) {
-        return $injector.invoke(getVisAndFields)($route.current.params);
+      visAndIndexPattern: function ($injector, $route) {
+        return $injector.invoke(visAndIndexPattern)($route.current.params);
       }
     }
   })
   .when('/visualize/edit/:id', {
     template: require('text!../editor.html'),
     resolve: {
-      visAndFields: function ($injector, $route) {
-        return $injector.invoke(getVisAndFields)($route.current.params.id);
+      visAndIndexPattern: function ($injector, $route) {
+        return $injector.invoke(visAndIndexPattern)($route.current.params.id);
       }
     }
   });
@@ -53,11 +55,12 @@ define(function (require) {
     });
 
     // get the vis loaded in from the routes
-    var vis = $route.current.locals.visAndFields[0];
+    var vis = $route.current.locals.visAndIndexPattern[0];
     // vis.destroy called by visualize directive
+    var indexPattern = $route.current.locals.visAndIndexPattern[1];
 
-    $scope.fields = _.sortBy($route.current.locals.visAndFields[1], 'name');
-    $scope.fields.byName = _.indexBy($scope.fields, 'name');
+    $scope.fields = _.sortBy(indexPattern.fields, 'name');
+    $scope.fields.byName = indexPattern.fieldsByName;
 
     var $state = new AppState(vis.getState());
 

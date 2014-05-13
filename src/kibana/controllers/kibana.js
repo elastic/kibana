@@ -13,9 +13,9 @@ define(function (require) {
   require('angular-bootstrap');
   require('utils/private');
 
-  var modules = require('modules').get('kibana/controllers', ['ui.bootstrap']);
+  var module = require('modules').get('kibana/controllers', ['ui.bootstrap']);
 
-  modules.config(function ($tooltipProvider) {
+  module.config(function ($tooltipProvider) {
     $tooltipProvider.options({
       placement: 'bottom',
       animation: true,
@@ -24,7 +24,7 @@ define(function (require) {
     });
   });
 
-  modules.controller('kibana', function ($scope, Notifier, $injector, $q, $http, config, kbnSetup) {
+  module.controller('kibana', function ($scope, Notifier, $injector, $q, $http, config, kbnSetup) {
     var notify = new Notifier();
 
     $scope.httpActive = $http.pendingRequests;
