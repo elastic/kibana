@@ -356,23 +356,11 @@ define(function (require) {
         function _getValForField(row, field, untruncate) {
           var val;
 
-          // Fall back to the root if not found in _source
-          val = row._source[field] || row[field];
+          // discover formats all of the values and puts them in _formatted for display
+          val = row._formatted[field] || row[field];
 
           // undefined and null should just be an empty string
           val = (val == null) ? '' : val;
-
-          // stringify array's and objects
-          var isComplex = _.isObject(val);
-
-          if (isComplex) {
-            var customToString = (
-              val.toString !== Object.prototype.toString &&
-              val.toString !== Array.prototype.toString
-            );
-
-            val = customToString ? val.toString() : angular.toJson(val);
-          }
 
           // truncate
           if (typeof val === 'string' && val.length > $scope.maxLength) {

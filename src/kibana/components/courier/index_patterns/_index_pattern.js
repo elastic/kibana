@@ -1,9 +1,10 @@
 define(function (require) {
-  var inherits = require('utils/inherits');
-
   return function IndexPatternFactory(Private) {
+    var inherits = require('utils/inherits');
     var SavedObject = Private(require('../saved_object/saved_object'));
     var mapper = Private(require('./_mapper'));
+    var fieldFormats = Private(require('./_field_formats'));
+    var _ = require('lodash');
 
     function IndexPattern(id) {
       var pattern = this;
@@ -15,22 +16,40 @@ define(function (require) {
         mapping: {
           title: 'string',
           timeFieldName: 'string',
+          customFormats: 'json',
           fields: 'json'
         },
 
         defaults: {
-          title: id
+          title: id,
+          customFormats: '{}'
         },
 
         afterESResp: function () {
           if (pattern.id) {
-            if (pattern.fields) mapper.cache.set(pattern.id, pattern.fields);
-            else return pattern.fetchFields();
+            if (!pattern.fields) return pattern.fetchFields();
+
+            mapper.cache.set(pattern.id, pattern.fields);
+            afterFieldsSet();
           }
         },
 
         searchSource: false
       });
+
+      function afterFieldsSet() {
+        pattern.fieldsByName = {};
+        pattern.fields.forEach(function (field) {
+          pattern.fieldsByName[field.name] = field;
+          var formatName = pattern.customFormats && pattern.customFormats[field.name];
+
+          // non-enumerable type so that it does not get included in the JSON
+          Object.defineProperty(field, 'format', {
+            enumerable: false,
+            value: formatName ? fieldFormats.byName[formatName] : fieldFormats.defaultByType[field.type]
+          });
+        });
+      }
 
       pattern.refreshFields = function () {
         return mapper.clearCache(pattern.id)
@@ -43,6 +62,7 @@ define(function (require) {
         return mapper.getFieldsForIndexPattern(pattern.id, true)
         .then(function (fields) {
           pattern.fields = fields;
+          afterFieldsSet();
           return pattern.save();
         });
       };
