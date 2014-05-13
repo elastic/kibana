@@ -103,7 +103,7 @@ function (angular, _, config, kbn) {
               .facetFilter(ejs.QueryFilter(
                 ejs.FilteredQuery(
                   ejs.QueryStringQuery(q.query || '*'),
-                  filterSrv.getBoolFilter(filterSrv.ids)
+                  filterSrv.getBoolFilter(filterSrv.ids())
                   )))).size(0);
 
           var results = request.doSearch();
