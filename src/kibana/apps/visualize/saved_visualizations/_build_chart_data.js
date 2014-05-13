@@ -1,7 +1,7 @@
 define(function (require) {
   return function BuildChartDataFn(Notifier, Private, courier) {
     var _ = require('lodash');
-    var aggs = require('./_aggs');
+    var aggs = Private(require('./_aggs'));
     var converters = require('./resp_converters/index');
 
     var fieldTypes = Private(require('field_types/field_types'));

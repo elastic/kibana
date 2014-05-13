@@ -1,6 +1,9 @@
 define(function (require) {
   var k4d3 = require('k4d3');
   var $ = require('jquery');
+  var _ = require('lodash');
+  var typeDefs = require('../saved_visualizations/_type_defs');
+
 
   require('css!../styles/visualization.css');
 
@@ -9,6 +12,9 @@ define(function (require) {
   module.directive('visualize', function (createNotifier, SavedVis, courier) {
     return {
       restrict: 'E',
+      scope : {
+        vis: '=',
+      },
       link: function ($scope, $el) {
         var chart; // set in "vis" watcher
 
@@ -29,9 +35,14 @@ define(function (require) {
             location: vis.typeName + ' visualization'
           });
 
-          chart = new k4d3.Chart($el[0], {
-            type: vis.typeName
-          });
+          var params = {
+            type: vis.typeName,
+          };
+
+          _.merge(vis.params, params);
+          _.defaults(params, typeDefs.byName[vis.typeName].params);
+
+          chart = new k4d3.Chart($el[0], params);
 
           chart.on('hover', onHover);
           chart.on('click', onHover);

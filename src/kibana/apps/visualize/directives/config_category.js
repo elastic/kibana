@@ -5,7 +5,8 @@ define(function (require) {
 
   require('modules')
     .get('app/visualize')
-    .directive('visConfigCategory', function () {
+    .directive('visConfigCategory', function (Private) {
+
       return {
         restrict: 'E',
         scope: {
