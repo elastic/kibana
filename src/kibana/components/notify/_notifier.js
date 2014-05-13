@@ -141,7 +141,7 @@ define(function (require) {
    * @param {boolean} success - Simple flag stating whether the lifecycle event succeeded
    */
   Notifier.prototype.lifecycle = createGroupLogger('lifecycle', {
-    open: true
+    open: false
   });
 
   /**

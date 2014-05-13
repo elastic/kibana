@@ -145,8 +145,16 @@ define(function (require) {
         // Bind a result handler. Any time searchSource.fetch() is executed this gets called
         // with the results
         searchSource.onResults().then(function onResults(resp) {
+          var complete = notify.event('on results');
           $scope.rows = resp.hits.hits;
-          $scope.chart = !!resp.aggregations ? {rows: [{columns: [{
+          $scope.rows.forEach(function (hit) {
+            hit._formatted = _.mapValues(hit._source, function (value, name) {
+              return $scope.fieldsByName[name].format.fn(value);
+            });
+            hit._formatted._source = angular.toJson(hit._source);
+          });
+
+          $scope.chart = !!resp.aggregations ? {
             label: 'Events over time',
             xAxisLabel: 'DateTime',
             yAxisLabel: 'Hits',
@@ -158,8 +166,9 @@ define(function (require) {
                 })
               }
             ]
-          }]}]} : undefined;
+          } : undefined;
 
+          complete();
           return searchSource.onResults().then(onResults);
         }).catch(function (err) {
           console.log('An error', err);
@@ -274,6 +283,7 @@ define(function (require) {
         var columnObjects = arrayToKeys($scope.state.columns);
 
         $scope.fields = [];
+        $scope.fieldsByName = {};
         $scope.state.columns = $scope.state.columns || [];
 
         // Inject source into list;
@@ -281,7 +291,12 @@ define(function (require) {
 
         _.sortBy(rawFields, 'name').forEach(function (field) {
           _.defaults(field, currentState[field.name]);
-          $scope.fields.push(_.defaults(field, {display: columnObjects[name] || false}));
+          var clone = _.clone(field);
+          clone.display = columnObjects[name] || false;
+          // copy over non-enumerable property manually
+          clone.format = field.format;
+          $scope.fields.push(clone);
+          $scope.fieldsByName[field.name] = clone;
         });
 
         // TODO: timefield should be associated with the index pattern, this is a hack

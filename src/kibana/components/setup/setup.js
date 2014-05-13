@@ -15,7 +15,7 @@ define(function (require) {
     var notify = new Notifier({ location: 'Setup' });
 
     return _.once(function () {
-      notify.lifecycle('bootstrap');
+      var complete = notify.lifecycle('bootstrap');
 
       return checkForEs()
       .then(checkEsVersion)
@@ -23,9 +23,7 @@ define(function (require) {
       .then(function (exists) {
         if (!exists) return createKibanaIndex();
       })
-      .finally(function () {
-        notify.lifecycle('bootstrap', true);
-      });
+      .then(complete, complete.failure);
     });
   });
 });
