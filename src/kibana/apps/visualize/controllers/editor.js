@@ -11,7 +11,6 @@ define(function (require) {
     'kibana/courier'
   ]);
 
-  var aggs = require('../saved_visualizations/_aggs');
   var visConfigCategories = require('../saved_visualizations/_config_categories');
 
   var getVisAndFields = function (savedVisualizations, courier, Notifier, $location, $route) {
@@ -46,7 +45,9 @@ define(function (require) {
     }
   });
 
-  app.controller('VisualizeEditor', function ($scope, $route, Notifier, $location, globalState, AppState, timefilter) {
+  app.controller('VisualizeEditor', function ($scope, $route, Notifier, $location, globalState, AppState, timefilter, Private) {
+    var aggs = Private(require('../saved_visualizations/_aggs'));
+
     var notify = new Notifier({
       location: 'Visualization Editor'
     });
@@ -61,6 +62,7 @@ define(function (require) {
     var $state = new AppState(vis.getState());
 
     $scope.vis = vis;
+
     $scope.aggs = aggs;
     $scope.visConfigCategories = visConfigCategories;
 
@@ -158,4 +160,5 @@ define(function (require) {
     // init
     readStateAndFetch();
   });
+
 });

@@ -3,12 +3,13 @@ define(function (require) {
   var inherits = require('utils/inherits');
 
   var configCats = require('./_config_categories');
-  var aggs = require('./_aggs');
   var typeDefs = require('./_type_defs');
 
   var module = require('modules').get('kibana/services');
 
   module.factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private) {
+    var aggs = Private(require('./_aggs'));
+
     function SavedVis(opts) {
       var vis = this;
       opts = opts || {};

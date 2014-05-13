@@ -6,7 +6,6 @@ define(function (require) {
   require('filters/field_type');
 
   var visConfigCategories = require('../saved_visualizations/_config_categories');
-  var aggs = require('../saved_visualizations/_aggs');
 
   var headerHtml = require('text!../partials/editor/header.html');
 
@@ -16,7 +15,8 @@ define(function (require) {
     globalLocal: require('text!../partials/controls/global_local.html')
   };
 
-  app.directive('visConfigEditor', function ($compile) {
+  app.directive('visConfigEditor', function ($compile, Private) {
+    var aggs = Private(require('../saved_visualizations/_aggs'));
 
     var categoryOptions = {
       metric: {

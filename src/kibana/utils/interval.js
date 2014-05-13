@@ -9,14 +9,17 @@ define(function (require) {
     * from::           Moment object containing the start time
     * to::             Moment object containing the finish time
     * target::         Calculate to approximately this many bars
-    *
+    * round::          Round to a nice value (default: true)
     *
     *
     */
-  var calculate = function (from, to, target) {
+  var calculate = function (from, to, target, round) {
+    var rawInterval;
+    round = round || true;
     from = datemath.parse(from).valueOf();
     to = datemath.parse(to, true).valueOf();
-    return roundInterval((to - from) / target);
+    rawInterval = ((to - from) / target);
+    return round ? roundInterval(rawInterval) : rawInterval;
   };
 
   // interval should be passed in ms

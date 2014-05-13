@@ -6,6 +6,9 @@ define(function (require) {
     {
       name: 'histogram',
       icon: 'icon-chart-bar',
+      params: {
+        shareYAxis: true,
+      },
       config: {
         metric: {
           label: 'Y-Axis',
