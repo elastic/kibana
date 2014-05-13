@@ -52,5 +52,7 @@ define(function (require) {
     indexPatterns.errors = {
       MissingIndices: errors.IndexPatternMissingIndices
     };
+
+    indexPatterns.ensureSome = Private(require('./_ensure_some'));
   };
 });

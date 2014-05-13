@@ -4,14 +4,12 @@ define(function (require) {
     var aggs = Private(require('./_aggs'));
     var converters = require('./resp_converters/index');
 
-    var fieldTypes = Private(require('field_types/field_types'));
-
     var notify = new Notifier();
 
-    return function (fields, resp) {
+    return function (indexPattern, resp) {
       notify.event('convert ES response');
 
-      var fieldsByName = _.indexBy(fields, 'name');
+      var fieldsByName = indexPattern.fieldsByName;
 
       // all aggregations will be prefixed with:
       var aggKeyPrefix = '_agg_';
@@ -23,9 +21,9 @@ define(function (require) {
 
       // the list of configs that make up the aggs and eventually
       // splits and columns, label added
-      var configs = vis.getConfig().map(function (col) {
-        col.Type = fieldTypes[fieldsByName[col.aggParams.field].type];
-        return col;
+      var configs = vis.getConfig().map(function (config) {
+        config.field = fieldsByName[config.aggParams.field];
+        return config;
       });
 
       var lastCol = configs[configs.length - 1];
@@ -60,17 +58,7 @@ define(function (require) {
       };
 
       var finishRow = function (rows, col, bucket) {
-        // collect the count and bail, free metric!!
-        var val;
-        if (bucket.value === void 0) {
-          val = new fieldTypes.number(bucket.doc_count);
-        } else if (col.Type) {
-          val = new col.Type(bucket.value);
-        } else {
-          throw new TypeError('unable to determine the field/type for this bucket\'s value ' + JSON.stringify([col, bucket]));
-        }
-
-        rows.push(rowStack.concat(val));
+        rows.push(rowStack.concat(bucket.value == null ? bucket.doc_count : bucket.value));
       };
 
       var writeChart = function (chart) {
@@ -162,7 +150,7 @@ define(function (require) {
             // non-metric aggs create buckets that we need to add
             // to the rows
             result.buckets.forEach(function (bucket) {
-              rowStack.push(new col.Type(bucket.key));
+              rowStack.push(bucket.key);
 
               if (col === lastCol) {
                 // since this is the last column, there is no metric (otherwise it
