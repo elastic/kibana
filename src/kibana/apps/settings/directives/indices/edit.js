@@ -28,6 +28,10 @@ define(function (require) {
     };
 
     $scope.removePattern = function () {
+      if ($scope.indexPattern.id === config.get('defaultIndex')) {
+        config.delete('defaultIndex');
+      }
+
       courier.indexPatterns.delete($scope.indexPattern)
       .then(refreshKibanaIndex)
       .then(function () {

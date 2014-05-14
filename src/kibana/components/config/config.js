@@ -112,6 +112,7 @@ define(function (require) {
           return true;
         });
     };
+    config.delete = config.clear;
 
     config.close = function () {};
 
