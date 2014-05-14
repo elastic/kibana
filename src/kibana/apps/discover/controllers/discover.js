@@ -69,8 +69,16 @@ define(function (require) {
     var $state = $scope.state = new AppState(stateDefaults);
 
     if (!_.contains(indexPatternList, $state.index)) {
-      notify.warning('The index specified in the URL is not a configured pattern. Using the default: ' + config.get('defaultIndex'));
-      $state.index = config.get('defaultIndex');
+      var reason = 'The index specified in the URL is not a configured pattern. ';
+      var defaultIndex = config.get('defaultIndex');
+      if (defaultIndex) {
+        notify.warning(reason + 'Updated it to use the default: "' + defaultIndex + '"');
+        $state.index = config.get('defaultIndex');
+      } else {
+        notify.warning(reason + 'Please set a default index to continue.');
+        $location.url('/settings/indices');
+        return;
+      }
     }
 
     $scope.opts = {
