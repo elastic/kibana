@@ -28,7 +28,7 @@ define(function (require) {
 
     this.get = function (indexPattern) {
       var timefield, filter;
-      
+
       // TODO: time field should be stored in the pattern meta data. For now we just use the first date field we find
       timefield = _.find(indexPattern.fields, {type: 'date'});
       var bounds = this.getBounds();
@@ -45,8 +45,8 @@ define(function (require) {
 
     this.getBounds = function (timefield) {
       return {
-        min: datemath.parse(self.time.from).valueOf(),
-        max: datemath.parse(self.time.to, true).valueOf()
+        min: datemath.parse(self.time.from),
+        max: datemath.parse(self.time.to, true)
       };
     };
 
