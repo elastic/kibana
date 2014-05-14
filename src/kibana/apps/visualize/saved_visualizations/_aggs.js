@@ -111,7 +111,7 @@ define(function (require) {
         params: {
           interval: {
             required: true,
-            default: 'hour',
+            default: 'auto',
             custom: true,
             options: [
               { display: 'Auto', val: 'auto' },

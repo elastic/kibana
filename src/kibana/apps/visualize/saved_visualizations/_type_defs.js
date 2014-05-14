@@ -8,6 +8,8 @@ define(function (require) {
       icon: 'icon-chart-bar',
       params: {
         shareYAxis: true,
+        addTooltip: true,
+        addLegend: true
       },
       config: {
         metric: {
