@@ -163,6 +163,7 @@ define(function (require) {
           gridster.$widgets.each(function (i, el) {
             var panel = getPanelFor(el);
             refreshPanelStats(panel);
+            panel.$scope.$broadcast('resize');
             makePanelSerializeable(panel);
             $scope.$root.$broadcast('change:vis');
           });

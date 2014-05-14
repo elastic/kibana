@@ -7160,6 +7160,11 @@ table td .fa {
   background-color: #46525d !important;
   color: #ffffff;
 }
+.sidebar-container .sidebar-list .sidebar-item .active:hover,
+.sidebar-container .sidebar-list .sidebar-item .active:hover .text-muted {
+  color: #ffffff;
+  background-color: #46525d;
+}
 saved-object-finder .form-group {
   margin-bottom: 0;
 }
