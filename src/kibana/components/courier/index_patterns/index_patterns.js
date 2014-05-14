@@ -4,16 +4,17 @@ define(function (require) {
     var _ = require('lodash');
 
     var IndexPattern = Private(require('./_index_pattern'));
+    var patternCache = Private(require('./_pattern_cache'));
     var SourceAbstract = Private(require('../data_source/_abstract'));
 
-    var mapper = Private(require('./_mapper'));
     var errors = Private(require('../_errors'));
 
     var notify = new Notifier({ location: 'IndexPatterns Service'});
 
-    indexPatterns.get = _.optMemoize(function (id) {
-      return (new IndexPattern(id)).init();
-    });
+    indexPatterns.get = function (id) {
+      var cache = patternCache.get(id);
+      return cache || patternCache.set(id, (new IndexPattern(id)).init());
+    };
 
     indexPatterns.getIds = function () {
       return es.search({
@@ -30,6 +31,7 @@ define(function (require) {
     };
 
     indexPatterns.delete = function (pattern) {
+      patternCache.delete(pattern.id);
       return es.delete({
         index: configFile.kibanaIndex,
         type: 'index-pattern',
@@ -54,5 +56,6 @@ define(function (require) {
     };
 
     indexPatterns.ensureSome = Private(require('./_ensure_some'));
+    indexPatterns.cache = patternCache;
   };
 });

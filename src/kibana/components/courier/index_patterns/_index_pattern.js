@@ -1,10 +1,11 @@
 define(function (require) {
   return function IndexPatternFactory(Private) {
     var inherits = require('utils/inherits');
-    var SavedObject = Private(require('../saved_object/saved_object'));
+
     var mapper = Private(require('./_mapper'));
+    var SavedObject = Private(require('../saved_object/saved_object'));
     var fieldFormats = Private(require('./_field_formats'));
-    var _ = require('lodash');
+    var patternCache = Private(require('./_pattern_cache'));
 
     function IndexPattern(id) {
       var pattern = this;
@@ -28,8 +29,6 @@ define(function (require) {
         afterESResp: function () {
           if (pattern.id) {
             if (!pattern.fields) return pattern.fetchFields();
-
-            mapper.cache.set(pattern.id, pattern.fields);
             afterFieldsSet();
           }
         },
@@ -77,6 +76,8 @@ define(function (require) {
         return '' + this.toJSON();
       };
     }
+    inherits(IndexPattern, SavedObject);
+
     return IndexPattern;
   };
 });
