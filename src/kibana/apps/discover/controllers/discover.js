@@ -393,7 +393,6 @@ define(function (require) {
         config.format = chartOptions.format;
 
         vis.segment.configs.push(config);
-        vis.writeAggs();
         // enable the source, but wait for the visualization to be ready before running
         searchSource.enable();
       });

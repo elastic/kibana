@@ -180,7 +180,7 @@ define(function (require) {
       };
 
       // reads the vis' config and write the agg to the searchSource
-      vis.writeAggs = function () {
+      vis.searchSource.aggs(function () {
         // stores the config objects in queryDsl
         var dsl = {};
         // counter to ensure unique agg names
@@ -201,8 +201,8 @@ define(function (require) {
         });
 
         // set the dsl to the searchSource
-        vis.searchSource.aggs(dsl.aggs || {});
-      };
+        return dsl.aggs || {};
+      });
 
       /**
        * Create a list of config objects, which are ready to be turned into aggregations,
