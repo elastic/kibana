@@ -60,8 +60,18 @@ define(function (require) {
           $scope.$root.$broadcast('ready:vis');
         });
 
+        $scope.$on('resize', function () {
+          // chart reference changes over time, don't bind to a specific chart object.
+          chart.resize();
+        });
+
         $scope.$on('$destroy', function () {
           if ($scope.vis) $scope.vis.destroy();
+          if (chart) {
+            chart.off('hover');
+            chart.off('click');
+            chart.destroy();
+          }
         });
       }
     };
