@@ -154,7 +154,7 @@ define(function (require) {
      */
     errors.NoDefinedIndexPatterns = function NoDefinedIndexPatterns(type) {
       CourierError.call(this,
-        'Define your first index patterns to begin',
+        'Define at least one index pattern to continue',
         errors.NoDefinedIndexPatterns);
     };
     inherits(errors.NoDefinedIndexPatterns, CourierError);
