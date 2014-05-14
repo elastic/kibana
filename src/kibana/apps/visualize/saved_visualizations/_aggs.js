@@ -114,6 +114,7 @@ define(function (require) {
             default: 'hour',
             custom: true,
             options: [
+              { display: 'Auto', val: 'auto' },
               { display: 'Minute', val: 'minute' },
               { display: 'Hourly', val: 'hour' },
               { display: 'Daily', val: 'day' },
@@ -122,9 +123,10 @@ define(function (require) {
               { display: 'Quarterly', val: 'quarter' },
               { display: 'Yearly', val: 'year' }
             ],
-            toJSON: function () {
+            toJSON: function (val) {
+              if (val !== 'auto') return val;
               var bounds = timefilter.getBounds();
-              var bucketParams = interval.calculate(bounds.min, bounds.max, 200);
+              var bucketParams = interval.calculate(bounds.min, bounds.max, 100);
               return bucketParams.interval + 'ms';
             }
           },
