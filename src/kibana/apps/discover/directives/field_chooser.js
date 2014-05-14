@@ -51,7 +51,7 @@ define(function (require) {
         var getFieldValues = function (data, field) {
           return _.map(data, function (row) {
             var val;
-            val = jsonPath.eval(row, '$._source.' + field)[0] || row[field];
+            val = row._source[field] || row[field];
             val = (val === null) ? '' : val;
             return val;
           });

@@ -386,7 +386,6 @@ define(function (require) {
         var config = vis.segment.configs.pop() || {};
         config.agg = 'date_histogram';
         config.field = $scope.opts.timefield;
-        config.interval = 'auto',
         config.min_doc_count = 0;
 
         vis.segment.configs.push(config);
