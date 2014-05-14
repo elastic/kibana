@@ -20,6 +20,7 @@ define(function (require) {
         return indexPattern.refreshFields()
         .then(refreshKibanaIndex)
         .then(function () {
+          courier.indexPatterns.cache.clear(indexPattern.id);
           $location.url('/settings/indices/' + indexPattern.id);
         });
 
