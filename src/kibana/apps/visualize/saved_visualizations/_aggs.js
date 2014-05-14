@@ -121,7 +121,12 @@ define(function (require) {
               { display: 'Monthly', val: 'month' },
               { display: 'Quarterly', val: 'quarter' },
               { display: 'Yearly', val: 'year' }
-            ]
+            ],
+            toJSON: function () {
+              var bounds = timefilter.getBounds();
+              var bucketParams = interval.calculate(bounds.min, bounds.max, 200);
+              return bucketParams.interval + 'ms';
+            }
           },
           format: {
             custom: true
