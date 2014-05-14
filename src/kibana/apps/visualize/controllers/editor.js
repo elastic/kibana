@@ -17,7 +17,10 @@ define(function (require) {
     return function (using) {
       return savedVisualizations.get(using)
       .then(function (vis) {
-        return courier.indexPatterns.get(vis.searchSource.get('index'))
+        var index = vis.searchSource.get('index');
+        if (!index) throw new courier.errors.SavedObjectNotFound('index-pattern');
+
+        return courier.indexPatterns.get(index)
         .then(function (indexPattern) {
           return [vis, indexPattern];
         });

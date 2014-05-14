@@ -21,7 +21,7 @@ define(function (require) {
       }
 
       var typeDef;
-      var parentSearch = opts.parentSearchSource || courier.SavedObject.rootSearch();
+      var rootSearch = opts.parentSearchSource || courier.SavedObject.rootSearch();
 
       courier.SavedObject.call(vis, {
         type: 'visualization',
@@ -33,7 +33,8 @@ define(function (require) {
           typeName: 'string',
           stateJSON: 'string',
           description: 'string',
-          savedSearchId: 'string'
+          savedSearchId: 'string',
+          indexPattern: 'string'
         },
 
         defaults: {
@@ -42,6 +43,7 @@ define(function (require) {
           stateJSON: null,
           description: '',
           savedSearchId: opts.savedSearchId,
+          indexPattern: opts.indexPattern
         },
 
         searchSource: true,
@@ -64,22 +66,31 @@ define(function (require) {
           if (state) vis.setState(state);
 
 
-          // default parent is the rootSearch, can be overridden (like in discover)
-          // but we mimic the searchSource prop from saved objects here
-          var parent = {
-            searchSource: parentSearch
-          };
 
-          // set/get the parent savedSearch
-          if (vis.savedSearchId) {
-            if (!vis.savedSearch || vis.savedSearch.id !== vis.savedSearchId) {
+          var relatedSearch = vis.savedSearchId;
+          var relatedPattern = !relatedSearch && vis.indexPattern;
+
+          var promisedParent = (function () {
+            if (relatedSearch) {
               // returns a promise
-              parent = savedSearches.get(vis.savedSearchId);
+              return savedSearches.get(vis.savedSearchId);
             }
-          }
 
-          // can be either a SavedSearch or a savedSearches.get() promise
-          return Promise.cast(parent)
+            if (relatedPattern) {
+              // create a new search source that inherits from the parent and uses the indexPattern
+              return Promise.resolve({
+                searchSource: rootSearch.extend().index(relatedPattern)
+              });
+            }
+
+            // default parent is the rootSearch, can be overridden (like in discover)
+            // but we mimic the searchSource prop from saved objects here
+            return Promise.resolve({
+              searchSource: rootSearch
+            });
+          }());
+
+          return promisedParent
           .then(function (parent) {
             vis.savedSearch = parent;
 
@@ -88,8 +99,10 @@ define(function (require) {
               .size(0);
 
             vis._fillConfigsToMinimum();
+
             // get and cache the field list
-            return courier.getFieldsFor(vis.searchSource.get('index'));
+            var index = vis.searchSource.get('index');
+            if (index) return courier.getFieldsFor(index);
           })
           .then(function () {
             return vis;
