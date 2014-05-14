@@ -81,7 +81,6 @@ define(function (require) {
      * @return {Array} - a list of the keys from state that were updated.
      */
     var writeStateAndFetch = function () {
-      vis.writeAggs();
       _.assign($state, vis.getState());
       $state.commit();
       vis.searchSource.fetch();
@@ -94,7 +93,6 @@ define(function (require) {
     var readStateAndFetch = function () {
       // update and commit the state, which will update the vis dataSource if there were new changes
       vis.setState($state);
-      vis.writeAggs();
       vis.searchSource.fetch();
     };
 
