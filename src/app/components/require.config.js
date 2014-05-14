@@ -21,6 +21,7 @@ require.config({
     'angular-dragdrop':       '../vendor/angular/angular-dragdrop',
     'angular-strap':          '../vendor/angular/angular-strap',
     'angular-sanitize':       '../vendor/angular/angular-sanitize',
+    'angular-route':          '../vendor/angular/angular-route',
     timepicker:               '../vendor/angular/timepicker',
     datepicker:               '../vendor/angular/datepicker',
     bindonce:                 '../vendor/angular/bindonce',
