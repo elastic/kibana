@@ -383,14 +383,11 @@ define(function (require) {
 
         $scope.vis = vis;
 
-        var chartOptions = interval.calculate(timefilter.time.from, timefilter.time.to, 100);
-
         var config = vis.segment.configs.pop() || {};
         config.agg = 'date_histogram';
         config.field = $scope.opts.timefield;
-        config.interval = chartOptions.interval + 'ms';
+        config.interval = 'auto',
         config.min_doc_count = 0;
-        config.format = chartOptions.format;
 
         vis.segment.configs.push(config);
         // enable the source, but wait for the visualization to be ready before running
