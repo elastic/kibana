@@ -65,8 +65,6 @@ define(function (require) {
           // set the state on the vis
           if (state) vis.setState(state);
 
-
-
           var relatedSearch = vis.savedSearchId;
           var relatedPattern = !relatedSearch && vis.indexPattern;
 
@@ -164,6 +162,31 @@ define(function (require) {
           });
         });
 
+        // reads the vis' config and write the agg to the searchSource
+        vis.searchSource.aggs(function () {
+          // stores the config objects in queryDsl
+          var dsl = {};
+          // counter to ensure unique agg names
+          var i = 0;
+          // start at the root, but the current will move
+          var current = dsl;
+
+          // continue to nest the aggs under each other
+          // writes to the dsl object
+          vis.getConfig().forEach(function (config) {
+            current.aggs = {};
+            var key = '_agg_' + (i++);
+
+            var aggDsl = {};
+            aggDsl[config.agg] = config.aggParams;
+
+            current = current.aggs[key] = aggDsl;
+          });
+
+          // set the dsl to the searchSource
+          return dsl.aggs || {};
+        });
+
         vis._fillConfigsToMinimum();
       };
 
@@ -178,31 +201,6 @@ define(function (require) {
           }));
         }, {});
       };
-
-      // reads the vis' config and write the agg to the searchSource
-      vis.searchSource.aggs(function () {
-        // stores the config objects in queryDsl
-        var dsl = {};
-        // counter to ensure unique agg names
-        var i = 0;
-        // start at the root, but the current will move
-        var current = dsl;
-
-        // continue to nest the aggs under each other
-        // writes to the dsl object
-        vis.getConfig().forEach(function (config) {
-          current.aggs = {};
-          var key = '_agg_' + (i++);
-
-          var aggDsl = {};
-          aggDsl[config.agg] = config.aggParams;
-
-          current = current.aggs[key] = aggDsl;
-        });
-
-        // set the dsl to the searchSource
-        return dsl.aggs || {};
-      });
 
       /**
        * Create a list of config objects, which are ready to be turned into aggregations,
