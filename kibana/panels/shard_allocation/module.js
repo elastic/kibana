@@ -57,7 +57,7 @@ define(function (require) {
     $scope.timeRange = {};
 
     // Inject dependicies for the getTimelineData
-    var getTimeline = getTimelineDataGenerator($http, dashboard, filterSrv);
+    var getTimeline = getTimelineDataGenerator($http, dashboard, filterSrv, $scope);
     var getStateSource = getStateSourceGenerator($http);
 
     // Create a partial with the config for the first argument

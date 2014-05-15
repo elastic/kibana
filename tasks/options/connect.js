@@ -38,6 +38,7 @@ module.exports = function (config) {
     },
     test: {
       options: {
+        hostname: '<%= kibanaHost %>',
         port: '6767',
         base: testBase,
         keepalive: false,

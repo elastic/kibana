@@ -2,13 +2,17 @@ define(function (require) {
   'use strict';
   var _ = require('lodash');
   var getValueFromArrayOrString = require('../lib/getValueFromArrayOrString');
-  return function ($http, dashboard, filterSrv) {
-    var getTimelineData = function (config, size, timeRange, data) {
+  return function ($http, dashboard, filterSrv, $scope) {
+
+    var getTimelineData = function (config, size, timeRange, data, position) {
+      var newPosition = false;
       size = _.isUndefined(size) ? 300 : size;
       data = _.isUndefined(data) ? [] : data;
+      position = _.isUndefined(position) ? 0 : position;
+
       timeRange = _.isUndefined(timeRange) ? filterSrv.timeRange(true) : timeRange;
 
-      var url = config.elasticsearch+'/'+dashboard.indices.join(',')+'/cluster_state/_search';
+      var url = config.elasticsearch+'/'+dashboard.indices[position]+'/cluster_state/_search';
       var body = {
         size: size,
         from: 0,
@@ -27,20 +31,37 @@ define(function (require) {
         }
       };
 
-      return $http.post(url, body).then(function (resp) {
+      var success = function (resp) {
         var nextTimeRange;
         var hits = resp.data.hits;
         data.push.apply(data, hits.hits);
-        if (hits.total > size && hits.hits.length === size) {
+
+        if (hits.hits.length === hits.total) {
+          position++;
+          newPosition = dashboard.indices[position] ? true : false;
+        }
+
+        if ((hits.total > size && hits.hits.length === size) || newPosition) {
           nextTimeRange = {
-            to: getValueFromArrayOrString(hits.hits[size-1].fields['@timestamp']),
+            to: getValueFromArrayOrString(hits.hits[hits.hits.length-1].fields['@timestamp']),
             from: timeRange.from
           };
-          return getTimelineData(config, size, nextTimeRange, data); // call again
+          return getTimelineData(config, size, nextTimeRange, data, position); // call again
         }
         // flip data back to normal order
         return data.reverse();
-      });
+      };
+
+      var error = function (resp) {
+        $scope.panel.error = resp.data.error; 
+        position++;
+        if (dashboard.indices[position]) {
+          return getTimelineData(config, size, timeRange, data, position); // call again
+        }
+        return data.reverse();
+      };
+
+      return $http.post(url, body).then(success, error);
 
     };
 
