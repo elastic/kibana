@@ -10,7 +10,6 @@ function (angular) {
       return {
         restrict: 'A',
         link: function(scope, elem) {
-          console.log('linked');
 
           var getOpts = function() {
             return {
