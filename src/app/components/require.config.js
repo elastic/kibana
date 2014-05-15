@@ -48,6 +48,9 @@ require.config({
     numeral:                  '../vendor/numeral',
     jsonpath:                 '../vendor/jsonpath',
     elasticjs:                '../vendor/elasticjs/elastic-angular-client',
+      
+    d3:                       '../vendor/d3/d3',
+    'd3.layout.cloud':        '../vendor/d3/d3.layout.cloud',
   },
   shim: {
     angular: {
@@ -93,6 +96,8 @@ require.config({
     'angular-touch':        ['angular'],
     'bindonce':             ['angular'],
     'angular-strap':        ['angular', 'bootstrap','timepicker', 'datepicker'],
+      
+    'd3.layout.cloud':      ['d3'],
 
     timepicker:             ['jquery', 'bootstrap'],
     datepicker:             ['jquery', 'bootstrap'],

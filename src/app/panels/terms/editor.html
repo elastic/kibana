@@ -37,7 +37,7 @@
       <h5>View Options</h5>
       <div class="editor-option">
         <label class="small">Style</label>
-        <select class="input-small" ng-model="panel.chart" ng-options="f for f in ['bar','pie','table']"></select></span>
+        <select class="input-medium" ng-model="panel.chart" ng-options="f for f in ['bar','pie','table','wordcloud']"></select></span>
       </div>
       <div class="editor-option" ng-show="panel.chart == 'table'">
         <label class="small">Font Size</label>
@@ -47,9 +47,37 @@
         <label class="small">Legend</label>
         <select class="input-small" ng-model="panel.counter_pos" ng-options="f for f in ['above','below','none']"></select></span>
       </div>
-      <div class="editor-option" ng-show="panel.chart != 'table' && panel.counter_pos != 'none'">
+      <div class="editor-option" ng-show="panel.chart != 'table' && panel.chart != 'wordcloud' && panel.counter_pos != 'none'">
         <label class="small" >Legend Format</label>
         <select class="input-small" ng-model="panel.arrangement" ng-options="f for f in ['horizontal','vertical']"></select></span>
+      </div>
+      <div class="editor-option" ng-show="panel.chart == 'wordcloud'">
+        <label class="small">N&deg; of orientation</label>
+        <input class="input-small" type="number" ng-model="panel.orientation" ng-change="set_refresh(true)">
+      </div>
+      <div class="editor-option" ng-show="panel.chart == 'wordcloud'">
+        <label class="small">From degree</label>
+        <input class="input-small" type="number" ng-model="panel.from_degree" ng-change="set_refresh(true)">
+      </div>
+      <div class="editor-option" ng-show="panel.chart == 'wordcloud'">
+        <label class="small">To degree</label>
+        <input class="input-small" type="number" ng-model="panel.to_degree" ng-change="set_refresh(true)">
+      </div>
+      <div class="editor-option" ng-show="panel.chart == 'wordcloud'">
+        <label class="small">Minimum Font Size</label>
+        <input class="input-small" type="number" ng-model="panel.min_font_size" ng-change="set_refresh(true)">
+      </div>
+      <div class="editor-option" ng-show="panel.chart == 'wordcloud'">
+        <label class="small">Maximum Font Size</label>
+        <input class="input-small" type="number" ng-model="panel.max_font_size" ng-change="set_refresh(true)">
+      </div>
+      <div class="editor-option" ng-show="panel.chart == 'wordcloud'">
+        <label class="small">Padding</label>
+        <input class="input-small" type="number" ng-model="panel.padding" ng-change="set_refresh(true)">
+      </div>
+      <div class="editor-option" ng-show="panel.chart == 'wordcloud'">
+        <label class="small">Color by size</label>
+        <input type="checkbox" ng-model="panel.group_by_color" ng-checked="panel.group_by_color">
       </div>
       <div class="editor-option">
         <label class="small">Missing</label><input type="checkbox" ng-model="panel.missing" ng-checked="panel.missing">

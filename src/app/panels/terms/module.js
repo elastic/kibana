@@ -16,9 +16,10 @@ define([
   'app',
   'lodash',
   'jquery',
-  'kbn'
+  'kbn',
+  'd3'
 ],
-function (angular, app, _, $, kbn) {
+function (angular, app, _, $, kbn, d3) {
   'use strict';
 
   var module = angular.module('kibana.panels.terms', []);
@@ -99,6 +100,34 @@ function (angular, app, _, $, kbn) {
        * counter_pos:: The location of the legend in respect to the chart, above, below, or none.
        */
       counter_pos : 'above',
+      /** @scratch /panels/terms/5
+       * group_by_color:: When true uses the same color to words with the same size, 
+       */
+      group_by_color : true,
+      /** @scratch /panels/terms/5
+       * orientation:: Number of possible orientations.
+       */
+      orientation: 5,
+      /** @scratch /panels/terms/5
+       * from_degree:: From degree, min = -90, max = 0.
+       */
+      from_degree: -90,
+      /** @scratch /panels/terms/5
+       * to_degree:: To degree, min = 0, max = 90.
+       */
+      to_degree: 90,
+      /** @scratch /panels/terms/5
+       * max_font_size:: Maximum font size.
+       */
+      min_font_size: 10,
+      /** @scratch /panels/terms/5
+       * padding:: Padding among words.
+       */
+      max_font_size: 40,
+      /** @scratch /panels/terms/5
+       * padding:: Padding among words.
+       */
+      padding: 5,
       /** @scratch /panels/terms/5
        * spyable:: Set spyable to false to disable the inspect button
        */
@@ -256,6 +285,7 @@ function (angular, app, _, $, kbn) {
       restrict: 'A',
       link: function(scope, elem) {
         var plot;
+        var width_wc;
 
         // Receive render events
         scope.$on('render',function(){
@@ -301,105 +331,147 @@ function (angular, app, _, $, kbn) {
             _.without(chartData,_.findWhere(chartData,{meta:'missing'}));
           chartData = scope.panel.other ? chartData :
           _.without(chartData,_.findWhere(chartData,{meta:'other'}));
+          if(scope.panel.chart === 'bar' || scope.panel.chart === 'pie'){
+            // Populate element.
+            require(['jquery.flot.pie'], function(){
+              // Populate element
+              try {
+                // Add plot to scope so we can build out own legend
+                if(scope.panel.chart === 'bar') {
+                  plot = $.plot(elem, chartData, {
+                    legend: { show: false },
+                    series: {
+                      lines:  { show: false, },
+                      bars:   { show: true,  fill: 1, barWidth: 0.8, horizontal: false },
+                      shadowSize: 1
+                    },
+                    yaxis: { show: true, min: 0, color: "#c8c8c8" },
+                    xaxis: { show: false },
+                    grid: {
+                      borderWidth: 0,
+                      borderColor: '#c8c8c8',
+                      color: "#c8c8c8",
+                      hoverable: true,
+                      clickable: true
+                    },
+                    colors: querySrv.colors
+                  });
+                }
+                if(scope.panel.chart === 'pie') {
+                  var labelFormat = function(label, series){
+                    return '<div ng-click="build_search(panel.field,\''+label+'\')'+
+                      ' "style="font-size:8pt;text-align:center;padding:2px;color:white;">'+
+                      label+'<br/>'+Math.round(series.percent)+'%</div>';
+                  };
 
-          // Populate element.
-          require(['jquery.flot.pie'], function(){
-            // Populate element
-            try {
-              // Add plot to scope so we can build out own legend
-              if(scope.panel.chart === 'bar') {
-                plot = $.plot(elem, chartData, {
-                  legend: { show: false },
-                  series: {
-                    lines:  { show: false, },
-                    bars:   { show: true,  fill: 1, barWidth: 0.8, horizontal: false },
-                    shadowSize: 1
-                  },
-                  yaxis: { show: true, min: 0, color: "#c8c8c8" },
-                  xaxis: { show: false },
-                  grid: {
-                    borderWidth: 0,
-                    borderColor: '#c8c8c8',
-                    color: "#c8c8c8",
-                    hoverable: true,
-                    clickable: true
-                  },
-                  colors: querySrv.colors
-                });
-              }
-              if(scope.panel.chart === 'pie') {
-                var labelFormat = function(label, series){
-                  return '<div ng-click="build_search(panel.field,\''+label+'\')'+
-                    ' "style="font-size:8pt;text-align:center;padding:2px;color:white;">'+
-                    label+'<br/>'+Math.round(series.percent)+'%</div>';
-                };
-
-                plot = $.plot(elem, chartData, {
-                  legend: { show: false },
-                  series: {
-                    pie: {
-                      innerRadius: scope.panel.donut ? 0.4 : 0,
-                      tilt: scope.panel.tilt ? 0.45 : 1,
-                      radius: 1,
-                      show: true,
-                      combine: {
-                        color: '#999',
-                        label: 'The Rest'
-                      },
-                      stroke: {
-                        width: 0
-                      },
-                      label: {
-                        show: scope.panel.labels,
-                        radius: 2/3,
-                        formatter: labelFormat,
-                        threshold: 0.1
+                  plot = $.plot(elem, chartData, {
+                    legend: { show: false },
+                    series: {
+                      pie: {
+                        innerRadius: scope.panel.donut ? 0.4 : 0,
+                        tilt: scope.panel.tilt ? 0.45 : 1,
+                        radius: 1,
+                        show: true,
+                        combine: {
+                          color: '#999',
+                          label: 'The Rest'
+                        },
+                        stroke: {
+                          width: 0
+                        },
+                        label: {
+                          show: scope.panel.labels,
+                          radius: 2/3,
+                          formatter: labelFormat,
+                          threshold: 0.1
+                        }
                       }
+                    },
+                    //grid: { hoverable: true, clickable: true },
+                    grid:   { hoverable: true, clickable: true, color: '#c8c8c8' },
+                    colors: querySrv.colors
+                  });
+                }
+
+                // Populate legend
+                if(elem.is(":visible")){
+                  setTimeout(function(){
+                    scope.legend = plot.getData();
+                    if(!scope.$$phase) {
+                      scope.$apply();
                     }
-                  },
-                  //grid: { hoverable: true, clickable: true },
-                  grid:   { hoverable: true, clickable: true, color: '#c8c8c8' },
-                  colors: querySrv.colors
-                });
-              }
+                  });
+                }
 
-              // Populate legend
-              if(elem.is(":visible")){
-                setTimeout(function(){
-                  scope.legend = plot.getData();
-                  if(!scope.$$phase) {
-                    scope.$apply();
-                  }
-                });
+              } catch(e) {
+                elem.text(e);
               }
+            });
+            elem.bind("plotclick", function (event, pos, object) {
+              if(object) {
+                scope.build_search(scope.data[object.seriesIndex]);
+              }
+            });
 
-            } catch(e) {
-              elem.text(e);
-            }
-          });
+            var $tooltip = $('<div>');
+            elem.bind("plothover", function (event, pos, item) {
+              if (item) {
+                var value = scope.panel.chart === 'bar' ? item.datapoint[1] : item.datapoint[1][0][1];
+                $tooltip
+                  .html(
+                    kbn.query_color_dot(item.series.color, 20) + ' ' +
+                    item.series.label + " (" + value.toFixed(0)+")"
+                  )
+                  .place_tt(pos.pageX, pos.pageY);
+              } else {
+                $tooltip.remove();
+              }
+            });
+          }
+          if(scope.panel.chart === 'wordcloud'){
+            elem.empty();
+            require(['d3.layout.cloud'], function(){    
+              var $tooltip = $('<div>');
+              var fill = d3.scale.ordinal().range(querySrv.colors);
+              var min_fs = scope.panel.min_font_size;
+              var max_fs =scope.panel.max_font_size;
+              var from_d = scope.panel.from_degree;
+              var to_d = scope.panel.to_degree;
+              var groupByColor = scope.panel.group_by_color;
+              var fontScale = d3.scale.linear().domain([1,chartData[0].data[0][1]]).range([min_fs,max_fs]);
+              var height_wc = elem.height();
+              var scaleDegree = d3.scale.linear().domain([0, scope.panel.orientation - 1]).range([from_d, to_d]);
+              width_wc = elem.width() === 0 ? width_wc : elem.width();
+
+              
+              
+              function draw() {
+                var text = vis.selectAll("text").data(chartData, function(d) {return d.label;});
+                text.enter().append("text")
+                .attr("text-anchor", "middle")
+                .attr("transform", function(d) {return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";})
+                .style("font-size", function(d) {return (fontScale(d.data[0][1])) + "px"; })
+                .style("fill", function(d, i) { return groupByColor ? fill(d.data[0][1]) : fill(i); })
+                .text(function(d) {return d.text;})
+                .on('mouseover', function(d,i){
+                                  var color = kbn.query_color_dot(groupByColor ? fill(d.data[0][1]) : fill(i), 20);
+                                  $tooltip.html( color + ' ' +d.data[0][1]).place_tt(event.pageX, event.pageY);
+                                })
+                .on('mouseout', function(){$tooltip.remove();})
+                .on('click', function(d,i){return scope.build_search(scope.data[i]);});
+              }
+              
+              d3.layout.cloud().words(chartData)
+              .timeInterval(10).size([width_wc, height_wc]).text(function(d) {return d.label;})
+              .rotate(function() { return scaleDegree(~~(Math.random() * scope.panel.orientation)); })
+              .fontSize(function(d) { return fontScale(d.data[0][1]); })
+              .padding(scope.panel.padding).spiral('archimedean').on("end", draw).start();
+              var svg = d3.select("div.terms-chart").append("svg").attr("width", width_wc).attr("height", height_wc),
+              vis = svg.append("g").attr("transform", "translate(" + [width_wc >> 1, height_wc >> 1] + ")");
+
+            });
+          }
         }
-
-        elem.bind("plotclick", function (event, pos, object) {
-          if(object) {
-            scope.build_search(scope.data[object.seriesIndex]);
-          }
-        });
-
-        var $tooltip = $('<div>');
-        elem.bind("plothover", function (event, pos, item) {
-          if (item) {
-            var value = scope.panel.chart === 'bar' ? item.datapoint[1] : item.datapoint[1][0][1];
-            $tooltip
-              .html(
-                kbn.query_color_dot(item.series.color, 20) + ' ' +
-                item.series.label + " (" + value.toFixed(0)+")"
-              )
-              .place_tt(pos.pageX, pos.pageY);
-          } else {
-            $tooltip.remove();
-          }
-        });
-
       }
     };
   });

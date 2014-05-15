@@ -90,5 +90,9 @@
   "jvectormap": {
     "version":"1.2.2",
     "license":"MIT"
+  },
+  "d3": {
+    "version":"3.4.6",
+    "license":"BSD"
   }
 }
