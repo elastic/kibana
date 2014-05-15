@@ -1,10 +1,10 @@
 module.exports = function (grunt) {
   /* jshint scripturl:true */
   grunt.registerTask('test', [
-    'jshint',
     'maybe_start_server',
     'jade',
-    'mocha:unit'
+    'mocha:unit',
+    'jshint'
   ]);
 
   grunt.registerTask('coverage', [

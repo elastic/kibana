@@ -1,8 +1,11 @@
 define(function (require) {
   var angular = require('angular');
   var mocks = require('angular-mocks');
+  var moment = require('moment');
   var _ = require('lodash');
   var $ = require('jquery');
+  var sinon = require('sinon/sinon');
+
 
   // Load the kibana app dependencies.
   require('angular-route');
@@ -16,40 +19,37 @@ define(function (require) {
   require('apps/discover/index');
 
 
-  describe('Dashboard panels', function () {
+  describe('Modes', function () {
     var $scope, $elem;
+    var clock, anchor = '2014-01-01T06:06:06.666Z';
 
     beforeEach(function () {
-
+      // Need some module, doesn't matter which really
       module('kibana');
+
+      clock = sinon.useFakeTimers(moment(anchor).valueOf());
 
       // Create the scope
       inject(function ($rootScope, $compile) {
 
         $scope = $rootScope;
 
-        var params = {
-          type: 'new'
+        $scope.time = {
+          from: moment().subtract(15, 'minutes'),
+          to: moment()
         };
 
         $elem = angular.element(
-          '<dashboard-panel params=\'' + JSON.stringify(params) + '\'></dashboard-panel>'
+          '<kbn-timepicker from="time.from" to="time.to"></kbn-timepicker>'
         );
 
         $compile($elem)($scope);
-        $scope.$digest();
       });
 
     });
 
-    it('should have a close button', function (done) {
-      var closeIcon = $elem.find('i.remove');
-      expect(closeIcon.length).to.be(1);
-      done();
-    });
-
-    it('should have the name of the panel', function (done) {
-      expect($elem.text()).to.be('new');
+    it('should contain something', function (done) {
+      expect($elem.text().length).to.be.above(1);
       done();
     });
 
