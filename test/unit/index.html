@@ -48,16 +48,19 @@
       function runTests() {
         require([
           'sinon/sinon',
-          'specs/apps/dashboard/directives/panel',
+          //'specs/apps/dashboard/directives/panel',
+          'specs/directives/timepicker',
           'specs/utils/datemath',
           'specs/utils/interval',
-          'specs/courier/index'
         ], function (sinon) {
 
           var xhr = sinon.useFakeXMLHttpRequest();
+
+          /*
           xhr.onCreate = function () {
             throw new Error('Tests should not be sending XHR requests');
           };
+          */
 
           window.mochaRunner = mocha.run().on('end', function () {
             window.mochaResults = this.stats;
