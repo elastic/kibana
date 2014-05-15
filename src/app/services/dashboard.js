@@ -82,6 +82,9 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
       self.current = {};
       self.indices = [];
       esVersion.isMinimum().then(function(isMinimum) {
+        if(_.isUndefined(isMinimum)) {
+          return;
+        }
         if(isMinimum) {
           route();
         } else {
