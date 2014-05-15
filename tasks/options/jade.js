@@ -7,7 +7,8 @@ module.exports = function (grunt) {
     test: {
       options: {
         data: {
-          tests: JSON.stringify(tests)
+          tests: JSON.stringify(tests),
+          host: '<%= kibanaHost %>'
         },
         client: false
       },

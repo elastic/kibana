@@ -5,11 +5,13 @@ define([
     'lodash',
     'jquery',
     'numeral',
+    './lib/detectSplitBrain',
+    './lib/splitBrainHistogram',
     'jquery.flot',
     'jquery.flot.time',
     'services/marvel/index'
   ],
-  function (angular, app, kbn, _, $, numeral) {
+  function (angular, app, kbn, _, $, numeral, detectSplitBrain, splitBrainHistogram) {
     'use strict';
 
     var module = angular.module('kibana.panels.marvel.stats_table', []);
@@ -62,7 +64,7 @@ define([
     }
 
     module.controller('marvel.stats_table', function ($scope, dashboard, filterSrv, esVersion, $clusterState, $filter,
-                                                      alertSrv) {
+                                                      alertSrv, $http) {
       $scope.panelMeta = {
         modals: [],
         editorTabs: [],
@@ -362,7 +364,8 @@ define([
         var
           request,
           filter,
-          results;
+          results,
+          master_nodes;
 
         filter = filterSrv.getBoolFilter(filterSrv.ids);
 
@@ -386,11 +389,10 @@ define([
 
         // master node detection
         if ($scope.panel.mode === "nodes") {
-          request.facet($scope.ejs.TermStatsFacet("master_periods")
-            .keyField($scope.panel.persistent_field).valueField("@timestamp")
-            .order('term').facetFilter($scope.ejs.TermFilter("node.master", "true"))
+          request.facet($scope.ejs.TermsFacet("master_nodes")
+            .field("node.ip_port.raw")
+            .facetFilter($scope.ejs.TermFilter("node.master", "true"))
             .size(2000));
-
         }
 
         _.each($scope.panel.metrics, function (m) {
@@ -439,34 +441,10 @@ define([
             };
           });
 
-          if (r.facets['master_periods']) {
-            var most_recent_master = _.max(r.facets['master_periods'].terms, function (f) {
-              return f.max;
-            });
-            newData[most_recent_master.term].master = true;
-            // now check we have other active master within the same time frame
-            var other_masters = _.filter(r.facets['master_periods'].terms, function (t) {
-              if (t.term === most_recent_master.term) {
-                return false;
-              }
-              if (maxFilterTime - t.max > $scope.staleIntervalCount * newData[t.term].reporting_interval * 1000) {
-                // stale master info, we don't care.
-                return false;
-              }
-              // enough of overlap to not be a master swap
-              return (t.max - most_recent_master.min >
-                Math.min(300 * 1000, $scope.staleIntervalCount * newData[t.term].reporting_interval * 1000));
-            });
-            _.each(other_masters, function (t) {
-              newData[t.term].master = true;
-            });
-            if (other_masters.length > 0) {
-              // mark all master nodes as alerting
-              _.each(newData, function (n) {
-                if (n.master) {
-                  n.alert_level = n.id_alert_level = 2;
-                }
-              });
+          if (r.facets['master_nodes']) {
+            master_nodes = r.facets['master_nodes'];
+            if (master_nodes.terms.length === 1) {
+              newData[master_nodes.terms[0].term].master = true;
             }
           }
 
@@ -604,8 +582,66 @@ define([
                 }
                 (newData[persistent_name] || {}).display_name = display_name;
               });
-              $scope._register_data_end();
-              $scope.select_display_data_and_enrich(newData);
+            
+            
+              if (master_nodes.terms.length !== 1) {
+                var nodes = _.map(master_nodes.terms, function (term) {
+                  return term.term; 
+                });
+                var req = splitBrainHistogram($http, dashboard, $scope.panel.persistent_field);
+                var success = function (data) {
+
+                  // Get the splitBrainReport. This will return an object with
+                  // the following attributes:
+                  //
+                  //   status:  The status of the report:
+                  //            red = immediate split
+                  //            yellow = was a split
+                  //            green = all clear
+                  //
+                  //  red:      a list of the red events. Each event will have
+                  //            the following attributes: to, from, nodes
+                  //
+                  //  yellow:  Same as the red events excpet these events
+                  //           are events that happened in the past
+                  //
+                  //  series:  an object of the raw events used to calculate the
+                  //           the different status. 
+                  //
+                  // As you can see there is a lot more we can do with this report
+                  // for now we just use it to highlight the correct nodes that will
+                  // trigger an error message for split brain.
+                  var splitBrainReport = detectSplitBrain(data);
+
+                  // Highlight each master
+                  _.each(splitBrainReport.master, function(node) {
+                    newData[node].master = true;
+                  });
+
+                  // Set alert level for red nodes
+                  _.each(splitBrainReport.red, function (event) {
+                    _.each(event.nodes, function (node) {
+                      newData[node].alert_level = newData[node].id_alert_level = 2;
+                    });
+                  });
+
+                  $scope._register_data_end();
+                  $scope.select_display_data_and_enrich(newData);
+                };
+
+                var error = function (resp) {
+                  $scope.error = resp.data.error; 
+                  $scope._register_data_end();
+                  $scope.select_display_data_and_enrich(newData);
+                };
+
+                req(nodes, to).then(success, error);
+
+              } else {
+                $scope._register_data_end();
+                $scope.select_display_data_and_enrich(newData);
+              }
+
             });
           }, $scope._register_data_end);
         }, $scope._register_data_end);

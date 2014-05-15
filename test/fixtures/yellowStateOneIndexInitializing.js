@@ -2,6 +2,7 @@ define(function () {
   'use strict';
   return function () {
     return {
+      _id: new Date().getTime(), 
       status: 'yellow',
       nodes: {
         'node-1':  {
