@@ -94,7 +94,31 @@ define(function (require) {
 
             vis.searchSource
               .inherits(parent.searchSource)
-              .size(0);
+              .size(0)
+              // reads the vis' config and write the agg to the searchSource
+              .aggs(function () {
+                // stores the config objects in queryDsl
+                var dsl = {};
+                // counter to ensure unique agg names
+                var i = 0;
+                // start at the root, but the current will move
+                var current = dsl;
+
+                // continue to nest the aggs under each other
+                // writes to the dsl object
+                vis.getConfig().forEach(function (config) {
+                  current.aggs = {};
+                  var key = '_agg_' + (i++);
+
+                  var aggDsl = {};
+                  aggDsl[config.agg] = config.aggParams;
+
+                  current = current.aggs[key] = aggDsl;
+                });
+
+                // set the dsl to the searchSource
+                return dsl.aggs || {};
+              });
 
             vis._fillConfigsToMinimum();
 
@@ -160,31 +184,6 @@ define(function (require) {
             var config = vis.addConfig(category.name);
             _.assign(config, configState);
           });
-        });
-
-        // reads the vis' config and write the agg to the searchSource
-        vis.searchSource.aggs(function () {
-          // stores the config objects in queryDsl
-          var dsl = {};
-          // counter to ensure unique agg names
-          var i = 0;
-          // start at the root, but the current will move
-          var current = dsl;
-
-          // continue to nest the aggs under each other
-          // writes to the dsl object
-          vis.getConfig().forEach(function (config) {
-            current.aggs = {};
-            var key = '_agg_' + (i++);
-
-            var aggDsl = {};
-            aggDsl[config.agg] = config.aggParams;
-
-            current = current.aggs[key] = aggDsl;
-          });
-
-          // set the dsl to the searchSource
-          return dsl.aggs || {};
         });
 
         vis._fillConfigsToMinimum();
