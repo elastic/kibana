@@ -18,8 +18,6 @@ define(function (require) {
       link: function ($scope, $el) {
         var chart; // set in "vis" watcher
 
-
-
         $scope.$watch('vis', function (vis, prevVis) {
           var typeDefinition = typeDefs.byName[vis.typeName];
 
@@ -29,7 +27,8 @@ define(function (require) {
             chart.off('click');
             chart.destroy();
           }
-          if (!(vis instanceof SavedVis)) return;
+
+          //if (!(vis instanceof SavedVis)) return;
 
           var notify = createNotifier({
             location: vis.typeName + ' visualization'
@@ -39,15 +38,17 @@ define(function (require) {
             type: vis.typeName,
           };
 
-          _.merge(vis.params, params);
+          _.merge(params, vis.params);
           _.defaults(params, typeDefinition.params);
 
           chart = new k4d3.Chart($el[0], params);
 
-          if (!!typeDefinition.onHover) chart.on('hover', typeDefinition.onHover);
-          if (!!typeDefinition.onClick) chart.on('click', typeDefinition.onClick);
-          if (!!typeDefinition.onBrush) chart.on('brush', typeDefinition.onBrush);
-
+          // For each type of interaction, assign the the handler if the vis object has it
+          // otherwise use the typeDef, otherwise, do nothing.
+          _.each({hover: 'onHover', click: 'onClick', brush: 'onBrush'}, function (func, event) {
+            var callback = vis[func] || typeDefinition[func];
+            if (!!callback) chart.on(event, callback);
+          });
 
           vis.searchSource.onResults(function onResults(resp) {
             courier.indexPatterns.get(vis.searchSource.get('index'))
