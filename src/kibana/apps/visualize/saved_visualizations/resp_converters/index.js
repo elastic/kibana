@@ -1,5 +1,7 @@
 define(function (require) {
-  return {
-    histogram: require('./histogram')
+  return function RespConvertersService(Private) {
+    return {
+      histogram: Private(require('./histogram'))
+    };
   };
 });
