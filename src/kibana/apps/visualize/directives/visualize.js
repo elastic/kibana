@@ -18,11 +18,11 @@ define(function (require) {
       link: function ($scope, $el) {
         var chart; // set in "vis" watcher
 
-        function onHover(event) {
-          console.log(event);
-        }
+
 
         $scope.$watch('vis', function (vis, prevVis) {
+          var typeDefinition = typeDefs.byName[vis.typeName];
+
           if (prevVis && prevVis.destroy) prevVis.destroy();
           if (chart) {
             chart.off('hover');
@@ -40,12 +40,14 @@ define(function (require) {
           };
 
           _.merge(vis.params, params);
-          _.defaults(params, typeDefs.byName[vis.typeName].params);
+          _.defaults(params, typeDefinition.params);
 
           chart = new k4d3.Chart($el[0], params);
 
-          chart.on('hover', onHover);
-          chart.on('click', onHover);
+          if (!!typeDefinition.onHover) chart.on('hover', typeDefinition.onHover);
+          if (!!typeDefinition.onClick) chart.on('click', typeDefinition.onClick);
+          if (!!typeDefinition.onBrush) chart.on('brush', typeDefinition.onBrush);
+
 
           vis.searchSource.onResults(function onResults(resp) {
             courier.indexPatterns.get(vis.searchSource.get('index'))
