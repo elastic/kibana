@@ -17,7 +17,10 @@ define(function (require) {
   require('state_management/app_state');
   require('services/timefilter');
 
+  require('apps/visualize/saved_visualizations/_adhoc_vis');
+
   var app = require('modules').get('app/discover', [
+    'kibana/services',
     'kibana/notify',
     'kibana/courier'
   ]);
@@ -40,7 +43,7 @@ define(function (require) {
 
 
   app.controller('discover', function ($scope, config, courier, $route, savedSearches, savedVisualizations,
-    Notifier, $location, globalState, AppState, timefilter) {
+    Notifier, $location, globalState, AppState, timefilter, AdhocVis) {
 
     var notify = new Notifier({
       location: 'Discover'
@@ -139,6 +142,7 @@ define(function (require) {
         // with the results
         searchSource.onResults().then(function onResults(resp) {
           var complete = notify.event('on results');
+          $scope.hits = resp.hits.total;
           $scope.rows = resp.hits.hits;
           $scope.rows.forEach(function (hit) {
             hit._formatted = _.mapValues(hit._source, function (value, name) {
@@ -146,20 +150,6 @@ define(function (require) {
             });
             hit._formatted._source = angular.toJson(hit._source);
           });
-
-          $scope.chart = !!resp.aggregations ? {
-            label: 'Events over time',
-            xAxisLabel: 'DateTime',
-            yAxisLabel: 'Hits',
-            layers: [
-              {
-                key: 'somekey',
-                values: _.map(resp.aggregations.events.buckets, function (bucket) {
-                  return { y: bucket.doc_count, x: bucket.key_as_string };
-                })
-              }
-            ]
-          } : undefined;
 
           complete();
           return searchSource.onResults().then(onResults);
@@ -377,25 +367,38 @@ define(function (require) {
       if ($scope.vis) return;
 
       searchSource.disable();
-      var prom = savedVisualizations.tempForDiscover(searchSource)
-      .then(function (vis) {
-        if ($scope.vis !== prom) return;
-
-        $scope.vis = vis;
-
-        var config = vis.segment.configs.pop() || {};
-        config.agg = 'date_histogram';
-        config.field = $scope.opts.timefield;
-        config.min_doc_count = 0;
-
-        vis.segment.configs.push(config);
-        // enable the source, but wait for the visualization to be ready before running
-        searchSource.enable();
+      var vis = new AdhocVis({
+        searchSource: searchSource,
+        type: 'histogram',
+        listeners: {
+          onClick: function (e) {
+            console.log(e);
+          }
+        },
+        config: {
+          metric: {
+            configs: [{
+              agg: 'count',
+            }]
+          },
+          segment: {
+            configs: [{
+              agg: 'date_histogram',
+              field: $scope.opts.timefield,
+              min_doc_count: 0,
+            }]
+          },
+          group: { configs: [] },
+          split: { configs: [] },
+        }
       });
 
+      // enable the source, but wait for the visualization to be ready before running
+      searchSource.enable();
+
       // set it to the promise, so that we don't try to fetch it again
-      $scope.vis = prom;
-      return prom;
+      $scope.vis = vis;
+      return vis;
     };
 
     init();

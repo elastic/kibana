@@ -73,13 +73,20 @@
   overflow-x: hidden;
 }
 .discover-timechart {
+  margin-top: -20px;
   display: block;
-  height: 150px;
+  height: 200px;
+}
+.discover-hits {
+  background-color: #ecf0f1;
+  float: right;
+  padding: 5px 10px;
+  border-bottom-left-radius: 4px;
 }
 .discover-table {
+  margin-top: -30px;
   overflow-y: auto;
   overflow-x: auto;
-  margin-top: 10px;
   padding-left: 0px !important;
   padding-right: 0px !important;
 }

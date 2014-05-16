@@ -9,13 +9,6 @@ define(function (require) {
       return (new SavedVis(id)).init();
     };
 
-    this.tempForDiscover = function (searchSource) {
-      return (new SavedVis({
-        parentSearchSource: searchSource,
-        type: 'histogram'
-      })).init();
-    };
-
     this.find = function (searchString) {
       var body = searchString.length ? {
           query: {
