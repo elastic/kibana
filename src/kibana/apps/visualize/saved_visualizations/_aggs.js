@@ -108,6 +108,7 @@ define(function (require) {
       {
         name: 'date_histogram',
         display: 'Date Histogram',
+        ordinal: {},
         params: {
           interval: {
             required: true,
