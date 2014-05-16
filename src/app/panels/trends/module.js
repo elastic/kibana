@@ -61,6 +61,10 @@ function (angular, app, _, kbn) {
        */
       arrangement : 'vertical',
       /** @scratch /panels/trends/5
+       * reverse:: true or false. If true, use red for positive, green for negative
+       */
+      reverse : false,
+      /** @scratch /panels/trends/5
        * spyable:: Set to false to disable the inspect icon
        */
       spyable: true,
@@ -110,11 +114,13 @@ function (angular, app, _, kbn) {
         timeField = timeField[0];
       }
 
-      // This logic can be simplifie greatly with the new kbn.parseDate
+      // This logic can be simplified greatly with the new kbn.parseDate
       $scope.time = filterSrv.timeRange('last');
+
+
       $scope.old_time = {
-        from : new Date($scope.time.from.getTime() - kbn.interval_to_ms($scope.panel.ago)),
-        to   : new Date($scope.time.to.getTime() - kbn.interval_to_ms($scope.panel.ago))
+        from : new Date($scope.time.from.getTime() - kbn.interval_to_ms($scope.panel.ago)).valueOf(),
+        to   : new Date($scope.time.to.getTime() - kbn.interval_to_ms($scope.panel.ago)).valueOf()
       };
 
       var _segment = _.isUndefined(segment) ? 0 : segment;
@@ -128,11 +134,7 @@ function (angular, app, _, kbn) {
       _.each(queries, function(query) {
         var q = $scope.ejs.FilteredQuery(
           querySrv.toEjsObj(query),
-          filterSrv.getBoolFilter(_ids_without_time).must(
-            $scope.ejs.RangeFilter(timeField)
-            .from($scope.time.from)
-            .to($scope.time.to)
-          ));
+          filterSrv.getBoolFilter(filterSrv.ids()));
 
         request = request
           .facet($scope.ejs.QueryFacet(query.id)
