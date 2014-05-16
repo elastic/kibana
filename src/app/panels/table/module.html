@@ -59,7 +59,7 @@
     <div bindonce ng-class="{'table-sidebar':panel.field_list}" ng-if="panel.field_list">
       <div style="{{panel.overflow}}:{{panel.height||row.height}};overflow-y:auto">
 
-        <strong>Fields <i class=" icon-chevron-sign-left pointer " ng-click="panel.field_list = !panel.field_list" bs-tooltip="'Hide field list'"></i></strong><p>
+        <strong>Fields <i class=" fa fa-chevron-circle-left pointer " ng-click="panel.field_list = !panel.field_list" bs-tooltip="'Hide field list'"></i></strong><p>
 
         <div class="small">
           <span class="link small" ng-click="panel.all_fields = true;" ng-if="fields.list.length" ng-class="{strong:panel.all_fields}">
@@ -80,14 +80,14 @@
 
         <ul class="unstyled" ng-if="panel.all_fields">
           <li class="table-fieldname" ng-style="panel.style" ng-repeat="field in fields.list|filter:fieldFilter|orderBy:identity">
-            <i class="pointer" ng-class="{'icon-check': columns[field],'icon-check-empty': _.isUndefined(columns[field])}" ng-click="toggle_field(field)"></i>
+            <i class="pointer" ng-class="{'fa fa-check-square-o': columns[field],'fa fa-square-o': _.isUndefined(columns[field])}" ng-click="toggle_field(field)"></i>
             <a class="pointer" data-unique="1" bs-popover="'app/panels/table/micropanel.html'" data-placement="rightTop" ng-click="toggle_micropanel(field,true)" ng-class="{label: columns[field]}" bo-text="field"></a>
           </li>
         </ul>
 
         <ul class="unstyled" ng-if="!panel.all_fields">
           <li class="table-fieldname"  ng-style="panel.style" ng-repeat="field in current_fields|filter:fieldFilter|orderBy:identity">
-            <i class="pointer" ng-class="{'icon-check': columns[field],'icon-check-empty': _.isUndefined(columns[field])}" ng-click="toggle_field(field)"></i>
+            <i class="pointer" ng-class="{'fa fa-check-square-o': columns[field],'fa fa-square-o': _.isUndefined(columns[field])}" ng-click="toggle_field(field)"></i>
             <a class="pointer" data-unique="1" bs-popover="'app/panels/table/micropanel.html'" data-placement="rightTop" ng-click="toggle_micropanel(field,true)" ng-class="{label: columns[field]}" bo-text="field"></a>
           </li>
         </ul>
@@ -109,37 +109,37 @@
               ng-model="adhocOpts"
               data-original-title=""
               title=""
-              aria-disabled="false" style="position: relative;"><i class="icon-move"></i></span>
+              aria-disabled="false" style="position: relative;"><i class="fa fa-arrows"></i></span>
           </h4>
           <kibana-simple-panel type="'{{facetType}}'" panel='{{facetPanel}}' ng-cloak></kibana-simple-panel>
         </div>
 
-        <i class="pull-left icon-chevron-sign-right pointer" ng-click="panel.field_list = !panel.field_list" bs-tooltip="'Show field list'" ng-show="!panel.field_list"></i>
+        <i class="pull-left fa fa-chevron-circle-right pointer" ng-click="panel.field_list = !panel.field_list" bs-tooltip="'Show field list'" ng-show="!panel.field_list"></i>
         <div class="row-fluid" ng-show="panel.paging">
           <div class="span1 offset1" style="text-align:right">
-            <i ng-click="panel.offset = 0" ng-show="panel.offset > 0" class='icon-circle-arrow-left pointer'></i>
-            <i ng-click="panel.offset = (panel.offset - panel.size)" ng-show="panel.offset > 0" class='icon-arrow-left pointer'></i>
+            <i ng-click="panel.offset = 0" ng-show="panel.offset > 0" class='fa fa-arrow-circle-left pointer'></i>
+            <i ng-click="panel.offset = (panel.offset - panel.size)" ng-show="panel.offset > 0" class='fa fa-arrow-left pointer'></i>
           </div>
           <div class="span8" style="text-align:center">
             <strong>{{panel.offset}}</strong> to <strong>{{panel.offset + data.slice(panel.offset,panel.offset+panel.size).length}}</strong>
             <small> of {{data.length}} available for paging</small>
           </div>
           <div class="span1" style="text-align:left">
-            <i ng-click="panel.offset = (panel.offset + panel.size)" ng-show="data.length > panel.offset+panel.size" class='icon-arrow-right pointer'></i>
+            <i ng-click="panel.offset = (panel.offset + panel.size)" ng-show="data.length > panel.offset+panel.size" class='fa fa-arrow-right pointer'></i>
           </div>
         </div>
         <table class="table-hover table table-condensed" ng-style="panel.style">
           <thead ng-show="panel.header">
             <th ng-show="panel.fields.length<1">_source (select columns from the list to the left)</th>
             <th style="white-space:nowrap" ng-repeat="field in panel.fields">
-              <i ng-show="!$first" class="pointer link icon-caret-left" ng-click="_.move(panel.fields,$index,$index-1)"></i>
+              <i ng-show="!$first" class="pointer link fa fa-caret-left" ng-click="_.move(panel.fields,$index,$index-1)"></i>
 
               <span  class="pointer" ng-click="set_sort(field)" ng-show='panel.sortable'>
                 {{field}}
-                <i ng-show='field == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
+                <i ng-show='field == panel.sort[0]' class="pointer link" ng-class="{'fa fa-chevron-up': panel.sort[1] == 'asc','fa fa-chevron-down': panel.sort[1] == 'desc'}"></i>
               </span>
               <span ng-show='!panel.sortable'>{{field}}</span>
-              <i ng-show="!$last" class="pointer link icon-caret-right" ng-click="_.move(panel.fields,$index,$index+1)"></i>
+              <i ng-show="!$last" class="pointer link fa fa-caret-right" ng-click="_.move(panel.fields,$index,$index+1)"></i>
             </th>
 
           </thead>
@@ -158,7 +158,7 @@
                   <a class="link" ng-class="{'strong':event.kibana.view == 'table'}" ng-click="event.kibana.view = 'table'">Table</a> /
                   <a class="link" ng-class="{'strong':event.kibana.view == 'json'}" ng-click="event.kibana.view = 'json'">JSON</a> /
                   <a class="link" ng-class="{'strong':event.kibana.view == 'raw'}" ng-click="event.kibana.view = 'raw'">Raw</a>
-                  <i class="link pull-right icon-chevron-up" ng-click="toggle_details(event)"></i>
+                  <i class="link pull-right fa fa-chevron-up" ng-click="toggle_details(event)"></i>
                 </span>
                 <table class='table table-bordered table-condensed table-details' ng-switch-when="table">
                   <thead>
@@ -169,9 +169,9 @@
                   <tr ng-repeat="(key,value) in event.kibana._source track by $index" ng-class-odd="'odd'">
                     <td style="word-wrap:break-word" bo-text="key"></td>
                     <td style="white-space:nowrap">
-                      <i class='icon-search pointer' ng-click="build_search(key,value)" bs-tooltip="'Add filter to match this value'"></i>
-                      <i class='icon-ban-circle pointer' ng-click="build_search(key,value,true)" bs-tooltip="'Add filter to NOT match this value'"></i>
-                      <i class="pointer icon-th" ng-click="toggle_field(key)" bs-tooltip="'Toggle table column'"></i>
+                      <i class='fa fa-search pointer' ng-click="build_search(key,value)" bs-tooltip="'Add filter to match this value'"></i>
+                      <i class='fa fa-ban pointer' ng-click="build_search(key,value,true)" bs-tooltip="'Add filter to NOT match this value'"></i>
+                      <i class="pointer fa fa-th" ng-click="toggle_field(key)" bs-tooltip="'Toggle table column'"></i>
                     </td>
                     <!-- At some point we need to create a more efficient way of applying the filter pipeline -->
                     <td style="white-space:pre-wrap;word-wrap:break-word" bo-html="value|noXml|urlLink|stringify"></td>
@@ -185,15 +185,15 @@
         </table>
         <div class="row-fluid" ng-show="panel.paging">
           <div class="span1 offset3" style="text-align:right">
-            <i ng-click="panel.offset = 0" ng-show="panel.offset > 0" class='icon-circle-arrow-left pointer'></i>
-            <i ng-click="panel.offset = (panel.offset - panel.size)" ng-show="panel.offset > 0" class='icon-arrow-left pointer'></i>
+            <i ng-click="panel.offset = 0" ng-show="panel.offset > 0" class='fa fa-arrow-circle-left pointer'></i>
+            <i ng-click="panel.offset = (panel.offset - panel.size)" ng-show="panel.offset > 0" class='fa fa-arrow-left pointer'></i>
           </div>
           <div class="span4" style="text-align:center">
             <strong>{{panel.offset}}</strong> to <strong>{{panel.offset + data.slice(panel.offset,panel.offset+panel.size).length}}</strong>
             <small> of {{data.length}} available for paging</small>
           </div>
           <div class="span1" style="text-align:left">
-            <i ng-click="panel.offset = (panel.offset + panel.size)" ng-show="data.length > panel.offset+panel.size" class='icon-arrow-right pointer'></i>
+            <i ng-click="panel.offset = (panel.offset + panel.size)" ng-show="data.length > panel.offset+panel.size" class='fa fa-arrow-right pointer'></i>
           </div>
         </div>
       </div>

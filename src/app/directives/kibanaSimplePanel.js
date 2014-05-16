@@ -10,7 +10,7 @@ function (angular, _) {
     .directive('kibanaSimplePanel', function($compile) {
       var panelLoading = '<span ng-show="panelMeta.loading == true">' +
         '<span style="font-size:24px;font-weight:200">'+
-          '<i class="icon-spinner icon-spin"></i> loading ...' +
+          '<i class="fa fa-spinner fa-spin"></i> loading ...' +
         '</span>'+
       '</span>';
 

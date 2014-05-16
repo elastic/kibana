@@ -16,7 +16,7 @@ function (angular,$) {
         '<div class="row-fluid">' +
           '<div class="span12 alert-error panel-error" ng-hide="!panel.error">' +
             '<a class="close" ng-click="panel.error=false">&times;</a>' +
-            '<i class="icon-exclamation-sign"></i> <strong>Oops!</strong> {{panel.error}}' +
+            '<i class="fa fa-exclamation-circle"></i> <strong>Oops!</strong> {{panel.error}}' +
           '</div>' +
         '</div>\n' +
 
@@ -26,7 +26,7 @@ function (angular,$) {
             '<span class="extra row-button" ng-show="panel.editable != false && panel.removable != false">' +
               '<span confirm-click="row.panels = _.without(row.panels,panel)" '+
               'confirmation="Are you sure you want to remove this {{panel.type}} panel?" class="pointer">'+
-              '<i class="icon-remove pointer" bs-tooltip="\'Remove\'"></i></span>'+
+              '<i class="fa fa-times pointer" bs-tooltip="\'Remove\'"></i></span>'+
             '</span>' +
 
             '<span class="extra row-button" ng-hide="panel.draggable == false">' +
@@ -39,12 +39,12 @@ function (angular,$) {
                 'index:{{$index}},'+
                 'onStart:\'panelMoveStart\','+
                 'onStop:\'panelMoveStop\''+
-                '}"  ng-model="row.panels"><i class="icon-move"></i></span>'+
+                '}"  ng-model="row.panels"><i class="fa fa-arrows"></i></span>'+
             '</span>' +
 
             '<span class="row-button extra" ng-show="panel.editable != false">' +
               '<span config-modal="./app/partials/paneleditor.html" kbn-model="panel" class="pointer">'+
-              '<i class="icon-cog pointer" bs-tooltip="\'Configure\'"></i></span>'+
+              '<i class="fa fa-cog pointer" bs-tooltip="\'Configure\'"></i></span>'+
             '</span>' +
 
             '<span ng-repeat="task in panelMeta.modals" class="row-button extra" ng-show="task.show">' +
@@ -54,7 +54,7 @@ function (angular,$) {
 
             '<span class="row-button extra" ng-show="panelMeta.loading == true">' +
               '<span>'+
-                '<i class="icon-spinner icon-spin icon-large"></i>' +
+                '<i class="fa fa-spinner fa-spin fa-lg"></i>' +
               '</span>'+
             '</span>' +
 

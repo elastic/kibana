@@ -65,7 +65,7 @@ function (angular, _, config, kbn) {
     this.queryTypes = {
       lucene: {
         require:">=0.17.0",
-        icon: "icon-circle",
+        icon: "fa fa-circle",
         resolve: function(query) {
           // Simply returns itself
           var p = $q.defer();
@@ -75,7 +75,7 @@ function (angular, _, config, kbn) {
       },
       regex: {
         require:">=0.90.12",
-        icon: "icon-circle",
+        icon: "fa fa-circle",
         resolve: function(query) {
           // Simply returns itself
           var p = $q.defer();
@@ -85,7 +85,7 @@ function (angular, _, config, kbn) {
       },
       topN : {
         require:">=0.90.3",
-        icon: "icon-cog",
+        icon: "fa fa-cog",
         resolve: function(q) {
           var suffix = '';
           if (q.union === 'AND') {

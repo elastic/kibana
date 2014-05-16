@@ -38,6 +38,6 @@
   <div class="editor-option" ng-show="panel.annotate.enable">
     <label class="small">Sort <tip>Determine the most relevant markers using this field</tip></label>
     <input type="text" class="input-small" bs-typeahead="fields.list" ng-model="panel.annotate.sort[0]" ng-change="set_refresh(true)" />
-    <i ng-click="panel.annotate.sort[1] = _.toggle(panel.annotate.sort[1],'desc','asc');set_refresh(true)" ng-class="{'icon-chevron-up': panel.annotate.sort[1] == 'asc','icon-chevron-down': panel.annotate.sort[1] == 'desc'}"></i>
+    <i ng-click="panel.annotate.sort[1] = _.toggle(panel.annotate.sort[1],'desc','asc');set_refresh(true)" ng-class="{'fa fa-chevron-up': panel.annotate.sort[1] == 'asc','fa fa-chevron-down': panel.annotate.sort[1] == 'desc'}"></i>
   </div>
 </div>

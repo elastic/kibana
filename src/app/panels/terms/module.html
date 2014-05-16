@@ -33,7 +33,7 @@
       <!-- vertical legend above -->
       <table class="small" ng-show="panel.arrangement == 'vertical'">
         <tr ng-repeat="term in legend">
-          <td><i class="icon-circle" ng-style="{color:term.color}"></i></td>
+          <td><i class="fa fa-circle" ng-style="{color:term.color}"></i></td>
           <td class="terms-legend-term" style="padding-right:10px;padding-left:10px;">{{term.label}}</td>
           <td>{{term.data[0][1]}}</td>
         </tr>
@@ -42,7 +42,7 @@
       <!-- horizontal legend above -->
       <span class="small" ng-show="panel.arrangement == 'horizontal'" ng-repeat="term in legend" style="float:left;padding-left: 10px;">
         <span>
-          <i class="icon-circle" ng-style="{color:term.color}"></i>
+          <i class="fa fa-circle" ng-style="{color:term.color}"></i>
           <span class="terms-legend-term">{{term.label}}</span> ({{term.data[0][1]}})
         </span>
       </span>
@@ -65,7 +65,7 @@
       <!-- vertical legend below -->
       <table class="small" ng-show="panel.arrangement == 'vertical'">
         <tr ng-repeat="term in legend">
-          <td><i class="icon-circle" ng-style="{color:term.color}"></i></i></td>
+          <td><i class="fa fa-circle" ng-style="{color:term.color}"></i></i></td>
           <td class="terms-legend-term" style="padding-right:10px;padding-left:10px;">{{term.label}}</td>
           <td>{{term.data[0][1]}}</td>
         </tr>
@@ -74,7 +74,7 @@
       <!-- horizontal legend below -->
       <span class="small" ng-show="panel.arrangement == 'horizontal'" ng-repeat="term in legend" style="float:left;padding-left: 10px;">
         <span>
-          <i class="icon-circle" ng-style="{color:term.color}"></i>
+          <i class="fa fa-circle" ng-style="{color:term.color}"></i>
           <span class="terms-legend-term">{{term.label}}</span> ({{term.data[0][1]}})
         </span>
       </span>
@@ -98,8 +98,8 @@
       <td>{{term.data[0][1]}}</td>
       <td>
         <span ng-hide="term.meta == 'other'">
-          <i class='icon-search pointer' ng-click="build_search(term)"></i>
-          <i class='icon-ban-circle pointer' ng-click="build_search(term,true)"></i>
+          <i class='fa fa-search pointer' ng-click="build_search(term)"></i>
+          <i class='fa fa-ban pointer' ng-click="build_search(term,true)"></i>
         </span>
       </td>
     </tr>

@@ -324,7 +324,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
             content: 'This dashboard has been loaded from the browsers local cache. If you use '+
             'another brower or computer you will not be able to access it! '+
             '\n\n  <h4>Good news!</h4> Kibana'+
-            ' now stores saved dashboards in Elasticsearch. Click the <i class="icon-save"></i> '+
+            ' now stores saved dashboards in Elasticsearch. Click the <i class="fa fa-save"></i> '+
             'button in the top left to save this dashboard. Then select "Set as Home" from'+
             ' the "advanced" sub menu to automatically use the stored dashboard as your Kibana '+
             'landing page afterwards'+

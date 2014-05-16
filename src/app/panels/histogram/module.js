@@ -42,7 +42,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
       modals : [
         {
           description: "Inspect",
-          icon: "icon-info-sign",
+          icon: "fa fa-info-circle",
           partial: "app/partials/inspector.html",
           show: $scope.panel.spyable
         }
@@ -485,7 +485,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
                 max: hit.sort[1],
                 eventType: "annotation",
                 title: null,
-                description: "<small><i class='icon-tag icon-flip-vertical'></i> "+
+                description: "<small><i class='fa fa-tag icon-flip-vertical'></i> "+
                   _h[$scope.panel.annotate.field]+"</small><br>"+
                   moment(hit.sort[1]).format('YYYY-MM-DD HH:mm:ss'),
                 score: hit.sort[0]
@@ -768,7 +768,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
           if (item) {
             if (item.series.info.alias || scope.panel.tooltip.query_as_alias) {
               group = '<small style="font-size:0.9em;">' +
-                '<i class="icon-circle" style="color:'+item.series.color+';"></i>' + ' ' +
+                '<i class="fa fa-circle" style="color:'+item.series.color+';"></i>' + ' ' +
                 (item.series.info.alias || item.series.info.query)+
               '</small><br>';
             } else {

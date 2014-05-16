@@ -44,7 +44,7 @@
 (function($){
     function init(plot){
         var DEFAULT_ICON = {
-            icon: "icon-caret-up",
+            icon: "fa fa-caret-up",
             size: 20,
             width: 19,
             height: 10
