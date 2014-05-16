@@ -21,7 +21,7 @@ define(function (require) {
       }
 
       var agg = columns[iX].agg && aggs.byName[columns[iX].agg];
-      if (agg.ordinal) {
+      if (agg && agg.ordinal) {
         // TODO: add interval, min, max data here for the chart
         chart.ordinal = {};
       }
