@@ -5,6 +5,7 @@ module.exports = function (grunt) {
   return {
     dev: {
       options: {
+        hostname: '0.0.0.0',
         middleware: function (connect, options, stack) {
           stack = stack || [];
 

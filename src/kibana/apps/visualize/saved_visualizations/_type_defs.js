@@ -11,6 +11,12 @@ define(function (require) {
         addTooltip: true,
         addLegend: true
       },
+      onClick: function (e) {
+        console.log('click', e);
+      },
+      onHover: function (e) {
+        console.log('hover', e);
+      },
       config: {
         metric: {
           label: 'Y-Axis',
