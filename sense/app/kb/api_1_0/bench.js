@@ -1,8 +1,6 @@
 define(function () {
   'use strict';
   return function init(api) {
-
-
     api.addEndpointDescription('_put_bench', {
       methods: ['PUT'],
       patterns: ['_bench'],
@@ -18,11 +16,11 @@ define(function () {
           name: '',
           requests: [
             { 
-            __template: {
+              __template: {
+                query: {}
+              },
               query: {}
-            },
-            query: {}
-          }
+            }
           ],
           iterations: 5,
           concurrency: 5,
