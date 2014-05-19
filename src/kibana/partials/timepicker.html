@@ -64,37 +64,38 @@
             </ul>
           </div>
 
+          <!-- TODO: Add a section for custom intervals -->
         </div>
         <div ng-switch-when="relative">
-        
+
           <div class="kbn-timepicker-section">
-            
+
             <form class="form-inline" role="form">
               <label>
-                From: 
+                From:
                 <span ng-show="relative.preview">{{relative.preview}}</span><span ng-hide="relative.preview"><i>Invalid Expression</i></span>
               </label><br>
               <div class="form-group">
-                <input type="number" class="form-control" 
-                  ng-model="relative.count" 
+                <input type="number" class="form-control"
+                  ng-model="relative.count"
                   ng-change="formatRelative()">
               </div>
               <div class="form-group">
-                <select class="form-control col-xs-2" 
-                  ng-model="relative.unit" 
+                <select class="form-control col-xs-2"
+                  ng-model="relative.unit"
                   ng-options="opt.value as opt.text for opt in relativeOptions"
                   ng-change="formatRelative()">
                 </select>
               </div>
               <br>
               <div class="small">
-                <input type="checkbox" 
-                  ng-model="relative.round" 
-                  ng-checked="relative.round" 
+                <input type="checkbox"
+                  ng-model="relative.round"
+                  ng-checked="relative.round"
                   ng-change="formatRelative()"/> round to the {{units[relative.unit]}}
               </div>
             </form>
-           
+
           </div>
 
           <div class="kbn-timepicker-section">
@@ -104,7 +105,7 @@
               </label><br>
               <div class="form-group">
                 <input type="text" disabled class="form-control" value="Now">
-              </div> 
+              </div>
             </form>
           </div>
 
@@ -155,9 +156,9 @@
           </div>
 
         </div>
-      </div>  
+      </div>
     </div>
-  
+
   </div>
 </div>
 
