@@ -24,33 +24,13 @@ define(function (require) {
     });
   });
 
-  module.controller('kibana', function ($scope, Notifier, $injector, $q, $http, config, kbnSetup) {
+  module.controller('kibana', function ($rootScope, $scope, Notifier, $injector, $q, $http, config, kbnSetup) {
     var notify = new Notifier();
 
     $scope.httpActive = $http.pendingRequests;
 
-    /**
-     * When Notifiers send their first fatal error, start listening
-     * for "$routeChangeStart" and force a refresh the first time it
-     * is fired. This prevents the back button from rendering content
-     * under the fatal error messages.
-     */
-    Notifier.prototype.fatal = (function () {
-      var orig = Notifier.prototype.fatal;
-      return function () {
-        orig.apply(this, arguments);
-        function forceReload(event, next) {
-          // reload using the current route, force re-get
-          window.location.reload(false);
-        }
-        $scope.$on('$routeUpdate', forceReload);
-        $scope.$on('$routeChangeStart', forceReload);
-        Notifier.prototype.fatal = orig;
-      };
-    }());
-
     // this is the only way to handle uncaught route.resolve errors
-    $scope.$on('$routeChangeError', function (event, next, prev, err) {
+    $rootScope.$on('$routeChangeError', function (event, next, prev, err) {
       notify.fatal(err);
     });
 
@@ -87,8 +67,8 @@ define(function (require) {
           $scope.activeApp = route ? route[1] : null;
         }
 
-        $scope.$on('$routeChangeSuccess', onRouteChange);
-        $scope.$on('$routeUpdate', onRouteChange);
+        $rootScope.$on('$routeChangeSuccess', onRouteChange);
+        $rootScope.$on('$routeUpdate', onRouteChange);
 
         var writeGlobalStateToLastPaths = function () {
           var currentUrl = $location.url();
