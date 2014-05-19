@@ -9,6 +9,7 @@ require.config({
     settings:                 'components/settings',
     kbn:                      'components/kbn',
 
+    vendor:                   '../vendor',
     css:                      '../vendor/require/css',
     text:                     '../vendor/require/text',
     moment:                   '../vendor/moment',
@@ -44,7 +45,8 @@ require.config({
 
 
     modernizr:                '../vendor/modernizr-2.6.1',
-    numeral:                '../vendor/numeral',
+    numeral:                  '../vendor/numeral',
+    jsonpath:                 '../vendor/jsonpath',
     elasticjs:                '../vendor/elasticjs/elastic-angular-client',
   },
   shim: {
@@ -59,6 +61,10 @@ require.config({
 
     modernizr: {
       exports: 'Modernizr'
+    },
+
+    jsonpath: {
+      exports: 'jsonPath'
     },
 
     jquery: {

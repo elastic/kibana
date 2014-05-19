@@ -8,9 +8,12 @@ function (angular, _, config) {
 
   var module = angular.module('kibana.services');
 
-  module.service('esVersion', function($http, alertSrv, esMinVersion, $q) {
+  module.service('esVersion', function($http, alertSrv, esMinVersion, $q, ejsResource) {
 
     this.versions = [];
+
+    var ejs = ejsResource(config.elasticsearch);
+
 
     // save a reference to this
     var self = this,
@@ -25,21 +28,20 @@ function (angular, _, config) {
         defer.resolve(self.versions);
         return defer.promise;
       } else {
-        var nodeInfo = $http({
-          url: config.elasticsearch + '/_nodes',
-          method: "GET",
-        }).error(function(data, status) {
-          if(status === 0) {
-            alertSrv.set('Error',"Could not contact Elasticsearch at "+config.elasticsearch+
+        var nodeInfo = ejs.client.get('/_nodes',
+          undefined, undefined, function(data, status) {
+          if(_.isUndefined(status)) {
+            alertSrv.set('Error',"Could not contact Elasticsearch at "+ejs.client.server()+
               ". Please ensure that Elasticsearch is reachable from your system." ,'error');
           } else {
-            alertSrv.set('Error',"Could not reach "+config.elasticsearch+"/_nodes. If you"+
+            alertSrv.set('Error',"Could not reach "+ejs.client.server()+"/_nodes. If you"+
             " are using a proxy, ensure it is configured correctly",'error');
           }
+          return;
         });
 
         return nodeInfo.then(function(p) {
-          _.each(p.data.nodes, function(v) {
+          _.each(p.nodes, function(v) {
             self.versions.push(v.version.split('-')[0]);
           });
           self.versions = sortVersions(_.uniq(self.versions));
@@ -143,6 +145,14 @@ function (angular, _, config) {
 
     // Determine if a specific version is greater than or equal to another
     this.compare = function (required,installed) {
+      if(_.isUndefined(installed)) {
+        return;
+      }
+
+      if(!required || !installed) {
+        return undefined;
+      }
+
       var a = installed.split('.');
       var b = required.split('.');
       var i;

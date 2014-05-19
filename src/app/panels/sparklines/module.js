@@ -173,7 +173,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
       _.each(queries, function(q) {
         var query = $scope.ejs.FilteredQuery(
           querySrv.toEjsObj(q),
-          filterSrv.getBoolFilter(filterSrv.ids)
+          filterSrv.getBoolFilter(filterSrv.ids())
         );
 
         var facet = $scope.ejs.DateHistogramFacet(q.id);
@@ -293,11 +293,6 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
 
         // Receive render events
         scope.$watch('series',function(){
-          render_panel();
-        });
-
-        // Re-render if the window is resized
-        angular.element(window).bind('resize', function(){
           render_panel();
         });
 

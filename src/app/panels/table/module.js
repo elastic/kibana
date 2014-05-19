@@ -18,6 +18,7 @@ define([
   'lodash',
   'kbn',
   'moment',
+  'jsonpath'
 ],
 function (angular, app, _, kbn, moment) {
   'use strict';
@@ -25,7 +26,8 @@ function (angular, app, _, kbn, moment) {
   var module = angular.module('kibana.panels.table', []);
   app.useModule(module);
 
-  module.controller('table', function($rootScope, $scope, $modal, $q, $compile, fields, querySrv, dashboard, filterSrv) {
+  module.controller('table', function($rootScope, $scope, $modal, $q, $compile, $timeout,
+    fields, querySrv, dashboard, filterSrv) {
     $scope.panelMeta = {
       modals : [
         {
@@ -156,39 +158,50 @@ function (angular, app, _, kbn, moment) {
     // Create a percent function for the view
     $scope.percent = kbn.to_percent;
 
+    $scope.closeFacet = function() {
+      if($scope.modalField) {
+        delete $scope.modalField;
+      }
+    };
+
     $scope.termsModal = function(field,chart) {
-      $scope.modalField = field;
-      showModal(
-        '{"height":"300px","chart":"'+chart+'","field":"'+field+'"}','terms');
+      $scope.closeFacet();
+      $timeout(function() {
+        $scope.modalField = field;
+        $scope.adhocOpts = {
+          height: "200px",
+          chart: chart,
+          field: field,
+          span: $scope.panel.span,
+          type: 'terms',
+          title: 'Top 10 terms in field ' + field
+        };
+        showModal(
+          angular.toJson($scope.adhocOpts),'terms');
+      },0);
     };
 
     $scope.statsModal = function(field) {
-      $scope.modalField = field;
-      showModal(
-        '{"field":"'+field+'"}','statistics');
+      $scope.closeFacet();
+      $timeout(function() {
+        $scope.modalField = field;
+        $scope.adhocOpts = {
+          height: "200px",
+          field: field,
+          mode: 'mean',
+          span: $scope.panel.span,
+          type: 'stats',
+          title: 'Statistics for ' + field
+        };
+        showModal(
+          angular.toJson($scope.adhocOpts),'stats');
+      },0);
     };
 
     var showModal = function(panel,type) {
       $scope.facetPanel = panel;
       $scope.facetType = type;
-
-      // create a new modal. Can't reuse one modal unforunately as the directive will not
-      // re-render on show.
-      var panelModal = $modal({
-        template: './app/panels/table/modal.html',
-        persist: true,
-        show: false,
-        scope: $scope,
-        keyboard: false
-      });
-
-      // and show it
-      $q.when(panelModal).then(function(modalEl) {
-        modalEl.modal('show');
-      });
     };
-
-
 
     $scope.toggle_micropanel = function(field,groups) {
       var docs = _.map($scope.data,function(_d){return _d.kibana._source;});
@@ -202,6 +215,26 @@ function (angular, app, _, kbn, moment) {
         limit: 10,
         count: _.countBy(docs,function(doc){return _.contains(_.keys(doc),field);})['true']
       };
+
+
+      var nodeInfo = $scope.ejs.client.get('/' + dashboard.indices + '/_mapping/field/' + field,
+        undefined, undefined, function(data, status) {
+        console.log(status);
+        return;
+      });
+
+      return nodeInfo.then(function(p) {
+        var types = _.uniq(jsonPath(p, '*.*.*.*.mapping.*.type'));
+        if (_.isArray(types)) {
+          $scope.micropanel.type = types.join(', ');
+        }
+
+
+        if(_.intersection(types, ['long','float','integer','double']).length > 0) {
+          $scope.micropanel.hasStats =  true;
+        }
+      });
+
     };
 
     $scope.micropanelColor = function(index) {
@@ -281,9 +314,9 @@ function (angular, app, _, kbn, moment) {
         return;
       }
 
-      sort = [$scope.ejs.Sort($scope.panel.sort[0]).order($scope.panel.sort[1])];
+      sort = [$scope.ejs.Sort($scope.panel.sort[0]).order($scope.panel.sort[1]).ignoreUnmapped(true)];
       if($scope.panel.localTime) {
-        sort.push($scope.ejs.Sort($scope.panel.timeField).order($scope.panel.sort[1]));
+        sort.push($scope.ejs.Sort($scope.panel.timeField).order($scope.panel.sort[1]).ignoreUnmapped(true));
       }
 
 
@@ -306,7 +339,7 @@ function (angular, app, _, kbn, moment) {
       request = request.query(
         $scope.ejs.FilteredQuery(
           boolQuery,
-          filterSrv.getBoolFilter(filterSrv.ids)
+          filterSrv.getBoolFilter(filterSrv.ids())
         ))
         .highlight(
           $scope.ejs.Highlight($scope.panel.highlight)
@@ -324,6 +357,7 @@ function (angular, app, _, kbn, moment) {
         $scope.panelMeta.loading = false;
 
         if(_segment === 0) {
+          $scope.panel.offset = 0;
           $scope.hits = 0;
           $scope.data = [];
           $scope.current_fields = [];

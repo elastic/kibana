@@ -75,22 +75,37 @@ code, pre {
   display: inline-table;
   vertical-align: top;
   // Work around for overflow issue.
-  margin-left: -1px;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  padding: 0px 0px 0px 0px;
+  background: @kibanaPanelBackground;
+  border: 3px solid @bodyBackground;
 }
 
 .panel-container {
-  padding: 0px 0px 0px 0px;
-  background: @kibanaPanelBackground;
   border: 1px solid rgba(100, 100, 100, 0.50);
-  margin: 5px;
+  padding: 10px;
+}
+
+.panel-container > [ng-controller] {
+  box-sizing: border-box;
+  display: table;
+  width: 100%;
+  min-height: inherit;
+}
+
+.panel-header {
+  display: table-row;
+  width: 100%;
+  height: 0px;
 }
 
 .panel-content {
-  padding: 0px 10px 10px 10px;
+  display: table-row;
+  width: 100%;
 }
 
 .panel-title {
-  padding-left: 10px;
   border: 0px;
   text-transform: uppercase;
   font-weight: bold;
@@ -105,7 +120,7 @@ code, pre {
 
 .panel div.panel-extra div.panel-extra-container {
   margin-right: 0px;
-  margin-top: 7px;
+  line-height: 20px;
 }
 
 .panel div.panel-extra {
@@ -115,11 +130,13 @@ code, pre {
 
 .panel div.panel-extra .extra {
   float:right !important;
+  text-align: right;
 }
 
 .panel-error {
   color: @white;
   padding: 3px 10px 0px 10px;
+  margin-bottom: 10px;
 }
 
 .ui-draggable-dragging {
@@ -138,6 +155,11 @@ code, pre {
   background:rgba(100,100,100,0.50);
   border: 1px solid @blue;
 }
+
+.ui-resizable { position: relative;}
+.ui-resizable-handle { position: absolute;font-size: 0.1px; display: block; }
+.ui-resizable-disabled .ui-resizable-handle, .ui-resizable-autohide .ui-resizable-handle { display: none; }
+.ui-resizable-e { cursor: e-resize; width: 7px; right: 3px; top: 0; height: 100%; }
 
 // ---------------------------
 
