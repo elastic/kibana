@@ -162,7 +162,7 @@
     }
   }
 
-  @displaySize: 175px;
+  @displaySize: 200px;
   @controlSize: 180px;
 
   @statusGreen: #309600; 
@@ -179,23 +179,23 @@
     height: 20px;
     padding: 27px 0 0;
     .user-select(none);
-    .current {
-      color: #FFF;
-    }
 
     .disabled {
       color: #666;
     }
     .display {
       position: relative;
-      top: -5px;
+      top: -7px;
       width: @displaySize;
       color: #999;
       padding-left: 5px;
       &.playing { color: #1A9C00; }
-      div {
-        padding: 0 10px;
-      }
+    }
+    .current {
+      padding: 0;
+      color: #FFF;
+      text-align: center;
+      font-size: 15px;
     }
     .control {
       position: relative;

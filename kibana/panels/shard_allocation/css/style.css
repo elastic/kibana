@@ -152,24 +152,24 @@
   -ms-user-select: none;
   user-select: none;
 }
-.marvel-cluster-view .player .current {
-  color: #FFF;
-}
 .marvel-cluster-view .player .disabled {
   color: #666;
 }
 .marvel-cluster-view .player .display {
   position: relative;
-  top: -5px;
-  width: 175px;
+  top: -7px;
+  width: 200px;
   color: #999;
   padding-left: 5px;
 }
 .marvel-cluster-view .player .display.playing {
   color: #1A9C00;
 }
-.marvel-cluster-view .player .display div {
-  padding: 0 10px;
+.marvel-cluster-view .player .current {
+  padding: 0;
+  color: #FFF;
+  text-align: center;
+  font-size: 15px;
 }
 .marvel-cluster-view .player .control {
   position: relative;
@@ -193,7 +193,7 @@
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   position: relative;
-  margin: 0 175px 0 180px;
+  margin: 0 200px 0 180px;
 }
 .marvel-cluster-view .player .timeline .head {
   position: absolute;
