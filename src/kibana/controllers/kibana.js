@@ -144,7 +144,7 @@ define(function (require) {
 
         $scope.toggleTimepicker = function () {
           var timepickerHtml = '<kbn-timepicker from="opts.timefilter.time.from"' +
-            ' to="opts.timefilter.time.to" mode="timepickerMode"></kbn-timepicker>';
+            ' to="opts.timefilter.time.to" mode="opts.timefilter.time.mode"></kbn-timepicker>';
           // Close if already open
           if ($scope.globalConfigTemplate === timepickerHtml) {
             delete $scope.globalConfigTemplate;
