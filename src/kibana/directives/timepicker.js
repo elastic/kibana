@@ -98,16 +98,18 @@ define(function (require) {
         };
 
         $scope.formatRelative = function () {
-          var parsed = datemath.parse('now-' + $scope.relative.count + $scope.relative.unit +
-            ($scope.relative.round ? '/' + $scope.relative.unit: ''));
+          var parsed = datemath.parse(getRelativeString());
           $scope.relative.preview =  parsed ? parsed.format($scope.format) : undefined;
           return parsed;
         };
 
         $scope.applyRelative = function () {
-          $scope.from = 'now-' + $scope.relative.count + $scope.relative.unit +
-            ($scope.relative.round ? '/' + $scope.relative.unit : '');
+          $scope.from = getRelativeString();
           $scope.to = 'now';
+        };
+
+        var getRelativeString = function () {
+          return 'now-' + $scope.relative.count + $scope.relative.unit + ($scope.relative.round ? '/' + $scope.relative.unit : '');
         };
 
         $scope.applyAbsolute = function () {
