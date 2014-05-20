@@ -151,6 +151,88 @@ define(function (require) {
       done();
     });
 
+    it('rounds the preview down to the unit when rounding is enabled', function (done) {
+      // Enable rounding
+      $scope.relative.round = true;
+      $scope.relative.count = 0;
+
+      _.each($scope.units, function (longUnit, shortUnit) {
+        $scope.relative.count = 0;
+        $scope.relative.unit = shortUnit;
+        $scope.formatRelative();
+
+        // The preview should match the start of the unit eg, the start of the minute
+        expect($scope.relative.preview).to.be(moment().startOf(longUnit).format($scope.format));
+      });
+
+      done();
+    });
+
+    it('does not round the preview down to the unit when rounding is disable', function (done) {
+      // Disable rounding
+      $scope.relative.round = false;
+      $scope.relative.count = 0;
+
+      _.each($scope.units, function (longUnit, shortUnit) {
+        $scope.relative.unit = shortUnit;
+        $scope.formatRelative();
+
+        // The preview should match the start of the unit eg, the start of the minute
+        expect($scope.relative.preview).to.be(moment().format($scope.format));
+      });
+
+      done();
+    });
+
+    it('has a $scope.applyRelative() that sets from and to based on relative.round, relative.count and relative.unit', function (done) {
+      // Enable rounding
+      $scope.relative.round = false;
+      $scope.relative.count = 5;
+
+      _.each($scope.units, function (longUnit, shortUnit) {
+        $scope.relative.unit = shortUnit;
+        $scope.applyRelative();
+
+        expect($scope.from).to.be('now-' + $scope.relative.count + $scope.relative.unit);
+        expect($scope.to).to.be('now');
+      });
+
+      $scope.relative.round = true;
+
+      _.each($scope.units, function (longUnit, shortUnit) {
+        $scope.relative.unit = shortUnit;
+        $scope.applyRelative();
+
+        expect($scope.from).to.be('now-' + $scope.relative.count + $scope.relative.unit + '/' + $scope.relative.unit);
+        expect($scope.to).to.be('now');
+      });
+
+      done();
+    });
+
+    it('updates the input fields when the scope variables are changed', function (done) {
+      var input = $elem.find('.kbn-timepicker-section input[ng-model="relative.count"]');
+      var select = $elem.find('.kbn-timepicker-section select[ng-model="relative.unit"]');
+
+      $scope.relative.count = 5;
+      $scope.$digest();
+      expect(input.val()).to.be('5');
+
+
+      // Should update
+      var i = 0;
+      _.each($scope.units, function (longUnit, shortUnit) {
+        $scope.relative.unit = shortUnit;
+        $scope.$digest();
+
+        expect(select.val()).to.be(i.toString());
+        i++;
+      });
+
+      done();
+
+    });
+
   });
 
 });
