@@ -241,7 +241,7 @@ function (angular, app, _, L, localRequire) {
 
               // This could be made configurable?
               L.tileLayer('http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg', {
-                attribution: '"Data, imagery and map information provided by MapQuest, '+
+                attribution: 'Data, imagery and map information provided by MapQuest, '+
                   'OpenStreetMap <http://www.openstreetmap.org/copyright> and contributors, ODbL',
                 maxZoom: 18,
                 minZoom: 2
