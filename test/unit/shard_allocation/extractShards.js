@@ -6,9 +6,22 @@ define(function (require) {
   var _ = require('lodash');
   var state = relocatingState();
   var shards = extractShards(state);
+  var fakeState = require('lib/fakeState');
 
   describe('shard_allocation', function () {
     describe('transforms/extractShards.js', function () {
+
+      it('should test performance', function() {
+        var _state = fakeState({
+          indices: 2000,
+          replicas: 2,
+          nodes: 100
+        });
+        var _shards = extractShards(_state); 
+        expect(_shards)
+          .to.be.instanceOf(Array)
+          .to.have.length(30000);
+      });
 
       it('should return an array', function () {
         expect(shards)

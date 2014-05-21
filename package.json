@@ -39,7 +39,8 @@
     "grunt-contrib-jade": "~0.10.0",
     "lodash": "~2.4.1",
     "grunt-contrib-watch": "~0.5.3",
-    "grunt-blanket-mocha": "^0.4.0"
+    "grunt-blanket-mocha": "^0.4.0",
+    "moment": "~2.6.0"
   },
   "dependencies": {}
 }

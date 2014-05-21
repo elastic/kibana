@@ -71,11 +71,7 @@ define(function (require) {
   return React.createClass({
     displayName: 'Shards',
     createShard: function (shard) {
-      var key = [];
-      key.push('shard.'+shard.shard);
-      key.push(shard.state);
-      key.push(shard.primary ? 'primary' : 'replica');
-      return Shard({ shard: shard, key: key.join('.') });
+      return Shard({ shard: shard });
     },
     render: function () {
       return D.div({ className: 'shards' }, 

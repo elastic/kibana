@@ -2,7 +2,7 @@ define(function () {
   'use strict';
   return function () {
     return {
-      _id: new Date().getTime(), 
+      _id: new Date().getTime()+Math.random(), 
       status: 'red',
       nodes: {
         'node-1':  {

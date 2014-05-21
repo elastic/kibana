@@ -20,13 +20,17 @@ define(function (require) {
       return shard;
     }
 
-    var data  = _.chain(state.routing_nodes.nodes)
-      .values()
-      .flatten()
-      .union(state.routing_nodes.unassigned)
-      .map(setNodeName)
-      .value(); 
+    var pushShardToData = function (shard) {
+      data.push(setNodeName(shard)); 
+    };
 
+    var data = [];
+    _.each(state.routing_nodes.nodes, function (node) {
+      _.each(node, pushShardToData);
+    });
+
+    _.each(state.routing_nodes.unassigned, pushShardToData);
+    
     return data;
   };
 
