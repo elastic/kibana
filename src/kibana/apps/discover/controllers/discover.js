@@ -118,7 +118,7 @@ define(function (require) {
         // TODO: Switch this to watching time.string when we implement it
         $scope.$watchCollection('time', function (newTime, oldTime) {
           // don't fetch unless there was a previous value and the values are not loosly equal
-          if (!_.isUndefined(oldTime) && !angular.equal(newTime, oldTime)) $scope.fetch();
+          if (!_.isUndefined(oldTime) && !angular.equals(newTime, oldTime)) $scope.fetch();
         });
 
         $scope.$watch('state.sort', function (sort) {
