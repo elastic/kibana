@@ -154,7 +154,7 @@ define(function (require) {
           console.log('An error', err);
         });
 
-        setupVisualization().then(function () {
+        return setupVisualization().then(function () {
           $scope.$emit('application.load');
         });
       });
@@ -181,7 +181,7 @@ define(function (require) {
 
       setupVisualization().then(function () {
         courier.fetch();
-      });
+      }, notify.error);
     };
 
     $scope.toggleConfig = function () {
@@ -291,7 +291,7 @@ define(function (require) {
         }
 
         refreshColumns();
-      });
+      }, notify.error);
     }
 
     // TODO: On array fields, negating does not negate the combination, rather all terms
