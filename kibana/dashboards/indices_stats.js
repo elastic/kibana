@@ -309,6 +309,13 @@ var rows = [
         "value_field": "total.segments.memory_in_bytes",
         "title": "Lucene Memory",
         "y_format": "bytes"
+      },
+      {
+        "value_field": "total.fielddata.evictions",
+        "title": "Indices Field Data Eviction Rate",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true
       }
     ]
   },
