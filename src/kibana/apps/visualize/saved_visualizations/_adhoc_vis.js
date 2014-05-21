@@ -28,7 +28,7 @@ define(function (require) {
       var params;
 
       // Must get an object for this one
-      if (typeof opts !== 'object') return;
+      if (!_.isObject(opts)) return;
 
       vis.typeName = opts.type || 'histogram';
       vis.params = _.cloneDeep(opts.params);
