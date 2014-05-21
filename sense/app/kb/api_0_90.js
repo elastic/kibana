@@ -3,6 +3,7 @@ define([
   './api',
   './api_0_90/aliases',
   './api_0_90/cluster',
+  './api_0_90/count',
   './api_0_90/document',
   './api_0_90/facets',
   './api_0_90/filter',

@@ -6,6 +6,7 @@ define([
   './api_1_0/bench',
   './api_1_0/cat',
   './api_1_0/cluster',
+  './api_1_0/count',
   './api_1_0/document',
   './api_1_0/facets',
   './api_1_0/filter',
