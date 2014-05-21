@@ -43,7 +43,7 @@ define(function (require) {
 
 
   app.controller('discover', function ($scope, config, courier, $route, savedSearches, savedVisualizations,
-    Notifier, $location, globalState, AppState, timefilter, AdhocVis) {
+    Notifier, $location, globalState, AppState, timefilter, AdhocVis, Promise) {
 
     var notify = new Notifier({
       location: 'Discover'
@@ -101,9 +101,6 @@ define(function (require) {
     // TODO: Switch this to watching time.string when we implement it
     $scope.$watchCollection('time', _.bindKey($scope, 'fetch'));
 
-    // when we init the visualization, we re-run the fetch;
-    $scope.$on('ready:vis', _.bindKey($scope, 'fetch'));
-
     // stores the complete list of fields
     $scope.fields = null;
 
@@ -157,7 +154,9 @@ define(function (require) {
           console.log('An error', err);
         });
 
-        $scope.$emit('application.load');
+        setupVisualization().then(function () {
+          $scope.$emit('application.load');
+        });
       });
     });
 
@@ -175,14 +174,14 @@ define(function (require) {
     };
 
     $scope.fetch = function () {
-      updateDataSource();
-
       if ($scope.opts.timefield) timefilter.enabled(true);
-      if (!$scope.opts.timefield && $scope.vis) delete $scope.vis;
-      if ($scope.opts.timefield && !$scope.vis) setupVisualization();
 
+      updateDataSource();
       $state.commit();
-      if (courier.started()) courier.fetch();
+
+      setupVisualization().then(function () {
+        courier.fetch();
+      });
     };
 
     $scope.toggleConfig = function () {
@@ -222,6 +221,15 @@ define(function (require) {
     function updateDataSource() {
       var chartOptions;
 
+      searchSource
+        .size($scope.opts.sampleSize)
+        .sort(_.zipObject([$state.sort]))
+        .query(!$scope.state.query ? null : {
+          query_string: {
+            query: $scope.state.query
+          }
+        });
+
       if ($scope.opts.index !== searchSource.get('index')) {
         // set the index on the savedSearch
         searchSource.index($scope.opts.index);
@@ -232,15 +240,6 @@ define(function (require) {
 
         setFields();
       }
-
-      searchSource
-        .size($scope.opts.sampleSize)
-        .sort(_.zipObject([$state.sort]))
-        .query(!$scope.state.query ? null : {
-          query_string: {
-            query: $scope.state.query
-          }
-        });
     }
 
     // This is a hacky optimization for comparing the contents of a large array to a short one.
@@ -365,41 +364,45 @@ define(function (require) {
     };
 
     var setupVisualization = function () {
-      if ($scope.vis) return;
+      return new Promise(function (resolve, reject) {
+        // we shouldn't have a vis, delete it
+        if (!$scope.opts.timefield && $scope.vis) delete $scope.vis;
+        // we shouldn't have one, or already do, return whatever we already have
+        if (!$scope.opts.timefield || $scope.vis) return resolve($scope.vis);
 
-      searchSource.disable();
-      var vis = new AdhocVis({
-        searchSource: searchSource,
-        type: 'histogram',
-        listeners: {
-          onClick: function (e) {
-            console.log(e);
+        // set the scopes vis property to the AdhocVis so that we know not to re-init
+        $scope.vis = new AdhocVis({
+          searchSource: searchSource,
+          type: 'histogram',
+          listeners: {
+            onClick: function (e) {
+              console.log(e);
+            }
+          },
+          config: {
+            metric: {
+              configs: [{
+                agg: 'count',
+              }]
+            },
+            segment: {
+              configs: [{
+                agg: 'date_histogram',
+                field: $scope.opts.timefield,
+                min_doc_count: 0,
+              }]
+            },
+            group: { configs: [] },
+            split: { configs: [] },
           }
-        },
-        config: {
-          metric: {
-            configs: [{
-              agg: 'count',
-            }]
-          },
-          segment: {
-            configs: [{
-              agg: 'date_histogram',
-              field: $scope.opts.timefield,
-              min_doc_count: 0,
-            }]
-          },
-          group: { configs: [] },
-          split: { configs: [] },
-        }
+        });
+
+        // once the visualization is ready, resolve the promise with the vis
+        $scope.$on('ready:vis', function () {
+          // enable the source, but wait for the visualization to be ready before running
+          resolve($scope.vis);
+        });
       });
-
-      // enable the source, but wait for the visualization to be ready before running
-      searchSource.enable();
-
-      // set it to the promise, so that we don't try to fetch it again
-      $scope.vis = vis;
-      return vis;
     };
 
     init();
