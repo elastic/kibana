@@ -59,7 +59,7 @@ define(function (require) {
     // the actual courier.SearchSource
     var searchSource = savedSearch.searchSource;
 
-    /* Manage state & url state */
+    // Manage state & url state
     var initialQuery = searchSource.get('query');
 
     var stateDefaults = {
@@ -98,9 +98,6 @@ define(function (require) {
     // So we can watch it.
     $scope.time = timefilter.time;
 
-    // TODO: Switch this to watching time.string when we implement it
-    $scope.$watchCollection('time', _.bindKey($scope, 'fetch'));
-
     // stores the complete list of fields
     $scope.fields = null;
 
@@ -116,6 +113,12 @@ define(function (require) {
         $state.onUpdate(function (changed) {
           // if we only have ignorable changes, do nothing
           if (_.difference(changed, ignoreStateChanges).length) $scope.fetch();
+        });
+
+        // TODO: Switch this to watching time.string when we implement it
+        $scope.$watchCollection('time', function (newTime, oldTime) {
+          // don't fetch unless there was a previous value and the values are not loosly equal
+          if (!_.isUndefined(oldTime) && !angular.equal(newTime, oldTime)) $scope.fetch();
         });
 
         $scope.$watch('state.sort', function (sort) {
@@ -174,12 +177,12 @@ define(function (require) {
     };
 
     $scope.fetch = function () {
-      if ($scope.opts.timefield) timefilter.enabled(true);
-
-      updateDataSource();
-      $state.commit();
-
       setupVisualization().then(function () {
+        if ($scope.opts.timefield) timefilter.enabled(true);
+
+        updateDataSource();
+        $state.commit();
+
         courier.fetch();
       }, notify.error);
     };
@@ -343,8 +346,8 @@ define(function (require) {
         return;
       }
 
-      // since we fetch all fields, adding/removing fields does not require another fetch
-      // $scope.fetch();
+      // if this commit results in something besides the columns changing, a fetch will be executed.
+      $state.commit();
     }
 
     // TODO: Move to utility class
