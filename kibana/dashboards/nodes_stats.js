@@ -582,6 +582,22 @@ var rows = [
     ]
   },
   {
+    "title": "Circuit Breakers",
+    "panels": [
+      {
+        "value_field": "fielddata_breaker.estimated_size_in_bytes",
+        "mode": "max",
+        "title": "Field Data Circuit Breaker Estimated Size",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "fielddata_breaker.tripped",
+        "mode": "max",
+        "title": "Field Data Circuit Breaker Trip Count"
+      }      
+    ]
+  },
+  {
     "title": "Process",
     "panels": [
       {

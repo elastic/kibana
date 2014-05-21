@@ -12,7 +12,7 @@
             }
         },
         "mapper.dynamic": true,
-      "marvel.index_format": 3
+      "marvel.index_format": 4
     },
     "mappings": {
         "_default_": {
@@ -42,6 +42,16 @@
         },
         "node_stats": {
             "properties": {
+                "fielddata_breaker": {
+                    "properties": {
+                        "estimated_size_in_bytes": {
+                          "type": "long"
+                        },
+                        "tripped": {
+                          "type": "long"
+                        }
+                    }
+                },
                 "fs": {
                     "properties": {
                         "total": {
