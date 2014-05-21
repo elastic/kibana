@@ -344,7 +344,8 @@ define(function (require) {
         return;
       }
 
-      $scope.fetch();
+      // since we fetch all fields, adding/removing fields does not require another fetch
+      // $scope.fetch();
     }
 
     // TODO: Move to utility class
