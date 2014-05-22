@@ -32,19 +32,21 @@ define(function (require) {
       // setup the range that the list will span, return two moment objects that
       // are in proper order. a and b can be numbers to specify to go before or after now (respectively)
       // a certain number of times, based on the interval
-      var range = [ [a, 'min'], [b, 'max'] ].map(function (v) {
+      var range = [[a, 'min', 'startOf'], [b, 'max', 'startOf']].map(function (v) {
         var val = v[0];
         var bound = v[1];
+        var extend = v[2];
 
         // grab a bound from the time filter
         if (val == null) {
           bounds = bounds || timefilter.getBounds();
-          return bounds[bound];
+          val = bounds[bound];
         }
 
-        if (_.isNumeric(val)) return moment().add(interval.name, val);
-        if (moment.isMoment(val)) return val;
-        return moment(val);
+        if (_.isNumeric(val)) val = moment().add(interval.name, val);
+        else if (!moment.isMoment(val)) val = moment(val);
+
+        return val.clone().utc()[extend](interval.name);
       }).sort(function (a, b) {
         return a - b;
       });
@@ -60,8 +62,8 @@ define(function (require) {
       var stop = range.shift().valueOf();
 
       while (start <= stop) {
-        start.add(interval.name, 1);
         indexList.push(start.format(format));
+        start.add(interval.name, 1);
       }
       return indexList;
     };
