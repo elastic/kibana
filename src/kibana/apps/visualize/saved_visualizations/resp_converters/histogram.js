@@ -1,5 +1,5 @@
 define(function (require) {
-  return function HistogramConverterFn(Private) {
+  return function HistogramConverterFn(Private, timefilter) {
     var _ = require('lodash');
     var aggs = Private(require('../_aggs'));
 
@@ -20,10 +20,19 @@ define(function (require) {
         }) - 1;
       }
 
-      var agg = columns[iX].agg && aggs.byName[columns[iX].agg];
-      if (agg && agg.ordinal) {
+      var xAgg = columns[iX].agg && aggs.byName[columns[iX].agg];
+      if (xAgg && xAgg.ordinal) {
         // TODO: add interval, min, max data here for the chart
-        chart.ordinal = {};
+        if (xAgg.name === 'date_histogram') {
+          var timeBounds = timefilter.getBounds();
+          chart.ordered = {
+            date: true,
+            min: timeBounds.min.valueOf(),
+            max: timeBounds.max.valueOf()
+          };
+        } else {
+          chart.ordered = {};
+        }
       }
 
       // X-axis description
