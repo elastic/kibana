@@ -95,10 +95,8 @@ dashboard-grid {
   display: block;
   height: 100%;
   background: #ffffff;
-  color: #589cbc;
+  color: #46525d;
   padding: 0;
-  font-weight: bold;
-  font-size: 20px;
   overflow: hidden;
   position: relative;
 }
