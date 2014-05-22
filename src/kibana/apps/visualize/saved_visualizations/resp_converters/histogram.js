@@ -39,9 +39,6 @@ define(function (require) {
       chart.xAxisLabel = columns[iX].label;
       if (columns[iX].field) chart.xAxisFormatter = columns[iX].field.format.convert;
 
-      // Legend value
-      chart.label = columns[iY].label;
-
       // Y-axis description
       chart.yAxisLabel = columns[iY].label;
       if (columns[iY].field) chart.yAxisFormatter = columns[iY].field.format.convert;

@@ -26,14 +26,17 @@ define(function (require) {
         return config;
       });
 
-      var lastCol = configs[configs.length - 1];
+      // when we are recursing put previous configs here
+      var configStack = [];
 
-      // column stack, when we are deap within recursion this
-      // will hold the previous columns
+      // when we are recursing put previous columns here
       var colStack = [];
 
       // row stack, similar to the colStack but tracks unfinished rows
       var rowStack = [];
+
+      // when charts are created they will be pushed here, and then at the end will be converted
+      var chartConvertQueue = [];
 
       // all chart data will be written here or to child chartData
       // formatted objects
@@ -61,15 +64,6 @@ define(function (require) {
         rows.push(rowStack.concat(bucket.value == null ? bucket.doc_count : bucket.value));
       };
 
-      var writeChart = function (chart) {
-        var rows = chart.rows;
-        var cols = chart.columns;
-        delete chart.rows;
-        delete chart.columns;
-
-        converter(chart, cols, rows);
-      };
-
       var getAggKey = function (bucket) {
         return Object.keys(bucket)
           .filter(function (key) {
@@ -82,92 +76,80 @@ define(function (require) {
         // pull the next column from the configs list
         var col = configs.shift();
 
-        if (!col) throw new Error('Missing config in render');
+        if (!col) {
+          // fake the config
+          col = {
+            fake: true,
+            categoryName: 'metric',
+            agg: aggs.byName.count.name,
+            label: aggs.byName.count.display
+          };
+        }
 
         // add it to the top of the stack
-        colStack.unshift(col);
+        configStack.unshift(col);
 
         // the actual results for the aggregation is under an _agg_* key
-        var result = bucket[getAggKey(bucket)];
+        var result = col.fake ? bucket : bucket[getAggKey(bucket)];
 
         switch (col.categoryName) {
         case 'split':
           // pick the key for the split's groups
           var groupsKey = col.row ? 'rows' : 'columns';
 
-          // if (chartData.label) {
-          //   chartData.label = col.label + ' > ' + chartData.label;
-          // } else {
-          //   chartData.label = col.label;
-          // }
-
-          // the groups will be written here
-          chartData[groupsKey] = [];
+          var groupList = (chartData[groupsKey] = chartData[groupsKey] || []);
+          var groupMap = (chartData.groups = chartData.groups || {});
 
           result.buckets.forEach(function (bucket) {
-            // create a new group for each bucket
-            var group = {
-              label: bucket.key
-            };
-            chartData[groupsKey].push(group);
+            var group = groupMap[bucket.key];
 
-            // down the rabbit hole
+            if (!group) {
+              group = {
+                label: col.aggParams.field + ': ' + bucket.key
+              };
+              groupList.push(group);
+              groupMap[bucket.key] = group;
+            }
+
             splitAndFlatten(group, bucket);
-
-            // flattening this bucket caused a chart to be created
-            // convert the rows and columns into a legit chart
-            if (group.rows && group.columns) writeChart(group);
           });
           break;
         case 'group':
         case 'segment':
+          // non-metric aggs create buckets that we need to add
+          // to the rows
+          colStack.push(col);
+          result.buckets.forEach(function (bucket) {
+            rowStack.push(bucket.key);
+
+            // into the rabbit hole
+            splitAndFlatten(chartData, bucket);
+
+            rowStack.pop();
+          });
+          colStack.pop();
+          break;
         case 'metric':
           // this column represents actual chart data
           if (!chartData.columns || !chartData.rows) {
             // copy the current column and remaining columns into the column list
-            chartData.columns = [col].concat(configs);
+            chartData.columns = colStack.concat(col);
 
             // write rows here
             chartData.rows = [];
 
-            // if the columns don't end in a metric then we will be
-            // pulling the count of the final bucket as the metric.
-            // Ensure that there is a column for this data
-            if (chartData.columns[chartData.columns.length - 1].categoryName !== 'metric') {
-              chartData.columns.push({
-                categoryName: 'metric',
-                agg: aggs.byName.count.name,
-                label: aggs.byName.count.display
-              });
-            }
+            // push the chart object into the convert queue so that once we are done splitting the data it
+            // can be turned into a specific chart type
+            chartConvertQueue.push(chartData);
           }
 
-          if (col.categoryName === 'metric') {
-            // there are no buckets, just values to collect.
-            // Write the the row to the chartData
-            finishRow(chartData.rows, col, result);
-          } else {
-            // non-metric aggs create buckets that we need to add
-            // to the rows
-            result.buckets.forEach(function (bucket) {
-              rowStack.push(bucket.key);
-
-              if (col === lastCol) {
-                // since this is the last column, there is no metric (otherwise it
-                // would be last) so write the row into the chart data
-                finishRow(chartData.rows, col, bucket);
-              } else {
-                // into the rabbit hole
-                splitAndFlatten(chartData, bucket);
-              }
-
-              rowStack.pop();
-            });
-          }
+          // there are no buckets, just values to collect.
+          // Write the the row to the chartData
+          finishRow(chartData.rows, col, result);
           break;
         }
 
-        configs.unshift(colStack.shift());
+        configs.unshift(configStack.shift());
       };
 
       if (resp.aggregations) {
@@ -184,9 +166,14 @@ define(function (require) {
         finishRow(chartData.rows, null, { doc_count: resp.hits.total });
       }
 
-      // flattening the chart does not always result in a split,
-      // so we need to check for a chart before we return
-      if (chartData.rows && chartData.columns) writeChart(chartData);
+      chartConvertQueue.forEach(function (chart) {
+        var rows = chart.rows;
+        var cols = chart.columns;
+        delete chart.rows;
+        delete chart.columns;
+
+        converter(chart, cols, rows);
+      });
 
       notify.event('convert ES response', true);
       return chartData;
