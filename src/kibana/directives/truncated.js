@@ -12,7 +12,7 @@ define(function (require) {
       template: function ($element, attrs) {
         var template = '<span>{{text}}</span>';
         if (attrs.length && attrs.orig && attrs.orig.length > attrs.length) {
-          template += ' <a ng-click="toggle($event)">{{action}}</a>';
+          template += ' <a ng-click="toggle()">{{action}}</a>';
         }
         return template;
       },
@@ -31,8 +31,7 @@ define(function (require) {
         $scope.text = truncated;
         $scope.action = 'more';
 
-        $scope.toggle = function ($event) {
-          $event.stopPropagation();
+        $scope.toggle = function () {
           $scope.expanded = !$scope.expanded;
           $scope.text = $scope.expanded ? fullText : truncated;
           $scope.action = $scope.expanded ? 'less' : 'more';
