@@ -1,9 +1,10 @@
 define(function (require) {
-  var _ = require('lodash');
-
   return function MapperService(Private, Promise, es, configFile) {
-    var IndexPatternMissingIndices = Private(require('../_errors')).IndexPatternMissingIndices;
+    var _ = require('lodash');
+
+    var IndexPatternMissingIndices = require('errors').IndexPatternMissingIndices;
     var transformMappingIntoFields = Private(require('./_transform_mapping_into_fields'));
+    var intervals = Private(require('./_intervals'));
 
     var LocalCache = Private(require('./_local_cache'));
 
@@ -23,19 +24,22 @@ define(function (require) {
        * @async
        */
       mapper.getFieldsForIndexPattern = function (indexPattern, skipIndexPatternCache) {
-        var cache;
-        if (cache = fieldCache.get(indexPattern)) return Promise.resolve(cache);
+        var id = indexPattern.id;
+        var indexList = indexPattern.toIndexList(0, 5);
+
+        var cache = fieldCache.get(id);
+        if (cache) return Promise.resolve(cache);
 
         if (!skipIndexPatternCache) {
           return es.get({
             index: configFile.kibanaIndex,
             type: 'index-pattern',
-            id: indexPattern,
+            id: id,
             _sourceInclude: ['fields']
           })
           .then(function (resp) {
             if (resp.found && resp._source.fields) {
-              fieldCache.set(indexPattern, JSON.parse(resp._source.fields));
+              fieldCache.set(id, JSON.parse(resp._source.fields));
             }
             return mapper.getFieldsForIndexPattern(indexPattern, true);
           });
@@ -43,8 +47,10 @@ define(function (require) {
 
         return es.indices.getFieldMapping({
           // TODO: Change index to be the resolved in some way, last three months, last hour, last year, whatever
-          index: indexPattern,
+          index: indexList,
           field: '*',
+          ignoreUnavailable: _.isArray(indexList),
+          allowNoIndices: false
         })
         .catch(function (err) {
           if (err.status >= 400) {
@@ -57,8 +63,8 @@ define(function (require) {
         })
         .then(transformMappingIntoFields)
         .then(function (fields) {
-          fieldCache.set(indexPattern, fields);
-          return fieldCache.get(indexPattern);
+          fieldCache.set(id, fields);
+          return fieldCache.get(id);
         });
       };
 

@@ -14,6 +14,7 @@ define(function (require) {
       restrict: 'E',
       template: html,
       replace: true,
+      require: '^discFieldChooser',
       link: function ($scope, $elem) {
         var detailsElem;
         var detailScope = $scope.$new();
@@ -21,6 +22,16 @@ define(function (require) {
         var init = function () {
           if ($scope.field.details) {
             $scope.toggleDetails($scope.field, true);
+          }
+        };
+
+        $scope.toggleDisplay = function (field) {
+          // inheritted param to fieldChooser
+          $scope.toggle(field.name);
+
+          // we are now displaying the field, kill it's details
+          if (field.details) {
+            $scope.toggleDetails(field);
           }
         };
 

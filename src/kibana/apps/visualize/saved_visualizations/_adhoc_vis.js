@@ -5,9 +5,8 @@ define(function (require) {
   var configCats = require('./_config_categories');
 
 
-  module.factory('AdhocVis', function (courier, Private) {
+  module.factory('AdhocVis', function (courier, Private, Promise) {
     var aggs = Private(require('./_aggs'));
-
 
     /**
       opts params:
@@ -24,48 +23,66 @@ define(function (require) {
 
     */
     function AdhocVis(opts) {
+      opts = opts || {};
+      if (!_.isObject(opts)) throw new TypeError('options must be an object');
+
       var vis = this;
       var params;
 
-      // Must get an object for this one
-      if (!_.isObject(opts)) return;
+      vis.init = _.once(function () {
+        vis.typeName = opts.type || 'histogram';
+        vis.params = _.cloneDeep(opts.params);
 
-      vis.typeName = opts.type || 'histogram';
-      vis.params = _.cloneDeep(opts.params);
-      vis.searchSource = opts.searchSource || courier.SavedObject.rootSearch();
+        // give vis the properties of config
+        _.assign(vis, opts.config);
 
-      // give this the properties of config
-      _.merge(vis, opts.config);
+        // also give it the on* interaction functions, if any
+        _.assign(vis, opts.listeners);
 
-      // also give it the on* interaction functions, if any
-      _.merge(vis, opts.listeners);
+        vis._fillConfigsToMinimum();
 
-      // TODO: Should we abtract out the agg building stuff?
-      vis.searchSource
-        // reads the vis' config and write the agg to the searchSource
-        .aggs(function () {
-          // stores the config objects in queryDsl
-          var dsl = {};
-          // counter to ensure unique agg names
-          var i = 0;
-          // start at the root, but the current will move
-          var current = dsl;
+        // resolve the search source for this AdhocVis
+        return Promise.cast((function () {
+          if (opts.searchSource) return opts.searchSource;
 
-          // continue to nest the aggs under each other
-          // writes to the dsl object
-          vis.getConfig().forEach(function (config) {
-            current.aggs = {};
-            var key = '_agg_' + (i++);
+          return courier.getRootSearch()
+          .then(function (rootSearch) {
+            var searchSource = courier.createSource('search');
+            searchSource.inherits(rootSearch);
+            return searchSource;
+          });
+        }()))
+        .then(function (searchSource) {
+          // TODO: Should we abtract out the agg building stuff?
+          searchSource.aggs(function () {
+            // stores the config objects in queryDsl
+            var dsl = {};
+            // counter to ensure unique agg names
+            var i = 0;
+            // start at the root, but the current will move
+            var current = dsl;
 
-            var aggDsl = {};
-            aggDsl[config.agg] = config.aggParams;
+            // continue to nest the aggs under each other
+            // writes to the dsl object
+            vis.getConfig().forEach(function (config) {
+              current.aggs = {};
+              var key = '_agg_' + (i++);
 
-            current = current.aggs[key] = aggDsl;
+              var aggDsl = {};
+              aggDsl[config.agg] = config.aggParams;
+
+              current = current.aggs[key] = aggDsl;
+            });
+
+            // set the dsl to the searchSource
+            return dsl.aggs || {};
           });
 
-          // set the dsl to the searchSource
-          return dsl.aggs || {};
+          vis.searchSource = searchSource;
+
+          return vis;
         });
+      });
 
       // TODO: Should this be abstracted somewhere? Its a copy/paste from _saved_vis.js
       vis._fillConfigsToMinimum = function () {
@@ -80,8 +97,6 @@ define(function (require) {
           }
         });
       };
-
-      vis._fillConfigsToMinimum();
 
       // Need these, but we have nothing to destroy for now;
       vis.destroy = function () {};

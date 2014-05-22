@@ -1,7 +1,7 @@
 define(function (require) {
   return function transformMappingIntoFields(Private, configFile) {
     var _ = require('lodash');
-    var MappingConflict = Private(require('../_errors')).MappingConflict;
+    var MappingConflict = require('errors').MappingConflict;
     var castMappingType = Private(require('./_cast_mapping_type'));
 
     var reservedFields = {

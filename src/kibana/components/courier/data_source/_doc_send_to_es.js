@@ -1,8 +1,8 @@
 define(function (require) {
   var _ = require('lodash');
+  var errors = require('errors');
 
   return function (Promise, Private, es) {
-    var errors = Private(require('../_errors'));
     var pendingRequests = Private(require('../_pending_requests'));
 
     /**

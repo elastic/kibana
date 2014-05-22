@@ -2,11 +2,13 @@ require.config({
   baseUrl: './kibana',
   paths: {
     // components
-    kibana: './index',
-    courier: './components/courier',
-    config: './components/config',
     setup: './components/setup',
+    kibana: './index',
+    config: './components/config',
+    errors: './components/errors',
     notify: './components/notify',
+    courier: './components/courier',
+    index_patterns: './components/index_patterns',
     state_management: './components/state_management',
 
     // special utils

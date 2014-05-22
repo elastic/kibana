@@ -9,7 +9,7 @@ define(function (require) {
     'kibana/courier'
   ]);
 
-  module.factory('SavedSearch', function (configFile, courier, Promise) {
+  module.factory('SavedSearch', function (courier, indexPatterns) {
     function SavedSearch(id) {
       courier.SavedObject.call(this, {
         type: 'search',
@@ -33,7 +33,7 @@ define(function (require) {
         afterESResp: function () {
           var index = this.searchSource.get('index');
           if (typeof index === 'string') {
-            this.searchSource.index(courier.indexPatterns.get(index));
+            this.searchSource.index(indexPatterns.get(index));
           }
         }
       });

@@ -7,7 +7,7 @@ define(function (require) {
       return {
         restrict: 'E',
         scope: {
-          info: '=',
+          info: '@',
           placement: '@'
         },
         template: html,

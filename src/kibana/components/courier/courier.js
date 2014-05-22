@@ -1,9 +1,12 @@
 define(function (require) {
+  var errors = require('errors');
+
   require('services/es');
   require('services/promises');
+  require('index_patterns/index_patterns');
 
   require('modules').get('kibana/courier')
-  .service('courier', function ($rootScope, Private, Promise) {
+  .service('courier', function ($rootScope, Private, Promise, indexPatterns) {
     function Courier() {
       var courier = this;
 
@@ -15,13 +18,13 @@ define(function (require) {
       var docLooper = Private(require('./looper/doc'));
 
       // expose some internal modules
-      courier.errors = Private(require('./_errors'));
+      courier.getRootSearch = Private(require('./_get_root_search'));
       courier.SavedObject = Private(require('./saved_object/saved_object'));
-      courier.indexPatterns = Private(require('./index_patterns/index_patterns'));
+      courier.indexPatterns = indexPatterns;
       courier.redirectWhenMissing = Private(require('./_redirect_when_missing'));
 
-      var HastyRefresh = courier.errors.HastyRefresh;
-      var Abort = courier.errors.Abort;
+      var HastyRefresh = errors.HastyRefresh;
+      var Abort = errors.Abort;
 
       /**
        * update the time between automatic search requests

@@ -1,7 +1,17 @@
 define(function () {
   return function MappingSetupService(configFile, es) {
+    var angular = require('angular');
     var _ = require('lodash');
     var mappingSetup = this;
+
+    var json = {
+      _serialize: function (val) {
+        if (val != null) return angular.toJson(val);
+      },
+      _deserialize: function (val) {
+        if (val != null) return JSON.parse(val);
+      }
+    };
 
     /**
      * Use to create the mappings, but that should only happen one at a time
@@ -25,6 +35,22 @@ define(function () {
         return _.keys(resp[indexName].mappings);
       });
     });
+
+    mappingSetup.expandShorthand = function (sh) {
+      return _.mapValues(sh || {}, function (val, prop) {
+        // allow shortcuts for the field types, by just setting the value
+        // to the type name
+        if (typeof val === 'string') val = { type: val };
+
+        if (val.type === 'json') {
+          val.type = 'string';
+          val._serialize = json._serialize;
+          val._deserialize = json._deserialize;
+        }
+
+        return val;
+      });
+    };
 
     mappingSetup.isDefined = function (type) {
       return getKnownKibanaTypes()

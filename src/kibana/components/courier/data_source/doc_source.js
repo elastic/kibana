@@ -1,10 +1,10 @@
 define(function (require) {
   var _ = require('lodash');
+  var errors = require('errors');
 
   var inherits = require('utils/inherits');
 
   return function DocSourceFactory(Private, Promise, es) {
-    var errors = Private(require('../_errors'));
     var sendToEs = Private(require('./_doc_send_to_es'));
     var SourceAbstract = Private(require('./_abstract'));
 

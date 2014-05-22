@@ -14,7 +14,7 @@ define(function (require) {
 
       var handlerCount = 0;
       errorHandlers.splice(0).forEach(function (handler) {
-        if (handler.source !== req.source) return pendingRequests.push(handler);
+        if (handler.source !== req.source) return errorHandlers.push(handler);
         handler.defer.resolve(error);
         handlerCount++;
       });

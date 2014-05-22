@@ -1,8 +1,8 @@
 define(function (require) {
   return function SearchLooperService(Private, Promise) {
+    var errors = require('errors');
     var fetch = Private(require('../fetch/fetch'));
     var Looper = Private(require('./_looper'));
-    var errors = Private(require('../_errors'));
 
     // track the currently executing search resquest
     var _activeAutoSearch = null;

@@ -1,9 +1,9 @@
 define(function (require) {
   var inherits = require('utils/inherits');
   var _ = require('lodash');
+  var errors = require('errors');
 
   return function SearchSourceFactory(Promise, Private) {
-    var errors = Private(require('../_errors'));
     var SourceAbstract = Private(require('./_abstract'));
 
     var FetchFailure = errors.FetchFailure;
@@ -25,8 +25,6 @@ define(function (require) {
      * @type {Array}
      */
     SearchSource.prototype._methods = [
-      'index',
-      'indexInterval', // monthly, daily, etc
       'type',
       'query',
       'filter',
@@ -37,6 +35,16 @@ define(function (require) {
       'size',
       'source'
     ];
+
+    SearchSource.prototype.index = function (indexPattern) {
+      if (indexPattern === void 0) return this._state.index;
+      if (!indexPattern || typeof indexPattern.toIndexList !== 'function') {
+        throw new TypeError('expected indexPattern to be an IndexPattern duck.');
+      }
+
+      this._state.index = indexPattern;
+      return this;
+    };
 
     SearchSource.prototype.extend = function () {
       return (new SearchSource()).inherits(this);

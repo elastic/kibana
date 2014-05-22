@@ -1,11 +1,11 @@
 define(function (require) {
-  return function fetchService(Private, es, Promise, Notifier, $q) {
+  return function fetchService(Private, es, Promise, Notifier) {
     var _ = require('lodash');
+    var errors = require('errors');
 
     var docStrategy = Private(require('./strategy/doc'));
     var searchStrategy = Private(require('./strategy/search'));
 
-    var errors = Private(require('../_errors'));
     var RequestErrorHandler = Private(require('./_request_error_handler'));
     var pendingRequests = Private(require('../_pending_requests'));
 
@@ -16,7 +16,27 @@ define(function (require) {
     var fetchThese = function (strategy, requests, reqErrHandler) {
       var all, body;
 
-      all = requests.splice(0);
+      // dedupe requests
+      var uniqs = {};
+      all = requests.splice(0).filter(function (req) {
+        var iid = req.source._instanceid;
+        if (!uniqs[iid]) {
+          // this request is unique so far
+          uniqs[iid] = req;
+          // keep the request
+          return true;
+        }
+
+        // the source was requested at least twice
+        var uniq = uniqs[iid];
+        if (uniq._merged) {
+          // already setup the multi-responder
+          uniq._merged.push(req);
+        } else {
+          // put all requests into this array and itterate them all
+          uniq._merged = [uniq, req];
+        }
+      });
 
       return Promise.map(all, function (req) {
         return req.source._flatten();
@@ -31,18 +51,32 @@ define(function (require) {
           body: body
         })
         .then(function (resp) {
-          strategy.getResponses(resp).forEach(function (resp) {
-            var req = all.shift();
+          var sendResponse = function (req, resp) {
             if (resp.error) return reqErrHandler.handle(req, new errors.FetchFailure(resp));
             else strategy.resolveRequest(req, resp);
+          };
+
+          strategy.getResponses(resp).forEach(function (resp) {
+            var req = all.shift();
+            if (!req._merged) sendResponse(req, resp);
+            else {
+              req._merged.forEach(function (mergedReq) {
+                sendResponse(mergedReq, _.cloneDeep(resp));
+              });
+            }
           });
 
           // pass the response along to the next promise
           return resp;
         })
         .catch(function (err) {
-          all.forEach(function (req) {
+          var sendFailure = function (req) {
             reqErrHandler.handle(req, err);
+          };
+
+          all.forEach(function (req) {
+            if (!req._merged) sendFailure(req);
+            else req._merged.forEach(sendFailure);
           });
           throw err;
         });

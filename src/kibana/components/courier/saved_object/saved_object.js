@@ -1,22 +1,13 @@
 define(function (require) {
   return function SavedObjectFactory(configFile, Promise, Private, Notifier) {
+    var errors = require('errors');
     var angular = require('angular');
     var _ = require('lodash');
 
     var DocSource = Private(require('../data_source/doc_source'));
     var SearchSource = Private(require('../data_source/search_source'));
-
-    var errors = Private(require('../_errors'));
-    var mappingSetup = Private(require('./_mapping_setup'));
-
-    var json = {
-      _serialize: function (val) {
-        if (val != null) return angular.toJson(val);
-      },
-      _deserialize: function (val) {
-        if (val != null) return JSON.parse(val);
-      }
-    };
+    var mappingSetup = Private(require('utils/mapping_setup'));
+    var getRootSearch = Private(require('../_get_root_search'));
 
     function SavedObject(config) {
       if (!_.isObject(config)) config = {};
@@ -39,19 +30,7 @@ define(function (require) {
       });
 
       // mapping definition for the fields that this object will expose
-      var mapping = _.mapValues(config.mapping || {}, function (val, prop) {
-        // allow shortcuts for the field types, by just setting the value
-        // to the type name
-        if (typeof val === 'string') val = { type: val };
-
-        if (val.type === 'json') {
-          val.type = 'string';
-          val._serialize = json._serialize;
-          val._deserialize = json._deserialize;
-        }
-
-        return val;
-      });
+      var mapping = mappingSetup.expandShorthand(config.mapping);
 
       // default field values, assigned when the source is loaded
       var defaults = config.defaults || {};
@@ -83,12 +62,13 @@ define(function (require) {
           .id(obj.id);
 
         // by default, the search source should inherit from the rootSearch
-        if (obj.searchSource) {
-          obj.searchSource.inherits(SavedObject.rootSearch());
-        }
+        return Promise.cast(obj.searchSource && getRootSearch())
+        .then(function (rootSearch) {
+          if (rootSearch) obj.searchSource.inherits(rootSearch);
 
-        // check that the mapping for this type is defined
-        return mappingSetup.isDefined(type)
+          // check that the mapping for this type is defined
+          return mappingSetup.isDefined(type);
+        })
         .then(function (defined) {
           // if it is already defined skip this step
           if (defined) return true;
@@ -207,12 +187,6 @@ define(function (require) {
       };
 
     }
-
-    SavedObject.rootSearch = function () {
-      var rootSearch = Private(require('./_root_search'))();
-      SavedObject.rootSearch = function () { return rootSearch; };
-      return rootSearch;
-    };
 
     return SavedObject;
   };

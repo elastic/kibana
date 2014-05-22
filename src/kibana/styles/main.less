@@ -216,3 +216,27 @@ saved-object-finder {
   color: @text-muted;
   padding: @padding-base-vertical @padding-base-horizontal;
 }
+
+
+//== override the disabled cursor that doesn't work everywhere
+.form-control{
+  &[disabled],
+  &[readonly],
+  fieldset[disabled] & {
+    cursor: default;
+    opacity: .8;
+  }
+}
+
+input[type="radio"],
+input[type="checkbox"],
+.radio,
+.radio-inline,
+.checkbox,
+.checkbox-inline {
+  &[disabled],
+  fieldset[disabled] & {
+    cursor: default;
+    opacity: .8;
+  }
+}
