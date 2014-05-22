@@ -29,7 +29,7 @@ module.exports = function (repo, dir) {
   .then(function (out) {
     if (prevHash) newHash = out.trim();
     if (!prevHash || newHash !== prevHash) {
-      return spawn('npm', ['install'], dir)()
+      return spawn('npm', ['update'], dir)()
       .then(spawn('bower', ['install'], dir))
       .then(function () {
         return true;
