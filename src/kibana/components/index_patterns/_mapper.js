@@ -25,7 +25,7 @@ define(function (require) {
        */
       mapper.getFieldsForIndexPattern = function (indexPattern, skipIndexPatternCache) {
         var id = indexPattern.id;
-        var indexList = indexPattern.toIndexList(0, 5);
+        var indexList = indexPattern.toIndexList(-5, 5);
 
         var cache = fieldCache.get(id);
         if (cache) return Promise.resolve(cache);

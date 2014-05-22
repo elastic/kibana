@@ -9,7 +9,7 @@ define(function (require) {
 
   var module = require('modules').get('kibana/directive');
 
-  module.directive('visualize', function (createNotifier, SavedVis, courier) {
+  module.directive('visualize', function (createNotifier, SavedVis, indexPatterns) {
     return {
       restrict: 'E',
       scope : {
@@ -51,7 +51,7 @@ define(function (require) {
           });
 
           vis.searchSource.onResults(function onResults(resp) {
-            courier.indexPatterns.get(vis.searchSource.get('index'))
+            indexPatterns.get(vis.searchSource.get('index'))
             .then(function (indexPattern) {
               var chartData = vis.buildChartDataFromResponse(indexPattern, resp);
               chart.render(chartData);

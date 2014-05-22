@@ -27,7 +27,7 @@ define(function (require) {
     };
 
     index.nameInterval = _.find(index.nameIntervalOptions, { name: 'daily' });
-    index.timeField = _.find(index.nameIntervalOptions, { name: 'field' });
+    index.timeField = null;
 
     var updateSamples = function () {
       index.samples = null;
@@ -74,9 +74,8 @@ define(function (require) {
       .catch(notify.error);
     };
 
-    $scope.refreshFieldList = function () {
-      index.dateFields = index.timeField = index.fetchFieldsError = null;
-
+    $scope.refreshFieldList = _.debounce(function () {
+      index.dateFields = index.timeField = index.fetchFieldsError = index.listUsed = null;
       var useIndexList = index.isTimeBased && index.nameIsPattern;
 
       // we don't have enough info to continue
@@ -90,24 +89,30 @@ define(function (require) {
         return;
       }
 
-      indexPatterns.mapper.clearCache(index.name)
+      return indexPatterns.mapper.clearCache(index.name)
       .then(function () {
-        var pattern = index.name;
-
-        if (useIndexList) {
-          // trick the mapper into thinking this is an indexPattern
-          pattern = {
-            id: index.name,
-            toIndexList: function (to, from) {
-              return intervals.toIndexList(index.name, index.nameInterval, to, from);
+        // trick the mapper into thinking this is an indexPattern
+        var pattern = {
+          id: index.name,
+          nameInterval: index.nameInterval,
+          toIndexList: function (to, from) {
+            if (!index.nameInterval) {
+              index.listUsed = index.name;
+            } else {
+              index.listUsed = intervals.toIndexList(index.name, index.nameInterval, to, from);
             }
-          };
-        }
+            return index.listUsed;
+          }
+        };
 
         return indexPatterns.mapper.getFieldsForIndexPattern(pattern, true)
         .catch(function (err) {
           // TODO: we should probably display a message of some kind
-          if (err instanceof MissingIndices) return [];
+          if (err instanceof MissingIndices) {
+            index.fetchFieldsError = 'Unable to fetch mapping. Do you have recent indices matching the interval?';
+            return [];
+          }
+
           throw err;
         });
       })
@@ -116,7 +121,7 @@ define(function (require) {
           return field.type === 'date';
         });
       }, notify.fatal);
-    };
+    }, 50, { leading: true, trailing: false });
 
     $scope.createIndexPattern = function () {
       // get an empty indexPattern to start
@@ -168,11 +173,13 @@ define(function (require) {
     };
 
     $scope.$watch('index.name', updateSamples);
+    $scope.$watch('index.nameInterval', updateSamples);
+
+    $scope.$watch('index.nameIsPattern', updateDefaultIndexName);
+
     $scope.$watch('index.name', $scope.refreshFieldList);
     $scope.$watch('index.isTimeBased', $scope.refreshFieldList);
-    $scope.$watch('index.nameIsPattern', updateDefaultIndexName);
     $scope.$watch('index.nameIsPattern', $scope.refreshFieldList);
-    $scope.$watch('index.nameInterval', updateSamples);
     $scope.$watch('index.nameInterval', $scope.refreshFieldList);
   });
 });

@@ -101,7 +101,6 @@
             <select
               required
               ng-if="!index.fetchFieldsError"
-              ng-init="refreshFieldList();"
               ng-options="field.name for field in index.dateFields"
               ng-model="index.timeField"
               class="form-control">

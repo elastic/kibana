@@ -7,7 +7,7 @@ define(function (require) {
 
   var module = require('modules').get('kibana/services');
 
-  module.factory('SavedVis', function (config, $injector, courier, Promise, savedSearches, Private) {
+  module.factory('SavedVis', function (config, $injector, courier, indexPatterns, Promise, savedSearches, Private) {
     var aggs = Private(require('./_aggs'));
 
     function SavedVis(opts) {
@@ -78,7 +78,7 @@ define(function (require) {
             .then(function (rootSearch) {
 
               if (relatedPattern) {
-                return courier.indexPatterns.get(relatedPattern)
+                return indexPatterns.get(relatedPattern)
                 .then(function (indexPattern) {
                   // create a new search source that inherits from the parent and uses the indexPattern
                   return {
