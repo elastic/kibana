@@ -1,6 +1,6 @@
 module.exports = function (grunt) {
   var instrumentationMiddleware = require('../utils/instrumentation');
-  var amdRapperMiddleware = require('../utils/amd-rapper');
+  var amdRapperMiddleware = require('../utils/amd_rapper');
 
   return {
     dev: {
