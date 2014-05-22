@@ -19,6 +19,12 @@ define(function (require) {
         var chart; // set in "vis" watcher
 
         $scope.$watch('vis', function (vis, prevVis) {
+          if (!!vis.error) {
+            console.log('yep error');
+            $el.html('<div class="visualize-error"><i class="fa fa-exclamation-triangle"></i><br>' + vis.error + '</div>');
+            return;
+          }
+
           var typeDefinition = typeDefs.byName[vis.typeName];
 
           if (prevVis && prevVis.destroy) prevVis.destroy();

@@ -25,6 +25,9 @@ define(function (require) {
             // .destroy() called by the visualize directive
           })
           .catch(function (e) {
+            $scope.vis = {
+              error: e
+            };
             console.log(e);
           });
         });
