@@ -96,8 +96,12 @@ define(function (require) {
         });
       }
 
+      pattern.getInterval = function () {
+        return this.intervalName && _.find(intervals, { name: this.intervalName });
+      };
+
       pattern.toIndexList = function (start, stop) {
-        var interval = this.intervalName && _.find(intervals, { name: this.intervalName });
+        var interval = this.getInterval();
         if (interval) {
           return intervals.toIndexList(pattern.id, interval, start, stop);
         } else {

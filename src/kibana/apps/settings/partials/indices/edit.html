@@ -1,6 +1,6 @@
 <kbn-settings-app section="indices">
   <kbn-settings-indices>
-    <div ng-controller="kbnSettingsIndicesEdit">
+    <div ng-controller="kbnSettingsIndicesEdit" bindonce>
       <div class="page-header">
         <h1>
           <i ng-if="defaultIndex === indexPattern.id" class="fa fa-star"></i>
@@ -25,8 +25,13 @@
           </button>
 
         </h1>
-        This page lists every field in the <strong>{{indexPattern.id}}</strong>
-        index and the field's associated core type as recorded by Elasticsearch
+        <p>
+          This page lists every field in the <strong>{{indexPattern.id}}</strong>
+          index and the field's associated core type as recorded by Elasticsearch
+        </p>
+        <div bo-if="indexPattern.timeFieldName && indexPattern.intervalName" class="alert alert-info">
+          This index uses a <strong>Time-based index pattern</strong> which repeats <span bo-text="indexPattern.getInterval().display"></span>
+        </p>
       </div>
 
       <div ng-hide="tablePages() == 1">
@@ -47,7 +52,7 @@
         </center>
       </div>
 
-      <table class="table" bindonce>
+      <table class="table">
         <thead>
           <th ng-click="setFieldSort('name')">name <i ng-class="sortClass('name')"></i></th>
           <th ng-click="setFieldSort('type')">type <i ng-class="sortClass('type')"></i></th>
@@ -57,23 +62,15 @@
           | orderBy:table.by:table.reverse
           | startFrom:table.page*table.max
           | limitTo:table.max">
-          <td bo-text="field.name"></td>
-          <td
-            ng-if="field.type != 'date'"
-            bo-text="field.type">
-          </td>
-          <td
-            ng-if="field.type === 'date'"
-            class="datefield">
-            {{field.type}}
+        <td>
+            <span bo-text="field.name"></span>
+            &nbsp;
             <i
-              ng-click="setIndexPatternsTimeField(field)"
-              tooltip="Use this field as the time that event occured"
-              ng-class="{
-                'fa fa-clock-o pull-right': true,
-                'active': indexPattern.timeFieldName === field.name
-              }"></i>
+              bo-if="indexPattern.timeFieldName === field.name"
+              tooltip="This field is represents the time that events occured"
+              class="fa fa-clock-o active"></i>
           </td>
+          <td bo-text="field.type"></td>
         </tr>
       </table>
     </div>

@@ -91,9 +91,6 @@ kbn-settings-advanced {
 .advanced-settings table td.actions {
   width: 150px;
 }
-.indices-settings .datefield i {
-  color: #b4bcc2;
-}
-.indices-settings .datefield .active {
+.indices-settings i.active {
   color: #31c471;
 }
