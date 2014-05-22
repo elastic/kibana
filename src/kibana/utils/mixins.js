@@ -55,6 +55,9 @@ define(function (require) {
           return memo.apply(this, arguments);
         }
       };
+    },
+    isNumeric: function (v) {
+      return !isNaN(v) && _.isNumber(v);
     }
   });
 

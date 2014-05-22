@@ -21,7 +21,7 @@ define(function (require) {
       }
 
       var typeDef;
-      var rootSearch = opts.parentSearchSource || courier.SavedObject.rootSearch();
+      var defaultParent = opts.parentSearchSource;
 
       courier.SavedObject.call(vis, {
         type: 'visualization',
@@ -74,17 +74,25 @@ define(function (require) {
               return savedSearches.get(vis.savedSearchId);
             }
 
-            if (relatedPattern) {
-              // create a new search source that inherits from the parent and uses the indexPattern
-              return Promise.resolve({
-                searchSource: rootSearch.extend().index(relatedPattern)
-              });
-            }
+            return courier.getRootSearch()
+            .then(function (rootSearch) {
 
-            // default parent is the rootSearch, can be overridden (like in discover)
-            // but we mimic the searchSource prop from saved objects here
-            return Promise.resolve({
-              searchSource: rootSearch
+              if (relatedPattern) {
+                return courier.indexPatterns.get(relatedPattern)
+                .then(function (indexPattern) {
+                  // create a new search source that inherits from the parent and uses the indexPattern
+                  return {
+                    searchSource: rootSearch.extend().index(indexPattern)
+                  };
+                });
+              }
+
+              // default parent is the rootSearch, can be overridden (like in discover)
+              // but we mimic the searchSource prop from saved objects here
+              return {
+                searchSource: rootSearch
+              };
+
             });
           }());
 
@@ -122,11 +130,6 @@ define(function (require) {
 
             vis._fillConfigsToMinimum();
 
-            // get and cache the field list
-            var index = vis.searchSource.get('index');
-            if (index) return courier.getFieldsFor(index);
-          })
-          .then(function () {
             return vis;
           });
         }

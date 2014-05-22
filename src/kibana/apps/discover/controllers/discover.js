@@ -14,6 +14,7 @@ define(function (require) {
   require('directives/fixed_scroll');
   require('filters/moment');
   require('courier/courier');
+  require('index_patterns/index_patterns');
   require('state_management/app_state');
   require('services/timefilter');
 
@@ -22,7 +23,8 @@ define(function (require) {
   var app = require('modules').get('app/discover', [
     'kibana/services',
     'kibana/notify',
-    'kibana/courier'
+    'kibana/courier',
+    'kibana/index_patterns'
   ]);
 
   require('routes')
@@ -34,9 +36,9 @@ define(function (require) {
         return savedSearches.get($route.current.params.id)
         .catch(courier.redirectWhenMissing('/discover'));
       },
-      indexPatternList: function (courier) {
-        return courier.indexPatterns.getIds()
-        .then(courier.indexPatterns.ensureSome());
+      indexPatternList: function (indexPatterns) {
+        return indexPatterns.getIds()
+        .then(indexPatterns.ensureSome());
       }
     }
   });
@@ -102,9 +104,9 @@ define(function (require) {
     $scope.fields = null;
 
     var init = _.once(function () {
-      return setFields()
+      return updateDataSource()
       .then(function () {
-        updateDataSource();
+        setFields();
 
         // state fields that shouldn't trigger a fetch when changed
         var ignoreStateChanges = ['columns'];
@@ -129,6 +131,10 @@ define(function (require) {
 
           // if the searchSource doesn't know, tell it so
           if (!angular.equals(sort, currentSort)) $scope.fetch();
+        });
+
+        $scope.$watch('opts.timefield', function (timefield) {
+          timefilter.enabled(!!timefield);
         });
 
         searchSource.onError().then(function searchError(err) {
@@ -164,27 +170,29 @@ define(function (require) {
     });
 
     $scope.opts.saveDataSource = function () {
-      updateDataSource();
-      savedSearch.id = savedSearch.title;
-
-      savedSearch.save()
+      return updateDataSource()
       .then(function () {
-        notify.info('Saved Data Source "' + savedSearch.title + '"');
-        if (savedSearch.id !== $route.current.params.id) {
-          $location.url(globalState.writeToUrl('/discover/' + savedSearch.id));
-        }
-      }, notify.error);
+        savedSearch.id = savedSearch.title;
+
+        return savedSearch.save()
+        .then(function () {
+          notify.info('Saved Data Source "' + savedSearch.title + '"');
+          if (savedSearch.id !== $route.current.params.id) {
+            $location.url(globalState.writeToUrl('/discover/' + savedSearch.id));
+          }
+        });
+      })
+      .catch(notify.error);
     };
 
     $scope.fetch = function () {
-      setupVisualization().then(function () {
-        if ($scope.opts.timefield) timefilter.enabled(true);
-
-        updateDataSource();
+      setupVisualization()
+      .then(updateDataSource)
+      .then(function () {
         $state.commit();
-
         courier.fetch();
-      }, notify.error);
+      })
+      .catch(notify.error);
     };
 
     $scope.toggleConfig = function () {
@@ -233,16 +241,29 @@ define(function (require) {
           }
         });
 
-      if ($scope.opts.index !== searchSource.get('index')) {
-        // set the index on the savedSearch
-        searchSource.index($scope.opts.index);
-
-        $state.index = $scope.opts.index;
-        delete $scope.fields;
-        delete $scope.columns;
-
-        setFields();
+      // get the current indexPattern
+      var indexPattern = searchSource.get('index');
+      // if indexPattern exists, but $scope.opts.index doesn't, or the opposite, or if indexPattern's id
+      // is not equal to the $scope.opts.index then either clean or
+      if (
+        Boolean($scope.opts.index) !== Boolean(indexPattern)
+        || (indexPattern && indexPattern.id) !== $scope.opts.index
+      ) {
+        $state.index = $scope.opts.index = $scope.opts.index || config.get('defaultIndex');
+        indexPattern = courier.indexPatterns.get($scope.opts.index);
       }
+
+      return Promise.cast(indexPattern)
+      .then(function (indexPattern) {
+        if (indexPattern !== searchSource.get('index')) {
+          // set the index on the savedSearch
+          searchSource.index(indexPattern);
+          delete $scope.fields;
+          delete $scope.columns;
+
+          setFields();
+        }
+      });
     }
 
     // This is a hacky optimization for comparing the contents of a large array to a short one.
@@ -255,46 +276,44 @@ define(function (require) {
     }
 
     function setFields() {
-      return courier.getFieldsFor($scope.opts.index)
-      .then(function (rawFields) {
-        var currentState = _.transform($scope.fields || [], function (current, field) {
-          current[field.name] = {
-            display: field.display
-          };
-        }, {});
+      var indexPattern = searchSource.get('index');
+      var currentState = _.transform($scope.fields || [], function (current, field) {
+        current[field.name] = {
+          display: field.display
+        };
+      }, {});
 
-        if (!rawFields) return;
+      if (!indexPattern) return;
 
-        var columnObjects = arrayToKeys($scope.state.columns);
+      var columnObjects = arrayToKeys($scope.state.columns);
 
-        $scope.fields = [];
-        $scope.fieldsByName = {};
-        $scope.formatsByName = {};
-        $scope.state.columns = $scope.state.columns || [];
+      $scope.fields = [];
+      $scope.fieldsByName = {};
+      $scope.formatsByName = {};
+      $scope.state.columns = $scope.state.columns || [];
 
-        // Inject source into list;
-        $scope.fields.push({name: '_source', type: 'source', display: false});
+      // Inject source into list;
+      $scope.fields.push({name: '_source', type: 'source', display: false});
 
-        _.sortBy(rawFields, 'name').forEach(function (field) {
-          _.defaults(field, currentState[field.name]);
-          // clone the field and add it's display prop
-          var clone = _.assign({}, field, { display: columnObjects[name] || false });
-          $scope.fields.push(clone);
-          $scope.fieldsByName[field.name] = clone;
-          $scope.formatsByName[field.name] = field.format;
-        });
+      _.sortBy(indexPattern.fields, 'name').forEach(function (field) {
+        _.defaults(field, currentState[field.name]);
+        // clone the field and add it's display prop
+        var clone = _.assign({}, field, { display: columnObjects[name] || false });
+        $scope.fields.push(clone);
+        $scope.fieldsByName[field.name] = clone;
+        $scope.formatsByName[field.name] = field.format;
+      });
 
-        // TODO: timefield should be associated with the index pattern, this is a hack
-        // to pick the first date field and use it.
-        var timefields = _.find($scope.fields, {type: 'date'});
-        if (!!timefields) {
-          $scope.opts.timefield = timefields.name;
-        } else {
-          delete $scope.opts.timefield;
-        }
+      // TODO: timefield should be associated with the index pattern, this is a hack
+      // to pick the first date field and use it.
+      var timefields = _.find($scope.fields, {type: 'date'});
+      if (!!timefields) {
+        $scope.opts.timefield = timefields.name;
+      } else {
+        delete $scope.opts.timefield;
+      }
 
-        refreshColumns();
-      }, notify.error);
+      refreshColumns();
     }
 
     // TODO: On array fields, negating does not negate the combination, rather all terms
@@ -366,46 +385,59 @@ define(function (require) {
       return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     };
 
+    var loadingVis;
     var setupVisualization = function () {
-      return new Promise(function (resolve, reject) {
-        // we shouldn't have a vis, delete it
-        if (!$scope.opts.timefield && $scope.vis) delete $scope.vis;
-        // we shouldn't have one, or already do, return whatever we already have
-        if (!$scope.opts.timefield || $scope.vis) return resolve($scope.vis);
+      if (loadingVis) return loadingVis;
 
-        // set the scopes vis property to the AdhocVis so that we know not to re-init
-        $scope.vis = new AdhocVis({
-          searchSource: searchSource,
-          type: 'histogram',
-          listeners: {
-            onClick: function (e) {
-              console.log(e);
-            }
-          },
-          config: {
-            metric: {
-              configs: [{
-                agg: 'count',
-              }]
-            },
-            segment: {
-              configs: [{
-                agg: 'date_histogram',
-                field: $scope.opts.timefield,
-                min_doc_count: 0,
-              }]
-            },
-            group: { configs: [] },
-            split: { configs: [] },
+      // we shouldn't have a vis, delete it
+      if (!$scope.opts.timefield && $scope.vis) delete $scope.vis;
+      // we shouldn't have one, or already do, return whatever we already have
+      if (!$scope.opts.timefield || $scope.vis) return Promise.resolve($scope.vis);
+
+      var vis = new AdhocVis({
+        searchSource: searchSource,
+        type: 'histogram',
+        listeners: {
+          onClick: function (e) {
+            console.log(e);
           }
-        });
-
-        // once the visualization is ready, resolve the promise with the vis
-        $scope.$on('ready:vis', function () {
-          // enable the source, but wait for the visualization to be ready before running
-          resolve($scope.vis);
-        });
+        },
+        config: {
+          metric: {
+            configs: [{
+              agg: 'count',
+            }]
+          },
+          segment: {
+            configs: [{
+              agg: 'date_histogram',
+              field: $scope.opts.timefield,
+              min_doc_count: 0,
+            }]
+          },
+          group: { configs: [] },
+          split: { configs: [] },
+        }
       });
+
+      // stash this promise so that other calls to setupVisualization will have to wait
+      loadingVis = vis.init()
+      .then(function () {
+        // expose the vis so that the visualize directive can get started
+        $scope.vis = vis;
+
+        // wait for visualize directive to emit that it's ready before resolving
+        return new Promise(function (resolve) {
+          $scope.$on('ready:vis', resolve);
+        });
+      })
+      .then(function () {
+        // clear the loading flag
+        loadingVis = null;
+        return vis;
+      });
+
+      return loadingVis;
     };
 
     init();

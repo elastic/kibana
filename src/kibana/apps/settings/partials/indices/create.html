@@ -1,21 +1,124 @@
 <kbn-settings-app section="indices">
   <kbn-settings-indices>
-    <div ng-controller="kbnSettingsIndicesCreate">
+    <div ng-controller="kbnSettingsIndicesCreate" class="kbn-settings-indices-create">
       <div class="page-header">
         <h1>Configure an index pattern</h1>
         In order to use Kibana you must configure at least one index pattern. Index patterns are
         used to identify the Elasticsearch index to run search and analytics against. They are also
         used to configure fields.
       </div>
-      <form name="form" role="form" class="well" ng-submit="create()">
-        <div class="form-group">
-          <label>Index Name <small>or pattern</small></label>
-          <input type="text" class="form-control" placeholder="Enter index name"
-            ng-model="newIndexPattern" required>
-        </div>
-        <button type="submit" class="btn btn-primary"
-          ng-disabled="form.$invalid">Create</button>
-      </form>
+      <div class="container">
+        <form name="form" role="form" class="well" ng-submit="createIndexPattern()">
+          <div class="form-group time-and-pattern">
+            <label>
+              <input
+                ng-model="index.isTimeBased"
+                type="checkbox">
+              Index contains time-based events
+            </label>
+            <br>
+            <label ng-if="index.isTimeBased">
+              <input ng-model="index.nameIsPattern" type="checkbox">
+              Use event times to create index names
+            </label>
+          </div>
+          <div class="form-group">
+            <label>
+              Index Name
+              or Pattern &mdash;
+              <small><a href="http://momentjs.com/docs/#/displaying/format/">docs</a></small>
+            </label>
+            <input
+              ng-model="index.name"
+              ng-attr-placeholder="{{index.defaultName}}"
+              ng-model-options="{ updateOn: 'default blur', debounce: {'default': 2500, 'blur': 0} }"
+              required
+              type="text"
+              class="form-control">
+          </div>
+          <section ng-if="index.isTimeBased && index.nameIsPattern">
+            <div class="form-group">
+              <label>
+                Index Pattern Interval&nbsp;
+                <kbn-info info="The interval at which index names rotate."></kbn-info>
+              </label>
+              <select
+                required
+                ng-options="opt.display for opt in index.nameIntervalOptions"
+                ng-model="index.nameInterval"
+                class="form-control">
+              </select>
+            </div>
+
+            <div class="alert alert-danger" ng-repeat="err in index.patternErrors">{{err}}</div>
+
+            <div class="alert alert-info" ng-if="index.samples">
+              Sample Index Names
+              <ul>
+                <li ng-repeat="sample in index.samples">{{sample}}</li>
+              </ul>
+              <a ng-click="moreSamples(true)" class="alert-link">more</a>
+            </div>
+
+            <div class="alert alert-{{index.existing.class}}" ng-if="index.existing">
+              Pattern matches {{index.existing.matchPercent}} of similar indices
+              <ul>
+                <li ng-repeat="match in index.existing.matches | limitTo: index.sampleCount">{{match}}</li>
+              </ul>
+              <a
+                ng-if="index.sampleCount < index.existing.matches.length"
+                ng-click="moreSamples()"
+                class="alert-link">
+                more
+              </a>
+            </div>
+            <div class="alert alert-danger" ng-if="index.existing.failures.length">
+              Indices that did not match:
+              <ul>
+                <li ng-repeat="match in index.existing.failures | limitTo: index.sampleCount">{{match}}</li>
+              </ul>
+              <a
+                ng-if="index.sampleCount < index.existing.matches.length"
+                ng-click="moreSamples()"
+                class="alert-link">
+                more
+              </a>
+            </section>
+
+
+          </section>
+
+          <div class="form-group" ng-if="index.isTimeBased">
+            <label>
+              Time-Field Name
+              &nbsp;
+              <kbn-info info="This field will be use to filter events with the global time filter"></kbn-info>
+              &nbsp;
+              <small>
+                <a ng-click="refreshFieldList();"> refresh fields</a>
+              </small>
+            </label>
+            <select
+              required
+              ng-if="!index.fetchFieldsError"
+              ng-init="refreshFieldList();"
+              ng-options="field.name for field in index.dateFields"
+              ng-model="index.timeField"
+              class="form-control">
+            </select>
+            <select ng-if="index.fetchFieldsError" class="form-control" disabled >
+              <option>{{index.fetchFieldsError}}</option>
+            </select>
+          </div>
+
+          <button
+            ng-disabled="form.$invalid"
+            type="submit"
+            class="btn btn-success">
+            Create
+          </button>
+        </form>
+      </div>
     </div>
   </kbn-settings-indices>
 </kbn-settings-app>

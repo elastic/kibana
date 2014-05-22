@@ -1,6 +1,6 @@
 define(function (require) {
   return function EnsureSomeIndexPatternsFn(Private, Notifier, $location, $route) {
-    var errors = Private(require('../_errors'));
+    var errors = require('errors');
     var notify = new Notifier();
 
     return function ensureSomeIndexPatterns() {

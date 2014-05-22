@@ -53,7 +53,8 @@ define(function (require) {
           vis.searchSource.onResults(function onResults(resp) {
             courier.indexPatterns.get(vis.searchSource.get('index'))
             .then(function (indexPattern) {
-              chart.render(vis.buildChartDataFromResponse(indexPattern, resp));
+              var chartData = vis.buildChartDataFromResponse(indexPattern, resp);
+              chart.render(chartData);
             })
             .catch(notify.fatal);
           }).catch(notify.fatal);

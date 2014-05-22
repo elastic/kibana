@@ -1,5 +1,5 @@
 define(function (require) {
-  return function FetchStrategyForSearch(Private, Promise, Notifier) {
+  return function FetchStrategyForSearch(Private, Promise, Notifier, timefilter) {
     var _ = require('lodash');
 
     var notify = new Notifier();
@@ -14,9 +14,13 @@ define(function (require) {
        */
       requestStatesToBody: function (states) {
         return states.map(function (state) {
+          var timeBounds = timefilter.getBounds();
+          var indexList = state.index.toIndexList(timeBounds.min, timeBounds.max);
+
           return JSON.stringify({
-              index: state.index,
-              type: state.type
+              index: indexList,
+              type: state.type,
+              ignore_unavailable: true
             })
             + '\n'
             + JSON.stringify(state.body);

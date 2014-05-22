@@ -9,6 +9,8 @@ define(function (require) {
     var fetch = Private(require('../fetch/fetch'));
 
     function SourceAbstract(initialState) {
+      this._instanceid = _.uniqueId('data_source');
+
       this._state = (function () {
         // state can be serialized as JSON, and passed back in to restore
         if (initialState) {
@@ -62,9 +64,10 @@ define(function (require) {
      */
     SourceAbstract.prototype.set = function (state, val) {
       if (typeof state === 'string') {
-        return this[state](val);
+        this[state](val);
+      } else {
+        this._state = state;
       }
-      this._state = state;
       return this;
     };
 

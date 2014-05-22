@@ -10,7 +10,7 @@
 <div class="form-group" ng-if="config.agg && config.agg !== 'count'">
   <label for="field">
     Field to {{config.agg}}&nbsp;
-    <kbn-info placement="right" info="'Field to use for the ' + metric.label"></kbn-info>
+    <kbn-info placement="right" info="Field to use for the {{metric.label}}"></kbn-info>
   </label>
   <select
     class="form-control"
