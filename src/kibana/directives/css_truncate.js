@@ -18,14 +18,16 @@ define(function (require) {
 
         if (!_.isUndefined(attrs.cssTruncateExpandable)) {
           $elem.css({'cursor': 'pointer'});
-          $elem.bind('click', function () {
-            if ($elem.css('white-space') !== 'normal') {
-              $elem.css({'white-space': 'normal'});
-            } else {
-              $elem.css({'white-space': 'nowrap'});
-            }
-          });
+          $elem.bind('click', $scope.toggle);
         }
+
+        $scope.toggle = function () {
+          if ($elem.css('white-space') !== 'normal') {
+            $elem.css({'white-space': 'normal'});
+          } else {
+            $elem.css({'white-space': 'nowrap'});
+          }
+        };
 
         $scope.$on('$destroy', function () {
           $elem.unbind('click');

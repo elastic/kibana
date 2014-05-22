@@ -113,7 +113,7 @@
             <form role="form">
               <label>&nbsp</label>
               <div class="form-group">
-                <button class="btn btn-primary" ng-disabled="!relative.preview" ng-click="applyRelative()">Go</button>
+                <button class="btn btn-primary kbn-timepicker-go" ng-disabled="!relative.preview" ng-click="applyRelative()">Go</button>
               </div>
             </form>
           </div>
@@ -149,7 +149,7 @@
             <form role="form">
               <label>&nbsp</label>
               <div class="form-group">
-                <button class="btn btn-primary" ng-disabled="absolute.from > absolute.to || !absolute.from || !absolute.to" ng-click="applyAbsolute()">Go</button>
+                <button class="btn btn-primary kbn-timepicker-go" ng-disabled="absolute.from > absolute.to || !absolute.from || !absolute.to" ng-click="applyAbsolute()">Go</button>
                 <span class="small" ng-show="absolute.from > absolute.to"><strong>From</strong> must occur before <strong>To</strong></span>
               </div>
             </form>
