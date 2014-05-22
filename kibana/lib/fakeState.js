@@ -1,6 +1,7 @@
 define(function (require) {
 	'use strict';
 	var _ = require('lodash');
+  var moment = require('moment');
 	return function (options) {
 
 		options = _.defaults(options || {}, {
@@ -65,7 +66,7 @@ define(function (require) {
 				});
 
 				// Generate Replica Shards
-				_.times(options.replicas, function (replica) {
+				_.times(options.replicas, function () {
 					var shardState      = (options.nodes < 2) ? 'UNASSIGNED' : 'STARTED';
 					var replicaNode     = (options.nodes < 2) ? null : getNode();
 					var shardCollection = (options.nodes < 2) ? state.routing_nodes.unassigned : state.routing_nodes.nodes[replicaNode];
