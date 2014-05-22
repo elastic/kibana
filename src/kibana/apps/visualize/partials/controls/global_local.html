@@ -1,22 +1,9 @@
-<div class="form-group btn-group">
-  <button
-    type="button"
-    class="btn btn-xs btn-default"
-    ng-model="config.global"
-    tooltip="Use the {{group.label}} values for every {{vis.segment.label}} value"
-    tooltip-position="top"
-    tooltip-append-to-body="true"
-    btn-radio="true">
-    Global
-  </button>
-  <button
-    type="button"
-    class="btn btn-xs btn-default"
-    tooltip="Break up each {{vis.segment.label}} value by {{group.label}}"
-    tooltip-position="top"
-    tooltip-append-to-body="true"
-    ng-model="config.global"
-    btn-radio="false">
-    Local
-  </button>
+<div class="checkbox">
+  <label>
+    <input
+      ng-model="config.global"
+      type="checkbox">Global
+      &nbsp;
+      <kbn-info info="Ensure that all charts have the same {{group.label | lowercase}} values." placement="right"></kbn-info>
+  </label>
 </div>
