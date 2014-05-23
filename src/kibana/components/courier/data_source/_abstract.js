@@ -38,6 +38,9 @@ define(function (require) {
           return this;
         };
       }, this);
+
+      // this.history = [];
+      this._fetchStrategy = fetch.strategies[this._getType()];
     }
 
     /*****
@@ -104,10 +107,7 @@ define(function (require) {
     SourceAbstract.prototype.onResults = function (handler) {
       var source = this;
       return new Promise.emitter(function (resolve, reject, defer) {
-        pendingRequests.push({
-          source: source,
-          defer: defer
-        });
+        source._createRequest(defer);
       }, handler);
     };
 
@@ -132,17 +132,20 @@ define(function (require) {
      */
     SourceAbstract.prototype.fetch = function () {
       var source = this;
-      return fetch[this._getType()](this)
-      .then(function (res) {
-        pendingRequests.splice(0).forEach(function (req) {
-          if (req.source === source) {
-            req.defer.resolve(_.cloneDeep(res));
-          } else {
-            pendingRequests.push(req);
-          }
-        });
-        return res;
-      });
+
+      var req = source._createRequest();
+
+      // fetch just the requests for this source
+      fetch.these(source._getType(), pendingRequests.splice(0).filter(function (req) {
+        if (req.source !== source) {
+          pendingRequests.push(req);
+          return false;
+        }
+
+        return true;
+      }));
+
+      return req.defer.promise;
     };
 
     /**
@@ -165,6 +168,23 @@ define(function (require) {
     /*****
      * PRIVATE API
      *****/
+
+    SourceAbstract.prototype._createRequest = function (defer) {
+      var req = {
+        source: this,
+        defer: defer || Promise.defer()
+      };
+
+      if (this.history) {
+        // latest history at the top
+        this.history.unshift(req);
+        // trim all entries beyond 19/20
+        this.history.splice(20);
+      }
+
+      pendingRequests.push(req);
+      return req;
+    };
 
     /**
      * Walk the inheritance chain of a source and return it's
@@ -239,6 +259,5 @@ define(function (require) {
     };
 
     return SourceAbstract;
-
   };
 });

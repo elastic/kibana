@@ -13,39 +13,28 @@ define(function (require) {
 
   var visConfigCategories = require('../saved_visualizations/_config_categories');
 
-  var visAndIndexPattern = function (savedVisualizations, courier, Notifier, $location, $route) {
-    return function (using) {
-      return savedVisualizations.get(using)
-      .then(function (vis) {
-        var index = vis.searchSource.get('index');
-        if (!index) throw new courier.errors.SavedObjectNotFound('index-pattern');
-
-        return courier.indexPatterns.get(index)
-        .then(function (indexPattern) {
-          return [vis, indexPattern];
-        });
-      })
-      .catch(courier.redirectWhenMissing({
-        'index-pattern': '/settings',
-        '*': '/visualize'
-      }));
-    };
-  };
-
   require('routes')
   .when('/visualize/create', {
     template: require('text!../editor.html'),
     resolve: {
-      visAndIndexPattern: function ($injector, $route) {
-        return $injector.invoke(visAndIndexPattern)($route.current.params);
+      vis: function (savedVisualizations, courier, $route) {
+        return savedVisualizations.get($route.current.params)
+        .catch(courier.redirectWhenMissing({
+          'index-pattern': '/settings',
+          '*': '/visualize'
+        }));
       }
     }
   })
   .when('/visualize/edit/:id', {
     template: require('text!../editor.html'),
     resolve: {
-      visAndIndexPattern: function ($injector, $route) {
-        return $injector.invoke(visAndIndexPattern)($route.current.params.id);
+      vis: function (savedVisualizations, courier, $route) {
+        return savedVisualizations.get($route.current.params.id)
+        .catch(courier.redirectWhenMissing({
+          'index-pattern': '/settings',
+          '*': '/visualize'
+        }));
       }
     }
   });
@@ -58,9 +47,10 @@ define(function (require) {
     });
 
     // get the vis loaded in from the routes
-    var vis = $route.current.locals.visAndIndexPattern[0];
+    var vis = $route.current.locals.vis;
     // vis.destroy called by visualize directive
-    var indexPattern = $route.current.locals.visAndIndexPattern[1];
+
+    var indexPattern = vis.searchSource.get('index');
 
     $scope.fields = _.sortBy(indexPattern.fields, 'name');
     $scope.fields.byName = indexPattern.fieldsByName;
