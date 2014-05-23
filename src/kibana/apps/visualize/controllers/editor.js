@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  var angular = require('angular');
   var ConfigTemplate = require('utils/config_template');
   var typeDefs = require('../saved_visualizations/_type_defs');
 
@@ -63,6 +64,14 @@ define(function (require) {
     $scope.visConfigCategories = visConfigCategories;
 
     var visConfigProperties = Object.keys(visConfigCategories.byName);
+
+    var init = function () {
+      $scope.$on('ready:vis', function () {
+        // once the visualization is ready, boot up
+        vis.setState($state);
+        $scope.$emit('application.load');
+      });
+    };
 
     /**
      * Write the latest changes made on the visualization to the $state. This
@@ -130,7 +139,11 @@ define(function (require) {
      */
     timefilter.enabled(true);
     $scope.timefilter = timefilter;
-    $scope.$watchCollection('timefilter.time', $scope.doVisualize);
+    // TODO: Switch this to watching time.string when we implement it
+    $scope.$watchCollection('timefilter.time', function (newTime, oldTime) {
+      // don't fetch unless there was a previous value and the values are not loosly equal
+      if (!_.isUndefined(oldTime) && !angular.equals(newTime, oldTime)) $scope.doVisualize();
+    });
 
     // config panel templates
     var configTemplate = $scope.configTemplate = new ConfigTemplate({
@@ -152,7 +165,7 @@ define(function (require) {
     $scope.conf = _.pick($scope, 'doSave', 'vis');
 
     // init
-    readStateAndFetch();
+    init();
   });
 
 });
