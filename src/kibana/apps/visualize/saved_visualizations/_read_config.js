@@ -24,19 +24,26 @@ define(function (require) {
         metric: []
       };
 
-      function moveValidatedParam(config, params, paramDef, name) {
-        if (!config[name]) {
-          if (paramDef.default != null) config[name] = _.cloneDeep(paramDef.default);
+      function moveValidatedParam(input, output, paramDef, name) {
+        if (!input[name]) {
+          if (paramDef.default != null) input[name] = _.cloneDeep(paramDef.default);
           else return !paramDef.required;
         }
-        if (!paramDef.custom && paramDef.options && !_.find(paramDef.options, { val: config[name] })) return false;
 
-        // copy over the param
-        params[name] = config[name];
+        var val = input[name];
+        var selectedOption = paramDef.options &&  _.find(paramDef.options, { val: val });
+        if (!paramDef.custom && paramDef.options && !selectedOption) return false;
 
-        // provide a hook to covert string values into more complex structures
-        if (paramDef.toJSON) {
-          params[name] = $injector.invoke(paramDef.toJSON, paramDef, { val: params[name] });
+        if (paramDef.write) {
+          var selection = selectedOption;
+          // either the value is custom or there just aren't any options defined
+          if (!selectedOption && val != null) selection = { val: val };
+
+          // provide a hook to apply custom logic when writing this config value
+          paramDef.write(selection, output);
+        } else {
+          // copy over the param
+          output.aggParams[name] = val;
         }
 
         return true;
@@ -51,8 +58,8 @@ define(function (require) {
           var agg = aggs.byName[config.agg];
           if (!agg || agg.name === 'count') return;
 
-          // copy parts of the config to the "validated" config object
-          var validated = {
+          // copy parts of the config to the validated "output" object
+          var output = {
             agg: config.agg,
             aggParams: {
               field: config.field
@@ -63,20 +70,20 @@ define(function (require) {
           // copy over other properties based on the category
           switch (category.name) {
           case 'split':
-            validated.row = !!config.row;
+            output.row = !!config.row;
             break;
           case 'group':
-            validated.global = !!config.global;
+            output.global = !!config.global;
             break;
           }
 
-          // this function will move valus from config.* to validated.aggParams.* when they are
+          // this function will move valus from config.* to output.aggParams.* when they are
           // needed for that aggregation, and return true or false based on if all requirements
           // are meet
-          var moveToAggParams = _.partial(moveValidatedParam, config, validated.aggParams);
+          var moveToAggParams = _.partial(moveValidatedParam, config, output);
 
           // ensure that all of the declared params for the agg are declared on the config
-          if (_.every(agg.params, moveToAggParams)) return validated;
+          if (_.every(agg.params, moveToAggParams)) return output;
         };
       }
 
