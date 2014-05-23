@@ -390,7 +390,7 @@ define([
         // master node detection
         if ($scope.panel.mode === "nodes") {
           request.facet($scope.ejs.TermsFacet("master_nodes")
-            .field("node.ip_port.raw")
+            .field($scope.panel.persistent_field)
             .facetFilter($scope.ejs.TermFilter("node.master", "true"))
             .size(2000));
         }
