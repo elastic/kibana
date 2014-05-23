@@ -5,6 +5,10 @@ define(function (require) {
 
     var docStrategy = Private(require('./strategy/doc'));
     var searchStrategy = Private(require('./strategy/search'));
+    var strategies = this.strategies = {
+      doc: docStrategy,
+      search: searchStrategy
+    };
 
     var RequestErrorHandler = Private(require('./_request_error_handler'));
     var pendingRequests = Private(require('../_pending_requests'));
@@ -30,10 +34,10 @@ define(function (require) {
         // the source was requested at least twice
         var uniq = uniqs[iid];
         if (uniq._merged) {
-          // already setup the multi-responder
+          // already setup the merged list
           uniq._merged.push(req);
         } else {
-          // put all requests into this array and itterate them all
+          // put all requests into this array and itterate them on response
           uniq._merged = [uniq, req];
         }
       });
@@ -41,26 +45,33 @@ define(function (require) {
       return Promise.map(all, function (req) {
         return req.source._flatten();
       })
-      .then(function (reqs) {
+      .then(function (states) {
         // all requests must have been disabled
-        if (!reqs.length) return Promise.resolve();
+        if (!states.length) return Promise.resolve();
 
-        body = strategy.requestStatesToBody(reqs);
+        body = strategy.requestStatesToBody(states);
 
         return es[strategy.clientMethod]({
           body: body
         })
         .then(function (resp) {
           var sendResponse = function (req, resp) {
+            req.complete = true;
+            req.resp = resp;
+
             if (resp.error) return reqErrHandler.handle(req, new errors.FetchFailure(resp));
             else strategy.resolveRequest(req, resp);
           };
 
           strategy.getResponses(resp).forEach(function (resp) {
             var req = all.shift();
-            if (!req._merged) sendResponse(req, resp);
-            else {
+            var state = states.shift();
+            if (!req._merged) {
+              req.state = state;
+              sendResponse(req, resp);
+            } else {
               req._merged.forEach(function (mergedReq) {
+                mergedReq.state = state;
                 sendResponse(mergedReq, _.cloneDeep(resp));
               });
             }
@@ -129,5 +140,18 @@ define(function (require) {
      * @async
      */
     this.search = _.partial(fetchASource, searchStrategy);
+
+    /**
+     * Fetch a list of pendingRequests, which is already filtered
+     * @param {string} type - the type name for the sources in the requests
+     * @param {array} reqs - the requests to fetch
+     */
+    this.these = function (type, reqs) {
+      return fetchThese(
+        strategies[type],
+        reqs,
+        new RequestErrorHandler()
+      );
+    };
   };
 });

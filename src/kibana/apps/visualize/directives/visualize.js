@@ -57,12 +57,9 @@ define(function (require) {
           });
 
           vis.searchSource.onResults(function onResults(resp) {
-            indexPatterns.get(vis.searchSource.get('index'))
-            .then(function (indexPattern) {
-              var chartData = vis.buildChartDataFromResponse(indexPattern, resp);
-              chart.render(chartData);
-            })
-            .catch(notify.fatal);
+            var indexPattern = vis.searchSource.get('index');
+            var chartData = vis.buildChartDataFromResponse(indexPattern, resp);
+            chart.render(chartData);
           }).catch(notify.fatal);
 
           vis.searchSource.onError(notify.error);
