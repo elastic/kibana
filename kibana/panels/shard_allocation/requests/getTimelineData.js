@@ -41,9 +41,14 @@ define(function (require) {
           newPosition = dashboard.indices[position] ? true : false;
         }
 
+        var to = timeRange.to;
+        if (hits.hits.length > 0) {
+          to = getValueFromArrayOrString(hits.hits[hits.hits.length-1].fields['@timestamp']);
+        }
+
         if ((hits.total > size && hits.hits.length === size) || newPosition) {
           nextTimeRange = {
-            to: getValueFromArrayOrString(hits.hits[hits.hits.length-1].fields['@timestamp']),
+            to: to,
             from: timeRange.from
           };
           return getTimelineData(config, size, nextTimeRange, data, position); // call again
