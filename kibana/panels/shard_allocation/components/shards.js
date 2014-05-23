@@ -37,8 +37,9 @@ define(function (require) {
     generateKey: function (relocating) {
       var shard = this.props.shard;
       var shardType = shard.primary ? 'primary' : 'replica';
+      var additionId = shard.state === 'UNASSIGNED' ? Math.random() : '';
       var node = relocating ? shard.relocating_node : shard.node;
-      return shard.index+':'+node+':'+shardType+':'+shard.shard;
+      return shard.index+'.'+node+'.'+shardType+'.'+shard.shard+additionId;
     },
     componentWillUnmount: function () {
       var key, element;
@@ -71,7 +72,10 @@ define(function (require) {
   return React.createClass({
     displayName: 'Shards',
     createShard: function (shard) {
-      return Shard({ shard: shard });
+      var type = shard.primary ? 'primary' : 'replica';
+      var additionId = shard.state === 'UNASSIGNED' ? Math.random() : '';
+      var key = shard.index+'.'+shard.node+'.'+type+'.'+shard.state+'.'+shard.shard+additionId;
+      return Shard({ shard: shard, key: key });
     },
     render: function () {
       return D.div({ className: 'shards' }, 
