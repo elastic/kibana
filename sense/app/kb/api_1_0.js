@@ -3,7 +3,6 @@ define([
   './api',
   './api_1_0/aliases',
   './api_1_0/aggregations',
-  './api_1_0/bench',
   './api_1_0/cat',
   './api_1_0/cluster',
   './api_1_0/count',
