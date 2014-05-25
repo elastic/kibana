@@ -422,11 +422,18 @@ define([
           // pageY is relative to page, so subtract the offset
           // from pageY to get the new top value
           var offsetFromPage = editor.$el.offset().top;
+          var startRow = CURRENT_REQ_RANGE.start.row;
+          var startColumn = CURRENT_REQ_RANGE.start.column;
+          var session = editor.session;
+          var firstLine = session.getLine(startRow);
 
-          var topOfReq = editor.renderer.textToScreenCoordinates(
-            CURRENT_REQ_RANGE.start.row,
-            CURRENT_REQ_RANGE.start.column
-          ).pageY - offsetFromPage;
+          if (firstLine.length > session.getScreenWidth() - 5) {
+            // overlap first row
+            if (startRow > 0) startRow--; else startRow++;
+          }
+
+
+          var topOfReq = editor.renderer.textToScreenCoordinates(startRow, startColumn).pageY - offsetFromPage;
 
           if (topOfReq >= 0) {
             return set(topOfReq);
