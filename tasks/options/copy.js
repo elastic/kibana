@@ -7,6 +7,13 @@ module.exports = function (config) {
     artifacts_to_build: {
       files: [
         {
+          // LICENSE.txt
+          cwd: '.',
+          expand: true,
+          src: ['LICENSE.txt'],
+          dest: '<%= buildDir %>'
+        },
+        {
           // agent jar
           cwd: '<%= agentDir %>/target',
           expand: true,
