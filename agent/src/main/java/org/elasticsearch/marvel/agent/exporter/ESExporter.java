@@ -301,7 +301,13 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
                 String host = hosts[hostIndex];
                 try {
                     URL url = new URL("http://" + host + "/" + path);
+                    if (url.getPort() == -1) {
+                        // url has no port, default to 9200
+                        host = host + ":9200";
+                        url = new URL("http://" + host + "/" + path);
+                    }
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
                     conn.setRequestMethod(method);
                     conn.setConnectTimeout(timeoutInMillis);
                     if (contentType != null) {
