@@ -237,6 +237,8 @@ define([
 
         addReplacementInfoToContext(context, pos);
 
+        context.createdWithToken = context.updatedForToken;
+
         return context;
       }
 
@@ -329,6 +331,10 @@ define([
           context.updatedForToken = { value: "", start: pos.column };
         } // empty line
 
+        var anchorToken = context.createdWithToken;
+        if (!anchorToken) {
+          anchorToken = context.updatedForToken;
+        }
 
         switch (context.updatedForToken.type) {
           case "variable":
@@ -347,7 +353,7 @@ define([
           case "url.value":
             insertingRelativeToToken = 0;
             context.rangeToReplace = new AceRange(
-              pos.row, context.updatedForToken.start, pos.row,
+              pos.row, anchorToken.start, pos.row,
                 context.updatedForToken.start + context.updatedForToken.value.length
             );
             context.replacingToken = true;
@@ -356,7 +362,7 @@ define([
             if (replacingTerm && context.updatedForToken.value == replacingTerm) {
               insertingRelativeToToken = 0;
               context.rangeToReplace = new AceRange(
-                pos.row, context.updatedForToken.start, pos.row,
+                pos.row, anchorToken.start, pos.row,
                   context.updatedForToken.start + context.updatedForToken.value.length
               );
               context.replacingToken = true;
@@ -936,6 +942,7 @@ define([
           }
         }
         catch (e) {
+          console.log("error while getting completion terms", e);
           callback(e, null);
         }
       }
