@@ -102,6 +102,7 @@ define([
 
     zc.on('complete', function () {
       $copyAsCURL.click();
+      input.focus();
     });
 
     return zc;

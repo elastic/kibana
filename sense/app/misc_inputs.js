@@ -31,6 +31,7 @@ define([
   var $autoIndent = $("#auto_indent").click(function (e) {
     input.autoIndent();
     e.preventDefault();
+    input.focus();
   });
 
   var $header = $('.navbar.navbar-static-top');

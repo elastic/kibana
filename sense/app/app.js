@@ -263,6 +263,7 @@ define([
     });
 
     $send.click(function () {
+      input.focus();
       submitCurrentRequestToES();
       return false;
     });
