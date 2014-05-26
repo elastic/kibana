@@ -18,7 +18,9 @@ define(function (require) {
 
         if (!_.isUndefined(attrs.cssTruncateExpandable)) {
           $elem.css({'cursor': 'pointer'});
-          $elem.bind('click', $scope.toggle);
+          $elem.bind('click', function () {
+            $scope.toggle();
+          });
         }
 
         $scope.toggle = function () {

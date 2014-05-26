@@ -291,18 +291,6 @@ define(function (require) {
         done();
       });
 
-      it('should highlight the right day on the calendar', function (done) {
-        $scope.from = moment('2012-02-05');
-        $scope.to = moment('2012-02-09');
-        $scope.setMode('absolute');
-
-        $scope.$digest();
-
-        expect(inputs.fromCalendar.find('.btn-info').text()).to.be('05');
-        expect(inputs.toCalendar.find('.btn-info').text()).to.be('09');
-        done();
-      });
-
       it('should disable the "Go" button if from > to', function (done) {
         $scope.absolute.from = moment('2012-02-01');
         $scope.absolute.to = moment('2012-02-11');
