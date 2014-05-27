@@ -8,22 +8,25 @@ define(function (require) {
       var iColor = _.findIndex(columns, { categoryName: 'group' });
       var hasColor = iColor !== -1;
 
-      // index of x-axis
-      var iX = _.findIndex(columns, { categoryName: 'segment'});
-      // index of y-axis
-      var iY = _.findIndex(columns, { categoryName: 'metric'});
+      /*****
+       * Get values related to the X-Axis
+       *****/
 
+      // index of the x-axis column
+      var iX = _.findIndex(columns, { categoryName: 'segment'});
       // when we don't have an x-axis, just push everything into '_all'
       if (iX === -1) {
         iX = columns.push({
           label: ''
         }) - 1;
       }
-
-      var xAgg = columns[iX].agg && aggs.byName[columns[iX].agg];
-      if (xAgg && xAgg.ordinal) {
+      // column that defines the x-axis
+      var colX = columns[iX];
+      // aggregation for the x-axis
+      var aggX = colX.agg && aggs.byName[colX.agg];
+      if (aggX && aggX.ordinal) {
         // TODO: add interval, min, max data here for the chart
-        if (xAgg.name === 'date_histogram') {
+        if (aggX.name === 'date_histogram') {
           var timeBounds = timefilter.getBounds();
           chart.ordered = {
             date: true,
@@ -35,13 +38,27 @@ define(function (require) {
         }
       }
 
+      /*****
+       * Get values related to the X-Axis
+       *****/
+
+      // index of y-axis stuff
+      var iY = _.findIndex(columns, { categoryName: 'metric'});
+      // column for the y-axis
+      var colY = columns[iY];
+
+
+      /*****
+       * Build the chart
+       *****/
+
       // X-axis description
-      chart.xAxisLabel = columns[iX].label;
-      if (columns[iX].field) chart.xAxisFormatter = columns[iX].field.format.convert;
+      chart.xAxisLabel = colX.label;
+      if (colX.field) chart.xAxisFormatter = colX.field.format.convert;
 
       // Y-axis description
-      chart.yAxisLabel = columns[iY].label;
-      if (columns[iY].field) chart.yAxisFormatter = columns[iY].field.format.convert;
+      chart.yAxisLabel = colY.label;
+      if (colY.field) chart.yAxisFormatter = colY.field.format.convert;
 
       var series = chart.series = [];
       var seriesByLabel = {};
@@ -66,10 +83,17 @@ define(function (require) {
           series.push(s);
         }
 
-        s.values.push({
+        var datum = {
           x: row[iX] || '_all',
           y: row[iY === -1 ? row.length - 1 : iY] // y-axis value
-        });
+        };
+
+        if (colX.metricScale) {
+          // support scaling response values to represent an average value on the y-axis
+          datum.y = datum.y * colX.metricScale;
+        }
+
+        s.values.push(datum);
       });
     };
   };
