@@ -9,7 +9,7 @@ define(function (require) {
 
     var pickInterval = function (bounds) {
       bounds || (bounds = timefilter.getBounds());
-      return interval.calculate(bounds.min, bounds.max, 100).interval;
+      return interval.calculate(bounds.min, bounds.max, 100);
     };
 
     var agg = this;
@@ -67,9 +67,12 @@ define(function (require) {
 
       write: function (selection, output) {
         var bounds = timefilter.getBounds();
+        var auto;
 
         if (selection.val === 'auto') {
-          output.aggParams.interval = pickInterval(bounds) + 'ms';
+          auto = pickInterval(bounds);
+          output.aggParams.interval = auto.interval + 'ms';
+          output.metricScaleText = auto.description;
           return;
         }
 
@@ -77,9 +80,10 @@ define(function (require) {
         var buckets = Math.ceil((bounds.max - bounds.min) / ms);
         if (buckets > 150) {
           // we should round these buckets out, and scale back the y values
-          var msPerBucket = pickInterval(bounds);
-          output.aggParams.interval = msPerBucket + 'ms';
-          output.metricScale = ms / msPerBucket;
+          auto = pickInterval(bounds);
+          output.aggParams.interval = auto.interval + 'ms';
+          output.metricScale = ms / auto.interval;
+          output.metricScaleText = selection.val || auto.description;
         } else {
           output.aggParams.interval = selection.val;
         }
