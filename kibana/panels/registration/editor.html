@@ -29,6 +29,7 @@ em { color: #666; }
         <div>License: <strong>Development Trial</strong></div>
         <em>This product not registered.</em>
       </div>
+      <p style="margin-top: 10px;" ng-if="status !== 'purchased'"><a ng-click="dismiss();confirmPurchase()" class="btn btn-success">Enter License Details</a></p>
       <div class="optout"><input type="checkbox" ng-model="report" /> Send usage data</div>
     </div>
     <div class="span4">

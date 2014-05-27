@@ -22,7 +22,7 @@ define(function (require) {
   app.useModule(module);
 
   module.controller('marvel.registration', function ($scope, $modal, cacheBust, $q,
-                                                     $phoneHome, kbnVersion) {
+                                                     $phoneHome, kbnVersion, $location) {
 
     var pageView = function () {
       if ($phoneHome.get('version') && $phoneHome.get('report')) {
@@ -52,12 +52,16 @@ define(function (require) {
       });
     };
 
-    $scope.optInModal = function () {
+    $scope.optInModal = function (options) {
 
       $scope.options = {
         showRegistration: false,
         showConfirmation: false
       };
+
+      if (!_.isUndefined(options)) {
+        $scope.options = options;
+      }
 
       var panelModal = $modal({
         template: './app/panels/marvel/registration/optin.html?' + cacheBust,
@@ -195,6 +199,7 @@ define(function (require) {
 
     $scope.init = function () {
       $scope.kbnVersion = kbnVersion;
+
       $scope.options = {
         showRegistration: false,
         showConfirmation: false
@@ -207,6 +212,16 @@ define(function (require) {
 
         // Trigger a page view
         pageView();
+
+        // If the user has not purchased the product then we need to display
+        // the OptIn modal. If they set ?reg=purchased then we need to switch
+        // to the purchase confirmation.
+        if ($scope.status !== 'purchased' && $location.search().reg) {
+          if ($location.search().reg === 'purchase') {
+            $scope.options.showConfirmation = true;
+          }
+          return $scope.optInModal($scope.options);
+        }
 
         // If the user is registered or has purchased then we can skip the
         // rest of the checkes.
@@ -223,10 +238,12 @@ define(function (require) {
         }
       });
     };
+});
 
-  });
-
-  module.controller('marvel.registration.editor', function ($scope, $phoneHome, kbnVersion) {
+  module.controller('marvel.registration.editor', function ($scope, $phoneHome, kbnVersion, $location) {
+    $scope.confirmPurchase = function () {
+      $location.search('reg', 'purchase');
+    };
     $scope.$watch('report', function (val) {
       $phoneHome.set('report', val);
       $phoneHome.saveAll();
