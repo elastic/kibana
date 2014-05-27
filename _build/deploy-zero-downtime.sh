@@ -3,14 +3,15 @@ pushd `dirname $0` > /dev/null
 SCRIPT_PATH=`pwd`
 popd > /dev/null
 
-APP=${1:-cityindex-kibana}
-LIVE_URL_HOST=${2:-cityindex-kibana-live}
-LIVE_URL_DOMAIN=${3:-monitor-cloud.cityindextest5.co.uk}
-RUN_SMOKE_TESTS=${4:-$SCRIPT_PATH/run_smoke_tests.sh}
-DIST_FOLDER=${5:-dist/}
+APP=${APP:-kibana}
+LIVE_URL_HOST=${LIVE_URL_HOST:-environment-diagram}
+LIVE_URL_DOMAIN=${LIVE_URL_DOMAIN:-cityindex.logsearch.io}
+RUN_SMOKE_TESTS=${RUN_SMOKE_TESTS:-$SCRIPT_PATH/run_smoke_tests.sh}
+DIST_FOLDER=${DIST_FOLDER:-dist/}
 
-CF_DOMAIN=${6:-monitor-cloud.cityindextest5.co.uk}
-CF_API=${7:-http://api.$CF_DOMAIN}
+CF_DOMAIN=${CF_DOMAIN:-apps.cityindex.logsearch.io}
+CF_APPS_DOMAIN=${CF_APPS_DOMAIN:-apps.cityindex.logsearch.io}
+CF_API=${7:-https://api.$CF_DOMAIN}
 CF_USER=${CF_USER:?"env CF_USER must be defined"}
 CF_PASSWD=${CF_PASSWD:?"env CF_PASSWD must be defined"}
 CF_ORG=${CF_ORG:?"env CF_ORG must be defined"}
@@ -32,15 +33,15 @@ echo "=====> Checking dependancies"
 echo $(date)
 
 	if [[ ! "$(cf --version)" =~ "cf version 6" ]]; then
-	  echo "!!! cf must be installed and in the PATH"
+	  echo "!!! cf version (>= 6.1.1) must be installed and in the PATH"
 	  exit 1
 	fi
 	echo "$(cf --version)" | head -n 1 | indent
 
 echo "=====> Connecting to CF at $CF_API as $CF_USER"
 echo $(date)
-
-	cf login -a $CF_API -u $CF_USER -p "$CF_PASSWD" -o $CF_ORG -s $CF_SPACE | indent
+	echo "Connecting from IP $(curl -s icanhazip.com)"
+	cf login -a $CF_API -u $CF_USER -p "$CF_PASSWD" -o $CF_ORG -s $CF_SPACE --skip-ssl-validation | indent
 
 echo "=====> Ensuring $LIVE_URL_HOST.$LIVE_URL_DOMAIN exists"	
 echo $(date)
@@ -60,12 +61,12 @@ echo $(date)
 
 echo "=====> Pushing new version..."
 echo $(date)
-	cf push $APP -p=$DIST_FOLDER -m=64m -b=https://github.com/cloudfoundry-community/nginx-buildpack.git | indent
+	CF_TRACE=false cf push $APP -p=$DIST_FOLDER -m=64m -i=3 -b=https://github.com/cloudfoundry-community/nginx-buildpack.git | indent
 	cf apps | grep $APP | indent
 
 echo "=====> Running smoke tests against $APP"
 echo $(date)
-$RUN_SMOKE_TESTS http://$APP.$CF_DOMAIN
+$RUN_SMOKE_TESTS http://$APP.$CF_APPS_DOMAIN
 
 echo "=====> Routing $LIVE_URL_HOST.$LIVE_URL_DOMAIN to $APP"
 echo $(date)
@@ -80,4 +81,3 @@ echo "=====> Completed!"
 echo $(date)
 
 	echo "live-url:$LIVE_URL_HOST.$LIVE_URL_DOMAIN"
-	
