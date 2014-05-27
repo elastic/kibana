@@ -1,7 +1,9 @@
 define(function (require) {
   return function HistogramConverterFn(Private, timefilter) {
     var _ = require('lodash');
+    var moment = require('moment');
     var aggs = Private(require('../_aggs'));
+    var interval = require('utils/interval');
 
     return function (chart, columns, rows) {
       // index of color
@@ -55,6 +57,23 @@ define(function (require) {
       // X-axis description
       chart.xAxisLabel = colX.label;
       if (colX.field) chart.xAxisFormatter = colX.field.format.convert;
+      if (aggX.name === 'date_histogram') {
+        chart.xAxisFormatter = function (thing) {
+          var bounds = timefilter.getBounds();
+          return moment(thing).format(interval.calculate(
+            moment(bounds.min.valueOf()),
+            moment(bounds.max.valueOf()),
+            rows.length)
+          .format);
+        };
+      }
+
+      chart.tooltipFormatter = function (datapoint) {
+        if (aggX.name === 'date_histogram') {
+          return moment(datapoint.x).format();
+        }
+        return datapoint.x;
+      };
 
       // Y-axis description
       chart.yAxisLabel = colY.label;
