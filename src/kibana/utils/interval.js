@@ -19,66 +19,87 @@ define(function (require) {
     from = datemath.parse(from).valueOf();
     to = datemath.parse(to, true).valueOf();
     rawInterval = ((to - from) / target);
-    return round ? roundInterval(rawInterval) : rawInterval;
+    var rounded = roundInterval(rawInterval);
+    if (!round) rounded.interval = rawInterval;
+    return rounded;
   };
 
-  // interval should be passed in ms
+  // these are the rounding rules used by roundInterval()
+  var roundingRules = [
+    // bound, interval/desc, format
+    ['500ms', '100 ms',      'hh:mm:ss.SSS'],
+    ['5s',    'second',      'HH:mm:ss'],
+    ['7.5s',  '5 sec',       'HH:mm:ss'],
+    ['15s',   '10 sec',      'HH:mm:ss'],
+    ['45s',   '30 sec',      'HH:mm:ss'],
+    ['3m',    'minute',      'HH:mm'],
+    ['9m',    '5 min',       'HH:mm'],
+    ['20m',   '10 min',      'HH:mm'],
+    ['45m',   '30 min',      'YYYY-MM-DD HH:mm'],
+    ['2h',    'hour',        'YYYY-MM-DD HH:mm'],
+    ['6h',    '3 hours',     'YYYY-MM-DD HH:mm'],
+    ['24h',   '12 hours',    'YYYY-MM-DD HH:mm'],
+    ['1w',    '1 day',       'YYYY-MM-DD'],
+    ['3w',    '1 week',      'YYYY-MM-DD'],
+    ['1y',    '1 month',     'YYYY-MM'],
+    [null,    '1 year',      'YYYY'] // default
+  ];
+  var boundCache = {};
+
+  /**
+   * Round a millisecond interval to the closest "clean" interval,
+   *
+   * @param  {ms} interval - interval in milliseconds
+   * @return {[type]}          [description]
+   */
   var roundInterval = function (interval) {
-    switch (true) {
-    case (interval <=   toMS('500ms')):
-      return {interval: toMS('100ms'), format: 'hh:mm:ss.SSS'};
-    case (interval <=   toMS('5s')):
-      return {interval: toMS('1s'), format: 'HH:mm:ss'};
-    case (interval <=   toMS('7.5s')):
-      return {interval: toMS('5s'), format: 'HH:mm:ss'};
-    case (interval <=   toMS('15s')):
-      return {interval: toMS('10s'), format: 'HH:mm:ss'};
-    case (interval <=   toMS('45s')):
-      return {interval: toMS('30s'), format: 'HH:mm:ss'};
-    case (interval <=   toMS('3m')):
-      return {interval: toMS('1m'), format: 'HH:mm'};
-    case (interval <=   toMS('9m')):
-      return {interval: toMS('5m'), format: 'HH:mm'};
-    case (interval <=   toMS('20m')):
-      return {interval: toMS('10m'), format: 'HH:mm'};
-    case (interval <=   toMS('45m')):
-      return {interval: toMS('30m'), format: 'YYYY-MM-DD HH:mm'};
-    case (interval <=   toMS('2h')):
-      return {interval: toMS('1h'), format: 'YYYY-MM-DD HH:mm'};
-    case (interval <=   toMS('6h')):
-      return {interval: toMS('3h'), format: 'YYYY-MM-DD HH:mm'};
-    case (interval <=   toMS('24h')):
-      return {interval: toMS('12h'), format: 'YYYY-MM-DD HH:mm'};
-    case (interval <=   toMS('1w')):
-      return {interval: toMS('1d'), format: 'YYYY-MM-DD'};
-    case (interval <=   toMS('3w')):
-      return {interval: toMS('1w'), format: 'YYYY-MM-DD'};
-    case (interval <    toMS('1y')):
-      return {interval: toMS('1M'), format: 'YYYY-MM'};
-    default:
-      return {interval: toMS('1y'), format: 'YYYY'};
-    }
+    var rule = _.find(roundingRules, function (rule, i, rules) {
+      var remaining = rules.length - i - 1;
+      // no bound? then succeed
+      if (!rule[0]) return true;
+
+      var bound = boundCache[rule[0]] || (boundCache[rule[0]] = toMs(rule[0]));
+      // check that we are below or equal to the bounds
+      if (remaining > 1 && interval <= bound) return true;
+      // the last rule before the default shouldn't include the default (which is the bound)
+      if (remaining === 1 && interval < bound) return true;
+    });
+    return {
+      description: rule[1],
+      interval: toMs(rule[1]),
+      format: rule[2]
+    };
   };
 
-  var toMS = function (interval) {
-    var _p = interval.match(/([0-9.]+)([a-zA-Z]+)/);
-    if (_p.length !== 3) return undefined;
-    return moment.duration(parseFloat(_p[1]), shorthand[_p[2]]).valueOf();
-  };
+  // map of moment's short/long unit ids and elasticsearch's long unit ids
+  // to their value in milliseconds
+  var vals = _.transform([
+    ['ms', 'milliseconds', 'millisecond'],
+    ['s', 'seconds', 'second', 'sec'],
+    ['m', 'minutes', 'minute', 'min'],
+    ['h', 'hours', 'hour'],
+    ['d', 'days', 'day'],
+    ['w', 'weeks', 'week'],
+    ['M', 'months', 'month'],
+    ['quarter'],
+    ['y',  'years', 'year']
+  ], function (vals, units) {
+    var normal = moment.normalizeUnits(units[0]);
+    var val = moment.duration(1, normal).asMilliseconds();
+    [].concat(normal, units).forEach(function (unit) {
+      vals[unit] = val;
+    });
+  }, {});
+  // match any key from the vals object prececed by an optional number
+  var parseRE = new RegExp('^(\\d+(?:\\.\\d*)?)?\\s*(' + _.keys(vals).join('|') + ')$');
 
-  var shorthand = {
-    ms: 'milliseconds',
-    s:  'seconds',
-    m:  'minutes',
-    h:  'hours',
-    d:  'days',
-    w:  'weeks',
-    M:  'months',
-    y:  'years',
+  var toMs = function (expr) {
+    var match = expr.match(parseRE);
+    if (match) return parseFloat(match[1] || 1) * vals[match[2]];
   };
 
   return {
-    toMS: toMS,
+    toMs: toMs,
     calculate: calculate
   };
 });
