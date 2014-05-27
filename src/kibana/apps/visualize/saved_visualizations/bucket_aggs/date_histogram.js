@@ -58,11 +58,6 @@ define(function (require) {
           ms: ms('month')
         },
         {
-          display: 'Quarterly',
-          val: 'quarter',
-          ms: ms('quarter')
-        },
-        {
           display: 'Yearly',
           val: 'year',
           ms: ms('year')
