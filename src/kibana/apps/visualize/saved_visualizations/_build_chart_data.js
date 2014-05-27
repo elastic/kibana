@@ -35,30 +35,9 @@ define(function (require) {
       // row stack, similar to the colStack but tracks unfinished rows
       var rowStack = [];
 
-      // when charts are created they will be pushed here, and then at the end will be converted
-      var chartConvertQueue = [];
-
       // all chart data will be written here or to child chartData
       // formatted objects
-      var chartData = {
-        label: _.reduce(configs, function (label, col) {
-          var agg = aggs.byName[col.agg];
-
-          if (!agg) {
-            col.label = col.agg;
-          } else if (agg.makeLabel) {
-            col.label = aggs.byName[col.agg].makeLabel(col.aggParams);
-          } else {
-            col.label = agg.display || agg.name;
-          }
-
-          if (label) {
-            return label + ' > ' + col.label;
-          } else {
-            return col.label;
-          }
-        }, '')
-      };
+      var chartData = {};
 
       var finishRow = function (rows, col, bucket) {
         rows.push(rowStack.concat(bucket.value == null ? bucket.doc_count : bucket.value));
@@ -96,9 +75,8 @@ define(function (require) {
         case 'split':
           // pick the key for the split's groups
           var groupsKey = col.row ? 'rows' : 'columns';
-
-          var groupList = (chartData[groupsKey] = chartData[groupsKey] || []);
-          var groupMap = (chartData.groups = chartData.groups || {});
+          var groupList = chartData[groupsKey] || (chartData[groupsKey] = []);
+          var groupMap = chartData.splits || (chartData.splits = {});
 
           result.buckets.forEach(function (bucket) {
             var group = groupMap[bucket.key];
@@ -108,7 +86,7 @@ define(function (require) {
                 label: col.aggParams.field + ': ' + bucket.key
               };
               groupList.push(group);
-              groupMap[bucket.key] = group;
+              groupMap[group.label] = group;
             }
 
             splitAndFlatten(group, bucket);
@@ -137,10 +115,6 @@ define(function (require) {
 
             // write rows here
             chartData.rows = [];
-
-            // push the chart object into the convert queue so that once we are done splitting the data it
-            // can be turned into a specific chart type
-            chartConvertQueue.push(chartData);
           }
 
           // there are no buckets, just values to collect.
@@ -166,14 +140,30 @@ define(function (require) {
         finishRow(chartData.rows, null, { doc_count: resp.hits.total });
       }
 
-      chartConvertQueue.forEach(function (chart) {
-        var rows = chart.rows;
-        var cols = chart.columns;
-        delete chart.rows;
-        delete chart.columns;
+      // now that things are well-ordered, and
+      // all related values have been segregated into
+      // their individual charts, we can go through and
+      // cleanup the leftover metadata and label each chart
+      var labelStack = [];
+      (function cleanup(obj) {
+        if (obj.rows && obj.columns) {
+          // this obj is a chart
+          var rows = obj.rows;
+          var cols = obj.columns;
+          delete obj.rows;
+          delete obj.columns;
+          obj.label = [].concat(labelStack, obj.label).filter(Boolean).join(' > ');
 
-        converter(chart, cols, rows);
-      });
+          converter(obj, cols, rows);
+        } else if (obj.splits) {
+          var splits = obj.splits;
+          delete obj.splits;
+          labelStack.push(obj.label);
+          _.forOwn(splits, cleanup);
+          labelStack.pop();
+        }
+      }(chartData));
+
 
       notify.event('convert ES response', true);
       return chartData;
