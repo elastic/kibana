@@ -5,7 +5,8 @@ module.exports = function (config) {
       files: {
         src: [
           'Gruntfile.js',
-          '<%= src %>/**/*.js',
+          '<%= src %>/*.js',
+          '<%= src %>/kibana/**/*.js',
           '<%= unitTestDir %>/**/*.js',
           '<%= root %>/tasks/**/*.js'
         ]
@@ -16,8 +17,7 @@ module.exports = function (config) {
       ignores: [
         'node_modules/*',
         'dist/*',
-        'sample/*',
-        '<%= root %>/src/bower_components/**/*'
+        'sample/*'
       ]
     }
   };

@@ -33,7 +33,8 @@ define(function (require) {
           chart.ordered = {
             date: true,
             min: timeBounds.min.valueOf(),
-            max: timeBounds.max.valueOf()
+            max: timeBounds.max.valueOf(),
+            interval: interval.toMs(colX.aggParams.interval)
           };
         } else {
           chart.ordered = {};
@@ -56,28 +57,42 @@ define(function (require) {
 
       // X-axis description
       chart.xAxisLabel = colX.label;
-      if (colX.field) chart.xAxisFormatter = colX.field.format.convert;
       if (aggX.name === 'date_histogram') {
-        chart.xAxisFormatter = function (thing) {
+        chart.xAxisFormatter = (function () {
           var bounds = timefilter.getBounds();
-          return moment(thing).format(interval.calculate(
+          var format = interval.calculate(
             moment(bounds.min.valueOf()),
             moment(bounds.max.valueOf()),
-            rows.length)
-          .format);
-        };
-      }
+            rows.length
+          ).format;
 
-      chart.tooltipFormatter = function (datapoint) {
-        if (aggX.name === 'date_histogram') {
-          return moment(datapoint.x).format();
-        }
-        return datapoint.x;
-      };
+          return function (thing) {
+            return moment(thing).format(format);
+          };
+        }());
+      }
+      else if (colX.field) chart.xAxisFormatter = colX.field.format.convert;
 
       // Y-axis description
       chart.yAxisLabel = colY.label;
       if (colY.field) chart.yAxisFormatter = colY.field.format.convert;
+
+
+
+      // setup the formatter for the label
+      chart.tooltipFormatter = function (datapoint) {
+        var x = datapoint.x;
+        var y = datapoint.y;
+
+        if (colX.field) x = colX.field.format.convert(x);
+        if (colY.field) y = colY.field.format.convert(y);
+
+        if (colX.metricScaleText) {
+          y += ' per ' + colX.metricScaleText;
+        }
+
+        return x + ': ' + y;
+      };
 
       var series = chart.series = [];
       var seriesByLabel = {};
