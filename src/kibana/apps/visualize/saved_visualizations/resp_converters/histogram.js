@@ -26,20 +26,6 @@ define(function (require) {
       var colX = columns[iX];
       // aggregation for the x-axis
       var aggX = colX.agg && aggs.byName[colX.agg];
-      if (aggX && aggX.ordinal) {
-        // TODO: add interval, min, max data here for the chart
-        if (aggX.name === 'date_histogram') {
-          var timeBounds = timefilter.getBounds();
-          chart.ordered = {
-            date: true,
-            min: timeBounds.min.valueOf(),
-            max: timeBounds.max.valueOf(),
-            interval: interval.toMs(colX.aggParams.interval)
-          };
-        } else {
-          chart.ordered = {};
-        }
-      }
 
       /*****
        * Get values related to the X-Axis
@@ -57,7 +43,7 @@ define(function (require) {
 
       // X-axis description
       chart.xAxisLabel = colX.label;
-      if (aggX.name === 'date_histogram') {
+      if (aggX && aggX.name === 'date_histogram') {
         chart.xAxisFormatter = (function () {
           var bounds = timefilter.getBounds();
           var format = interval.calculate(
@@ -70,8 +56,19 @@ define(function (require) {
             return moment(thing).format(format);
           };
         }());
+
+        var timeBounds = timefilter.getBounds();
+        chart.ordered = {
+          date: true,
+          min: timeBounds.min.valueOf(),
+          max: timeBounds.max.valueOf(),
+          interval: interval.toMs(colX.aggParams.interval)
+        };
       }
-      else if (colX.field) chart.xAxisFormatter = colX.field.format.convert;
+      else {
+        chart.xAxisFormatter = colX.field && colX.field.format.convert;
+        chart.ordinal = aggX && aggX.ordinal && {};
+      }
 
       // Y-axis description
       chart.yAxisLabel = colY.label;
