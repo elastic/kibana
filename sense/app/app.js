@@ -28,9 +28,12 @@ define([
           ga.pageview();
         }
       } catch (e) {
+        marvelOpts = { status: 'trial' };
       } // Meh! Who cares...
+    } else {
+      marvelOpts = { status: 'trial' };
     }
-
+     
     function submitCurrentRequestToES(cb) {
       cb = typeof cb === 'function' ? cb : $.noop;
 
@@ -297,6 +300,20 @@ define([
     }
 
     mappings.onInitComplete();
-    // $(mappings).on('update', phone_home);
+
+      
+    if (marvelOpts.status && marvelOpts.version && marvelOpts.report) {
+      ga.pageview();
+    }
+
+    if (marvelOpts.status === 'trial') {
+      $('#developer-tag').removeClass('hide');
+      $('#developer-tag').html('Development Trial');
+    }    
+
+    if (marvelOpts.status === 'registered') {
+      $('#developer-tag').removeClass('hide');
+      $('#developer-tag').html('Development Mode');
+    }    
 
   });

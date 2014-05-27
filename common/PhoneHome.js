@@ -32,7 +32,8 @@ define(function (require) {
       'trialTimestamp',
       'lastReport',
       'registrationSent',
-      'report'
+      'report',
+      'status'
     ];
 
     var self = this;
