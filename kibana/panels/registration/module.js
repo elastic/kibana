@@ -95,7 +95,7 @@ define(function (require) {
       $phoneHome.set({
         version: kbnVersion,
         report: report,
-        purchased: purchased
+        status: purchased ? 'purchased' : 'trial'
       });
       $phoneHome.saveAll();
     };
@@ -132,11 +132,11 @@ define(function (require) {
       };
 
       $phoneHome.register(registration).then(null, function () {
-        $phoneHome.set('registered', false);
+        $phoneHome.set('status', 'trial');
         $phoneHome.setTrialTimestamp(delayTrial());
         $scope.sysadmin = {
-          data: { registered: true, version: kbnVersion, registrationData: registration, report: $phoneHome.get('report') },
-          registered: true,
+          data: { status: 'registered', version: kbnVersion, registrationData: registration, report: $phoneHome.get('report') },
+          status: 'registered',
           host_port: config.elasticsearch
         };
         $scope.sysadminModal();
@@ -166,11 +166,11 @@ define(function (require) {
       };
 
       $phoneHome.confirmPurchase(registration).then(null, function () {
-        $phoneHome.set('purchased', false);
+        $phoneHome.set('status', 'trial');
         $phoneHome.setTrialTimestamp(delayTrial());
         $scope.sysadmin = {
-          data: { purchased: true, version: kbnVersion, registrationData: registration, report: $phoneHome.get('report') },
-          purchased: true,
+          data: { status: 'purchased', version: kbnVersion, registrationData: registration, report: $phoneHome.get('report') },
+          status: 'purchased',
           host_port: config.elasticsearch
         };
         $scope.sysadminModal();
@@ -189,12 +189,8 @@ define(function (require) {
       $scope.report = val; 
     });
 
-    $phoneHome.on('change:purchased', function (val) {
-      $scope.purchased = val; 
-    });
-
-    $phoneHome.on('change:registered', function (val) {
-      $scope.registered = val; 
+    $phoneHome.on('change:status', function (val) {
+      $scope.status = val; 
     });
 
     $scope.init = function () {
@@ -206,8 +202,7 @@ define(function (require) {
 
       $phoneHome.fetch().always(function () {
         $scope.report = $phoneHome.get('report');
-        $scope.purchased = $phoneHome.get('purchased');
-        $scope.registered = $phoneHome.get('registered');
+        $scope.status = $phoneHome.get('status');
         $scope.registration = $phoneHome.get('registrationData');
 
         // Trigger a page view
@@ -215,7 +210,7 @@ define(function (require) {
 
         // If the user is registered or has purchased then we can skip the
         // rest of the checkes.
-        if ($scope.registered || $scope.purchased) {
+        if ($scope.status !== 'trial') {
           return;
         }
 
@@ -243,8 +238,7 @@ define(function (require) {
       $scope.kbnVersion = kbnVersion;
       $phoneHome.fetch().then(function () {
         $scope.report = $phoneHome.get('report');
-        $scope.purchased = $phoneHome.get('purchased');
-        $scope.registered = $phoneHome.get('registered');
+        $scope.status = $phoneHome.get('status');
         $scope.registration = $phoneHome.get('registrationData');
       });
     };

@@ -6,13 +6,13 @@ em { color: #666; }
   <div class="row-fluid">
     <div class="span4">
       <h4>License</h4>
-      <div ng-if="purchased && registration">
+      <div ng-if="status === 'purchased' && registration">
         <p>Thank You for Purchasing Marvel!</p>
         <div>License: <strong>Production</strong></div>
         <div>Name: <strong>{{ registration.first_name }} {{ registration.last_name }}</strong></div>
         <div>Company: <strong>{{ registration.company }}</strong></div>
       </div>
-      <div ng-if="registered && registration">
+      <div ng-if="status === 'registered' && registration">
         <p>Marvel is Free for Development Use. <br>
         Like it? Then <a href="http://www.elasticsearch.com/_redirect/marvel/buynow" target="_BLANK">buy a license</a> for production.<p>
         <div>License <strong>Development</strong></div>
@@ -23,7 +23,7 @@ em { color: #666; }
         <div ng-if="registration.state">State: <strong>{{ registration.state}}</strong></div>
         <div>Country: <strong>{{ registration.country}}</strong></div>
       </div>
-      <div ng-if="!registration">
+      <div ng-if="status === 'trial'">
         <p>Marvel is Free for Development Use. <br>
         Like it? Then <a href="http://www.elasticsearch.com/_redirect/marvel/buynow" target="_BLANK">buy a license</a> for production.<p>
         <div>License: <strong>Development Trial</strong></div>

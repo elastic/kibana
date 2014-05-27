@@ -14,15 +14,14 @@ define(function (require) {
     // set defaults
     this.attributes = {
       report: true,
-      purchased: false
+      status: 'trial'
     }; 
     this.events = {};
     this.currentBaseUrl = this.baseUrl;
 
     this.fieldsToES= [
       'registrationData',
-      'purchased',
-      'registered',
+      'status',
       'version',
       'report'
     ];
@@ -160,7 +159,7 @@ define(function (require) {
       var regDue = (new Date().getTime() - parseInt(this.get('trialTimestamp'), 10) > regTimeout);
       // if the user is not registers and they haven't purchased and it's been 7 days
       // since we displayed the welcome screen then force registration.
-      return (!this.get('registered') && !this.get('purchased') && regDue);
+      return (this.get('status') === 'trial' && regDue);
     },
 
     sendIfDue: function (data) {
@@ -176,7 +175,7 @@ define(function (require) {
     register: function (data) {
       var self = this;
       this.set('registrationData', data);
-      this.set('registered', true);
+      this.set('status', 'registered');
       self.saveToBrowser();
       return self.saveToES();
     },
@@ -184,7 +183,8 @@ define(function (require) {
     confirmPurchase: function (data) {
       var self = this;
       this.set('registrationData', data);
-      this.set('purchased', true);
+      this.set('status', 'purchased');
+      this.set('registrationSent', false);
       self.saveToBrowser();
       return self.saveToES();
     },
@@ -199,7 +199,7 @@ define(function (require) {
         registrationData.uuid = data.uuid;
         regData = { type: 'registration', data: registrationData };
 
-        if (this.get('purchased')) {
+        if (this.get('status') === 'purchased') {
           regData.type = 'purchase_confirmation';
         }
 
