@@ -1,5 +1,4 @@
 define(function (require) {
-  var html = require('text!partials/table.html');
   var _ = require('lodash');
   var ConfigTemplate = require('utils/config_template');
   var angular = require('angular');
