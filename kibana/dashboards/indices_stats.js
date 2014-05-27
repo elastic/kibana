@@ -109,10 +109,10 @@ dashboard.services.filter = {
 };
 
 function clusterViewFilter (query) {
-  if (query.length !==0) {
-    var filter = _.map(query, function (row) {
-      return row.alias; 
-    });
+  var filter = _.map(query, function (row) {
+    return row.alias; 
+  });
+  if (filter.length !== 0) {
     return '^('+filter.join('|')+')$';
   }
   return '';

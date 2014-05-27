@@ -155,10 +155,10 @@ panel_defaults_by_type["histogram"] = {
 };
 
 function clusterViewFilter (query) {
-  if (query.length !==0) {
-    var filter = _.map(query, function (row) {
-      return row.query.replace(/node.ip_port.raw:"([^"]+)"/, '$1'); 
-    });
+  var filter = _.map(query, function (row) {
+    return row.query.replace(/node.ip_port.raw:"([^"]+)"/, '$1'); 
+  });
+  if (filter.length !==0) {
     return '^('+filter.join('|')+')$';
   }
   return '';

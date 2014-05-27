@@ -280,10 +280,6 @@ define(function (require) {
     // If the time range updates then we need to update the timeline
     $scope.$on('refresh', function () {
 
-      if (!$scope.panel.showPlayer) {
-        return;
-      }
-
       var timeRange = filterSrv.timeRange(false);
       var timeChanged = (timeRange.from !== $scope.timeRange.from ||
         timeRange.to !== $scope.timeRange.to);
