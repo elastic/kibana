@@ -19,13 +19,6 @@ define(function (require) {
         var chart; // set in "vis" watcher
 
         $scope.$watch('vis', function (vis, prevVis) {
-          if (vis.error) {
-            $el.html('<div class="visualize-error"><i class="fa fa-exclamation-triangle"></i><br>' + vis.error + '</div>');
-            return;
-          }
-
-          var typeDefinition = typeDefs.byName[vis.typeName];
-
           if (prevVis && prevVis.destroy) prevVis.destroy();
           if (chart) {
             chart.off('hover');
@@ -33,10 +26,15 @@ define(function (require) {
             chart.destroy();
           }
 
-          var notify = createNotifier({
-            location: vis.typeName + ' visualization'
-          });
+          if (!vis) return;
 
+          if (vis.error) {
+            $el.html('<div class="visualize-error"><i class="fa fa-exclamation-triangle"></i><br>' + vis.error + '</div>');
+            return;
+          }
+
+          var typeDefinition = typeDefs.byName[vis.typeName];
+          var notify = createNotifier({ location: vis.title || vis.typeName + ' visualization' });
           var params = {
             type: vis.typeName,
           };
