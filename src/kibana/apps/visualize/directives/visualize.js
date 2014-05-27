@@ -19,8 +19,7 @@ define(function (require) {
         var chart; // set in "vis" watcher
 
         $scope.$watch('vis', function (vis, prevVis) {
-          if (!!vis.error) {
-            console.log('yep error');
+          if (vis.error) {
             $el.html('<div class="visualize-error"><i class="fa fa-exclamation-triangle"></i><br>' + vis.error + '</div>');
             return;
           }
@@ -33,8 +32,6 @@ define(function (require) {
             chart.off('click');
             chart.destroy();
           }
-
-          //if (!(vis instanceof SavedVis)) return;
 
           var notify = createNotifier({
             location: vis.typeName + ' visualization'
