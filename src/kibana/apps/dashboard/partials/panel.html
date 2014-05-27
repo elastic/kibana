@@ -1,2 +1,10 @@
-<button class="btn" ng-click="remove()"><i class="fa fa-times"></i></button>
-<visualize vis="vis"></visualize>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <span class="panel-title">{{vis.title}}</span>
+    <div class="btn-group pull-right">
+      <button class="btn" ng-click="remove()"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="clearfix"></div>
+  </div>
+  <visualize vis="vis"></visualize>
+</div>
