@@ -31,13 +31,14 @@ Currently, the [histogram formatter](https://github.com/elasticsearch/kibana4/bl
 define(function (require) {
   return function FieldFormattingService() {
     var _ = require('lodash');
+    var moment = require('moment');
 
     var formats = [
       {
         types: [
           'number',
-          'date',
           'boolean',
+          'date',
           'ip',
           'attachment',
           'geo_point',
@@ -51,6 +52,15 @@ define(function (require) {
           } else {
             return '' + val;
           }
+        }
+      },
+      {
+        types: [
+          'date'
+        ],
+        name: 'date',
+        convert: function (val) {
+          return moment(val).format();
         }
       },
       {
@@ -75,7 +85,7 @@ define(function (require) {
 
     formats.defaultByType = {
       number:     formats.byName.string,
-      date:       formats.byName.string,
+      date:       formats.byName.date,
       boolean:    formats.byName.string,
       ip:         formats.byName.string,
       attachment: formats.byName.string,
