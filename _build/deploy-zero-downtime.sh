@@ -4,7 +4,7 @@ SCRIPT_PATH=`pwd`
 popd > /dev/null
 
 APP=${APP:-kibana}
-LIVE_URL_HOST=${LIVE_URL_HOST:-environment-diagram}
+LIVE_URL_HOST=${LIVE_URL_HOST:-kibana}
 LIVE_URL_DOMAIN=${LIVE_URL_DOMAIN:-cityindex.logsearch.io}
 RUN_SMOKE_TESTS=${RUN_SMOKE_TESTS:-$SCRIPT_PATH/run_smoke_tests.sh}
 DIST_FOLDER=${DIST_FOLDER:-dist/}
