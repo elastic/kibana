@@ -57,7 +57,7 @@ define(function (require) {
       };
     },
     isNumeric: function (v) {
-      return !isNaN(v) && _.isNumber(v);
+      return !_.isNaN(v) && !_.isNaN(parseInt(v, 10));
     }
   });
 
