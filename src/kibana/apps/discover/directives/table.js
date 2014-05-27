@@ -1,6 +1,6 @@
 define(function (require) {
   var angular = require('angular');
-  var html = require('text!partials/table.html');
+  var html = require('text!../partials/table.html');
   var _ = require('lodash');
   var nextTick = require('utils/next_tick');
   var $ = require('jquery');
@@ -11,7 +11,7 @@ define(function (require) {
   var module = require('modules').get('kibana/directives');
 
   module.directive('kbnTableHeader', function () {
-    var headerHtml = require('text!partials/table_header.html');
+    var headerHtml = require('text!../partials/table_header.html');
     return {
       restrict: 'A',
       scope: {

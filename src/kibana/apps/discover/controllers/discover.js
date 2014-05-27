@@ -18,6 +18,8 @@ define(function (require) {
   require('state_management/app_state');
   require('services/timefilter');
 
+  require('./table');
+
   require('apps/visualize/saved_visualizations/_adhoc_vis');
 
   var app = require('modules').get('app/discover', [
