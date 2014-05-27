@@ -16,6 +16,7 @@ define(function (require) {
     agg.name = 'date_histogram';
     agg.display = 'Date Histogram';
     agg.ordinal = {};
+
     agg.makeLabel = function (params) {
       var interval = _.find(agg.params.interval.options, { val: params.interval });
       if (interval) return interval.display + ' ' + params.field;
@@ -63,6 +64,7 @@ define(function (require) {
           ms: ms('year')
         }
       ],
+
       write: function (selection, output) {
         var bounds = timefilter.getBounds();
 
