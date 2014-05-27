@@ -238,7 +238,7 @@ define(function (require) {
         }
       });
     };
-});
+  });
 
   module.controller('marvel.registration.editor', function ($scope, $phoneHome, kbnVersion, $location) {
     $scope.confirmPurchase = function () {
