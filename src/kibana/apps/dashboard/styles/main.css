@@ -100,22 +100,40 @@ dashboard-grid {
   overflow: hidden;
   position: relative;
 }
-.gridster dashboard-panel .btn {
-  position: absolute;
+.gridster dashboard-panel .panel {
+  margin: 0;
+  height: 100%;
+  display: flex;
+  -webkit-flex-direction: column;
+  -moz-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-justify-content: flex-start;
+  -moz-justify-content: flex-start;
+  -ms-justify-content: flex-start;
+  justify-content: flex-start;
+}
+.gridster dashboard-panel .panel .panel-heading .btn {
   color: #e74c3c;
-  top: 0px;
-  left: 0px;
   border: none;
   background: none;
   opacity: .25;
+  padding: 0;
   transition: opacity 0.25s ease-in-out;
   -webkit-transition: opacity 0.25s ease-in-out;
   -moz-transition: opacity 0.25s ease-in-out;
   -ms-transition: opacity 0.25s ease-in-out;
   -o-transition: opacity 0.25s ease-in-out;
 }
-.gridster dashboard-panel .btn:hover {
+.gridster dashboard-panel .panel .panel-heading .btn:hover {
   opacity: 1;
+}
+.gridster dashboard-panel .panel visualize {
+  -webkit-flex-grow: 1;
+  -moz-flex-grow: 1;
+  -ms-flex-grow: 1;
+  flex-grow: 1;
+  height: auto;
 }
 .dashboard-load {
   margin: 10px;

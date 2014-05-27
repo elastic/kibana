@@ -39,18 +39,32 @@ dashboard-grid {
     overflow: hidden;
     position: relative;
 
-    .btn {
-      position: absolute;
-      color: @brand-danger;
-      top: 0px;
-      left: 0px;
-      border: none;
-      background: none;
-      opacity: .25;
-      .transition(opacity .25s ease-in-out);
+    .panel {
+      margin: 0;
+      // maintain the 100% height of the panel
+      height: 100%;
 
-      &:hover {
-        opacity: 1;
+      // flex layout allows us to define the visualize element as "fill available space"
+      display: flex;
+      .flex-direction(column);
+      .justify-content(flex-start);
+
+      .panel-heading {
+        .btn {
+          color: @brand-danger;
+          border: none;
+          background: none;
+          opacity: .25;
+          padding: 0;
+          .transition(opacity .25s ease-in-out);
+          &:hover {
+            opacity: 1;
+          }
+        }
+      }
+      visualize {
+        .flex-grow(1);
+        height: auto;
       }
     }
   }
