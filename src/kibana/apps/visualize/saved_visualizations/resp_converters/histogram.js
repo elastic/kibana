@@ -78,17 +78,21 @@ define(function (require) {
 
       // setup the formatter for the label
       chart.tooltipFormatter = function (datapoint) {
-        var x = datapoint.x;
-        var y = datapoint.y;
+        var datum = _.clone(datapoint);
 
-        if (colX.field) x = colX.field.format.convert(x);
-        if (colY.field) y = colY.field.format.convert(y);
+        if (colX.field) datum.x = colX.field.format.convert(datum.x);
+        if (colY.field) datum.y = colY.field.format.convert(datum.y);
 
         if (colX.metricScaleText) {
-          y += ' per ' + colX.metricScaleText;
+          datum.y += ' per ' + colX.metricScaleText;
         }
 
-        return x + ': ' + y;
+
+        var out = datum.label ? datum.label + '\n' : '';
+        out += datum.x + '\n';
+        out += datum.y;
+
+        return out;
       };
 
       var series = chart.series = [];

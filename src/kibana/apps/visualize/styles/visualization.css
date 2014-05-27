@@ -85,3 +85,6 @@ visualize .visualize-error .fa-exclamation-triangle {
   font-size: 2em;
   color: #e74c3c;
 }
+visualize .k4tip {
+  white-space: pre-line;
+}
