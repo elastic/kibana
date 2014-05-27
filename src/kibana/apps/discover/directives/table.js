@@ -79,6 +79,7 @@ define(function (require) {
         columns: '=',
         rows: '=',
         sorting: '=',
+        filtering: '=',
         refresh: '=',
         maxLength: '=?',
         mapping: '=?'
@@ -270,8 +271,8 @@ define(function (require) {
           var topLevelDetails = ['_index', '_type', '_id'];
 
           // we need a td to wrap the details table
-          var containerTd = document.createElement('td');
-          containerTd.setAttribute('colspan', $scope.columns.length);
+          var containerTd = $(document.createElement('td'));
+          containerTd.attr('colspan', $scope.columns.length);
           $tr.append(containerTd);
 
           var open = !!~opened.indexOf(id);
@@ -284,13 +285,13 @@ define(function (require) {
           }
 
           // table that will hold details about the row
-          var table = document.createElement('table');
-          containerTd.appendChild(table);
-          table.className = 'table table-condensed';
+          var table = $(document.createElement('table'));
+          containerTd.append(table);
+          table.addClass('table table-condensed');
 
           // body of the table
-          var tbody = document.createElement('tbody');
-          table.appendChild(tbody);
+          var tbody = $(document.createElement('tbody'));
+          table.append(tbody);
 
           // itterate each row and append it to the tbody
           _(row._source)
@@ -298,23 +299,42 @@ define(function (require) {
             .concat(topLevelDetails)
             .sort()
             .each(function (field) {
-              var tr = document.createElement('tr');
+              var tr = $(document.createElement('tr'));
               // tr -> || <field> || <val> ||
 
-              var fieldTd = document.createElement('td');
-              fieldTd.textContent = field;
-              fieldTd.className = 'field-name';
-              tr.appendChild(fieldTd);
+              var fieldTd = $(document.createElement('td'));
+              fieldTd.text(field);
+              tr.append(fieldTd);
 
-              var valTd = document.createElement('td');
+              var filterTd = $(document.createElement('td'));
+              var plusFilter = $(document.createElement('i'))
+                .addClass('fa fa-search-plus')
+                .data('field', field)
+                .data('value', row._source[field] || row[field])
+                .attr('ng-click', 'filter($event, "+")');
+              var minusFilter = $(document.createElement('i'))
+                .addClass('fa fa-search-minus')
+                .data('field', field)
+                .data('value', row._source[field] || row[field])
+                .attr('ng-click', 'filter($event, "-")');
+
+              filterTd.append(plusFilter).append(minusFilter);
+              tr.append(filterTd);
+
+              var valTd = $(document.createElement('td'));
               _displayField(valTd, row, field, true);
-              tr.appendChild(valTd);
+              tr.append(valTd);
 
-              tbody.appendChild(tr);
+              tbody.append(tr);
             });
 
-          return $tr;
+          return $compile($tr)($scope);
         }
+
+        $scope.filter = function (event, operation) {
+          var params = $.data(event.target);
+          $scope.filtering(params.field, params.value, operation);
+        };
 
         // create a tr element that lists the value for each *column*
         function createSummaryRow(row, id) {
@@ -323,7 +343,7 @@ define(function (require) {
           var $tr = $compile(tr)($scope);
 
           _.each($scope.columns, function (column) {
-            var td = document.createElement('td');
+            var td = $(document.createElement('td'));
             _displayField(td, row, column);
             $tr.append(td);
           });
@@ -337,9 +357,9 @@ define(function (require) {
         function _displayField(el, row, field, truncate) {
           var val = _getValForField(row, field, truncate);
           if (val instanceof DOMNode) {
-            el.appendChild(val);
+            el.append(val);
           } else {
-            el.textContent = val;
+            el.text(val);
           }
           return el;
         }
