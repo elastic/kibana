@@ -28,7 +28,7 @@ define(function (require) {
       min: 0,
       max: 1,
       configDefaults: {
-        global: true,
+        global: false,
         size: 5
       }
     },
