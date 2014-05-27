@@ -68,6 +68,13 @@ define(function (require) {
         };
       }
 
+      chart.tooltipFormatter = function (datapoint) {
+        if (aggX.name === 'date_histogram') {
+          return moment(datapoint.x).format();
+        }
+        return datapoint.x;
+      };
+
       // Y-axis description
       chart.yAxisLabel = colY.label;
       if (colY.field) chart.yAxisFormatter = colY.field.format.convert;
