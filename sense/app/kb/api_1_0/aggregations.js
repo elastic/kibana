@@ -206,10 +206,15 @@ define(function () {
       },
       "percentiles": {
         __template: {
-          "field": ""
+          "field": "",
+          "percents": [1.0, 5.0, 25.0, 50.0, 75.0, 95.0, 99.0]
         },
         "field": "{field}",
-        "percents": [],
+        "percents": {
+          __template: [1.0, 5.0, 25.0, 50.0, 75.0, 95.0, 99.0],
+          // mark type as list
+          __any_of: []
+        },
         "script": "_value",
         "params": {},
         "lang": "mvel",
