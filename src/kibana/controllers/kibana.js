@@ -40,6 +40,8 @@ define(function (require) {
     ]).then(function () {
       $injector.invoke(function ($rootScope, courier, config, configFile, $timeout, $location, timefilter, globalState) {
 
+        $rootScope.globalState = globalState;
+
         // get/set last path for an app
         var lastPathFor = function (app, path) {
           var key = 'lastPath:' + app.id;
@@ -82,13 +84,16 @@ define(function (require) {
           });
         };
 
-        // watch the timefilter for changes, and write to globalState when it changes
-        $scope.$watchCollection('opts.timefilter.time', function writeToGlobalState() {
+        var writeTime = function () {
           globalState.time = _.clone(timefilter.time);
           globalState.commit();
 
           writeGlobalStateToLastPaths();
-        });
+        };
+
+        // watch the timefilter for changes, and write to globalState when it changes
+        $scope.$watch('opts.timefilter.time.from', writeTime);
+        $scope.$watch('opts.timefilter.time.to', writeTime);
 
         $scope.$on('application.load', function () {
           courier.start();

@@ -73,7 +73,7 @@ define(function (require) {
 
         timefilter.enabled(true);
         $scope.timefilter = timefilter;
-        $scope.$watchCollection('timefilter.time', $scope.refresh);
+        $scope.$watchCollection('globalState.time', $scope.refresh);
 
         $scope.save = function () {
           $state.title = dash.id = dash.title;
