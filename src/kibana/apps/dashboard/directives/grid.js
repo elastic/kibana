@@ -46,9 +46,6 @@ define(function (require) {
               stop: readGridsterChangeHandler
             }
           }).data('gridster');
-          reflowGridster();
-
-          $window.on('resize', safeLayout);
 
           $scope.$watchCollection('$state.panels', function (panels) {
             var currentPanels = gridster.$widgets.toArray().map(function (el) {
@@ -86,6 +83,9 @@ define(function (require) {
               makePanelSerializeable(panel);
             });
           });
+
+          $window.on('resize', safeLayout);
+          $scope.$on('ready:vis', safeLayout);
         };
 
         // return the panel object for an element.
@@ -219,9 +219,10 @@ define(function (require) {
           var complete = notify.event('reflow dashboard');
           reflowGridster();
           stretchContainer();
+          readGridsterChangeHandler();
           complete();
         };
-        var safeLayout = _.debounce(layout, 500, { trailing: true });
+        var safeLayout = _.debounce(layout, 200);
 
         init();
       }
