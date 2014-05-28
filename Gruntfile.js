@@ -23,6 +23,14 @@ module.exports = function (grunt) {
       dev: 'http://'+(grunt.option('host') || 'localhost')+':'+ (grunt.option('es_port') ||  9200) +'/.marvel_cluster_report/report',
       dist: 'https://marvel-stats.elasticsearch.com/'
     },
+    registrationUrl: {
+      dev: 'http://'+(grunt.option('host') || 'localhost')+':'+ (grunt.option('es_port') ||  9200) +'/.marvel_cluster_report/registration',
+      dist: 'https://marvel-stats.elasticsearch.com/registration'
+    },
+    purchaseConfirmationUrl: {
+      dev: 'http://'+(grunt.option('host') || 'localhost')+':'+ (grunt.option('es_port') ||  9200) +'/.marvel_cluster_report/purchase_confirmation',
+      dist: 'https://marvel-stats.elasticsearch.com/purchase_confirmation'
+    },
     kibanaPort: grunt.option('port') ||  5601,
     kibanaHost: grunt.option('host') ||'localhost'
   };

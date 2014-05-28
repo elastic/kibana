@@ -13,6 +13,14 @@ module.exports = function (config) {
             replacement: '<%= statsReportUrl.dev %>',
           },
           {
+            match: 'registration_url',
+            replacement: '<%= registrationUrl.dev %>',
+          },
+          {
+            match: 'purchase_confirmation_url',
+            replacement: '<%= purchaseConfirmationUrl.dev %>',
+          },
+          {
             match: 'ga_tracking_code',
             replacement: '<%= ga_tracking_code.dev %>',
           }
@@ -34,6 +42,14 @@ module.exports = function (config) {
           {
             match: 'stats_report_url',
             replacement: '<%= statsReportUrl.dist %>',
+          },
+          {
+            match: 'registration_url',
+            replacement: '<%= registrationUrl.dist %>',
+          },
+          {
+            match: 'purchase_confirmation_url',
+            replacement: '<%= purchaseConfirmationUrl.dist %>',
           },
           {
             match: 'ga_tracking_code',

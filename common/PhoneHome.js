@@ -2,6 +2,8 @@ define(function (require) {
   'use strict';
 
   var statsReportURL = '@@stats_report_url';
+  var registrationUrl = '@@registration_url';
+  var purchaseConfirmationUrl = '@@purchase_confirmation_url';
   var _ = require('lodash');
   var $ = require("jquery");
 
@@ -194,16 +196,16 @@ define(function (require) {
       var regData;
       var registrationData = this.get('registrationData');
       var data = this.get('data');
+      var url = registrationUrl; 
 
       if (!this.get('registrationSent') && registrationData && data && data.uuid ) {
         registrationData.uuid = data.uuid;
-        regData = { type: 'registration', data: registrationData };
 
         if (this.get('status') === 'purchased') {
-          regData.type = 'purchase_confirmation';
+          url = purchaseConfirmationUrl;
         }
 
-        return this.client.post(statsReportURL, regData).then(function () {
+        return this.client.post(url, registrationData).then(function () {
           self.set('registrationSent', true);
           self.saveToBrowser();
         });
