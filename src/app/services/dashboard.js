@@ -382,18 +382,20 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
         method: "GET",
         transformResponse: function(response) {
           /*jshint -W054 */
-          var _f = new Function('ARGS','kbn','_','moment','window','document','angular','require','define','$','jQuery',response);
-          return _f($routeParams,kbn,_,moment);
+          var _f = new Function('ARGS','kbn','_','moment','window','document','angular','require','define','$','jQuery', 'ejs', response);
+          return _f($routeParams, kbn, _, moment, window, document, angular, require, define, $, jQuery, ejs);
         }
       }).then(function(result) {
         if(!result) {
           return false;
         }
-        self.dash_load(dash_defaults(result.data));
+        $.when(result.data).done(function(dashboard) {
+          self.dash_load(dash_defaults(dashboard));
+        });
         return true;
-      },function() {
+      },function(error) {
         alertSrv.set('Error',
-          "Could not load <i>scripts/"+file+"</i>. Please make sure it exists and returns a valid dashboard" ,
+          "Could not load <i>scripts/"+file+"</i>. Please make sure it exists and returns a valid dashboard: " + error ,
           'error');
         return false;
       });
