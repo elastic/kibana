@@ -25,23 +25,23 @@
   <form name="confirmationForm" ng-submit="confirmPurchase();dismiss();">
     <div class="row-fluid">
       <div class="span3 offset3">
-        <label>First Name</label>
+        <label>First Name *</label>
         <input ng-model="registration.first_name" required="true" type="text" class="span12" />
       </div>
       <div class="span3">
-        <label>Last Name</label>
+        <label>Last Name *</label>
         <input ng-model="registration.last_name" required="true" type="text" class="span12" />
       </div>
     </div>
     <div class="row-fluid">
       <div class="span6 offset3">
-        <label>Company Name</label>
+        <label>Company Name *</label>
         <input ng-model="registration.company" required="true" type="text" class="span12" />
       </div>
     </div>
     <div class="row-fluid">
       <div class="span6 offset3">
-        <label>Order Number or Support Quote Reference<br><span class="note">This can be found either on your signed order form or the order confirmation email.</span></label>
+        <label>Order Number or Support Quote Reference *<br><span class="note">This can be found either on your signed order form or the order confirmation email.</span></label>
         <input ng-model="registration.order_number" required="true" type="text" ng-pattern="/^(\d{4}|Q-\S{7}|\d{8})$/" class="span12" />
       </div>
     </div>
