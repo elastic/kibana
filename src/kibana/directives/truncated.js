@@ -11,12 +11,11 @@ define(function (require) {
       },
       template: function ($element, attrs) {
         var template = '<span>{{text}}</span>';
-        if (attrs.length && attrs.orig && attrs.orig.length > attrs.length) {
-          template += ' <a ng-click="toggle()">{{action}}</a>';
-        }
+        template += '<span ng-if="orig.length > length"> <a ng-click="toggle()">{{action}}</a></span>';
         return template;
       },
       link: function ($scope, $element, attrs) {
+
         var fullText = $scope.orig;
         var truncated = fullText.substring(0, $scope.length);
 
