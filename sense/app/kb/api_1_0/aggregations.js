@@ -45,6 +45,12 @@ define(function () {
         },
         "path": ""
       },
+      "reverse_nested": {
+        __template: {
+          "path": ""
+        },
+        "path": ""
+      },
       "terms": {
         __template: {
           "field": "",
