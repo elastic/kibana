@@ -1,6 +1,8 @@
 define(function (require) {
   var angular = require('angular');
   var html = require('text!../partials/table.html');
+  var detailsHtml = require('text!../partials/row_details.html');
+
   var _ = require('lodash');
   var nextTick = require('utils/next_tick');
   var $ = require('jquery');
@@ -169,7 +171,7 @@ define(function (require) {
             var currentPosition = cursor - queue.length - currentChunk.length + i;
             if (currentPosition % 2) {
               $summary.addClass('even');
-              $details.addClass('even');
+              //$details.addClass('even');
             }
 
             $body.append([
@@ -270,6 +272,10 @@ define(function (require) {
         function appendDetailsToRow($tr, row, id) {
           var topLevelDetails = ['_index', '_type', '_id'];
 
+          // The fields to loop over
+          row._fields = _.keys(row._source).concat(topLevelDetails).sort();
+          row._mode = 'table';
+
           // we need a td to wrap the details table
           var containerTd = $(document.createElement('td'));
           containerTd.attr('colspan', $scope.columns.length);
@@ -285,55 +291,16 @@ define(function (require) {
           }
 
           // table that will hold details about the row
-          var table = $(document.createElement('table'));
-          containerTd.append(table);
-          table.addClass('table table-condensed');
+          var container = $(document.createElement('div'));
 
-          // body of the table
-          var tbody = $(document.createElement('tbody'));
-          table.append(tbody);
-
-          // itterate each row and append it to the tbody
-          _(row._source)
-            .keys()
-            .concat(topLevelDetails)
-            .sort()
-            .each(function (field) {
-              var tr = $(document.createElement('tr'));
-              // tr -> || <field> || <val> ||
-
-              var fieldTd = $(document.createElement('td'));
-              fieldTd.text(field);
-              tr.append(fieldTd);
-
-              var filterTd = $(document.createElement('td'));
-              var plusFilter = $(document.createElement('i'))
-                .addClass('fa fa-search-plus')
-                .data('field', field)
-                .data('value', row._source[field] || row[field])
-                .attr('ng-click', 'filter($event, "+")');
-              var minusFilter = $(document.createElement('i'))
-                .addClass('fa fa-search-minus')
-                .data('field', field)
-                .data('value', row._source[field] || row[field])
-                .attr('ng-click', 'filter($event, "-")');
-
-              filterTd.append(plusFilter).append(minusFilter);
-              tr.append(filterTd);
-
-              var valTd = $(document.createElement('td'));
-              _displayField(valTd, row, field, true);
-              tr.append(valTd);
-
-              tbody.append(tr);
-            });
-
+          container.attr('ng-init', 'row = ' + JSON.stringify(row));
+          containerTd.append(container);
+          container.html(detailsHtml);
           return $compile($tr)($scope);
         }
 
-        $scope.filter = function (event, operation) {
-          var params = $.data(event.target);
-          $scope.filtering(params.field, params.value, operation);
+        $scope.filter = function (row, field, operation) {
+          $scope.filtering(field, row._source[field] || row[field], operation);
         };
 
         // create a tr element that lists the value for each *column*
