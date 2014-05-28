@@ -85,7 +85,7 @@
     <tr ng-repeat="row in rows" ng-class="{'marvel-muted':!row.alive}">
       <td>
         <div>
-          <label class="checkbox" ng-class="alertClassForId(row)">
+          <div class="checkbox" ng-class="alertClassForId(row)">
             <input type="checkbox" ng-model="row.selected" ng-checked="row.selected">
             <span class="pointer" ng-click="rowClick(row)">
               {{row.display_name}}
@@ -96,7 +96,7 @@
               <i bs-tooltip="'This node is master'" ng-show="row.master" class="icon-star"></i>
             </span>
             <div class="marvel-persistent-name pointer" ng-hide="row.id == row.display_name" ng-click="rowClick(row)">{{row.id}}</div>
-          </label>
+          </div>
         </div>
       </td>
       <td ng-repeat="metric in panel.metrics" class="mutable" ng-class="alertClass(row[metric.field].alert_level)">

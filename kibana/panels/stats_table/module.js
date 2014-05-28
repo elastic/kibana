@@ -64,7 +64,7 @@ define([
     }
 
     module.controller('marvel.stats_table', function ($scope, dashboard, filterSrv, esVersion, $clusterState, $filter,
-                                                      alertSrv, $http) {
+                                                      alertSrv, $http, $location) {
       $scope.panelMeta = {
         modals: [],
         editorTabs: [],
@@ -1001,13 +1001,8 @@ define([
       };
 
       $scope.rowClick = function (row, metric) {
-        var current = window.location.href;
-        var i = current.indexOf('#');
-        if (i > 0) {
-          current = current.substr(0, i);
-        }
-        current += $scope.detailViewLink([row], metric ? [metric.field] : undefined);
-        window.location = current;
+        var view = $scope.detailViewLink([row], metric ? [metric.field] : undefined, true);
+        $location.path(view.path).search(view.search);
       };
 
       $scope.formatAlert = function (a, metric) {
@@ -1023,7 +1018,7 @@ define([
         return (a.type === "upper_bound" ? ">" : "<") + value;
       };
 
-      $scope.detailViewLink = function (rows, fields) {
+      $scope.detailViewLink = function (rows, fields, returnObject) {
         var
           query,
           time,
@@ -1056,6 +1051,18 @@ define([
 
         from = _.isDate(time.from) ? time.from.toISOString() : time.from;
         to = _.isDate(time.to) ? time.to.toISOString() : time.to;
+
+        if (returnObject) {
+          return {
+            path: "/dashboard/script/marvel." + $scope.panel.mode + "_stats.js",
+            search: {
+              queries: rows,
+              from: from,
+              to: to,
+              show: (!_.isUndefined(fields)) ? fields.join(',') : ''
+            }
+          };
+        }
 
         return "#/dashboard/script/marvel." + $scope.panel.mode + "_stats.js?queries=" + encodeUriSegment(rows) + "&from=" +
           from + "&to=" + to + show;
