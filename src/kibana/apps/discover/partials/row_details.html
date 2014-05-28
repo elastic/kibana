@@ -1,0 +1,24 @@
+<div class="discover-table-details">
+
+  <ul class="nav nav-tabs discover-table-details-toggle">
+    <li ng-class="{active: row._mode == 'table'}"><a ng-click="row._mode='table'">Table</a></li>
+    <li ng-class="{active: row._mode == 'json'}"><a ng-click="row._mode='json'">JSON</a></li>
+  </ul>
+
+  <table class="table table-condensed" ng-show="row._mode == 'table'">
+    <tbody>
+      <tr ng-repeat="field in row._fields" bindonce>
+        <td bo-text="field" width="1%" class="discover-table-details-field"></td>
+        <td width="1%" class="discover-table-details-buttons">
+          <i ng-click="filter(row, field, '+')" class="fa fa-search-plus"></i>
+          <i ng-click="filter(row, field, '-')" class="fa fa-search-minus"></i>
+        </td>
+
+        <td class="discover-table-details-value"><kbn-truncated orig="{{row._formatted[field] || row[field]}}" length=100></kbn-truncated></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <pre ng-show="row._mode == 'json'">{{row._source | json}}</pre>
+
+</div>
