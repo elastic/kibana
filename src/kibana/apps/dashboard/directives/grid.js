@@ -7,11 +7,12 @@ define(function (require) {
 
   var app = require('modules').get('app/dashboard');
 
-  app.directive('dashboardGrid', function ($compile) {
+  app.directive('dashboardGrid', function ($compile, Notifier) {
     return {
       restrict: 'E',
       require: '^dashboardApp', // must inherit from the dashboardApp
       link: function ($scope, $el) {
+        var notify = new Notifier();
         var $container = $el;
         $el = $('<ul>').appendTo($container);
 
@@ -214,8 +215,13 @@ define(function (require) {
           g.drag_api.set_limits(COLS * g.min_widget_width);
         };
 
-        var layout = _.compose(reflowGridster, stretchContainer);
-        var safeLayout = _.debounce(layout, 200);
+        var layout = function () {
+          var complete = notify.event('reflow dashboard');
+          reflowGridster();
+          stretchContainer();
+          complete();
+        };
+        var safeLayout = _.debounce(layout, 500, { trailing: true });
 
         init();
       }
