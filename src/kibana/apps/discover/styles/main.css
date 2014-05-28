@@ -102,6 +102,12 @@
   word-wrap: break-word;
   white-space: pre-wrap;
 }
+.discover-field-filter {
+  margin-right: 10px;
+}
+.discover-field-filter .form-group {
+  margin-bottom: 0px;
+}
 .discover-field-details-close {
   text-align: center;
   border-top: 1px solid transparent;
