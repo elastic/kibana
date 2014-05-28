@@ -118,7 +118,11 @@ define(function () {
 
     api.addEndpointDescription('_search_template', {
       methods: ['GET'],
-      patterns: ['_search/template'],
+      patterns: [
+        "{indices}/{types}/_search/template",
+        "{indices}/_search/template",
+        "_search/template"
+      ],
       data_autocomplete_rules: {
         template: {
           __template: {
