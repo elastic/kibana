@@ -3,22 +3,19 @@ define(function (require) {
   var angular = require('angular');  
   var app = require('app');
   var _ = require('lodash');
-  var $ = require('jquery');
   var save = require('./lib/save');
 
   var module = angular.module('kibana.panels.marvel.save', []);
   app.useModule(module);
 
-  module.controller('marvel.reset', function ($scope, dashboard, $routeParams) {
+  module.controller('marvel.reset', function ($scope, dashboard, $routeParams, $location, $timeout) {
     $scope.reset = function () {
       var link = dashboard.current.base.link;
       dashboard.elasticsearch_delete($routeParams.kbnId).then(function () {
-        var a = $('<a/>');
-        a.attr('href', '../kibana/index.html#'+link);
         // Add an artificial wait for the index to update so when the page reloads
         // it doesn't try and redirect to the saved dashboard.
-        setTimeout(function () {
-          window.location = a[0].href;
+        $timeout(function () {
+          $location.path(link);
         }, 1000);
       });
     };

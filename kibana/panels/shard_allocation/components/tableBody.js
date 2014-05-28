@@ -26,7 +26,7 @@ define(function (require) {
           'Where\'s the data? It looks like you don\'t have any indexes in your cluster (or they are not visible).'
         ),
         D.div({ className: 'text-center', style: { margin: '0 0 10px 0' } },
-          'Marvel indexes are hidden by default, click the "cog" icon on this pannel and uncheck "show hidden indices" to make them visable.'
+          'Marvel indexes are hidden by default, click the "cog" icon on this panel and ensure "show hidden indices" is checked.'
         )
       );
       return D.tbody(null, 

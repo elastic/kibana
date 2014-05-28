@@ -16,7 +16,6 @@ define(function (require) {
 
   var angular = require('angular');
   var app = require('app');
-  var $ = require('jquery');
   var _ = require('lodash');
 
   var loadDashboards = require('./lib/loadDashboards');
@@ -83,7 +82,6 @@ define(function (require) {
       if($scope.panel.source === 'url') {
 
         $http.get($scope.panel.url).then(function (response) {
-          var a = $('<a />');
           var links = response.data.links;
           var ids = links.filter(extractIds).map(extractIds);
           loadDashboards($http, ids).then(function (dashboards) {
@@ -100,10 +98,8 @@ define(function (require) {
 
               // Redirect the the override dashboard if it exists 
               if (overrideDashboard) {
-                var href = '../kibana/index.html#/dashboard/elasticsearch/'+
-                  encodeURIComponent(overrideDashboard._id);
-                a.attr('href', href);
-                window.location = a[0].href;
+                var path = '/dashboard/elasticsearch/'+overrideDashboard._id;
+                $location.path(path);
                 return;
               }
             }
