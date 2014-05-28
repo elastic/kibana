@@ -237,7 +237,7 @@ define([
 
         addReplacementInfoToContext(context, pos);
 
-        context.createdWithToken = context.updatedForToken;
+        context.createdWithToken = _.clone(context.updatedForToken);
 
         return context;
       }
@@ -326,7 +326,7 @@ define([
         var session = editor.getSession();
         var insertingRelativeToToken;
 
-        context.updatedForToken = session.getTokenAt(pos.row, pos.column);
+        context.updatedForToken = _.clone(session.getTokenAt(pos.row, pos.column));
         if (!context.updatedForToken) {
           context.updatedForToken = { value: "", start: pos.column };
         } // empty line
@@ -900,6 +900,8 @@ define([
                 term = {
                   name: term
                 }
+              } else {
+                term = _.clone(term);
               }
 
               return _.defaults(term, {
