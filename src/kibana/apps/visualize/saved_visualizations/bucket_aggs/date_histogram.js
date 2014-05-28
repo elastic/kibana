@@ -34,6 +34,11 @@ define(function (require) {
           val: 'auto'
         },
         {
+          display: 'Second',
+          val: 'second',
+          ms: ms('second')
+        },
+        {
           display: 'Minute',
           val: 'minute',
           ms: ms('minute')
