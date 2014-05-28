@@ -79,14 +79,15 @@ define(function (require) {
           var groupMap = chartData.splits || (chartData.splits = {});
 
           result.buckets.forEach(function (bucket) {
-            var group = groupMap[bucket.key];
+            var label = col.aggParams.field + ': ' + bucket.key;
+            var group = groupMap[label];
 
             if (!group) {
               group = {
-                label: col.aggParams.field + ': ' + bucket.key
+                label: label
               };
               groupList.push(group);
-              groupMap[group.label] = group;
+              groupMap[label] = group;
             }
 
             splitAndFlatten(group, bucket);
