@@ -9,7 +9,28 @@
 .discover-timechart {
   margin-top: -20px; // TODO: Remove this when the vis CSS is better
   display: block;
-  height: 200px
+  height: 200px;
+  position: relative;
+
+  .chartwrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .discover-timechart-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.75;
+    text-align: center;
+    background: #ffffff url(../../../images/loader_64.gif) no-repeat center center;
+    z-index: 100;
+  }
 }
 
 .discover-hits {
