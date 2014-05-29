@@ -6827,7 +6827,9 @@ button.close {
 .glyphicon-chevron-right:before {
   content: "\f061";
 }
+html,
 body {
+  height: 100%;
   margin: 0px;
 }
 .content {
@@ -7036,6 +7038,10 @@ kbn-table tr.even td {
   padding-top: 2px;
   padding-bottom: 2px;
 }
+.navbar > .container-fluid > .navbar-nav:not(.pull-right):first-child,
+.navbar > .container-fluid > .navbar-form:not(.pull-right):first-child {
+  margin-left: -15px;
+}
 .navbar-static-top .navbar-right {
   font-size: 13px;
 }
@@ -7131,6 +7137,7 @@ table td .fa {
 .sidebar-container .sidebar-list .sidebar-list-header {
   padding-left: 10px;
   color: #777777;
+  border: 1px solid rgba(0, 0, 0, 0);
 }
 .sidebar-container .sidebar-list .sidebar-item {
   border-top: 1px solid transparent;
