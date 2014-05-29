@@ -130,6 +130,8 @@ define(function (require) {
 
             vis._fillConfigsToMinimum();
 
+            _.assign(vis, typeDef.listeners);
+
             return vis;
           });
         }
