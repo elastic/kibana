@@ -50,15 +50,13 @@ dashboard-grid {
       .justify-content(flex-start);
 
       .panel-heading {
-        .btn {
-          color: @brand-danger;
+        a {
+          color: @text-color;
           border: none;
           background: none;
-          opacity: .25;
-          padding: 0;
-          .transition(opacity .25s ease-in-out);
+          padding: 0px 3px;
           &:hover {
-            opacity: 1;
+            color: @link-hover-color;
           }
         }
       }

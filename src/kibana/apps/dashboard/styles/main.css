@@ -113,20 +113,14 @@ dashboard-grid {
   -ms-justify-content: flex-start;
   justify-content: flex-start;
 }
-.gridster dashboard-panel .panel .panel-heading .btn {
-  color: #e74c3c;
+.gridster dashboard-panel .panel .panel-heading a {
+  color: #46525d;
   border: none;
   background: none;
-  opacity: .25;
-  padding: 0;
-  transition: opacity 0.25s ease-in-out;
-  -webkit-transition: opacity 0.25s ease-in-out;
-  -moz-transition: opacity 0.25s ease-in-out;
-  -ms-transition: opacity 0.25s ease-in-out;
-  -o-transition: opacity 0.25s ease-in-out;
+  padding: 0px 3px;
 }
-.gridster dashboard-panel .panel .panel-heading .btn:hover {
-  opacity: 1;
+.gridster dashboard-panel .panel .panel-heading a:hover {
+  color: #31c471;
 }
 .gridster dashboard-panel .panel visualize {
   -webkit-flex-grow: 1;
