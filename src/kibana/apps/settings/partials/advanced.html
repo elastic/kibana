@@ -24,11 +24,11 @@
               <input
                 ng-model="conf.unsavedValue"
                 ng-keyup="maybeCancel($event, conf)"
-                placeholder="{{conf.value || conf.defVal | json}}"
+                placeholder="{{conf.value || conf.defVal}}"
                 type="text"
                 class="form-control">
             </form>
-            <span ng-if="!conf.editting" ng-dblclick="edit(conf)">{{conf.value || conf.defVal | json}}</span>
+            <span ng-if="!conf.editting" ng-dblclick="edit(conf)">{{conf.value || conf.defVal}}</span>
           </td>
           <td class="actions">
             <button

@@ -14,7 +14,7 @@ define(function (require, module, exports) {
   });
 
   require('modules').get('app/settings')
-  .directive('kbnSettingsApp', function ($route) {
+  .directive('kbnSettingsApp', function ($route, timefilter) {
     return {
       restrict: 'E',
       template: require('text!./partials/app.html'),
@@ -23,6 +23,9 @@ define(function (require, module, exports) {
         sectionName: '@section'
       },
       link: function ($scope, $el) {
+
+        timefilter.enabled(false);
+
         var sections = require('./_sections');
 
         $scope.sections = _.sortBy(sections, 'order');

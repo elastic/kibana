@@ -32,8 +32,8 @@ define(function (require) {
     };
 
     var castTime = function () {
-      self.time.from = convertISO8601(globalState.time.from);
-      self.time.to = convertISO8601(globalState.time.to);
+      if (globalState.time && globalState.time.from) self.time.from = convertISO8601(globalState.time.from);
+      if (globalState.time && globalState.time.to) self.time.to = convertISO8601(globalState.time.to);
     };
 
     this.enabled = function (state) {
