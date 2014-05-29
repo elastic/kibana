@@ -4,9 +4,9 @@ define(function (require) {
 
   require('modules')
     .get('kibana/filters')
-    .filter('moment', function () {
+    .filter('moment', function (config) {
     return function (datetime, roundUp) {
-      var format = 'MMMM Do YYYY, HH:mm:ss.SSS';
+      var format = config.get('dateFormat');
       if (moment.isMoment(datetime)) return datetime.format(format);
       if (_.isDate(datetime)) return moment(datetime).format(format);
       return datetime;
