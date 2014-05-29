@@ -184,7 +184,8 @@ define(function (require) {
 
       delete vis.savedSearchId;
 
-      $state.query = vis.searchSource.get('query');
+      var q = vis.searchSource.get('query');
+      $state.query = _.isObject(q) ? q.query_string.query : q;
 
       var parent = vis.searchSource.parent();
       vis.searchSource.set(parent.toJSON());
@@ -201,11 +202,7 @@ define(function (require) {
       delete $state.query;
     } else {
       var q = vis.searchSource.get('query');
-      if (_.isObject(q)) {
-        $state.query = q.query_string.query;
-      } else {
-        $state.query = q;
-      }
+      $state.query = _.isObject(q) ? q.query_string.query : q;
     }
 
     // init
