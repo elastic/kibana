@@ -19,7 +19,22 @@ define(function (require) {
 
     globalState.onUpdate(function readFromGlobalState() {
       _.assign(self.time, globalState.time);
+      castTime();
     });
+
+    var init = function () {
+      castTime();
+    };
+
+    var convertISO8601 = function (stringTime) {
+      var obj = moment(stringTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true);
+      return obj.isValid() ? obj : stringTime;
+    };
+
+    var castTime = function () {
+      self.time.from = convertISO8601(globalState.time.from);
+      self.time.to = convertISO8601(globalState.time.to);
+    };
 
     this.enabled = function (state) {
       if (!_.isUndefined(state)) enable = state;
@@ -49,6 +64,8 @@ define(function (require) {
         max: datemath.parse(self.time.to, true)
       };
     };
+
+    init();
 
   });
 
