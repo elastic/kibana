@@ -112,7 +112,7 @@ define(function (require) {
         });
       }
 
-      if (val == null) return;
+      if (val == null || !key || !_.isString(key)) return;
 
       switch (key) {
       case 'filter':
@@ -131,7 +131,12 @@ define(function (require) {
         /* fall through */
       default:
         state.body = state.body || {};
-        if (key && state.body[key] == null) {
+        // ignore if we already have a value
+        if (state.body[key] == null) {
+          if (key === 'query' && _.isString(val)) {
+            val = { query_string: { query: val }};
+          }
+
           state.body[key] = val;
         }
       }
