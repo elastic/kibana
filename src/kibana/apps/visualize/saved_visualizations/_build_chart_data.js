@@ -127,6 +127,16 @@ define(function (require) {
         configs.unshift(configStack.shift());
       };
 
+      // add labels to each config before they are processed
+      configs.forEach(function (config) {
+        var agg = aggs.byName[config.agg];
+        if (agg && agg.makeLabel) {
+          config.label = agg.makeLabel(config.aggParams);
+        } else {
+          config.label = config.aggParams.field;
+        }
+      });
+
       if (resp.aggregations) {
         splitAndFlatten(chartData, resp.aggregations);
       } else {
