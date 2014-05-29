@@ -41,7 +41,7 @@ define(function (require) {
     }
   });
 
-  app.controller('VisualizeEditor', function ($scope, $route, Notifier, $location, globalState, AppState, timefilter, Private) {
+  app.controller('VisualizeEditor', function ($scope, $route, $timeout, Notifier, $location, globalState, AppState, timefilter, Private) {
     var aggs = Private(require('../saved_visualizations/_aggs'));
 
     var notify = new Notifier({
@@ -179,8 +179,8 @@ define(function (require) {
     $scope.conf = _.pick($scope, 'doSave', 'vis');
 
     $scope.unlink = function () {
-      // display unlinking for a few seconds, unless it is double clicked
-      $scope.unlinking = setTimeout($scope.doneUnlinking, 1500);
+      // display unlinking for 2 seconds, unless it is double clicked
+      $scope.unlinking = $timeout($scope.doneUnlinking, 2000);
 
       delete vis.savedSearchId;
 

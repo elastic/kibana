@@ -24,14 +24,13 @@
               ng-model="state.query">
             <span class="input-group-addon" ng-click="doVisualize()"><span class="fa fa-search"></span></span>
 
-            <div ng-if="linked && !unlinking" ng-dblclick="unlink()" class="bitty-modal">
+            <div ng-if="linked && !unlinking"
+              ng-dblclick="unlink()"
+              tooltip="Double click to unlink this visualization from the saved search"
+              class="bitty-modal visualize-linked">
               <i class="fa fa-link"></i>
               &nbsp;
-              This visualization is linked to the <a href="#/discover/{{ vis.savedSearchId | uriescape }}">{{ vis.savedSearchId | json}}</a> Saved Search
-              <kbn-info
-                placement="bottom"
-                info="To unlink this one visualization and modify it's data source, double click the link icon">
-              </kbn-info>
+              This visualization is linked to a saved search: <b>{{ vis.savedSearchId | json}}</b> <a href="#/discover/{{ vis.savedSearchId | uriescape }}"><i class="fa fa-pencil" tooltip="Click here to edit the linked saved search"></i></a>
             </div>
 
             <div ng-if="linked && unlinking" ng-click="doneUnlinking()" class="bitty-modal">
