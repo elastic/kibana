@@ -6,6 +6,7 @@ define(function (require) {
 
   require('../saved_visualizations/saved_visualizations');
   require('notify/notify');
+  require('filters/uriescape');
 
   var app = require('modules').get('app/visualize', [
     'kibana/notify',
@@ -56,7 +57,7 @@ define(function (require) {
     $scope.fields = _.sortBy(indexPattern.fields, 'name');
     $scope.fields.byName = indexPattern.fieldsByName;
 
-    var $state = new AppState(vis.getState());
+    var $state = $scope.state = new AppState(vis.getState());
 
     $scope.vis = vis;
 
@@ -74,6 +75,19 @@ define(function (require) {
     };
 
     /**
+     * YOU PROBABLY WANT write|readStateAndFetch
+     */
+    var justFetch = function () {
+      // we use state to track query, must write before we fetch
+      if ($state.query) {
+        vis.searchSource.set('query', $state.query);
+      } else {
+        vis.searchSource.set('query', false);
+      }
+      vis.searchSource.fetch();
+    };
+
+    /**
      * Write the latest changes made on the visualization to the $state. This
      * will cause a fetch if there were changes
      *
@@ -82,7 +96,7 @@ define(function (require) {
     var writeStateAndFetch = function () {
       _.assign($state, vis.getState());
       $state.commit();
-      vis.searchSource.fetch();
+      justFetch();
     };
 
     /**
@@ -92,7 +106,7 @@ define(function (require) {
     var readStateAndFetch = function () {
       // update and commit the state, which will update the vis dataSource if there were new changes
       vis.setState($state);
-      vis.searchSource.fetch();
+      justFetch();
     };
 
     /**
@@ -163,6 +177,36 @@ define(function (require) {
 
     // objects to make available within the config panel's scope
     $scope.conf = _.pick($scope, 'doSave', 'vis');
+
+    $scope.unlink = function () {
+      // display unlinking for a few seconds, unless it is double clicked
+      $scope.unlinking = setTimeout($scope.doneUnlinking, 1500);
+
+      delete vis.savedSearchId;
+
+      $state.query = vis.searchSource.get('query');
+
+      var parent = vis.searchSource.parent();
+      vis.searchSource.set(parent.toJSON());
+      vis.searchSource.inherits(parent.parent());
+    };
+    $scope.doneUnlinking = function () {
+      $scope.unlinking = clearTimeout($scope.unlinking);
+      $scope.linked = false;
+    };
+
+    $scope.linked = !!vis.savedSearchId;
+    if ($scope.linked) {
+      // possibly left over state from unsaved unlinking
+      delete $state.query;
+    } else {
+      var q = vis.searchSource.get('query');
+      if (_.isObject(q)) {
+        $state.query = q.query_string.query;
+      } else {
+        $state.query = q;
+      }
+    }
 
     // init
     init();
