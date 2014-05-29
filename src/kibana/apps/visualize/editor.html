@@ -1,18 +1,45 @@
- <div ng-controller="VisualizeEditor">
+ <div ng-controller="VisualizeEditor" class="vis-editor">
   <nav class="navbar navbar-default navbar-static-top">
     <div class="container-fluid">
-      <div class="navbar-header" ng-if="vis.title">
-        <span class="navbar-brand pull-left">
+      <div ng-if="vis.title" class="navbar-header pull-left">
+        <span class="navbar-brand">
           {{vis.title}}
         </span>
       </div>
 
-      <ul class="nav navbar-nav pull-left">
+      <ul class="nav navbar-nav pull-right">
         <li><a ng-click="startOver()" class="navbar-link"><i class="fa fa-file-o"></i></a></li>
         <li><a ng-click="toggleSave()" class="navbar-link"><i class="fa fa-save"></i></a></li>
         <li><a ng-click="toggleLoad()" class="navbar-link"><i class="fa fa-folder-open"></i></a></li>
         <li><a class="navbar-link" ng-click="doVisualize()"><i class="fa fa-refresh"></i></a></li>
       </ul>
+
+      <form ng-submit="doVisualize()" ng-class="{ 'navbar-form': true, 'first': !vis.title }">
+        <div class="form-group">
+          <div class="input-group">
+            <input
+              placeholder="Search..."
+              type="text"
+              class="form-control ng-pristine ng-valid"
+              ng-model="state.query">
+            <span class="input-group-addon" ng-click="doVisualize()"><span class="fa fa-search"></span></span>
+
+            <div ng-if="linked && !unlinking" ng-dblclick="unlink()" class="bitty-modal">
+              <i class="fa fa-link"></i>
+              &nbsp;
+              This visualization is linked to the <a href="#/discover/{{ vis.savedSearchId | uriescape }}">{{ vis.savedSearchId | json}}</a> Saved Search
+              <kbn-info
+                placement="bottom"
+                info="To unlink this one visualization and modify it's data source, double click the link icon">
+              </kbn-info>
+            </div>
+
+            <div ng-if="linked && unlinking" ng-click="doneUnlinking()" class="bitty-modal">
+              <i class="fa fa-chain-broken"></i> Unlinked!
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
   </nav>
   <config
@@ -21,23 +48,25 @@
   </config>
   <div class="container-fluid">
     <div class="row vis-editor-content">
-      <div class="col-md-2 sidebar-container">
-        <form class="sidebar-list">
-          <div class="sidebar-list-header">
-            <h5>Dimensions</h5>
-          </div>
-          <ul class="list-unstyled">
-            <li ng-repeat="category in visConfigCategories.displayOrder" class="sidebar-item">
-              <vis-config-category
-                vis="vis"
-                category="vis[category.name]"
-                fields="fields">
-              </vis-config-category>
-            </li>
-          </ul>
-        </form>
+      <div class="vis-sidebar">
+        <div class="sidebar-container">
+          <form class="sidebar-list">
+            <div class="sidebar-list-header">
+              <h5>Dimensions</h5>
+            </div>
+            <ul class="list-unstyled">
+              <li ng-repeat="category in visConfigCategories.displayOrder" class="sidebar-item">
+                <vis-config-category
+                  vis="vis"
+                  category="vis[category.name]"
+                  fields="fields">
+                </vis-config-category>
+              </li>
+            </ul>
+          </form>
+        </div>
       </div>
-      <div class="col-md-10 vis-canvas">
+      <div class="vis-canvas">
         <vis-canvas><visualize vis="vis"></visualize></vis-canvas>
       </div>
     </div>

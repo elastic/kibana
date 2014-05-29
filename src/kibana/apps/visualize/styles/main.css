@@ -69,6 +69,28 @@
 .modal-footer:after {
   clear: both;
 }
+@media (min-width: 992px) {
+  .vis-editor-content {
+    display: flex;
+    -webkit-flex-direction: row;
+    -moz-flex-direction: row;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    -webkit-justify-content: flex-start;
+    -moz-justify-content: flex-start;
+    -ms-justify-content: flex-start;
+    justify-content: flex-start;
+  }
+  .vis-editor-content .vis-sidebar {
+    width: 300px;
+  }
+  .vis-editor-content .vis-canvas {
+    -webkit-flex-grow: 1;
+    -moz-flex-grow: 1;
+    -ms-flex-grow: 1;
+    flex-grow: 1;
+  }
+}
 .vis-editor-content vis-config-editor {
   display: block;
 }
@@ -91,13 +113,36 @@
 .vis-editor-content .agg-config-interval td:first-child {
   padding-left: 0px;
 }
-.vis-editor-content vis-canvas {
-  display: block;
-  height: 800px;
-  width: 95%;
-  margin: 0 auto;
-  overflow: auto;
-}
 .vis-wizard h1 {
   margin-top: 45px;
+}
+vis-canvas {
+  display: block;
+}
+.vis-editor .navbar .form-group {
+  display: block;
+}
+.vis-editor .navbar .input-group {
+  position: relative;
+}
+.vis-editor .navbar .navbar-form.first {
+  margin-left: -15px;
+}
+.vis-editor .navbar .bitty-modal {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  z-index: 10;
+  background: rgba(70, 82, 93, 0.9);
+  color: white;
+  text-align: center;
+  padding-top: 6px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }

@@ -1,8 +1,25 @@
 @import (reference) "../../../styles/_bootstrap.less";
 @import (reference) "../../../styles/theme/_theme.less";
+@import (reference) "../../../styles/_variables.less";
+@import (reference) "../../../styles/_mixins.less";
+
+@media (min-width: @screen-md-min) {
+  .vis-editor-content {
+    display: flex;
+    .flex-direction(row);
+    .justify-content(flex-start);
+
+    .vis-sidebar {
+      width: 300px;
+    }
+
+    .vis-canvas {
+      .flex-grow(1);
+    }
+  }
+}
 
 .vis-editor-content {
-
   vis-config-editor {
     display: block;
   }
@@ -31,14 +48,6 @@
       }
     }
   }
-
-  vis-canvas {
-    display: block;
-    height: 800px;
-    width: 95%;
-    margin: 0 auto;
-    overflow: auto;
-  }
 }
 
 .vis-wizard {
@@ -46,3 +55,46 @@
     margin-top: 45px;
   }
 }
+
+vis-canvas {
+  display: block;
+}
+
+.vis-editor .navbar {
+  .form-group {
+    display: block;
+  }
+  .input-group {
+    position: relative;
+  }
+  .navbar-form.first {
+    margin-left: -15px;
+  }
+  .bitty-modal {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    z-index: 10;
+    background: rgba(70, 82, 93, 0.9);
+    color: white;
+    text-align: center;
+    padding-top: 6px;
+    .prevent-selection;
+  }
+}
+
+// vis-search-editor {
+//   display: block;
+//   background: @sidebar-bg;
+//   text-align: center;
+//   min-height: 0;
+//   border-bottom: 1px solid darken(@sidebar-bg, 10%);
+//   .prevent-selection;
+
+//   color: @sidebar-color;
+//   a {
+//     color: @sidebar-color;
+//   }
+// }

@@ -7,6 +7,7 @@ define(function (require) {
   require('./directives/canvas');
   require('./directives/visualize');
   require('./directives/config_category');
+  require('./directives/search_editor');
 
   require('routes')
   .when('/visualize', {
