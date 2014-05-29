@@ -401,8 +401,10 @@ define(function (require) {
         type: 'histogram',
         listeners: {
           onClick: function (e) {
-            console.log(e);
-          }
+            timefilter.time.from = moment(e.point.x);
+            timefilter.time.to = moment(e.point.x + e.data.ordered.interval);
+            timefilter.time.mode = 'absolute';
+          },
         },
         config: {
           metric: {
