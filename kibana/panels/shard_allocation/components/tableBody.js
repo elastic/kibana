@@ -22,12 +22,7 @@ define(function (require) {
         return D.tbody(null, rows);
       }
       var message = D.div(null, 
-        D.p({ style: { margin: '10px 0 0 0' }, className: 'text-center lead' },
-          'Where\'s the data? It looks like you don\'t have any indexes in your cluster (or they are not visible).'
-        ),
-        D.div({ className: 'text-center', style: { margin: '0 0 10px 0' } },
-          'Marvel indexes are hidden by default, click the "cog" icon on this panel and ensure "show hidden indices" is checked.'
-        )
+        D.p({ style: { margin: '10px 0' }, className: 'text-center lead mutted' })
       );
       return D.tbody(null, 
         D.tr(null, D.td({ colSpan: 2 }, message))
