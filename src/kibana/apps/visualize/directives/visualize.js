@@ -74,7 +74,7 @@ define(function (require) {
             }
 
             // chart reference changes over time, don't bind to a specific chart object.
-            chart.resize();
+            if (chart) chart.resize();
           }());
         });
 

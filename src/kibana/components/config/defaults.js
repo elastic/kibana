@@ -5,5 +5,8 @@ define(function (require) {
     dateFormat: 'MMMM Do YYYY, HH:mm:ss.SSS',
     defaultIndex: null,
     refreshInterval: 10000,
+
+    'histogram:barTarget': 50,
+    'histogram:maxBars': 100,
   });
 });

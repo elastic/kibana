@@ -1,5 +1,5 @@
 define(function (require) {
-  return function DateHistogramAggDefinition(timefilter) {
+  return function DateHistogramAggDefinition(timefilter, config) {
     var _ = require('lodash');
     var moment = require('moment');
     var interval = require('utils/interval');
@@ -9,7 +9,7 @@ define(function (require) {
 
     var pickInterval = function (bounds) {
       bounds || (bounds = timefilter.getBounds());
-      return interval.calculate(bounds.min, bounds.max, 100);
+      return interval.calculate(bounds.min, bounds.max, config.get('histogram:barTarget'));
     };
 
     var agg = this;
@@ -83,7 +83,7 @@ define(function (require) {
 
         var ms = selection.ms || interval.toMs(selection.val);
         var buckets = Math.ceil((bounds.max - bounds.min) / ms);
-        if (buckets > 150) {
+        if (buckets > config.get('histogram:maxBars')) {
           // we should round these buckets out, and scale back the y values
           auto = pickInterval(bounds);
           output.aggParams.interval = auto.interval + 'ms';
