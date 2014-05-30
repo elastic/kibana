@@ -934,11 +934,18 @@ define([
               if (summary.min === Number.POSITIVE_INFINITY) {
                 summary.min = null;
               }
-
+            } else {
+              summary.max = _.isNumber(summary.max) ? summary.max : null;
+              summary.min = _.isNumber(summary.min) ? summary.min : null;
             }
 
             summary.series = _.zip(series_time, series_data);
-            summary.value = series_data[series_data.length - 1]; // use the last data point as value
+            if (summary.max === null || summary.min === null)  {
+              // there is no data
+              summary.value = null;
+            } else {
+              summary.value = series_data[series_data.length - 1]; // use the last data point as value
+            }
             summary.alert_level = $scope.alertLevel(m, summary.value);
             if (summary.alert_level > row.alert_level) {
               row.alert_level = summary.alert_level;
@@ -1108,7 +1115,7 @@ define([
         var level = 0;
 
         function testAlert(alert, num) {
-          if (!alert) {
+          if (!alert || !_.isNumber(num)) {
             return false;
           }
           return alert.type === "upper_bound" ? num > alert.threshold : num < alert.threshold;
