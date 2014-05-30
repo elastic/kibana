@@ -1,42 +1,36 @@
 define(function (require) {
-  var angular = require('angular');
-  var _ = require('lodash');
-  var nextTick = require('utils/next_tick');
-  var configFile = require('../../../config');
-  var defaults = require('./defaults');
-
-  require('notify/notify');
-
   var module = require('modules').get('kibana/config', [
     'kibana/notify'
   ]);
 
-  // guid within this window
-  var nextId = (function () {
-    var i = 0;
-    return function () {
-      return ++i;
-    };
-  }());
-
+  var configFile = require('../../../config');
   // allow the rest of the app to get the configFile easily
   module.constant('configFile', configFile);
 
   // service for delivering config variables to everywhere else
-  module.service('config', function (Private, $rootScope, Notifier, kbnVersion, Promise, kbnSetup) {
+  module.service('config', function (Private, Notifier, kbnVersion, kbnSetup) {
     var config = this;
-    var notify = new Notifier({
-      location: 'Config'
-    });
+
+    var angular = require('angular');
+    var _ = require('lodash');
+    var nextTick = require('utils/next_tick');
+    var defaults = require('./defaults');
+    require('notify/notify');
+
+    var DelayedUpdater = Private(require('./_delayed_updater'));
 
     var DocSource = Private(require('courier/data_source/doc_source'));
-
     var doc = (new DocSource())
       .index(configFile.kibanaIndex)
       .type('config')
       .id(kbnVersion);
 
-    var vals = null;
+    var vals = Private(require('./_vals'));
+    var updater;
+
+    var notify = new Notifier({
+      location: 'Config'
+    });
 
     /******
      * PUBLIC API
@@ -54,18 +48,29 @@ define(function (require) {
       var complete = notify.lifecycle('config init');
       return kbnSetup()
       .then(function getDoc() {
+
+        var applyMassUpdate = function (resp, silentAndLocal) {
+          var newKeys = _.keys(resp._source);
+          var oldKeys = _.keys(vals);
+
+          _.difference(oldKeys, newKeys).forEach(function (key) {
+            _change(key, void 0, silentAndLocal);
+          });
+
+          newKeys.forEach(function (key) {
+            _change(key, resp._source[key], silentAndLocal);
+          });
+        };
+
         return doc.fetch().then(function initDoc(resp) {
           if (!resp.found) return doc.doIndex({}).then(getDoc);
           else {
-            vals = _.cloneDeep(resp._source || {});
+            // apply update, and keep it quite the first time
+            applyMassUpdate(resp, true);
 
-            doc.onUpdate(function applyMassUpdate(resp) {
-              var allKeys = [].concat(_.keys(vals), _.keys(resp._source));
-              _.uniq(allKeys).forEach(function (key) {
-                if (!angular.equals(vals[key], resp._source[key])) {
-                  change(key, resp._source[key]);
-                }
-              });
+            // don't keep it quite other times
+            doc.onUpdate(function (resp) {
+              applyMassUpdate(resp, false);
             });
           }
         });
@@ -85,45 +90,36 @@ define(function (require) {
       }
     };
 
+    // sets a value in the config
     config.set = function (key, val) {
-      // sets a value in the config
-      // the es doc must be updated successfully for the update to reflect in the get api.
-      if (vals[key] === val) return Promise.resolve(true);
-
-      var update = {};
-      update[key] = val;
-
-      return doc.doUpdate(update)
-        .then(function () {
-          change(key, val);
-          return true;
-        });
+      return _change(key, val);
     };
 
+    // clears a value from the config
     config.clear = function (key) {
-      if (vals[key] == null) return Promise.resolve(true);
-
-      var newVals = _.cloneDeep(vals);
-      delete newVals[key];
-
-      return doc.doIndex(newVals)
-        .then(function () {
-          change(key, void 0);
-          return true;
-        });
+      return _change(key);
     };
+    // alias for clear
     config.delete = config.clear;
 
-    config.close = function () {};
+    config.close = function () {
+      if (updater) updater.fire();
+    };
 
     /*****
      * PRIVATE API
      *****/
+    var _notify = function (key, newVal, oldVal) {
 
-    var change = function (key, val) {
-      notify.log('config change: ' + key + ': ' + vals[key] + ' -> ' + val);
-      vals[key] = val;
-      $rootScope.$broadcast('change:config.' + key, val, vals[key]);
+    };
+
+    var _change = function (key, val, silentAndLocal) {
+      // if the previous updater has already fired, then start over with null
+      if (updater && updater.fired) updater = null;
+      // create a new updater
+      if (!updater) updater = new DelayedUpdater(doc);
+      // return a promise that will be resolved once the action is eventually done
+      return updater.update(key, val, silentAndLocal);
     };
 
     config._vals = function () {
