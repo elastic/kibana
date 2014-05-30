@@ -3,6 +3,8 @@ define(function (require) {
   var html = require('text!../partials/field_chooser.html');
   var _ = require('lodash');
   var jsonPath = require('jsonpath');
+  var rison = require('utils/rison');
+  var qs = require('utils/query_string');
 
   require('directives/css_truncate');
   require('directives/field_name');
@@ -10,7 +12,7 @@ define(function (require) {
 
 
 
-  app.directive('discFieldChooser', function () {
+  app.directive('discFieldChooser', function ($location, globalState, config) {
     return {
       restrict: 'E',
       scope: {
@@ -18,6 +20,7 @@ define(function (require) {
         toggle: '=',
         refresh: '=',
         data: '=',
+        state: '=',
         filterFunc: '=filter'
       },
       template: html,
@@ -30,6 +33,26 @@ define(function (require) {
             }
           });
         });
+
+        $scope.termsAgg = function (field) {
+          $location.path('/visualize/create').search({
+            indexPattern: $scope.state.index,
+            type: 'histogram',
+            _a: rison.encode({
+              metric: [{
+                agg: 'count',
+              }],
+              segment: [{
+                agg: 'terms',
+                field: field.name,
+                size: config.get('discover:aggs:terms:size', 20),
+              }],
+              group: [],
+              split: [],
+            }),
+            _g: rison.encode(globalState)
+          });
+        };
 
         $scope.filter = function (field, value, operation) {
           $scope.filterFunc(field.name, value, operation);
@@ -113,7 +136,7 @@ define(function (require) {
               };
             });
 
-          if (params.data.length - missing === 0) return {error: 'Field not present in results'};
+          if (params.data.length - missing === 0) return {error: 'Field not present in _source'};
 
           return {
             total: params.data.length,
