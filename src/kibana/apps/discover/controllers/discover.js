@@ -106,7 +106,7 @@ define(function (require) {
     $scope.fields = null;
 
     var init = _.once(function () {
-      return updateDataSource()
+      return $scope.updateDataSource()
       .then(function () {
         setFields();
 
@@ -172,7 +172,7 @@ define(function (require) {
     });
 
     $scope.opts.saveDataSource = function () {
-      return updateDataSource()
+      return $scope.updateDataSource()
       .then(function () {
         savedSearch.id = savedSearch.title;
 
@@ -187,9 +187,9 @@ define(function (require) {
       .catch(notify.error);
     };
 
-    $scope.fetch = function () {
-      setupVisualization()
-      .then(updateDataSource)
+    $scope.opts.fetch = $scope.fetch = function () {
+      $scope.updateDataSource()
+      .then(setupVisualization)
       .then(function () {
         $state.commit();
         courier.fetch();
@@ -231,7 +231,7 @@ define(function (require) {
       $scope.fetch();
     };
 
-    function updateDataSource() {
+    $scope.updateDataSource = function () {
       var chartOptions;
 
       searchSource
@@ -255,8 +255,13 @@ define(function (require) {
         indexPattern = courier.indexPatterns.get($scope.opts.index);
       }
 
+      $scope.opts.timefield = indexPattern.timeFieldName;
+
+
       return Promise.cast(indexPattern)
       .then(function (indexPattern) {
+        $scope.opts.timefield = indexPattern.timeFieldName;
+
         if (indexPattern !== searchSource.get('index')) {
           // set the index on the savedSearch
           searchSource.index(indexPattern);
@@ -266,7 +271,7 @@ define(function (require) {
           setFields();
         }
       });
-    }
+    };
 
     // This is a hacky optimization for comparing the contents of a large array to a short one.
     function arrayToKeys(array, value) {
@@ -306,6 +311,7 @@ define(function (require) {
         $scope.formatsByName[field.name] = field.format;
       });
 
+      /*
       // TODO: timefield should be associated with the index pattern, this is a hack
       // to pick the first date field and use it.
       var timefields = _.find($scope.fields, {type: 'date'});
@@ -314,6 +320,7 @@ define(function (require) {
       } else {
         delete $scope.opts.timefield;
       }
+      */
 
       refreshColumns();
     }

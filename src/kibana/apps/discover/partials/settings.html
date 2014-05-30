@@ -8,7 +8,8 @@
       <select
         class="form-control"
         ng-model="opts.index"
-        ng-options="id as id for id in opts.indexPatternList">
+        ng-options="id as id for id in opts.indexPatternList"
+        ng-change="opts.updateDataSource.then(opts.fetch())">
       </select>
       <small>
         Time field: <strong>{{opts.timefield || 'not configured'}}</strong>
