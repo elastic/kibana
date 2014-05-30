@@ -159,7 +159,7 @@ define(function (require) {
 
         if (obj.searchSource) {
           body.kibanaSavedObjectMeta = {
-            searchSourceJSON: JSON.stringify(obj.searchSource)
+            searchSourceJSON: JSON.stringify(_.omit(obj.searchSource.toJSON(), ['sort', 'size']))
           };
         }
 
