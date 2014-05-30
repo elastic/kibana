@@ -8,17 +8,33 @@ define(function (require) {
 
   require('setup/setup');
 
-  var prepWork = _.once(function ($q, kbnSetup, config) {
-    return $q.all([
+  var setup = function ($q, kbnSetup, config) {
+    var prom = $q.all([
       kbnSetup(),
-      config.init()
+      config.init(),
     ]);
-  });
+
+    // override setup to only return the promise
+    setup = function () { return prom; };
+
+    return prom;
+  };
+  var prepWork = function ($injector, config, $location, $route, Notifier) {
+    return $injector.invoke(setup)
+    .then(function () {
+      if ($location.path().indexOf('/settings/indices') !== 0 && !config.get('defaultIndex')) {
+        var notify = new Notifier();
+        notify.error('Please specify a default index pattern');
+        $location.path('/settings/indices');
+        $route.reload();
+      }
+    });
+  };
 
   var wrapResolvesWithPrepWork = function (resolves) {
     return _.mapValues(resolves, function (expr, name) {
-      return function ($q, kbnSetup, config, $injector) {
-        return prepWork($q, kbnSetup, config).then(function () {
+      return function ($injector) {
+        return $injector.invoke(prepWork).then(function () {
           return $injector[angular.isString(expr) ? 'get': 'invoke'](expr);
         });
       };
@@ -31,8 +47,8 @@ define(function (require) {
         route.resolve = wrapResolvesWithPrepWork(route.resolve);
       } else if (!route.redirectTo) {
         route.resolve = {
-          __prep__: function ($q, kbnSetup, config) {
-            return prepWork($q, kbnSetup, config);
+          __prep__: function ($injector) {
+            return $injector.invoke(prepWork);
           }
         };
       }
