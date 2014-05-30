@@ -1,4 +1,7 @@
 define(function (require) {
+  var _ = require('lodash');
+  var module = require('modules').get('app/settings');
+
   require('routes')
   .when('/settings/indices/:id', {
     template: require('text!../../partials/indices/edit.html'),
@@ -10,12 +13,13 @@ define(function (require) {
     }
   });
 
-  require('modules').get('app/settings')
-  .controller('kbnSettingsIndicesEdit', function ($scope, $location, $route, config, courier, Notifier, Private) {
+  module.controller('kbnSettingsIndicesEdit', function ($scope, $location, $route, config, courier, Notifier, Private) {
     var notify = new Notifier();
     var refreshKibanaIndex = Private(require('./_refresh_kibana_index'));
 
     $scope.indexPattern = $route.current.locals.indexPattern;
+    var otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);
+
     $scope.table = {
       by: 'name',
       reverse: false,
@@ -30,6 +34,9 @@ define(function (require) {
     $scope.removePattern = function () {
       if ($scope.indexPattern.id === config.get('defaultIndex')) {
         config.delete('defaultIndex');
+        if (otherIds.length) {
+          config.set('defaultIndex', otherIds[0]);
+        }
       }
 
       courier.indexPatterns.delete($scope.indexPattern)

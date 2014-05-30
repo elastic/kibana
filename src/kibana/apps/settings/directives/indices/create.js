@@ -8,7 +8,7 @@ define(function (require) {
   });
 
   require('modules').get('app/settings')
-  .controller('kbnSettingsIndicesCreate', function ($scope, $location, Notifier, Private, indexPatterns, es) {
+  .controller('kbnSettingsIndicesCreate', function ($scope, $location, Notifier, Private, indexPatterns, es, config) {
     var notify = new Notifier();
     var refreshKibanaIndex = Private(require('./_refresh_kibana_index'));
     var MissingIndices = errors.IndexPatternMissingIndices;
@@ -140,6 +140,9 @@ define(function (require) {
         return indexPattern.refreshFields()
         .then(refreshKibanaIndex)
         .then(function () {
+          if (!config.get('defaultIndex')) {
+            config.set('defaultIndex', indexPattern.id);
+          }
           indexPatterns.cache.clear(indexPattern.id);
           $location.url('/settings/indices/' + indexPattern.id);
         });
