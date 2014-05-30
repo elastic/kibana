@@ -316,7 +316,7 @@ define(function (require) {
           if ($scope.timefield) {
             td.addClass('discover-table-timefield');
             td.attr('width', '1%');
-            _displayTimeField(td, row, $scope.timefield);
+            _displayField(td, row, $scope.timefield);
             $tr.append(td);
           }
 
@@ -327,13 +327,6 @@ define(function (require) {
           });
 
           return $tr;
-        }
-
-        // Cast the time field to a moment
-        function _displayTimeField(el, row, field, truncate) {
-          var val = moment(row._formatted[field] || row[field]).format(config.get('dateFormat'));
-          el.text(val);
-          return el;
         }
 
         /**

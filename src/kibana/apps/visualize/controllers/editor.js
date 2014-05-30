@@ -20,6 +20,10 @@ define(function (require) {
     template: require('text!../editor.html'),
     resolve: {
       vis: function (savedVisualizations, courier, $route) {
+        if (!$route.current.params.indexPattern && !$route.current.params.savedSearchId) {
+          throw new Error('You must provide either an indexPattern or a savedSearchId');
+        }
+
         return savedVisualizations.get($route.current.params)
         .catch(courier.redirectWhenMissing({
           'index-pattern': '/settings',

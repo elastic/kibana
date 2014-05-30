@@ -29,7 +29,7 @@ Currently, the [histogram formatter](https://github.com/elasticsearch/kibana4/bl
 /* jshint ignore:end */
 
 define(function (require) {
-  return function FieldFormattingService() {
+  return function FieldFormattingService(config) {
     var _ = require('lodash');
     var moment = require('moment');
 
@@ -60,7 +60,7 @@ define(function (require) {
         ],
         name: 'date',
         convert: function (val) {
-          return moment(val).format();
+          return moment(val).format(config.get('dateFormat'));
         }
       },
       {
