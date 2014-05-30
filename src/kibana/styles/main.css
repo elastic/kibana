@@ -7201,9 +7201,6 @@ table td .fa {
   border-top: 1px solid transparent;
   font-size: 12px;
 }
-.sidebar-container .sidebar-list .sidebar-item a {
-  color: #46525d;
-}
 .sidebar-container .sidebar-list .sidebar-item a:hover {
   text-decoration: none;
 }
