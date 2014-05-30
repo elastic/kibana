@@ -124,11 +124,7 @@ define(function () {
         "_search/template"
       ],
       data_autocomplete_rules: {
-        template: {
-          __template: {
-            "query": {}
-          }
-        },
+        template: { __scope_link: "_search" },
         query: {
 
         },
