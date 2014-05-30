@@ -36,7 +36,10 @@ define(function (require) {
     resolve: {
       savedSearch: function (savedSearches, $route, $location, Notifier, courier) {
         return savedSearches.get($route.current.params.id)
-        .catch(courier.redirectWhenMissing('/discover'));
+        .catch(courier.redirectWhenMissing({
+          'index-pattern': '/settings/indices',
+          '*': '/discover'
+        }));
       },
       indexPatternList: function (indexPatterns) {
         return indexPatterns.getIds()
