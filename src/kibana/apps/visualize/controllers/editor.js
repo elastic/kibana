@@ -86,7 +86,7 @@ define(function (require) {
       if ($state.query) {
         vis.searchSource.set('query', $state.query);
       } else {
-        vis.searchSource.set('query', false);
+        vis.searchSource.set('query', null);
       }
       vis.searchSource.fetch();
     };
@@ -192,7 +192,11 @@ define(function (require) {
       $state.query = _.isObject(q) ? q.query_string.query : q;
 
       var parent = vis.searchSource.parent();
-      vis.searchSource.set(parent.toJSON());
+      // we will copy over all state minus the "aggs"
+      _(parent.toJSON()).omit('aggs').forOwn(function (val, key) {
+        vis.searchSource.set(key, val);
+      });
+
       vis.searchSource.inherits(parent.parent());
     };
     $scope.doneUnlinking = function () {
