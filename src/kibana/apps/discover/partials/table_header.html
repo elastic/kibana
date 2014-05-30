@@ -1,3 +1,6 @@
+<th ng-if="timefield">
+	<span ng-click="sort(timefield)">Time <i ng-class="headerClass(timefield)"></i></span>
+</th>
 <th ng-repeat="name in columns">
   <span ng-click="sort(name)">{{name}} <i ng-class="headerClass(name)"></i> </span>
   <span class="table-header-move">

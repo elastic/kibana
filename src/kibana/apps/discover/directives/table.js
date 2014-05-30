@@ -2,6 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var html = require('text!../partials/table.html');
   var detailsHtml = require('text!../partials/row_details.html');
+  var moment = require('moment');
 
   var _ = require('lodash');
   var nextTick = require('utils/next_tick');
@@ -18,7 +19,8 @@ define(function (require) {
       restrict: 'A',
       scope: {
         columns: '=',
-        sorting: '='
+        sorting: '=',
+        timefield: '=?'
       },
       template: headerHtml,
       controller: function ($scope) {
@@ -62,7 +64,7 @@ define(function (require) {
    * <kbn-table columns="columnsToDisplay" rows="rowsToDisplay"></kbn-table>
    * ```
    */
-  module.directive('kbnTable', function ($compile) {
+  module.directive('kbnTable', function ($compile, config) {
     // base class for all dom nodes
     var DOMNode = window.Node;
 
@@ -84,7 +86,8 @@ define(function (require) {
         filtering: '=',
         refresh: '=',
         maxLength: '=?',
-        mapping: '=?'
+        mapping: '=?',
+        timefield: '=?'
       },
       link: function ($scope, element, attrs) {
         // track a list of id's that are currently open, so that
@@ -278,7 +281,7 @@ define(function (require) {
 
           // we need a td to wrap the details table
           var containerTd = $(document.createElement('td'));
-          containerTd.attr('colspan', $scope.columns.length);
+          containerTd.attr('colspan', $scope.columns.length + 1);
           $tr.append(containerTd);
 
           var open = !!~opened.indexOf(id);
@@ -309,13 +312,28 @@ define(function (require) {
           tr.setAttribute('ng-click', 'toggleRow(' + JSON.stringify(id) + ', $event)');
           var $tr = $compile(tr)($scope);
 
+          var td = $(document.createElement('td'));
+          if ($scope.timefield) {
+            td.addClass('discover-table-timefield');
+            td.attr('width', '1%');
+            _displayTimeField(td, row, $scope.timefield);
+            $tr.append(td);
+          }
+
           _.each($scope.columns, function (column) {
-            var td = $(document.createElement('td'));
+            td = $(document.createElement('td'));
             _displayField(td, row, column);
             $tr.append(td);
           });
 
           return $tr;
+        }
+
+        // Cast the time field to a moment
+        function _displayTimeField(el, row, field, truncate) {
+          var val = moment(row._formatted[field] || row[field]).format(config.get('dateFormat'));
+          el.text(val);
+          return el;
         }
 
         /**
