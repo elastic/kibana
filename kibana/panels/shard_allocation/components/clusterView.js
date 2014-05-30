@@ -28,7 +28,12 @@ define(function (require) {
     },
     render: function () {
       var tableHead = TableHead({ columns: this.state.labels });
-      var tableBody = TableBody({ rows: this.state.showing, cols: this.state.labels.length });
+      var tableBody = TableBody({
+        fitler: this.props.scope.filter,
+        totalCount: this.props.scope.totalCount,
+        rows: this.state.showing,
+        cols: this.state.labels.length
+      });
       return D.table(
         { cellPadding: 0, cellSpacing: 0, className: 'table table-bordered' },
         tableHead,

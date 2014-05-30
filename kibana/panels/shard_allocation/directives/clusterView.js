@@ -8,6 +8,8 @@ define(function (require) {
       return {
         restrict: 'E',
         scope: {
+          totalCount: '=totalCount',
+          filter: '=filter',
           showing: '=showing',
           labels: '=labels'
         },
