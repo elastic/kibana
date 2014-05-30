@@ -86,7 +86,7 @@ define(function (require) {
      * @param {boolean} success - Simple flag stating whether the event succeeded
      */
     notif.event = createGroupLogger('event', {
-      open: false
+      open: true
     });
 
     /**
@@ -95,7 +95,7 @@ define(function (require) {
      * @param {boolean} success - Simple flag stating whether the lifecycle event succeeded
      */
     notif.lifecycle = createGroupLogger('lifecycle', {
-      open: false
+      open: true
     });
 
     /**

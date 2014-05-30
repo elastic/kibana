@@ -48,7 +48,7 @@
                 <div class="spinner">
                 </div>
               </li>
-              <li ng-show="opts.timefilter.enabled()" class="navbar-timepicker-display">
+              <li ng-if="setupComplete" ng-show="opts.timefilter.enabled()" class="navbar-timepicker-display">
                 <a ng-click="toggleTimepicker()">
                   {{opts.timefilter.time.from | moment}} to {{opts.timefilter.time.to | moment}}
                   &nbsp;

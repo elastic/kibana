@@ -40,6 +40,7 @@ define(function (require) {
       kbnSetup(),
       config.init()
     ]).then(function () {
+      $scope.setupComplete = true;
       $injector.invoke(function ($rootScope, courier, config, configFile, $timeout, $location, timefilter, globalState) {
 
         $rootScope.globalState = globalState;
@@ -92,6 +93,8 @@ define(function (require) {
 
           writeGlobalStateToLastPaths();
         };
+
+
 
         // watch the timefilter for changes, and write to globalState when it changes
         $scope.$watch('opts.timefilter.time.from', writeTime);

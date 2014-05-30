@@ -105,7 +105,7 @@ define(function (require) {
       });
 
       // join all of the different positions into a single array
-      return positions.global.concat(positions.split, positions.local, positions.segment, positions.metric);
+      return positions.global.concat(positions.split, positions.segment, positions.local, positions.metric);
     };
   };
 });
