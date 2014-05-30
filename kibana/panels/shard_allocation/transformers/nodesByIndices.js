@@ -10,13 +10,29 @@ define(function (require) {
   return function ($scope) {
     return function nodesByIndices (state) {
 
+      var getNodeType = function (node) {
+        if (node.attributes.client === 'true' && node.attributes.data === 'false') {
+          return 'client';
+        }
+        if (node.attributes.master === 'true' && node.attributes.data === 'false') {
+          return 'master';
+        }
+        if (node.attributes.data === 'true') {
+          return 'data';
+        }
+        return 'normal';
+      };
+
       function createNode (obj, node, id) {
         node.master = state.master_node === id; 
         node.details = extractIp(node);
         node.ip_port = extractIp(node);
         node.type = 'node';
         node.children = [];
-        obj[id] = node;
+        var nodeType = getNodeType(node);
+        if (nodeType === 'normal' || nodeType === 'data') {
+          obj[id] = node;
+        }
         return obj;
       }
 
