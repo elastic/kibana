@@ -414,8 +414,13 @@ define(function (require) {
             timefilter.time.mode = 'absolute';
           },
           onBrush: function (e) {
-            timefilter.time.from = moment(e.range[0]);
-            timefilter.time.to = moment(e.range[1]);
+            var from = moment(e.range[0]);
+            var to = moment(e.range[1]);
+
+            if (to - from === 0) return;
+
+            timefilter.time.from = from;
+            timefilter.time.to = to;
             timefilter.time.mode = 'absolute';
           }
         },
