@@ -20,22 +20,38 @@
     <div class="content" style="display: none;">
       <nav bindonce class="navbar navbar-inverse navbar-static-top">
         <div class="container-fluid">
-          <ul class="nav navbar-nav">
-            <li ng-repeat="app in apps" ng-class="{active: activeApp == app.id}">
-              <a ng-href="#{{app.lastPath}}" bo-text="app.name"></a>
-            </li>
-          </ul>
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#kibana-primary-navbar">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand visible-xs" href="#">{{activeApp}}</a>
+          </div>
 
-          <ul class="nav navbar-nav navbar-right">
-            <li ng-show="httpActive.length"><a href="#"><i class="fa fa-spinner fa-spin loading-spinner"></i></a></li>
-            <li ng-show="opts.timefilter.enabled()" class="navbar-timepicker-display">
-              <a ng-click="toggleTimepicker()">
-                {{opts.timefilter.time.from | moment}} to {{opts.timefilter.time.to | moment}}
-                &nbsp;
-                <i class="fa fa-clock-o"></i>
-              </a>
-            </li>
-          </ul>
+
+          <!-- Full navbar -->
+          <div class="collapse navbar-collapse" id="kibana-primary-navbar">
+            <ul class="nav navbar-nav">
+              <li ng-repeat="app in apps" ng-class="{active: activeApp == app.id}">
+                <a ng-href="#{{app.lastPath}}" bo-text="app.name"></a>
+              </li>
+            </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+              <li ng-show="httpActive.length"><a href="#"><i class="fa fa-spinner fa-spin loading-spinner"></i></a></li>
+              <li ng-show="opts.timefilter.enabled()" class="navbar-timepicker-display">
+                <a ng-click="toggleTimepicker()">
+                  {{opts.timefilter.time.from | moment}} to {{opts.timefilter.time.to | moment}}
+                  &nbsp;
+                  <i class="fa fa-clock-o"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
+          <!-- /Full navbar -->
+
 
         </div>
       </nav>
