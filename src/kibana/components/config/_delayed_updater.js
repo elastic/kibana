@@ -1,12 +1,14 @@
 define(function (require) {
   return function DelayedUpdaterFactory(Private, $rootScope, Promise, Notifier) {
     var notify = new Notifier();
+    var _ = require('lodash');
     var angular = require('angular');
     var vals = Private(require('./_vals'));
 
     return function DelayedUpdater(doc) {
       var updater = this;
       var queue = [];
+      var log = {};
       var timer;
 
       updater.fire = function () {
@@ -16,11 +18,24 @@ define(function (require) {
         if (updater.fired) return;
         updater.fired = true;
 
-        var method, body;
-        if (updater.reindex) {
+
+        var method;
+        var body;
+        var updated = [];
+        var deleted = [];
+
+        // seperate the log into lists
+        Object.keys(log).forEach(function (key) {
+          if (log[key] === 'updated') updated.push(key);
+          else deleted.push(key);
+        });
+
+        if (deleted.length) {
           method = 'doIndex';
+          body = _.clone(vals);
         } else {
           method = 'doUpdate';
+          body = _.pick(vals, updated);
         }
 
         doc[method](vals)
@@ -39,12 +54,12 @@ define(function (require) {
           return Promise.resolve();
         }
         else if (newVal == null) {
-          // only set if it's true, preserving previous trues
-          updater.reindex = true;
           delete vals[key];
+          log[key] = 'deleted';
         }
         else {
           vals[key] = newVal;
+          log[key] = 'updated';
         }
 
         if (silentAndLocal) return Promise.resolve();
