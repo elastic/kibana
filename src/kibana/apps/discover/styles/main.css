@@ -93,8 +93,12 @@
   height: 100%;
   opacity: 0.75;
   text-align: center;
-  background: #ffffff url(../../../images/loader_64.gif) no-repeat center center;
+  background-color: #ffffff;
   z-index: 100;
+}
+.discover-timechart .discover-timechart-overlay .spinner {
+  position: absolute;
+  top: 70px;
 }
 .discover-hits {
   background-color: #ecf0f1;

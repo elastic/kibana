@@ -10,6 +10,8 @@ define(function (require) {
   require('courier/courier');
   require('notify/notify');
   require('directives/info');
+  require('directives/spinner');
+
   require('angular-bootstrap');
   require('utils/private');
 

@@ -28,6 +28,10 @@
               <span class="icon-bar"></span>
             </button>
             <a class="navbar-brand visible-xs" href="#">{{activeApp}}</a>
+            <span class="navbar-brand visible-xs">
+              <div ng-show="httpActive.length" class="spinner">
+              </div>
+            </span>
           </div>
 
 
@@ -40,7 +44,10 @@
             </ul>
 
             <ul class="nav navbar-nav navbar-right">
-              <li ng-show="httpActive.length"><a href="#"><i class="fa fa-spinner fa-spin loading-spinner"></i></a></li>
+              <li ng-show="httpActive.length" class="navbar-text">
+                <div class="spinner">
+                </div>
+              </li>
               <li ng-show="opts.timefilter.enabled()" class="navbar-timepicker-display">
                 <a ng-click="toggleTimepicker()">
                   {{opts.timefilter.time.from | moment}} to {{opts.timefilter.time.to | moment}}
