@@ -408,12 +408,12 @@ define(function (require) {
         type: 'histogram',
         listeners: {
           onClick: function (e) {
+            console.log(e);
             timefilter.time.from = moment(e.point.x);
             timefilter.time.to = moment(e.point.x + e.data.ordered.interval);
             timefilter.time.mode = 'absolute';
           },
           onBrush: function (e) {
-            console.log(e);
             timefilter.time.from = moment(e.range[0]);
             timefilter.time.to = moment(e.range[1]);
             timefilter.time.mode = 'absolute';
