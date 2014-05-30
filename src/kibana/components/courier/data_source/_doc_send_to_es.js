@@ -34,7 +34,7 @@ define(function (require) {
         Promise.cast(method !== 'index' ? doc.fetch() : {
           _id: resp._id,
           _index: params.index,
-          _source: body.doc,
+          _source: body,
           _type: params.type,
           _version: doc._getVersion(),
           found: true
