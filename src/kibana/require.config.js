@@ -22,6 +22,7 @@ require.config({
     'angular-bootstrap': '../bower_components/angular-bootstrap/ui-bootstrap-tpls',
     'angular-bindonce': '../bower_components/angular-bindonce/bindonce',
     async: '../bower_components/async/lib/async',
+    bootstrap: '../bower_components/bootstrap/dist/js/bootstrap',
     css: '../bower_components/require-css/css',
     text: '../bower_components/requirejs-text/text',
     elasticsearch: '../bower_components/elasticsearch/dist/elasticsearch.angular',
@@ -45,7 +46,7 @@ require.config({
     'angular-route': ['angular'],
     'angular-mocks': ['angular'],
     'elasticsearch': ['angular'],
-    'angular-bootstrap': ['angular'],
+    'angular-bootstrap': ['angular', 'bootstrap'],
     'angular-bindonce': ['angular']
   },
   waitSeconds: 60
