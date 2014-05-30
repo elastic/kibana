@@ -13,24 +13,23 @@ define(function (require) {
 
     var angular = require('angular');
     var _ = require('lodash');
-    var nextTick = require('utils/next_tick');
     var defaults = require('./defaults');
-    require('notify/notify');
-
     var DelayedUpdater = Private(require('./_delayed_updater'));
+    var vals = Private(require('./_vals'));
+
+    var notify = new Notifier({
+      location: 'Config'
+    });
+
+    // active or previous instance of DelayedUpdater. This will log and then process an
+    // update once it is requested by calling #set() or #clear().
+    var updater;
 
     var DocSource = Private(require('courier/data_source/doc_source'));
     var doc = (new DocSource())
       .index(configFile.kibanaIndex)
       .type('config')
       .id(kbnVersion);
-
-    var vals = Private(require('./_vals'));
-    var updater;
-
-    var notify = new Notifier({
-      location: 'Config'
-    });
 
     /******
      * PUBLIC API
@@ -49,26 +48,21 @@ define(function (require) {
       return kbnSetup()
       .then(function getDoc() {
 
+        // used to apply an entire es response to the vals, silentAndLocal will prevent
+        // event/notifications/writes from occuring.
         var applyMassUpdate = function (resp, silentAndLocal) {
-          var newKeys = _.keys(resp._source);
-          var oldKeys = _.keys(vals);
-
-          _.difference(oldKeys, newKeys).forEach(function (key) {
-            _change(key, void 0, silentAndLocal);
-          });
-
-          newKeys.forEach(function (key) {
-            _change(key, resp._source[key], silentAndLocal);
+          _.union(_.keys(resp._source), _.keys(vals)).forEach(function (key) {
+            change(key, resp._source[key], silentAndLocal);
           });
         };
 
         return doc.fetch().then(function initDoc(resp) {
           if (!resp.found) return doc.doIndex({}).then(getDoc);
           else {
-            // apply update, and keep it quite the first time
+            // apply update, and keep it quiet the first time
             applyMassUpdate(resp, true);
 
-            // don't keep it quite other times
+            // don't keep it quiet other times
             doc.onUpdate(function (resp) {
               applyMassUpdate(resp, false);
             });
@@ -92,12 +86,12 @@ define(function (require) {
 
     // sets a value in the config
     config.set = function (key, val) {
-      return _change(key, val);
+      return change(key, val);
     };
 
     // clears a value from the config
     config.clear = function (key) {
-      return _change(key);
+      return change(key);
     };
     // alias for clear
     config.delete = config.clear;
@@ -109,11 +103,7 @@ define(function (require) {
     /*****
      * PRIVATE API
      *****/
-    var _notify = function (key, newVal, oldVal) {
-
-    };
-
-    var _change = function (key, val, silentAndLocal) {
+    var change = function (key, val, silentAndLocal) {
       // if the previous updater has already fired, then start over with null
       if (updater && updater.fired) updater = null;
       // create a new updater
