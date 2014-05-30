@@ -31,7 +31,7 @@ define(function (require) {
         doc.id(resp._id);
 
         // notify pending request for this same document that we have updates
-        Promise.cast(!body || !body.doc ? doc.fetch() : {
+        Promise.cast(method !== 'index' ? doc.fetch() : {
           _id: resp._id,
           _index: params.index,
           _source: body.doc,
