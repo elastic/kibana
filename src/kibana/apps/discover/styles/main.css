@@ -149,8 +149,11 @@
   background-color: #ffffff;
   color: #46525d;
 }
-.discover-field-details h5 a {
+.discover-field-details a {
   color: #31c471 !important;
+}
+.discover-field-details a.btn {
+  color: #46525d !important;
 }
 .discover-field-details .discover-field-details-error {
   margin-top: 5px;

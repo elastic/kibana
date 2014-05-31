@@ -55,8 +55,8 @@ define(function (require) {
           });
         };
 
-        $scope.filter = function (field, value, operation) {
-          $scope.filterFunc(field.name, value, operation);
+        $scope.filter = function (fieldName, value, operation) {
+          $scope.filterFunc(fieldName, value, operation);
         };
 
         $scope.details = function (field, recompute) {
