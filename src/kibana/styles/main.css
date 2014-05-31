@@ -7218,6 +7218,34 @@ table td .fa {
   color: #46525d;
   background-color: #cfd9db;
 }
+.sidebar-container .sidebar-list .sidebar-item .sidebar-item-button {
+  padding: 5px 10px;
+  text-align: center;
+}
+.sidebar-container .sidebar-list .sidebar-item .sidebar-item-button[disabled] {
+  opacity: 0.65;
+  cursor: default;
+}
+.sidebar-container .sidebar-list .sidebar-item .sidebar-item-button.primary {
+  background-color: #46525d;
+  color: #ffffff;
+}
+.sidebar-container .sidebar-list .sidebar-item .sidebar-item-button.info {
+  background-color: #3498db;
+  color: #ffffff;
+}
+.sidebar-container .sidebar-list .sidebar-item .sidebar-item-button.success {
+  background-color: #31c471;
+  color: #ffffff;
+}
+.sidebar-container .sidebar-list .sidebar-item .sidebar-item-button.warning {
+  background-color: #f39c12;
+  color: #ffffff;
+}
+.sidebar-container .sidebar-list .sidebar-item .sidebar-item-button.danger {
+  background-color: #e74c3c;
+  color: #ffffff;
+}
 .sidebar-container .sidebar-list .sidebar-item .active {
   background-color: #46525d !important;
   color: #ffffff;
