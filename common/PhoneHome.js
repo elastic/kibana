@@ -1,11 +1,13 @@
 define(function (require) {
   'use strict';
 
-  var statsReportURL = '@@stats_report_url';
-  var registrationUrl = '@@registration_url';
-  var purchaseConfirmationUrl = '@@purchase_confirmation_url';
   var _ = require('lodash');
   var $ = require("jquery");
+
+  var ATTR_DEFAULTS= {
+    report: true,
+    status: 'trial'
+  };
 
   function PhoneHome (options) {
     this._id = options._id || 'marvelOpts';
@@ -14,10 +16,7 @@ define(function (require) {
     this.baseUrl = options.baseUrl;
     this.index = options.index;
     // set defaults
-    this.attributes = {
-      report: true,
-      status: 'trial'
-    }; 
+    this.attributes = _.defaults({},ATTR_DEFAULTS);
     this.events = {};
     this.currentBaseUrl = this.baseUrl;
 
@@ -168,7 +167,7 @@ define(function (require) {
     sendIfDue: function (data) {
       var self = this;
       if (this.checkReportStatus()) {
-        return this.client.post(statsReportURL, data).then(function () {
+        return this.client.post(this.getStatsReportUrl(), data).then(function () {
           self.set('lastReport', new Date().getTime());
           self.saveToBrowser();
         });
@@ -197,13 +196,13 @@ define(function (require) {
       var regData;
       var registrationData = this.get('registrationData');
       var data = this.get('data');
-      var url = registrationUrl; 
+      var url = this.getRegistrationUrl();
 
       if (!this.get('registrationSent') && registrationData && data && data.uuid ) {
         registrationData.uuid = data.uuid;
 
         if (this.get('status') === 'purchased') {
-          url = purchaseConfirmationUrl;
+          url = this.getPurchaseConfirmationUrl();
         }
 
         return this.client.post(url, registrationData).then(function () {
@@ -223,12 +222,35 @@ define(function (require) {
         // do nothing
       }
 
+      var emptyESVars = _.transform(self.fieldsToES, function (res, key) { res[key]= ATTR_DEFAULTS[key]; }, {});
+
+      // for now, just delete report as we don't want to override people opting out locally when they
+      // have no write access to their ES instance.
+      delete emptyESVars.report;
+
       var url = this.baseUrl+'/'+this.index+'/'+this._type+'/'+this._id;
       return this.client.get(url).then(function (resp) {
-        self.set(resp.data._source);
+        // make sure that all missing vars are overridden to missing
+        var data = _.defaults(resp.data._source, emptyESVars);
+        self.set(data);
         self.saveToBrowser();
         return self.attributes;
+      }, function (resp) {
+        // error loading ES, make all variables and override browser
+        self.set(emptyESVars);
+        self.saveToBrowser();
       });
+    },
+
+    // needed for testing
+    getStatsReportUrl: function () {
+      return '@@stats_report_url';
+    },
+    getRegistrationUrl: function () {
+      return '@@registration_url';
+    },
+    getPurchaseConfirmationUrl: function () {
+      return '@@purchase_confirmation_url';
     }
 
   };

@@ -103,24 +103,26 @@ define(function (require) {
           var data = {
             trialTimestamp: 1,
             report: true,
+            status: 'test',
             foo: true
           };
           phoneHome.set(data); 
           phoneHome.saveToBrowser();
-          expect(localStorage.getItem('marvelOpts')).to.equal(JSON.stringify({ trialTimestamp: 1, report: true }));
+          expect(localStorage.getItem('marvelOpts')).to.equal(JSON.stringify({ trialTimestamp: 1, report: true, status: 'test' }));
         });
 
         it('should save only fieldsToES fields to the Elasticsearch', function () {
           var data = {
             registrationData: 'test',
             report: true,
+            status: 'purchased',
             trialTimestamp: 1 
           };
           phoneHome.set(data); 
           phoneHome.saveToES();
           sinon.assert.calledOnce(client.put);
           expect(client.put.args[0][0]).to.equal('http://localhost:9200/.marvel-kibana/appdata/marvelOpts');
-          expect(client.put.args[0][1]).to.have.property('purchased', false);
+          expect(client.put.args[0][1]).to.have.property('status', 'purchased');
           expect(client.put.args[0][1]).to.have.property('registrationData', 'test');
           expect(client.put.args[0][1]).to.have.property('report', true);
           expect(client.put.args[0][1]).to.not.have.property('trialTimestamp');
@@ -229,7 +231,7 @@ define(function (require) {
       describe('checkRegistratonStatus()', function() {
         it('should return true if registered is false and trialTimestamp is older then 7 days', function() {
           phoneHome.set({
-            registered: false,
+            status: 'trial',
             trialTimestamp: new Date().getTime()-(86400000*7.25)
           });
           expect(phoneHome.checkRegistratonStatus()).to.equal(true);
@@ -237,7 +239,7 @@ define(function (require) {
 
         it('should return false if registered is true and trialTimestamp is older then 7 days', function() {
           phoneHome.set({
-            registered: true,
+            status: 'registered',
             trialTimestamp: new Date().getTime()-(86400000*7.25)
           });
           expect(phoneHome.checkRegistratonStatus()).to.equal(false);
@@ -245,7 +247,7 @@ define(function (require) {
 
         it('should return false if purchased is true and trialTimestamp is older then 7 days', function() {
           phoneHome.set({
-            purchased: true,
+            status: 'purchased',
             trialTimestamp: new Date().getTime()-(86400000*7.25)
           });
           expect(phoneHome.checkRegistratonStatus()).to.equal(false);
@@ -261,8 +263,8 @@ define(function (require) {
           client.post.onFirstCall().returns(promise);
           phoneHome.sendIfDue({ key1: 'value1' }); 
           sinon.assert.calledOnce(client.post);
-          expect(client.post.args[0][0]).to.equal('http://localhost:9200/.marvel_cluster_report/report');
-            expect(client.post.args[0][1]).to.have.property('key1', 'value1');
+          expect(client.post.args[0][0]).to.equal(phoneHome.getStatsReportUrl());
+          expect(client.post.args[0][1]).to.have.property('key1', 'value1');
         });
 
         it('should set lastReport  when sendIfDue() is due', function(done) {
@@ -306,9 +308,9 @@ define(function (require) {
           expect(phoneHome.get('registrationData')).to.have.property('key1', 'value1');
         });
 
-        it('should set registered to true', function() {
+        it('should set status to registered', function() {
           phoneHome.register({ key1: 'value1' });
-          expect(phoneHome.get('registered')).to.equal(true);
+          expect(phoneHome.get('status')).to.equal('registered');
         });
       });
 
@@ -328,7 +330,7 @@ define(function (require) {
 
         it('should set purchased to true', function() {
           phoneHome.confirmPurchase({ key1: 'value1' });
-          expect(phoneHome.get('purchased')).to.equal(true);
+          expect(phoneHome.get('status')).to.equal('purchased');
         });
       });
 
@@ -366,20 +368,20 @@ define(function (require) {
           sinon.assert.notCalled(client.post);
         });
 
-        it('should set type to registration', function() {
+        it('should send registration to the right url', function() {
           var promise = $.Deferred();
           client.post.returns(promise);
-          phoneHome.checkAndSendRegistrationData();   
-          expect(client.post.args[0][1]).to.have.property('type', 'registration');
+          phoneHome.checkAndSendRegistrationData();
+          expect(client.post.args[0][0]).to.equal(phoneHome.getRegistrationUrl());
           promise.resolve(true);
         });
 
-        it('should set type to purchase_confirmation', function() {
+        it('should send purchase information to the right url', function() {
           var promise = $.Deferred();
           client.post.returns(promise);
-          phoneHome.set('purchased', true);
-          phoneHome.checkAndSendRegistrationData();   
-          expect(client.post.args[0][1]).to.have.property('type', 'purchase_confirmation');
+          phoneHome.set('status', 'purchased');
+          phoneHome.checkAndSendRegistrationData();
+          expect(client.post.args[0][0]).to.equal(phoneHome.getPurchaseConfirmationUrl());
           promise.resolve(true);
         });
 
@@ -388,9 +390,7 @@ define(function (require) {
           client.post.returns(promise);
           phoneHome.checkAndSendRegistrationData();   
           sinon.assert.calledOnce(client.post);
-          expect(client.post.args[0][1])
-            .to.have.property('data')
-            .to.have.property('uuid', 123456789);
+          expect(client.post.args[0][1]).to.have.property('uuid', 123456789);
         }); 
 
         it('should set the values for registrationData', function() {
@@ -398,9 +398,7 @@ define(function (require) {
           client.post.returns(promise);
           phoneHome.checkAndSendRegistrationData();   
           sinon.assert.calledOnce(client.post);
-          expect(client.post.args[0][1])
-            .to.have.property('data')
-            .to.have.property('key1', 'value1');
+          expect(client.post.args[0][1]).to.have.property('key1', 'value1');
         }); 
 
         it('should set registrationSent to true', function() {
