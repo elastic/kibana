@@ -6,6 +6,9 @@
       Some of these settings may be undocumented, unsupported or experimental. Blanking a field will cause Kibana to use its internal
       defaults which may be unacceptable given other configuration directives.
     </div>
+    <form>
+      <input ng-model="advancedFilter" class="form-control span12" type="text" placeholder="Filter"/>
+    </form>
     <table class="table">
       <thead>
         <tr>
@@ -15,7 +18,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="conf in configs" ng-class="!conf.value ? 'default' : 'custom'">
+        <tr ng-repeat="conf in configs | filter:advancedFilter" ng-class="!conf.value ? 'default' : 'custom'">
           <td class="name">{{conf.name}}</td>
           <td class="value">
             <form
