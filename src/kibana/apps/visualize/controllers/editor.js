@@ -63,6 +63,12 @@ define(function (require) {
 
     var $state = $scope.state = new AppState(vis.getState());
 
+    if ($state.query) {
+      vis.searchSource.set('query', $state.query);
+    } else {
+      vis.searchSource.set('query', null);
+    }
+
     $scope.vis = vis;
 
     $scope.aggs = aggs;
@@ -209,7 +215,7 @@ define(function (require) {
       // possibly left over state from unsaved unlinking
       delete $state.query;
     } else {
-      var q = vis.searchSource.get('query');
+      var q = $state.query || vis.searchSource.get('query');
       $state.query = _.isObject(q) ? q.query_string.query : q;
     }
 
