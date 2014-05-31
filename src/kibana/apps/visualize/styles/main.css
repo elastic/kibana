@@ -71,6 +71,9 @@
 }
 @media (min-width: 992px) {
   .vis-editor-content {
+    margin-left: -16px;
+    margin-right: -16px;
+    margin-top: -1px;
     display: flex;
     -webkit-flex-direction: row;
     -moz-flex-direction: row;
