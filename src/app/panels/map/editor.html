@@ -1,15 +1,29 @@
   <div class="editor-row">
-    <div class="editor-option">
-      <form>
-        <h6>Field <tip>2 letter country or state code</tip></h6>
-        <input bs-typeahead="fields.list" type="text" class="input-small" ng-model="panel.field" ng-change="set_refresh(true)">
-      </form>
-    </div>
-    <div class="editor-option">
-      <h6>Max <tip>Maximum countries to plot</tip></h6>
-      <input class="input-mini" type="number" ng-model="panel.size" ng-change="set_refresh(true)">
-    </div>
-    <div class="editor-option"><h6>Map</h6>
-      <select ng-change="$emit('render')" class="input-small" ng-model="panel.map" ng-options="f for f in ['world','europe','usa']"></select>
+    <div class="section">
+      <h5>Parameters</h5>
+      <div class="editor-option">
+        <label class="small">Terms mode</label>
+        <select class="input-medium" ng-model="panel.tmode" ng-options="f for f in ['terms','terms_stats']" ng-change="set_refresh(true)"></select>
+      </div>
+      <div class="editor-option">
+        <label class="small">Field <tip>2 letter country or state code</tip></label>
+        <input type="text" class="input-small" bs-typeahead="fields.list" ng-model="panel.field" ng-change="set_refresh(true)">
+      </div>
+      <div class="editor-option" ng-show="panel.tmode == 'terms_stats'">
+        <label class="small">Value field</label>
+        <input type="text" class="input-small" bs-typeahead="fields.list" ng-model="panel.valuefield" ng-change="set_refresh(true)">
+      </div>
+      <div class="editor-option" ng-show="panel.tmode == 'terms_stats'">
+        <label class="small">Stats type of Value</label>
+        <select class="input-medium" ng-model="panel.tstat" ng-options="f for f in ['count', 'total_count', 'min', 'max', 'total', 'mean']"></select>
+      </div>
+      <div class="editor-option">
+        <label class="small">Length <tip>Maximum countries to plot</tip></label>
+        <input class="input-small" type="number" ng-model="panel.size" ng-change="set_refresh(true)">
+      </div>
+      <div class="editor-option">
+        <label class="small">Map</label>
+        <select ng-change="$emit('render')" class="input-small" ng-model="panel.map" ng-options="f for f in ['world','europe','usa']"></select>
+      </div>
     </div>
   </div>

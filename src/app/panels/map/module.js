@@ -81,12 +81,26 @@ function (angular, app, _, $) {
       queries     : {
         mode        : 'all',
         ids         : []
-      }
+      },
+      /** @scratch /panels/map/3
+       * tmode:: Facet mode: terms or terms_stats
+       */
+      tmode       : 'terms',
+      /** @scratch /panels/map/3
+       * tstat:: Terms_stats facet stats field
+       */
+      tstat       : 'total',
+      /** @scratch /panels/map/3
+       * valuefield:: Terms_stats facet value field
+       */
+      valuefield  : ''
     };
     _.defaults($scope.panel,_d);
 
     $scope.init = function() {
-      $scope.$on('refresh',function(){$scope.get_data();});
+      $scope.$on('refresh',function() {
+        $scope.get_data();
+      });
       $scope.get_data();
     };
 
@@ -113,8 +127,10 @@ function (angular, app, _, $) {
       });
 
       // Then the insert into facet and make the request
-      request = request
-        .facet($scope.ejs.TermsFacet('map')
+      // Terms mode
+      if($scope.panel.tmode === 'terms') {
+        request = request
+          .facet($scope.ejs.TermsFacet('map')
           .field($scope.panel.field)
           .size($scope.panel.size)
           .exclude($scope.panel.exclude)
@@ -122,7 +138,21 @@ function (angular, app, _, $) {
             $scope.ejs.FilteredQuery(
               boolQuery,
               filterSrv.getBoolFilter(filterSrv.ids())
-              )))).size(0);
+            )))).size(0);
+      }
+      if($scope.panel.tmode === 'terms_stats') {
+        request = request
+          .facet($scope.ejs.TermStatsFacet('map')
+          .valueField($scope.panel.valuefield)
+          .keyField($scope.panel.field)
+          .size($scope.panel.size)
+          .facetFilter($scope.ejs.QueryFilter(
+            $scope.ejs.FilteredQuery(
+              boolQuery,
+              filterSrv.getBoolFilter(filterSrv.ids())
+            )))).size(0);
+      }
+
 
       $scope.populate_modal(request);
 
@@ -134,7 +164,16 @@ function (angular, app, _, $) {
         $scope.hits = results.hits.total;
         $scope.data = {};
         _.each(results.facets.map.terms, function(v) {
-          $scope.data[v.term.toUpperCase()] = v.count;
+          if($scope.panel.tmode === 'terms') {
+            //slice = { label : v.term, data : [[k,v.count]], actions: true};
+            $scope.data[v.term.toUpperCase()] = v.count;
+          }
+          if($scope.panel.tmode === 'terms_stats') {
+            $scope.data[v.term.toUpperCase()] = v[$scope.panel.tstat];
+
+            //slice = { label : v.term, data : [[k,v[scope.panel.tstat]]], actions: true};
+          }
+          //$scope.data[v.term.toUpperCase()] = v.total;
         });
         $scope.$emit('render');
       });
@@ -149,6 +188,17 @@ function (angular, app, _, $) {
       filterSrv.set({type:'field', field:field, query:value, mandate:"must"});
     };
 
+    $scope.set_refresh = function (state) {
+      $scope.refresh = state;
+    };
+
+    $scope.close_edit = function() {
+      if($scope.refresh) {
+        $scope.get_data();
+      }
+      $scope.refresh =  false;
+      $scope.$emit('render');
+    };
   });
 
 
