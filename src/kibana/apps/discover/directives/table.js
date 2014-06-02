@@ -200,7 +200,7 @@ define(function (require) {
 
             queue
               // grab the first n from the buffer
-              .splice(0, rowsPerTick)
+              .splice(0, rowsPerTick || queue.length)
               // render each row
               .forEach(forEachRow);
 
@@ -228,6 +228,7 @@ define(function (require) {
           if (cursor > $scope.rows.length) {
             $scope.addRows = null;
           }
+
           renderRows($scope.rows.slice(cursor, cursor += pageSize));
         }
 
