@@ -15,6 +15,24 @@
       padding-left: 10px;
       color: @sidebar-header-color;
       border: 1px solid rgba(0, 0, 0, 0);
+
+      button {
+        float: right;
+        border: none;
+        background-color: transparent;
+        margin: 10.5px 5px;
+        padding: 0;
+        font-size: 1em;
+        line-height: 1em;
+
+        &:focus {
+          outline: none;
+        }
+
+        &.active {
+          color: @btn-success-bg;
+        }
+      }
     }
     .sidebar-item {
       border-top: 1px solid @sidebar-border;
