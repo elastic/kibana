@@ -8,8 +8,15 @@
   </ul>
 
   <div class="sidebar-list-header">
+    <button
+      ng-click="showFilter = !showFilter"
+      ng-class="{
+        active: showFilter
+      }">
+      <i class="fa fa-filter"></i>
+    </button>
     <h5>Available</h5>
-    <form role="form" class="discover-field-filter">
+    <form ng-show="showFilter" role="form" class="discover-field-filter">
       <div class="form-group">
         <input type="text" class="form-control" placeholder="Filter" ng-model="fieldFilter">
       </div>
@@ -17,7 +24,7 @@
   </div>
 
   <ul bindonce class="list-unstyled">
-    <discover-field field="field" ng-repeat="field in fields|filter:{display:false}|filter:fieldFilter" data="data">
+    <discover-field field="field" ng-repeat="field in fields|filter:{display:false}|filter:{name:fieldFilter}" data="data">
     </discover-field>
   </ul>
 </div>
