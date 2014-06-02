@@ -26,7 +26,7 @@ define(function (require) {
 
         return savedVisualizations.get($route.current.params)
         .catch(courier.redirectWhenMissing({
-          'index-pattern': '/settings',
+          //'index-pattern': '/visualize',
           '*': '/visualize'
         }));
       }
@@ -65,8 +65,6 @@ define(function (require) {
 
     if ($state.query) {
       vis.searchSource.set('query', $state.query);
-    } else {
-      vis.searchSource.set('query', null);
     }
 
     $scope.vis = vis;
