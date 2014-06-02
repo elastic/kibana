@@ -23,6 +23,12 @@ define(function (require) {
       // dedupe requests
       var uniqs = {};
       all = requests.splice(0).filter(function (req) {
+        if (req.source.activeFetchCount) {
+          req.source.activeFetchCount += 1;
+        } else {
+          req.source.activeFetchCount = 1;
+        }
+
         var iid = req.source._instanceid;
         if (!uniqs[iid]) {
           // this request is unique so far
@@ -43,6 +49,7 @@ define(function (require) {
       });
 
       return Promise.map(all, function (req) {
+        window.sourceHistory = [req.source].concat(window.sourceHistory).splice(0, 5);
         return req.source._flatten();
       })
       .then(function (states) {
@@ -58,6 +65,7 @@ define(function (require) {
           var sendResponse = function (req, resp) {
             req.complete = true;
             req.resp = resp;
+            req.source.activeFetchCount -= 1;
 
             if (resp.error) return reqErrHandler.handle(req, new errors.FetchFailure(resp));
             else strategy.resolveRequest(req, resp);
@@ -82,6 +90,7 @@ define(function (require) {
         })
         .catch(function (err) {
           var sendFailure = function (req) {
+            req.source.activeFetchCount -= 1;
             reqErrHandler.handle(req, err);
           };
 
