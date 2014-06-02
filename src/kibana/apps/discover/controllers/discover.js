@@ -72,7 +72,6 @@ define(function (require) {
     var stateDefaults = {
       query: initialQuery ? initialQuery.query_string.query : '',
       columns: ['_source'],
-      sort: ['_score', 'desc'],
       index: config.get('defaultIndex'),
     };
 
@@ -248,7 +247,17 @@ define(function (require) {
 
       searchSource
         .size($scope.opts.sampleSize)
-        .sort(_.zipObject([$state.sort]))
+        .sort(function () {
+          var sort = {};
+          if (_.isArray($state.sort)) {
+            sort[$state.sort[0]] = $state.sort[1];
+          } else if (indexPattern.timeFieldName) {
+            sort[indexPattern.timeFieldName] = 'desc';
+          } else {
+            sort._score = 'desc';
+          }
+          return sort;
+        })
         .query(!$state.query ? null : {
           query_string: {
             query: $state.query
