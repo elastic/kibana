@@ -7197,6 +7197,21 @@ table td .fa {
   color: #777777;
   border: 1px solid rgba(0, 0, 0, 0);
 }
+.sidebar-container .sidebar-list .sidebar-list-header button {
+  float: right;
+  border: none;
+  background-color: transparent;
+  margin: 10.5px 5px;
+  padding: 0;
+  font-size: 1em;
+  line-height: 1em;
+}
+.sidebar-container .sidebar-list .sidebar-list-header button:focus {
+  outline: none;
+}
+.sidebar-container .sidebar-list .sidebar-list-header button.active {
+  color: #31c471;
+}
 .sidebar-container .sidebar-list .sidebar-item {
   border-top: 1px solid transparent;
   font-size: 12px;
