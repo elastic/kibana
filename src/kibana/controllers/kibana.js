@@ -88,12 +88,9 @@ define(function (require) {
         };
 
         var writeTime = function (newVal, oldVal) {
-          globalState.time = {
-            from: timefilter.time.from.format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-            to: timefilter.time.to.format('YYYY-MM-DDTHH:mm:ss.SSSZ')
-          };
-          globalState.commit();
+          globalState.time = _.clone(timefilter.time);
 
+          globalState.commit();
           writeGlobalStateToLastPaths();
         };
 
