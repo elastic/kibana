@@ -115,6 +115,10 @@
 .discover-table .discover-table-timefield {
   white-space: nowrap;
 }
+.discover-table-footer {
+  background-color: #ecf0f1;
+  padding: 5px 10px;
+}
 .discover-table-details-toggle {
   margin-bottom: 3px;
 }
