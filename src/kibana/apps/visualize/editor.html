@@ -59,7 +59,13 @@
                 </vis-config-category>
               </li>
               <li class="sidebar-item">
-                <div class="sidebar-item-button success" ng-click="doVisualize()" ng-disabled="httpActive.length">Apply</div>
+                <div
+                  ng-click="doVisualize()"
+                  ng-if="vis.dirty"
+                  ng-disabled="httpActive.length"
+                  class="sidebar-item-button success">
+                  Apply
+                </div>
               </li>
             </ul>
           </form>
