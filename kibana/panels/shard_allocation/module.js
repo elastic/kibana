@@ -6,6 +6,7 @@ define(function (require) {
   var app = require('app');
   var _ = require('lodash');
   var config = require('config');
+  var moment = require('moment');
 
   require('services/marvel/index');
 
@@ -30,6 +31,15 @@ define(function (require) {
   shardGroups(module);
   clusterView(module);
   segments(module);
+
+  module.filter('localTime', function(){
+    return function(text) {
+      if (!text) {
+        return text;
+      }
+      return moment(text).format("YYYY-MM-DD HH:mm:ss.SS");
+    };
+  });
 
   module.controller('marvel.shard_allocation', function ($scope, $clusterState, $http, $timeout, dashboard,
                                                          filterSrv, alertSrv) {

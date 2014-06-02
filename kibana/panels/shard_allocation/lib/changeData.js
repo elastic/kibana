@@ -1,7 +1,6 @@
 define(function (require) {
   'use strict';
-  var moment = require('moment');
-  var transform = require('./transform');   
+  var transform = require('./transform');
   var filterByName = require('./filterByName');
   var countChildren = require('./countChildren'); 
   var hasUnassigned = require('./hasUnassigned');
@@ -13,7 +12,7 @@ define(function (require) {
   return function ($scope) {
     if ($scope.currentState && $scope.panel) {
       var data = _.cloneDeep($scope.currentState);
-      $scope.current = moment.utc(data['@timestamp']).format('YYYY-MM-DD HH:mm:ss.SSS');
+      $scope.current = data['@timestamp'];
       // Create the transformer. The transformer returned is based on the 
       // $scope.panel.view
       var transformer = transform($scope.panel.view, $scope);

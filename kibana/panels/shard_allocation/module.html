@@ -33,7 +33,7 @@
   </div>
   <div class="player" ng-show="panel.showPlayer">
     <div class="display pull-right">
-      <div class="current">{{ current }}</div>
+      <div class="current">{{ current|localTime }}</div>
 
       
     </div>
@@ -64,7 +64,7 @@
       <div class="marker" ng-repeat="marker in timelineMarkers" ng-style="{ left: ((marker.count/total)*100)+'%' }"><div class="arrow-down"></div><div class="marker-display">{{ marker.display }}</div></div>
       <div ng-show="showHead" class="head" ng-style="{ left: headX+'px' }" ng-class="headStatus|lowercase">
         <div class="head-display">
-          <div class="time">{{ headTime }}</div>
+          <div class="time">{{ headTime|localTime }}</div>
           <div class="message">{{ headMessage }}</div>
         </div>
         <div class="arrow-down"></div>
