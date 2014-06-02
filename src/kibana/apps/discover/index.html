@@ -34,6 +34,7 @@
       <div class="col-md-10" ng-controller="discoverTable">
 
         <div class="discover-timechart" ng-if="vis">
+          <center class="small">{{timeRange.from | moment}} - {{timeRange.to | moment}}</center>
           <div ng-show="httpActive.length" class="discover-timechart-overlay">
             <div class="spinner large">
             </div>

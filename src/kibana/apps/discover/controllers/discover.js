@@ -169,6 +169,7 @@ define(function (require) {
         });
 
         return setupVisualization().then(function () {
+          $scope.updateTime();
           $scope.$emit('application.load');
         });
       });
@@ -191,6 +192,7 @@ define(function (require) {
     };
 
     $scope.opts.fetch = $scope.fetch = function () {
+      $scope.updateTime();
       $scope.updateDataSource()
       .then(setupVisualization)
       .then(function () {
@@ -198,6 +200,13 @@ define(function (require) {
         courier.fetch();
       })
       .catch(notify.error);
+    };
+
+    $scope.updateTime = function () {
+      $scope.timeRange = {
+        from: datemath.parse(timefilter.time.from),
+        to: datemath.parse(timefilter.time.to, true)
+      };
     };
 
     $scope.toggleConfig = function () {

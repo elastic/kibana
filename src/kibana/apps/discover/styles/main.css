@@ -74,6 +74,7 @@
 }
 .discover-timechart {
   margin-top: -20px;
+  margin-bottom: 20px;
   display: block;
   height: 200px;
   position: relative;
@@ -94,7 +95,7 @@
   opacity: 0.75;
   text-align: center;
   background-color: #ffffff;
-  z-index: 100;
+  z-index: 20;
 }
 .discover-timechart .discover-timechart-overlay .spinner {
   position: absolute;

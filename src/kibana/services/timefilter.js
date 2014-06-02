@@ -4,7 +4,7 @@ define(function (require) {
   var datemath = require('utils/datemath');
   var module = require('modules').get('kibana/services');
 
-  module.service('timefilter', function (Promise, globalState) {
+  module.service('timefilter', function (Promise, globalState, $rootScope) {
 
     var self = this;
 
@@ -12,11 +12,12 @@ define(function (require) {
     var enable = false;
 
     // These can be date math strings or moments.
-    this.time = _.defaults(globalState.time || {}, {
+    $rootScope.time = this.time = _.defaults(globalState.time || {}, {
       from: 'now-15m',
       to: 'now'
     });
 
+    // Only gets called if the user manually updates the URL
     globalState.onUpdate(function readFromGlobalState() {
       _.assign(self.time, globalState.time);
       castTime();
