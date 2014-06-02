@@ -50,7 +50,7 @@
               </li>
               <li ng-if="setupComplete" ng-show="opts.timefilter.enabled()" class="navbar-timepicker-display">
                 <a ng-click="toggleTimepicker()">
-                  {{opts.timefilter.time.from | moment}} to {{opts.timefilter.time.to | moment}}
+                  <pretty-duration from="opts.timefilter.time.from" to="opts.timefilter.time.to"></pretty-duration>
                   &nbsp;
                   <i class="fa fa-clock-o"></i>
                 </a>

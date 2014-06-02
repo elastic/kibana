@@ -11,6 +11,8 @@ define(function (require) {
   require('notify/notify');
   require('directives/info');
   require('directives/spinner');
+  require('directives/pretty_duration');
+
 
   require('angular-bootstrap');
   require('utils/private');

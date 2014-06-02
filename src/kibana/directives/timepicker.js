@@ -92,7 +92,7 @@ define(function (require) {
           $scope.mode = thisMode;
         };
 
-        $scope.setQuick = function (from, to) {
+        $scope.setQuick = function (from, to, description) {
           $scope.from = from;
           $scope.to = to;
         };
