@@ -33,7 +33,7 @@ em { color: #666; }
       <div class="optout"><input type="checkbox" ng-model="report" /> Send usage data</div>
     </div>
     <div class="span4">
-      <div ng-show="kbnVersion == '@REV@'" class="editor-option">
+      <div ng-show="marvelVersion == '@' + 'MARVEL_REV' + '@'" class="editor-option">
         <label class="small">Clear marvelOpts <tip>Only shown in unbuilt versions, clear stored opt-in and version data</tip></label>
         <button class="btn btn-danger" ng-click="clearMarvelStorage()">Clear</button>
       </div>

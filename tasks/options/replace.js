@@ -71,6 +71,10 @@ module.exports = function (config) {
             replacement: '<%= marvelCommit %>'
           },
           {
+            match: /@MARVEL_REV@/g,
+            replacement: config.pkg.version + "-" + '<%= marvelCommit %>'
+          },
+          {
             match: 'KIBANA_REVISION',
             replacement: '<%= kibanaCommit %>'
           }
@@ -79,7 +83,7 @@ module.exports = function (config) {
       files: [
         {
           cwd: '<%= buildSiteDir %>',
-          expand: true,  src: ['**/*'], dest: '<%= buildSiteDir %>/'}
+          expand: true, src: ['**/*'], dest: '<%= buildSiteDir %>/'}
       ]
     },
     kibana_replace_title: {
@@ -94,7 +98,7 @@ module.exports = function (config) {
       files: [
         {
           cwd: '<%= buildSiteDir %>',
-          expand: true,  src: ['kibana/index.html'], dest: '<%= buildSiteDir %>/'}
+          expand: true, src: ['kibana/index.html'], dest: '<%= buildSiteDir %>/'}
       ]
     }
   };

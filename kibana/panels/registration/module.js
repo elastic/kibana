@@ -22,7 +22,7 @@ define(function (require) {
   app.useModule(module);
 
   module.controller('marvel.registration', function ($scope, $modal, cacheBust, $q,
-                                                     $phoneHome, kbnVersion, $location) {
+                                                     $phoneHome, $location) {
 
     var pageView = function () {
       if ($phoneHome.get('version') && $phoneHome.get('report')) {
@@ -97,7 +97,7 @@ define(function (require) {
 
     $scope.setOptIn = function (report, purchased) {
       $phoneHome.set({
-        version: kbnVersion,
+        version: $scope.marvelVersion,
         report: report,
         status: purchased ? 'purchased' : 'trial'
       });
@@ -139,7 +139,7 @@ define(function (require) {
         $phoneHome.set('status', 'trial');
         $phoneHome.setTrialTimestamp(delayTrial());
         $scope.sysadmin = {
-          data: { status: 'registered', version: kbnVersion, registrationData: registration, report: $phoneHome.get('report') },
+          data: { status: 'registered', version: $scope.marvelVersion, registrationData: registration, report: $phoneHome.get('report') },
           status: 'registered',
           host_port: config.elasticsearch
         };
@@ -156,7 +156,7 @@ define(function (require) {
       // This needs to be set because when the "Already Have License" button is
       // clicked we don't have the version or report status recorded.
       $phoneHome.set({
-        version: kbnVersion,
+        version: $scope.marvelVersion,
         report: $scope.report
       });
       // Trigger a page view (this is similar to $scope.freeTrial)
@@ -173,7 +173,7 @@ define(function (require) {
         $phoneHome.set('status', 'trial');
         $phoneHome.setTrialTimestamp(delayTrial());
         $scope.sysadmin = {
-          data: { status: 'purchased', version: kbnVersion, registrationData: registration, report: $phoneHome.get('report') },
+          data: { status: 'purchased', version: $scope.marvelVersion, registrationData: registration, report: $phoneHome.get('report') },
           status: 'purchased',
           host_port: config.elasticsearch
         };
@@ -198,7 +198,7 @@ define(function (require) {
     });
 
     $scope.init = function () {
-      $scope.kbnVersion = kbnVersion;
+      $scope.marvelVersion = '@MARVEL_REV@';
 
       $scope.options = {
         showRegistration: false,
@@ -240,7 +240,7 @@ define(function (require) {
     };
   });
 
-  module.controller('marvel.registration.editor', function ($scope, $phoneHome, kbnVersion, $location) {
+  module.controller('marvel.registration.editor', function ($scope, $phoneHome, $location) {
     $scope.confirmPurchase = function () {
       $location.search('reg', 'purchase');
     };
@@ -252,7 +252,7 @@ define(function (require) {
       $phoneHome.destroy();
     };
     $scope.init = function () {
-      $scope.kbnVersion = kbnVersion;
+      $scope.marvelVersion = '@MARVEL_REV@';
       $phoneHome.fetch().then(function () {
         $scope.report = $phoneHome.get('report');
         $scope.status = $phoneHome.get('status');
