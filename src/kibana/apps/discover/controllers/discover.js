@@ -317,7 +317,7 @@ define(function (require) {
       _.sortBy(indexPattern.fields, 'name').forEach(function (field) {
         _.defaults(field, currentState[field.name]);
         // clone the field and add it's display prop
-        var clone = _.assign({}, field, { display: columnObjects[name] || false });
+        var clone = _.assign({}, field, { display: columnObjects[field.name] || false });
 
         $scope.fields.push(clone);
         $scope.fieldsByName[field.name] = clone;
