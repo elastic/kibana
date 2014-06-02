@@ -6,7 +6,7 @@ define(function (require) {
     defaultIndex: null,
     refreshInterval: 10000,
 
-    'discover:maxResults': 500,
+    'discover:sampleSize': 500,
 
     'histogram:barTarget': 50,
     'histogram:maxBars': 100,

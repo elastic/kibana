@@ -53,6 +53,12 @@
             max-length="opts.maxSummaryLength"
             timefield="opts.timefield">
           </kbn-table>
+          <p ng-if="rows.length == opts.sampleSize">
+            <center>
+              These are the first {{opts.sampleSize}} results matching your query,
+              refine your search to see more.
+            </center>
+          </p>
         </div>
       </div>
     </div>

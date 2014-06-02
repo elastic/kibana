@@ -93,7 +93,7 @@ define(function (require) {
 
     $scope.opts = {
       // number of records to fetch, then paginate through
-      sampleSize: config.get('discover:maxResults'),
+      sampleSize: config.get('discover:sampleSize'),
       // max length for summaries in the table
       maxSummaryLength: 100,
       // Index to match
