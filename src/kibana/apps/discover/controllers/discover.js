@@ -419,6 +419,7 @@ define(function (require) {
             timefilter.time.from = moment(e.point.x);
             timefilter.time.to = moment(e.point.x + e.data.ordered.interval);
             timefilter.time.mode = 'absolute';
+            $scope.$apply();
           },
           onBrush: function (e) {
             var from = moment(e.range[0]);
@@ -429,6 +430,7 @@ define(function (require) {
             timefilter.time.from = from;
             timefilter.time.to = to;
             timefilter.time.mode = 'absolute';
+            $scope.$apply();
           }
         },
         config: {
