@@ -119,7 +119,7 @@ define(function (require) {
         }
 
         var datum = {
-          x: row[iX] || '_all',
+          x: (row[iX] == null) ? '_all' : row[iX],
           y: row[iY === -1 ? row.length - 1 : iY] // y-axis value
         };
 
