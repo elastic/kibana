@@ -49,7 +49,7 @@ define(function (require) {
   });
 
 
-  app.controller('discover', function ($scope, config, courier, $route, savedSearches, savedVisualizations,
+  app.controller('discover', function ($scope, config, courier, $route, $window, savedSearches, savedVisualizations,
     Notifier, $location, globalState, AppState, timefilter, AdhocVis, Promise) {
 
     var notify = new Notifier({
@@ -360,6 +360,10 @@ define(function (require) {
       }
 
       refreshColumns();
+    };
+
+    $scope.toTop = function () {
+      $window.scrollTo(0, 0);
     };
 
     function refreshColumns() {

@@ -53,12 +53,12 @@
             max-length="opts.maxSummaryLength"
             timefield="opts.timefield">
           </kbn-table>
-          <p ng-if="rows.length == opts.sampleSize">
+          <div ng-if="rows.length == opts.sampleSize" class="discover-table-footer">
             <center>
               These are the first {{opts.sampleSize}} results matching your query,
-              refine your search to see more.
+              refine your search to see more. <a ng-click="toTop()">Back to top.</a>
             </center>
-          </p>
+          </div>
         </div>
       </div>
     </div>
