@@ -87,14 +87,15 @@ define(function (require) {
           });
         };
 
-        var writeTime = function () {
-          globalState.time = _.clone(timefilter.time);
+        var writeTime = function (newVal, oldVal) {
+          globalState.time = {
+            from: timefilter.time.from.format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+            to: timefilter.time.to.format('YYYY-MM-DDTHH:mm:ss.SSSZ')
+          };
           globalState.commit();
 
           writeGlobalStateToLastPaths();
         };
-
-
 
         // watch the timefilter for changes, and write to globalState when it changes
         $scope.$watch('opts.timefilter.time.from', writeTime);
