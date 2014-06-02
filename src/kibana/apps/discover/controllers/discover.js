@@ -249,9 +249,9 @@ define(function (require) {
       searchSource
         .size($scope.opts.sampleSize)
         .sort(_.zipObject([$state.sort]))
-        .query(!$scope.state.query ? null : {
+        .query(!$state.query ? null : {
           query_string: {
-            query: $scope.state.query
+            query: $state.query
           }
         });
 
@@ -304,12 +304,12 @@ define(function (require) {
 
       if (!indexPattern) return;
 
-      var columnObjects = arrayToKeys($scope.state.columns);
+      var columnObjects = arrayToKeys($state.columns);
 
       $scope.fields = [];
       $scope.fieldsByName = {};
       $scope.formatsByName = {};
-      $scope.state.columns = $scope.state.columns || [];
+      $state.columns = $state.columns || [];
 
       // Inject source into list;
       $scope.fields.push({name: '_source', type: 'source', display: false});
@@ -318,6 +318,7 @@ define(function (require) {
         _.defaults(field, currentState[field.name]);
         // clone the field and add it's display prop
         var clone = _.assign({}, field, { display: columnObjects[name] || false });
+
         $scope.fields.push(clone);
         $scope.fieldsByName[field.name] = clone;
         $scope.formatsByName[field.name] = field.format;
@@ -346,7 +347,7 @@ define(function (require) {
         var filter = field + ':"' + addSlashes(clause) + '"';
         var regex = '[\\+-]' + regexEscape(filter) + '\\s*';
 
-        $scope.state.query = $scope.state.query.replace(new RegExp(regex), '') +
+        $state.query = $state.query.replace(new RegExp(regex), '') +
           ' ' + operation + filter;
       });
 
@@ -359,13 +360,12 @@ define(function (require) {
       // toggle the display property
       field.display = !field.display;
 
-      if ($scope.state.columns.length === 1 && $scope.state.columns[0] === '_source') {
-        $scope.state.columns = _.toggleInOut($scope.state.columns, name);
-        $scope.state.columns = _.toggleInOut($scope.state.columns, '_source');
+      if ($state.columns.length === 1 && $state.columns[0] === '_source') {
+        $state.columns = _.toggleInOut($state.columns, name);
+        $state.columns = _.toggleInOut($state.columns, '_source');
         _.find($scope.fields, {name: '_source'}).display = false;
-
       } else {
-        $scope.state.columns = _.toggleInOut($scope.state.columns, name);
+        $state.columns = _.toggleInOut($state.columns, name);
       }
 
       refreshColumns();
@@ -382,10 +382,10 @@ define(function (require) {
       }), 'name');
 
       // Make sure there are no columns added that aren't in the displayed field list.
-      $scope.state.columns = _.intersection($scope.state.columns, fields);
+      $state.columns = _.intersection($state.columns, fields);
 
       // If no columns remain, use _source
-      if (!$scope.state.columns.length) {
+      if (!$state.columns.length) {
         $scope.toggleField('_source');
         return;
       }
