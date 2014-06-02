@@ -80,6 +80,7 @@ define(function (require) {
       $scope.$on('ready:vis', function () {
         // once the visualization is ready, boot up
         vis.setState($state);
+        watchForConfigChanges();
         $scope.$emit('application.load');
       });
     };
@@ -105,6 +106,7 @@ define(function (require) {
      */
     var writeStateAndFetch = function () {
       _.assign($state, vis.getState());
+      watchForConfigChanges();
       $state.commit();
       justFetch();
     };
@@ -116,8 +118,29 @@ define(function (require) {
     var readStateAndFetch = function () {
       // update and commit the state, which will update the vis dataSource if there were new changes
       vis.setState($state);
+      watchForConfigChanges();
       justFetch();
     };
+
+    var watchForConfigChanges = (function () {
+      var _unwatchers = [];
+      var _clearWatchers = function () {
+        _unwatchers.length && _unwatchers.splice(0).forEach(function (unwatcher) { unwatcher(); });
+      };
+
+      return function () {
+        $scope.vis.dirty = false;
+        _clearWatchers();
+        // watch config properties for deep changes
+        visConfigProperties.forEach(function (prop) {
+          _unwatchers.push($scope.$watch('vis.' + prop + '.configs', function (newVal, oldVal) {
+            if (newVal === oldVal) return; // stupid initRun
+            $scope.vis.dirty = true;
+            _clearWatchers();
+          }, true));
+        });
+      };
+    }());
 
     /**
      * When something else updates the state, let us know
