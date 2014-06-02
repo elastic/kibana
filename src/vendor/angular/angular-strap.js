@@ -772,7 +772,8 @@ angular.module('$strap.directives').directive('bsTimepicker', [
 angular.module('$strap.directives').directive('bsTooltip', [
   '$parse',
   '$compile',
-  function ($parse, $compile) {
+  '$sanitize',
+  function ($parse, $compile, $sanitize) {
     return {
       restrict: 'A',
       scope: true,
@@ -795,7 +796,7 @@ angular.module('$strap.directives').directive('bsTooltip', [
         }
         element.tooltip({
           title: function () {
-            return angular.isFunction(value) ? value.apply(null, arguments) : value;
+            return $sanitize(angular.isFunction(value) ? value.apply(null, arguments) : value);
           },
           html: true
         });
