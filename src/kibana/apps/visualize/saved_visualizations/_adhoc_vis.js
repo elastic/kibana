@@ -29,6 +29,8 @@ define(function (require) {
       var vis = this;
       var params;
 
+      var createdSource = true;
+
       vis.init = _.once(function () {
         vis.typeName = opts.type || 'histogram';
         vis.params = _.cloneDeep(opts.params);
@@ -43,7 +45,11 @@ define(function (require) {
 
         // resolve the search source for this AdhocVis
         return Promise.cast((function () {
-          if (opts.searchSource) return opts.searchSource;
+          if (opts.searchSource) {
+            // did not create the source, so we won't destroy it either
+            createdSource = false;
+            return opts.searchSource;
+          }
 
           return courier.getRootSearch()
           .then(function (rootSearch) {
@@ -98,8 +104,14 @@ define(function (require) {
         });
       };
 
-      // Need these, but we have nothing to destroy for now;
-      vis.destroy = function () {};
+      vis.destroy = function () {
+        if (createdSource) {
+          this.searchSource.cancelPending();
+        } else {
+          //remove our aggregations from the serarch source
+          this.searchSource.set('aggs', null);
+        }
+      };
 
       /**
        * Create a list of config objects, which are ready to be turned into aggregations,
