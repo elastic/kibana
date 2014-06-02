@@ -22,7 +22,7 @@ define(function (require) {
 
           if (remaining <= winHeight * 0.50) {
             $scope[$scope.$$phase ? '$eval' : '$apply'](function () {
-              $scope.more();
+              var more = $scope.more();
             });
           }
         }
