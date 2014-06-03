@@ -6,7 +6,7 @@
     class="form-control"
     name="field"
     ng-model="config.field"
-    ng-options="field.name as field.name group by field.type for field in fields | orderBy:['type','name']">
+    ng-options="field.name as field.name group by field.type for field in fields | filter:{indexed:true} |orderBy:['type','name']">
   </select>
 </div>
 <div class="form-group" ng-show="availableAggs">
