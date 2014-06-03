@@ -8,14 +8,14 @@
   </ul>
 
   <div class="sidebar-list-header">
-    <button
-      ng-click="showFilter = !showFilter"
-      ng-class="{
-        active: showFilter
-      }">
-      <i class="fa fa-filter"></i>
-    </button>
-    <h5>Available</h5>
+    <h5>Available
+      <button
+        ng-click="showFilter = !showFilter"
+        ng-class="showFilter ? 'btn-success' : 'btn-default'"
+        class="btn btn-xs btn-default pull-right discover-field-filter-toggle">
+        filter
+      </button>
+    </h5>
     <form ng-show="showFilter" role="form" class="discover-field-filter">
       <div class="form-group">
         <input type="text" class="form-control" placeholder="Filter" ng-model="fieldFilter">
