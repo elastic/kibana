@@ -139,6 +139,10 @@
 .discover-field-filter .form-group {
   margin-bottom: 0px;
 }
+.discover-field-filter-toggle {
+  color: #ffffff;
+  font-size: 9px;
+}
 .sidebar-item button.discover-field-toggle {
   display: none;
   font-size: 9px;
