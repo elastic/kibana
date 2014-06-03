@@ -19,7 +19,7 @@ define(function (require) {
         var chart; // set in "vis" watcher
 
         $scope.$watch('vis', function (vis, prevVis) {
-          if (vis !== prevVis && prevVis.destroy) prevVis.destroy();
+          if (prevVis && vis !== prevVis && prevVis.destroy) prevVis.destroy();
           if (chart) {
             chart.off('hover');
             chart.off('click');
