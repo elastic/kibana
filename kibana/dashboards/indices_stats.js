@@ -321,6 +321,13 @@ var rows = [
         "derivative": true,
         "mode": "min",
         "scaleSeconds": true
+      },
+      {
+        "value_field": "indices.filter_cache.evictions",
+        "title": "Indices Filter Cache Eviction Rate",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true
       }
     ]
   },
