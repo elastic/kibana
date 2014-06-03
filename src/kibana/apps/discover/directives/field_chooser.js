@@ -39,7 +39,7 @@ define(function (require) {
             indexPattern: $scope.state.index,
             type: 'histogram',
             _a: rison.encode({
-              query: $scope.state.query,
+              query: $scope.state.query || undefined,
               metric: [{
                 agg: 'count',
               }],

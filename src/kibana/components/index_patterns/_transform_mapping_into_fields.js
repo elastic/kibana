@@ -1,14 +1,8 @@
 define(function (require) {
-  return function transformMappingIntoFields(Private, configFile) {
+  return function transformMappingIntoFields(Private, configFile, config) {
     var _ = require('lodash');
     var MappingConflict = require('errors').MappingConflict;
     var castMappingType = Private(require('./_cast_mapping_type'));
-
-    var reservedFields = {
-      _id: { type: 'string'},
-      _type: { type: 'string' },
-      _index: { type: 'string' }
-    };
 
     /**
      * Convert the ES response into the simple map for fields to
@@ -20,20 +14,20 @@ define(function (require) {
      *                    use-cases
      */
     return function (response) {
-      var fields = _.cloneDeep(reservedFields);
+      var fields = {};
       _.each(response, function (index, indexName) {
         if (indexName === configFile.kibanaIndex) return;
         _.each(index.mappings, function (mappings, typeName) {
           _.each(mappings, function (field, name) {
             var keys = Object.keys(field.mapping);
-            //if (keys.length === 0 || name[0] === '_') return;
-            if (keys.length === 0) return;
+            if (keys.length === 0 || (name[0] === '_') && !_.contains(config.get('metaFields'), name)) return;
 
             var mapping = _.cloneDeep(field.mapping[keys.shift()]);
             mapping.type = castMappingType(mapping.type);
 
             // Internally, elasticsearch uses 'false' as the default for say, _id. The docs use 'no', make them the same
-            mapping.index = mapping.index === 'no' ? false : mapping.index;
+            mapping.indexed = (!!!mapping.index || mapping.index === 'no') ? false : true;
+            mapping.analyzed = mapping.index === 'analyzed' ? true : false;
 
             if (fields[name]) {
               if (fields[name].type !== mapping.type
@@ -43,7 +37,7 @@ define(function (require) {
               return;
             }
 
-            fields[name] = _.pick(mapping, 'type', 'index');
+            fields[name] = _.pick(mapping, 'type', 'indexed', 'analyzed');
           });
         });
       });
