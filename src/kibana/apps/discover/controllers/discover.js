@@ -321,7 +321,7 @@ define(function (require) {
       $state.columns = $state.columns || [];
 
       // Inject source into list;
-      $scope.fields.push({name: '_source', type: 'source', display: false});
+      //$scope.fields.push({name: '_source', type: 'source', display: false});
 
       _.sortBy(indexPattern.fields, 'name').forEach(function (field) {
         _.defaults(field, currentState[field.name]);

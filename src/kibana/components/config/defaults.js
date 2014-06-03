@@ -5,6 +5,7 @@ define(function (require) {
     dateFormat: 'MMMM Do YYYY, HH:mm:ss.SSS',
     defaultIndex: null,
     refreshInterval: 10000,
+    metaFields: ['_source', '_id', '_type', '_index'],
 
     'discover:sampleSize': 500,
 
