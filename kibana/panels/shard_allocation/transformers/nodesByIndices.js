@@ -1,30 +1,31 @@
 define(function (require) {
   'use strict';
   var extractShards = require('lib/extractShards');
-  var _ = require('lodash');  
+  var _ = require('lodash');
 
   var filterHiddenIndices = require('../lib/filterHiddenIndices');
   var hasPrimaryChildren = require('../lib/hasPrimaryChildren');
   var extractIp = require('../lib/extractIp');
-  
+
   return function ($scope) {
     return function nodesByIndices (state) {
 
       var getNodeType = function (node) {
-        if (node.attributes.client === 'true' && node.attributes.data === 'false') {
+        if (node.attributes.client === 'true') {
           return 'client';
         }
-        if (node.attributes.master === 'true' && node.attributes.data === 'false') {
-          return 'master';
+        if (node.attributes.data === 'false') {
+          return node.attributes.master === 'true' ? 'master' : 'client';
         }
-        if (node.attributes.data === 'true') {
+        if (node.attributes.master === 'false') {
+          // we know data is true here..
           return 'data';
         }
         return 'normal';
       };
 
       function createNode (obj, node, id) {
-        node.master = state.master_node === id; 
+        node.master = state.master_node === id;
         node.details = extractIp(node);
         node.ip_port = extractIp(node);
         node.type = 'node';
@@ -54,7 +55,7 @@ define(function (require) {
       }
 
       var shards = extractShards(state);
-      if (!$scope.panel.show_hidden) { 
+      if (!$scope.panel.show_hidden) {
         shards = shards.filter(filterHiddenIndices);
       }
 
