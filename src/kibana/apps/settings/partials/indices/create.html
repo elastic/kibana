@@ -63,7 +63,7 @@
             <div class="alert alert-{{index.existing.class}}" ng-if="index.existing">
               Pattern matches {{index.existing.matchPercent}} of similar indices
               <ul>
-                <li ng-repeat="match in index.existing.matches | limitTo: index.sampleCount">{{match}}</li>
+                <li ng-repeat="match in index.existing.matches | orderBy:'toString()'| limitTo: index.sampleCount">{{match}}</li>
               </ul>
               <a
                 ng-if="index.sampleCount < index.existing.matches.length"
