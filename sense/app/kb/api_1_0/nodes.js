@@ -12,10 +12,9 @@ define(function () {
       patterns: [
         "_nodes",
         "_nodes/{metrics}",
-        "_nodes/{nodes}/stats",
-        "_nodes/{nodes}/stats/{metrics}",
-        "_nodes/{nodes}/stats/{metrics}/{index_metric}",
-        "_nodes/{nodes}/stats/{metrics}/{index_metric}/{fields}"
+        "_nodes/{nodes}",
+        "_nodes/{nodes}/{metrics}",
+        "_nodes/{nodes}/info/{metrics}"
       ],
       url_components: {
         "metrics": [
@@ -27,7 +26,7 @@ define(function () {
           "network",
           "transport",
           "http",
-          "plugin",
+          "plugins",
           "_all"
         ]
       }
@@ -36,10 +35,10 @@ define(function () {
       patterns: [
         "_nodes/stats",
         "_nodes/stats/{metrics}",
+        "_nodes/stats/{metrics}/{index_metric}",
         "_nodes/{nodes}/stats",
         "_nodes/{nodes}/stats/{metrics}",
-        "_nodes/{nodes}/stats/{metrics}/{index_metric}",
-        "_nodes/{nodes}/stats/{metrics}/{index_metric}/{fields}"
+        "_nodes/{nodes}/stats/{metrics}/{index_metric}"
       ],
       url_components: {
         "metrics": [
