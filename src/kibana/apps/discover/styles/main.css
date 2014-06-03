@@ -139,6 +139,13 @@
 .discover-field-filter .form-group {
   margin-bottom: 0px;
 }
+.sidebar-item button.discover-field-toggle {
+  display: none;
+  font-size: 9px;
+}
+.sidebar-item:hover:hover button.discover-field-toggle {
+  display: inherit;
+}
 .discover-field-details-close {
   text-align: center;
   border-top: 1px solid transparent;

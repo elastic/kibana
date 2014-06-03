@@ -2,5 +2,10 @@
     <li bindonce class="sidebar-item">
       <div ng-click="toggleDetails(field)" class="sidebar-item-title">
         <span field-name="field.name" field-type="field.type"></span>
+        <button
+          ng-click="toggleDisplay(field)"
+          ng-class="{'btn-primary': !field.display, 'btn-danger': field.display}"
+          ng-if="!(field.name == '_source' && field.display && (fields|filter:{display:true}).length == 1)"
+          class="pull-right btn btn-xs btn-primary discover-field-toggle" >{{field.display ? 'remove' : 'add'}}</button>
       </div>
     </li>
