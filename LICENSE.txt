@@ -1,4 +1,4 @@
-                     Marvel Software License Agreement
+                   Marvel Software License Agreement
 
 READ THIS AGREEMENT CAREFULLY, WHICH CONSITUTES A LEGALLY BINDING AGREEMENT
 AND GOVERNS YOUR USE OF ELASTICSEARCH’S MARVEL SOFTWARE. BY INSTALLING AND/OR
@@ -16,7 +16,7 @@ Software (the “Effective Date”).
 
 1. Software License and Restrictions
 
-1.1 License Grants. Subject to the terms and conditions of this Agreement and
+1.1. License Grants. Subject to the terms and conditions of this Agreement and
 complete payment of any and all applicable license fees (provided that no
 license fee shall be required for use of the Marvel Software for other than
 production purposes, Elasticsearch agrees to grant, and does hereby grant to
@@ -36,7 +36,7 @@ such use must be solely for Your benefit, and You shall be responsible for all
 acts and omissions of such contractors in connection with their use of the
 Marvel Software.
 
-1.2 Reservation of Rights; Restrictions. As between Elasticsearch and You,
+1.2. Reservation of Rights; Restrictions. As between Elasticsearch and You,
 Elasticsearch owns all right title and interest in and to the Marvel Software
 and any derivative works thereof, and except as expressly set forth in Section
 1.1 above, no other license to the Marvel Software is granted to You by
@@ -52,13 +52,23 @@ notices in the Marvel Software; or (v) make available to any third party any
 analysis of the results of operation of the Marvel Software, including
 benchmarking results, without the prior written consent of Elasticsearch.
 
+1.3. Cluster Metadata.  You understand and agree that once deployed, and on a
+daily basis, the Marvel Software provides metadata to Elasticsearch about Your
+cluster statistics and associates that metadata with Your IP address.
+However, no other information is provided to Elasticsearch by the Marvel
+Software, including any information about the data You process or store in
+connection with your use of the Marvel Software.   Instructions for disabling
+this feature are contained in the Marvel Software, however leaving this
+feature active enables Elasticsearch to gather cluster statistics and provide
+an improved level of support to You.
+
 2. Term and Termination
 
-2.1 Term.  This Agreement shall commence on the Effective Date, and shall
+2.1. Term.  This Agreement shall commence on the Effective Date, and shall
 continue in force for the license term set forth in the applicable Order Form,
 unless earlier terminated under Section 2.2 below.
 
-2.2 Termination.  Either party may, upon written notice to the other party,
+2.2. Termination.  Either party may, upon written notice to the other party,
 terminate this Agreement for material breach by the other party automatically
 and without any other formality, if such party has failed to cure such
 material breach within thirty (30) days of receiving written notice of such
@@ -67,14 +77,14 @@ this Agreement shall automatically terminate in the event that You
 intentionally breach the scope of the license granted in Section 1.1 of this
 Agreement.
 
-2.3 Post Termination or Expiration.  Upon termination or expiration of this
+2.3. Post Termination or Expiration.  Upon termination or expiration of this
 Agreement, for any reason, You shall promptly cease the use of the Marvel
 Software and Documentation and destroy (and certify to Elasticsearch in
 writing the fact of such destruction), or return to Elasticsearch, all copies
 of the Marvel Software and Documentation then in Your possession or under Your
 control.
 
-2.4 Survival.  Sections 2.3, 3, 4 and 5, as well as any payment obligations
+2.4. Survival.  Sections 2.3, 3, 4 and 5, as well as any payment obligations
 under this Agreement and/or the Order Form, shall survive any termination or
 expiration of this Agreement.
 
@@ -93,7 +103,7 @@ BE ERROR FREE OR THAT THE USE OF THE MARVEL SOFTWARE WILL BE UNINTERRUPTED.
 
 4. Limitation of Liability
 
-4.1 Disclaimer of Certain Damages. IN NO EVENT SHALL YOU OR ELASTICSEARCH OR
+4.1. Disclaimer of Certain Damages. IN NO EVENT SHALL YOU OR ELASTICSEARCH OR
 ITS LICENSORS BE LIABLE FOR ANY LOSS OF PROFITS, LOSS OF USE, BUSINESS
 INTERRUPTION, LOSS OF DATA, COST OF SUBSTITUTE GOODS OR SERVICES, OR FOR ANY
 INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OF ANY KIND IN
@@ -106,14 +116,14 @@ APPLY TO A BREACH THROUGH GROSS NEGLIGENCE OR INTENTIONAL MISCONDUCT BY YOU OF
 THE SCOPE OF THE LICENSE GRANTED IN SECTION 1.1 OR TO ANY OTHER LIABILITY THAT
 CANNOT BE EXCLUDED OR LIMITED UNDER APPLICABLE LAW.
 
-4.2 Damages Cap. IN NO EVENT SHALL ELASTICSEARCH’S OR ITS LICENSORS’
+4.2. Damages Cap. IN NO EVENT SHALL ELASTICSEARCH’S OR ITS LICENSORS’
 AGGREGATE, CUMULATIVE LIABILITY UNDER THIS AGREEMENT EXCEED THE AMOUNTS YOU
 WERE REQUIRED TO PAY ELASTICSEARCH IN RELATION TO THIS AGREEMENT FOR THE
 MARVEL SOFTWARE GIVING RISE TO SUCH LIABILITY, IN THE TWELVE (12) MONTHS
 IMMEDIATELY PRIOR TO THE EVENT GIVING RISE TO LIABILITY.
 
-4.3 YOU AGREE THAT THE FOREGOING LIMITATIONS, EXCLUSIONS AND DISCLAIMERS ARE A
-REASONABLE ALLOCATION OF THE RISK BETWEEN THE PARTIES AND WILL APPLY TO THE
+4.3. YOU AGREE THAT THE FOREGOING LIMITATIONS, EXCLUSIONS AND DISCLAIMERS ARE
+A REASONABLE ALLOCATION OF THE RISK BETWEEN THE PARTIES AND WILL APPLY TO THE
 MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, EVEN IF ANY REMEDY FAILS IN ITS
 ESSENTIAL PURPOSE.
 
@@ -135,11 +145,7 @@ representatives. If any provision(s) hereof is held unenforceable, this
 Agreement will continue without said provision and be interpreted to reflect
 the original intent of the parties.
 
-
-
-ATTACHMENT 1
-
-ADDITIONAL TERMS AND CONDITIONS
+ATTACHMENT 1 ADDITIONAL TERMS AND CONDITIONS
 
 A   The following additional  terms and conditions apply to all Customers with
 principal offices in North America:
@@ -169,34 +175,34 @@ technical data related to the Marvel Software under this Agreement and in any
 Subcontract under which this commercial computer software and commercial
 computer software documentation is acquired or licensed.
 
-Export Control. You acknowledge that the goods, software and technology
-acquired from Elasticsearch are subject to U.S. export control laws and
-regulations, including but not limited to the International Traffic In Arms
-Regulations (“ITAR”) (22 C.F.R. Parts 120-130 (2010)); the Export
-Administration Regulations ("EAR") (15 C.F.R. Parts 730-774 (2010)); the U.S.
-antiboycott regulations in the EAR and U.S. Department of the Treasury
-regulations; the economic sanctions regulations and guidelines of the U.S.
-Department of the Treasury, Office of Foreign Assets Control, and the USA
-Patriot Act (Title III of Pub. L. 107-56, signed into law October 26, 2001),
-as amended.  You are now and will remain in the future compliant with all such
-export control laws and regulations, and will not export, re-export, otherwise
-transfer any Elasticsearch goods, software or technology or disclose any
-Elasticsearch software or technology to any person contrary to such laws or
-regulations.  You acknowledge that remote access to the Marvel Software may in
-certain circumstances be considered a re-export of Marvel Software, and
-accordingly, may not be granted in contravention of U.S. export control laws
-and regulations.
-
-Governing Law.  This Agreement will be governed by the laws of the State of
-California, without regard to its conflict of laws principles. This Agreement
-shall not be governed by the 1980 UN Convention on Contracts for the
-International Sale of Goods. All suits hereunder will be brought solely in
-Federal Court for the Northern District of California, or if that court lacks
-subject matter jurisdiction, in any California State Court located in Santa
-Clara County.  The parties hereby irrevocably waive any and all claims and
-defenses either might otherwise have in any such action or proceeding in any
-of such courts based upon any alleged lack of personal jurisdiction, improper
-venue, forum non conveniens or any similar claim or defense.
+Export Control.
+You acknowledge that the goods, software and technology acquired from
+Elasticsearch are subject to U.S. export control laws and regulations,
+including but not limited to the International Traffic In Arms Regulations
+(“ITAR”) (22 C.F.R. Parts 120-130 (2010)); the Export Administration
+Regulations ("EAR") (15 C.F.R. Parts 730-774 (2010)); the U.S. antiboycott
+regulations in the EAR and U.S. Department of the Treasury regulations; the
+economic sanctions regulations and guidelines of the U.S. Department of the
+Treasury, Office of Foreign Assets Control, and the USA Patriot Act (Title III
+of Pub. L. 107-56, signed into law October 26, 2001), as amended.  You are now
+and will remain in the future compliant with all such export control laws and
+regulations, and will not export, re-export, otherwise transfer any
+Elasticsearch goods, software or technology or disclose any Elasticsearch
+software or technology to any person contrary to such laws or regulations.
+You acknowledge that remote access to the Marvel Software may in certain
+circumstances be considered a re-export of Marvel Software, and accordingly,
+may not be granted in contravention of U.S. export control laws and
+regulations. Governing Law.  This Agreement will be governed by the laws of
+the State of California, without regard to its conflict of laws principles.
+This Agreement shall not be governed by the 1980 UN Convention on Contracts
+for the International Sale of Goods. All suits hereunder will be brought
+solely in Federal Court for the Northern District of California, or if that
+court lacks subject matter jurisdiction, in any California State Court located
+in Santa Clara County.  The parties hereby irrevocably waive any and all
+claims and defenses either might otherwise have in any such action or
+proceeding in any of such courts based upon any alleged lack of personal
+jurisdiction, improper venue, forum non conveniens or any similar claim or
+defense.
 
 B   The following additional terms and conditions apply to all Customers with
 principal offices outside of North America:
