@@ -35,8 +35,8 @@ image:images/index_stats_thumb.png["Index Statistics Dashboard",link="images/ind
 
 The _Shard Allocation_ dashboard displays how the shards are allocated across nodes.
 The dashboard also shows the status of the shards. It has two perspectives, _By Indices_ and _By Nodes_.
-The "By Indices" view lists each index and shows you how it's shards are
-distributed across nodes. The "By Nodes" view lists each node and shows you which shards the node current host.
+The _By Indices_ view lists each index and shows you how it's shards are
+distributed across nodes. The _By Nodes_ view lists each node and shows you which shards the node current host.
 
 The viewer also has a playback feature which allows you to view the history of the shard allocation. You can rewind to each
 allocation event and then play back the history from any point in time. Hover on relocating shards to highlight both
