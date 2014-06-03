@@ -70,11 +70,19 @@
   clear: both;
 }
 visualize {
-  display: block;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
   height: 100%;
   width: 100%;
   overflow: auto;
   position: relative;
+  -webkit-flex-direction: column;
+  -moz-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
 }
 visualize .visualize-error {
   margin-top: 20px;
@@ -87,4 +95,32 @@ visualize .visualize-error .fa-exclamation-triangle {
 }
 visualize .k4tip {
   white-space: pre-line;
+}
+visualize .visualize-show-table {
+  width: 100%;
+  background-color: #ecf0f1;
+  text-align: center;
+}
+visualize .visualize-show-table.active {
+  margin: 15px 0;
+}
+visualize .visualize-chart,
+visualize .visualize-table {
+  -webkit-flex-grow: 1;
+  -moz-flex-grow: 1;
+  -ms-flex-grow: 1;
+  flex-grow: 1;
+  height: 50%;
+}
+@media (max-width: 992px) {
+  visualize .visualize-chart.table-visible {
+    display: none;
+  }
+}
+visualize .visualize-table {
+  display: none;
+  overflow: auto;
+}
+visualize .visualize-table.visible {
+  display: block;
 }

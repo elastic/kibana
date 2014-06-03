@@ -1,0 +1,23 @@
+<div class="visualize-chart" ng-class="{ 'table-visible': showTable }"></div>
+<div
+  ng-click="showTable = !showTable"
+  ng-class="{ active: showTable }"
+  class="visualize-show-table">
+  <small><i class="fa fa-table"></i></small>
+</div>
+<div class="visualize-table" ng-class="{ 'visible': showTable }">
+  <paginate list="flattenedData.rows" per-page="20">
+    <table ng-if="flattenedData" bindonce class="table">
+      <thead>
+        <tr>
+          <th ng-repeat="col in flattenedData.columns" bo-text="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="row in page">
+          <td ng-repeat="cells in row" bo-text="cells"></td>
+        </tr>
+      </tbody>
+    </table>
+  </paginate>
+</div>

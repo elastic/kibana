@@ -1,0 +1,37 @@
+<button
+  ng-disabled="page.first"
+  ng-click="goToPage(1)"
+  class="btn btn-primary jump-to-end">
+  <i class="fa fa-angle-double-left"></i>
+</button>
+&nbsp;
+<button
+  ng-disabled="page.first"
+  ng-click="goToPage(page.prev)"
+  class="btn btn-primary">
+  <i class="fa fa-angle-left"></i>
+</button>
+
+
+<div class="paginate-other-pages">
+  <a
+    ng-repeat="other in otherPages"
+    ng-click="goToPage(other)"
+    ng-class="{ active: other.number === page.number }"
+    ng-bind="other.number">
+  </a>
+</div>
+
+<button
+  ng-disabled="page.last"
+  ng-click="goToPage(page.next)"
+  class="btn btn-primary">
+  <i class="fa fa-angle-right"></i>
+</button>
+&nbsp;
+<button
+  ng-disabled="page.last"
+  ng-click="goToPage(page.count)"
+  class="btn btn-primary jump-to-end">
+  <i class="fa fa-angle-double-right"></i>
+</button>

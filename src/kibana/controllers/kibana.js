@@ -11,6 +11,7 @@ define(function (require) {
   require('notify/notify');
   require('directives/info');
   require('directives/spinner');
+  require('directives/paginate');
   require('directives/pretty_duration');
 
 

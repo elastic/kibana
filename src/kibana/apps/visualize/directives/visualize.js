@@ -15,8 +15,47 @@ define(function (require) {
       scope : {
         vis: '=',
       },
+      template: require('text!../partials/visualize.html'),
       link: function ($scope, $el) {
         var chart; // set in "vis" watcher
+
+        var $visualize = $el.find('.visualize-chart');
+        var $table = $el.find('.visualize-table');
+
+        $scope.showTable = false;
+
+        var buildFlattenedData = function () {
+          if (!$scope.showTable) {
+            delete $scope.flattenedData;
+            return;
+          }
+
+          // clone chartData.raw so that we can replace the rows and columns
+          $scope.flattenedData = _.clone($scope.chartData.raw);
+
+          // flatten the fields to a list of strings
+          $scope.flattenedData.columns = $scope.chartData.raw.columns.map(function (col) {
+            return col.aggParams ? col.aggParams.field : 'count';
+          });
+
+          // collect the formats before itterating
+          var formats = $scope.chartData.raw.columns.map(function (col) {
+            return col.field ? col.field.format.convert : _.identity;
+          });
+          // format all of the row values
+          $scope.flattenedData.rows = $scope.chartData.raw.rows.map(function (row) {
+            return row.map(function (cell, i) {
+              return formats[i](cell);
+            });
+          });
+        };
+
+        var render = function () {
+          buildFlattenedData();
+          if (chart && $scope.chartData && $visualize.is(':visible')) {
+            chart.render($scope.chartData);
+          }
+        };
 
         $scope.$watch('vis', function (vis, prevVis) {
           if (prevVis && vis !== prevVis && prevVis.destroy) prevVis.destroy();
@@ -42,7 +81,7 @@ define(function (require) {
           _.merge(params, vis.params);
           _.defaults(params, typeDefinition.params);
 
-          chart = new k4d3.Chart($el[0], params);
+          chart = new k4d3.Chart($visualize[0], params);
 
           // For each type of interaction, assign the the handler if the vis object has it
           // otherwise use the typeDef, otherwise, do nothing.
@@ -52,15 +91,16 @@ define(function (require) {
           });
 
           vis.searchSource.onResults(function onResults(resp) {
-            var indexPattern = vis.searchSource.get('index');
-            var chartData = vis.buildChartDataFromResponse(indexPattern, resp);
-            chart.render(chartData);
+            $scope.chartData = vis.buildChartDataFromResponse(vis.searchSource.get('index'), resp);
+            render();
           }).catch(notify.fatal);
 
           vis.searchSource.onError(notify.error);
 
           $scope.$root.$broadcast('ready:vis');
         });
+
+        $scope.$watch('showTable', render);
 
         $scope.$on('resize', function () {
           var old;

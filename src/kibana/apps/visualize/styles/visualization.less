@@ -1,13 +1,15 @@
 @import (reference) "../../../styles/_bootstrap.less";
 @import (reference) "../../../styles/theme/_theme.less";
 @import (reference) "../../../styles/_variables.less";
+@import (reference) "../../../styles/_mixins.less";
 
 visualize {
-  display: block;
+  .flex-display();
   height: 100%;
   width: 100%;
   overflow: auto;
   position: relative;
+  .flex-direction(column);
 
   .visualize-error {
     margin-top: 20px;
@@ -22,5 +24,37 @@ visualize {
 
   .k4tip {
     white-space: pre-line;
+  }
+
+  .visualize-show-table {
+    width: 100%;
+    background-color: @well-bg;
+    text-align: center;
+    &.active {
+      margin: 15px 0;
+    }
+  }
+
+  .visualize-chart,
+  .visualize-table {
+    .flex-grow(1);
+    height: 50%;
+  }
+
+  .visualize-chart {
+    &.table-visible {
+      @media (max-width: @screen-md-min) {
+        display: none;
+      }
+    }
+  }
+
+  .visualize-table {
+    display: none;
+    overflow: auto;
+
+    &.visible {
+      display: block;
+    }
   }
 }
