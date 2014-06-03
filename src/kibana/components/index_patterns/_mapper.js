@@ -50,7 +50,8 @@ define(function (require) {
           index: indexList,
           field: '*',
           ignoreUnavailable: _.isArray(indexList),
-          allowNoIndices: false
+          allowNoIndices: false,
+          includeDefaults: true
         })
         .catch(function (err) {
           if (err.status >= 400) {

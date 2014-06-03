@@ -26,19 +26,24 @@ define(function (require) {
         _.each(index.mappings, function (mappings, typeName) {
           _.each(mappings, function (field, name) {
             var keys = Object.keys(field.mapping);
-            if (keys.length === 0 || name[0] === '_') return;
+            //if (keys.length === 0 || name[0] === '_') return;
+            if (keys.length === 0) return;
 
             var mapping = _.cloneDeep(field.mapping[keys.shift()]);
             mapping.type = castMappingType(mapping.type);
 
+            // Internally, elasticsearch uses 'false' as the default for say, _id. The docs use 'no', make them the same
+            mapping.index = mapping.index === 'no' ? false : mapping.index;
+
             if (fields[name]) {
-              if (fields[name].type !== mapping.type) {
+              if (fields[name].type !== mapping.type
+              ) {
                 throw new MappingConflict(name);
               }
               return;
             }
 
-            fields[name] = mapping;
+            fields[name] = _.pick(mapping, 'type', 'index');
           });
         });
       });
