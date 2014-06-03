@@ -75,7 +75,7 @@ define(function (require) {
         var getFieldValues = function (data, field) {
           return _.map(data, function (row) {
             var val;
-            val = row._source[field];
+            val = _.isUndefined(row._source[field]) ? row[field] : row._source[field];
             if (val === null) val = row[field];
             if (val === null) val = '';
             return val;
@@ -138,7 +138,9 @@ define(function (require) {
               };
             });
 
-          if (params.data.length - missing === 0) return {error: 'Field not present in _source'};
+          if (params.data.length - missing === 0) {
+            return {error: 'Field missing in record list. This field may still be indexed in Elasticsearch.'};
+          }
 
           return {
             total: params.data.length,
