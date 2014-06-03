@@ -124,13 +124,7 @@ define(function () {
         "_search/template"
       ],
       data_autocomplete_rules: {
-        template: { __scope_link: "_search" },
-        query: {
-
-        },
-        params: {
-
-        }
+        __scope_link: "_search"
       }
     });
   };
