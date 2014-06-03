@@ -1,5 +1,5 @@
 define(function (require) {
-  return function SavedObjectFactory(configFile, Promise, Private, Notifier) {
+  return function SavedObjectFactory(es, configFile, Promise, Private, Notifier) {
     var errors = require('errors');
     var angular = require('angular');
     var _ = require('lodash');
@@ -96,6 +96,9 @@ define(function (require) {
           // fetch the object from ES
           return docSource.fetch()
           .then(function applyESResp(resp) {
+            
+            obj._source = _.cloneDeep(resp._source);
+
             if (!resp.found) throw new errors.SavedObjectNotFound(type);
 
             var meta = resp._source.kibanaSavedObjectMeta || {};
@@ -167,8 +170,17 @@ define(function (require) {
         docSource.id(obj.id);
 
         // index the document
-        return docSource.doIndex(body).then(function (id) {
+        return obj.saveSource(body);
+      };
+
+      obj.saveSource = function (source) {
+        return docSource.doIndex(source).then(function (id) {
           obj.id = id;
+        })
+        .then(function () {
+          return es.indices.refresh({
+            index: configFile.kibanaIndex
+          });
         })
         .then(function () {
           // ensure that the object has the potentially new id
@@ -184,6 +196,22 @@ define(function (require) {
       obj.destroy = function () {
         docSource.cancelPending();
         if (obj.searchSource) obj.searchSource.cancelPending();
+      };
+
+      /**
+       * Delete this object from Elasticsearch
+       * @return {promise}
+       */
+      obj.delete = function () {
+        return es.delete({
+          index: configFile.kibanaIndex,
+          type: type,
+          id: this.id
+        }).then(function () {
+          return es.indices.refresh({
+            index: configFile.kibanaIndex
+          });
+        });
       };
 
     }

@@ -8,7 +8,16 @@ define(function (require) {
     'kibana/notify'
   ]);
 
-  module.service('savedSearches', function (configFile, es, createNotifier, SavedSearch) {
+  // Register this service with the saved object registry so it can be 
+  // edited by the object editor.
+  require('apps/settings/saved_object_registry').register({
+    service: 'savedSearches',
+    title: 'Searches'
+  });
+
+  module.service('savedSearches', function (config, configFile, es, createNotifier, SavedSearch) {
+
+
     var notify = createNotifier({
       location: 'Saved Searches'
     });
@@ -17,8 +26,13 @@ define(function (require) {
       return (new SavedSearch(id)).init();
     };
 
+    this.urlFor = function (id) {
+      return '#/discover/' + id;
+    };
+
     this.find = function (searchString) {
-      var body = searchString.length ? {
+      var self = this;
+      var body = searchString ? {
           query: {
             simple_query_string: {
               query: searchString + '*',
@@ -36,7 +50,7 @@ define(function (require) {
         return resp.hits.hits.map(function (hit) {
           var source = hit._source;
           source.id = hit._id;
-          source.url = '#/discover/' + hit._id;
+          source.url = self.urlFor(hit._id);
           return source;
         });
       });

@@ -6,12 +6,38 @@ kibana-settings-app,
 kbn-settings-indices,
 kbn-settings-indices-edit,
 kbn-settings-indices-create,
-kbn-settings-advanced {
+kbn-settings-advanced,
+kbn-settings-objects, 
+kbn-settings-objects-view {
   display: block;
 }
 
 .settings-nav {
   text-transform: capitalize;
+}
+
+kbn-settings-objects {  
+  form {
+    margin-bottom: @line-height-computed;
+  }
+  .list-unstyled {
+    // border-top: 1px solid @gray-lighter;
+    // margin-top: @line-height-computed;
+    li {
+      border-bottom: 1px solid @gray-lighter;
+      padding: 8px;
+    }
+  }
+  .empty {
+    color: @gray-light;
+  }
+}
+
+kbn-settings-objects-view {
+  label {
+    font-family: @font-family-monospace;
+  }
+  .ace_editor { height: 300px; }
 }
 
 .advanced-settings {

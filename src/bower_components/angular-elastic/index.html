@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en-gb" data-ng-app="elasticDemo" id="ng-app">
+<head>
+  <meta charset="utf-8">
+  <title>Angular Elastic</title>
+  <meta name="viewport" content="width=device-width">
+  <link rel="stylesheet" href="//necolas.github.io/normalize.css/2.1.1/normalize.css">
+  <style>
+    html {
+      background: #e7f3ff;
+      color: #1c000e;
+      text-shadow: 0 1px 0 #fff;
+    }
+    body {
+      margin: 8px auto;
+      max-width: 90%;
+      width: 480px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-weight: normal;
+      font-size: 30px;
+    }
+    a {
+      color: #0074e7;
+      text-decoration: none;
+      -webkit-transition: all 250ms ease-in-out;
+         -moz-transition: all 250ms ease-in-out;
+           -o-transition: all 250ms ease-in-out;
+              transition: all 250ms ease-in-out;
+    }
+    a:hover,
+    a:focus,
+    a:active {
+      color: #0067ce;
+      -webkit-transition: none;
+         -moz-transition: none;
+           -o-transition: none;
+              transition: none;
+    }
+    textarea {
+      padding: 10px;
+      width: 300px;
+      max-width: 90%;
+    }
+    .animate:focus {
+      -webkit-transition: height 50ms ease-in-out;
+         -moz-transition: height 50ms ease-in-out;
+           -o-transition: height 50ms ease-in-out;
+              transition: height 50ms ease-in-out;
+    }
+    #first {
+      font-size: 30px;
+    }
+  </style>
+</head>
+<body data-ng-controller="elasticDemoController">
+
+  <h1>Angular Elastic</h1>
+
+  <form data-ng-submit="submit()">
+    <p>
+      <textarea class="msd-elastic" data-ng-model="foo" id="first" data-ng-show="show" ng-init="show = true"></textarea>
+    </p>
+    <small data-ng-show="show"><a href data-ng-click="show = false">Hide</a> | </small>
+    <small data-ng-show="!show"><a href data-ng-click="show = true">Show</a> | </small>
+    <small><a href data-ng-click="foo = 'Model changed'">Change model</a></small>
+    <p>
+      <textarea class="animate msd-elastic: \n;" data-ng-model="bar"></textarea>
+    </p>
+    <p>
+      <input type="submit" value="Submit and reset">
+    </p>
+  </form>
+
+  <small>
+    <a href="https://github.com/monospaced/angular-elastic">https://github.com/monospaced/angular-elastic</a> <br>
+    <a href="http://monospaced.github.io/">Monospaced Labs</a>
+  </small>
+
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular.min.js"></script>
+  <script src="elastic.js"></script>
+  <script>
+    angular.module('elasticDemo', ['monospaced.elastic'])
+      .controller('elasticDemoController', ['$scope', function($scope){
+        'use strict';
+
+        $scope.foo = 'This textarea is going to grow when you fill it with text. Just type a few more words in it and you will see. This textarea is going to grow when you fill it with text.';
+        $scope.bar = 'Elastic with a CSS transition. Try typing something...';
+
+        $scope.submit = function(){
+          $scope.bar = '';
+        };
+      }]);
+  </script>
+</body>
+</html>

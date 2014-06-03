@@ -4,6 +4,7 @@ define(function (require, module, exports) {
   require('css!./styles/main.css');
   require('filters/start_from');
   require('./directives/advanced');
+  require('./directives/objects');
   require('./directives/indices/indices');
   require('./directives/indices/create');
   require('./directives/indices/edit');
