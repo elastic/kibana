@@ -7,7 +7,7 @@ define(function (require) {
     var notify = new Notifier();
 
     return function (indexPattern, resp) {
-      notify.event('convert ES response');
+      var complete = notify.event('convert ES response');
 
       var fieldsByName = indexPattern.fieldsByName;
 
@@ -80,14 +80,17 @@ define(function (require) {
 
           result.buckets.forEach(function (bucket) {
             var label = col.aggParams.field + ': ' + bucket.key;
-            var group = groupMap[label];
+            var id = col.aggParams.field + bucket.key;
+            var group = groupMap[id];
 
             if (!group) {
               group = {
+                column: col,
+                value: bucket.key,
                 label: label
               };
               groupList.push(group);
-              groupMap[label] = group;
+              groupMap[id] = group;
             }
 
             splitAndFlatten(group, bucket);
@@ -156,27 +159,59 @@ define(function (require) {
       // their individual charts, we can go through and
       // cleanup the leftover metadata and label each chart
       var labelStack = [];
+
+      // we will also collect a raw view of the data, which may be displayed in a table view by the visualization
+      var raw = {
+        // track the columns from splits, write when we hit the first chart
+        splitColumns: [],
+        splitValStack: [],
+        // written the first time a chart is encoutered, merges the splitColumns and the chart's columns
+        columns: null,
+        rows: []
+      };
+
       (function cleanup(obj) {
         if (obj.rows && obj.columns) {
           // this obj is a chart
+
+          if (!raw.columns) {
+            raw.columns = raw.splitColumns.concat(obj.columns);
+          }
+
           var rows = obj.rows;
           var cols = obj.columns;
           delete obj.rows;
           delete obj.columns;
           obj.label = [].concat(labelStack, obj.label).filter(Boolean).join(' > ');
 
+          rows.forEach(function (row) {
+            raw.rows.push([].concat(raw.splitValStack, row));
+          });
+
           converter(obj, cols, rows);
         } else if (obj.splits) {
           var splits = obj.splits;
           delete obj.splits;
+
           labelStack.push(obj.label);
-          _.forOwn(splits, cleanup);
+          _.forOwn(splits, function (split) {
+            raw.splitColumns.push(split.column);
+            raw.splitValStack.push(split.value);
+            delete split.column;
+            delete split.value;
+
+            cleanup(split);
+
+            raw.splitColumns.pop();
+            raw.splitValStack.pop();
+          });
+
           labelStack.pop();
         }
       }(chartData));
 
-
-      notify.event('convert ES response', true);
+      chartData.raw = raw;
+      complete();
       return chartData;
     };
   };

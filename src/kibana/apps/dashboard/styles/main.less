@@ -45,11 +45,13 @@ dashboard-grid {
       height: 100%;
 
       // flex layout allows us to define the visualize element as "fill available space"
-      display: flex;
+      .flex-display();
       .flex-direction(column);
       .justify-content(flex-start);
 
       .panel-heading {
+        min-height: 45px;
+
         a {
           color: @text-color;
           border: none;

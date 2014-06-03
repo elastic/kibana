@@ -1,0 +1,35 @@
+@import (reference) "./_mixins.less";
+paginate {
+  .flex-display();
+  .flex-direction(column);
+
+  paginate-controls {
+    .flex-display();
+    padding: 5px;
+
+    .paginate-other-pages {
+      .flex-grow(1);
+      text-align: center;
+
+      a {
+        display: inline-block;
+        margin: 10px 15px 0;
+
+        &.active {
+          color: @brand-primary;
+          text-decoration: none;
+        }
+      }
+    }
+
+    @media (max-width: @screen-sm-min) {
+      .jump-to-end {
+        display: none;
+      }
+    }
+  }
+
+  .paginate-content {
+    .flex-grow(1);
+  }
+}
