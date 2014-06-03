@@ -1,0 +1,53 @@
+[[upgrade]]
+== Upgrade
+
+Marvel must be upgraded on *every node in the cluster*.  If a monitoring cluster is in use as well, Marvel must be upgraded on that cluster as well.  It is not necessary to fully shut down the production cluster in order to perform the upgrade.  A rolling upgrade of the production cluster is sufficient.  The monitoring cluster, if present, can be upgraded using a rolling upgrade, or it can be shut down and upgraded while offline.  The monitoring cluster should be upgraded before the production cluster.
+
+In order to perform a rolling Marvel upgrade:
+
+* Disable shard reallocation (optional).  This is done to allow for a faster startup after cluster shutdown.  If this step is not performed, the nodes will immediately start trying to replicate shards to each other on startup and will spend a lot of time on wasted I/O.  With shard reallocation disabled, the nodes will join the cluster with their indices intact, without attempting to rebalance.  After startup is complete, reallocation will be turned back on.
++
+This syntax applies to Elasticsearch 1.0 and later:
++
+[source,sh]
+--------------------------------------------------
+curl -XPUT localhost:9200/_cluster/settings -d '{
+  "transient" : {
+    "cluster.routing.allocation.enable" : "none"
+  }
+}'
+--------------------------------------------------
+
+* On each node in the cluster, one at a time, do the following:
+
+** Stop Elasticsearch.
+** Once the node stopped, remove the old version of the Marvel plugin:
++
+[source,sh]
+--------------------------------------------------
+bin/plugin -r marvel
+--------------------------------------------------
+
+** On the same node, install the latest version of the Marvel plugin:
++
+[source,sh]
+--------------------------------------------------
+bin/plugin -i elasticsearch/marvel/latest
+--------------------------------------------------
+
+** Start Elasticsearch and confirm that the node rejoins the cluster and that there are no errors in the logs.
+
+* Repeat the above for each node in the cluster, including dedicated master noded is used.
+
+* When all nodes in the cluster are upgraded, re-enable shard allocation:
++
+[source,sh]
+--------------------------------------------------
+curl -XPUT localhost:9200/_cluster/settings -d '{
+  "transient" : {
+      "cluster.routing.allocation.enable" : "all"
+  }
+}'
+--------------------------------------------------
+
+* If you're using a dedicated monitoring cluster, follow the same procedure to upgrade the production cluster.

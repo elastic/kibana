@@ -21,6 +21,8 @@ Browser::       The latest version of Chrome, Firefox or Safari is
 
 include::install.asciidoc[]
 
+include::upgrade.asciidoc[]
+
 include::configuration.asciidoc[]
 
 include::changes.asciidoc[]
