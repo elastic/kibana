@@ -31,6 +31,20 @@ size of the index data across the whole cluster.
 
 image:images/index_stats_thumb.png["Index Statistics Dashboard",link="images/index_stats.png"]
 
+=== Shard Allocation
+
+The _Shard Allocation_ dashboard displays how the shards are allocated across nodes.
+The dashboard also shows the status of the shards. It has two perspectives, _By Indices_ and _By Nodes_.
+The "By Indices" view lists each index and shows you how it's shards are
+distributed across nodes. The "By Nodes" view lists each node and shows you which shards the node current host.
+
+The viewer also has a playback feature which allows you to view the history of the shard allocation. You can rewind to each
+allocation event and then play back the history from any point in time. Hover on relocating shards to highlight both
+their previous and new location. The time line color changes based on the state of the cluster for
+each time period.
+
+image:images/shard_allocation_thumb.png["Shard Allocation Dashboard",link="images/shard_allocation.png"]
+
 === Cluster Pulse
 
 The Cluster Pulse Dashboard allows you to see any event of interest in the cluster. Typical

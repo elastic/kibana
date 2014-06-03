@@ -1,6 +1,41 @@
 [[change_list]]
 == Change list
 
+=== 1.2.0
+  - New Shard Allocation Dashboard.
+  - Simplified navigation and dashboard customization.
+  - Sense:
+    * Update the KB to the ES 1.2.0 API, adding the following:
+      * `_cat/plugins`
+      * `_cat/segments`
+      * `_search/template`
+      * `_count`
+      * `_snapshot`
+      * Alias support for index creation.
+      * Significant terms aggregation.
+      * Percentiles aggregation.
+      * Cardinality aggregation.
+      * Time_zone keyword to date_histogram facet/aggregation.
+    * Removed deprecated `custom_score` & `custom_boost_factor` from the 1.0 API.
+    * Fixed a bug causing the query panel to loose focus after running a command.
+
+  - Charts and Dashboards changes:
+    * Added an information icon next to the status information of Cluster Summary panel. Hovering on it will show a
+      short explanation of current status.
+    * The indices stats table in the Overview dashboard now shows an information icon next to red and yellow indices.
+      Hovering on it will show a short shard level summary.
+    * Marvel's index template will now be automatically updated upon upgrade.
+    * Added field data & filter cache eviction charts to Node Stats dashboard and Index Stats dashboard.
+    * Added field data circuit breaker charts to Node Stats dashboard.
+    * Added a registration & purchasing form.
+    * Hidden indexes are now shown by default.
+    * Default cluster pulse default time span to 7 days.
+    * Fixed: Split brain detection algorithm didn't fire in some configurations.
+
+
+  - `marvel.agent.exporter.es.host` configuration option now defaults to port 9200.
+
+
 === 1.1.1
   - Fixed: agent did not interpret timeout settings correctly, causing potential connectivity errors when shipping data.
 
