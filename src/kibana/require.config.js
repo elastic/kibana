@@ -21,6 +21,9 @@ require.config({
     'angular-route': '../bower_components/angular-route/angular-route',
     'angular-bootstrap': '../bower_components/angular-bootstrap/ui-bootstrap-tpls',
     'angular-bindonce': '../bower_components/angular-bindonce/bindonce',
+    'angular-ui-ace': '../bower_components/angular-ui-ace/ui-ace',
+    'angular-elastic': '../bower_components/angular-elastic/elastic',
+    ace: '../bower_components/ace-builds/src-noconflict/ace',
     async: '../bower_components/async/lib/async',
     bootstrap: '../bower_components/bootstrap/dist/js/bootstrap',
     css: '../bower_components/require-css/css',
@@ -32,6 +35,7 @@ require.config({
     gridster: '../bower_components/gridster/dist/jquery.gridster',
     jsonpath: '../bower_components/jsonpath/lib/jsonpath',
     k4d3: '../bower_components/K4D3/build/k4.d3',
+    inflection: '../bower_components/inflection/lib/inflection',
     bower_components: '../bower_components'
   },
   shim: {
@@ -48,7 +52,11 @@ require.config({
     'elasticsearch': ['angular'],
     'angular-bootstrap': ['angular', 'bootstrap'],
     'angular-bindonce': ['angular'],
-    k4d3: ['jquery', 'lodash']
+    k4d3: ['jquery', 'lodash'],
+    'angular-ui-ace': ['angular', 'ace'],
+    inflection: {
+      exports: 'inflection'
+    }
   },
   waitSeconds: 60
 });

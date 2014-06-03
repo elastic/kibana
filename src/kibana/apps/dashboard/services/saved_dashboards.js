@@ -4,6 +4,14 @@ define(function (require) {
  // bring in the factory
   require('./_saved_dashboard');
 
+
+  // Register this service with the saved object registry so it can be 
+  // edited by the object editor.
+  require('apps/settings/saved_object_registry').register({
+    service: 'savedDashboards',
+    title: 'Dashboards'
+  });
+
   // This is the only thing that gets injected into controllers
   module.service('savedDashboards', function (SavedDashboard, config, es) {
 
@@ -14,8 +22,13 @@ define(function (require) {
       return (new SavedDashboard(id)).init();
     };
 
+    this.urlFor = function (id) {
+      return '#/dashboard/' + id;
+    };
+
     this.find = function (searchString) {
-      var body = searchString.length ? {
+      var self = this;
+      var body = searchString ? {
           query: {
             simple_query_string: {
               query: searchString + '*',
@@ -33,7 +46,7 @@ define(function (require) {
         return resp.hits.hits.map(function (hit) {
           var source = hit._source;
           source.id = hit._id;
-          source.url = '#/dashboard/' + hit._id;
+          source.url = self.urlFor(hit._id);
           return source;
         });
       });

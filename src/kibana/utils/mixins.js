@@ -57,7 +57,24 @@ define(function (require) {
       };
     },
     isNumeric: function (v) {
-      return !_.isNaN(v) && !_.isNaN(parseInt(v, 10));
+      return !_.isNaN(v) && !_.isArray(v) && !_.isNaN(parseInt(v, 10));
+    },
+    setValue: function (obj, name, value) {
+      var path = name.split('.');
+      var current = obj;
+
+      (function recurse() {
+        var step = path.shift();
+
+        if (path.length === 0) {
+          current[step] = value;
+        }
+
+        if (_.isObject(current)) {
+          current = current[step];
+          recurse();
+        }
+      }());
     }
   });
 

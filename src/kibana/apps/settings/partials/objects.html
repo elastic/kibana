@@ -1,0 +1,30 @@
+<kbn-settings-app section="objects">
+  <kbn-settings-objects class="container">
+    <h2>Edit Saved Objects</h2>
+    <div class="bs-callout bs-callout-warning">
+      <h4>Caution: You can break stuff here</h4>
+      Be careful in here, these setting are for very advanced users only. Tweaks you make here can break large poritions of Kibana.
+      Some of these settings may be undocumented, unsupported or experimental. Seriously, if you thought the "Advance" tab was dangerous this is even more extreme!
+    </div>
+    <form>
+      <input ng-model="advancedFilter" class="form-control span12" type="text" placeholder="Filter"/>
+    </form>
+
+    <tabset>
+      <tab ng-click="changeTab(service)" active="state.tab == service.title" heading="{{service.title}}" ng-repeat="service in services">
+        <ul class="list-unstyled">
+          <li ng-repeat="item in service.data">
+            <div class="pull-right">
+              <a href="{{ item.link }}" class="btn-success btn btn-xs">View</a>
+              &nbsp;
+              <a href="#/settings/objects/{{service.service}}/{{item.id}}" class="btn-primary btn btn-xs">Edit</a>
+            </div>
+            <a href="#/settings/objects/{{service.service}}/{{item.id}}"><i ng-class="item.icon" class="fa"></i>&nbsp;{{ item.title }}</a>
+          </li>
+          <li ng-if="!service.data.length" class="empty">You do not have any "{{service.title}}" saved.</li>
+        </ul>
+      </tab>
+    </tabset>
+
+  </kbn-settings-objects>
+</kbn-settings-app>

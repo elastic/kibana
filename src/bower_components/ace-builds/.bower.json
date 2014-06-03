@@ -1,0 +1,14 @@
+{
+  "name": "ace-builds",
+  "homepage": "https://github.com/ajaxorg/ace-builds",
+  "version": "1.1.3",
+  "_release": "1.1.3",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.1.3",
+    "commit": "fc9d2cae9fe8e6e95e74c86a31d21caadd8f9f39"
+  },
+  "_source": "git://github.com/ajaxorg/ace-builds.git",
+  "_target": "~1.1.1",
+  "_originalSource": "ace-builds"
+}

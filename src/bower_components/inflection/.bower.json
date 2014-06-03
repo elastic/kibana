@@ -1,0 +1,46 @@
+{
+  "name": "inflection",
+  "version": "1.3.5",
+  "homepage": "https://github.com/dreamerslab/node.inflection",
+  "authors": [
+    "ben <ben@dreamerslab.com>"
+  ],
+  "description": "JavaScript Inflection Support",
+  "main": "inflection.min.js",
+  "keywords": [
+    "inflection",
+    "inflections",
+    "inflection-js",
+    "pluralize",
+    "singularize",
+    "camelize",
+    "underscore",
+    "humanize",
+    "capitalize",
+    "dasherize",
+    "titleize",
+    "demodulize",
+    "tableize",
+    "classify",
+    "foreign_key",
+    "ordinalize"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "_release": "1.3.5",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.3.5",
+    "commit": "9df1e87a168d6358d95e559278c17e627ebcf3c5"
+  },
+  "_source": "git://github.com/dreamerslab/node.inflection.git",
+  "_target": "~1.3.5",
+  "_originalSource": "inflection",
+  "_direct": true
+}
