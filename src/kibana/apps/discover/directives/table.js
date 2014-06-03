@@ -91,7 +91,7 @@ define(function (require) {
         filtering: '=',
         refresh: '=',
         maxLength: '=?',
-        mapping: '=?',
+        mapping: '=',
         timefield: '=?'
       },
       link: function ($scope, element, attrs) {

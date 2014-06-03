@@ -10,8 +10,10 @@
       <tr ng-repeat="field in row._fields" bindonce>
         <td bo-text="field" width="1%" class="discover-table-details-field"></td>
         <td width="1%" class="discover-table-details-buttons">
-          <i ng-click="filter(row, field, '+')" class="fa fa-search-plus"></i>
-          <i ng-click="filter(row, field, '-')" class="fa fa-search-minus"></i>
+          <span ng-show="mapping[field].indexed">
+            <i ng-click="filter(row, field, '+')" class="fa fa-search-plus"></i>
+            <i ng-click="filter(row, field, '-')" class="fa fa-search-minus"></i>
+          </span>
         </td>
 
         <td class="discover-table-details-value"><kbn-truncated orig="{{row._formatted[field] || row[field]}}" length=100></kbn-truncated></td>
