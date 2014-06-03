@@ -65,10 +65,11 @@
         <td>
             <span bo-text="field.name"></span>
             &nbsp;
-            <i
+            <span
               bo-if="indexPattern.timeFieldName === field.name"
-              tooltip="This field is represents the time that events occured"
-              class="fa fa-clock-o active"></i>
+              tooltip="This field represents the time that events occured"
+              class="label label-default">
+            <i class="fa fa-clock-o"></i>
           </td>
           <td bo-text="field.type"></td>
         </tr>
