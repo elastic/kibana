@@ -20,11 +20,14 @@ define(function (require) {
       scope: {
         columns: '=',
         sorting: '=',
+        mapping: '=',
         timefield: '=?'
       },
       template: headerHtml,
       controller: function ($scope) {
         $scope.headerClass = function (column) {
+          if ($scope.mapping[column] && !$scope.mapping[column].indexed) return;
+
           var sorting = $scope.sorting;
 
           if (!sorting) return [];
@@ -47,6 +50,7 @@ define(function (require) {
         };
 
         $scope.sort = function (column) {
+          if ($scope.mapping[column] && !$scope.mapping[column].indexed) return;
           var sorting = $scope.sorting || [];
           $scope.sorting = [column, sorting[1] === 'asc' ? 'desc' : 'asc'];
         };
@@ -80,6 +84,7 @@ define(function (require) {
       restrict: 'E',
       template: html,
       scope: {
+        fields: '=',
         columns: '=',
         rows: '=',
         sorting: '=',
