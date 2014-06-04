@@ -106,6 +106,7 @@ dashboard-grid {
   display: -webkit-box;
   display: -moz-box;
   display: -ms-flexbox;
+  display: -ms-box;
   display: -webkit-flex;
   display: flex;
   -webkit-flex-direction: column;

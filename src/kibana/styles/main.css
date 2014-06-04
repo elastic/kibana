@@ -6961,6 +6961,7 @@ paginate {
   display: -webkit-box;
   display: -moz-box;
   display: -ms-flexbox;
+  display: -ms-box;
   display: -webkit-flex;
   display: flex;
   -webkit-flex-direction: column;
@@ -6972,6 +6973,7 @@ paginate paginate-controls {
   display: -webkit-box;
   display: -moz-box;
   display: -ms-flexbox;
+  display: -ms-box;
   display: -webkit-flex;
   display: flex;
   padding: 5px;

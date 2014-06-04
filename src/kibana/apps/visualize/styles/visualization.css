@@ -73,16 +73,17 @@ visualize {
   display: -webkit-box;
   display: -moz-box;
   display: -ms-flexbox;
+  display: -ms-box;
   display: -webkit-flex;
   display: flex;
-  height: 100%;
-  width: 100%;
-  overflow: auto;
-  position: relative;
   -webkit-flex-direction: column;
   -moz-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  position: relative;
 }
 visualize .visualize-error {
   margin-top: 20px;
@@ -104,15 +105,19 @@ visualize .visualize-show-table {
 visualize .visualize-show-table.active {
   margin-bottom: 10px;
 }
-visualize .visualize-chart,
-visualize .visualize-table {
+visualize .visualize-chart {
   -webkit-flex-grow: 1;
   -moz-flex-grow: 1;
   -ms-flex-grow: 1;
   flex-grow: 1;
-  height: 50%;
-}
-visualize .visualize-chart {
+  -webkit-flex-shrink: 1;
+  -moz-flex-shrink: 1;
+  -ms-flex-shrink: 1;
+  flex-shrink: 1;
+  -webkit-flex-basis: 100%;
+  -moz-flex-basis: 100%;
+  -ms-flex-basis: 100%;
+  flex-basis: 100%;
   overflow: hidden;
 }
 visualize .visualize-chart.table-visible {
@@ -123,7 +128,7 @@ visualize .visualize-chart.only-table {
 }
 visualize .visualize-table {
   display: none;
-  overflow: auto;
+  overflow: hidden;
 }
 visualize .visualize-table.visible {
   display: block;
