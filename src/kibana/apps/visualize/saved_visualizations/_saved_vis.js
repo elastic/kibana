@@ -20,7 +20,6 @@ define(function (require) {
         };
       }
 
-      var typeDef;
       var defaultParent = opts.parentSearchSource;
 
       courier.SavedObject.call(vis, {
@@ -49,9 +48,9 @@ define(function (require) {
         searchSource: true,
 
         afterESResp: function setVisState() {
-          if (!typeDef || vis.typeName !== typeDef.name) {
+          if (!vis.typeDef || vis.typeName !== vis.typeDef.name) {
             // refresh the typeDef
-            typeDef = typeDefs.byName[vis.typeName];
+            vis.typeDef = typeDefs.byName[vis.typeName];
             // refresh the defaults for all config categories
             configCats.forEach(function (category) {
               vis._initConfigCategory(category, vis[category.name]);
@@ -130,7 +129,7 @@ define(function (require) {
 
             vis._fillConfigsToMinimum();
 
-            _.assign(vis, typeDef.listeners);
+            _.assign(vis, vis.typeDef.listeners);
 
             return vis;
           });
@@ -172,7 +171,7 @@ define(function (require) {
       vis._initConfigCategory = function (category, cat) {
         cat = cat || {};
 
-        if (typeDef) _.assign(cat, category, typeDef.config[category.name]);
+        if (vis.typeDef) _.assign(cat, category, vis.typeDef.config[category.name]);
         cat.configDefaults = _.clone(category.configDefaults),
         cat.configs = cat.config || [];
 

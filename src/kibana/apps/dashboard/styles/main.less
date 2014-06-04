@@ -50,6 +50,7 @@ dashboard-grid {
       .justify-content(flex-start);
 
       .panel-heading {
+        .flex();
         min-height: 45px;
 
         a {
@@ -62,8 +63,9 @@ dashboard-grid {
           }
         }
       }
+
       visualize {
-        .flex-grow(1);
+        .flex(1, 1, 100%);
         height: auto;
       }
     }

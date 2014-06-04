@@ -366,6 +366,12 @@ define(function (require) {
     $scope.toggleField = function (name) {
       var field = _.find($scope.fields, { name: name });
 
+      // If we can't find the field in the mapping, ensure it isn't in the column list and abort
+      if (!field) {
+        $state.columns = _.without($state.columns, name);
+        return;
+      }
+
       // toggle the display property
       field.display = !field.display;
 

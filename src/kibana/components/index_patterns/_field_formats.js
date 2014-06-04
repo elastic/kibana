@@ -49,7 +49,11 @@ define(function (require) {
         convert: function (val) {
           if (_.isObject(val)) {
             return JSON.stringify(val);
-          } else {
+          }
+          else if (val == null) {
+            return '';
+          }
+          else {
             return '' + val;
           }
         }

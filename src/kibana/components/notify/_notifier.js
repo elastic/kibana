@@ -194,16 +194,26 @@ define(function (require) {
     var groups = window[type + 'Groups'] = {};
 
     return function logger(name, success) {
-      var status;
-      var ret;
+      var status; // status of the timer
+      var exec; // function to execute and wrap
+      var ret; // return value
 
-      if (success === void 0) {
+      var complete = function (val) { logger(name, true); return val; };
+      var failure = function (err) { logger(name, false); throw err; };
+
+      if (typeof success === 'function' || success === void 0) {
         // start
         groups[name] = now();
-        // function that can report on the success or failure of an op, and pass their value along
-        ret = function (val) { logger(name, true); return val; };
-        ret.failure = function (err) { logger(name, false); throw err; };
-      } else {
+        if (success) {
+          // success === the function to time
+          exec = success;
+        } else {
+          // function that can report on the success or failure of an op, and pass their value along
+          ret = complete;
+          ret.failure = failure;
+        }
+      }
+      else {
         groups[name] = now() - (groups[name] || 0);
         var time = ' in ' + groups[name].toFixed(2) + 'ms';
 
@@ -229,6 +239,21 @@ define(function (require) {
         }
       } else {
         log('KBN: ' + name + (status ? ' - ' + status : ''));
+      }
+
+      if (exec) {
+        if (exec.length) {
+          exec(complete, failure);
+        } else {
+          try {
+            exec();
+          } catch (e) {
+            failure(e);
+            return;
+          }
+
+          complete();
+        }
       }
 
       return ret;

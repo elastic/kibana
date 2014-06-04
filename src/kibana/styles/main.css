@@ -6961,6 +6961,7 @@ paginate {
   display: -webkit-box;
   display: -moz-box;
   display: -ms-flexbox;
+  display: -ms-box;
   display: -webkit-flex;
   display: flex;
   -webkit-flex-direction: column;
@@ -6972,6 +6973,7 @@ paginate paginate-controls {
   display: -webkit-box;
   display: -moz-box;
   display: -ms-flexbox;
+  display: -ms-box;
   display: -webkit-flex;
   display: flex;
   padding: 5px;
@@ -6981,6 +6983,14 @@ paginate paginate-controls .paginate-other-pages {
   -moz-flex-grow: 1;
   -ms-flex-grow: 1;
   flex-grow: 1;
+  -webkit-flex-shrink: 1;
+  -moz-flex-shrink: 1;
+  -ms-flex-shrink: 1;
+  flex-shrink: 1;
+  -webkit-flex-basis: 100%;
+  -moz-flex-basis: 100%;
+  -ms-flex-basis: 100%;
+  flex-basis: 100%;
   text-align: center;
 }
 paginate paginate-controls .paginate-other-pages a {
@@ -7001,6 +7011,14 @@ paginate .paginate-content {
   -moz-flex-grow: 1;
   -ms-flex-grow: 1;
   flex-grow: 1;
+  -webkit-flex-shrink: 1;
+  -moz-flex-shrink: 1;
+  -ms-flex-shrink: 1;
+  flex-shrink: 1;
+  -webkit-flex-basis: auto;
+  -moz-flex-basis: auto;
+  -ms-flex-basis: auto;
+  flex-basis: auto;
 }
 html,
 body {
