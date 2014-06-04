@@ -27,6 +27,8 @@ define(function (require) {
       max: 35
     };
 
+    $scope.conflictFields = _.filter($scope.indexPattern.fields, {type: 'conflict'});
+
     $scope.refreshFields = function () {
       $scope.indexPattern.refreshFields();
     };

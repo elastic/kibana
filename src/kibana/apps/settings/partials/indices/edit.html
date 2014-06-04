@@ -27,11 +27,19 @@
         </h1>
         <p>
           This page lists every field in the <strong>{{indexPattern.id}}</strong>
-          index and the field's associated core type as recorded by Elasticsearch
+          index and the field's associated core type as recorded by Elasticsearch.
+          While this list allows you to view the core type of each field, changing
+          field types must be done using Elasticsearch's
+          <a href="http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/mapping.html">
+            Mapping API
+          </a>
         </p>
         <div bo-if="indexPattern.timeFieldName && indexPattern.intervalName" class="alert alert-info">
           This index uses a <strong>Time-based index pattern</strong> which repeats <span bo-text="indexPattern.getInterval().display"></span>
-        </p>
+        </div>
+        <div bo-if="conflictFields.length" class="alert alert-warning">
+          <strong>Mapping conflict!</strong> {{conflictFields.length > 1 ? conflictFields.length : 'A'}} field{{conflictFields.length > 1 ? 's' : ''}} {{conflictFields.length > 1 ? 'are' : 'is'}} defined as several types (string, integer, etc) across the indices that match this pattern. You may still be able to use these conflict fields in parts of Kibana, but they will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.
+        </div>
       </div>
 
       <div ng-hide="tablePages() == 1">
@@ -70,8 +78,15 @@
               tooltip="This field represents the time that events occured"
               class="label label-default">
             <i class="fa fa-clock-o"></i>
+            </span>
           </td>
-          <td bo-text="field.type"></td>
+          <td>
+            <span bo-text="field.type"></span>
+            <i
+            bo-if="field.type == 'conflict'"
+            tooltip="The type of this field changes across indices. It is unavailable for many analysis functions"
+            class="fa fa-warning text-color-warning"></i>
+          </td>
         </tr>
       </table>
     </div>
