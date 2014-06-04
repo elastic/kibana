@@ -43,7 +43,8 @@ define(function (require) {
           'attachment',
           'geo_point',
           'geo_shape',
-          'string'
+          'string',
+          'conflict'
         ],
         name: 'string',
         convert: function (val) {
@@ -95,7 +96,9 @@ define(function (require) {
       attachment: formats.byName.string,
       geo_point:  formats.byName.string,
       geo_shape:  formats.byName.string,
-      string:     formats.byName.string
+      string:     formats.byName.string,
+      conflict:   formats.byName.string
+
     };
 
     return formats;
