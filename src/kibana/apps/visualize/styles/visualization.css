@@ -130,7 +130,6 @@ visualize .visualize-chart {
   -ms-flex-basis: 100%;
   flex-basis: 100%;
   overflow: hidden;
-  position: relative;
 }
 visualize .visualize-chart.table-visible {
   margin-bottom: 10px;
