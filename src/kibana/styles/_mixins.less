@@ -150,6 +150,11 @@
   -ms-flex-direction: @rule;
   flex-direction: @rule;
 }
+.flex (@grow: 0, @shrink: 0, @basis: auto) {
+  .flex-grow(@grow);
+  .flex-shrink(@shrink);
+  .flex-basis(@basis);
+}
 .flex-grow (@rule) {
   -webkit-flex-grow: @rule;
   -moz-flex-grow: @rule;
