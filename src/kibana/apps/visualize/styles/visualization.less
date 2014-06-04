@@ -31,7 +31,7 @@ visualize {
     background-color: @well-bg;
     text-align: center;
     &.active {
-      margin: 15px 0;
+      margin-bottom: 10px;
     }
   }
 
@@ -42,10 +42,14 @@ visualize {
   }
 
   .visualize-chart {
+    overflow: hidden;
+
     &.table-visible {
-      @media (max-width: @screen-md-min) {
-        display: none;
-      }
+      margin-bottom: 10px;
+    }
+
+    &.only-table {
+      display: none;
     }
   }
 
