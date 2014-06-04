@@ -18,43 +18,80 @@ define(function (require) {
       template: require('text!../partials/visualize.html'),
       link: function ($scope, $el) {
         var chart; // set in "vis" watcher
+        var notify = createNotifier();
 
         var $visualize = $el.find('.visualize-chart');
         var $table = $el.find('.visualize-table');
+        var $showTableBtn = $el.find('.visualize-show-table');
 
         $scope.showTable = false;
+        $scope.onlyShowTable = false;
 
         var buildFlattenedData = function () {
-          if (!$scope.showTable) {
-            delete $scope.flattenedData;
-            return;
-          }
+          notify.event('flatten data for table', function () {
+            if (!$scope.showTable) {
+              delete $scope.flattenedData;
+              return;
+            }
 
-          // clone chartData.raw so that we can replace the rows and columns
-          $scope.flattenedData = _.clone($scope.chartData.raw);
+            // clone chartData.raw so that we can replace the rows and columns
+            $scope.flattenedData = _.clone($scope.chartData.raw);
 
-          // flatten the fields to a list of strings
-          $scope.flattenedData.columns = $scope.chartData.raw.columns.map(function (col) {
-            return col.aggParams ? col.aggParams.field : 'count';
-          });
+            // flatten the fields to a list of strings
+            $scope.flattenedData.columns = $scope.chartData.raw.columns.map(function (col) {
+              return col.aggParams ? col.aggParams.field : 'count';
+            });
 
-          // collect the formats before itterating
-          var formats = $scope.chartData.raw.columns.map(function (col) {
-            return col.field ? col.field.format.convert : _.identity;
-          });
-          // format all of the row values
-          $scope.flattenedData.rows = $scope.chartData.raw.rows.map(function (row) {
-            return row.map(function (cell, i) {
-              return formats[i](cell);
+            // collect the formats before itterating
+            var formats = $scope.chartData.raw.columns.map(function (col) {
+              return col.field ? col.field.format.convert : _.identity;
+            });
+            // format all of the row values
+            $scope.flattenedData.rows = $scope.chartData.raw.rows.map(function (row) {
+              return row.map(function (cell, i) {
+                return formats[i](cell);
+              });
             });
           });
         };
 
+        var callChartRender = function () {
+          notify.event('call chart render', function () {
+            chart.render($scope.chartData);
+          });
+        };
+
+        var applyClassNames = function () {
+          // external
+          $el.toggleClass('only-visualization', !$scope.showTable);
+          $el.toggleClass('visualization-and-table', $scope.showTable && !$scope.onlyShowTable);
+          $el.toggleClass('only-table', $scope.onlyShowTable);
+
+          // interval
+          $table.toggleClass('visible', $scope.showTable);
+          $visualize.toggleClass('table-visible', $scope.showTable);
+          $visualize.toggleClass('only-table', $scope.onlyShowTable);
+          $showTableBtn.toggleClass('active', $scope.showTable);
+        };
+
+        var calcResponsiveStuff = function () {
+          var containerTooShort = $el.height() < 750;
+          var containerTooThin = $el.width() < 400;
+          $scope.onlyShowTable = $scope.showTable && (containerTooShort || containerTooThin);
+        };
+
         var render = function () {
           buildFlattenedData();
-          if (chart && $scope.chartData && $visualize.is(':visible')) {
-            chart.render($scope.chartData);
+          applyClassNames();
+          if (chart && $scope.chartData && !$scope.onlyShowTable) {
+            callChartRender();
           }
+        };
+
+        $scope.toggleTable = function () {
+          $scope.showTable = !$scope.showTable;
+          calcResponsiveStuff();
+          render();
         };
 
         $scope.$watch('vis', function (vis, prevVis) {
@@ -73,7 +110,6 @@ define(function (require) {
           }
 
           var typeDefinition = typeDefs.byName[vis.typeName];
-          var notify = createNotifier({ location: vis.title || vis.typeName + ' visualization' });
           var params = {
             type: vis.typeName,
           };
@@ -100,8 +136,6 @@ define(function (require) {
           $scope.$root.$broadcast('ready:vis');
         });
 
-        $scope.$watch('showTable', render);
-
         $scope.$on('resize', function () {
           var old;
           (function waitForAnim() {
@@ -112,6 +146,9 @@ define(function (require) {
               // check each 50ms if the animations are complete and then render when they are
               return setTimeout(waitForAnim, 200);
             }
+
+            calcResponsiveStuff();
+            applyClassNames();
 
             // chart reference changes over time, don't bind to a specific chart object.
             if (chart) chart.resize();

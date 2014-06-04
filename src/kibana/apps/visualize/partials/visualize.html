@@ -1,12 +1,15 @@
-<div class="visualize-chart" ng-class="{ 'table-visible': showTable }"></div>
-<div
-  ng-click="showTable = !showTable"
-  ng-class="{ active: showTable }"
-  class="visualize-show-table">
-  <small><i class="fa fa-table"></i></small>
+<div class="visualize-chart"></div>
+<div ng-click="toggleTable()" class="visualize-show-table">
+  <small>
+    <i
+      ng-class="{
+        'fa-chevron-up': !showTable,
+        'fa-chevron-down': showTable
+      }"
+      class="fa"></i></small>
 </div>
-<div class="visualize-table" ng-class="{ 'visible': showTable }">
-  <paginate list="flattenedData.rows" per-page="30">
+<div class="visualize-table">
+  <paginate list="flattenedData.rows" per-page="10">
     <table class="table">
       <thead>
         <tr>

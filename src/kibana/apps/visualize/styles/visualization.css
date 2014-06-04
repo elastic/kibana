@@ -102,7 +102,7 @@ visualize .visualize-show-table {
   text-align: center;
 }
 visualize .visualize-show-table.active {
-  margin: 15px 0;
+  margin-bottom: 10px;
 }
 visualize .visualize-chart,
 visualize .visualize-table {
@@ -112,10 +112,14 @@ visualize .visualize-table {
   flex-grow: 1;
   height: 50%;
 }
-@media (max-width: 992px) {
-  visualize .visualize-chart.table-visible {
-    display: none;
-  }
+visualize .visualize-chart {
+  overflow: hidden;
+}
+visualize .visualize-chart.table-visible {
+  margin-bottom: 10px;
+}
+visualize .visualize-chart.only-table {
+  display: none;
 }
 visualize .visualize-table {
   display: none;

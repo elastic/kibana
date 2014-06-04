@@ -7,11 +7,21 @@
 }
 
 .discover-timechart {
-  margin-top: -20px; // TODO: Remove this when the vis CSS is better
   margin-bottom: 20px;
   display: block;
-  height: 200px;
   position: relative;
+
+  visualize {
+    height: 200px;
+
+    &.only-table {
+      height: auto;
+
+      .visualize-table {
+        height: auto;
+      }
+    }
+  }
 
   .chartwrapper {
     position: absolute;
@@ -25,12 +35,13 @@
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    bottom: 0;
+    right: 0;
+    z-index: 20;
+
     opacity: 0.75;
     text-align: center;
     background-color: #ffffff;
-    z-index: 20;
 
     .spinner {
       position: absolute;
