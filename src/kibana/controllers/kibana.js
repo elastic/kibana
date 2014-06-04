@@ -13,6 +13,7 @@ define(function (require) {
   require('directives/spinner');
   require('directives/paginate');
   require('directives/pretty_duration');
+  require('directives/rows');
 
 
   require('angular-bootstrap');
