@@ -5,11 +5,11 @@
 
 visualize {
   .flex-display();
+  .flex-direction(column);
   height: 100%;
   width: 100%;
   overflow: auto;
   position: relative;
-  .flex-direction(column);
 
   .visualize-error {
     margin-top: 20px;
@@ -35,13 +35,10 @@ visualize {
     }
   }
 
-  .visualize-chart,
-  .visualize-table {
-    .flex-grow(1);
-    height: 50%;
-  }
-
   .visualize-chart {
+    .flex-grow(1);
+    .flex-shrink(1);
+    .flex-basis(100%);
     overflow: hidden;
 
     &.table-visible {
@@ -55,7 +52,7 @@ visualize {
 
   .visualize-table {
     display: none;
-    overflow: auto;
+    overflow: hidden;
 
     &.visible {
       display: block;
