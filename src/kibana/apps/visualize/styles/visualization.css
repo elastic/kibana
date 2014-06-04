@@ -104,6 +104,9 @@ visualize .visualize-show-table {
 visualize .visualize-show-table.active {
   margin: 15px 0;
 }
+visualize .visualize-chart {
+    position: relative;
+}
 visualize .visualize-chart,
 visualize .visualize-table {
   -webkit-flex-grow: 1;
