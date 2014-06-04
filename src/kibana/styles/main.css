@@ -6976,7 +6976,7 @@ paginate paginate-controls {
   display: -ms-box;
   display: -webkit-flex;
   display: flex;
-  padding: 5px;
+  padding: 5px 5px 10px;
 }
 paginate paginate-controls .paginate-other-pages {
   -webkit-flex-grow: 1;

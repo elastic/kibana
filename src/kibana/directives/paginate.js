@@ -7,9 +7,8 @@ define(function (require) {
     return {
       restrict: 'E',
       transclude: true,
-      template: '<paginate-controls></paginate-controls>' +
-        '<div class="paginate-content" ng-transclude></div>' +
-        '<paginate-controls></paginate-controls>'
+      template: '<div class="paginate-content" ng-transclude></div>' +
+        '<paginate-controls ng-if="page.count > 1"></paginate-controls>'
       ,
       link: function ($scope, $el, attrs) {
         var perPage = _.parseInt(attrs.perPage);
