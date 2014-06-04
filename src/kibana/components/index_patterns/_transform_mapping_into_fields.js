@@ -32,11 +32,12 @@ define(function (require) {
             if (fields[name]) {
               if (fields[name].type !== mapping.type
               ) {
-                throw new MappingConflict(name);
-              }
-              return;
-            }
+                // conflict fields are not available for much except showing in the discover table
+                mapping.type = 'conflict';
+                mapping.indexed = false;
 
+              }
+            }
             fields[name] = _.pick(mapping, 'type', 'indexed', 'analyzed');
           });
         });
