@@ -7025,6 +7025,21 @@ body {
   height: 100%;
   margin: 0px;
 }
+.text-color-primary {
+  color: #46525d;
+}
+.text-color-info {
+  color: #3498db;
+}
+.text-color-success {
+  color: #31c471;
+}
+.text-color-warning {
+  color: #f39c12;
+}
+.text-color-danger {
+  color: #e74c3c;
+}
 ul.navbar-inline li {
   display: inline;
 }
