@@ -47,7 +47,8 @@ require.config({
     'angular-mocks': ['angular'],
     'elasticsearch': ['angular'],
     'angular-bootstrap': ['angular', 'bootstrap'],
-    'angular-bindonce': ['angular']
+    'angular-bindonce': ['angular'],
+    k4d3: ['jquery', 'lodash']
   },
   waitSeconds: 60
 });

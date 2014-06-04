@@ -73,16 +73,17 @@ visualize {
   display: -webkit-box;
   display: -moz-box;
   display: -ms-flexbox;
+  display: -ms-box;
   display: -webkit-flex;
   display: flex;
-  height: 100%;
-  width: 100%;
-  overflow: auto;
-  position: relative;
   -webkit-flex-direction: column;
   -moz-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  position: relative;
 }
 visualize .visualize-error {
   margin-top: 20px;
@@ -97,32 +98,61 @@ visualize .k4tip {
   white-space: pre-line;
 }
 visualize .visualize-show-table {
-  width: 100%;
+  -webkit-flex-grow: 0;
+  -moz-flex-grow: 0;
+  -ms-flex-grow: 0;
+  flex-grow: 0;
+  -webkit-flex-shrink: 0;
+  -moz-flex-shrink: 0;
+  -ms-flex-shrink: 0;
+  flex-shrink: 0;
+  -webkit-flex-basis: auto;
+  -moz-flex-basis: auto;
+  -ms-flex-basis: auto;
+  flex-basis: auto;
   background-color: #ecf0f1;
   text-align: center;
 }
 visualize .visualize-show-table.active {
-  margin: 15px 0;
+  margin-bottom: 10px;
 }
 visualize .visualize-chart {
-    position: relative;
-}
-visualize .visualize-chart,
-visualize .visualize-table {
   -webkit-flex-grow: 1;
   -moz-flex-grow: 1;
   -ms-flex-grow: 1;
   flex-grow: 1;
-  height: 50%;
+  -webkit-flex-shrink: 1;
+  -moz-flex-shrink: 1;
+  -ms-flex-shrink: 1;
+  flex-shrink: 1;
+  -webkit-flex-basis: 100%;
+  -moz-flex-basis: 100%;
+  -ms-flex-basis: 100%;
+  flex-basis: 100%;
+  overflow: hidden;
+  position: relative;
 }
-@media (max-width: 992px) {
-  visualize .visualize-chart.table-visible {
-    display: none;
-  }
+visualize .visualize-chart.table-visible {
+  margin-bottom: 10px;
+}
+visualize .visualize-chart.only-table {
+  display: none;
 }
 visualize .visualize-table {
+  -webkit-flex-grow: 0;
+  -moz-flex-grow: 0;
+  -ms-flex-grow: 0;
+  flex-grow: 0;
+  -webkit-flex-shrink: 0;
+  -moz-flex-shrink: 0;
+  -ms-flex-shrink: 0;
+  flex-shrink: 0;
+  -webkit-flex-basis: auto;
+  -moz-flex-basis: auto;
+  -ms-flex-basis: auto;
+  flex-basis: auto;
   display: none;
-  overflow: auto;
+  overflow: hidden;
 }
 visualize .visualize-table.visible {
   display: block;

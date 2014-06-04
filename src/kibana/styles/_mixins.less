@@ -136,11 +136,11 @@
   -ms-transform-origin:     @x @y;
   -o-transform-origin:      @x @y;
 }
-
 .flex-display () {
   display: -webkit-box;
   display: -moz-box;
-  display: -ms-flexbox;
+  display: -ms-flexbox; // IE10 uses -ms-flexbox
+  display: -ms-box; // IE10 uses -ms-flexbox
   display: -webkit-flex;
   display: flex;
 }
@@ -150,17 +150,34 @@
   -ms-flex-direction: @rule;
   flex-direction: @rule;
 }
-.justify-content (@rule) {
-  -webkit-justify-content: @rule;
-  -moz-justify-content: @rule;
-  -ms-justify-content: @rule;
-  justify-content: @rule;
+.flex (@grow: 0, @shrink: 0, @basis: auto) {
+  .flex-grow(@grow);
+  .flex-shrink(@shrink);
+  .flex-basis(@basis);
 }
 .flex-grow (@rule) {
   -webkit-flex-grow: @rule;
   -moz-flex-grow: @rule;
   -ms-flex-grow: @rule;
   flex-grow: @rule;
+}
+.flex-shrink (@rule) {
+  -webkit-flex-shrink: @rule;
+  -moz-flex-shrink: @rule;
+  -ms-flex-shrink: @rule;
+  flex-shrink: @rule;
+}
+.flex-basis (@rule) {
+  -webkit-flex-basis: @rule;
+  -moz-flex-basis: @rule;
+  -ms-flex-basis: @rule;
+  flex-basis: @rule;
+}
+.justify-content (@rule) {
+  -webkit-justify-content: @rule;
+  -moz-justify-content: @rule;
+  -ms-justify-content: @rule;
+  justify-content: @rule;
 }
 .prevent-selection () {
   -webkit-touch-callout: none;

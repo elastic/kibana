@@ -5,11 +5,11 @@
 
 visualize {
   .flex-display();
+  .flex-direction(column);
   height: 100%;
   width: 100%;
   overflow: auto;
   position: relative;
-  .flex-direction(column);
 
   .visualize-error {
     margin-top: 20px;
@@ -27,31 +27,32 @@ visualize {
   }
 
   .visualize-show-table {
-    width: 100%;
+    .flex();
+
     background-color: @well-bg;
     text-align: center;
     &.active {
-      margin: 15px 0;
+      margin-bottom: 10px;
     }
-  }
-
-  .visualize-chart,
-  .visualize-table {
-    .flex-grow(1);
-    height: 50%;
   }
 
   .visualize-chart {
+    .flex(1, 1, 100%);
+    overflow: hidden;
+
     &.table-visible {
-      @media (max-width: @screen-md-min) {
-        display: none;
-      }
+      margin-bottom: 10px;
+    }
+
+    &.only-table {
+      display: none;
     }
   }
 
   .visualize-table {
+    .flex();
     display: none;
-    overflow: auto;
+    overflow: hidden;
 
     &.visible {
       display: block;
