@@ -27,7 +27,8 @@ visualize {
   }
 
   .visualize-show-table {
-    width: 100%;
+    .flex();
+
     background-color: @well-bg;
     text-align: center;
     &.active {
@@ -36,9 +37,7 @@ visualize {
   }
 
   .visualize-chart {
-    .flex-grow(1);
-    .flex-shrink(1);
-    .flex-basis(100%);
+    .flex(1, 1, 100%);
     overflow: hidden;
 
     &.table-visible {
@@ -51,6 +50,7 @@ visualize {
   }
 
   .visualize-table {
+    .flex();
     display: none;
     overflow: hidden;
 
