@@ -25,6 +25,8 @@ define(function (require) {
             return $('<i class="fa fa-clock-o"></i> ');
           case 'ip':
             return $('<i class="fa fa-laptop"></i> ');
+          case 'conflict':
+            return $('<i class="fa fa-warning"></i> ');
           default:
             return $('<i><strong>?</strong></i> ');
           }
