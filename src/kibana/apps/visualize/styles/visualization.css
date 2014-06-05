@@ -137,7 +137,7 @@ visualize .visualize-chart.table-visible {
 visualize .visualize-chart.only-table {
   display: none;
 }
-visualize .visualize-table {
+visualize visualize-table {
   -webkit-flex-grow: 0;
   -moz-flex-grow: 0;
   -ms-flex-grow: 0;
@@ -153,6 +153,12 @@ visualize .visualize-table {
   display: none;
   overflow: hidden;
 }
-visualize .visualize-table.visible {
+visualize visualize-table.visible {
   display: block;
+}
+visualize visualize-table .table {
+  margin-bottom: 5px;
+}
+visualize visualize-table .visualize-table-controls {
+  padding: 0 5px;
 }

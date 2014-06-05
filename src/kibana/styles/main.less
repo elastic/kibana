@@ -260,6 +260,10 @@ saved-object-finder {
   padding: @padding-base-vertical @padding-base-horizontal;
 }
 
+//== clicking disabled buttons should not cause the whole page to get selected
+button[disabled] {
+  .prevent-selection();
+}
 
 //== override the disabled cursor that doesn't work everywhere
 .form-control{

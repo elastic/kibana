@@ -49,13 +49,21 @@ visualize {
     }
   }
 
-  .visualize-table {
+  visualize-table {
     .flex();
     display: none;
     overflow: hidden;
 
     &.visible {
       display: block;
+    }
+
+    .table {
+      margin-bottom: 5px;
+    }
+
+    .visualize-table-controls {
+      padding: 0 5px;
     }
   }
 }
