@@ -49,7 +49,7 @@
     <div class="row vis-editor-content">
       <div class="vis-sidebar">
         <div class="sidebar-container">
-          <form class="sidebar-list">
+          <form class="sidebar-list" ng-submit="doVisualize()">
             <ul class="list-unstyled">
               <li ng-repeat="category in visConfigCategories.displayOrder" class="sidebar-item">
                 <vis-config-category
