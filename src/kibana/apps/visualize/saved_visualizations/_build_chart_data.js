@@ -100,17 +100,21 @@ define(function (require) {
         case 'segment':
           // non-metric aggs create buckets that we need to add
           // to the rows
-          colStack.push(col);
-          result.buckets.forEach(function (bucket) {
-            rowStack.push(bucket.key);
+          if (result.buckets.length) {
+            colStack.push(col);
 
-            // into the rabbit hole
-            splitAndFlatten(chartData, bucket);
+            result.buckets.forEach(function (bucket) {
+              rowStack.push(bucket.key);
 
-            rowStack.pop();
-          });
-          colStack.pop();
-          break;
+              // into the rabbit hole
+              splitAndFlatten(chartData, bucket);
+
+              rowStack.pop();
+            });
+            colStack.pop();
+            break;
+          }
+          /* falls through */
         case 'metric':
           // this column represents actual chart data
           if (!chartData.columns || !chartData.rows) {
