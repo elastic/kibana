@@ -36,8 +36,9 @@ define(function (require) {
 
           // interval
           $table.toggleClass('visible', $scope.showTable);
+          $table.toggleClass('only', $scope.onlyShowTable);
           $visualize.toggleClass('table-visible', $scope.showTable);
-          $visualize.toggleClass('only-table', $scope.onlyShowTable);
+          $visualize.toggleClass('table-only', $scope.onlyShowTable);
           $showTableBtn.toggleClass('active', $scope.showTable);
         };
 

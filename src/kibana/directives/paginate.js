@@ -62,7 +62,7 @@ define(function (require) {
           $scope.otherPages = [];
           var width = getOtherWidth($scope) || 5;
           var left = newPage.i - Math.round((width - 1) / 2);
-          var right = left + width;
+          var right = left + width - 1;
 
           // shift neg count from left to right
           if (left < 0) {
@@ -71,15 +71,16 @@ define(function (require) {
           }
 
           // shift extra right nums to left
-          if (right > newPage.count) {
-            right = newPage.count;
-            left = right - width;
+          var lastI = newPage.count - 1;
+          if (right > lastI) {
+            right = lastI;
+            left = right - width + 1;
           }
 
-          for (var i = left; i < right; i++) {
+          for (var i = left; i <= right; i++) {
             var other = $scope.pages[i];
 
-            if (!other) return;
+            if (!other) continue;
 
             $scope.otherPages.push(other);
             if (other.last) $scope.otherPages.containsLast = true;
