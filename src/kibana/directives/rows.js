@@ -23,7 +23,7 @@ define(function (require) {
             // crate the empty row which will be pushed into the row list over and over
             var emptyRow = new Array(width);
             // fill the empty row with values
-            _.times(width, function (i) { emptyRow[i] = '\0'; });
+            _.times(width, function (i) { emptyRow[i] = ''; });
             // push as many empty rows into the row array as needed
             _.times(min - rows.length, function () { rows.push(emptyRow); });
           }
@@ -32,7 +32,11 @@ define(function (require) {
             var $tr = $(document.createElement('tr'));
             var addCell = function (cell) {
               var $cell = $(document.createElement('td'));
-              $cell.text(cell);
+              if (cell === '') {
+                $cell.html('&nbsp;');
+              } else {
+                $cell.text(cell);
+              }
               $tr.append($cell);
             };
 
