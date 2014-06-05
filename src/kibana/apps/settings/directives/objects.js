@@ -40,6 +40,9 @@ define(function (require) {
           });
           $q.all(services).then(function (data) {
             $scope.services =  _.sortBy(data, 'title');
+            if (!$state.tab) {
+              $scope.changeTab($scope.services[0]);
+            }
           });
         };
 
