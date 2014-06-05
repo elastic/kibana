@@ -49,6 +49,35 @@ define(function (require) {
 
         $rootScope.globalState = globalState;
 
+        $rootScope.$watchMulti = function (expressions, fn) {
+          if (!_.isArray(expressions)) throw new TypeError('expected an array of expressions to watch');
+          if (!_.isFunction(fn)) throw new TypeError('expexted a function that is triggered on each watch');
+
+          var $scope = this;
+          var initQueue = _.clone(expressions);
+          var fired = false;
+          expressions.forEach(function (expr) {
+            $scope.$watch(expr, function () {
+              if (initQueue) {
+                var i = initQueue.indexOf(expr);
+                if (i !== -1) initQueue.splice(i, 1);
+                if (initQueue.length === 0) {
+                  initQueue = false;
+                  fn();
+                }
+                return;
+              }
+
+              if (fired) return;
+              fired = true;
+              $scope.$evalAsync(function () {
+                fired = false;
+                fn();
+              });
+            });
+          });
+        };
+
         // get/set last path for an app
         var lastPathFor = function (app, path) {
           var key = 'lastPath:' + app.id;
