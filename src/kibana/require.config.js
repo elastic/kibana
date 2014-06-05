@@ -36,6 +36,7 @@ require.config({
     jsonpath: '../bower_components/jsonpath/lib/jsonpath',
     k4d3: '../bower_components/K4D3/build/k4.d3',
     inflection: '../bower_components/inflection/lib/inflection',
+    file_saver: '../bower_components/FileSaver/filesaver',
     bower_components: '../bower_components'
   },
   shim: {
@@ -56,6 +57,9 @@ require.config({
     'angular-ui-ace': ['angular', 'ace'],
     inflection: {
       exports: 'inflection'
+    },
+    file_saver: {
+      exports: 'saveAs'
     }
   },
   waitSeconds: 60
