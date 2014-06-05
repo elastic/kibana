@@ -8,15 +8,4 @@
       }"
       class="fa"></i></small>
 </div>
-<div class="visualize-table">
-  <paginate list="flattenedData.rows" per-page="10">
-    <table class="table">
-      <thead>
-        <tr>
-          <th ng-repeat="col in flattenedData.columns">{{col}}</th>
-        </tr>
-      </thead>
-      <tbody kbn-rows="page"></tbody>
-    </table>
-  </paginate>
-</div>
+<visualize-table rows="chartData.raw.rows" columns="chartData.raw.columns" show="showTable"></visualize-table>
