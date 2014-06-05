@@ -1,17 +1,17 @@
-<button
-  ng-disabled="page.first"
-  ng-click="goToPage(1)"
-  class="btn btn-primary jump-to-end">
-  <i class="fa fa-angle-double-left"></i>
-</button>
-&nbsp;
-<button
-  ng-disabled="page.first"
-  ng-click="goToPage(page.prev)"
-  class="btn btn-primary">
-  <i class="fa fa-angle-left"></i>
-</button>
-
+<div class="btn-group">
+  <button
+    ng-disabled="page.first"
+    ng-click="goToPage(1)"
+    class="btn btn-primary jump-to-end">
+    <i class="fa fa-angle-double-left"></i>
+  </button>
+  <button
+    ng-disabled="page.first"
+    ng-click="goToPage(page.prev)"
+    class="btn btn-primary">
+    <i class="fa fa-angle-left"></i>
+  </button>
+</div>
 
 <div class="paginate-other-pages">
   <a
@@ -22,16 +22,17 @@
   </a>
 </div>
 
-<button
-  ng-disabled="page.last"
-  ng-click="goToPage(page.next)"
-  class="btn btn-primary">
-  <i class="fa fa-angle-right"></i>
-</button>
-&nbsp;
-<button
-  ng-disabled="page.last"
-  ng-click="goToPage(page.count)"
-  class="btn btn-primary jump-to-end">
-  <i class="fa fa-angle-double-right"></i>
-</button>
+<div class="btn-group">
+  <button
+    ng-disabled="page.last"
+    ng-click="goToPage(page.next)"
+    class="btn btn-primary">
+    <i class="fa fa-angle-right"></i>
+  </button>
+  <button
+    ng-disabled="page.last"
+    ng-click="goToPage(page.count)"
+    class="btn btn-primary jump-to-end">
+    <i class="fa fa-angle-double-right"></i>
+  </button>
+</div>

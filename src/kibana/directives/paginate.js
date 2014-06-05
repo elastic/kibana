@@ -16,6 +16,8 @@ define(function (require) {
           perPage: _.parseInt(attrs.perPage)
         };
 
+        var getOtherWidth = $parse(attrs.otherWidth);
+
         $scope.$watch(attrs.list, function (list) {
           $scope.pages = [];
           if (!list) return;
@@ -58,17 +60,31 @@ define(function (require) {
 
           // setup the list of the other pages to link to
           $scope.otherPages = [];
-          var left = Math.max(newPage.i - 2, 0);
-          _.times(5, function (i) {
-            var otherI = left + i;
-            var other = $scope.pages[otherI];
+          var width = getOtherWidth($scope) || 5;
+          var left = newPage.i - Math.round((width - 1) / 2);
+          var right = left + width;
+
+          // shift neg count from left to right
+          if (left < 0) {
+            right += 0 - left;
+            left = 0;
+          }
+
+          // shift extra right nums to left
+          if (right > newPage.count) {
+            right = newPage.count;
+            left = right - width;
+          }
+
+          for (var i = left; i < right; i++) {
+            var other = $scope.pages[i];
 
             if (!other) return;
 
             $scope.otherPages.push(other);
             if (other.last) $scope.otherPages.containsLast = true;
             if (other.first) $scope.otherPages.containsFirst = true;
-          });
+          }
         });
 
         $scope.goToPage = function (number) {
