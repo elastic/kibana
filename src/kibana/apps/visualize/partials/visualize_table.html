@@ -1,0 +1,20 @@
+<paginate list="rows" per-page="10">
+  <table class="table table-condensed">
+    <thead>
+      <tr bindonce>
+        <th ng-repeat="col in columns" ng-click="cycleSort(col)">
+          <span bo-text="col"></span>
+          <i
+            ng-if="sort.field === col"
+            class="fa"
+            ng-class="{
+              'fa-angle-up': sort.asc,
+              'fa-angle-down': !sort.asc
+            }">
+          </i>
+        </th>
+      </tr>
+    </thead>
+    <tbody kbn-rows="page"></tbody>
+  </table>
+</paginate>

@@ -6,6 +6,7 @@ define(function (require) {
 
 
   require('css!../styles/visualization.css');
+  require('./visualize_table');
 
   var module = require('modules').get('kibana/directive');
 
@@ -21,45 +22,11 @@ define(function (require) {
         var notify = createNotifier();
 
         var $visualize = $el.find('.visualize-chart');
-        var $table = $el.find('.visualize-table');
+        var $table = $el.find('visualize-table');
         var $showTableBtn = $el.find('.visualize-show-table');
 
         $scope.showTable = false;
         $scope.onlyShowTable = false;
-
-        var buildFlattenedData = function () {
-          notify.event('flatten data for table', function () {
-            if (!$scope.showTable) {
-              delete $scope.flattenedData;
-              return;
-            }
-
-            // clone chartData.raw so that we can replace the rows and columns
-            $scope.flattenedData = _.clone($scope.chartData.raw);
-
-            // flatten the fields to a list of strings
-            $scope.flattenedData.columns = $scope.chartData.raw.columns.map(function (col) {
-              return col.aggParams ? col.aggParams.field : 'count';
-            });
-
-            // collect the formats before itterating
-            var formats = $scope.chartData.raw.columns.map(function (col) {
-              return col.field ? col.field.format.convert : _.identity;
-            });
-            // format all of the row values
-            $scope.flattenedData.rows = $scope.chartData.raw.rows.map(function (row) {
-              return row.map(function (cell, i) {
-                return formats[i](cell);
-              });
-            });
-          });
-        };
-
-        var callChartRender = function () {
-          notify.event('call chart render', function () {
-            chart.render($scope.chartData);
-          });
-        };
 
         var applyClassNames = function () {
           // external
@@ -81,10 +48,11 @@ define(function (require) {
         };
 
         var render = function () {
-          buildFlattenedData();
           applyClassNames();
           if (chart && $scope.chartData && !$scope.onlyShowTable) {
-            callChartRender();
+            notify.event('call chart render', function () {
+              chart.render($scope.chartData);
+            });
           }
         };
 
