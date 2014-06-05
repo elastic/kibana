@@ -1,3 +1,10 @@
+<div class="btn-toolbar visualize-table-controls" role="toolbar">
+  <div class="btn-group pull-right">
+    <button class="btn btn-default" tooltip="Export this table as CSV">
+      <i class="fa fa-download" ng-click="exportAsCsv()"></i>
+    </button>
+  </div>
+</div>
 <paginate list="rows" per-page="10">
   <table class="table table-condensed">
     <thead>

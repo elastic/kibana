@@ -159,3 +159,6 @@ visualize visualize-table.visible {
 visualize visualize-table .table {
   margin-bottom: 5px;
 }
+visualize visualize-table .visualize-table-controls {
+  padding: 0 5px;
+}

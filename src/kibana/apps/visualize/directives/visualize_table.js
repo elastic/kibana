@@ -1,6 +1,7 @@
 define(function (require) {
   var module = require('modules').get('app/visualize');
   var _ = require('lodash');
+  var saveAs = require('file_saver');
 
   module.directive('visualizeTable', function (Notifier, $filter, $rootScope) {
     return {
@@ -35,6 +36,42 @@ define(function (require) {
             };
             if (fieldi === -1) delete $scope.sort;
           }
+        };
+
+        $scope.exportAsCsv = function () {
+          if (!$scope.rawRows || !$scope.rawColumns) return;
+
+          var text = '';
+          var nonAlphaNumRE = /[^a-zA-Z0-9]/;
+          var controlCharRE = /"/g;
+          var escape = function (val) {
+            val = String(val).replace(controlCharRE, '""');
+            if (nonAlphaNumRE.test(val)) val = '"' + val + '"';
+            return val;
+          };
+
+          var rows = new Array($scope.rawRows + 1);
+          var colRow = [];
+          rows[0] = colRow;
+
+          $scope.rawColumns.forEach(function (col) {
+            colRow.push(escape(col.aggParams ? col.aggParams.field : 'count'));
+          });
+
+          $scope.rawRows.forEach(function (rawRow, i) {
+            var row = new Array(rawRow.length);
+            rows[i + 1] = row;
+
+            rawRow.forEach(function (cell, i) {
+              row[i] = escape(cell);
+            });
+          });
+
+          var blob = new Blob(rows.map(function (row) {
+            return row.join(',') + '\n';
+          }), { type: 'text/plain' });
+
+          saveAs(blob, 'table.csv');
         };
 
         $rootScope.$watchMulti.call($scope, [
