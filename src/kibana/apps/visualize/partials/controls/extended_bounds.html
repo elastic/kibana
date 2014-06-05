@@ -1,0 +1,22 @@
+<div class="form-group">
+  <div class="row">
+    <div class="col-xs-6">
+      <label>Min</label>
+      <input
+        ng-show="aggParams.min_doc_count"
+        ng-model="config.extended_bounds.min"
+        type="number"
+        class="form-control"
+        name="extended_bounds.min" />
+    </div>
+    <div class="col-xs-6">
+      <label>Max</label>
+      <input
+        ng-show="aggParams.min_doc_count"
+        ng-model="config.extended_bounds.max"
+        type="number"
+        class="form-control"
+        name="extended_bounds.max" />
+    </div>
+  </div>
+</div>
