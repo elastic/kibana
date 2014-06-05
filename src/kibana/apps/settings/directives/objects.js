@@ -103,11 +103,30 @@ define(function (require) {
         };
         
         $scope.title = inflection.singularize(serviceObj.title);
+
         service.get($routeParams.id).then(function (obj) {
           $scope.obj = obj;
           $scope.link = service.urlFor(obj.id);
           $scope.fields = _.reduce(obj._source, createField, []);
         });
+
+        // This handles the validation of the Ace Editor. Since we don't have any
+        // other hooks into the editors to tell us if the content is valid or not
+        // we need to use the annotations to see if they have any errors. If they
+        // do then we increment the aceInvalidCount variable. If it's valid then we
+        // deincrement (only if aceInvalidCount !== 0)
+        $scope.aceInvalidCount = 0;
+        $scope.aceLoaded = function (editor) {
+          var session = editor.getSession();
+          session.on('changeAnnotation', function () {
+            var annotations = session.getAnnotations();
+            if (_.some(annotations, { type: 'error'})) {
+              $scope.aceInvalidCount++;
+            } else {
+              if($scope.aceInvalidCount !== 0) $scope.aceInvalidCount--;  
+            }
+          });
+        };
 
         $scope.delete = function () {
           $scope.obj.delete().then(function (resp) {
