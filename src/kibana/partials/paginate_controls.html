@@ -1,15 +1,15 @@
-<div class="btn-group">
+<div>
   <button
     ng-disabled="page.first"
     ng-click="goToPage(1)"
-    class="btn btn-default jump-to-end">
-    <i class="fa fa-angle-double-left"></i>
+    class="btn btn-default btn-xs jump-to-end">
+    <i class="fa fa-fast-backward"></i>
   </button>
   <button
     ng-disabled="page.first"
     ng-click="goToPage(page.prev)"
-    class="btn btn-default">
-    <i class="fa fa-angle-left"></i>
+    class="btn btn-default btn-xs">
+    <i class="fa fa-backward"></i>
   </button>
 </div>
 
@@ -22,17 +22,18 @@
   </a>
 </div>
 
-<div class="btn-group">
+<div>
   <button
     ng-disabled="page.last"
     ng-click="goToPage(page.next)"
-    class="btn btn-default">
-    <i class="fa fa-angle-right"></i>
+    class="btn btn-default btn-xs">
+    <i class="fa fa-forward"></i>
   </button>
+
   <button
     ng-disabled="page.last"
     ng-click="goToPage(page.count)"
-    class="btn btn-default jump-to-end">
-    <i class="fa fa-angle-double-right"></i>
+    class="btn btn-default btn-xs jump-to-end">
+    <i class="fa fa-fast-forward"></i>
   </button>
 </div>
