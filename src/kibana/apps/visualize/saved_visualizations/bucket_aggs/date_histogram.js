@@ -15,7 +15,7 @@ define(function (require) {
     var agg = this;
     agg.name = 'date_histogram';
     agg.display = 'Date Histogram';
-    agg.ordinal = {};
+    agg.ordered = {date: true};
 
     agg.makeLabel = function (params) {
       var interval = _.find(agg.params.interval.options, { val: params.interval });
@@ -96,15 +96,18 @@ define(function (require) {
     };
 
     agg.params.format = {
+      hide: true,
       custom: true
     };
 
     agg.params.min_doc_count = {
+      hide: true,
       custom: true,
       default: 0
     };
 
     agg.params.extended_bounds = {
+      hide: true,
       default: {},
       write: function (selection, output) {
         var bounds = timefilter.getBounds();

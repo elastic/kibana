@@ -43,7 +43,7 @@ define(function (require) {
 
       // X-axis description
       chart.xAxisLabel = colX.label;
-      if (aggX && aggX.name === 'date_histogram') {
+      if (aggX && aggX.ordered && aggX.ordered.date) {
         chart.xAxisFormatter = (function () {
           var bounds = timefilter.getBounds();
           var format = interval.calculate(
@@ -67,7 +67,10 @@ define(function (require) {
       }
       else {
         chart.xAxisFormatter = colX.field && colX.field.format.convert;
-        chart.ordinal = aggX && aggX.ordinal && {};
+        chart.ordered = aggX && aggX.ordered && {};
+        if (aggX !== false && colX && colX.aggParams && colX.aggParams.interval) {
+          chart.ordered.interval = colX.aggParams.interval;
+        }
       }
 
       // Y-axis description

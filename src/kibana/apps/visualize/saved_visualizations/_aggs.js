@@ -66,11 +66,13 @@ define(function (require) {
       number: [
         // aggs.bucketAggsByName.histogram,
         aggs.bucketAggsByName.terms,
+        aggs.bucketAggsByName.histogram,
         // 'range'
       ],
       date: [
         // 'date range',
         aggs.bucketAggsByName.date_histogram,
+        aggs.bucketAggsByName.terms,
       ],
       boolean: [
         // 'terms'
