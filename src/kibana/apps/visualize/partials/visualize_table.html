@@ -1,10 +1,3 @@
-<div class="btn-toolbar visualize-table-controls" role="toolbar">
-  <div class="btn-group pull-right">
-    <button class="btn btn-default" tooltip="Export this table as CSV" tooltip-placement="left" tooltip-append-to-body="true">
-      <i class="fa fa-download" ng-click="exportAsCsv()"></i>
-    </button>
-  </div>
-</div>
 <paginate list="rows" per-page="10">
   <table class="table table-condensed">
     <thead>
@@ -24,4 +17,25 @@
     </thead>
     <tbody kbn-rows="page" kbn-rows-min="paginate.perPage"></tbody>
   </table>
+  <form class="visualize-table-controls form-inline" role="form" ng-submit="exportAsCsv()">
+    <span class="small" ng-click="csv.showOptions = true" ng-if="csv.showOptions === false">
+      Export <i class="fa fa-download"></i>
+    </span>
+    <span class="small visualize-csv-options" ng-if="csv.showOptions">
+      <div class="form-group">
+        <label>Filename</label>
+        <input type="text" class="form-control" ng-model="csv.filename">
+      </div>
+      <div class="form-group">
+        <label>Separator</label>
+        <input type="text" class="form-control visualize-csv-separator" ng-model="csv.separator">
+      </div>
+      <div class="checkbox">
+        <label>
+          Quote values? <input type="checkbox" ng-model="csv.quoteValues">
+        </label>
+      </div>
+      <button type="submit"><i class="fa fa-download"></i></button>
+    </span>
+  </div>
 </paginate>
