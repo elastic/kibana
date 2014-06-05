@@ -6987,10 +6987,10 @@ paginate paginate-controls .paginate-other-pages {
   -moz-flex-shrink: 1;
   -ms-flex-shrink: 1;
   flex-shrink: 1;
-  -webkit-flex-basis: 100%;
-  -moz-flex-basis: 100%;
-  -ms-flex-basis: 100%;
-  flex-basis: 100%;
+  -webkit-flex-basis: 50%;
+  -moz-flex-basis: 50%;
+  -ms-flex-basis: 50%;
+  flex-basis: 50%;
   text-align: center;
 }
 paginate paginate-controls .paginate-other-pages a {
