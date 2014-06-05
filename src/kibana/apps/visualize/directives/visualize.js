@@ -42,9 +42,8 @@ define(function (require) {
         };
 
         var calcResponsiveStuff = function () {
-          var containerTooShort = $el.height() < 750;
-          var containerTooThin = $el.width() < 400;
-          $scope.onlyShowTable = $scope.showTable && (containerTooShort || containerTooThin);
+          var containerTooShort = $el.height() < 550;
+          $scope.onlyShowTable = $scope.showTable && containerTooShort;
         };
 
         var render = function () {

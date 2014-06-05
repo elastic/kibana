@@ -11,12 +11,18 @@ define(function (require) {
         '<paginate-controls ng-if="page.count > 1"></paginate-controls>'
       ,
       link: function ($scope, $el, attrs) {
-        var perPage = _.parseInt(attrs.perPage);
+        // pagination controls
+        $scope.paginate = {
+          perPage: _.parseInt(attrs.perPage)
+        };
+
         $scope.$watch(attrs.list, function (list) {
           $scope.pages = [];
           if (!list) return;
 
+          var perPage = $scope.paginate.perPage;
           var count = Math.ceil(list.length / perPage);
+
           _.times(count, function (i) {
             var start = perPage * i;
             var page = list.slice(start, start + perPage);
