@@ -3,7 +3,7 @@ define(function (require) {
   var _ = require('lodash');
   var saveAs = require('file_saver');
 
-  module.directive('visualizeTable', function (Notifier, $filter, $rootScope) {
+  module.directive('visualizeTable', function (Notifier, $filter, $rootScope, config) {
     return {
       restrict: 'E',
       template: require('text!../partials/visualize_table.html'),
@@ -15,7 +15,14 @@ define(function (require) {
       link: function ($scope, $el) {
         var notify = new Notifier();
         var orderBy = $filter('orderBy');
+
         $scope.sort = null;
+        $scope.csv = {
+          showOptions: false,
+          separator: config.get('csv:separator'),
+          quoteValues: config.get('csv:quoteValues'),
+          filename: 'table.csv'
+        };
 
         $scope.cycleSort = function (col) {
           if (!$scope.sort || $scope.sort.field !== col) {
@@ -39,14 +46,17 @@ define(function (require) {
         };
 
         $scope.exportAsCsv = function () {
+          $scope.csv.showOptions = false;
           if (!$scope.rawRows || !$scope.rawColumns) return;
 
           var text = '';
           var nonAlphaNumRE = /[^a-zA-Z0-9]/;
-          var controlCharRE = /"/g;
+          var allDoubleQuoteRE = /"/g;
           var escape = function (val) {
-            val = String(val).replace(controlCharRE, '""');
-            if (nonAlphaNumRE.test(val)) val = '"' + val + '"';
+            val = String(val);
+            if ($scope.csv.quoteValues && nonAlphaNumRE.test(val)) {
+              val = '"' + val.replace(allDoubleQuoteRE, '""') + '"';
+            }
             return val;
           };
 
@@ -68,10 +78,10 @@ define(function (require) {
           });
 
           var blob = new Blob(rows.map(function (row) {
-            return row.join(',') + '\n';
+            return row.join($scope.csv.separator) + '\r\n';
           }), { type: 'text/plain' });
 
-          saveAs(blob, 'table.csv');
+          saveAs(blob, $scope.csv.filename);
         };
 
         $rootScope.$watchMulti.call($scope, [

@@ -11,5 +11,8 @@ define(function (require) {
 
     'histogram:barTarget': 50,
     'histogram:maxBars': 100,
+
+    'csv:separator': ',',
+    'csv:quoteValues': true
   });
 });

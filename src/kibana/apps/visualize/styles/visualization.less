@@ -31,9 +31,6 @@ visualize {
 
     background-color: @well-bg;
     text-align: center;
-    &.active {
-      margin-bottom: 10px;
-    }
   }
 
   .visualize-chart {
@@ -50,9 +47,10 @@ visualize {
   }
 
   visualize-table {
-    .flex();
+    .flex(0, 1, auto);
     display: none;
-    overflow: hidden;
+    overflow: auto;
+    padding-top: 10px;
 
     &.visible {
       display: block;
@@ -61,9 +59,31 @@ visualize {
     .table {
       margin-bottom: 5px;
     }
+  }
 
-    .visualize-table-controls {
-      padding: 0 5px;
+  .visualize-table-controls {
+    padding: 0 5px;
+    text-align: right;
+  }
+
+  .visualize-csv-options {
+    .form-control {
+      padding: 0px 6px;
+      height: auto;
+    }
+    label {
+      margin: 0 10px;
+      padding: 0;
+      font-weight: normal;
+    }
+    .visualize-csv-separator {
+      width: 1.5em;
+    }
+    button[type=submit] {
+      font-size: 1.25em;
+      padding: 0 0 0 15px;
+      background: none;
+      border: none;
     }
   }
 }
