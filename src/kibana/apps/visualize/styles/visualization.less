@@ -34,26 +34,30 @@ visualize {
   }
 
   .visualize-chart {
-    .flex(1, 1, 100%);
+    .flex(1, 1);
     overflow: hidden;
 
     &.table-visible {
       margin-bottom: 10px;
     }
 
-    &.only-table {
+    &.table-only {
       display: none;
     }
   }
 
   visualize-table {
-    .flex(0, 1, auto);
+    .flex();
     display: none;
     overflow: auto;
     padding-top: 10px;
 
     &.visible {
       display: block;
+    }
+
+    &.only {
+      .flex(1, 1, 100%);
     }
 
     .table {
