@@ -7477,6 +7477,14 @@ saved-object-finder .finder-options > li.active a {
   color: #b4bcc2;
   padding: 5px 15px;
 }
+button[disabled] {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
 .form-control[disabled],
 .form-control[readonly],
 fieldset[disabled] .form-control {
