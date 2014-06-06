@@ -1,0 +1,100 @@
+<style>
+  .querySelect .query {
+    margin-right: 5px;
+  }
+  .querySelect .selected {
+    border: 3px solid;
+  }
+  .querySelect .unselected {
+    border: 0px solid;
+  }
+</style>
+<div class="editor-row">
+  <div class="section">
+    <h5>Values</h5>
+    <table class="table table-condensed table-striped">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Chart value</th>
+          <th>Transform Series</th>
+          <th>Queries</th>
+          <th ng-show="panel.values.length > 1">Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="value in panel.values">
+          <td>
+            <label class="small">&nbsp</label>
+            <i class="icon-circle pointer" data-unique="1" bs-popover="'app/panels/multifieldhistogram/meta.html'" data-placement="right" ng-style="{color: value.color}"></i></td>
+          <td>
+            <div class="editor-option">
+              <label class="small">Mode</label>
+              <select ng-change="set_refresh(true)" class="input-small" ng-model="value.mode" ng-options="f for f in ['count','min','mean','max','total']"></select>
+            </div>
+            <div class="editor-option" ng-show="value.mode != 'count'">
+              <label class="small">Value Field <tip>This field must contain a numeric value</tip></label>
+              <input ng-change="set_refresh(true)" placeholder="Start typing" bs-typeahead="fields.list" type="text" class="input-medium" ng-model="value.value_field">
+            </div>
+          </td>
+          <td>
+            <div class="editor-option" ng-show="value.mode != 'count'">
+              <label class="small">Scale</label>
+              <input type="text" class="input-mini" ng-model="value.scale">
+            </div>
+            <div class="editor-option">
+              <label class="small">Seconds <tip>Normalize intervals to per-second</tip></label>
+              <input type="checkbox" ng-model="value.scaleSeconds" ng-checked="value.scaleSeconds">
+            </div>
+            <div class="editor-option">
+              <label class="small">Derivative <tip>Plot the change per interval in the series</tip></label>
+              <input type="checkbox" ng-model="value.derivative" ng-checked="value.derivative" ng-change="set_refresh(true)">
+            </div>
+            <div class="editor-option">
+              <label class="small">Zero fill <tip>Fills zeros in gaps.</tip></label>
+              <input type="checkbox" ng-model="value.zerofill" ng-checked="value.zerofill" ng-change="set_refresh(true)">
+            </div>
+          </td>
+          <td>
+            <div class="editor-option querySelect">
+              <label class="small">Selected Queries</label>
+              <span ng-style="{'border-color': querySrv.list()[id].color}" ng-class="{selected:_.contains(value.queries,id),unselected:!_.contains(value.queries,id)}" ng-repeat="id in querySrv.ids()" ng-click="value.queries = _.toggleInOut(value.queries,id);set_refresh(true);" class="query pointer badge">
+                <i class="icon-circle" ng-style="{color: querySrv.list()[id].color}"></i>
+                <span> {{querySrv.list()[id].alias || querySrv.list()[id].query}}</span>
+              </span>
+            </div>
+          </td>
+          <td ng-show="panel.values.length > 1">
+            <label class="small">&nbsp</label>
+            <i ng-click="panel.values = _.without(panel.values, value);set_refresh(true)" class="pointer icon-remove"></i>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <button type="button" class="btn btn-success" ng-click="add_new_value(panel);set_refresh(true)"><i class="icon-plus-sign"></i> Add value</button>
+  </div>
+</div>
+<div class="editor-row">
+  <div class="section">
+  <h5>Time Options</h5>
+    <div class="editor-option">
+      <label class="small">Time Field</label>
+        <input ng-change="set_refresh(true)" placeholder="Start typing" bs-typeahead="fields.list" type="text" class="input-small" ng-model="panel.time_field">
+    </div>
+    <div class="editor-option">
+      <label class="small">Time correction</label>
+      <select ng-model="panel.timezone" class='input-small' ng-options="f for f in ['browser','utc']"></select>
+    </div>
+    <div class="editor-option">
+      <label class="small">Auto-interval</label><input type="checkbox" ng-model="panel.auto_int" ng-checked="panel.auto_int" />
+    </div>
+    <div class="editor-option" ng-show='panel.auto_int'>
+      <label class="small">Resolution <tip>Shoot for this many data points, rounding to sane intervals</tip></label>
+      <input type="number" class='input-mini' ng-model="panel.resolution" ng-change='set_refresh(true)'/>
+    </div>
+    <div class="editor-option" ng-hide='panel.auto_int'>
+      <label class="small">Interval <tip>Use Elasticsearch date math format (eg 1m, 5m, 1d, 2w, 1y)</tip></label>
+      <input type="text" class='input-mini' ng-model="panel.interval" ng-change='set_refresh(true)'/>
+    </div>
+  </div>
+</div>

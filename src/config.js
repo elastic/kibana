@@ -74,7 +74,8 @@ function (Settings) {
       'query',
       'terms',
       'stats',
-      'sparklines'
+      'sparklines',
+      'multifieldhistogram'
     ]
   });
 });

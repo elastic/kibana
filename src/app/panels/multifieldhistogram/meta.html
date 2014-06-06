@@ -1,0 +1,22 @@
+<div class="panel-query-meta row-fluid" style="width:260px">
+  <style>
+    .panel-query-meta fieldset label {
+      margin-top: 3px;
+    }
+  </style>
+
+    <fieldset>
+      <label class="small">Legend value</label>
+      <input class="input-medium input-value-alias" type="text" ng-model="value.alias" placeholder='Alias...' ng-change="set_refresh(true);" />
+    </fieldset>
+    
+    <hr class="small" />
+    <div>
+      <i ng-repeat="color in querySrv.colors" class="pointer" ng-class="{'icon-circle-blank':value.color == color,'icon-circle':value.color != color}" ng-style="{color:color}" ng-click="value.color = color;set_refresh(true);"> </i>
+    </div>
+
+  <div class="pull-right">
+    <a class="btn btn-mini btn-value-remove-color" ng-click="value.color = null;set_refresh(true);" ng-show="value.color" class="pointer">Remove color</a>
+    <input class="btn btn-mini" ng-click="set_refresh(true);dismiss();" type="submit"/ value="Close">
+  </div>
+</div>
