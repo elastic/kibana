@@ -61,7 +61,7 @@ define(function (require) {
   .directive('kbnSettingsObjectsView', function (config, Notifier) {
     return {
       restrict: 'E',
-      controller: function ($scope, $injector, $routeParams, $location, $window) {
+      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope) {
 
         var serviceObj = registry.get($routeParams.service);
         var service = $injector.get(serviceObj.service);
@@ -122,9 +122,10 @@ define(function (require) {
           loadedEditors.push(editor);
 
           var session = editor.getSession();
-          session.setTabSize(2);
           var fieldName = editor.container.id;
 
+          session.setTabSize(2);
+          session.setUseSoftTabs(true);
           session.on('changeAnnotation', function () {
             var annotations = session.getAnnotations();
             if (_.some(annotations, { type: 'error'})) {
@@ -134,7 +135,7 @@ define(function (require) {
             } else {
               $scope.aceInvalidEditors = _.without($scope.aceInvalidEditors, fieldName);
             }
-            $scope.$apply();
+            $rootScope.$$phase || $scope.$apply();
           });
         };
 
