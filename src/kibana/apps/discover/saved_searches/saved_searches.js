@@ -15,7 +15,7 @@ define(function (require) {
     title: 'Searches'
   });
 
-  module.service('savedSearches', function (config, configFile, es, createNotifier, SavedSearch) {
+  module.service('savedSearches', function (Promise, config, configFile, es, createNotifier, SavedSearch) {
 
 
     var notify = createNotifier({
@@ -28,6 +28,13 @@ define(function (require) {
 
     this.urlFor = function (id) {
       return '#/discover/' + id;
+    };
+
+    this.delete = function (ids) {
+      ids = !_.isArray(ids) ? [ids] : ids;
+      return Promise.map(ids, function (id) {
+        return (new SavedSearch(id)).delete();
+      });
     };
 
     this.find = function (searchString) {

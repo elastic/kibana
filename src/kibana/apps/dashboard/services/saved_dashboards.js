@@ -1,6 +1,6 @@
 define(function (require) {
   var module = require('modules').get('app/dashboard');
-
+  var _ = require('lodash');
  // bring in the factory
   require('./_saved_dashboard');
 
@@ -13,7 +13,7 @@ define(function (require) {
   });
 
   // This is the only thing that gets injected into controllers
-  module.service('savedDashboards', function (SavedDashboard, config, es) {
+  module.service('savedDashboards', function (Promise, SavedDashboard, config, es) {
 
     // Returns a single dashboard by ID, should be the name of the dashboard
     this.get = function (id) {
@@ -25,6 +25,14 @@ define(function (require) {
     this.urlFor = function (id) {
       return '#/dashboard/' + id;
     };
+
+    this.delete = function (ids) {
+      ids = !_.isArray(ids) ? [ids] : ids;
+      return Promise.map(ids, function (id) {
+        return (new SavedDashboard(id)).delete();
+      });
+    };
+
 
     this.find = function (searchString) {
       var self = this;
