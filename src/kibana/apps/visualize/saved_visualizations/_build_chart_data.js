@@ -26,8 +26,20 @@ define(function (require) {
         return config;
       });
 
-      // when we are recursing put previous configs here
-      var configStack = [];
+      var lastCol = configs[configs.length - 1];
+      if (!lastCol || lastCol.categoryName !== 'metric') {
+        // fake the config
+        configs.push({
+          fake: true,
+          categoryName: 'metric',
+          agg: aggs.byName.count.name,
+          label: aggs.byName.count.display
+        });
+      }
+
+      // a reverse stack of the configs, so we can pop and push
+      var revColStack = configs.slice(0);
+      revColStack.reverse();
 
       // when we are recursing put previous columns here
       var colStack = [];
@@ -39,8 +51,24 @@ define(function (require) {
       // formatted objects
       var chartData = {};
 
-      var finishRow = function (rows, col, bucket) {
-        rows.push(rowStack.concat(bucket.value == null ? bucket.doc_count : bucket.value));
+      var writeRow = function (chartData, bucket) {
+        if (!chartData.rows || !chartData.columns) {
+          // write rows here
+          chartData.rows = [];
+          chartData.columns = configs.slice(0);
+        }
+
+        var row = rowStack.slice(0);
+        var metric = bucket.value == null ? bucket.doc_count : bucket.value;
+
+        while (row.length < configs.length - 1) {
+          row.push(void 0);
+        }
+
+        // we have a full row, minus the final metric
+        row.push(metric);
+
+        chartData.rows.push(row);
       };
 
       var getAggKey = function (bucket) {
@@ -53,20 +81,7 @@ define(function (require) {
 
       var splitAndFlatten = function (chartData, bucket) {
         // pull the next column from the configs list
-        var col = configs.shift();
-
-        if (!col) {
-          // fake the config
-          col = {
-            fake: true,
-            categoryName: 'metric',
-            agg: aggs.byName.count.name,
-            label: aggs.byName.count.display
-          };
-        }
-
-        // add it to the top of the stack
-        configStack.unshift(col);
+        var col = revColStack.pop();
 
         // the actual results for the aggregation is under an _agg_* key
         var result = col.fake ? bucket : bucket[getAggKey(bucket)];
@@ -98,11 +113,10 @@ define(function (require) {
           break;
         case 'group':
         case 'segment':
+          colStack.push(col);
           // non-metric aggs create buckets that we need to add
           // to the rows
           if (result.buckets.length) {
-            colStack.push(col);
-
             result.buckets.forEach(function (bucket) {
               rowStack.push(bucket.key);
 
@@ -111,27 +125,21 @@ define(function (require) {
 
               rowStack.pop();
             });
-            colStack.pop();
-            break;
+          } else {
+            writeRow(chartData, bucket);
           }
-          /* falls through */
+          colStack.pop();
+          break;
         case 'metric':
-          // this column represents actual chart data
-          if (!chartData.columns || !chartData.rows) {
-            // copy the current column and remaining columns into the column list
-            chartData.columns = colStack.concat(col);
-
-            // write rows here
-            chartData.rows = [];
-          }
-
+          colStack.push(col);
           // there are no buckets, just values to collect.
           // Write the the row to the chartData
-          finishRow(chartData.rows, col, result);
+          writeRow(chartData, result);
+          colStack.pop();
           break;
         }
 
-        configs.unshift(configStack.shift());
+        revColStack.push(col);
       };
 
       // add labels to each config before they are processed
@@ -147,15 +155,7 @@ define(function (require) {
       if (resp.aggregations) {
         splitAndFlatten(chartData, resp.aggregations);
       } else {
-        chartData.rows = [];
-        chartData.columns = [
-          {
-            categoryName: 'metric',
-            agg: aggs.byName.count.name,
-            label: aggs.byName.count.display
-          }
-        ];
-        finishRow(chartData.rows, null, { doc_count: resp.hits.total });
+        writeRow(chartData, { doc_count: resp.hits.total });
       }
 
       // now that things are well-ordered, and
