@@ -12,6 +12,7 @@ time is 1:10pm, your time picker was set to "Last 10m", and the "Time Ago" param
 ago:: A date math formatted string describing the relative time period to compare the
 queries to.
 arrangement:: `horizontal' or `vertical'
+reverse:: true or false. If true, use red for positive, green for negative
 spyable:: Set to false to disable the inspect icon
 
 ==== Queries

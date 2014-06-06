@@ -52,11 +52,11 @@ function (angular, app, _, L, localRequire) {
         }
       ],
       status  : "Experimental",
-      description : "Displays geo points in clustered groups on a map. The cavaet for this panel is"+
+      description : "Displays geo points in clustered groups on a map. The caveat for this panel is"+
         " that, for better or worse, it does NOT use the terms facet and it <b>does</b> query "+
         "sequentially. This however means that it transfers more data and is generally heavier to"+
         " compute, while showing less actual data. If you have a time filter, it will attempt to"+
-        " show to most recent points in your search, up to your defined limit"
+        " show to most recent points in your search, up to your defined limit."
     };
 
     // Set and populate defaults
@@ -145,7 +145,7 @@ function (angular, app, _, L, localRequire) {
         var request = $scope.ejs.Request().indices(dashboard.indices[_segment])
           .query($scope.ejs.FilteredQuery(
             boolQuery,
-            filterSrv.getBoolFilter(filterSrv.ids).must($scope.ejs.ExistsFilter($scope.panel.field))
+            filterSrv.getBoolFilter(filterSrv.ids()).must($scope.ejs.ExistsFilter($scope.panel.field))
           ))
           .fields([$scope.panel.field,$scope.panel.tooltip])
           .size($scope.panel.size);
@@ -227,7 +227,7 @@ function (angular, app, _, L, localRequire) {
         var map, layerGroup;
 
         function render_panel() {
-          elem.css({height:scope.row.height});
+          elem.css({height:scope.panel.height||scope.row.height});
 
           scope.require(['./leaflet/plugins'], function () {
             scope.panelMeta.loading = false;
@@ -255,7 +255,7 @@ function (angular, app, _, L, localRequire) {
 
             _.each(scope.data, function(p) {
               if(!_.isUndefined(p.tooltip) && p.tooltip !== '') {
-                markerList.push(L.marker(p.coordinates).bindLabel(p.tooltip));
+                markerList.push(L.marker(p.coordinates).bindLabel(_.isArray(p.tooltip) ? p.tooltip[0] : p.tooltip));
               } else {
                 markerList.push(L.marker(p.coordinates));
               }
