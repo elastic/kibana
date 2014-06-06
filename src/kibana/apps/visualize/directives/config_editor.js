@@ -10,6 +10,7 @@ define(function (require) {
   var headerHtml = require('text!../partials/editor/header.html');
 
   var controlHtml = {
+    ranges: require('text!../partials/controls/ranges.html'),
     orderAndSize: require('text!../partials/controls/order_and_size.html'),
     minDocCount: require('text!../partials/controls/min_doc_count.html'),
     extendedBounds: require('text!../partials/controls/extended_bounds.html'),
@@ -101,6 +102,10 @@ define(function (require) {
           if (params.interval && !params.interval.hide) {
             controlsHtml += ' ' + controlHtml.interval;
             if (!controlsHtml.match(/aggParams\.interval\.options/)) ; //debugger;
+          }
+
+          if (params.ranges) {
+            controlsHtml += ' ' + controlHtml.ranges;
           }
 
           if (params.min_doc_count && !params.min_doc_count.hide) {

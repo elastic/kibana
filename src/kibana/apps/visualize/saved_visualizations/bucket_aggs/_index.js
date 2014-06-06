@@ -3,6 +3,7 @@ define(function (require) {
     return [
       Private(require('./date_histogram')),
       Private(require('./histogram')),
+      Private(require('./range')),
       Private(require('./terms'))
     ];
   };
