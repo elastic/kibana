@@ -95,13 +95,13 @@ define(function (require) {
           }
 
           memo.push(field);
-          
+
           // once the field is added to the object you need to pop the parents
           // to remove it since we've hit the end of the branch.
           parents.pop();
           return memo;
         };
-        
+
         $scope.title = inflection.singularize(serviceObj.title);
 
         service.get($routeParams.id).then(function (obj) {
@@ -116,22 +116,24 @@ define(function (require) {
         // do then we push the field.name to aceInvalidEditor variable. 
         // Otherwise we remove it.
         $scope.aceInvalidEditors = [];
+        var loadedEditors = [];
         $scope.aceLoaded = function (editor) {
+          if (_.contains(loadedEditors, editor)) return;
+          loadedEditors.push(editor);
+
           var session = editor.getSession();
           var fieldName = editor.container.id;
-          // For some reason the editor is initialized with {{field.name}} as the ID
-          // then it's re-initalized a second time with the proper id. We need to 
-          // return from the function if we do not get the proper fieldName.
-          if (fieldName === '{{field.name}}') return;
+
           session.on('changeAnnotation', function () {
             var annotations = session.getAnnotations();
             if (_.some(annotations, { type: 'error'})) {
               if (!_.contains($scope.aceInvalidEditors, fieldName)) {
-                $scope.aceInvalidEditors.push(fieldName)
+                $scope.aceInvalidEditors.push(fieldName);
               }
             } else {
-              $scope.aceInvalidEditors = _.without($scope.aceInvalidEditors, fieldName)
+              $scope.aceInvalidEditors = _.without($scope.aceInvalidEditors, fieldName);
             }
+            $scope.$apply();
           });
         };
 
