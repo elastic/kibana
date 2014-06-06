@@ -418,20 +418,20 @@
 //
 //##
 
-@pagination-color:                     #fff;
-@pagination-bg:                        @brand-success;
+@pagination-color:                     @brand-success;
+@pagination-bg:                        transparent;
 @pagination-border:                    transparent;
 
-@pagination-hover-color:               #fff;
-@pagination-hover-bg:                  darken(@brand-success, 15%);
+@pagination-hover-color:               @brand-success;
+@pagination-hover-bg:                  darken(transparent, 15%);
 @pagination-hover-border:              transparent;
 
-@pagination-active-color:              #fff;
-@pagination-active-bg:                 darken(@brand-success, 15%);
+@pagination-active-color:              @text-color;
+@pagination-active-bg:                 darken(transparent, 15%);
 @pagination-active-border:             transparent;
 
-@pagination-disabled-color:            @gray-lighter;
-@pagination-disabled-bg:               lighten(@brand-success, 15%);;
+@pagination-disabled-color:            @gray-darker;
+@pagination-disabled-bg:               lighten(transparent, 15%);;
 @pagination-disabled-border:           transparent;
 
 
@@ -441,7 +441,7 @@
 
 @pager-bg:                             @pagination-bg;
 @pager-border:                         @pagination-border;
-@pager-border-radius:                  15px;
+@pager-border-radius:                  0px;
 
 @pager-hover-bg:                       @pagination-hover-bg;
 
