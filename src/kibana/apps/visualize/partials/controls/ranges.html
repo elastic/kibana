@@ -1,0 +1,43 @@
+<div ng-init="config.ranges = (config.ranges || [{}])">
+  <div class="form-group" >
+
+    <div class="row">
+      <div class="col-xs-5">
+        <label>From</label>
+      </div>
+      <div class="col-xs-5">
+        <label>To</label>
+      </div>
+    </div>
+
+    <div class="row"
+      ng-repeat="range in config.ranges">
+      <div class="col-xs-5">
+        <input
+          ng-model="range.from"
+          type="number"
+          class="form-control"
+          name="range.from" />
+      </div>
+      <div class="col-xs-5">
+        <input
+          ng-model="range.to"
+          type="number"
+          class="form-control"
+          name="range.to" />
+      </div>
+      <div class="col-xs-1">
+        <button ng-click="config.ranges.splice($index, 1)"
+          class="btn btn-danger btn-xs">
+          <i class="fa fa-ban" ></i>
+        </button>
+      </div>
+    </div>
+
+  </div>
+  <div
+    ng-click="config.ranges.push({})"
+    class="sidebar-item-button primary">
+    Add Range
+  </div>
+</div>

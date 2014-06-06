@@ -89,6 +89,13 @@ define(function (require) {
         // the actual results for the aggregation is under an _agg_* key
         var result = col.fake ? bucket : bucket[getAggKey(bucket)];
 
+        if (result && _.isPlainObject(result.buckets)) {
+          result.buckets = _.map(result.buckets, function (v, k) {
+            v.key = k;
+            return v;
+          });
+        }
+
         switch (col.categoryName) {
         case 'split':
           // pick the key for the split's groups

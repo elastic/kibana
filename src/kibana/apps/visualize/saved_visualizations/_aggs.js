@@ -64,9 +64,9 @@ define(function (require) {
 
     aggs.byFieldType = {
       number: [
-        // aggs.bucketAggsByName.histogram,
         aggs.bucketAggsByName.terms,
         aggs.bucketAggsByName.histogram,
+        aggs.bucketAggsByName.range,
         // 'range'
       ],
       date: [

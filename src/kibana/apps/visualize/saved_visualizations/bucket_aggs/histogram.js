@@ -1,5 +1,5 @@
 define(function (require) {
-  return function DateHistogramAggDefinition(timefilter, config) {
+  return function HistogramAggDefinition(timefilter, config) {
     var _ = require('lodash');
     var moment = require('moment');
 
