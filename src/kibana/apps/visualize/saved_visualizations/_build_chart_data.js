@@ -41,6 +41,11 @@ define(function (require) {
       var revColStack = configs.slice(0);
       revColStack.reverse();
 
+      // only non-split columns apply to charts, so create a list that can be used for each chart
+      var chartColumns = configs.filter(function (col) {
+        return col.categoryName !== 'split';
+      });
+
       // when we are recursing put previous columns here
       var colStack = [];
 
@@ -55,15 +60,13 @@ define(function (require) {
         if (!chartData.rows || !chartData.columns) {
           // write rows here
           chartData.rows = [];
-          chartData.columns = configs.slice(0);
+          chartData.columns = chartColumns;
         }
 
         var row = rowStack.slice(0);
         var metric = bucket.value == null ? bucket.doc_count : bucket.value;
 
-        while (row.length < configs.length - 1) {
-          row.push(void 0);
-        }
+        if (revColStack.length) [].push.apply(row, new Array(revColStack.length));
 
         // we have a full row, minus the final metric
         row.push(metric);
@@ -72,11 +75,11 @@ define(function (require) {
       };
 
       var getAggKey = function (bucket) {
-        return Object.keys(bucket)
+        return bucket.__aggKey__ || (bucket.__aggKey__ = Object.keys(bucket)
           .filter(function (key) {
             return key.substr(0, aggKeyPrefix.length) === aggKeyPrefix;
           })
-          .pop();
+          .pop());
       };
 
       var splitAndFlatten = function (chartData, bucket) {
@@ -173,6 +176,8 @@ define(function (require) {
         columns: null,
         rows: []
       };
+
+      // debugger;
 
       (function cleanup(obj) {
         if (obj.rows && obj.columns) {
