@@ -14,6 +14,10 @@
       <li ng-class="{ active: state.tab === service.title }" ng-repeat="service in services"><a ng-click="changeTab(service)">{{ service.title }}</a></li>
     </ul>
     <div class="tab-content">
+      <div class="action-bar">
+        <input type="checkbox" ng-model="deleteAll">
+        <a ng-disabled="!deleteAllBtn" ng-click="bulkDelete()" class="btn btn-default btn-xs">Delete All</a>
+      </div>
       <div ng-repeat="service in services" ng-class="{ active: state.tab === service.title }" class="tab-pane">
         <ul class="list-unstyled">
           <li ng-repeat="item in service.data">
@@ -21,6 +25,9 @@
               <a href="{{ item.url }}" class="btn-success btn btn-xs">View</a>
               &nbsp;
               <a href="#/settings/objects/{{service.service}}/{{item.id}}" class="btn-primary btn btn-xs">Edit</a>
+            </div>
+            <div class="pull-left">
+              <input type="checkbox" ng-click="item.checked = !item.checked; toggleDeleteBtn(service)" ng-checked="item.checked">
             </div>
             <a href="#/settings/objects/{{service.service}}/{{item.id}}"><i ng-class="item.icon" class="fa"></i>&nbsp;{{ item.title }}</a>
           </li>

@@ -31,6 +31,15 @@ define(function (require) {
 
         var $state = $scope.state = new AppState();
 
+        var resetCheckBoxes = function () {
+          $scope.deleteAll = false;
+          _.each($scope.services, function (service) {
+            _.each(service.data, function (item) {
+              item.checked = false;
+            });
+          });
+        };
+
         var getData = function (filter) {
           var services = registry.all().map(function (obj) {
             var service = $injector.get(obj.service);
@@ -46,9 +55,39 @@ define(function (require) {
           });
         };
 
+        $scope.$watch('deleteAll', function (checked) {
+          var service = _.find($scope.services, { title: $state.tab });
+          if (!service) return;
+          _.each(service.data, function (item) {
+            item.checked = checked;
+          });
+          $scope.toggleDeleteBtn(service);
+        });
+
+        $scope.toggleDeleteBtn = function (service) {
+          $scope.deleteAllBtn = _.some(service.data, { checked: true});
+        };
+
+        $scope.bulkDelete = function () {
+          var serviceObj = _.find($scope.services, { title: $state.tab });
+          if (!serviceObj) return;
+          var service = $injector.get(serviceObj.service);
+          var ids = _(serviceObj.data)
+            .filter({ checked: true})
+            .pluck('id')
+            .value();
+          service.delete(ids).then(function (resp) {
+            serviceObj.data = _.filter(serviceObj.data, function (obj) {
+              return !obj.checked;
+            });
+            resetCheckBoxes();
+          });
+        };
+
         $scope.changeTab = function (obj) {
           $state.tab = obj.title;
           $state.commit();
+          resetCheckBoxes();
         };
 
         $scope.$watch('advancedFilter', function (filter) {
