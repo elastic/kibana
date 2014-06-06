@@ -122,6 +122,7 @@ define(function (require) {
           loadedEditors.push(editor);
 
           var session = editor.getSession();
+          session.setTabSize(2);
           var fieldName = editor.container.id;
 
           session.on('changeAnnotation', function () {
