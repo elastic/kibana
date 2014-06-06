@@ -8,6 +8,7 @@
 /agent/.settings
 /agent/config
 /agent/lib
+/agent/.local-execution-hints.log
 .DS_Store
 *.iml
 /kibana/vendor/kibana

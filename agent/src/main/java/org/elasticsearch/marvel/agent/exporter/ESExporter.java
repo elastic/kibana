@@ -214,14 +214,15 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
                     .field("_index", getIndexName())
                     .field("_type", renderer.type(i))
                     .endObject().endObject();
-            os.write(builder.bytes().array(), builder.bytes().arrayOffset(), builder.bytes().length());
+            builder.close();
+            builder.bytes().writeTo(os);
             os.write(SmileXContent.smileXContent.streamSeparator());
 
             builder = XContentFactory.smileBuilder();
             builder.humanReadable(false);
             renderer.render(i, builder);
             builder.close();
-            os.write(builder.bytes().array(), builder.bytes().arrayOffset(), builder.bytes().length());
+            builder.bytes().writeTo(os);
             os.write(SmileXContent.smileXContent.streamSeparator());
         }
     }
