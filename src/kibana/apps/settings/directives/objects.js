@@ -113,17 +113,24 @@ define(function (require) {
         // This handles the validation of the Ace Editor. Since we don't have any
         // other hooks into the editors to tell us if the content is valid or not
         // we need to use the annotations to see if they have any errors. If they
-        // do then we increment the aceInvalidCount variable. If it's valid then we
-        // deincrement (only if aceInvalidCount !== 0)
-        $scope.aceInvalidCount = 0;
+        // do then we push the field.name to aceInvalidEditor variable. 
+        // Otherwise we remove it.
+        $scope.aceInvalidEditors = [];
         $scope.aceLoaded = function (editor) {
           var session = editor.getSession();
+          var fieldName = editor.container.id;
+          // For some reason the editor is initialized with {{field.name}} as the ID
+          // then it's re-initalized a second time with the proper id. We need to 
+          // return from the function if we do not get the proper fieldName.
+          if (fieldName === '{{field.name}}') return;
           session.on('changeAnnotation', function () {
             var annotations = session.getAnnotations();
             if (_.some(annotations, { type: 'error'})) {
-              $scope.aceInvalidCount++;
+              if (!_.contains($scope.aceInvalidEditors, fieldName)) {
+                $scope.aceInvalidEditors.push(fieldName)
+              }
             } else {
-              if($scope.aceInvalidCount !== 0) $scope.aceInvalidCount--;  
+              $scope.aceInvalidEditors = _.without($scope.aceInvalidEditors, fieldName)
             }
           });
         };
