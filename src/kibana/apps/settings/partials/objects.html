@@ -10,8 +10,11 @@
       <input ng-model="advancedFilter" class="form-control span12" type="text" placeholder="Filter"/>
     </form>
 
-    <tabset>
-      <tab ng-click="changeTab(service)" active="state.tab == service.title" heading="{{service.title}}" ng-repeat="service in services">
+    <ul class="nav nav-tabs">
+      <li ng-class="{ active: state.tab === service.title }" ng-repeat="service in services"><a ng-click="changeTab(service)">{{ service.title }}</a></li>
+    </ul>
+    <div class="tab-content">
+      <div ng-repeat="service in services" ng-class="{ active: state.tab === service.title }" class="tab-pane">
         <ul class="list-unstyled">
           <li ng-repeat="item in service.data">
             <div class="pull-right">
@@ -23,8 +26,8 @@
           </li>
           <li ng-if="!service.data.length" class="empty">You do not have any "{{service.title}}" saved.</li>
         </ul>
-      </tab>
-    </tabset>
+      </div>
+    </div>
 
   </kbn-settings-objects>
 </kbn-settings-app>
