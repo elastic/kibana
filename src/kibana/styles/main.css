@@ -7005,6 +7005,9 @@ body {
   height: 100%;
   margin: 0px;
 }
+label > small {
+  font-weight: normal;
+}
 .text-color-primary {
   color: #46525d;
 }
