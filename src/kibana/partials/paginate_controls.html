@@ -1,35 +1,23 @@
-<button
-  ng-disabled="page.first"
-  ng-click="goToPage(1)"
-  class="btn btn-default btn-xs jump-to-end">
-  <i class="fa fa-fast-backward"></i>
-</button>
-<button
-  ng-disabled="page.first"
-  ng-click="goToPage(page.prev)"
-  class="btn btn-default btn-xs">
-  <i class="fa fa-backward"></i>
-</button>
+<ul class="pagination pagination-sm">
+  <li ng-class="{disabled: page.first}">
+    <a ng-click="goToPage(page.prev)">«</a>
+  </li>
 
-<div class="paginate-other-pages">
-  <a ng-if="!otherPages.containsFirst" ng-click="goToPage(1)">1 ...</a><a
+  <li ng-if="!otherPages.containsFirst">
+    <a ng-click="goToPage(1)">1...</a>
+  </li>
+
+  <li
     ng-repeat="other in otherPages"
-    ng-click="goToPage(other)"
-    ng-class="{ active: other.number === page.number }"
-    ng-bind="other.number">
-  </a><a ng-if="!otherPages.containsLast" ng-click="goToPage(page.count)">... {{page.count}}</a>
-</div>
+    ng-class="{ active: other.number === page.number }">
+    <a ng-click="goToPage(other)">{{other.number}}</a>
+  </li>
 
-<button
-  ng-disabled="page.last"
-  ng-click="goToPage(page.next)"
-  class="btn btn-default btn-xs">
-  <i class="fa fa-forward"></i>
-</button>
+  <li ng-if="!otherPages.containsLast">
+    <a ng-click="goToPage(page.count)">...{{page.count}}</a>
+  </li>
 
-<button
-  ng-disabled="page.last"
-  ng-click="goToPage(page.count)"
-  class="btn btn-default btn-xs jump-to-end">
-  <i class="fa fa-fast-forward"></i>
-</button>
+  <li ng-class="{disabled: page.last}">
+    <a ng-click="goToPage(page.next)">»</a>
+  </li>
+</ul>

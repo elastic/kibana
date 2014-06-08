@@ -9,54 +9,9 @@ paginate {
     .flex-display();
     padding: 5px 5px 10px;
 
-    > .btn,
-    .paginate-other-pages a {
-      background-color: @pagination-bg;
-      border-color: @pagination-border;
-      color: @pagination-color;
-      &:hover {
-        background-color: @pagination-hover-bg;
-        color: @pagination-hover-color;
-        border-color: @pagination-hover-border;
-      }
-    }
 
-    > .btn {
-      margin-left: 1px;
-      padding: 0 15px;
-
-      &:first-child {
-        margin-left: 0;
-      }
-
-      &[disabled] {
-        color: @pagination-disabled-color;
-        background-color: @pagination-disabled-bg;
-        border-color: @pagination-disabled-border;
-      }
-
-      &:active,
-      &:hover {
-        box-shadow: none;
-        background: transparent;
-      }
-    }
-
-    .paginate-other-pages {
-      .flex(1, 1, 50%);
-      text-align: center;
-
-      a {
-        display: inline-block;
-        padding: 0 15px;
-
-        &.active {
-          background: @pagination-active-bg;
-          color: @pagination-active-color;
-          border-color: @pagination-active-border;
-          text-decoration: none;
-        }
-      }
+    .pagination {
+      margin: 0 auto !important;
     }
 
     @media (max-width: @screen-sm-min) {
