@@ -89,8 +89,10 @@ define(function (require) {
         });
 
         $scope.goToPage = function (number) {
-          if (number.hasOwnProperty('number')) number = number.number;
-          $scope.page = $scope.pages[number - 1] || $scope.pages[0];
+          if (number) {
+            if (number.hasOwnProperty('number')) number = number.number;
+            $scope.page = $scope.pages[number - 1] || $scope.pages[0];
+          }
         };
       }
     };
