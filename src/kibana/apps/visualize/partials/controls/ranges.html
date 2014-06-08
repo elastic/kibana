@@ -11,7 +11,7 @@
     </div>
 
     <div class="row"
-      ng-repeat="range in config.ranges">
+      ng-repeat="range in config.ranges track by $index">
       <div class="col-xs-5">
         <input
           ng-model="range.from"
