@@ -1,6 +1,7 @@
 define(function (require) {
   var app = require('modules').get('app/visualize');
   var typeDefs = require('./_type_defs');
+  var _ = require('lodash');
 
   require('./_saved_vis');
 
@@ -11,7 +12,7 @@ define(function (require) {
     title: 'Visualizations'
   });
 
-  app.service('savedVisualizations', function (es, config, SavedVis) {
+  app.service('savedVisualizations', function (Promise, es, config, SavedVis) {
 
     this.get = function (id) {
       return (new SavedVis(id)).init();
@@ -19,6 +20,13 @@ define(function (require) {
 
     this.urlFor = function (id) {
       return '#/visualize/edit/' + id;
+    };
+
+    this.delete = function (ids) {
+      ids = !_.isArray(ids) ? [ids] : ids;
+      return Promise.map(ids, function (id) {
+        return (new SavedVis(id)).delete();
+      });
     };
 
     this.find = function (searchString) {
