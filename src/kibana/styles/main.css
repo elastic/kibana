@@ -6978,59 +6978,8 @@ paginate paginate-controls {
   display: flex;
   padding: 5px 5px 10px;
 }
-paginate paginate-controls > .btn,
-paginate paginate-controls .paginate-other-pages a {
-  background-color: transparent;
-  border-color: transparent;
-  color: #31c471;
-}
-paginate paginate-controls > .btn:hover,
-paginate paginate-controls .paginate-other-pages a:hover {
-  background-color: rgba(0, 0, 0, 0);
-  color: #31c471;
-  border-color: transparent;
-}
-paginate paginate-controls > .btn {
-  margin-left: 1px;
-  padding: 0 15px;
-}
-paginate paginate-controls > .btn:first-child {
-  margin-left: 0;
-}
-paginate paginate-controls > .btn[disabled] {
-  color: #222222;
-  background-color: rgba(38, 38, 38, 0);
-  border-color: transparent;
-}
-paginate paginate-controls > .btn:active,
-paginate paginate-controls > .btn:hover {
-  box-shadow: none;
-  background: transparent;
-}
-paginate paginate-controls .paginate-other-pages {
-  -webkit-flex-grow: 1;
-  -moz-flex-grow: 1;
-  -ms-flex-grow: 1;
-  flex-grow: 1;
-  -webkit-flex-shrink: 1;
-  -moz-flex-shrink: 1;
-  -ms-flex-shrink: 1;
-  flex-shrink: 1;
-  -webkit-flex-basis: 50%;
-  -moz-flex-basis: 50%;
-  -ms-flex-basis: 50%;
-  flex-basis: 50%;
-  text-align: center;
-}
-paginate paginate-controls .paginate-other-pages a {
-  display: inline-block;
-  padding: 0 15px;
-}
-paginate paginate-controls .paginate-other-pages a.active {
-  background: rgba(0, 0, 0, 0);
-  color: #46525d;
-  border-color: transparent;
-  text-decoration: none;
+paginate paginate-controls .pagination {
+  margin: 0 auto !important;
 }
 @media (max-width: 768px) {
   paginate paginate-controls .jump-to-end {
