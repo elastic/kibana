@@ -2,6 +2,7 @@ define(function (require) {
   return function RangeAggDefinition(timefilter, config) {
     var _ = require('lodash');
     var moment = require('moment');
+    var angular = require('angular');
 
     var agg = this;
     agg.name = 'range';
