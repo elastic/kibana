@@ -47,6 +47,11 @@ function (angular,$) {
               '<i class="icon-cog pointer" bs-tooltip="\'Configure\'"></i></span>'+
             '</span>' +
 
+            '<span class="row-button extra" ng-show="panel.editable != false">' +
+              '<span ng-click="duplicate_panel(panel)" class="pointer">'+
+              '<i class="icon-plus pointer" bs-tooltip="\'Duplicate\'"></i></span>'+
+            '</span>' +
+
             '<span ng-repeat="task in panelMeta.modals" class="row-button extra" ng-show="task.show">' +
               '<span bs-modal="task.partial" class="pointer"><i ' +
                 'bs-tooltip="task.description" ng-class="task.icon" class="pointer"></i></span>'+

@@ -58,6 +58,11 @@ function (angular, app, _) {
         $scope.row.panels.push(panel);
       };
 
+      $scope.duplicate_panel = function(panel) {
+        var clone = angular.copy(panel);
+        $scope.row.panels.push(clone);
+      };
+
       /** @scratch /panels/0
        * [[panels]]
        * = Panels
