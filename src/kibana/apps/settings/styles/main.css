@@ -91,6 +91,14 @@ kbn-settings-objects .list-unstyled li {
 kbn-settings-objects .empty {
   color: #b4bcc2;
 }
+kbn-settings-objects .action-bar {
+  margin-top: 10px;
+  background-color: #ecf0f1;
+  padding: 4px 8px;
+}
+kbn-settings-objects .action-bar .btn-xs {
+  font-size: 10px;
+}
 kbn-settings-objects-view label {
   font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
 }
