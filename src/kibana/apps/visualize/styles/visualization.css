@@ -149,7 +149,10 @@ visualize visualize-table {
   flex-basis: auto;
   display: none;
   overflow: auto;
-  padding-top: 10px;
+  padding: 10px 10px 0 10px;
+}
+visualize visualize-table tr > td {
+  font-size: 0.85em;
 }
 visualize visualize-table.visible {
   display: block;
