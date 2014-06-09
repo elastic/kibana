@@ -122,7 +122,7 @@ define([
       _.each(queries, function(q) {
         var _q = $scope.ejs.FilteredQuery(
           querySrv.toEjsObj(q),
-          filterSrv.getBoolFilter(filterSrv.ids));
+          filterSrv.getBoolFilter(filterSrv.ids()));
 
         request = request
           .facet($scope.ejs.QueryFacet(q.id)
@@ -203,15 +203,10 @@ define([
           render_panel();
         });
 
-        // Re-render if the window is resized
-        angular.element(window).bind('resize', function(){
-          render_panel();
-        });
-
         // Function for rendering panel
         function render_panel() {
           // IE doesn't work without this
-          elem.css({height:scope.row.height});
+          elem.css({height:scope.panel.height||scope.row.height});
 
           try {
             _.each(scope.data,function(series) {

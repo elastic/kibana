@@ -81,7 +81,6 @@ function (angular, app, _, moment, kbn) {
       $scope.temptime.from.date.setHours(0,0,0,0);
       $scope.temptime.to.date.setHours(0,0,0,0);
 
-      console.log(new Date().getTimezoneOffset());
 
       // This is an ugly hack, but works.
       if(new Date().getTimezoneOffset() < 0) {

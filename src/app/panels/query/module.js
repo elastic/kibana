@@ -36,6 +36,7 @@ define([
     _.defaults($scope.panel,_d);
 
     $scope.querySrv = querySrv;
+    $scope.dashboard = dashboard;
 
     // A list of query types for the query config popover
     $scope.queryTypes = querySrv.types;
@@ -51,7 +52,7 @@ define([
     };
 
     $scope.refresh = function() {
-      update_history(_.pluck($scope.querySrv.list,'query'));
+      update_history(_.pluck($scope.dashboard.current.services.query.list,'query'));
       dashboard.refresh();
     };
 
@@ -60,7 +61,7 @@ define([
     };
 
     $scope.toggle_pin = function(id) {
-      querySrv.list[id].pin = querySrv.list[id].pin ? false : true;
+      dashboard.current.services.query.list[id].pin = dashboard.current.services.query.list[id].pin ? false : true;
     };
 
     $scope.queryIcon = function(type) {
@@ -92,7 +93,7 @@ define([
         alias: q.alias,
         color: q.color
       };
-      querySrv.list[_nq.id] = querySrv.defaults(_nq);
+      dashboard.current.services.query.list[_nq.id] = querySrv.defaults(_nq);
     };
 
     var update_history = function(query) {
