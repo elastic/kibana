@@ -1,6 +1,9 @@
 [[change_list]]
 == Change list
 
+=== 1.2.1
+  - Fix a cluster state data shipping for cluster states larger than 16K (in `SMILE` format and without meta data).
+
 === 1.2.0
   - New Shard Allocation Dashboard.
   - Simplified navigation and dashboard customization.
