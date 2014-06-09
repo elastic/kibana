@@ -171,6 +171,9 @@ visualize visualize-table.only {
 visualize visualize-table .table {
   margin-bottom: 5px;
 }
+visualize visualize-table .visualize-table-right {
+  text-align: right;
+}
 visualize .visualize-table-controls {
   padding: 0 5px;
   text-align: right;

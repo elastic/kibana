@@ -10,7 +10,8 @@ define(function (require) {
       scope: {
         rawRows: '=rows',
         rawColumns: '=columns',
-        show: '='
+        show: '=',
+        fields: '='
       },
       link: function ($scope, $el) {
         var notify = new Notifier();
@@ -22,6 +23,12 @@ define(function (require) {
           separator: config.get('csv:separator'),
           quoteValues: config.get('csv:quoteValues'),
           filename: 'table.csv'
+        };
+
+        $scope.getColumnClass = function (col, $first, $last) {
+          if ($last || $scope.fields && $scope.fields[col] && $scope.fields[col].type === 'number') {
+            return 'visualize-table-right';
+          }
         };
 
         $scope.cycleSort = function (col) {

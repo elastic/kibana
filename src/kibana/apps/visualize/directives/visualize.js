@@ -27,6 +27,7 @@ define(function (require) {
 
         $scope.showTable = false;
         $scope.onlyShowTable = false;
+        $scope.fields = {};
 
         var applyClassNames = function () {
           // external
@@ -82,6 +83,8 @@ define(function (require) {
             type: vis.typeName,
           };
 
+          $scope.fields = vis.searchSource.get('index').fieldsByName;
+
           _.merge(params, vis.params);
           _.defaults(params, typeDefinition.params);
 
@@ -93,6 +96,8 @@ define(function (require) {
             var callback = vis[func] || typeDefinition[func];
             if (!!callback) chart.on(event, callback);
           });
+
+
 
           vis.searchSource.onResults(function onResults(resp) {
             $scope.chartData = vis.buildChartDataFromResponse(vis.searchSource.get('index'), resp);
