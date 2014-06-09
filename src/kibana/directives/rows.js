@@ -8,6 +8,7 @@ define(function (require) {
       restrict: 'A',
       link: function ($scope, $el, attr) {
         var getter = $parse(attr.kbnRowsMin);
+
         $scope.$watch(attr.kbnRows, function (rows) {
           $el.empty();
 
@@ -30,8 +31,10 @@ define(function (require) {
 
           rows.forEach(function (row) {
             var $tr = $(document.createElement('tr'));
+
             var addCell = function (cell) {
               var $cell = $(document.createElement('td'));
+              if (_.isNumber(cell)) $cell.css('text-align', 'right');
               if (cell === '') {
                 $cell.html('&nbsp;');
               } else {
@@ -40,10 +43,10 @@ define(function (require) {
               $tr.append($cell);
             };
 
+            $el.append($tr);
+
             row.forEach(addCell);
             if (width > row.length) _.times(width - row.length, _.partial(addCell, ''));
-
-            $el.append($tr);
           });
         });
       }

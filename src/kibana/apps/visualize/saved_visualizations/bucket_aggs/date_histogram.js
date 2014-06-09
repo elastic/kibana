@@ -14,7 +14,7 @@ define(function (require) {
 
     var agg = this;
     agg.name = 'date_histogram';
-    agg.display = 'Date Histogram';
+    agg.display = 'Histogram';
     agg.ordered = {date: true};
 
     agg.makeLabel = function (params) {

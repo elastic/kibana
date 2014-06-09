@@ -2,7 +2,10 @@
   <table class="table table-condensed">
     <thead>
       <tr bindonce>
-        <th ng-repeat="col in columns track by $index" ng-click="cycleSort(col)">
+        <th
+          ng-repeat="col in columns track by $index"
+          ng-click="cycleSort(col)"
+          ng-class="getColumnClass(columns, $first, $last)">
           <span bo-text="col"></span>
           <i
             ng-if="sort.field === col"
