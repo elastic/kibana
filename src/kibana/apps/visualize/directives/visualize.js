@@ -6,7 +6,7 @@ define(function (require) {
 
 
   require('css!../styles/visualization.css');
-  require('./visualize_table');
+  require('../visualize_extras/extras');
 
   var module = require('modules').get('kibana/directive');
 
@@ -22,43 +22,45 @@ define(function (require) {
         var notify = createNotifier();
 
         var $visualize = $el.find('.visualize-chart');
-        var $table = $el.find('visualize-table');
-        var $showTableBtn = $el.find('.visualize-show-table');
+        var $extras = $el.find('visualize-extras');
 
-        $scope.showTable = false;
-        $scope.onlyShowTable = false;
         $scope.fields = {};
+        $scope.currentExtra = false;
+        $scope.onlyShowExtra = false;
 
         var applyClassNames = function () {
           // external
-          $el.toggleClass('only-visualization', !$scope.showTable);
-          $el.toggleClass('visualization-and-table', $scope.showTable && !$scope.onlyShowTable);
-          $el.toggleClass('only-table', $scope.onlyShowTable);
+          $el.toggleClass('only-visualization', !$scope.currentExtra);
+          $el.toggleClass('visualization-and-extra', $scope.currentExtra && !$scope.onlyShowExtra);
+          $el.toggleClass('only-extra', Boolean($scope.onlyShowExtra));
 
-          // interval
-          $table.toggleClass('visible', $scope.showTable);
-          $table.toggleClass('only', $scope.onlyShowTable);
-          $visualize.toggleClass('table-visible', $scope.showTable);
-          $visualize.toggleClass('table-only', $scope.onlyShowTable);
-          $showTableBtn.toggleClass('active', $scope.showTable);
+          $extras.toggleClass('only', Boolean($scope.onlyShowExtra));
+
+          // internal
+          $visualize.toggleClass('extra-visible', Boolean($scope.currentExtra));
+          $visualize.toggleClass('extra-only', Boolean($scope.onlyShowExtra));
         };
 
         var calcResponsiveStuff = function () {
-          var containerTooShort = $el.height() < 550;
-          $scope.onlyShowTable = $scope.showTable && containerTooShort;
+          if ($scope.currentExtra && $scope.currentExtra.name === 'spy') {
+            $scope.onlyShowExtra = true;
+          } else {
+            $scope.onlyShowExtra = $scope.currentExtra && $el.height() < 550;
+          }
         };
 
         var render = function () {
           applyClassNames();
-          if (chart && $scope.chartData && !$scope.onlyShowTable) {
+          if (chart && $scope.chartData && !$scope.onlyShowExtra) {
             notify.event('call chart render', function () {
               chart.render($scope.chartData);
             });
           }
         };
 
-        $scope.toggleTable = function () {
-          $scope.showTable = !$scope.showTable;
+        // provide a setter to the visualize-extras directive
+        $scope.setCurrentExtra = function (extra) {
+          $scope.currentExtra = extra || false;
           calcResponsiveStuff();
           render();
         };

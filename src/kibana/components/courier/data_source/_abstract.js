@@ -39,7 +39,7 @@ define(function (require) {
         };
       }, this);
 
-      // this.history = [];
+      this.history = [];
       this._fetchStrategy = fetch.strategies[this._getType()];
     }
 

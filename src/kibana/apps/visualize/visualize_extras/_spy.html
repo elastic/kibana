@@ -1,0 +1,14 @@
+<div class="visualize-spy">
+  <paginate list="history" per-page="1">
+    <ul class="visualize-spy-metadata">
+      <li ng-repeat="pair in page[0].meta">
+        <label>{{pair[0]}}</label>
+        {{pair[1]}}
+      </li>
+    </ul>
+    <h3>Request</h3>
+    <div ui-ace="{ mode: 'json' }" readonly="true" ng-model="page[0].req"></div>
+    <h3>Response</h3>
+    <div ui-ace="{ mode: 'json' }" readonly="true" ng-model="page[0].resp"></div>
+  </paginate>
+</div>
