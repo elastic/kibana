@@ -96,12 +96,12 @@ define(function (require) {
     };
 
     agg.params.format = {
-      hide: true,
+      ui: false,
       custom: true
     };
 
     agg.params.min_doc_count = {
-      hide: true,
+      ui: false,
       custom: true,
       default: 0,
       write: function (selection, output) {
@@ -110,7 +110,7 @@ define(function (require) {
     };
 
     agg.params.extended_bounds = {
-      hide: true,
+      ui: false,
       default: {},
       write: function (selection, output) {
         var bounds = timefilter.getBounds();

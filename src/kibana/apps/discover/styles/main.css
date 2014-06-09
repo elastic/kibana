@@ -80,10 +80,10 @@
 .discover-timechart visualize {
   height: 200px;
 }
-.discover-timechart visualize.only-table {
+.discover-timechart visualize.only-extra {
   height: auto;
 }
-.discover-timechart visualize.only-table .visualize-table {
+.discover-timechart visualize.only-extra .visualize-table {
   height: auto;
 }
 .discover-timechart .chartwrapper {
