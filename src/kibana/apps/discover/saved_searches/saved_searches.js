@@ -8,11 +8,11 @@ define(function (require) {
     'kibana/notify'
   ]);
 
-  // Register this service with the saved object registry so it can be 
+  // Register this service with the saved object registry so it can be
   // edited by the object editor.
   require('apps/settings/saved_object_registry').register({
     service: 'savedSearches',
-    title: 'Searches'
+    title: 'searches'
   });
 
   module.service('savedSearches', function (Promise, config, configFile, es, createNotifier, SavedSearch) {

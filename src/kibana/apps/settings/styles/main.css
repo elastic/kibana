@@ -81,6 +81,9 @@ kbn-settings-objects-view {
 .settings-nav {
   text-transform: capitalize;
 }
+li.kbn-settings-tab {
+  text-transform: capitalize;
+}
 kbn-settings-objects form {
   margin-bottom: 21px;
 }

@@ -1,6 +1,6 @@
 <form>
   <div class="form-group">
-    <label ng-if="title" ng-bind="title"></label>
+    <a class="small pull-right" ng-click="manageObject(type)">manage {{type}}</a>
     <input
       ng-model="filter"
       ng-attr-placeholder="{{noun}} Filter"
