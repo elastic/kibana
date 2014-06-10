@@ -29,42 +29,11 @@
 
     <div class="col-md-10">
       <div ng-switch on="mode" class="container-fluid">
-        <div ng-switch-when="quick">
+        <div ng-switch-when="quick" bindonce>
 
-          <div class="kbn-timepicker-section">
+          <div ng-repeat="list in quickLists" class="kbn-timepicker-section">
             <ul class="list-unstyled">
-              <li><a ng-click="setQuick('now/d', 'now/d')">Today</a></li>
-              <li><a ng-click="setQuick('now/w', 'now/w')">This week</a></li>
-              <li><a ng-click="setQuick('now/M', 'now/M')">This month</a></li>
-              <li><a ng-click="setQuick('now/y', 'now/y')">This year</a></li>
-              <li><a ng-click="setQuick('now/d', 'now')">The day so far</a></li>
-              <li><a ng-click="setQuick('now/w', 'now')">Week to date</a></li>
-              <li><a ng-click="setQuick('now/M', 'now')">Month to date</a></li>
-              <li><a ng-click="setQuick('now/y', 'now')">Year to date</a></li>
-            </ul>
-          </div>
-
-          <div class="kbn-timepicker-section">
-            <ul class="list-unstyled">
-              <li><a ng-click="setQuick('now-1d/d', 'now-1d/d')">Yesterday</a></li>
-              <li><a ng-click="setQuick('now-2d/d', 'now-2d/d')">Day before yesterday</a></li>
-              <li><a ng-click="setQuick('now-7d/d', 'now-7d/d')">This day last week</a></li>
-              <li><a ng-click="setQuick('now-1w/w', 'now-1w/w')">Last week</a></li>
-              <li><a ng-click="setQuick('now-1M/M', 'now-1M/M')">Last month</a></li>
-              <li><a ng-click="setQuick('now-1y/y', 'now-1y/y')">Last year</a></li>
-            </ul>
-          </div>
-
-          <div class="kbn-timepicker-section">
-            <ul class="list-unstyled">
-              <li><a ng-click="setQuick('now-15m', 'now')">Last 15 minutes</a></li>
-              <li><a ng-click="setQuick('now-30m', 'now')">Last 30 minutes</a></li>
-              <li><a ng-click="setQuick('now-1h', 'now')">Last 1 hour</a></li>
-              <li><a ng-click="setQuick('now-4h', 'now')">Last 4 hours</a></li>
-              <li><a ng-click="setQuick('now-12h', 'now')">Last 12 hours</a></li>
-              <li><a ng-click="setQuick('now-24h', 'now')">Last 24 hours</a></li>
-              <li><a ng-click="setQuick('now-7d', 'now')">Last 7 days</a></li>
-              <li><a ng-click="setQuick('now-30d', 'now')">Last 30 days</a></li>
+              <li ng-repeat="option in list"><a ng-click="setQuick(option.from, option.to)" bo-text="option.display"></a></li>
             </ul>
           </div>
 
@@ -165,25 +134,3 @@
 
   </div>
 </div>
-
-
-<!--  <div class="row">
-    <div class="timepicker-from col-xs-6 col-md-3">
-      <center>
-        <div ng-model="from">
-          <datepicker max="to" show-weeks="false"></datepicker>
-        </div>
-        <br>
-      </center>
-    </div>
-
-    <div class="timepicker-from col-xs-6 col-md-3">
-      <center>
-        <div ng-model="to">
-          <datepicker min="from" show-weeks="false"></datepicker>
-        </div>
-      </center>
-    </div>
-  </div>
-</div>
--->
