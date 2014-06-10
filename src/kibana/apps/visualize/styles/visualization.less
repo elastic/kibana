@@ -26,51 +26,65 @@ visualize {
     white-space: pre-line;
   }
 
-  .visualize-show-table {
-    .flex();
-
-    background-color: @well-bg;
-    text-align: center;
-  }
-
   .visualize-chart {
     .flex(1, 1);
     overflow: hidden;
 
-    &.table-visible {
+    &.extra-visible {
       margin-bottom: 10px;
     }
 
-    &.table-only {
+    &.extra-only {
       display: none;
     }
   }
+}
 
-  visualize-table {
+visualize-extras {
+  // this element should flex
+  .flex();
+
+  // it's children should also flex vertically
+  .flex-direction(column);
+  .flex-display();
+
+  overflow: auto;
+  padding-top: 10px;
+
+  &.visible {
+    display: block;
+  }
+
+  &.only {
+    .flex(1, 1, auto);
+    padding-top: 0px;
+  }
+
+  .visualize-show-extras {
     .flex();
-    display: none;
-    overflow: auto;
-    padding: 10px 10px 0 10px;
+    background-color: @well-bg;
+    text-align: center;
+
+    i {
+      padding: 0 10px;
+    }
+  }
+
+  .visualize-extra-container {
+    .flex(1, 1, auto);
+
+    .flex-display();
+    .flex-direction(column);
+
+    padding: 10px 10px 0;
 
     tr > td {
       font-size: 0.85em;
     }
+  }
 
-    &.visible {
-      display: block;
-    }
-
-    &.only {
-      .flex(1, 1, auto);
-    }
-
-    .table {
-      margin-bottom: 5px;
-    }
-
-    .visualize-table-right {
-      text-align: right;
-    }
+  .visualize-table-right {
+    text-align: right;
   }
 
   .visualize-table-controls {
@@ -93,6 +107,46 @@ visualize {
     }
     button[type=submit] {
       margin-left: 5px;
+    }
+  }
+
+  .visualize-spy {
+    .flex(1, 1, auto);
+    .flex-display();
+    .flex-direction(column);
+
+    paginate {
+      .flex(1, 1, auto);
+      .flex-display();
+      .flex-direction(column);
+
+      .paginate-content {
+        .flex(1, 1, auto);
+        .flex-display();
+        .flex-direction(column);
+
+        [ui-ace] {
+          .flex(1, 1, 100%);
+          min-height: 250px;
+        }
+      }
+    }
+  }
+
+  .visualize-spy-metadata {
+    padding: 0;
+    list-style: none;
+
+    li {
+      .flex-display();
+    }
+
+    label {
+      width: 125px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      display: block;
     }
   }
 }

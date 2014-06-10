@@ -2,6 +2,7 @@ define(function (require) {
   return function fetchService(Private, es, Promise, Notifier) {
     var _ = require('lodash');
     var errors = require('errors');
+    var moment = require('moment');
 
     var docStrategy = Private(require('./strategy/doc'));
     var searchStrategy = Private(require('./strategy/search'));
@@ -29,6 +30,8 @@ define(function (require) {
           req.source.activeFetchCount = 1;
         }
 
+        req.moment = moment();
+
         var iid = req.source._instanceid;
         if (!uniqs[iid]) {
           // this request is unique so far
@@ -49,7 +52,6 @@ define(function (require) {
       });
 
       return Promise.map(all, function (req) {
-        window.sourceHistory = [req.source].concat(window.sourceHistory).splice(0, 5);
         return req.source._flatten();
       })
       .then(function (states) {
