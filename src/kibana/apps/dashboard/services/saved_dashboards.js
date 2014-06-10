@@ -5,11 +5,11 @@ define(function (require) {
   require('./_saved_dashboard');
 
 
-  // Register this service with the saved object registry so it can be 
+  // Register this service with the saved object registry so it can be
   // edited by the object editor.
   require('apps/settings/saved_object_registry').register({
     service: 'savedDashboards',
-    title: 'Dashboards'
+    title: 'dashboards'
   });
 
   // This is the only thing that gets injected into controllers

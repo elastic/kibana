@@ -5,11 +5,11 @@ define(function (require) {
 
   require('./_saved_vis');
 
-  // Register this service with the saved object registry so it can be 
+  // Register this service with the saved object registry so it can be
   // edited by the object editor.
   require('apps/settings/saved_object_registry').register({
     service: 'savedVisualizations',
-    title: 'Visualizations'
+    title: 'visualizations'
   });
 
   app.service('savedVisualizations', function (Promise, es, config, SavedVis) {
