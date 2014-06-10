@@ -23,6 +23,7 @@ define(function (require) {
         ],
         default: 'desc',
         write: function (selection, output) {
+          // TODO: We need more just _count here.
           output.aggParams.order = { _count: selection.val };
         }
       }

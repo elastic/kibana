@@ -10,7 +10,7 @@ define(function (require) {
   var datemath = require('utils/datemath');
 
   require('notify/notify');
-  require('directives/timepicker');
+  require('components/timepicker/timepicker');
   require('directives/fixed_scroll');
   require('filters/moment');
   require('courier/courier');
