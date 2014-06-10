@@ -1,8 +1,9 @@
 define(function (require) {
   var module = require('modules').get('kibana/directives');
   var _ = require('lodash');
+  var rison = require('utils/rison');
 
-  module.directive('savedObjectFinder', function (savedSearches, savedVisualizations, savedDashboards) {
+  module.directive('savedObjectFinder', function (savedSearches, savedVisualizations, savedDashboards, $location) {
     var vars = {
       searches: {
         service: savedSearches,
@@ -157,6 +158,10 @@ define(function (require) {
         $scope.$on('$destroy', function () {
           $input.off('keydown');
         });
+
+        $scope.manageObject = function (type) {
+          $location.url('/settings/objects?_a=' + rison.encode({tab: type}));
+        };
 
         function filterResults() {
           if (!service) return;
