@@ -11,7 +11,9 @@
     </form>
 
     <ul class="nav nav-tabs">
-      <li ng-class="{ active: state.tab === service.title }" ng-repeat="service in services"><a ng-click="changeTab(service)">{{ service.title }}</a></li>
+      <li class="kbn-settings-tab" ng-class="{ active: state.tab === service.title }" ng-repeat="service in services">
+        <a ng-click="changeTab(service)">{{ service.title }}</a>
+      </li>
     </ul>
     <div class="tab-content">
       <div class="action-bar">
