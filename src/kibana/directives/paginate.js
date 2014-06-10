@@ -60,7 +60,7 @@ define(function (require) {
 
           // setup the list of the other pages to link to
           $scope.otherPages = [];
-          var width = getOtherWidth($scope) || 5;
+          var width = +getOtherWidth($scope) || 5;
           var left = newPage.i - Math.round((width - 1) / 2);
           var right = left + width - 1;
 

@@ -1,14 +1,15 @@
 define(function (require) {
-  var html = require('text!partials/timepicker.html');
+  var html = require('text!./timepicker.html');
   var module = require('modules').get('kibana/directives');
   var _ = require('lodash');
   var datemath = require('utils/datemath');
   var moment = require('moment');
 
   require('directives/input_datetime');
+  require('./quick_ranges');
 
 
-  module.directive('kbnTimepicker', function () {
+  module.directive('kbnTimepicker', function (quickRanges) {
     return {
       restrict: 'E',
       scope: {
@@ -25,6 +26,10 @@ define(function (require) {
         $scope.format = 'MMMM Do YYYY, HH:mm:ss.SSS';
         $scope.modes = ['quick', 'relative', 'absolute'];
         if (_.isUndefined($scope.mode)) $scope.mode = 'quick';
+
+        $scope.quickLists = _.map(_.uniq(_.pluck(quickRanges, 'section')), function (section) {
+          return _.filter(quickRanges, {section: section});
+        });
 
 
         $scope.relative = {
