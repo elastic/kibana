@@ -441,19 +441,12 @@ define(function (require) {
     var setupVisualization = function () {
       if (loadingVis) return loadingVis;
 
-      /*
+
       // we shouldn't have a vis, delete it
       if (!$scope.opts.timefield && $scope.vis) {
         $scope.vis.destroy();
         delete $scope.vis;
       }
-      */
-
-      if ($scope.vis) {
-        $scope.vis.destroy();
-        delete $scope.vis;
-      }
-
       // we shouldn't have one, or already do, return whatever we already have
       if (!$scope.opts.timefield || $scope.vis) return Promise.resolve($scope.vis);
 
