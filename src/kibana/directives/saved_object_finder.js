@@ -179,7 +179,8 @@ define(function (require) {
             // ensure that we don't display old results
             // as we can't really cancel requests
             if (currentFilter === filter) {
-              $scope.hits = hits;
+              $scope.hitCount = hits.total;
+              $scope.hits = hits.hits;
               $selected = null;
             }
           });
