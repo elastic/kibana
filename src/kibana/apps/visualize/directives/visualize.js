@@ -59,7 +59,7 @@ define(function (require) {
         };
 
         // provide a setter to the visualize-extras directive
-        $scope.setCurrentExtra = function (extra) {
+        $scope.renderExtra = function (extra) {
           $scope.currentExtra = extra || false;
           calcResponsiveStuff();
           render();

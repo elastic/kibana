@@ -1,12 +1,6 @@
-<div class="visualize-show-extras">
+<div ng-click="toggleExtra()" class="visualize-show-extras">
   <small>
-    <i
-      ng-repeat="extra in extras"
-      ng-click="toggleExtra(extra.name)"
-      class="fa"
-      tooltip="{{ currentExtra.name === extra.name ? 'close' : extra.desc}}"
-      tooltip-placement="{{ onlyShowExtra ? 'bottom' : 'top' }}"
-      ng-class="currentExtra.name === extra.name ? 'fa-chevron-down' : extra.icon">
+    <i class="fa" ng-class="currentExtra ? 'fa-chevron-down' : 'fa-chevron-up'">
     </i>
   </small>
 </div>

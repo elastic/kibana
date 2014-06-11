@@ -28,6 +28,7 @@
     </ul>-->
 
     <ul class="nav nav-tabs visualize-spy-tabs">
+      <li ng-class="{active: spyMode == 'table'}"><a ng-click="spyMode = 'table'">Table</a></li>
       <li ng-class="{active: spyMode == 'request'}"><a ng-click="spyMode = 'request'">Request</a></li>
       <li ng-class="{active: spyMode == 'response'}"><a ng-click="spyMode = 'response'">Response</a></li>
       <li ng-class="{active: spyMode == 'stats'}"><a ng-click="spyMode = 'stats'">Statistics</a></li>
@@ -35,12 +36,12 @@
 
     <div ng-show="spyMode == 'request'">
       <!--<div ui-ace="{ mode: 'json' }" readonly="true" ng-model="page[0].req"></div>-->
-      <pre>{{history[0].req}}</pre>
+      <pre>{{history[0].req | json}}</pre>
     </div>
 
     <div ng-show="spyMode == 'response'">
       <!--<div ui-ace="{ mode: 'json' }" readonly="true" ng-model="page[0].resp"></div>-->
-      <pre>{{history[0].resp}}</pre>
+      <pre>{{history[0].resp | json}}</pre>
     </div>
 
     <div ng-show="spyMode == 'stats'">
@@ -49,7 +50,37 @@
           <td>{{pair[0]}}</td>
           <td>{{pair[1]}}</td>
         </tr>
-      </table>>
+      </table>
+    </div>
+
+    <div ng-show="spyMode == 'table'">
+      <paginate list="rows" per-page="10">
+        <table class="table table-condensed">
+          <thead>
+            <tr bindonce>
+              <th
+                ng-repeat="col in columns track by $index"
+                ng-click="cycleSort(col)"
+                ng-class="getColumnClass(columns, $first, $last)">
+                <span bo-text="col"></span>
+                <i
+                  ng-if="sort.field === col"
+                  class="fa"
+                  ng-class="{
+                    'fa-sort-asc': sort.asc,
+                    'fa-sort-desc': !sort.asc
+                  }">
+                </i>
+              </th>
+            </tr>
+          </thead>
+          <tbody kbn-rows="page" kbn-rows-min="paginate.perPage"></tbody>
+        </table>
+        <a class="small pull-right" ng-click="exportAsCsv()">
+          Export <i class="fa fa-download"></i>
+        </a>
+      </paginate>
+
     </div>
 
   <!--</paginate>-->
