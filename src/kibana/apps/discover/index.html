@@ -34,7 +34,18 @@
       <div class="col-md-10" ng-controller="discoverTable">
 
         <div class="discover-timechart" ng-if="vis">
-          <center class="small">{{timeRange.from | moment}} - {{timeRange.to | moment}}</center>
+          <center class="small">
+            {{timeRange.from | moment}} - {{timeRange.to | moment}}
+            <!-- TODO: Currently no way to apply this setting to the visualization -->
+            <!-- <select
+              class="form-control"
+              ng-model="state.interval"
+              ng-options="interval as interval for interval in intervalOptions"
+              ng-change="setupVisualization();fetch()"
+              >
+            </select> -->
+          </center>
+
           <div ng-show="httpActive.length" class="discover-timechart-overlay">
             <div class="spinner large">
             </div>
