@@ -7423,6 +7423,15 @@ saved-object-finder .form-group input {
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
 }
+saved-object-finder div.finder-form {
+  position: relative;
+}
+saved-object-finder span.finder-hit-count {
+  position: absolute;
+  right: 10px;
+  top: 25px;
+  font-size: 0.85em;
+}
 saved-object-finder .finder-options {
   max-height: 300px;
   overflow: auto;

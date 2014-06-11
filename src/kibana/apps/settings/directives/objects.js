@@ -44,7 +44,7 @@ define(function (require) {
           var services = registry.all().map(function (obj) {
             var service = $injector.get(obj.service);
             return service.find(filter).then(function (data) {
-              return { service: obj.service, title: obj.title, data: data };
+              return { service: obj.service, title: obj.title, data: data.hits };
             });
           });
           $q.all(services).then(function (data) {
@@ -127,7 +127,7 @@ define(function (require) {
             field.type = 'array';
             field.value = JSON.stringify(field.value, null, ' ');
           } else if (_.isPlainObject(field.value)) {
-            // do something recursive 
+            // do something recursive
             return _.reduce(field.value, _.partialRight(createField, parents), memo);
           } else {
             return;
@@ -152,7 +152,7 @@ define(function (require) {
         // This handles the validation of the Ace Editor. Since we don't have any
         // other hooks into the editors to tell us if the content is valid or not
         // we need to use the annotations to see if they have any errors. If they
-        // do then we push the field.name to aceInvalidEditor variable. 
+        // do then we push the field.name to aceInvalidEditor variable.
         // Otherwise we remove it.
         $scope.aceInvalidEditors = [];
         var loadedEditors = [];
@@ -218,5 +218,5 @@ define(function (require) {
       }
     };
   });
-  
+
 });
