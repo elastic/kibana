@@ -110,43 +110,18 @@ visualize-extras {
     }
   }
 
+
   .visualize-spy {
-    .flex(1, 1, auto);
-    .flex-display();
-    .flex-direction(column);
-
-    paginate {
-      .flex(1, 1, auto);
-      .flex-display();
-      .flex-direction(column);
-
-      .paginate-content {
-        .flex(1, 1, auto);
-        .flex-display();
-        .flex-direction(column);
-
-        [ui-ace] {
-          .flex(1, 1, 100%);
-          min-height: 250px;
-        }
-      }
+    .visualize-spy-tabs {
+      margin-bottom: 10px;
     }
+
+    pre {
+      word-break: break-all;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+
   }
 
-  .visualize-spy-metadata {
-    padding: 0;
-    list-style: none;
-
-    li {
-      .flex-display();
-    }
-
-    label {
-      width: 125px;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-      display: block;
-    }
-  }
 }

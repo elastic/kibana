@@ -3,8 +3,10 @@ define(function (require) {
   var _ = require('lodash');
   var saveAs = require('file_saver');
 
-  return function VisualizeExtraSpy() {
-    return function spyLinkFn ($scope, $el) {
+  return function VisualizeExtraSpy(config) {
+    return function spyLinkFn($scope, $el) {
+      $scope.spyMode = 'request';
+
       $scope.$watchCollection('vis.searchSource.history', function (searchHistory) {
         if (!searchHistory) {
           $scope.history = [];
@@ -18,8 +20,9 @@ define(function (require) {
           var resp = entry.resp;
           var meta = [];
 
-          if (entry.moment) meta.push(['Time', entry.moment.fromNow()]);
+          if (entry.moment) meta.push(['Time', entry.moment.format(config.get('dateFormat'))]);
           if (resp && resp.took != null) meta.push(['Took (ms)', resp.took]);
+          if (resp && resp.hits) meta.push(['Hits', resp.hits.total]);
 
           if (state.index) meta.push(['Index', state.index]);
           if (state.type) meta.push(['Type', state.type]);
