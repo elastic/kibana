@@ -48,15 +48,19 @@ define(function (require) {
       return es.search({
         index: config.file.kibanaIndex,
         type: 'dashboard',
-        body: body
+        body: body,
+        size: 100
       })
       .then(function (resp) {
-        return resp.hits.hits.map(function (hit) {
-          var source = hit._source;
-          source.id = hit._id;
-          source.url = self.urlFor(hit._id);
-          return source;
-        });
+        return {
+          total: resp.hits.total,
+          hits: resp.hits.hits.map(function (hit) {
+            var source = hit._source;
+            source.id = hit._id;
+            source.url = self.urlFor(hit._id);
+            return source;
+          })
+        };
       });
     };
   });

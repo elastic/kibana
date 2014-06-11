@@ -43,17 +43,21 @@ define(function (require) {
       return es.search({
         index: config.file.kibanaIndex,
         type: 'visualization',
-        body: body
+        body: body,
+        size: 100,
       })
       .then(function (resp) {
-        return resp.hits.hits.map(function (hit) {
-          var source = hit._source;
-          source.id = hit._id;
-          source.url = self.urlFor(hit._id);
-          source.typeDef = typeDefs.byName[source.typeName];
-          source.icon = source.typeDef.icon;
-          return source;
-        });
+        return {
+          total: resp.hits.total,
+          hits: resp.hits.hits.map(function (hit) {
+            var source = hit._source;
+            source.id = hit._id;
+            source.url = self.urlFor(hit._id);
+            source.typeDef = typeDefs.byName[source.typeName];
+            source.icon = source.typeDef.icon;
+            return source;
+          })
+        };
       });
     };
   });

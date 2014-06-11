@@ -6,56 +6,32 @@ define(function (require) {
 
     var $ = require('jquery');
     var _ = require('lodash');
-
-    var extras = [
-      {
-        name: 'table',
-        desc: 'tabular visualization data',
-        link: Private(require('./_table')),
-        template: require('text!./_table.html'),
-        icon: 'fa-table'
-      },
-      {
-        name: 'spy',
-        desc: 'visualization request history',
-        link: Private(require('./_spy')),
-        template: require('text!./_spy.html'),
-        icon: 'fa-search'
-      }
-    ];
-    extras.byName = _.indexBy(extras, 'name');
+    var contentTemplate = require('text!./_spy.html');
+    var link = Private(require('./_spy'));
 
     return {
       restrict: 'E',
       template: require('text!./_extras.html'),
       link: function ($scope, $el) {
         $scope.currentExtra = null;
-        $scope.extras = extras;
 
-
-        $scope.toggleExtra = function (name) {
+        $scope.toggleExtra = function () {
           var current = $scope.currentExtra;
 
           if (current) {
             current.$container.remove();
             current.$scope.$destroy();
+            return $scope.renderExtra(null);
           }
 
-          if (current && current.name === name) {
-            // toggle out the current extra, don't proceed any further
-            return $scope.setCurrentExtra(null);
-          }
-
-          var newExtra = extras.byName[name];
           current = {
-            name: name,
             $scope: $scope.$new(),
             $container: $('<div class="visualize-extra-container">').appendTo($el)
           };
 
-          current.$container.append($compile(newExtra.template)(current.$scope));
-          newExtra.link(current.$scope, current.$container);
-          $scope.setCurrentExtra(current);
+          current.$container.append($compile(contentTemplate)(current.$scope));
+          link(current.$scope, current.$container);
+          $scope.renderExtra(current);
         };
       }
     };
