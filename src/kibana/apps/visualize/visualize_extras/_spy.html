@@ -1,3 +1,5 @@
+
+<!--
 <div class="visualize-spy">
   <paginate list="history" per-page="1">
     <ul class="visualize-spy-metadata">
@@ -11,4 +13,45 @@
     <h3>Response</h3>
     <div ui-ace="{ mode: 'json' }" readonly="true" ng-model="page[0].resp"></div>
   </paginate>
+</div>
+-->
+
+<div class="visualize-spy">
+
+  <!--<paginate list="history" per-page="1">-->
+
+    <!--<ul class="visualize-spy-metadata">
+      <li ng-repeat="pair in page[0].meta">
+        <label>{{pair[0]}}</label>
+        {{pair[1]}}
+      </li>
+    </ul>-->
+
+    <ul class="nav nav-tabs visualize-spy-tabs">
+      <li ng-class="{active: spyMode == 'request'}"><a ng-click="spyMode = 'request'">Request</a></li>
+      <li ng-class="{active: spyMode == 'response'}"><a ng-click="spyMode = 'response'">Response</a></li>
+      <li ng-class="{active: spyMode == 'stats'}"><a ng-click="spyMode = 'stats'">Statistics</a></li>
+    </ul>
+
+    <div ng-show="spyMode == 'request'">
+      <!--<div ui-ace="{ mode: 'json' }" readonly="true" ng-model="page[0].req"></div>-->
+      <pre>{{history[0].req}}</pre>
+    </div>
+
+    <div ng-show="spyMode == 'response'">
+      <!--<div ui-ace="{ mode: 'json' }" readonly="true" ng-model="page[0].resp"></div>-->
+      <pre>{{history[0].resp}}</pre>
+    </div>
+
+    <div ng-show="spyMode == 'stats'">
+      <table class="table">
+        <tr ng-repeat="pair in history[0].meta">
+          <td>{{pair[0]}}</td>
+          <td>{{pair[1]}}</td>
+        </tr>
+      </table>>
+    </div>
+
+  <!--</paginate>-->
+
 </div>
