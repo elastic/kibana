@@ -12,7 +12,7 @@
 
     <ul class="nav nav-tabs">
       <li class="kbn-settings-tab" ng-class="{ active: state.tab === service.title }" ng-repeat="service in services">
-        <a ng-click="changeTab(service)">{{ service.title }}</a>
+        <a ng-click="changeTab(service)">{{ service.title }} <small>({{service.hits}})</small></a>
       </li>
     </ul>
     <div class="tab-content">
