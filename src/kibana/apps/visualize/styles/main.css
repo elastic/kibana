@@ -172,3 +172,6 @@ vis-canvas {
 .vis-editor .navbar a .fa {
   color: white;
 }
+form.vis-share div.form-control {
+  height: inherit;
+}
