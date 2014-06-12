@@ -18,7 +18,7 @@
   <body ng-controller="kibana" ng-class="'application-'+activeApp">
     <kbn-notifications list="notifList"></kbn-notifications>
     <div class="content" style="display: none;">
-      <nav bindonce class="navbar navbar-inverse navbar-static-top">
+      <nav ng-hide="appEmbedded" bindonce class="navbar navbar-inverse navbar-static-top">
         <div class="container-fluid">
           <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#kibana-primary-navbar">

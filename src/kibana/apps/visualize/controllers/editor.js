@@ -43,20 +43,8 @@ define(function (require) {
       vis: createFn
     }
   })
-  .when('/visualize/create/embed', {
-    template: require('text!../embed.html'),
-    resolve: {
-      vis: createFn
-    }
-  })
   .when('/visualize/edit/:id', {
     template: require('text!../editor.html'),
-    resolve: {
-      vis: editFn
-    }
-  })
-  .when('/visualize/edit/:id/embed', {
-    template: require('text!../embed.html'),
     resolve: {
       vis: editFn
     }
@@ -220,7 +208,7 @@ define(function (require) {
       return {
         link: $location.absUrl(),
         // This sucks, but seems like the cleanest way. Uhg.
-        embed: $location.absUrl().replace('?', '/embed/?')
+        embed: $location.absUrl().replace('?', '?embed&')
       };
     };
 
