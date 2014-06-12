@@ -26,6 +26,7 @@ define(function (require) {
       template: headerHtml,
       controller: function ($scope) {
         $scope.headerClass = function (column) {
+          if (!$scope.mapping) return;
           if ($scope.mapping[column] && !$scope.mapping[column].indexed) return;
 
           var sorting = $scope.sorting;
