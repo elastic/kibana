@@ -56,8 +56,6 @@ define(function (require) {
             return;
           }
 
-          if (newPage === oldPage) return;
-
           // setup the list of the other pages to link to
           $scope.otherPages = [];
           var width = +getOtherWidth($scope) || 5;
