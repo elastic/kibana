@@ -1,11 +1,11 @@
-<form role="form">
+<form role="form" class="vis-share">
   <div class="form-group">
  	<label>Embed this visualization. <small>Copy code into your html source. Note all clients must still be able to access kibana</small></label>
-  	<textarea class="form-control" disabled><iframe src="{{conf.shareData().embed}}" height="400" width="600"></iframe></textarea>
+  	<div class="form-control" disabled>&lt;iframe src="{{conf.shareData().embed}}" height="400" width="600"&gt;</iframe></div>
   </div>
 
   <div class="form-group">
 	<label>Share a link</label>
-  	<textarea class="form-control" disabled>{{conf.shareData().link}}</textarea>
+  	<div class="form-control" disabled>{{conf.shareData().link}}</div>
   </div>
 </form>
