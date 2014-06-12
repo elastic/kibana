@@ -30,8 +30,10 @@ define(function (require) {
     });
   });
 
-  module.controller('kibana', function ($rootScope, $scope, Notifier, $injector, $q, $http, config, kbnSetup) {
+  module.controller('kibana', function ($rootScope, $location, $scope, Notifier, $injector, $q, $http, config, kbnSetup) {
     var notify = new Notifier();
+
+    $scope.appEmbedded = $location.search().embed;
 
     $scope.httpActive = $http.pendingRequests;
 
