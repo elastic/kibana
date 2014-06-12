@@ -6,22 +6,22 @@
   "main": "Gulpfile.js",
   "dependencies": {},
   "devDependencies": {
-    "bluebird": "~2.0.7",
-    "connect": "~2.19.5",
-    "event-stream": "~3.1.5",
     "expect.js": "~0.2.0",
     "grunt": "~0.4.2",
+    "grunt-cli": "~0.1.13",
+    "grunt-contrib-connect": "~0.6.0",
     "grunt-contrib-jade": "~0.10.0",
     "grunt-contrib-jshint": "~0.8.0",
     "grunt-contrib-less": "~0.10.0",
     "grunt-contrib-requirejs": "~0.4.4",
     "grunt-contrib-watch": "~0.5.3",
     "grunt-mocha": "~0.4.10",
-    "http-proxy": "~1.1.4",
     "istanbul": "~0.2.4",
     "load-grunt-config": "~0.7.0",
     "lodash": "~2.4.1",
-    "mocha": "~1.17.1"
+    "bluebird": "~1.2.4",
+    "mocha": "~1.17.1",
+    "event-stream": "~3.1.5"
   },
   "scripts": {
     "test": "grunt test",

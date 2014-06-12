@@ -100,6 +100,15 @@ define(function (require) {
       custom: true
     };
 
+    agg.params.min_doc_count = {
+      hide: true,
+      custom: true,
+      default: 0,
+      write: function (selection, output) {
+        output.aggParams.min_doc_count = 0;
+      }
+    };
+
     agg.params.extended_bounds = {
       hide: true,
       default: {},

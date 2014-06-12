@@ -66,12 +66,10 @@ define(function (require) {
         var row = rowStack.slice(0);
         var metric = bucket.value == null ? bucket.doc_count : bucket.value;
 
-        if (!revColStack.length) {
-          // we have a full row, minus the final metric
-          row.push(metric);
-        } else {
-          [].push.apply(row, new Array(revColStack.length + 1));
-        }
+        if (revColStack.length) [].push.apply(row, new Array(revColStack.length));
+
+        // we have a full row, minus the final metric
+        row.push(metric);
 
         chartData.rows.push(row);
       };
@@ -186,6 +184,8 @@ define(function (require) {
         rows: []
       };
 
+      // debugger;
+
       (function cleanup(obj) {
         if (obj.rows && obj.columns) {
           // this obj is a chart
@@ -196,11 +196,10 @@ define(function (require) {
 
           var rows = obj.rows;
           var cols = obj.columns;
-
           delete obj.rows;
           delete obj.columns;
-
           obj.label = [].concat(labelStack, obj.label).filter(Boolean).join(' > ');
+
           rows.forEach(function (row) {
             raw.rows.push([].concat(raw.splitValStack, row));
           });
@@ -211,7 +210,6 @@ define(function (require) {
           delete obj.splits;
 
           labelStack.push(obj.label);
-
           _.forOwn(splits, function (split) {
             raw.splitColumns.push(split.column);
             raw.splitValStack.push(split.value);
