@@ -3,6 +3,7 @@ define(function (require) {
   var angular = require('angular');
   var ConfigTemplate = require('utils/config_template');
   var typeDefs = require('../saved_visualizations/_type_defs');
+  var qs = require('utils/query_string');
 
   require('../saved_visualizations/saved_visualizations');
   require('notify/notify');
@@ -15,37 +16,54 @@ define(function (require) {
 
   var visConfigCategories = require('../saved_visualizations/_config_categories');
 
+  var createFn = function (savedVisualizations, courier, $route) {
+    if (!$route.current.params.indexPattern && !$route.current.params.savedSearchId) {
+      throw new Error('You must provide either an indexPattern or a savedSearchId');
+    }
+
+    return savedVisualizations.get($route.current.params)
+    .catch(courier.redirectWhenMissing({
+      //'index-pattern': '/visualize',
+      '*': '/visualize'
+    }));
+  };
+
+  var editFn = function (savedVisualizations, courier, $route) {
+    return savedVisualizations.get($route.current.params.id)
+    .catch(courier.redirectWhenMissing({
+      'index-pattern': '/settings',
+      '*': '/visualize'
+    }));
+  };
+
   require('routes')
   .when('/visualize/create', {
     template: require('text!../editor.html'),
     resolve: {
-      vis: function (savedVisualizations, courier, $route) {
-        if (!$route.current.params.indexPattern && !$route.current.params.savedSearchId) {
-          throw new Error('You must provide either an indexPattern or a savedSearchId');
-        }
-
-        return savedVisualizations.get($route.current.params)
-        .catch(courier.redirectWhenMissing({
-          //'index-pattern': '/visualize',
-          '*': '/visualize'
-        }));
-      }
+      vis: createFn
+    }
+  })
+  .when('/visualize/create/embed', {
+    template: require('text!../embed.html'),
+    resolve: {
+      vis: createFn
     }
   })
   .when('/visualize/edit/:id', {
     template: require('text!../editor.html'),
     resolve: {
-      vis: function (savedVisualizations, courier, $route) {
-        return savedVisualizations.get($route.current.params.id)
-        .catch(courier.redirectWhenMissing({
-          'index-pattern': '/settings',
-          '*': '/visualize'
-        }));
-      }
+      vis: editFn
+    }
+  })
+  .when('/visualize/edit/:id/embed', {
+    template: require('text!../embed.html'),
+    resolve: {
+      vis: editFn
     }
   });
 
-  app.controller('VisualizeEditor', function ($scope, $route, $timeout, Notifier, $location, globalState, AppState, timefilter, Private) {
+  app.controller('VisualizeEditor', function ($scope, $route, $timeout, $window, Notifier, $location,
+    globalState, AppState, timefilter, Private) {
     var aggs = Private(require('../saved_visualizations/_aggs'));
 
     var notify = new Notifier({
@@ -193,8 +211,18 @@ define(function (require) {
     // config panel templates
     var configTemplate = $scope.configTemplate = new ConfigTemplate({
       save: require('text!../partials/save.html'),
-      load: require('text!../partials/load.html')
+      load: require('text!../partials/load.html'),
+      share: require('text!../partials/share.html'),
     });
+
+    $scope.toggleShare = _.bindKey(configTemplate, 'toggle', 'share');
+    $scope.shareData = function () {
+      return {
+        link: $location.absUrl(),
+        // This sucks, but seems like the cleanest way. Uhg.
+        embed: $location.absUrl().replace('?', '/embed/?')
+      };
+    };
 
     /**
      * Click handler for the "save" button.
@@ -207,7 +235,7 @@ define(function (require) {
     $scope.toggleLoad = _.bindKey(configTemplate, 'toggle', 'load');
 
     // objects to make available within the config panel's scope
-    $scope.conf = _.pick($scope, 'doSave', 'vis');
+    $scope.conf = _.pick($scope, 'doSave', 'vis', 'shareData');
 
     $scope.unlink = function () {
       // display unlinking for 2 seconds, unless it is double clicked
