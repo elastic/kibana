@@ -62,10 +62,12 @@ define(function (require) {
         $scope.configTemplate = new ConfigTemplate({
           save: require('text!./partials/save_dashboard.html'),
           load: require('text!./partials/load_dashboard.html'),
+          share: require('text!./partials/share.html'),
           pickVis: require('text!./partials/pick_visualization.html')
         });
 
         $scope.openSave = _.partial($scope.configTemplate.toggle, 'save');
+        $scope.openShare = _.partial($scope.configTemplate.toggle, 'share');
         $scope.openLoad = _.partial($scope.configTemplate.toggle, 'load');
         $scope.openAdd = _.partial($scope.configTemplate.toggle, 'pickVis');
         $scope.refresh = _.bindKey(courier, 'fetch');
@@ -115,7 +117,14 @@ define(function (require) {
         $scope.opts = {
           dashboard: dash,
           save: $scope.save,
-          addVis: $scope.addVis
+          addVis: $scope.addVis,
+          shareData: function () {
+            return {
+              link: $location.absUrl(),
+              // This sucks, but seems like the cleanest way. Uhg.
+              embed: $location.absUrl().replace('?', '?embed&')
+            };
+          }
         };
 
         $scope.$broadcast('application.load');
