@@ -19,7 +19,7 @@ module.exports = function (grunt) {
     }
 
     function onError() {
-      grunt.task.run(['server']);
+      grunt.task.run(['connect:dev']);
       done();
     }
 

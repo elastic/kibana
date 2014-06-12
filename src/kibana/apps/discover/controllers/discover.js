@@ -323,14 +323,14 @@ define(function (require) {
         };
       }, {});
 
+      if (!indexPattern) return;
+
       var columnObjects = arrayToKeys($state.columns);
 
       $scope.fields = [];
       $scope.fieldsByName = {};
       $scope.formatsByName = {};
       $state.columns = $state.columns || [];
-
-      if (!indexPattern) return;
 
       // Inject source into list;
       //$scope.fields.push({name: '_source', type: 'source', display: false});
