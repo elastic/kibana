@@ -48,5 +48,6 @@ define(function (require) {
     indexPatterns.intervals = Private(require('./_intervals'));
     indexPatterns.mapper = Private(require('./_mapper'));
     indexPatterns.patternToWildcard = Private(require('./_pattern_to_wildcard'));
+    indexPatterns.fieldFormats = Private(require('./_field_formats'));
   });
 });
