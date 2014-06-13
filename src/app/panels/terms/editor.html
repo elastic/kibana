@@ -28,7 +28,10 @@
       </div>
       <div class="editor-option" ng-show="panel.tmode == 'terms'">
         <label class="small">Exclude Terms(s) (comma separated)</label>
-        <input array-join type="text" ng-model='panel.exclude'></input>
+        <input array-join type="text" ng-model='panel.exclude'>
+      </div>
+      <div class="editor-option" ng-show="panel.tmode == 'terms_stats'">
+        <label class="small">Distinct queries</label><input type="checkbox" ng-model="panel.distinctQueries" ng-checked="panel.distinctQueries" ng-change="set_refresh(true)">
       </div>
     </div>
   </div>
