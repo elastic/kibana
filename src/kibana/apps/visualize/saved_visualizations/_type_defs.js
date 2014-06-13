@@ -49,10 +49,6 @@ define(function (require) {
         addLegend: true
       },
       listeners: {
-        onClick: function (e) {
-          // TODO: We need to be able to get ahold of angular services here
-          console.log(e);
-        }
       },
       config: {
         metric: {
@@ -86,10 +82,6 @@ define(function (require) {
         addLegend: true
       },
       listeners: {
-        onClick: function (e) {
-          // TODO: We need to be able to get ahold of angular services here
-          console.log(e);
-        }
       },
       config: {
         metric: {
