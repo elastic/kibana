@@ -307,12 +307,9 @@ define([
             scope.data = [];
             var k = 0;
 
-            console.log(scope.panel);
             if (scope.panel.tmode === 'terms_stats' && (scope.panel.distinctQueries === true)) {
-              console.log('multi queries');
               var termIndices = {};
               var key = 0;
-              console.log(scope.results);
               $.each(scope.results, function (k, r) {
                 var queryLabel = k;
                 _.each(r.facets.terms.terms, function (v) {
