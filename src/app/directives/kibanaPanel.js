@@ -49,7 +49,7 @@ function (angular,$) {
 
             '<span class="row-button extra" ng-show="panel.editable != false">' +
               '<span ng-click="duplicate_panel(panel)" class="pointer">'+
-              '<i class="icon-plus pointer" bs-tooltip="\'Duplicate\'"></i></span>'+
+              '<i class="icon-copy pointer" bs-tooltip="\'Duplicate\'"></i></span>'+
             '</span>' +
 
             '<span ng-repeat="task in panelMeta.modals" class="row-button extra" ng-show="task.show">' +
