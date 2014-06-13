@@ -24,9 +24,9 @@ function (angular, app, _, $, kbn) {
   var module = angular.module('kibana.panels.terms', []);
   app.useModule(module);
 
-  module.controller('terms', function($scope, querySrv, dashboard, filterSrv, fields) {
+  module.controller('terms', function ($scope, querySrv, dashboard, filterSrv, fields) {
     $scope.panelMeta = {
-      modals : [
+      modals: [
         {
           description: "Inspect",
           icon: "icon-info-sign",
@@ -34,11 +34,11 @@ function (angular, app, _, $, kbn) {
           show: $scope.panel.spyable
         }
       ],
-      editorTabs : [
-        {title:'Queries', src:'app/partials/querySelect.html'}
+      editorTabs: [
+        {title: 'Queries', src: 'app/partials/querySelect.html'}
       ],
-      status  : "Stable",
-      description : "Displays the results of an elasticsearch facet as a pie chart, bar chart, or a "+
+      status: "Stable",
+      description: "Displays the results of an elasticsearch facet as a pie chart, bar chart, or a " +
         "table"
     };
 
@@ -49,60 +49,60 @@ function (angular, app, _, $, kbn) {
        *
        * field:: The field on which to computer the facet
        */
-      field   : '_type',
+      field: '_type',
       /** @scratch /panels/terms/5
        * exclude:: terms to exclude from the results
        */
-      exclude : [],
+      exclude: [],
       /** @scratch /panels/terms/5
        * missing:: Set to false to disable the display of a counter showing how much results are
        * missing the field
        */
-      missing : true,
+      missing: true,
       /** @scratch /panels/terms/5
        * other:: Set to false to disable the display of a counter representing the aggregate of all
        * values outside of the scope of your +size+ property
        */
-      other   : true,
+      other: true,
       /** @scratch /panels/terms/5
        * size:: Show this many terms
        */
-      size    : 10,
+      size: 10,
       /** @scratch /panels/terms/5
        * order:: In terms mode: count, term, reverse_count or reverse_term,
        * in terms_stats mode: term, reverse_term, count, reverse_count,
        * total, reverse_total, min, reverse_min, max, reverse_max, mean or reverse_mean
        */
-      order   : 'count',
-      style   : { "font-size": '10pt'},
+      order: 'count',
+      style: { "font-size": '10pt'},
       /** @scratch /panels/terms/5
        * donut:: In pie chart mode, draw a hole in the middle of the pie to make a tasty donut.
        */
-      donut   : false,
+      donut: false,
       /** @scratch /panels/terms/5
        * tilt:: In pie chart mode, tilt the chart back to appear as more of an oval shape
        */
-      tilt    : false,
+      tilt: false,
       /** @scratch /panels/terms/5
        * lables:: In pie chart mode, draw labels in the pie slices
        */
-      labels  : true,
+      labels: true,
       /** @scratch /panels/terms/5
        * arrangement:: In bar or pie mode, arrangement of the legend. horizontal or vertical
        */
-      arrangement : 'horizontal',
+      arrangement: 'horizontal',
       /** @scratch /panels/terms/5
        * chart:: table, bar or pie
        */
-      chart       : 'bar',
+      chart: 'bar',
       /** @scratch /panels/terms/5
        * counter_pos:: The location of the legend in respect to the chart, above, below, or none.
        */
-      counter_pos : 'above',
+      counter_pos: 'above',
       /** @scratch /panels/terms/5
        * spyable:: Set spyable to false to disable the inspect button
        */
-      spyable     : true,
+      spyable: true,
       /** @scratch /panels/terms/5
        *
        * ==== Queries
@@ -110,39 +110,39 @@ function (angular, app, _, $, kbn) {
        * queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
        * queries.ids::: In +selected+ mode, which query ids are selected.
        */
-      queries     : {
-        mode        : 'all',
-        ids         : []
+      queries: {
+        mode: 'all',
+        ids: []
       },
       /** @scratch /panels/terms/5
        * tmode:: Facet mode: terms or terms_stats
        */
-      tmode       : 'terms',
+      tmode: 'terms',
       /** @scratch /panels/terms/5
        * tstat:: Terms_stats facet stats field
        */
-      tstat       : 'total',
+      tstat: 'total',
       /** @scratch /panels/terms/5
        * valuefield:: Terms_stats facet value field
        */
-      valuefield  : ''
+      valuefield: ''
     };
 
-    _.defaults($scope.panel,_d);
+    _.defaults($scope.panel, _d);
 
     $scope.init = function () {
       $scope.hits = 0;
 
-      $scope.$on('refresh',function(){
+      $scope.$on('refresh', function () {
         $scope.get_data();
       });
       $scope.get_data();
 
     };
 
-    $scope.get_data = function() {
+    $scope.get_data = function () {
       // Make sure we have everything for the request to complete
-      if(dashboard.indices.length === 0) {
+      if (dashboard.indices.length === 0) {
         return;
       }
 
@@ -152,8 +152,8 @@ function (angular, app, _, $, kbn) {
         boolQuery,
         queries;
 
-      $scope.field = _.contains(fields.list,$scope.panel.field+'.raw') ?
-        $scope.panel.field+'.raw' : $scope.panel.field;
+      $scope.field = _.contains(fields.list, $scope.panel.field + '.raw') ?
+        $scope.panel.field + '.raw' : $scope.panel.field;
 
       request = $scope.ejs.Request().indices(dashboard.indices);
 
@@ -162,63 +162,104 @@ function (angular, app, _, $, kbn) {
 
       // This could probably be changed to a BoolFilter
       boolQuery = $scope.ejs.BoolQuery();
-      _.each(queries,function(q) {
+      _.each(queries, function (q) {
         boolQuery = boolQuery.should(querySrv.toEjsObj(q));
       });
 
       // Terms mode
-      if($scope.panel.tmode === 'terms') {
+      if ($scope.panel.tmode === 'terms') {
         request = request
           .facet($scope.ejs.TermsFacet('terms')
-          .field($scope.field)
-          .size($scope.panel.size)
-          .order($scope.panel.order)
-          .exclude($scope.panel.exclude)
-          .facetFilter($scope.ejs.QueryFilter(
-            $scope.ejs.FilteredQuery(
-              boolQuery,
-              filterSrv.getBoolFilter(filterSrv.ids())
-            )))).size(0);
+            .field($scope.field)
+            .size($scope.panel.size)
+            .order($scope.panel.order)
+            .exclude($scope.panel.exclude)
+            .facetFilter($scope.ejs.QueryFilter(
+              $scope.ejs.FilteredQuery(
+                boolQuery,
+                filterSrv.getBoolFilter(filterSrv.ids())
+              )))).size(0);
       }
-      if($scope.panel.tmode === 'terms_stats') {
-        request = request
-          .facet($scope.ejs.TermStatsFacet('terms')
-          .valueField($scope.panel.valuefield)
-          .keyField($scope.field)
-          .size($scope.panel.size)
-          .order($scope.panel.order)
-          .facetFilter($scope.ejs.QueryFilter(
-            $scope.ejs.FilteredQuery(
-              boolQuery,
-              filterSrv.getBoolFilter(filterSrv.ids())
-            )))).size(0);
-      }
+      if ($scope.panel.tmode === 'terms_stats') {
+        if ($scope.panel.distinctQueries === true) {
+          _.each(queries, function (q) {
+            boolQuery = $scope.ejs.BoolQuery();
+            boolQuery = boolQuery.should(querySrv.toEjsObj(q));
 
-      // Populate the inspector panel
-      $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
+            request = request
+              .facet($scope.ejs.TermStatsFacet('terms')
+                .valueField($scope.panel.valuefield)
+                .keyField($scope.field)
+                .size($scope.panel.size)
+                .order($scope.panel.order)
+                .facetFilter($scope.ejs.QueryFilter(
+                  $scope.ejs.FilteredQuery(
+                    boolQuery,
+                    filterSrv.getBoolFilter(filterSrv.ids())
+                  )))).size(0);
 
-      results = request.doSearch();
+            results = {};
+            if (q.alias !== "") {
+              results[q.alias] = (request.doSearch());
+            } else {
+              results[q.query] = (request.doSearch());
+            }
 
-      // Populate scope when we have results
-      results.then(function(results) {
-        $scope.panelMeta.loading = false;
-        if($scope.panel.tmode === 'terms') {
-          $scope.hits = results.hits.total;
+            // Populate scope when we have results
+            $scope.results = {};
+            $.each(results, function (key, r) { //_.each(results, function(r) {
+              r.then(function (r) {
+                $scope.panelMeta.loading = false;
+                $scope.results[key] = r;
+                $scope.$emit('render');
+              });
+            });
+
+            // Populate the inspector panel
+            $scope.inspector += angular.toJson(JSON.parse(request.toString()), true);
+          });
+        } else {
+          request = request
+            .facet($scope.ejs.TermStatsFacet('terms')
+              .valueField($scope.panel.valuefield)
+              .keyField($scope.field)
+              .size($scope.panel.size)
+              .order($scope.panel.order)
+              .facetFilter($scope.ejs.QueryFilter(
+                $scope.ejs.FilteredQuery(
+                  boolQuery,
+                  filterSrv.getBoolFilter(filterSrv.ids())
+                )))).size(0);
         }
+      }
 
-        $scope.results = results;
+      if ($scope.panel.distinctQueries !== true) {
+        // Populate the inspector panel
+        $scope.inspector = angular.toJson(JSON.parse(request.toString()), true);
 
-        $scope.$emit('render');
-      });
+        results = request.doSearch();
+
+        // Populate scope when we have results
+        results.then(function (results) {
+          $scope.panelMeta.loading = false;
+          if ($scope.panel.tmode === 'terms') {
+            $scope.hits = results.hits.total;
+          }
+
+          $scope.results = results;
+
+          $scope.$emit('render');
+        });
+      }
     };
 
-    $scope.build_search = function(term,negate) {
-      if(_.isUndefined(term.meta)) {
-        filterSrv.set({type:'terms',field:$scope.field,value:term.label,
-          mandate:(negate ? 'mustNot':'must')});
-      } else if(term.meta === 'missing') {
-        filterSrv.set({type:'exists',field:$scope.field,
-          mandate:(negate ? 'must':'mustNot')});
+    $scope.build_search = function (term, negate) {
+      if (_.isUndefined(term.meta)) {
+        filterSrv.set({type: 'terms', field: $scope.field, value: term.label,
+          mandate: (negate ? 'mustNot' : 'must')});
+      } else if (term.meta === 'missing') {
+        filterSrv.set({type: 'exists', field: $scope.field,
+          mandate: (negate ? 'must' : 'mustNot')});
       } else {
         return;
       }
@@ -228,22 +269,22 @@ function (angular, app, _, $, kbn) {
       $scope.refresh = state;
     };
 
-    $scope.close_edit = function() {
-      if($scope.refresh) {
+    $scope.close_edit = function () {
+      if ($scope.refresh) {
         $scope.get_data();
       }
-      $scope.refresh =  false;
+      $scope.refresh = false;
       $scope.$emit('render');
     };
 
-    $scope.showMeta = function(term) {
-      if(_.isUndefined(term.meta)) {
+    $scope.showMeta = function (term) {
+      if (_.isUndefined(term.meta)) {
         return true;
       }
-      if(term.meta === 'other' && !$scope.panel.other) {
+      if (term.meta === 'other' && !$scope.panel.other) {
         return false;
       }
-      if(term.meta === 'missing' && !$scope.panel.missing) {
+      if (term.meta === 'missing' && !$scope.panel.missing) {
         return false;
       }
       return true;
@@ -251,38 +292,77 @@ function (angular, app, _, $, kbn) {
 
   });
 
-  module.directive('termsChart', function(querySrv) {
+  module.directive('termsChart', function (querySrv) {
     return {
       restrict: 'A',
-      link: function(scope, elem) {
+      link: function (scope, elem) {
         var plot;
 
         // Receive render events
-        scope.$on('render',function(){
+        scope.$on('render', function () {
           render_panel();
         });
 
         function build_results() {
-          var k = 0;
           scope.data = [];
-          _.each(scope.results.facets.terms.terms, function(v) {
-            var slice;
-            if(scope.panel.tmode === 'terms') {
-              slice = { label : v.term, data : [[k,v.count]], actions: true};
-            }
-            if(scope.panel.tmode === 'terms_stats') {
-              slice = { label : v.term, data : [[k,v[scope.panel.tstat]]], actions: true};
-            }
-            scope.data.push(slice);
-            k = k + 1;
-          });
+          var k = 0;
 
-          scope.data.push({label:'Missing field',
-            data:[[k,scope.results.facets.terms.missing]],meta:"missing",color:'#aaa',opacity:0});
+          if (scope.panel.tmode === 'terms_stats' && (scope.panel.distinctQueries === true)) {
+            var termIndices = {};
+            var key = 0;
+            $.each(scope.results, function (k, r) {
+              var queryLabel = k;
+              _.each(r.facets.terms.terms, function (v) {
+                if (termIndices[v.term] === undefined) {
+                  termIndices[v.term] = [];
+                }
 
-          if(scope.panel.tmode === 'terms') {
-            scope.data.push({label:'Other values',
-              data:[[k+1,scope.results.facets.terms.other]],meta:"other",color:'#444'});
+                v.query = queryLabel;
+                termIndices[v.term].push(v);
+                key++;
+              });
+            });
+
+            $.each(termIndices, function (t, term) {
+
+              $.each(term, function (key, v) {
+                var slice;
+                slice = { label: (v.term + '(' + v.query + ')'), data: [
+                  [k, v[scope.panel.tstat]]
+                ], actions: true};
+                scope.data.push(slice);
+                k = k + 1;
+              });
+
+              k = k + 0.5;
+            });
+          } else {
+            _.each(scope.results.facets.terms.terms, function (v) {
+              var slice;
+              if (scope.panel.tmode === 'terms') {
+                slice = { label: v.term, data: [
+                  [k, v.count]
+                ], actions: true};
+              }
+              if (scope.panel.tmode === 'terms_stats') {
+                slice = { label: v.term, data: [
+                  [k, v[scope.panel.tstat]]
+                ], actions: true};
+              }
+              scope.data.push(slice);
+              k = k + 1;
+            });
+          }
+
+          if (scope.panel.tmode === 'terms') {
+            scope.data.push({label: 'Missing field',
+              data: [
+                [k, scope.results.facets.terms.missing]
+              ], meta: "missing", color: '#aaa', opacity: 0});
+            scope.data.push({label: 'Other values',
+              data: [
+                [k + 1, scope.results.facets.terms.other]
+              ], meta: "other", color: '#444'});
           }
         }
 
@@ -293,26 +373,26 @@ function (angular, app, _, $, kbn) {
           build_results();
 
           // IE doesn't work without this
-          elem.css({height:scope.panel.height||scope.row.height});
+          elem.css({height: scope.panel.height || scope.row.height});
 
           // Make a clone we can operate on.
           chartData = _.clone(scope.data);
           chartData = scope.panel.missing ? chartData :
-            _.without(chartData,_.findWhere(chartData,{meta:'missing'}));
+            _.without(chartData, _.findWhere(chartData, {meta: 'missing'}));
           chartData = scope.panel.other ? chartData :
-          _.without(chartData,_.findWhere(chartData,{meta:'other'}));
+            _.without(chartData, _.findWhere(chartData, {meta: 'other'}));
 
           // Populate element.
-          require(['jquery.flot.pie'], function(){
+          require(['jquery.flot.pie'], function () {
             // Populate element
             try {
               // Add plot to scope so we can build out own legend
-              if(scope.panel.chart === 'bar') {
+              if (scope.panel.chart === 'bar') {
                 plot = $.plot(elem, chartData, {
                   legend: { show: false },
                   series: {
-                    lines:  { show: false, },
-                    bars:   { show: true,  fill: 1, barWidth: 0.8, horizontal: false },
+                    lines: { show: false },
+                    bars: { show: true, fill: 1, barWidth: 0.8, horizontal: false },
                     shadowSize: 1
                   },
                   yaxis: { show: true, min: 0, color: "#c8c8c8" },
@@ -327,11 +407,11 @@ function (angular, app, _, $, kbn) {
                   colors: querySrv.colors
                 });
               }
-              if(scope.panel.chart === 'pie') {
-                var labelFormat = function(label, series){
-                  return '<div ng-click="build_search(panel.field,\''+label+'\')'+
-                    ' "style="font-size:8pt;text-align:center;padding:2px;color:white;">'+
-                    label+'<br/>'+Math.round(series.percent)+'%</div>';
+              if (scope.panel.chart === 'pie') {
+                var labelFormat = function (label, series) {
+                  return '<div ng-click="build_search(panel.field,\'' + label + '\')' +
+                    ' "style="font-size:8pt;text-align:center;padding:2px;color:white;">' +
+                    label + '<br/>' + Math.round(series.percent) + '%</div>';
                 };
 
                 plot = $.plot(elem, chartData, {
@@ -351,36 +431,36 @@ function (angular, app, _, $, kbn) {
                       },
                       label: {
                         show: scope.panel.labels,
-                        radius: 2/3,
+                        radius: 2 / 3,
                         formatter: labelFormat,
                         threshold: 0.1
                       }
                     }
                   },
                   //grid: { hoverable: true, clickable: true },
-                  grid:   { hoverable: true, clickable: true, color: '#c8c8c8' },
+                  grid: { hoverable: true, clickable: true, color: '#c8c8c8' },
                   colors: querySrv.colors
                 });
               }
 
               // Populate legend
-              if(elem.is(":visible")){
-                setTimeout(function(){
+              if (elem.is(":visible")) {
+                setTimeout(function () {
                   scope.legend = plot.getData();
-                  if(!scope.$$phase) {
+                  if (!scope.$$phase) {
                     scope.$apply();
                   }
                 });
               }
 
-            } catch(e) {
+            } catch (e) {
               elem.text(e);
             }
           });
         }
 
         elem.bind("plotclick", function (event, pos, object) {
-          if(object) {
+          if (object) {
             scope.build_search(scope.data[object.seriesIndex]);
           }
         });
@@ -392,7 +472,7 @@ function (angular, app, _, $, kbn) {
             $tooltip
               .html(
                 kbn.query_color_dot(item.series.color, 20) + ' ' +
-                item.series.label + " (" + value.toFixed(0)+")"
+                  item.series.label + " (" + value.toFixed(0) + ")"
               )
               .place_tt(pos.pageX, pos.pageY);
           } else {
