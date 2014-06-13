@@ -69,6 +69,8 @@ define(function (require) {
     // Manage state & url state
     var initialQuery = searchSource.get('query');
 
+    var defaultFormat = courier.indexPatterns.fieldFormats.defaultByType.string;
+
     var stateDefaults = {
       query: initialQuery ? initialQuery.query_string.query : '',
       columns: ['_source'],
@@ -168,7 +170,7 @@ define(function (require) {
           $scope.rows = resp.hits.hits;
           $scope.rows.forEach(function (hit) {
             hit._formatted = _.mapValues(hit._source, function (value, name) {
-              return $scope.formatsByName[name].convert(value);
+              return ($scope.formatsByName[name] || defaultFormat).convert(value);
             });
             hit._formatted._source = angular.toJson(hit._source);
           });
@@ -323,14 +325,14 @@ define(function (require) {
         };
       }, {});
 
-      if (!indexPattern) return;
-
       var columnObjects = arrayToKeys($state.columns);
 
       $scope.fields = [];
       $scope.fieldsByName = {};
       $scope.formatsByName = {};
       $state.columns = $state.columns || [];
+
+      if (!indexPattern) return;
 
       // Inject source into list;
       //$scope.fields.push({name: '_source', type: 'source', display: false});
