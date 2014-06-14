@@ -93,6 +93,24 @@ define(function (require) {
   // match any key from the vals object prececed by an optional number
   var parseRE = new RegExp('^(\\d+(?:\\.\\d*)?)?\\s*(' + _.keys(vals).join('|') + ')$');
 
+  // Months and years are not handled here since they have sort of fuzzy values
+  var describe = function (intervalString) {
+    var totalMs = toMs(intervalString);
+    var weeks = parseInt(totalMs / (1000 * 60 * 60 * 24 * 7));
+    var days = parseInt((totalMs / (1000 * 60 * 60 * 24))) % 7;
+    var hours = parseInt(totalMs / 3600000) % 24;
+    var minutes = parseInt(totalMs / 60000) % 60;
+    var seconds = parseInt(totalMs / 1000) % 60;
+    var ms = totalMs % 1000;
+
+    return  (weeks ? weeks + 'w ' : '') +
+            (days ? days + 'd ' : '') +
+            (hours ? hours + 'h ' : '') +
+            (minutes ? (minutes < 10 ? '0' + minutes : minutes) + 'm ' : '') +
+            (seconds ? (seconds  < 10 ? '0' + seconds : seconds) + 's ' : '') +
+            (ms ? ms + 'ms' : '');
+  };
+
   var toMs = function (expr) {
     var match = expr.match(parseRE);
     if (match) return parseFloat(match[1] || 1) * vals[match[2]];
@@ -100,6 +118,7 @@ define(function (require) {
 
   return {
     toMs: toMs,
-    calculate: calculate
+    calculate: calculate,
+    describe: describe
   };
 });

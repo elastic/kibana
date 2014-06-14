@@ -18,9 +18,9 @@ define(function (require) {
     agg.ordered = {date: true};
 
     agg.makeLabel = function (params) {
-      var interval = _.find(agg.params.interval.options, { val: params.interval });
-      if (interval) return interval.display + ' ' + params.field;
-      else return params.field + '/' + moment.duration(params.interval).humanize();
+      var aggInterval = _.find(agg.params.interval.options, { val: params.interval });
+      if (aggInterval) return aggInterval.display + ' ' + params.field;
+      else return params.field + ' per ' + interval.describe(params.interval);
     };
 
     agg.params = {};
