@@ -5,9 +5,12 @@ module.exports = function (grunt) {
     configPath: __dirname + '/tasks/config',
     init: true,
     config: {
+      pkg: grunt.file.readJSON('package.json'),
       root: __dirname,
       src: __dirname + '/src',
       app: __dirname + '/src/kibana',
+      build: __dirname + '/build',
+
       unitTestDir: __dirname + '/test/unit',
       testUtilsDir: __dirname + '/test/utils',
       bowerComponentsDir: __dirname + '/src/bower_components',

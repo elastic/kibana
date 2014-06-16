@@ -1,8 +1,8 @@
 {
-  "name": "kibana4",
+  "name": "kibana",
   "private": true,
-  "version": "0.0.0",
-  "description": "Kibana TNG",
+  "version": "4.0.0-BETA1",
+  "description": "Kibana 4",
   "main": "Gulpfile.js",
   "dependencies": {},
   "devDependencies": {
@@ -21,7 +21,9 @@
     "istanbul": "~0.2.4",
     "load-grunt-config": "~0.7.0",
     "lodash": "~2.4.1",
-    "mocha": "~1.17.1"
+    "mocha": "~1.17.1",
+    "grunt-contrib-compress": "~0.9.1",
+    "grunt-contrib-copy": "~0.5.0"
   },
   "scripts": {
     "test": "grunt test",
