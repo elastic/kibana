@@ -19,6 +19,25 @@ define(function (require) {
       });
     });
 
+    describe('description', function () {
+      it('returns a readable description for an interval', function () {
+        expect(interval.describe('1ms')).to.be('1ms');
+        expect(interval.describe('1s')).to.be('1s');
+        expect(interval.describe('1m')).to.be('1m');
+        expect(interval.describe('1h')).to.be('1h');
+        expect(interval.describe('1d')).to.be('1d');
+        expect(interval.describe('1w')).to.be('1w');
+
+        expect(interval.describe('2w')).to.be('2w');
+        expect(interval.describe('86400000ms')).to.be('1d');
+        expect(interval.describe('86400001ms')).to.be('1d 1ms');
+        expect(interval.describe('90000000ms')).to.be('1d 1h');
+        expect(interval.describe('90060000ms')).to.be('1d 1h 1m');
+        expect(interval.describe('90061000ms')).to.be('1d 1h 1m 1s');
+        expect(interval.describe('90061300ms')).to.be('1d 1h 1m 1s 300ms');
+      });
+    });
+
     describe('rounding', function () {
       var mmnt, date, string, now, clock, then;
 
