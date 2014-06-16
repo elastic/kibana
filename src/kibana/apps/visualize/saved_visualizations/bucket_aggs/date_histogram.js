@@ -7,9 +7,9 @@ define(function (require) {
     // shorthand
     var ms = function (type) { return moment.duration(1, type).asMilliseconds(); };
 
-    var pickInterval = function (bounds) {
+    var pickInterval = function (bounds, targetBuckets) {
       bounds || (bounds = timefilter.getBounds());
-      return interval.calculate(bounds.min, bounds.max, config.get('histogram:barTarget'));
+      return interval.calculate(bounds.min, bounds.max, targetBuckets);
     };
 
     var agg = this;
@@ -17,8 +17,10 @@ define(function (require) {
     agg.display = 'Date Histogram';
     agg.ordered = {date: true};
 
-    agg.makeLabel = function (params) {
-      var aggInterval = _.find(agg.params.interval.options, { val: params.interval });
+    agg.makeLabel = function (params, fullConfig) {
+      if (fullConfig.metricScaleText) return params.field + ' per ' + fullConfig.metricScaleText;
+
+      var aggInterval = _.find(agg.params.interval.options, { ms: interval.toMs(params.interval) });
       if (aggInterval) return aggInterval.display + ' ' + params.field;
       else return params.field + ' per ' + interval.describe(params.interval);
     };
@@ -75,7 +77,8 @@ define(function (require) {
         var auto;
 
         if (selection.val === 'auto') {
-          auto = pickInterval(bounds);
+          var bucketTarget = config.get('histogram:barTarget');
+          auto = pickInterval(bounds, bucketTarget);
           output.aggParams.interval = auto.interval + 'ms';
           output.metricScaleText = auto.description;
           return;
@@ -83,9 +86,10 @@ define(function (require) {
 
         var ms = selection.ms || interval.toMs(selection.val);
         var buckets = Math.ceil((bounds.max - bounds.min) / ms);
-        if (buckets > config.get('histogram:maxBars')) {
+        var maxBuckets = config.get('histogram:maxBars');
+        if (buckets > maxBuckets) {
           // we should round these buckets out, and scale back the y values
-          auto = pickInterval(bounds);
+          auto = pickInterval(bounds, maxBuckets);
           output.aggParams.interval = auto.interval + 'ms';
           output.metricScale = ms / auto.interval;
           output.metricScaleText = selection.val || auto.description;

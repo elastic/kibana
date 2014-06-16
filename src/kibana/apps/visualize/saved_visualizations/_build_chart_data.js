@@ -158,7 +158,7 @@ define(function (require) {
       configs.forEach(function (config) {
         var agg = aggs.byName[config.agg];
         if (agg && agg.makeLabel) {
-          config.label = agg.makeLabel(config.aggParams);
+          config.label = agg.makeLabel(config.aggParams, config);
         } else {
           config.label = config.aggParams.field;
         }
