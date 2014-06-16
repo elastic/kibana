@@ -2,9 +2,6 @@
   <div class="section">
     <h5>Chart Options</h5>
     <div class="editor-option">
-      <label class="small">Bars</label><input type="checkbox" ng-model="panel.bars" ng-checked="panel.bars">
-    </div>
-    <div class="editor-option">
       <label class="small">Lines</label><input type="checkbox" ng-model="panel.lines" ng-checked="panel.lines">
     </div>
     <div class="editor-option">
@@ -66,7 +63,7 @@
       <label class="small">Legend</label><input type="checkbox" ng-model="panel.legend" ng-checked="panel.legend">
     </div>
     <div ng-show="panel.legend" class="editor-option">
-      <label class="small">Query <tip>If no alias is set, show the query in the legend</tip></label><input type="checkbox" ng-model="panel.show_query" ng-checked="panel.show_query">
+      <label class="small">Query <tip>If no alias is set, show the query in the legend</tip></label><input type="checkbox" ng-model="panel.show_query" ng-checked="panel.show_query" ng-change='set_refresh(true)'>
     </div>
     <div ng-show="panel.legend" class="editor-option">
       <label class="small">Counts</label><input type="checkbox" ng-model="panel.legend_counts" ng-checked="panel.legend_counts">

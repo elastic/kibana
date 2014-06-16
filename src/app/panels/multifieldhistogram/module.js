@@ -1,16 +1,17 @@
 /** @scratch /panels/5
  *
- * include::panels/histogram.asciidoc[]
+ * include::panels/multifieldhistogram.asciidoc[]
  */
 
-/** @scratch /panels/histogram/0
+/** @scratch /panels/multifieldhistogram/0
  *
- * == Histogram
+ * == multifieldhistogram
  * Status: *Stable*
  *
- * The histogram panel allow for the display of time charts. It includes several modes and tranformations
+ * The multifieldhistogram panel allow for the display of time charts. It includes several modes and tranformations
  * to display event counts, mean, min, max and total of numeric fields, and derivatives of counter
- * fields.
+ * fields, just like the histogram panel. It provides a bit more flexibility than the histogram by allowing
+ * to use different fields.
  *
  */
 define([
@@ -53,8 +54,8 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
           src:'app/panels/multifieldhistogram/styleEditor.html'
         },
         {
-          title:'Queries',
-          src:'app/panels/multifieldhistogram/queriesEditor.html'
+          title:'Markers',
+          src:'app/panels/multifieldhistogram/markersEditor.html'
         },
       ],
       status  : "Stable",
@@ -65,27 +66,27 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
 
     // Set and populate defaults
     $scope.defaultValue = {
-      /** mode:: Value to use for the y-axis. For all modes other than count, +value_field+ must be
+      /** m ode:: Value to use for the y-axis. For all modes other than count, +value_field+ must be
        * defined. Possible values: count, mean, max, min, total.
        */
       mode          : 'count',
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * value_field:: y-axis field if +mode+ is set to mean, max, min or total. Must be numeric.
        */
       value_field   : null,
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * scale:: Scale the y-axis by this factor
        */
       scale         : 1,
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * zerofill:: Improves the accuracy of line charts at a small performance cost.
        */
       zerofill      : true,
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * derivative:: Show each point on the x-axis as the change from the previous point
        */
       derivative    : false,
-      /** @scratch /panels/histogram/5
+      /** @scratch /panels/multifieldhistogram/5
        * queries array:: which query ids are selected.
        */
       queries     : querySrv.ids(),
@@ -94,33 +95,33 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
     };
     
     var _d = {
-      /** @scratch /panels/histogram/3
+      /** @scra tch /panels/multifieldhistogram/3
        *
        * === Parameters
        * ==== Axis options
        *
        */
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * values:: array of values.
        */
       values        : [angular.copy($scope.defaultValue)],
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * time_field:: x-axis field. This must be defined as a date type in Elasticsearch.
        */
       time_field    : '@timestamp',
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * x-axis:: Show the x-axis
        */
       'x-axis'      : true,
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * y-axis:: Show the y-axis
        */
       'y-axis'      : true,
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * y_format:: 'none','bytes','short '
        */
       y_format    : 'none',
-      /** @scratch /panels/histogram/5
+      /** @scratch /panels/multifieldhistogram/5
        * grid object:: Min and max y-axis values
        * grid.min::: Minimum y-axis value
        * grid.max::: Maximum y-axis value
@@ -129,7 +130,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
         max: null,
         min: 0
       },
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        *
        * ==== Annotations
        * annotate object:: A query can be specified, the results of which will be displayed as markers on
@@ -147,91 +148,87 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
         field       : '_type',
         sort        : ['_score','desc']
       },
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * ==== Interval options
        * auto_int:: Automatically scale intervals?
        */
       auto_int      : true,
-      /** @scratch /panels/histogram/3
-       * resolution:: If auto_int is true, shoot for this many bars.
+      /** @scratch /panels/multifieldhistogram/3
+       * resolution:: If auto_int is true, shoot for this many points.
        */
       resolution    : 100,
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * interval:: If auto_int is set to false, use this as the interval.
        */
       interval      : '5m',
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * interval:: Array of possible intervals in the *View* selector. Example [`auto',`1s',`5m',`3h']
        */
       intervals     : ['auto','1s','1m','5m','10m','30m','1h','3h','12h','1d','1w','1y'],
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * ==== Drawing options
        * lines:: Show line chart
        */
-      lines         : false,
-      /** @scratch /panels/histogram/3
+      lines         : true,
+      /** @scratch /panels/multifieldhistogram/3
        * fill:: Area fill factor for line charts, 1-10
        */
       fill          : 0,
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * linewidth:: Weight of lines in pixels
        */
       linewidth     : 3,
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * points:: Show points on chart
        */
       points        : false,
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * pointradius:: Size of points in pixels
        */
       pointradius   : 5,
-      /** @scratch /panels/histogram/3
-       * bars:: Show bars on chart
-       */
-      bars          : true,
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * stack:: Stack multiple series
        */
       stack         : true,
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * spyable:: Show inspect icon
        */
       spyable       : true,
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * zoomlinks:: Show `Zoom Out' link
        */
       zoomlinks     : true,
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * options:: Show quick view options section
        */
       options       : true,
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * legend:: Display the legond
        */
       legend        : true,
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * show_query:: If no alias is set, should the query be displayed?
        */
       show_query    : true,
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * interactive:: Enable click-and-drag to zoom functionality
        */
       interactive   : true,
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * legend_counts:: Show counts in legend
        */
       legend_counts : true,
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * ==== Transformations
        * timezone:: Correct for browser timezone?. Valid values: browser, utc
        */
       timezone      : 'browser', // browser or utc
-      /** @scratch /panels/histogram/3
+      /** @scratch /panels/multifieldhistogram/3
        * percentage:: Show the y-axis as a percentage of the axis total. Only makes sense for multiple
        * queries
        */
       percentage    : false,
-       /** @scratch /panels/histogram/3
+       /** @scratch /panels/multifieldhistogram/3
        * tooltip object::
        * tooltip.value_type::: Individual or cumulative controls how tooltips are display on stacked charts
        * tooltip.query_as_alias::: If no alias is set, should the query be displayed?
@@ -281,6 +278,27 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
     $scope.get_time_range = function () {
       var range = $scope.range = filterSrv.timeRange('last');
       return range;
+    };
+
+    $scope.get_alias = function (value, query) {
+      var alias = '';
+      var isCount = value.mode === 'count';
+      if (value.alias) {
+        alias += value.alias;
+      } else {
+        if (query.alias) {
+          alias += query.alias;
+        } else {
+          if (isCount) {
+            alias += $scope.panel.show_query ? query.query||'*' : '';
+          } else {
+            alias += $scope.panel.show_query ? '('+(query.query||'*')+')' : '';
+          }
+        }
+        alias += !isCount && value.value_field ? (alias && '.')+value.value_field : '';
+        alias = alias ? value.mode + '(' + alias + ')' : value.mode;
+      }
+      return alias;
     };
 
     $scope.get_interval = function () {
@@ -472,7 +490,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
 
               var info = {
                 color: panel_value.color || q.color,
-                alias: panel_value.alias || q.alias || q.query,
+                alias: $scope.get_alias(panel_value, q),
               };
               
               $scope.legend[serie_id] = {query:info,hits:hits};
@@ -511,7 +529,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
           }
         }
 
-        // Tell the histogram directive to render.
+        // Tell the multifieldhistogram directive to render.
         $scope.$emit('render', data);
 
         // If we still have segments left, get them
@@ -634,8 +652,6 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
             });
           } catch(e) {return;}
 
-          // Set barwidth based on specified interval
-          var barwidth = kbn.interval_to_ms(scope.panel.interval);
 
           var stack = scope.panel.stack ? true : null;
 
@@ -652,13 +668,6 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
                   fill: scope.panel.fill === 0 ? 0.001 : scope.panel.fill/10,
                   lineWidth: scope.panel.linewidth,
                   steps: false
-                },
-                bars:   {
-                  show: scope.panel.bars,
-                  fill: 1,
-                  barWidth: barwidth/1.5,
-                  zero: false,
-                  lineWidth: 0
                 },
                 points: {
                   show: scope.panel.points,
@@ -727,7 +736,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
               options.selection = { mode: "x", color: '#666' };
             }
 
-            // when rendering stacked bars, we need to ensure each point that has data is zero-filled
+            // when rendering stacked, we need to ensure each point that has data is zero-filled
             // so that the stacking happens in the proper order
             var required_times = [];
             if (data.length > 1) {
@@ -784,9 +793,8 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
           if (item) {
             if (item.series.info.alias || scope.panel.tooltip.query_as_alias) {
               group = '<small style="font-size:0.9em;">' +
-                '<i class="icon-circle" style="color:'+item.series.color+';"></i>' + ' ' +
-                (item.series.info.alias || item.series.info.query)+
-              '</small><br>';
+                '<i class="icon-circle" style="color:'+item.series.color+';"></i>' +
+                ' ' + item.series.info.alias + '</small><br>';
             } else {
               group = kbn.query_color_dot(item.series.color, 15) + ' ';
             }
