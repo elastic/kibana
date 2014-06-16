@@ -103,12 +103,12 @@ define(function (require) {
     var seconds = parseInt(totalMs / 1000) % 60;
     var ms = totalMs % 1000;
 
-    return  (weeks ? weeks + 'w ' : '') +
+    return  ((weeks ? weeks + 'w ' : '') +
             (days ? days + 'd ' : '') +
             (hours ? hours + 'h ' : '') +
-            (minutes ? (minutes < 10 ? '0' + minutes : minutes) + 'm ' : '') +
-            (seconds ? (seconds  < 10 ? '0' + seconds : seconds) + 's ' : '') +
-            (ms ? ms + 'ms' : '');
+            (minutes ? minutes + 'm ' : '') +
+            (seconds ? seconds + 's ' : '') +
+            (ms ? ms + 'ms' : '')).trim();
   };
 
   var toMs = function (expr) {
