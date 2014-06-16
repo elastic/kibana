@@ -8,6 +8,37 @@ define(function (require) {
 
   require('setup/setup');
 
+  require('modules').get('kibana/controllers')
+  .config(function ($provide) {
+    $provide.decorator('$route', function ($delegate, $location, $rootScope) {
+
+      // flag tracking when we are waiting for a reload
+      var reloading;
+
+      var doneReloading = function () { reloading = false; };
+      $rootScope.$on('$routeUpdate', doneReloading);
+      $rootScope.$on('$routeChangeStart', doneReloading);
+
+      var reload = function () {
+        if (!reloading) $delegate.reload();
+        reloading = true;
+      };
+
+      $delegate.change = function (path) {
+        if (path !== $location.path()) {
+          $location.path(path); reload();
+        }
+      };
+      $delegate.changeUrl = function (url) {
+        if (url !== $location.url()) {
+          $location.url(url); reload();
+        }
+      };
+
+      return $delegate;
+    });
+  });
+
   var setup = function ($q, kbnSetup, config) {
     var prom = $q.all([
       kbnSetup(),
@@ -19,14 +50,14 @@ define(function (require) {
 
     return prom;
   };
+
   var prepWork = function ($injector, config, $location, $route, Notifier) {
     return $injector.invoke(setup)
     .then(function () {
       if ($location.path().indexOf('/settings/indices') !== 0 && !config.get('defaultIndex')) {
         var notify = new Notifier();
         notify.error('Please specify a default index pattern');
-        $location.path('/settings/indices');
-        $route.reload();
+        $route.change('/settings/indices');
       }
     });
   };

@@ -27,8 +27,7 @@ define(function (require) {
         if (!url) url = '/';
 
         notify.error(err);
-        $location.url(globalState.writeToUrl(url));
-        $route.reload();
+        $route.changeUrl(globalState.writeToUrl(url));
         return;
       };
     };
