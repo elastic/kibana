@@ -3,15 +3,16 @@ define(function (require) {
   var moment = require('moment');
   var errors = require('errors');
 
-  require('routes').when('/settings/indices/', {
-    template: require('text!../../partials/indices/create.html')
+  require('routes')
+  .when('/settings/indices/', {
+    template: require('text!./_create.html')
   });
 
   require('modules').get('app/settings')
-  .controller('kbnSettingsIndicesCreate', function ($scope, $location, Notifier, Private, indexPatterns, es, config) {
+  .controller('settingsIndicesCreate', function ($scope, $location, Private, Notifier, indexPatterns, es, config) {
     var notify = new Notifier();
-    var refreshKibanaIndex = Private(require('./_refresh_kibana_index'));
     var MissingIndices = errors.IndexPatternMissingIndices;
+    var refreshKibanaIndex = Private(require('./_refresh_kibana_index'));
     var intervals = indexPatterns.intervals;
 
     // this and child scopes will write pattern vars here
