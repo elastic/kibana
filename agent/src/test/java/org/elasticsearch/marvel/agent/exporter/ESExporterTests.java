@@ -7,7 +7,8 @@ import org.elasticsearch.cluster.ClusterState;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.cluster.node.DiscoveryNodes;
 import org.elasticsearch.common.io.Streams;
-import org.elasticsearch.common.transport.DummyTransportAddress;
+import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.transport.LocalTransportAddress;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.marvel.agent.event.ClusterEvent;
 import org.elasticsearch.marvel.agent.event.Event;
@@ -25,7 +26,7 @@ import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertHitC
 
 
 // Transport Client instantiation also calls the marvel plugin, which then fails to find modules
-@ClusterScope(transportClientRatio = 0.0, scope = ElasticsearchIntegrationTest.Scope.SUITE)
+@ClusterScope(transportClientRatio = 0.0, scope = ElasticsearchIntegrationTest.Scope.TEST, numNodes = 0)
 public class ESExporterTests extends ElasticsearchIntegrationTest {
 
     @Test
@@ -42,13 +43,16 @@ public class ESExporterTests extends ElasticsearchIntegrationTest {
 
     @Test
     public void testLargeClusterStateSerialization() throws InterruptedException {
+        // make sure not other exporting is done (quicker)..
+        cluster().startNode(ImmutableSettings.builder().put("marvel.agent.interval", "2m"));
         ESExporter esExporter = cluster().getInstance(ESExporter.class);
         DiscoveryNodes.Builder nodesBuilder = new DiscoveryNodes.Builder();
-        for (int i = 0; i < randomIntBetween(10, 10000); i++) {
-            nodesBuilder.put(new DiscoveryNode("node_" + i, DummyTransportAddress.INSTANCE, Version.CURRENT));
+        int nodeCount = randomIntBetween(10, 200);
+        for (int i = 0; i < nodeCount; i++) {
+            nodesBuilder.put(new DiscoveryNode("node_" + i, new LocalTransportAddress("node_" + i), Version.CURRENT));
         }
 
-        // get the current cluster state rather then construct one because the constructors have changed accross ES versions
+        // get the current cluster state rather then construct one because the constructors have changed across ES versions
         ClusterService clusterService = cluster().getInstance(ClusterService.class);
         ClusterState state = ClusterState.builder(clusterService.state()).nodes(nodesBuilder).build();
         logger.info("exporting cluster state with {} nodes", state.nodes().size());
@@ -57,7 +61,7 @@ public class ESExporterTests extends ElasticsearchIntegrationTest {
         });
         logger.info("done exporting");
 
-        ensureGreen();
+        ensureYellow();
         client().admin().indices().prepareRefresh(".marvel-*").get();
         assertHitCount(client().prepareSearch().setQuery(QueryBuilders.termQuery("event_source", "test_source_unique")).get(), 1);
 

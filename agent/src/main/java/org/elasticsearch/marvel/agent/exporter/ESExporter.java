@@ -366,7 +366,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
                     conn.setConnectTimeout(timeoutInMillis);
                     conn.setReadTimeout(readTimeoutInMillis);
                     if (contentType != null) {
-                        conn.setRequestProperty("Content-Type", XContentType.SMILE.restContentType());
+                        conn.setRequestProperty("Content-Type", contentType);
                     }
                     if (url.getUserInfo() != null) {
                         String basicAuth = "Basic " + Base64.encodeBytes(url.getUserInfo().getBytes("ISO-8859-1"));
