@@ -20,7 +20,7 @@ define(function (require) {
       name: null,
       defaultName: null,
 
-      isTimeBased: false,
+      isTimeBased: true,
       nameIsPattern: false,
       sampleCount: 5,
       nameIntervalOptions: intervals
