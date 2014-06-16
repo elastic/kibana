@@ -20,7 +20,6 @@ import org.junit.Test;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 
 import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertHitCount;
 
@@ -30,20 +29,14 @@ import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertHitC
 public class ESExporterTests extends ElasticsearchIntegrationTest {
 
     @Test
-    public void testVersionIsExtractableFromIndexTemplate() throws UnsupportedEncodingException {
+    public void testVersionIsExtractableFromIndexTemplate() throws IOException {
         byte[] template;
-        try {
-            InputStream is = ESExporter.class.getResourceAsStream("/marvel_index_template.json");
-            if (is == null) {
-                throw new FileNotFoundException("Resource [/marvel_index_template.json] not found in classpath");
-            }
-            template = Streams.copyToByteArray(is);
-            is.close();
-        } catch (IOException e) {
-            // throwing an exception to stop exporting process - we don't want to send data unless
-            // we put in the template for it.
-            throw new RuntimeException("failed to load marvel_index_template.json", e);
+        InputStream is = ESExporter.class.getResourceAsStream("/marvel_index_template.json");
+        if (is == null) {
+            throw new FileNotFoundException("Resource [/marvel_index_template.json] not found in classpath");
         }
+        template = Streams.copyToByteArray(is);
+        is.close();
         MatcherAssert.assertThat(ESExporter.parseIndexVersionFromTemplate(template), Matchers.greaterThan(0));
     }
 
