@@ -1,13 +1,10 @@
 define(function (require) {
   var _ = require('lodash');
 
-  require('../../_sections').push({
-    order: 1,
-    name: 'indices',
-    display: 'Indices',
-    url: '#/settings/indices',
-  });
+  require('./_create');
+  require('./_edit');
 
+  // add a dependency to all of the subsection routes
   require('routes')
   .addResolves(/settings\/indices/, {
     indexPatternIds: function (courier) {
@@ -15,12 +12,13 @@ define(function (require) {
     }
   });
 
+  // wrapper directive, which sets some global stuff up like the left nav
   require('modules').get('app/settings')
   .directive('kbnSettingsIndices', function ($route, config) {
     return {
       restrict: 'E',
       transclude: true,
-      template: require('text!../../partials/indices/indices.html'),
+      template: require('text!./index.html'),
       link: function ($scope) {
         $scope.edittingId = $route.current.params.id;
         $scope.defaultIndex = config.get('defaultIndex');
@@ -46,5 +44,9 @@ define(function (require) {
     };
   });
 
-
+  return {
+    name: 'indices',
+    display: 'Indices',
+    url: '#/settings/indices',
+  };
 });

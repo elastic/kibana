@@ -2,16 +2,9 @@ define(function (require) {
   var _ = require('lodash');
   var configDefaults = require('config/defaults');
 
-  require('../_sections').push({
-    order: 2,
-    name: 'advanced',
-    display: 'Advanced',
-    url: '#/settings/advanced'
-  });
-
   require('routes')
   .when('/settings/advanced', {
-    template: require('text!../partials/advanced.html')
+    template: require('text!./index.html')
   });
 
   require('modules').get('app/settings')
@@ -93,4 +86,11 @@ define(function (require) {
       }
     };
   });
+
+  return {
+    order: 2,
+    name: 'advanced',
+    display: 'Advanced',
+    url: '#/settings/advanced'
+  };
 });

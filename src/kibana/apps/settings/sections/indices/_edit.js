@@ -1,10 +1,9 @@
 define(function (require) {
   var _ = require('lodash');
-  var module = require('modules').get('app/settings');
 
   require('routes')
   .when('/settings/indices/:id', {
-    template: require('text!../../partials/indices/edit.html'),
+    template: require('text!./_edit.html'),
     resolve: {
       indexPattern: function ($route, courier) {
         return courier.indexPatterns.get($route.current.params.id)
@@ -13,7 +12,8 @@ define(function (require) {
     }
   });
 
-  module.controller('kbnSettingsIndicesEdit', function ($scope, $location, $route, config, courier, Notifier, Private) {
+  require('modules').get('app/settings')
+  .controller('settingsIndicesEdit', function ($scope, $location, $route, config, courier, Notifier, Private) {
     var notify = new Notifier();
     var refreshKibanaIndex = Private(require('./_refresh_kibana_index'));
 
@@ -45,7 +45,6 @@ define(function (require) {
       .then(refreshKibanaIndex)
       .then(function () {
         $location.url('/settings/indices');
-        $route.reload();
       })
       .catch(notify.fatal);
     };
