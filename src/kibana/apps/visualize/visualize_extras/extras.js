@@ -1,7 +1,7 @@
 define(function (require) {
   // require('angular-ui-ace');
 
-  var module = require('modules').get('app/visualize', ['ui.ace']);
+  var module = require('modules').get('app/visualize');
   module.directive('visualizeExtras', function (Private, $compile) {
 
     var $ = require('jquery');
