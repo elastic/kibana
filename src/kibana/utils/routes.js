@@ -27,12 +27,14 @@ define(function (require) {
 
       $delegate.change = function (path) {
         if (path !== $location.path()) {
-          $location.path(path); reload();
+          $location.path(path);
+          reload();
         }
       };
       $delegate.changeUrl = function (url) {
         if (url !== $location.url()) {
-          $location.url(url); reload();
+          $location.url(url);
+          reload();
         }
       };
 
