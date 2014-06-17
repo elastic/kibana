@@ -148,10 +148,15 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
         if(_.isUndefined(filterSrv)) {
           return;
         }
+        var indexPattern;
+        if(self.current.index.pattern !== '[logstash-]YYYY.MM.DD'){
+          indexPattern = self.current.index.pattern;
+        } else {
+          indexPattern = config.default_search_index;
+        }
         if(filterSrv.idsByType('time').length > 0) {
           var _range = filterSrv.timeRange('last');
-          kbnIndex.indices(_range.from,_range.to,
-            self.current.index.pattern,self.current.index.interval
+          kbnIndex.indices(_range.from,_range.to,indexPattern,self.current.index.interval
           ).then(function (p) {
             if(p.length > 0) {
               self.indices = p;

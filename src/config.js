@@ -54,6 +54,15 @@ function (Settings) {
 
     /** @scratch /configuration/config.js/5
      *
+     * ==== [logstash-]YYYY.MM.DD
+     *
+     * The default search index pattern to use.
+     * 
+     */
+    default_search_index: "[logstash-]YYYY.MM.DD",
+    
+    /** @scratch /configuration/config.js/5
+     *
      * ==== panel_name
      *
      * An array of panel modules available. Panels will only be loaded when they are defined in the
