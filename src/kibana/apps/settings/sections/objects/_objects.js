@@ -1,13 +1,14 @@
 define(function (require) {
   var _ = require('lodash');
-  var registry = require('../../saved_object_registry');
+  var registry = require('apps/settings/saved_object_registry');
+  var objectIndexHTML = require('text!apps/settings/sections/objects/_objects.html');
 
   require('routes')
   .when('/settings/objects', {
-    template: require('text!./_objects.html')
+    template: objectIndexHTML
   });
 
-  require('modules').get('app/settings')
+  require('modules').get('apps/settings')
   .directive('kbnSettingsObjects', function (config, Notifier, Private) {
     return {
       restrict: 'E',

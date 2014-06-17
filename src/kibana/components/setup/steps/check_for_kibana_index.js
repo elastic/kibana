@@ -1,6 +1,6 @@
 define(function (require) {
   return function CheckForKibanaIndexFn(Private, es, Notifier, configFile) {
-    var SetupError = Private(require('../_setup_error'));
+    var SetupError = Private(require('components/setup/_setup_error'));
     var notify = new Notifier({ location: 'Setup: Kibana index check' });
 
     return function checkForKibana() {

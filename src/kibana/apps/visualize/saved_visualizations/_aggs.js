@@ -57,7 +57,7 @@ define(function (require) {
     ];
     aggs.metricAggsByName = _.indexBy(aggs.metricAggs, 'name');
 
-    aggs.bucketAggs = Private(require('./bucket_aggs/_index'));
+    aggs.bucketAggs = Private(require('apps/visualize/saved_visualizations/bucket_aggs/_index'));
     aggs.bucketAggsByName = _.indexBy(aggs.bucketAggs, 'name');
 
     aggs.byName = _.assign({}, aggs.bucketAggsByName, aggs.metricAggsByName);

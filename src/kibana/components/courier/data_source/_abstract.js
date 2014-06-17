@@ -4,9 +4,9 @@ define(function (require) {
   var nextTick = require('utils/next_tick');
 
   return function SourceAbstractFactory(Private, Promise, timefilter) {
-    var pendingRequests = Private(require('../_pending_requests'));
-    var errorHandlers = Private(require('../_error_handlers'));
-    var fetch = Private(require('../fetch/fetch'));
+    var pendingRequests = Private(require('components/courier/_pending_requests'));
+    var errorHandlers = Private(require('components/courier/_error_handlers'));
+    var fetch = Private(require('components/courier/fetch/fetch'));
 
     function SourceAbstract(initialState) {
       this._instanceid = _.uniqueId('data_source');

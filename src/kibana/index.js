@@ -4,7 +4,6 @@
 define(function (require) {
   var angular = require('angular');
   var $ = require('jquery');
-  var configFile = require('../config');
   var modules = require('modules');
   var routes = require('routes');
 
@@ -12,12 +11,16 @@ define(function (require) {
   require('angular-route');
   require('angular-bindonce');
 
+  var configFile = window.kbnConfigFile = require('../config');
+
   var kibana = angular.module('kibana', [
     // list external requirements here
     'elasticsearch',
     'pasvaz.bindonce',
     'ngRoute'
   ]);
+
+  configFile.elasticsearch = configFile.elasticsearch || ('http://' + window.location.hostname + ':9200');
 
   kibana
     // This stores the Kibana revision number, @REV@ is replaced by grunt.

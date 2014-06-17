@@ -3,7 +3,7 @@ define(function (require) {
   var errors = require('errors');
 
   return function (Promise, Private, es) {
-    var pendingRequests = Private(require('../_pending_requests'));
+    var pendingRequests = Private(require('components/courier/_pending_requests'));
 
     /**
      * Backend for doUpdate and doIndex

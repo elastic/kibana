@@ -3,7 +3,7 @@ define(function (require) {
   var $ = require('jquery');
   var k4 = require('k4d3');
 
-  var app = require('modules').get('app/discover');
+  var app = require('modules').get('apps/discover');
 
   app.directive('discoverTimechart', function ($compile) {
     return {

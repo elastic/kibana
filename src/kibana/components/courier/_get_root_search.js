@@ -1,6 +1,6 @@
 define(function (require) {
   return function RootSearchFactory(Private, config, $rootScope, timefilter, indexPatterns, Promise) {
-    var SearchSource = Private(require('./data_source/search_source'));
+    var SearchSource = Private(require('components/courier/data_source/search_source'));
 
     var source; // the actual search source
     var prom; // promise that must be resolved before the source is acurrate (updated by loadDefaultPattern)

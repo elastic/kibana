@@ -2,13 +2,13 @@ define(function (require) {
   var _ = require('lodash');
   var inherits = require('utils/inherits');
 
-  var configCats = require('./_config_categories');
-  var typeDefs = require('./_type_defs');
+  var configCats = require('apps/visualize/saved_visualizations/_config_categories');
+  var typeDefs = require('apps/visualize/saved_visualizations/_type_defs');
 
   var module = require('modules').get('kibana/services');
 
   module.factory('SavedVis', function (config, $injector, courier, indexPatterns, Promise, savedSearches, Private) {
-    var aggs = Private(require('./_aggs'));
+    var aggs = Private(require('apps/visualize/saved_visualizations/_aggs'));
 
     function SavedVis(opts) {
       var vis = this;
@@ -211,13 +211,13 @@ define(function (require) {
        *
        * @return {Array} - The list of config objects
        */
-      vis.getConfig = Private(require('./_read_config'));
+      vis.getConfig = Private(require('apps/visualize/saved_visualizations/_read_config'));
       /**
        * Transform an ES Response into data for this visualization
        * @param  {object} resp The elasticsearch response
        * @return {array} An array of flattened response rows
        */
-      vis.buildChartDataFromResponse = Private(require('./_build_chart_data'));
+      vis.buildChartDataFromResponse = Private(require('apps/visualize/saved_visualizations/_build_chart_data'));
     }
     inherits(SavedVis, courier.SavedObject);
 

@@ -2,19 +2,19 @@ define(function (require) {
   var _ = require('lodash');
   var angular = require('angular');
   var ConfigTemplate = require('utils/config_template');
-  var typeDefs = require('../saved_visualizations/_type_defs');
+  var typeDefs = require('apps/visualize/saved_visualizations/_type_defs');
   var qs = require('utils/query_string');
 
-  require('../saved_visualizations/saved_visualizations');
-  require('notify/notify');
+  require('apps/visualize/saved_visualizations/saved_visualizations');
+  require('components/notify/notify');
   require('filters/uriescape');
 
-  var app = require('modules').get('app/visualize', [
+  var app = require('modules').get('apps/visualize', [
     'kibana/notify',
     'kibana/courier'
   ]);
 
-  var visConfigCategories = require('../saved_visualizations/_config_categories');
+  var visConfigCategories = require('apps/visualize/saved_visualizations/_config_categories');
 
   var createFn = function (savedVisualizations, courier, $route) {
     if (!$route.current.params.indexPattern && !$route.current.params.savedSearchId) {
@@ -38,13 +38,13 @@ define(function (require) {
 
   require('routes')
   .when('/visualize/create', {
-    template: require('text!../editor.html'),
+    template: require('text!apps/visualize/editor.html'),
     resolve: {
       vis: createFn
     }
   })
   .when('/visualize/edit/:id', {
-    template: require('text!../editor.html'),
+    template: require('text!apps/visualize/editor.html'),
     resolve: {
       vis: editFn
     }
@@ -52,7 +52,7 @@ define(function (require) {
 
   app.controller('VisualizeEditor', function ($scope, $route, $timeout, $window, Notifier, $location,
     globalState, AppState, timefilter, Private) {
-    var aggs = Private(require('../saved_visualizations/_aggs'));
+    var aggs = Private(require('apps/visualize/saved_visualizations/_aggs'));
 
     var notify = new Notifier({
       location: 'Visualization Editor'
@@ -198,9 +198,9 @@ define(function (require) {
 
     // config panel templates
     var configTemplate = $scope.configTemplate = new ConfigTemplate({
-      save: require('text!../partials/save.html'),
-      load: require('text!../partials/load.html'),
-      share: require('text!../partials/share.html'),
+      save: require('text!apps/visualize/partials/save.html'),
+      load: require('text!apps/visualize/partials/load.html'),
+      share: require('text!apps/visualize/partials/share.html'),
     });
 
     $scope.toggleShare = _.bindKey(configTemplate, 'toggle', 'share');

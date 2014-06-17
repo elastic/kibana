@@ -4,7 +4,7 @@ define(function (require) {
       var notify = new Notifier({ location: 'Setup: Elasticsearch version check' });
       var complete = notify.lifecycle('check es version');
 
-      var SetupError = Private(require('../_setup_error'));
+      var SetupError = Private(require('components/setup/_setup_error'));
 
 
       // core expression for finding a version

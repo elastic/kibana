@@ -1,13 +1,13 @@
 define(function (require) {
-  require('css!./styles/main.css');
+  require('css!apps/visualize/styles/main.css');
 
-  require('./controllers/editor');
-  require('./controllers/wizard');
+  require('apps/visualize/controllers/editor');
+  require('apps/visualize/controllers/wizard');
 
-  require('./directives/canvas');
-  require('./directives/visualize');
-  require('./directives/config_category');
-  require('./directives/search_editor');
+  require('apps/visualize/directives/canvas');
+  require('apps/visualize/directives/visualize');
+  require('apps/visualize/directives/config_category');
+  require('apps/visualize/directives/search_editor');
 
   require('routes')
   .when('/visualize', {
