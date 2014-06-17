@@ -2,7 +2,7 @@ module.exports = function (config) {
   return {
     plugin: {
       options: {
-        archive: '<%= build %>/<%= pkg.name %>-plugin-latest.tar.gz'
+        archive: '<%= build %>/<%= pkg.name %>-plugin-<%= pkg.version %>.tar.gz'
       },
       files : [
         {
