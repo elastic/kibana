@@ -34,16 +34,21 @@ define(function (require) {
     templateUrl: 'kibana/apps/discover/index.html',
     reloadOnSearch: false,
     resolve: {
-      savedSearch: function (savedSearches, $route, $location, Notifier, courier) {
+      savedSearch: function (savedSearches, $route, $location, Notifier, courier, indexPatterns) {
         return savedSearches.get($route.current.params.id)
         .catch(courier.redirectWhenMissing({
           'index-pattern': '/settings/indices',
           '*': '/discover'
-        }));
-      },
-      indexPatternList: function (indexPatterns) {
-        return indexPatterns.getIds()
-        .then(indexPatterns.ensureSome());
+        }))
+        .then(function (savedSearch) {
+          if (!savedSearch) return;
+
+          return indexPatterns.getIds()
+          .then(indexPatterns.ensureSome())
+          .then(function () {
+            return savedSearch;
+          });
+        });
       }
     }
   });
