@@ -275,7 +275,6 @@ var requirejs, require, define;
 
             //Adjust any relative paths.
             if (name && name.charAt(0) === '.') {
-                if (name !== '../config') throw new Error(name + ' is relative to ' + baseName);
                 //If have a base name, try to normalize against it,
                 //otherwise, assume it is a top-level require that will
                 //be relative to baseUrl in the end.
