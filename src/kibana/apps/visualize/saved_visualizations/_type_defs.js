@@ -72,39 +72,6 @@ define(function (require) {
           max: 1
         }
       }
-    },
-    {
-      name: 'area',
-      icon: 'icon-chart-bar',
-      params: {
-        shareYAxis: true,
-        addTooltip: true,
-        addLegend: true
-      },
-      listeners: {
-      },
-      config: {
-        metric: {
-          label: 'Y-Axis',
-          min: 1,
-          max: 1
-        },
-        segment: {
-          label: 'X-Axis',
-          min: 1,
-          max: 1
-        },
-        group: {
-          label: 'Color',
-          min: 0,
-          max: 1
-        },
-        split: {
-          label: 'Rows & Columns',
-          min: 0,
-          max: 1
-        }
-      }
     }
   ];
 
