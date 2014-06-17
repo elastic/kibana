@@ -1,5 +1,5 @@
 define(function (require) {
-  var module = require('modules').get('app/visualize');
+  var module = require('modules').get('apps/visualize');
   var _ = require('lodash');
 
   var typeDefs = [

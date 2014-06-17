@@ -3,25 +3,25 @@ define(function (require) {
 
   require('services/es');
   require('services/promises');
-  require('index_patterns/index_patterns');
+  require('components/index_patterns/index_patterns');
 
   require('modules').get('kibana/courier')
   .service('courier', function ($rootScope, Private, Promise, indexPatterns) {
     function Courier() {
       var courier = this;
 
-      var DocSource = Private(require('./data_source/doc_source'));
-      var SearchSource = Private(require('./data_source/search_source'));
+      var DocSource = Private(require('components/courier/data_source/doc_source'));
+      var SearchSource = Private(require('components/courier/data_source/search_source'));
 
-      var pendingRequests = Private(require('./_pending_requests'));
-      var searchLooper = Private(require('./looper/search'));
-      var docLooper = Private(require('./looper/doc'));
+      var pendingRequests = Private(require('components/courier/_pending_requests'));
+      var searchLooper = Private(require('components/courier/looper/search'));
+      var docLooper = Private(require('components/courier/looper/doc'));
 
       // expose some internal modules
-      courier.getRootSearch = Private(require('./_get_root_search'));
-      courier.SavedObject = Private(require('./saved_object/saved_object'));
+      courier.getRootSearch = Private(require('components/courier/_get_root_search'));
+      courier.SavedObject = Private(require('components/courier/saved_object/saved_object'));
       courier.indexPatterns = indexPatterns;
-      courier.redirectWhenMissing = Private(require('./_redirect_when_missing'));
+      courier.redirectWhenMissing = Private(require('components/courier/_redirect_when_missing'));
 
       var HastyRefresh = errors.HastyRefresh;
       var Abort = errors.Abort;

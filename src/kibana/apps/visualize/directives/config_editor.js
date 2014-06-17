@@ -1,40 +1,40 @@
 define(function (require) {
-  var app = require('modules').get('app/visualize');
+  var app = require('modules').get('apps/visualize');
   var _ = require('lodash');
   var $ = require('jquery');
 
   require('filters/field_type');
 
-  var visConfigCategories = require('../saved_visualizations/_config_categories');
+  var visConfigCategories = require('apps/visualize/saved_visualizations/_config_categories');
 
-  var headerHtml = require('text!../partials/editor/header.html');
+  var headerHtml = require('text!apps/visualize/partials/editor/header.html');
 
   var controlHtml = {
-    ranges: require('text!../partials/controls/ranges.html'),
-    orderAndSize: require('text!../partials/controls/order_and_size.html'),
-    minDocCount: require('text!../partials/controls/min_doc_count.html'),
-    extendedBounds: require('text!../partials/controls/extended_bounds.html'),
-    interval: require('text!../partials/controls/interval.html'),
-    globalLocal: require('text!../partials/controls/global_local.html')
+    ranges: require('text!apps/visualize/partials/controls/ranges.html'),
+    orderAndSize: require('text!apps/visualize/partials/controls/order_and_size.html'),
+    minDocCount: require('text!apps/visualize/partials/controls/min_doc_count.html'),
+    extendedBounds: require('text!apps/visualize/partials/controls/extended_bounds.html'),
+    interval: require('text!apps/visualize/partials/controls/interval.html'),
+    globalLocal: require('text!apps/visualize/partials/controls/global_local.html')
   };
 
   app.directive('visConfigEditor', function ($compile, Private) {
-    var aggs = Private(require('../saved_visualizations/_aggs'));
+    var aggs = Private(require('apps/visualize/saved_visualizations/_aggs'));
 
     var categoryOptions = {
       metric: {
-        template: require('text!../partials/editor/metric.html')
+        template: require('text!apps/visualize/partials/editor/metric.html')
       },
       segment: {
-        template: require('text!../partials/editor/dimension.html'),
+        template: require('text!apps/visualize/partials/editor/dimension.html'),
         setup: setupDimension
       },
       group: {
-        template: require('text!../partials/editor/dimension.html'),
+        template: require('text!apps/visualize/partials/editor/dimension.html'),
         setup: setupDimension
       },
       split: {
-        template: require('text!../partials/editor/dimension.html'),
+        template: require('text!apps/visualize/partials/editor/dimension.html'),
         setup: setupDimension
       }
     };

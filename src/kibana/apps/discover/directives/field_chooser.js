@@ -1,6 +1,6 @@
 define(function (require) {
-  var app = require('modules').get('app/discover');
-  var html = require('text!../partials/field_chooser.html');
+  var app = require('modules').get('apps/discover');
+  var html = require('text!apps/discover/partials/field_chooser.html');
   var _ = require('lodash');
   var jsonPath = require('jsonpath');
   var rison = require('utils/rison');
@@ -8,7 +8,7 @@ define(function (require) {
 
   require('directives/css_truncate');
   require('directives/field_name');
-  require('./discover_field');
+  require('apps/discover/directives/discover_field');
 
 
 

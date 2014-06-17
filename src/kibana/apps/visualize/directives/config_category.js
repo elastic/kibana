@@ -1,10 +1,10 @@
 define(function (require) {
-  var html = require('text!../partials/config_category.html');
+  var html = require('text!apps/visualize/partials/config_category.html');
 
-  require('./config_editor');
+  require('apps/visualize/directives/config_editor');
 
   require('modules')
-    .get('app/visualize')
+    .get('apps/visualize')
     .directive('visConfigCategory', function (Private) {
 
       return {

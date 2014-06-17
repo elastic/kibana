@@ -6,7 +6,7 @@ define(function (require) {
   var additions = [];
   var otherwise;
 
-  require('setup/setup');
+  require('components/setup/setup');
   var NoDefaultIndexPattern = require('errors').NoDefaultIndexPattern;
 
   require('modules').get('kibana/controllers')

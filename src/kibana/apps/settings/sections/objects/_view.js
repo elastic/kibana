@@ -2,14 +2,15 @@ define(function (require) {
   var _ = require('lodash');
   var inflection = require('inflection');
   var rison = require('utils/rison');
-  var registry = require('../../saved_object_registry');
+  var registry = require('apps/settings/saved_object_registry');
+  var objectViewHTML = require('text!apps/settings/sections/objects/_view.html');
 
   require('routes')
   .when('/settings/objects/:service/:id', {
-    template: require('text!./_view.html')
+    template: objectViewHTML
   });
 
-  require('modules').get('app/settings')
+  require('modules').get('apps/settings')
   .directive('kbnSettingsObjectsView', function (config, Notifier) {
     return {
       restrict: 'E',

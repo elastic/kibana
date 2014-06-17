@@ -1,7 +1,7 @@
 define(function (require, module, exports) {
   var _ = require('utils/mixins');
 
-  require('css!./styles/main.css');
+  require('css!apps/settings/styles/main.css');
   require('filters/start_from');
 
   require('routes')
@@ -9,18 +9,18 @@ define(function (require, module, exports) {
     redirectTo: '/settings/indices'
   });
 
-  require('modules').get('app/settings')
+  require('modules').get('apps/settings')
   .directive('kbnSettingsApp', function (Private, $route, timefilter) {
     return {
       restrict: 'E',
-      template: require('text!./app.html'),
+      template: require('text!apps/settings/app.html'),
       transclude: true,
       scope: {
         sectionName: '@section'
       },
       link: function ($scope, $el) {
         timefilter.enabled(false);
-        $scope.sections = require('./sections/index');
+        $scope.sections = require('apps/settings/sections/index');
         $scope.section = _.find($scope.sections, { name: $scope.sectionName });
 
         $scope.sections.forEach(function (section) {

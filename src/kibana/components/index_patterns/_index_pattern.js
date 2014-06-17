@@ -4,12 +4,12 @@ define(function (require) {
     var angular = require('angular');
     var errors = require('errors');
 
-    var mapper = Private(require('./_mapper'));
-    var fieldFormats = Private(require('./_field_formats'));
-    var patternCache = Private(require('./_pattern_cache'));
-    var intervals = Private(require('./_intervals'));
+    var mapper = Private(require('components/index_patterns/_mapper'));
+    var fieldFormats = Private(require('components/index_patterns/_field_formats'));
+    var patternCache = Private(require('components/index_patterns/_pattern_cache'));
+    var intervals = Private(require('components/index_patterns/_intervals'));
     var mappingSetup = Private(require('utils/mapping_setup'));
-    var DocSource = Private(require('courier/data_source/doc_source'));
+    var DocSource = Private(require('components/courier/data_source/doc_source'));
 
     var type = 'index-pattern';
 
