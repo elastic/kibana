@@ -1,7 +1,7 @@
 define(function (require) {
   var angular = require('angular');
-  var html = require('text!../partials/table.html');
-  var detailsHtml = require('text!../partials/row_details.html');
+  var html = require('text!apps/discover/partials/table.html');
+  var detailsHtml = require('text!apps/discover/partials/row_details.html');
   var moment = require('moment');
 
   var _ = require('lodash');
@@ -14,7 +14,7 @@ define(function (require) {
   var module = require('modules').get('kibana/directives');
 
   module.directive('kbnTableHeader', function () {
-    var headerHtml = require('text!../partials/table_header.html');
+    var headerHtml = require('text!apps/discover/partials/table_header.html');
     return {
       restrict: 'A',
       scope: {

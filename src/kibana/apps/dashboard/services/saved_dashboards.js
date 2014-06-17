@@ -2,7 +2,7 @@ define(function (require) {
   var module = require('modules').get('app/dashboard');
   var _ = require('lodash');
  // bring in the factory
-  require('./_saved_dashboard');
+  require('apps/dashboard/services/_saved_dashboard');
 
 
   // Register this service with the saved object registry so it can be

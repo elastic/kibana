@@ -17,7 +17,7 @@ define(function (require) {
     return function (vars) {
       return (compiled || (compiled = _.template(tmpl)))(vars);
     };
-  }(require('text!./partials/fatal.html')));
+  }(require('text!components/notify/partials/fatal.html')));
 
   function now() {
     if (window.performance && window.performance.now) {

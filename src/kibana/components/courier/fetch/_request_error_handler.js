@@ -1,7 +1,7 @@
 define(function (require) {
   return function RequestErrorHandlerFactory(Private, Notifier) {
-    var pendingRequests = Private(require('../_pending_requests'));
-    var errorHandlers = Private(require('../_error_handlers'));
+    var pendingRequests = Private(require('components/courier/_pending_requests'));
+    var errorHandlers = Private(require('components/courier/_error_handlers'));
 
     var notify = new Notifier({
       location: 'Courier Fetch Error'

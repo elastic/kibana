@@ -28,7 +28,7 @@ define(function (require) {
         makeUrl: '=?',
         onChoose: '=?'
       },
-      template: require('text!../partials/saved_object_finder.html'),
+      template: require('text!partials/saved_object_finder.html'),
       link: function ($scope, $el) {
         // the text input element
         var $input = $el.find('input[ng-model=filter]');

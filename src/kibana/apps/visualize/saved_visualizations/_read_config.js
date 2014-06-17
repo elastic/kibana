@@ -1,9 +1,9 @@
 define(function (require) {
   return function ReadConfigFn(Private, $injector) {
     var _ = require('lodash');
-    var configCategories = require('./_config_categories');
-    var aggs = Private(require('./_aggs'));
-    var courier = require('courier/courier');
+    var configCategories = require('apps/visualize/saved_visualizations/_config_categories');
+    var aggs = Private(require('apps/visualize/saved_visualizations/_aggs'));
+    var courier = require('components/courier/courier');
 
     return function readConfig() {
       var vis = this;

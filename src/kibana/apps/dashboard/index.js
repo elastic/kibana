@@ -3,16 +3,15 @@ define(function (require) {
   var $ = require('jquery');
   var ConfigTemplate = require('utils/config_template');
 
-  require('css!./styles/main.css');
   require('directives/config');
-  require('courier/courier');
-  require('config/config');
-  require('notify/notify');
+  require('components/courier/courier');
+  require('components/config/config');
+  require('components/notify/notify');
 
-
-  require('./directives/grid');
-  require('./directives/panel');
-  require('./services/saved_dashboards');
+  require('apps/dashboard/directives/grid');
+  require('apps/dashboard/directives/panel');
+  require('apps/dashboard/services/saved_dashboards');
+  require('css!apps/dashboard/styles/main.css');
 
   var app = require('modules').get('app/dashboard', [
     'elasticsearch',
@@ -60,10 +59,10 @@ define(function (require) {
         var $state = $scope.$state = new AppState(stateDefaults);
 
         $scope.configTemplate = new ConfigTemplate({
-          save: require('text!./partials/save_dashboard.html'),
-          load: require('text!./partials/load_dashboard.html'),
-          share: require('text!./partials/share.html'),
-          pickVis: require('text!./partials/pick_visualization.html')
+          save: require('text!apps/dashboard/partials/save_dashboard.html'),
+          load: require('text!apps/dashboard/partials/load_dashboard.html'),
+          share: require('text!apps/dashboard/partials/share.html'),
+          pickVis: require('text!apps/dashboard/partials/pick_visualization.html')
         });
 
         $scope.openSave = _.partial($scope.configTemplate.toggle, 'save');

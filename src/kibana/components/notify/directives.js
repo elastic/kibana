@@ -8,7 +8,7 @@ define(function (require) {
         list: '=list'
       },
       replace: true,
-      template: require('text!./partials/toaster.html')
+      template: require('text!components/notify/partials/toaster.html')
     };
   });
 });

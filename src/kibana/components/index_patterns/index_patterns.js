@@ -6,8 +6,8 @@ define(function (require) {
     var _ = require('lodash');
     var errors = require('errors');
 
-    var IndexPattern = Private(require('./_index_pattern'));
-    var patternCache = Private(require('./_pattern_cache'));
+    var IndexPattern = Private(require('components/index_patterns/_index_pattern'));
+    var patternCache = Private(require('components/index_patterns/_pattern_cache'));
 
     var notify = new Notifier({ location: 'IndexPatterns Service'});
 
@@ -43,11 +43,11 @@ define(function (require) {
       MissingIndices: errors.IndexPatternMissingIndices
     };
 
-    indexPatterns.ensureSome = Private(require('./_ensure_some'));
+    indexPatterns.ensureSome = Private(require('components/index_patterns/_ensure_some'));
     indexPatterns.cache = patternCache;
-    indexPatterns.intervals = Private(require('./_intervals'));
-    indexPatterns.mapper = Private(require('./_mapper'));
-    indexPatterns.patternToWildcard = Private(require('./_pattern_to_wildcard'));
-    indexPatterns.fieldFormats = Private(require('./_field_formats'));
+    indexPatterns.intervals = Private(require('components/index_patterns/_intervals'));
+    indexPatterns.mapper = Private(require('components/index_patterns/_mapper'));
+    indexPatterns.patternToWildcard = Private(require('components/index_patterns/_pattern_to_wildcard'));
+    indexPatterns.fieldFormats = Private(require('components/index_patterns/_field_formats'));
   });
 });

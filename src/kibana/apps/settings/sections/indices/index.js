@@ -1,8 +1,8 @@
 define(function (require) {
   var _ = require('lodash');
 
-  require('./_create');
-  require('./_edit');
+  require('apps/settings/sections/indices/_create');
+  require('apps/settings/sections/indices/_edit');
 
   // add a dependency to all of the subsection routes
   require('routes')
@@ -13,12 +13,12 @@ define(function (require) {
   });
 
   // wrapper directive, which sets some global stuff up like the left nav
-  require('modules').get('app/settings')
+  require('modules').get('apps/settings')
   .directive('kbnSettingsIndices', function ($route, config) {
     return {
       restrict: 'E',
       transclude: true,
-      template: require('text!./index.html'),
+      template: require('text!apps/settings/sections/indices/index.html'),
       link: function ($scope) {
         $scope.edittingId = $route.current.params.id;
         $scope.defaultIndex = config.get('defaultIndex');

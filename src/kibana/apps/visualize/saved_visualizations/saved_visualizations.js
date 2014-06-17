@@ -1,9 +1,9 @@
 define(function (require) {
-  var app = require('modules').get('app/visualize');
-  var typeDefs = require('./_type_defs');
+  var app = require('modules').get('apps/visualize');
+  var typeDefs = require('apps/visualize/saved_visualizations/_type_defs');
   var _ = require('lodash');
 
-  require('./_saved_vis');
+  require('apps/visualize/saved_visualizations/_saved_vis');
 
   // Register this service with the saved object registry so it can be
   // edited by the object editor.

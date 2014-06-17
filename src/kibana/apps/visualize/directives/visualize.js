@@ -2,11 +2,11 @@ define(function (require) {
   var k4d3 = require('k4d3');
   var $ = require('jquery');
   var _ = require('lodash');
-  var typeDefs = require('../saved_visualizations/_type_defs');
+  var typeDefs = require('apps/visualize/saved_visualizations/_type_defs');
 
 
-  require('css!../styles/visualization.css');
-  require('../visualize_extras/extras');
+  require('css!apps/visualize/styles/visualization.css');
+  require('apps/visualize/visualize_extras/extras');
 
   var module = require('modules').get('kibana/directive');
 
@@ -16,7 +16,7 @@ define(function (require) {
       scope : {
         vis: '=',
       },
-      template: require('text!../partials/visualize.html'),
+      template: require('text!apps/visualize/partials/visualize.html'),
       link: function ($scope, $el) {
         var chart; // set in "vis" watcher
         var notify = createNotifier();

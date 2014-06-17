@@ -2,7 +2,7 @@ define(function (require) {
   return function HistogramConverterFn(Private, timefilter) {
     var _ = require('lodash');
     var moment = require('moment');
-    var aggs = Private(require('../_aggs'));
+    var aggs = Private(require('apps/visualize/saved_visualizations/_aggs'));
     var interval = require('utils/interval');
 
     return function (chart, columns, rows) {

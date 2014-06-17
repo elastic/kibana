@@ -1,13 +1,13 @@
 define(function (require) {
   var _ = require('lodash');
-  var configDefaults = require('config/defaults');
+  var configDefaults = require('components/config/defaults');
 
   require('routes')
   .when('/settings/advanced', {
-    template: require('text!./index.html')
+    template: require('text!apps/settings/sections/advanced/index.html')
   });
 
-  require('modules').get('app/settings')
+  require('modules').get('apps/settings')
   .directive('kbnSettingsAdvanced', function (config, Notifier, Private) {
     return {
       restrict: 'E',

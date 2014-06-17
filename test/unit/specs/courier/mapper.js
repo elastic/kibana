@@ -2,7 +2,7 @@ define(function (require) {
   var elasticsearch = require('bower_components/elasticsearch/elasticsearch');
   var sinon = require('test_utils/auto_release_sinon');
 
-  var Mapper = require('courier/mapper');
+  var Mapper = require('components/courier/mapper');
   var fieldMapping = require('fixtures/field_mapping');
   var fieldMappingWithDupes = require('fixtures/mapping_with_dupes');
   var nextTick = require('utils/next_tick');

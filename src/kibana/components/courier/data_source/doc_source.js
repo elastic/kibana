@@ -5,8 +5,8 @@ define(function (require) {
   var inherits = require('utils/inherits');
 
   return function DocSourceFactory(Private, Promise, es) {
-    var sendToEs = Private(require('./_doc_send_to_es'));
-    var SourceAbstract = Private(require('./_abstract'));
+    var sendToEs = Private(require('components/courier/data_source/_doc_send_to_es'));
+    var SourceAbstract = Private(require('components/courier/data_source/_abstract'));
 
     var VersionConflict = errors.VersionConflict;
     var RequestFailure = errors.RequestFailure;
