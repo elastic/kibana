@@ -36,19 +36,17 @@ define(function (require) {
     resolve: {
       savedSearch: function (savedSearches, $route, $location, Notifier, courier, indexPatterns) {
         return savedSearches.get($route.current.params.id)
-        .catch(courier.redirectWhenMissing({
-          'index-pattern': '/settings/indices',
-          '*': '/discover'
-        }))
         .then(function (savedSearch) {
-          if (!savedSearch) return;
-
           return indexPatterns.getIds()
           .then(indexPatterns.ensureSome())
           .then(function () {
             return savedSearch;
           });
-        });
+        })
+        .catch(courier.redirectWhenMissing({
+          'index-pattern': '/settings/indices',
+          '*': '/discover'
+        }));
       }
     }
   });
