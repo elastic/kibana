@@ -4,10 +4,10 @@ define(function (require) {
     var angular = require('angular');
     var _ = require('lodash');
 
-    var DocSource = Private(require('../data_source/doc_source'));
-    var SearchSource = Private(require('../data_source/search_source'));
+    var DocSource = Private(require('components/courier/data_source/doc_source'));
+    var SearchSource = Private(require('components/courier/data_source/search_source'));
     var mappingSetup = Private(require('utils/mapping_setup'));
-    var getRootSearch = Private(require('../_get_root_search'));
+    var getRootSearch = Private(require('components/courier/_get_root_search'));
 
     function SavedObject(config) {
       if (!_.isObject(config)) config = {};

@@ -1,13 +1,13 @@
 define(function (require) {
-  require('./_view');
-  require('./_objects');
+  require('apps/settings/sections/objects/_view');
+  require('apps/settings/sections/objects/_objects');
 
   require('angular-ui-ace');
   require('angular-elastic');
   require('directives/confirm_click');
 
   // add the module deps to this module
-  require('modules').get('app/settings', ['ui.ace', 'monospaced.elastic']);
+  require('modules').get('apps/settings', ['ui.ace', 'monospaced.elastic']);
 
   return {
     name: 'objects',

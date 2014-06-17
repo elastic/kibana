@@ -8,7 +8,7 @@ define(function (require) {
     var notify = new Notifier();
     return {
       restrict: 'E',
-      template: require('text!../partials/panel.html'),
+      template: require('text!apps/dashboard/partials/panel.html'),
       requires: '^dashboardGrid',
       link: function ($scope, $el) {
         // using $scope inheritance, panels are available in AppState

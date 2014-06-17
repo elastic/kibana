@@ -3,7 +3,8 @@ define(function (require) {
     var notify = new Notifier();
     var _ = require('lodash');
     var angular = require('angular');
-    var vals = Private(require('./_vals'));
+
+    var vals = Private(require('components/config/_vals'));
 
     return function DelayedUpdater(doc) {
       var updater = this;

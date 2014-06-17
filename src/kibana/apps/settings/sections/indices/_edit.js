@@ -3,7 +3,7 @@ define(function (require) {
 
   require('routes')
   .when('/settings/indices/:id', {
-    template: require('text!./_edit.html'),
+    template: require('text!apps/settings/sections/indices/_edit.html'),
     resolve: {
       indexPattern: function ($route, courier) {
         return courier.indexPatterns.get($route.current.params.id)
@@ -12,10 +12,10 @@ define(function (require) {
     }
   });
 
-  require('modules').get('app/settings')
+  require('modules').get('apps/settings')
   .controller('settingsIndicesEdit', function ($scope, $location, $route, config, courier, Notifier, Private) {
     var notify = new Notifier();
-    var refreshKibanaIndex = Private(require('./_refresh_kibana_index'));
+    var refreshKibanaIndex = Private(require('apps/settings/sections/indices/_refresh_kibana_index'));
 
     $scope.indexPattern = $route.current.locals.indexPattern;
     var otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);

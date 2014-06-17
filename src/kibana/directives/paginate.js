@@ -99,7 +99,7 @@ define(function (require) {
   module.directive('paginateControls', function () {
     return {
       restrict: 'E',
-      template: require('text!../partials/paginate_controls.html')
+      template: require('text!partials/paginate_controls.html')
     };
   });
 });

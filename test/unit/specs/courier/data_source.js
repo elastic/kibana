@@ -1,5 +1,5 @@
 define(function (require) {
-  require('courier/courier');
+  require('components/courier/courier');
 
   return function extendCourierSuite() {
     inject(function ($injector) {
