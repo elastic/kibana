@@ -30,7 +30,7 @@ function (angular, _, config) {
       } else {
         var nodeInfo = ejs.client.get('/_nodes',
           undefined, undefined, function(data, status) {
-          if(status === 0) {
+          if(_.isUndefined(status)) {
             alertSrv.set('Error',"Could not contact Elasticsearch at "+ejs.client.server()+
               ". Please ensure that Elasticsearch is reachable from your system." ,'error');
           } else {
@@ -145,6 +145,10 @@ function (angular, _, config) {
 
     // Determine if a specific version is greater than or equal to another
     this.compare = function (required,installed) {
+      if(_.isUndefined(installed)) {
+        return;
+      }
+
       if(!required || !installed) {
         return undefined;
       }
