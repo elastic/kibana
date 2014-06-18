@@ -28,9 +28,12 @@ define(function (require) {
   function getIndexOf(val, arr) {
     var i, max = arr.length;
     for (i = 0; i < max; i++) {
-      if (val === arr[i].x) {
+      /* jshint eqeqeq:false */
+      // intentional double equals
+      if (val == arr[i].x) {
         return i;
       }
+      /* jshint eqeqeq:true */
     }
     return -1;
   }
