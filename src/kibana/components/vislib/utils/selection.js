@@ -3,7 +3,7 @@ define(function (require) {
   var d3 = require('d3');
 
   // Dynamically adds css file
-  require('css!../css/k4.d3');
+  require('css!components/vislib/styles/k4.d3');
 
   // adds an array to another array
   function addTo(to, array) {
