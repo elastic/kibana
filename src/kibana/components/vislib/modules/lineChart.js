@@ -1,10 +1,9 @@
-define(function(require) {
-    'use strict';
+define(function (require) {
 
-    var d3 = require('lib/d3/d3'),
-        getSelection = require('src/utils/selection'),
-        getLegend = require('src/modules/legend'),
-        getColor = require('src/utils/colorspace');
+    var d3 = require('d3'),
+        getSelection = require('components/vislib/utils/selection'),
+        getLegend = require('components/vislib/modules/legend'),
+        getColor = require('components/vislib/utils/colorspace');
 
     return function getLineChart(elem, config) {
         if (typeof config === 'undefined') { config = {}; }

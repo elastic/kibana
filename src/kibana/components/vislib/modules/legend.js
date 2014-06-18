@@ -1,7 +1,6 @@
 define(function(require) {
-    'use strict';
 
-    var d3 = require('lib/d3/d3');
+    var d3 = require('d3');
 
     function legend (elem, colors, chart) {
 

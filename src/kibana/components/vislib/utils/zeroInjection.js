@@ -1,7 +1,6 @@
 define(function(require) {
-    'use strict';
 
-    var _ = require('lib/lodash/dist/lodash');
+    var _ = require('lodash');
 
     /* Returns an array of ordered keys for a data series
      * or several arrays of data values.
