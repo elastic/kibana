@@ -110,7 +110,7 @@ define(function (require) {
         .catch(function (err) {
           // TODO: we should probably display a message of some kind
           if (err instanceof MissingIndices) {
-            index.fetchFieldsError = 'Unable to fetch mapping. Do you have recent indices matching the interval?';
+            index.fetchFieldsError = 'Unable to fetch mapping. Do you have indices matching the pattern?';
             return [];
           }
 
