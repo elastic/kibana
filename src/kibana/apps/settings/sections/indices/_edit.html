@@ -43,17 +43,14 @@
         </div>
       </div>
 
-      <paginate list="indexPattern.fields" per-page="20">
+      <paginate list="indexPattern.fields|orderBy:table.by:table.reverse" per-page="20">
         <table class="table">
           <thead>
             <th ng-click="setFieldSort('name')">name <i ng-class="sortClass('name')"></i></th>
             <th ng-click="setFieldSort('type')">type <i ng-class="sortClass('type')"></i></th>
           </thead>
           <tr
-            ng-repeat="field in page
-            | orderBy:table.by:table.reverse
-            | startFrom:table.page*table.max
-            | limitTo:table.max">
+            ng-repeat="field in page">
           <td>
               <span bo-text="field.name"></span>
               &nbsp;
