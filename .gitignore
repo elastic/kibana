@@ -4,3 +4,4 @@ trash
 src/bower_components/K4D3
 src/bower_components/elasticsearch
 build
+target
