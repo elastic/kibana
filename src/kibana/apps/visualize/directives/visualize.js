@@ -1,5 +1,5 @@
 define(function (require) {
-  var k4d3 = require('k4d3');
+  var vislib = require('components/vislib/index');
   var $ = require('jquery');
   var _ = require('lodash');
   var typeDefs = require('apps/visualize/saved_visualizations/_type_defs');
@@ -90,7 +90,7 @@ define(function (require) {
           _.merge(params, vis.params);
           _.defaults(params, typeDefinition.params);
 
-          chart = new k4d3.Chart($visualize[0], params);
+          chart = new vislib.Chart($visualize[0], params);
 
           // For each type of interaction, assign the the handler if the vis object has it
           // otherwise use the typeDef, otherwise, do nothing.

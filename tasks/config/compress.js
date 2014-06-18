@@ -1,17 +1,26 @@
-module.exports = function (config) {
-  return {
-    plugin: {
+module.exports = function (grunt) {
+  var _ = require('lodash');
+  var archiveName = function (plugin) {
+    return '<%= target %>/<%= pkg.name %>-' + (plugin ? 'plugin-' : '') + '<%= pkg.version %>';
+  };
+
+  return _.mapValues({
+    build_zip: archiveName() + '.zip',
+    build_tarball: archiveName() + '.zip',
+    plugin: archiveName(true) + '.tar.gz'
+  }, function (filename, task) {
+    return {
       options: {
-        archive: '<%= build %>/<%= pkg.name %>-plugin-<%= pkg.version %>.tar.gz'
+        archive: filename
       },
-      files : [
+      files: [
         {
           expand: true,
-          cwd: 'src',
+          cwd: '<%= build %>',
           src: ['**/*'],
-          dest: '<%= pkg.name %>/_site'
+          dest: '<%= pkg.name %>' + (task === 'plugin' ? '/_site' : '')
         }
       ]
-    }
-  };
+    };
+  });
 };

@@ -9,6 +9,5 @@
   },
   "_source": "git://github.com/eligrey/FileSaver.js.git",
   "_target": "*",
-  "_originalSource": "FileSaver",
-  "_direct": true
+  "_originalSource": "FileSaver"
 }

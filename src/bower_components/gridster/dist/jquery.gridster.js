@@ -1,4 +1,4 @@
-/*! gridster.js - v0.5.1 - 2014-03-05
+/*! gridster.js - v0.5.2 - 2014-06-16
 * http://gridster.net/
 * Copyright (c) 2014 ducksboard; Licensed MIT */
 
@@ -415,11 +415,12 @@
         limit: true,
         offset_left: 0,
         autoscroll: true,
-        ignore_dragging: ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'],
+        ignore_dragging: ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'], // or function
         handle: null,
         container_width: 0,  // 0 == auto
         move_element: true,
-        helper: false  // or 'clone'
+        helper: false,  // or 'clone'
+        remove_helper: true
         // drag: function(e) {},
         // start : function(e, ui) {},
         // stop : function(e) {}
@@ -429,9 +430,9 @@
     var dir_map = { x : 'left', y : 'top' };
     var isTouch = !!('ontouchstart' in window);
     var pointer_events = {
-        start: isTouch ? 'touchstart.gridster-draggable' : 'mousedown.gridster-draggable',
-        move: isTouch ? 'touchmove.gridster-draggable' : 'mousemove.gridster-draggable',
-        end: isTouch ? 'touchend.gridster-draggable' : 'mouseup.gridster-draggable'
+        start: 'touchstart.gridster-draggable mousedown.gridster-draggable',
+        move: 'touchmove.gridster-draggable mousemove.gridster-draggable',
+        end: 'touchend.gridster-draggable mouseup.gridster-draggable'
     };
 
     var capitalize = function(str) {
@@ -466,7 +467,7 @@
     */
     function Draggable(el, options) {
       this.options = $.extend({}, defaults, options);
-      this.$body = $(document.body);
+      this.$document = $(document);
       this.$container = $(el);
       this.$dragitems = $(this.options.items, this.$container);
       this.is_dragging = false;
@@ -494,10 +495,10 @@
         this.$container.on(pointer_events.start, this.options.items,
             $.proxy(this.drag_handler, this));
 
-        this.$body.on(pointer_events.end, $.proxy(function(e) {
+        this.$document.on(pointer_events.end, $.proxy(function(e) {
             this.is_dragging = false;
             if (this.disabled) { return; }
-            this.$body.off(pointer_events.move);
+            this.$document.off(pointer_events.move);
             if (this.drag_start) {
                 this.on_dragstop(e);
             }
@@ -511,7 +512,7 @@
 
 
     fn.get_mouse_pos = function(e) {
-        if (isTouch) {
+        if (e.originalEvent && e.originalEvent.touches) {
             var oe = e.originalEvent;
             e = oe.touches.length ? oe.touches[0] : oe.changedTouches[0];
         }
@@ -531,9 +532,9 @@
         var diff_y = Math.round(mouse_actual_pos.top - this.mouse_init_pos.top);
 
         var left = Math.round(this.el_init_offset.left +
-            diff_x - this.baseX + this.scroll_offset_x);
+            diff_x - this.baseX + $(window).scrollLeft() - this.win_offset_x);
         var top = Math.round(this.el_init_offset.top +
-            diff_y - this.baseY + this.scroll_offset_y);
+            diff_y - this.baseY + $(window).scrollTop() - this.win_offset_y);
 
         if (this.options.limit) {
             if (left > this.player_max_left) {
@@ -551,8 +552,8 @@
             pointer: {
                 left: mouse_actual_pos.left,
                 top: mouse_actual_pos.top,
-                diff_left: diff_x + this.scroll_offset_x,
-                diff_top: diff_y + this.scroll_offset_y
+                diff_left: diff_x + ($(window).scrollLeft() - this.win_offset_x),
+                diff_top: diff_y + ($(window).scrollTop() - this.win_offset_y)
             }
         };
     };
@@ -635,6 +636,7 @@
 
     fn.drag_handler = function(e) {
         var node = e.target.nodeName;
+        // skip if drag is disabled, or click was not done with the mouse primary button
         if (this.disabled || e.which !== 1 && !isTouch) {
             return;
         }
@@ -651,7 +653,7 @@
         this.mouse_init_pos = this.get_mouse_pos(e);
         this.offsetY = this.mouse_init_pos.top - this.el_init_pos.top;
 
-        this.$body.on(pointer_events.move, function(mme) {
+        this.$document.on(pointer_events.move, function(mme) {
             var mouse_actual_pos = self.get_mouse_pos(mme);
             var diff_x = Math.abs(
                 mouse_actual_pos.left - self.mouse_init_pos.left);
@@ -699,6 +701,8 @@
             this.helper = false;
         }
 
+        this.win_offset_y = $(window).scrollTop();
+        this.win_offset_x = $(window).scrollLeft();
         this.scroll_offset_y = 0;
         this.scroll_offset_x = 0;
         this.el_init_offset = this.$player.offset();
@@ -747,7 +751,7 @@
             this.options.stop.call(this.$player, e, data);
         }
 
-        if (this.helper) {
+        if (this.helper && this.options.remove_helper) {
             this.$helper.remove();
         }
 
@@ -776,7 +780,7 @@
         this.disable();
 
         this.$container.off('.gridster-draggable');
-        this.$body.off('.gridster-draggable');
+        this.$document.off('.gridster-draggable');
         $(window).off('.gridster-draggable');
 
         $.removeData(this.$container, 'drag');
@@ -785,6 +789,10 @@
     fn.ignore_drag = function(event) {
         if (this.options.handle) {
             return !$(event.target).is(this.options.handle);
+        }
+
+        if ($.isFunction(this.options.ignore_dragging)) {
+            return this.options.ignore_dragging(event);
         }
 
         return $(event.target).is(this.options.ignore_dragging.join(', '));
@@ -1023,7 +1031,9 @@
         }else{
             pos = {
                 col: col,
-                row: row
+                row: row,
+                size_x: size_x,
+                size_y: size_y
             };
 
             this.empty_cells(col, row, size_x, size_y);
@@ -3587,6 +3597,8 @@
                 (x * opts.widget_base_dimensions[0] +
                 (x - 1) * (opts.widget_margins[0] * 2)) + 'px; }\n');
         }
+
+        this.remove_style_tags();
 
         return this.add_style_tag(styles);
     };

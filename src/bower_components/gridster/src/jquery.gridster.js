@@ -230,7 +230,9 @@
         }else{
             pos = {
                 col: col,
-                row: row
+                row: row,
+                size_x: size_x,
+                size_y: size_y
             };
 
             this.empty_cells(col, row, size_x, size_y);
@@ -2794,6 +2796,8 @@
                 (x * opts.widget_base_dimensions[0] +
                 (x - 1) * (opts.widget_margins[0] * 2)) + 'px; }\n');
         }
+
+        this.remove_style_tags();
 
         return this.add_style_tag(styles);
     };
