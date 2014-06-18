@@ -2,6 +2,9 @@ define(function (require) {
   var $ = require('jquery');
   var d3 = require('d3');
 
+  // Dynamically adds css file
+  require('css!components/vislib/styles/k4.d3');
+
   // adds an array to another array
   function addTo(to, array) {
     [].push.apply(to, array);
