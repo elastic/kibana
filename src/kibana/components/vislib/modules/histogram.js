@@ -145,8 +145,7 @@ define(function (require) {
       chartwrapper = d3.select(elem)
         .append('div')
         .attr('class', 'chartwrapper')
-        .style('height', $(elem)
-          .height() + 'px');
+        .style('height', $(elem).height() + 'px');
 
       // Selection function - returns an array of DOM elements with data bound
       try {
@@ -162,9 +161,9 @@ define(function (require) {
       // Chart options
       if (addLegend) {
         legend = legendFn(elem, colors, chart);
-        allItms = d3.select('.legendwrapper')
-          .selectAll('li.legends');
+        allItms = d3.select('.legendwrapper').selectAll('li.legends');
       }
+
       if (addTooltip) {
         tip = d3.select(elem)
           .append('div')
@@ -607,7 +606,7 @@ define(function (require) {
           d3.select(this)
             .classed('hover', true)
             .style('stroke', '#333');
-          //                        .style('cursor', 'pointer');
+            // .style('cursor', 'pointer');
 
           var itm;
 
