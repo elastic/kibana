@@ -9,7 +9,7 @@ define(function (require) {
   var getColor = require('components/vislib/utils/colorspace');
 
   // Dynamically adds css file
-  require('css!../css/k4.d3');
+  require('css!components/vislib/styles/k4.d3');
 
   return function histogram(elem, args) {
     if (typeof args === 'undefined') {
