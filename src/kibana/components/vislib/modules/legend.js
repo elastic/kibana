@@ -16,7 +16,7 @@ define(function (require) {
       .attr('class', 'header')
       .append('div')
       .attr('class', 'column-labels')
-      .html('<span class="btn btn-xs btn-default legend-toggle"><i class="fa fa-list-ul"></i></span>;');
+      .html('<span class="btn btn-xs btn-default legend-toggle"><i class="fa fa-list-ul"></i></span>');
 
     list = legendWrap.append('ul')
       .attr('class', 'legend-ul')
