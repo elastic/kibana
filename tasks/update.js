@@ -3,7 +3,7 @@ module.exports = function (grunt) {
   var spawn = require('./utils/spawn');
   var installOrUpdateRepo = require('./utils/install_or_update_repo');
 
-  // bower update elasticsearch && bower update k4d3 && npm run rebuild-esjs"
+  // bower update elasticsearch && npm run rebuild-esjs"
   grunt.registerTask('update', [
     'update-esjs',
   ]);

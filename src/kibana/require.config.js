@@ -45,7 +45,6 @@ require.config({
     'elasticsearch': ['angular'],
     'angular-bootstrap': ['angular'],
     'angular-bindonce': ['angular'],
-    k4d3: ['jquery', 'lodash'],
     'angular-ui-ace': ['angular', 'ace'],
     inflection: {
       exports: 'inflection'

@@ -10,7 +10,6 @@ module.exports = function (grunt) {
             name: 'kibana',
             excludeShallow: [
               '../config',
-              'k4d3'
             ],
             include: [
               'controllers/kibana'
