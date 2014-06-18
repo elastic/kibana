@@ -21,7 +21,6 @@ define(function (require) {
 
     describe('description', function () {
       it('returns a readable description for an interval', function () {
-        expect(interval.describe('1ms')).to.be('1ms');
         expect(interval.describe('1s')).to.be('1s');
         expect(interval.describe('1m')).to.be('1m');
         expect(interval.describe('1h')).to.be('1h');

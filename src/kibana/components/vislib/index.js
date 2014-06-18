@@ -6,8 +6,8 @@ define(function (require) {
     Chart: require('components/vislib/core'),
     histogram: require('components/vislib/modules/histogram'),
     line: require('components/vislib/modules/lineChart'),
-    area: require('components/vislib/modules/areaChart')
+    area: require('components/vislib/modules/areaChart'),
   };
 
-    return k4;
+  return k4;
 });

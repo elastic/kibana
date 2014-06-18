@@ -25,6 +25,8 @@ define(function (require) {
   kibana
     // This stores the Kibana revision number, @REV@ is replaced by grunt.
     .constant('kbnVersion', '@REV@')
+    // The minimum Elasticsearch version required to run Kibana
+    .constant('minimumElasticsearchVersion', '1.2.1')
     // Use this for cache busting partials
     .constant('cacheBust', 'cache-bust=' + Date.now())
     // attach the route manager's known routes
