@@ -7,6 +7,8 @@ Useful for writing modular CSS dependencies alongside scripts. For an example of
 
 For LESS inclusion, use [require-less](https://github.com/guybedford/require-less), which behaves and builds the css exactly like this module apart from the preprocessing step.
 
+<a href="https://www.gittip.com/guybedford/"><img src="http://img.shields.io/gittip/guybedford.svg" /></a>
+
 Overview
 --------
 
@@ -126,6 +128,40 @@ This will then output all the css to the file `mymodule.css`. This configuration
 
 Optimization is fully compatible with exclude and include.
 
+### IE8 and 9 Selector Limit
+
+In IE9 and below, there is a maximum limit of 4095 selectors per stylesheet.
+
+In order to avoid this limit, CSS concatenation can be disabled entirely with the `IESelectorLimit` option.
+
+```javascript
+{
+  IESelectorLimit: true,
+  modules: [
+  {
+    name: 'mymodule'
+  }
+  ]
+}
+```
+
+Ideally build layers would avoid this limit entirely by naturally being designed to not reach it. This option is really only as a fix when nothing else
+is possible as it will degrade injection performance.
+
+This option is also not compatible with the `separateCSS` option.
+
+### Excluding the CSS Module in Production
+
+When dynamic CSS requires are not going to be made in production, a minimal version of RequireCSS can be written by setting a pragma for the build:
+
+```javascript
+{
+  pragmasOnSave: {
+    excludeRequireCss: true
+  }
+}
+```
+
 ### siteRoot Configuration
 
 When building the CSS, all URIs are renormalized relative to the site root.
@@ -149,6 +185,20 @@ For example, if the site root is `www` and we are building the directory `www/li
 }
 ```
 
+### Almond Configuration
+
+Almond doesn't support the `packages` configuration option. When using Almond, rather configuration RequireCSS with map configuration instead, by including the following configuration in the production app:
+
+```javascript
+  requirejs.config({
+    map: {
+      '*': {
+        css: 'require-css/css'
+      }
+    }
+  });
+```
+
 ### Disabling the Build
 
 To disable any CSS build entirely, use the configuration option `buildCSS`:
@@ -164,7 +214,7 @@ To disable any CSS build entirely, use the configuration option `buildCSS`:
 }
 ```
 
-CSS requires will then be left in the source "as is".
+CSS requires will then be left in the source "as is". This shouldn't be used with `stubModules`.
 
 CSS Compression
 ---------------
@@ -197,7 +247,4 @@ License
 ---
 
 MIT
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/guybedford/require-css/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 

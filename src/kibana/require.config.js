@@ -19,6 +19,7 @@ require.config({
     ace: '../bower_components/ace-builds/src-noconflict/ace',
     async: '../bower_components/async/lib/async',
     css: '../bower_components/require-css/css',
+    d3: '../bower_components/d3/d3',
     text: '../bower_components/requirejs-text/text',
     elasticsearch: '../bower_components/elasticsearch/dist/elasticsearch.angular',
     jquery: '../bower_components/jquery/dist/jquery',
@@ -26,7 +27,6 @@ require.config({
     moment: '../bower_components/moment/moment',
     gridster: '../bower_components/gridster/dist/jquery.gridster',
     jsonpath: '../bower_components/jsonpath/lib/jsonpath',
-    k4d3: '../bower_components/K4D3/build/k4.d3',
     inflection: '../bower_components/inflection/lib/inflection',
     file_saver: '../bower_components/FileSaver/filesaver',
     bower_components: '../bower_components'
@@ -45,7 +45,6 @@ require.config({
     'elasticsearch': ['angular'],
     'angular-bootstrap': ['angular'],
     'angular-bindonce': ['angular'],
-    k4d3: ['jquery', 'lodash'],
     'angular-ui-ace': ['angular', 'ace'],
     inflection: {
       exports: 'inflection'

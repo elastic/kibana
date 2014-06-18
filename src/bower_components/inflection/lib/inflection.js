@@ -113,9 +113,9 @@
     [ new RegExp( '(curve)s$', 'gi' ),                                                    '$1' ],
     [ new RegExp( '([lr])ves$', 'gi' ),                                                   '$1f' ],
     [ new RegExp( '([^fo])ves$', 'gi' ),                                                  '$1fe' ],
+    [ new RegExp( '(m)ovies$', 'gi' ),                                                    '$1ovie' ],
     [ new RegExp( '([^aeiouy]|qu)ies$', 'gi' ),                                           '$1y' ],
     [ new RegExp( '(s)eries$', 'gi' ),                                                    '$1eries' ],
-    [ new RegExp( '(m)ovies$', 'gi' ),                                                    '$1ovie' ],
     [ new RegExp( '(x|ch|ss|sh)es$', 'gi' ),                                              '$1' ],
     [ new RegExp( '([m|l])ice$', 'gi' ),                                                  '$1ouse' ],
     [ new RegExp( '(bus)es$', 'gi' ),                                                     '$1' ],
@@ -436,8 +436,8 @@
    *     inflection.titleize( 'message properties to keep' ); // === 'Message Properties to Keep'
    */
     titleize : function ( str ){
-      str         = str.toLowerCase().replace( underbar, ' ');
-      var str_arr = str.split(' ');
+      str         = str.toLowerCase().replace( underbar, ' ' );
+      var str_arr = str.split( ' ' );
       var i       = 0;
       var j       = str_arr.length;
       var d, k, l;
@@ -563,7 +563,7 @@
    *     inflection.ordinalize( 'the 1 pitch' ); // === 'the 1st pitch'
    */
     ordinalize : function ( str ){
-      var str_arr = str.split(' ');
+      var str_arr = str.split( ' ' );
       var i       = 0;
       var j       = str_arr.length;
 
@@ -624,7 +624,7 @@
 /**
  * @public
  */
-  inflector.version = '1.3.5';
+  inflector.version = '1.3.6';
 
   // browser support
   // requirejs

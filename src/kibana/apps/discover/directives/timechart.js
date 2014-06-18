@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
-  var k4 = require('k4d3');
+  var vislib = require('components/vislib/index');
 
   var app = require('modules').get('apps/discover');
 
@@ -15,7 +15,7 @@ define(function (require) {
 
         var init = function () {
           // This elem should already have a height/width
-          var myChart = new k4.Chart(elem[0], {
+          var myChart = new vislib.Chart(elem[0], {
 
           });
 
