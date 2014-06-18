@@ -11,6 +11,9 @@
     "event-stream": "~3.1.5",
     "expect.js": "~0.2.0",
     "grunt": "~0.4.2",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-compress": "~0.9.1",
+    "grunt-contrib-copy": "~0.5.0",
     "grunt-contrib-jade": "~0.10.0",
     "grunt-contrib-jshint": "~0.8.0",
     "grunt-contrib-less": "~0.10.0",
@@ -22,8 +25,8 @@
     "load-grunt-config": "~0.7.0",
     "lodash": "~2.4.1",
     "mocha": "~1.17.1",
-    "grunt-contrib-compress": "~0.9.1",
-    "grunt-contrib-copy": "~0.5.0"
+    "requirejs": "~2.1.14",
+    "rjs-build-analysis": "0.0.3"
   },
   "scripts": {
     "test": "grunt test",

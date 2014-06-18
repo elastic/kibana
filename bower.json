@@ -23,7 +23,6 @@
     "requirejs": "~2.1.10",
     "angular": "~1.2.14",
     "lodash": "~2.4.1",
-    "d3": "~3.4.1",
     "angular-route": "~1.2.14",
     "gridster": "~0.5.0",
     "angular-mocks": "~1.2.14",
