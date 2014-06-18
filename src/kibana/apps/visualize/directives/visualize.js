@@ -1,5 +1,5 @@
 define(function (require) {
-  var k4d3 = require('k4d3');
+  var k4d3 = require('components/k4d3/index');
   var $ = require('jquery');
   var _ = require('lodash');
   var typeDefs = require('apps/visualize/saved_visualizations/_type_defs');

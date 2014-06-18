@@ -1,6 +1,6 @@
 {
   "name": "inflection",
-  "version": "1.3.5",
+  "version": "1.3.6",
   "homepage": "https://github.com/dreamerslab/node.inflection",
   "authors": [
     "ben <ben@dreamerslab.com>"
@@ -33,14 +33,13 @@
     "test",
     "tests"
   ],
-  "_release": "1.3.5",
+  "_release": "1.3.6",
   "_resolution": {
     "type": "version",
-    "tag": "v1.3.5",
-    "commit": "9df1e87a168d6358d95e559278c17e627ebcf3c5"
+    "tag": "v1.3.6",
+    "commit": "a2140a5791e3c96bd4739d822e90a73de91f5e39"
   },
   "_source": "git://github.com/dreamerslab/node.inflection.git",
   "_target": "~1.3.5",
-  "_originalSource": "inflection",
-  "_direct": true
+  "_originalSource": "inflection"
 }

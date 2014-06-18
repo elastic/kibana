@@ -1,6 +1,6 @@
 define(['require', './normalize'], function(req, normalize) {
   var cssAPI = {};
-  
+
   var isWindows = !!process.platform.match(/^win/);
 
   function compress(css) {
@@ -26,7 +26,7 @@ define(['require', './normalize'], function(req, normalize) {
     console.log('Compression not supported outside of nodejs environments.');
     return css;
   }
-  
+
   //load file code - stolen from text plugin
   function loadFile(path) {
     if (typeof process !== "undefined" && process.versions && !!process.versions.node && require.nodeRequire) {
@@ -57,8 +57,8 @@ define(['require', './normalize'], function(req, normalize) {
       }
     }
   }
-  
-  
+
+
   function saveFile(path, data) {
     if (typeof process !== "undefined" && process.versions && !!process.versions.node && require.nodeRequire) {
       var fs = require.nodeRequire('fs');
@@ -67,7 +67,7 @@ define(['require', './normalize'], function(req, normalize) {
     else {
       var content = new java.lang.String(data);
       var output = new java.io.BufferedWriter(new java.io.OutputStreamWriter(new java.io.FileOutputStream(path), 'utf-8'));
-  
+
       try {
         output.write(content, 0, content.length());
         output.flush();
@@ -77,7 +77,7 @@ define(['require', './normalize'], function(req, normalize) {
       }
     }
   }
-  
+
   //when adding to the link buffer, paths are normalised to the baseUrl
   //when removing from the link buffer, paths are normalised to the output file path
   function escape(content) {
@@ -99,7 +99,7 @@ define(['require', './normalize'], function(req, normalize) {
   var baseParts = req.toUrl('base_url').split('/');
   baseParts[baseParts.length - 1] = '';
   var baseUrl = baseParts.join('/');
-  
+
   var curModule = 0;
   var config;
 
@@ -128,47 +128,56 @@ define(['require', './normalize'], function(req, normalize) {
 
     load();
   }
-  
+
   cssAPI.normalize = function(name, normalize) {
     if (name.substr(name.length - 4, 4) == '.css')
       name = name.substr(0, name.length - 4);
     return normalize(name);
   }
-  
+
   cssAPI.write = function(pluginName, moduleName, write, parse) {
     //external URLS don't get added (just like JS requires)
     if (moduleName.match(absUrlRegEx))
       return;
 
     layerBuffer.push(cssBuffer[moduleName]);
-    
+
     if (config.buildCSS != false)
     write.asModule(pluginName + '!' + moduleName, 'define(function(){})');
   }
-  
-  cssAPI.onLayerEnd = function(write, data) {
-    //calculate layer css
-    var css = layerBuffer.join('');
-    
-    if (config.separateCSS) {
-      console.log('Writing CSS! file: ' + data.name + '\n');
 
-      var outPath = config.appDir ? config.baseUrl + data.name + '.css' : config.out.replace(/(\.js)?$/, '.css');
-      
-      saveFile(outPath, compress(css));
+  cssAPI.onLayerEnd = function(write, data) {
+    if (config.separateCSS && config.IESelectorLimit)
+      throw 'RequireCSS: separateCSS option is not compatible with ensuring the IE selector limit';
+
+    if (config.separateCSS) {
+      var outPath = data.path.replace(/(\.js)?$/, '.css');
+      console.log('Writing CSS! file: ' + outPath + '\n');
+
+      var css = layerBuffer.join('');
+
+      if (fs.existsSync(outPath))
+        console.log('RequireCSS: Warning, separateCSS module path "' + outPath + '" already exists and is being replaced by the layer CSS.');
+
+      process.nextTick(function() {
+        saveFile(outPath, compress(css));
+      });
+
     }
     else if (config.buildCSS != false) {
-      if (css == '')
-        return;
-      write(
-        "(function(c){var d=document,a='appendChild',i='styleSheet',s=d.createElement('style');s.type='text/css';d.getElementsByTagName('head')[0][a](s);s[i]?s[i].cssText=c:s[a](d.createTextNode(c));})\n"
-        + "('" + escape(compress(css)) + "');\n"
-      );
+      var styles = config.IESelectorLimit ? layerBuffer : [layerBuffer.join('')];
+      for (var i = 0; i < styles.length; i++) {
+        if (styles[i] == '')
+          return;
+        write(
+          "(function(c){var d=document,a='appendChild',i='styleSheet',s=d.createElement('style');s.type='text/css';d.getElementsByTagName('head')[0][a](s);s[i]?s[i].cssText=c:s[a](d.createTextNode(c));})\n"
+          + "('" + escape(compress(styles[i])) + "');\n"
+        );
+      }
     }
-    
     //clear layer buffer for next layer
     layerBuffer = [];
   }
-  
+
   return cssAPI;
 });
