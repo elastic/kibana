@@ -1,10 +1,7 @@
 define(function(require) {
     'use strict';
 
-    var d3 = require('lib/d3/d3');
-
-    // Dynamically adds css file
-    require('lib/require-css/css!../css/k4.d3');
+    var d3 = require('d3');
 
     // adds an array to another array
     function addTo(to, array) {

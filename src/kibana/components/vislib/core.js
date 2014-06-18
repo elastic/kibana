@@ -10,9 +10,9 @@ define(function(require) {
     return function(elem, args) {
         var type = args.type,
             charts = {
-            'histogram': require('src/modules/histogram'),
-            'line': require('src/modules/lineChart'),
-            'area': require('src/modules/areaChart'),
+            'histogram': require('components/vislib/modules/histogram'),
+            'line': require('components/vislib/modules/lineChart'),
+            'area': require('components/vislib/modules/areaChart')
         };
 
         if (typeof(charts[type]) !== 'function') { throw type + " is not a supported k4 function."; }
