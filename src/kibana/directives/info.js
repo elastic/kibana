@@ -1,5 +1,5 @@
 define(function (require) {
-  var html = require('text!../partials/info.html');
+  var html = require('text!partials/info.html');
 
   require('modules')
     .get('kibana/directives')

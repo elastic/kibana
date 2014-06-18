@@ -1,4 +1,4 @@
-module.exports = function (config) {
+module.exports = function (grunt) {
   return {
     // just lint the source dir
     source: {

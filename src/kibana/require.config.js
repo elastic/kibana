@@ -1,18 +1,11 @@
 require.config({
   baseUrl: './kibana',
   paths: {
-    // components
-    setup: './components/setup',
     kibana: './index',
-    config: './components/config',
-    errors: './components/errors',
-    notify: './components/notify',
-    courier: './components/courier',
-    index_patterns: './components/index_patterns',
-    state_management: './components/state_management',
 
     // special utils
     routes: 'utils/routes',
+    errors: 'components/errors',
     modules: 'utils/modules',
 
     // bower_components
@@ -25,8 +18,8 @@ require.config({
     'angular-elastic': '../bower_components/angular-elastic/elastic',
     ace: '../bower_components/ace-builds/src-noconflict/ace',
     async: '../bower_components/async/lib/async',
-    bootstrap: '../bower_components/bootstrap/dist/js/bootstrap',
     css: '../bower_components/require-css/css',
+    d3: '../bower_components/d3/d3',
     text: '../bower_components/requirejs-text/text',
     elasticsearch: '../bower_components/elasticsearch/dist/elasticsearch.angular',
     jquery: '../bower_components/jquery/dist/jquery',
@@ -34,7 +27,6 @@ require.config({
     moment: '../bower_components/moment/moment',
     gridster: '../bower_components/gridster/dist/jquery.gridster',
     jsonpath: '../bower_components/jsonpath/lib/jsonpath',
-    k4d3: '../bower_components/K4D3/build/k4.d3',
     inflection: '../bower_components/inflection/lib/inflection',
     file_saver: '../bower_components/FileSaver/filesaver',
     bower_components: '../bower_components'
@@ -51,9 +43,8 @@ require.config({
     'angular-route': ['angular'],
     'angular-mocks': ['angular'],
     'elasticsearch': ['angular'],
-    'angular-bootstrap': ['angular', 'bootstrap'],
+    'angular-bootstrap': ['angular'],
     'angular-bindonce': ['angular'],
-    k4d3: ['jquery', 'lodash'],
     'angular-ui-ace': ['angular', 'ace'],
     inflection: {
       exports: 'inflection'

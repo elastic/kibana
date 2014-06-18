@@ -2,7 +2,7 @@ define(function (require) {
   return function transformMappingIntoFields(Private, configFile, config) {
     var _ = require('lodash');
     var MappingConflict = require('errors').MappingConflict;
-    var castMappingType = Private(require('./_cast_mapping_type'));
+    var castMappingType = Private(require('components/index_patterns/_cast_mapping_type'));
 
     /**
      * Convert the ES response into the simple map for fields to

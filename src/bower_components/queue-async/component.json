@@ -1,5 +1,0 @@
-{
-  "name": "queue-async",
-  "version": "1.0.7",
-  "main": "./queue.js"
-}

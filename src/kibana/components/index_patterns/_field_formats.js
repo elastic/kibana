@@ -2,7 +2,7 @@
 /* markdown
 
 ### Formatting a value
-To format a response value, you need to get ahold of the field list, which is usually available at `indexPattern.fields` or `indexPattern.fieldsByName`. When the indexPattern is not available, call `courier.getFieldsFor`. Each field object has a `format` property*, which is an object detailed in [_field_formats.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/courier/index_patterns/_field_formats.js).
+To format a response value, you need to get ahold of the field list, which is usually available at `indexPattern.fields` or `indexPattern.fieldsByName`. When the indexPattern is not available, call `courier.getFieldsFor`. Each field object has a `format` property*, which is an object detailed in [_field_formats.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/index_patterns/_field_formats.js).
 
 Once you have the field that a response value came from, pass the value to `field.format.convert(value)` and a formatted string representation of the field will be returned.
 
@@ -10,9 +10,9 @@ Once you have the field that a response value came from, pass the value to `fiel
 
 ### Changing a field's format
 
-Currently only one field format exists, `"string"`, which just [flattens any value down to a string](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/courier/index_patterns/_field_formats.js#L18-L24).
+Currently only one field format exists, `"string"`, which just [flattens any value down to a string](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/index_patterns/_field_formats.js#L18-L24).
 
-To change the format for a specific field you can either change the default for a field type modify the [default format mapping here](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/courier/index_patterns/_field_formats.js#L37-L46).
+To change the format for a specific field you can either change the default for a field type modify the [default format mapping here](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/index_patterns/_field_formats.js#L37-L46).
 
 To change the format for a specific indexPattern's field, add the field and format name to `indexPattern.customFormats` object property.
 

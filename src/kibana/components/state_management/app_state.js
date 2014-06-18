@@ -1,7 +1,7 @@
 define(function (require) {
   var module = require('modules').get('kibana/factories');
 
-  require('./global_state');
+  require('components/state_management/global_state');
 
   module.factory('AppState', function (globalState, $route, $location, Promise) {
 

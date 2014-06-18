@@ -4,15 +4,15 @@ define(function (require) {
     var errors = require('errors');
     var moment = require('moment');
 
-    var docStrategy = Private(require('./strategy/doc'));
-    var searchStrategy = Private(require('./strategy/search'));
+    var docStrategy = Private(require('components/courier/fetch/strategy/doc'));
+    var searchStrategy = Private(require('components/courier/fetch/strategy/search'));
     var strategies = this.strategies = {
       doc: docStrategy,
       search: searchStrategy
     };
 
-    var RequestErrorHandler = Private(require('./_request_error_handler'));
-    var pendingRequests = Private(require('../_pending_requests'));
+    var RequestErrorHandler = Private(require('components/courier/fetch/_request_error_handler'));
+    var pendingRequests = Private(require('components/courier/_pending_requests'));
 
     var notify = new Notifier({
       location: 'Courier Fetch'

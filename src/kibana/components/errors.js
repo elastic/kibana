@@ -156,5 +156,16 @@ define(function (require) {
   };
   inherits(errors.NoDefinedIndexPatterns, KbnError);
 
+
+  /**
+   * Tried to load a route besides settings/indices but you don't have a default index pattern!
+   */
+  errors.NoDefaultIndexPattern = function NoDefaultIndexPattern(type) {
+    KbnError.call(this,
+      'Please specify a default index pattern',
+      errors.NoDefaultIndexPattern);
+  };
+  inherits(errors.NoDefaultIndexPattern, KbnError);
+
   return errors;
 });

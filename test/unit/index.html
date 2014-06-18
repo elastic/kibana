@@ -31,7 +31,7 @@
             exports: 'sinon'
           }
         },
-        waitSeconds: 60,
+        waitSeconds: 6000,
         // mark all requested files with instrument query param
         urlArgs: COVERAGE ? 'instrument=true' : void 0
       });
@@ -53,8 +53,13 @@
           'specs/directives/timepicker',
           'specs/directives/truncate',
           'specs/directives/css_truncate',
+          'specs/filters/field_type',
+          'specs/filters/uriescape',
+          'specs/filters/moment',
+          'specs/filters/start_from',
           'specs/utils/datemath',
           'specs/utils/interval',
+          'specs/utils/versionmath',
         ], function (sinon) {
 
           var xhr = sinon.useFakeXMLHttpRequest();

@@ -6,38 +6,81 @@ define(function (require) {
   var additions = [];
   var otherwise;
 
-  require('setup/setup');
+  require('components/setup/setup');
+  var NoDefaultIndexPattern = require('errors').NoDefaultIndexPattern;
 
-  var setup = function ($q, kbnSetup, config) {
+  require('modules').get('kibana/controllers')
+  .config(function ($provide) {
+    $provide.decorator('$route', function ($delegate, $location, $rootScope) {
+
+      // flag tracking when we are waiting for a reload
+      var reloading;
+
+      var doneReloading = function () { reloading = false; };
+      $rootScope.$on('$routeUpdate', doneReloading);
+      $rootScope.$on('$routeChangeStart', doneReloading);
+
+      var reload = function () {
+        if (!reloading) $delegate.reload();
+        reloading = true;
+      };
+
+      $delegate.change = function (path) {
+        if (path !== $location.path()) {
+          $location.path(path);
+          reload();
+        }
+      };
+      $delegate.changeUrl = function (url) {
+        if (url !== $location.url()) {
+          $location.url(url);
+          reload();
+        }
+      };
+
+      return $delegate;
+    });
+  });
+
+  var oneTimeSetup = function ($q, kbnSetup, config) {
     var prom = $q.all([
       kbnSetup(),
       config.init(),
     ]);
 
     // override setup to only return the promise
-    setup = function () { return prom; };
+    oneTimeSetup = function () { return prom; };
 
     return prom;
   };
-  var prepWork = function ($injector, config, $location, $route, Notifier) {
-    return $injector.invoke(setup)
-    .then(function () {
-      if ($location.path().indexOf('/settings/indices') !== 0 && !config.get('defaultIndex')) {
-        var notify = new Notifier();
-        notify.error('Please specify a default index pattern');
-        $location.path('/settings/indices');
-        $route.reload();
-      }
-    });
+
+  var makePrepWork = function (userWork) {
+    return function ($injector, config, $location, $route, Notifier) {
+      return $injector.invoke(oneTimeSetup)
+      .then(function () {
+        if ($location.path().indexOf('/settings/indices') !== 0 && !config.get('defaultIndex')) {
+          throw new NoDefaultIndexPattern();
+        }
+      })
+      .then(function () {
+        if (userWork) {
+          return $injector[angular.isString(userWork) ? 'get': 'invoke'](userWork);
+        }
+      })
+      .catch(function (err) {
+        if (err instanceof NoDefaultIndexPattern) {
+          $route.change('/settings/indices');
+          (new Notifier()).error(err);
+        } else {
+          throw err;
+        }
+      });
+    };
   };
 
   var wrapResolvesWithPrepWork = function (resolves) {
     return _.mapValues(resolves, function (expr, name) {
-      return function ($injector) {
-        return $injector.invoke(prepWork).then(function () {
-          return $injector[angular.isString(expr) ? 'get': 'invoke'](expr);
-        });
-      };
+      return makePrepWork(expr);
     });
   };
 
@@ -47,9 +90,7 @@ define(function (require) {
         route.resolve = wrapResolvesWithPrepWork(route.resolve);
       } else if (!route.redirectTo) {
         route.resolve = {
-          __prep__: function ($injector) {
-            return $injector.invoke(prepWork);
-          }
+          __prep__: makePrepWork()
         };
       }
 

@@ -7,8 +7,7 @@ define(function (require) {
       return function promiseHandler(patterns) {
         if (!patterns || patterns.length === 0) {
           notify.warning(new errors.NoDefinedIndexPatterns());
-          $location.path('/settings/indices');
-          $route.reload();
+          $route.change('/settings/indices');
         }
 
         return patterns;

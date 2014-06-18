@@ -1,3 +1,4 @@
+//>>excludeStart('excludeRequireCss', pragmas.excludeRequireCss)
 /*
  * css.normalize.js
  *
@@ -137,3 +138,4 @@ define(function() {
   
   return normalizeCSS;
 });
+//>>excludeEnd('excludeRequireCss')

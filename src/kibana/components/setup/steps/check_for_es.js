@@ -1,6 +1,6 @@
 define(function (require) {
   return function checkForEsFunction(Private, Notifier, es, configFile) {
-    var SetupError = Private(require('../_setup_error'));
+    var SetupError = Private(require('components/setup/_setup_error'));
     var notify = new Notifier({ location: 'Setup: Elasticsearch check' });
 
     return function checkForES() {

@@ -1,12 +1,12 @@
 define(function (require) {
   var _ = require('lodash');
-  var typeDefs = require('../saved_visualizations/_type_defs');
+  var typeDefs = require('apps/visualize/saved_visualizations/_type_defs');
 
-  require('../saved_visualizations/saved_visualizations');
+  require('apps/visualize/saved_visualizations/saved_visualizations');
   require('directives/saved_object_finder');
   require('apps/discover/saved_searches/saved_searches');
 
-  var app = require('modules').get('app/visualize', [
+  var app = require('modules').get('apps/visualize', [
     'kibana/courier'
   ]);
 
@@ -20,7 +20,7 @@ define(function (require) {
   /** Wizard Step 1
   /********/
   routes.when('/visualize/step/1', {
-    template: templateStep(1, require('text!../partials/wizard/step_1.html')),
+    template: templateStep(1, require('text!apps/visualize/partials/wizard/step_1.html')),
     resolve: {
       indexPatternIds: function (courier) {
         return courier.indexPatterns.getIds()
@@ -51,7 +51,7 @@ define(function (require) {
   /** Wizard Step 2
   /********/
   routes.when('/visualize/step/2', {
-    template: templateStep(2, require('text!../partials/wizard/step_2.html'))
+    template: templateStep(2, require('text!apps/visualize/partials/wizard/step_2.html'))
   });
 
   app.controller('VisualizeWizardStep2', function ($scope, $route, $location, timefilter) {

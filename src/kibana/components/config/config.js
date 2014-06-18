@@ -3,7 +3,7 @@ define(function (require) {
     'kibana/notify'
   ]);
 
-  var configFile = require('../../../config');
+  var configFile = window.kbnConfigFile;
   // allow the rest of the app to get the configFile easily
   module.constant('configFile', configFile);
 
@@ -13,9 +13,9 @@ define(function (require) {
 
     var angular = require('angular');
     var _ = require('lodash');
-    var defaults = require('./defaults');
-    var DelayedUpdater = Private(require('./_delayed_updater'));
-    var vals = Private(require('./_vals'));
+    var defaults = require('components/config/defaults');
+    var DelayedUpdater = Private(require('components/config/_delayed_updater'));
+    var vals = Private(require('components/config/_vals'));
 
     var notify = new Notifier({
       location: 'Config'
@@ -25,7 +25,7 @@ define(function (require) {
     // update once it is requested by calling #set() or #clear().
     var updater;
 
-    var DocSource = Private(require('courier/data_source/doc_source'));
+    var DocSource = Private(require('components/courier/data_source/doc_source'));
     var doc = (new DocSource())
       .index(configFile.kibanaIndex)
       .type('config')
