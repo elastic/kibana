@@ -1,20 +1,24 @@
 {
-  "name": "topojson",
-  "version": "1.4.9",
-  "main": "topojson.js",
+  "name": "d3",
+  "version": "3.4.8",
+  "main": "d3.js",
   "scripts": [
-    "topojson.js"
+    "d3.js"
   ],
   "ignore": [
     ".DS_Store",
     ".git",
+    ".gitignore",
+    ".npmignore",
+    ".travis.yml",
     "Makefile",
     "bin",
-    "examples",
+    "component.json",
     "index.js",
     "lib",
     "node_modules",
     "package.json",
+    "src",
     "test"
   ]
 }

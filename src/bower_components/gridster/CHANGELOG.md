@@ -1,3 +1,25 @@
+<a name="v0.5.2"></a>
+### v0.5.2 (2014-06-16)
+
+
+#### Bug Fixes
+
+* **draggable:**
+  * handle both touch and click events ([021a6c23](http://github.com/ducksboard/gridster.js/commit/021a6c23e851210c1b817bd353a1e5e19ce10b90), closes [#207](http://github.com/ducksboard/gridster.js/issues/207), [#236](http://github.com/ducksboard/gridster.js/issues/236), [#329](http://github.com/ducksboard/gridster.js/issues/329), [#380](http://github.com/ducksboard/gridster.js/issues/380))
+  * replaced scrollX/Y with scrollLeft/Top ([bb7463a3](http://github.com/ducksboard/gridster.js/commit/bb7463a3241750397492dfbac133cea193f0254f))
+  * fix offset during drag ([c726c4ad](http://github.com/ducksboard/gridster.js/commit/c726c4ad9c18fea95e4b46b9bacd36c42aa9691c))
+  * bind drag events to $document ([dd6c7420](http://github.com/ducksboard/gridster.js/commit/dd6c7420087d5810a9f6b02bf9d81a04a60ae840))
+* **gridster:**
+  * fix add_widget to use correct size_y when adding rows ([7d22e6c8](http://github.com/ducksboard/gridster.js/commit/7d22e6c8b201de33e33def77a93dc9009d0aa4cb))
+  * Removing previously added style tags before adding new one. ([93c46ff4](http://github.com/ducksboard/gridster.js/commit/93c46ff45ebe59f3658b7f32f05b67109aa87311))
+
+
+#### Features
+
+* **draggable:**
+  * allow ignore_dragging config option to be a function ([69fcfe45](http://github.com/ducksboard/gridster.js/commit/69fcfe459678e833cb53de040b9fbc96dd687543))
+  * option to not remove helper on drag stop ([03910df9](http://github.com/ducksboard/gridster.js/commit/03910df967a1ae7bcb2fa3aadd58255e0bcbf327))
+
 <a name="v0.5.1"></a>
 ### v0.5.1 (2014-03-05)
 
