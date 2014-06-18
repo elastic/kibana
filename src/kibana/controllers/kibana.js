@@ -6,9 +6,9 @@ define(function (require) {
   var qs = require('utils/query_string');
   var rison = require('utils/rison');
 
-  require('config/config');
-  require('courier/courier');
-  require('notify/notify');
+  require('components/config/config');
+  require('components/courier/courier');
+  require('components/notify/notify');
   require('directives/info');
   require('directives/spinner');
   require('directives/paginate');
@@ -156,7 +156,7 @@ define(function (require) {
         };
 
         $scope.configure = function () {
-          $scope.configureTemplateUrl = require('text!../partials/global_config.html');
+          $scope.configureTemplateUrl = require('text!partials/global_config.html');
         };
 
         // expose the notification services list of notifs on the $scope so that the

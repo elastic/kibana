@@ -1,12 +1,12 @@
 define(function (require) {
-  var html = require('text!./timepicker.html');
+  var html = require('text!components/timepicker/timepicker.html');
   var module = require('modules').get('kibana/directives');
   var _ = require('lodash');
   var datemath = require('utils/datemath');
   var moment = require('moment');
 
   require('directives/input_datetime');
-  require('./quick_ranges');
+  require('components/timepicker/quick_ranges');
 
 
   module.directive('kbnTimepicker', function (quickRanges) {

@@ -1,17 +1,15 @@
 define(function (require) {
-  // require('angular-ui-ace');
-
-  var module = require('modules').get('app/visualize', ['ui.ace']);
+  var module = require('modules').get('apps/visualize');
   module.directive('visualizeExtras', function (Private, $compile) {
 
     var $ = require('jquery');
     var _ = require('lodash');
-    var contentTemplate = require('text!./_spy.html');
-    var link = Private(require('./_spy'));
+    var contentTemplate = require('text!apps/visualize/visualize_extras/_spy.html');
+    var link = Private(require('apps/visualize/visualize_extras/_spy'));
 
     return {
       restrict: 'E',
-      template: require('text!./_extras.html'),
+      template: require('text!apps/visualize/visualize_extras/_extras.html'),
       link: function ($scope, $el) {
         $scope.currentExtra = null;
 

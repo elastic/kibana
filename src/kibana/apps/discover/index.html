@@ -31,11 +31,11 @@
           state="state">
         </disc-field-chooser>
       </div>
-      <div class="col-md-10" ng-controller="discoverTable">
+      <div class="col-md-10">
 
         <div class="discover-timechart" ng-if="vis">
           <center class="small">
-            {{timeRange.from | moment}} - {{timeRange.to | moment}}
+            <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>
             <!-- TODO: Currently no way to apply this setting to the visualization -->
             <!-- <select
               class="form-control"

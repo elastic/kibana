@@ -6,10 +6,10 @@ define(function (require) {
 
   var module = require('modules').get('kibana/global_state');
 
-  module.service('globalState', function ($rootScope, $route, $injector, Promise) {
+  module.service('globalState', function (Private, $rootScope, $route, $injector, Promise) {
     var globalState = this;
 
-    var setupSync = $injector.invoke(require('./_state_sync'));
+    var setupSync = Private(require('components/state_management/_state_sync'));
 
     // store app related stuff in here
     var app = {};

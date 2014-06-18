@@ -1,5 +1,11 @@
 # History
 
+## 1.3.6 / 2014-06-07
+
+- [bug fix] Rearrange rules. `movies` -> `movy`
+
+
+
 ## 1.3.5 / 2014-02-12
 
 - Unable to publsih v1.3.4 therefore jump to v1.3.5

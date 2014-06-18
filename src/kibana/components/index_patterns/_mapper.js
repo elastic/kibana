@@ -3,10 +3,10 @@ define(function (require) {
     var _ = require('lodash');
 
     var IndexPatternMissingIndices = require('errors').IndexPatternMissingIndices;
-    var transformMappingIntoFields = Private(require('./_transform_mapping_into_fields'));
-    var intervals = Private(require('./_intervals'));
+    var transformMappingIntoFields = Private(require('components/index_patterns/_transform_mapping_into_fields'));
+    var intervals = Private(require('components/index_patterns/_intervals'));
 
-    var LocalCache = Private(require('./_local_cache'));
+    var LocalCache = Private(require('components/index_patterns/_local_cache'));
 
     function Mapper() {
 

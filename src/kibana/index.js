@@ -4,13 +4,14 @@
 define(function (require) {
   var angular = require('angular');
   var $ = require('jquery');
-  var configFile = require('../config');
   var modules = require('modules');
   var routes = require('routes');
 
   require('elasticsearch');
   require('angular-route');
   require('angular-bindonce');
+
+  var configFile = window.kbnConfigFile = require('../config');
 
   var kibana = angular.module('kibana', [
     // list external requirements here
@@ -19,9 +20,13 @@ define(function (require) {
     'ngRoute'
   ]);
 
+  configFile.elasticsearch = configFile.elasticsearch || ('http://' + window.location.hostname + ':9200');
+
   kibana
     // This stores the Kibana revision number, @REV@ is replaced by grunt.
     .constant('kbnVersion', '@REV@')
+    // The minimum Elasticsearch version required to run Kibana
+    .constant('minimumElasticsearchVersion', '1.2.1')
     // Use this for cache busting partials
     .constant('cacheBust', 'cache-bust=' + Date.now())
     // attach the route manager's known routes

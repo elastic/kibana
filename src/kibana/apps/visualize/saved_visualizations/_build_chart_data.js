@@ -1,8 +1,8 @@
 define(function (require) {
   return function BuildChartDataFn(Notifier, Private, courier) {
     var _ = require('lodash');
-    var aggs = Private(require('./_aggs'));
-    var converters = Private(require('./resp_converters/index'));
+    var aggs = Private(require('apps/visualize/saved_visualizations/_aggs'));
+    var converters = Private(require('apps/visualize/saved_visualizations/resp_converters/index'));
 
     var notify = new Notifier();
 
@@ -158,7 +158,7 @@ define(function (require) {
       configs.forEach(function (config) {
         var agg = aggs.byName[config.agg];
         if (agg && agg.makeLabel) {
-          config.label = agg.makeLabel(config.aggParams);
+          config.label = agg.makeLabel(config.aggParams, config);
         } else {
           config.label = config.aggParams.field;
         }

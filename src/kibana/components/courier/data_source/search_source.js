@@ -4,7 +4,7 @@ define(function (require) {
   var errors = require('errors');
 
   return function SearchSourceFactory(Promise, Private) {
-    var SourceAbstract = Private(require('./_abstract'));
+    var SourceAbstract = Private(require('components/courier/data_source/_abstract'));
 
     var FetchFailure = errors.FetchFailure;
     var RequestFailure = errors.RequestFailure;

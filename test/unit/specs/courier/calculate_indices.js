@@ -1,5 +1,5 @@
 define(function (require) {
-  var calculateIndices = require('courier/calculate_indices');
+  var calculateIndices = require('components/courier/calculate_indices');
   var moment = require('moment');
 
   return function extendCourierSuite() {

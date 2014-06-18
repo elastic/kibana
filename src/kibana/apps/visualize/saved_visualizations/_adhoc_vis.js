@@ -2,11 +2,11 @@ define(function (require) {
   var _ = require('lodash');
 
   var module = require('modules').get('kibana/services');
-  var configCats = require('./_config_categories');
+  var configCats = require('apps/visualize/saved_visualizations/_config_categories');
 
 
   module.factory('AdhocVis', function (courier, Private, Promise) {
-    var aggs = Private(require('./_aggs'));
+    var aggs = Private(require('apps/visualize/saved_visualizations/_aggs'));
 
     /**
       opts params:
@@ -119,14 +119,14 @@ define(function (require) {
        *
        * @return {Array} - The list of config objects
        */
-      vis.getConfig = Private(require('./_read_config'));
+      vis.getConfig = Private(require('apps/visualize/saved_visualizations/_read_config'));
 
       /**
        * Transform an ES Response into data for this visualization
        * @param  {object} resp The elasticsearch response
        * @return {array} An array of flattened response rows
        */
-      vis.buildChartDataFromResponse = Private(require('./_build_chart_data'));
+      vis.buildChartDataFromResponse = Private(require('apps/visualize/saved_visualizations/_build_chart_data'));
 
     }
 
