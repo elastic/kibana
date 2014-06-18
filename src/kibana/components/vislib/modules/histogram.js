@@ -8,6 +8,9 @@ define(function (require) {
   var legendFn = require('components/vislib/modules/legend');
   var getColor = require('components/vislib/utils/colorspace');
 
+  // Dynamically adds css file
+  require('css!components/vislib/styles/k4.d3');
+
   return function histogram(elem, args) {
     if (typeof args === 'undefined') {
       args = {};
