@@ -30,8 +30,7 @@
   },
   "scripts": {
     "test": "grunt test",
-    "server": "grunt server",
-    "postinstall": "grunt update"
+    "server": "grunt server"
   },
   "repository": {
     "type": "git",
