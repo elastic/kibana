@@ -1,5 +1,5 @@
-language: node_js
-node_js:
-  - "0.10"
-before_script:
+script:
+  - "nvm use 0.10"
   - "npm install -g grunt-cli"
+  - "npm install"
+  - "npm test"
