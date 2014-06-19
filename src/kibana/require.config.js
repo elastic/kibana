@@ -4,7 +4,7 @@ require.config({
     kibana: './index',
 
     // special utils
-    routes: 'utils/routes',
+    routes: 'utils/routes/index',
     errors: 'components/errors',
     modules: 'utils/modules',
 
