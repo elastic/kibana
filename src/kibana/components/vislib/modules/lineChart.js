@@ -514,7 +514,7 @@ define(function (require) {
             return 'rl rl-' + chart.getClassName(d.label, yAxisLabel);
           })
           .attr('d', function (d) {
-              return line(d.values);
+            return line(d.values);
           })
           .attr('fill', 'none')
           .attr('stroke', function (d) {
