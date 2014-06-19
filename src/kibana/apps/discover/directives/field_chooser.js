@@ -8,6 +8,7 @@ define(function (require) {
 
   require('directives/css_truncate');
   require('directives/field_name');
+  require('filters/unique');
   require('apps/discover/directives/discover_field');
 
 
@@ -25,6 +26,14 @@ define(function (require) {
       },
       template: html,
       controller: function ($scope) {
+
+        $scope.fieldFilterOptions = [
+          {label: '', value: undefined},
+          {label: 'yes', value: 'true'},
+          {label: 'no', value: 'false'},
+        ];
+
+        $scope.fieldFilter = {};
 
         $scope.$watch('data', function () {
           _.each($scope.fields, function (field) {

@@ -18,13 +18,46 @@
     </h5>
     <form ng-show="showFilter" role="form" class="discover-field-filter">
       <div class="form-group">
-        <input type="text" class="form-control" placeholder="Filter" ng-model="fieldFilter">
+        <input type="text" class="form-control" placeholder="Filter" ng-model="fieldFilter.search">
+      </div>
+      <div class="form-group">
+        <label>
+          Analyzed
+        </label>
+        <select
+          required
+          ng-options="opt.value as opt.label for opt in fieldFilterOptions"
+          ng-model="fieldFilter.analyzed"
+          class="form-control">
+        </select> {{fieldFilter.analyzed}}
+      </div>
+      <div class="form-group">
+        <label>
+          Indexed
+        </label>
+        <select
+          required
+          ng-options="opt.value as opt.label for opt in fieldFilterOptions"
+          ng-model="fieldFilter.indexed"
+          class="form-control">
+        </select>
+      </div>
+      <div class="form-group">
+        <label>
+          Type
+        </label>
+        <select
+          required
+          ng-options="field.type as field.type for field in fields | unique:field.type"
+          ng-model="fieldFilter.type"
+          class="form-control"> {{fieldFilter.type}}
+        </select>
       </div>
     </form>
   </div>
 
   <ul bindonce class="list-unstyled">
-    <discover-field field="field" ng-repeat="field in fields|filter:{display:false}|filter:{name:fieldFilter}" data="data">
+    <discover-field field="field" ng-repeat="field in fields|filter:{display:false}|filter:{name:fieldFilter.search}" data="data">
     </discover-field>
   </ul>
 </div>
