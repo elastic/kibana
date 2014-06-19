@@ -34,15 +34,11 @@ define(function (require) {
     templateUrl: 'kibana/apps/discover/index.html',
     reloadOnSearch: false,
     resolve: {
-      savedSearchAndIndexList: function (savedSearches, $route, $location, Notifier, courier, indexPatterns) {
+      indexList: function (courier) {
+        return courier.indexPatterns.getIds();
+      },
+      savedSearch: function (courier, savedSearches, $route) {
         return savedSearches.get($route.current.params.id)
-        .then(function (savedSearch) {
-          return indexPatterns.getIds()
-          .then(indexPatterns.ensureSome())
-          .then(function (indexPatterns) {
-            return [savedSearch, indexPatterns];
-          });
-        })
         .catch(courier.redirectWhenMissing({
           'index-pattern': '/settings/indices',
           '*': '/discover'
@@ -60,11 +56,11 @@ define(function (require) {
     });
 
     // the saved savedSearch
-    var savedSearch = $route.current.locals.savedSearchAndIndexList[0];
+    var savedSearch = $route.current.locals.savedSearch;
     $scope.$on('$destroy', savedSearch.destroy);
 
     // list of indexPattern id's
-    var indexPatternList = $route.current.locals.savedSearchAndIndexList[1];
+    var indexPatternList = $route.current.locals.indexList;
 
     // the actual courier.SearchSource
     var searchSource = savedSearch.searchSource;

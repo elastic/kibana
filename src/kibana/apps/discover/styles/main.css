@@ -78,6 +78,7 @@
 }
 .discover-timechart visualize {
   height: 200px;
+  max-height: 600px;
 }
 .discover-timechart visualize.only-extra {
   height: auto;
@@ -140,6 +141,7 @@
   white-space: pre-wrap;
 }
 .discover-field-filter {
+  background-color: #ecf0f1;
   margin-right: 10px;
 }
 .discover-field-filter .form-group {

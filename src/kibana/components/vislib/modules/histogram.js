@@ -288,14 +288,14 @@ define(function (require) {
     };
 
     chart.isString = function (value) {
-        if (typeof value === 'string') {
-          return true;
-        }
-        return false;
+      if (typeof value === 'string') {
+        return true;
+      }
+      return false;
     };
 
     chart.stringify = function (value) {
-        return value + '';
+      return value + '';
     };
 
     chart.checkForNumbers = function (array) {
@@ -340,7 +340,6 @@ define(function (require) {
     chart.isNumber = function (n) {
       return !isNaN(parseFloat(n)) && isFinite(n);
     };
-
 
     /* Color domain */
     chart.colorDomain = function (selection) {

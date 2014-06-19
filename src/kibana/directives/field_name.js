@@ -16,7 +16,7 @@ define(function (require) {
           switch (fieldType)
           {
           case 'source':
-            return $('<i class="fa fa-file-text-o"></i> ');
+            return $('<i class="fa fa-file-text-o "></i> ');
           case 'string':
             return $('<i><strong>t</strong></i> ');
           case 'number':
@@ -25,6 +25,8 @@ define(function (require) {
             return $('<i class="fa fa-clock-o"></i> ');
           case 'ip':
             return $('<i class="fa fa-laptop"></i> ');
+          case 'geo_point':
+            return $('<i class="fa fa-globe"></i> ');
           case 'conflict':
             return $('<i class="fa fa-warning"></i> ');
           default:
@@ -32,7 +34,14 @@ define(function (require) {
           }
         };
 
-        var icon = typeIcon($scope.fieldType).addClass('text-muted').css({'margin-right': '5px'});
+        var icon = typeIcon($scope.fieldType)
+          .addClass('text-muted')
+          .css({
+            'margin-right': '5px',
+            'text-align': 'center',
+            'display': 'inline-block',
+            'width': '12px'
+          });
 
         $elem.text($scope.fieldName).prepend(icon);
       }
