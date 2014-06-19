@@ -3,6 +3,9 @@ define(function (require) {
   var versionmath = require('utils/versionmath');
   var versions = [
     '1.1.12',
+    '1.1.12',
+    '1.1.12',
+    '1.1.12',
     '0.90.0',
     '0.90.1',
     '1.0.0',

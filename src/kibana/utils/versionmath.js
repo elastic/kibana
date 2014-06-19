@@ -18,21 +18,9 @@ define(function (require) {
 
   // Sort versions from lowest to highest
   var sortVersions = function (versions) {
-    var _versions = _.clone(versions),
-      _r = [];
-
-    while (_r.length < versions.length) {
-      var _h = '0';
-      /*jshint -W083 */
-      _.each(_versions, function (v) {
-        if (compare(_h, v)) {
-          _h = v;
-        }
-      });
-      _versions = _.without(_versions, _h);
-      _r.push(_h);
-    }
-    return _r.reverse();
+    return _.uniq(versions).sort(function (a, b) {
+      return !compare(a, b);
+    });
   };
 
   /*
