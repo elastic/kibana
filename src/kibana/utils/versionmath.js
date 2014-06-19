@@ -8,18 +8,18 @@ define(function (require) {
 
   // Get the max version in this cluster
   var max = function (versions) {
-    return _.last(sortVersions(versions));
+    return sortVersions(versions).pop();
   };
 
   // Return the lowest version in the cluster
   var min = function (versions) {
-    return _.first(sortVersions(versions));
+    return sortVersions(versions).shift();
   };
 
   // Sort versions from lowest to highest
   var sortVersions = function (versions) {
     return _.uniq(versions).sort(function (a, b) {
-      return !compare(a, b);
+      return compare(a, b) ? -1 : 1;
     });
   };
 
