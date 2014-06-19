@@ -1,3 +1,5 @@
-language: node_js
-node_js:
-  - "0.10"
+script:
+  - "nvm use 0.10"
+  - "npm install -g grunt-cli bower"
+  - "npm install"
+  - "npm test"

@@ -3,6 +3,9 @@ define(function (require) {
   var versionmath = require('utils/versionmath');
   var versions = [
     '1.1.12',
+    '1.1.12',
+    '1.1.12',
+    '1.1.12',
     '0.90.0',
     '0.90.1',
     '1.0.0',
@@ -14,7 +17,6 @@ define(function (require) {
   ];
 
   describe('version math (0.90.0 - 2.3.1)', function () {
-
     var methods = 'max,min,eq,is,lt,lte,gt,gte'.split(',');
     describe('methods', function () {
       it('should have ' + methods.join(', ') + ' methods', function () {

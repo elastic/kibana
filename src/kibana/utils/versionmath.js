@@ -8,31 +8,19 @@ define(function (require) {
 
   // Get the max version in this cluster
   var max = function (versions) {
-    return _.last(sortVersions(versions));
+    return sortVersions(versions).pop();
   };
 
   // Return the lowest version in the cluster
   var min = function (versions) {
-    return _.first(sortVersions(versions));
+    return sortVersions(versions).shift();
   };
 
   // Sort versions from lowest to highest
   var sortVersions = function (versions) {
-    var _versions = _.clone(versions),
-      _r = [];
-
-    while (_r.length < versions.length) {
-      var _h = '0';
-      /*jshint -W083 */
-      _.each(_versions, function (v) {
-        if (compare(_h, v)) {
-          _h = v;
-        }
-      });
-      _versions = _.without(_versions, _h);
-      _r.push(_h);
-    }
-    return _r.reverse();
+    return _.uniq(versions).sort(function (a, b) {
+      return compare(a, b) ? -1 : 1;
+    });
   };
 
   /*

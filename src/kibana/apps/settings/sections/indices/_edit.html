@@ -48,6 +48,14 @@
           <thead>
             <th ng-click="setFieldSort('name')">name <i ng-class="sortClass('name')"></i></th>
             <th ng-click="setFieldSort('type')">type <i ng-class="sortClass('type')"></i></th>
+            <th ng-click="setFieldSort('analyzed')">
+              analyzed <kbn-info info="Analyzed fields may require extra memory to visualize" placement="top"></kbn-info>
+              <i ng-class="sortClass('analyzed')"></i>
+            </th>
+            <th ng-click="setFieldSort('indexed')">
+              indexed <kbn-info info="Fields that are not indexed are unavailable for search" placement="top"></kbn-info>
+              <i ng-class="sortClass('indexed')"></i>
+            </th>
           </thead>
           <tr
             ng-repeat="field in page">
@@ -68,6 +76,8 @@
               tooltip="The type of this field changes across indices. It is unavailable for many analysis functions"
               class="fa fa-warning text-color-warning"></i>
             </td>
+            <td><span bo-text="field.analyzed ? 'yes' : 'no'"></span></td>
+            <td><span bo-text="field.indexed ? 'yes' : 'no'"></span></td>
           </tr>
         </table>
       </paginate>
