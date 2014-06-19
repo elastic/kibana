@@ -106,7 +106,6 @@ define(function (require) {
         }
 
         var items = [];
-
         selection.each(function (d) {
           d.series.forEach(function (label) {
             if (label.label) {
@@ -122,6 +121,79 @@ define(function (require) {
       } catch (error) {
         console.group('chart.getColorDomain: ' + error);
       }
+    };
+
+    chart.getClassName = function (label, yAxisLabel) {
+      try {
+        return label ? chart.classifyString(label) : chart.classifyString(yAxisLabel);
+      } catch (error) {
+        console.group('chart.getClassName: ' + error);
+      }
+    };
+
+    chart.classifyString = function (string) {
+      try {
+        if (!chart.isString(string)) {
+          string = chart.stringify(string);
+        }
+        return string.replace(/[.]+|[/]+|[\s]+|[*]+|[;]+|[(]+|[)]+|[:]+|[,]+/g, '');
+      } catch (error) {
+        console.group('chart.classifyString: ' + error);
+      }
+    };
+
+    chart.isString = function (value) {
+      if (typeof value === 'string') {
+        return true;
+      }
+      return false;
+    };
+
+    chart.stringify = function (value) {
+      return value + '';
+    };
+
+    chart.checkForNumbers = function (array) {
+      try {
+        var num = 0;
+        var i;
+
+        for (i = 0; i < array.length; i++) {
+          if (chart.isNumber(array[i])) {
+            num++;
+          }
+        }
+        if (num === array.length) {
+          return true;
+        }
+        return false;
+      } catch (error) {
+        console.error('chart.checkForNumber: ' + error);
+      }
+    };
+
+    chart.convertStringsToNumbers = function (array) {
+      try{
+        if (chart.checkForNumbers(array)) {
+          var i;
+
+          for (i = 0; i < array.length; i++) {
+            array[i] = chart.convertToNumber(array[i]);
+          }
+          return array;
+        }
+        return array;
+      } catch (error) {
+        console.error('chart.convertStringsToNumbers: ' + error);
+      }
+    };
+
+    chart.convertToNumber = function (n) {
+      return +n;
+    };
+
+    chart.isNumber = function (n) {
+      return !isNaN(parseFloat(n)) && isFinite(n);
     };
 
     chart.render = function render(data) {
@@ -279,6 +351,7 @@ define(function (require) {
           return d.x;
         }))
         .values();
+      keys = chart.convertStringsToNumbers(keys);
 
       /* Error Handler that prevents a chart from being rendered when
              there are too many data points for the width of the container. */
@@ -550,12 +623,8 @@ define(function (require) {
       // enter
       bars.enter()
         .append('rect')
-        .attr('class', function (d, i) {
-          // Regex to remove ., /, white space, *, ;, (, ), :, , from labels.
-          var label = d.label !== undefined ?
-            d.label.replace(/[.]+|[/]+|[\s]+|[*]+|[;]+|[(]+|[)]+|[:]+|[,]+/g, '') :
-            data.yAxisLabel.replace(/[.]+|[/]+|[\s]+|[*]+|[;]+|[(]+|[)]+|[:]+|[,]+/g, '');
-          return 'rl rl-' + label;
+        .attr('class', function (d) {
+          return 'rl rl-' + chart.getClassName(d.label, data.yAxisLabel);
         })
         .on('mouseover', function (d, i) {
           d3.select(this)
@@ -598,8 +667,8 @@ define(function (require) {
 
           // hilite chart layer
           allLayers.style('opacity', 0.3);
-          var layerClass = '.rl-' + d.label.replace(/[.]+|[/]+|[\s]+|[*]+|[;]+|[(]+|[)]+|[:]+|[,]+/g, ''),
-            mylayer = vis.selectAll(layerClass)
+          var layerClass = '.rl-' + chart.getClassName(d.label, data.yAxisLabel);
+          var mylayer = vis.selectAll(layerClass)
             .style('opacity', 1);
 
           // stroke this rect

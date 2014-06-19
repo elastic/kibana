@@ -18,7 +18,7 @@ define(function (require) {
 
         var getOtherWidth = $parse(attrs.otherWidth);
 
-        $scope.$watch(attrs.list, function (list) {
+        $scope.$watchCollection(attrs.list, function (list) {
           $scope.pages = [];
           if (!list) return;
 

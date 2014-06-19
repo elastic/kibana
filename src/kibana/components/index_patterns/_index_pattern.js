@@ -4,6 +4,7 @@ define(function (require) {
     var angular = require('angular');
     var errors = require('errors');
 
+    var getIds = Private(require('components/index_patterns/_get_ids'));
     var mapper = Private(require('components/index_patterns/_mapper'));
     var fieldFormats = Private(require('components/index_patterns/_field_formats'));
     var patternCache = Private(require('components/index_patterns/_pattern_cache'));
@@ -123,6 +124,9 @@ define(function (require) {
 
         // ensure that the docSource has the current pattern.id
         docSource.id(pattern.id);
+
+        // clear the indexPattern list cache
+        getIds.clearCache();
 
         // index the document
         return docSource.doIndex(body)
