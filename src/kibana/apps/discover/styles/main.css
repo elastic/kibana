@@ -204,3 +204,16 @@
   margin-left: 3px;
   margin-right: 3px;
 }
+field-name {
+  display: inline;
+}
+field-name > i {
+  margin-right: 5px;
+  text-align: center;
+  display: inline-block;
+  width: 12px;
+  color: #b4bcc2;
+}
+field-name.no-results {
+  color: #b4bcc2;
+}

@@ -1,7 +1,7 @@
 
     <li bindonce class="sidebar-item">
       <div ng-click="toggleDetails(field)" class="sidebar-item-title">
-        <span field-name="field.name" field-type="field.type"></span>
+        <field-name field="field"></field-name>
         <button
           ng-click="toggleDisplay(field)"
           ng-class="{'btn-primary': !field.display, 'btn-danger': field.display}"
