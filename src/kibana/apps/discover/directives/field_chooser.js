@@ -33,7 +33,25 @@ define(function (require) {
           {label: 'no', value: 'false'},
         ];
 
-        $scope.fieldFilter = {};
+        $scope.resetFilters = function () {
+          $scope.fieldFilter = {
+            type: undefined,
+            indexed: undefined,
+            analyzed: undefined,
+            search: undefined
+          };
+
+        };
+        $scope.resetFilters();
+
+        $scope.$watchCollection('fieldFilter', function (newFieldFilters) {
+          $scope.hasFieldFilter = _.unique(_.values($scope.fieldFilter)).length > 1 ? true : false;
+        });
+
+        $scope.$watch('fields', function (newFields) {
+          $scope.fieldTypes = _.unique(_.pluck(newFields, 'type'));
+          $scope.fieldTypes.unshift(undefined);
+        });
 
         $scope.$watch('data', function () {
           _.each($scope.fields, function (field) {

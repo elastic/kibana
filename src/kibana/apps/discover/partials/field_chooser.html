@@ -7,57 +7,70 @@
     </discover-field>
   </ul>
 
-  <div class="sidebar-list-header">
-    <h5>Available
+  <div class="sidebar-list-header sidebar-item">
+    <h5 ng-click="showFilter = !showFilter">Available
       <button
-        ng-click="showFilter = !showFilter"
-        ng-class="showFilter ? 'btn-success' : 'btn-default'"
+        ng-class="hasFieldFilter ? 'btn-success' : 'btn-default'"
         class="btn btn-xs btn-default pull-right discover-field-filter-toggle">
         filter
       </button>
     </h5>
-    <form ng-show="showFilter" role="form" class="discover-field-filter">
-      <div class="form-group">
-        <input type="text" class="form-control" placeholder="Filter" ng-model="fieldFilter.search">
-      </div>
-      <div class="form-group">
-        <label>
-          Analyzed
-        </label>
-        <select
-          required
-          ng-options="opt.value as opt.label for opt in fieldFilterOptions"
-          ng-model="fieldFilter.analyzed"
-          class="form-control">
-        </select> {{fieldFilter.analyzed}}
-      </div>
-      <div class="form-group">
-        <label>
-          Indexed
-        </label>
-        <select
-          required
-          ng-options="opt.value as opt.label for opt in fieldFilterOptions"
-          ng-model="fieldFilter.indexed"
-          class="form-control">
-        </select>
-      </div>
-      <div class="form-group">
-        <label>
-          Type
-        </label>
-        <select
-          required
-          ng-options="field.type as field.type for field in fields | unique:field.type"
-          ng-model="fieldFilter.type"
-          class="form-control"> {{fieldFilter.type}}
-        </select>
-      </div>
-    </form>
   </div>
 
   <ul bindonce class="list-unstyled">
-    <discover-field field="field" ng-repeat="field in fields|filter:{display:false}|filter:{name:fieldFilter.search}" data="data">
+    <li class="sidebar-item" ng-show="showFilter">
+      <div ng-click="showFilter = !showFilter" class="discover-field-details-close">
+          <i class="fa fa-chevron-up"></i>
+      </div>
+      <form role="form" class="discover-field-details">
+        <div class="form-group">
+          <label>
+            Analyzed
+          </label>
+          <select
+            required
+            ng-options="opt.value as opt.label for opt in fieldFilterOptions"
+            ng-model="fieldFilter.analyzed"
+            class="form-control">
+          </select>
+        </div>
+        <div class="form-group">
+          <label>
+            Indexed
+          </label>
+          <select
+            required
+            ng-options="opt.value as opt.label for opt in fieldFilterOptions"
+            ng-model="fieldFilter.indexed"
+            class="form-control">
+          </select>
+        </div>
+        <div class="form-group">
+          <label>
+            Type
+          </label>
+          <select
+            required
+            ng-options="field as field for field in fieldTypes"
+            ng-model="fieldFilter.type"
+            class="form-control">
+          </select>
+        </div>
+        <div class="form-group">
+          <label>
+            Field name
+          </label>
+          <input type="text" class="form-control" ng-model="fieldFilter.name">
+        </div>
+      </form>
+      <div ng-click="resetFilters()" class="sidebar-item-button danger ng-scope" ng-disabled="!hasFieldFilter">Reset Filters</div>
+
+    </li>
+
+    <discover-field field="field"
+      ng-repeat="field in fields|
+                filter:fieldFilter"
+      data="data">
     </discover-field>
   </ul>
 </div>

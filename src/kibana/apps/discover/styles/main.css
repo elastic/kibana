@@ -141,6 +141,7 @@
   white-space: pre-wrap;
 }
 .discover-field-filter {
+  background-color: #ecf0f1;
   margin-right: 10px;
 }
 .discover-field-filter .form-group {
