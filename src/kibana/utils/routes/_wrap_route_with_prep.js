@@ -32,12 +32,10 @@ define(function (require) {
     var waitForPrepWorkThen = function (expr) {
       return function ($injector, Promise) {
         var defer = Promise.defer();
-
-        defer.promise.then(function () {
+        userWork.push(defer);
+        return defer.promise.then(function () {
           return $injector[angular.isString(expr) ? 'get': 'invoke'](expr);
         });
-
-        userWork.push(defer);
       };
     };
 
