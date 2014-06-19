@@ -16,21 +16,8 @@ define(function (require) {
       return cache || patternCache.set(id, (new IndexPattern(id)).init());
     };
 
-    indexPatterns.getIds = function () {
-      return es.search({
-        index: configFile.kibanaIndex,
-        type: 'index-pattern',
-        fields: [],
-        body: {
-          query: { match_all: {} }
-        }
-      })
-      .then(function (resp) {
-        return _.pluck(resp.hits.hits, '_id');
-      });
-    };
-
     indexPatterns.delete = function (pattern) {
+      indexPatterns.getIds.clearCache();
       patternCache.delete(pattern.id);
       return es.delete({
         index: configFile.kibanaIndex,
@@ -43,8 +30,8 @@ define(function (require) {
       MissingIndices: errors.IndexPatternMissingIndices
     };
 
-    indexPatterns.ensureSome = Private(require('components/index_patterns/_ensure_some'));
     indexPatterns.cache = patternCache;
+    indexPatterns.getIds = Private(require('components/index_patterns/_get_ids'));
     indexPatterns.intervals = Private(require('components/index_patterns/_intervals'));
     indexPatterns.mapper = Private(require('components/index_patterns/_mapper'));
     indexPatterns.patternToWildcard = Private(require('components/index_patterns/_pattern_to_wildcard'));

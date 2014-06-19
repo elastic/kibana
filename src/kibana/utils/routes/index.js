@@ -62,7 +62,9 @@ define(function (require) {
 
         // merge in any additions
         additions.forEach(function (addition) {
-          if (addition[0].test(path)) _.assign(route.resolve, addition[1]);
+          if (addition[0].test(path)) {
+            route.resolve = _.assign(route.resolve || {}, addition[1]);
+          }
         });
 
         if (route.reloadOnSearch === void 0) {
