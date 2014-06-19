@@ -27,25 +27,36 @@ define(function (require) {
       template: html,
       controller: function ($scope) {
 
+        var defaultFieldFilter = {
+          type: undefined,
+          indexed: undefined,
+          analyzed: undefined,
+          search: undefined,
+          missing: true
+        };
+
         $scope.fieldFilterOptions = [
-          {label: '', value: undefined},
-          {label: 'yes', value: 'true'},
-          {label: 'no', value: 'false'},
+          {label: 'yes', value: true },
+          {label: 'no', value: false },
+          // {label: 'either', value: undefined }
         ];
 
-        $scope.resetFilters = function () {
-          $scope.fieldFilter = {
-            type: undefined,
-            indexed: undefined,
-            analyzed: undefined,
-            search: undefined
-          };
-
+        $scope.toggleFilterVal = function (name, def) {
+          if ($scope.fieldFilter[name] !== def) $scope.fieldFilter[name] = def;
+          else $scope.fieldFilter[name] = undefined;
         };
+
+        $scope.resetFilters = function () {
+          $scope.fieldFilter = _.clone(defaultFieldFilter);
+        };
+
+        // set the initial values to the defaults
         $scope.resetFilters();
 
         $scope.$watchCollection('fieldFilter', function (newFieldFilters) {
-          $scope.hasFieldFilter = _.unique(_.values($scope.fieldFilter)).length > 1 ? true : false;
+          $scope.hasFieldFilter = _.some(defaultFieldFilter, function (def, name) {
+            return def !== $scope.fieldFilter[name];
+          });
         });
 
         $scope.$watch('fields', function (newFields) {
@@ -84,6 +95,13 @@ define(function (require) {
 
         $scope.filter = function (fieldName, value, operation) {
           $scope.filterFunc(fieldName, value, operation);
+        };
+
+        $scope.showInAvailableList = function (field) {
+          return !field.display
+          && (!$scope.fieldFilter.name || _.contains(field.name, $scope.fieldFilter.name))
+          && (!$scope.fieldFilter.missing || field.rowCount > 0)
+          ;
         };
 
         $scope.details = function (field, recompute) {
