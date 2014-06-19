@@ -12,17 +12,17 @@ define(function (require) {
   require('css!components/vislib/styles/k4.d3');
 
   return function histogram(elem, config) {
-    if (typeof args === 'undefined') {
+    if (typeof config === 'undefined') {
       config = {};
     }
 
+    console.log(config);
     var chart = {};
 
     var shareYAxis = config.shareYAxis || false;
     var addLegend = config.addLegend || false;
     var addTooltip = config.addTooltip || false;
     var offset = config.offset || 'zero';
-    console.log(config.addLegend);
 
     var destroyFlag = false;
 
@@ -300,14 +300,36 @@ define(function (require) {
 
     chart.checkForNumbers = function (array) {
       try {
-        for (var i = 0; i < array.length; i++) {
+        var num = 0;
+        var i;
+
+        for (i = 0; i < array.length; i++) {
           if (chart.isNumber(array[i])) {
+            num++;
+          }
+        }
+        if (num === array.length) {
+          return true;
+        }
+        return false;
+      } catch (error) {
+        console.error('chart.checkForNumber: ' + error);
+      }
+    };
+
+    chart.convertStringsToNumbers = function (array) {
+      try{
+        if (chart.checkForNumbers(array)) {
+          var i;
+
+          for (i = 0; i < array.length; i++) {
             array[i] = chart.convertToNumber(array[i]);
           }
+          return array;
         }
         return array;
       } catch (error) {
-        console.error('chart.checkForNumber: ' + error);
+        console.error('chart.convertStringsToNumbers: ' + error);
       }
     };
 
@@ -340,6 +362,7 @@ define(function (require) {
     chart.getYAxisMax = function (selection) {
       try {
         var yArray = [];
+        var stack = d3.layout.stack().values(function (d) { return d.values; });
 
         selection.each(function (d) {
           d = injectZeros(d);
@@ -420,7 +443,7 @@ define(function (require) {
           return d.x;
         }))
           .values();
-        keys = chart.checkForNumbers(keys);
+        keys = chart.convertStringsToNumbers(keys);
 
         /* Error Handler that prevents a chart from being rendered when
          there are too many data points for the width of the container. */
@@ -734,8 +757,12 @@ define(function (require) {
         if (addTooltip) {
           // **** hilite series on hover
           allLayers = vis.selectAll('rect');
-          var itm, itmRect, ht, ot, legendwrap = d3.select('.legendwrapper');
-          //var allLayers = svg.selectAll('.rect');
+          var legendwrap = d3.select('.legendwrapper');
+          var itm;
+          var itmRect;
+          var ht;
+          var ot;
+
           bars.on('mouseover', function (d) {
 
             // hilite chart layer
