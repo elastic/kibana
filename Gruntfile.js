@@ -16,9 +16,6 @@ module.exports = function (grunt) {
     testUtilsDir: __dirname + '/test/utils',
     bowerComponentsDir: __dirname + '/src/bower_components',
 
-    esjsRepo: 'git@github.com:elasticsearch/elasticsearch-js.git',
-    esjsDir: '<%= bowerComponentsDir %>/elasticsearch',
-
     meta: {
       banner: '/*! <%= package.name %> - v<%= package.version %> - ' +
         '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
