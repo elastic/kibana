@@ -10,7 +10,7 @@
   <div class="sidebar-list-header sidebar-item">
     <h5 ng-click="showFilter = !showFilter">Available
       <button
-        ng-class="hasFieldFilter ? 'btn-success' : 'btn-default'"
+        ng-class="isFiltering ? 'btn-success' : 'btn-default'"
         class="btn btn-xs btn-default pull-right discover-field-filter-toggle">
         <i class="fa fa-gear"></i>
       </button>
@@ -25,10 +25,10 @@
       <div class="form-group">
         <div class="btn-group pull-right">
           <button
-            ng-repeat="opt in fieldFilterOptions"
+            ng-repeat="opt in filter.boolOpts"
             class="btn btn-default btn-xs"
-            ng-class="{active: fieldFilter.analyzed === opt.value}"
-            ng-click="toggleFilterVal('analyzed', opt.value)"
+            ng-class="{active: filter.vals.analyzed === opt.value}"
+            ng-click="filter.toggleVal('analyzed', opt.value)"
             type="button">
             {{opt.label}}
           </button>
@@ -36,20 +36,14 @@
         <label>
           Analyzed
         </label>
-        <!-- <select
-          required
-          ng-options="opt.value as opt.label for opt in fieldFilterOptions"
-          ng-model="fieldFilter.analyzed"
-          class="form-control">
-        </select> -->
       </div>
       <div class="form-group">
         <div class="btn-group pull-right">
           <button
-            ng-repeat="opt in fieldFilterOptions"
+            ng-repeat="opt in filter.boolOpts"
             class="btn btn-default btn-xs"
-            ng-class="{active: fieldFilter.indexed === opt.value}"
-            ng-click="toggleFilterVal('indexed', opt.value)"
+            ng-class="{active: filter.vals.indexed === opt.value}"
+            ng-click="filter.toggleVal('indexed', opt.value)"
             type="button">
             {{opt.label}}
           </button>
@@ -57,13 +51,6 @@
         <label>
           Indexed
         </label>
-        <!--
-        <select
-          required
-          ng-options="opt.value as opt.label for opt in fieldFilterOptions"
-          ng-model="fieldFilter.indexed"
-          class="form-control">
-        </select> -->
       </div>
       <div class="form-group">
         <label>
@@ -72,7 +59,7 @@
         <select
           required
           ng-options="field as field for field in fieldTypes"
-          ng-model="fieldFilter.type"
+          ng-model="filter.vals.type"
           class="form-control">
         </select>
       </div>
@@ -80,21 +67,26 @@
         <label>
           Field name
         </label>
-        <input type="text" class="form-control" ng-model="fieldFilter.name">
+        <input type="text" class="form-control" ng-model="filter.vals.name">
       </div>
       <div class="form-group">
         <label>
-          <input type="checkbox" ng-model="fieldFilter.missing">
+          <input type="checkbox" ng-model="filter.vals.missing">
           Hide Missing Fields
         </label>
       </div>
     </form>
-    <div ng-click="resetFilters()" class="sidebar-item-button danger ng-scope" ng-disabled="!hasFieldFilter">Reset Filters</div>
+    <div
+      ng-click="filter.reset()"
+      ng-disabled="!isFiltering"
+      class="sidebar-item-button danger ng-scope">
+      Reset Filters
+    </div>
   </div>
 
   <ul bindonce class="list-unstyled">
     <discover-field
-      ng-repeat="field in fields | filter:showInAvailableList"
+      ng-repeat="field in fields | filter:filter.isFieldFiltered"
       field="field"
       data="data">
     </discover-field>
