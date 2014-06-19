@@ -514,13 +514,13 @@ define(function (require) {
             return 'rl rl-' + chart.getClassName(d.label, yAxisLabel);
           })
           .attr('d', function (d) {
-            return line(d.values);
+              return line(d.values);
           })
-          .style('fill', 'none')
-          .style('stroke', function (d) {
+          .attr('fill', 'none')
+          .attr('stroke', function (d) {
             return d.label ? colors[d.label] : colors[yAxisLabel];
           })
-          .style('stroke-width', '3px');
+          .attr('stroke-width', 3);
 
         var layer = g.selectAll('.layer')
           .data(seriesData)
@@ -799,19 +799,43 @@ define(function (require) {
       }
     };
 
+    chart.getClassName = function (label, yAxisLabel) {
+      try {
+        return label ? chart.classifyString(label) : chart.classifyString(yAxisLabel);
+      } catch (error) {
+        console.group('chart.getClassName: ' + error);
+      }
+    };
+
     chart.classifyString = function (string) {
       try {
+        if (!chart.isString(string)) {
+          string = chart.stringify(string);
+        }
         return string.replace(/[.]+|[/]+|[\s]+|[*]+|[;]+|[(]+|[)]+|[:]+|[,]+/g, '');
       } catch (error) {
         console.group('chart.classifyString: ' + error);
       }
     };
 
-    chart.getClassName = function (label, yAxisLabel) {
+    chart.isString = function (value) {
       try {
-        return label ? chart.classifyString(label) : chart.classifyString(yAxisLabel);
+        if (typeof value === 'string') {
+          return true;
+        } else {
+          return false;
+        }
       } catch (error) {
-        console.group('chart.getClassName: ' + error);
+        console.group('chart.isString: ' + error);
+      }
+    };
+
+    chart.stringify = function (value) {
+      try {
+        var string = value + '';
+        return string;
+      } catch (error) {
+        console.group('chart.stringify: ' + error);
       }
     };
 
