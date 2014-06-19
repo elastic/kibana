@@ -7,7 +7,12 @@ define(function (require) {
     var cachedPromise;
 
     var getIds = function () {
-      if (cachedPromise) return cachedPromise;
+      if (cachedPromise) {
+        // retrun a clone of the cached response
+        return cachedPromise.then(function (cachedResp) {
+          return _.clone(cachedResp);
+        });
+      }
 
       cachedPromise = es.search({
         index: configFile.kibanaIndex,
@@ -21,7 +26,10 @@ define(function (require) {
         return _.pluck(resp.hits.hits, '_id');
       });
 
-      return cachedPromise;
+      // ensure that the response stays pristine by cloning it here too
+      return cachedPromise.then(function (resp) {
+        return _.clone(resp);
+      });
     };
 
     getIds.clearCache = function () {
