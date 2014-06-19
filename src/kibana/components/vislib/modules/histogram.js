@@ -155,14 +155,36 @@ define(function (require) {
 
     chart.checkForNumbers = function (array) {
       try {
-        for (var i = 0; i < array.length; i++) {
+        var num = 0;
+        var i;
+
+        for (i = 0; i < array.length; i++) {
           if (chart.isNumber(array[i])) {
+            num++;
+          }
+        }
+        if (num === array.length) {
+          return true;
+        }
+        return false;
+      } catch (error) {
+        console.error('chart.checkForNumber: ' + error);
+      }
+    };
+
+    chart.convertStringsToNumbers = function (array) {
+      try{
+        if (chart.checkForNumbers(array)) {
+          var i;
+
+          for (i = 0; i < array.length; i++) {
             array[i] = chart.convertToNumber(array[i]);
           }
+          return array;
         }
         return array;
       } catch (error) {
-        console.group('chart.checkForNumber: ' + error);
+        console.error('chart.convertStringsToNumbers: ' + error);
       }
     };
 
@@ -329,7 +351,7 @@ define(function (require) {
           return d.x;
         }))
         .values();
-      keys = chart.checkForNumbers(keys);
+      keys = chart.convertStringsToNumbers(keys);
 
       /* Error Handler that prevents a chart from being rendered when
              there are too many data points for the width of the container. */
