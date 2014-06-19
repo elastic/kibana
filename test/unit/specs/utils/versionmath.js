@@ -20,7 +20,7 @@ define(function (require) {
 
     var methods = 'max,min,eq,is,lt,lte,gt,gte'.split(',');
     describe('methods', function () {
-      it('should have ' + methods.join(', ') + ' method', function () {
+      it('should have ' + methods.join(', ') + ' methods', function () {
         _.each(methods, function (method) {
           expect(versionmath[method]).to.be.a(Function);
         });
