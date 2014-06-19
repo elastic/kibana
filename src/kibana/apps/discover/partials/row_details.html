@@ -5,18 +5,30 @@
     <li ng-class="{active: row._mode == 'json'}"><a ng-click="row._mode='json'">JSON</a></li>
   </ul>
 
-  <table class="table table-condensed" ng-show="row._mode == 'table'">
+  <table class="table table-condensed" ng-show="row._mode == 'table'" bindonce>
     <tbody>
       <tr ng-repeat="field in row._fields" bindonce>
-        <td bo-text="field" width="1%" class="discover-table-details-field"></td>
+        <td field-name="field"
+            field-type="mapping[field].type"
+            width="1%"
+            class="discover-table-details-field">
+        </td>
         <td width="1%" class="discover-table-details-buttons">
-          <span ng-show="mapping[field].indexed">
+          <span bo-if="mapping[field].indexed">
             <i ng-click="filter(row, field, '+')" class="fa fa-search-plus"></i>
             <i ng-click="filter(row, field, '-')" class="fa fa-search-minus"></i>
           </span>
         </td>
 
-        <td class="discover-table-details-value"><kbn-truncated orig="{{row._formatted[field] || row[field]}}" length=100></kbn-truncated></td>
+        <td>
+          <i bo-show="!mapping[field]"
+            tooltip-placement="top"
+            tooltip="No cached mapping for this field. Refresh your mapping from the Settings > Indices page"
+            class="fa fa-warning text-color-warning ng-scope"></i>
+          <kbn-truncated class="discover-table-details-value"
+            orig="{{row._formatted[field] || row[field]}}"
+            length=100></kbn-truncated>
+        </td>
       </tr>
     </tbody>
   </table>
