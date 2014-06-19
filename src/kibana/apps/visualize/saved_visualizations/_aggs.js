@@ -75,15 +75,19 @@ define(function (require) {
         aggs.bucketAggsByName.terms,
       ],
       boolean: [
+        aggs.bucketAggsByName.terms,
         // 'terms'
       ],
       ip: [
+        aggs.bucketAggsByName.terms,
         // 'ipv4 range'
       ],
       geo_point: [
+        aggs.bucketAggsByName.terms,
         // 'geo distance'
       ],
       geo_shape: [
+        aggs.bucketAggsByName.terms,
         // 'geohash grid'
       ],
       string: [
