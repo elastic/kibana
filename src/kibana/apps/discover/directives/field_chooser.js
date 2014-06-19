@@ -22,45 +22,59 @@ define(function (require) {
         refresh: '=',
         data: '=',
         state: '=',
-        filterFunc: '=filter'
+        updateFilterInQuery: '=filter'
       },
       template: html,
       controller: function ($scope) {
 
-        var defaultFieldFilter = {
-          type: undefined,
-          indexed: undefined,
-          analyzed: undefined,
-          search: undefined,
-          missing: true
-        };
-
-        $scope.fieldFilterOptions = [
-          {label: 'yes', value: true },
-          {label: 'no', value: false },
-          // {label: 'either', value: undefined }
-        ];
-
-        $scope.toggleFilterVal = function (name, def) {
-          if ($scope.fieldFilter[name] !== def) $scope.fieldFilter[name] = def;
-          else $scope.fieldFilter[name] = undefined;
-        };
-
-        $scope.resetFilters = function () {
-          $scope.fieldFilter = _.clone(defaultFieldFilter);
+        var filter = $scope.filter = {
+          props: [
+            'type',
+            'indexed',
+            'analyzed',
+            'search',
+            'missing'
+          ],
+          defaults: {
+            missing: true
+          },
+          boolOpts: [
+            {label: 'yes', value: true },
+            {label: 'no', value: false }
+          ],
+          toggleVal: function (name, def) {
+            if (filter.vals[name] !== def) filter.vals[name] = def;
+            else filter.vals[name] = undefined;
+          },
+          reset: function () {
+            filter.vals = _.clone(filter.defaults);
+          },
+          isFieldFiltered: function (field) {
+            return !field.display
+              && (filter.vals.type == null || field.type === filter.vals.type)
+              && (filter.vals.analyzed == null || field.analyzed === filter.vals.analyzed)
+              && (filter.vals.indexed == null || field.indexed === filter.vals.indexed)
+              && (!filter.vals.missing || field.rowCount > 0)
+              && (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1)
+            ;
+          },
+          isFiltering: function () {
+            return _.some(filter.props, function (prop) {
+              return filter.vals[prop] !== filter.defaults[prop];
+            });
+          }
         };
 
         // set the initial values to the defaults
-        $scope.resetFilters();
+        filter.reset();
 
-        $scope.$watchCollection('fieldFilter', function (newFieldFilters) {
-          $scope.hasFieldFilter = _.some(defaultFieldFilter, function (def, name) {
-            return def !== $scope.fieldFilter[name];
-          });
+        $scope.$watchCollection('filter.vals', function (newFieldFilters) {
+          filter.isFiltering = filter.isFiltering();
         });
 
         $scope.$watch('fields', function (newFields) {
           $scope.fieldTypes = _.unique(_.pluck(newFields, 'type'));
+          // push undefined so the user can clear the filter
           $scope.fieldTypes.unshift(undefined);
         });
 
@@ -91,17 +105,6 @@ define(function (require) {
             }),
             _g: rison.encode(globalState)
           });
-        };
-
-        $scope.filter = function (fieldName, value, operation) {
-          $scope.filterFunc(fieldName, value, operation);
-        };
-
-        $scope.showInAvailableList = function (field) {
-          return !field.display
-          && (!$scope.fieldFilter.name || _.contains(field.name, $scope.fieldFilter.name))
-          && (!$scope.fieldFilter.missing || field.rowCount > 0)
-          ;
         };
 
         $scope.details = function (field, recompute) {
