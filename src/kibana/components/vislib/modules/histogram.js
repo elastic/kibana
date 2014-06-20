@@ -892,10 +892,6 @@ define(function (require) {
                 return xScale(d.x);
               })
               .attr('width', function () {
-                // return data.ordered === undefined || !data.ordered.date ?
-                //   xScale.rangeBand() :
-                //   xScale(data.ordered.min + data.ordered.interval) -
-                //   xScale(data.ordered.min) - 2;
                 var val;
                 if (data.ordered === undefined || !data.ordered.date) {
                   val = xScale.rangeBand();
@@ -903,13 +899,12 @@ define(function (require) {
                   val = xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min) - 2;
                 }
                 if (isNaN(val) || val <= 0) {
-                  throw new Error('line 890: bars attr width: ' + val);
+                  throw new Error('line 894: bars attr width: ' + val);
                 } else {
                   return val;
                 }
               })
               .attr('y', function (d) {
-                // return yScale(d.y0 + d.y);
                 var val = yScale(d.y0 + d.y);
                 if (isNaN(val) || val <= 0) {
                   throw new Error('line 907: bars attr y: ' + val);
@@ -918,10 +913,9 @@ define(function (require) {
                 }
               })
               .attr('height', function (d) {
-                // return yScale(d.y0) - yScale(d.y0 + d.y);
                 var val = yScale(d.y0) - yScale(d.y0 + d.y);
                 if (isNaN(val) || val <= 0) {
-                  throw new Error('line 916: bars attr height: ' + val);
+                  throw new Error('line 915: bars attr height: ' + val);
                 } else {
                   return val;
                 }
