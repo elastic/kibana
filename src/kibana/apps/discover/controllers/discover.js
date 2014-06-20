@@ -34,15 +34,11 @@ define(function (require) {
     templateUrl: 'kibana/apps/discover/index.html',
     reloadOnSearch: false,
     resolve: {
-      savedSearchAndIndexList: function (savedSearches, $route, $location, Notifier, courier, indexPatterns) {
+      indexList: function (courier) {
+        return courier.indexPatterns.getIds();
+      },
+      savedSearch: function (courier, savedSearches, $route) {
         return savedSearches.get($route.current.params.id)
-        .then(function (savedSearch) {
-          return indexPatterns.getIds()
-          .then(indexPatterns.ensureSome())
-          .then(function (indexPatterns) {
-            return [savedSearch, indexPatterns];
-          });
-        })
         .catch(courier.redirectWhenMissing({
           'index-pattern': '/settings/indices',
           '*': '/discover'
@@ -60,11 +56,11 @@ define(function (require) {
     });
 
     // the saved savedSearch
-    var savedSearch = $route.current.locals.savedSearchAndIndexList[0];
+    var savedSearch = $route.current.locals.savedSearch;
     $scope.$on('$destroy', savedSearch.destroy);
 
     // list of indexPattern id's
-    var indexPatternList = $route.current.locals.savedSearchAndIndexList[1];
+    var indexPatternList = $route.current.locals.indexList;
 
     // the actual courier.SearchSource
     var searchSource = savedSearch.searchSource;
@@ -80,6 +76,8 @@ define(function (require) {
       index: config.get('defaultIndex'),
       interval: 'auto'
     };
+
+    var metaFields = config.get('metaFields');
 
     $scope.intervalOptions = [
       'auto',
@@ -171,11 +169,26 @@ define(function (require) {
           var complete = notify.event('on results');
           $scope.hits = resp.hits.total;
           $scope.rows = resp.hits.hits;
+          var counts = $scope.rows.fieldCounts = {};
           $scope.rows.forEach(function (hit) {
             hit._formatted = _.mapValues(hit._source, function (value, name) {
+              // add up the counts for each field name
+              if (counts[name]) counts[name] = counts[name] + 1;
+              else counts[name] = 1;
+
               return ($scope.formatsByName[name] || defaultFormat).convert(value);
             });
             hit._formatted._source = angular.toJson(hit._source);
+          });
+
+          // ensure that the meta fields always have a "row count" equal to the number of rows
+          metaFields.forEach(function (fieldName) {
+            counts[fieldName] = $scope.rows.length;
+          });
+
+          // apply the field counts to the field list
+          $scope.fields.forEach(function (field) {
+            field.rowCount = counts[field.name] || 0;
           });
 
           complete();
@@ -337,29 +350,19 @@ define(function (require) {
 
       if (!indexPattern) return;
 
-      // Inject source into list;
-      //$scope.fields.push({name: '_source', type: 'source', display: false});
-
       _.sortBy(indexPattern.fields, 'name').forEach(function (field) {
         _.defaults(field, currentState[field.name]);
         // clone the field and add it's display prop
-        var clone = _.assign({}, field, { display: columnObjects[field.name] || false });
+        var clone = _.assign({}, field, {
+          display: columnObjects[field.name] || false,
+          rowCount: $scope.rows ? $scope.rows.fieldCounts[field.name] : 0
+        });
+
 
         $scope.fields.push(clone);
         $scope.fieldsByName[field.name] = clone;
         $scope.formatsByName[field.name] = field.format;
       });
-
-      /*
-      // TODO: timefield should be associated with the index pattern, this is a hack
-      // to pick the first date field and use it.
-      var timefields = _.find($scope.fields, {type: 'date'});
-      if (!!timefields) {
-        $scope.opts.timefield = timefields.name;
-      } else {
-        delete $scope.opts.timefield;
-      }
-      */
 
       refreshColumns();
     }

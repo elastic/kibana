@@ -230,6 +230,9 @@ visualize-extras .visualize-csv-options .visualize-csv-separator {
 visualize-extras .visualize-csv-options button[type=submit] {
   margin-left: 5px;
 }
+visualize-extras .visualize-spy {
+  overflow-y: auto;
+}
 visualize-extras .visualize-spy .visualize-spy-tabs {
   margin-bottom: 10px;
 }

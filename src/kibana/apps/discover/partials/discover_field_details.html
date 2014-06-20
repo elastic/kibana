@@ -23,9 +23,9 @@
               <div>
                 <span ng-show="field.indexed" class="pull-right">
                   <i class="fa fa-search-minus pull-right discover-field-details-filter"
-                    ng-click="filter(field.name, bucket.value, '-')"></i>
+                    ng-click="updateFilterInQuery(field.name, bucket.value, '-')"></i>
                   <i class="fa fa-search-plus pull-right discover-field-details-filter"
-                    ng-click="filter(field.name, bucket.value, '+')"></i>
+                    ng-click="updateFilterInQuery(field.name, bucket.value, '+')"></i>
                 </span>
                 <div css-truncate css-truncate-expandable="true" class="discover-field-details-value">
                   {{bucket.value}}
@@ -36,6 +36,17 @@
           </div>
         </div>
       </div>
-      <div ng-click="termsAgg(field)"
-          ng-show="field.indexed"
+      <div ng-show="field.indexed && !field.analyzed"
+          ng-click="termsAgg(field)"
           class="sidebar-item-button success">Visualize</div>
+
+      <div ng-show="field.indexed && field.analyzed"
+          ng-click="termsAgg(field)"
+          tooltip="Analyzed fields may require more memory to visualize"
+          class="sidebar-item-button warning">Visualize</div>
+
+      <div ng-show="!field.indexed"
+          disabled="disabled"
+          tooltip="This field is not indexed thus unavailable for visualization and search"
+          ng-class="field.analyzed ? 'success' : 'warning'"
+          class="sidebar-item-button">Not Indexed</div>

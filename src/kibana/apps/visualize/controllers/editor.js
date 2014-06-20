@@ -16,37 +16,33 @@ define(function (require) {
 
   var visConfigCategories = require('apps/visualize/saved_visualizations/_config_categories');
 
-  var createFn = function (savedVisualizations, courier, $route) {
-    if (!$route.current.params.indexPattern && !$route.current.params.savedSearchId) {
-      throw new Error('You must provide either an indexPattern or a savedSearchId');
-    }
-
-    return savedVisualizations.get($route.current.params)
-    .catch(courier.redirectWhenMissing({
-      //'index-pattern': '/visualize',
-      '*': '/visualize'
-    }));
-  };
-
-  var editFn = function (savedVisualizations, courier, $route) {
-    return savedVisualizations.get($route.current.params.id)
-    .catch(courier.redirectWhenMissing({
-      'index-pattern': '/settings',
-      '*': '/visualize'
-    }));
-  };
-
   require('routes')
   .when('/visualize/create', {
     template: require('text!apps/visualize/editor.html'),
     resolve: {
-      vis: createFn
+      vis: function (savedVisualizations, courier, $route) {
+        if (!$route.current.params.indexPattern && !$route.current.params.savedSearchId) {
+          throw new Error('You must provide either an indexPattern or a savedSearchId');
+        }
+
+        return savedVisualizations.get($route.current.params)
+        .catch(courier.redirectWhenMissing({
+          //'index-pattern': '/visualize',
+          '*': '/visualize'
+        }));
+      }
     }
   })
   .when('/visualize/edit/:id', {
     template: require('text!apps/visualize/editor.html'),
     resolve: {
-      vis: editFn
+      vis: function (savedVisualizations, courier, $route) {
+        return savedVisualizations.get($route.current.params.id)
+        .catch(courier.redirectWhenMissing({
+          'index-pattern': '/settings',
+          '*': '/visualize'
+        }));
+      }
     }
   });
 

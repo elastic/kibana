@@ -25,7 +25,7 @@ module.exports = function DevServer(opts) {
     filter: function (filename) {
       return filename.match(/.*\/src\/.*\.js$/)
         && !filename.match(/.*\/src\/bower_components\/.*\.js$/)
-        && !filename.match(/.*\/src\/kibana\/utils\/(event_emitter|next_tick)\.js$/);
+        && !filename.match(/.*\/src\/kibana\/utils\/(event_emitter|next_tick|rison)\.js$/);
     }
   }));
 
