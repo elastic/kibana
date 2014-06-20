@@ -32,13 +32,13 @@ define(function (require) {
             'type',
             'indexed',
             'analyzed',
-            'search',
             'missing'
           ],
           defaults: {
             missing: true
           },
           boolOpts: [
+            {label: 'any', value: undefined },
             {label: 'yes', value: true },
             {label: 'no', value: false }
           ],
@@ -58,7 +58,7 @@ define(function (require) {
               && (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1)
             ;
           },
-          isFiltering: function () {
+          getActive: function () {
             return _.some(filter.props, function (prop) {
               return filter.vals[prop] !== filter.defaults[prop];
             });
@@ -69,7 +69,7 @@ define(function (require) {
         filter.reset();
 
         $scope.$watchCollection('filter.vals', function (newFieldFilters) {
-          filter.isFiltering = filter.isFiltering();
+          filter.active = filter.getActive();
         });
 
         $scope.$watch('fields', function (newFields) {

@@ -10,7 +10,7 @@
   <div class="sidebar-list-header sidebar-item">
     <h5 ng-click="showFilter = !showFilter">Available
       <button
-        ng-class="isFiltering ? 'btn-success' : 'btn-default'"
+        ng-class="filter.active ? 'btn-success' : 'btn-default'"
         class="btn btn-xs btn-default pull-right discover-field-filter-toggle">
         <i class="fa fa-gear"></i>
       </button>
@@ -23,34 +23,26 @@
     </div>
     <form role="form" class="discover-field-details">
       <div class="form-group">
-        <div class="btn-group pull-right">
-          <button
-            ng-repeat="opt in filter.boolOpts"
-            class="btn btn-default btn-xs"
-            ng-class="{active: filter.vals.analyzed === opt.value}"
-            ng-click="filter.toggleVal('analyzed', opt.value)"
-            type="button">
-            {{opt.label}}
-          </button>
-        </div>
         <label>
           Analyzed
         </label>
+        <select
+          required
+          ng-options="opt.value as opt.label for opt in filter.boolOpts"
+          ng-model="filter.vals.analyzed"
+          class="form-control">
+        </select>
       </div>
       <div class="form-group">
-        <div class="btn-group pull-right">
-          <button
-            ng-repeat="opt in filter.boolOpts"
-            class="btn btn-default btn-xs"
-            ng-class="{active: filter.vals.indexed === opt.value}"
-            ng-click="filter.toggleVal('indexed', opt.value)"
-            type="button">
-            {{opt.label}}
-          </button>
-        </div>
         <label>
           Indexed
         </label>
+        <select
+          required
+          ng-options="opt.value as opt.label for opt in filter.boolOpts"
+          ng-model="filter.vals.indexed"
+          class="form-control">
+        </select>
       </div>
       <div class="form-group">
         <label>
@@ -78,7 +70,7 @@
     </form>
     <div
       ng-click="filter.reset()"
-      ng-disabled="!isFiltering"
+      ng-disabled="!filter.active"
       class="sidebar-item-button danger ng-scope">
       Reset Filters
     </div>
