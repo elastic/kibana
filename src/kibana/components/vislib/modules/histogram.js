@@ -16,7 +16,6 @@ define(function (require) {
       config = {};
     }
 
-    console.log(config);
     var chart = {};
 
     var shareYAxis = config.shareYAxis || false;
@@ -26,58 +25,30 @@ define(function (require) {
 
     var destroyFlag = false;
 
-    var dispatch = d3.dispatch('hover', 'click', 'mouseenter', 'mouseleave', 'mouseout', 'mouseover', 'brush');
-    var getY = function (d, i) { return d.y; };
-    var getX = function (d, i) { return d.x; };
-    var margin = config.margin || { top: 35, right: 15, bottom: 35, left: 60 };
-    var colDomain;
+    var dispatch = d3.dispatch(
+      'hover', 'click', 'mouseenter',
+      'mouseleave', 'mouseout', 'mouseover',
+      'brush'
+    );
     var $elem = $(elem);
-    var vis = d3.select(elem);
-    var allLayers;
-    var mousemove;
-    var scrolltop;
-    var selection;
-    var elemWidth;
-    var elemHeight;
-    var width;
-    var height;
-    var layers;
-    var n;
-    var yGroupMax;
-    var yStackMax;
-    var keys;
-    var xScale;
-    var yScale;
-    var xAxis;
-    var yAxis;
-    var layer;
-    var bars;
-    var legend;
-    var tip;
-    var xAxisFormatter;
-    var yAxisFormatter;
-    var tooltipFormatter;
-    var dataLength;
     var latestData;
-    var chartwrapper;
-    var allItms = false;
-
     /* ***************************** */
 
-    chart.render = function render (data) {
+    chart.render = function render(data) {
       try {
         var chartWrapper;
         var selection;
 
         if (!data) {
-          throw new Error("No valid data");
+          throw new Error('No valid data');
         }
 
         if (!elem) {
-          throw new Error("No elem provided");
+          throw new Error('No elem provided');
         }
 
-        // store a copy of the data sent to render, so that it can be resent with .resize()
+        // store a copy of the data sent to render,
+        // so that it can be resent with .resize()
         latestData = injectZeros(data);
 
         // removes elements to redraw the chart on subsequent calls
@@ -137,14 +108,14 @@ define(function (require) {
       } catch (error) {
         console.error('chart.getVisualization: ' + error);
       }
-    }
+    };
 
     chart.getChartWrapper = function (elem) {
       try {
         var chartWrapper;
 
         if (!elem) {
-          throw new Error("No valid elem");
+          throw new Error('No valid elem');
         }
 
         chartWrapper = d3.select(elem)
@@ -195,7 +166,7 @@ define(function (require) {
       } catch (error) {
         console.error('chart.getTooltip: ' + error);
       }
-    }
+    };
 
     chart.getColors = function (selection) {
       try {
@@ -281,7 +252,8 @@ define(function (require) {
         if (!chart.isString(string)) {
           string = chart.stringify(string);
         }
-        return string.replace(/[.]+|[/]+|[\s]+|[*]+|[;]+|[(]+|[)]+|[:]+|[,]+/g, '');
+        return string
+          .replace(/[.]+|[/]+|[\s]+|[*]+|[;]+|[(]+|[)]+|[:]+|[,]+/g, '');
       } catch (error) {
         console.error('chart.classifyString: ' + error);
       }
@@ -318,7 +290,7 @@ define(function (require) {
     };
 
     chart.convertStringsToNumbers = function (array) {
-      try{
+      try {
         if (chart.checkForNumbers(array)) {
           var i;
 
@@ -361,7 +333,8 @@ define(function (require) {
     chart.getYAxisMax = function (selection) {
       try {
         var yArray = [];
-        var stack = d3.layout.stack().values(function (d) { return d.values; });
+        var stack = d3.layout.stack()
+          .values(function (d) { return d.values; });
 
         selection.each(function (d) {
           d = injectZeros(d);
@@ -398,6 +371,20 @@ define(function (require) {
         var yAxisLabel = data.yAxisLabel;
         var chartLabel = data.label;
 
+        var vis = d3.select(elem);
+        var allItms = d3.select('.legendwrapper')
+          .selectAll('li.legends');
+        var scrolltop = document.body.scrollTop;
+        var allLayers = vis.selectAll('rect');
+        var mousemove;
+
+        var getX = function (d, i) {
+          return d.x;
+        };
+        var getY = function (d, i) {
+          return d.y;
+        };
+
         var xAxisFormatter = data.xAxisFormatter || function (v) {
           return v;
         };
@@ -414,6 +401,7 @@ define(function (require) {
         });
 
         // width, height, margins
+        var margin = { top: 35, right: 15, bottom: 35, left: 60 };
         var elemWidth = parseInt(d3.select(that)
           .style('width'), 10);
         var elemHeight = parseInt(d3.select(that)
@@ -450,7 +438,6 @@ define(function (require) {
           throw new Error('chart too small');
         }
 
-        /* ************************** DATE FORMAT *************************************************** */
         var xScale;
 
         if (data.ordered !== undefined && data.ordered.date !== undefined) {
@@ -482,8 +469,10 @@ define(function (require) {
           }
 
           // apply interval to last date in keys
-          var maxIntervalOffset = d3.time[testInterval].offset(new Date(maxDate), dateoffset);
-          var minIntervalOffset = d3.time[testInterval].offset(new Date(minDate), -dateoffset);
+          var maxIntervalOffset = d3.time[testInterval]
+            .offset(new Date(maxDate), dateoffset);
+          var minIntervalOffset = d3.time[testInterval]
+            .offset(new Date(minDate), -dateoffset);
 
           xScale = d3.time.scale()
             .domain([minIntervalOffset, maxIntervalOffset])
@@ -493,7 +482,6 @@ define(function (require) {
             .domain(keys)
             .rangeRoundBands([0, width], 0.1);
         }
-        /* ******************************************************************************************** */
 
         var yScale = d3.scale.linear()
           .range([height, 0]);
@@ -547,7 +535,8 @@ define(function (require) {
           .attr('width', '100%')
           .attr('height', '100%')
           .append('g')
-          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+          .attr('transform',
+            'translate(' + margin.left + ',' + margin.top + ')');
 
         // background rect
         svg.append('rect')
@@ -569,10 +558,10 @@ define(function (require) {
               left: d3.event.pageX,
               top: d3.event.pageY
             };
-            scrolltop = document.body.scrollTop;
 
             d3.select(that)
               .style('cursor', 'default');
+
             return tip.datum(d)
               .text(d)
               .style('top', mousemove.top - scrolltop - hh / 2 + 'px')
@@ -608,11 +597,12 @@ define(function (require) {
             var ww = svg.select('.y.axis')
               .node()
               .getBBox();
+
             return -1 * ww.width - 14;
           })
           .attr('dy', '.75em')
           .attr('transform', 'rotate(-90)')
-          .text(data.yAxisLabel);
+          .text(yAxisLabel);
 
         // Chart title
         svg.append('text')
@@ -629,10 +619,10 @@ define(function (require) {
               left: d3.event.pageX,
               top: d3.event.pageY
             };
-            scrolltop = document.body.scrollTop;
 
             d3.select(that)
               .style('cursor', 'default');
+
             return tip.text(d.label)
               .style('top', mousemove.top - scrolltop - hh / 2 + 'px')
               .style('left', mousemove.left + 20 + 'px')
@@ -642,6 +632,7 @@ define(function (require) {
             d3.select(that)
               .classed('hover', false)
               .style('stroke', null);
+
             tip.style('visibility', 'hidden');
           });
 
@@ -654,7 +645,8 @@ define(function (require) {
             // selected is used to determine the range for ordinal scales
             selected = xScale.domain()
               .filter(function (d) {
-                return (brush.extent()[0] <= xScale(d)) && (xScale(d) <= brush.extent()[1]);
+                return (brush.extent()[0] <= xScale(d)) &&
+                  (xScale(d) <= brush.extent()[1]);
               });
 
             start = selected[0];
@@ -695,7 +687,7 @@ define(function (require) {
           .append('g')
           .attr('class', function (d) {
             if (!d.label) {
-              return colors[data.yAxisLabel];
+              return colors[yAxisLabel];
             } else {
               return colors[d.label];
             }
@@ -703,7 +695,7 @@ define(function (require) {
           })
           .style('fill', function (d) {
             if (!d.label) {
-              return colors[data.yAxisLabel];
+              return colors[yAxisLabel];
             } else {
               return colors[d.label];
             }
@@ -719,7 +711,7 @@ define(function (require) {
         bars.enter()
           .append('rect')
           .attr('class', function (d) {
-            return 'rl rl-' + chart.getClassName(d.label, data.yAxisLabel);
+            return 'rl rl-' + chart.getClassName(d.label, yAxisLabel);
           })
           .on('mouseover', function (d, i) {
             d3.select(this)
@@ -755,7 +747,6 @@ define(function (require) {
 
         if (addTooltip) {
           // **** hilite series on hover
-          allLayers = vis.selectAll('rect');
           var legendwrap = d3.select('.legendwrapper');
           var itm;
           var itmRect;
@@ -763,11 +754,13 @@ define(function (require) {
           var ot;
 
           bars.on('mouseover', function (d) {
+            var layerClass = '.rl-' + chart.getClassName(d.label, yAxisLabel);
+            var itm;
 
             // hilite chart layer
+            allLayers = vis.selectAll('rect');
             allLayers.style('opacity', 0.3);
-            var layerClass = '.rl-' + chart.getClassName(d.label, data.yAxisLabel);
-            var mylayer = vis.selectAll(layerClass)
+            vis.selectAll(layerClass)
               .style('opacity', 1);
 
             // stroke this rect
@@ -775,8 +768,6 @@ define(function (require) {
               .classed('hover', true)
               .style('stroke', '#333');
             // .style('cursor', 'pointer');
-
-            var itm;
 
             // hilite legend item
             if (allItms) {
@@ -811,7 +802,6 @@ define(function (require) {
               left: d3.event.pageX,
               top: d3.event.pageY
             };
-            scrolltop = document.body.scrollTop;
 
             if (typeof d.label !== 'undefined') {
               datum = {
@@ -874,7 +864,8 @@ define(function (require) {
               .attr('width', function () {
                 return data.ordered === undefined || !data.ordered.date ?
                   xScale.rangeBand() :
-                  xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min) - 2;
+                  xScale(data.ordered.min + data.ordered.interval) -
+                  xScale(data.ordered.min) - 2;
               })
               .attr('y', function (d) {
                 return yScale(d.y0 + d.y);
