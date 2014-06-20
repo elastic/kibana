@@ -2,23 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
 
-  var errors = require('errors');
-  var NoDefaultIndexPattern = errors.NoDefaultIndexPattern;
-  var NoDefinedIndexPatterns = errors.NoDefinedIndexPatterns;
-
   var WorkQueue = require('utils/routes/_work_queue');
-
-  var oneTimeSetup = function ($q, kbnSetup, config) {
-    var prom = $q.all([
-      kbnSetup(),
-      config.init(),
-    ]);
-
-    // override setup to only return the promise
-    oneTimeSetup = function () { return prom; };
-
-    return prom;
-  };
 
   return function (route) {
     if (!route.resolve && route.redirectTo) {
@@ -30,23 +14,10 @@ define(function (require) {
     userWork.limit = _.keys(route.resolve).length;
 
     var resolve = {
-      __prep__: function (Promise, $injector, config, $route, Notifier, indexPatterns) {
-        return $injector.invoke(oneTimeSetup)
-        .then(function () {
-          if (!$route.current.$$route.originalPath.match(/settings\/indices/)) {
-            // always check for existing ids first
-            return indexPatterns.getIds()
-            .then(function (patterns) {
-              if (!patterns || patterns.length === 0) {
-                throw new errors.NoDefinedIndexPatterns();
-              }
+      __prep__: function (Promise, Private, config, kbnSetup) {
+        var setup = Private(require('utils/routes/_setup'));
 
-              if (!config.get('defaultIndex')) {
-                throw new NoDefaultIndexPattern();
-              }
-            });
-          }
-        })
+        return setup.routeSetupWork()
         .then(function () {
           // wait for the queue to fill up, then do all the work
           var defer = Promise.defer();
@@ -61,13 +32,7 @@ define(function (require) {
         .catch(function (err) {
           // discard any remaining user work
           userWork.empty();
-
-          if (err instanceof NoDefaultIndexPattern || err instanceof NoDefinedIndexPatterns) {
-            $route.change('/settings/indices');
-            (new Notifier()).error(err);
-          } else {
-            throw err;
-          }
+          return setup.handleKnownError(err);
         });
       }
     };
