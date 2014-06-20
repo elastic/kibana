@@ -173,7 +173,7 @@ define(function (require) {
     };
 
     chart.convertStringsToNumbers = function (array) {
-      try{
+      try {
         if (chart.checkForNumbers(array)) {
           var i;
 
@@ -341,7 +341,7 @@ define(function (require) {
       stack.offset(offset);
       layers = stack(data.series);
       n = layers.length; // number of layers
-      globalYAxis = chart.globalYAxisFn(selection);
+      globalYAxis = chart.globalYAxisFn(selection) || 0;
       yGroupMax = d3.max(layers, function (layer) {
         return d3.max(layer.values, function (d) {
           return d.y;
@@ -360,12 +360,6 @@ define(function (require) {
         .values();
       keys = chart.convertStringsToNumbers(keys);
 
-      for (var i = 0; i < keys.length; i++) {
-        if (chart.isNumber(keys[i])) {
-          keys[i] = +keys[i];
-        }
-      }
-
       /* Error Handler that prevents a chart from being rendered when
              there are too many data points for the width of the container. */
       if (width / dataLength <= 4) {
@@ -374,10 +368,20 @@ define(function (require) {
 
       /* ************************** DATE FORMAT *************************************************** */
       if (data.ordered !== undefined && data.ordered.date !== undefined) {
-        var milsInterval = data.ordered.interval,
-          testInterval, dateoffset;
-
-        if (milsInterval < 2419200000) {
+        var milsInterval = data.ordered.interval;
+        var testInterval;
+        var dateoffset;
+        console.log(' ');
+        console.log('375 PRE OFFSET', milsInterval, testInterval, dateoffset);
+        if (milsInterval < 604800000 * 364) {
+          testInterval = 'year';
+          dateoffset = (milsInterval / 604800000 * 28);
+        }
+        if (milsInterval < 604800000 * 28) {
+          testInterval = 'month';
+          dateoffset = (milsInterval / 604800000 * 7);
+        }
+        if (milsInterval < 604800000 * 7) {
           testInterval = 'week';
           dateoffset = (milsInterval / 604800000);
         }
@@ -397,6 +401,8 @@ define(function (require) {
           testInterval = 'second';
           dateoffset = (milsInterval / 1000);
         }
+        console.log('404 POST OFFSET', milsInterval, testInterval, dateoffset);
+
 
         // apply interval to last date in keys
         var maxIntervalOffset = d3.time[testInterval].offset(new Date(data.ordered.max), dateoffset);
@@ -412,6 +418,10 @@ define(function (require) {
       }
       /* ******************************************************************************************** */
 
+      // height must be positive for yScale.range()
+      if (height < 10 || isNaN(height)) {
+        height = 10;
+      }
       yScale = d3.scale.linear()
         .range([height, 0]);
       var xTickScale = d3.scale.linear()
@@ -454,7 +464,13 @@ define(function (require) {
             .nice(tickN);
         }
       }
-
+      // yScale domain values must be positive nums
+      console.log('475', yScale.domain(), yScale.domain()[0], yScale.domain()[1]);
+      console.log('476', yScale.range(), yScale.domain(), globalYAxis, yGroupMax, yStackMax);
+      if (isNaN(yScale.domain()[0]) || isNaN(yScale.domain()[1])) {
+        yScale.domain([0, 10]);
+      }
+      
       // maps color domain to range
       //color.domain([0, colDomain.length - 1]);
 
@@ -786,15 +802,34 @@ define(function (require) {
             return xScale(d.x);
           })
           .attr('width', function () {
-            return data.ordered === undefined || !data.ordered.date ?
-              xScale.rangeBand() :
-              xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min) - 2;
+            // return data.ordered === undefined || !data.ordered.date ?
+            //   xScale.rangeBand() :
+            //   xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min) - 2;
+            var ww;
+            if (data.ordered === undefined || !data.ordered.date) {
+              ww = xScale.rangeBand();
+            } else {
+              ww = xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min) - 2;
+            }
+            try {
+              if (ww === undefined || ww <= 0) {
+                throw new Error('Negative width!');
+              }
+            } catch (error) {
+              console.group('819: Bars attr width: ' + error);
+            }
           })
           .attr('y', function (d) {
             return yScale(d.y0 + d.y);
           })
           .attr('height', function (d) {
-            return yScale(d.y0) - yScale(d.y0 + d.y);
+            // return yScale(d.y0) - yScale(d.y0 + d.y);
+            var val = yScale(d.y0) - yScale(d.y0 + d.y);
+            if (isNaN(val) || val === undefined || val <= 0) {
+              val = 0.01;
+            }
+            // console.log('824 HEIGHT', yScale.range(), yScale.domain(), d.y0, d.y, yScale(d.y0), yScale(d.y0), val);
+            return val;
           });
         break;
       }
