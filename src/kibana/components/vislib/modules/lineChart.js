@@ -13,30 +13,30 @@ define(function (require) {
       config = {};
     }
 
-    var chart = {},
+    var chart = {};
 
-      /* ***** Chart Options ***** */
-      addLegend = config.addLegend || false,
-      addTooltip = config.addTooltip || false,
-      shareYAxis = config.shareYAxis || false,
-      /* ************************* */
-
-      /* ***** Chart Flags ******* */
-      destroyFlag = false,
-      /* ************************* */
-
-      /* ***** Chart Globals ******* */
-      dispatch = d3.dispatch('hover', 'click', 'mouseenter', 'mouseleave', 'mouseout', 'mouseover', 'brush'),
-      $elem = $(elem), // cached jquery version of element
-      latestData,
-      prevSize,
-      xValue = function (d, i) {
-        return d.x;
-      },
-      yValue = function (d, i) {
-        return d.y;
-      };
+    /* ***** Chart Options ***** */
+    var addLegend = config.addLegend || false;
+    var addTooltip = config.addTooltip || false;
+    var shareYAxis = config.shareYAxis || false;
     /* ************************* */
+
+    /* ***** Chart Flags ******* */
+    var destroyFlag = false;
+    /* ************************* */
+
+    /* ***** Chart Globals ******* */
+    var dispatch = d3.dispatch('hover', 'click', 'mouseenter', 'mouseleave', 'mouseout', 'mouseover', 'brush');
+    var $elem = $(elem); // cached jquery version of element
+    var latestData;
+    var prevSize;
+    var xValue = function (d, i) {
+      return d.x;
+    };
+    var yValue = function (d, i) {
+      return d.y;
+    };
+  /* ************************* */
 
     /*
      Renders the chart to the HTML element
