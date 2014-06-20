@@ -5,9 +5,11 @@ define(function (require) {
 
   module.directive('fieldName', function ($compile, $rootScope) {
     return {
-      restrict: 'E',
+      restrict: 'AE',
       scope: {
-        field: '='
+        'field': '=',
+        'fieldName': '=',
+        'fieldType': '='
       },
       link: function ($scope, $el, attrs) {
 
@@ -34,12 +36,19 @@ define(function (require) {
 
         $rootScope.$watchMulti.call($scope, [
           'field',
+          'fieldName',
+          'fieldType',
           'field.rowCount'
         ], function () {
+
+          var type = $scope.field ? $scope.field.type : $scope.fieldType;
+          var name = $scope.field ? $scope.field.name : $scope.fieldName;
+          var results = $scope.field ? !$scope.field.rowCount : false;
+
           $el
-            .text($scope.field.name)
-            .toggleClass('no-results', !$scope.field.rowCount)
-            .prepend(typeIcon($scope.field.type));
+            .text(name)
+            .toggleClass('no-results', results)
+            .prepend(typeIcon(type));
         });
       }
     };

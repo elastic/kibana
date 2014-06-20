@@ -60,15 +60,15 @@
           'specs/utils/datemath',
           'specs/utils/interval',
           'specs/utils/versionmath',
+          'specs/utils/routes/index'
         ], function (sinon) {
 
           var xhr = sinon.useFakeXMLHttpRequest();
 
-          /*
-          xhr.onCreate = function () {
-            throw new Error('Tests should not be sending XHR requests');
-          };
-          */
+
+          // xhr.onCreate = function () {
+          //   throw new Error('Tests should not be sending XHR requests');
+          // };
 
           window.mochaRunner = mocha.run().on('end', function () {
             window.mochaResults = this.stats;

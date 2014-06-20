@@ -1,6 +1,5 @@
 .DS_Store
 node_modules
 trash
-src/bower_components/elasticsearch
 build
 target

@@ -28,7 +28,7 @@ require.config({
     gridster: '../bower_components/gridster/dist/jquery.gridster',
     jsonpath: '../bower_components/jsonpath/lib/jsonpath',
     inflection: '../bower_components/inflection/lib/inflection',
-    file_saver: '../bower_components/FileSaver/filesaver',
+    file_saver: '../bower_components/FileSaver/FileSaver',
     bower_components: '../bower_components'
   },
   shim: {
