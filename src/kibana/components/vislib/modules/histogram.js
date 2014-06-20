@@ -84,7 +84,7 @@ define(function (require) {
           var that = this;
           var colors = chart.getColors(selection);
           var tip = chart.addTooltip(addTooltip, elem);
-          var yAxisMax = chart.getSameYAxis(shareYAxis, selection)
+          var yAxisMax = chart.getSameYAxis(shareYAxis, selection);
 
           chart.addLegend(addLegend, elem, colors, chart);
           chart.createHistogram({
@@ -441,7 +441,7 @@ define(function (require) {
 
         // adds the label value to each data point
         // within the values array for displaying in the tooltip
-        data.series.forEach(function(d) {
+        data.series.forEach(function (d) {
           return chart.appendLabelsToData(d, yAxisLabel);
         });
 
