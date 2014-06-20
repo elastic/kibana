@@ -7,7 +7,7 @@
           <h5 ng-show="!field.details.error">Quick Count
             <span bo-if="!field.details.error" class="small">
               (
-              <a ng-show="field.indexed" ng-click="filter('_exists_', field.name, '+')">{{field.details.exists}}</a>
+              <a ng-show="field.indexed" ng-click="updateFilterInQuery('_exists_', field.name, '+')">{{field.details.exists}}</a>
               <span ng-show="!field.indexed">{{field.details.exists}}</span>
               /{{field.details.total}} records
               )
@@ -23,9 +23,9 @@
               <div>
                 <span ng-show="field.indexed" class="pull-right">
                   <i class="fa fa-search-minus pull-right discover-field-details-filter"
-                    ng-click="filter(field.name, bucket.value, '-')"></i>
+                    ng-click="updateFilterInQuery(field.name, bucket.value, '-')"></i>
                   <i class="fa fa-search-plus pull-right discover-field-details-filter"
-                    ng-click="filter(field.name, bucket.value, '+')"></i>
+                    ng-click="updateFilterInQuery(field.name, bucket.value, '+')"></i>
                 </span>
                 <div css-truncate css-truncate-expandable="true" class="discover-field-details-value">
                   {{bucket.value}}
