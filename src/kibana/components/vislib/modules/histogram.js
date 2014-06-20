@@ -470,11 +470,11 @@ define(function (require) {
 
           if (milsInterval >= 86400000 * 364) {
             testInterval = 'year';
-            dateoffset = (milsInterval / 86400000 * 364);
+            dateoffset = 1;
           }
           if (milsInterval < 86400000 * 364) {
             testInterval = 'month';
-            dateoffset = (milsInterval / 86400000 * 30);
+            dateoffset = 1;
           }
           if (milsInterval < 86400000 * 30) {
             testInterval = 'week';
@@ -533,7 +533,7 @@ define(function (require) {
         var tickScale = d3.scale.linear()
             .clamp(true)
             .domain([20, 40, 1000])
-            .range([0, 1, 10]),
+            .range([0, 2, 10]),
           tickN = Math.floor(tickScale(height));
 
         var yAxis = d3.svg.axis()
@@ -896,9 +896,10 @@ define(function (require) {
                 if (data.ordered === undefined || !data.ordered.date) {
                   val = xScale.rangeBand();
                 } else {
-                  val = xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min) - 2;
+                  val = xScale(data.ordered.min + data.ordered.interval) -
+                    xScale(data.ordered.min) - 2;
                 }
-                if (isNaN(val) || val <= 0) {
+                if (isNaN(val) || val < 0) {
                   throw new Error('line 894: bars attr width: ' + val);
                 } else {
                   return val;
@@ -906,7 +907,7 @@ define(function (require) {
               })
               .attr('y', function (d) {
                 var val = yScale(d.y0 + d.y);
-                if (isNaN(val) || val <= 0) {
+                if (isNaN(val) || val < 0) {
                   throw new Error('line 907: bars attr y: ' + val);
                 } else {
                   return val;
