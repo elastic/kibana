@@ -892,25 +892,35 @@ define(function (require) {
                 //   xScale.rangeBand() :
                 //   xScale(data.ordered.min + data.ordered.interval) -
                 //   xScale(data.ordered.min) - 2;
-                var ww;
+                var val;
                 if (data.ordered === undefined || !data.ordered.date) {
-                  ww = xScale.rangeBand();
+                  val = xScale.rangeBand();
                 } else {
-                  ww = xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min) - 2;
+                  val = xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min) - 2;
                 }
-                try {
-                  if (ww === undefined || ww <= 0) {
-                    throw new Error('Negative width!');
-                  }
-                } catch (error) {
-                  console.group('819: Bars attr width: ' + error);
+                if (isNaN(val) || val <= 0) {
+                  throw new Error('line 890: bars attr width: ' + val);
+                } else {
+                  return val;
                 }
               })
               .attr('y', function (d) {
-                return yScale(d.y0 + d.y);
+                // return yScale(d.y0 + d.y);
+                var val = yScale(d.y0 + d.y);
+                if (isNaN(val) || val <= 0) {
+                  throw new Error('line 907: bars attr y: ' + val);
+                } else {
+                  return val;
+                }
               })
               .attr('height', function (d) {
-                return yScale(d.y0) - yScale(d.y0 + d.y);
+                // return yScale(d.y0) - yScale(d.y0 + d.y);
+                var val = yScale(d.y0) - yScale(d.y0 + d.y);
+                if (isNaN(val) || val <= 0) {
+                  throw new Error('line 916: bars attr height: ' + val);
+                } else {
+                  return val;
+                }
               });
             break;
         }
