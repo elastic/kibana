@@ -468,11 +468,19 @@ define(function (require) {
           var testInterval;
           var dateoffset;
 
-          if (milsInterval < 2419200000) {
-            testInterval = 'week';
-            dateoffset = (milsInterval / 604800000);
+          if (milsInterval >= 86400000 * 364) {
+            testInterval = 'year';
+            dateoffset = (milsInterval / 86400000 * 364);
           }
-          if (milsInterval < 604800000) {
+          if (milsInterval < 86400000 * 364) {
+            testInterval = 'month';
+            dateoffset = (milsInterval / 86400000 * 30);
+          }
+          if (milsInterval < 86400000 * 30) {
+            testInterval = 'week';
+            dateoffset = (milsInterval / 86400000 * 7);
+          }
+          if (milsInterval < 86400000 * 7) {
             testInterval = 'day';
             dateoffset = (milsInterval / 86400000);
           }
@@ -884,16 +892,39 @@ define(function (require) {
                 return xScale(d.x);
               })
               .attr('width', function () {
-                return data.ordered === undefined || !data.ordered.date ?
-                  xScale.rangeBand() :
-                  xScale(data.ordered.min + data.ordered.interval) -
-                  xScale(data.ordered.min) - 2;
+                // return data.ordered === undefined || !data.ordered.date ?
+                //   xScale.rangeBand() :
+                //   xScale(data.ordered.min + data.ordered.interval) -
+                //   xScale(data.ordered.min) - 2;
+                var val;
+                if (data.ordered === undefined || !data.ordered.date) {
+                  val = xScale.rangeBand();
+                } else {
+                  val = xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min) - 2;
+                }
+                if (isNaN(val) || val <= 0) {
+                  throw new Error('line 890: bars attr width: ' + val);
+                } else {
+                  return val;
+                }
               })
               .attr('y', function (d) {
-                return yScale(d.y0 + d.y);
+                // return yScale(d.y0 + d.y);
+                var val = yScale(d.y0 + d.y);
+                if (isNaN(val) || val <= 0) {
+                  throw new Error('line 907: bars attr y: ' + val);
+                } else {
+                  return val;
+                }
               })
               .attr('height', function (d) {
-                return yScale(d.y0) - yScale(d.y0 + d.y);
+                // return yScale(d.y0) - yScale(d.y0 + d.y);
+                var val = yScale(d.y0) - yScale(d.y0 + d.y);
+                if (isNaN(val) || val <= 0) {
+                  throw new Error('line 916: bars attr height: ' + val);
+                } else {
+                  return val;
+                }
               });
             break;
         }
