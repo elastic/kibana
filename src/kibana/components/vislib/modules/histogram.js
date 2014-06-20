@@ -51,11 +51,7 @@ define(function (require) {
         // so that it can be resent with .resize()
         latestData = injectZeros(data);
 
-        // removes elements to redraw the chart on subsequent calls
-        d3.select(elem)
-          .selectAll('*')
-          .remove();
-
+        chart.removeAll(elem);
         chartWrapper = chart.getChartWrapper(elem)[0][0];
         selection = chart.getSelection(chartWrapper, latestData);
 
@@ -65,14 +61,17 @@ define(function (require) {
       }
     };
 
+    // removes elements to redraw the chart on subsequent calls
+    chart.removeAll = function (elem) {
+      d3.select(elem)
+        .selectAll('*')
+        .remove();
+
+      return chart;
+    };
+
     chart.getVisualization = function (selection) {
       try {
-        var colors = chart.getColors(selection);
-        var yAxisMax;
-        var legend;
-        var tip;
-        var that;
-
         if (!selection) {
           throw new Error('No valid selection');
         }
@@ -81,33 +80,48 @@ define(function (require) {
           throw new Error('You destroyed the chart and tried to use it again');
         }
 
-        if (shareYAxis) {
-          yAxisMax = chart.getYAxisMax(selection);
-        }
-
-        if (addLegend) {
-          legend = getLegend(elem, colors, chart);
-        }
-
-        if (addTooltip) {
-          tip = chart.getTooltip(elem);
-        }
-
         return selection.each(function (d, i) {
-          that = this;
+          var that = this;
+          var colors = chart.getColors(selection);
+          var tip = chart.addTooltip(addTooltip, elem);
+          var yAxisMax = chart.getSameYAxis(shareYAxis, selection)
 
+          chart.addLegend(addLegend, elem, colors, chart);
           chart.createHistogram({
             data: d,
             index: i,
             this: that,
             colors: colors,
             tip: tip,
-            yAxisMax: yAxisMax
+            yAxisMax: yAxisMax,
+            isTooltip: addTooltip,
+            isSharingYAxis: shareYAxis
           });
         });
       } catch (error) {
         console.error('chart.getVisualization: ' + error);
       }
+    };
+
+    chart.addTooltip = function (boolean, elem) {
+      if (boolean) {
+        var tip = chart.getTooltip(elem);
+        return tip;
+      }
+    };
+
+    chart.getSameYAxis = function (boolean, selection) {
+      if (boolean) {
+        var yAxisMax = chart.getYAxisMax(selection);
+        return yAxisMax;
+      }
+    };
+
+    chart.addLegend = function (boolean, elem, colors, chart) {
+      if (boolean) {
+        return getLegend(elem, colors, chart);
+      }
+      return;
     };
 
     chart.getChartWrapper = function (elem) {
@@ -313,23 +327,6 @@ define(function (require) {
       return !isNaN(parseFloat(n)) && isFinite(n);
     };
 
-    /* Color domain */
-    chart.colorDomain = function (selection) {
-      var items = [];
-      selection.each(function (d) {
-        d.series.forEach(function (label) {
-          if (label.label) {
-            items.push(label.label);
-          } else {
-            items.push(d.yAxisLabel);
-          }
-        });
-      });
-
-      items = _.uniq(items);
-      return items;
-    };
-
     chart.getYAxisMax = function (selection) {
       try {
         var yArray = [];
@@ -356,6 +353,38 @@ define(function (require) {
       }
     };
 
+    chart.appendLabelsToData = function (d, yAxisLabel) {
+      d.values.forEach(function (e) {
+        var label = d.label ? d.label : yAxisLabel;
+        e.label = label;
+      });
+    };
+
+    chart.getYGroupMax = function (data) {
+      d3.max(data, function (d) {
+        return d3.max(d.values, function (e) {
+          return e.y;
+        });
+      });
+    };
+
+    chart.getYStackMax = function (data) {
+      d3.max(data, function (d) {
+        return d3.max(d.values, function (e) {
+          return e.y0 + d.y;
+        });
+      });
+    };
+
+    chart.getXAxisKeys = function (data) {
+      var keys = d3.set(data.map(function (d) {
+        return d.x;
+      }))
+        .values();
+
+      return chart.convertStringsToNumbers(keys);
+    };
+
     chart.createHistogram = function (args) {
       try {
         if (typeof args === 'undefined') {
@@ -367,9 +396,15 @@ define(function (require) {
         var colors = args.colors;
         var tip = args.tip;
         var yAxisMax = args.yAxisMax;
+
         var xAxisLabel = data.xAxisLabel;
         var yAxisLabel = data.yAxisLabel;
         var chartLabel = data.label;
+        var xAxisFormatter = data.xAxisFormatter || function (v) {
+          return v;
+        };
+        var yAxisFormatter = data.yAxisFormatter;
+        var tooltipFormatter = data.tooltipFormatter;
 
         var vis = d3.select(elem);
         var allItms = d3.select('.legendwrapper')
@@ -377,28 +412,12 @@ define(function (require) {
         var scrolltop = document.body.scrollTop;
         var allLayers = vis.selectAll('rect');
         var mousemove;
-
         var getX = function (d, i) {
           return d.x;
         };
         var getY = function (d, i) {
           return d.y;
         };
-
-        var xAxisFormatter = data.xAxisFormatter || function (v) {
-          return v;
-        };
-        var yAxisFormatter = data.yAxisFormatter;
-        var tooltipFormatter = data.tooltipFormatter;
-
-        // adds the label value to each data point
-        // within the values array for displaying in the tooltip
-        data.series.forEach(function (d) {
-          d.values.forEach(function (e) {
-            var label = d.label ? d.label : yAxisLabel;
-            e.label = label;
-          });
-        });
 
         // width, height, margins
         var margin = { top: 35, right: 15, bottom: 35, left: 60 };
@@ -408,35 +427,29 @@ define(function (require) {
           .style('height'), 10);
         var width = elemWidth - margin.left - margin.right;
         var height = elemHeight - margin.top - margin.bottom;
-
-        // preparing the data and scales
-        var stack = d3.layout.stack().values(function (d) { return d.values; });
-        stack.offset(offset);
-
         var dataLength = data.series[0].values.length;
-        var layers = stack(data.series);
-        var n = layers.length; // number of layers
-        var yGroupMax = d3.max(layers, function (layer) {
-          return d3.max(layer.values, function (d) {
-            return d.y;
-          });
-        });
-        var yStackMax = d3.max(layers, function (layer) {
-          return d3.max(layer.values, function (d) {
-            return d.y0 + d.y;
-          });
-        });
-        var keys = d3.set(layers[0].values.map(function (d) {
-          return d.x;
-        }))
-          .values();
-        keys = chart.convertStringsToNumbers(keys);
 
         /* Error Handler that prevents a chart from being rendered when
          there are too many data points for the width of the container. */
         if (width / dataLength <= 4) {
           throw new Error('chart too small');
         }
+
+        // adds the label value to each data point
+        // within the values array for displaying in the tooltip
+        data.series.forEach(function(d) {
+          return chart.appendLabelsToData(d, yAxisLabel);
+        });
+
+        // preparing the data and scales
+        var stack = d3.layout.stack()
+          .values(function (d) { return d.values; })
+          .offset(offset);
+        var layers = stack(data.series);
+        var n = layers.length; // number of layers
+        var yGroupMax = chart.getYGroupMax(layers);
+        var yStackMax = chart.getYStackMax(layers);
+        var keys = chart.getXAxisKeys(layers[0].values);
 
         var xScale;
 
@@ -533,19 +546,20 @@ define(function (require) {
           .append('svg')
           .attr('class', 'canvas')
           .attr('width', '100%')
-          .attr('height', '100%')
-          .append('g')
+          .attr('height', '100%');
+
+        var g = svg.append('g')
           .attr('transform',
             'translate(' + margin.left + ',' + margin.top + ')');
 
         // background rect
-        svg.append('rect')
+        g.append('rect')
           .attr('class', 'chart-bkgd')
           .attr('width', width)
           .attr('height', height);
 
         // x axis
-        svg.append('g')
+        g.append('g')
           .attr('class', 'x axis')
           .attr('transform', 'translate(0,' + height + ')')
           .call(xAxis)
@@ -576,25 +590,25 @@ define(function (require) {
           });
 
         // y axis
-        svg.append('g')
+        g.append('g')
           .attr('class', 'y axis')
           .call(yAxis);
 
         // Axis labels
-        svg.append('text')
+        g.append('text')
           .attr('class', 'x-axis-label')
           .attr('text-anchor', 'middle')
           .attr('x', width / 2)
           .attr('y', height + 30)
           .text(data.xAxisLabel);
 
-        svg.append('text')
+        g.append('text')
           .attr('class', 'y-axis-label')
           .attr('text-anchor', 'middle')
           .attr('x', -height / 2)
           .attr('y', function () {
             // get width of y axis group for label offset
-            var ww = svg.select('.y.axis')
+            var ww = g.select('.y.axis')
               .node()
               .getBBox();
 
@@ -605,7 +619,7 @@ define(function (require) {
           .text(yAxisLabel);
 
         // Chart title
-        svg.append('text')
+        g.append('text')
           .attr('class', 'charts-label')
           .attr('text-anchor', 'middle')
           .attr('x', width / 2)
@@ -670,7 +684,7 @@ define(function (require) {
           });
 
         if (dispatch.on('brush')) {
-          svg.append('g')
+          g.append('g')
             .attr('class', 'brush')
             .call(brush)
             .selectAll('rect')
@@ -679,7 +693,7 @@ define(function (require) {
         /* ************************** */
 
         // layers
-        var layer = svg.selectAll('.layer')
+        var layer = g.selectAll('.layer')
           .data(function (d) {
             return d.series;
           })
