@@ -49,7 +49,7 @@ define(function (require) {
 
         // store a copy of the data sent to render,
         // so that it can be resent with .resize()
-        latestData = injectZeros(data);
+        latestData = data;
 
         chart.removeAll(elem);
         chartWrapper = chart.getChartWrapper(elem)[0][0];
@@ -155,7 +155,6 @@ define(function (require) {
           throw new Error('No valid data');
         }
 
-        data = injectZeros(data);
         selection = d3.selectAll(getSelection(elem, data));
 
         return selection;
@@ -391,7 +390,7 @@ define(function (require) {
           args = {};
         }
 
-        var data = args.data;
+        var data = injectZeros(args.data);
         var that = args.this;
         var colors = args.colors;
         var tip = args.tip;
@@ -428,6 +427,11 @@ define(function (require) {
         var width = elemWidth - margin.left - margin.right;
         var height = elemHeight - margin.top - margin.bottom;
         var dataLength = data.series[0].values.length;
+
+        /* Error Handling around width and height NaN values */
+        if (isNaN(width) || isNaN(height)) {
+          throw new Error('width: ' + width + '; height:' + height);
+        }
 
         /* Error Handler that prevents a chart from being rendered when
          there are too many data points for the width of the container. */
@@ -946,10 +950,10 @@ define(function (require) {
 
     chart.destroy = function (_) {
       /*
-             Destroys all charts associated with the parent element
-             if the argument passed is true. By default the argument
-             is true.
-             */
+       Destroys all charts associated with the parent element
+       if the argument passed is true. By default the argument
+       is true.
+       */
       if (!arguments.length || _) {
         destroyFlag = _ || true;
 
