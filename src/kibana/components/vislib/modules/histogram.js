@@ -173,7 +173,7 @@ define(function (require) {
     };
 
     chart.convertStringsToNumbers = function (array) {
-      try{
+      try {
         if (chart.checkForNumbers(array)) {
           var i;
 
