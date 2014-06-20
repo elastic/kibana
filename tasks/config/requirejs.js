@@ -41,7 +41,7 @@ module.exports = function (grunt) {
             var bundles = tree.bundles || [];
             bundles.forEach(function (bundle) {
               bundle.children.forEach(function (child) {
-                if (child.match(/\.\.\//)) relative.push(child + ' is relative to ' + bundle.parent);
+                if (child.match(/\.\//)) relative.push(child + ' is relative to ' + bundle.parent);
               });
             });
 
