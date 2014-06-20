@@ -433,10 +433,14 @@ define(function (require) {
           throw new Error('width: ' + width + '; height:' + height);
         }
 
+        if (height <= margin.top) {
+          throw new Error('The container is too small for this chart.');
+        }
+
         /* Error Handler that prevents a chart from being rendered when
          there are too many data points for the width of the container. */
         if (width / dataLength <= 4) {
-          throw new Error('chart too small');
+          throw new Error('The container is too small for this chart.');
         }
 
         // adds the label value to each data point
@@ -900,6 +904,9 @@ define(function (require) {
 
         return svg;
       } catch (error) {
+        if (error.message === 'The container is too small for this chart.') {
+          chart.error(error.message);
+        }
         console.error('chart.createHistogram: ' + error);
       }
     };
@@ -973,7 +980,7 @@ define(function (require) {
       return chart;
     };
 
-    chart.error = function () {
+    chart.error = function (message) {
       // Removes the legend container
       d3.select(elem)
         .selectAll('*')
@@ -995,7 +1002,7 @@ define(function (require) {
             .height() / 3 + 'px';
         })
         .style('line-height', '18px')
-        .text('The container is too small for this chart.');
+        .text(message);
       return chart;
     };
 
