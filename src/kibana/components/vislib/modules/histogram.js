@@ -687,7 +687,7 @@ define(function (require) {
             return brush.extent()[0] instanceof Date ?
               dispatch.brush({
                 range: brush.extent(),
-                config: args,
+                config: config,
                 e: d3.event,
                 data: latestData
               }) :
@@ -754,7 +754,7 @@ define(function (require) {
               point: d,
               pointIndex: i,
               series: data.series,
-              config: args,
+              config: config,
               data: latestData,
               e: d3.event
             });
@@ -767,7 +767,7 @@ define(function (require) {
               point: d,
               pointIndex: i,
               series: data.series,
-              config: args,
+              config: config,
               data: latestData,
               e: d3.event
             });
