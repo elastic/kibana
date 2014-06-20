@@ -693,7 +693,7 @@ define(function (require) {
               }) :
               dispatch.brush({
                 range: selectedRange,
-                config: args,
+                config:config,
                 e: d3.event,
                 data: latestData
               });
