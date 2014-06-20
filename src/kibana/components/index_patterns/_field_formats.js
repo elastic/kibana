@@ -70,6 +70,16 @@ define(function (require) {
       },
       {
         types: [
+          'ip'
+        ],
+        name: 'ip',
+        convert: function (ip) {
+          if (!isFinite(ip)) return ip;
+          return [ip >>> 24, ip >>> 16 & 0xFF, ip >>> 8 & 0xFF, ip & 0xFF].join('.');
+        }
+      },
+      {
+        types: [
           'number'
         ],
         name: 'kilobytes',
@@ -92,7 +102,7 @@ define(function (require) {
       number:     formats.byName.string,
       date:       formats.byName.date,
       boolean:    formats.byName.string,
-      ip:         formats.byName.string,
+      ip:         formats.byName.ip,
       attachment: formats.byName.string,
       geo_point:  formats.byName.string,
       geo_shape:  formats.byName.string,

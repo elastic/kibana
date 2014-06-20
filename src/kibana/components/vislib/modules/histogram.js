@@ -173,7 +173,7 @@ define(function (require) {
     };
 
     chart.convertStringsToNumbers = function (array) {
-      try{
+      try {
         if (chart.checkForNumbers(array)) {
           var i;
 
@@ -297,6 +297,11 @@ define(function (require) {
       return d3.max(yArray);
     };
 
+    // test if val is a number
+    chart.isNumber = function (n) {
+      return !isNaN(parseFloat(n)) && isFinite(n);
+    };
+
     chart.iterateSelection = function (args) {
       if (typeof args === 'undefined') {
         args = {};
@@ -347,6 +352,8 @@ define(function (require) {
           return d.y0 + d.y;
         });
       });
+
+      // need to check if number here
       keys = d3.set(layers[0].values.map(function (d) {
           return d.x;
         }))
