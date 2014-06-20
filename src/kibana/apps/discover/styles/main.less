@@ -13,6 +13,7 @@
 
   visualize {
     height: 200px;
+    max-height: 600px;
 
     &.only-extra {
       height: auto;
@@ -88,6 +89,7 @@
 }
 
 .discover-field-filter {
+  background-color: @well-bg;
   margin-right: 10px;
 
   .form-group {
@@ -163,5 +165,21 @@
         margin-right: 3px;
       }
     }
+  }
+}
+
+field-name {
+  display: inline;
+
+  > i {
+    margin-right: 5px;
+    text-align: center;
+    display: inline-block;
+    width: 12px;
+    color: @text-muted;
+  }
+
+  &.no-results {
+    color: @text-muted;
   }
 }

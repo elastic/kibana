@@ -8,6 +8,7 @@ define(function (require) {
 
   require('directives/css_truncate');
   require('directives/field_name');
+  require('filters/unique');
   require('apps/discover/directives/discover_field');
 
 
@@ -21,10 +22,61 @@ define(function (require) {
         refresh: '=',
         data: '=',
         state: '=',
-        filterFunc: '=filter'
+        updateFilterInQuery: '=filter'
       },
       template: html,
       controller: function ($scope) {
+
+        var filter = $scope.filter = {
+          props: [
+            'type',
+            'indexed',
+            'analyzed',
+            'missing'
+          ],
+          defaults: {
+            missing: true
+          },
+          boolOpts: [
+            {label: 'any', value: undefined },
+            {label: 'yes', value: true },
+            {label: 'no', value: false }
+          ],
+          toggleVal: function (name, def) {
+            if (filter.vals[name] !== def) filter.vals[name] = def;
+            else filter.vals[name] = undefined;
+          },
+          reset: function () {
+            filter.vals = _.clone(filter.defaults);
+          },
+          isFieldFiltered: function (field) {
+            return !field.display
+              && (filter.vals.type == null || field.type === filter.vals.type)
+              && (filter.vals.analyzed == null || field.analyzed === filter.vals.analyzed)
+              && (filter.vals.indexed == null || field.indexed === filter.vals.indexed)
+              && (!filter.vals.missing || field.rowCount > 0)
+              && (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1)
+            ;
+          },
+          getActive: function () {
+            return _.some(filter.props, function (prop) {
+              return filter.vals[prop] !== filter.defaults[prop];
+            });
+          }
+        };
+
+        // set the initial values to the defaults
+        filter.reset();
+
+        $scope.$watchCollection('filter.vals', function (newFieldFilters) {
+          filter.active = filter.getActive();
+        });
+
+        $scope.$watch('fields', function (newFields) {
+          $scope.fieldTypes = _.unique(_.pluck(newFields, 'type'));
+          // push undefined so the user can clear the filter
+          $scope.fieldTypes.unshift(undefined);
+        });
 
         $scope.$watch('data', function () {
           _.each($scope.fields, function (field) {
@@ -53,10 +105,6 @@ define(function (require) {
             }),
             _g: rison.encode(globalState)
           });
-        };
-
-        $scope.filter = function (fieldName, value, operation) {
-          $scope.filterFunc(fieldName, value, operation);
         };
 
         $scope.details = function (field, recompute) {
