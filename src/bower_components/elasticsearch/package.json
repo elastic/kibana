@@ -1,0 +1,19 @@
+{
+  "name": "elasticsearch-browser",
+  "version": "2.2.0",
+  "description": "The official low-level Elasticsearch client, for use in the browser.",
+  "main": "elasticsearch.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/elasticsearch/bower-elasticsearch-js.git"
+  },
+  "author": "Spencer Alger <spencer@spenceralger.com>",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/elasticsearch/bower-elasticsearch-js/issues"
+  },
+  "homepage": "https://github.com/elasticsearch/bower-elasticsearch-js"
+}
