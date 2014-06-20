@@ -360,12 +360,6 @@ define(function (require) {
         .values();
       keys = chart.convertStringsToNumbers(keys);
 
-      for (var i = 0; i < keys.length; i++) {
-        if (chart.isNumber(keys[i])) {
-          keys[i] = +keys[i];
-        }
-      }
-
       /* Error Handler that prevents a chart from being rendered when
              there are too many data points for the width of the container. */
       if (width / dataLength <= 4) {
