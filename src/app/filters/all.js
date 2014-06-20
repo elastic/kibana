@@ -81,17 +81,30 @@ define([
       //URLs starting with "www." (without // before it, or it'd re-link the ones done above).
       r2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim,
       //Change email addresses to mailto:: links.
-      r3 = /(\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6})/gim;
+      r3 = /(\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6})/gim,
+	  // Button with link Syntax: btn:<Button Text>:http://...
+      r4 = /((btn:)(.+)(:)(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|]))/gim;
 
     var urlLink = function(text) {
-      var t1,t2,t3;
+      var t1,t2,t3,t4;
       if(!_.isString(text)) {
         return text;
       } else {
-        _.each(text.match(r1), function() {
-          t1 = text.replace(r1, "<a href=\"$1\" target=\"_blank\">$1</a>");
-        });
-        text = t1 || text;
+      		console.log("Huhu");
+      	// need this if, because r1 is a subset of r4
+      	if(text.match(r4)){
+	      	_.each(text.match(r4), function() {
+	      		console.log("treffer");
+	        	// I am not sure if this is the best way.
+	          t4 = text.replace(r4, "<a class=\"btn btn-default\" href=\"$5\" target=\"_blank\">$3</a>");
+	        });
+			text = t4 || text;
+		}else{
+	        _.each(text.match(r1), function() {
+	          t1 = text.replace(r1, "<a href=\"$1\" target=\"_blank\">$1</a>");
+	        });
+    		text = t1 || text;
+    	}
         _.each(text.match(r2), function() {
           t2 = text.replace(r2, "$1<a href=\"http://$2\" target=\"_blank\">$2</a>");
         });
