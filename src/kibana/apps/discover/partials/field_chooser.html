@@ -8,7 +8,7 @@
   </ul>
 
   <div class="sidebar-list-header sidebar-item">
-    <h5 ng-click="showFilter = !showFilter">Available
+    <h5 ng-click="showFilter = !showFilter">Fields
       <button
         ng-class="filter.active ? 'btn-success' : 'btn-default'"
         class="btn btn-xs btn-default pull-right discover-field-filter-toggle">
@@ -75,6 +75,22 @@
       Reset Filters
     </div>
   </div>
+
+  <ul bindonce
+    ng-show="(fields | filter:filter.isPopular).length > 0"
+    class="list-unstyled sidebar-well">
+    <li class="sidebar-item sidebar-list-header"><h6>Popular fields</h6></li>
+    <discover-field
+      ng-repeat="field in fields |
+        filter:filter.isPopular |
+        orderBy:'count':true |
+        filter:filter.isFieldFiltered |
+        limitTo:popularLimit |
+        orderBy:'name'"
+      field="field"
+      data="data">
+    </discover-field>
+  </ul>
 
   <ul bindonce class="list-unstyled">
     <discover-field

@@ -22,7 +22,8 @@ define(function (require) {
         refresh: '=',
         data: '=',
         state: '=',
-        updateFilterInQuery: '=filter'
+        updateFilterInQuery: '=filter',
+        searchSource: '='
       },
       template: html,
       controller: function ($scope) {
@@ -58,6 +59,9 @@ define(function (require) {
               && (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1)
             ;
           },
+          isPopular: function (field) {
+            return field.count;
+          },
           getActive: function () {
             return _.some(filter.props, function (prop) {
               return filter.vals[prop] !== filter.defaults[prop];
@@ -67,6 +71,8 @@ define(function (require) {
 
         // set the initial values to the defaults
         filter.reset();
+
+        $scope.popularLimit = config.get('fields:popularLimit');
 
         $scope.$watchCollection('filter.vals', function (newFieldFilters) {
           filter.active = filter.getActive();
@@ -85,6 +91,13 @@ define(function (require) {
             }
           });
         });
+
+        $scope.increaseFieldCounter = function (field) {
+          var indexPattern = $scope.searchSource.get('index');
+          indexPattern.increaseField(field.name);
+          field.count++;
+          //field.count = indexPattern.fieldsByName[field].count;
+        };
 
         $scope.termsAgg = function (field) {
           $location.path('/visualize/create').search({
@@ -187,7 +200,8 @@ define(function (require) {
             });
 
           if (params.data.length - missing === 0) {
-            return {error: 'Field missing in record list. This field may still be indexed in Elasticsearch.'};
+            return {error: 'This is field is present in your elasticsearch mapping,' +
+              ' but not in any documents in the search results. You may still be able to visualize or search on it'};
           }
 
           return {
