@@ -8,6 +8,7 @@ define(function (require) {
     metaFields: ['_source', '_id', '_type', '_index'],
 
     'discover:sampleSize': 500,
+    'fields:popularLimit': 10,
 
     'histogram:barTarget': 50,
     'histogram:maxBars': 100,

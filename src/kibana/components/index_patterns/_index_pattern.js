@@ -84,6 +84,7 @@ define(function (require) {
       function afterFieldsSet() {
         pattern.fieldsByName = {};
         pattern.fields.forEach(function (field) {
+          field.count = field.count || 0;
           pattern.fieldsByName[field.name] = field;
 
           // non-enumerable type so that it does not get included in the JSON
@@ -96,6 +97,14 @@ define(function (require) {
           });
         });
       }
+
+      pattern.increaseField = function (fieldName) {
+        if (!(pattern.fieldsByName && pattern.fieldsByName[fieldName])) return;
+        var field = pattern.fieldsByName[fieldName];
+        if (!field.count) field.count = 1;
+        else field.count = field.count + 1;
+        pattern.save();
+      };
 
       pattern.getInterval = function () {
         return this.intervalName && _.find(intervals, { name: this.intervalName });

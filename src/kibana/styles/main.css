@@ -7328,6 +7328,9 @@ table td .fa {
   border-right: 1px solid transparent;
   border-bottom: 1px solid transparent;
 }
+.sidebar-container .sidebar-well {
+  background-color: #dde4e6;
+}
 .sidebar-container .sidebar-list ul {
   list-style: none;
   margin-bottom: 0px;
@@ -7337,25 +7340,6 @@ table td .fa {
   padding-right: 10px;
   color: #777777;
   border: 1px solid rgba(0, 0, 0, 0);
-  /*
-      button {
-        float: right;
-        border: none;
-        background-color: transparent;
-        margin: 10.5px 5px;
-        padding: 0;
-        font-size: 1em;
-        line-height: 1em;
-
-        &:focus {
-          outline: none;
-        }
-
-        &.active {
-          color: @btn-success-bg;
-        }
-      }
-      */
 }
 .sidebar-container .sidebar-list .sidebar-item {
   border-top: 1px solid transparent;

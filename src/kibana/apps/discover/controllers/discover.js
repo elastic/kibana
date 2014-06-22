@@ -63,10 +63,10 @@ define(function (require) {
     var indexPatternList = $route.current.locals.indexList;
 
     // the actual courier.SearchSource
-    var searchSource = savedSearch.searchSource;
+    $scope.searchSource = savedSearch.searchSource;
 
     // Manage state & url state
-    var initialQuery = searchSource.get('query');
+    var initialQuery = $scope.searchSource.get('query');
 
     var defaultFormat = courier.indexPatterns.fieldFormats.defaultByType.string;
 
@@ -146,7 +146,7 @@ define(function (require) {
           if (!sort) return;
 
           // get the current sort from {key: val} to ["key", "val"];
-          var currentSort = _.pairs(searchSource.get('sort')).pop();
+          var currentSort = _.pairs($scope.searchSource.get('sort')).pop();
 
           // if the searchSource doesn't know, tell it so
           if (!angular.equals(sort, currentSort)) $scope.fetch();
@@ -156,16 +156,16 @@ define(function (require) {
           timefilter.enabled(!!timefield);
         });
 
-        searchSource.onError().then(function searchError(err) {
+        $scope.searchSource.onError().then(function searchError(err) {
           console.log(err);
           notify.error('An error occured with your request. Reset your inputs and try again.');
 
-          return searchSource.onError().then(searchError);
+          return $scope.searchSource.onError().then(searchError);
         });
 
         // Bind a result handler. Any time searchSource.fetch() is executed this gets called
         // with the results
-        searchSource.onResults().then(function onResults(resp) {
+        $scope.searchSource.onResults().then(function onResults(resp) {
           var complete = notify.event('on results');
           $scope.hits = resp.hits.total;
           $scope.rows = resp.hits.hits;
@@ -192,7 +192,7 @@ define(function (require) {
           });
 
           complete();
-          return searchSource.onResults().then(onResults);
+          return $scope.searchSource.onResults().then(onResults);
         }).catch(function (err) {
           console.log('An error', err);
         });
@@ -275,7 +275,7 @@ define(function (require) {
     $scope.updateDataSource = function () {
       var chartOptions;
 
-      searchSource
+      $scope.searchSource
         .size($scope.opts.sampleSize)
         .sort(function () {
           var sort = {};
@@ -295,7 +295,7 @@ define(function (require) {
         });
 
       // get the current indexPattern
-      var indexPattern = searchSource.get('index');
+      var indexPattern = $scope.searchSource.get('index');
       // if indexPattern exists, but $scope.opts.index doesn't, or the opposite, or if indexPattern's id
       // is not equal to the $scope.opts.index then either clean or
       if (
@@ -313,9 +313,9 @@ define(function (require) {
       .then(function (indexPattern) {
         $scope.opts.timefield = indexPattern.timeFieldName;
 
-        if (indexPattern !== searchSource.get('index')) {
+        if (indexPattern !== $scope.searchSource.get('index')) {
           // set the index on the savedSearch
-          searchSource.index(indexPattern);
+          $scope.searchSource.index(indexPattern);
           delete $scope.fields;
           delete $scope.columns;
 
@@ -334,7 +334,7 @@ define(function (require) {
     }
 
     function setFields() {
-      var indexPattern = searchSource.get('index');
+      var indexPattern = $scope.searchSource.get('index');
       var currentState = _.transform($scope.fields || [], function (current, field) {
         current[field.name] = {
           display: field.display
@@ -459,7 +459,7 @@ define(function (require) {
       if (!$scope.opts.timefield || $scope.vis) return Promise.resolve($scope.vis);
 
       var vis = new AdhocVis({
-        searchSource: searchSource,
+        searchSource: $scope.searchSource,
         type: 'histogram',
         listeners: {
           onClick: function (e) {
