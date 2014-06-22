@@ -76,7 +76,14 @@ define(function (require) {
       }
 
       // since this depends on the field and field list, watch both
-      $scope.$watch('config.field', getAvailableAggsForField);
+      // this doesn't trigger when we switch the metric agg field?
+      $scope.$watch('config.field', function (field) {
+        getAvailableAggsForField(field);
+        if ($scope.vis && $scope.vis.searchSource) {
+          $scope.vis.searchSource.get('index').popularizeField(field, 1);
+        }
+      });
+
       $scope.$watch('fields', getAvailableAggsForField);
 
       $scope.$watch('config.agg', function (aggName) {

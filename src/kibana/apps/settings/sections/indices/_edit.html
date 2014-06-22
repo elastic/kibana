@@ -86,7 +86,10 @@
             <td><span bo-text="field.indexed ? 'yes' : 'no'"></span></td>
             <td>
               <span bo-text="field.count"></span>
-              <span ng-click="indexPattern.increaseField(field.name)" class="label label-default field-popularize"><i class="fa fa-plus"></i></span>
+              <span class="field-popularize">
+                <span ng-click="indexPattern.popularizeField(field.name, 1)" class="label label-default"><i class="fa fa-plus"></i></span>
+                <span ng-click="indexPattern.popularizeField(field.name, -1)" class="label label-default"><i class="fa fa-minus"></i></span>
+              </span>
             </td>
           </tr>
         </table>

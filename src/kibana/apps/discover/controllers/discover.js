@@ -372,6 +372,9 @@ define(function (require) {
       value = _.isArray(value) ? value : [value];
       operation = operation || '+';
 
+      var indexPattern = $scope.searchSource.get('index');
+      indexPattern.popularizeField(field, 1);
+
       _.each(value, function (clause) {
         var filter = field + ':"' + addSlashes(clause) + '"';
         var regex = '[\\+-]' + regexEscape(filter) + '\\s*';

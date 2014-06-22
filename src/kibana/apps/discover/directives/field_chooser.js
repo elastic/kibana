@@ -94,7 +94,7 @@ define(function (require) {
 
         $scope.increaseFieldCounter = function (field) {
           var indexPattern = $scope.searchSource.get('index');
-          indexPattern.increaseField(field.name);
+          indexPattern.popularizeField(field.name, 1);
           field.count++;
           //field.count = indexPattern.fieldsByName[field].count;
         };

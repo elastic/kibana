@@ -98,11 +98,14 @@ define(function (require) {
         });
       }
 
-      pattern.increaseField = function (fieldName) {
+      pattern.popularizeField = function (fieldName, unit) {
+        if (_.isUndefined(unit)) unit = 1;
         if (!(pattern.fieldsByName && pattern.fieldsByName[fieldName])) return;
+
         var field = pattern.fieldsByName[fieldName];
+        if (!field.count && unit < 1) return;
         if (!field.count) field.count = 1;
-        else field.count = field.count + 1;
+        else field.count = field.count + (unit);
         pattern.save();
       };
 
