@@ -79,12 +79,17 @@ define(function (require) {
         $scope.$watch('fields', function (newFields) {
 
           // Find the top N most popular fields
-          $scope.popularFields = _.filter(
+          $scope.popularFields = _.sortBy(_.filter(
             _.sortBy(newFields, 'count')
             .reverse()
             .slice(0, config.get('fields:popularLimit')), function (field) {
             return (field.count > 0);
-          });
+          }), 'name');
+
+          // Find the top N most popular fields
+          $scope.unpopularFields = _.sortBy(_.sortBy(newFields, 'count')
+            .reverse()
+            .slice($scope.popularFields.length), 'name');
 
           $scope.fieldTypes = _.unique(_.pluck(newFields, 'type'));
           // push undefined so the user can clear the filter
@@ -103,7 +108,6 @@ define(function (require) {
           var indexPattern = $scope.searchSource.get('index');
           indexPattern.popularizeField(field.name, 1);
           field.count++;
-          //field.count = indexPattern.fieldsByName[field].count;
         };
 
         $scope.termsAgg = function (field) {
@@ -135,6 +139,8 @@ define(function (require) {
               count: 5,
               grouped: false
             });
+            var indexPattern = $scope.searchSource.get('index');
+            indexPattern.popularizeField(field.name, 1);
           } else {
             delete field.details;
           }
