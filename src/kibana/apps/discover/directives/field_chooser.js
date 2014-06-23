@@ -59,7 +59,7 @@ define(function (require) {
               && (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1)
             ;
           },
-          isPopular: function (field) {
+          popularity: function (field) {
             return field.count;
           },
           getActive: function () {
@@ -72,13 +72,20 @@ define(function (require) {
         // set the initial values to the defaults
         filter.reset();
 
-        $scope.popularLimit = config.get('fields:popularLimit');
-
         $scope.$watchCollection('filter.vals', function (newFieldFilters) {
           filter.active = filter.getActive();
         });
 
         $scope.$watch('fields', function (newFields) {
+
+          // Find the top N most popular fields
+          $scope.popularFields = _.filter(
+            _.sortBy(newFields, 'count')
+            .reverse()
+            .slice(0, config.get('fields:popularLimit')), function (field) {
+            return (field.count > 0);
+          });
+
           $scope.fieldTypes = _.unique(_.pluck(newFields, 'type'));
           // push undefined so the user can clear the filter
           $scope.fieldTypes.unshift(undefined);
