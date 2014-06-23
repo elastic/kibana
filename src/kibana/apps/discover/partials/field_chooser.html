@@ -77,12 +77,11 @@
   </div>
 
   <ul bindonce
-    ng-show="(fields | filter:filter.isPopular).length > 0"
+    ng-show="(fields | filter:filter.popularity).length > 0"
     class="list-unstyled sidebar-well">
     <li class="sidebar-item sidebar-list-header"><h6>Popular fields</h6></li>
     <discover-field
-      ng-repeat="field in popularFields |
-        orderBy:'name' | filter:filter.isFieldFiltered"
+      ng-repeat="field in popularFields | filter:filter.isFieldFiltered"
       field="field"
       data="data">
     </discover-field>
@@ -90,7 +89,7 @@
 
   <ul bindonce class="list-unstyled">
     <discover-field
-      ng-repeat="field in fields | filter:filter.isFieldFiltered"
+      ng-repeat="field in unpopularFields | filter:filter.isFieldFiltered"
       field="field"
       data="data">
     </discover-field>
