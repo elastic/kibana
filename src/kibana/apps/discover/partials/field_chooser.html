@@ -2,7 +2,7 @@
   <div class="sidebar-list-header">
     <h5>Selected</h5>
   </div>
-  <ul bindonce class="list-unstyled">
+  <ul bindonce class="list-unstyled discover-selected-fields">
     <discover-field field="field" ng-repeat="field in fields|filter:{display:true}" data="data">
     </discover-field>
   </ul>
@@ -81,12 +81,8 @@
     class="list-unstyled sidebar-well">
     <li class="sidebar-item sidebar-list-header"><h6>Popular fields</h6></li>
     <discover-field
-      ng-repeat="field in fields |
-        filter:filter.isPopular |
-        orderBy:'count':true |
-        filter:filter.isFieldFiltered |
-        limitTo:popularLimit |
-        orderBy:'name'"
+      ng-repeat="field in popularFields |
+        orderBy:'name' | filter:filter.isFieldFiltered"
       field="field"
       data="data">
     </discover-field>

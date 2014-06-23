@@ -1,11 +1,11 @@
 
-    <li bindonce class="sidebar-item">
+    <li bindonce class="sidebar-item" bo-attr bo-attr-field="field.name">
       <div ng-click="toggleDetails(field)" class="sidebar-item-title">
         <field-name field="field"></field-name>
         <button
           ng-click="toggleDisplay(field)"
-          ng-class="{'btn-primary': !field.display, 'btn-danger': field.display}"
-          ng-if="!(field.name == '_source' && field.display && (fields|filter:{display:true}).length == 1)"
-          class="pull-right btn btn-xs btn-primary discover-field-toggle" >{{field.display ? 'remove' : 'add'}}</button>
+          bo-class="field.display ? 'btn-danger' : 'btn-primary'"
+          bo-text="field.display ? 'remove' : 'add'"
+          class="pull-right btn btn-xs btn-primary discover-field-toggle" ></button>
       </div>
     </li>

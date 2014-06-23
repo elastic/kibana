@@ -358,7 +358,6 @@ define(function (require) {
           rowCount: $scope.rows ? $scope.rows.fieldCounts[field.name] : 0
         });
 
-
         $scope.fields.push(clone);
         $scope.fieldsByName[field.name] = clone;
         $scope.formatsByName[field.name] = field.format;
