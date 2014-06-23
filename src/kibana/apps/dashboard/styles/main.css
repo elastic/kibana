@@ -83,6 +83,12 @@ dashboard-grid {
   margin: 0;
   padding: 0;
 }
+.gridster .gs-resize-handle {
+  background-position: 50% 50% !important;
+  bottom: 0 !important;
+  right: 0 !important;
+  padding: 4px;
+}
 .gridster .preview-holder {
   border: none!important;
   background: #b4bcc2 !important;
