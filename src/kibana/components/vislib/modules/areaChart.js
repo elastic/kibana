@@ -3,31 +3,45 @@ define(function (require) {
   var $ = require('jquery');
   var _ = require('lodash');
 
-  var selectionFn = require('components/vislib/utils/selection');
-  var zeroInjection = require('components/vislib/utils/zeroInjection');
-  var legendFn = require('components/vislib/modules/legend');
-  var colorFn = require('components/vislib/utils/colorspace');
+  var getSelection = require('components/vislib/utils/selection');
+  var injectZeros = require('components/vislib/utils/zeroInjection');
+  var getLegend = require('components/vislib/modules/legend');
+  var getColor = require('components/vislib/utils/colorspace');
 
-  return function area(elem, args) {
-    if (typeof args === 'undefined') {
-      args = {};
+  return function area(elem, config) {
+    if (typeof config === 'undefined') {
+      config = {};
     }
 
     var chart = {};
 
-    var addLegend = args.addLegend || true;
-    var addTooltip = args.addTooltip || true;
-    var shareYAxis = args.shareYAxis || false;
+    /* ***** Chart Options ***** */
+    var addLegend = config.addLegend || false;
+    var addTooltip = config.addTooltip || false;
+    var shareYAxis = config.shareYAxis || false;
+    /* ************************* */
 
+    /* ***** Chart Flags ******* */
     var destroyFlag = false;
+    /* ************************* */
 
+    /* ***** Chart Globals ******* */
     var dispatch = d3.dispatch('hover', 'click', 'mouseenter', 'mouseleave', 'mouseout', 'mouseover', 'brush');
-    var margin = args.margin || { top: 35, right: 15, bottom: 35, left: 50 };
-    var $elem = $(elem); // cached jquery version of elemen
+    var $elem = $(elem); // cached jquery version of element
+    var latestData;
+    var prevSize;
+    var xValue = function (d, i) {
+      return d.x;
+    };
+    var yValue = function (d, i) {
+      return d.y;
+    };
+    /* ************************* */
+
+    var margin = { top: 35, right: 15, bottom: 35, left: 50 };
     var vis = d3.select(elem);
     var height;
     var width;
-    var latestData;
     var chartwrapper;
     var selection;
     var selectors;
@@ -41,85 +55,30 @@ define(function (require) {
     var scrolltop;
     var allItms = false;
 
-    var xValue = function (d, i) {
-      return d.x;
-    };
-
-    var yValue = function (d, i) {
-      return d.y;
-    };
-
-
     chart.render = function (data) {
-      // removes elements to redraw the chart on subsequent calls
-      d3.select(elem)
-        .selectAll('*')
-        .remove();
-
-      // store a copy of the data sent to render, so that it can be resent with .resize()
-      latestData = data;
-
-      if (destroyFlag || !elem) {
-        if (destroyFlag) {
-          throw new Error('you destroyed this chart and then tried to use it again');
-        } else {
-          throw new Error('there is no element present');
-        }
-      }
-
-      // HTML div in which charts are contained
-      chartwrapper = d3.select(elem)
-        .append('div')
-        .attr('class', 'chartwrapper')
-        .style('height', $(elem)
-          .height() + 'px');
-
-      // Selection function - returns an array of DOM elements with data bound
-      selectors = selectionFn(chartwrapper[0][0], latestData);
-
       try {
-        selection = d3.selectAll(selectors);
+        if (!data) {
+          throw new Error('No valid data');
+        }
+        if (!elem) {
+          throw new Error('No elem provided');
+        }
+
+        // store a copy of the data sent to render, so that it can be resent with .resize()
+        latestData = data;
+
+        // removes elements to redraw the chart on subsequent calls
+        d3.select(elem)
+          .selectAll('*')
+          .remove();
+
+        var chartWrapper = chart.getChartWrapper(elem)[0][0],
+          selection = chart.getSelection(chartWrapper, latestData);
+
+        return chart.getVisualization(selection);
       } catch (error) {
-        return;
+        console.group('chart.render: ' + error);
       }
-
-      // get colDomain from chart obj
-      colDomain = chart.colorDomain(selection);
-
-      // color domain
-      getColors = colorFn(colDomain.length);
-      chart.colorObj = _.zipObject(colDomain, getColors);
-
-      // Chart options
-      if (addLegend) {
-        legend = legendFn(elem, selection, chart);
-        allItms = d3.select('.legendwrapper')
-          .selectAll('li.legends');
-      }
-
-      if (addTooltip) {
-        tip = d3.select(elem)
-          .append('div')
-          .attr('class', 'k4tip');
-      }
-
-      try {
-        selection.each(function (d, i) {
-          var that = this;
-          chart.createAreaChart({
-            'data': d,
-            'index': i,
-            'this': that
-          });
-        });
-      } catch (err) {
-        if (err.message === 'chart too small') {
-          chart.error();
-        }
-        console.group(err);
-      }
-
-      return chart;
     };
 
     /* Color domain */
@@ -139,6 +98,50 @@ define(function (require) {
       return items;
     };
 
+    chart.getVisualization = function (selection) {
+      try {
+        if (!selection) {
+          throw new Error('No valid selection');
+        }
+
+        if (destroyFlag) {
+          throw new Error('You destroyed the chart and tried to use it again');
+        }
+
+        var colors = chart.getColors(selection);
+
+        // Calculates the max Y axis value for all Charts
+        if (shareYAxis) {
+          var yAxisMax = chart.getYAxisMax(selection);
+        }
+
+        // Adds the legend
+        if (addLegend) {
+          var legend = getLegend(elem, colors, chart);
+        }
+
+        // Adds tooltips
+        if (addTooltip) {
+          var tip = chart.getTooltip(elem);
+        }
+
+        return selection.each(function (d, i) {
+          var that = this;
+
+          chart.createLineChart({
+            'data': d,
+            'index': i,
+            'this': that,
+            'colors': colors,
+            'tip': tip,
+            'yAxisMax': yAxisMax
+          });
+        });
+      } catch (error) {
+        console.group('chart.getVisualization: ' + error);
+      }
+    };
+
     /* Function for global yAxis */
     chart.globalYAxisFn = function (selection) {
       var yArray = [];
@@ -152,6 +155,148 @@ define(function (require) {
       });
 
       return d3.max(yArray);
+    };
+
+    chart.getTooltip = function (elem) {
+      try {
+        if (!elem) {
+          throw new Error('No valid elem');
+        }
+
+        var tooltipDiv;
+
+        tooltipDiv = d3.select(elem)
+          .append('div')
+          .attr('class', 'k4tip');
+
+        return tooltipDiv;
+      } catch (error) {
+        console.group('chart.getTooltip: ' + error);
+      }
+    };
+
+    chart.getChartWrapper = function (elem) {
+      try {
+        if (!elem) {
+          throw new Error('No valid elem');
+        }
+
+        var chartWrapper = d3.select(elem)
+          .append('div');
+
+        chartWrapper
+          .attr('class', 'chartwrapper')
+          .style('height', $(elem)
+            .height() + 'px');
+
+        return chartWrapper;
+      } catch (error) {
+        console.group('chart.getChartWrapper: ' + error);
+      }
+    };
+
+    chart.getSelection = function (elem, data) {
+      try {
+        if (!elem) {
+          throw new Error('No valid elem');
+        }
+        if (!data) {
+          throw new Error('No valid data');
+        }
+
+        var selection = d3.selectAll(getSelection(elem, data));
+
+        return selection;
+      } catch (error) {
+        console.group('chart.getSelection: ' + error);
+      }
+    };
+
+    chart.getColors = function (selection) {
+      try {
+        if (!selection) {
+          throw new Error('No valid selection');
+        }
+
+        var colorDomain = chart.getColorDomain(selection),
+          lengthOfColorDomain = colorDomain.length,
+          colorArray = getColor(lengthOfColorDomain),
+          colorDict;
+
+        colorDict = chart.getColorDict(colorDomain, colorArray);
+
+        return colorDict;
+      } catch (error) {
+        console.group('chart.getColors: ' + error);
+      }
+    };
+
+    chart.getColorDict = function (colorDomain, colorArray) {
+      try {
+        if (!colorDomain) {
+          throw new Error('No valid colorDomain');
+        }
+        if (!colorArray) {
+          throw new Error('No valid colorArray');
+        }
+
+        var colorDict;
+
+        colorDict = _.zipObject(colorDomain, colorArray);
+
+        return colorDict;
+      } catch (error) {
+        console.group('chart.getColorDict' + error);
+      }
+    };
+
+    /* Color domain */
+    chart.getColorDomain = function (selection) {
+      try {
+        if (!selection) {
+          throw new Error('No valid selection');
+        }
+
+        var items = [];
+
+        selection.each(function (d) {
+          d.series.forEach(function (label) {
+            if (label.label) {
+              items.push(label.label);
+            } else {
+              items.push(d.yAxisLabel);
+            }
+          });
+        });
+
+        items = _.uniq(items);
+        return items;
+      } catch (error) {
+        console.group('chart.getColorDomain: ' + error);
+      }
+    };
+
+    /* Function for global yAxis */
+    chart.getYAxisMax = function (selection) {
+      try {
+        if (!selection) {
+          throw new Error('No valid selection');
+        }
+
+        var yArray = [];
+
+        selection.each(function (d) {
+          return d3.max(d.series, function (layer) {
+            return d3.max(layer.values, function (d) {
+              yArray.push(d.y);
+            });
+          });
+        });
+
+        return d3.max(yArray);
+      } catch (error) {
+        console.group('chart.getYAxisMax: ' + error);
+      }
     };
 
     chart.getBounds = function (data) {
@@ -425,7 +570,7 @@ define(function (require) {
             point: d,
             pointIndex: i,
             series: data.series,
-            config: args,
+            config: config,
             data: latestData,
             e: d3.event
           });
@@ -465,7 +610,7 @@ define(function (require) {
             point: d,
             pointIndex: i,
             series: data.series,
-            config: args,
+            config: config,
             data: latestData,
             e: d3.event
           });
@@ -528,13 +673,13 @@ define(function (require) {
           return brush.extent()[0] instanceof Date ?
             dispatch.brush({
               range: brush.extent(),
-              config: args,
+              config: config,
               e: d3.event,
               data: latestData
             }) :
             dispatch.brush({
               range: selectedRange,
-              config: args,
+              config: config,
               e: d3.event,
               data: latestData
             });
