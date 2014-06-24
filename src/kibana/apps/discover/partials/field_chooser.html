@@ -2,13 +2,13 @@
   <div class="sidebar-list-header">
     <h5>Selected</h5>
   </div>
-  <ul bindonce class="list-unstyled">
+  <ul bindonce class="list-unstyled discover-selected-fields">
     <discover-field field="field" ng-repeat="field in fields|filter:{display:true}" data="data">
     </discover-field>
   </ul>
 
   <div class="sidebar-list-header sidebar-item">
-    <h5 ng-click="showFilter = !showFilter">Available
+    <h5 ng-click="showFilter = !showFilter">Fields
       <button
         ng-class="filter.active ? 'btn-success' : 'btn-default'"
         class="btn btn-xs btn-default pull-right discover-field-filter-toggle">
@@ -76,9 +76,20 @@
     </div>
   </div>
 
+  <ul bindonce
+    ng-show="(fields | filter:filter.popularity).length > 0"
+    class="list-unstyled sidebar-well">
+    <li class="sidebar-item sidebar-list-header"><h6>Popular fields</h6></li>
+    <discover-field
+      ng-repeat="field in popularFields | filter:filter.isFieldFiltered"
+      field="field"
+      data="data">
+    </discover-field>
+  </ul>
+
   <ul bindonce class="list-unstyled">
     <discover-field
-      ng-repeat="field in fields | filter:filter.isFieldFiltered"
+      ng-repeat="field in unpopularFields | filter:filter.isFieldFiltered"
       field="field"
       data="data">
     </discover-field>

@@ -12,8 +12,9 @@
             <i class="fa fa-star"></i>
           </button>
           <button
-            ng-click="indexPattern.refreshFields()"
-            tooltip="Refresh field list"
+            confirm-click="indexPattern.refreshFields()"
+            confirmation="This will reset the field popularity counters. Are you sure you want to reload your fields?"
+            tooltip="Reload field list"
             class="btn btn-warning">
             <i class="fa fa-refresh"></i>
           </button>
@@ -56,8 +57,13 @@
               indexed <kbn-info info="Fields that are not indexed are unavailable for search" placement="top"></kbn-info>
               <i ng-class="sortClass('indexed')"></i>
             </th>
+            <th ng-click="setFieldSort('count')">
+              popularity <kbn-info info="A gauge of how often this field is used" placement="top"></kbn-info>
+              <i ng-class="sortClass('count')"></i>
+            </th>
+
           </thead>
-          <tr
+          <tr class="field-settings"
             ng-repeat="field in page">
           <td>
               <span bo-text="field.name"></span>
@@ -78,6 +84,13 @@
             </td>
             <td><span bo-text="field.analyzed ? 'yes' : 'no'"></span></td>
             <td><span bo-text="field.indexed ? 'yes' : 'no'"></span></td>
+            <td>
+              <span bo-text="field.count"></span>
+              <span class="field-popularize">
+                <span ng-click="indexPattern.popularizeField(field.name, 1)" class="label label-default"><i class="fa fa-plus"></i></span>
+                <span ng-click="indexPattern.popularizeField(field.name, -1)" class="label label-default"><i class="fa fa-minus"></i></span>
+              </span>
+            </td>
           </tr>
         </table>
       </paginate>

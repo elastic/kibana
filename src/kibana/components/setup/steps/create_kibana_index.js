@@ -9,19 +9,8 @@ define(function (require) {
         index: configFile.kibanaIndex,
         body: {
           settings: {
-            mappings: {
-              mappings: {
-                _source: {
-                  enabled: false
-                },
-                properties: {
-                  type: {
-                    type: 'string',
-                    index: 'not_analyzed'
-                  }
-                }
-              }
-            }
+            number_of_shards : 1,
+            number_of_replicas: 1
           }
         }
       })
