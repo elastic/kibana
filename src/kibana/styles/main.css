@@ -7027,6 +7027,8 @@ ul.navbar-inline li {
 }
 .tooltip {
   font-size: 8pt;
+  font-weight: normal;
+  opacity: 90%;
 }
 .content {
   position: relative;

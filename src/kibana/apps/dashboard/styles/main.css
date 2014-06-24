@@ -88,6 +88,8 @@ dashboard-grid {
   bottom: 0 !important;
   right: 0 !important;
   padding: 4px;
+  height: 25px;
+  width: 25px;
 }
 .gridster .preview-holder {
   border: none!important;

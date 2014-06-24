@@ -38,7 +38,7 @@ define(function (require) {
 
               }
             }
-            fields[name] = _.pick(mapping, 'type', 'indexed', 'analyzed');
+            fields[name] = _.pick(mapping, 'type', 'indexed', 'analyzed', 'doc_values');
           });
         });
       });
