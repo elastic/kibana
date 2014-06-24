@@ -22,7 +22,8 @@ define(function (require) {
         refresh: '=',
         data: '=',
         state: '=',
-        updateFilterInQuery: '=filter'
+        updateFilterInQuery: '=filter',
+        searchSource: '='
       },
       template: html,
       controller: function ($scope) {
@@ -58,6 +59,9 @@ define(function (require) {
               && (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1)
             ;
           },
+          popularity: function (field) {
+            return field.count;
+          },
           getActive: function () {
             return _.some(filter.props, function (prop) {
               return filter.vals[prop] !== filter.defaults[prop];
@@ -73,6 +77,20 @@ define(function (require) {
         });
 
         $scope.$watch('fields', function (newFields) {
+
+          // Find the top N most popular fields
+          $scope.popularFields = _.sortBy(_.filter(
+            _.sortBy(newFields, 'count')
+            .reverse()
+            .slice(0, config.get('fields:popularLimit')), function (field) {
+            return (field.count > 0);
+          }), 'name');
+
+          // Find the top N most popular fields
+          $scope.unpopularFields = _.sortBy(_.sortBy(newFields, 'count')
+            .reverse()
+            .slice($scope.popularFields.length), 'name');
+
           $scope.fieldTypes = _.unique(_.pluck(newFields, 'type'));
           // push undefined so the user can clear the filter
           $scope.fieldTypes.unshift(undefined);
@@ -85,6 +103,12 @@ define(function (require) {
             }
           });
         });
+
+        $scope.increaseFieldCounter = function (field) {
+          var indexPattern = $scope.searchSource.get('index');
+          indexPattern.popularizeField(field.name, 1);
+          field.count++;
+        };
 
         $scope.termsAgg = function (field) {
           $location.path('/visualize/create').search({
@@ -115,6 +139,8 @@ define(function (require) {
               count: 5,
               grouped: false
             });
+            var indexPattern = $scope.searchSource.get('index');
+            indexPattern.popularizeField(field.name, 1);
           } else {
             delete field.details;
           }
@@ -187,7 +213,8 @@ define(function (require) {
             });
 
           if (params.data.length - missing === 0) {
-            return {error: 'Field missing in record list. This field may still be indexed in Elasticsearch.'};
+            return {error: 'This is field is present in your elasticsearch mapping,' +
+              ' but not in any documents in the search results. You may still be able to visualize or search on it'};
           }
 
           return {

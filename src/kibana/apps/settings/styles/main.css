@@ -122,3 +122,10 @@ kbn-settings-objects-view .ace_editor {
 .indices-settings i.active {
   color: #31c471;
 }
+.indices-settings tr.field-settings .field-popularize {
+  margin-left: 5px;
+  display: none;
+}
+.indices-settings tr.field-settings:hover .field-popularize {
+  display: inline;
+}

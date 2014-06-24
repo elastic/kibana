@@ -216,3 +216,9 @@ field-name.no-results,
 [field-name].no-results {
   color: #b4bcc2;
 }
+disc-field-chooser ul.discover-selected-fields {
+  /* If only _source is presend in the selected fields list, hide its toggle button */
+}
+disc-field-chooser ul.discover-selected-fields li:first-child:nth-last-child(1)[field=_source] button.discover-field-toggle {
+  display: none;
+}
