@@ -100,7 +100,7 @@ define(function () {
           }
           return {
             "settings": {
-              __scope_link: function (context) {
+              __scope_link: function (context, editor) {
                 var rules = {
                   fs: {
                     __template: {
@@ -145,7 +145,7 @@ define(function () {
                   }
                 };
 
-                var type = getRepositoryType(context);
+                var type = getRepositoryType(context, editor);
 
                 if (!type) {
                   console.log("failed to resolve snapshot, defaulting to 'fs'");
