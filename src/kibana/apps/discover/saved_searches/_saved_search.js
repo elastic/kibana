@@ -31,10 +31,12 @@ define(function (require) {
         searchSource: true,
 
         afterESResp: function () {
-          var index = this.searchSource.get('index');
-          if (typeof index === 'string') {
-            this.searchSource.index(indexPatterns.get(index));
-          }
+          var obj = this;
+
+          return indexPatterns.get(obj.searchSource.get('index'))
+          .then(function (indexPattern) {
+            obj.searchSource.index(indexPattern);
+          });
         }
       });
     }
