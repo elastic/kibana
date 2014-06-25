@@ -430,8 +430,10 @@ function (angular, app, _, $, kbn, d3) {
           }
           if(scope.panel.chart === 'wordcloud'){
             elem.empty();
+            $('div.wc_tooltip').remove();
             require(['d3.layout.cloud'], function(){    
               var $tooltip = $('<div>');
+              $tooltip.addClass('wc_tooltip');
               var fill = d3.scale.ordinal().range(querySrv.colors);
               var min_fs = scope.panel.min_font_size;
               var max_fs =scope.panel.max_font_size;
@@ -466,7 +468,7 @@ function (angular, app, _, $, kbn, d3) {
               .rotate(function() { return scaleDegree(~~(Math.random() * scope.panel.orientation)); })
               .fontSize(function(d) { return fontScale(d.data[0][1]); })
               .padding(scope.panel.padding).spiral('archimedean').on("end", draw).start();
-              var svg = d3.select("div.terms-chart").append("svg").attr("width", width_wc).attr("height", height_wc),
+              var svg = d3.select(elem[0]).append("svg").attr("width", width_wc).attr("height", height_wc),
               vis = svg.append("g").attr("transform", "translate(" + [width_wc >> 1, height_wc >> 1] + ")");
 
             });
