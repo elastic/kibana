@@ -111,7 +111,8 @@ define(function () {
         explain: {
           __one_of: [true, false]
         },
-        stats: ['']
+        stats: [''],
+        timeout: "1s"
 
       }
     });
