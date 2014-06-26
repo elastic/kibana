@@ -1,19 +1,13 @@
 define(function (require) {
-  var module = require('modules').get('apps/visualize');
+  var module = require('modules').get('app/visualize');
   var _ = require('lodash');
   var saveAs = require('file_saver');
 
-  module.directive('visualizeTable', function (Notifier, $filter, $rootScope, config) {
+  return function VisualizeExtrasTable(Notifier, $filter, $rootScope, config) {
     return {
-      restrict: 'E',
-      template: require('text!../partials/visualize_table.html'),
-      scope: {
-        rawRows: '=rows',
-        rawColumns: '=columns',
-        show: '=',
-        fields: '='
-      },
-      link: function ($scope, $el) {
+      name: 'table',
+      template: require('text!apps/visualize/spy/_table.html'),
+      link: function tableLinkFn($scope, $el) {
         var notify = new Notifier();
         var orderBy = $filter('orderBy');
 
@@ -62,7 +56,7 @@ define(function (require) {
 
         $scope.exportAsCsv = function () {
           $scope.csv.showOptions = false;
-          if (!$scope.rawRows || !$scope.rawColumns) return;
+          if (!$scope.chartData) return;
 
           var text = '';
           var nonAlphaNumRE = /[^a-zA-Z0-9]/;
@@ -75,15 +69,16 @@ define(function (require) {
             return val;
           };
 
-          var rows = new Array($scope.rawRows + 1);
+          var raw = $scope.chartData.raw;
+          var rows = new Array(raw.rows.length + 1);
           var colRow = [];
           rows[0] = colRow;
 
-          $scope.rawColumns.forEach(function (col) {
+          raw.columns.forEach(function (col) {
             colRow.push(escape(col.aggParams ? col.aggParams.field : 'count'));
           });
 
-          $scope.rawRows.forEach(function (rawRow, i) {
+          raw.rows.forEach(function (rawRow, i) {
             var row = new Array(rawRow.length);
             rows[i + 1] = row;
 
@@ -100,16 +95,14 @@ define(function (require) {
         };
 
         $rootScope.$watchMulti.call($scope, [
-          'rawRows',
-          'rawColumns',
-          'show',
+          'chartData',
           'sort.asc',
           'sort.field'
         ], function () {
           $scope.rows = null;
           $scope.columns = null;
 
-          if (!$scope.show) return;
+          if (!$scope.chartData) return;
 
           notify.event('flatten data for table', function () {
             // flatten the fields to a list of strings
@@ -118,13 +111,13 @@ define(function (require) {
             var formats = [];
 
             // populate columns and formates
-            $scope.rawColumns.forEach(function (col) {
+            $scope.chartData.raw.columns.forEach(function (col) {
               $scope.columns.push(col.aggParams ? col.aggParams.field : 'count');
               formats.push(col.field ? col.field.format.convert : _.identity);
             });
 
 
-            $scope.rows = $scope.rawRows;
+            $scope.rows = $scope.chartData.raw.rows;
 
             // sort the row values
             if ($scope.sort) $scope.rows = orderBy($scope.rows, $scope.sort.getter, $scope.sort.asc);
@@ -139,5 +132,5 @@ define(function (require) {
         });
       }
     };
-  });
+  };
 });

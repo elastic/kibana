@@ -6,7 +6,7 @@ define(function (require) {
 
 
   require('css!apps/visualize/styles/visualization.css');
-  require('apps/visualize/visualize_extras/extras');
+  require('apps/visualize/spy/spy');
 
   var module = require('modules').get('kibana/directive');
 
