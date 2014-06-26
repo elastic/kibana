@@ -26,17 +26,9 @@ define(function (require) {
         };
 
         $scope.getColumnClass = function (col, $first, $last) {
-          var cls = [];
-
           if ($last || $scope.fields && $scope.fields[col] && $scope.fields[col].type === 'number') {
-            cls.push('visualize-table-right');
+            return 'visualize-table-right';
           }
-
-          if (!$scope.sort || $scope.sort.field !== col) {
-            cls.push('no-sort');
-          }
-
-          return cls.join(' ');
         };
 
         $scope.cycleSort = function (col) {
