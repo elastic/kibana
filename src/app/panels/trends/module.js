@@ -125,7 +125,7 @@ function (angular, app, _, kbn) {
 
       var _segment = _.isUndefined(segment) ? 0 : segment;
       var request = $scope.ejs.Request();
-      var _ids_without_time = _.difference(filterSrv.ids,filterSrv.idsByType('time'));
+      var _ids_without_time = _.difference(filterSrv.ids(),filterSrv.idsByType('time'));
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
       var queries = querySrv.getQueryObjs($scope.panel.queries.ids);
