@@ -57,7 +57,7 @@ define(function (require) {
 
               current.$container.append($compile(newMode.template)(current.$scope));
               newMode.link(current.$scope, current.$container);
-            };
+            }
 
             // wrapped in fn to enable early return
             set();
