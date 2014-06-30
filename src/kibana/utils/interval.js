@@ -24,9 +24,56 @@ define(function (require) {
     return rounded;
   };
 
+  // these are the rounding rules used by roundInterval()
+  var roundingRules = [
+    // bound, interval/desc, format
+    ['500ms', '100 ms',      'hh:mm:ss.SSS'],
+    ['5s',    'second',      'HH:mm:ss'],
+    ['7.5s',  '5 sec',       'HH:mm:ss'],
+    ['15s',   '10 sec',      'HH:mm:ss'],
+    ['45s',   '30 sec',      'HH:mm:ss'],
+    ['3m',    'minute',      'HH:mm'],
+    ['9m',    '5 min',       'HH:mm'],
+    ['20m',   '10 min',      'HH:mm'],
+    ['45m',   '30 min',      'YYYY-MM-DD HH:mm'],
+    ['2h',    'hour',        'YYYY-MM-DD HH:mm'],
+    ['6h',    '3 hours',     'YYYY-MM-DD HH:mm'],
+    ['24h',   '12 hours',    'YYYY-MM-DD HH:mm'],
+    ['1w',    '1 day',       'YYYY-MM-DD'],
+    ['3w',    '1 week',      'YYYY-MM-DD'],
+    ['1y',    '1 month',     'YYYY-MM'],
+    [null,    '1 year',      'YYYY'] // default
+  ];
+  var boundCache = {};
+
+  /**
+   * Round a millisecond interval to the closest "clean" interval,
+   *
+   * @param  {ms} interval - interval in milliseconds
+   * @return {[type]}          [description]
+   */
+  var roundInterval = function (interval) {
+    var rule = _.find(roundingRules, function (rule, i, rules) {
+      var remaining = rules.length - i - 1;
+      // no bound? then succeed
+      if (!rule[0]) return true;
+
+      var bound = boundCache[rule[0]] || (boundCache[rule[0]] = toMs(rule[0]));
+      // check that we are below or equal to the bounds
+      if (remaining > 1 && interval <= bound) return true;
+      // the last rule before the default shouldn't include the default (which is the bound)
+      if (remaining === 1 && interval < bound) return true;
+    });
+    return {
+      description: rule[1],
+      interval: toMs(rule[1]),
+      format: rule[2]
+    };
+  };
+
   // map of moment's short/long unit ids and elasticsearch's long unit ids
   // to their value in milliseconds
-  var momentUnitMap = _.transform([
+  var vals = _.transform([
     ['ms', 'milliseconds', 'millisecond'],
     ['s', 'seconds', 'second', 'sec'],
     ['m', 'minutes', 'minute', 'min'],
@@ -43,65 +90,8 @@ define(function (require) {
       vals[unit] = val;
     });
   }, {});
-
   // match any key from the vals object prececed by an optional number
-  var parseRE = new RegExp('^(\\d+(?:\\.\\d*)?)?\\s*(' + _.keys(momentUnitMap).join('|') + ')$');
-
-  var toMs = function (expr) {
-    var match = expr.match(parseRE);
-    if (match) return parseFloat(match[1] || 1) * momentUnitMap[match[2]];
-  };
-
-  // these are the rounding rules used by roundInterval()
-  var roundingRules = [
-    // ms (calculated below), interval/desc, format
-    ['500ms', '100 ms',      'hh:mm:ss.SSS'],
-    ['5s',    'second',      'HH:mm:ss'],
-    ['7.5s',  '5 sec',       'HH:mm:ss'],
-    ['15s',   '10 sec',      'HH:mm:ss'],
-    ['45s',   '30 sec',      'HH:mm:ss'],
-    ['3m',    'minute',      'HH:mm'],
-    ['9m',    '5 min',       'HH:mm'],
-    ['20m',   '10 min',      'HH:mm'],
-    ['45m',   '30 min',      'YYYY-MM-DD HH:mm'],
-    ['2h',    'hour',        'YYYY-MM-DD HH:mm'],
-    ['6h',    '3 hours',     'YYYY-MM-DD HH:mm'],
-    ['24h',   '12 hours',    'YYYY-MM-DD HH:mm'],
-    ['1w',    '1 day',       'YYYY-MM-DD'],
-    ['3w',    '1 week',      'YYYY-MM-DD'],
-    ['1y',    '1 month',     'YYYY-MM'],
-    [null,    '1 year',      'YYYY']
-  ];
-
-  roundingRules.forEach(function (rule) {
-    if (rule[0]) rule[0] = toMs(rule[0]);
-  });
-
-  /**
-   * Round a millisecond interval to the closest "clean" interval,
-   *
-   * @param  {ms} interval - interval in milliseconds
-   * @return {[type]}          [description]
-   */
-  var roundInterval = function (interval) {
-    var rule = _.find(roundingRules, function (rule, i, rules) {
-      var remaining = rules.length - i - 1;
-      var bound = rule[0];
-
-      // no bound? then succeed, this is the default
-      if (!bound) return true;
-
-      // check that we are below or equal to the bounds
-      if (remaining > 1 && interval <= bound) return true;
-      // the last rule before the default shouldn't include the default (which is the bound)
-      if (remaining === 1 && interval < bound) return true;
-    });
-    return {
-      description: rule[1],
-      interval: rule[0],
-      format: rule[2]
-    };
-  };
+  var parseRE = new RegExp('^(\\d+(?:\\.\\d*)?)?\\s*(' + _.keys(vals).join('|') + ')$');
 
   // Months and years are not handled here since they have sort of fuzzy values
   var describe = function (intervalString) {
@@ -119,6 +109,11 @@ define(function (require) {
             (minutes ? minutes + 'm ' : '') +
             (seconds ? seconds + 's ' : '') +
             (ms ? ms + 'ms' : '')).trim();
+  };
+
+  var toMs = function (expr) {
+    var match = expr.match(parseRE);
+    if (match) return parseFloat(match[1] || 1) * vals[match[2]];
   };
 
   return {
