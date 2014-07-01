@@ -4,7 +4,7 @@ define(function (require) {
   var _ = require('lodash');
 
   var getSelection = require('components/vislib/utils/selection');
-//  var injectZeros = require('components/vislib/utils/zeroInjection');
+  var injectZeros = require('components/vislib/utils/zeroInjection');
   var getLegend = require('components/vislib/modules/legend');
   var getColor = require('components/vislib/utils/colorspace');
 
@@ -18,6 +18,7 @@ define(function (require) {
     var addLegend = config.addLegend || true;
     var addTooltip = config.addTooltip || true;
     var shareYAxis = config.shareYAxis || false;
+    var isStacked = config.isStacked || false;
 
     var destroyFlag = false;
 
@@ -26,24 +27,13 @@ define(function (require) {
     var $elem = $(elem); // cached jquery version of elemen
     var latestData;
     var prevSize;
-//    var chartwrapper;
-//    var selection;
-//    var selectors;
-//    var colDomain;
-//    var getColors;
-//    var legend;
-//    var tip;
-//    var allLayers;
-//    var color = d3.scale.category10();
-//    var mousemove;
-//    var scrolltop;
-//    var allItms = false;
-
     var xValue = function (d, i) {
       return d.x;
     };
-
     var yValue = function (d, i) {
+      if (isStacked) {
+        return d.y0 + d.y;
+      }
       return d.y;
     };
 
@@ -60,7 +50,7 @@ define(function (require) {
         }
 
         // store a copy of the data sent to render, so that it can be resent with .resize()
-        latestData = data;
+        latestData = injectZeros(data);
 
         // removes elements to redraw the chart on subsequent calls
         d3.select(elem)
@@ -115,7 +105,8 @@ define(function (require) {
             'this': that,
             'colors': colors,
             'tip': tip,
-            'yAxisMax': yAxisMax
+            'yAxisMax': yAxisMax,
+            'isStacked': isStacked
           });
         });
       } catch (error) {
@@ -184,10 +175,10 @@ define(function (require) {
           throw new Error('No valid selection');
         }
 
-        var colorDomain = chart.getColorDomain(selection),
-          lengthOfColorDomain = colorDomain.length,
-          colorArray = getColor(lengthOfColorDomain),
-          colorDict;
+        var colorDomain = chart.getColorDomain(selection);
+        var lengthOfColorDomain = colorDomain.length;
+        var colorArray = getColor(lengthOfColorDomain);
+        var colorDict;
 
         colorDict = chart.getColorDict(colorDomain, colorArray);
 
@@ -250,11 +241,16 @@ define(function (require) {
         }
 
         var yArray = [];
+        var stack = d3.layout.stack()
+          .values(function (d) { return d.values; });
 
         selection.each(function (d) {
-          return d3.max(d.series, function (layer) {
-            return d3.max(layer.values, function (d) {
-              yArray.push(d.y);
+          return d3.max(stack(d.series), function (layer) {
+            return d3.max(layer.values, function (e) {
+              if (isStacked) {
+                return yArray.push(e.y0 + e.y);
+              }
+              return yArray.push(e.y);
             });
           });
         });
@@ -297,12 +293,14 @@ define(function (require) {
       var that = args.this;
       var colors = args.colors;
       var tip = args.tip;
+      var yAxisMax = args.yAxisMax;
+      var isStacked = args.isStacked;
+
       var xAxisLabel = data.xAxisLabel;
       var yAxisLabel = data.yAxisLabel;
       var label = data.label;
       var xAxisFormatter = data.xAxisFormatter;
       var yAxisFormatter = data.yAxisFormatter;
-      var yAxisMax = args.yAxisMax;
       var tooltipFormatter = data.tooltipFormatter;
 
       var vis = d3.select(elem);
@@ -317,8 +315,8 @@ define(function (require) {
       var elemHeight = parseInt(d3.select(that)
         .style('height'), 10);
       var margin = { top: 35, right: 15, bottom: 35, left: 50 };
-      var width = elemWidth - margin.left - margin.right; // width of the parent element ??
-      var height = elemHeight - margin.top - margin.bottom; // height of the parent element ??
+      var width = elemWidth - margin.left - margin.right;
+      var height = elemHeight - margin.top - margin.bottom;
       var seriesData = [];
       var brush;
 
@@ -326,17 +324,25 @@ define(function (require) {
         seriesData.push(series);
       });
 
-      var interpolate = 'linear';
+      var stack = d3.layout.stack()
+        .values(function (d) { return d.values; });
+
+      var stackedSeriesData = stack(seriesData);
+
       var xTickScale = d3.scale.linear()
         .clamp(true)
         .domain([80, 300, 800])
         .range([0, 2, 4]);
+
       var xTickN = Math.floor(xTickScale(width));
-      var ytickScale = d3.scale.linear()
+
+      var yTickScale = d3.scale.linear()
         .clamp(true)
         .domain([20, 40, 1000])
         .range([0, 1, 10]);
-      var ytickN = Math.floor(ytickScale(height));
+
+      var yTickN = Math.floor(yTickScale(height));
+
       var xScale = d3.time.scale()
         .domain(d3.extent(
           chart.getBounds(data),
@@ -345,10 +351,8 @@ define(function (require) {
           }
         ))
         .range([0, width]);
+
       var yScale = d3.scale.linear()
-        .domain([0, d3.max(chart.getBounds(data), function (d) {
-          return d.y;
-        })])
         .range([height, 0]);
 
       var xAxis = d3.svg.axis()
@@ -360,14 +364,14 @@ define(function (require) {
 
       var yAxis = d3.svg.axis()
         .scale(yScale)
-        .ticks(ytickN)
+        .ticks(yTickN)
         .tickPadding(4)
         .tickFormat(yAxisFormatter)
         .orient('left');
 
       var area = d3.svg.area()
         .x(X)
-        .y0(height)
+        .y0(Y0)
         .y1(Y);
 
       var line = d3.svg.line()
@@ -378,12 +382,13 @@ define(function (require) {
       // setting the y scale domain
       if (shareYAxis) {
         yScale.domain([0, yAxisMax])
-          .nice(ytickN);
+          .nice(yTickN);
       } else {
-        yScale.domain([0, d3.max(chart.getBounds(data), function (d) {
+        yScale
+          .domain([0, d3.max(chart.getBounds(data), function (d) {
             return d.y;
           })])
-          .nice(ytickN);
+          .nice(yTickN);
       }
 
       var svg = d3.select(that)
@@ -484,28 +489,34 @@ define(function (require) {
         });
 
       var lines = g.selectAll('.lines')
-        .data(seriesData)
+        .data(stackedSeriesData)
         .enter()
-        .append('g')
-        .attr('class', 'lines');
+        .append('g');
 
       lines.append('path')
+        .attr('class', function (d) {
+          return 'rl rl-' + chart.getClassName(d.label, yAxisLabel);
+        })
         .attr('d', function (d) {
           return line(d.values);
         })
         .attr('fill', 'none')
-        .style('stroke', function (d) {
+        .attr('stroke', function (d) {
           return d.label ? colors[d.label] : colors[yAxisLabel];
         })
         .style('stroke-width', '3px');
 
       lines.append('path')
+        .attr('class', function (d) {
+          return 'rl rl-' + chart.getClassName(d.label, yAxisLabel);
+        })
         .attr('d', function (d) {
           return area(d.values);
         })
         .style('fill', function (d) {
           return d.label ? colors[d.label] : colors[yAxisLabel];
         })
+        .style('stroke', 'none')
         .style('stroke', function (d) {
           return d.label ? colors[d.label] : colors[yAxisLabel];
         })
@@ -529,11 +540,14 @@ define(function (require) {
         })
         .enter()
         .append('circle')
-        .attr('class', 'points')
+        .attr('class', 'point')
         .attr('cx', function (d) {
           return xScale(d.x);
         })
         .attr('cy', function (d) {
+          if (isStacked) {
+            return yScale(d.y0 + d.y);
+          }
           return yScale(d.y);
         })
         /* css styling */
@@ -554,7 +568,7 @@ define(function (require) {
 
           // highlight chart layer
           allLayers = vis.selectAll('path');
-          allLayers.style('opacity', 0.3);
+          allLayers.style('opacity', 0.1);
 
           vis.selectAll(layerClass)
             .style('opacity', 1);
@@ -631,33 +645,28 @@ define(function (require) {
 
       if (addTooltip) {
         // **** hilite series on hover
-        allLayers = vis.select('path');
-        //var allLayers = svg.selectAll('.rect');
-        lines.on(
-          'mouseover', function (d, i) {
+//        allLayers = vis.selectAll('path');
+        lines.on('mouseover', function (d) {
+          // highlight chart layer
+          allLayers.style('opacity', 0.1);
+          var layerClass = '.rl-' + chart.getClassName(d.label, yAxisLabel);
+          var myLayer = vis.selectAll(layerClass)
+            .style('opacity', 1);
 
-            // hilite chart layer
-            allLayers.style('opacity', 0.3);
-            var layerClass = '.' + d3.select(this)
-              .node()
-              .classList[2],
-              mylayer = vis.selectAll(layerClass)
+          // stroke this rect
+          d3.select(this)
+            .classed('hover', true)
+            .style('stroke', '#333')
+            .style('cursor', 'pointer');
+
+          // hilite legend item
+          if (allItms) {
+            allItms.style('opacity', 0.3);
+            var itm = d3.select('.legendwrapper')
+              .select(layerClass)
               .style('opacity', 1);
-
-            // stroke this rect
-            d3.select(this)
-              .classed('hover', true)
-              .style('stroke', '#333')
-              .style('cursor', 'pointer');
-
-            // hilite legend item
-            if (allItms) {
-              allItms.style('opacity', 0.3);
-              var itm = d3.select('.legendwrapper')
-                .select('li.legends' + layerClass)
-                .style('opacity', 1);
-            }
-          });
+          }
+        });
       }
 
       /* Event Selection: BRUSH */
@@ -702,7 +711,7 @@ define(function (require) {
       /* ************************** */
 
       lines.on('mouseout', function () {
-        allLayers.style('opacity', 1);
+        allLayers.style('opacity', 0.5);
         allItms.style('opacity', 1);
       });
 
@@ -711,7 +720,17 @@ define(function (require) {
       }
 
       function Y(d) {
+        if (isStacked) {
+          return yScale(d.y0 + d.y);
+        }
         return yScale(d.y);
+      }
+
+      function Y0(d) {
+        if (isStacked) {
+          return yScale(d.y0);
+        }
+        return height;
       }
 
       return svg;
@@ -725,7 +744,6 @@ define(function (require) {
     }, 200);
 
     // enable auto-resize
-    var prevSize;
     (function checkSize() {
       var size = $elem.width() + ':' + $elem.height();
       if (prevSize !== size) {

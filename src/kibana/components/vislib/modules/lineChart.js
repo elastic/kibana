@@ -651,8 +651,8 @@ define(function (require) {
           lines.on('mouseover', function (d) {
             // highlight chart layer
             allLayers.style('opacity', 0.3);
-            var layerClass = '.rl-' + chart.getClassName(d.label, yAxisLabel),
-              mylayer = vis.selectAll(layerClass)
+            var layerClass = '.rl-' + chart.getClassName(d.label, yAxisLabel);
+            var myLayer = vis.selectAll(layerClass)
               .style('opacity', 1);
 
             // stroke this rect
