@@ -320,6 +320,14 @@ define(function (require) {
       var seriesData = [];
       var brush;
 
+      // adds the label value to each data point
+      // within the values array for displaying in the tooltip
+      data.series.forEach(function (d) {
+        d.values.forEach(function (e) {
+          e.label = d.label;
+        });
+      });
+
       data.series.map(function (series) {
         seriesData.push(series);
       });
@@ -493,18 +501,18 @@ define(function (require) {
         .enter()
         .append('g');
 
-      lines.append('path')
-        .attr('class', function (d) {
-          return 'rl rl-' + chart.getClassName(d.label, yAxisLabel);
-        })
-        .attr('d', function (d) {
-          return line(d.values);
-        })
-        .attr('fill', 'none')
-        .attr('stroke', function (d) {
-          return d.label ? colors[d.label] : colors[yAxisLabel];
-        })
-        .style('stroke-width', '3px');
+//      lines.append('path')
+//        .attr('class', function (d) {
+//          return 'rl rl-' + chart.getClassName(d.label, yAxisLabel);
+//        })
+//        .attr('d', function (d) {
+//          return line(d.values);
+//        })
+//        .attr('fill', 'none')
+//        .attr('stroke', function (d) {
+//          return d.label ? colors[d.label] : colors[yAxisLabel];
+//        })
+//        .style('stroke-width', '3px');
 
       lines.append('path')
         .attr('class', function (d) {
@@ -517,11 +525,11 @@ define(function (require) {
           return d.label ? colors[d.label] : colors[yAxisLabel];
         })
         .style('stroke', 'none')
-        .style('stroke', function (d) {
-          return d.label ? colors[d.label] : colors[yAxisLabel];
-        })
-        .style('stroke-width', '3px')
-        .style('opacity', 0.5);
+//        .style('stroke', function (d) {
+//          return d.label ? colors[d.label] : colors[yAxisLabel];
+//        })
+//        .style('stroke-width', '3px')
+        .style('opacity', 1);
 
       var layer = g.selectAll('.layer')
         .data(seriesData)
@@ -568,7 +576,7 @@ define(function (require) {
 
           // highlight chart layer
           allLayers = vis.selectAll('path');
-          allLayers.style('opacity', 0.1);
+          allLayers.style('opacity', 0.3);
 
           vis.selectAll(layerClass)
             .style('opacity', 1);
@@ -639,7 +647,7 @@ define(function (require) {
           if (addTooltip) {
             tip.style('visibility', 'hidden');
           }
-          allLayers.style('opacity', 0.5);
+          allLayers.style('opacity', 1);
           allItms.style('opacity', 1);
         });
 
@@ -648,7 +656,7 @@ define(function (require) {
 //        allLayers = vis.selectAll('path');
         lines.on('mouseover', function (d) {
           // highlight chart layer
-          allLayers.style('opacity', 0.1);
+          allLayers.style('opacity', 0.3);
           var layerClass = '.rl-' + chart.getClassName(d.label, yAxisLabel);
           var myLayer = vis.selectAll(layerClass)
             .style('opacity', 1);
@@ -711,7 +719,7 @@ define(function (require) {
       /* ************************** */
 
       lines.on('mouseout', function () {
-        allLayers.style('opacity', 0.5);
+        allLayers.style('opacity', 1);
         allItms.style('opacity', 1);
       });
 

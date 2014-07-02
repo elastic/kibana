@@ -358,19 +358,23 @@ define(function (require) {
           .x(X)
           .y(Y);
 
-        var vis = d3.select(elem),
-          allLayers = vis.selectAll('path'),
-          allItms = d3.select('.legendwrapper')
-          .selectAll('li.legends'),
-          scrolltop = document.body.scrollTop,
-          mousemove;
+        var voronoi = d3.geom.voronoi()
+          .x(function(d) { return xScale(d.x); })
+          .y(function(d) { return yScale(d.y); })
+          .clipExtent([
+            [-margin.left, -margin.top],
+            [width + margin.right, height + margin.bottom]
+          ]);
+
+        var vis = d3.select(elem);
+        var allLayers = vis.selectAll('path');
+        var allItms = d3.select('.legendwrapper')
+          .selectAll('li.legends');
+        var scrolltop = document.body.scrollTop;
+        var mousemove;
 
         /* *** Data Manipulation *** */
         var seriesData = [];
-
-        data.series.map(function (series) {
-          seriesData.push(series);
-        });
 
         // adds the label value to each data point
         // within the values array for displaying in the tooltip
@@ -378,6 +382,10 @@ define(function (require) {
           d.values.forEach(function (e) {
             e.label = d.label;
           });
+        });
+
+        data.series.map(function (series) {
+          seriesData.push(series);
         });
 
         xScale.domain(d3.extent(chart.getBounds(data), function (d) {
@@ -521,6 +529,20 @@ define(function (require) {
             return d.label ? colors[d.label] : colors[yAxisLabel];
           })
           .attr('stroke-width', 3);
+
+        var voronoiGroup = g.append("g")
+          .attr("class", "voronoi");
+
+        voronoiGroup.selectAll("path")
+          .data(seriesData, function (d) {
+            return voronoi(d.values);
+          })
+          .enter().append("path")
+          .attr("d", function (d) { return line(d.values); })
+          .attr('fill', 'none')
+          .datum(function (d) { return d.values; })
+//          .on("mouseover", mouseover)
+//          .on("mouseout", mouseout);
 
         var layer = g.selectAll('.layer')
           .data(seriesData)
