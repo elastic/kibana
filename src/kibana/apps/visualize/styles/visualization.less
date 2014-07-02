@@ -30,17 +30,17 @@ visualize {
     .flex(1, 1);
     overflow: hidden;
 
-    &.extra-visible {
+    &.spy-visible {
       margin-bottom: 10px;
     }
 
-    &.extra-only {
+    &.spy-only {
       display: none;
     }
   }
 }
 
-visualize-extras {
+visualize-spy {
   // this element should flex
   .flex();
 
@@ -60,7 +60,7 @@ visualize-extras {
     padding-top: 0px;
   }
 
-  .visualize-show-extras {
+  .visualize-show-spy {
     .flex();
     background-color: @well-bg;
     text-align: center;
@@ -70,17 +70,23 @@ visualize-extras {
     }
   }
 
-  .visualize-extra-container {
+  .visualize-spy-container {
     .flex(1, 1, auto);
 
     .flex-display();
     .flex-direction(column);
 
     padding: 10px 10px 0;
+    overflow-y: auto;
 
     tr > td {
       font-size: 0.85em;
     }
+  }
+
+  // this is the default, double-arrow sort that is just a hint to the user that they can sort
+  .visualize-table th i.fa-sort {
+    color: @gray-light;
   }
 
   .visualize-table-right {
@@ -110,19 +116,15 @@ visualize-extras {
     }
   }
 
-
-  .visualize-spy {
-    overflow-y: auto;
-    .visualize-spy-tabs {
-      margin-bottom: 10px;
-    }
-
-    pre {
-      word-break: break-all;
-      word-wrap: break-word;
-      white-space: pre-wrap;
-    }
-
+  .visualize-spy-tabs {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    .flex();
   }
 
+  pre {
+    word-break: break-all;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+  }
 }
