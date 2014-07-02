@@ -58,6 +58,7 @@ define([
       style   : { "font-size": '24pt'},
       format: 'number',
       mode: 'count',
+      display_featured_stat: 'yes',
       display_breakdown: 'yes',
       sort_field: '',
       sort_reverse: false,

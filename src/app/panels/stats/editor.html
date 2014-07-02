@@ -12,6 +12,11 @@
       <label class="small">Unit</label>
         <input type="text" class="input-large" ng-model="panel.unit">
     </div>
+    <div class="editor-option">
+      <label class="small">Display Featured Stat</label>
+      <select class="input-mini" ng-model="panel.display_featured_stat" ng-options="f for f in ['yes', 'no']"></select></span>
+    </div>
+ 
 
     <h5>Columns</h5>
     <div class="editor-option" ng-repeat="stat in modes">

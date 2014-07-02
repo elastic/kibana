@@ -8,11 +8,15 @@
       text-align: left !important;
     }
 
+    table.no-featured th {
+      border:0;
+    }
+
 
   </style>
 
-  <h1 ng-style="panel.style" style="text-align: center; line-height: .6em">{{data.value|formatstats:panel.format}} <small style="font-size: .5em; line-height: 0;">{{panel.unit}} ({{panel.mode}})</small></h1>
-  <table ng-show="panel.display_breakdown == 'yes'" cellspacing="0" class="table-hover table table-condensed stats-table" style="margin-top: 38px;">
+  <h1 ng-show ="panel.display_featured_stat=='yes'" ng-style="panel.style" style="text-align: center; line-height: .6em;">{{data.value|formatstats:panel.format}} <small style="font-size: .5em; line-height: 0;">{{panel.unit}} ({{panel.mode}})</small></h1>
+  <table ng-show="panel.display_breakdown == 'yes'" cellspacing="0" class="table-hover table table-condensed stats-table ng-class:{'no-featured': panel.display_featured_stat=='no'}" ng-style="{'margin-top': panel.display_featured_stat=='yes' ? '38px' : '0'}">
     <tbody>
       <thead>
         <tr>
