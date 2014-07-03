@@ -4,7 +4,8 @@ define(function (require) {
     return {
       histogram: histogram,
       line: histogram,
-      area: histogram
+      area: histogram,
+      pie: histogram
     };
   };
 });
