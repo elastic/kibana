@@ -105,7 +105,7 @@ define(function (require) {
             'index': i,
             'this': that,
             'colors': colors,
-            'tip': tip,
+            'tip': tip
           });
         });
       } catch (error) {
@@ -237,7 +237,6 @@ define(function (require) {
         }
 
         var data = args.data;
-        console.log(data);
         var that = args.this;
         var colors = args.colors;
         var tip = args.tip;
@@ -270,7 +269,7 @@ define(function (require) {
 
         var arc = d3.svg.arc()
           .outerRadius(radius - 10)
-          .innerRadius(30);
+          .innerRadius(0);
 
         var pie = d3.layout.pie()
           .sort(null)
@@ -287,6 +286,14 @@ define(function (require) {
 
         /* *** Data Manipulation *** */
         var seriesData = [];
+
+        // adds the label value to each data point
+        // within the values array for displaying in the tooltip
+        data.series.forEach(function (d) {
+          d.values.forEach(function (e) {
+            d.label ? e.label = d.label : e.label = e.x;
+          });
+        });
 
         data.series.map(function (series) {
           seriesData.push(series);
@@ -354,19 +361,133 @@ define(function (require) {
 
         wedge.append('path')
           .attr('d', arc)
+          .attr('class', function (d) {
+            return 'rl rl-' + chart.getClassName(d.data.label, yAxisLabel);
+          })
           .style('fill', function (d) {
             return colors[d.data.x];
+          })
+          .on('mouseover', function (d, i) {
+            var point = d3.select(this);
+            var layerClass = '.rl-' + chart.getClassName(d.data.label, yAxisLabel);
+
+            point.attr('opacity', 1)
+              .classed('hover', true)
+              .style('cursor', 'pointer');
+
+            // highlight chart layer
+            allLayers = vis.selectAll('.rl');
+            allLayers.style('opacity', 0.3);
+
+            vis.selectAll(layerClass)
+              .style('opacity', 1);
+
+            // highlight legend item
+            if (allItms) {
+              allItms.style('opacity', 0.3);
+
+              var itm = d3.select('.legendwrapper')
+                .select(layerClass)
+                .style('opacity', 1);
+            }
+
+            dispatch.hover({
+              value: yValue(d, i),
+              point: d,
+              pointIndex: i,
+              series: data.series,
+              config: config,
+              data: latestData,
+              e: d3.event
+            });
+            d3.event.stopPropagation();
+          })
+          .on('mousemove', function (d) {
+            var datum;
+            var hh = tip[0][0].scrollHeight;
+
+            mousemove = {
+              left: d3.event.pageX,
+              top: d3.event.pageY
+            };
+            scrolltop = document.body.scrollTop;
+
+            if (typeof d.data.label !== 'undefined') {
+              datum = {
+                label: d.data.label,
+                x: d.data.x,
+                y: d.data.y
+              };
+            } else {
+              datum = {
+                x: d.data.x,
+                y: d.data.y
+              };
+            }
+
+            tip.datum(datum)
+              .text(tooltipFormatter)
+              .style('top', mousemove.top - scrolltop - hh / 2 + 'px')
+              .style('left', mousemove.left + 20 + 'px')
+              .style('visibility', 'visible');
+          })
+          .on('click', function (d, i) {
+            dispatch.click({
+              value: yValue(d, i),
+              point: d,
+              pointIndex: i,
+              series: data.series,
+              config: config,
+              data: latestData,
+              e: d3.event
+            });
+            d3.event.stopPropagation();
+          })
+          .on('mouseout', function () {
+            var point = d3.select(this);
+            point.attr('opacity', 0.3);
+            if (addTooltip) {
+              tip.style('visibility', 'hidden');
+            }
+            allLayers.style('opacity', 1);
+            allItms.style('opacity', 1);
           });
 
-        wedge.append('text')
-          .attr('transform', function (d) {
-            return 'translate(' + arc.centroid(d) + ')';
-          })
-          .attr('dy', '.35em')
-          .style('text-anchor', 'middle')
-          .text(function (d) {
-            return d.data.x;
+        if (addTooltip) {
+          // **** hilite series on hover
+//        allLayers = vis.selectAll('path');
+          wedge.on('mouseover', function (d) {
+            // highlight chart layer
+            allLayers.style('opacity', 0.3);
+            var layerClass = '.rl-' + chart.getClassName(d.label, yAxisLabel);
+            var myLayer = vis.selectAll(layerClass)
+              .style('opacity', 1);
+
+            // stroke this rect
+            d3.select(this)
+              .classed('hover', true)
+              .style('stroke', '#333')
+              .style('cursor', 'pointer');
+
+            // hilite legend item
+            if (allItms) {
+              allItms.style('opacity', 0.3);
+              var itm = d3.select('.legendwrapper')
+                .select(layerClass)
+                .style('opacity', 1);
+            }
           });
+        }
+
+//        wedge.append('text')
+//          .attr('transform', function (d) {
+//            return 'translate(' + arc.centroid(d) + ')';
+//          })
+//          .attr('dy', '.35em')
+//          .style('text-anchor', 'middle')
+//          .text(function (d) {
+//            return d.data.x;
+//          });
 
         return svg;
       } catch (error) {
