@@ -22,7 +22,7 @@
       <table class="table table-condensed table-striped">
         <tr bindonce ng-repeat="row in elasticsearch.dashboards | orderBy:['_id']">
           <td><a confirm-click="elasticsearch_delete(row._id)" confirmation="Are you sure you want to delete the {{row._id}} dashboard"><i class="icon-remove"></i></a></td>
-          <td><a href="#/dashboard/elasticsearch/{{row._id}}" bo-text="row._id"></a></td>
+          <td><a href="{{currentLocation}}#/dashboard/elasticsearch/{{row._id}}" bo-text="row._id"></a></td>
           <td><a><i class="icon-share" ng-click="share = dashboard.share_link(row._id,'elasticsearch',row._id)" bs-modal="'app/partials/dashLoaderShare.html'"></i></a></td>
         </tr>
       </table>
