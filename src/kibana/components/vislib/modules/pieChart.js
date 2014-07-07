@@ -237,6 +237,7 @@ define(function (require) {
         }
 
         var data = args.data;
+        console.log(data);
         var that = args.this;
         var colors = args.colors;
         var tip = args.tip;
@@ -269,7 +270,7 @@ define(function (require) {
 
         var arc = d3.svg.arc()
           .outerRadius(radius - 10)
-          .innerRadius(0);
+          .innerRadius(30);
 
         var pie = d3.layout.pie()
           .sort(null)
