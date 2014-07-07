@@ -50,15 +50,15 @@ define(function (require) {
         }
 
         // store a copy of the data sent to render, so that it can be resent with .resize()
-        latestData = injectZeros(data);
+        latestData = data;
 
         // removes elements to redraw the chart on subsequent calls
         d3.select(elem)
           .selectAll('*')
           .remove();
 
-        var chartWrapper = chart.getChartWrapper(elem)[0][0],
-          selection = chart.getSelection(chartWrapper, latestData);
+        var chartWrapper = chart.getChartWrapper(elem)[0][0];
+        var selection = chart.getSelection(chartWrapper, latestData);
 
         return chart.getVisualization(selection);
       } catch (error) {
@@ -245,6 +245,7 @@ define(function (require) {
           .values(function (d) { return d.values; });
 
         selection.each(function (d) {
+          d = injectZeros(d);
           return d3.max(stack(d.series), function (layer) {
             return d3.max(layer.values, function (e) {
               if (isStacked) {
@@ -289,7 +290,7 @@ define(function (require) {
         args = {};
       }
 
-      var data = args.data;
+      var data = injectZeros(args.data);
       var that = args.this;
       var colors = args.colors;
       var tip = args.tip;
@@ -529,6 +530,7 @@ define(function (require) {
 //          return d.label ? colors[d.label] : colors[yAxisLabel];
 //        })
 //        .style('stroke-width', '3px')
+//        .style('opacity', 1);
         .style('opacity', 1);
 
       var layer = g.selectAll('.layer')
@@ -575,7 +577,7 @@ define(function (require) {
             .style('cursor', 'pointer');
 
           // highlight chart layer
-          allLayers = vis.selectAll('path');
+          allLayers = vis.selectAll('.rl');
           allLayers.style('opacity', 0.3);
 
           vis.selectAll(layerClass)
