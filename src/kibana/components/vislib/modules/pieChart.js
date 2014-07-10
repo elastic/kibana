@@ -67,6 +67,25 @@ define(function (require) {
       }
     };
 
+    /* Function for truncating x axis tick labels */
+    chart.tickText = function (text, width) {
+      var n = text[0].length,
+        maxw = width / n * 0.9,
+        tickn = Math.floor(maxw);
+      text.each(function () {
+        var text = d3.select(this),
+          length = this.getComputedTextLength(),
+          tspan = text.text();
+        if (length > maxw) {
+          var str = text.text(),
+            avg = length / str.length,
+            end = Math.floor(maxw / avg);
+          str = str.substr(0, end) + '...';
+          tspan = text.text(str);
+        }
+      });
+    };
+
     /*
      Creates the d3 visualization
      */
@@ -256,15 +275,8 @@ define(function (require) {
           throw new Error('The visualization element has no height');
         }
 
-        var margin = {
-            top: 35,
-            right: 15,
-            bottom: 35,
-            left: 50
-          };
-
-        var width = elemWidth - margin.left - margin.right;
-        var height = elemHeight - margin.top - margin.bottom;
+        var width = elemWidth;
+        var height = elemHeight;
         var radius = Math.min(width, height) / 2;
 
         var arc = d3.svg.arc()
@@ -302,7 +314,6 @@ define(function (require) {
 
         var svg = d3.select(that)
           .append('svg')
-          .data(seriesData)
           .attr('class', 'canvas')
           .attr('width', '100%')
           .attr('height', '100%');
@@ -320,36 +331,38 @@ define(function (require) {
         g.append('text')
           .attr('class', 'charts-label')
           .attr('text-anchor', 'middle')
-          .attr('x', width / 2)
-          .attr('y', -10)
+          .attr('x', 0)
+          .attr('y', -radius)
           .text(chartLabel)
-//          .call(chart.tickText, width)
-//          .on('mouseover', function (d) {
-//            if (addTooltip) {
-//              var hh = tip[0][0].scrollHeight;
-//
-//              mousemove = {
-//                left: d3.event.pageX,
-//                top: d3.event.pageY
-//              };
-//
-//              d3.select(that)
-//                .style('cursor', 'default');
-//
-//              return tip.text(d.label)
-//                .style('top', mousemove.top - scrolltop - hh / 2 + 'px')
-//                .style('left', mousemove.left + 20 + 'px')
-//                .style('visibility', 'visible');
-//            }
-//          })
-//          .on('mouseout', function () {
-//            d3.select(that)
-//              .classed('hover', false)
-//              .style('stroke', null);
-//            if (addTooltip) {
-//              tip.style('visibility', 'hidden');
-//            }
-//          });
+          .call(chart.tickText, width)
+          .on('mouseover', function (d) {
+            if (addTooltip) {
+              var hh = tip[0][0].scrollHeight;
+
+              mousemove = {
+                left: d3.event.pageX,
+                top: d3.event.pageY
+              };
+
+              d3.select(that)
+                .style('cursor', 'default');
+
+              return tip.text(d.label)
+                .style('top', mousemove.top - scrolltop - hh / 2 + 'px')
+                .style('left', mousemove.left + 20 + 'px')
+                .style('visibility', 'visible');
+            }
+          })
+          .on('mouseout', function () {
+            d3.select(that)
+              .classed('hover', false)
+              .style('stroke', null);
+            if (addTooltip) {
+              tip.style('visibility', 'hidden');
+            }
+          });
+
+        g.data(seriesData);
 
         var wedge = g.selectAll('.arc')
           .data(function (d) {
