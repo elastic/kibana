@@ -125,7 +125,9 @@ function (angular, app, _, $, kbn) {
       /** @scratch /panels/terms/5
        * valuefield:: Terms_stats facet value field
        */
-      valuefield  : ''
+      valuefield  : '',
+      
+      mappings : {}
     };
 
     _.defaults($scope.panel,_d);
@@ -248,7 +250,10 @@ function (angular, app, _, $, kbn) {
       }
       return true;
     };
-
+    
+    $scope.delete_mapping = function(mappings, term) {
+      delete mappings[term];
+    };
   });
 
   module.directive('termsChart', function(querySrv) {
@@ -267,11 +272,13 @@ function (angular, app, _, $, kbn) {
           scope.data = [];
           _.each(scope.results.facets.terms.terms, function(v) {
             var slice;
+            var label = scope.panel.mappings[v.term] || v.term;
+            
             if(scope.panel.tmode === 'terms') {
-              slice = { label : v.term, data : [[k,v.count]], actions: true};
+              slice = { label : label, data : [[k,v.count]], actions: true};
             }
             if(scope.panel.tmode === 'terms_stats') {
-              slice = { label : v.term, data : [[k,v[scope.panel.tstat]]], actions: true};
+              slice = { label : label, data : [[k,v[scope.panel.tstat]]], actions: true};
             }
             scope.data.push(slice);
             k = k + 1;

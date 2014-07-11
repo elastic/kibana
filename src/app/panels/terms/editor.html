@@ -68,3 +68,35 @@
       </div>
     </div>
   </div>
+  <div class="editor-row">
+    <div class="section">
+      <h5>Term/Label Mappings</h5>
+      <div class="editor-option">
+        <label class="small">Term</label>
+        <input bs-typeahead="fields.list" type="text" class="input-small" ng-model='mapping_term'>
+      </div>
+      <div class="editor-option">
+        <label class="small">Label</label>
+        <input bs-typeahead="fields.list" type="text" class="input-small" ng-model='mapping_label'>
+      </div>
+      <div class="editor-option">
+        <label class="small">Add</label>
+        <button class="btn" ng-click="panel.mappings[mapping_term] = mapping_label; mapping_term = ''; mapping_label = '';"><i class="icon-plus"></i></button>
+      </div>
+      <div class="row-fluid">
+      <div class="span12">
+        <table class="table table-condensed table-striped">
+          <thead>
+            <th>Term</th>
+            <th>Label</th>
+            <th>Delete</th>
+          </thead>
+          <tr ng-repeat="(term, label) in panel.mappings | orderBy:'term'">
+            <td>{{term}}</td>
+            <td>{{label}}</td>
+            <td><i ng-click="delete_mapping(panel.mappings, term)" class="pointer icon-remove"></i></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
