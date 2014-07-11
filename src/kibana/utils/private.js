@@ -13,7 +13,7 @@ define(function (require) {
     return privPath.map(name).join(' -> ');
   };
 
-  var module = require('modules').get('kibana/utils');
+  var module = require('modules').get('kibana/services');
   module.service('Private', function ($injector) {
     return function Private(construct) {
       if (typeof construct !== 'function') {

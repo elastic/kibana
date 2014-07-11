@@ -31,7 +31,7 @@ define(function (require) {
 
   require('routes')
   .when('/discover/:id?', {
-    templateUrl: 'kibana/apps/discover/index.html',
+    template: require('text!apps/discover/index.html'),
     reloadOnSearch: false,
     resolve: {
       indexList: function (courier) {

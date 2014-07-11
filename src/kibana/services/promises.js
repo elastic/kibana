@@ -38,7 +38,7 @@ define(function (require) {
 
   // Provides a tiny subset of the excelent API from
   // bluebird, reimplemented using the $q service
-  module.service('Promise', function ($q) {
+  module.service('Promise', function ($q, $timeout) {
     function Promise(fn) {
       var defer = $q.defer();
       try {
@@ -55,13 +55,16 @@ define(function (require) {
       defer.resolve(val);
       return defer.promise;
     };
-    Promise.rejected = function (reason) {
+    Promise.reject = function (reason) {
       var defer = $q.defer();
       defer.reject(reason);
       return defer.promise;
     };
     Promise.cast = $q.when;
     Promise.defer = $q.defer;
+    Promise.delay = function (ms) {
+      return $timeout(_.noop, ms);
+    };
     Promise.nodeify = function (promise, cb) {
       promise.then(function (val) {
         cb(void 0, val);

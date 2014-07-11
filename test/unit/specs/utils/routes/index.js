@@ -104,5 +104,6 @@ define(function (require) {
     });
 
     require('./work_queue')();
+    require('./wrap_route_with_prep')();
   });
 });
