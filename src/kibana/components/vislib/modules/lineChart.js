@@ -359,8 +359,8 @@ define(function (require) {
           .y(Y);
 
         var voronoi = d3.geom.voronoi()
-          .x(function(d) { return xScale(d.x); })
-          .y(function(d) { return yScale(d.y); })
+          .x(function (d) { return xScale(d.x); })
+          .y(function (d) { return yScale(d.y); })
           .clipExtent([
             [-margin.left, -margin.top],
             [width + margin.right, height + margin.bottom]
@@ -530,19 +530,19 @@ define(function (require) {
           })
           .attr('stroke-width', 3);
 
-        var voronoiGroup = g.append("g")
-          .attr("class", "voronoi");
+        var voronoiGroup = g.append('g')
+          .attr('class', 'voronoi');
 
-        voronoiGroup.selectAll("path")
+        voronoiGroup.selectAll('path')
           .data(seriesData, function (d) {
             return voronoi(d.values);
           })
-          .enter().append("path")
-          .attr("d", function (d) { return line(d.values); })
+          .enter().append('path')
+          .attr('d', function (d) { return line(d.values); })
           .attr('fill', 'none')
-          .datum(function (d) { return d.values; })
-//          .on("mouseover", mouseover)
-//          .on("mouseout", mouseout);
+          .datum(function (d) { return d.values; });
+//          .on('mouseover', mouseover)
+//          .on('mouseout', mouseout);
 
         var layer = g.selectAll('.layer')
           .data(seriesData)
