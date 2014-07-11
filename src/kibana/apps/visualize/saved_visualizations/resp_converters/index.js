@@ -3,7 +3,9 @@ define(function (require) {
     var histogram = Private(require('apps/visualize/saved_visualizations/resp_converters/histogram'));
     return {
       histogram: histogram,
-      line: histogram
+      line: histogram,
+      area: histogram,
+      pie: histogram
     };
   };
 });

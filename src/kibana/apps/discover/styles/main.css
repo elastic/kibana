@@ -80,10 +80,10 @@
   height: 200px;
   max-height: 600px;
 }
-.discover-timechart visualize.only-extra {
+.discover-timechart visualize.only-spy {
   height: auto;
 }
-.discover-timechart visualize.only-extra .visualize-table {
+.discover-timechart visualize.only-spy .visualize-table {
   height: auto;
 }
 .discover-timechart .chartwrapper {

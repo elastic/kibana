@@ -8,7 +8,7 @@ define(function (require) {
   var getLegend = require('components/vislib/modules/legend');
   var getColor = require('components/vislib/utils/colorspace');
 
-  return function getLineChart(elem, config) {
+  return function getPieChart(elem, config) {
     if (typeof config === 'undefined') {
       config = {};
     }
@@ -36,7 +36,7 @@ define(function (require) {
     var yValue = function (d, i) {
       return d.y;
     };
-  /* ************************* */
+    /* ************************* */
 
     /*
      Renders the chart to the HTML element
@@ -65,6 +65,25 @@ define(function (require) {
       } catch (error) {
         console.group('chart.render: ' + error);
       }
+    };
+
+    /* Function for truncating x axis tick labels */
+    chart.tickText = function (text, width) {
+      var n = text[0].length,
+        maxw = width / n * 0.9,
+        tickn = Math.floor(maxw);
+      text.each(function () {
+        var text = d3.select(this),
+          length = this.getComputedTextLength(),
+          tspan = text.text();
+        if (length > maxw) {
+          var str = text.text(),
+            avg = length / str.length,
+            end = Math.floor(maxw / avg);
+          str = str.substr(0, end) + '...';
+          tspan = text.text(str);
+        }
+      });
     };
 
     /*
@@ -100,13 +119,12 @@ define(function (require) {
         return selection.each(function (d, i) {
           var that = this;
 
-          chart.createLineChart({
+          chart.createPieChart({
             'data': d,
             'index': i,
             'this': that,
             'colors': colors,
-            'tip': tip,
-            'yAxisMax': yAxisMax
+            'tip': tip
           });
         });
       } catch (error) {
@@ -218,11 +236,9 @@ define(function (require) {
 
         selection.each(function (d) {
           d.series.forEach(function (label) {
-            if (label.label) {
-              items.push(label.label);
-            } else {
-              items.push(d.yAxisLabel);
-            }
+            label.values.forEach(function (value) {
+              items.push(value.x);
+            });
           });
         });
 
@@ -233,73 +249,23 @@ define(function (require) {
       }
     };
 
-    /* Function for global yAxis */
-    chart.getYAxisMax = function (selection) {
-      try {
-        if (!selection) {
-          throw new Error('No valid selection');
-        }
-
-        var yArray = [];
-
-        selection.each(function (d) {
-          return d3.max(d.series, function (layer) {
-            return d3.max(layer.values, function (d) {
-              yArray.push(d.y);
-            });
-          });
-        });
-
-        return d3.max(yArray);
-      } catch (error) {
-        console.group('chart.getYAxisMax: ' + error);
-      }
-    };
-
-    chart.getBounds = function (data) {
-      try {
-        if (!data) {
-          throw new Error('No valid data');
-        }
-
-        var bounds = [];
-
-        data.series.map(function (series) {
-          series.values.map(function (d, i) {
-            bounds.push({
-              x: xValue.call(series, d, i),
-              y: yValue.call(series, d, i)
-            });
-          });
-        });
-
-        return bounds;
-      } catch (error) {
-        console.group('chart.getBounds: ' + error);
-      }
-    };
-
-    chart.createLineChart = function (args) {
+    chart.createPieChart = function (args) {
       try {
         if (typeof args === 'undefined') {
           args = {};
         }
 
-        var data = args.data,
-          that = args.this,
-          colors = args.colors,
-          tip = args.tip,
-          yAxisMax = args.yAxisMax,
-          xAxisLabel = data.xAxisLabel,
-          yAxisLabel = data.yAxisLabel,
-          chartLabel = data.label,
-          xAxisFormatter = data.xAxisFormatter,
-          yAxisFormatter = data.yAxisFormatter,
-          tooltipFormatter = data.tooltipFormatter;
+        var data = args.data;
+        var that = args.this;
+        var colors = args.colors;
+        var tip = args.tip;
+        var yAxisLabel = data.yAxisLabel;
+        var chartLabel = data.label;
+        var tooltipFormatter = data.tooltipFormatter;
 
         var elemWidth = parseInt(d3.select(that)
-            .style('width'), 10),
-          elemHeight = parseInt(d3.select(that)
+            .style('width'), 10);
+        var elemHeight = parseInt(d3.select(that)
             .style('height'), 10);
 
         if (!elemWidth) {
@@ -309,62 +275,19 @@ define(function (require) {
           throw new Error('The visualization element has no height');
         }
 
-        var margin = {
-            top: 35,
-            right: 15,
-            bottom: 35,
-            left: 50
-          },
-          width = elemWidth - margin.left - margin.right,
-          height = elemHeight - margin.top - margin.bottom;
+        var width = elemWidth;
+        var height = elemHeight;
+        var radius = Math.min(width, height) / 2;
 
-        var xTickScale = d3.scale.linear()
-          .clamp(true)
-          .domain([80, 300, 800])
-          .range([0, 2, 4]);
+        var arc = d3.svg.arc()
+          .outerRadius(radius - 10)
+          .innerRadius(0);
 
-        var yTickScale = d3.scale.linear()
-          .clamp(true)
-          .domain([20, 40, 1000])
-          .range([0, 1, 10]);
-
-        var xTickN = Math.floor(xTickScale(width)),
-          yTickN = Math.floor(yTickScale(height));
-
-        var xScale = d3.time.scale()
-          .range([0, width]);
-
-        var yScale = d3.scale.linear()
-          .range([height, 0]);
-
-        var xAxis = d3.svg.axis()
-          .scale(xScale)
-          .ticks(xTickN)
-          .tickPadding(5)
-          .tickFormat(xAxisFormatter)
-          .orient('bottom');
-
-        var yAxis = d3.svg.axis()
-          .scale(yScale)
-          .ticks(yTickN)
-          .tickPadding(4)
-          .tickFormat(yAxisFormatter)
-          .orient('left');
-
-        var interpolate = 'linear';
-
-        var line = d3.svg.line()
-          .interpolate(interpolate)
-          .x(X)
-          .y(Y);
-
-        var voronoi = d3.geom.voronoi()
-          .x(function (d) { return xScale(d.x); })
-          .y(function (d) { return yScale(d.y); })
-          .clipExtent([
-            [-margin.left, -margin.top],
-            [width + margin.right, height + margin.bottom]
-          ]);
+        var pie = d3.layout.pie()
+          .sort(null)
+          .value(function (d) {
+            return d.y;
+          });
 
         var vis = d3.select(elem);
         var allLayers = vis.selectAll('path');
@@ -380,30 +303,13 @@ define(function (require) {
         // within the values array for displaying in the tooltip
         data.series.forEach(function (d) {
           d.values.forEach(function (e) {
-            e.label = d.label;
+            d.label ? e.label = d.label : e.label = e.x;
           });
         });
 
         data.series.map(function (series) {
           seriesData.push(series);
         });
-
-        xScale.domain(d3.extent(chart.getBounds(data), function (d) {
-          return d.x;
-        }));
-
-        // setting the y scale domain
-        if (shareYAxis) {
-          yScale
-            .domain([0, yAxisMax])
-            .nice(yTickN);
-        } else {
-          yScale
-            .domain([0, d3.max(chart.getBounds(data), function (d) {
-              return d.y;
-            })])
-            .nice(yTickN);
-        }
         /* ************************** */
 
         var svg = d3.select(that)
@@ -412,76 +318,21 @@ define(function (require) {
           .attr('width', '100%')
           .attr('height', '100%');
 
-        var g = svg.append('g')
-          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
         // background rect
-        g.append('rect')
+        svg.append('rect')
           .attr('class', 'chart-bkgd')
           .attr('width', width)
           .attr('height', height);
 
-        g.append('g')
-          .attr('class', 'x axis')
-          .attr('transform', 'translate(0,' + height + ')')
-          .call(xAxis)
-          .selectAll('text')
-          .call(chart.tickText, width)
-          .on('mouseover', function (d) {
-            if (addTooltip) {
-              var hh = tip[0][0].scrollHeight;
-
-              mousemove = {
-                left: d3.event.pageX,
-                top: d3.event.pageY
-              };
-
-              d3.select(that)
-                .style('cursor', 'default');
-
-              return tip.datum(d)
-                .text(d)
-                .style('top', mousemove.top - scrolltop - hh / 2 + 'px')
-                .style('left', mousemove.left + 20 + 'px')
-                .style('visibility', 'visible');
-            }
-          })
-          .on('mouseout', function () {
-            d3.select(that)
-              .classed('hover', false)
-              .style('stroke', null);
-            if (addTooltip) {
-              tip.style('visibility', 'hidden');
-            }
-          });
-
-        g.append('g')
-          .attr('class', 'y axis')
-          .call(yAxis);
-
-        // Axis labels
-        g.append('text')
-          .attr('class', 'x-axis-label')
-          .attr('text-anchor', 'middle')
-          .attr('x', width / 2)
-          .attr('y', height + 30)
-          .text(xAxisLabel);
-
-        g.append('text')
-          .attr('class', 'y-axis-label')
-          .attr('text-anchor', 'middle')
-          .attr('x', -height / 2)
-          .attr('y', -40)
-          .attr('dy', '.75em')
-          .attr('transform', 'rotate(-90)')
-          .text(yAxisLabel);
+        var g = svg.append('g')
+          .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
 
         // Chart title
         g.append('text')
           .attr('class', 'charts-label')
           .attr('text-anchor', 'middle')
-          .attr('x', width / 2)
-          .attr('y', -10)
+          .attr('x', 0)
+          .attr('y', -radius)
           .text(chartLabel)
           .call(chart.tickText, width)
           .on('mouseover', function (d) {
@@ -511,84 +362,34 @@ define(function (require) {
             }
           });
 
-        var lines = g.selectAll('.lines')
-          .data(seriesData)
-          .enter()
-          .append('g')
-          .attr('class', 'lines');
+        g.data(seriesData);
 
-        lines.append('path')
-          .attr('class', function (d) {
-            return 'rl rl-' + chart.getClassName(d.label, yAxisLabel);
-          })
-          .attr('d', function (d) {
-            return line(d.values);
-          })
-          .attr('fill', 'none')
-          .attr('stroke', function (d) {
-            return d.label ? colors[d.label] : colors[yAxisLabel];
-          })
-          .attr('stroke-width', 3);
-
-        var voronoiGroup = g.append('g')
-          .attr('class', 'voronoi');
-
-        voronoiGroup.selectAll('path')
-          .data(seriesData, function (d) {
-            return voronoi(d.values);
-          })
-          .enter().append('path')
-          .attr('d', function (d) { return line(d.values); })
-          .attr('fill', 'none')
-          .datum(function (d) { return d.values; });
-//          .on('mouseover', mouseover)
-//          .on('mouseout', mouseout);
-
-        var layer = g.selectAll('.layer')
-          .data(seriesData)
-          .enter()
-          .append('g')
-          .attr('class', function (d) {
-            return 'rl rl-' + chart.getClassName(d.label, yAxisLabel);
-          })
-          .attr('stroke', function (d) {
-            return d.label ? colors[d.label] : colors[yAxisLabel];
-          });
-
-        var circle = layer.selectAll('.points')
+        var wedge = g.selectAll('.arc')
           .data(function (d) {
-            return d.values;
+            return pie(d.values);
           })
           .enter()
-          .append('circle')
-          .attr('class', 'points')
-          .attr('cx', function (d) {
-            return xScale(d.x);
-          })
-          .attr('cy', function (d) {
-            return yScale(d.y);
-          })
-          .attr('r', 8);
+          .append('g')
+          .attr('class', 'arc');
 
-        circle
-          .attr('fill', '#ffffff')
-          .attr('stroke', function (d) {
-            return d.label ? colors[d.label] : colors[yAxisLabel];
+        wedge.append('path')
+          .attr('d', arc)
+          .attr('class', function (d) {
+            return 'rl rl-' + chart.getClassName(d.data.label, yAxisLabel);
           })
-          .attr('stroke-width', 3.5)
-          .attr('opacity', 0);
-
-        circle
+          .style('fill', function (d) {
+            return colors[d.data.x];
+          })
           .on('mouseover', function (d, i) {
             var point = d3.select(this);
-            var layerClass = '.rl-' + chart.getClassName(d.label, yAxisLabel);
+            var layerClass = '.rl-' + chart.getClassName(d.data.label, yAxisLabel);
 
             point.attr('opacity', 1)
               .classed('hover', true)
               .style('cursor', 'pointer');
 
             // highlight chart layer
-            allLayers = vis.selectAll('path');
+            allLayers = vis.selectAll('.rl');
             allLayers.style('opacity', 0.3);
 
             vis.selectAll(layerClass)
@@ -612,38 +413,36 @@ define(function (require) {
               data: latestData,
               e: d3.event
             });
-
             d3.event.stopPropagation();
           })
           .on('mousemove', function (d) {
-            if (addTooltip) {
-              var hh = tip[0][0].scrollHeight,
-                datum;
+            var datum;
+            var hh = tip[0][0].scrollHeight;
 
-              mousemove = {
-                left: d3.event.pageX,
-                top: d3.event.pageY
+            mousemove = {
+              left: d3.event.pageX,
+              top: d3.event.pageY
+            };
+            scrolltop = document.body.scrollTop;
+
+            if (typeof d.data.label !== 'undefined') {
+              datum = {
+                label: d.data.label,
+                x: d.data.x,
+                y: d.data.y
               };
-
-              if (typeof d.label !== 'undefined') {
-                datum = {
-                  label: d.label,
-                  x: d.x,
-                  y: d.y
-                };
-              } else {
-                datum = {
-                  x: d.x,
-                  y: d.y
-                };
-              }
-
-              tip.datum(datum)
-                .text(tooltipFormatter)
-                .style('top', mousemove.top - scrolltop - hh / 2 + 'px')
-                .style('left', mousemove.left + 20 + 'px')
-                .style('visibility', 'visible');
+            } else {
+              datum = {
+                x: d.data.x,
+                y: d.data.y
+              };
             }
+
+            tip.datum(datum)
+              .text(tooltipFormatter)
+              .style('top', mousemove.top - scrolltop - hh / 2 + 'px')
+              .style('left', mousemove.left + 20 + 'px')
+              .style('visibility', 'visible');
           })
           .on('click', function (d, i) {
             dispatch.click({
@@ -659,7 +458,7 @@ define(function (require) {
           })
           .on('mouseout', function () {
             var point = d3.select(this);
-            point.attr('opacity', 0);
+            point.attr('opacity', 0.3);
             if (addTooltip) {
               tip.style('visibility', 'hidden');
             }
@@ -669,8 +468,8 @@ define(function (require) {
 
         if (addTooltip) {
           // **** hilite series on hover
-          allLayers = vis.selectAll('path');
-          lines.on('mouseover', function (d) {
+//        allLayers = vis.selectAll('path');
+          wedge.on('mouseover', function (d) {
             // highlight chart layer
             allLayers.style('opacity', 0.3);
             var layerClass = '.rl-' + chart.getClassName(d.label, yAxisLabel);
@@ -693,70 +492,19 @@ define(function (require) {
           });
         }
 
-        /* Event Selection: BRUSH */
-        var brush = d3.svg.brush()
-          .x(xScale)
-          .on('brushend', brushend);
-
-        if (dispatch.on('brush')) {
-          g.append('g')
-            .attr('class', 'brush')
-            .call(brush)
-            .selectAll('rect')
-            .attr('height', height);
-        }
-        /* ************************** */
-
-        lines.on('mouseout', function () {
-          allLayers.style('opacity', 1);
-          allItms.style('opacity', 1);
-        });
+//        wedge.append('text')
+//          .attr('transform', function (d) {
+//            return 'translate(' + arc.centroid(d) + ')';
+//          })
+//          .attr('dy', '.35em')
+//          .style('text-anchor', 'middle')
+//          .text(function (d) {
+//            return d.data.x;
+//          });
 
         return svg;
-
       } catch (error) {
-        console.group('chart.createLineChart: ' + error);
-      }
-
-      function X(d) {
-        return xScale(d.x);
-      }
-
-      function Y(d) {
-        return yScale(d.y);
-      }
-
-      function brushend() {
-        var selected;
-        var start;
-        var lastVal;
-        var end;
-        var selectedRange;
-
-        // selected is used to determine the range for ordinal scales
-        selected = xScale.domain()
-          .filter(function (d) {
-            return (brush.extent()[0] <= xScale(d)) && (xScale(d) <= brush.extent()[1]);
-          });
-
-        start = selected[0];
-        lastVal = selected.length - 1;
-        end = selected[lastVal];
-        selectedRange = [start, end];
-
-        return brush.extent()[0] instanceof Date ?
-          dispatch.brush({
-            range: brush.extent(),
-            config: config,
-            e: d3.event,
-            data: latestData
-          }) :
-          dispatch.brush({
-            range: selectedRange,
-            config: config,
-            e: d3.event,
-            data: latestData
-          });
+        console.group('chart.createPieChart: ' + error);
       }
     };
 
@@ -785,39 +533,6 @@ define(function (require) {
         setTimeout(checkSize, 250);
       } catch (error) {
         console.group('chart.checkSize: ' + error);
-      }
-    };
-
-    /* Function for truncating x axis tick labels */
-    chart.tickText = function (text, width) {
-      try {
-        if (!text) {
-          throw new Error('No text was given');
-        }
-        if (!width) {
-          throw new Error('No width was given');
-        }
-
-        var n = text[0].length,
-          maxw = width / n * 0.9,
-          tickn = Math.floor(maxw);
-
-        text.each(function () {
-          var text = d3.select(this),
-            length = this.getComputedTextLength(),
-            tspan = text.text();
-
-          if (length > maxw) {
-            var str = text.text(),
-              avg = length / str.length,
-              end = Math.floor(maxw / avg);
-            str = str.substr(0, end) + '...';
-            tspan = text.text(str);
-          }
-        });
-
-      } catch (error) {
-        console.group('chart.tickText: ' + error);
       }
     };
 
@@ -919,7 +634,6 @@ define(function (require) {
           // Cleaning up event listeners
           chart.off('click');
           chart.off('hover');
-          chart.off('brush');
           d3.select(window)
             .on('resize', null);
         }

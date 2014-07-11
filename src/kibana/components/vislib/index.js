@@ -7,6 +7,7 @@ define(function (require) {
     histogram: require('components/vislib/modules/histogram'),
     line: require('components/vislib/modules/lineChart'),
     area: require('components/vislib/modules/areaChart'),
+    pie: require('components/vislib/modules/pieChart'),
   };
 
   return k4;
