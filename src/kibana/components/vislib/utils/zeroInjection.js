@@ -68,8 +68,9 @@ define(function (require) {
   }
 
   return function (data) {
-    var i, max = data.series.length,
-      orderedKeys = orderKeys(data.series);
+    var i;
+    var max = data.series.length;
+    var orderedKeys = orderKeys(data.series);
 
     for (i = 0; i < max; i++) {
       var zeroArray = createZeroFilledArray(orderedKeys),
