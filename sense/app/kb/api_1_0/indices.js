@@ -50,6 +50,38 @@ define(function () {
       ]
     });
 
+    api.addEndpointDescription('_analyze', {
+        methods: ['GET','POST'],
+        patterns: [
+          "{indices}/_analyze",
+          "_analyze"
+        ],
+        url_params: {
+          "analyzer": "",
+          "char_filters": [],
+          "field": "",
+          "filters": [],
+          "text": "",
+          "tokenizer": ""
+        }
+    });
+
+    api.addEndpointDescription('_validate_query', {
+        methods: ['GET','POST'],
+        patterns: [
+          "{indices}/_validate/query",
+          "_validate/query"
+        ],
+        url_params: {
+          explain: "__flag__"
+        },
+        data_autocomplete_rules: {
+          query: {
+            // populated by a global rule
+          }
+        }
+    });
+
     api.addEndpointDescription('__create_index__', {
       methods: ['PUT'],
       patterns: [
