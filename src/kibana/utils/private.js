@@ -1,7 +1,8 @@
 define(function (require) {
+  var _ = require('lodash');
 
-  var name = function (construct) {
-    return construct.name || construct.toString().split('\n').shift();
+  var name = function (fn) {
+    return fn.name || fn.toString().split('\n').shift();
   };
 
   /**
@@ -13,26 +14,44 @@ define(function (require) {
     return privPath.map(name).join(' -> ');
   };
 
-  var module = require('modules').get('kibana/services');
+  // uniq ids for every module, across instances
+  var nextId = (function () {
+    var i = 0;
+    return function () { return 'pm_' + i++; };
+  }());
+
+  var module = require('modules').get('kibana/utils');
   module.service('Private', function ($injector) {
-    return function Private(construct) {
-      if (typeof construct !== 'function') {
-        throw new TypeError('Expected private module "' + construct + '" to be a function');
+    // one cache per instance of the Private service
+    var cache = {};
+
+    function Private(fn) {
+      if (typeof fn !== 'function') {
+        throw new TypeError('Expected private module "' + fn + '" to be a function');
       }
 
-      var circular = !!(~privPath.indexOf(construct));
-      if (circular) throw new Error('Circluar refrence to "' + name(construct) + '" found while resolving private deps: ' + pathToString());
+      var id = fn.$$id;
+      if (id && cache[id]) return cache[id];
 
-      privPath.push(construct);
-
-      if (!construct.$$instance) {
-        var instance = {};
-        construct.$$instance = $injector.invoke(construct, instance);
-        construct.$$instance = construct.$$instance || instance;
+      if (!id) id = fn.$$id = nextId();
+      else if (~privPath.indexOf(id)) {
+        throw new Error(
+          'Circluar refrence to "' + name(fn) + '"' +
+          ' found while resolving private deps: ' + pathToString()
+        );
       }
+
+      privPath.push(id);
+      var context = {};
+
+      var instance = $injector.invoke(fn, context);
+      // if the function returned an instance of something, use that. Otherwise use the context
+      if (!_.isObject(instance)) instance = context;
 
       privPath.pop();
-      return construct.$$instance;
-    };
+
+      cache[id] = instance;
+      return instance;
+    }
   });
 });

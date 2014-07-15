@@ -57,7 +57,7 @@ define(function (require) {
       };
     },
     isNumeric: function (v) {
-      return !_.isNaN(v) && !_.isArray(v) && !_.isNaN(parseInt(v, 10));
+      return !_.isNaN(v) && (typeof v === 'number' || (!_.isArray(v) && !_.isNaN(parseInt(v, 10))));
     },
     setValue: function (obj, name, value) {
       var path = name.split('.');
@@ -75,6 +75,32 @@ define(function (require) {
           recurse();
         }
       }());
+    },
+    // limit the number of arguments that are passed to the function
+    limit: function (context, fn, count) {
+      // syntax without context limit(fn, 1)
+      if (count == null && _.isNumeric(fn)) {
+        count = fn;
+        fn = context;
+        context = null;
+      }
+
+      count = count || 0;
+
+      if (count > 3) {
+        // catch all version
+        return function () {
+          return fn.apply(context, [].slice.call(arguments, 0, count));
+        };
+      }
+
+      // shortcuts for common path
+      return function (a, b, c) {
+        if (count === 0) return fn.call(context);
+        if (count === 1) return fn.call(context, a);
+        if (count === 2) return fn.call(context, a, b);
+        if (count === 3) return fn.call(context, a, b, c);
+      };
     }
   });
 
