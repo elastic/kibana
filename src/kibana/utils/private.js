@@ -53,5 +53,7 @@ define(function (require) {
       cache[id] = instance;
       return instance;
     }
+
+    return Private;
   });
 });
