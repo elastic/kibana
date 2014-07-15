@@ -8,6 +8,11 @@ define(function (require) {
     var fullDefers = [];
 
     q.limit = 0;
+    Object.defineProperty(q, 'length', {
+      get: function () {
+        return work.length;
+      }
+    });
 
     var checkIfFull = function () {
       if (work.length >= q.limit) {
@@ -41,7 +46,6 @@ define(function (require) {
       work.push(defer);
       checkIfFull();
     };
-
   }
 
   return WorkQueue;

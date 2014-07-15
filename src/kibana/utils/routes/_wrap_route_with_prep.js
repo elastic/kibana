@@ -4,30 +4,27 @@ define(function (require) {
 
   var WorkQueue = require('utils/routes/_work_queue');
 
-  return function (route) {
-    if (!route.resolve && route.redirectTo) {
-      return;
-    }
+
+  function wrapRouteWithPrep(route) {
+    if (!route.resolve && route.redirectTo) return;
 
     var userWork = new WorkQueue();
     // the point at which we will consider the queue "full"
     userWork.limit = _.keys(route.resolve).length;
 
     var resolve = {
-      __prep__: function (Promise, Private, config, kbnSetup) {
-        var setup = Private(require('utils/routes/_setup'));
-
-        return setup.routeSetupWork()
+      __prep__: function (Promise, $route, $injector, Notifier) {
+        return $injector.invoke(wrapRouteWithPrep._oneTimeSetup).then(function () {
+          return $injector.invoke(wrapRouteWithPrep._setupComplete);
+        })
         .then(function () {
           // wait for the queue to fill up, then do all the work
           var defer = Promise.defer();
           userWork.resolveWhenFull(defer);
 
-          defer.promise.then(function () {
+          return defer.promise.then(function () {
             return Promise.all(userWork.doWork());
           });
-
-          return defer.promise;
         })
         .catch(function (err) {
           // discard any remaining user work
@@ -51,5 +48,37 @@ define(function (require) {
 
     // we're copied everything over so now overwrite
     route.resolve = resolve;
+  }
+
+  // broken out so that it can be tested
+  wrapRouteWithPrep._oneTimeSetup = function ($q, kbnSetup, config) {
+    var prom = $q.all([
+      kbnSetup(),
+      config.init(),
+    ]);
+
+    // override setup to only return the promise
+    wrapRouteWithPrep._oneTimeSetup = function () { return prom; };
+
+    return prom;
   };
+
+  // broken out so that it can be tested
+  wrapRouteWithPrep._setupComplete = function ($route, indexPatterns, config) {
+    if (!$route.current.$$route.originalPath.match(/settings\/indices/)) {
+      // always check for existing ids first
+      return indexPatterns.getIds()
+      .then(function (patterns) {
+        if (!patterns || patterns.length === 0) {
+          throw new errors.NoDefinedIndexPatterns();
+        }
+
+        if (!config.get('defaultIndex')) {
+          throw new NoDefaultIndexPattern();
+        }
+      });
+    }
+  };
+
+  return wrapRouteWithPrep;
 });

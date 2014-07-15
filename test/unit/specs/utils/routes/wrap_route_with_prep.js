@@ -1,42 +1,45 @@
 define(function (require) {
-  var sinon = require('test_utils/auto_release_sinon');
+  var routes = require('routes');
+  var getRouteProvider = require('./_get_route_provider');
+  var wrapRouteWithPrep = require('utils/routes/_wrap_route_with_prep');
+  var Promise = require('bluebird');
   var _ = require('lodash');
-  var RouteManager = require('routes').RouteManager;
-  var routes;
-
-  require('utils/private');
+  var stub = require('test_utils/auto_release_sinon').stub;
 
   return function () {
-    describe('wrap route with prep work', function () {
+    describe('wrapRouteWithPrep fn', function () {
+      require('test_utils/no_digest_promises').activateForSuite();
 
-      beforeEach(function () {
-        routes = new RouteManager();
-      });
+      var $injector;
+      beforeEach(function (_$injector_) { $injector = _$injector_; });
 
-      it('creates resolves if none existed', function () {
-        var exec = 0;
-        routes.when('/jones', { template: '<picketfence color="white"></picketfence>' });
-        routes.config({
-          when: function (path, route) {
-            exec += 1;
-            expect(path).to.eql('/jones');
-            expect(route).to.have.property('resolve');
-            expect(route.resolve).to.be.an('object');
+      it('adds a __prep__ resolve, which does some setup work, then some user work', function () {
+        var i = 0;
+        var next = function () {
+          return _.partial(Promise.resolve, i++);
+        };
+
+        stub(wrapRouteWithPrep, 'oneTimeSetup', Promise.resolve);
+        stub(wrapRouteWithPrep, 'setupComplete', Promise.resolve);
+
+        var route = {
+          resolve: {
+            userWork1: next,
+            userWork2: next,
+            userWork3: next,
+            userWork4: next
           }
-        });
-        expect(exec).to.be(1);
-      });
+        };
+        wrapRouteWithPrep(route);
 
-      it('adds a __prep__ property to the resolve object', function () {
-        var exec = 0;
-        routes.when('/butter', { resolve: { toast: 'burnThatBread' } });
-        routes.config({
-          when: function (path, route) {
-            exec += 1;
-            expect(route.resolve).to.have.property('__prep__');
-          }
+        return Promise.props(_.mapValues(route.resolve, _.limit($injector.invoke, 1)))
+        .then(function (resolve) {
+          expect(resolve.__prep__).to.be('delayed_first');
+          expect(resolve.userWork1).to.be.above(0);
+          expect(resolve.userWork2).to.be.above(0);
+          expect(resolve.userWork3).to.be.above(0);
+          expect(resolve.userWork4).to.be.above(0);
         });
-        expect(exec).to.be(1);
       });
 
       var SchedulingTest = function (opts) {
@@ -62,7 +65,7 @@ define(function (require) {
             $scope = $rootScope.$new();
           });
 
-          sinon.stub(
+          stub(
             Private(require('utils/routes/_setup')),
             'routeSetupWork',
             function () {
