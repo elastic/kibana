@@ -261,53 +261,37 @@ define(function (require) {
             opened.push(id);
           }
 
-          var $detailTr = $(event.delegateTarget).next();
-          // remove the element from the details row --
-          // it is already empty or going to be rendered empty
-          $detailTr.empty();
-          // if this row has a child scope, (for contained
-          // directives) kill it
-          clearChildScopeFor(id);
+          var $tr = $(event.delegateTarget);
+          var $detailsTr = $tr.next();
 
-          // rather than replace the entire row, just replace the
-          // children, this way we keep the "even" class on the row
-          appendDetailsToRow($detailTr, row, id);
-        };
-
-        function createDetailsRow(row, id) {
-          var $tr = $(document.createElement('tr'));
-          return appendDetailsToRow($tr, row, id);
-        }
-
-        function appendDetailsToRow($tr, row, id) {
-          var topLevelDetails = ['_index', '_type', '_id'];
-
-          // The fields to loop over
-          row._fields = _.keys(row._source).concat(topLevelDetails).sort();
-          row._mode = 'table';
-
-          // we need a td to wrap the details table
-          var containerTd = $(document.createElement('td'));
-          containerTd.attr('colspan', $scope.columns.length + 1);
-          $tr.append(containerTd);
+          ///
+          // add/remove $details children
+          ///
 
           var open = !!~opened.indexOf(id);
-          $tr.toggle(open);
+          $detailsTr.toggle(open);
 
-          // it's closed, so no need to go any further
           if (!open) {
+            // close the child scope if it exists
             clearChildScopeFor(id);
-            return $tr;
+            // no need to go any further
+            return;
           }
 
-          // table that will hold details about the row
-          var container = $(document.createElement('div'));
+          // The fields to loop over
+          row._fields = row._fields || _.keys(row._source).concat(config.get('metaFields')).sort();
+          row._mode = 'table';
 
-          container.attr('ng-init', 'row = ' + JSON.stringify(row));
-          containerTd.append(container);
-          container.html(detailsHtml);
-          return $compile($tr)($scope);
-        }
+          // empty the details and rebuild it
+          $detailsTr
+            .empty()
+            .append(
+              $('<td>').attr('colspan', $scope.columns.length + 1).append(detailsHtml)
+            );
+
+          var $childScope = _.assign(childScopeFor(id), { row: row });
+          $compile($detailsTr)($childScope);
+        };
 
         $scope.filter = function (row, field, operation) {
           $scope.filtering(field, row._source[field] || row[field], operation);

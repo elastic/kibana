@@ -1,5 +1,4 @@
 <div class="discover-table-details">
-
   <ul class="nav nav-tabs discover-table-details-toggle">
     <li ng-class="{active: row._mode == 'table'}"><a ng-click="row._mode='table'">Table</a></li>
     <li ng-class="{active: row._mode == 'json'}"><a ng-click="row._mode='json'">JSON</a></li>
@@ -34,5 +33,4 @@
   </table>
 
   <pre ng-show="row._mode == 'json'">{{row._source | json}}</pre>
-
 </div>
