@@ -87,19 +87,15 @@ define(function (require) {
 
       count = count || 0;
 
-      if (count > 3) {
-        // catch all version
-        return function () {
-          return fn.apply(context, [].slice.call(arguments, 0, count));
-        };
-      }
+      // shortcuts for common paths
+      // !!!! PLEASE don't use more than two arg
+      if (count === 0) return function () { return fn.call(context); };
+      if (count === 1) return function (a) { return fn.call(context, a); };
+      if (count === 2) return function (a, b) { return fn.call(context, a, b); };
 
-      // shortcuts for common path
-      return function (a, b, c) {
-        if (count === 0) return fn.call(context);
-        if (count === 1) return fn.call(context, a);
-        if (count === 2) return fn.call(context, a, b);
-        if (count === 3) return fn.call(context, a, b, c);
+      // catch all version
+      return function () {
+        return fn.apply(context, [].slice.call(arguments, 0, count));
       };
     }
   });
