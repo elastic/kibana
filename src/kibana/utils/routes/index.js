@@ -3,6 +3,8 @@ define(function (require) {
   var wrapRouteWithPrep = require('utils/routes/_wrap_route_with_prep');
 
   require('components/setup/setup');
+  require('services/promises');
+
   require('modules').get('kibana/controllers')
   .config(function ($provide) {
     // decorate the $route object to include a change and changeUrl method

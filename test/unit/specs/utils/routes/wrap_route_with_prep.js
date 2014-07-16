@@ -1,45 +1,21 @@
 define(function (require) {
-  var routes = require('routes');
+  var RouteManager = require('routes').RouteManager;
   var getRouteProvider = require('./_get_route_provider');
   var wrapRouteWithPrep = require('utils/routes/_wrap_route_with_prep');
   var Promise = require('bluebird');
   var _ = require('lodash');
   var stub = require('test_utils/auto_release_sinon').stub;
 
+  require('services/private');
+
+  var routes;
+
   return function () {
     describe('wrapRouteWithPrep fn', function () {
       require('test_utils/no_digest_promises').activateForSuite();
 
-      var $injector;
-      beforeEach(function (_$injector_) { $injector = _$injector_; });
-
-      it('adds a __prep__ resolve, which does some setup work, then some user work', function () {
-        var i = 0;
-        var next = function () {
-          return _.partial(Promise.resolve, i++);
-        };
-
-        stub(wrapRouteWithPrep, 'oneTimeSetup', Promise.resolve);
-        stub(wrapRouteWithPrep, 'setupComplete', Promise.resolve);
-
-        var route = {
-          resolve: {
-            userWork1: next,
-            userWork2: next,
-            userWork3: next,
-            userWork4: next
-          }
-        };
-        wrapRouteWithPrep(route);
-
-        return Promise.props(_.mapValues(route.resolve, _.limit($injector.invoke, 1)))
-        .then(function (resolve) {
-          expect(resolve.__prep__).to.be('delayed_first');
-          expect(resolve.userWork1).to.be.above(0);
-          expect(resolve.userWork2).to.be.above(0);
-          expect(resolve.userWork3).to.be.above(0);
-          expect(resolve.userWork4).to.be.above(0);
-        });
+      beforeEach(function () {
+        routes = new RouteManager();
       });
 
       var SchedulingTest = function (opts) {
@@ -56,28 +32,22 @@ define(function (require) {
           var Private;
           var Promise;
           var $injector;
-          var $scope;
 
           inject(function ($rootScope, _Private_, _Promise_, _$injector_) {
             Private = _Private_;
             Promise = _Promise_;
             $injector = _$injector_;
-            $scope = $rootScope.$new();
           });
 
-          stub(
-            Private(require('utils/routes/_setup')),
-            'routeSetupWork',
-            function () {
-              return new Promise(function (resolve, reject) {
-                setTimeout(function () {
-                  setupComplete = true;
-                  resolve();
-                  $scope.$apply();
-                }, 50);
-              });
-            }
-          );
+          var setup = Private(require('utils/routes/_setup'));
+          stub(setup, 'routeSetupWork', function () {
+            return new Promise(function (resolve, reject) {
+              setTimeout(function () {
+                setupComplete = true;
+                resolve();
+              }, delaySetup);
+            });
+          });
 
           routes
             .when('/', {
@@ -103,7 +73,6 @@ define(function (require) {
               })
               .then(resolve, reject);
 
-              $scope.$apply();
             }, delayUserWork);
           });
         };

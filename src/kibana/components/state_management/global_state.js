@@ -6,7 +6,7 @@ define(function (require) {
 
   var module = require('modules').get('kibana/global_state');
 
-  module.service('globalState', function (Private, $rootScope, $route, $injector, Promise) {
+  module.service('globalState', function (Private, $rootScope, $route, $injector, Promise, PromiseEmitter) {
     var globalState = this;
 
     var setupSync = Private(require('components/state_management/_state_sync'));
@@ -41,13 +41,13 @@ define(function (require) {
     });
 
     globalState.onUpdate = function (handler) {
-      return new Promise.emitter(function (resolve, reject, defer) {
+      return new PromiseEmitter(function (resolve, reject, defer) {
         updateListeners.push(defer);
       }, handler);
     };
 
     globalState.onAppUpdate = function (handler) {
-      return new Promise.emitter(function (resolve, reject, defer) {
+      return new PromiseEmitter(function (resolve, reject, defer) {
         app.listeners.push(defer);
       }, handler);
     };

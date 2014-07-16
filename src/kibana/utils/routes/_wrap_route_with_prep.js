@@ -3,7 +3,7 @@ define(function (require) {
   var _ = require('lodash');
 
   var WorkQueue = require('utils/routes/_work_queue');
-
+  var errors = require('errors');
 
   function wrapRouteWithPrep(route) {
     if (!route.resolve && route.redirectTo) return;
@@ -13,10 +13,10 @@ define(function (require) {
     userWork.limit = _.keys(route.resolve).length;
 
     var resolve = {
-      __prep__: function (Promise, $route, $injector, Notifier) {
-        return $injector.invoke(wrapRouteWithPrep._oneTimeSetup).then(function () {
-          return $injector.invoke(wrapRouteWithPrep._setupComplete);
-        })
+      __prep__: function (Private, Promise, $route, $injector, Notifier) {
+        var setup = Private(require('utils/routes/_setup'));
+
+        return setup.routeSetupWork()
         .then(function () {
           // wait for the queue to fill up, then do all the work
           var defer = Promise.defer();
@@ -49,36 +49,6 @@ define(function (require) {
     // we're copied everything over so now overwrite
     route.resolve = resolve;
   }
-
-  // broken out so that it can be tested
-  wrapRouteWithPrep._oneTimeSetup = function ($q, kbnSetup, config) {
-    var prom = $q.all([
-      kbnSetup(),
-      config.init(),
-    ]);
-
-    // override setup to only return the promise
-    wrapRouteWithPrep._oneTimeSetup = function () { return prom; };
-
-    return prom;
-  };
-
-  // broken out so that it can be tested
-  wrapRouteWithPrep._setupComplete = function ($route, indexPatterns, config) {
-    if (!$route.current.$$route.originalPath.match(/settings\/indices/)) {
-      // always check for existing ids first
-      return indexPatterns.getIds()
-      .then(function (patterns) {
-        if (!patterns || patterns.length === 0) {
-          throw new errors.NoDefinedIndexPatterns();
-        }
-
-        if (!config.get('defaultIndex')) {
-          throw new NoDefaultIndexPattern();
-        }
-      });
-    }
-  };
 
   return wrapRouteWithPrep;
 });
