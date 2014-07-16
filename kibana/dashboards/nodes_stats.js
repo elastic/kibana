@@ -719,7 +719,7 @@ var rows = [
         "y_format": "bytes"
       },
       {
-        "value_field": "transport.tx_size_in_bytes",
+        "value_field": "transport.rx_size_in_bytes",
         "title": "Network Transport Bytes Received (per sec)",
         "derivative": true,
         "mode": "min",
