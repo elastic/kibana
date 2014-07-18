@@ -90,7 +90,7 @@ define(function (require) {
         var col = revColStack.pop();
 
         // the actual results for the aggregation is under an _agg_* key
-        var result = bucket[getAggKey(bucket)];
+        var result = col.fake ? bucket : bucket[getAggKey(bucket)];
 
         if (result && _.isPlainObject(result.buckets)) {
           result.buckets = _.map(result.buckets, function (v, k) {
@@ -168,10 +168,7 @@ define(function (require) {
       if (!resp.aggregations) {
         // fake the aggregation response since this requests didn't actually have aggs
         resp.aggregations = {
-          _fake_agg: {
-            doc_count: resp.hits.total
-          },
-          __aggKey__: '_fake_agg'
+          doc_count: resp.hits.total
         };
       }
 
