@@ -1,4 +1,6 @@
 @import "../../bower_components/font-awesome/less/font-awesome.less";
+@import (reference) "lesshat.less";
+@import (reference) "./theme/_variables.less";
 
 // Custom variables
 @import "./_variables.less";
@@ -287,7 +289,7 @@ saved-object-finder {
 
 //== clicking disabled buttons should not cause the whole page to get selected
 button[disabled] {
-  .prevent-selection();
+  .user-select(none);
 }
 
 //== override the disabled cursor that doesn't work everywhere
@@ -315,10 +317,10 @@ input[type="checkbox"],
 
 
 .flex {
-  .flex-display();
+  .display(flex);
 }
 .flex-vert {
-  .flex-display();
+  .display(flex);
   .flex-direction(column);
 }
 .flex-grow {
