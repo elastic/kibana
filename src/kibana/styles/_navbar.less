@@ -1,0 +1,63 @@
+navbar {
+  max-height: @navbar-collapse-max-height;
+  margin-bottom: @navbar-margin-bottom;
+  // top and bottom padding are normally calcuated and stored in @navbar-padding-vertical, but flexbox
+  padding: @padding-base-vertical @navbar-padding-horizontal;
+  color: @navbar-default-color;
+  background-color: @navbar-default-bg;
+
+  border-style: solid;
+  border-color: @navbar-default-border;
+  border-width: 0 0 1px;
+
+  z-index: @zindex-navbar;
+
+  a {
+    color: @navbar-default-link-color;
+
+    &:hover {
+      color: @navbar-default-link-hover-color;
+      background-color: @navbar-default-link-hover-bg;
+    }
+
+    &:active {
+      color: @navbar-default-link-active-color;
+      background-color: @navbar-default-link-active-bg;
+    }
+
+    &:disabled {
+      color: @navbar-default-link-disabled-color;
+      background-color: @navbar-default-link-disabled-bg;
+    }
+  }
+
+  // TODO: do these apply?
+  // @navbar-default-toggle-hover-bg:            darken(@navbar-default-bg, 10%);
+  // @navbar-default-toggle-icon-bar-bg:         #fff;
+  // @navbar-default-toggle-border-color:        darken(@navbar-default-bg, 10%);
+
+  .flex-display();
+  // TODO: prefix mixin
+  flex-flow: row wrap;
+  align-items: center;
+
+  > .navbar-brand,
+  > .button-group {
+    .flex(0, 0, auto);
+  }
+
+  > .name {
+    font-size: @font-size-large;
+    max-width: @screen-sm;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: @navbar-padding-horizontal;
+  }
+
+  > .fill {
+    .flex(1, 1, @screen-sm);
+  }
+}
+
+

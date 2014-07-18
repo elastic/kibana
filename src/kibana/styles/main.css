@@ -4897,7 +4897,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   background-color: transparent;
 }
 .navbar-default .navbar-text {
-  color: #777777;
+  color: #ffffff;
 }
 .navbar-default .navbar-nav > li > a {
   color: #ffffff;
@@ -6999,6 +6999,77 @@ paginate .paginate-content {
   -ms-flex-basis: auto;
   flex-basis: auto;
 }
+navbar {
+  max-height: 340px;
+  margin-bottom: 0px;
+  padding: 5px 15px;
+  color: #ffffff;
+  background-color: #46525d;
+  border-style: solid;
+  border-color: #303840;
+  border-width: 0 0 1px;
+  z-index: 1000;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -ms-box;
+  display: -webkit-flex;
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+}
+navbar a {
+  color: #ffffff;
+}
+navbar a:hover {
+  color: #31c471;
+  background-color: transparent;
+}
+navbar a:active {
+  color: #ffffff;
+  background-color: #303840;
+}
+navbar a:disabled {
+  color: #cccccc;
+  background-color: transparent;
+}
+navbar > .navbar-brand,
+navbar > .button-group {
+  -webkit-flex-grow: 0;
+  -moz-flex-grow: 0;
+  -ms-flex-grow: 0;
+  flex-grow: 0;
+  -webkit-flex-shrink: 0;
+  -moz-flex-shrink: 0;
+  -ms-flex-shrink: 0;
+  flex-shrink: 0;
+  -webkit-flex-basis: auto;
+  -moz-flex-basis: auto;
+  -ms-flex-basis: auto;
+  flex-basis: auto;
+}
+navbar > .name {
+  font-size: 19px;
+  max-width: 768px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 15px;
+}
+navbar > .fill {
+  -webkit-flex-grow: 1;
+  -moz-flex-grow: 1;
+  -ms-flex-grow: 1;
+  flex-grow: 1;
+  -webkit-flex-shrink: 1;
+  -moz-flex-shrink: 1;
+  -ms-flex-shrink: 1;
+  flex-shrink: 1;
+  -webkit-flex-basis: 768px;
+  -moz-flex-basis: 768px;
+  -ms-flex-basis: 768px;
+  flex-basis: 768px;
+}
 html,
 body {
   height: 100%;
@@ -7098,7 +7169,7 @@ notifications {
   background-color: transparent;
 }
 .config .navbar-text {
-  color: #777777;
+  color: #ffffff;
 }
 .config .navbar-nav > li > a {
   color: #ffffff;
@@ -7340,7 +7411,7 @@ table td .fa {
 .sidebar-container .sidebar-list .sidebar-list-header {
   padding-left: 10px;
   padding-right: 10px;
-  color: #777777;
+  color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0);
 }
 .sidebar-container .sidebar-list .sidebar-item {
