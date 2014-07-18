@@ -1,9 +1,5 @@
 @import "../../bower_components/font-awesome/less/font-awesome.less";
 @import (reference) "lesshat.less";
-@import (reference) "./theme/_variables.less";
-
-// Custom variables
-@import "./_variables.less";
 
 // custom bootstrap build
 @import "./_bootstrap.less";
@@ -26,7 +22,11 @@
 // custom navbar style
 @import "./_navbar.less";
 
-@fa-font-path: "../../bower_components/font-awesome/fonts";
+@import "./_sidebar.less";
+
+// Import variable files so that they are not overridden
+@import "./theme/_variables.less";
+@import "./_variables.less";
 
 html,
 body {
@@ -213,8 +213,6 @@ table {
     line-height: @line-height-base;
   }
 }
-
-@import "./_sidebar.less";
 
 //== SavedObjectFinder
 saved-object-finder {
