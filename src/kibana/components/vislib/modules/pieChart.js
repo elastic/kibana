@@ -280,7 +280,7 @@ define(function (require) {
         var radius = Math.min(width, height) / 2;
 
         var arc = d3.svg.arc()
-          .outerRadius(radius - 10)
+          .outerRadius(radius - 20)
           .innerRadius(0);
 
         var pie = d3.layout.pie()
@@ -332,7 +332,7 @@ define(function (require) {
           .attr('class', 'charts-label')
           .attr('text-anchor', 'middle')
           .attr('x', 0)
-          .attr('y', -radius)
+          .attr('y', -radius + 10)
           .text(chartLabel)
           .call(chart.tickText, width)
           .on('mouseover', function (d) {

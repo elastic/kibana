@@ -3,7 +3,7 @@ define(function (require) {
   var _ = require('lodash');
   var nextTick = require('utils/next_tick');
 
-  return function SourceAbstractFactory(Private, Promise, timefilter) {
+  return function SourceAbstractFactory(Private, Promise, PromiseEmitter, timefilter) {
     var pendingRequests = Private(require('components/courier/_pending_requests'));
     var errorHandlers = Private(require('components/courier/_error_handlers'));
     var fetch = Private(require('components/courier/fetch/fetch'));
@@ -106,7 +106,7 @@ define(function (require) {
      */
     SourceAbstract.prototype.onResults = function (handler) {
       var source = this;
-      return new Promise.emitter(function (resolve, reject, defer) {
+      return new PromiseEmitter(function (resolve, reject, defer) {
         source._createRequest(defer);
       }, handler);
     };

@@ -1,15 +1,14 @@
+/** @scratch /configuration/config.js/1
+ * == Configuration
+ * config.js is where you will find the core Kibana configuration. This file contains parameter that
+ * must be set before kibana is run for the first time.
+ */
+
+/** @scratch /configuration/config.js/2
+ * === Parameters
+ */
 define(function () {
-  /** @scratch /configuration/config.js/1
-   * == Configuration
-   * config.js is where you will find the core Kibana configuration. This file contains parameter that
-   * must be set before kibana is run for the first time.
-   */
-
-  /** @scratch /configuration/config.js/2
-   * === Parameters
-   */
   return {
-
     /** @scratch /configuration/config.js/5
      * ==== elasticsearch
      *

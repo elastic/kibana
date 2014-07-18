@@ -1,9 +1,15 @@
 language: node_js
 node_js:
-  - "0.10"
+- '0.10'
 install:
-  - "npm install -g grunt-cli bower"
-  - "npm install"
-  - "bower install"
+- npm install -g grunt-cli bower
+- npm install
+- bower install
 script:
-  - "npm test"
+- npm test
+notifications:
+  email:
+    - rashid.khan@elasticsearch.com 
+  hipchat:
+    rooms:
+      secure: IUlP4jtlY7qHgNFHdmpPskCr6SZ3gg8X8plqqPAH7x+f62UWE6jUoaJWM0t265qZj13cB1XrVjVdyFs0CCytJepGpAoZm8QfB6EAkCnVrsXpqWesYzgpZzH1Ld4/DEodvNrMRvPavMk/AxiNXuqUYDQ6Pfuer2CHukKiW/hhlMs=
