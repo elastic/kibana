@@ -18,23 +18,23 @@
     <div class="content" style="display: none;">
       <nav ng-hide="appEmbedded" bindonce class="navbar navbar-inverse navbar-static-top">
         <div class="container-fluid">
+
           <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#kibana-primary-navbar">
+            <button ng-click="showCollapsed = !showCollapsed" type="button" class="navbar-toggle">
               <span class="sr-only">Toggle navigation</span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand visible-xs" href="#">{{activeApp}}</a>
-            <span class="navbar-brand visible-xs">
-              <div ng-show="httpActive.length" class="spinner">
-              </div>
+            <span class="navbar-brand visible-xs">{{activeApp}}
+              <span ng-show="httpActive.length" class="spinner">
+              </span>
             </span>
           </div>
 
 
           <!-- Full navbar -->
-          <div class="collapse navbar-collapse" id="kibana-primary-navbar">
+          <div collapse="!showCollapsed" class="navbar-collapse" id="kibana-primary-navbar">
             <ul class="nav navbar-nav">
               <li ng-repeat="app in apps" ng-class="{active: activeApp == app.id}">
                 <a ng-href="#{{app.lastPath}}" bo-text="app.name"></a>
