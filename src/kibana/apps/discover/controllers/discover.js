@@ -132,6 +132,12 @@ define(function (require) {
 
         // listen for changes, and relisten everytime something happens
         $state.onUpdate(function (changed) {
+          if (_.contains(changed, 'columns')) {
+            $scope.fields.forEach(function(field) {
+              field.display = _.contains($state.columns, field.name);
+            });
+          }
+
           // if we only have ignorable changes, do nothing
           if (_.difference(changed, ignoreStateChanges).length) $scope.fetch();
         });
