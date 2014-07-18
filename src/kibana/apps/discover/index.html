@@ -11,7 +11,6 @@
           <input placeholder="Search..." type="text" class="form-control" ng-model="state.query">
           <span class="input-group-addon btn btn-default" ng-click="fetch()"><span class="fa fa-search"></span></span>
           <span class="input-group-addon btn btn-default" ng-click="resetQuery()"><span class="fa fa-ban"></span></span>
-
         </div>
       </div>
     </form>
@@ -48,7 +47,7 @@
             </select> -->
           </center>
 
-          <div ng-show="httpActive.length" class="discover-timechart-overlay">
+          <div ng-show="searchSource.activeFetchCount" class="discover-timechart-overlay">
             <div class="spinner large">
             </div>
           </div>

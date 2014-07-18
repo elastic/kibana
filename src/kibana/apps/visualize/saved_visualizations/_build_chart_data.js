@@ -70,6 +70,7 @@ define(function (require) {
           // we have a full row, minus the final metric
           row.push(metric);
         } else {
+          // we ended suddenly, so add undefined values for the columns we have not see yet
           [].push.apply(row, new Array(revColStack.length + 1));
         }
 
@@ -89,7 +90,7 @@ define(function (require) {
         var col = revColStack.pop();
 
         // the actual results for the aggregation is under an _agg_* key
-        var result = col.fake ? bucket : bucket[getAggKey(bucket)];
+        var result = bucket[getAggKey(bucket)];
 
         if (result && _.isPlainObject(result.buckets)) {
           result.buckets = _.map(result.buckets, function (v, k) {
@@ -164,11 +165,17 @@ define(function (require) {
         }
       });
 
-      if (resp.aggregations) {
-        splitAndFlatten(chartData, resp.aggregations);
-      } else {
-        writeRow(chartData, { doc_count: resp.hits.total });
+      if (!resp.aggregations) {
+        // fake the aggregation response since this requests didn't actually have aggs
+        resp.aggregations = {
+          _fake_agg: {
+            doc_count: resp.hits.total
+          },
+          __aggKey__: '_fake_agg'
+        };
       }
+
+      splitAndFlatten(chartData, resp.aggregations);
 
       // now that things are well-ordered, and
       // all related values have been segregated into
