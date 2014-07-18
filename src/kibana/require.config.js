@@ -2,6 +2,7 @@ require.config({
   baseUrl: './kibana',
   paths: {
     kibana: './index',
+    config_file: '../config',
 
     // special utils
     routes: 'utils/routes/index',

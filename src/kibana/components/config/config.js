@@ -3,7 +3,7 @@ define(function (require) {
     'kibana/notify'
   ]);
 
-  var configFile = window.kbnConfigFile;
+  var configFile = require('config_file');
   // allow the rest of the app to get the configFile easily
   module.constant('configFile', configFile);
 

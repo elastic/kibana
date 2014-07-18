@@ -2,72 +2,34 @@ define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
 
-  var errors = require('errors');
-  var NoDefaultIndexPattern = errors.NoDefaultIndexPattern;
-  var NoDefinedIndexPatterns = errors.NoDefinedIndexPatterns;
-
   var WorkQueue = require('utils/routes/_work_queue');
+  var errors = require('errors');
 
-  var oneTimeSetup = function ($q, kbnSetup, config) {
-    var prom = $q.all([
-      kbnSetup(),
-      config.init(),
-    ]);
-
-    // override setup to only return the promise
-    oneTimeSetup = function () { return prom; };
-
-    return prom;
-  };
-
-  return function (route) {
-    if (!route.resolve && route.redirectTo) {
-      return;
-    }
+  function wrapRouteWithPrep(route) {
+    if (!route.resolve && route.redirectTo) return;
 
     var userWork = new WorkQueue();
     // the point at which we will consider the queue "full"
     userWork.limit = _.keys(route.resolve).length;
 
     var resolve = {
-      __prep__: function (Promise, $injector, config, $route, Notifier, indexPatterns) {
-        return $injector.invoke(oneTimeSetup)
-        .then(function () {
-          if (!$route.current.$$route.originalPath.match(/settings\/indices/)) {
-            // always check for existing ids first
-            return indexPatterns.getIds()
-            .then(function (patterns) {
-              if (!patterns || patterns.length === 0) {
-                throw new errors.NoDefinedIndexPatterns();
-              }
+      __prep__: function (Private, Promise, $route, $injector, Notifier) {
+        var setup = Private(require('utils/routes/_setup'));
 
-              if (!config.get('defaultIndex')) {
-                throw new NoDefaultIndexPattern();
-              }
-            });
-          }
-        })
+        return setup.routeSetupWork()
         .then(function () {
           // wait for the queue to fill up, then do all the work
           var defer = Promise.defer();
           userWork.resolveWhenFull(defer);
 
-          defer.promise.then(function () {
+          return defer.promise.then(function () {
             return Promise.all(userWork.doWork());
           });
-
-          return defer.promise;
         })
         .catch(function (err) {
           // discard any remaining user work
           userWork.empty();
-
-          if (err instanceof NoDefaultIndexPattern || err instanceof NoDefinedIndexPatterns) {
-            $route.change('/settings/indices');
-            (new Notifier()).error(err);
-          } else {
-            throw err;
-          }
+          return setup.handleKnownError(err);
         });
       }
     };
@@ -86,5 +48,7 @@ define(function (require) {
 
     // we're copied everything over so now overwrite
     route.resolve = resolve;
-  };
+  }
+
+  return wrapRouteWithPrep;
 });

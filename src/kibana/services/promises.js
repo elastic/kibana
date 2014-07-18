@@ -3,43 +3,14 @@ define(function (require) {
 
   var module = require('modules').get('kibana/services');
 
-  module.service('promises', function ($q) {
-    function playNice(fn, fns) {
-      if (fns && _.isArray(fns) && _.isObject(fn)) {
-        fns.forEach(function (method) {
-          fn[method] = playNice(fn[method]);
-        });
-        return fn;
-      }
-
-      return function playNiceWrapper() {
-        // if the last arg is a callback then don't do anything
-        if (typeof arguments[arguments.length - 1] === 'function') {
-          return fn.apply(this, arguments);
-        }
-
-        // otherwise create a callback and pass it in
-        var args = Array.prototype.slice.call(arguments);
-        var defer = $q.defer();
-        args.push(function (err, result) {
-          if (err) return defer.reject(err);
-          defer.resolve(result);
-        });
-        fn.apply(this, args);
-        return defer.promise;
-      };
-    }
-
-
-    return {
-      playNice: playNice
-    };
-  });
-
   // Provides a tiny subset of the excelent API from
   // bluebird, reimplemented using the $q service
-  module.service('Promise', function ($q) {
+  module.service('Promise', function ($q, $timeout) {
+    'use strict';
+
     function Promise(fn) {
+      if (typeof this === 'undefined') throw new Error('Promise constructor must be called with "new"');
+
       var defer = $q.defer();
       try {
         fn(defer.resolve, defer.reject, defer);
@@ -55,13 +26,16 @@ define(function (require) {
       defer.resolve(val);
       return defer.promise;
     };
-    Promise.rejected = function (reason) {
+    Promise.reject = function (reason) {
       var defer = $q.defer();
       defer.reject(reason);
       return defer.promise;
     };
     Promise.cast = $q.when;
     Promise.defer = $q.defer;
+    Promise.delay = function (ms) {
+      return $timeout(_.noop, ms);
+    };
     Promise.nodeify = function (promise, cb) {
       promise.then(function (val) {
         cb(void 0, val);
@@ -76,8 +50,12 @@ define(function (require) {
       return obj && typeof obj.then === 'function';
     };
 
+    return Promise;
+  });
+
+  module.factory('PromiseEmitter', function (Promise) {
     /**
-     * Create a promise that uses our "event" like pattern.
+     * Create a function that uses an "event" like pattern for promises.
      *
      * When a single argument is passed, this will behave just like calling `new Promise(fn)`,
      * but when a second arguemnt is passed, the fn will be used to recreate a promise eveytime
@@ -128,18 +106,18 @@ define(function (require) {
      *                            time this promise is resolved
      * @return {Promise}
      */
-    Promise.emitter = function (fn, handler) {
-      var prom = Promise(fn);
+    function PromiseEmitter(fn, handler) {
+      var prom = new Promise(fn);
 
       if (handler) {
         prom.then(handler).then(function recurse() {
-          return Promise(fn).then(handler).then(recurse);
+          return new Promise(fn).then(handler).then(recurse);
         });
       }
 
       return prom;
-    };
+    }
 
-    return Promise;
+    return PromiseEmitter;
   });
 });

@@ -17,7 +17,7 @@ define(function (require) {
 
 
   require('angular-bootstrap');
-  require('utils/private');
+  require('services/private');
 
   var module = require('modules').get('kibana/controllers', ['ui.bootstrap']);
 

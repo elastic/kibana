@@ -13,7 +13,7 @@ define(function (require) {
      */
     var searchLooper = new Looper(null, function () {
       // fatal if refreshes take longer then the refresh interval
-      if (_activeAutoSearch) Promise.rejected(new errors.HastyRefresh());
+      if (_activeAutoSearch) Promise.reject(new errors.HastyRefresh());
       return _activeAutoSearch = fetch.searches().finally(function (res) {
         _activeAutoSearch = null;
       });
