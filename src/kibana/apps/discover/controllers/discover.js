@@ -133,7 +133,7 @@ define(function (require) {
         // listen for changes, and relisten everytime something happens
         $state.onUpdate(function (changed) {
           if (_.contains(changed, 'columns')) {
-            $scope.fields.forEach(function(field) {
+            $scope.fields.forEach(function (field) {
               field.display = _.contains($state.columns, field.name);
             });
           }
