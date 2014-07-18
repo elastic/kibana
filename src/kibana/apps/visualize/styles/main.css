@@ -71,42 +71,32 @@
 @media (min-width: 992px) {
   .vis-editor-content {
     display: flex;
+    -webkit-box-direction: normal;
+    -moz-box-direction: normal;
+    -webkit-box-orient: horizontal;
+    -moz-box-orient: horizontal;
     -webkit-flex-direction: row;
-    -moz-flex-direction: row;
     -ms-flex-direction: row;
     flex-direction: row;
+    -webkit-box-pack: start;
+    -moz-box-pack: start;
+    -ms-flex-pack: start;
     -webkit-justify-content: flex-start;
-    -moz-justify-content: flex-start;
-    -ms-justify-content: flex-start;
     justify-content: flex-start;
   }
   .vis-editor-content .vis-sidebar {
-    -webkit-flex-grow: 0;
-    -moz-flex-grow: 0;
-    -ms-flex-grow: 0;
-    flex-grow: 0;
-    -webkit-flex-shrink: 0;
-    -moz-flex-shrink: 0;
-    -ms-flex-shrink: 0;
-    flex-shrink: 0;
-    -webkit-flex-basis: 300px;
-    -moz-flex-basis: 300px;
-    -ms-flex-basis: 300px;
-    flex-basis: 300px;
+    -webkit-box-flex: 0;
+    -moz-box-flex: 0;
+    -webkit-flex: 0 0 300px;
+    -ms-flex: 0 0 300px;
+    flex: 0 0 300px;
   }
   .vis-editor-content .vis-canvas {
-    -webkit-flex-grow: 1;
-    -moz-flex-grow: 1;
-    -ms-flex-grow: 1;
-    flex-grow: 1;
-    -webkit-flex-shrink: 1;
-    -moz-flex-shrink: 1;
-    -ms-flex-shrink: 1;
-    flex-shrink: 1;
-    -webkit-flex-basis: 100%;
-    -moz-flex-basis: 100%;
-    -ms-flex-basis: 100%;
-    flex-basis: 100%;
+    -webkit-box-flex: 1;
+    -moz-box-flex: 1;
+    -webkit-flex: 1 1 100%;
+    -ms-flex: 1 1 100%;
+    flex: 1 1 100%;
   }
 }
 .vis-editor-content vis-config-editor {
@@ -158,9 +148,7 @@ vis-canvas {
   color: white;
   text-align: center;
   padding-top: 6px;
-  -webkit-touch-callout: none;
   -webkit-user-select: none;
-  -khtml-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;

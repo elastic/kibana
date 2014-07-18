@@ -1,3 +1,5 @@
+var bc = require('path').join(__dirname, '../../src/bower_components');
+
 module.exports = {
   src: {
     src: [
@@ -11,7 +13,8 @@ module.exports = {
     expand: true,
     ext: '.css',
     options: {
-      ieCompat: false
+      ieCompat: false,
+      paths: [bc + '/lesshat/build/']
     }
   }
 };
