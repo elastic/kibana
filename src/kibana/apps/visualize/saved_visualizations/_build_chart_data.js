@@ -63,15 +63,14 @@ define(function (require) {
           chartData.columns = chartColumns;
         }
 
-        var row = rowStack.slice(0);
-        var metric = bucket.value == null ? bucket.doc_count : bucket.value;
+        var row = new Array(chartColumns.length);
+        rowStack.forEach(function (val, i) {
+          row[i] = val;
+        });
 
-        if (!revColStack.length) {
-          // we have a full row, minus the final metric
-          row.push(metric);
-        } else {
-          // we ended suddenly, so add undefined values for the columns we have not see yet
-          [].push.apply(row, new Array(revColStack.length + 1));
+        var metric = bucket.value == null ? bucket.doc_count : bucket.value;
+        if (metric != null) {
+          row[row.length - 1] = metric;
         }
 
         chartData.rows.push(row);
@@ -165,14 +164,12 @@ define(function (require) {
         }
       });
 
-      if (!resp.aggregations) {
-        // fake the aggregation response since this requests didn't actually have aggs
-        resp.aggregations = {
-          doc_count: resp.hits.total
-        };
+      if (resp.aggregations) {
+        splitAndFlatten(chartData, resp.aggregations);
+      } else {
+        writeRow(chartData, { doc_count: resp.hits.total });
       }
 
-      splitAndFlatten(chartData, resp.aggregations);
 
       // now that things are well-ordered, and
       // all related values have been segregated into
