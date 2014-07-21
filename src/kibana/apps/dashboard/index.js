@@ -76,6 +76,17 @@ define(function (require) {
         $scope.timefilter = timefilter;
         $scope.$watchCollection('globalState.time', $scope.refresh);
 
+        $scope.filterResults = function () {
+          var root = courier.getRootSearch();
+          root.then(function (rootSource) {
+            rootSource.set('query', {
+              query_string: { query: $scope.state.query }
+            });
+
+            courier.fetch();
+          });
+        };
+
         $scope.save = function () {
           $state.title = dash.id = dash.title;
           $state.commit();
