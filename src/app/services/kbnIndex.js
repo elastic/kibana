@@ -28,7 +28,7 @@ function (angular, _, config, moment) {
       });
     };
 
-    var ejs = ejsResource(config.elasticsearch);
+    var ejs = ejsResource(config.elasticsearch, config.api_version);
 
 
     // returns a promise containing an array of all indices in an elasticsearch
@@ -37,20 +37,7 @@ function (angular, _, config, moment) {
       var something;
       indices = _.uniq(_.map(indices,  encodeURIComponent));
 
-      something = ejs.client.get("/" + indices.join(",") + "/_aliases?ignore_missing=true",
-        undefined, undefined, function (data, p) {
-          if (p === 404) {
-            return [];
-          }
-          else if(p === 0) {
-            alertSrv.set('Error',"Could not contact Elasticsearch at "+ejs.config.server+
-              ". Please ensure that Elasticsearch is reachable from your system." ,'error');
-          } else {
-            alertSrv.set('Error',"Could not reach "+ejs.config.server+"/_aliases. If you"+
-              " are using a proxy, ensure it is configured correctly",'error');
-          }
-          return [];
-        });
+      something = ejs.getAliases(indices);
 
       return something.then(function(p) {
 
@@ -63,7 +50,19 @@ function (angular, _, config, moment) {
           });
         });
         return indices;
-      });
+      }, function (data, p) {
+          if (p === 404) {
+            return [];
+          }
+          else if(p === 0) {
+            alertSrv.set('Error',"Could not contact Elasticsearch at "+ejs.config.host+
+              ". Please ensure that Elasticsearch is reachable from your system." ,'error');
+          } else {
+            alertSrv.set('Error',"Could not reach "+ejs.config.host+"/_aliases. If you"+
+              " are using a proxy, ensure it is configured correctly",'error');
+          }
+          return [];
+        });
     }
 
     /*

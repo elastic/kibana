@@ -21,6 +21,9 @@ require.config({
     'angular-dragdrop':       '../vendor/angular/angular-dragdrop',
     'angular-strap':          '../vendor/angular/angular-strap',
     'angular-sanitize':       '../vendor/angular/angular-sanitize',
+    'angular-resource':       '../vendor/angular/angular-resource',
+    'angular-route':          '../vendor/angular/angular-route',
+    'angular-loader':          '../vendor/angular/angular-loader',
     timepicker:               '../vendor/angular/timepicker',
     datepicker:               '../vendor/angular/datepicker',
     bindonce:                 '../vendor/angular/bindonce',
@@ -48,6 +51,7 @@ require.config({
     numeral:                  '../vendor/numeral',
     jsonpath:                 '../vendor/jsonpath',
     elasticjs:                '../vendor/elasticjs/elastic-angular-client',
+    elasticsearch:            '../vendor/elasticsearch.angular'
   },
   shim: {
     angular: {
@@ -89,15 +93,15 @@ require.config({
     'angular-loader':       ['angular'],
     'angular-mocks':        ['angular'],
     'angular-resource':     ['angular'],
-    'angular-route':        ['angular'],
     'angular-touch':        ['angular'],
+    'angular-route':        ['angular'],
     'bindonce':             ['angular'],
     'angular-strap':        ['angular', 'bootstrap','timepicker', 'datepicker'],
 
     timepicker:             ['jquery', 'bootstrap'],
     datepicker:             ['jquery', 'bootstrap'],
-
-    elasticjs:              ['angular', '../vendor/elasticjs/elastic']
+    elasticsearch:          ['angular'],
+    elasticjs:              ['elasticsearch', '../vendor/elasticjs/elastic']
   },
   waitSeconds: 60,
 });

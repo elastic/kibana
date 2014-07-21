@@ -10,83 +10,112 @@
 Angular.js service wrapping the elastic.js API. This module can simply
 be injected into your angular controllers.
 */
-angular.module('elasticjs.service', [])
-  .factory('ejsResource', ['$http', function ($http) {
+angular.module('elasticjs.service', ['elasticsearch'])
+  .factory('ejsResource', ['esFactory', function (esFactory) {
 
-  return function (config) {
+  return function (esHost, apiVersion) {
 
     var
 
-      // use existing ejs object if it exists
-      ejs = window.ejs || {},
-
-      /* results are returned as a promise */
-      promiseThen = function (httpPromise, successcb, errorcb) {
-        return httpPromise.then(function (response) {
-          (successcb || angular.noop)(response.data);
-          return response.data;
-        }, function (response) {
-          (errorcb || angular.noop)(response.data);
-          return response.data;
-        });
-      };
-
-    // check if we have a config object
-    // if not, we have the server url so
-    // we convert it to a config object
-    if (config !== Object(config)) {
-      config = {server: config};
+    // use existing ejs object if it exists
+    ejs = window.ejs || {}, esClient = window.esClient || undefined;
+      
+    // default to 1.0 API if none specified
+    if(!apiVersion) {
+        apiVersion = '1.0';
     }
-
-    // set url to empty string if it was not specified
-    if (config.server == null) {
-      config.server = '';
+      
+    if(!ejs.config) {
+        ejs.config = {
+            host: esHost,
+            apiVersion: apiVersion,
+            sniffOnStart: true
+        };
     }
-
-    /* implement the elastic.js client interface for angular */
-    ejs.client = {
-      server: function (s) {
-        if (s == null) {
-          return config.server;
+      
+    if(!esClient) {
+        window.esClient = esFactory(ejs.config);
+        esClient = window.esClient;
+    }
+      
+    ejs.getEsVersion = function() {
+        if(apiVersion == '0.9') {
+            return esClient.cluster.nodeInfo({all:true});
+        } else {
+            return esClient.nodes.info();
+        }
+    };
+    
+    ejs.doSearch = function(indices, searchBody, size) {
+        if(size) {
+            return esClient.search({
+            index: indices,
+            body: searchBody,
+                size: size
+            });
+        } else {
+            return esClient.search({
+            index: indices,
+            body: searchBody
+            });
         }
 
-        config.server = s;
-        return this;
-      },
-      post: function (path, data, successcb, errorcb) {
-        path = config.server + path;
-        var reqConfig = {url: path, data: data, method: 'POST'};
-        return promiseThen($http(angular.extend(reqConfig, config)), successcb, errorcb);
-      },
-      get: function (path, data, successcb, errorcb) {
-        path = config.server + path;
-        // no body on get request, data will be request params
-        var reqConfig = {url: path, params: data, method: 'GET'};
-        return promiseThen($http(angular.extend(reqConfig, config)), successcb, errorcb);
-      },
-      put: function (path, data, successcb, errorcb) {
-        path = config.server + path;
-        var reqConfig = {url: path, data: data, method: 'PUT'};
-        return promiseThen($http(angular.extend(reqConfig, config)), successcb, errorcb);
-      },
-      del: function (path, data, successcb, errorcb) {
-        path = config.server + path;
-        var reqConfig = {url: path, data: data, method: 'DELETE'};
-        return promiseThen($http(angular.extend(reqConfig, config)), successcb, errorcb);
-      },
-      head: function (path, data, successcb, errorcb) {
-        path = config.server + path;
-        // no body on HEAD request, data will be request params
-        var reqConfig = {url: path, params: data, method: 'HEAD'};
-        return $http(angular.extend(reqConfig, config))
-          .then(function (response) {
-          (successcb || angular.noop)(response.headers());
-          return response.headers();
-        }, function (response) {
-          (errorcb || angular.noop)(undefined);
-          return undefined;
+    };
+      
+    ejs.doCount = function(indices, searchBody) {
+        return esClient.search({
+          index: indices,
+          body: searchBody
         });
-      }
+    };
+      
+    ejs.doIndex = function(index, type, id, indexBody, ttl) {
+        if(ttl) {
+            return esClient.index({
+                index: index,
+                type: type,
+                id: id,
+                body: indexBody,
+                ttl: ttl
+            });
+        }
+        return esClient.index({
+            index: index,
+            type: type,
+            id: id,
+            body: indexBody
+        });
+    };
+      
+    ejs.doDelete = function(index, type, id) {
+        return esClient.delete({
+            index: index,
+            type: type,
+            id: id
+        });
+    };
+      
+    ejs.getAliases = function(indices) {
+        return esClient.indices.getAliases({
+          index: indices,
+          ignoreUnavailable: true
+        });  
+    };
+      
+    ejs.getMapping = function(indices) {
+        return esClient.indices.getMapping({
+          index: indices,
+          ignoreUnavailable: true
+        });
+    };
+      
+    ejs.getSource = function(index, type, id) {
+        var result = esClient.getSource({
+            index: index,
+            type: type,
+            id: id
+        });
+        return result;
     };
 
     return ejs;

@@ -13,7 +13,7 @@ function (angular, _, config) {
     // Save a reference to this
     var self = this;
 
-    var ejs = ejsResource(config.elasticsearch);
+    var ejs = ejsResource(config.elasticsearch, config.api_version);
 
 
     this.list = ['_type'];
@@ -48,17 +48,7 @@ function (angular, _, config) {
     };
 
     this.map = function(indices) {
-      var request = ejs.client.get('/' + indices.join(',') + "/_mapping",
-        undefined, undefined, function(data, status) {
-          if(status === 0) {
-            alertSrv.set('Error',"Could not contact Elasticsearch at "+ejs.config.server+
-              ". Please ensure that Elasticsearch is reachable from your system." ,'error');
-          } else {
-            alertSrv.set('Error',"No index found at "+ejs.config.server+"/" +
-              indices.join(',')+"/_mapping. Please create at least one index."  +
-              "If you're using a proxy ensure it is configured correctly.",'error');
-          }
-        });
+      var request = ejs.getMapping(indices);
 
       // Flatten the mapping of each index into dot notated keys.
       return request.then(function(p) {
@@ -72,7 +62,16 @@ function (angular, _, config) {
           });
           return mapping;
         });
-      });
+      }, function(data, status) {
+          if(status === 0) {
+            alertSrv.set('Error',"Could not contact Elasticsearch at "+ejs.config.host+
+              ". Please ensure that Elasticsearch is reachable from your system." ,'error');
+          } else {
+            alertSrv.set('Error',"No index found at "+ejs.config.host+"/" +
+              indices.join(',')+"/_mapping. Please create at least one index."  +
+              "If you're using a proxy ensure it is configured correctly.",'error');
+          }
+        });
     };
 
     // This should understand both the 1.0 format and the 0.90 format for mappings. Ugly.

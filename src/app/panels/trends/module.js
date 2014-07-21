@@ -160,7 +160,7 @@ function (angular, app, _, kbn) {
 
 
       // Populate the inspector panel
-      $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
+      $scope.inspector = request.toJSON();
 
       // If we're on the first segment we need to get our indices
       if (_segment === 0) {
@@ -171,11 +171,10 @@ function (angular, app, _, kbn) {
           dashboard.current.index.interval
         ).then(function (p) {
           $scope.index = _.union(p,$scope.index);
-          request = request.indices($scope.index[_segment]);
-          process_results(request.doSearch(),_segment,query_id);
+          process_results($scope.ejs.doSearch($scope.index[_segment], request),_segment,query_id);
         });
       } else {
-        process_results(request.indices($scope.index[_segment]).doSearch(),_segment,query_id);
+        process_results($scope.ejs.doSearch($scope.index[_segment], request),_segment,query_id);
       }
 
     };

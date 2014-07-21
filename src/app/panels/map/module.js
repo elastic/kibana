@@ -104,7 +104,7 @@ function (angular, app, _, $) {
         queries;
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
-      request = $scope.ejs.Request().indices(dashboard.indices);
+      request = $scope.ejs.Request();
       queries = querySrv.getQueryObjs($scope.panel.queries.ids);
 
       boolQuery = $scope.ejs.BoolQuery();
@@ -126,7 +126,7 @@ function (angular, app, _, $) {
 
       $scope.populate_modal(request);
 
-      var results = request.doSearch();
+      var results = $scope.ejs.doSearch(dashboard.indices, request);
 
       // Populate scope when we have results
       results.then(function(results) {
@@ -142,7 +142,7 @@ function (angular, app, _, $) {
 
     // I really don't like this function, too much dom manip. Break out into directive?
     $scope.populate_modal = function(request) {
-      $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
+      $scope.inspector = request.toJSON();
     };
 
     $scope.build_search = function(field, value) {

@@ -155,7 +155,7 @@ function (angular, app, _, $, kbn) {
       $scope.field = _.contains(fields.list,$scope.panel.field+'.raw') ?
         $scope.panel.field+'.raw' : $scope.panel.field;
 
-      request = $scope.ejs.Request().indices(dashboard.indices);
+      request = $scope.ejs.Request();
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
       queries = querySrv.getQueryObjs($scope.panel.queries.ids);
@@ -195,9 +195,9 @@ function (angular, app, _, $, kbn) {
       }
 
       // Populate the inspector panel
-      $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
+      $scope.inspector = request.toJSON();
 
-      results = request.doSearch();
+      results = $scope.ejs.doSearch(dashboard.indices, request);
 
       // Populate scope when we have results
       results.then(function(results) {
