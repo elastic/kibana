@@ -32,7 +32,21 @@
           state="state">
         </disc-field-chooser>
       </div>
-      <div class="col-md-10">
+      <div class="col-md-10" ng-show="!hits && !searchSource.activeFetchCount">
+        <div class="discover-overlay">
+          <h2>No results found</h2>
+          <div class="col-md-12">
+            Unfortunately I could not find any results matching your search. I tried really hard. I looked all over the place. Try expanding your search, or increasing your time window if searching by time. I really want to make this work for you. Help me, help you.
+          </div>
+        </div>
+      </div>
+      <div class="col-md-10" ng-show="!hits && searchSource.activeFetchCount">
+        <div class="discover-overlay">
+          <h2>Searching</h2>
+          <div class="spinner large"></div>
+        </div>
+      </div>
+      <div class="col-md-10" ng-show="hits">
 
         <div class="discover-timechart" ng-if="vis">
           <center class="small">
@@ -47,7 +61,7 @@
             </select> -->
           </center>
 
-          <div ng-show="searchSource.activeFetchCount" class="discover-timechart-overlay">
+          <div ng-show="searchSource.activeFetchCount" class="discover-overlay">
             <div class="spinner large">
             </div>
           </div>
