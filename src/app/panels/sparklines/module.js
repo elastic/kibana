@@ -163,7 +163,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
       _interval = $scope.get_interval(_range);
 
       $scope.panelMeta.loading = true;
-      request = $scope.ejs.Request().indices(dashboard.indices[segment]);
+      request = $scope.ejs.Request();
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
 
@@ -196,7 +196,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
       $scope.populate_modal(request);
 
       // Then run it
-      results = request.doSearch();
+      results = $scope.ejs.doSearch(dashboard.indices[segment], request);
 
       // Populate scope when we have results
       results.then(function(results) {
@@ -265,7 +265,7 @@ function (angular, app, $, _, kbn, moment, timeSeries) {
 
     // I really don't like this function, too much dom manip. Break out into directive?
     $scope.populate_modal = function(request) {
-      $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
+      $scope.inspector = request.toJSON();
     };
 
     $scope.set_refresh = function (state) {

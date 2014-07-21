@@ -113,11 +113,11 @@ define([
       }
 
       var _segment = _.isUndefined(segment) ? 0 : segment;
-      var request = $scope.ejs.Request().indices(dashboard.indices[_segment]);
+      var request = $scope.ejs.Request();
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
       var queries = querySrv.getQueryObjs($scope.panel.queries.ids);
-
+        
       // Build the question part of the query
       _.each(queries, function(q) {
         var _q = $scope.ejs.FilteredQuery(
@@ -131,10 +131,10 @@ define([
       });
 
       // Populate the inspector panel
-      $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
+      $scope.inspector = request.toJSON();
 
       // Then run it
-      var results = request.doSearch();
+      var results = $scope.ejs.doSearch(dashboard.indices[_segment], request);
 
       // Populate scope when we have results
       results.then(function(results) {

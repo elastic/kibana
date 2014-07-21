@@ -325,7 +325,7 @@ function (angular, app, _, kbn, moment) {
       _segment = _.isUndefined(segment) ? 0 : segment;
       $scope.segment = _segment;
 
-      request = $scope.ejs.Request().indices(dashboard.indices[_segment]);
+      request = $scope.ejs.Request();
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
 
@@ -346,14 +346,13 @@ function (angular, app, _, kbn, moment) {
           .fragmentSize(2147483647) // Max size of a 32bit unsigned int
           .preTags('@start-highlight@')
           .postTags('@end-highlight@')
-        )
-        .size($scope.panel.size*$scope.panel.pages)
+        ).size($scope.panel.size*$scope.panel.pages)
         .sort(sort);
 
       $scope.populate_modal(request);
 
       // Populate scope when we have results
-      request.doSearch().then(function(results) {
+      $scope.ejs.doSearch(dashboard.indices[_segment], request).then(function(results) {
         $scope.panelMeta.loading = false;
 
         if(_segment === 0) {
@@ -428,7 +427,7 @@ function (angular, app, _, kbn, moment) {
     };
 
     $scope.populate_modal = function(request) {
-      $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
+      $scope.inspector = request.toJSON();
     };
 
     $scope.without_kibana = function (row) {

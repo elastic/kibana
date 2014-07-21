@@ -116,7 +116,7 @@ define([
 
 
       $scope.panelMeta.loading = true;
-      var request = $scope.ejs.Request().indices(dashboard.indices);
+      var request = $scope.ejs.Request();
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
       var queries = querySrv.getQueryObjs($scope.panel.queries.ids);
@@ -134,9 +134,9 @@ define([
         .filter(filterSrv.getBoolFilter(filterSrv.ids()))
         .size(0);
 
-      $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
+      $scope.inspector = request.toJSON();
 
-      results = request.doSearch();
+      results = $scope.ejs.doSearch(dashboard.indices, request);
 
       results.then(function(results) {
         $scope.panelMeta.loading = false;
