@@ -7453,6 +7453,13 @@ kbn-table tr.even td {
 .navbar > .container-fluid > .navbar-form:not(.pull-right):first-child {
   margin-left: -15px;
 }
+.list-group-menu .list-group-menu-item.active {
+  font-weight: bold;
+  background-color: #ecf0f1;
+}
+.list-group-menu .list-group-menu-item:hover {
+  background-color: #ecf0f1;
+}
 .navbar-static-top .navbar-right {
   font-size: 13px;
 }

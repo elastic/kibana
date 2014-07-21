@@ -1,14 +1,12 @@
 <h1>
-  Choose a Visualization Type
+  I want to create a
+  <span class="pull-right label label-default">Step 2</span>
 </h1>
-<ul class="media-list">
-  <li ng-repeat="type in visTypeDefs" class="media">
-    <a class="pull-left" ng-href="{{ typeUrl(type) }}">
-      <i ng-class="type.icon"></i>
-    </a>
-    <div class="media-body">
-      <div class="media-heading"><a ng-href="{{ typeUrl(type) }}">{{type.name}}</a></div>
-      <p ng-if="type.description">{{type.description}}</p>
-    </div>
-  </li>
+
+<ul class="list-group list-group-menu">
+  <a ng-repeat="type in visTypeDefs"  ng-href="{{ typeUrl(type) }}">
+    <li class="list-group-item list-group-menu-item">
+      <i ng-class="type.icon"></i>{{type.name}}
+    </li>
+  </a>
 </ul>
