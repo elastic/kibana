@@ -32,7 +32,7 @@ function (angular, _, config, kbn) {
     ];
 
     // For convenience
-    var ejs = ejsResource(config.elasticsearch);
+    var ejs = ejsResource(config.elasticsearch, config.api_version);
 
     // Holds all actual queries, including all resolved abstract queries
     var resolvedQueries = [];
@@ -94,7 +94,7 @@ function (angular, _, config, kbn) {
             suffix = ' OR (' + (q.query||'*') + ')';
           }
 
-          var request = ejs.Request().indices(dashboard.indices);
+          var request = ejs.Request();
           // Terms mode
           request = request
             .facet(ejs.TermsFacet('query')
@@ -106,7 +106,7 @@ function (angular, _, config, kbn) {
                   filterSrv.getBoolFilter(filterSrv.ids())
                   )))).size(0);
 
-          var results = request.doSearch();
+          var results = $scope.ejs.doSearch(dashboard.indices, request);
           // Like the regex and lucene queries, this returns a promise
           return results.then(function(data) {
             var _colors = kbn.colorSteps(q.color,data.facets.query.terms.length);

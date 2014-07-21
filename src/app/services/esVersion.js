@@ -12,7 +12,7 @@ function (angular, _, config) {
 
     this.versions = [];
 
-    var ejs = ejsResource(config.elasticsearch);
+    var ejs = ejsResource(config.elasticsearch, config.api_version);
 
 
     // save a reference to this
@@ -28,17 +28,7 @@ function (angular, _, config) {
         defer.resolve(self.versions);
         return defer.promise;
       } else {
-        var nodeInfo = ejs.client.get('/_nodes',
-          undefined, undefined, function(data, status) {
-          if(_.isUndefined(status)) {
-            alertSrv.set('Error',"Could not contact Elasticsearch at "+ejs.client.server()+
-              ". Please ensure that Elasticsearch is reachable from your system." ,'error');
-          } else {
-            alertSrv.set('Error',"Could not reach "+ejs.client.server()+"/_nodes. If you"+
-            " are using a proxy, ensure it is configured correctly",'error');
-          }
-          return;
-        });
+        var nodeInfo = ejs.getEsVersion();
 
         return nodeInfo.then(function(p) {
           _.each(p.nodes, function(v) {
@@ -46,6 +36,15 @@ function (angular, _, config) {
           });
           self.versions = sortVersions(_.uniq(self.versions));
           return self.versions;
+        }, function(data, status) {
+          if(_.isUndefined(status)) {
+            alertSrv.set('Error',"Could not contact Elasticsearch at "+config.elasticsearch+
+              ". Please ensure that Elasticsearch is reachable from your system." ,'error');
+          } else {
+            alertSrv.set('Error',"Could not reach "+config.elasticsearch+"/_nodes. If you"+
+            " are using a proxy, ensure it is configured correctly",'error');
+          }
+          return;
         });
       }
 

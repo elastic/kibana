@@ -65,7 +65,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
     };
 
     // An elasticJS client to use
-    var ejs = ejsResource(config.elasticsearch);
+    var ejs = ejsResource(config.elasticsearch, config.api_version);
 
     var gist_pattern = /(^\d{5,}$)|(^[a-z0-9]{10,}$)|(gist.github.com(\/*.*)\/[a-z0-9]{5,}\/*$)/;
 
@@ -356,12 +356,12 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
 
     this.elasticsearch_load = function(type,id) {
       var successcb = function(data) {
-        var response = renderTemplate(angular.fromJson(data)._source.dashboard, $routeParams);
+        var response = renderTemplate(angular.fromJson(data).dashboard, $routeParams);
         self.dash_load(response);
       };
       var errorcb = function(data, status) {
         if(status === 0) {
-          alertSrv.set('Error',"Could not contact Elasticsearch at "+ejs.config.server+
+          alertSrv.set('Error',"Could not contact Elasticsearch at "+ejs.config.host+
             ". Please ensure that Elasticsearch is reachable from your system." ,'error');
         } else {
           alertSrv.set('Error',"Could not find "+id+". If you"+
@@ -369,11 +369,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
         }
         return false;
       };
-
-      ejs.client.get(
-        "/" + config.kibana_index + "/"+type+"/"+id+'?' + new Date().getTime(),
-        null, successcb, errorcb);
-
+      ejs.getSource(config.kibana_index, type, id).then(successcb, errorcb);
     };
 
     this.script_load = function(file) {
@@ -410,16 +406,14 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
       }
 
       // Create request with id as title. Rethink this.
-      var request = ejs.Document(config.kibana_index,type,id).source({
+      var indexSource = {
         user: 'guest',
         group: 'guest',
         title: save.title,
         dashboard: angular.toJson(save)
-      });
+      };
 
-      request = type === 'temp' && ttl ? request.ttl(ttl) : request;
-
-      return request.doIndex(
+      return ejs.doIndex(config.kibana_index,type,id, indexSource, type === 'temp' && ttl ? request.ttl(ttl) : undefined).then(
         // Success
         function(result) {
           if(type === 'dashboard') {
@@ -435,7 +429,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
     };
 
     this.elasticsearch_delete = function(id) {
-      return ejs.Document(config.kibana_index,'dashboard',id).doDelete(
+      return ejs.doDelete(config.kibana_index,'dashboard',id).then(
         // Success
         function(result) {
           return result;
@@ -448,10 +442,17 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
     };
 
     this.elasticsearch_list = function(query,count) {
-      var request = ejs.Request().indices(config.kibana_index).types('dashboard');
-      return request.query(
-        ejs.QueryStringQuery(query || '*')
-        ).size(count).doSearch(
+      var request = ejs.Request();
+      
+      var ejsQuery = ejs.BoolQuery();
+      if(query) {
+          ejsQuery = ejsQuery.must(ejs.QueryStringQuery(query).defaultField('title'));
+      }
+      ejsQuery = ejsQuery.must(ejs.MatchQuery('_type', 'dashboard'));
+        
+      request = request.query(ejsQuery);
+
+      return ejs.doSearch(config.kibana_index, request).then(
           // Success
           function(result) {
             return result;
