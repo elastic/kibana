@@ -1,11 +1,6 @@
 <div ng-controller="discover">
-  <nav class="navbar navbar-default navbar-static-top">
-    <ul class="nav navbar-nav pull-right navbar-inline">
-      <li><a class="navbar-link" ng-click="toggleSave()"><i class="fa fa-save"></i></a></li>
-      <li><a class="navbar-link" ng-click="toggleLoad()"><i class="fa fa-folder-open"></i></a></li>
-      <li><a class="navbar-link" ng-click="toggleConfig()"><i class="fa fa-gear"></i></a></li>
-    </ul>
-    <form class="navbar-form" ng-submit="fetch()">
+  <navbar>
+    <form class="fill" ng-submit="fetch()">
       <div class="form-group" style="display:inline;">
         <div class="input-group">
           <input placeholder="Search..." type="text" class="form-control" ng-model="state.query">
@@ -14,7 +9,12 @@
         </div>
       </div>
     </form>
-  </nav>
+    <div class="button-group">
+      <a class="btn" ng-click="toggleSave()"><i class="fa fa-save"></i></a>
+      <a class="btn" ng-click="toggleLoad()"><i class="fa fa-folder-open"></i></a>
+      <a class="btn" ng-click="toggleConfig()"><i class="fa fa-gear"></i></a>
+    </div>
+  </navbar>
   <config config-template="configTemplate" config-object="opts" config-close="configClose" config-submit="fetch"></config>
 
   <div class="container-fluid">
