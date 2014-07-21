@@ -48,7 +48,7 @@ define(function (require) {
       /**
        * Process the pending request queue right now, returns
        * a promise that resembles the success of the fetch completing,
-       * individual errors are routed to their respectiv requests.
+       * individual errors are routed to their respective requests.
        */
       courier.fetch = function () {
         return searchLooper.run();

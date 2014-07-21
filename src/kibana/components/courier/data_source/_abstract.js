@@ -26,7 +26,7 @@ define(function (require) {
 
       this._dynamicState = this._dynamicState || {};
 
-      // get/set internal state values
+      // set internal state values
       this._methods.forEach(function (name) {
         this[name] = function (val) {
           if (val == null) {

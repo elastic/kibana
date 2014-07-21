@@ -280,23 +280,23 @@ define(function (require) {
       var chartOptions;
 
       $scope.searchSource
-        .size($scope.opts.sampleSize)
-        .sort(function () {
-          var sort = {};
-          if (_.isArray($state.sort)) {
-            sort[$state.sort[0]] = $state.sort[1];
-          } else if (indexPattern.timeFieldName) {
-            sort[indexPattern.timeFieldName] = 'desc';
-          } else {
-            sort._score = 'desc';
-          }
-          return sort;
-        })
-        .query(!$state.query ? null : {
-          query_string: {
-            query: $state.query
-          }
-        });
+      .size($scope.opts.sampleSize)
+      .sort(function () {
+        var sort = {};
+        if (_.isArray($state.sort)) {
+          sort[$state.sort[0]] = $state.sort[1];
+        } else if (indexPattern.timeFieldName) {
+          sort[indexPattern.timeFieldName] = 'desc';
+        } else {
+          sort._score = 'desc';
+        }
+        return sort;
+      })
+      .query(!$state.query ? null : {
+        query_string: {
+          query: $state.query
+        }
+      });
 
       // get the current indexPattern
       var indexPattern = $scope.searchSource.get('index');
