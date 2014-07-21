@@ -7161,6 +7161,7 @@ navbar > .fill {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  position: relative;
 }
 .sidebar-container .sidebar-list .sidebar-item .sidebar-item-title.full-title {
   white-space: normal;
