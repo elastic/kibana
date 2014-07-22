@@ -162,12 +162,10 @@ define(function (require) {
           timefilter.enabled(!!timefield);
         });
 
-        $scope.searchSource.onError().then(function searchError(err) {
+        $scope.searchSource.onError(function (err) {
           console.log(err);
           notify.error('An error occured with your request. Reset your inputs and try again.');
-
-          return $scope.searchSource.onError().then(searchError);
-        });
+        }).catch(notify.fatal);
 
         // Bind a result handler. Any time searchSource.fetch() is executed this gets called
         // with the results
