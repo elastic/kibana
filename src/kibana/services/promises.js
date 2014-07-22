@@ -109,13 +109,11 @@ define(function (require) {
     function PromiseEmitter(fn, handler) {
       var prom = new Promise(fn);
 
-      if (handler) {
-        prom.then(handler).then(function recurse() {
-          return new Promise(fn).then(handler).then(recurse);
-        });
-      }
+      if (!handler) return prom;
 
-      return prom;
+      return prom.then(handler).then(function recurse() {
+        return new PromiseEmitter(fn, handler);
+      });
     }
 
     return PromiseEmitter;
