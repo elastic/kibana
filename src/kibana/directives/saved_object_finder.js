@@ -1,5 +1,5 @@
 define(function (require) {
-  var module = require('modules').get('kibana/directives');
+  var module = require('modules').get('kibana');
   var _ = require('lodash');
   var rison = require('utils/rison');
 

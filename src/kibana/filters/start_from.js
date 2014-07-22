@@ -1,6 +1,6 @@
 define(function (require) {
   require('modules')
-    .get('kibana/filters')
+    .get('kibana')
     .filter('startFrom', function () {
       return function (input, start) {
         if (!input) return [];

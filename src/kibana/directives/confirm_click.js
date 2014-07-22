@@ -1,6 +1,6 @@
 define(function (require) {
   require('modules')
-    .get('kibana/directives')
+    .get('kibana')
     .directive('confirmClick', function () {
       return {
         restrict: 'A',

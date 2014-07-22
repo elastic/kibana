@@ -3,7 +3,7 @@ define(function (require) {
   var _ = require('lodash');
 
   require('modules')
-    .get('kibana/filters')
+    .get('kibana')
     .filter('moment', function (config) {
     return function (datetime) {
       var format = config.get('dateFormat');

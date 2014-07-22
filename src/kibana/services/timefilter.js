@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var moment = require('moment');
   var datemath = require('utils/datemath');
-  var module = require('modules').get('kibana/services');
+  var module = require('modules').get('kibana');
 
   module.service('timefilter', function (Promise, globalState, $rootScope) {
 

@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  var module = require('modules').get('kibana/services');
+  var module = require('modules').get('kibana');
 
   // Provides a tiny subset of the excelent API from
   // bluebird, reimplemented using the $q service

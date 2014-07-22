@@ -5,7 +5,7 @@ define(function (require) {
   var _ = require('lodash');
 
   require('modules')
-    .get('kibana/filters')
+    .get('kibana')
     .filter('fieldType', function () {
       return function (arr, type) {
         if (type === '*') return arr;
