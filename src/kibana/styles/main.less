@@ -151,6 +151,7 @@ notifications {
 }
 
 .list-group-menu {
+
   .list-group-menu-item {
     &.active {
       font-weight: bold;
@@ -158,6 +159,10 @@ notifications {
     }
     &:hover {
       background-color: @well-bg;
+    }
+    li {
+      list-style: none;
+      color: @link-color;
     }
   }
 }
@@ -232,6 +237,12 @@ saved-object-finder {
     margin-bottom: 0;
     input {
       .border-bottom-radius(0);
+    }
+  }
+
+  .list-group-item {
+    &:first-child {
+      .border-top-radius(0) !important;
     }
   }
 
