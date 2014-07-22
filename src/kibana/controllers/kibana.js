@@ -19,7 +19,7 @@ define(function (require) {
   require('angular-bootstrap');
   require('services/private');
 
-  var module = require('modules').get('kibana/controllers', ['ui.bootstrap']);
+  var module = require('modules').get('kibana', ['ui.bootstrap']);
 
   module.config(function ($tooltipProvider) {
     $tooltipProvider.options({

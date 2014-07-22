@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var ConfigTemplate = require('utils/config_template');
   var angular = require('angular');
-  var module = require('modules').get('kibana/directives');
+  var module = require('modules').get('kibana');
 
   /**
    * config directive

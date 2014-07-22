@@ -3,7 +3,7 @@ define(function (require) {
 
   var es; // share the client amoungst all apps
   require('modules')
-    .get('kibana/services', ['elasticsearch', 'kibana/config'])
+    .get('kibana', ['elasticsearch', 'kibana/config'])
     .service('es', function (esFactory, configFile, $q) {
       if (es) return es;
 
