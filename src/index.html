@@ -10,7 +10,7 @@
     <script src="bower_components/requirejs/require.js"></script>
 
     <script src="kibana/require.config.js"></script>
-    <script>require(['kibana'], function () {});</script>
+    <script>require(['kibana'], function (kibana) { kibana.init(); });</script>
     <link rel="stylesheet" href="kibana/styles/main.css" >
   </head>
   <body ng-controller="kibana" ng-class="'application-'+activeApp">

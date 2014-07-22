@@ -97,6 +97,10 @@ define(function (require) {
       return function () {
         return fn.apply(context, [].slice.call(arguments, 0, count));
       };
+    },
+    // call all functions in an array
+    callEach: function (arr) {
+      _.invoke(arr, 'call');
     }
   });
 

@@ -49,6 +49,7 @@
 
       function runTests() {
         require([
+          'kibana',
           'sinon/sinon',
           //'specs/apps/dashboard/directives/panel',
           'specs/directives/timepicker',
@@ -62,18 +63,14 @@
           'specs/utils/interval',
           'specs/utils/versionmath',
           'specs/utils/routes/index'
-        ], function (sinon) {
+        ], function (kibana, sinon) {
+          kibana.load(function () {
+            var xhr = sinon.useFakeXMLHttpRequest();
 
-          var xhr = sinon.useFakeXMLHttpRequest();
-
-
-          // xhr.onCreate = function () {
-          //   throw new Error('Tests should not be sending XHR requests');
-          // };
-
-          window.mochaRunner = mocha.run().on('end', function () {
-            window.mochaResults = this.stats;
-            xhr.restore();
+            window.mochaRunner = mocha.run().on('end', function () {
+              window.mochaResults = this.stats;
+              xhr.restore();
+            });
           });
         });
       }
