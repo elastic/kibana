@@ -1,5 +1,5 @@
 define(function (require) {
-  var _ = require('utils/mixins');
+  var _ = require('lodash');
 
   return _.flattenWith('.', {
     dateFormat: 'MMMM Do YYYY, HH:mm:ss.SSS',

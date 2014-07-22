@@ -1,5 +1,15 @@
 define(function (require) {
-  var _ = require('lodash');
+  /**
+   * THESE ARE AUTOMATICALLY INCLUDED IN LODASH
+   *
+   * use:
+   * var _ = require('lodash');
+   *
+   * require.js config points the "lodash" id to
+   * this module, which provides a modified version
+   * of lodash.
+   */
+  var _ = require('lodash_src');
 
   _.mixin({
     move: function (array, fromIndex, toIndex) {

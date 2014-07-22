@@ -8,6 +8,7 @@ require.config({
     routes: 'utils/routes/index',
     errors: 'components/errors',
     modules: 'utils/modules',
+    lodash: 'utils/_mixins',
 
     // bower_components
     angular: '../bower_components/angular/angular',
@@ -24,7 +25,7 @@ require.config({
     text: '../bower_components/requirejs-text/text',
     elasticsearch: '../bower_components/elasticsearch/elasticsearch.angular',
     jquery: '../bower_components/jquery/dist/jquery',
-    lodash: '../bower_components/lodash/dist/lodash',
+    lodash_src: '../bower_components/lodash/dist/lodash',
     moment: '../bower_components/moment/moment',
     gridster: '../bower_components/gridster/dist/jquery.gridster',
     jsonpath: '../bower_components/jsonpath/lib/jsonpath',

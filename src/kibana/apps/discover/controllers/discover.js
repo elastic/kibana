@@ -1,5 +1,5 @@
 define(function (require) {
-  var _ = require('utils/mixins');
+  var _ = require('lodash');
   var angular = require('angular');
   var moment = require('moment');
   var settingsHtml = require('text!apps/discover/partials/settings.html');
