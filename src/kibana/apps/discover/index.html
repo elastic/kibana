@@ -1,14 +1,11 @@
 <div ng-controller="discover">
   <navbar>
-    <form class="fill" ng-submit="fetch()">
-      <div class="form-group" style="display:inline;">
-        <div class="input-group">
-          <input placeholder="Search..." type="text" class="form-control" ng-model="state.query">
-          <span class="input-group-addon btn btn-default" ng-click="fetch()"><span class="fa fa-search"></span></span>
-          <span class="input-group-addon btn btn-default" ng-click="resetQuery()"><span class="fa fa-ban"></span></span>
-        </div>
-      </div>
+    <form class="fill inline-form" ng-submit="fetch()">
+      <input placeholder="Search..." type="text" class="form-control" ng-model="state.query">
+      <button type="submit"><span class="fa fa-search"></span></button>
+      <button type="button" ng-click="resetQuery()"><span class="fa fa-ban"></span></button>
     </form>
+
     <div class="button-group">
       <a class="btn" ng-click="toggleSave()"><i class="fa fa-save"></i></a>
       <a class="btn" ng-click="toggleLoad()"><i class="fa fa-folder-open"></i></a>
