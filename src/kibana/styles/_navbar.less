@@ -46,18 +46,35 @@ navbar {
     .flex(0, 0, auto);
   }
 
+  form > form.flex-input-group {
+    min-width: 100px;
+  }
+
   > .name {
     font-size: @font-size-large;
-    max-width: @screen-sm;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     padding-right: @navbar-padding-horizontal;
   }
 
-  > .fill {
-    .flex(1, 1, @screen-sm);
+  @media (min-width: @screen-md-min) {
+    > .name {
+      // 500px is sort of arbitrary, not sure how to deal with lots of buttons
+      max-width: 500px;
+    }
   }
+
+  > .fill {
+    .flex(1, 1, 0);
+  }
+
+  @media (max-width: @screen-md-min) {
+    > .fill {
+      .flex(1, 1, @screen-md);
+    }
+  }
+
 }
 
 
