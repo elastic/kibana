@@ -53,7 +53,8 @@ define(function (require) {
 
         var stateDefaults = {
           title: dash.title,
-          panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : []
+          panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
+          query: ''
         };
 
         var $state = $scope.state = new AppState(stateDefaults);
@@ -76,13 +77,30 @@ define(function (require) {
         $scope.timefilter = timefilter;
         $scope.$watchCollection('globalState.time', $scope.refresh);
 
-        $scope.filterResults = function () {
-          var root = courier.getRootSearch();
-          root.then(function (rootSource) {
-            rootSource.set('query', {
-              query_string: { query: $scope.state.query }
-            });
+        function init() {
+          updateQueryOnRootSource()
+          .then(function () {
+            $scope.$broadcast('application.load');
+          });
+        }
 
+        function updateQueryOnRootSource() {
+          return courier.getRootSearch()
+          .then(function (rootSource) {
+            if ($state.query) {
+              rootSource.set('query', {
+                query_string: { query: $state.query }
+              });
+            } else {
+              rootSource.set('query', null);
+            }
+          });
+        }
+
+        $scope.filterResults = function () {
+          updateQueryOnRootSource()
+          .then(function () {
+            $state.commit();
             courier.fetch();
           });
         };
@@ -137,7 +155,7 @@ define(function (require) {
           }
         };
 
-        $scope.$broadcast('application.load');
+        init();
       }
     };
   });
