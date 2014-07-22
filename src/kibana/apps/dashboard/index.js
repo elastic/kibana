@@ -18,8 +18,7 @@ define(function (require) {
     'ngRoute',
     'kibana/courier',
     'kibana/config',
-    'kibana/notify',
-    'kibana/services'
+    'kibana/notify'
   ]);
 
   require('routes')

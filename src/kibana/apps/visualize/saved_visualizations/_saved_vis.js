@@ -5,7 +5,7 @@ define(function (require) {
   var configCats = require('apps/visualize/saved_visualizations/_config_categories');
   var typeDefs = require('apps/visualize/saved_visualizations/_type_defs');
 
-  var module = require('modules').get('kibana/services');
+  var module = require('modules').get('app/visualize');
 
   module.factory('SavedVis', function (config, $injector, courier, indexPatterns, Promise, savedSearches, Private) {
     var aggs = Private(require('apps/visualize/saved_visualizations/_aggs'));
