@@ -14,7 +14,7 @@ define(function (require) {
   var CbQueue = require('utils/cb_queue');
   var configFile = require('config_file');
 
-  var kibana = angular.module('kibana', [
+  var kibana = modules.get('kibana', [
     // list external requirements here
     'elasticsearch',
     'pasvaz.bindonce',
@@ -60,7 +60,7 @@ define(function (require) {
       $(function () {
         angular
           .bootstrap(document, ['kibana'])
-          .invoke(function ($rootScope, $route) {
+          .invoke(function () {
             $(document.body).children().show();
             cb();
           });
