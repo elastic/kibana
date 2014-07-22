@@ -1,28 +1,16 @@
 <div dashboard-app class="dashboard-container">
   <nav ng-show="!appEmbedded" class="navbar navbar-default navbar-static-top">
-    <!-- <div class="container-fluid"> -->
     <navbar>
       <span class="name">
         {{dash.title}}
       </span>
 
-      <form class="fill" ng-submit="filterResults()">
-        <div class="form-group" style="display:inline;">
-          <div class="input-group">
-            <input placeholder="Filter..." type="text" class="form-control" ng-model="state.query">
-            <span class="input-group-addon btn btn-default" ng-click="filterResults()"><span class="fa fa-search"></span></span>
-            <!-- <span class="input-group-addon btn btn-default" ng-click="resetQuery()"><span class="fa fa-ban"></span></span> -->
-          </div>
-        </div>
+      <form class="fill flex-input-group" ng-submit="filterResults()">
+        <input placeholder="Filter..." type="text" class="form-control" ng-model="state.query">
+        <button class="btn btn-default" type="submit">
+          <span class="fa fa-search"></span>
+        </button>
       </form>
-
-      <!-- <ul class="nav navbar-nav pull-right">
-        <li><a class="navbar-link" ng-click="openAdd()"><i class="fa fa-plus"></i></a></li>
-        <li><a class="navbar-link" ng-click="openSave();"><i class="fa fa-save"></i></a></li>
-        <li><a class="navbar-link" ng-click="openLoad()"><i class="fa fa-folder-open"></i></a></li>
-        <li><a class="navbar-link" ng-click="openShare()"><i class="fa fa-code"></i></a></li>
-        <li><a class="navbar-link" ng-click="refresh()"><i class="fa fa-refresh"></i></a></li>
-      </ul> -->
 
       <div class="button-group">
         <a ng-click="openAdd()" class="btn"><i class="fa fa-plus"></i></a>
@@ -32,7 +20,6 @@
         <a ng-click="refresh()" class="btn"><i class="fa fa-refresh"></i></a>
       </div>
     </navbar>
-    <!-- </div> -->
   </nav>
   <config config-template="configTemplate" config-object="opts"></config>
   <dashboard-grid></dashboard-grid>

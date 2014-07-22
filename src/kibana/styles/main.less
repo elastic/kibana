@@ -336,3 +336,17 @@ input[type="checkbox"],
 .flex-grow {
   .flex(1, 1, auto);
 }
+
+.flex-input-group {
+  .flex();
+
+  > * {
+    .border-radius(0);
+  }
+  > :first-child {
+    .border-left-radius(@input-border-radius);
+  }
+  > :last-child {
+    .border-right-radius(@input-border-radius);
+  }
+}
