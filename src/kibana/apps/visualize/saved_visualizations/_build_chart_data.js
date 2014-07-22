@@ -128,7 +128,7 @@ define(function (require) {
           colStack.push(col);
           // non-metric aggs create buckets that we need to add
           // to the rows
-          if (result.buckets.length) {
+          if (result && result.buckets.length) {
             result.buckets.forEach(function (bucket) {
               rowStack.push(bucket.key);
 
