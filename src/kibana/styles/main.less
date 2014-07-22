@@ -1,6 +1,9 @@
 @import "../../bower_components/font-awesome/less/font-awesome.less";
 @import (reference) "lesshat.less";
 
+// Import variable files
+@import "./_variables.less";
+
 // custom bootstrap build
 @import "./_bootstrap.less";
 
@@ -24,9 +27,7 @@
 
 @import "./_sidebar.less";
 
-// Import variable files so that they are not overridden
-@import "./theme/_variables.less";
-@import "./_variables.less";
+@import "./theme/_theme.less";
 
 html,
 body {
@@ -336,28 +337,3 @@ input[type="checkbox"],
   }
 }
 
-
-.flex {
-  .display(flex);
-}
-.flex-vert {
-  .display(flex);
-  .flex-direction(column);
-}
-.flex-grow {
-  .flex(1, 1, auto);
-}
-
-.flex-input-group {
-  .flex();
-
-  > * {
-    .border-radius(0);
-  }
-  > :first-child {
-    .border-left-radius(@input-border-radius);
-  }
-  > :last-child {
-    .border-right-radius(@input-border-radius);
-  }
-}

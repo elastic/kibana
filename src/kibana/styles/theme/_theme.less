@@ -110,7 +110,7 @@ table,
 
 .form-control,
 input, {
-  border-width: 2px;
+  border-width: @input-border-width;
   .box-shadow(none);
 
   &:focus {
@@ -131,7 +131,7 @@ input, {
 
   .form-control,
   .form-control:focus {
-    border: 2px solid @brand-warning;
+    border: @input-border-width solid @brand-warning;
   }
 
   .input-group-addon {
@@ -152,7 +152,7 @@ input, {
 
   .form-control,
   .form-control:focus {
-    border: 2px solid @brand-danger;
+    border: @input-border-width solid @brand-danger;
   }
 
   .input-group-addon {
@@ -173,7 +173,7 @@ input, {
 
   .form-control,
   .form-control:focus {
-    border: 2px solid @brand-success;
+    border: solid @brand-success;
   }
 
   .input-group-addon {
@@ -233,7 +233,6 @@ input, {
 // Progress bars ==============================================================
 
 .progress {
-  height: 10px;
   .box-shadow(none);
   .progress-bar {
     font-size: 10px;
