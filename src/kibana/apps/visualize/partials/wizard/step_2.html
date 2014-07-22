@@ -4,8 +4,10 @@
 </h1>
 
 <ul class="list-group list-group-menu">
-  <a ng-repeat="type in visTypeDefs"  ng-href="{{ typeUrl(type) }}">
-    <li class="list-group-item list-group-menu-item">
+  <a class="list-group-item list-group-menu-item"
+  	ng-repeat="type in visTypeDefs"
+  	ng-href="{{ typeUrl(type) }}">
+    <li>
       <i ng-class="type.icon"></i>{{type.name}}
     </li>
   </a>
