@@ -4,7 +4,7 @@ define(function (require) {
   var WorkQueue = require('utils/routes/_work_queue');
   var sinon = require('test_utils/auto_release_sinon');
   require('services/promises');
-  require('angular').module('UtilsRouteWorkQueueTests', ['kibana/services']);
+  require('angular').module('UtilsRouteWorkQueueTests', ['kibana']);
 
   return function () {
     describe('work queue', function () {
