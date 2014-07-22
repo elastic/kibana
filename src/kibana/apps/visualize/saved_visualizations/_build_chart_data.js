@@ -170,7 +170,6 @@ define(function (require) {
         writeRow(chartData, { doc_count: resp.hits.total });
       }
 
-
       // now that things are well-ordered, and
       // all related values have been segregated into
       // their individual charts, we can go through and
