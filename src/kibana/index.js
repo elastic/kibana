@@ -3,6 +3,7 @@
  */
 define(function (require) {
   var angular = require('angular');
+  var _ = require('lodash');
   var $ = require('jquery');
   var modules = require('modules');
   var routes = require('routes');
