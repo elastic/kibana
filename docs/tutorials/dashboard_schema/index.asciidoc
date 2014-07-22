@@ -31,7 +31,7 @@ Like any JSON document, we start with an opening brace.
   "services": {
 ---------------
 
-Services are persisted objects that are used by mulitple panels. There
+Services are persisted objects that are used by multiple panels. There
 are currently 2 services that attach to the dashboard object and if
 omitted will be automatically populated with query and filter services.
 
