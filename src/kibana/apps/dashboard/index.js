@@ -56,7 +56,7 @@ define(function (require) {
           panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : []
         };
 
-        var $state = $scope.$state = new AppState(stateDefaults);
+        var $state = $scope.state = new AppState(stateDefaults);
 
         $scope.configTemplate = new ConfigTemplate({
           save: require('text!apps/dashboard/partials/save_dashboard.html'),

@@ -20,7 +20,7 @@ define(function (require) {
         var $body = $(document.body);
 
         // appState from controller
-        var $state = $scope.$state;
+        var $state = $scope.state;
 
         var gridster; // defined in init()
 
@@ -47,7 +47,7 @@ define(function (require) {
             }
           }).data('gridster');
 
-          $scope.$watchCollection('$state.panels', function (panels) {
+          $scope.$watchCollection('state.panels', function (panels) {
             var currentPanels = gridster.$widgets.toArray().map(function (el) {
               return getPanelFor(el);
             });
