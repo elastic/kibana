@@ -42,7 +42,7 @@ stack:: Stack multiple series
 spyable:: Show inspect icon
 zoomlinks:: Show `Zoom Out' link
 options:: Show quick view options section
-legend:: Display the legond
+legend:: Display the legend
 show_query:: If no alias is set, should the query be displayed?
 interactive:: Enable click-and-drag to zoom functionality
 legend_counts:: Show counts in legend
