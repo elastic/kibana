@@ -3,17 +3,7 @@
   <div ng-if="!appEmbedded">
     <navbar>
       <span ng-if="!!vis.title" class="name" ng-bind="vis.title"></span>
-
-      <form ng-submit="doVisualize()" class="fill">
-        <div class="input-group">
-          <input
-            placeholder="Search..."
-            type="text"
-            class="form-control"
-            ng-model="state.query">
-          <span class="input-group-addon" ng-click="doVisualize()"><span class="fa fa-search"></span></span>
-        </div>
-
+      <div class="fill bitty-modal-container">
         <div ng-if="linked && !unlinking"
           ng-dblclick="unlink()"
           tooltip="Double click to unlink this visualization from the saved search"
@@ -26,7 +16,16 @@
         <div ng-if="linked && unlinking" ng-click="doneUnlinking()" class="bitty-modal">
           <i class="fa fa-chain-broken"></i> Unlinked!
         </div>
-      </form>
+
+        <form ng-submit="doVisualize()" class="flex-input-group">
+          <input
+            placeholder="Search..."
+            type="text"
+            class="form-control"
+            ng-model="state.query">
+          <button class="btn btn-default" type="submit"><span class="fa fa-search"></span></button>
+        </form>
+      </div>
 
       <div class="button-group">
         <a ng-click="startOver()" class="btn"><i class="fa fa-file-o"></i></a>
