@@ -12,7 +12,6 @@ define(function (require) {
   require('angular-route');
   require('angular-bindonce');
 
-  var CbQueue = require('utils/cb_queue');
   var configFile = require('config_file');
 
   var kibana = modules.get('kibana', [
@@ -48,7 +47,8 @@ define(function (require) {
     return 'apps/' + app.id + '/index';
   });
 
-  var loadQueue = new CbQueue(function (cb) {
+
+  kibana.load = _.onceWithCb(function (cb) {
     require([
       'controllers/kibana'
     ], function loadApps() {
@@ -56,8 +56,8 @@ define(function (require) {
     });
   });
 
-  var initQueue = new CbQueue(function (cb) {
-    loadQueue.push(function () {
+  kibana.init = _.onceWithCb(function (cb) {
+    kibana.load(function () {
       $(function () {
         angular
           .bootstrap(document, ['kibana'])
@@ -68,9 +68,6 @@ define(function (require) {
       });
     });
   });
-
-  kibana.load = loadQueue.push;
-  kibana.init = initQueue.push;
 
   return kibana;
 });
