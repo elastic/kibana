@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  var module = require('modules').get('kibana/services');
+  var module = require('modules').get('app/visualize');
   var configCats = require('apps/visualize/saved_visualizations/_config_categories');
 
 

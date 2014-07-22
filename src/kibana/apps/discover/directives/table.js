@@ -11,7 +11,7 @@ define(function (require) {
   require('directives/truncated');
   require('directives/infinite_scroll');
 
-  var module = require('modules').get('kibana/directives');
+  var module = require('modules').get('app/discover');
 
   module.directive('kbnTableHeader', function () {
     var headerHtml = require('text!apps/discover/partials/table_header.html');

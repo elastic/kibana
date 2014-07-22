@@ -13,7 +13,7 @@ define(['angular', 'bluebird', 'services/promises'], function (angular, Bluebird
 
   var active = false;
 
-  angular.module('kibana/services')
+  angular.module('kibana')
   .config(function ($provide) {
     $provide.decorator('Promise', function ($delegate) {
       return active ? Bluebird : $delegate;

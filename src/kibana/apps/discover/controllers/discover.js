@@ -23,7 +23,6 @@ define(function (require) {
   require('apps/visualize/saved_visualizations/_adhoc_vis');
 
   var app = require('modules').get('apps/discover', [
-    'kibana/services',
     'kibana/notify',
     'kibana/courier',
     'kibana/index_patterns'

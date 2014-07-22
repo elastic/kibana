@@ -4,7 +4,7 @@ define(function (require) {
 
   require('components/notify/notify');
 
-  require('modules').get('kibana/services', ['kibana', 'kibana/notify', 'kibana/config'])
+  require('modules').get('components/setup', ['kibana', 'kibana/notify', 'kibana/config'])
   .service('kbnSetup', function (Private, Promise, Notifier, es, configFile) {
     // setup steps
     var checkForEs = Private(require('components/setup/steps/check_for_es'));
