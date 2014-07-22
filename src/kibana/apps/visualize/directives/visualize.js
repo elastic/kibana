@@ -101,7 +101,7 @@ define(function (require) {
             render();
           }).catch(notify.fatal);
 
-          vis.searchSource.onError(notify.error);
+          vis.searchSource.onError(notify.error).catch(notify.fatal);
 
           $scope.$root.$broadcast('ready:vis');
         });
