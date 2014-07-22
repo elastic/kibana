@@ -111,6 +111,41 @@ define(function (require) {
     // call all functions in an array
     callEach: function (arr) {
       _.invoke(arr, 'call');
+    },
+    onceWithCb: function (fn) {
+      var callbacks = [];
+
+      // on initial flush, call the init function, but ensure
+      // that it only happens once
+      var flush = _.once(function (cntx, args) {
+        args.push(function finishedOnce() {
+          // override flush to simply schedule an asynchronous clear
+          flush = function () {
+            setTimeout(function () {
+              _.callEach(callbacks.splice(0));
+            }, 0);
+          };
+
+          flush();
+        });
+
+        fn.apply(cntx, args);
+      });
+
+      return function runOnceWithCb() {
+        var args = [].slice.call(arguments, 0);
+        var cb = args[args.length - 1];
+
+        if (typeof cb === 'function') {
+          callbacks.push(cb);
+          // trim the arg list so the other callback can
+          // be pushed if needed
+          args = args.slice(0, -1);
+        }
+
+        // always call flush, it might not do anything
+        flush(this, args);
+      };
     }
   });
 
