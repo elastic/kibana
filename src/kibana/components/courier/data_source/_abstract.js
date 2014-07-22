@@ -117,13 +117,13 @@ define(function (require) {
      *
      * @return {Promise}
      */
-    SourceAbstract.prototype.onError = function () {
-      var defer = Promise.defer();
-      errorHandlers.push({
-        source: this,
-        defer: defer
-      });
-      return defer.promise;
+    SourceAbstract.prototype.onError = function (handler) {
+      return new PromiseEmitter(function (resolve, reject, defer) {
+        errorHandlers.push({
+          source: this,
+          defer: defer
+        });
+      }, handler);
     };
 
     /**
