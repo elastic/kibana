@@ -8,7 +8,8 @@ define(function (require) {
       if (es) return es;
 
       es = esFactory({
-        host: configFile.elasticsearch
+        host: configFile.elasticsearch,
+        log: 'info'
       });
 
       return es;
