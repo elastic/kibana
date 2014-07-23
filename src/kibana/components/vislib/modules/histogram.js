@@ -467,7 +467,7 @@ define(function (require) {
         var xTickScale = d3.scale.linear()
           .clamp(true)
           .domain([80, 300, 800])
-          .range([0, 2, 4]);
+          .range([0, 4, 8]);
 
         var xTicks = Math.floor(xTickScale(width));
 
@@ -550,14 +550,12 @@ define(function (require) {
         var xAxis = d3.svg.axis()
           .scale(xScale)
           .ticks(xTicks)
-          .tickPadding(5)
           .tickFormat(xAxisFormatter)
           .orient('bottom');
 
         var yAxis = d3.svg.axis()
           .scale(yScale)
           .ticks(yTicks)
-          .tickPadding(4)
           .tickFormat(yAxisFormatter)
           .orient('left');
 
@@ -627,6 +625,14 @@ define(function (require) {
           .append('p')
           .text(data.xAxisLabel);
 
+        svg.selectAll('.x').selectAll('.tick')
+          .each(function (d, i) {
+            if (xTicks > 5) {
+              if (i === 0 || i > 5) {
+                this.remove();
+              }
+            }
+          });
         // Removes the x-axis for all charts except the last one
         // when multiple rows for timeseries data are selected
         if ($('div.rows').length > 0 && data.ordered) {
@@ -945,7 +951,6 @@ define(function (require) {
                 }
               })
               .attr('height', function (d) {
-                console.log(yScale.domain());
                 var val = yScale(d.y0) - yScale(d.y0 + d.y);
                 if (isNaN(val) || val <= 0) {
                   throw new Error('line 915: bars attr height: ' + val);
