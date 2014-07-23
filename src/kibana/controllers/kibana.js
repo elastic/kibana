@@ -11,6 +11,7 @@ define(function (require) {
   require('components/notify/notify');
   require('components/state_management/app_state_factory');
   require('components/filter_bar/filter_bar');
+  require('components/storage/storage');
   require('directives/info');
   require('directives/spinner');
   require('directives/paginate');
@@ -49,7 +50,7 @@ define(function (require) {
       config.init()
     ]).then(function () {
       $scope.setupComplete = true;
-      $injector.invoke(function ($rootScope, courier, config, configFile, $timeout, $location, timefilter, globalState) {
+      $injector.invoke(function ($rootScope, courier, config, configFile, storage, $timeout, $location, timefilter, globalState) {
 
         $rootScope.globalState = globalState;
 
@@ -86,16 +87,16 @@ define(function (require) {
         var lastPathFor = function (app, path) {
           var key = 'lastPath:' + app.id;
           if (path === void 0) {
-            app.lastPath = localStorage.getItem(key) || '/' + app.id;
+            app.lastPath = storage.get(key) || '/' + app.id;
             return app.lastPath;
           } else {
             app.lastPath = path;
-            return localStorage.setItem(key, path);
+            return storage.set(key, path);
           }
         };
 
         $scope.apps = configFile.apps;
-        // initialize each apps lastPath (fetch it from localStorage)
+        // initialize each apps lastPath (fetch it from storage)
         $scope.apps.forEach(function (app) { lastPathFor(app); });
 
         function onRouteChange() {
