@@ -671,7 +671,7 @@ define(function (require) {
               .getBBox();
 
             return -1 * ww.width - 14;
-            })
+          })
             .attr('dy', '.75em')
             .attr('transform', 'rotate(-90)');
         }
