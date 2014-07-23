@@ -42,7 +42,7 @@ visualize {
 
 visualize-spy {
   // this element should flex
-  .flex();
+  .flex(0, 0, auto);
 
   // it's children should also flex vertically
   .flex-direction(column);
@@ -61,7 +61,7 @@ visualize-spy {
   }
 
   .visualize-show-spy {
-    .flex();
+    .flex(0, 0, auto);
     background-color: @well-bg;
     text-align: center;
 
@@ -119,7 +119,7 @@ visualize-spy {
   .visualize-spy-tabs {
     margin-top: 10px;
     margin-bottom: 10px;
-    .flex();
+    .flex(0, 0, auto);
   }
 
   pre {
