@@ -116,8 +116,8 @@ define(function (require) {
 
       switch (key) {
       case 'filter':
-        state.filters = state.filters || [];
-        state.filters.push(val);
+        // user a shallow flatten to detect if val is an array, and pull the values out if it is
+        state.filters = _.flatten([ state.filters || [], val ], true);
         return;
       case 'index':
       case 'type':

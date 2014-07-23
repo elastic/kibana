@@ -87,8 +87,12 @@ define(function (require) {
           return courier.getRootSearch()
           .then(function (rootSource) {
             if ($state.query) {
-              rootSource.set('query', {
-                query_string: { query: $state.query }
+              rootSource.set('filter', {
+                query: {
+                  query_string: {
+                    query: $state.query
+                  }
+                }
               });
             } else {
               rootSource.set('query', null);
