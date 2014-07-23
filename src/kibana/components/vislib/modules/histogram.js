@@ -625,14 +625,19 @@ define(function (require) {
           .append('p')
           .text(data.xAxisLabel);
 
-        svg.selectAll('.x').selectAll('.tick')
-          .each(function (d, i) {
-            if (xTicks > 5) {
-              if (i === 0 || i > 5) {
-                this.remove();
+        // Removes the first and last x axis tick marks
+        // when the number of xTicks is greater than 5.
+        if (data.ordered) {
+          svg.selectAll('.x').selectAll('.tick')
+            .each(function (d, i) {
+              if (xTicks > 5) {
+                if (i === 0 || i > 5) {
+                  this.remove();
+                }
               }
-            }
-          });
+            });
+        }
+
         // Removes the x-axis for all charts except the last one
         // when multiple rows for timeseries data are selected
         if ($('div.rows').length > 0 && data.ordered) {
