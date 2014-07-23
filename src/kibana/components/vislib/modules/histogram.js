@@ -419,7 +419,7 @@ define(function (require) {
         };
 
         // width, height, margins
-        var margin = { top: 35, right: 15, bottom: 35, left: 60 };
+        var margin = { top: 5, right: 0, bottom: 25, left: 60 };
         var elemWidth = parseInt(d3.select(that)
           .style('width'), 10);
         var elemHeight = parseInt(d3.select(that)
@@ -458,6 +458,20 @@ define(function (require) {
         var yGroupMax = chart.getYGroupMax(layers);
         var yStackMax = chart.getYStackMax(layers);
         var keys = chart.getXAxisKeys(layers[0].values);
+
+        var xTickScale = d3.scale.linear()
+          .clamp(true)
+          .domain([80, 300, 800])
+          .range([0, 2, 4]);
+
+        var xTicks = Math.floor(xTickScale(width));
+
+        var yTickScale = d3.scale.linear()
+          .clamp(true)
+          .domain([20, 40, 1000])
+          .range([0, 2, 10]);
+
+        var yTicks = Math.floor(yTickScale(height));
 
         var xScale;
 
@@ -505,7 +519,8 @@ define(function (require) {
 
           xScale = d3.time.scale()
             .domain([minIntervalOffset, maxIntervalOffset])
-            .range([0, width]);
+            .range([0, width])
+            .nice(xTicks);
         } else {
           xScale = d3.scale.ordinal()
             .domain(keys)
@@ -513,14 +528,19 @@ define(function (require) {
         }
 
         var yScale = d3.scale.linear()
-          .range([height, 0]);
+          .range([height, 0])
+          .nice(yTicks);
 
-        var xTickScale = d3.scale.linear()
-          .clamp(true)
-          .domain([80, 300, 800])
-          .range([0, 2, 4]);
-
-        var xTicks = Math.floor(xTickScale(width));
+        // setting the y scale domain
+        if (shareYAxis) {
+          yScale.domain([0, yAxisMax]);
+        } else {
+          if (offset === 'group') {
+            yScale.domain([0, yGroupMax]);
+          } else {
+            yScale.domain([0, yStackMax]);
+          }
+        }
 
         var xAxis = d3.svg.axis()
           .scale(xScale)
@@ -529,33 +549,12 @@ define(function (require) {
           .tickFormat(xAxisFormatter)
           .orient('bottom');
 
-        // tickScale uses height to get tickN value for ticks() and nice()
-        var tickScale = d3.scale.linear()
-            .clamp(true)
-            .domain([20, 40, 1000])
-            .range([0, 2, 10]),
-          tickN = Math.floor(tickScale(height));
-
         var yAxis = d3.svg.axis()
           .scale(yScale)
-          .ticks(tickN)
+          .ticks(yTicks)
           .tickPadding(4)
           .tickFormat(yAxisFormatter)
           .orient('left');
-
-        // setting the y scale domain
-        if (shareYAxis) {
-          yScale.domain([0, yAxisMax])
-            .nice(tickN);
-        } else {
-          if (offset === 'group') {
-            yScale.domain([0, yGroupMax])
-              .nice(tickN);
-          } else {
-            yScale.domain([0, yStackMax])
-              .nice(tickN);
-          }
-        }
 
         // canvas
         var svg = d3.select(that)
@@ -611,15 +610,31 @@ define(function (require) {
           .call(yAxis);
 
         // Axis labels
-        g.append('text')
+        // y Axis label
+        d3.select(elem).append('div')
+          .attr('class', 'y-axis-label')
+          .append('p')
+          .text(yAxisLabel);
+
+        // x Axis label
+        d3.select(elem).append('div')
           .attr('class', 'x-axis-label')
-          .attr('text-anchor', 'middle')
-          .attr('x', width / 2)
-          .attr('y', height + 30)
+          .append('p')
           .text(data.xAxisLabel);
 
-        g.append('text')
-          .attr('class', 'y-axis-label')
+        // Removes the x-axis for all charts except the last one
+        // when multiple rows for timeseries data are selected
+        if ($('div.rows').length > 0 && data.ordered) {
+          if (args.index !== $('div.rows').length - 1) {
+            d3.selectAll('.x')
+              .selectAll('.tick')
+              .remove();
+          }
+        }
+
+        // Chart title
+        var title = g.append('text')
+          .attr('class', 'charts-label')
           .attr('text-anchor', 'middle')
           .attr('x', -height / 2)
           .attr('y', function () {
@@ -632,16 +647,10 @@ define(function (require) {
           })
           .attr('dy', '.75em')
           .attr('transform', 'rotate(-90)')
-          .text(yAxisLabel);
-
-        // Chart title
-        g.append('text')
-          .attr('class', 'charts-label')
-          .attr('text-anchor', 'middle')
-          .attr('x', width / 2)
-          .attr('y', -10)
+//          title.attr('x', width / 2)
+//          .attr('y', -10);
           .text(data.label)
-          .call(chart.tickText, width)
+          .call(chart.tickText, height)
           .on('mouseover', function (d) {
             var hh = tip[0][0].scrollHeight;
 
