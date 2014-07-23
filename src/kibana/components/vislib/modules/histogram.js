@@ -420,6 +420,11 @@ define(function (require) {
 
         // width, height, margins
         var margin = { top: 5, right: 0, bottom: 25, left: 60 };
+
+        if ($('div.columns').length > 0) {
+          margin.top = 35;
+        }
+
         var elemWidth = parseInt(d3.select(that)
           .style('width'), 10);
         var elemHeight = parseInt(d3.select(that)
@@ -531,6 +536,7 @@ define(function (require) {
           .range([height, 0])
           .nice(yTicks);
 
+        console.log(yAxisMax);
         // setting the y scale domain
         if (shareYAxis) {
           yScale.domain([0, yAxisMax]);
@@ -632,24 +638,39 @@ define(function (require) {
           }
         }
 
+        if ($('div.columns').length > 0) {
+          if (args.index !== 0) {
+            d3.select(that).selectAll('.y')
+              .selectAll('.tick')
+              .remove();
+          }
+        }
+
         // Chart title
         var title = g.append('text')
           .attr('class', 'charts-label')
           .attr('text-anchor', 'middle')
-          .attr('x', -height / 2)
-          .attr('y', function () {
+          .attr('x', -height / 2);
+
+        if ($('div.rows').length > 0) {
+          title.attr('y', function () {
             // get width of y axis group for label offset
             var ww = g.select('.y.axis')
               .node()
               .getBBox();
 
             return -1 * ww.width - 14;
-          })
-          .attr('dy', '.75em')
-          .attr('transform', 'rotate(-90)')
-//          title.attr('x', width / 2)
-//          .attr('y', -10);
-          .text(data.label)
+            })
+            .attr('dy', '.75em')
+            .attr('transform', 'rotate(-90)');
+        }
+
+        if ($('div.columns').length > 0) {
+          title.attr('x', width / 2)
+            .attr('y', -10);
+        }
+
+        title.text(data.label)
           .call(chart.tickText, height)
           .on('mouseover', function (d) {
             var hh = tip[0][0].scrollHeight;
