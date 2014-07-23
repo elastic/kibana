@@ -630,8 +630,9 @@ define(function (require) {
         if (data.ordered) {
           svg.selectAll('.x').selectAll('.tick')
             .each(function (d, i) {
+              var length = svg.selectAll('.x').selectAll('.tick')[0].length;
               if (xTicks > 5) {
-                if (i === 0 || i > 5) {
+                if (i === 0 || i === length) {
                   this.remove();
                 }
               }
