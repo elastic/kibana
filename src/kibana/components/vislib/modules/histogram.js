@@ -905,11 +905,13 @@ define(function (require) {
                 if (data.ordered === undefined || !data.ordered.date) {
                   val = xScale.rangeBand();
                 } else {
-                  val = xScale(data.ordered.min + data.ordered.interval) -
-                    xScale(data.ordered.min) - 2;
+                  var barWidth = xScale(data.ordered.min + data.ordered.interval) -
+                    xScale(data.ordered.min);
+                  var barSpacing = barWidth * 0.25;
+                  val = barWidth - barSpacing;
                 }
-                if (isNaN(val) || val < 0) {
-                  throw new Error('line 894: bars attr width: ' + val);
+                if (isNaN(val) || val < 0.5) {
+                  throw new Error('The container is too small for this chart.');
                 } else {
                   return val;
                 }
