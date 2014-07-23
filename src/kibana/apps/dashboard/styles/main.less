@@ -61,6 +61,20 @@ dashboard-grid {
       .panel-heading {
         .flex();
         min-height: 45px;
+        white-space: nowrap;
+        display: flex;
+
+        div.btn-group {
+          white-space: nowrap;
+          .flex(0 0 auto);
+        }
+
+        .panel-title {
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          .flex(1 1 0);
+        }
 
         a {
           color: @text-color;
