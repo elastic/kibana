@@ -1,3 +1,21 @@
+<div ng-if="category.name === 'split'" class="form-group">
+  <div class="btn-group">
+    <button
+      type="button"
+      class="btn btn-xs btn-default"
+      ng-model="config.row"
+      btn-radio="true">
+      Row
+    </button>
+    <button
+      type="button"
+      class="btn btn-xs btn-default"
+      ng-model="config.row"
+      btn-radio="false">
+      Column
+    </button>
+  </div>
+</div>
 <div class="form-group" ng-show="availableAggs">
   <label>Aggregation</label>
   <select
@@ -19,21 +37,3 @@
   </select>
 </div>
 <div class="agg-param-controls"></div>
-<div ng-if="category.name === 'split'" class="form-group">
-  <div class="btn-group">
-    <button
-      type="button"
-      class="btn btn-xs btn-default"
-      ng-model="config.row"
-      btn-radio="true">
-      Row
-    </button>
-    <button
-      type="button"
-      class="btn btn-xs btn-default"
-      ng-model="config.row"
-      btn-radio="false">
-      Column
-    </button>
-  </div>
-</div>
