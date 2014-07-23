@@ -18,7 +18,7 @@
     <a class="list-group-item list-group-menu-item"
       ng-repeat="hit in page"
       ng-href="{{ makeUrl(hit) }}"
-      ng-click="onChoose(hit)">
+      ng-click="onChoose(hit, $event)">
       <li>
         <i ng-class="hit.icon"></i> {{hit.title}}
         <p ng-if="hit.description" ng-bind="hit.description"></p>

@@ -31,6 +31,11 @@ define(function (require) {
           reload();
         }
       };
+      $delegate.matches = function (url) {
+        var route = $delegate.current.$$route;
+        if (!route || !route.regexp) return null;
+        return route.regexp.test(url);
+      };
 
       return $delegate;
     });
