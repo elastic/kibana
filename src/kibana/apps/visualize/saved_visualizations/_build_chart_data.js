@@ -229,6 +229,7 @@ define(function (require) {
       }(chartData));
 
       chartData.raw = raw;
+      chartData.hits = resp.hits.total;
       complete();
       return chartData;
     };
