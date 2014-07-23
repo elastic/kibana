@@ -21,7 +21,7 @@
     "grunt-contrib-watch": "~0.5.3",
     "grunt-mocha": "~0.4.10",
     "http-proxy": "~1.1.4",
-    "husky": "^0.6.0",
+    "husky": "~0.6.0",
     "istanbul": "~0.2.4",
     "load-grunt-config": "~0.7.0",
     "lodash": "~2.4.1",
