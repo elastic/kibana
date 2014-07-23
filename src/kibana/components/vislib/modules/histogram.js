@@ -368,9 +368,9 @@ define(function (require) {
     };
 
     chart.getYStackMax = function (data) {
-      d3.max(data, function (d) {
+      return d3.max(data, function (d) {
         return d3.max(d.values, function (e) {
-          return e.y0 + d.y;
+          return e.y0 + e.y;
         });
       });
     };
@@ -536,7 +536,6 @@ define(function (require) {
           .range([height, 0])
           .nice(yTicks);
 
-        console.log(yAxisMax);
         // setting the y scale domain
         if (shareYAxis) {
           yScale.domain([0, yAxisMax]);
@@ -638,7 +637,7 @@ define(function (require) {
           }
         }
 
-        if ($('div.columns').length > 0) {
+        if ($('div.columns').length > 0 && shareYAxis) {
           if (args.index !== 0) {
             d3.select(that).selectAll('.y')
               .selectAll('.tick')
@@ -946,6 +945,7 @@ define(function (require) {
                 }
               })
               .attr('height', function (d) {
+                console.log(yScale.domain());
                 var val = yScale(d.y0) - yScale(d.y0 + d.y);
                 if (isNaN(val) || val <= 0) {
                   throw new Error('line 915: bars attr height: ' + val);
