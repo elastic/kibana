@@ -7,9 +7,9 @@
     </form>
 
     <div class="button-group">
-      <button class="btn" ng-click="toggleSave()"><i class="fa fa-save"></i></button>
-      <button class="btn" ng-click="toggleLoad()"><i class="fa fa-folder-open"></i></button>
-      <button class="btn" ng-click="toggleConfig()"><i class="fa fa-gear"></i></button>
+      <button ng-click="toggleSave()"><i class="fa fa-save"></i></button>
+      <button ng-click="toggleLoad()"><i class="fa fa-folder-open"></i></button>
+      <button ng-click="toggleConfig()"><i class="fa fa-gear"></i></button>
     </div>
   </navbar>
   <config config-template="configTemplate" config-object="opts" config-close="configClose" config-submit="fetch"></config>
