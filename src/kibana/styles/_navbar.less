@@ -35,21 +35,19 @@ navbar {
 
   // the "brand" that is displayed, usually on the left of the navbar
   > .name {
+    .align-self(center);
+
     font-size: @font-size-large;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    .align-self(center);
   }
 
   button {
-    color: @navbar-default-link-color;
-    background-color: @brand-primary;
     padding: @padding-base-vertical @padding-base-horizontal;
     font-size: @font-size-base;
-    font-weight: normal;
-    line-height: 1;
-    text-align: center;
+    color: @navbar-default-link-color;
+    background-color: @brand-primary;
 
     &:hover {
       color: @navbar-default-link-hover-color;
@@ -64,6 +62,14 @@ navbar {
     &[disabled] {
       color: @navbar-default-link-disabled-color;
       background-color: @navbar-default-link-disabled-bg;
+    }
+
+    &:focus {
+      // because some buttons are all side-to-side, the browser's outline
+      // is cut off by the next button. This causes the outline to be
+      // drawn inside the button. Appplied to all buttons so that it's
+      // uniform within this widget
+      outline-offset: -4px;
     }
   }
 
@@ -84,10 +90,16 @@ navbar {
     }
   }
 
-  > .inline-form button {
-    color: @brand-primary;
-    background-color: @input-group-addon-bg;
-    border: 1px solid @input-group-addon-border-color;
+  .inline-form {
+    input {
+      height: auto;
+    }
+
+    button {
+      color: @brand-primary;
+      background-color: @input-group-addon-bg;
+      border: 1px solid @input-group-addon-border-color;
+    }
   }
 
   /***
