@@ -18,7 +18,8 @@ define(function (require) {
       var docLooper = Private(require('components/courier/looper/doc'));
 
       // expose some internal modules
-      courier.getRootSearch = Private(require('components/courier/_get_root_search'));
+      courier.setRootSearchSource = Private(require('components/courier/data_source/_root_search_source')).set;
+
       courier.SavedObject = Private(require('components/courier/saved_object/saved_object'));
       courier.indexPatterns = indexPatterns;
       courier.redirectWhenMissing = Private(require('components/courier/_redirect_when_missing'));

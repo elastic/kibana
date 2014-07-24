@@ -15,13 +15,16 @@ define(function (require) {
       });
     };
 
-    var init = function () {
-      globalSource = new SearchSource();
+    globalSource = new SearchSource();
 
-      globalSource.filter(function (globalSource) {
-        // dynamic time filter will be called in the _flatten phase of things
-        return timefilter.get(globalSource.get('index'));
-      });
+    // searchSourceManager.registerGlobal(globalSource);
+
+    globalSource.filter(function (globalSource) {
+      // dynamic time filter will be called in the _flatten phase of things
+      return timefilter.get(globalSource.get('index'));
+    });
+
+    var init = function () {
 
       appSource = new SearchSource();
       appSource.inherits(globalSource);

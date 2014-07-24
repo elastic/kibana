@@ -32,7 +32,9 @@ define(function (require) {
           hits: 0,
           description: '',
           panelsJSON: '[]'
-        }
+        },
+
+        searchSource: true
       });
     }
 
