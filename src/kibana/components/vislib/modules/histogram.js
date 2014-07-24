@@ -233,11 +233,7 @@ define(function (require) {
 
         selection.each(function (d) {
           d.series.forEach(function (label) {
-            if (label.label) {
-              items.push(label.label);
-            } else {
-              items.push(d.yAxisLabel);
-            }
+            items.push(label.label);
           });
         });
 
@@ -487,45 +483,44 @@ define(function (require) {
           var testInterval;
           var dateoffset;
 
-          if (milsInterval >= 86400000 * 364) {
-            testInterval = 'year';
-            dateoffset = 1;
+          switch (true) {
+            case milsInterval >= 86400000 * 364:
+              testInterval = 'year';
+              dateoffset = 1;
+              break;
+            case milsInterval >= 86400000 * 30:
+              testInterval = 'month';
+              dateoffset = 1;
+              break;
+            case milsInterval >= 86400000 * 7:
+              testInterval = 'week';
+              dateoffset = (milsInterval / 86400000 * 7);
+              break;
+            case milsInterval >= 86400000:
+              testInterval = 'day';
+              dateoffset = (milsInterval / 86400000);
+              break;
+            case milsInterval >= 3600000:
+              testInterval = 'hour';
+              dateoffset = (milsInterval / 3600000);
+              break;
+            case milsInterval >= 60000:
+              testInterval = 'minute';
+              dateoffset = (milsInterval / 60000);
+              break;
+            default:
+              testInterval = 'second';
+              dateoffset = (milsInterval / 1000);
           }
-          if (milsInterval < 86400000 * 364) {
-            testInterval = 'month';
-            dateoffset = 1;
-          }
-          if (milsInterval < 86400000 * 30) {
-            testInterval = 'week';
-            dateoffset = (milsInterval / 86400000 * 7);
-          }
-          if (milsInterval < 86400000 * 7) {
-            testInterval = 'day';
-            dateoffset = (milsInterval / 86400000);
-          }
-          if (milsInterval < 86400000) {
-            testInterval = 'hour';
-            dateoffset = (milsInterval / 3600000);
-          }
-          if (milsInterval < 3600000) {
-            testInterval = 'minute';
-            dateoffset = (milsInterval / 60000);
-          }
-          if (milsInterval < 60000) {
-            testInterval = 'second';
-            dateoffset = (milsInterval / 1000);
-          }
-
-          // apply interval to last date in keys
-          var maxIntervalOffset = d3.time[testInterval]
-            .offset(new Date(maxDate), dateoffset);
-          var minIntervalOffset = d3.time[testInterval]
-            .offset(new Date(minDate), -dateoffset);
 
           xScale = d3.time.scale()
-            .domain([minIntervalOffset, maxIntervalOffset])
             .range([0, width])
             .nice(xTicks);
+
+          xScale.domain([
+            d3.time[testInterval].offset(new Date(minDate), -dateoffset),
+            d3.time[testInterval].offset(new Date(maxDate), dateoffset)
+          ]);
         } else {
           xScale = d3.scale.ordinal()
             .domain(keys)
@@ -757,20 +752,10 @@ define(function (require) {
           .enter()
           .append('g')
           .attr('class', function (d) {
-            if (!d.label) {
-              return colors[yAxisLabel];
-            } else {
-              return colors[d.label];
-            }
-
+            return colors[d.label];
           })
           .style('fill', function (d) {
-            if (!d.label) {
-              return colors[yAxisLabel];
-            } else {
-              return colors[d.label];
-            }
-
+            return colors[d.label];
           });
 
         var bars = layer.selectAll('rect')
@@ -934,6 +919,7 @@ define(function (require) {
               })
               .attr('width', function () {
                 var val;
+
                 if (data.ordered === undefined || !data.ordered.date) {
                   val = xScale.rangeBand();
                 } else {
@@ -942,27 +928,14 @@ define(function (require) {
                   var barSpacing = barWidth * 0.25;
                   val = barWidth - barSpacing;
                 }
-                if (isNaN(val) || val < 0.5) {
-                  throw new Error('The container is too small for this chart.');
-                } else {
-                  return val;
-                }
+
+                return val;
               })
               .attr('y', function (d) {
-                var val = yScale(d.y0 + d.y);
-                if (isNaN(val) || val < 0) {
-                  throw new Error('line 907: bars attr y: ' + val);
-                } else {
-                  return val;
-                }
+                return yScale(d.y0 + d.y);
               })
               .attr('height', function (d) {
-                var val = yScale(d.y0) - yScale(d.y0 + d.y);
-                if (isNaN(val) || val <= 0) {
-                  throw new Error('line 915: bars attr height: ' + val);
-                } else {
-                  return val;
-                }
+                return yScale(d.y0) - yScale(d.y0 + d.y);
               });
             break;
         }
