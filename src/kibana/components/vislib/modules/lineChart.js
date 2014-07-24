@@ -218,11 +218,7 @@ define(function (require) {
 
         selection.each(function (d) {
           d.series.forEach(function (label) {
-            if (label.label) {
-              items.push(label.label);
-            } else {
-              items.push(d.yAxisLabel);
-            }
+            items.push(label.label);
           });
         });
 
@@ -526,7 +522,8 @@ define(function (require) {
           })
           .attr('fill', 'none')
           .attr('stroke', function (d) {
-            return d.label ? colors[d.label] : colors[yAxisLabel];
+            return colors[d.label];
+//            return d.label ? colors[d.label] : colors[yAxisLabel];
           })
           .attr('stroke-width', 3);
 
@@ -552,7 +549,8 @@ define(function (require) {
             return 'rl rl-' + chart.getClassName(d.label, yAxisLabel);
           })
           .attr('stroke', function (d) {
-            return d.label ? colors[d.label] : colors[yAxisLabel];
+            return colors[d.label];
+//            return d.label ? colors[d.label] : colors[yAxisLabel];
           });
 
         var circle = layer.selectAll('.points')
@@ -573,7 +571,8 @@ define(function (require) {
         circle
           .attr('fill', '#ffffff')
           .attr('stroke', function (d) {
-            return d.label ? colors[d.label] : colors[yAxisLabel];
+            return colors[d.label];
+//            return d.label ? colors[d.label] : colors[yAxisLabel];
           })
           .attr('stroke-width', 3.5)
           .attr('opacity', 0);
