@@ -18,7 +18,8 @@ define([
   'jquery',
   'kbn',
   'config',
-  'chromath'
+  'chromath',
+  'numeral'
 ], function (angular, app, _, $, kbn) {
   'use strict';
 
@@ -87,6 +88,12 @@ define([
         mode        : 'all',
         ids         : []
       },
+      /** @scratch /panels/terms/5
+       * tstat:: Terms_stats facet stats field
+       */
+      tstat       : 'count',
+      timestamp : "@timestamp",
+      goalfield : ''
     };
     _.defaults($scope.panel,_d);
 
@@ -127,29 +134,49 @@ define([
         boolQuery = boolQuery.should(querySrv.toEjsObj(q));
       });
 
-      var results;
-
-      request = request
-        .query(boolQuery)
-        .filter(filterSrv.getBoolFilter(filterSrv.ids()))
-        .size(0);
+       var request = request
+          .agg($scope.ejs.FilterAggregation('filter_agg')
+            .agg($scope.ejs.StatsAggregation('stat_agg')
+              .field($scope.panel.valuefield))
+            .filter($scope.ejs.QueryFilter(
+              $scope.ejs.FilteredQuery(
+                boolQuery,
+                filterSrv.getBoolFilter(filterSrv.ids())
+            )))).size(0);
 
       $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
 
-      results = request.doSearch();
+      var results = request.doSearch();
 
-      results.then(function(results) {
-        $scope.panelMeta.loading = false;
-        var complete  = results.hits.total;
-        var remaining = $scope.panel.query.goal - complete;
-        $scope.data = [
-          { label : 'Complete', data : complete, color: querySrv.colors[parseInt($scope.$id, 16)%8] },
-          { data : remaining, color: Chromath.lighten(querySrv.colors[parseInt($scope.$id, 16)%8],0.70).toString() }
-        ];
-        $scope.$emit('render');
-      });
+      if ($scope.panel.goalfield != undefined && $scope.panel.goalfield.length > 0){
+
+        request = $scope.ejs.Request().indices(dashboard.indices);
+
+        request = request
+          .query($scope.ejs.QueryStringQuery('*')
+            .fields($scope.panel.goalfield))
+          .fields($scope.panel.goalfield)
+          .sort("timestamp", "desc").size(1);
+
+        var goal_result = request.doSearch();
+
+        goal_result.then(function(goal_result){
+          $scope.goalresults = goal_result;
+          results.then(function(results) {
+            $scope.panelMeta.loading = false;
+            $scope.results = results;
+            $scope.$emit('render');
+          });
+        });
+      }
+      else {
+        results.then(function(results) {
+          $scope.panelMeta.loading = false;
+          $scope.results = results;
+          $scope.$emit('render');
+        });
+      }
     };
-
   });
 
   module.directive('goal', function(querySrv) {
@@ -164,9 +191,27 @@ define([
           render_panel();
         });
 
+        function build_results() {
+          var goal;
+          if (scope.panel.goalfield != undefined && scope.panel.goalfield.length > 0 && scope.goalresults != undefined){
+            goal = scope.goalresults.hits.hits[0].fields[scope.panel.goalfield][0]
+          }
+          else{
+            goal = scope.panel.query.goal;
+          }
+          var complete = scope.results.aggregations.filter_agg.stat_agg[scope.panel.tstat]
+          complete = numeral(complete).format(complete % 1 === 0 ? '0': '0.00')
+          var remaining = goal - complete;
+          scope.data = [
+            { label : 'Complete', data : complete, color: querySrv.colors[parseInt(scope.$id, 16)%8] },
+            { data : remaining, color: Chromath.lighten(querySrv.colors[parseInt(scope.$id, 16)%8],0.70).toString() }
+          ];
+        }
+
         // Function for rendering panel
         function render_panel() {
           // IE doesn't work without this
+          build_results();
           elem.css({height:scope.panel.height||scope.row.height});
 
           var label;
@@ -178,7 +223,8 @@ define([
               var font = parseInt(
                 (scope.panel.height||scope.row.height).replace('px',''),10)/8 + String('px');
               if(!(_.isUndefined(label))) {
-                return '<div style="font-size:'+font+';font-weight:bold;text-align:center;padding:2px;color:#fff;">'+
+                var color = scope.dashboard.current.style == 'dark'? '#fff': '#000'
+                return '<div style="font-size:'+font+';font-weight:bold;text-align:center;padding:2px;color:'+color+';">'+
                 Math.round(series.percent)+'%</div>';
               } else {
                 return '';

@@ -1,30 +1,44 @@
-  <div class="editor-row">
-
-    <div class="section">
-      <h5>Parameters</h5>
-      <div class="editor-option">
-        <form style="margin-bottom: 0px">
-          <label class="small">Goal</label>
-          <input type="number" style="width:90%" ng-model="panel.query.goal" ng-change="set_refresh(true)">
-        </form>
-      </div>
+<div class="editor-row">
+  <div class="section">
+    <h5>Parameters</h5>
+    <div class="editor-option">
+      <form style="margin-bottom: 120px">
+        <label class="small">Goal</label>
+        <input type="number" style="width:90%" ng-model="panel.query.goal" ng-change="set_refresh(true)">
+      </form>
     </div>
-
-    <div class="section">
-      <h5>View Options</h5>
-      <div class="editor-option">
+    <div class="editor-option">
+      <label class="small">Goal field<tip>If this field is used, this will overwrite the value in Goal</tip></label>
+      <input type="text" class="input-small" bs-typeahead="fields.list" ng-model="panel.goalfield" ng-change="set_refresh(true)">
+    </div>
+    <div class="editor-option" ng-show="panel.goalfield != ''">
+      <label class="small">Timestamp<tip>This is needed when goal field is used, in order to be able to extract it's latest value</tip></label>
+      <input type="text" class="input-small" bs-typeahead="fields.list" ng-model="panel.timestamp" ng-change="set_refresh(true)">
+    </div>
+    <div class="editor-option">
+      <label class="small">Stats type<tip>How should we compute what has been completed?</tip></label>
+      <select class="input-medium" ng-model="panel.tstat" ng-options="f for f in ['count', 'min', 'max', 'avg', 'sum']"></select>
+    </div>
+    <div class="editor-option">
+      <label class="small">Value field<tip> This field should contain a numeric value</tip></label>
+      <input type="text" class="input-small" bs-typeahead="fields.list" ng-model="panel.valuefield" ng-change="set_refresh(true)">
+    </div>
+  </div>
+  <div class="section">
+    <h5>View Options</h5>
+    <div class="editor-option">
         <label class="small"> Donut </label><input type="checkbox" ng-model="panel.donut" ng-checked="panel.donut">
-      </div>
-      <div class="editor-option">
+    </div>
+    <div class="editor-option">
         <label class="small"> Tilt </label><input type="checkbox" ng-model="panel.tilt" ng-checked="panel.tilt">
-      </div>
-      <div class="editor-option">
+    </div>
+    <div class="editor-option">
         <label class="small"> Labels </label><input type="checkbox" ng-model="panel.labels" ng-checked="panel.labels">
-      </div>
-      <div class="editor-option">
+    </div>
+    <div class="editor-option">
         <label class="small">Legend</label>
         <select class="input-small" ng-model="panel.legend" ng-options="f for f in ['above','below','none']"></select></span>
-      </div>
     </div>
-
   </div>
+
+</div>
