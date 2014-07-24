@@ -1,19 +1,55 @@
 navbar {
+  .display(flex);
+  .flex-direction(row);
+  .flex-wrap(wrap);
+  .align-items(stretch);
+
   max-height: @navbar-collapse-max-height;
   margin-bottom: @navbar-margin-bottom;
   // top and bottom padding are normally calcuated and stored in @navbar-padding-vertical, but flexbox
   padding: @padding-base-vertical @navbar-padding-horizontal;
   color: @navbar-default-color;
   background-color: @navbar-default-bg;
-
   border-style: solid;
   border-color: @navbar-default-border;
   border-width: 0 0 1px;
-
   z-index: @zindex-navbar;
 
-  a {
+  /***
+   * components
+   ***/
+
+  > * {
+    padding-right: @navbar-padding-horizontal;
+    .flex(0, 0, auto);
+
+    &:last-child {
+      padding-right: 0;
+    }
+  }
+
+  // the element should take up an even share of available space
+  > .fill {
+    .flex(1, 1, 0);
+  }
+
+  // the "brand" that is displayed, usually on the left of the navbar
+  > .name {
+    font-size: @font-size-large;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    .align-self(center);
+  }
+
+  button {
     color: @navbar-default-link-color;
+    background-color: @brand-primary;
+    padding: @padding-base-vertical @padding-base-horizontal;
+    font-size: @font-size-base;
+    font-weight: normal;
+    line-height: 1;
+    text-align: center;
 
     &:hover {
       color: @navbar-default-link-hover-color;
@@ -25,74 +61,17 @@ navbar {
       background-color: @navbar-default-link-active-bg;
     }
 
-    &:disabled {
+    &[disabled] {
       color: @navbar-default-link-disabled-color;
       background-color: @navbar-default-link-disabled-bg;
     }
   }
 
-  // TODO: do these apply?
-  // @navbar-default-toggle-hover-bg:            darken(@navbar-default-bg, 10%);
-  // @navbar-default-toggle-icon-bar-bg:         #fff;
-  // @navbar-default-toggle-border-color:        darken(@navbar-default-bg, 10%);
 
-  .display(flex);
-  .flex-direction(row);
-  .flex-wrap(wrap);
-  .align-items(center);
-
-  > .navbar-brand,
-  > .button-group {
-    .flex(0, 0, auto);
-  }
-
-  form > form.flex-input-group {
-    min-width: 100px;
-  }
-
-  > .name {
-    font-size: @font-size-large;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding-right: @navbar-padding-horizontal;
-  }
-
-  @media (min-width: @screen-md-min) {
-    > .name {
-      // 500px is sort of arbitrary, not sure how to deal with lots of buttons
-      max-width: 500px;
-    }
-  }
-
-  > .fill {
-    .flex(1, 1, 0);
-  }
-
-  @media (max-width: @screen-md-min) {
-    > .fill {
-      .flex(1, 1, @screen-md);
-    }
-  }
-
+  // horizontal group of buttons/form elements
+  .button-group,
   .inline-form {
     .display(flex);
-
-    > button {
-      .btn();
-      .btn-default();
-
-      color: @brand-primary;
-      padding: @padding-base-vertical @padding-base-horizontal;
-      font-size: @font-size-base;
-      font-weight: normal;
-      line-height: 1;
-      text-align: center;
-
-      .border-radius(0);
-      background-color: @input-group-addon-bg;
-      border: 1px solid @input-group-addon-border-color;
-    }
 
     > * {
       .border-radius(0);
@@ -102,6 +81,31 @@ navbar {
     }
     > :last-child {
       .border-right-radius(@input-border-radius);
+    }
+  }
+
+  > .inline-form button {
+    color: @brand-primary;
+    background-color: @input-group-addon-bg;
+    border: 1px solid @input-group-addon-border-color;
+  }
+
+  /***
+   * responsive modifications
+   ***/
+
+  // desktop
+  @media (min-width: @screen-md-min) {
+    > .name {
+      // 500px is sort of arbitrary, not sure how to deal with lots of buttons
+      max-width: 500px;
+    }
+  }
+
+  // tablets/phones
+  @media (max-width: @screen-md-min) {
+    > .fill {
+      .flex(1, 1, @screen-md);
     }
   }
 }
