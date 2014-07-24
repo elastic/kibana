@@ -1,0 +1,112 @@
+define(function (require) {
+  var _ = require('lodash');
+  var $ = require('jquery');
+
+  require('css!components/query_input/query_input.css');
+
+  require('modules')
+    .get('kibana')
+    .directive('queryInput', function (es, $compile, timefilter, configFile) {
+      return {
+        restrict: 'A',
+        require: 'ngModel',
+        scope: {
+          'ngModel': '=',
+          'queryInput': '=?',
+        },
+        link: function ($scope, elem, attr, ngModel) {
+
+          // track request so we can abort it if needed
+          var request = {};
+
+          var errorElem = $('<i class="fa fa-ban input-query-error"></i>').hide();
+
+          var init = function () {
+            elem.after(errorElem);
+            validater($scope.ngModel);
+          };
+
+          var validater = function (query) {
+            var index, type;
+
+            var error = function (resp) {
+              ngModel.$setValidity('queryInput', false);
+
+              errorElem.attr('tooltip', resp.explanations && resp.explanations[0] ?
+                resp.explanations[0].error : undefined);
+
+              // Compile is needed for the tooltip
+              $compile(errorElem)($scope);
+              errorElem.show();
+
+              return undefined;
+            };
+
+            var success = function (resp) {
+              if (resp.valid) {
+                ngModel.$setValidity('queryInput', true);
+                errorElem.hide();
+                return query;
+              } else {
+                return error(resp);
+              }
+            };
+
+            if ($scope.queryInput) {
+              index = $scope.queryInput.get('index').toIndexList();
+            } else {
+              index = configFile.kibanaIndex;
+              type = '__kibanaQueryValidator';
+            }
+
+            if (request.abort) request.abort();
+
+            request = es.indices.validateQuery({
+              index: index,
+              type: type,
+              explain: true,
+              ignoreUnavailable: true,
+              body: {
+                query: query || { match_all: {} }
+              }
+            }).then(success, error);
+          };
+
+          var debouncedValidator = _.debounce(validater, 300);
+
+
+          // What should I make with the input from the user?
+          var fromUser = function (text) {
+            try {
+              return JSON.parse(text);
+            } catch (e) {
+              return {
+                query_string: {
+                  query: text || '*'
+                }
+              };
+            }
+          };
+
+          // How should I present the data back to the user in the input field?
+          var toUser = function (text) {
+            if (_.isString(text)) return text;
+            if (_.isObject(text)) {
+              if (text.query_string) return text.query_string.query;
+              return JSON.stringify(text);
+            }
+            return undefined;
+          };
+
+          ngModel.$parsers.push(fromUser);
+          ngModel.$formatters.push(toUser);
+
+          // Use a model watch instead of parser/formatter. Debounced anyway. Parsers require the
+          // user to actually enter input, which may not happen if the back button is clicked
+          $scope.$watch('ngModel', debouncedValidator);
+
+          init();
+        }
+      };
+    });
+});

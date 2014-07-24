@@ -1,9 +1,18 @@
 <div ng-controller="discover">
   <navbar>
-    <form class="fill inline-form" ng-submit="fetch()">
-      <input placeholder="Search..." type="text" class="form-control" ng-model="state.query">
-      <button type="submit"><span class="fa fa-search"></span></button>
-      <button type="button" ng-click="resetQuery()"><span class="fa fa-ban"></span></button>
+    <form class="fill inline-form" ng-submit="fetch()" name="discoverSearch">
+      <div class="input-group"
+        ng-class="discoverSearch.$invalid ? 'has-error' : ''">
+        <input query-input="searchSource"
+          ng-model="state.query"
+          placeholder="Search..."
+          type="text"
+          class="form-control">
+        <button type="submit"
+          ng-disabled="discoverSearch.$invalid">
+          <span class="fa fa-search"></span></button>
+        <button type="button" ng-click="resetQuery()"><span class="fa fa-ban"></span></button>
+      </div>
     </form>
 
     <div class="button-group">

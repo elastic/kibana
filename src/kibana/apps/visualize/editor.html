@@ -17,13 +17,19 @@
           <i class="fa fa-chain-broken"></i> Unlinked!
         </div>
 
-        <form ng-submit="doVisualize()" class="inline-form">
-          <input
-            placeholder="Search..."
-            type="text"
-            class="form-control"
-            ng-model="state.query">
-          <button class="btn btn-default" type="submit"><span class="fa fa-search"></span></button>
+        <form ng-submit="doVisualize()" class="inline-form" name="queryInput">
+          <div class="input-group"
+          ng-class="queryInput.$invalid ? 'has-error' : ''">
+            <input query-input="vis.searchSource"
+              placeholder="Search..."
+              type="text"
+              class="form-control"
+              ng-model="state.query">
+            <button class="btn btn-default" type="submit"
+              ng-disabled="queryInput.$invalid">
+              <span class="fa fa-search"></span>
+            </button>
+          </div>
         </form>
       </div>
 
