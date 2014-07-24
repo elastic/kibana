@@ -110,17 +110,6 @@ define(function (require) {
         $rootScope.$on('$routeChangeSuccess', onRouteChange);
         $rootScope.$on('$routeUpdate', onRouteChange);
 
-        function onRouteChangeStart() {
-          // Reset appSource
-          courier.getRootSearch()
-          .then(function (rootSearch) {
-            rootSearch.set({});
-          });
-        }
-
-        $rootScope.$on('$routeChangeStart', onRouteChangeStart);
-        $rootScope.$on('$routeUpdate', onRouteChangeStart);
-
         var writeGlobalStateToLastPaths = function () {
           var currentUrl = $location.url();
           var _g = rison.encode(globalState);

@@ -73,26 +73,20 @@ define(function (require) {
               return savedSearches.get(vis.savedSearchId);
             }
 
-            return courier.getRootSearch()
-            .then(function (rootSearch) {
+            var fakeSavedSearch = {
+              searchSource: courier.createSource('search')
+            };
 
-              if (relatedPattern) {
-                return indexPatterns.get(relatedPattern)
-                .then(function (indexPattern) {
-                  // create a new search source that inherits from the parent and uses the indexPattern
-                  return {
-                    searchSource: rootSearch.extend().index(indexPattern)
-                  };
-                });
-              }
+            if (relatedPattern) {
+              return indexPatterns.get(relatedPattern)
+              .then(function (indexPattern) {
+                fakeSavedSearch.searchSource.index(indexPattern);
+                return fakeSavedSearch;
+              });
+            }
 
-              // default parent is the rootSearch, can be overridden (like in discover)
-              // but we mimic the searchSource prop from saved objects here
-              return {
-                searchSource: rootSearch
-              };
+            return Promise.resolve(fakeSavedSearch);
 
-            });
           }());
 
           return promisedParent

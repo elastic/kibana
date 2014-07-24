@@ -71,41 +71,35 @@ define(function (require) {
         $scope.openAdd = _.partial($scope.configTemplate.toggle, 'pickVis');
         $scope.refresh = _.bindKey(courier, 'fetch');
 
-
         timefilter.enabled(true);
         $scope.timefilter = timefilter;
         $scope.$watchCollection('globalState.time', $scope.refresh);
 
+        courier.setRootSearchSource(dash.searchSource);
+
         function init() {
-          updateQueryOnRootSource()
-          .then(function () {
-            $scope.$broadcast('application.load');
-          });
+          updateQueryOnRootSource();
+          $scope.$broadcast('application.load');
         }
 
         function updateQueryOnRootSource() {
-          return courier.getRootSearch()
-          .then(function (rootSource) {
-            if ($state.query) {
-              rootSource.set('filter', {
-                query: {
-                  query_string: {
-                    query: $state.query
-                  }
+          if ($state.query) {
+            dash.searchSource.set('filter', {
+              query: {
+                query_string: {
+                  query: $state.query
                 }
-              });
-            } else {
-              rootSource.set('query', null);
-            }
-          });
+              }
+            });
+          } else {
+            dash.searchSource.set('filter', null);
+          }
         }
 
         $scope.filterResults = function () {
-          updateQueryOnRootSource()
-          .then(function () {
-            $state.commit();
-            courier.fetch();
-          });
+          updateQueryOnRootSource();
+          $state.commit();
+          courier.fetch();
         };
 
         $scope.save = function () {

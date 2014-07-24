@@ -112,6 +112,13 @@ define(function (require) {
     };
 
     /**
+     * Noop
+     */
+    SourceAbstract.prototype.getParent = function () {
+      return Promise.resolve(false);
+    };
+
+    /**
      * similar to onResults, but allows a seperate loopy code path
      * for error handling.
      *
@@ -221,10 +228,13 @@ define(function (require) {
         }))
         .then(function () {
           // move to this sources parent
-          current = current._parent;
-
-          // keep calling until we reach the top parent
-          if (current) return ittr();
+          return current.getParent().then(function (parent) {
+            // keep calling until we reach the top parent
+            if (parent) {
+              current = parent;
+              return ittr();
+            }
+          });
         });
       }())
       .then(function () {

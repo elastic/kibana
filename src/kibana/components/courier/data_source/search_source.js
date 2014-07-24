@@ -1,10 +1,14 @@
 define(function (require) {
-  var inherits = require('utils/inherits');
-  var _ = require('lodash');
-  var errors = require('errors');
 
   return function SearchSourceFactory(Promise, Private) {
+    var inherits = require('utils/inherits');
+    var _ = require('lodash');
+    var errors = require('errors');
     var SourceAbstract = Private(require('components/courier/data_source/_abstract'));
+
+    var getRootSourcePromise = new Promise(function (resolve) {
+      require(['components/courier/data_source/_root_search_source'], _.compose(resolve, Private));
+    });
 
     var FetchFailure = errors.FetchFailure;
     var RequestFailure = errors.RequestFailure;
@@ -62,10 +66,15 @@ define(function (require) {
 
     /**
      * Get the parent of this SearchSource
-     * @return {SearchSource}
+     * @return {Promise}
      */
-    SearchSource.prototype.parent = function () {
-      return this._parent;
+    SearchSource.prototype.getParent = function () {
+      var self = this;
+      return getRootSourcePromise.then(function (rootSearchSource) {
+        if (self._parent === false) return false;
+        if (self._parent) return self._parent;
+        return rootSearchSource.get();
+      });
     };
 
     /**
