@@ -1,7 +1,7 @@
 .DS_Store
 node_modules
 src/bower_components
-**/styles/*.css
+**/*.css
 trash
 build
 target

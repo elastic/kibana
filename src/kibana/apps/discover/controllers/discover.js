@@ -15,6 +15,7 @@ define(function (require) {
   require('filters/moment');
   require('components/courier/courier');
   require('components/index_patterns/index_patterns');
+  require('components/query_input/query_input');
   require('components/state_management/app_state');
   require('services/timefilter');
 
@@ -70,7 +71,7 @@ define(function (require) {
     var defaultFormat = courier.indexPatterns.fieldFormats.defaultByType.string;
 
     var stateDefaults = {
-      query: initialQuery ? initialQuery.query_string.query : '',
+      query: initialQuery || '',
       columns: ['_source'],
       index: config.get('defaultIndex'),
       interval: 'auto'
@@ -291,11 +292,7 @@ define(function (require) {
         }
         return sort;
       })
-      .query(!$state.query ? null : {
-        query_string: {
-          query: $state.query
-        }
-      });
+      .query(!$state.query ? null : $state.query);
 
       // get the current indexPattern
       var indexPattern = $scope.searchSource.get('index');

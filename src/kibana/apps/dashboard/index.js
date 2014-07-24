@@ -85,11 +85,7 @@ define(function (require) {
         function updateQueryOnRootSource() {
           if ($state.query) {
             dash.searchSource.set('filter', {
-              query: {
-                query_string: {
-                  query: $state.query
-                }
-              }
+              query:  $state.query
             });
           } else {
             dash.searchSource.set('filter', null);

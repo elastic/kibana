@@ -228,7 +228,7 @@ define(function (require) {
       delete vis.savedSearchId;
 
       var q = vis.searchSource.get('query');
-      $state.query = _.isObject(q) ? q.query_string.query : q;
+      $state.query = q;
 
       var parent = vis.searchSource.parent();
       // we will copy over all state minus the "aggs"
@@ -249,7 +249,7 @@ define(function (require) {
       delete $state.query;
     } else {
       var q = $state.query || vis.searchSource.get('query');
-      $state.query = _.isObject(q) ? q.query_string.query : q;
+      $state.query = q;
     }
 
     // init
