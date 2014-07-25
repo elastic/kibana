@@ -23,41 +23,44 @@
   </navbar>
   <config config-template="configTemplate" config-object="opts" config-close="configClose" config-submit="fetch"></config>
 
-  <div class="container-fluid">
-    <div class="row">
-      <filter-bar state="state"></filter-bar>
-    </div>
-    <div class="row">
-      <div class="discover-hits"><strong>{{hits || 0}}</strong> hits</div>
-
-      <div class="col-md-2 sidebar-container">
-        <disc-field-chooser
-          fields="fields"
-          toggle="toggleField"
-          refresh="refreshFieldList"
-          data="rows"
-          filter="filterQuery"
-          search-source="searchSource"
-          state="state">
-        </disc-field-chooser>
+  <div class="app-container">
+    <div class="container-fluid">
+      <div class="row">
+        <filter-bar state="state"></filter-bar>
       </div>
 
-      <!-- no results -->
-      <div class="col-md-10" ng-show="resultState === 'none'">
-        <div class="discover-overlay">
-          <h2>No results found <i class="fa fa-meh-o"></i></h2>
-          <div class="col-md-12">
-            Unfortunately I could not find any results matching your search. I tried really hard. I looked all over the place. Try expanding your search, or increasing your time window if searching by time. I really want to make this work for you. Help me, help you.
+      <div class="row">
+        <div class="discover-hits"><strong>{{hits || 0}}</strong> hits</div>
+
+        <div class="col-md-2 sidebar-container">
+          <disc-field-chooser
+            fields="fields"
+            toggle="toggleField"
+            refresh="refreshFieldList"
+            data="rows"
+            filter="filterQuery"
+            search-source="searchSource"
+            state="state">
+          </disc-field-chooser>
+        </div>
+
+        <!-- no results -->
+        <div class="col-md-10" ng-show="resultState === 'none'">
+          <div class="discover-overlay">
+            <h2>No results found <i class="fa fa-meh-o"></i></h2>
+            <div class="col-md-12">
+              Unfortunately I could not find any results matching your search. I tried really hard. I looked all over the place. Try expanding your search, or increasing your time window if searching by time. I really want to make this work for you. Help me, help you.
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- loading -->
-      <div class="col-md-10" ng-show="resultState === 'loading'">
-        <div class="discover-overlay">
-          <h2>Searching</h2>
-          <div class="spinner large"></div>
-          <div ng-show="fetchStatus">{{fetchStatus.complete}}/{{fetchStatus.total}}</div>
+        <!-- loading -->
+        <div class="col-md-10" ng-show="resultState === 'loading'">
+          <div class="discover-overlay">
+            <h2>Searching</h2>
+            <div class="spinner large"></div>
+            <div ng-show="fetchStatus">{{fetchStatus.complete}}/{{fetchStatus.total}}</div>
+          </div>
         </div>
       </div>
 
@@ -78,6 +81,7 @@
           <div ng-show="searchSource.activeFetchCount" class="discover-overlay">
             <div class="spinner large">
             </div>
+            <visualize vis="vis"></visualize>
           </div>
           <visualize vis="vis" es-resp="mergedEsResp"></visualize>
         </div>
@@ -85,21 +89,22 @@
           fixed-scroll='table'
           fixed-scroll-trigger="state.columns">
 
-          <kbn-table class="table table-condensed"
-            rows="rows"
-            columns="state.columns"
-            sorting="state.sort"
-            filtering="filterQuery"
-            refresh="fetch"
-            max-length="opts.maxSummaryLength"
-            timefield="opts.timefield"
-            mapping="fieldsByName">
-          </kbn-table>
-          <div ng-if="rows.length == opts.sampleSize" class="discover-table-footer">
-            <center>
-              These are the first {{opts.sampleSize}} results matching your query,
-              refine your search to see more. <a ng-click="toTop()">Back to top.</a>
-            </center>
+            <kbn-table class="table table-condensed"
+              rows="rows"
+              columns="state.columns"
+              sorting="state.sort"
+              filtering="filterQuery"
+              refresh="fetch"
+              max-length="opts.maxSummaryLength"
+              timefield="opts.timefield"
+              mapping="fieldsByName">
+            </kbn-table>
+            <div ng-if="rows.length == opts.sampleSize" class="discover-table-footer">
+              <center>
+                These are the first {{opts.sampleSize}} results matching your query,
+                refine your search to see more. <a ng-click="toTop()">Back to top.</a>
+              </center>
+            </div>
           </div>
         </div>
       </div>

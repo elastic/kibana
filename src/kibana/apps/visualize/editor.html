@@ -45,45 +45,50 @@
         <button ng-click="doVisualize()"><i class="fa fa-refresh"></i></button>
       </div>
     </navbar>
+
     <config
       config-template="configTemplate"
       config-object="conf">
     </config>
-    <div class="vis-editor-content">
-      <div class="vis-sidebar">
-        <div class="sidebar-container">
-          <form class="sidebar-list" ng-submit="doVisualize()" name="visualizeEditor">
-            <ul class="list-unstyled">
-              <li ng-repeat="category in visConfigCategories.displayOrder" class="sidebar-item">
-                <vis-config-category
-                  vis="vis"
-                  category="vis[category.name]"
-                  fields="fields">
-                </vis-config-category>
-              </li>
-              <li class="sidebar-item">
-                <button
-                  ng-click="doVisualize()"
-                  ng-if="vis.dirty"
-                  ng-disabled="httpActive.length || visualizeEditor.$invalid"
-                  class="sidebar-item-button success">
-                  Apply
-                </button>
-              </li>
-            </ul>
-          </form>
+
+    <div class="app-container">
+      <div class="vis-editor-content">
+        <div class="vis-sidebar">
+          <div class="sidebar-container">
+            <form class="sidebar-list" ng-submit="doVisualize()" name="visualizeEditor">
+              <ul class="list-unstyled">
+                <li ng-repeat="category in visConfigCategories.displayOrder" class="sidebar-item">
+                  <vis-config-category
+                    vis="vis"
+                    category="vis[category.name]"
+                    fields="fields">
+                  </vis-config-category>
+                </li>
+                <li class="sidebar-item">
+                  <button
+                    ng-click="doVisualize()"
+                    ng-if="vis.dirty"
+                    ng-disabled="httpActive.length || visualizeEditor.$invalid"
+                    class="sidebar-item-button success">
+                    Apply
+                  </button>
+                </li>
+              </ul>
+            </form>
+          </div>
+        </div>
+
+        <div class="vis-canvas">
+          <vis-canvas><visualize vis="vis"></visualize></vis-canvas>
         </div>
       </div>
-      <div class="vis-canvas">
-        <vis-canvas><visualize vis="vis"></visualize></vis-canvas>
-      </div>
     </div>
-  </div>
 
-  <div ng-if="appEmbedded" class="container-fluid">
-    <div class="row vis-editor-content">
-      <div class="vis-canvas">
-        <vis-canvas><visualize vis="vis"></visualize></vis-canvas>
+    <div ng-if="appEmbedded" class="container-fluid">
+      <div class="row vis-editor-content">
+        <div class="vis-canvas">
+          <vis-canvas><visualize vis="vis"></visualize></vis-canvas>
+        </div>
       </div>
     </div>
   </div>

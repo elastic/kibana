@@ -58,6 +58,18 @@ define(function (require) {
           query: ''
         };
 
+        $scope.history = [
+          {
+            title: 'one'
+          }, {
+            title: 'two'
+          }, {
+            title: 'three'
+          }, {
+            title: 'four'
+          }
+        ];
+
         var $state = $scope.state = appStateFactory.create(stateDefaults);
 
         $scope.configTemplate = new ConfigTemplate({

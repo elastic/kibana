@@ -1,7 +1,7 @@
 <div class="typeahead">
   <div ng-transclude></div>
 
-  <div class="typeahead-items">
-    <div class="typeahead-item" ng-repeat="item in items">{{item.title}}</div>
+  <div class="typeahead-items" ng-show="isVisible()">
+    <div kbn-typeahead-item="item" class="typeahead-item" ng-repeat="item in items">{{item.value}}</div>
   </div>
 </div>
