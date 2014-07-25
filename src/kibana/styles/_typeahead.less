@@ -1,0 +1,22 @@
+.typeahead {
+  position: relative;
+
+  .typeahead-items {
+    border: 1px solid @popover-border-color;
+    color: @text-color;
+    background-color: @body-bg;
+    position: absolute;
+    z-index: 2;
+    margin-top: 2px;
+    width: 100%;
+
+    .typeahead-item {
+      border-bottom: 1px solid lighten(@popover-border-color, 60%);
+      padding: @padding-base-vertical @padding-base-horizontal;
+    }
+
+    .typeahead-item:last-child {
+      border-bottom: 0px;
+    }
+  }
+}
