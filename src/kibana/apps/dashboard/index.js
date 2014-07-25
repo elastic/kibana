@@ -7,6 +7,7 @@ define(function (require) {
   require('components/courier/courier');
   require('components/config/config');
   require('components/notify/notify');
+  require('components/typeahead/typeahead');
 
   require('apps/dashboard/directives/grid');
   require('apps/dashboard/directives/panel');
@@ -18,7 +19,8 @@ define(function (require) {
     'ngRoute',
     'kibana/courier',
     'kibana/config',
-    'kibana/notify'
+    'kibana/notify',
+    'kibana/typeahead'
   ]);
 
   require('routes')

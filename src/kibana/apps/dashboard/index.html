@@ -8,11 +8,13 @@
       <form class="fill inline-form" ng-submit="filterResults()" name="queryInput">
         <div class="input-group"
           ng-class="queryInput.$invalid ? 'has-error' : ''">
-          <input query-input
-            placeholder="Filter..."
-            type="text"
-            class="form-control"
-            ng-model="state.query">
+          <kbn-typeahead items="history" query="state.query">
+            <input query-input
+              placeholder="Filter..."
+              type="text"
+              class="form-control"
+              ng-model="state.query">
+          </kbn-typeahead>
           <button class="btn btn-default" type="submit"
             ng-disabled="queryInput.$invalid">
             <span class="fa fa-search"></span>
