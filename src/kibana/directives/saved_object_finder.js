@@ -83,12 +83,14 @@ define(function (require) {
           var url = $scope.makeUrl(hit);
           if (!url || url.charAt(0) !== '#') return;
 
+          // angular wants the '/path', not '#/path'
           var path = url.substr(1);
           if ($route.matches(path)) {
             $event.preventDefault();
+
             // change works with paths, but we are only here because the paths
-            // are the same, so we have to change the whole url
-            $route.changeUrl(url);
+            // are the same, so we have to change the whole url to be the new path
+            $route.changeUrl(path);
           }
         };
 
