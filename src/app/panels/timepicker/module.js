@@ -76,8 +76,8 @@ function (angular, app, _, moment, kbn) {
       // Assume the form is valid since we're setting it to something valid
       $scope.input.$setValidity("dummy", true);
 
-	  // If time is not defined, set it to current time
-	  if(_.isUndefined($scope.time)) {
+      // If time is not defined, set it to current time
+      if(_.isUndefined($scope.time)) {
         $scope.time = {from : getTimeObj(new Date()), to : getTimeObj(new Date())};
       }
       $scope.temptime = cloneTime($scope.time);
