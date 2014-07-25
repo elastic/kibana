@@ -51,12 +51,12 @@ define(function (require) {
         }
       });
 
-      return Promise.map(all, _.limit(strategy.flattenRequest, 1))
+      return Promise.map(all, _.limit(strategy.getSourceStateFromRequest, 1))
       .then(function (states) {
         // all requests must have been disabled
         if (!states.length) return Promise.resolve();
 
-        body = strategy.requestStatesToBody(states);
+        body = strategy.convertStatesToBody(states);
 
         return es[strategy.clientMethod]({
           body: body
