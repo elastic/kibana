@@ -25,26 +25,62 @@ define(function (require) {
       },
 
       controller: function ($scope) {
+        var self = this;
         $scope.items = [];
         $scope.hidden = true;
 
-        // internal methods
-        this.activate = function (item) {
+        // activation methods
+        self.activate = function (item) {
           $scope.active = item;
         };
 
-        this.isActive = function (item) {
+        self.getActiveIndex = function () {
+          if (!$scope.active) {
+            return;
+          }
+
+          return $scope.items.indexOf($scope.active);
+        };
+
+        self.activateNext = function () {
+          var index = self.getActiveIndex();
+          if (index == null) {
+            index = 0;
+          } else if (index < $scope.items.length - 1) {
+            ++index;
+          }
+
+          $scope.active = $scope.items[index];
+        };
+
+        self.activatePrev = function () {
+          var index = self.getActiveIndex();
+
+          if (index > 0 && index != null) {
+            --index;
+          } else if (index === 0) {
+            $scope.active = false;
+            return;
+          }
+
+          $scope.active = $scope.items[index];
+        };
+
+        self.isActive = function (item) {
           return item === $scope.active;
         };
 
-        this.select = function (item) {
+        // selection methods
+        self.select = function (item) {
           $scope.hidden = true;
           $scope.active = false;
           $scope.$input.val(item.value);
         };
 
-        this.selectActive = function () {
-          this.select($scope.active);
+        self.selectActive = function () {
+          if ($scope.active) {
+            self.select($scope.active);
+          }
         };
 
         // methods exposed to the view
@@ -52,17 +88,30 @@ define(function (require) {
           return !$scope.hidden && ($scope.focused || $scope.mousedOver) && $scope.items.length;
         };
 
-        $scope.eventDispatch = function (keyCode) {
-          if (_.contains([keyMap.ESC, keyMap.TAB], keyCode)) {
+        $scope.keypressHandler = function (ev) {
+          var keyCode = ev.which || ev.keyCode;
+
+          // hide on escape
+          if (_.contains([keyMap.ESC], keyCode)) {
             $scope.hidden = true;
           }
 
+          // change selection with arrow up/down
           if (_.contains([keyMap.UP, keyMap.DOWN], keyCode)) {
-            console.log('arrows');
+            if ($scope.isVisible && $scope.items.length) {
+              ev.preventDefault();
+
+              if (keyCode === keyMap.DOWN) {
+                self.activateNext();
+              } else {
+                self.activatePrev();
+              }
+            }
           }
 
-          if (_.contains([keyMap.ENTER], keyCode)) {
-            console.log('select', this.select);
+          // select on enter or tab
+          if (_.contains([keyMap.ENTER, keyMap.TAB], keyCode)) {
+            self.selectActive();
           }
         };
       },
@@ -75,8 +124,8 @@ define(function (require) {
           throw new Error('Typeahead must contain an input');
         }
 
+        // watch for changes to the query parameter
         $scope.$watch('query', function (query) {
-          console.log(query);
           // if the query is empty, clear the list items
           if (!query.length) {
             $scope.items = [];
@@ -90,11 +139,24 @@ define(function (require) {
           });
         });
 
+        // when items list changes, deactivate if no results or active result is gone
+        $scope.$watch('items', function (items) {
+          if (!items.length || !_.contains($scope.items, $scope.active)) {
+            $scope.active = false;
+          }
+        });
+
+        // handle keypresses
         $el.on('keydown', function (ev) {
-          var keyCode = ev.which || ev.keyCode;
+          // unhide on keypress
           $scope.hidden = false;
 
-          $scope.eventDispatch(keyCode);
+          // react to specific key presses
+          if ($scope.focused) {
+            $scope.$apply(function () {
+              $scope.keypressHandler(ev);
+            });
+          }
         });
 
         // control the mouse state
@@ -109,13 +171,17 @@ define(function (require) {
         $list.on('mouseleave', function () {
           $scope.$apply(function () {
             $scope.mousedOver = false;
+            $scope.active = false;
+            if (!$scope.focused) {
+              $scope.hidden = true;
+            }
           });
         });
 
         // control the focus state
         $input.on('focus', function () {
-          console.log('focus');
           $scope.$apply(function () {
+            $scope.hidden = true;
             $scope.focused = true;
           });
         });
@@ -136,6 +202,16 @@ define(function (require) {
 
       link: function ($scope, $el, attr, typeaheadCtrl) {
         var item = $scope.$eval(attr.kbnTypeaheadItem);
+
+        $scope.$watch(function () {
+          return typeaheadCtrl.isActive(item);
+        }, function (active) {
+          if (active) {
+            $el.addClass('active');
+          } else {
+            $el.removeClass('active');
+          }
+        });
 
         $el.on('mouseenter', function (e) {
           $scope.$apply(function () {
