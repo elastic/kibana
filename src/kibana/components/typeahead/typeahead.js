@@ -40,7 +40,7 @@ define(function (require) {
         this.select = function (item) {
           $scope.hidden = true;
           $scope.active = false;
-          console.log('select', item);
+          $scope.$input.val(item.value);
         };
 
         this.selectActive = function () {
@@ -68,7 +68,7 @@ define(function (require) {
       },
 
       link: function ($scope, $el, attr, ngModel) {
-        var $input = $el.find('input').first();
+        var $input = $scope.$input = $el.find('input').first();
         var $list = $el.find('.typeahead-items').first();
 
         if (!$input.length) {
