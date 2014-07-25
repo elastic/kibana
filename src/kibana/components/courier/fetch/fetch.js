@@ -51,9 +51,7 @@ define(function (require) {
         }
       });
 
-      return Promise.map(all, function (req) {
-        return req.source._flatten();
-      })
+      return Promise.map(all, _.limit(strategy.flattenRequest, 1))
       .then(function (states) {
         // all requests must have been disabled
         if (!states.length) return Promise.resolve();
