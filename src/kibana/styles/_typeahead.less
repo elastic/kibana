@@ -7,7 +7,6 @@
     background-color: @body-bg;
     position: absolute;
     z-index: 2;
-    margin-top: 2px;
     width: 100%;
 
     .typeahead-item {
@@ -22,5 +21,15 @@
     .typeahead-item.active {
       background-color: @well-bg;
     }
+  }
+}
+
+.typeahead.visible .button-group,
+.typeahead.visible .inline-form {
+  > :first-child {
+    .border-bottom-radius(0);
+  }
+  > :last-child {
+    .border-bottom-radius(0);
   }
 }
