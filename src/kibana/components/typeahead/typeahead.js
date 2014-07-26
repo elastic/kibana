@@ -191,6 +191,13 @@ define(function (require) {
             $scope.focused = false;
           });
         });
+
+        // unbind all the events when the element is destroyed
+        $scope.$on('$destroy', function () {
+          $el.off();
+          $input.off();
+          $list.off();
+        });
       }
     };
   });
