@@ -2,6 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var typeahead = require('modules').get('kibana/typeahead');
   var template = require('text!components/typeahead/partials/typeahead.html');
+  var listTemplate = require('text!components/typeahead/partials/typeahead-list.html');
 
   require('components/notify/directives');
 
@@ -15,7 +16,7 @@ define(function (require) {
     };
 
     return {
-      restrict: 'E',
+      restrict: 'A',
       replace: true,
       transclude: true,
       template: template,
@@ -83,12 +84,8 @@ define(function (require) {
           }
         };
 
-        // methods exposed to the view
-        $scope.isVisible = function () {
-          return !$scope.hidden && ($scope.focused || $scope.mousedOver) && $scope.items.length;
-        };
-
-        $scope.keypressHandler = function (ev) {
+        self.keypressHandler = function (ev) {
+          debugger;
           var keyCode = ev.which || ev.keyCode;
 
           // hide on escape
@@ -114,53 +111,99 @@ define(function (require) {
             self.selectActive();
           }
         };
+
+        // methods exposed to the view
+        $scope.isVisible = function () {
+          return !$scope.hidden && ($scope.focused || $scope.mousedOver) && $scope.items.length;
+        };
       },
 
       link: function ($scope, $el, attr, ngModel) {
         var $input = $scope.$input = $el.find('input').first();
         var $list = $el.find('.typeahead-items').first();
 
-        if (!$input.length) {
-          throw new Error('Typeahead must contain an input');
+        if (!$scope.$input) {
+          throw new Error('kbn-typeahead-input must be defined');
         }
 
-        // watch for changes to the query parameter
-        $scope.$watch('query', function (query) {
-          // if the query is empty, clear the list items
-          if (!query.length) {
-            $scope.items = [];
-            return;
-          }
+        // // watch for changes to the query parameter
+        // $scope.$watch('query', function (query) {
+        //   // if the query is empty, clear the list items
+        //   if (!query.length) {
+        //     $scope.items = [];
+        //     return;
+        //   }
 
-          // filter items
-          $scope.items = $scope.fullItemList.filter(function (item) {
-            var re = new RegExp(query, 'i');
-            return !!(item.value.match(re));
-          });
-        });
+        //   // filter items
+        //   $scope.items = $scope.fullItemList.filter(function (item) {
+        //     var re = new RegExp(query, 'i');
+        //     return !!(item.value.match(re));
+        //   });
+        // });
 
-        // when items list changes, deactivate if no results or active result is gone
-        $scope.$watch('items', function (items) {
-          if (!items.length || !_.contains($scope.items, $scope.active)) {
-            $scope.active = false;
-          }
-        });
+        // // when items list changes, deactivate if no results or active result is gone
+        // $scope.$watch('items', function (items) {
+        //   if (!items.length || !_.contains($scope.items, $scope.active)) {
+        //     $scope.active = false;
+        //   }
+        // });
+
+        // // unbind all the events when the element is destroyed
+        // $scope.$on('$destroy', function () {
+        //   $scope.input.off();
+        //   $list.off();
+        // });
+      }
+    };
+  });
+
+  typeahead.directive('kbnTypeaheadInput', function () {
+    return {
+      restrict: 'A',
+      require: '^kbnTypeahead',
+
+      link: function ($scope, $el, $attr, typeaheadCtrl) {
+        $scope.$input = $el;
 
         // handle keypresses
         $el.on('keydown', function (ev) {
-          // unhide on keypress
-          $scope.hidden = false;
-
           // react to specific key presses
           if ($scope.focused) {
             $scope.$apply(function () {
-              $scope.keypressHandler(ev);
+              // unhide on keypress
+              $scope.hidden = false;
+
+              typeaheadCtrl.keypressHandler(ev);
             });
           }
         });
 
+        // control the focus state
+        $el.on('focus', function () {
+          $scope.$apply(function () {
+            $scope.hidden = true;
+            $scope.focused = true;
+          });
+        });
+
+        $el.on('blur', function () {
+          $scope.$apply(function () {
+            $scope.focused = false;
+          });
+        });
+      }
+    };
+  });
+
+  typeahead.directive('kbnTypeaheadItems', function () {
+    return {
+      restrict: 'E',
+      require: '^kbnTypeahead',
+      template: listTemplate,
+
+      link: function ($scope, $el, attr, typeaheadCtrl) {
         // control the mouse state
-        $list.on('mouseover', function () {
+        $el.on('mouseover', function () {
           if ($scope.focused) {
             $scope.$apply(function () {
               $scope.mousedOver = true;
@@ -168,7 +211,7 @@ define(function (require) {
           }
         });
 
-        $list.on('mouseleave', function () {
+        $el.on('mouseleave', function () {
           $scope.$apply(function () {
             $scope.mousedOver = false;
             $scope.active = false;
@@ -176,27 +219,6 @@ define(function (require) {
               $scope.hidden = true;
             }
           });
-        });
-
-        // control the focus state
-        $input.on('focus', function () {
-          $scope.$apply(function () {
-            $scope.hidden = true;
-            $scope.focused = true;
-          });
-        });
-
-        $input.on('blur', function () {
-          $scope.$apply(function () {
-            $scope.focused = false;
-          });
-        });
-
-        // unbind all the events when the element is destroyed
-        $scope.$on('$destroy', function () {
-          $el.off();
-          $input.off();
-          $list.off();
         });
       }
     };
