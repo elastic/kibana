@@ -44,7 +44,7 @@ We can also match the entire phrase
 "to be or not to be"
 --------------------
 
-Or in a specifc fields:
+Or in a specific field:
 
 [source,shell]
 -------------
@@ -83,9 +83,8 @@ And of course to search everything:
 [[multiple-queries]]
 === Multiple queries
 
-In some cases, you might want to compare the results of two seperate queries.Kibana can handle multiple queries byjoining them with a logical
-`OR` and using the knowledge that they should be treated as seperate to
-influence visualizations.
+In some cases, you might want to compare the results of two seperate queries. Kibana can handle multiple queries by joining them with a logical
+`OR` and using the knowledge that they should be treated as seperate to influence visualizations.
 
 [[adding]]
 ==== Adding
