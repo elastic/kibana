@@ -35,4 +35,11 @@
       <label class="small">Query column name</label>
         <input type="text" class="input-large" ng-model="panel.label_name">
     </div>
+
+    <h5>Time Options</h5>
+    <div class="editor-option">
+      <label class="small">Time Field</label>
+        <input ng-change="set_refresh(true)" placeholder="Start typing" bs-typeahead="fields.list" type="text" class="input-small" ng-model="panel.time_field">
+    </div>
+
 </div>

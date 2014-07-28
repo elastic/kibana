@@ -15,7 +15,7 @@ define([
   'lodash',
   'jquery',
   'kbn',
-  'numeral'
+  'numeral',
 ], function (
   angular,
   app,
@@ -30,7 +30,7 @@ define([
   var module = angular.module('kibana.panels.stats', []);
   app.useModule(module);
 
-  module.controller('stats', function ($scope, querySrv, dashboard, filterSrv) {
+  module.controller('stats', function ($scope, $q, querySrv, dashboard, filterSrv) {
 
     $scope.panelMeta = {
       modals : [
@@ -48,7 +48,7 @@ define([
       description: 'A statistical panel for displaying aggregations using the Elastic Search statistical facet query.'
     };
 
-    $scope.modes = ['count','min','max','mean','total','variance','std_deviation','sum_of_squares'];
+    $scope.modes = ['count','min','max','mean','total','variance','std_deviation','sum_of_squares','last_value'];
 
     var defaults = {
       queries     : {
@@ -63,6 +63,7 @@ define([
       sort_reverse: false,
       label_name: 'Query',
       value_name: 'Value',
+      time_field: '@timestamp',
       spyable     : true,
       show: {
         count: true,
@@ -72,7 +73,8 @@ define([
         std_deviation: true,
         sum_of_squares: true,
         total: true,
-        variance: true
+        variance: true,
+        last_value: true
       }
     };
 
@@ -109,13 +111,14 @@ define([
       var request,
         results,
         boolQuery,
-        queries;
+        queries,
+        multiSearchRequest,
+        multiSearchResults;
 
       request = $scope.ejs.Request().indices(dashboard.indices);
 
       $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
       queries = querySrv.getQueryObjs($scope.panel.queries.ids);
-
 
       // This could probably be changed to a BoolFilter
       boolQuery = $scope.ejs.BoolQuery();
@@ -150,21 +153,60 @@ define([
       // Populate the inspector panel
       $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
 
-      results = request.doSearch();
+      // Multisearch query to get the last_value field
+      multiSearchRequest = $scope.ejs.MultiSearchRequest();
+      _.each(queries, function(q) {
+        var boolQuery = $scope.ejs.BoolQuery();
+        var request = $scope.ejs.Request().indices(dashboard.indices);
+        boolQuery.should(querySrv.toEjsObj(q));
+        request.query($scope.ejs.FilteredQuery(boolQuery))
+          .fields($scope.panel.field)
+          .filter($scope.ejs.ExistsFilter($scope.panel.field))
+          .sort($scope.ejs.Sort($scope.panel.time_field).ignoreUnmapped(true).desc())
+          .size(1);
 
-      results.then(function(results) {
+        multiSearchRequest.requests(request);
+      })
+
+      results = request.doSearch();
+      multiSearchResults = multiSearchRequest.doSearch();
+
+      // We finish till the end of these two functions
+      $q.all([results, multiSearchResults]).then(function(results) {
+        var stats_results = results[0];
+        var last_value_results = results[1];
+
         $scope.panelMeta.loading = false;
-        var value = results.facets.stats[$scope.panel.mode];
+
+        // We only show 'last_value' in the featured stat if we have more than 1 query
+        if ($scope.panel.mode != 'last_value') {
+          var value = stats_results.facets.stats[$scope.panel.mode];
+        } else if (queries.length > 1) {
+          var value = '-';
+        } else {
+          var value = last_value_results.responses[0].hits.hits[0].fields[$scope.panel.field][0];
+        }
 
         var rows = queries.map(function (q) {
           var alias = q.alias || q.query;
           var obj = _.clone(q);
           obj.label = alias;
           obj.Label = alias.toLowerCase(); //sort field
-          obj.value = results.facets['stats_'+alias];
-          obj.Value = results.facets['stats_'+alias]; //sort field
+          try {
+            obj.value = stats_results.facets['stats_'+alias];
+            obj.Value = stats_results.facets['stats_'+alias]; //sort field
+          } catch (TypeError) {
+            // In the case that we have a
+            obj.value = {};
+            obj.Value = {};
+          }
           return obj;
         });
+
+        // We add the last_value to the stats
+        for(var i = 0, len = queries.length; i < len; i++) {
+            rows[i].value['last_value'] = rows[i].value['last_value'] = last_value_results.responses[i].hits.hits[0].fields[$scope.panel.field][0];
+        }
 
         $scope.data = {
           value: value,
@@ -195,16 +237,24 @@ define([
     return function (value,format) {
       switch (format) {
       case 'money':
-        value = numeral(value).format('$0,0.00');
+        if (!isNaN(value)) {
+          value = numeral(value).format('$0,0.00');
+        }
         break;
       case 'bytes':
-        value = numeral(value).format('0.00b');
+        if (!isNaN(value)) {
+          value = numeral(value).format('0.00b');
+        }
         break;
       case 'float':
-        value = numeral(value).format('0.000');
+        if (!isNaN(value)) {
+          value = numeral(value).format('0.000');
+        }
         break;
       default:
-        value = numeral(value).format('0,0');
+        if (!isNaN(value)) {
+          value = numeral(value).format('0,0');
+        }
       }
       return value;
     };
