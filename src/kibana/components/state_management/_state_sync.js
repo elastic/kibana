@@ -11,6 +11,7 @@ define(function (require) {
       var getAppStash = function (search) {
         var appStash = search._a && rison.decode(search._a);
         if (app.current) {
+          // Apply the defaults to appStash
           appStash = _.defaults(appStash || {}, app.defaults);
         }
         return appStash;
