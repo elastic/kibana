@@ -77,7 +77,8 @@ define(function (require) {
       query: initialQuery || '',
       columns: ['_source'],
       index: config.get('defaultIndex'),
-      interval: 'auto'
+      interval: 'auto',
+      filters: _.cloneDeep($scope.searchSource.get('filter'))
     };
 
     var metaFields = config.get('metaFields');
@@ -93,7 +94,7 @@ define(function (require) {
       'year'
     ];
 
-    var $state = $scope.state = new appStateFactory.create(stateDefaults);
+    var $state = $scope.state = appStateFactory.create(stateDefaults);
 
     if (!_.contains(indexPatternList, $state.index)) {
       var reason = 'The index specified in the URL is not a configured pattern. ';
@@ -161,6 +162,11 @@ define(function (require) {
           if (!angular.equals(sort, currentSort)) $scope.fetch();
         });
 
+        $scope.$watch('state.filters', function (filters) {
+          $scope.searchSource.set('filter', filters);
+          $scope.fetch();
+        });
+
         $scope.$watch('opts.timefield', function (timefield) {
           timefilter.enabled(!!timefield);
         });
@@ -199,6 +205,8 @@ define(function (require) {
       if (!init.complete) return;
 
       $scope.updateTime();
+      if (_.isEmpty($state.columns)) refreshColumns();
+      $state.save();
       $scope.updateDataSource()
       .then(setupVisualization)
       .then(function () {
@@ -340,7 +348,6 @@ define(function (require) {
 
     $scope.updateDataSource = function () {
       var chartOptions;
-
       $scope.searchSource
       .size($scope.opts.sampleSize)
       .sort(function () {
@@ -354,7 +361,8 @@ define(function (require) {
         }
         return sort;
       })
-      .query(!$state.query ? null : $state.query);
+      .query(!$state.query ? null : $state.query)
+      .set('filter', $state.filters || []);
 
       // get the current indexPattern
       var indexPattern = $scope.searchSource.get('index');
@@ -431,20 +439,26 @@ define(function (require) {
     // TODO: On array fields, negating does not negate the combination, rather all terms
     $scope.filterQuery = function (field, value, operation) {
       value = _.isArray(value) ? value : [value];
-      operation = operation || '+';
 
       var indexPattern = $scope.searchSource.get('index');
       indexPattern.popularizeField(field, 1);
 
-      _.each(value, function (clause) {
-        var filter = field + ':"' + addSlashes(clause) + '"';
-        var regex = '[\\+-]' + regexEscape(filter) + '\\s*';
+      // Grap the filters from the searchSource and ensure it's an array
+      var filters = _.flatten([$state.filters], true);
 
-        $state.query = $state.query.replace(new RegExp(regex), '') +
-          ' ' + operation + filter;
+      _.each(value, function (clause) {
+        var previous = _.find(filters, function (item) {
+          return item && item.query.match[field] === clause;
+        });
+        if (!previous) {
+          var filter = { query: { match: {} } };
+          filter.negate = operation === '-';
+          filter.query.match[field] = clause;
+          filters.push(filter);
+        }
       });
 
-      $scope.fetch();
+      $state.filters = filters;
     };
 
     $scope.toggleField = function (name) {

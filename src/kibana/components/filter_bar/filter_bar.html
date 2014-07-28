@@ -1,0 +1,9 @@
+<div class="bar" ng-show="filters.length">
+  <!-- <div class="title">Filters</div> -->
+  <div class="filter" ng-class="{ negate: filter.negate }" ng-repeat="filter in filters">
+    <span class="key">{{ filter.key }}:</span>
+    <span class="value">"{{ filter.value }}"</span>
+    <a class="fa" tooltip="Toggle" tooltip-placement="top" ng-class="{ 'fa-eye-slash': filter.disabled, 'fa-eye': !filter.disabled }" ng-click="toggleFilter(filter)"><a>
+    <a class="fa fa-times" tooltip="Remove" tooltip-placement="top" ng-click="removeFilter(filter)"><a>
+  </div>
+</div>

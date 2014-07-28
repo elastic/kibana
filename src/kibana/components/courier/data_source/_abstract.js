@@ -247,6 +247,29 @@ define(function (require) {
             };
           }
 
+          /**
+           * Create a filter that can be reversed for filters with negate set
+           * @param {boolean} reverse This will reverse the filter. If true then
+           *                          anything where negate is set will come 
+           *                          through otherwise it will filter out   
+           * @returns {function}
+           */
+          var filterNegate = function (reverse) {
+            return function (filter) {
+              if (_.isUndefined(filter.negate)) return !reverse;
+              return filter.negate === reverse;
+            };
+          };
+
+          /**
+           * Clean out any invalid attributes from the filters
+           * @param {object} filter The filter to clean
+           * @returns {object}
+           */
+          var cleanFilter = function (filter) {
+            return _.omit(filter, ['negate', 'disabled']);
+          };
+
           // switch to filtered query if there are filters
           if (flatState.filters) {
             if (flatState.filters.length) {
@@ -255,7 +278,8 @@ define(function (require) {
                   query: flatState.body.query,
                   filter: {
                     bool: {
-                      must: flatState.filters
+                      must: _(flatState.filters).filter(filterNegate(false)).map(cleanFilter).value(),
+                      must_not: _(flatState.filters).filter(filterNegate(true)).map(cleanFilter).value()
                     }
                   }
                 }

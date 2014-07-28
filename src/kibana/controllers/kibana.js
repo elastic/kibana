@@ -10,6 +10,7 @@ define(function (require) {
   require('components/courier/courier');
   require('components/notify/notify');
   require('components/state_management/app_state_factory');
+  require('components/filter_bar/filter_bar');
   require('directives/info');
   require('directives/spinner');
   require('directives/paginate');
