@@ -517,10 +517,14 @@ define(function (require) {
             .range([0, width])
             .nice(xTicks);
 
-          xScale.domain([
-            d3.time[testInterval].offset(new Date(minDate), -dateoffset),
-            d3.time[testInterval].offset(new Date(maxDate), dateoffset)
-          ]);
+          xScale = d3.scale.ordinal()
+            .domain(keys)
+            .rangeBands([0, width], 0.1);
+
+//          xScale.domain([
+//            d3.time[testInterval].offset(new Date(minDate), -dateoffset),
+//            d3.time[testInterval].offset(new Date(maxDate), dateoffset)
+//          ]);
         } else {
           xScale = d3.scale.ordinal()
             .domain(keys)
@@ -918,18 +922,7 @@ define(function (require) {
                 return xScale(d.x);
               })
               .attr('width', function () {
-                var val;
-
-                if (data.ordered === undefined || !data.ordered.date) {
-                  val = xScale.rangeBand();
-                } else {
-                  var barWidth = xScale(data.ordered.min + data.ordered.interval) -
-                    xScale(data.ordered.min);
-                  var barSpacing = barWidth * 0.25;
-                  val = barWidth - barSpacing;
-                }
-
-                return val;
+                return xScale.rangeBand();
               })
               .attr('y', function (d) {
                 return yScale(d.y0 + d.y);
