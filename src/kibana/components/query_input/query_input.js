@@ -19,7 +19,7 @@ define(function (require) {
           // track request so we can abort it if needed
           var request = {};
 
-          var errorElem = $('<i class="fa fa-ban input-query-error"></i>').hide();
+          var errorElem = $('<i class="fa fa-ban query-input-error"></i>').hide();
 
           var init = function () {
             elem.after(errorElem);
