@@ -23,6 +23,7 @@ define(function (require) {
         items: '=kbnTypeahead',
         itemKey: '@kbnTypeaheadKey'
       },
+      controllerAs: 'typeahead',
 
       controller: function ($scope, $element, $timeout) {
         var self = this;
