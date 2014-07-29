@@ -102,7 +102,7 @@ function (angular, _, config, kbn) {
               .size(q.size)
               .facetFilter(ejs.QueryFilter(
                 ejs.FilteredQuery(
-                  ejs.QueryStringQuery(q.query || '*'),
+                  ejs.QueryStringQuery(q.query || '*').lowercaseExpandedTerms(false),
                   filterSrv.getBoolFilter(filterSrv.ids())
                   )))).size(0);
 
@@ -206,7 +206,7 @@ function (angular, _, config, kbn) {
       switch(q.type)
       {
       case 'lucene':
-        return ejs.QueryStringQuery(q.query || '*');
+        return ejs.QueryStringQuery(q.query || '*').lowercaseExpandedTerms(false);
       case 'regex':
         return ejs.RegexpQuery('_all',q.query);
       default:
