@@ -5,7 +5,7 @@
         {{dash.title}}
       </span>
 
-      <form kbn-typeahead="history" kbn-typeahead-field="value" class="fill inline-form" ng-submit="filterResults()" name="queryInput">
+      <form kbn-typeahead="history" class="fill inline-form" ng-submit="filterResults()" name="queryInput">
         <div class="input-group"
           ng-class="queryInput.$invalid ? 'has-error' : ''">
           <input kbn-typeahead-input
