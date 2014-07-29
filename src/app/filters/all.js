@@ -47,6 +47,16 @@ define([
     };
   });
 
+  module.filter('prettify', function() {
+    return function(arr) {
+      if(_.isObject(arr) && !_.isArray(arr)) {
+        return JSON.stringify(arr, undefined, 2);        
+      } else {
+        return _.isNull(arr) ? null : arr.toString();
+      }
+    };
+  });
+
   module.filter('moment', function() {
     return function(date,mode) {
       switch(mode) {
