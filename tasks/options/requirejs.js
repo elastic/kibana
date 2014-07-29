@@ -47,6 +47,7 @@ module.exports = function(config,grunt) {
         'settings',
         'bootstrap',
         'modernizr',
+        'elasticsearch',
         'elasticjs',
         'timepicker',
         'datepicker',
@@ -58,7 +59,11 @@ module.exports = function(config,grunt) {
         'directives/all',
         'jquery.flot.pie',
         'angular-sanitize',
-        'angular-dragdrop'
+        'angular-dragdrop',
+        'angular-cookies',
+        'angular-loader',
+        'angular-resource',
+        'angular-route'
       ]
     }
   ];
