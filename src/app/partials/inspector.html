@@ -5,7 +5,7 @@
 <div class="modal-body">
 
   <div>
-    <pre>curl -XGET '{{config.elasticsearch}}/{{dashboard.indices|stringify}}/_search?pretty' -d '{{inspector}}'
+    <pre>curl -XGET '{{config.elasticsearch}}/{{dashboard.indices|stringify}}/_search?pretty' -d '{{inspector|prettify}}'
     </pre>
   </div>
   
