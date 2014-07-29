@@ -1,3 +1,17 @@
-<div class="typeahead-items" ng-show="typeahead.isVisible()">
-  <div kbn-typeahead-item="item" class="typeahead-item" ng-repeat="item in typeahead.filteredItems" ng-class="{active: item === typeahead.active}">{{item.value}}</div>
+<div
+  ng-show="typeahead.isVisible()"
+  ng-mouseenter="typeahead.setMouseover(true);"
+  ng-mouseleave="typeahead.setMouseover(false);"
+  class="typeahead-items"
+  >
+
+  <div
+    ng-repeat="item in typeahead.filteredItems"
+    ng-class="{active: item === typeahead.active}"
+    ng-click="typeahead.selectItem(item, $event);"
+    ng-mouseenter="typeahead.activateItem(item);"
+    class="typeahead-item"
+    >
+    {{item.value}}
+  </div>
 </div"

@@ -24,7 +24,7 @@ define(function (require) {
         itemKey: '@kbnTypeaheadKey'
       },
 
-      controller: function ($scope, $element) {
+      controller: function ($scope, $element, $timeout) {
         var self = this;
         $scope.query = undefined;
         $scope.hidden = true;
@@ -93,13 +93,17 @@ define(function (require) {
         };
 
         // selection methods
-        self.selectItem = function (item) {
+        self.selectItem = function (item, ev) {
           $scope.hidden = true;
           self.active = false;
           $scope.inputModel.$setViewValue(self.getItemValue(item));
           $scope.inputModel.$render();
 
-          self.submitForm();
+          if (ev && ev.type === 'click') {
+            $timeout(function () {
+              self.submitForm();
+            });
+          }
         };
 
         self.submitForm = function () {
@@ -195,7 +199,8 @@ define(function (require) {
     };
   });
 
-  typeahead.directive('kbnTypeaheadInput', function () {
+  typeahead.directive('kbnTypeaheadInput', function ($rootScope) {
+
     return {
       restrict: 'A',
       require: ['^ngModel', '^kbnTypeahead'],
@@ -213,26 +218,29 @@ define(function (require) {
 
         // handle keypresses
         $el.on('keydown', function (ev) {
-          $scope.$apply(function () {
-            typeaheadCtrl.keypressHandler(ev);
-          });
+          typeaheadCtrl.keypressHandler(ev);
+          digest();
         });
 
         // update focus state based on the input focus state
         $el.on('focus', function () {
           typeaheadCtrl.setFocused(true);
+          digest();
         });
 
         $el.on('blur', function () {
-          $scope.$apply(function () {
-            typeaheadCtrl.setFocused(false);
-          });
+          typeaheadCtrl.setFocused(false);
+          digest();
         });
 
         // unbind event listeners
         $scope.$on('$destroy', function () {
           $el.off();
         });
+
+        function digest() {
+          $rootScope.$$phase || $scope.$digest();
+        }
       }
     };
   });
@@ -246,53 +254,7 @@ define(function (require) {
 
       link: function ($scope, $el, attr, typeaheadCtrl) {
         $scope.typeahead = typeaheadCtrl;
-
-        // control the mouse state of the typeahead
-        $el.on('mouseover', function () {
-          typeaheadCtrl.setMouseover(true);
-        });
-
-        $el.on('mouseleave', function () {
-          typeaheadCtrl.setMouseover(false);
-        });
-
-        // unbind all events when removed
-        $scope.$on('$destroy', function () {
-          $el.off();
-        });
       }
     };
   });
-
-  typeahead.directive('kbnTypeaheadItem', function () {
-    return {
-      restrict: 'A',
-      require: '^kbnTypeahead',
-
-      link: function ($scope, $el, attr, typeaheadCtrl) {
-        var item = $scope.$eval(attr.kbnTypeaheadItem);
-        $scope.typeahead = typeaheadCtrl;
-
-        // activate items on mouse enter
-        $el.on('mouseenter', function (e) {
-          $scope.$apply(function () {
-            typeaheadCtrl.activateItem(item);
-          });
-        });
-
-        // select specific list item when clicked
-        $el.on('click', function (e) {
-          $scope.$apply(function () {
-            typeaheadCtrl.selectItem(item);
-          });
-        });
-
-        // unbind all events when removed
-        $scope.$on('$destroy', function () {
-          $el.off();
-        });
-      }
-    };
-  });
-
 });
