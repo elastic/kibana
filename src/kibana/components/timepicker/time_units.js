@@ -1,5 +1,5 @@
 define(function (require) {
-  var module = require('modules').get('kibana/constants');
+  var module = require('modules').get('kibana');
 
   module.constant('timeUnits', {
     s: 'second',
