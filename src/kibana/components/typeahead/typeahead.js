@@ -127,10 +127,15 @@ define(function (require) {
           // hide on escape
           if (_.contains([keyMap.ESC], keyCode)) {
             $scope.hidden = true;
+            self.active = false;
           }
 
           // change selection with arrow up/down
-          if (_.contains([keyMap.UP, keyMap.DOWN], keyCode)) {
+          // on down key, attempt to load all items if none are loaded
+          if (_.contains([keyMap.DOWN], keyCode) && $scope.filteredItems.length === 0) {
+            $scope.filteredItems = $scope.items;
+            $scope.$digest();
+          } else if (_.contains([keyMap.UP, keyMap.DOWN], keyCode)) {
             if (self.isVisible() && $scope.filteredItems.length) {
               ev.preventDefault();
 
