@@ -1,5 +1,5 @@
 define(function (require) {
-  var inherits = require('utils/inherits');
+  var inherits = require('lodash').inherits;
   var _ = require('lodash');
   var nextTick = require('utils/next_tick');
 

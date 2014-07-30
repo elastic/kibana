@@ -1,7 +1,7 @@
 define(function (require) {
 
   return function SearchSourceFactory(Promise, Private) {
-    var inherits = require('utils/inherits');
+    var inherits = require('lodash').inherits;
     var _ = require('lodash');
     var errors = require('errors');
     var SourceAbstract = Private(require('components/courier/data_source/_abstract'));
