@@ -53,6 +53,8 @@ module.exports = function(config,grunt) {
         'lodash',
         'filters/all',
         'jquery.flot',
+        'jquery.flot.stack',
+        'jquery.flot.stackpercent',
         'services/all',
         'angular-strap',
         'directives/all',
