@@ -71,7 +71,7 @@ define(function (require) {
 
         $scope.changeTab = function (obj) {
           $state.tab = obj.title;
-          $state.commit();
+          $state.save();
           resetCheckBoxes();
         };
 

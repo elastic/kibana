@@ -3,6 +3,7 @@ define(function (require) {
   var moment = require('moment');
   var datemath = require('utils/datemath');
   var module = require('modules').get('kibana');
+  require('components/state_management/global_state');
 
   module.service('timefilter', function (Promise, globalState, $rootScope) {
 
@@ -33,8 +34,9 @@ define(function (require) {
     };
 
     var castTime = function () {
-      if (globalState.time && globalState.time.from) self.time.from = convertISO8601(globalState.time.from);
-      if (globalState.time && globalState.time.to) self.time.to = convertISO8601(globalState.time.to);
+      var time = globalState.time;
+      if (time && time.from) self.time.from = convertISO8601(time.from);
+      if (time && time.to) self.time.to = convertISO8601(time.to);
     };
 
     this.enabled = function (state) {
