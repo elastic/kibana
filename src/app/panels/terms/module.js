@@ -183,10 +183,10 @@ function (angular, app, _, $, kbn) {
 
       // Build list of ids to pass to query depending on settings
       if($scope.panel.ignoreown) {
-        panelFilterIds = _.map($scope.filter_ids, function(num, key){ return num; });
-        boolFilterIds = _.difference(filterSrv.ids, panelFilterIds);
+        panelFilterIds = _.map($scope.get_filter_ids(), function(num, key){ return num; });
+        boolFilterIds = _.difference(filterSrv.ids(), panelFilterIds);
       } else {
-        boolFilterIds = filterSrv.ids;
+        boolFilterIds = filterSrv.ids();
       }
 
       // Terms mode
@@ -236,25 +236,24 @@ function (angular, app, _, $, kbn) {
     };
 
     $scope.build_search = function(term,negate) {
-      if(term.label in $scope.filter_ids &&
-         $scope.filter_ids[term.label] in filterSrv.list){
-        filterSrv.remove($scope.filter_ids[term.label]);
-        delete $scope.filter_ids[term.label];
+      var ids = $scope.get_filter_ids();                
+        
+      if(term.label in ids){
+        filterSrv.remove(ids[term.label]);
       } else if(_.isUndefined(term.meta)) {
         if($scope.panel.radioselect) { 
-          _.each($scope.filter_ids, function(value, key){
-              filterSrv.remove($scope.filter_ids[key]);
-              delete $scope.filter_ids[key];
+          _.each(ids, function(value, key){
+              filterSrv.remove(ids[key]);
           });
         }
-        $scope.filter_ids[term.label] = filterSrv.set({
+        filterSrv.set({
           type:'terms',
           field:$scope.field, 
           value:term.label, 
           mandate:(negate ? 'mustNot' : $scope.panel.fmode)
         });
       } else if(term.meta === 'missing') {
-        $scope.filter_ids[term.label] = filterSrv.set({
+        filterSrv.set({
           type:'exists',
           field:$scope.field, 
           mandate:(negate ? $scope.panel.fmode : 'mustNot')
@@ -262,6 +261,17 @@ function (angular, app, _, $, kbn) {
       } else {
         return;
       }
+    };
+    
+    $scope.get_filter_ids = function() {
+       var ids = {};
+       for (var id in filterSrv.list()) {
+          var filter = filterSrv.list()[id];
+          if (filter.type === "terms" && filter.field === $scope.field) {
+              ids[filter.value] = parseInt(id);
+          }
+       }       
+       return ids;
     };
 
     $scope.set_refresh = function (state) {
@@ -303,6 +313,7 @@ function (angular, app, _, $, kbn) {
         });
 
         function build_results() {
+          var ids = scope.get_filter_ids();                        
           var k = 0;
           scope.data = [];
           _.each(scope.results.facets.terms.terms, function(v) {
@@ -313,7 +324,7 @@ function (angular, app, _, $, kbn) {
             if(scope.panel.tmode === 'terms_stats') {
               slice = { label : v.term, data : [[k,v[scope.panel.tstat]]], actions: true};
             }
-            if(scope.panel.ignoreown && _.size(scope.filter_ids) && !scope.filter_ids[v.term]) {
+            if(scope.panel.ignoreown && _.size(ids) && !ids[v.term]) {
               slice.color = "#aaa";
             } else {
               slice.color = querySrv.colors[k];
