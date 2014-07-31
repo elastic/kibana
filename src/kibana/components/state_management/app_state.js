@@ -8,6 +8,7 @@ define(function (require) {
     function AppState(defaults) {
       AppState.Super.call(this, '_a', defaults);
     }
+    _.inherits(AppState, State);
 
     return AppState;
   };
