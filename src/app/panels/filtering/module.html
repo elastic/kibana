@@ -79,5 +79,6 @@
       </form>
     </div>
     <i class="pointer icon-plus-sign" ng-click="add()" bs-tooltip="'Add a query filter'" data-placement="right"></i>
+    <i class="pointer icon-remove-sign" ng-click="remove_all()" bs-tooltip="'Remove all query filters'" data-placement="right" ng-show="dashboard.current.services.filter.ids.length > 0"></i>
   </div>
 </div>

@@ -41,6 +41,12 @@ function (angular, app, _) {
       filterSrv.remove(id);
     };
 
+    $scope.remove_all = function() {
+      _.each(dashboard.current.services.filter.ids, function(id) {
+          filterSrv.remove(id);
+        });
+    };
+
     // This function should be moved to the service
     $scope.toggle = function(id) {
       dashboard.current.services.filter.list[id].active = !dashboard.current.services.filter.list[id].active;
