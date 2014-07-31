@@ -89,7 +89,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
       /** @scratch /panels/multifieldhistogram/5
        * queries array:: which query ids are selected.
        */
-      queries     : querySrv.ids(),
+      queries     : [],
       color       : null,
       alias       : null
     };
@@ -752,11 +752,11 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
 
             for (var i = 0; i < data.length; i++) {
               var _d = data[i].time_series.getFlotPairs(required_times);
-              if(scope.panel.values[0].derivative) {
+              if(scope.panel.values[i].derivative) {
                 _d = derivative(_d);
               }
-              if(scope.panel.values[0].scale !== 1) {
-                _d = scale(_d,scope.panel.values[0].scale);
+              if(scope.panel.values[i].scale !== 1) {
+                _d = scale(_d,scope.panel.values[i].scale);
               }
               if(scope.panel.scaleSeconds) {
                 _d = scaleSeconds(_d,scope.panel.interval);
