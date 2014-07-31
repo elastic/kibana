@@ -588,8 +588,13 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
         });
 
         // Compute the logarithm of the value converted to the specified base
+        function log_base(b, x) {
+          return Math.log(x < 0 ? 0 : x) / Math.log(b);
+        }
+
+        // Compute the logarithm of the value converted to the specified base
         function log(x) {
-          return Math.log(x < 0 ? 0 : x) / Math.log(scope.panel.base);
+          return log_base(scope.panel.base, x)
         }
 
         // Compute the power value for the specified base
@@ -603,17 +608,20 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
               u = axis.min,
               v = axis.max,
               i = u === 0 ? 0 : Math.floor(log(u)),
-              j = Math.ceil(log(v)),
-              n = scope.panel.base % 1 ? 2 : scope.panel.base;
+              j = Math.ceil(log(v));
           if (isFinite(j - i)) {
-            for (; i < j; i++) {
-              if (i === 0) { ticks.push(0); }
-              for (var k = 1; k < n; k++) { ticks.push(pow(i) * k); }
+            for (var index = i; index < j; index++) {
+              if (index === 0) {
+                ticks.push(0);
+              }
+              ticks.push(pow(index));
             }
-            ticks.push(pow(i));
-            for (i = 0; ticks[i] < u; i++) { i; } // strip small values
-            for (j = ticks.length; ticks[j - 1] > v; j--) { j; } // strip big values
-            ticks = ticks.slice(i, j);
+
+            // Add final tick mark for upper bound
+            ticks.push(pow(j));
+
+            for (i = 0; ticks[i] < u;) { i++; } // strip small values
+            for (j = ticks.length; ticks[j - 1] > v;) { j--; } // strip big values
           }
           return ticks;
         };
