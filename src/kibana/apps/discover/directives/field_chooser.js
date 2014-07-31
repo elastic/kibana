@@ -127,7 +127,7 @@ define(function (require) {
               group: [],
               split: [],
             }),
-            _g: rison.encode(globalState)
+            _g: globalState.toRISON()
           });
         };
 

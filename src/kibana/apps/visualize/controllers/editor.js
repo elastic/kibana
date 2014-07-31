@@ -107,7 +107,7 @@ define(function (require) {
     var writeStateAndFetch = function () {
       _.assign($state, vis.getState());
       watchForConfigChanges();
-      $state.commit();
+      $state.save();
       justFetch();
     };
 

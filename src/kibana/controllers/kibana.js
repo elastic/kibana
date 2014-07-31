@@ -112,7 +112,7 @@ define(function (require) {
 
         var writeGlobalStateToLastPaths = function () {
           var currentUrl = $location.url();
-          var _g = rison.encode(globalState);
+          var _g = globalState.toRISON();
 
           $scope.apps.forEach(function (app) {
             var url = lastPathFor(app);
@@ -124,8 +124,7 @@ define(function (require) {
 
         var writeTime = function (newVal, oldVal) {
           globalState.time = _.clone(timefilter.time);
-
-          globalState.commit();
+          globalState.save();
           writeGlobalStateToLastPaths();
         };
 

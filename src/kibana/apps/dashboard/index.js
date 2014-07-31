@@ -94,13 +94,13 @@ define(function (require) {
 
         $scope.filterResults = function () {
           updateQueryOnRootSource();
-          $state.commit();
+          $state.save();
           courier.fetch();
         };
 
         $scope.save = function () {
           $state.title = dash.id = dash.title;
-          $state.commit();
+          $state.save();
           dash.panelsJSON = JSON.stringify($state.panels);
 
           dash.save()
@@ -117,7 +117,7 @@ define(function (require) {
         $scope.$on('ready:vis', function () {
           if (pendingVis) pendingVis--;
           if (pendingVis === 0) {
-            $state.commit();
+            $state.save();
             courier.fetch();
           }
         });
@@ -125,7 +125,7 @@ define(function (require) {
         // listen for notifications from the grid component that changes have
         // been made, rather than watching the panels deeply
         $scope.$on('change:vis', function () {
-          $state.commit();
+          $state.save();
         });
 
         // called by the saved-object-finder when a user clicks a vis
