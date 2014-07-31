@@ -68,3 +68,19 @@
       </div>
     </div>
   </div>
+  <div class="editor-row">
+    <div class="section">
+      <h5>Filtering Options</h5>
+      <div class="editor-option">
+        <label class="small">Filter mode</label>
+        <select class="input-small" ng-model="panel.fmode" ng-options="f for f in ['must','either']" ng-change="set_refresh(true)"></select>
+      </div>
+      <div class="editor-option">
+        <label class="small">Ignore Own</label><input type="checkbox" ng-model="panel.ignoreown" ng-checked="panel.ignoreown" ng-change="set_refresh(true)">
+      </div>
+      <div class="editor-option" ng-show="panel.ignoreown == true">
+        <label class="small">Radio Select</label><input type="checkbox" ng-model="panel.radioselect" ng-checked="panel.radioselect">
+      </div>
+    </div>
+  </div>
+
