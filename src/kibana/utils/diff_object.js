@@ -14,6 +14,7 @@ define(function (require) {
     var filterPrivateAndMethods = function (obj) {
       return function (key) {
         if (_.isFunction(obj[key])) return false;
+        if (key.charAt(0) === '$') return false;
         return key.charAt(0) !== '_';
       };
     };

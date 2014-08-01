@@ -40,7 +40,7 @@ define(function (require) {
     }
   });
 
-  app.directive('dashboardApp', function (Notifier, courier, savedVisualizations, AppState, timefilter) {
+  app.directive('dashboardApp', function (Notifier, courier, savedVisualizations, appStateFactory, timefilter) {
     return {
       controller: function ($scope, $route, $routeParams, $location, configFile) {
         var notify = new Notifier({
@@ -56,7 +56,7 @@ define(function (require) {
           query: ''
         };
 
-        var $state = $scope.state = new AppState(stateDefaults);
+        var $state = $scope.state = appStateFactory.create(stateDefaults);
 
         $scope.configTemplate = new ConfigTemplate({
           save: require('text!apps/dashboard/partials/save_dashboard.html'),

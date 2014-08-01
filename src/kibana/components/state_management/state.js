@@ -5,8 +5,10 @@ define(function (require) {
   var applyDiff = require('utils/diff_object');
 
   return function StateProvider(Private, $rootScope, $location) {
-    var Model = Private(require('components/state_management/_base_model'));
+    var BaseObject = Private(require('components/state_management/_base_object'));
+    var IsolatedScope = Private(require('components/state_management/_isolated_scope'));
 
+    _.inherits(State, IsolatedScope);
     function State(urlParam, defaults) {
       State.Super.call(this);
       this._defaults = defaults || {};
@@ -18,8 +20,9 @@ define(function (require) {
       // Initialize the State with fetch
       this.fetch();
     }
-    _.inherits(State, Model);
 
+    // // mixin the base object methods
+    _.mixin(State.prototype, BaseObject.prototype);
 
     /**
      * Fetches the state from the url
@@ -33,7 +36,7 @@ define(function (require) {
       // it will change state in place.
       var diffResults = applyDiff(this, stash);
       if (diffResults.keys.length) {
-        this.emit('fetch_with_changes', diffResults.keys);
+        this.$emit('fetch_with_changes', diffResults.keys);
       }
     };
 
@@ -50,7 +53,7 @@ define(function (require) {
       // it will change stash in place.
       var diffResults = applyDiff(stash, state);
       if (diffResults.keys.length) {
-        this.emit('save_with_changes', diffResults.keys);
+        this.$emit('save_with_changes', diffResults.keys);
       }
       search[this._urlParam] = this.toRISON();
       $location.search(search);
@@ -73,11 +76,17 @@ define(function (require) {
      * @returns {void}
      */
     State.prototype.onUpdate = function (cb) {
-      this.on('fetch_with_changes', cb);
+      this.$on('fetch_with_changes', function () {
+        // onUpdate interface for the listner expects the first argument to
+        // be the start of the arguments passed to the event emitter. So we need
+        // to lop off the first argument and pass the rest.
+        var args = Array.prototype.slice.call(arguments);
+        args.shift();
+        cb.apply(null, args);
+      });
     };
 
     return State;
-
 
   };
 

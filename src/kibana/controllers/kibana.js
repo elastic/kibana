@@ -9,6 +9,7 @@ define(function (require) {
   require('components/config/config');
   require('components/courier/courier');
   require('components/notify/notify');
+  require('components/state_management/app_state_factory');
   require('directives/info');
   require('directives/spinner');
   require('directives/paginate');

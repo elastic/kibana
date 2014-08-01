@@ -50,5 +50,12 @@ define(function (require) {
       expect(target).to.not.have.property('_private');
     });
 
+    it('should ignore dollar signs', function () {
+      var target = { foo: 'bar', test: 'foo' };
+      var source = { foo: 'test', $private: 'foo' };
+      diff(target, source);
+      expect(target).to.not.have.property('$private');
+    });
+
   });
 });
