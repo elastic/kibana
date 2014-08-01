@@ -71,114 +71,146 @@ define(function (require) {
    * Functionality to check that
    */
   function Notifier(opts) {
-    var notif = this;
+    var self = this;
     opts = opts || {};
 
     // label type thing to say where notifications came from
-    notif.from = opts.location;
+    self.from = opts.location;
 
-    // attach the global notification list
-    notif._notifs = notifs;
-
-    /**
-     * Log a sometimes redundant event
-     * @param {string} name - The name of the group
-     * @param {boolean} success - Simple flag stating whether the event succeeded
-     */
-    notif.event = createGroupLogger('event', {
-      open: true
-    });
-
-    /**
-     * Log a major, important, event in the lifecycle of the application
-     * @param {string} name - The name of the lifecycle event
-     * @param {boolean} success - Simple flag stating whether the lifecycle event succeeded
-     */
-    notif.lifecycle = createGroupLogger('lifecycle', {
-      open: true
-    });
-
-    /**
-     * Kill the page, and display an error
-     * @param  {Error} err - The fatal error that occured
-     */
-    notif.fatal = function (err) {
-      if (firstFatal) {
-        firstFatal = false;
-        window.addEventListener('hashchange', function () {
-          window.location.reload();
-        });
-      }
-
-      var html = fatalToastTemplate({
-        msg: formatMsg(err, notif.from),
-        stack: err.stack
-      });
-
-      var $container = $('#fatal-splash-screen');
-      if ($container.size()) {
-        $container.append(html);
-        return;
-      }
-
-      // in case the app has not completed boot
-      $(document.body)
-        .removeAttr('ng-cloak')
-        .html('<div id="fatal-splash-screen" class="container-fuild">' + html + '</div>');
-
-      console.error(err.stack);
-
-      throw err;
-    };
-
-    /**
-     * Alert the user of an error that occured
-     * @param  {Error|String} err
-     */
-    notif.error = function (err, cb) {
-      add({
-        type: 'danger',
-        content: formatMsg(err, notif.from),
-        icon: 'warning',
-        title: 'Error',
-        lifetime: Infinity,
-        actions: ['report', 'accept'],
-        stack: err.stack
-      }, cb);
-    };
-
-    /**
-     * Warn the user abort something
-     * @param  {[type]} msg [description]
-     * @return {[type]}     [description]
-     */
-    notif.warning = function (msg, cb) {
-      add({
-        type: 'warning',
-        content: formatMsg(msg, notif.from),
-        icon: 'warning',
-        title: 'Warning',
-        lifetime: 10000,
-        actions: ['accept']
-      }, cb);
-    };
-
-    /**
-     * Display a debug message
-     * @param  {String} msg [description]
-     * @return {[type]}     [description]
-     */
-    notif.info = function (msg, cb) {
-      add({
-        type: 'info',
-        content: formatMsg(msg),
-        icon: 'info-circle',
-        title: 'Debug',
-        lifetime: 5000,
-        actions: ['accept']
-      }, cb);
-    };
+    'event lifecycle timed fatal error warning info'.split(' ')
+    .forEach(_.limit(_.bind(_.bindKey, self), 1));
   }
+
+  // simply a pointer to the global notif list
+  Notifier.prototype._notifs = notifs;
+
+  /**
+   * Log a sometimes redundant event
+   * @param {string} name - The name of the group
+   * @param {boolean} success - Simple flag stating whether the event succeeded
+   */
+  Notifier.prototype.event = createGroupLogger('event', {
+    open: true
+  });
+
+  /**
+   * Log a major, important, event in the lifecycle of the application
+   * @param {string} name - The name of the lifecycle event
+   * @param {boolean} success - Simple flag stating whether the lifecycle event succeeded
+   */
+  Notifier.prototype.lifecycle = createGroupLogger('lifecycle', {
+    open: true
+  });
+
+  /**
+   * Wrap a function so that it's execution time gets logged.
+   *
+   * @param {function} fn - the function to wrap, it's .name property is
+   *                      read so make sure to set it
+   * @return {function} - the wrapped function
+   */
+  Notifier.prototype.timed = function (name, fn) {
+    var self = this;
+    return function WrappedNotifierFunction() {
+      var complete = self.event(name);
+      fn.apply(this, arguments);
+      complete();
+    };
+  };
+
+  /**
+   * Kill the page, display an error, then throw the error.
+   * Used as a last-resort error back in many promise chains
+   * so it rethrows the error that's displayed on the page.
+   *
+   * @param  {Error} err - The error that occured
+   */
+  Notifier.prototype.fatal = function (err) {
+    this._showFatal(err);
+    throw err;
+  };
+
+  /**
+   * Display an error that destroys the entire app. Broken out so that
+   * global error handlers can display fatal errors without throwing another
+   * error like in #fatal()
+   *
+   * @param  {Error} err - The fatal error that occured
+   */
+  Notifier.prototype._showFatal = function (err) {
+    if (firstFatal) {
+      firstFatal = false;
+      window.addEventListener('hashchange', function () {
+        window.location.reload();
+      });
+    }
+
+    var html = fatalToastTemplate({
+      msg: formatMsg(err, this.from),
+      stack: err.stack
+    });
+
+    var $container = $('#fatal-splash-screen');
+    if ($container.size()) {
+      $container.append(html);
+      return;
+    }
+
+    // in case the app has not completed boot
+    $(document.body)
+      .removeAttr('ng-cloak')
+      .html('<div id="fatal-splash-screen" class="container-fuild">' + html + '</div>');
+
+    console.error(err.stack);
+  };
+
+  /**
+   * Alert the user of an error that occured
+   * @param  {Error|String} err
+   */
+  Notifier.prototype.error = function (err, cb) {
+    add({
+      type: 'danger',
+      content: formatMsg(err, this.from),
+      icon: 'warning',
+      title: 'Error',
+      lifetime: Infinity,
+      actions: ['report', 'accept'],
+      stack: err.stack
+    }, cb);
+  };
+
+  /**
+   * Warn the user abort something
+   * @param  {[type]} msg [description]
+   * @return {[type]}     [description]
+   */
+  Notifier.prototype.warning = function (msg, cb) {
+    add({
+      type: 'warning',
+      content: formatMsg(msg, this.from),
+      icon: 'warning',
+      title: 'Warning',
+      lifetime: 10000,
+      actions: ['accept']
+    }, cb);
+  };
+
+  /**
+   * Display a debug message
+   * @param  {String} msg [description]
+   * @return {[type]}     [description]
+   */
+  Notifier.prototype.info = function (msg, cb) {
+    add({
+      type: 'info',
+      content: formatMsg(msg),
+      icon: 'info-circle',
+      title: 'Debug',
+      lifetime: 5000,
+      actions: ['accept']
+    }, cb);
+  };
 
   Notifier.prototype.log = log;
 
