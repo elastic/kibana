@@ -11,7 +11,7 @@ define(function (require) {
   describe('State Management', function () {
     describe('State', function () {
 
-      var $rootScope, $location, State, Model;
+      var $rootScope, $location, State, IsolatedScope;
 
       beforeEach(function () {
         module('kibana');
@@ -20,13 +20,13 @@ define(function (require) {
           $location = _$location_;
           $rootScope = _$rootScope_;
           State = Private(require('components/state_management/state'));
-          Model = Private(require('components/state_management/_base_model'));
+          IsolatedScope = Private(require('components/state_management/_isolated_scope'));
         });
       });
 
-      it('should inherit from Model', function () {
+      it('should inherit from IsolatedScope', function () {
         var state = new State();
-        expect(state).to.be.an(Model);
+        expect(state).to.be.an(IsolatedScope);
       });
 
       it('should save to $location.search()', function () {
@@ -39,13 +39,14 @@ define(function (require) {
 
       it('should emit an event if changes are saved', function (done) {
         var state = new State();
-        state.on('save_with_changes', function (keys) {
+        state.$on('save_with_changes', function (event, keys) {
           expect(keys).to.eql(['test']);
           done();
         });
         state.test = 'foo';
         state.save();
         var search = $location.search();
+        $rootScope.$apply();
       });
 
       it('should fetch the state from $location.search()', function () {
@@ -57,13 +58,23 @@ define(function (require) {
 
       it('should emit an event if changes are fetched', function (done) {
         var state = new State();
-        state.on('fetch_with_changes', function (keys) {
+        state.$on('fetch_with_changes', function (events, keys) {
           expect(keys).to.eql(['foo']);
           done();
         });
         $location.search({ _s: '(foo:bar)' });
         state.fetch();
         expect(state).to.have.property('foo', 'bar');
+      });
+
+      it('should have events that attach to scope', function (done) {
+        var state = new State();
+        state.$on('test', function (event, message) {
+          expect(message).to.equal('foo');
+          done();
+        });
+        state.$emit('test', 'foo');
+        $rootScope.$apply();
       });
 
       it('should fire listeners for #onUpdate() on #fetch()', function (done) {
@@ -102,9 +113,9 @@ define(function (require) {
 
       it('should call fetch when $routeUpdate is fired on $rootScope', function () {
         var state = new State();
-        var stub = sinon.spy(state, 'fetch');
+        var spy = sinon.spy(state, 'fetch');
         $rootScope.$emit('$routeUpdate', 'test');
-        sinon.assert.calledOnce(stub);
+        sinon.assert.calledOnce(spy);
       });
 
     });

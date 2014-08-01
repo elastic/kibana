@@ -49,7 +49,7 @@ define(function (require) {
 
 
   app.controller('discover', function ($scope, config, courier, $route, $window, savedSearches, savedVisualizations,
-    Notifier, $location, globalState, AppState, timefilter, AdhocVis, Promise, Private) {
+    Notifier, $location, globalState, appStateFactory, timefilter, AdhocVis, Promise, Private) {
 
     var segmentedFetch = $scope.segmentedFetch = Private(require('apps/discover/_segmented_fetch'));
     var HitSortFn = Private(require('apps/discover/_hit_sort_fn'));
@@ -93,7 +93,7 @@ define(function (require) {
       'year'
     ];
 
-    var $state = $scope.state = new AppState(stateDefaults);
+    var $state = $scope.state = new appStateFactory.create(stateDefaults);
 
     if (!_.contains(indexPatternList, $state.index)) {
       var reason = 'The index specified in the URL is not a configured pattern. ';

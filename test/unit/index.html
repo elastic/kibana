@@ -74,9 +74,10 @@
           'specs/utils/versionmath',
           'specs/utils/routes/index',
           'specs/courier/search_source/_get_normalized_sort',
-          'specs/state_management/_base_model',
+          'specs/state_management/_base_object',
           'specs/state_management/state',
-          'specs/utils/diff_object'
+          'specs/utils/diff_object',
+          'specs/state_management/_isolated_scope'
         ], function (kibana, sinon) {
           kibana.load(function () {
             var xhr = sinon.useFakeXMLHttpRequest();
