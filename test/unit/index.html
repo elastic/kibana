@@ -22,9 +22,18 @@
           fixtures: '../../test/unit/fixtures',
           specs: '../../test/unit/specs',
           sinon: '../../test/utils/sinon',
-          bluebird: '../bower_components/bluebird/js/browser/bluebird'
+          bluebird: '../bower_components/bluebird/js/browser/bluebird',
+          angular: '../bower_components/angular-mocks/angular-mocks',
+          angular_src: '../bower_components/angular/angular'
         },
         shim: {
+          angular: {
+            deps: [
+              'jquery',
+              'angular_src'
+            ],
+            exports: 'angular'
+          },
           'sinon/sinon': {
             deps: [
               'sinon/sinon-timers-1.8.2'

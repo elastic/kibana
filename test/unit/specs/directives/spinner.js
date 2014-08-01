@@ -1,6 +1,5 @@
 define(function (require) {
   var angular = require('angular');
-  var mocks = require('angular-mocks');
   var $ = require('jquery');
 
   // Load the kibana app dependencies.
