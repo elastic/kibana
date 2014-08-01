@@ -49,6 +49,23 @@ define(function (require) {
       // https://github.com/angular/angular.js/blob/58f5da86645990ef984353418cd1ed83213b111e/src/ng/q.js#L335
       return obj && typeof obj.then === 'function';
     };
+    Promise.try = function (fn, args, ctx) {
+      if (typeof fn !== 'function') {
+        return Promise.reject('fn must be a function');
+      }
+
+      var value;
+
+      if (_.isArray(args)) {
+        try { value = fn.apply(ctx, args); }
+        catch (e) { return Promise.reject(e); }
+      } else {
+        try { value = fn.call(ctx, args); }
+        catch (e) { return Promise.reject(e); }
+      }
+
+      return Promise.resolve(value);
+    };
 
     return Promise;
   });
@@ -101,9 +118,11 @@ define(function (require) {
      * });
      * ```
      *
-     * @param  {Function} fn - Used to init the promise, and call either reject or resolve (passed as args)
+     * @param  {Function} fn - Used to init the promise, and call either
+     *                       reject or resolve (passed as args)
      * @param  {Function} handler - A function that will be called every
      *                            time this promise is resolved
+     *
      * @return {Promise}
      */
     function PromiseEmitter(fn, handler) {
