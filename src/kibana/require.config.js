@@ -12,7 +12,6 @@ require.config({
 
     // bower_components
     angular: '../bower_components/angular/angular',
-    'angular-mocks': '../bower_components/angular-mocks/angular-mocks',
     'angular-route': '../bower_components/angular-route/angular-route',
     'angular-bootstrap': '../bower_components/angular-bootstrap/ui-bootstrap-tpls',
     'angular-bindonce': '../bower_components/angular-bindonce/bindonce',
@@ -43,7 +42,6 @@ require.config({
     },
     gridster: ['jquery'],
     'angular-route': ['angular'],
-    'angular-mocks': ['angular'],
     'elasticsearch': ['angular'],
     'angular-bootstrap': ['angular'],
     'angular-bindonce': ['angular'],
