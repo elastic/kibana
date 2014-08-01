@@ -22,9 +22,18 @@
           fixtures: '../../test/unit/fixtures',
           specs: '../../test/unit/specs',
           sinon: '../../test/utils/sinon',
-          bluebird: '../bower_components/bluebird/js/browser/bluebird'
+          bluebird: '../bower_components/bluebird/js/browser/bluebird',
+          angular: '../bower_components/angular-mocks/angular-mocks',
+          angular_src: '../bower_components/angular/angular'
         },
         shim: {
+          angular: {
+            deps: [
+              'jquery',
+              'angular_src'
+            ],
+            exports: 'angular'
+          },
           'sinon/sinon': {
             deps: [
               'sinon/sinon-timers-1.8.2'
@@ -63,7 +72,8 @@
           'specs/utils/datemath',
           'specs/utils/interval',
           'specs/utils/versionmath',
-          'specs/utils/routes/index'
+          'specs/utils/routes/index',
+          'specs/courier/search_source/_get_normalized_sort'
         ], function (kibana, sinon) {
           kibana.load(function () {
             var xhr = sinon.useFakeXMLHttpRequest();
