@@ -91,6 +91,37 @@ define(function (require) {
       this._fetchDisabled = false;
     };
 
+    /**
+     * Special reader function for sort, which will transform the sort syntax into a simple
+     * map of `field: dir`
+     */
+    SearchSource.prototype.getNormalizedSort = function () {
+      var sort = this.get('sort');
+      if (!sort) return;
+
+      var normal = {};
+
+      (function read(lvl) {
+        if (_.isString(lvl)) {
+          normal[lvl] = 'asc';
+        }
+        else if (_.isArray(lvl)) {
+          _.forEach(lvl, read);
+        }
+        else if (_.isObject(lvl)) {
+          _.forOwn(lvl, function (dir, field) {
+            if (_.isObject(dir)) {
+              normal[field] = dir.dir || 'asc';
+            } else {
+              normal[field] = String(dir);
+            }
+          });
+        }
+      }(sort));
+
+      return normal;
+    };
+
     /******
      * PRIVATE APIS
      ******/
