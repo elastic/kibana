@@ -15,8 +15,8 @@ define(function (require) {
           var resp = entry.resp;
           var meta = [];
 
-          if (entry.moment) meta.push(['Completion Time', entry.moment.format(config.get('dateFormat'))]);
-          if (resp && resp.took != null) meta.push(['Duration', resp.took + 'ms']);
+          if (resp && resp.took != null) meta.push(['Query Duration', resp.took + 'ms']);
+          if (entry && entry.ms != null) meta.push(['Request Duration', entry.ms + 'ms']);
           if (resp && resp.hits) meta.push(['Hits', resp.hits.total]);
 
           if (state.index) meta.push(['Index', state.index]);
