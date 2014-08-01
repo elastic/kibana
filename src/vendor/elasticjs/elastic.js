@@ -60,7 +60,7 @@
     isNodeInfo, // checks valid ejs NodeInfo object
     isRequest, // checks valid ejs Request object
     isMultiSearchRequest, // checks valid ejs MultiSearchRequest object
-
+    isAggregation, // checks valid ejs Aggregation object
     // create ejs object
     ejs;
 
@@ -221,10 +221,13 @@
   // Is a given value an ejs object?
   // Yes if object and has "_type", "_self", and "toString" properties
   isEJSObject = function (obj) {
-    return (isObject(obj) &&
+    return ((isObject(obj) &&
       has(obj, '_type') &&
       has(obj, '_self') &&
-      has(obj, 'toString'));
+      has(obj, 'toString'))||
+      (isObject(obj) &&
+      has (obj, '_type') &&
+      has(obj, 'toJSON')));
   };
 
   isQuery = function (obj) {
@@ -299,7 +302,10 @@
     return (isEJSObject(obj) && obj._type() === 'multi search request');
   };
 
-  /**
+  isAggregation = function (obj) {
+    return (isEJSObject(obj) && obj._type() === 'aggregation');
+  }; 
+/**
     @class
     <p>The DateHistogram facet works with time-based values by building a histogram across time
        intervals of the <code>value</code> field. Each value is <em>rounded</em> into an interval (or
@@ -20444,6 +20450,47 @@
 
         // we don't need to send in the body data, just use empty string
         return ejs.client.post(getRestPath('_search_shards'), '', successcb, errorcb);
+      },
+
+
+      /**
+            Add an aggregation. This method can be called multiple times
+            in order to set multiple nested aggregations that will be executed
+            at the same time as the search request.
+
+            @member ejs.Request
+            @param {Aggregation} agg Any valid <code>Aggregation</code> object.
+            @returns {Object} returns <code>this</code> so that calls can be chained.
+            */
+      aggregation: function(agg) {
+        if (agg == null) {
+          return query.aggs;
+        }
+
+        if (query.aggs == null) {
+          query.aggs = {};
+        }
+
+        if (!isAggregation(agg)) {
+          throw new TypeError('Argument must be an Aggregation');
+        }
+
+        extend(query.aggs, agg.toJSON());
+
+        return this;
+      },
+
+      /**
+            Add an aggregation. This method can be called multiple times
+            in order to set multiple nested aggregations that will be executed
+            at the same time as the search request. Alias for the aggregation method.
+
+            @member ejs.Request
+            @param {Aggregation} agg Any valid <code>Aggregation</code> object.
+            @returns {Object} returns <code>this</code> so that calls can be chained.
+            */
+      agg: function(agg) {
+        return this.aggregation(agg);
       }
 
     };
@@ -22265,4 +22312,358 @@
     return this;
   };
 
+  /**
+    @mixin
+    <p>The MetricsAggregationMixin provides support for common options used across
+    various metrics <code>Aggregation</code> implementations. This object should
+    not be used directly.</p>
+
+    @name ejs.MetricsAggregationMixin
+    @ejs aggregation
+    @borrows ejs.AggregationMixin._type as _type
+    @borrows ejs.AggregationMixin.toJSON as toJSON
+    */
+  ejs.MetricsAggregationMixin = function (name, type) {
+
+    var
+      _common = ejs.AggregationMixin(name),
+      agg = _common.toJSON();
+
+    // remove ability for sub-aggregations since metrics aggregations dont
+    // support them.
+    delete _common.aggregation;
+    delete _common.agg;
+
+    agg[name][type] = {};
+
+    return extend(_common, {
+
+      /**
+            <p>Sets the field to operate on.</p>
+
+            @member ejs.MetricsAggregationMixin
+            @param {String} field a valid field name..
+            @returns {Object} returns <code>this</code> so that calls can be chained.
+            */
+      field: function (field) {
+        if (field == null) {
+          return agg[name][type].field;
+        }
+
+        agg[name][type].field = field;
+        return this;
+      },
+
+      /**
+            Allows you generate or modify the terms/values using a script.
+
+            @member ejs.MetricsAggregationMixin
+            @param {String} scriptCode A valid script string to execute.
+            @returns {Object} returns <code>this</code> so that calls can be chained.
+            */
+      script: function (scriptCode) {
+        if (scriptCode == null) {
+          return agg[name][type].script;
+        }
+
+        agg[name][type].script = scriptCode;
+        return this;
+      },
+
+      /**
+            The script language being used.
+
+            @member ejs.MetricsAggregationMixin
+            @param {String} language The language of the script.
+            @returns {Object} returns <code>this</code> so that calls can be chained.
+            */
+      lang: function (language) {
+        if (language == null) {
+          return agg[name][type].lang;
+        }
+
+        agg[name][type].lang = language;
+        return this;
+      },
+
+      /**
+            Set to true to assume script values are sorted.
+
+            @member ejs.MetricsAggregationMixin
+            @param {Boolean} trueFalse assume sorted values or not
+            @returns {Object} returns <code>this</code> so that calls can be chained.
+            */
+      scriptValuesSorted: function (trueFalse) {
+        if (trueFalse == null) {
+          return agg[name][type].script_values_sorted;
+        }
+
+        agg[name][type].script_values_sorted = trueFalse;
+        return this;
+      },
+
+      /**
+            Sets parameters that will be applied to the script. Overwrites
+            any existing params.
+
+            @member ejs.MetricsAggregationMixin
+            @param {Object} p An object where the keys are the parameter name and
+            values are the parameter value.
+            @returns {Object} returns <code>this</code> so that calls can be chained.
+            */
+      params: function (p) {
+        if (p == null) {
+          return agg[name][type].params;
+        }
+
+        agg[name][type].params = p;
+        return this;
+      }
+
+    });
+  };
+
+
+
+  /**
+    @mixin
+    <p>The AggregationMixin provides support for common options used across
+    various <code>Aggregation</code> implementations. This object should not be
+    used directly.</p>
+
+    @name ejs.AggregationMixin
+    */
+  ejs.AggregationMixin = function (name) {
+
+    var aggs = {};
+    aggs[name] = {};
+
+    return {
+
+      /**
+            Add a nesated aggregation. This method can be called multiple times
+            in order to set multiple nested aggregations what will be executed
+            at the same time as the parent aggregation.
+
+            @member ejs.AggregationMixin
+            @param {Aggregation} agg Any valid <code>Aggregation</code> object.
+            @returns {Object} returns <code>this</code> so that calls can be chained.
+            */
+      aggregation: function(agg) {
+        if (agg == null) {
+          return aggs[name].aggs;
+        }
+
+        if (aggs[name].aggs == null) {
+          aggs[name].aggs = {};
+        }
+
+        if (!isAggregation(agg)) {
+          throw new TypeError('Argument must be an Aggregation');
+        }
+
+        extend(aggs[name].aggs, agg.toJSON());
+        return this;
+      },
+
+      /**
+            Add a nesated aggregation. This method can be called multiple times
+            in order to set multiple nested aggregations what will be executed
+            at the same time as the parent aggregation. Alias for the
+            aggregation method.
+
+            @member ejs.AggregationMixin
+            @param {Aggregation} agg Any valid <code>Aggregation</code> object.
+            @returns {Object} returns <code>this</code> so that calls can be chained.
+            */
+      agg: function(agg) {
+        return this.aggregation(agg);
+      },
+
+      /**
+            The type of ejs object. For internal use only.
+
+            @member ejs.AggregationMixin
+            @returns {String} the type of object
+            */
+      _type: function () {
+        return 'aggregation';
+      },
+
+      /**
+            <p>Retrieves the internal <code>agg</code> object. This is typically used by
+            internal API functions so use with caution.</p>
+
+            @member ejs.AggregationMixin
+            @returns {String} returns this object's internal object.
+            */
+      toJSON: function () {
+        return aggs;
+      }
+
+    };
+  };
+
+  /**
+    @class
+    <p>A multi-value metrics aggregation that computes stats over numeric values
+    extracted from the aggregated documents. These values can be extracted either
+    from specific numeric fields in the documents, or be generated by a provided
+    script.</p>
+
+    <p>The stats that are returned consist of: min, max, sum, count and avg.</p>
+
+    @name ejs.StatsAggregation
+    @ejs aggregation
+    @borrows ejs.MetricsAggregationMixin.field as field
+    @borrows ejs.MetricsAggregationMixin.script as script
+    @borrows ejs.MetricsAggregationMixin.lang as lang
+    @borrows ejs.MetricsAggregationMixin.scriptValuesSorted as scriptValuesSorted
+    @borrows ejs.MetricsAggregationMixin.params as params
+    @borrows ejs.AggregationMixin._type as _type
+    @borrows ejs.AggregationMixin.toJSON as toJSON
+
+    @desc
+    <p>Aggregation that computes stats over numeric values extracted from the
+    aggregated documents.</p>
+
+    @param {String} name The name which be used to refer to this aggregation.
+
+    */
+  ejs.StatsAggregation = function (name) {
+
+    var
+      _common = ejs.MetricsAggregationMixin(name, 'stats'),
+      agg = _common.toJSON();
+
+    return _common;
+  };
+
+  /**
+    @class
+    <p>Defines a single bucket of all the documents in the current document set
+    context that match a specified filter. Often this will be used to narrow down
+    the current aggregation context to a specific set of documents.</p>
+
+    @name ejs.FilterAggregation
+    @ejs aggregation
+    @borrows ejs.AggregationMixin.aggregation as aggregation
+    @borrows ejs.AggregationMixin.agg as agg
+    @borrows ejs.AggregationMixin._type as _type
+    @borrows ejs.AggregationMixin.toJSON as toJSON
+
+    @desc
+    <p>Defines a single bucket of all the documents that match a given filter.</p>
+
+    @param {String} name The name which be used to refer to this aggregation.
+
+    */
+  ejs.FilterAggregation = function (name) {
+
+    var
+      _common = ejs.AggregationMixin(name),
+      agg = _common.toJSON();
+
+    return extend(_common, {
+
+      /**
+            <p>Sets the filter to be used for this aggregation.</p>
+
+            @member ejs.FilterAggregation
+            @param {Filter} oFilter A valid <code>Filter</code> object.
+            @returns {Object} returns <code>this</code> so that calls can be chained.
+            */
+      filter: function (oFilter) {
+        if (oFilter == null) {
+          return agg[name].filter;
+        }
+
+        if (!isFilter(oFilter)) {
+          throw new TypeError('Argument must be a Filter');
+        }
+
+        agg[name].filter = JSON.parse(oFilter.toString());
+        return this;
+      }
+
+    });
+  };
+
+
+
+/*
+<p>A single-value metrics aggregation that calculates an approximate count of
+distinct values. Values can be extracted either from specific fields in the
+document or generated by a script.</p>
+
+@name ejs.CardinalityAggregation
+@ejs aggregation
+@borrows ejs.MetricsAggregationMixin.field as field
+@borrows ejs.MetricsAggregationMixin.script as script
+@borrows ejs.MetricsAggregationMixin.lang as lang
+@borrows ejs.MetricsAggregationMixin.params as params
+@borrows ejs.AggregationMixin._type as _type
+@borrows ejs.AggregationMixin.toJSON as toJSON
+
+@desc
+<p>Aggregation that calculates an approximate count of distinct values.</p>
+
+@param {String} name The name which be used to refer to this aggregation.
+
+*/
+  ejs.CardinalityAggregation = function (name) {
+
+    var
+      _common = ejs.MetricsAggregationMixin(name, 'cardinality'),
+      agg = _common.toJSON();
+
+    // not supported in cardinality aggregation
+    delete _common.scriptValuesSorted;
+
+    return extend(_common, {
+
+      /**
+            Set to false to disable rehashing of values. You must have computed a hash
+            on the client-side and stored it into your documents if you disable this.
+
+            @member ejs.CardinalityAggregation
+            @param {Boolean} trueFalse set to false to disable rehashing
+            @returns {Object} returns <code>this</code> so that calls can be chained.
+            */
+      rehash: function (trueFalse) {
+        if (trueFalse == null) {
+          return agg[name].cardinality.rehash;
+        }
+
+        agg[name].cardinality.rehash = trueFalse;
+        return this;
+      },
+
+      /**
+            Allows to trade memory for accuracy, and defines a unique count below which
+            counts are expected to be close to accurate. Above this value, counts might
+            become a bit more fuzzy. The maximum supported value is 40000, thresholds
+            above this number will have the same effect as a threshold of 40000.
+            Default value depends on the number of parent aggregations that multiple
+            create buckets (such as terms or histograms).
+
+            @member ejs.CardinalityAggregation
+            @param {Long} num The threshold value
+            @returns {Object} returns <code>this</code> so that calls can be chained.
+            */
+      precisionThreshold: function (num) {
+        if (num == null) {
+          return agg[name].cardinality.precision_threshold;
+        }
+
+        agg[name].cardinality.precision_threshold = num;
+        return this;
+      }
+
+    });
+
+  };
+
+
 }).call(this);
+

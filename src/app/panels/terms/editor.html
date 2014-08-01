@@ -54,8 +54,14 @@
       <div class="editor-option">
         <label class="small">Missing</label><input type="checkbox" ng-model="panel.missing" ng-checked="panel.missing">
       </div>
-      <div class="editor-option">
+      <div class="editor-option" ng-show="panel.tmode == 'terms' && panel.chart != 'table'">
         <label class="small">Other</label><input type="checkbox" ng-model="panel.other" ng-checked="panel.other">
+      </div>
+      <div class="editor-option" ng-show="panel.chart == 'table'">
+        <label class="small">Count</label><input type="checkbox" ng-model="panel.count_column" ng-checked="panel.count_column">
+      </div>
+      <div class="editor-option" ng-show="panel.chart == 'table'">
+        <label class="small">Value info</label><input type="checkbox" ng-model="panel.value_info" ng-checked="panel.value_info">
       </div>
       <div class="editor-option" ng-show="panel.chart == 'pie'">
         <label class="small">Donut</label><input type="checkbox" ng-model="panel.donut" ng-checked="panel.donut">

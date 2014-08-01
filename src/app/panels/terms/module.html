@@ -91,11 +91,11 @@
   <!-- TABLE -->
   <table ng-style="panel.style" class="table table-striped table-condensed" ng-show="panel.chart == 'table'">
     <thead>
-      <th>Term</th> <th>{{ panel.tmode == 'terms_stats' ? panel.tstat : 'Count' }}</th> <th>Action</th>
+      <th>Term</th> <th ng-show="panel.count_column">{{ panel.tmode == 'terms_stats' ? panel.tstat : 'Count' }}</th> <th>Action</th>
     </thead>
     <tr ng-repeat="term in data" ng-show="showMeta(term)">
       <td class="terms-legend-term">{{term.label}}</td>
-      <td>{{term.data[0][1]}}</td>
+      <td ng-show="panel.count_column">{{term.data[0][1]}}</td>
       <td>
         <span ng-hide="term.meta == 'other'">
           <i class='icon-search pointer' ng-click="build_search(term)"></i>
@@ -104,5 +104,7 @@
       </td>
     </tr>
   </table>
-
+ <span class="small" ng-show="panel.tmode == 'terms' && panel.chart == 'table' && panel.value_info"style="float:left;">
+Showing {{values_showing[0]}} out of {{values_showing[1]}} values
+</span>
 </div>

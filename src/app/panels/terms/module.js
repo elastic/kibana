@@ -16,7 +16,8 @@ define([
   'app',
   'lodash',
   'jquery',
-  'kbn'
+  'kbn',
+  'numeral'
 ],
 function (angular, app, _, $, kbn) {
   'use strict';
@@ -64,6 +65,7 @@ function (angular, app, _, $, kbn) {
        * values outside of the scope of your +size+ property
        */
       other   : true,
+      count_column : true,
       /** @scratch /panels/terms/5
        * size:: Show this many terms
        */
@@ -125,7 +127,12 @@ function (angular, app, _, $, kbn) {
       /** @scratch /panels/terms/5
        * valuefield:: Terms_stats facet value field
        */
-      valuefield  : ''
+      valuefield  : '',
+      /** 
+       * value_info:: Show info about how any values are showing.
+       *
+       */ 
+      value_info  :  true
     };
 
     _.defaults($scope.panel,_d);
@@ -179,6 +186,7 @@ function (angular, app, _, $, kbn) {
               boolQuery,
               filterSrv.getBoolFilter(filterSrv.ids())
             )))).size(0);
+
       }
       if($scope.panel.tmode === 'terms_stats') {
         request = request
@@ -199,7 +207,21 @@ function (angular, app, _, $, kbn) {
 
       results = request.doSearch();
 
+      request = $scope.ejs.Request().indices(dashboard.indices);
+      request = request
+        .agg($scope.ejs.FilterAggregation('filter_agg')
+        .agg($scope.ejs.CardinalityAggregation('cardinality')
+        .field($scope.field)).filter($scope.ejs.QueryFilter(
+          $scope.ejs.FilteredQuery(
+            boolQuery,
+            filterSrv.getBoolFilter(filterSrv.ids())
+          )))).size(0);
+
+    var distinct_result = request.doSearch();
+
+    distinct_result.then(function(distinct_result){
       // Populate scope when we have results
+      $scope.distinct_result = distinct_result;
       results.then(function(results) {
         $scope.panelMeta.loading = false;
         if($scope.panel.tmode === 'terms') {
@@ -210,9 +232,11 @@ function (angular, app, _, $, kbn) {
 
         $scope.$emit('render');
       });
+     });
     };
 
     $scope.build_search = function(term,negate) {
+      
       if(_.isUndefined(term.meta)) {
         filterSrv.set({type:'terms',field:$scope.field,value:term.label,
           mandate:(negate ? 'mustNot':'must')});
@@ -271,18 +295,24 @@ function (angular, app, _, $, kbn) {
               slice = { label : v.term, data : [[k,v.count]], actions: true};
             }
             if(scope.panel.tmode === 'terms_stats') {
-              slice = { label : v.term, data : [[k,v[scope.panel.tstat]]], actions: true};
+              var int_format = v[scope.panel.tstat] % 1 === 0 ? '0': '0.00';
+              var data_value = numeral(v[scope.panel.tstat]).format(int_format);
+              slice = { label : v.term, data : [[k,data_value]], actions: true};
             }
             scope.data.push(slice);
             k = k + 1;
           });
-
           scope.data.push({label:'Missing field',
             data:[[k,scope.results.facets.terms.missing]],meta:"missing",color:'#aaa',opacity:0});
 
           if(scope.panel.tmode === 'terms') {
-            scope.data.push({label:'Other values',
-              data:[[k+1,scope.results.facets.terms.other]],meta:"other",color:'#444'});
+            if(scope.panel.chart != 'table'){
+              scope.data.push({label:'Other values',
+                data:[[k+1,scope.results.facets.terms.other]],meta:"other",color:'#444'});
+            }
+            else {
+              scope.values_showing = [k, scope.distinct_result.aggregations.filter_agg.cardinality.value];
+            }
           }
         }
 
