@@ -10,7 +10,11 @@
           class="bitty-modal visualize-linked">
           <i class="fa fa-link"></i>
           &nbsp;
-          This visualization is linked to a saved search: <b>{{ vis.savedSearchId | json}}</b> <a href="#/discover/{{ vis.savedSearchId | uriescape }}"><i class="fa fa-pencil" tooltip="Click here to edit the linked saved search"></i></a>
+          This visualization is linked to a saved search:
+          <b>{{ vis.savedSearchId | json}}</b>
+          <a href="#/discover/{{ vis.savedSearchId | uriescape }}">
+            <i class="fa fa-pencil" tooltip="Click here to edit the linked saved search"></i>
+          </a>
         </div>
 
         <div ng-if="linked && unlinking" ng-click="doneUnlinking()" class="bitty-modal">

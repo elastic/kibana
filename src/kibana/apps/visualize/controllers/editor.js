@@ -174,7 +174,7 @@ define(function (require) {
       vis.save()
       .then(function () {
         if (vis.id !== $route.current.params.id) {
-          $location.url(globalState.writeToUrl('/visualize/edit/' + vis.id));
+          $location.url(globalState.writeToUrl('/visualize/edit/' + encodeURIComponent(vis.id)));
         }
         configTemplate.close('save');
       }, notify.fatal);
