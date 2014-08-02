@@ -217,7 +217,7 @@ define(function (require) {
         .then(function () {
           notify.info('Saved Data Source "' + savedSearch.title + '"');
           if (savedSearch.id !== $route.current.params.id) {
-            $location.url(globalState.writeToUrl('/discover/' + savedSearch.id));
+            $location.url(globalState.writeToUrl('/discover/' + encodeURIComponent(savedSearch.id)));
           }
         });
       })
