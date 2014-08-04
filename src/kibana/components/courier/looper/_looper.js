@@ -5,7 +5,7 @@ define(function (require) {
 
     function Looper(ms, fn) {
       var _ms = ms === void 0 ? 1500 : ms;
-      var _fn = fn || _.noop;
+      var _fns = [fn || _.noop];
       var _timerId;
       var _started = false;
       var looper = this;
@@ -30,8 +30,21 @@ define(function (require) {
        * @param  {function} fn
        * @chainable
        */
-      looper.fn = function (fn) {
-        _fn = fn;
+      looper.add = function (fn) {
+        _fns.push(fn);
+        return this;
+      };
+
+      /**
+       * Set the function that will be executed at the
+       * end of each looper.
+       *
+       * @param  {function} fn
+       * @chainable
+       */
+      looper.remove = function (fn) {
+        var i = _fns.indexOf(fn);
+        if (i > -1) _fns.splice(i, 1);
         return this;
       };
 
@@ -94,7 +107,7 @@ define(function (require) {
        */
       looper._looperOver = function () {
         try {
-          _fn();
+          _.callEach(_fns);
         } catch (e) {
           looper.stop();
           if (typeof console === 'undefined' || !console.error) {

@@ -65,6 +65,7 @@ define(function (require) {
           var sendResponse = function (req, resp) {
             req.complete = true;
             req.resp = resp;
+            req.ms = req.moment.diff() * -1;
             req.source.activeFetchCount -= 1;
 
             if (resp.error) return reqErrHandler.handle(req, new errors.FetchFailure(resp));

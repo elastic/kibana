@@ -15,9 +15,10 @@ define(function (require) {
       restrict: 'E',
       scope : {
         vis: '=',
+        esResp: '=?'
       },
       template: require('text!apps/visualize/partials/visualize.html'),
-      link: function ($scope, $el) {
+      link: function ($scope, $el, attr) {
         var chart; // set in "vis" watcher
         var notify = createNotifier();
 
@@ -47,6 +48,7 @@ define(function (require) {
 
         var render = function () {
           applyClassNames();
+
           if (chart && $scope.chartData && !$scope.onlyShowSpy) {
             notify.event('call chart render', function () {
               chart.render($scope.chartData);
@@ -95,16 +97,29 @@ define(function (require) {
           });
 
 
+          if (!attr.esResp) {
+            // fetch the response ourselves if it's not provided
+            vis.searchSource.onResults(function onResults(resp) {
+              $scope.esResp = resp;
+            }).catch(notify.fatal);
+          }
 
-          vis.searchSource.onResults(function onResults(resp) {
-            $scope.chartData = vis.buildChartDataFromResponse(vis.searchSource.get('index'), resp);
-            render();
-          }).catch(notify.fatal);
 
           vis.searchSource.onError(notify.error).catch(notify.fatal);
 
           $scope.$root.$broadcast('ready:vis');
         });
+
+        $scope.$watch('esResp', function (resp, prevResp) {
+          if (!resp) return;
+
+          var vis = $scope.vis;
+          var source = vis.searchSource;
+
+          $scope.chartData = vis.buildChartDataFromResponse($scope.vis.searchSource.get('index'), resp);
+        });
+
+        $scope.$watch('chartData', render);
 
         $scope.$on('resize', function () {
           var old;
