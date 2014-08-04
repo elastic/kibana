@@ -206,27 +206,28 @@ define(function (require) {
         var timeField = $scope.searchSource.get('index').timeFieldName;
         var totalSize = $scope.size || 500;
 
-        var sortByTime = false;
-        var sortByNonTime = false;
-        var sortByScore = false;
-
-        // pick one of the above
-        if (!_.isArray(sort)) {
-          sortByScore = true;
-        } else {
-          if (sort[0] === timeField) {
-            sortByTime = true;
-          } else {
-            sortByNonTime = true;
-          }
-        }
+        /**
+         * Basically an emum.
+         *
+         * opts:
+         *   "time" - sorted by the timefield
+         *   "non-time" - explicitly sorted by a non-time field, NOT THE SAME AS `sortBy !== "time"`
+         *   "implicit" - no sorting set, NOT THE SAME AS "non-time"
+         *
+         * @type {String}
+         */
+        var sortBy = (function () {
+          if (!_.isArray(sort)) return 'implicit';
+          else if (sort[0] === timeField) return 'time';
+          else return 'non-time';
+        }());
 
         var eventComplete = notify.event('segmented fetch');
 
         return segmentedFetch.fetch({
           searchSource: $scope.searchSource,
-          limitSize: sortByNonTime ? false : totalSize,
-          direction: sortByTime ? sort[1] : 'desc',
+          totalSize: sortBy === 'non-time' ? false : totalSize,
+          direction: sortBy === 'time' ? sort[1] : 'desc',
           first: function (resp) {
             $scope.hits = resp.hits.total;
             $scope.rows = [];
@@ -241,7 +242,7 @@ define(function (require) {
             rows = $scope.rows = rows.concat(resp.hits.hits);
             rows.fieldCounts = counts;
 
-            if (sortByNonTime) {
+            if (sortBy === 'non-time') {
               rows.sort(function (rowA, rowB) {
                 var diff = 0;
                 var a = rowA.sort[0];
@@ -263,7 +264,7 @@ define(function (require) {
             $scope.rows.forEach(function (hit) {
               // when we are sorting by non time field, our rows will vary too
               // much to rely on the previous counts, so we have to do this all again.
-              if (!sortByNonTime && hit._formatted) return;
+              if (sortBy === 'non-time' && hit._formatted) return;
 
               hit._formatted = _.mapValues(hit._source, function (value, name) {
                 // add up the counts for each field name
