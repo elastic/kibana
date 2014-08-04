@@ -16,7 +16,12 @@ define(function (require) {
      *
      * @param {object} opts
      * @param {SearchSource} opts.searchSource - The searchSource to base the fetch on
-     * @param {number} opts.totalSize - The total number of rows that should be returned
+     * @param {number} opts.totalSize - The maximum number of rows that should be returned, as a sum of all segments
+     * @param {enum} opts.direction - The direction that indices should be fetched. When fetching time based data
+     *                              in decening order, this should be set to descending so that the data comes in its
+     *                              proper order, otherwize indices will be fetched ascending
+     *
+     * // all callbacks can return a promise to delay furthur processing
      * @param {function} opts.first - a function that will be called for the first segment
      * @param {function} opts.each - a function that will be called for each segment
      * @param {function} opts.eachMerged - a function that will be called with the merged result on each segment
@@ -26,8 +31,13 @@ define(function (require) {
     segmentedFetch.fetch = function (opts) {
       var searchSource = opts.searchSource;
       var direction = opts.direction;
-      var limitSize = opts.limitSize;
-      var remainingSize = opts.limitSize;
+      var limitSize = false;
+      var remainingSize = false;
+
+      if (opts.totalSize) {
+        limitSize = true;
+        remainingSize = opts.totalSize;
+      }
 
       var req = searchSource._createRequest();
       req.moment = moment();
