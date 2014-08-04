@@ -243,7 +243,6 @@ define(function (require) {
           each: notify.timed('handle each segment', function (resp, req) {
             var rows = $scope.rows;
             var counts = rows.fieldCounts;
-            var rebuildFieldCounts = false;
 
             // merge the rows and the hits, use a new array to help watchers
             rows = $scope.rows = rows.concat(resp.hits.hits);

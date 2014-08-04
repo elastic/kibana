@@ -80,9 +80,22 @@ define(function (require) {
             ignoreUnavailable: true,
             body: state.body
           })
+          .catch(function (err) {
+            if (err.status === 403 && err.message.match(/ClusterBlockException.+index closed/)) {
+              return false;
+            } else {
+              throw err;
+            }
+          })
           .then(function (resp) {
             // abort if fetch is called twice quickly
             if (req !== activeReq) return;
+
+            // a response was swallowed intentionally. Move to next index
+            if (!resp) {
+              if (queue.length) return recurse();
+              else return done();
+            }
 
             var start; // promise that starts the chain
 
@@ -119,17 +132,19 @@ define(function (require) {
             })
             .then(function () {
               if (queue.length) return recurse();
-
-              req.complete = true;
-              req.ms = req.moment.diff() * -1;
-              req.source.activeFetchCount -= 1;
-
-              return (i + 1);
+              return done();
             });
           });
         }());
       })
       .then(req.defer.resolve, req.defer.reject);
+
+      function done() {
+        req.complete = true;
+        req.ms = req.moment.diff() * -1;
+        req.source.activeFetchCount -= 1;
+        return (i + 1);
+      }
 
       return req.defer.promise;
     };
