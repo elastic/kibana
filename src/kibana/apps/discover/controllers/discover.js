@@ -52,6 +52,8 @@ define(function (require) {
     Notifier, $location, globalState, AppState, timefilter, AdhocVis, Promise, Private) {
 
     var segmentedFetch = $scope.segmentedFetch = Private(require('apps/discover/_segmented_fetch'));
+    var HitSortFn = Private(require('apps/discover/_hit_sort_fn'));
+
     var notify = new Notifier({
       location: 'Discover'
     });
@@ -222,6 +224,11 @@ define(function (require) {
           else return 'non-time';
         }());
 
+        var sortFn = null;
+        if (sortBy === 'non-time') {
+          sortFn = new HitSortFn(sort[1]);
+        }
+
         var eventComplete = notify.event('segmented fetch');
 
         return segmentedFetch.fetch({
@@ -242,29 +249,16 @@ define(function (require) {
             rows = $scope.rows = rows.concat(resp.hits.hits);
             rows.fieldCounts = counts;
 
-            if (sortBy === 'non-time') {
-              rows.sort(function (rowA, rowB) {
-                var dir = 0;
-                var a = rowA.sort[0];
-                var b = rowB.sort[0];
-
-                if (a < b) dir = 1;
-                else if (a > b) dir = -1;
-
-                if (sort[1] === 'desc') {
-                  dir = dir * -1;
-                }
-                return dir;
-              });
-
+            if (sortFn) {
+              rows.sort(sortFn);
               rows = $scope.rows = rows.slice(0, totalSize);
               counts = rows.fieldCounts = {};
             }
 
             $scope.rows.forEach(function (hit) {
-              // when we are sorting by non time field, our rows will vary too
-              // much to rely on the previous counts, so we have to do this all again.
-              if (sortBy === 'non-time' && hit._formatted) return;
+              // when we are resorting on each segment we need to rebuild the
+              // counts each time
+              if (sortFn && hit._formatted) return;
 
               hit._formatted = _.mapValues(hit._source, function (value, name) {
                 // add up the counts for each field name
