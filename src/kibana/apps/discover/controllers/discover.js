@@ -244,17 +244,17 @@ define(function (require) {
 
             if (sortBy === 'non-time') {
               rows.sort(function (rowA, rowB) {
-                var diff = 0;
+                var dir = 0;
                 var a = rowA.sort[0];
                 var b = rowB.sort[0];
 
-                if (a < b) diff = 1;
-                else if (a > b) diff = -1;
+                if (a < b) dir = 1;
+                else if (a > b) dir = -1;
 
                 if (sort[1] === 'desc') {
-                  diff = diff * -1;
+                  dir = dir * -1;
                 }
-                return diff;
+                return dir;
               });
 
               rows = $scope.rows = rows.slice(0, totalSize);
