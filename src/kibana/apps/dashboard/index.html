@@ -1,4 +1,4 @@
-<div dashboard-app class="dashboard-container">
+<div dashboard-app class="app-container dashboard-container">
   <nav ng-show="!appEmbedded" class="navbar navbar-default navbar-static-top">
     <navbar>
       <span class="name">
@@ -32,9 +32,8 @@
       </div>
     </navbar>
   </nav>
+
   <config config-template="configTemplate" config-object="opts"></config>
 
-  <div class="app-container">
-    <dashboard-grid></dashboard-grid>
-  </div>
+  <dashboard-grid></dashboard-grid>
 </div>
