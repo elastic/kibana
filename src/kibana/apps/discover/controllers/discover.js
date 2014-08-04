@@ -49,7 +49,10 @@ define(function (require) {
 
 
   app.controller('discover', function ($scope, config, courier, $route, $window, savedSearches, savedVisualizations,
-    Notifier, $location, globalState, AppState, timefilter, AdhocVis, Promise) {
+    Notifier, $location, globalState, AppState, timefilter, AdhocVis, Promise, Private) {
+
+    var segmentedFetch = $scope.segmentedFetch = Private(require('apps/discover/_segmented_fetch'));
+    var HitSortFn = Private(require('apps/discover/_hit_sort_fn'));
 
     var notify = new Notifier({
       location: 'Discover'
@@ -167,42 +170,9 @@ define(function (require) {
           notify.error('An error occured with your request. Reset your inputs and try again.');
         }).catch(notify.fatal);
 
-        // Bind a result handler. Any time searchSource.fetch() is executed this gets called
-        // with the results
-        $scope.searchSource.onResults().then(function onResults(resp) {
-          var complete = notify.event('on results');
-          $scope.hits = resp.hits.total;
-          $scope.rows = resp.hits.hits;
-          var counts = $scope.rows.fieldCounts = {};
-          $scope.rows.forEach(function (hit) {
-            hit._formatted = _.mapValues(hit._source, function (value, name) {
-              // add up the counts for each field name
-              if (counts[name]) counts[name] = counts[name] + 1;
-              else counts[name] = 1;
-
-              return ($scope.formatsByName[name] || defaultFormat).convert(value);
-            });
-            hit._formatted._source = angular.toJson(hit._source);
-          });
-
-          // ensure that the meta fields always have a "row count" equal to the number of rows
-          metaFields.forEach(function (fieldName) {
-            counts[fieldName] = $scope.rows.length;
-          });
-
-          // apply the field counts to the field list
-          $scope.fields.forEach(function (field) {
-            field.rowCount = counts[field.name] || 0;
-          });
-
-          complete();
-          return $scope.searchSource.onResults().then(onResults);
-        }).catch(function (err) {
-          console.log('An error', err);
-        });
-
         return setupVisualization().then(function () {
           $scope.updateTime();
+          init.complete = true;
           $scope.$emit('application.load');
         });
       });
@@ -225,15 +195,106 @@ define(function (require) {
     };
 
     $scope.opts.fetch = $scope.fetch = function () {
+      // ignore requests to fetch before the app inits
+      if (!init.complete) return;
+
       $scope.updateTime();
       $scope.updateDataSource()
       .then(setupVisualization)
       .then(function () {
         $state.commit();
-        courier.fetch();
+
+        var sort = $state.sort;
+        var timeField = $scope.searchSource.get('index').timeFieldName;
+        var totalSize = $scope.size || 500;
+
+        /**
+         * Basically an emum.
+         *
+         * opts:
+         *   "time" - sorted by the timefield
+         *   "non-time" - explicitly sorted by a non-time field, NOT THE SAME AS `sortBy !== "time"`
+         *   "implicit" - no sorting set, NOT THE SAME AS "non-time"
+         *
+         * @type {String}
+         */
+        var sortBy = (function () {
+          if (!_.isArray(sort)) return 'implicit';
+          else if (sort[0] === timeField) return 'time';
+          else return 'non-time';
+        }());
+
+        var sortFn = null;
+        if (sortBy === 'non-time') {
+          sortFn = new HitSortFn(sort[1]);
+        }
+
+        var eventComplete = notify.event('segmented fetch');
+
+        return segmentedFetch.fetch({
+          searchSource: $scope.searchSource,
+          totalSize: sortBy === 'non-time' ? false : totalSize,
+          direction: sortBy === 'time' ? sort[1] : 'desc',
+          first: function (resp) {
+            $scope.hits = resp.hits.total;
+            $scope.rows = [];
+            $scope.rows.fieldCounts = {};
+          },
+          each: notify.timed('handle each segment', function (resp, req) {
+            var rows = $scope.rows;
+            var counts = rows.fieldCounts;
+
+            // merge the rows and the hits, use a new array to help watchers
+            rows = $scope.rows = rows.concat(resp.hits.hits);
+            rows.fieldCounts = counts;
+
+            if (sortFn) {
+              rows.sort(sortFn);
+              rows = $scope.rows = rows.slice(0, totalSize);
+              counts = rows.fieldCounts = {};
+            }
+
+            $scope.rows.forEach(function (hit) {
+              // when we are resorting on each segment we need to rebuild the
+              // counts each time
+              if (sortFn && hit._formatted) return;
+
+              hit._formatted = _.mapValues(hit._source, function (value, name) {
+                // add up the counts for each field name
+                if (counts[name]) counts[name] = counts[name] + 1;
+                else counts[name] = 1;
+
+                return ($scope.formatsByName[name] || defaultFormat).convert(value);
+              });
+
+              hit._formatted._source = angular.toJson(hit._source);
+            });
+
+            // ensure that the meta fields always have a "row count" equal to the number of rows
+            metaFields.forEach(function (fieldName) {
+              counts[fieldName] = $scope.rows.length;
+            });
+
+            // apply the field counts to the field list
+            $scope.fields.forEach(function (field) {
+              field.rowCount = counts[field.name] || 0;
+            });
+          }),
+          eachMerged: function (merged) {
+            $scope.mergedEsResp = merged;
+          }
+        })
+        .finally(eventComplete);
       })
       .catch(notify.error);
     };
+
+    // we use a custom fetch mechanism, so tie into the courier's looper
+    courier.searchLooper.add($scope.fetch);
+    $scope.$on('$destroy', function () {
+      courier.searchLooper.remove($scope.fetch);
+    });
+
 
     $scope.updateTime = function () {
       $scope.timeRange = {
