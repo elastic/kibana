@@ -5,20 +5,26 @@
         {{dash.title}}
       </span>
 
-      <form kbn-typeahead="history" class="fill inline-form" ng-submit="filterResults()" name="queryInput">
+      <form name="queryInput"
+        class="fill inline-form"
+        ng-submit="filterResults()"
+        kbn-typeahead="history">
+
         <div class="input-group"
           ng-class="queryInput.$invalid ? 'has-error' : ''">
-          <input kbn-typeahead-input
-            query-input
+
+          <input type="text"
             placeholder="Filter..."
-            type="text"
             class="form-control"
-            ng-model="state.query">
-          <button class="btn btn-default" type="submit"
-            ng-disabled="queryInput.$invalid">
+            ng-model="state.query"
+            kbn-typeahead-input
+            query-input>
+          <button type="submit" class="btn btn-default" ng-disabled="queryInput.$invalid">
             <span class="fa fa-search"></span>
           </button>
+
         </div>
+
         <kbn-typeahead-items></kbn-typeahead-items>
 
       </form>
