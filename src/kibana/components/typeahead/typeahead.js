@@ -2,9 +2,9 @@ define(function (require) {
   var _ = require('lodash');
   var typeahead = require('modules').get('kibana/typeahead');
   var template = require('text!components/typeahead/partials/typeahead.html');
-  var listTemplate = require('text!components/typeahead/partials/typeahead-items.html');
 
-  require('components/notify/directives');
+  require('components/typeahead/_input');
+  require('components/typeahead/_items');
 
   typeahead.directive('kbnTypeahead', function () {
     var keyMap = {
@@ -201,65 +201,6 @@ define(function (require) {
         if (!$scope.inputModel) {
           throw new Error('kbn-typeahead-input must be defined');
         }
-      }
-    };
-  });
-
-  typeahead.directive('kbnTypeaheadInput', function ($rootScope) {
-
-    return {
-      restrict: 'A',
-      require: ['^ngModel', '^kbnTypeahead'],
-
-      link: function ($scope, $el, $attr, deps) {
-        var model = deps[0];
-        var typeaheadCtrl = deps[1];
-
-        typeaheadCtrl.setInputModel(model);
-
-        // add handler to get query fro`m input
-        var getQuery = function () {
-          return model.$modelValue;
-        };
-
-        // handle keypresses
-        $el.on('keydown', function (ev) {
-          typeaheadCtrl.keypressHandler(ev);
-          digest();
-        });
-
-        // update focus state based on the input focus state
-        $el.on('focus', function () {
-          typeaheadCtrl.setFocused(true);
-          digest();
-        });
-
-        $el.on('blur', function () {
-          typeaheadCtrl.setFocused(false);
-          digest();
-        });
-
-        // unbind event listeners
-        $scope.$on('$destroy', function () {
-          $el.off();
-        });
-
-        function digest() {
-          $rootScope.$$phase || $scope.$digest();
-        }
-      }
-    };
-  });
-
-  typeahead.directive('kbnTypeaheadItems', function () {
-    return {
-      restrict: 'E',
-      require: '^kbnTypeahead',
-      replace: true,
-      template: listTemplate,
-
-      link: function ($scope, $el, attr, typeaheadCtrl) {
-        $scope.typeahead = typeaheadCtrl;
       }
     };
   });
