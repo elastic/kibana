@@ -14,7 +14,7 @@ define(function (require) {
       this._urlParam = urlParam || '_s';
 
       // When the URL updates we need to fetch the values from the URL
-      $rootScope.$on('$routeUpdate', _.bindKey(this, 'fetch'));
+      this._deregisterRouteUpdate = $rootScope.$on('$routeUpdate', _.bindKey(this, 'fetch'));
 
       // Initialize the State with fetch
       this.fetch();
@@ -81,6 +81,7 @@ define(function (require) {
      */
     State.prototype.destroy = function () {
       this.off(); // removes all listners
+      this._deregisterRouteUpdate(); // Removes the $routeUpdate listner
     };
 
     return State;
