@@ -27,11 +27,11 @@ define(function (require) {
 
       controller: function ($scope, $element, $timeout) {
         var self = this;
-        $scope.query = undefined;
-        $scope.hidden = true;
-        $scope.focused = false;
-        $scope.mousedOver = false;
-        $scope.filteredItems = [];
+        self.query = undefined;
+        self.hidden = true;
+        self.focused = false;
+        self.mousedOver = false;
+        self.filteredItems = [];
 
         self.getItemValue = function (item) {
           return ($scope.itemKey) ? item[$scope.itemKey] : item;
@@ -44,12 +44,16 @@ define(function (require) {
           $scope.$watch('inputModel.$viewValue', self.filteredItemsByQuery);
         };
 
+        self.setHidden = function (hidden) {
+          self.hidden = !!(hidden);
+        };
+
         self.setFocused = function (focused) {
-          $scope.focused = !!(focused);
+          self.focused = !!(focused);
         };
 
         self.setMouseover = function (mousedOver) {
-          $scope.mousedOver = !!(mousedOver);
+          self.mousedOver = !!(mousedOver);
         };
 
         // activation methods
@@ -62,18 +66,18 @@ define(function (require) {
             return;
           }
 
-          return $scope.filteredItems.indexOf(self.active);
+          return self.filteredItems.indexOf(self.active);
         };
 
         self.activateNext = function () {
           var index = self.getActiveIndex();
           if (index == null) {
             index = 0;
-          } else if (index < $scope.filteredItems.length - 1) {
+          } else if (index < self.filteredItems.length - 1) {
             ++index;
           }
 
-          self.activateItem($scope.filteredItems[index]);
+          self.activateItem(self.filteredItems[index]);
         };
 
         self.activatePrev = function () {
@@ -86,7 +90,7 @@ define(function (require) {
             return;
           }
 
-          self.activateItem($scope.filteredItems[index]);
+          self.activateItem(self.filteredItems[index]);
         };
 
         self.isActive = function (item) {
@@ -95,7 +99,7 @@ define(function (require) {
 
         // selection methods
         self.selectItem = function (item, ev) {
-          $scope.hidden = true;
+          self.hidden = true;
           self.active = false;
           $scope.inputModel.$setViewValue(self.getItemValue(item));
           $scope.inputModel.$render();
@@ -120,23 +124,23 @@ define(function (require) {
         self.keypressHandler = function (ev) {
           var keyCode = ev.which || ev.keyCode;
 
-          if ($scope.focused) {
-            $scope.hidden = false;
+          if (self.focused) {
+            self.hidden = false;
           }
 
           // hide on escape
           if (_.contains([keyMap.ESC], keyCode)) {
-            $scope.hidden = true;
+            self.hidden = true;
             self.active = false;
           }
 
           // change selection with arrow up/down
           // on down key, attempt to load all items if none are loaded
-          if (_.contains([keyMap.DOWN], keyCode) && $scope.filteredItems.length === 0) {
-            $scope.filteredItems = $scope.items;
+          if (_.contains([keyMap.DOWN], keyCode) && self.filteredItems.length === 0) {
+            self.filteredItems = $scope.items;
             $scope.$digest();
           } else if (_.contains([keyMap.UP, keyMap.DOWN], keyCode)) {
-            if (self.isVisible() && $scope.filteredItems.length) {
+            if (self.isVisible() && self.filteredItems.length) {
               ev.preventDefault();
 
               if (keyCode === keyMap.DOWN) {
@@ -150,37 +154,37 @@ define(function (require) {
           // select on enter or tab
           if (_.contains([keyMap.ENTER, keyMap.TAB], keyCode)) {
             self.selectActive();
-            $scope.hidden = true;
+            self.hidden = true;
           }
         };
 
         self.filteredItemsByQuery = function (query) {
           // cache query so we can call it again if needed
-          $scope.query = query;
+          self.query = query;
 
           // if the query is empty, clear the list items
           if (!query.length) {
-            $scope.filteredItems = [];
+            self.filteredItems = [];
             return;
           }
 
           // update the filteredItems using the query
           var re = new RegExp(query, 'i');
-          $scope.filteredItems = $scope.items.filter(function (item) {
+          self.filteredItems = $scope.items.filter(function (item) {
             var value = self.getItemValue(item);
             return !!(value.match(re));
           });
         };
 
         self.isVisible = function () {
-          return !$scope.hidden && ($scope.focused || $scope.mousedOver) && $scope.filteredItems.length;
+          return !self.hidden && (self.focused || self.mousedOver) && self.filteredItems.length;
         };
 
         // handle updates to parent scope history
         $scope.$watch('items', function (items) {
           self.items = items;
 
-          if ($scope.query) {
+          if (self.query) {
             self.filteredItemsByQuery($scope.$query);
           }
         });
@@ -190,7 +194,7 @@ define(function (require) {
           self.filteredItems = filteredItems;
 
           // if list is empty, or active item is missing, unset active item
-          if (!filteredItems.length || !_.contains($scope.filteredItems, self.active)) {
+          if (!filteredItems.length || !_.contains(self.filteredItems, self.active)) {
             self.active = false;
           }
         });
