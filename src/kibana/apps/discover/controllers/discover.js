@@ -259,6 +259,9 @@ define(function (require) {
               // counts each time
               if (sortFn && hit._formatted) return;
 
+              // Flatten the fields
+              hit._source = _.flattenWith('.', hit._source);
+
               hit._formatted = _.mapValues(hit._source, function (value, name) {
                 // add up the counts for each field name
                 if (counts[name]) counts[name] = counts[name] + 1;
