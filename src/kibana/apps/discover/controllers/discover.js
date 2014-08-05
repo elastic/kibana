@@ -49,7 +49,7 @@ define(function (require) {
 
 
   app.controller('discover', function ($scope, config, courier, $route, $window, savedSearches, savedVisualizations,
-    Notifier, $location, globalState, AppState, timefilter, AdhocVis, Promise, Private) {
+    Notifier, $location, globalState, appStateFactory, timefilter, AdhocVis, Promise, Private) {
 
     var segmentedFetch = $scope.segmentedFetch = Private(require('apps/discover/_segmented_fetch'));
     var HitSortFn = Private(require('apps/discover/_hit_sort_fn'));
@@ -93,7 +93,7 @@ define(function (require) {
       'year'
     ];
 
-    var $state = $scope.state = new AppState(stateDefaults);
+    var $state = $scope.state = new appStateFactory.create(stateDefaults);
 
     if (!_.contains(indexPatternList, $state.index)) {
       var reason = 'The index specified in the URL is not a configured pattern. ';
@@ -202,7 +202,7 @@ define(function (require) {
       $scope.updateDataSource()
       .then(setupVisualization)
       .then(function () {
-        $state.commit();
+        $state.save();
 
         var sort = $state.sort;
         var timeField = $scope.searchSource.get('index').timeFieldName;
@@ -331,9 +331,7 @@ define(function (require) {
     };
 
     $scope.resetQuery = function () {
-      $state.query = stateDefaults.query;
-      $state.sort = stateDefaults.sort;
-      $state.columns = stateDefaults.columns;
+      $state.reset();
       $scope.fetch();
     };
 
@@ -489,7 +487,7 @@ define(function (require) {
       }
 
       // if this commit results in something besides the columns changing, a fetch will be executed.
-      $state.commit();
+      $state.save();
     }
 
     // TODO: Move to utility class
@@ -554,7 +552,7 @@ define(function (require) {
             configs: [{
               agg: 'date_histogram',
               field: $scope.opts.timefield,
-              interval: $scope.state.interval,
+              interval: $state.interval,
               min_doc_count: 0,
             }]
           },

@@ -47,7 +47,7 @@ define(function (require) {
   });
 
   app.controller('VisualizeEditor', function ($scope, $route, $timeout, $window, Notifier, $location,
-    globalState, AppState, timefilter, Private) {
+    globalState, appStateFactory, timefilter, Private) {
     var aggs = Private(require('apps/visualize/saved_visualizations/_aggs'));
 
     var notify = new Notifier({
@@ -63,7 +63,7 @@ define(function (require) {
     $scope.fields = _.sortBy(indexPattern.fields, 'name');
     $scope.fields.byName = indexPattern.fieldsByName;
 
-    var $state = $scope.state = new AppState(vis.getState());
+    var $state = $scope.state = new appStateFactory.create(vis.getState());
 
     if ($state.query) {
       vis.searchSource.set('query', $state.query);
@@ -107,7 +107,7 @@ define(function (require) {
     var writeStateAndFetch = function () {
       _.assign($state, vis.getState());
       watchForConfigChanges();
-      $state.commit();
+      $state.save();
       justFetch();
     };
 
