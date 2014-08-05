@@ -41,7 +41,7 @@ define(function (require) {
           $scope.inputModel = model;
 
           // watch for changes to the query parameter, delegate to typeaheadCtrl
-          $scope.$watch('inputModel.$modelValue', self.filteredItemsByQuery);
+          $scope.$watch('inputModel.$viewValue', self.filteredItemsByQuery);
         };
 
         self.setFocused = function (focused) {
