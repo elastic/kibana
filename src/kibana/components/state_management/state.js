@@ -5,8 +5,7 @@ define(function (require) {
   var applyDiff = require('utils/diff_object');
 
   return function StateProvider(Private, $rootScope, $location) {
-    var BaseObject = Private(require('components/state_management/_base_object'));
-    var Events = Private(require('components/state_management/_events'));
+    var Events = Private(require('factories/_events'));
 
     _.inherits(State, Events);
     function State(urlParam, defaults) {
@@ -74,6 +73,14 @@ define(function (require) {
      */
     State.prototype.onUpdate = function (cb) {
       this.on('fetch_with_changes', cb);
+    };
+
+    /**
+     * Cleans up the state object
+     * @returns {void}
+     */
+    State.prototype.destroy = function () {
+      this.off(); // removes all listners
     };
 
     return State;

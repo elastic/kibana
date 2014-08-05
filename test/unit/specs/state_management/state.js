@@ -19,7 +19,7 @@ define(function (require) {
           $location = _$location_;
           $rootScope = _$rootScope_;
           State = Private(require('components/state_management/state'));
-          Events = Private(require('components/state_management/_events'));
+          Events = Private(require('factories/_events'));
         });
       });
 
@@ -48,12 +48,6 @@ define(function (require) {
         $rootScope.$apply();
       });
 
-      it('should fetch the state from $location.search()', function () {
-        var state = new State();
-        $location.search({ _s: '(foo:bar)' });
-        state.fetch();
-        expect(state).to.have.property('foo', 'bar');
-      });
 
       it('should emit an event if changes are fetched', function (done) {
         var state = new State();
