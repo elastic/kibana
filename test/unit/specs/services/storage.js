@@ -1,5 +1,4 @@
 define(function (require) {
-  var mocks = require('angular-mocks');
   var sinon = require('sinon/sinon');
 
   var storage;
@@ -47,19 +46,32 @@ define(function (require) {
         expect($window.localStorage.getItem.callCount).to.equal(1);
       });
 
+      it('should call setItem on the store', function () {
+        storage.set('name', 'john smith');
+
+        expect($window.localStorage.setItem.callCount).to.equal(1);
+      });
+
+      it('should call removeItem on the store', function () {
+        storage.remove('name');
+
+        expect($window.localStorage.removeItem.callCount).to.equal(1);
+      });
+
+      it('should call clear on the store', function () {
+        storage.clear();
+
+        expect($window.localStorage.clear.callCount).to.equal(1);
+      });
+    });
+
+    describe('json data', function () {
       it('should parse JSON when reading from the store', function () {
         var getItem = $window.localStorage.getItem;
         getItem.returns(JSON.stringify(payload));
 
         var data = storage.get('name');
-
         expect(data).to.eql(payload);
-      });
-
-      it('should call setItem on the store', function () {
-        storage.set('name', 'john smith');
-
-        expect($window.localStorage.setItem.callCount).to.equal(1);
       });
 
       it('should write JSON string to the store', function () {
@@ -73,17 +85,20 @@ define(function (require) {
         expect(call.args[0]).to.equal(key);
         expect(call.args[1]).to.equal(JSON.stringify(value));
       });
+    });
 
-      it('should call removeItem on the store', function () {
-        storage.remove('name');
-
-        expect($window.localStorage.removeItem.callCount).to.equal(1);
+    describe('expected responses', function () {
+      it('should return null when not exists', function () {
+        var data = storage.get('notexists');
+        expect(data).to.equal(null);
       });
 
-      it('should call clear on the store', function () {
-        storage.clear();
+      it('should return null when invalid JSON', function () {
+        var getItem = $window.localStorage.getItem;
+        getItem.returns('not: json');
 
-        expect($window.localStorage.clear.callCount).to.equal(1);
+        var data = storage.get('name');
+        expect(data).to.equal(null);
       });
     });
   });
