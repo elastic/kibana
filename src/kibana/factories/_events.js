@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
 
   return function EventsProvider(Private, PromiseEmitter) {
-    var BaseObject = Private(require('components/state_management/_base_object'));
+    var BaseObject = Private(require('factories/_base_object'));
 
     _.inherits(Events, BaseObject);
     function Events() {
@@ -24,8 +24,33 @@ define(function (require) {
       }
 
       return new PromiseEmitter(function (resolve, reject, defer) {
+        defer._handler = handler;
         self._listeners[name].push(defer);
       }, handler);
+    };
+
+    /**
+     * Removes a event listner
+     * @param {string} name The name of the event
+     * @param {function} [handler] The handler to remove
+     * @return {void}
+     */
+    Events.prototype.off = function (name, handler) {
+      if (_.isEmpty(name) && _.isEmpty(handler)) {
+        this._listeners = {};
+      }
+
+      // exit early if there is not an event that matches
+      if (!this._listeners[name]) return;
+
+      // If no hander remove all the events
+      if (_.isEmpty(handler)) {
+        delete this._listeners[name];
+      } else {
+        this._listeners[name] = _.filter(this._listeners[name], function (defer) {
+          return handler !== defer._handler;
+        });
+      }
     };
 
     /**
@@ -38,7 +63,9 @@ define(function (require) {
       var args = Array.prototype.slice.call(arguments);
       var name = args.shift();
       if (this._listeners[name]) {
-        _.each(this._listeners[name], function (defer) {
+        // We need to empty the array when we resolve the listners. PromiseEmitter
+        // will regenerate the listners array with new promises.
+        _.each(this._listeners[name].slice(0), function (defer) {
           defer.resolve.apply(defer, args);
         });
       }

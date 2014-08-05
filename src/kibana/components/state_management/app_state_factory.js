@@ -25,7 +25,7 @@ define(function (require) {
         // Check to see if the state already exists. If it does then we need
         // to call the destory method.
         if (!_.isUndefined(currentAppState)) {
-          currentAppState.$destroy();
+          currentAppState.destroy();
         }
         currentAppState = new AppState(defaults);
 
