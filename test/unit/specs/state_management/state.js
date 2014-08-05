@@ -10,7 +10,7 @@ define(function (require) {
   describe('State Management', function () {
     describe('State', function () {
 
-      var $rootScope, $location, State, IsolatedScope;
+      var $rootScope, $location, State, Events;
 
       beforeEach(function () {
         module('kibana');
@@ -19,13 +19,13 @@ define(function (require) {
           $location = _$location_;
           $rootScope = _$rootScope_;
           State = Private(require('components/state_management/state'));
-          IsolatedScope = Private(require('components/state_management/_isolated_scope'));
+          Events = Private(require('components/state_management/_events'));
         });
       });
 
-      it('should inherit from IsolatedScope', function () {
+      it('should inherit from Events', function () {
         var state = new State();
-        expect(state).to.be.an(IsolatedScope);
+        expect(state).to.be.an(Events);
       });
 
       it('should save to $location.search()', function () {
@@ -38,7 +38,7 @@ define(function (require) {
 
       it('should emit an event if changes are saved', function (done) {
         var state = new State();
-        state.$on('save_with_changes', function (event, keys) {
+        state.on('save_with_changes', function (keys) {
           expect(keys).to.eql(['test']);
           done();
         });
@@ -57,22 +57,23 @@ define(function (require) {
 
       it('should emit an event if changes are fetched', function (done) {
         var state = new State();
-        state.$on('fetch_with_changes', function (events, keys) {
+        state.on('fetch_with_changes', function (keys) {
           expect(keys).to.eql(['foo']);
           done();
         });
         $location.search({ _s: '(foo:bar)' });
         state.fetch();
         expect(state).to.have.property('foo', 'bar');
+        $rootScope.$apply();
       });
 
       it('should have events that attach to scope', function (done) {
         var state = new State();
-        state.$on('test', function (event, message) {
+        state.on('test', function (message) {
           expect(message).to.equal('foo');
           done();
         });
-        state.$emit('test', 'foo');
+        state.emit('test', 'foo');
         $rootScope.$apply();
       });
 
