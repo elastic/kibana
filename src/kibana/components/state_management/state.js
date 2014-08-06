@@ -5,7 +5,7 @@ define(function (require) {
   var applyDiff = require('utils/diff_object');
 
   return function StateProvider(Private, $rootScope, $location) {
-    var Events = Private(require('factories/_events'));
+    var Events = Private(require('factories/events'));
 
     _.inherits(State, Events);
     function State(urlParam, defaults) {

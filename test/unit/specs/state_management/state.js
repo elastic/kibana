@@ -19,7 +19,7 @@ define(function (require) {
           $location = _$location_;
           $rootScope = _$rootScope_;
           State = Private(require('components/state_management/state'));
-          Events = Private(require('factories/_events'));
+          Events = Private(require('factories/events'));
         });
       });
 
