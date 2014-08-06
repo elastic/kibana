@@ -22,17 +22,24 @@ define(function (require) {
         this._listeners[name] = [];
       }
 
-      var listener = {
-        defer: Promise.defer(),
-        handler: handler
-      };
+      var listener = { handler: handler };
 
-      // capture then's promise, attach it to the listener
-      listener.newDeferPromise = listener.defer.promise.then(function recurse(value) {
+      // capture the promise that is resolved when listener.defer is "fresh"/new
+      // and attach it to the listener
+      (function buildDefer(value) {
+
+        // we will execute the handler on each re-build, but not the initial build
+        var rebuilding = listener.defer != null;
+
         listener.defer = Promise.defer();
-        listener.newDeferPromise = listener.defer.promise.then(recurse);
+        listener.deferResolved = false;
+        listener.newDeferPromise = listener.defer.promise.then(buildDefer);
+
+        if (!rebuilding) return;
+
+        // we ignore the completion of handlers, just watch for unhandled errors
         Promise.try(handler, [value]).catch(notify.fatal);
-      });
+      }());
 
       this._listeners[name].push(listener);
     };
@@ -74,19 +81,19 @@ define(function (require) {
       }
 
       return Promise.map(this._listeners[name], function resolveListener(listener) {
-        if (listener.defer.resolved) {
-          // wait for listener.defer to be re-written
+        if (listener.deferResolved) {
+          // this listener has already been resolved by another call to events#emit()
+          // so we wait for listener.defer to be recreated and try again
           return listener.newDeferPromise.then(function () {
             return resolveListener(listener);
           });
         } else {
+          listener.deferResolved = true;
           listener.defer.resolve(value);
-          listener.defer.resolved = true;
         }
       });
     };
 
     return Events;
-
   };
 });

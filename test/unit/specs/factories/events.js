@@ -127,5 +127,7 @@ define(function (require) {
         done();
       });
     });
+
+    it('should only emit to handlers registered before emit is called');
   });
 });
