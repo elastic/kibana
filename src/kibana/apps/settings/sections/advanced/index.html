@@ -25,13 +25,24 @@
               ng-if="conf.editting"
               ng-submit="save(conf)">
               <input
+                ng-show="!conf.array"
                 ng-model="conf.unsavedValue"
                 ng-keyup="maybeCancel($event, conf)"
                 placeholder="{{conf.value || conf.defVal}}"
                 type="text"
                 class="form-control">
+              <input
+                ng-show="conf.array"
+                ng-list=","
+                ng-model="conf.unsavedValue"
+                ng-keyup="maybeCancel($event, conf)"
+                placeholder="{{(conf.value || conf.defVal).join(', ')}}"
+                type="text"
+                class="form-control">
             </form>
-            <span ng-if="!conf.editting">{{conf.value || conf.defVal}}</span>
+            <span ng-if="!conf.editting && !conf.array">{{conf.value || conf.defVal}}</span>
+            <span ng-if="!conf.editting && conf.array">{{(conf.value || conf.defVal).join(', ')}}</span>
+
           </td>
           <td class="actions">
             <button

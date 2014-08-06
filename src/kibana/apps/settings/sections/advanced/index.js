@@ -26,7 +26,12 @@ define(function (require) {
             conf.tooComplex = false;
             break;
           default:
-            conf.tooComplex = true;
+            if (_.isArray(config.get(conf.name))) {
+              conf.tooComplex = false;
+              conf.array = true;
+            } else {
+              conf.tooComplex = true;
+            }
           }
         };
 
