@@ -76,12 +76,14 @@
               >
             </select> -->
           </center>
+
           <div ng-show="searchSource.activeFetchCount" class="discover-overlay">
-            <div class="spinner large">
-            </div>
+            <div class="spinner large"> </div>
           </div>
+
           <visualize vis="vis" es-resp="mergedEsResp"></visualize>
         </div>
+
         <div class="discover-table"
           fixed-scroll='table'
           fixed-scroll-trigger="state.columns">
@@ -96,6 +98,7 @@
             timefield="opts.timefield"
             mapping="fieldsByName">
           </kbn-table>
+
           <div ng-if="rows.length == opts.sampleSize" class="discover-table-footer">
             <center>
               These are the first {{opts.sampleSize}} results matching your query,
