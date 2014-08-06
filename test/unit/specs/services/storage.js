@@ -9,6 +9,7 @@ define(function (require) {
 
   function init() {
     module('kibana/storage', function ($provide) {
+      // mock $window.localStorage for storage
       $provide.value('$window', {
         localStorage: {
           getItem: sinon.stub(),

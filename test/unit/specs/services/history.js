@@ -38,7 +38,7 @@ define(function (require) {
     });
   }
 
-  describe.only('HistoryFactory', function () {
+  describe('HistoryFactory', function () {
     beforeEach(function () {
       init();
     });
