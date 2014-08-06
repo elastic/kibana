@@ -7,7 +7,7 @@ define(function (require) {
   // Load kibana
   require('index');
 
-  describe('State Management', function () {
+  describe.only('State Management', function () {
     describe('Events', function () {
       var $rootScope;
       var Events;
@@ -80,6 +80,22 @@ define(function (require) {
         sinon.assert.notCalled(handler1);
       });
 
+      it('should handle mulitple identical emits in the same tick', function () {
+        var obj = new Events();
+        var handler1 = sinon.stub();
+
+        obj.on('test', handler1);
+        obj.emit('test', 'one');
+        obj.emit('test', 'two');
+        obj.emit('test', 'three');
+
+        $rootScope.$apply();
+
+        expect(handler1.callCount).to.be(3);
+        expect(handler1.getCall(0).calledWith('one')).to.be(true);
+        expect(handler1.getCall(1).calledWith('two')).to.be(true);
+        expect(handler1.getCall(2).calledWith('three')).to.be(true);
+      });
     });
   });
 
