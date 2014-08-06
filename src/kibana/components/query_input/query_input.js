@@ -30,10 +30,17 @@ define(function (require) {
             var index, type;
 
             var error = function (resp) {
+              var msg;
+
               ngModel.$setValidity('queryInput', false);
 
-              errorElem.attr('tooltip', resp.explanations && resp.explanations[0] ?
-                resp.explanations[0].error : undefined);
+              if (resp.explanations && resp.explanations[0]) {
+                msg = resp.explanations[0].error;
+              } else {
+                msg = resp.body.error;
+              }
+
+              errorElem.attr('tooltip', msg);
 
               // Compile is needed for the tooltip
               $compile(errorElem)($scope);
