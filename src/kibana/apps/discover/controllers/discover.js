@@ -163,7 +163,6 @@ define(function (require) {
         });
 
         $scope.$watch('state.filters', function (filters) {
-          $scope.searchSource.set('filter', filters);
           $scope.fetch();
         });
 
