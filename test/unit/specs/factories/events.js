@@ -100,18 +100,21 @@ define(function (require) {
         expect(handler1.getCall(2).calledWith('three')).to.be(true);
       });
 
-      it('should notify on uncaught errors', function () {
-        var stub = sinon.stub(Notifier.prototype, 'fatal');
-
+      it('should handle emits from the handler', function () {
         var obj = new Events();
-        var handler1 = sinon.stub().throws();
+        var handler1 = sinon.spy(function () {
+          if (handler1.calledTwice) {
+            return;
+          }
+          obj.emit('test');
+        });
 
         obj.on('test', handler1);
         obj.emit('test');
 
         $rootScope.$apply();
 
-        expect(stub.callCount).to.equal(1);
+        expect(handler1.callCount).to.be(2);
       });
     });
   });
