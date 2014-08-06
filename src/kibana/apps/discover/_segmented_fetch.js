@@ -49,6 +49,10 @@ define(function (require) {
 
       var queue = searchSource.get('index').toIndexList();
 
+      if (!_.isArray(queue)) {
+        queue = [queue];
+      }
+
       if (direction === 'desc') {
         queue = queue.reverse();
       }
