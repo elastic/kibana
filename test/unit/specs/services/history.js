@@ -91,5 +91,38 @@ define(function (require) {
         expect(items[0]).to.eql(newItem);
       });
     });
+
+    describe('stack limit', function () {
+      it('should observe the stack limit config', function () {
+        var bulkData = [];
+
+        for (var i = 0; i < historyLimit; i++) {
+          bulkData.push(['record ' + i]);
+        }
+        storage.get.returns(bulkData);
+
+        var h = new history(historyName);
+        h.add(['new array 1']);
+        var items = h.add(['new array 2']);
+
+        expect(items.length).to.equal(historyLimit);
+      });
+
+      it('should observe the passed stack limit', function () {
+        var customHistoryLimit = 15;
+        var bulkData = [];
+
+        for (var i = 0; i < customHistoryLimit; i++) {
+          bulkData.push('record ' + i);
+        }
+        storage.get.returns(bulkData);
+
+        var h = new history(historyName, customHistoryLimit);
+        h.add('new string 1');
+        var items = h.add('new string 2');
+
+        expect(items.length).to.equal(customHistoryLimit);
+      });
+    });
   });
 });
