@@ -75,7 +75,10 @@ function (angular, $, _, appLevelRequire) {
       return {
         responseError: function(resp) {
           if (resp.status === 0) {
+<<<<<<< HEAD
             console.log("redirecting");
+=======
+>>>>>>> Redirect users to connection failed page upon http request failure
             $location.path('/connectionFailed');
             console.log(resp);
           }
