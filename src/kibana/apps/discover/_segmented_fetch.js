@@ -66,7 +66,6 @@ define(function (require) {
       getStateFromRequest(req)
       .then(function (state) {
         return (function recurse() {
-          i++;
           var index = queue.shift();
 
           if (limitSize) {
@@ -91,22 +90,21 @@ define(function (require) {
             // abort if fetch is called twice quickly
             if (req !== activeReq) return;
 
-            // a response was swallowed intentionally. Move to next index
+            // a response was swallowed intentionally. Try the next one
             if (!resp) {
               if (queue.length) return recurse();
               else return done();
             }
 
-            var start; // promise that starts the chain
+            // increment i after we are sure that we have a valid response
+            // so that we always call opts.first()
+            i++;
 
-            if (i > 0) {
-              start = Promise.resolve();
+            var start; // promise that starts the chain
+            if (i === 0 && _.isFunction(opts.first)) {
+              start = Promise.try(opts.first, [resp, req]);
             } else {
-              start = Promise.try(function () {
-                if (_.isFunction(opts.first)) {
-                  return opts.first(resp, req);
-                }
-              });
+              start = Promise.resolve();
             }
 
             if (limitSize) {
