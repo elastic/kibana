@@ -1,0 +1,20 @@
+
+<p>
+  <div class="row">
+    <div class="container-fluid main">
+      <div class="kibana-container container">
+        <div class="span12">
+          <h1>Connection Failed</h1>
+
+            <h5>Possibility #1: Your elasticsearch server is down or unreachable</h5>
+            This can be caused by a network outage, or a failure of the Elasticsearch process. If you have recently run a query that required a <i>terms</i> facet to be executed it is possible the process has run out of memory and stopped. Be sure to check your Elasticsearch logs for any sign of memory pressure.
+            <h5>Possibility #2: You are running Elasticsearch 1.4 or higher</h5>
+            Elasticsearch 1.4 ships with a security setting that prevents Kibana from connecting. You will need to set <i>http.cors.allow-origin</i> in your <i>elasticsearch.yml</i> to the correct protocol, hostname, and port (if not 80) that your access Kibana from. Note that if you are running Kibana in a sub-url, you should exclude the sub-url path and only include the protocol, hostname and port. For example, <i>http://mycompany.com:8080</i>, not <i>http://mycompany.com:8080/kibana</i>.
+
+            <h5>Click back, or the home button, when you have resolved the connection issue</h5>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</p>
