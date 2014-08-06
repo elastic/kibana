@@ -42,10 +42,11 @@ define(function (require) {
     }
   });
 
-  app.directive('dashboardApp', function (Notifier, courier, storage, config, savedVisualizations, appStateFactory, timefilter) {
+  app.directive('dashboardApp', function (Notifier, courier, History, savedVisualizations, appStateFactory, timefilter) {
     return {
       controller: function ($scope, $route, $routeParams, $location, configFile) {
-        $scope.history = storage.get('dashboard:history') || [];
+        var history = new History('dashboard:history');
+        $scope.history = history.get();
 
         var notify = new Notifier({
           location: 'Dashboard'
@@ -98,19 +99,10 @@ define(function (require) {
           }
         }
 
-        function updateQueryHistory() {
-          if ($state.query.length) {
-            var history = _.pull($scope.history.slice(0), $state.query);
-            history.unshift($state.query);
-            $scope.history = history.slice(0, config.get('history:limit'));
-            storage.set('dashboard:history', $scope.history);
-          }
-        }
-
         $scope.filterResults = function () {
           updateQueryOnRootSource();
           $state.save();
-          updateQueryHistory();
+          $scope.history = history.add($state.query);
           courier.fetch();
         };
 
