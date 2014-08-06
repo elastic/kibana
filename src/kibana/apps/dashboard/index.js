@@ -61,8 +61,6 @@ define(function (require) {
           query: ''
         };
 
-        $scope.history = storage.get('dashboard:history') || [];
-
         var $state = $scope.state = appStateFactory.create(stateDefaults);
 
         $scope.configTemplate = new ConfigTemplate({
