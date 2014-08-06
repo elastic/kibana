@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
 
   return function EventsProvider(Private, PromiseEmitter) {
-    var BaseObject = Private(require('factories/_base_object'));
+    var BaseObject = Private(require('factories/base_object'));
 
     _.inherits(Events, BaseObject);
     function Events() {
