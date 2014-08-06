@@ -13,9 +13,9 @@ define(function (require) {
 
     /**
      * Listens for events
-     * @param {string} name The name of the event
-     * @param {function} handler The handler for the event
-     * @returns {PromiseEmitter}
+     * @param {string} name - The name of the event
+     * @param {function} handler - The function to call when the event is triggered
+     * @returns {undefined}
      */
     Events.prototype.on = function (name, handler) {
       if (!_.isArray(this._listeners[name])) {
@@ -38,10 +38,10 @@ define(function (require) {
     };
 
     /**
-     * Removes a event listner
-     * @param {string} name The name of the event
-     * @param {function} [handler] The handler to remove
-     * @return {void}
+     * Removes an event listener
+     * @param {string} [name] - The name of the event
+     * @param {function} [handler] - The handler to remove
+     * @return {undefined}
      */
     Events.prototype.off = function (name, handler) {
       if (!name && !handler) {
@@ -62,10 +62,11 @@ define(function (require) {
     };
 
     /**
-     * Emits and event using the PromiseEmitter
-     * @param {string} name The name of the event
-     * @param {mixed} args The args to pass along to the handers
-     * @returns {void}
+     * Emits the event to all listeners
+     *
+     * @param {string} name - The name of the event.
+     * @param {any} [value] - The value that will be passed to all event handlers.
+     * @returns {Promise}
      */
     Events.prototype.emit = function (name, value) {
       if (!this._listeners[name]) {
