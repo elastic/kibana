@@ -30,6 +30,8 @@ define(function (require) {
     .constant('minimumElasticsearchVersion', '1.3.1')
     // Use this for cache busting partials
     .constant('cacheBust', 'cache-bust=' + Date.now())
+    // When we need to identify the current session of the app, ef shard preference
+    .constant('sessionId', Date.now())
     // attach the route manager's known routes
     .config(routes.config);
 
