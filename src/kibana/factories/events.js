@@ -1,8 +1,9 @@
 define(function (require) {
   var _ = require('lodash');
 
-  return function EventsProvider(Private, PromiseEmitter) {
+  return function EventsProvider(Private, Promise, Notifier) {
     var BaseObject = Private(require('factories/base_object'));
+    var notify = new Notifier({ location: 'EventEmitter' });
 
     _.inherits(Events, BaseObject);
     function Events() {
@@ -17,16 +18,23 @@ define(function (require) {
      * @returns {PromiseEmitter}
      */
     Events.prototype.on = function (name, handler) {
-      var self = this;
-
       if (!_.isArray(this._listeners[name])) {
         this._listeners[name] = [];
       }
 
-      return new PromiseEmitter(function (resolve, reject, defer) {
-        defer._handler = handler;
-        self._listeners[name].push(defer);
-      }, handler);
+      var listener = {
+        defer: Promise.defer(),
+        handler: handler
+      };
+
+      // capture then's promise, attach it to the listener
+      listener.newDeferPromise = listener.defer.promise.then(function recurse(value) {
+        listener.defer = Promise.defer();
+        listener.newDeferPromise = listener.defer.promise.then(recurse);
+        Promise.try(handler, [value]).catch(notify.fatal);
+      });
+
+      this._listeners[name].push(listener);
     };
 
     /**
@@ -47,8 +55,8 @@ define(function (require) {
       if (!handler) {
         delete this._listeners[name];
       } else {
-        this._listeners[name] = _.filter(this._listeners[name], function (defer) {
-          return handler !== defer._handler;
+        this._listeners[name] = _.filter(this._listeners[name], function (listener) {
+          return handler !== listener.handler;
         });
       }
     };
@@ -59,14 +67,22 @@ define(function (require) {
      * @param {mixed} args The args to pass along to the handers
      * @returns {void}
      */
-    Events.prototype.emit = function () {
-      var args = Array.prototype.slice.call(arguments);
-      var name = args.shift();
+    Events.prototype.emit = function (name, value) {
+      // var args = Array.prototype.slice.call(arguments);
+      // var name = args.shift();
       if (this._listeners[name]) {
         // We need to empty the array when we resolve the listners. PromiseEmitter
         // will regenerate the listners array with new promises.
-        _.each(this._listeners[name].splice(0), function (defer) {
-          defer.resolve.apply(defer, args);
+        _.each(this._listeners[name], function resolveListener(listener) {
+          if (listener.defer.resolved) {
+            // wait for listener.defer to be re-written
+            listener.newDeferPromise.then(function () {
+              resolveListener(listener);
+            });
+          } else {
+            listener.defer.resolve(value);
+            listener.defer.resolved = true;
+          }
         });
       }
     };
