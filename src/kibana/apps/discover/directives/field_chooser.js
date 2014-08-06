@@ -110,7 +110,24 @@ define(function (require) {
           field.count++;
         };
 
-        $scope.termsAgg = function (field) {
+        $scope.runAgg = function (field) {
+          var agg = {};
+          // If we're visualizing a date field, and our index is time based (and thus has a time filter),
+          // then run a date histogram
+          if (field.type === 'date' && $scope.searchSource.get('index').timeFieldName) {
+            agg = {
+              agg: 'date_histogram',
+              field: field.name,
+              interval: 'auto'
+            };
+          } else {
+            agg = {
+              agg: 'terms',
+              field: field.name,
+              size: config.get('discover:aggs:terms:size', 20),
+            };
+          }
+
           $location.path('/visualize/create').search({
             indexPattern: $scope.state.index,
             type: 'histogram',
@@ -119,11 +136,7 @@ define(function (require) {
               metric: [{
                 agg: 'count',
               }],
-              segment: [{
-                agg: 'terms',
-                field: field.name,
-                size: config.get('discover:aggs:terms:size', 20),
-              }],
+              segment: [agg],
               group: [],
               split: [],
             }),
