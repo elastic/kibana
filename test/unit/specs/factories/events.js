@@ -1,22 +1,25 @@
 define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
-  var sinon = require('sinon/sinon');
+  var sinon = require('test_utils/auto_release_sinon');
   require('services/private');
+
 
   // Load kibana
   require('index');
 
-  describe.only('State Management', function () {
+  describe('State Management', function () {
     describe('Events', function () {
       var $rootScope;
       var Events;
+      var Notifier;
 
       beforeEach(function () {
         module('kibana');
 
-        inject(function (_$rootScope_, Private) {
-          $rootScope = _$rootScope_;
+        inject(function ($injector, Private) {
+          $rootScope = $injector.get('$rootScope');
+          Notifier = $injector.get('Notifier');
           Events = Private(require('factories/events'));
         });
       });
@@ -95,6 +98,20 @@ define(function (require) {
         expect(handler1.getCall(0).calledWith('one')).to.be(true);
         expect(handler1.getCall(1).calledWith('two')).to.be(true);
         expect(handler1.getCall(2).calledWith('three')).to.be(true);
+      });
+
+      it('should notify on uncaught errors', function () {
+        var stub = sinon.stub(Notifier.prototype, 'fatal');
+
+        var obj = new Events();
+        var handler1 = sinon.stub().throws();
+
+        obj.on('test', handler1);
+        obj.emit('test');
+
+        $rootScope.$apply();
+
+        expect(stub.callCount).to.equal(1);
       });
     });
   });
