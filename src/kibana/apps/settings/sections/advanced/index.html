@@ -71,7 +71,7 @@
 
             <button
               ng-click="clear(conf)"
-              ng-disabled="!conf.value"
+              ng-disabled="conf.value === undefined"
               class="btn btn-danger">
               <i class="fa fa-trash-o"></i>
             </button>
