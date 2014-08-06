@@ -33,16 +33,16 @@
         </div>
       </div>
       <div ng-show="field.indexed && !field.analyzed && field.doc_values"
-          ng-click="termsAgg(field)"
+          ng-click="runAgg(field)"
           class="sidebar-item-button success">Visualize</div>
 
       <div ng-show="field.indexed && !field.analyzed"
-          ng-click="termsAgg(field)"
+          ng-click="runAgg(field)"
           tooltip="Doc_values are not enabled on this field. This operation may be dangerous."
           class="sidebar-item-button warning">Visualize</div>
 
       <div ng-show="field.indexed && field.analyzed"
-          ng-click="termsAgg(field)"
+          ng-click="runAgg(field)"
           tooltip="Analyzed fields may require more memory to visualize. This operation may be dangerous."
           class="sidebar-item-button danger">Visualize</div>
 
