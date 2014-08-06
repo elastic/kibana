@@ -68,23 +68,21 @@ define(function (require) {
      * @returns {void}
      */
     Events.prototype.emit = function (name, value) {
-      // var args = Array.prototype.slice.call(arguments);
-      // var name = args.shift();
-      if (this._listeners[name]) {
-        // We need to empty the array when we resolve the listners. PromiseEmitter
-        // will regenerate the listners array with new promises.
-        _.each(this._listeners[name], function resolveListener(listener) {
-          if (listener.defer.resolved) {
-            // wait for listener.defer to be re-written
-            listener.newDeferPromise.then(function () {
-              resolveListener(listener);
-            });
-          } else {
-            listener.defer.resolve(value);
-            listener.defer.resolved = true;
-          }
-        });
+      if (!this._listeners[name]) {
+        return Promise.resolve();
       }
+
+      return Promise.map(this._listeners[name], function resolveListener(listener) {
+        if (listener.defer.resolved) {
+          // wait for listener.defer to be re-written
+          return listener.newDeferPromise.then(function () {
+            return resolveListener(listener);
+          });
+        } else {
+          listener.defer.resolve(value);
+          listener.defer.resolved = true;
+        }
+      });
     };
 
     return Events;
