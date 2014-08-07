@@ -53,6 +53,7 @@ define(function (require) {
 
     var segmentedFetch = $scope.segmentedFetch = Private(require('apps/discover/_segmented_fetch'));
     var HitSortFn = Private(require('apps/discover/_hit_sort_fn'));
+    var diffTimePickerValues = Private(require('utils/diff_time_picker_vals'));
 
     var notify = new Notifier({
       location: 'Discover'
@@ -146,8 +147,7 @@ define(function (require) {
 
         // TODO: Switch this to watching time.string when we implement it
         $scope.$watchCollection('globalState.time', function (newTime, oldTime) {
-          // don't fetch unless there was a previous value and the values are not loosly equal
-          if (!_.isUndefined(oldTime) && !angular.equals(newTime, oldTime)) $scope.fetch();
+          if (diffTimePickerValues(newTime, oldTime)) $scope.fetch();
         });
 
         $scope.$watch('state.sort', function (sort) {
