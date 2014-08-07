@@ -58,7 +58,7 @@ define(function (require) {
          */
         $scope.toggleFilter = function (filter) {
           // Toggle the disabled flag
-          var disabled = !(!!filter.disabled);
+          var disabled = !filter.disabled;
           filter.disabled = disabled;
           filter.filter.disabled = disabled;
 
