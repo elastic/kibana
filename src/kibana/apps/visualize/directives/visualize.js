@@ -10,7 +10,7 @@ define(function (require) {
 
   var module = require('modules').get('kibana/directive');
 
-  module.directive('visualize', function (createNotifier, SavedVis, indexPatterns) {
+  module.directive('visualize', function (createNotifier, SavedVis, indexPatterns, visLib) {
     return {
       restrict: 'E',
       scope : {
@@ -87,14 +87,14 @@ define(function (require) {
           _.merge(params, vis.params);
           _.defaults(params, typeDefinition.params);
 
-          chart = new vislib.Chart($visualize[0], params);
+          chart = new visLib.Vis($visualize[0], params);
 
           // For each type of interaction, assign the the handler if the vis object has it
           // otherwise use the typeDef, otherwise, do nothing.
-          _.each({hover: 'onHover', click: 'onClick', brush: 'onBrush'}, function (func, event) {
-            var callback = vis[func] || typeDefinition[func];
-            if (!!callback) chart.on(event, callback);
-          });
+//          _.each({hover: 'onHover', click: 'onClick', brush: 'onBrush'}, function (func, event) {
+//            var callback = vis[func] || typeDefinition[func];
+//            if (!!callback) chart.on(event, callback);
+//          });
 
 
           if (!attr.esResp) {
@@ -142,11 +142,11 @@ define(function (require) {
 
         $scope.$on('$destroy', function () {
           if ($scope.vis) $scope.vis.destroy();
-          if (chart) {
-            chart.off('hover');
-            chart.off('click');
-            chart.destroy();
-          }
+////          if (chart) {
+////            chart.off('hover');
+////            chart.off('click');
+////            chart.destroy();
+//          }
         });
       }
     };
