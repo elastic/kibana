@@ -38,7 +38,7 @@ define(function (require) {
 
     // Find the keys that will be changed
     diff.changed = _.filter(sourceKeys, function (key) {
-      return !angular.equals(target[key]);
+      return !angular.equals(target[key], source[key]);
     });
 
     // Make a list of all the keys that are changing

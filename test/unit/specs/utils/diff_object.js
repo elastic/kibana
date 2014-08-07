@@ -57,5 +57,12 @@ define(function (require) {
       expect(target).to.not.have.property('$private');
     });
 
+    it('should not list any changes for similar objects', function () {
+      var target = { foo: 'bar', test: 'foo' };
+      var source = { foo: 'bar', test: 'foo', $private: 'foo' };
+      var results = diff(target, source);
+      expect(results.changed).to.be.empty();
+    });
+
   });
 });
