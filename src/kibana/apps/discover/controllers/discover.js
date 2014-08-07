@@ -416,6 +416,7 @@ define(function (require) {
         _.defaults(field, currentState[field.name]);
         // clone the field and add it's display prop
         var clone = _.assign({}, field, {
+          format: field.format, // this is a getter, so we need to copy it over manually
           display: columnObjects[field.name] || false,
           rowCount: $scope.rows ? $scope.rows.fieldCounts[field.name] : 0
         });
