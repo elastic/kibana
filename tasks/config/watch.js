@@ -8,7 +8,8 @@ module.exports = function (grunt) {
     },
     less: {
       files: [
-        '<%= app %>/**/styles/**/*.less'
+        '<%= app %>/**/styles/**/*.less',
+        '<%= app %>/**/components/**/*.less'
       ],
       tasks: ['less']
     },
