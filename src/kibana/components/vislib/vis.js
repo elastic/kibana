@@ -28,25 +28,25 @@ define(function (require) {
       return this.chart.resize();
     };
 
-    Vis.prototype.on = function () {
-      return this.chart.on();
-    };
-
-    Vis.prototype.off = function () {
-      return this.chart.off();
-    };
-
-    Vis.prototype.destroy = function () {
-      return this.chart.destroy();
-    };
-
-    Vis.prototype.set = function (name, val) {
-      return this.chart.set(name, val);
-    };
-
-    Vis.prototype.get = function (name) {
-      return this.chart.get(name);
-    };
+//    Vis.prototype.on = function () {
+//      return this.chart.on();
+//    };
+//
+//    Vis.prototype.off = function () {
+//      return this.chart.off();
+//    };
+//
+//    Vis.prototype.destroy = function () {
+//      return this.chart.destroy();
+//    };
+//
+//    Vis.prototype.set = function (name, val) {
+//      return this.chart.set(name, val);
+//    };
+//
+//    Vis.prototype.get = function (name) {
+//      return this.chart.get(name);
+//    };
 
     return Vis;
   };
