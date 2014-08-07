@@ -9,6 +9,7 @@ define(function (require) {
       AppState.Super.call(this, '_a', defaults);
     }
 
+
     return AppState;
   };
 
