@@ -1,7 +1,7 @@
 define(function (require) {
   var module = require('modules').get('app/dashboard');
   var _ = require('lodash');
-  var inherits = require('utils/inherits');
+  var inherits = require('lodash').inherits;
 
   // Used only by the savedDashboards service, usually no reason to change this
   module.factory('SavedDashboard', function (courier) {

@@ -10,20 +10,30 @@
           class="bitty-modal visualize-linked">
           <i class="fa fa-link"></i>
           &nbsp;
-          This visualization is linked to a saved search: <b>{{ vis.savedSearchId | json}}</b> <a href="#/discover/{{ vis.savedSearchId | uriescape }}"><i class="fa fa-pencil" tooltip="Click here to edit the linked saved search"></i></a>
+          This visualization is linked to a saved search:
+          <b>{{ vis.savedSearchId | json}}</b>
+          <a href="#/discover/{{ vis.savedSearchId | uriescape }}">
+            <i class="fa fa-pencil" tooltip="Click here to edit the linked saved search"></i>
+          </a>
         </div>
 
         <div ng-if="linked && unlinking" ng-click="doneUnlinking()" class="bitty-modal">
           <i class="fa fa-chain-broken"></i> Unlinked!
         </div>
 
-        <form ng-submit="doVisualize()" class="inline-form">
-          <input
-            placeholder="Search..."
-            type="text"
-            class="form-control"
-            ng-model="state.query">
-          <button class="btn btn-default" type="submit"><span class="fa fa-search"></span></button>
+        <form ng-submit="doVisualize()" class="inline-form" name="queryInput">
+          <div class="input-group"
+          ng-class="queryInput.$invalid ? 'has-error' : ''">
+            <input query-input="vis.searchSource"
+              placeholder="Search..."
+              type="text"
+              class="form-control"
+              ng-model="state.query">
+            <button class="btn btn-default" type="submit"
+              ng-disabled="queryInput.$invalid">
+              <span class="fa fa-search"></span>
+            </button>
+          </div>
         </form>
       </div>
 
