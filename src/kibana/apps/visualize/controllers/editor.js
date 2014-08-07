@@ -63,7 +63,7 @@ define(function (require) {
     $scope.fields = _.sortBy(indexPattern.fields, 'name');
     $scope.fields.byName = indexPattern.fieldsByName;
 
-    var $state = $scope.state = new appStateFactory.create(vis.getState());
+    var $state = $scope.state = appStateFactory.create(vis.getState());
 
     if ($state.query) {
       vis.searchSource.set('query', $state.query);
