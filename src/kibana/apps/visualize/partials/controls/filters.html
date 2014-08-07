@@ -1,6 +1,5 @@
 <div ng-init="config.filters = (config.filters || [{}])">
   <div class="form-group" >
-
     <div ng-repeat="filter in config.filters track by $index">
       <div class="config-controls pull-right btn-group">
         <span ng-click="config.filters.splice($index, 1)"
@@ -14,7 +13,7 @@
             ng-model="filter.query_string"
             type="text"
             class="form-control"
-            name="filter.query_string" />
+            name="filter{{$index}}" />
         </div>
       </div>
     </div>
