@@ -3,6 +3,7 @@
  */
 define(function (require) {
   var angular = require('angular');
+  var _ = require('lodash');
   var $ = require('jquery');
   var modules = require('modules');
   var routes = require('routes');
@@ -13,7 +14,7 @@ define(function (require) {
 
   var configFile = require('config_file');
 
-  var kibana = angular.module('kibana', [
+  var kibana = modules.get('kibana', [
     // list external requirements here
     'elasticsearch',
     'pasvaz.bindonce',
@@ -26,9 +27,11 @@ define(function (require) {
     // This stores the Kibana revision number, @REV@ is replaced by grunt.
     .constant('kbnVersion', '@REV@')
     // The minimum Elasticsearch version required to run Kibana
-    .constant('minimumElasticsearchVersion', '1.2.1')
+    .constant('minimumElasticsearchVersion', '1.3.1')
     // Use this for cache busting partials
     .constant('cacheBust', 'cache-bust=' + Date.now())
+    // When we need to identify the current session of the app, ef shard preference
+    .constant('sessionId', Date.now())
     // attach the route manager's known routes
     .config(routes.config);
 
@@ -46,15 +49,23 @@ define(function (require) {
     return 'apps/' + app.id + '/index';
   });
 
-  require([
-    'controllers/kibana'
-  ], function loadApps() {
-    require(appModules, function bootstrap() {
+
+  kibana.load = _.onceWithCb(function (cb) {
+    require([
+      'controllers/kibana'
+    ], function loadApps() {
+      require(appModules, cb);
+    });
+  });
+
+  kibana.init = _.onceWithCb(function (cb) {
+    kibana.load(function () {
       $(function () {
         angular
           .bootstrap(document, ['kibana'])
-          .invoke(function ($rootScope, $route) {
+          .invoke(function () {
             $(document.body).children().show();
+            cb();
           });
       });
     });

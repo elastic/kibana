@@ -1,2 +1,8 @@
-<div class="visualize-chart"></div>
+<div ng-if="chartData.hits === 0"
+  class="visualize-error visualize-chart">
+  <h2><i class="fa fa-meh-o"></i></h2>
+  <h4>No results found</h4>
+</div>
+
+<div ng-hide="chartData.hits === 0" class="visualize-chart"></div>
 <visualize-spy></visualize-spy>

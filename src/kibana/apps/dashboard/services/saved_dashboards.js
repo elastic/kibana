@@ -23,7 +23,7 @@ define(function (require) {
     };
 
     this.urlFor = function (id) {
-      return '#/dashboard/' + id;
+      return '#/dashboard/' + encodeURIComponent(id);
     };
 
     this.delete = function (ids) {

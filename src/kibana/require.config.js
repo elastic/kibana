@@ -8,10 +8,10 @@ require.config({
     routes: 'utils/routes/index',
     errors: 'components/errors',
     modules: 'utils/modules',
+    lodash: 'utils/_mixins',
 
     // bower_components
     angular: '../bower_components/angular/angular',
-    'angular-mocks': '../bower_components/angular-mocks/angular-mocks',
     'angular-route': '../bower_components/angular-route/angular-route',
     'angular-bootstrap': '../bower_components/angular-bootstrap/ui-bootstrap-tpls',
     'angular-bindonce': '../bower_components/angular-bindonce/bindonce',
@@ -24,7 +24,7 @@ require.config({
     text: '../bower_components/requirejs-text/text',
     elasticsearch: '../bower_components/elasticsearch/elasticsearch.angular',
     jquery: '../bower_components/jquery/dist/jquery',
-    lodash: '../bower_components/lodash/dist/lodash',
+    lodash_src: '../bower_components/lodash/dist/lodash',
     moment: '../bower_components/moment/moment',
     gridster: '../bower_components/gridster/dist/jquery.gridster',
     jsonpath: '../bower_components/jsonpath/lib/jsonpath',
@@ -42,7 +42,6 @@ require.config({
     },
     gridster: ['jquery'],
     'angular-route': ['angular'],
-    'angular-mocks': ['angular'],
     'elasticsearch': ['angular'],
     'angular-bootstrap': ['angular'],
     'angular-bindonce': ['angular'],

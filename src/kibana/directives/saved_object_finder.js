@@ -1,9 +1,10 @@
 define(function (require) {
-  var module = require('modules').get('kibana/directives');
+  var module = require('modules').get('kibana');
   var _ = require('lodash');
   var rison = require('utils/rison');
 
-  module.directive('savedObjectFinder', function (savedSearches, savedVisualizations, savedDashboards, $location) {
+  module.directive('savedObjectFinder', function (savedSearches, savedVisualizations, savedDashboards, $location, $route) {
+
     var vars = {
       searches: {
         service: savedSearches,
@@ -25,8 +26,10 @@ define(function (require) {
       scope: {
         type: '@',
         title: '@?',
-        makeUrl: '=?',
-        onChoose: '=?'
+        // optional make-url attr, sets the userMakeUrl in our scope
+        userMakeUrl: '=?makeUrl',
+        // optional on-choose attr, sets the userOnChoose in our scope
+        userOnChoose: '=?onChoose'
       },
       template: require('text!partials/saved_object_finder.html'),
       link: function ($scope, $el) {
@@ -51,6 +54,46 @@ define(function (require) {
         // the list of hits, used to render display
         $scope.hits = [];
 
+        /**
+         * Passed the hit objects and will determine if the
+         * hit should have a url in the UI, returns it if so
+         * @return {string|null} - the url or nothing
+         */
+        $scope.makeUrl = function (hit) {
+          if ($scope.userMakeUrl) {
+            return $scope.userMakeUrl(hit);
+          }
+
+          if (!$scope.userOnChoose) {
+            return hit.url;
+          }
+        };
+
+        /**
+         * Called when a hit object is clicked, can override the
+         * url behavior if necessary.
+         */
+        $scope.onChoose = function (hit, $event) {
+          if ($scope.userOnChoose) {
+            $scope.userOnChoose(hit, $event);
+          }
+
+          if ($event.isDefaultPrevented()) return;
+
+          var url = $scope.makeUrl(hit);
+          if (!url || url.charAt(0) !== '#') return;
+
+          // angular wants the '/path', not '#/path'
+          var path = url.substr(1);
+          if ($route.matches(path)) {
+            $event.preventDefault();
+
+            // change works with paths, but we are only here because the paths
+            // are the same, so we have to change the whole url to be the new path
+            $route.changeUrl(path);
+          }
+        };
+
         $scope.$watch('type', function (type) {
           type = vars[type];
           service = type.service;
@@ -58,11 +101,6 @@ define(function (require) {
           $scope.nouns = type.nouns || type.noun + 's';
           filterResults();
         });
-
-        if (!$scope.makeUrl) {
-          $scope.makeUrl = $scope.onChoose ? _.noop : function (hit) { return hit.url; };
-        }
-        $scope.onChoose = $scope.onChoose || _.noop;
 
         $scope.$watch('filter', function (newFilter) {
           // ensure that the currentFilter changes from undefined to ''

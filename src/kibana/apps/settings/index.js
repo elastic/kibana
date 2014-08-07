@@ -1,5 +1,5 @@
 define(function (require, module, exports) {
-  var _ = require('utils/mixins');
+  var _ = require('lodash');
 
   require('css!apps/settings/styles/main.css');
   require('filters/start_from');

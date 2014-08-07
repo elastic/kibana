@@ -22,9 +22,18 @@
           fixtures: '../../test/unit/fixtures',
           specs: '../../test/unit/specs',
           sinon: '../../test/utils/sinon',
-          bluebird: '../bower_components/bluebird/js/browser/bluebird'
+          bluebird: '../bower_components/bluebird/js/browser/bluebird',
+          angular: '../bower_components/angular-mocks/angular-mocks',
+          angular_src: '../bower_components/angular/angular'
         },
         shim: {
+          angular: {
+            deps: [
+              'jquery',
+              'angular_src'
+            ],
+            exports: 'angular'
+          },
           'sinon/sinon': {
             deps: [
               'sinon/sinon-timers-1.8.2'
@@ -49,11 +58,13 @@
 
       function runTests() {
         require([
+          'kibana',
           'sinon/sinon',
-          //'specs/apps/dashboard/directives/panel',
+          'specs/apps/discover/hit_sort_fn',
           'specs/directives/timepicker',
           'specs/directives/truncate',
           'specs/directives/css_truncate',
+          'specs/directives/spinner',
           'specs/filters/field_type',
           'specs/filters/uriescape',
           'specs/filters/moment',
@@ -61,19 +72,20 @@
           'specs/utils/datemath',
           'specs/utils/interval',
           'specs/utils/versionmath',
-          'specs/utils/routes/index'
-        ], function (sinon) {
+          'specs/utils/routes/index',
+          'specs/courier/search_source/_get_normalized_sort',
+          'specs/factories/base_object',
+          'specs/state_management/state',
+          'specs/utils/diff_object',
+          'specs/factories/events'
+        ], function (kibana, sinon) {
+          kibana.load(function () {
+            var xhr = sinon.useFakeXMLHttpRequest();
 
-          var xhr = sinon.useFakeXMLHttpRequest();
-
-
-          // xhr.onCreate = function () {
-          //   throw new Error('Tests should not be sending XHR requests');
-          // };
-
-          window.mochaRunner = mocha.run().on('end', function () {
-            window.mochaResults = this.stats;
-            xhr.restore();
+            window.mochaRunner = mocha.run().on('end', function () {
+              window.mochaResults = this.stats;
+              xhr.restore();
+            });
           });
         });
       }

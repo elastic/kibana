@@ -1,6 +1,5 @@
 define(function (require) {
   var angular = require('angular');
-  var mocks = require('angular-mocks');
   var moment = require('moment');
   var _ = require('lodash');
   var $ = require('jquery');

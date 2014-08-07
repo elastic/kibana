@@ -20,7 +20,7 @@ define(function (require) {
     return function () { return 'pm_' + i++; };
   }());
 
-  var module = require('modules').get('kibana/services');
+  var module = require('modules').get('kibana');
   module.service('Private', function ($injector) {
     // one cache per instance of the Private service
     var cache = {};

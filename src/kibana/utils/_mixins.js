@@ -1,7 +1,21 @@
 define(function (require) {
-  var _ = require('lodash');
+  /**
+   * THESE ARE AUTOMATICALLY INCLUDED IN LODASH
+   *
+   * use:
+   * var _ = require('lodash');
+   *
+   * require.js config points the "lodash" id to
+   * this module, which provides a modified version
+   * of lodash.
+   */
+  var _ = require('lodash_src');
 
   _.mixin({
+    inherits: function (Sub, Super) {
+      Sub.prototype = _.create(Super.prototype, { 'constructor': Super });
+      Sub.Super = Super;
+    },
     move: function (array, fromIndex, toIndex) {
       array.splice(toIndex, 0, array.splice(fromIndex, 1)[0]);
       return array;
@@ -96,6 +110,45 @@ define(function (require) {
       // catch all version
       return function () {
         return fn.apply(context, [].slice.call(arguments, 0, count));
+      };
+    },
+    // call all functions in an array
+    callEach: function (arr) {
+      _.invoke(arr, 'call');
+    },
+    onceWithCb: function (fn) {
+      var callbacks = [];
+
+      // on initial flush, call the init function, but ensure
+      // that it only happens once
+      var flush = _.once(function (cntx, args) {
+        args.push(function finishedOnce() {
+          // override flush to simply schedule an asynchronous clear
+          flush = function () {
+            setTimeout(function () {
+              _.callEach(callbacks.splice(0));
+            }, 0);
+          };
+
+          flush();
+        });
+
+        fn.apply(cntx, args);
+      });
+
+      return function runOnceWithCb() {
+        var args = [].slice.call(arguments, 0);
+        var cb = args[args.length - 1];
+
+        if (typeof cb === 'function') {
+          callbacks.push(cb);
+          // trim the arg list so the other callback can
+          // be pushed if needed
+          args = args.slice(0, -1);
+        }
+
+        // always call flush, it might not do anything
+        flush(this, args);
       };
     }
   });

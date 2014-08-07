@@ -233,11 +233,7 @@ define(function (require) {
 
         selection.each(function (d) {
           d.series.forEach(function (label) {
-            if (label.label) {
-              items.push(label.label);
-            } else {
-              items.push(d.yAxisLabel);
-            }
+            items.push(label.label);
           });
         });
 
@@ -368,9 +364,9 @@ define(function (require) {
     };
 
     chart.getYStackMax = function (data) {
-      d3.max(data, function (d) {
+      return d3.max(data, function (d) {
         return d3.max(d.values, function (e) {
-          return e.y0 + d.y;
+          return e.y0 + e.y;
         });
       });
     };
@@ -419,7 +415,12 @@ define(function (require) {
         };
 
         // width, height, margins
-        var margin = { top: 35, right: 15, bottom: 35, left: 60 };
+        var margin = { top: 5, right: 0, bottom: 25, left: 60 };
+
+        if ($('div.columns').length > 0) {
+          margin.top = 35;
+        }
+
         var elemWidth = parseInt(d3.select(that)
           .style('width'), 10);
         var elemHeight = parseInt(d3.select(that)
@@ -459,6 +460,20 @@ define(function (require) {
         var yStackMax = chart.getYStackMax(layers);
         var keys = chart.getXAxisKeys(layers[0].values);
 
+        var xTickScale = d3.scale.linear()
+          .clamp(true)
+          .domain([80, 300, 800])
+          .range([0, 4, 8]);
+
+        var xTicks = Math.floor(xTickScale(width));
+
+        var yTickScale = d3.scale.linear()
+          .clamp(true)
+          .domain([20, 40, 1000])
+          .range([0, 2, 10]);
+
+        var yTicks = Math.floor(yTickScale(height));
+
         var xScale;
 
         if (data.ordered !== undefined && data.ordered.date !== undefined) {
@@ -468,44 +483,48 @@ define(function (require) {
           var testInterval;
           var dateoffset;
 
-          if (milsInterval >= 86400000 * 364) {
-            testInterval = 'year';
-            dateoffset = 1;
+          switch (true) {
+            case milsInterval >= 86400000 * 364:
+              testInterval = 'year';
+              dateoffset = 1;
+              break;
+            case milsInterval >= 86400000 * 30:
+              testInterval = 'month';
+              dateoffset = 1;
+              break;
+            case milsInterval >= 86400000 * 7:
+              testInterval = 'week';
+              dateoffset = (milsInterval / 86400000 * 7);
+              break;
+            case milsInterval >= 86400000:
+              testInterval = 'day';
+              dateoffset = (milsInterval / 86400000);
+              break;
+            case milsInterval >= 3600000:
+              testInterval = 'hour';
+              dateoffset = (milsInterval / 3600000);
+              break;
+            case milsInterval >= 60000:
+              testInterval = 'minute';
+              dateoffset = (milsInterval / 60000);
+              break;
+            default:
+              testInterval = 'second';
+              dateoffset = (milsInterval / 1000);
           }
-          if (milsInterval < 86400000 * 364) {
-            testInterval = 'month';
-            dateoffset = 1;
-          }
-          if (milsInterval < 86400000 * 30) {
-            testInterval = 'week';
-            dateoffset = (milsInterval / 86400000 * 7);
-          }
-          if (milsInterval < 86400000 * 7) {
-            testInterval = 'day';
-            dateoffset = (milsInterval / 86400000);
-          }
-          if (milsInterval < 86400000) {
-            testInterval = 'hour';
-            dateoffset = (milsInterval / 3600000);
-          }
-          if (milsInterval < 3600000) {
-            testInterval = 'minute';
-            dateoffset = (milsInterval / 60000);
-          }
-          if (milsInterval < 60000) {
-            testInterval = 'second';
-            dateoffset = (milsInterval / 1000);
-          }
-
-          // apply interval to last date in keys
-          var maxIntervalOffset = d3.time[testInterval]
-            .offset(new Date(maxDate), dateoffset);
-          var minIntervalOffset = d3.time[testInterval]
-            .offset(new Date(minDate), -dateoffset);
 
           xScale = d3.time.scale()
-            .domain([minIntervalOffset, maxIntervalOffset])
-            .range([0, width]);
+            .range([0, width])
+            .nice(xTicks);
+
+          xScale = d3.scale.ordinal()
+            .domain(keys)
+            .rangeBands([0, width], 0.1);
+
+//          xScale.domain([
+//            d3.time[testInterval].offset(new Date(minDate), -dateoffset),
+//            d3.time[testInterval].offset(new Date(maxDate), dateoffset)
+//          ]);
         } else {
           xScale = d3.scale.ordinal()
             .domain(keys)
@@ -513,49 +532,31 @@ define(function (require) {
         }
 
         var yScale = d3.scale.linear()
-          .range([height, 0]);
+          .range([height, 0])
+          .nice(yTicks);
 
-        var xTickScale = d3.scale.linear()
-          .clamp(true)
-          .domain([80, 300, 800])
-          .range([0, 2, 4]);
-
-        var xTicks = Math.floor(xTickScale(width));
+        // setting the y scale domain
+        if (shareYAxis) {
+          yScale.domain([0, yAxisMax]);
+        } else {
+          if (offset === 'group') {
+            yScale.domain([0, yGroupMax]);
+          } else {
+            yScale.domain([0, yStackMax]);
+          }
+        }
 
         var xAxis = d3.svg.axis()
           .scale(xScale)
           .ticks(xTicks)
-          .tickPadding(5)
           .tickFormat(xAxisFormatter)
           .orient('bottom');
 
-        // tickScale uses height to get tickN value for ticks() and nice()
-        var tickScale = d3.scale.linear()
-            .clamp(true)
-            .domain([20, 40, 1000])
-            .range([0, 2, 10]),
-          tickN = Math.floor(tickScale(height));
-
         var yAxis = d3.svg.axis()
           .scale(yScale)
-          .ticks(tickN)
-          .tickPadding(4)
+          .ticks(yTicks)
           .tickFormat(yAxisFormatter)
           .orient('left');
-
-        // setting the y scale domain
-        if (shareYAxis) {
-          yScale.domain([0, yAxisMax])
-            .nice(tickN);
-        } else {
-          if (offset === 'group') {
-            yScale.domain([0, yGroupMax])
-              .nice(tickN);
-          } else {
-            yScale.domain([0, yStackMax])
-              .nice(tickN);
-          }
-        }
 
         // canvas
         var svg = d3.select(that)
@@ -611,18 +612,58 @@ define(function (require) {
           .call(yAxis);
 
         // Axis labels
-        g.append('text')
+        // y Axis label
+        d3.select(elem).append('div')
+          .attr('class', 'y-axis-label')
+          .append('p')
+          .text(yAxisLabel);
+
+        // x Axis label
+        d3.select(elem).append('div')
           .attr('class', 'x-axis-label')
-          .attr('text-anchor', 'middle')
-          .attr('x', width / 2)
-          .attr('y', height + 30)
+          .append('p')
           .text(data.xAxisLabel);
 
-        g.append('text')
-          .attr('class', 'y-axis-label')
+        // Removes the first and last x axis tick marks
+        // when the number of xTicks is greater than 5.
+        if (data.ordered) {
+          svg.selectAll('.x').selectAll('.tick')
+            .each(function (d, i) {
+              var length = svg.selectAll('.x').selectAll('.tick')[0].length;
+              if (xTicks > 5) {
+                if (i === 0 || i === length) {
+                  this.remove();
+                }
+              }
+            });
+        }
+
+        // Removes the x-axis for all charts except the last one
+        // when multiple rows for timeseries data are selected
+        if ($('div.rows').length > 0 && data.ordered) {
+          if (args.index !== $('div.rows').length - 1) {
+            d3.selectAll('.x')
+              .selectAll('.tick')
+              .remove();
+          }
+        }
+
+        if ($('div.columns').length > 0 && shareYAxis) {
+          if (args.index !== 0) {
+            d3.select(that).selectAll('.y')
+              .selectAll('.tick')
+              .remove();
+          }
+        }
+
+        // Chart title
+        var title = g.append('text')
+          .attr('class', 'charts-label')
           .attr('text-anchor', 'middle')
-          .attr('x', -height / 2)
-          .attr('y', function () {
+          .attr('x', -height / 2);
+
+        if ($('div.rows').length > 0) {
+          title.attr('y', function () {
             // get width of y axis group for label offset
             var ww = g.select('.y.axis')
               .node()
@@ -630,18 +671,17 @@ define(function (require) {
 
             return -1 * ww.width - 14;
           })
-          .attr('dy', '.75em')
-          .attr('transform', 'rotate(-90)')
-          .text(yAxisLabel);
+            .attr('dy', '.75em')
+            .attr('transform', 'rotate(-90)');
+        }
 
-        // Chart title
-        g.append('text')
-          .attr('class', 'charts-label')
-          .attr('text-anchor', 'middle')
-          .attr('x', width / 2)
-          .attr('y', -10)
-          .text(data.label)
-          .call(chart.tickText, width)
+        if ($('div.columns').length > 0) {
+          title.attr('x', width / 2)
+            .attr('y', -10);
+        }
+
+        title.text(data.label)
+          .call(chart.tickText, height)
           .on('mouseover', function (d) {
             var hh = tip[0][0].scrollHeight;
 
@@ -716,20 +756,10 @@ define(function (require) {
           .enter()
           .append('g')
           .attr('class', function (d) {
-            if (!d.label) {
-              return colors[yAxisLabel];
-            } else {
-              return colors[d.label];
-            }
-
+            return colors[d.label];
           })
           .style('fill', function (d) {
-            if (!d.label) {
-              return colors[yAxisLabel];
-            } else {
-              return colors[d.label];
-            }
-
+            return colors[d.label];
           });
 
         var bars = layer.selectAll('rect')
@@ -892,34 +922,13 @@ define(function (require) {
                 return xScale(d.x);
               })
               .attr('width', function () {
-                var val;
-                if (data.ordered === undefined || !data.ordered.date) {
-                  val = xScale.rangeBand();
-                } else {
-                  val = xScale(data.ordered.min + data.ordered.interval) -
-                    xScale(data.ordered.min) - 2;
-                }
-                if (isNaN(val) || val < 0) {
-                  throw new Error('line 894: bars attr width: ' + val);
-                } else {
-                  return val;
-                }
+                return xScale.rangeBand();
               })
               .attr('y', function (d) {
-                var val = yScale(d.y0 + d.y);
-                if (isNaN(val) || val < 0) {
-                  throw new Error('line 907: bars attr y: ' + val);
-                } else {
-                  return val;
-                }
+                return yScale(d.y0 + d.y);
               })
               .attr('height', function (d) {
-                var val = yScale(d.y0) - yScale(d.y0 + d.y);
-                if (isNaN(val) || val <= 0) {
-                  throw new Error('line 915: bars attr height: ' + val);
-                } else {
-                  return val;
-                }
+                return yScale(d.y0) - yScale(d.y0 + d.y);
               });
             break;
         }

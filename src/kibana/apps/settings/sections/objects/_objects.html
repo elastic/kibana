@@ -29,12 +29,19 @@
             <div class="pull-right">
               <a href="{{ item.url }}" class="btn-success btn btn-xs">View</a>
               &nbsp;
-              <a href="#/settings/objects/{{service.service}}/{{item.id}}" class="btn-primary btn btn-xs">Edit</a>
+              <a
+                href="#/settings/objects/{{service.service | uriescape}}/{{item.id | uriescape}}"
+                class="btn-primary btn btn-xs" >
+                Edit
+              </a>
             </div>
             <div class="pull-left">
-              <input type="checkbox" ng-click="item.checked = !item.checked; toggleDeleteBtn(service)" ng-checked="item.checked">
+              <input
+                ng-click="item.checked = !item.checked; toggleDeleteBtn(service)"
+                ng-checked="item.checked"
+                type="checkbox" >
             </div>
-            <a href="#/settings/objects/{{service.service}}/{{item.id}}"><i ng-class="item.icon" class="fa"></i>&nbsp;{{ item.title }}</a>
+            <a href="#/settings/objects/{{service.service | uriescape}}/{{item.id | uriescape}}"><i ng-class="item.icon" class="fa"></i>&nbsp;{{ item.title }}</a>
           </li>
           <li ng-if="!service.data.length" class="empty">No "{{service.title}}" found.</li>
         </ul>

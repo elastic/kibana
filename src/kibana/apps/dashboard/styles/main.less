@@ -1,6 +1,6 @@
 @import (reference) "../../../styles/_bootstrap.less";
 @import (reference) "../../../styles/theme/_theme.less";
-@import (reference) "../../../styles/_mixins.less";
+@import (reference) "lesshat.less";
 
 @dashboard-background: #589CbC;
 
@@ -54,13 +54,27 @@ dashboard-grid {
       height: 100%;
 
       // flex layout allows us to define the visualize element as "fill available space"
-      .flex-display();
+      .display(flex);
       .flex-direction(column);
       .justify-content(flex-start);
 
       .panel-heading {
         .flex();
         min-height: 45px;
+        white-space: nowrap;
+        display: flex;
+
+        div.btn-group {
+          white-space: nowrap;
+          .flex(0 0 auto);
+        }
+
+        .panel-title {
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          .flex(1 1 0);
+        }
 
         a {
           color: @text-color;

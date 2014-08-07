@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  var module = require('modules').get('kibana/services');
+  var module = require('modules').get('app/visualize');
   var configCats = require('apps/visualize/saved_visualizations/_config_categories');
 
 
@@ -51,12 +51,8 @@ define(function (require) {
             return opts.searchSource;
           }
 
-          return courier.getRootSearch()
-          .then(function (rootSearch) {
-            var searchSource = courier.createSource('search');
-            searchSource.inherits(rootSearch);
-            return searchSource;
-          });
+          return courier.createSource('search');
+
         }()))
         .then(function (searchSource) {
           // TODO: Should we abtract out the agg building stuff?

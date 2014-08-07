@@ -7,12 +7,16 @@ define(function (require) {
     return {
       clientMethod: 'msearch',
 
+      getSourceStateFromRequest: function (req) {
+        return req.source._flatten();
+      },
+
       /**
        * Flatten a series of requests into as ES request body
        * @param  {array} requests - the requests to serialize
        * @return {string} - the request body
        */
-      requestStatesToBody: function (states) {
+      convertStatesToBody: function (states) {
         return states.map(function (state) {
           var timeBounds = timefilter.getBounds();
           var indexList = state.index.toIndexList(timeBounds.min, timeBounds.max);

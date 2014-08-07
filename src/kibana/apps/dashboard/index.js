@@ -18,8 +18,7 @@ define(function (require) {
     'ngRoute',
     'kibana/courier',
     'kibana/config',
-    'kibana/notify',
-    'kibana/services'
+    'kibana/notify'
   ]);
 
   require('routes')
@@ -41,7 +40,7 @@ define(function (require) {
     }
   });
 
-  app.directive('dashboardApp', function (Notifier, courier, savedVisualizations, AppState, timefilter) {
+  app.directive('dashboardApp', function (Notifier, courier, savedVisualizations, appStateFactory, timefilter) {
     return {
       controller: function ($scope, $route, $routeParams, $location, configFile) {
         var notify = new Notifier({
@@ -53,10 +52,11 @@ define(function (require) {
 
         var stateDefaults = {
           title: dash.title,
-          panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : []
+          panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
+          query: ''
         };
 
-        var $state = $scope.$state = new AppState(stateDefaults);
+        var $state = $scope.state = appStateFactory.create(stateDefaults);
 
         $scope.configTemplate = new ConfigTemplate({
           save: require('text!apps/dashboard/partials/save_dashboard.html'),
@@ -71,14 +71,36 @@ define(function (require) {
         $scope.openAdd = _.partial($scope.configTemplate.toggle, 'pickVis');
         $scope.refresh = _.bindKey(courier, 'fetch');
 
-
         timefilter.enabled(true);
         $scope.timefilter = timefilter;
         $scope.$watchCollection('globalState.time', $scope.refresh);
 
+        courier.setRootSearchSource(dash.searchSource);
+
+        function init() {
+          updateQueryOnRootSource();
+          $scope.$broadcast('application.load');
+        }
+
+        function updateQueryOnRootSource() {
+          if ($state.query) {
+            dash.searchSource.set('filter', {
+              query:  $state.query
+            });
+          } else {
+            dash.searchSource.set('filter', null);
+          }
+        }
+
+        $scope.filterResults = function () {
+          updateQueryOnRootSource();
+          $state.save();
+          courier.fetch();
+        };
+
         $scope.save = function () {
           $state.title = dash.id = dash.title;
-          $state.commit();
+          $state.save();
           dash.panelsJSON = JSON.stringify($state.panels);
 
           dash.save()
@@ -95,7 +117,7 @@ define(function (require) {
         $scope.$on('ready:vis', function () {
           if (pendingVis) pendingVis--;
           if (pendingVis === 0) {
-            $state.commit();
+            $state.save();
             courier.fetch();
           }
         });
@@ -103,7 +125,7 @@ define(function (require) {
         // listen for notifications from the grid component that changes have
         // been made, rather than watching the panels deeply
         $scope.$on('change:vis', function () {
-          $state.commit();
+          $state.save();
         });
 
         // called by the saved-object-finder when a user clicks a vis
@@ -126,7 +148,7 @@ define(function (require) {
           }
         };
 
-        $scope.$broadcast('application.load');
+        init();
       }
     };
   });

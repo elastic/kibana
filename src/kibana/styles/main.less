@@ -1,10 +1,14 @@
 @import "../../bower_components/font-awesome/less/font-awesome.less";
+@import (reference) "lesshat.less";
 
-// Custom variables
+// Import variable files
 @import "./_variables.less";
 
 // custom bootstrap build
 @import "./_bootstrap.less";
+
+// bootstrap modifications
+@import "./theme/_theme.less";
 
 // call outs
 @import "./_callout.less";
@@ -21,7 +25,10 @@
 // Pagniation directive
 @import "./_pagination.less";
 
-@fa-font-path: "../../bower_components/font-awesome/fonts";
+// custom navbar style
+@import "./_navbar.less";
+
+@import "./_sidebar.less";
 
 html,
 body {
@@ -31,6 +38,11 @@ body {
 
 label > small {
   font-weight: normal;
+}
+
+button {
+  // buttons have a stupid 1990's default look which should be disabled
+  .btn();
 }
 
 // Colors available for font awesome icons, these might not look good with normal text
@@ -62,6 +74,10 @@ ul.navbar-inline li {
   font-size: 8pt;
   font-weight: normal;
   opacity: 90%;
+
+  &-inner {
+    word-break: break-word;
+  }
 }
 
 .content {
@@ -145,6 +161,23 @@ notifications {
   }
 }
 
+.list-group-menu {
+
+  .list-group-menu-item {
+    &.active {
+      font-weight: bold;
+      background-color: @well-bg;
+    }
+    &:hover {
+      background-color: @well-bg;
+    }
+    li {
+      list-style: none;
+      color: @link-color;
+    }
+  }
+}
+
 // right section of the main nav base
 .navbar-static-top .navbar-right {
   font-size: @font-size-small;
@@ -209,14 +242,18 @@ table {
   }
 }
 
-@import "./_sidebar.less";
-
 //== SavedObjectFinder
 saved-object-finder {
   .form-group {
     margin-bottom: 0;
     input {
       .border-bottom-radius(0);
+    }
+  }
+
+  .list-group-item {
+    &:first-child {
+      .border-top-radius(0) !important;
     }
   }
 
@@ -284,7 +321,7 @@ saved-object-finder {
 
 //== clicking disabled buttons should not cause the whole page to get selected
 button[disabled] {
-  .prevent-selection();
+  .user-select(none);
 }
 
 //== override the disabled cursor that doesn't work everywhere
@@ -310,14 +347,3 @@ input[type="checkbox"],
   }
 }
 
-
-.flex {
-  .flex-display();
-}
-.flex-vert {
-  .flex-display();
-  .flex-direction(column);
-}
-.flex-grow {
-  .flex(1, 1, auto);
-}

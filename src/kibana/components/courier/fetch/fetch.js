@@ -1,5 +1,5 @@
 define(function (require) {
-  return function fetchService(Private, es, Promise, Notifier) {
+  return function fetchService(Private, es, Promise, Notifier, sessionId) {
     var _ = require('lodash');
     var errors = require('errors');
     var moment = require('moment');
@@ -51,22 +51,22 @@ define(function (require) {
         }
       });
 
-      return Promise.map(all, function (req) {
-        return req.source._flatten();
-      })
+      return Promise.map(all, _.limit(strategy.getSourceStateFromRequest, 1))
       .then(function (states) {
         // all requests must have been disabled
         if (!states.length) return Promise.resolve();
 
-        body = strategy.requestStatesToBody(states);
+        body = strategy.convertStatesToBody(states);
 
         return es[strategy.clientMethod]({
+          preference: sessionId,
           body: body
         })
         .then(function (resp) {
           var sendResponse = function (req, resp) {
             req.complete = true;
             req.resp = resp;
+            req.ms = req.moment.diff() * -1;
             req.source.activeFetchCount -= 1;
 
             if (resp.error) return reqErrHandler.handle(req, new errors.FetchFailure(resp));

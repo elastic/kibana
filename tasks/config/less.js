@@ -1,6 +1,9 @@
+var bc = require('path').join(__dirname, '../../src/bower_components');
+
 module.exports = {
   src: {
     src: [
+      '<%= src %>/kibana/components/*/*.less',
       '<%= src %>/kibana/apps/dashboard/styles/main.less',
       '<%= src %>/kibana/apps/discover/styles/main.less',
       '<%= src %>/kibana/apps/settings/styles/main.less',
@@ -11,7 +14,8 @@ module.exports = {
     expand: true,
     ext: '.css',
     options: {
-      ieCompat: false
+      ieCompat: false,
+      paths: [bc + '/lesshat/build/']
     }
   }
 };

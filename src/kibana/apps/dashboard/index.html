@@ -1,20 +1,33 @@
 <div dashboard-app class="dashboard-container">
   <nav ng-show="!appEmbedded" class="navbar navbar-default navbar-static-top">
-    <div class="container-fluid">
-      <div class="navbar-header">
-        <span class="navbar-brand pull-left">
-          {{dash.title}}
-        </span>
-      </div>
+    <navbar>
+      <span class="name">
+        {{dash.title}}
+      </span>
 
-      <ul class="nav navbar-nav pull-right">
-        <li><a class="navbar-link" ng-click="openAdd()"><i class="fa fa-plus"></i></a></li>
-        <li><a class="navbar-link" ng-click="openSave();"><i class="fa fa-save"></i></a></li>
-        <li><a class="navbar-link" ng-click="openLoad()"><i class="fa fa-folder-open"></i></a></li>
-        <li><a class="navbar-link" ng-click="openShare()"><i class="fa fa-code"></i></a></li>
-        <li><a class="navbar-link" ng-click="refresh()"><i class="fa fa-refresh"></i></a></li>
-      </ul>
-    </div>
+      <form class="fill inline-form" ng-submit="filterResults()" name="queryInput">
+        <div class="input-group"
+          ng-class="queryInput.$invalid ? 'has-error' : ''">
+          <input query-input
+            placeholder="Filter..."
+            type="text"
+            class="form-control"
+            ng-model="state.query">
+          <button class="btn btn-default" type="submit"
+            ng-disabled="queryInput.$invalid">
+            <span class="fa fa-search"></span>
+          </button>
+        </div>
+      </form>
+
+      <div class="button-group">
+        <button ng-click="openAdd()"><i class="fa fa-plus"></i></button>
+        <button ng-click="openSave()"><i class="fa fa-save"></i></button>
+        <button ng-click="openLoad()"><i class="fa fa-folder-open"></i></button>
+        <button ng-click="openShare()"><i class="fa fa-code"></i></button>
+        <button ng-click="refresh()"><i class="fa fa-refresh"></i></button>
+      </div>
+    </navbar>
   </nav>
   <config config-template="configTemplate" config-object="opts"></config>
   <dashboard-grid></dashboard-grid>

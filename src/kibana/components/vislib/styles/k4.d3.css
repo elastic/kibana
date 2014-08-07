@@ -32,8 +32,30 @@ visualize {
 
 .chartwrapper {
     margin: 0;
-    padding: 0;
+    padding: 20px;
     overflow: hidden;
+}
+
+div.x-axis-label {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    bottom: 15px;
+    font-size: 7pt;
+    color: #848e96;
+}
+
+div.y-axis-label {
+    position: absolute;
+    left: -25px;
+    top: 42.5%;
+    font-size: 7pt;
+    color: #848e96;
+    -webkit-transform: rotate(270deg);
+    -moz-transform: rotate(270deg);
+    -o-transform: rotate(270deg);
+    -ms-transform: rotate(270deg);
+    transform: rotate(270deg);
 }
 
 /*  legends  */

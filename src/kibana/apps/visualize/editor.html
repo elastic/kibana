@@ -1,82 +1,81 @@
  <div ng-controller="VisualizeEditor" class="vis-editor">
 
   <div ng-if="!appEmbedded">
-    <nav class="navbar navbar-default navbar-static-top">
-      <div class="container-fluid">
-        <div ng-if="vis.title" class="navbar-header pull-left">
-          <span class="navbar-brand">
-            {{vis.title}}
-          </span>
+    <navbar>
+      <span ng-if="!!vis.title" class="name" ng-bind="vis.title"></span>
+      <div class="fill bitty-modal-container">
+        <div ng-if="linked && !unlinking"
+          ng-dblclick="unlink()"
+          tooltip="Double click to unlink this visualization from the saved search"
+          class="bitty-modal visualize-linked">
+          <i class="fa fa-link"></i>
+          &nbsp;
+          This visualization is linked to a saved search:
+          <b>{{ vis.savedSearchId | json}}</b>
+          <a href="#/discover/{{ vis.savedSearchId | uriescape }}">
+            <i class="fa fa-pencil" tooltip="Click here to edit the linked saved search"></i>
+          </a>
         </div>
 
-        <ul class="nav navbar-nav pull-right">
-          <li><a ng-click="startOver()" class="navbar-link"><i class="fa fa-file-o"></i></a></li>
-          <li><a ng-click="toggleSave()" class="navbar-link"><i class="fa fa-save"></i></a></li>
-          <li><a ng-click="toggleLoad()" class="navbar-link"><i class="fa fa-folder-open"></i></a></li>
-          <li><a ng-click="toggleShare()" class="navbar-link"><i class="fa fa-code"></i></a></li>
-          <li><a class="navbar-link" ng-click="doVisualize()"><i class="fa fa-refresh"></i></a></li>
-        </ul>
+        <div ng-if="linked && unlinking" ng-click="doneUnlinking()" class="bitty-modal">
+          <i class="fa fa-chain-broken"></i> Unlinked!
+        </div>
 
-        <form ng-submit="doVisualize()" ng-class="{ 'navbar-form': true, 'first': !vis.title }">
-          <div class="form-group">
-            <div class="input-group">
-              <input
-                placeholder="Search..."
-                type="text"
-                class="form-control ng-pristine ng-valid"
-                ng-model="state.query">
-              <span class="input-group-addon" ng-click="doVisualize()"><span class="fa fa-search"></span></span>
-
-              <div ng-if="linked && !unlinking"
-                ng-dblclick="unlink()"
-                tooltip="Double click to unlink this visualization from the saved search"
-                class="bitty-modal visualize-linked">
-                <i class="fa fa-link"></i>
-                &nbsp;
-                This visualization is linked to a saved search: <b>{{ vis.savedSearchId | json}}</b> <a href="#/discover/{{ vis.savedSearchId | uriescape }}"><i class="fa fa-pencil" tooltip="Click here to edit the linked saved search"></i></a>
-              </div>
-
-              <div ng-if="linked && unlinking" ng-click="doneUnlinking()" class="bitty-modal">
-                <i class="fa fa-chain-broken"></i> Unlinked!
-              </div>
-            </div>
+        <form ng-submit="doVisualize()" class="inline-form" name="queryInput">
+          <div class="input-group"
+          ng-class="queryInput.$invalid ? 'has-error' : ''">
+            <input query-input="vis.searchSource"
+              placeholder="Search..."
+              type="text"
+              class="form-control"
+              ng-model="state.query">
+            <button class="btn btn-default" type="submit"
+              ng-disabled="queryInput.$invalid">
+              <span class="fa fa-search"></span>
+            </button>
           </div>
         </form>
       </div>
-    </nav>
+
+      <div class="button-group">
+        <button ng-click="startOver()"><i class="fa fa-file-o"></i></button>
+        <button ng-click="toggleSave()"><i class="fa fa-save"></i></button>
+        <button ng-click="toggleLoad()"><i class="fa fa-folder-open"></i></button>
+        <button ng-click="toggleShare()"><i class="fa fa-code"></i></button>
+        <button ng-click="doVisualize()"><i class="fa fa-refresh"></i></button>
+      </div>
+    </navbar>
     <config
       config-template="configTemplate"
       config-object="conf">
     </config>
-    <div class="container-fluid">
-      <div class="row vis-editor-content">
-        <div class="vis-sidebar">
-          <div class="sidebar-container">
-            <form class="sidebar-list" ng-submit="doVisualize()">
-              <ul class="list-unstyled">
-                <li ng-repeat="category in visConfigCategories.displayOrder" class="sidebar-item">
-                  <vis-config-category
-                    vis="vis"
-                    category="vis[category.name]"
-                    fields="fields">
-                  </vis-config-category>
-                </li>
-                <li class="sidebar-item">
-                  <div
-                    ng-click="doVisualize()"
-                    ng-if="vis.dirty"
-                    ng-disabled="httpActive.length"
-                    class="sidebar-item-button success">
-                    Apply
-                  </div>
-                </li>
-              </ul>
-            </form>
-          </div>
+    <div class="vis-editor-content">
+      <div class="vis-sidebar">
+        <div class="sidebar-container">
+          <form class="sidebar-list" ng-submit="doVisualize()">
+            <ul class="list-unstyled">
+              <li ng-repeat="category in visConfigCategories.displayOrder" class="sidebar-item">
+                <vis-config-category
+                  vis="vis"
+                  category="vis[category.name]"
+                  fields="fields">
+                </vis-config-category>
+              </li>
+              <li class="sidebar-item">
+                <div
+                  ng-click="doVisualize()"
+                  ng-if="vis.dirty"
+                  ng-disabled="httpActive.length"
+                  class="sidebar-item-button success">
+                  Apply
+                </div>
+              </li>
+            </ul>
+          </form>
         </div>
-        <div class="vis-canvas">
-          <vis-canvas><visualize vis="vis"></visualize></vis-canvas>
-        </div>
+      </div>
+      <div class="vis-canvas">
+        <vis-canvas><visualize vis="vis"></visualize></vis-canvas>
       </div>
     </div>
   </div>

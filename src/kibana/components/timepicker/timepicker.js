@@ -1,15 +1,17 @@
 define(function (require) {
   var html = require('text!components/timepicker/timepicker.html');
-  var module = require('modules').get('kibana/directives');
+  var module = require('modules').get('components/timepicker');
   var _ = require('lodash');
   var datemath = require('utils/datemath');
   var moment = require('moment');
 
   require('directives/input_datetime');
   require('components/timepicker/quick_ranges');
+  require('components/timepicker/time_units');
 
 
-  module.directive('kbnTimepicker', function (quickRanges) {
+
+  module.directive('kbnTimepicker', function (quickRanges, timeUnits) {
     return {
       restrict: 'E',
       scope: {
@@ -21,6 +23,7 @@ define(function (require) {
       controller: function ($scope) {
         var init = function () {
           $scope.formatRelative();
+          $scope.setMode($scope.mode);
         };
 
         $scope.format = 'MMMM Do YYYY, HH:mm:ss.SSS';
@@ -44,15 +47,7 @@ define(function (require) {
           to: moment()
         };
 
-        $scope.units = {
-          s: 'second',
-          m: 'minute',
-          h: 'hour',
-          d: 'day',
-          w: 'week',
-          M: 'month',
-          y: 'year'
-        };
+        $scope.units = timeUnits;
 
         $scope.relativeOptions = [
           {text: 'Seconds ago', value: 's'},
@@ -77,16 +72,32 @@ define(function (require) {
           case 'quick':
             break;
           case 'relative':
-            var duration = moment.duration(moment().diff(datemath.parse($scope.from)));
-            var units = _.pluck(_.clone($scope.relativeOptions).reverse(), 'value');
-            for (var i = 0; i < units.length; i++) {
-              var as = duration.as(units[i]);
-              if (as > 1) {
-                $scope.relative.count = Math.round(as);
-                $scope.relative.unit = units[i];
-                break;
+            var fromParts = $scope.from.toString().split('-');
+            var relativeParts = [];
+
+            // Try to parse the relative time, if we can't use moment duration to guestimate
+            if ($scope.to.toString() === 'now' && fromParts[0] === 'now' && fromParts[1]) {
+              relativeParts = fromParts[1].match(/([0-9]+)([smhdwMy]).*/);
+            }
+            if (relativeParts[1] && relativeParts[2]) {
+              $scope.relative.count = parseInt(relativeParts[1], 10);
+              $scope.relative.unit = relativeParts[2];
+            } else {
+              var duration = moment.duration(moment().diff(datemath.parse($scope.from)));
+              var units = _.pluck(_.clone($scope.relativeOptions).reverse(), 'value');
+              if ($scope.from.toString().split('/')[1]) $scope.relative.round = true;
+              for (var i = 0; i < units.length; i++) {
+                var as = duration.as(units[i]);
+                if (as > 1) {
+                  $scope.relative.count = Math.round(as);
+                  $scope.relative.unit = units[i];
+                  break;
+                }
               }
             }
+
+            if ($scope.from.toString().split('/')[1]) $scope.relative.round = true;
+
             break;
           case 'absolute':
             $scope.absolute.from = datemath.parse($scope.from || moment().subtract('minutes', 15));
