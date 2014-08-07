@@ -157,7 +157,16 @@ define(function (require) {
       switch (key) {
       case 'filter':
         // user a shallow flatten to detect if val is an array, and pull the values out if it is
-        state.filters = _.flatten([ state.filters || [], val ], true);
+        state.filters = _([ state.filters || [], val ])
+          .flatten(true)
+          // Yo Dawg! I heard you needed to filter out your filters
+          .filter(function (filter) {
+            if (!filter) return false;
+            // return true for anything that is either empty or false
+            // return false for anything that is explicitly set to true
+            return !filter.disabled;
+          })
+          .value();
         return;
       case 'index':
       case 'type':
