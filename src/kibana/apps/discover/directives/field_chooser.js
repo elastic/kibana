@@ -148,7 +148,7 @@ define(function (require) {
           if (_.isUndefined(field.details) || recompute) {
             field.details = getFieldValueCounts({
               data: $scope.data,
-              field: field.name,
+              field: field,
               count: 5,
               grouped: false
             });
@@ -160,11 +160,17 @@ define(function (require) {
         };
 
         var getFieldValues = function (data, field) {
+          var name = field.name;
+          var normalize = field.format && field.format.normalize;
+
           return _.map(data, function (row) {
             var val;
-            val = _.isUndefined(row._source[field]) ? row[field] : row._source[field];
-            if (val === null) val = row[field];
-            if (val === null) val = '';
+
+            val = _.isUndefined(row._source[name]) ? row[name] : row._source[name];
+
+            // for fields that come back in weird formats like geo_point
+            if (val != null && normalize) val = normalize(val);
+
             return val;
           });
         };
@@ -174,6 +180,14 @@ define(function (require) {
             count: 5,
             grouped: false
           });
+
+          if (
+            params.field.type === 'geo_point'
+            || params.field.type === 'geo_shape'
+            || params.field.type === 'attachment'
+          ) {
+            return { error: 'Analysis is not available for geo fields.' };
+          }
 
           var allValues = getFieldValues(params.data, params.field),
             groups = {},
@@ -191,9 +205,10 @@ define(function (require) {
             }
 
             if (_.isArray(value)) {
-              hasArrays =  true;
-            } else if (_.isObject(value)) {
-              return {error: 'Analysis is not available for object fields'};
+              hasArrays = true;
+            }
+            else if (_.isObject(value)) {
+              return { error: 'Analysis is not available for object fields' };
             }
 
             if (_.isArray(value) && !params.grouped) {
