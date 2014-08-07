@@ -13,6 +13,7 @@ missing the field
 other:: Set to false to disable the display of a counter representing the aggregate of all
 values outside of the scope of your +size+ property
 size:: Show this many terms
+precision:: Number of digits to show after the decimal point
 order:: In terms mode: count, term, reverse_count or reverse_term,
 in terms_stats mode: term, reverse_term, count, reverse_count,
 total, reverse_total, min, reverse_min, max, reverse_max, mean or reverse_mean

@@ -69,6 +69,10 @@ function (angular, app, _, $, kbn) {
        */
       size    : 10,
       /** @scratch /panels/terms/5
+       * precision:: Number of digits to show after the decimal point
+       */
+      precision    : 0,
+      /** @scratch /panels/terms/5
        * order:: In terms mode: count, term, reverse_count or reverse_term,
        * in terms_stats mode: term, reverse_term, count, reverse_count,
        * total, reverse_total, min, reverse_min, max, reverse_max, mean or reverse_mean

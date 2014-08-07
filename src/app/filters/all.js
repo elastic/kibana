@@ -37,6 +37,15 @@ define([
     };
   });
 
+  module.filter('round', function() {
+    return function(val, precision) {
+      if(val.toFixed && !_.isUndefined(precision)) {
+        return val.toFixed(precision);
+      }
+      return val;
+    };
+  });
+
   module.filter('stringify', function() {
     return function(arr) {
       if(_.isObject(arr) && !_.isArray(arr)) {

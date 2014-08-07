@@ -21,6 +21,10 @@
         <label class="small">Length</label>
         <input class="input-small" type="number" ng-model="panel.size" ng-change="set_refresh(true)">
       </div>
+      <div class="editor-option" ng-show="panel.tmode == 'terms_stats' && panel.tstat.indexOf('count') < 0">
+        <label class="small">Precision</label>
+        <input class="input-small" type="number" ng-model="panel.precision" ng-change="set_refresh(true)">
+      </div>
       <div class="editor-option">
         <label class="small">Order</label>
         <select class="input-medium" ng-model="panel.order" ng-options="f for f in ['count','term','reverse_count','reverse_term']" ng-change="set_refresh(true)"  ng-show="panel.tmode == 'terms'"></select>
