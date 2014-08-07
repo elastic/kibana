@@ -42,10 +42,14 @@ define(function (require) {
     }
   });
 
-  app.directive('dashboardApp', function (Notifier, courier, History, savedVisualizations, appStateFactory, timefilter) {
+  app.directive('dashboardApp', function (Notifier, courier, PersistedLog, config, savedVisualizations, appStateFactory, timefilter) {
     return {
       controller: function ($scope, $route, $routeParams, $location, configFile) {
-        var history = new History('dashboard:history');
+        var history = new PersistedLog('dashboard:history', {
+          maxLength: config.get('history:limit'),
+          filterDuplicates: true
+        });
+
         $scope.history = history.get();
 
         var notify = new Notifier({

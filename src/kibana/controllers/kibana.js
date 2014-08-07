@@ -12,6 +12,7 @@ define(function (require) {
   require('components/state_management/app_state_factory');
   require('components/filter_bar/filter_bar');
   require('components/storage/storage');
+  require('components/persisted_log/persisted_log');
   require('directives/info');
   require('directives/spinner');
   require('directives/paginate');
