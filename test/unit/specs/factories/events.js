@@ -34,7 +34,6 @@ define(function (require) {
         done();
       });
       obj.emit('test', 'Hello World');
-      // $rootScope.$apply();
     });
 
     it('should work with inherited objects', function (done) {
@@ -48,7 +47,6 @@ define(function (require) {
         done();
       });
       obj.emit('test', 'Hello World');
-      // $rootScope.$apply();
     });
 
     it('should clear events when off is called', function () {
@@ -75,16 +73,17 @@ define(function (require) {
       });
     });
 
-    it('should clear a all handlers when off is called for an event', function () {
+    it('should clear a all handlers when off is called for an event', function (done) {
       var obj = new Events();
       var handler1 = sinon.stub();
       obj.on('test', handler1);
       expect(obj._listeners).to.have.property('test');
       obj.off('test');
       expect(obj._listeners).to.not.have.property('test');
-      obj.emit('test', 'Hello World');
-      // $rootScope.$apply();
-      sinon.assert.notCalled(handler1);
+      obj.emit('test', 'Hello World').then(function () {
+        sinon.assert.notCalled(handler1);
+        done();
+      });
     });
 
     it('should handle mulitple identical emits in the same tick', function (done) {
