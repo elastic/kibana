@@ -129,8 +129,6 @@ define(function (require) {
     var init = _.once(function () {
       return $scope.updateDataSource()
       .then(function () {
-        setFields();
-
         // state fields that shouldn't trigger a fetch when changed
         var ignoreStateChanges = ['columns'];
 
@@ -205,7 +203,6 @@ define(function (require) {
 
       $scope.updateTime();
       if (_.isEmpty($state.columns)) refreshColumns();
-      $state.save();
       $scope.updateDataSource()
       .then(setupVisualization)
       .then(function () {
@@ -415,7 +412,6 @@ define(function (require) {
       $scope.fields = [];
       $scope.fieldsByName = {};
       $scope.formatsByName = {};
-      $state.columns = $state.columns || [];
 
       if (!indexPattern) return;
 
