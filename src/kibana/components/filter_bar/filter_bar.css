@@ -1,0 +1,30 @@
+filter-bar .bar {
+  padding: 6px 6px 4px 6px;
+  background: #dde4e6;
+}
+filter-bar .bar .title {
+  display: inline;
+  color: #748287;
+  margin: 0 6px;
+}
+filter-bar .bar .filter {
+  font-size: 12px;
+  border-radius: 12px;
+  display: inline-block;
+  background-color: #83949C;
+  padding: 4px 8px;
+  color: #fff;
+  margin-right: 4px;
+  margin-bottom: 4px;
+}
+filter-bar .bar .filter .value {
+  border-right: 1px solid rgba(255, 255, 255, 0.4);
+  padding-right: 8px;
+  margin-right: 4px;
+}
+filter-bar .bar .filter.negate {
+  background-color: #D18282;
+}
+filter-bar .bar .filter a {
+  color: #FFF;
+}

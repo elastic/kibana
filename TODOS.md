@@ -1,0 +1,34 @@
+# TODO items
+> Automatically extracted
+
+ - **src/kibana/apps/dashboard/directives/grid.js**
+   - change this from event based to calling a method on dashboardApp – [L68](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/dashboard/directives/grid.js#L68)
+ - **src/kibana/apps/discover/controllers/discover.js**
+   - Switch this to watching time.string when we implement it – [L148](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/discover/controllers/discover.js#L148)
+   - On array fields, negating does not negate the combination, rather all terms – [L431](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/discover/controllers/discover.js#L431)
+   - Move to utility class – [L496](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/discover/controllers/discover.js#L496)
+   - Move to utility class – [L506](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/discover/controllers/discover.js#L506)
+ - **src/kibana/apps/settings/sections/indices/_create.js**
+   - we should probably display a message of some kind – [L111](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/settings/sections/indices/_create.js#L111)
+ - **src/kibana/apps/visualize/controllers/editor.js**
+   - Switch this to watching time.string when we implement it – [L189](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/visualize/controllers/editor.js#L189)
+ - **src/kibana/apps/visualize/saved_visualizations/_adhoc_vis.js**
+   - Should we abtract out the agg building stuff? – [L58](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/visualize/saved_visualizations/_adhoc_vis.js#L58)
+   - Should this be abstracted somewhere? Its a copy/paste from _saved_vis.js – [L89](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/visualize/saved_visualizations/_adhoc_vis.js#L89)
+ - **src/kibana/apps/visualize/saved_visualizations/_type_defs.js**
+   - We need to be able to get ahold of angular services here – [L16](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/visualize/saved_visualizations/_type_defs.js#L16)
+   - We need to be able to get ahold of angular services here – [L88](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/visualize/saved_visualizations/_type_defs.js#L88)
+ - **src/kibana/apps/visualize/saved_visualizations/bucket_aggs/terms.js**
+   - We need more just _count here. – [L26](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/visualize/saved_visualizations/bucket_aggs/terms.js#L26)
+ - **src/kibana/components/index_patterns/_mapper.js**
+   - Change index to be the resolved in some way, last three months, last hour, last year, whatever – [L49](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/index_patterns/_mapper.js#L49)
+ - **src/kibana/components/state_management/state.js**
+   - Change all the references to onUpdate to the actual fetch_with_changes event – [L72](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/state_management/state.js#L72)
+ - **src/kibana/directives/rows.js**
+   - It would be better to actually check the type of the field, but we don't have – [L38](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/directives/rows.js#L38)
+ - **src/kibana/services/timefilter.js**
+   - This should be disabled on route change, apps need to enable it explicitly – [L12](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/services/timefilter.js#L12)
+ - **test/unit/specs/apps/dashboard/directives/panel.js**
+   - This should not be needed, timefilter is only included here – [L14](https://github.com/elasticsearch/kibana4/blob/master/test/unit/specs/apps/dashboard/directives/panel.js#L14)
+ - **test/unit/specs/directives/timepicker.js**
+   - This should not be needed, timefilter is only included here, it should move – [L17](https://github.com/elasticsearch/kibana4/blob/master/test/unit/specs/directives/timepicker.js#L17)
