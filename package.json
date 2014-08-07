@@ -33,7 +33,7 @@
   "scripts": {
     "test": "grunt test",
     "server": "grunt server",
-    "precommit": "grunt jshint"
+    "precommit": "grunt jshint todos"
   },
   "repository": {
     "type": "git",

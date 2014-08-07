@@ -19,6 +19,19 @@ define(function (require) {
         var serviceObj = registry.get($routeParams.service);
         var service = $injector.get(serviceObj.service);
 
+        /**
+         * Creates a field definition and pushes it to the memo stack. This function
+         * is designed to be used in conjunction with _.reduce(). If the
+         * values is plain object it will recurse through all the keys till it hits
+         * a string, number or an array.
+         *
+         * @param {array} memo The stack of fields 
+         * @param {mixed} value The value of the field
+         * @param {stirng} key The key of the field
+         * @param {object} collection This is a reference the collection being reduced
+         * @param {array} parents The parent keys to the field
+         * @returns {array}
+         */
         var createField = function (memo, val, key, collection, parents) {
           if (_.isArray(parents))  {
             parents.push(key);
@@ -92,6 +105,11 @@ define(function (require) {
           });
         };
 
+        /**
+         * Deletes an object and sets the notification 
+         * @param {type} name description
+         * @returns {type} description
+         */
         $scope.delete = function () {
           $scope.obj.delete().then(function (resp) {
             $location.path('/settings/objects').search({ _a: rison.encode({
