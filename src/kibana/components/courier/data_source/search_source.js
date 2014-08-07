@@ -162,7 +162,9 @@ define(function (require) {
           // Yo Dawg! I heard you needed to filter out your filters
           .filter(function (filter) {
             if (!filter) return false;
-            return !(!!filter.disabled);
+            // return true for anything that is either empty or false
+            // return false for anything that is explicitly set to true
+            return !filter.disabled;
           })
           .value();
         return;
