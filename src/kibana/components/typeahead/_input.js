@@ -23,7 +23,6 @@ define(function (require) {
 
         // handle keypresses
         $el.on('keydown', function (ev) {
-          console.log('keydown');
           typeaheadCtrl.keypressHandler(ev);
           digest();
         });
