@@ -27,7 +27,7 @@ define(function (require) {
     };
 
     this.urlFor = function (id) {
-      return '#/discover/' + id;
+      return '#/discover/' + encodeURIComponent(id);
     };
 
     this.delete = function (ids) {

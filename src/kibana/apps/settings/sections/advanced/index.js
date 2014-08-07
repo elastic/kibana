@@ -23,10 +23,16 @@ define(function (require) {
           case 'number':
           case 'null':
           case 'undefined':
-            conf.tooComplex = false;
+            conf.normal = true;
             break;
           default:
-            conf.tooComplex = true;
+            if (_.isArray(config.get(conf.name))) {
+              conf.array = true;
+            } else if (typeof config.get(conf.name) === 'boolean') {
+              conf.bool = true;
+            } else {
+              conf.tooComplex = true;
+            }
           }
         };
 

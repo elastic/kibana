@@ -14,8 +14,9 @@ define(function (require) {
       var SearchSource = Private(require('components/courier/data_source/search_source'));
 
       var pendingRequests = Private(require('components/courier/_pending_requests'));
-      var searchLooper = Private(require('components/courier/looper/search'));
-      var docLooper = Private(require('components/courier/looper/doc'));
+
+      var docLooper = courier.docLooper = Private(require('components/courier/looper/doc'));
+      var searchLooper = courier.searchLooper = Private(require('components/courier/looper/search'));
 
       // expose some internal modules
       courier.setRootSearchSource = Private(require('components/courier/data_source/_root_search_source')).set;

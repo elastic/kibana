@@ -1,5 +1,5 @@
 define(function (require) {
-  var inherits = require('utils/inherits');
+  var inherits = require('lodash').inherits;
   var _ = require('lodash');
   var nextTick = require('utils/next_tick');
 
@@ -107,7 +107,8 @@ define(function (require) {
     SourceAbstract.prototype.onResults = function (handler) {
       var source = this;
       return new PromiseEmitter(function (resolve, reject, defer) {
-        source._createRequest(defer);
+        var req = source._createRequest(defer);
+        pendingRequests.push(req);
       }, handler);
     };
 
@@ -141,6 +142,7 @@ define(function (require) {
       var source = this;
 
       var req = source._createRequest();
+      pendingRequests.push(req);
 
       // fetch just the requests for this source
       fetch.these(source._getType(), pendingRequests.splice(0).filter(function (req) {
@@ -189,7 +191,6 @@ define(function (require) {
         this.history.splice(20);
       }
 
-      pendingRequests.push(req);
       return req;
     };
 

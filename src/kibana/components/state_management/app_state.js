@@ -1,24 +1,15 @@
 define(function (require) {
-  var module = require('modules').get('kibana/factories');
+  var _ = require('lodash');
 
-  require('components/state_management/global_state');
+  return function AppStateProvider(Private) {
+    var State = Private(require('components/state_management/state'));
 
-  module.factory('AppState', function (globalState, $route, $location, Promise) {
-
+    _.inherits(AppState, State);
     function AppState(defaults) {
-      globalState._setApp(this, defaults);
-
-      this.onUpdate = function (handler) {
-        return globalState.onAppUpdate(handler);
-      };
-
-      this.commit = function () {
-        var diff = globalState.commit();
-        return diff.app.all;
-      };
+      AppState.Super.call(this, '_a', defaults);
     }
 
     return AppState;
-  });
+  };
 
 });

@@ -1,7 +1,7 @@
 define(function (require) {
   var errors = {};
   var _ = require('lodash');
-  var inherits = require('utils/inherits');
+  var inherits = require('lodash').inherits;
 
   var canStack = (function () {
     var err = new Error();

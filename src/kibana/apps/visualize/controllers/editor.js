@@ -47,7 +47,7 @@ define(function (require) {
   });
 
   app.controller('VisualizeEditor', function ($scope, $route, $timeout, $window, Notifier, $location,
-    globalState, AppState, timefilter, Private) {
+    globalState, appStateFactory, timefilter, Private) {
     var aggs = Private(require('apps/visualize/saved_visualizations/_aggs'));
 
     var notify = new Notifier({
@@ -63,7 +63,7 @@ define(function (require) {
     $scope.fields = _.sortBy(indexPattern.fields, 'name');
     $scope.fields.byName = indexPattern.fieldsByName;
 
-    var $state = $scope.state = new AppState(vis.getState());
+    var $state = $scope.state = new appStateFactory.create(vis.getState());
 
     if ($state.query) {
       vis.searchSource.set('query', $state.query);
@@ -107,7 +107,7 @@ define(function (require) {
     var writeStateAndFetch = function () {
       _.assign($state, vis.getState());
       watchForConfigChanges();
-      $state.commit();
+      $state.save();
       justFetch();
     };
 
@@ -174,7 +174,7 @@ define(function (require) {
       vis.save()
       .then(function () {
         if (vis.id !== $route.current.params.id) {
-          $location.url(globalState.writeToUrl('/visualize/edit/' + vis.id));
+          $location.url(globalState.writeToUrl('/visualize/edit/' + encodeURIComponent(vis.id)));
         }
         configTemplate.close('save');
       }, notify.fatal);
@@ -228,7 +228,7 @@ define(function (require) {
       delete vis.savedSearchId;
 
       var q = vis.searchSource.get('query');
-      $state.query = _.isObject(q) ? q.query_string.query : q;
+      $state.query = q;
 
       var parent = vis.searchSource.parent();
       // we will copy over all state minus the "aggs"
@@ -249,7 +249,7 @@ define(function (require) {
       delete $state.query;
     } else {
       var q = $state.query || vis.searchSource.get('query');
-      $state.query = _.isObject(q) ? q.query_string.query : q;
+      $state.query = q;
     }
 
     // init

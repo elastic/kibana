@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var inherits = require('utils/inherits');
+  var inherits = require('lodash').inherits;
 
   var configCats = require('apps/visualize/saved_visualizations/_config_categories');
   var typeDefs = require('apps/visualize/saved_visualizations/_type_defs');

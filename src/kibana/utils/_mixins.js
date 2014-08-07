@@ -12,6 +12,10 @@ define(function (require) {
   var _ = require('lodash_src');
 
   _.mixin({
+    inherits: function (Sub, Super) {
+      Sub.prototype = _.create(Super.prototype, { 'constructor': Super });
+      Sub.Super = Super;
+    },
     move: function (array, fromIndex, toIndex) {
       array.splice(toIndex, 0, array.splice(fromIndex, 1)[0]);
       return array;

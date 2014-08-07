@@ -1,5 +1,5 @@
 define(function (require) {
-  var mocks = require('angular-mocks');
+  var angular = require('angular');
   var _ = require('lodash');
   var $ = require('jquery');
   var sinon = require('test_utils/auto_release_sinon');
