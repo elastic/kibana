@@ -20,7 +20,7 @@ define(function (require) {
         return flattenSeries(obj);
       }
 
-      // Returns a kibana obj.series array
+      // Returns a kibana obj.series array of objects with values array
       return obj.series;
     };
   };

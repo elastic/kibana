@@ -129,6 +129,11 @@ define(function (require) {
       it('should return an array of the same length as the input when input is greater than 72', function () {
         expect(createColorPalette(num3).length).to.be(num3);
       });
+
+      it('should create new darker colors when input is greater than 72', function () {
+        expect(createColorPalette(num3)[72]).not.to.equal(seedColors[0]);
+      });
+
     });
   });
 });
