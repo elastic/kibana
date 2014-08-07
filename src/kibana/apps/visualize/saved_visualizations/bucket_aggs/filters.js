@@ -19,9 +19,12 @@ define(function (require) {
       custom: true,
       default: [{query_string: '*'}],
       write: function (input, output) {
-        output.aggParams = _.zipObject(_.map(input.val, function (filter, iterator) {
-          return [filter.query_string, {query: {query_string: {query: filter.query_string || '*'}}}];
-        }));
+        output.aggParams = {
+          filters: _.zipObject(_.map(input.val, function (filter, iterator) {
+            // We need to check here
+            return [filter.query_string, {query: {query_string: {query: filter.query_string || '*'}}}];
+          }))
+        };
       }
     };
   };
