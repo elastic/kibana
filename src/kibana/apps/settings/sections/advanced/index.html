@@ -18,20 +18,38 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="conf in configs | filter:advancedFilter" ng-class="!conf.value ? 'default' : 'custom'">
+        <tr ng-repeat="conf in configs | filter:advancedFilter" ng-class="conf.value === undefined ? 'default' : 'custom'">
           <td class="name">{{conf.name}}</td>
           <td class="value">
             <form
               ng-if="conf.editting"
               ng-submit="save(conf)">
               <input
+                ng-show="conf.normal"
                 ng-model="conf.unsavedValue"
                 ng-keyup="maybeCancel($event, conf)"
                 placeholder="{{conf.value || conf.defVal}}"
                 type="text"
                 class="form-control">
+              <input
+                ng-show="conf.array"
+                ng-list=","
+                ng-model="conf.unsavedValue"
+                ng-keyup="maybeCancel($event, conf)"
+                placeholder="{{(conf.value || conf.defVal).join(', ')}}"
+                type="text"
+                class="form-control">
+              <input
+                ng-show="conf.bool"
+                ng-model="conf.unsavedValue"
+                ng-checked="conf.unsavedValue === undefined ? conf.defVal : conf.unsavedValue"
+                type="checkbox"
+                class="form-control">
             </form>
-            <span ng-if="!conf.editting">{{conf.value || conf.defVal}}</span>
+            <span ng-if="!conf.editting && conf.normal">{{conf.value || conf.defVal}}</span>
+            <span ng-if="!conf.editting && conf.bool">{{conf.value === undefined ? conf.defVal : conf.value}}</span>
+            <span ng-if="!conf.editting && conf.array">{{(conf.value || conf.defVal).join(', ')}}</span>
+
           </td>
           <td class="actions">
             <button
@@ -53,7 +71,7 @@
 
             <button
               ng-click="clear(conf)"
-              ng-disabled="!conf.value"
+              ng-disabled="conf.value === undefined"
               class="btn btn-danger">
               <i class="fa fa-trash-o"></i>
             </button>

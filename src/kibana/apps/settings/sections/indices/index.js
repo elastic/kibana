@@ -31,7 +31,7 @@ define(function (require) {
             .map(function (id) {
               return {
                 id: id,
-                url: '#/settings/indices/' + id,
+                url: '#/settings/indices/' + encodeURIComponent(id),
                 class: 'sidebar-item-title ' + ($scope.edittingId === id ? 'active' : ''),
                 default: $scope.defaultIndex === id
               };

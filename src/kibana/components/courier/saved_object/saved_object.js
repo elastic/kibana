@@ -61,14 +61,8 @@ define(function (require) {
           .type(type)
           .id(obj.id);
 
-        // by default, the search source should inherit from the rootSearch
-        return Promise.cast(obj.searchSource && getRootSearch())
-        .then(function (rootSearch) {
-          if (rootSearch) obj.searchSource.inherits(rootSearch);
-
-          // check that the mapping for this type is defined
-          return mappingSetup.isDefined(type);
-        })
+        // check that the mapping for this type is defined
+        return mappingSetup.isDefined(type)
         .then(function (defined) {
           // if it is already defined skip this step
           if (defined) return true;

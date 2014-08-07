@@ -31,23 +31,25 @@
     width: 100%;
     height: 100%;
   }
+}
 
-  .discover-timechart-overlay {
+.discover-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 20;
+
+  opacity: 0.75;
+  text-align: center;
+  background-color: #ffffff;
+
+  .spinner {
     position: absolute;
-    top: 0;
+    top: 70px;
     left: 0;
-    bottom: 0;
     right: 0;
-    z-index: 20;
-
-    opacity: 0.75;
-    text-align: center;
-    background-color: #ffffff;
-
-    .spinner {
-      position: absolute;
-      top: 70px;
-    }
   }
 }
 
@@ -105,6 +107,10 @@
 .sidebar-item button.discover-field-toggle {
   display: none;
   font-size: 9px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin: 5px 10px;
 }
 
 .sidebar-item:hover:hover button.discover-field-toggle {
@@ -127,6 +133,10 @@
   padding: 5px 10px;
   background-color: @body-bg;
   color: @text-color;
+
+  .discover-field-details-count {
+    white-space: nowrap;
+  }
 
   a {
     color: @link-color !important;

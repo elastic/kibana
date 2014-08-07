@@ -14,11 +14,13 @@ define(function (require) {
       var SearchSource = Private(require('components/courier/data_source/search_source'));
 
       var pendingRequests = Private(require('components/courier/_pending_requests'));
-      var searchLooper = Private(require('components/courier/looper/search'));
-      var docLooper = Private(require('components/courier/looper/doc'));
+
+      var docLooper = courier.docLooper = Private(require('components/courier/looper/doc'));
+      var searchLooper = courier.searchLooper = Private(require('components/courier/looper/search'));
 
       // expose some internal modules
-      courier.getRootSearch = Private(require('components/courier/_get_root_search'));
+      courier.setRootSearchSource = Private(require('components/courier/data_source/_root_search_source')).set;
+
       courier.SavedObject = Private(require('components/courier/saved_object/saved_object'));
       courier.indexPatterns = indexPatterns;
       courier.redirectWhenMissing = Private(require('components/courier/_redirect_when_missing'));
@@ -48,7 +50,7 @@ define(function (require) {
       /**
        * Process the pending request queue right now, returns
        * a promise that resembles the success of the fetch completing,
-       * individual errors are routed to their respectiv requests.
+       * individual errors are routed to their respective requests.
        */
       courier.fetch = function () {
         return searchLooper.run();

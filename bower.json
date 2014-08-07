@@ -42,8 +42,9 @@
     "angular-elastic": "~2.3.3",
     "inflection": "~1.3.5",
     "FileSaver": "*",
-    "elasticsearch": "~2.2.0",
-    "bluebird": "~2.1.3"
+    "elasticsearch": "*",
+    "bluebird": "~2.1.3",
+    "lesshat": "~3.0.2"
   },
   "devDependencies": {}
 }

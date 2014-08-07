@@ -1,3 +1,5 @@
+@import "../_variables.less";
+
 // Flatly 3.1.1
 // Variables
 // --------------------------------------------------
@@ -176,11 +178,11 @@
 //** Text color for `<input>`s
 @input-color:                    @text-color;
 //** `<input>` border color
-@input-border:                   #dce4ec;
+@input-border:                   @gray-lighter;
 //** `<input>` border radius
 @input-border-radius:            @border-radius-base;
 //** Border color for inputs on focus
-@input-border-focus:             @brand-primary;
+@input-border-focus:             @gray-light;
 
 //** Placeholder text color
 @input-color-placeholder:        #acb6c0;
@@ -333,7 +335,7 @@
 @navbar-padding-vertical:          ((@navbar-height - @line-height-computed) / 2);
 @navbar-collapse-max-height:       340px;
 
-@navbar-default-color:             #777;
+@navbar-default-color:             #fff;
 @navbar-default-bg:                @brand-primary;
 @navbar-default-border:            darken(@brand-primary, 10%);
 

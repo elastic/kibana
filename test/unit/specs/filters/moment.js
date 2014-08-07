@@ -1,6 +1,5 @@
 define(function (require) {
   var angular = require('angular');
-  var mocks = require('angular-mocks');
   var sinon = require('sinon/sinon');
   var moment = require('moment');
 

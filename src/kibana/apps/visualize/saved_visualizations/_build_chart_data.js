@@ -63,15 +63,14 @@ define(function (require) {
           chartData.columns = chartColumns;
         }
 
-        var row = rowStack.slice(0);
-        var metric = bucket.value == null ? bucket.doc_count : bucket.value;
+        var row = new Array(chartColumns.length);
+        rowStack.forEach(function (val, i) {
+          row[i] = val;
+        });
 
-        if (!revColStack.length) {
-          // we have a full row, minus the final metric
-          row.push(metric);
-        } else {
-          // we ended suddenly, so add undefined values for the columns we have not see yet
-          [].push.apply(row, new Array(revColStack.length + 1));
+        var metric = bucket.value == null ? bucket.doc_count : bucket.value;
+        if (metric != null) {
+          row[row.length - 1] = metric;
         }
 
         chartData.rows.push(row);
@@ -90,7 +89,7 @@ define(function (require) {
         var col = revColStack.pop();
 
         // the actual results for the aggregation is under an _agg_* key
-        var result = bucket[getAggKey(bucket)];
+        var result = col.fake ? bucket : bucket[getAggKey(bucket)];
 
         if (result && _.isPlainObject(result.buckets)) {
           result.buckets = _.map(result.buckets, function (v, k) {
@@ -129,7 +128,7 @@ define(function (require) {
           colStack.push(col);
           // non-metric aggs create buckets that we need to add
           // to the rows
-          if (result.buckets.length) {
+          if (result && result.buckets.length) {
             result.buckets.forEach(function (bucket) {
               rowStack.push(bucket.key);
 
@@ -165,17 +164,11 @@ define(function (require) {
         }
       });
 
-      if (!resp.aggregations) {
-        // fake the aggregation response since this requests didn't actually have aggs
-        resp.aggregations = {
-          _fake_agg: {
-            doc_count: resp.hits.total
-          },
-          __aggKey__: '_fake_agg'
-        };
+      if (resp.aggregations) {
+        splitAndFlatten(chartData, resp.aggregations);
+      } else {
+        writeRow(chartData, { doc_count: resp.hits.total });
       }
-
-      splitAndFlatten(chartData, resp.aggregations);
 
       // now that things are well-ordered, and
       // all related values have been segregated into
@@ -236,6 +229,7 @@ define(function (require) {
       }(chartData));
 
       chartData.raw = raw;
+      chartData.hits = resp.hits.total;
       complete();
       return chartData;
     };

@@ -1,13 +1,10 @@
 @import (reference) "../../../styles/_bootstrap.less";
 @import (reference) "../../../styles/theme/_theme.less";
 @import (reference) "../../../styles/_variables.less";
-@import (reference) "../../../styles/_mixins.less";
+@import (reference) "lesshat.less";
 
 @media (min-width: @screen-md-min) {
   .vis-editor-content {
-    margin-left: -16px;
-    margin-right: -16px;
-    margin-top: -1px;
     display: flex;
     .flex-direction(row);
     .justify-content(flex-start);
@@ -63,32 +60,24 @@ vis-canvas {
   display: block;
 }
 
-.vis-editor .navbar {
-  .form-group {
-    display: block;
-  }
-  .input-group {
+.vis-editor navbar {
+  .bitty-modal-container {
     position: relative;
-  }
-  .navbar-form.first {
-    margin-left: -15px;
-  }
-  .bitty-modal {
-    position: absolute;
-    cursor: pointer;
-    top: 0px;
-    left: 0px;
-    right: 0px;
-    bottom: 0px;
-    z-index: 10;
-    background: rgba(70, 82, 93, 0.9);
-    color: white;
-    text-align: center;
-    padding-top: 6px;
-    .prevent-selection;
-  }
-  a .fa {
-    color: white;
+
+    .bitty-modal {
+      position: absolute;
+      cursor: pointer;
+      top: 0px;
+      left: 0px;
+      right: 0px;
+      bottom: 0px;
+      z-index: 10;
+      background: rgba(70, 82, 93, 0.9);
+      color: white;
+      text-align: center;
+      padding-top: 6px;
+      .user-select(none);
+    }
   }
 }
 
@@ -105,7 +94,7 @@ form.vis-share {
 //   text-align: center;
 //   min-height: 0;
 //   border-bottom: 1px solid darken(@sidebar-bg, 10%);
-//   .prevent-selection;
+//   .user-select(none);
 
 //   color: @sidebar-color;
 //   a {

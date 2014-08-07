@@ -9,7 +9,7 @@ script:
 - npm test
 notifications:
   email:
-    - rashid.khan@elasticsearch.com 
+  - rashid.khan@elasticsearch.com
   hipchat:
     rooms:
-      secure: IUlP4jtlY7qHgNFHdmpPskCr6SZ3gg8X8plqqPAH7x+f62UWE6jUoaJWM0t265qZj13cB1XrVjVdyFs0CCytJepGpAoZm8QfB6EAkCnVrsXpqWesYzgpZzH1Ld4/DEodvNrMRvPavMk/AxiNXuqUYDQ6Pfuer2CHukKiW/hhlMs=
+      secure: lcRkWO1DIrU778TuklKrLG9caBeTtc/zeyM36zJo1Ms4skTALNWk/+xayrebbAABS0AekRG5FlAHoRhx+Z57GcUJGe1y3SRTh5qTVRQmSODTv7lMyeu+md8B5yNY4+5hINrwzWO4NJr/PIrMAlnHIGIADerZRsZWSbf7xvqUcl0=

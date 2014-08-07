@@ -9,6 +9,7 @@ define(function (require) {
   require('components/config/config');
   require('components/courier/courier');
   require('components/notify/notify');
+  require('components/state_management/app_state_factory');
   require('directives/info');
   require('directives/spinner');
   require('directives/paginate');
@@ -19,7 +20,7 @@ define(function (require) {
   require('angular-bootstrap');
   require('services/private');
 
-  var module = require('modules').get('kibana/controllers', ['ui.bootstrap']);
+  var module = require('modules').get('kibana', ['ui.bootstrap']);
 
   module.config(function ($tooltipProvider) {
     $tooltipProvider.options({
@@ -112,7 +113,7 @@ define(function (require) {
 
         var writeGlobalStateToLastPaths = function () {
           var currentUrl = $location.url();
-          var _g = rison.encode(globalState);
+          var _g = globalState.toRISON();
 
           $scope.apps.forEach(function (app) {
             var url = lastPathFor(app);
@@ -124,8 +125,7 @@ define(function (require) {
 
         var writeTime = function (newVal, oldVal) {
           globalState.time = _.clone(timefilter.time);
-
-          globalState.commit();
+          globalState.save();
           writeGlobalStateToLastPaths();
         };
 

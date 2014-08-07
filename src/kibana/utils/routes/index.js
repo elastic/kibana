@@ -5,7 +5,7 @@ define(function (require) {
   require('components/setup/setup');
   require('services/promises');
 
-  require('modules').get('kibana/controllers')
+  require('modules').get('kibana')
   .config(function ($provide) {
     // decorate the $route object to include a change and changeUrl method
     $provide.decorator('$route', function ($delegate, $location, $rootScope) {
@@ -30,6 +30,11 @@ define(function (require) {
           $location.url(url);
           reload();
         }
+      };
+      $delegate.matches = function (url) {
+        var route = $delegate.current.$$route;
+        if (!route || !route.regexp) return null;
+        return route.regexp.test(url);
       };
 
       return $delegate;

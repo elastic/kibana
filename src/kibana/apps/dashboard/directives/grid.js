@@ -20,7 +20,7 @@ define(function (require) {
         var $body = $(document.body);
 
         // appState from controller
-        var $state = $scope.$state;
+        var $state = $scope.state;
 
         var gridster; // defined in init()
 
@@ -47,7 +47,7 @@ define(function (require) {
             }
           }).data('gridster');
 
-          $scope.$watchCollection('$state.panels', function (panels) {
+          $scope.$watchCollection('state.panels', function (panels) {
             var currentPanels = gridster.$widgets.toArray().map(function (el) {
               return getPanelFor(el);
             });
@@ -67,7 +67,6 @@ define(function (require) {
             // alert interested parties that we have finished processing changes to the panels
             // TODO: change this from event based to calling a method on dashboardApp
             if (added.length || removed.length) $scope.$root.$broadcast('change:vis');
-            stretchContainer();
           });
 
           $scope.$on('$destroy', function () {
@@ -170,26 +169,6 @@ define(function (require) {
           });
         };
 
-        // standard jquery.offset().top does not factor in borders
-        var stretchContainer = function () {
-          var top = 0;
-          var $current, $from = $container;
-          while ($from.length) {
-            $current = $from.prev();
-            if ($current.length) top += $current.outerHeight(true);
-            else {
-              $current = $from.parent();
-              if ($current[0] === document.body) break;
-            }
-
-            $from = $current;
-          }
-
-          // vertical padding on the container
-          var vertPadding = parseInt($container.css('paddingTop'), 10) + parseInt($container.css('paddingBottom'), 10);
-          $container.height($window.height() - Math.max(top - $body.scrollTop(), 0) - vertPadding);
-        };
-
         // calculate the position and sizing of the gridster el, and the columns within it
         // then tell gridster to "reflow" -- which is definitely not supported.
         // we may need to consider using a different library
@@ -218,7 +197,6 @@ define(function (require) {
         var layout = function () {
           var complete = notify.event('reflow dashboard');
           reflowGridster();
-          stretchContainer();
           readGridsterChangeHandler();
           complete();
         };

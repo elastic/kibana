@@ -11,7 +11,7 @@ define(function (require) {
   require('directives/truncated');
   require('directives/infinite_scroll');
 
-  var module = require('modules').get('kibana/directives');
+  var module = require('modules').get('app/discover');
 
   module.directive('kbnTableHeader', function () {
     var headerHtml = require('text!apps/discover/partials/table_header.html');
@@ -261,7 +261,7 @@ define(function (require) {
             opened.push(id);
           }
 
-          var $tr = $(event.delegateTarget);
+          var $tr = $(event.delegateTarget.parentElement);
           var $detailsTr = $tr.next();
 
           ///
@@ -271,12 +271,18 @@ define(function (require) {
           var open = !!~opened.indexOf(id);
           $detailsTr.toggle(open);
 
+          // Change the caret icon
+          var $toggleIcon = $($(event.delegateTarget).children('i')[0]);
+          $toggleIcon.toggleClass('fa-caret-down');
+          $toggleIcon.toggleClass('fa-caret-right');
+
           if (!open) {
             // close the child scope if it exists
             clearChildScopeFor(id);
             // no need to go any further
             return;
           }
+
 
           // The fields to loop over
           row._fields = row._fields || _.keys(row._source).concat(config.get('metaFields')).sort();
@@ -286,7 +292,7 @@ define(function (require) {
           $detailsTr
             .empty()
             .append(
-              $('<td>').attr('colspan', $scope.columns.length + 1).append(detailsHtml)
+              $('<td>').attr('colspan', $scope.columns.length + 2).append(detailsHtml)
             );
 
           var $childScope = _.assign(childScopeFor(id), { row: row });
@@ -299,9 +305,12 @@ define(function (require) {
 
         // create a tr element that lists the value for each *column*
         function createSummaryRow(row, id) {
-          var tr = document.createElement('tr');
-          tr.setAttribute('ng-click', 'toggleRow(' + JSON.stringify(id) + ', $event)');
-          var $tr = $compile(tr)($scope);
+          var $tr = $('<tr>');
+
+          var expandTd = $('<td>').html('<i class="fa fa-caret-right"></span>')
+            .attr('ng-click', 'toggleRow(' + JSON.stringify(id) + ', $event)');
+          $compile(expandTd)($scope);
+          $tr.append(expandTd);
 
           var td = $(document.createElement('td'));
           if ($scope.timefield) {

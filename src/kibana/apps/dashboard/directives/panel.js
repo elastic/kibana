@@ -12,7 +12,7 @@ define(function (require) {
       requires: '^dashboardGrid',
       link: function ($scope, $el) {
         // using $scope inheritance, panels are available in AppState
-        var $state = $scope.$state;
+        var $state = $scope.state;
 
         // receives panel object from the dashboard grid directive
         $scope.$watch('visId', function (visId) {

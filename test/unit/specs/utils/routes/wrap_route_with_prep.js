@@ -25,7 +25,7 @@ define(function (require) {
         var delayUserWork = opts.delayUserWork ? 50: 0;
 
         return function () {
-          module('kibana/services', 'kibana/notify');
+          module('kibana', 'kibana/notify');
           var setupComplete = false;
           var userWorkComplete = false;
           var route;

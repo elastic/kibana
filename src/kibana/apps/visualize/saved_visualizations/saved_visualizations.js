@@ -19,7 +19,7 @@ define(function (require) {
     };
 
     this.urlFor = function (id) {
-      return '#/visualize/edit/' + id;
+      return '#/visualize/edit/' + encodeURIComponent(id);
     };
 
     this.delete = function (ids) {

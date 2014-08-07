@@ -2,7 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var errors = require('errors');
 
-  var inherits = require('utils/inherits');
+  var inherits = require('lodash').inherits;
 
   return function DocSourceFactory(Private, Promise, es) {
     var sendToEs = Private(require('components/courier/data_source/_doc_send_to_es'));

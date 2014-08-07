@@ -1,10 +1,10 @@
 @import (reference) "../../../styles/_bootstrap.less";
 @import (reference) "../../../styles/theme/_theme.less";
 @import (reference) "../../../styles/_variables.less";
-@import (reference) "../../../styles/_mixins.less";
+@import (reference) "lesshat.less";
 
 visualize {
-  .flex-display();
+  .display(flex);
   .flex-direction(column);
   height: 100%;
   width: 100%;
@@ -42,11 +42,11 @@ visualize {
 
 visualize-spy {
   // this element should flex
-  .flex();
+  .flex(0, 0, auto);
 
   // it's children should also flex vertically
   .flex-direction(column);
-  .flex-display();
+  .display(flex);
 
   overflow: auto;
   padding-top: 10px;
@@ -61,7 +61,7 @@ visualize-spy {
   }
 
   .visualize-show-spy {
-    .flex();
+    .flex(0, 0, auto);
     background-color: @well-bg;
     text-align: center;
 
@@ -73,7 +73,7 @@ visualize-spy {
   .visualize-spy-container {
     .flex(1, 1, auto);
 
-    .flex-display();
+    .display(flex);
     .flex-direction(column);
 
     padding: 10px 10px 0;
@@ -119,7 +119,7 @@ visualize-spy {
   .visualize-spy-tabs {
     margin-top: 10px;
     margin-bottom: 10px;
-    .flex();
+    .flex(0, 0, auto);
   }
 
   pre {

@@ -1,6 +1,6 @@
 // Creates a fake scrollbar at the bottom of an element. Useful for infinite scrolling components
 define(function (require) {
-  var module = require('modules').get('kibana/directives');
+  var module = require('modules').get('kibana');
   var $ = require('jquery');
   var _ = require('lodash');
 

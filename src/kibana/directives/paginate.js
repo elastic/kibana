@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
 
-  var module = require('modules').get('kibana/directives');
+  var module = require('modules').get('kibana');
 
   module.directive('paginate', function ($parse) {
     return {

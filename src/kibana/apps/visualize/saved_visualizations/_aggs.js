@@ -1,6 +1,6 @@
 define(function (require) {
   return function AggsService(Private) {
-    require('utils/mixins');
+    require('lodash');
     var _ = require('lodash');
 
     var aggs = {};

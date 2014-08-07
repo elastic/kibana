@@ -1,5 +1,5 @@
 define(function (require) {
-  var inherits = require('utils/inherits');
+  var inherits = require('lodash').inherits;
   var _ = require('lodash');
   var nextTick = require('utils/next_tick');
 
@@ -26,7 +26,7 @@ define(function (require) {
 
       this._dynamicState = this._dynamicState || {};
 
-      // get/set internal state values
+      // set internal state values
       this._methods.forEach(function (name) {
         this[name] = function (val) {
           if (val == null) {
@@ -107,8 +107,16 @@ define(function (require) {
     SourceAbstract.prototype.onResults = function (handler) {
       var source = this;
       return new PromiseEmitter(function (resolve, reject, defer) {
-        source._createRequest(defer);
+        var req = source._createRequest(defer);
+        pendingRequests.push(req);
       }, handler);
+    };
+
+    /**
+     * Noop
+     */
+    SourceAbstract.prototype.getParent = function () {
+      return Promise.resolve(false);
     };
 
     /**
@@ -117,13 +125,13 @@ define(function (require) {
      *
      * @return {Promise}
      */
-    SourceAbstract.prototype.onError = function () {
-      var defer = Promise.defer();
-      errorHandlers.push({
-        source: this,
-        defer: defer
-      });
-      return defer.promise;
+    SourceAbstract.prototype.onError = function (handler) {
+      return new PromiseEmitter(function (resolve, reject, defer) {
+        errorHandlers.push({
+          source: this,
+          defer: defer
+        });
+      }, handler);
     };
 
     /**
@@ -134,6 +142,7 @@ define(function (require) {
       var source = this;
 
       var req = source._createRequest();
+      pendingRequests.push(req);
 
       // fetch just the requests for this source
       fetch.these(source._getType(), pendingRequests.splice(0).filter(function (req) {
@@ -182,7 +191,6 @@ define(function (require) {
         this.history.splice(20);
       }
 
-      pendingRequests.push(req);
       return req;
     };
 
@@ -221,10 +229,13 @@ define(function (require) {
         }))
         .then(function () {
           // move to this sources parent
-          current = current._parent;
-
-          // keep calling until we reach the top parent
-          if (current) return ittr();
+          return current.getParent().then(function (parent) {
+            // keep calling until we reach the top parent
+            if (parent) {
+              current = parent;
+              return ittr();
+            }
+          });
         });
       }())
       .then(function () {
