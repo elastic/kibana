@@ -1,6 +1,7 @@
 define(function (require) {
   return function ColumnChartUtilService(d3, Private) {
     var $ = require('jquery');
+    var _ = require('lodash');
 
     var orderKeys = Private(require('components/vislib/utils/zero_injection/ordered_x_keys'));
     var classify = Private(require('components/vislib/utils/d3/legend/classify'));
@@ -13,10 +14,11 @@ define(function (require) {
 
     return function (args) {
       // Attributes
+      var $elem = $('.chart');
+      var callXAxis = args.callXAxis;
       var margin = args._attr.margin;
-      var elWidth = args._attr.width = $('.chart').width();
-      var elHeight = args._attr.height = $('.chart').height();
-      console.log(elWidth, elHeight);
+      var elWidth = args._attr.width = $elem.width();
+      var elHeight = args._attr.height = $elem.height();
       var offset = args._attr.offset;
       var focusOpacity = args._attr.focusOpacity;
       var blurredOpacity = args._attr.blurredOpacity;
@@ -123,11 +125,12 @@ define(function (require) {
 //          brush.x(xScale);
 
           // Create the canvas for the visualization
-          var svg = createSVG(this, elWidth, elHeight);
+          var svg = createSVG(this, width, height);
           transformSVG(svg, margin.left, margin.top);
 
           // x axis
-          appendXAxis(svg, height, xAxis);
+          d3.select('.x-axis-wrapper').call(callXAxis.draw(xAxis));
+//          appendXAxis(svg, height, xAxis);
 
           // y axis
           appendYAxis(svg, yAxis)
@@ -196,6 +199,7 @@ define(function (require) {
 //          if (isTooltip) {
 //            bars.call(tooltip.draw);
 //          }
+
           return svg;
         });
       };

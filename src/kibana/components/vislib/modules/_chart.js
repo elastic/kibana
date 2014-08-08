@@ -11,6 +11,7 @@ define(function (require) {
       Chart.Super.apply(this, arguments);
       this.el = vis.el;
       this.data = vis.data;
+      this.callXAxis = vis.callXAxis;
       this.ChartClass = vis.ChartClass;
       this.labels = this.getLabels(this.data);
       this.color = this.color(this.labels);
@@ -21,14 +22,15 @@ define(function (require) {
       return renderChart(this);
     };
 
-    Chart.prototype.checkSize = function () {
+    Chart.prototype.checkSize = function (el) {
       // enable auto-resize
-      var size = $(this.el).width() + ':' + $(this.el).height();
+      var size = $(el).width() + ':' + $(el).height();
 
       if (this.prevSize !== size) {
         this.resize();
       }
       this.prevSize = size;
+      setTimeout(this.checkSize, 250);
     };
 
     Chart.prototype.resize = _.debounce(function () {

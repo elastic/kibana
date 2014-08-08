@@ -1,8 +1,7 @@
 define(function () {
-  return function CallFunctionUtilService(d3) {
-    return function (el, data, callback) {
-      return d3.select(el)
-        .datum(data)
+  return function CallFunctionUtilService() {
+    return function (d3el, data, callback) {
+      return d3el.datum(data)
         .call(callback);
     };
   };
