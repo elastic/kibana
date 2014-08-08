@@ -8,8 +8,13 @@ define(function (require) {
     var color = Private(require('components/vislib/utils/color/color'));
     var callFunction = Private(require('components/vislib/utils/d3/_call_function'));
     var removeAll = Private(require('components/vislib/utils/d3/_remove_all'));
+    var layout = Private(require('components/vislib/utils/d3/_chart/_layout'));
 
     function ChartFunctions() {}
+
+    ChartFunctions.prototype.layout = function (el) {
+      return layout(el);
+    };
 
     ChartFunctions.prototype.injectZeros = function (arr, obj) {
       return injectZeros(arr, obj);

@@ -5,7 +5,8 @@ define(function (require) {
     var chartTypes = {
       histogram : Private(require('components/vislib/modules/ColumnChart')),
       legend : Private(require('components/vislib/modules/Legend')),
-      tooltip : Private(require('components/vislib/modules/Tooltip'))
+      tooltip : Private(require('components/vislib/modules/Tooltip')),
+      xAxis: Private(require('components/vislib/modules/XAxis'))
     };
 
     function Vis($el, config) {
@@ -20,6 +21,7 @@ define(function (require) {
       }
       this.data = data;
 
+      this.callXAxis = new chartTypes.xAxis(this);
       this.chart = new this.ChartClass(this);
       this.chart.render();
     };
