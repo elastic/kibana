@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
 
     var Chart = Private(require('components/vislib/modules/_chart'));
-    var renderYAxis = Private(require('components/vislib/utils/d3/XAxis/_render_y_axis'));
+    var renderYAxis = Private(require('components/vislib/utils/d3/XAxis/_y_axis'));
 
     _(YAxis).inherits(Chart);
     function YAxis(vis) {
