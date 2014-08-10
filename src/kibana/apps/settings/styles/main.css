@@ -1,0 +1,131 @@
+.thumbnail > img,
+.thumbnail a > img,
+.carousel-inner > .item > img,
+.carousel-inner > .item > a > img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.btn-group-lg > .btn {
+  padding: 18px 27px;
+  font-size: 19px;
+  line-height: 1.33;
+  border-radius: 6px;
+}
+.btn-group-sm > .btn {
+  padding: 6px 9px;
+  font-size: 13px;
+  line-height: 1.5;
+  border-radius: 3px;
+}
+.btn-group-xs > .btn {
+  padding: 1px 5px;
+  font-size: 13px;
+  line-height: 1.5;
+  border-radius: 3px;
+}
+.container:before,
+.container:after,
+.container-fluid:before,
+.container-fluid:after,
+.row:before,
+.row:after,
+.form-horizontal .form-group:before,
+.form-horizontal .form-group:after,
+.btn-toolbar:before,
+.btn-toolbar:after,
+.btn-group-vertical > .btn-group:before,
+.btn-group-vertical > .btn-group:after,
+.nav:before,
+.nav:after,
+.navbar:before,
+.navbar:after,
+.navbar-header:before,
+.navbar-header:after,
+.navbar-collapse:before,
+.navbar-collapse:after,
+.pager:before,
+.pager:after,
+.panel-body:before,
+.panel-body:after,
+.modal-footer:before,
+.modal-footer:after {
+  content: " ";
+  display: table;
+}
+.container:after,
+.container-fluid:after,
+.row:after,
+.form-horizontal .form-group:after,
+.btn-toolbar:after,
+.btn-group-vertical > .btn-group:after,
+.nav:after,
+.navbar:after,
+.navbar-header:after,
+.navbar-collapse:after,
+.pager:after,
+.panel-body:after,
+.modal-footer:after {
+  clear: both;
+}
+kibana-settings-app,
+kbn-settings-indices,
+kbn-settings-indices-edit,
+kbn-settings-indices-create,
+kbn-settings-advanced,
+kbn-settings-objects,
+kbn-settings-objects-view {
+  display: block;
+}
+.settings-nav {
+  text-transform: capitalize;
+}
+li.kbn-settings-tab {
+  text-transform: capitalize;
+}
+kbn-settings-objects form {
+  margin-bottom: 21px;
+}
+kbn-settings-objects .list-unstyled li {
+  border-bottom: 1px solid #ecf0f1;
+  padding: 8px;
+}
+kbn-settings-objects .empty {
+  color: #b4bcc2;
+}
+kbn-settings-objects .action-bar {
+  margin-top: 10px;
+  background-color: #ecf0f1;
+  padding: 4px 8px;
+}
+kbn-settings-objects .action-bar .btn-xs {
+  font-size: 10px;
+}
+kbn-settings-objects-view label {
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+kbn-settings-objects-view .ace_editor {
+  height: 300px;
+}
+.advanced-settings table {
+  width: 100%;
+}
+.advanced-settings table tr.default td.value {
+  color: #acb6c0;
+}
+.advanced-settings table td {
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+.advanced-settings table td.actions {
+  width: 150px;
+}
+.indices-settings i.active {
+  color: #31c471;
+}
+.indices-settings tr.field-settings .field-popularize {
+  margin-left: 5px;
+  display: none;
+}
+.indices-settings tr.field-settings:hover .field-popularize {
+  display: inline;
+}
