@@ -17,7 +17,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          appendElem = Private(require('components/vislib/utils/d3/_append_elem'));
+          appendElem = Private(require('components/vislib/components/_functions/d3/_append_elem'));
           fixture = appendElem('body', 'div', 'test');
           fixture1 = appendElem('body', 'div');
         });
