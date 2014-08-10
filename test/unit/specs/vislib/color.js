@@ -22,9 +22,9 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          seedColors = Private(require('components/vislib/utils/color/seed_colors'));
-          getColors = Private(require('components/vislib/utils/color/color'));
-          error = getColors(str);
+          seedColors = Private(require('components/vislib/components/_functions/color/seed_colors'));
+          getColors = Private(require('components/vislib/components/_functions/color/color'));
+//          error = getColors(str);
           color = getColors(arr);
         });
       });
@@ -74,7 +74,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          createColorObj = Private(require('components/vislib/utils/color/color_obj'));
+          createColorObj = Private(require('components/vislib/components/_functions/color/color_obj'));
           dict = createColorObj(arr1, arr2);
         });
       });
@@ -105,7 +105,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          createColorPalette = Private(require('components/vislib/utils/color/color_palette'));
+          createColorPalette = Private(require('components/vislib/components/_functions/color/color_palette'));
           colorPalette = createColorPalette(num1);
         });
       });
