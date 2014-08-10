@@ -109,7 +109,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (Private) {
-          injectZeros = Private(require('components/vislib/utils/zero_injection/inject_zeros'));
+          injectZeros = Private(require('components/vislib/components/_functions/zero_injection/inject_zeros'));
           sample1 = injectZeros(data1.series, false);
           sample2 = injectZeros(data2.series, ordered);
         });
@@ -166,7 +166,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (Private) {
-          orderXValues = Private(require('components/vislib/utils/zero_injection/ordered_x_keys'));
+          orderXValues = Private(require('components/vislib/components/_functions/zero_injection/ordered_x_keys'));
           results = orderXValues(data2.series);
         });
       });
@@ -198,7 +198,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (Private) {
-          uniqueKeys = Private(require('components/vislib/utils/zero_injection/uniq_keys'));
+          uniqueKeys = Private(require('components/vislib/components/_functions/zero_injection/uniq_keys'));
           results = uniqueKeys(data2.series);
         });
       });
@@ -233,7 +233,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (Private) {
-          replaceIndex = Private(require('components/vislib/utils/zero_injection/replace_index'));
+          replaceIndex = Private(require('components/vislib/components/_functions/zero_injection/replace_index'));
           results = replaceIndex(arr, index, obj);
         });
       });
@@ -261,7 +261,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (Private) {
-          flattenData = Private(require('components/vislib/utils/zero_injection/flatten_data'));
+          flattenData = Private(require('components/vislib/components/_functions/zero_injection/flatten_data'));
           results = flattenData(data2.series);
         });
       });
@@ -293,7 +293,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (Private) {
-          createZeroArray = Private(require('components/vislib/utils/zero_injection/zero_filled_array'));
+          createZeroArray = Private(require('components/vislib/components/_functions/zero_injection/zero_filled_array'));
           results1 = createZeroArray(arr, ordered);
           results2 = createZeroArray(arr, false);
         });
@@ -354,8 +354,8 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (Private) {
-          zeroFillArray = Private(require('components/vislib/utils/zero_injection/zero_fill_data_array'));
-          createZeroArray = Private(require('components/vislib/utils/zero_injection/zero_filled_array'));
+          zeroFillArray = Private(require('components/vislib/components/_functions/zero_injection/zero_fill_data_array'));
+          createZeroArray = Private(require('components/vislib/components/_functions/zero_injection/zero_filled_array'));
           arr1 = createZeroArray(xValueArr);
           // Takes zero array as 1st arg and data array as 2nd arg
           results = zeroFillArray(arr1, arr2);
