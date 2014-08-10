@@ -1,6 +1,5 @@
 define(function (require) {
   return function VisFactory(d3, Private) {
-//    var Chart = Private(require('components/vislib/modules/_chart'));
 
     var chartTypes = {
       histogram : Private(require('components/vislib/modules/ColumnChart')),
@@ -21,7 +20,7 @@ define(function (require) {
       this.data = data;
 
       this.chart = new this.ChartClass(this);
-      this.chart.render();
+      this.chart.render(this);
     };
 
     Vis.prototype.resize = function () {
@@ -39,14 +38,14 @@ define(function (require) {
 //    Vis.prototype.destroy = function () {
 //      return this.chart.destroy();
 //    };
-//
-//    Vis.prototype.set = function (name, val) {
-//      return this.chart.set(name, val);
-//    };
-//
-//    Vis.prototype.get = function (name) {
-//      return this.chart.get(name);
-//    };
+
+    Vis.prototype.set = function (name, val) {
+      return this.chart.set(name, val);
+    };
+
+    Vis.prototype.get = function (name) {
+      return this.chart.get(name);
+    };
 
     return Vis;
   };
