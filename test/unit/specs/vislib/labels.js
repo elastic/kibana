@@ -113,7 +113,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          getLabels = Private(require('components/vislib/utils/labels/labels'));
+          getLabels = Private(require('components/vislib/components/_functions/labels/labels'));
           seriesLabels = getLabels(seriesData);
           rowsLabels = getLabels(rowsData);
           seriesArr = _.isArray(seriesLabels);
@@ -163,7 +163,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          dataArray = Private(require('components/vislib/utils/labels/data_array'));
+          dataArray = Private(require('components/vislib/components/_functions/labels/data_array'));
           seriesLabels = dataArray(seriesData);
           rowsLabels = dataArray(rowsData);
           testSeries = _.isArray(seriesLabels);
@@ -219,7 +219,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          uniqLabels = Private(require('components/vislib/utils/labels/uniq_labels'));
+          uniqLabels = Private(require('components/vislib/components/_functions/labels/uniq_labels'));
           uniq = uniqLabels(arrObj);
           testArr = _.isArray(uniq);
         });
@@ -255,7 +255,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          getSeries = Private(require('components/vislib/utils/labels/get_series'));
+          getSeries = Private(require('components/vislib/components/_functions/labels/get_series'));
           columnsLabels = getSeries(columnsData);
           rowsLabels = getSeries(rowsData);
           seriesLabels = getSeries(seriesData);
