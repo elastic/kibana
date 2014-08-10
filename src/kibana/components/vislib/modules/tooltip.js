@@ -3,10 +3,10 @@ define(function (require) {
     var _ = require('lodash');
 
     var Chart = Private(require('components/vislib/modules/_chart'));
-    var renderTooltip = Private(require('components/vislib/utils/d3/tooltip/tooltip'));
+    var renderTooltip = Private(require('components/vislib/components/Tooltip/tooltip'));
 
     // Dynamically adds css file
-    require('css!components/vislib/styles/main');
+    require('css!components/vislib/components/styles/main');
 
     _(Tooltip).inherits(Chart);
     function Tooltip(vis) {

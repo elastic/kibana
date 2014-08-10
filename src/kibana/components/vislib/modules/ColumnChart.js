@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
 
     var Chart = Private(require('components/vislib/modules/_chart'));
-    var renderColumnChart = Private(require('components/vislib/utils/d3/ColumnChart/column'));
+    var renderColumnChart = Private(require('components/vislib/components/ColumnChart/_draw'));
 
     _(ColumnChart).inherits(Chart);
     function ColumnChart(vis) {
@@ -15,7 +15,7 @@ define(function (require) {
     }
 
     ColumnChart.prototype.draw = function () {
-      return d3.selectAll('.chart').call(renderColumnChart(this));
+      return renderColumnChart(this);
     };
 
     return ColumnChart;

@@ -4,9 +4,9 @@ define(function (require) {
 
   angular.module('AppendElemUtilService', ['kibana']);
 
-  describe('Vislib d3 Function Test Suite', function () {
+  describe('Vislib d3 Functions Test Suite', function () {
 
-    describe('Test Append Function', function () {
+    describe('Test Append Elem Function', function () {
       var appendElem;
       var fixture;
       var fixture1;
@@ -28,22 +28,22 @@ define(function (require) {
         fixture1.remove();
       });
 
-      it(' should return a function', function () {
+      it('should return a function', function () {
         expect(_.isFunction(appendElem)).to.be(true);
       });
 
-      it(' should rappend a div to the body', function () {
+      it('should append a div to the body', function () {
         expect(fixture).to.have.length(1);
       });
 
-      it(' should have the correct class name', function () {
+      it('should have the correct class name', function () {
         expect(fixture.attr('class')).to.be('test');
       });
 
-      it(' should have the correct class name if class name not provided', function () {
+      it('should have the correct class name if the class name is not provided', function () {
         expect(fixture1.attr('class')).to.be('div');
       });
-
     });
+
   });
 });

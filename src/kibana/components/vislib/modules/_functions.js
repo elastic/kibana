@@ -1,15 +1,19 @@
 define(function (require) {
   return function ChartFunctionsBaseClass(d3, Private) {
 
-    var split = Private(require('components/vislib/utils/d3/_split'));
-    var injectZeros = Private(require('components/vislib/utils/zero_injection/inject_zeros'));
-    var yStackMax = Private(require('components/vislib/utils/d3/_functions/_y_stack_max'));
-    var getLabels = Private(require('components/vislib/utils/labels/labels'));
-    var color = Private(require('components/vislib/utils/color/color'));
-    var callFunction = Private(require('components/vislib/utils/d3/_call_function'));
-    var removeAll = Private(require('components/vislib/utils/d3/_remove_all'));
+    var injectZeros = Private(require('components/vislib/components/_functions/zero_injection/inject_zeros'));
+    var yStackMax = Private(require('components/vislib/components/_functions/d3/_y_stack_max'));
+    var getLabels = Private(require('components/vislib/components/_functions/labels/labels'));
+    var color = Private(require('components/vislib/components/_functions/color/color'));
+    var callFunction = Private(require('components/vislib/components/_functions/d3/_call_function'));
+    var removeAll = Private(require('components/vislib/components/_functions/d3/_remove_all'));
+    var layout = Private(require('components/vislib/components/_functions/d3/_layout'));
 
     function ChartFunctions() {}
+
+    ChartFunctions.prototype.layout = function (el) {
+      return layout(el);
+    };
 
     ChartFunctions.prototype.injectZeros = function (arr, obj) {
       return injectZeros(arr, obj);
@@ -34,11 +38,6 @@ define(function (require) {
     ChartFunctions.prototype.removeAll = function (el) {
       return removeAll(el);
     };
-
-    ChartFunctions.prototype.drawXAxis = function () {};
-    ChartFunctions.prototype.drawYAxis = function () {};
-    ChartFunctions.prototype.xScale = function () {};
-    ChartFunctions.prototype.yScale = function () {};
 
     return ChartFunctions;
   };
