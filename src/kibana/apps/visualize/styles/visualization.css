@@ -1,0 +1,221 @@
+.thumbnail > img,
+.thumbnail a > img,
+.carousel-inner > .item > img,
+.carousel-inner > .item > a > img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.btn-group-lg > .btn {
+  padding: 18px 27px;
+  font-size: 19px;
+  line-height: 1.33;
+  border-radius: 6px;
+}
+.btn-group-sm > .btn {
+  padding: 6px 9px;
+  font-size: 13px;
+  line-height: 1.5;
+  border-radius: 3px;
+}
+.btn-group-xs > .btn {
+  padding: 1px 5px;
+  font-size: 13px;
+  line-height: 1.5;
+  border-radius: 3px;
+}
+.container:before,
+.container:after,
+.container-fluid:before,
+.container-fluid:after,
+.row:before,
+.row:after,
+.form-horizontal .form-group:before,
+.form-horizontal .form-group:after,
+.btn-toolbar:before,
+.btn-toolbar:after,
+.btn-group-vertical > .btn-group:before,
+.btn-group-vertical > .btn-group:after,
+.nav:before,
+.nav:after,
+.navbar:before,
+.navbar:after,
+.navbar-header:before,
+.navbar-header:after,
+.navbar-collapse:before,
+.navbar-collapse:after,
+.pager:before,
+.pager:after,
+.panel-body:before,
+.panel-body:after,
+.modal-footer:before,
+.modal-footer:after {
+  content: " ";
+  display: table;
+}
+.container:after,
+.container-fluid:after,
+.row:after,
+.form-horizontal .form-group:after,
+.btn-toolbar:after,
+.btn-group-vertical > .btn-group:after,
+.nav:after,
+.navbar:after,
+.navbar-header:after,
+.navbar-collapse:after,
+.pager:after,
+.panel-body:after,
+.modal-footer:after {
+  clear: both;
+}
+visualize {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-direction: normal;
+  -moz-box-direction: normal;
+  -webkit-box-orient: vertical;
+  -moz-box-orient: vertical;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  position: relative;
+}
+visualize .visualize-error {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 1em;
+}
+visualize .visualize-error .fa-exclamation-triangle {
+  font-size: 2em;
+  color: #e74c3c;
+}
+visualize .k4tip {
+  white-space: pre-line;
+}
+visualize .visualize-chart {
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex: 1 1;
+  -ms-flex: 1 1;
+  flex: 1 1;
+  overflow: hidden;
+}
+visualize .visualize-chart.spy-visible {
+  margin-bottom: 10px;
+}
+visualize .visualize-chart.spy-only {
+  display: none;
+}
+visualize-spy {
+  -webkit-box-flex: 0;
+  -moz-box-flex: 0;
+  -webkit-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
+  -webkit-box-direction: normal;
+  -moz-box-direction: normal;
+  -webkit-box-orient: vertical;
+  -moz-box-orient: vertical;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  overflow: auto;
+  padding-top: 10px;
+}
+visualize-spy.visible {
+  display: block;
+}
+visualize-spy.only {
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
+  padding-top: 0px;
+}
+visualize-spy .visualize-show-spy {
+  -webkit-box-flex: 0;
+  -moz-box-flex: 0;
+  -webkit-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
+  background-color: #ecf0f1;
+  text-align: center;
+}
+visualize-spy .visualize-show-spy i {
+  padding: 0 10px;
+}
+visualize-spy .visualize-spy-container {
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-direction: normal;
+  -moz-box-direction: normal;
+  -webkit-box-orient: vertical;
+  -moz-box-orient: vertical;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  padding: 10px 10px 0;
+  overflow-y: auto;
+}
+visualize-spy .visualize-spy-container tr > td {
+  font-size: 0.85em;
+}
+visualize-spy .visualize-table th i.fa-sort {
+  color: #b4bcc2;
+}
+visualize-spy .visualize-table-right {
+  text-align: right;
+}
+visualize-spy .visualize-table-controls {
+  padding: 0 5px;
+  text-align: right;
+}
+visualize-spy .visualize-csv-options .form-control {
+  padding: 0px 6px;
+  height: auto;
+}
+visualize-spy .visualize-csv-options label {
+  margin: 0 10px;
+  padding: 0;
+  font-weight: normal;
+}
+visualize-spy .visualize-csv-options .visualize-csv-separator {
+  width: 1.5em;
+}
+visualize-spy .visualize-csv-options button[type=submit] {
+  margin-left: 5px;
+}
+visualize-spy .visualize-spy-tabs {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  -webkit-box-flex: 0;
+  -moz-box-flex: 0;
+  -webkit-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
+}
+visualize-spy pre {
+  word-break: break-all;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
