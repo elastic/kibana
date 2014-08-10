@@ -1,21 +1,16 @@
 define(function (require) {
   return function YAxisFactory(d3, Private) {
-    var _ = require('lodash');
+    var renderYAxis = Private(require('components/vislib/components/YAxis/_draw'));
 
-    var Chart = Private(require('components/vislib/modules/_chart'));
-    var renderYAxis = Private(require('components/vislib/utils/d3/XAxis/_y_axis'));
-
-    _(YAxis).inherits(Chart);
-    function YAxis(vis) {
-      YAxis.Super.apply(this, arguments);
-    }
+    function YAxis() {}
 
     YAxis.prototype.draw = function (yAxis) {
-      this.yAxis = yAxis;
-      return renderYAxis(this);
+      return renderYAxis(this, yAxis);
     };
 
     YAxis.prototype.ticks = function () {};
+    YAxis.prototype.title = function () {};
+    YAxis.prototype.chartTitle = function () {};
 
     return YAxis;
   };

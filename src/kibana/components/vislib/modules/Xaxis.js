@@ -1,18 +1,13 @@
 define(function (require) {
   return function XAxisFactory(d3, Private) {
-    var _ = require('lodash');
+    var renderXAxis = Private(require('components/vislib/components/XAxis/_draw'));
 
-    var Chart = Private(require('components/vislib/modules/_chart'));
-    var renderXAxis = Private(require('components/vislib/utils/d3/XAxis/_x_axis'));
-
-    _(XAxis).inherits(Chart);
-    function XAxis(vis) {
-      XAxis.Super.apply(this, arguments);
+    function XAxis(that) {
+      this.data = that.data;
     }
 
     XAxis.prototype.draw = function (xAxis) {
-      this.xAxis = xAxis;
-      return renderXAxis(this);
+      return renderXAxis(this, xAxis);
     };
 
     XAxis.prototype.rotateTickLabels = function () {};

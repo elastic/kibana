@@ -3,10 +3,10 @@ define(function (require) {
     var _ = require('lodash');
 
     var Chart = Private(require('components/vislib/modules/_chart'));
-    var renderLegend = Private(require('components/vislib/utils/d3/legend/legend'));
+    var renderLegend = Private(require('components/vislib/components/Legend/legend'));
 
     // Dynamically adds css file
-    require('css!components/vislib/styles/main');
+    require('css!components/vislib/components/styles/main');
 
     _(Legend).inherits(Chart);
     function Legend(vis) {
