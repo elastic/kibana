@@ -4,61 +4,61 @@ define(function (require) {
     var $ = require('jquery');
 
     var ChartFunctions = Private(require('components/vislib/modules/_functions'));
-    var XAxis = Private(require('components/vislib/modules/XAxis'));
-    var YAxis = Private(require('components/vislib/modules/YAxis'));
+//    var XAxis = Private(require('components/vislib/modules/XAxis'));
+//    var YAxis = Private(require('components/vislib/modules/YAxis'));
     var renderChart = Private(require('components/vislib/components/_chart/_render'));
+//    var legend = Private(require('components/vislib/modules/Legend'));
+//    var tooltip = Private(require('components/vislib/modules/Tooltip'));
 
     _(Chart).inherits(ChartFunctions);
-    function Chart(vis) {
+    function Chart(vis, el, chartData) {
       Chart.Super.apply(this, arguments);
+
       this.el = vis.el;
       this.config = vis.config;
       this.ChartClass = vis.ChartClass;
+      this.data = vis.data;
+      this.color = vis.color;
+
+      // Chart specific items
+      this.chartEl = el;
+      this.chartData = chartData;
       this._attr = _.defaults(vis.config || {}, {});
     }
 
-    Chart.prototype.render = function (data) {
-      if (!data) {
-        throw new Error('No valid data');
-      }
-
-      this.data = data;
-      this.labels = this.getLabels(this.data);
-      this.color = this.getColor(this.labels);
-
-      return renderChart(this);
+    Chart.prototype.render = function () {
+      return this.draw();
     };
 
-    Chart.prototype.callXAxis = function () {
-      return new XAxis(this);
-    };
+//    Chart.prototype.callXAxis = function () {
+//      return new XAxis(this);
+//    };
+//
+//    Chart.prototype.callYAxis = function () {
+//      return new YAxis(this);
+//    };
+//
+//    Chart.prototype.resize = _.debounce(function () {
+//      if (!this.data) {
+//        throw new Error('No valid data');
+//      }
+//      this.render(this.data);
+//    }, 200);
+//
+//    Chart.prototype.checkSize = function () {
+//      // enable auto-resize
+//      var size = $('.chart').width() + ':' + $('.chart').height();
+//
+//      if (this.prevSize !== size) {
+//        this.resize();
+//      }
+//      this.prevSize = size;
+//      setTimeout(this.checkSize, 250);
+//    };
 
-    Chart.prototype.callYAxis = function () {
-      return new YAxis(this);
-    };
-
-    Chart.prototype.resize = _.debounce(function () {
-      if (!this.data) {
-        throw new Error('No valid data');
-      }
-
-      this.render(this.data);
-    }, 200);
-
-    Chart.prototype.checkSize = function () {
-      // enable auto-resize
-      var size = $('.chart').width() + ':' + $('.chart').height();
-
-      if (this.prevSize !== size) {
-        this.resize();
-      }
-      this.prevSize = size;
-      setTimeout(this.checkSize, 250);
-    };
-
-//    Chart.prototype.on = function () {};
-//    Chart.prototype.off = function () {};
-//    Chart.prototype.destroy = function () {};
+    Chart.prototype.on = function () {};
+    Chart.prototype.off = function () {};
+    Chart.prototype.destroy = function () {};
 
     Chart.prototype.set = function (name, val) {
       this._attr[name] = val;
