@@ -28,6 +28,10 @@ function (angular,$) {
               'confirmation="Are you sure you want to remove this {{panel.type}} panel?" class="pointer">'+
               '<i class="icon-remove pointer" bs-tooltip="\'Remove\'"></i></span>'+
             '</span>' +
+            
+            '<span class="row-button extra" data-ng-click="refresh()">' +
+              '<i class="icon-refresh pointer" bs-tooltip="\'Refresh\'"></i>' +
+            '</span>' +
 
             '<span class="extra row-button" ng-hide="panel.draggable == false">' +
               '<span class="pointer" bs-tooltip="\'Drag here to move\'"' +
@@ -81,6 +85,10 @@ function (angular,$) {
           elem.parent().parent().parent().resize(function() {
             $rootScope.$broadcast('render');
           });
+          
+          $scope.refresh = function() {
+            $scope.$broadcast('refresh') 
+          }
 
           $scope.kbnJqUiDraggableOptions = {
             revert: 'invalid',
