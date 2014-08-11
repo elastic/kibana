@@ -130,6 +130,8 @@ define(function (require) {
     var init = _.once(function () {
       return $scope.updateDataSource()
       .then(function () {
+        setFields();
+
         // state fields that shouldn't trigger a fetch when changed
         var ignoreStateChanges = ['columns'];
 
