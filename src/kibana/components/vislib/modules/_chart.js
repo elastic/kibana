@@ -12,14 +12,20 @@ define(function (require) {
     function Chart(vis) {
       Chart.Super.apply(this, arguments);
       this.el = vis.el;
-      this.data = vis.data;
+      this.config = vis.config;
       this.ChartClass = vis.ChartClass;
-      this.labels = this.getLabels(this.data);
-      this.color = this.color(this.labels);
       this._attr = _.defaults(vis.config || {}, {});
     }
 
-    Chart.prototype.render = function () {
+    Chart.prototype.render = function (data) {
+      if (!data) {
+        throw new Error('No valid data');
+      }
+
+      this.data = data;
+      this.labels = this.getLabels(this.data);
+      this.color = this.getColor(this.labels);
+
       return renderChart(this);
     };
 
@@ -35,7 +41,8 @@ define(function (require) {
       if (!this.data) {
         throw new Error('No valid data');
       }
-      this.render();
+
+      this.render(this.data);
     }, 200);
 
     Chart.prototype.checkSize = function () {

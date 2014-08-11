@@ -13,6 +13,7 @@ define(function (require) {
     return function (that) {
 
       // Attributes
+      var chart = that;
       var $elem = $('.chart');
       var callXAxis = that.callXAxis(that);
       var callYAxis = that.callYAxis(that);
@@ -129,8 +130,7 @@ define(function (require) {
           transformSVG(svg, margin.left, margin.top);
 
           // x axis
-//          d3.select('.x-axis-wrapper').call(callXAxis.draw(xAxis));
-//          checkSize();
+          d3.select('.x-axis-wrapper').call(callXAxis.draw(xAxis));
 //          appendXAxis(svg, height, xAxis);
 
           d3.select('.y-axis-col').call(callYAxis.draw(yAxis));
@@ -201,6 +201,23 @@ define(function (require) {
 //          if (isTooltip) {
 //            bars.call(tooltip.draw);
 //          }
+
+          var prevSize;
+          (function checkSize() {
+            // enable auto-resize
+            var size = $('.chart').width() + ':' + $('.chart').height();
+
+            if (prevSize === undefined) {
+              prevSize = size;
+            }
+
+            if (prevSize !== size) {
+              chart.resize();
+            }
+
+            prevSize = size;
+            setTimeout(checkSize, 250);
+          })();
 
           return svg;
         });
