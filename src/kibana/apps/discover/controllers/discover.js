@@ -448,12 +448,12 @@ define(function (require) {
 
       _.each(value, function (clause) {
         var previous = _.find(filters, function (item) {
-          return item && item.query.match[field] === clause;
+          return item && item.query.match[field] === {query: clause, type: 'phrase'};
         });
         if (!previous) {
           var filter = { query: { match: {} } };
           filter.negate = operation === '-';
-          filter.query.match[field] = clause;
+          filter.query.match[field] = {query: clause, type: 'phrase'};
           filters.push(filter);
         }
       });
