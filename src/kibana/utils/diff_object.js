@@ -49,8 +49,10 @@ define(function (require) {
       delete target[key];
     });
 
-    // Assign the source to the target
-    _.assign(target, _.pick(source, sourceKeys));
+    // Assign the changed to the source to the target
+    _.assign(target, _.pick(source, diff.changed));
+    // Assign the added to the source to the target
+    _.assign(target, _.pick(source, diff.added));
 
     return diff;
 
