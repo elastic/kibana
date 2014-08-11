@@ -87,7 +87,7 @@ function (angular,$) {
           });
           
           $scope.refresh = function() {
-            $scope.$broadcast('refresh') 
+            $scope.$broadcast('refresh');
           }
 
           $scope.kbnJqUiDraggableOptions = {
