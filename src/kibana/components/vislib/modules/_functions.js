@@ -27,7 +27,7 @@ define(function (require) {
       return getLabels(obj);
     };
 
-    ChartFunctions.prototype.color = function (arr) {
+    ChartFunctions.prototype.getColor = function (arr) {
       return color(arr);
     };
 

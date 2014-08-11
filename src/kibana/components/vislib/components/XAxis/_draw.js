@@ -5,8 +5,7 @@ define(function (require) {
 
     return function (that, xAxis) {
       that.xAxis = xAxis;
-      return split(that.data);
-//      return renderXAxis(that);
+      return renderXAxis(that);
     };
   };
 });
