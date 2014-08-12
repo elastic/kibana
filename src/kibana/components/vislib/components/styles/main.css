@@ -367,8 +367,14 @@ p.rows-label, p.columns-label {
 
 .legend-col-wrapper {
     flex: 0 1;
+    z-index: 10;
+    overflow: hidden;
 }
 
 .test-wrapper {
     flex: 20 1;
+}
+
+li.color {
+    list-style: none;
 }

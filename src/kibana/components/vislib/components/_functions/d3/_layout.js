@@ -21,6 +21,9 @@ define(function () {
       var legend = vis.append('div')
         .attr('class', 'legend-col-wrapper');
 
+      var tooltip = vis.append('div')
+        .attr('class', 'k4tip');
+
       return vis;
     };
   };
