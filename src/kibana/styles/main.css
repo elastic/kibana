@@ -7685,6 +7685,10 @@ fieldset[disabled] .checkbox-inline {
   cursor: default;
   opacity: .8;
 }
+.field-collapse-toggle {
+  color: #999;
+  margin-left: 10px !important;
+}
 filter-bar .bar {
   padding: 6px 6px 4px 6px;
   background: #dde4e6;
