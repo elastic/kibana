@@ -242,11 +242,12 @@ define(function (require) {
           totalSize: sortBy === 'non-time' ? false : totalSize,
           direction: sortBy === 'time' ? sort[1] : 'desc',
           first: function (resp) {
-            $scope.hits = resp.hits.total;
+            $scope.hits = 0;
             $scope.rows = [];
             $scope.rows.fieldCounts = {};
           },
           each: notify.timed('handle each segment', function (resp, req) {
+            $scope.hits += resp.hits.total;
             var rows = $scope.rows;
             var counts = rows.fieldCounts;
 
