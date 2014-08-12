@@ -1,7 +1,7 @@
 [[templated-and-scripted-dashboards]]
 == Templates and Scripts
 Kibana has support for creating dashboards dynamically via templates,
-and more advanced scripts. This allows you to create a based dashboard,
+and more advanced scripts. This allows you to create a base dashboard,
 then influence it with parameters, such as inserting a new query or
 filter via the URL.
 
