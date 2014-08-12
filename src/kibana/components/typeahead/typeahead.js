@@ -1,7 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
   var typeahead = require('modules').get('kibana/typeahead');
-  var template = require('text!components/typeahead/partials/typeahead.html');
 
   require('components/typeahead/_input');
   require('components/typeahead/_items');
@@ -17,8 +16,6 @@ define(function (require) {
 
     return {
       restrict: 'A',
-      transclude: true,
-      template: template,
       scope: {
         items: '=kbnTypeahead',
         itemKey: '@kbnTypeaheadKey'
@@ -205,6 +202,10 @@ define(function (require) {
         if (!$scope.inputModel) {
           throw new Error('kbn-typeahead-input must be defined');
         }
+
+        $scope.$watch('typeahead.isVisible()', function (vis) {
+          $el.toggleClass('visible', vis);
+        });
       }
     };
   });

@@ -32,7 +32,7 @@ define(function (require) {
     });
   }
 
-  describe.only('PersistedLog', function () {
+  describe('PersistedLog', function () {
     beforeEach(function () {
       init();
     });
