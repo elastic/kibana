@@ -7,10 +7,12 @@ define(function (require) {
     var classify = Private(require('components/vislib/components/Legend/classify'));
 
     return function (args) {
+      console.log('legend args:', args);
       var legendDiv = d3.select('.' + args.legend._attr.legendClass);
       var items = args.labels;
 
       createHeader(legendDiv);
+      console.log(toggleLegend);
 //        .on('click', toggleLegend);
 
       createList(legendDiv, items, args);
