@@ -5,8 +5,8 @@ define(function (require) {
     var flattenDataArray = Private(require('components/vislib/components/_functions/zero_injection/flatten_data'));
 
     // accepts a kibana data.series array of objects
-    return function (arr) {
-      var flattenedData = flattenDataArray(arr);
+    return function (obj) {
+      var flattenedData = flattenDataArray(obj);
       var uniqueXValues = {};
 
       // Appends unique x values in the order they appear

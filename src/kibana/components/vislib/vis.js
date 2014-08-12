@@ -18,7 +18,7 @@ define(function (require) {
       this.config = config;
       this.ChartClass = chartTypes[config.type];
       this.checkSize = _.bindKey(this, 'checkSize');
-      this.resize = _.bindKey(this, 'resize');
+//      this.resize = _.bindKey(this, 'resize');
       this.prevSize;
     }
 
@@ -27,10 +27,8 @@ define(function (require) {
         throw new Error('No valid data!');
       }
 
-      this.data = data;
-      console.log(this.data);
-      this.zeroFilledData = this.injectZeros(breakData(this.data));
-      console.log(this.zeroFilledData);
+      this.data = this.injectZeros(data);
+      this.orderedKeys = this.getOrderedKeys(this.data);
 
       this.labels = this.getLabels(this.data);
       this.color = this.getColor(this.labels);
@@ -54,6 +52,7 @@ define(function (require) {
           charts.push(chart);
           chart.render();
         });
+      this.checkSize();
     };
 
     Vis.prototype.resize = _.debounce(function () {
@@ -66,11 +65,13 @@ define(function (require) {
     Vis.prototype.checkSize = function () {
       // enable auto-resize
       var size = $(this.el).width() + ':' + $(this.el).height();
+      console.log(this.prevSize + ':' + size);
 
-      if (this.prevSize !== size) {
+      if (this.prevSize !== undefined && this.prevSize !== size) {
         this.resize();
       }
       this.prevSize = size;
+      setTimeout(this.checkSize, 250);
     };
 
     Vis.prototype.on = function () {

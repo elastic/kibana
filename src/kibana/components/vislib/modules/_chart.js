@@ -15,10 +15,10 @@ define(function (require) {
       Chart.Super.apply(this, arguments);
 
       this.el = vis.el;
-      this.config = vis.config;
       this.ChartClass = vis.ChartClass;
       this.data = vis.data;
       this.color = vis.color;
+      this.orderedKeys = vis.orderedKeys;
 
       // Chart specific items
       this.chartEl = el;

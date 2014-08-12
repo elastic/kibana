@@ -6,24 +6,45 @@ define(function (require) {
     var createZeroFilledArray = Private(require('components/vislib/components/_functions/zero_injection/zero_filled_array'));
     var zeroFillDataArray = Private(require('components/vislib/components/_functions/zero_injection/zero_fill_data_array'));
 
-    // Takes the kibana data.series array of objects
-    // and the kibana data.ordered object
-    return function (arr, obj) {
-      var keys = orderXValues(arr);
-      var max = arr.length;
+    // Takes the kibana data objects
+    return function (obj) {
+      var keys = orderXValues(obj);
+      var max;
+      var zeroArray;
+      var dataArray;
       var i;
+      var j;
+
+      if (!obj.series) {
+        var arr = obj.rows ? obj.rows : obj.columns;
+        max = obj.rows ? obj.rows.length : obj.columns.length;
+
+        for (i = 0; i < max; i++) {
+          var jMax = arr[i].series.length;
+
+          for (j = 0; j < jMax; j++) {
+            zeroArray = createZeroFilledArray(keys, arr[i].ordered);
+            dataArray = arr[i].series[j].values;
+            arr[i].series[j].values = zeroFillDataArray(zeroArray, dataArray);
+          }
+        }
+
+        return obj;
+      }
 
       // Looping thru each arr.values object and replacing
       // the y value of the zero-filled array
+      max = obj.series.length;
       for (i = 0; i < max; i++) {
-        var zeroArray = createZeroFilledArray(keys, obj);
-        var dataArray = arr[i].values;
+//        var zeroArray = createZeroFilledArray(keys, obj);
+        zeroArray = createZeroFilledArray(keys, obj.ordered);
+        dataArray = obj.series[i].values;
 
-        arr[i].values = zeroFillDataArray(zeroArray, dataArray);
+        obj.series[i].values = zeroFillDataArray(zeroArray, dataArray);
       }
 
       // Returns a zero-filled array of objects
-      return arr;
+      return obj;
     };
   };
 });
