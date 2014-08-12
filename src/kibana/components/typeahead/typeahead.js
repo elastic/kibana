@@ -24,7 +24,7 @@ define(function (require) {
       controller: function ($scope, $element, $timeout, PersistedLog, config) {
         var self = this;
         self.form = $element.closest('form');
-        self.query = undefined;
+        self.query = '';
         self.hidden = true;
         self.focused = false;
         self.mousedOver = false;
@@ -181,10 +181,12 @@ define(function (require) {
 
         self.filterItemsByQuery = function (query) {
           // cache query so we can call it again if needed
-          self.query = query;
+          if (query) {
+            self.query = query;
+          }
 
           // if the query is empty, clear the list items
-          if (!query.length) {
+          if (!self.query.length) {
             $scope.filteredItems = [];
             return;
           }
