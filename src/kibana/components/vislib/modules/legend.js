@@ -9,7 +9,7 @@ define(function (require) {
 
     function Legend(vis) {
       this._attr = _.defaults(vis.config || {}, {
-        'legendClass' : 'legendwrapper',
+        'legendClass' : 'legend-col-wrapper',
         'blurredOpacity' : 0.3,
         'focusOpacity' : 1,
         'defaultOpacity' : 1,
@@ -17,8 +17,8 @@ define(function (require) {
       });
     }
 
-    Legend.prototype.draw = function () {
-      return renderLegend(this);
+    Legend.prototype.draw = function (vis) {
+      return renderLegend(vis);
     };
 
     return Legend;
