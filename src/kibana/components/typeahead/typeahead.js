@@ -17,7 +17,7 @@ define(function (require) {
     return {
       restrict: 'A',
       scope: {
-        historyKey: '=kbnTypeahead',
+        historyKey: '@kbnTypeahead',
       },
       controllerAs: 'typeahead',
 
@@ -30,7 +30,7 @@ define(function (require) {
         self.mousedOver = false;
 
         // instantiate history and add items to the scope
-        self.history = new PersistedLog($scope.historyKey, {
+        self.history = new PersistedLog('typeahead:' + $scope.historyKey, {
           maxLength: config.get('history:limit'),
           filterDuplicates: true
         });
