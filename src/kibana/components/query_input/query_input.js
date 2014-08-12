@@ -79,7 +79,10 @@ define(function (require) {
             }).then(success, error);
           };
 
-          var debouncedValidator = _.debounce(validator, 300);
+          var debouncedValidator = _.debounce(validator, 300, {
+            leading: true,
+            trailing: true
+          });
 
           // What should I make with the input from the user?
           var fromUser = function (text) {
