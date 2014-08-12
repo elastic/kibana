@@ -3,13 +3,15 @@ define(function (require) {
     var classify = Private(require('components/vislib/components/Legend/classify'));
 
     return function (d3el, arrOfItms, args) {
+      console.log(args);
       return d3el.append('ul')
-//        .attr('class', function () {
-//          if (args._attr.isOpen) {
-//            return 'legend-ul';
-//          }
-//          return 'legend-ul hidden';
-//        })
+        .attr('class', function () {
+          if (args.legend._attr.isLegendOpen) {
+            return 'legend-ul';
+          }
+          //return 'legend-ul';
+          return 'legend-ul hidden';
+        })
         .selectAll('li')
         .data(arrOfItms)
         .enter()
