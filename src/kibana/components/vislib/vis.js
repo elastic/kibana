@@ -19,6 +19,8 @@ define(function (require) {
       this.config = config;
       this.ChartClass = chartTypes[config.type];
       this.prevSize;
+      this.isLegendOpen = false;
+      console.log('vis.isLegendOpen', this.isLegendOpen, ' vis args', config);
     }
 
     Vis.prototype.render = function (data) {
@@ -68,6 +70,7 @@ define(function (require) {
       if (!this.data) {
         throw new Error('No valid data');
       }
+      console.log('RESIZE');
       this.render(this.data);
     };
 

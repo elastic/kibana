@@ -7,25 +7,32 @@ define(function (require) {
     var classify = Private(require('components/vislib/components/Legend/classify'));
 
     return function (args) {
-      console.log('legend args:', args);
       var legendDiv = d3.select('.' + args.legend._attr.legendClass);
       var items = args.labels;
-
-      createHeader(legendDiv);
-      console.log(toggleLegend);
-//        .on('click', toggleLegend);
+      var header = createHeader(legendDiv);
+      var headerIcon = d3.select('.legend-toggle');
+      
+      headerIcon.on('click', function (d) {
+        toggleLegend(args);
+      });
 
       createList(legendDiv, items, args);
-//        .on('mouseover', function (d) {
-//          var liClass = '.' + classify(args.color(d));
-//          d3.selectAll('.color').style('opacity', args._attr.blurredOpacity);
-//
-//          // Select series on chart
-//          d3.selectAll(liClass).style('opacity', args._attr.focusOpacity);
-//        })
-//        .on('mouseout', function () {
-//          d3.selectAll('.color').style('opacity', args._attr.defaultOpacity);
-//        });
+
+      d3.selectAll('.color')
+        .on('mouseover', function (d) {
+          var liClass = '.' + classify(args.color(d));
+          console.log(d, liClass);
+        });
+          // var liClass = '.' + classify(args.color(d));
+          // d3.selectAll('.color').style('opacity', args._attr.blurredOpacity);
+          // // Select series on chart
+          // d3.selectAll(liClass).style('opacity', args._attr.focusOpacity);
+          // });
+        // .on('mouseout', function () {
+        //   d3.selectAll('.color').style('opacity', args._attr.defaultOpacity);
+        // });
+
+      
     };
   };
 });
