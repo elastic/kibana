@@ -17,28 +17,32 @@ define(function (require) {
     return {
       restrict: 'A',
       scope: {
-        items: '=kbnTypeahead',
-        itemKey: '@kbnTypeaheadKey'
+        historyKey: '=kbnTypeahead',
       },
       controllerAs: 'typeahead',
 
-      controller: function ($scope, $element, $timeout) {
+      controller: function ($scope, $element, $timeout, PersistedLog, config) {
         var self = this;
+        self.form = $element.closest('form');
         self.query = undefined;
         self.hidden = true;
         self.focused = false;
         self.mousedOver = false;
-        self.filteredItems = [];
 
-        self.getItemValue = function (item) {
-          return ($scope.itemKey) ? item[$scope.itemKey] : item;
-        };
+        // instantiate history and add items to the scope
+        self.history = new PersistedLog($scope.historyKey, {
+          maxLength: config.get('history:limit'),
+          filterDuplicates: true
+        });
+
+        $scope.items = self.history.get();
+        $scope.filteredItems = [];
 
         self.setInputModel = function (model) {
           $scope.inputModel = model;
 
           // watch for changes to the query parameter, delegate to typeaheadCtrl
-          $scope.$watch('inputModel.$viewValue', self.filteredItemsByQuery);
+          $scope.$watch('inputModel.$viewValue', self.filterItemsByQuery);
         };
 
         self.setHidden = function (hidden) {
@@ -63,18 +67,22 @@ define(function (require) {
             return;
           }
 
-          return self.filteredItems.indexOf(self.active);
+          return $scope.filteredItems.indexOf(self.active);
+        };
+
+        self.getItems = function () {
+          return $scope.filteredItems;
         };
 
         self.activateNext = function () {
           var index = self.getActiveIndex();
           if (index == null) {
             index = 0;
-          } else if (index < self.filteredItems.length - 1) {
+          } else if (index < $scope.filteredItems.length - 1) {
             ++index;
           }
 
-          self.activateItem(self.filteredItems[index]);
+          self.activateItem($scope.filteredItems[index]);
         };
 
         self.activatePrev = function () {
@@ -87,7 +95,7 @@ define(function (require) {
             return;
           }
 
-          self.activateItem(self.filteredItems[index]);
+          self.activateItem($scope.filteredItems[index]);
         };
 
         self.isActive = function (item) {
@@ -98,8 +106,9 @@ define(function (require) {
         self.selectItem = function (item, ev) {
           self.hidden = true;
           self.active = false;
-          $scope.inputModel.$setViewValue(self.getItemValue(item));
+          $scope.inputModel.$setViewValue(item);
           $scope.inputModel.$render();
+          self.persistEntry();
 
           if (ev && ev.type === 'click') {
             $timeout(function () {
@@ -109,7 +118,15 @@ define(function (require) {
         };
 
         self.submitForm = function () {
-          $element.closest('form').submit();
+          if (self.form.length) {
+            self.form.submit();
+          }
+        };
+
+        self.persistEntry = function () {
+          // push selection into the history
+          $scope.items = self.history.add($scope.inputModel.$viewValue);
+          console.log($scope.items.length);
         };
 
         self.selectActive = function () {
@@ -133,11 +150,11 @@ define(function (require) {
 
           // change selection with arrow up/down
           // on down key, attempt to load all items if none are loaded
-          if (_.contains([keyMap.DOWN], keyCode) && self.filteredItems.length === 0) {
-            self.filteredItems = $scope.items;
+          if (_.contains([keyMap.DOWN], keyCode) && $scope.filteredItems.length === 0) {
+            $scope.filteredItems = $scope.items;
             $scope.$digest();
           } else if (_.contains([keyMap.UP, keyMap.DOWN], keyCode)) {
-            if (self.isVisible() && self.filteredItems.length) {
+            if (self.isVisible() && $scope.filteredItems.length) {
               ev.preventDefault();
 
               if (keyCode === keyMap.DOWN) {
@@ -148,6 +165,13 @@ define(function (require) {
             }
           }
 
+          // persist selection on enter, when not selecting from the list
+          if (_.contains([keyMap.ENTER], keyCode)) {
+            if (! self.active) {
+              self.persistEntry();
+            }
+          }
+
           // select on enter or tab
           if (_.contains([keyMap.ENTER, keyMap.TAB], keyCode)) {
             self.selectActive();
@@ -155,43 +179,39 @@ define(function (require) {
           }
         };
 
-        self.filteredItemsByQuery = function (query) {
+        self.filterItemsByQuery = function (query) {
           // cache query so we can call it again if needed
           self.query = query;
 
           // if the query is empty, clear the list items
           if (!query.length) {
-            self.filteredItems = [];
+            $scope.filteredItems = [];
             return;
           }
 
           // update the filteredItems using the query
           var re = new RegExp(query, 'i');
-          self.filteredItems = $scope.items.filter(function (item) {
-            var value = self.getItemValue(item);
-            return !!(value.match(re));
+          $scope.filteredItems = $scope.items.filter(function (item) {
+            return !!(item.match(re));
           });
         };
 
         self.isVisible = function () {
-          return !self.hidden && (self.focused || self.mousedOver) && self.filteredItems.length;
+          return !self.hidden && ($scope.filteredItems.length > 0) && (self.focused || self.mousedOver);
         };
 
         // handle updates to parent scope history
         $scope.$watch('items', function (items) {
-          self.items = items;
-
           if (self.query) {
-            self.filteredItemsByQuery($scope.$query);
+            self.filterItemsByQuery($scope.$query);
           }
         });
 
         // watch for changes to the filtered item list
         $scope.$watch('filteredItems', function (filteredItems) {
-          self.filteredItems = filteredItems;
 
           // if list is empty, or active item is missing, unset active item
-          if (!filteredItems.length || !_.contains(self.filteredItems, self.active)) {
+          if (!filteredItems.length || !_.contains(filteredItems, self.active)) {
             self.active = false;
           }
         });

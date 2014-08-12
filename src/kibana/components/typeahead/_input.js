@@ -16,11 +16,6 @@ define(function (require) {
 
         typeaheadCtrl.setInputModel(model);
 
-        // add handler to get query fro`m input
-        var getQuery = function () {
-          return model.$modelValue;
-        };
-
         // handle keypresses
         $el.on('keydown', function (ev) {
           typeaheadCtrl.keypressHandler(ev);
