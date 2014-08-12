@@ -203,7 +203,7 @@ define(function (require) {
         // handle updates to parent scope history
         $scope.$watch('items', function (items) {
           if (self.query) {
-            self.filterItemsByQuery($scope.$query);
+            self.filterItemsByQuery(self.query);
           }
         });
 
