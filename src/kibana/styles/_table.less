@@ -1,0 +1,18 @@
+kbn-table {
+  // sub tables should not have a leading border
+  .table .table {
+    margin-bottom: 0px;
+
+    tr:first-child > td {
+      border-top: none;
+    }
+
+    td.field-name {
+      font-weight: bold;
+    }
+  }
+
+  tr.even td {
+    background-color: #f1f1f1;
+  }
+}

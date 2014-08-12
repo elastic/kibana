@@ -1,0 +1,24 @@
+paginate {
+  .display(flex);
+  .flex-direction(column);
+
+  paginate-controls {
+    .display(flex);
+    padding: 5px 5px 10px;
+
+
+    .pagination {
+      margin: 0 auto !important;
+    }
+
+    @media (max-width: @screen-sm-min) {
+      .jump-to-end {
+        display: none;
+      }
+    }
+  }
+
+  .paginate-content {
+    .flex(1, 1, auto);
+  }
+}
