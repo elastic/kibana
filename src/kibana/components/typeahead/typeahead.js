@@ -190,10 +190,15 @@ define(function (require) {
           }
 
           // update the filteredItems using the query
-          var re = new RegExp(query, 'i');
-          $scope.filteredItems = $scope.items.filter(function (item) {
-            return !!(item.match(re));
+          var beginningMatches = $scope.items.filter(function (item) {
+            return item.indexOf(query) === 0;
           });
+
+          var otherMatches = $scope.items.filter(function (item) {
+            return item.indexOf(query) > 0;
+          });
+
+          $scope.filteredItems = beginningMatches.concat(otherMatches);
         };
 
         self.isVisible = function () {
