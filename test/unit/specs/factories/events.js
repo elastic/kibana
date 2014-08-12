@@ -98,7 +98,7 @@ define(function (require) {
       ];
 
       Promise.all(emits).then(function () {
-        expect(handler1.callCount).to.be(3);
+        expect(handler1.callCount).to.be(emits.length);
         expect(handler1.getCall(0).calledWith('one')).to.be(true);
         expect(handler1.getCall(1).calledWith('two')).to.be(true);
         expect(handler1.getCall(2).calledWith('three')).to.be(true);
@@ -127,6 +127,36 @@ define(function (require) {
       });
     });
 
-    it('should only emit to handlers registered before emit is called');
+    it('should only emit to handlers registered before emit is called', function (done) {
+      var obj = new Events();
+      var handler1 = sinon.stub();
+      var handler2 = sinon.stub();
+
+      obj.on('test', handler1);
+      var emits = [
+        obj.emit('test', 'one'),
+        obj.emit('test', 'two'),
+        obj.emit('test', 'three')
+      ];
+
+
+      Promise.all(emits).then(function () {
+        expect(handler1.callCount).to.be(emits.length);
+
+        obj.on('test', handler2);
+
+        var emits2 = [
+          obj.emit('test', 'four'),
+          obj.emit('test', 'five'),
+          obj.emit('test', 'six')
+        ];
+
+        Promise.all(emits2).then(function () {
+          expect(handler1.callCount).to.be(emits.length + emits2.length);
+          expect(handler2.callCount).to.be(emits2.length);
+          done();
+        });
+      });
+    });
   });
 });

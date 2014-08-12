@@ -53,6 +53,7 @@ define(function (require) {
 
     var segmentedFetch = $scope.segmentedFetch = Private(require('apps/discover/_segmented_fetch'));
     var HitSortFn = Private(require('apps/discover/_hit_sort_fn'));
+    var diffTimePickerValues = Private(require('utils/diff_time_picker_vals'));
 
     var notify = new Notifier({
       location: 'Discover'
@@ -148,8 +149,7 @@ define(function (require) {
 
         // TODO: Switch this to watching time.string when we implement it
         $scope.$watchCollection('globalState.time', function (newTime, oldTime) {
-          // don't fetch unless there was a previous value and the values are not loosly equal
-          if (!_.isUndefined(oldTime) && !angular.equals(newTime, oldTime)) $scope.fetch();
+          if (diffTimePickerValues(newTime, oldTime)) $scope.fetch();
         });
 
         $scope.$watch('state.sort', function (sort) {
@@ -205,7 +205,6 @@ define(function (require) {
 
       $scope.updateTime();
       if (_.isEmpty($state.columns)) refreshColumns();
-      $state.save();
       $scope.updateDataSource()
       .then(setupVisualization)
       .then(function () {
@@ -243,11 +242,12 @@ define(function (require) {
           totalSize: sortBy === 'non-time' ? false : totalSize,
           direction: sortBy === 'time' ? sort[1] : 'desc',
           first: function (resp) {
-            $scope.hits = resp.hits.total;
+            $scope.hits = 0;
             $scope.rows = [];
             $scope.rows.fieldCounts = {};
           },
           each: notify.timed('handle each segment', function (resp, req) {
+            $scope.hits += resp.hits.total;
             var rows = $scope.rows;
             var counts = rows.fieldCounts;
 
@@ -415,7 +415,6 @@ define(function (require) {
       $scope.fields = [];
       $scope.fieldsByName = {};
       $scope.formatsByName = {};
-      $state.columns = $state.columns || [];
 
       if (!indexPattern) return;
 
@@ -448,12 +447,12 @@ define(function (require) {
 
       _.each(value, function (clause) {
         var previous = _.find(filters, function (item) {
-          return item && item.query.match[field] === clause;
+          return item && item.query.match[field] === {query: clause, type: 'phrase'};
         });
         if (!previous) {
           var filter = { query: { match: {} } };
           filter.negate = operation === '-';
-          filter.query.match[field] = clause;
+          filter.query.match[field] = {query: clause, type: 'phrase'};
           filters.push(filter);
         }
       });
