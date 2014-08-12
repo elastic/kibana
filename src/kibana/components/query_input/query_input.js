@@ -23,10 +23,10 @@ define(function (require) {
 
           var init = function () {
             elem.after(errorElem);
-            validater($scope.ngModel);
+            validator($scope.ngModel);
           };
 
-          var validater = function (query) {
+          var validator = function (query) {
             var index, type;
 
             var error = function (resp) {
@@ -79,8 +79,7 @@ define(function (require) {
             }).then(success, error);
           };
 
-          var debouncedValidator = _.debounce(validater, 300);
-
+          var debouncedValidator = _.debounce(validator, 300);
 
           // What should I make with the input from the user?
           var fromUser = function (text) {
