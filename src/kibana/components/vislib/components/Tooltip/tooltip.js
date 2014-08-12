@@ -1,12 +1,9 @@
-define(function (require) {
-  return function TooltipUtilService(d3, Private) {
-    var appendTooltipDiv = Private(require('components/vislib/components/_functions/d3/_append_elem'));
-
+define(function () {
+  return function TooltipUtilService(d3) {
     return function (args) {
-      var tooltipDiv = appendTooltipDiv(args.el, 'div', args._attr.tooltipClass);
-
       return function (selection) {
         selection.each(function () {
+          var tooltipDiv = d3.select('.' + args._attr.tooltipClass);
           var element = d3.select(this);
 
           element
@@ -16,16 +13,14 @@ define(function (require) {
                 top: d3.event.pageY
               };
 
-              return tooltipDiv
-                .datum(d)
+              return tooltipDiv.datum(d)
                 .text(args._attr.tooltipFormatter)
                 .style('visibility', 'visible')
                 .style('top', mouseMove.top + 'px')
                 .style('left', mouseMove.left + 10 + 'px');
             })
             .on('mouseout', function () {
-              return tooltipDiv
-                .style('visibility', 'hidden');
+              return tooltipDiv.style('visibility', 'hidden');
             });
         });
       };

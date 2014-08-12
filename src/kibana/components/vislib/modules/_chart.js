@@ -4,11 +4,6 @@ define(function (require) {
     var $ = require('jquery');
 
     var ChartFunctions = Private(require('components/vislib/modules/_functions'));
-//    var XAxis = Private(require('components/vislib/modules/XAxis'));
-//    var YAxis = Private(require('components/vislib/modules/YAxis'));
-    var renderChart = Private(require('components/vislib/components/_chart/_render'));
-//    var legend = Private(require('components/vislib/modules/Legend'));
-//    var tooltip = Private(require('components/vislib/modules/Tooltip'));
 
     _(Chart).inherits(ChartFunctions);
     function Chart(vis, el, chartData) {
@@ -19,6 +14,7 @@ define(function (require) {
       this.data = vis.data;
       this.color = vis.color;
       this.orderedKeys = vis.orderedKeys;
+      this.tooltip = vis.tooltip;
 
       // Chart specific items
       this.chartEl = el;

@@ -5,10 +5,11 @@ define(function (require) {
 
     var ChartFunctions = Private(require('components/vislib/modules/_functions'));
     var split = Private(require('components/vislib/components/_functions/d3/_split'));
-    var breakData = Private(require('components/vislib/components/_functions/labels/data_array'));
 
     var chartTypes = {
-      histogram : Private(require('components/vislib/modules/ColumnChart'))
+      histogram : Private(require('components/vislib/modules/ColumnChart')),
+      legend: Private(require('components/vislib/modules/Legend')),
+      tooltip: Private(require('components/vislib/modules/Tooltip'))
     };
 
     _(Vis).inherits(ChartFunctions);
@@ -17,8 +18,6 @@ define(function (require) {
       this.el = $el.get ? $el.get(0) : $el;
       this.config = config;
       this.ChartClass = chartTypes[config.type];
-      this.checkSize = _.bindKey(this, 'checkSize');
-//      this.resize = _.bindKey(this, 'resize');
       this.prevSize;
     }
 
@@ -42,6 +41,15 @@ define(function (require) {
       // split data
       this.callFunction(d3.select('.chart-wrapper'), this.data, split);
 
+      if (this.config.addLegend) {
+        this.legend = new chartTypes.legend(this);
+        this.legend.draw(this);
+      }
+
+      if (this.config.addTooltip) {
+        this.tooltip = new chartTypes.tooltip(this);
+      }
+
       var vis = this;
       var charts = this.charts = [];
 
@@ -52,27 +60,28 @@ define(function (require) {
           charts.push(chart);
           chart.render();
         });
-      this.checkSize();
+
+      this.checkSize('.vis-col-wrapper');
     };
 
-    Vis.prototype.resize = _.debounce(function () {
+    Vis.prototype.resize = function () {
       if (!this.data) {
         throw new Error('No valid data');
       }
       this.render(this.data);
-    }, 200);
+    };
 
-    Vis.prototype.checkSize = function () {
+    Vis.prototype.checkSize = _.debounce(function (el) {
       // enable auto-resize
-      var size = $(this.el).width() + ':' + $(this.el).height();
-      console.log(this.prevSize + ':' + size);
+      var size = $(el).width() + ':' + $(el).height();
+      console.log(size);
 
       if (this.prevSize !== undefined && this.prevSize !== size) {
         this.resize();
       }
       this.prevSize = size;
-      setTimeout(this.checkSize, 250);
-    };
+      setTimeout(this.checkSize(el), 500);
+    }, 500);
 
     Vis.prototype.on = function () {
       return this.chart.on();
