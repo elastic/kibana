@@ -6,12 +6,12 @@
   >
 
   <div
-    ng-repeat="item in typeahead.filteredItems"
+    ng-repeat="item in typeahead.getItems()"
     ng-class="{active: item === typeahead.active}"
     ng-click="typeahead.selectItem(item, $event);"
     ng-mouseenter="typeahead.activateItem(item);"
     class="typeahead-item"
     >
-    {{typeahead.getItemValue(item)}}
+    {{item}}
   </div>
-</div"
+</div>
