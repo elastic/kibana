@@ -1,17 +1,23 @@
 <div class="sidebar-list">
   <div class="sidebar-list-header">
-    <h5>Selected</h5>
+    <h5>Selected Fields</h5>
   </div>
-  <ul bindonce class="list-unstyled discover-selected-fields">
+  <ul
+    bindonce class="list-unstyled discover-selected-fields" >
     <discover-field field="field" ng-repeat="field in fields|filter:{display:true}" data="data">
     </discover-field>
   </ul>
 
   <div class="sidebar-list-header sidebar-item">
-    <h5 ng-click="showFilter = !showFilter">Fields
+    <h5>Fields
+      <i
+        ng-class="{ 'fa-chevron-right': !showFields, 'fa-chevron-down': showFields }"
+        ng-click="showFields = !showFields"
+        class="fa visible-xs visible-sm pull-right field-collapse-toggle" ></i>
       <button
-        ng-class="filter.active ? 'btn-success' : 'btn-default'"
-        class="btn btn-xs btn-default pull-right discover-field-filter-toggle">
+        ng-class="{ 'btn-defualt': !filter.active, 'btn-success': filter.active, 'hidden-xs': !showFields, 'hidden-sm': !showFields }"
+        class="btn btn-xs btn-default pull-right discover-field-filter-toggle"
+        ng-click="showFilter = !showFilter">
         <i class="fa fa-gear"></i>
       </button>
     </h5>
@@ -78,7 +84,7 @@
 
   <ul bindonce
     ng-show="(fields | filter:filter.popularity).length > 0"
-    class="list-unstyled sidebar-well">
+    class="list-unstyled sidebar-well" ng-class="{ 'hidden-sm': !showFields, 'hidden-xs': !showFields }">
     <li class="sidebar-item sidebar-list-header"><h6>Popular fields</h6></li>
     <discover-field
       ng-repeat="field in popularFields | filter:filter.isFieldFiltered"
@@ -87,7 +93,7 @@
     </discover-field>
   </ul>
 
-  <ul bindonce class="list-unstyled">
+  <ul bindonce class="list-unstyled" ng-class="{ 'hidden-sm': !showFields, 'hidden-xs': !showFields  }">
     <discover-field
       ng-repeat="field in unpopularFields | filter:filter.isFieldFiltered"
       field="field"
