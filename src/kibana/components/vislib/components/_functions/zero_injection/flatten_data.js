@@ -3,7 +3,18 @@ define(function (require) {
     var _ = require('lodash');
 
     // Takes a kibana data.series array of objects
-    return function (arr) {
+    return function (obj) {
+      if (!obj.series) {
+        obj = obj.rows ? obj.rows : obj.columns;
+
+        return _.chain(obj)
+          .pluck('series')
+          .flatten()
+          .pluck('values')
+          .flatten()
+          .value();
+      }
+
       // Returns an array of objects
       /*
        * [
@@ -12,7 +23,7 @@ define(function (require) {
        *    { x: ..., y: ...}
        * ]
        */
-      return _.flatten(arr, 'values');
+      return _.flatten(obj.series, 'values');
     };
   };
 });

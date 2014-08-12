@@ -3,7 +3,7 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
 
-    var orderKeys = Private(require('components/vislib/components/_functions/zero_injection/ordered_x_keys'));
+//    var orderKeys = Private(require('components/vislib/components/_functions/zero_injection/ordered_x_keys'));
 //    var classify = Private(require('components/vislib/components/Legend/classify'));
     var createSVG = Private(require('components/vislib/components/_functions/d3/_create_svg'));
     var transformSVG = Private(require('components/vislib/components/_functions/d3/_transform_svg'));
@@ -14,6 +14,7 @@ define(function (require) {
 
       // Attributes
       var data = chartData;
+      var orderedKeys = vis.orderedKeys;
       var $elem = $('.chart');
 //      var callXAxis = vis.callXAxis(vis);
 //      var callYAxis = vis.callYAxis(vis);
@@ -80,7 +81,7 @@ define(function (require) {
       return d3.select(chartEl).call(function () {
 //          zeroFilledData = injectZeros(data.series, data.ordered);
 
-        layers = stack(data.map(function (d, i) {
+        layers = stack(data.series.map(function (d, i) {
           var label = d.label;
           return d.values.map(function (e, i) {
             return {
@@ -102,10 +103,9 @@ define(function (require) {
 //          yTicks = Math.floor(yTickScale(height));
 
         // Update the xScale
-        xScale.domain(orderKeys(zeroFilledData)) // May always return strings - need to add new function vis returns the correct values
+        xScale.domain(orderedKeys) // May always return strings - need to add new function vis returns the correct values
           .rangeBands([0, width], 0.1);
 
-        console.log(zeroFilledData);
         // Update the yScale
 //          yScale = getYDomain()
         yScale

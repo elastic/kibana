@@ -2,6 +2,7 @@ define(function (require) {
   return function ChartFunctionsBaseClass(d3, Private) {
 
     var injectZeros = Private(require('components/vislib/components/_functions/zero_injection/inject_zeros'));
+    var orderKeys = Private(require('components/vislib/components/_functions/zero_injection/ordered_x_keys'));
     var yStackMax = Private(require('components/vislib/components/_functions/d3/_y_stack_max'));
     var getLabels = Private(require('components/vislib/components/_functions/labels/labels'));
     var color = Private(require('components/vislib/components/_functions/color/color'));
@@ -17,6 +18,10 @@ define(function (require) {
 
     ChartFunctions.prototype.injectZeros = function (arr, obj) {
       return injectZeros(arr, obj);
+    };
+
+    ChartFunctions.prototype.getOrderedKeys = function (obj) {
+      return orderKeys(obj);
     };
 
     ChartFunctions.prototype.yStackMax = function (stackedData) {
