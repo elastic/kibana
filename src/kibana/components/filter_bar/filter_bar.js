@@ -23,7 +23,7 @@ define(function (require) {
           var key = _.keys(filter.query.match)[0];
           return {
             key: key,
-            value: filter.query.match[key],
+            value: filter.query.match[key].query,
             disabled: !!(filter.disabled),
             negate: !!(filter.negate),
             filter: filter
