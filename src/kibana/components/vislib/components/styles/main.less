@@ -1,0 +1,385 @@
+/* Stylings that will blow your mind! */
+
+.arc path {
+  stroke: #fff;
+  /* stroke-width: 3px; */
+}
+
+.arc path {
+  stroke: #fff;
+  /* stroke-width: 3px; */
+}
+
+div.columns {
+  display: flex;
+  flex-direction: row;
+  flex: 1 1 100%;
+  margin: 0;
+  padding: 0;
+}
+
+div.rows {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 100%;
+  margin: 0;
+  padding: 0;
+}
+
+div.chart {
+  display: flex;
+  flex: 1 1;
+  flex-direction: column;
+}
+
+.row-labels, .column-labels {
+  margin: 0;
+  padding: 10;
+}
+
+visualize {
+  margin:0;
+  padding:0;
+}
+
+.visualize-chart {
+  display: flex;
+  flex: 1 1 100%;
+}
+
+.visualize-wrapper {
+  display: flex;
+  flex-direction: row;
+}
+
+.y-axis-wrapper {
+  display: flex;
+  flex: 1 1;
+  flex-direction: column;
+}
+
+.y-axis-div {
+  flex: 5 1;
+}
+
+.y-axis-filler-div {
+  flex: 1 1;
+}
+
+.vis-wrapper {
+  display: flex;
+  flex: 5 1;
+  flex-direction: column;
+}
+
+.chart-wrapper {
+  flex: 5 1;
+}
+
+.x-axis-div {
+  flex: 1 1;
+}
+
+.legend-wrapper {
+  flex: 1 1;
+}
+
+.chartwrapper {
+  display: flex;
+  flex: 1 1 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+div.x-axis-label {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  bottom: 15px;
+  font-size: 7pt;
+  color: #848e96;
+}
+
+div.y-axis-label {
+  position: absolute;
+  left: -25px;
+  top: 42.5%;
+  font-size: 7pt;
+  color: #848e96;
+  -webkit-transform: rotate(270deg);
+  -moz-transform: rotate(270deg);
+  -o-transform: rotate(270deg);
+  -ms-transform: rotate(270deg);
+  transform: rotate(270deg);
+}
+
+/*  legends  */
+.legendwrapper {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 10px 10px 10px 0;
+  /*border: 1px solid #ddd;*/
+  /*position: absolute;*/
+  float: right;
+  /*width: 30px;*/
+  /*height: 25px;*/
+  /*top: 34px;*/
+  /*right: 10px;*/
+  z-index: 10;
+  overflow: hidden;
+}
+.legendwrapper.legend-open {
+  width: auto;
+}
+.legendwrapper.legend-closed {
+  width: 40px;
+}
+
+.header {
+  width: 100%;
+  height: 26px;
+  margin: 0 0 6px 0;
+}
+.legend-ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 150px;
+  visibility: visible;
+}
+.legend-ul.hidden {
+  visibility: hidden;
+}
+.legend-ul li {
+  display: block;
+  float: left;
+  width: 150px;
+  min-height: 22px;
+  margin: 0 18px 0 18px;
+  padding: 4px 0 4px 0;
+  text-align: left;
+  word-wrap: break-word;
+  font-size: 12px;
+  line-height: 13px;
+  list-style: none;
+  color: #666;
+}
+li.legends {
+  cursor: pointer;
+}
+.dots {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: block;
+  float: left;
+  margin: 2px 0 0 -16px;
+  padding: 0;
+}
+.legend-toggle {
+  position: relative;
+  float: right;
+  right: 2px;
+  top: 1px;
+}
+
+.legend-open {
+  overflow: auto;
+}
+
+
+.column-labels {
+  color: #777;
+  font-size: 10pt;
+  font-weight: normal;
+  display: block;
+  margin: 0;
+  padding: 0;
+  padding-left: 1.0em;
+  line-height: 2.0em;
+}
+
+/*  histogram axis and label styles  */
+.vis-canvas {
+  /* background-color: #fff; */
+}
+
+.chart-bkgd {
+  fill: #ffffff;
+  /*fill: #eff3f4;*/
+  /*stroke: #ddd;*/
+  /*shape-rendering: crispEdges;*/
+}
+
+/*.rows-label, .columns-label {
+  font-size: 10pt;
+  fill: #46525d;
+  text-align: center;
+  line-height: 1.5em;
+}*/
+
+p.rows-label, p.columns-label {
+  display: block;
+  background: #eff3f4;
+  padding: 0;
+  margin: 0;
+  font-size: 9pt;
+  fill: #46525d;
+  text-align: center;
+  line-height: 1.9em;
+}
+
+.charts-label {
+  font-size: 8pt;
+  fill: #848e96;
+}
+
+.x-axis-label, .y-axis-label {
+  font-size: 7pt;
+  fill: #848e96;
+}
+
+.tick text {
+  font-size: 7pt;
+  fill: #848e96;
+  /*cursor: pointer;*/
+}
+
+.axis {
+  shape-rendering: crispEdges;
+  stroke-width: 1px;
+}
+
+.axis line, .axis path {
+  stroke: #ddd;
+  fill: none;
+}
+
+.legend-box {
+   fill: #ffffff;
+}
+
+.brush .extent {
+  stroke: #fff;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}
+
+.layer .rect:hover {
+  stroke: 3px;
+}
+
+.k4tip {
+  line-height: 1;
+  font-size: 12px;
+  font-weight: normal;
+  padding: 8px;
+  background: rgba(70, 82, 93, 0.95);
+  color: #fff;
+  border-radius: 4px;
+  position: fixed;
+  z-index: 20;
+  visibility: hidden;
+}
+
+.rect {
+  /*shape-rendering: crispEdges;*/
+  stroke: transparent;
+  stroke-width: 2;
+}
+.rect.hover {
+  /*shape-rendering: crispEdges;*/
+  stroke: #333;
+}
+
+/* Flex Box Testing */
+.vis-wrapper {
+  display: flex;
+  flex: 1 1 100%;
+  flex-direction: row;
+}
+
+.y-axis-col-wrapper {
+  display: flex;
+  flex: 0 1;
+  flex-direction: column;
+}
+
+.y-axis-col {
+  display: flex;
+  flex: 15 1;
+  flex-direction: column;
+}
+
+.y-axis-div {
+  flex: 1 1;
+}
+
+.y-axis-spacer-block {
+  flex: 1 1;
+}
+
+.vis-col-wrapper {
+  display: flex;
+  flex: 10 1;
+  flex-direction: column;
+}
+
+.chart-wrapper {
+  display: flex;
+  flex: 15 1;
+}
+
+.chart-wrapper-column {
+  display: flex;
+  flex: 15 1;
+  flex-direction: row;
+}
+
+.chart-wrapper-row {
+  display: flex;
+  flex: 15 1;
+  flex-direction: column;
+}
+
+.chart-row {
+  flex: 1 1;
+}
+
+.chart-column {
+  flex: 1 1;
+}
+
+.x-axis-wrapper {
+  display: flex;
+  flex: 0 1;
+  flex-direction: row;
+}
+
+.open-wrapper {
+  flex: 1 1 ;
+}
+
+.x-axis-div {
+  flex: 1 1;
+}
+
+.legend-col-wrapper {
+  flex: 2 1;
+  z-index: 10;
+  overflow: hidden;
+}
+.legend-col-wrapper .hidden {
+  flex: 0 1;
+  z-index: 10;
+  overflow: hidden;
+}
+.test-wrapper {
+  flex: 20 1;
+}
+
+li.color {
+  list-style: none;
+  cursor: default;
+}
