@@ -1,17 +1,21 @@
 <div ng-controller="discover" class="app-container">
   <navbar>
     <form class="fill inline-form" ng-submit="fetch()" name="discoverSearch">
-      <div class="input-group"
-        ng-class="discoverSearch.$invalid ? 'has-error' : ''">
-        <input query-input="searchSource"
-          ng-model="state.query"
-          placeholder="Search..."
-          type="text"
-          class="form-control">
-        <button type="submit"
-          ng-disabled="discoverSearch.$invalid">
-          <span class="fa fa-search"></span></button>
-        <button type="button" ng-click="resetQuery()"><span class="fa fa-ban"></span></button>
+      <div class="typeahead" kbn-typeahead="discover">
+        <div class="input-group"
+          ng-class="discoverSearch.$invalid ? 'has-error' : ''">
+          <input query-input="searchSource"
+            kbn-typeahead-input
+            ng-model="state.query"
+            placeholder="Search..."
+            type="text"
+            class="form-control">
+          <button type="submit"
+            ng-disabled="discoverSearch.$invalid">
+            <span class="fa fa-search"></span></button>
+          <button type="button" ng-click="resetQuery()"><span class="fa fa-ban"></span></button>
+        </div>
+        <kbn-typeahead-items></kbn-typeahead-items>
       </div>
     </form>
 
