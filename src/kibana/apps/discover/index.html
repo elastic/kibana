@@ -41,7 +41,9 @@
           state="state">
         </disc-field-chooser>
       </div>
-      <div class="col-md-10" ng-show="!hits && !searchSource.activeFetchCount">
+
+      <!-- no results -->
+      <div class="col-md-10" ng-show="resultState === 'none'">
         <div class="discover-overlay">
           <h2>No results found <i class="fa fa-meh-o"></i></h2>
           <div class="col-md-12">
@@ -49,13 +51,17 @@
           </div>
         </div>
       </div>
-      <div class="col-md-10" ng-show="!hits && searchSource.activeFetchCount">
+
+      <!-- loading -->
+      <div class="col-md-10" ng-show="resultState === 'loading'">
         <div class="discover-overlay">
           <h2>Searching</h2>
           <div class="spinner large"></div>
         </div>
       </div>
-      <div class="col-md-10" ng-show="hits">
+
+      <!-- result -->
+      <div class="col-md-10" ng-show="resultState === 'ready'">
         <div class="discover-timechart" ng-if="vis">
           <center class="small">
             <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>
