@@ -170,6 +170,36 @@ define(function (require) {
           timefilter.enabled(!!timefield);
         });
 
+        // options are 'loading', 'ready', 'none', undefined
+        $scope.$watchMulti([
+          'rows',
+          'searchSource.activeFetchCount'
+        ], (function updateResultState() {
+          var prev = {};
+
+          function pick(rows, oldRows, activeFetchCount, oldActiveFetchCount) {
+            if (!rows && !oldRows && !activeFetchCount) return 'loading';
+            if (activeFetchCount) return 'loading';
+            return _.isEmpty(rows) ? 'none' : 'ready';
+          }
+
+          return function () {
+            var current = {
+              rows: $scope.rows,
+              activeFetchCount: $scope.searchSource.activeFetchCount
+            };
+
+            $scope.resultState = pick(
+              current.rows,
+              prev.rows,
+              current.activeFetchCount,
+              prev.activeFetchCount
+            );
+
+            prev = current;
+          };
+        }()));
+
         $scope.searchSource.onError(function (err) {
           console.log(err);
           notify.error('An error occured with your request. Reset your inputs and try again.');
@@ -304,7 +334,6 @@ define(function (require) {
     $scope.$on('$destroy', function () {
       courier.searchLooper.remove($scope.fetch);
     });
-
 
     $scope.updateTime = function () {
       $scope.timeRange = {
