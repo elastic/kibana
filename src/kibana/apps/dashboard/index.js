@@ -42,16 +42,9 @@ define(function (require) {
     }
   });
 
-  app.directive('dashboardApp', function (Notifier, courier, PersistedLog, config, savedVisualizations, appStateFactory, timefilter) {
+  app.directive('dashboardApp', function (Notifier, courier, savedVisualizations, appStateFactory, timefilter) {
     return {
       controller: function ($scope, $route, $routeParams, $location, configFile) {
-        var history = new PersistedLog('dashboard:history', {
-          maxLength: config.get('history:limit'),
-          filterDuplicates: true
-        });
-
-        $scope.history = history.get();
-
         var notify = new Notifier({
           location: 'Dashboard'
         });
@@ -104,7 +97,6 @@ define(function (require) {
         $scope.filterResults = function () {
           updateQueryOnRootSource();
           $state.save();
-          $scope.history = history.add($state.query);
           courier.fetch();
         };
 
