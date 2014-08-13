@@ -29,7 +29,7 @@ extracted into the configured document root.
 We will be using the entire collected works of Shakespeare as our
 example data. In order to make the best use of Kibana you will likely
 want to apply a mapping to your new index. Let's create the shakespeare
-index with the following mapping. Our data with have more fields than
+index with the following mapping. Our data will have more fields than
 this, but these are the ones we want to explicitly map. Specifically we
 do not want to analyze 'speaker' and 'play_name'. You'll see why later
 on.
@@ -58,7 +58,7 @@ Great, we've created the index. Now we want to import the data. You can
 download the entire works of shakespeare in elasticsearch bulk import
 format here: link:./snippets/shakespeare.json[shakespeare.json]
 
-Import it into your local elasticsearch instance the following command.
+Import it into your local elasticsearch instance using the following command.
 This may take a few minutes. Shakespeare wrote a lot of stuff!
 
 [source,shell]
@@ -112,7 +112,7 @@ Right now you only have one, `shakespeare`, but you might have more
 someday and we don't want Kibana searching all of that data if you're
 only looking for your favorite line from Macbeth.
 
-To configure the the index click the configure icon in the top right:
+To configure the index click the configure icon in the top right:
 
 image:./tutorials/intro/configicon.png[Sample Dashboard]
 
