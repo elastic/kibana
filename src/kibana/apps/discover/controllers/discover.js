@@ -74,6 +74,7 @@ define(function (require) {
 
     var defaultFormat = courier.indexPatterns.fieldFormats.defaultByType.string;
 
+
     var stateDefaults = {
       query: initialQuery || '',
       columns: ['_source'],
@@ -304,7 +305,9 @@ define(function (require) {
               if (sortFn && hit._formatted) return;
 
               // Flatten the fields
-              hit._source = _.flattenWith('.', hit._source);
+
+              var indexPattern = $scope.searchSource.get('index');
+              hit._source = indexPattern.flattenWith('.', hit._source);
 
               hit._formatted = _.mapValues(hit._source, function (value, name) {
                 // add up the counts for each field name
