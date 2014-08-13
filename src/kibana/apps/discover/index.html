@@ -57,6 +57,7 @@
         <div class="discover-overlay">
           <h2>Searching</h2>
           <div class="spinner large"></div>
+          <div ng-show="fetchStatus">{{fetchStatus.complete}}/{{fetchStatus.total}}</div>
         </div>
       </div>
 
