@@ -39,10 +39,16 @@ function (angular,_) {
               scope: tmpScope,
               keyboard: false
             });
+            
+            var x = window.scrollX, y = window.scrollY;
 
             // and show it
             $q.when(panelModal).then(function(modalEl) {
               modalEl.modal('show');
+              modalEl.bind('shown', function(){
+                modalEl.attr('style', function(i, s) { return s + 'top: ' + y + 'px !important'});
+                window.scrollTo(x, y);
+              });
             });
             scope.$apply();
           });
