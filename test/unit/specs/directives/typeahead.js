@@ -157,6 +157,62 @@ define(function (require) {
           expect($typeaheadScope.filteredItems).not.to.contain('skrillex');
         });
       });
+
+      describe('list appearance', function () {
+        beforeEach(function () {
+          typeaheadCtrl.history.add.returns(typeaheadItems);
+          $typeaheadScope.inputModel.$setViewValue(typeaheadItems[0]);
+          typeaheadCtrl.persistEntry();
+
+          // make sure the data looks how we expect
+          expect($typeaheadScope.items.length).to.be(3);
+        });
+
+        it('should default to hidden', function () {
+          expect(typeaheadCtrl.isVisible()).to.be(false);
+        });
+
+        it('should appear when not hidden, has matches input and focused', function () {
+          typeaheadCtrl.setHidden(false);
+          expect(typeaheadCtrl.isVisible()).to.be(false);
+
+          typeaheadCtrl.filterItemsByQuery(typeaheadItems[0]);
+          expect(typeaheadCtrl.isVisible()).to.be(false);
+
+          // only visible when all conditions match
+          typeaheadCtrl.setFocused(true);
+          expect(typeaheadCtrl.isVisible()).to.be(true);
+
+          typeaheadCtrl.setFocused(false);
+          expect(typeaheadCtrl.isVisible()).to.be(false);
+        });
+
+        it('should appear when not hidden, has matches input and moused over', function () {
+          typeaheadCtrl.setHidden(false);
+          expect(typeaheadCtrl.isVisible()).to.be(false);
+
+          typeaheadCtrl.filterItemsByQuery(typeaheadItems[0]);
+          expect(typeaheadCtrl.isVisible()).to.be(false);
+
+          // only visible when all conditions match
+          typeaheadCtrl.setMouseover(true);
+          expect(typeaheadCtrl.isVisible()).to.be(true);
+
+          typeaheadCtrl.setMouseover(false);
+          expect(typeaheadCtrl.isVisible()).to.be(false);
+        });
+
+        it('should hide when no matches', function () {
+          typeaheadCtrl.setHidden(false);
+          typeaheadCtrl.setFocused(true);
+
+          typeaheadCtrl.filterItemsByQuery(typeaheadItems[0]);
+          expect(typeaheadCtrl.isVisible()).to.be(true);
+
+          typeaheadCtrl.filterItemsByQuery('a8h4o8ah48thal4i7rlia4ujru4glia47gf');
+          expect(typeaheadCtrl.isVisible()).to.be(false);
+        });
+      });
     });
   });
 });
