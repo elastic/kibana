@@ -11,28 +11,49 @@ define(function (require) {
       var items = args.labels;
       var header = createHeader(legendDiv);
       var headerIcon = d3.select('.legend-toggle');
-      
+      var list = createList(legendDiv, items, args);
+      console.log('list', list);
+
       headerIcon.on('click', function (d) {
         toggleLegend(args);
       });
 
-      createList(legendDiv, items, args);
+
 
       d3.selectAll('.color')
         .on('mouseover', function (d) {
           var liClass = '.' + classify(args.color(d));
-          console.log(d, liClass);
+          d3.selectAll('.color').style('opacity', args.legend._attr.blurredOpacity);
+          
+          // select series on chart
+          d3.selectAll(liClass).style('opacity', args.legend._attr.focusOpacity);
+
+          d3.selectAll('.color')
+            .style('opacity', args.legend._attr.blurredOpacity);
+          
+          // Select series on chart
+          d3.selectAll(liClass)
+            .style('opacity', args.legend._attr.focusOpacity);
         });
-          // var liClass = '.' + classify(args.color(d));
-          // d3.selectAll('.color').style('opacity', args._attr.blurredOpacity);
-          // // Select series on chart
-          // d3.selectAll(liClass).style('opacity', args._attr.focusOpacity);
-          // });
-        // .on('mouseout', function () {
-        //   d3.selectAll('.color').style('opacity', args._attr.defaultOpacity);
-        // });
+
+      d3.selectAll('.color')
+        .on('mouseout', function () {
+          d3.selectAll('.color').style('opacity', args.legend._attr.defaultOpacity);
+        });
 
       
+
+      
+
+      // add/remove class for legend-open
+      if (args.isLegendOpen) {
+        d3.select('.' + args.legend._attr.legendClass)
+          .classed('legend-open', true);
+      } else {
+        d3.select('.' + args.legend._attr.legendClass)
+          .classed('legend-open', false);
+      }
+
     };
   };
 });
