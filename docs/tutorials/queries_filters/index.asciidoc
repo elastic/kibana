@@ -44,7 +44,7 @@ We can also match the entire phrase
 "to be or not to be"
 --------------------
 
-Or in a specifc field:
+Or in a specific field:
 
 [source,shell]
 -------------
