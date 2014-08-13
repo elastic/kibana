@@ -112,7 +112,7 @@ Right now you only have one, `shakespeare`, but you might have more
 someday and we don't want Kibana searching all of that data if you're
 only looking for your favorite line from Macbeth.
 
-To configure the the index click the configure icon in the top right:
+To configure the index click the configure icon in the top right:
 
 image:./tutorials/intro/configicon.png[Sample Dashboard]
 
