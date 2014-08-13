@@ -173,27 +173,31 @@ define(function (require) {
         // options are 'loading', 'ready', 'none', undefined
         $scope.$watchMulti([
           'rows',
-          'searchSource.activeFetchCount'
+          'fetchStatus'
         ], (function updateResultState() {
           var prev = {};
 
-          function pick(rows, oldRows, activeFetchCount, oldActiveFetchCount) {
-            if (!rows && !oldRows && !activeFetchCount) return 'loading';
-            if (activeFetchCount) return 'loading';
-            return _.isEmpty(rows) ? 'none' : 'ready';
+          function pick(rows, oldRows, fetchStatus, oldFetchStatus) {
+            // initial state, pretend we are loading
+            if (rows == null && oldRows == null) return 'loading';
+
+            var rowsEmpty = _.isEmpty(rows);
+            if (rowsEmpty && fetchStatus) return 'loading';
+            else if (!rowsEmpty) return 'ready';
+            else return 'none';
           }
 
           return function () {
             var current = {
               rows: $scope.rows,
-              activeFetchCount: $scope.searchSource.activeFetchCount
+              fetchStatus: $scope.fetchStatus
             };
 
             $scope.resultState = pick(
               current.rows,
               prev.rows,
-              current.activeFetchCount,
-              prev.activeFetchCount
+              current.fetchStatus,
+              prev.fetchStatus
             );
 
             prev = current;
@@ -271,6 +275,9 @@ define(function (require) {
           searchSource: $scope.searchSource,
           totalSize: sortBy === 'non-time' ? false : totalSize,
           direction: sortBy === 'time' ? sort[1] : 'desc',
+          status: function (status) {
+            $scope.fetchStatus = status;
+          },
           first: function (resp) {
             $scope.hits = 0;
             $scope.rows = [];
@@ -324,7 +331,10 @@ define(function (require) {
             $scope.mergedEsResp = merged;
           }
         })
-        .finally(eventComplete);
+        .finally(function () {
+          $scope.fetchStatus = false;
+          eventComplete();
+        });
       })
       .catch(notify.error);
     };
