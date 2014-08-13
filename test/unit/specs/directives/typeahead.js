@@ -23,6 +23,7 @@ define(function (require) {
     '<input type="text" placeholder="Filter..." class="form-control" ng-model="query" kbn-typeahead-input>' +
     '<kbn-typeahead-items></kbn-typeahead-items>' +
     '</div>';
+  var typeaheadItems = ['abc', 'def', 'ghi'];
 
   var init = function () {
     // Load the application
@@ -36,7 +37,7 @@ define(function (require) {
         }
 
         PersistedLogMock.prototype.add = sinon.stub();
-        PersistedLogMock.prototype.get = sinon.stub();
+        PersistedLogMock.prototype.get = sinon.stub().returns(typeaheadItems);
 
         return PersistedLogMock;
       });
@@ -84,23 +85,50 @@ define(function (require) {
       });
     });
 
-    describe('functionality', function () {
+    describe('internal functionality', function () {
       beforeEach(function () {
         init();
       });
 
-      describe('Persisted history', function () {
+      describe('PersistedLog', function () {
         it('should instantiate PersistedLog', function () {
           expect(typeaheadCtrl.history.name).to.equal('typeahead:' + typeaheadName);
           expect(typeaheadCtrl.history.options.maxLength).to.equal(typeaheadHistoryCount);
           expect(typeaheadCtrl.history.options.filterDuplicates).to.equal(true);
         });
+
+        it('should read data when directive is instantiated', function () {
+          expect(typeaheadCtrl.history.get.callCount).to.be(1);
+        });
+
+        it('should not save empty entries', function () {
+          var entries = typeaheadItems.slice(0);
+          entries.push('', 'jkl');
+          for (var i = 0; i < entries.length; i++) {
+            $typeaheadScope.inputModel.$setViewValue(entries[i]);
+            typeaheadCtrl.persistEntry();
+          }
+          expect(typeaheadCtrl.history.add.callCount).to.be(4);
+        });
+
       });
 
       describe('controller scope', function () {
         it('should contain the input model', function () {
           expect($typeaheadScope.inputModel).to.be.an('object');
           expect($typeaheadScope.inputModel).to.have.keys(['$viewValue', '$modelValue', '$setViewValue']);
+        });
+
+        it('should save data to the scope', function () {
+          // $scope.items is set via history.add, so mock the output
+          typeaheadCtrl.history.add.returns(typeaheadItems);
+
+          // a single call will call history.add, which will respond with the mocked data
+          $typeaheadScope.inputModel.$setViewValue(typeaheadItems[0]);
+          typeaheadCtrl.persistEntry();
+
+          expect($typeaheadScope.items).to.be.an('array');
+          expect($typeaheadScope.items.length).to.be(typeaheadItems.length);
         });
       });
     });
