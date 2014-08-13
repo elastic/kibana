@@ -19,6 +19,11 @@ define(function (require) {
   var $typeaheadInputScope;
   var typeaheadCtrl, PersistedLog;
 
+  var markup = '<div class="typeahead" kbn-typeahead="' + typeaheadName + '">' +
+    '<input type="text" placeholder="Filter..." class="form-control" ng-model="query" kbn-typeahead-input>' +
+    '<kbn-typeahead-items></kbn-typeahead-items>' +
+    '</div>';
+
   var init = function () {
     // Load the application
     module('kibana');
@@ -47,11 +52,7 @@ define(function (require) {
       // Give us a scope
       $parentScope = $rootScope;
 
-      $elem = angular.element(
-        '<div class="typeahead" kbn-typeahead="' + typeaheadName + '">' +
-        '<input type="text" placeholder="Filter..." class="form-control" ng-model="query" kbn-typeahead-input>' +
-        '<kbn-typeahead-items></kbn-typeahead-items>'
-      );
+      $elem = angular.element(markup);
 
       PersistedLog = $injector.get('PersistedLog');
 
@@ -62,22 +63,45 @@ define(function (require) {
     });
   };
 
-  describe('typeahead directive', function () {
-    beforeEach(function () {
-      init();
-    });
+  describe.only('typeahead directive', function () {
+    describe('typeahead requirements', function () {
+      describe('missing input', function () {
+        var goodMarkup = markup;
 
-    describe('Persisted history', function () {
-      it('should instantiate PersistedLog', function () {
-        expect(typeaheadCtrl.history.name).to.equal('typeahead:' + typeaheadName);
-        expect(typeaheadCtrl.history.options.maxLength).to.equal(typeaheadHistoryCount);
-        expect(typeaheadCtrl.history.options.filterDuplicates).to.equal(true);
+        before(function () {
+          markup = '<div class="typeahead" kbn-typeahead="' + typeaheadName + '">' +
+            '<kbn-typeahead-items></kbn-typeahead-items>' +
+            '</div>';
+        });
+
+        after(function () {
+          markup = goodMarkup;
+        });
+
+        it('should throw with message', function () {
+          expect(init).to.throwException(/kbn-typeahead-input must be defined/);
+        });
       });
     });
 
-    describe('controller scope', function () {
-      it('should contain the input', function () {
-        expect($typeaheadScope.inputModel).to.be.an('object');
+    describe('functionality', function () {
+      beforeEach(function () {
+        init();
+      });
+
+      describe('Persisted history', function () {
+        it('should instantiate PersistedLog', function () {
+          expect(typeaheadCtrl.history.name).to.equal('typeahead:' + typeaheadName);
+          expect(typeaheadCtrl.history.options.maxLength).to.equal(typeaheadHistoryCount);
+          expect(typeaheadCtrl.history.options.filterDuplicates).to.equal(true);
+        });
+      });
+
+      describe('controller scope', function () {
+        it('should contain the input model', function () {
+          expect($typeaheadScope.inputModel).to.be.an('object');
+          expect($typeaheadScope.inputModel).to.have.keys(['$viewValue', '$modelValue', '$setViewValue']);
+        });
       });
     });
   });
