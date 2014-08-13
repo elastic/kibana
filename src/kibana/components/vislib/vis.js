@@ -19,8 +19,6 @@ define(function (require) {
       this.config = config;
       this.ChartClass = chartTypes[config.type];
       this.prevSize;
-      this.isLegendOpen = false;
-      console.log('vis.isLegendOpen', this.isLegendOpen, ' vis args', config);
     }
 
     Vis.prototype.render = function (data) {
@@ -70,21 +68,19 @@ define(function (require) {
       if (!this.data) {
         throw new Error('No valid data');
       }
-      console.log('RESIZE');
       this.render(this.data);
     };
 
     Vis.prototype.checkSize = _.debounce(function (el) {
       // enable auto-resize
       var size = $(el).width() + ':' + $(el).height();
-      console.log(size);
 
       if (this.prevSize !== undefined && this.prevSize !== size) {
         this.resize();
       }
       this.prevSize = size;
-      setTimeout(this.checkSize(el), 500);
-    }, 500);
+      setTimeout(this.checkSize(el), 300);
+    }, 300);
 
     Vis.prototype.on = function () {
       return this.chart.on();

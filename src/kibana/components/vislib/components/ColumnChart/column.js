@@ -8,6 +8,7 @@ define(function (require) {
     var transformSVG = Private(require('components/vislib/components/_functions/d3/_transform_svg'));
     var appendYAxis = Private(require('components/vislib/components/_functions/d3/_append_y_axis'));
     var getYStackMax = Private(require('components/vislib/components/_functions/d3/_y_stack_max'));
+    var classify = Private(require('components/vislib/components/Legend/classify'));
 
     return function (vis, chartEl, chartData) {
 
@@ -174,7 +175,7 @@ define(function (require) {
         bars.enter()
           .append('rect')
           .attr('class', function (d) {
-            return 'color c' + color(d.label);
+            return 'color ' + classify(color(d.label));
           })
           .attr('fill', function (d) {
             return color(d.label);
