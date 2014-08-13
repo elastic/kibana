@@ -29,7 +29,7 @@ extracted into the configured document root.
 We will be using the entire collected works of Shakespeare as our
 example data. In order to make the best use of Kibana you will likely
 want to apply a mapping to your new index. Let's create the shakespeare
-index with the following mapping. Our data with have more fields than
+index with the following mapping. Our data will have more fields than
 this, but these are the ones we want to explicitly map. Specifically we
 do not want to analyze 'speaker' and 'play_name'. You'll see why later
 on.
