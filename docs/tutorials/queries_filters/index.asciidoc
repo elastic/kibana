@@ -44,7 +44,7 @@ We can also match the entire phrase
 "to be or not to be"
 --------------------
 
-Or in a specifc fields:
+Or in a specifc field:
 
 [source,shell]
 -------------
@@ -83,8 +83,8 @@ And of course to search everything:
 [[multiple-queries]]
 === Multiple queries
 
-In some cases, you might want to compare the results of two seperate queries.Kibana can handle multiple queries byjoining them with a logical
-`OR` and using the knowledge that they should be treated as seperate to
+In some cases, you might want to compare the results of two separate queries. Kibana can handle multiple queries by joining them with a logical
+`OR` and using the knowledge that they should be treated as separate to
 influence visualizations.
 
 [[adding]]
@@ -134,7 +134,7 @@ image:./tutorials/queries_filters/comedyoferrors.png[image]
 "But where" you say?
 
 The answer lies in that little white star that appeared on the filtering
-tab. Give the tab a click and we can see that a filter has added to the
+tab. Give the tab a click and we can see that a filter was added to the
 _filtering_ panel. From the _filtering_ panel filters can be added,
 edited, toggled and removed. Many panels have the ability to add
 filters, including the table, histogram, map and others.
