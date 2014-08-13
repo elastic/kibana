@@ -32,5 +32,3 @@
    - This should not be needed, timefilter is only included here – [L14](https://github.com/elasticsearch/kibana4/blob/master/test/unit/specs/apps/dashboard/directives/panel.js#L14)
  - **test/unit/specs/directives/timepicker.js**
    - This should not be needed, timefilter is only included here, it should move – [L17](https://github.com/elasticsearch/kibana4/blob/master/test/unit/specs/directives/timepicker.js#L17)
- - **test/unit/specs/directives/typeahead.js**
-   - This should not be needed, timefilter is only included here, it should move – [L12](https://github.com/elasticsearch/kibana4/blob/master/test/unit/specs/directives/typeahead.js#L12)
