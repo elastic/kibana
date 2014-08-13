@@ -130,6 +130,32 @@ define(function (require) {
           expect($typeaheadScope.items).to.be.an('array');
           expect($typeaheadScope.items.length).to.be(typeaheadItems.length);
         });
+
+        it('should order fitlered results', function () {
+          var entries = ['ac/dc', 'anthrax', 'abba', 'phantogram', 'skrillex'];
+          var allEntries = typeaheadItems.concat(entries);
+          var startMatches = allEntries.filter(function (item) {
+            return /^a/.test(item);
+          });
+          typeaheadCtrl.history.add.returns(allEntries);
+
+          for (var i = 0; i < entries.length; i++) {
+            $typeaheadScope.inputModel.$setViewValue(entries[i]);
+            typeaheadCtrl.persistEntry();
+          }
+
+          typeaheadCtrl.filterItemsByQuery('a');
+
+          expect($typeaheadScope.filteredItems).to.contain('phantogram');
+          var nonStarterIndex = $typeaheadScope.filteredItems.indexOf('phantogram');
+
+          startMatches.forEach(function (item) {
+            expect($typeaheadScope.filteredItems).to.contain(item);
+            expect($typeaheadScope.filteredItems.indexOf(item)).to.be.below(nonStarterIndex);
+          });
+
+          expect($typeaheadScope.filteredItems).not.to.contain('skrillex');
+        });
       });
     });
   });
