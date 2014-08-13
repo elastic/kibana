@@ -5,9 +5,9 @@
    - change this from event based to calling a method on dashboardApp – [L68](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/dashboard/directives/grid.js#L68)
  - **src/kibana/apps/discover/controllers/discover.js**
    - Switch this to watching time.string when we implement it – [L150](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/discover/controllers/discover.js#L150)
-   - On array fields, negating does not negate the combination, rather all terms – [L467](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/discover/controllers/discover.js#L467)
-   - Move to utility class – [L538](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/discover/controllers/discover.js#L538)
+   - On array fields, negating does not negate the combination, rather all terms – [L477](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/discover/controllers/discover.js#L477)
    - Move to utility class – [L548](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/discover/controllers/discover.js#L548)
+   - Move to utility class – [L558](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/discover/controllers/discover.js#L558)
  - **src/kibana/apps/settings/sections/indices/_create.js**
    - we should probably display a message of some kind – [L111](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/settings/sections/indices/_create.js#L111)
  - **src/kibana/apps/visualize/controllers/editor.js**
