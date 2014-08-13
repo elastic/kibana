@@ -17,7 +17,7 @@ define(function (require) {
     return {
       restrict: 'A',
       scope: {
-        historyKey: '@kbnTypeahead',
+        historyKey: '@kbnTypeahead'
       },
       controllerAs: 'typeahead',
 
