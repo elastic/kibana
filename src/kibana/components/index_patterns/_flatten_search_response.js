@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  return function (delimiter, nestedObj) {
+  return function (nestedObj) {
     var key; // original key
     var stack = []; // track key stack
     var flatObj = {};
@@ -8,7 +8,7 @@ define(function (require) {
     (function flattenObj(obj) {
       _.keys(obj).forEach(function (key) {
         stack.push(key);
-        var flattenKey = stack.join(delimiter);
+        var flattenKey = stack.join('.');
 
         if (self.fieldsByName[flattenKey]) {
           flatObj[flattenKey] = obj[key];

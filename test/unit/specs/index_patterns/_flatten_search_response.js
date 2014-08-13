@@ -1,6 +1,6 @@
 define(function (require) {
-  var flattenWith = require('components/index_patterns/_flatten_with');
-  describe('IndexPattern#flattenWith()', function () {
+  var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
+  describe('IndexPattern#flattenSearchResponse()', function () {
 
     var indexPattern = {
       fieldsByName: {
@@ -13,7 +13,7 @@ define(function (require) {
       }
     };
 
-    indexPattern.flattenWith = flattenWith.bind(indexPattern);
+    indexPattern.flattenSearchResponse = flattenSearchResponse.bind(indexPattern);
 
     var fixture = {
       message: 'Hello World',
@@ -27,7 +27,7 @@ define(function (require) {
     };
 
     it('should only flatten keys as far as the mapping', function () {
-      var obj = indexPattern.flattenWith('.', fixture);
+      var obj = indexPattern.flattenSearchResponse(fixture);
       expect(obj).to.have.property('geo.coordinates', fixture.geo.coordinates);
       expect(obj).to.not.have.property('geo.coordinates.lat');
       expect(obj).to.not.have.property('geo.coordinates.lon');
