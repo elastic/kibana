@@ -11,6 +11,7 @@ define(function (require) {
 
   var controlHtml = {
     ranges: require('text!apps/visualize/partials/controls/ranges.html'),
+    ip_range: require('text!apps/visualize/partials/controls/ip_range.html'),
     filters: require('text!apps/visualize/partials/controls/filters.html'),
     orderAndSize: require('text!apps/visualize/partials/controls/order_and_size.html'),
     minDocCount: require('text!apps/visualize/partials/controls/min_doc_count.html'),
@@ -57,6 +58,7 @@ define(function (require) {
           aggs.bucketAggsByName.terms,
           aggs.bucketAggsByName.histogram,
           aggs.bucketAggsByName.range,
+          aggs.bucketAggsByName.ip_range,
           aggs.bucketAggsByName.date_histogram,
           aggs.bucketAggsByName.filters,
           // 'range'
@@ -123,8 +125,12 @@ define(function (require) {
             if (!controlsHtml.match(/aggParams\.interval\.options/)) ; //debugger;
           }
 
-          if (params.ranges) {
+          if (aggName === 'range' && params.ranges) {
             controlsHtml += ' ' + controlHtml.ranges;
+          }
+
+          if (aggName === 'ip_range' && params.ranges) {
+            controlsHtml += ' ' + controlHtml.ip_range;
           }
 
           if (params.filters) {
