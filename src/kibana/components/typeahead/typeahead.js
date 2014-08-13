@@ -127,7 +127,6 @@ define(function (require) {
           if ($scope.inputModel.$viewValue.length) {
             // push selection into the history
             $scope.items = self.history.add($scope.inputModel.$viewValue);
-            console.log($scope.items.length);
           }
         };
 
