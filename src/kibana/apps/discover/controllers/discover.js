@@ -307,7 +307,7 @@ define(function (require) {
               // Flatten the fields
 
               var indexPattern = $scope.searchSource.get('index');
-              hit._source = indexPattern.flattenWith('.', hit._source);
+              hit._source = indexPattern.flattenSearchResponse(hit._source);
 
               hit._formatted = _.mapValues(hit._source, function (value, name) {
                 // add up the counts for each field name
