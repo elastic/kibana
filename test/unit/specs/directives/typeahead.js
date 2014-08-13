@@ -64,7 +64,7 @@ define(function (require) {
     });
   };
 
-  describe.only('typeahead directive', function () {
+  describe('typeahead directive', function () {
     describe('typeahead requirements', function () {
       describe('missing input', function () {
         var goodMarkup = markup;
