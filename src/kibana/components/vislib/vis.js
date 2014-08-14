@@ -3,14 +3,14 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
 
-    // Vislib Objects
-    var ChartFunctions = Private(require('components/vislib/modules/_functions'));
+    // VisLib Objects
     var Data = Private(require('components/vislib/modules/Data'));
     var Tooltip = Private(require('components/vislib/modules/Tooltip'));
     var XAxis = Private(require('components/vislib/modules/Xaxis'));
     var YAxis = Private(require('components/vislib/modules/YAxis'));
     var Legend = Private(require('components/vislib/modules/Legend'));
 
+    var ChartFunctions = Private(require('components/vislib/modules/_functions'));
     var split = Private(require('components/vislib/components/_functions/d3/_split'));
 
     var chartTypes = {
@@ -51,7 +51,7 @@ define(function (require) {
       // split data
       this.callFunction(d3.select('.chart-wrapper'), zeroInjectedData, split);
 
-      if (this.config.addLegend) {
+      if (this.config.addLegend && !this.legend) {
         this.legend = new Legend({
           class: 'legend-col-wrapper',
           color: color,
@@ -60,26 +60,32 @@ define(function (require) {
         this.legend.draw();
       }
 
-      if (this.config.addTooltip) {
+      if (this.config.addTooltip && !this.tooltip) {
         this.tooltip = new Tooltip('k4tip', tooltipFormatter);
       }
 
-      var vis = this;
-      var charts = this.charts = [];
+      if (!this.charts) {
+        var vis = this;
+        var charts = this.charts = [];
 
-      d3.select(this.el)
-        .selectAll('.chart')
-        .each(function (chartData) {
-          var chart = new vis.ChartClass(vis, this, chartData);
-          charts.push(chart);
-          chart.render();
-        });
+        d3.select(this.el)
+          .selectAll('.chart')
+          .each(function (chartData) {
+            var chart = new vis.ChartClass(vis, this, chartData);
+            charts.push(chart);
+            chart.render();
+          });
+      }
 
-      var xAxis = new XAxis(this.data);
-      xAxis.draw();
+      if (!this.xAxis) {
+        this.xAxis = new XAxis(this.data);
+        this.xAxis.draw();
+      }
 
-      var yAxis = new YAxis(this.data);
-      yAxis.draw();
+      if (!this.yAxis) {
+        this.yAxis = new YAxis(this.data);
+        this.yAxis.draw();
+      }
 
       this.checkSize('.chart');
     };
