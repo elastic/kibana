@@ -17,7 +17,7 @@ define(function (require) {
 
       if (!obj.series) {
         var arr = obj.rows ? obj.rows : obj.columns;
-        max = obj.rows ? obj.rows.length : obj.columns.length;
+        max = arr.length;
 
         for (i = 0; i < max; i++) {
           var jMax = arr[i].series.length;
