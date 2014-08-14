@@ -66,11 +66,11 @@ visualize {
     flex: 1 1;
 }
 
-.vis-wrapper {
-    display: flex;
-    flex: 5 1;
-    flex-direction: column;
-}
+/*.vis-wrapper {*/
+    /*display: flex;*/
+    /*flex: 5 1;*/
+    /*flex-direction: column;*/
+/*}*/
 
 .chart-wrapper {
     flex: 5 1;
@@ -298,22 +298,34 @@ p.rows-label, p.columns-label {
     display: flex;
     flex: 1 1 100%;
     flex-direction: row;
+    margin: 10px;
 }
 
 .y-axis-col-wrapper {
     display: flex;
-    flex: 0 1;
+    flex: 2 1;
     flex-direction: column;
 }
 
 .y-axis-col {
     display: flex;
-    flex: 15 1;
+    flex: 25 1;
+    flex-direction: row;
+}
+
+.y-axis-div-wrapper {
+    display: flex;
+    flex: 25 1;
     flex-direction: column;
+}
+
+.y-axis-title {
+    flex: 1 1;
 }
 
 .y-axis-div {
     flex: 1 1;
+    overflow: visible;
 }
 
 .y-axis-spacer-block {
@@ -322,24 +334,24 @@ p.rows-label, p.columns-label {
 
 .vis-col-wrapper {
     display: flex;
-    flex: 10 1;
+    flex: 25 1;
     flex-direction: column;
 }
 
 .chart-wrapper {
     display: flex;
-    flex: 15 1;
+    flex: 25 1;
 }
 
 .chart-wrapper-column {
     display: flex;
-    flex: 15 1;
+    flex: 25 1;
     flex-direction: row;
 }
 
 .chart-wrapper-row {
     display: flex;
-    flex: 15 1;
+    flex: 25 1;
     flex-direction: column;
 }
 
@@ -353,8 +365,18 @@ p.rows-label, p.columns-label {
 
 .x-axis-wrapper {
     display: flex;
-    flex: 0 1;
+    flex: 1 1;
+    flex-direction: column;
+}
+
+.x-axis-div-wrapper {
+    display: flex;
+    flex: 25 1;
     flex-direction: row;
+}
+
+.x-axis-title {
+    flex: 5 1;
 }
 
 .open-wrapper {
@@ -366,7 +388,7 @@ p.rows-label, p.columns-label {
 }
 
 .legend-col-wrapper {
-    flex: 0 1;
+    flex: 1 1;
     z-index: 10;
     overflow: hidden;
 }

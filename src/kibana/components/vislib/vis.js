@@ -4,12 +4,15 @@ define(function (require) {
     var _ = require('lodash');
 
     var ChartFunctions = Private(require('components/vislib/modules/_functions'));
+    var Data = Private(require('components/vislib/modules/Data'));
+    var Tooltip = Private(require('components/vislib/modules/Tooltip'));
+    var XAxis = Private(require('components/vislib/modules/Xaxis'));
+    var YAxis = Private(require('components/vislib/modules/YAxis'));
+    var Legend = Private(require('components/vislib/modules/Legend'));
     var split = Private(require('components/vislib/components/_functions/d3/_split'));
 
     var chartTypes = {
       histogram : Private(require('components/vislib/modules/ColumnChart')),
-      legend: Private(require('components/vislib/modules/Legend')),
-      tooltip: Private(require('components/vislib/modules/Tooltip'))
     };
 
     _(Vis).inherits(ChartFunctions);
@@ -22,15 +25,21 @@ define(function (require) {
     }
 
     Vis.prototype.render = function (data) {
+      var color;
+      var labels;
+      var tooltipFormatter;
+      var zeroInjectedData;
+
       if (!data) {
         throw new Error('No valid data!');
       }
 
-      this.data = this.injectZeros(data);
-      this.orderedKeys = this.getOrderedKeys(this.data);
-
-      this.labels = this.getLabels(this.data);
-      this.color = this.getColor(this.labels);
+      this.data = new Data(data);
+      zeroInjectedData = this.data.injectZeros();
+      color = this.data.color ? this.data.color : this.data.getColorFunc();
+      labels = this.data.labels ? this.data.labels : this.data.getLabels();
+      tooltipFormatter = this.data.tooltipFormatter ? this.data.tooltipFormatter :
+        this.data.get('tooltipFormatter');
 
       // clears the el
       this.removeAll(this.el);
@@ -39,15 +48,19 @@ define(function (require) {
       this.layout(this.el);
 
       // split data
-      this.callFunction(d3.select('.chart-wrapper'), this.data, split);
+      this.callFunction(d3.select('.chart-wrapper'), zeroInjectedData, split);
 
       if (this.config.addLegend) {
-        this.legend = new chartTypes.legend(this);
-        this.legend.draw(this);
+        this.legend = new Legend({
+          class: 'legend-col-wrapper',
+          color: color,
+          labels: labels
+        });
+        this.legend.draw();
       }
 
       if (this.config.addTooltip) {
-        this.tooltip = new chartTypes.tooltip(this);
+        this.tooltip = new Tooltip('k4tip', tooltipFormatter);
       }
 
       var vis = this;
@@ -61,20 +74,25 @@ define(function (require) {
           chart.render();
         });
 
-      this.checkSize('.vis-col-wrapper');
+      var xAxis = new XAxis(this.data);
+      xAxis.draw();
+
+      var yAxis = new YAxis(this.data);
+      yAxis.draw();
+
+      this.checkSize('.chart');
     };
 
     Vis.prototype.resize = function () {
-      if (!this.data) {
+      if (!this.data.data) {
         throw new Error('No valid data');
       }
-      this.render(this.data);
+      this.render(this.data.data);
     };
 
     Vis.prototype.checkSize = _.debounce(function (el) {
       // enable auto-resize
       var size = $(el).width() + ':' + $(el).height();
-      console.log(size);
 
       if (this.prevSize !== undefined && this.prevSize !== size) {
         this.resize();
