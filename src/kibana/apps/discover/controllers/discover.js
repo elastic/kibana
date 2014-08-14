@@ -54,7 +54,6 @@ define(function (require) {
     var segmentedFetch = $scope.segmentedFetch = Private(require('apps/discover/_segmented_fetch'));
     var HitSortFn = Private(require('apps/discover/_hit_sort_fn'));
     var diffTimePickerValues = Private(require('utils/diff_time_picker_vals'));
-    var segmentedEventComplete;
 
     var notify = new Notifier({
       location: 'Discover'
@@ -66,9 +65,7 @@ define(function (require) {
 
     // abort any seqmented query requests when leaving discover
     $scope.$on('$routeChangeStart', function () {
-      if (typeof segmentedEventComplete === 'function') {
-        segmentedEventComplete();
-      }
+      notify.event('segmented fetch')();
       segmentedFetch.abort();
     });
 
@@ -279,7 +276,7 @@ define(function (require) {
           sortFn = new HitSortFn(sort[1]);
         }
 
-        segmentedEventComplete = notify.event('segmented fetch');
+        var segmentedEventComplete = notify.event('segmented fetch');
 
         return segmentedFetch.fetch({
           searchSource: $scope.searchSource,
