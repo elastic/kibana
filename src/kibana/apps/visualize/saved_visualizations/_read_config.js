@@ -61,11 +61,11 @@ define(function (require) {
           // copy parts of the config to the validated "output" object
           var output = {
             agg: config.agg,
-            aggParams: {
-              field: config.field
-            },
+            aggParams: {},
             categoryName: category.name
           };
+
+          if (agg.name !== 'filters') output.aggParams.field = config.field;
 
           // copy over other properties based on the category
           switch (category.name) {
