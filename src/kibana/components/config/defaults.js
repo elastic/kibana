@@ -14,6 +14,8 @@ define(function (require) {
     'histogram:maxBars': 100,
 
     'csv:separator': ',',
-    'csv:quoteValues': true
+    'csv:quoteValues': true,
+
+    'history:limit': 10
   });
 });
