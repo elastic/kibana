@@ -1,10 +1,13 @@
-<nav class="navbar navbar-default navbar-static-top subnav">
-  <div class="container-fluid">
-    <ul class="nav navbar-nav">
-      <li ng-repeat="s in sections" ng-class="s.class">
-        <a class="navbar-link" ng-href="{{s.url}}">{{s.display}}</a>
-      </li>
-    </ul>
-  </div>
-</nav>
-<div class="settings-section-container {{section.name}}-settings" ng-transclude></div>
+<div class="app-container">
+  <nav class="navbar navbar-default navbar-static-top subnav">
+    <div class="container-fluid">
+      <ul class="nav navbar-nav">
+        <li ng-repeat="s in sections" ng-class="s.class">
+          <a class="navbar-link" ng-href="{{s.url}}">{{s.display}}</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="settings-section-container {{section.name}}-settings" ng-transclude></div>
+</div>
