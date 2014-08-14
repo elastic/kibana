@@ -80,6 +80,7 @@ define(function (require) {
       ],
       ip: [
         aggs.bucketAggsByName.terms,
+        aggs.bucketAggsByName.ip_range,
         // 'ipv4 range'
       ],
       geo_point: [

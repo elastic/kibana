@@ -141,12 +141,13 @@ define(function (require) {
         });
 
         $scope.$on('$destroy', function () {
-          if ($scope.vis) $scope.vis.destroy();
-////          if (chart) {
-////            chart.off('hover');
-////            chart.off('click');
-////            chart.destroy();
-//          }
+          // Vis with missing indexpattern will not have destroy
+          if ($scope.vis && $scope.vis.destroy) $scope.vis.destroy();
+          if (chart) {
+            chart.off('hover');
+            chart.off('click');
+            chart.destroy();
+          }
         });
       }
     };
