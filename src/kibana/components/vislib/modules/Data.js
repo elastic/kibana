@@ -20,7 +20,6 @@ define(function (require) {
           .pluck('series')
           .flatten()
           .pluck('values')
-          .flatten()
           .value();
 
         return this.flattenedData;
@@ -29,7 +28,6 @@ define(function (require) {
       this.flattenedData = _.chain(this.data.series)
         .flatten()
         .pluck('values')
-        .flatten()
         .value();
 
       return this.flattenedData;
@@ -60,9 +58,9 @@ define(function (require) {
       return this.zeroInjectedData;
     };
 
-    Data.prototype.stack = function (offset) {
+    Data.prototype.stack = function () {
       if (!this.flattenedData) {
-        this.flattenedData = this.flatten(this.data);
+        this.flattenedData = this.flatten();
       }
 
       var stack = d3.layout.stack()
@@ -72,10 +70,20 @@ define(function (require) {
         .y(function (d) {
           return d.y;
         })
-        .offset(offset);
+        .offset('zero');
 
-      this.stackedData = stack([this.flattenedData]);
+      this.stackedData = stack(this.flattenedData);
       return this.stackedData;
+    };
+
+    Data.prototype.getYStackMax = function () {
+      console.log(this.stack());
+      this.yStackMax = d3.max(this.stack(), function (data) {
+        return d3.max(data, function (d) {
+          return d.y0 + d.y;
+        });
+      });
+      return this.yStackMax;
     };
 
     Data.prototype.getColorFunc = function () {

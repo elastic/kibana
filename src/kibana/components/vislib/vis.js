@@ -53,18 +53,18 @@ define(function (require) {
       this.callFunction(d3.select('.chart-wrapper'), zeroInjectedData, split);
 
       // add legend
-      if (this.config.addLegend && !this.legend) {
+      if (this.config.addLegend) {
         this.legend = new Legend({
           // class: 'legend-col-wrapper',
           color: color,
           labels: labels
         }, this.config);
         this.legend.timeStamp = new Date().getTime();
+        this.legend.draw();
       }
-      this.legend.draw();
 
       // add tooltip
-      if (this.config.addTooltip && !this.tooltip) {
+      if (this.config.addTooltip) {
         this.tooltip = new Tooltip('k4tip', tooltipFormatter);
       }
 
@@ -85,6 +85,7 @@ define(function (require) {
           chart.render();
         });
 
+      console.log(this);
       this.checkSize('.chart');
     };
 
