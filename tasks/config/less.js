@@ -10,6 +10,7 @@ module.exports = {
       '<%= src %>/kibana/apps/visualize/styles/main.less',
       '<%= src %>/kibana/apps/visualize/styles/visualization.less',
       '<%= src %>/kibana/styles/main.less',
+      '<%= src %>/kibana/components/vislib/components/styles/main.less',
       '<%= src %>/kibana/components/**/*.less'
     ],
     expand: true,
