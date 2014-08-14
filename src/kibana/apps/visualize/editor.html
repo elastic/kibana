@@ -52,7 +52,7 @@
     <div class="vis-editor-content">
       <div class="vis-sidebar">
         <div class="sidebar-container">
-          <form class="sidebar-list" ng-submit="doVisualize()">
+          <form class="sidebar-list" ng-submit="doVisualize()" name="visualizeEditor">
             <ul class="list-unstyled">
               <li ng-repeat="category in visConfigCategories.displayOrder" class="sidebar-item">
                 <vis-config-category
@@ -62,13 +62,13 @@
                 </vis-config-category>
               </li>
               <li class="sidebar-item">
-                <div
+                <button
                   ng-click="doVisualize()"
                   ng-if="vis.dirty"
-                  ng-disabled="httpActive.length"
+                  ng-disabled="httpActive.length || visualizeEditor.$invalid"
                   class="sidebar-item-button success">
                   Apply
-                </div>
+                </button>
               </li>
             </ul>
           </form>
