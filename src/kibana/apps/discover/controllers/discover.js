@@ -54,6 +54,7 @@ define(function (require) {
     var segmentedFetch = $scope.segmentedFetch = Private(require('apps/discover/_segmented_fetch'));
     var HitSortFn = Private(require('apps/discover/_hit_sort_fn'));
     var diffTimePickerValues = Private(require('utils/diff_time_picker_vals'));
+    var segmentedEventComplete;
 
     var notify = new Notifier({
       location: 'Discover'
@@ -62,6 +63,14 @@ define(function (require) {
     // the saved savedSearch
     var savedSearch = $route.current.locals.savedSearch;
     $scope.$on('$destroy', savedSearch.destroy);
+
+    // abort any seqmented query requests when leaving discover
+    $scope.$on('$routeChangeStart', function () {
+      if (typeof segmentedEventComplete === 'function') {
+        segmentedEventComplete();
+      }
+      segmentedFetch.abort();
+    });
 
     // list of indexPattern id's
     var indexPatternList = $route.current.locals.indexList;
@@ -270,7 +279,7 @@ define(function (require) {
           sortFn = new HitSortFn(sort[1]);
         }
 
-        var eventComplete = notify.event('segmented fetch');
+        segmentedEventComplete = notify.event('segmented fetch');
 
         return segmentedFetch.fetch({
           searchSource: $scope.searchSource,
@@ -336,7 +345,7 @@ define(function (require) {
         })
         .finally(function () {
           $scope.fetchStatus = false;
-          eventComplete();
+          segmentedEventComplete();
         });
       })
       .catch(notify.error);
@@ -407,6 +416,7 @@ define(function (require) {
 
       // get the current indexPattern
       var indexPattern = $scope.searchSource.get('index');
+
       // if indexPattern exists, but $scope.opts.index doesn't, or the opposite, or if indexPattern's id
       // is not equal to the $scope.opts.index then either clean or
       if (
@@ -418,7 +428,6 @@ define(function (require) {
       }
 
       $scope.opts.timefield = indexPattern.timeFieldName;
-
 
       return Promise.cast(indexPattern)
       .then(function (indexPattern) {
