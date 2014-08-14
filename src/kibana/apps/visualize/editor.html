@@ -1,13 +1,12 @@
- <div ng-controller="VisualizeEditor" class="vis-editor">
-
-  <div ng-if="!appEmbedded">
+<div ng-controller="VisualizeEditor" class="vis-editor">
+  <div ng-if="!appEmbedded" class="app-container">
     <navbar>
       <span ng-if="!!vis.title" class="name" ng-bind="vis.title"></span>
       <div class="fill bitty-modal-container">
         <div ng-if="linked && !unlinking"
-          ng-dblclick="unlink()"
-          tooltip="Double click to unlink this visualization from the saved search"
-          class="bitty-modal visualize-linked">
+        ng-dblclick="unlink()"
+        tooltip="Double click to unlink this visualization from the saved search"
+        class="bitty-modal visualize-linked">
           <i class="fa fa-link"></i>
           &nbsp;
           This visualization is linked to a saved search:
@@ -22,17 +21,22 @@
         </div>
 
         <form ng-submit="doVisualize()" class="inline-form" name="queryInput">
-          <div class="input-group"
-          ng-class="queryInput.$invalid ? 'has-error' : ''">
-            <input query-input="vis.searchSource"
+          <div class="typeahead" kbn-typeahead="visualize">
+            <div class="input-group"
+            ng-class="queryInput.$invalid ? 'has-error' : ''">
+              <input query-input="vis.searchSource"
+              kbn-typeahead-input
               placeholder="Search..."
               type="text"
               class="form-control"
               ng-model="state.query">
-            <button class="btn btn-default" type="submit"
+
+              <button class="btn btn-default" type="submit"
               ng-disabled="queryInput.$invalid">
-              <span class="fa fa-search"></span>
-            </button>
+                <span class="fa fa-search"></span>
+              </button>
+            </div>
+            <kbn-typeahead-items></kbn-typeahead-items>
           </div>
         </form>
       </div>
@@ -45,10 +49,12 @@
         <button ng-click="doVisualize()"><i class="fa fa-refresh"></i></button>
       </div>
     </navbar>
+
     <config
       config-template="configTemplate"
       config-object="conf">
     </config>
+
     <div class="vis-editor-content">
       <div class="vis-sidebar">
         <div class="sidebar-container">
@@ -56,24 +62,25 @@
             <ul class="list-unstyled">
               <li ng-repeat="category in visConfigCategories.displayOrder" class="sidebar-item">
                 <vis-config-category
-                  vis="vis"
-                  category="vis[category.name]"
-                  fields="fields">
+                vis="vis"
+                category="vis[category.name]"
+                fields="fields">
                 </vis-config-category>
               </li>
               <li class="sidebar-item">
                 <button
-                  ng-click="doVisualize()"
-                  ng-if="vis.dirty"
-                  ng-disabled="httpActive.length || visualizeEditor.$invalid"
-                  class="sidebar-item-button success">
-                  Apply
+                ng-click="doVisualize()"
+                ng-if="vis.dirty"
+                ng-disabled="httpActive.length || visualizeEditor.$invalid"
+                class="sidebar-item-button success">
+                Apply
                 </button>
               </li>
             </ul>
           </form>
         </div>
       </div>
+
       <div class="vis-canvas">
         <vis-canvas><visualize vis="vis"></visualize></vis-canvas>
       </div>

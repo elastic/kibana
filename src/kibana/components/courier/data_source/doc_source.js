@@ -4,7 +4,7 @@ define(function (require) {
 
   var inherits = require('lodash').inherits;
 
-  return function DocSourceFactory(Private, Promise, es) {
+  return function DocSourceFactory(Private, Promise, es, storage) {
     var sendToEs = Private(require('components/courier/data_source/_doc_send_to_es'));
     var SourceAbstract = Private(require('components/courier/data_source/_abstract'));
 
@@ -18,6 +18,7 @@ define(function (require) {
       this.onUpdate = this.onResults;
       this.onResults = void 0;
     }
+
     inherits(DocSource, SourceAbstract);
 
     /*****
@@ -115,20 +116,20 @@ define(function (require) {
     };
 
     /**
-     * Fetches the stored version from localStorage
+     * Fetches the stored version from storage
      * @return {[type]} [description]
      */
     DocSource.prototype._getStoredVersion = function () {
       var key = this._versionKey();
       if (!key) return;
 
-      var v = localStorage.getItem(key);
+      var v = storage.get(key);
       this._version = v ? _.parseInt(v) : void 0;
       return this._version;
     };
 
     /**
-     * Stores the version into localStorage
+     * Stores the version into storage
      * @param  {number, NaN} version - the current version number, NaN works well forcing a refresh
      * @return {undefined}
      */
@@ -138,7 +139,7 @@ define(function (require) {
       var key = this._versionKey();
       if (!key) return;
       this._version = version;
-      localStorage.setItem(key, version);
+      storage.set(key, version);
     };
 
     /**
@@ -147,7 +148,7 @@ define(function (require) {
     DocSource.prototype._clearVersion = function () {
       var key = this._versionKey();
       if (!key) return;
-      localStorage.removeItem(key);
+      storage.remove(key);
     };
 
     return DocSource;
