@@ -7,19 +7,11 @@ define(function (require) {
     function YAxis(data) {
       this.data = data.data;
       this.stackedData = data.stack();
-      this.yStackMax = this.getYStackMax();
+      this.yStackMax = data.getYStackMax();
     }
 
     YAxis.prototype.draw = function () {
       return renderYAxis(this);
-    };
-
-    YAxis.prototype.getYStackMax = function () {
-      return d3.max(this.stackedData, function (data) {
-        return d3.max(data, function (d) {
-          return d.y0 + d.y;
-        });
-      });
     };
 
     YAxis.prototype.ticks = function () {};
