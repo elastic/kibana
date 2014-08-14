@@ -1,4 +1,5 @@
 define(function (require) {
+  var _ = require('lodash');
   var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
   describe('IndexPattern#flattenSearchResponse()', function () {
 
@@ -13,7 +14,7 @@ define(function (require) {
       }
     };
 
-    indexPattern.flattenSearchResponse = flattenSearchResponse.bind(indexPattern);
+    indexPattern.flattenSearchResponse = _.bind(flattenSearchResponse, indexPattern);
 
     var fixture = {
       message: 'Hello World',
