@@ -82,7 +82,7 @@ define(function (require) {
               makePanelSerializeable(panel);
             });
           });
-
+          safeLayout();
           $window.on('resize', safeLayout);
           $scope.$on('ready:vis', safeLayout);
         };

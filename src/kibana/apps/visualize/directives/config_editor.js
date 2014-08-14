@@ -11,6 +11,8 @@ define(function (require) {
 
   var controlHtml = {
     ranges: require('text!apps/visualize/partials/controls/ranges.html'),
+    ip_range: require('text!apps/visualize/partials/controls/ip_range.html'),
+    filters: require('text!apps/visualize/partials/controls/filters.html'),
     orderAndSize: require('text!apps/visualize/partials/controls/order_and_size.html'),
     minDocCount: require('text!apps/visualize/partials/controls/min_doc_count.html'),
     extendedBounds: require('text!apps/visualize/partials/controls/extended_bounds.html'),
@@ -50,8 +52,20 @@ define(function (require) {
 
         // clear the previous choices
         $scope.availableAggs = void 0;
+
+
+        var options = [
+          aggs.bucketAggsByName.terms,
+          aggs.bucketAggsByName.histogram,
+          aggs.bucketAggsByName.range,
+          aggs.bucketAggsByName.ip_range,
+          aggs.bucketAggsByName.date_histogram,
+          aggs.bucketAggsByName.filters,
+          // 'range'
+        ];
+
         // get the new choices
-        var options = aggs.byFieldType[field.type];
+        //var options = aggs.byFieldType[field.type];
 
         if (!options || options.length === 0) {
           // init or invalid field type
@@ -111,8 +125,16 @@ define(function (require) {
             if (!controlsHtml.match(/aggParams\.interval\.options/)) ; //debugger;
           }
 
-          if (params.ranges) {
+          if (aggName === 'range' && params.ranges) {
             controlsHtml += ' ' + controlHtml.ranges;
+          }
+
+          if (aggName === 'ip_range' && params.ranges) {
+            controlsHtml += ' ' + controlHtml.ip_range;
+          }
+
+          if (params.filters) {
+            controlsHtml += ' ' + controlHtml.filters;
           }
 
           if (params.min_doc_count && !params.min_doc_count.hide) {
