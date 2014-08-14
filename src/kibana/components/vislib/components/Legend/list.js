@@ -5,7 +5,7 @@ define(function (require) {
     return function (d3el, arrOfItms, args) {
       return d3el.append('ul')
         .attr('class', function () {
-          if (args.isLegendOpen) {
+          if (args._attr.isOpen) {
             return 'legend-ul';
           }
           return 'legend-ul hidden';

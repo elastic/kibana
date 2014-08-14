@@ -6,47 +6,58 @@ define(function (require) {
     var createList = Private(require('components/vislib/components/Legend/list'));
     var classify = Private(require('components/vislib/components/Legend/classify'));
 
-    return function (args) {
-      var legendDiv = d3.select('.' + args.legend._attr.legendClass);
-      var items = args.labels;
+    return function (self) {
+      var legendDiv = d3.select('.' + self.legendClass);
+      var items = self.labels;
       var header = createHeader(legendDiv);
       var headerIcon = d3.select('.legend-toggle');
-      var list = createList(legendDiv, items, args);
+      var list = createList(legendDiv, items, self);
 
       headerIcon.on('click', function (d) {
-        toggleLegend(args);
+        toggleLegend(self);
       });
 
       d3.selectAll('.color')
         .on('mouseover', function (d) {
-          var liClass = '.' + classify(args.color(d));
-          d3.selectAll('.color').style('opacity', args.legend._attr.blurredOpacity);
+          var liClass = '.' + classify(self.color(d));
+          d3.selectAll('.color').style('opacity', self.blurredOpacity);
           
           // select series on chart
-          d3.selectAll(liClass).style('opacity', args.legend._attr.focusOpacity);
+          d3.selectAll(liClass).style('opacity', self.focusOpacity);
 
           d3.selectAll('.color')
-            .style('opacity', args.legend._attr.blurredOpacity);
+            .style('opacity', self.blurredOpacity);
           
           // Select series on chart
           d3.selectAll(liClass)
-            .style('opacity', args.legend._attr.focusOpacity);
+            .style('opacity', self.focusOpacity);
         });
 
       d3.selectAll('.color')
         .on('mouseout', function () {
-          d3.selectAll('.color').style('opacity', args.legend._attr.defaultOpacity);
+          d3.selectAll('.color').style('opacity', self.defaultOpacity);
         });
 
       // add/remove class for legend-open
-      if (args.isLegendOpen) {
-        d3.select('.' + args.legend._attr.legendClass)
+      if (self.isOpen) {
+        d3.select('.' + self.legendClass)
           .classed('legend-open', true);
       } else {
-        d3.select('.' + args.legend._attr.legendClass)
+        d3.select('.' + self.legendClass)
           .classed('legend-open', false);
       }
 
+      // createList(legendDiv, items, self)
+      //   .on('mouseover', function (d) {
+      //     var liClass = '.' + classify(self.color(d));
+      //     d3.selectAll('.color').style('opacity', self.blurredOpacity);
+
+      //     // Select series on chart
+      //     d3.selectAll(liClass).style('opacity', self.focusOpacity);
+      //   })
+      //   .on('mouseout', function () {
+      //     d3.selectAll('.color').style('opacity', self.defaultOpacity);
+      //   });
     };
   };
 });

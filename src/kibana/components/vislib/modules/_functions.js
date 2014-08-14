@@ -16,10 +16,6 @@ define(function (require) {
       return layout(el);
     };
 
-    ChartFunctions.prototype.injectZeros = function (arr, obj) {
-      return injectZeros(arr, obj);
-    };
-
     ChartFunctions.prototype.getOrderedKeys = function (obj) {
       return orderKeys(obj);
     };

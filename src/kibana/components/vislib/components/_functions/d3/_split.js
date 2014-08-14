@@ -2,7 +2,6 @@ define(function () {
   return function splittingUtilService(d3) {
     return function split(selection) {
       selection.each(function (data) {
-
         var div = d3.select(this)
           .attr('class', function () {
             return data.rows ? 'chart-wrapper-row' : data.columns ? 'chart-wrapper-column' : 'chart-wrapper';

@@ -1,24 +1,31 @@
 define(function (require) {
-  return function YAxisUtilService(d3, Private) {
-    var split = Private(require('components/vislib/components/YAxis/_split_y_axis'));
+  return function YAxisUtilService(d3) {
+    var $ = require('jquery');
 
     return function (that) {
-      split(that.data);
-
       return function (selection) {
         selection.each(function () {
           var div = d3.select(this);
 
-          var yAxis = div.append('div')
-            .attr('class', 'y-axis-div');
+          var width = $(this).width();
+          var height = $(this).height();
 
-          var svg = yAxis.append('svg')
-            .attr('width', '100%')
-            .attr('height', '100%');
+          var yScale = d3.scale.linear()
+            .domain([0, that.yStackMax])
+            .range([height, 0]);
+
+          var yAxis = d3.svg.axis()
+            .scale(yScale)
+            .orient('left');
+
+          var svg = div.append('svg')
+            .attr('width', width)
+            .attr('height', height + 10);
 
           svg.append('g')
             .attr('class', 'y axis')
-            .call(that.yAxis);
+            .attr('transform', 'translate(0' + width + ')')
+            .call(yAxis);
         });
       };
     };
