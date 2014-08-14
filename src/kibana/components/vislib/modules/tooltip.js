@@ -10,14 +10,9 @@ define(function (require) {
     function Tooltip(className, formatter) {
       this.tooltipClass = className;
       this.tooltipFormatter = formatter;
-//      this._attr = _.defaults(chart.config || {}, {
-//        'tooltipClass' : 'k4tip',
-//        'tooltipFormatter' : 'It works'
-//      });
     }
 
     Tooltip.prototype.draw = function () {
-//      this._attr.tooltipFormatter = chart.chartData.tooltipFormatter;
       return renderTooltip(this);
     };
 
