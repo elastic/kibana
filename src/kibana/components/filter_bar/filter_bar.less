@@ -32,10 +32,22 @@ filter-bar .bar {
       color: #FFF;
     }
 
+    &:hover {
+      span {
+        text-decoration: line-through;
+      }
+    }
+
     &.disabled {
       opacity: 0.8;
       span {
         text-decoration: line-through;
+      }
+    }
+
+    &.disabled:hover {
+      span {
+        text-decoration: none;
       }
     }
   }
