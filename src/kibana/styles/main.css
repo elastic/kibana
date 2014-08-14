@@ -7304,11 +7304,11 @@ ul.navbar-inline li {
   position: relative;
   z-index: 0;
 }
-.content .navbar {
+.content > .navbar {
   position: relative;
   z-index: 1;
 }
-.content .application {
+.content > .application {
   position: relative;
   z-index: 0;
 }
@@ -7456,6 +7456,17 @@ notifications {
   padding: 10px 10px;
   background-color: #ffffff;
 }
+.app-container > * {
+  position: relative;
+  z-index: 0;
+}
+.app-container > config {
+  z-index: 1;
+}
+.app-container > nav,
+.app-container > navbar {
+  z-index: 2 !important;
+}
 kbn-table .table .table {
   margin-bottom: 0px;
 }
@@ -7503,6 +7514,37 @@ kbn-table tr.even td {
   margin: 10px 0;
   word-break: normal;
   word-wrap: normal;
+}
+.typeahead {
+  position: relative;
+}
+.typeahead .typeahead-items {
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  color: #46525d;
+  background-color: #ffffff;
+  position: absolute;
+  z-index: 1020;
+  width: 100%;
+}
+.typeahead .typeahead-items .typeahead-item {
+  border-bottom: 1px solid rgba(153, 153, 153, 0.2);
+  padding: 5px 15px;
+}
+.typeahead .typeahead-items .typeahead-item:last-child {
+  border-bottom: 0px;
+}
+.typeahead .typeahead-items .typeahead-item.active {
+  background-color: #ecf0f1;
+}
+.button-group .typeahead.visible .input-group > :first-child,
+.inline-form .typeahead.visible .input-group > :first-child {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.button-group .typeahead.visible .input-group > :last-child,
+.inline-form .typeahead.visible .input-group > :last-child {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
 }
 .nav-condensed > li > a {
   padding-top: 2px;
@@ -7724,4 +7766,10 @@ filter-bar .bar .filter.negate {
 }
 filter-bar .bar .filter a {
   color: #FFF;
+}
+filter-bar .bar .filter.disabled {
+  opacity: 0.8;
+}
+filter-bar .bar .filter.disabled span {
+  text-decoration: line-through;
 }

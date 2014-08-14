@@ -64,6 +64,16 @@ define(function (require) {
         this.tooltip = new Tooltip('k4tip', tooltipFormatter);
       }
 
+      if (!this.xAxis) {
+        this.xAxis = new XAxis(this.data);
+        this.xAxis.draw();
+      }
+
+      if (!this.yAxis) {
+        this.yAxis = new YAxis(this.data);
+        this.yAxis.draw();
+      }
+
       if (!this.charts) {
         var vis = this;
         var charts = this.charts = [];
@@ -75,16 +85,6 @@ define(function (require) {
             charts.push(chart);
             chart.render();
           });
-      }
-
-      if (!this.xAxis) {
-        this.xAxis = new XAxis(this.data);
-        this.xAxis.draw();
-      }
-
-      if (!this.yAxis) {
-        this.yAxis = new YAxis(this.data);
-        this.yAxis.draw();
       }
 
       this.checkSize('.chart');
