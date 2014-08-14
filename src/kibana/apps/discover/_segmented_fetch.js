@@ -11,6 +11,10 @@ define(function (require) {
       location: 'Segmented Fetch'
     });
 
+    segmentedFetch.abort = function () {
+      activeReq = null;
+    };
+
     /**
      * Fetch search results, but segment by index name.
      *
