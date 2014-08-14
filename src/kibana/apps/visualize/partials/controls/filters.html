@@ -1,0 +1,26 @@
+<div ng-init="config.filters = (config.filters || [{input: {query_string: {query: '*'}}}])">
+  <div class="form-group" >
+    <div ng-repeat="filter in config.filters track by $index">
+      <div class="config-controls pull-right btn-group">
+        <span ng-click="config.filters.splice($index, 1)"
+          class="btn btn-danger btn-xs ">
+          <i class="fa fa-ban" ></i>
+        </span>
+      </div>
+      <div class="form-group">
+          <label>Query string {{$index + 1}}</label>
+          <input query-input
+            ng-model="filter.input"
+            type="text"
+            class="form-control"
+            name="filter{{$index}}" />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    ng-click="config.filters.push({input: {query_string: {query: '*'}}})"
+    class="sidebar-item-button primary">
+    Add filter
+  </div>
+</div>

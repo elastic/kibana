@@ -7176,6 +7176,9 @@ navbar .inline-form .input-group button {
 .sidebar-container .sidebar-list .sidebar-item .sidebar-item-button {
   padding: 5px 10px;
   text-align: center;
+  width: 100%;
+  border-radius: 0;
+  font-size: inherit;
 }
 .sidebar-container .sidebar-list .sidebar-item .sidebar-item-button[disabled] {
   opacity: 0.65;
@@ -7669,6 +7672,9 @@ button[disabled] {
 fieldset[disabled] .form-control {
   cursor: default;
   opacity: .8;
+}
+input.ng-invalid {
+  border-color: #e74c3c !important;
 }
 input[type="radio"][disabled],
 input[type="checkbox"][disabled],
