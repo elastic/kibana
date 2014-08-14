@@ -1,9 +1,9 @@
 define(function () {
   return function TooltipUtilService(d3) {
-    return function (args) {
+    return function (self) {
       return function (selection) {
         selection.each(function () {
-          var tooltipDiv = d3.select('.' + args._attr.tooltipClass);
+          var tooltipDiv = d3.select('.' + self.tooltipClass);
           var element = d3.select(this);
 
           element
@@ -14,7 +14,7 @@ define(function () {
               };
 
               return tooltipDiv.datum(d)
-                .text(args._attr.tooltipFormatter)
+                .text(self.tooltipFormatter)
                 .style('visibility', 'visible')
                 .style('top', mouseMove.top + 'px')
                 .style('left', mouseMove.left + 10 + 'px');

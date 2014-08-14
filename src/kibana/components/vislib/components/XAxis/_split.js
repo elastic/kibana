@@ -1,15 +1,12 @@
 define(function () {
   return function XAxisSplitUtilService(d3) {
-    return function () {
       return function (selection) {
         selection.each(function (data) {
           var div = d3.select(this);
 
-          div.append('div')
-            .data(data, function (d) {
-              if (d.rows && d.ordered.date) {
-                return [d];
-              }
+          div.selectAll('.x-axis-div')
+            .append('div')
+            .data(function (d) {
               return d.columns ? d.columns : [d];
             })
             .enter()
@@ -18,5 +15,4 @@ define(function () {
         });
       };
     };
-  };
 });

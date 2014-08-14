@@ -13,10 +13,9 @@ define(function (require) {
 
       // Attributes
       var data = chartData;
-      var orderedKeys = vis.orderedKeys;
-      var $elem = $('.chart');
-//      var callXAxis = vis.callXAxis(vis);
-//      var callYAxis = vis.callYAxis(vis);
+      var xValues = vis.data.orderedKeys ? vis.data.orderedKeys : vis.data.xValues();
+      var $elem = $(chartEl);
+
       var margin = vis._attr.margin;
       var elWidth = vis._attr.width = $elem.width();
       var elHeight = vis._attr.height = $elem.height();
@@ -27,9 +26,8 @@ define(function (require) {
       var isTooltip = vis._attr.addTooltip;
 
       // Inherited functions
-      var color = vis.color;
+      var color = vis.data.color;
       var tooltip = vis.tooltip;
-      var injectZeros = vis.injectZeros;
 //      var getYStackMax = vis.yStackMax;
       var yMax;
 //      var createSVG = vis.createSVG;
@@ -64,23 +62,19 @@ define(function (require) {
       var yValue = function (d, i) {
         return d.y;
       };
-      var brush = d3.svg.brush();
 
       // Unassigned variables
       var svg;
       var width;
       var height;
-      var zeroFilledData;
       var layers;
       var yStackMax;
       var xTicks;
       var yTicks;
 
-//      return function () {
       return d3.select(chartEl).call(function () {
-//          zeroFilledData = injectZeros(data.series, data.ordered);
 
-        layers = stack(data.series.map(function (d, i) {
+        layers = stack(data.series.map(function (d) {
           var label = d.label;
           return d.values.map(function (e, i) {
             return {
@@ -102,61 +96,37 @@ define(function (require) {
 //          yTicks = Math.floor(yTickScale(height));
 
         // Update the xScale
-        xScale.domain(orderedKeys) // May always return strings - need to add new function vis returns the correct values
+        xScale.domain(xValues)
           .rangeBands([0, width], 0.1);
-
-        // Update the yScale
-//          yScale = getYDomain()
         yScale
           .domain([0, yStackMax])
           .range([height, 0]);
 
         // Update the Axes
-        xAxis.scale(xScale)
-//          .tickValues(xScale.domain().filter(function (d, i) {
-//            if (i % 5 === 0) {
-//              return true;
-//            }
-//            return false;
-//          }))
-          .tickFormat(data.xAxisFormatter);
-
+        xAxis.scale(xScale);
         yAxis.scale(yScale);
 
-//          brush.x(xScale);
-
         // Create the canvas for the visualization
-        var svg = createSVG(chartEl, width, height);
-        transformSVG(svg, margin.left, margin.top);
+        var svg = d3.select(chartEl).append('svg')
+          .attr('width', width + margin.left + margin.right)
+          .attr('height', height + margin.top + margin.bottom)
+          .append('g')
+          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-        // x axis
-////          d3.select('.x-axis-wrapper').call(callXAxis.draw(xAxis));
-//
-//          // y axis
-//          d3.select('.y-axis-col').call(callYAxis.draw(yAxis));
-//            .append('text')
-//            .attr('transform', 'rotate(-90)')
-//            .attr('x', -height / 2)
-//            .attr('y', -40)
-//            .attr('dy', '.71em')
-//            .style('text-anchor', 'middle')
-//            .text(data.yAxisLabel);
-
-        // Chart title
-        svg.append('text')
-          .attr('class', 'charts-label')
-          .attr('text-anchor', 'middle')
-          .attr('x', width / 2)
-          .attr('y', -10)
-          .text(data.label);
+//        // Chart title
+//        svg.append('text')
+//          .attr('class', 'charts-label')
+//          .attr('text-anchor', 'middle')
+//          .attr('x', width / 2)
+//          .attr('y', -10)
+//          .text(data.label);
 
         // Data layers
         var layer = svg.selectAll('.layer')
           .data(layers)
           .enter()
           .append('g')
-          .attr(
-          'class', function (d, i) {
+          .attr('class', function (d, i) {
             return i;
           });
 
@@ -197,12 +167,11 @@ define(function (require) {
 
         // Add tooltip
         if (isTooltip) {
-          bars.call(tooltip.draw(vis));
+          bars.call(tooltip.draw());
         }
 
         return svg;
       });
     };
-//    };
   };
 });

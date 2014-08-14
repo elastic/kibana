@@ -6,25 +6,24 @@ define(function (require) {
     var createList = Private(require('components/vislib/components/Legend/list'));
     var classify = Private(require('components/vislib/components/Legend/classify'));
 
-    return function (args) {
-//      var legendDiv = appendLegendDiv(args.el, 'div', args._attr.legendClass);
-      var legendDiv = d3.select('.' + args._attr.legendClass);
-      var items = args.labels;
+    return function (self) {
+      var legendDiv = d3.select('.' + self.legendClass);
+      var items = self.labels;
 
       createHeader(legendDiv);
 //        .on('click', toggleLegend);
 
-      createList(legendDiv, items, args);
-//        .on('mouseover', function (d) {
-//          var liClass = '.' + classify(args.color(d));
-//          d3.selectAll('.color').style('opacity', args._attr.blurredOpacity);
-//
-//          // Select series on chart
-//          d3.selectAll(liClass).style('opacity', args._attr.focusOpacity);
-//        })
-//        .on('mouseout', function () {
-//          d3.selectAll('.color').style('opacity', args._attr.defaultOpacity);
-//        });
+      createList(legendDiv, items, self)
+        .on('mouseover', function (d) {
+          var liClass = '.' + classify(self.color(d));
+          d3.selectAll('.color').style('opacity', self.blurredOpacity);
+
+          // Select series on chart
+          d3.selectAll(liClass).style('opacity', self.focusOpacity);
+        })
+        .on('mouseout', function () {
+          d3.selectAll('.color').style('opacity', self.defaultOpacity);
+        });
     };
   };
 });
