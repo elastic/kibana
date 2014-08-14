@@ -28,3 +28,9 @@ filter-bar .bar .filter.negate {
 filter-bar .bar .filter a {
   color: #FFF;
 }
+filter-bar .bar .filter.disabled {
+  opacity: 0.8;
+}
+filter-bar .bar .filter.disabled span {
+  text-decoration: line-through;
+}
