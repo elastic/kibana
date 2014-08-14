@@ -3,11 +3,6 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
 
-//    var classify = Private(require('components/vislib/components/Legend/classify'));
-    var createSVG = Private(require('components/vislib/components/_functions/d3/_create_svg'));
-    var transformSVG = Private(require('components/vislib/components/_functions/d3/_transform_svg'));
-    var appendYAxis = Private(require('components/vislib/components/_functions/d3/_append_y_axis'));
-    var getYStackMax = Private(require('components/vislib/components/_functions/d3/_y_stack_max'));
     var classify = Private(require('components/vislib/components/Legend/classify'));
 
     return function (vis, chartEl, chartData) {
@@ -25,10 +20,11 @@ define(function (require) {
       var defaultOpacity = vis._attr.defaultOpacity;
       var isTooltip = vis._attr.addTooltip;
 
+      console.log(vis);
       // Inherited functions
       var color = vis.data.color;
       var tooltip = vis.tooltip;
-      var yStackMax = vis.yStackMax;
+      var yStackMax = vis.data.yStackMax;
       var yMax;
 //      var createSVG = vis.createSVG;
 //      var transformSVG = vis.transformSVG;
