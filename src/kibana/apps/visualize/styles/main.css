@@ -8,19 +8,19 @@
 }
 .btn-group-lg > .btn {
   padding: 18px 27px;
-  font-size: 19px;
+  font-size: 17px;
   line-height: 1.33;
   border-radius: 6px;
 }
 .btn-group-sm > .btn {
   padding: 6px 9px;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.5;
   border-radius: 3px;
 }
 .btn-group-xs > .btn {
   padding: 1px 5px;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.5;
   border-radius: 3px;
 }
@@ -110,7 +110,7 @@
   border-top: 1px solid transparent;
   padding: 5px 10px;
   background-color: #ffffff;
-  color: #46525d;
+  color: #444444;
 }
 .vis-editor-content .vis-config-details .config-controls {
   margin-bottom: 5px;
