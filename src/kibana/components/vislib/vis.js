@@ -3,6 +3,7 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
 
+    // Vislib Objects
     var ChartFunctions = Private(require('components/vislib/modules/_functions'));
     var Data = Private(require('components/vislib/modules/Data'));
     var Tooltip = Private(require('components/vislib/modules/Tooltip'));
@@ -13,17 +14,16 @@ define(function (require) {
     var split = Private(require('components/vislib/components/_functions/d3/_split'));
 
     var chartTypes = {
-      histogram : Private(require('components/vislib/modules/ColumnChart')),
+      histogram : Private(require('components/vislib/modules/ColumnChart'))
     };
 
-    _(Vis).inherits(ChartFunctions);
     function Vis($el, config) {
-      Vis.Super.apply(this, arguments);
       this.el = $el.get ? $el.get(0) : $el;
       this.config = config;
       this.ChartClass = chartTypes[config.type];
-      this.prevSize;
     }
+
+    _(Vis.prototype).extend(ChartFunctions.prototype);
 
     Vis.prototype.render = function (data) {
       var color;
