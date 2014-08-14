@@ -28,7 +28,7 @@ define(function (require) {
       // Inherited functions
       var color = vis.data.color;
       var tooltip = vis.tooltip;
-//      var getYStackMax = vis.yStackMax;
+      var yStackMax = vis.yStackMax;
       var yMax;
 //      var createSVG = vis.createSVG;
 //      var transformSVG = vis.transformSVG;
@@ -68,7 +68,6 @@ define(function (require) {
       var width;
       var height;
       var layers;
-      var yStackMax;
       var xTicks;
       var yTicks;
 
@@ -85,7 +84,6 @@ define(function (require) {
           });
         }));
 
-        yStackMax = getYStackMax(layers);
 
         // Get the width and height
         width = elWidth - margin.left - margin.right;

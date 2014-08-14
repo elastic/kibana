@@ -5,11 +5,6 @@
   /* stroke-width: 3px; */
 }
 
-.arc path {
-  stroke: #fff;
-  /* stroke-width: 3px; */
-}
-
 div.columns {
   display: flex;
   flex-direction: row;
@@ -150,20 +145,6 @@ div.y-axis-label {
 }
 .legend-ul.hidden {
   visibility: hidden;
-}
-.xxxxlegend-ul li {
-  display: block;
-  float: left;
-  width: 150px;
-  min-height: 22px;
-  margin: 0 18px 0 18px;
-  padding: 4px 0 4px 0;
-  text-align: left;
-  word-wrap: break-word;
-  font-size: 12px;
-  line-height: 13px;
-  list-style: none;
-  color: #666;
 }
 
 li.color {
@@ -308,87 +289,104 @@ p.rows-label, p.columns-label {
 
 /* Flex Box Testing */
 .vis-wrapper {
-  display: flex;
-  flex: 1 1 100%;
-  flex-direction: row;
+    display: flex;
+    flex: 1 1 100%;
+    flex-direction: row;
+    margin: 10px;
 }
 
 .y-axis-col-wrapper {
-  display: flex;
-  flex: 1 1;
-  flex-direction: column;
+    display: flex;
+    flex: 2 1;
+    flex-direction: column;
 }
 
 .y-axis-col {
-  display: flex;
-  flex: 25 1;
-  flex-direction: column;
+    display: flex;
+    flex: 25 1;
+    flex-direction: row;
+}
+
+.y-axis-div-wrapper {
+    display: flex;
+    flex: 25 1;
+    flex-direction: column;
+}
+
+.y-axis-title {
+    flex: 1 1;
 }
 
 .y-axis-div {
-  flex: 1 1;
+    flex: 1 1;
+    overflow: visible;
 }
 
 .y-axis-spacer-block {
-  flex: 1 1;
+    flex: 1 1;
 }
 
 .vis-col-wrapper {
-  display: flex;
-  flex: 25 1;
-  flex-direction: column;
+    display: flex;
+    flex: 25 1;
+    flex-direction: column;
 }
 
 .chart-wrapper {
-  display: flex;
-  flex: 25 1;
+    display: flex;
+    flex: 25 1;
 }
 
 .chart-wrapper-column {
-  display: flex;
-  flex: 25 1;
-  flex-direction: row;
+    display: flex;
+    flex: 25 1;
+    flex-direction: row;
 }
 
 .chart-wrapper-row {
-  display: flex;
-  flex: 25 1;
-  flex-direction: column;
+    display: flex;
+    flex: 25 1;
+    flex-direction: column;
 }
 
 .chart-row {
-  flex: 1 1;
+    flex: 1 1;
 }
 
 .chart-column {
-  flex: 1 1;
+    flex: 1 1;
 }
 
 .x-axis-wrapper {
-  display: flex;
-  flex: 0 1;
-  flex-direction: row;
+    display: flex;
+    flex: 1 1;
+    flex-direction: column;
+}
+
+.x-axis-div-wrapper {
+    display: flex;
+    flex: 25 1;
+    flex-direction: row;
+}
+
+.x-axis-title {
+    flex: 5 1;
 }
 
 .open-wrapper {
-  flex: 1 1 ;
+    flex: 1 1 ;
 }
 
 .x-axis-div {
-  flex: 1 1;
+    flex: 1 1;
 }
 
 .legend-col-wrapper {
-  flex: 1 1;
-  z-index: 10;
-  overflow: hidden;
-  margin: 0 0 0 8px
+    flex: 1 1;
+    z-index: 10;
+    overflow: hidden;
 }
 
-.legend-open {
-  flex: 4 1;
-}
-
-.test-wrapper {
-  flex: 25 1;
+li.color {
+    list-style: none;
 }
