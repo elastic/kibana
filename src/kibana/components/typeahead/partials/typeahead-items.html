@@ -1,0 +1,17 @@
+<div
+  ng-show="typeahead.isVisible()"
+  ng-mouseenter="typeahead.setMouseover(true);"
+  ng-mouseleave="typeahead.setMouseover(false);"
+  class="typeahead-items"
+  >
+
+  <div
+    ng-repeat="item in typeahead.getItems()"
+    ng-class="{active: item === typeahead.active}"
+    ng-click="typeahead.selectItem(item, $event);"
+    ng-mouseenter="typeahead.activateItem(item);"
+    class="typeahead-item"
+    >
+    {{item}}
+  </div>
+</div>
