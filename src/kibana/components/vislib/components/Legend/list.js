@@ -17,10 +17,8 @@ define(function (require) {
         .attr('class', function (d) {
           return 'color ' + classify(args.color(d));
         })
-        .html(
-        function (d) {
-          return '<span class="dots" style="background:' + args.color(d) +
-            '"></span>' + d + '';
+        .html(function (d) {
+          return '<span class="dots" style="background:' + args.color(d) + '"></span>' + d;
         });
     };
   };
