@@ -295,7 +295,13 @@ define(function (require) {
               $('<td>').attr('colspan', $scope.columns.length + 2).append(detailsHtml)
             );
 
-          var $childScope = _.assign(childScopeFor(id), { row: row });
+          var showFilters = function (mapping) {
+            var validTypes = ['string', 'number', 'date', 'ip'];
+            if (!mapping.indexed) return false;
+            return _.contains(validTypes, mapping.type);
+          }
+
+          var $childScope = _.assign(childScopeFor(id), { row: row, showFilters: showFilters });
           $compile($detailsTr)($childScope);
         };
 
@@ -377,5 +383,6 @@ define(function (require) {
         }
       }
     };
+
   });
 });

@@ -15,7 +15,7 @@
 @gray-light:             #b4bcc2;   // #999
 @gray-lighter:           #ecf0f1; // #eee
 
-@brand-primary:         #46525D;
+@brand-primary:         #444444;
 @brand-success:         #31C471; // #18BC9C
 @brand-info:            #3498DB;
 @brand-warning:         #F39C12;
@@ -47,7 +47,7 @@
 @font-family-monospace:   Menlo, Monaco, Consolas, "Courier New", monospace;
 @font-family-base:        @font-family-sans-serif;
 
-@font-size-base:          15px;
+@font-size-base:          13px;
 @font-size-large:         ceil((@font-size-base * 1.25)); // ~18px
 @font-size-small:         ceil((@font-size-base * 0.85)); // ~12px
 
@@ -248,6 +248,7 @@
 @zindex-navbar:            1000;
 @zindex-dropdown:          1000;
 @zindex-popover:           1010;
+@zindex-typeahead:         1020;
 @zindex-tooltip:           1030;
 @zindex-navbar-fixed:      1030;
 @zindex-modal-background:  1040;
@@ -328,7 +329,7 @@
 //##
 
 // Basics of a navbar
-@navbar-height:                    45px;
+@navbar-height:                    35px;
 @navbar-margin-bottom:             0px;
 @navbar-border-radius:             @border-radius-base;
 @navbar-padding-horizontal:        floor((@grid-gutter-width / 2));
@@ -336,8 +337,8 @@
 @navbar-collapse-max-height:       340px;
 
 @navbar-default-color:             #fff;
-@navbar-default-bg:                @brand-primary;
-@navbar-default-border:            darken(@brand-primary, 10%);
+@navbar-default-bg:                #555;
+@navbar-default-border:            darken(@navbar-default-bg, 10%);
 
 // Navbar links
 @navbar-default-link-color:                #fff;
@@ -362,16 +363,16 @@
 // Inverted navbar
 // Reset inverted navbar basics
 @navbar-inverse-color:                      #fff;
-@navbar-inverse-bg:                         @brand-success;
-@navbar-inverse-border:                     darken(@brand-success, 10%);
+@navbar-inverse-bg:                         #333;
+@navbar-inverse-border:                     darken(@navbar-inverse-bg, 10%);
 
 // Inverted navbar links
-@navbar-inverse-link-color:                 #fff;
-@navbar-inverse-link-hover-color:           @brand-primary;
+@navbar-inverse-link-color:                 @gray-lighter;
+@navbar-inverse-link-hover-color:           #fff;
 @navbar-inverse-link-hover-bg:              transparent;
 @navbar-inverse-link-active-color:          #fff;
 @navbar-inverse-link-active-bg:             darken(@navbar-inverse-bg, 5%);
-@navbar-inverse-link-disabled-color:        #ccc;
+@navbar-inverse-link-disabled-color:        @gray-light;
 @navbar-inverse-link-disabled-bg:           transparent;
 
 // Inverted navbar brand label
