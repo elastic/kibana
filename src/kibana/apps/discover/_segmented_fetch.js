@@ -29,6 +29,7 @@ define(function (require) {
      * @return {Promise}
      */
     segmentedFetch.fetch = function (opts) {
+      opts = opts || {};
       var searchSource = opts.searchSource;
       var direction = opts.direction;
       var limitSize = false;
@@ -48,6 +49,9 @@ define(function (require) {
       activeReq = req;
 
       var queue = searchSource.get('index').toIndexList();
+      var total = queue.length;
+      var active = null;
+      var complete = [];
 
       if (!_.isArray(queue)) {
         queue = [queue];
@@ -67,10 +71,24 @@ define(function (require) {
         }
       };
 
+      function reportStatus() {
+        if (!opts.status) return;
+        opts.status({
+          total: total,
+          complete: complete.length,
+          remaining: queue.length,
+          active: active
+        });
+      }
+
+      reportStatus();
       getStateFromRequest(req)
       .then(function (state) {
         return (function recurse() {
           var index = queue.shift();
+          active = index;
+
+          reportStatus();
 
           if (limitSize) {
             state.body.size = remainingSize;
@@ -133,6 +151,7 @@ define(function (require) {
               }
             })
             .then(function () {
+              complete.push(index);
               if (queue.length) return recurse();
               return done();
             });

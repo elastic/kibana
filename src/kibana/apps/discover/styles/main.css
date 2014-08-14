@@ -104,11 +104,8 @@
   text-align: center;
   background-color: #ffffff;
 }
-.discover-overlay .spinner {
-  position: absolute;
-  top: 70px;
-  left: 0;
-  right: 0;
+.discover-overlay > div {
+  text-align: center;
 }
 .discover-hits {
   background-color: #ecf0f1;
