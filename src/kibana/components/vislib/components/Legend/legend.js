@@ -9,21 +9,55 @@ define(function (require) {
     return function (self) {
       var legendDiv = d3.select('.' + self.legendClass);
       var items = self.labels;
+      var header = createHeader(legendDiv);
+      var headerIcon = d3.select('.legend-toggle');
+      var list = createList(legendDiv, items, self);
 
-      createHeader(legendDiv);
-//        .on('click', toggleLegend);
+      headerIcon.on('click', function (d) {
+        toggleLegend(self);
+      });
 
-      createList(legendDiv, items, self)
+      d3.selectAll('.color')
         .on('mouseover', function (d) {
           var liClass = '.' + classify(self.color(d));
           d3.selectAll('.color').style('opacity', self.blurredOpacity);
-
-          // Select series on chart
+          
+          // select series on chart
           d3.selectAll(liClass).style('opacity', self.focusOpacity);
-        })
+
+          d3.selectAll('.color')
+            .style('opacity', self.blurredOpacity);
+          
+          // Select series on chart
+          d3.selectAll(liClass)
+            .style('opacity', self.focusOpacity);
+        });
+
+      d3.selectAll('.color')
         .on('mouseout', function () {
           d3.selectAll('.color').style('opacity', self.defaultOpacity);
         });
+
+      // add/remove class for legend-open
+      if (self.isOpen) {
+        d3.select('.' + self.legendClass)
+          .classed('legend-open', true);
+      } else {
+        d3.select('.' + self.legendClass)
+          .classed('legend-open', false);
+      }
+
+      // createList(legendDiv, items, self)
+      //   .on('mouseover', function (d) {
+      //     var liClass = '.' + classify(self.color(d));
+      //     d3.selectAll('.color').style('opacity', self.blurredOpacity);
+
+      //     // Select series on chart
+      //     d3.selectAll(liClass).style('opacity', self.focusOpacity);
+      //   })
+      //   .on('mouseout', function () {
+      //     d3.selectAll('.color').style('opacity', self.defaultOpacity);
+      //   });
     };
   };
 });

@@ -1,6 +1,7 @@
 define(function (require) {
   return function TooltipFactory(d3, Private) {
     var _ = require('lodash');
+    var $ = require('jquery');
 
     var renderTooltip = Private(require('components/vislib/components/Tooltip/tooltip'));
 
@@ -10,6 +11,8 @@ define(function (require) {
     function Tooltip(className, formatter) {
       this.tooltipClass = className;
       this.tooltipFormatter = formatter;
+      this.chartWidth = $('.chart').width();
+      this.chartHeight = $('.chart').height();
     }
 
     Tooltip.prototype.draw = function () {

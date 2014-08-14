@@ -21,6 +21,7 @@ define(function (require) {
       this.el = $el.get ? $el.get(0) : $el;
       this.config = config;
       this.ChartClass = chartTypes[config.type];
+      this.timestamp = new Date().getTime();
     }
 
     _(Vis.prototype).extend(ChartFunctions.prototype);
@@ -51,15 +52,18 @@ define(function (require) {
       // split data
       this.callFunction(d3.select('.chart-wrapper'), zeroInjectedData, split);
 
+      // add legend
       if (this.config.addLegend && !this.legend) {
         this.legend = new Legend({
-          class: 'legend-col-wrapper',
+          // class: 'legend-col-wrapper',
           color: color,
           labels: labels
-        });
-        this.legend.draw();
+        }, this.config);
+        this.legend.timeStamp = new Date().getTime();
       }
+      this.legend.draw();
 
+      // add tooltip
       if (this.config.addTooltip && !this.tooltip) {
         this.tooltip = new Tooltip('k4tip', tooltipFormatter);
       }
@@ -105,8 +109,8 @@ define(function (require) {
         this.resize();
       }
       this.prevSize = size;
-      setTimeout(this.checkSize(el), 500);
-    }, 500);
+      setTimeout(this.checkSize(el), 300);
+    }, 300);
 
     Vis.prototype.on = function () {
       return this.chart.on();
