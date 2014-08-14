@@ -1,17 +1,21 @@
-<div ng-controller="discover">
+<div ng-controller="discover" class="app-container">
   <navbar>
     <form class="fill inline-form" ng-submit="fetch()" name="discoverSearch">
-      <div class="input-group"
-        ng-class="discoverSearch.$invalid ? 'has-error' : ''">
-        <input query-input="searchSource"
-          ng-model="state.query"
-          placeholder="Search..."
-          type="text"
-          class="form-control">
-        <button type="submit"
-          ng-disabled="discoverSearch.$invalid">
-          <span class="fa fa-search"></span></button>
-        <button type="button" ng-click="resetQuery()"><span class="fa fa-ban"></span></button>
+      <div class="typeahead" kbn-typeahead="discover">
+        <div class="input-group"
+          ng-class="discoverSearch.$invalid ? 'has-error' : ''">
+          <input query-input="searchSource"
+            kbn-typeahead-input
+            ng-model="state.query"
+            placeholder="Search..."
+            type="text"
+            class="form-control">
+          <button type="submit"
+            ng-disabled="discoverSearch.$invalid">
+            <span class="fa fa-search"></span></button>
+          <button type="button" ng-click="resetQuery()"><span class="fa fa-ban"></span></button>
+        </div>
+        <kbn-typeahead-items></kbn-typeahead-items>
       </div>
     </form>
 
@@ -21,6 +25,7 @@
       <button ng-click="toggleConfig()"><i class="fa fa-gear"></i></button>
     </div>
   </navbar>
+
   <config config-template="configTemplate" config-object="opts" config-close="configClose" config-submit="fetch"></config>
 
   <div class="container-fluid">
@@ -75,12 +80,14 @@
               >
             </select> -->
           </center>
+
           <div ng-show="searchSource.activeFetchCount" class="discover-overlay">
-            <div class="spinner large">
-            </div>
+            <div class="spinner large"> </div>
           </div>
+
           <visualize vis="vis" es-resp="mergedEsResp"></visualize>
         </div>
+
         <div class="discover-table"
           fixed-scroll='table'
           fixed-scroll-trigger="state.columns">
@@ -95,6 +102,7 @@
             timefield="opts.timefield"
             mapping="fieldsByName">
           </kbn-table>
+
           <div ng-if="rows.length == opts.sampleSize" class="discover-table-footer">
             <center>
               These are the first {{opts.sampleSize}} results matching your query,

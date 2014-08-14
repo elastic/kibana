@@ -11,6 +11,7 @@ define(function (require) {
     var intervals = Private(require('components/index_patterns/_intervals'));
     var mappingSetup = Private(require('utils/mapping_setup'));
     var DocSource = Private(require('components/courier/data_source/doc_source'));
+    var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
 
     var type = 'index-pattern';
 
@@ -171,6 +172,9 @@ define(function (require) {
       pattern.toString = function () {
         return '' + pattern.toJSON();
       };
+
+      pattern.flattenSearchResponse = flattenSearchResponse.bind(pattern);
+
     }
     return IndexPattern;
   };
