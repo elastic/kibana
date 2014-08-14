@@ -8,7 +8,6 @@ define(function (require) {
 
     // Takes the kibana data objects
     return function (obj) {
-      console.log(obj);
       var keys = orderXValues(obj);
       var max;
       var zeroArray;

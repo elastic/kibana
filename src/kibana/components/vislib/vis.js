@@ -9,6 +9,7 @@ define(function (require) {
     var XAxis = Private(require('components/vislib/modules/Xaxis'));
     var YAxis = Private(require('components/vislib/modules/YAxis'));
     var Legend = Private(require('components/vislib/modules/Legend'));
+
     var split = Private(require('components/vislib/components/_functions/d3/_split'));
 
     var chartTypes = {
