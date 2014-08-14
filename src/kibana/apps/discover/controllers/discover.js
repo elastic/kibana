@@ -170,6 +170,40 @@ define(function (require) {
           timefilter.enabled(!!timefield);
         });
 
+        // options are 'loading', 'ready', 'none', undefined
+        $scope.$watchMulti([
+          'rows',
+          'fetchStatus'
+        ], (function updateResultState() {
+          var prev = {};
+
+          function pick(rows, oldRows, fetchStatus, oldFetchStatus) {
+            // initial state, pretend we are loading
+            if (rows == null && oldRows == null) return 'loading';
+
+            var rowsEmpty = _.isEmpty(rows);
+            if (rowsEmpty && fetchStatus) return 'loading';
+            else if (!rowsEmpty) return 'ready';
+            else return 'none';
+          }
+
+          return function () {
+            var current = {
+              rows: $scope.rows,
+              fetchStatus: $scope.fetchStatus
+            };
+
+            $scope.resultState = pick(
+              current.rows,
+              prev.rows,
+              current.fetchStatus,
+              prev.fetchStatus
+            );
+
+            prev = current;
+          };
+        }()));
+
         $scope.searchSource.onError(function (err) {
           console.log(err);
           notify.error('An error occured with your request. Reset your inputs and try again.');
@@ -241,6 +275,9 @@ define(function (require) {
           searchSource: $scope.searchSource,
           totalSize: sortBy === 'non-time' ? false : totalSize,
           direction: sortBy === 'time' ? sort[1] : 'desc',
+          status: function (status) {
+            $scope.fetchStatus = status;
+          },
           first: function (resp) {
             $scope.hits = 0;
             $scope.rows = [];
@@ -294,7 +331,10 @@ define(function (require) {
             $scope.mergedEsResp = merged;
           }
         })
-        .finally(eventComplete);
+        .finally(function () {
+          $scope.fetchStatus = false;
+          eventComplete();
+        });
       })
       .catch(notify.error);
     };
@@ -304,7 +344,6 @@ define(function (require) {
     $scope.$on('$destroy', function () {
       courier.searchLooper.remove($scope.fetch);
     });
-
 
     $scope.updateTime = function () {
       $scope.timeRange = {
