@@ -8,19 +8,19 @@
 }
 .btn-group-lg > .btn {
   padding: 18px 27px;
-  font-size: 19px;
+  font-size: 17px;
   line-height: 1.33;
   border-radius: 6px;
 }
 .btn-group-sm > .btn {
   padding: 6px 9px;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.5;
   border-radius: 3px;
 }
 .btn-group-xs > .btn {
   padding: 1px 5px;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.5;
   border-radius: 3px;
 }
@@ -168,13 +168,13 @@
 }
 .discover-field-details-close:hover {
   background-color: #cfd9db;
-  color: #46525d;
+  color: #444444;
 }
 .discover-field-details {
   border-top: 1px solid transparent;
   padding: 5px 10px;
   background-color: #ffffff;
-  color: #46525d;
+  color: #444444;
 }
 .discover-field-details .discover-field-details-count {
   white-space: nowrap;
@@ -183,7 +183,7 @@
   color: #31c471 !important;
 }
 .discover-field-details a.btn {
-  color: #46525d !important;
+  color: #444444 !important;
 }
 .discover-field-details .discover-field-details-error {
   margin-top: 5px;
@@ -200,13 +200,14 @@
 .discover-field-details .progress .progress-bar {
   padding-left: 10px;
   text-align: right;
-  line-height: 20px;
+  line-height: 18px;
+  max-width: 100%;
+  border-radius: 4px;
 }
 .discover-field-details .progress .progress-bar span {
   background-color: #95a5a6;
   padding: 3px;
   border-radius: 4px;
-  font-size: 0.8em;
   margin-left: 3px;
   margin-right: 3px;
 }

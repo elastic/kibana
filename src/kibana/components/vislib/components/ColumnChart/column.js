@@ -8,9 +8,9 @@ define(function (require) {
     var transformSVG = Private(require('components/vislib/components/_functions/d3/_transform_svg'));
     var appendYAxis = Private(require('components/vislib/components/_functions/d3/_append_y_axis'));
     var getYStackMax = Private(require('components/vislib/components/_functions/d3/_y_stack_max'));
+    var classify = Private(require('components/vislib/components/Legend/classify'));
 
     return function (vis, chartEl, chartData) {
-
       // Attributes
       var data = chartData;
       var xValues = vis.data.orderedKeys ? vis.data.orderedKeys : vis.data.xValues();
@@ -142,10 +142,31 @@ define(function (require) {
         bars.enter()
           .append('rect')
           .attr('class', function (d) {
-            return 'color c' + color(d.label);
+            return 'color ' + classify(color(d.label));
           })
           .attr('fill', function (d) {
             return color(d.label);
+          })
+          .on('mouseover', function (d, i) {
+            //console.log(i, d, data.series, d3.event);
+            d3.select(this)
+              .classed('hover', true)
+              .style('stroke', '#333')
+              .style('cursor', 'pointer');
+
+            // dispatch.hover({
+            //   value: getY(d, i),
+            //   point: d,
+            //   pointIndex: i,
+            //   series: data.series,
+            //   config: config,
+            //   data: latestData,
+            //   e: d3.event
+            // });
+            // d3.event.stopPropagation();
+          })
+          .on('mouseout', function () {
+            console.log('OUT');
           });
 
         // update
