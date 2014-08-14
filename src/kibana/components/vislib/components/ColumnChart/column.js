@@ -179,6 +179,27 @@ define(function (require) {
           })
           .attr('fill', function (d) {
             return color(d.label);
+          })
+          .on('mouseover', function (d, i) {
+            //console.log(i, d, data.series, d3.event);
+            d3.select(this)
+              .classed('hover', true)
+              .style('stroke', '#333')
+              .style('cursor', 'pointer');
+
+            // dispatch.hover({
+            //   value: getY(d, i),
+            //   point: d,
+            //   pointIndex: i,
+            //   series: data.series,
+            //   config: config,
+            //   data: latestData,
+            //   e: d3.event
+            // });
+            // d3.event.stopPropagation();
+          })
+          .on('mouseout', function () {
+            console.log('OUT');
           });
 
         // update

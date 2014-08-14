@@ -12,13 +12,10 @@ define(function (require) {
       var header = createHeader(legendDiv);
       var headerIcon = d3.select('.legend-toggle');
       var list = createList(legendDiv, items, args);
-      console.log('list', list);
 
       headerIcon.on('click', function (d) {
         toggleLegend(args);
       });
-
-
 
       d3.selectAll('.color')
         .on('mouseover', function (d) {
@@ -40,10 +37,6 @@ define(function (require) {
         .on('mouseout', function () {
           d3.selectAll('.color').style('opacity', args.legend._attr.defaultOpacity);
         });
-
-      
-
-      
 
       // add/remove class for legend-open
       if (args.isLegendOpen) {
