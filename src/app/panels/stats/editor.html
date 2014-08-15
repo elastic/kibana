@@ -18,18 +18,18 @@
       <label class="small">{{stat}}</label><input type="checkbox" ng-model="panel.show[stat]" ng-checked="panel.show[stat]">
     </div>
 
-    <h5>Formating</h5>
+    <h5>Formatting</h5>
     <div class="editor-option">
       <label class="small">Format</label>
       <select ng-change="set_refresh(true)" class="input-small" ng-model="panel.format" ng-options="f for f in ['number','float','money','bytes']"></select>
     </div>
     <div class="editor-option">
       <label class="small">Font Size</label>
-      <select class="input-mini" ng-model="panel.style['font-size']" ng-options="f for f in ['7pt','8pt','9pt','10pt','12pt','14pt','16pt','18pt','20pt','24pt','28pt','32pt','36pt','42pt','48pt','52pt','60pt','72pt']"></select></span>
+      <select class="input-mini" ng-model="panel.style['font-size']" ng-options="f for f in ['7pt','8pt','9pt','10pt','12pt','14pt','16pt','18pt','20pt','24pt','28pt','32pt','36pt','42pt','48pt','52pt','60pt','72pt']"></select>
     </div>
     <div class="editor-option">
       <label class="small">Display Breakdowns</label>
-      <select class="input-mini" ng-model="panel.display_breakdown" ng-options="f for f in ['yes', 'no']"></select></span>
+      <select class="input-mini" ng-model="panel.display_breakdown" ng-options="f for f in ['yes', 'no']"></select>
     </div>
     <div class="editor-option">
       <label class="small">Query column name</label>

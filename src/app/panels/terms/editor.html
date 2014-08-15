@@ -28,7 +28,7 @@
       </div>
       <div class="editor-option" ng-show="panel.tmode == 'terms'">
         <label class="small">Exclude Terms(s) (comma separated)</label>
-        <input array-join type="text" ng-model='panel.exclude'></input>
+        <input array-join type="text" ng-model='panel.exclude'>
       </div>
     </div>
   </div>
@@ -37,19 +37,19 @@
       <h5>View Options</h5>
       <div class="editor-option">
         <label class="small">Style</label>
-        <select class="input-small" ng-model="panel.chart" ng-options="f for f in ['bar','pie','table']"></select></span>
+        <select class="input-small" ng-model="panel.chart" ng-options="f for f in ['bar','pie','table']"></select>
       </div>
       <div class="editor-option" ng-show="panel.chart == 'table'">
         <label class="small">Font Size</label>
-        <select class="input-mini" ng-model="panel.style['font-size']" ng-options="f for f in ['7pt','8pt','9pt','10pt','12pt','14pt','16pt','18pt','20pt','24pt','28pt','32pt','36pt','42pt','48pt','52pt','60pt','72pt']"></select></span>
+        <select class="input-mini" ng-model="panel.style['font-size']" ng-options="f for f in ['7pt','8pt','9pt','10pt','12pt','14pt','16pt','18pt','20pt','24pt','28pt','32pt','36pt','42pt','48pt','52pt','60pt','72pt']"></select>
       </div>
       <div class="editor-option" ng-show="panel.chart == 'bar' || panel.chart == 'pie'">
         <label class="small">Legend</label>
-        <select class="input-small" ng-model="panel.counter_pos" ng-options="f for f in ['above','below','none']"></select></span>
+        <select class="input-small" ng-model="panel.counter_pos" ng-options="f for f in ['above','below','none']"></select>
       </div>
       <div class="editor-option" ng-show="panel.chart != 'table' && panel.counter_pos != 'none'">
         <label class="small" >Legend Format</label>
-        <select class="input-small" ng-model="panel.arrangement" ng-options="f for f in ['horizontal','vertical']"></select></span>
+        <select class="input-small" ng-model="panel.arrangement" ng-options="f for f in ['horizontal','vertical']"></select>
       </div>
       <div class="editor-option">
         <label class="small">Missing</label><input type="checkbox" ng-model="panel.missing" ng-checked="panel.missing">
