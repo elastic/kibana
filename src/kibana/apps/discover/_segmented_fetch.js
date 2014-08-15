@@ -2,6 +2,7 @@ define(function (require) {
   return function DiscoverSegmentedFetch(es, Private, Promise, Notifier) {
     var activeReq = null;
     var notifyEvent;
+    var searchPromise;
     var getStateFromRequest = Private(require('components/courier/fetch/strategy/search')).getSourceStateFromRequest;
     var _ = require('lodash');
     var moment = require('moment');
@@ -14,6 +15,7 @@ define(function (require) {
 
     segmentedFetch.abort = function () {
       activeReq = null;
+      searchPromise.abort();
       clearNotifyEvent();
     };
 
@@ -103,19 +105,7 @@ define(function (require) {
           }
           req.state = state;
 
-          return es.search({
-            index: index,
-            type: state.type,
-            ignoreUnavailable: true,
-            body: state.body
-          })
-          .catch(function (err) {
-            if (err.status === 403 && err.message.match(/ClusterBlockException.+index closed/)) {
-              return false;
-            } else {
-              throw err;
-            }
-          })
+          return execSearch(index, state)
           .then(function (resp) {
             // abort if fetch is called twice quickly
             if (req !== activeReq) return;
@@ -207,6 +197,26 @@ define(function (require) {
         mbucket = merged._bucketIndex[bucket.key] = bucket;
         merged.aggregations._agg_0.buckets.push(mbucket);
       });
+    }
+
+    function execSearch(index, state) {
+      searchPromise = es.search({
+        index: index,
+        type: state.type,
+        ignoreUnavailable: true,
+        body: state.body
+      });
+
+      // don't throw ClusterBlockException errors
+      searchPromise.catch(function (err) {
+        if (err.status === 403 && err.message.match(/ClusterBlockException.+index closed/)) {
+          return false;
+        } else {
+          throw err;
+        }
+      });
+
+      return searchPromise;
     }
 
     function clearNotifyEvent() {
