@@ -1,6 +1,7 @@
 define(function (require) {
   return function DiscoverSegmentedFetch(es, Private, Promise, Notifier) {
     var activeReq = null;
+    var notifyEvent;
     var getStateFromRequest = Private(require('components/courier/fetch/strategy/search')).getSourceStateFromRequest;
     var _ = require('lodash');
     var moment = require('moment');
@@ -13,6 +14,7 @@ define(function (require) {
 
     segmentedFetch.abort = function () {
       activeReq = null;
+      clearNotifyEvent();
     };
 
     /**
@@ -38,6 +40,8 @@ define(function (require) {
       var direction = opts.direction;
       var limitSize = false;
       var remainingSize = false;
+
+      notifyEvent = notify.event('segmented fetch');
 
       if (opts.totalSize) {
         limitSize = true;
@@ -165,6 +169,7 @@ define(function (require) {
       .then(req.defer.resolve, req.defer.reject);
 
       function done() {
+        clearNotifyEvent();
         req.complete = true;
         req.ms = req.moment.diff() * -1;
         req.source.activeFetchCount -= 1;
@@ -202,6 +207,12 @@ define(function (require) {
         mbucket = merged._bucketIndex[bucket.key] = bucket;
         merged.aggregations._agg_0.buckets.push(mbucket);
       });
+    }
+
+    function clearNotifyEvent() {
+      if (_.isFunction(notifyEvent)) {
+        notifyEvent();
+      }
     }
 
     return segmentedFetch;
