@@ -1,8 +1,12 @@
 <div class="bar" ng-show="filters.length">
-  <!-- <div class="title">Filters</div> -->
-  <div class="filter" ng-click="toggleFilter(filter)" ng-class="{ negate: filter.negate, disabled: filter.disabled }" ng-repeat="filter in filters">
-    <span class="key">{{ filter.key }}:</span>
-    <span class="value">"{{ filter.value }}"</span>
-    <a class="fa fa-times" ng-click="removeFilter(filter)"><a>
+  <div class="filter" ng-class="{ negate: filter.negate, disabled: filter.disabled }" ng-repeat="filter in filters">
+    <div class="filter-description">
+      <span>{{ filter.key }}:</span>
+      <span>"{{ filter.value }}"</span>
+    </div>
+    <div class="filter-actions">
+      <a class="filter-toggle" ng-click="toggleFilter(filter)">toggle</a>
+      <a class="filter-remove" ng-click="removeFilter(filter)">remove</a>
+    </div>
   </div>
 </div>
