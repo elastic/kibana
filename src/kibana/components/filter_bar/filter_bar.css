@@ -76,6 +76,8 @@ filter-bar .bar {
 filter-bar .bar .filter {
   position: relative;
   display: inline-block;
+  text-align: center;
+  min-width: 110px;
   font-size: 12px;
   background-color: #7b8a8b;
   color: #fff;
@@ -103,9 +105,9 @@ filter-bar .bar .filter > .filter-actions {
   width: 100%;
   display: none;
   text-align: center;
+  white-space: nowrap;
 }
 filter-bar .bar .filter > .filter-description {
-  max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
