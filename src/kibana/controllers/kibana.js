@@ -13,6 +13,7 @@ define(function (require) {
   require('components/filter_bar/filter_bar');
   require('components/storage/storage');
   require('components/persisted_log/persisted_log');
+  require('directives/click_focus');
   require('directives/info');
   require('directives/spinner');
   require('directives/paginate');
