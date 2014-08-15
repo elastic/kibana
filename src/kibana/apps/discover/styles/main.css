@@ -180,7 +180,7 @@
   white-space: nowrap;
 }
 .discover-field-details a {
-  color: #31c471 !important;
+  color: #1f6b7a !important;
 }
 .discover-field-details a.btn {
   color: #444444 !important;
@@ -228,4 +228,8 @@ disc-field-chooser ul.discover-selected-fields {
 }
 disc-field-chooser ul.discover-selected-fields li:first-child:nth-last-child(1)[field=_source] button.discover-field-toggle {
   display: none;
+}
+.results h3 {
+  margin: -20px 0 10px 0;
+  text-align: center;
 }

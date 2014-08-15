@@ -20,11 +20,10 @@ define(function (require) {
       var defaultOpacity = vis._attr.defaultOpacity;
       var isTooltip = vis._attr.addTooltip;
 
-      console.log(vis);
       // Inherited functions
-      var color = vis.data.color;
+      var color = vis.data.getColorFunc();
       var tooltip = vis.tooltip;
-      var yStackMax = vis.data.yStackMax;
+      var yStackMax = vis.data.getYMaxValue();
       var yMax;
 //      var createSVG = vis.createSVG;
 //      var transformSVG = vis.transformSVG;

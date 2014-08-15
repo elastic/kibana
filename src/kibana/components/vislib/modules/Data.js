@@ -14,23 +14,67 @@ define(function (require) {
     Data.prototype.flatten = function () {
       if (!this.data.series) {
         var arr = this.data.rows ? this.data.rows : this.data.columns;
+        var series = _.chain(arr).pluck('series').pluck().value();
+        var values = [];
 
-        this.flattenedData = _.chain(arr)
-          .pluck()
-          .pluck('series')
-          .flatten()
-          .pluck('values')
-          .value();
+        _(series).forEach(function (d) {
+          values.push(_.chain(d).flatten().pluck('values').value());
+        });
 
-        return this.flattenedData;
+        return values;
       }
+      return [_.chain(this.data.series).flatten().pluck('values').value()];
+    };
 
-      this.flattenedData = _.chain(this.data.series)
-        .flatten()
-        .pluck('values')
-        .value();
+    Data.prototype.stack = function (series) {
+      var stack = d3.layout.stack()
+        .x(function (d) {
+          return d.x;
+        })
+        .y(function (d) {
+          return d.y;
+        })
+        .offset('zero');
 
-      return this.flattenedData;
+      return stack(series);
+    };
+
+    Data.prototype.isStacked = function () {
+      if (!this.data.series) {
+        var arr = this.data.rows ? this.data.rows[0] : this.data.columns[0];
+        var length = arr.series.length;
+
+        return length > 1 ? true : false;
+      }
+      return this.data.series.length > 1 ? true : false;
+    };
+
+    // calculate the yStackMax for each chart and return the highest yStackMax value
+    Data.prototype.getYMaxValue = function () {
+      var flattenedData = this.flatten();
+      var self = this;
+      var arr = [];
+
+      _.forEach(flattenedData, function (series) {
+        arr.push(self.getYStackMax(series));
+      });
+
+      return _.max(arr);
+    };
+
+    Data.prototype.getYStackMax = function (series) {
+      var self = this;
+      if (this.isStacked()) {
+        series = this.stack(series);
+      }
+      return d3.max(series, function (data) {
+        return d3.max(data, function (d) {
+          if (self.isStacked()) {
+            return d.y0 + d.y;
+          }
+          return d.y;
+        });
+      });
     };
 
     Data.prototype.isOrdered = function () {
@@ -58,34 +102,6 @@ define(function (require) {
       return this.zeroInjectedData;
     };
 
-    Data.prototype.stack = function () {
-      if (!this.flattenedData) {
-        this.flattenedData = this.flatten();
-      }
-
-      var stack = d3.layout.stack()
-        .x(function (d) {
-          return d.x;
-        })
-        .y(function (d) {
-          return d.y;
-        })
-        .offset('zero');
-
-      this.stackedData = stack(this.flattenedData);
-      return this.stackedData;
-    };
-
-    Data.prototype.getYStackMax = function () {
-      console.log(this.stack());
-      this.yStackMax = d3.max(this.stack(), function (data) {
-        return d3.max(data, function (d) {
-          return d.y0 + d.y;
-        });
-      });
-      return this.yStackMax;
-    };
-
     Data.prototype.getColorFunc = function () {
       if (!this.labels) {
         this.labels = this.getLabels(this.data);
@@ -100,9 +116,8 @@ define(function (require) {
     };
 
     Data.prototype.get = function (name) {
-      this[name] = this.data.rows ? this.data.rows[0][name] :
+      return this.data.rows ? this.data.rows[0][name] :
         this.data.columns ? this.data.columns[0][name] : this.data[name];
-      return this[name];
     };
 
     return Data;

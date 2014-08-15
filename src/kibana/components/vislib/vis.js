@@ -21,7 +21,6 @@ define(function (require) {
       this.el = $el.get ? $el.get(0) : $el;
       this.config = config;
       this.ChartClass = chartTypes[config.type];
-      this.timestamp = new Date().getTime();
     }
 
     _(Vis.prototype).extend(ChartFunctions.prototype);
@@ -43,6 +42,7 @@ define(function (require) {
       tooltipFormatter = this.data.tooltipFormatter ? this.data.tooltipFormatter :
         this.data.get('tooltipFormatter');
 
+      // LAYOUT OBJECT
       // clears the el
       this.removeAll(this.el);
 
@@ -52,7 +52,7 @@ define(function (require) {
       // split data
       this.callFunction(d3.select('.chart-wrapper'), zeroInjectedData, split);
 
-      // add legend
+      // LEGEND OBJECT
       if (this.config.addLegend) {
         this.legend = new Legend({
           // class: 'legend-col-wrapper',
@@ -63,17 +63,20 @@ define(function (require) {
         this.legend.draw();
       }
 
-      // add tooltip
+      // TOOLTIP OBJECT
       if (this.config.addTooltip) {
         this.tooltip = new Tooltip('k4tip', tooltipFormatter);
       }
 
+      // XAXIS OBJECT
       this.xAxis = new XAxis(this.data);
       this.xAxis.draw();
 
+      // YAXIS OBJECT
       this.yAxis = new YAxis(this.data);
       this.yAxis.draw();
 
+      // CHART OBJECT
       var vis = this;
       var charts = this.charts = [];
 
@@ -85,7 +88,6 @@ define(function (require) {
           chart.render();
         });
 
-      console.log(this);
       this.checkSize('.chart');
     };
 

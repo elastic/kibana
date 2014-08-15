@@ -17,7 +17,7 @@
 
 @brand-primary:         #444444;
 @brand-success:         #31C471; // #18BC9C
-@brand-info:            #3498DB;
+@brand-info:            #1F6B7A;
 @brand-warning:         #F39C12;
 @brand-danger:          #E74C3C;
 
@@ -32,9 +32,9 @@
 @text-color:            @brand-primary;
 
 //** Global textual link color.
-@link-color:            @brand-success;
+@link-color:            #1F6B7A;
 //** Link hover color set via `darken()` function.
-@link-hover-color:      @link-color;
+@link-hover-color:      lighten(@link-color, 10%);
 
 
 //== Typography
@@ -60,6 +60,7 @@
 
 //** Unit-less `line-height` for use in components like buttons.
 @line-height-base:        1.428571429; // 20/14
+//@line-height-base: 1;
 //** Computed "line-height" (`font-size` * `line-height`) for use with `margin`, `padding`, etc.
 @line-height-computed:    floor((@font-size-base * @line-height-base)); // ~20px
 
@@ -337,12 +338,12 @@
 @navbar-collapse-max-height:       340px;
 
 @navbar-default-color:             #fff;
-@navbar-default-bg:                #555;
+@navbar-default-bg:                #3D636B;
 @navbar-default-border:            darken(@navbar-default-bg, 10%);
 
 // Navbar links
-@navbar-default-link-color:                #fff;
-@navbar-default-link-hover-color:          @brand-success;
+@navbar-default-link-color:                @gray-lighter;
+@navbar-default-link-hover-color:          #fff;
 @navbar-default-link-hover-bg:             transparent;
 @navbar-default-link-active-color:         #fff;
 @navbar-default-link-active-bg:            darken(@navbar-default-bg, 10%);
@@ -363,13 +364,13 @@
 // Inverted navbar
 // Reset inverted navbar basics
 @navbar-inverse-color:                      #fff;
-@navbar-inverse-bg:                         #333;
+@navbar-inverse-bg:                         #294247;
 @navbar-inverse-border:                     darken(@navbar-inverse-bg, 10%);
 
 // Inverted navbar links
 @navbar-inverse-link-color:                 @gray-lighter;
 @navbar-inverse-link-hover-color:           #fff;
-@navbar-inverse-link-hover-bg:              transparent;
+@navbar-inverse-link-hover-bg:              lighten(@navbar-inverse-bg, 5%);
 @navbar-inverse-link-active-color:          #fff;
 @navbar-inverse-link-active-bg:             darken(@navbar-inverse-bg, 5%);
 @navbar-inverse-link-disabled-color:        @gray-light;
@@ -421,11 +422,11 @@
 //
 //##
 
-@pagination-color:                     @brand-success;
+@pagination-color:                     @link-color;
 @pagination-bg:                        transparent;
 @pagination-border:                    transparent;
 
-@pagination-hover-color:               @brand-success;
+@pagination-hover-color:               @link-color;
 @pagination-hover-bg:                  darken(transparent, 15%);
 @pagination-hover-border:              transparent;
 
