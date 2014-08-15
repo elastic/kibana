@@ -7,6 +7,19 @@ filter-bar .bar {
   background: @gray-lighter;
   border-bottom: 1px solid #ccc;
 
+  .filter-remove-all {
+    position: relative;
+    display: inline-block;
+    border: 4px solid transparent;
+    margin-bottom: 4px;
+  }
+
+  .filter-description {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .filter {
     position: relative;
     display: inline-block;
@@ -49,13 +62,6 @@ filter-bar .bar {
       text-align: center;
       white-space: nowrap;
     }
-
-    > .filter-description {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
 
     .filter-toggle {
       border-right: 1px solid rgba(255, 255, 255, 0.4);
