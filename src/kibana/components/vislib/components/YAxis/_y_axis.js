@@ -11,7 +11,7 @@ define(function (require) {
           var height = $(this).height();
 
           var yScale = d3.scale.linear()
-            .domain([0, that.yStackMax])
+            .domain([0, that.yMax])
             .range([height, 0]);
 
           var yAxis = d3.svg.axis()
