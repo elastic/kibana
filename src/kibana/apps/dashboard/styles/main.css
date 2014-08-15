@@ -134,7 +134,7 @@ dashboard-grid {
   -webkit-flex: 0 1 auto;
   -ms-flex: 0 1 auto;
   flex: 0 1 auto;
-  min-height: 45px;
+  min-height: 25px;
   white-space: nowrap;
   display: flex;
 }
@@ -147,6 +147,7 @@ dashboard-grid {
   flex: 0 0 auto;
 }
 .gridster dashboard-panel .panel .panel-heading .panel-title {
+  font-size: inherit;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
@@ -163,7 +164,7 @@ dashboard-grid {
   padding: 0px 3px;
 }
 .gridster dashboard-panel .panel .panel-heading a:hover {
-  color: #31c471;
+  color: #298fa3;
 }
 .gridster dashboard-panel .panel visualize {
   -webkit-box-flex: 1;
