@@ -30,6 +30,8 @@ define(function (require) {
         .pluck('values')
         .value();
 
+      console.log(this.flattenedData);
+
       return this.flattenedData;
     };
 
@@ -58,7 +60,7 @@ define(function (require) {
       return this.zeroInjectedData;
     };
 
-    Data.prototype.stack = function () {
+    Data.prototype.stack = function (offset) {
       if (!this.flattenedData) {
         this.flattenedData = this.flatten();
       }
@@ -70,7 +72,7 @@ define(function (require) {
         .y(function (d) {
           return d.y;
         })
-        .offset('zero');
+        .offset(offset);
 
       this.stackedData = stack(this.flattenedData);
       return this.stackedData;
