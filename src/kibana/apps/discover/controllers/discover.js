@@ -65,7 +65,6 @@ define(function (require) {
 
     // abort any seqmented query requests when leaving discover
     $scope.$on('$routeChangeStart', function () {
-      notify.event('segmented fetch')();
       segmentedFetch.abort();
     });
 
@@ -276,8 +275,6 @@ define(function (require) {
           sortFn = new HitSortFn(sort[1]);
         }
 
-        var segmentedEventComplete = notify.event('segmented fetch');
-
         return segmentedFetch.fetch({
           searchSource: $scope.searchSource,
           totalSize: sortBy === 'non-time' ? false : totalSize,
@@ -342,7 +339,6 @@ define(function (require) {
         })
         .finally(function () {
           $scope.fetchStatus = false;
-          segmentedEventComplete();
         });
       })
       .catch(notify.error);
