@@ -489,12 +489,25 @@ define(function (require) {
 
       _.each(value, function (clause) {
         var previous = _.find(filters, function (item) {
-          return item && item.query.match[field] === {query: clause, type: 'phrase'};
+          if (item && item.query) {
+            return item.query.match[field] === { query: clause, type: 'phrase' };
+          } else if (item && item.exists && field === '_exists_') {
+            return item.exists.field === clause;
+          } else if (item && item.missing && field === '_missing_') {
+            return item.missing.field === clause;
+          }
         });
         if (!previous) {
-          var filter = { query: { match: {} } };
-          filter.negate = operation === '-';
-          filter.query.match[field] = {query: clause, type: 'phrase'};
+          var filter;
+          if (field === '_exists_') {
+            filter = { exists: { field: clause } };
+          } else if (field === '_missing_') {
+            filter = { missing: { field: clause } };
+          } else {
+            filter = { query: { match: {} } };
+            filter.negate = operation === '-';
+            filter.query.match[field] = { query: clause, type: 'phrase' };
+          }
           filters.push(filter);
         }
       });
