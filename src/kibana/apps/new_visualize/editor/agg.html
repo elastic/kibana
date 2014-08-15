@@ -1,0 +1,71 @@
+<div class="vis-editor-agg">
+
+  <!-- header -->
+  <div class="vis-editor-agg-header">
+
+    <!-- open/close editor -->
+    <button
+      ng-click="editorOpen = !editorOpen"
+      type="button"
+      class="btn btn-xs vis-editor-agg-header-toggle">
+      <i ng-class="{ 'fa-caret-down': editorOpen, 'fa-caret-right': !editorOpen }" class="fa"></i>
+    </button>
+
+    <!-- title -->
+    <span class="vis-editor-agg-header-title">
+      {{ agg.schema.title }}
+      <span ng-if="!editorOpen" class="vis-editor-agg-header-description">{{ makeDescription() }}</span>
+    </span>
+
+    <!-- controls !!!actually disabling buttons breaks tooltip¡¡¡ -->
+    <div class="vis-editor-agg-header-controls btn-group">
+      <button
+        ng-show="group.length > 1"
+        ng-class="{ disabled: $first }"
+        ng-click="moveUp(agg)"
+        tooltip="Increase Priority"
+        tooltip-append-to-body="true"
+
+        type="button"
+        class="btn btn-xs btn-default">
+        <i class="fa fa-caret-up"></i>
+      </button>
+
+      <button
+        ng-show="group.length > 1"
+        ng-class="{ disabled: $last }"
+        ng-click="moveDown(agg)"
+        tooltip="Decrease Priority"
+        tooltip-append-to-body="true"
+
+        type="button"
+        class="btn btn-xs btn-default">
+        <i class="fa fa-caret-down"></i>
+      </button>
+
+      <button
+        ng-if="group.length > groupMin"
+        ng-click="remove(agg)"
+        tooltip="Remove Dimension"
+        tooltip-append-to-body="true"
+        type="button"
+        class="btn btn-xs btn-danger">
+        <i class="fa fa-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="vis-editor-agg-editor" ng-show="editorOpen">
+    <!-- schema editors go here -->
+
+    <div class="form-group">
+      <label>Aggregation</label>
+      <select
+        name="agg"
+        class="form-control"
+        ng-model="agg.type"
+        ng-options="agg as agg.title for agg in aggTypeOptions">
+      </select>
+    </div>
+  </div>
+</div>

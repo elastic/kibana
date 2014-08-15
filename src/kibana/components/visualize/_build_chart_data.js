@@ -1,53 +1,51 @@
 define(function (require) {
-  return function BuildChartDataFn(Notifier, Private, courier) {
+  return function BuildChartDataFn(Notifier, Private) {
     var _ = require('lodash');
-    var aggs = Private(require('apps/visualize/saved_visualizations/_aggs'));
-    var converters = Private(require('apps/visualize/saved_visualizations/resp_converters/index'));
+    var AggConfig = Private(require('components/vis/_agg_config'));
+    var countAgg = Private(require('components/agg_types/index')).byName.count;
 
     var notify = new Notifier();
 
-    return function (indexPattern, resp) {
+    return function (vis, resp) {
       var complete = notify.event('convert ES response');
-
-      var fieldsByName = indexPattern.fieldsByName;
 
       // all aggregations will be prefixed with:
       var aggKeyPrefix = '_agg_';
-      var vis = this;
 
       // this will transform our flattened rows and columns into the
       // data structure expected for a visualization
-      var converter = converters[vis.typeName];
+      var converter = vis.type.responseConverter;
 
-      // the list of configs that make up the aggs and eventually
-      // splits and columns, label added
-      var configs = vis.getConfig().map(function (config) {
-        config.field = fieldsByName[config.aggParams.field];
-        return config;
+      // the list of "configs" that we will use to read the response
+      var configs = vis.aggs.getValid().map(function (aggConfig) {
+        return _.assign(aggConfig.type.params.write(aggConfig), {
+          categoryName: aggConfig.schema.name,
+          id: aggConfig.id,
+          aggConfig: aggConfig,
+          aggType: aggConfig.type,
+          field: aggConfig.params.field,
+          label: aggConfig.type.title
+        });
       });
 
-      var lastCol = configs[configs.length - 1];
-      if (!lastCol || lastCol.categoryName !== 'metric') {
+      var lastConfig = configs[configs.length - 1];
+      if (!lastConfig || lastConfig.categoryName !== 'metric') {
         // fake the config
         configs.push({
           fake: true,
           categoryName: 'metric',
-          agg: aggs.byName.count.name,
-          label: aggs.byName.count.display
+          agg: countAgg,
+          label: countAgg.title
         });
       }
 
-      // a reverse stack of the configs, so we can pop and push
-      var revColStack = configs.slice(0);
-      revColStack.reverse();
-
       // only non-split columns apply to charts, so create a list that can be used for each chart
-      var chartColumns = configs.filter(function (col) {
-        return col.categoryName !== 'split';
+      var chartColumns = configs.filter(function (agg) {
+        return agg.categoryName !== 'split';
       });
 
-      // when we are recursing put previous columns here
-      var colStack = [];
+      // a reverse stack of the aggs, so we can pop and push
+      var colStack = configs.slice(0).reverse();
 
       // row stack, similar to the colStack but tracks unfinished rows
       var rowStack = [];
@@ -85,11 +83,11 @@ define(function (require) {
       };
 
       var splitAndFlatten = function (chartData, bucket) {
-        // pull the next column from the configs list
-        var col = revColStack.pop();
+        // pull the next column from the aggs list
+        var col = colStack.pop();
 
         // the actual results for the aggregation is under an _agg_* key
-        var result = col.fake ? bucket : bucket[getAggKey(bucket)];
+        var result = bucket[getAggKey(bucket)] || bucket;
 
         if (result && _.isPlainObject(result.buckets)) {
           result.buckets = _.map(result.buckets, function (v, k) {
@@ -101,14 +99,17 @@ define(function (require) {
         switch (col.categoryName) {
         case 'split':
           // pick the key for the split's groups
-          var groupsKey = col.row ? 'rows' : 'columns';
+          var groupsKey = col.params.row ? 'rows' : 'columns';
           var groupList = chartData[groupsKey] || (chartData[groupsKey] = []);
           var groupMap = chartData.splits || (chartData.splits = {});
 
           result.buckets.forEach(function (bucket) {
-            var label = col.aggParams.field + ': ' + bucket.key;
-            var id = col.aggParams.field + bucket.key;
-            var group = groupMap[id];
+            var label = bucket.key;
+            if (col.field) {
+              label = col.field.name + ': ' + label;
+            }
+
+            var group = groupMap[col.id];
 
             if (!group) {
               group = {
@@ -117,15 +118,18 @@ define(function (require) {
                 label: label
               };
               groupList.push(group);
-              groupMap[id] = group;
+              groupMap[col.id] = group;
             }
 
             splitAndFlatten(group, bucket);
           });
           break;
-        case 'group':
-        case 'segment':
-          colStack.push(col);
+        case 'metric':
+          // there are no buckets, just values to collect.
+          // Write the the row to the chartData
+          writeRow(chartData, result);
+          break;
+        default:
           // non-metric aggs create buckets that we need to add
           // to the rows
           if (result && result.buckets.length) {
@@ -140,35 +144,26 @@ define(function (require) {
           } else {
             writeRow(chartData, bucket);
           }
-          colStack.pop();
-          break;
-        case 'metric':
-          colStack.push(col);
-          // there are no buckets, just values to collect.
-          // Write the the row to the chartData
-          writeRow(chartData, result);
-          colStack.pop();
           break;
         }
 
-        revColStack.push(col);
+        colStack.push(col);
       };
-
-      // add labels to each config before they are processed
-      configs.forEach(function (config) {
-        var agg = aggs.byName[config.agg];
-        if (agg && agg.makeLabel) {
-          config.label = agg.makeLabel(config.aggParams, config);
-        } else {
-          config.label = config.aggParams.field;
-        }
-      });
 
       if (resp.aggregations) {
         splitAndFlatten(chartData, resp.aggregations);
       } else {
         writeRow(chartData, { doc_count: resp.hits.total });
       }
+
+      // add labels to each config before they are processed
+      configs.forEach(function (config) {
+        if (config.aggType && config.aggType.makeLabel) {
+          config.label = config.aggType.makeLabel(config.aggConfig);
+        } else {
+          config.label = config.field.name;
+        }
+      });
 
       // now that things are well-ordered, and
       // all related values have been segregated into

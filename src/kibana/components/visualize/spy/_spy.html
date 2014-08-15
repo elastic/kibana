@@ -1,0 +1,12 @@
+<div ng-click="toggleDisplay()" class="visualize-show-spy">
+  <small>
+    <i class="fa" ng-class="spyMode ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
+  </small>
+</div>
+<ul ng-if="spyMode" class="nav nav-tabs visualize-spy-tabs">
+  <li
+    ng-repeat="mode in modes"
+    ng-class="{ active: spyMode.name === mode.name }">
+    <a ng-click="setSpyMode(mode)">{{mode.display}}</a>
+  </li>
+</ul>

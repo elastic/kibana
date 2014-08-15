@@ -1,0 +1,16 @@
+<div ng-if="aggParam.options || params.field.type === 'number'" class="form-group">
+  <label>Interval</label>
+  <select
+    ng-if="aggParam.options"
+    ng-model="params.interval"
+    ng-options="opt as opt.display for opt in aggParam.options"
+    class="form-control"
+    name="interval">
+  </select>
+  <input
+    ng-if="!aggParam.options"
+    ng-model="params.interval"
+    type="number"
+    class="form-control"
+    name="interval" />
+</div>

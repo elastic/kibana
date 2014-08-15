@@ -198,20 +198,6 @@ define(function (require) {
           }));
         }, {});
       };
-
-      /**
-       * Create a list of config objects, which are ready to be turned into aggregations,
-       * in the order which they should be executed.
-       *
-       * @return {Array} - The list of config objects
-       */
-      vis.getConfig = Private(require('apps/visualize/saved_visualizations/_read_config'));
-      /**
-       * Transform an ES Response into data for this visualization
-       * @param  {object} resp The elasticsearch response
-       * @return {array} An array of flattened response rows
-       */
-      vis.buildChartDataFromResponse = Private(require('apps/visualize/saved_visualizations/_build_chart_data'));
     }
     inherits(SavedVis, courier.SavedObject);
 

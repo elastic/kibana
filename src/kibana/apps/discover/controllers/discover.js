@@ -21,8 +21,6 @@ define(function (require) {
 
   require('apps/discover/directives/table');
 
-  require('apps/visualize/saved_visualizations/_adhoc_vis');
-
   var app = require('modules').get('apps/discover', [
     'kibana/notify',
     'kibana/courier',
@@ -49,8 +47,9 @@ define(function (require) {
 
 
   app.controller('discover', function ($scope, config, courier, $route, $window, savedSearches, savedVisualizations,
-    Notifier, $location, globalState, appStateFactory, timefilter, AdhocVis, Promise, Private) {
+    Notifier, $location, globalState, appStateFactory, timefilter, Promise, Private) {
 
+    var Vis = Private(require('components/vis/vis'));
     var segmentedFetch = $scope.segmentedFetch = Private(require('apps/discover/_segmented_fetch'));
     var HitSortFn = Private(require('apps/discover/_hit_sort_fn'));
     var diffTimePickerValues = Private(require('utils/diff_time_picker_vals'));
@@ -168,7 +167,7 @@ define(function (require) {
         });
 
         $scope.$watch('opts.timefield', function (timefield) {
-          timefilter.enabled(!!timefield);
+          timefilter.enabled = !!timefield;
         });
 
         // options are 'loading', 'ready', 'none', undefined
@@ -577,7 +576,7 @@ define(function (require) {
       // we shouldn't have one, or already do, return whatever we already have
       if (!$scope.opts.timefield || $scope.vis) return Promise.resolve($scope.vis);
 
-      var vis = new AdhocVis({
+      var vis = new Vis({
         searchSource: $scope.searchSource,
         type: 'histogram',
         listeners: {

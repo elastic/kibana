@@ -9,13 +9,13 @@ define(function (require) {
 
       this.get = function (obj) {
         var id = _id(obj);
-        return _.isObject(_cache[id]) ? _.cloneDeep(_cache[id]) : _cache[id];
+        return _cache[id] ? JSON.parse(_cache[id]) : null;
       };
 
       this.set = function (obj, val) {
         var id = _id(obj);
         var clean = !_cache.hasOwnProperty(id);
-        _cache[id] = _.isObject(val) ? _.cloneDeep(val) : val;
+        _cache[id] = JSON.stringify(val);
         return clean;
       };
 

@@ -10,7 +10,6 @@ define(function (require) {
   require('components/timepicker/time_units');
 
 
-
   module.directive('kbnTimepicker', function (quickRanges, timeUnits) {
     return {
       restrict: 'E',
@@ -33,7 +32,6 @@ define(function (require) {
         $scope.quickLists = _.map(_.uniq(_.pluck(quickRanges, 'section')), function (section) {
           return _.filter(quickRanges, {section: section});
         });
-
 
         $scope.relative = {
           count: 1,
