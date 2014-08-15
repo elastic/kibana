@@ -11,6 +11,20 @@ define(function (require) {
       this.data = data;
     }
 
+    Data.prototype.splitType = function () {
+      if (!this.data.series) {
+        return this.data.rows ? 'rows' : 'columns';
+      }
+      return 'series';
+    };
+
+    Data.prototype.splits = function () {
+      if (!this.data.series) {
+        return this.data.rows ? this.data.rows : this.data.columns;
+      }
+      return this.data.series;
+    };
+
     Data.prototype.flatten = function () {
       if (!this.data.series) {
         var arr = this.data.rows ? this.data.rows : this.data.columns;
@@ -49,7 +63,6 @@ define(function (require) {
       return this.data.series.length > 1 ? true : false;
     };
 
-    // calculate the yStackMax for each chart and return the highest yStackMax value
     Data.prototype.getYMaxValue = function () {
       var flattenedData = this.flatten();
       var self = this;
