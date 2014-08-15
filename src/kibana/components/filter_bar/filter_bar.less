@@ -1,6 +1,11 @@
+@import (reference) "../../styles/_bootstrap.less";
+@import (reference) "../../styles/theme/_theme.less";
+@import (reference) "lesshat.less";
+
 filter-bar .bar {
   padding: 6px 6px 4px 6px;
-  background: #dde4e6;
+  background: @gray-lighter;
+  border-bottom: 1px solid #ccc;
 
   .title {
     display: inline;
@@ -32,10 +37,22 @@ filter-bar .bar {
       color: #FFF;
     }
 
+    &:hover {
+      span {
+        text-decoration: line-through;
+      }
+    }
+
     &.disabled {
       opacity: 0.8;
       span {
         text-decoration: line-through;
+      }
+    }
+
+    &.disabled:hover {
+      span {
+        text-decoration: none;
       }
     }
   }
