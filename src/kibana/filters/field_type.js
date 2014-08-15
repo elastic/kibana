@@ -7,18 +7,28 @@ define(function (require) {
   require('modules')
     .get('kibana')
     .filter('fieldType', function () {
-      return function (arr, type) {
-        if (type === '*') return arr;
+      return function (fields, types) {
+        if (!_.isArray(types)) types = [types];
+        if (_.contains(types, '*')) return fields;
 
-        if (_.isArray(type)) {
-          if (_.contains(type, '*')) return arr;
-          return _.filter(arr, function (field) {
-            return _.contains(type, field.type);
-          });
-        }
+        var filters = types.map(function (type) {
+          var filter = {
+            match: true,
+            type: type
+          };
 
-        return arr && arr.filter(function (field) {
-          return (field.type === type);
+          if (type.charAt(0) === '!') {
+            filter.match = false;
+            filter.type = type.substr(1);
+          }
+          return filter;
+        });
+
+        return fields.filter(function (field) {
+          for (var i = 0; i < filters.length; i++) {
+            var filter = filters[i];
+            if ((field.type === filter.type) === filter.match) return true;
+          }
         });
       };
     });
