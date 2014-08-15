@@ -20,10 +20,20 @@ define(function (require) {
          * @returns {object}
          */
         var mapFilter = function (filter) {
-          var key = _.keys(filter.query.match)[0];
+          var key, value;
+          if (filter.query) {
+            key = _.keys(filter.query.match)[0];
+            value = filter.query.match[key].query;
+          } else if (filter.exists) {
+            key = 'exists';
+            value = filter.exists.field;
+          } else if (filter.missing) {
+            key = 'missing';
+            value = filter.missing.field;
+          }
           return {
             key: key,
-            value: filter.query.match[key].query,
+            value: value,
             disabled: !!(filter.disabled),
             negate: !!(filter.negate),
             filter: filter
