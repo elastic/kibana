@@ -3,6 +3,6 @@
   <div class="filter" ng-click="toggleFilter(filter)" ng-class="{ negate: filter.negate, disabled: filter.disabled }" ng-repeat="filter in filters">
     <span class="key">{{ filter.key }}:</span>
     <span class="value">"{{ filter.value }}"</span>
-    <a class="fa fa-times" tooltip="Remove" tooltip-placement="bottom" ng-click="removeFilter(filter)"><a>
+    <a class="fa fa-times" ng-click="removeFilter(filter)"><a>
   </div>
 </div>
