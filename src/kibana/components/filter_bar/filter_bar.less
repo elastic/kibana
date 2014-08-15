@@ -7,26 +7,58 @@ filter-bar .bar {
   background: @gray-lighter;
   border-bottom: 1px solid #ccc;
 
-  .title {
-    display: inline;
-    color: #748287;
-    margin: 0 6px;
-  }
-
   .filter {
-    font-size: 12px;
-    border-radius: 12px;
+    position: relative;
     display: inline-block;
-    background-color: #83949C;
-    padding: 4px 8px;
+
+    font-size: @font-size-small;
+    background-color: @gray-dark;
     color: #fff;
     margin-right: 4px;
     margin-bottom: 4px;
+    max-width: 100%;
 
-    .value {
+    // Replace padding with border so absolute controls position correctly
+    border-color: transparent;
+    border-style: solid;
+    border-width: 4px;
+    border-left-width: 8px;
+    border-right-width: 8px;
+    border-radius: 12px;
+
+
+    &:hover {
+      > .filter-actions {
+        display: block;
+      }
+
+      > .filter-description {
+        opacity: 0.15;
+        overflow: hidden;
+      }
+    }
+
+    > .filter-actions {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: none;
+      text-align: center;
+    }
+
+    > .filter-description {
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+
+    .filter-toggle {
       border-right: 1px solid rgba(255, 255, 255, 0.4);
-      padding-right: 8px;
-      margin-right: 4px;
+      padding-right: 6px;
+      margin-right: 3px;
     }
 
     &.negate {
@@ -37,17 +69,8 @@ filter-bar .bar {
       color: #FFF;
     }
 
-    &:hover {
-      span {
-        text-decoration: line-through;
-      }
-    }
-
     &.disabled {
-      opacity: 0.8;
-      span {
-        text-decoration: line-through;
-      }
+      opacity: 0.7;
     }
 
     &.disabled:hover {
