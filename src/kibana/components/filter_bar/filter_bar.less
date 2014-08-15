@@ -10,6 +10,8 @@ filter-bar .bar {
   .filter {
     position: relative;
     display: inline-block;
+    text-align: center;
+    min-width: 110px;
 
     font-size: @font-size-small;
     background-color: @gray-dark;
@@ -45,10 +47,10 @@ filter-bar .bar {
       width: 100%;
       display: none;
       text-align: center;
+      white-space: nowrap;
     }
 
     > .filter-description {
-      max-width: 100%;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
