@@ -6,8 +6,7 @@ define(function (require) {
 
     function YAxis(data) {
       this.data = data.data;
-      this.stackedData = data.stack();
-      this.yStackMax = data.getYStackMax();
+      this.yMax = data.getYMaxValue();
     }
 
     YAxis.prototype.draw = function () {
