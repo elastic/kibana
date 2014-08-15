@@ -299,7 +299,7 @@ define(function (require) {
             var validTypes = ['string', 'number', 'date', 'ip'];
             if (!mapping.indexed) return false;
             return _.contains(validTypes, mapping.type);
-          }
+          };
 
           var $childScope = _.assign(childScopeFor(id), { row: row, showFilters: showFilters });
           $compile($detailsTr)($childScope);
