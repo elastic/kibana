@@ -387,6 +387,10 @@ define(function (require) {
       $scope.fetch();
     };
 
+    $scope.newQuery = function () {
+      $location.url('/discover');
+    };
+
     $scope.updateDataSource = function () {
       var chartOptions;
       $scope.searchSource
