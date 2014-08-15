@@ -78,7 +78,7 @@ define(function (require) {
     var stateDefaults = {
       query: initialQuery || '',
       columns: ['_source'],
-      index: config.get('defaultIndex'),
+      index: $scope.searchSource.get('index').id || config.get('defaultIndex'),
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.get('filter'))
     };
