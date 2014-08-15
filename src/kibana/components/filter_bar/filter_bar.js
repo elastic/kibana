@@ -92,6 +92,14 @@ define(function (require) {
             .value();
         };
 
+        /**
+         * Removes all filters
+         * @returns {void}
+         */
+        $scope.removeAll = function () {
+          $scope.state.filters = [];
+        };
+
       }
     };
   });

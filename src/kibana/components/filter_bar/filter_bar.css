@@ -73,6 +73,17 @@ filter-bar .bar {
   background: #ecf0f1;
   border-bottom: 1px solid #ccc;
 }
+filter-bar .bar .filter-remove-all {
+  position: relative;
+  display: inline-block;
+  border: 4px solid transparent;
+  margin-bottom: 4px;
+}
+filter-bar .bar .filter-description {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 filter-bar .bar .filter {
   position: relative;
   display: inline-block;
@@ -106,11 +117,6 @@ filter-bar .bar .filter > .filter-actions {
   display: none;
   text-align: center;
   white-space: nowrap;
-}
-filter-bar .bar .filter > .filter-description {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 filter-bar .bar .filter .filter-toggle {
   border-right: 1px solid rgba(255, 255, 255, 0.4);
