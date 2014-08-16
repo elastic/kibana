@@ -5,19 +5,18 @@ define(function () {
       if (self._attr.isOpen) {
         // close legend
         d3.select('.' + self._attr.legendClass)
-          .classed('legend-open', false);
+          .classed('open4', false);
         d3.select('ul.legend-ul')
           .classed('hidden', true);
         self._attr.isOpen = false;
-        
+
       } else {
         // open legend
         d3.select('.' + self._attr.legendClass)
-          .classed('legend-open', true);
+          .classed('open4', true);
         d3.select('ul.legend-ul')
           .classed('hidden', false);
         self._attr.isOpen = true;
-        console.log('after', self._attr.isOpen);
         
       }
     };
