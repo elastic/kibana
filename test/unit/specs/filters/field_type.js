@@ -61,6 +61,10 @@ define(function (require) {
       expect(filter(types, '*').length).to.be(7);
     });
 
+    it('should allow negation', function () {
+      var resultNames = _.pluck(filter(types, '!string'), 'name');
+      expect(resultNames).to.eql(['n1', 'n2', 'i1', 'd1']);
+    });
   });
 
 });
