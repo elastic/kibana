@@ -38,13 +38,13 @@ define(function (require) {
           d3.selectAll('.color').style('opacity', self.defaultOpacity);
         });
 
-      // add/remove class for legend-open
+      // add/remove class to open legend
       if (self.isOpen) {
         d3.select('.' + self.legendClass)
-          .classed('legend-open', true);
+          .classed('open4', true);
       } else {
         d3.select('.' + self.legendClass)
-          .classed('legend-open', false);
+          .classed('open4', false);
       }
 
       // createList(legendDiv, items, self)
