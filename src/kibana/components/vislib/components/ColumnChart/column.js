@@ -106,14 +106,6 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-        var line = svg.append('line')
-          .attr('x1', 0)
-          .attr('y1', height)
-          .attr('x2', width)
-          .attr('y2', height)
-          .style('stroke', '#848e96')
-          .style('stroke-width', 0.5);
-
         // Data layers
         var layer = svg.selectAll('.layer')
           .data(layers)
@@ -141,27 +133,6 @@ define(function (require) {
           })
           .attr('fill', function (d) {
             return color(d.label);
-          })
-          .on('mouseover', function (d, i) {
-            //console.log(i, d, data.series, d3.event);
-            d3.select(this)
-              .classed('hover', true)
-              .style('stroke', '#333')
-              .style('cursor', 'pointer');
-
-            // dispatch.hover({
-            //   value: getY(d, i),
-            //   point: d,
-            //   pointIndex: i,
-            //   series: data.series,
-            //   config: config,
-            //   data: latestData,
-            //   e: d3.event
-            // });
-            // d3.event.stopPropagation();
-          })
-          .on('mouseout', function () {
-            console.log('OUT');
           });
 
         // update
@@ -177,7 +148,43 @@ define(function (require) {
           })
           .attr('height', function (d) {
             return yScale(d.y0) - yScale(d.y0 + d.y);
+          })
+
+          .on('mouseover.bar', function (d, i) {
+            //console.log(i, d, data.series, d3.event);
+            d3.select(this)
+              .classed('hover', true)
+              .style('stroke', '#333');
+              //.style('cursor', 'pointer');
+
+            // dispatch.hover({
+            //   value: getY(d, i),
+            //   point: d,
+            //   pointIndex: i,
+            //   series: data.series,
+            //   config: config,
+            //   data: latestData,
+            //   e: d3.event
+            // });
+            // d3.event.stopPropagation();
+
+          })
+          .on('mouseout.bar', function (d) {
+            //console.log('OUT', d);
+            d3.select(this)
+              .classed('hover', false)
+              .style('stroke', null);
+              //.style('cursor', 'pointer');
           });
+
+        // chart base line
+        var line = svg.append('line')
+          .attr('x1', 0)
+          .attr('y1', height)
+          .attr('x2', width)
+          .attr('y2', height)
+          .style('stroke', '#848e96')
+          .style('stroke-width', 1);
 
         // Add tooltip
         if (isTooltip) {
