@@ -94,6 +94,10 @@ define(function (require) {
           }
         }
 
+        $scope.newDashboard = function () {
+          $location.url('/dashboard');
+        };
+
         $scope.filterResults = function () {
           updateQueryOnRootSource();
           $state.save();

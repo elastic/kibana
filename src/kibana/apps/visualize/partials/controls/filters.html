@@ -1,4 +1,4 @@
-<div ng-init="config.filters = (config.filters || [{input: {query_string: {query: '*'}}}])">
+<div ng-init="config.filters = (config.filters || [{input: {}}])">
   <div class="form-group" >
     <div ng-repeat="filter in config.filters track by $index">
       <div class="config-controls pull-right btn-group">
@@ -19,7 +19,7 @@
     </div>
   </div>
   <div
-    ng-click="config.filters.push({input: {query_string: {query: '*'}}})"
+    ng-click="config.filters.push({input: {}})"
     class="sidebar-item-button primary">
     Add filter
   </div>

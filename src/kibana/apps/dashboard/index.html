@@ -13,7 +13,7 @@
           <div class="input-group"
             ng-class="queryInput.$invalid ? 'has-error' : ''">
 
-            <input type="text"
+            <input type="text" input-focus
               placeholder="Filter..."
               class="form-control"
               ng-model="state.query"
@@ -30,11 +30,11 @@
       </form>
 
       <div class="button-group">
+        <button ng-click="newDashboard()"><i class="fa fa-file-o"></i></button>
         <button ng-click="openAdd()"><i class="fa fa-plus"></i></button>
         <button ng-click="openSave()"><i class="fa fa-save"></i></button>
         <button ng-click="openLoad()"><i class="fa fa-folder-open"></i></button>
         <button ng-click="openShare()"><i class="fa fa-code"></i></button>
-        <button ng-click="refresh()"><i class="fa fa-refresh"></i></button>
       </div>
     </navbar>
   </nav>
