@@ -79,8 +79,7 @@ module.exports = function (grunt) {
           newFileLines.push(
             '   - ' + (priority ? match.type + ' – ' : '') +
             match.msg + ' – ' +
-            '[L' + match.line + ']' +
-            '(https://github.com/elasticsearch/kibana4/blob/master/' + match.path + '#L' + match.line + ')'
+            '(https://github.com/elasticsearch/kibana4/blob/master/' + match.path + ')'
           );
         });
       });
