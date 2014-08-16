@@ -7,7 +7,7 @@ define(function () {
           var element = d3.select(this);
 
           element
-            .on('mousemove', function (d) {
+            .on('mousemove.tip', function (d) {
               var mouseMove = {
                 left: d3.event.x,
                 top: d3.event.y
@@ -35,7 +35,7 @@ define(function () {
                 .style('left', mouseMove.left + xOffset + 'px')
                 .style('top', mouseMove.top - yOffset + 'px');
             })
-            .on('mouseout', function () {
+            .on('mouseout.tip', function () {
               return tooltipDiv.style('visibility', 'hidden');
             });
         });
