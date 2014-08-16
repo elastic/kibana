@@ -16,7 +16,7 @@ define(function (require) {
       this.vis = vis;
 //      this.yStackMax = vis.yAxis.yStackMax;
       this._attr = _.defaults(vis.config || {}, {
-        'margin' : { top: 0, right: 0, bottom: 0, left: 0 },
+        'margin' : { top: 5, right: 5, bottom: 0, left: 5 },
         'offset' : 'zero'
       });
     }
