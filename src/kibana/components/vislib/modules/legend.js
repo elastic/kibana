@@ -44,7 +44,7 @@ define(function (require) {
         if (that._attr.isOpen) {
           // close legend
           d3.select('.' + that._attr.legendClass)
-            .classed('legend-open', false);
+            .classed('open4', false);
           d3.select('ul.legend-ul')
             .classed('hidden', true);
           that._attr.isOpen = false;
@@ -52,7 +52,7 @@ define(function (require) {
         } else {
           // open legend
           d3.select('.' + that._attr.legendClass)
-            .classed('legend-open', true);
+            .classed('open4', true);
           d3.select('ul.legend-ul')
             .classed('hidden', false);
           that._attr.isOpen = true;
@@ -80,13 +80,13 @@ define(function (require) {
           d3.selectAll('.color').style('opacity', that._attr.defaultOpacity);
         });
 
-      // add/remove class for legend-open
+      // add/remove class to open legend
       if (this._attr.isOpen) {
         d3.select('.' + this._attr.legendClass)
-          .classed('legend-open', true);
+          .classed('open4', true);
       } else {
         d3.select('.' + this._attr.legendClass)
-          .classed('legend-open', false);
+          .classed('open4', false);
       }
 
     };
