@@ -1,7 +1,7 @@
 
     <li bindonce class="sidebar-item" bo-attr bo-attr-field="field.name">
       <div ng-click="toggleDetails(field)" class="sidebar-item-title">
-        <field-name field="field"></field-name>
+        <field-name field="field" title="{{field.name}}"></field-name>
         <button
           ng-click="toggleDisplay(field)"
           bo-class="field.display ? 'btn-danger' : 'btn-primary'"
