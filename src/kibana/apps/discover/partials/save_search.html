@@ -3,7 +3,7 @@
     <div class="col-md-12">
       <div class="form-group">
         <label class="control-label">Save Search</label>
-        <input ng-model="opts.savedSearch.title" class="form-control" placeholder="Name this search...">
+        <input ng-model="opts.savedSearch.title" input-focus class="form-control" placeholder="Name this search...">
       </div>
       <div class="form-group">
         <button ng-click="opts.saveDataSource()" ng-disabled="!opts.savedSearch.title" type="submit" class="btn btn-primary">
