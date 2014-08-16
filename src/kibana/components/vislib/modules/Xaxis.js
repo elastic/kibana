@@ -14,8 +14,22 @@ define(function (require) {
       return renderXAxis(this);
     };
 
-    XAxis.prototype.rotateTickLabels = function () {};
-    XAxis.prototype.ticks = function () {};
+    XAxis.prototype.rotateAxisLabels = function (selection) {
+      return selection.selectAll('.tick text')
+        .style('text-anchor', 'end')
+        .attr('dx', '-.8em')
+        .attr('dy', '-.60em')
+        .attr('transform', function () {
+          return 'rotate(-90)';
+        });
+    };
+
+    XAxis.prototype.filterAxisLabels = function (selection, nth) {
+      return selection.selectAll('text')
+        .text(function (d, i) {
+          return i % nth === 0 ? d.xAxisLabel : '';
+        });
+    };
 
     return XAxis;
   };

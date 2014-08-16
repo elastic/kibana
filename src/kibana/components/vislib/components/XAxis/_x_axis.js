@@ -2,7 +2,7 @@ define(function (require) {
   return function XAxisUtilService(d3) {
     var $ = require('jquery');
 
-    return function (that) {
+    return function (self) {
       return function (selection) {
         selection.each(function (data) {
           var div = d3.select(this);
@@ -11,12 +11,13 @@ define(function (require) {
           var height = $(this).height();
 
           var xScale = d3.scale.ordinal()
-            .domain(that.xValues)
+            .domain(self.xValues)
             .rangeBands([0, width], 0.1);
 
           var xAxis = d3.svg.axis()
             .scale(xScale)
-            .tickFormat(that.xAxisFormatter)
+            .tickFormat(self.xAxisFormatter)
+//            .tickValues(xScale.domain().filter(function(d, i) { return !(i % 5); }))
             .orient('bottom');
 
           var svg = div.append('svg')
@@ -27,6 +28,8 @@ define(function (require) {
             .attr('class', 'x axis')
             .attr('transform', 'translate(5,0)')
             .call(xAxis);
+
+          self.rotateAxisLabels(selection);
         });
       };
     };
