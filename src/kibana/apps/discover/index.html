@@ -4,7 +4,7 @@
       <div class="typeahead" kbn-typeahead="discover">
         <div class="input-group"
           ng-class="discoverSearch.$invalid ? 'has-error' : ''">
-          <input query-input="searchSource"
+          <input query-input="searchSource" input-focus
             kbn-typeahead-input
             ng-model="state.query"
             placeholder="Search..."
@@ -13,13 +13,14 @@
           <button type="submit"
             ng-disabled="discoverSearch.$invalid">
             <span class="fa fa-search"></span></button>
-          <button type="button" ng-click="resetQuery()"><span class="fa fa-ban"></span></button>
+          <!--<button type="button" ng-click="resetQuery()"><span class="fa fa-ban"></span></button>-->
         </div>
         <kbn-typeahead-items></kbn-typeahead-items>
       </div>
     </form>
 
     <div class="button-group">
+      <button ng-click="newQuery()"><i class="fa fa-file-o"></i></button>
       <button ng-click="toggleSave()"><i class="fa fa-save"></i></button>
       <button ng-click="toggleLoad()"><i class="fa fa-folder-open"></i></button>
       <button ng-click="toggleConfig()"><i class="fa fa-gear"></i></button>
@@ -68,7 +69,10 @@
 
       <!-- result -->
       <div class="col-md-10 results" ng-show="resultState === 'ready'">
-        <h3 ng-show="opts.savedSearch.id">{{ opts.savedSearch.title }}</h3>
+        <h3 ng-show="opts.savedSearch.id">
+          {{ opts.savedSearch.title }}
+          <i tooltip="Reload saved query" ng-click="resetQuery();" class="fa fa-undo smallest small"></i>
+        </h3>
         <div class="discover-timechart" ng-if="vis">
           <center class="small">
             <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>

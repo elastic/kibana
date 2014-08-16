@@ -4,6 +4,8 @@ define(function (require) {
   var angular = require('angular');
   var module = require('modules').get('kibana');
 
+  require('directives/input_focus');
+
   /**
    * config directive
    *
