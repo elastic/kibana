@@ -106,13 +106,13 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-//        // Chart title
-//        svg.append('text')
-//          .attr('class', 'charts-label')
-//          .attr('text-anchor', 'middle')
-//          .attr('x', width / 2)
-//          .attr('y', -10)
-//          .text(data.label);
+        var line = svg.append('line')
+          .attr('x1', 0)
+          .attr('y1', height)
+          .attr('x2', width)
+          .attr('y2', height)
+          .style('stroke', '#848e96')
+          .style('stroke-width', 0.5);
 
         // Data layers
         var layer = svg.selectAll('.layer')

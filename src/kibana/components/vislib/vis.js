@@ -9,6 +9,8 @@ define(function (require) {
     var XAxis = Private(require('components/vislib/modules/Xaxis'));
     var YAxis = Private(require('components/vislib/modules/YAxis'));
     var Legend = Private(require('components/vislib/modules/Legend'));
+    var AxisTitle = Private(require('components/vislib/modules/AxisTitle'));
+    var ChartTitle = Private(require('components/vislib/modules/ChartTitle'));
 
     var ChartFunctions = Private(require('components/vislib/modules/_functions'));
     var split = Private(require('components/vislib/components/_functions/d3/_split'));
@@ -68,6 +70,10 @@ define(function (require) {
         this.tooltip = new Tooltip('k4tip', tooltipFormatter);
       }
 
+      // CHART TITLE OBJECT
+      this.chartTitle = new ChartTitle(this.data.splitType(), this.data.splits());
+      this.chartTitle.append();
+
       // XAXIS OBJECT
       this.xAxis = new XAxis(this.data);
       this.xAxis.draw();
@@ -75,6 +81,11 @@ define(function (require) {
       // YAXIS OBJECT
       this.yAxis = new YAxis(this.data);
       this.yAxis.draw();
+
+      // AXIS TITLE OBJECT
+      this.axisTitle = new AxisTitle(this.data.get('xAxisLabel'), this.data.get('yAxisLabel'));
+      this.axisTitle.append();
+
 
       // CHART OBJECT
       var vis = this;

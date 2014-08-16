@@ -7,7 +7,7 @@ define(function (require) {
         selection.each(function (data) {
           var div = d3.select(this);
 
-          var width = $(this).width();
+          var width = $(this).width() - 10;
           var height = $(this).height();
 
           var xScale = d3.scale.ordinal()
@@ -25,7 +25,7 @@ define(function (require) {
 
           svg.append('g')
             .attr('class', 'x axis')
-            .attr('transform', 'translate(0,0)')
+            .attr('transform', 'translate(5,0)')
             .call(xAxis);
         });
       };
