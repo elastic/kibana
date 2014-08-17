@@ -25,11 +25,14 @@ define(function (require) {
     };
 
     XAxis.prototype.filterAxisLabels = function (selection, nth) {
+      var self = this;
       return selection.selectAll('text')
         .text(function (d, i) {
-          return i % nth === 0 ? d.xAxisLabel : '';
+          return i % nth === 0 ? self.xAxisFormatter(d) : '';
         });
     };
+
+
 
     return XAxis;
   };

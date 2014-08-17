@@ -23,6 +23,7 @@ define(function (require) {
       this.el = $el.get ? $el.get(0) : $el;
       this.config = config;
       this.ChartClass = chartTypes[config.type];
+      this.timeStamp = new Date().getTime();
     }
 
     _(Vis.prototype).extend(ChartFunctions.prototype);
@@ -36,7 +37,6 @@ define(function (require) {
       if (!data) {
         throw new Error('No valid data!');
       }
-
       this.data = new Data(data);
       zeroInjectedData = this.data.injectZeros();
       color = this.data.color ? this.data.color : this.data.getColorFunc();
@@ -112,8 +112,7 @@ define(function (require) {
     Vis.prototype.checkSize = _.debounce(function (el) {
       // enable auto-resize
       var size = $(el).width() + ':' + $(el).height();
-
-      if (this.prevSize !== undefined && this.prevSize !== size) {
+      if (this.prevSize !== size) {
         this.resize();
       }
       this.prevSize = size;
