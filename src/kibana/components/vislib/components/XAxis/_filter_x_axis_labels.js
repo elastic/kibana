@@ -6,7 +6,7 @@ define(function () {
       return selection
         .selectAll('text')
         .text(function (d, i) {
-          return i % nth === 0 ? d.xAxisLabel : '';
+          return i % nth === 0 ? d : '';
         });
     };
   };

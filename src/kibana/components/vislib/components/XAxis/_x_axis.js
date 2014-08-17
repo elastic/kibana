@@ -7,17 +7,16 @@ define(function (require) {
         selection.each(function (data) {
           var div = d3.select(this);
 
-          var width = $(this).width() - 10;
+          var width = $(this).width();
           var height = $(this).height();
 
           var xScale = d3.scale.ordinal()
             .domain(self.xValues)
-            .rangeBands([0, width], 0.1);
+            .rangeBands([0, width - 10], 0.1);
 
           var xAxis = d3.svg.axis()
             .scale(xScale)
             .tickFormat(self.xAxisFormatter)
-//            .tickValues(xScale.domain().filter(function(d, i) { return !(i % 5); }))
             .orient('bottom');
 
           var svg = div.append('svg')
@@ -29,7 +28,21 @@ define(function (require) {
             .attr('transform', 'translate(5,0)')
             .call(xAxis);
 
-          self.rotateAxisLabels(selection);
+          // check widths to apply rotate
+          var bbox = selection.selectAll('.tick text').node().getBBox();
+          var tickN = selection.selectAll('.tick text')[0].length;
+          var ticksLength = bbox.width * 1.05 * tickN;
+          if (ticksLength > width) {
+            self.rotateAxisLabels(selection);
+          }
+
+          // check widths to apply filter
+          var rotatedTicksLength = bbox.height * 1.05 * tickN;
+          var testpct = Math.floor(rotatedTicksLength / width) + 1;
+          if (rotatedTicksLength > width) {
+            self.filterAxisLabels(selection, testpct);
+          }
+
         });
       };
     };

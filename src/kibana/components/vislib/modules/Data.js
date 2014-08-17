@@ -22,7 +22,7 @@ define(function (require) {
       if (!this.data.series) {
         return this.data.rows ? this.data.rows : this.data.columns;
       }
-      return this.data.series;
+      return this.data;
     };
 
     Data.prototype.flatten = function () {
