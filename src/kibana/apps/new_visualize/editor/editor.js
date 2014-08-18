@@ -67,7 +67,7 @@ define(function (require) {
       $scope.vis = vis;
       $scope.state = $state;
 
-      $scope.conf = _.pick($scope, 'doSave', 'vis', 'shareData');
+      $scope.conf = _.pick($scope, 'doSave', 'savedVis', 'shareData');
       $scope.configTemplate = configTemplate;
       $scope.toggleShare = _.bindKey(configTemplate, 'toggle', 'share');
       $scope.toggleSave = _.bindKey(configTemplate, 'toggle', 'save');
@@ -143,7 +143,7 @@ define(function (require) {
       savedVis.save()
       .then(function () {
         configTemplate.close('save');
-        notify.info('Saved Data Source "' + savedVis.title + '"');
+        notify.info('Saved Visualization "' + savedVis.title + '"');
 
         if (savedVis.id === $route.current.params.id) return;
 

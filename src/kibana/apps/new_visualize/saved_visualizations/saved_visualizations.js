@@ -11,15 +11,18 @@ define(function (require) {
     title: 'visualizations'
   });
 
-  app.service('savedVisualizations', function (Promise, es, config, SavedVis, Private) {
+  app.service('savedVisualizations', function (Promise, es, config, SavedVis, Private, Notifier) {
     var visTypes = Private(require('components/vis_types/index'));
+    var notify = new Notifier({
+      location: 'saved visualization service'
+    });
 
     this.get = function (id) {
       return (new SavedVis(id)).init();
     };
 
     this.urlFor = function (id) {
-      return '#/visualize/edit/' + encodeURIComponent(id);
+      return '#/new_visualize/edit/' + encodeURIComponent(id);
     };
 
     this.delete = function (ids) {
@@ -49,14 +52,25 @@ define(function (require) {
       .then(function (resp) {
         return {
           total: resp.hits.total,
-          hits: resp.hits.hits.map(function (hit) {
+          hits: _.transform(resp.hits.hits, function (hits, hit) {
             var source = hit._source;
             source.id = hit._id;
             source.url = self.urlFor(hit._id);
-            source.typeDef = visTypes.byName[source.typeName];
-            source.icon = source.typeDef.icon;
-            return source;
-          })
+
+            if (!source.typeName && source.visState) {
+              try { source.typeName = JSON.parse(source.visState).type; }
+              catch (e) { /* missing typename handled below */ }
+            }
+
+            if (!source.typeName) {
+              notify.info('unable to detect type from visualization source', hit);
+              return;
+            }
+
+            source.type = visTypes.byName[source.typeName];
+            source.icon = source.type.icon;
+            hits.push(source);
+          }, [])
         };
       });
     };

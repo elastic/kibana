@@ -18,6 +18,7 @@ define(function (require) {
         {
           name: 'size',
           required: false,
+          default: 5
           // editor: batched with order
         },
         {
