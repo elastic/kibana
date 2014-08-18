@@ -21,7 +21,6 @@ define(function (require) {
         .attr('text-anchor', 'middle')
         .text(this.xTitle);
 
-
       // Append y axis title
       d3.select('.y-axis-title').append('svg')
         .attr('width', yWidth)

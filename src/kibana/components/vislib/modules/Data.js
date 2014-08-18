@@ -55,11 +55,17 @@ define(function (require) {
 
     Data.prototype.isStacked = function () {
       if (!this.data.series) {
-        var arr = this.data.rows ? this.data.rows[0] : this.data.columns[0];
-        var length = arr.series.length;
 
-        return length > 1 ? true : false;
+        // for loop to 
+        var dataArr = this.data.rows ? this.data.rows : this.data.columns;
+        for (var i = 0; i < dataArr.length; i++) {
+          if (dataArr[i].series.length > 1) {
+            return true;
+          }
+        }
+        return false;
       }
+
       return this.data.series.length > 1 ? true : false;
     };
 
