@@ -17,7 +17,7 @@ define(function (require) {
         .attr('width', xWidth)
         .attr('height', xHeight)
         .append('text')
-        .attr('transform', 'translate(' + xWidth / 2 + ',' + xHeight / 2 + ')')
+        .attr('transform', 'translate(' + xWidth / 2 + ',' + xHeight * 0.7 + ')')
         .attr('text-anchor', 'middle')
         .text(this.xTitle);
 
@@ -26,7 +26,7 @@ define(function (require) {
         .attr('width', yWidth)
         .attr('height', yHeight)
         .append('text')
-        .attr('transform', 'translate(' + yWidth + ',' + yHeight / 2 + ')rotate(270)')
+        .attr('transform', 'translate(' + yWidth * 0.7 + ',' + yHeight / 2 + ')rotate(270)')
         .attr('text-anchor', 'middle')
         .text(this.yTitle);
     };

@@ -115,6 +115,15 @@ define(function (require) {
             return i;
           });
 
+        // chart base line
+        var line = layer.append('line')
+          .attr('x1', 0)
+          .attr('y1', height)
+          .attr('x2', width)
+          .attr('y2', height)
+          .style('stroke', '#ddd')
+          .style('stroke-width', 0.7);
+
         // Append the bars
         var bars = layer.selectAll('rect')
           .data(function (d) {
@@ -176,15 +185,6 @@ define(function (require) {
               .style('stroke', null);
               //.style('cursor', 'pointer');
           });
-
-        // chart base line
-        var line = svg.append('line')
-          .attr('x1', 0)
-          .attr('y1', height)
-          .attr('x2', width)
-          .attr('y2', height)
-          .style('stroke', '#848e96')
-          .style('stroke-width', 1);
 
         // Add tooltip
         if (isTooltip) {

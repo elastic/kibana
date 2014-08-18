@@ -108,7 +108,6 @@ define(function (require) {
 
     Data.prototype.xValues = function () {
       this.orderedKeys = orderKeys(this.data);
-      console.log(this.orderedKeys, this.isOrdered());
       if (this.isOrdered()) {
         this.orderedKeys = this.orderedKeys.map(function (d) {
           return +d;

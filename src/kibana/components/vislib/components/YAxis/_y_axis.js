@@ -8,7 +8,7 @@ define(function (require) {
           var div = d3.select(this);
 
           var width = $(this).width();
-          var height = $(this).height() - 5;
+          var height = $(this).height() - 0;
 
           var yScale = d3.scale.linear()
             .domain([0, that.yMax])
@@ -26,7 +26,7 @@ define(function (require) {
 
           svg.append('g')
             .attr('class', 'y axis')
-            .attr('transform', 'translate(' + width + ',5)')
+            .attr('transform', 'translate(' + width + ', 4)')
             .call(yAxis);
         });
       };
