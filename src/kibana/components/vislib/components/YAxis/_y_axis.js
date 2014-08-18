@@ -17,6 +17,7 @@ define(function (require) {
 
           var yAxis = d3.svg.axis()
             .scale(yScale)
+            .tickFormat(d3.format('s'))
             .orient('left');
 
           var svg = div.append('svg')
