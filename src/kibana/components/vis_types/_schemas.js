@@ -1,7 +1,8 @@
 define(function (require) {
-  return function VisTypeSchemasFactory() {
+  return function VisTypeSchemasFactory(Private) {
     var _ = require('lodash');
     var Registry = require('utils/registry');
+    var AggParams = Private(require('components/agg_types/_agg_params'));
 
     function Schemas(schemas) {
       var self = this;
@@ -10,19 +11,27 @@ define(function (require) {
         .map(function (schema) {
           if (!schema.name) throw new Error('all schema must have a unique name');
 
+          if (schema.name === 'split') {
+            schema.params = [
+              {
+                name: 'row',
+                default: true
+              }
+            ];
+            schema.editor = require('text!components/vis_types/controls/rows_or_columns.html');
+          }
+
           _.defaults(schema, {
             min: 0,
             max: Infinity,
             group: 'buckets',
-            title: schema.name
+            title: schema.name,
+            editor: false,
+            params: []
           });
 
-          if (schema.name === 'split') {
-            schema.params = {
-              row: true
-            };
-            schema.editor = require('text!components/vis_types/controls/rows_or_columns.html');
-          }
+          // convert the params into a params registry
+          schema.params = new AggParams(schema.params);
 
           return schema;
         })

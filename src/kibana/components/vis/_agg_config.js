@@ -9,26 +9,40 @@ define(function (require) {
       self.id = _.uniqueId('_agg_');
       self.vis = vis;
       self._opts = opts = (opts || {});
-      self.type = opts.type;
 
+      // get the config type
+      self.type = opts.type;
       if (_.isString(self.type)) {
         self.type = aggTypes.byName[self.type];
       }
 
-      self.params = _.mapValues(opts.params || {}, function (val, name) {
-        var aggParam = self.type.params.byName[name];
-
-        if (aggParam.deserialize) {
-          return aggParam.deserialize(val, self);
-        } else {
-          return val;
-        }
-      });
-
+      // get the config schema
       self.schema = opts.schema;
       if (_.isString(self.schema)) {
         self.schema = self.vis.type.schemas.all.byName[self.schema];
       }
+
+      // resolve the params
+      self.params = {};
+      self.possibleParamKeys =  _.union(_.pluck(self.type.params, 'name'), _.pluck(self.schema.params, 'name'));
+
+      self.possibleParamKeys.forEach(function (name) {
+        var val = opts.params[name];
+
+        var aggParam = self.type.params.byName[name] || self.schema.params.byName[name];
+        if (!aggParam) return;
+
+        if (val == null) {
+          self.params[name] = aggParam.default;
+          return;
+        }
+
+        if (aggParam.deserialize) {
+          self.params[name] = aggParam.deserialize(val, self);
+        } else {
+          self.params[name] = val;
+        }
+      }, {});
     }
 
     AggConfig.prototype.validate = function () {
@@ -50,16 +64,19 @@ define(function (require) {
 
       if (!self.isValid()) return;
 
-      var outParams = _.transform(self.type.params, function (outParams, aggParam) {
-        var val = params[aggParam.name];
-
+      var outParams = _.transform(self.possibleParamKeys, function (out, name) {
+        var val = params[name];
+        // don't serialize undefined/null values
         if (val == null) return;
 
+        var aggParam = self.type.params.byName[name] || self.schema.params.byName[name];
+
         if (aggParam.serialize) {
-          outParams[aggParam.name] = aggParam.serialize(val, self);
-        } else {
-          outParams[aggParam.name] = val;
+          out[name] = aggParam.serialize(val, self);
+          return;
         }
+
+        out[name] = val;
       }, {});
 
       return {

@@ -18,14 +18,18 @@ define(function (require) {
 
       // the list of "configs" that we will use to read the response
       var configs = vis.aggs.getValid().map(function (aggConfig) {
-        return _.assign(aggConfig.type.params.write(aggConfig), {
-          categoryName: aggConfig.schema.name,
-          id: aggConfig.id,
-          aggConfig: aggConfig,
-          aggType: aggConfig.type,
-          field: aggConfig.params.field,
-          label: aggConfig.type.title
-        });
+        return _.assign(
+          aggConfig.type.params.write(aggConfig),
+          aggConfig.schema.params.write(aggConfig),
+          {
+            categoryName: aggConfig.schema.name,
+            id: aggConfig.id,
+            aggConfig: aggConfig,
+            aggType: aggConfig.type,
+            field: aggConfig.params.field,
+            label: aggConfig.type.title
+          }
+        );
       });
 
       var lastConfig = configs[configs.length - 1];
@@ -104,21 +108,17 @@ define(function (require) {
           var groupMap = chartData.splits || (chartData.splits = {});
 
           result.buckets.forEach(function (bucket) {
-            var label = bucket.key;
-            if (col.field) {
-              label = col.field.name + ': ' + label;
-            }
-
-            var group = groupMap[label];
+            var bucketId = bucket.key + (col.field ? ': ' + col.field.name : '');
+            var group = groupMap[bucketId];
 
             if (!group) {
               group = {
                 column: col,
                 value: bucket.key,
-                label: label
+                label: bucketId
               };
               groupList.push(group);
-              groupMap[col.id] = group;
+              groupMap[bucketId] = group;
             }
 
             splitAndFlatten(group, bucket);

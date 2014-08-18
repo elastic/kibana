@@ -26,10 +26,6 @@ define(function (require) {
       });
     }
 
-    function asName(val) {
-      return val.name;
-    }
-
     AggParams.prototype.write = function (aggConfig, locals) {
       var output = { params: {} };
       locals = locals || {};
