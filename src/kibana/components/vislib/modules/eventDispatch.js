@@ -1,5 +1,5 @@
 define(function (require) {
-  return function HistogramChartFactory(d3, Private) {
+  return function ChartEventsDispatch(d3, Private) {
 
     var _ = require('lodash');
 
