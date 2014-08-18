@@ -24,9 +24,8 @@ define(function (require) {
 
       // resolve the params
       self.params = {};
-      self.possibleParamKeys =  _.union(_.pluck(self.type.params, 'name'), _.pluck(self.schema.params, 'name'));
 
-      self.possibleParamKeys.forEach(function (name) {
+      self.getPossibleParamKeys().forEach(function (name) {
         var val = opts.params[name];
 
         var aggParam = self.type.params.byName[name] || self.schema.params.byName[name];
@@ -54,6 +53,19 @@ define(function (require) {
       if (typeErrors) return typeErrors;
     };
 
+    AggConfig.prototype.getPossibleParamKeys = function () {
+      var keys = [];
+
+      if (this.type) {
+        keys.push.apply(keys, _.pluck(this.type.params, 'name'));
+      }
+      if (this.schema) {
+        keys.push.apply(keys, _.pluck(this.schema.params, 'name'));
+      }
+
+      return keys;
+    };
+
     AggConfig.prototype.isValid = function () {
       return !this.validate();
     };
@@ -64,7 +76,7 @@ define(function (require) {
 
       if (!self.isValid()) return;
 
-      var outParams = _.transform(self.possibleParamKeys, function (out, name) {
+      var outParams = _.transform(self.getPossibleParamKeys(), function (out, name) {
         var val = params[name];
         // don't serialize undefined/null values
         if (val == null) return;
