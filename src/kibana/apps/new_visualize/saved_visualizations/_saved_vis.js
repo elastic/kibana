@@ -74,7 +74,9 @@ define(function (require) {
             if (!self.vis) self._createVis();
             else self._updateVis();
 
-            self.searchSource.aggs(_.bindKey(self.vis.aggs, 'toDSL'));
+            self.searchSource.aggs(function () {
+              return self.vis.aggs.toDSL();
+            });
 
             return self;
           });

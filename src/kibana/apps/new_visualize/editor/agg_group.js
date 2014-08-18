@@ -58,9 +58,11 @@ define(function (require) {
         $scope.createUsingSchema = function (schema) {
           $scope.addForm = {};
 
-          $scope.vis.aggs.push(new AggConfig($scope.vis, {
+          var aggConfig = new AggConfig($scope.vis, {
             schema: schema
-          }));
+          });
+          aggConfig.brandNew = true;
+          $scope.vis.aggs.push(aggConfig);
         };
       }
     };

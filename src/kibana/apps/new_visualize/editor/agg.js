@@ -25,6 +25,7 @@ define(function (require) {
       },
       link: function ($scope, $el) {
         $scope.aggTypeOptions = aggTypes.byType[$scope.groupName];
+        $scope.editorOpen = $scope.agg.brandNew;
 
         $scope.$watch('$index', function (i) {
           $scope.$first = i === 0;

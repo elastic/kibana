@@ -109,7 +109,7 @@ define(function (require) {
               label = col.field.name + ': ' + label;
             }
 
-            var group = groupMap[col.id];
+            var group = groupMap[label];
 
             if (!group) {
               group = {

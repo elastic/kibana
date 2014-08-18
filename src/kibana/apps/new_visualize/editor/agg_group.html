@@ -24,14 +24,6 @@
     </vis-editor-agg>
   </div>
 
-  <button
-    ng-if="!addForm.visible && stats.count < stats.max"
-    type="button"
-    ng-click="addForm.visible = true"
-    class="vis-editor-agg-add-btn btn btn-xs btn-default" >
-    <i class="fa fa-plus"></i>
-  </button>
-
   <div ng-if="addForm.visible" class="vis-editor-agg-add-form form-group">
     <label>Select {{ groupName }} type</label>
     <select
@@ -42,4 +34,14 @@
       ng-options="schema as schema.title for schema in availableSchema">
     </select>
   </div>
+
+  <button
+    ng-if="stats.count < stats.max"
+    type="button"
+    ng-click="addForm.visible = !addForm.visible"
+    class="vis-editor-agg-wide-btn btn btn-xs btn-default" >
+
+    <i ng-if="!addForm.visible" class="fa fa-plus"></i>
+    <span ng-if="addForm.visible">cancel</span>
+  </button>
 </div>

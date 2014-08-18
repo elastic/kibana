@@ -87,9 +87,20 @@ define(function (require) {
       });
     }
 
-    var $state = appStateFactory.create({
-      vis: vis.getState()
-    });
+    var $state = (function setupAppState() {
+
+      var savedVisState = vis.getState();
+
+      var $state = appStateFactory.create({
+        vis: savedVisState
+      });
+
+      if (!angular.equals($state.vis, savedVisState)) {
+        vis.setState($state.vis);
+      }
+
+      return $state;
+    }());
 
     $state.on('fetch_with_changes', function () {
       vis.setState($state.vis);
@@ -104,7 +115,10 @@ define(function (require) {
       $scope.fetch();
     });
 
-    $scope.$watch(_.bindKey(vis, 'getState'), function (newState) {
+    $scope.$watch(_.bindKey(vis, 'getState'), function (newState, prevState) {
+      // only run on actual updates, this is true on the first run.
+      if (newState === prevState) return;
+
       $state.vis = newState;
       $scope.stateDirty = true;
     }, true);
@@ -114,6 +128,7 @@ define(function (require) {
 
     $scope.fetch = function () {
       $state.save();
+      $scope.stateDirty = false;
       searchSource.fetch();
     };
 

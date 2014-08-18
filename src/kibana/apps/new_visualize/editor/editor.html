@@ -20,7 +20,7 @@
         <i class="fa fa-chain-broken"></i> Unlinked!
       </div>
 
-      <form ng-submit="doVisualize()" class="inline-form" name="queryInput">
+      <form ng-submit="fetch()" class="inline-form" name="queryInput">
         <div class="typeahead" kbn-typeahead="visualize">
           <div class="input-group"
           ng-class="queryInput.$invalid ? 'has-error' : ''">
@@ -46,7 +46,7 @@
       <button ng-click="toggleSave()"><i class="fa fa-save"></i></button>
       <button ng-click="toggleLoad()"><i class="fa fa-folder-open"></i></button>
       <button ng-click="toggleShare()"><i class="fa fa-code"></i></button>
-      <button ng-click="doVisualize()"><i class="fa fa-refresh"></i></button>
+      <button ng-click="fetch()"><i class="fa fa-refresh"></i></button>
     </div>
   </navbar>
 
@@ -61,7 +61,7 @@
   <div class="vis-editor-content">
     <div ng-if="!appEmbedded" class="vis-editor-sidebar">
       <div class="sidebar-container">
-        <form class="sidebar-list" ng-submit="doVisualize()" name="visualizeEditor">
+        <form class="sidebar-list" ng-submit="fetch()" name="visualizeEditor">
           <ul class="list-unstyled">
 
             <!-- metrics -->
@@ -91,8 +91,8 @@
             <!-- apply -->
             <li class="sidebar-item">
               <button
-                ng-click="doVisualize()"
-                ng-if="vis.dirty"
+                ng-click="fetch()"
+                ng-if="stateDirty"
                 ng-disabled="httpActive.length || visualizeEditor.$invalid"
                 class="sidebar-item-button success">
                 Apply
