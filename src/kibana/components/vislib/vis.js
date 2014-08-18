@@ -37,6 +37,7 @@ define(function (require) {
       if (!data) {
         throw new Error('No valid data!');
       }
+
       this.data = new Data(data);
       zeroInjectedData = this.data.injectZeros();
       color = this.data.color ? this.data.color : this.data.getColorFunc();
