@@ -158,10 +158,16 @@ define(function (require) {
 
       // add labels to each config before they are processed
       configs.forEach(function (config) {
+        if (config.label) return;
+
         if (config.aggType && config.aggType.makeLabel) {
           config.label = config.aggType.makeLabel(config.aggConfig);
-        } else {
+          return;
+        }
+
+        if (config.field) {
           config.label = config.field.name;
+          return;
         }
       });
 
