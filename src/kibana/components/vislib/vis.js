@@ -103,8 +103,6 @@ define(function (require) {
           }
         });
 
-      console.log(this);
-
       this.checkSize('.chart');
     };
 
