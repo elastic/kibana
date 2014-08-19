@@ -133,7 +133,7 @@ define(function (require) {
     };
 
     $scope.startOver = function () {
-      $location.url('/visualize');
+      $location.url('/new_visualize');
     };
 
     $scope.doSave = function () {
