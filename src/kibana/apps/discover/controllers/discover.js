@@ -45,12 +45,12 @@ define(function (require) {
     }
   });
 
-
   app.controller('discover', function ($scope, config, courier, $route, $window, savedSearches, savedVisualizations,
     Notifier, $location, globalState, appStateFactory, timefilter, Promise, Private) {
 
     var Vis = Private(require('components/vis/vis'));
-    var segmentedFetch = $scope.segmentedFetch = Private(require('apps/discover/_segmented_fetch'));
+    var SegmentedFetch = Private(require('apps/discover/_segmented_fetch'));
+
     var HitSortFn = Private(require('apps/discover/_hit_sort_fn'));
 
     var notify = new Notifier({
@@ -71,6 +71,7 @@ define(function (require) {
 
     // the actual courier.SearchSource
     $scope.searchSource = savedSearch.searchSource;
+    var segmentedFetch = $scope.segmentedFetch = new SegmentedFetch($scope.searchSource);
 
     // Manage state & url state
     var initialQuery = $scope.searchSource.get('query');
@@ -238,7 +239,11 @@ define(function (require) {
       if (!init.complete) return;
 
       $scope.updateTime();
-      if (_.isEmpty($state.columns)) refreshColumns();
+
+      if (_.isEmpty($state.columns)) {
+        refreshColumns();
+      }
+
       $scope.updateDataSource()
       .then(setupVisualization)
       .then(function () {
@@ -270,7 +275,6 @@ define(function (require) {
         }
 
         return segmentedFetch.fetch({
-          searchSource: $scope.searchSource,
           totalSize: sortBy === 'non-time' ? false : totalSize,
           direction: sortBy === 'time' ? sort[1] : 'desc',
           status: function (status) {

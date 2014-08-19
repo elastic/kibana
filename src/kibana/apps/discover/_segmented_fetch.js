@@ -1,22 +1,69 @@
 define(function (require) {
   return function DiscoverSegmentedFetch(es, Private, Promise, Notifier) {
-    var activeReq = null;
-    var notifyEvent;
-    var searchPromise;
-    var getStateFromRequest = Private(require('components/courier/fetch/strategy/search')).getSourceStateFromRequest;
     var _ = require('lodash');
     var moment = require('moment');
-
-    var segmentedFetch = {};
+    var searchStrategy = Private(require('components/courier/fetch/strategy/search'));
+    var eventName = 'segmented fetch';
 
     var notify = new Notifier({
       location: 'Segmented Fetch'
     });
 
-    segmentedFetch.abort = function () {
-      activeReq = null;
-      searchPromise.abort();
-      clearNotifyEvent();
+    // var segmentedFetch = {};
+    function segmentedFetch(searchSource) {
+      this.searchSource = searchSource;
+      this.running = false;
+      this.activeRequest = null;
+      this.notifyEvent = null;
+    }
+
+    // segmentedFetch.prototype.setSearchSource(searchSource) {
+    //   this.searchSource = searchSource;
+    // };
+
+    segmentedFetch.prototype._startRequest = function (req) {
+      this.activeRequest = req;
+      this.running = true;
+      this.notifyEvent = notify.event(eventName);
+    };
+
+    segmentedFetch.prototype._stopRequest = function () {
+      this.activeRequest = null;
+      this.running = false;
+      if (_.isFunction(this.notifyEvent)) {
+        this.notifyEvent();
+        this.notifyEvent = null;
+      }
+    };
+
+    segmentedFetch.prototype._execSearch = function (index, state) {
+      this.searchPromise = es.search({
+        index: index,
+        type: state.type,
+        ignoreUnavailable: true,
+        body: state.body
+      });
+
+      // don't throw ClusterBlockException errors
+      this.searchPromise.catch(function (err) {
+        if (err.status === 403 && err.message.match(/ClusterBlockException.+index closed/)) {
+          return false;
+        } else {
+          throw err;
+        }
+      });
+
+      return this.searchPromise;
+    };
+
+    segmentedFetch.prototype._getQueue = function () {
+      return this.searchSource.get('index').toIndexList();
+    };
+
+    segmentedFetch.prototype.abort = function () {
+      var self = this;
+      this._stopRequest();
+      this.searchPromise.abort();
     };
 
     /**
@@ -29,36 +76,34 @@ define(function (require) {
      *                              in decening order, this should be set to descending so that the data comes in its
      *                              proper order, otherwize indices will be fetched ascending
      *
-     * // all callbacks can return a promise to delay furthur processing
+     * // all callbacks can return a promise to delay further processing
      * @param {function} opts.first - a function that will be called for the first segment
      * @param {function} opts.each - a function that will be called for each segment
      * @param {function} opts.eachMerged - a function that will be called with the merged result on each segment
      *
      * @return {Promise}
      */
-    segmentedFetch.fetch = function (opts) {
+    segmentedFetch.prototype.fetch = function (opts) {
+      var self = this;
       opts = opts || {};
-      var searchSource = opts.searchSource;
       var direction = opts.direction;
       var limitSize = false;
       var remainingSize = false;
-
-      notifyEvent = notify.event('segmented fetch');
 
       if (opts.totalSize) {
         limitSize = true;
         remainingSize = opts.totalSize;
       }
 
-      var req = searchSource._createRequest();
+      var req = self.searchSource._createRequest();
       req.moment = moment();
       req.source.activeFetchCount += 1;
 
       // track the req out of scope so that while we are itterating we can
       // ensure we are still relevant
-      activeReq = req;
+      self._startRequest(req);
 
-      var queue = searchSource.get('index').toIndexList();
+      var queue = self._getQueue();
       var total = queue.length;
       var active = null;
       var complete = [];
@@ -92,7 +137,7 @@ define(function (require) {
       }
 
       reportStatus();
-      getStateFromRequest(req)
+      searchStrategy.getSourceStateFromRequest(req)
       .then(function (state) {
         return (function recurse() {
           var index = queue.shift();
@@ -105,10 +150,12 @@ define(function (require) {
           }
           req.state = state;
 
-          return execSearch(index, state)
+          return self._execSearch(index, state)
           .then(function (resp) {
             // abort if fetch is called twice quickly
-            if (req !== activeReq) return;
+            if (!self.running || req !== self.activeRequest) {
+              return;
+            }
 
             // a response was swallowed intentionally. Try the next one
             if (!resp) {
@@ -136,7 +183,9 @@ define(function (require) {
               return prom;
             })
             .then(function () {
-              if (_.isFunction(opts.each)) return opts.each(resp, req);
+              if (_.isFunction(opts.each)) {
+                return opts.each(resp, req);
+              }
             })
             .then(function () {
               var mergedCopy = _.omit(merged, '_bucketIndex');
@@ -159,7 +208,7 @@ define(function (require) {
       .then(req.defer.resolve, req.defer.reject);
 
       function done() {
-        clearNotifyEvent();
+        self._stopRequest();
         req.complete = true;
         req.ms = req.moment.diff() * -1;
         req.source.activeFetchCount -= 1;
@@ -200,32 +249,6 @@ define(function (require) {
         mbucket = merged._bucketIndex[bucket.key] = bucket;
         merged.aggregations[aggKey].buckets.push(mbucket);
       });
-    }
-
-    function execSearch(index, state) {
-      searchPromise = es.search({
-        index: index,
-        type: state.type,
-        ignoreUnavailable: true,
-        body: state.body
-      });
-
-      // don't throw ClusterBlockException errors
-      searchPromise.catch(function (err) {
-        if (err.status === 403 && err.message.match(/ClusterBlockException.+index closed/)) {
-          return false;
-        } else {
-          throw err;
-        }
-      });
-
-      return searchPromise;
-    }
-
-    function clearNotifyEvent() {
-      if (_.isFunction(notifyEvent)) {
-        notifyEvent();
-      }
     }
 
     return segmentedFetch;
