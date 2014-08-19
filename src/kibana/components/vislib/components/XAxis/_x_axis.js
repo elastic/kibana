@@ -31,17 +31,13 @@ define(function (require) {
           // check widths to apply rotate
           var bbox = selection.selectAll('.tick text').node().getBBox();
           var tickN = selection.selectAll('.tick text')[0].length;
-          var ticksLength = bbox.width * 1.05 * tickN;
-          if (ticksLength > width) {
-            self.rotateAxisLabels(selection);
-          }
-          
           var lbls = selection.selectAll('.tick text')[0];
-          console.log('ticks n', tickN, lbls);
+          var maxW = width / tickN;
           for (var i = 0; i < tickN; i++) {
-            console.log(i, lbls[i]);
-            //if (bbox[i]) {
-            //}
+            if (lbls[i].clientWidth > maxW) {
+              self.rotateAxisLabels(selection);
+              break;
+            }
           }
 
           // check widths to apply filter

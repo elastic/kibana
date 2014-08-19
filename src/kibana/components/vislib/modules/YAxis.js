@@ -25,7 +25,6 @@ define(function (require) {
     };
 
     YAxis.prototype.appendSVG = function (self) {
-      console.log(self);
       return function (selection) {
         selection.each(function () {
           var div = d3.select(this);
