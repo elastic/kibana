@@ -25,10 +25,10 @@ define(function (require) {
       // resolve the params
       self.params = {};
 
-      self.getPossibleParamKeys().forEach(function (name) {
-        var val = opts.params[name];
+      self.getParamNames().forEach(function (name) {
+        var val = opts.params && opts.params[name];
 
-        var aggParam = self.type.params.byName[name] || self.schema.params.byName[name];
+        var aggParam = self.getParam(name);
         if (!aggParam) return;
 
         if (val == null) {
@@ -53,20 +53,6 @@ define(function (require) {
       if (typeErrors) return typeErrors;
     };
 
-    AggConfig.prototype.getPossibleParamKeys = function () {
-      var keys = [];
-
-      if (this.type) {
-        keys.push.apply(keys, _.pluck(this.type.params, 'name'));
-      }
-
-      if (this.schema) {
-        keys.push.apply(keys, _.pluck(this.schema.params, 'name'));
-      }
-
-      return keys;
-    };
-
     AggConfig.prototype.isValid = function () {
       return !this.validate();
     };
@@ -77,12 +63,12 @@ define(function (require) {
 
       if (!self.isValid()) return;
 
-      var outParams = _.transform(self.getPossibleParamKeys(), function (out, name) {
+      var outParams = _.transform(self.getParamNames(), function (out, name) {
         var val = params[name];
         // don't serialize undefined/null values
         if (val == null) return;
 
-        var aggParam = self.type.params.byName[name] || self.schema.params.byName[name];
+        var aggParam = self.getParam(name);
 
         if (aggParam.serialize) {
           out[name] = aggParam.serialize(val, self);
@@ -97,6 +83,24 @@ define(function (require) {
         schema: self.schema.name,
         params: outParams
       };
+    };
+
+    AggConfig.prototype.getParamNames = function () {
+      var keys = [];
+
+      if (this.type) keys.push.apply(keys, _.pluck(this.type.params, 'name'));
+      if (this.schema) keys.push.apply(keys, _.pluck(this.schema.params, 'name'));
+
+      return keys;
+    };
+
+    AggConfig.prototype.getParam = function (name) {
+      var aggParam;
+
+      if (this.type) aggParam = this.type.params.byName[name];
+      if (!aggParam && this.schema) aggParam = this.schema.params.byName[name];
+
+      return aggParam;
     };
 
     return AggConfig;
