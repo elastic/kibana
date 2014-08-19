@@ -80,13 +80,12 @@ define(function (require) {
       this.xAxis.draw();
 
       // YAXIS OBJECT
-      this.yAxis = new YAxis(this.data);
+      this.yAxis = new YAxis(this.data, this.data.getYMaxValue());
       this.yAxis.draw();
 
       // AXIS TITLE OBJECT
       this.axisTitle = new AxisTitle(this.data.get('xAxisLabel'), this.data.get('yAxisLabel'));
       this.axisTitle.append();
-
 
       // CHART OBJECT
       var vis = this;
@@ -100,9 +99,11 @@ define(function (require) {
           try {
             chart.render();
           } catch (error) {
-            console.error(error.message);
+            console.group(error.message);
           }
         });
+
+      console.log(this);
 
       this.checkSize('.chart');
     };
