@@ -149,7 +149,7 @@ define(function (require) {
 
         $location.url(
           globalState.writeToUrl(
-            '/visualize/edit/' + encodeURIComponent(savedVis.id)
+            '/new_visualize/edit/' + encodeURIComponent(savedVis.id)
           )
         );
       }, notify.fatal);

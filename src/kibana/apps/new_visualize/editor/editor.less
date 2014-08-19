@@ -148,12 +148,18 @@
   &-canvas {
     .flex(1, 0, @screen-md-min - @vis-editor-sidebar-width);
     .display(flex);
+    .flex-direction(column);
     overflow: auto;
 
     // overrided for tablet and desktop
     @media (min-width: @screen-md-min) {
       .flex-shrink(1);
       .flex-basis(100%);
+    }
+
+    &-title {
+      text-align: center;
+      margin: 10px 0 0;
     }
 
     visualize {

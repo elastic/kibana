@@ -1,7 +1,6 @@
 <div ng-controller="VisEditor" class="vis-editor">
 
   <navbar ng-if="!appEmbedded">
-    <span ng-if="!!vis.title" class="name" ng-bind="vis.title"></span>
     <div class="fill bitty-modal-container">
       <div ng-if="linked && !unlinking"
       ng-dblclick="unlink()"
@@ -10,8 +9,8 @@
         <i class="fa fa-link"></i>
         &nbsp;
         This visualization is linked to a saved search:
-        <b>{{ vis.savedSearchId | json}}</b>
-        <a href="#/discover/{{ vis.savedSearchId | uriescape }}">
+        <b>{{ savedVis.savedSearchId | json}}</b>
+        <a href="#/discover/{{ savedVis.savedSearchId | uriescape }}">
           <i class="fa fa-pencil" tooltip="Click here to edit the linked saved search"></i>
         </a>
       </div>
@@ -24,7 +23,7 @@
         <div class="typeahead" kbn-typeahead="visualize">
           <div class="input-group"
           ng-class="queryInput.$invalid ? 'has-error' : ''">
-            <input query-input="vis.searchSource"
+            <input query-input="savedVis.searchSource"
             kbn-typeahead-input
             placeholder="Search..."
             type="text"
@@ -104,6 +103,7 @@
     </div>
 
     <div class="vis-editor-canvas">
+      <p class="vis-editor-canvas-title" ng-if="savedVis.title" ng-bind="savedVis.title"></p>
       <visualize vis="vis" search-source="savedVis.searchSource"></visualize>
     </div>
   </div>
