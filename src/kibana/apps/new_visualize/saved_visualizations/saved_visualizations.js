@@ -57,17 +57,18 @@ define(function (require) {
             source.id = hit._id;
             source.url = self.urlFor(hit._id);
 
-            if (!source.typeName && source.visState) {
-              try { source.typeName = JSON.parse(source.visState).type; }
+            var typeName = source.typeName;
+            if (source.visState) {
+              try { typeName = JSON.parse(source.visState).type; }
               catch (e) { /* missing typename handled below */ }
             }
 
-            if (!source.typeName) {
+            if (!typeName) {
               notify.info('unable to detect type from visualization source', hit);
               return;
             }
 
-            source.type = visTypes.byName[source.typeName];
+            source.type = visTypes.byName[typeName];
             source.icon = source.type.icon;
             hits.push(source);
           }, [])
