@@ -8,16 +8,7 @@ define(function (require) {
     _(Chart).inherits(ChartFunctions);
     function Chart(vis, el, chartData) {
       Chart.Super.apply(this, arguments);
-
-      this.el = vis.el;
-      this.ChartClass = vis.ChartClass;
-      this.data = vis.data;
-      this.color = vis.color;
-      this.orderedKeys = vis.orderedKeys;
-      this.tooltip = vis.tooltip;
-      this.yAxis = vis.yAxis;
-
-      // Chart specific items
+      this.vis = vis;
       this.chartEl = el;
       this.chartData = chartData;
       this._attr = _.defaults(vis.config || {}, {});

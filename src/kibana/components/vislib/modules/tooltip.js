@@ -15,7 +15,7 @@ define(function (require) {
       this.chartHeight = $('.chart').height();
     }
 
-    Tooltip.prototype.draw = function () {
+    Tooltip.prototype.render = function () {
       return renderTooltip(this);
     };
 
