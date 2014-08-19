@@ -2,7 +2,6 @@ define(function (require) {
   return function FiltersAggDefinition(Private) {
     var _ = require('lodash');
     var AggType = Private(require('components/agg_types/_agg_type'));
-    var AggParams = Private(require('components/agg_types/_agg_params'));
 
     function getTickLabel(query) {
       if (query.query_string && query.query_string.query) {
@@ -15,7 +14,7 @@ define(function (require) {
     return new AggType({
       name: 'filters',
       title: 'Filters',
-      params: new AggParams([
+      params: [
         {
           name: 'filters',
           editor: require('text!components/agg_types/controls/filters.html'),
@@ -31,7 +30,7 @@ define(function (require) {
             };
           }
         }
-      ])
+      ]
     });
   };
 });

@@ -63,13 +63,11 @@ define(function (require) {
       };
     };
 
-    Vis.prototype.type = visTypes.byName.histogram;
+    Vis.prototype.type = 'histogram';
 
     Vis.prototype.setState = function (state) {
       this.type = state.type || this.type;
       if (_.isString(this.type)) this.type = visTypes.byName[this.type];
-
-      var type = this.type;
 
       this.aggs = new AggConfigs(this, state.aggs);
     };

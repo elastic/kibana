@@ -6,7 +6,6 @@ define(function (require) {
     return new VisType({
       name: 'histogram',
       icon: 'icon-chart-bar',
-      responseConverter: Private(require('components/vis_types/converters/histogram')),
       vislibParams: {
         shareYAxis: true,
         addTooltip: true,

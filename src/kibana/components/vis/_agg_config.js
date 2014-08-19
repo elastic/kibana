@@ -59,6 +59,7 @@ define(function (require) {
       if (this.type) {
         keys.push.apply(keys, _.pluck(this.type.params, 'name'));
       }
+
       if (this.schema) {
         keys.push.apply(keys, _.pluck(this.schema.params, 'name'));
       }

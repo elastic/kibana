@@ -90,9 +90,15 @@ define(function (require) {
             return;
           }
 
-          chart = new vislib.Chart($visualize[0], _.assign({}, vis.type.vislibParams, {
-            type: vis.type.name,
-          }));
+          var vislibParams = _.assign(
+            {},
+            vis.type.vislibParams,
+            {
+              type: vis.type.name,
+            }
+          );
+
+          chart = new vislib.Chart($visualize[0], vislibParams);
 
           // For each type of interaction, assign the the handler if the vis object has it
           // otherwise use the typeDef, otherwise, do nothing.
@@ -152,10 +158,10 @@ define(function (require) {
         });
 
         $scope.$on('$destroy', function () {
-          if ($scope.vis) $scope.vis.destroy();
           if (chart) {
-            chart.off('hover');
-            chart.off('click');
+            _.forOwn($scope.vis.type.listeners, function (listener, event) {
+              chart.off(event, listener);
+            });
             chart.destroy();
           }
         });

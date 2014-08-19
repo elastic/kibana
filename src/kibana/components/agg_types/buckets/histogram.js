@@ -17,6 +17,7 @@ define(function (require) {
           required: true,
           filterFieldType: '!date'
         },
+
         {
           name: 'interval',
           required: true,
@@ -26,6 +27,7 @@ define(function (require) {
             output.params.interval = parseInt(aggConfig.params.interval, 10);
           }
         },
+
         {
           name: 'min_doc_count',
           custom: true,
@@ -37,6 +39,7 @@ define(function (require) {
             }
           }
         },
+
         {
           name: 'extended_bounds',
           default: {},

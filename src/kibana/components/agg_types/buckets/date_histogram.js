@@ -3,10 +3,9 @@ define(function (require) {
     var _ = require('lodash');
     var moment = require('moment');
     var interval = require('utils/interval');
+    var AggType = Private(require('components/agg_types/_agg_type'));
 
     require('filters/field_type');
-
-    var AggType = Private(require('components/agg_types/_agg_type'));
 
     var pickInterval = function (bounds, targetBuckets) {
       bounds || (bounds = timefilter.getBounds());
@@ -38,6 +37,7 @@ define(function (require) {
           required: true,
           filterFieldTypes: 'date'
         },
+
         {
           name: 'interval',
           required: true,
@@ -84,10 +84,12 @@ define(function (require) {
             }
           }
         },
+
         {
           name: 'format',
           custom: true
         },
+
         {
           name: 'extended_bounds',
           default: {},

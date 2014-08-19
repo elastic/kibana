@@ -6,7 +6,6 @@ define(function (require) {
     return new VisType({
       name: 'pie',
       icon: 'icon-chart-bar',
-      responseConverter: Private(require('components/vis_types/converters/histogram')),
       vislibParams: {
         addTooltip: true,
         addLegend: true
@@ -15,7 +14,7 @@ define(function (require) {
         {
           group: 'metrics',
           name: 'metric',
-          title: 'Y-Axis',
+          title: 'Slice Size',
           min: 1,
           max: 1
         },
