@@ -79,6 +79,9 @@ define(function (require) {
           });
         }));
 
+        if (elWidth <= 0 || elHeight <= 0) {
+          throw new Error('Height is ' + elHeight + ', and width is ' + elWidth);
+        }
 
         // Get the width and height
         width = elWidth - margin.left - margin.right;
@@ -91,13 +94,10 @@ define(function (require) {
         // Update the xScale
         xScale.domain(xValues)
           .rangeBands([0, width], 0.1);
+
         yScale
           .domain([0, yStackMax])
           .range([height, 0]);
-
-        // Update the Axes
-        xAxis.scale(xScale);
-        yAxis.scale(yScale);
 
         // Create the canvas for the visualization
         var svg = d3.select(chartEl).append('svg')

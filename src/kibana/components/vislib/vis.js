@@ -97,7 +97,11 @@ define(function (require) {
         .each(function (chartData) {
           var chart = new vis.ChartClass(vis, this, chartData);
           charts.push(chart);
-          chart.render();
+          try {
+            chart.render();
+          } catch (error) {
+            console.error(error.message);
+          }
         });
 
       this.checkSize('.chart');
@@ -113,6 +117,7 @@ define(function (require) {
     Vis.prototype.checkSize = _.debounce(function (el) {
       // enable auto-resize
       var size = $(el).width() + ':' + $(el).height();
+
       if (this.prevSize !== size) {
         this.resize();
       }
