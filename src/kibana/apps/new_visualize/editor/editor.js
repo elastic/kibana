@@ -108,7 +108,6 @@ define(function (require) {
 
     $state.on('fetch_with_changes', function () {
       vis.setState($state.vis);
-      vis.setState($state.vis);
 
       // we use state to track query, must write before we fetch
       if ($state.query) {
@@ -129,6 +128,11 @@ define(function (require) {
 
     $scope.stageEditableVis = function () {
       vis.setState(editableVis.getState());
+      $state.save();
+    };
+
+    $scope.resetEditableVis = function () {
+      editableVis.setState(vis.getState());
       $state.save();
     };
 

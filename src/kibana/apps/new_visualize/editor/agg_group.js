@@ -11,6 +11,7 @@ define(function (require) {
     return {
       restrict: 'E',
       template: require('text!apps/visualize/editor/agg_group.html'),
+      replace: true,
       scope: {
         vis: '=',
         schemas: '=',

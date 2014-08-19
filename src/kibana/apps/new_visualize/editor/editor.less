@@ -32,18 +32,26 @@
   }
 
   &-sidebar {
-    .flex(0, 0, auto);
+    .flex-parent(0, 0, 100%);
+    overflow: auto;
+
 
     // overrided for tablet and desktop
     @media (min-width: @screen-md-min) {
       .flex-basis(@vis-editor-sidebar-width);
     }
 
-    overflow: auto;
-
+    .sidebar-container {
+      .flex(1, 0, auto);
+      background-color: @body-bg;
+      border-right-color: @sidebar-bg;
+    }
+    .sidebar-item-title {
+      background: @sidebar-bg;
+    }
     .sidebar-item-title:hover {
-      color: inherit !important;
-      background-color: inherit !important;
+      color: @sidebar-header-color !important;
+      background-color: @sidebar-bg !important;
     }
   }
 
@@ -67,7 +75,7 @@
     .flex-parent();
 
     padding: @vis-editor-agg-editor-spacing;
-    border-top: 1px solid @sidebar-bg;
+    border-bottom: 1px solid @sidebar-bg;
 
     // wraps the .vis-editor-agg and nesting-indicator ^^
     &-wrapper {
@@ -76,8 +84,8 @@
 
     &-group {
       .flex-parent();
-      background-color: @body-bg;
       color: @text-color;
+      margin-bottom: 10px;
     }
 
     &-header {
