@@ -86,6 +86,15 @@ define(function (require) {
         searchSource.set('query', $state.query);
       }
 
+      // track state of editable vis vs. "actual" vis
+      $scope.stageEditableVis = transferVisState(editableVis, vis);
+      $scope.resetEditableVis = transferVisState(vis, editableVis);
+      $scope.$watch(function () {
+        return editableVis.getState();
+      }, function (newState) {
+        editableVis.dirty = !angular.equals(newState, vis.getState());
+      }, true);
+
       $scope.$on('ready:vis', function () {
         $scope.$emit('application.load');
       });
@@ -124,16 +133,6 @@ define(function (require) {
 
     $scope.fetch = function () {
       searchSource.fetch();
-    };
-
-    $scope.stageEditableVis = function () {
-      vis.setState(editableVis.getState());
-      $state.save();
-    };
-
-    $scope.resetEditableVis = function () {
-      editableVis.setState(vis.getState());
-      $state.save();
     };
 
     $scope.startOver = function () {
@@ -193,6 +192,14 @@ define(function (require) {
     $scope.$on('$destroy', function () {
       savedVis.destroy();
     });
+
+    function transferVisState(fromVis, toVis) {
+      return function () {
+        toVis.setState(fromVis.getState());
+        editableVis.dirty = false;
+        $state.save();
+      };
+    }
 
     init();
   });
