@@ -81,6 +81,10 @@ define(function (require) {
       };
     };
 
+    Vis.prototype.clone = function () {
+      return new Vis(this.indexPattern, this.getState());
+    };
+
     return Vis;
   };
 });

@@ -1,0 +1,43 @@
+<div class="vis-editor-sidebar">
+  <div class="sidebar-container">
+    <form class="sidebar-list" ng-submit="doApply()" name="visualizeEditor">
+      <ul class="list-unstyled">
+
+        <!-- metrics -->
+        <li ng-if="vis.type.schemas.metrics" class="sidebar-item">
+          <vis-editor-agg-group
+            vis="vis"
+            saved-vis="savedVis"
+            schemas="vis.type.schemas.metrics"
+            group="vis.aggs.bySchemaGroup.metrics"
+            group-name="'metrics'"
+            >
+          </vis-editor-agg-group>
+        </li>
+
+        <!-- buckets -->
+        <li ng-if="vis.type.schemas.buckets" class="sidebar-item">
+          <vis-editor-agg-group
+            vis="vis"
+            saved-vis="savedVis"
+            schemas="vis.type.schemas.buckets"
+            group="vis.aggs.bySchemaGroup.buckets"
+            group-name="'buckets'"
+            >
+          </vis-editor-agg-group>
+        </li>
+
+        <!-- apply -->
+        <li class="sidebar-item">
+          <button
+            type="submit"
+            ng-if="stateDirty"
+            ng-disabled="httpActive.length || visualizeEditor.$invalid"
+            class="sidebar-item-button success">
+            Apply
+          </button>
+        </li>
+      </ul>
+    </form>
+  </div>
+</div>

@@ -58,49 +58,12 @@
 
 
   <div class="vis-editor-content">
-    <div ng-if="!appEmbedded" class="vis-editor-sidebar">
-      <div class="sidebar-container">
-        <form class="sidebar-list" ng-submit="fetch()" name="visualizeEditor">
-          <ul class="list-unstyled">
-
-            <!-- metrics -->
-            <li ng-if="vis.type.schemas.metrics" class="sidebar-item">
-              <vis-editor-agg-group
-                vis="vis"
-                saved-vis="savedVis"
-                schemas="vis.type.schemas.metrics"
-                group="vis.aggs.bySchemaGroup.metrics"
-                group-name="'metrics'"
-                >
-              </vis-editor-agg-group>
-            </li>
-
-            <!-- buckets -->
-            <li ng-if="vis.type.schemas.buckets" class="sidebar-item">
-              <vis-editor-agg-group
-                vis="vis"
-                saved-vis="savedVis"
-                schemas="vis.type.schemas.buckets"
-                group="vis.aggs.bySchemaGroup.buckets"
-                group-name="'buckets'"
-                >
-              </vis-editor-agg-group>
-            </li>
-
-            <!-- apply -->
-            <li class="sidebar-item">
-              <button
-                ng-click="fetch()"
-                ng-if="stateDirty"
-                ng-disabled="httpActive.length || visualizeEditor.$invalid"
-                class="sidebar-item-button success">
-                Apply
-              </button>
-            </li>
-          </ul>
-        </form>
-      </div>
-    </div>
+    <vis-editor-sidebar
+      ng-if="!appEmbedded"
+      vis="editableVis"
+      saved-vis="savedVis"
+      apply="stageEditableVis(); fetch();">
+    </vis-editor-sidebar>
 
     <div class="vis-editor-canvas">
       <p class="vis-editor-canvas-title" ng-if="savedVis.title" ng-bind="savedVis.title"></p>

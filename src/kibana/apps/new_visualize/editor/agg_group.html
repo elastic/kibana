@@ -26,13 +26,13 @@
 
   <div ng-if="addForm.visible" class="vis-editor-agg-add-form form-group">
     <label>Select {{ groupName }} type</label>
-    <select
-      name="aggType"
-      class="form-control"
-      ng-model="addForm.selected"
-      ng-change="createUsingSchema(addForm.selected)"
-      ng-options="schema as schema.title for schema in availableSchema">
-    </select>
+    <button
+      ng-repeat="schema in availableSchema"
+      ng-click="createUsingSchema(schema)"
+      class="btn-default">
+      <i ng-show="schema.icon" ng-class="schema.icon"></i>
+      {{schema.title}}
+    </button>
   </div>
 
   <button

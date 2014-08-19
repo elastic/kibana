@@ -21,6 +21,7 @@ define(function (require) {
         {
           group: 'buckets',
           name: 'segment',
+          icon: 'fa fa-scissors',
           title: 'Slices',
           min: 0,
           max: 1
@@ -28,7 +29,8 @@ define(function (require) {
         {
           group: 'buckets',
           name: 'split',
-          title: 'Splits',
+          icon: 'fa fa-th',
+          title: 'Rows & Columns',
           min: 0,
           max: 1
         }

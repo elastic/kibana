@@ -1,7 +1,8 @@
 define(function (require) {
   require('apps/visualize/saved_visualizations/saved_visualizations');
+  require('apps/visualize/editor/sidebar');
+
   require('directives/saved_object_finder');
-  require('apps/visualize/editor/agg_group');
   require('components/visualize/visualize');
   require('filters/uriescape');
 
@@ -41,6 +42,7 @@ define(function (require) {
     'kibana/courier'
   ])
   .controller('VisEditor', function ($scope, $route, timefilter, appStateFactory, $location, globalState, $timeout) {
+
     var _ = require('lodash');
     var angular = require('angular');
     var ConfigTemplate = require('utils/config_template');
@@ -52,6 +54,7 @@ define(function (require) {
 
     var savedVis = $route.current.locals.savedVis;
     var vis = savedVis.vis;
+    var editableVis = vis.clone();
     var searchSource = savedVis.searchSource;
 
     // config panel templates
@@ -65,6 +68,7 @@ define(function (require) {
       // export some objects
       $scope.savedVis = savedVis;
       $scope.vis = vis;
+      $scope.editableVis = editableVis;
       $scope.state = $state;
 
       $scope.conf = _.pick($scope, 'doSave', 'savedVis', 'shareData');
@@ -104,6 +108,7 @@ define(function (require) {
 
     $state.on('fetch_with_changes', function () {
       vis.setState($state.vis);
+      vis.setState($state.vis);
 
       // we use state to track query, must write before we fetch
       if ($state.query) {
@@ -115,21 +120,16 @@ define(function (require) {
       $scope.fetch();
     });
 
-    $scope.$watch(_.bindKey(vis, 'getState'), function (newState, prevState) {
-      // only run on actual updates, this is true on the first run.
-      if (newState === prevState) return;
-
-      $state.vis = newState;
-      $scope.stateDirty = true;
-    }, true);
-
     timefilter.enabled = true;
     timefilter.on('update', _.bindKey($scope, 'fetch'));
 
     $scope.fetch = function () {
-      $state.save();
-      $scope.stateDirty = false;
       searchSource.fetch();
+    };
+
+    $scope.stageEditableVis = function () {
+      vis.setState(editableVis.getState());
+      $state.save();
     };
 
     $scope.startOver = function () {
