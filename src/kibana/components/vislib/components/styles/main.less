@@ -21,10 +21,6 @@ div.rows {
   padding: 0;
 }
 
-div.chart {
-  flex: 1 1;
-}
-
 .row-labels, .column-labels {
   margin: 0;
   padding: 10;
@@ -66,24 +62,12 @@ visualize {
   flex-direction: column;
 }
 
-.chart-wrapper {
-  flex: 5 1;
-}
-
 .x-axis-div {
   flex: 1 1;
 }
 
 .legend-wrapper {
   flex: 1 1;
-}
-
-.chartwrapper {
-  display: flex;
-  flex: 1 1 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
 }
 
 div.x-axis-label {
@@ -326,6 +310,7 @@ line, .axis line, .axis path {
 .chart-wrapper {
   display: flex;
   flex: 25 1;
+  overflow: visible;
 }
 
 .chart-wrapper-column {
@@ -342,6 +327,7 @@ line, .axis line, .axis path {
 
 .chart {
   flex: 1 1;
+  overflow: visible;
 }
 
 .chart-row {
@@ -435,6 +421,8 @@ li.color {
   display: none;
 }
 
+/*
 svg:not(:root) {
   overflow: visible;
 }
+*/

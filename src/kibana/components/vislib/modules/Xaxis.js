@@ -32,8 +32,6 @@ define(function (require) {
         });
     };
 
-
-
     return XAxis;
   };
 });
