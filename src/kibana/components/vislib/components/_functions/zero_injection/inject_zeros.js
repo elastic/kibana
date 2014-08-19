@@ -36,7 +36,6 @@ define(function (require) {
       // the y value of the zero-filled array
       max = obj.series.length;
       for (i = 0; i < max; i++) {
-//        var zeroArray = createZeroFilledArray(keys, obj);
         zeroArray = createZeroFilledArray(keys, obj.ordered);
         dataArray = obj.series[i].values;
 

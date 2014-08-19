@@ -14,6 +14,7 @@ define(function (require) {
   var rowsArr;
   var uniqLabels;
   var error;
+  
   var seriesData = {
     'label': '',
     'series': [
@@ -23,6 +24,7 @@ define(function (require) {
       }
     ]
   };
+
   var rowsData = {
     'rows': [
       {
@@ -63,6 +65,7 @@ define(function (require) {
       }
     ]
   };
+
   var columnsData = {
     'columns': [
       {
