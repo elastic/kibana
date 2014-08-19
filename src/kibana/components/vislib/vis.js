@@ -3,20 +3,12 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
 
+    var VisFunctions = Private(require('components/vislib/modules/_functions'));
+
     // VisLib Visualization Types
     var chartTypes = {
       histogram : Private(require('components/vislib/modules/ColumnChart'))
     };
-
-    // VisLib Classes
-    var Data = Private(require('components/vislib/modules/Data'));
-    var Layout = Private(require('components/vislib/modules/Layout'));
-    var Legend = Private(require('components/vislib/modules/Legend'));
-    var Tooltip = Private(require('components/vislib/modules/Tooltip'));
-    var XAxis = Private(require('components/vislib/modules/XAxis'));
-    var YAxis = Private(require('components/vislib/modules/YAxis'));
-    var AxisTitle = Private(require('components/vislib/modules/AxisTitle'));
-    var ChartTitle = Private(require('components/vislib/modules/ChartTitle'));
 
     function Vis($el, config) {
       this.el = $el.get ? $el.get(0) : $el;
@@ -24,82 +16,73 @@ define(function (require) {
       this.ChartClass = chartTypes[config.type];
     }
 
+    _(Vis.prototype).extend(VisFunctions.prototype);
+
     Vis.prototype.render = function (data) {
-      var color;
-      var labels;
       var tooltipFormatter;
       var zeroInjectedData;
       var type;
+      var legend;
+      var xValues;
+      var formatter;
+      var width;
+      var yMax;
+      var height;
+      var xTitle;
+      var yTitle;
+      var vis;
+      var charts;
 
       if (!data) {
         throw new Error('No valid data!');
       }
 
-      this.data = new Data(data);
-      color = this.data.color ? this.data.color : this.data.getColorFunc();
-      labels = this.data.labels ? this.data.labels : this.data.getLabels();
-      tooltipFormatter = this.data.tooltipFormatter ? this.data.tooltipFormatter :
-        this.data.get('tooltipFormatter');
+      // DATA CLASS
+      this.instantiateData(data);
 
-      // LAYOUT OBJECT
-      // clears the el
+      // LAYOUT CLASS
       zeroInjectedData = this.data.injectZeros();
-      this.layout = new Layout(this.el, zeroInjectedData);
-      this.layout.render();
+      this.renderLayout(zeroInjectedData);
 
-      // LEGEND OBJECT
+      // LEGEND CLASS
       if (this.config.addLegend) {
-        this.legend = new Legend({
-          color: color,
-          labels: labels
-        }, this.config);
-        this.legend.render();
+        legend = {
+          color: this.data.getColorFunc(),
+          labels: this.data.getLabels()
+        };
+        this.renderLegend(legend, this.config);
       }
 
-      // TOOLTIP OBJECT
+      // TOOLTIP CLASS
       if (this.config.addTooltip) {
-        this.tooltip = new Tooltip('k4tip', tooltipFormatter);
+        tooltipFormatter = this.data.get('tooltipFormatter');
+        this.renderTooltip('k4tip', tooltipFormatter);
       }
 
-      // CHART TITLE OBJECT
+      // CHART TITLE CLASS
       type = this.data.splitType();
-      this.chartTitle = new ChartTitle(this.el, type);
-      this.chartTitle.render();
+      this.renderChartTitles(type);
 
-      // XAXIS OBJECT
-      var xValues = this.data.xValues();
-      var formatter = this.data.get('xAxisFormatter');
-      var width = $('.x-axis-div').width();
-      this.xAxis = new XAxis(this.el, xValues, formatter, width);
-      this.xAxis.render();
+      // XAXIS CLASS
+      xValues = this.data.xValues();
+      formatter = this.data.get('xAxisFormatter');
+      width = $('.x-axis-div').width();
+      this.renderXAxis(xValues, formatter, width);
 
-      // YAXIS OBJECT
-      var yMax = this.data.getYMaxValue();
-      var height = $('.y-axis-div').height();
-      this.yAxis = new YAxis(this.el, yMax, height);
-      this.yAxis.render();
+      // YAXIS CLASS
+      yMax = this.data.getYMaxValue();
+      height = $('.y-axis-div').height();
+      this.renderYAxis(yMax, height);
 
-      // AXIS TITLE OBJECT
-      var xTitle = this.data.get('xAxisLabel');
-      var yTitle = this.data.get('yAxisLabel');
-      this.axisTitle = new AxisTitle(this.el, xTitle, yTitle);
-      this.axisTitle.render();
+      // AXIS TITLE CLASS
+      xTitle = this.data.get('xAxisLabel');
+      yTitle = this.data.get('yAxisLabel');
+      this.renderAxisTitles(xTitle, yTitle);
 
-      // CHART OBJECT
-      var vis = this;
-      var charts = this.charts = [];
-
-      d3.select(this.el)
-        .selectAll('.chart')
-        .each(function (chartData) {
-          var chart = new vis.ChartClass(vis, this, chartData);
-          charts.push(chart);
-          try {
-            chart.render();
-          } catch (error) {
-            console.error(error.message);
-          }
-        });
+      // CHART CLASS
+      vis = this;
+      charts = this.charts = [];
+      this.renderCharts(vis, charts);
 
       this.checkSize();
     };

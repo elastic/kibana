@@ -3,11 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
 
-    var ChartFunctions = Private(require('components/vislib/modules/_functions'));
-
-    _(Chart).inherits(ChartFunctions);
     function Chart(vis, el, chartData) {
-      Chart.Super.apply(this, arguments);
       this.vis = vis;
       this.chartEl = el;
       this.chartData = chartData;
@@ -15,37 +11,13 @@ define(function (require) {
     }
 
     Chart.prototype.render = function () {
-      return this.draw();
+      return d3.select(this.chartEl).call(this.draw());
     };
 
-//    Chart.prototype.callXAxis = function () {
-//      return new XAxis(this);
-//    };
-//
-//    Chart.prototype.callYAxis = function () {
-//      return new YAxis(this);
-//    };
-//
-//    Chart.prototype.resize = _.debounce(function () {
-//      if (!this.data) {
-//        throw new Error('No valid data');
-//      }
-//      this.render(this.data);
-//    }, 200);
-//
-//    Chart.prototype.checkSize = function () {
-//      // enable auto-resize
-//      var size = $('.chart').width() + ':' + $('.chart').height();
-//
-//      if (this.prevSize !== size) {
-//        this.resize();
-//      }
-//      this.prevSize = size;
-//      setTimeout(this.checkSize, 250);
-//    };
-
     Chart.prototype.on = function () {};
+
     Chart.prototype.off = function () {};
+
     Chart.prototype.destroy = function () {};
 
     Chart.prototype.set = function (name, val) {
