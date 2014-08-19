@@ -13,6 +13,13 @@ define(function (require) {
       return renderYAxis(this);
     };
 
+    YAxis.prototype.getYScale = function () {
+      this.yScale = d3.scale.linear()
+        .domain([0, this.yMax])
+        .range([this.height, 0])
+        .nice();
+    };
+
     YAxis.prototype.ticks = function () {};
     YAxis.prototype.title = function () {};
     YAxis.prototype.chartTitle = function () {};
