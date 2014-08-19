@@ -63,6 +63,11 @@ define(function (require) {
     var savedSearch = $route.current.locals.savedSearch;
     $scope.$on('$destroy', savedSearch.destroy);
 
+    // abort any seqmented query requests when leaving discover
+    $scope.$on('$routeChangeStart', function () {
+      segmentedFetch.abort();
+    });
+
     // list of indexPattern id's
     var indexPatternList = $route.current.locals.indexList;
 
@@ -270,8 +275,6 @@ define(function (require) {
           sortFn = new HitSortFn(sort[1]);
         }
 
-        var eventComplete = notify.event('segmented fetch');
-
         return segmentedFetch.fetch({
           searchSource: $scope.searchSource,
           totalSize: sortBy === 'non-time' ? false : totalSize,
@@ -336,7 +339,6 @@ define(function (require) {
         })
         .finally(function () {
           $scope.fetchStatus = false;
-          eventComplete();
         });
       })
       .catch(notify.error);
@@ -411,6 +413,7 @@ define(function (require) {
 
       // get the current indexPattern
       var indexPattern = $scope.searchSource.get('index');
+
       // if indexPattern exists, but $scope.opts.index doesn't, or the opposite, or if indexPattern's id
       // is not equal to the $scope.opts.index then either clean or
       if (
@@ -422,7 +425,6 @@ define(function (require) {
       }
 
       $scope.opts.timefield = indexPattern.timeFieldName;
-
 
       return Promise.cast(indexPattern)
       .then(function (indexPattern) {

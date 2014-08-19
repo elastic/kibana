@@ -1,6 +1,8 @@
 define(function (require) {
   return function DiscoverSegmentedFetch(es, Private, Promise, Notifier) {
     var activeReq = null;
+    var notifyEvent;
+    var searchPromise;
     var getStateFromRequest = Private(require('components/courier/fetch/strategy/search')).getSourceStateFromRequest;
     var _ = require('lodash');
     var moment = require('moment');
@@ -10,6 +12,12 @@ define(function (require) {
     var notify = new Notifier({
       location: 'Segmented Fetch'
     });
+
+    segmentedFetch.abort = function () {
+      activeReq = null;
+      searchPromise.abort();
+      clearNotifyEvent();
+    };
 
     /**
      * Fetch search results, but segment by index name.
@@ -34,6 +42,8 @@ define(function (require) {
       var direction = opts.direction;
       var limitSize = false;
       var remainingSize = false;
+
+      notifyEvent = notify.event('segmented fetch');
 
       if (opts.totalSize) {
         limitSize = true;
@@ -95,19 +105,7 @@ define(function (require) {
           }
           req.state = state;
 
-          return es.search({
-            index: index,
-            type: state.type,
-            ignoreUnavailable: true,
-            body: state.body
-          })
-          .catch(function (err) {
-            if (err.status === 403 && err.message.match(/ClusterBlockException.+index closed/)) {
-              return false;
-            } else {
-              throw err;
-            }
-          })
+          return execSearch(index, state)
           .then(function (resp) {
             // abort if fetch is called twice quickly
             if (req !== activeReq) return;
@@ -161,6 +159,7 @@ define(function (require) {
       .then(req.defer.resolve, req.defer.reject);
 
       function done() {
+        clearNotifyEvent();
         req.complete = true;
         req.ms = req.moment.diff() * -1;
         req.source.activeFetchCount -= 1;
@@ -198,6 +197,32 @@ define(function (require) {
         mbucket = merged._bucketIndex[bucket.key] = bucket;
         merged.aggregations._agg_0.buckets.push(mbucket);
       });
+    }
+
+    function execSearch(index, state) {
+      searchPromise = es.search({
+        index: index,
+        type: state.type,
+        ignoreUnavailable: true,
+        body: state.body
+      });
+
+      // don't throw ClusterBlockException errors
+      searchPromise.catch(function (err) {
+        if (err.status === 403 && err.message.match(/ClusterBlockException.+index closed/)) {
+          return false;
+        } else {
+          throw err;
+        }
+      });
+
+      return searchPromise;
+    }
+
+    function clearNotifyEvent() {
+      if (_.isFunction(notifyEvent)) {
+        notifyEvent();
+      }
     }
 
     return segmentedFetch;
