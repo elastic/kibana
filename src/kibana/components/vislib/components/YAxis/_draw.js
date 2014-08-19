@@ -5,7 +5,6 @@ define(function (require) {
 
     return function (that) {
       // split
-      d3.select('.y-axis-div-wrapper').datum(that.data).call(split);
       // drawing axis
       return d3.selectAll('.y-axis-div').call(drawYAxis(that));
     };

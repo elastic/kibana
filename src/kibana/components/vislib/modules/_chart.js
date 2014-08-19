@@ -15,6 +15,7 @@ define(function (require) {
       this.color = vis.color;
       this.orderedKeys = vis.orderedKeys;
       this.tooltip = vis.tooltip;
+      this.yAxis = vis.yAxis;
 
       // Chart specific items
       this.chartEl = el;

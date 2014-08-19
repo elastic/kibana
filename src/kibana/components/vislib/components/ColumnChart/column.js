@@ -23,18 +23,10 @@ define(function (require) {
       // Inherited functions
       var color = vis.data.getColorFunc();
       var tooltip = vis.tooltip;
-      var yStackMax = vis.data.getYMaxValue();
-      var yMax;
-//      var createSVG = vis.createSVG;
-//      var transformSVG = vis.transformSVG;
-//      var appendXAxis = vis.appendXAxis;
-//      var appendYAxis = vis.appendYAxis;
 
       // d3 Functions
-      var yScale = d3.scale.linear();
+      var yScale = vis.yAxis.yScale;
       var xScale = d3.scale.ordinal();
-      var xAxis = d3.svg.axis().orient('bottom');
-      var yAxis = d3.svg.axis().orient('left');
 //      var xTickScale = d3.scale.linear()
 //        .clamp(true)
 //        .domain([80, 300, 800])
@@ -79,6 +71,9 @@ define(function (require) {
           });
         }));
 
+        if (elWidth <= 0 || elHeight <= 0) {
+          throw new Error($elem.attr('class') + ' height is ' + elHeight + ' and width is ' + elWidth);
+        }
 
         // Get the width and height
         width = elWidth - margin.left - margin.right;
@@ -91,13 +86,6 @@ define(function (require) {
         // Update the xScale
         xScale.domain(xValues)
           .rangeBands([0, width], 0.1);
-        yScale
-          .domain([0, yStackMax])
-          .range([height, 0]);
-
-        // Update the Axes
-        xAxis.scale(xScale);
-        yAxis.scale(yScale);
 
         // Create the canvas for the visualization
         var svg = d3.select(chartEl).append('svg')
