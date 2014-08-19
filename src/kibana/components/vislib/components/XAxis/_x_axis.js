@@ -35,6 +35,14 @@ define(function (require) {
           if (ticksLength > width) {
             self.rotateAxisLabels(selection);
           }
+          
+          var lbls = selection.selectAll('.tick text')[0];
+          console.log('ticks n', tickN, lbls);
+          for (var i = 0; i < tickN; i++) {
+            console.log(i, lbls[i]);
+            //if (bbox[i]) {
+            //}
+          }
 
           // check widths to apply filter
           var rotatedTicksLength = bbox.height * 1.05 * tickN;
