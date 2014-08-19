@@ -3,43 +3,39 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
 
-    // VisLib Objects
-    var Data = Private(require('components/vislib/modules/Data'));
-    var Tooltip = Private(require('components/vislib/modules/Tooltip'));
-    var XAxis = Private(require('components/vislib/modules/Xaxis'));
-    var YAxis = Private(require('components/vislib/modules/YAxis'));
-    var Legend = Private(require('components/vislib/modules/Legend'));
-    var AxisTitle = Private(require('components/vislib/modules/AxisTitle'));
-    var ChartTitle = Private(require('components/vislib/modules/ChartTitle'));
-
-    var ChartFunctions = Private(require('components/vislib/modules/_functions'));
-    var split = Private(require('components/vislib/components/_functions/d3/_split'));
-
+    // VisLib Visualization Types
     var chartTypes = {
       histogram : Private(require('components/vislib/modules/ColumnChart'))
     };
+
+    // VisLib Classes
+    var Data = Private(require('components/vislib/modules/Data'));
+    var Layout = Private(require('components/vislib/modules/Layout'));
+    var Legend = Private(require('components/vislib/modules/Legend'));
+    var Tooltip = Private(require('components/vislib/modules/Tooltip'));
+    var XAxis = Private(require('components/vislib/modules/XAxis'));
+    var YAxis = Private(require('components/vislib/modules/YAxis'));
+    var AxisTitle = Private(require('components/vislib/modules/AxisTitle'));
+    var ChartTitle = Private(require('components/vislib/modules/ChartTitle'));
 
     function Vis($el, config) {
       this.el = $el.get ? $el.get(0) : $el;
       this.config = config;
       this.ChartClass = chartTypes[config.type];
-      this.timeStamp = new Date().getTime();
     }
-
-    _(Vis.prototype).extend(ChartFunctions.prototype);
 
     Vis.prototype.render = function (data) {
       var color;
       var labels;
       var tooltipFormatter;
       var zeroInjectedData;
+      var type;
 
       if (!data) {
         throw new Error('No valid data!');
       }
 
       this.data = new Data(data);
-      zeroInjectedData = this.data.injectZeros();
       color = this.data.color ? this.data.color : this.data.getColorFunc();
       labels = this.data.labels ? this.data.labels : this.data.getLabels();
       tooltipFormatter = this.data.tooltipFormatter ? this.data.tooltipFormatter :
@@ -47,23 +43,17 @@ define(function (require) {
 
       // LAYOUT OBJECT
       // clears the el
-      this.removeAll(this.el);
-
-      // add layout
-      this.layout(this.el);
-
-      // split data
-      this.callFunction(d3.select('.chart-wrapper'), zeroInjectedData, split);
+      zeroInjectedData = this.data.injectZeros();
+      this.layout = new Layout(this.el, zeroInjectedData);
+      this.layout.render();
 
       // LEGEND OBJECT
       if (this.config.addLegend) {
         this.legend = new Legend({
-          // class: 'legend-col-wrapper',
           color: color,
           labels: labels
         }, this.config);
-        this.legend.timeStamp = new Date().getTime();
-        this.legend.draw();
+        this.legend.render();
       }
 
       // TOOLTIP OBJECT
@@ -72,20 +62,28 @@ define(function (require) {
       }
 
       // CHART TITLE OBJECT
-      this.chartTitle = new ChartTitle(this.data.splitType(), this.data.splits());
-      this.chartTitle.append();
+      type = this.data.splitType();
+      this.chartTitle = new ChartTitle(this.el, type);
+      this.chartTitle.render();
 
       // XAXIS OBJECT
-      this.xAxis = new XAxis(this.data);
-      this.xAxis.draw();
+      var xValues = this.data.xValues();
+      var formatter = this.data.get('xAxisFormatter');
+      var width = $('.x-axis-div').width();
+      this.xAxis = new XAxis(this.el, xValues, formatter, width);
+      this.xAxis.render();
 
       // YAXIS OBJECT
-      this.yAxis = new YAxis(this.data, this.data.getYMaxValue());
-      this.yAxis.draw();
+      var yMax = this.data.getYMaxValue();
+      var height = $('.y-axis-div').height();
+      this.yAxis = new YAxis(this.el, yMax, height);
+      this.yAxis.render();
 
       // AXIS TITLE OBJECT
-      this.axisTitle = new AxisTitle(this.data.get('xAxisLabel'), this.data.get('yAxisLabel'));
-      this.axisTitle.append();
+      var xTitle = this.data.get('xAxisLabel');
+      var yTitle = this.data.get('yAxisLabel');
+      this.axisTitle = new AxisTitle(this.el, xTitle, yTitle);
+      this.axisTitle.render();
 
       // CHART OBJECT
       var vis = this;
@@ -99,11 +97,11 @@ define(function (require) {
           try {
             chart.render();
           } catch (error) {
-            console.group(error.message);
+            console.error(error.message);
           }
         });
 
-      this.checkSize('.chart');
+      this.checkSize();
     };
 
     Vis.prototype.resize = function () {
@@ -113,15 +111,15 @@ define(function (require) {
       this.render(this.data.data);
     };
 
-    Vis.prototype.checkSize = _.debounce(function (el) {
+    Vis.prototype.checkSize = _.debounce(function () {
       // enable auto-resize
-      var size = $(el).width() + ':' + $(el).height();
+      var size = $('.chart').width() + ':' + $('.chart').height();
 
       if (this.prevSize !== size) {
         this.resize();
       }
       this.prevSize = size;
-      setTimeout(this.checkSize(el), 300);
+      setTimeout(this.checkSize(), 300);
     }, 300);
 
     Vis.prototype.on = function () {

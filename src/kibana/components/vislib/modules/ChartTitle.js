@@ -2,47 +2,40 @@ define(function (require) {
   return function ChartTitleFactory(d3) {
     var $ = require('jquery');
 
-    function ChartTitle(type, splits) {
+    function ChartTitle(el, type) {
+      this.el = el;
       this.splitType = type;
-      this.splitArray = splits;
-      this.divClass = this.splitType === 'rows' ? 'y-axis-chart-title' : 'x-axis-chart-title';
-      this.removeClass = this.splitType === 'rows' ? 'x-axis-chart-title' : 'y-axis-chart-title';
     }
 
-    ChartTitle.prototype.append = function () {
+    ChartTitle.prototype.render = function () {
+      d3.select(this.el).selectAll('.chart-title').call(this.appendTitles());
+    };
+    
+    ChartTitle.prototype.appendTitles = function () {
       var self = this;
 
-      d3.select('.' + this.divClass).selectAll('chart-title').append('div')
-        .data(this.splitArray)
-        .enter().append('div')
-        .attr('class', 'chart-title')
-        .append('svg')
-        .attr('width', $('.chart-title').width())
-        .attr('height', $('.chart-title').height())
-        .append('text')
-        .attr('transform', function () {
-          var width = $('.chart-title').width();
-          var height = $('.chart-title').height();
-          if (self.splitType === 'rows') {
-            return 'translate(' + width * 0.7 + ',' + height / 2 + ')rotate(270)';
-          }
-          return 'translate(' + width / 2 + ',' + height * 0.7 + ')';
-        })
-        .attr('text-anchor', 'middle')
-        .text(function (d) {
-          return d.label;
+      return function (selection) {
+        selection.each(function () {
+          var div = d3.select(this);
+          var width = $(this).width();
+          var height = $(this).height();
+
+          div.append('svg')
+            .attr('width', width)
+            .attr('height', height)
+            .append('text')
+            .attr('transform', function () {
+              if (self.splitType === 'rows') {
+                return 'translate(' + width + ',' + height / 2 + ')rotate(270)';
+              }
+              return 'translate(' + width / 2 + ',' + height * 0.8 + ')';
+            })
+            .attr('text-anchor', 'middle')
+            .text(function (d) {
+              return d.label;
+            });
         });
-
-      if (this.splitArray.series) {
-        this.remove(this.divClass);
-        this.remove(this.removeClass);
-      }
-
-      this.remove(this.removeClass);
-    };
-
-    ChartTitle.prototype.remove = function (divClass) {
-      d3.select('.' + divClass).style('flex', '0 1');
+      };
     };
 
     return ChartTitle;

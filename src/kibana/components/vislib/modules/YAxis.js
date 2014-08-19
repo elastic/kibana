@@ -5,10 +5,15 @@ define(function (require) {
 
     var split = Private(require('components/vislib/components/YAxis/_split'));
 
-    function YAxis(data, yMax) {
-      this.data = data;
+    function YAxis(el, yMax, height) {
+      this.el = el;
       this.yMax = yMax;
+      this.height = height;
     }
+
+    YAxis.prototype.render = function () {
+      d3.select(this.el).selectAll('.y-axis-div').call(this.appendSVG());
+    };
 
     YAxis.prototype.getYScale = function () {
       this.yScale = d3.scale.linear()
@@ -18,43 +23,40 @@ define(function (require) {
     };
 
     YAxis.prototype.getYAxis = function () {
+      this.getYScale();
+
       this.yAxis = d3.svg.axis()
         .scale(this.yScale)
         .tickFormat(d3.format('s'))
         .orient('left');
     };
 
-    YAxis.prototype.appendSVG = function (self) {
+    YAxis.prototype.appendSVG = function () {
+      var self = this;
+      var div;
+      var width;
+      var height;
+      var svg;
+
+      this.getYAxis();
+
       return function (selection) {
         selection.each(function () {
-          var div = d3.select(this);
+          div = d3.select(this);
+          width = $(this).width();
+          height = $(this).height();
 
-          var svg = div.append('svg')
-            .attr('width', self.width)
-            .attr('height', self.height + 10);
+          svg = div.append('svg')
+            .attr('width', width)
+            .attr('height', height);
 
           svg.append('g')
             .attr('class', 'y axis')
-            .attr('transform', 'translate(' + self.width + ',5)')
+            .attr('transform', 'translate(' + width + ', 0)')
             .call(self.yAxis);
         });
       };
     };
-
-    YAxis.prototype.draw = function () {
-      d3.select('.y-axis-div-wrapper').datum(this.data.data).call(split);
-
-      this.height = $('.y-axis-div').height();
-      this.width = $('.y-axis-div').width();
-
-      this.getYScale();
-      this.getYAxis();
-      d3.selectAll('.y-axis-div').call(this.appendSVG(this));
-    };
-
-    YAxis.prototype.ticks = function () {};
-    YAxis.prototype.title = function () {};
-    YAxis.prototype.chartTitle = function () {};
 
     return YAxis;
   };

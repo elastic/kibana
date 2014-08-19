@@ -5,36 +5,24 @@ define(function (require) {
 
     var classify = Private(require('components/vislib/components/Legend/classify'));
 
-    return function (vis, chartEl, chartData) {
+    return function (self) {
       // Attributes
-      var data = chartData;
-      var xValues = vis.data.orderedKeys ? vis.data.orderedKeys : vis.data.xValues();
-      var $elem = $(chartEl);
+      var $elem = $(self.chartEl);
+      var data = self.chartData;
 
-      var margin = vis._attr.margin;
-      var elWidth = vis._attr.width = $elem.width();
-      var elHeight = vis._attr.height = $elem.height();
-      var offset = vis._attr.offset;
-      var focusOpacity = vis._attr.focusOpacity;
-      var blurredOpacity = vis._attr.blurredOpacity;
-      var defaultOpacity = vis._attr.defaultOpacity;
-      var isTooltip = vis._attr.addTooltip;
+      var margin = self._attr.margin;
+      var elWidth = self._attr.width = $elem.width();
+      var elHeight = self._attr.height = $elem.height();
+      var offset = self._attr.offset;
+      var isTooltip = self._attr.addTooltip;
 
       // Inherited functions
-      var color = vis.data.getColorFunc();
-      var tooltip = vis.tooltip;
+      var color = self.vis.data.color;
+      var tooltip = self.vis.tooltip;
 
       // d3 Functions
-      var yScale = vis.yAxis.yScale;
-      var xScale = d3.scale.ordinal();
-//      var xTickScale = d3.scale.linear()
-//        .clamp(true)
-//        .domain([80, 300, 800])
-//        .range([0, 2, 4]);
-//      var yTickScale = d3.scale.linear()
-//        .clamp(true)
-//        .domain([20, 40, 1000])
-//        .range([0, 2, 10]);
+      var yScale = self.vis.yAxis.yScale;
+      var xScale = self.vis.xAxis.xScale;
       var stack = d3.layout.stack()
         .x(function (d) {
           return d.x;
@@ -55,10 +43,8 @@ define(function (require) {
       var width;
       var height;
       var layers;
-      var xTicks;
-      var yTicks;
 
-      return d3.select(chartEl).call(function () {
+      return d3.select(self.chartEl).call(function () {
 
         layers = stack(data.series.map(function (d) {
           var label = d.label;
@@ -79,16 +65,8 @@ define(function (require) {
         width = elWidth - margin.left - margin.right;
         height = elHeight - margin.top - margin.bottom;
 
-        // Get the number of axis ticks
-//          xTicks = Math.floor(xTickScale(width));
-//          yTicks = Math.floor(yTickScale(height));
-
-        // Update the xScale
-        xScale.domain(xValues)
-          .rangeBands([0, width], 0.1);
-
         // Create the canvas for the visualization
-        var svg = d3.select(chartEl).append('svg')
+        var svg = d3.select(self.chartEl).append('svg')
           .attr('width', width + margin.left + margin.right)
           .attr('height', height + margin.top + margin.bottom)
           .append('g')
@@ -97,8 +75,7 @@ define(function (require) {
         // Data layers
         var layer = svg.selectAll('.layer')
           .data(layers)
-          .enter()
-          .append('g')
+          .enter().append('g')
           .attr('class', function (d, i) {
             return i;
           });
@@ -139,42 +116,28 @@ define(function (require) {
           })
 
           .on('mouseover.bar', function (d, i) {
-            //console.log(i, d, data.series, d3.event);
             d3.select(this)
               .classed('hover', true)
               .style('stroke', '#333');
-              //.style('cursor', 'pointer');
-
-            // dispatch.hover({
-            //   value: getY(d, i),
-            //   point: d,
-            //   pointIndex: i,
-            //   series: data.series,
-            //   config: config,
-            //   data: latestData,
-            //   e: d3.event
-            // });
-            // d3.event.stopPropagation();
-
           })
           .on('mouseout.bar', function (d) {
-            //console.log('OUT', d);
             d3.select(this)
               .classed('hover', false)
               .style('stroke', null);
-              //.style('cursor', 'pointer');
           });
 
         // chart base line
-        var line = layer.append('line')
-          .attr('x1', 0)
-          .attr('y1', height)
-          .attr('x2', width)
-          .attr('y2', height);
-          
+//        var line = svg.append('line')
+//          .attr('x1', 0)
+//          .attr('y1', height)
+//          .attr('x2', width)
+//          .attr('y2', height)
+//          .style('stroke', '#848e96')
+//          .style('stroke-width', 1);
+
         // Add tooltip
         if (isTooltip) {
-          bars.call(tooltip.draw());
+          bars.call(tooltip.render());
         }
 
         return svg;
