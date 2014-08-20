@@ -44,8 +44,13 @@ define(function (require) {
           }
 
           var $aggParamEditors;
+          var $aggParamEditorsScope;
           $scope.$watch('agg.type', function updateAggParamEditor() {
-            if ($aggParamEditors) $aggParamEditors.remove();
+            if ($aggParamEditors) {
+              $aggParamEditors.remove();
+              $aggParamEditorsScope.$destroy();
+              $aggParamEditors = $aggParamEditorsScope = null;
+            }
 
             var agg = $scope.agg;
             var type = $scope.agg.type;
@@ -70,7 +75,8 @@ define(function (require) {
             }).filter(Boolean);
 
             $aggParamEditors = $(editors).appendTo($editorContainer);
-            $compile($aggParamEditors)($scope);
+            $aggParamEditorsScope = $scope.$new();
+            $compile($aggParamEditors)($aggParamEditorsScope);
           });
 
           // generic child scope creation, for both schema and agg
@@ -93,14 +99,25 @@ define(function (require) {
         }());
 
         /**
-         * [makeDescription description]
+         * Describe the aggregation, for display in the collapsed agg header
          * @return {[type]} [description]
          */
-        $scope.makeDescription = function () {
+        $scope.describe = function () {
           if (!$scope.agg.type.makeLabel) return '';
-
           var label = $scope.agg.type.makeLabel($scope.agg);
           return label ? label : '';
+        };
+
+        /**
+         * Describe the errors in this agg
+         * @return {[type]} [description]
+         */
+        $scope.describeError = function () {
+          var count = _.reduce($scope.aggForm.$error, function (count, controls, errorType) {
+            return count + _.size(controls);
+          }, 0);
+
+          return count + ' Error' + (count > 1 ? 's' : '');
         };
 
         $scope.moveUp = function (agg) {

@@ -10,7 +10,6 @@ define(function (require) {
         aggParam: '=',
         params: '='
       },
-      replace: true,
       template: function ($el, attr) {
         return $el.html();
       }
