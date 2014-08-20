@@ -34,7 +34,7 @@ define(function (require) {
 
             // TODO: It would be better to actually check the type of the field, but we don't have
             // access to it here. This may become a problem with the switch to BigNumber
-            if (_.isNumeric(contents)) $cell.css('text-align', 'right');
+            if (_.isNumeric(contents)) $cell.addClass('numeric-value');
 
             if (contents === '') {
               $cell.html('&nbsp;');
