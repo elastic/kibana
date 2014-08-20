@@ -7,7 +7,7 @@ define(function (require) {
     return {
       name: 'table',
       display: 'Table',
-      template: require('text!apps/visualize/spy/_table.html'),
+      template: require('text!components/visualize/spy/_table.html'),
       link: function tableLinkFn($scope, $el) {
         var notify = new Notifier();
         var orderBy = $filter('orderBy');
@@ -20,10 +20,17 @@ define(function (require) {
           filename: 'table.csv'
         };
 
+        $scope.colTitle = function (col) {
+          var aggConfig = col.aggConfig;
+          if (!aggConfig) return 'count';
+          if (aggConfig.schema.group !== 'metrics') return col.field.name;
+          return aggConfig.type.makeLabel(aggConfig);
+        };
+
         $scope.getColumnClass = function (col, $first, $last) {
           var cls = [];
 
-          if ($last || $scope.fields && $scope.fields[col] && $scope.fields[col].type === 'number') {
+          if ($last || (col.field && col.field.type === 'number')) {
             cls.push('visualize-table-right');
           }
 
@@ -35,9 +42,9 @@ define(function (require) {
         };
 
         $scope.cycleSort = function (col) {
-          if (!$scope.sort || $scope.sort.field !== col) {
+          if (!$scope.sort || $scope.sort.col !== col) {
             $scope.sort = {
-              field: col,
+              col: col,
               asc: true
             };
           } else if ($scope.sort.asc) {
@@ -47,11 +54,11 @@ define(function (require) {
           }
 
           if ($scope.sort && !$scope.sort.getter) {
-            var fieldi = $scope.columns.indexOf($scope.sort.field);
+            var colI = $scope.columns.indexOf($scope.sort.col);
             $scope.sort.getter = function (row) {
-              return row[fieldi];
+              return row[colI];
             };
-            if (fieldi === -1) delete $scope.sort;
+            if (colI === -1) delete $scope.sort;
           }
         };
 
@@ -76,7 +83,7 @@ define(function (require) {
           rows[0] = colRow;
 
           raw.columns.forEach(function (col) {
-            colRow.push(escape(col.params ? col.params.field : 'count'));
+            colRow.push(escape($scope.colTitle(col)));
           });
 
           raw.rows.forEach(function (rawRow, i) {
@@ -100,33 +107,25 @@ define(function (require) {
           'sort.asc',
           'sort.field'
         ], function () {
-          $scope.rows = null;
-          $scope.columns = null;
+          if (!$scope.chartData) {
+            $scope.rows = $scope.columns = null;
+            return;
+          }
 
-          if (!$scope.chartData) return;
+          $scope.rows = $scope.chartData.raw.rows;
+          $scope.columns = $scope.chartData.raw.columns;
 
           notify.event('flatten data for table', function () {
-            // flatten the fields to a list of strings
-            $scope.columns = [];
-            // collect the formatter for each column, in order
-            var formats = [];
-
-            // populate columns and formates
-            $scope.chartData.raw.columns.forEach(function (col) {
-              $scope.columns.push(col.params ? col.params.field : 'count');
-              formats.push(col.field ? col.field.format.convert : _.identity);
-            });
-
-
-            $scope.rows = $scope.chartData.raw.rows;
 
             // sort the row values
-            if ($scope.sort) $scope.rows = orderBy($scope.rows, $scope.sort.getter, $scope.sort.asc);
+            if ($scope.sort){
+              $scope.rows = orderBy($scope.rows, $scope.sort.getter, $scope.sort.asc);
+            }
 
             // format all row values
             $scope.rows = $scope.rows.map(function (row) {
               return row.map(function (cell, i) {
-                return formats[i](cell);
+                return $scope.columns[i].field.format.convert(cell);
               });
             });
           });

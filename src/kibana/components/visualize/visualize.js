@@ -2,6 +2,9 @@ define(function (require) {
   require('modules')
   .get('kibana/directive')
   .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private) {
+
+    require('components/visualize/spy/spy');
+    require('css!components/visualize/visualize.css');
     var vislib = require('components/vislib/index');
     var $ = require('jquery');
     var _ = require('lodash');
@@ -45,10 +48,9 @@ define(function (require) {
           $scope.onlyShowSpy = $scope.spyMode && $el.height() < 550;
         };
 
-        // we need to wait for two watchers to fire
+        // we need to wait for come watchers to fire at least once
         // before we are "ready", this manages that
         var prereq = (function () {
-
           var fns = [];
 
           return function register(fn) {
@@ -67,7 +69,6 @@ define(function (require) {
           };
         }());
 
-        // provide a setter to the visualize-spy directive
         $scope.$on('change:spyMode', function (event, newMode) {
           calcResponsiveStuff();
         });
@@ -100,15 +101,13 @@ define(function (require) {
 
           chart = new vislib.Chart($visualize[0], vislibParams);
 
-          // For each type of interaction, assign the the handler if the vis object has it
-          // otherwise use the typeDef, otherwise, do nothing.
           _.each(vis.type.listeners, function (listener, event) {
             chart.on(event, listener);
           });
         }));
 
         $scope.$watch('searchSource', prereq(function (searchSource) {
-          if (!searchSource) return;
+          if (!searchSource || attr.esResp) return;
 
           // TODO: we need to have some way to clean up result requests
           searchSource.onResults().then(function onResults(resp) {
@@ -124,7 +123,6 @@ define(function (require) {
 
         $scope.$watch('esResp', prereq(function (resp, prevResp) {
           if (!resp) return;
-
           $scope.chartData = buildChartData($scope.vis, resp);
         }));
 

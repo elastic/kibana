@@ -3,16 +3,16 @@
     <thead>
       <tr bindonce>
         <th
-          ng-repeat="col in columns track by $index"
+          ng-repeat="col in columns"
           ng-click="cycleSort(col)"
-          ng-class="getColumnClass(columns, $first, $last)">
-          <span bo-text="col"></span>
+          ng-class="getColumnClass(col, $first, $last)">
+          <span bo-text="colTitle(col)"></span>
           <i
             class="fa"
             ng-class="{
-              'fa-sort-asc': sort.field === col && sort.asc === true,
-              'fa-sort-desc': sort.field === col && sort.asc === false,
-              'fa-sort': !sort || sort.field !== col
+              'fa-sort-asc': sort.col === col && sort.asc === true,
+              'fa-sort-desc': sort.col === col && sort.asc === false,
+              'fa-sort': !sort || sort.col !== col
             }">
           </i>
         </th>

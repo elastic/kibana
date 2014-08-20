@@ -6,15 +6,15 @@ define(function (require) {
       var _ = require('lodash');
 
       var modes = _.flatten([
-        Private(require('apps/visualize/spy/_table')),
-        Private(require('apps/visualize/spy/_req_resp_stats'))
+        Private(require('components/visualize/spy/_table')),
+        Private(require('components/visualize/spy/_req_resp_stats'))
       ]);
       var defaultMode = modes[0];
       modes.byName = _.indexBy(modes, 'name');
 
       return {
         restrict: 'E',
-        template: require('text!apps/visualize/spy/_spy.html'),
+        template: require('text!components/visualize/spy/_spy.html'),
         link: function ($scope, $el) {
           $scope.spyMode = null;
           $scope.modes = modes;
