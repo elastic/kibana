@@ -49,7 +49,6 @@ define(function (require) {
                 max: val.max
               };
             }
-
           },
 
           // called from the editor

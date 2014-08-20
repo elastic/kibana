@@ -85,13 +85,6 @@ define(function (require) {
 
           if (!vis) return;
 
-          if (vis.error) {
-            $visualize.html(
-              '<div class="visualize-error"><i class="fa fa-exclamation-triangle"></i><br>' + vis.error + '</div>'
-            );
-            return;
-          }
-
           var vislibParams = _.assign(
             {},
             vis.type.vislibParams,

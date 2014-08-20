@@ -85,7 +85,7 @@ define(function (require) {
           self.vis = self._createVis();
         } else {
           self.vis.indexPattern = self.searchSource.get('index');
-          self.vis.setConfig(self.visState);
+          self.vis.setState(self.visState);
         }
 
         self.searchSource.aggs(function () {

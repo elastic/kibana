@@ -22,14 +22,12 @@ define(function (require) {
           if (!$scope.panel.visId) return;
 
           savedVisualizations.get($scope.panel.visId)
-          .then(function (vis) {
-            $scope.vis = vis;
+          .then(function (savedVis) {
+            $scope.savedVis = savedVis;
             // .destroy() called by the visualize directive
           })
           .catch(function (e) {
-            $scope.vis = {
-              error: e
-            };
+            $scope.error = e.message;
             console.log(e);
           });
         });

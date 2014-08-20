@@ -87,6 +87,20 @@ dashboard-grid {
         }
       }
 
+      .load-error {
+        text-align: center;
+        font-size: 1em;
+        .display(flex);
+        .flex(1 0 auto);
+        .justify-content(center);
+        .flex-direction(column);
+
+        .fa-exclamation-triangle {
+          font-size: 2em;
+          color: @btn-danger-bg;
+        }
+      }
+
       visualize {
         .flex(1, 1, 100%);
         height: auto;
