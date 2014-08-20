@@ -4,10 +4,10 @@
  - **src/kibana/apps/dashboard/directives/grid.js**
    - change this from event based to calling a method on dashboardApp – (https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/dashboard/directives/grid.js)
  - **src/kibana/apps/discover/controllers/discover.js**
-   - Switch this to watching time.string when we implement it – (https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/discover/controllers/discover.js)
    - On array fields, negating does not negate the combination, rather all terms – (https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/discover/controllers/discover.js)
    - Move to utility class – (https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/discover/controllers/discover.js)
    - Move to utility class – (https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/discover/controllers/discover.js)
+   - a legit way to update the index pattern – (https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/discover/controllers/discover.js)
  - **src/kibana/apps/settings/sections/indices/_create.js**
    - we should probably display a message of some kind – (https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/settings/sections/indices/_create.js)
  - **src/kibana/components/agg_types/buckets/terms.js**
