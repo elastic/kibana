@@ -1,5 +1,5 @@
 define(function (require) {
-  var app = require('modules').get('apps/visualize');
+  var app = require('modules').get('app/visualize');
   var _ = require('lodash');
 
   require('apps/visualize/saved_visualizations/_saved_vis');

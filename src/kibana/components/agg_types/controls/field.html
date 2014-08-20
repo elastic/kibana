@@ -5,8 +5,8 @@
   <select
     class="form-control"
     name="field"
-    ng-model="params.field"
     required
+    ng-model="params.field"
     ng-options="
       field as field.name group by field.type for field in aggConfig.vis.indexPattern.fields.raw
       | fieldType: aggParam.filterFieldTypes

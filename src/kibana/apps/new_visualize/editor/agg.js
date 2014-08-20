@@ -1,6 +1,6 @@
 define(function (require) {
   require('modules')
-  .get('apps/visualize')
+  .get('app/visualize')
   .directive('visEditorAgg', function ($compile, $parse, Private, Notifier) {
     var _ = require('lodash');
     var $ = require('jquery');

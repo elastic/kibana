@@ -37,7 +37,7 @@ define(function (require) {
   });
 
   require('modules')
-  .get('apps/visualize', [
+  .get('app/visualize', [
     'kibana/notify',
     'kibana/courier'
   ])

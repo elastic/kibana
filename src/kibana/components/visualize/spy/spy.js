@@ -1,6 +1,6 @@
 define(function (require) {
   require('modules')
-    .get('apps/visualize')
+    .get('app/visualize')
     .directive('visualizeSpy', function (Private, $compile) {
       var $ = require('jquery');
       var _ = require('lodash');

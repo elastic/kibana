@@ -9,7 +9,7 @@ define(function (require) {
     return '<div ng-controller="VisualizeWizardStep' + num + '" class="container vis-wizard">' + txt + '</div>';
   };
 
-  var module = require('modules').get('apps/visualize', ['kibana/courier']);
+  var module = require('modules').get('app/visualize', ['kibana/courier']);
   var routes = require('routes');
 
   /********

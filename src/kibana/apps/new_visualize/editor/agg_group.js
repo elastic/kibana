@@ -1,6 +1,6 @@
 define(function (require) {
   require('modules')
-  .get('apps/visualize')
+  .get('app/visualize')
   .directive('visEditorAggGroup', function (Private) {
     require('apps/visualize/editor/agg');
     require('apps/visualize/editor/nesting_indicator');
