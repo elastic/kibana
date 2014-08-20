@@ -35,8 +35,8 @@ define(function (require) {
      */
     AggConfig.prototype.fillDefaults = function (from) {
       var self = this;
-      var to = self.params || (self.params = {});
-      from = from || self.params;
+      from = from || self.params || {};
+      var to = self.params = {};
 
       self.getAggParams().forEach(function (aggParam) {
         var val = from[aggParam.name];
