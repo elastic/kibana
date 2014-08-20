@@ -61,17 +61,17 @@ define(function (require) {
     var savedSearch = $route.current.locals.savedSearch;
     $scope.$on('$destroy', savedSearch.destroy);
 
-    // abort any seqmented query requests when leaving discover
-    $scope.$on('$routeChangeStart', function () {
-      segmentedFetch.abort();
-    });
-
     // list of indexPattern id's
     var indexPatternList = $route.current.locals.indexList;
 
     // the actual courier.SearchSource
     $scope.searchSource = savedSearch.searchSource;
     var segmentedFetch = $scope.segmentedFetch = new SegmentedFetch($scope.searchSource);
+
+    // abort any seqmented query requests when leaving discover
+    $scope.$on('$routeChangeStart', function () {
+      segmentedFetch.abort();
+    });
 
     // Manage state & url state
     var initialQuery = $scope.searchSource.get('query');

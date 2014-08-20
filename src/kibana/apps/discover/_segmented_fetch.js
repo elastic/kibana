@@ -22,18 +22,32 @@ define(function (require) {
     // };
 
     segmentedFetch.prototype._startRequest = function (req) {
-      this.activeRequest = req;
-      this.running = true;
-      this.notifyEvent = notify.event(eventName);
+      var self = this;
+      var p = Promise.resolve();
+
+      if (self.running) {
+        p = p.then(self._stopRequest);
+      }
+
+      return p.then(function () {
+        self.activeRequest = req;
+        self.running = true;
+        self.notifyEvent = notify.event(eventName);
+      });
     };
 
     segmentedFetch.prototype._stopRequest = function () {
-      this.activeRequest = null;
-      this.running = false;
-      if (_.isFunction(this.notifyEvent)) {
-        this.notifyEvent();
-        this.notifyEvent = null;
-      }
+      var self = this;
+      var p = Promise.resolve();
+
+      return p.then(function () {
+        self.activeRequest = null;
+        self.running = false;
+        if (_.isFunction(self.notifyEvent)) {
+          self.notifyEvent();
+          self.notifyEvent = null;
+        }
+      });
     };
 
     segmentedFetch.prototype._execSearch = function (index, state) {
@@ -57,63 +71,31 @@ define(function (require) {
     };
 
     segmentedFetch.prototype._getQueue = function () {
-      return this.searchSource.get('index').toIndexList();
+      var queue = this.searchSource.get('index').toIndexList();
+      if (!_.isArray(queue)) {
+        queue = [queue];
+      }
+      return queue;
     };
 
-    segmentedFetch.prototype.abort = function () {
+    segmentedFetch.prototype._createRequest = function () {
       var self = this;
-      this._stopRequest();
-      this.searchPromise.abort();
+      var req = self.searchSource._createRequest();
+      req.moment = moment();
+      req.source.activeFetchCount += 1;
+      return req;
     };
 
-    /**
-     * Fetch search results, but segment by index name.
-     *
-     * @param {object} opts
-     * @param {SearchSource} opts.searchSource - The searchSource to base the fetch on
-     * @param {number} opts.totalSize - The maximum number of rows that should be returned, as a sum of all segments
-     * @param {enum} opts.direction - The direction that indices should be fetched. When fetching time based data
-     *                              in decening order, this should be set to descending so that the data comes in its
-     *                              proper order, otherwize indices will be fetched ascending
-     *
-     * // all callbacks can return a promise to delay further processing
-     * @param {function} opts.first - a function that will be called for the first segment
-     * @param {function} opts.each - a function that will be called for each segment
-     * @param {function} opts.eachMerged - a function that will be called with the merged result on each segment
-     *
-     * @return {Promise}
-     */
-    segmentedFetch.prototype.fetch = function (opts) {
+    segmentedFetch.prototype._processQueue = function (req, queue, opts) {
       var self = this;
-      opts = opts || {};
-      var direction = opts.direction;
+      var active = null;
+      var complete = [];
       var limitSize = false;
       var remainingSize = false;
 
       if (opts.totalSize) {
         limitSize = true;
         remainingSize = opts.totalSize;
-      }
-
-      var req = self.searchSource._createRequest();
-      req.moment = moment();
-      req.source.activeFetchCount += 1;
-
-      // track the req out of scope so that while we are itterating we can
-      // ensure we are still relevant
-      self._startRequest(req);
-
-      var queue = self._getQueue();
-      var total = queue.length;
-      var active = null;
-      var complete = [];
-
-      if (!_.isArray(queue)) {
-        queue = [queue];
-      }
-
-      if (direction === 'desc') {
-        queue = queue.reverse();
       }
 
       var i = -1;
@@ -129,7 +111,7 @@ define(function (require) {
       function reportStatus() {
         if (!opts.status) return;
         opts.status({
-          total: total,
+          total: queue.length,
           complete: complete.length,
           remaining: queue.length,
           active: active
@@ -137,6 +119,7 @@ define(function (require) {
       }
 
       reportStatus();
+
       searchStrategy.getSourceStateFromRequest(req)
       .then(function (state) {
         return (function recurse() {
@@ -148,14 +131,13 @@ define(function (require) {
           if (limitSize) {
             state.body.size = remainingSize;
           }
+
           req.state = state;
 
           return self._execSearch(index, state)
           .then(function (resp) {
             // abort if fetch is called twice quickly
-            if (!self.running || req !== self.activeRequest) {
-              return;
-            }
+            if (!self.running || req !== self.activeRequest) return;
 
             // a response was swallowed intentionally. Try the next one
             if (!resp) {
@@ -207,15 +189,60 @@ define(function (require) {
       })
       .then(req.defer.resolve, req.defer.reject);
 
+      return req.defer.promise;
+
       function done() {
-        self._stopRequest();
-        req.complete = true;
-        req.ms = req.moment.diff() * -1;
-        req.source.activeFetchCount -= 1;
-        return (i + 1);
+        return self._stopRequest().then(function () {
+          req.complete = true;
+          req.ms = req.moment.diff() * -1;
+          req.source.activeFetchCount -= 1;
+          return (i + 1);
+        });
+      }
+    };
+
+    segmentedFetch.prototype.abort = function () {
+      var self = this;
+      var stop = self._stopRequest();
+      if ('abort' in self.searchPromise) {
+        return stop.then(self.searchPromise.abort);
+      }
+      return stop;
+    };
+
+    /**
+     * Fetch search results, but segment by index name.
+     *
+     * @param {object} opts
+     * @param {SearchSource} opts.searchSource - The searchSource to base the fetch on
+     * @param {number} opts.totalSize - The maximum number of rows that should be returned, as a sum of all segments
+     * @param {enum} opts.direction - The direction that indices should be fetched. When fetching time based data
+     *                              in decening order, this should be set to descending so that the data comes in its
+     *                              proper order, otherwize indices will be fetched ascending
+     *
+     * // all callbacks can return a promise to delay further processing
+     * @param {function} opts.first - a function that will be called for the first segment
+     * @param {function} opts.each - a function that will be called for each segment
+     * @param {function} opts.eachMerged - a function that will be called with the merged result on each segment
+     *
+     * @return {Promise}
+     */
+    segmentedFetch.prototype.fetch = function (opts) {
+      var self = this;
+      opts = opts || {};
+      var direction = opts.direction;
+      var queue = self._getQueue();
+
+      if (direction === 'desc') {
+        queue = queue.reverse();
       }
 
-      return req.defer.promise;
+      var req = self._createRequest();
+
+      return self._startRequest(req)
+      .then(function () {
+        self._processQueue(req, queue, opts);
+      });
     };
 
     function each(merged, resp) {
