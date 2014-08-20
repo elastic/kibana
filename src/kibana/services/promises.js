@@ -36,6 +36,12 @@ define(function (require) {
     Promise.delay = function (ms) {
       return $timeout(_.noop, ms);
     };
+    Promise.method = function (fn) {
+      return function () {
+        var args = Array.prototype.slice.call(arguments);
+        return Promise.try(fn, args, this);
+      };
+    };
     Promise.nodeify = function (promise, cb) {
       promise.then(function (val) {
         cb(void 0, val);
