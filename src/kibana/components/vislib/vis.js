@@ -12,8 +12,12 @@ define(function (require) {
 
     function Vis($el, config) {
       this.el = $el.get ? $el.get(0) : $el;
-      this.config = config;
+//      this.config = config;
       this.ChartClass = chartTypes[config.type];
+      this._attr = _.defaults(config || {}, {
+        'margin' : { top: 6, right: 0, bottom: 0, left: 0 },
+        'offset' : 'zero'
+      });
     }
 
     _(Vis.prototype).extend(VisFunctions.prototype);
@@ -45,16 +49,16 @@ define(function (require) {
       this.renderLayout(zeroInjectedData);
 
       // LEGEND CLASS
-      if (this.config.addLegend) {
+      if (this._attr.addLegend) {
         legend = {
           color: this.data.getColorFunc(),
           labels: this.data.getLabels()
         };
-        this.renderLegend(legend, this.config);
+        this.renderLegend(legend, this._attr);
       }
 
       // TOOLTIP CLASS
-      if (this.config.addTooltip) {
+      if (this._attr.addTooltip) {
         tooltipFormatter = this.data.get('tooltipFormatter');
         this.renderTooltip('k4tip', tooltipFormatter);
       }
@@ -67,12 +71,12 @@ define(function (require) {
       xValues = this.data.xValues();
       formatter = this.data.get('xAxisFormatter');
       width = $('.x-axis-div').width();
-      this.renderXAxis(xValues, formatter, width);
+      this.renderXAxis(xValues, formatter, width, this._attr.margin);
 
       // YAXIS CLASS
       yMax = this.data.getYMaxValue();
       height = $('.y-axis-div').height();
-      this.renderYAxis(yMax, height);
+      this.renderYAxis(yMax, height, this._attr.margin);
 
       // AXIS TITLE CLASS
       xTitle = this.data.get('xAxisLabel');

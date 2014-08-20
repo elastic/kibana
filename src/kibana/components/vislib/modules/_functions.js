@@ -34,13 +34,13 @@ define(function (require) {
       this.chartTitle.render();
     };
 
-    VisFunctions.prototype.renderXAxis = function (xValues, formatter, width) {
-      this.xAxis = new XAxis(this.el, xValues, formatter, width);
+    VisFunctions.prototype.renderXAxis = function (xValues, formatter, width, margin) {
+      this.xAxis = new XAxis(this.el, xValues, formatter, width, margin);
       this.xAxis.render();
     };
 
-    VisFunctions.prototype.renderYAxis = function (yMax, height) {
-      this.yAxis = new YAxis(this.el, yMax, height);
+    VisFunctions.prototype.renderYAxis = function (yMax, height, margin) {
+      this.yAxis = new YAxis(this.el, yMax, height, margin);
       this.yAxis.render();
     };
 

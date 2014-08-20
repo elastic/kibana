@@ -5,10 +5,11 @@ define(function (require) {
 
     var split = Private(require('components/vislib/components/YAxis/_split'));
 
-    function YAxis(el, yMax, height) {
+    function YAxis(el, yMax, height, margin) {
       this.el = el;
       this.yMax = yMax;
-      this.height = height;
+      this.margin = margin;
+      this.height = height - margin.top - margin.bottom;
     }
 
     YAxis.prototype.render = function () {
@@ -44,15 +45,15 @@ define(function (require) {
         selection.each(function () {
           div = d3.select(this);
           width = $(this).width();
-          height = $(this).height();
+          height = $(this).height() - self.margin.top - self.margin.bottom;
 
           svg = div.append('svg')
             .attr('width', width)
-            .attr('height', height);
+            .attr('height', height + self.margin.top + self.margin.bottom);
 
           svg.append('g')
             .attr('class', 'y axis')
-            .attr('transform', 'translate(' + width + ', 0)')
+            .attr('transform', 'translate(' + width + ',' + self.margin.top + ')')
             .call(self.yAxis);
         });
       };

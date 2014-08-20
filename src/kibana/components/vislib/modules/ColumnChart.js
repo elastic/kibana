@@ -12,13 +12,14 @@ define(function (require) {
     _(ColumnChart).inherits(Chart);
     function ColumnChart(vis, chartEl, chartData) {
       ColumnChart.Super.apply(this, arguments);
-      this._attr = _.defaults(vis.config || {}, {
-        'margin' : { top: 0, right: 0, bottom: 0, left: 0 },
-        'offset' : 'zero'
+      this._attr = _.defaults(vis._attr || {}, {
+//        'margin' : { top: 0, right: 0, bottom: 0, left: 0 },
+//        'offset' : 'zero'
       });
     }
 
     ColumnChart.prototype.draw = function () {
+      console.log(this);
       // Attributes
       var $elem = $(this.chartEl);
       var margin = this._attr.margin;
