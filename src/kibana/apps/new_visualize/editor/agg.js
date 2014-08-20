@@ -6,6 +6,8 @@ define(function (require) {
     var $ = require('jquery');
     var aggTypes = Private(require('components/agg_types/index'));
 
+    require('apps/visualize/editor/agg_param');
+
     var notify = new Notifier({
       location: 'visAggGroup'
     });
@@ -41,31 +43,34 @@ define(function (require) {
             $compile($schemaEditor)(editorScope());
           }
 
-          // rebuild these each time the agg.type changes
-          var $aggParamsScope;
-          var $aggParamsContainer;
+          var $aggParamEditors;
+          $scope.$watch('agg.type', function updateAggParamEditor() {
+            if ($aggParamEditors) $aggParamEditors.remove();
 
-          $scope.$watch('agg.type', function updateAggParamEditor(type) {
-            if ($aggParamsScope) $aggParamsScope.$destroy();
-            if ($aggParamsContainer) $aggParamsContainer.remove();
+            var agg = $scope.agg;
+            var type = $scope.agg.type;
+
+            if (!agg) return;
+            agg.fillDefaults();
 
             if (!type) return;
 
-            $aggParamsContainer = $('<div>').appendTo($editorContainer);
-            $aggParamsScope = editorScope();
+            var editors = type.params.map(function (param, i) {
+              if (!param.editor) return;
 
-            $compile($aggParamsContainer)($aggParamsScope);
+              return $('<vis-agg-param-editor>')
+              .attr({
+                'agg-type': 'agg.type',
+                'agg-config': 'agg',
+                'agg-param': 'agg.type.params[' + i + ']',
+                'params': 'agg.params'
+              })
+              .append(param.editor)
+              .get(0);
+            }).filter(Boolean);
 
-            $aggParamsContainer.html(type.params.map(function (param, i) {
-              if (!param.editor) return '';
-
-              var $child = $aggParamsScope.$new();
-              setupBoundProp($child, 'agg.type.params[' + i + ']', 'aggParam');
-
-              return $compile(param.editor)($child);
-            }));
-
-            $scope.agg.fillDefaults();
+            $aggParamEditors = $(editors).appendTo($editorContainer);
+            $compile($aggParamEditors)($scope);
           });
 
           // generic child scope creation, for both schema and agg
