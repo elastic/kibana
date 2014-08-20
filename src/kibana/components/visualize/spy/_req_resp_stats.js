@@ -1,34 +1,47 @@
 define(function (require) {
   return function VisSpyReqRespStats() {
+    var _ = require('lodash');
     var reqRespStatsHTML = require('text!components/visualize/spy/_req_resp_stats.html');
+
     var linkReqRespStats = function ($scope, config) {
-      $scope.$watchCollection('searchSource.history', function (searchHistory) {
-        if (!searchHistory) {
-          $scope.history = [];
-          return;
-        }
+      $scope.$watch('searchSource.history.length', function () {
+        // force the entry to be collected again
+        $scope.entry = null;
+      });
 
-        $scope.history = searchHistory.map(function (entry) {
-          if (!entry.complete || !entry.state) return;
+      $scope.$watchMulti([
+        'entry',
+        'searchSource',
+        'entry.complete'
+      ], function () {
+        $scope.entry = null;
 
-          var state = entry.state;
-          var resp = entry.resp;
-          var meta = [];
+        if (!$scope.searchSource) return;
 
-          if (resp && resp.took != null) meta.push(['Query Duration', resp.took + 'ms']);
-          if (entry && entry.ms != null) meta.push(['Request Duration', entry.ms + 'ms']);
-          if (resp && resp.hits) meta.push(['Hits', resp.hits.total]);
+        var searchHistory = $scope.searchSource.history;
+        if (!searchHistory) return;
 
-          if (state.index) meta.push(['Index', state.index]);
-          if (state.type) meta.push(['Type', state.type]);
-          if (state.id) meta.push(['Id', state.id]);
+        var entry = $scope.entry = _.find(searchHistory, 'state');
+        if (!entry) return;
 
-          return {
-            meta: meta,
-            req: state.body,
-            resp: entry.resp
-          };
-        }).filter(Boolean).pop();
+        var state = entry.state;
+        var resp = entry.resp;
+        var meta = [];
+
+        if (resp && resp.took != null) meta.push(['Query Duration', resp.took + 'ms']);
+        if (entry && entry.ms != null) meta.push(['Request Duration', entry.ms + 'ms']);
+        if (resp && resp.hits) meta.push(['Hits', resp.hits.total]);
+
+        if (state.index) meta.push(['Index', state.index]);
+        if (state.type) meta.push(['Type', state.type]);
+        if (state.id) meta.push(['Id', state.id]);
+
+        $scope.history = {
+          meta: meta,
+          req: state.body,
+          resp: entry.resp,
+          complete: entry.complete
+        };
       });
     };
 

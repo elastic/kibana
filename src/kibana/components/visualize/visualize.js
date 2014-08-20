@@ -46,6 +46,7 @@ define(function (require) {
 
         var calcResponsiveStuff = function () {
           $scope.onlyShowSpy = $scope.spyMode && $el.height() < 550;
+          applyClassNames();
         };
 
         // we need to wait for come watchers to fire at least once
