@@ -8,6 +8,8 @@ define(function (require) {
     var moment = require('moment');
     var datemath = require('utils/datemath');
     var Events = Private(require('factories/events'));
+    var diff = Private(require('utils/diff_time_picker_vals'));
+
     require('components/state_management/global_state');
 
     function convertISO8601(stringTime) {
@@ -39,8 +41,7 @@ define(function (require) {
 
       $rootScope.$$timefilter = self;
       $rootScope.$watch('$$timefilter.time', function (newTime, oldTime) {
-        // don't fetch unless there was a previous value and the values are not loosly equal
-        if (!_.isUndefined(oldTime) && !angular.equals(newTime, oldTime)) self.emit('update');
+        if (diff(newTime, oldTime)) self.emit('update');
       }, true);
     }
 

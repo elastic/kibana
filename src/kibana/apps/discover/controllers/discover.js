@@ -121,9 +121,6 @@ define(function (require) {
       indexPatternList: indexPatternList,
     };
 
-    // So we can watch it.
-    $scope.time = timefilter.time;
-
     // stores the complete list of fields
     $scope.fields = null;
 
@@ -147,9 +144,8 @@ define(function (require) {
           if (_.difference(changed, ignoreStateChanges).length) $scope.fetch();
         });
 
-        // TODO: Switch this to watching time.string when we implement it
-        $scope.$watchCollection('globalState.time', function (newTime, oldTime) {
-          if (diffTimePickerValues(newTime, oldTime)) $scope.fetch();
+        timefilter.on('update', function () {
+          $scope.fetch();
         });
 
         $scope.$watch('state.sort', function (sort) {
