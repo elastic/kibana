@@ -118,7 +118,7 @@ define(function (require) {
           notify.event('flatten data for table', function () {
 
             // sort the row values
-            if ($scope.sort){
+            if ($scope.sort) {
               $scope.rows = orderBy($scope.rows, $scope.sort.getter, $scope.sort.asc);
             }
 
