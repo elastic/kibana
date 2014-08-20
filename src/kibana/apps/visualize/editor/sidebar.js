@@ -8,7 +8,7 @@ define(function (require) {
 
     return {
       restrict: 'E',
-      template: require('text!apps/new_visualize/editor/sidebar.html'),
+      template: require('text!apps/visualize/editor/sidebar.html'),
       replace: true,
       scope: {
         vis: '=',

@@ -10,8 +10,6 @@ require.config({
     modules: 'utils/modules',
     lodash: 'utils/_mixins',
 
-    'apps/visualize': 'apps/new_visualize',
-
     // bower_components
     angular: '../bower_components/angular/angular',
     'angular-route': '../bower_components/angular-route/angular-route',

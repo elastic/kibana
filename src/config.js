@@ -35,7 +35,7 @@ define(function () {
      */
     apps: [
       { id: 'discover', name: 'Discover' },
-      { id: 'new_visualize', name: 'Visualize' },
+      { id: 'visualize', name: 'Visualize' },
       { id: 'dashboard', name: 'Dashboard' },
       { id: 'settings', name: 'Settings' }
     ],

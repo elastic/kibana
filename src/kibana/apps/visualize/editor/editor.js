@@ -7,7 +7,7 @@ define(function (require) {
   require('filters/uriescape');
 
   require('routes')
-  .when('/new_visualize/create', {
+  .when('/visualize/create', {
     template: require('text!apps/visualize/editor/editor.html'),
     resolve: {
       savedVis: function (savedVisualizations, courier, $route) {
@@ -18,19 +18,19 @@ define(function (require) {
         return savedVisualizations.get($route.current.params)
         .catch(courier.redirectWhenMissing({
           //'index-pattern': '/visualize',
-          '*': '/new_visualize'
+          '*': '/visualize'
         }));
       }
     }
   })
-  .when('/new_visualize/edit/:id', {
+  .when('/visualize/edit/:id', {
     template: require('text!apps/visualize/editor/editor.html'),
     resolve: {
       savedVis: function (savedVisualizations, courier, $route) {
         return savedVisualizations.get($route.current.params.id)
         .catch(courier.redirectWhenMissing({
           'index-pattern': '/settings',
-          '*': '/new_visualize'
+          '*': '/visualize'
         }));
       }
     }
@@ -141,7 +141,7 @@ define(function (require) {
     };
 
     $scope.startOver = function () {
-      $location.url('/new_visualize');
+      $location.url('/visualize');
     };
 
     $scope.doSave = function () {
@@ -157,7 +157,7 @@ define(function (require) {
 
         $location.url(
           globalState.writeToUrl(
-            '/new_visualize/edit/' + encodeURIComponent(savedVis.id)
+            '/visualize/edit/' + encodeURIComponent(savedVis.id)
           )
         );
       }, notify.fatal);

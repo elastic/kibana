@@ -9,7 +9,7 @@ module.exports = {
       '<%= src %>/kibana/apps/settings/styles/main.less',
       '<%= src %>/kibana/apps/visualize/styles/main.less',
       '<%= src %>/kibana/apps/visualize/styles/visualization.less',
-      '<%= src %>/kibana/apps/new_visualize/styles/main.less',
+      '<%= src %>/kibana/apps/visualize/styles/main.less',
       '<%= src %>/kibana/styles/main.less',
       '<%= src %>/kibana/components/**/*.less'
     ],
