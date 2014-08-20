@@ -46,12 +46,17 @@ define(function (require) {
           else val = aggParam.default;
         }
 
-        // only deserialize if we have a scalar value, and a deserialize fn
-        if (!_.isObject(val) && aggParam.deserialize) {
-          to[aggParam.name] = aggParam.deserialize(val, self);
-        } else {
+        if (aggParam.deserialize) {
+          if (!_.isObject(val)) {
+            // only deserialize if we have a scalar value
+            val = aggParam.deserialize(val, self);
+          }
+
           to[aggParam.name] = val;
+          return;
         }
+
+        to[aggParam.name] = _.cloneDeep(val);
       });
     };
 
@@ -65,12 +70,10 @@ define(function (require) {
         // don't serialize undefined/null values
         if (val == null) return;
 
-        if (aggParam.serialize) {
-          out[aggParam.name] = aggParam.serialize(val, self);
-          return;
-        }
+        if (aggParam.serialize) val = aggParam.serialize(val, self);
 
-        out[aggParam.name] = val;
+        // to prevent accidental leaking, we will clone all complex values
+        out[aggParam.name] = _.cloneDeep(val);
       }, {});
 
       return {

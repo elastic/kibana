@@ -22,8 +22,7 @@ define(function (require) {
         $index: '=',
         group: '=',
         groupName: '=',
-        groupMin: '=',
-        savedVis: '='
+        groupMin: '='
       },
       link: function ($scope, $el) {
         $scope.aggTypeOptions = aggTypes.byType[$scope.groupName];

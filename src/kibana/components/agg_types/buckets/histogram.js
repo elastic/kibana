@@ -14,7 +14,7 @@ define(function (require) {
       params: [
         {
           name: 'field',
-          filterFieldType: '!date'
+          filterFieldTypes: 'number'
         },
 
         {
@@ -43,10 +43,13 @@ define(function (require) {
           write: function (aggConfig, output) {
             var val = aggConfig.params.extended_bounds;
 
-            output.params.extended_bounds = {
-              min: val.min,
-              max: val.max
-            };
+            if (val.min != null && val.max != null) {
+              output.params.extended_bounds = {
+                min: val.min,
+                max: val.max
+              };
+            }
+
           },
 
           // called from the editor
