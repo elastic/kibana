@@ -12,11 +12,9 @@ define(function (require) {
 
     function Vis($el, config) {
       this.el = $el.get ? $el.get(0) : $el;
-//      this.config = config;
       this.ChartClass = chartTypes[config.type];
       this._attr = _.defaults(config || {}, {
-        'margin' : { top: 6, right: 0, bottom: 0, left: 0 },
-        'offset' : 'zero'
+        'margin' : { top: 6, right: 0, bottom: 0, left: 0 }
       });
     }
 
@@ -110,15 +108,15 @@ define(function (require) {
     }, 300);
 
     Vis.prototype.on = function () {
-      return this.chart.on();
+      return this.ChartClass.prototype.on.apply(this, arguments);
     };
 
     Vis.prototype.off = function () {
-      return this.chart.off();
+      return this.charts.off.apply(this.charts, arguments);
     };
 
     Vis.prototype.destroy = function () {
-      return this.chart.destroy();
+      return this.ChartClass.prototype.destroy.apply(this, arguments);
     };
 
     Vis.prototype.set = function (name, val) {

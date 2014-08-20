@@ -3,7 +3,11 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
 
+    var Events = Private(require('factories/events'));
+
+    _(Chart).inherits(Events);
     function Chart(vis, el, chartData) {
+      Chart.Super.apply(this, arguments);
       this.vis = vis;
       this.chartEl = el;
       this.chartData = chartData;
@@ -14,9 +18,29 @@ define(function (require) {
       return d3.select(this.chartEl).call(this.draw());
     };
 
-    Chart.prototype.on = function () {};
+    Chart.prototype.rebind = function () {
+      return d3.rebind(Chart.Super, Chart._attr.dispatch, 'on');
+    };
 
-    Chart.prototype.off = function () {};
+    Chart.prototype.on = function () {
+      var args = Array.prototype.slice.call(arguments);
+      var eventName = args[0];
+      var self = this;
+      console.log(this);
+
+      // This should only be called the first time to wire up the D3 event handler
+      if (!this._listners[eventName]) {
+        this.dispatch.on.call(this.dispatch, eventName, function () {
+          var eventArgs = Array.prototype.slice.call(arguments);
+          self.emit.apply(eventName, eventArgs);
+        });
+      }
+      Chart.Super.prototype.on.apply(this, args);
+    };
+
+    Chart.prototype.off = function (event) {
+      this.dispatch.on(event, null);
+    };
 
     Chart.prototype.destroy = function () {};
 

@@ -54,6 +54,9 @@ define(function (require) {
         .selectAll('.chart')
         .each(function (chartData) {
           var chart = new vis.ChartClass(vis, this, chartData);
+
+          d3.rebind(vis, chart._attr.dispatch, 'on');
+
           charts.push(chart);
           try {
             chart.render();
