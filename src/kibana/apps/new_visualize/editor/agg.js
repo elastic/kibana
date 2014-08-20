@@ -1,7 +1,7 @@
 define(function (require) {
   require('modules')
   .get('apps/visualize')
-  .directive('visEditorAgg', function ($compile, Private, Notifier) {
+  .directive('visEditorAgg', function ($compile, $parse, Private, Notifier) {
     var _ = require('lodash');
     var $ = require('jquery');
     var aggTypes = Private(require('components/agg_types/index'));
@@ -35,17 +35,6 @@ define(function (require) {
         (function setupControlManagement() {
           var $editorContainer = $el.find('.vis-editor-agg-editor');
 
-          // generic child scope creation, for both schema and agg
-          function editorScope() {
-            var $editorScope = $scope.$new();
-
-            $editorScope.aggType = $scope.agg.type;
-            $editorScope.aggConfig = $scope.agg;
-            $editorScope.params = $scope.agg.params;
-
-            return $editorScope;
-          }
-
           if ($scope.agg.schema.editor) {
             var $schemaEditor = $('<div>').prependTo($editorContainer);
             $schemaEditor.append($scope.agg.schema.editor);
@@ -67,17 +56,35 @@ define(function (require) {
 
             $compile($aggParamsContainer)($aggParamsScope);
 
-            $aggParamsContainer.html(type.params.map(function (param) {
+            $aggParamsContainer.html(type.params.map(function (param, i) {
               if (!param.editor) return '';
 
               var $child = $aggParamsScope.$new();
-              $child.aggParam = param;
+              setupBoundProp($child, 'agg.type.params[' + i + ']', 'aggParam');
 
               return $compile(param.editor)($child);
             }));
 
             $scope.agg.fillDefaults();
           });
+
+          // generic child scope creation, for both schema and agg
+          function editorScope() {
+            var $editorScope = $scope.$new();
+
+            setupBoundProp($editorScope, 'agg.type', 'aggType');
+            setupBoundProp($editorScope, 'agg', 'aggConfig');
+            setupBoundProp($editorScope, 'agg.params', 'params');
+
+            return $editorScope;
+          }
+
+          // bind a property from our scope a child scope, with one-way binding
+          function setupBoundProp($child, get, set) {
+            var getter = _.partial($parse(get), $scope);
+            var setter = _.partial($parse(set).assign, $child);
+            $scope.$watch(getter, setter);
+          }
         }());
 
         /**
