@@ -115,6 +115,10 @@ define(function (require) {
           $scope.rows = $scope.chartData.raw.rows;
           $scope.columns = $scope.chartData.raw.columns;
 
+          var formatters = $scope.columns.map(function (col) {
+            return (col.field) ? col.field.format.convert : _.identity;
+          });
+
           notify.event('flatten data for table', function () {
 
             // sort the row values
@@ -125,7 +129,7 @@ define(function (require) {
             // format all row values
             $scope.rows = $scope.rows.map(function (row) {
               return row.map(function (cell, i) {
-                return $scope.columns[i].field.format.convert(cell);
+                return formatters[i](cell);
               });
             });
           });

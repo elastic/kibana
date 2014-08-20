@@ -29,28 +29,28 @@ define(function (require) {
             _.times(min - rows.length, function () { rows.push(emptyRow); });
           }
 
+          var addCell = function ($tr, contents) {
+            var $cell = $(document.createElement('td'));
+
+            // TODO: It would be better to actually check the type of the field, but we don't have
+            // access to it here. This may become a problem with the switch to BigNumber
+            if (_.isNumeric(contents)) $cell.css('text-align', 'right');
+
+            if (contents === '') {
+              $cell.html('&nbsp;');
+            } else {
+              $cell.text(contents);
+            }
+            $tr.append($cell);
+          };
+
           rows.forEach(function (row) {
             var $tr = $(document.createElement('tr'));
-
-            var addCell = function (cell) {
-              var $cell = $(document.createElement('td'));
-
-              // TODO: It would be better to actually check the type of the field, but we don't have
-              // access to it here. This may become a problem with the switch to BigNumber
-              if (_.isNumeric(cell)) $cell.css('text-align', 'right');
-
-              if (cell === '') {
-                $cell.html('&nbsp;');
-              } else {
-                $cell.text(cell);
-              }
-              $tr.append($cell);
-            };
-
             $el.append($tr);
 
-            row.forEach(addCell);
-            if (width > row.length) _.times(width - row.length, _.partial(addCell, ''));
+            for (var i = 0; i < width; i++) {
+              addCell($tr, row[i]);
+            }
           });
         });
       }

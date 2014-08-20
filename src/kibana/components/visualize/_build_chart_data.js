@@ -38,7 +38,7 @@ define(function (require) {
         configs.push({
           fake: true,
           categoryName: 'metric',
-          agg: countAgg,
+          aggType: countAgg,
           label: countAgg.title
         });
       }
@@ -78,20 +78,12 @@ define(function (require) {
         chartData.rows.push(row);
       };
 
-      var getAggKey = function (bucket) {
-        return bucket.__aggKey__ || (bucket.__aggKey__ = Object.keys(bucket)
-          .filter(function (key) {
-            return key.substr(0, aggKeyPrefix.length) === aggKeyPrefix;
-          })
-          .pop());
-      };
-
       var splitAndFlatten = function (chartData, bucket) {
         // pull the next column from the aggs list
         var col = colStack.pop();
 
         // the actual results for the aggregation is under an _agg_* key
-        var result = bucket[getAggKey(bucket)] || bucket;
+        var result = (col.aggConfig && bucket[col.aggConfig.id]) || bucket;
 
         if (result && _.isPlainObject(result.buckets)) {
           result.buckets = _.map(result.buckets, function (v, k) {

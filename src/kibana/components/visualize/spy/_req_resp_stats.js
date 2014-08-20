@@ -2,7 +2,7 @@ define(function (require) {
   return function VisSpyReqRespStats() {
     var reqRespStatsHTML = require('text!components/visualize/spy/_req_resp_stats.html');
     var linkReqRespStats = function ($scope, config) {
-      $scope.$watchCollection('vis.searchSource.history', function (searchHistory) {
+      $scope.$watchCollection('searchSource.history', function (searchHistory) {
         if (!searchHistory) {
           $scope.history = [];
           return;
@@ -28,7 +28,7 @@ define(function (require) {
             req: state.body,
             resp: entry.resp
           };
-        }).filter(Boolean);
+        }).filter(Boolean).pop();
       });
     };
 
