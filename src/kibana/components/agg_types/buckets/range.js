@@ -14,12 +14,10 @@ define(function (require) {
       params: [
         {
           name: 'field',
-          required: true,
           filterFieldTypes: ['number', 'date', 'string']
         },
         {
           name: 'ranges',
-          custom: true,
           default: [
             { from: 0, to: 1000 },
             { from: 1000, to: 2000 }

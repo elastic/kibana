@@ -24,44 +24,43 @@ define(function (require) {
 
       // resolve the params
       self.params = {};
+      self.fillDefaults(opts.params);
+    }
+
+    /**
+     * Write the current values to this.params,
+     * filling in the defaults as we go
+     *
+     * @param  {} from [description]
+     * @return {[type]}      [description]
+     */
+    AggConfig.prototype.fillDefaults = function (from) {
+      var self = this;
+      from = from || self.params;
+      var to = self.params = {};
 
       self.getParamNames().forEach(function (name) {
-        var val = opts.params && opts.params[name];
-
+        var val = from[name];
         var aggParam = self.getParam(name);
         if (!aggParam) return;
 
         if (val == null) {
-          self.params[name] = aggParam.default;
-          return;
+          if (aggParam.default == null) return;
+          else val = aggParam.default;
         }
 
-        if (aggParam.deserialize) {
+        // only deserialize if we have a scalar value, and a deserialize fn
+        if (!_.isObject(val) && aggParam.deserialize) {
           self.params[name] = aggParam.deserialize(val, self);
         } else {
           self.params[name] = val;
         }
-      }, {});
-    }
-
-    AggConfig.prototype.validate = function () {
-      if (!this.type) {
-        return ['AggConfigs should have a type.'];
-      }
-
-      var typeErrors = this.type.validate(this);
-      if (typeErrors) return typeErrors;
-    };
-
-    AggConfig.prototype.isValid = function () {
-      return !this.validate();
+      });
     };
 
     AggConfig.prototype.toJSON = function () {
       var self = this;
       var params = self.params;
-
-      if (!self.isValid()) return;
 
       var outParams = _.transform(self.getParamNames(), function (out, name) {
         var val = params[name];
@@ -79,8 +78,8 @@ define(function (require) {
       }, {});
 
       return {
-        type: self.type.name,
-        schema: self.schema.name,
+        type: self.type && self.type.name,
+        schema: self.schema && self.schema.name,
         params: outParams
       };
     };

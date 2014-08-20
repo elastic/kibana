@@ -34,14 +34,11 @@ define(function (require) {
       params: [
         {
           name: 'field',
-          required: true,
           filterFieldTypes: 'date'
         },
 
         {
           name: 'interval',
-          required: true,
-          custom: true,
           default: 'auto',
           options: Private(require('components/agg_types/buckets/_interval_options')),
           editor: require('text!components/agg_types/controls/interval.html'),
@@ -86,8 +83,7 @@ define(function (require) {
         },
 
         {
-          name: 'format',
-          custom: true
+          name: 'format'
         },
 
         {

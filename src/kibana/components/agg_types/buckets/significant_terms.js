@@ -12,12 +12,10 @@ define(function (require) {
       params: [
         {
           name: 'field',
-          required: true,
           filterFieldTypes: 'string'
         },
         {
           name: 'size',
-          required: false,
           editor: require('text!components/agg_types/controls/order_and_size.html'),
         }
       ]

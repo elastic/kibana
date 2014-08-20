@@ -12,18 +12,15 @@ define(function (require) {
       },
       params: [
         {
-          name: 'field',
-          required: true
+          name: 'field'
         },
         {
           name: 'size',
-          required: false,
           default: 5
           // editor: batched with order
         },
         {
           name: 'order',
-          required: true,
           options: [
             { display: 'Top', val: 'desc' },
             { display: 'Bottom', val: 'asc' }

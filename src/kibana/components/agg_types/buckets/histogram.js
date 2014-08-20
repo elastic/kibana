@@ -14,14 +14,11 @@ define(function (require) {
       params: [
         {
           name: 'field',
-          required: true,
           filterFieldType: '!date'
         },
 
         {
           name: 'interval',
-          required: true,
-          filterFieldType: 'number',
           editor: require('text!components/agg_types/controls/interval.html'),
           write: function (aggConfig, output) {
             output.params.interval = parseInt(aggConfig.params.interval, 10);
@@ -30,7 +27,6 @@ define(function (require) {
 
         {
           name: 'min_doc_count',
-          custom: true,
           default: false,
           editor: require('text!components/agg_types/controls/min_doc_count.html'),
           write: function (aggConfig, output) {

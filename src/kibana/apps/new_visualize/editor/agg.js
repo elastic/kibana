@@ -75,6 +75,8 @@ define(function (require) {
 
               return $compile(param.editor)($child);
             }));
+
+            $scope.agg.fillDefaults();
           });
         }());
 
@@ -83,7 +85,6 @@ define(function (require) {
          * @return {[type]} [description]
          */
         $scope.makeDescription = function () {
-          if (!$scope.agg.isValid()) return 'invalid';
           if (!$scope.agg.type.makeLabel) return '';
 
           var label = $scope.agg.type.makeLabel($scope.agg);

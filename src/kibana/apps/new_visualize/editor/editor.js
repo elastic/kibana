@@ -64,6 +64,20 @@ define(function (require) {
       share: require('text!apps/visualize/editor/panels/share.html'),
     });
 
+    var $state = (function initState() {
+      var savedVisState = vis.getState();
+
+      var $state = appStateFactory.create({
+        vis: savedVisState
+      });
+
+      if (!angular.equals($state.vis, savedVisState)) {
+        vis.setState($state.vis);
+      }
+
+      return $state;
+    }());
+
     function init() {
       // export some objects
       $scope.savedVis = savedVis;
@@ -95,41 +109,30 @@ define(function (require) {
         editableVis.dirty = !angular.equals(newState, vis.getState());
       }, true);
 
+      $state.on('fetch_with_changes', function () {
+        vis.setState($state.vis);
+
+        // we use state to track query, must write before we fetch
+        if ($state.query) {
+          searchSource.set('query', $state.query);
+        } else {
+          searchSource.set('query', null);
+        }
+
+        $scope.fetch();
+      });
+
+      timefilter.enabled = true;
+      timefilter.on('update', _.bindKey($scope, 'fetch'));
+
       $scope.$on('ready:vis', function () {
         $scope.$emit('application.load');
       });
-    }
 
-    var $state = (function setupAppState() {
-
-      var savedVisState = vis.getState();
-
-      var $state = appStateFactory.create({
-        vis: savedVisState
+      $scope.$on('$destroy', function () {
+        savedVis.destroy();
       });
-
-      if (!angular.equals($state.vis, savedVisState)) {
-        vis.setState($state.vis);
-      }
-
-      return $state;
-    }());
-
-    $state.on('fetch_with_changes', function () {
-      vis.setState($state.vis);
-
-      // we use state to track query, must write before we fetch
-      if ($state.query) {
-        searchSource.set('query', $state.query);
-      } else {
-        searchSource.set('query', null);
-      }
-
-      $scope.fetch();
-    });
-
-    timefilter.enabled = true;
-    timefilter.on('update', _.bindKey($scope, 'fetch'));
+    }
 
     $scope.fetch = function () {
       searchSource.fetch();
@@ -188,10 +191,6 @@ define(function (require) {
       $scope.unlinking = clearTimeout($scope.unlinking);
       $scope.linked = false;
     };
-
-    $scope.$on('$destroy', function () {
-      savedVis.destroy();
-    });
 
     function transferVisState(fromVis, toVis) {
       return function () {

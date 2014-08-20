@@ -20,7 +20,7 @@ define(function (require) {
       var dsl = {};
       var current = dsl;
 
-      this.getValid().forEach(function (agg) {
+      this.getSorted().forEach(function (agg) {
         if (agg.type.name === 'count') return;
 
         current.aggs = {};
@@ -35,15 +35,10 @@ define(function (require) {
       return dsl.aggs || {};
     };
 
-    AggConfigs.prototype.getValid = function () {
-      return _(this)
-        .filter(function (agg) {
-          return agg.isValid();
-        })
-        .sortBy(function (agg) {
-          return agg.schema.group === 'metrics' ? 1 : 0;
-        })
-        .valueOf();
+    AggConfigs.prototype.getSorted = function () {
+      return _.sortBy(this, function (agg) {
+        return agg.schema.group === 'metrics' ? 1 : 0;
+      });
     };
 
     return AggConfigs;

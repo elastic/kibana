@@ -19,7 +19,6 @@ define(function (require) {
         params: [
           {
             name: 'field',
-            required: true,
             filterFieldTypes: 'number'
           }
         ]
@@ -33,7 +32,6 @@ define(function (require) {
         params: [
           {
             name: 'field',
-            required: true,
             filterFieldTypes: 'number'
           }
         ]
@@ -47,7 +45,6 @@ define(function (require) {
         params: [
           {
             name: 'field',
-            required: true,
             filterFieldTypes: 'number'
           }
         ]
@@ -61,7 +58,6 @@ define(function (require) {
         params: [
           {
             name: 'field',
-            required: true,
             filterFieldTypes: 'number'
           }
         ]
@@ -74,8 +70,7 @@ define(function (require) {
         },
         params: [
           {
-            name: 'field',
-            required: true
+            name: 'field'
           }
         ]
       }

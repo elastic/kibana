@@ -15,10 +15,6 @@ define(function (require) {
         immutable: true,
         initialSet: this.options
       });
-
-      if (_.isString(this.default)) {
-        this.default = this.options.byVal[this.default];
-      }
     }
 
     /**

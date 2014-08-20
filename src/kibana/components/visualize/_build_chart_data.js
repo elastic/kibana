@@ -17,7 +17,7 @@ define(function (require) {
       var converter = vis.type.responseConverter;
 
       // the list of "configs" that we will use to read the response
-      var configs = vis.aggs.getValid().map(function (aggConfig) {
+      var configs = vis.aggs.getSorted().map(function (aggConfig) {
         return _.assign(
           aggConfig.type.params.write(aggConfig),
           aggConfig.schema.params.write(aggConfig),
