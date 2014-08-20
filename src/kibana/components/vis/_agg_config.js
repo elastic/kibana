@@ -23,26 +23,23 @@ define(function (require) {
       }
 
       // resolve the params
-      self.params = {};
       self.fillDefaults(opts.params);
     }
 
     /**
-     * Write the current values to this.params,
-     * filling in the defaults as we go
+     * Write the current values to this.params, filling in the defaults as we go
      *
-     * @param  {} from [description]
-     * @return {[type]}      [description]
+     * @param  {object} [from] - optional object to read values from,
+     *                         used when initializing
+     * @return {undefined}
      */
     AggConfig.prototype.fillDefaults = function (from) {
       var self = this;
+      var to = self.params || (self.params = {});
       from = from || self.params;
-      var to = self.params = {};
 
-      self.getParamNames().forEach(function (name) {
-        var val = from[name];
-        var aggParam = self.getParam(name);
-        if (!aggParam) return;
+      self.getAggParams().forEach(function (aggParam) {
+        var val = from[aggParam.name];
 
         if (val == null) {
           if (aggParam.default == null) return;
@@ -51,9 +48,9 @@ define(function (require) {
 
         // only deserialize if we have a scalar value, and a deserialize fn
         if (!_.isObject(val) && aggParam.deserialize) {
-          self.params[name] = aggParam.deserialize(val, self);
+          to[aggParam.name] = aggParam.deserialize(val, self);
         } else {
-          self.params[name] = val;
+          to[aggParam.name] = val;
         }
       });
     };
@@ -62,19 +59,18 @@ define(function (require) {
       var self = this;
       var params = self.params;
 
-      var outParams = _.transform(self.getParamNames(), function (out, name) {
-        var val = params[name];
+      var outParams = _.transform(self.getAggParams(), function (out, aggParam) {
+        var val = params[aggParam.name];
+
         // don't serialize undefined/null values
         if (val == null) return;
 
-        var aggParam = self.getParam(name);
-
         if (aggParam.serialize) {
-          out[name] = aggParam.serialize(val, self);
+          out[aggParam.name] = aggParam.serialize(val, self);
           return;
         }
 
-        out[name] = val;
+        out[aggParam.name] = val;
       }, {});
 
       return {
@@ -84,22 +80,11 @@ define(function (require) {
       };
     };
 
-    AggConfig.prototype.getParamNames = function () {
-      var keys = [];
-
-      if (this.type) keys.push.apply(keys, _.pluck(this.type.params, 'name'));
-      if (this.schema) keys.push.apply(keys, _.pluck(this.schema.params, 'name'));
-
-      return keys;
-    };
-
-    AggConfig.prototype.getParam = function (name) {
-      var aggParam;
-
-      if (this.type) aggParam = this.type.params.byName[name];
-      if (!aggParam && this.schema) aggParam = this.schema.params.byName[name];
-
-      return aggParam;
+    AggConfig.prototype.getAggParams = function () {
+      return [].concat(
+        (this.type) ? this.type.params.raw : [],
+        (this.schema) ? this.schema.params.raw : []
+      );
     };
 
     return AggConfig;
