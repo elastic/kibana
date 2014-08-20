@@ -51,6 +51,7 @@ define(function (require) {
                 // copy a couple values over
                 name: newMode.name,
                 display: newMode.display,
+                alwaysFill: !!newMode.alwaysFill,
                 $scope: $scope.$new(),
                 $container: $('<div class="visualize-spy-container">').appendTo($el)
               };
