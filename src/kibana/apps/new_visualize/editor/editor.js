@@ -73,6 +73,7 @@ define(function (require) {
 
       if (!angular.equals($state.vis, savedVisState)) {
         vis.setState($state.vis);
+        editableVis.setState($state.vis);
       }
 
       return $state;
@@ -111,6 +112,7 @@ define(function (require) {
 
       $state.on('fetch_with_changes', function () {
         vis.setState($state.vis);
+        editableVis.setState($state.vis);
 
         // we use state to track query, must write before we fetch
         if ($state.query) {
@@ -196,6 +198,7 @@ define(function (require) {
       return function () {
         toVis.setState(fromVis.getState());
         editableVis.dirty = false;
+        $state.vis = vis.getState();
         $state.save();
       };
     }
