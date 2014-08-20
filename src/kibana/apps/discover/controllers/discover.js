@@ -567,23 +567,24 @@ define(function (require) {
       // we shouldn't have a vis, delete it
       if (!$scope.opts.timefield && $scope.vis) {
         $scope.vis.destroy();
+        $scope.searchSource.set('aggs', undefined);
         delete $scope.vis;
       }
       // we shouldn't have one, or already do, return whatever we already have
       if (!$scope.opts.timefield || $scope.vis) return Promise.resolve($scope.vis);
 
-      var vis = new Vis({
-        searchSource: $scope.searchSource,
+      // TODO: a legit way to update the index pattern
+      $scope.vis = new Vis($scope.searchSource.get('index'), {
         type: 'histogram',
         listeners: {
-          onClick: function (e) {
+          click: function (e) {
             console.log(e);
             timefilter.time.from = moment(e.point.x);
             timefilter.time.to = moment(e.point.x + e.data.ordered.interval);
             timefilter.time.mode = 'absolute';
             $scope.$apply();
           },
-          onBrush: function (e) {
+          brush: function (e) {
             var from = moment(e.range[0]);
             var to = moment(e.range[1]);
 
@@ -595,40 +596,35 @@ define(function (require) {
             $scope.$apply();
           }
         },
-        config: {
-          metric: {
-            configs: [{
-              agg: 'count',
-            }]
+        aggs: [
+          {
+            type: 'count',
+            schema: 'metric'
           },
-          segment: {
-            configs: [{
-              agg: 'date_histogram',
+          {
+            type: 'date_histogram',
+            schema: 'segment',
+            params: {
               field: $scope.opts.timefield,
-              interval: $state.interval,
-              min_doc_count: 0,
-            }]
-          },
-          group: { configs: [] },
-          split: { configs: [] },
-        }
+              interval: 'auto'
+            }
+          }
+        ]
+      });
+
+      $scope.searchSource.aggs(function () {
+        return $scope.vis.aggs.toDSL();
       });
 
       // stash this promise so that other calls to setupVisualization will have to wait
-      loadingVis = vis.init()
-      .then(function () {
-        // expose the vis so that the visualize directive can get started
-        $scope.vis = vis;
-
-        // wait for visualize directive to emit that it's ready before resolving
-        return new Promise(function (resolve) {
-          $scope.$on('ready:vis', resolve);
+      loadingVis = new Promise(function (resolve) {
+        $scope.$on('ready:vis', function () {
+          resolve($scope.vis);
         });
       })
-      .then(function () {
+      .finally(function () {
         // clear the loading flag
         loadingVis = null;
-        return vis;
       });
 
       return loadingVis;

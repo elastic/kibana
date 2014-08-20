@@ -89,12 +89,15 @@ define(function (require) {
         {
           name: 'extended_bounds',
           default: {},
-          write: function (selection, output) {
-            var bounds = timefilter.getBounds();
-            output.params.extended_bounds = {
-              min: bounds.min,
-              max: bounds.max
-            };
+          write: function (aggConfig, output) {
+            var val = aggConfig.params.extended_bounds;
+
+            if (val.min != null && val.max != null) {
+              output.params.extended_bounds = {
+                min: val.min,
+                max: val.max
+              };
+            }
           }
         }
       ]
