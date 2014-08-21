@@ -22,8 +22,6 @@ define(function (require) {
 
         return NotifierMock;
       });
-
-      // var getStateFromRequest = Private(require('components/courier/fetch/strategy/search')).getSourceStateFromRequest;
     });
 
     inject(function ($injector, Private) {
@@ -36,7 +34,12 @@ define(function (require) {
       searchSourceStubs = {
         get: sinon.stub(),
         toIndexList: sinon.stub().returns([]),
-        createRequest: sinon.stub().returns({source: {activeFetchCount: 0}})
+        createRequest: sinon.stub().returns({
+          defer: Promise,
+          source: {
+            activeFetchCount: 0
+          }
+        })
       };
       mockSearchSource = {
         get: searchSourceStubs.get.returns({
@@ -77,19 +80,33 @@ define(function (require) {
         });
       });
 
-      it('should stop existing requests', function (done) {
-        segmentedFetch.running = true;
+      it('should not call stopRequest if request is not running', function () {
         SegmentedFetch.prototype._executeRequest = Promise.resolve;
-        SegmentedFetch.prototype._stopProcess = sinon.stub().returns(Promise.resolve());
+        SegmentedFetch.prototype._stopRequest = sinon.stub().returns(Promise.resolve());
 
+        expect(segmentedFetch.running).to.be(false);
         return segmentedFetch.fetch().then(function () {
-          setTimeout(function () {
-            expect(segmentedFetch.running).to.be(true);
-            segmentedFetch.fetch().then(function () {
-              expect(segmentedFetch._stopProcess.callCount).to.be(1);
-            });
-            done();
-          }, 0);
+          expect(segmentedFetch.running).to.be(true);
+          expect(segmentedFetch._stopRequest.callCount).to.be(0);
+        });
+      });
+
+      it('should stop existing requests', function () {
+        SegmentedFetch.prototype._executeRequest = sinon.stub().returns(Promise.delay(5));
+        SegmentedFetch.prototype._stopRequest = sinon.stub().returns(Promise.resolve());
+
+        segmentedFetch.fetch();
+
+        Promise.delay(1).then(function () {
+          expect(segmentedFetch.running).to.be(true);
+          segmentedFetch.fetch();
+        });
+
+        return Promise.delay(2).then(function () {
+          expect(segmentedFetch.running).to.be(true);
+          return segmentedFetch.fetch().then(function () {
+            expect(segmentedFetch._stopRequest.callCount).to.be(2);
+          });
         });
       });
 
@@ -107,10 +124,26 @@ define(function (require) {
       });
 
       it('should create a notification event', function () {
-        SegmentedFetch.prototype._processQueue = Promise.resolve;
+        SegmentedFetch.prototype._executeRequest = Promise.resolve;
 
         return segmentedFetch.fetch().then(function () {
           expect(notify.event.callCount).to.be(1);
+        });
+      });
+
+      it('should report initial status', function () {
+        var statusStub = sinon.stub();
+        SegmentedFetch.prototype._processQueue = Promise.resolve;
+        searchStrategy.getSourceStateFromRequest.returns(Promise.resolve());
+
+        return segmentedFetch.fetch({
+          status: statusStub
+        }).then(function () {
+          expect(statusStub.callCount).to.be(1);
+
+          var status = statusStub.getCall(0).args[0];
+          expect(status.active).to.be(null);
+          expect(status.total).to.be(searchSourceStubs.toIndexList.length);
         });
       });
     });
