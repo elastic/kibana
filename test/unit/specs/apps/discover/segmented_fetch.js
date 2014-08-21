@@ -62,7 +62,7 @@ define(function (require) {
     describe('fetch', function () {
       it('should return a promise', function () {
         SegmentedFetch.prototype._startRequest = Promise.resolve;
-        SegmentedFetch.prototype._processQueue = Promise.resolve;
+        SegmentedFetch.prototype._executeRequest = Promise.resolve;
 
         var fetch = segmentedFetch.fetch();
         expect('then' in fetch).to.be(true);
@@ -70,7 +70,7 @@ define(function (require) {
       });
 
       it('should set the running state', function () {
-        SegmentedFetch.prototype._processQueue = Promise.resolve;
+        SegmentedFetch.prototype._executeRequest = Promise.resolve;
 
         return segmentedFetch.fetch().then(function () {
           expect(segmentedFetch.running).to.be(true);
@@ -79,7 +79,7 @@ define(function (require) {
 
       it('should stop existing requests', function (done) {
         segmentedFetch.running = true;
-        SegmentedFetch.prototype._processQueue = Promise.resolve;
+        SegmentedFetch.prototype._executeRequest = Promise.resolve;
         SegmentedFetch.prototype._stopProcess = sinon.stub().returns(Promise.resolve());
 
         return segmentedFetch.fetch().then(function () {
@@ -95,7 +95,7 @@ define(function (require) {
 
       it('should perform actions on searchSource', function () {
         SegmentedFetch.prototype._startRequest = Promise.resolve;
-        SegmentedFetch.prototype._processQueue = Promise.resolve;
+        SegmentedFetch.prototype._executeRequest = Promise.resolve;
 
         return segmentedFetch.fetch().then(function () {
           // read the searchSource queue
