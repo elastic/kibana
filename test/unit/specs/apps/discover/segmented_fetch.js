@@ -7,11 +7,7 @@ define(function (require) {
   var searchStrategy;
   var searchSource;
   var mockSearchSource;
-  var searchSourceStubs = {
-    get: sinon.stub(),
-    toIndexList: sinon.stub().returns([]),
-    createRequest: sinon.stub().returns({source: {activeFetchCount: 0}})
-  };
+  var searchSourceStubs;
   var notify;
 
   function init() {
@@ -36,27 +32,65 @@ define(function (require) {
 
       SegmentedFetch = Private(require('apps/discover/_segmented_fetch'));
 
+      // mock the searchSource
+      searchSourceStubs = {
+        get: sinon.stub(),
+        toIndexList: sinon.stub().returns([]),
+        createRequest: sinon.stub().returns({source: {activeFetchCount: 0}})
+      };
       mockSearchSource = {
         get: searchSourceStubs.get.returns({
           toIndexList: searchSourceStubs.toIndexList.returns([])
         }),
         _createRequest: searchSourceStubs.createRequest
       };
+
+      // create segmentedFetch instance with mocked searchSource
       segmentedFetch = new SegmentedFetch(mockSearchSource);
 
+      // stub the searchStrategy
       searchStrategy = Private(require('components/courier/fetch/strategy/search'));
       searchStrategy.getSourceStateFromRequest = sinon.stub();
     });
   }
 
   describe.only('segmented fetch', function () {
+    require('test_utils/no_digest_promises').activateForSuite();
+
     beforeEach(init);
 
     describe('fetch', function () {
-      var fetch;
+      it('should return a promise', function () {
+        SegmentedFetch.prototype._processQueue = Promise.resolve;
 
-      it('should return a promise');
-      it('should stop existing requests');
+        var fetch = segmentedFetch.fetch();
+        expect('then' in fetch).to.be(true);
+        return fetch;
+      });
+
+      it('should set the running state', function () {
+        SegmentedFetch.prototype._processQueue = Promise.resolve;
+
+        return segmentedFetch.fetch().then(function () {
+          expect(segmentedFetch.running).to.be(true);
+        });
+      });
+
+      it('should stop existing requests', function (done) {
+        segmentedFetch.running = true;
+        SegmentedFetch.prototype._processQueue = Promise.resolve;
+        SegmentedFetch.prototype._stopProcess = sinon.stub().returns(Promise.resolve());
+
+        return segmentedFetch.fetch().then(function () {
+          setTimeout(function () {
+            expect(segmentedFetch.running).to.be(true);
+            segmentedFetch.fetch().then(function () {
+              expect(segmentedFetch._stopProcess.callCount).to.be(1);
+            });
+            done();
+          }, 0);
+        });
+      });
 
       it('should perform actions on searchSource', function () {
         SegmentedFetch.prototype._startRequest = Promise.resolve;
@@ -71,14 +105,35 @@ define(function (require) {
         });
       });
 
-      it('should create a notification event');
+      it('should create a notification event', function () {
+        SegmentedFetch.prototype._processQueue = Promise.resolve;
+
+        return segmentedFetch.fetch().then(function () {
+          expect(notify.event.callCount).to.be(1);
+        });
+      });
     });
 
     describe('abort', function () {
-      it('should return a promise');
+      it('should return a promise', function () {
+        var abort = segmentedFetch.abort();
+        expect('then' in abort).to.be(true);
+        return abort;
+      });
+
       it('should abort the existing fetch');
-      it('should abort the es promise');
-      it('should clear the notification');
+
+      it('should abort the es promise', function () {
+
+      });
+
+      it('should clear the notification', function () {
+        var spy = segmentedFetch.notifyEvent = sinon.spy();
+
+        return segmentedFetch.abort().then(function () {
+          expect(spy.callCount).to.be(1);
+        });
+      });
     });
   });
 });
