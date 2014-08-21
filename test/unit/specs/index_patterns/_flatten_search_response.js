@@ -4,13 +4,15 @@ define(function (require) {
   describe('IndexPattern#flattenSearchResponse()', function () {
 
     var indexPattern = {
-      fieldsByName: {
-        'message': { type: 'string' },
-        'geo.coordinates': { type: 'geo_point' },
-        'geo.dest': { type: 'string' },
-        'geo.src': { type: 'string' },
-        'bytes': { type: 'number' },
-        '@timestamp': { type: 'date' }
+      fields: {
+        byName: {
+          'message': { type: 'string' },
+          'geo.coordinates': { type: 'geo_point' },
+          'geo.dest': { type: 'string' },
+          'geo.src': { type: 'string' },
+          'bytes': { type: 'number' },
+          '@timestamp': { type: 'date' }
+        }
       }
     };
 

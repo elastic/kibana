@@ -6,8 +6,14 @@ define(function (require) {
   var notifs = [];
   var setTO = setTimeout;
   var clearTO = clearTimeout;
-  var log = (typeof KIBANA_DIST === 'undefined') ? _.bindKey(console, 'log') : _.noop;
   var consoleGroups = ('group' in window.console) && ('groupCollapsed' in window.console) && ('groupEnd' in window.console);
+
+  var log = _.noop;
+  if (typeof KIBANA_DIST === 'undefined') {
+    log = function () {
+      console.log.apply(console, arguments);
+    };
+  }
 
   // used to identify the first call to fatal, set to false there
   var firstFatal = true;
@@ -204,7 +210,7 @@ define(function (require) {
   Notifier.prototype.info = function (msg, cb) {
     add({
       type: 'info',
-      content: formatMsg(msg),
+      content: formatMsg(msg, this.from),
       icon: 'info-circle',
       title: 'Debug',
       lifetime: 5000,
@@ -212,7 +218,15 @@ define(function (require) {
     }, cb);
   };
 
-  Notifier.prototype.log = log;
+  if (log === _.noop) {
+    Notifier.prototype.log = _.noop;
+  } else {
+    Notifier.prototype.log = function () {
+      var args = [].slice.apply(arguments);
+      if (this.from) args.unshift(this.from + ':');
+      log.apply(null, args);
+    };
+  }
 
   // set the timer functions that all notification managers will use
   Notifier.prototype._setTimerFns = function (set, clear) {

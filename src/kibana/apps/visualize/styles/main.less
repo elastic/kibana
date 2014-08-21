@@ -1,54 +1,8 @@
+@import (reference) "../../../styles/_mixins.less";
 @import (reference) "../../../styles/_bootstrap.less";
 @import (reference) "../../../styles/theme/_theme.less";
 @import (reference) "../../../styles/_variables.less";
 @import (reference) "lesshat.less";
-
-@media (min-width: @screen-md-min) {
-  .vis-editor-content {
-    display: flex;
-    .flex-direction(row);
-    .justify-content(flex-start);
-
-    .vis-sidebar {
-      .flex(0, 0, 300px);
-    }
-
-    .vis-canvas {
-      .flex(1, 1, 100%);
-    }
-  }
-}
-
-.vis-editor-content {
-  vis-config-editor {
-    display: block;
-  }
-
-  .sidebar-item-title:hover {
-    color: inherit !important;
-    background-color: inherit !important;
-  }
-
-  .vis-config-details {
-    border-top: 1px solid @well-border;
-    padding: 5px 10px;
-    background-color: @body-bg;
-    color: @text-color;
-
-    .config-controls {
-      margin-bottom: 5px;
-    }
-  }
-
-  .agg-config-interval {
-    td {
-      padding-left: 10px;
-      &:first-child {
-        padding-left: 0px;
-      }
-    }
-  }
-}
 
 .vis-wizard {
   h1 {
@@ -56,48 +10,4 @@
   }
 }
 
-vis-canvas {
-  display: block;
-}
-
-.vis-editor navbar {
-  .bitty-modal-container {
-    position: relative;
-
-    .bitty-modal {
-      position: absolute;
-      cursor: pointer;
-      top: 0px;
-      left: 0px;
-      right: 0px;
-      bottom: 0px;
-      z-index: 10;
-      background: rgba(70, 82, 93, 0.9);
-      color: white;
-      text-align: center;
-      padding-top: 6px;
-      .user-select(none);
-    }
-  }
-}
-
-
-form.vis-share {
-  div.form-control {
-    height: inherit;
-  }
-}
-
-// vis-search-editor {
-//   display: block;
-//   background: @sidebar-bg;
-//   text-align: center;
-//   min-height: 0;
-//   border-bottom: 1px solid darken(@sidebar-bg, 10%);
-//   .user-select(none);
-
-//   color: @sidebar-color;
-//   a {
-//     color: @sidebar-color;
-//   }
-// }
+@import "../editor/editor.less";

@@ -19,7 +19,7 @@ define(function (require, module, exports) {
         sectionName: '@section'
       },
       link: function ($scope, $el) {
-        timefilter.enabled(false);
+        timefilter.enabled = false;
         $scope.sections = require('apps/settings/sections/index');
         $scope.section = _.find($scope.sections, { name: $scope.sectionName });
 

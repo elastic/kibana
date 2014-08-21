@@ -8,6 +8,7 @@ define(function (require) {
     .get('kibana')
     .filter('fieldType', function () {
       return function (fields, types) {
+        if (!types) return fields;
         if (!_.isArray(types)) types = [types];
         if (_.contains(types, '*')) return fields;
 
