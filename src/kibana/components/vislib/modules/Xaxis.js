@@ -41,6 +41,14 @@ define(function (require) {
       var ticksLength;
       var rotatedTicksLength;
       var percentage;
+      var isRotated = false;
+      var ratio;
+      var oClass;
+      var iClass;
+      var spacerht;
+      var isDiscover = false;
+      
+      if ($('.discover-timechart').length) isDiscover = true;
 
       this.getXAxis();
 
@@ -54,26 +62,42 @@ define(function (require) {
             .attr('width', width + self.margin.left + self.margin.right)
             .attr('height', height);
 
-          svg.append('g')
+          var xaxis = svg.append('g')
             .attr('class', 'x axis')
             .attr('transform', 'translate(' + self.margin.left + ',0)')
             .call(self.xAxis);
 
-          // check widths to apply rotate
           bbox = selection.selectAll('.tick text').node().getBBox();
           tickN = selection.selectAll('.tick text')[0].length;
           ticksLength = bbox.width * 1.05 * tickN;
-          if (ticksLength > width) {
-            self.rotateAxisLabels(selection);
+          rotatedTicksLength = bbox.width * 1.05 * tickN;
+          
+          if (!isDiscover) {
+            rotatedTicksLength = bbox.height * 1.05 * tickN;
+            // check widths to apply rotate
+            if (ticksLength > width) {
+              self.rotateAxisLabels(selection);
+              isRotated = true;
+            }
           }
 
           // check widths to apply filter
-          rotatedTicksLength = bbox.height * 1.05 * tickN;
           percentage = Math.floor(rotatedTicksLength / width) + 1;
           if (rotatedTicksLength > width) {
             self.filterAxisLabels(selection, percentage);
           }
+
+          // set heights of x-axis-div and x-axis-div-wrapper to fit ticklabels
+          var newheight = xaxis.node().getBBox();
+          $('.x-axis-div').height(newheight.height);
+          $('.x-axis-div-wrapper').height(newheight.height);
+          svg.attr('height', newheight.height);
+
+          $('.x-axis-wrapper').height(newheight.height + 20);
+          $('.y-axis-spacer-block').height(newheight.height + 20);
+
         });
+
       };
     };
 
