@@ -94,6 +94,22 @@ define(function (require) {
       return req;
     };
 
+    segmentedFetch.prototype._updateStatus = function (statusHandler, active, complete) {
+      var self = this;
+
+      if (!statusHandler) return;
+
+      var status = {
+        total: self.queue.length,
+        complete: complete.length,
+        remaining: self.queue.length,
+        active: active
+      };
+      statusHandler(status);
+
+      return status;
+    };
+
     segmentedFetch.prototype._processQueue = function (req, opts) {
       var self = this;
       var active = null;
@@ -116,25 +132,15 @@ define(function (require) {
         }
       };
 
-      function reportStatus() {
-        if (!opts.status) return;
-        opts.status({
-          total: self.queue.length,
-          complete: complete.length,
-          remaining: self.queue.length,
-          active: active
-        });
-      }
-
-      reportStatus();
+      self._updateStatus(opts.status, active, complete);
 
       searchStrategy.getSourceStateFromRequest(req)
       .then(function (state) {
         return (function recurse() {
           var index = self.queue.shift();
-          active = index;
 
-          reportStatus();
+          self._updateStatus(opts.status, index, complete);
+
 
           if (limitSize) {
             state.body.size = remainingSize;
@@ -235,6 +241,7 @@ define(function (require) {
      * @param {function} opts.first - a function that will be called for the first segment
      * @param {function} opts.each - a function that will be called for each segment
      * @param {function} opts.eachMerged - a function that will be called with the merged result on each segment
+     * @param {function} opts.status - a function that will be called for each segment and given the process status
      *
      * @return {Promise}
      */
