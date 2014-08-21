@@ -71,12 +71,19 @@ define(function (require) {
       return this.searchPromise;
     };
 
-    segmentedFetch.prototype._getQueue = function () {
-      var queue = this.searchSource.get('index').toIndexList();
+    segmentedFetch.prototype._extractQueue = function (direction) {
+      var self = this;
+      var queue = self.searchSource.get('index').toIndexList();
+
       if (!_.isArray(queue)) {
         queue = [queue];
       }
-      return queue;
+
+      if (direction === 'desc') {
+        queue = queue.reverse();
+      }
+
+      self.queue = queue;
     };
 
     segmentedFetch.prototype._createRequest = function () {
@@ -87,7 +94,7 @@ define(function (require) {
       return req;
     };
 
-    segmentedFetch.prototype._processQueue = function (req, queue, opts) {
+    segmentedFetch.prototype._processQueue = function (req, opts) {
       var self = this;
       var active = null;
       var complete = [];
@@ -112,9 +119,9 @@ define(function (require) {
       function reportStatus() {
         if (!opts.status) return;
         opts.status({
-          total: queue.length,
+          total: self.queue.length,
           complete: complete.length,
-          remaining: queue.length,
+          remaining: self.queue.length,
           active: active
         });
       }
@@ -124,7 +131,7 @@ define(function (require) {
       searchStrategy.getSourceStateFromRequest(req)
       .then(function (state) {
         return (function recurse() {
-          var index = queue.shift();
+          var index = self.queue.shift();
           active = index;
 
           reportStatus();
@@ -142,7 +149,7 @@ define(function (require) {
 
             // a response was swallowed intentionally. Try the next one
             if (!resp) {
-              if (queue.length) return recurse();
+              if (self.queue.length) return recurse();
               else return done();
             }
 
@@ -182,7 +189,7 @@ define(function (require) {
             })
             .then(function () {
               complete.push(index);
-              if (queue.length) return recurse();
+              if (self.queue.length) return recurse();
               return done();
             });
           });
@@ -233,19 +240,21 @@ define(function (require) {
      */
     segmentedFetch.prototype.fetch = function (opts) {
       var self = this;
+      var req;
       opts = opts || {};
-      var direction = opts.direction;
-      var queue = self._getQueue();
 
-      if (direction === 'desc') {
-        queue = queue.reverse();
-      }
-
-      var req = self._createRequest();
-
-      return self._startRequest(req)
+      return Promise.try(function () {
+        self._extractQueue(opts.direction);
+      })
       .then(function () {
-        self._processQueue(req, queue, opts);
+        req = self._createRequest();
+        return req;
+      })
+      .then(function (req) {
+        self._startRequest(req);
+      })
+      .then(function () {
+        self._processQueue(req, opts);
       });
     };
 

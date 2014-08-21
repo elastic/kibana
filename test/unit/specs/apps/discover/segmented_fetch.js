@@ -61,6 +61,7 @@ define(function (require) {
 
     describe('fetch', function () {
       it('should return a promise', function () {
+        SegmentedFetch.prototype._startRequest = Promise.resolve;
         SegmentedFetch.prototype._processQueue = Promise.resolve;
 
         var fetch = segmentedFetch.fetch();
