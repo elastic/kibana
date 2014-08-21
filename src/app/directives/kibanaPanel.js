@@ -63,7 +63,7 @@ function (angular,$) {
               '</span>'+
             '</span>' +
 
-            '<span class="panel-text panel-title">' +
+            '<span class="panel-text panel-title" ng-hide="panel.hideTitle">' +
               '{{panel.title?panel.title:panel.type}}' +
             '</span>'+
 

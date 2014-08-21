@@ -41,7 +41,11 @@ function (angular, app, _, config) {
        *
        * panel:: An array of panel objects
        */
-      panels : []
+      panels : [],
+      /**
+       * hideableTitle:: Boolean value that determines if a the column title can be hidden.
+       */
+      hideableTitle: true
     };
     _.defaults($scope.panel,_d);
 
@@ -76,7 +80,8 @@ function (angular, app, _, config) {
         span: 10,
         height: "150px",
         editable: true,
-        type: type
+        type: type,
+        hideTitle: false
       };
     };
 
