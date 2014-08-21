@@ -87,15 +87,26 @@ define(function (require) {
         },
 
         {
+          name: 'min_doc_count',
+          default: 1
+        },
+
+        {
           name: 'extended_bounds',
           default: {},
           write: function (aggConfig, output) {
             var val = aggConfig.params.extended_bounds;
 
-            if (val.min != null && val.max != null) {
+            if (val.min != null || val.max != null) {
               output.params.extended_bounds = {
                 min: val.min,
                 max: val.max
+              };
+            } else {
+              var tfBounds = timefilter.getBounds();
+              output.params.extended_bounds = {
+                min: tfBounds.min,
+                max: tfBounds.max,
               };
             }
           }
