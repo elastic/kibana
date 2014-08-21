@@ -18,18 +18,24 @@ define(function (require) {
 
       // the list of "configs" that we will use to read the response
       var configs = vis.aggs.getSorted().map(function (aggConfig) {
-        return _.assign(
-          aggConfig.type.params.write(aggConfig),
-          aggConfig.schema.params.write(aggConfig),
+        var aggParams = aggConfig.schema.params.write(aggConfig);
+
+        var chartDataConfig = _.assign(
           {
             categoryName: aggConfig.schema.name,
             id: aggConfig.id,
             aggConfig: aggConfig,
             aggType: aggConfig.type,
             field: aggConfig.params.field,
-            label: aggConfig.type.title
-          }
+            label: aggConfig.type.title,
+          },
+          _.merge(
+            aggConfig.schema.params.write(aggConfig),
+            aggConfig.type.params.write(aggConfig)
+          )
+
         );
+        return chartDataConfig;
       });
 
       var lastConfig = configs[configs.length - 1];
