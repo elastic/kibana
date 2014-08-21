@@ -77,7 +77,6 @@ define(function (require) {
       _.forEach(flattenedData, function (series) {
         arr.push(self.getYStackMax(series));
       });
-
       return _.max(arr);
     };
 
