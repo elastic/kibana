@@ -1,20 +1,23 @@
 define(function (require) {
 
-  function upFirst(str) {
-    return str.charAt(0).toUpperCase() + str.substr(1);
+  function upFirst(str, total) {
+    return str.charAt(0).toUpperCase() + (total ? str.substr(1).toLowerCase() : str.substr(1));
   }
 
   function inflector(prefix, postfix) {
+
     return function inflect(key) {
-      var inflected = key;
+      var inflected;
 
       if (key.indexOf('.') !== -1) {
         inflected = key
           .split('.')
           .map(function (step, i) {
-            return (i === 0) ? step : upFirst(step);
+            return (i === 0) ? step : upFirst(step, true);
           })
           .join('');
+      } else {
+        inflected = key.toLowerCase();
       }
 
       if (prefix && key.indexOf(prefix) !== 0) {
