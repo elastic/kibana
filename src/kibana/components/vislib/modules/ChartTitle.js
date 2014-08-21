@@ -26,9 +26,9 @@ define(function (require) {
             .append('text')
             .attr('transform', function () {
               if (self.splitType === 'rows') {
-                return 'translate(' + width + ',' + height / 2 + ')rotate(270)';
+                return 'translate(' + width * 0.7 + ',' + height / 2 + ')rotate(270)';
               }
-              return 'translate(' + width / 2 + ',' + height * 0.8 + ')';
+              return 'translate(' + width / 2 + ',' + height * 0.7 + ')';
             })
             .attr('text-anchor', 'middle')
             .text(function (d) {

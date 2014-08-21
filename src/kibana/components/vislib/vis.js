@@ -17,7 +17,7 @@ define(function (require) {
       this.el = $el.get ? $el.get(0) : $el;
       this.ChartClass = chartTypes[config.type];
       this._attr = _.defaults(config || {}, {
-        'margin' : { top: 6, right: 0, bottom: 0, left: 0 }
+        'margin' : { top: 10, right: 3, bottom: 5, left: 3 }
       });
     }
 

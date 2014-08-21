@@ -53,7 +53,7 @@ define(function (require) {
 
           svg.append('g')
             .attr('class', 'y axis')
-            .attr('transform', 'translate(' + width + ',' + self.margin.top + ')')
+            .attr('transform', 'translate(' + width * 0.95 + ',' + self.margin.top + ')')
             .call(self.yAxis);
         });
       };
