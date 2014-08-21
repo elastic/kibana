@@ -12,6 +12,9 @@ define(function (require) {
     // var segmentedFetch = {};
     function segmentedFetch(searchSource) {
       this.searchSource = searchSource;
+      this.queue = [];
+      this.completedQueue = [];
+      this.requestHandlers = {};
       this.running = false;
       this.activeRequest = null;
       this.notifyEvent = null;
@@ -94,25 +97,24 @@ define(function (require) {
       return req;
     };
 
-    segmentedFetch.prototype._updateStatus = function (statusHandler, active, complete) {
+    segmentedFetch.prototype._statusReport = function (active) {
       var self = this;
 
-      if (!statusHandler) return;
+      if (!self.requestHandlers.status) return;
 
       var status = {
         total: self.queue.length,
-        complete: complete.length,
+        complete: self.completedQueue.length,
         remaining: self.queue.length,
         active: active
       };
-      statusHandler(status);
+      self.requestHandlers.status(status);
 
       return status;
     };
 
     segmentedFetch.prototype._processQueue = function (req, opts) {
       var self = this;
-      var active = null;
       var complete = [];
       var limitSize = false;
       var remainingSize = false;
@@ -132,14 +134,15 @@ define(function (require) {
         }
       };
 
-      self._updateStatus(opts.status, active, complete);
+      // initial status report
+      self._statusReport(null);
 
       searchStrategy.getSourceStateFromRequest(req)
       .then(function (state) {
         return (function recurse() {
           var index = self.queue.shift();
 
-          self._updateStatus(opts.status, index, complete);
+          self._statusReport(index);
 
 
           if (limitSize) {
@@ -249,6 +252,9 @@ define(function (require) {
       var self = this;
       var req;
       opts = opts || {};
+
+      // keep an internal record of the attached handlers
+      self._setRequestHandlers(opts);
 
       return Promise.try(function () {
         self._extractQueue(opts.direction);
