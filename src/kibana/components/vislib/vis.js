@@ -3,103 +3,91 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
 
+    var VisFunctions = Private(require('components/vislib/modules/_functions'));
+    var Events = Private(require('factories/events'));
+
     // VisLib Visualization Types
     var chartTypes = {
       histogram : Private(require('components/vislib/modules/ColumnChart'))
     };
 
-    // VisLib Classes
-    var Data = Private(require('components/vislib/modules/Data'));
-    var Layout = Private(require('components/vislib/modules/Layout'));
-    var Legend = Private(require('components/vislib/modules/Legend'));
-    var Tooltip = Private(require('components/vislib/modules/Tooltip'));
-    var XAxis = Private(require('components/vislib/modules/XAxis'));
-    var YAxis = Private(require('components/vislib/modules/YAxis'));
-    var AxisTitle = Private(require('components/vislib/modules/AxisTitle'));
-    var ChartTitle = Private(require('components/vislib/modules/ChartTitle'));
-
+//    _(Vis).inherits(Events);
     function Vis($el, config) {
+//      Vis.Super.apply(this, arguments);
       this.el = $el.get ? $el.get(0) : $el;
-      this.config = config;
       this.ChartClass = chartTypes[config.type];
+      this._attr = _.defaults(config || {}, {
+        'margin' : { top: 6, right: 0, bottom: 0, left: 0 }
+      });
     }
 
+    _(Vis.prototype).extend(VisFunctions.prototype);
+
     Vis.prototype.render = function (data) {
-      var color;
-      var labels;
       var tooltipFormatter;
       var zeroInjectedData;
       var type;
+      var legend;
+      var xValues;
+      var formatter;
+      var width;
+      var yMax;
+      var height;
+      var xTitle;
+      var yTitle;
+      var vis;
+      var charts;
 
       if (!data) {
         throw new Error('No valid data!');
       }
 
-      this.data = new Data(data);
-      color = this.data.color ? this.data.color : this.data.getColorFunc();
-      labels = this.data.labels ? this.data.labels : this.data.getLabels();
-      tooltipFormatter = this.data.tooltipFormatter ? this.data.tooltipFormatter :
-        this.data.get('tooltipFormatter');
+      // DATA CLASS
+      this.instantiateData(data);
 
-      // LAYOUT OBJECT
-      // clears the el
+      // LAYOUT CLASS
       zeroInjectedData = this.data.injectZeros();
-      this.layout = new Layout(this.el, zeroInjectedData);
-      this.layout.render();
+      this.renderLayout(zeroInjectedData);
 
-      // LEGEND OBJECT
-      if (this.config.addLegend) {
-        this.legend = new Legend({
-          color: color,
-          labels: labels
-        }, this.config);
-        this.legend.render();
+      // LEGEND CLASS
+      if (this._attr.addLegend) {
+        legend = {
+          color: this.data.getColorFunc(),
+          labels: this.data.getLabels()
+        };
+        this.renderLegend(legend, this._attr);
       }
 
-      // TOOLTIP OBJECT
-      if (this.config.addTooltip) {
-        this.tooltip = new Tooltip('k4tip', tooltipFormatter);
+      // TOOLTIP CLASS
+      if (this._attr.addTooltip) {
+        tooltipFormatter = this.data.get('tooltipFormatter');
+        this.renderTooltip('k4tip', tooltipFormatter);
       }
 
-      // CHART TITLE OBJECT
+      // CHART TITLE CLASS
       type = this.data.splitType();
-      this.chartTitle = new ChartTitle(this.el, type);
-      this.chartTitle.render();
+      this.renderChartTitles(type);
 
-      // XAXIS OBJECT
-      var xValues = this.data.xValues();
-      var formatter = this.data.get('xAxisFormatter');
-      var width = $('.x-axis-div').width();
-      this.xAxis = new XAxis(this.el, xValues, formatter, width);
-      this.xAxis.render();
+      // XAXIS CLASS
+      xValues = this.data.xValues();
+      formatter = this.data.get('xAxisFormatter');
+      width = $('.x-axis-div').width();
+      this.renderXAxis(xValues, formatter, width, this._attr.margin);
 
-      // YAXIS OBJECT
-      var yMax = this.data.getYMaxValue();
-      var height = $('.y-axis-div').height();
-      this.yAxis = new YAxis(this.el, yMax, height);
-      this.yAxis.render();
+      // YAXIS CLASS
+      yMax = this.data.getYMaxValue();
+      height = $('.y-axis-div').height();
+      this.renderYAxis(yMax, height, this._attr.margin);
 
-      // AXIS TITLE OBJECT
-      var xTitle = this.data.get('xAxisLabel');
-      var yTitle = this.data.get('yAxisLabel');
-      this.axisTitle = new AxisTitle(this.el, xTitle, yTitle);
-      this.axisTitle.render();
+      // AXIS TITLE CLASS
+      xTitle = this.data.get('xAxisLabel');
+      yTitle = this.data.get('yAxisLabel');
+      this.renderAxisTitles(xTitle, yTitle);
 
-      // CHART OBJECT
-      var vis = this;
-      var charts = this.charts = [];
-
-      d3.select(this.el)
-        .selectAll('.chart')
-        .each(function (chartData) {
-          var chart = new vis.ChartClass(vis, this, chartData);
-          charts.push(chart);
-          try {
-            chart.render();
-          } catch (error) {
-            console.error(error.message);
-          }
-        });
+      // CHART CLASS
+      vis = this;
+      charts = this.charts = [];
+      this.renderCharts(vis, charts);
 
       this.checkSize();
     };
@@ -123,15 +111,15 @@ define(function (require) {
     }, 300);
 
     Vis.prototype.on = function () {
-      return this.chart.on();
+      return this.charts.on.apply(this.charts, arguments);
     };
 
     Vis.prototype.off = function () {
-      return this.chart.off();
+      return this.charts.off.apply(this.charts, arguments);
     };
 
     Vis.prototype.destroy = function () {
-      return this.chart.destroy();
+      return this.ChartClass.prototype.destroy.apply(this, arguments);
     };
 
     Vis.prototype.set = function (name, val) {

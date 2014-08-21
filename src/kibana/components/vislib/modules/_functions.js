@@ -1,45 +1,74 @@
 define(function (require) {
-  return function ChartFunctionsBaseClass(d3, Private) {
+  var _ = require('lodash');
 
-    var injectZeros = Private(require('components/vislib/components/_functions/zero_injection/inject_zeros'));
-    var orderKeys = Private(require('components/vislib/components/_functions/zero_injection/ordered_x_keys'));
-    var yStackMax = Private(require('components/vislib/components/_functions/d3/_y_stack_max'));
-    var getLabels = Private(require('components/vislib/components/_functions/labels/labels'));
-    var color = Private(require('components/vislib/components/_functions/color/color'));
-    var callFunction = Private(require('components/vislib/components/_functions/d3/_call_function'));
-    var removeAll = Private(require('components/vislib/components/_functions/d3/_remove_all'));
-    var layout = Private(require('components/vislib/components/_functions/d3/_layout'));
+  return function VisFunctionsBaseClass(d3, Private) {
+    var Data = Private(require('components/vislib/modules/Data'));
+    var Layout = Private(require('components/vislib/modules/Layout'));
+    var Legend = Private(require('components/vislib/modules/Legend'));
+    var Tooltip = Private(require('components/vislib/modules/Tooltip'));
+    var XAxis = Private(require('components/vislib/modules/XAxis'));
+    var YAxis = Private(require('components/vislib/modules/YAxis'));
+    var AxisTitle = Private(require('components/vislib/modules/AxisTitle'));
+    var ChartTitle = Private(require('components/vislib/modules/ChartTitle'));
 
-    function ChartFunctions() {}
+    function VisFunctions() {}
 
-    ChartFunctions.prototype.layout = function (el) {
-      return layout(el);
+    VisFunctions.prototype.instantiateData = function (data) {
+      this.data = new Data(data);
     };
 
-    ChartFunctions.prototype.getOrderedKeys = function (obj) {
-      return orderKeys(obj);
+    VisFunctions.prototype.renderLayout = function (data) {
+      this.layout = new Layout(this.el, data);
+      this.layout.render();
     };
 
-    ChartFunctions.prototype.yStackMax = function (stackedData) {
-      return yStackMax(stackedData);
+    VisFunctions.prototype.renderLegend = function (legend, config) {
+      this.legend = new Legend(legend, config);
+      this.legend.render();
     };
 
-    ChartFunctions.prototype.getLabels = function (obj) {
-      return getLabels(obj);
+    VisFunctions.prototype.renderTooltip = function (elClass, formatter) {
+      this.tooltip = new Tooltip(elClass, formatter);
     };
 
-    ChartFunctions.prototype.getColor = function (arr) {
-      return color(arr);
+    VisFunctions.prototype.renderChartTitles = function (splitType) {
+      this.chartTitle = new ChartTitle(this.el, splitType);
+      this.chartTitle.render();
     };
 
-    ChartFunctions.prototype.callFunction = function (el, data, callback) {
-      return callFunction(el, data, callback);
+    VisFunctions.prototype.renderXAxis = function (xValues, formatter, width, margin) {
+      this.xAxis = new XAxis(this.el, xValues, formatter, width, margin);
+      this.xAxis.render();
     };
 
-    ChartFunctions.prototype.removeAll = function (el) {
-      return removeAll(el);
+    VisFunctions.prototype.renderYAxis = function (yMax, height, margin) {
+      this.yAxis = new YAxis(this.el, yMax, height, margin);
+      this.yAxis.render();
     };
 
-    return ChartFunctions;
+    VisFunctions.prototype.renderAxisTitles = function (xTitle, yTitle) {
+      this.axisTitle = new AxisTitle(this.el, xTitle, yTitle);
+      this.axisTitle.render();
+    };
+
+    VisFunctions.prototype.renderCharts = function (vis, charts) {
+      var self = this;
+
+      d3.select(this.el)
+        .selectAll('.chart')
+        .each(function (chartData) {
+          var chart = new vis.ChartClass(vis, this, chartData);
+//          d3.rebind(vis, chart._attr.dispatch, 'on');
+          charts.push(chart);
+
+          try {
+            chart.render();
+          } catch (error) {
+            console.error(error.message);
+          }
+        });
+    };
+
+    return VisFunctions;
   };
 });

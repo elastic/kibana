@@ -3,9 +3,9 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
 
-    var ChartFunctions = Private(require('components/vislib/modules/_functions'));
+    var Events = Private(require('factories/events'));
 
-    _(Chart).inherits(ChartFunctions);
+    _(Chart).inherits(Events);
     function Chart(vis, el, chartData) {
       Chart.Super.apply(this, arguments);
       this.vis = vis;
@@ -15,37 +15,28 @@ define(function (require) {
     }
 
     Chart.prototype.render = function () {
-      return this.draw();
+      return d3.select(this.chartEl).call(this.draw());
     };
 
-//    Chart.prototype.callXAxis = function () {
-//      return new XAxis(this);
-//    };
-//
-//    Chart.prototype.callYAxis = function () {
-//      return new YAxis(this);
-//    };
-//
-//    Chart.prototype.resize = _.debounce(function () {
-//      if (!this.data) {
-//        throw new Error('No valid data');
-//      }
-//      this.render(this.data);
-//    }, 200);
-//
-//    Chart.prototype.checkSize = function () {
-//      // enable auto-resize
-//      var size = $('.chart').width() + ':' + $('.chart').height();
-//
-//      if (this.prevSize !== size) {
-//        this.resize();
-//      }
-//      this.prevSize = size;
-//      setTimeout(this.checkSize, 250);
-//    };
+    Chart.prototype.on = function () {
+      var args = Array.prototype.slice.call(arguments);
+      var eventName = args[0];
+      var self = this;
 
-    Chart.prototype.on = function () {};
-    Chart.prototype.off = function () {};
+      // This should only be called the first time to wire up the D3 event handler
+      if (!this._listeners[eventName]) {
+        this._attr.dispatch.on.call(this._attr.dispatch, eventName, function () {
+          var eventArgs = Array.prototype.slice.call(arguments);
+          self.emit.apply(eventName, eventArgs);
+        });
+      }
+      Chart.Super.prototype.on.apply(this, args);
+    };
+
+    Chart.prototype.off = function (event) {
+      this.dispatch.on(event, null);
+    };
+
     Chart.prototype.destroy = function () {};
 
     Chart.prototype.set = function (name, val) {

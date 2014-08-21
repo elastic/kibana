@@ -3,11 +3,12 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
 
-    function XAxis(el, values, formatter, width) {
+    function XAxis(el, values, formatter, width, margin) {
       this.el = el;
       this.xValues = values;
       this.xAxisFormatter = formatter;
-      this.width = width;
+      this.margin = margin;
+      this.width = width - margin.left - margin.right;
     }
 
     XAxis.prototype.render = function () {
@@ -46,16 +47,16 @@ define(function (require) {
       return function (selection) {
         selection.each(function () {
           div = d3.select(this);
-          width = $(this).width();
+          width = $(this).width() - self.margin.left - self.margin.right;
           height = $(this).height();
 
           svg = div.append('svg')
-            .attr('width', width)
+            .attr('width', width + self.margin.left + self.margin.right)
             .attr('height', height);
 
           svg.append('g')
             .attr('class', 'x axis')
-            .attr('transform', 'translate(0,0)')
+            .attr('transform', 'translate(' + self.margin.left + ',0)')
             .call(self.xAxis);
 
           // check widths to apply rotate
