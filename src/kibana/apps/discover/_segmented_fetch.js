@@ -25,6 +25,7 @@ define(function (require) {
       var self = this;
       var p = Promise.resolve();
 
+      // stop any existing segmentedFetches
       if (self.running) {
         p = p.then(self._stopRequest);
       }
@@ -204,9 +205,12 @@ define(function (require) {
     segmentedFetch.prototype.abort = function () {
       var self = this;
       var stop = self._stopRequest();
-      if ('abort' in self.searchPromise) {
+
+      // if we have a searchPromise, abort it as well
+      if (self.searchPromise && 'abort' in self.searchPromise) {
         return stop.then(self.searchPromise.abort);
       }
+
       return stop;
     };
 
