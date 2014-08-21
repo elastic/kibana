@@ -4,13 +4,16 @@ define(function (require) {
     var _ = require('lodash');
 
     var VisFunctions = Private(require('components/vislib/modules/_functions'));
+    var Events = Private(require('factories/events'));
 
     // VisLib Visualization Types
     var chartTypes = {
       histogram : Private(require('components/vislib/modules/ColumnChart'))
     };
 
+//    _(Vis).inherits(Events);
     function Vis($el, config) {
+//      Vis.Super.apply(this, arguments);
       this.el = $el.get ? $el.get(0) : $el;
       this.ChartClass = chartTypes[config.type];
       this._attr = _.defaults(config || {}, {
@@ -108,7 +111,7 @@ define(function (require) {
     }, 300);
 
     Vis.prototype.on = function () {
-      return this.ChartClass.prototype.on.apply(this, arguments);
+      return this.charts.on.apply(this.charts, arguments);
     };
 
     Vis.prototype.off = function () {

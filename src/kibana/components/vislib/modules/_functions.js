@@ -1,4 +1,6 @@
 define(function (require) {
+  var _ = require('lodash');
+
   return function VisFunctionsBaseClass(d3, Private) {
     var Data = Private(require('components/vislib/modules/Data'));
     var Layout = Private(require('components/vislib/modules/Layout'));
@@ -50,14 +52,15 @@ define(function (require) {
     };
 
     VisFunctions.prototype.renderCharts = function (vis, charts) {
+      var self = this;
+
       d3.select(this.el)
         .selectAll('.chart')
         .each(function (chartData) {
           var chart = new vis.ChartClass(vis, this, chartData);
-
-          d3.rebind(vis, chart._attr.dispatch, 'on');
-
+//          d3.rebind(vis, chart._attr.dispatch, 'on');
           charts.push(chart);
+
           try {
             chart.render();
           } catch (error) {

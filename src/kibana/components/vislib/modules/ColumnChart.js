@@ -153,11 +153,11 @@ define(function (require) {
                 .style('cursor', 'pointer');
 
               dispatch.hover(self.eventResponse(d, i));
-              d3.event.stopPropagation();
+//              d3.event.stopPropagation();
             })
             .on('click.bar', function (d, i) {
               dispatch.click(self.eventResponse(d, i));
-              d3.event.stopPropagation();
+//              d3.event.stopPropagation();
             })
             .on('mouseout.bar', function () {
               d3.select(this).classed('hover', false)
