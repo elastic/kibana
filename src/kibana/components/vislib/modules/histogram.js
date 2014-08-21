@@ -477,8 +477,9 @@ define(function (require) {
         var xScale;
 
         if (data.ordered !== undefined && data.ordered.date !== undefined) {
-          var maxDate = data.ordered.max;
-          var minDate = data.ordered.min;
+          // Calculate the real max and min
+          var maxDate = d3.max(keys);
+          var minDate = Math.min(d3.min(keys), data.ordered.min);
           var milsInterval = data.ordered.interval;
           var testInterval;
           var dateoffset;
@@ -513,14 +514,18 @@ define(function (require) {
               dateoffset = (milsInterval / 1000);
           }
 
-          xScale = d3.time.scale()
-            .range([0, width])
-            .nice(xTicks);
 
-          xScale.domain([
-            d3.time[testInterval].offset(new Date(minDate), -dateoffset),
-            d3.time[testInterval].offset(new Date(maxDate), dateoffset)
-          ]);
+          xScale = d3.time.scale()
+            .domain([minDate, maxDate + milsInterval * 0.75])
+            .range([0, width]);
+
+//          var barWidth = xScale(minDate + dateoffset) - xScale(minDate);
+
+//          xScale.domain([minDate, d3.time[testInterval].offset(new Date(maxDate), 1)]);
+//          xScale.domain([
+//            d3.time[testInterval].offset(new Date(minDate), -dateoffset),
+//            d3.time[testInterval].offset(new Date(maxDate), dateoffset)
+//          ]);
         } else {
           xScale = d3.scale.ordinal()
             .domain(keys)
@@ -702,9 +707,14 @@ define(function (require) {
             tip.style('visibility', 'hidden');
           });
 
+        var brushScale = d3.time.scale()
+          .domain([new Date(data.ordered.min), new Date(data.ordered.max)])
+          .range([0, width]);
+
         /* Event Selection: BRUSH */
         var brush = d3.svg.brush()
           .x(xScale)
+//          .x(brushScale)
           .on('brushend', function brushend() {
             var selected, start, lastVal, end, selectedRange;
 
@@ -923,8 +933,7 @@ define(function (require) {
                 if (data.ordered === undefined || !data.ordered.date) {
                   val = xScale.rangeBand();
                 } else {
-                  var barWidth = xScale(data.ordered.min + data.ordered.interval) -
-                    xScale(data.ordered.min);
+                  var barWidth = xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min);
                   var barSpacing = barWidth * 0.25;
                   val = barWidth - barSpacing;
                 }
