@@ -14,11 +14,17 @@
     <!-- title -->
     <span class="vis-editor-agg-header-title">
       {{ agg.schema.title }}
-      <span ng-if="!editorOpen && aggForm.$valid" class="vis-editor-agg-header-description">{{ describe() }}</span>
-      <span ng-if="!editorOpen && aggForm.$invalid" class="vis-editor-agg-header-error">{{ describeError() }}</span>
     </span>
 
-    <!-- controls !!!actually disabling buttons breaks tooltip¡¡¡ -->
+    <!-- description -->
+    <span ng-if="!editorOpen && aggForm.$valid" class="vis-editor-agg-header-description">{{ describe() }}</span>
+
+    <!-- error -->
+    <span ng-if="!editorOpen && aggForm.$invalid" class="vis-editor-agg-header-description danger">
+      {{ describeError() }}
+    </span>
+
+    <!-- controls !!!actually disabling buttons will break tooltips¡¡¡ -->
     <div class="vis-editor-agg-header-controls btn-group">
       <button
         ng-if="group.length > 1"
