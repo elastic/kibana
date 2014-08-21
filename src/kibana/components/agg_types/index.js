@@ -1,6 +1,6 @@
 define(function (require) {
   return function AggTypeService(Private) {
-    var Registry = require('utils/registry');
+    var Registry = require('utils/registry/registry');
 
     var aggs = {
       metrics: Private(require('components/agg_types/metric_aggs')),
