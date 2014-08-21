@@ -27,10 +27,11 @@ define(function (require) {
 
     Data.prototype.xValues = function () {
       var orderedKeys = orderKeys(this.data);
+      var ordered = this.get('ordered');
 
       // Converts x values to numbers
-      if (this.ordered) {
-        this.orderedKeys = this.orderedKeys.map(function (d) {
+      if (ordered) {
+        orderedKeys = orderedKeys.map(function (d) {
           return +d;
         });
       }

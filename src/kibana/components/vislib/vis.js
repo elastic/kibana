@@ -70,11 +70,16 @@ define(function (require) {
       this.renderChartTitles(type);
 
       // XAXIS CLASS
-      xValues = this.data.xValues();
-      formatter = this.data.get('xAxisFormatter');
+//      xValues = this.data.xValues();
+//      formatter = this.data.get('xAxisFormatter');
       width = $('.x-axis-div').width();
-      this.renderXAxis(xValues, formatter, width, this._attr.margin, this.data);
-      var domain = this.xAxis.getDomain();
+      this.renderXAxis({
+        el: this.el,
+        data: this.data,
+        width: width,
+        attr: this._attr
+      });
+//      this.renderXAxis(xValues, formatter, width, this._attr.margin, this.data);
 
       // YAXIS CLASS
       yMax = this.data.getYMaxValue();

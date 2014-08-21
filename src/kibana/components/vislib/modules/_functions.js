@@ -36,8 +36,8 @@ define(function (require) {
       this.chartTitle.render();
     };
 
-    VisFunctions.prototype.renderXAxis = function (xValues, formatter, width, margin, data) {
-      this.xAxis = new XAxis(this.el, xValues, formatter, width, margin, data);
+    VisFunctions.prototype.renderXAxis = function (args) {
+      this.xAxis = new XAxis(args);
       this.xAxis.render();
     };
 
