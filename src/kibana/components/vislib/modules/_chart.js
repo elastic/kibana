@@ -18,20 +18,20 @@ define(function (require) {
       return d3.select(this.chartEl).call(this.draw());
     };
 
-    Chart.prototype.on = function () {
-      var args = Array.prototype.slice.call(arguments);
-      var eventName = args[0];
-      var self = this;
-
-      // This should only be called the first time to wire up the D3 event handler
-      if (!this._listeners[eventName]) {
-        this._attr.dispatch.on.call(this._attr.dispatch, eventName, function () {
-          var eventArgs = Array.prototype.slice.call(arguments);
-          self.emit.apply(eventName, eventArgs);
-        });
-      }
-      Chart.Super.prototype.on.apply(this, args);
-    };
+//    Chart.prototype.on = function () {
+//      var args = Array.prototype.slice.call(arguments);
+//      var eventName = args[0];
+//      var self = this;
+//
+//      // This should only be called the first time to wire up the D3 event handler
+//      if (!this._listeners[eventName]) {
+//        this._attr.dispatch.on.call(this._attr.dispatch, eventName, function () {
+//          var eventArgs = Array.prototype.slice.call(arguments);
+//          self.emit.apply(eventName, eventArgs);
+//        });
+//      }
+//      Chart.Super.prototype.on.apply(this, args);
+//    };
 
     Chart.prototype.off = function (event) {
       this.dispatch.on(event, null);

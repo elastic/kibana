@@ -110,9 +110,9 @@ define(function (require) {
       setTimeout(this.checkSize(), 300);
     }, 300);
 
-    Vis.prototype.on = function () {
-      return this.charts.on.apply(this.charts, arguments);
-    };
+//    Vis.prototype.on = function () {
+//      return this.charts.on.apply(this.charts, arguments);
+//    };
 
     Vis.prototype.off = function () {
       return this.charts.off.apply(this.charts, arguments);
