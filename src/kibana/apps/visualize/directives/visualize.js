@@ -88,7 +88,6 @@ define(function (require) {
           _.defaults(params, typeDefinition.params);
 
           chart = new visLib.Vis($visualize[0], params);
-          console.log(chart.on);
 
           // For each type of interaction, assign the the handler if the vis object has it
           // otherwise use the typeDef, otherwise, do nothing.
@@ -144,11 +143,11 @@ define(function (require) {
         $scope.$on('$destroy', function () {
           // Vis with missing indexpattern will not have destroy
           if ($scope.vis && $scope.vis.destroy) $scope.vis.destroy();
-          if (chart) {
-            chart.off('hover');
-            chart.off('click');
-            chart.destroy();
-          }
+//          if (chart) {
+//            chart.off('hover');
+//            chart.off('click');
+//            chart.destroy();
+//          }
         });
       }
     };

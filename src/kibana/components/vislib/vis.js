@@ -114,9 +114,9 @@ define(function (require) {
 //      return this.charts.on.apply(this.charts, arguments);
 //    };
 
-    Vis.prototype.off = function () {
-      return this.charts.off.apply(this.charts, arguments);
-    };
+//    Vis.prototype.off = function () {
+//      return this.charts.off.apply(this.charts, arguments);
+//    };
 
     Vis.prototype.destroy = function () {
       return this.ChartClass.prototype.destroy.apply(this, arguments);
