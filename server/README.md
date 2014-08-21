@@ -14,15 +14,15 @@ This is the backend server for Kibana 4. It's written in Ruby using Sinatra and 
 Coming Soon...
 
 ### Project Layout
-**bin** - Where the kibana executable lives. This is the entry point for the Jar file
-**config** - Configuration files for warble, puma and the rack server
-**lib** - Where Kibana specific ruby libraries live
-**public** - This is where the static assets go
-**routes** - This is where the route controllers go
-**Gemfile** - This is the Gemfile for Bundler. Any dependencies need to be listed in here.
-**Gemfile.lock** - Bundler creates a lock file for the gem versions
-**Rakefile** - This is where the `rake` tasks go
-**README.md** - You're looking at it :D
+- **bin** - Where the kibana executable lives. This is the entry point for the Jar file
+- **config** - Configuration files for warble, puma and the rack server
+- **lib** - Where Kibana specific ruby libraries live
+- **public** - This is where the static assets go
+- **routes** - This is where the route controllers go
+- **Gemfile** - This is the Gemfile for Bundler. Any dependencies need to be listed in here.
+- **Gemfile.lock** - Bundler creates a lock file for the gem versions
+- **Rakefile** - This is where the `rake` tasks go
+- **README.md** - You're looking at it :D
 
 ### Development Evn Setup
 
