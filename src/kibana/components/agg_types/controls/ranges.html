@@ -1,0 +1,39 @@
+<table class="vis-editor-agg-editor-ranges form-group">
+  <tr>
+    <th>
+      <label>From</label>
+    </th>
+    <th colspan="2">
+      <label>To</label>
+    </th>
+  </tr>
+
+  <tr
+    ng-repeat="range in params.ranges track by $index">
+    <td>
+      <input
+        ng-model="range.from"
+        type="number"
+        class="form-control"
+        name="range.from" />
+    </td>
+    <td>
+      <input
+        ng-model="range.to"
+        type="number"
+        class="form-control"
+        name="range.to" />
+    </td>
+    <td>
+      <button ng-click="params.ranges.splice($index, 1)"
+        class="btn btn-danger btn-xs">
+        <i class="fa fa-ban" ></i>
+      </button>
+    </td>
+  </tr>
+</table>
+<div
+  ng-click="params.ranges.push({})"
+  class="sidebar-item-button primary">
+  Add Range
+</div>

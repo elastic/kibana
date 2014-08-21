@@ -56,7 +56,7 @@ define(function (require) {
 
         $rootScope.globalState = globalState;
 
-        $rootScope.$watchMulti = function (expressions, fn) {
+        $rootScope.constructor.prototype.$watchMulti = function (expressions, fn, deep) {
           if (!_.isArray(expressions)) throw new TypeError('expected an array of expressions to watch');
           if (!_.isFunction(fn)) throw new TypeError('expexted a function that is triggered on each watch');
 

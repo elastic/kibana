@@ -1,4 +1,4 @@
-kbn-table {
+kbn-table,tbody[kbn-rows] {
   // sub tables should not have a leading border
   .table .table {
     margin-bottom: 0px;
@@ -14,5 +14,10 @@ kbn-table {
 
   tr.even td {
     background-color: #f1f1f1;
+  }
+
+  td.numeric-value {
+    text-align: right;
+    padding-right: 15px;
   }
 }

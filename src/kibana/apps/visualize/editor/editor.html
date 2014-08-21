@@ -1,0 +1,87 @@
+<div ng-controller="VisEditor" class="vis-editor">
+
+  <navbar ng-if="!appEmbedded">
+    <div class="fill bitty-modal-container">
+      <div ng-if="linked && !unlinking"
+        ng-dblclick="unlink()"
+        tooltip="Double click to unlink this visualization from the saved search"
+        class="bitty-modal visualize-linked">
+        <i class="fa fa-link"></i>
+        &nbsp;
+        This visualization is linked to a saved search:
+        <b>{{ savedVis.savedSearchId | json}}</b>
+        <a href="#/discover/{{ savedVis.savedSearchId | uriescape }}">
+          <i class="fa fa-pencil" tooltip="Click here to edit the linked saved search"></i>
+        </a>
+      </div>
+
+      <div ng-if="linked && unlinking" ng-click="doneUnlinking()" class="bitty-modal">
+        <i class="fa fa-chain-broken"></i> Unlinked!
+      </div>
+
+      <form ng-submit="fetch()" class="inline-form" name="queryInput">
+        <div class="typeahead" kbn-typeahead="visualize">
+          <div class="input-group"
+            ng-class="queryInput.$invalid ? 'has-error' : ''">
+            <input
+              query-input="savedVis.searchSource"
+              input-focus
+              kbn-typeahead-input
+              placeholder="Search..."
+              type="text"
+              class="form-control"
+              ng-model="state.query">
+
+            <button
+              class="btn btn-default" type="submit"
+              ng-disabled="queryInput.$invalid">
+              <span class="fa fa-search"></span>
+            </button>
+          </div>
+          <kbn-typeahead-items></kbn-typeahead-items>
+        </div>
+      </form>
+    </div>
+
+    <div class="button-group">
+      <button ng-click="startOver()"><i class="fa fa-file-o"></i></button>
+
+      <!-- normal save -->
+      <button ng-if="!editableVis.dirty" ng-click="toggleSave()">
+        <i class="fa fa-save"></i>
+      </button>
+
+      <!-- save stub with tooltip -->
+      <button disabled ng-if="editableVis.dirty" tooltip="Apply or Discard your changes before saving">
+        <i class="fa fa-save"></i>
+      </button>
+
+      <button ng-click="toggleLoad()"><i class="fa fa-folder-open"></i></button>
+      <button ng-click="toggleShare()"><i class="fa fa-code"></i></button>
+      <button ng-click="fetch()"><i class="fa fa-refresh"></i></button>
+    </div>
+  </navbar>
+
+
+  <config
+    ng-if="!appEmbedded"
+    config-template="configTemplate"
+    config-object="conf">
+  </config>
+
+
+  <div class="vis-editor-content">
+    <vis-editor-sidebar
+      ng-if="!appEmbedded"
+      vis="editableVis"
+      apply="stageEditableVis(); fetch();"
+      reset="resetEditableVis();">
+    </vis-editor-sidebar>
+
+    <div class="vis-editor-canvas">
+      <p class="vis-editor-canvas-title" ng-if="savedVis.title" ng-bind="savedVis.title"></p>
+      <visualize vis="vis" search-source="savedVis.searchSource"></visualize>
+    </div>
+  </div>
+
+</div>

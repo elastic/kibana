@@ -63,7 +63,7 @@ define(function (require) {
 
         return chart.getVisualization(selection);
       } catch (error) {
-        console.group('chart.render: ' + error);
+        console.error('chart.render: ' + error);
       }
     };
 
@@ -128,7 +128,7 @@ define(function (require) {
           });
         });
       } catch (error) {
-        console.group('chart.getVisualization: ' + error);
+        console.error('chart.getVisualization: ' + error);
       }
     };
 
@@ -146,7 +146,7 @@ define(function (require) {
 
         return tooltipDiv;
       } catch (error) {
-        console.group('chart.getTooltip: ' + error);
+        console.error('chart.getTooltip: ' + error);
       }
     };
 
@@ -166,7 +166,7 @@ define(function (require) {
 
         return chartWrapper;
       } catch (error) {
-        console.group('chart.getChartWrapper: ' + error);
+        console.error('chart.getChartWrapper: ' + error);
       }
     };
 
@@ -183,7 +183,7 @@ define(function (require) {
 
         return selection;
       } catch (error) {
-        console.group('chart.getSelection: ' + error);
+        console.error('chart.getSelection: ' + error);
       }
     };
 
@@ -202,7 +202,7 @@ define(function (require) {
 
         return colorDict;
       } catch (error) {
-        console.group('chart.getColors: ' + error);
+        console.error('chart.getColors: ' + error);
       }
     };
 
@@ -221,7 +221,7 @@ define(function (require) {
 
         return colorDict;
       } catch (error) {
-        console.group('chart.getColorDict' + error);
+        console.error('chart.getColorDict' + error);
       }
     };
 
@@ -245,7 +245,7 @@ define(function (require) {
         items = _.uniq(items);
         return items;
       } catch (error) {
-        console.group('chart.getColorDomain: ' + error);
+        console.error('chart.getColorDomain: ' + error);
       }
     };
 
@@ -504,7 +504,7 @@ define(function (require) {
 
         return svg;
       } catch (error) {
-        console.group('chart.createPieChart: ' + error);
+        console.error('chart.createPieChart: ' + error);
       }
     };
 
@@ -516,7 +516,7 @@ define(function (require) {
         }
         chart.render(latestData);
       } catch (error) {
-        console.group('chart.resize: ' + error);
+        console.error('chart.resize: ' + error);
       }
     }, 200);
 
@@ -532,7 +532,7 @@ define(function (require) {
 
         setTimeout(checkSize, 250);
       } catch (error) {
-        console.group('chart.checkSize: ' + error);
+        console.error('chart.checkSize: ' + error);
       }
     };
 
@@ -540,7 +540,7 @@ define(function (require) {
       try {
         return label ? chart.classifyString(label) : chart.classifyString(yAxisLabel);
       } catch (error) {
-        console.group('chart.getClassName: ' + error);
+        console.error('chart.getClassName: ' + error);
       }
     };
 
@@ -551,7 +551,7 @@ define(function (require) {
         }
         return string.replace(/[.]+|[/]+|[\s]+|[*]+|[;]+|[(]+|[)]+|[:]+|[,]+/g, '');
       } catch (error) {
-        console.group('chart.classifyString: ' + error);
+        console.error('chart.classifyString: ' + error);
       }
     };
 
@@ -563,7 +563,7 @@ define(function (require) {
           return false;
         }
       } catch (error) {
-        console.group('chart.isString: ' + error);
+        console.error('chart.isString: ' + error);
       }
     };
 
@@ -572,7 +572,7 @@ define(function (require) {
         var string = value + '';
         return string;
       } catch (error) {
-        console.group('chart.stringify: ' + error);
+        console.error('chart.stringify: ' + error);
       }
     };
 
@@ -603,7 +603,7 @@ define(function (require) {
 
         return chart;
       } catch (error) {
-        console.group('chart.error: ' + error);
+        console.error('chart.error: ' + error);
       }
     };
 
@@ -612,7 +612,7 @@ define(function (require) {
         dispatch.on(event, null);
         return chart;
       } catch (error) {
-        console.group('chart.off: ' + error);
+        console.error('chart.off: ' + error);
       }
     };
 
@@ -641,7 +641,7 @@ define(function (require) {
         destroyFlag = _;
         return chart;
       } catch (error) {
-        console.group('chart.destroy: ' + error);
+        console.error('chart.destroy: ' + error);
       }
     };
 

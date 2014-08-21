@@ -21,8 +21,6 @@ define(function (require) {
 
   require('apps/discover/directives/table');
 
-  require('apps/visualize/saved_visualizations/_adhoc_vis');
-
   var app = require('modules').get('apps/discover', [
     'kibana/notify',
     'kibana/courier',
@@ -49,8 +47,9 @@ define(function (require) {
 
 
   app.controller('discover', function ($scope, config, courier, $route, $window, savedSearches, savedVisualizations,
-    Notifier, $location, globalState, appStateFactory, timefilter, AdhocVis, Promise, Private) {
+    Notifier, $location, globalState, appStateFactory, timefilter, Promise, Private) {
 
+    var Vis = Private(require('components/vis/vis'));
     var segmentedFetch = $scope.segmentedFetch = Private(require('apps/discover/_segmented_fetch'));
     var HitSortFn = Private(require('apps/discover/_hit_sort_fn'));
     var diffTimePickerValues = Private(require('utils/diff_time_picker_vals'));
@@ -127,9 +126,6 @@ define(function (require) {
       indexPatternList: indexPatternList,
     };
 
-    // So we can watch it.
-    $scope.time = timefilter.time;
-
     // stores the complete list of fields
     $scope.fields = null;
 
@@ -153,9 +149,8 @@ define(function (require) {
           if (_.difference(changed, ignoreStateChanges).length) $scope.fetch();
         });
 
-        // TODO: Switch this to watching time.string when we implement it
-        $scope.$watchCollection('globalState.time', function (newTime, oldTime) {
-          if (diffTimePickerValues(newTime, oldTime)) $scope.fetch();
+        timefilter.on('update', function () {
+          $scope.fetch();
         });
 
         $scope.$watch('state.sort', function (sort) {
@@ -173,7 +168,7 @@ define(function (require) {
         });
 
         $scope.$watch('opts.timefield', function (timefield) {
-          timefilter.enabled(!!timefield);
+          timefilter.enabled = !!timefield;
         });
 
         // options are 'loading', 'ready', 'none', undefined
@@ -591,23 +586,24 @@ define(function (require) {
       // we shouldn't have a vis, delete it
       if (!$scope.opts.timefield && $scope.vis) {
         $scope.vis.destroy();
+        $scope.searchSource.set('aggs', undefined);
         delete $scope.vis;
       }
       // we shouldn't have one, or already do, return whatever we already have
       if (!$scope.opts.timefield || $scope.vis) return Promise.resolve($scope.vis);
 
-      var vis = new AdhocVis({
-        searchSource: $scope.searchSource,
+      // TODO: a legit way to update the index pattern
+      $scope.vis = new Vis($scope.searchSource.get('index'), {
         type: 'histogram',
         listeners: {
-          onClick: function (e) {
+          click: function (e) {
             console.log(e);
             timefilter.time.from = moment(e.point.x);
             timefilter.time.to = moment(e.point.x + e.data.ordered.interval);
             timefilter.time.mode = 'absolute';
             $scope.$apply();
           },
-          onBrush: function (e) {
+          brush: function (e) {
             var from = moment(e.range[0]);
             var to = moment(e.range[1]);
 
@@ -619,40 +615,35 @@ define(function (require) {
             $scope.$apply();
           }
         },
-        config: {
-          metric: {
-            configs: [{
-              agg: 'count',
-            }]
+        aggs: [
+          {
+            type: 'count',
+            schema: 'metric'
           },
-          segment: {
-            configs: [{
-              agg: 'date_histogram',
+          {
+            type: 'date_histogram',
+            schema: 'segment',
+            params: {
               field: $scope.opts.timefield,
-              interval: $state.interval,
-              min_doc_count: 0,
-            }]
-          },
-          group: { configs: [] },
-          split: { configs: [] },
-        }
+              interval: 'auto'
+            }
+          }
+        ]
+      });
+
+      $scope.searchSource.aggs(function () {
+        return $scope.vis.aggs.toDSL();
       });
 
       // stash this promise so that other calls to setupVisualization will have to wait
-      loadingVis = vis.init()
-      .then(function () {
-        // expose the vis so that the visualize directive can get started
-        $scope.vis = vis;
-
-        // wait for visualize directive to emit that it's ready before resolving
-        return new Promise(function (resolve) {
-          $scope.$on('ready:vis', resolve);
+      loadingVis = new Promise(function (resolve) {
+        $scope.$on('ready:vis', function () {
+          resolve($scope.vis);
         });
       })
-      .then(function () {
+      .finally(function () {
         // clear the loading flag
         loadingVis = null;
-        return vis;
       });
 
       return loadingVis;
