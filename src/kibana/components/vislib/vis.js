@@ -11,9 +11,9 @@ define(function (require) {
       histogram : Private(require('components/vislib/modules/ColumnChart'))
     };
 
-//    _(Vis).inherits(Events);
+    _(Vis).inherits(Events);
     function Vis($el, config) {
-//      Vis.Super.apply(this, arguments);
+      Vis.Super.apply(this, arguments);
       this.el = $el.get ? $el.get(0) : $el;
       this.ChartClass = chartTypes[config.type];
       this._attr = _.defaults(config || {}, {
@@ -41,6 +41,7 @@ define(function (require) {
       if (!data) {
         throw new Error('No valid data!');
       }
+
 
       // DATA CLASS
       this.instantiateData(data);
@@ -72,7 +73,8 @@ define(function (require) {
       xValues = this.data.xValues();
       formatter = this.data.get('xAxisFormatter');
       width = $('.x-axis-div').width();
-      this.renderXAxis(xValues, formatter, width, this._attr.margin);
+      this.renderXAxis(xValues, formatter, width, this._attr.margin, this.data);
+      var domain = this.xAxis.getDomain();
 
       // YAXIS CLASS
       yMax = this.data.getYMaxValue();
@@ -109,10 +111,6 @@ define(function (require) {
       this.prevSize = size;
       setTimeout(this.checkSize(), 300);
     }, 300);
-
-//    Vis.prototype.on = function () {
-//      return this.charts.on.apply(this.charts, arguments);
-//    };
 
 //    Vis.prototype.off = function () {
 //      return this.charts.off.apply(this.charts, arguments);

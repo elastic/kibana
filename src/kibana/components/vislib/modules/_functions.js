@@ -36,8 +36,8 @@ define(function (require) {
       this.chartTitle.render();
     };
 
-    VisFunctions.prototype.renderXAxis = function (xValues, formatter, width, margin) {
-      this.xAxis = new XAxis(this.el, xValues, formatter, width, margin);
+    VisFunctions.prototype.renderXAxis = function (xValues, formatter, width, margin, data) {
+      this.xAxis = new XAxis(this.el, xValues, formatter, width, margin, data);
       this.xAxis.render();
     };
 
@@ -58,7 +58,23 @@ define(function (require) {
         .selectAll('.chart')
         .each(function (chartData) {
           var chart = new vis.ChartClass(vis, this, chartData);
-//          d3.rebind(vis, chart._attr.dispatch, 'on');
+
+          // Bind events to the chart
+          d3.rebind(chart, chart._attr.dispatch, 'on');
+
+          // Bubbles the events up to the Vis Class and Events Class
+          chart.on('click', function (e) {
+            self.emit('click', e);
+          });
+
+          chart.on('hover', function (e) {
+            self.emit('hover', e);
+          });
+
+          chart.on('brush', function (e) {
+            self.emit('brush', e);
+          });
+
           charts.push(chart);
 
           try {

@@ -3,8 +3,9 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
 
-    function XAxis(el, values, formatter, width, margin) {
+    function XAxis(el, values, formatter, width, margin, data) {
       this.el = el;
+      this.data = data;
       this.xValues = values;
       this.xAxisFormatter = formatter;
       this.margin = margin;
@@ -15,7 +16,46 @@ define(function (require) {
       d3.select(this.el).selectAll('.x-axis-div').call(this.appendSVG());
     };
 
+    XAxis.prototype.getScale = function () {
+      this.ordered = this.data.get('ordered');
+
+      // Tests whether the xValues are dates
+      if (this.ordered && this.ordered.date) {
+        return d3.time.scale();
+      }
+      return d3.scale.ordinal();
+    };
+
+    XAxis.prototype.getDomain = function () {
+      var scale = this.getScale();
+      var keys = this.data.xValues();
+      var minDate;
+      var maxDate;
+      var timeInterval;
+      var spacingPercentage;
+
+      if (this.ordered.date) {
+        // Calculate the min date, max date, and time interval;
+        minDate = Math.min(Math.min(keys), this.ordered.min);
+        maxDate = Math.max(keys);
+        timeInterval = this.ordered.interval;
+        spacingPercentage = 0.25;
+
+        return scale.domain([minDate, maxDate + timeInterval * (1 - spacingPercentage)]);
+      }
+      return scale.domain(keys);
+    };
+
+    XAxis.prototype.getRange = function () {
+      var scale = this.getDomain();
+      if (this.ordered) {
+        return scale.range([0, this.width]);
+      }
+      return scale.range([0, this.width], 0.1);
+    };
+
     XAxis.prototype.getXScale = function () {
+//      this.xScale = this.getRange();
       this.xScale = d3.scale.ordinal()
         .domain(this.xValues)
         .rangeBands([0, this.width], 0.1);
