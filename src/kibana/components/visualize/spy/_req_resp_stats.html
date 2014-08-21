@@ -1,0 +1,20 @@
+<div ng-if="!history.complete" class="alert alert-info" role="alert">
+  Request in progress
+</div>
+
+<div ng-show="spyMode.name === 'request'">
+  <pre>{{history.req | json}}</pre>
+</div>
+
+<div ng-show="spyMode.name === 'response'">
+  <pre>{{history.resp | json}}</pre>
+</div>
+
+<div ng-show="spyMode.name === 'stats'">
+  <table class="table">
+    <tr ng-repeat="pair in history.meta">
+      <td>{{pair[0]}}</td>
+      <td>{{pair[1]}}</td>
+    </tr>
+  </table>
+</div>

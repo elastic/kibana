@@ -1,0 +1,17 @@
+<div class="form-group">
+  <label for="field">
+    Field
+  </label>
+  <select
+    class="form-control"
+    name="field"
+    required
+    ng-model="params.field"
+    ng-options="
+      field as field.name group by field.type for field in aggConfig.vis.indexPattern.fields.raw
+      | fieldType: aggParam.filterFieldTypes
+      | filter: { indexed:true }
+      | orderBy:['type','name']
+    ">
+  </select>
+</div>

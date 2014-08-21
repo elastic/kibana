@@ -1,0 +1,30 @@
+require "java"
+require "warbler"
+
+HERE = File.expand_path(File.dirname(__FILE__))
+
+task "default" => "jar:run"
+
+namespace "jar" do
+  desc "Run the project jar file"
+  task "run" => "jar" do
+    exec("cd #{HERE} && rm -rf /tmp/kibana* && cp kibana.jar /tmp && cd /tmp && unzip -o kibana.jar 'kibana/public/*' && unzip -o kibana.jar kibana/config/web.ru && env PUBLIC_FOLDER=/tmp/kibana/public java -server -jar kibana.jar kibana/config/web.ru")
+  end
+end
+
+desc "Create the project jar file"
+task "jar" do
+  system("cd #{HERE} && jruby -S warble")
+end
+
+# desc "Watch for changes"
+# task "watch" => "vendor/fswatch" do
+#   system("killall fswatch")
+#   system("fswatch #{HERE}/lib \"bash -c \\\"kill -SIGUSR2 \\\`ps u|grep [o]rg.jruby.Main|grep bin/puma|awk {\'print \\\$2\'}\\\`\\\"\" &")
+# end
+
+desc "Run the project from jruby"
+# task "run" => "watch" do
+task "run" do
+  exec("cd #{HERE} && jruby -S bundle exec jruby -S bin/kibana config/web.ru")
+end
