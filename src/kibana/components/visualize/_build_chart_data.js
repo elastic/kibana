@@ -18,8 +18,6 @@ define(function (require) {
 
       // the list of "configs" that we will use to read the response
       var configs = vis.aggs.getSorted().map(function (aggConfig) {
-        var aggParams = aggConfig.schema.params.write(aggConfig);
-
         var chartDataConfig = _.assign(
           {
             categoryName: aggConfig.schema.name,
@@ -33,7 +31,6 @@ define(function (require) {
             aggConfig.schema.params.write(aggConfig),
             aggConfig.type.params.write(aggConfig)
           )
-
         );
         return chartDataConfig;
       });
