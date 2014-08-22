@@ -8,7 +8,7 @@ define(function (require) {
 
     var getColor = (function () {
       var i = 0;
-      var colorPool = require('components/vislib/utils/colorspace')(100);
+      var colorPool = require('components/vislib/components/_functions/color/seed_colors')(100);
       var assigned = {};
       return function (item) {
         var key = item.$$hashKey;

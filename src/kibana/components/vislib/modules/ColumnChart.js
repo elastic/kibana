@@ -80,9 +80,7 @@ define(function (require) {
         selection.each(function (data) {
           layers = self.stackData(data);
 
-          if (elWidth <= 0 || elHeight <= 0) {
-            throw new Error($elem.attr('class') + ' height is ' + elHeight + ' and width is ' + elWidth);
-          }
+          self.validateHeightAndWidth($elem, elWidth, elHeight);
 
           // Get the width and height
           width = elWidth - margin.left - margin.right;

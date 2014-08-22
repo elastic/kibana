@@ -37,7 +37,6 @@ define(function (require) {
         throw new Error('No valid data!');
       }
 
-
       // DATA CLASS
       this.instantiateData(data);
 
