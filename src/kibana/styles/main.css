@@ -7057,8 +7057,8 @@ navbar > .name {
   align-self: center;
   font-size: 17px;
   white-space: nowrap;
-  overflow: hidden;
   text-overflow: ellipsis;
+  overflow: hidden;
 }
 navbar button {
   padding: 5px 15px;
@@ -7165,9 +7165,8 @@ navbar .inline-form .input-group button {
 .sidebar-container .sidebar-list .sidebar-item .sidebar-item-title {
   padding: 5px 10px;
   white-space: nowrap;
-  overflow: hidden;
   text-overflow: ellipsis;
-  position: relative;
+  overflow: hidden;
 }
 .sidebar-container .sidebar-list .sidebar-item .sidebar-item-title.full-title {
   white-space: normal;
@@ -7219,8 +7218,30 @@ navbar .inline-form .input-group button {
 }
 html,
 body {
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-direction: normal;
+  -moz-box-direction: normal;
+  -webkit-box-orient: vertical;
+  -moz-box-orient: vertical;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
   height: 100%;
   margin: 0px;
+}
+html > *,
+body > * {
+  -webkit-flex-shrink: 0;
+  flex-shrink: 0;
 }
 label > small {
   font-weight: normal;
@@ -7314,16 +7335,58 @@ ul.navbar-inline li {
   word-break: break-word;
 }
 .content {
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-direction: normal;
+  -moz-box-direction: normal;
+  -webkit-box-orient: vertical;
+  -moz-box-orient: vertical;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
   position: relative;
   z-index: 0;
+}
+.content > * {
+  -webkit-flex-shrink: 0;
+  flex-shrink: 0;
 }
 .content > .navbar {
   position: relative;
   z-index: 1;
 }
-.content > .application {
+.application {
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-direction: normal;
+  -moz-box-direction: normal;
+  -webkit-box-orient: vertical;
+  -moz-box-orient: vertical;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
   position: relative;
   z-index: 0;
+}
+.application > * {
+  -webkit-flex-shrink: 0;
+  flex-shrink: 0;
 }
 .top-fixed {
   position: fixed;
@@ -7484,17 +7547,26 @@ notifications {
 .app-container > navbar {
   z-index: 2 !important;
 }
-kbn-table .table .table {
+kbn-table .table .table,
+tbody[kbn-rows] .table .table {
   margin-bottom: 0px;
 }
-kbn-table .table .table tr:first-child > td {
+kbn-table .table .table tr:first-child > td,
+tbody[kbn-rows] .table .table tr:first-child > td {
   border-top: none;
 }
-kbn-table .table .table td.field-name {
+kbn-table .table .table td.field-name,
+tbody[kbn-rows] .table .table td.field-name {
   font-weight: bold;
 }
-kbn-table tr.even td {
+kbn-table tr.even td,
+tbody[kbn-rows] tr.even td {
   background-color: #f1f1f1;
+}
+kbn-table td.numeric-value,
+tbody[kbn-rows] td.numeric-value {
+  text-align: right;
+  padding-right: 15px;
 }
 #fatal-splash-screen {
   margin: 15px;
@@ -7732,7 +7804,8 @@ fieldset[disabled] .form-control {
   cursor: default;
   opacity: .8;
 }
-input.ng-invalid {
+input.ng-dirty.ng-invalid,
+select.ng-dirty.ng-invalid {
   border-color: #e74c3c !important;
 }
 input[type="radio"][disabled],

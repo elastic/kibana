@@ -73,7 +73,7 @@ define(function (require) {
         $scope.openAdd = _.partial($scope.configTemplate.toggle, 'pickVis');
         $scope.refresh = _.bindKey(courier, 'fetch');
 
-        timefilter.enabled(true);
+        timefilter.enabled = true;
         $scope.timefilter = timefilter;
         $scope.$watchCollection('globalState.time', $scope.refresh);
 

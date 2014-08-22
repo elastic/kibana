@@ -1,6 +1,5 @@
 define(function (require) {
-  var app = require('modules').get('apps/visualize');
-  var typeDefs = require('apps/visualize/saved_visualizations/_type_defs');
+  var app = require('modules').get('app/visualize');
   var _ = require('lodash');
 
   require('apps/visualize/saved_visualizations/_saved_vis');
@@ -12,7 +11,11 @@ define(function (require) {
     title: 'visualizations'
   });
 
-  app.service('savedVisualizations', function (Promise, es, config, SavedVis) {
+  app.service('savedVisualizations', function (Promise, es, config, SavedVis, Private, Notifier) {
+    var visTypes = Private(require('components/vis_types/index'));
+    var notify = new Notifier({
+      location: 'saved visualization service'
+    });
 
     this.get = function (id) {
       return (new SavedVis(id)).init();
@@ -49,14 +52,26 @@ define(function (require) {
       .then(function (resp) {
         return {
           total: resp.hits.total,
-          hits: resp.hits.hits.map(function (hit) {
+          hits: _.transform(resp.hits.hits, function (hits, hit) {
             var source = hit._source;
             source.id = hit._id;
             source.url = self.urlFor(hit._id);
-            source.typeDef = typeDefs.byName[source.typeName];
-            source.icon = source.typeDef.icon;
-            return source;
-          })
+
+            var typeName = source.typeName;
+            if (source.visState) {
+              try { typeName = JSON.parse(source.visState).type; }
+              catch (e) { /* missing typename handled below */ }
+            }
+
+            if (!typeName) {
+              notify.info('unable to detect type from visualization source', hit);
+              return;
+            }
+
+            source.type = visTypes.byName[typeName];
+            source.icon = source.type.icon;
+            hits.push(source);
+          }, [])
         };
       });
     };

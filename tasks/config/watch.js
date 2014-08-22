@@ -8,6 +8,7 @@ module.exports = function (grunt) {
     },
     less: {
       files: [
+        '<%= app %>/**/*.less',
         '<%= app %>/**/styles/**/*.less',
         '<%= app %>/**/components/**/*.less',
         '<%= app %>/**/components/vislib/components/styles/**/*.less'

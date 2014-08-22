@@ -1,0 +1,18 @@
+<div ng-if="aggParam.shouldShow(aggConfig)" class="vis-editor-agg-form-row">
+  <div class="form-group">
+    <label>Min <small>(optional)</small></label>
+    <input
+      ng-model="params.extended_bounds.min"
+      type="number"
+      class="form-control"
+      name="extended_bounds.min" />
+  </div>
+  <div class="form-group">
+    <label>Max <small>(optional)</small></label>
+    <input
+      ng-model="params.extended_bounds.max"
+      type="number"
+      class="form-control"
+      name="extended_bounds.max" />
+  </div>
+</div>

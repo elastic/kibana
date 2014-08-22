@@ -166,6 +166,36 @@ dashboard-grid {
 .gridster dashboard-panel .panel .panel-heading a:hover {
   color: #298fa3;
 }
+.gridster dashboard-panel .panel .load-error {
+  text-align: center;
+  font-size: 1em;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
+  flex: 1 0 auto;
+  -webkit-box-pack: center;
+  -moz-box-pack: center;
+  -ms-flex-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-box-direction: normal;
+  -moz-box-direction: normal;
+  -webkit-box-orient: vertical;
+  -moz-box-orient: vertical;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+.gridster dashboard-panel .panel .load-error .fa-exclamation-triangle {
+  font-size: 2em;
+  color: #e74c3c;
+}
 .gridster dashboard-panel .panel visualize {
   -webkit-box-flex: 1;
   -moz-box-flex: 1;

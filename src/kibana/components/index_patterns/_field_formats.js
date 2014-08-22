@@ -2,7 +2,7 @@
 /* markdown
 
 ### Formatting a value
-To format a response value, you need to get ahold of the field list, which is usually available at `indexPattern.fields` or `indexPattern.fieldsByName`. When the indexPattern is not available, call `courier.getFieldsFor`. Each field object has a `format` property*, which is an object detailed in [_field_formats.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/index_patterns/_field_formats.js).
+To format a response value, you need to get ahold of the field list, which is usually available at `indexPattern.fields`. When the indexPattern is not available, call `courier.getFieldsFor`. Each field object has a `format` property*, which is an object detailed in [_field_formats.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/index_patterns/_field_formats.js).
 
 Once you have the field that a response value came from, pass the value to `field.format.convert(value)` and a formatted string representation of the field will be returned.
 

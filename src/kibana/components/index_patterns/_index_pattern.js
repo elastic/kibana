@@ -12,6 +12,7 @@ define(function (require) {
     var mappingSetup = Private(require('utils/mapping_setup'));
     var DocSource = Private(require('components/courier/data_source/doc_source'));
     var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
+    var Registry = require('utils/registry/registry');
 
     var type = 'index-pattern';
 
@@ -83,27 +84,31 @@ define(function (require) {
       };
 
       function afterFieldsSet() {
-        pattern.fieldsByName = {};
-        pattern.fields.forEach(function (field) {
-          field.count = field.count || 0;
-          pattern.fieldsByName[field.name] = field;
+        pattern.fields = new Registry({
+          index: ['name'],
+          group: ['type'],
+          initialSet: pattern.fields.map(function (field) {
+            field.count = field.count || 0;
 
-          // non-enumerable type so that it does not get included in the JSON
-          Object.defineProperty(field, 'format', {
-            enumerable: false,
-            get: function () {
-              var formatName = pattern.customFormats && pattern.customFormats[field.name];
-              return formatName ? fieldFormats.byName[formatName] : fieldFormats.defaultByType[field.type];
-            }
-          });
+            // non-enumerable type so that it does not get included in the JSON
+            Object.defineProperty(field, 'format', {
+              enumerable: false,
+              get: function () {
+                var formatName = pattern.customFormats && pattern.customFormats[field.name];
+                return formatName ? fieldFormats.byName[formatName] : fieldFormats.defaultByType[field.type];
+              }
+            });
+
+            return field;
+          })
         });
       }
 
       pattern.popularizeField = function (fieldName, unit) {
         if (_.isUndefined(unit)) unit = 1;
-        if (!(pattern.fieldsByName && pattern.fieldsByName[fieldName])) return;
+        if (!(pattern.fields.byName && pattern.fields.byName[fieldName])) return;
 
-        var field = pattern.fieldsByName[fieldName];
+        var field = pattern.fields.byName[fieldName];
         if (!field.count && unit < 1) return;
         if (!field.count) field.count = 1;
         else field.count = field.count + (unit);

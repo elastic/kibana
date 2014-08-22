@@ -177,17 +177,20 @@ define(function (require) {
 
       if (!resp.aggregations) return;
 
+      var aggKey = _.find(Object.keys(resp.aggregations), function (key) {
+        return key.substr(0, 5) === '_agg_';
+      });
+
       // start merging aggregations
       if (!merged.aggregations) {
-        merged.aggregations = {
-          _agg_0: {
-            buckets: []
-          }
+        merged.aggregations = {};
+        merged.aggregations[aggKey] = {
+          buckets: []
         };
         merged._bucketIndex = {};
       }
 
-      resp.aggregations._agg_0.buckets.forEach(function (bucket) {
+      resp.aggregations[aggKey].buckets.forEach(function (bucket) {
         var mbucket = merged._bucketIndex[bucket.key];
         if (mbucket) {
           mbucket.doc_count += bucket.doc_count;
@@ -195,7 +198,7 @@ define(function (require) {
         }
 
         mbucket = merged._bucketIndex[bucket.key] = bucket;
-        merged.aggregations._agg_0.buckets.push(mbucket);
+        merged.aggregations[aggKey].buckets.push(mbucket);
       });
     }
 

@@ -16,6 +16,8 @@ define(function (require) {
     'csv:separator': ',',
     'csv:quoteValues': true,
 
-    'history:limit': 10
+    'history:limit': 10,
+
+    'shortDots:enable': false
   });
 });

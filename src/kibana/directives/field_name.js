@@ -2,8 +2,9 @@ define(function (require) {
   var module = require('modules').get('kibana');
   var $ = require('jquery');
   var _ = require('lodash');
+  require('filters/short_dots');
 
-  module.directive('fieldName', function ($compile, $rootScope) {
+  module.directive('fieldName', function ($compile, $rootScope, $filter) {
     return {
       restrict: 'AE',
       scope: {
@@ -45,8 +46,11 @@ define(function (require) {
           var name = $scope.field ? $scope.field.name : $scope.fieldName;
           var results = $scope.field ? !$scope.field.rowCount : false;
 
+          var displayName = $filter('shortDots')(name);
+
           $el
-            .text(name)
+            .text(displayName)
+            .attr('title', name)
             .toggleClass('no-results', results)
             .prepend(typeIcon(type));
         });
