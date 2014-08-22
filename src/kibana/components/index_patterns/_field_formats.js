@@ -64,9 +64,9 @@ define(function (require) {
           'date'
         ],
         name: 'date',
-        convert: function (val) {
+        convert: _.memoize(function (val) {
           return moment(val).format(config.get('dateFormat'));
-        }
+        })
       },
       {
         types: [
