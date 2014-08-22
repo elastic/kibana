@@ -149,7 +149,7 @@ define(function (require) {
           if (_.difference(changed, ignoreStateChanges).length) $scope.fetch();
         });
 
-        timefilter.on('update', function () {
+        $scope.$listen(timefilter, 'update', function () {
           $scope.fetch();
         });
 
