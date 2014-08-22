@@ -25,11 +25,13 @@ define(function (require) {
     }
 
     ColumnChart.prototype.eventResponse = function (d, i) {
+      var color = this.vis.data.getColorFunc();
+
       return {
         value     : this._attr.yValue(d, i),
         point     : d,
         label     : d.label,
-        color     : this.vis.data.color(d.label),
+        color     : color(d.label),
         pointIndex: i,
         series    : this.chartData.series,
         config    : this._attr,
@@ -61,7 +63,7 @@ define(function (require) {
       var elWidth = this._attr.width = $elem.width();
       var elHeight = this._attr.height = $elem.height();
       var isTooltip = this._attr.addTooltip;
-      var color = this.vis.data.color;
+      var color = this.vis.data.getColorFunc();
       var tooltip = this.vis.tooltip;
       var yScale = this.vis.yAxis.yScale;
       var xScale = this.vis.xAxis.xScale;

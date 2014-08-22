@@ -20,10 +20,14 @@
    - We need to be able to get ahold of angular services here – (https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/visualize/saved_visualizations/_type_defs.js)
  - **src/kibana/apps/visualize/saved_visualizations/bucket_aggs/terms.js**
    - We need more just _count here. – (https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/visualize/saved_visualizations/bucket_aggs/terms.js)
+ - **src/kibana/components/agg_types/buckets/terms.js**
+   - We need more than just _count here. – (https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/agg_types/buckets/terms.js)
  - **src/kibana/components/index_patterns/_mapper.js**
    - Change index to be the resolved in some way, last three months, last hour, last year, whatever – (https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/index_patterns/_mapper.js)
  - **src/kibana/components/state_management/state.js**
    - Change all the references to onUpdate to the actual fetch_with_changes event – (https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/state_management/state.js)
+ - **src/kibana/components/visualize/visualize.js**
+   - we need to have some way to clean up result requests – (https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/visualize/visualize.js)
  - **src/kibana/directives/rows.js**
    - It would be better to actually check the type of the field, but we don't have – (https://github.com/elasticsearch/kibana4/blob/master/src/kibana/directives/rows.js)
  - **src/kibana/services/timefilter.js**

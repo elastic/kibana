@@ -1,10 +1,15 @@
 define(function (require) {
-  return function ChartTitleFactory(d3) {
+  return function ChartTitleFactory(d3, Private) {
     var $ = require('jquery');
+    var _ = require('lodash');
 
+    var Chart = Private(require('components/vislib/modules/_chart'));
+
+    _(ChartTitle).inherits(Chart);
     function ChartTitle(el, type) {
+      ChartTitle.Super.apply(this, arguments);
       this.el = el;
-      this.splitType = type;
+      this.dataType = type;
     }
 
     ChartTitle.prototype.render = function () {
@@ -20,12 +25,14 @@ define(function (require) {
           var width = $(this).width();
           var height = $(this).height();
 
+          self.validateHeightAndWidth(div, width, height);
+
           div.append('svg')
             .attr('width', width)
             .attr('height', height)
             .append('text')
             .attr('transform', function () {
-              if (self.splitType === 'rows') {
+              if (self.dataType === 'rows') {
                 return 'translate(' + width + ',' + height / 2 + ')rotate(270)';
               }
               return 'translate(' + width / 2 + ',' + height * 0.8 + ')';

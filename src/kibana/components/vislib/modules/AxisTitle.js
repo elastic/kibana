@@ -1,8 +1,13 @@
 define(function (require) {
-  return function AxisTitleFactory(d3) {
+  return function AxisTitleFactory(d3, Private) {
     var $ = require('jquery');
+    var _ = require('lodash');
 
+    var Chart = Private(require('components/vislib/modules/_chart'));
+
+    _(AxisTitle).inherits(Chart);
     function AxisTitle(el, xTitle, yTitle) {
+      AxisTitle.Super.apply(this, arguments);
       this.el = el;
       this.xTitle = xTitle;
       this.yTitle = yTitle;
@@ -14,16 +19,18 @@ define(function (require) {
     };
 
     AxisTitle.prototype.appendAxisTitle = function (title) {
-      return function (selection) {
-        var self = this;
-        var div;
-        var width;
-        var height;
+      var self = this;
+      var div;
+      var width;
+      var height;
 
+      return function (selection) {
         selection.each(function () {
           div = d3.select(this);
           width = $(this).width();
           height = $(this).height();
+
+          self.validateHeightAndWidth(div, width, height);
 
           div.append('svg')
             .attr('width', width)

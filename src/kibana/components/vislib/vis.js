@@ -28,11 +28,6 @@ define(function (require) {
       var zeroInjectedData;
       var type;
       var legend;
-      var xValues;
-      var formatter;
-      var width;
-      var yMax;
-      var height;
       var xTitle;
       var yTitle;
       var vis;
@@ -70,21 +65,18 @@ define(function (require) {
       this.renderChartTitles(type);
 
       // XAXIS CLASS
-//      xValues = this.data.xValues();
-//      formatter = this.data.get('xAxisFormatter');
-      width = $('.x-axis-div').width();
       this.renderXAxis({
         el: this.el,
         data: this.data,
-        width: width,
         attr: this._attr
       });
-//      this.renderXAxis(xValues, formatter, width, this._attr.margin, this.data);
 
       // YAXIS CLASS
-      yMax = this.data.getYMaxValue();
-      height = $('.y-axis-div').height();
-      this.renderYAxis(yMax, height, this._attr.margin);
+      this.renderYAxis({
+        el: this.el,
+        yMax: this.data.getYMaxValue(),
+        attr: this._attr
+      });
 
       // AXIS TITLE CLASS
       xTitle = this.data.get('xAxisLabel');

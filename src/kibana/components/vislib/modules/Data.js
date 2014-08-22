@@ -26,17 +26,21 @@ define(function (require) {
     };
 
     Data.prototype.xValues = function () {
-      var orderedKeys = orderKeys(this.data);
+      var xValues = orderKeys(this.data);
       var ordered = this.get('ordered');
 
       // Converts x values to numbers
       if (ordered) {
-        orderedKeys = orderedKeys.map(function (d) {
-          return +d;
-        });
+        this.convertXValueStringsToNumbers(xValues);
       }
 
-      return orderedKeys;
+      return xValues;
+    };
+
+    Data.prototype.convertXValueStringsToNumbers = function (xValues) {
+      return xValues.map(function (d) {
+        return +d;
+      });
     };
 
     Data.prototype.splitType = function () {
@@ -46,12 +50,12 @@ define(function (require) {
       return 'series';
     };
 
-    Data.prototype.splits = function () {
-      if (!this.data.series) {
-        return this.data.rows ? this.data.rows : this.data.columns;
-      }
-      return this.data;
-    };
+//    Data.prototype.splits = function () {
+//      if (!this.data.series) {
+//        return this.data.rows ? this.data.rows : this.data.columns;
+//      }
+//      return this.data;
+//    };
 
     Data.prototype.flatten = function () {
       if (!this.data.series) {
@@ -105,9 +109,11 @@ define(function (require) {
 
     Data.prototype.getYStackMax = function (series) {
       var self = this;
+
       if (this.isStacked()) {
         series = this.stack(series);
       }
+
       return d3.max(series, function (data) {
         return d3.max(data, function (d) {
           if (self.isStacked()) {
@@ -118,37 +124,16 @@ define(function (require) {
       });
     };
 
-    Data.prototype.isOrdered = function () {
-      this.ordered = this.data.rows ? this.data.rows[0].ordered :
-        this.data.columns ? this.data.columns[0].ordered : this.data.ordered;
-
-      if (this.ordered) {
-        return true;
-      }
-      return false;
-    };
-
     Data.prototype.injectZeros = function () {
-      this.zeroInjectedData = injectZeros(this.data);
-      return this.zeroInjectedData;
-    };
-
-    Data.prototype.getColorFunc = function () {
-      if (!this.labels) {
-        this.labels = this.getLabels(this.data);
-      }
-      this.color = color(this.labels);
-      return this.color;
+      return injectZeros(this.data);
     };
 
     Data.prototype.getLabels = function () {
-      this.labels = getLabels(this.data);
-      return this.labels;
+      return getLabels(this.data);
     };
 
-    Data.prototype.get = function (name) {
-      return this.data.rows ? this.data.rows[0][name] :
-        this.data.columns ? this.data.columns[0][name] : this.data[name];
+    Data.prototype.getColorFunc = function () {
+      return color(this.getLabels(this.data));
     };
 
     return Data;
