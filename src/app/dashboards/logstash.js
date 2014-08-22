@@ -95,19 +95,32 @@ var timefilter = {
   id: 0,
 };
   
-// In this dashboard we let users pass filters as comma seperated list to the filter parameter.
+// In this dashboard we let users pass filters as comma seperated triplets to the filter parameter.
 // Or they can specify a split character using the split aparameter (same as for query)
-// If filter is defined, split it into a list of filter objects
-// NOTE: ids must be integers, hence the parseInt()s
+// If a filter is defined, its values get split it into a list of filter objects 
+// Filter parameters expected as field:query{:mandate} (where mandate is optional, using the cases below)
+// NOTE: ids must be integers, hence the parseInt()s - User filter Ids start with 1 to include time filter at 0
 if(!_.isUndefined(ARGS.filter)) {
   filters = _.object(_.map(ARGS.filter.split(ARGS.split||','), function(v,k) {
-    // parameters are in key:param format
-    var uparam = v.split(':');
+    var mandate; var uparam = v.split(':');
+      switch(uparam[2]){
+        case '1':
+          mandate="must"
+          break;
+        case '0':
+          mandate="mustNot"
+          break;
+        case '2':
+          mandate="either"
+          break;
+        default:
+          mandate="must"
+      }
     return [k+1,{
       query: uparam[1],
       field: uparam[0],
       type: 'field',
-      mandate: 'must',
+      mandate: mandate,
       active: true,
       alias: '',
       id: parseInt(k+1,10),
