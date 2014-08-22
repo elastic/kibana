@@ -12,7 +12,7 @@ define(function (require) {
     var mappingSetup = Private(require('utils/mapping_setup'));
     var DocSource = Private(require('components/courier/data_source/doc_source'));
     var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
-    var Registry = require('utils/registry');
+    var Registry = require('utils/registry/registry');
 
     var type = 'index-pattern';
 

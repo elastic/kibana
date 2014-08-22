@@ -1,7 +1,7 @@
 define(function (require) {
   return function AggParamsFactory(Private) {
     var _ = require('lodash');
-    var Registry = require('utils/registry');
+    var Registry = require('utils/registry/registry');
 
     var BaseAggParam = Private(require('components/agg_types/param_types/base'));
     var FieldAggParam = Private(require('components/agg_types/param_types/field'));

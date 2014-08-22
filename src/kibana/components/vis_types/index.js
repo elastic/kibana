@@ -1,7 +1,7 @@
 define(function (require) {
   return function VisTypeService(Private) {
     var _ = require('lodash');
-    var Registry = require('utils/registry');
+    var Registry = require('utils/registry/registry');
 
     return new Registry({
       index: ['name'],

@@ -7,6 +7,7 @@ define(function (require) {
       this.name = config.name;
       this.title = config.title;
       this.makeLabel = config.makeLabel || _.constant(this.name);
+      this.ordered = config.ordered;
 
       var params = this.params = config.params || [];
 
