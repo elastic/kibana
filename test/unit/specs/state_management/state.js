@@ -73,7 +73,7 @@ define(function (require) {
 
       it('should fire listeners for #onUpdate() on #fetch()', function (done) {
         var state = new State();
-        state.onUpdate(function (keys) {
+        state.on('fetch_with_changes', function (keys) {
           expect(keys).to.eql(['foo']);
           done();
         });

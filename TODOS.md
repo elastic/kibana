@@ -14,8 +14,6 @@
    - We need more than just _count here. – (https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/agg_types/buckets/terms.js)
  - **src/kibana/components/index_patterns/_mapper.js**
    - Change index to be the resolved in some way, last three months, last hour, last year, whatever – (https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/index_patterns/_mapper.js)
- - **src/kibana/components/state_management/state.js**
-   - Change all the references to onUpdate to the actual fetch_with_changes event – (https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/state_management/state.js)
  - **src/kibana/components/visualize/visualize.js**
    - we need to have some way to clean up result requests – (https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/visualize/visualize.js)
  - **src/kibana/directives/rows.js**
