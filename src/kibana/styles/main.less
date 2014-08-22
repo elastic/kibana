@@ -367,9 +367,12 @@ button[disabled] {
 }
 
 input.ng-dirty.ng-invalid,
-select.ng-dirty.ng-invalid {
+select.ng-dirty.ng-invalid,
+form:not(.hide-errors) input.ng-invalid,
+form:not(.hide-errors) select.ng-invalid {
   border-color: @state-danger-bg !important;
 }
+
 
 input[type="radio"],
 input[type="checkbox"],

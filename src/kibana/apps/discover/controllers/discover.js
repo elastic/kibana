@@ -52,7 +52,6 @@ define(function (require) {
     var Vis = Private(require('components/vis/vis'));
     var segmentedFetch = $scope.segmentedFetch = Private(require('apps/discover/_segmented_fetch'));
     var HitSortFn = Private(require('apps/discover/_hit_sort_fn'));
-    var diffTimePickerValues = Private(require('utils/diff_time_picker_vals'));
 
     var notify = new Notifier({
       location: 'Discover'
@@ -149,7 +148,7 @@ define(function (require) {
           if (_.difference(changed, ignoreStateChanges).length) $scope.fetch();
         });
 
-        timefilter.on('update', function () {
+        $scope.$listen(timefilter, 'update', function () {
           $scope.fetch();
         });
 
