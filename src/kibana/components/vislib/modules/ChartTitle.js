@@ -19,16 +19,17 @@ define(function (require) {
           var div = d3.select(this);
           var width = $(this).width();
           var height = $(this).height();
-
           div.append('svg')
             .attr('width', width)
             .attr('height', height)
             .append('text')
             .attr('transform', function () {
               if (self.splitType === 'rows') {
-                return 'translate(' + width * 0.7 + ',' + height / 2 + ')rotate(270)';
+                return 'translate(' + width * 0.5 + ',' + height / 2 + ')rotate(270)';
               }
-              return 'translate(' + width / 2 + ',' + height * 0.7 + ')';
+              // problem: 'height' var grows with each column, causing layout issue
+              // return 'translate(' + width / 2 + ',' + height * 0.7 + ')';
+              return 'translate(' + width / 2 + ',' + 17 * 0.7 + ')';
             })
             .attr('text-anchor', 'middle')
             .text(function (d) {

@@ -97,6 +97,7 @@ define(function (require) {
       this.renderCharts(vis, charts);
 
       this.checkSize();
+      
     };
 
     Vis.prototype.resize = function () {
