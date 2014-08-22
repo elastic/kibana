@@ -32,17 +32,34 @@ define(function (require) {
       });
 
       globalState.on('fetch_with_changes', function () {
-        _.assign(self.time, globalState.time);
+        // clone and default to {} in one
+        var newTime = _.clone(globalState.time);
 
-        var time = globalState.time;
-        if (time && time.from) this.time.from = convertISO8601(time.from);
-        if (time && time.to) this.time.to = convertISO8601(time.to);
+        if (newTime) {
+          if (newTime.to) newTime.to = convertISO8601(newTime.to);
+          if (newTime.from) newTime.from = convertISO8601(newTime.from);
+        }
+
+        self.time = newTime;
       });
 
       $rootScope.$$timefilter = self;
-      $rootScope.$watch('$$timefilter.time', function (newTime, oldTime) {
-        if (diff(newTime, oldTime)) self.emit('update');
-      }, true);
+      $rootScope.$watchMulti([
+        '$$timefilter.time.from',
+        '$$timefilter.time.to',
+        '$$timefilter.time.mode',
+        '$$timefilter.time'
+      ], (function () {
+        var oldTime;
+
+        return function () {
+          if (diff(self.time, oldTime)) {
+            self.emit('update');
+          }
+
+          oldTime = _.clone(self.time);
+        };
+      }()));
     }
 
     Timefilter.prototype.enabled = function (state) {
