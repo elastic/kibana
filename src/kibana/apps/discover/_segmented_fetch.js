@@ -47,17 +47,19 @@ define(function (require) {
       self._setRequestHandlers(opts);
 
       return Promise.try(function () {
-        self._extractQueue(opts.direction);
+        return self._extractQueue(opts.direction);
       })
       .then(function () {
         req = self._createRequest();
         return req;
       })
       .then(function (req) {
-        self._startRequest(req);
+        return self._startRequest(req);
       })
       .then(function () {
-        self._executeRequest(req, opts);
+        return self._executeRequest(req, opts);
+      }).then(function () {
+        return self._stopRequest();
       });
     };
 
@@ -87,7 +89,9 @@ define(function (require) {
 
       // stop any existing segmentedFetches
       if (self.running) {
-        p = p.then(self._stopRequest);
+        p = p.then(function () {
+          self._stopRequest();
+        });
       }
 
       return p.then(function () {
@@ -268,12 +272,10 @@ define(function (require) {
     };
 
     segmentedFetch.prototype._processQueueComplete = function (req, loopCount) {
-      return this._stopRequest().then(function () {
-        req.complete = true;
-        req.ms = req.moment.diff() * -1;
-        req.source.activeFetchCount -= 1;
-        return (loopCount + 1);
-      });
+      req.complete = true;
+      req.ms = req.moment.diff() * -1;
+      req.source.activeFetchCount -= 1;
+      return (loopCount + 1);
     };
 
     function mergeRequestStats(requestStats, resp) {

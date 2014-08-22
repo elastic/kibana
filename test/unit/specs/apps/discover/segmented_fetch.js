@@ -1,5 +1,5 @@
 define(function (require) {
-  var sinon = require('sinon/sinon');
+  var sinon = require('test_utils/auto_release_sinon');
   var Promise = require('bluebird');
 
   var SegmentedFetch;
@@ -157,9 +157,10 @@ define(function (require) {
 
       it('should abort the existing fetch');
 
-      it('should abort the es promise', function () {
 
       });
+
+      it('should abort the es promise');
 
       it('should clear the notification', function () {
         var spy = segmentedFetch.notifyEvent = sinon.spy();
