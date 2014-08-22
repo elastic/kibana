@@ -55,6 +55,29 @@ define(function (require) {
       }));
     };
 
+    ColumnChart.prototype.addBrush = function (xScale, svg) {
+      var self = this;
+
+      var brush = d3.svg.brush()
+        .x(xScale)
+        .on('brushend', function brushend() {
+          return self._attr.dispatch.brush({
+            range: brush.extent(),
+            config: self._attr,
+            e: d3.event,
+            data: self.chartData
+          });
+        });
+
+      if (this._attr.dispatch.on('brush')) {
+        svg.append('g')
+          .attr('class', 'brush')
+          .call(brush)
+          .selectAll('rect')
+          .attr('height', this._attr.height);
+      }
+    };
+
     ColumnChart.prototype.draw = function () {
       // Attributes
       var self = this;
@@ -94,6 +117,8 @@ define(function (require) {
             .attr('height', height + margin.top + margin.bottom)
             .append('g')
             .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+          self.addBrush(xScale, svg);
 
           // Data layers
           layer = svg.selectAll('.layer')
