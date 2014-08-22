@@ -69,6 +69,7 @@
           'specs/filters/field_type',
           'specs/filters/uriescape',
           'specs/filters/moment',
+          'specs/filters/short_dots',
           'specs/filters/start_from',
           'specs/services/storage',
           'specs/services/persisted_log',
@@ -88,7 +89,9 @@
           'specs/vislib/data',
           'specs/utils/diff_time_picker_vals',
           'specs/factories/events',
-          'specs/index_patterns/_flatten_search_response'
+          'specs/index_patterns/_flatten_search_response',
+          'specs/utils/registry/index',
+          'specs/directives/filter_bar'
         ], function (kibana, sinon) {
           kibana.load(function () {
             var xhr = sinon.useFakeXMLHttpRequest();

@@ -10,7 +10,7 @@ define(function (require) {
         stack.push(key);
         var flattenKey = stack.join('.');
 
-        if (self.fieldsByName[flattenKey]) {
+        if (self.fields.byName[flattenKey]) {
           flatObj[flattenKey] = obj[key];
         } else if (_.isObject(obj[key])) {
           flattenObj(obj[key]);

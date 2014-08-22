@@ -1,11 +1,13 @@
 define(function (require) {
-  var app = require('modules').get('app/dashboard');
-  var _ = require('lodash');
+  require('modules')
+  .get('app/dashboard')
+  .directive('dashboardPanel', function (savedVisualizations, Notifier) {
+    var _ = require('lodash');
 
-  require('apps/visualize/directives/visualize');
-
-  app.directive('dashboardPanel', function (savedVisualizations, Notifier) {
     var notify = new Notifier();
+
+    require('components/visualize/visualize');
+
     return {
       restrict: 'E',
       template: require('text!apps/dashboard/partials/panel.html'),
@@ -20,14 +22,12 @@ define(function (require) {
           if (!$scope.panel.visId) return;
 
           savedVisualizations.get($scope.panel.visId)
-          .then(function (vis) {
-            $scope.vis = vis;
+          .then(function (savedVis) {
+            $scope.savedVis = savedVis;
             // .destroy() called by the visualize directive
           })
           .catch(function (e) {
-            $scope.vis = {
-              error: e
-            };
+            $scope.error = e.message;
             console.log(e);
           });
         });
