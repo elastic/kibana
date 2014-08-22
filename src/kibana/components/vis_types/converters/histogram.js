@@ -61,14 +61,14 @@ define(function (require) {
           date: true,
           min: timeBounds.min.valueOf(),
           max: timeBounds.max.valueOf(),
-          interval: interval.toMs(colX.aggParams.interval)
+          interval: interval.toMs(colX.params.interval)
         };
       }
       else {
         chart.xAxisFormatter = colX.field && colX.field.format.convert;
         chart.ordered = aggX && aggX.ordered && {};
-        if (aggX !== false && colX && colX.aggParams && colX.aggParams.interval) {
-          chart.ordered.interval = colX.aggParams.interval;
+        if (aggX !== false && colX && colX.params && colX.params.interval) {
+          chart.ordered.interval = colX.params.interval;
         }
       }
 

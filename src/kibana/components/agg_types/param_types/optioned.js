@@ -2,7 +2,7 @@ define(function (require) {
   return function OptionedAggParamFactory(Private) {
     var _ = require('lodash');
 
-    var Registry = require('utils/registry');
+    var Registry = require('utils/registry/registry');
     var editorHtml = require('text!components/agg_types/controls/field.html');
     var BaseAggParam = Private(require('components/agg_types/param_types/base'));
 
