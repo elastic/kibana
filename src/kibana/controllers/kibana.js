@@ -85,6 +85,13 @@ define(function (require) {
           });
         };
 
+        $rootScope.constructor.prototype.$listen = function (emitter, eventName, handler) {
+          emitter.on(eventName, handler);
+          this.$on('$destroy', function () {
+            emitter.off(eventName, handler);
+          });
+        };
+
         // get/set last path for an app
         var lastPathFor = function (app, path) {
           var key = 'lastPath:' + app.id;
