@@ -1,43 +1,37 @@
 define(function (require) {
   return function ChartBaseClass(d3, Private) {
     var _ = require('lodash');
-    var $ = require('jquery');
 
-    var Events = Private(require('factories/events'));
-
-    _(Chart).inherits(Events);
     function Chart(vis, el, chartData) {
-      Chart.Super.apply(this, arguments);
       this.vis = vis;
       this.chartEl = el;
       this.chartData = chartData;
-      this._attr = _.defaults(vis.config || {}, {});
+      this._attr = _.defaults(vis.config || {}, {
+        destroyFlag: false
+      });
     }
 
     Chart.prototype.render = function () {
       return d3.select(this.chartEl).call(this.draw());
     };
 
-//    Chart.prototype.on = function () {
-//      var args = Array.prototype.slice.call(arguments);
-//      var eventName = args[0];
-//      var self = this;
-//
-//      // This should only be called the first time to wire up the D3 event handler
-//      if (!this._listeners[eventName]) {
-//        this._attr.dispatch.on.call(this._attr.dispatch, eventName, function () {
-//          var eventArgs = Array.prototype.slice.call(arguments);
-//          self.emit.apply(eventName, eventArgs);
-//        });
-//      }
-//      Chart.Super.prototype.on.apply(this, args);
-//    };
-
     Chart.prototype.off = function (event) {
-      this.dispatch.on(event, null);
+      return this._attr.dispatch.on(event, null);
     };
 
-    Chart.prototype.destroy = function () {};
+    Chart.prototype.destroy = function () {
+      this._attr.destroyFlag = true;
+
+      // Removing chart and all elements associated with it
+      d3.select(this.chartEl).selectAll('*').remove();
+
+      // Cleaning up event listeners
+      this.off('click');
+      this.off('hover');
+      this.off('brush');
+      d3.select(window)
+        .on('resize', null);
+    };
 
     Chart.prototype.set = function (name, val) {
       this._attr[name] = val;

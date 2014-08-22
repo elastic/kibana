@@ -1,36 +1,77 @@
 define(function (require) {
   return function XAxisFactory(d3, Private) {
-    var _ = require('lodash');
     var $ = require('jquery');
 
-    function XAxis(el, values, formatter, width, margin) {
-      this.el = el;
-      this.xValues = values;
-      this.xAxisFormatter = formatter;
-      this.margin = margin;
-      this.width = width - margin.left - margin.right;
+    function XAxis(args) {
+      this.el = args.el;
+      this.data = args.data;
+      this._attr = args.attr;
+      this.width = args.width - this._attr.margin.left - this._attr.margin.right;
     }
 
     XAxis.prototype.render = function () {
-      d3.select(this.el).selectAll('.x-axis-div').call(this.appendSVG());
+      d3.select(this.el).selectAll('.x-axis-div').call(this.draw());
+    };
+
+    XAxis.prototype.getScale = function () {
+      var ordered = this.data.get('ordered');
+
+      // Tests whether the xValues are dates
+      if (ordered && ordered.date) {
+        return d3.time.scale();
+      }
+      return d3.scale.ordinal();
+    };
+
+    XAxis.prototype.getDomain = function () {
+      var scale = this.getScale();
+      var ordered = this.data.get('ordered');
+      var keys = this.data.xValues();
+      var minDate;
+      var maxDate;
+      var timeInterval;
+      var spacingPercentage;
+
+      if (ordered && ordered.date) {
+        // Calculate the min date, max date, and time interval;
+        minDate = Math.min(d3.min(keys), ordered.min);
+        maxDate = d3.max(keys);
+        timeInterval = ordered.interval;
+        spacingPercentage = 0.25;
+
+        scale.domain([minDate, maxDate + timeInterval * (1 - spacingPercentage)]);
+        return scale;
+      }
+      scale.domain(keys);
+      return scale;
+    };
+
+    XAxis.prototype.getRange = function () {
+      var ordered = this.data.get('ordered');
+      var scale = this.getDomain();
+      if (ordered) {
+        scale.range([0, this.width]);
+        return scale;
+      }
+      scale.rangeBands([0, this.width], 0.1);
+      return scale;
     };
 
     XAxis.prototype.getXScale = function () {
-      this.xScale = d3.scale.ordinal()
-        .domain(this.xValues)
-        .rangeBands([0, this.width], 0.1);
+      return this.getRange();
     };
 
     XAxis.prototype.getXAxis = function () {
-      this.getXScale();
+      var xAxisFormatter = this.data.get('xAxisFormatter');
+      this.xScale = this.getXScale();
 
       this.xAxis = d3.svg.axis()
         .scale(this.xScale)
-        .tickFormat(this.xAxisFormatter)
+        .tickFormat(xAxisFormatter)
         .orient('bottom');
     };
 
-    XAxis.prototype.appendSVG = function () {
+    XAxis.prototype.draw = function () {
       var self = this;
       var div;
       var width;
@@ -55,16 +96,16 @@ define(function (require) {
       return function (selection) {
         selection.each(function () {
           div = d3.select(this);
-          width = $(this).width() - self.margin.left - self.margin.right;
+          width = $(this).width() - self._attr.margin.left - self._attr.margin.right;
           height = $(this).height();
 
           svg = div.append('svg')
-            .attr('width', width + self.margin.left + self.margin.right)
+            .attr('width', width + self._attr.margin.left + self._attr.margin.right)
             .attr('height', height);
 
           var xaxis = svg.append('g')
             .attr('class', 'x axis')
-            .attr('transform', 'translate(' + self.margin.left + ',0)')
+            .attr('transform', 'translate(' + self._attr.margin.left + ',0)')
             .call(self.xAxis);
 
           bbox = selection.selectAll('.tick text').node().getBBox();

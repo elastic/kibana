@@ -11,6 +11,34 @@ define(function (require) {
       this.data = data;
     }
 
+    Data.prototype.getChartData = function () {
+      if (!this.data.series) {
+        var arr = this.data.rows ? this.data.rows : this.data.columns;
+        return _.pluck(arr);
+      }
+      return [this.data];
+    };
+
+    Data.prototype.get = function (thing) {
+      var data = this.getChartData();
+      // returns the first thing in the array
+      return _.pluck(data, thing)[0];
+    };
+
+    Data.prototype.xValues = function () {
+      var orderedKeys = orderKeys(this.data);
+      var ordered = this.get('ordered');
+
+      // Converts x values to numbers
+      if (ordered) {
+        orderedKeys = orderedKeys.map(function (d) {
+          return +d;
+        });
+      }
+
+      return orderedKeys;
+    };
+
     Data.prototype.splitType = function () {
       if (!this.data.series) {
         return this.data.rows ? 'rows' : 'columns';
@@ -103,17 +131,6 @@ define(function (require) {
         return true;
       }
       return false;
-    };
-
-    Data.prototype.xValues = function () {
-      this.orderedKeys = orderKeys(this.data);
-
-      if (this.isOrdered()) {
-        this.orderedKeys = this.orderedKeys.map(function (d) {
-          return +d;
-        });
-      }
-      return this.orderedKeys;
     };
 
     Data.prototype.injectZeros = function () {

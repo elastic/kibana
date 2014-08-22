@@ -91,10 +91,10 @@ define(function (require) {
 
           // For each type of interaction, assign the the handler if the vis object has it
           // otherwise use the typeDef, otherwise, do nothing.
-//          _.each({hover: 'onHover', click: 'onClick', brush: 'onBrush'}, function (func, event) {
-//            var callback = vis[func] || typeDefinition[func];
-//            if (!!callback) chart.on(event, callback);
-//          });
+          _.each({hover: 'onHover', click: 'onClick', brush: 'onBrush'}, function (func, event) {
+            var callback = vis[func] || typeDefinition[func];
+            if (!!callback) chart.on(event, callback);
+          });
 
 
           if (!attr.esResp) {
@@ -143,11 +143,11 @@ define(function (require) {
         $scope.$on('$destroy', function () {
           // Vis with missing indexpattern will not have destroy
           if ($scope.vis && $scope.vis.destroy) $scope.vis.destroy();
-//          if (chart) {
-//            chart.off('hover');
-//            chart.off('click');
-//            chart.destroy();
-//          }
+          if (chart) {
+            chart.off('hover');
+            chart.off('click');
+            chart.destroy();
+          }
         });
       }
     };

@@ -128,20 +128,25 @@ define(function (require) {
 
           // update
           bars
-            .attr(
-            'x', function (d) {
+            .attr('x', function (d) {
               return xScale(d.x);
             })
-            .attr(
-            'width', function () {
+            .attr('width', function () {
+              var barWidth;
+              var barSpacing;
+
+              if (data.ordered && data.ordered.date) {
+                barWidth = xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min);
+                barSpacing = barWidth * 0.25;
+
+                return barWidth - barSpacing;
+              }
               return xScale.rangeBand();
             })
-            .attr(
-            'y', function (d) {
+            .attr('y', function (d) {
               return yScale(d.y0 + d.y);
             })
-            .attr(
-            'height', function (d) {
+            .attr('height', function (d) {
               return yScale(d.y0) - yScale(d.y0 + d.y);
             });
 

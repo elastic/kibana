@@ -12,7 +12,6 @@ define(function (require) {
     function Legend(legend, config) {
       this.labels = legend.labels;
       this.color = legend.color;
-
       this._attr = _.defaults(config || {}, {
         'legendClass' : 'legend-col-wrapper',
         'blurredOpacity' : 0.3,
@@ -23,8 +22,6 @@ define(function (require) {
     }
 
     Legend.prototype.render = function () {
-      //this.isOpen = isLegendOpen;
-      //return renderLegend(this);
       var legendDiv = d3.select('.' + this._attr.legendClass);
       var items = this.labels;
       var header = createHeader(legendDiv);
