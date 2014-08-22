@@ -17,7 +17,8 @@ define(function (require) {
           this.opts = opts;
         }
 
-        var stopEventSpy = NotifierMock.prototype.stopEventSpy = sinon.spy();
+
+        var stopEventSpy = sinon.spy();
         NotifierMock.prototype.event = sinon.stub().returns(stopEventSpy);
 
         return NotifierMock;
@@ -53,19 +54,19 @@ define(function (require) {
 
       // stub the searchStrategy
       searchStrategy = Private(require('components/courier/fetch/strategy/search'));
-      searchStrategy.getSourceStateFromRequest = sinon.stub();
+      sinon.stub(searchStrategy, 'getSourceStateFromRequest');
     });
   }
 
-  describe.only('segmented fetch', function () {
+  describe('segmented fetch', function () {
     require('test_utils/no_digest_promises').activateForSuite();
 
     beforeEach(init);
 
     describe('fetch', function () {
       it('should return a promise', function () {
-        SegmentedFetch.prototype._startRequest = Promise.resolve;
-        SegmentedFetch.prototype._executeRequest = Promise.resolve;
+        sinon.stub(SegmentedFetch.prototype, '_startRequest', Promise.resolve);
+        sinon.stub(SegmentedFetch.prototype, '_executeRequest', Promise.resolve);
 
         var fetch = segmentedFetch.fetch();
         expect('then' in fetch).to.be(true);
@@ -73,46 +74,35 @@ define(function (require) {
       });
 
       it('should set the running state', function () {
-        SegmentedFetch.prototype._executeRequest = Promise.resolve;
+        var stopStub = sinon.stub(SegmentedFetch.prototype, '_stopRequest', Promise.resolve);
+        sinon.stub(SegmentedFetch.prototype, '_executeRequest', Promise.resolve);
 
         return segmentedFetch.fetch().then(function () {
           expect(segmentedFetch.running).to.be(true);
-        });
-      });
-
-      it('should not call stopRequest if request is not running', function () {
-        SegmentedFetch.prototype._executeRequest = Promise.resolve;
-        SegmentedFetch.prototype._stopRequest = sinon.stub().returns(Promise.resolve());
-
-        expect(segmentedFetch.running).to.be(false);
-        return segmentedFetch.fetch().then(function () {
-          expect(segmentedFetch.running).to.be(true);
-          expect(segmentedFetch._stopRequest.callCount).to.be(0);
+          expect(stopStub.callCount).to.be(1);
         });
       });
 
       it('should stop existing requests', function () {
-        SegmentedFetch.prototype._executeRequest = sinon.stub().returns(Promise.delay(5));
-        SegmentedFetch.prototype._stopRequest = sinon.stub().returns(Promise.resolve());
+        var stopStub = sinon.stub(SegmentedFetch.prototype, '_stopRequest', Promise.resolve);
+        sinon.stub(SegmentedFetch.prototype, '_executeRequest').returns(Promise.delay(5));
 
         segmentedFetch.fetch();
 
-        Promise.delay(1).then(function () {
-          expect(segmentedFetch.running).to.be(true);
-          segmentedFetch.fetch();
-        });
-
-        return Promise.delay(2).then(function () {
+        return Promise.delay(1).then(function () {
           expect(segmentedFetch.running).to.be(true);
           return segmentedFetch.fetch().then(function () {
-            expect(segmentedFetch._stopRequest.callCount).to.be(2);
+            // 1 for stopping early
+            // 1 for finishing the first request
+            // 1 for finishing the second request
+            expect(stopStub.callCount).to.be(3);
           });
         });
       });
 
       it('should perform actions on searchSource', function () {
-        SegmentedFetch.prototype._startRequest = Promise.resolve;
-        SegmentedFetch.prototype._executeRequest = Promise.resolve;
+        sinon.stub(SegmentedFetch.prototype, '_startRequest', Promise.resolve);
+        sinon.stub(SegmentedFetch.prototype, '_executeRequest', Promise.resolve);
 
         return segmentedFetch.fetch().then(function () {
           // read the searchSource queue
@@ -124,7 +114,7 @@ define(function (require) {
       });
 
       it('should create a notification event', function () {
-        SegmentedFetch.prototype._executeRequest = Promise.resolve;
+        sinon.stub(SegmentedFetch.prototype, '_executeRequest', Promise.resolve);
 
         return segmentedFetch.fetch().then(function () {
           expect(notify.event.callCount).to.be(1);
@@ -133,7 +123,9 @@ define(function (require) {
 
       it('should report initial status', function () {
         var statusStub = sinon.stub();
-        SegmentedFetch.prototype._processQueue = Promise.resolve;
+        sinon.stub(SegmentedFetch.prototype, '_processQueue', function () {
+          return new Promise(function (res) { return res(); });
+        });
         searchStrategy.getSourceStateFromRequest.returns(Promise.resolve());
 
         return segmentedFetch.fetch({
