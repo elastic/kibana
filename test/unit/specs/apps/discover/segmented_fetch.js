@@ -189,7 +189,40 @@ define(function (require) {
         });
       });
 
-      it('should abort the es promise');
+      it('should abort the es promise', function () {
+        var searchPromiseAbortStub = sinon.spy();
+        sinon.stub(SegmentedFetch.prototype, '_extractQueue', function () {
+          this.queue = ['one', 'two', 'three'];
+        });
+        sinon.stub(SegmentedFetch.prototype, '_executeSearch', function () {
+          this.searchPromise = { abort: searchPromiseAbortStub };
+          return Promise.resolve();
+        });
+        sinon.stub(SegmentedFetch.prototype, '_executeRequest', function () {
+          var self = this;
+          return self._executeSearch()
+          .then(function () {
+            if (typeof self.requestHandlers.each === 'function') {
+              return self.requestHandlers.each();
+            }
+          });
+        });
+
+        searchStrategy.getSourceStateFromRequest.returns(Promise.resolve({
+          body: {
+            size: 10
+          }
+        }));
+
+        var eachHandler = sinon.spy(function () {
+          segmentedFetch.abort();
+        });
+
+        return segmentedFetch.fetch({ each: eachHandler }).then(function () {
+          expect(eachHandler.callCount).to.be(1);
+          expect(searchPromiseAbortStub.callCount).to.be(1);
+        });
+      });
 
       it('should clear the notification', function () {
         var spy = segmentedFetch.notifyEvent = sinon.spy();
