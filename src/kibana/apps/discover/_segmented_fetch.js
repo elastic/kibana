@@ -214,8 +214,10 @@ define(function (require) {
       var self = this;
       var index = self.queue.shift();
 
-      // update the status on every iteration
-      self._statusReport(index);
+      // abort if not in running state, or fetch is called twice quickly
+      if (!self.running || req !== self.activeRequest) {
+        return self._processQueueComplete(req, loopCount);
+      }
 
       if (remainingSize !== false) {
         state.body.size = remainingSize;
@@ -223,10 +225,11 @@ define(function (require) {
 
       req.state = state;
 
+      // update the status on every iteration
+      self._statusReport(index);
+
       return self._executeSearch(index, state)
       .then(function (resp) {
-        // abort if not in running state, or fetch is called twice quickly
-        if (!self.running || req !== self.activeRequest) return;
 
         // a response was swallowed intentionally. Try the next one
         if (!resp) {
