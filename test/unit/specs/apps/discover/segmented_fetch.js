@@ -35,11 +35,13 @@ define(function (require) {
       searchSourceStubs = {
         get: sinon.stub(),
         toIndexList: sinon.stub().returns([]),
-        createRequest: sinon.stub().returns({
-          defer: Promise,
-          source: {
-            activeFetchCount: 0
-          }
+        createRequest: sinon.spy(function () {
+          return {
+            defer: Promise.defer(),
+            source: {
+              activeFetchCount: 0
+            }
+          };
         })
       };
       mockSearchSource = {
@@ -147,9 +149,44 @@ define(function (require) {
         return abort;
       });
 
-      it('should abort the existing fetch');
+      it('should abort the existing fetch', function () {
+        var loopCount = 3;
+        var queue = [];
+        for (var i = 0; i < 20; i++) {
+          queue.push('queue-index-' + i);
+        }
 
+        sinon.stub(SegmentedFetch.prototype, '_extractQueue', function () {
+          this.queue = queue;
+        });
+        sinon.stub(SegmentedFetch.prototype, '_executeSearch', function () {
+          return new Promise(function (resolve) {
+            resolve({
+              took: 10,
+              hits: {
+                total: 10,
+                max_score: 1,
+                hits: []
+              }
+            });
+          });
+        });
 
+        searchStrategy.getSourceStateFromRequest.returns(Promise.resolve({
+          body: {
+            size: 10
+          }
+        }));
+
+        var eachHandler = sinon.spy(function () {
+          if (eachHandler.callCount === loopCount) {
+            segmentedFetch.abort();
+          }
+        });
+
+        return segmentedFetch.fetch({ each: eachHandler }).then(function () {
+          expect(eachHandler.callCount).to.be(loopCount);
+        });
       });
 
       it('should abort the es promise');

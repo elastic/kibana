@@ -58,7 +58,8 @@ define(function (require) {
       })
       .then(function () {
         return self._executeRequest(req, opts);
-      }).then(function () {
+      })
+      .then(function () {
         return self._stopRequest();
       });
     };
@@ -152,7 +153,7 @@ define(function (require) {
         queue = queue.reverse();
       }
 
-      self.queue = queue;
+      return self.queue = queue;
     };
 
     segmentedFetch.prototype._createRequest = function () {
@@ -195,14 +196,18 @@ define(function (require) {
       // initial status report
       self._statusReport(null);
 
-      searchStrategy.getSourceStateFromRequest(req)
+      return searchStrategy.getSourceStateFromRequest(req)
       .then(function (state) {
         var loopCount = -1;
         return self._processQueue(req, state, remainingSize, loopCount);
       })
-      .then(req.defer.resolve, req.defer.reject);
-
-      return req.defer.promise;
+      .then(function (count) {
+        return req.defer.resolve(count);
+      })
+      .catch(function (err) {
+        req.defer.reject(err);
+        return err;
+      });
     };
 
     segmentedFetch.prototype._processQueue = function (req, state, remainingSize, loopCount) {
