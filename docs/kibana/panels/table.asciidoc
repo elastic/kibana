@@ -28,6 +28,8 @@ still available in the expanded view of the event.
 localTime:: Set to true to adjust the timeField to the browser's local time
 timeField:: If localTime is set to true, this field will be adjusted to the browsers local time
 spyable:: Set to false to disable the inspect icon
+download:: Set to false to disable the download icon
+headings:: Add headings to CSV output
 
 ==== Queries
 queries object:: This object describes the queries to use on this panel.

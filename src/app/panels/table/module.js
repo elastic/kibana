@@ -31,6 +31,12 @@ function (angular, app, _, kbn, moment) {
     $scope.panelMeta = {
       modals : [
         {
+          description: "Download",
+          icon: "icon-share",
+          partial: "app/partials/download.html",
+          show: $scope.panel.download
+        },
+        {
           description: "Inspect",
           icon: "icon-info-sign",
           partial: "app/partials/inspector.html",
@@ -125,6 +131,14 @@ function (angular, app, _, kbn, moment) {
        * spyable:: Set to false to disable the inspect icon
        */
       spyable : true,
+      /** @scratch /panels/table/5
+       * download:: Set to false to disable the download icon
+       */
+      download : true,
+      /** @scratch /panels/table/5
+       * headings:: Add headings to CSV output
+       */
+      headings : true,
       /** @scratch /panels/table/5
        *
        * ==== Queries
@@ -468,6 +482,80 @@ function (angular, app, _, kbn, moment) {
 
 
   });
+
+  module.controller('DownloadController', function($rootScope, $scope, $modal, $q, $compile, $timeout,
+    fields, querySrv, dashboard, filterSrv, alertSrv) {
+      $scope.suffix = 'json';
+      $scope.savefilename = 'data-' + dashboard.current.title + '.' + $scope.suffix;
+      $scope.maxrows = 1000;
+      $scope.refetch = true;
+      $scope.fixsuffix = function() {
+        $scope.savefilename = $scope.savefilename.replace(/(.json|.csv)$/, '.' + $scope.suffix);
+      };
+      $scope.json2csv = function(objArray) {
+        var array = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray;
+        var str = '';
+        if ($scope.headings) {
+          var hline = '';
+          for (var hindex in array[0]) {
+            var hvalue = hindex + "";
+            hline += '"' + hvalue.replace(/"/g, '""') + '",';
+          }
+
+          hline = hline.slice(0, -1);
+          str += hline + '\r\n';
+        }
+        for (var i = 0; i < array.length; i++) {
+          var line = '';
+
+          for (var index in array[i]) {
+            var value = array[i][index] + "";
+            line += '"' + value.replace(/"/g, '""') + '",';
+          }
+
+          line = line.slice(0, -1);
+          str += line + '\r\n';
+        }
+        return str;
+      };
+      $scope.downloadData = function() {
+        var request = $scope.ejs.Request().indices(dashboard.indices[0]);
+        $scope.panel.queries.ids = querySrv.idsByMode($scope.panel.queries);
+        var queries = querySrv.getQueryObjs($scope.panel.queries.ids);
+        var boolQuery = $scope.ejs.BoolQuery();
+        _.each(queries,function(q) {
+          boolQuery = boolQuery.should(querySrv.toEjsObj(q));
+        });
+        request = request.query(
+          $scope.ejs.FilteredQuery(
+            boolQuery,
+            filterSrv.getBoolFilter(filterSrv.ids())
+          ))
+          .size($scope.maxrows);
+          // TODO: should this query be sorted based on the tool's settings?
+        request.doSearch().then(function(results) {
+          // Check for error and abort if found
+          if(!(_.isUndefined(results.error))) {
+            $scope.panel.error = $scope.parse_error(results.error);
+            return;
+          }
+          if (results.hits.total > $scope.maxrows) {
+            alertSrv.set('Not all rows were fetched (' + $scope.maxrows + ' of ' + results.hits.total + ')','warn',5000);
+          } else {
+            alertSrv.set('All ' + results.hits.total + ' rows fetched','info',5000);
+          }
+          if ($scope.suffix === 'json') {
+            var jblob = new Blob([angular.toJson(results.hits)], {type: "application/json;charset=utf-8"});
+            window.saveAs(jblob, $scope.savefilename);
+          } else {
+            var cblob = new Blob([$scope.json2csv(results.hits.hits.map(function(data) {
+                return data._source;
+              }))], {type: "text/csv;charset=utf-8"});
+            window.saveAs(cblob, $scope.savefilename);
+          }
+        });
+      };
+    });
 
   // This also escapes some xml sequences
   module.filter('tableHighlight', function() {

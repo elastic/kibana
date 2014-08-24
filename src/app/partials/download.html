@@ -1,0 +1,39 @@
+<div class="modal-header">
+  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+</div>
+<div ng-controller="DownloadController">
+  <div class="modal-body">
+    <form class="form-inline" name="downloadOptionsForm">
+      <h4>Download Query Results</h4>
+      <p>Save the results from the current query into a local file. The query will be executed again, so the results may be slightly different.</p>
+      <h5 style="margin-bottom:5px">File format</h5>
+      <div class="form-group">
+        <label class="radio-inline">
+          <input type="radio" name="format" ng-model="suffix" ng-change="fixsuffix()" value="json" id="save-data-json" />
+          JSON</label>
+        <label class="radio-inline">
+          <input type="radio" name="format" ng-model="suffix" ng-change="fixsuffix()" value="csv"" id="save-data-csv" />
+          CSV</label>
+	<label class="radio-inline" ng-show="suffix==='csv'">
+	  <input type="checkbox" name="headings" ng-model="headings" value="headings" id="save-data-csv-headings" />
+          Add header row</label>
+      </div>
+      <br />
+      <div class="form-group">
+        <label class="control-label" for="save-data-maxrows">Maximum row count</label>
+	<br/>
+        <input class="form-control" type="number" class="input-mini min="1" required ng-pristine ng-valid ng-valid-number" ng-model="maxrows" id="save-data-maxrows"/>
+      </div>
+      <br />
+      <div class="form-group">
+        <label class="control-label" for="save-data-savefile">Local filename</label>
+	<br/>
+        <input type="text" id="save-data-savefile" ng-model="savefilename" required /><br>
+        </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary pull-left" data-dismiss="modal" ng-click="downloadData()">Download</button>
+    <button type="button" class="btn btn-cancel" ng-click="dismiss()">Cancel</button>
+  </div>
+</div>

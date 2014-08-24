@@ -21,6 +21,12 @@
       </div>
       <br>
       <div class="editor-option">
+        <label class="small">Inspectable <tip>Allow for inspecting the elasticsearch query, requires save/reload dashboard to change</tip></label><input type="checkbox" ng-change="set_refresh(true)" ng-model="panel.spyable" ng-checked="panel.spyable">
+      </div>
+      <div class="editor-option">
+        <label class="small">Downloadable <tip>Allow for downloading the results, requires save/reload dashboard to change</tip></label><input type="checkbox" ng-change="set_refresh(true)" ng-model="panel.download" ng-checked="panel.download">
+      </div>
+      <div class="editor-option">
         <label class="small">Local Time <tip>Adjust time field to browser's local time</tip></label><input type="checkbox" ng-change="set_refresh(true)" ng-model="panel.localTime" ng-checked="panel.localTime">
       </div>
       <div class="editor-option" ng-show="panel.localTime">
