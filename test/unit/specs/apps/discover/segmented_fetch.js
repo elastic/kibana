@@ -224,10 +224,38 @@ define(function (require) {
       });
 
       it('should clear the notification', function () {
-        var spy = segmentedFetch.notifyEvent = sinon.spy();
+        segmentedFetch.notifyEvent = sinon.spy();
 
-        return segmentedFetch.abort().then(function () {
-          expect(spy.callCount).to.be(1);
+        sinon.stub(SegmentedFetch.prototype, 'fetch', function (opts) {
+          var SegmentedFetchSelf = this;
+          var fakeRequest = {};
+
+          return SegmentedFetchSelf._startRequest(fakeRequest)
+          .then(function () {
+            // dumb mock or the fetch lifecycle
+            // loop, running each
+            while (SegmentedFetchSelf.running) {
+              if (typeof opts.each === 'function') {
+                opts.each();
+              }
+            }
+
+            // return when activeRequest is null
+            return;
+          })
+          .then(function () {
+            SegmentedFetchSelf._stopRequest();
+          });
+        });
+
+        var eachHandler = sinon.spy(function () {
+          // will set activeRequest to null
+          segmentedFetch.abort();
+        });
+
+        return segmentedFetch.fetch({ each: eachHandler }).then(function () {
+          expect(eachHandler.callCount).to.be(1);
+          expect(segmentedFetch.notifyEvent.callCount).to.be(1);
         });
       });
     });
