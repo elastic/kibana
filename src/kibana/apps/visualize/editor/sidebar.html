@@ -1,6 +1,9 @@
 <div class="vis-editor-sidebar">
   <div class="sidebar-container">
-    <form class="sidebar-list" ng-submit="apply()" name="visualizeEditor">
+    <form class="sidebar-list"
+          ng-class="{'hide-errors': hideErrors}"
+          ng-submit="visualizeEditor.$invalid ? dontApply() : apply()"
+          name="visualizeEditor">
       <ul class="list-unstyled">
 
         <!-- metrics -->
@@ -26,10 +29,9 @@
         </vis-editor-agg-group>
 
         <!-- apply/discard -->
-        <li ng-if="vis.dirty" class="sidebar-item">
+        <li class="sidebar-item" ng-if="vis.dirty">
           <button
             type="submit"
-            ng-disabled="httpActive.length || visualizeEditor.$invalid"
             class="sidebar-item-button success">
             Apply
           </button>

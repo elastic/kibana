@@ -69,6 +69,8 @@ define(function (require) {
       this.type = state.type || this.type;
       if (_.isString(this.type)) this.type = visTypes.byName[this.type];
 
+      this.listeners = _.assign({}, state.listeners, this.type.listeners);
+
       this.aggs = new AggConfigs(this, state.aggs);
     };
 
