@@ -15,7 +15,7 @@ section. You may find settings here which are not exposed via the web interface.
 Each panel type has its own properties, however there are several that are shared.
 
 span:: A number, 1-12, that describes the width of the panel.
-editable:: Enable or disable the edit button the the panel
+editable:: Enable or disable the edit button of the panel
 type:: The type of panel this object contains. Each panel type will require additional
 properties. See the panel types list to the right.
 --
