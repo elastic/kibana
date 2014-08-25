@@ -6,11 +6,12 @@ var Promise = require('bluebird');
 
 var instrumentationMiddleware = require('./_instrumentation');
 var amdRapperMiddleware = require('./_amd_rapper');
-var rel = require('path').join.bind(null, __dirname);
-
 var proxy = require('http-proxy').createProxyServer({});
-var ROOT = rel('../../../');
-var SRC = rel('../../../src');
+
+var join = require('path').join;
+var ROOT = join(__dirname, '../../../');
+var DOCS = join(ROOT, 'docs');
+var SRC = join(ROOT, 'src');
 
 module.exports = function DevServer(opts) {
   opts = opts || {};
@@ -39,8 +40,9 @@ module.exports = function DevServer(opts) {
   });
 
   app.use(connect.static(ROOT));
+  app.use('/docs', connect.static(DOCS));
 
-  // respond to the "maybe_start_server" pings
+  // respond to "maybe_start_server" pings
   app.use(function (req, res, next) {
     if (req.method !== 'HEAD' || req.url !== '/') return next();
     res.statusCode === 200;
