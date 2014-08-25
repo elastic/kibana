@@ -94,10 +94,9 @@ define(function (require) {
         return Promise.delay(1).then(function () {
           expect(segmentedFetch.running).to.be(true);
           return segmentedFetch.fetch().then(function () {
-            // 1 for stopping early
-            // 1 for finishing the first request
+            // 1 for stopping the first request early
             // 1 for finishing the second request
-            expect(stopStub.callCount).to.be(3);
+            expect(stopStub.callCount).to.be(2);
           });
         });
       });
@@ -152,7 +151,7 @@ define(function (require) {
       it('should abort the existing fetch', function () {
         var loopCount = 3;
         var queue = [];
-        for (var i = 0; i < 20; i++) {
+        for (var i = 0; i <= loopCount; i++) {
           queue.push('queue-index-' + i);
         }
 
