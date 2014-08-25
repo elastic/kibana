@@ -108,7 +108,7 @@ define(function (require) {
       $('.y-axis-div').width(length);
       //$('.y-axis-col-wrapper').width(length);
       //$('.y-axis-col').width(length + tickspace);
-      d3.select('.y.axis').attr('transform', 'translate(' + (length + 2) + ',' + self.margin.top + ')');
+      d3.select('.y.axis').attr('transform', 'translate(' + (length + 2) + ',' + self._attr.margin.top + ')');
       
       // set widths of y-axis-spacer-block and x-axis-wrapper to fit resized x axis      
       $('.y-axis-spacer-block').width(spacer);

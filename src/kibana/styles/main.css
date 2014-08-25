@@ -7805,13 +7805,9 @@ fieldset[disabled] .form-control {
   opacity: .8;
 }
 input.ng-dirty.ng-invalid,
-<<<<<<< HEAD
-select.ng-dirty.ng-invalid {
-=======
 select.ng-dirty.ng-invalid,
 form:not(.hide-errors) input.ng-invalid,
 form:not(.hide-errors) select.ng-invalid {
->>>>>>> 55f72e5d3dac5f9c29a9ba32ac53cd551732bd97
   border-color: #e74c3c !important;
 }
 input[type="radio"][disabled],
