@@ -98,6 +98,49 @@ define(function (require) {
         });
       });
 
+      it('should wait before starting new requests', function () {
+        var startSpy = sinon.spy(SegmentedFetch.prototype, '_startRequest');
+        var stopSpy = sinon.spy(SegmentedFetch.prototype, '_stopRequest');
+        var execDefer = Promise.defer();
+        sinon.stub(SegmentedFetch.prototype, '_executeRequest').returns(execDefer.promise);
+
+        // helper to make delayed concurrent calls and check spys
+        function checkSpies(startCount, stopCount, delay) {
+          delay = delay || 1;
+
+          return Promise.delay(delay).then(function () {
+            expect(startSpy.callCount).to.be(startCount);
+            expect(stopSpy.callCount).to.be(stopCount);
+          });
+        }
+
+        // start fetch
+        var fetch1 = segmentedFetch.fetch();
+        var fetch2;
+
+        return checkSpies(1, 0)
+        .then(function () {
+          fetch2 = segmentedFetch.fetch();
+          return checkSpies(2, 0);
+        })
+        .then(function () {
+          // resolve _executeRequest
+          Promise.delay(5).then(function () {
+            execDefer.resolve();
+          });
+
+          return fetch1.then(function () {
+            expect(stopSpy.callCount).to.be(1);
+          });
+        })
+        .then(function () {
+          // _executeRequest is still resolved from above
+          return fetch2.then(function () {
+            expect(stopSpy.callCount).to.be(2);
+          });
+        });
+      });
+
       it('should perform actions on searchSource', function () {
         sinon.stub(SegmentedFetch.prototype, '_executeRequest', Promise.resolve);
 
