@@ -19,12 +19,20 @@ define(function (require) {
 
     VisFunctions.prototype.renderLayout = function (data) {
       this.layout = new Layout(this.el, data);
-      this.layout.render();
+      try {
+        this.layout.render();
+      } catch (error) {
+        console.error(error.message);
+      }
     };
 
     VisFunctions.prototype.renderLegend = function (legend, config) {
       this.legend = new Legend(legend, config);
-      this.legend.render();
+      try {
+        this.legend.render();
+      } catch (error) {
+        console.error(error.message);
+      }
     };
 
     VisFunctions.prototype.renderTooltip = function (elClass, formatter) {
@@ -33,22 +41,38 @@ define(function (require) {
 
     VisFunctions.prototype.renderChartTitles = function (splitType) {
       this.chartTitle = new ChartTitle(this.el, splitType);
-      this.chartTitle.render();
+      try {
+        this.chartTitle.render();
+      } catch (error) {
+        console.error(error.message);
+      }
     };
 
     VisFunctions.prototype.renderXAxis = function (args) {
       this.xAxis = new XAxis(args);
-      this.xAxis.render();
+      try {
+        this.xAxis.render();
+      } catch (error) {
+        console.error(error.message);
+      }
     };
 
-    VisFunctions.prototype.renderYAxis = function (yMax, height, margin) {
-      this.yAxis = new YAxis(this.el, yMax, height, margin);
-      this.yAxis.render();
+    VisFunctions.prototype.renderYAxis = function (args) {
+      this.yAxis = new YAxis(args);
+      try {
+        this.yAxis.render();
+      } catch (error) {
+        console.error(error.message);
+      }
     };
 
     VisFunctions.prototype.renderAxisTitles = function (xTitle, yTitle) {
       this.axisTitle = new AxisTitle(this.el, xTitle, yTitle);
-      this.axisTitle.render();
+      try {
+        this.axisTitle.render();
+      } catch (error) {
+        console.error(error.message);
+      }
     };
 
     VisFunctions.prototype.renderCharts = function (vis, charts) {
@@ -76,7 +100,6 @@ define(function (require) {
           });
 
           charts.push(chart);
-
           try {
             chart.render();
           } catch (error) {

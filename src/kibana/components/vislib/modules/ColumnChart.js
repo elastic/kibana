@@ -25,11 +25,13 @@ define(function (require) {
     }
 
     ColumnChart.prototype.eventResponse = function (d, i) {
+      var color = this.vis.data.getColorFunc();
+
       return {
         value     : this._attr.yValue(d, i),
         point     : d,
         label     : d.label,
-        color     : this.vis.data.color(d.label),
+        color     : color(d.label),
         pointIndex: i,
         series    : this.chartData.series,
         config    : this._attr,
@@ -53,6 +55,30 @@ define(function (require) {
       }));
     };
 
+    ColumnChart.prototype.addBrush = function (xScale, svg) {
+      var self = this;
+
+      var brush = d3.svg.brush()
+        .x(xScale)
+        .on('brushend', function brushEnd() {
+          return self._attr.dispatch.brush({
+            range: brush.extent(),
+            config: self._attr,
+            e: d3.event,
+            data: self.chartData
+          });
+        });
+
+//      if (this._attr.dispatch.on('brush')) {
+      if (this._attr.addBrush) {
+        svg.append('g')
+          .attr('class', 'brush')
+          .call(brush)
+          .selectAll('rect')
+          .attr('height', this._attr.height);
+      }
+    };
+
     ColumnChart.prototype.draw = function () {
       // Attributes
       var self = this;
@@ -61,7 +87,7 @@ define(function (require) {
       var elWidth = this._attr.width = $elem.width();
       var elHeight = this._attr.height = $elem.height();
       var isTooltip = this._attr.addTooltip;
-      var color = this.vis.data.color;
+      var color = this.vis.data.getColorFunc();
       var tooltip = this.vis.tooltip;
       var yScale = this.vis.yAxis.yScale;
       var xScale = this.vis.xAxis.xScale;
@@ -78,9 +104,7 @@ define(function (require) {
         selection.each(function (data) {
           layers = self.stackData(data);
 
-          if (elWidth <= 0 || elHeight <= 0) {
-            throw new Error($elem.attr('class') + ' height is ' + elHeight + ' and width is ' + elWidth);
-          }
+          self.validateHeightAndWidth($elem, elWidth, elHeight);
 
           // Get the width and height
           width = elWidth - margin.left - margin.right;
@@ -94,6 +118,8 @@ define(function (require) {
             .attr('height', height + margin.top + margin.bottom)
             .append('g')
             .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+          self.addBrush(xScale, svg);
 
           // Data layers
           layer = svg.selectAll('.layer')

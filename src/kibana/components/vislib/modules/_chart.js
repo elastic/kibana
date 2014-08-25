@@ -19,6 +19,13 @@ define(function (require) {
       return this._attr.dispatch.on(event, null);
     };
 
+    Chart.prototype.validateHeightAndWidth = function ($el, width, height) {
+      if (width <= 0 || height <= 0) {
+        throw new Error($el.attr('class') + ' height is ' + height + ' and width is ' + width);
+      }
+      return;
+    };
+
     Chart.prototype.destroy = function () {
       this._attr.destroyFlag = true;
 
