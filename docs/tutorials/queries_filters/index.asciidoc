@@ -44,7 +44,7 @@ We can also match the entire phrase
 "to be or not to be"
 --------------------
 
-Or in a specifc fields:
+Or a specific field:
 
 [source,shell]
 -------------
@@ -83,7 +83,7 @@ And of course to search everything:
 [[multiple-queries]]
 === Multiple queries
 
-In some cases, you might want to compare the results of two seperate queries.Kibana can handle multiple queries byjoining them with a logical
+In some cases, you might want to compare the results of two seperate queries. Kibana can handle multiple queries by joining them with a logical
 `OR` and using the knowledge that they should be treated as seperate to
 influence visualizations.
 
@@ -97,7 +97,7 @@ You should now have this
 
 image:./tutorials/queries_filters/split.png[image]
 
-In the lefthand, green input, type `"to be"` and in the right, yellow
+In the left hand, green input, type `"to be"` and in the right, yellow
 input, type `"not to be"`. This will search for every document that has
 `"to be"` OR `"not to be"` in it, and break that down on our hits pie
 chart. So we go from a big green circle to:
