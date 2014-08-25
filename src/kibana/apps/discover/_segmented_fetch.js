@@ -15,7 +15,6 @@ define(function (require) {
       this.queue = [];
       this.completedQueue = [];
       this.requestHandlers = {};
-      this.running = false;
       this.activeRequest = null;
       this.notifyEvent = null;
     }
@@ -47,6 +46,9 @@ define(function (require) {
       self._setRequestHandlers(opts);
 
       return Promise.try(function () {
+        return self._startRequest();
+      })
+      .then(function () {
         return self._extractQueue(opts.direction);
       })
       .then(function () {
@@ -54,7 +56,7 @@ define(function (require) {
         return req;
       })
       .then(function (req) {
-        return self._startRequest(req);
+        return self._setRequest(req);
       })
       .then(function () {
         return self._executeRequest(req, opts);
@@ -69,7 +71,6 @@ define(function (require) {
 
       return new Promise(function (resolve) {
         self._setRequest();
-        self.running = false;
 
         if (self.searchPromise && 'abort' in self.searchPromise) {
           self.searchPromise.abort();
@@ -79,7 +80,7 @@ define(function (require) {
       });
     };
 
-    segmentedFetch.prototype._startRequest = function (req) {
+    segmentedFetch.prototype._startRequest = function () {
       var self = this;
       self.requestStats = {
         took: 0,
@@ -90,16 +91,23 @@ define(function (require) {
         }
       };
 
-      return new Promise(function (resolve) {
-        // stop any existing segmentedFetches
-        if (self.running) {
-          self._setRequest();
-        }
-
-        self._setRequest(req);
-        self.running = true;
+      function initRequest() {
+        self._processDeferred = Promise.defer();
         self.notifyEvent = notify.event(eventName);
-        resolve();
+      }
+
+      return new Promise(function (resolve) {
+        // cause existing request to exit
+        if (self._processDeferred) {
+          self._setRequest();
+          self._processDeferred.promise.then(function () {
+            initRequest();
+            resolve();
+          });
+        } else {
+          initRequest();
+          resolve();
+        }
       });
     };
 
@@ -109,7 +117,7 @@ define(function (require) {
       return new Promise(function (resolve) {
         self._setRequest();
         self._clearNotification();
-        self.running = false;
+        self._processDeferred.resolve();
         resolve();
       });
     };
@@ -235,9 +243,8 @@ define(function (require) {
 
       return self._executeSearch(index, state)
       .then(function (resp) {
-        // abort if not in running state, or fetch is called twice quickly
-        if (!self.running || req !== self.activeRequest) {
-          // return self._processQueueComplete(req, loopCount);
+        // abort if request changed (fetch is called twice quickly)
+        if (req !== self.activeRequest) {
           return;
         }
 

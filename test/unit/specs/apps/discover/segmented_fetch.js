@@ -67,7 +67,6 @@ define(function (require) {
 
     describe('fetch', function () {
       it('should return a promise', function () {
-        sinon.stub(SegmentedFetch.prototype, '_startRequest', Promise.resolve);
         sinon.stub(SegmentedFetch.prototype, '_executeRequest', Promise.resolve);
 
         var fetch = segmentedFetch.fetch();
@@ -75,34 +74,31 @@ define(function (require) {
         return fetch;
       });
 
-      it('should set the running state', function () {
-        var stopStub = sinon.stub(SegmentedFetch.prototype, '_stopRequest', Promise.resolve);
+      it('should stop the request', function () {
+        var stopSpy = sinon.spy(SegmentedFetch.prototype, '_stopRequest');
         sinon.stub(SegmentedFetch.prototype, '_executeRequest', Promise.resolve);
 
         return segmentedFetch.fetch().then(function () {
-          expect(segmentedFetch.running).to.be(true);
-          expect(stopStub.callCount).to.be(1);
+          expect(stopSpy.callCount).to.be(1);
         });
       });
 
-      it('should stop existing requests', function () {
-        var stopStub = sinon.stub(SegmentedFetch.prototype, '_stopRequest', Promise.resolve);
+      it('should stop multiple requests', function () {
+        var stopSpy = sinon.spy(SegmentedFetch.prototype, '_stopRequest');
         sinon.stub(SegmentedFetch.prototype, '_executeRequest').returns(Promise.delay(5));
 
         segmentedFetch.fetch();
 
         return Promise.delay(1).then(function () {
-          expect(segmentedFetch.running).to.be(true);
           return segmentedFetch.fetch().then(function () {
             // 1 for stopping the first request early
             // 1 for finishing the second request
-            expect(stopStub.callCount).to.be(2);
+            expect(stopSpy.callCount).to.be(2);
           });
         });
       });
 
       it('should perform actions on searchSource', function () {
-        sinon.stub(SegmentedFetch.prototype, '_startRequest', Promise.resolve);
         sinon.stub(SegmentedFetch.prototype, '_executeRequest', Promise.resolve);
 
         return segmentedFetch.fetch().then(function () {
@@ -230,11 +226,14 @@ define(function (require) {
           var SegmentedFetchSelf = this;
           var fakeRequest = {};
 
-          return SegmentedFetchSelf._startRequest(fakeRequest)
+          return SegmentedFetchSelf._startRequest()
+          .then(function () {
+            SegmentedFetchSelf._setRequest(fakeRequest);
+          })
           .then(function () {
             // dumb mock or the fetch lifecycle
             // loop, running each
-            while (SegmentedFetchSelf.running) {
+            while (SegmentedFetchSelf.activeRequest !== null) {
               if (typeof opts.each === 'function') {
                 opts.each();
               }
