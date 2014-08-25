@@ -110,7 +110,8 @@ define(function (require) {
         editableVis.dirty = !angular.equals(newState, vis.getState());
       }, true);
 
-      $state.on('fetch_with_changes', function () {
+      $scope.$listen($state, 'fetch_with_changes', function () {
+
         vis.setState($state.vis);
         editableVis.setState($state.vis);
 
@@ -122,10 +123,11 @@ define(function (require) {
         }
 
         $scope.fetch();
+
       });
 
       timefilter.enabled = true;
-      timefilter.on('update', _.bindKey($scope, 'fetch'));
+      $scope.$listen(timefilter, 'update', _.bindKey($scope, 'fetch'));
 
       $scope.$on('ready:vis', function () {
         $scope.$emit('application.load');

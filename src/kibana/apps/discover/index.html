@@ -73,7 +73,7 @@
           {{ opts.savedSearch.title }}
           <i tooltip="Reload saved query" ng-click="resetQuery();" class="fa fa-undo smallest small"></i>
         </h3>
-        <div class="discover-timechart" ng-if="vis">
+        <div class="discover-timechart" >
           <center class="small">
             <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>
             <!-- TODO: Currently no way to apply this setting to the visualization -->
@@ -90,7 +90,7 @@
             <div class="spinner large"> </div>
           </div>
 
-          <visualize vis="vis" es-resp="mergedEsResp" search-source="searchSource"></visualize>
+          <visualize ng-if="vis && rows.length != 0" vis="vis" es-resp="mergedEsResp" search-source="searchSource"></visualize>
         </div>
 
         <div class="discover-table"
