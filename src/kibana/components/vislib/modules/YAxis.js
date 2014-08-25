@@ -3,8 +3,6 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
 
-    var split = Private(require('components/vislib/components/YAxis/_split'));
-
     function YAxis(el, yMax, height, margin) {
       this.el = el;
       this.yMax = yMax;
@@ -59,7 +57,7 @@ define(function (require) {
             .call(self.yAxis);
 
           // update layout divs to tick lengths
-          // self.updateLayoutForRotatedLabels(div, self.getMaxLabelLength(selection));
+          //self.updateLayoutForRotatedLabels(div, self.getMaxLabelLength(selection));
 
         });
       };
@@ -77,7 +75,7 @@ define(function (require) {
       _.forEach(labels[0], function (n) {
         arr.push(n.getBBox().width);
       });
-      console.log(arr, _.max(arr));
+      //console.log(arr, _.max(arr));
       return length = _.max(arr);
     };
 
