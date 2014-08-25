@@ -116,23 +116,36 @@ define(function (require) {
           // then run a date histogram
           if (field.type === 'date' && $scope.searchSource.get('index').timeFieldName) {
             agg = {
-              agg: 'date_histogram',
-              field: field.name,
-              interval: 'auto'
+              type: 'date_histogram',
+              schema: 'segment',
+              params: {
+                field: field.name,
+                interval: 'auto'
+              }
             };
           } else {
             agg = {
-              agg: 'terms',
-              field: field.name,
-              size: config.get('discover:aggs:terms:size', 20),
+              type: 'terms',
+              schema: 'segment',
+              params: {
+                field: field.name,
+                size: config.get('discover:aggs:terms:size', 20)
+              }
             };
           }
 
           $location.path('/visualize/create').search({
+            //(query:(query_string:(query:'*')),vis:(aggs:!((params:(field:'@tags',order:desc,size:5)
             indexPattern: $scope.state.index,
             type: 'histogram',
             _a: rison.encode({
               query: $scope.state.query || undefined,
+              vis: {
+                aggs: [
+                  agg,
+                  {schema: 'metric', type: 'count'}
+                ]
+              },
               metric: [{
                 agg: 'count',
               }],

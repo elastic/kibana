@@ -15,6 +15,13 @@ define(function (require) {
         savedVis: '=',
         apply: '&',
         reset: '&'
+      },
+      link: function ($scope) {
+        $scope.hideErrors = true;
+        $scope.dontApply = function () {
+          console.log('showing validation');
+          $scope.hideErrors = false;
+        };
       }
     };
   });
