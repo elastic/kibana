@@ -67,7 +67,12 @@ module.exports = function (grunt) {
         }
       })
       .forEach(function (path) {
-        newFileLines.push(' - **' + path + '**');
+        newFileLines.push(
+          ' - **' +
+          '[' + path + ']' +
+          '(https://github.com/elasticsearch/kibana4/blob/master/' + path + ')' +
+          '**'
+        );
 
         _(groupedByPath[path])
         .sortBy(function (match) {
@@ -77,9 +82,7 @@ module.exports = function (grunt) {
           var priority = TYPE_PRIORITIES[match.type] || 0;
 
           newFileLines.push(
-            '   - ' + (priority ? match.type + ' – ' : '') +
-            match.msg + ' – ' +
-            '(https://github.com/elasticsearch/kibana4/blob/master/' + match.path + ')'
+            '   - ' + (priority ? match.type + ' – [ ] ' : '') + match.msg
           );
         });
       });

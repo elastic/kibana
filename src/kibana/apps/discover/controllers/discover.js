@@ -137,7 +137,7 @@ define(function (require) {
         var ignoreStateChanges = ['columns'];
 
         // listen for changes, and relisten everytime something happens
-        $state.onUpdate(function (changed) {
+        $scope.$listen($state, 'fetch_with_changes', function (changed) {
           if (_.contains(changed, 'columns')) {
             $scope.fields.forEach(function (field) {
               field.display = _.contains($state.columns, field.name);
