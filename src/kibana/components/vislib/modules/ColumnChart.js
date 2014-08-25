@@ -60,7 +60,7 @@ define(function (require) {
 
       var brush = d3.svg.brush()
         .x(xScale)
-        .on('brushend', function brushend() {
+        .on('brushend', function brushEnd() {
           return self._attr.dispatch.brush({
             range: brush.extent(),
             config: self._attr,
@@ -69,7 +69,8 @@ define(function (require) {
           });
         });
 
-      if (this._attr.dispatch.on('brush')) {
+//      if (this._attr.dispatch.on('brush')) {
+      if (this._attr.addBrush) {
         svg.append('g')
           .attr('class', 'brush')
           .call(brush)
