@@ -66,14 +66,17 @@ define(function (require) {
 
     segmentedFetch.prototype.abort = function () {
       var self = this;
-      var stop = self._stopRequest();
 
-      // if we have a searchPromise, abort it as well
-      if (self.searchPromise && 'abort' in self.searchPromise) {
-        return stop.then(self.searchPromise.abort);
-      }
+      return new Promise(function (resolve) {
+        self._setRequest();
+        self.running = false;
 
-      return stop;
+        if (self.searchPromise && 'abort' in self.searchPromise) {
+          self.searchPromise.abort();
+        }
+
+        resolve();
+      });
     };
 
     segmentedFetch.prototype._startRequest = function (req) {
@@ -86,34 +89,41 @@ define(function (require) {
           max_score: 0
         }
       };
-      var p = Promise.resolve();
 
-      // stop any existing segmentedFetches
-      if (self.running) {
-        p = p.then(function () {
-          self._stopRequest();
-        });
-      }
+      return new Promise(function (resolve) {
+        // stop any existing segmentedFetches
+        if (self.running) {
+          self._setRequest();
+        }
 
-      return p.then(function () {
-        self.activeRequest = req;
+        self._setRequest(req);
         self.running = true;
         self.notifyEvent = notify.event(eventName);
+        resolve();
       });
     };
 
     segmentedFetch.prototype._stopRequest = function () {
       var self = this;
-      var p = Promise.resolve();
 
-      return p.then(function () {
-        self.activeRequest = null;
+      return new Promise(function (resolve) {
+        self._setRequest();
+        self._clearNotification();
         self.running = false;
-        if (_.isFunction(self.notifyEvent)) {
-          self.notifyEvent();
-          self.notifyEvent = null;
-        }
+        resolve();
       });
+    };
+
+    segmentedFetch.prototype._setRequest = function (req) {
+      req = req || null;
+      this.activeRequest = req;
+    };
+
+    segmentedFetch.prototype._clearNotification = function () {
+      var self = this;
+      if (_.isFunction(self.notifyEvent)) {
+        self.notifyEvent();
+      }
     };
 
     segmentedFetch.prototype._setRequestHandlers = function (handlers) {
@@ -214,11 +224,6 @@ define(function (require) {
       var self = this;
       var index = self.queue.shift();
 
-      // abort if not in running state, or fetch is called twice quickly
-      if (!self.running || req !== self.activeRequest) {
-        return self._processQueueComplete(req, loopCount);
-      }
-
       if (remainingSize !== false) {
         state.body.size = remainingSize;
       }
@@ -230,6 +235,11 @@ define(function (require) {
 
       return self._executeSearch(index, state)
       .then(function (resp) {
+        // abort if not in running state, or fetch is called twice quickly
+        if (!self.running || req !== self.activeRequest) {
+          // return self._processQueueComplete(req, loopCount);
+          return;
+        }
 
         // a response was swallowed intentionally. Try the next one
         if (!resp) {
