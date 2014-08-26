@@ -1,27 +1,30 @@
 define(function (require) {
+  var _ = require('lodash');
   var location = require('modules').get('kibana/url');
 
   location.service('kbnUrl', function ($route, $location, $rootScope, globalState) {
-    var reloading = false;
+    var self = this;
+    self.reloading = false;
 
-    function KbnUrl() {
-    }
-
-    KbnUrl.prototype.changePath = function (path) {
-      if (path !== $location.path()) {
-        $location.path(globalState.writeToUrl(path));
-        reload();
+    self.change = function (url, paramObj, forceReload) {
+      if (!_.isBoolean(paramObj)) {
+        forceReload = paramObj;
+        paramObj = undefined;
       }
-    };
 
-    KbnUrl.prototype.change = function (url) {
+      if (_.isObject(paramObj)) {
+        url = parseUrlPrams(url, paramObj);
+      }
+
       if (url !== $location.url()) {
         $location.url(globalState.writeToUrl(url));
-        reload();
+        if (forceReload) {
+          reload();
+        }
       }
     };
 
-    KbnUrl.prototype.matches = function (url) {
+    self.matches = function (url) {
       var route = $route.current.$$route;
       if (!route || !route.regexp) return null;
       return route.regexp.test(url);
@@ -30,15 +33,23 @@ define(function (require) {
     $rootScope.$on('$routeUpdate', reloadingComplete);
     $rootScope.$on('$routeChangeStart', reloadingComplete);
 
+    function parseUrlPrams(url, paramObj) {
+      return url.replace(/\{([^\}]+)\}/g, function (match, key) {
+        if (_.isUndefined(paramObj[key])) {
+          throw new Error('Replacement failed, key not found: ' + key);
+        }
+
+        return paramObj[key];
+      });
+    }
+
     function reload() {
-      if (!reloading) $route.reload();
-      reloading = true;
+      if (!self.reloading) $route.reload();
+      self.reloading = true;
     }
 
     function reloadingComplete() {
-      reloading = false;
+      self.reloading = false;
     }
-
-    return new KbnUrl();
   });
 });
