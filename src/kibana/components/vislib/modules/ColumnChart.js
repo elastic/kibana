@@ -69,8 +69,7 @@ define(function (require) {
           });
         });
 
-//      if (this._attr.dispatch.on('brush')) {
-      if (this._attr.addBrush) {
+      if (self._attr.addEvents) {
         svg.append('g')
           .attr('class', 'brush')
           .call(brush)
@@ -87,6 +86,7 @@ define(function (require) {
       var elWidth = this._attr.width = $elem.width();
       var elHeight = this._attr.height = $elem.height();
       var isTooltip = this._attr.addTooltip;
+      var addEvents = this._attr.addEvents;
       var color = this.vis.data.getColorFunc();
       var tooltip = this.vis.tooltip;
       var yScale = this.vis.yAxis.yScale;
@@ -129,6 +129,10 @@ define(function (require) {
             'class', function (d, i) {
               return i;
             });
+
+          if (!yScale) {
+            throw new Error('yScale is ' + yScale);
+          }
 
           // Append the bars
           bars = layer.selectAll('rect')
@@ -178,17 +182,21 @@ define(function (require) {
 
           bars
             .on('mouseover.bar', function (d, i) {
-              d3.select(this)
-                .classed('hover', true)
-                .style('stroke', '#333')
-                .style('cursor', 'pointer');
+              if (addEvents) {
+                d3.select(this)
+                  .classed('hover', true)
+                  .style('stroke', '#333')
+                  .style('cursor', 'pointer');
 
-              dispatch.hover(self.eventResponse(d, i));
-//              d3.event.stopPropagation();
+                dispatch.hover(self.eventResponse(d, i));
+                d3.event.stopPropagation();
+              }
             })
             .on('click.bar', function (d, i) {
-              dispatch.click(self.eventResponse(d, i));
-//              d3.event.stopPropagation();
+              if (addEvents) {
+                dispatch.click(self.eventResponse(d, i));
+                d3.event.stopPropagation();
+              }
             })
             .on('mouseout.bar', function () {
               d3.select(this).classed('hover', false)

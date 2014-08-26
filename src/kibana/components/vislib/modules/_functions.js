@@ -22,7 +22,7 @@ define(function (require) {
       try {
         this.layout.render();
       } catch (error) {
-        console.error(error.message);
+        console.group(error.message);
       }
     };
 
@@ -31,7 +31,7 @@ define(function (require) {
       try {
         this.legend.render();
       } catch (error) {
-        console.error(error.message);
+        console.group(error.message);
       }
     };
 
@@ -44,7 +44,7 @@ define(function (require) {
       try {
         this.chartTitle.render();
       } catch (error) {
-        console.error(error.message);
+        console.group(error.message);
       }
     };
 
@@ -53,7 +53,7 @@ define(function (require) {
       try {
         this.xAxis.render();
       } catch (error) {
-        console.error(error.message);
+        console.group(error.message);
       }
     };
 
@@ -62,7 +62,7 @@ define(function (require) {
       try {
         this.yAxis.render();
       } catch (error) {
-        console.error(error.message);
+        console.group(error.message);
       }
     };
 
@@ -71,7 +71,7 @@ define(function (require) {
       try {
         this.axisTitle.render();
       } catch (error) {
-        console.error(error.message);
+        console.group(error.message);
       }
     };
 
@@ -103,7 +103,11 @@ define(function (require) {
           try {
             chart.render();
           } catch (error) {
-            console.error(error.message);
+            if (error.message === 'yScale is undefined') {
+              chart.error(self.el);
+            } else {
+              console.group(error.message);
+            }
           }
         });
     };

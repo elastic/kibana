@@ -23,7 +23,7 @@ define(function (require) {
           var jMax = arr[i].series.length;
 
           for (j = 0; j < jMax; j++) {
-            zeroArray = createZeroFilledArray(keys, arr[i].ordered);
+            zeroArray = createZeroFilledArray(keys);
             dataArray = arr[i].series[j].values;
             arr[i].series[j].values = zeroFillDataArray(zeroArray, dataArray);
           }
@@ -35,9 +35,9 @@ define(function (require) {
       // Looping thru each arr.values object and replacing
       // the y value of the zero-filled array
       max = obj.series.length;
+
       for (i = 0; i < max; i++) {
-//        var zeroArray = createZeroFilledArray(keys, obj);
-        zeroArray = createZeroFilledArray(keys, obj.ordered);
+        zeroArray = createZeroFilledArray(keys);
         dataArray = obj.series[i].values;
 
         obj.series[i].values = zeroFillDataArray(zeroArray, dataArray);

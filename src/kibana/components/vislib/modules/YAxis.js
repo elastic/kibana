@@ -14,7 +14,7 @@ define(function (require) {
     }
 
     YAxis.prototype.render = function () {
-      d3.select(this.el).selectAll('.y-axis-div').call(this.appendSVG());
+      d3.select(this.el).selectAll('.y-axis-div').call(this.draw());
     };
 
     YAxis.prototype.getYScale = function (height) {
@@ -33,7 +33,7 @@ define(function (require) {
         .orient('left');
     };
 
-    YAxis.prototype.appendSVG = function () {
+    YAxis.prototype.draw = function () {
       var self = this;
       var margin = this._attr.margin;
       var div;

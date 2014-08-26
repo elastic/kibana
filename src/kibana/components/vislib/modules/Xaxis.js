@@ -35,15 +35,18 @@ define(function (require) {
     };
 
     XAxis.prototype.getTimeDomain = function (scale, xValues, ordered) {
-      // Take the min of the xValues or the ordered object
-      var minDate = Math.min(d3.min(xValues), ordered.min);
-      // Take the max of the xValues or the ordered object
-      var maxDate = Math.max(d3.max(xValues), ordered.max);
-      var timeInterval = ordered.interval;
-
       // Should think about replacing
       var spacingPercentage = 0.25;
-      scale.domain([minDate, maxDate + timeInterval * (1 - spacingPercentage)]);
+      var maxXValue = d3.max(xValues);
+      var timeInterval = ordered.interval;
+      // Take the min of the xValues or the ordered object
+      var minDate = Math.min(d3.min(xValues), ordered.min);
+      // Take the max of the xValues or the max date that is sent
+      var maxDate = +maxXValue + timeInterval <= ordered.max ? ordered.max : +maxXValue + timeInterval * (1 - spacingPercentage);
+
+      console.log('maxXValue: ', new Date(+maxXValue), 'orderedDate: ', new Date(ordered.max), 'maxDate: ', new Date(maxDate));
+
+      scale.domain([minDate, maxDate]);
 
       return scale;
     };

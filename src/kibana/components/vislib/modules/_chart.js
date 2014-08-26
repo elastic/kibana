@@ -1,6 +1,7 @@
 define(function (require) {
   return function ChartBaseClass(d3, Private) {
     var _ = require('lodash');
+    var $ = require('jquery');
 
     function Chart(vis, el, chartData) {
       this.vis = vis;
@@ -25,6 +26,26 @@ define(function (require) {
       }
       return;
     };
+
+    Chart.prototype.removeAll = function (elem) {
+      return d3.select(elem).selectAll('*').remove();
+    };
+
+    Chart.prototype.error = function (elem) {
+      // Removes the legend container
+      this.removeAll(elem);
+
+      return d3.select(elem)
+        .append('div')
+        .attr('class', 'error-wrapper')
+        .append('div')
+        .attr('class', 'chart-error')
+//        .style('line-height', function () {
+//          return $(elem).height() + 'px';
+//        })
+        .text('The container is too small for this chart.');
+    };
+
 
     Chart.prototype.destroy = function () {
       this._attr.destroyFlag = true;

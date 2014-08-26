@@ -9,11 +9,11 @@ define(function (require) {
       var flattenedData = flattenDataArray(obj);
       var uniqueXValues = {};
 
-      // Appends unique x values in the order they appear
-      // to an empty object
+      // Appends unique x values in the order they appear to an empty object
       flattenedData.forEach(function (d, i) {
         var key = d.x;
-        uniqueXValues[key] = uniqueXValues[key] === void 0 ? i : Math.max(i, uniqueXValues[key]);
+        uniqueXValues[key] = uniqueXValues[key] === void 0 ?
+        { index: i, isNumber: _.isNumber(key) } : { index: Math.max(i, uniqueXValues[key]), isNumber: _.isNumber(key) };
       });
 
       // returns an object with unique x values in the correct order
