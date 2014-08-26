@@ -69,9 +69,8 @@ define(function (require) {
     };
 
     segmentedFetch.prototype.abort = function () {
-      var self = this;
-
-      return self._stopRequest();
+      this._stopRequest();
+      return this.lastRequestPromise;
     };
 
     segmentedFetch.prototype._startRequest = function (req) {
@@ -85,24 +84,18 @@ define(function (require) {
         }
       };
 
-      return new Promise(function (resolve) {
-        self._setRequest(req);
-        self.notifyEvent = notify.event(eventName);
-        resolve();
-      });
+      self._setRequest(req);
+      self.notifyEvent = notify.event(eventName);
     };
 
     segmentedFetch.prototype._stopRequest = function () {
       var self = this;
 
-      return new Promise(function (resolve) {
-        self._setRequest();
-        self._clearNotification();
-        if (self.searchPromise && 'abort' in self.searchPromise) {
-          self.searchPromise.abort();
-        }
-        resolve();
-      });
+      self._setRequest();
+      self._clearNotification();
+      if (self.searchPromise && 'abort' in self.searchPromise) {
+        self.searchPromise.abort();
+      }
     };
 
     segmentedFetch.prototype._setRequest = function (req) {
