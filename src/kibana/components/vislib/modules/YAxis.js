@@ -3,26 +3,29 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
 
-    function YAxis(el, yMax, height, margin) {
-      this.el = el;
-      this.yMax = yMax;
-      this.margin = margin;
-      this.height = height - margin.top - margin.bottom;
+    var Chart = Private(require('components/vislib/modules/_chart'));
+
+    _(YAxis).inherits(Chart);
+    function YAxis(args) {
+      YAxis.Super.apply(this, arguments);
+      this.el = args.el;
+      this.yMax = args.yMax;
+      this._attr = args.attr;
     }
 
     YAxis.prototype.render = function () {
-      d3.select(this.el).selectAll('.y-axis-div').call(this.appendSVG());
+      d3.select(this.el).selectAll('.y-axis-div').call(this.draw());
     };
 
-    YAxis.prototype.getYScale = function () {
+    YAxis.prototype.getYScale = function (height) {
       this.yScale = d3.scale.linear()
         .domain([0, this.yMax])
-        .range([this.height, 0])
+        .range([height, 0])
         .nice();
     };
 
-    YAxis.prototype.getYAxis = function () {
-      this.getYScale();
+    YAxis.prototype.getYAxis = function (height) {
+      this.getYScale(height);
 
       this.yAxis = d3.svg.axis()
         .scale(this.yScale)
@@ -30,8 +33,9 @@ define(function (require) {
         .orient('left');
     };
 
-    YAxis.prototype.appendSVG = function () {
+    YAxis.prototype.draw = function () {
       var self = this;
+      var margin = this._attr.margin;
       var div;
       var width;
       var height;
@@ -39,25 +43,29 @@ define(function (require) {
       var bbox;
       var tickN;
 
-      this.getYAxis();
-
       return function (selection) {
         selection.each(function () {
           div = d3.select(this);
           width = $(this).width();
-          height = $(this).height() - self.margin.top - self.margin.bottom;
+          height = $(this).height() - margin.top - margin.bottom;
+
+          self.validateHeightAndWidth(div, width, height);
+
+          // Return access to the yAxis
+          self.getYAxis(height);
 
           svg = div.append('svg')
             .attr('width', width)
-            .attr('height', height + self.margin.top + self.margin.bottom);
+            .attr('height', height + margin.top + margin.bottom);
 
           svg.append('g')
             .attr('class', 'y axis')
-            .attr('transform', 'translate(' + width * 0.95 + ',' + self.margin.top + ')')
+            //.attr('transform', 'translate(' + width * 0.95 + ',' + self.margin.top + ')')
+            .attr('transform', 'translate(' + width + ',' + margin.top + ')')
             .call(self.yAxis);
 
           // update layout divs to tick lengths
-          //self.updateLayoutForRotatedLabels(div, self.getMaxLabelLength(selection));
+          self.updateLayoutForRotatedLabels(div, self.getMaxLabelLength(selection));
 
         });
       };
@@ -97,15 +105,15 @@ define(function (require) {
       // set widths of svg, x-axis-div and x-axis-div-wrapper to fit ticklabels
       svg.attr('width', length + 6);
       //$('.y-axis-div-wrapper').width(length + tickspace);
-      $('.y-axis-div').width(length);
+      //$('.y-axis-div').width(length);
       //$('.y-axis-col-wrapper').width(length);
       //$('.y-axis-col').width(length + tickspace);
-      d3.select('.y.axis').attr('transform', 'translate(' + (length + 2) + ',' + self.margin.top + ')');
+      d3.selectAll('.y.axis').attr('transform', 'translate(' + (length + 2) + ',' + self._attr.margin.top + ')');
       
       // set widths of y-axis-spacer-block and x-axis-wrapper to fit resized x axis      
-      $('.y-axis-spacer-block').width(spacer);
-      $('.y-axis-col-wrapper').width(spacer);
-      $('.y-axis-col').width(spacer);
+      //$('.y-axis-spacer-block').width(spacer);
+      //$('.y-axis-col-wrapper').width(spacer);
+      //$('.y-axis-col').width(spacer);
       
     };
 

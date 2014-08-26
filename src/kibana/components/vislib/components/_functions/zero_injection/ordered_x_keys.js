@@ -10,7 +10,9 @@ define(function (require) {
       // Returns an array x axis values
       return _.chain(objKeys)
         .pairs()
-        .pluck(0)
+        .map(function (d) {
+          return d[1].isNumber ? +d[0] : d[0];
+        })
         .value();
     };
   };
