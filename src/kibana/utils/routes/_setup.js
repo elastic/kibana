@@ -15,10 +15,6 @@ define(function (require) {
           if (!$route.current.$$route.originalPath.match(/settings\/indices/)) {
             return indexPatterns.getIds()
             .then(function (patterns) {
-              if (!patterns || patterns.length === 0) {
-                throw new errors.NoDefinedIndexPatterns();
-              }
-
               if (!config.get('defaultIndex')) {
                 throw new NoDefaultIndexPattern();
               }
