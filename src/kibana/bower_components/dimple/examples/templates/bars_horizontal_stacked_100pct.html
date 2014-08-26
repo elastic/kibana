@@ -1,0 +1,16 @@
+<div id="chartContainer">
+  {scriptDependencies}
+  <script type="text/javascript">
+    var svg = dimple.newSvg("#chartContainer", 590, 400);
+    d3.tsv("/data/example_data.tsv", function (data) {
+      var myChart = new dimple.chart(svg, data);
+      myChart.setBounds(75, 30, 480, 330)
+      myChart.addPctAxis("x", "Unit Sales");
+      var y = myChart.addCategoryAxis("y", "Month");
+      y.addOrderRule("Date");
+      myChart.addSeries("Channel", dimple.plot.bar);
+      myChart.addLegend(60, 10, 510, 20, "right");
+      myChart.draw();
+    });
+  </script>
+</div>

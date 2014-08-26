@@ -1,0 +1,130 @@
+<!----------------------------------------------------------------->
+<!-- AUTOMATICALLY GENERATED CODE - PLEASE EDIT TEMPLATE INSTEAD -->
+<!----------------------------------------------------------------->
+<div id="chartContainer">
+  <script src="/lib/d3.v3.4.8.js"></script>
+  <script src="/dist/dimple.v2.1.0.js"></script>
+  <script type="text/javascript">
+
+    // Create the svg and set the dimensions
+    var svg = dimple.newSvg("#chartContainer", 590, 400);
+
+    d3.tsv("/data/example_data.tsv", function (data) {
+
+      // Add a bullet chart to the svg
+      function addBullet(x, y, height, width, measure, lowMark,
+                        highMark, compareField, keyVal,
+                        compareVal, color) {
+        
+        // This is a custom algorithm to lighten the passed color, I find I can't
+        // get the results I want from the d3.rgb.brighter method.
+        function lighten(color, pct) {
+            return d3.rgb(
+                    d3.rgb(color).r + pct * (255 - d3.rgb(color).r),
+                    d3.rgb(color).g + pct * (255 - d3.rgb(color).g),
+                    d3.rgb(color).b + pct * (255 - d3.rgb(color).b)
+                );
+        }
+
+        // Create a single data row for bullet data.  Dimple doesn't
+        // quite handle bullets out of the box so we need to do some
+        // data manipulation here
+        var bData = [
+            {
+                "Metric":measure,
+                "Value":0,
+                "Low Value":lowMark,
+                "High Value":highMark,
+                "Compare Value":0
+            }
+        ];
+
+        // Add the key and compare values for coloring and pop-ups
+        bData[0][keyVal] = keyVal;
+        bData[0][compareVal] = compareVal;
+
+        // Iterate the data and put numbers into the low key or compare
+        // value fields or exclude if in neither value
+        data.forEach(function (d) {
+          if (d[compareField] === keyVal) {
+            bData[0]["Value"] += parseFloat(d[measure]);
+          } else if (d[compareField] === compareVal) {
+            bData[0]["Compare Value"] += parseFloat(d[measure]);
+          }
+        }, this);
+
+        // Create the bullet chart itself at the passed bounds
+        var bullet = new dimple.chart(svg, bData);
+        bullet.setBounds(x, y, height, width);
+
+        // Add the x and y for the main bar
+        var bY = bullet.addCategoryAxis("y", "Metric");
+        var bX = bullet.addMeasureAxis("x", "Value");
+
+        // Add a separate x axis for each measure, this is required
+        // where we want to do a series for each measure.  By passing
+        // another axis in place of the position we combine them to create
+        // a 4 measure composite.
+        var lX = bullet.addMeasureAxis(bX, "Low Value");
+        var hX = bullet.addMeasureAxis(bX, "High Value");
+        var cX = bullet.addMeasureAxis(bX, "Compare Value");
+
+        // Add a series for the marks first (the order defines)
+        // document z position - first at back, last on top
+        // NB. High/Low Mark here doesn't refer to a field in the data
+        // rather it tags the total value with a name we can use to color
+        var hm = bullet.addSeries("High Mark", dimple.plot.bar, [bY, hX]);
+        var lm = bullet.addSeries("Low Mark", dimple.plot.bar, [bY, lX]);
+        // Add the main series - keyVal is for color and tooltip
+        var b = bullet.addSeries(keyVal, dimple.plot.bar, [bY, bX]);
+        // Add the comparison series - compareVal is for color and tooltip
+        var m = bullet.addSeries(compareVal, dimple.plot.bar, [bY, cX]);
+
+        // Configure the markers as floating bars
+        m.stacked = false;
+        cX.floatingBarWidth = 2;
+
+        // Set the gaps for the bar series with a narrow main series and full
+        // width for the markers
+        hm.barGap = 0;
+        lm.barGap = 0;
+        b.barGap = 0.75;
+
+        // Assign the colors as different shades of the passed color
+        bullet.assignColor(keyVal, color);
+        bullet.assignColor(compareVal, d3.rgb(color).darker(0.5));
+        bullet.assignColor("Low Mark", lighten(color, 0.4));
+        bullet.assignColor("High Mark", lighten(color, 0.6));
+
+        // Draw the chart
+        bullet.draw();
+
+        // Once drawn we can remove titles
+        bX.titleShape.remove();
+        bY.titleShape.remove();
+
+      }
+
+      // Draw the chart for each financial metric in the data to compare
+      // Black Mesa with rival brand owner Aperture. We are coloring most
+      // measures blue, but the costs are red as they should be interperated
+      // as "less is better".  Typically the high and low marks would be target
+      // KPI bounds, the values are just hard coded for this example. A smarter
+      // means to determine axis bounds would be better but I don't want to
+      // bloat this example.
+      addBullet(100, 30, 430, 30, "Unit Sales", 2300000, 2800000, 
+        "Owner", "Aperture", "Black Mesa", "#80B1D3");
+      addBullet(100, 90, 430, 30, "Sales Value", 135000000, 145000000, 
+        "Owner", "Aperture", "Black Mesa", "#80B1D3");
+      addBullet(100, 150, 430, 30, "Cost of Sales", 200000, 300000, 
+        "Owner", "Aperture", "Black Mesa", "#FB8072");
+      addBullet(100, 210, 430, 30, "Gross Profit", 140000000, 170000000, 
+        "Owner", "Aperture", "Black Mesa", "#80B1D3");
+      addBullet(100, 270, 430, 30, "Indirect Costs", 100000000, 150000000, 
+        "Owner", "Aperture", "Black Mesa", "#FB8072");
+      addBullet(100, 330, 430, 30, "Operating Profit", 12000000, 16000000, 
+        "Owner", "Aperture", "Black Mesa", "#80B1D3");
+
+    });
+  </script>
+</div>

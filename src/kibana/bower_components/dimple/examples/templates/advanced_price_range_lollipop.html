@@ -1,0 +1,44 @@
+<div id="chartContainer">
+  {scriptDependencies}
+  <script type="text/javascript">
+    var svg = dimple.newSvg("#chartContainer", 590, 400);
+      d3.tsv("/data/example_data.tsv", function (data) {
+        
+        // Filter the data for a single channel
+        data = dimple.filterData(data, "Channel", "Hypermarkets");
+        
+        // Create the chart
+        var myChart = new dimple.chart(svg, data);
+        myChart.setBounds(60, 30, 470, 300)
+        
+        // Add an x and 2 y-axes.  When using multiple axes it's
+        // important to assign them to variables to pass to the series
+        var x = myChart.addCategoryAxis("x", "Brand");
+        var y1 = myChart.addMeasureAxis("y", "Price");
+        var y2 = myChart.addMeasureAxis("y", "Sales Value");
+
+        // Order the x axis by sales value desc
+        x.addOrderRule("Sales Value", true);
+
+        // Color the sales bars to be highly transparent
+        myChart.assignColor("Sales", "#222222", "#000000", 0.1);
+        
+        // Add the bars mapped to the second y axis
+        myChart.addSeries("Sales", dimple.plot.bar, [x, y2]);
+        
+        // Add series for minimum, average and maximum price
+        var min = myChart.addSeries("Min", dimple.plot.bubble, [x, y1]);
+        min.aggregate = dimple.aggregateMethod.min;
+        var avg = myChart.addSeries("Avg", dimple.plot.bubble, [x, y1]);
+        avg.aggregate = dimple.aggregateMethod.avg;
+        var max = myChart.addSeries("Max", dimple.plot.bubble, [x, y1]);
+        max.aggregate = dimple.aggregateMethod.max;
+        
+        // Animate the chart for every date value, any dimension can be passed
+        // here and dimple will animate over its values.
+        myChart.setStoryboard("Date");
+        
+        myChart.draw();
+      });
+  </script>
+</div>

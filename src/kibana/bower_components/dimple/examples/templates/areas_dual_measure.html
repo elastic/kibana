@@ -1,0 +1,17 @@
+<div id="chartContainer">
+  {scriptDependencies}
+  <script type="text/javascript">
+    var svg = dimple.newSvg("#chartContainer", 590, 400);
+    d3.tsv("/data/example_data.tsv", function (data) {
+      var myChart = new dimple.chart(svg, data);
+      myChart.setBounds(50, 40, 500, 310)
+      var x = myChart.addMeasureAxis("x", "Distribution");
+      var y = myChart.addMeasureAxis("y", "Price");
+      var s = myChart.addSeries(["SKU", "Price Tier"], dimple.plot.area);
+      s.aggregate = dimple.aggregateMethod.avg;
+      s.lineMarkers = true;
+      myChart.addLegend(30, 10, 500, 35, "right");
+      myChart.draw();
+    });
+  </script>
+</div>

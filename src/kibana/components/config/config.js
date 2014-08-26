@@ -3,7 +3,7 @@ define(function (require) {
     'kibana/notify'
   ]);
 
-  var configFile = require('config_file');
+  var configFile = JSON.parse(require('text!config'));
   // allow the rest of the app to get the configFile easily
   module.constant('configFile', configFile);
 

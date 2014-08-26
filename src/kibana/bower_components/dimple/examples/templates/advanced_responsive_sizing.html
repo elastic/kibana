@@ -1,0 +1,80 @@
+<div id="chartContainer" style="height: 100%">
+    {scriptDependencies}
+    <script type="text/javascript">
+        // In version 1.1.0 it's possible to initialise any size parameter with a
+        // % value as well as pixels
+        var svg = dimple.newSvg("#chartContainer", "100%", "100%");
+
+        // Decide whether to draw the button or the graph
+        if (window.opener !== null && window.opener !== undefined) {
+
+            // Set up a standard chart
+            var myChart;
+            d3.tsv("/data/example_data.tsv", function (data) {
+                myChart = new dimple.chart(svg, data);
+
+                // Fix the margins
+                myChart.setMargins("60px", "30px", "110px", "70px");
+
+                // Continue to set up a standard chart
+                myChart.addCategoryAxis("x", "Month").addOrderRule("Date");
+                myChart.addMeasureAxis("y", "Unit Sales");
+                myChart.addSeries("Channel", dimple.plot.bar);
+                // Set the legend using negative values to set the co-ordinate from the right
+                myChart.addLegend("-100px", "30px", "100px", "-70px");
+                myChart.draw();
+            });
+            // Add a method to draw the chart on resize of the window
+            window.onresize = function () {
+                // As of 1.1.0 the second parameter here allows you to draw
+                // without reprocessing data.  This saves a lot on performance
+                // when you know the data won't have changed.
+                myChart.draw(0, true);
+            };
+
+        } else {
+
+            // Use d3 for the button, there are many simpler ways to add a
+            // button to a form but as we have the library loaded - and we
+            // love d3 - we may as well use it. Ignore the code from this
+            // point on unless you want to learn a way of making buttons in d3
+            var height = 60, width = 180, color = new dimple.color("#B3DE69");
+
+            svg.append("rect")
+                    .attr("x", dimple._parentWidth(svg.node()) / 2 - width / 2)
+                    .attr("y", dimple._parentHeight(svg.node()) / 2 - height / 2)
+                    .attr("rx", 15).attr("ry", 15)
+                    .attr("width", width).attr("height", height)
+                    .style("fill", color.fill).style("stroke", color.stroke);
+
+            svg.selectAll("title_text")
+                    .data(["Click Here To", "To Open Resizable Popup"])
+                    .enter().append("text")
+                    .attr("x", dimple._parentWidth(svg.node()) / 2)
+                    .attr("y", function (d, i) {
+                        return dimple._parentHeight(svg.node()) / 2 - 5 + i * 18;
+                    })
+                    .style("text-anchor", "middle")
+                    .style("font-family", "sans-serif")
+                    .style("font-size", "12px").style("opacity", 0.7)
+                    .text(function (d) { return d; });
+
+            svg.selectAll("text,rect")
+                    .on("mouseenter", function () {
+                        svg.selectAll("rect").style("fill", color.stroke)
+                    })
+                    .on("mouseleave", function () {
+                        svg.selectAll("rect").style("fill", color.fill)
+                    })
+                    .style("cursor", "pointer")
+                    .on("click", function () {
+                        var w = window.open(
+                                '/examples/advanced_responsive_sizing.html',
+                                'Resize Window To See Chart Resizing',
+                                        'width=640px,height=480px,resizable=1,' +
+                                        'toolbar=0,menubar=0,scrollbars=0');
+                    });
+        }
+
+    </script>
+</div>

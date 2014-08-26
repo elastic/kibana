@@ -1,0 +1,13 @@
+{
+  "name": "angular-elastic",
+  "version": "2.3.6",
+  "main": "elastic.js",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components"
+  ],
+  "dependencies": {
+    "angular": ">=1.0.6"
+  }
+}

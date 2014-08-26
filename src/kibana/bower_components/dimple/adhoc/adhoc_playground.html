@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <script src="/lib/d3.v3.4.8.min.js"></script>
+    <script src="/tmp/dimple.js"></script>
+</head>
+<body>
+<div id="chartContainer">
+    <script type="text/javascript">
+        var svg = dimple.newSvg("#chartContainer", 590, 400);
+        d3.tsv("/data/example_data.tsv", function (data) {
+            data = dimple.filterData(data, "Owner", ["Aperture", "Black Mesa"])
+            var myChart = new dimple.chart(svg, data);
+            myChart.setBounds(60, 30, 505, 305);
+            var x = myChart.addCategoryAxis("x", "Month");
+            x.addOrderRule("Date");
+            myChart.addMeasureAxis("y", "Unit Sales");
+            var s = myChart.addSeries(null, dimple.plot.area);
+            myChart.draw();
+        });
+    </script>
+</div>
+</body>
+</html>

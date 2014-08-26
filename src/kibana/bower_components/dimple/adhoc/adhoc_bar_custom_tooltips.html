@@ -1,0 +1,22 @@
+<div id="chartContainer">
+    <script src="/lib/d3.v3.4.8.min.js"></script>
+    <script src="/dist/dimple.v2.0.0.js"></script>
+    <script type="text/javascript">
+        var svg = dimple.newSvg("#chartContainer", 590, 400);
+        d3.tsv("/data/example_data.tsv", function (data) {
+            var myChart = new dimple.chart(svg, data);
+            myChart.setBounds(75, 30, 480, 330)
+            myChart.addMeasureAxis("x", "Unit Sales");
+            myChart.addCategoryAxis("y", "Brand");
+            var mySeries = myChart.addSeries("Channel", dimple.plot.bar);
+            mySeries.getTooltipText = function (e) {
+                return [
+                    "Hey you hovered over " + e.aggField[0] + "!",
+                    "Each element in the array becomes a new line."
+                ];
+            };
+            myChart.addLegend(60, 10, 510, 20, "right");
+            myChart.draw();
+        });
+    </script>
+</div>

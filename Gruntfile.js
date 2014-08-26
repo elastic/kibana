@@ -14,7 +14,7 @@ module.exports = function (grunt) {
 
     unitTestDir: __dirname + '/test/unit',
     testUtilsDir: __dirname + '/test/utils',
-    bowerComponentsDir: __dirname + '/src/bower_components',
+    bowerComponentsDir: __dirname + '/src/kibana/bower_components',
 
     meta: {
       banner: '/*! <%= package.name %> - v<%= package.version %> - ' +

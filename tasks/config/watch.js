@@ -25,6 +25,19 @@ module.exports = function (grunt) {
         '<%= testUtilsDir %>/istanbul_reporter/report.clientside.jade'
       ],
       tasks: ['jade:clientside']
+    },
+    kibana_server: {
+      options: {
+        spawn: false
+      },
+      files: [
+        'src/server/**/*.rb',
+        'src/server/**/*.yml'
+        ],
+      tasks: [
+        'stop:kibana_server',
+        'run:kibana_server'
+        ]
     }
   };
 

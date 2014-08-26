@@ -1,0 +1,22 @@
+<div id="chartContainer">
+  <script src="/lib/d3.v3.4.8.min.js"></script>
+  <script src="/dist/dimple.v2.0.0.js"></script>
+  <script type="text/javascript">
+    var svg = dimple.newSvg("#chartContainer", 590, 400);
+    d3.tsv("/data/example_data.tsv", function (data) {
+      var myChart = new dimple.chart(svg, data);
+      myChart.setBounds(60, 50, 480, 280);
+      var priceTierAxis = myChart.addCategoryAxis("x", "Price Tier");
+      var monthAxis = myChart.addCategoryAxis(priceTierAxis, "Month");
+      monthAxis.addOrderRule("Date");
+      var packTypeAxis = myChart.addCategoryAxis(priceTierAxis, "Pack Type");
+      var volumeAxis = myChart.addPctAxis("y", "Unit Sales");
+      myChart.addSeries("Owner",  dimple.plot.bar, [priceTierAxis, volumeAxis]);
+      myChart.addSeries("Owner",  dimple.plot.area, [monthAxis, volumeAxis]);
+      myChart.addSeries("Owner",  dimple.plot.bar, [packTypeAxis, volumeAxis]);
+      myChart.addLegend(200, 10, 380, 20, "right");
+      priceTierAxis.title = null;
+      myChart.draw();
+    });
+  </script>
+</div>

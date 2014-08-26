@@ -1,0 +1,20 @@
+<div id="chartContainer">
+  <script src="/lib/d3.v3.4.8.min.js"></script>
+  <script src="/dist/dimple.v2.0.0.js"></script>
+  <script type="text/javascript">
+    var svg = dimple.newSvg("#chartContainer", 590, 400);
+    d3.tsv("/data/example_data.tsv", function (data) {
+      var myChart = new dimple.chart(svg, data);
+      myChart.setBounds(60, 50, 480, 280);
+      var monthAxis = myChart.addCategoryAxis("x", "Month");
+      monthAxis.addOrderRule("Date");
+      var volumeAxis = myChart.addMeasureAxis("y", "Unit Sales");
+      var profitAxis = myChart.addMeasureAxis(volumeAxis, "Operating Profit");
+      myChart.addSeries("Quantity",  dimple.plot.line, [monthAxis, volumeAxis]);
+      myChart.addSeries("Op. Profit",  dimple.plot.line, [monthAxis, profitAxis]);
+      myChart.addLegend(200, 10, 380, 20, "right");
+      volumeAxis.title = "£";
+      myChart.draw();
+    });
+  </script>
+</div>

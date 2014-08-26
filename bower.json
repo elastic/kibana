@@ -47,5 +47,8 @@
     "requirejs": "~2.1.10",
     "requirejs-text": "~2.0.10"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "resolutions": {
+    "angular": ">=1.0.6"
+  }
 }

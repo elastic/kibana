@@ -1,0 +1,74 @@
+<!----------------------------------------------------------------->
+<!-- AUTOMATICALLY GENERATED CODE - PLEASE EDIT TEMPLATE INSTEAD -->
+<!----------------------------------------------------------------->
+<div id="chartContainer">
+  <script src="/lib/d3.v3.4.8.js"></script>
+  <script src="/dist/dimple.v2.1.0.js"></script>
+  <script type="text/javascript">
+    var svg = dimple.newSvg("#chartContainer", 590, 400);
+    var data = [
+      { "F":0, "Seg":"G", "BarX":"L", "BarY":60, "BubX":16, "BubY":70 },
+      { "F":0, "Seg":"P", "BarX":"L", "BarY":20, "BubX":0, "BubY":0 },
+      { "F":0, "Seg":"G", "BarX":"R", "BarY":30, "BubX":0, "BubY":0 },
+      { "F":0, "Seg":"P", "BarX":"R", "BarY":20, "BubX":0, "BubY":0 },
+      { "F":1, "Seg":"G", "BarX":"L", "BarY":40, "BubX":44, "BubY":70 },
+      { "F":1, "Seg":"P", "BarX":"L", "BarY":20, "BubX":0, "BubY":0 },
+      { "F":1, "Seg":"G", "BarX":"R", "BarY":60, "BubX":0, "BubY":0 },
+      { "F":1, "Seg":"P", "BarX":"R", "BarY":20, "BubX":0, "BubY":0 },
+      { "F":2, "Seg":"G", "BarX":"L", "BarY":60, "BubX":16, "BubY":70 },
+      { "F":2, "Seg":"P", "BarX":"L", "BarY":20, "BubX":0, "BubY":0 },
+      { "F":2, "Seg":"G", "BarX":"R", "BarY":10, "BubX":0, "BubY":0 },
+      { "F":2, "Seg":"P", "BarX":"R", "BarY":20, "BubX":0, "BubY":0 },
+      { "F":3, "Seg":"G", "BarX":"L", "BarY":30, "BubX":44, "BubY":10 },
+      { "F":3, "Seg":"P", "BarX":"L", "BarY":20, "BubX":0, "BubY":0 },
+      { "F":3, "Seg":"G", "BarX":"R", "BarY":0, "BubX":0, "BubY":0 },
+      { "F":3, "Seg":"P", "BarX":"R", "BarY":20, "BubX":0, "BubY":0 },
+      { "F":4, "Seg":"G", "BarX":"L", "BarY":0, "BubX":16, "BubY":10 },
+      { "F":4, "Seg":"P", "BarX":"L", "BarY":20, "BubX":0, "BubY":0 },
+      { "F":4, "Seg":"G", "BarX":"R", "BarY":30, "BubX":0, "BubY":0 },
+      { "F":4, "Seg":"P", "BarX":"R", "BarY":20, "BubX":0, "BubY":0 },
+      { "F":5, "Seg":"G", "BarX":"L", "BarY":30, "BubX":44, "BubY":50 },
+      { "F":5, "Seg":"P", "BarX":"L", "BarY":20, "BubX":0, "BubY":0 },
+      { "F":5, "Seg":"G", "BarX":"R", "BarY":40, "BubX":0, "BubY":0 },
+      { "F":5, "Seg":"P", "BarX":"R", "BarY":20, "BubX":0, "BubY":0 }
+    ];        
+    
+    // Create the chart
+    var myChart = new dimple.chart(svg, data);
+    myChart.setBounds(20, 20, 550, 300)
+    
+    myChart.assignColor("G", "#FFF", "#FFF", 0);
+    myChart.assignColor("P", "#888", "#888", 1);
+    myChart.assignColor("Ball", "#888", "#888", 1);
+
+    var barX = myChart.addCategoryAxis("x", "BarX");
+    barX.hidden = true;
+    
+    var barY = myChart.addMeasureAxis("y", "BarY");
+    barY.overrideMax = 100;
+    barY.hidden = true;
+    
+    var bubX = myChart.addMeasureAxis("x", "BubX");
+    bubX.overrideMax = 60;
+    bubX.hidden = true;
+    
+    var bubY = myChart.addMeasureAxis("y", "BubY");
+    bubY.overrideMax = 100;
+    bubY.hidden = true;
+        
+    var paddles = myChart.addSeries("Seg", dimple.plot.bar, [barX, barY]);
+    paddles.barGap = 0.99;
+    
+    var ball = myChart.addSeries("Ball", dimple.plot.bubble, [bubX, bubY]);
+    
+    // Animate the chart for every date value, any dimension can be passed
+    // here and dimple will animate over its values.
+    var sb = myChart.setStoryboard("F");
+    sb.frameDuration = 600;
+        
+    myChart.draw();
+    
+    sb.storyLabel.remove();
+        
+  </script>
+</div>

@@ -1,0 +1,20 @@
+<div id="chartContainer">
+  {scriptDependencies}
+  <script type="text/javascript">
+    var svg = dimple.newSvg("#chartContainer", 590, 400);
+      d3.tsv("/data/example_data.tsv", function (data) {
+        data = dimple.filterData(data, "Date", [
+          "01/07/2012", "01/08/2012", "01/09/2012",
+          "01/10/2012", "01/11/2012", "01/12/2012"]);
+        var myChart = new dimple.chart(svg, data);
+        myChart.setBounds(60, 30, 500, 330)
+        var x = myChart.addCategoryAxis("x", "Month");
+        x.addOrderRule("Date");
+        myChart.addMeasureAxis("y", "Unit Sales");
+        myChart.addMeasureAxis("z", "Operating Profit");
+        myChart.addSeries("Channel", dimple.plot.bubble);
+        myChart.addLegend(140, 10, 360, 20, "right");
+        myChart.draw();
+      });
+  </script>
+</div>

@@ -1,0 +1,37 @@
+<!----------------------------------------------------------------->
+<!-- AUTOMATICALLY GENERATED CODE - PLEASE EDIT TEMPLATE INSTEAD -->
+<!----------------------------------------------------------------->
+<div id="chartContainer">
+  <script src="/lib/d3.v3.4.8.js"></script>
+  <script src="/dist/dimple.v2.1.0.js"></script>
+  <script type="text/javascript">
+    var svg = dimple.newSvg("#chartContainer", 590, 400);
+    d3.tsv("/data/example_data.tsv", function (data) {
+
+      // Filter for a single SKU and Channel
+      data = dimple.filterData(data, "SKU", "Theta 18 Pack Standard");
+      data = dimple.filterData(data, "Channel", "Hypermarkets");
+
+      // Create and Position a Chart
+      var myChart = new dimple.chart(svg, data);
+      myChart.setBounds(60, 30, 500, 300);
+      var x = myChart.addCategoryAxis("x", "Month")
+      myChart.addMeasureAxis("y", "Unit Sales");
+
+      // Order the x axis by date
+      x.addOrderRule("Date");
+
+      // Min price will be green, middle price yellow and max red
+      myChart.addColorAxis("Price", ["green", "yellow", "red"]);
+
+      // Add a thick line with markers
+      var lines = myChart.addSeries(null, dimple.plot.line); 
+      lines.lineWeight = 5;
+      lines.lineMarkers = true;
+
+      // Draw the chart
+      myChart.draw();
+
+    });
+  </script>
+</div>

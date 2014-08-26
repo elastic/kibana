@@ -1,0 +1,32 @@
+{
+  "name": "angular-elastic",
+  "version": "2.3.6",
+  "description": "Elastic (autosize) textareas for AngularJS, without jQuery dependency.",
+  "keywords": [
+    "angular",
+    "angularjs",
+    "textarea",
+    "elastic",
+    "autosize"
+  ],
+  "homepage": "http://monospaced.github.io/angular-elastic/",
+  "main": "elastic",
+  "bugs": "http://github.com/monospaced/angular-elastic/issues",
+  "license" : "MIT",
+  "repository" : {
+    "type" : "git",
+    "url" : "http://github.com/monospaced/angular-elastic"
+  },
+  "author": {
+    "name" : "Scott Boyle",
+    "email" : "scott@monospaced.com",
+    "url" : "http://scottboyle.co.uk/about"
+  },
+  "files": [
+    "elastic.js",
+    "package.json"
+  ],
+  "dependencies": {
+    "angular": ">=1.0.6"
+  }
+}
