@@ -18,7 +18,6 @@ define(function () {
       yaxis.append('div')
         .attr('class', 'y-axis-spacer-block');
 
-
       // 2. Append vis column
       var chart = vis.append('div')
         .attr('class', 'vis-col-wrapper');
@@ -34,11 +33,9 @@ define(function () {
       xAxisWrapper.append('div')
         .attr('class', 'x-axis-title');
 
-
       // 3. Legend div
       var legend = vis.append('div')
         .attr('class', 'legend-col-wrapper');
-
 
       // 4. Tooltip
       var tooltip = vis.append('div')

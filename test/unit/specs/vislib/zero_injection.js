@@ -11,91 +11,40 @@ define(function (require) {
   angular.module('ZeroFilledArrayUtilService', ['kibana']);
 
   describe('Vislib Zero Injection Module Test Suite', function () {
-    var data1 = {
+    var seriesData = {
       series: [
         {
           label: '200',
           values: [
-            {
-              x: 'value1',
-              y: 234
-            },
-            {
-              x: 'value2',
-              y: 34
-            },
-            {
-              x: 'value3',
-              y: 834
-            },
-            {
-              x: 'value4',
-              y: 1234
-            },
-            {
-              x: 'value5',
-              y: 4
-            }
+            {x: 'v1', y: 234}, {x: 'v2', y: 34}, {x: 'v3', y: 834}, {x: 'v4', y: 1234}, {x: 'v5', y: 4}
           ]
         }
       ]
     };
 
-    var data2 = {
+    var multiSeriesData = {
       series: [
         {
           label: '200',
           values: [
-            {
-              x: 1,
-              y: 234
-            },
-            {
-              x: 2,
-              y: 34
-            },
-            {
-              x: 3,
-              y: 834
-            },
-            {
-              x: 4,
-              y: 1234
-            },
-            {
-              x: 5,
-              y: 4
-            }
+            {x: '1', y: 234}, {x: '2', y: 34}, {x: '3', y: 834}, {x: '4', y: 1234}, {x: '5', y: 4}
           ]
         },
         {
           label: '404',
           values: [
-            {
-              x: 4,
-              y: 1234
-            },
-            {
-              x: 1,
-              y: 234
-            },
-            {
-              x: 2,
-              y: 34
-            }
+            {x: '1', y: 1234}, {x: '3', y: 234}, {x: '5', y: 34}
           ]
         },
         {
           label: '503',
           values: [
-            {
-              x: 3,
-              y: 834
-            }
+            {x: '3', y: 834}
           ]
         }
       ]
     };
+
     var ordered = {};
 
     describe('Zero Injection (main)', function () {
@@ -110,8 +59,8 @@ define(function (require) {
       beforeEach(function () {
         inject(function (Private) {
           injectZeros = Private(require('components/vislib/components/_functions/zero_injection/inject_zeros'));
-          sample1 = injectZeros(data1.series, false);
-          sample2 = injectZeros(data2.series, ordered);
+          sample1 = injectZeros(seriesData);
+          sample2 = injectZeros(multiSeriesData);
         });
       });
 
@@ -119,40 +68,38 @@ define(function (require) {
         expect(_.isFunction(injectZeros)).to.be(true);
       });
 
-      it('should return an array of objects', function () {
-        expect(_.isArray(sample1)).to.be(true);
-        expect(_.isObject(sample1[0])).to.be(true);
+      it('should return an object with series[0].values"', function () {
+        expect(_.isObject(sample1)).to.be(true);
+        expect(_.isObject(sample1.series[0].values)).to.be(true);
       });
 
       it('should return the same array of objects when the length of the series array is 1', function () {
-        expect(sample1[0].values[0].x).to.be(data1.series[0].values[0].x);
-        expect(sample1[0].values[1].x).to.be(data1.series[0].values[1].x);
-        expect(sample1[0].values[2].x).to.be(data1.series[0].values[2].x);
-        expect(sample1[0].values[3].x).to.be(data1.series[0].values[3].x);
-        expect(sample1[0].values[4].x).to.be(data1.series[0].values[4].x);
+        expect(sample1.series[0].values[0].x).to.be(seriesData.series[0].values[0].x);
+        expect(sample1.series[0].values[1].x).to.be(seriesData.series[0].values[1].x);
+        expect(sample1.series[0].values[2].x).to.be(seriesData.series[0].values[2].x);
+        expect(sample1.series[0].values[3].x).to.be(seriesData.series[0].values[3].x);
+        expect(sample1.series[0].values[4].x).to.be(seriesData.series[0].values[4].x);
       });
 
       it('should inject zeros in the input array', function () {
-        expect(sample2[1].values[2].y).to.be(0);
-        expect(sample2[1].values[4].y).to.be(0);
-        expect(sample2[2].values[0].y).to.be(0);
-        expect(sample2[2].values[1].y).to.be(0);
-        expect(sample2[2].values[3].y).to.be(0);
-        expect(sample2[2].values[4].y).to.be(0);
+        expect(sample2.series[1].values[1].y).to.be(0);
+        expect(sample2.series[2].values[0].y).to.be(0);
+        expect(sample2.series[2].values[1].y).to.be(0);
+        expect(sample2.series[2].values[4].y).to.be(0);
       });
 
       it('should return values arrays with the same x values', function () {
-        expect(sample2[1].values[0].x).to.be(sample2[2].values[0].x);
-        expect(sample2[1].values[1].x).to.be(sample2[2].values[1].x);
-        expect(sample2[1].values[2].x).to.be(sample2[2].values[2].x);
-        expect(sample2[1].values[3].x).to.be(sample2[2].values[3].x);
-        expect(sample2[1].values[4].x).to.be(sample2[2].values[4].x);
+        expect(sample2.series[1].values[0].x).to.be(sample2.series[2].values[0].x);
+        expect(sample2.series[1].values[1].x).to.be(sample2.series[2].values[1].x);
+        expect(sample2.series[1].values[2].x).to.be(sample2.series[2].values[2].x);
+        expect(sample2.series[1].values[3].x).to.be(sample2.series[2].values[3].x);
+        expect(sample2.series[1].values[4].x).to.be(sample2.series[2].values[4].x);
       });
 
       it('should return values arrays of the same length', function () {
-        expect(sample2[0].values.length).to.be(sample2[1].values.length);
-        expect(sample2[0].values.length).to.be(sample2[2].values.length);
-        expect(sample2[1].values.length).to.be(sample2[2].values.length);
+        expect(sample2.series[0].values.length).to.be(sample2.series[1].values.length);
+        expect(sample2.series[0].values.length).to.be(sample2.series[2].values.length);
+        expect(sample2.series[1].values.length).to.be(sample2.series[2].values.length);
       });
     });
 
@@ -167,7 +114,7 @@ define(function (require) {
       beforeEach(function () {
         inject(function (Private) {
           orderXValues = Private(require('components/vislib/components/_functions/zero_injection/ordered_x_keys'));
-          results = orderXValues(data2.series);
+          results = orderXValues(multiSeriesData);
         });
       });
 
@@ -199,7 +146,7 @@ define(function (require) {
       beforeEach(function () {
         inject(function (Private) {
           uniqueKeys = Private(require('components/vislib/components/_functions/zero_injection/uniq_keys'));
-          results = uniqueKeys(data2.series);
+          results = uniqueKeys(multiSeriesData.series);
         });
       });
 
@@ -262,7 +209,7 @@ define(function (require) {
       beforeEach(function () {
         inject(function (Private) {
           flattenData = Private(require('components/vislib/components/_functions/zero_injection/flatten_data'));
-          results = flattenData(data2.series);
+          results = flattenData(multiSeriesData);
         });
       });
 
@@ -345,7 +292,7 @@ define(function (require) {
       var xValueArr = [1, 2, 3, 4, 5];
       var createZeroArray;
       var arr1;
-      var arr2 = data2.series[2].values;
+      var arr2 = multiSeriesData.series[2].values;
       var results;
 
       beforeEach(function () {
@@ -379,7 +326,7 @@ define(function (require) {
       it('should return an array with zeros injected in the appropriate objects as y values', function () {
         expect(results[0].y).to.be(0);
         expect(results[1].y).to.be(0);
-        expect(results[3].y).to.be(0);
+        expect(results[2].y).to.be(0);
         expect(results[4].y).to.be(0);
       });
     });

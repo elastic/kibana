@@ -204,13 +204,13 @@ define(function (require) {
             });
 
           // chart base line
-//        var line = svg.append('line')
-//          .attr('x1', 0)
-//          .attr('y1', height)
-//          .attr('x2', width)
-//          .attr('y2', height)
-//          .style('stroke', '#848e96')
-//          .style('stroke-width', 1);
+          var line = svg.append('line')
+          .attr('x1', 0)
+          .attr('y1', height)
+          .attr('x2', width)
+          .attr('y2', height)
+          .style('stroke', '#ddd')
+          .style('stroke-width', 1);
 
           // Add tooltip
           if (isTooltip) {

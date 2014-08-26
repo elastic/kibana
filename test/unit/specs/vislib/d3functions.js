@@ -6,7 +6,7 @@ define(function (require) {
 
   describe('Vislib d3 Functions Test Suite', function () {
 
-    describe('Test Append Elem Function', function () {
+    describe('Append Elem Function', function () {
       var appendElem;
       var fixture;
       var fixture1;
