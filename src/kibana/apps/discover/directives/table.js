@@ -5,7 +5,6 @@ define(function (require) {
   var moment = require('moment');
 
   var _ = require('lodash');
-  var nextTick = require('utils/next_tick');
   var $ = require('jquery');
 
   require('directives/truncated');
@@ -60,6 +59,8 @@ define(function (require) {
     };
   });
 
+
+
   /**
    * kbnTable directive
    *
@@ -69,18 +70,7 @@ define(function (require) {
    * <kbn-table columns="columnsToDisplay" rows="rowsToDisplay"></kbn-table>
    * ```
    */
-  module.directive('kbnTable', function ($compile, config) {
-    // base class for all dom nodes
-    var DOMNode = window.Node;
-
-    function scheduleNextRenderTick(cb) {
-      if (typeof window.requestAnimationFrame === 'function') {
-        window.requestAnimationFrame(cb);
-      } else {
-        nextTick(cb);
-      }
-    }
-
+  module.directive('kbnTable', function (config) {
     return {
       restrict: 'E',
       template: html,
@@ -91,152 +81,64 @@ define(function (require) {
         sorting: '=',
         filtering: '=',
         refresh: '=',
-        maxLength: '=?',
+        maxLength: '=',
         mapping: '=',
         timefield: '=?'
       },
+      link: function ($scope, element) {
+        $scope.limit = 50;
+        $scope.addRows = function () {
+          if ($scope.limit < config.get('discover:sampleSize')) {
+            $scope.limit = $scope.limit + 50;
+          }
+        };
+      }
+    };
+  });
+
+
+  /**
+   * kbnTableRow directive
+   *
+   * Display a row in the table
+   * ```
+   * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
+   * ```
+   */
+  module.directive('kbnTableRow', function ($compile, config) {
+    // base class for all dom nodes
+    var DOMNode = window.Node;
+
+    return {
+      restrict: 'A',
+      scope: {
+        fields: '=',
+        columns: '=',
+        filtering: '=',
+        mapping: '=',
+        maxLength: '=',
+        timefield: '=?',
+        row: '=kbnTableRow'
+      },
       link: function ($scope, element, attrs) {
+        element.after('<tr>');
+
+        var init = function () {
+          createSummaryRow($scope.row, $scope.row._id);
+        };
+
         // track a list of id's that are currently open, so that
         // render can easily render in the same current state
         var opened = [];
 
         // whenever we compile, we should create a child scope that we can then detroy
-        var childScopes = {};
-        var childScopeFor = function (id) {
-          if (childScopes[id]) return childScopes[id];
-
-          var $child = $scope.$new();
-          childScopes[id] = $child;
-          return $child;
-        };
-        var clearChildScopeFor = function (id) {
-          if (childScopes[id]) {
-            childScopes[id].$destroy();
-            delete childScopes[id];
-          }
-        };
-
-        // the current position in the list of rows
-        var cursor = 0;
-
-        // the page size to load rows (out of the rows array, load 50 at a time)
-        var pageSize = 50;
-
-        // rendering an entire page while the page is scrolling can cause a good
-        // bit of jank, lets only render a certain amount per "tick"
-        var rowsPerTick;
+        var $child;
 
         // set the maxLength for summaries
         if ($scope.maxLength === void 0) {
           $scope.maxLength = 250;
         }
 
-        // rerender when either is changed
-        $scope.$watch('rows', render);
-        $scope.$watchCollection('columns', render);
-        $scope.$watch('maxLength', render);
-
-        // the body of the table
-        var $body = element.find('tbody');
-
-        // itterate the columns and rows, rebuild the table's html
-        function render() {
-          // Close all rows
-          opened = [];
-
-          // Clear the body
-          $body.empty();
-
-          // destroy all child scopes
-          Object.keys(childScopes).forEach(clearChildScopeFor);
-
-          if (!$scope.rows || $scope.rows.length === 0) return;
-          if (!$scope.columns || $scope.columns.length === 0) return;
-          cursor = 0;
-          addRows();
-          $scope.addRows = addRows;
-        }
-
-        var renderRows = (function () {
-          // basic buffer that will be pulled from when we are adding rows.
-          var queue = [];
-          var rendering = false;
-
-          return function renderRows(rows) {
-            // overwrite the queue, don't keep old rows
-            queue = rows.slice(0);
-            if (!rendering) {
-              onTick();
-            }
-          };
-
-          function forEachRow(row, i, currentChunk) {
-            var id = rowId(row);
-            var $summary = createSummaryRow(row, id);
-            var $details = $('<tr></tr>');
-            // cursor is the end of current selection, so
-            // subtract the remaining queue size, then the
-            // size of this chunk, and add the current i
-            var currentPosition = cursor - queue.length - currentChunk.length + i;
-            if (currentPosition % 2) {
-              $summary.addClass('even');
-              //$details.addClass('even');
-            }
-
-            $body.append([
-              $summary,
-              $details
-            ]);
-          }
-
-          function onTick() {
-            // ensure that the rendering flag is set
-            rendering = true;
-            var performance = window.performance;
-            var timing;
-
-            if (
-              rowsPerTick === void 0
-              && window.performance
-              && typeof window.performance.now === 'function'
-            ) {
-              timing = performance.now();
-              rowsPerTick = 30;
-            }
-
-            queue
-              // grab the first n from the buffer
-              .splice(0, rowsPerTick || queue.length)
-              // render each row
-              .forEach(forEachRow);
-
-            if (timing) {
-              // we know we have performance.now, because timing was set
-              var time = performance.now() - timing;
-              var rowsRendered = rowsPerTick;
-              var msPerRow = time / rowsPerTick;
-              // aim to fit the rendering into 5 milliseconds
-              rowsPerTick = Math.ceil(15 / msPerRow);
-              console.log('completed render of %d rows in %d milliseconds. rowsPerTick set to %d', rowsRendered, time, rowsPerTick);
-            }
-
-            if (queue.length) {
-              // the queue is not empty, draw again next tick
-              scheduleNextRenderTick(onTick);
-            } else {
-              // unset the rendering flag
-              rendering = false;
-            }
-          }
-        }());
-
-        function addRows() {
-          if (cursor > $scope.rows.length) {
-            $scope.addRows = null;
-          }
-
-          renderRows($scope.rows.slice(cursor, cursor += pageSize));
-        }
 
         // for now, rows are "tracked" by their index, but this could eventually
         // be configured so that changing the order of the rows won't prevent
@@ -252,14 +154,10 @@ define(function (require) {
         }
 
         // toggle display of the rows details, a full list of the fields from each row
-        $scope.toggleRow = function (id, event) {
-          var row = rowForId(id);
+        $scope.toggleRow = function (row, event) {
+          var id = row._id;
 
-          if (~opened.indexOf(id)) {
-            _.pull(opened, id);
-          } else {
-            opened.push(id);
-          }
+          $scope.open = !$scope.open;
 
           var $tr = $(event.delegateTarget.parentElement);
           var $detailsTr = $tr.next();
@@ -268,21 +166,21 @@ define(function (require) {
           // add/remove $details children
           ///
 
-          var open = !!~opened.indexOf(id);
-          $detailsTr.toggle(open);
+          $detailsTr.toggle($scope.open);
 
           // Change the caret icon
           var $toggleIcon = $($(event.delegateTarget).children('i')[0]);
           $toggleIcon.toggleClass('fa-caret-down');
           $toggleIcon.toggleClass('fa-caret-right');
 
-          if (!open) {
+          if (!$scope.open) {
             // close the child scope if it exists
-            clearChildScopeFor(id);
+            $child.$destroy();
             // no need to go any further
             return;
+          } else {
+            $child = $scope.$new();
           }
-
 
           // The fields to loop over
           row._fields = row._fields || _.keys(row._source).concat(config.get('metaFields')).sort();
@@ -301,7 +199,7 @@ define(function (require) {
             return _.contains(validTypes, mapping.type);
           };
 
-          var $childScope = _.assign(childScopeFor(id), { row: row, showFilters: showFilters });
+          var $childScope = _.assign($child, { row: row, showFilters: showFilters });
           $compile($detailsTr)($childScope);
         };
 
@@ -311,28 +209,25 @@ define(function (require) {
 
         // create a tr element that lists the value for each *column*
         function createSummaryRow(row, id) {
-          var $tr = $('<tr>');
 
           var expandTd = $('<td>').html('<i class="fa fa-caret-right"></span>')
-            .attr('ng-click', 'toggleRow(' + JSON.stringify(id) + ', $event)');
+            .attr('ng-click', 'toggleRow(row, $event)');
           $compile(expandTd)($scope);
-          $tr.append(expandTd);
+          element.append(expandTd);
 
           var td = $(document.createElement('td'));
           if ($scope.timefield) {
             td.addClass('discover-table-timefield');
             td.attr('width', '1%');
             _displayField(td, row, $scope.timefield);
-            $tr.append(td);
+            element.append(td);
           }
 
           _.each($scope.columns, function (column) {
             td = $(document.createElement('td'));
             _displayField(td, row, column);
-            $tr.append(td);
+            element.append(td);
           });
-
-          return $tr;
         }
 
         /**
@@ -373,7 +268,7 @@ define(function (require) {
               val = document.createElement('kbn-truncated');
               val.setAttribute('orig', complete);
               val.setAttribute('length', $scope.maxLength);
-              val = $compile(val)(childScopeFor(rowId(row)))[0];// return the actual element
+              val = $compile(val)($scope)[0];// return the actual element
             } else {
               val = val.substring(0, $scope.maxLength) + '...';
             }
@@ -381,6 +276,8 @@ define(function (require) {
 
           return val;
         }
+
+        init();
       }
     };
 
