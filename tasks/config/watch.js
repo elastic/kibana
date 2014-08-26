@@ -27,17 +27,14 @@ module.exports = function (grunt) {
       tasks: ['jade:clientside']
     },
     kibana_server: {
-      options: {
-        spawn: false
-      },
       files: [
         'src/server/**/*.rb',
         'src/server/**/*.yml'
-        ],
+      ],
       tasks: [
         'stop:kibana_server',
         'run:kibana_server'
-        ]
+      ]
     }
   };
 
