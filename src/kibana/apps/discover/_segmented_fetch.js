@@ -161,9 +161,9 @@ define(function (require) {
     segmentedFetch.prototype._executeSearch = function (index, state) {
       var resolve, reject;
 
-      this.searchPromise = new Promise(function (res, rej) {
-        resolve = res;
-        reject = rej;
+      this.searchPromise = new Promise(function () {
+        resolve = arguments[0];
+        reject = arguments[1];
       });
 
       var clientPromise = es.search({
