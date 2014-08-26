@@ -61,7 +61,7 @@ define(function (require) {
           svg.append('g')
             .attr('class', 'y axis')
             //.attr('transform', 'translate(' + width * 0.95 + ',' + self.margin.top + ')')
-            .attr('transform', 'translate(' + width + ',' + margin.top + ')')
+            .attr('transform', 'translate(' + (width - 2) + ',' + margin.top + ')')
             .call(self.yAxis);
 
           // update layout divs to tick lengths

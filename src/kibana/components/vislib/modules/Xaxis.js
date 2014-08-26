@@ -17,6 +17,10 @@ define(function (require) {
       d3.select(this.el).selectAll('.x-axis-div').call(this.appendSVG());
     };
 
+    XAxis.prototype.removeAll = function () {
+      return d3.select(this.el).selectAll('.x-axis-div').selectAll('*').remove();
+    };
+
     XAxis.prototype.getScale = function (ordered) {
       if (ordered && ordered.date) {
         return d3.time.scale();
@@ -89,20 +93,15 @@ define(function (require) {
       var width;
       var height;
       var svg;
-      var bbox;
-      var tickN;
-      var ticksLength;
-      var rotatedTicksLength;
-      var percentage;
 
       this.getXAxis();
 
       // set var for discover view
       if ($('.discover-timechart').length) {
-        self.isDiscover = true;
-        self.isRotated = false;
+        self._attr.isDiscover = true;
+        self._attr.isRotated = false;
       } else {
-        self.isDiscover = false;
+        self._attr.isDiscover = false;
       }
 
       return function (selection) {
@@ -124,31 +123,83 @@ define(function (require) {
             .attr('class', 'x axis')
             .attr('transform', 'translate(' + margin.left + ',0)')
             .call(self.xAxis);
-
-          // get label widths
-          bbox = selection.selectAll('.tick text').node().getBBox();
-          tickN = selection.selectAll('.tick text')[0].length;
-          ticksLength = bbox.width * 1.05 * tickN;
-          
-          // rotate & filter does not apply to discover view
-          if (!self.isDiscover && ticksLength > width) {
-            self.rotateAxisLabels(selection);
-            self.isRotated = true;
-          } else {
-            self.isRotated = false;
-          }
-
-          // filter labels to prevent overlap of rotated labels
-          rotatedTicksLength = bbox.height * 1.05 * tickN;
-          percentage = Math.floor(rotatedTicksLength / width) + 1;
-          if (rotatedTicksLength > width) {
-            self.filterAxisLabels(selection, percentage);
-          }
-
-          // update layout divs to tick lengths
-          // self.updateLayoutForRotatedLabels(div, self.getMaxLabelLength(selection));
         });
+
+        self.checkTickLabels(selection);
+
       };
+    };
+
+    XAxis.prototype.checkTickLabels = function (selection) {
+      
+      var self = this;
+      var margin = this._attr.margin;
+      var div;
+      var width;
+      var height;
+      var labels;
+      var widthArr = [];
+      var heightArr = [];
+      var subtotalW;
+      var subtotalH;
+      var tickN;
+      var maxWidth;
+      var maxHeight;
+      var total;
+      var nth;
+      var rotate = false;
+      self._attr.isRotated = false;
+      
+      selection.each(function () {
+        // select each x axis
+        div = d3.select(this);
+        width = $(this).width() - margin.left - margin.right;
+        height = $(this).height();
+        labels = selection.selectAll('.tick text');
+
+        // total widths for every label from each x axis
+        subtotalW = 0;
+        subtotalH = 0;
+        _.forEach(labels[0], function (n) {
+          subtotalW += n.getBBox().width;
+          subtotalH += n.getBBox().height;
+        });
+
+        widthArr.push(subtotalW);
+        heightArr.push(subtotalH);
+
+        // should rotate if any chart subtotal > width
+        if (subtotalW > width) {
+          rotate = true;
+        }
+      });
+
+      // apply rotate if not discover view
+      if (!self._attr.isDiscover && rotate) {
+        self.rotateAxisLabels(selection);
+        self._attr.isRotated = true;
+      }
+      
+      // filter labels to prevent overlap of text
+      if (self._attr.isRotated) {
+        // if rotated, use label heights
+        maxHeight = _.max(heightArr);
+        total = _.reduce(heightArr, function (sum, n) {
+          return sum + (n * 1.05);
+        });
+        nth = 1 + Math.floor(maxHeight / width);
+      } else {
+        // if not rotated, use label widths
+        maxWidth = _.max(widthArr);
+        total = _.reduce(widthArr, function (sum, n) {
+          return sum + (n * 1.05);
+        });
+        nth = 1 + Math.floor(maxWidth / width);
+      }
+      if (nth > 1) {
+        self.filterAxisLabels(selection, nth);
+      }
+
     };
 
     XAxis.prototype.rotateAxisLabels = function (selection) {
@@ -170,49 +221,49 @@ define(function (require) {
         });
     };
 
-    XAxis.prototype.getMaxLabelLength = function (selection) {
-      var svg = selection.select('svg');
-      var labels = selection.selectAll('.tick text');
-      var param;
-      var arr = [];
-      var length;
-      var spacer;
+    // XAxis.prototype.getMaxLabelLength = function (selection) {
+    //   var svg = selection.select('svg');
+    //   var labels = selection.selectAll('.tick text');
+    //   var param;
+    //   var arr = [];
+    //   var length;
+    //   var spacer;
       
-      // if rotated use width else use height
-      param = 'width';
-      if (!this.isRotated) {
-        param = 'height';
-      }
+    //   // if rotated use width else use height
+    //   param = 'width';
+    //   if (!this.isRotated) {
+    //     param = 'height';
+    //   }
       
-      // get max tick label length
-      _.forEach(labels[0], function (n) {
-        arr.push(n.getBBox()[param]);
-      });
-      return length = _.max(arr);
-    };
+    //   // get max tick label length
+    //   _.forEach(labels[0], function (n) {
+    //     arr.push(n.getBBox()[param]);
+    //   });
+    //   return length = _.max(arr);
+    // };
 
-    XAxis.prototype.updateLayoutForRotatedLabels = function (selection, length) {
-      var svg = selection.select('svg');
-      var spacer;
-      var tickspace = 10;
-      length += tickspace;
-      // if rows, space for chart title
-      // if cols, space for chart title + axis label
-      spacer = length + 18;
-      if (this.data.data.columns) {
-        spacer = length + 32;
-      }
+    // XAxis.prototype.updateLayoutForRotatedLabels = function (selection, length) {
+    //   var svg = selection.select('svg');
+    //   var spacer;
+    //   var tickspace = 10;
+    //   length += tickspace;
+    //   // if rows, space for chart title
+    //   // if cols, space for chart title + axis label
+    //   spacer = length + 18;
+    //   if (this.data.data.columns) {
+    //     spacer = length + 32;
+    //   }
       
-      // set heights of svg, x-axis-div and x-axis-div-wrapper to fit ticklabels
-      svg.attr('height', length);
-      $('.x-axis-div-wrapper').height(length);
-      $('.x-axis-div').height(length);
+    //   // set heights of svg, x-axis-div and x-axis-div-wrapper to fit ticklabels
+    //   svg.attr('height', length);
+    //   $('.x-axis-div-wrapper').height(length);
+    //   $('.x-axis-div').height(length);
 
-      // set heights of y-axis-spacer-block and x-axis-wrapper to fit resized x axis      
-      $('.y-axis-spacer-block').height(spacer);
-      $('.x-axis-wrapper').height(spacer);
+    //   // set heights of y-axis-spacer-block and x-axis-wrapper to fit resized x axis      
+    //   $('.y-axis-spacer-block').height(spacer);
+    //   $('.x-axis-wrapper').height(spacer);
       
-    };
+    // };
 
     return XAxis;
   };
