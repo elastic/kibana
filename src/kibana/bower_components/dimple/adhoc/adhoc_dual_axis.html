@@ -1,0 +1,34 @@
+<div id="chartContainer">
+    <script src="/lib/d3.v3.4.8.min.js"></script>
+    <script src="/dist/dimple.v2.0.2.js"></script>
+    <script type="text/javascript">
+        var svg = dimple.newSvg("#chartContainer", 590, 400);
+        d3.tsv("/data/example_data.tsv", function (data) {
+            var myChart = new dimple.chart(svg, data);
+            myChart.setBounds(60, 50, 460, 280);
+
+            data = [
+                { "Int": 1, "Float": 234, "Text": "XFBGR", "Date": "12/5/99", "Group": "A"},
+                { "Int": 2, "Float": 54.35, "Text": "YTREB", "Date": "1/1/00", "Group": "A"},
+                { "Int": 3, "Float": -453, "Text": "XGFDY", "Date": "2 February 2007", "Group": "B"},
+                { "Int": 4, "Float": 5436546, "Text": "XGFDE", "Date": "2000-03-01", "Group": "B"},
+                { "Int": 5, "Float": 4323, "Text": "YTREB", "Date": "10/10/2000", "Group": "C"},
+                { "Int": 6, "Float": 0, "Text": "GFDHN", "Date": "11/10/2000", "Group": "C"},
+                { "Int": 7, "Float": -453, "Text": "TRET", "Date": "10/9/2000", "Group": "D"},
+                { "Int": 1, "Float": 5436546, "Text": "GFDGFDHG", "Date": "10/10/2000", "Group": "E"}
+            ];
+            var s = dimple._getOrderedList(data, "Int", { ordering : "Text" });
+            console.log(s);
+//
+//
+//            var monthAxis = myChart.addCategoryAxis("x", "Owner");
+//            monthAxis.addOrderRule("Brand");
+//            var volumeAxis = myChart.addMeasureAxis("y", "Unit Sales");
+//            var profitAxis = myChart.addMeasureAxis("y", "Operating Profit");
+//            myChart.addSeries("Quantity",  dimple.plot.line, [monthAxis, volumeAxis]);
+//            myChart.addSeries("Op. Profit",  dimple.plot.line, [monthAxis, profitAxis]);
+//            myChart.addLegend(200, 10, 380, 20, "right");
+//            myChart.draw();
+        });
+    </script>
+</div>

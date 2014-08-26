@@ -1,0 +1,47 @@
+<div id="chartContainer">
+  {scriptDependencies}
+  <script type="text/javascript">
+    var svg = dimple.newSvg("#chartContainer", 590, 400);
+    d3.tsv("/data/example_data.tsv", function (data) {
+    
+      // Create and position the chart
+      var myChart = new dimple.chart(svg, data);
+      myChart.setBounds(65, 50, 505, 310)
+
+      // Add a Grouped Mekko Axis.  This will show Brands grouped by owners
+      // sized by unit sales.
+      var x = myChart.addAxis("x", ["Owner", "Brand"], "Unit Sales");
+      x.showPercent = true;
+
+      // Add the vertical measure to also show unit sales, which is standard
+      // for a mekko, but not a requirement in dimple.
+      myChart.addPctAxis("y", "Unit Sales");
+
+      // Color by Unit Sales.  By defining this without specifying the color
+      // range in the second parameter, dimple will assign colors as usual
+      // and adjust saturation based on the Unit Sales value.
+      var c = myChart.addColorAxis("Unit Sales");
+
+      // Override the minimum axis value to a lower number.  By default the
+      // range of values is used with the minimum being 0 saturation and the
+      // maximum being 100% this causes the bars to be too washed out in this
+      // particular case.
+      c.overrideMin = -10000;
+
+      // Draw SKU's for the series, by specifying owner second here, it
+      // ensures dimple will color by owner rather than SKU.  This suits the
+      // grouping to give blocks of color for each owner faded by the SKU
+      // unit sales value.
+      myChart.addSeries(["SKU", "Owner"], dimple.plot.bar);
+    
+      // Add a legend
+      myChart.addLegend(240, 10, 330, 20, "right");
+
+      // Animate the chart by date values
+      myChart.setStoryboard("Date");
+
+      // Draw the chart
+      myChart.draw();
+    });
+  </script>
+</div>

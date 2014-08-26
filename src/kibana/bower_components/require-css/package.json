@@ -1,0 +1,7 @@
+{
+  "name": "require-css",
+  "version": "0.1.5",
+  "volo": {
+    "type": "directory"
+  }
+}

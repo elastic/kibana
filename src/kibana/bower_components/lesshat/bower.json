@@ -1,0 +1,15 @@
+{
+  "name": "lesshat",
+  "version": "3.0.2",
+  "main": [
+    "./build/lesshat.less",
+    "./build/lesshat-prefixed.less"
+  ],
+  "ignore": [
+    "mixins",
+    "*.md",
+    "*.json",
+    "LICENCE",
+    ".*.*"
+  ]
+}

@@ -9,6 +9,7 @@ if ENV['RACK_ENV'] == ('development')
 end
 
 if ENV['RACK_ENV'] == ('production')
+  ROOT = File.expand_path("#{File.dirname(__FILE__)}/../")
   PUBLIC_ROOT = File.expand_path("#{File.dirname(__FILE__)}/../public/")
   CONFIG_PATH = ENV["CONFIG_PATH"]
 end

@@ -1,0 +1,9 @@
+{
+  "name": "angular-ui-ace",
+  "version": "0.1.1",
+  "main": "./ui-ace.js",
+  "dependencies": {
+    "angular": "~1.x",
+    "ace-builds": "~1.1.1"
+  }
+}

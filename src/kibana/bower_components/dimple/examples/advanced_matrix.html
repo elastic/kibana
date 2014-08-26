@@ -1,0 +1,98 @@
+<!----------------------------------------------------------------->
+<!-- AUTOMATICALLY GENERATED CODE - PLEASE EDIT TEMPLATE INSTEAD -->
+<!----------------------------------------------------------------->
+<div id="chartContainer">
+  <script src="/lib/d3.v3.4.8.js"></script>
+  <script src="/dist/dimple.v2.1.0.js"></script>
+  <script type="text/javascript">
+
+    // Create the svg and set the dimensions
+    var svg = dimple.newSvg("#chartContainer", 590, 400);
+
+    d3.tsv("/data/example_data.tsv", function (data) {
+
+      // Split the months into Years and Quarters.  This could
+      // be better done in the data, but I've included it here
+      // in case anybody needs to do anything similar.  This is
+      // just javascript, nothing dimple specific.
+      data.forEach(function (d) {
+        d.Year = "20" + d.Month.substring(4, 6);
+        var name = d.Month.substring(0, 3);
+        if (["Jan", "Feb", "Mar"].indexOf(name) >= 0) {
+            d.Quarter = "Q1";
+        } else if (name === "Apr" || name === "May" || name === "Jun") {
+            d.Quarter = "Q2";
+        } else if (name === "Jul" || name === "Aug" || name === "Sep") {
+            d.Quarter = "Q3";
+        } else {
+            d.Quarter = "Q4"
+        }
+      }, this);
+
+      // Create a base chart.  This will provide the base axes and the
+      // chart positioning.
+      var myChart = new dimple.chart(svg, data);
+      myChart.setBounds(60, 25, 505, 350)
+      // Create a matrix by the 2 dimensions
+      var x = myChart.addCategoryAxis("x", "Quarter");
+      var y = myChart.addCategoryAxis("y", "Price Tier");
+      // Define the natural order for price tiers
+      y.addOrderRule(["Budget", "Regular", "Premium"]);
+
+      // Add the bar series to create the matrix shapes
+      var s = myChart.addSeries("Hide", dimple.plot.bar);
+      // Hide this series
+      myChart.assignColor("Hide", "#fff", "#fff", 0);
+      // The bar gap here will define the gaps between the charts
+      s.barGap = 0.1;
+      // Remove the click event from the master chart
+      s.addEventHandler("mouseover", function (e) {});
+
+      // Draw the main chart
+      myChart.draw();
+
+      // Remove the axis shapes from the main chart
+      x.shapes.selectAll("path,line").remove();
+      x.titleShape.remove();
+      y.shapes.selectAll("path,line").remove();
+      y.titleShape.remove();
+
+      // Iterate the shapes from the parent chart
+      s.shapes.each(function (d) {
+
+        // Filter the data set for the quarter and the price tier
+        // of the current shape
+        var filteredData = dimple.filterData(data, "Quarter", d.xField);
+        filteredData = dimple.filterData(filteredData, "Price Tier", d.yField);
+
+        // Draw a new chart which will go in the current shape
+        var subChart = new dimple.chart(svg, filteredData);
+
+        // Get the shape from the main chart on which this chart is based
+        var shape = d3.select(this);
+
+        // Position the chart inside the shape
+        subChart.setBounds(
+            parseFloat(shape.attr("x")),
+            parseFloat(shape.attr("y")),
+            parseFloat(shape.attr("width")),
+            parseFloat(shape.attr("height")));
+
+        // Add the axes with a standard mekko configuration
+        var subX = subChart.addAxis("x", "Pack Type", "Unit Sales");
+        subX.showPercent = true;
+        subX.hidden = true;
+        var subY = subChart.addPctAxis("y", "Unit Sales");
+        subY.hidden = true;
+
+        // Stack by Owner but include price tier and quarter so that they
+        // appear in the tooltip
+        var subS = subChart.addSeries(["Price Tier", "Quarter", "Owner"],
+            dimple.plot.bar);
+
+        // Draw the sub chart
+        subChart.draw();
+      });
+    });
+  </script>
+</div>

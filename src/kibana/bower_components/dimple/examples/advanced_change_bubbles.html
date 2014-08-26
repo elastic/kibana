@@ -1,0 +1,100 @@
+<!----------------------------------------------------------------->
+<!-- AUTOMATICALLY GENERATED CODE - PLEASE EDIT TEMPLATE INSTEAD -->
+<!----------------------------------------------------------------->
+<div id="chartContainer">
+  <script src="/lib/d3.v3.4.8.js"></script>
+  <script src="/dist/dimple.v2.1.0.js"></script>
+  <script type="text/javascript">
+    var svg = dimple.newSvg("#chartContainer", 590, 400);
+    d3.tsv("/data/example_data.tsv", function (data) {
+
+      // Reduce the number of owners as this chart can get a bit busy
+      data = dimple.filterData(data, "Owner", [
+        "Stark Ind",
+        "MomCorp",
+        "Rekall",
+        "Wayne Ent"]);
+
+      var series,
+        // Set a background and foreground chart
+        charts = [
+          new dimple.chart(svg, null),
+          new dimple.chart(svg, data)
+        ],
+        lastDate = null,
+        owners = dimple.getUniqueValues(data, "Owner");
+
+        // Define 2 nearly identical charts.  It's essential
+        // for this that the max and minimum values are fixed
+        // and unmoving otherwise the background chart will get
+        // out of sync with the foreground the background chart's
+        // axes are hidden and it's colors are faded.  Both have
+        // their borders set to white, which looks better on this chart
+        charts.forEach(function (chart, i) {
+          var x, y, z;
+          chart.setBounds(60, 30, 510, 330);
+          x = chart.addMeasureAxis("x", "Unit Sales");
+          x.overrideMax = 5000;
+          x.hidden = (i === 0);
+          y = chart.addMeasureAxis("y", "Price");
+          y.overrideMax = 120;
+          y.hidden = (i === 0);
+          z = chart.addMeasureAxis("z", "Distribution");
+          z.overrideMax = 120;
+          // Ensure the same colors for every owner in both charts
+          // differing by opacity
+          owners.forEach(function (owner, k) {
+            chart.assignColor(
+              owner,
+              charts[0].defaultColors[k].fill,
+              "white",
+              (i === 0 ? 0.3 : 1));
+            }, this);
+          }, this);
+
+          // Define a storyboard on the main chart, this will iterate
+          // all dates and redraw for each, the callback will build the
+          // the background chart
+          charts[1].setStoryboard("Date", function (d) {
+            // Use the last date variable to manage the previous tick's data
+            if (lastDate !== null) {
+              // Pull the previous data
+              var lastData = dimple.filterData(data, "Date", lastDate);
+              // Add a series to the background chart to display old position
+              var lastSeries = charts[0].addSeries("Owner", dimple.plot.bubble);
+              // Average suits these measures better
+              lastSeries.aggregate = dimple.aggregateMethod.avg;
+              // Give each series its own data at different periods
+              lastSeries.data = lastData;
+              // Draw the background chart
+              charts[0].draw();
+              // Class all shapes as .historic
+              lastSeries.shapes.attr("class", "historic");
+                // Reduce all opacity and remove once opacity drops below 5%
+                d3.selectAll(".historic")
+                  .each(function () {
+                    var shape = d3.select(this),
+                      opacity = shape.style("opacity") - 0.02;
+                    if (opacity < 0.1) {
+                      shape.remove();
+                    } else {
+                      shape.style("opacity", opacity);
+                    }
+                  });
+                }
+                lastDate = d;
+            });
+
+            // Add the primary series to the main chart
+            series = charts[1].addSeries("Owner", dimple.plot.bubble)
+            series.aggregate = dimple.aggregateMethod.avg;
+            // Draw the main chart
+            charts[1].draw();
+
+            // Add some border weight to the main series so it separates a bit from
+            // the former period shadows
+            d3.selectAll("circle").style("stroke-width", 2);
+
+        });
+    </script>
+</div>

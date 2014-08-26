@@ -1,0 +1,23 @@
+<!----------------------------------------------------------------->
+<!-- AUTOMATICALLY GENERATED CODE - PLEASE EDIT TEMPLATE INSTEAD -->
+<!----------------------------------------------------------------->
+<div id="chartContainer">
+  <script src="/lib/d3.v3.4.8.js"></script>
+  <script src="/dist/dimple.v2.1.0.js"></script>
+  <script type="text/javascript">
+    var svg = dimple.newSvg("#chartContainer", 590, 400);
+    d3.tsv("/data/example_data.tsv", function (data) {
+      var myChart = new dimple.chart(svg, data);
+      myChart.setBounds(50, 55, 500, 310)
+      var x = myChart.addMeasureAxis("x", "Distribution");
+      x.overrideMin = 20;
+      var y = myChart.addMeasureAxis("y", "Price");
+      y.overrideMin = 50
+      var s = myChart.addSeries(["Month", "Owner"], dimple.plot.line);
+      s.addOrderRule("Date");
+      s.aggregate = dimple.aggregateMethod.avg;
+      myChart.addLegend(130, 10, 400, 35, "right");
+      myChart.draw();
+    });
+  </script>
+</div>

@@ -1,0 +1,45 @@
+<!----------------------------------------------------------------->
+<!-- AUTOMATICALLY GENERATED CODE - PLEASE EDIT TEMPLATE INSTEAD -->
+<!----------------------------------------------------------------->
+<div id="chartContainer">
+  <script src="/lib/d3.v3.4.8.js"></script>
+  <script src="/dist/dimple.v2.1.0.js"></script>
+  <script type="text/javascript">
+    var svg = dimple.newSvg("#chartContainer", 590, 400);
+    d3.tsv("/data/example_data.tsv", function (data) {
+      var myChart = new dimple.chart(svg, data);
+      myChart.setBounds(60, 30, 470, 300)
+
+      // Define all the axes
+      var xAxis = myChart.addMeasureAxis("x", "Distribution");
+      var yAxis = myChart.addMeasureAxis("y", "Price");
+      var segments = myChart.addMeasureAxis("p", "Unit Sales");
+      var size = myChart.addMeasureAxis("z", "Sales Value");
+      var ring = myChart.addSeries(["Price Tier", "Channel"], dimple.plot.pie);
+      var pie = myChart.addSeries(["Price Tier", "Owner"], dimple.plot.pie);
+
+      // Zoom in the axis bounds
+      xAxis.overrideMin = 40;
+      xAxis.overrideMax = 70;
+      yAxis.overrideMax = 150;
+
+      // Set the maximum radius for the bubbles
+      ring.radius = 75;
+      pie.radius = 75;
+
+      // Create fixed 10px ring with a 5px
+      // margin (negative sizes are calculated inwards)
+      ring.innerRadius = "-10px";
+      pie.outerRadius = "-15px";
+
+      // Draw averages for the pie and ring
+      ring.aggregate = dimple.aggregateMethod.avg;
+      pie.aggregate = dimple.aggregateMethod.avg;
+
+      // Animate by date
+      myChart.setStoryboard("Date");
+
+      myChart.draw();
+    });
+  </script>
+</div>

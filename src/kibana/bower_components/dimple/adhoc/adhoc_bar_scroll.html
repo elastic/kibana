@@ -1,0 +1,32 @@
+<div id="chartContainer">
+  <script src="/lib/d3.v3.4.8.min.js"></script>
+  <script src="/dist/dimple.v2.0.0.js"></script>
+  <script type="text/javascript">
+    // Start off with a couple of rows of data
+    var data = [
+      { "Date": Date.now(), "Value": 2000000 * Math.random() }
+    ];
+    var svg = dimple.newSvg("#chartContainer", 590, 400);
+    var myChart = new dimple.chart(svg, [].concat(data));
+    myChart.setBounds(60, 50, 480, 250)
+    x = myChart.addTimeAxis("x", "Date", null, "%d/%m/%Y");
+    myChart.addMeasureAxis("y", "Value");
+    myChart.addSeries("Sales",  dimple.plot.bar);
+    myChart.ease = "linear";
+    window.setInterval(function () {
+      // Let 60 bars accumulate and then start slicing them off the front
+      if (data.length > 60) { data = data.slice(1); }
+      // Keep a day's gap at each end of the axis
+      x.overrideMin = data[0]["Date"] - 86400000;
+      x.overrideMax = data[data.length - 1]["Date"] + 86400000;
+      data.push({
+          "Date": data[data.length - 1]["Date"] + 86400000,
+          "Value": 2000000 * Math.random() });
+      // Update the data, using a clone to maintain order
+      myChart.data = [].concat(data);
+      // Draw with an animation. Each bar will take 1 second to draw and a new
+      // one is added every 500ms so there will be a few animating at once
+      myChart.draw(1000);
+    }, 500);
+  </script>
+</div>
