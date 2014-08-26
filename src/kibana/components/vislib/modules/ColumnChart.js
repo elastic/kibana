@@ -74,7 +74,7 @@ define(function (require) {
           .attr('class', 'brush')
           .call(brush)
           .selectAll('rect')
-          .attr('height', this._attr.height);
+          .attr('height', this._attr.height - this._attr.margin.top - this._attr.margin.bottom);
       }
     };
 

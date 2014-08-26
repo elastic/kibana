@@ -40,6 +40,7 @@ define(function (require) {
         .attr('class', 'error-wrapper')
         .append('div')
         .attr('class', 'chart-error')
+        .append('span')
         .style('line-height', function () {
           return $(elem).height() + 'px';
         })

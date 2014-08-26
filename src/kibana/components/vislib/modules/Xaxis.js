@@ -44,8 +44,6 @@ define(function (require) {
       // Take the max of the xValues or the max date that is sent
       var maxDate = +maxXValue + timeInterval <= ordered.max ? ordered.max : +maxXValue + timeInterval * (1 - spacingPercentage);
 
-      console.log('maxXValue: ', new Date(+maxXValue), 'orderedDate: ', new Date(ordered.max), 'maxDate: ', new Date(maxDate));
-
       scale.domain([minDate, maxDate]);
 
       return scale;
