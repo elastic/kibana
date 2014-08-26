@@ -1,6 +1,7 @@
 define(function (require) {
   var sinon = require('test_utils/auto_release_sinon');
   var Promise = require('bluebird');
+  var _ = require('lodash');
 
   var SegmentedFetch;
   var segmentedFetch;
@@ -79,7 +80,8 @@ define(function (require) {
         sinon.stub(SegmentedFetch.prototype, '_executeRequest', Promise.resolve);
 
         return segmentedFetch.fetch().then(function () {
-          expect(stopSpy.callCount).to.be(1);
+          // always called on fetch, called again at resolution
+          expect(stopSpy.callCount).to.be(2);
         });
       });
 
@@ -91,9 +93,11 @@ define(function (require) {
 
         return Promise.delay(1).then(function () {
           return segmentedFetch.fetch().then(function () {
+            // 1 for fetch
+            // 1 for second fetch
             // 1 for stopping the first request early
-            // 1 for finishing the second request
-            expect(stopSpy.callCount).to.be(2);
+            // 1 for resolving the second request
+            expect(stopSpy.callCount).to.be(4);
           });
         });
       });
@@ -101,44 +105,28 @@ define(function (require) {
       it('should wait before starting new requests', function () {
         var startSpy = sinon.spy(SegmentedFetch.prototype, '_startRequest');
         var stopSpy = sinon.spy(SegmentedFetch.prototype, '_stopRequest');
-        var execDefer = Promise.defer();
-        sinon.stub(SegmentedFetch.prototype, '_executeRequest').returns(execDefer.promise);
+        var fetchCount = _.random(3, 6);
+        var resolveCount = 0;
+        var resolvedPromises = [];
 
-        // helper to make delayed concurrent calls and check spys
-        function checkSpies(startCount, stopCount, delay) {
-          delay = delay || 1;
-
-          return Promise.delay(delay).then(function () {
-            expect(startSpy.callCount).to.be(startCount);
-            expect(stopSpy.callCount).to.be(stopCount);
-          });
-        }
-
-        // start fetch
-        var fetch1 = segmentedFetch.fetch();
-        var fetch2;
-
-        return checkSpies(1, 0)
-        .then(function () {
-          fetch2 = segmentedFetch.fetch();
-          return checkSpies(2, 0);
-        })
-        .then(function () {
-          // resolve _executeRequest
-          Promise.delay(5).then(function () {
-            execDefer.resolve();
-          });
-
-          return fetch1.then(function () {
-            expect(stopSpy.callCount).to.be(1);
-          });
-        })
-        .then(function () {
-          // _executeRequest is still resolved from above
-          return fetch2.then(function () {
-            expect(stopSpy.callCount).to.be(2);
-          });
+        sinon.stub(SegmentedFetch.prototype, '_executeRequest', function () {
+          // keep resolving faster as we move along
+          return Promise.delay(fetchCount - resolveCount);
         });
+
+        _.times(fetchCount, function (idx) {
+          resolvedPromises.push(segmentedFetch.fetch().then(function () {
+            var resolveOrder = idx + 1;
+            ++resolveCount;
+
+            expect(resolveCount).to.be(resolveOrder);
+            expect(startSpy.callCount).to.be(resolveOrder);
+            // called once for every fetch, and again for each resolution
+            expect(stopSpy.callCount).to.be(fetchCount + resolveOrder);
+          }));
+        });
+
+        return Promise.all(resolvedPromises);
       });
 
       it('should perform actions on searchSource', function () {
@@ -258,7 +246,8 @@ define(function (require) {
 
         return segmentedFetch.fetch({ each: eachHandler }).then(function () {
           expect(eachHandler.callCount).to.be(1);
-          expect(searchPromiseAbortStub.callCount).to.be(1);
+          // 1 for fetch, 1 for actual abort call
+          expect(searchPromiseAbortStub.callCount).to.be(2);
         });
       });
 
@@ -269,7 +258,9 @@ define(function (require) {
           var SegmentedFetchSelf = this;
           var fakeRequest = {};
 
-          return SegmentedFetchSelf._startRequest()
+          return Promise.try(function () {
+            return SegmentedFetchSelf._startRequest();
+          })
           .then(function () {
             SegmentedFetchSelf._setRequest(fakeRequest);
           })
@@ -297,7 +288,8 @@ define(function (require) {
 
         return segmentedFetch.fetch({ each: eachHandler }).then(function () {
           expect(eachHandler.callCount).to.be(1);
-          expect(segmentedFetch.notifyEvent.callCount).to.be(1);
+          // 1 for stop from fetch, 1 from abort
+          expect(segmentedFetch.notifyEvent.callCount).to.be(2);
         });
       });
     });
