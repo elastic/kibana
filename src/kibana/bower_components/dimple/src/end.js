@@ -1,4 +1,0 @@
-
-    return dimple;
-}));
-// End dimple
