@@ -60,6 +60,7 @@ define(function (require) {
 
     Private.stub = function (fn, val) {
       cache[indent(fn)] = val;
+      return val;
     };
 
     return Private;
