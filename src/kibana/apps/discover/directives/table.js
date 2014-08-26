@@ -207,6 +207,11 @@ define(function (require) {
           $scope.filtering(field, row._source[field] || row[field], operation);
         };
 
+        $scope.$watch('columns', function () {
+          element.empty();
+          createSummaryRow($scope.row, $scope.row._id);
+        });
+
         // create a tr element that lists the value for each *column*
         function createSummaryRow(row, id) {
 
