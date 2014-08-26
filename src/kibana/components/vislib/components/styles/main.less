@@ -55,9 +55,9 @@ visualize {
   flex: 1 1;
 }
 
-.legend-wrapper {
-  flex: 1 1;
-}
+// .legend-wrapper {
+//   flex: 1 1;
+// }
 
 div.x-axis-label {
   position: absolute;
@@ -85,33 +85,38 @@ div.y-axis-label {
 .header {
   width: 100%;
   height: 26px;
-  margin: 0 0 6px 0;
+  margin: 0 0 14px 0;
 }
 .legend-ul {
-  list-style: none;
+  list-style-type: none;
   margin: 0;
   padding: 0;
-  width: 150px;
   visibility: visible;
+  display: flex;
+  flex-direction: column;
+  
 }
 .legend-ul.hidden {
   visibility: hidden;
 }
 
 li.color {
-  display: block;
-  float: left;
-  width: 150px;
+  // display: block;
+  // float: left;
   min-height: 22px;
   margin: 0 18px 0 18px;
+  padding: 3px 0 3px 0;
   text-align: left;
-  word-wrap: break-word;
+  // word-wrap: break-word;
   font-size: 12px;
   line-height: 13px;
   color: #666;
-  list-style: none;
+  // list-style: none;
   cursor: default;
-  padding: 3px 0 3px 0;
+
+  text-align: left;
+  flex-grow: 2;
+
 }
 
 .dots {
@@ -238,7 +243,7 @@ path, line, .axis line, .axis path {
 /* YAxis logic */
 .y-axis-col-wrapper {
   display: flex;
-  flex: 2 1;
+  flex: 2 1 auto;
   flex-direction: column;
 }
 
@@ -253,8 +258,8 @@ path, line, .axis line, .axis path {
 }
 
 .y-axis-title {
-  flex: 1 1;
-  min-width: 16px
+  // flex: 1 1;
+  width: 16px
 }
 
 .y-axis-title text {
@@ -263,9 +268,9 @@ path, line, .axis line, .axis path {
 
 .y-axis-chart-title {
   display: flex;
-  flex: 1 1;
+  // flex: 1 1;
   flex-direction: column;
-    min-width: 16px
+  width: 16px
 }
 
 .chart-title {
@@ -285,7 +290,7 @@ path, line, .axis line, .axis path {
 
 .vis-col-wrapper {
   display: flex;
-  flex: 35 1;
+  flex: 35 1 auto;
   flex-direction: column;
 }
 
@@ -358,13 +363,13 @@ path, line, .axis line, .axis path {
 }
 
 .legend-col-wrapper {
-  flex: 1 1;
+  flex: 2 1 auto;
   z-index: 10;
   overflow-x: hidden;
   overflow-y: auto;
-  min-width: 34px;
 }
 
+/*
 .open2 {
   flex: 2 1;
 }
@@ -400,10 +405,8 @@ path, line, .axis line, .axis path {
 .open12 {
   flex: 12 1;
 }
+*/
 
-li.color {
-  list-style: none;
-}
 
 .x.axis path {
   display: none;

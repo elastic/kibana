@@ -65,7 +65,7 @@ define(function (require) {
             .call(self.yAxis);
 
           // update layout divs to tick lengths
-          //self.updateLayoutForRotatedLabels(div, self.getMaxLabelLength(selection));
+          self.updateLayoutForRotatedLabels(div, self.getMaxLabelLength(selection));
 
         });
       };
@@ -105,15 +105,15 @@ define(function (require) {
       // set widths of svg, x-axis-div and x-axis-div-wrapper to fit ticklabels
       svg.attr('width', length + 6);
       //$('.y-axis-div-wrapper').width(length + tickspace);
-      $('.y-axis-div').width(length);
+      //$('.y-axis-div').width(length);
       //$('.y-axis-col-wrapper').width(length);
       //$('.y-axis-col').width(length + tickspace);
-      d3.select('.y.axis').attr('transform', 'translate(' + (length + 2) + ',' + self._attr.margin.top + ')');
+      d3.selectAll('.y.axis').attr('transform', 'translate(' + (length + 2) + ',' + self._attr.margin.top + ')');
       
       // set widths of y-axis-spacer-block and x-axis-wrapper to fit resized x axis      
-      $('.y-axis-spacer-block').width(spacer);
-      $('.y-axis-col-wrapper').width(spacer);
-      $('.y-axis-col').width(spacer);
+      //$('.y-axis-spacer-block').width(spacer);
+      //$('.y-axis-col-wrapper').width(spacer);
+      //$('.y-axis-col').width(spacer);
       
     };
 

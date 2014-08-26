@@ -1,5 +1,6 @@
 define(function (require) {
   return function LegendFactory(d3, Private) {
+    var $ = require('jquery');
     var _ = require('lodash');
 
     var createHeader = Private(require('components/vislib/components/Legend/header'));
@@ -17,7 +18,8 @@ define(function (require) {
         'blurredOpacity' : 0.3,
         'focusOpacity' : 1,
         'defaultOpacity' : 1,
-        'isOpen' : false
+        'isOpen' : false,
+        'width': 20
       });
     }
 
@@ -27,26 +29,27 @@ define(function (require) {
       var header = createHeader(legendDiv);
       var headerIcon = d3.select('.legend-toggle');
       var list = createList(legendDiv, items, this);
+      //var width = this._attr.width ? this._attr.width : this.getMaxLabelLength(list);
+
       var that = this;
 
       // toggle
       headerIcon.on('click', function (d) {
         if (that._attr.isOpen) {
           // close legend
-          d3.select('.' + that._attr.legendClass)
-            .classed('open4', false);
           d3.select('ul.legend-ul')
             .classed('hidden', true);
           that._attr.isOpen = false;
           
         } else {
           // open legend
-          d3.select('.' + that._attr.legendClass)
-            .classed('open4', true);
           d3.select('ul.legend-ul')
             .classed('hidden', false);
           that._attr.isOpen = true;
+          
         }
+
+
       });
 
       d3.selectAll('.color')
@@ -71,13 +74,13 @@ define(function (require) {
         });
 
       // add/remove class to open legend
-      if (this._attr.isOpen) {
-        d3.select('.' + this._attr.legendClass)
-          .classed('open4', true);
-      } else {
-        d3.select('.' + this._attr.legendClass)
-          .classed('open4', false);
-      }
+      // if (this._attr.isOpen) {
+      //   d3.select('.' + this._attr.legendClass)
+      //     .classed('open4', true);
+      // } else {
+      //   d3.select('.' + this._attr.legendClass)
+      //     .classed('open4', false);
+      // }
 
     };
 

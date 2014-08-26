@@ -40,7 +40,8 @@ define(function (require) {
               if (div.attr('class') === 'x-axis-title') {
                 return 'translate(' + width / 2 + ',' + height * 0.7 + ')';
               }
-              return 'translate(' + width * 0.7 + ',' + height / 2 + ')rotate(270)';
+              // return 'translate(' + width * 0.7 + ',' + height / 2 + ')rotate(270)';
+              return 'translate(16,' + height / 2 + ')rotate(270)';
             })
             .attr('text-anchor', 'middle')
             .text(title);
