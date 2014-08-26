@@ -52,7 +52,6 @@ define(function (require) {
     var Vis = Private(require('components/vis/vis'));
     var segmentedFetch = $scope.segmentedFetch = Private(require('apps/discover/_segmented_fetch'));
     var HitSortFn = Private(require('apps/discover/_hit_sort_fn'));
-    var diffTimePickerValues = Private(require('utils/diff_time_picker_vals'));
 
     var notify = new Notifier({
       location: 'Discover'
@@ -138,7 +137,7 @@ define(function (require) {
         var ignoreStateChanges = ['columns'];
 
         // listen for changes, and relisten everytime something happens
-        $state.onUpdate(function (changed) {
+        $scope.$listen($state, 'fetch_with_changes', function (changed) {
           if (_.contains(changed, 'columns')) {
             $scope.fields.forEach(function (field) {
               field.display = _.contains($state.columns, field.name);

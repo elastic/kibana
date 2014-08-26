@@ -76,7 +76,7 @@ define(function (require) {
         $scope.$watch('vis', prereq(function (vis, prevVis) {
           if (prevVis && vis !== prevVis && prevVis.destroy) prevVis.destroy();
           if (chart) {
-            _.forOwn(prevVis.type.listeners, function (listener, event) {
+            _.forOwn(prevVis.listeners, function (listener, event) {
               chart.off(event, listener);
             });
             chart.destroy();
@@ -94,7 +94,7 @@ define(function (require) {
 
           chart = new visLib.Vis($visualize[0], vislibParams);
 
-          _.each(vis.type.listeners, function (listener, event) {
+          _.each(vis.listeners, function (listener, event) {
             chart.on(event, listener);
           });
         }));
@@ -150,7 +150,7 @@ define(function (require) {
 
         $scope.$on('$destroy', function () {
           if (chart) {
-            _.forOwn($scope.vis.type.listeners, function (listener, event) {
+            _.forOwn($scope.vis.listeners, function (listener, event) {
               chart.off(event, listener);
             });
             chart.destroy();

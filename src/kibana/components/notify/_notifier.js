@@ -83,8 +83,9 @@ define(function (require) {
     // label type thing to say where notifications came from
     self.from = opts.location;
 
-    'event lifecycle timed fatal error warning info'.split(' ')
-    .forEach(_.limit(_.bind(_.bindKey, self), 1));
+    'event lifecycle timed fatal error warning info'.split(' ').forEach(function (m) {
+      self[m] = _.bind(self[m], self);
+    });
   }
 
   // simply a pointer to the global notif list

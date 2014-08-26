@@ -68,15 +68,6 @@ define(function (require) {
     };
 
     /**
-     * Registers a listner for updates to pulls
-     * TODO: Change all the references to onUpdate to the actual fetch_with_changes event
-     * @returns {void}
-     */
-    State.prototype.onUpdate = function (cb) {
-      this.on('fetch_with_changes', cb);
-    };
-
-    /**
      * Cleans up the state object
      * @returns {void}
      */
