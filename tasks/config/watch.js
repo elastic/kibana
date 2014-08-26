@@ -34,7 +34,10 @@ module.exports = function (grunt) {
       tasks: [
         'stop:kibana_server',
         'run:kibana_server'
-      ]
+      ],
+      options: {
+        spawn: false
+      }
     }
   };
 
