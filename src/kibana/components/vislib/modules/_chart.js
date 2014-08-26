@@ -40,9 +40,9 @@ define(function (require) {
         .attr('class', 'error-wrapper')
         .append('div')
         .attr('class', 'chart-error')
-//        .style('line-height', function () {
-//          return $(elem).height() + 'px';
-//        })
+        .style('line-height', function () {
+          return $(elem).height() + 'px';
+        })
         .text('The container is too small for this chart.');
     };
 
