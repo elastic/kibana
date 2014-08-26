@@ -146,7 +146,7 @@ define(function (require) {
           }
 
           // update layout divs to tick lengths
-          self.updateLayoutForRotatedLabels(div, self.getMaxLabelLength(selection));
+          // self.updateLayoutForRotatedLabels(div, self.getMaxLabelLength(selection));
         });
       };
     };

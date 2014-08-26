@@ -65,7 +65,7 @@ define(function (require) {
             .call(self.yAxis);
 
           // update layout divs to tick lengths
-          self.updateLayoutForRotatedLabels(div, self.getMaxLabelLength(selection));
+          // self.updateLayoutForRotatedLabels(div, self.getMaxLabelLength(selection));
 
         });
       };
