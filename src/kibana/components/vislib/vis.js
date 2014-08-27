@@ -13,8 +13,11 @@ define(function (require) {
 
     _(Vis).inherits(Events);
     function Vis($el, config) {
-      Vis.Super.apply(this, arguments);
+      if (!(this instanceof Vis)) {
+        return new Vis($el, config);
+      }
 
+      Vis.Super.apply(this, arguments);
       this.el = $el.get ? $el.get(0) : $el;
       this.ChartClass = chartTypes[config.type];
       this._attr = _.defaults(config || {}, {
@@ -62,8 +65,7 @@ define(function (require) {
       }
 
       // CHART TITLE CLASS
-      type = this.data.splitType();
-      this.renderChartTitles(type);
+      this.renderChartTitles();
 
       // XAXIS CLASS
       this.renderXAxis({

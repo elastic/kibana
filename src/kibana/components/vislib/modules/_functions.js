@@ -40,7 +40,7 @@ define(function (require) {
     };
 
     VisFunctions.prototype.renderChartTitles = function (splitType) {
-      this.chartTitle = new ChartTitle(this.el, splitType);
+      this.chartTitle = new ChartTitle(this.el);
       try {
         this.chartTitle.render();
       } catch (error) {

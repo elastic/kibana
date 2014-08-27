@@ -7,6 +7,10 @@ define(function (require) {
 
     _(XAxis).inherits(Chart);
     function XAxis(args) {
+      if (!(this instanceof XAxis)) {
+        return new XAxis(args);
+      }
+
       XAxis.Super.apply(this, arguments);
       this.el = args.el;
       this.data = args.data;

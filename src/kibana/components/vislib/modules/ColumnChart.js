@@ -11,6 +11,10 @@ define(function (require) {
 
     _(ColumnChart).inherits(Chart);
     function ColumnChart(vis, chartEl, chartData) {
+      if (!(this instanceof ColumnChart)) {
+        return new ColumnChart(vis, chartEl, chartData);
+      }
+
       ColumnChart.Super.apply(this, arguments);
       this._attr = _.defaults(vis._attr || {}, {
         offset: 'zero',
@@ -25,13 +29,11 @@ define(function (require) {
     }
 
     ColumnChart.prototype.eventResponse = function (d, i) {
-      var color = this.vis.data.getColorFunc();
-
       return {
         value     : this._attr.yValue(d, i),
         point     : d,
         label     : d.label,
-        color     : color(d.label),
+        color     : this.vis.data.getColorFunc()(d.label),
         pointIndex: i,
         series    : this.chartData.series,
         config    : this._attr,
@@ -81,16 +83,16 @@ define(function (require) {
     ColumnChart.prototype.draw = function () {
       // Attributes
       var self = this;
+      var color = this.vis.data.getColorFunc();
+      var tooltip = this.vis.tooltip;
+      var yScale = this.vis.yAxis.yScale;
+      var xScale = this.vis.xAxis.xScale;
       var $elem = $(this.chartEl);
       var margin = this._attr.margin;
       var elWidth = this._attr.width = $elem.width();
       var elHeight = this._attr.height = $elem.height();
       var isTooltip = this._attr.addTooltip;
       var addEvents = this._attr.addEvents;
-      var color = this.vis.data.getColorFunc();
-      var tooltip = this.vis.tooltip;
-      var yScale = this.vis.yAxis.yScale;
-      var xScale = this.vis.xAxis.xScale;
       var dispatch = this._attr.dispatch;
       var div;
       var svg;

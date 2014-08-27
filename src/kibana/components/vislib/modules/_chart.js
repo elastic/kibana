@@ -4,12 +4,14 @@ define(function (require) {
     var $ = require('jquery');
 
     function Chart(vis, el, chartData) {
+      if (!(this instanceof Chart)) {
+        return new Chart(vis, el, chartData);
+      }
+
       this.vis = vis;
       this.chartEl = el;
       this.chartData = chartData;
-      this._attr = _.defaults(vis.config || {}, {
-        destroyFlag: false
-      });
+      this._attr = _.defaults(vis.config || {}, {});
     }
 
     Chart.prototype.render = function () {
