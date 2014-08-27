@@ -42,10 +42,6 @@ define(function (require) {
         throw new Error('No valid data!');
       }
 
-      if (this._attr.destroyFlag) {
-        throw new Error('You tried rendering a visualization that has been destroyed');
-      }
-
       // DATA CLASS
       this.instantiateData(data);
 
