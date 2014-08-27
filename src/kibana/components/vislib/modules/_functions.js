@@ -77,7 +77,6 @@ define(function (require) {
 
     VisFunctions.prototype.renderCharts = function (vis, charts) {
       var self = this;
-
       d3.select(this.el)
         .selectAll('.chart')
         .each(function (chartData) {

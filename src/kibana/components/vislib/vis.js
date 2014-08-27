@@ -13,6 +13,7 @@ define(function (require) {
 
     _(Vis).inherits(Events);
     function Vis($el, config) {
+
       if (!(this instanceof Vis)) {
         return new Vis($el, config);
       }
@@ -21,8 +22,7 @@ define(function (require) {
       this.el = $el.get ? $el.get(0) : $el;
       this.ChartClass = chartTypes[config.type];
       this._attr = _.defaults(config || {}, {
-        'margin' : { top: 10, right: 3, bottom: 5, left: 3 },
-        destroyFlag : false
+        'margin' : { top: 10, right: 3, bottom: 5, left: 3 }
       });
     }
 
@@ -40,6 +40,10 @@ define(function (require) {
 
       if (!data) {
         throw new Error('No valid data!');
+      }
+
+      if (this._attr.destroyFlag) {
+        throw new Error('You tried rendering a visualization that has been destroyed');
       }
 
       // DATA CLASS
@@ -99,6 +103,7 @@ define(function (require) {
         throw new Error('No valid data');
       }
       this.render(this.data.data);
+      console.log('resized');
     };
 
     Vis.prototype.checkSize = _.debounce(function () {
@@ -109,8 +114,8 @@ define(function (require) {
         this.resize();
       }
       this.prevSize = size;
-      setTimeout(this.checkSize(), 300);
-    }, 300);
+      setTimeout(this.checkSize(), 250);
+    }, 250);
 
     Vis.prototype.destroy = function () {
       this._attr.destroyFlag = true;
