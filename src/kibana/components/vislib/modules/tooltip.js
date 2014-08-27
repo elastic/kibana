@@ -18,14 +18,11 @@ define(function (require) {
     }
 
     Tooltip.prototype.render = function () {
-      var tooltipClass = this.tooltipClass;
-      var tooltipFormatter = this.tooltipFormatter;
-      var chartHeight = this.chartHeight;
-      var chartWidth = this.chartWidth;
+      var self = this;
 
       return function (selection) {
         selection.each(function () {
-          var tooltipDiv = d3.select('.' + tooltipClass);
+          var tooltipDiv = d3.select('.' + self.tooltipClass);
           var element = d3.select(this);
 
           element
@@ -35,7 +32,7 @@ define(function (require) {
                 top: d3.event.y
               };
 
-              var chartWidth = chartWidth;
+              var chartWidth = self.chartWidth;
               var offsetX = d3.event.offsetX;
               var tipWidth = tooltipDiv[0][0].clientWidth;
               var xOffset = 10;
@@ -43,7 +40,7 @@ define(function (require) {
                 xOffset = -10 - tipWidth;
               }
 
-              var chartHeight = chartHeight;
+              var chartHeight = self.chartHeight;
               var offsetY = d3.event.offsetY;
               var tipHeight = tooltipDiv[0][0].clientHeight;
               var yOffset = 5;
@@ -52,7 +49,7 @@ define(function (require) {
               }
 
               return tooltipDiv.datum(d)
-                .text(tooltipFormatter)
+                .text(self.tooltipFormatter)
                 .style('visibility', 'visible')
                 .style('left', mouseMove.left + xOffset + 'px')
                 .style('top', mouseMove.top - yOffset + 'px');
