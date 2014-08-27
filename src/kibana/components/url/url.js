@@ -18,15 +18,15 @@ define(function (require) {
 
       if (url !== $location.url()) {
         $location.url(globalState.writeToUrl(url));
-        if (forceReload) {
-          reload();
+        if (forceReload || !self.matches(url)) {
+          self.reload();
         }
       }
     };
 
     self.matches = function (url) {
       var route = $route.current.$$route;
-      if (!route || !route.regexp) return null;
+      if (!route || !route.regexp) return false;
       return route.regexp.test(url);
     };
 
@@ -43,10 +43,10 @@ define(function (require) {
       });
     }
 
-    function reload() {
+    self.reload = function () {
       if (!self.reloading) $route.reload();
       self.reloading = true;
-    }
+    };
 
     function reloadingComplete() {
       self.reloading = false;
