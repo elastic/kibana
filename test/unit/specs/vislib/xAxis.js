@@ -78,7 +78,7 @@ define(function (require) {
 
     beforeEach(function () {
       inject(function (d3, Private) {
-        XAxis = Private(require('components/vislib/modules/XAxis'));
+        XAxis = Private(require('components/vislib/modules/Xaxis'));
         Data = Private(require('components/vislib/modules/Data'));
 
         el = d3.select('body').append('div')
