@@ -102,10 +102,6 @@ define(function (require) {
 
       return function (selection) {
         selection.each(function (data) {
-          if (self._attr.destroFlag) {
-            throw new Error('You are trying to render a chart you have destroyed');
-          }
-
           if (!yScale) {
             throw new Error('yScale is ' + yScale);
           }
