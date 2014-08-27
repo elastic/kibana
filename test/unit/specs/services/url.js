@@ -84,12 +84,10 @@ define(function (require) {
         });
 
         expect(kbnUrl.reload.callCount).to.be(uniqWordCount);
-
-        console.log('no fakin');
       });
 
       it('should reload when forceReload is true', function () {
-        var words = faker.Lorem.words(1);
+        var words = [faker.Lorem.words(_.random(2, 6)).join('/')];
         words.push(words[0]);
 
         words.forEach(function (url) {
@@ -103,7 +101,7 @@ define(function (require) {
       });
 
       it('should allow forceReload as the 2nd param', function () {
-        var words = [faker.Lorem.words(2).join('/')];
+        var words = [faker.Lorem.words(_.random(4, 10)).join('/')];
         words.push(words[0]);
 
         words.forEach(function (url) {
