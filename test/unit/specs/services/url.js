@@ -14,7 +14,9 @@ define(function (require) {
 
   function init() {
     globalStateMock = {
-      writeToUrl: sinon.stub()
+      writeToUrl: function (url) {
+        return url;
+      }
     };
 
     module('kibana/url', function ($provide) {
@@ -63,8 +65,6 @@ define(function (require) {
 
         words.forEach(function (url) {
           url = '/' + url;
-          // make the mocked method return what we expect
-          globalStateMock.writeToUrl.returns(url);
 
           kbnUrl.change(url);
 
@@ -92,7 +92,6 @@ define(function (require) {
 
         words.forEach(function (url) {
           url = '/' + url;
-          globalStateMock.writeToUrl.returns(url);
 
           kbnUrl.change(url, {}, true);
         });
@@ -106,7 +105,6 @@ define(function (require) {
 
         words.forEach(function (url) {
           url = '/' + url;
-          globalStateMock.writeToUrl.returns(url);
 
           kbnUrl.change(url, true);
         });
@@ -114,7 +112,19 @@ define(function (require) {
         expect(kbnUrl.reload.callCount).to.be(words.length);
       });
 
-      it('should replace template params');
+      it('should replace template params', function () {
+        var words = faker.Lorem.words(3);
+        var replace = faker.Lorem.words(2);
+        var url = '/' + words[0] + '/{' + words[1] + '}?{' + words[2] + '}';
+        var params = {};
+        params[words[1]] = replace[0];
+        params[words[2]] = replace[1];
+
+        kbnUrl.change(url, params);
+
+        expect(locationUrlSpy.secondCall.args[0]).to.not.be(url);
+        expect(locationUrlSpy.secondCall.args[0]).to.be('/' + words[0] + '/' + replace[0] + '?' + replace[1]);
+      });
       it('should rison encode template parameters');
       it('should throw when params are missing');
     });
@@ -123,7 +133,7 @@ define(function (require) {
       it('should not reload when another reload is running');
     });
 
-    describe('match', function () {
+    describe('matches', function () {
       it('should return null if no route is set');
       it('should return true when matching route');
       it('should return false when not matching route');
