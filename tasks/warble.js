@@ -12,12 +12,8 @@ module.exports = function (grunt) {
         grunt.log.error(stderr);
         return done(err);
       }
-
       grunt.log.writeln(stdout);
       return done();
-
-
-
     });
   });
 };

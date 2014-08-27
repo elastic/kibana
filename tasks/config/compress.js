@@ -6,7 +6,7 @@ module.exports = function (grunt) {
 
   return _.mapValues({
     build_zip: archiveName() + '.zip',
-    build_tarball: archiveName() + '.zip',
+    build_tarball: archiveName() + '.tar.gz',
     plugin: archiveName(true) + '.tar.gz'
   }, function (filename, task) {
     return {
@@ -16,7 +16,7 @@ module.exports = function (grunt) {
       files: [
         {
           expand: true,
-          cwd: '<%= build %>',
+          cwd: '<%= build %>/dist',
           src: ['**/*'],
           dest: '<%= pkg.name %>' + (task === 'plugin' ? '/_site' : '')
         }
