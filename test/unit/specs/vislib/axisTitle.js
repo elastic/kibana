@@ -84,9 +84,11 @@ define(function (require) {
         el = d3.select('body').append('div')
           .attr('class', 'vis-wrapper');
         el.append('div')
-          .attr('class', 'y-axis-title');
+          .attr('class', 'y-axis-title')
+          .style('height', '20px');
         el.append('div')
-          .attr('class', 'x-axis-title');
+          .attr('class', 'x-axis-title')
+          .style('height', '20px');
 
         dataObj = new Data(data);
         xTitle = dataObj.get('xAxisLabel');
