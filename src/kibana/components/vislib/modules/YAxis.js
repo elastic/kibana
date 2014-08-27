@@ -50,7 +50,6 @@ define(function (require) {
           div = d3.select(this);
           width = $(this).width();
           height = $(this).height() - margin.top - margin.bottom;
-
           self.validateHeightAndWidth(div, width, height);
 
           // Return access to the yAxis
@@ -62,12 +61,9 @@ define(function (require) {
 
           svg.append('g')
             .attr('class', 'y axis')
-            //.attr('transform', 'translate(' + width * 0.95 + ',' + self.margin.top + ')')
-            .attr('transform', 'translate(' + width + ',' + margin.top + ')')
-            .call(yAxis);
+            .attr('transform', 'translate(' + (width - 2) + ',' + margin.top + ')')
+            .call(self.yAxis);
 
-          // update layout divs to tick lengths
-          self.updateLayoutForRotatedLabels(svg, self.getMaxLabelLength(svg.selectAll('.tick text')));
         });
       };
     };

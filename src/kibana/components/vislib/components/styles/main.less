@@ -49,6 +49,7 @@ visualize {
 
 .y-axis-div {
   flex: 5 1;
+  min-width: 40px
 }
 
 .y-axis-filler-div {
@@ -89,7 +90,7 @@ div.y-axis-label {
 }
 .legend-ul {
   list-style-type: none;
-  margin: 0;
+  margin: 0 0 0 10px]]];
   padding: 0;
   visibility: visible;
   display: flex;
@@ -254,8 +255,9 @@ path, line, .axis line, .axis path {
 /* YAxis logic */
 .y-axis-col-wrapper {
   display: flex;
-  flex: 2 1 auto;
+  flex: 1 1;
   flex-direction: column;
+  min-width: 75px;
 }
 
 .y-axis-col {
@@ -265,7 +267,7 @@ path, line, .axis line, .axis path {
 }
 
 .y-axis-spacer-block {
-  // flex: 5 1;
+  flex: 5 1;
 }
 
 .y-axis-title {
@@ -295,13 +297,14 @@ path, line, .axis line, .axis path {
 
 .y-axis-div-wrapper {
   display: flex;
-  flex: 1 1;
+  flex: 1 1 auto;
   flex-direction: column;
+  min-width: 35px
 }
 
 .vis-col-wrapper {
   display: flex;
-  flex: 35 1 auto;
+  flex: 35 1;
   flex-direction: column;
 }
 
@@ -338,14 +341,14 @@ path, line, .axis line, .axis path {
 
 .x-axis-wrapper {
   display: flex;
-  // flex: 5 1;
+  flex: 5 1;
   flex-direction: column;
   overflow: visible;
 }
 
 .x-axis-div-wrapper {
   display: flex;
-//  flex: 5 1;
+  flex: 5 1;
   flex-direction: row;
   overflow: visible;
   min-height: 16px;
@@ -374,50 +377,12 @@ path, line, .axis line, .axis path {
 }
 
 .legend-col-wrapper {
-  flex: 2 1 auto;
+  flex: 0 1 auto;
   z-index: 10;
   overflow-x: hidden;
   overflow-y: auto;
+  min-width: 30px
 }
-
-/*
-.open2 {
-  flex: 2 1;
-}
-
-.open3 {
-  flex: 3 1;
-}
-
-.open4 {
-  flex: 4 1;
-}
-
-.open5 {
-  flex: 5 1;
-}
-
-.open6 {
-  flex: 6 1;
-}
-
-.open7 {
-  flex: 7 1;
-}
-
-.open8 {
-  flex: 8 1;
-}
-
-.open9 {
-  flex: 9 1;
-}
-
-.open12 {
-  flex: 12 1;
-}
-*/
-
 
 .x.axis path {
   display: none;
