@@ -105,9 +105,8 @@ define(function (require) {
           } catch (error) {
             if (error.message === 'yScale is undefined') {
               chart.error(self.el);
-              self.checkSize(self.el);
-//            } else {
-//              console.group(error.message);
+            } else {
+              console.group(error.message);
             }
           }
         });

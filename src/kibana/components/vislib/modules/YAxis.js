@@ -22,15 +22,19 @@ define(function (require) {
         .domain([0, this.yMax])
         .range([height, 0])
         .nice();
+
+      return this.yScale;
     };
 
     YAxis.prototype.getYAxis = function (height) {
-      this.getYScale(height);
+      var yScale = this.getYScale(height);
 
       this.yAxis = d3.svg.axis()
-        .scale(this.yScale)
+        .scale(yScale)
         .tickFormat(d3.format('s'))
         .orient('left');
+
+      return this.yAxis;
     };
 
     YAxis.prototype.draw = function () {
@@ -40,8 +44,6 @@ define(function (require) {
       var width;
       var height;
       var svg;
-      var bbox;
-      var tickN;
 
       return function (selection) {
         selection.each(function () {
@@ -52,7 +54,7 @@ define(function (require) {
           self.validateHeightAndWidth(div, width, height);
 
           // Return access to the yAxis
-          self.getYAxis(height);
+          var yAxis = self.getYAxis(height);
 
           svg = div.append('svg')
             .attr('width', width)
@@ -62,59 +64,34 @@ define(function (require) {
             .attr('class', 'y axis')
             //.attr('transform', 'translate(' + width * 0.95 + ',' + self.margin.top + ')')
             .attr('transform', 'translate(' + width + ',' + margin.top + ')')
-            .call(self.yAxis);
+            .call(yAxis);
 
           // update layout divs to tick lengths
-          self.updateLayoutForRotatedLabels(div, self.getMaxLabelLength(selection));
-
+          self.updateLayoutForRotatedLabels(svg, self.getMaxLabelLength(svg.selectAll('.tick text')));
         });
       };
     };
 
-    YAxis.prototype.getMaxLabelLength = function (selection) {
-      var svg = selection.select('svg');
-      var labels = selection.selectAll('.tick text');
-      var param;
+    YAxis.prototype.getMaxLabelLength = function (labels) {
       var arr = [];
-      var length;
-      var spacer;
-      
+
       // get max tick label length
       _.forEach(labels[0], function (n) {
         arr.push(n.getBBox().width);
       });
-      //console.log(arr, _.max(arr));
-      return length = _.max(arr);
+
+      return _.max(arr);
     };
 
-    YAxis.prototype.updateLayoutForRotatedLabels = function (selection, length) {
-      var self = this;
-
-      var svg = selection.select('svg');
-      var spacer;
+    YAxis.prototype.updateLayoutForRotatedLabels = function (svg, length) {
+      var margin = this._attr.margin;
       var tickspace = 14;
-      length += tickspace;
 
-      // if rows, space for chart title
-      // if cols, space for chart title + axis label
-      spacer = length + tickspace + 18;
-      if (this.el.__data__.rows) {
-        spacer = length + 32;
-      }
+      length += tickspace;
 
       // set widths of svg, x-axis-div and x-axis-div-wrapper to fit ticklabels
       svg.attr('width', length + 6);
-      //$('.y-axis-div-wrapper').width(length + tickspace);
-      //$('.y-axis-div').width(length);
-      //$('.y-axis-col-wrapper').width(length);
-      //$('.y-axis-col').width(length + tickspace);
-      d3.selectAll('.y.axis').attr('transform', 'translate(' + (length + 2) + ',' + self._attr.margin.top + ')');
-      
-      // set widths of y-axis-spacer-block and x-axis-wrapper to fit resized x axis      
-      //$('.y-axis-spacer-block').width(spacer);
-      //$('.y-axis-col-wrapper').width(spacer);
-      //$('.y-axis-col').width(spacer);
-      
+      d3.selectAll('.y.axis').attr('transform', 'translate(' + (length + 2) + ',' + margin.top + ')');
     };
 
     return YAxis;

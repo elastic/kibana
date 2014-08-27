@@ -14,7 +14,7 @@ define(function (require) {
     }
 
     XAxis.prototype.render = function () {
-      d3.select(this.el).selectAll('.x-axis-div').call(this.appendSVG());
+      d3.select(this.el).selectAll('.x-axis-div').call(this.draw());
     };
 
     XAxis.prototype.getScale = function (ordered) {
@@ -82,7 +82,7 @@ define(function (require) {
         .orient('bottom');
     };
 
-    XAxis.prototype.appendSVG = function () {
+    XAxis.prototype.draw = function () {
       var self = this;
       var margin = this._attr.margin;
       var div;
@@ -129,7 +129,7 @@ define(function (require) {
           bbox = selection.selectAll('.tick text').node().getBBox();
           tickN = selection.selectAll('.tick text')[0].length;
           ticksLength = bbox.width * 1.05 * tickN;
-          
+
           // rotate & filter does not apply to discover view
           if (!self.isDiscover && ticksLength > width) {
             self.rotateAxisLabels(selection);

@@ -102,6 +102,18 @@ define(function (require) {
 
       return function (selection) {
         selection.each(function (data) {
+          if (self._attr.destroFlag) {
+            throw new Error('You are trying to render a chart you have destroyed');
+          }
+
+          if (!yScale) {
+            throw new Error('yScale is ' + yScale);
+          }
+
+          if (!xScale) {
+            throw new Error('xScale is ' + xScale);
+          }
+
           layers = self.stackData(data);
 
           self.validateHeightAndWidth($elem, elWidth, elHeight);
@@ -129,10 +141,6 @@ define(function (require) {
             'class', function (d, i) {
               return i;
             });
-
-          if (!yScale) {
-            throw new Error('yScale is ' + yScale);
-          }
 
           // Append the bars
           bars = layer.selectAll('rect')

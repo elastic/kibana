@@ -13,10 +13,10 @@ define(function (require) {
     }
 
     ChartTitle.prototype.render = function () {
-      d3.select(this.el).selectAll('.chart-title').call(this.appendTitles());
+      d3.select(this.el).selectAll('.chart-title').call(this.draw());
     };
     
-    ChartTitle.prototype.appendTitles = function () {
+    ChartTitle.prototype.draw = function () {
       var self = this;
 
       return function (selection) {

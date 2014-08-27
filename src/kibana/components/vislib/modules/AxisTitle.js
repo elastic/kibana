@@ -14,11 +14,11 @@ define(function (require) {
     }
 
     AxisTitle.prototype.render = function () {
-      d3.select(this.el).select('.x-axis-title').call(this.appendAxisTitle(this.xTitle));
-      d3.select(this.el).select('.y-axis-title').call(this.appendAxisTitle(this.yTitle));
+      d3.select(this.el).select('.x-axis-title').call(this.draw(this.xTitle));
+      d3.select(this.el).select('.y-axis-title').call(this.draw(this.yTitle));
     };
 
-    AxisTitle.prototype.appendAxisTitle = function (title) {
+    AxisTitle.prototype.draw = function (title) {
       var self = this;
       var div;
       var width;
