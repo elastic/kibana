@@ -18,7 +18,8 @@ define(function (require) {
       this.el = $el.get ? $el.get(0) : $el;
       this.ChartClass = chartTypes[config.type];
       this._attr = _.defaults(config || {}, {
-        'margin' : { top: 10, right: 3, bottom: 5, left: 3 }
+        'margin' : { top: 10, right: 3, bottom: 5, left: 3 },
+        destroyFlag : false
       });
     }
 
@@ -36,10 +37,6 @@ define(function (require) {
 
       if (!data) {
         throw new Error('No valid data!');
-      }
-
-      if (this._attr.destroyFlag) {
-        throw new Error('You tried rendering a visualization that has been destroyed');
       }
 
       // DATA CLASS
