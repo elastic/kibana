@@ -22,6 +22,7 @@ define(function (require) {
 
     module('kibana/url', function ($provide) {
       $provide.service('$route', function () {
+        return {};
       });
 
       $provide.service('globalState', function () {
@@ -165,9 +166,36 @@ define(function (require) {
     });
 
     describe('matches', function () {
-      it('should return null if no route is set');
-      it('should return true when matching route');
-      it('should return false when not matching route');
+      it('should return false if no route is set', function () {
+        $route.current = { $$route: undefined };
+
+        var match = kbnUrl.matches('/test');
+        expect(match).to.be(false);
+      });
+
+      it('should return false when not matching route', function () {
+        var url = '/' + faker.Lorem.words(3).join('/');
+        $route.current = { $$route:
+          {
+            regexp: new RegExp(url + 'fail')
+          }
+        };
+
+        var match = kbnUrl.matches(url);
+        expect(match).to.be(false);
+      });
+      it('should return true when matching route', function () {
+        var url = '/' + faker.Lorem.words(3).join('/');
+
+        $route.current = { $$route:
+          {
+            regexp: new RegExp(url)
+          }
+        };
+
+        var match = kbnUrl.matches(url);
+        expect(match).to.be(true);
+      });
     });
   });
 });
