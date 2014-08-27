@@ -54,7 +54,7 @@ define(function (require) {
           color: this.data.getColorFunc(),
           labels: this.data.getLabels()
         };
-        this.renderLegend(legend, this._attr);
+        this.renderLegend(legend, this._attr, this.el);
       }
 
       // TOOLTIP CLASS

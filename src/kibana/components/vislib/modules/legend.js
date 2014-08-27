@@ -10,7 +10,7 @@ define(function (require) {
     // Dynamically adds css file
     require('css!components/vislib/components/styles/main');
 
-    function Legend(legend, config) {
+    function Legend(legend, config, el) {
       this.labels = legend.labels;
       this.color = legend.color;
       this._attr = _.defaults(config || {}, {
@@ -21,13 +21,15 @@ define(function (require) {
         'isOpen' : false,
         'width': 20
       });
+      this.el = el;
     }
 
     Legend.prototype.render = function () {
-      var legendDiv = d3.select('.' + this._attr.legendClass);
+      var visEl = d3.select(this.el);
+      var legendDiv = visEl.select('.' + this._attr.legendClass);
       var items = this.labels;
       var header = createHeader(legendDiv);
-      var headerIcon = d3.select('.legend-toggle');
+      var headerIcon = visEl.select('.legend-toggle');
       var list = createList(legendDiv, items, this);
       //var width = this._attr.width ? this._attr.width : this.getMaxLabelLength(list);
 
@@ -37,13 +39,13 @@ define(function (require) {
       headerIcon.on('click', function (d) {
         if (that._attr.isOpen) {
           // close legend
-          d3.select('ul.legend-ul')
+          visEl.select('ul.legend-ul')
             .classed('hidden', true);
           that._attr.isOpen = false;
           
         } else {
           // open legend
-          d3.select('ul.legend-ul')
+          visEl.select('ul.legend-ul')
             .classed('hidden', false);
           that._attr.isOpen = true;
           
@@ -52,25 +54,25 @@ define(function (require) {
 
       });
 
-      d3.selectAll('.color')
+      visEl.selectAll('.color')
         .on('mouseover', function (d) {
           var liClass = '.' + classify(that.color(d));
-          d3.selectAll('.color').style('opacity', that._attr.blurredOpacity);
+          visEl.selectAll('.color').style('opacity', that._attr.blurredOpacity);
           
           // select series on chart
-          d3.selectAll(liClass).style('opacity', that._attr.focusOpacity);
+          visEl.selectAll(liClass).style('opacity', that._attr.focusOpacity);
 
-          d3.selectAll('.color')
+          visEl.selectAll('.color')
             .style('opacity', that._attr.blurredOpacity);
           
           // Select series on chart
-          d3.selectAll(liClass)
+          visEl.selectAll(liClass)
             .style('opacity', that._attr.focusOpacity);
         });
 
-      d3.selectAll('.color')
+      visEl.selectAll('.color')
         .on('mouseout', function () {
-          d3.selectAll('.color').style('opacity', that._attr.defaultOpacity);
+          visEl.selectAll('.color').style('opacity', that._attr.defaultOpacity);
         });
 
       // add/remove class to open legend
