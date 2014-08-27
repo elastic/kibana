@@ -4,6 +4,7 @@ define(function (require) {
     var AggType = Private(require('components/agg_types/_agg_type'));
 
     function getTickLabel(query) {
+
       if (query.query_string && query.query_string.query) {
         return query.query_string.query;
       }
@@ -18,14 +19,12 @@ define(function (require) {
         {
           name: 'filters',
           editor: require('text!components/agg_types/controls/filters.html'),
-          default: [ {} ],
+          default: [ {input: {}} ],
           write: function (aggConfig, output) {
-            output.aggParams = {
+            output.params = {
               filters: _.transform(aggConfig.params.filters, function (filters, filter, iterator) {
                 // We need to check here
-                filters[getTickLabel(filter.input)] = {
-                  query: filter.input || { query_string: {query: '*'} }
-                };
+                filters[getTickLabel(filter.input.query)] = filter.input || {query: {query_string: {query: '*'}}};
               }, {})
             };
           }
