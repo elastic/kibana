@@ -3,7 +3,7 @@ define(function (require) {
   var _ = require('lodash');
   var rison = require('utils/rison');
 
-  module.directive('savedObjectFinder', function (savedSearches, savedVisualizations, savedDashboards, $location, $route) {
+  module.directive('savedObjectFinder', function (savedSearches, savedVisualizations, savedDashboards, $location, $route, kbnUrl) {
 
     var vars = {
       searches: {
@@ -90,7 +90,7 @@ define(function (require) {
 
             // change works with paths, but we are only here because the paths
             // are the same, so we have to change the whole url to be the new path
-            $route.changeUrl(path);
+            kbnUrl.change(path);
           }
         };
 
