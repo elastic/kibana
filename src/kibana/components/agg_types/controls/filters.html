@@ -1,9 +1,9 @@
 <div class="form-group">
   <div ng-repeat="filter in params.filters">
-    <label>Query string {{$index + 1}}</label>
+    <label>Query {{$index + 1}}</label>
     <div class="form-group vis-editor-agg-form-row">
       <input query-input
-        ng-model="filter.query"
+        ng-model="filter.input.query"
         type="text"
         class="form-control"
         name="filter{{$index}}">
@@ -18,7 +18,8 @@
   </div>
 </div>
 <div
-  ng-click="params.filters.push({})"
+  click-focus="'filter'+(params.filters.length-1)"
+  ng-click="params.filters.push({input:{}})"
   class="sidebar-item-button primary">
   Add filter
 </div>
