@@ -144,7 +144,20 @@ define(function (require) {
         expect(locationUrlSpy.secondCall.args[0]).to.be(testUrl);
       });
 
-      it('should throw when params are missing');
+      it('should throw when params are missing', function () {
+        var url = '/{replace-me}/{but-not-me}';
+        var params = {
+          'replace-me': 'done'
+        };
+
+        try {
+          kbnUrl.change(url, params);
+          throw new Error('this should not run');
+        } catch (err) {
+          expect(err).to.be.an(Error);
+          expect(err.message).to.match(/but-not-me$/);
+        }
+      });
     });
 
     describe('reload', function () {
