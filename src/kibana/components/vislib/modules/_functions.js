@@ -26,8 +26,8 @@ define(function (require) {
       }
     };
 
-    VisFunctions.prototype.renderLegend = function (legend, config) {
-      this.legend = new Legend(legend, config);
+    VisFunctions.prototype.renderLegend = function (legend, config, el) {
+      this.legend = new Legend(legend, config, el);
       try {
         this.legend.render();
       } catch (error) {

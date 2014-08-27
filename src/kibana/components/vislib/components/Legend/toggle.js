@@ -1,7 +1,6 @@
 define(function () {
   return function LegendToggleUtilService(d3) {
     return function (self) {
-      console.log('toggle', self);
       if (self._attr.isOpen) {
         // close legend
         d3.select('.' + self._attr.legendClass)
