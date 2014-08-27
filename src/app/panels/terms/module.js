@@ -196,6 +196,7 @@ function (angular, app, _, $, kbn) {
 
       // Populate the inspector panel
       $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
+      $scope.base64inspector = btoa(angular.toJson(JSON.parse(request.toString()),true));
 
       results = request.doSearch();
 

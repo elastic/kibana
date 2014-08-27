@@ -429,6 +429,7 @@ function (angular, app, _, kbn, moment) {
 
     $scope.populate_modal = function(request) {
       $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
+      $scope.base64inspector = btoa(angular.toJson(JSON.parse(request.toString()),true));
     };
 
     $scope.without_kibana = function (row) {

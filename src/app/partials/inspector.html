@@ -11,5 +11,6 @@
   
 </div>
 <div class="modal-footer">
+  <button type="button" class="btn btn-danger" onclick="window.open('export.php?url={{config.elasticsearch}}&indices={{dashboard.indices|stringify}}&export={{base64inspector}}','popUpWindow','height=400,width=600,left=10,top=10,,scrollbars=yes,menubar=no'); return false;">Export Logs</button>
   <button type="button" class="btn btn-success" ng-click="dismiss()">Close</button>
 </div>

@@ -85,7 +85,7 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
         if(_.isUndefined(isMinimum)) {
           return;
         }
-        if(isMinimum) {
+        if(!isMinimum) {
           route();
         } else {
           alertSrv.set('Upgrade Required',"Your version of Elasticsearch is too old. Kibana requires" +
