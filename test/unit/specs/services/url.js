@@ -1,11 +1,13 @@
 define(function (require) {
   var sinon = require('test_utils/auto_release_sinon');
   var faker = require('faker');
+  var _ = require('lodash');
 
   // global vars, injected and mocked in init()
   var kbnUrl;
   var $route;
   var $location;
+  var locationUrlSpy;
   var globalStateMock;
 
   require('components/url/url');
@@ -28,6 +30,8 @@ define(function (require) {
       $route = $injector.get('$route');
       $location = $injector.get('$location');
       kbnUrl = $injector.get('kbnUrl');
+
+      locationUrlSpy = sinon.spy($location, 'url');
     });
   }
 
@@ -42,16 +46,20 @@ define(function (require) {
         sinon.stub(kbnUrl, 'reload');
       });
 
-      it('should set $location.url when given new url', function () {
-        var wordCount = 5;
+      it('should set $location.url and call reload when given new url', function () {
+        var wordCount = _.random(3, 6);
         var callCount = 0;
         var lastUrl;
-        var urlSpy = sinon.spy($location, 'url');
 
         var words = faker.Lorem.words(wordCount);
 
         // add repeat word to check that url doesn't change again
         words.push(words[wordCount - 1]);
+
+        var uniqWordCount = _.uniq(words).length;
+
+        expect(words.length).to.be(wordCount + 1);
+        expect(uniqWordCount).to.be(wordCount);
 
         words.forEach(function (url) {
           url = '/' + url;
@@ -60,35 +68,60 @@ define(function (require) {
 
           kbnUrl.change(url);
 
+          // 1 for getter
+          callCount++;
+
           if (lastUrl !== url) {
-            // 1 for getter
             // 1 for setter
-            callCount += 2;
-          } else {
-            // 1 for getter
             callCount++;
           }
 
           expect($location.url()).to.be(url);
           // we called $location.url again, increment when checking
-          expect(urlSpy.callCount).to.be(++callCount);
+          expect(locationUrlSpy.callCount).to.be(++callCount);
 
           lastUrl = url;
         });
 
+        expect(kbnUrl.reload.callCount).to.be(uniqWordCount);
+
         console.log('no fakin');
       });
 
-      it('should allow forceReload as the 2nd param');
+      it('should reload when forceReload is true', function () {
+        var words = faker.Lorem.words(1);
+        words.push(words[0]);
+
+        words.forEach(function (url) {
+          url = '/' + url;
+          globalStateMock.writeToUrl.returns(url);
+
+          kbnUrl.change(url, {}, true);
+        });
+
+        expect(kbnUrl.reload.callCount).to.be(words.length);
+      });
+
+      it('should allow forceReload as the 2nd param', function () {
+        var words = [faker.Lorem.words(2).join('/')];
+        words.push(words[0]);
+
+        words.forEach(function (url) {
+          url = '/' + url;
+          globalStateMock.writeToUrl.returns(url);
+
+          kbnUrl.change(url, true);
+        });
+
+        expect(kbnUrl.reload.callCount).to.be(words.length);
+      });
+
       it('should replace template params');
       it('should rison encode template parameters');
       it('should throw when params are missing');
     });
 
     describe('reload', function () {
-      it('should reload on new url');
-      it('should reload when forceReload is true');
-      it('should not reload when url is the same');
       it('should not reload when another reload is running');
     });
 

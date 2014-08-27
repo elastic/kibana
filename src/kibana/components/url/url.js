@@ -7,7 +7,7 @@ define(function (require) {
     self.reloading = false;
 
     self.change = function (url, paramObj, forceReload) {
-      if (!_.isBoolean(paramObj)) {
+      if (_.isBoolean(paramObj)) {
         forceReload = paramObj;
         paramObj = undefined;
       }
@@ -21,6 +21,8 @@ define(function (require) {
         if (forceReload || !self.matches(url)) {
           self.reload();
         }
+      } else if (forceReload) {
+        self.reload();
       }
     };
 
