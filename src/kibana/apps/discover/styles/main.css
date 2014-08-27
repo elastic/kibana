@@ -159,7 +159,7 @@
   margin: 5px 10px;
 }
 .sidebar-item:hover:hover button.discover-field-toggle {
-  display: inherit;
+  display: block;
 }
 .discover-field-details-close {
   text-align: center;
@@ -228,6 +228,9 @@ disc-field-chooser ul.discover-selected-fields {
 }
 disc-field-chooser ul.discover-selected-fields li:first-child:nth-last-child(1)[field=_source] button.discover-field-toggle {
   display: none;
+}
+disc-field-chooser .sidebar-item-title {
+  position: relative;
 }
 .results h3 {
   margin: -20px 0 10px 0;
