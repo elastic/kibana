@@ -40,7 +40,7 @@ define(function (require) {
     };
 
     VisFunctions.prototype.renderChartTitles = function (splitType) {
-      this.chartTitle = new ChartTitle(this.el, splitType);
+      this.chartTitle = new ChartTitle(this.el);
       try {
         this.chartTitle.render();
       } catch (error) {
@@ -77,7 +77,6 @@ define(function (require) {
 
     VisFunctions.prototype.renderCharts = function (vis, charts) {
       var self = this;
-
       d3.select(this.el)
         .selectAll('.chart')
         .each(function (chartData) {

@@ -7,6 +7,10 @@ define(function (require) {
 
     _(AxisTitle).inherits(Chart);
     function AxisTitle(el, xTitle, yTitle) {
+      if (!(this instanceof AxisTitle)) {
+        return new AxisTitle(el, xTitle, yTitle);
+      }
+
       AxisTitle.Super.apply(this, arguments);
       this.el = el;
       this.xTitle = xTitle;
@@ -40,7 +44,6 @@ define(function (require) {
               if (div.attr('class') === 'x-axis-title') {
                 return 'translate(' + width / 2 + ',' + height * 0.7 + ')';
               }
-              // return 'translate(' + width * 0.7 + ',' + height / 2 + ')rotate(270)';
               return 'translate(11,' + height / 2 + ')rotate(270)';
             })
             .attr('text-anchor', 'middle')

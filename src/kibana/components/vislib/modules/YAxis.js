@@ -21,7 +21,7 @@ define(function (require) {
       this.yScale = d3.scale.linear()
         .domain([0, this.yMax])
         .range([height, 0])
-        .nice();
+        .nice(this.tickScale(height));
 
       return this.yScale;
     };
@@ -32,9 +32,21 @@ define(function (require) {
       this.yAxis = d3.svg.axis()
         .scale(yScale)
         .tickFormat(d3.format('s'))
+        .ticks(this.tickScale(height))
         .orient('left');
 
       return this.yAxis;
+    };
+
+    YAxis.prototype.tickScale = function (height) {
+      // Avoid using even numbers in the yTickScale.range
+      // Causes the top most tickValue in the chart to be missing
+      var yTickScale = d3.scale.linear()
+        .clamp(true)
+        .domain([20, 40, 1000])
+        .range([0, 3, 11]);
+
+      return Math.ceil(yTickScale(height));
     };
 
     YAxis.prototype.draw = function () {

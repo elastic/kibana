@@ -6,10 +6,13 @@ define(function (require) {
     var Chart = Private(require('components/vislib/modules/_chart'));
 
     _(ChartTitle).inherits(Chart);
-    function ChartTitle(el, type) {
+    function ChartTitle(el) {
+      if (!(this instanceof ChartTitle)) {
+        return new ChartTitle(el);
+      }
+
       ChartTitle.Super.apply(this, arguments);
       this.el = el;
-      this.dataType = type;
     }
 
     ChartTitle.prototype.render = function () {
@@ -20,6 +23,11 @@ define(function (require) {
       var self = this;
 
       return function (selection) {
+        // Determines whether the data are in rows or columns, which is needed
+        // for the chart title placement.
+        var parentNode = selection[0].parentNode;
+        var dataType = parentNode.__data__.rows ? 'rows' : 'columns';
+
         selection.each(function () {
           var div = d3.select(this);
           var width = $(this).width();
@@ -32,12 +40,9 @@ define(function (require) {
             .attr('height', height)
             .append('text')
             .attr('transform', function () {
-              if (self.dataType === 'rows') {
-                // return 'translate(' + width * 0.95 + ',' + height / 2 + ')rotate(270)';
+              if (dataType === 'rows') {
                 return 'translate(11,' + height / 2 + ')rotate(270)';
               }
-              // problem: 'height' var grows with each column, causing layout issue
-              // return 'translate(' + width / 2 + ',' + height * 0.7 + ')';
               return 'translate(' + width / 2 + ',' + 17 * 0.7 + ')';
             })
             .attr('text-anchor', 'middle')

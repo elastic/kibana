@@ -86,14 +86,6 @@ define(function (require) {
 
     };
 
-    Legend.prototype.set = function (name, val) {
-      this[name] = val;
-    };
-
-    Legend.prototype.get = function (name) {
-      return this[name];
-    };
-
     return Legend;
   };
 });

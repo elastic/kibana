@@ -13,6 +13,11 @@ define(function (require) {
 
     _(Vis).inherits(Events);
     function Vis($el, config) {
+
+      if (!(this instanceof Vis)) {
+        return new Vis($el, config);
+      }
+
       Vis.Super.apply(this, arguments);
       this.el = $el.get ? $el.get(0) : $el;
       this.ChartClass = chartTypes[config.type];
@@ -64,8 +69,7 @@ define(function (require) {
       }
 
       // CHART TITLE CLASS
-      type = this.data.splitType();
-      this.renderChartTitles(type);
+      this.renderChartTitles();
 
       // XAXIS CLASS
       this.renderXAxis({
@@ -99,6 +103,7 @@ define(function (require) {
         throw new Error('No valid data');
       }
       this.render(this.data.data);
+      console.log('resized');
     };
 
     Vis.prototype.checkSize = _.debounce(function () {
@@ -109,8 +114,8 @@ define(function (require) {
         this.resize();
       }
       this.prevSize = size;
-      setTimeout(this.checkSize(), 300);
-    }, 300);
+      setTimeout(this.checkSize(), 250);
+    }, 250);
 
     Vis.prototype.destroy = function () {
       this._attr.destroyFlag = true;
