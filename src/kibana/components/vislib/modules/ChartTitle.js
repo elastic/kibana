@@ -17,16 +17,39 @@ define(function (require) {
 
     ChartTitle.prototype.render = function () {
       d3.select(this.el).selectAll('.chart-title').call(this.draw());
+      d3.select(this.el).selectAll('.chart-title').call(this.truncate());
+    };
+
+    ChartTitle.prototype.truncate = function () {
+      return function (selection) {
+        var dataType = selection[0].parentNode.__data__.rows ? 'rows' : 'columns';
+
+        selection.each(function () {
+          var div = d3.select(this);
+          var text = div.select('text');
+          var textLength = text.node().getComputedTextLength();
+          var maxWidth = dataType === 'rows' ? $(this).height() : $(this).width();
+          var subtractionPercentage = maxWidth * 0.05;
+          var str = text.text();
+
+          maxWidth = maxWidth - subtractionPercentage;
+          if (textLength > maxWidth) {
+            var avg = textLength / str.length;
+            var end = Math.floor(maxWidth / avg);
+
+            str = str.substr(0, end) + '...';
+          }
+
+          text.text(str);
+        });
+      };
     };
     
     ChartTitle.prototype.draw = function () {
       var self = this;
 
       return function (selection) {
-        // Determines whether the data are in rows or columns, which is needed
-        // for the chart title placement.
-        var parentNode = selection[0].parentNode;
-        var dataType = parentNode.__data__.rows ? 'rows' : 'columns';
+        var dataType = selection[0].parentNode.__data__.rows ? 'rows' : 'columns';
 
         selection.each(function () {
           var div = d3.select(this);

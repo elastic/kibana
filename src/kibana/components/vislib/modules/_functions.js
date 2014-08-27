@@ -102,11 +102,7 @@ define(function (require) {
           try {
             chart.render();
           } catch (error) {
-            if (error.message === 'yScale is undefined') {
-              chart.error(self.el);
-            } else {
-              console.group(error.message);
-            }
+//            console.group(error.message);
           }
         });
     };
