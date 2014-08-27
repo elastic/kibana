@@ -33,7 +33,8 @@ define(function (require) {
             .append('text')
             .attr('transform', function () {
               if (self.dataType === 'rows') {
-                return 'translate(' + width * 0.95 + ',' + height / 2 + ')rotate(270)';
+                // return 'translate(' + width * 0.95 + ',' + height / 2 + ')rotate(270)';
+                return 'translate(11,' + height / 2 + ')rotate(270)';
               }
               // problem: 'height' var grows with each column, causing layout issue
               // return 'translate(' + width / 2 + ',' + height * 0.7 + ')';

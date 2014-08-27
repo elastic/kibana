@@ -49,6 +49,7 @@ visualize {
 
 .y-axis-div {
   flex: 5 1;
+  min-width: 40px
 }
 
 .y-axis-filler-div {
@@ -89,7 +90,7 @@ div.y-axis-label {
 }
 .legend-ul {
   list-style-type: none;
-  margin: 0;
+  margin: 0 0 0 10px;
   padding: 0;
   visibility: visible;
   display: flex;
@@ -257,8 +258,9 @@ path, line, .axis line, .axis path {
 /* YAxis logic */
 .y-axis-col-wrapper {
   display: flex;
-  flex: 2 1;
+  flex: 1 1;
   flex-direction: column;
+  min-width: 75px;
 }
 
 .y-axis-col {
@@ -298,8 +300,9 @@ path, line, .axis line, .axis path {
 
 .y-axis-div-wrapper {
   display: flex;
-  flex: 1 1;
+  flex: 1 1 auto;
   flex-direction: column;
+  min-width: 35px
 }
 
 .vis-col-wrapper {
@@ -377,10 +380,11 @@ path, line, .axis line, .axis path {
 }
 
 .legend-col-wrapper {
-  flex: 2 1;
+  flex: 0 1 auto;
   z-index: 10;
   overflow-x: hidden;
   overflow-y: auto;
+  min-width: 30px
 }
 
 .x.axis path {

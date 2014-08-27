@@ -48,7 +48,7 @@ define(function (require) {
           div = d3.select(this);
           width = $(this).width();
           height = $(this).height() - margin.top - margin.bottom;
-
+          console.log(width, height, div);
           self.validateHeightAndWidth(div, width, height);
 
           // Return access to the yAxis
