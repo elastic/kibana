@@ -92,7 +92,6 @@ define(function (require) {
       charts = this.charts = [];
       this.renderCharts(vis, charts);
 
-      console.log(this);
       this.checkSize();
     };
 
