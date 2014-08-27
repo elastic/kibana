@@ -230,7 +230,8 @@ define(function (require) {
 
     describe('Zero Filled Array', function () {
       var createZeroArray;
-      var arr = ['1', '2', '3', '4', '5'];
+      var arr1 = [1, 2, 3, 4, 5];
+      var arr2 = ['1', '2', '3', '4', '5'];
       var results1;
       var results2;
 
@@ -241,8 +242,8 @@ define(function (require) {
       beforeEach(function () {
         inject(function (Private) {
           createZeroArray = Private(require('components/vislib/components/_functions/zero_injection/zero_filled_array'));
-          results1 = createZeroArray(arr, ordered);
-          results2 = createZeroArray(arr, false);
+          results1 = createZeroArray(arr1);
+          results2 = createZeroArray(arr2);
         });
       });
 
@@ -270,7 +271,7 @@ define(function (require) {
         expect(results1[4].y).to.be(0);
       });
 
-      it('should return an array of objects where each x values are numbers when ordered obj is defined', function () {
+      it('should return an array of objects where each x values are numbers', function () {
         expect(_.isNumber(results1[0].x)).to.be(true);
         expect(_.isNumber(results1[1].x)).to.be(true);
         expect(_.isNumber(results1[2].x)).to.be(true);
@@ -278,7 +279,7 @@ define(function (require) {
         expect(_.isNumber(results1[4].x)).to.be(true);
       });
 
-      it('should return an array of objects where each x values are strings when ordered obj is undefined', function () {
+      it('should return an array of objects where each x values are strings', function () {
         expect(_.isString(results2[0].x)).to.be(true);
         expect(_.isString(results2[1].x)).to.be(true);
         expect(_.isString(results2[2].x)).to.be(true);

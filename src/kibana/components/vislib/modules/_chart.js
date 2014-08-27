@@ -39,8 +39,8 @@ define(function (require) {
         .append('div')
         .attr('class', 'error-wrapper')
         .append('div')
-        .attr('class', 'chart-error')
-        .append('span')
+        .attr('class', 'chart error')
+        .append('p')
         .style('line-height', function () {
           return $(elem).height() + 'px';
         })

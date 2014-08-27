@@ -14,7 +14,7 @@ define(function (require) {
     }
 
     XAxis.prototype.render = function () {
-      d3.select(this.el).selectAll('.x-axis-div').call(this.appendSVG());
+      d3.select(this.el).selectAll('.x-axis-div').call(this.draw());
     };
 
     XAxis.prototype.removeAll = function () {
@@ -86,7 +86,7 @@ define(function (require) {
         .orient('bottom');
     };
 
-    XAxis.prototype.appendSVG = function () {
+    XAxis.prototype.draw = function () {
       var self = this;
       var margin = this._attr.margin;
       var div;
@@ -199,7 +199,6 @@ define(function (require) {
       if (nth > 1) {
         self.filterAxisLabels(selection, nth);
       }
-
     };
 
     XAxis.prototype.rotateAxisLabels = function (selection) {
@@ -220,50 +219,6 @@ define(function (require) {
           return i % nth === 0 ? xAxisFormatter(d) : '';
         });
     };
-
-    // XAxis.prototype.getMaxLabelLength = function (selection) {
-    //   var svg = selection.select('svg');
-    //   var labels = selection.selectAll('.tick text');
-    //   var param;
-    //   var arr = [];
-    //   var length;
-    //   var spacer;
-      
-    //   // if rotated use width else use height
-    //   param = 'width';
-    //   if (!this.isRotated) {
-    //     param = 'height';
-    //   }
-      
-    //   // get max tick label length
-    //   _.forEach(labels[0], function (n) {
-    //     arr.push(n.getBBox()[param]);
-    //   });
-    //   return length = _.max(arr);
-    // };
-
-    // XAxis.prototype.updateLayoutForRotatedLabels = function (selection, length) {
-    //   var svg = selection.select('svg');
-    //   var spacer;
-    //   var tickspace = 10;
-    //   length += tickspace;
-    //   // if rows, space for chart title
-    //   // if cols, space for chart title + axis label
-    //   spacer = length + 18;
-    //   if (this.data.data.columns) {
-    //     spacer = length + 32;
-    //   }
-      
-    //   // set heights of svg, x-axis-div and x-axis-div-wrapper to fit ticklabels
-    //   svg.attr('height', length);
-    //   $('.x-axis-div-wrapper').height(length);
-    //   $('.x-axis-div').height(length);
-
-    //   // set heights of y-axis-spacer-block and x-axis-wrapper to fit resized x axis      
-    //   $('.y-axis-spacer-block').height(spacer);
-    //   $('.x-axis-wrapper').height(spacer);
-      
-    // };
 
     return XAxis;
   };
