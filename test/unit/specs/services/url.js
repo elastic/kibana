@@ -2,6 +2,7 @@ define(function (require) {
   var sinon = require('test_utils/auto_release_sinon');
   var faker = require('faker');
   var _ = require('lodash');
+  var rison = require('utils/rison');
 
   // global vars, injected and mocked in init()
   var kbnUrl;
@@ -112,20 +113,37 @@ define(function (require) {
         expect(kbnUrl.reload.callCount).to.be(words.length);
       });
 
-      it('should replace template params', function () {
-        var words = faker.Lorem.words(3);
-        var replace = faker.Lorem.words(2);
-        var url = '/' + words[0] + '/{' + words[1] + '}?{' + words[2] + '}';
+      it('should replace template rison encoded params', function () {
+        var urlParts = ['/', '/', '?', '&', '#'];
+        var wrappers = [ ['{', '}'], ['{ ', ' }'], ['{', '  }'], ['{    ', '}'], ['{    ', '         }']];
+        var words = faker.Lorem.words(5);
+        var replacements = faker.Lorem.words(5).map(function (word, i) {
+          if (i % 2) {
+            return { replace: word };
+          }
+          return word;
+        });
+        var url = '';
+        var testUrl = '';
+
+        // create the url and test url
+        urlParts.forEach(function (part, i) {
+          url += part + wrappers[i][0] + words[i] + wrappers[i][1];
+          testUrl += part + rison.encode(replacements[i]);
+        });
+
+        // create the substitution object
         var params = {};
-        params[words[1]] = replace[0];
-        params[words[2]] = replace[1];
+        replacements.forEach(function (replacement, i) {
+          params[words[i]] = replacement;
+        });
 
         kbnUrl.change(url, params);
 
         expect(locationUrlSpy.secondCall.args[0]).to.not.be(url);
-        expect(locationUrlSpy.secondCall.args[0]).to.be('/' + words[0] + '/' + replace[0] + '?' + replace[1]);
+        expect(locationUrlSpy.secondCall.args[0]).to.be(testUrl);
       });
-      it('should rison encode template parameters');
+
       it('should throw when params are missing');
     });
 

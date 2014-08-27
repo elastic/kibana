@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  var rison = require('utils/rison');
   var location = require('modules').get('kibana/url');
 
   location.service('kbnUrl', function ($route, $location, $rootScope, globalState) {
@@ -37,11 +38,12 @@ define(function (require) {
 
     function parseUrlPrams(url, paramObj) {
       return url.replace(/\{([^\}]+)\}/g, function (match, key) {
+        key = key.trim();
         if (_.isUndefined(paramObj[key])) {
           throw new Error('Replacement failed, key not found: ' + key);
         }
 
-        return paramObj[key];
+        return rison.encode(paramObj[key]);
       });
     }
 
