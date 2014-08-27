@@ -8,6 +8,7 @@ define(function (require) {
   var kbnUrl;
   var $route;
   var $location;
+  var $rootScope;
   var locationUrlSpy;
   var globalStateMock;
 
@@ -33,6 +34,7 @@ define(function (require) {
     inject(function ($injector) {
       $route = $injector.get('$route');
       $location = $injector.get('$location');
+      $rootScope = $injector.get('$rootScope');
       kbnUrl = $injector.get('kbnUrl');
 
       locationUrlSpy = sinon.spy($location, 'url');
@@ -162,7 +164,48 @@ define(function (require) {
     });
 
     describe('reload', function () {
-      it('should not reload when another reload is running');
+      require('test_utils/no_digest_promises').activateForSuite();
+
+      beforeEach(function () {
+        $route.reload = sinon.spy();
+      });
+
+      it('should call $route.reload and update the reloading state', function () {
+        expect(kbnUrl.reloading).to.be(false);
+        kbnUrl.reload();
+        expect(kbnUrl.reloading).to.be(true);
+        expect($route.reload.callCount).to.be(1);
+      });
+
+      it('should not reload when reloading state is true', function () {
+        kbnUrl.reload();
+        expect(kbnUrl.reloading).to.be(true);
+        kbnUrl.reload();
+        expect($route.reload.callCount).to.be(1);
+      });
+
+      it('should reset the running state when routes change', function (done) {
+        kbnUrl.reload();
+        expect(kbnUrl.reloading).to.be(true);
+
+        function checkEvent(event, handler) {
+          $rootScope.$on(event, handler);
+          $rootScope.$emit(event);
+        }
+
+        checkEvent('$routeUpdate', function () {
+          expect(kbnUrl.reloading).to.be(false);
+
+          kbnUrl.reload();
+          expect(kbnUrl.reloading).to.be(true);
+
+          checkEvent('$routeChangeStart', function () {
+            expect(kbnUrl.reloading).to.be(false);
+
+            done();
+          });
+        });
+      });
     });
 
     describe('matches', function () {
@@ -187,8 +230,8 @@ define(function (require) {
       it('should return true when matching route', function () {
         var url = '/' + faker.Lorem.words(3).join('/');
 
-        $route.current = { $$route:
-          {
+        $route.current = {
+          $$route: {
             regexp: new RegExp(url)
           }
         };

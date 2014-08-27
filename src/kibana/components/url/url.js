@@ -48,8 +48,10 @@ define(function (require) {
     }
 
     self.reload = function () {
-      if (!self.reloading) $route.reload();
-      self.reloading = true;
+      if (!self.reloading) {
+        $route.reload();
+        self.reloading = true;
+      }
     };
 
     function reloadingComplete() {
