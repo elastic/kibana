@@ -13,7 +13,6 @@ define(function (require) {
 
     _(Vis).inherits(Events);
     function Vis($el, config) {
-
       if (!(this instanceof Vis)) {
         return new Vis($el, config);
       }
@@ -31,7 +30,6 @@ define(function (require) {
     Vis.prototype.render = function (data) {
       var tooltipFormatter;
       var zeroInjectedData;
-      var type;
       var legend;
       var xTitle;
       var yTitle;
