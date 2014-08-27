@@ -120,6 +120,20 @@ define(function (require) {
           width = elWidth - margin.left - margin.right;
           height = elHeight - margin.top - margin.bottom;
 
+          if (_.isNaN(width) || _.isNaN(height)) {
+            throw new Error('width: ' + width + '; height:' + height);
+          }
+
+          if (height <= margin.top + margin.bottom) {
+            throw new Error('The container is too small for this chart.');
+          }
+
+          /* Error Handler that prevents a chart from being rendered when
+           there are too many data points for the width of the container. */
+          if (width / layers.length <= 4) {
+            throw new Error('The container is too small for this chart.');
+          }
+
           // Create the canvas for the visualization
           div = d3.select(this);
 
@@ -180,10 +194,18 @@ define(function (require) {
               return xScale.rangeBand();
             })
             .attr('y', function (d) {
-              return yScale(d.y0 + d.y);
+              var y = yScale(d.y0 + d.y);
+              if (!_.isNaN(y) || y < 0) {
+                return y;
+              }
+              throw new Error('The container is too small for this chart.');
             })
             .attr('height', function (d) {
-              return yScale(d.y0) - yScale(d.y0 + d.y);
+              var height = yScale(d.y0) - yScale(d.y0 + d.y);
+              if (!_.isNaN(height) || height < 0) {
+                return height;
+              }
+              throw new Error('The container is too small for this chart.');
             });
 
           bars

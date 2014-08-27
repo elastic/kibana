@@ -4,9 +4,9 @@ define(function (require) {
   return function VisFunctionsBaseClass(d3, Private) {
     var Data = Private(require('components/vislib/modules/Data'));
     var Layout = Private(require('components/vislib/modules/Layout'));
-    var Legend = Private(require('components/vislib/modules/Legend'));
-    var Tooltip = Private(require('components/vislib/modules/Tooltip'));
-    var XAxis = Private(require('components/vislib/modules/XAxis'));
+    var Legend = Private(require('components/vislib/modules/legend'));
+    var Tooltip = Private(require('components/vislib/modules/tooltip'));
+    var XAxis = Private(require('components/vislib/modules/Xaxis'));
     var YAxis = Private(require('components/vislib/modules/YAxis'));
     var AxisTitle = Private(require('components/vislib/modules/AxisTitle'));
     var ChartTitle = Private(require('components/vislib/modules/ChartTitle'));
@@ -102,7 +102,11 @@ define(function (require) {
           try {
             chart.render();
           } catch (error) {
-//            console.group(error.message);
+            if (error.message === 'The container is too small for this chart.') {
+              chart.error(self.el);
+//            } else {
+//              console.group(error.message);
+            }
           }
         });
     };

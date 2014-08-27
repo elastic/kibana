@@ -97,7 +97,6 @@ define(function (require) {
         throw new Error('No valid data');
       }
       this.render(this.data.data);
-      console.log('resized');
     };
 
     Vis.prototype.checkSize = _.debounce(function () {
