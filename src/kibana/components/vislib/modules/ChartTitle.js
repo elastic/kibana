@@ -66,7 +66,7 @@ define(function (require) {
               if (dataType === 'rows') {
                 return 'translate(11,' + height / 2 + ')rotate(270)';
               }
-              return 'translate(' + width / 2 + ',' + 17 * 0.7 + ')';
+              return 'translate(' + width / 2 + ',11)';
             })
             .attr('text-anchor', 'middle')
             .text(function (d) {
