@@ -26,7 +26,7 @@ define(function (require) {
      */
     State.prototype.fetch = function () {
       var search = $location.search();
-      var stash = rison.decode(search[this._urlParam] || '()');
+      var stash = (search[this._urlParam]) ? rison.decode(search[this._urlParam]) : this.toObject();
       _.defaults(stash, this._defaults);
       // apply diff to state from stash, this is side effecting so
       // it will change state in place.
@@ -42,7 +42,7 @@ define(function (require) {
      */
     State.prototype.save = function () {
       var search = $location.search();
-      var stash = rison.decode(search[this._urlParam] || '()');
+      var stash = (search[this._urlParam]) ? rison.decode(search[this._urlParam]) : this.toObject();
       var state = this.toObject();
       _.defaults(state, this._defaults);
       // apply diff to stash from state, this is side effecting so
