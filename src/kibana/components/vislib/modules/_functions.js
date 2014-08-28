@@ -104,8 +104,8 @@ define(function (require) {
           } catch (error) {
             if (error.message === 'The container is too small for this chart.') {
               chart.error(self.el);
-//            } else {
-//              console.group(error.message);
+            } else {
+              console.group(error.message);
             }
           }
         });

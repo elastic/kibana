@@ -62,9 +62,14 @@ define(function (require) {
           div = d3.select(this);
           width = $(this).width();
           height = $(this).height() - margin.top - margin.bottom;
-          self.validateHeightAndWidth(div, width, height);
 
           // Return access to the yAxis
+          if (_.isNaN(height) || height <= 0) {
+            throw new Error('The container is too small for this chart.');
+          }
+
+          self.validateHeightAndWidth(div, width, height);
+
           var yAxis = self.getYAxis(height);
 
           svg = div.append('svg')
@@ -74,8 +79,7 @@ define(function (require) {
           svg.append('g')
             .attr('class', 'y axis')
             .attr('transform', 'translate(' + (width - 2) + ',' + margin.top + ')')
-            .call(self.yAxis);
-
+            .call(yAxis);
         });
       };
     };
