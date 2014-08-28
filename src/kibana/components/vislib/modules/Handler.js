@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  var $ = require('jquery');
 
   return function HandlerBaseClass(d3, Private) {
     var Data = Private(require('components/vislib/modules/Data'));
