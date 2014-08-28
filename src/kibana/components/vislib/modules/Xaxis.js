@@ -46,7 +46,7 @@ define(function (require) {
       // Take the min of the xValues or the ordered object
       var minDate = Math.min(d3.min(xValues), ordered.min);
       // Take the max of the xValues or the max date that is sent
-      var maxDate = +maxXValue + timeInterval <= ordered.max ? ordered.max : +maxXValue + timeInterval * (1 - spacingPercentage);
+      var maxDate = +maxXValue + timeInterval <= ordered.max ? ordered.max : +maxXValue + timeInterval;
 
       scale.domain([minDate, maxDate]);
 
