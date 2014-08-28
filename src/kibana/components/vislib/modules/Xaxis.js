@@ -196,7 +196,7 @@ define(function (require) {
         self.filterAxisLabels(selection, nth);
       }
 
-      self.resizeAxisLayoutForLabels(selection);
+      //self.resizeAxisLayoutForLabels(selection);
     };
 
     XAxis.prototype.rotateAxisLabels = function (selection) {
@@ -232,6 +232,7 @@ define(function (require) {
       var ratio;
       var flex;
       var chartToXaxis;
+      var dataType = selection[0][0].__data__.rows ? 'rows' : 'columns';
 
       var rotScale = d3.scale.linear()
         .domain([0.12, 0.3, 0.7, 2.1])
@@ -242,11 +243,12 @@ define(function (require) {
         .range([1.2, 11]);
 
       selection.each(function () {
+
         div = d3.select(this);
         svg = div.select('svg');
         tick = svg.select('.tick');
 
-        if (!self.data.data.columns) {
+        if (dataType === 'rows') {
           chartwrap =  visEl.find('.chart-wrapper-row');
           titlespace = 10;
         } else {
@@ -257,7 +259,6 @@ define(function (require) {
         xdiv = visEl.find('.x-axis-div');
         xdivwrapper = visEl.find('.x-axis-div-wrapper');
         yspacerblock = visEl.find('.y-axis-spacer-block');
-
         if (!self._attr.isRotated) {
           // flat labels
           ratio = flatScale(1800 / chartwrap.height());
