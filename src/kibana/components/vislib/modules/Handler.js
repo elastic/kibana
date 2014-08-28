@@ -24,8 +24,15 @@ define(function (require) {
         'margin' : { top: 10, right: 3, bottom: 5, left: 3 }
       });
       this.layout = new Layout(this.el, this.data.injectZeros());
-      this.legend = new Legend(this.data.getLabels(), this.data.getColorFunc(), this._attr, this.el);
-      this.tooltip = new Tooltip(this.data.get('tooltipFormatter'));
+
+      if (this._attr.addLegend) {
+        this.legend = new Legend(this.data.getLabels(), this.data.getColorFunc(), this._attr, this.el);
+      }
+
+      if (this._attr.addTooltip) {
+        this.tooltip = new Tooltip(this.data.get('tooltipFormatter'));
+      }
+
       this.chartTitle = new ChartTitle(this.el);
       this.xAxis = new XAxis({
         el: this.el,
@@ -40,18 +47,26 @@ define(function (require) {
         _attr: this._attr
       });
       this.axisTitle = new AxisTitle(this.el, this.data.get('xAxisLabel'), this.data.get('yAxisLabel'));
+      this.renderArray = [
+        this.layout,
+        this.legend,
+        this.tooltip,
+        this.chartTitle,
+        this.xAxis,
+        this.yAxis,
+        this.axisTitle
+      ];
     }
 
     Handler.prototype.render = function () {
       var self = this;
       var charts = this.charts = [];
 
-      this.layout.render();
-      this.legend.render();
-      this.chartTitle.render();
-      this.xAxis.render();
-      this.yAxis.render();
-      this.axisTitle.render();
+      _.forEach(this.renderArray, function (property) {
+        if (typeof property.render === 'function') {
+          property.render();
+        }
+      });
 
       d3.select(this.el)
         .selectAll('.chart')
@@ -78,6 +93,8 @@ define(function (require) {
           chart.render();
         });
     };
+
+    Handler.prototype.error = function () {};
 
     return Handler;
   };
