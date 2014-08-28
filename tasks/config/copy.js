@@ -23,14 +23,6 @@ module.exports = function (grunt) {
           dest: '<%= build %>/dist/INSTALL',
         },
         {
-          src: '<%= build %>/kibana/bin/kibana.bat',
-          dest: '<%= build %>/dist/bin/kibana.bat',
-        },
-        {
-          src: '<%= build %>/kibana/bin/kibana.sh',
-          dest: '<%= build %>/dist/bin/kibana',
-        },
-        {
           expand: true,
           cwd: '<%= build %>/kibana/',
           src: '*.jar',

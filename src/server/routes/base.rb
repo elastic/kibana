@@ -15,6 +15,8 @@ module Kibana
 
         config = YAML.load(IO.read(CONFIG_PATH))
         set :config, config
+        config['elasticsearch'] = ENV['KIBANA_ELASTICSEARCH']
+        config['port'] = ENV['KIBANA_PORT'].to_i
       end
 
     end

@@ -10,6 +10,7 @@ module.exports = function (grunt) {
     'clean:unneeded_source_in_build',
     'copy:server_src',
     'warble',
+    'replace:dist',
     'copy:dist',
     'chmod_kibana',
     'compress:build_zip',

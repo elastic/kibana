@@ -27,4 +27,4 @@ if [ ! -x "${JAVA}" ]; then
   exit 1
 fi
 
-CONFIG_PATH=${DIR}/../config/kibana.yml RACK_ENV=production exec "${JAVA}" -jar "${DIR}/../lib/kibana.jar" "$@"
+KIBANA_VERSION=@@version CONFIG_PATH=${DIR}/../config/kibana.yml RACK_ENV=production exec "${JAVA}" -jar "${DIR}/../lib/kibana.jar" "$@"
