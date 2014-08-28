@@ -272,15 +272,15 @@ define(function (require) {
           div.style('height', 2 + tick.node().getBBox().height + 'px');
           svg.attr('height', 2 + tick.node().getBBox().height + 'px');
           //xdivwrapper.css('min-height', tick.node().getBBox().height);
-          console.log('ROT:', ratio);
-          console.log((titlespace + tick.node().getBBox().height) / chartwrap.height());
+          //console.log('ROT:', ratio);
+          //console.log((titlespace + tick.node().getBBox().height) / chartwrap.height());
         }
 
         flex = ratio.toFixed(1);
         xwrapper.css('flex', flex + ' 1');
         xdiv.css('flex', flex + ' 1');
         yspacerblock.css('flex', flex + ' 1');
-        console.log('flex:', flex);
+        //console.log('flex:', flex);
 
       });
 
