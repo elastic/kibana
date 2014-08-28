@@ -450,8 +450,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
                 if (foundVersion < 0) {
                     logger.warn("found an existing index template but couldn't extract it's version. leaving it as is.");
                     hasTemplate = true;
-                }
-                if (foundVersion >= expectedVersion) {
+                } else if (foundVersion >= expectedVersion) {
                     logger.debug("accepting existing index template (version [{}], needed [{}])", foundVersion, expectedVersion);
                     hasTemplate = true;
                 } else {
