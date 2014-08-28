@@ -196,7 +196,7 @@ define(function (require) {
         self.filterAxisLabels(selection, nth);
       }
 
-      //self.resizeAxisLayoutForLabels(selection);
+      self.resizeAxisLayoutForLabels(selection);
     };
 
     XAxis.prototype.rotateAxisLabels = function (selection) {
@@ -259,6 +259,7 @@ define(function (require) {
         xdiv = visEl.find('.x-axis-div');
         xdivwrapper = visEl.find('.x-axis-div-wrapper');
         yspacerblock = visEl.find('.y-axis-spacer-block');
+        //console.log(self._attr.isRotated);
         if (!self._attr.isRotated) {
           // flat labels
           ratio = flatScale(1800 / chartwrap.height());

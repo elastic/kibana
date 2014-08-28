@@ -96,7 +96,6 @@ define(function (require) {
       length += tickspace;
 
       // set widths of svg, x-axis-div and x-axis-div-wrapper to fit ticklabels
-      console.log(svg);
       svg.attr('width', length + 6);
       d3.selectAll('.y.axis').attr('transform', 'translate(' + (length + 2) + ',' + margin.top + ')');
     };
