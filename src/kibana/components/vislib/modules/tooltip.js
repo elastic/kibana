@@ -6,13 +6,13 @@ define(function (require) {
     // Dynamically adds css file
     require('css!components/vislib/components/styles/main');
 
-    function Tooltip(className, formatter) {
+    function Tooltip(formatter) {
       if (!(this instanceof Tooltip)) {
-        return new Tooltip(className, formatter);
+        return new Tooltip(formatter);
       }
 
-      this.tooltipClass = className;
       this.tooltipFormatter = formatter;
+      this.tooltipClass = 'k4tip';
       this.chartWidth = $('.chart').width();
       this.chartHeight = $('.chart').height();
     }

@@ -3,18 +3,16 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
 
-    var Chart = Private(require('components/vislib/modules/_chart'));
-
-    _(XAxis).inherits(Chart);
     function XAxis(args) {
       if (!(this instanceof XAxis)) {
         return new XAxis(args);
       }
 
-      XAxis.Super.apply(this, arguments);
       this.el = args.el;
-      this.data = args.data;
-      this._attr = args.attr;
+      this.xValues = args.xValues;
+      this.ordered = args.ordered;
+      this.xAxisFormatter = args.xAxisFormatter;
+      this._attr = args._attr;
     }
 
     XAxis.prototype.render = function () {
@@ -33,13 +31,11 @@ define(function (require) {
     };
 
     XAxis.prototype.getDomain = function (scale, ordered) {
-      var xValues = this.data.xValues();
-
       if (ordered && ordered.date) {
         // Calculate the min date, max date, and time interval;
-        return this.getTimeDomain(scale, xValues, ordered);
+        return this.getTimeDomain(scale, this.xValues, ordered);
       }
-      return this.getOrdinalDomain(scale, xValues);
+      return this.getOrdinalDomain(scale, this.xValues);
     };
 
     XAxis.prototype.getTimeDomain = function (scale, xValues, ordered) {
@@ -50,7 +46,7 @@ define(function (require) {
       // Take the min of the xValues or the ordered object
       var minDate = Math.min(d3.min(xValues), ordered.min);
       // Take the max of the xValues or the max date that is sent
-      var maxDate = +maxXValue + timeInterval <= ordered.max ? ordered.max : +maxXValue + timeInterval * (1 - spacingPercentage);
+      var maxDate = +maxXValue <= ordered.max ? ordered.max : +maxXValue + timeInterval;
 
       scale.domain([minDate, maxDate]);
 
@@ -79,10 +75,8 @@ define(function (require) {
     };
 
     XAxis.prototype.getXAxis = function (width) {
-      var ordered = this.data.get('ordered');
-
-      this.xAxisFormatter = this.data.get('xAxisFormatter');
-      this.xScale = this.getXScale(ordered, width);
+      this.xAxisFormatter = this.xAxisFormatter;
+      this.xScale = this.getXScale(this.ordered, width);
 
       this.xAxis = d3.svg.axis()
         .scale(this.xScale)
@@ -113,8 +107,6 @@ define(function (require) {
           div = d3.select(this);
           width = $(this).width() - margin.left - margin.right;
           height = $(this).height();
-
-          self.validateHeightAndWidth(div, width, height);
 
           // Return access to xAxis variable on the object
           self.getXAxis(width);
@@ -219,10 +211,9 @@ define(function (require) {
 
     XAxis.prototype.filterAxisLabels = function (selection, nth) {
       var self = this;
-      var xAxisFormatter = this.data.get('xAxisFormatter');
       return selection.selectAll('text')
         .text(function (d, i) {
-          return i % nth === 0 ? xAxisFormatter(d) : '';
+          return i % nth === 0 ? self.xAxisFormatter(d) : '';
         });
     };
 

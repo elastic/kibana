@@ -3,15 +3,11 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
 
-    var Chart = Private(require('components/vislib/modules/_chart'));
-
-    _(ChartTitle).inherits(Chart);
     function ChartTitle(el) {
       if (!(this instanceof ChartTitle)) {
         return new ChartTitle(el);
       }
 
-      ChartTitle.Super.apply(this, arguments);
       this.el = el;
     }
 
@@ -55,8 +51,6 @@ define(function (require) {
           var div = d3.select(this);
           var width = $(this).width();
           var height = $(this).height();
-
-          self.validateHeightAndWidth(div, width, height);
 
           div.append('svg')
             .attr('width', width)

@@ -3,14 +3,10 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
 
-    var Chart = Private(require('components/vislib/modules/_chart'));
-
-    _(YAxis).inherits(Chart);
     function YAxis(args) {
-      YAxis.Super.apply(this, arguments);
       this.el = args.el;
       this.yMax = args.yMax;
-      this._attr = args.attr;
+      this._attr = args._attr;
     }
 
     YAxis.prototype.render = function () {
@@ -62,9 +58,12 @@ define(function (require) {
           div = d3.select(this);
           width = $(this).width();
           height = $(this).height() - margin.top - margin.bottom;
-          self.validateHeightAndWidth(div, width, height);
 
           // Return access to the yAxis
+          if (_.isNaN(height) || height <= 0) {
+            throw new Error('The container is too small for this chart.');
+          }
+
           var yAxis = self.getYAxis(height);
 
           svg = div.append('svg')
@@ -74,8 +73,7 @@ define(function (require) {
           svg.append('g')
             .attr('class', 'y axis')
             .attr('transform', 'translate(' + (width - 2) + ',' + margin.top + ')')
-            .call(self.yAxis);
-
+            .call(yAxis);
         });
       };
     };

@@ -4,6 +4,10 @@ define(function (require) {
     var $ = require('jquery');
 
     function Layout(el, data) {
+      if (!(this instanceof Layout)) {
+        return new Layout(el, data);
+      }
+
       this.el = el;
       this.data = data;
     }

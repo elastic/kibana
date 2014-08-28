@@ -11,7 +11,7 @@ define(function (require) {
       this.vis = vis;
       this.chartEl = el;
       this.chartData = chartData;
-      this._attr = _.defaults(vis.config || {}, {});
+      this._attr = _.defaults(vis._attr || {}, {});
     }
 
     Chart.prototype.render = function () {

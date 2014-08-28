@@ -5,13 +5,11 @@ define(function (require) {
 
     var Chart = Private(require('components/vislib/modules/_chart'));
 
-    _(AxisTitle).inherits(Chart);
     function AxisTitle(el, xTitle, yTitle) {
       if (!(this instanceof AxisTitle)) {
         return new AxisTitle(el, xTitle, yTitle);
       }
 
-      AxisTitle.Super.apply(this, arguments);
       this.el = el;
       this.xTitle = xTitle;
       this.yTitle = yTitle;
@@ -33,8 +31,6 @@ define(function (require) {
           div = d3.select(this);
           width = $(this).width();
           height = $(this).height();
-
-          self.validateHeightAndWidth(div, width, height);
 
           div.append('svg')
             .attr('width', width)
