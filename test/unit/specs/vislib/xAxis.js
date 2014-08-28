@@ -79,16 +79,18 @@ define(function (require) {
 
     beforeEach(function () {
       inject(function (d3, Private) {
-        XAxis = Private(require('components/vislib/modules/Xaxis'));
         Data = Private(require('components/vislib/modules/Data'));
-
+        XAxis = Private(require('components/vislib/modules/Xaxis'));
+        
         el = d3.select('body').append('div')
           .attr('class', 'x-axis-wrapper')
+          .datum(data)
           .append('div')
           .attr('class', 'x-axis-div')
           .style('height', '20px');
 
         dataObj = new Data(data);
+
         xAxis = new XAxis({
           el: $('.x-axis-wrapper')[0],
           xValues: dataObj.xValues(),

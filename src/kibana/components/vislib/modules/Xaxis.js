@@ -232,15 +232,18 @@ define(function (require) {
       var ratio;
       var flex;
       var chartToXaxis;
-      var dataType = selection[0][0].__data__.rows ? 'rows' : 'columns';
+      var dataType;
+
+      dataType = selection[0].parentNode.__data__.series ? 'series' :
+        selection[0].parentNode.__data__.rows ? 'rows' : 'columns';
 
       var rotScale = d3.scale.linear()
         .domain([0.14, 0.28, 0.85, 2.6])
         .range([5, 10, 30, 100]);
 
       var flatScale = d3.scale.linear()
-        .domain([2.2, 14.5])
-        .range([1.2, 11]);
+        .domain([1.3, 8, 14.5, 29])
+        .range([1.1, 9, 13, 30]);
 
       selection.each(function () {
 
@@ -248,32 +251,34 @@ define(function (require) {
         svg = div.select('svg');
         tick = svg.select('.tick');
 
-        if (dataType === 'rows') {
-          chartwrap =  visEl.find('.chart-wrapper-row');
-          titlespace = 10;
-        } else {
-          chartwrap =  visEl.find('.chart-wrapper-column');
-          titlespace = 28;
-        }
         xwrapper = visEl.find('.x-axis-wrapper');
         xdiv = visEl.find('.x-axis-div');
         xdivwrapper = visEl.find('.x-axis-div-wrapper');
         yspacerblock = visEl.find('.y-axis-spacer-block');
-        //console.log(self._attr.isRotated);
+
+        if (dataType === 'series') {
+          chartwrap =  visEl.find('.chart-wrapper');
+          titlespace = 15;
+        } else if (dataType === 'rows') {
+          chartwrap =  visEl.find('.chart-wrapper-row');
+          titlespace = 15;
+        } else {
+          chartwrap =  visEl.find('.chart-wrapper-column');
+          titlespace = 30;
+        }
+
         if (!self._attr.isRotated) {
           // flat labels
-          ratio = flatScale(1800 / chartwrap.height());
-          xdivwrapper.css('flex', flex + ' 1');
+          ratio = flatScale(35 * (titlespace +
+            tick.node().getBBox().height) / chartwrap.height());
           //console.log('FLAT:', ratio);
-          //console.log(chartwrap.height());
+          //console.log(chartwrap.height(), tick.node().getBBox());
         } else {
           // rotated labels
           ratio = rotScale((titlespace + tick.node().getBBox().height) / chartwrap.height());
           div.style('height', 2 + tick.node().getBBox().height + 'px');
           svg.attr('height', 2 + tick.node().getBBox().height + 'px');
-          //xdivwrapper.css('min-height', tick.node().getBBox().height);
           //console.log('ROT:', ratio);
-          //console.log((titlespace + tick.node().getBBox().height) / chartwrap.height());
         }
 
         flex = ratio.toFixed(1);
@@ -283,7 +288,7 @@ define(function (require) {
         //console.log('flex:', flex);
 
       });
-
+      
     };
 
     return XAxis;

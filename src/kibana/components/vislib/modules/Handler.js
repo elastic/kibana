@@ -17,9 +17,9 @@ define(function (require) {
         return new Handler(vis);
       }
 
+      this.data = new Data(vis.data);
       this.vis = vis;
       this.el = vis.el;
-      this.data = new Data(vis.data);
       this.ChartClass = vis.ChartClass;
       this._attr = _.defaults(vis._attr || {}, {
         'margin' : { top: 10, right: 3, bottom: 5, left: 3 }
