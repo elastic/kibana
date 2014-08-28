@@ -149,15 +149,13 @@ define(function (require) {
           layer = svg.selectAll('.layer')
             .data(layers)
             .enter().append('g')
-            .attr(
-            'class', function (d, i) {
+            .attr('class', function (d, i) {
               return i;
             });
 
           // Append the bars
           bars = layer.selectAll('rect')
-            .data(
-            function (d) {
+            .data(function (d) {
               return d;
             });
 
@@ -167,12 +165,10 @@ define(function (require) {
           // enter
           bars.enter()
             .append('rect')
-            .attr(
-            'class', function (d) {
+            .attr('class', function (d) {
               return 'color ' + classify(color(d.label));
             })
-            .attr(
-            'fill', function (d) {
+            .attr('fill', function (d) {
               return color(d.label);
             });
 
