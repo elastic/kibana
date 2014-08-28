@@ -52,10 +52,10 @@ define(function (require) {
         this.layout,
         this.legend,
         this.tooltip,
-        this.chartTitle,
         this.xAxis,
         this.yAxis,
-        this.axisTitle
+        this.axisTitle,
+        this.chartTitle
       ];
     }
 

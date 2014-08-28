@@ -51,7 +51,6 @@ define(function (require) {
           var div = d3.select(this);
           var width = $(this).width();
           var height = $(this).height();
-
           div.append('svg')
             .attr('width', width)
             .attr('height', height)

@@ -235,8 +235,8 @@ define(function (require) {
       var dataType = selection[0][0].__data__.rows ? 'rows' : 'columns';
 
       var rotScale = d3.scale.linear()
-        .domain([0.12, 0.3, 0.7, 2.1])
-        .range([4.3, 13, 27, 102]);
+        .domain([0.14, 0.28, 0.85, 2.6])
+        .range([5, 10, 30, 100]);
 
       var flatScale = d3.scale.linear()
         .domain([2.2, 14.5])
@@ -271,16 +271,16 @@ define(function (require) {
           ratio = rotScale((titlespace + tick.node().getBBox().height) / chartwrap.height());
           div.style('height', 2 + tick.node().getBBox().height + 'px');
           svg.attr('height', 2 + tick.node().getBBox().height + 'px');
-          xdivwrapper.css('min-height', tick.node().getBBox().height);
-          //console.log('ROT:', ratio);
-          //console.log((titlespace + tick.node().getBBox().height) / chartwrap.height());
+          //xdivwrapper.css('min-height', tick.node().getBBox().height);
+          console.log('ROT:', ratio);
+          console.log((titlespace + tick.node().getBBox().height) / chartwrap.height());
         }
 
         flex = ratio.toFixed(1);
         xwrapper.css('flex', flex + ' 1');
         xdiv.css('flex', flex + ' 1');
         yspacerblock.css('flex', flex + ' 1');
-        //console.log('flex:', flex);
+        console.log('flex:', flex);
 
       });
 
