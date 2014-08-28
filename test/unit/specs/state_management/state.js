@@ -1,5 +1,4 @@
 define(function (require) {
-  var angular = require('angular');
   var _ = require('lodash');
   var sinon = require('sinon/sinon');
   require('services/private');
@@ -8,26 +7,41 @@ define(function (require) {
   require('index');
 
   describe('State Management', function () {
-    describe('State', function () {
+    var $rootScope, $location, State, Events;
 
-      var $rootScope, $location, State, Events;
+    beforeEach(function () {
+      module('kibana');
 
-      beforeEach(function () {
-        module('kibana');
+      inject(function (_$rootScope_, _$location_, Private) {
+        $location = _$location_;
+        $rootScope = _$rootScope_;
+        State = Private(require('components/state_management/state'));
+        Events = Private(require('factories/events'));
+      });
+    });
 
-        inject(function (_$rootScope_, _$location_, Private) {
-          $location = _$location_;
-          $rootScope = _$rootScope_;
-          State = Private(require('components/state_management/state'));
-          Events = Private(require('factories/events'));
-        });
+    describe('Provider', function () {
+      it('should reset the state to the defaults', function () {
+        var state = new State('_s', { message: ['test'] });
+        state.reset();
+        var search = $location.search();
+        expect(search).to.have.property('_s');
+        expect(search._s).to.equal('(message:!(test))');
+        expect(state.message).to.eql(['test']);
+      });
+
+      it('should apply the defaults upon initialization', function () {
+        var state = new State('_s', { message: 'test' });
+        expect(state).to.have.property('message', 'test');
       });
 
       it('should inherit from Events', function () {
         var state = new State();
         expect(state).to.be.an(Events);
       });
+    });
 
+    describe('Search', function () {
       it('should save to $location.search()', function () {
         var state = new State('_s', { test: 'foo' });
         state.save();
@@ -47,8 +61,9 @@ define(function (require) {
         var search = $location.search();
         $rootScope.$apply();
       });
+    });
 
-
+    describe('Fetch', function () {
       it('should emit an event if changes are fetched', function (done) {
         var state = new State();
         state.on('fetch_with_changes', function (keys) {
@@ -91,20 +106,6 @@ define(function (require) {
         expect(state).to.have.property('message', 'test');
       });
 
-      it('should reset the state to the defaults', function () {
-        var state = new State('_s', { message: ['test'] });
-        state.reset();
-        var search = $location.search();
-        expect(search).to.have.property('_s');
-        expect(search._s).to.equal('(message:!(test))');
-        expect(state.message).to.eql(['test']);
-      });
-
-      it('should apply the defaults upon initialization', function () {
-        var state = new State('_s', { message: 'test' });
-        expect(state).to.have.property('message', 'test');
-      });
-
       it('should call fetch when $routeUpdate is fired on $rootScope', function () {
         var state = new State();
         var spy = sinon.spy(state, 'fetch');
@@ -112,7 +113,28 @@ define(function (require) {
         sinon.assert.calledOnce(spy);
       });
 
+      it('should clear state when missing form URL', function () {
+        var stateObj;
+        var state = new State();
+
+        // set satte via URL
+        $location.search({ _s: '(foo:(bar:baz))' });
+        state.fetch();
+        stateObj = state.toObject();
+        expect(stateObj).to.eql({ foo: { bar: 'baz' } });
+
+        // ensure changing URL changes state
+        $location.search({ _s: '(one:two)' });
+        state.fetch();
+        stateObj = state.toObject();
+        expect(stateObj).to.eql({ one: 'two' });
+
+        // remove search, state should be empty
+        $location.search({});
+        state.fetch();
+        stateObj = state.toObject();
+        expect(stateObj).to.eql({});
+      });
     });
   });
-
 });
