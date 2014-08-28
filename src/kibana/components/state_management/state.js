@@ -20,17 +20,22 @@ define(function (require) {
       this.fetch();
     }
 
+    State.prototype._readFromURL = function (method) {
+      var search = $location.search();
+      return rison.decode(search[this._urlParam] || '()');
+    };
+
     /**
      * Fetches the state from the url
      * @returns {void}
      */
     State.prototype.fetch = function () {
-      var search = $location.search();
-      var stash = (search[this._urlParam]) ? rison.decode(search[this._urlParam]) : this.toObject();
+      var stash = this._readFromURL('fetch');
+
       _.defaults(stash, this._defaults);
-      // apply diff to state from stash, this is side effecting so
-      // it will change state in place.
+      // apply diff to state from stash, will change state in place via side effect
       var diffResults = applyDiff(this, stash);
+
       if (diffResults.keys.length) {
         this.emit('fetch_with_changes', diffResults.keys);
       }
@@ -41,16 +46,19 @@ define(function (require) {
      * @returns {void}
      */
     State.prototype.save = function () {
-      var search = $location.search();
-      var stash = (search[this._urlParam]) ? rison.decode(search[this._urlParam]) : this.toObject();
+      var stash = this._readFromURL('save');
       var state = this.toObject();
+
       _.defaults(state, this._defaults);
-      // apply diff to stash from state, this is side effecting so
-      // it will change stash in place.
+      // apply diff to state from stash, will change state in place via side effect
       var diffResults = applyDiff(stash, state);
+
       if (diffResults.keys.length) {
         this.emit('save_with_changes', diffResults.keys);
       }
+
+      // persist the state in the URL
+      var search = $location.search();
       search[this._urlParam] = this.toRISON();
       $location.search(search);
     };
