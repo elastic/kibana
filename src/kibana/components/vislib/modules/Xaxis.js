@@ -195,6 +195,8 @@ define(function (require) {
       if (nth > 1) {
         self.filterAxisLabels(selection, nth);
       }
+
+      //self.resizeAxisLayoutForLabels(selection);
     };
 
     XAxis.prototype.rotateAxisLabels = function (selection) {
@@ -213,6 +215,74 @@ define(function (require) {
         .text(function (d, i) {
           return i % nth === 0 ? self.xAxisFormatter(d) : '';
         });
+    };
+
+    XAxis.prototype.resizeAxisLayoutForLabels = function (selection) {
+      var self = this;
+      var visEl = $(self.el);
+      var div;
+      var svg;
+      var tick;
+      var chartwrap;
+      var titlespace;
+      var xwrapper;
+      var xdiv;
+      var xdivwrapper;
+      var yspacerblock;
+      var ratio;
+      var flex;
+      var chartToXaxis;
+      var dataType = selection[0][0].__data__.rows ? 'rows' : 'columns';
+
+      var rotScale = d3.scale.linear()
+        .domain([0.12, 0.3, 0.7, 2.1])
+        .range([4.3, 13, 27, 102]);
+
+      var flatScale = d3.scale.linear()
+        .domain([2.2, 14.5])
+        .range([1.2, 11]);
+
+      selection.each(function () {
+
+        div = d3.select(this);
+        svg = div.select('svg');
+        tick = svg.select('.tick');
+
+        if (dataType === 'rows') {
+          chartwrap =  visEl.find('.chart-wrapper-row');
+          titlespace = 10;
+        } else {
+          chartwrap =  visEl.find('.chart-wrapper-column');
+          titlespace = 28;
+        }
+        xwrapper = visEl.find('.x-axis-wrapper');
+        xdiv = visEl.find('.x-axis-div');
+        xdivwrapper = visEl.find('.x-axis-div-wrapper');
+        yspacerblock = visEl.find('.y-axis-spacer-block');
+        if (!self._attr.isRotated) {
+          // flat labels
+          ratio = flatScale(1800 / chartwrap.height());
+          xdivwrapper.css('flex', flex + ' 1');
+          //console.log('FLAT:', ratio);
+          //console.log(chartwrap.height());
+        } else {
+          // rotated labels
+          ratio = rotScale((titlespace + tick.node().getBBox().height) / chartwrap.height());
+          div.style('height', 2 + tick.node().getBBox().height + 'px');
+          svg.attr('height', 2 + tick.node().getBBox().height + 'px');
+          xdivwrapper.css('min-height', tick.node().getBBox().height);
+          //console.log('ROT:', ratio);
+          //console.log((titlespace + tick.node().getBBox().height) / chartwrap.height());
+        }
+
+        flex = ratio.toFixed(1);
+        xwrapper.css('flex', flex + ' 1');
+        xdiv.css('flex', flex + ' 1');
+        yspacerblock.css('flex', flex + ' 1');
+        //console.log('flex:', flex);
+
+      });
+
     };
 
     return XAxis;

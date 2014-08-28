@@ -44,6 +44,7 @@ define(function (require) {
       if (!this.data) {
         throw new Error('No valid data');
       }
+      //this.render(this.data.data);
       this.render(this.data);
     };
 

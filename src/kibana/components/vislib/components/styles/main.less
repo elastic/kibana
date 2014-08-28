@@ -255,19 +255,15 @@ path, line, .axis line, .axis path {
 /* YAxis logic */
 .y-axis-col-wrapper {
   display: flex;
-  flex: 1 1;
+  flex: 2 1;
   flex-direction: column;
-  min-width: 60px;
+  min-width: 50px;
 }
 
 .y-axis-col {
   display: flex;
   flex: 35 1;
   flex-direction: row;
-}
-
-.y-axis-spacer-block {
-  flex: 5 1;
 }
 
 .y-axis-title {
@@ -339,31 +335,41 @@ path, line, .axis line, .axis path {
   flex: 1 1;
 }
 
+
+
+.y-axis-spacer-block {
+  flex: 8 1;
+}
+
 .x-axis-wrapper {
   display: flex;
-  flex: 5 1;
+  flex: 8 1;
   flex-direction: column;
   overflow: visible;
 }
 
 .x-axis-div-wrapper {
   display: flex;
-  flex: 5 1;
+  flex: 8 1;
   flex-direction: row;
-  overflow: visible;
+  // overflow: visible;
   min-height: 16px;
 }
+
+
 
 .x-axis-chart-title {
   display: flex;
   flex: 1 1;
   flex-direction: row;
-  min-height: 16px;
+  min-height: 15px;
+  max-height: 15px;
 }
 
 .x-axis-title {
   flex: 1 1;
-  min-height: 16px;
+  min-height: 15px;
+  max-height: 15px;
 }
 
 .x-axis-title text {
@@ -371,7 +377,7 @@ path, line, .axis line, .axis path {
 }
 
 .x-axis-div {
-  flex: 1 1;
+  flex: 8 1;
   overflow: visible;
   margin-top: -5px;
 }
