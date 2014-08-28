@@ -10,6 +10,7 @@ define(function (require) {
     var Data;
     var xAxis;
     var el;
+    var dataObj;
     var data = {
       hits: 621,
       label: '',
@@ -87,10 +88,13 @@ define(function (require) {
           .attr('class', 'x-axis-div')
           .style('height', '20px');
 
+        dataObj = new Data(data);
         xAxis = new XAxis({
           el: $('.x-axis-wrapper')[0],
-          data: new Data(data),
-          attr: { margin: { top: 0, right: 0, bottom: 0, left: 0 } }
+          xValues: dataObj.xValues(),
+          ordered: dataObj.get('ordered'),
+          xAxisFormatter: dataObj.get('xAxisFormatter'),
+          _attr: { margin: { top: 0, right: 0, bottom: 0, left: 0 } }
         });
       });
     });
@@ -127,7 +131,7 @@ define(function (require) {
       var range;
 
       beforeEach(function () {
-        ordered = xAxis.data.get('ordered');
+        ordered = dataObj.get('ordered');
         timeScale = xAxis.getScale(ordered);
         timeDomain = xAxis.getDomain(timeScale, ordered);
         ordinalScale = xAxis.getScale(false);
@@ -163,7 +167,7 @@ define(function (require) {
       var xScale;
 
       beforeEach(function () {
-        ordered = xAxis.data.get('ordered');
+        ordered = dataObj.get('ordered');
         width = $('.x-axis-div').width();
         xScale = xAxis.getXScale(ordered, width);
       });

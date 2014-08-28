@@ -3,7 +3,7 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
 
-    var VisFunctions = Private(require('components/vislib/modules/_functions'));
+    var Handler = Private(require('components/vislib/modules/Handler'));
     var Events = Private(require('factories/events'));
 
     // VisLib Visualization Types
@@ -20,83 +20,31 @@ define(function (require) {
       Vis.Super.apply(this, arguments);
       this.el = $el.get ? $el.get(0) : $el;
       this.ChartClass = chartTypes[config.type];
-      this._attr = _.defaults(config || {}, {
-        'margin' : { top: 10, right: 3, bottom: 5, left: 3 }
-      });
+      this._attr = _.defaults(config || {}, {});
     }
 
-    _(Vis.prototype).extend(VisFunctions.prototype);
-
     Vis.prototype.render = function (data) {
-      var tooltipFormatter;
-      var zeroInjectedData;
-      var legend;
-      var xTitle;
-      var yTitle;
-      var vis;
-      var charts;
-
       if (!data) {
         throw new Error('No valid data!');
       }
 
-      // DATA CLASS
-      this.instantiateData(data);
+      this.data = data;
+      this.handler = new Handler(this);
 
-      // LAYOUT CLASS
-      zeroInjectedData = this.data.injectZeros();
-      this.renderLayout(zeroInjectedData);
-
-      // LEGEND CLASS
-      if (this._attr.addLegend) {
-        legend = {
-          color: this.data.getColorFunc(),
-          labels: this.data.getLabels()
-        };
-        this.renderLegend(legend, this._attr, this.el);
+      try {
+        this.handler.render();
+      } catch (error) {
+        console.error(error.message);
       }
-
-      // TOOLTIP CLASS
-      if (this._attr.addTooltip) {
-        tooltipFormatter = this.data.get('tooltipFormatter');
-        this.renderTooltip('k4tip', tooltipFormatter);
-      }
-
-      // CHART TITLE CLASS
-      this.renderChartTitles();
-
-      // XAXIS CLASS
-      this.renderXAxis({
-        el: this.el,
-        data: this.data,
-        attr: this._attr
-      });
-
-      // YAXIS CLASS
-      this.renderYAxis({
-        el: this.el,
-        yMax: this.data.getYMaxValue(),
-        attr: this._attr
-      });
-
-      // AXIS TITLE CLASS
-      xTitle = this.data.get('xAxisLabel');
-      yTitle = this.data.get('yAxisLabel');
-      this.renderAxisTitles(xTitle, yTitle);
-
-      // CHART CLASS
-      vis = this;
-      charts = this.charts = [];
-      this.renderCharts(vis, charts);
 
       this.checkSize();
     };
 
     Vis.prototype.resize = function () {
-      if (!this.data.data) {
+      if (!this.data) {
         throw new Error('No valid data');
       }
-      this.render(this.data.data);
+      this.render(this.data);
     };
 
     Vis.prototype.checkSize = _.debounce(function () {

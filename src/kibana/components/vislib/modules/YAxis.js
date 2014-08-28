@@ -3,14 +3,10 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
 
-    var Chart = Private(require('components/vislib/modules/_chart'));
-
-    _(YAxis).inherits(Chart);
     function YAxis(args) {
-      YAxis.Super.apply(this, arguments);
       this.el = args.el;
       this.yMax = args.yMax;
-      this._attr = args.attr;
+      this._attr = args._attr;
     }
 
     YAxis.prototype.render = function () {
@@ -67,8 +63,6 @@ define(function (require) {
           if (_.isNaN(height) || height <= 0) {
             throw new Error('The container is too small for this chart.');
           }
-
-          self.validateHeightAndWidth(div, width, height);
 
           var yAxis = self.getYAxis(height);
 

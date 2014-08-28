@@ -10,9 +10,9 @@ define(function (require) {
     // Dynamically adds css file
     require('css!components/vislib/components/styles/main');
 
-    function Legend(legend, config, el) {
-      this.labels = legend.labels;
-      this.color = legend.color;
+    function Legend(labels, color, config, el) {
+      this.labels = labels;
+      this.color = color;
       this._attr = _.defaults(config || {}, {
         'legendClass' : 'legend-col-wrapper',
         'blurredOpacity' : 0.3,
