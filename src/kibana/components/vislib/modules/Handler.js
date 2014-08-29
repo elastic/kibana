@@ -27,7 +27,7 @@ define(function (require) {
       });
 
       // Visualization Classes
-      this.layout = new Layout(this.el, this.data.injectZeros());
+      this.layout = new Layout(this.el, this.data.injectZeros(), this._attr.type);
 
       if (this._attr.addLegend) {
         this.legend = new Legend(this.data.getLabels(), this.data.getColorFunc(), this._attr, this.el);

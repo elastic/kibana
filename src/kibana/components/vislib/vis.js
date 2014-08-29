@@ -5,7 +5,7 @@ define(function (require) {
 
     var Handler = Private(require('components/vislib/modules/Handler'));
     var Events = Private(require('factories/events'));
-    var chartTypes = Private(require('components/vislib/visTypes'));
+    var chartTypes = Private(require('components/vislib/vis_types'));
 
     _(Vis).inherits(Events);
     function Vis($el, config) {

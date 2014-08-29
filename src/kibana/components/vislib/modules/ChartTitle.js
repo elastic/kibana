@@ -18,10 +18,9 @@ define(function (require) {
 
     ChartTitle.prototype.truncate = function () {
       return function (selection) {
-        var dataType = selection[0].parentNode.__data__.rows ? 'rows' : 'columns';
-
         selection.each(function () {
           var div = d3.select(this);
+          var dataType = this.parentNode.__data__.rows ? 'rows' : 'columns';
           var text = div.select('text');
           var textLength = text.node().getComputedTextLength();
           var maxWidth = dataType === 'rows' ? $(this).height() : $(this).width();
@@ -45,10 +44,9 @@ define(function (require) {
       var self = this;
 
       return function (selection) {
-        var dataType = selection[0].parentNode.__data__.rows ? 'rows' : 'columns';
-
         selection.each(function () {
           var div = d3.select(this);
+          var dataType = this.parentNode.__data__.rows ? 'rows' : 'columns';
           var width = $(this).width();
           var height = $(this).height();
 

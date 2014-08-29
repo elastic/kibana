@@ -1,188 +1,92 @@
 define(function (require) {
-  return function LayoutFactory(d3) {
+  return function LayoutFactory(d3, Private) {
     var _ = require('lodash');
-    var $ = require('jquery');
 
-    function Layout(el, data) {
+    var layoutType = Private(require('components/vislib/layout_types'));
+
+    /*
+    * The Layout Constructor is responsible for rendering the visualization
+    * layout, which includes all the DOM div elements.
+    * Input:
+    *   1. DOM div - parent element for which the layout is attached
+    *   2. data - data is bound to the div element
+    *   3. chartType (e.g. 'histogram') - specifies the layout type to grab
+    */
+    function Layout(el, data, chartType) {
       if (!(this instanceof Layout)) {
-        return new Layout(el, data);
+        return new Layout(el, data, chartType);
       }
 
       this.el = el;
       this.data = data;
+      this.layoutType = layoutType[chartType](el, data);
     }
 
     Layout.prototype.render = function () {
       // Remove all elements from the current visualization
-      this.removeAll();
+      this.removeAll(this.el);
 
       // Create the layout
-      this.layout();
-
-      // Split the layout elements
-      this.split();
+      this.createLayout(this.layoutType);
     };
 
-    Layout.prototype.layout = function () {
-      // 1. Create the visualization wrapper element
-      var vis = d3.select(this.el).datum(this.data)
-        .append('div')
-        .attr('class', 'vis-wrapper');
+    // Accepts the layoutType array
+    Layout.prototype.createLayout = function (arr) {
+      var self = this;
 
-      // 2. Append yAxis
-      var yaxis = vis.append('div')
-        .attr('class', 'y-axis-col-wrapper');
-      var yAxisWrapper = yaxis.append('div')
-        .attr('class', 'y-axis-col');
-      yAxisWrapper.append('div')
-        .attr('class', 'y-axis-title');
-      yAxisWrapper.append('div')
-        .attr('class', 'y-axis-chart-title');
-      yAxisWrapper.append('div')
-        .attr('class', 'y-axis-div-wrapper');
-      yaxis.append('div')
-        .attr('class', 'y-axis-spacer-block');
-
-      // 3. Append the visualization element
-      var chart = vis.append('div')
-        .attr('class', 'vis-col-wrapper');
-      chart.append('div')
-        .attr('class', 'chart-wrapper');
-      // append xAxis
-      var xAxisWrapper = chart.append('div')
-        .attr('class', 'x-axis-wrapper');
-      xAxisWrapper.append('div')
-        .attr('class', 'x-axis-div-wrapper');
-      xAxisWrapper.append('div')
-        .attr('class', 'x-axis-chart-title');
-      xAxisWrapper.append('div')
-        .attr('class', 'x-axis-title');
-
-      // 4. Append the Legend element
-      var legend = vis.append('div')
-        .attr('class', 'legend-col-wrapper');
-
-      // 5. Append the Tooltip element
-      var tooltip = vis.append('div')
-        .attr('class', 'k4tip');
-
-      return vis;
+      // for each object in the layout array, calls the layout function on it
+      return _(arr).forEach(function (obj) {
+        self.layout(obj);
+      });
     };
 
-    Layout.prototype.split = function () {
-      // Split y axis div wrapper
-      d3.select('.y-axis-div-wrapper').call(this.yAxisSplit());
-
-      // Split chart titles
-      this.splitChartTitles();
-
-      // Split chart wrapper
-      d3.select('.chart-wrapper').call(this.chartSplit());
-
-      // Split x axis div wrapper
-      d3.select('.x-axis-div-wrapper').call(this.xAxisSplit());
-    };
-
-    Layout.prototype.splitChartTitles = function () {
-      if ($('.y-axis-chart-title').length) {
-        d3.select('.y-axis-chart-title').call(this.chartTitleSplit());
+    // Appends a DOM element based on the object keys
+    Layout.prototype.layout = function (obj) {
+      if (!obj.parent) {
+        throw new Error('No parent element provided');
       }
 
-      if ($('.x-axis-chart-title').length) {
-        d3.select('.x-axis-chart-title').call(this.chartTitleSplit());
+      if (!obj.type) {
+        throw new Error('No element type provided');
       }
+
+      if (typeof obj.type !== 'string') {
+        throw new Error (obj.type + ' must be a string');
+      }
+
+      if (typeof obj.parent === 'string') {
+        obj.parent = '.' + obj.parent;
+      }
+
+      var el = this.appendElem(obj.parent, obj.type, obj.class);
+
+      if (obj.datum) {
+        el.datum(obj.datum);
+      }
+
+      if (obj.splits) {
+        d3.select('.' + obj.class).call(obj.splits);
+      }
+
+      if (obj.children) {
+        this.createLayout(obj.children);
+      }
+
+      return el;
     };
 
-    Layout.prototype.yAxisSplit = function () {
-      return function (selection) {
-        selection.each(function () {
-          var div = d3.select(this);
-
-          div.selectAll('.y-axis-div')
-            .append('div')
-            .data(function (d) {
-              return d.rows ? d.rows : [d];
-            })
-            .enter()
-            .append('div')
-            .attr('class', 'y-axis-div');
-        });
-      };
+    // Appends a `type` of DOM element to `el` and gives it a class attribute `elClass`
+    Layout.prototype.appendElem = function (el, type, elClass) {
+      if (!el || !type || !elClass) {
+        throw new Error('Function requires that an el, type, and class be provided');
+      }
+      return d3.select(el).append(type)
+        .attr('class', elClass);
     };
 
-    Layout.prototype.xAxisSplit = function () {
-      return function (selection) {
-        selection.each(function () {
-          var div = d3.select(this);
-
-          div.selectAll('.x-axis-div')
-            .append('div')
-            .data(function (d) {
-              return d.columns ? d.columns : [d];
-            })
-            .enter()
-            .append('div')
-            .attr('class', 'x-axis-div');
-        });
-      };
-    };
-
-    Layout.prototype.chartSplit = function () {
-      return function split(selection) {
-        selection.each(function (data) {
-          var div = d3.select(this)
-            .attr('class', function () {
-              return data.rows ? 'chart-wrapper-row' : data.columns ? 'chart-wrapper-column' : 'chart-wrapper';
-            });
-          var divClass;
-
-          var charts = div.selectAll('charts')
-            .append('div')
-            .data(function (d) {
-              divClass = d.rows ? 'chart-row' : d.columns ? 'chart-column' : 'chart';
-              return d.rows ? d.rows : d.columns ? d.columns : [d];
-            })
-            .enter().append('div')
-            .attr('class', function () {
-              return divClass;
-            });
-
-          if (!data.series) {
-            charts.call(split);
-          }
-        });
-      };
-    };
-
-    Layout.prototype.chartTitleSplit = function () {
-      return function (selection) {
-        selection.each(function (data) {
-          var div = d3.select(this);
-
-          if (!data.series) {
-            div.selectAll('.chart-title').append('div')
-              .data(function (d) {
-                return d.rows ? d.rows : d.columns;
-              })
-              .enter().append('div')
-              .attr('class', 'chart-title');
-
-            if (data.rows) {
-              d3.select('.x-axis-chart-title').remove();
-            } else {
-              d3.select('.y-axis-chart-title').remove();
-            }
-
-            return div;
-          }
-
-          return d3.select(this).remove();
-        });
-      };
-    };
-
-    Layout.prototype.removeAll = function () {
-      return d3.select(this.el).selectAll('*').remove();
+    // Removes all DOM elements from `el`
+    Layout.prototype.removeAll = function (el) {
+      return d3.select(el).selectAll('*').remove();
     };
 
     return Layout;
