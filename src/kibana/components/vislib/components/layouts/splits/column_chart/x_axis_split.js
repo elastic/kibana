@@ -1,5 +1,5 @@
 define(function () {
-  return function XAxisFactory(d3) {
+  return function XAxisSplitFactory(d3) {
     return function (selection) {
       selection.each(function () {
         var div = d3.select(this);

@@ -76,12 +76,12 @@ define(function (require) {
     };
 
     // Appends a `type` of DOM element to `el` and gives it a class attribute `elClass`
-    Layout.prototype.appendElem = function (el, type, elClass) {
-      if (!el || !type || !elClass) {
+    Layout.prototype.appendElem = function (el, type, className) {
+      if (!el || !type || !className) {
         throw new Error('Function requires that an el, type, and class be provided');
       }
       return d3.select(el).append(type)
-        .attr('class', elClass);
+        .attr('class', className);
     };
 
     // Removes all DOM elements from `el`

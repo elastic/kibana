@@ -99,8 +99,8 @@ define(function (require) {
         });
     };
 
-    Handler.prototype.removeAll = function (elem) {
-      return d3.select(elem).selectAll('*').remove();
+    Handler.prototype.removeAll = function (el) {
+      return d3.select(el).selectAll('*').remove();
     };
 
     Handler.prototype.error = function (message) {
