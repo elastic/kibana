@@ -17,6 +17,8 @@ define(function (require) {
 
     XAxis.prototype.render = function () {
       d3.select(this.el).selectAll('.x-axis-div').call(this.draw());
+      d3.select(this.el).selectAll('.x-axis-div').call(this.checkTickLabels());
+      d3.select(this.el).selectAll('.x-axis-div').call(this.resizeAxisLayoutForLabels());
     };
 
     XAxis.prototype.removeAll = function () {
@@ -101,8 +103,8 @@ define(function (require) {
       } else {
         self._attr.isDiscover = false;
       }
-
       return function (selection) {
+        
         selection.each(function () {
           div = d3.select(this);
           width = $(this).width() - margin.left - margin.right;
@@ -120,9 +122,6 @@ define(function (require) {
             .attr('transform', 'translate(' + margin.left + ',0)')
             .call(self.xAxis);
         });
-
-        self.checkTickLabels(selection);
-
       };
     };
 
@@ -146,57 +145,58 @@ define(function (require) {
       var rotate = false;
       self._attr.isRotated = false;
       
-      selection.each(function () {
-        // select each x axis
-        div = d3.select(this);
-        width = $(this).width() - margin.left - margin.right;
-        height = $(this).height();
-        labels = selection.selectAll('.tick text');
+      return function (selection) {
 
-        // total widths for every label from each x axis
-        subtotalW = 0;
-        subtotalH = 0;
-        _.forEach(labels[0], function (n) {
-          subtotalW += n.getBBox().width;
-          subtotalH += n.getBBox().height;
+        selection.each(function () {
+          // select each x axis
+          div = d3.select(this);
+          width = $(this).width() - margin.left - margin.right;
+          height = $(this).height();
+          labels = selection.selectAll('.tick text');
+
+          // total widths for every label from each x axis
+          subtotalW = 0;
+          subtotalH = 0;
+          _.forEach(labels[0], function (n) {
+            subtotalW += n.getBBox().width;
+            subtotalH += n.getBBox().height;
+          });
+
+          widthArr.push(subtotalW);
+          heightArr.push(subtotalH);
+
+          // should rotate if any chart subtotal > width
+          if (subtotalW > width) {
+            rotate = true;
+          }
         });
 
-        widthArr.push(subtotalW);
-        heightArr.push(subtotalH);
-
-        // should rotate if any chart subtotal > width
-        if (subtotalW > width) {
-          rotate = true;
+        // apply rotate if not discover view
+        if (!self._attr.isDiscover && rotate) {
+          self.rotateAxisLabels(selection);
+          self._attr.isRotated = true;
         }
-      });
-
-      // apply rotate if not discover view
-      if (!self._attr.isDiscover && rotate) {
-        self.rotateAxisLabels(selection);
-        self._attr.isRotated = true;
-      }
-      
-      // filter labels to prevent overlap of text
-      if (self._attr.isRotated) {
-        // if rotated, use label heights
-        maxHeight = _.max(heightArr);
-        total = _.reduce(heightArr, function (sum, n) {
-          return sum + (n * 1.05);
-        });
-        nth = 1 + Math.floor(maxHeight / width);
-      } else {
-        // if not rotated, use label widths
-        maxWidth = _.max(widthArr);
-        total = _.reduce(widthArr, function (sum, n) {
-          return sum + (n * 1.05);
-        });
-        nth = 1 + Math.floor(maxWidth / width);
-      }
-      if (nth > 1) {
-        self.filterAxisLabels(selection, nth);
-      }
-
-      self.resizeAxisLayoutForLabels(selection);
+        
+        // filter labels to prevent overlap of text
+        if (self._attr.isRotated) {
+          // if rotated, use label heights
+          maxHeight = _.max(heightArr);
+          total = _.reduce(heightArr, function (sum, n) {
+            return sum + (n * 1.05);
+          });
+          nth = 1 + Math.floor(maxHeight / width);
+        } else {
+          // if not rotated, use label widths
+          maxWidth = _.max(widthArr);
+          total = _.reduce(widthArr, function (sum, n) {
+            return sum + (n * 1.05);
+          });
+          nth = 1 + Math.floor(maxWidth / width);
+        }
+        if (nth > 1) {
+          self.filterAxisLabels(selection, nth);
+        }
+      };
     };
 
     XAxis.prototype.rotateAxisLabels = function (selection) {
@@ -234,61 +234,63 @@ define(function (require) {
       var chartToXaxis;
       var dataType;
 
-      dataType = selection[0].parentNode.__data__.series ? 'series' :
-        selection[0].parentNode.__data__.rows ? 'rows' : 'columns';
+      return function (selection) {
+        dataType = selection[0].parentNode.__data__.series ? 'series' :
+          selection[0].parentNode.__data__.rows ? 'rows' : 'columns';
 
-      var rotScale = d3.scale.linear()
-        .domain([0.14, 0.28, 0.85, 2.6])
-        .range([5, 10, 30, 100]);
+        var rotScale = d3.scale.linear()
+          .domain([0.14, 0.28, 0.6, 0.8, 0.9, 2.6])
+          .range([5, 10, 30, 55, 80, 100]);
 
-      var flatScale = d3.scale.linear()
-        .domain([1.3, 8, 14.5, 29])
-        .range([1.1, 9, 13, 30]);
+        var flatScale = d3.scale.linear()
+          .domain([1.3, 8, 14.5, 29])
+          .range([1.1, 9, 13, 30]);
 
-      selection.each(function () {
+        selection.each(function () {
 
-        div = d3.select(this);
-        svg = div.select('svg');
-        tick = svg.select('.tick');
+          div = d3.select(this);
+          svg = div.select('svg');
+          tick = svg.select('.tick');
 
-        xwrapper = visEl.find('.x-axis-wrapper');
-        xdiv = visEl.find('.x-axis-div');
-        xdivwrapper = visEl.find('.x-axis-div-wrapper');
-        yspacerblock = visEl.find('.y-axis-spacer-block');
+          xwrapper = visEl.find('.x-axis-wrapper');
+          xdiv = visEl.find('.x-axis-div');
+          xdivwrapper = visEl.find('.x-axis-div-wrapper');
+          yspacerblock = visEl.find('.y-axis-spacer-block');
 
-        if (dataType === 'series') {
-          chartwrap =  visEl.find('.chart-wrapper');
-          titlespace = 15;
-        } else if (dataType === 'rows') {
-          chartwrap =  visEl.find('.chart-wrapper-row');
-          titlespace = 15;
-        } else {
-          chartwrap =  visEl.find('.chart-wrapper-column');
-          titlespace = 30;
-        }
+          if (dataType === 'series') {
+            chartwrap =  visEl.find('.chart-wrapper');
+            titlespace = 15;
+          } else if (dataType === 'rows') {
+            chartwrap =  visEl.find('.chart-wrapper-row');
+            titlespace = 15;
+          } else {
+            chartwrap =  visEl.find('.chart-wrapper-column');
+            titlespace = 30;
+          }
 
-        if (!self._attr.isRotated) {
-          // flat labels
-          ratio = flatScale(35 * (titlespace +
-            tick.node().getBBox().height) / chartwrap.height());
-          //console.log('FLAT:', ratio);
-          //console.log(chartwrap.height(), tick.node().getBBox());
-        } else {
-          // rotated labels
-          ratio = rotScale((titlespace + tick.node().getBBox().height) / chartwrap.height());
-          div.style('height', 2 + tick.node().getBBox().height + 'px');
-          svg.attr('height', 2 + tick.node().getBBox().height + 'px');
-          //console.log('ROT:', ratio);
-        }
+          if (!self._attr.isRotated) {
+            // flat labels
+            ratio = flatScale(35 * (titlespace +
+              tick.node().getBBox().height) / chartwrap.height());
+            //console.log('FLAT:', ratio);
+            //console.log(35 * (titlespace + tick.node().getBBox().height) / chartwrap.height());
+          } else {
+            // rotated labels
+            ratio = rotScale((titlespace + tick.node().getBBox().height) / chartwrap.height());
+            div.style('height', 2 + tick.node().getBBox().height + 'px');
+            svg.attr('height', 2 + tick.node().getBBox().height + 'px');
+            //console.log('ROT:', ratio);
+            //console.log((titlespace + tick.node().getBBox().height) / chartwrap.height());
+          }
 
-        flex = ratio.toFixed(1);
-        xwrapper.css('flex', flex + ' 1');
-        xdiv.css('flex', flex + ' 1');
-        yspacerblock.css('flex', flex + ' 1');
-        //console.log('flex:', flex);
+          flex = ratio.toFixed(1);
+          xwrapper.css('flex', flex + ' 1');
+          xdiv.css('flex', flex + ' 1');
+          yspacerblock.css('flex', flex + ' 1');
+          //console.log('flex:', flex);
 
-      });
-      
+        });
+      };
     };
 
     return XAxis;

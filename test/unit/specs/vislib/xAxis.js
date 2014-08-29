@@ -217,5 +217,31 @@ define(function (require) {
       });
     });
 
+    describe('checkTickLabels Method', function () {
+      var selection;
+
+      beforeEach(function () {
+        xAxis.render();
+        selection = $('.x-axis-wrapper');
+      });
+
+      it('should be a function', function () {
+        expect(_.isFunction(xAxis.checkTickLabels(selection))).to.be(true);
+      });
+    });
+
+    describe('resizeAxisLayoutForLabels Method', function () {
+      var selection;
+
+      beforeEach(function () {
+        xAxis.render();
+        selection = $('.x-axis-wrapper');
+      });
+
+      it('should be a function', function () {
+        expect(_.isFunction(xAxis.checkTickLabels(selection))).to.be(true);
+      });
+    });
+
   });
 });
