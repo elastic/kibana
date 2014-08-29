@@ -78,6 +78,10 @@ define(function (require) {
       this.xAxisFormatter = this.xAxisFormatter;
       this.xScale = this.getXScale(this.ordered, width);
 
+      if (!this.xScale || _.isNaN(this.xScale)) {
+        throw new Error('xScale is ' + this.xScale);
+      }
+
       this.xAxis = d3.svg.axis()
         .scale(this.xScale)
         .tickFormat(this.xAxisFormatter)
@@ -107,6 +111,10 @@ define(function (require) {
           div = d3.select(this);
           width = $(this).width() - margin.left - margin.right;
           height = $(this).height();
+
+          if (_.isNaN(height) || height <= 0 || _.isNaN(width) || width <= 0) {
+            throw new Error('The height and/or width of this container is too small for this chart. Height: ' + height + ', width: ' + width);
+          }
 
           // Return access to xAxis variable on the object
           self.getXAxis(width);

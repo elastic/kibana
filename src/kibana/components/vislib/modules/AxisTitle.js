@@ -3,8 +3,6 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
 
-    var Chart = Private(require('components/vislib/modules/_chart'));
-
     function AxisTitle(el, xTitle, yTitle) {
       if (!(this instanceof AxisTitle)) {
         return new AxisTitle(el, xTitle, yTitle);
@@ -21,16 +19,15 @@ define(function (require) {
     };
 
     AxisTitle.prototype.draw = function (title) {
-      var self = this;
-      var div;
-      var width;
-      var height;
-
       return function (selection) {
         selection.each(function () {
-          div = d3.select(this);
-          width = $(this).width();
-          height = $(this).height();
+          var div = d3.select(this);
+          var width = $(this).width();
+          var height = $(this).height();
+
+          if (_.isNaN(height) || height <= 0 || _.isNaN(width) || width <= 0) {
+            throw new Error('The height and/or width of this container is too small for this chart. Height: ' + height + ', width: ' + width);
+          }
 
           div.append('svg')
             .attr('width', width)

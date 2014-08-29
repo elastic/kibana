@@ -5,25 +5,25 @@ define(function (require) {
 
     var Handler = Private(require('components/vislib/modules/Handler'));
     var Events = Private(require('factories/events'));
-
-    // VisLib Visualization Types
-    var chartTypes = {
-      histogram : Private(require('components/vislib/modules/ColumnChart'))
-    };
+    var chartTypes = Private(require('components/vislib/visTypes'));
 
     _(Vis).inherits(Events);
     function Vis($el, config) {
       if (!(this instanceof Vis)) {
         return new Vis($el, config);
       }
-
       Vis.Super.apply(this, arguments);
+
       this.el = $el.get ? $el.get(0) : $el;
       this.ChartClass = chartTypes[config.type];
       this._attr = _.defaults(config || {}, {});
     }
 
     Vis.prototype.render = function (data) {
+      if (this._attr.destroyFlag) {
+        throw new Error('You tried to render a chart that was destroyed');
+      }
+
       if (!data) {
         throw new Error('No valid data!');
       }
@@ -34,21 +34,15 @@ define(function (require) {
       try {
         this.handler.render();
       } catch (error) {
-        console.error(error.message);
+        this.handler.error(error.message);
       }
 
       this.checkSize();
     };
 
-    Vis.prototype.resize = function () {
-      if (!this.data) {
-        throw new Error('No valid data');
-      }
-      //this.render(this.data.data);
-      this.render(this.data);
-    };
-
     Vis.prototype.checkSize = _.debounce(function () {
+      if (arguments.length) { return; }
+
       // enable auto-resize
       var size = $('.chart').width() + ':' + $('.chart').height();
 
@@ -59,23 +53,29 @@ define(function (require) {
       setTimeout(this.checkSize(), 250);
     }, 250);
 
+    Vis.prototype.resize = function () {
+      if (!this.data) {
+        throw new Error('No valid data');
+      }
+      this.render(this.data);
+    };
+
     Vis.prototype.destroy = function () {
       this._attr.destroyFlag = true;
+      this.checkSize(false);
 
       // Removing chart and all elements associated with it
       d3.select(this.el).selectAll('*').remove();
 
       // Cleaning up event listeners
-      this.off('click');
-      this.off('hover');
-      this.off('brush');
-      d3.select(window)
-        .on('resize', null);
+      this.off('click', null);
+      this.off('hover', null);
+      this.off('brush', null);
     };
 
     Vis.prototype.set = function (name, val) {
       this._attr[name] = val;
-      this.render();
+      this.render(this.data);
     };
 
     Vis.prototype.get = function (name) {

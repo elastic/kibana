@@ -64,6 +64,50 @@ define(function (require) {
               y: 24
             }
           ]
+        },
+        {
+          values: [
+            {
+              x: 1408734060000,
+              y: 8
+            },
+            {
+              x: 1408734090000,
+              y: 23
+            },
+            {
+              x: 1408734120000,
+              y: 30
+            },
+            {
+              x: 1408734150000,
+              y: 28
+            },
+            {
+              x: 1408734180000,
+              y: 36
+            },
+            {
+              x: 1408734210000,
+              y: 30
+            },
+            {
+              x: 1408734240000,
+              y: 26
+            },
+            {
+              x: 1408734270000,
+              y: 22
+            },
+            {
+              x: 1408734300000,
+              y: 29
+            },
+            {
+              x: 1408734330000,
+              y: 24
+            }
+          ]
         }
       ],
       xAxisLabel: 'Date Histogram',
@@ -88,8 +132,11 @@ define(function (require) {
         dataObj = new Data(data);
         yAxis = new YAxis({
           el: $('.y-axis-wrapper')[0],
-          yMax: dataObj.getYMaxValue(),
-          _attr: { margin: { top: 0, right: 0, bottom: 0, left: 0 } }
+          chartData: dataObj.chartData(),
+          dataArray: dataObj.flatten(),
+          _attr: {
+            margin: { top: 0, right: 0, bottom: 0, left: 0 }
+          }
         });
       });
     });
@@ -140,6 +187,25 @@ define(function (require) {
         expect(yScale.range()[1]).to.be(0);
       });
     });
+
+    describe('isStacked Method', function () {
+      it('should return false', function () {
+        expect(yAxis.isStacked()).to.be(true);
+      });
+    });
+
+//    describe('getYStackMax Method', function () {
+//      it('should return the max value of a series array', function () {
+//        expect(typeof yAxis._attr.stack).to.be('function');
+//        expect(yAxis.getYStackMax(data.series[0].values)).to.be(36);
+//      });
+//    });
+//
+//    describe('getYMaxValue Method', function () {
+//      it('should return the data max y value', function () {
+//        expect(yAxis.getYMaxValue()).to.be(36);
+//      });
+//    });
 
     describe('draw Method', function () {
       it('should be a function', function () {

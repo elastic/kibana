@@ -21,10 +21,7 @@ define(function (require) {
         xValue: function (d, i) { return d.x; },
         yValue: function (d, i) { return d.y; },
         dispatch: d3.dispatch('brush', 'click', 'hover', 'mouseenter', 'mouseleave', 'mouseover', 'mouseout'),
-        stack: d3.layout.stack()
-          .x(function (d) { return d.x; })
-          .y(function (d) { return d.y; })
-          .offset(this.offset)
+        stack: this._attr.stack.offset(this.offset)
       });
     }
 
@@ -104,34 +101,15 @@ define(function (require) {
 
       return function (selection) {
         selection.each(function (data) {
-          if (!yScale) {
-            throw new Error('yScale is ' + yScale);
-          }
-
-          if (!xScale) {
-            throw new Error('xScale is ' + xScale);
-          }
 
           layers = self.stackData(data);
-
-          self.validateHeightAndWidth($elem, elWidth, elHeight);
 
           // Get the width and height
           width = elWidth - margin.left - margin.right;
           height = elHeight - margin.top - margin.bottom;
 
-          if (_.isNaN(width) || _.isNaN(height)) {
-            throw new Error('width: ' + width + '; height:' + height);
-          }
-
-          if (height <= margin.top + margin.bottom) {
-            throw new Error('The container is too small for this chart.');
-          }
-
-          /* Error Handler that prevents a chart from being rendered when
-           there are too many data points for the width of the container. */
-          if (width / layers.length <= 4) {
-            throw new Error('The container is too small for this chart.');
+          if (_.isNaN(width) || width < 20 || _.isNaN(height) || height < 20) {
+            throw new Error('The height and/or width of the chart container(s) is too small. Height: ' + height + ', width: ' + width);
           }
 
           // Create the canvas for the visualization
@@ -185,23 +163,22 @@ define(function (require) {
                 barWidth = xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min);
                 barSpacing = barWidth * 0.25;
 
+                if (barWidth <= 1) {
+                  throw new Error('This container is too small for this chart.');
+                }
                 return barWidth - barSpacing;
+              }
+
+              if (xScale.rangeBand() <= 1) {
+                throw new Error('This container is too small for this chart.');
               }
               return xScale.rangeBand();
             })
             .attr('y', function (d) {
-              var y = yScale(d.y0 + d.y);
-              if (!_.isNaN(y) || y < 0) {
-                return y;
-              }
-              throw new Error('The container is too small for this chart.');
+              return yScale(d.y0 + d.y);
             })
             .attr('height', function (d) {
-              var height = yScale(d.y0) - yScale(d.y0 + d.y);
-              if (!_.isNaN(height) || height < 0) {
-                return height;
-              }
-              throw new Error('The container is too small for this chart.');
+              return yScale(d.y0) - yScale(d.y0 + d.y);
             });
 
           bars

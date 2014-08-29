@@ -22,8 +22,11 @@ define(function (require) {
       this.data = new Data(vis.data);
       this.ChartClass = vis.ChartClass;
       this._attr = _.defaults(vis._attr || {}, {
-        'margin' : { top: 10, right: 3, bottom: 5, left: 3 }
+        'margin' : { top: 10, right: 3, bottom: 5, left: 3 },
+        destroyFlag: false
       });
+
+      // Visualization Classes
       this.layout = new Layout(this.el, this.data.injectZeros());
 
       if (this._attr.addLegend) {
@@ -44,7 +47,8 @@ define(function (require) {
       });
       this.yAxis = new YAxis({
         el: this.el,
-        yMax: this.data.getYMaxValue(),
+        chartData: this.data.chartData(),
+        dataArray: this.data.flatten(),
         _attr: this._attr
       });
       this.axisTitle = new AxisTitle(this.el, this.data.get('xAxisLabel'), this.data.get('yAxisLabel'));
@@ -52,10 +56,10 @@ define(function (require) {
         this.layout,
         this.legend,
         this.tooltip,
-        this.chartTitle,
         this.xAxis,
         this.yAxis,
-        this.axisTitle
+        this.axisTitle,
+        this.chartTitle
       ];
     }
 
@@ -95,7 +99,25 @@ define(function (require) {
         });
     };
 
-    Handler.prototype.error = function () {};
+    Handler.prototype.removeAll = function (elem) {
+      return d3.select(elem).selectAll('*').remove();
+    };
+
+    Handler.prototype.error = function (message) {
+      // Removes the legend container
+      this.removeAll(this.el);
+
+      return d3.select(this.el)
+        .append('div')
+        .attr('class', 'error-wrapper')
+        .append('div')
+        .attr('class', 'chart error')
+        .append('p')
+        .style('line-height', function () {
+          return $(this.el).height() + 'px';
+        })
+        .text(message);
+    };
 
     return Handler;
   };

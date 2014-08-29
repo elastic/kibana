@@ -5,15 +5,64 @@ define(function (require) {
 
     function YAxis(args) {
       this.el = args.el;
-      this.yMax = args.yMax;
-      this._attr = args._attr;
+      this.chartData = args.chartData;
+      this.dataArray = args.dataArray;
+      this._attr = _.defaults(args._attr || {}, {
+        stack: d3.layout.stack()
+          .x(function (d) { return d.x; })
+          .y(function (d) { return d.y; })
+      });
     }
 
     YAxis.prototype.render = function () {
       d3.select(this.el).selectAll('.y-axis-div').call(this.draw());
     };
 
+    // should be moved to yAxis class
+    YAxis.prototype.isStacked = function () {
+      var data = this.chartData;
+
+      for (var i = 0; i < data.length; i++) {
+        if (data[i].series.length > 1) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    // should be moved to yAxis class
+    YAxis.prototype.getYMaxValue = function () {
+      var self = this;
+      var arr = [];
+
+      _.forEach(this.dataArray, function (series) {
+        arr.push(self.getYStackMax(series));
+      });
+
+      return _.max(arr);
+    };
+
+    // should be moved to yAxis class
+    YAxis.prototype.getYStackMax = function (series) {
+      var self = this;
+
+      if (this.isStacked()) {
+        series = this._attr.stack(series);
+      }
+
+      return d3.max(series, function (data) {
+        return d3.max(data, function (d) {
+          if (self.isStacked()) {
+            return d.y0 + d.y;
+          }
+          return d.y;
+        });
+      });
+    };
+
     YAxis.prototype.getYScale = function (height) {
+      this.yMax = this.getYMaxValue();
+
       this.yScale = d3.scale.linear()
         .domain([0, this.yMax])
         .range([height, 0])
@@ -24,6 +73,10 @@ define(function (require) {
 
     YAxis.prototype.getYAxis = function (height) {
       var yScale = this.getYScale(height);
+
+      if (!yScale || _.isNaN(yScale)) {
+        throw new Error('yScale is ' + yScale);
+      }
 
       this.yAxis = d3.svg.axis()
         .scale(yScale)
@@ -59,9 +112,8 @@ define(function (require) {
           width = $(this).width();
           height = $(this).height() - margin.top - margin.bottom;
 
-          // Return access to the yAxis
-          if (_.isNaN(height) || height <= 0) {
-            throw new Error('The container is too small for this chart.');
+          if (_.isNaN(height) || height <= 0 || _.isNaN(width) || width <= 0) {
+            throw new Error('The height and/or width of this container is too small for this chart. Height: ' + height + ', width: ' + width);
           }
 
           var yAxis = self.getYAxis(height);
@@ -96,7 +148,6 @@ define(function (require) {
       length += tickspace;
 
       // set widths of svg, x-axis-div and x-axis-div-wrapper to fit ticklabels
-      console.log(svg);
       svg.attr('width', length + 6);
       d3.selectAll('.y.axis').attr('transform', 'translate(' + (length + 2) + ',' + margin.top + ')');
     };
