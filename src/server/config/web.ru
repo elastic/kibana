@@ -1,3 +1,6 @@
+require "rubygems"
+require "bundler/setup"
+
 ROOT = File.expand_path("#{File.dirname(__FILE__)}/../")
 
 if ENV['RACK_ENV'] == ('development')
@@ -10,12 +13,7 @@ if ENV['RACK_ENV'] == ('production')
   CONFIG_PATH = ENV["CONFIG_PATH"]
 end
 
-print ENV;
-
 $LOAD_PATH.unshift(ROOT)
-
-require "rubygems"
-require "bundler/setup"
 
 # Require the application
 require "#{ROOT}/lib/app"

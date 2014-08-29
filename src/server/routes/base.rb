@@ -9,11 +9,11 @@ module Kibana
 
       helpers Sinatra::JSON
       configure do
-        set :root, ROOT
-        set :public_folder, PUBLIC_ROOT
+        set :root, ENV['KIBANA_ROOT']
+        set :public_folder, ENV['PUBLIC_ROOT']
         set :httponly, true
 
-        config = YAML.load(IO.read(CONFIG_PATH))
+        config = YAML.load(IO.read(ENV['CONFIG_PATH']))
         set :config, config
         config['elasticsearch'] = ENV['KIBANA_ELASTICSEARCH']
         config['port'] = ENV['KIBANA_PORT'].to_i
