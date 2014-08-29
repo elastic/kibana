@@ -6,7 +6,7 @@ define(function (require) {
 
   var module = require('modules').get('kibana/global_state');
 
-  module.service('globalState', function (Private, $rootScope) {
+  module.service('globalState', function (Private, $rootScope, $location) {
     var State = Private(require('components/state_management/state'));
 
     _.inherits(GlobalState, State);
@@ -16,6 +16,14 @@ define(function (require) {
 
     GlobalState.prototype.writeToUrl = function (url) {
       return qs.replaceParamInUrl(url, this._urlParam, this.toRISON());
+    };
+
+    GlobalState.prototype._readFromURL = function (method) {
+      var search = $location.search();
+      if (method === 'fetch') {
+        return (search[this._urlParam]) ? rison.decode(search[this._urlParam]) : this.toObject();
+      }
+      return rison.decode(search[this._urlParam] || '()');
     };
 
     return new GlobalState();
