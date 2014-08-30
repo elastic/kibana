@@ -10,6 +10,7 @@ define(function (require) {
     var Data;
     var xAxis;
     var el;
+    var fixture;
     var dataObj;
     var data = {
       hits: 621,
@@ -83,8 +84,9 @@ define(function (require) {
         Data = Private(require('components/vislib/modules/Data'));
 
         el = d3.select('body').append('div')
-          .attr('class', 'x-axis-wrapper')
-          .append('div')
+          .attr('class', 'x-axis-wrapper');
+
+        fixture = el.append('div')
           .attr('class', 'x-axis-div')
           .style('height', '20px');
 

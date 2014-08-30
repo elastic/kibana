@@ -7,6 +7,9 @@ define(function () {
         div.selectAll('.x-axis-div')
           .append('div')
           .data(function (d) {
+            if (!d) {
+              console.log(selection[0].parentNode);
+            }
             return d.columns ? d.columns : [d];
           })
           .enter()
