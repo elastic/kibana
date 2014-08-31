@@ -123,7 +123,7 @@ define(function (require) {
       });
     });
 
-    describe('getScale, getDomain, and getRange Methods', function () {
+    describe('getScale, getDomain, getTimeDomain, getOrdinalDomain, and getRange Methods', function () {
       var ordered;
       var timeScale;
       var timeDomain;
@@ -152,9 +152,18 @@ define(function (require) {
         expect(_.isDate(timeDomain.domain()[1])).to.be(true);
       });
 
+      it('should return the min and max dates', function () {
+        expect(timeDomain.domain()[0].toDateString()).to.be(new Date(1408734060000).toDateString());
+        expect(timeDomain.domain()[1].toDateString()).to.be(new Date(1408734330000).toDateString());
+      });
+
       it('should return an ordinal scale', function () {
         expect(ordinalDomain.domain()[0]).to.be('this');
         expect(ordinalDomain.domain()[4]).to.be('array');
+      });
+
+      it('should return an array of values', function () {
+        expect(_.isArray(ordinalDomain.domain())).to.be(true);
       });
 
       it('should return the correct range', function () {

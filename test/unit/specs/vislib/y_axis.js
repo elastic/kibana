@@ -194,22 +194,29 @@ define(function (require) {
       });
     });
 
-//    describe('getYStackMax Method', function () {
-//      it('should return the max value of a series array', function () {
-//        expect(typeof yAxis._attr.stack).to.be('function');
-//        expect(yAxis.getYStackMax(data.series[0].values)).to.be(36);
-//      });
-//    });
-//
-//    describe('getYMaxValue Method', function () {
-//      it('should return the data max y value', function () {
-//        expect(yAxis.getYMaxValue()).to.be(36);
-//      });
-//    });
+    describe('getYStackMax Method', function () {
+      it('should return the max value of a series array', function () {
+        expect(yAxis.getYStackMax(yAxis.dataArray[0])).to.be(72);
+      });
+    });
+
+    describe('getYMaxValue Method', function () {
+      it('should return the data max y value', function () {
+        expect(yAxis.getYMaxValue()).to.be(72);
+      });
+    });
 
     describe('draw Method', function () {
       it('should be a function', function () {
         expect(_.isFunction(yAxis.draw())).to.be(true);
+      });
+    });
+
+    describe('tickScale Method', function () {
+      it('should return the correct number of ticks', function () {
+        expect(yAxis.tickScale(1000)).to.be(11);
+        expect(yAxis.tickScale(40)).to.be(3);
+        expect(yAxis.tickScale(20)).to.be(0);
       });
     });
 

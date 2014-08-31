@@ -103,8 +103,9 @@ define(function (require) {
     });
 
     describe('render Method', function () {
-      beforeEach(function () {
+      beforeEach(function (done) {
         chart.render(data);
+        done();
       });
 
       it('should bind data to this object', function () {

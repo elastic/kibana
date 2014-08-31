@@ -19,10 +19,6 @@ define(function (require) {
       d3.select(this.el).selectAll('.x-axis-div').call(this.draw());
     };
 
-    XAxis.prototype.removeAll = function () {
-      return d3.select(this.el).selectAll('.x-axis-div').selectAll('*').remove();
-    };
-
     XAxis.prototype.getScale = function (ordered) {
       if (ordered && ordered.date) {
         return d3.time.scale();
