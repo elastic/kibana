@@ -37,7 +37,6 @@ define(function (require) {
         this.tooltip = new Tooltip(this.data.get('tooltipFormatter'));
       }
 
-      this.chartTitle = new ChartTitle(this.el);
       this.xAxis = new XAxis({
         el: this.el,
         xValues: this.data.xValues(),
@@ -52,6 +51,8 @@ define(function (require) {
         _attr: this._attr
       });
       this.axisTitle = new AxisTitle(this.el, this.data.get('xAxisLabel'), this.data.get('yAxisLabel'));
+      this.chartTitle = new ChartTitle(this.el);
+
       this.renderArray = [
         this.layout,
         this.legend,

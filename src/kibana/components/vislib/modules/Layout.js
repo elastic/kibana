@@ -51,7 +51,7 @@ define(function (require) {
       }
 
       if (typeof obj.type !== 'string') {
-        throw new Error (obj.type + ' must be a string');
+        throw new Error(obj.type + ' must be a string');
       }
 
       if (typeof obj.parent === 'string') {

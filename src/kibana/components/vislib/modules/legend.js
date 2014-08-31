@@ -3,14 +3,11 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
 
-    var createHeader = Private(require('components/vislib/components/Legend/header'));
-    var createList = Private(require('components/vislib/components/Legend/list'));
-    var classify = Private(require('components/vislib/components/Legend/classify'));
-
     // Dynamically adds css file
     require('css!components/vislib/components/styles/main');
 
     function Legend(labels, color, config, el) {
+      this.el = el;
       this.labels = labels;
       this.color = color;
       this._attr = _.defaults(config || {}, {
@@ -21,69 +18,89 @@ define(function (require) {
         'isOpen' : false,
         'width': 20
       });
-      this.el = el;
     }
+
+    Legend.prototype.header = function (el) {
+      return el.append('div')
+        .attr('class', 'header')
+        .append('div')
+        .attr('class', 'column-labels')
+        .html('<span class="btn btn-xs btn-default legend-toggle">' +
+          '<i class="fa fa-list-ul"></i></span>');
+    };
+
+    Legend.prototype.list = function (el, arrOfItms, args) {
+      var self = this;
+
+      return el.append('ul')
+        .attr('class', function () {
+          if (args._attr.isOpen) {
+            return 'legend-ul';
+          }
+          return 'legend-ul hidden';
+        })
+        .selectAll('li')
+        .data(arrOfItms)
+        .enter()
+        .append('li')
+        .attr('class', function (d) {
+          return 'color ' + self.classify(args.color(d));
+        })
+        .html(function (d) {
+          return '<span class="dots" style="background:' + args.color(d) + '"></span>' + d;
+        });
+    };
+
+    Legend.prototype.classify = function (name) {
+      return 'c' + name.replace(/[#]/g, '');
+    };
 
     Legend.prototype.render = function () {
       var visEl = d3.select(this.el);
       var legendDiv = visEl.select('.' + this._attr.legendClass);
       var items = this.labels;
-      var header = createHeader(legendDiv);
+      var header = this.header(legendDiv);
       var headerIcon = visEl.select('.legend-toggle');
-      var list = createList(legendDiv, items, this);
-      //var width = this._attr.width ? this._attr.width : this.getMaxLabelLength(list);
+      var list = this.list(legendDiv, items, this);
 
-      var that = this;
+      var self = this;
 
       // toggle
       headerIcon.on('click', function (d) {
-        if (that._attr.isOpen) {
+        if (self._attr.isOpen) {
           // close legend
           visEl.select('ul.legend-ul')
             .classed('hidden', true);
-          that._attr.isOpen = false;
+          self._attr.isOpen = false;
           
         } else {
           // open legend
           visEl.select('ul.legend-ul')
             .classed('hidden', false);
-          that._attr.isOpen = true;
-          
+          self._attr.isOpen = true;
         }
-
-
       });
 
       visEl.selectAll('.color')
         .on('mouseover', function (d) {
-          var liClass = '.' + classify(that.color(d));
-          visEl.selectAll('.color').style('opacity', that._attr.blurredOpacity);
+          var liClass = '.' + self.classify(self.color(d));
+          visEl.selectAll('.color').style('opacity', self._attr.blurredOpacity);
           
           // select series on chart
-          visEl.selectAll(liClass).style('opacity', that._attr.focusOpacity);
+          visEl.selectAll(liClass).style('opacity', self._attr.focusOpacity);
 
           visEl.selectAll('.color')
-            .style('opacity', that._attr.blurredOpacity);
+            .style('opacity', self._attr.blurredOpacity);
           
           // Select series on chart
           visEl.selectAll(liClass)
-            .style('opacity', that._attr.focusOpacity);
+            .style('opacity', self._attr.focusOpacity);
         });
 
       visEl.selectAll('.color')
         .on('mouseout', function () {
-          visEl.selectAll('.color').style('opacity', that._attr.defaultOpacity);
+          visEl.selectAll('.color').style('opacity', self._attr.defaultOpacity);
         });
-
-      // add/remove class to open legend
-      // if (this._attr.isOpen) {
-      //   d3.select('.' + this._attr.legendClass)
-      //     .classed('open4', true);
-      // } else {
-      //   d3.select('.' + this._attr.legendClass)
-      //     .classed('open4', false);
-      // }
-
     };
 
     return Legend;

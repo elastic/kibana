@@ -4,7 +4,7 @@ define(function (require) {
     var $ = require('jquery');
 
     var Chart = Private(require('components/vislib/modules/_chart'));
-    var classify = Private(require('components/vislib/components/Legend/classify'));
+    var Legend = Private(require('components/vislib/modules/legend'));
 
     // Dynamically adds css file
     require('css!components/vislib/components/styles/main');
@@ -144,7 +144,7 @@ define(function (require) {
           bars.enter()
             .append('rect')
             .attr('class', function (d) {
-              return 'color ' + classify(color(d.label));
+              return 'color ' + Legend.prototype.classify.call(this, color(d.label));
             })
             .attr('fill', function (d) {
               return color(d.label);

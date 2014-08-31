@@ -255,7 +255,7 @@ define(function (require) {
           inject(function (d3) {
             fixture = d3.select('body').append('div')
               .attr('class', 'rows')
-              .datum( { rows: [{}, {}] });
+              .datum({ rows: [{}, {}] });
             d3.select('.rows').call(yAxisSplit);
             divs = d3.selectAll('.y-axis-div')[0];
           });
