@@ -10,6 +10,7 @@ define(function (require) {
     var Data;
     var yAxis;
     var el;
+    var yAxisDiv;
     var dataObj;
     var data = {
       hits: 621,
@@ -124,8 +125,9 @@ define(function (require) {
         Data = Private(require('components/vislib/modules/Data'));
 
         el = d3.select('body').append('div')
-          .attr('class', 'y-axis-wrapper')
-          .append('div')
+          .attr('class', 'y-axis-wrapper');
+
+        yAxisDiv = el.append('div')
           .attr('class', 'y-axis-div')
           .style('height', '20px');
 

@@ -3,6 +3,8 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
 
+    var ErrorHandler = Private(require('components/vislib/modules/_error_handler'));
+
     function ChartTitle(el) {
       if (!(this instanceof ChartTitle)) {
         return new ChartTitle(el);
@@ -10,6 +12,8 @@ define(function (require) {
 
       this.el = el;
     }
+
+    _(ChartTitle.prototype).extend(ErrorHandler.prototype);
 
     ChartTitle.prototype.render = function () {
       d3.select(this.el).selectAll('.chart-title').call(this.draw());
@@ -50,9 +54,7 @@ define(function (require) {
           var width = $(this).width();
           var height = $(this).height();
 
-          if (_.isNaN(height) || height <= 0 || _.isNaN(width) || width <= 0) {
-            throw new Error('The height and/or width of this container is too small for this chart. Height: ' + height + ', width: ' + width);
-          }
+          self.validateWidthandHeight(width, height);
 
           div.append('svg')
             .attr('width', width)

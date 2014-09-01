@@ -3,6 +3,8 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
 
+    var ErrorHandler = Private(require('components/vislib/modules/_error_handler'));
+
     function YAxis(args) {
       this.el = args.el;
       this.chartData = args.chartData;
@@ -13,6 +15,8 @@ define(function (require) {
           .y(function (d) { return d.y; })
       });
     }
+
+    _(YAxis.prototype).extend(ErrorHandler.prototype);
 
     YAxis.prototype.render = function () {
       d3.select(this.el).selectAll('.y-axis-div').call(this.draw());
@@ -112,9 +116,7 @@ define(function (require) {
           width = $(this).width();
           height = $(this).height() - margin.top - margin.bottom;
 
-          if (_.isNaN(height) || height <= 0 || _.isNaN(width) || width <= 0) {
-            throw new Error('The height and/or width of this container is too small for this chart. Height: ' + height + ', width: ' + width);
-          }
+          self.validateWidthandHeight(width, height);
 
           var yAxis = self.getYAxis(height);
 
