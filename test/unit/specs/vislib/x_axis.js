@@ -80,9 +80,9 @@ define(function (require) {
 
     beforeEach(function () {
       inject(function (d3, Private) {
-        XAxis = Private(require('components/vislib/modules/Xaxis'));
         Data = Private(require('components/vislib/modules/Data'));
-
+        XAxis = Private(require('components/vislib/modules/Xaxis'));
+        
         el = d3.select('body').append('div')
           .attr('class', 'x-axis-wrapper');
 
@@ -91,8 +91,9 @@ define(function (require) {
           .style('height', '20px');
 
         dataObj = new Data(data);
+
         xAxis = new XAxis({
-          el: $('.x-axis-wrapper')[0],
+          el: $('x-axis-div')[0],
           xValues: dataObj.xValues(),
           ordered: dataObj.get('ordered'),
           xAxisFormatter: dataObj.get('xAxisFormatter'),
@@ -223,6 +224,32 @@ define(function (require) {
     describe('draw Method', function () {
       it('should be a function', function () {
         expect(_.isFunction(xAxis.draw())).to.be(true);
+      });
+    });
+
+    describe('checkTickLabels Method', function () {
+      var selection;
+
+      beforeEach(function () {
+        xAxis.render();
+        selection = $('.x-axis-wrapper');
+      });
+
+      it('should be a function', function () {
+        expect(_.isFunction(xAxis.checkTickLabels(selection))).to.be(true);
+      });
+    });
+
+    describe('resizeAxisLayoutForLabels Method', function () {
+      var selection;
+
+      beforeEach(function () {
+        xAxis.render();
+        selection = $('.x-axis-wrapper');
+      });
+
+      it('should be a function', function () {
+        expect(_.isFunction(xAxis.checkTickLabels(selection))).to.be(true);
       });
     });
 
