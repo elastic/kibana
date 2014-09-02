@@ -16,7 +16,7 @@
         <select class="input-small" ng-model="panel.style['font-size']" ng-options="f for f in ['7pt','8pt','9pt','10pt','12pt','14pt','16pt','18pt','20pt','24pt','28pt','32pt','36pt','42pt','48pt','52pt','60pt','72pt']"></select></span>
       </div>
       <div class="editor-option">
-        <label class="small">Trim Factor <tip>Trim fields to this long divided by # of rows. Requires data refresh.</tip></label>
+        <label class="small">Trim Factor <tip>Trim fields to this size divided by the number of columns in the table. Requires data refresh.</tip></label>
         <input type="number" class="input-small" ng-model="panel.trimFactor" ng-change="set_refresh(true)">
       </div>
       <br>
