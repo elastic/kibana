@@ -2,11 +2,9 @@ require "sinatra/base"
 require "sinatra/json"
 require "yaml"
 
-
 module Kibana
   module Routes
     class Base < Sinatra::Base
-
       helpers Sinatra::JSON
       configure do
         set :root, ENV['KIBANA_ROOT']
@@ -18,7 +16,6 @@ module Kibana
         config['elasticsearch'] = ENV['KIBANA_ELASTICSEARCH']
         config['port'] = ENV['KIBANA_PORT'].to_i
       end
-
     end
   end
 end

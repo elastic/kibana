@@ -1,6 +1,7 @@
 require "rubygems"
 require "bundler/setup"
 require "puma"
+require "colorize"
 require "json"
 
 ENV['KIBANA_ROOT'] = File.expand_path("#{File.dirname(__FILE__)}/../")
@@ -31,8 +32,19 @@ module Kibana
     }
 
     def self.log(msg)
-      data = { "@timestamp" => Time.now.iso8601, :message => msg }
-      puts data.to_json
+      if ENV['RACK_ENV'] == 'production'
+        data = {
+          "@timestamp" => Time.now.iso8601,
+          :level => 'INFO',
+          :name => 'Kibana',
+          :message => msg
+        }
+        puts data.to_json
+      else
+        message = (Time.now.strftime('%b %d, %Y @ %H:%M:%S.%L')).light_black << ' '
+        message << msg.yellow
+        puts message
+      end
     end
 
     def self.run(options = {})

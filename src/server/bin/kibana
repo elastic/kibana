@@ -60,22 +60,7 @@ ENV["KIBANA_PORT"] = port.to_s
 ENV["KIBANA_CONFIG_FILE"] = options[:config]
 ENV["KIBANA_ELASTICSEARCH"] = elasticsearch
 
-# Clone argv and then clear it and set up the defaults for the Puma CLI
-# puma_args = ARGV.clone()
-# puma_args.clear
-# puma_args << '--tag'
-# puma_args << 'kibana'
-# puma_args << '-d'
-# puma_args << '--port'
-# puma_args << port.to_s
-# puma_args << "#{HERE}/../config/web.ru"
-
-# gem 'puma', version
-# load Gem.bin_path('puma', 'puma', version)
-#
-# cli = Puma::CLI.new puma_args
-# cli.run
-
+# Require the server and start it with defaults
 require "#{HERE}/../lib/server"
 
 server_opts = {
