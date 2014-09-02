@@ -9,10 +9,12 @@ define(function (require) {
   var searchSource;
   var mockSearchSource;
   var searchSourceStubs;
+  var es;
   var notify;
 
   function init() {
     module('kibana', function ($provide) {
+      // mock notifier
       $provide.factory('Notifier', function () {
         function NotifierMock(opts) {
           this.opts = opts;
@@ -24,9 +26,15 @@ define(function (require) {
 
         return NotifierMock;
       });
+
+      // mock es client
+      $provide.factory('es', function () {
+        return {};
+      });
     });
 
     inject(function ($injector, Private) {
+      es = $injector.get('es');
       var Notifier = $injector.get('Notifier');
       notify = new Notifier();
 
@@ -45,6 +53,7 @@ define(function (require) {
           };
         })
       };
+
       mockSearchSource = {
         get: searchSourceStubs.get.returns({
           toIndexList: searchSourceStubs.toIndexList.returns([])
@@ -65,6 +74,70 @@ define(function (require) {
     require('test_utils/no_digest_promises').activateForSuite();
 
     beforeEach(init);
+
+    describe('_executeSearch', function () {
+      it('should attach abort method to searchPromise', function () {
+        es.search = function () { return Promise.resolve(); };
+        segmentedFetch._executeSearch('test-index', {body: '', type: ''});
+
+        expect(segmentedFetch.searchPromise).to.have.property('abort');
+      });
+
+      it('should abort client promise', function () {
+        var clientAbortSpy = sinon.spy();
+        es.search = function () {
+          function MockClass() {
+          }
+
+          // mock the search client promise
+          MockClass.prototype.then = function () {
+            return this;
+          };
+          MockClass.prototype.catch = function () {
+            return this;
+          };
+          MockClass.prototype.abort = clientAbortSpy;
+
+          return new MockClass();
+        };
+
+        segmentedFetch._executeSearch(1, {body: '', type: ''});
+        segmentedFetch.abort();
+
+
+        return segmentedFetch.searchPromise.then(function (resolve) {
+          expect(clientAbortSpy.callCount).to.be(1);
+          expect(resolve).to.be(false);
+        });
+      });
+
+      it('should resolve on ClusterBlockException', function () {
+        es.search = Promise.method(function () {
+          throw {
+            status: 403,
+            message: 'ClusterBlockException mock error test, index closed'
+          };
+        });
+
+        segmentedFetch._executeSearch('test-index', {body: '', type: ''});
+
+        return segmentedFetch.searchPromise.then(function (resolve) {
+          expect(resolve).to.be(false);
+        });
+      });
+
+      it('should reject on es client errors', function () {
+        es.search = Promise.method(function () {
+          throw new Error('es client error of some kind');
+        });
+
+        segmentedFetch._executeSearch('test-index', {body: '', type: ''});
+
+        return segmentedFetch.searchPromise.catch(function (err) {
+          expect(err.message).to.be('es client error of some kind');
+        });
+      });
+    });
 
     describe('fetch', function () {
       it('should return a promise', function () {
@@ -185,6 +258,7 @@ define(function (require) {
         sinon.stub(SegmentedFetch.prototype, '_extractQueue', function () {
           this.queue = queue;
         });
+
         sinon.stub(SegmentedFetch.prototype, '_executeSearch', function () {
           return new Promise(function (resolve) {
             resolve({
@@ -215,15 +289,18 @@ define(function (require) {
         });
       });
 
-      it('should abort the es promise', function () {
+      it('should abort the searchPromise', function () {
         var searchPromiseAbortStub = sinon.spy();
+
         sinon.stub(SegmentedFetch.prototype, '_extractQueue', function () {
           this.queue = ['one', 'two', 'three'];
         });
+
         sinon.stub(SegmentedFetch.prototype, '_executeSearch', function () {
           this.searchPromise = { abort: searchPromiseAbortStub };
           return Promise.resolve();
         });
+
         sinon.stub(SegmentedFetch.prototype, '_executeRequest', function () {
           var self = this;
           return self._executeSearch()
@@ -250,6 +327,7 @@ define(function (require) {
           expect(searchPromiseAbortStub.callCount).to.be(2);
         });
       });
+
 
       it('should clear the notification', function () {
         segmentedFetch.notifyEvent = sinon.spy();

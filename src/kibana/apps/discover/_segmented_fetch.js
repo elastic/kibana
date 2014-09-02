@@ -178,8 +178,9 @@ define(function (require) {
         resolve(false);
       };
 
-      // don't throw ClusterBlockException errors
-      clientPromise.then(resolve).catch(function (err) {
+      clientPromise.then(resolve)
+      .catch(function (err) {
+        // don't throw ClusterBlockException errors
         if (err.status === 403 && err.message.match(/ClusterBlockException.+index closed/)) {
           resolve(false);
         } else {
