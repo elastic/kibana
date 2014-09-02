@@ -10,7 +10,7 @@ define(function (require) {
       var complete = notify.event('convert ES response');
 
       // all aggregations will be prefixed with:
-      var aggKeyPrefix = '_agg_';
+      var aggKeyPrefix = 'agg_';
 
       // this will transform our flattened rows and columns into the
       // data structure expected for a visualization
