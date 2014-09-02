@@ -55,5 +55,57 @@ define(function () {
         }
       }
     });
+
+    api.addEndpointDescription('_cluster/reroute', {
+      methods: ['POST'],
+      url_params: {
+        explain: "__flag__",
+        dry_run: "__flag__"
+      },
+      data_autocomplete_rules: {
+        commands: [
+          {
+            move: {
+              __template: {
+                index: "",
+                shard: 0,
+                from_node: "",
+                to_node: ""
+              },
+              index: "{index}",
+              shard: 0,
+              from_node: "",
+              to_node: ""
+            }
+          },
+          {
+            cancel: {
+              __template: {
+                index: "",
+                shard: 0,
+                node: ""
+              },
+              index: "{index}",
+              shard: 0,
+              node: "",
+              allow_primary: { __one_of: [false , true]}
+            }
+          },
+          {
+            allocate: {
+              __template: {
+                index: "",
+                shard: 0,
+                node: ""
+              },
+              index: "{index}",
+              shard: 0,
+              node: "",
+              allow_primary: { __one_of: [false , true]}
+            }
+          }
+        ]
+      }
+    });
   };
 });
