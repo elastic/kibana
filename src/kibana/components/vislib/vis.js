@@ -44,7 +44,7 @@ define(function (require) {
       if (arguments.length) { return; }
 
       // enable auto-resize
-      var size = $('.chart').width() + ':' + $('.chart').height();
+      var size = $(this.el).find('.chart').width() + ':' + $(this.el).find('.chart').height();
 
       if (this.prevSize !== size) {
         this.resize();
