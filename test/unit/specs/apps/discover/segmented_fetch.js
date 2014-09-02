@@ -171,7 +171,7 @@ define(function (require) {
             max_score: score
           },
           aggregations: {
-            '_agg_test': {
+            'agg_test': {
               buckets: [{
                 doc_count: hits.length,
                 key: aggKey
@@ -213,7 +213,7 @@ define(function (require) {
         function eachHandler(resp, req) {
           // check results from mergeRequestStats
           expect(segmentedFetch.requestStats).to.have.property('aggregations');
-          expect(segmentedFetch.requestStats.aggregations['_agg_test'].buckets.length).to.be(aggregationKeys.length);
+          expect(segmentedFetch.requestStats.aggregations['agg_test'].buckets.length).to.be(aggregationKeys.length);
           expect(segmentedFetch.requestStats.took).to.be(totalTime);
           expect(segmentedFetch.requestStats.hits.hits.length).to.be(totalHits);
           expect(segmentedFetch.requestStats.hits.total).to.be(maxHits);

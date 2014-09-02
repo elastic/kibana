@@ -304,6 +304,8 @@ define(function (require) {
         return key.substr(0, 4) === 'agg_';
       });
 
+      if (!aggKey) throw new Error('aggKey not found in response: ' + Object.keys(resp.aggregations));
+
       // start merging aggregations
       if (!requestStats.aggregations) {
         requestStats.aggregations = {};
