@@ -6,11 +6,12 @@ define(function (require) {
     // Dynamically adds css file
     require('css!components/vislib/components/styles/main');
 
-    function Tooltip(formatter) {
+    function Tooltip(el, formatter) {
       if (!(this instanceof Tooltip)) {
-        return new Tooltip(formatter);
+        return new Tooltip(el, formatter);
       }
 
+      this.el = el;
       this.tooltipFormatter = formatter;
       this.tooltipClass = 'k4tip';
       this.chartWidth = $('.chart').width();
@@ -22,7 +23,7 @@ define(function (require) {
 
       return function (selection) {
         selection.each(function () {
-          var tooltipDiv = d3.select('.' + self.tooltipClass);
+          var tooltipDiv = d3.select(self.el).select('.' + self.tooltipClass);
           var element = d3.select(this);
 
           element

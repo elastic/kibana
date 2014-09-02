@@ -29,11 +29,11 @@ define(function (require) {
       this.layout = new Layout(this.el, this.data.injectZeros(), this._attr.type);
 
       if (this._attr.addLegend) {
-        this.legend = new Legend(this.data.getLabels(), this.data.getColorFunc(), this._attr, this.el);
+        this.legend = new Legend(this.el, this.data.getLabels(), this.data.getColorFunc(), this._attr);
       }
 
       if (this._attr.addTooltip) {
-        this.tooltip = new Tooltip(this.data.get('tooltipFormatter'));
+        this.tooltip = new Tooltip(this.el, this.data.get('tooltipFormatter'));
       }
 
       this.xAxis = new XAxis({

@@ -6,7 +6,7 @@ define(function (require) {
     // Dynamically adds css file
     require('css!components/vislib/components/styles/main');
 
-    function Legend(labels, color, config, el) {
+    function Legend(el, labels, color, config) {
       this.el = el;
       this.labels = labels;
       this.color = color;
