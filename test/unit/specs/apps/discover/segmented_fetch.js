@@ -1,5 +1,6 @@
 define(function (require) {
   var sinon = require('test_utils/auto_release_sinon');
+  var faker = require('faker');
   var Promise = require('bluebird');
   var _ = require('lodash');
 
@@ -135,6 +136,80 @@ define(function (require) {
 
         return segmentedFetch.searchPromise.catch(function (err) {
           expect(err.message).to.be('es client error of some kind');
+        });
+      });
+    });
+
+    describe('_processQueue', function () {
+      var queueSpy;
+      var completeSpy;
+      var queue = [];
+
+      beforeEach(function () {
+        queueSpy = sinon.spy(SegmentedFetch.prototype, '_processQueue');
+        completeSpy = sinon.spy(SegmentedFetch.prototype, '_processQueueComplete');
+
+        for (var i = 0; i < _.random(3, 6); i++) {
+          queue.push('test-' + i);
+        }
+
+        sinon.stub(SegmentedFetch.prototype, '_extractQueue', function () {
+          this.queue = queue.slice(0);
+        });
+
+        searchStrategy.getSourceStateFromRequest.returns(Promise.resolve({
+          body: {
+            size: 10
+          }
+        }));
+      });
+
+      it('should call merge stats and complete', function () {
+        var totalTime = 0;
+        var totalHits = 0;
+        var maxHits = 0;
+        var maxScore = 0;
+
+        sinon.stub(SegmentedFetch.prototype, '_executeSearch', function (index, state) {
+          var took = _.random(20, 60);
+          var score = _.random(20, 90) / 100;
+          var hits = faker.Lorem.sentence().split(' ');
+          totalTime += took;
+          totalHits += hits.length;
+          maxHits = Math.max(maxHits, hits.length);
+          maxScore = Math.max(maxScore, score);
+
+          return Promise.resolve({
+            took: took,
+            hits: {
+              hits: hits,
+              total: maxHits,
+              max_score: score
+            }
+          });
+        });
+
+        function eachHandler(resp, req) {
+          expect(segmentedFetch.requestStats.took).to.be(totalTime);
+          expect(segmentedFetch.requestStats.hits.hits.length).to.be(totalHits);
+          expect(segmentedFetch.requestStats.hits.total).to.be(maxHits);
+          expect(segmentedFetch.requestStats.hits.max_score).to.be(maxScore);
+        }
+
+        return segmentedFetch.fetch({ each: eachHandler }).then(function () {
+          expect(completeSpy.callCount).to.be(1);
+          expect(queueSpy.callCount).to.be(queue.length);
+        });
+      });
+
+      it('should complete on empty response', function () {
+        sinon.stub(SegmentedFetch.prototype, '_executeSearch', function (index, state) {
+          return Promise.resolve(false);
+        });
+
+        return segmentedFetch.fetch().then(function () {
+          expect(completeSpy.callCount).to.be(1);
+          expect(queueSpy.callCount).to.be(queue.length);
         });
       });
     });
