@@ -145,7 +145,49 @@ define(function (require) {
       var completeSpy;
       var queue = [];
 
+      // mock es client response trackers
+      var totalTime;
+      var totalHits;
+      var maxHits;
+      var maxScore;
+      var aggregationKeys;
+
+      var getESResponse = function (index, state) {
+        var took = _.random(20, 60);
+        var score = _.random(20, 90) / 100;
+        var hits = faker.Lorem.sentence().split(' ');
+        var aggKey = 'key' + _.random(1, 100);
+        totalTime += took;
+        totalHits += hits.length;
+        maxHits = Math.max(maxHits, hits.length);
+        maxScore = Math.max(maxScore, score);
+        aggregationKeys = _.union(aggregationKeys, [aggKey]);
+
+        return Promise.resolve({
+          took: took,
+          hits: {
+            hits: hits,
+            total: maxHits,
+            max_score: score
+          },
+          aggregations: {
+            '_agg_test': {
+              buckets: [{
+                doc_count: hits.length,
+                key: aggKey
+              }]
+            }
+          }
+        });
+      };
+
       beforeEach(function () {
+        totalTime = 0;
+        totalHits = 0;
+        maxHits = 0;
+        maxScore = 0;
+        aggregationKeys = [];
+
         queueSpy = sinon.spy(SegmentedFetch.prototype, '_processQueue');
         completeSpy = sinon.spy(SegmentedFetch.prototype, '_processQueueComplete');
 
@@ -165,35 +207,22 @@ define(function (require) {
       });
 
       it('should call merge stats and complete', function () {
-        var totalTime = 0;
-        var totalHits = 0;
-        var maxHits = 0;
-        var maxScore = 0;
 
-        sinon.stub(SegmentedFetch.prototype, '_executeSearch', function (index, state) {
-          var took = _.random(20, 60);
-          var score = _.random(20, 90) / 100;
-          var hits = faker.Lorem.sentence().split(' ');
-          totalTime += took;
-          totalHits += hits.length;
-          maxHits = Math.max(maxHits, hits.length);
-          maxScore = Math.max(maxScore, score);
-
-          return Promise.resolve({
-            took: took,
-            hits: {
-              hits: hits,
-              total: maxHits,
-              max_score: score
-            }
-          });
-        });
+        sinon.stub(SegmentedFetch.prototype, '_executeSearch', getESResponse);
 
         function eachHandler(resp, req) {
+          // check results from mergeRequestStats
+          expect(segmentedFetch.requestStats).to.have.property('aggregations');
+          expect(segmentedFetch.requestStats.aggregations['_agg_test'].buckets.length).to.be(aggregationKeys.length);
           expect(segmentedFetch.requestStats.took).to.be(totalTime);
           expect(segmentedFetch.requestStats.hits.hits.length).to.be(totalHits);
           expect(segmentedFetch.requestStats.hits.total).to.be(maxHits);
           expect(segmentedFetch.requestStats.hits.max_score).to.be(maxScore);
+
+          // check aggregation stats
+          aggregationKeys.forEach(function (key) {
+            expect(segmentedFetch.requestStats._bucketIndex).to.have.property(key);
+          });
         }
 
         return segmentedFetch.fetch({ each: eachHandler }).then(function () {
@@ -202,7 +231,7 @@ define(function (require) {
         });
       });
 
-      it('should complete on empty response', function () {
+      it('should complete on falsey response', function () {
         sinon.stub(SegmentedFetch.prototype, '_executeSearch', function (index, state) {
           return Promise.resolve(false);
         });
