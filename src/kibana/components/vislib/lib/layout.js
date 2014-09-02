@@ -65,7 +65,7 @@ define(function (require) {
       }
 
       if (obj.splits) {
-        d3.select('.' + obj.class).call(obj.splits);
+        d3.select(this.el).select('.' + obj.class).call(obj.splits);
       }
 
       if (obj.children) {
@@ -80,6 +80,11 @@ define(function (require) {
       if (!el || !type || !className) {
         throw new Error('Function requires that an el, type, and class be provided');
       }
+
+      if (typeof el === 'string') {
+        el = d3.select(this.el).select(el)[0][0];
+      }
+
       return d3.select(el).append(type)
         .attr('class', className);
     };

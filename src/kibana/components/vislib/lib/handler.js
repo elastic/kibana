@@ -26,7 +26,6 @@ define(function (require) {
         destroyFlag: false
       });
 
-      // Visualization Classes
       this.layout = new Layout(this.el, this.data.injectZeros(), this._attr.type);
 
       if (this._attr.addLegend) {
