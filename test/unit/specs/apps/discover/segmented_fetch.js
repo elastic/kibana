@@ -206,7 +206,7 @@ define(function (require) {
         }));
       });
 
-      it('should call merge stats and complete', function () {
+      it('should merge stats and complete', function () {
 
         sinon.stub(SegmentedFetch.prototype, '_executeSearch', getESResponse);
 
