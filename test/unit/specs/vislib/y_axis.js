@@ -121,8 +121,8 @@ define(function (require) {
 
     beforeEach(function () {
       inject(function (d3, Private) {
-        YAxis = Private(require('components/vislib/modules/YAxis'));
-        Data = Private(require('components/vislib/modules/Data'));
+        YAxis = Private(require('components/vislib/lib/y_axis'));
+        Data = Private(require('components/vislib/lib/data'));
 
         el = d3.select('body').append('div')
           .attr('class', 'y-axis-wrapper');

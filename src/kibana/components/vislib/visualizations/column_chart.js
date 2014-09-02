@@ -3,8 +3,8 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
 
-    var Chart = Private(require('components/vislib/modules/_chart'));
-    var Legend = Private(require('components/vislib/modules/legend'));
+    var Chart = Private(require('components/vislib/visualizations/_chart'));
+    var Legend = Private(require('components/vislib/lib/legend'));
 
     // Dynamically adds css file
     require('css!components/vislib/components/styles/main');

@@ -190,7 +190,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          dataFactory = Private(require('components/vislib/modules/Data'));
+          dataFactory = Private(require('components/vislib/lib/data'));
         });
         rowIn = new dataFactory(rowsData);
       });
@@ -220,7 +220,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          dataFactory = Private(require('components/vislib/modules/Data'));
+          dataFactory = Private(require('components/vislib/lib/data'));
         });
         serIn = new dataFactory(seriesData);
         rowIn = new dataFactory(rowsData);

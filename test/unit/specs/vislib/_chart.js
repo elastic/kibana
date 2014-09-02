@@ -19,8 +19,8 @@ define(function (require) {
 
     beforeEach(function () {
       inject(function (d3, Private) {
-        ColumnChart = Private(require('components/vislib/modules/ColumnChart'));
-        Chart = Private(require('components/vislib/modules/_chart'));
+        ColumnChart = Private(require('components/vislib/visualizations/column_chart'));
+        Chart = Private(require('components/vislib/visualizations/_chart'));
 
         el = d3.select('body').append('div').attr('class', 'column-chart');
         vis = {

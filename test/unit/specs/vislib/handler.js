@@ -91,8 +91,8 @@ define(function (require) {
     beforeEach(function () {
       inject(function (d3, Private) {
         Vis = Private(require('components/vislib/vis'));
-        Data = Private(require('components/vislib/modules/Data'));
-        Handler = Private(require('components/vislib/modules/Handler'));
+        Data = Private(require('components/vislib/lib/data'));
+        Handler = Private(require('components/vislib/lib/handler'));
 
         el = d3.select('body').append('div')
           .attr('class', 'visualize');

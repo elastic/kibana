@@ -3,7 +3,7 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
 
-    var Handler = Private(require('components/vislib/modules/Handler'));
+    var Handler = Private(require('components/vislib/lib/handler'));
     var Events = Private(require('factories/events'));
     var chartTypes = Private(require('components/vislib/vis_types'));
 

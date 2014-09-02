@@ -78,8 +78,8 @@ define(function (require) {
 
     beforeEach(function () {
       inject(function (d3, Private) {
-        AxisTitle = Private(require('components/vislib/modules/AxisTitle'));
-        Data = Private(require('components/vislib/modules/Data'));
+        AxisTitle = Private(require('components/vislib/lib/axis_title'));
+        Data = Private(require('components/vislib/lib/data'));
 
         el = d3.select('body').append('div')
           .attr('class', 'vis-wrapper');

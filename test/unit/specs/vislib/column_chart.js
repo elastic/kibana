@@ -76,8 +76,8 @@ define(function (require) {
 
     beforeEach(function () {
       inject(function (d3, Private) {
-        ColumnChart = Private(require('components/vislib/modules/ColumnChart'));
-        Data = Private(require('components/vislib/modules/Data'));
+        ColumnChart = Private(require('components/vislib/visualizations/column_chart'));
+        Data = Private(require('components/vislib/lib/data'));
 
         el = d3.select('body').append('div')
           .attr('class', 'vis-wrapper')
