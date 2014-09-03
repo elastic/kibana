@@ -11,7 +11,7 @@ module Kibana
         set :public_folder, ENV['PUBLIC_ROOT']
         set :httponly, true
 
-        config = YAML.load(IO.read(ENV['CONFIG_PATH']))
+        config = YAML.load(IO.read(ENV['KIBANA_CONFIG_FILE']))
         set :config, config
         config['elasticsearch'] = ENV['KIBANA_ELASTICSEARCH']
         config['port'] = ENV['KIBANA_PORT'].to_i
