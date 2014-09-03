@@ -1,4 +1,6 @@
 define(function (require) {
+  require('filters/uriescape');
+  require('filters/rison');
   var _ = require('lodash');
   var rison = require('utils/rison');
   var location = require('modules').get('kibana/url');
@@ -50,7 +52,12 @@ define(function (require) {
           throw new Error('Replacement failed, key not found: ' + key);
         }
 
-        return encodeURIComponent($rootScope.$eval(expr, paramObj));
+        // append uriescape filter if not included
+        if (expr.indexOf('uriescape') === -1) {
+          expr += '|uriescape';
+        }
+
+        return $rootScope.$eval(expr, paramObj);
       });
     }
 
