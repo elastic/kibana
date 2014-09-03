@@ -16,23 +16,30 @@ define(function (require) {
       });
     }
 
-    AggConfigs.prototype.toDSL = function () {
-      var dsl = {};
-      var current = dsl;
+    AggConfigs.prototype.toDsl = function () {
+      var dslTopLvl = {};
+      var dslLvlCursor;
 
-      this.getSorted().forEach(function (agg) {
-        if (agg.type.name === 'count') return;
+      this.getSorted()
+      .filter(function (config) {
+        return !config.type.hasNoDsl;
+      })
+      .forEach(function nestEachConfig(config, i, list) {
+        var prevConfig = list[i - 1];
+        var prevDsl = prevConfig && dslLvlCursor && dslLvlCursor[prevConfig.id];
 
-        current.aggs = {};
+        // advance the cursor
+        if (prevDsl && prevConfig.schema.group !== 'metrics') {
+          dslLvlCursor = prevDsl.aggs || (prevDsl.aggs = {});
+        }
 
-        var aggDsl = {};
-        var output = agg.type.params.write(agg);
-        aggDsl[agg.type.name] = output.params;
-        current = current.aggs[agg.id] = aggDsl;
+        // start at the top level
+        if (!dslLvlCursor) dslLvlCursor = dslTopLvl;
+
+        dslLvlCursor[config.id] = config.toDsl();
       });
 
-      // set the dsl to the searchSource
-      return dsl.aggs || {};
+      return dslTopLvl;
     };
 
     AggConfigs.prototype.getSorted = function () {
