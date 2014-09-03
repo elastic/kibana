@@ -27,6 +27,24 @@ define(function (require) {
       }
     };
 
+    self.changePath = function (path, paramObj, forceReload) {
+      if (_.isBoolean(paramObj)) {
+        forceReload = paramObj;
+        paramObj = undefined;
+      }
+
+      path = self.eval(path, paramObj);
+
+      if (path !== $location.path()) {
+        $location.path(globalState.writeToUrl(path));
+        if (forceReload || !self.matches(path)) {
+          self.reload();
+        }
+      } else if (forceReload) {
+        self.reload();
+      }
+    };
+
     self.eval = function (url, paramObj) {
       if (!_.isObject(paramObj)) {
         return url;

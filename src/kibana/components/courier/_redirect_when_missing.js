@@ -1,7 +1,7 @@
 define(function (require) {
   var errors = require('errors');
 
-  return function RedirectWhenMissingFn($location, $route, globalState, Notifier) {
+  return function RedirectWhenMissingFn($location, kbnUrl, globalState, Notifier) {
     var SavedObjectNotFound = errors.SavedObjectNotFound;
 
     var notify = new Notifier();
@@ -27,7 +27,7 @@ define(function (require) {
         if (!url) url = '/';
 
         notify.error(err);
-        $route.changeUrl(globalState.writeToUrl(url));
+        kbnUrl.change(url);
         return;
       };
     };
