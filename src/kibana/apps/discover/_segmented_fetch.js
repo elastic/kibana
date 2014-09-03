@@ -178,7 +178,7 @@ define(function (require) {
       if (!resp.aggregations) return;
 
       var aggKey = _.find(Object.keys(resp.aggregations), function (key) {
-        return key.substr(0, 5) === '_agg_';
+        return key.substr(0, 4) === 'agg_';
       });
 
       // start merging aggregations

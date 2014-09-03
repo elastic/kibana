@@ -5,6 +5,15 @@ define(function (require) {
 
     var ErrorHandler = Private(require('components/vislib/lib/_error_handler'));
 
+    /*
+     * Add an x axis to the visualization
+     * aruments =>
+     *  el => reference to DOM element
+     *  xValues => array of x values from the dataset
+     *  ordered => data object that is defined when the data is ordered
+     *  xAxisFormatter => function to format x axis tick values
+     *  _attr => visualization attributes
+     */
     function XAxis(args) {
       if (!(this instanceof XAxis)) {
         return new XAxis(args);
@@ -19,29 +28,37 @@ define(function (require) {
 
     _(XAxis.prototype).extend(ErrorHandler.prototype);
 
+    // Render the x axis
     XAxis.prototype.render = function () {
       d3.select(this.el).selectAll('.x-axis-div').call(this.draw());
       d3.select(this.el).selectAll('.x-axis-div').call(this.checkTickLabels());
       d3.select(this.el).selectAll('.x-axis-div').call(this.resizeAxisLayoutForLabels());
     };
 
+    // Get the d3 scale
     XAxis.prototype.getScale = function (ordered) {
+      // if time, return time scale
       if (ordered && ordered.date) {
         return d3.time.scale();
       }
+      // return d3 ordinal scale for nominal data
       return d3.scale.ordinal();
     };
 
+    // Add domain to the scale
     XAxis.prototype.getDomain = function (scale, ordered) {
+      // if time, return a time domain
       if (ordered && ordered.date) {
         // Calculate the min date, max date, and time interval;
         return this.getTimeDomain(scale, this.xValues, ordered);
       }
+      // return a nominal domain, i.e. array of x values
       return this.getOrdinalDomain(scale, this.xValues);
     };
 
+    // Returns a time domain
     XAxis.prototype.getTimeDomain = function (scale, xValues, ordered) {
-      // Should think about replacing
+      // Should think about replacing and not hard coding
       var spacingPercentage = 0.25;
       var maxXValue = d3.max(xValues);
       var timeInterval = ordered.interval;
@@ -50,24 +67,30 @@ define(function (require) {
       // Take the max of the xValues or the max date that is sent
       var maxDate = +maxXValue <= ordered.max ? ordered.max : +maxXValue + timeInterval;
 
+      // Add the domain to the scale
       scale.domain([minDate, maxDate]);
 
       return scale;
     };
 
+    // Return a nominal(d3 ordinal) domain
     XAxis.prototype.getOrdinalDomain = function (scale, xValues) {
       return scale.domain(xValues);
     };
 
+    // Return the range for the x axis scale
     XAxis.prototype.getRange = function (scale, ordered, width) {
+      // if time, return a normal range
       if (ordered && ordered.date) {
         scale.range([0, width]);
         return scale;
       }
+      // if nominal, return rangeBands with a default (0.1) spacer specified
       scale.rangeBands([0, width], 0.1);
       return scale;
     };
 
+    // Return the x axis scale
     XAxis.prototype.getXScale = function (ordered, width) {
       var scale = this.getScale(ordered);
       var domain = this.getDomain(scale, ordered);
@@ -76,20 +99,25 @@ define(function (require) {
       return xScale;
     };
 
+    // Create the d3 xAxis function
     XAxis.prototype.getXAxis = function (width) {
       this.xAxisFormatter = this.xAxisFormatter;
+      // save a reference to the xScale
       this.xScale = this.getXScale(this.ordered, width);
 
+      // Scale should never === `NaN`
       if (!this.xScale || _.isNaN(this.xScale)) {
         throw new Error('xScale is ' + this.xScale);
       }
 
+      // save a reference to the xAxis
       this.xAxis = d3.svg.axis()
         .scale(this.xScale)
         .tickFormat(this.xAxisFormatter)
         .orient('bottom');
     };
 
+    // Return a function that renders the x axis
     XAxis.prototype.draw = function () {
       var self = this;
       var margin = this._attr.margin;
@@ -98,8 +126,6 @@ define(function (require) {
       var height;
       var svg;
 
-      this.getXAxis();
-
       // set var for discover view
       if ($('.discover-timechart').length) {
         self._attr.isDiscover = true;
@@ -107,18 +133,20 @@ define(function (require) {
       } else {
         self._attr.isDiscover = false;
       }
+
       return function (selection) {
-        
         selection.each(function () {
           div = d3.select(this);
           width = $(this).width() - margin.left - margin.right;
           height = $(this).height();
 
+          // Validate that the width and height are not 0 or `NaN`
           self.validateWidthandHeight(width, height);
 
           // Return access to xAxis variable on the object
           self.getXAxis(width);
 
+          // Append svg and x axis
           svg = div.append('svg')
             .attr('width', width + margin.left + margin.right)
             .attr('height', height);
@@ -131,8 +159,7 @@ define(function (require) {
       };
     };
 
-    XAxis.prototype.checkTickLabels = function (selection) {
-      
+    XAxis.prototype.checkTickLabels = function () {
       var self = this;
       var margin = this._attr.margin;
       var div;
@@ -223,7 +250,7 @@ define(function (require) {
         });
     };
 
-    XAxis.prototype.resizeAxisLayoutForLabels = function (selection) {
+    XAxis.prototype.resizeAxisLayoutForLabels = function () {
       var self = this;
       var visEl = $(self.el);
       var div;

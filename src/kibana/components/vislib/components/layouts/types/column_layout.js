@@ -6,6 +6,21 @@ define(function (require) {
     var xAxisSplit = Private(require('components/vislib/components/layouts/splits/column_chart/x_axis_split'));
     var chartTitleSplit = Private(require('components/vislib/components/layouts/splits/column_chart/chart_title_split'));
 
+    /*
+     * Specifies the visualization layout for column charts.
+     *
+     * This is done using an array of objects. Each object has
+     * a `parent` DOM element, a DOM `type` (e.g. div, svg, etc),
+     * and a `class`. These are required attributes.
+     *
+     * Optionally, you can specify `datum` to be bound to the DOM
+     * element, a `splits` function that divides the selected element
+     * into more DOM elements based on a callback function provided, or
+     * a children array which nests other layout objects.
+     *
+     * Objects in children arrays are children of the current object and return
+     * DOM elements which are children of their respective parent element.
+     */
     return function (el, data) {
       if (!el || !data) {
         throw new Error('Both an el and data need to be specified');

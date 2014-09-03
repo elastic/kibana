@@ -5,6 +5,9 @@ define(function (require) {
 
     var ErrorHandler = Private(require('components/vislib/lib/_error_handler'));
 
+    /*
+     * Appends axis title(s) to the visualization
+     */
     function AxisTitle(el, xTitle, yTitle) {
       if (!(this instanceof AxisTitle)) {
         return new AxisTitle(el, xTitle, yTitle);
@@ -17,11 +20,13 @@ define(function (require) {
 
     _(AxisTitle.prototype).extend(ErrorHandler.prototype);
 
+    // Render both x and y axis titles
     AxisTitle.prototype.render = function () {
       d3.select(this.el).select('.x-axis-title').call(this.draw(this.xTitle));
       d3.select(this.el).select('.y-axis-title').call(this.draw(this.yTitle));
     };
 
+    // Return a callback function that appends an svg with title text
     AxisTitle.prototype.draw = function (title) {
       var self = this;
 

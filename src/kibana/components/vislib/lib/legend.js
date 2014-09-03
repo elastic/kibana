@@ -1,16 +1,24 @@
 define(function (require) {
   return function LegendFactory(d3, Private) {
-    var $ = require('jquery');
     var _ = require('lodash');
 
     // Dynamically adds css file
     require('css!components/vislib/components/styles/main');
 
-    function Legend(el, labels, color, config) {
+    /*
+     * Append legend to the visualization
+     * arguments:
+     *  el => reference to DOM element
+     *  labels => array of labels from the chart data
+     *  color => color function to assign colors to labels
+     *  _attr => visualization attributes
+     */
+    function Legend(el, labels, color, _attr) {
       this.el = el;
       this.labels = labels;
       this.color = color;
-      this._attr = _.defaults(config || {}, {
+      this._attr = _.defaults(_attr || {}, {
+        // Legend specific attributes
         'legendClass' : 'legend-col-wrapper',
         'blurredOpacity' : 0.3,
         'focusOpacity' : 1,
@@ -20,6 +28,8 @@ define(function (require) {
       });
     }
 
+    // Add legend header
+    // Need to change the header icon
     Legend.prototype.header = function (el) {
       return el.append('div')
         .attr('class', 'header')
@@ -29,7 +39,8 @@ define(function (require) {
           '<i class="fa fa-list-ul"></i></span>');
     };
 
-    Legend.prototype.list = function (el, arrOfItms, args) {
+    // Add legend list
+    Legend.prototype.list = function (el, arrOfLabels, args) {
       var self = this;
 
       return el.append('ul')
@@ -40,21 +51,25 @@ define(function (require) {
           return 'legend-ul hidden';
         })
         .selectAll('li')
-        .data(arrOfItms)
+        .data(arrOfLabels)
         .enter()
         .append('li')
         .attr('class', function (d) {
+          // class names reflect the color assigned to the labels
           return 'color ' + self.classify(args.color(d));
         })
         .html(function (d) {
+          // return the appropriate color for each dot
           return '<span class="dots" style="background:' + args.color(d) + '"></span>' + d;
         });
     };
 
+    // Create a class name based on the colors assigned to each label
     Legend.prototype.classify = function (name) {
       return 'c' + name.replace(/[#]/g, '');
     };
 
+    // Render the legend
     Legend.prototype.render = function () {
       var visEl = d3.select(this.el);
       var legendDiv = visEl.select('.' + this._attr.legendClass);

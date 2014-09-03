@@ -22,6 +22,7 @@ define(function (require) {
       this.layoutType = layoutType[chartType](el, data);
     }
 
+    // Render the layout
     Layout.prototype.render = function () {
       // Remove all elements from the current visualization
       this.removeAll(this.el);
@@ -30,11 +31,11 @@ define(function (require) {
       this.createLayout(this.layoutType);
     };
 
-    // Accepts the layoutType array
+    // Create the layout based on the json array provided
     Layout.prototype.createLayout = function (arr) {
       var self = this;
 
-      // for each object in the layout array, calls the layout function on it
+      // for each object in the layout array, call the layout function
       return _(arr).forEach(function (obj) {
         self.layout(obj);
       });
@@ -55,33 +56,40 @@ define(function (require) {
       }
 
       if (typeof obj.parent === 'string') {
+        // Create a class selector
         obj.parent = '.' + obj.parent;
       }
 
       var el = this.appendElem(obj.parent, obj.type, obj.class);
 
       if (obj.datum) {
+        // Bind datum to the element
         el.datum(obj.datum);
       }
 
       if (obj.splits) {
+        // Call the split on its obj.class
         d3.select(this.el).select('.' + obj.class).call(obj.splits);
       }
 
       if (obj.children) {
+        // Recursively pass object to createLayout
         this.createLayout(obj.children);
       }
 
       return el;
     };
 
-    // Appends a `type` of DOM element to `el` and gives it a class attribute `elClass`
+    // Appends a `type` of DOM element to `el` and gives it a class name attribute `className`
     Layout.prototype.appendElem = function (el, type, className) {
       if (!el || !type || !className) {
         throw new Error('Function requires that an el, type, and class be provided');
       }
 
       if (typeof el === 'string') {
+        // Create a DOM reference with a d3 selection
+        // Need to make sure that the `el` is bound to this object
+        // to prevent it from being appended to another Layout
         el = d3.select(this.el).select(el)[0][0];
       }
 

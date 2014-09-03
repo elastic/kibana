@@ -6,6 +6,12 @@ define(function (require) {
     // Dynamically adds css file
     require('css!components/vislib/components/styles/main');
 
+    /*
+     * Append a tooltip div element to the visualization
+     * arguments:
+     *  el => reference to DOM element
+     *  formatter => tooltip formatter
+     */
     function Tooltip(el, formatter) {
       if (!(this instanceof Tooltip)) {
         return new Tooltip(el, formatter);
@@ -13,7 +19,10 @@ define(function (require) {
 
       this.el = el;
       this.tooltipFormatter = formatter;
+      // hard coded class name for the tooltip `div`
       this.tooltipClass = 'k4tip';
+      // reference to the width and height of the chart DOM elements
+      // establishes the bounds for the tooltip per chart
       this.chartWidth = $('.chart').width();
       this.chartHeight = $('.chart').height();
     }
@@ -24,10 +33,12 @@ define(function (require) {
       return function (selection) {
         selection.each(function () {
           var tooltipDiv = d3.select(self.el).select('.' + self.tooltipClass);
+          // DOM element on which the tooltip is called
           var element = d3.select(this);
 
           element
             .on('mousemove.tip', function (d) {
+              // Calculate the x and y coordinates of the mouse on the page
               var mouseMove = {
                 left: d3.event.x,
                 top: d3.event.y
@@ -56,6 +67,7 @@ define(function (require) {
                 .style('top', mouseMove.top - yOffset + 'px');
             })
             .on('mouseout.tip', function () {
+              // Hide tooltip
               return tooltipDiv.style('visibility', 'hidden');
             });
         });

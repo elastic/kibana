@@ -12,6 +12,14 @@ define(function (require) {
     var AxisTitle = Private(require('components/vislib/lib/axis_title'));
     var ChartTitle = Private(require('components/vislib/lib/chart_title'));
 
+    /*
+     * Handles building all the components of the visualization
+     * arguments:
+     *  vis => this object from vis.js
+     *
+     *  returns an object with reference to the vis.prototype,
+     *  and news up all the constructors needed to build a visualization
+     */
     function Handler(vis) {
       if (!(this instanceof Handler)) {
         return new Handler(vis);
@@ -22,20 +30,24 @@ define(function (require) {
       this.el = vis.el;
       this.ChartClass = vis.ChartClass;
       this._attr = _.defaults(vis._attr || {}, {
-        'margin' : { top: 10, right: 3, bottom: 5, left: 3 },
-        destroyFlag: false
+        'margin' : { top: 10, right: 3, bottom: 5, left: 3 }
       });
 
+      // Visualizaation constructors
+      // Add the visualization layout
       this.layout = new Layout(this.el, this.data.injectZeros(), this._attr.type);
 
+      // Only add legend if addLegend attribute set
       if (this._attr.addLegend) {
         this.legend = new Legend(this.el, this.data.getLabels(), this.data.getColorFunc(), this._attr);
       }
 
+      // only add tooltip if addTooltip attribute set
       if (this._attr.addTooltip) {
         this.tooltip = new Tooltip(this.el, this.data.get('tooltipFormatter'));
       }
 
+      // add a x axis
       this.xAxis = new XAxis({
         el: this.el,
         xValues: this.data.xValues(),
@@ -44,6 +56,7 @@ define(function (require) {
         _attr: this._attr
       });
 
+      // add a y axis
       this.yAxis = new YAxis({
         el: this.el,
         chartData: this.data.chartData(),
@@ -51,9 +64,13 @@ define(function (require) {
         _attr: this._attr
       });
 
+      // add axis titles
       this.axisTitle = new AxisTitle(this.el, this.data.get('xAxisLabel'), this.data.get('yAxisLabel'));
+
+      // add chart titles
       this.chartTitle = new ChartTitle(this.el);
 
+      // Array of objects to render to the visualization
       this.renderArray = [
         this.layout,
         this.legend,
@@ -65,19 +82,24 @@ define(function (require) {
       ];
     }
 
+    // Render the visualization
     Handler.prototype.render = function () {
       var self = this;
+      // Save a reference to the charts
       var charts = this.charts = [];
 
+      // Render objects in the render array
       _.forEach(this.renderArray, function (property) {
         if (typeof property.render === 'function') {
           property.render();
         }
       });
 
+      // Add charts to the visualization
       d3.select(this.el)
         .selectAll('.chart')
         .each(function (chartData) {
+          // new up the visualization type
           var chart = new self.ChartClass(self, this, chartData);
 
           // Bind events to the chart
@@ -97,18 +119,21 @@ define(function (require) {
           });
 
           charts.push(chart);
+          // Render charts to screen
           chart.render();
         });
     };
 
+    // Remove all DOM elements from the `el` provided
     Handler.prototype.removeAll = function (el) {
       return d3.select(el).selectAll('*').remove();
     };
 
+    // Displays an error message to the screen
     Handler.prototype.error = function (message) {
-      // Removes the legend container
       this.removeAll(this.el);
 
+      // Return an error wrapper DOM element
       return d3.select(this.el)
         .append('div')
         .attr('class', 'error-wrapper')

@@ -1,5 +1,10 @@
 define(function () {
   return function XAxisSplitFactory(d3) {
+    /*
+     * Adds div DOM elements to the `.x-axis-div-wrapper` element based on the data layout.
+     * For example, if the data has rows, it returns the same number of
+     * `.x-axis-div` elements as row objects.
+     */
     return function (selection) {
       selection.each(function () {
         var div = d3.select(this);
@@ -7,9 +12,6 @@ define(function () {
         div.selectAll('.x-axis-div')
           .append('div')
           .data(function (d) {
-            if (!d) {
-              console.log(selection[0].parentNode);
-            }
             return d.columns ? d.columns : [d];
           })
           .enter()
