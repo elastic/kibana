@@ -7,10 +7,12 @@ define(function (require) {
     _(AggConfigs).inherits(Registry);
     function AggConfigs(vis, configStates) {
       this.vis = vis;
+
       AggConfigs.Super.call(this, {
         index: ['id'],
-        group: ['schema.group'],
+        group: ['schema.group', 'type.name'],
         initialSet: (configStates || []).map(function (aggConfigState) {
+          if (aggConfigState instanceof AggConfig) return aggConfigState;
           return new AggConfig(vis, aggConfigState);
         })
       });
