@@ -1,9 +1,21 @@
 module.exports = function (grunt) {
-  grunt.registerTask('dev', [
+  var useMRI = grunt.option('use-mri');
+  var tasks = [
     'less',
-    'jade',
-    'run:kibana_server',
+    'jade'
+  ];
+  if (useMRI) {
+    tasks = tasks.concat(['run:mri_server']);
+  } else {
+    tasks = tasks.concat([
+      'download_jruby',
+      'install_gems',
+      'run:jruby_server',
+      'wait_for_jruby'
+    ]);
+  }
+  grunt.registerTask('dev', tasks.concat([
     'maybe_start_server',
     'watch'
-  ]);
+  ]));
 };

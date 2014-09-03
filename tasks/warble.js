@@ -3,7 +3,8 @@ var join = require('path').join;
 module.exports = function (grunt) {
   grunt.registerTask('warble', 'Creates an executable jar.', function () {
     var done = this.async();
-    var command = 'jruby -S warble';
+    var jrubyPath = grunt.config.get('jrubyPath');
+    var command = jrubyPath + '/bin/jruby -S warble';
     var options = {
       cwd: join(grunt.config.get('build'), 'kibana')
     };

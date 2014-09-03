@@ -1,11 +1,25 @@
 module.exports = function (grunt) {
+  var jrubyPath = grunt.config.get('jrubyPath');
+  var jruby = jrubyPath + '/bin/jruby';
+  var cmd =  grunt.config.get('src') + '/server/bin/kibana';
+
   var config = {
-    kibana_server: {
+    mri_server: {
       options: {
         wait: false
         // quiet: true
       },
-      cmd: 'src/server/bin/kibana'
+      cmd: cmd
+    },
+    jruby_server: {
+      options: {
+        wait: false
+        // quiet: true
+      },
+      cmd: jruby,
+      args: [
+        cmd
+      ]
     }
   };
 

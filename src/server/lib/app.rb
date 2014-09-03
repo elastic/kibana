@@ -58,7 +58,7 @@ module Kibana
     end
 
     get '/throw' do
-      raise "SHIT!"
+      raise "Oops!"
     end
 
     # Routes go here
