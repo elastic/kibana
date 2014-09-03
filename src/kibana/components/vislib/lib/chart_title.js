@@ -57,7 +57,12 @@ define(function (require) {
           self.validateWidthandHeight(width, height);
 
           div.append('svg')
-            .attr('width', width)
+            .attr('width', function () {
+              if (dataType === 'rows') {
+                return 15;
+              }
+              return width;
+            })
             .attr('height', height)
             .append('text')
             .attr('transform', function () {

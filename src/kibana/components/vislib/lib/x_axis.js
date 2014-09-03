@@ -241,13 +241,6 @@ define(function (require) {
       var dataType;
 
       return function (selection) {
-        var rotScale = d3.scale.linear()
-          .domain([0.14, 0.28, 0.6, 0.8, 0.9, 2.6])
-          .range([5, 10, 30, 55, 80, 100]);
-        var flatScale = d3.scale.linear()
-          .domain([1.3, 8, 14.5, 29])
-          .range([1.1, 9, 13, 30]);
-
         selection.each(function () {
           div = d3.select(this);
           svg = div.select('svg');
@@ -270,23 +263,37 @@ define(function (require) {
             titlespace = 30;
           }
 
-          if (!self._attr.isRotated) {
-            // flat labels
-            ratio = flatScale(35 * (titlespace +
-              tick.node().getBBox().height) / chartwrap.height());
-          } else {
-            // rotated labels
-            ratio = rotScale((titlespace + tick.node().getBBox().height) / chartwrap.height());
-            div.style('height', 2 + tick.node().getBBox().height + 'px');
-            svg.attr('height', 2 + tick.node().getBBox().height + 'px');
+          if (!tick.node()) {
+            throw new Error('x-axis tick.node() is undefined');
           }
 
-          flex = ratio.toFixed(1);
+          flex = self.getFlexVal(self._attr.isRotated, titlespace, tick.node().getBBox().height, chartwrap.height());
+          
           xwrapper.css('flex', flex + ' 1');
           xdiv.css('flex', flex + ' 1');
           yspacerblock.css('flex', flex + ' 1');
         });
       };
+    };
+
+    XAxis.prototype.getFlexVal = function (isRotated, titleSpace, tickHt, chartHt) {
+      var ratio;
+      var rotScale = d3.scale.linear()
+        .domain([0.14, 0.28, 0.6, 0.8, 0.9, 2.6])
+        .range([5, 10, 30, 55, 80, 100]);
+      var flatScale = d3.scale.linear()
+        .domain([1.3, 8, 14.5, 29])
+        .range([1.1, 9, 13, 30]);
+      
+      if (!isRotated) {
+        // flat labels
+        ratio = flatScale(35 * (titleSpace + tickHt) / chartHt);
+      } else {
+        // rotated labels
+        ratio = rotScale((titleSpace + tickHt) / chartHt);
+      }
+
+      return ratio.toFixed(1);
     };
 
     return XAxis;
