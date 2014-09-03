@@ -30,7 +30,6 @@ require.config({
     jsonpath: '../bower_components/jsonpath/lib/jsonpath',
     inflection: '../bower_components/inflection/lib/inflection',
     file_saver: '../bower_components/FileSaver/FileSaver',
-    squire: '../bower_components/squire/src/Squire',
     bower_components: '../bower_components'
   },
   shim: {
