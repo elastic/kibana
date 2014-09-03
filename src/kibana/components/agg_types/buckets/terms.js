@@ -28,10 +28,11 @@ define(function (require) {
           editor: require('text!components/agg_types/controls/order_and_size.html'),
           default: 'desc',
           write: function (aggConfig, output) {
-            // TODO: We need more than just _count here.
-            output.params.order = {
-              _count: aggConfig.params.order.val
-            };
+
+            var metricAgg = _.first(aggConfig.vis.aggs.bySchemaGroup.metrics);
+
+            output.params.order = {};
+            output.params.order[metricAgg.id] = aggConfig.params.order.val;
           }
         }
       ]
