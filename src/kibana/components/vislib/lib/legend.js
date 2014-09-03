@@ -30,13 +30,19 @@ define(function (require) {
 
     // Add legend header
     // Need to change the header icon
-    Legend.prototype.header = function (el) {
+    Legend.prototype.header = function (el, args) {
       return el.append('div')
         .attr('class', 'header')
         .append('div')
         .attr('class', 'column-labels')
-        .html('<span class="btn btn-xs btn-default legend-toggle">' +
-          '<i class="fa fa-list-ul"></i></span>');
+        .html(function (d) {
+          if (args._attr.isOpen) {
+            return '<span class="btn btn-xs btn-default legend-toggle">' +
+              '<i class="fa fa-chevron-right"></i></span>';
+          }
+          return '<span class="btn btn-xs btn-default legend-toggle">' +
+            '<i class="fa fa-chevron-left"></i></span>';
+        });
     };
 
     // Add legend list
@@ -74,7 +80,7 @@ define(function (require) {
       var visEl = d3.select(this.el);
       var legendDiv = visEl.select('.' + this._attr.legendClass);
       var items = this.labels;
-      var header = this.header(legendDiv);
+      var header = this.header(legendDiv, this);
       var headerIcon = visEl.select('.legend-toggle');
       var list = this.list(legendDiv, items, this);
 
@@ -93,6 +99,7 @@ define(function (require) {
           visEl.select('ul.legend-ul')
             .classed('hidden', false);
           self._attr.isOpen = true;
+          
         }
       });
 

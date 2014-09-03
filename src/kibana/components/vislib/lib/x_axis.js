@@ -159,6 +159,7 @@ define(function (require) {
       };
     };
 
+    // Eval tick label widths to apply rotate and or filter
     XAxis.prototype.checkTickLabels = function () {
       var self = this;
       var margin = this._attr.margin;
@@ -198,19 +199,19 @@ define(function (require) {
           widthArr.push(subtotalW);
           heightArr.push(subtotalH);
 
-          // should rotate if any chart subtotal > width
+          // rotate if any chart subtotal > width
           if (subtotalW > width) {
             rotate = true;
           }
         });
 
-        // apply rotate if not discover view
+        // do not rotate labels for discover view
         if (!self._attr.isDiscover && rotate) {
           self.rotateAxisLabels(selection);
           self._attr.isRotated = true;
         }
         
-        // filter labels to prevent overlap of text
+        // Filter labels to prevent overlap of text
         if (self._attr.isRotated) {
           // if rotated, use label heights
           maxHeight = _.max(heightArr);
@@ -232,6 +233,7 @@ define(function (require) {
       };
     };
 
+    // Rotate the axis tick labels within selection
     XAxis.prototype.rotateAxisLabels = function (selection) {
       return selection.selectAll('.tick text')
         .style('text-anchor', 'end')
@@ -242,6 +244,7 @@ define(function (require) {
         });
     };
 
+    // Filter out every nth text label
     XAxis.prototype.filterAxisLabels = function (selection, nth) {
       var self = this;
       return selection.selectAll('text')
@@ -250,6 +253,7 @@ define(function (require) {
         });
     };
 
+    // Resize layout divs and flexbox values to fit axis labels
     XAxis.prototype.resizeAxisLayoutForLabels = function () {
       var self = this;
       var visEl = $(self.el);
@@ -279,6 +283,8 @@ define(function (require) {
           xdivwrapper = visEl.find('.x-axis-div-wrapper');
           yspacerblock = visEl.find('.y-axis-spacer-block');
 
+          // define chartwrap and titlespace, for chart title 
+          // and axis title based on data type
           if (dataType === 'series') {
             chartwrap =  visEl.find('.chart-wrapper');
             titlespace = 15;
@@ -290,6 +296,7 @@ define(function (require) {
             titlespace = 30;
           }
 
+          // should have a tick node
           if (!tick.node()) {
             throw new Error('x-axis tick.node() is undefined');
           }
@@ -303,6 +310,7 @@ define(function (require) {
       };
     };
 
+    // Return flexbox css value using linear scales
     XAxis.prototype.getFlexVal = function (isRotated, titleSpace, tickHt, chartHt) {
       var ratio;
       var rotScale = d3.scale.linear()
@@ -319,7 +327,6 @@ define(function (require) {
         // rotated labels
         ratio = rotScale((titleSpace + tickHt) / chartHt);
       }
-
       return ratio.toFixed(1);
     };
 

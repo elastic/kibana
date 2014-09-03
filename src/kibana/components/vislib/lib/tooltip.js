@@ -48,6 +48,8 @@ define(function (require) {
               var offsetX = d3.event.offsetX;
               var tipWidth = tooltipDiv[0][0].clientWidth;
               var xOffset = 10;
+              // check position of tooltip relative to chart width 
+              // to apply offset if tooltip should flip 'west'
               if ((chartWidth - offsetX) < tipWidth) {
                 xOffset = -10 - tipWidth;
               }
@@ -56,10 +58,12 @@ define(function (require) {
               var offsetY = d3.event.offsetY;
               var tipHeight = tooltipDiv[0][0].clientHeight;
               var yOffset = 5;
+              // apply y offset to keep tooltip within bottom of chart
               if ((chartHeight - offsetY + 10) < (tipHeight)) {
                 yOffset = tipHeight - (chartHeight - offsetY + 5);
               }
 
+              // return text and position for tooltip
               return tooltipDiv.datum(d)
                 .text(self.tooltipFormatter)
                 .style('visibility', 'visible')

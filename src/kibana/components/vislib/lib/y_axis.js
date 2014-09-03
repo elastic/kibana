@@ -162,6 +162,7 @@ define(function (require) {
       };
     };
 
+    // Returns max tick label length
     YAxis.prototype.getMaxLabelLength = function (labels) {
       var arr = [];
 
@@ -173,13 +174,14 @@ define(function (require) {
       return _.max(arr);
     };
 
+    // Set width of svg and trnasform axis to fit labels
     YAxis.prototype.updateLayoutForRotatedLabels = function (svg, length) {
       var margin = this._attr.margin;
       var tickspace = 14;
 
       length += tickspace;
 
-      // set widths of svg, x-axis-div and x-axis-div-wrapper to fit ticklabels
+      // set width of svg, x-axis-div and x-axis-div-wrapper to fit ticklabels
       svg.attr('width', length + 6);
       d3.selectAll('.y.axis').attr('transform', 'translate(' + (length + 2) + ',' + margin.top + ')');
     };
@@ -190,15 +192,8 @@ define(function (require) {
       var div;
       var svg;
       var tick;
-      //var chartwrap;
       var titlespace;
-      //var xwrapper;
-      //var xdiv;
-      //var xdivwrapper;
-      //var yspacerblock;
-      //var ratio;
       var flex;
-      //var chartToXaxis;
       var dataType;
 
       var visWrap = visEl.find('.vis-col-wrapper');
@@ -211,11 +206,7 @@ define(function (require) {
       var labelWidths = [];
       var maxWidth;
       var labels;
-      //console.log('visWrap', visWrap);
-      //console.log('yAxisColWrap', yAxisColWrap);
-      //console.log('yAxisDivWrap', yAxisDivWrap);
-      //console.log('legendColWrap', legendColWrap);
-
+      
       return function (selection) {
         selection.each(function () {
           div = d3.select(this);
@@ -223,12 +214,7 @@ define(function (require) {
           tick = svg.select('.tick');
           dataType = this.parentNode.__data__.series ? 'series' : this.parentNode.__data__.rows ? 'rows' : 'columns';
           labels = selection.selectAll('.tick text');
-          //console.log('div', div);
-          //console.log('svg', svg, svg[0]);
-          //console.log('tick', tick);
-          //console.log('dataType', dataType);
-          //console.log('labels', labels);
-
+          
           if (dataType === 'series') {
             titlespace = 15;
           } else if (dataType === 'rows') {
@@ -242,20 +228,20 @@ define(function (require) {
             labelWidths.push(n.getBBox().height);
           });
           maxWidth = Math.ceil(_.max(labelWidths)) + 20;
-          flex = self.getFlexVal(dataType, titlespace, tick.node().getBBox().width, legendColWrap.width(), visWrap.width());
-          //console.log('maxWidth', maxWidth);
-          //console.log('flex', flex);
-          //console.log('bbox', tick.node().getBBox());
           
-          //yAxisTitle.css('flex', 1 + ' 0 15px');
-          //yAxisChartTitle.css('flex', 1 + ' 0 15px');
-          //yAxisDiv.css('flex', 4 + ' 0 15px');
-          yAxisColWrap.css('flex', flex + ' 1');
-          //yAxisDivWrap.css('flex', flex + ' 1');
+          // should have a tick node
+          if (!tick.node()) {
+            throw new Error('y-axis tick.node() is undefined');
+          }
 
+          flex = self.getFlexVal(dataType, titlespace, tick.node().getBBox().width, legendColWrap.width(), visWrap.width());
+          
+          // set flex values
+          yAxisColWrap.css('flex', flex + ' 1');
           yAxisDiv.css('width', maxWidth + 'px');
-          //yAxisColWrap.css('width', (maxWidth + 12) + 'px');
           yAxisDivWrap.css('width', (maxWidth + 12) + 'px');
+          
+          // set width of svg, trnasform to fit axis labels
           svg.attr('width', maxWidth);
           svg.attr('transform', 'translate(0,0)');
           svg.select('g').attr('transform', 'translate(' + (maxWidth - 1) + ',10)');
@@ -263,6 +249,7 @@ define(function (require) {
       };
     };
 
+    // Return flexbox css value using linear scales
     YAxis.prototype.getFlexVal = function (dataType, titleSpace, tickWidth, legendWidth, visWidth) {
       var ratio;
       var seriesScale = d3.scale.linear()
@@ -274,17 +261,14 @@ define(function (require) {
       var colsScale = d3.scale.linear()
         .domain([0.8, 2])
         .range([0.9, 2.2]);
-      // console.log(35 * (titleSpace + tickWidth) / visWidth);
 
+      // define ratio based on datatype
       if (dataType === 'rows') {
         ratio = rowsScale(35 * (titleSpace + tickWidth) / visWidth);
-        //console.log('rows', ratio.toFixed(1));
       } else if (dataType === 'columns') {
         ratio = colsScale(35 * (titleSpace + tickWidth) / visWidth);
-        //console.log('columns', ratio.toFixed(1));
       } else {
         ratio = seriesScale(35 * (titleSpace + tickWidth) / visWidth);
-        //console.log('series', ratio.toFixed(1));
       }
       return ratio.toFixed(1);
 
