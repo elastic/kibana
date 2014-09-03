@@ -10,6 +10,8 @@
    - a legit way to update the index pattern
  - **[src/kibana/apps/settings/sections/indices/_create.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/settings/sections/indices/_create.js)**
    - we should probably display a message of some kind
+ - **[src/kibana/components/agg_types/buckets/terms.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/agg_types/buckets/terms.js)**
+   - We need more than just _count here.
  - **[src/kibana/components/index_patterns/_mapper.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/index_patterns/_mapper.js)**
    - Change index to be the resolved in some way, last three months, last hour, last year, whatever
  - **[src/kibana/components/visualize/visualize.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/visualize/visualize.js)**
