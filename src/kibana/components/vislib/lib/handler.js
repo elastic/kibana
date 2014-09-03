@@ -22,8 +22,7 @@ define(function (require) {
       this.el = vis.el;
       this.ChartClass = vis.ChartClass;
       this._attr = _.defaults(vis._attr || {}, {
-        'margin' : { top: 10, right: 3, bottom: 5, left: 3 },
-        destroyFlag: false
+        'margin' : { top: 10, right: 3, bottom: 5, left: 3 }
       });
 
       this.layout = new Layout(this.el, this.data.injectZeros(), this._attr.type);

@@ -25,6 +25,7 @@ define(function (require) {
         selection.each(function () {
           var div = d3.select(this);
           var dataType = this.parentNode.__data__.rows ? 'rows' : 'columns';
+
           var text = div.select('text');
           var textLength = text.node().getComputedTextLength();
           var maxWidth = dataType === 'rows' ? $(this).height() : $(this).width();

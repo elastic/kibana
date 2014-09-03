@@ -1,6 +1,6 @@
 define(function (require) {
   return function VisTypeFactory(Private) {
-    // VisLib Visualization Types
+    // visLib visualization types
     return {
       histogram: Private(require('components/vislib/visualizations/column_chart'))
     };

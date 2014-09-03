@@ -7,6 +7,7 @@ define(function (require) {
     return require('d3');
   });
 
+  // Kibana visualization library
   module.service('visLib', function (Private) {
     return {
       version: '0.0.0',
