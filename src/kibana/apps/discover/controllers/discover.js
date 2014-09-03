@@ -632,7 +632,7 @@ define(function (require) {
       });
 
       $scope.searchSource.aggs(function () {
-        return $scope.vis.aggs.toDSL();
+        return $scope.vis.aggs.toDsl();
       });
 
       // stash this promise so that other calls to setupVisualization will have to wait

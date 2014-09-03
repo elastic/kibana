@@ -57,7 +57,7 @@ define(function (require) {
      *         the quality of things like date_histogram's "auto" interval)
      * @return {object} output
      *         output of the write calls, reduced into a single object. A `params: {}` property is exposed on the
-     *         output object which is used to create the agg DSL for the search request. All other properties
+     *         output object which is used to create the agg dsl for the search request. All other properties
      *         are dependent on the AggParam#write methods which should be studied for each AggType.
      */
     AggParams.prototype.write = function (aggConfig, locals) {
