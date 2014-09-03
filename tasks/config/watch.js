@@ -20,12 +20,6 @@ module.exports = function (grunt) {
       ],
       tasks: ['jade:test']
     },
-    docs: {
-      files: [
-        '<%= app %>/**/*.js'
-      ],
-      tasks: ['yuidoc']
-    },
     clientside_jade: {
       files: [
         '<%= testUtilsDir %>/istanbul_reporter/report.clientside.jade'
@@ -34,8 +28,10 @@ module.exports = function (grunt) {
     }
   };
 
-  if (grunt.option('no-test-watcher')) delete config.test;
-  if (!grunt.option('doc-watcher'))    delete config.docs;
+  if (grunt.option('no-test-watcher')) {
+    // unset the test watcher
+    delete config.test;
+  }
 
   return config;
 };
