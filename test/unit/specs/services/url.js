@@ -21,7 +21,7 @@ define(function (require) {
       }
     };
 
-    module('kibana/url', function ($provide) {
+    module('kibana/url', 'kibana', function ($provide) {
       $provide.service('$route', function () {
         return {};
       });
@@ -149,7 +149,7 @@ define(function (require) {
         var wrappers = [ ['{', '}'], ['{ ', ' }'], ['{', '  }'], ['{    ', '}'], ['{    ', '         }']];
         // make sure filters are evaluated via angular expressions
         var objIndex = 4; // used to case one replace as an object
-        var filters = ['', 'uppercase', '', 'uppercase', 'uppercase'];
+        var filters = ['', 'uppercase', '', 'uppercase', 'rison'];
 
         // the words (template keys) used must all be unique
         var words = _.uniq(faker.Lorem.words(10)).slice(0, urlParts.length).map(function (word, i) {
