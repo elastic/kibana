@@ -20,8 +20,26 @@ define(function (require) {
       });
     });
 
+
+    /**
+     * Registry of Aggregation Types.
+     *
+     * These types form two groups, metric and buckets.
+     *
+     * @module agg_types
+     * @type {Registry}
+     */
     return new Registry({
+
+      /**
+       * @type {Array}
+       */
       index: ['name'],
+
+      /**
+       * [group description]
+       * @type {Array}
+       */
       group: ['type'],
       initialSet: aggs.metrics.concat(aggs.buckets)
     });

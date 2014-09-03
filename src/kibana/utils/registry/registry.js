@@ -14,6 +14,9 @@ define(function (require) {
    * Generic extension of Array class, which will index (and reindex) the
    * objects it contains based on their properties.
    *
+   * @class  Registry
+   * @module utils
+   * @constructor
    * @param {object}   [config]            - describes the properties of this registry object
    * @param {string[]} [config.index]      - a list of props/paths that should be used to index the docs.
    * @param {string[]} [config.group]      - a list of keys/paths to group docs by.

@@ -25,15 +25,19 @@ define(function (require) {
     // one cache per instance of the Private service
     var cache = {};
 
-    function Private(fn) {
+    function indent(fn) {
       if (typeof fn !== 'function') {
         throw new TypeError('Expected private module "' + fn + '" to be a function');
       }
 
-      var id = fn.$$id;
-      if (id && cache[id]) return cache[id];
+      if (fn.$$id) return fn.$$id;
+      else return (fn.$$id = nextId());
+    }
 
-      if (!id) id = fn.$$id = nextId();
+    function Private(fn) {
+      var id = indent(fn);
+
+      if (cache[id]) return cache[id];
       else if (~privPath.indexOf(id)) {
         throw new Error(
           'Circluar refrence to "' + name(fn) + '"' +
@@ -53,6 +57,11 @@ define(function (require) {
       cache[id] = instance;
       return instance;
     }
+
+    Private.stub = function (fn, val) {
+      cache[indent(fn)] = val;
+      return val;
+    };
 
     return Private;
   });
