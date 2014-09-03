@@ -207,6 +207,50 @@ define(function (require) {
       });
     });
 
+    describe('changePath', function () {
+      beforeEach(function () {
+        sinon.stub(kbnUrl, 'matches', function () { return false; });
+        sinon.stub(kbnUrl, 'reload');
+      });
+
+      it('should only change the path', function () {
+        var path = '/test/path';
+        var search = {search: 'test'};
+        var hash = 'hash';
+        var newPath = '/new/location';
+
+        $location.path(path).search(search).hash(hash);
+
+        // verify the starting state
+        expect($location.url()).to.be(path + '?search=test#hash');
+
+        kbnUrl.changePath(newPath);
+        expect($location.url()).to.be(newPath + '?search=test#hash');
+      });
+
+      it('should set $location.url and call reload when path changes', function () {
+        for (var i = 0; i < _.random(3, 6); i++) {
+          kbnUrl.changePath('/new/path/' + i);
+          expect(kbnUrl.reload.callCount).to.be(i + 1);
+        }
+      });
+
+      it('should reload when forceReload is set', function () {
+        var path = '/test/path';
+
+        kbnUrl.changePath(path);
+        expect(kbnUrl.reload.callCount).to.be(1);
+
+        // same url, no change in reload count
+        kbnUrl.changePath(path);
+        expect(kbnUrl.reload.callCount).to.be(1);
+
+        // same url again, but with forceReload true
+        kbnUrl.changePath(path, true);
+        expect(kbnUrl.reload.callCount).to.be(2);
+      });
+    });
+
     describe('reload', function () {
       require('test_utils/no_digest_promises').activateForSuite();
 
