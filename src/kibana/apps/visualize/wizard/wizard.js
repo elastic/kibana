@@ -24,9 +24,9 @@ define(function (require) {
     }
   });
 
-  module.controller('VisualizeWizardStep1', function ($route, $scope, $location, timefilter) {
+  module.controller('VisualizeWizardStep1', function ($route, $scope, $location, timefilter, kbnUrl) {
     $scope.step2WithSearchUrl = function (hit) {
-      return '#/visualize/step/2?savedSearchId=' + encodeURIComponent(hit.id);
+      return kbnUrl.eval('#/visualize/step/2?savedSearchId={id}', {id: hit.id});
     };
 
     timefilter.enabled = false;
@@ -38,7 +38,7 @@ define(function (require) {
 
     $scope.$watch('indexPattern.selection', function (pattern) {
       if (!pattern) return;
-      $location.url('/visualize/step/2?indexPattern=' + encodeURIComponent(pattern));
+      kbnUrl.change('/visualize/step/2?indexPattern={pattern}', {pattern: pattern});
     });
   });
 

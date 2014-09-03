@@ -11,7 +11,7 @@ define(function (require) {
     title: 'visualizations'
   });
 
-  app.service('savedVisualizations', function (Promise, es, config, SavedVis, Private, Notifier) {
+  app.service('savedVisualizations', function (Promise, es, config, SavedVis, Private, Notifier, kbnUrl) {
     var visTypes = Private(require('components/vis_types/index'));
     var notify = new Notifier({
       location: 'saved visualization service'
@@ -22,7 +22,7 @@ define(function (require) {
     };
 
     this.urlFor = function (id) {
-      return '#/visualize/edit/' + encodeURIComponent(id);
+      return kbnUrl.eval('#/visualize/edit/{id}', {id: id});
     };
 
     this.delete = function (ids) {

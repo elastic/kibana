@@ -41,7 +41,7 @@ define(function (require) {
     'kibana/notify',
     'kibana/courier'
   ])
-  .controller('VisEditor', function ($scope, $route, timefilter, appStateFactory, $location, globalState, $timeout) {
+  .controller('VisEditor', function ($scope, $route, timefilter, appStateFactory, $location, kbnUrl, $timeout) {
 
     var _ = require('lodash');
     var angular = require('angular');
@@ -157,11 +157,7 @@ define(function (require) {
 
         if (savedVis.id === $route.current.params.id) return;
 
-        $location.url(
-          globalState.writeToUrl(
-            '/visualize/edit/' + encodeURIComponent(savedVis.id)
-          )
-        );
+        kbnUrl.change('/visualize/edit/{id}', {id: savedVis.id});
       }, notify.fatal);
     };
 
