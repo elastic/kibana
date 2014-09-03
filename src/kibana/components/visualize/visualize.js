@@ -1,7 +1,7 @@
 define(function (require) {
   require('modules')
   .get('kibana/directive')
-  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, visLib, $timeout) {
+  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, visLib) {
 
     require('components/visualize/spy/spy');
     require('css!components/visualize/visualize.css');
@@ -124,9 +124,7 @@ define(function (require) {
 
           if (chart && chartData && !$scope.onlyShowSpy) {
             notify.event('call chart render', function () {
-              $timeout(function () {
-                chart.render(chartData);
-              });
+              chart.render(chartData);
             });
           }
         });

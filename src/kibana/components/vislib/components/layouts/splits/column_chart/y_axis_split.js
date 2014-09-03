@@ -1,5 +1,10 @@
 define(function () {
   return function YAxisSplitFactory(d3) {
+    /*
+     * Adds div DOM elements to the `.y-axis-div-wrapper` element based on the data layout.
+     * For example, if the data has rows, it returns the same number of
+     * `.y-axis-div` elements as row objects.
+     */
     return function (selection) {
       selection.each(function () {
         var div = d3.select(this);
