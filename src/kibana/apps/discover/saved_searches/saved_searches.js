@@ -15,7 +15,7 @@ define(function (require) {
     title: 'searches'
   });
 
-  module.service('savedSearches', function (Promise, config, configFile, es, createNotifier, SavedSearch) {
+  module.service('savedSearches', function (Promise, config, configFile, es, createNotifier, SavedSearch, kbnUrl) {
 
 
     var notify = createNotifier({
@@ -27,7 +27,7 @@ define(function (require) {
     };
 
     this.urlFor = function (id) {
-      return '#/discover/' + encodeURIComponent(id);
+      return kbnUrl.eval('#/discover/{id}', {id: id});
     };
 
     this.delete = function (ids) {

@@ -13,7 +13,7 @@ define(function (require) {
   });
 
   // This is the only thing that gets injected into controllers
-  module.service('savedDashboards', function (Promise, SavedDashboard, config, es) {
+  module.service('savedDashboards', function (Promise, SavedDashboard, config, es, kbnUrl) {
 
     // Returns a single dashboard by ID, should be the name of the dashboard
     this.get = function (id) {
@@ -23,7 +23,7 @@ define(function (require) {
     };
 
     this.urlFor = function (id) {
-      return '#/dashboard/' + encodeURIComponent(id);
+      return kbnUrl.eval('#/dashboard/{id}' + {id: id});
     };
 
     this.delete = function (ids) {
