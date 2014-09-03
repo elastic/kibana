@@ -132,29 +132,57 @@ define(function (require) {
         expect(kbnUrl.reload.callCount).to.be(words.length);
       });
 
-      it('should replace template rison encoded params', function () {
+      it('should uri encode replaced params', function () {
+        var url = '/some/path/';
+        var params = { replace: faker.Lorem.words(3).join(' ') };
+        var check = encodeURIComponent(params.replace);
+
+        kbnUrl.change(url + '{replace}', params);
+
+        expect(locationUrlSpy.secondCall.args[0]).to.be(url + check);
+      });
+
+      it('should parse angular expression in substitutions and uri encode the results', function () {
+        // build url by piecing together these parts
         var urlParts = ['/', '/', '?', '&', '#'];
+        // make sure it can parse templates with weird spacing
         var wrappers = [ ['{', '}'], ['{ ', ' }'], ['{', '  }'], ['{    ', '}'], ['{    ', '         }']];
-        var words = faker.Lorem.words(5);
-        var replacements = faker.Lorem.words(5).map(function (word, i) {
-          if (i % 2) {
-            return { replace: word };
+        // make sure filters are evaluated via angular expressions
+        var objIndex = 4; // used to case one replace as an object
+        var filters = ['', 'uppercase', '', 'uppercase', 'uppercase'];
+
+        // the words (template keys) used must all be unique
+        var words = _.uniq(faker.Lorem.words(10)).slice(0, urlParts.length).map(function (word, i) {
+          if (filters[i].length) {
+            return word + '|' + filters[i];
           }
           return word;
         });
-        var url = '';
-        var testUrl = '';
 
-        // create the url and test url
-        urlParts.forEach(function (part, i) {
-          url += part + wrappers[i][0] + words[i] + wrappers[i][1];
-          testUrl += part + rison.encode(replacements[i]);
+        var replacements = faker.Lorem.words(urlParts.length).map(function (word, i) {
+          // make selected replacement into an object
+          if (i === objIndex) {
+            return { replace: word };
+          }
+
+          return word;
         });
 
-        // create the substitution object
+        // build the url and test url
+        var url = '';
+        var testUrl = '';
+        urlParts.forEach(function (part, i) {
+          url += part + wrappers[i][0] + words[i] + wrappers[i][1];
+          var locals = {};
+          locals[words[i].split('|')[0]] = replacements[i];
+          testUrl += part + encodeURIComponent($rootScope.$eval(words[i], locals));
+        });
+
+        // create the locals replacement object
         var params = {};
         replacements.forEach(function (replacement, i) {
-          params[words[i]] = replacement;
+          var word = words[i].split('|')[0];
+          params[word] = replacement;
         });
 
         kbnUrl.change(url, params);

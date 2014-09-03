@@ -43,13 +43,14 @@ define(function (require) {
     $rootScope.$on('$routeChangeStart', reloadingComplete);
 
     function parseUrlPrams(url, paramObj) {
-      return url.replace(/\{([^\}]+)\}/g, function (match, key) {
-        key = key.trim();
+      return url.replace(/\{([^\}]+)\}/g, function (match, expr) {
+        var key = expr.split('|')[0].trim();
+
         if (_.isUndefined(paramObj[key])) {
           throw new Error('Replacement failed, key not found: ' + key);
         }
 
-        return rison.encode(paramObj[key]);
+        return encodeURIComponent($rootScope.$eval(expr, paramObj));
       });
     }
 
