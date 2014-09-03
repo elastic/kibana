@@ -34,7 +34,12 @@ define(function (require) {
       try {
         this.handler.render();
       } catch (error) {
-        this.handler.error(error.message);
+        if (error.message === 'The height and/or width of this container ' +
+          'is too small for this chart.') {
+          this.handler.error(error.message);
+        } else {
+          console.log(error);
+        }
       }
 
       this.checkSize();

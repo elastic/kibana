@@ -112,12 +112,7 @@ define(function (require) {
       return d3.select(this.el)
         .append('div')
         .attr('class', 'error-wrapper')
-        .append('div')
-        .attr('class', 'chart error')
         .append('p')
-        .style('line-height', function () {
-          return $(this.el).height() + 'px';
-        })
         .text(message);
     };
 

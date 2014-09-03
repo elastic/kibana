@@ -109,7 +109,8 @@ define(function (require) {
           height = elHeight - margin.top - margin.bottom;
 
           if (_.isNaN(width) || width < 20 || _.isNaN(height) || height < 20) {
-            throw new Error('The height and/or width of the chart container(s) is too small. Height: ' + height + ', width: ' + width);
+            throw new Error('The height and/or width of this container is too ' +
+              'small for this chart.');
           }
 
           // Create the canvas for the visualization
