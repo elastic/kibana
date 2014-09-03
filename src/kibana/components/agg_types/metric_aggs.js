@@ -6,6 +6,7 @@ define(function (require) {
       {
         name: 'count',
         title: 'Count',
+        hasNoDsl: true,
         makeLabel: function (aggConfig) {
           return 'Count of documents';
         }
