@@ -25,7 +25,7 @@ define(function (require) {
     // one cache per instance of the Private service
     var cache = {};
 
-    function indent(fn) {
+    function identify(fn) {
       if (typeof fn !== 'function') {
         throw new TypeError('Expected private module "' + fn + '" to be a function');
       }
@@ -35,7 +35,7 @@ define(function (require) {
     }
 
     function Private(fn) {
-      var id = indent(fn);
+      var id = identify(fn);
 
       if (cache[id]) return cache[id];
       else if (~privPath.indexOf(id)) {
@@ -59,7 +59,7 @@ define(function (require) {
     }
 
     Private.stub = function (fn, val) {
-      cache[indent(fn)] = val;
+      cache[identify(fn)] = val;
       return val;
     };
 
