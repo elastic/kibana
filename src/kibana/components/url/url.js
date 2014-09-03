@@ -13,9 +13,7 @@ define(function (require) {
         paramObj = undefined;
       }
 
-      if (_.isObject(paramObj)) {
-        url = parseUrlPrams(url, paramObj);
-      }
+      url = self.eval(url, paramObj);
 
       if (url !== $location.url()) {
         $location.url(globalState.writeToUrl(url));
@@ -25,6 +23,14 @@ define(function (require) {
       } else if (forceReload) {
         self.reload();
       }
+    };
+
+    self.eval = function (url, paramObj) {
+      if (!_.isObject(paramObj)) {
+        return url;
+      }
+
+      return parseUrlPrams(url, paramObj);
     };
 
     self.matches = function (url) {
