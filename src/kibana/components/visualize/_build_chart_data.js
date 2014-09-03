@@ -26,7 +26,7 @@ define(function (require) {
           },
           _.merge(
             aggConfig.schema.params.write(aggConfig),
-            aggConfig.type.params.write(aggConfig)
+            aggConfig.write()
           )
         );
         return chartDataConfig;

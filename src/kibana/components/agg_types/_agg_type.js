@@ -57,6 +57,15 @@ define(function (require) {
       this.ordered = config.ordered;
 
       /**
+       * Flag that prevents this aggregation from being included in the dsl. This is only
+       * used by the count aggregation (currently) since it doesn't really exist and it's output
+       * is available on every bucket.
+       *
+       * @type {Boolean}
+       */
+      this.hasNoDsl = !!config.hasNoDsl;
+
+      /**
        * An instance of {{#crossLink "AggParams"}}{{/crossLink}}.
        *
        * @property params

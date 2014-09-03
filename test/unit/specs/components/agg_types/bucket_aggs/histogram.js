@@ -30,7 +30,7 @@ define(function (require) {
       }));
 
       describe('interval', function () {
-        // reads aggConfig.params.interval, writes to DSL.interval
+        // reads aggConfig.params.interval, writes to dsl.interval
 
         it('accepts a number', function () {
           var output = paramWriter.write({ interval: 100 });

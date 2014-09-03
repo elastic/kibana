@@ -2,6 +2,7 @@ define(function (require) {
   return function TermsAggDefinition(Private) {
     var _ = require('lodash');
     var AggType = Private(require('components/agg_types/_agg_type'));
+    var bucketCountBetween = Private(require('components/agg_types/buckets/_bucket_count_between'));
 
     return new AggType({
       name: 'terms',
@@ -28,11 +29,23 @@ define(function (require) {
           editor: require('text!components/agg_types/controls/order_and_size.html'),
           default: 'desc',
           write: function (aggConfig, output) {
+            var metricAggConfig = _.first(aggConfig.vis.aggs.bySchemaGroup.metrics);
 
-            var metricAgg = _.first(aggConfig.vis.aggs.bySchemaGroup.metrics);
+            /**
+             * In order to sort by a metric agg, the metric need to be an immediate
+             * decendant, this checks if that is the case.
+             *
+             * @type {boolean}
+             */
+            var metricIsOwned = bucketCountBetween(aggConfig, metricAggConfig) === 0;
 
             output.params.order = {};
-            output.params.order[metricAgg.id] = aggConfig.params.order.val;
+            output.params.order[metricAggConfig.id] = aggConfig.params.order.val;
+
+            if (!metricIsOwned) {
+              output.subAggs = output.subAggs || [];
+              output.subAggs.push(metricAggConfig);
+            }
           }
         }
       ]
