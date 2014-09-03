@@ -6,7 +6,7 @@ define(function (require) {
     function AggConfig(vis, opts) {
       var self = this;
 
-      self.id = _.uniqueId('_agg_');
+      self.id = _.uniqueId('agg_');
       self.vis = vis;
       self._opts = opts = (opts || {});
 
