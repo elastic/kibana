@@ -62,10 +62,10 @@ define(function (require) {
         // add repeat word to check that url doesn't change again
         words.push(words[wordCount - 1]);
 
-        var uniqWordCount = _.uniq(words).length;
+        var uniqWordCount = _.uniq(words, true).length;
 
+        // validate our test data
         expect(words.length).to.be(wordCount + 1);
-        expect(uniqWordCount).to.be(wordCount);
 
         words.forEach(function (url) {
           url = '/' + url;
