@@ -135,15 +135,15 @@ define(function (require) {
             barWidth = xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min);
             barSpacing = barWidth * 0.25;
 
-            if (barWidth <= 1) {
-              throw new Error('This container is too small for this chart.');
-            }
+//            if (barWidth <= 1) {
+//              throw new Error('The height and/or width of this container is too small for this chart.');
+//            }
             return barWidth - barSpacing;
           }
 
-          if (xScale.rangeBand() <= 1) {
-            throw new Error('This container is too small for this chart.');
-          }
+//          if (xScale.rangeBand() <= 1) {
+//            throw new Error('The height and/or width of this container is too small for this chart.');
+//          }
           return xScale.rangeBand();
         })
         .attr('y', function (d) {

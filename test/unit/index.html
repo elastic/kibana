@@ -61,6 +61,7 @@
           'kibana',
           'sinon/sinon',
           'specs/apps/discover/hit_sort_fn',
+          'specs/apps/discover/segmented_fetch',
           'specs/directives/confirm-click',
           'specs/directives/timepicker',
           'specs/directives/truncate',
@@ -106,7 +107,9 @@
           'specs/factories/events',
           'specs/index_patterns/_flatten_search_response',
           'specs/utils/registry/index',
-          'specs/directives/filter_bar'
+          'specs/directives/filter_bar',
+          'specs/components/agg_types/index',
+          'specs/components/vis/index'
         ], function (kibana, sinon) {
           kibana.load(function () {
             var xhr = sinon.useFakeXMLHttpRequest();

@@ -60,6 +60,38 @@ define(function (require) {
       });
     };
 
+    AggConfig.prototype.write = function () {
+      return this.type.params.write(this);
+    };
+
+    /**
+     * Convert this aggConfig to it's dsl syntax.
+     *
+     * Adds params and adhoc subaggs to a pojo, then returns it
+     *
+     * @param  {AggConfig} aggConfig - the config object to convert
+     * @return {void|Object} - if the config has a dsl representation, it is
+     *                         returned, else undefined is returned
+     */
+    AggConfig.prototype.toDsl = function () {
+      if (this.type.hasNoDsl) return;
+
+      var output = this.write();
+
+      var configDsl = {};
+      configDsl[this.type.name] = output.params;
+
+      // if the config requires subAggs, write them to the dsl as well
+      if (output.subAggs) {
+        var subDslLvl = configDsl.aggs || (configDsl.aggs = {});
+        output.subAggs.forEach(function nestAdhocSubAggs(subAggConfig) {
+          subDslLvl[subAggConfig.id] = subAggConfig.toDsl();
+        });
+      }
+
+      return configDsl;
+    };
+
     AggConfig.prototype.toJSON = function () {
       var self = this;
       var params = self.params;

@@ -4,6 +4,7 @@ define(function (require) {
     var _ = require('lodash');
 
     var ErrorHandler = Private(require('components/vislib/lib/_error_handler'));
+    var Tooltip = Private(require('components/vislib/lib/tooltip'));
 
     /*
      * Append chart titles to the visualization
@@ -16,42 +17,55 @@ define(function (require) {
       }
 
       this.el = el;
+      this.tooltip = new Tooltip(el, function (d) {
+        return d.label;
+      });
     }
 
     _(ChartTitle.prototype).extend(ErrorHandler.prototype);
 
     // Render chart titles
     ChartTitle.prototype.render = function () {
-      d3.select(this.el).selectAll('.chart-title').call(this.draw());
-      d3.select(this.el).selectAll('.chart-title').call(this.truncate());
+      return d3.select(this.el).selectAll('.chart-title').call(this.draw());
     };
 
     // Return a function that truncates chart title text
-    // Need to refactor this function, so that it is called inside the draw method
-    ChartTitle.prototype.truncate = function () {
+    ChartTitle.prototype.truncate = function (size) {
+      var self = this;
+
       return function (selection) {
         selection.each(function () {
-          var div = d3.select(this);
-          var dataType = this.parentNode.__data__.rows ? 'rows' : 'columns';
+          var text = d3.select(this);
+          var n = text[0].length;
+          var maxWidth = size / n * 0.9;
+          var length = this.getComputedTextLength();
+          var str;
+          var avg;
+          var end;
 
-          var text = div.select('text');
-          var textLength = text.node().getComputedTextLength();
-          var maxWidth = dataType === 'rows' ? $(this).height() : $(this).width();
-          var subtractionPercentage = maxWidth * 0.05;
-          var str = text.text();
-
-          // if length of text is longer than the chart div, truncate
-          maxWidth = maxWidth - subtractionPercentage;
-          if (textLength > maxWidth) {
-            var avg = textLength / str.length;
-            var end = Math.floor(maxWidth / avg);
+          if (length > maxWidth) {
+            str = text.text();
+            avg = length / str.length;
+            end = Math.floor(maxWidth / avg) - 5;
 
             str = str.substr(0, end) + '...';
+
+            // mouseover and mouseout
+            self.addMouseEvents(text);
+
+            return text.text(str);
           }
 
-          text.text(str);
+          return text.text();
         });
       };
+    };
+
+    // Add mouseover and mouseout events on truncated chart titles
+    ChartTitle.prototype.addMouseEvents = function (target) {
+      if (this.tooltip) {
+        return target.call(this.tooltip.render());
+      }
     };
 
     // Return a callback function that appends chart titles to the visualization
@@ -64,6 +78,7 @@ define(function (require) {
           var dataType = this.parentNode.__data__.rows ? 'rows' : 'columns';
           var width = $(this).width();
           var height = $(this).height();
+          var size = dataType === 'rows' ? height : width;
 
           // Check if width or height are 0 or NaN
           self.validateWidthandHeight(width, height);
@@ -80,7 +95,7 @@ define(function (require) {
             .attr('transform', function () {
               if (dataType === 'rows') {
                 // if `rows`, rotate the chart titles
-                return 'translate(11,' + height / 2 + ')rotate(270)';
+                return 'translate(11,' + height / 2.2 + ')rotate(270)';
               }
               return 'translate(' + width / 2 + ',11)';
             })
@@ -88,6 +103,9 @@ define(function (require) {
             .text(function (d) {
               return d.label;
             });
+
+          // truncate long chart titles
+          div.selectAll('text').call(self.truncate(size));
         });
       };
     };
