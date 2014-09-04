@@ -228,7 +228,7 @@ define(function (require) {
         .then(function () {
           notify.info('Saved Data Source "' + savedSearch.title + '"');
           if (savedSearch.id !== $route.current.params.id) {
-            kbnUrl.change('/discover/{id}', { id: savedSearch.id });
+            kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
           }
         });
       })

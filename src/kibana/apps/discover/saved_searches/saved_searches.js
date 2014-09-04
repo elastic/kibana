@@ -27,7 +27,7 @@ define(function (require) {
     };
 
     this.urlFor = function (id) {
-      return kbnUrl.eval('#/discover/{id}', {id: id});
+      return kbnUrl.eval('#/discover/{{id}}', {id: id});
     };
 
     this.delete = function (ids) {

@@ -157,7 +157,7 @@ define(function (require) {
 
         if (savedVis.id === $route.current.params.id) return;
 
-        kbnUrl.change('/visualize/edit/{id}', {id: savedVis.id});
+        kbnUrl.change('/visualize/edit/{{id}}', {id: savedVis.id});
       }, notify.fatal);
     };
 

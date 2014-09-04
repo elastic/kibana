@@ -113,7 +113,7 @@ define(function (require) {
           .then(function () {
             notify.info('Saved Dashboard as "' + dash.title + '"');
             if (dash.id !== $routeParams.id) {
-              kbnUrl.change('/dashboard/{id}', {id: dash.id});
+              kbnUrl.change('/dashboard/{{id}}', {id: dash.id});
             }
           })
           .catch(notify.fatal);

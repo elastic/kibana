@@ -22,7 +22,7 @@ define(function (require) {
     };
 
     this.urlFor = function (id) {
-      return kbnUrl.eval('#/visualize/edit/{id}', {id: id});
+      return kbnUrl.eval('#/visualize/edit/{{id}}', {id: id});
     };
 
     this.delete = function (ids) {

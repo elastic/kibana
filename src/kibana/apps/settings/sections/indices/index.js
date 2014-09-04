@@ -31,7 +31,7 @@ define(function (require) {
             .map(function (id) {
               return {
                 id: id,
-                url: kbnUrl.eval('#/settings/indices/{id}', {id: id}),
+                url: kbnUrl.eval('#/settings/indices/{{id}}', {id: id}),
                 class: 'sidebar-item-title ' + ($scope.edittingId === id ? 'active' : ''),
                 default: $scope.defaultIndex === id
               };

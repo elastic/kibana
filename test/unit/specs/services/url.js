@@ -137,7 +137,7 @@ define(function (require) {
         var params = { replace: faker.Lorem.words(3).join(' ') };
         var check = encodeURIComponent(params.replace);
 
-        kbnUrl.change(url + '{replace}', params);
+        kbnUrl.change(url + '{{replace}}', params);
 
         expect(locationUrlSpy.secondCall.args[0]).to.be(url + check);
       });
@@ -146,7 +146,7 @@ define(function (require) {
         // build url by piecing together these parts
         var urlParts = ['/', '/', '?', '&', '#'];
         // make sure it can parse templates with weird spacing
-        var wrappers = [ ['{', '}'], ['{ ', ' }'], ['{', '  }'], ['{    ', '}'], ['{    ', '         }']];
+        var wrappers = [ ['{{', '}}'], ['{{ ', ' }}'], ['{{', '  }}'], ['{{    ', '}}'], ['{{    ', '         }}']];
         // make sure filters are evaluated via angular expressions
         var objIndex = 4; // used to case one replace as an object
         var filters = ['', 'uppercase', '', 'uppercase', 'rison'];
@@ -192,7 +192,7 @@ define(function (require) {
       });
 
       it('should throw when params are missing', function () {
-        var url = '/{replace-me}/{but-not-me}';
+        var url = '/{{replace-me}}/{{but-not-me}}';
         var params = {
           'replace-me': 'done'
         };

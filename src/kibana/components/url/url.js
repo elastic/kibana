@@ -64,7 +64,7 @@ define(function (require) {
     $rootScope.$on('$routeChangeStart', reloadingComplete);
 
     function parseUrlPrams(url, paramObj) {
-      return url.replace(/\{([^\}]+)\}/g, function (match, expr) {
+      return url.replace(/\{\{([^\}]+)\}\}/g, function (match, expr) {
         var key = expr.split('|')[0].trim();
 
         if (_.isUndefined(paramObj[key])) {

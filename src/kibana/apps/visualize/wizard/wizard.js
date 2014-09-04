@@ -26,7 +26,7 @@ define(function (require) {
 
   module.controller('VisualizeWizardStep1', function ($route, $scope, $location, timefilter, kbnUrl) {
     $scope.step2WithSearchUrl = function (hit) {
-      return kbnUrl.eval('#/visualize/step/2?savedSearchId={id}', {id: hit.id});
+      return kbnUrl.eval('#/visualize/step/2?savedSearchId={{id}}', {id: hit.id});
     };
 
     timefilter.enabled = false;
@@ -38,7 +38,7 @@ define(function (require) {
 
     $scope.$watch('indexPattern.selection', function (pattern) {
       if (!pattern) return;
-      kbnUrl.change('/visualize/step/2?indexPattern={pattern}', {pattern: pattern});
+      kbnUrl.change('/visualize/step/2?indexPattern={{pattern}}', {pattern: pattern});
     });
   });
 
