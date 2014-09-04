@@ -191,18 +191,45 @@ define(function (require) {
         expect(locationUrlSpy.secondCall.args[0]).to.be(testUrl);
       });
 
+      it('should handle dot notation', function () {
+        var url = '/some/thing/{{that.is.substituted}}';
+
+        kbnUrl.change(url, {
+          that: {
+            is: {
+              substituted: 'test'
+            }
+          }
+        });
+
+        expect($location.url()).to.be('/some/thing/test');
+      });
+
       it('should throw when params are missing', function () {
-        var url = '/{{replace-me}}/{{but-not-me}}';
-        var params = {
-          'replace-me': 'done'
-        };
+        var url = '/{{replace_me}}';
+        var params = {};
 
         try {
           kbnUrl.change(url, params);
           throw new Error('this should not run');
         } catch (err) {
           expect(err).to.be.an(Error);
-          expect(err.message).to.match(/but-not-me$/);
+          console.log(err.message);
+          expect(err.message).to.match(/replace_me/);
+        }
+      });
+
+      it('should throw when filtered params are missing', function () {
+        var url = '/{{replace_me|number}}';
+        var params = {};
+
+        try {
+          kbnUrl.change(url, params);
+          throw new Error('this should not run');
+        } catch (err) {
+          expect(err).to.be.an(Error);
+          console.log(err.message);
+          expect(err.message).to.match(/replace_me\|number/);
         }
       });
     });

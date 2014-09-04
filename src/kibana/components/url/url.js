@@ -5,7 +5,7 @@ define(function (require) {
   var rison = require('utils/rison');
   var location = require('modules').get('kibana/url');
 
-  location.service('kbnUrl', function ($route, $location, $rootScope, globalState) {
+  location.service('kbnUrl', function ($route, $location, $rootScope, globalState, $parse) {
     var self = this;
     self.reloading = false;
 
@@ -47,9 +47,7 @@ define(function (require) {
     };
 
     self.eval = function (url, paramObj) {
-      if (!_.isObject(paramObj)) {
-        return url;
-      }
+      paramObj = paramObj || {};
 
       return parseUrlPrams(url, paramObj);
     };
@@ -65,10 +63,15 @@ define(function (require) {
 
     function parseUrlPrams(url, paramObj) {
       return url.replace(/\{\{([^\}]+)\}\}/g, function (match, expr) {
+        // remove filters
         var key = expr.split('|')[0].trim();
 
-        if (_.isUndefined(paramObj[key])) {
-          throw new Error('Replacement failed, key not found: ' + key);
+        // verify that the expression can be evaluated
+        var p = $parse(key)(paramObj);
+
+        // if evaluation can't be made, throw
+        if (_.isUndefined(p)) {
+          throw new Error('Replacement failed, unresolved expression: ' + expr);
         }
 
         // append uriescape filter if not included
@@ -76,7 +79,7 @@ define(function (require) {
           expr += '|uriescape';
         }
 
-        return $rootScope.$eval(expr, paramObj);
+        return $parse(expr)(paramObj);
       });
     }
 
