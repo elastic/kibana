@@ -10,6 +10,16 @@ define(function (require) {
     self.reloading = false;
 
     self.change = function (url, paramObj, forceReload) {
+      self._changeLocation('url', url, paramObj, forceReload);
+    };
+
+    self.changePath = function (url, paramObj, forceReload) {
+      self._changeLocation('path', url, paramObj, forceReload);
+    };
+
+    self._changeLocation = function (type, url, paramObj, forceReload) {
+      var doReload = false;
+
       if (_.isBoolean(paramObj)) {
         forceReload = paramObj;
         paramObj = undefined;
@@ -17,30 +27,21 @@ define(function (require) {
 
       url = self.eval(url, paramObj);
 
-      if (url !== $location.url()) {
-        $location.url(globalState.writeToUrl(url));
-        if (forceReload || !self.matches(url)) {
-          self.reload();
+      // path change
+      if (type === 'path') {
+        if (url !== $location.path()) {
+          $location.path(globalState.writeToUrl(url));
+          doReload = (!self.matches(url));
         }
-      } else if (forceReload) {
-        self.reload();
-      }
-    };
-
-    self.changePath = function (path, paramObj, forceReload) {
-      if (_.isBoolean(paramObj)) {
-        forceReload = paramObj;
-        paramObj = undefined;
+      // default to url change
+      } else {
+        if (url !== $location.url()) {
+          $location.url(globalState.writeToUrl(url));
+          doReload = (!self.matches(url));
+        }
       }
 
-      path = self.eval(path, paramObj);
-
-      if (path !== $location.path()) {
-        $location.path(globalState.writeToUrl(path));
-        if (forceReload || !self.matches(path)) {
-          self.reload();
-        }
-      } else if (forceReload) {
+      if (forceReload || doReload) {
         self.reload();
       }
     };
