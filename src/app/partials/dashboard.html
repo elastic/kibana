@@ -2,8 +2,8 @@
 <nil ng-repeat="pulldown in dashboard.current.pulldowns" ng-controller="PulldownCtrl" ng-show="pulldown.enable">
   <div class="top-row-close pointer pull-left" ng-class="pulldownTabStyle($index)" ng-click="toggle_pulldown(pulldown);dismiss();" bs-tooltip="'Toggle '+pulldown.type" data-placement="bottom">
     <span class="small">{{pulldown.type}}</span>
-    <i class="small" ng-class="{'icon-caret-left':pulldown.collapse,'icon-caret-right':!pulldown.collapse}"></i>
-    <i class="small icon-star" ng-show="row.notice && pulldown.collapse"></i>
+    <i class="small" ng-class="{'fa fa-caret-left':pulldown.collapse,'fa fa-caret-right':!pulldown.collapse}"></i>
+    <i class="small fa fa-star" ng-show="row.notice && pulldown.collapse"></i>
   </div>
   <div class="clearfix bgNav" ng-hide="pulldown.collapse"></div>
   <div class="top-row-open" ng-hide="pulldown.collapse">
@@ -21,25 +21,25 @@
 
             <div class="row-close" ng-show="row.collapse" data-placement="bottom" >
               <span class="row-button bgWarning" config-modal="app/partials/roweditor.html" kbn-model="row" class="pointer">
-                <i bs-tooltip="'Configure row'" data-placement="right" ng-show="row.editable" class="icon-cog pointer"></i>
+                <i bs-tooltip="'Configure row'" data-placement="right" ng-show="row.editable" class="fa fa-cog pointer"></i>
               </span>
               <span class="row-button bgPrimary" ng-click="toggle_row(row)" ng-show="row.collapsable">
-                <i bs-tooltip="'Expand row'" data-placement="right" ng-show="row.collapsable" class="icon-caret-left pointer" ></i>
+                <i bs-tooltip="'Expand row'" data-placement="right" ng-show="row.collapsable" class="fa fa-caret-left pointer" ></i>
               </span>
               <span class="row-button row-text" ng-click="toggle_row(row)" ng-class="{'pointer':row.collapsable}">{{row.title || 'Row '+$index}}</span>
             </div>
 
             <div style="text-align:center" class="row-open" ng-show="!row.collapse">
               <div ng-show="row.collapsable" class='row-tab bgPrimary' ng-click="toggle_row(row)">
-                <i bs-tooltip="'Collapse row'" data-placement="right"  class="icon-caret-right" ></i>
+                <i bs-tooltip="'Collapse row'" data-placement="right"  class="fa fa-caret-right" ></i>
                 <br>
               </div>
               <div config-modal="app/partials/roweditor.html" kbn-model="row" class='row-tab bgWarning' ng-show="row.editable">
-                <i bs-tooltip="'Configure row'" data-placement="right"  class="icon-cog pointer"></i>
+                <i bs-tooltip="'Configure row'" data-placement="right"  class="fa fa-cog pointer"></i>
                 <br>
               </div>
               <div class="bgSuccess row-tab" ng-click="editor.index = 2" config-modal="app/partials/roweditor.html" kbn-model="row" ng-show="row.editable">
-                <i class="icon-plus-sign" bs-tooltip="'Add Panel'" data-placement="right"></i>
+                <i class="fa fa-plus-circle" bs-tooltip="'Add Panel'" data-placement="right"></i>
                 <br>
               </div>
 
@@ -77,7 +77,7 @@
       <div class="row-fluid" ng-show='dashboard.current.editable'>
         <div class="span12" style="text-align:right;">
           <span class="pointer btn btn-mini row-add-button" config-modal="app/partials/dasheditor.html" kbn-model="dashboard">
-            <span ng-click="editor.index = 2"><i class="icon-plus-sign"></i> ADD A ROW</span>
+            <span ng-click="editor.index = 2"><i class="fa fa-plus-circle"></i> ADD A ROW</span>
           </span>
         </div>
       </div>

@@ -29,7 +29,7 @@ function (angular, app, _, $, kbn) {
       modals : [
         {
           description: "Inspect",
-          icon: "icon-info-sign",
+          icon: "fa fa-info-circle",
           partial: "app/partials/inspector.html",
           show: $scope.panel.spyable
         }

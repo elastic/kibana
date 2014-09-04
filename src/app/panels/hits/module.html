@@ -9,7 +9,7 @@
 
     <!-- horizontal legend -->
     <div class="small" ng-show="panel.arrangement == 'horizontal'" ng-repeat="query in data" style="float:left;padding-left: 10px;">
-     <span><i class="icon-circle" ng-style="{color:query.info.color}"></i> {{query.info.alias}} ({{query.data[0][1]}}) </span>
+     <span><i class="fa fa-circle" ng-style="{color:query.info.color}"></i> {{query.info.alias}} ({{query.data[0][1]}}) </span>
     </div><br>
 
   </div>
@@ -22,13 +22,13 @@
     <!-- vertical legend -->
     <table class="small" ng-show="panel.arrangement == 'vertical'">
       <tr ng-repeat="query in data">
-        <td><i class="icon-circle" ng-style="{color:query.info.color}"></i></td> <td style="padding-right:10px;padding-left:10px;">{{query.info.alias}}</td><td>{{query.data[0][1]}}</td>
+        <td><i class="fa fa-circle" ng-style="{color:query.info.color}"></i></td> <td style="padding-right:10px;padding-left:10px;">{{query.info.alias}}</td><td>{{query.data[0][1]}}</td>
       </tr>
     </table>
 
     <!-- horizontal legend -->
     <div class="small" ng-show="panel.arrangement == 'horizontal'" ng-repeat="query in data" style="float:left;padding-left: 10px;">
-     <span><i class="icon-circle" ng-style="{color:query.info.color}"></i></span> {{query.info.alias}} ({{query.data[0][1]}}) </span>
+     <span><i class="fa fa-circle" ng-style="{color:query.info.color}"></i></span> {{query.info.alias}} ({{query.data[0][1]}}) </span>
     </div><br>
 
   </div>
@@ -37,7 +37,7 @@
 
   <span ng-show="panel.chart == 'list'">
     <div ng-style="panel.style" style="display:inline-block;line-height:{{panel.style['font-size']}}" ng-repeat="query in data">
-      <i class="icon-circle" style="color:{{query.info.color}}"></i> {{query.info.alias}} ({{query.hits}})
+      <i class="fa fa-circle" style="color:{{query.info.color}}"></i> {{query.info.alias}} ({{query.hits}})
     </div>
   </span><br ng-show="panel.arrangement == 'vertical' && panel.chart == 'list'">
 

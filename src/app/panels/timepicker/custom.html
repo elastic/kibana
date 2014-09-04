@@ -59,7 +59,7 @@
               <input class="timepicker-hms" type="text" maxlength="2" ng-change="validate(temptime)" ng-model="temptime.to.second" required ng-pattern="patterns.second" onClick="this.select();"/>.
               <input class="timepicker-ms" type="text" maxlength="3" ng-change="validate(temptime)" ng-model="temptime.to.millisecond" required ng-pattern="patterns.millisecond" onClick="this.select();"/>
             </div>
-            <span type="text" ng-show="panel.now" ng-disabled="panel.now">&nbsp <i class="pointer icon-remove-sign" ng-click="setNow();panel.now=false"></i> Right Now <input type="text" name="dummy" style="visibility:hidden" /></span>
+            <span type="text" ng-show="panel.now" ng-disabled="panel.now">&nbsp <i class="pointer fa fa-times-circle" ng-click="setNow();panel.now=false"></i> Right Now <input type="text" name="dummy" style="visibility:hidden" /></span>
           </div>
         </div>
 

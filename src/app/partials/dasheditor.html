@@ -61,7 +61,7 @@
           <input type="text" class="input-large" ng-model="dashboard.current.index.pattern">
         </div>
         <div class="editor-option" ng-show="dashboard.current.index.interval != 'none'">
-          <h6>Failover <i class="icon-question-sign" bs-tooltip="'If no indices match the pattern, failover to default index *NOT RECOMMENDED*'"></i></h6>
+          <h6>Failover <i class="fa fa-question-circle" bs-tooltip="'If no indices match the pattern, failover to default index *NOT RECOMMENDED*'"></i></h6>
           <input type="checkbox" ng-model="dashboard.current.failover" ng-checked="dashboard.current.failover" />
         </div>
         <div class="editor-option" ng-show="dashboard.current.failover || dashboard.current.index.interval == 'none'">
@@ -69,7 +69,7 @@
           <input type="text" class="input-medium" ng-model="dashboard.current.index.default">
         </div>
         <div class="editor-option">
-          <h6>Preload Fields <i class="icon-question-sign" bs-tooltip="'Preload available fields for the purpose of autocomplete. Turn this off if you have many fields'"></i></h6>
+          <h6>Preload Fields <i class="fa fa-question-circle" bs-tooltip="'Preload available fields for the purpose of autocomplete. Turn this off if you have many fields'"></i></h6>
           <input type="checkbox" ng-model="dashboard.current.index.warm_fields" ng-checked="dashboard.current.index.warm_fields" />
         </div>
       </div>
@@ -88,9 +88,9 @@
             <th width="97%">Title</th>
           </thead>
           <tr ng-repeat="row in dashboard.current.rows">
-            <td><i ng-click="_.move(dashboard.current.rows,$index,$index-1)" ng-hide="$first" class="pointer icon-arrow-up"></i></td>
-            <td><i ng-click="_.move(dashboard.current.rows,$index,$index+1)" ng-hide="$last" class="pointer icon-arrow-down"></i></td>
-            <td><i ng-click="dashboard.current.rows = _.without(dashboard.current.rows,row)" class="pointer icon-remove"></i></td>
+            <td><i ng-click="_.move(dashboard.current.rows,$index,$index-1)" ng-hide="$first" class="pointer fa fa-arrow-up"></i></td>
+            <td><i ng-click="_.move(dashboard.current.rows,$index,$index+1)" ng-hide="$last" class="pointer fa fa-arrow-down"></i></td>
+            <td><i ng-click="dashboard.current.rows = _.without(dashboard.current.rows,row)" class="pointer fa fa-times"></i></td>
             <td>{{row.title||'Untitled'}}</td>
           </tr>
         </table>

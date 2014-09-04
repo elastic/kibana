@@ -46,15 +46,15 @@
           {{dashboard.current.services.filter.list[id].mandate}}
         </span>
 
-        <i ng-class="getFilterClass(dashboard.current.services.filter.list[id])" class="icon-circle"></i>
+        <i ng-class="getFilterClass(dashboard.current.services.filter.list[id])" class="fa fa-circle"></i>
 
         <span ng-show="dashboard.current.services.filter.list[id].editing">
           <select class="input-small" ng-model="dashboard.current.services.filter.list[id].mandate" ng-options="f for f in ['must','mustNot','either']"></select>
         </span>
 
-        <i class="filter-action pointer icon-remove" bs-tooltip="'Remove'" ng-click="remove(id)"></i>
-        <i class="filter-action pointer" ng-class="{'icon-check': dashboard.current.services.filter.list[id].active,'icon-check-empty': !dashboard.current.services.filter.list[id].active}" bs-tooltip="'Toggle'" ng-click="toggle(id)"></i>
-        <i class="filter-action pointer icon-edit" ng-hide="dashboard.current.services.filter.list[id].editing || !isEditable(dashboard.current.services.filter.list[id])" bs-tooltip="'Edit'" ng-click="dashboard.current.services.filter.list[id].editing = true"></i>
+        <i class="filter-action pointer fa fa-times" bs-tooltip="'Remove'" ng-click="remove(id)"></i>
+        <i class="filter-action pointer" ng-class="{'fa fa-check-square-o': dashboard.current.services.filter.list[id].active,'fa fa-square-o': !dashboard.current.services.filter.list[id].active}" bs-tooltip="'Toggle'" ng-click="toggle(id)"></i>
+        <i class="filter-action pointer fa fa-edit" ng-hide="dashboard.current.services.filter.list[id].editing || !isEditable(dashboard.current.services.filter.list[id])" bs-tooltip="'Edit'" ng-click="dashboard.current.services.filter.list[id].editing = true"></i>
       </div>
 
       <div ng-hide="dashboard.current.services.filter.list[id].editing && isEditable(dashboard.current.services.filter.list[id])">
@@ -78,6 +78,6 @@
         </div>
       </form>
     </div>
-    <i class="pointer icon-plus-sign" ng-click="add()" bs-tooltip="'Add a query filter'" data-placement="right"></i>
+    <i class="pointer fa fa-plus-circle" ng-click="add()" bs-tooltip="'Add a query filter'" data-placement="right"></i>
   </div>
 </div>

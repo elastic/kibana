@@ -461,7 +461,7 @@ function($, _, moment) {
   };
 
   kbn.query_color_dot = function (color, diameter) {
-    return '<div class="icon-circle" style="' + [
+    return '<div class="fa fa-circle" style="' + [
         'display:inline-block',
         'color:' + color,
         'font-size:' + diameter + 'px',

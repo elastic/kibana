@@ -3,8 +3,8 @@
 
 </style>
 <span>
-  <i class="pointer icon-search" ng-click="fieldExists(micropanel.field,'must');dismiss();" bs-tooltip="'Find events with this field'"></i>
-  <i class="pointer icon-ban-circle" ng-click="fieldExists(micropanel.field,'mustNot');dismiss();" bs-tooltip="'Find events without this field'"></i>
+  <i class="pointer fa fa-search" ng-click="fieldExists(micropanel.field,'must');dismiss();" bs-tooltip="'Find events with this field'"></i>
+  <i class="pointer fa fa-ban" ng-click="fieldExists(micropanel.field,'mustNot');dismiss();" bs-tooltip="'Find events without this field'"></i>
   <strong>Micro Analysis of {{micropanel.field}} <span ng-if='micropanel.type'>({{micropanel.type}})</span></strong>
   <span ng-show="micropanel.hasArrays">
     as
@@ -24,8 +24,8 @@
       <td>{{$index+1}}.</td>
       <td style="word-wrap:break-word">{{{true: "__blank__", false:field[0] }[(field[0] == '' || field[0] == undefined) && field[0] != 0]|tableTruncate:panel.trimFactor:3}}</td>
       <td>
-        <i class="pointer icon-search" ng-click="build_search(micropanel.field,field[0]);dismiss();"></i>
-        <i class="pointer icon-ban-circle" ng-click="build_search(micropanel.field,field[0],true);dismiss();"></i>
+        <i class="pointer fa fa-search" ng-click="build_search(micropanel.field,field[0]);dismiss();"></i>
+        <i class="pointer fa fa-ban" ng-click="build_search(micropanel.field,field[0],true);dismiss();"></i>
       </td>
       <td class="progress" style="position:relative">
         <style scoped>
@@ -44,13 +44,13 @@
 </div>
 <div>
   <span ng-repeat="field in micropanel.related|orderBy:'count':true|limitTo:micropanel.limit track by $index"><a ng-click="toggle_field(field.name)" bs-tooltip="'Toggle {{field.name}} column'">{{field.name}}</a> ({{Math.round((field.count / micropanel.count) * 100)}}%), </span>
-  <a class="link" ng-show="micropanel.related.length > micropanel.limit" ng-click="micropanel.limit = micropanel.limit + 10">More <i class="icon-caret-right"></i></a>
+  <a class="link" ng-show="micropanel.related.length > micropanel.limit" ng-click="micropanel.limit = micropanel.limit + 10">More <i class="fa fa-caret-right"></i></a>
 </div>
 <div class="row-fluid">
   <div class="span12">
     <div class="btn-group">
       <a class="btn dropdown-toggle pointer" data-toggle="dropdown">
-        <i class="icon-list-ol"></i> Terms
+        <i class="fa fa-list-ol"></i> Terms
         <span class="caret"></span>
       </a>
       <ul class="dropdown-menu">
@@ -61,7 +61,7 @@
     </div>
     <div class="btn-group" ng-show="micropanel.hasStats">
       <a class="btn dropdown-toggle pointer" ng-click="statsModal(field);dismiss();">
-        <i class="icon-list-ol"></i> Stats
+        <i class="fa fa-list-ol"></i> Stats
       </a>
     </div>
 
