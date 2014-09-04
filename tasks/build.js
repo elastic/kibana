@@ -9,6 +9,8 @@ module.exports = function (grunt) {
     'requirejs',
     'clean:unneeded_source_in_build',
     'copy:server_src',
+    'download_jruby',
+    'install_gems',
     'warble',
     'replace:dist',
     'copy:dist',
