@@ -11,7 +11,7 @@ define(function (require) {
      *  el => reference to DOM element
      *  xValues => array of x values from the dataset
      *  ordered => data object that is defined when the data is ordered
-     *  xAxisFormatter => function to format x axis tick values
+     *  xAxisFormatter => function to formatx axis tick values
      *  _attr => visualization attributes
      */
     function XAxis(args) {
@@ -270,6 +270,8 @@ define(function (require) {
       var flex;
       var chartToXaxis;
       var dataType;
+      var tickHt;
+      var chartHt;
 
       return function (selection) {
         selection.each(function () {
@@ -301,8 +303,12 @@ define(function (require) {
             throw new Error('x-axis tick.node() is undefined');
           }
 
-          flex = self.getFlexVal(self._attr.isRotated, titlespace, tick.node().getBBox().height, chartwrap.height());
+          tickHt = tick.node().getBBox().height;
+          chartHt = chartwrap.height();
+          flex = self.getFlexVal(self._attr.isRotated, titlespace, tickHt, chartHt);
           
+          // set height of svg, transform to fit axis labels
+          svg.attr('height', chartHt);
           xwrapper.css('flex', flex + ' 1');
           xdiv.css('flex', flex + ' 1');
           yspacerblock.css('flex', flex + ' 1');
@@ -313,19 +319,25 @@ define(function (require) {
     // Return flexbox css value using linear scales
     XAxis.prototype.getFlexVal = function (isRotated, titleSpace, tickHt, chartHt) {
       var ratio;
+
       var rotScale = d3.scale.linear()
-        .domain([0.14, 0.28, 0.6, 0.8, 0.9, 2.6])
-        .range([5, 10, 30, 55, 80, 100]);
+        .domain([0.1, 0.5, 2])
+        .range([3.3, 22, 70]);
+
       var flatScale = d3.scale.linear()
-        .domain([1.3, 8, 14.5, 29])
-        .range([1.1, 9, 13, 30]);
+        .domain([0.2, 1, 2, 20])
+        .range([1.1, 1, 2, 20]);
       
       if (!isRotated) {
         // flat labels
         ratio = flatScale(35 * (titleSpace + tickHt) / chartHt);
+        // console.log('flat', +ratio.toFixed(1), 35 * (titleSpace + tickHt) / chartHt);
+        
       } else {
         // rotated labels
         ratio = rotScale((titleSpace + tickHt) / chartHt);
+        // console.log('rotated', +ratio.toFixed(1), (titleSpace + tickHt) / chartHt);
+        
       }
       return ratio.toFixed(1);
     };

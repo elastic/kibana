@@ -112,7 +112,6 @@ define(function (require) {
         .tickFormat(d3.format('s'))
         .ticks(this.tickScale(height))
         .orient('left');
-
       return this.yAxis;
     };
 
@@ -186,7 +185,7 @@ define(function (require) {
       d3.selectAll('.y.axis').attr('transform', 'translate(' + (length + 2) + ',' + margin.top + ')');
     };
 
-    YAxis.prototype.resizeAxisLayoutForLabels = function (selection) {
+    YAxis.prototype.resizeAxisLayoutForLabels = function () {
       var self = this;
       var visEl = $(self.el);
       var div;
@@ -211,7 +210,6 @@ define(function (require) {
         selection.each(function () {
           div = d3.select(this);
           svg = div.select('svg');
-          tick = svg.select('.tick');
           dataType = this.parentNode.__data__.series ? 'series' : this.parentNode.__data__.rows ? 'rows' : 'columns';
           labels = selection.selectAll('.tick text');
           
@@ -225,23 +223,18 @@ define(function (require) {
 
           // get max width tick
           _.forEach(labels[0], function (n) {
-            labelWidths.push(n.getBBox().height);
+            labelWidths.push(n.getBBox().width);
           });
-          maxWidth = Math.ceil(_.max(labelWidths)) + 20;
-          
-          // should have a tick node
-          if (!tick.node()) {
-            throw new Error('y-axis tick.node() is undefined');
-          }
 
-          flex = self.getFlexVal(dataType, titlespace, tick.node().getBBox().width, legendColWrap.width(), visWrap.width());
+          maxWidth = d3.max(labelWidths) + 18;
+          flex = self.getFlexVal(dataType, titlespace, maxWidth, visWrap.width());
           
           // set flex values
           yAxisColWrap.css('flex', flex + ' 1');
           yAxisDiv.css('width', maxWidth + 'px');
           yAxisDivWrap.css('width', (maxWidth + 12) + 'px');
           
-          // set width of svg, trnasform to fit axis labels
+          // set width of svg, transform to fit axis labels
           svg.attr('width', maxWidth);
           svg.attr('transform', 'translate(0,0)');
           svg.select('g').attr('transform', 'translate(' + (maxWidth - 1) + ',10)');
@@ -250,17 +243,20 @@ define(function (require) {
     };
 
     // Return flexbox css value using linear scales
-    YAxis.prototype.getFlexVal = function (dataType, titleSpace, tickWidth, legendWidth, visWidth) {
+    YAxis.prototype.getFlexVal = function (dataType, titleSpace, tickWidth, visWidth) {
       var ratio;
+
       var seriesScale = d3.scale.linear()
-        .domain([0.57, 2])
-        .range([1.0, 3.4]);
+        .domain([0.2, 2])
+        .range([0.24, 2]);
+
       var rowsScale = d3.scale.linear()
-        .domain([0.5, 2])
-        .range([1.1, 4.3]);
+        .domain([0.2, 2])
+        .range([0.26, 2.6]);
+
       var colsScale = d3.scale.linear()
-        .domain([0.8, 2])
-        .range([0.9, 2.2]);
+        .domain([0.2, 2])
+        .range([0.16, 1.6]);
 
       // define ratio based on datatype
       if (dataType === 'rows') {
@@ -270,6 +266,7 @@ define(function (require) {
       } else {
         ratio = seriesScale(35 * (titleSpace + tickWidth) / visWidth);
       }
+      //console.log(dataType, ratio.toFixed(1), 35 * (titleSpace + tickWidth) / visWidth);
       return ratio.toFixed(1);
 
     };

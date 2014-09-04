@@ -87,6 +87,12 @@ div.y-axis-label {
   min-width: 40px
 }
 
+.header {
+  width: 100%;
+  height: 26px;
+  margin: 0 0 14px 0;
+}
+
 .legend {
   width: 100%;
   height: 26px;
@@ -113,15 +119,18 @@ li.color {
   margin: 0 18px 0 18px;
   padding: 3px 0 3px 0;
   text-align: left;
-  word-wrap: break-word;
-  max-width: 150px;
   font-size: 12px;
   line-height: 13px;
   color: #666;
-  // list-style: none;
   cursor: default;
   text-align: left;
-  //flex-grow: 2;
+  flex-grow: 2;
+  word-wrap: break-word;
+  max-width: 150px;
+}
+.wordwrap {
+  word-wrap: break-word;
+  max-width: 150px;
 }
 
 .dots {
@@ -226,7 +235,7 @@ path, line, .axis line, .axis path {
   z-index: 20;
   visibility: hidden;
   word-wrap: break-word;
-  max-width: 200px;
+  max-width: 220px;
 }
 
 .rect {

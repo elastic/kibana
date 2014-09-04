@@ -88,16 +88,17 @@ define(function (require) {
 
         fixture = el.append('div')
           .attr('class', 'x-axis-div')
-          .style('height', '20px');
+          .style('height', '40px');
 
         dataObj = new Data(data);
-
         xAxis = new XAxis({
           el: $('x-axis-div')[0],
           xValues: dataObj.xValues(),
           ordered: dataObj.get('ordered'),
           xAxisFormatter: dataObj.get('xAxisFormatter'),
-          _attr: { margin: { top: 0, right: 0, bottom: 0, left: 0 } }
+          _attr: {
+            margin: { top: 0, right: 0, bottom: 0, left: 0 }
+          }
         });
       });
     });

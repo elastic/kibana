@@ -45,6 +45,7 @@ define(function (require) {
           this.handler.error(error.message);
         } else {
           console.log(error);
+          //throw(error);
         }
       }
 

@@ -14,7 +14,7 @@ define(function (require) {
     var dataObj;
     var data = {
       hits: 621,
-      label: '',
+      label: 'test',
       ordered: {
         date: true,
         interval: 30000,
@@ -121,15 +121,16 @@ define(function (require) {
 
     beforeEach(function () {
       inject(function (d3, Private) {
-        YAxis = Private(require('components/vislib/lib/y_axis'));
         Data = Private(require('components/vislib/lib/data'));
+        YAxis = Private(require('components/vislib/lib/y_axis'));
 
         el = d3.select('body').append('div')
-          .attr('class', 'y-axis-wrapper');
+          .attr('class', 'y-axis-wrapper')
+          .datum(data);
 
         yAxisDiv = el.append('div')
           .attr('class', 'y-axis-div')
-          .style('height', '20px');
+          .style('height', '40px');
 
         dataObj = new Data(data);
         yAxis = new YAxis({
