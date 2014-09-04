@@ -3,7 +3,7 @@ require "bundler/setup"
 require "puma"
 require "colorize"
 require "json"
-require "lib/app"
+require "#{Kibana.global_settings[:root]}/lib/app"
 
 # Require the application
 module Kibana

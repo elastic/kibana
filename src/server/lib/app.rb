@@ -1,5 +1,7 @@
 # Add the root of the project to the $LOAD_PATH, For some reason it seems
 # to be getting lost when we use warble to make the jar. This fixes it :D
+$LOAD_PATH.unshift(Kibana.global_settings[:root])
+
 require "logger"
 require "json"
 require "lib/JSONLogger"
