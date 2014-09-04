@@ -1,5 +1,5 @@
 define(function (require) {
-  return function routeSetup(Promise, kbnSetup, config, $route, indexPatterns, Notifier) {
+  return function routeSetup(Promise, kbnSetup, config, $route, kbnUrl, indexPatterns, Notifier) {
 
     var errors = require('errors');
     var NoDefaultIndexPattern = errors.NoDefaultIndexPattern;
@@ -26,7 +26,7 @@ define(function (require) {
         if (err instanceof NoDefaultIndexPattern || err instanceof NoDefinedIndexPatterns) {
           // .change short circuits the routes by calling $route.refresh(). We can safely swallow this error
           // after reporting it to the user
-          $route.change('/settings/indices');
+          kbnUrl.changePath('/settings/indices');
           (new Notifier()).error(err);
         } else {
           return Promise.reject(err);
