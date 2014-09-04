@@ -1,14 +1,14 @@
 define(function (require) {
   require('modules')
   .get('kibana')
-  .directive('nestingIndicator', function ($rootScope, $parse) {
+  .directive('nestingIndicator', function ($rootScope, $parse, Private) {
     var _ = require('lodash');
     var angular = require('angular');
     var ruleBase = 'border-left-';
 
     var getColor = (function () {
       var i = 0;
-      var colorPool = require('components/vislib/utils/colorspace')(100);
+      var colorPool = Private(require('components/vislib/components/_functions/color/color_palette'))(100);
       var assigned = {};
       return function (item) {
         var key = item.$$hashKey;

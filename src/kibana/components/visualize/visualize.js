@@ -1,11 +1,10 @@
 define(function (require) {
   require('modules')
   .get('kibana/directive')
-  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private) {
+  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, visLib) {
 
     require('components/visualize/spy/spy');
     require('css!components/visualize/visualize.css');
-    var vislib = require('components/vislib/index');
     var $ = require('jquery');
     var _ = require('lodash');
     var visTypes = Private(require('components/vis_types/index'));
@@ -93,7 +92,7 @@ define(function (require) {
             }
           );
 
-          chart = new vislib.Chart($visualize[0], vislibParams);
+          chart = new visLib.Vis($visualize[0], vislibParams);
 
           _.each(vis.listeners, function (listener, event) {
             chart.on(event, listener);
