@@ -55,7 +55,8 @@ define(function (require) {
         throw new Error(obj.type + ' must be a string');
       }
 
-      if (typeof obj.parent === 'string') {
+      // check to see if reference to DOM element is string but not class selector
+      if (typeof obj.parent === 'string' && obj.parent.charAt(0) !== '.') {
         // Create a class selector
         obj.parent = '.' + obj.parent;
       }
