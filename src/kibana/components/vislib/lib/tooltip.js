@@ -40,12 +40,13 @@ define(function (require) {
             .on('mousemove.tip', function (d) {
               // Calculate the x and y coordinates of the mouse on the page
               var mouseMove = {
-                left: d3.event.x,
-                top: d3.event.y
+                left: d3.event.clientX,
+                top: d3.event.clientY
               };
 
+
               var chartWidth = self.chartWidth;
-              var offsetX = d3.event.offsetX;
+              var offsetX = d3.event.offsetX === undefined ? d3.event.layerX : d3.event.offsetX;
               var tipWidth = tooltipDiv[0][0].clientWidth;
               var xOffset = 10;
               // check position of tooltip relative to chart width 
@@ -55,7 +56,7 @@ define(function (require) {
               }
 
               var chartHeight = self.chartHeight;
-              var offsetY = d3.event.offsetY;
+              var offsetY = d3.event.offsetY === undefined ? d3.event.layerY : d3.event.offsetY;
               var tipHeight = tooltipDiv[0][0].clientHeight;
               var yOffset = 5;
               // apply y offset to keep tooltip within bottom of chart
