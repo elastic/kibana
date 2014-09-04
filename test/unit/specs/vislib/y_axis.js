@@ -129,7 +129,7 @@ define(function (require) {
 
         yAxisDiv = el.append('div')
           .attr('class', 'y-axis-div')
-          .style('height', '20px');
+          .style('height', '40px');
 
         dataObj = new Data(data);
         yAxis = new YAxis({

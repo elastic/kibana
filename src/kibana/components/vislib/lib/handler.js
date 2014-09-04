@@ -33,13 +33,14 @@ define(function (require) {
         'margin' : { top: 10, right: 3, bottom: 5, left: 3 }
       });
 
-      // Visualizaation constructors
+      // Visualization constructors
+
       // Add the visualization layout
       this.layout = new Layout(this.el, this.data.injectZeros(), this._attr.type);
 
       // Only add legend if addLegend attribute set
       if (this._attr.addLegend) {
-        this.legend = new Legend(this.el, this.data.getLabels(), this.data.getColorFunc(), this._attr);
+        this.legend = new Legend(this.vis, this.el, this.data.getLabels(), this.data.getColorFunc(), this._attr);
       }
 
       // only add tooltip if addTooltip attribute set
@@ -90,7 +91,7 @@ define(function (require) {
 
       // Render objects in the render array
       _.forEach(this.renderArray, function (property) {
-        if (typeof property.render === 'function') {
+        if (property && typeof property.render === 'function') {
           property.render();
         }
       });
@@ -105,7 +106,7 @@ define(function (require) {
           // Bind events to the chart
           d3.rebind(chart, chart._attr.dispatch, 'on');
 
-          // Bubbles the events up to the Vis Class and Events Class
+          // Bubble events up to the Vis Class and Events Class
           chart.on('click', function (e) {
             self.vis.emit('click', e);
           });
@@ -118,7 +119,9 @@ define(function (require) {
             self.vis.emit('brush', e);
           });
 
+          // Save reference to charts
           charts.push(chart);
+
           // Render charts to screen
           chart.render();
         });
@@ -129,14 +132,16 @@ define(function (require) {
       return d3.select(el).selectAll('*').remove();
     };
 
-    // Displays an error message to the screen
+    // Display an error message on the screen
     Handler.prototype.error = function (message) {
       this.removeAll(this.el);
 
       // Return an error wrapper DOM element
       return d3.select(this.el)
         .append('div')
-        .attr('class', 'error-wrapper')
+        // class name needs `chart` in it for the polling checkSize function
+        // to continuously call render on resize
+        .attr('class', 'chart error')
         .append('p')
         .text(message);
     };

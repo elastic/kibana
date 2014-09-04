@@ -13,7 +13,12 @@ define(function (require) {
      *  color => color function to assign colors to labels
      *  _attr => visualization attributes
      */
-    function Legend(el, labels, color, _attr) {
+    function Legend(vis, el, labels, color, _attr) {
+      if (!(this instanceof Legend)) {
+        return new Legend(vis, el, labels, color, _attr);
+      }
+
+      this.vis = vis;
       this.el = el;
       this.labels = labels;
       this.color = color;
@@ -81,18 +86,21 @@ define(function (require) {
       var self = this;
 
       // toggle
-      headerIcon.on('click', function (d) {
+      headerIcon.on('click', function () {
         if (self._attr.isOpen) {
           // close legend
           visEl.select('ul.legend-ul')
             .classed('hidden', true);
           self._attr.isOpen = false;
-          
+          // need to add reference to resize function on toggle
+          self.vis.resize();
         } else {
           // open legend
           visEl.select('ul.legend-ul')
             .classed('hidden', false);
           self._attr.isOpen = true;
+          // need to add reference to resize function on toggle
+          self.vis.resize();
         }
       });
 

@@ -44,7 +44,7 @@ define(function (require) {
           'is too small for this chart.') {
           this.handler.error(error.message);
         } else {
-          console.log(error);
+          throw (error);
         }
       }
 

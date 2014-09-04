@@ -88,7 +88,7 @@ define(function (require) {
 
         fixture = el.append('div')
           .attr('class', 'x-axis-div')
-          .style('height', '20px');
+          .style('height', '40px');
 
         dataObj = new Data(data);
 

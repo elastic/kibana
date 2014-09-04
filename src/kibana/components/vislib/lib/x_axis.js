@@ -23,7 +23,10 @@ define(function (require) {
       this.xValues = args.xValues;
       this.ordered = args.ordered;
       this.xAxisFormatter = args.xAxisFormatter;
-      this._attr = args._attr;
+      this._attr = _.defaults(args._attr || {}, {
+        isDiscover: false,
+        isRotated: true
+      });
     }
 
     _(XAxis.prototype).extend(ErrorHandler.prototype);
@@ -58,19 +61,52 @@ define(function (require) {
 
     // Returns a time domain
     XAxis.prototype.getTimeDomain = function (scale, xValues, ordered) {
-      // Should think about replacing and not hard coding
-      var spacingPercentage = 0.25;
       var maxXValue = d3.max(xValues);
       var timeInterval = ordered.interval;
-      // Take the min of the xValues or the ordered object
+      // Take the min of the xValues or the min date sent on the ordered object
       var minDate = Math.min(d3.min(xValues), ordered.min);
-      // Take the max of the xValues or the max date that is sent
-      var maxDate = +maxXValue <= ordered.max ? ordered.max : +maxXValue + timeInterval;
+      // Take the max of the xValues or the max date that sent on the ordered object
+      var maxDate = +maxXValue <= ordered.max ?
+        this.calculateMaxDate(ordered.max, +maxXValue, timeInterval) : +maxXValue + timeInterval;
 
       // Add the domain to the scale
       scale.domain([minDate, maxDate]);
 
       return scale;
+    };
+
+    // Returns an accurate maxDate
+    XAxis.prototype.calculateMaxDate = function (orderedDate, maxXValue, interval) {
+      /*
+       * Elasticsearch returns bucketed data.
+       *
+       * Buckets have a beginning (the start time), an end (the end time),
+       * and an interval, the width of the bar minus padding.
+       *
+       * We need to create an x axis that ends at the end (or end time) of the
+       * last bucket.
+       *
+       * The time stamp values from the maxXValue represent the beginning
+       * of each bucket. We cannot guarantee that the values passed from
+       * the ordered.max field represents the end of a bucket.
+       *
+       * So, if we were to render either as the cutoff date, then the last bar
+       * on the far right side of the axis may be partially cut off.
+       * Therefore, we need to calculate the end time of the last bucket.
+       */
+
+      // Difference between the ordered.max value and the max x value
+      var diff = orderedDate - maxXValue;
+
+      // if diff is smaller than the interval, but not zero, add the missing
+      // percentage of the interval back to the ordered.max date
+      if (diff !== 0 && diff < interval) {
+        // calculates the appropriate end time
+        return +orderedDate + ((1 - diff / interval) * interval);
+      }
+
+      // if diff is > than the interval or equals 0 return the ordered.max value
+      return orderedDate;
     };
 
     // Return a nominal(d3 ordinal) domain
@@ -130,8 +166,6 @@ define(function (require) {
       if ($('.discover-timechart').length) {
         self._attr.isDiscover = true;
         self._attr.isRotated = false;
-      } else {
-        self._attr.isDiscover = false;
       }
 
       return function (selection) {
