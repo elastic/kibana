@@ -1,7 +1,5 @@
 # Add the root of the project to the $LOAD_PATH, For some reason it seems
 # to be getting lost when we use warble to make the jar. This fixes it :D
-$LOAD_PATH.unshift(ENV['KIBANA_ROOT'])
-
 require "logger"
 require "json"
 require "lib/JSONLogger"
@@ -55,10 +53,6 @@ module Kibana
 
     not_found do
       json :status => 404, :message => "Not Found"
-    end
-
-    get '/throw' do
-      raise "Oops!"
     end
 
     # Routes go here

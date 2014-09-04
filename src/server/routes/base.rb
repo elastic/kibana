@@ -7,14 +7,14 @@ module Kibana
     class Base < Sinatra::Base
       helpers Sinatra::JSON
       configure do
-        set :root, ENV['KIBANA_ROOT']
-        set :public_folder, ENV['PUBLIC_ROOT']
-        set :httponly, true
+        config = Kibana.global_settings[:config].clone()
+        config['elasticsearch'] = Kibana.global_settings[:elasticsearch]
+        config['port'] = Kibana.global_settings[:port].to_i
 
-        config = YAML.load(IO.read(ENV['KIBANA_CONFIG_FILE']))
-        set :config, config
-        config['elasticsearch'] = ENV['KIBANA_ELASTICSEARCH']
-        config['port'] = ENV['KIBANA_PORT'].to_i
+        set :root, Kibana.global_settings[:root]
+        set :public_folder, Kibana.global_settings[:public_folder]
+        set :httponly, true
+        set :config, Kibana.global_settings[:config].clone
       end
     end
   end

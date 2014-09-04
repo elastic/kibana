@@ -5,7 +5,7 @@ module Kibana
     class Home < Base
 
       get "/" do
-        File.read(File.join(ENV['PUBLIC_ROOT'], 'index.html'))
+        File.read(File.join(settings.public_folder, 'index.html'))
       end
 
       get "/config" do

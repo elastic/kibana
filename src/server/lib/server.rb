@@ -3,24 +3,9 @@ require "bundler/setup"
 require "puma"
 require "colorize"
 require "json"
-
-ENV['KIBANA_ROOT'] = File.expand_path("#{File.dirname(__FILE__)}/../")
-
-if ENV['RACK_ENV'] == ('production')
-  ENV['PUBLIC_ROOT'] = File.expand_path("#{File.dirname(__FILE__)}/../public/")
-end
-
-if ENV['RACK_ENV'].nil? || ENV['RACK_ENV'] == ('development')
-  ENV['PUBLIC_ROOT'] = File.expand_path("#{File.dirname(__FILE__)}/../../kibana/")
-  ENV['CONFIG_PATH'] = File.expand_path("#{File.dirname(__FILE__)}/../config/kibana.yml")
-end
-
-
-$LOAD_PATH.unshift(ENV['KIBANA_ROOT'])
+require "lib/app"
 
 # Require the application
-require "#{ENV['KIBANA_ROOT']}/lib/app"
-
 module Kibana
   module Server
 

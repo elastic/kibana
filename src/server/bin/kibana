@@ -7,6 +7,11 @@ require "yaml"
 
 HERE = File.expand_path(File.dirname(__FILE__))
 
+module Kibana
+  def self.global_settings
+    @settings ||= {}
+  end
+end
 
 # Defaults for the options
 options = {
@@ -55,17 +60,25 @@ host = (options[:host] || config['host'])
 # Set the override for Elasticsaerch
 elasticsearch = (options[:elasticsearch] || config['elasticsearch'])
 
-# Set the enviroment vars
-ENV["KIBANA_PORT"] = port.to_s
-ENV["KIBANA_CONFIG_FILE"] = options[:config]
-ENV["KIBANA_ELASTICSEARCH"] = elasticsearch
+# If the env isn't set we need to set it to development
+ENV["RACK_ENV"] = "development" if ENV["RACK_ENV"].nil?
 
-# Require the server and start it with defaults
-require "#{HERE}/../lib/server"
+# Set the global_settings that are shared across every app
+Kibana.global_settings[:port] = port || 5601
+Kibana.global_settings[:host] = host || '0.0.0.0'
+Kibana.global_settings[:config] = config
+Kibana.global_settings[:elasticsearch] = elasticsearch
+Kibana.global_settings[:root] = File.expand_path("#{File.dirname(__FILE__)}/../")
 
-server_opts = {
-  :port => port || 5601,
-  :host => host || '0.0.0.0'
-}
+# Set the public folder based on whether we are running in production or not.
+if ENV['RACK_ENV'] == ('production')
+  Kibana.global_settings[:public_folder] = File.expand_path("#{File.dirname(__FILE__)}/../public/")
+else
+  Kibana.global_settings[:public_folder] = File.expand_path("#{File.dirname(__FILE__)}/../../kibana/")
+end
 
-Kibana::Server.run(server_opts)
+# Add the root of the project to the load path
+$LOAD_PATH.unshift(Kibana.global_settings[:root])
+
+require "lib/server"
+Kibana::Server.run(Kibana.global_settings)
