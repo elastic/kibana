@@ -29,7 +29,17 @@ define(function (require) {
           editor: require('text!components/agg_types/controls/order_and_size.html'),
           default: 'desc',
           write: function (aggConfig, output) {
+            var sort = output.params.order = {};
+            var order = aggConfig.params.order.val;
+
             var metricAggConfig = _.first(aggConfig.vis.aggs.bySchemaGroup.metrics);
+
+            if (metricAggConfig.type.name === 'count') {
+              sort._count = order;
+              return;
+            }
+
+            sort[metricAggConfig.id] = order;
 
             /**
              * In order to sort by a metric agg, the metric need to be an immediate
@@ -38,9 +48,6 @@ define(function (require) {
              * @type {boolean}
              */
             var metricIsOwned = bucketCountBetween(aggConfig, metricAggConfig) === 0;
-
-            output.params.order = {};
-            output.params.order[metricAggConfig.id] = aggConfig.params.order.val;
 
             if (!metricIsOwned) {
               output.subAggs = output.subAggs || [];
