@@ -3,7 +3,7 @@ define(function (require) {
   var _ = require('lodash');
   var rison = require('utils/rison');
 
-  module.directive('savedObjectFinder', function (savedSearches, savedVisualizations, savedDashboards, $location, $route) {
+  module.directive('savedObjectFinder', function (savedSearches, savedVisualizations, savedDashboards, $location, kbnUrl) {
 
     var vars = {
       searches: {
@@ -85,12 +85,12 @@ define(function (require) {
 
           // angular wants the '/path', not '#/path'
           var path = url.substr(1);
-          if ($route.matches(path)) {
+          if (kbnUrl.matches(path)) {
             $event.preventDefault();
 
             // change works with paths, but we are only here because the paths
             // are the same, so we have to change the whole url to be the new path
-            $route.changeUrl(path);
+            kbnUrl.change(path);
           }
         };
 

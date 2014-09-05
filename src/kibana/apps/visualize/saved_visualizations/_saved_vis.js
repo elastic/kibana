@@ -89,7 +89,7 @@ define(function (require) {
         }
 
         self.searchSource.aggs(function () {
-          return self.vis.aggs.toDSL();
+          return self.vis.aggs.toDsl();
         });
 
         return self;

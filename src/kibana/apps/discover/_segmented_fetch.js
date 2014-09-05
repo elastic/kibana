@@ -1,23 +1,24 @@
 define(function (require) {
   return function DiscoverSegmentedFetch(es, Private, Promise, Notifier) {
-    var activeReq = null;
-    var notifyEvent;
-    var searchPromise;
-    var getStateFromRequest = Private(require('components/courier/fetch/strategy/search')).getSourceStateFromRequest;
     var _ = require('lodash');
     var moment = require('moment');
-
-    var segmentedFetch = {};
+    var searchStrategy = Private(require('components/courier/fetch/strategy/search'));
+    var eventName = 'segmented fetch';
 
     var notify = new Notifier({
       location: 'Segmented Fetch'
     });
 
-    segmentedFetch.abort = function () {
-      activeReq = null;
-      searchPromise.abort();
-      clearNotifyEvent();
-    };
+    // var segmentedFetch = {};
+    function segmentedFetch(searchSource) {
+      this.searchSource = searchSource;
+      this.queue = [];
+      this.completedQueue = [];
+      this.requestHandlers = {};
+      this.activeRequest = null;
+      this.notifyEvent = null;
+      this.lastRequestPromise = Promise.resolve();
+    }
 
     /**
      * Fetch search results, but segment by index name.
@@ -29,39 +30,114 @@ define(function (require) {
      *                              in decening order, this should be set to descending so that the data comes in its
      *                              proper order, otherwize indices will be fetched ascending
      *
-     * // all callbacks can return a promise to delay furthur processing
+     * // all callbacks can return a promise to delay further processing
      * @param {function} opts.first - a function that will be called for the first segment
      * @param {function} opts.each - a function that will be called for each segment
      * @param {function} opts.eachMerged - a function that will be called with the merged result on each segment
+     * @param {function} opts.status - a function that will be called for each segment and given the process status
      *
      * @return {Promise}
      */
-    segmentedFetch.fetch = function (opts) {
+    segmentedFetch.prototype.fetch = function (opts) {
+      var self = this;
+      var req;
       opts = opts || {};
-      var searchSource = opts.searchSource;
-      var direction = opts.direction;
-      var limitSize = false;
-      var remainingSize = false;
 
-      notifyEvent = notify.event('segmented fetch');
+      self._stopRequest();
 
-      if (opts.totalSize) {
-        limitSize = true;
-        remainingSize = opts.totalSize;
+      return (self.lastRequestPromise = self.lastRequestPromise.then(function () {
+        // keep an internal record of the attached handlers
+        self._setRequestHandlers(opts);
+
+        return Promise.try(function () {
+          return self._extractQueue(opts.direction);
+        })
+        .then(function () {
+          req = self._createRequest();
+          return req;
+        })
+        .then(function (req) {
+          return self._startRequest(req);
+        })
+        .then(function () {
+          return self._executeRequest(req, opts);
+        })
+        .then(function () {
+          return self._stopRequest();
+        });
+      }));
+    };
+
+    segmentedFetch.prototype.abort = function () {
+      this._stopRequest();
+      return this.lastRequestPromise;
+    };
+
+    segmentedFetch.prototype._startRequest = function (req) {
+      var self = this;
+      self.requestStats = {
+        took: 0,
+        hits: {
+          hits: [],
+          total: 0,
+          max_score: 0
+        }
+      };
+
+      self._setRequest(req);
+      self.notifyEvent = notify.event(eventName);
+    };
+
+    segmentedFetch.prototype._stopRequest = function () {
+      var self = this;
+
+      self._setRequest();
+      self._clearNotification();
+      if (self.searchPromise && 'abort' in self.searchPromise) {
+        self.searchPromise.abort();
       }
+    };
 
-      var req = searchSource._createRequest();
-      req.moment = moment();
-      req.source.activeFetchCount += 1;
+    segmentedFetch.prototype._setRequest = function (req) {
+      req = req || null;
+      this.activeRequest = req;
+    };
 
-      // track the req out of scope so that while we are itterating we can
-      // ensure we are still relevant
-      activeReq = req;
+    segmentedFetch.prototype._clearNotification = function () {
+      var self = this;
+      if (_.isFunction(self.notifyEvent)) {
+        self.notifyEvent();
+      }
+    };
 
-      var queue = searchSource.get('index').toIndexList();
-      var total = queue.length;
-      var active = null;
-      var complete = [];
+    segmentedFetch.prototype._setRequestHandlers = function (handlers) {
+      this.requestHandlers = {
+        first: handlers.first,
+        each: handlers.each,
+        eachMerged: handlers.eachMerged,
+        status: handlers.status,
+      };
+    };
+
+    segmentedFetch.prototype._statusReport = function (active) {
+      var self = this;
+
+      if (!self.requestHandlers.status) return;
+
+      var status = {
+        total: self.queue.length,
+        complete: self.completedQueue.length,
+        remaining: self.queue.length,
+        active: active
+      };
+      self.requestHandlers.status(status);
+
+      return status;
+    };
+
+    segmentedFetch.prototype._extractQueue = function (direction) {
+      var self = this;
+      var queue = self.searchSource.get('index').toIndexList();
 
       if (!_.isArray(queue)) {
         queue = [queue];
@@ -71,161 +147,184 @@ define(function (require) {
         queue = queue.reverse();
       }
 
-      var i = -1;
-      var merged = {
-        took: 0,
-        hits: {
-          hits: [],
-          total: 0,
-          max_score: 0
-        }
-      };
-
-      function reportStatus() {
-        if (!opts.status) return;
-        opts.status({
-          total: total,
-          complete: complete.length,
-          remaining: queue.length,
-          active: active
-        });
-      }
-
-      reportStatus();
-      getStateFromRequest(req)
-      .then(function (state) {
-        return (function recurse() {
-          var index = queue.shift();
-          active = index;
-
-          reportStatus();
-
-          if (limitSize) {
-            state.body.size = remainingSize;
-          }
-          req.state = state;
-
-          return execSearch(index, state)
-          .then(function (resp) {
-            // abort if fetch is called twice quickly
-            if (req !== activeReq) return;
-
-            // a response was swallowed intentionally. Try the next one
-            if (!resp) {
-              if (queue.length) return recurse();
-              else return done();
-            }
-
-            // increment i after we are sure that we have a valid response
-            // so that we always call opts.first()
-            i++;
-
-            var start; // promise that starts the chain
-            if (i === 0 && _.isFunction(opts.first)) {
-              start = Promise.try(opts.first, [resp, req]);
-            } else {
-              start = Promise.resolve();
-            }
-
-            if (limitSize) {
-              remainingSize -= resp.hits.hits.length;
-            }
-
-            return start.then(function () {
-              var prom = each(merged, resp);
-              return prom;
-            })
-            .then(function () {
-              if (_.isFunction(opts.each)) return opts.each(resp, req);
-            })
-            .then(function () {
-              var mergedCopy = _.omit(merged, '_bucketIndex');
-              req.resp = mergedCopy;
-
-              if (_.isFunction(opts.eachMerged)) {
-                // resolve with a "shallow clone" that omits the _aggIndex
-                // which helps with watchers and protects the index
-                return opts.eachMerged(mergedCopy, req);
-              }
-            })
-            .then(function () {
-              complete.push(index);
-              if (queue.length) return recurse();
-              return done();
-            });
-          });
-        }());
-      })
-      .then(req.defer.resolve, req.defer.reject);
-
-      function done() {
-        clearNotifyEvent();
-        req.complete = true;
-        req.ms = req.moment.diff() * -1;
-        req.source.activeFetchCount -= 1;
-        return (i + 1);
-      }
-
-      return req.defer.promise;
+      return self.queue = queue;
     };
 
-    function each(merged, resp) {
-      merged.took += resp.took;
-      merged.hits.total = Math.max(merged.hits.total, resp.hits.total);
-      merged.hits.max_score = Math.max(merged.hits.max_score, resp.hits.max_score);
-      [].push.apply(merged.hits.hits, resp.hits.hits);
+    segmentedFetch.prototype._createRequest = function () {
+      var self = this;
+      var req = self.searchSource._createRequest();
+      req.moment = moment();
+      req.source.activeFetchCount += 1;
+      return req;
+    };
 
-      if (!resp.aggregations) return;
+    segmentedFetch.prototype._executeSearch = function (index, state) {
+      var resolve, reject;
 
-      var aggKey = _.find(Object.keys(resp.aggregations), function (key) {
-        return key.substr(0, 5) === '_agg_';
+      this.searchPromise = new Promise(function () {
+        resolve = arguments[0];
+        reject = arguments[1];
       });
 
-      // start merging aggregations
-      if (!merged.aggregations) {
-        merged.aggregations = {};
-        merged.aggregations[aggKey] = {
-          buckets: []
-        };
-        merged._bucketIndex = {};
-      }
-
-      resp.aggregations[aggKey].buckets.forEach(function (bucket) {
-        var mbucket = merged._bucketIndex[bucket.key];
-        if (mbucket) {
-          mbucket.doc_count += bucket.doc_count;
-          return;
-        }
-
-        mbucket = merged._bucketIndex[bucket.key] = bucket;
-        merged.aggregations[aggKey].buckets.push(mbucket);
-      });
-    }
-
-    function execSearch(index, state) {
-      searchPromise = es.search({
+      var clientPromise = es.search({
         index: index,
         type: state.type,
         ignoreUnavailable: true,
         body: state.body
       });
 
-      // don't throw ClusterBlockException errors
-      searchPromise.catch(function (err) {
+      this.searchPromise.abort = function () {
+        clientPromise.abort();
+        resolve(false);
+      };
+
+      clientPromise.then(resolve)
+      .catch(function (err) {
+        // don't throw ClusterBlockException errors
         if (err.status === 403 && err.message.match(/ClusterBlockException.+index closed/)) {
-          return false;
+          resolve(false);
         } else {
-          throw err;
+          reject(err);
         }
       });
 
-      return searchPromise;
-    }
+      return this.searchPromise;
+    };
 
-    function clearNotifyEvent() {
-      if (_.isFunction(notifyEvent)) {
-        notifyEvent();
+    segmentedFetch.prototype._executeRequest = function (req, opts) {
+      var self = this;
+      var complete = [];
+      var remainingSize = false;
+
+      if (opts.totalSize) {
+        remainingSize = opts.totalSize;
       }
+
+      // initial status report
+      self._statusReport(null);
+
+      return searchStrategy.getSourceStateFromRequest(req)
+      .then(function (state) {
+        var loopCount = -1;
+        return self._processQueue(req, state, remainingSize, loopCount);
+      })
+      .then(function (count) {
+        return req.defer.resolve(count);
+      })
+      .catch(function (err) {
+        req.defer.reject(err);
+        return err;
+      });
+    };
+
+    segmentedFetch.prototype._processQueue = function (req, state, remainingSize, loopCount) {
+      var self = this;
+      var index = self.queue.shift();
+
+      // abort if request changed (fetch is called twice quickly)
+      if (req !== self.activeRequest) {
+        return;
+      }
+
+      if (remainingSize !== false) {
+        state.body.size = remainingSize;
+      }
+
+      req.state = state;
+
+      // update the status on every iteration
+      self._statusReport(index);
+
+      return self._executeSearch(index, state)
+      .then(function (resp) {
+        // a response was swallowed intentionally. Try the next one
+        if (!resp) {
+          if (self.queue.length) return self._processQueue(req, state, remainingSize, loopCount);
+          else return self._processQueueComplete(req, loopCount);
+        }
+
+        // increment loopCount after we are sure that we have a valid response
+        // so that we always call self.requestHandlers.first()
+        loopCount++;
+
+        var start; // promise that starts the chain
+        if (loopCount === 0 && _.isFunction(self.requestHandlers.first)) {
+          start = Promise.try(self.requestHandlers.first, [resp, req]);
+        } else {
+          start = Promise.resolve();
+        }
+
+        if (remainingSize !== false) {
+          remainingSize -= resp.hits.hits.length;
+        }
+
+        return start.then(function () {
+          var prom = mergeRequestStats(self.requestStats, resp);
+          return prom;
+        })
+        .then(function () {
+          if (_.isFunction(self.requestHandlers.each)) {
+            return self.requestHandlers.each(resp, req);
+          }
+        })
+        .then(function () {
+          var mergedCopy = _.omit(self.requestStats, '_bucketIndex');
+          req.resp = mergedCopy;
+
+          if (_.isFunction(self.requestHandlers.eachMerged)) {
+            // resolve with a "shallow clone" that omits the _aggIndex
+            // which helps with watchers and protects the index
+            return self.requestHandlers.eachMerged(mergedCopy, req);
+          }
+        })
+        .then(function () {
+          self.completedQueue.push(index);
+          if (self.queue.length) return self._processQueue(req, state, remainingSize, loopCount);
+          return self._processQueueComplete(req, loopCount);
+        });
+      });
+    };
+
+    segmentedFetch.prototype._processQueueComplete = function (req, loopCount) {
+      req.complete = true;
+      req.ms = req.moment.diff() * -1;
+      req.source.activeFetchCount -= 1;
+      return (loopCount + 1);
+    };
+
+    function mergeRequestStats(requestStats, resp) {
+      requestStats.took += resp.took;
+      requestStats.hits.total = Math.max(requestStats.hits.total, resp.hits.total);
+      requestStats.hits.max_score = Math.max(requestStats.hits.max_score, resp.hits.max_score);
+      [].push.apply(requestStats.hits.hits, resp.hits.hits);
+
+      if (!resp.aggregations) return;
+
+      var aggKey = _.find(Object.keys(resp.aggregations), function (key) {
+        return key.substr(0, 4) === 'agg_';
+      });
+
+      if (!aggKey) throw new Error('aggKey not found in response: ' + Object.keys(resp.aggregations));
+
+      // start merging aggregations
+      if (!requestStats.aggregations) {
+        requestStats.aggregations = {};
+        requestStats.aggregations[aggKey] = {
+          buckets: []
+        };
+        requestStats._bucketIndex = {};
+      }
+
+      resp.aggregations[aggKey].buckets.forEach(function (bucket) {
+        var mbucket = requestStats._bucketIndex[bucket.key];
+        if (mbucket) {
+          mbucket.doc_count += bucket.doc_count;
+          return;
+        }
+
+        mbucket = requestStats._bucketIndex[bucket.key] = bucket;
+        requestStats.aggregations[aggKey].buckets.push(mbucket);
+      });
     }
 
     return segmentedFetch;

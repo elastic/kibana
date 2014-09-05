@@ -45,12 +45,12 @@ define(function (require) {
     }
   });
 
-
   app.controller('discover', function ($scope, config, courier, $route, $window, savedSearches, savedVisualizations,
-    Notifier, $location, globalState, appStateFactory, timefilter, Promise, Private) {
+    Notifier, $location, globalState, appStateFactory, timefilter, Promise, Private, kbnUrl) {
 
     var Vis = Private(require('components/vis/vis'));
-    var segmentedFetch = $scope.segmentedFetch = Private(require('apps/discover/_segmented_fetch'));
+    var SegmentedFetch = Private(require('apps/discover/_segmented_fetch'));
+
     var HitSortFn = Private(require('apps/discover/_hit_sort_fn'));
 
     var notify = new Notifier({
@@ -61,16 +61,17 @@ define(function (require) {
     var savedSearch = $route.current.locals.savedSearch;
     $scope.$on('$destroy', savedSearch.destroy);
 
-    // abort any seqmented query requests when leaving discover
-    $scope.$on('$routeChangeStart', function () {
-      segmentedFetch.abort();
-    });
-
     // list of indexPattern id's
     var indexPatternList = $route.current.locals.indexList;
 
     // the actual courier.SearchSource
     $scope.searchSource = savedSearch.searchSource;
+    var segmentedFetch = $scope.segmentedFetch = new SegmentedFetch($scope.searchSource);
+
+    // abort any seqmented query requests when leaving discover
+    $scope.$on('$routeChangeStart', function () {
+      segmentedFetch.abort();
+    });
 
     // Manage state & url state
     var initialQuery = $scope.searchSource.get('query');
@@ -109,7 +110,8 @@ define(function (require) {
         $state.index = config.get('defaultIndex');
       } else {
         notify.warning(reason + 'Please set a default index to continue.');
-        $location.url('/settings/indices');
+        kbnUrl.change('/settings/indices');
+
         return;
       }
     }
@@ -226,7 +228,7 @@ define(function (require) {
         .then(function () {
           notify.info('Saved Data Source "' + savedSearch.title + '"');
           if (savedSearch.id !== $route.current.params.id) {
-            $location.url(globalState.writeToUrl('/discover/' + encodeURIComponent(savedSearch.id)));
+            kbnUrl.change('/discover/{{id}}', { id: savedSearch.id });
           }
         });
       })
@@ -238,7 +240,11 @@ define(function (require) {
       if (!init.complete) return;
 
       $scope.updateTime();
-      if (_.isEmpty($state.columns)) refreshColumns();
+
+      if (_.isEmpty($state.columns)) {
+        refreshColumns();
+      }
+
       $scope.updateDataSource()
       .then(setupVisualization)
       .then(function () {
@@ -270,7 +276,6 @@ define(function (require) {
         }
 
         return segmentedFetch.fetch({
-          searchSource: $scope.searchSource,
           totalSize: sortBy === 'non-time' ? false : totalSize,
           direction: sortBy === 'time' ? sort[1] : 'desc',
           status: function (status) {
@@ -384,7 +389,7 @@ define(function (require) {
     };
 
     $scope.newQuery = function () {
-      $location.url('/discover');
+      kbnUrl.change('/discover');
     };
 
     $scope.updateDataSource = function () {
@@ -632,7 +637,7 @@ define(function (require) {
       });
 
       $scope.searchSource.aggs(function () {
-        return $scope.vis.aggs.toDSL();
+        return $scope.vis.aggs.toDsl();
       });
 
       // stash this promise so that other calls to setupVisualization will have to wait

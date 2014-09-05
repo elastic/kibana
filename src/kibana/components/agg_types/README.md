@@ -10,9 +10,9 @@ Collection of `AggType` definition objects. See the [Vis component](../vis) for 
 
 ### Included
 
-  - [`AggType`](_agg_type.js) class
-  - `AggParam` classes
+  - [`AggType`](_agg_type.js)
+  - `AggParam`
     - [`BaseAggParam`](param_types/base.js)
     - [`FieldAggParam`](param_types/field.js)
     - [`OptionedAggParam`](param_types/optioned.js)
-  - [`AggParams`](_agg_params.js) class
+  - [`AggParams`](_agg_params.js)
