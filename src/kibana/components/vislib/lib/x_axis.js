@@ -34,7 +34,7 @@ define(function (require) {
     // Render the x axis
     XAxis.prototype.render = function () {
       d3.select(this.el).selectAll('.x-axis-div').call(this.draw());
-      d3.select(this.el).selectAll('.x-axis-div').call(this.checkTickLabels());
+      d3.select(this.el).selectAll('.x-axis-div').call(this.checkTickLabelLengths());
       d3.select(this.el).selectAll('.x-axis-div').call(this.resizeAxisLayoutForLabels());
     };
 
@@ -193,8 +193,9 @@ define(function (require) {
       };
     };
 
-    // Eval tick label widths to apply rotate and or filter
-    XAxis.prototype.checkTickLabels = function () {
+    // Return a function that evaluates tick label lengths
+    // to apply rotate, truncate, filter as needed
+    XAxis.prototype.checkTickLabelLengths = function () {
       var self = this;
       var margin = this._attr.margin;
       var div;
@@ -287,7 +288,8 @@ define(function (require) {
         });
     };
 
-    // Resize layout divs and flexbox values to fit axis labels
+    // Return a function that resizes layout divs and 
+    // adds css flexbox values to fit axis labels
     XAxis.prototype.resizeAxisLayoutForLabels = function () {
       var self = this;
       var visEl = $(self.el);

@@ -29,8 +29,9 @@ define(function (require) {
 
     Tooltip.prototype.render = function () {
       var self = this;
-
+      
       return function (selection) {
+
         selection.each(function () {
           var tooltipDiv = d3.select(self.el).select('.' + self.tooltipClass);
           // DOM element on which the tooltip is called
@@ -44,14 +45,24 @@ define(function (require) {
                 top: d3.event.clientY
               };
 
+              // hack to keep active tooltip in front of gridster/dashboard list
+              if ($('.gridster').length) {
+                var gridsterUl = $('.gridster');
+                var gridsterLis = $('.gridster').find('li').removeClass('player-revert');
+                var tipLi = $(tooltipDiv.node()).closest('li').addClass('player-revert');
+              }
 
-              var chartWidth = self.chartWidth;
+              var chartWidth = $(tooltipDiv.node()).closest('.vis-wrapper').width();
+              var yaxisWidth = $('.y-axis-col-wrapper').width();
               var offsetX = d3.event.offsetX === undefined ? d3.event.layerX : d3.event.offsetX;
               var tipWidth = tooltipDiv[0][0].clientWidth;
               var xOffset = 10;
+
               // check position of tooltip relative to chart width 
               // to apply offset if tooltip should flip 'west'
-              if ((chartWidth - offsetX) < tipWidth) {
+              // if tip width + offset puts it off chart, flip direction
+              // unless flip puts it off the left edge of vis wrapper
+              if ((chartWidth - offsetX) < (tipWidth + yaxisWidth + 10) && (offsetX + yaxisWidth + 10) > (tipWidth + 10)) {
                 xOffset = -10 - tipWidth;
               }
 
