@@ -10,6 +10,12 @@
    - a legit way to update the index pattern
  - **[src/kibana/apps/settings/sections/indices/_create.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/settings/sections/indices/_create.js)**
    - we should probably display a message of some kind
+ - **[src/kibana/bower_components/Faker/examples/js/prettyPrint.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/bower_components/Faker/examples/js/prettyPrint.js)**
+   - Make cross-browser functional */
+ - **[src/kibana/bower_components/Faker/lib/address.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/bower_components/Faker/lib/address.js)**
+   - change all these methods that accept a boolean to instead accept an options hash.
+ - **[src/kibana/bower_components/Faker/lib/phone_number.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/bower_components/Faker/lib/phone_number.js)**
+   - FIXME – [ ] this is strange passing in an array index.
  - **[src/kibana/bower_components/ace-builds/src/ace.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/bower_components/ace-builds/src/ace.js)**
    - message
    - message

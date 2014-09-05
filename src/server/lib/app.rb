@@ -7,6 +7,7 @@ require "json"
 require "lib/JSONLogger"
 require "lib/ColorLogger"
 require "routes/home"
+require "sinatra/json"
 require "routes/proxy"
 
 class Logger
@@ -15,6 +16,8 @@ end
 
 module Kibana
   class App < Sinatra::Base
+
+    helpers Sinatra::JSON
 
     configure do
       logger = Logger.new(STDOUT)

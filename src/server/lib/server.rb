@@ -44,8 +44,6 @@ module Kibana
       server.min_threads = min
       server.max_threads = max
 
-      yield server if block_given?
-
       begin
         log("Kibana server started on tcp://#{options[:host]}:#{options[:port]} in #{ENV['RACK_ENV']} mode.")
         server.run.join

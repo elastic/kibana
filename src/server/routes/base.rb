@@ -14,7 +14,7 @@ module Kibana
         set :root, Kibana.global_settings[:root]
         set :public_folder, Kibana.global_settings[:public_folder]
         set :httponly, true
-        set :config, Kibana.global_settings[:config].clone
+        set :config, config
       end
     end
   end

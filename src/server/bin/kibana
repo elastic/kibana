@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 require "optparse"
-require "pp"
 require 'rubygems'
 require 'puma/cli'
 require "yaml"
