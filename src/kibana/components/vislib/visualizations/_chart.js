@@ -2,6 +2,8 @@ define(function (require) {
   return function ChartBaseClass(d3, Private) {
     var _ = require('lodash');
 
+    var Legend = Private(require('components/vislib/lib/legend'));
+
     /*
      * Base Class for all visualizations.
      * Exposes a render method.
@@ -20,6 +22,10 @@ define(function (require) {
     // Render the visualization.
     Chart.prototype.render = function () {
       return d3.select(this.chartEl).call(this.draw());
+    };
+
+    Chart.prototype.classify = function (label) {
+      Legend.prototype.classify.call(this, label);
     };
 
     return Chart;

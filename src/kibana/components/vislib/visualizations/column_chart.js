@@ -88,6 +88,7 @@ define(function (require) {
     };
 
     ColumnChart.prototype.addBars = function (svg, layers) {
+      var self = this;
       var data = this.chartData;
       var color = this.vis.data.getColorFunc();
       var xScale = this.vis.xAxis.xScale;
@@ -114,13 +115,13 @@ define(function (require) {
 
       // enter
       bars.enter()
-      .append('rect')
-      .attr('class', function (d) {
-        return 'color ' + Legend.prototype.colorToClass.call(this, color(d.label));
-      })
-      .attr('fill', function (d) {
-        return color(d.label);
-      });
+        .append('rect')
+        .attr('class', function (d) {
+          return 'color ' + self.classify(color(d.label));
+        })
+        .attr('fill', function (d) {
+          return color(d.label);
+        });
 
       // update
       bars
