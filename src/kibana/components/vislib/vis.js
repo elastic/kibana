@@ -40,11 +40,13 @@ define(function (require) {
         this.handler.render();
       } catch (error) {
         // if involving height and width of the container, log error to screen
-        if (error.message === 'The height and/or width of this container ' +
+        // Because we have to wait for the DOM element to initialize, we do not
+        // want to throw an error when the DOM `el` is zero
+        if ($(this.el).height() > 0 && error.message === 'The height and/or width of this container ' +
           'is too small for this chart.') {
           this.handler.error(error.message);
         } else {
-          throw (error);
+          console.group(error.message);
         }
       }
 
