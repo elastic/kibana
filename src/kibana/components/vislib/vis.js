@@ -70,7 +70,8 @@ define(function (require) {
     // Resize the chart
     Vis.prototype.resize = function () {
       if (!this.data) {
-        throw new Error('No valid data');
+        // TODO: need to come up with a solution for resizing when no data is available
+        return;
       }
       this.render(this.data);
     };
