@@ -166,7 +166,7 @@
                     <th class="table-details-action">Action</th>
                     <th class="table-details-value">Value</th>
                   </thead>
-                  <tr ng-repeat="(key,value) in event.kibana._source track by $index" ng-class-odd="'odd'">
+                  <tr ng-repeat="(key,value) in event.kibana._source | visibleField:this track by $index" ng-class-odd="'odd'">
                     <td style="word-wrap:break-word" bo-text="key"></td>
                     <td style="white-space:nowrap">
                       <i class='icon-search pointer' ng-click="build_search(key,value)" bs-tooltip="'Add filter to match this value'"></i>

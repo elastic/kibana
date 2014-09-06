@@ -85,6 +85,10 @@ function (angular, app, _, kbn, moment) {
        */
       highlight : [],
       /** @scratch /panels/table/5
+       * visible_fields:: The fields to show in the details view, in an array
+       */
+      visible_fields : [],
+      /** @scratch /panels/table/5
        * sortable:: Set sortable to false to disable sorting
        */
       sortable: true,
@@ -530,6 +534,25 @@ function (angular, app, _, kbn, moment) {
   module.filter('tableLocalTime', function(){
     return function(text,event) {
       return moment(event.sort[1]).format("YYYY-MM-DDTHH:mm:ss.SSSZ");
+    };
+  });
+
+  module.filter('visibleField', function() {
+    return function(items, scope) {
+      // Filter defaults to showing all fields when no fields are specified
+      if(_.isEmpty(scope.panel.visible_fields)) {
+        return items;
+      } else {
+        var result = {};
+
+        angular.forEach(items, function (value, key) {
+          if (_.contains(scope.panel.visible_fields, key)) {
+            result[key] = value;
+          }
+        });
+
+        return result;
+      }
     };
   });
 
