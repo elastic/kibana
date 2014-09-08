@@ -1,7 +1,8 @@
 .DS_Store
 node_modules
-src/bower_components
+bower_components
 **/*.css
 trash
 build
 target
+.jruby
