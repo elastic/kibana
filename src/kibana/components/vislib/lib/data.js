@@ -12,12 +12,21 @@ define(function (require) {
      * arguments:
      *  data => Provided data object
      */
-    function Data(data) {
+    function Data(data, attr) {
       if (!(this instanceof Data)) {
-        return new Data(data);
+        return new Data(data, attr);
       }
 
       this.data = data;
+      this._attr = attr;
+      // d3 stack function
+      this._attr = _.defaults(attr || {}, {
+        offset: 'zero',
+        stack: d3.layout.stack()
+          .x(function (d) { return d.x; })
+          .y(function (d) { return d.y; })
+          .offset(this._attr.offset)
+      });
     }
 
     // Return the actual x and y data values
@@ -51,6 +60,51 @@ define(function (require) {
       });
 
       return values;
+    };
+
+    Data.prototype.shouldBeStacked = function (series) {
+      // Series should be an array
+      if (series.length > 1) {
+        return true;
+      }
+      return false;
+    };
+
+    // Calculate the max y value from this.dataArray
+    Data.prototype.getYMaxValue = function () {
+      var self = this;
+      var arr = [];
+
+      // for each object in the dataArray,
+      // push the calculated y value to the initialized array (arr)
+      _.forEach(this.flatten(), function (series) {
+        arr.push(self.getYStackMax(series));
+      });
+
+      // return the largest value from the array
+      return _.max(arr);
+    };
+
+    Data.prototype.stackData = function (series) {
+      // Determine if the data should be stacked
+      if (this.shouldBeStacked(series)) {
+        // if true, stack data
+        return this._attr.stack(series);
+      }
+      return series;
+    };
+
+    Data.prototype.getYStackMax = function (series) {
+      // Return the calculated y value
+      return d3.max(this.stackData(series), function (data) {
+        return d3.max(data, function (d) {
+          // if stacked, need to add d.y0 + d.y for the y value
+          if (d.y0) {
+            return d.y0 + d.y;
+          }
+          return d.y;
+        });
+      });
     };
 
     // Inject zeros into the data

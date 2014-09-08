@@ -83,11 +83,6 @@ define(function (require) {
 
       // Removing chart and all elements associated with it
       d3.select(this.el).selectAll('*').remove();
-
-      // Cleaning up event listeners
-      this.off('click', null);
-      this.off('hover', null);
-      this.off('brush', null);
     };
 
     // Set attributes on the chart

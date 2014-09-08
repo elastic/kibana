@@ -21,11 +21,9 @@ define(function (require) {
       ColumnChart.Super.apply(this, arguments);
       // Column chart specific attributes
       this._attr = _.defaults(vis._attr || {}, {
-        offset: 'zero',
         xValue: function (d, i) { return d.x; },
         yValue: function (d, i) { return d.y; },
         dispatch: d3.dispatch('brush', 'click', 'hover', 'mouseenter', 'mouseleave', 'mouseover', 'mouseout'),
-        stack: this._attr.stack.offset(this.offset)
       });
     }
 
@@ -45,6 +43,7 @@ define(function (require) {
     };
 
     // Stack data
+    // TODO: refactor so that this is called from the data module
     ColumnChart.prototype.stackData = function (data) {
       var self = this;
 
@@ -77,8 +76,8 @@ define(function (require) {
           });
         });
 
-      // if `addEvents` is true, add brush canvas
-      if (self._attr.addEvents) {
+      // if `addBrushing` is true, add brush canvas
+      if (self._attr.addBrushing) {
         svg.append('g')
           .attr('class', 'brush')
           .call(brush)
@@ -116,7 +115,7 @@ define(function (require) {
       bars.enter()
         .append('rect')
         .attr('class', function (d) {
-          return 'color ' + Legend.prototype.classify.call(this, color(d.label));
+          return 'color ' + Legend.prototype.colorToClass.call(this, color(d.label));
         })
         .attr('fill', function (d) {
           return color(d.label);
@@ -160,26 +159,21 @@ define(function (require) {
       var self = this;
       var tooltip = this.vis.tooltip;
       var isTooltip = this._attr.addTooltip;
-      var addEvents = this._attr.addEvents;
       var dispatch = this._attr.dispatch;
 
       bars
         .on('mouseover.bar', function (d, i) {
-          if (addEvents) {
-            d3.select(this)
-              .classed('hover', true)
-              .style('stroke', '#333')
-              .style('cursor', 'pointer');
+          d3.select(this)
+            .classed('hover', true)
+            .style('stroke', '#333')
+            .style('cursor', 'pointer');
 
-            dispatch.hover(self.eventResponse(d, i));
-            d3.event.stopPropagation();
-          }
+          dispatch.hover(self.eventResponse(d, i));
+          d3.event.stopPropagation();
         })
         .on('click.bar', function (d, i) {
-          if (addEvents) {
-            dispatch.click(self.eventResponse(d, i));
-            d3.event.stopPropagation();
-          }
+          dispatch.click(self.eventResponse(d, i));
+          d3.event.stopPropagation();
         })
         .on('mouseout.bar', function () {
           d3.select(this).classed('hover', false)

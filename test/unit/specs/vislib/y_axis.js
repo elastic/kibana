@@ -132,11 +132,10 @@ define(function (require) {
           .attr('class', 'y-axis-div')
           .style('height', '40px');
 
-        dataObj = new Data(data);
+        dataObj = new Data(data, {});
         yAxis = new YAxis({
           el: $('.y-axis-wrapper')[0],
-          chartData: dataObj.chartData(),
-          dataArray: dataObj.flatten(),
+          yMax: dataObj.getYMaxValue(),
           _attr: {
             margin: { top: 0, right: 0, bottom: 0, left: 0 }
           }
@@ -188,24 +187,6 @@ define(function (require) {
         expect(yScale.range()[0]).to.be(height);
         // The yScale range should always start from 0
         expect(yScale.range()[1]).to.be(0);
-      });
-    });
-
-    describe('isStacked Method', function () {
-      it('should return false', function () {
-        expect(yAxis.isStacked()).to.be(true);
-      });
-    });
-
-    describe('getYStackMax Method', function () {
-      it('should return the max value of a series array', function () {
-        expect(yAxis.getYStackMax(yAxis.dataArray[0])).to.be(72);
-      });
-    });
-
-    describe('getYMaxValue Method', function () {
-      it('should return the data max y value', function () {
-        expect(yAxis.getYMaxValue()).to.be(72);
       });
     });
 
