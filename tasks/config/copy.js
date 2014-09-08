@@ -11,10 +11,6 @@ module.exports = function (grunt) {
     server_src: {
       files: [
         {
-          src: '<%= src %>/server/INSTALL',
-          dest: '<%= build %>/kibana/INSTALL'
-        },
-        {
           src: '<%= src %>/server/Gemfile',
           dest: '<%= build %>/kibana/Gemfile'
         },
@@ -51,8 +47,8 @@ module.exports = function (grunt) {
       options: { mode: true },
       files: [
         {
-          src: '<%= build %>/kibana/INSTALL',
-          dest: '<%= build %>/dist/INSTALL',
+          src: '<%= root %>/LICENSE.md',
+          dest: '<%= build %>/dist/LICENSE.md'
         },
         {
           expand: true,
