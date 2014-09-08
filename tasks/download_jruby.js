@@ -21,7 +21,7 @@ module.exports = function (grunt) {
           out.on('close', done).on('error', done);
           var req = request.get(url);
           var bar;
-          if (process.stdout.isTTY) {
+          if (!process.env.JENKINS_HOME) {
             req.on('response', function (resp) {
               var total = parseInt(resp.headers['content-length'], 10);
               bar = new ProgressBar('[:bar] :percent :etas', {
