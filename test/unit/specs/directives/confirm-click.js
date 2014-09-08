@@ -34,7 +34,7 @@ define(function (require) {
       $elem.scope().$digest();
 
       // Grab the isolate scope so we can test it
-      $scope = $elem.isolateScope();
+      $scope = $elem.scope();
 
       // Add a function to check the run status of.
       $scope.runThis = sinon.spy();
