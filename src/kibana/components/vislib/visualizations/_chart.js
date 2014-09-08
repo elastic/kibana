@@ -25,7 +25,7 @@ define(function (require) {
     };
 
     Chart.prototype.classify = function (label) {
-      Legend.prototype.classify.call(this, label);
+      return 'color ' + Legend.prototype.classify.call(null, label);
     };
 
     return Chart;

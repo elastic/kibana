@@ -117,7 +117,7 @@ define(function (require) {
       bars.enter()
         .append('rect')
         .attr('class', function (d) {
-          return 'color ' + self.classify(color(d.label));
+          return self.classify(color(d.label));
         })
         .attr('fill', function (d) {
           return color(d.label);
