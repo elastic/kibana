@@ -1,7 +1,7 @@
 module.exports = function (grunt) {
   var jrubyPath = grunt.config.get('jrubyPath');
   var jruby = jrubyPath + '/bin/jruby';
-  var cmd =  grunt.config.get('src') + '/server/bin/kibana';
+  var cmd =  grunt.config.get('src') + '/server/bin/initialize';
 
   var config = {
     mri_server: {
