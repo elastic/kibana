@@ -4,13 +4,10 @@ define(function (require) {
   var sinon = require('sinon/sinon');
   require('services/private');
 
-  // Load kibana
-  require('index');
 
   describe('Base Object', function () {
     var $rootScope;
     var BaseObject;
-
     beforeEach(function () {
       module('kibana');
 

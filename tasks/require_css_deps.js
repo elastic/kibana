@@ -8,7 +8,7 @@ module.exports = function (grunt) {
     ].forEach(function (dep) {
       grunt.file.copy(
         join(grunt.config.get('bowerComponentsDir'), 'require-css',  dep),
-        join(grunt.config.get('app'), dep)
+        join(grunt.config.get('build'), 'src',  dep)
       );
     });
   });
