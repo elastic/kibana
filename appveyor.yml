@@ -1,4 +1,4 @@
-version: "2.1.0.{build}"
+version: "2.1.{build}"
 
 os: Windows Server 2012 R2
 
