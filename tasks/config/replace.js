@@ -2,6 +2,7 @@ var join = require('path').join;
 module.exports = function (grunt) {
   var pkg = grunt.config.get('pkg');
   var build = grunt.config.get('build');
+  var src = grunt.config.get('src');
   var config = {
     dist: {
       options: {
@@ -11,11 +12,11 @@ module.exports = function (grunt) {
       },
       files: [
         {
-          src: [join(build, 'kibana', 'bin', 'kibana.sh')],
+          src: [join(src, 'server', 'bin', 'kibana.sh')],
           dest: join(build, 'dist', 'bin', 'kibana')
         },
         {
-          src: [join(build, 'kibana', 'bin', 'kibana.bat')],
+          src: [join(src, 'server', 'bin', 'kibana.bat')],
           dest: join(build, 'dist', 'bin', 'kibana.bat')
         }
       ]

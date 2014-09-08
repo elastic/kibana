@@ -9,10 +9,42 @@ module.exports = function (grunt) {
     },
 
     server_src: {
-      expand: true,
-      cwd: '<%= src %>/server',
-      src: '**',
-      dest: '<%= build %>/kibana'
+      files: [
+        {
+          src: '<%= src %>/server/INSTALL',
+          dest: '<%= build %>/kibana/INSTALL'
+        },
+        {
+          src: '<%= src %>/server/Gemfile',
+          dest: '<%= build %>/kibana/Gemfile'
+        },
+        {
+          src: '<%= src %>/server/Gemfile.lock',
+          dest: '<%= build %>/kibana/Gemfile.lock'
+        },
+        {
+          src: '<%= src %>/server/bin/initialize',
+          dest: '<%= build %>/kibana/bin/initialize'
+        },
+        {
+          expand: true,
+          cwd: '<%= src %>/server/config/',
+          src: '**',
+          dest: '<%= build %>/kibana/config'
+        },
+        {
+          expand: true,
+          cwd: '<%= src %>/server/lib/',
+          src: '**',
+          dest: '<%= build %>/kibana/lib'
+        },
+        {
+          expand: true,
+          cwd: '<%= src %>/server/routes/',
+          src: '**',
+          dest: '<%= build %>/kibana/routes'
+        }
+      ]
     },
 
     dist: {
