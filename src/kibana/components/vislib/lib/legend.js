@@ -28,8 +28,7 @@ define(function (require) {
         'blurredOpacity' : 0.3,
         'focusOpacity' : 1,
         'defaultOpacity' : 1,
-        'isOpen' : false,
-        'width': 20
+        'isOpen' : false
       });
     }
 
@@ -119,12 +118,6 @@ define(function (require) {
           // select series on chart
           visEl.selectAll(liClass).style('opacity', self._attr.focusOpacity);
 
-          visEl.selectAll('.color')
-            .style('opacity', self._attr.blurredOpacity);
-          
-          // Select series on chart
-          visEl.selectAll(liClass)
-            .style('opacity', self._attr.focusOpacity);
         });
 
       visEl.selectAll('.color')

@@ -24,8 +24,8 @@ define(function (require) {
       this.ordered = args.ordered;
       this.xAxisFormatter = args.xAxisFormatter;
       this._attr = _.defaults(args._attr || {}, {
-        isDiscover: false,
-        isRotated: true
+        // isDiscover: false,
+        //isRotated: true
       });
     }
 
@@ -34,8 +34,6 @@ define(function (require) {
     // Render the x axis
     XAxis.prototype.render = function () {
       d3.select(this.el).selectAll('.x-axis-div').call(this.draw());
-      d3.select(this.el).selectAll('.x-axis-div').call(this.checkTickLabelLengths());
-      d3.select(this.el).selectAll('.x-axis-div').call(this.resizeAxisLayoutForLabels());
     };
 
     // Get the d3 scale
@@ -111,6 +109,7 @@ define(function (require) {
 
     // Return a nominal(d3 ordinal) domain
     XAxis.prototype.getOrdinalDomain = function (scale, xValues) {
+      
       return scale.domain(xValues);
     };
 
@@ -161,14 +160,10 @@ define(function (require) {
       var width;
       var height;
       var svg;
-
-      // set var for discover view
-      if ($('.discover-timechart').length) {
-        self._attr.isDiscover = true;
-        self._attr.isRotated = false;
-      }
+      this._attr.isRotated = false;
 
       return function (selection) {
+
         selection.each(function () {
           div = d3.select(this);
           width = $(this).width() - margin.left - margin.right;
@@ -190,102 +185,133 @@ define(function (require) {
             .attr('transform', 'translate(' + margin.left + ',0)')
             .call(self.xAxis);
         });
+
+        selection.call(self.filterOrRotate());
+
       };
     };
 
-    // Return a function that evaluates tick label lengths
-    // to apply rotate, truncate, filter as needed
-    XAxis.prototype.checkTickLabelLengths = function () {
+    // Return a function that evaluates scale type and applies 
+    // filters tick labels on time scales
+    // rotates and truncates labels on nominal/ordinal scales
+    XAxis.prototype.filterOrRotate = function () {
       var self = this;
-      var margin = this._attr.margin;
-      var div;
-      var width;
-      var height;
+      var ordered = self.ordered;
+      var axis;
       var labels;
-      var widthArr = [];
-      var heightArr = [];
-      var subtotalW;
-      var subtotalH;
-      var tickN;
-      var maxWidth;
-      var maxHeight;
-      var total;
-      var nth;
-      var rotate = false;
-      self._attr.isRotated = false;
-      
+
       return function (selection) {
-
         selection.each(function () {
-          // select each x axis
-          div = d3.select(this);
-          width = $(this).width() - margin.left - margin.right;
-          height = $(this).height();
-          labels = selection.selectAll('.tick text');
-
-          // total widths for every label from each x axis
-          subtotalW = 0;
-          subtotalH = 0;
-          _.forEach(labels[0], function (n) {
-            subtotalW += n.getBBox().width;
-            subtotalH += n.getBBox().height;
-          });
-
-          widthArr.push(subtotalW);
-          heightArr.push(subtotalH);
-
-          // rotate if any chart subtotal > width
-          if (subtotalW > width) {
-            rotate = true;
+          axis = d3.select(this);
+          labels = axis.selectAll('.tick text');
+          
+          if (!self.ordered) {
+            // nominal/ordinal scale
+            axis.call(self.rotateAxisLabels());
+            axis.call(self.truncateLabels(100));
+          } else {
+            // time scale
+            axis.call(self.filterAxisLabels());
           }
         });
 
-        // do not rotate labels for discover view
-        if (!self._attr.isDiscover && rotate) {
-          self.rotateAxisLabels(selection);
-          self._attr.isRotated = true;
-        }
-        
-        // Filter labels to prevent overlap of text
-        if (self._attr.isRotated) {
-          // if rotated, use label heights
-          maxHeight = _.max(heightArr);
-          total = _.reduce(heightArr, function (sum, n) {
-            return sum + (n * 1.05);
+        selection.call(self.resizeAxisLayoutForLabels());
+      };
+    };
+
+    // Filter out text labels by width and position on axis
+    XAxis.prototype.filterAxisLabels = function () {
+      var self = this;
+      var startX = 0;
+      var maxW = $('.x-axis-div').width();
+      var par;
+      var myX;
+      var myWidth;
+      var halfWidth;
+
+      return function (selection) {
+        selection.selectAll('.tick text')
+          .text(function (d, i) {
+            par = d3.select(this.parentNode).node();
+            myX = +self.xScale(d).toFixed(1);
+            myWidth = +par.getBBox().width.toFixed(1);
+            halfWidth = +((par.getBBox().width / 2).toFixed(1));
+
+            // trims labels that would overlap each other 
+            // or extend past left or right edges
+            // if prev label pos (or 0) + half of label width is < label pos
+            // and label pos + half width  is not > width of axis
+            if ((startX + halfWidth) < myX && maxW > (myX + halfWidth)) {
+              startX = myX + halfWidth;
+              return self.xAxisFormatter(d);
+            } else {
+              d3.select(this.parentNode).select('line').remove();
+              return '';
+            }
           });
-          nth = 1 + Math.floor(maxHeight / width);
-        } else {
-          // if not rotated, use label widths
-          maxWidth = _.max(widthArr);
-          total = _.reduce(widthArr, function (sum, n) {
-            return sum + (n * 1.05);
-          });
-          nth = 1 + Math.floor(maxWidth / width);
-        }
-        if (nth > 1) {
-          self.filterAxisLabels(selection, nth);
-        }
       };
     };
 
     // Rotate the axis tick labels within selection
-    XAxis.prototype.rotateAxisLabels = function (selection) {
-      return selection.selectAll('.tick text')
-        .style('text-anchor', 'end')
-        .attr('dx', '-.8em')
-        .attr('dy', '-.60em')
-        .attr('transform', function () {
-          return 'rotate(-90)';
-        });
+    XAxis.prototype.rotateAxisLabels = function () {
+      this._attr.isRotated = true;
+      return function (selection) {
+        selection.selectAll('.tick text')
+          .style('text-anchor', 'end')
+          .attr('dx', '-.8em')
+          .attr('dy', '-.60em')
+          .attr('transform', function () {
+            return 'rotate(-90)';
+          });
+      };
     };
 
-    // Filter out every nth text label
-    XAxis.prototype.filterAxisLabels = function (selection, nth) {
+    // Return a function that truncates tick labels
+    XAxis.prototype.truncateLabels = function (size) {
       var self = this;
-      return selection.selectAll('text')
-        .text(function (d, i) {
-          return i % nth === 0 ? self.xAxisFormatter(d) : '';
+      var labels;
+      var label;
+      var node;
+      var length;
+      var str;
+      var n;
+      var maxWidth;
+      var maxLength;
+      var pixPerChar;
+      var endChar;
+
+      return function (selection) {
+        
+        // get label maxWidth
+        labels = selection.selectAll('.tick text');
+        maxWidth = 0;
+        maxLength = 0;
+        labels.each(function () {
+          node = d3.select(this).node();
+          n = node.innerHTML.length;
+          maxWidth = _.max([maxWidth, node.getComputedTextLength() * 0.9]);
+          maxLength = _.max([maxLength, n]);
         });
+        pixPerChar = maxWidth / maxLength;
+
+        // truncate str
+        selection.selectAll('.tick text')
+          .text(function (d) {
+            str = self.xAxisFormatter(d);
+            if (maxWidth > size) {
+              endChar = 0;
+              if (Math.floor((size / pixPerChar) - 4) >= 4) {
+                endChar = Math.floor((size / pixPerChar) - 4);
+                while (str[endChar - 1] === ' ' || str[endChar - 1] === '-' || str[endChar - 1] === ',') {
+                  endChar = endChar - 1;
+                }
+              }
+              str = str.substr(0, endChar) + '...';
+              return str;
+            }
+            return str;
+          });
+      };
     };
 
     // Return a function that resizes layout divs and 
@@ -348,6 +374,7 @@ define(function (require) {
           xwrapper.css('flex', flex + ' 1');
           xdiv.css('flex', flex + ' 1');
           yspacerblock.css('flex', flex + ' 1');
+
         });
       };
     };
@@ -367,12 +394,12 @@ define(function (require) {
       if (!isRotated) {
         // flat labels
         ratio = flatScale(35 * (titleSpace + tickHt) / chartHt);
-        // console.log('flat', +ratio.toFixed(1), 35 * (titleSpace + tickHt) / chartHt);
+        //console.log('flat', +ratio.toFixed(1), 35 * (titleSpace + tickHt) / chartHt);
         
       } else {
         // rotated labels
         ratio = rotScale((titleSpace + tickHt) / chartHt);
-        // console.log('rotated', +ratio.toFixed(1), (titleSpace + tickHt) / chartHt);
+        //console.log('rotated', +ratio.toFixed(1), (titleSpace + tickHt) / chartHt);
         
       }
       return ratio.toFixed(1);
