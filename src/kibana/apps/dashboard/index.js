@@ -25,7 +25,7 @@ define(function (require) {
 
   require('routes')
   .when('/dashboard', {
-    templateUrl: 'kibana/apps/dashboard/index.html',
+    template: require('text!apps/dashboard/index.html'),
     resolve: {
       dash: function (savedDashboards) {
         return savedDashboards.get();
@@ -33,7 +33,7 @@ define(function (require) {
     }
   })
   .when('/dashboard/:id', {
-    templateUrl: 'kibana/apps/dashboard/index.html',
+    templateUrl: require('text!apps/dashboard/index.html'),
     resolve: {
       dash: function (savedDashboards, Notifier, $route, $location, courier) {
         return savedDashboards.get($route.current.params.id)
