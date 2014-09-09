@@ -33,7 +33,7 @@ define(function (require) {
     }
   })
   .when('/dashboard/:id', {
-    templateUrl: require('text!apps/dashboard/index.html'),
+    template: require('text!apps/dashboard/index.html'),
     resolve: {
       dash: function (savedDashboards, Notifier, $route, $location, courier) {
         return savedDashboards.get($route.current.params.id)
