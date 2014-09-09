@@ -152,7 +152,7 @@ define(function (require) {
         .orient('bottom');
     };
 
-    // Return a function that renders the x axis
+    // Returns a function that renders the x axis
     XAxis.prototype.draw = function () {
       var self = this;
       var margin = this._attr.margin;
@@ -191,7 +191,7 @@ define(function (require) {
       };
     };
 
-    // Return a function that evaluates scale type and applies 
+    // Returns a function that evaluates scale type and applies 
     // filters tick labels on time scales
     // rotates and truncates labels on nominal/ordinal scales
     XAxis.prototype.filterOrRotate = function () {
@@ -266,7 +266,7 @@ define(function (require) {
       };
     };
 
-    // Return a function that truncates tick labels
+    // Returns a function that truncates tick labels
     XAxis.prototype.truncateLabels = function (size) {
       var self = this;
       var labels;
@@ -312,7 +312,7 @@ define(function (require) {
       };
     };
 
-    // Return a function that resizes layout divs and 
+    // Returns a function that resizes layout divs and 
     // adds css flexbox values to fit axis labels
     XAxis.prototype.resizeAxisLayoutForLabels = function () {
       var self = this;
@@ -377,7 +377,7 @@ define(function (require) {
       };
     };
 
-    // Return flexbox css value using linear scales
+    // Returns flexbox css value using linear scales
     XAxis.prototype.getFlexVal = function (isRotated, titleSpace, tickHt, chartHt) {
       var ratio;
 
