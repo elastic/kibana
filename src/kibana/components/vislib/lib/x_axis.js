@@ -270,9 +270,7 @@ define(function (require) {
     XAxis.prototype.truncateLabels = function (size) {
       var self = this;
       var labels;
-      var label;
       var node;
-      var length;
       var str;
       var n;
       var maxWidth;
