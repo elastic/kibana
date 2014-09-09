@@ -26,7 +26,7 @@ define(function (require) {
         if (err instanceof NoDefaultIndexPattern || err instanceof NoDefinedIndexPatterns) {
           // .change short circuits the routes by calling $route.refresh(). We can safely swallow this error
           // after reporting it to the user
-          kbnUrl.changePath('/settings/indices');
+          kbnUrl.change('/settings/indices');
           (new Notifier()).error(err);
         } else {
           return Promise.reject(err);
