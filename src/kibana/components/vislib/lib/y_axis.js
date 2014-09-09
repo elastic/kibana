@@ -26,10 +26,10 @@ define(function (require) {
     };
 
     // Return the d3 y scale
-    YAxis.prototype.getYScale = function (height) {
+    YAxis.prototype.getYScale = function (yMax, height) {
       // save reference to y scale
       this.yScale = d3.scale.linear()
-        .domain([0, this.yMax])
+        .domain([0, yMax])
         .range([height, 0])
         .nice(this.tickScale(height));
 
@@ -37,8 +37,8 @@ define(function (require) {
     };
 
     // Return the d3 y axis
-    YAxis.prototype.getYAxis = function (height) {
-      var yScale = this.getYScale(height);
+    YAxis.prototype.getYAxis = function (yMax, height) {
+      var yScale = this.getYScale(yMax, height);
 
       // y scale should never be `NaN`
       if (!yScale || _.isNaN(yScale)) {
@@ -71,6 +71,7 @@ define(function (require) {
     YAxis.prototype.draw = function () {
       var self = this;
       var margin = this._attr.margin;
+      var yMax = this.yMax;
       var div;
       var width;
       var height;
@@ -85,7 +86,7 @@ define(function (require) {
           // Validate whether width and height are not 0 or `NaN`
           self.validateWidthandHeight(width, height);
 
-          var yAxis = self.getYAxis(height);
+          var yAxis = self.getYAxis(yMax, height);
 
           // Append svg and y axis
           svg = div.append('svg')

@@ -76,7 +76,7 @@ define(function (require) {
 
       if (obj.children) {
         // Creating the parent elem for the child nodes
-        var newParent = d3.select('.' + obj.class)[0][0];
+        var newParent = d3.select(this.el).select('.' + obj.class)[0][0];
 
         _.forEach(obj.children, function (obj) {
           if (!obj.parent) {
