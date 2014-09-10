@@ -6,16 +6,41 @@ define(function (require) {
 
     _(AggConfigs).inherits(Registry);
     function AggConfigs(vis, configStates) {
+      var self = this;
       this.vis = vis;
+
 
       AggConfigs.Super.call(this, {
         index: ['id'],
-        group: ['schema.group', 'type.name'],
+        group: ['schema.group', 'type.name', 'schema.name'],
         initialSet: (configStates || []).map(function (aggConfigState) {
           if (aggConfigState instanceof AggConfig) return aggConfigState;
           return new AggConfig(vis, aggConfigState);
         })
       });
+
+
+      // Set the defaults for any schema which has them. If the defaults
+      // for some reason has more then the max only set the max number
+      // of defaults (not sure why a someone define more...
+      // but whatever). Also if a schema.name is already set then don't
+      // set anything.
+      _(vis.type.schemas.all)
+      .filter(function (schema) {
+        return _.isArray(schema.defaults) && schema.defaults.length > 0;
+      })
+      .each(function (schema) {
+        if (!self.bySchemaName[schema.name]) {
+          var defaults = schema.defaults.slice(0, schema.max);
+          _.each(defaults, function (def) {
+            self.push(new AggConfig(vis, {
+              schema: schema.name,
+              type: def
+            }));
+          });
+        }
+      });
+
     }
 
     AggConfigs.prototype.toDsl = function () {

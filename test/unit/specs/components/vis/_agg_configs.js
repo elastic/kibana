@@ -9,6 +9,7 @@ define(function (require) {
     var AggConfigs;
     var SpiedAggConfig;
     var indexPattern;
+    var Schemas;
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
@@ -23,6 +24,7 @@ define(function (require) {
       AggConfigs = Private(require('components/vis/_agg_configs'));
       Registry = require('utils/registry/registry');
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+      Schemas = Private(require('components/vis_types/_schemas'));
     }));
 
     it('extends Registry', function () {
@@ -60,6 +62,51 @@ define(function (require) {
 
         expect(ac).to.have.length(2);
         expect(SpiedAggConfig).to.have.property('callCount', 1);
+      });
+
+      describe('defaults', function () {
+        var vis;
+        beforeEach(function () {
+          vis = {
+            type: {
+              schemas: new Schemas([
+                {
+                  group: 'metrics',
+                  name: 'metric',
+                  title: 'Simple',
+                  min: 1,
+                  max: 2,
+                  defaults: [ 'count', 'avg', 'sum' ]
+                },
+                {
+                  group: 'buckets',
+                  name: 'segment',
+                  title: 'Example',
+                  min: 0,
+                  max: 1,
+                  defaults: [ 'terms', 'fitlers' ]
+                }
+              ])
+            }
+          };
+        });
+
+        it('should only set the number of defaults defined by the max', function () {
+          var ac = new AggConfigs(vis);
+          expect(ac.bySchemaName['metric']).to.have.length(2);
+        });
+
+        it('should set the defaults defined in the schema when none exist', function () {
+          var ac = new AggConfigs(vis);
+          expect(ac).to.have.length(3);
+        });
+
+        it('should NOT set the defaults defined in the schema when some exist', function () {
+          var ac = new AggConfigs(vis, [{ schema: 'segment', type: 'date_histogram' }]);
+          expect(ac).to.have.length(3);
+          expect(ac.bySchemaName['segment'][0].type.name).to.equal('date_histogram');
+        });
+
       });
     });
 
