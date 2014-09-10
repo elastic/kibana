@@ -48,7 +48,36 @@ define([
       description: 'A statistical panel for displaying aggregations using the Elastic Search statistical facet query.'
     };
 
-    $scope.modes = ['count','min','max','mean','total','variance','std_deviation','sum_of_squares'];
+    $scope.modes = [
+      {
+        'name': 'count',
+        'format': function (value, format_string) { return numeral(value).format('0,0'); }
+      },
+      {
+        'name': 'min',
+        'format': function (value, format_string) { return numeral(value).format(format_string); }
+      },
+      {
+        'name': 'max',
+        'format': function (value, format_string) { return numeral(value).format(format_string); }
+      },
+      {
+        'name': 'total',
+        'format': function (value, format_string) { return numeral(value).format(format_string); }
+      },
+      {
+        'name': 'variance',
+        'format': function (value, format_string) { return numeral(value).format(format_string) + "²"; }
+      },
+      {
+        'name': 'std_deviation',
+        'format': function (value, format_string) { return numeral(value).format(format_string); }
+      },
+      {
+        'name': 'sum_of_squares',
+        'format': function (value, format_string) { return numeral(value).format(format_string) + "²"; }
+      },
+    ];
 
     var defaults = {
       queries     : {
@@ -166,9 +195,12 @@ define([
           return obj;
         });
 
+        var format = _.find( $scope.modes, function (mode) { return mode.name == $scope.panel.mode; } ).format;
+
         $scope.data = {
           value: value,
-          rows: rows
+          rows: rows,
+          format: format
         };
 
         console.log($scope.data);
@@ -192,19 +224,22 @@ define([
   });
 
   module.filter('formatstats', function(){
-    return function (value,format) {
+    return function (value,format,stat) {
+      if (stat == undefined) // Catch a weird bug in Angular.
+        return;
+
       switch (format) {
       case 'money':
-        value = numeral(value).format('$0,0.00');
+        value = stat.format(value, '$0,0.00');
         break;
       case 'bytes':
-        value = numeral(value).format('0.00b');
+        value = stat.format(value, '0.00b');
         break;
       case 'float':
-        value = numeral(value).format('0.000');
+        value = stat.format(value, '0.000');
         break;
       default:
-        value = numeral(value).format('0,0');
+        value = stat.format(value, '0,0');
       }
       return value;
     };
