@@ -125,6 +125,8 @@ define(function (require) {
       d3.selectAll('.y.axis').attr('transform', 'translate(' + (length + 2) + ',' + margin.top + ')');
     };
 
+    // Return a function that resizes layout divs and
+    // adds css flexbox values to fit axis labels
     YAxis.prototype.resizeAxisLayoutForLabels = function () {
       var self = this;
       var visEl = $(self.el);
