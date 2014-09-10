@@ -8,7 +8,6 @@ define(function (require) {
       if (query.query_string && query.query_string.query) {
         return query.query_string.query;
       }
-
       return JSON.stringify(query);
     }
 

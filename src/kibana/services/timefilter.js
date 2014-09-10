@@ -62,10 +62,6 @@ define(function (require) {
       }()));
     }
 
-    Timefilter.prototype.enabled = function (state) {
-      this.enabled = !!state;
-    };
-
     Timefilter.prototype.get = function (indexPattern) {
       var filter;
       var timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, {name: indexPattern.timeFieldName});

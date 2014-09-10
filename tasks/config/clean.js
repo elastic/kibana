@@ -6,19 +6,18 @@ module.exports = function (grunt) {
     unneeded_source_in_build: {
       src: [
         // select all top level folders in bower_components
-        '<%= build %>/bower_components/*',
+        '<%= build %>/kibana/public/bower_components/*',
         // exclude the following top level components
-        '!<%= build %>/bower_components/' + notIncludedComponents,
-
+        '!<%= build %>/kibana/public/bower_components/' + notIncludedComponents,
         // remove the contents of K4D3, font-awesome, and requirejs except necessary files
-        '<%= build %>/bower_components/' + notIncludedComponents + '/*',
-        '!<%= build %>/bower_components/requirejs/require.js',
-        '!<%= build %>/bower_components/font-awesome/fonts',
-
-        '<%= build %>/**/_empty_',
-        '<%= build %>/**/*.less',
-        '<%= appBuild %>/{css-builder,normalize}.js',
-        '<%= app %>/{css-builder,normalize}.js',
+        '<%= build %>/kibana/public/bower_components/' + notIncludedComponents + '/*',
+        '!<%= build %>/kibana/public/bower_components/requirejs/require.js',
+        '!<%= build %>/kibana/public/bower_components/font-awesome/fonts',
+        '<%= build %>/kibana/public/**/_empty_',
+        '<%= build %>/kibana/public/**/*.less',
+        '<%= build %>/kibana/public/config',
+        '<%= build %>/kibana/public/{css-builder,normalize}.js',
+        '<%= app %>/public/{css-builder,normalize}.js',
       ]
     }
   };

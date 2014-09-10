@@ -38,6 +38,14 @@ module.exports = function DevServer(opts) {
     proxy.web(req, res, { target: 'http://localhost:' + (process.env.ES_PORT || 9200) });
   });
 
+  // Kibana Backend Proxy
+  app.use(function (req, res, next) {
+    // Don't proxy test requests
+    if (/^\/(test|src|node_modules)/.test(req.url)) return next();
+    // Proxy everything else to the Kibana backend
+    proxy.web(req, res, { target: 'http://localhost:5601' });
+  });
+
   app.use(connect.static(ROOT));
 
   // respond to the "maybe_start_server" pings

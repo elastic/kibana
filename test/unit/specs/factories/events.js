@@ -4,10 +4,6 @@ define(function (require) {
   var sinon = require('test_utils/auto_release_sinon');
   require('services/private');
 
-
-  // Load kibana
-  require('index');
-
   describe('Events', function () {
     require('test_utils/no_digest_promises').activateForSuite();
 

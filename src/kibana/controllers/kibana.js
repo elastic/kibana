@@ -8,11 +8,12 @@ define(function (require) {
 
   require('components/config/config');
   require('components/courier/courier');
-  require('components/notify/notify');
-  require('components/state_management/app_state_factory');
   require('components/filter_bar/filter_bar');
-  require('components/storage/storage');
+  require('components/notify/notify');
   require('components/persisted_log/persisted_log');
+  require('components/state_management/app_state_factory');
+  require('components/storage/storage');
+  require('components/url/url');
   require('directives/click_focus');
   require('directives/info');
   require('directives/spinner');

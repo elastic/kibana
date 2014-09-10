@@ -4,9 +4,6 @@ define(function (require) {
 
   // Load the kibana app dependencies.
   require('angular-route');
-
-  // Load kibana and its applications
-  require('index');
   require('components/typeahead/typeahead');
 
   // TODO: This should not be needed, timefilter is only included here, it should move

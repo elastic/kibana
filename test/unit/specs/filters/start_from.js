@@ -3,9 +3,6 @@ define(function (require) {
 
   // Load the kibana app dependencies.
   require('angular-route');
-
-  // Load kibana and its applications
-  require('index');
   require('filters/start_from');
 
   var filter;

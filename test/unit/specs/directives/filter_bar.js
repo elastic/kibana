@@ -9,8 +9,6 @@ define(function (require) {
   var removeFilter = require('components/filter_bar/lib/removeFilter');
   var removeAll = require('components/filter_bar/lib/removeAll');
 
-  // Load kibana
-  require('index');
   require('components/filter_bar/filter_bar');
 
   describe('Filter Bar Directive', function () {

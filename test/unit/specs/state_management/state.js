@@ -3,9 +3,6 @@ define(function (require) {
   var sinon = require('sinon/sinon');
   require('services/private');
 
-  // Load kibana
-  require('index');
-
   describe('State Management', function () {
     var $rootScope, $location, State, Events;
 
