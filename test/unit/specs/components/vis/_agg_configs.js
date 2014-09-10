@@ -40,7 +40,7 @@ define(function (require) {
         });
 
         var ac = new AggConfigs(vis);
-        expect(ac).to.have.length(0);
+        expect(ac).to.have.length(1);
       });
 
       it('converts configStates into AggConfig objects if they are not already', function () {
@@ -60,8 +60,8 @@ define(function (require) {
           })
         ]);
 
-        expect(ac).to.have.length(2);
-        expect(SpiedAggConfig).to.have.property('callCount', 1);
+        expect(ac).to.have.length(3);
+        expect(SpiedAggConfig).to.have.property('callCount', 3);
       });
 
       describe('defaults', function () {
@@ -187,7 +187,7 @@ define(function (require) {
           }
         }(vis.aggs.toDsl()));
 
-        expect(aggInfos).to.have.length(0);
+        expect(aggInfos).to.have.length(1);
       });
 
       it('skips aggs that don\'t have a dsl representation', function () {

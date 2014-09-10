@@ -25,21 +25,23 @@ define(function (require) {
       // of defaults (not sure why a someone define more...
       // but whatever). Also if a schema.name is already set then don't
       // set anything.
-      _(vis.type.schemas.all)
-      .filter(function (schema) {
-        return _.isArray(schema.defaults) && schema.defaults.length > 0;
-      })
-      .each(function (schema) {
-        if (!self.bySchemaName[schema.name]) {
-          var defaults = schema.defaults.slice(0, schema.max);
-          _.each(defaults, function (def) {
-            self.push(new AggConfig(vis, {
-              schema: schema.name,
-              type: def
-            }));
-          });
-        }
-      });
+      if (vis && vis.type && vis.type.schemas && vis.type.schemas.all) {
+        _(vis.type.schemas.all)
+        .filter(function (schema) {
+          return _.isArray(schema.defaults) && schema.defaults.length > 0;
+        })
+        .each(function (schema) {
+          if (!self.bySchemaName[schema.name]) {
+            var defaults = schema.defaults.slice(0, schema.max);
+            _.each(defaults, function (def) {
+              self.push(new AggConfig(vis, {
+                schema: schema.name,
+                type: def
+              }));
+            });
+          }
+        });
+      }
 
     }
 
