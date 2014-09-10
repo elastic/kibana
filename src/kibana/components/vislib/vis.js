@@ -46,7 +46,7 @@ define(function (require) {
           error.message === 'The height and/or width of this container is too small for this chart.') {
           this.handler.error(error.message);
         } else {
-          console.group(error.message);
+          console.log(error.message);
         }
       }
 
