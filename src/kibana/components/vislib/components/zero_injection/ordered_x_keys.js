@@ -10,6 +10,13 @@ define(function (require) {
       // Returns an array x axis values
       return _.chain(objKeys)
         .pairs()
+        .sortBy(function (d) {
+          // sortBy number
+          if (d[1].isNumber) {
+            return +d[0];
+          }
+          return;
+        })
         .map(function (d) {
           return d[1].isNumber ? +d[0] : d[0];
         })

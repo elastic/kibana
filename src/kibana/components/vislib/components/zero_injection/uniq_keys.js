@@ -16,7 +16,7 @@ define(function (require) {
         { index: i, isNumber: _.isNumber(key) } : { index: Math.max(i, uniqueXValues[key].index), isNumber: _.isNumber(key) };
       });
 
-      // returns an object with unique x values in the correct order
+      // returns an object with unique x values
       return uniqueXValues;
     };
   };
