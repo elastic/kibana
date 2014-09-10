@@ -24,8 +24,8 @@ define(function (require) {
       return d3.select(this.chartEl).call(this.draw());
     };
 
-    Chart.prototype.classify = function (label) {
-      return 'color ' + Legend.prototype.classify.call(null, label);
+    Chart.prototype.colorToClass = function (label) {
+      return 'color ' + Legend.prototype.colorToClass.call(null, label);
     };
 
     return Chart;

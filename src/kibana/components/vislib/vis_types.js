@@ -6,4 +6,5 @@ define(function (require) {
       line: Private(require('components/vislib/visualizations/line_chart'))
     };
   };
+
 });

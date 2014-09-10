@@ -17,77 +17,84 @@ define(function (require) {
       LineChart.Super.apply(this, arguments);
       // Line chart specific attributes
       this._attr = _.defaults(vis._attr || {}, {
-        color: this.vis.data.getColorFunc(),
         interpolate: 'linear',
-        offset: 'zero',
-        xValue: function (d, i) { return d.x; },
-        yValue: function (d, i) { return d.y; },
-        dispatch: d3.dispatch('brush', 'click', 'hover', 'mouseenter', 'mouseleave', 'mouseover', 'mouseout'),
-        line: d3.svg.line()
-          .interpolate(this.interpolate)
-          .x(this.xValue)
-          .y(this.yValue),
-        stack: this._attr.stack.offset(this.offset)
+        xValue: function (d) { return d.x; },
+        yValue: function (d) { return d.y; },
+        dispatch: d3.dispatch('brush', 'click', 'hover', 'mouseenter', 'mouseleave', 'mouseover', 'mouseout')
       });
     }
 
-    LineChart.prototype.addCircles = function (svg, layers) {
-      var color = this._attr.color;
+    LineChart.prototype.addCircles = function (svg, data) {
+      var self = this;
+      var color = this.vis.data.getColorFunc();
       var xScale = this.vis.xAxis.xScale;
       var yScale = this.vis.yAxis.yScale;
-      var layer;
+      var ordered = this.vis.data.get('ordered');
+      var circles;
       var circle;
 
-      layer = svg.selectAll('.layer')
-        .data(layers)
+      circles = svg.selectAll('.points')
+        .data(data)
         .enter()
         .append('g')
-        .attr('class', function (d) {
-          return this.classify(color(d.label));
-        })
-        .attr('stroke', function (d) {
-          return color(d.label);
-        });
+        .attr('class', 'points');
 
-      circle = layer.selectAll('.point')
-        .data(function (d) { return d.values; })
+      circle = circles.selectAll('.point').append('circle')
+        .data(function (d) { return d; })
         .enter()
         .append('circle')
         .attr('class', function (d) {
-          return this.classify(color(d.label));
+          return self.colorToClass(color(d.label));
         })
-        .attr('fill', 'none')
-        .attr('stroke', function (d) {
-          return color(d.label);
-        })
-        .attr('stroke-width', 3)
         .attr('cx', function (d) {
+          if (!ordered) {
+            return xScale(d.x) + xScale.rangeBand() / 2;
+          }
           return xScale(d.x);
         })
         .attr('cy', function (d) {
           return yScale(d.y);
         })
-        .attr('r', 8);
+        .attr('r', 8)
+        .attr('fill', 'none')
+        .attr('stroke', function (d) {
+          return color(d.label);
+        })
+        .attr('stroke-width', 3);
 
-      return layer;
+      return circles;
     };
 
-    LineChart.prototype.addLines = function (svg, layers) {
-      var color = this._attr.color;
+    LineChart.prototype.addLines = function (svg, data) {
+      var self = this;
+      var xScale = this.vis.xAxis.xScale;
+      var yScale = this.vis.yAxis.yScale;
+      var xAxisFormatter = this.vis.data.get('xAxisFormatter');
+      var color = this.vis.data.getColorFunc();
+      var ordered = this.vis.data.get('ordered');
+      var line = d3.svg.line()
+        .interpolate(this._attr.interpolate)
+        .x(function (d) {
+          if (!ordered) {
+            return xScale(d.x) + xScale.rangeBand() / 2;
+          }
+          return xScale(d.x);
+        })
+        .y(function (d) { return yScale(d.y); });
       var lines;
 
       lines = svg.selectAll('.lines')
-        .data(layers)
+        .data(data)
         .enter()
         .append('g')
         .attr('class', 'lines');
 
       lines.append('path')
         .attr('class', function (d) {
-          return this.classify(color(d.label));
+          return self.colorToClass(color(d.label));
         })
         .attr('d', function (d) {
-          return this.line(d.values);
+          return line(d.values);
         })
         .attr('fill', 'none')
         .attr('stroke', function (d) {
@@ -109,11 +116,23 @@ define(function (require) {
       var svg;
       var width;
       var height;
-      var layers;
       var lines;
+      var circles;
 
       return function (selection) {
         selection.each(function (data) {
+
+          var layers = data.series.map(function (d) {
+            var label = d.label;
+            return d.values.map(function (e, i) {
+              return {
+                label: label,
+                x    : self._attr.xValue.call(d.values, e, i),
+                y    : self._attr.yValue.call(d.values, e, i)
+              };
+            });
+          });
+
           // Get the width and height
           width = elWidth - margin.left - margin.right;
           height = elHeight - margin.top - margin.bottom;
@@ -134,8 +153,9 @@ define(function (require) {
             .append('g')
             .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-          // add bars
-          lines = self.addLines(svg, layers);
+          // add lines
+          lines = self.addLines(svg, data.series);
+          circles = self.addCircles(svg, layers);
 
           // chart base line
           var line = svg.append('line')
@@ -151,5 +171,6 @@ define(function (require) {
       };
     };
 
+    return LineChart;
   };
 });
