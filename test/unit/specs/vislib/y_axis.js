@@ -145,7 +145,7 @@ define(function (require) {
     });
 
     afterEach(function () {
-      //el.remove();
+      el.remove();
     });
 
     describe('render Method', function () {

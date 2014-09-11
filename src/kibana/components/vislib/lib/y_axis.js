@@ -89,7 +89,6 @@ define(function (require) {
           height = $(this).height() - margin.top - margin.bottom;
 
           // Validate whether width and height are not 0 or `NaN`
-          console.log('y-axis', width, height);
           self.validateWidthandHeight(width, height);
 
           var yAxis = self.getYAxis(height);

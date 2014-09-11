@@ -85,10 +85,13 @@ define(function (require) {
           .attr('class', 'vis-wrapper');
         el.append('div')
           .attr('class', 'y-axis-title')
-          .style('height', '20px');
+          .style('height', '20px')
+          .style('width', '20px');
         el.append('div')
           .attr('class', 'x-axis-title')
-          .style('height', '20px');
+          .style('height', '20px')
+          .style('width', '20px');
+
 
         dataObj = new Data(data, {});
         xTitle = dataObj.get('xAxisLabel');
