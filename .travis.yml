@@ -12,4 +12,4 @@ notifications:
   - rashid.khan@elasticsearch.com
   hipchat:
     rooms:
-      secure: lcRkWO1DIrU778TuklKrLG9caBeTtc/zeyM36zJo1Ms4skTALNWk/+xayrebbAABS0AekRG5FlAHoRhx+Z57GcUJGe1y3SRTh5qTVRQmSODTv7lMyeu+md8B5yNY4+5hINrwzWO4NJr/PIrMAlnHIGIADerZRsZWSbf7xvqUcl0=
+      secure: BYXpMi8WiOM/ONeqnMqruhr/OUW93rVJ38sltpARoUQJSMcZYecnSZDWIthTWy3cOIECn4gRWcFYMxdF9VTTOe0dg2m4bGg+EnsxA2+Exjv3s8JPFJOczqBGnJud8DPOOCTVxKIAQMbfd6qvudAQaii7JknOGHjSnwNWT/IL6rI=
