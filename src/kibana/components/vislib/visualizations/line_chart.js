@@ -24,43 +24,126 @@ define(function (require) {
       });
     }
 
+    // Response to `click` and `hover` events
+    LineChart.prototype.eventResponse = function (d, i) {
+      return {
+        value     : this._attr.yValue(d, i),
+        point     : d,
+        label     : d.label,
+        color     : this.vis.data.getColorFunc()(d.label),
+        pointIndex: i,
+        series    : this.chartData.series,
+        config    : this._attr,
+        data      : this.chartData,
+        e         : d3.event
+      };
+    };
+
+    LineChart.prototype.addCircleEvents = function (circles) {
+      var self = this;
+      var tooltip = this.vis.tooltip;
+      var isTooltip = this._attr.addTooltip;
+      var dispatch = this._attr.dispatch;
+
+      circles
+        .on('mouseover.circle', function (d, i) {
+          d3.select(this)
+            .classed('hover', true)
+            .style('stroke', '#333')
+            .style('cursor', 'pointer');
+
+          dispatch.hover(self.eventResponse(d, i));
+          d3.event.stopPropagation();
+        })
+        .on('click.circle', function (d, i) {
+          dispatch.click(self.eventResponse(d, i));
+          d3.event.stopPropagation();
+        })
+        .on('mouseout.circle', function () {
+          d3.select(this).classed('hover', false)
+            .style('stroke', null);
+        });
+
+      // Add tooltip
+      if (isTooltip) {
+        circles.call(tooltip.render());
+      }
+    };
+
+    // Add brush to the svg
+    LineChart.prototype.addBrush = function (xScale, svg) {
+      var self = this;
+
+      // Brush scale
+      var brush = d3.svg.brush()
+        .x(xScale)
+        .on('brushend', function brushEnd() {
+          // response returned on brush
+          return self._attr.dispatch.brush({
+            range: brush.extent(),
+            config: self._attr,
+            e: d3.event,
+            data: self.chartData
+          });
+        });
+
+      // if `addBrushing` is true, add brush canvas
+      if (self._attr.addBrushing) {
+        svg.append('g')
+          .attr('class', 'brush')
+          .call(brush)
+          .selectAll('rect')
+          .attr('height', this._attr.height - this._attr.margin.top - this._attr.margin.bottom);
+      }
+    };
+
     LineChart.prototype.addCircles = function (svg, data) {
       var self = this;
       var color = this.vis.data.getColorFunc();
       var xScale = this.vis.xAxis.xScale;
       var yScale = this.vis.yAxis.yScale;
       var ordered = this.vis.data.get('ordered');
+      var layer;
       var circles;
-      var circle;
 
-      circles = svg.selectAll('.points')
+      layer = svg.selectAll('.points')
         .data(data)
         .enter()
         .append('g')
         .attr('class', 'points');
 
-      circle = circles.selectAll('.point').append('circle')
-        .data(function (d) { return d; })
-        .enter()
+      // Append the bars
+      circles = layer.selectAll('rect')
+        .data(function (d) {
+          return d;
+        });
+
+      // exit
+      circles.exit().remove();
+
+      // enter
+      circles.enter()
         .append('circle')
         .attr('class', function (d) {
           return self.colorToClass(color(d.label));
         })
-        .attr('cx', function (d) {
-          if (!ordered) {
-            return xScale(d.x) + xScale.rangeBand() / 2;
-          }
-          return xScale(d.x);
-        })
-        .attr('cy', function (d) {
-          return yScale(d.y);
-        })
-        .attr('r', 8)
         .attr('fill', 'none')
         .attr('stroke', function (d) {
           return color(d.label);
         })
-        .attr('stroke-width', 3);
+        .attr('stroke-width', 1);
+
+      circles
+        .attr('cx', function (d) {
+          if (ordered && ordered.date) {
+            return xScale(d.x);
+          }
+          return xScale(d.x) + xScale.rangeBand() / 2;
+        })
+        .attr('cy', function (d) {
+          return yScale(d.y);
+        })
+        .attr('r', 4);
 
       return circles;
     };
@@ -75,10 +158,10 @@ define(function (require) {
       var line = d3.svg.line()
         .interpolate(this._attr.interpolate)
         .x(function (d) {
-          if (!ordered) {
-            return xScale(d.x) + xScale.rangeBand() / 2;
+          if (ordered && ordered.date) {
+            return xScale(d.x);
           }
-          return xScale(d.x);
+          return xScale(d.x) + xScale.rangeBand() / 2;
         })
         .y(function (d) { return yScale(d.y); });
       var lines;
@@ -100,9 +183,21 @@ define(function (require) {
         .attr('stroke', function (d) {
           return color(d.label);
         })
-        .attr('stroke-width', 3);
+        .attr('stroke-width', 2);
 
       return lines;
+    };
+
+    LineChart.prototype.addClipPath = function (svg, width, height) {
+      // Creating clipPath
+      return svg.attr('clip-path', 'url(#chart-area)')
+        .append('clipPath')
+        .attr('id', 'chart-area')
+        .append('rect')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('width', width)
+        .attr('height', height);
     };
 
     LineChart.prototype.draw = function () {
@@ -112,6 +207,7 @@ define(function (require) {
       var margin = this._attr.margin;
       var elWidth = this._attr.width = $elem.width();
       var elHeight = this._attr.height = $elem.height();
+      var xScale = this.vis.xAxis.xScale;
       var div;
       var svg;
       var width;
@@ -153,9 +249,20 @@ define(function (require) {
             .append('g')
             .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
+          // add clipPath to hide circles when they go out of bounds
+          self.addClipPath(svg, width, height);
+
+          // addBrush canvas
+          self.addBrush(xScale, svg);
+
           // add lines
           lines = self.addLines(svg, data.series);
+
+          // add circles
           circles = self.addCircles(svg, layers);
+
+          // add click and hover events to circles
+          self.addCircleEvents(circles);
 
           // chart base line
           var line = svg.append('line')
