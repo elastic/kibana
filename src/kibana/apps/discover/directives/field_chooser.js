@@ -19,11 +19,10 @@ define(function (require) {
       scope: {
         fields: '=',
         toggle: '=',
-        refresh: '=',
         data: '=',
         state: '=',
-        updateFilterInQuery: '=filter',
-        searchSource: '='
+        searchSource: '=',
+        updateFilterInQuery: '=filter'
       },
       template: html,
       controller: function ($scope) {
@@ -165,8 +164,7 @@ define(function (require) {
               count: 5,
               grouped: false
             });
-            var indexPattern = $scope.searchSource.get('index');
-            indexPattern.popularizeField(field.name, 1);
+            $scope.increaseFieldCounter(field, 1);
           } else {
             delete field.details;
           }

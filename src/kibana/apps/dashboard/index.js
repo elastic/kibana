@@ -25,7 +25,7 @@ define(function (require) {
 
   require('routes')
   .when('/dashboard', {
-    templateUrl: 'kibana/apps/dashboard/index.html',
+    template: require('text!apps/dashboard/index.html'),
     resolve: {
       dash: function (savedDashboards) {
         return savedDashboards.get();
@@ -33,7 +33,7 @@ define(function (require) {
     }
   })
   .when('/dashboard/:id', {
-    templateUrl: 'kibana/apps/dashboard/index.html',
+    template: require('text!apps/dashboard/index.html'),
     resolve: {
       dash: function (savedDashboards, Notifier, $route, $location, courier) {
         return savedDashboards.get($route.current.params.id)
@@ -42,7 +42,7 @@ define(function (require) {
     }
   });
 
-  app.directive('dashboardApp', function (Notifier, courier, savedVisualizations, appStateFactory, timefilter) {
+  app.directive('dashboardApp', function (Notifier, courier, savedVisualizations, appStateFactory, timefilter, kbnUrl) {
     return {
       controller: function ($scope, $route, $routeParams, $location, configFile) {
         var notify = new Notifier({
@@ -113,7 +113,7 @@ define(function (require) {
           .then(function () {
             notify.info('Saved Dashboard as "' + dash.title + '"');
             if (dash.id !== $routeParams.id) {
-              $location.url('/dashboard/' + encodeURIComponent(dash.id));
+              kbnUrl.change('/dashboard/{{id}}', {id: dash.id});
             }
           })
           .catch(notify.fatal);

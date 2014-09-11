@@ -1,9 +1,7 @@
 require.config({
-  baseUrl: './kibana',
+  baseUrl: './',
   paths: {
-    kibana: './index',
-    config_file: '../config',
-
+    kibana: 'index',
     // special utils
     routes: 'utils/routes/index',
     errors: 'components/errors',
@@ -11,27 +9,27 @@ require.config({
     lodash: 'utils/_mixins',
 
     // bower_components
-    'angular-bindonce': '../bower_components/angular-bindonce/bindonce',
-    'angular-bootstrap': '../bower_components/angular-bootstrap/ui-bootstrap-tpls',
-    'angular-elastic': '../bower_components/angular-elastic/elastic',
-    'angular-route': '../bower_components/angular-route/angular-route',
-    'angular-ui-ace': '../bower_components/angular-ui-ace/ui-ace',
-    ace: '../bower_components/ace-builds/src-noconflict/ace',
-    angular: '../bower_components/angular/angular',
-    async: '../bower_components/async/lib/async',
-    bower_components: '../bower_components',
-    css: '../bower_components/require-css/css',
-    d3: '../bower_components/d3/d3',
-    elasticsearch: '../bower_components/elasticsearch/elasticsearch.angular',
-    faker: '../bower_components/Faker/faker',
-    file_saver: '../bower_components/FileSaver/FileSaver',
-    gridster: '../bower_components/gridster/dist/jquery.gridster',
-    inflection: '../bower_components/inflection/lib/inflection',
-    jquery: '../bower_components/jquery/dist/jquery',
-    jsonpath: '../bower_components/jsonpath/lib/jsonpath',
-    lodash_src: '../bower_components/lodash/dist/lodash',
-    moment: '../bower_components/moment/moment',
-    text: '../bower_components/requirejs-text/text'
+    'angular-bindonce': 'bower_components/angular-bindonce/bindonce',
+    'angular-bootstrap': 'bower_components/angular-bootstrap/ui-bootstrap-tpls',
+    'angular-elastic': 'bower_components/angular-elastic/elastic',
+    'angular-route': 'bower_components/angular-route/angular-route',
+    'angular-ui-ace': 'bower_components/angular-ui-ace/ui-ace',
+    ace: 'bower_components/ace-builds/src-noconflict/ace',
+    angular: 'bower_components/angular/angular',
+    async: 'bower_components/async/lib/async',
+    bower_components: 'bower_components',
+    css: 'bower_components/require-css/css',
+    d3: 'bower_components/d3/d3',
+    elasticsearch: 'bower_components/elasticsearch/elasticsearch.angular',
+    faker: 'bower_components/Faker/faker',
+    file_saver: 'bower_components/FileSaver/FileSaver',
+    gridster: 'bower_components/gridster/dist/jquery.gridster',
+    inflection: 'bower_components/inflection/lib/inflection',
+    jquery: 'bower_components/jquery/dist/jquery',
+    jsonpath: 'bower_components/jsonpath/lib/jsonpath',
+    lodash_src: 'bower_components/lodash/dist/lodash',
+    moment: 'bower_components/moment/moment',
+    text: 'bower_components/requirejs-text/text'
   },
   shim: {
     angular: {

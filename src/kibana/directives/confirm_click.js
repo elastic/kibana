@@ -4,7 +4,6 @@ define(function (require) {
     .directive('confirmClick', function () {
       return {
         restrict: 'A',
-        scope: {},
         link: function ($scope, $elem, attrs) {
           $elem.bind('click', function () {
             var message = attrs.confirmation || 'Are you sure?';

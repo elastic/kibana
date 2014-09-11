@@ -1,4 +1,16 @@
 module.exports = function (grunt) {
+  var kibana_server_tasks = [];
+  if (grunt.option('use-mri')) {
+    kibana_server_tasks = [
+      'stop:mri_server',
+      'run:mri_server'
+    ];
+  } else {
+    kibana_server_tasks = [
+      'stop:jruby_server',
+      'run:jruby_server'
+    ];
+  }
   var config = {
     test: {
       files: [
@@ -26,6 +38,16 @@ module.exports = function (grunt) {
         '<%= testUtilsDir %>/istanbul_reporter/report.clientside.jade'
       ],
       tasks: ['jade:clientside']
+    },
+    kibana_server: {
+      files: [
+        'src/server/**/*.rb',
+        'src/server/**/*.yml'
+      ],
+      tasks: kibana_server_tasks,
+      options: {
+        spawn: false
+      }
     }
   };
 

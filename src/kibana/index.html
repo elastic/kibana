@@ -7,11 +7,11 @@
     <meta name="viewport" content="width=device-width">
     <title>Kibana 4</title>
     <!-- load the root require context -->
-    <script src="bower_components/requirejs/require.js"></script>
+    <script src="/bower_components/requirejs/require.js"></script>
 
-    <script src="kibana/require.config.js"></script>
+    <script src="/require.config.js"></script>
     <script>require(['kibana'], function (kibana) { kibana.init(); });</script>
-    <link rel="stylesheet" href="kibana/styles/main.css" >
+    <link rel="stylesheet" href="/styles/main.css" >
   </head>
   <body ng-controller="kibana" ng-class="'application-'+activeApp">
     <kbn-notifications list="notifList"></kbn-notifications>

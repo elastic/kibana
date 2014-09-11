@@ -9,6 +9,7 @@ define(function (require) {
     var AggConfigs;
     var SpiedAggConfig;
     var indexPattern;
+    var Schemas;
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
@@ -23,6 +24,7 @@ define(function (require) {
       AggConfigs = Private(require('components/vis/_agg_configs'));
       Registry = require('utils/registry/registry');
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+      Schemas = Private(require('components/vis_types/_schemas'));
     }));
 
     it('extends Registry', function () {
@@ -38,7 +40,7 @@ define(function (require) {
         });
 
         var ac = new AggConfigs(vis);
-        expect(ac).to.have.length(0);
+        expect(ac).to.have.length(1);
       });
 
       it('converts configStates into AggConfig objects if they are not already', function () {
@@ -58,8 +60,60 @@ define(function (require) {
           })
         ]);
 
-        expect(ac).to.have.length(2);
-        expect(SpiedAggConfig).to.have.property('callCount', 1);
+        expect(ac).to.have.length(3);
+        expect(SpiedAggConfig).to.have.property('callCount', 3);
+      });
+
+      describe('defaults', function () {
+        var vis;
+        beforeEach(function () {
+          vis = {
+            type: {
+              schemas: new Schemas([
+                {
+                  group: 'metrics',
+                  name: 'metric',
+                  title: 'Simple',
+                  min: 1,
+                  max: 2,
+                  defaults: [
+                    { schema: 'metric', type: 'count' },
+                    { schema: 'metric', type: 'avg' },
+                    { schema: 'metric', type: 'sum' }
+                  ]
+                },
+                {
+                  group: 'buckets',
+                  name: 'segment',
+                  title: 'Example',
+                  min: 0,
+                  max: 1,
+                  defaults: [
+                    { schema: 'segment', type: 'terms' },
+                    { schema: 'segment', type: 'filters' }
+                  ]
+                }
+              ])
+            }
+          };
+        });
+
+        it('should only set the number of defaults defined by the max', function () {
+          var ac = new AggConfigs(vis);
+          expect(ac.bySchemaName['metric']).to.have.length(2);
+        });
+
+        it('should set the defaults defined in the schema when none exist', function () {
+          var ac = new AggConfigs(vis);
+          expect(ac).to.have.length(3);
+        });
+
+        it('should NOT set the defaults defined in the schema when some exist', function () {
+          var ac = new AggConfigs(vis, [{ schema: 'segment', type: 'date_histogram' }]);
+          expect(ac).to.have.length(3);
+          expect(ac.bySchemaName['segment'][0].type.name).to.equal('date_histogram');
+        });
+
       });
     });
 
@@ -140,7 +194,7 @@ define(function (require) {
           }
         }(vis.aggs.toDsl()));
 
-        expect(aggInfos).to.have.length(0);
+        expect(aggInfos).to.have.length(1);
       });
 
       it('skips aggs that don\'t have a dsl representation', function () {

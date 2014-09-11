@@ -18,7 +18,10 @@ define(function (require) {
           name: 'metric',
           title: 'Y-Axis',
           min: 1,
-          max: 1
+          max: 1,
+          defaults: [
+            { schema: 'metric', type: 'count' }
+          ]
         },
         {
           group: 'buckets',

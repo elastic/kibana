@@ -17,7 +17,8 @@ module.exports = function (grunt) {
       ignores: [
         'node_modules/*',
         'dist/*',
-        'sample/*'
+        'sample/*',
+        '<%= src %>/kibana/bower_components/**/*'
       ]
     }
   };

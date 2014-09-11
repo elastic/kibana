@@ -29,23 +29,28 @@ define(function (require) {
           if ($scope.mapping[column] && !$scope.mapping[column].indexed) return;
 
           var sorting = $scope.sorting;
+          var defaultClass = ['fa', 'fa-sort', 'table-header-sortchange'];
 
-          if (!sorting) return [];
+          if (!sorting) return defaultClass;
 
           if (column === sorting[0]) {
             return ['fa', sorting[1] === 'asc' ? 'fa-sort-up' : 'fa-sort-down'];
           } else {
-            return ['fa', 'fa-sort', 'table-header-sortchange'];
+            return defaultClass;
           }
         };
 
         $scope.moveLeft = function (column) {
           var index = _.indexOf($scope.columns, column);
+          if (index === 0) return;
+
           _.move($scope.columns, index, --index);
         };
 
         $scope.moveRight = function (column) {
           var index = _.indexOf($scope.columns, column);
+          if (index === $scope.columns.length - 1) return;
+
           _.move($scope.columns, index, ++index);
         };
 
@@ -112,7 +117,6 @@ define(function (require) {
     return {
       restrict: 'A',
       scope: {
-        fields: '=',
         columns: '=',
         filtering: '=',
         mapping: '=',
@@ -139,27 +143,14 @@ define(function (require) {
           $scope.maxLength = 250;
         }
 
-
-        // for now, rows are "tracked" by their index, but this could eventually
-        // be configured so that changing the order of the rows won't prevent
-        // them from staying open on update
-        function rowId(row) {
-          var id = $scope.rows.indexOf(row);
-          return ~id ? id : null;
-        }
-
-        // inverse of rowId()
-        function rowForId(id) {
-          return $scope.rows[id];
-        }
-
         // toggle display of the rows details, a full list of the fields from each row
-        $scope.toggleRow = function (row, event) {
+        $scope.toggleRow = function () {
+          var row = $scope.row;
           var id = row._id;
 
           $scope.open = !$scope.open;
 
-          var $tr = $(event.delegateTarget.parentElement);
+          var $tr = element;
           var $detailsTr = $tr.next();
 
           ///
@@ -169,7 +160,7 @@ define(function (require) {
           $detailsTr.toggle($scope.open);
 
           // Change the caret icon
-          var $toggleIcon = $($(event.delegateTarget).children('i')[0]);
+          var $toggleIcon = $(element.children().first().find('i')[0]);
           $toggleIcon.toggleClass('fa-caret-down');
           $toggleIcon.toggleClass('fa-caret-right');
 
@@ -207,7 +198,12 @@ define(function (require) {
           $scope.filtering(field, row._source[field] || row[field], operation);
         };
 
-        $scope.$watch('columns', function () {
+        $scope.$watch('columns', function (columns) {
+          element.empty();
+          createSummaryRow($scope.row, $scope.row._id);
+        });
+
+        $scope.$watch('timefield', function (timefield) {
           element.empty();
           createSummaryRow($scope.row, $scope.row._id);
         });
@@ -216,7 +212,7 @@ define(function (require) {
         function createSummaryRow(row, id) {
 
           var expandTd = $('<td>').html('<i class="fa fa-caret-right"></span>')
-            .attr('ng-click', 'toggleRow(row, $event)');
+            .attr('ng-click', 'toggleRow()');
           $compile(expandTd)($scope);
           element.append(expandTd);
 
@@ -240,11 +236,7 @@ define(function (require) {
          */
         function _displayField(el, row, field, truncate) {
           var val = _getValForField(row, field, truncate);
-          if (val instanceof DOMNode) {
-            el.append(val);
-          } else {
-            el.text(val);
-          }
+          el.text(val);
           return el;
         }
 
@@ -266,17 +258,9 @@ define(function (require) {
           // undefined and null should just be an empty string
           val = (val == null) ? '' : val;
 
-          // truncate
+          // truncate the column text, not the details
           if (typeof val === 'string' && val.length > $scope.maxLength) {
-            if (untruncate) {
-              var complete = val;
-              val = document.createElement('kbn-truncated');
-              val.setAttribute('orig', complete);
-              val.setAttribute('length', $scope.maxLength);
-              val = $compile(val)($scope)[0];// return the actual element
-            } else {
-              val = val.substring(0, $scope.maxLength) + '...';
-            }
+            val = val.substring(0, $scope.maxLength) + '...';
           }
 
           return val;
