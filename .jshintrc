@@ -24,7 +24,7 @@
   "sub": true,
   "unused": true,
 
-  "maxlen": 140,
+  "maxlen": 9999999999999999,
 
   "globals": {
     "define": true,
