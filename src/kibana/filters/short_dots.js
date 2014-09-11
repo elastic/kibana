@@ -4,7 +4,7 @@
 define(function (require) {
   var _ = require('lodash');
   require('modules')
-    .get('kbn/filters')
+    .get('kibana')
     .filter('shortDots', function (config) {
       return function (str) {
         if (!_.isString(str) || config.get('shortDots:enable') !== true) {

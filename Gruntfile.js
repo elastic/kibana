@@ -12,9 +12,12 @@ module.exports = function (grunt) {
     target: __dirname + '/target',  // location of the compressed build targets
     buildApp: __dirname + '/build/kibana', // build directory for the app
 
+    jrubyVersion: '1.7.14',
+    jrubyPath: __dirname + '/.jruby',
+
     unitTestDir: __dirname + '/test/unit',
     testUtilsDir: __dirname + '/test/utils',
-    bowerComponentsDir: __dirname + '/src/bower_components',
+    bowerComponentsDir: __dirname + '/src/kibana/bower_components',
 
     meta: {
       banner: '/*! <%= package.name %> - v<%= package.version %> - ' +

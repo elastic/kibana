@@ -66,7 +66,7 @@ define(function (require) {
         .append('li')
         .attr('class', function (d) {
           // class names reflect the color assigned to the labels
-          return 'color ' + self.classify(args.color(d));
+          return 'color ' + self.colorToClass(args.color(d));
         })
         .html(function (d) {
           // return the appropriate color for each dot
@@ -75,7 +75,7 @@ define(function (require) {
     };
 
     // Create a class name based on the colors assigned to each label
-    Legend.prototype.classify = function (name) {
+    Legend.prototype.colorToClass = function (name) {
       return 'c' + name.replace(/[#]/g, '');
     };
 
@@ -112,15 +112,12 @@ define(function (require) {
 
       visEl.selectAll('.color')
         .on('mouseover', function (d) {
-          var liClass = '.' + self.classify(self.color(d));
+          var liClass = '.' + self.colorToClass(self.color(d));
           visEl.selectAll('.color').style('opacity', self._attr.blurredOpacity);
           
           // select series on chart
           visEl.selectAll(liClass).style('opacity', self._attr.focusOpacity);
-
-        });
-
-      visEl.selectAll('.color')
+        })
         .on('mouseout', function () {
           visEl.selectAll('.color').style('opacity', self._attr.defaultOpacity);
         });

@@ -9,20 +9,12 @@ define(function (require) {
      * Append a y axis to the visualization
      * arguments:
      *  el => reference to DOM element
-     *  chartData => array(s) of x and y value objects
-     *  dataArray => flattened array of all value (x, y) objects
      *  _attr => visualization attributes
      */
     function YAxis(args) {
       this.el = args.el;
-      this.chartData = args.chartData;
-      this.dataArray = args.dataArray;
-      this._attr = _.defaults(args._attr || {}, {
-        // d3 stack function
-        stack: d3.layout.stack()
-          .x(function (d) { return d.x; })
-          .y(function (d) { return d.y; })
-      });
+      this.yMax = args.yMax;
+      this._attr = _.defaults(args._attr || {}, {});
     }
 
     _(YAxis.prototype).extend(ErrorHandler.prototype);
@@ -32,61 +24,8 @@ define(function (require) {
       d3.select(this.el).selectAll('.y-axis-div').call(this.draw());
     };
 
-    // Determine if data should be stacked
-    YAxis.prototype.isStacked = function () {
-      var data = this.chartData;
-
-      // if the length of the series array is > 1, stack is true
-      for (var i = 0; i < data.length; i++) {
-        if (data[i].series.length > 1) {
-          return true;
-        }
-      }
-      return false;
-    };
-
-    // Calculate the max y value from this.dataArray
-    YAxis.prototype.getYMaxValue = function () {
-      var self = this;
-      var arr = [];
-
-      // for each object in the dataArray,
-      // push the calculated y value to the initialized array (arr)
-      _.forEach(this.dataArray, function (series) {
-        arr.push(self.getYStackMax(series));
-      });
-
-      // return the largest value from the array
-      return _.max(arr);
-    };
-
-    // Calculate the y value from the value object
-    YAxis.prototype.getYStackMax = function (series) {
-      var self = this;
-
-      // Determine if the data should be stacked
-      if (this.isStacked()) {
-        // if true, stack data
-        series = this._attr.stack(series);
-      }
-
-      // Return the calculated y value
-      return d3.max(series, function (data) {
-        return d3.max(data, function (d) {
-          // if stacked, need to add d.y0 + d.y for the y value
-          if (self.isStacked()) {
-            return d.y0 + d.y;
-          }
-          return d.y;
-        });
-      });
-    };
-
     // Return the d3 y scale
     YAxis.prototype.getYScale = function (height) {
-      // save reference to max y value
-      this.yMax = this.getYMaxValue();
-
       // save reference to y scale
       this.yScale = d3.scale.linear()
         .domain([0, this.yMax])

@@ -192,7 +192,7 @@ define(function (require) {
         inject(function (d3, Private) {
           dataFactory = Private(require('components/vislib/lib/data'));
         });
-        rowIn = new dataFactory(rowsData);
+        rowIn = new dataFactory(rowsData, {});
       });
 
       it('should be a function', function () {
@@ -222,9 +222,9 @@ define(function (require) {
         inject(function (d3, Private) {
           dataFactory = Private(require('components/vislib/lib/data'));
         });
-        serIn = new dataFactory(seriesData);
-        rowIn = new dataFactory(rowsData);
-        colIn = new dataFactory(colsData);
+        serIn = new dataFactory(seriesData, {});
+        rowIn = new dataFactory(rowsData, {});
+        colIn = new dataFactory(colsData, {});
         serOut = serIn.flatten();
         rowOut = rowIn.flatten();
         colOut = colIn.flatten();

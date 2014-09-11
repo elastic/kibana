@@ -1,6 +1,5 @@
 define(function (require) {
   var _ = require('lodash');
-  var $ = require('jquery');
 
   return function HandlerBaseClass(d3, Private) {
     var Data = Private(require('components/vislib/lib/data'));
@@ -25,7 +24,7 @@ define(function (require) {
         return new Handler(vis);
       }
 
-      this.data = new Data(vis.data);
+      this.data = new Data(vis.data, vis._attr);
       this.vis = vis;
       this.el = vis.el;
       this.ChartClass = vis.ChartClass;
@@ -34,7 +33,6 @@ define(function (require) {
       });
 
       // Visualization constructors
-
       // Add the visualization layout
       this.layout = new Layout(this.el, this.data.injectZeros(), this._attr.type);
 
@@ -60,8 +58,7 @@ define(function (require) {
       // add a y axis
       this.yAxis = new YAxis({
         el: this.el,
-        chartData: this.data.chartData(),
-        dataArray: this.data.flatten(),
+        yMax: this.data.getYMaxValue(),
         _attr: this._attr
       });
 
@@ -72,7 +69,7 @@ define(function (require) {
       this.chartTitle = new ChartTitle(this.el);
 
       // Array of objects to render to the visualization
-      this.renderArray = [
+      this.renderArray = _.filter([
         this.layout,
         this.legend,
         this.tooltip,
@@ -80,7 +77,7 @@ define(function (require) {
         this.chartTitle,
         this.yAxis,
         this.xAxis
-      ];
+      ], Boolean);
     }
 
     // Render the visualization
@@ -91,7 +88,7 @@ define(function (require) {
 
       // Render objects in the render array
       _.forEach(this.renderArray, function (property) {
-        if (property && typeof property.render === 'function') {
+        if (typeof property.render === 'function') {
           property.render();
         }
       });
@@ -137,8 +134,7 @@ define(function (require) {
       this.removeAll(this.el);
 
       // Return an error wrapper DOM element
-      return d3.select(this.el)
-        .append('div')
+      return d3.select(this.el).append('div')
         // class name needs `chart` in it for the polling checkSize function
         // to continuously call render on resize
         .attr('class', 'chart error')

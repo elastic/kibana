@@ -1,4 +1,4 @@
-var bc = require('path').join(__dirname, '../../src/bower_components');
+var bc = require('path').join(__dirname, '../../src/kibana/bower_components');
 
 module.exports = {
   src: {

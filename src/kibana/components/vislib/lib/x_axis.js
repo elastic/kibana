@@ -52,60 +52,15 @@ define(function (require) {
       // if time, return a time domain
       if (ordered && ordered.date) {
         // Calculate the min date, max date, and time interval;
-        return this.getTimeDomain(scale, this.xValues, ordered);
+        return this.getTimeDomain(scale, ordered);
       }
       // return a nominal domain, i.e. array of x values
       return this.getOrdinalDomain(scale, this.xValues);
     };
 
     // Returns a time domain
-    XAxis.prototype.getTimeDomain = function (scale, xValues, ordered) {
-      var maxXValue = d3.max(xValues);
-      var timeInterval = ordered.interval;
-      // Take the min of the xValues or the min date sent on the ordered object
-      var minDate = Math.min(d3.min(xValues), ordered.min);
-      // Take the max of the xValues or the max date that sent on the ordered object
-      var maxDate = +maxXValue <= ordered.max ?
-        this.calculateMaxDate(ordered.max, +maxXValue, timeInterval) : +maxXValue + timeInterval;
-
-      // Add the domain to the scale
-      scale.domain([minDate, maxDate]);
-
-      return scale;
-    };
-
-    // Returns an accurate maxDate
-    XAxis.prototype.calculateMaxDate = function (orderedDate, maxXValue, interval) {
-      /*
-       * Elasticsearch returns bucketed data.
-       *
-       * Buckets have a beginning (the start time), an end (the end time),
-       * and an interval, the width of the bar minus padding.
-       *
-       * We need to create an x axis that ends at the end (or end time) of the
-       * last bucket.
-       *
-       * The time stamp values from the maxXValue represent the beginning
-       * of each bucket. We cannot guarantee that the values passed from
-       * the ordered.max field represents the end of a bucket.
-       *
-       * So, if we were to render either as the cutoff date, then the last bar
-       * on the far right side of the axis may be partially cut off.
-       * Therefore, we need to calculate the end time of the last bucket.
-       */
-
-      // Difference between the ordered.max value and the max x value
-      var diff = orderedDate - maxXValue;
-
-      // if diff is smaller than the interval, but not zero, add the missing
-      // percentage of the interval back to the ordered.max date
-      if (diff !== 0 && diff < interval) {
-        // calculates the appropriate end time
-        return +orderedDate + ((1 - diff / interval) * interval);
-      }
-
-      // if diff is > than the interval or equals 0 return the ordered.max value
-      return orderedDate;
+    XAxis.prototype.getTimeDomain = function (scale, ordered) {
+      return scale.domain([ordered.min, ordered.max]);
     };
 
     // Return a nominal(d3 ordinal) domain
@@ -118,12 +73,10 @@ define(function (require) {
     XAxis.prototype.getRange = function (scale, ordered, width) {
       // if time, return a normal range
       if (ordered && ordered.date) {
-        scale.range([0, width]);
-        return scale;
+        return scale.range([0, width]);
       }
       // if nominal, return rangeBands with a default (0.1) spacer specified
-      scale.rangeBands([0, width], 0.1);
-      return scale;
+      return scale.rangeBands([0, width], 0.1);
     };
 
     // Return the x axis scale

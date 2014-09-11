@@ -4,6 +4,7 @@ define(function (require) {
     var _ = require('lodash');
 
     var Handler = Private(require('components/vislib/lib/handler'));
+    var ResizeChecker = Private(require('components/vislib/lib/resize_checker'));
     var Events = Private(require('factories/events'));
     var chartTypes = Private(require('components/vislib/vis_types'));
 
@@ -24,6 +25,12 @@ define(function (require) {
       this.el = $el.get ? $el.get(0) : $el;
       this.ChartClass = chartTypes[config.type];
       this._attr = _.defaults(config || {}, {});
+
+      // bind the resize function so it can be used as an event handler
+      this.resize = _.bind(this.resize, this);
+
+      this.resizeChecker = new ResizeChecker(this.el);
+      this.resizeChecker.on('resize', this.resize);
     }
 
     // Exposed API for rendering charts.
@@ -46,26 +53,10 @@ define(function (require) {
           error.message === 'The height and/or width of this container is too small for this chart.') {
           this.handler.error(error.message);
         } else {
-          console.group(error.message);
+          console.log(error.message);
         }
       }
-
-      this.checkSize();
     };
-
-    // Check for changes to the chart container height and width.
-    Vis.prototype.checkSize = _.debounce(function () {
-      if (arguments.length) { return; }
-
-      // enable auto-resize
-      var size = $(this.el).find('.chart').width() + ':' + $(this.el).find('.chart').height();
-
-      if (this.prevSize !== size) {
-        this.resize();
-      }
-      this.prevSize = size;
-      setTimeout(this.checkSize(), 250);
-    }, 250);
 
     // Resize the chart
     Vis.prototype.resize = function () {
@@ -78,16 +69,14 @@ define(function (require) {
 
     // Destroy the chart
     Vis.prototype.destroy = function () {
-      // Turn off checkSize
-      this.checkSize(false);
-
       // Removing chart and all elements associated with it
       d3.select(this.el).selectAll('*').remove();
 
-      // Cleaning up event listeners
-      this.off('click', null);
-      this.off('hover', null);
-      this.off('brush', null);
+      // remove event listeners
+      this.resizeChecker.off('resize', this.resize);
+
+      // pass destroy call down to owned objects
+      this.resizeChecker.destroy();
     };
 
     // Set attributes on the chart

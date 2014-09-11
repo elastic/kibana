@@ -90,7 +90,7 @@ define(function (require) {
           .attr('class', 'x-axis-title')
           .style('height', '20px');
 
-        dataObj = new Data(data);
+        dataObj = new Data(data, {});
         xTitle = dataObj.get('xAxisLabel');
         yTitle = dataObj.get('yAxisLabel');
         axisTitle = new AxisTitle($('.vis-wrapper')[0], xTitle, yTitle);

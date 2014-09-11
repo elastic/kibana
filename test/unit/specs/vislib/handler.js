@@ -104,7 +104,7 @@ define(function (require) {
           addLegend: true
         };
 
-        vis = new Vis(el, config);
+        vis = new Vis(el[0][0], config);
 
         handler = new Handler({
           vis: vis,
@@ -171,7 +171,7 @@ define(function (require) {
       });
 
       it('should return an error classed DOM element with a text message', function () {
-        expect($('.error').length).to.be(1);
+        expect($('.visualize').find('.error').length).to.be(1);
         expect($('.error p').html()).to.be('This is an error!');
       });
     });

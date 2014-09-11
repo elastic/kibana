@@ -7,7 +7,6 @@ define(function (require) {
   require('angular-route');
 
   // Load the code for the directive
-  require('index');
   require('apps/visualize/index');
   require('apps/dashboard/index');
 

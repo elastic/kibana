@@ -61,11 +61,12 @@ define(function (require) {
         obj.parent = '.' + obj.parent;
       }
 
-      var el = this.appendElem(obj.parent, obj.type, obj.class);
+      // append child
+      var childEl = this.appendElem(obj.parent, obj.type, obj.class);
 
       if (obj.datum) {
         // Bind datum to the element
-        el.datum(obj.datum);
+        childEl.datum(obj.datum);
       }
 
       if (obj.splits) {
@@ -74,11 +75,20 @@ define(function (require) {
       }
 
       if (obj.children) {
-        // Recursively pass object to createLayout
+        // Creating the parent elem for the child nodes
+        var newParent = d3.select(this.el).select('.' + obj.class)[0][0];
+
+        _.forEach(obj.children, function (obj) {
+          if (!obj.parent) {
+            obj.parent = newParent;
+          }
+        });
+
+        // Recursively pass children to createLayout
         this.createLayout(obj.children);
       }
 
-      return el;
+      return childEl;
     };
 
     // Appends a `type` of DOM element to `el` and gives it a class name attribute `className`

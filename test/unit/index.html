@@ -3,9 +3,9 @@
   <head>
     <title>Kibana4 Tests</title>
     <link rel="stylesheet" href="/node_modules/mocha/mocha.css" />
-    <script src="/node_modules/expect.js/expect.js"></script>
+    <script src="/node_modules/expect.js/index.js"></script>
     <script src="/node_modules/mocha/mocha.js"></script>
-    <script src="/src/bower_components/requirejs/require.js"></script>
+    <script src="/src/kibana/bower_components/requirejs/require.js"></script>
     <script src="/src/kibana/require.config.js"></script>
     <script>(function () {
       var COVERAGE = !!(/coverage/i.test(window.location.search));
@@ -18,13 +18,14 @@
       require.config({
         baseUrl: '/src/kibana',
         paths: {
+          config: '/config',
           test_utils: '../../test/utils',
           fixtures: '../../test/unit/fixtures',
           specs: '../../test/unit/specs',
           sinon: '../../test/utils/sinon',
-          bluebird: '../bower_components/bluebird/js/browser/bluebird',
-          angular: '../bower_components/angular-mocks/angular-mocks',
-          angular_src: '../bower_components/angular/angular'
+          bluebird: 'bower_components/bluebird/js/browser/bluebird',
+          angular: 'bower_components/angular-mocks/angular-mocks',
+          angular_src: 'bower_components/angular/angular'
         },
         shim: {
           angular: {
@@ -61,6 +62,7 @@
           'kibana',
           'sinon/sinon',
           'specs/apps/discover/hit_sort_fn',
+          'specs/apps/discover/directives/table',
           'specs/apps/discover/segmented_fetch',
           'specs/directives/confirm-click',
           'specs/directives/timepicker',
@@ -71,14 +73,17 @@
           'specs/filters/field_type',
           'specs/filters/uriescape',
           'specs/filters/moment',
+          'specs/filters/rison',
           'specs/filters/short_dots',
           'specs/filters/start_from',
           'specs/services/storage',
           'specs/services/persisted_log',
+          'specs/services/url',
           'specs/utils/datemath',
           'specs/utils/interval',
           'specs/utils/versionmath',
           'specs/utils/routes/index',
+          'specs/utils/sequencer',
           'specs/courier/search_source/_get_normalized_sort',
           'specs/factories/base_object',
           'specs/state_management/state',
@@ -103,13 +108,15 @@
           'specs/vislib/handler',
           'specs/vislib/_error_handler',
           'specs/vislib/data',
+          'specs/vislib/resize_checker',
           'specs/utils/diff_time_picker_vals',
           'specs/factories/events',
           'specs/index_patterns/_flatten_search_response',
           'specs/utils/registry/index',
           'specs/directives/filter_bar',
           'specs/components/agg_types/index',
-          'specs/components/vis/index'
+          'specs/components/vis/index',
+          'specs/components/reflow_watcher'
         ], function (kibana, sinon) {
           kibana.load(function () {
             var xhr = sinon.useFakeXMLHttpRequest();

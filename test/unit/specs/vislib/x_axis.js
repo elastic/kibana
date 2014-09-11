@@ -90,7 +90,7 @@ define(function (require) {
           .attr('class', 'x-axis-div')
           .style('height', '40px');
 
-        dataObj = new Data(data);
+        dataObj = new Data(data, {});
         xAxis = new XAxis({
           el: $('x-axis-div')[0],
           xValues: dataObj.xValues(),

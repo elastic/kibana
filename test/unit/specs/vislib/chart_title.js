@@ -87,7 +87,7 @@ define(function (require) {
           .attr('class', 'chart-title')
           .style('height', '20px');
 
-        dataObj = new Data(data);
+        dataObj = new Data(data, {});
         chartTitle = new ChartTitle($('.vis-wrapper')[0], 'rows');
       });
     });

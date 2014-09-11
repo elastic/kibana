@@ -2,12 +2,7 @@ define(function (require) {
   var angular = require('angular');
   var $ = require('jquery');
 
-  // Load the kibana app dependencies.
   require('angular-route');
-
-  // Load kibana and its applications
-  require('index');
-
   require('apps/discover/index');
 
   var $parentScope, $scope, $elem;
