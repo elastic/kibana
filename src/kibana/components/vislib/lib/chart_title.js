@@ -95,9 +95,9 @@ define(function (require) {
             .attr('transform', function () {
               if (dataType === 'rows') {
                 // if `rows`, rotate the chart titles
-                return 'translate(11,' + height / 2.2 + ')rotate(270)';
+                return 'translate(11,' + height / 2 + ')rotate(270)';
               }
-              return 'translate(' + width / 2 + ',11)';
+              return 'translate(' + width / 2 + ',8)';
             })
             .attr('text-anchor', 'middle')
             .text(function (d) {

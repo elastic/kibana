@@ -76,10 +76,10 @@ define(function (require) {
         this.layout,
         this.legend,
         this.tooltip,
-        this.xAxis,
-        this.yAxis,
         this.axisTitle,
-        this.chartTitle
+        this.chartTitle,
+        this.yAxis,
+        this.xAxis
       ];
     }
 

@@ -4,6 +4,7 @@ define(function (require) {
     var _ = require('lodash');
 
     var ErrorHandler = Private(require('components/vislib/lib/_error_handler'));
+    var ChartTitle = Private(require('components/vislib/lib/chart_title'));
 
     /*
      * Add an x axis to the visualization
@@ -148,6 +149,7 @@ define(function (require) {
       // save a reference to the xAxis
       this.xAxis = d3.svg.axis()
         .scale(this.xScale)
+        .ticks(10)
         .tickFormat(this.xAxisFormatter)
         .orient('bottom');
     };
@@ -187,7 +189,6 @@ define(function (require) {
         });
 
         selection.call(self.filterOrRotate());
-
       };
     };
 
@@ -215,40 +216,7 @@ define(function (require) {
           }
         });
 
-        selection.call(self.resizeAxisLayoutForLabels());
-      };
-    };
-
-    // Filter out text labels by width and position on axis
-    XAxis.prototype.filterAxisLabels = function () {
-      var self = this;
-      var startX = 0;
-      var maxW = $('.x-axis-div').width();
-      var par;
-      var myX;
-      var myWidth;
-      var halfWidth;
-
-      return function (selection) {
-        selection.selectAll('.tick text')
-          .text(function (d, i) {
-            par = d3.select(this.parentNode).node();
-            myX = +self.xScale(d).toFixed(1);
-            myWidth = +par.getBBox().width.toFixed(1);
-            halfWidth = +((par.getBBox().width / 2).toFixed(1));
-
-            // trims labels that would overlap each other 
-            // or extend past left or right edges
-            // if prev label pos (or 0) + half of label width is < label pos
-            // and label pos + half width  is not > width of axis
-            if ((startX + halfWidth) < myX && maxW > (myX + halfWidth)) {
-              startX = myX + halfWidth;
-              return self.xAxisFormatter(d);
-            } else {
-              d3.select(this.parentNode).select('line').remove();
-              return '';
-            }
-          });
+        selection.call(self.fitTitles());
       };
     };
 
@@ -312,95 +280,69 @@ define(function (require) {
       };
     };
 
-    // Returns a function that resizes layout divs and 
-    // adds css flexbox values to fit axis labels
-    XAxis.prototype.resizeAxisLayoutForLabels = function () {
+    // Filter out text labels by width and position on axis
+    XAxis.prototype.filterAxisLabels = function () {
       var self = this;
-      var visEl = $(self.el);
-      var div;
-      var svg;
-      var tick;
-      var chartwrap;
-      var titlespace;
-      var xwrapper;
-      var xdiv;
-      var xdivwrapper;
-      var yspacerblock;
-      var ratio;
-      var flex;
-      var chartToXaxis;
-      var dataType;
-      var tickHt;
-      var chartHt;
+      var startX = 0;
+      var maxW;
+      var par;
+      var myX;
+      var myWidth;
+      var halfWidth;
 
       return function (selection) {
-        selection.each(function () {
-          div = d3.select(this);
-          svg = div.select('svg');
-          tick = svg.select('.tick');
-          dataType = this.parentNode.__data__.series ? 'series' : this.parentNode.__data__.rows ? 'rows' : 'columns';
-
-          xwrapper = visEl.find('.x-axis-wrapper');
-          xdiv = visEl.find('.x-axis-div');
-          xdivwrapper = visEl.find('.x-axis-div-wrapper');
-          yspacerblock = visEl.find('.y-axis-spacer-block');
-
-          // define chartwrap and titlespace, for chart title 
-          // and axis title based on data type
-          if (dataType === 'series') {
-            chartwrap =  visEl.find('.chart-wrapper');
-            titlespace = 15;
-          } else if (dataType === 'rows') {
-            chartwrap =  visEl.find('.chart-wrapper-row');
-            titlespace = 15;
-          } else {
-            chartwrap =  visEl.find('.chart-wrapper-column');
-            titlespace = 30;
-          }
-
-          // should have a tick node
-          if (!tick.node()) {
-            throw new Error('x-axis tick.node() is undefined');
-          }
-
-          tickHt = tick.node().getBBox().height;
-          chartHt = chartwrap.height();
-          flex = self.getFlexVal(self._attr.isRotated, titlespace, tickHt, chartHt);
-          
-          // set height of svg, transform to fit axis labels
-          svg.attr('height', chartHt);
-          xwrapper.css('flex', flex + ' 1');
-          xdiv.css('flex', flex + ' 1');
-          yspacerblock.css('flex', flex + ' 1');
-
-        });
+        selection.selectAll('.tick text')
+          .text(function (d, i) {
+            par = d3.select(this.parentNode).node();
+            myX = self.xScale(d);
+            myWidth = par.getBBox().width;
+            halfWidth = par.getBBox().width / 2;
+            maxW = $('.x-axis-div').width();
+            // trims labels that would overlap each other 
+            // or extend past left or right edges
+            // if prev label pos (or 0) + half of label width is < label pos
+            // and label pos + half width  is not > width of axis
+            if ((startX + halfWidth) < myX && maxW > (myX + halfWidth)) {
+              startX = myX + halfWidth;
+              return self.xAxisFormatter(d);
+            } else {
+              d3.select(this.parentNode).remove();
+            }
+          });
       };
     };
 
-    // Returns flexbox css value using linear scales
-    XAxis.prototype.getFlexVal = function (isRotated, titleSpace, tickHt, chartHt) {
-      var ratio;
 
-      var rotScale = d3.scale.linear()
-        .domain([0.1, 0.5, 2])
-        .range([3.3, 22, 70]);
+    // Returns a function that adjusts axis title and
+    // all chart title transforms to fit axis labels
+    XAxis.prototype.fitTitles = function () {
+      var self = this;
+      var visEl = $(self.el);
+      var xAxisTitle = visEl.find('.x-axis-title');
+      var xAxisChartTitle = visEl.find('.x-axis-chart-title');
+      var text;
+      var titles;
+      var titleWidth;
 
-      var flatScale = d3.scale.linear()
-        .domain([0.2, 1, 2, 20])
-        .range([1.1, 1, 2, 20]);
-      
-      if (!isRotated) {
-        // flat labels
-        ratio = flatScale(35 * (titleSpace + tickHt) / chartHt);
-        //console.log('flat', +ratio.toFixed(1), 35 * (titleSpace + tickHt) / chartHt);
-        
-      } else {
-        // rotated labels
-        ratio = rotScale((titleSpace + tickHt) / chartHt);
-        //console.log('rotated', +ratio.toFixed(1), (titleSpace + tickHt) / chartHt);
-        
-      }
-      return ratio.toFixed(1);
+      return function () {
+        // set transform of x-axis-title text to fit .x-axis-title div width
+        titleWidth = xAxisTitle.width();
+        text = d3.select('.x-axis-title')
+          .select('svg')
+          .select('text')
+          .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
+
+        // set transform of x-axis-chart-titles text to fit .chart-title div width
+        titleWidth = xAxisChartTitle.find('.chart-title').width();
+        titles = d3.select('.x-axis-chart-title')
+          .selectAll('.chart-title');
+        titles.each(function () {
+          text = d3.select(this)
+            .select('svg')
+            .select('text')
+            .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
+        });
+      };
     };
 
     return XAxis;

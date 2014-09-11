@@ -71,8 +71,8 @@ define(function (require) {
               var tipHeight = tooltipDiv[0][0].clientHeight;
               var yOffset = 5;
               // apply y offset to keep tooltip within bottom of chart
-              if ((chartHeight - offsetY + 10) < (tipHeight)) {
-                yOffset = tipHeight - (chartHeight - offsetY + 5);
+              if ((chartHeight - offsetY + 5) < (tipHeight)) {
+                yOffset = tipHeight - (chartHeight - offsetY + 0);
               }
 
               // return text and position for tooltip

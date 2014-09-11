@@ -126,11 +126,12 @@ define(function (require) {
 
         el = d3.select('body').append('div')
           .attr('class', 'y-axis-wrapper')
+          .style('width', '40px')
+          .style('height', '40px')
           .datum(data);
 
         yAxisDiv = el.append('div')
-          .attr('class', 'y-axis-div')
-          .style('height', '40px');
+          .attr('class', 'y-axis-div');
 
         dataObj = new Data(data);
         yAxis = new YAxis({
@@ -145,7 +146,7 @@ define(function (require) {
     });
 
     afterEach(function () {
-      el.remove();
+      //el.remove();
     });
 
     describe('render Method', function () {

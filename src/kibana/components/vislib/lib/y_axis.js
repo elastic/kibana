@@ -30,7 +30,6 @@ define(function (require) {
     // Render the y axis
     YAxis.prototype.render = function () {
       d3.select(this.el).selectAll('.y-axis-div').call(this.draw());
-      d3.select(this.el).selectAll('.y-axis-div').call(this.resizeAxisLayoutForLabels());
     };
 
     // Determine if data should be stacked
@@ -99,6 +98,7 @@ define(function (require) {
 
     // Return the d3 y axis
     YAxis.prototype.getYAxis = function (height) {
+      var self = this;
       var yScale = this.getYScale(height);
 
       // y scale should never be `NaN`
@@ -112,6 +112,11 @@ define(function (require) {
         .tickFormat(d3.format('s'))
         .ticks(this.tickScale(height))
         .orient('left');
+
+      if (self.yScale.domain()[1] <= 10) {
+        this.yAxis.tickFormat(d3.format('n'));
+      }
+      
       return this.yAxis;
     };
 
@@ -138,12 +143,14 @@ define(function (require) {
       var svg;
 
       return function (selection) {
+        
         selection.each(function () {
           div = d3.select(this);
           width = $(this).width();
           height = $(this).height() - margin.top - margin.bottom;
 
           // Validate whether width and height are not 0 or `NaN`
+          console.log('y-axis', width, height);
           self.validateWidthandHeight(width, height);
 
           var yAxis = self.getYAxis(height);
@@ -159,118 +166,6 @@ define(function (require) {
             .call(yAxis);
         });
       };
-    };
-
-    // Returns max tick label length
-    YAxis.prototype.getMaxLabelLength = function (labels) {
-      var arr = [];
-
-      // get max tick label length
-      _.forEach(labels[0], function (n) {
-        arr.push(n.getBBox().width);
-      });
-
-      return _.max(arr);
-    };
-
-    // Set width of svg and trnasform axis to fit labels
-    YAxis.prototype.updateLayoutForRotatedLabels = function (svg, length) {
-      var margin = this._attr.margin;
-      var tickspace = 14;
-
-      length += tickspace;
-
-      // set width of svg, x-axis-div and x-axis-div-wrapper to fit ticklabels
-      svg.attr('width', length + 6);
-      d3.selectAll('.y.axis').attr('transform', 'translate(' + (length + 2) + ',' + margin.top + ')');
-    };
-
-    // Return a function that resizes layout divs and
-    // adds css flexbox values to fit axis labels
-    YAxis.prototype.resizeAxisLayoutForLabels = function () {
-      var self = this;
-      var visEl = $(self.el);
-      var div;
-      var svg;
-      var tick;
-      var titlespace;
-      var flex;
-      var dataType;
-
-      var visWrap = visEl.find('.vis-col-wrapper');
-      var yAxisColWrap = visEl.find('.y-axis-col-wrapper');
-      var yAxisDivWrap = visEl.find('.y-axis-div-wrapper');
-      var yAxisDiv = visEl.find('.y-axis-div');
-      var yAxisTitle = visEl.find('.y-axis-title');
-      var yAxisChartTitle = visEl.find('.y-axis-chart-title');
-      var legendColWrap = visEl.find('.legend-col-wrapper');
-      var labelWidths = [];
-      var maxWidth;
-      var labels;
-      
-      return function (selection) {
-        selection.each(function () {
-          div = d3.select(this);
-          svg = div.select('svg');
-          dataType = this.parentNode.__data__.series ? 'series' : this.parentNode.__data__.rows ? 'rows' : 'columns';
-          labels = selection.selectAll('.tick text');
-          
-          if (dataType === 'series') {
-            titlespace = 15;
-          } else if (dataType === 'rows') {
-            titlespace = 15;
-          } else {
-            titlespace = 30;
-          }
-
-          // get max width tick
-          _.forEach(labels[0], function (n) {
-            labelWidths.push(n.getBBox().width);
-          });
-
-          maxWidth = d3.max(labelWidths) + 18;
-          flex = self.getFlexVal(dataType, titlespace, maxWidth, visWrap.width());
-          
-          // set flex values
-          yAxisColWrap.css('flex', flex + ' 1');
-          yAxisDiv.css('width', maxWidth + 'px');
-          yAxisDivWrap.css('width', (maxWidth + 12) + 'px');
-          
-          // set width of svg, transform to fit axis labels
-          svg.attr('width', maxWidth);
-          svg.attr('transform', 'translate(0,0)');
-          svg.select('g').attr('transform', 'translate(' + (maxWidth - 1) + ',10)');
-        });
-      };
-    };
-
-    // Return flexbox css value using linear scales
-    YAxis.prototype.getFlexVal = function (dataType, titleSpace, tickWidth, visWidth) {
-      var ratio;
-
-      var seriesScale = d3.scale.linear()
-        .domain([0.2, 2])
-        .range([0.24, 2]);
-
-      var rowsScale = d3.scale.linear()
-        .domain([0.2, 2])
-        .range([0.26, 2.6]);
-
-      var colsScale = d3.scale.linear()
-        .domain([0.2, 2])
-        .range([0.16, 1.6]);
-
-      // define ratio based on datatype
-      if (dataType === 'rows') {
-        ratio = rowsScale(35 * (titleSpace + tickWidth) / visWidth);
-      } else if (dataType === 'columns') {
-        ratio = colsScale(35 * (titleSpace + tickWidth) / visWidth);
-      } else {
-        ratio = seriesScale(35 * (titleSpace + tickWidth) / visWidth);
-      }
-      //console.log(dataType, ratio.toFixed(1), 35 * (titleSpace + tickWidth) / visWidth);
-      return ratio.toFixed(1);
-
     };
 
     return YAxis;
