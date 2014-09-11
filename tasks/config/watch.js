@@ -1,6 +1,6 @@
 module.exports = function (grunt) {
   var kibana_server_tasks = [];
-  if (grunt.option('use-mri')) {
+  if (grunt.option('use-jruby')) {
     kibana_server_tasks = [
       'stop:mri_server',
       'run:mri_server'
