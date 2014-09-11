@@ -3,7 +3,8 @@
   <tbody>
     <tr ng-repeat="row in rows |limitTo:limit track by row._index+row._id"
       kbn-table-row="row"
-      columns="columns" mapping="mapping" sorting="sorting" timefield="timefield" max-length="maxLength" filtering="filtering"></tr>
+      columns="columns" mapping="mapping" sorting="sorting" timefield="timefield" max-length="maxLength" filtering="filtering"
+      class="discover-table-row"></tr>
   </tbody>
 </table>
 <kbn-infinite-scroll more="addRows"></kbn-infinite-scroll>

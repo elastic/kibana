@@ -5,42 +5,6 @@ define(function (require) {
   require('components/setup/setup');
   require('services/promises');
 
-  require('modules').get('kibana')
-  .config(function ($provide) {
-    // decorate the $route object to include a change and changeUrl method
-    $provide.decorator('$route', function ($delegate, $location, $rootScope) {
-      var reloading;
-      var doneReloading = function () { reloading = false; };
-      $rootScope.$on('$routeUpdate', doneReloading);
-      $rootScope.$on('$routeChangeStart', doneReloading);
-
-      var reload = function () {
-        if (!reloading) $delegate.reload();
-        reloading = true;
-      };
-
-      $delegate.change = function (path) {
-        if (path !== $location.path()) {
-          $location.path(path);
-          reload();
-        }
-      };
-      $delegate.changeUrl = function (url) {
-        if (url !== $location.url()) {
-          $location.url(url);
-          reload();
-        }
-      };
-      $delegate.matches = function (url) {
-        var route = $delegate.current.$$route;
-        if (!route || !route.regexp) return null;
-        return route.regexp.test(url);
-      };
-
-      return $delegate;
-    });
-  });
-
   function RouteManager() {
     var when = [];
     var additions = [];

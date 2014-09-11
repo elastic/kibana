@@ -12,7 +12,7 @@ define(function (require) {
   require('angular-route');
   require('angular-bindonce');
 
-  var configFile = require('config_file');
+  var configFile = JSON.parse(require('text!config'));
 
   var kibana = modules.get('kibana', [
     // list external requirements here
@@ -21,7 +21,7 @@ define(function (require) {
     'ngRoute'
   ]);
 
-  configFile.elasticsearch = configFile.elasticsearch || ('http://' + window.location.hostname + ':9200');
+  configFile.elasticsearch = ('http://' + window.location.hostname + '/elasticsearch/');
 
   kibana
     // This stores the Kibana revision number, @REV@ is replaced by grunt.

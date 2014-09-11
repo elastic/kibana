@@ -1,5 +1,3 @@
-ruby "1.9.3", :engine => 'jruby', :engine_version => '1.7.13'
-
 source "https://rubygems.org"
 
 gem 'sinatra', :require => 'sinatra/base'
@@ -8,3 +6,4 @@ gem 'puma'
 gem 'warbler'
 gem 'elasticsearch'
 gem 'rack-reverse-proxy', :require => 'rack/reverse_proxy'
+gem 'colorize'

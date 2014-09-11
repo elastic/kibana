@@ -2,14 +2,15 @@ module.exports = function (grunt) {
   var config = {
     build: {
       options: {
-        appDir: '<%= src %>',
-        dir: '<%= build %>',
-        mainConfigFile: '<%= app %>/require.config.js',
+        appDir: '<%= build %>/src',
+        dir: '<%= build %>/kibana/public',
+        mainConfigFile: '<%= build %>/src/require.config.js',
         modules: [
           {
             name: 'kibana',
             excludeShallow: [
               '../config',
+              'text!config'
             ],
             include: [
               'controllers/kibana'
@@ -60,7 +61,7 @@ module.exports = function (grunt) {
 
   // include each app
   var main = config.build.options.modules[0];
-  var configFile = require('requirejs')(grunt.config.get('src') + '/config.js');
+  var configFile = require('requirejs')(grunt.config.get('app') + '/config.js');
   configFile.apps.forEach(function (app) {
     main.include.push('apps/' + app.id + '/index');
   });

@@ -20,15 +20,21 @@
     "grunt-contrib-requirejs": "~0.4.4",
     "grunt-contrib-watch": "~0.5.3",
     "grunt-mocha": "~0.4.10",
+    "grunt-replace": "^0.7.9",
+    "grunt-run": "^0.2.3",
     "http-proxy": "~1.1.4",
     "husky": "~0.6.0",
     "istanbul": "~0.2.4",
     "load-grunt-config": "~0.7.0",
     "lodash": "~2.4.1",
+    "mkdirp": "^0.5.0",
     "mocha": "~1.20.1",
     "path-browserify": "0.0.0",
+    "progress": "^1.1.8",
+    "request": "^2.40.0",
     "requirejs": "~2.1.14",
-    "rjs-build-analysis": "0.0.3"
+    "rjs-build-analysis": "0.0.3",
+    "tar": "^1.0.1"
   },
   "scripts": {
     "test": "grunt test",

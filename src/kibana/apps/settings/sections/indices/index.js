@@ -14,7 +14,7 @@ define(function (require) {
 
   // wrapper directive, which sets some global stuff up like the left nav
   require('modules').get('apps/settings')
-  .directive('kbnSettingsIndices', function ($route, config) {
+  .directive('kbnSettingsIndices', function ($route, config, kbnUrl) {
     return {
       restrict: 'E',
       transclude: true,
@@ -31,7 +31,7 @@ define(function (require) {
             .map(function (id) {
               return {
                 id: id,
-                url: '#/settings/indices/' + encodeURIComponent(id),
+                url: kbnUrl.eval('#/settings/indices/{{id}}', {id: id}),
                 class: 'sidebar-item-title ' + ($scope.edittingId === id ? 'active' : ''),
                 default: $scope.defaultIndex === id
               };

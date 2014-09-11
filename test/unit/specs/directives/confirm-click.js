@@ -8,9 +8,6 @@ define(function (require) {
   // Load the kibana app dependencies.
   require('angular-route');
 
-  // Load kibana and its applications
-  require('index');
-
   require('apps/discover/index');
 
   var $parentScope, $scope, $elem;
@@ -37,7 +34,7 @@ define(function (require) {
       $elem.scope().$digest();
 
       // Grab the isolate scope so we can test it
-      $scope = $elem.isolateScope();
+      $scope = $elem.scope();
 
       // Add a function to check the run status of.
       $scope.runThis = sinon.spy();
