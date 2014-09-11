@@ -21,7 +21,8 @@ define(function (require) {
         toggle: '=',
         data: '=',
         state: '=',
-        searchSource: '='
+        searchSource: '=',
+        updateFilterInQuery: '=filter'
       },
       template: html,
       controller: function ($scope) {
