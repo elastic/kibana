@@ -15,9 +15,6 @@ define(function (require) {
 
     describe('#toDsl', function () {
       it('calls #write()', function () {
-
-        throw new Error('force failure');
-
         var vis = new Vis(indexPattern, {
           type: 'histogram',
           aggs: [
