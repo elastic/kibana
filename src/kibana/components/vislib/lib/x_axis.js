@@ -121,7 +121,7 @@ define(function (require) {
 
         selection.each(function () {
           div = d3.select(this);
-          width = $(this).width() - margin.left - margin.right;
+          width = $(this).width();
           height = $(this).height();
 
           // Validate that the width and height are not 0 or `NaN`
@@ -132,12 +132,12 @@ define(function (require) {
 
           // Append svg and x axis
           svg = div.append('svg')
-            .attr('width', width + margin.left + margin.right)
+            .attr('width', width)
             .attr('height', height);
 
           svg.append('g')
             .attr('class', 'x axis')
-            .attr('transform', 'translate(' + margin.left + ',0)')
+            .attr('transform', 'translate(0,0)')
             .call(self.xAxis);
         });
 

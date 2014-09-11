@@ -207,7 +207,7 @@ define(function (require) {
           layers = self.stackData(data);
 
           // Get the width and height
-          width = elWidth - margin.left - margin.right;
+          width = elWidth;
           height = elHeight - margin.top - margin.bottom;
 
           // if height or width < 20 or NaN, throw error
@@ -221,10 +221,10 @@ define(function (require) {
 
           // Create the canvas for the visualization
           svg = div.append('svg')
-            .attr('width', width + margin.left + margin.right)
+            .attr('width', width)
             .attr('height', height + margin.top + margin.bottom)
             .append('g')
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+            .attr('transform', 'translate(0,' + margin.top + ')');
 
           // addBrush canvas
           self.addBrush(xScale, svg);
