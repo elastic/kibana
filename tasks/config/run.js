@@ -6,15 +6,15 @@ module.exports = function (grunt) {
   var config = {
     mri_server: {
       options: {
-        wait: false
-        // quiet: true
+        wait: false,
+        ready: /kibana server started/i
       },
       cmd: cmd
     },
     jruby_server: {
       options: {
-        wait: false
-        // quiet: true
+        wait: false,
+        ready: /kibana server started/i
       },
       cmd: jruby,
       args: [
