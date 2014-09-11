@@ -19,7 +19,7 @@ define(function (require) {
           min: 1,
           max: 1,
           defaults: [
-            'count'
+            { schema: 'metric', type: 'count' }
           ]
         },
         {

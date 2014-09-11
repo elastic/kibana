@@ -34,10 +34,7 @@ define(function (require) {
           if (!self.bySchemaName[schema.name]) {
             var defaults = schema.defaults.slice(0, schema.max);
             _.each(defaults, function (def) {
-              self.push(new AggConfig(vis, {
-                schema: schema.name,
-                type: def
-              }));
+              self.push(new AggConfig(vis, def));
             });
           }
         });

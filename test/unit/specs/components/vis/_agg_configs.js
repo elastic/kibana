@@ -76,7 +76,11 @@ define(function (require) {
                   title: 'Simple',
                   min: 1,
                   max: 2,
-                  defaults: [ 'count', 'avg', 'sum' ]
+                  defaults: [
+                    { schema: 'metric', type: 'count' },
+                    { schema: 'metric', type: 'avg' },
+                    { schema: 'metric', type: 'sum' }
+                  ]
                 },
                 {
                   group: 'buckets',
@@ -84,7 +88,10 @@ define(function (require) {
                   title: 'Example',
                   min: 0,
                   max: 1,
-                  defaults: [ 'terms', 'fitlers' ]
+                  defaults: [
+                    { schema: 'segment', type: 'terms' },
+                    { schema: 'segment', type: 'filters' }
+                  ]
                 }
               ])
             }
