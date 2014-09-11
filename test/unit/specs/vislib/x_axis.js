@@ -84,11 +84,11 @@ define(function (require) {
         XAxis = Private(require('components/vislib/lib/x_axis'));
         
         el = d3.select('body').append('div')
-          .attr('class', 'x-axis-wrapper');
+          .attr('class', 'x-axis-wrapper')
+          .style('height', '40px');
 
         fixture = el.append('div')
-          .attr('class', 'x-axis-div')
-          .style('height', '40px');
+          .attr('class', 'x-axis-div');
 
         dataObj = new Data(data, {});
         xAxis = new XAxis({

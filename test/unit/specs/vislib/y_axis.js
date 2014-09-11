@@ -126,7 +126,6 @@ define(function (require) {
 
         el = d3.select('body').append('div')
           .attr('class', 'y-axis-wrapper')
-          .style('width', '40px')
           .style('height', '40px')
           .datum(data);
 
