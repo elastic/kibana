@@ -76,6 +76,16 @@ dashboard-grid {
   margin: 0;
   padding: 5px;
 }
+.start-screen {
+  margin: 20px;
+  background-color: #ecf0f1;
+  padding: 20px;
+}
+.start-screen i {
+  padding: 4px 8px;
+  background-color: #3d636b;
+  color: white;
+}
 .gridster {
   list-style-type: none;
   display: block;
