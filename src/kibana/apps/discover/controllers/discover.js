@@ -307,7 +307,6 @@ define(function (require) {
               if (sortFn && hit._formatted) return;
 
               // Flatten the fields
-
               var indexPattern = $scope.searchSource.get('index');
               hit._source = indexPattern.flattenSearchResponse(hit._source);
 
@@ -328,6 +327,7 @@ define(function (require) {
             });
 
             // apply the field counts to the field list
+            // We could do this in the field_chooser but it would us to iterate the array again
             $scope.fields.forEach(function (field) {
               field.rowCount = counts[field.name] || 0;
             });

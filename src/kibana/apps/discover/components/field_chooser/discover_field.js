@@ -1,8 +1,8 @@
 define(function (require) {
   var $ = require('jquery');
   var app = require('modules').get('apps/discover');
-  var html = require('text!apps/discover/partials/discover_field.html');
-  var detailsHtml = require('text!apps/discover/partials/discover_field_details.html');
+  var html = require('text!apps/discover/components/field_chooser/discover_field.html');
+  var detailsHtml = require('text!apps/discover/components/field_chooser/discover_field_details.html');
   var _ = require('lodash');
 
   require('directives/css_truncate');
