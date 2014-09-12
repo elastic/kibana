@@ -22,6 +22,7 @@
     "grunt-mocha": "~0.4.10",
     "grunt-replace": "^0.7.9",
     "grunt-run": "^0.2.3",
+    "grunt-saucelabs": "~8.3.2",
     "http-proxy": "~1.1.4",
     "husky": "~0.6.0",
     "istanbul": "~0.2.4",
