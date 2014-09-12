@@ -206,7 +206,6 @@ define(function (require) {
         });
 
         afterEach(function () {
-          fixture.remove();
           newEl.remove();
         });
 
@@ -240,7 +239,7 @@ define(function (require) {
 
         afterEach(function () {
           fixture.remove();
-          divs.remove();
+          $(divs).remove();
         });
 
         it('should append the correct number of divs', function () {
@@ -266,7 +265,7 @@ define(function (require) {
 
         afterEach(function () {
           fixture.remove();
-          divs.remove();
+          $(divs).remove();
         });
 
         it('should append the correct number of divs', function () {

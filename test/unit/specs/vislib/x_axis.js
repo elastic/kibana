@@ -104,7 +104,7 @@ define(function (require) {
     });
 
     afterEach(function () {
-      fixture.destroy();
+      fixture.remove();
       el.remove();
     });
 

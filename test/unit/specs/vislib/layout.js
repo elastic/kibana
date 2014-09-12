@@ -118,13 +118,12 @@ define(function (require) {
     describe('layout Method', function () {
       beforeEach(function () {
         layout.layout({
-          parent: el,
+          parent: layout.el,
           type: 'div',
           class: 'chart',
           datum: layout.data,
           children: [
             {
-              parent: 'chart',
               type: 'div',
               class: 'x-axis',
               splits: xAxisSplit
@@ -160,7 +159,7 @@ define(function (require) {
 
         expect(function () {
           layout.layout({
-            parent: el,
+            parent: layout.el,
             type: undefined,
             class: 'chart'
           });
@@ -179,7 +178,7 @@ define(function (require) {
 
     describe('appendElem Method', function () {
       beforeEach(function () {
-        layout.appendElem(el, 'svg', 'column');
+        layout.appendElem(layout.el, 'svg', 'column');
       });
 
       it('should append DOM element to el with a class name', function () {
@@ -190,8 +189,8 @@ define(function (require) {
     describe('removeAll Method', function () {
       beforeEach(function () {
         inject(function (d3) {
-          d3.select(el).append('div').attr('class', 'visualize');
-          layout.removeAll(el);
+          d3.select(layout.el).append('div').attr('class', 'visualize');
+          layout.removeAll(layout.el);
         });
       });
 
