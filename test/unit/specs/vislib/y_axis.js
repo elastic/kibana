@@ -178,10 +178,20 @@ define(function (require) {
     });
 
     describe('render Method', function () {
-      beforeEach(function () {
-        expect(d3.select(yAxis.el).selectAll('.y-axis-div')).to.have.length(1);
-        [$(yAxis.el), $(yAxis.el).find('.y-axis-div')].forEach(debug);
-        yAxis.render();
+      beforeEach(function (done) {
+        var $node = $(yAxis.el);
+
+        (function check() {
+          if ($node.css('display') !== '-webkit-box') {
+            console.log('waiting for css to load');
+            setTimeout(check, 1000);
+          } else {
+            expect(d3.select(yAxis.el).selectAll('.y-axis-div')).to.have.length(1);
+            [$(yAxis.el), $(yAxis.el).find('.y-axis-div')].forEach(debug);
+            yAxis.render();
+            done();
+          }
+        }());
       });
 
       it('should append an svg to div', function () {
