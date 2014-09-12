@@ -1,10 +1,8 @@
 /** @scratch /panels/5
- *
  * include::panels/bettermap.asciidoc[]
  */
 
 /** @scratch /panels/bettermap/0
- *
  * == Bettermap
  * Status: *Experimental*
  *
@@ -52,17 +50,16 @@ function (angular, app, _, L, localRequire) {
         }
       ],
       status  : "Experimental",
-      description : "Displays geo points in clustered groups on a map. The caveat for this panel is"+
+      description : "Displays geo points in clustered groups on a map. The cavaet for this panel is"+
         " that, for better or worse, it does NOT use the terms facet and it <b>does</b> query "+
         "sequentially. This however means that it transfers more data and is generally heavier to"+
         " compute, while showing less actual data. If you have a time filter, it will attempt to"+
-        " show to most recent points in your search, up to your defined limit."
+        " show to most recent points in your search, up to your defined limit"
     };
 
     // Set and populate defaults
     var _d = {
       /** @scratch /panels/bettermap/3
-       *
        * === Parameters
        *
        * field:: The field that contains the coordinates, in geojson format. GeoJSON is
@@ -83,7 +80,6 @@ function (angular, app, _, L, localRequire) {
        */
       tooltip : "_id",
       /** @scratch /panels/bettermap/5
-       *
        * ==== Queries
        * queries object:: This object describes the queries to use on this panel.
        * queries.mode::: Of the queries available, which to use. Options: +all, pinned, unpinned, selected+
@@ -145,7 +141,7 @@ function (angular, app, _, L, localRequire) {
         var request = $scope.ejs.Request().indices(dashboard.indices[_segment])
           .query($scope.ejs.FilteredQuery(
             boolQuery,
-            filterSrv.getBoolFilter(filterSrv.ids()).must($scope.ejs.ExistsFilter($scope.panel.field))
+            filterSrv.getBoolFilter(filterSrv.ids).must($scope.ejs.ExistsFilter($scope.panel.field))
           ))
           .fields([$scope.panel.field,$scope.panel.tooltip])
           .size($scope.panel.size);
@@ -209,7 +205,8 @@ function (angular, app, _, L, localRequire) {
   module.directive('bettermap', function() {
     return {
       restrict: 'A',
-      link: function(scope, elem) {
+      link: function(scope, elem, attrs) {
+
         elem.html('<center><img src="img/load_big.gif"></center>');
 
         // Receive render events
@@ -227,22 +224,18 @@ function (angular, app, _, L, localRequire) {
         var map, layerGroup;
 
         function render_panel() {
-          elem.css({height:scope.panel.height||scope.row.height});
-
           scope.require(['./leaflet/plugins'], function () {
             scope.panelMeta.loading = false;
             L.Icon.Default.imagePath = 'app/panels/bettermap/leaflet/images';
             if(_.isUndefined(map)) {
-              map = L.map(scope.$id, {
+              map = L.map(attrs.id, {
                 scrollWheelZoom: false,
                 center: [40, -86],
                 zoom: 10
               });
 
               // This could be made configurable?
-              L.tileLayer('http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg', {
-                attribution: 'Data, imagery and map information provided by MapQuest, '+
-                  'OpenStreetMap <http://www.openstreetmap.org/copyright> and contributors, ODbL',
+              L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 18,
                 minZoom: 2
               }).addTo(map);
@@ -255,7 +248,7 @@ function (angular, app, _, L, localRequire) {
 
             _.each(scope.data, function(p) {
               if(!_.isUndefined(p.tooltip) && p.tooltip !== '') {
-                markerList.push(L.marker(p.coordinates).bindLabel(_.isArray(p.tooltip) ? p.tooltip[0] : p.tooltip));
+                markerList.push(L.marker(p.coordinates).bindLabel(p.tooltip));
               } else {
                 markerList.push(L.marker(p.coordinates));
               }
