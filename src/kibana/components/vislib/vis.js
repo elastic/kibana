@@ -7,6 +7,7 @@ define(function (require) {
     var ResizeChecker = Private(require('components/vislib/lib/resize_checker'));
     var Events = Private(require('factories/events'));
     var chartTypes = Private(require('components/vislib/vis_types'));
+    require('css!components/vislib/components/styles/main.css');
 
     /*
      * Visualization controller. Exposed API for creating visualizations.
