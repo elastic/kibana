@@ -24,6 +24,13 @@ define([
     // Save a reference to this
     var self = this;
 
+    // Types of filters.
+    self.filterTypes = [
+      {"name": "Query String", "type": "querystring"}
+      ,{"name": "Geo Distance", "type": "geo_distance"}
+    ];
+
+
     // Call this whenever we need to reload the important stuff
     this.init = function() {
       // Populate defaults
@@ -172,6 +179,11 @@ define([
           .to(filter.to);
       case 'querystring':
         return ejs.QueryFilter(ejs.QueryStringQuery(filter.query)).cache(true);
+      case 'geo_distance':
+        return ejs.GeoDistanceFilter(filter.field)
+          .distance(parseFloat(filter.distance))
+          .unit(filter.unit)
+          .point(ejs.GeoPoint([parseFloat(filter.lat), parseFloat(filter.lon)]));
       case 'field':
         return ejs.QueryFilter(ejs.FieldQuery(filter.field,filter.query)).cache(true);
       case 'terms':
