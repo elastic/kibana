@@ -116,7 +116,7 @@ define(function (require) {
       });
 
       it('should resize the chart', function () {
-        expect($('.chart').width()).to.be.lessThan(500);
+        expect($('.chart').width()).to.be.eql(500);
       });
     });
 

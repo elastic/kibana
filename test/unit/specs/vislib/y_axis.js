@@ -1,6 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
+  var d3 = require('d3');
   var $ = require('jquery');
 
   angular.module('YAxisFactory', ['kibana']);
@@ -124,7 +125,9 @@ define(function (require) {
         Data = Private(require('components/vislib/lib/data'));
         YAxis = Private(require('components/vislib/lib/y_axis'));
 
-        el = d3.select('body').append('div')
+        var node = $('<div>').get(0);
+
+        el = d3.select(node).append('div')
           .attr('class', 'y-axis-wrapper')
           .style('height', '40px')
           .datum(data);
@@ -134,7 +137,7 @@ define(function (require) {
 
         dataObj = new Data(data, {});
         yAxis = new YAxis({
-          el: $('.y-axis-wrapper')[0],
+          el: node,
           yMax: dataObj.getYMaxValue(),
           _attr: {
             margin: { top: 0, right: 0, bottom: 0, left: 0 }
@@ -150,6 +153,7 @@ define(function (require) {
 
     describe('render Method', function () {
       beforeEach(function () {
+        expect(d3.select(yAxis.el).selectAll('.y-axis-div')).to.have.length(1);
         yAxis.render();
       });
 
