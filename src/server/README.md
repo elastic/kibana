@@ -26,7 +26,31 @@ Coming Soon...
 
 ### Development Evn Setup
 
-Coming Soon...
+#### JRuby
+
+You'll need to have Java installed
+
+Then, just run `grunt dev --use-jruby`
+
+#### Ruby
+
+Do the following to install and use ruby
+
+- Install `rbenv`
+  - Use `brew update; brew install rbenv ruby-build` on Mac
+  - See [rbenv docs](https://github.com/sstephenson/rbenv#installation) otherwise
+- Run `rbenv init` and add `eval "$(rbenv init -)"` to your .bashrc/.bash_profile
+- Install ruby 1.9.3-p547 - `rbenv install 1.9.3-p547`
+  - See [rbenv docs](https://github.com/sstephenson/rbenv#installing-ruby-versions) for help
+- Run `ruby -v` and make sure you are using *1.9.3-p547*
+  - If not, run `rbenv global 1.9.3-p547` and check again
+- `gem install bundler`
+- `cd src/server`
+- `bundle`
+- `cd ../..`
+- `grunt dev`
+
+In the future, the last line will be all you need
 
 ### Build Process
 
