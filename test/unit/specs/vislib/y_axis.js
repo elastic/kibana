@@ -181,6 +181,8 @@ define(function (require) {
       beforeEach(function (done) {
         var $node = $(yAxis.el);
 
+        this.timeout(30000);
+
         (function check() {
           if ($node.css('display') !== '-webkit-box') {
             console.log('waiting for css to load');
