@@ -125,12 +125,24 @@ define(function (require) {
         Data = Private(require('components/vislib/lib/data'));
         YAxis = Private(require('components/vislib/lib/y_axis'));
 
-        var node = $('<div>').get(0);
+        expect($('.y-axis-wrapper')).to.have.length(0);
 
-        el = d3.select(node).append('div')
-          .attr('class', 'y-axis-wrapper')
-          .style('height', '40px')
-          .datum(data);
+        console.log($(document.body).css('height'));
+        console.log($(document.body).css('display'));
+
+        var node = $('<div>').css({
+          height: 40,
+          width: 40,
+        })
+        .appendTo('body')
+        .addClass('y-axis-wrapper')
+        .get(0);
+
+        console.log($(document.body).children().toArray().map(function (el) {
+          return $(el).height() + ' #' + $(el).attr('id');
+        }));
+
+        el = d3.select(node).datum(data);
 
         yAxisDiv = el.append('div')
           .attr('class', 'y-axis-div');
