@@ -1,16 +1,4 @@
 module.exports = function (grunt) {
-  var kibana_server_tasks = [];
-  if (grunt.option('use-mri')) {
-    kibana_server_tasks = [
-      'stop:mri_server',
-      'run:mri_server'
-    ];
-  } else {
-    kibana_server_tasks = [
-      'stop:jruby_server',
-      'run:jruby_server'
-    ];
-  }
   var config = {
     test: {
       files: [
@@ -38,22 +26,29 @@ module.exports = function (grunt) {
         '<%= testUtilsDir %>/istanbul_reporter/report.clientside.jade'
       ],
       tasks: ['jade:clientside']
-    },
-    kibana_server: {
-      files: [
-        'src/server/**/*.rb',
-        'src/server/**/*.yml'
-      ],
-      tasks: kibana_server_tasks,
-      options: {
-        spawn: false
-      }
     }
   };
 
   if (grunt.option('no-test-watcher')) {
     // unset the test watcher
     delete config.test;
+  }
+
+  var ruby_server = grunt.config.get('ruby_server');
+  if (ruby_server) {
+    config.kibana_server = {
+      files: [
+        'src/server/**/*.rb',
+        'src/server/**/*.yml'
+      ],
+      tasks: [
+        'stop:' + ruby_server,
+        'run:' + ruby_server
+      ],
+      options: {
+        spawn: false
+      }
+    };
   }
 
   return config;

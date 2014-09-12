@@ -40,6 +40,10 @@ module Kibana
       use JSONLogger, settings.logger
     end
 
+    configure :quiet do
+      set :logger, false
+    end
+
     configure :development do
       use ColorLogger, settings.logger
     end
