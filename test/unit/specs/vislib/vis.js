@@ -99,7 +99,7 @@ define(function (require) {
 
     afterEach(function () {
       el.remove();
-      chart.destroy();
+//      chart.destroy();
     });
 
 //    describe('render Method', function () {
@@ -139,65 +139,65 @@ define(function (require) {
 
     });
 
-    describe('resize Method', function () {
-      beforeEach(function () {
-        chart.render(data);
-        $('.visualize').width(500);
-        chart.resize();
-        chart.destroy();
-      });
-
-      it('should resize the chart', function () {
-        expect($('.chart').width()).to.be.lessThan(500);
-      });
-
-//      it('should throw an error when no valid data provided', function () {
-//        expect(function () {
-//          chart.resize();
-//        }).to.throwError();
+//    describe('resize Method', function () {
+//      beforeEach(function () {
+//        chart.render(data);
+//        $('.visualize').width(500);
+//        chart.resize();
+//        chart.destroy();
 //      });
-    });
-
-    describe('destroy Method', function () {
-      beforeEach(function () {
-        chart.destroy();
-      });
-
-//      it('should set the destroyFlag to true', function () {
-//        expect(chart._attr.destroyFlag).to.be(true);
+//
+//      it('should resize the chart', function () {
+//        expect($('.chart').width()).to.be.lessThan(500);
 //      });
+//
+////      it('should throw an error when no valid data provided', function () {
+////        expect(function () {
+////          chart.resize();
+////        }).to.throwError();
+////      });
+//    });
+//
+//    describe('destroy Method', function () {
+//      beforeEach(function () {
+//        chart.destroy();
+//      });
+//
+////      it('should set the destroyFlag to true', function () {
+////        expect(chart._attr.destroyFlag).to.be(true);
+////      });
+//
+//      it('should remove all DOM elements from el', function () {
+//        expect($('.vis-wrapper').length).to.be(0);
+//      });
+//
+//      it('should turn off events', function () {});
+//    });
 
-      it('should remove all DOM elements from el', function () {
-        expect($('.vis-wrapper').length).to.be(0);
-      });
-
-      it('should turn off events', function () {});
-    });
-
-    describe('set Method', function () {
-      beforeEach(function () {
-        chart.render(data);
-        chart.set('addLegend', false);
-        chart.set('offset', 'wiggle');
-      });
-
-      it('should set an attribute', function () {
-        expect(chart.get('addLegend')).to.be(false);
-        expect(chart.get('offset')).to.be('wiggle');
-      });
-    });
-
-    describe('get Method', function () {
-      beforeEach(function () {
-        chart.render(data);
-      });
-
-      it('should get attribue values', function () {
-        expect(chart.get('addLegend')).to.be(true);
-        expect(chart.get('addTooltip')).to.be(true);
-        expect(chart.get('type')).to.be('histogram');
-      });
-    });
-
+//    describe('set Method', function () {
+//      beforeEach(function () {
+//        chart.render(data);
+//        chart.set('addLegend', false);
+//        chart.set('offset', 'wiggle');
+//      });
+//
+//      it('should set an attribute', function () {
+//        expect(chart.get('addLegend')).to.be(false);
+//        expect(chart.get('offset')).to.be('wiggle');
+//      });
+//    });
+//
+//    describe('get Method', function () {
+//      beforeEach(function () {
+////        chart.render(data);
+//      });
+//
+//      it('should get attribue values', function () {
+//        expect(chart.get('addLegend')).to.be(true);
+//        expect(chart.get('addTooltip')).to.be(true);
+//        expect(chart.get('type')).to.be('histogram');
+//      });
+//    });
+//
   });
 });
