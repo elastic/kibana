@@ -145,6 +145,7 @@ define(function (require) {
 
     afterEach(function () {
       el.remove();
+      yAxisDiv.remove();
     });
 
     describe('render Method', function () {

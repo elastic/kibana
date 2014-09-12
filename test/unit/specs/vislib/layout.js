@@ -82,6 +82,7 @@ define(function (require) {
 
         el = d3.select('body').append('div')
           .attr('class', 'visualize-chart');
+
         layout = new Layout(el[0][0], data, chartType);
       });
     });
@@ -117,7 +118,7 @@ define(function (require) {
     describe('layout Method', function () {
       beforeEach(function () {
         layout.layout({
-          parent: layout.el,
+          parent: el,
           type: 'div',
           class: 'chart',
           datum: layout.data,
@@ -159,7 +160,7 @@ define(function (require) {
 
         expect(function () {
           layout.layout({
-            parent: layout.el,
+            parent: el,
             type: undefined,
             class: 'chart'
           });
@@ -167,7 +168,7 @@ define(function (require) {
 
         expect(function () {
           layout.layout({
-            parent: layout.el,
+            parent: el,
             type: xAxisSplit,
             class: 'chart'
           });
@@ -178,7 +179,7 @@ define(function (require) {
 
     describe('appendElem Method', function () {
       beforeEach(function () {
-        layout.appendElem(layout.el, 'svg', 'column');
+        layout.appendElem(el, 'svg', 'column');
       });
 
       it('should append DOM element to el with a class name', function () {
@@ -189,13 +190,13 @@ define(function (require) {
     describe('removeAll Method', function () {
       beforeEach(function () {
         inject(function (d3) {
-          d3.select(layout.el).append('div').attr('class', 'visualize');
-          layout.removeAll(layout.el);
+          d3.select(el).append('div').attr('class', 'visualize');
+          layout.removeAll(el);
         });
       });
 
       it('should remove all DOM elements from the el', function () {
-        expect(el.selectAll(this.childNodes)[0].length).to.be(0);
+        expect($(el).children().length).to.be(0);
       });
     });
 

@@ -92,7 +92,7 @@ define(function (require) {
 
         dataObj = new Data(data, {});
         xAxis = new XAxis({
-          el: $('x-axis-div')[0],
+          el: $('.x-axis-div')[0],
           xValues: dataObj.xValues(),
           ordered: dataObj.get('ordered'),
           xAxisFormatter: dataObj.get('xAxisFormatter'),
@@ -104,6 +104,7 @@ define(function (require) {
     });
 
     afterEach(function () {
+      fixture.destroy();
       el.remove();
     });
 

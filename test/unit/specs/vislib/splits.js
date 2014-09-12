@@ -170,7 +170,6 @@ define(function (require) {
 
         afterEach(function () {
           fixture.remove();
-          el.remove();
         });
 
         it('should append the correct number of divs', function () {
@@ -196,16 +195,18 @@ define(function (require) {
             newEl = d3.select('body').append('div')
               .attr('class', 'series')
               .datum({ series: []});
+
             newEl.append('div').attr('class', 'x-axis-chart-title');
             newEl.append('div').attr('class', 'y-axis-chart-title');
             newEl.select('.x-axis-chart-title').call(chartTitleSplit);
             newEl.select('.y-axis-chart-title').call(chartTitleSplit);
+
             fixture = newEl.selectAll(this.childNodes)[0].length;
           });
         });
 
         afterEach(function () {
-          el.remove();
+          fixture.remove();
           newEl.remove();
         });
 
@@ -239,7 +240,7 @@ define(function (require) {
 
         afterEach(function () {
           fixture.remove();
-          el.remove();
+          divs.remove();
         });
 
         it('should append the correct number of divs', function () {
@@ -256,14 +257,16 @@ define(function (require) {
             fixture = d3.select('body').append('div')
               .attr('class', 'rows')
               .datum({ rows: [{}, {}] });
+
             d3.select('.rows').call(yAxisSplit);
+
             divs = d3.selectAll('.y-axis-div')[0];
           });
         });
 
         afterEach(function () {
           fixture.remove();
-          el.remove();
+          divs.remove();
         });
 
         it('should append the correct number of divs', function () {
