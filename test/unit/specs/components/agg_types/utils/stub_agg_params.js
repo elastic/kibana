@@ -6,7 +6,7 @@ define(function (require) {
     var stub = sinon.spy(body || function () {
       stub.Super && stub.Super.call(this);
     });
-    if (parent) _.inherits(stub, parent);
+    if (parent) _(stub).inherits(parent);
     return stub;
   }
 

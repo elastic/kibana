@@ -4,7 +4,7 @@ define(function (require) {
   return function AppStateProvider(Private) {
     var State = Private(require('components/state_management/state'));
 
-    _.inherits(AppState, State);
+    _(AppState).inherits(State);
     function AppState(defaults) {
       AppState.Super.call(this, '_a', defaults);
     }
