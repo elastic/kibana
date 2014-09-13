@@ -9,7 +9,7 @@ define(function (require) {
   module.service('globalState', function (Private, $rootScope, $location) {
     var State = Private(require('components/state_management/state'));
 
-    _.inherits(GlobalState, State);
+    _(GlobalState).inherits(State);
     function GlobalState(defaults) {
       GlobalState.Super.call(this, '_g', defaults);
     }

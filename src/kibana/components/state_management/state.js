@@ -7,7 +7,7 @@ define(function (require) {
   return function StateProvider(Private, $rootScope, $location) {
     var Events = Private(require('factories/events'));
 
-    _.inherits(State, Events);
+    _(State).inherits(Events);
     function State(urlParam, defaults) {
       State.Super.call(this);
       this._defaults = defaults || {};

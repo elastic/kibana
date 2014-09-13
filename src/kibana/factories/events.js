@@ -5,7 +5,7 @@ define(function (require) {
     var BaseObject = Private(require('factories/base_object'));
     var notify = new Notifier({ location: 'EventEmitter' });
 
-    _.inherits(Events, BaseObject);
+    _(Events).inherits(BaseObject);
     function Events() {
       Events.Super.call(this);
       this._listeners = {};
