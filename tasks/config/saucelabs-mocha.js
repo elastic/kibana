@@ -11,12 +11,19 @@ module.exports = {
       key: process.env.SAUCE_ACCESS_KEY,
       browsers: [
         {
-          browserName: 'googlechrome',
-          platform: 'XP'
+          browserName: 'chrome',
+          platform: 'Windows 7'
+        },
+        {
+          browserName: 'safari',
+          platform: 'OS X 10.9',
+        },
+        {
+          browserName: 'firefox',
+          platform: 'Linux',
         },
         {
           browserName: 'internet explorer',
-          version: '10',
           platform: 'Windows 7'
         }
       ]

@@ -4,11 +4,11 @@ module.exports = function (grunt) {
   var testTask = process.env.TRAVIS ? 'saucelabs-mocha:unit' : 'mocha:unit';
 
   grunt.registerTask('test', [
+    'jshint',
     'ruby_server',
     'maybe_start_server',
     'jade',
-    testTask,
-    'jshint'
+    testTask
   ]);
 
   grunt.registerTask('coverage', [

@@ -140,7 +140,7 @@
                 })
                 .forEach(function (test) {
                   fails.push({
-                    title: suiteStack.reduce(function (title, suite) {
+                    title: suiteStack.concat(test).reduce(function (title, suite) {
                       if (suite.title) {
                         return (title ? title + ' ' : '') + suite.title;
                       } else {
