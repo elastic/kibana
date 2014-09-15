@@ -1,9 +1,14 @@
 <div class="toaster-container">
   <ul class="toaster">
     <li ng-repeat="notif in list" kbn-toast notif="notif">
-      <div class="alert" ng-class="'alert-' + notif.type">
+      <div class="toast alert" ng-class="'alert-' + notif.type">
 
-        <div class="btn-group pull-right toaster-controls">
+        <span ng-show="notif.count > 1" class="badge">{{ notif.count }}</span>
+
+        <i class="fa" ng-class="'fa-' + notif.icon" tooltip="{{notif.title}}"></i>
+        <kbn-truncated orig="{{notif.content}}" length="250" class="toast-message" /></kbn-truncated>
+
+        <div class="btn-group pull-right toast-controls">
           <button
             type="button"
             ng-if="notif.stack && !notif.showStack"
@@ -26,14 +31,12 @@
             ng-click="notif.address()"
             >Fix it</button>
         </div>
-
-        <i class="fa" ng-class="'fa-' + notif.icon" tooltip="{{notif.title}}"></i> <kbn-truncated orig="{{notif.content}}" length="250" /></kbn-truncated><span ng-show="notif.count > 1">&nbsp;({{ notif.count }} errors)</span>
-
-        <div ng-if="notif.stack && notif.showStack" class="toaster-stack">
-          <pre ng-bind="notif.stack"></pre>
-        </div>
-
       </div>
+
+      <div ng-if="notif.stack && notif.showStack" class="toast-stack alert" ng-class="'alert-' + notif.type">
+        <pre ng-bind="notif.stack"></pre>
+      </div>
+
     </li>
   </ul>
 </div>
