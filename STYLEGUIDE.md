@@ -1,8 +1,6 @@
 This is a collection of style guides for Kibana projects. The include guides for the following:
 
 - [JavaScript](#javascript-style-guide)
-- [Angular](#angular-style-guide)
-- [Ruby](#ruby-style-guide)
 - [Kibana Project](#kibana-style-guide)
 
 # JavaScript Style Guide
@@ -797,10 +795,6 @@ require('routes')
   // angular route code goes here
 });
 ```
-
-# Ruby Style Guide
-
-coming soon...
 
 # Attribution
 
