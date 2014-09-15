@@ -8,6 +8,7 @@ module.exports = function (grunt) {
     'ruby_server',
     'maybe_start_server',
     'jade',
+    'less',
     testTask
   ]);
 
