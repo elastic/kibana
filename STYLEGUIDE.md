@@ -723,6 +723,24 @@ Kibana uses AMD modules to organize code, and require.js to load those modules.
 
 Even Angular code is loaded this way.
 
+### Module paths
+
+Paths to modules should not be relative (ie. no dot notation). Instead, they should be loaded from one of the defined paths in the require config.
+
+*Right:*
+
+```js
+require('some/base/path/my_module');
+require('another/path/another_module');
+```
+
+*Wrong:*
+
+```js
+require('../my_module');
+require('./path/another_module');
+```
+
 ### CommonJS Syntax
 
 Module dependencies should be loaded via the CommonJS syntax:
