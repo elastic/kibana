@@ -2,7 +2,7 @@ module.exports = {
   unit: {
     options: {
       urls: [
-        'http://localhost:8000/test/unit/'
+        'http://localhost:8000/test/unit/?saucelabs=true'
       ],
       testname: 'Kibana Browser Tests',
       build: process.env.TRAVIS_BUILD_ID || 'test build',
@@ -24,7 +24,7 @@ module.exports = {
         },
         {
           browserName: 'internet explorer',
-          platform: 'Windows 7'
+          platform: 'Windows 8'
         }
       ]
     }

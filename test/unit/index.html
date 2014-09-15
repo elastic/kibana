@@ -2,17 +2,23 @@
 <html>
   <head>
     <title>Kibana4 Tests</title>
+
     <link rel="stylesheet" href="/node_modules/mocha/mocha.css" />
+    <link rel="stylesheet" href="/node_modules/mocha-screencast-reporter/screencast-reporter.css" />
+
     <script src="/node_modules/expect.js/index.js"></script>
     <script src="/node_modules/mocha/mocha.js"></script>
+    <script src="/node_modules/mocha-screencast-reporter/screencast-reporter.js"></script>
     <script src="/src/kibana/bower_components/requirejs/require.js"></script>
     <script src="/src/kibana/require.config.js"></script>
+
     <script>(function () {
       var COVERAGE = !!(/coverage/i.test(window.location.search));
+      var SAUCELABS = !!(/saucelabs/i.test(window.location.search));
 
       mocha.setup({
         ui: 'bdd',
-        reporter: 'html'
+        reporter: SAUCELABS ? ScreencastReporter : 'html'
       });
 
       require.config({
@@ -136,7 +142,7 @@
 
                 (suite.tests || [])
                 .filter(function (test) {
-                  return test.state === 'failed';
+                  return test.state !== 'passed' && test.state !== 'pending';
                 })
                 .forEach(function (test) {
                   fails.push({
