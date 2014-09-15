@@ -27,7 +27,7 @@
             >Fix it</button>
         </div>
 
-        <i class="fa" ng-class="'fa-' + notif.icon" tooltip="{{notif.title}}"></i> <kbn-truncated orig="{{notif.content}}" length="250" /></kbn-truncated>
+        <i class="fa" ng-class="'fa-' + notif.icon" tooltip="{{notif.title}}"></i> <kbn-truncated orig="{{notif.content}}" length="250" /></kbn-truncated><span ng-show="notif.count > 1">&nbsp;({{ notif.count }} errors)</span>
 
         <div ng-if="notif.stack && notif.showStack" class="toaster-stack">
           <pre ng-bind="notif.stack"></pre>

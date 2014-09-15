@@ -55,7 +55,20 @@ define(function (require) {
       });
     }
 
-    notifs.push(notif);
+    if (!notif.count) notif.count = 1;
+
+    var dup = _.find(notifs, function (item) {
+      return item.content === notif.content
+        && item.stack === notif.stack
+        && item.lifetime === notif.lifetime;
+    });
+
+    if (dup) {
+      dup.count++;
+    } else {
+      notifs.push(notif);
+    }
+
   }
 
   function formatMsg(msg, from) {

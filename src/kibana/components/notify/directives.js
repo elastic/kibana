@@ -1,5 +1,6 @@
 define(function (require) {
   var notify = require('modules').get('kibana/notify');
+  var _ = require('lodash');
 
   notify.directive('kbnNotifications', function () {
     return {
