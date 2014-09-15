@@ -3,6 +3,7 @@ This is a collection of style guides for Kibana projects. The include guides for
 - [JavaScript](#javascript-style-guide)
 - [Angular](#angular-style-guide)
 - [Ruby](#ruby-style-guide)
+- [Kibana Project](#kibana-style-guide)
 
 # JavaScript Style Guide
 
@@ -237,6 +238,34 @@ var a = [
 var b = {"good": 'code'
         , is generally: 'pretty'
         };
+```
+
+## Object / Array iterations, transformations and operations
+
+Use native ES5 methods to iterate and transform arrays and objects where possible. Do not use `for` and `while` loops.
+
+Use descriptive variable names in the closures.
+
+Use a utility library as needed and where it will make code more comprehensible.
+
+*Right:*
+
+```js
+var userNames = users.map(function (user) {
+  return user.name;
+});
+
+// examples where lodash makes the code more readable
+var userNames = _.pluck(users, 'name');
+```
+
+*Wrong:*
+
+```js
+var userNames = [];
+for (var i = 0; i < users.length; i++) {
+  userNames.push(users[i].name);
+}
 ```
 
 ## Use the === operator
@@ -632,9 +661,94 @@ software than they can solve.
 
 [sideeffect]: http://en.wikipedia.org/wiki/Side_effect_(computer_science)
 
-# Angular Style Guide
+# Kibana Style Guide
 
-coming soon...
+Things listed here are specific to Kibana and likely only apply to this project
+
+## Share common utilities as lodash mixins
+
+When creating a utility function, attach it as a lodash mixin.
+
+Several already exist, and can be found in `src/kibana/utils/_mixins.js`
+
+## Modules
+
+Kibana uses AMD modules to organize code, and require.js to load those modules.
+
+Even Angular code is loaded this way.
+
+### CommonJS Syntax
+
+Module dependencies should be loaded via the CommonJS syntax:
+
+*Right:*
+
+```js
+define(function (require) {
+  var _ = require('lodash');
+  ...
+});
+```
+
+*Wrong:*
+
+```js
+define(['lodash'], function (_) {
+  ...
+});
+```
+
+## Angular Usage
+
+Kibana is written in Angular, and uses several utility methods to make using Angular easier.
+
+### Defining modules
+
+Angular modules are defined using a custom require module named `module`. It is used as follows:
+
+```js
+var app = require('modules').get('app/namespace');
+```
+
+`app` above is a reference to an Angular module, and can be used to define controllers, providers and anything else used in Angular.
+
+### Private modules
+
+A service called `Private` is available to load any function as an angular module without needing to define it as such. It is used as follows:
+
+```js
+app.controller('myController', function($scope, otherDeps, Private) {
+  var ExternalClass = Private(require('path/to/some/class'));
+  ...
+});
+```
+
+### Promises
+
+A more robust version of Angular's `$q` service is available as `Promise`. It can be used in the same way as `$q`, but it comes packaged with several utility methods that provide many of the same useful utilities as Bluebird.
+
+```js
+app.service('CustomService', function(Promise, otherDeps) {
+  new Promise(function (resolve, reject) {
+    ...
+  });
+
+  var promisedFunc = Promise.cast(someFunc);
+
+  return Promise.resolve('value');
+});
+```
+
+### Routes
+
+Angular routes are defined using a custom require modules named `routes` that remove much of the required boilerplate.
+
+```js
+require('routes')
+.when('/my/object/route/:id?', {
+  // angular route code goes here
+});
+```
 
 # Ruby Style Guide
 
