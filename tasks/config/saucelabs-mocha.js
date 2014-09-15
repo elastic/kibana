@@ -1,3 +1,8 @@
+var buildId = 'test build';
+if (process.env.TRAVIS_BUILD_ID) {
+  buildId = 'travis build #' + process.env.TRAVIS_BUILD_ID;
+}
+
 module.exports = {
   unit: {
     options: {
@@ -5,10 +10,11 @@ module.exports = {
         'http://localhost:8000/test/unit/?saucelabs=true'
       ],
       testname: 'Kibana Browser Tests',
-      build: process.env.TRAVIS_BUILD_ID || 'test build',
+      build: buildId,
       concurrency: 10,
       username: 'kibana',
       key: process.env.SAUCE_ACCESS_KEY,
+      'max-duration': 360,
       browsers: [
         {
           browserName: 'chrome',
