@@ -109,13 +109,10 @@ define(function (require) {
     });
 
     describe('resize Method', function () {
-      beforeEach(function () {
+      it('should resize the chart', function () {
         vis.render(data);
         $('.visualize').width(500);
         vis.resize();
-      });
-
-      it('should resize the chart', function () {
         expect($('.chart').width()).to.be.lessThan(500);
       });
     });

@@ -6,21 +6,6 @@ define(function (require) {
 
   angular.module('YAxisFactory', ['kibana']);
 
-  function debug($node) {
-    console.log('\n\n.' + $node.attr('class'));
-    console.log(JSON.stringify({
-      height: $node.height(),
-      width: $node.width(),
-      style: {
-        display: $node.css('display'),
-        '-webkit-box-flex': $node.css('-webkit-box-flex'),
-        '-webkit-box-direction': $node.css('-webkit-box-direction'),
-        '-webkit-flex-direction': $node.css('-webkit-flex-direction'),
-        '-webkit-box-orient': $node.css('-webkit-box-orient')
-      }
-    }, null, '  '));
-  }
-
   describe('Vislib yAxis Class Test Suite', function () {
     var YAxis;
     var Data;
@@ -131,46 +116,36 @@ define(function (require) {
       yAxisLabel: 'Count'
     };
 
-    beforeEach(function () {
-      module('YAxisFactory');
-    });
+    beforeEach(module('YAxisFactory'));
+    beforeEach(inject(function (d3, Private) {
+      Data = Private(require('components/vislib/lib/data'));
+      YAxis = Private(require('components/vislib/lib/y_axis'));
 
-    beforeEach(function () {
-      inject(function (d3, Private) {
-        Data = Private(require('components/vislib/lib/data'));
-        YAxis = Private(require('components/vislib/lib/y_axis'));
+      expect($('.y-axis-wrapper')).to.have.length(0);
 
-        expect($('.y-axis-wrapper')).to.have.length(0);
+      var $node = $('<div>').css({
+        height: 40,
+        width: 40,
+      })
+      .appendTo('body')
+      .addClass('y-axis-wrapper');
 
-        console.log($(document.body).css('height'));
-        console.log($(document.body).css('display'));
+      var node = $node.get(0);
 
-        var $node = $('<div>').css({
-          height: 40,
-          width: 40,
-        })
-        .appendTo('body')
-        .addClass('y-axis-wrapper');
+      el = d3.select(node).datum(data);
 
-        var node = $node.get(0);
+      yAxisDiv = el.append('div')
+        .attr('class', 'y-axis-div');
 
-        el = d3.select(node).datum(data);
-
-        yAxisDiv = el.append('div')
-          .attr('class', 'y-axis-div');
-
-        dataObj = new Data(data, {});
-        yAxis = new YAxis({
-          el: node,
-          yMax: dataObj.getYMaxValue(),
-          _attr: {
-            margin: { top: 0, right: 0, bottom: 0, left: 0 }
-          }
-        });
-
-        [$node, $node.find('.y-axis-div')].forEach(debug);
+      dataObj = new Data(data, {});
+      yAxis = new YAxis({
+        el: node,
+        yMax: dataObj.getYMaxValue(),
+        _attr: {
+          margin: { top: 0, right: 0, bottom: 0, left: 0 }
+        }
       });
-    });
+    }));
 
     afterEach(function () {
       el.remove();
@@ -180,9 +155,6 @@ define(function (require) {
     describe('render Method', function () {
       beforeEach(function () {
         expect(d3.select(yAxis.el).selectAll('.y-axis-div')).to.have.length(1);
-
-        [$(yAxis.el), $(yAxis.el).find('.y-axis-div')].forEach(debug);
-
         yAxis.render();
       });
 

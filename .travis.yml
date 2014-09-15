@@ -17,7 +17,6 @@ notifications:
     - ! '%{repository}/%{branch} #%{build_number} by %{author}: %{message} (<a href="%{build_url}">open</a>)'
     format: html
     on_success: change
-    on_failure: always
 env:
   global:
     secure: AX9xidE0quyS07ZfOcecxEGjlNDT9YlM+fvtQHqOaODBII2jg5rgz0SyyxmTPSG68aqUNk8ML9slbRE4h0iPqNkB6fbDE2Dc6oTrRE7XFGDBjw66OHV2ZbsobdORf4UtWO06JBgLUEU2pzRYphe/B14dyA+ZO6p+bAgBmcdLd8k=
