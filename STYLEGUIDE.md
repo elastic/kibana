@@ -214,6 +214,54 @@ File.fullPermissions = 0777;
 
 [const]: https://developer.mozilla.org/en/JavaScript/Reference/Statements/const
 
+## Magic numbers
+
+These are numbers (or other values) simply used in line in your code. **Do not use these**, give them a variable name so they can be understood and changed easily.
+
+*Right:*
+
+```js
+var minWidth = 300;
+
+if (width < minWidth) {
+  ...
+}
+```
+
+*Wrong:*
+
+```js
+if (width < 300) {
+  ...
+}
+```
+
+## Global definitions
+
+Don't do this. Everything should be wrapped in a module that can be depended on by other modules. Even things as simple as a single value should be a module.
+
+## Function definitions
+
+Prefer the use of function declarations over function expressions. Function expressions are allowed, but should usually be avoided.
+
+Also, keep function definitions above other code instead of relying on function hoising.
+
+*Preferred:*
+
+```js
+function myFunc() {
+  ...
+}
+```
+
+*Allowed:*
+
+```js
+var myFunc = function () {
+  ...
+};
+```
+
 ## Object / Array creation
 
 Use trailing commas and put *short* declarations on a single line. Only quote
