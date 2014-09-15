@@ -2,17 +2,23 @@
 <html>
   <head>
     <title>Kibana4 Tests</title>
+
     <link rel="stylesheet" href="/node_modules/mocha/mocha.css" />
-    <script src="/node_modules/expect.js/expect.js"></script>
+    <link rel="stylesheet" href="/node_modules/mocha-screencast-reporter/screencast-reporter.css" />
+
+    <script src="/node_modules/expect.js/index.js"></script>
     <script src="/node_modules/mocha/mocha.js"></script>
+    <script src="/node_modules/mocha-screencast-reporter/screencast-reporter.js"></script>
     <script src="/src/kibana/bower_components/requirejs/require.js"></script>
     <script src="/src/kibana/require.config.js"></script>
+
     <script>(function () {
       var COVERAGE = !!(/coverage/i.test(window.location.search));
+      var SAUCELABS = !!(/saucelabs/i.test(window.location.search));
 
       mocha.setup({
         ui: 'bdd',
-        reporter: 'html'
+        reporter: SAUCELABS ? ScreencastReporter : 'html'
       });
 
       require.config({
@@ -83,26 +89,82 @@
           'specs/utils/interval',
           'specs/utils/versionmath',
           'specs/utils/routes/index',
+          'specs/utils/sequencer',
           'specs/courier/search_source/_get_normalized_sort',
           'specs/factories/base_object',
           'specs/state_management/state',
           'specs/state_management/global_state',
           'specs/utils/diff_object',
+          'specs/factories/events',
+          'specs/vislib/color',
+          'specs/vislib/zero_injection',
+          'specs/vislib/labels',
+          'specs/vislib/x_axis',
+          'specs/vislib/y_axis',
+          'specs/vislib/axis_title',
+          'specs/vislib/chart_title',
+          'specs/vislib/layout_types',
+          'specs/vislib/vis_types',
+          'specs/vislib/splits',
+          'specs/vislib/layout',
+          'specs/vislib/_chart',
+          'specs/vislib/column_layout',
+          'specs/vislib/index',
+          'specs/vislib/vis',
+          'specs/vislib/handler',
+          'specs/vislib/_error_handler',
+          'specs/vislib/data',
+          'specs/vislib/resize_checker',
           'specs/utils/diff_time_picker_vals',
           'specs/factories/events',
           'specs/index_patterns/_flatten_search_response',
           'specs/utils/registry/index',
           'specs/directives/filter_bar',
           'specs/components/agg_types/index',
-          'specs/components/vis/index'
+          'specs/components/vis/index',
+          'specs/components/reflow_watcher'
         ], function (kibana, sinon) {
           kibana.load(function () {
             var xhr = sinon.useFakeXMLHttpRequest();
 
             window.mochaRunner = mocha.run().on('end', function () {
               window.mochaResults = this.stats;
+              window.mochaResults.details = getFailedTests(this);
               xhr.restore();
             });
+
+            function getFailedTests(runner) {
+              var fails = [];
+              var suiteStack = [];
+
+              (function recurse(suite) {
+                suiteStack.push(suite);
+
+                (suite.tests || [])
+                .filter(function (test) {
+                  return test.state !== 'passed' && test.state !== 'pending';
+                })
+                .forEach(function (test) {
+                  fails.push({
+                    title: suiteStack.concat(test).reduce(function (title, suite) {
+                      if (suite.title) {
+                        return (title ? title + ' ' : '') + suite.title;
+                      } else {
+                        return title;
+                      }
+                    }, ''),
+                    err: test.err ? (test.err.stack || test.err.message) : 'unknown error'
+                  });
+                });
+
+                (suite.suites || []).forEach(recurse);
+
+                suiteStack.pop();
+              }(runner.suite));
+
+              return fails;
+            }
+
           });
         });
       }

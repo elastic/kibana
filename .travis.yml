@@ -1,20 +1,22 @@
 language: node_js
 node_js:
-  - '0.10'
+- '0.10'
 install:
-  - npm install -g grunt-cli bower
-  - npm install
-  - bower install
+- npm install -g grunt-cli bower
+- npm install
+- bower install
 script:
-  - npm test
+- npm test
 notifications:
   email:
-    - rashid.khan@elasticsearch.com
+  - rashid.khan@elasticsearch.com
   hipchat:
     rooms:
       secure: a2FERvICecrUAR62vP4vrUCTG3haRzf6kSzDDzGu6SICEXWLRrK0xeNQDpdwDAfzFmaIJ6txpkmInvEFeNPYNngTgEDyfhqdIa/lW0Ermdg+1hL0dK6QJiVmT1V6LDB2mgtaTTmfontxJqq7P2tmr0zz8ny4Eqq3lUnwPxYFNNo=
     template:
-      - '%{repository}/%{branch} #%{build_number} by %{author}: %{message} (<a href="%{build_url}">open</a>)'
+    - ! '%{repository}/%{branch} #%{build_number} by %{author}: %{message} (<a href="%{build_url}">open</a>)'
     format: html
     on_success: change
-    on_failure: always
+env:
+  global:
+    secure: AX9xidE0quyS07ZfOcecxEGjlNDT9YlM+fvtQHqOaODBII2jg5rgz0SyyxmTPSG68aqUNk8ML9slbRE4h0iPqNkB6fbDE2Dc6oTrRE7XFGDBjw66OHV2ZbsobdORf4UtWO06JBgLUEU2pzRYphe/B14dyA+ZO6p+bAgBmcdLd8k=

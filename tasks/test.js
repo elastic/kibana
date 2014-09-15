@@ -1,12 +1,14 @@
 var _ = require('lodash');
 module.exports = function (grunt) {
-  /* jshint scripturl:true */
+
+  var testTask = process.env.TRAVIS ? 'saucelabs-mocha:unit' : 'mocha:unit';
+
   grunt.registerTask('test', [
+    'jshint',
     'ruby_server',
     'maybe_start_server',
     'jade',
-    'mocha:unit',
-    'jshint'
+    testTask
   ]);
 
   grunt.registerTask('coverage', [

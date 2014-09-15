@@ -1,14 +1,17 @@
 define(function (require) {
+  var module = require('modules').get('kibana/vislib', ['kibana']);
+  
+  require('services/private');
 
-  var k4 = {
-    version: '0.0.0',
-    legend: require('components/vislib/modules/legend'),
-    Chart: require('components/vislib/core'),
-    histogram: require('components/vislib/modules/histogram'),
-    line: require('components/vislib/modules/lineChart'),
-    area: require('components/vislib/modules/areaChart'),
-    pie: require('components/vislib/modules/pieChart'),
-  };
+  module.service('d3', function () {
+    return require('d3');
+  });
 
-  return k4;
+  // Kibana visualization library
+  module.service('visLib', function (Private) {
+    return {
+      version: '0.0.0',
+      Vis: Private(require('components/vislib/vis'))
+    };
+  });
 });

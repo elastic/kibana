@@ -16,6 +16,7 @@ module.exports = function (grunt) {
   grunt.registerTask('todos', function () {
     var files = grunt.file.expand([
       'src/kibana/**/*.js',
+      '!src/kibana/bower_components',
       'test/unit/specs/**/*.js'
     ]);
     var matches = [];

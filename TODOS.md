@@ -443,6 +443,10 @@
    - Now that all calls to _data and _removeData have been replaced
  - **[src/kibana/components/index_patterns/_mapper.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/index_patterns/_mapper.js)**
    - Change index to be the resolved in some way, last three months, last hour, last year, whatever
+ - **[src/kibana/components/vislib/vis.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/vislib/vis.js)**
+   - need to come up with a solution for resizing when no data is available
+ - **[src/kibana/components/vislib/visualizations/column_chart.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/vislib/visualizations/column_chart.js)**
+   - refactor so that this is called from the data module
  - **[src/kibana/components/visualize/visualize.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/visualize/visualize.js)**
    - we need to have some way to clean up result requests
  - **[src/kibana/directives/rows.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/directives/rows.js)**

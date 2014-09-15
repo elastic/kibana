@@ -10,7 +10,8 @@ module.exports = function (grunt) {
       files: [
         '<%= app %>/**/*.less',
         '<%= app %>/**/styles/**/*.less',
-        '<%= app %>/**/components/**/*.less'
+        '<%= app %>/**/components/**/*.less',
+        '<%= app %>/**/components/vislib/components/styles/**/*.less'
       ],
       tasks: ['less']
     },
