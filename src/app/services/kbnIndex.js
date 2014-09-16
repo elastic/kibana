@@ -15,7 +15,11 @@ function (angular, _, config, moment) {
     this.indices = function(from,to,pattern,interval) {
       var possible = [];
       _.each(expand_range(from,to,interval),function(d){
-        possible.push(d.utc().format(pattern));
+        if (config.utc_tz === true) {
+          possible.push(d.utc().format(pattern));
+        } else {
+          possible.push(d.local().format(pattern));
+        }
       });
 
       return resolve_indices(possible).then(function(p) {

@@ -33,6 +33,15 @@ function (Settings) {
 
     /** @scratch /configuration/config.js/5
      *
+     * ==== utc_tz
+     *
+     * A bool that declares if your index timestamps will be in UTC or local time. Use true for UTC and 
+     * false for local time.
+     */
+    utc_tz: true,
+
+    /** @scratch /configuration/config.js/5
+     *
      * ==== default_route
      *
      * This is the default landing page when you don't specify a dashboard to load. You can specify
