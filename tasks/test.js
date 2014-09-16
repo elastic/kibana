@@ -3,13 +3,12 @@ module.exports = function (grunt) {
 
 
   grunt.registerTask('test', function () {
+    var testTask = 'mocha:unit';
     if (process.env.TRAVIS && !process.env.SAUCE_ACCESS_KEY) {
-      grunt.fail.fatal('SAUCE_ACCESS_KEY not set in env, can not run tests on Sauce Labs');
+      grunt.log.writeln('SAUCE_ACCESS_KEY not set in env, running with Phantom');
     } else {
-      grunt.log.ok('SAUCE KEY: ' + process.env.SAUCE_ACCESS_KEY);
+      testTask = 'saucelabs-mocha:unit';
     }
-
-    var testTask = process.env.TRAVIS ? 'saucelabs-mocha:unit' : 'mocha:unit';
 
     var tasks = [
       'jshint',
