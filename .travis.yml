@@ -13,6 +13,8 @@ notifications:
   hipchat:
     rooms:
       secure: a2FERvICecrUAR62vP4vrUCTG3haRzf6kSzDDzGu6SICEXWLRrK0xeNQDpdwDAfzFmaIJ6txpkmInvEFeNPYNngTgEDyfhqdIa/lW0Ermdg+1hL0dK6QJiVmT1V6LDB2mgtaTTmfontxJqq7P2tmr0zz8ny4Eqq3lUnwPxYFNNo=
+    format: html
+    on_success: change
     template:
     - ! '%{repository_slug}/%{branch} by %{author}: %{commit_message} (<a href="%{build_url}">open</a>)'
 env:
