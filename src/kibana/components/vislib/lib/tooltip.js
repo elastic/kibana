@@ -16,15 +16,10 @@ define(function (require) {
       if (!(this instanceof Tooltip)) {
         return new Tooltip(el, formatter);
       }
-
       this.el = el;
       this.tooltipFormatter = formatter;
-      // hard coded class name for the tooltip `div`
-      this.tooltipClass = 'k4tip';
-      // reference to the width and height of the chart DOM elements
-      // establishes the bounds for the tooltip per chart
-      this.chartWidth = $('.chart').width();
-      this.chartHeight = $('.chart').height();
+      this.tooltipClass = 'vis-tooltip';
+      this.containerClass = 'vis-wrapper';
     }
 
     Tooltip.prototype.render = function () {
@@ -32,62 +27,94 @@ define(function (require) {
       
       return function (selection) {
 
+        // if tooltip not appended to body, append one
+        if (d3.select('body').select('.' + self.tooltipClass)[0][0] === null) {
+          d3.select('body').append('div').attr('class', self.tooltipClass);
+        }
+
+        // if container not saved on Tooltip, save it
+        if (self.container === undefined || self.container !== d3.select(self.el).select('.' + self.containerClass)) {
+          self.container = d3.select(self.el).select('.' + self.containerClass);
+        }
+
+        var tooltipDiv = d3.select('.' + self.tooltipClass);
+
         selection.each(function () {
-          var tooltipDiv = d3.select(self.el).select('.' + self.tooltipClass);
+          
           // DOM element on which the tooltip is called
           var element = d3.select(this);
+          
+          // define selections relative to el of tooltip
+          var chartXoffset;
+          var chartWidth;
+          var chartHeight;
+          var yaxisWidth;
+          var offset;
+          var tipWidth;
+          var tipHeight;
 
           element
             .on('mousemove.tip', function (d) {
-              // Calculate the x and y coordinates of the mouse on the page
+              // get x and y coordinates of the mouse event
               var mouseMove = {
                 left: d3.event.clientX,
                 top: d3.event.clientY
               };
-
-              // hack to keep active tooltip in front of gridster/dashboard list
-              if ($('.gridster').length) {
-                var gridsterUl = $('.gridster');
-                var gridsterLis = $('.gridster').find('li').removeClass('player-revert');
-                var tipLi = $(tooltipDiv.node()).closest('li').addClass('player-revert');
-              }
-
-              var chartWidth = $(tooltipDiv.node()).closest('.vis-wrapper').width();
-              var yaxisWidth = $('.y-axis-col-wrapper').width();
-              var offsetX = d3.event.offsetX === undefined ? d3.event.layerX : d3.event.offsetX;
-              var tipWidth = tooltipDiv[0][0].clientWidth;
-              var xOffset = 10;
-
-              // check position of tooltip relative to chart width 
-              // to apply offset if tooltip should flip 'west'
-              // if tip width + offset puts it off chart, flip direction
-              // unless flip puts it off the left edge of vis wrapper
-              if ((chartWidth - offsetX) < (tipWidth + yaxisWidth + 10) && (offsetX + yaxisWidth + 10) > (tipWidth + 10)) {
-                xOffset = -10 - tipWidth;
-              }
-
-              var chartHeight = self.chartHeight;
-              var offsetY = d3.event.offsetY === undefined ? d3.event.layerY : d3.event.offsetY;
-              var tipHeight = tooltipDiv[0][0].clientHeight;
-              var yOffset = 5;
-              // apply y offset to keep tooltip within bottom of chart
-              if ((chartHeight - offsetY + 5) < (tipHeight)) {
-                yOffset = tipHeight - (chartHeight - offsetY + 0);
-              }
+              
+              offset = self.getOffsets(tooltipDiv, mouseMove);
 
               // return text and position for tooltip
               return tooltipDiv.datum(d)
                 .text(self.tooltipFormatter)
                 .style('visibility', 'visible')
-                .style('left', mouseMove.left + xOffset + 'px')
-                .style('top', mouseMove.top - yOffset + 'px');
+                .style('left', mouseMove.left + offset.left + 'px')
+                .style('top', mouseMove.top - offset.top + 'px');
             })
+
             .on('mouseout.tip', function () {
-              // Hide tooltip
+              // hide tooltip
               return tooltipDiv.style('visibility', 'hidden');
             });
         });
       };
+    };
+
+    Tooltip.prototype.getOffsets = function (tooltipDiv, mouseMove) {
+
+      var self = this;
+      var offset = {top: 10, left: 10};
+      var container;
+      var chartXoffset;
+      var chartYoffset;
+      var chartWidth;
+      var chartHeight;
+      var tipWidth;
+      var tipHeight;
+      
+      if ($(self.el).find('.' + self.containerClass)) {
+        container    = $(self.el).find('.' + self.containerClass);
+        chartXoffset = container.offset().left;
+        chartYoffset = container.offset().top;
+        chartWidth   = container.width();
+        chartHeight  = container.height();
+        tipWidth     = tooltipDiv[0][0].clientWidth;
+        tipHeight    = tooltipDiv[0][0].clientHeight;
+
+        // change xOffset to keep tooltip within container
+        // if tip width + xOffset puts it over right edge of container, flip left
+        // unless flip left puts it over left edge of container
+        if ((mouseMove.left + offset.left + tipWidth) > (chartXoffset + chartWidth) &&
+          (mouseMove.left - tipWidth - 10) > chartXoffset) {
+          offset.left = -10 - tipWidth;
+        }
+
+        // change yOffset to keep tooltip within container
+        if ((mouseMove.top + tipHeight - 10) > (chartYoffset + chartHeight)) {
+          offset.top = chartYoffset + chartHeight;
+        }
+      }
+      
+      return offset;
     };
 
     return Tooltip;

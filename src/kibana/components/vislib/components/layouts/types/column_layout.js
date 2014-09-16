@@ -99,10 +99,6 @@ define(function (require) {
             {
               type: 'div',
               class: 'legend-col-wrapper'
-            },
-            {
-              type: 'div',
-              class: 'k4tip'
             }
           ]
         }
