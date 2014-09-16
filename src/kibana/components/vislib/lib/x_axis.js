@@ -90,7 +90,6 @@ define(function (require) {
 
     // Create the d3 xAxis function
     XAxis.prototype.getXAxis = function (width) {
-      this.xAxisFormatter = this.xAxisFormatter;
       // save a reference to the xScale
       this.xScale = this.getXScale(this.ordered, width);
 
@@ -216,7 +215,7 @@ define(function (require) {
         // truncate str
         selection.selectAll('.tick text')
           .text(function (d) {
-            str = self.xAxisFormatter(d);
+            str = d;
             if (maxWidth > size) {
               endChar = 0;
               if (Math.floor((size / pixPerChar) - 4) >= 4) {

@@ -1,7 +1,7 @@
 define(function (require) {
   return function OrderedXKeysUtilService(Private) {
     var _ = require('lodash');
-    var getUniqKeys = Private(require('components/vislib/components/_functions/zero_injection/uniq_keys'));
+    var getUniqKeys = Private(require('components/vislib/components/zero_injection/uniq_keys'));
 
     // Takes a kibana data objects
     return function (obj) {

@@ -58,7 +58,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (Private) {
-          injectZeros = Private(require('components/vislib/components/_functions/zero_injection/inject_zeros'));
+          injectZeros = Private(require('components/vislib/components/zero_injection/inject_zeros'));
           sample1 = injectZeros(seriesData);
           sample2 = injectZeros(multiSeriesData);
         });
@@ -113,7 +113,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (Private) {
-          orderXValues = Private(require('components/vislib/components/_functions/zero_injection/ordered_x_keys'));
+          orderXValues = Private(require('components/vislib/components/zero_injection/ordered_x_keys'));
           results = orderXValues(multiSeriesData);
         });
       });
@@ -145,7 +145,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (Private) {
-          uniqueKeys = Private(require('components/vislib/components/_functions/zero_injection/uniq_keys'));
+          uniqueKeys = Private(require('components/vislib/components/zero_injection/uniq_keys'));
           results = uniqueKeys(multiSeriesData.series);
         });
       });
@@ -163,41 +163,6 @@ define(function (require) {
       });
     });
 
-    describe('Replace Index', function () {
-      var replaceIndex;
-      var arr = [
-        { x: 1, y: 2},
-        { x: 2, y: 3},
-        { x: 3, y: 4}
-      ];
-      var index = 1;
-      var obj = { x: 2, y: 5 };
-      var results;
-
-      beforeEach(function () {
-        module('ReplaceIndexUtilService');
-      });
-
-      beforeEach(function () {
-        inject(function (Private) {
-          replaceIndex = Private(require('components/vislib/components/_functions/zero_injection/replace_index'));
-          results = replaceIndex(arr, index, obj);
-        });
-      });
-
-      it('should return a function', function () {
-        expect(_.isFunction(replaceIndex)).to.be(true);
-      });
-
-      it('should return an array', function () {
-        expect(_.isArray(results)).to.be(true);
-      });
-
-      it('should replace the object at the index in the array with the new object', function () {
-        expect(results[1].y).to.be(5);
-      });
-    });
-
     describe('Flatten Data', function () {
       var flattenData;
       var results;
@@ -208,7 +173,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (Private) {
-          flattenData = Private(require('components/vislib/components/_functions/zero_injection/flatten_data'));
+          flattenData = Private(require('components/vislib/components/zero_injection/flatten_data'));
           results = flattenData(multiSeriesData);
         });
       });
@@ -241,7 +206,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (Private) {
-          createZeroArray = Private(require('components/vislib/components/_functions/zero_injection/zero_filled_array'));
+          createZeroArray = Private(require('components/vislib/components/zero_injection/zero_filled_array'));
           results1 = createZeroArray(arr1);
           results2 = createZeroArray(arr2);
         });
@@ -293,7 +258,7 @@ define(function (require) {
       var xValueArr = [1, 2, 3, 4, 5];
       var createZeroArray;
       var arr1;
-      var arr2 = multiSeriesData.series[2].values;
+      var arr2 = [ {x: 3, y: 834} ];
       var results;
 
       beforeEach(function () {
@@ -302,8 +267,8 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (Private) {
-          zeroFillArray = Private(require('components/vislib/components/_functions/zero_injection/zero_fill_data_array'));
-          createZeroArray = Private(require('components/vislib/components/_functions/zero_injection/zero_filled_array'));
+          zeroFillArray = Private(require('components/vislib/components/zero_injection/zero_fill_data_array'));
+          createZeroArray = Private(require('components/vislib/components/zero_injection/zero_filled_array'));
           arr1 = createZeroArray(xValueArr);
           // Takes zero array as 1st arg and data array as 2nd arg
           results = zeroFillArray(arr1, arr2);
@@ -327,7 +292,7 @@ define(function (require) {
       it('should return an array with zeros injected in the appropriate objects as y values', function () {
         expect(results[0].y).to.be(0);
         expect(results[1].y).to.be(0);
-        expect(results[2].y).to.be(0);
+        expect(results[3].y).to.be(0);
         expect(results[4].y).to.be(0);
       });
     });

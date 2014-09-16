@@ -11,11 +11,13 @@ define(function () {
         var div = d3.select(this);
 
         if (!data.series) {
-          div.selectAll('.chart-title').append('div')
+          div.selectAll('.chart-title')
+            .append('div')
             .data(function (d) {
               return d.rows ? d.rows : d.columns;
             })
-            .enter().append('div')
+            .enter()
+            .append('div')
             .attr('class', 'chart-title');
 
           if (data.rows) {

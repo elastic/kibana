@@ -8,7 +8,7 @@ define(function (require) {
 
     var getColor = (function () {
       var i = 0;
-      var colorPool = Private(require('components/vislib/components/_functions/color/color_palette'))(100);
+      var colorPool = Private(require('components/vislib/components/color/color_palette'))(100);
       var assigned = {};
       return function (item) {
         var key = item.$$hashKey;

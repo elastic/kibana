@@ -2,10 +2,10 @@ define(function (require) {
   return function DataFactory(d3, Private) {
     var _ = require('lodash');
 
-    var injectZeros = Private(require('components/vislib/components/_functions/zero_injection/inject_zeros'));
-    var orderKeys = Private(require('components/vislib/components/_functions/zero_injection/ordered_x_keys'));
-    var getLabels = Private(require('components/vislib/components/_functions/labels/labels'));
-    var color = Private(require('components/vislib/components/_functions/color/color'));
+    var injectZeros = Private(require('components/vislib/components/zero_injection/inject_zeros'));
+    var orderKeys = Private(require('components/vislib/components/zero_injection/ordered_x_keys'));
+    var getLabels = Private(require('components/vislib/components/labels/labels'));
+    var color = Private(require('components/vislib/components/color/color'));
 
     /*
      * Provides an API for pulling values off the data
