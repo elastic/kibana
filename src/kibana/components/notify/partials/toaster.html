@@ -34,7 +34,7 @@
       </div>
 
       <div ng-if="notif.stack && notif.showStack" class="toast-stack alert" ng-class="'alert-' + notif.type">
-        <pre ng-bind="notif.stack"></pre>
+        <pre ng-repeat="stack in notif.stacks" ng-bind="stack"></pre>
       </div>
 
     </li>
