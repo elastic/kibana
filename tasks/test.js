@@ -5,6 +5,8 @@ module.exports = function (grunt) {
   grunt.registerTask('test', function () {
     if (process.env.TRAVIS && !process.env.SAUCE_ACCESS_KEY) {
       grunt.fail.fatal('SAUCE_ACCESS_KEY not set in env, can not run tests on Sauce Labs');
+    } else {
+      grunt.log.ok('SAUCE KEY: ' + process.env.SAUCE_ACCESS_KEY);
     }
 
     var testTask = process.env.TRAVIS ? 'saucelabs-mocha:unit' : 'mocha:unit';
