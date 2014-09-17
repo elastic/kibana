@@ -109,10 +109,39 @@ define(function (require) {
 
     Data.prototype.root = function () {
       var data = this.data;
+      var self = this;
 
-      _.forEach(this.chartData, function (obj) {
-
+      _.forEach(this.chartData(), function (obj) {
+        // Add a root
+        return obj.root = {
+          name: obj.xAxisLabel + ' ' + obj.yAxisLabel,
+          children: self.children(obj.series)
+        };
       });
+
+      return data;
+    };
+
+    Data.prototype.children = function (array) {
+      var self = this;
+      var newArray = [];
+
+      _.forEach(array, function (obj) {
+        if (obj.x && obj.y) {
+          return newArray.push({
+            name: obj.x,
+            size: obj.y
+          });
+        }
+
+        return newArray.push({
+          name: obj.label,
+          children: self.children(obj.values)
+        });
+      });
+
+      console.log(newArray);
+      return newArray;
     };
 
     // Inject zeros into the data

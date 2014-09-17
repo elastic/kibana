@@ -20,7 +20,7 @@ define(function (require) {
       PieChart.Super.apply(this, arguments);
       // Column chart specific attributes
       this._attr = _.defaults(vis._attr || {}, {
-        yValue: function (d, i) { return d.y; },
+        yValue: function (d) { return d.y; },
         dispatch: d3.dispatch('brush', 'click', 'hover', 'mouseenter', 'mouseleave', 'mouseover', 'mouseout')
       });
     }
@@ -116,16 +116,21 @@ define(function (require) {
             .data(partition.nodes)
             .enter()
             .append('path')
-//              .attr('display', function (d) { return d.depth ? null : 'none'; }) // hide inner ring
             .attr('d', arc)
             .attr('class', function (d) {
-              return
+              if (d.parent) {
+                return labelColor(d.name);
+              }
+              return xValueColor(d.name);
             })
             .style('stroke', '#fff')
             .style('fill', function (d) {
-              return color((d.children ? d : d.parent).name);
-            })
-            .style('fill-rule', 'evenodd');
+              if (!d.children) {
+                return xValueColor(d.name);
+              }
+              return labelColor(d.name);
+            });
+//            .style('fill-rule', 'evenodd');
 
           // add events to bars
           self.addPathEvents(path);
