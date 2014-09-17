@@ -118,19 +118,13 @@ define(function (require) {
             .append('path')
             .attr('d', arc)
             .attr('class', function (d) {
-              if (d.parent) {
-                return labelColor(d.name);
-              }
-              return xValueColor(d.name);
+              if (d.depth === 0) { return; }
+              return self.colorToClass(xValueColor(d.name));
             })
             .style('stroke', '#fff')
             .style('fill', function (d) {
-              if (!d.children) {
-                return xValueColor(d.name);
-              }
-              return labelColor(d.name);
+              return xValueColor(d.name);
             });
-//            .style('fill-rule', 'evenodd');
 
           // add events to bars
           self.addPathEvents(path);

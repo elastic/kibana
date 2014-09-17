@@ -132,15 +132,21 @@ define(function (require) {
             name: obj.x,
             size: obj.y
           });
+        } else if (!obj.label) {
+          return _.forEach(obj.values, function (obj) {
+            return newArray.push({
+              name: obj.x,
+              size: obj.y
+            });
+          });
+        } else {
+          return newArray.push({
+            name: obj.label,
+            children: self.children(obj.values)
+          });
         }
-
-        return newArray.push({
-          name: obj.label,
-          children: self.children(obj.values)
-        });
       });
 
-      console.log(newArray);
       return newArray;
     };
 
@@ -159,13 +165,17 @@ define(function (require) {
       return getLabels(this.data);
     };
 
+    Data.prototype.getLabelsAndXValues = function () {
+      return _.union(_.filter(this.getLabels(), Boolean), this.xValues());
+    };
+
     // Return a function that does color lookup on labels
     Data.prototype.getColorFunc = function () {
       return color(this.getLabels());
     };
 
     Data.prototype.getPieColorFunc = function () {
-      return color(this.xValues());
+      return color(_.union(_.filter(this.getLabels(), Boolean), this.xValues()));
     };
 
     return Data;

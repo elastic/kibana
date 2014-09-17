@@ -2,8 +2,7 @@ define(function (require) {
   return function VisTypeFactory(Private) {
     // visLib visualization types
     return {
-//      histogram: Private(require('components/vislib/visualizations/column_chart')),
-      histogram: Private(require('components/vislib/visualizations/pie_chart')),
+      histogram: Private(require('components/vislib/visualizations/column_chart')),
       pie: Private(require('components/vislib/visualizations/pie_chart'))
     };
   };

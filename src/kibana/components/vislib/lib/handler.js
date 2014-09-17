@@ -33,12 +33,25 @@ define(function (require) {
       });
 
       // Visualization constructors
+      var axesVisTypes = this.axesVisTypes = {
+        ColumnChart: 'histogram',
+        LineChart: 'line'
+      };
+
       // Add the visualization layout
-      this.layout = new Layout(this.el, this.data.root(), this._attr.type);
+      if (axesVisTypes[this.ChartClass.name]) {
+        this.layout = new Layout(this.el, this.data.injectZeros(), this._attr.type);
+      } else {
+        this.layout = new Layout(this.el, this.data.root(), this._attr.type);
+      }
 
       // Only add legend if addLegend attribute set
       if (this._attr.addLegend) {
-        this.legend = new Legend(this.vis, this.el, this.data.getLabels(), this.data.getColorFunc(), this._attr);
+        if (this.ChartClass.name in axesVisTypes) {
+          this.legend = new Legend(this.vis, this.el, this.data.getLabels(), this.data.getColorFunc(), this._attr);
+        } else {
+          this.legend = new Legend(this.vis, this.el, this.data.getLabelsAndXValues(), this.data.getPieColorFunc(), this._attr);
+        }
       }
 
       // only add tooltip if addTooltip attribute set
@@ -47,23 +60,25 @@ define(function (require) {
       }
 
       // add a x axis
-//      this.xAxis = new XAxis({
-//        el: this.el,
-//        xValues: this.data.xValues(),
-//        ordered: this.data.get('ordered'),
-//        xAxisFormatter: this.data.get('xAxisFormatter'),
-//        _attr: this._attr
-//      });
-//
-//      // add a y axis
-//      this.yAxis = new YAxis({
-//        el: this.el,
-//        yMax: this.data.getYMaxValue(),
-//        _attr: this._attr
-//      });
-//
-//      // add axis titles
-//      this.axisTitle = new AxisTitle(this.el, this.data.get('xAxisLabel'), this.data.get('yAxisLabel'));
+      if (axesVisTypes[this.ChartClass.name]) {
+        this.xAxis = new XAxis({
+          el: this.el,
+          xValues: this.data.xValues(),
+          ordered: this.data.get('ordered'),
+          xAxisFormatter: this.data.get('xAxisFormatter'),
+          _attr: this._attr
+        });
+
+        // add a y axis
+        this.yAxis = new YAxis({
+          el: this.el,
+          yMax: this.data.getYMaxValue(),
+          _attr: this._attr
+        });
+
+        // add axis titles
+        this.axisTitle = new AxisTitle(this.el, this.data.get('xAxisLabel'), this.data.get('yAxisLabel'));
+      }
 
       // add chart titles
       this.chartTitle = new ChartTitle(this.el);
