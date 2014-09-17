@@ -6,15 +6,14 @@ if (process.env.TRAVIS_BUILD_ID) {
 module.exports = {
   unit: {
     options: {
-      urls: [
-        'http://localhost:8000/test/unit/?saucelabs=true'
-      ],
+      username: 'kibana',
+      key: process.env.SAUCE_ACCESS_KEY,
+      urls: ['http://localhost:8000/test/unit/?saucelabs=true'],
       testname: 'Kibana Browser Tests',
       build: buildId,
       concurrency: 10,
-      username: 'kibana',
-      key: process.env.SAUCE_ACCESS_KEY,
-      'max-duration': 360,
+      'max-duration': 60,
+      maxRetries: 1,
       browsers: [
         {
           browserName: 'chrome',

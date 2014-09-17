@@ -38,5 +38,5 @@ module.exports = function (grunt) {
   });
 
   // load task definitions
-  grunt.loadTasks('tasks');
+  grunt.task.loadTasks('tasks');
 };
