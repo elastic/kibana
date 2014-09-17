@@ -617,6 +617,10 @@ if (isSessionValid) {
 }
 ```
 
+## Do not comment out code
+
+We use a version management system. If a line of code is no longer needed, remove it, don't simply comment it out.
+
 ## Classes/Constructors and Inheritance
 
 While JavaScript it is not always considered an object-oriented language, it does have the building blocks for writing object oriented code. Of course, as with all things JavaScript, there are many ways this can be accomplished. Generally, we try to err on the side of readability.
