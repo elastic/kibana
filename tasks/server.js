@@ -6,7 +6,10 @@ module.exports = function (grunt) {
 
     server.listen(8000).then(function () {
       console.log('visit http://localhost:8000');
-      if (keepalive !== 'keepalive') done();
+
+      if (keepalive !== 'keepalive') {
+        done();
+      }
     });
   });
 };
