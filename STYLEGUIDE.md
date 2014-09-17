@@ -481,6 +481,43 @@ function isPercentage(val) {
 }
 ```
 
+## Chaining operations
+
+When using a chaining syntax (jquery or promises, for example), do not indent the subsequent chained operations, unless there is a logical grouping in them.
+
+Also, if the chain is long, each method should be on a new line.
+
+*Right:*
+
+```js
+$('.someClass')
+.addClass('another-class')
+.append(someElement)
+```
+
+```js
+d3.selectAll('g.bar')
+.enter()
+  .append('thing')
+  .data(anything)
+  .exit()
+.each(function() ... )
+```
+
+*Wrong:*
+
+```js
+$('.someClass')
+  .addClass('another-class')
+  .append(someElement)
+```
+
+```js
+d3.selectAll('g.bar')
+.enter().append('thing').data(anything).exit()
+.each(function() ... )
+```
+
 ## Name your closures
 
 Feel free to give your closures a descriptive name. It shows that you care about them, and
