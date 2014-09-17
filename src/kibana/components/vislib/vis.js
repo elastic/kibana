@@ -55,6 +55,7 @@ define(function (require) {
           this.handler.error(error.message);
         } else {
           console.error(error.message);
+          throw (error);
         }
       }
     };

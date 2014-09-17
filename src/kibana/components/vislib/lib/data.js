@@ -107,6 +107,14 @@ define(function (require) {
       });
     };
 
+    Data.prototype.root = function () {
+      var data = this.data;
+
+      _.forEach(this.chartData, function (obj) {
+
+      });
+    };
+
     // Inject zeros into the data
     Data.prototype.injectZeros = function () {
       return injectZeros(this.data);
@@ -124,7 +132,11 @@ define(function (require) {
 
     // Return a function that does color lookup on labels
     Data.prototype.getColorFunc = function () {
-      return color(this.getLabels(this.data));
+      return color(this.getLabels());
+    };
+
+    Data.prototype.getPieColorFunc = function () {
+      return color(this.xValues());
     };
 
     return Data;

@@ -4,7 +4,6 @@ define(function (require) {
     var $ = require('jquery');
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
-    var Legend = Private(require('components/vislib/lib/legend'));
     var errors = require('errors');
 
     // Dynamically adds css file
@@ -92,6 +91,7 @@ define(function (require) {
       var color = this.vis.data.getColorFunc();
       var xScale = this.vis.xAxis.xScale;
       var yScale = this.vis.yAxis.yScale;
+      var self = this;
       var layer;
       var bars;
 
@@ -114,13 +114,13 @@ define(function (require) {
 
       // enter
       bars.enter()
-      .append('rect')
-      .attr('class', function (d) {
-        return 'color ' + Legend.prototype.colorToClass.call(this, color(d.label));
-      })
-      .attr('fill', function (d) {
-        return color(d.label);
-      });
+        .append('rect')
+        .attr('class', function (d) {
+          return self.colorToClass(color(d.label));
+        })
+        .attr('fill', function (d) {
+          return color(d.label);
+        });
 
       // update
       bars
