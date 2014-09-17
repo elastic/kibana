@@ -160,8 +160,8 @@ define(function (require) {
           
           if (!self.ordered) {
             // nominal/ordinal scale
-            axis.call(self.rotateAxisLabels());
-            axis.call(self.truncateLabels(100));
+            //axis.call(self.rotateAxisLabels());
+            axis.call(self.truncateLabels(200));
           } else {
             // time scale
             axis.call(self.filterAxisLabels());
@@ -250,6 +250,7 @@ define(function (require) {
             myWidth = par.getBBox().width;
             halfWidth = par.getBBox().width / 2;
             maxW = $('.x-axis-div').width();
+
             // trims labels that would overlap each other 
             // or extend past left or right edges
             // if prev label pos (or 0) + half of label width is < label pos
@@ -264,36 +265,49 @@ define(function (require) {
       };
     };
 
-
     // Returns a function that adjusts axis title and
     // all chart title transforms to fit axis labels
     XAxis.prototype.fitTitles = function () {
       var self = this;
-      var visEl = $(self.el);
-      var xAxisTitle = visEl.find('.x-axis-title');
-      var xAxisChartTitle = visEl.find('.x-axis-chart-title');
+      var visEls = $('.vis-wrapper');
+      var visEl;
+      var xAxisTitle;
+      var xAxisChartTitle;
+      var titleWidth;
       var text;
       var titles;
-      var titleWidth;
 
       return function () {
-        // set transform of x-axis-title text to fit .x-axis-title div width
-        titleWidth = xAxisTitle.width();
-        text = d3.select('.x-axis-title')
-          .select('svg')
-          .select('text')
-          .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
+        visEls.each(function () {
+          visEl = this;
+          // set transform of x-axis-title to fit .x-axis-title div width
+          xAxisTitle = $(this).find('.x-axis-title');
+          titleWidth = xAxisTitle.width();
 
-        // set transform of x-axis-chart-titles text to fit .chart-title div width
-        titleWidth = xAxisChartTitle.find('.chart-title').width();
-        titles = d3.select('.x-axis-chart-title')
-          .selectAll('.chart-title');
-        titles.each(function () {
-          text = d3.select(this)
+          text = d3.select(this).select('.x-axis-title')
             .select('svg')
+            .attr('width', titleWidth)
             .select('text')
             .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
+
+          // if x-axis-chart-titles, set transform of x-axis-chart-titles
+          // to fit .chart-title div width
+          if ($(this).find('.x-axis-chart-title').length) {
+            xAxisChartTitle = $(this).find('.x-axis-chart-title');
+            titleWidth = xAxisChartTitle.find('.chart-title').width();
+            
+            titles = d3.select(this).select('.x-axis-chart-title').selectAll('.chart-title');
+            titles.each(function () {
+              text = d3.select(this)
+                .select('svg')
+                .attr('width', titleWidth)
+                .select('text')
+                .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
+            });
+          }
+          
         });
+        
       };
     };
 
