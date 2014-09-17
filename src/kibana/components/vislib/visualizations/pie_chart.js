@@ -18,7 +18,7 @@ define(function (require) {
       }
 
       PieChart.Super.apply(this, arguments);
-      // Column chart specific attributes
+
       this._attr = _.defaults(vis._attr || {}, {
         yValue: function (d) { return d.y; },
         dispatch: d3.dispatch('brush', 'click', 'hover', 'mouseenter', 'mouseleave', 'mouseover', 'mouseout')
