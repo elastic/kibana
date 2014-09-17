@@ -79,8 +79,7 @@ define(function (require) {
           var width = $(this).width();
           var height = $(this).height();
           var radius = Math.min(width, height) / 2;
-          var labelColor = self.vis.data.getColorFunc();
-          var xValueColor = self.vis.data.getPieColorFunc();
+          var color = self.vis.data.getPieColorFunc();
 
           var svg = div.append('svg')
             .attr('width', width)
@@ -119,11 +118,11 @@ define(function (require) {
             .attr('d', arc)
             .attr('class', function (d) {
               if (d.depth === 0) { return; }
-              return self.colorToClass(xValueColor(d.name));
+              return self.colorToClass(color(d.name));
             })
             .style('stroke', '#fff')
             .style('fill', function (d) {
-              return xValueColor(d.name);
+              return color(d.name);
             });
 
           // add events to bars
