@@ -80,6 +80,8 @@ define(function (require) {
 
       $scope.httpActive = $http.pendingRequests;
 
+      window.$kibanaInjector = $injector;
+
       // this is the only way to handle uncaught route.resolve errors
       $rootScope.$on('$routeChangeError', function (event, next, prev, err) {
         notify.fatal(err);
@@ -151,21 +153,7 @@ define(function (require) {
           });
 
           $scope.opts = {
-            timefilter: timefilter,
-            activeFetchInterval: void 0,
-            fetchIntervals: [
-              { display: 'none', val: null},
-              { display: '5s', val: 5000 },
-              { display: '10s', val: 10000 },
-              { display: '30s', val: 30000 },
-              { display: '1m', val: 60000 },
-              { display: '5m', val: 300000 },
-              { display: '15m', val: 900000 },
-              { display: '30m', val: 1.8e+6 },
-              { display: '1h', val: 3.6e+6 },
-              { display: '2h', val: 7.2e+6 },
-              { display: '1d', val: 8.64e+7 }
-            ]
+            timefilter: timefilter
           };
 
           $scope.configure = function () {
@@ -188,42 +176,6 @@ define(function (require) {
               $scope.globalConfigTemplate = timepickerHtml;
             }
           };
-
-          /**
-           * Persist current settings
-           * @return {[type]} [description]
-           */
-          $scope.saveOpts = function () {
-            config.set('refreshInterval', $scope.opts.activeFetchInterval.val);
-          };
-
-          $scope.setActiveFetchInterval = function (val) {
-            var option = _.find($scope.opts.fetchIntervals, { val: val });
-            if (option) {
-              $scope.opts.activeFetchInterval = option;
-              return;
-            }
-
-            // create a custom option for this value
-            option = { display: moment.duration(val).humanize(), val: val };
-            $scope.opts.fetchIntervals.unshift(option);
-            $scope.opts.activeFetchInterval = option;
-          };
-
-          $scope.activeFetchIntervalChanged = function (option, prev) {
-            var opts = $scope.opts;
-
-            if (option && typeof option !== 'object') {
-              $scope.setActiveFetchInterval(option);
-              return;
-            }
-
-            courier.fetchInterval(option.val);
-          };
-
-          $scope.setActiveFetchInterval(config.get('fetchInterval', null));
-          $scope.$on('change:config.refreshInterval', $scope.setActiveFetchInterval);
-          $scope.$watch('opts.activeFetchInterval', $scope.activeFetchIntervalChanged);
         });
       });
     });
