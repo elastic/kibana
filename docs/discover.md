@@ -34,7 +34,7 @@ Now, instead of clicking the **add** button, click the name of the field itself.
 In addition, the Visualize button will pop you over to the **Visualize** application and run a more detailed aggregation on the field. For more information about visualization, see the [Visualize section](visualize.md) of the docs.
 
 ### Filters
-When you expand a document in the document list you will see two magnifying glasses next to indexed terms, one with a plus sign and one with a minus sign. If you click on the magnifying glass with the plus sign it will add a filter to the query for that term. If you click on the mangifying glass with the minus sign, it will add a negative filter (which will remove any documents containing the term). Both filters will appear in the filter bar underneath the **search bar**. When you hover over the fitlers in the filter bar you will see an option to toggle or remove them. There is also a link to remove all the filters.
+When you expand a document in the document list you will see two magnifying glasses next to indexed terms, one with a plus sign and one with a minus sign. If you click on the magnifying glass with the plus sign it will add a filter to the query for that term. If you click on the magnifying glass with the minus sign, it will add a negative filter (which will remove any documents containing the term). Both filters will appear in the filter bar underneath the **search bar**. When you hover over the filters in the filter bar you will see an option to toggle or remove them. There is also a link to remove all the filters.
 
 
 ### Sorting
