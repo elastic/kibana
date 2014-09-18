@@ -12,11 +12,12 @@ Kibana is an open source (Apache Licensed), browser based analytics and search d
 * Run **bin/kibana** on unix, or **bin/kibana.bat** on Windows.
 * Visit http://localhost:5601
 
-## Need Help?
-
-Need help? Try #elasticsearch or #logstash on Freenode IRC. You can also find help on the elasticsearch-users@googlegroups.com or logstash-users@googlegroups.com mailing lists.
-
-You can also find documentation at http://www.elasticsearch.com/guide/en/kibana/current
+## Contents
+ - [Quick Start](#quick-start)
+ - [Discover](#discover)
+ - [Visualize](#visualize)
+ - [Dashboard](#dashboard)
+ - [Setting](#settings)
 
 <!-- include {"path":"docs/quick_start.md"} -->
 ## Quick Start
@@ -32,51 +33,6 @@ Congratulations, you have an index pattern! You should now be looking at a pagin
 **Did you know:** Both *indices* and *indexes* are acceptable plural forms of the word *index*. Knowledge is power.
 
 Now that you've configured an index pattern, you're ready to hop over to the [Discover](discover.md) screen and try out a few searches. Click on **Discover** in the navigation bar at the top of the screen.
-<!-- /include -->
-<!-- include {"path":"docs/settings.md"} -->
-## Settings
-
-The settings application is broken up into three pages: Indices, Advanced, and Object.
-
-### Indices
-
-The Indices page manages Index Patterns. Before you can do anything in Kibana you will need to create an Index Pattern to use in other parts of the application. Index Patterns represent one or more indices in Elasticsearch and track associated meta-data, like field types and pattern interval.
-
-#### Creating an Index Pattern
-
-If this is your first time in Kibana you'll be prompted to create your first index pattern. For more information on index pattern creation see the **Getting Started** section of the documentation.
-
-### Advanced
-
-Please, **use caution** on this page, because the advanced editor will let you break things.
-
-The Advanced page allows modification of individual configuration parameters. Each of these parameters can be tweaked to customize the entire Kibana installation. This means that your changes will apply to all users. This could prevent the application from loading if used incorrectly.
-
-#### Edit
-
-Clicking on the edit button for any line will cause the *Value* column on that line to become an input, allowing you change the value.
-
-Click the *Save* button to save your changes.
-
-#### Reset
-
-Clicking on the *Reset* button will undo any changes you made and restore the value back to its default.
-
-### Objects
-
-Please, **use caution** on this page. No support is available for changes made here.
-
-The Objects page manages all of the objects created by Kibana (except Index Patterns which are handled by the Indices page).  Most apps give you all the tools needed to manage objects they create, but if/when they fall short, you can come here to tweak the specifics.
-
-#### View
-
-Clicking on the *View* action loads that item in the associated applications. Refer to the documentation for the associated applications if you need help using them.
-
-#### Edit
-
-Clicking *Edit* will allow you to change the title, description and other settings of the saved object. You can also edit the schema of the stored object.
-
-*Note:* this operation is for advanced users only - making changes here can break large portions of the application.
 <!-- /include -->
 <!-- include {"path":"docs/discover.md"} -->
 ## Discover
@@ -312,4 +268,49 @@ This is a summary of the statistics related to the request and the response, pre
 ### Changing the Visualization
 
 To change a visualization, click on the *Edit* icon at the top right of the visualization container. This will open that visualization in the *Visualize* app. Refer to the [Visualize docs](#vis) for usage instructions.
+<!-- /include -->
+<!-- include {"path":"docs/settings.md"} -->
+## Settings
+
+The settings application is broken up into three pages: Indices, Advanced, and Object.
+
+### Indices
+
+The Indices page manages Index Patterns. Before you can do anything in Kibana you will need to create an Index Pattern to use in other parts of the application. Index Patterns represent one or more indices in Elasticsearch and track associated meta-data, like field types and pattern interval.
+
+#### Creating an Index Pattern
+
+If this is your first time in Kibana you'll be prompted to create your first index pattern. For more information on index pattern creation see the **Getting Started** section of the documentation.
+
+### Advanced
+
+Please, **use caution** on this page, because the advanced editor will let you break things.
+
+The Advanced page allows modification of individual configuration parameters. Each of these parameters can be tweaked to customize the entire Kibana installation. This means that your changes will apply to all users. This could prevent the application from loading if used incorrectly.
+
+#### Edit
+
+Clicking on the edit button for any line will cause the *Value* column on that line to become an input, allowing you change the value.
+
+Click the *Save* button to save your changes.
+
+#### Reset
+
+Clicking on the *Reset* button will undo any changes you made and restore the value back to its default.
+
+### Objects
+
+Please, **use caution** on this page. No support is available for changes made here.
+
+The Objects page manages all of the objects created by Kibana (except Index Patterns which are handled by the Indices page).  Most apps give you all the tools needed to manage objects they create, but if/when they fall short, you can come here to tweak the specifics.
+
+#### View
+
+Clicking on the *View* action loads that item in the associated applications. Refer to the documentation for the associated applications if you need help using them.
+
+#### Edit
+
+Clicking *Edit* will allow you to change the title, description and other settings of the saved object. You can also edit the schema of the stored object.
+
+*Note:* this operation is for advanced users only - making changes here can break large portions of the application.
 <!-- /include -->
