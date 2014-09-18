@@ -145,49 +145,61 @@ define(function (require) {
       expect(bucketCountBetween(a, b)).to.be(null);
     });
 
-    it('can count', function () {
-      var schemas = visTypes.byName.histogram.schemas.buckets;
+    function countTest(pre, post) {
+      return function () {
+        var schemas = visTypes.byName.histogram.schemas.buckets;
 
-      // slow for this test is actually somewhere around 1/2 a sec
-      this.slow(500);
+        // slow for this test is actually somewhere around 1/2 a sec
+        this.slow(500);
 
-      function randBucketAggForVis(vis) {
-        var schema = _.sample(schemas);
-        var aggType = _.sample(aggTypes.byType.buckets);
+        function randBucketAggForVis(vis) {
+          var schema = _.sample(schemas);
+          var aggType = _.sample(aggTypes.byType.buckets);
 
-        return new AggConfig(vis, {
-          schema: schema,
-          type: aggType
-        });
-      }
-
-      _.times(50, function (n) {
-        var vis = new Vis(indexPattern, {
-          type: 'histogram',
-          aggs: []
-        });
-
-        var randBucketAgg = _.partial(randBucketAggForVis, vis);
-
-        var a = randBucketAgg();
-        var b = randBucketAgg();
-
-        // create n aggs between a and b
-        var aggs = [];
-        for (var i = 0; i < n; i++) {
-          aggs.push(randBucketAgg());
+          return new AggConfig(vis, {
+            schema: schema,
+            type: aggType
+          });
         }
 
-        aggs.unshift(a);
-        aggs.push(b);
+        _.times(50, function (n) {
+          var vis = new Vis(indexPattern, {
+            type: 'histogram',
+            aggs: []
+          });
 
-        vis.setState({
-          type: 'histogram',
-          aggs: aggs
+          var randBucketAgg = _.partial(randBucketAggForVis, vis);
+
+          var a = randBucketAgg();
+          var b = randBucketAgg();
+
+          // create n aggs between a and b
+          var aggs = [];
+          aggs.fill = function (n) {
+            for (var i = 0; i < n; i++) {
+              aggs.push(randBucketAgg());
+            }
+          };
+
+          pre && aggs.fill(_.random(0, 10));
+          aggs.push(a);
+          aggs.fill(n);
+          aggs.push(b);
+          post && aggs.fill(_.random(0, 10));
+
+          vis.setState({
+            type: 'histogram',
+            aggs: aggs
+          });
+
+          expect(bucketCountBetween(a, b)).to.be(n);
         });
+      };
+    }
 
-        expect(bucketCountBetween(a, b)).to.be(n);
-      });
-    });
+    it('can count', countTest());
+    it('can count with elements before', countTest(true));
+    it('can count with elements after', countTest(false, true));
+    it('can count with elements before and after', countTest(true, true));
   }];
 });
