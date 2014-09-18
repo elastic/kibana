@@ -14,7 +14,6 @@ define(function (require) {
       restrict: 'E',
       template: html,
       replace: true,
-      require: '^discFieldChooser',
       link: function ($scope, $elem) {
         var detailsElem;
         var detailScope = $scope.$new();
@@ -51,10 +50,6 @@ define(function (require) {
             delete field.details;
             detailsElem.remove();
           }
-        };
-
-        $scope.displayButton = function (field) {
-          return field.display ? 'btn-danger' : '';
         };
 
         init();

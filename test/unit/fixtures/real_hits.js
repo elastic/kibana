@@ -1,8 +1,8 @@
 define(function (require) {
     /* Extensions:
+    gif: 5
     html: 8
     php: 5 (thus 5 with phpmemory fields)
-    gif: 5
     png: 2
 
     _type:
