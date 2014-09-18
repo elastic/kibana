@@ -3,7 +3,7 @@ define(function (require) {
     // handler types
     return {
       histogram: Private(require('components/vislib/lib/handler/axes_handler')),
-      line: this.histogram,
+      line: Private(require('components/vislib/lib/handler/axes_handler')),
       pie: Private(require('components/vislib/lib/handler/pie_handler'))
     };
   };
