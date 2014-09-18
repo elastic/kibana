@@ -10,11 +10,11 @@ Using the dashboard requires that you have at least one [saved visualization](#v
 
 The first time you open the Dashboard, it will be ready for you to build a new dashboard. You can create a new dashboard by clicking the left-most icon in the toolbar panel.
 
-### Adding Visualizations To a Dashboard
+### Adding Visualizations to a Dashboard
 
-To add a visualization to the dashboard, click the plus button in the toolbar panel and a menu with all of your saved visualizations will appear.
+To add a visualization to the dashboard, click the plus button in the toolbar panel. A menu of your saved visualizations will appear.
 
-From the menu, click on the visualization you want to include in your dashboard. If you have more then 5 saved visualizations, you will need to use the *Visualization Filter* at the top of the list to find the visualization your looking for.
+From the menu, click on the visualization you want to include in your dashboard. If you have more then 5 saved visualizations, the list will paginate. You can also filter the list from the **Visualization Filter** at the top of the list.
 
 Once you've clicked on the visualization, you will see it appear in a *container* in the dashboard below.
 
@@ -26,7 +26,7 @@ Click on the save button in the toolbar panel to save the dashboard to Elasticse
 
 ### Loading a Saved Dashboard
 
-To load an existing dashboard, click on the *Open* icon in the toolbar menu. This will present you with a list of existing dashboard you can load. If you have more then 5 dashboards, you can use the filter input at the top to search for the dashboard you want to load.
+To load an existing dashboard, click on the *Open* icon in the toolbar menu. This will present you with a list of existing dashboard you can load. If you have more then 5 dashboards, you can use the filter input at the top to search for the dashboard you want to load or click the page links at the bottom of the loader panel.
 
 ### Sharing Dashboards
 
@@ -34,11 +34,11 @@ To obtain the code needed to embed a dashboard in other applications, click the 
 
 #### Embedding Dashboards
 
-Dashboards can be embedded in other web apps by using the embed code. Simply copy the embed code from the *Share* menu and paste it in your external web application.
+Dashboards can be embedded in other web apps by using the embed code. Simply copy the embed code from the *Share* menu and paste it in your external web application. Note that anyone that views an embedded dashboard must also have access to Kibana.
 
 #### Sharing Dashboards
 
-Dashboards can also be shared with anyone else that has access to Kibana. Simply copy the share code from the *Share* menu and share it with others via email or other means.
+Dashboards can also be shared with anyone that has access to Kibana. Simply copy the share link from the *Share* menu and share it with others via email or other means.
 
 ## Customizing Your Dashboard
 
