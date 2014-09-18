@@ -75,6 +75,7 @@ function (angular, $, _, appLevelRequire) {
       return {
         responseError: function(resp) {
           if (resp.status === 0) {
+            console.log("redirecting");
             $location.path('/connectionFailed');
             console.log(resp);
           }

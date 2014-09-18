@@ -77,8 +77,9 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
     this.last = {};
     this.availablePanels = [];
 
-    $rootScope.$on('$routeChangeSuccess',function(){
+    $rootScope.$on('$routeChangeSuccess', function () {
       // Clear the current dashboard to prevent reloading
+      if ($location.path() === '/connectionFailed') { return; }
       self.current = {};
       self.indices = [];
       esVersion.isMinimum().then(function(isMinimum) {
