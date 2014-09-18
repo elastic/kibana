@@ -27,15 +27,15 @@ define(function (require) {
     // Response to `click` and `hover` events
     LineChart.prototype.eventResponse = function (d, i) {
       return {
-        value     : this._attr.yValue(d, i),
-        point     : d,
-        label     : d.label,
-        color     : this.vis.data.getColorFunc()(d.label),
+        value: this._attr.yValue(d, i),
+        point: d,
+        label: d.label,
+        color: this.vis.data.getColorFunc()(d.label),
         pointIndex: i,
-        series    : this.chartData.series,
-        config    : this._attr,
-        data      : this.chartData,
-        e         : d3.event
+        series: this.chartData.series,
+        config: this._attr,
+        data: this.chartData,
+        e: d3.event
       };
     };
 
@@ -223,8 +223,8 @@ define(function (require) {
             return d.values.map(function (e, i) {
               return {
                 label: label,
-                x    : self._attr.xValue.call(d.values, e, i),
-                y    : self._attr.yValue.call(d.values, e, i)
+                x: self._attr.xValue.call(d.values, e, i),
+                y: self._attr.yValue.call(d.values, e, i)
               };
             });
           });
