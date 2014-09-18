@@ -1,10 +1,10 @@
 # Visualize
 
-The **Visualize** app is used to design and create saved visualizations that can be used on their own, or added to a dashboard. The data source for a visualization can be based on three types: a new interactive search, a saved search, or an existing saved visualization. Visualizations are based on the aggregation feature introduced in Elasticsearch 1.x. Aggregations are highly performant, but may require signifigant memory from Elasticsearch.
+The **Visualize** app is used to design and create saved visualizations that can be used on their own, or added to a dashboard. The data source for a visualization can be based on three types: a new interactive search, a saved search, or an existing saved visualization. Visualizations are based on the aggregation feature introduced in Elasticsearch 1.x. Aggregations are highly performant, but may require significant memory from Elasticsearch.
 
 ## Getting Started
 
-To create a new visualization either click on the visualize tab at the top of the screen or the new document button to the left of the search search bar. This will start the "New Visualization Wizard".
+To create a new visualization either click on the visualize tab at the top of the screen or the new document button in the toolbar panel to the right of the search bar. This will start the "New Visualization Wizard".
 
 - **Step 1:** Choose the data source for the new visualization - You have 3 options here:
   - *New search* Pick an index pattern and search as you create your visualization
@@ -24,7 +24,9 @@ The visualization editor is where you will configure and edit your visualization
 
 ### Toolbar Panel
 
-The toolbar panel is used for interactive searching of data as well as saving and loading visualizations. When you choose "New search" in the wizard, you will be presented with a search bar where you can add your search terms. For visualizations based on saved searches, the search bar will be disabled, but you can double click the grayed out saved search link to convert it to an interactive search. To the right of the search box there are a row of icons for creating new visualizations, saving the current visualization, loading an existing visualization, sharing or embedding the visualization, and refreshing the data for the current visualization.
+The toolbar panel is used for interactive searching of data as well as saving and loading visualizations. When you choose *New search* in the wizard, you will be presented with a search bar where you can add your search terms. For visualizations based on saved searches, the search bar will be disabled, but you can double click the grayed out saved search link to convert it to an interactive search.
+
+To the right of the search box there are a row of icons for creating new visualizations, saving the current visualization, loading an existing visualization, sharing or embedding the visualization, and refreshing the data for the current visualization.
 
 ### Aggregation Builder
 
@@ -37,7 +39,7 @@ The aggregation builder allows you to choose which "metric" aggregation you woul
 You can also change the execution order of the buckets. In Elasticsearch the first aggregation determines the data set for the subsequent aggregations. For example, lets say you want to create a date bar chart of the hits for top 5 extensions.  If you want to have the same extension across all of the hits then you will need to set the order as follows:
 
 1. Color: Terms aggregation of extensions
-1. X-Axis: Date bar chart of @timestamp
+1. X-Axis: Date bar chart of `@timestamp`
 
 Inside Elasticsearch, it collects the records for the top 5 extensions then creates a date bar chart for each of them. Let say you now want the top 5 extensions for each hour then you would use the following order:
 
