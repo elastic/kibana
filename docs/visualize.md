@@ -4,7 +4,7 @@ The **Visualize** app is used to design and create saved visualizations that can
 
 ## Getting Started
 
-To create a new visualization either click on the visualize tab at the top of the screen or the new document button in the toolbar panel to the right of the search bar. This will start the "New Visualization Wizard".
+To create a new visualization either click on the visualize tab at the top of the screen or the new document button in the toolbar panel to the right of the search bar. This will start the *New Visualization Wizard*.
 
 - **Step 1:** Choose the data source for the new visualization - You have 3 options here:
   - *New search* Pick an index pattern and search as you create your visualization
@@ -30,11 +30,11 @@ To the right of the search box there are a row of icons for creating new visuali
 
 ### Aggregation Builder
 
-The aggregation builder on the left of the screen is used for configuring the metrics and buckets for a visualization. (If you are coming from the SQL world, buckets are similar to group-bys) For a bar chart or line chart the "metric" is used for the y-axis and the "buckets" are used for the x-axis, segment bar colors, and row/column splits. For pie charts the "metric" is used for the size of the slice and the "bucket" is used for the number of slices. Other visualizations may use these in new and different ways.
+The aggregation builder on the left of the screen is used for configuring the metrics and buckets for a visualization. (If you are coming from the SQL world, buckets are similar to group-bys) For a bar chart or line chart the *metric* is used for the y-axis and the *buckets* are used for the x-axis, segment bar colors, and row/column splits. For pie charts the "metric" is used for the size of the slice and the *bucket* is used for the number of slices. Other visualizations may use these in new and different ways.
 
 For the remainder of this documentation we are going to use the bar chart as our example when discussing the features of the aggregation panel. The same concepts apply to the other visualizations but the bar chart is the workhorse of the visualization world.
 
-The aggregation builder allows you to choose which "metric" aggregation you would like to use for the x-axis. Example metrics include: count, average, sum, min, max, and unique count (cardinality). The "bucket" aggregations are used for the x-axis, color slices, and row/columns splits.  Example "bucket" aggregations include date histogram, range, terms, filters, and significant terms.
+The aggregation builder allows you to choose which *metric* aggregation you would like to use for the x-axis. Example metrics include: count, average, sum, min, max, and unique count (cardinality). The *bucket* aggregations are used for the x-axis, color slices, and row/columns splits.  Example "bucket" aggregations include date histogram, range, terms, filters, and significant terms.
 
 You can also change the execution order of the buckets. In Elasticsearch the first aggregation determines the data set for the subsequent aggregations. For example, lets say you want to create a date bar chart of the hits for top 5 extensions.  If you want to have the same extension across all of the hits then you will need to set the order as follows:
 
