@@ -8,6 +8,6 @@ The first screen you arrive at will ask you to configure an **index pattern**. A
 
 Great, you have an index pattern! You should now be looking at a paginated list of the fields in your index or indices, as well as some informative data about them. Kibana has automatically set this new index pattern as your default index pattern. If you'd like to know more about index patterns, pop into to the Settings section of the documentation.
 
-**Did you know:** Both *indices* and **indexes** are acceptable plural forms of the word *index*. Knowledge is power.
+**Did you know:** Both *indices* and *indexes* are acceptable plural forms of the word *index*. Knowledge is power.
 
 Now that you've configured an index pattern, you're ready to hop over to the Discover screen and try out a few searches. Click on **Discover** in the navigation bar at the top of the screen.
