@@ -39,9 +39,13 @@ The Advanced page allows modification of individual configuration parameters. Ea
 
 ### Edit
 
-### Save
+Clicking on the edit button for any line will cause the *Value* column on that line to become an input, allowing you change the value.
 
-### Delete
+Click the *Save* button to save your changes.
+
+### Reset
+
+Clicking on the *Reset* button will undo any changes you made and restore the value back to its default.
 
 ## Objects
 
@@ -55,5 +59,7 @@ Clicking on the *View* action loads that item in the associated applications. Re
 
 ### Edit
 
-The edit button will allow you to edit the schema of the stored object. Note this operation is for advanced users only. Making changes here can break large portions of the application.
+Clicking *Edit* will allow you to change the title, description and other settings of the saved object. You can also edit the schema of the stored object.
+
+*Note:* this operation is for advanced users only - making changes here can break large portions of the application.
 <!-- /include -->
