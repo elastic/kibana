@@ -92,7 +92,7 @@ define(function (require) {
       inject(function (d3, Private) {
         Vis = Private(require('components/vislib/vis'));
         Data = Private(require('components/vislib/lib/data'));
-        Handler = Private(require('components/vislib/lib/handler'));
+        Handler = Private(require('components/vislib/lib/handler/handler'));
 
         el = d3.select('body').append('div')
           .attr('class', 'visualize');

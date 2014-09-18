@@ -1,15 +1,9 @@
 define(function (require) {
-  var _ = require('lodash');
-
   return function HandlerBaseClass(d3, Private) {
+    var _ = require('lodash');
+
     var Data = Private(require('components/vislib/lib/data'));
-    var Layout = Private(require('components/vislib/lib/layout'));
-    var Legend = Private(require('components/vislib/lib/legend'));
     var Tooltip = Private(require('components/vislib/lib/tooltip'));
-    var XAxis = Private(require('components/vislib/lib/x_axis'));
-    var YAxis = Private(require('components/vislib/lib/y_axis'));
-    var AxisTitle = Private(require('components/vislib/lib/axis_title'));
-    var ChartTitle = Private(require('components/vislib/lib/chart_title'));
 
     /*
      * Handles building all the components of the visualization
@@ -33,65 +27,13 @@ define(function (require) {
       });
 
       // Visualization constructors
-      var axesVisTypes = this.axesVisTypes = {
-        ColumnChart: 'histogram',
-        LineChart: 'line'
-      };
-
-      // Add the visualization layout
-      if (axesVisTypes[this.ChartClass.name]) {
-        this.layout = new Layout(this.el, this.data.injectZeros(), this._attr.type);
-      } else {
-        this.layout = new Layout(this.el, this.data.root(), this._attr.type);
-      }
-
-      // Only add legend if addLegend attribute set
-      if (this._attr.addLegend) {
-        if (this.ChartClass.name in axesVisTypes) {
-          this.legend = new Legend(this.vis, this.el, this.data.getLabels(), this.data.getColorFunc(), this._attr);
-        } else {
-          this.legend = new Legend(this.vis, this.el, this.data.getLabelsAndXValues(), this.data.getPieColorFunc(), this._attr);
-        }
-      }
-
-      // only add tooltip if addTooltip attribute set
       if (this._attr.addTooltip) {
         this.tooltip = new Tooltip(this.el, this.data.get('tooltipFormatter'));
       }
 
-      // add a x axis
-      if (axesVisTypes[this.ChartClass.name]) {
-        this.xAxis = new XAxis({
-          el: this.el,
-          xValues: this.data.xValues(),
-          ordered: this.data.get('ordered'),
-          xAxisFormatter: this.data.get('xAxisFormatter'),
-          _attr: this._attr
-        });
-
-        // add a y axis
-        this.yAxis = new YAxis({
-          el: this.el,
-          yMax: this.data.getYMaxValue(),
-          _attr: this._attr
-        });
-
-        // add axis titles
-        this.axisTitle = new AxisTitle(this.el, this.data.get('xAxisLabel'), this.data.get('yAxisLabel'));
-      }
-
-      // add chart titles
-      this.chartTitle = new ChartTitle(this.el);
-
       // Array of objects to render to the visualization
       this.renderArray = _.filter([
-        this.layout,
-        this.legend,
-        this.tooltip,
-        this.axisTitle,
-        this.chartTitle,
-        this.yAxis,
-        this.xAxis
+        this.tooltip
       ], Boolean);
     }
 

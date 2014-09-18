@@ -3,9 +3,9 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
 
-    var Handler = Private(require('components/vislib/lib/handler'));
     var ResizeChecker = Private(require('components/vislib/lib/resize_checker'));
     var Events = Private(require('factories/events'));
+    var handlerTypes = Private(require('components/vislib/handler_types'));
     var chartTypes = Private(require('components/vislib/vis_types'));
     var errors = require('errors');
     require('css!components/vislib/components/styles/main.css');
@@ -37,13 +37,15 @@ define(function (require) {
 
     // Exposed API for rendering charts.
     Vis.prototype.render = function (data) {
+      var chartType = this._attr.type;
+
       if (!data) {
         throw new Error('No valid data!');
       }
 
       // Save data to this object and new up the Handler constructor
       this.data = data;
-      this.handler = new Handler(this);
+      this.handler = new handlerTypes[chartType](this);
 
       try {
         this.handler.render();
