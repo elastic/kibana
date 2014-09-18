@@ -51,6 +51,10 @@ module.exports = function (grunt) {
           dest: '<%= build %>/dist/LICENSE.md'
         },
         {
+          src: '<%= root %>/README.md',
+          dest: '<%= build %>/dist/README.md'
+        },
+        {
           expand: true,
           cwd: '<%= build %>/kibana/',
           src: '*.jar',
