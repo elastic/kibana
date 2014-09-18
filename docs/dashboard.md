@@ -4,7 +4,7 @@ The dashboard is used to group and display any Visualizations you've created. On
 
 ### Getting Started
 
-Using the dashboard requires that you have at least one [saved visualization](visualize.md).
+Using the dashboard requires that you have at least one [saved visualization](#visualize).
 
 #### Creating a New Dashboard
 
@@ -78,4 +78,4 @@ This is a summary of the statistics related to the request and the response, pre
 
 ### Changing the Visualization
 
-To change a visualization, click on the *Edit* icon at the top right of the visualization container. This will open that visualization in the *Visualize* app. Refer to the [Visualize docs](#vis) for usage instructions.
+To change a visualization, click on the *Edit* icon at the top right of the visualization container. This will open that visualization in the *Visualize* app. Refer to the [Visualize docs](#visualize) for usage instructions.

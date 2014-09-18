@@ -19,8 +19,8 @@ Once the visualization wizard is complete you will be presented with the *visual
 The visualization editor is where you will configure and edit your visualization. There are three parts to the visualization editor:
 
 1. [Toolbar Panel](#toolbar-panel)
-1. [Aggregation Panel](#aggregation-panel)
-1. [Preview Panel](#preview-panel)
+1. [Aggregation Builder](#aggregation-builder)
+1. [Preview Canvas](#preview-canvas)
 
 #### Toolbar Panel
 

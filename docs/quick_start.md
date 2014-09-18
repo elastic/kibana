@@ -6,8 +6,8 @@ The first screen you arrive at will ask you to configure an **index pattern**. A
 
 **Tip:** there's an optimization in the way of the *Use event times to create index names* option. Since Logstash creates an index every day, Kibana uses that fact to only search indices that could possibly contain data in your selected time range.
 
-Congratulations, you have an index pattern! You should now be looking at a paginated list of the fields in your index or indices, as well as some informative data about them. Kibana has automatically set this new index pattern as your default index pattern. If you'd like to know more about index patterns, pop into to the [Settings](settings.md) section of the documentation.
+Congratulations, you have an index pattern! You should now be looking at a paginated list of the fields in your index or indices, as well as some informative data about them. Kibana has automatically set this new index pattern as your default index pattern. If you'd like to know more about index patterns, pop into to the [Settings](#settings) section of the documentation.
 
 **Did you know:** Both *indices* and *indexes* are acceptable plural forms of the word *index*. Knowledge is power.
 
-Now that you've configured an index pattern, you're ready to hop over to the [Discover](discover.md) screen and try out a few searches. Click on **Discover** in the navigation bar at the top of the screen.
+Now that you've configured an index pattern, you're ready to hop over to the [Discover](#discover) screen and try out a few searches. Click on **Discover** in the navigation bar at the top of the screen.
