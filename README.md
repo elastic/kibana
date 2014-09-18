@@ -18,7 +18,7 @@ Need help? Try #elasticsearch or #logstash on Freenode IRC. You can also find he
 
 You can also find documentation at http://www.elasticsearch.com/guide/en/kibana/current
 
-<!-- include {"path":"src/kibana/apps/settings/README.md"} -->
+<!-- include {"path":"docs/settings.md"} -->
 # Settings
 
 The settings application is broken up into three pages: Indices, Advanced, and Object.
