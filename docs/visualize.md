@@ -12,7 +12,7 @@ To create a new visualization either click on the visualize tab at the top of th
   - *From an existing visualization* Pick an existing visualization and make changes to it.
 - **Step 2:** Choose a visualization type from the list of currently available visualizations.
 
-Once the visualization wizard is complete you will be presented with the "visualization editor".
+Once the visualization wizard is complete you will be presented with the *visualization editor*.
 
 ## Visualization Editor
 
