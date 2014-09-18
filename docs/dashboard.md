@@ -4,7 +4,7 @@ The dashboard is used to group and display any Visualizations you've created. On
 
 ## Getting Started
 
-Using the dashboard requires that you have at least one [saved visualization](#vis).
+Using the dashboard requires that you have at least one [saved visualization](visualize.md).
 
 ### Creating a New Dashboard
 
@@ -18,7 +18,7 @@ From the menu, click on the visualization you want to include in your dashboard.
 
 Once you've clicked on the visualization, you will see it appear in a *container* in the dashboard below.
 
-*NOTE:* You may see a message saying that the height and/or width of the container is too small. If you see this message, you can fix it by making the container larger - described below.
+**NOTE:** You may see a message saying that the height and/or width of the container is too small. If you see this message, you can fix it by making the container larger - described below.
 
 ### Saving Dashboards
 
