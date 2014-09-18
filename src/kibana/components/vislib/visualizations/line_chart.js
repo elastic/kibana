@@ -26,15 +26,21 @@ define(function (require) {
 
     // Response to `click` and `hover` events
     LineChart.prototype.eventResponse = function (d, i) {
+      var getYValue = this._attr.yValue;
+      var color = this.vis.data.getColorFunc();
+      var series = this.chartData.series;
+      var config = this._attr;
+      var chartData = this.chartData;
+
       return {
-        value: this._attr.yValue(d, i),
+        value: getYValue(d, i),
         point: d,
         label: d.label,
-        color: this.vis.data.getColorFunc()(d.label),
+        color: color(d.label),
         pointIndex: i,
-        series: this.chartData.series,
-        config: this._attr,
-        data: this.chartData,
+        series: series,
+        config: config,
+        data: chartData,
         e: d3.event
       };
     };
@@ -46,23 +52,28 @@ define(function (require) {
       var dispatch = this._attr.dispatch;
 
       circles
-        .on('mouseover.circle', function (d, i) {
-          d3.select(this)
-            .classed('hover', true)
-            .style('stroke', '#333')
-            .style('cursor', 'pointer');
+      .on('mouseover.circle', function mouseOverCircle(d, i) {
+        var circle = this;
 
-          dispatch.hover(self.eventResponse(d, i));
-          d3.event.stopPropagation();
-        })
-        .on('click.circle', function (d, i) {
-          dispatch.click(self.eventResponse(d, i));
-          d3.event.stopPropagation();
-        })
-        .on('mouseout.circle', function () {
-          d3.select(this).classed('hover', false)
-            .style('stroke', null);
-        });
+        d3.select(circle)
+        .classed('hover', true)
+        .style('stroke', '#333')
+        .style('cursor', 'pointer');
+
+        dispatch.hover(self.eventResponse(d, i));
+        d3.event.stopPropagation();
+      })
+      .on('click.circle', function clickCircle(d, i) {
+        dispatch.click(self.eventResponse(d, i));
+        d3.event.stopPropagation();
+      })
+      .on('mouseout.circle', function mouseOutCircle() {
+        var circle = this;
+
+        d3.select(circle)
+        .classed('hover', false)
+        .style('stroke', null);
+      });
 
       // Add tooltip
       if (isTooltip) {
@@ -72,28 +83,31 @@ define(function (require) {
 
     // Add brush to the svg
     LineChart.prototype.addBrush = function (xScale, svg) {
+      var brushDispatch = this._attr.dispatch.brush;
+      var height = this._attr.height;
+      var margin = this._attr.margin;
       var self = this;
 
       // Brush scale
       var brush = d3.svg.brush()
-        .x(xScale)
-        .on('brushend', function brushEnd() {
-          // response returned on brush
-          return self._attr.dispatch.brush({
-            range: brush.extent(),
-            config: self._attr,
-            e: d3.event,
-            data: self.chartData
-          });
+      .x(xScale)
+      .on('brushend', function brushEnd() {
+        // response returned on brush
+        return brushDispatch({
+          range: brush.extent(),
+          config: self._attr,
+          e: d3.event,
+          data: self.chartData
         });
+      });
 
-      // if `addBrushing` is true, add brush canvas
       if (self._attr.addBrushing) {
+        // add brush canvas
         svg.append('g')
-          .attr('class', 'brush')
-          .call(brush)
+        .attr('class', 'brush')
+        .call(brush)
           .selectAll('rect')
-          .attr('height', this._attr.height - this._attr.margin.top - this._attr.margin.bottom);
+          .attr('height', height - margin.top - margin.bottom);
       }
     };
 
@@ -103,47 +117,56 @@ define(function (require) {
       var xScale = this.vis.xAxis.xScale;
       var yScale = this.vis.yAxis.yScale;
       var ordered = this.vis.data.get('ordered');
+      var circleRadius = 4;
+      var circleStrokeWidth = 1;
       var layer;
       var circles;
 
       layer = svg.selectAll('.points')
-        .data(data)
-        .enter()
+      .data(data)
+      .enter()
         .append('g')
         .attr('class', 'points');
 
       // Append the bars
-      circles = layer.selectAll('rect')
-        .data(function (d) {
-          return d;
-        });
+      circles = layer
+      .selectAll('rect')
+      .data(function appendData(d) {
+        return d;
+      });
 
       // exit
-      circles.exit().remove();
+      circles
+      .exit()
+      .remove();
 
       // enter
-      circles.enter()
+      circles
+      .enter()
         .append('circle')
-        .attr('class', function (d) {
+        .attr('class', function circleClass(d) {
           return self.colorToClass(color(d.label));
         })
-        .attr('fill', 'none')
-        .attr('stroke', function (d) {
+        .attr('fill', function (d) {
           return color(d.label);
         })
-        .attr('stroke-width', 1);
+        .attr('stroke', function strokeColor(d) {
+          return color(d.label);
+        })
+        .attr('stroke-width', circleStrokeWidth);
 
+      // update
       circles
-        .attr('cx', function (d) {
-          if (ordered && ordered.date) {
-            return xScale(d.x);
-          }
-          return xScale(d.x) + xScale.rangeBand() / 2;
-        })
-        .attr('cy', function (d) {
-          return yScale(d.y);
-        })
-        .attr('r', 4);
+      .attr('cx', function cx(d) {
+        if (ordered && ordered.date) {
+          return xScale(d.x);
+        }
+        return xScale(d.x) + xScale.rangeBand() / 2;
+      })
+      .attr('cy', function cy(d) {
+        return yScale(d.y);
+      })
+      .attr('r', circleRadius);
 
       return circles;
     };
@@ -155,47 +178,55 @@ define(function (require) {
       var xAxisFormatter = this.vis.data.get('xAxisFormatter');
       var color = this.vis.data.getColorFunc();
       var ordered = this.vis.data.get('ordered');
+      var interpolate = this._attr.interpolate;
       var line = d3.svg.line()
-        .interpolate(this._attr.interpolate)
-        .x(function (d) {
-          if (ordered && ordered.date) {
-            return xScale(d.x);
-          }
-          return xScale(d.x) + xScale.rangeBand() / 2;
-        })
-        .y(function (d) { return yScale(d.y); });
+      .interpolate(interpolate)
+      .x(function x(d) {
+        if (ordered && ordered.date) {
+          return xScale(d.x);
+        }
+        return xScale(d.x) + xScale.rangeBand() / 2;
+      })
+      .y(function y(d) {
+        return yScale(d.y);
+      });
       var lines;
 
-      lines = svg.selectAll('.lines')
-        .data(data)
-        .enter()
+      lines = svg
+      .selectAll('.lines')
+      .data(data)
+      .enter()
         .append('g')
         .attr('class', 'lines');
 
       lines.append('path')
-        .attr('class', function (d) {
-          return self.colorToClass(color(d.label));
-        })
-        .attr('d', function (d) {
-          return line(d.values);
-        })
-        .attr('fill', 'none')
-        .attr('stroke', function (d) {
-          return color(d.label);
-        })
-        .attr('stroke-width', 2);
+      .attr('class', function lineClass(d) {
+        return self.colorToClass(color(d.label));
+      })
+      .attr('d', function lineD(d) {
+        return line(d.values);
+      })
+      .attr('fill', 'none')
+      .attr('stroke', function lineStroke(d) {
+        return color(d.label);
+      })
+      .attr('stroke-width', 2);
 
       return lines;
     };
 
     LineChart.prototype.addClipPath = function (svg, width, height) {
+      var startX = 0;
+      var startY = 0;
+
       // Creating clipPath
-      return svg.attr('clip-path', 'url(#chart-area)')
-        .append('clipPath')
+      return svg
+      .attr('clip-path', 'url(#chart-area)')
+      .append('clipPath')
         .attr('id', 'chart-area')
-        .append('rect')
-        .attr('x', 0)
-        .attr('y', 0)
+      .append('rect')
+        .attr('x', startX)
+        .attr('y', startY)
         .attr('width', width)
         .attr('height', height);
     };
@@ -208,6 +239,11 @@ define(function (require) {
       var elWidth = this._attr.width = $elem.width();
       var elHeight = this._attr.height = $elem.height();
       var xScale = this.vis.xAxis.xScale;
+      var chartToSmallError = 'The height and/or width of this container is too small for this chart.';
+      var minWidth = 20;
+      var minHeight = 20;
+      var startLineX = 0;
+      var lineStrokeWidth = 1;
       var div;
       var svg;
       var width;
@@ -217,10 +253,11 @@ define(function (require) {
 
       return function (selection) {
         selection.each(function (data) {
+          var el = this;
 
-          var layers = data.series.map(function (d) {
+          var layers = data.series.map(function mapSeries(d) {
             var label = d.label;
-            return d.values.map(function (e, i) {
+            return d.values.map(function mapValues(e, i) {
               return {
                 label: label,
                 x: self._attr.xValue.call(d.values, e, i),
@@ -234,19 +271,18 @@ define(function (require) {
           height = elHeight - margin.top - margin.bottom;
 
           // if height or width < 20 or NaN, throw error
-          if (_.isNaN(width) || width < 20 || _.isNaN(height) || height < 20) {
-            throw new Error('The height and/or width of this container is too ' +
-              'small for this chart.');
+          if (_.isNaN(width) || width < minWidth || _.isNaN(height) || height < minHeight) {
+            throw new Error(chartToSmallError);
           }
 
           // Select the current DOM element
-          div = d3.select(this);
+          div = d3.select(el);
 
           // Create the canvas for the visualization
           svg = div.append('svg')
-            .attr('width', width + margin.left + margin.right)
-            .attr('height', height + margin.top + margin.bottom)
-            .append('g')
+          .attr('width', width + margin.left + margin.right)
+          .attr('height', height + margin.top + margin.bottom)
+          .append('g')
             .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
           // add clipPath to hide circles when they go out of bounds
@@ -265,13 +301,14 @@ define(function (require) {
           self.addCircleEvents(circles);
 
           // chart base line
-          var line = svg.append('line')
-            .attr('x1', 0)
-            .attr('y1', height)
-            .attr('x2', width)
-            .attr('y2', height)
-            .style('stroke', '#ddd')
-            .style('stroke-width', 1);
+          var line = svg
+          .append('line')
+          .attr('x1', startLineX)
+          .attr('y1', height)
+          .attr('x2', width)
+          .attr('y2', height)
+          .style('stroke', '#ddd')
+          .style('stroke-width', lineStrokeWidth);
 
           return svg;
         });
