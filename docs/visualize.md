@@ -1,8 +1,8 @@
-# Visualize
+## Visualize
 
 The **Visualize** app is used to design and create saved visualizations that can be used on their own, or added to a dashboard. The data source for a visualization can be based on three types: a new interactive search, a saved search, or an existing saved visualization. Visualizations are based on the aggregation feature introduced in Elasticsearch 1.x. Aggregations are highly performant, but may require significant memory from Elasticsearch.
 
-## Getting Started
+### Getting Started
 
 To create a new visualization either click on the visualize tab at the top of the screen or the new document button in the toolbar panel to the right of the search bar. This will start the *New Visualization Wizard*.
 
@@ -14,7 +14,7 @@ To create a new visualization either click on the visualize tab at the top of th
 
 Once the visualization wizard is complete you will be presented with the *visualization editor*.
 
-## Visualization Editor
+### Visualization Editor
 
 The visualization editor is where you will configure and edit your visualization. There are three parts to the visualization editor:
 
@@ -22,13 +22,13 @@ The visualization editor is where you will configure and edit your visualization
 1. [Aggregation Panel](#aggregation-panel)
 1. [Preview Panel](#preview-panel)
 
-### Toolbar Panel
+#### Toolbar Panel
 
 The toolbar panel is used for interactive searching of data as well as saving and loading visualizations. When you choose *New search* in the wizard, you will be presented with a search bar where you can add your search terms. For visualizations based on saved searches, the search bar will be disabled, but you can double click the grayed out saved search link to convert it to an interactive search.
 
 To the right of the search box there are a row of icons for creating new visualizations, saving the current visualization, loading an existing visualization, sharing or embedding the visualization, and refreshing the data for the current visualization.
 
-### Aggregation Builder
+#### Aggregation Builder
 
 The aggregation builder on the left of the screen is used for configuring the [metric](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html#_metrics_aggregations) and [bucket](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html#_bucket_aggregations) aggregations used to create a visualization. (If you are coming from the SQL world, buckets are similar to group-bys. Check out the [elasticsearch docs](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html) for more info) For a bar chart or line chart the *metric* is used for the y-axis and the *buckets* are used for the x-axis, segment bar colors, and row/column splits. For pie charts the "metric" is used for the size of the slice and the *bucket* is used for the number of slices. Other visualizations may use these in new and different ways.
 
@@ -48,7 +48,7 @@ Inside Elasticsearch, it collects the records for the top 5 extensions then crea
 
 For these requests, Elasticsearch will create a date bar chart from all the records then group the top five extensions inside each bucket (or hour since we specified an hour interval). Just remember each subsequent bucket slices the data from the previous bucket.
 
-### Preview Canvas
+#### Preview Canvas
 
 The preview canvas will render the visualization once you click the apply button below the buckets in the aggregation builder.
 
