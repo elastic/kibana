@@ -146,7 +146,9 @@ define(function (require) {
 
       if (!vis.listeners) vis.listeners = {};
       vis.listeners.click = function (e) {
-        if (e.aggConfig.aggType.name === 'terms') {
+        // This code is only inplace for the beta release this will all get refactored
+        // after we get the release out.
+        if (e.aggConfig && e.aggConfig.aggType && e.aggConfig.aggType.name === 'terms') {
           var filter;
           var filters = _.flatten([$state.filters || []], true);
           var previous = _.find(filters, function (item) {
