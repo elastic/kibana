@@ -14,7 +14,7 @@ If you don't see any documents, it is possible that:
 ### Document list
 Now that you see some documents you can begin to explore. In the document list Kibana will show you the localized version of the time field your specified in your index pattern, as well as the `_source` of the elasticsearch document. By default the table contains 500 of the most recent documents.
 
-Tip: You can increase the number of document in the table from the advanced settings screen. See the [Setting section](settings.md#advanced) of the documentation.
+**Tip:** You can increase the number of document in the table from the advanced settings screen. See the [Setting section](settings.md#advanced) of the documentation.
 
 Click on the expand button to the left of the time. Kibana will read the fields from the document and present them in a table. The + and - buttons allow you to quickly filter for documents that share common traits with the one you're looking at. Click the JSON tab at the top of the table to see the full, pretty printed, original document.
 
