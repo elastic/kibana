@@ -5,8 +5,7 @@ define(function (require) {
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var Legend = Private(require('components/vislib/lib/legend'));
-    var ErrorHandler = Private(require('components/vislib/lib/_error_handler'));
-    var errorHandler = new ErrorHandler();
+    var errors = require('errors');
 
     // Dynamically adds css file
     require('css!components/vislib/components/styles/main');
@@ -227,13 +226,9 @@ define(function (require) {
           width = elWidth;
           height = elHeight - margin.top - margin.bottom;
 
-          // if height or width < minimum or NaN, throw error
-          if (_.isNaN(width) || width < minWidth || _.isNaN(height) || height < minHeight) {
-            throw new Error('The height and/or width of this container is too ' +
-              'small for this chart.');
+          if (width < minWidth || height < minHeight) {
+            throw new errors.ContainerTooSmall();
           }
-
-          errorHandler.validateWidthandHeight(width, height, minWidth, minHeight);
 
           // Select the current DOM element
           div = d3.select(this);
