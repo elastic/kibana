@@ -198,7 +198,7 @@ define(function (require) {
           $scope.filtering(field, row._source[field] || row[field], operation);
         };
 
-        $scope.$watch('columns', function (columns) {
+        $scope.$watchCollection('columns', function (columns) {
           element.empty();
           createSummaryRow($scope.row, $scope.row._id);
         });
