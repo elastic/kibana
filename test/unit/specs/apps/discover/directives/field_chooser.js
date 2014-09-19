@@ -90,6 +90,36 @@ define(function (require) {
         done();
       });
 
+
+      it('should show the popular fields header if there are popular fields', function (done) {
+        var section = getSections($elem);
+        expect(section.popular.hasClass('ng-hide')).to.be(false);
+        expect(section.popular.find('li:not(.sidebar-list-header)').length).to.be.above(0);
+        done();
+      });
+
+      it('should not show the popular fields if there are not any', function (done) {
+        // Re-init
+        destroy();
+        init($elem, {
+          fields: _.filter(
+            _.map(indexPattern.fields.raw, function (v, i) { return _.merge(v, {display: false, rowCount: i}); }),
+            {count: 0}
+          ),
+          toggle: sinon.spy(),
+          data: require('fixtures/hits'),
+          filter: sinon.spy(),
+          indexPattern: indexPattern
+        });
+
+        var section = getSections($elem);
+        // Remove the popular fields
+        $scope.$digest();
+        expect(section.popular.hasClass('ng-hide')).to.be(true);
+        expect(section.popular.find('li:not(.sidebar-list-header)').length).to.be(0);
+        done();
+      });
+
       it('setting field.display should move the field into selected', function (done) {
         var section = getSections($elem);
         indexPattern.fields.byName.bytes.display = true;
@@ -129,7 +159,6 @@ define(function (require) {
         indexPattern.popularizeField = sinon.spy();
         $scope.details(field);
         expect(indexPattern.popularizeField.called).to.be(true);
-        expect(field.count).to.be(counter + 1);
         done();
       });
 

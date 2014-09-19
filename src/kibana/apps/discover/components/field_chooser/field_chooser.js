@@ -75,7 +75,7 @@ define(function (require) {
           filter.active = filter.getActive();
         });
 
-        $scope.$watch('fields', function (newFields) {
+        $scope.$watchCollection('fields', function (newFields) {
 
           // Find the top N most popular fields
           $scope.popularFields = _(newFields)
