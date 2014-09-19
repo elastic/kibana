@@ -7,6 +7,7 @@ define(function (require) {
     var ResizeChecker = Private(require('components/vislib/lib/resize_checker'));
     var Events = Private(require('factories/events'));
     var chartTypes = Private(require('components/vislib/vis_types'));
+    var errors = require('errors');
     require('css!components/vislib/components/styles/main.css');
 
     /*
@@ -50,8 +51,7 @@ define(function (require) {
         // if involving height and width of the container, log error to screen
         // Because we have to wait for the DOM element to initialize, we do not
         // want to throw an error when the DOM `el` is zero
-        if ($(this.el).height() > 0 &&
-          error.message === 'The height and/or width of this container is too small for this chart.') {
+        if (error instanceof errors.ContainerTooSmall && $(this.el).height() > 0) {
           this.handler.error(error.message);
         } else {
           console.error(error.message);
