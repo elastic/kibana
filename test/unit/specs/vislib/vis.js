@@ -110,16 +110,16 @@ define(function (require) {
     });
 
     // TODO: fix this test instead of just skipping it
-    describe.skip('resize Method', function () {
-      it('should resize the chart', function () {
-        var width = 555;
+    // describe('resize Method', function () {
+    //   it('should resize the chart', function () {
+    //     var width = 555;
 
-        vis.render(data);
-        $('.visualize').width(width);
-        vis.resize();
-        expect($('.visualize').width()).to.be.lessThan(width);
-      });
-    });
+    //     vis.render(data);
+    //     $('.visualize').width(width);
+    //     vis.resize();
+    //     expect($('.visualize').width()).to.be.lessThan(width);
+    //   });
+    // });
 
     describe('destroy Method', function () {
       beforeEach(function () {
