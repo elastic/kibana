@@ -55,7 +55,19 @@ define(function (require) {
       });
     }
 
-    notifs.push(notif);
+    notif.count = (notif.count || 0) + 1;
+
+    var dup = _.find(notifs, function (item) {
+      return item.content === notif.content && item.lifetime === notif.lifetime;
+    });
+
+    if (dup) {
+      dup.count += 1;
+      dup.stacks = _.union(dup.stacks, [notif.stack]);
+    } else {
+      notif.stacks = [notif.stack];
+      notifs.push(notif);
+    }
   }
 
   function formatMsg(msg, from) {

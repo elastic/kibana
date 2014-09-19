@@ -1,9 +1,20 @@
 <table class="table">
-  <thead kbn-table-header columns="columns" mapping="mapping" sorting="sorting" timefield="timefield"></thead>
+  <thead
+    kbn-table-header
+    columns="columns"
+    mapping="mapping"
+    sorting="sorting"
+    timefield="timefield">
+  </thead>
   <tbody>
     <tr ng-repeat="row in rows |limitTo:limit track by row._index+row._id"
       kbn-table-row="row"
-      columns="columns" mapping="mapping" sorting="sorting" timefield="timefield" max-length="maxLength" filtering="filtering"
+      columns="columns"
+      mapping="mapping"
+      sorting="sorting"
+      timefield="timefield"
+      max-length="maxLength"
+      filtering="filtering"
       class="discover-table-row"></tr>
   </tbody>
 </table>

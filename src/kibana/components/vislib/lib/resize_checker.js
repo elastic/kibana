@@ -7,16 +7,10 @@ define(function (require) {
     var reflowWatcher = Private(require('components/reflow_watcher'));
     var sequencer = require('utils/sequencer');
 
-    var SCHEDULE_LONG = ResizeChecker.SCHEDULE_LONG = sequencer.createEaseOut(
-      250,   // shortest delay
-      10000, // longest delay
-      150    // tick count
-    );
-
-    var SCHEDULE_SHORT = ResizeChecker.SCHEDULE_SHORT = sequencer.createEaseIn(
-      5,   // shortest delay
-      500, // longest delay
-      100  // tick count
+    var SCHEDULE = ResizeChecker.SCHEDULE = sequencer.createEaseIn(
+      5,      // shortest delay
+      10000,  // longest delay
+      125     // tick count
     );
 
     // maximum ms that we can delay emitting 'resize'. This is only used
@@ -47,7 +41,7 @@ define(function (require) {
     }
 
     ResizeChecker.prototype.onReflow = function () {
-      this.startSchedule(SCHEDULE_LONG);
+      this.startSchedule(SCHEDULE);
     };
 
     /**
@@ -149,9 +143,7 @@ define(function (require) {
         return this.continueSchedule();
       }
 
-      // when the state changes start a new schedule. Use a schedule that quickly
-      // slows down if it is unknown wether there are will be additional changes
-      return this.startSchedule(dirty ? SCHEDULE_SHORT : SCHEDULE_LONG);
+      return this.startSchedule(SCHEDULE);
     };
 
     /**

@@ -2,7 +2,7 @@ define(function (require) {
   return function GetArrayUtilService(Private) {
     var _ = require('lodash');
 
-    var flattenSeries = Private(require('components/vislib/components/_functions/labels/get_series'));
+    var flattenSeries = Private(require('components/vislib/components/labels/flatten_series'));
 
     /* Takes a kibana obj object
      * for example:

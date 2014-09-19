@@ -1,6 +1,7 @@
 define(function (require) {
   return function LegendFactory(d3, Private) {
     var _ = require('lodash');
+    var legendHeaderTemplate = _.template(require('text!components/vislib/partials/legend_header.html'));
 
     // Dynamically adds css file
     require('css!components/vislib/components/styles/main');
@@ -39,13 +40,8 @@ define(function (require) {
         .attr('class', 'header')
         .append('div')
         .attr('class', 'column-labels')
-        .html(function (d) {
-          if (args._attr.isOpen) {
-            return '<span class="btn btn-xs btn-default legend-toggle">' +
-              '<i class="fa fa-chevron-right"></i></span>';
-          }
-          return '<span class="btn btn-xs btn-default legend-toggle">' +
-            '<i class="fa fa-chevron-left"></i></span>';
+        .html(function () {
+          return legendHeaderTemplate(args._attr);
         });
     };
 

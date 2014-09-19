@@ -2,7 +2,7 @@ define(function (require) {
   return function ColorPaletteUtilService(d3, Private) {
     var _ = require('lodash');
 
-    var seedColors = Private(require('components/vislib/components/_functions/color/seed_colors'));
+    var seedColors = Private(require('components/vislib/components/color/seed_colors'));
 
     // Accepts a number that represents a length of an array
     return function (num) {

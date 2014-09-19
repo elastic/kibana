@@ -217,7 +217,7 @@ path, line, .axis line, .axis path {
   stroke: 3px;
 }
 
-.k4tip {
+.k4tip, .vis-tooltip {
   line-height: 1.1;
   font-size: 12px;
   font-weight: normal;
@@ -252,12 +252,13 @@ path, line, .axis line, .axis path {
 
 .error {
   .flex(1 1 100%);
+  .display(flex);
+  .align-items(center);
   text-align: center;
 
   p {
-    margin-top: 15%;
+    .flex(1 1 auto);
     font-size: 18px;
-    text-wrap: wrap;
   }
 }
 

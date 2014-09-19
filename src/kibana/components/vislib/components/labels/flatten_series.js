@@ -18,7 +18,6 @@ define(function (require) {
        */
 
       return _.chain(obj)
-        .pluck()
         .pluck('series')
         .flatten()
         .value();

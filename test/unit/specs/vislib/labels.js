@@ -116,7 +116,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          getLabels = Private(require('components/vislib/components/_functions/labels/labels'));
+          getLabels = Private(require('components/vislib/components/labels/labels'));
           seriesLabels = getLabels(seriesData);
           rowsLabels = getLabels(rowsData);
           seriesArr = _.isArray(seriesLabels);
@@ -142,9 +142,10 @@ define(function (require) {
         expect(rowsArr).to.be(true);
       });
 
-      it('should return empty array if input is not an object', function () {
-        error = getLabels('string not object');
-        expect(error.length).to.be(0);
+      it('should throw an error if input is not an object', function () {
+        expect(function () {
+          getLabels('string not object');
+        }).to.throwError();
       });
 
       it('should return unique label values', function () {
@@ -166,7 +167,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          dataArray = Private(require('components/vislib/components/_functions/labels/data_array'));
+          dataArray = Private(require('components/vislib/components/labels/data_array'));
           seriesLabels = dataArray(seriesData);
           rowsLabels = dataArray(rowsData);
           testSeries = _.isArray(seriesLabels);
@@ -222,7 +223,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          uniqLabels = Private(require('components/vislib/components/_functions/labels/uniq_labels'));
+          uniqLabels = Private(require('components/vislib/components/labels/uniq_labels'));
           uniq = uniqLabels(arrObj);
           testArr = _.isArray(uniq);
         });
@@ -258,7 +259,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          getSeries = Private(require('components/vislib/components/_functions/labels/get_series'));
+          getSeries = Private(require('components/vislib/components/labels/flatten_series'));
           columnsLabels = getSeries(columnsData);
           rowsLabels = getSeries(rowsData);
           seriesLabels = getSeries(seriesData);

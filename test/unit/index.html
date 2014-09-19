@@ -4,11 +4,8 @@
     <title>Kibana4 Tests</title>
 
     <link rel="stylesheet" href="/node_modules/mocha/mocha.css" />
-    <link rel="stylesheet" href="/node_modules/mocha-screencast-reporter/screencast-reporter.css" />
-
     <script src="/node_modules/expect.js/index.js"></script>
     <script src="/node_modules/mocha/mocha.js"></script>
-    <script src="/node_modules/mocha-screencast-reporter/screencast-reporter.js"></script>
     <script src="/src/kibana/bower_components/requirejs/require.js"></script>
     <script src="/src/kibana/require.config.js"></script>
 
@@ -18,7 +15,7 @@
 
       mocha.setup({
         ui: 'bdd',
-        reporter: SAUCELABS ? ScreencastReporter : 'html'
+        reporter: 'html'
       });
 
       require.config({
@@ -31,7 +28,9 @@
           sinon: '../../test/utils/sinon',
           bluebird: 'bower_components/bluebird/js/browser/bluebird',
           angular: 'bower_components/angular-mocks/angular-mocks',
-          angular_src: 'bower_components/angular/angular'
+          angular_src: 'bower_components/angular/angular',
+          screencast_reporter_css: '../../node_modules/mocha-screencast-reporter/screencast-reporter',
+          ScreencastReporter: '../../node_modules/mocha-screencast-reporter/screencast-reporter'
         },
         shim: {
           angular: {
@@ -60,6 +59,16 @@
         ], function (IstanbulReporter) {
           mocha.reporter(IstanbulReporter);
           done();
+        });
+      }
+
+      function setupSaucelabsReporter(done) {
+        require([
+          'ScreencastReporter',
+          'css!screencast_reporter_css'
+        ], function (ScreencastReporter) {
+          mocha.reporter(ScreencastReporter);
+          done()
         });
       }
 
@@ -114,6 +123,7 @@
           'specs/vislib/column_layout',
           'specs/vislib/index',
           'specs/vislib/vis',
+          'specs/vislib/tooltip',
           'specs/vislib/handler',
           'specs/vislib/_error_handler',
           'specs/vislib/data',
@@ -174,7 +184,11 @@
 
       if (COVERAGE) {
         setupCoverage(runTests);
-      } else {
+      }
+      else if (SAUCELABS) {
+        setupSaucelabsReporter(runTests);
+      }
+      else {
         runTests();
       }
 

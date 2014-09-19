@@ -4,8 +4,8 @@ define(function (require) {
 
     // Takes an array of objects
     return function (arr) {
-      if (!arr instanceof Array) {
-        throw TypeError(arr + ' should be an array of objects');
+      if (!_.isArray(arr)) {
+        throw TypeError('UniqLabelUtil expects an array of objects');
       }
 
       // Returns a array of unique chart labels

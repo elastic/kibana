@@ -10,7 +10,13 @@ define(function () {
         var div = d3.select(this)
           .attr('class', function () {
             // Determine the parent class
-            return data.rows ? 'chart-wrapper-row' : data.columns ? 'chart-wrapper-column' : 'chart-wrapper';
+            if (data.rows) {
+              return 'chart-wrapper-row';
+            } else if (data.columns) {
+              return 'chart-wrapper-column';
+            } else {
+              return 'chart-wrapper';
+            }
           });
         var divClass;
 
@@ -18,10 +24,19 @@ define(function () {
           .append('div')
           .data(function (d) {
             // Determine the child class
-            divClass = d.rows ? 'chart-row' : d.columns ? 'chart-column' : 'chart';
-            return d.rows ? d.rows : d.columns ? d.columns : [d];
+            if (d.rows) {
+              divClass = 'chart-row';
+              return d.rows;
+            } else if (d.columns) {
+              divClass = 'chart-column';
+              return d.columns;
+            } else {
+              divClass = 'chart';
+              return [d];
+            }
           })
-          .enter().append('div')
+          .enter()
+          .append('div')
           .attr('class', function () {
             return divClass;
           });
