@@ -47,18 +47,18 @@ define(function (require) {
       }
 
       return {
-        value     : this._attr.yValue(d, i),
-        point     : d,
-        label     : d.label,
-        color     : this.vis.data.getColorFunc()(d.label),
+        value: this._attr.yValue(d, i),
+        point: d,
+        label: d.label,
+        color: this.vis.data.getColorFunc()(d.label),
         pointIndex: i,
-        series    : this.chartData.series,
-        config    : this._attr,
-        data      : this.chartData,
-        e         : d3.event,
-        field     : field,
-        aggConfig : aggConfig,
-        vis       : this.vis
+        series: this.chartData.series,
+        config: this._attr,
+        data: this.chartData,
+        e: d3.event,
+        field: field,
+        aggConfig: aggConfig,
+        vis: this.vis
       };
     };
 
@@ -72,8 +72,8 @@ define(function (require) {
         return d.values.map(function (e, i) {
           return {
             label: label,
-            x    : self._attr.xValue.call(d.values, e, i),
-            y    : self._attr.yValue.call(d.values, e, i)
+            x: self._attr.xValue.call(d.values, e, i),
+            y: self._attr.yValue.call(d.values, e, i)
           };
         });
       }));
@@ -99,10 +99,10 @@ define(function (require) {
       // if `addBrushing` is true, add brush canvas
       if (self._attr.addBrushing) {
         svg.append('g')
-          .attr('class', 'brush')
-          .call(brush)
-          .selectAll('rect')
-          .attr('height', this._attr.height - this._attr.margin.top - this._attr.margin.bottom);
+        .attr('class', 'brush')
+        .call(brush)
+        .selectAll('rect')
+        .attr('height', this._attr.height - this._attr.margin.top - this._attr.margin.bottom);
       }
     };
 
@@ -116,55 +116,55 @@ define(function (require) {
 
       // Data layers
       layer = svg.selectAll('.layer')
-        .data(layers)
-        .enter().append('g')
-        .attr('class', function (d, i) {
-          return i;
-        });
+      .data(layers)
+      .enter().append('g')
+      .attr('class', function (d, i) {
+        return i;
+      });
 
       // Append the bars
       bars = layer.selectAll('rect')
-        .data(function (d) {
-          return d;
-        });
+      .data(function (d) {
+        return d;
+      });
 
       // exit
       bars.exit().remove();
 
       // enter
       bars.enter()
-        .append('rect')
-        .attr('class', function (d) {
-          return 'color ' + Legend.prototype.colorToClass.call(this, color(d.label));
-        })
-        .attr('fill', function (d) {
-          return color(d.label);
-        });
+      .append('rect')
+      .attr('class', function (d) {
+        return 'color ' + Legend.prototype.colorToClass.call(this, color(d.label));
+      })
+      .attr('fill', function (d) {
+        return color(d.label);
+      });
 
       // update
       bars
-        .attr('x', function (d) {
-          return xScale(d.x);
-        })
-        .attr('width', function () {
-          var barWidth;
-          var barSpacing;
+      .attr('x', function (d) {
+        return xScale(d.x);
+      })
+      .attr('width', function () {
+        var barWidth;
+        var barSpacing;
 
-          if (data.ordered && data.ordered.date) {
-            barWidth = xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min);
-            barSpacing = barWidth * 0.25;
+        if (data.ordered && data.ordered.date) {
+          barWidth = xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min);
+          barSpacing = barWidth * 0.25;
 
-            return barWidth - barSpacing;
-          }
+          return barWidth - barSpacing;
+        }
 
-          return xScale.rangeBand();
-        })
-        .attr('y', function (d) {
-          return yScale(d.y0 + d.y);
-        })
-        .attr('height', function (d) {
-          return yScale(d.y0) - yScale(d.y0 + d.y);
-        });
+        return xScale.rangeBand();
+      })
+      .attr('y', function (d) {
+        return yScale(d.y0 + d.y);
+      })
+      .attr('height', function (d) {
+        return yScale(d.y0) - yScale(d.y0 + d.y);
+      });
 
       return bars;
     };
@@ -176,23 +176,23 @@ define(function (require) {
       var dispatch = this._attr.dispatch;
 
       bars
-        .on('mouseover.bar', function (d, i) {
-          d3.select(this)
-            .classed('hover', true)
-            .style('stroke', '#333')
-            .style('cursor', 'pointer');
+      .on('mouseover.bar', function (d, i) {
+        d3.select(this)
+          .classed('hover', true)
+          .style('stroke', '#333')
+          .style('cursor', 'pointer');
 
-          dispatch.hover(self.eventResponse(d, i));
-          d3.event.stopPropagation();
-        })
-        .on('click.bar', function (d, i) {
-          dispatch.click(self.eventResponse(d, i));
-          d3.event.stopPropagation();
-        })
-        .on('mouseout.bar', function () {
-          d3.select(this).classed('hover', false)
-            .style('stroke', null);
-        });
+        dispatch.hover(self.eventResponse(d, i));
+        d3.event.stopPropagation();
+      })
+      .on('click.bar', function (d, i) {
+        dispatch.click(self.eventResponse(d, i));
+        d3.event.stopPropagation();
+      })
+      .on('mouseout.bar', function () {
+        d3.select(this).classed('hover', false)
+          .style('stroke', null);
+      });
 
       // Add tooltip
       if (isTooltip) {
@@ -235,10 +235,10 @@ define(function (require) {
 
           // Create the canvas for the visualization
           svg = div.append('svg')
-            .attr('width', width)
-            .attr('height', height + margin.top + margin.bottom)
-            .append('g')
-            .attr('transform', 'translate(0,' + margin.top + ')');
+          .attr('width', width)
+          .attr('height', height + margin.top + margin.bottom)
+          .append('g')
+          .attr('transform', 'translate(0,' + margin.top + ')');
 
           // addBrush canvas
           self.addBrush(xScale, svg);
