@@ -71,8 +71,9 @@ define(function (require) {
       inject(function (d3, Private) {
         Vis = Private(require('components/vislib/vis'));
 
-        el = d3.select('body').append('div')
-          .attr('class', 'visualize');
+        el = d3.select('body')
+        .append('div')
+        .attr('class', 'visualize');
 
         config = {
           type: 'histogram',
