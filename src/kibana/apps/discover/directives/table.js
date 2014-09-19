@@ -159,11 +159,6 @@ define(function (require) {
 
           $detailsTr.toggle($scope.open);
 
-          // Change the caret icon
-          var $toggleIcon = $(element.children().first().find('i')[0]);
-          $toggleIcon.toggleClass('fa-caret-down');
-          $toggleIcon.toggleClass('fa-caret-right');
-
           if (!$scope.open) {
             // close the child scope if it exists
             $child.$destroy();
@@ -190,8 +185,10 @@ define(function (require) {
             return _.contains(validTypes, mapping.type);
           };
 
-          var $childScope = _.assign($child, { row: row, showFilters: showFilters });
-          $compile($detailsTr)($childScope);
+          $child.row = row;
+          $child.showFilters = showFilters;
+
+          $compile($detailsTr)($child);
         };
 
         $scope.filter = function (row, field, operation) {
@@ -211,7 +208,11 @@ define(function (require) {
         // create a tr element that lists the value for each *column*
         function createSummaryRow(row, id) {
 
-          var expandTd = $('<td>').html('<i class="fa fa-caret-right"></span>')
+          var expandTd = $('<td>')
+            .append(
+              $('<i class="fa"></span>')
+              .attr('ng-class', '{"fa-caret-right": !open, "fa-caret-down": open}')
+            )
             .attr('ng-click', 'toggleRow()');
           $compile(expandTd)($scope);
           element.append(expandTd);
