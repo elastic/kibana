@@ -59,7 +59,7 @@ define(function (require) {
             ;
           },
           popularity: function (field) {
-            return field.count;
+            return field.count > 0;
           },
           getActive: function () {
             return _.some(filter.props, function (prop) {
@@ -78,12 +78,15 @@ define(function (require) {
         $scope.$watch('fields', function (newFields) {
 
           // Find the top N most popular fields
-          $scope.popularFields = _.sortBy(_.filter(
-            _.sortBy(newFields, 'count')
-            .reverse()
-            .slice(0, config.get('fields:popularLimit')), function (field) {
-            return (field.count > 0);
-          }), 'name');
+          $scope.popularFields = _(newFields)
+          .where(function (field) {
+            return field.count > 0;
+          })
+          .sortBy('count')
+          .reverse()
+          .slice(0, config.get('fields:popularLimit'))
+          .sortBy('name')
+          .value();
 
           // Find the top N most popular fields
           $scope.unpopularFields = _.sortBy(_.sortBy(newFields, 'count')
