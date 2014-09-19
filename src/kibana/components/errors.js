@@ -167,5 +167,23 @@ define(function (require) {
   };
   inherits(errors.NoDefaultIndexPattern, KbnError);
 
+
+  /**
+   * user with the vislib, when the container is too small
+   * @param {String} message - the message to provide with the error
+   */
+  errors.ContainerTooSmall = function ContainerTooSmall(msg) {
+    var errMessage = 'The size of this container is too small';
+
+    if (msg.length) {
+      errMessage += ' : ' + msg;
+    }
+
+    KbnError.call(this,
+    errMessage,
+    errors.ContainerTooSmall);
+  };
+  inherits(errors.ContainerTooSmall, KbnError);
+
   return errors;
 });

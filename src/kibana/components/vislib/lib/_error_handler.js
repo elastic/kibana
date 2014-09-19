@@ -1,17 +1,25 @@
 define(function (require) {
+  var _ = require('lodash');
+  var errors = require('errors');
+
   return function ErrorHandlerFactory(Private) {
-    var _ = require('lodash');
+    var errMessage = 'The size of this container is too small.';
 
     // Common errors shared between constructors
     function ErrorHandler() {}
 
     // Validate that the height and width are not 0 or NaN
-    ErrorHandler.prototype.validateWidthandHeight = function (width, height) {
-      if (_.isNaN(height) || height <= 0 || _.isNaN(width) || width <= 0) {
-        throw new Error('The height and/or width of this container is too ' +
-          'small for this chart. w:' + width + ', h:' + height);
+    ErrorHandler.prototype.validateWidthandHeight = function (width, height, checkWidth, checkHeight) {
+      // min size must be at least 1px
+      checkWidth = checkWidth || 1;
+      checkHeight = checkHeight || 1;
+      var badWidth = _.isNaN(width) || width < checkWidth;
+      var badHeight = _.isNaN(height) || height < checkHeight;
+
+      if (badWidth || badHeight) {
+        throw new errors.ContainerTooSmall('Expected ' + checkWidth + ', ' + checkHeight +
+          ', got ' + width + ', ' + height);
       }
-      return;
     };
 
     return ErrorHandler;
