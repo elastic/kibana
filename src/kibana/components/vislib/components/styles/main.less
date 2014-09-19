@@ -153,6 +153,9 @@ li.color {
 }
 
 /*  histogram axis and label styles  */
+.vis-canvas {
+}
+
 .chart-bkgd {
   fill: #ffffff;
 }
@@ -241,47 +244,48 @@ path, line, .axis line, .axis path {
 
 .error {
   .flex(1 1 100%);
-  .display(flex);
-  .align-items(center);
   text-align: center;
 
   p {
-    .flex(1 1 auto);
+    margin-top: 15%;
     font-size: 18px;
+    text-wrap: wrap;
   }
 }
 
 /* YAxis logic */
 .y-axis-col-wrapper {
   .display(flex);
-  .flex(0 0 auto);
   .flex-direction(column);
-  min-width: 45px;
 }
 
 .y-axis-col {
   .display(flex);
   .flex-direction(row);
-  .flex(1 1);
+  .flex(1 0 50px);
 }
 
 .y-axis-spacer-block {
-  .flex(0 1 auto);
-  min-height: 30px;
+  min-height: 50px
 }
 
 .y-axis-div-wrapper {
   .display(flex);
   .flex-direction(column);
-  .flex(1 1 63px);
+  .flex(0 0 33px);
+  min-width: 50px;
+  min-height: 15px;
 }
 
 .y-axis-div {
-  .flex(1 1 auto);
+  .flex(1 1 100%);
+  min-width: 15px;
+  min-height: 15px;
+
 }
 
 .y-axis-title {
-  .flex(0 0 15px);
+  min-width: 15px;
 }
 
 .y-axis-chart-title {
@@ -325,11 +329,11 @@ path, line, .axis line, .axis path {
 .chart-wrapper-row {
   .display(flex);
   .flex-direction(column);
-  .flex(1 0 50px);
+  .flex(1 0 100%);
 }
 
 .chart {
-  .flex(1 1);
+  .flex(1 1 100%);
   overflow: visible;
 }
 
@@ -344,25 +348,24 @@ path, line, .axis line, .axis path {
 .x-axis-wrapper {
   .display(flex);
   .flex-direction(column);
-  .flex(0 1 auto);
-  min-height: 20px;
+  min-height: 50px;
+  overflow: visible;
 }
 
 .x-axis-div-wrapper {
   .display(flex);
   .flex-direction(row);
-  .flex(0 1 auto);
-  min-height: 15px;
+  min-height: 20px;
 }
 
 .x-axis-chart-title {
   .display(flex);
   .flex-direction(row);
-  .flex(0 0 15px);
+  min-height: 15px;
 }
 
 .x-axis-title {
-  .flex(0 0 15px);
+  min-height: 15px;
 }
 
 .x-axis-title text {
@@ -370,9 +373,8 @@ path, line, .axis line, .axis path {
 }
 
 .x-axis-div {
-  .flex(1 0 auto);
-  min-height: 15px;
   margin-top: -5px;
+  min-height: 50px;
 }
 
 .x.axis path {

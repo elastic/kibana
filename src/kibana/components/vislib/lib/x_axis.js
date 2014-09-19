@@ -166,9 +166,9 @@ define(function (require) {
           }
         });
 
+        self.updateXaxisHeight();
+
         selection.call(self.fitTitles());
-        
-        self.updateSpacer();
 
       };
     };
@@ -181,7 +181,7 @@ define(function (require) {
       var textWidth = 0;
       var xAxisPadding = 15;
       var svg;
-      var maxSize = 120;
+      var maxSize = 180;
       self._attr.isRotated = false;
       
       return function test(selection) {
@@ -209,7 +209,7 @@ define(function (require) {
           selection.select('svg').attr('height', maxSize);
         }
 
-        // need to add mouseover to show tooltip on truncated labels
+        // TODO: need to add mouseover to show tooltip on truncated labels
 
       };
     };
@@ -277,22 +277,34 @@ define(function (require) {
       var visEls = $('.vis-wrapper');
       var visEl;
       var xAxisTitle;
+      var yAxisTitle;
       var xAxisChartTitle;
+      var yAxisChartTitle;
       var titleWidth;
+      var titleHeight;
       var text;
       var titles;
 
       return function () {
+
         visEls.each(function () {
           visEl = this;
           xAxisTitle = $(this).find('.x-axis-title');
+          yAxisTitle = $(this).find('.y-axis-title');
           titleWidth = xAxisTitle.width();
+          titleHeight = yAxisTitle.height();
 
           text = d3.select(this).select('.x-axis-title')
             .select('svg')
             .attr('width', titleWidth)
             .select('text')
             .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
+
+          text = d3.select(this).select('.y-axis-title')
+            .select('svg')
+            .attr('height', titleHeight)
+            .select('text')
+            .attr('transform', 'translate(11,' + (titleHeight / 2) + ')rotate(-90)');
 
           if ($(this).find('.x-axis-chart-title').length) {
             xAxisChartTitle = $(this).find('.x-axis-chart-title');
@@ -307,6 +319,20 @@ define(function (require) {
                 .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
             });
           }
+
+          if ($(this).find('.y-axis-chart-title').length) {
+            yAxisChartTitle = $(this).find('.y-axis-chart-title');
+            titleHeight = yAxisChartTitle.find('.chart-title').height();
+
+            titles = d3.select(this).select('.y-axis-chart-title').selectAll('.chart-title');
+            titles.each(function () {
+              text = d3.select(this)
+                .select('svg')
+                .attr('height', titleHeight)
+                .select('text')
+                .attr('transform', 'translate(11,' + (titleHeight / 2) + ')rotate(-90)');
+            });
+          }
           
         });
         
@@ -315,22 +341,27 @@ define(function (require) {
 
     // Appends div to make .y-axis-spacer-block
     // match height of .x-axis-wrapper
-    XAxis.prototype.updateSpacer = function () {
+    XAxis.prototype.updateXaxisHeight = function () {
       
       var selection = d3.selectAll('.vis-wrapper');
       var $selection = $('.vis-wrapper');
-      
+      var size = 45;
       selection.each(function () {
         var vis = d3.select(this);
         var $vis = $(this);
-        var newHeight = $vis.find('.x-axis-wrapper').height();
+        
+        var labelSvg = vis.select('.x-axis-div-wrapper').select('g.x');
+        size = 37 + labelSvg.node().getBBox().height;
+        
+        $vis.find('.x-axis-wrapper').height(size);
+        $vis.find('.x-axis-div-wrapper').height(size - 20);
         if (vis.select('.inner-spacer-block').node() === null) {
           vis.select('.y-axis-spacer-block')
             .append('div')
             .attr('class', 'inner-spacer-block');
         }
         vis.select('.inner-spacer-block')
-          .style('height', newHeight + 'px');
+          .style('height', size + 'px');
       });
       
     };
