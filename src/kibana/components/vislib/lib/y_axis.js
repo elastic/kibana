@@ -55,7 +55,7 @@ define(function (require) {
       if (self.yScale.domain()[1] <= 10) {
         this.yAxis.tickFormat(d3.format('n'));
       }
-      
+
       return this.yAxis;
     };
 
@@ -82,7 +82,7 @@ define(function (require) {
       var svg;
 
       return function (selection) {
-        
+
         selection.each(function () {
           div = d3.select(this);
           width = $(this).width();
