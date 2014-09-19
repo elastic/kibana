@@ -3,7 +3,6 @@
 /* vislib styles */
 .arc path {
   stroke: #fff;
-  /* stroke-width: 3px; */
 }
 
 div.columns {
@@ -154,15 +153,8 @@ li.color {
 }
 
 /*  histogram axis and label styles  */
-.vis-canvas {
-  /* background-color: #fff; */
-}
-
 .chart-bkgd {
   fill: #ffffff;
-  /*fill: #eff3f4;*/
-  /*stroke: #ddd;*/
-  /*shape-rendering: crispEdges;*/
 }
 
 p.rows-label, p.columns-label {
@@ -189,7 +181,6 @@ p.rows-label, p.columns-label {
 .tick text {
   font-size: 7pt;
   fill: #848e96;
-  /*cursor: pointer;*/
 }
 
 .axis {
@@ -233,12 +224,10 @@ path, line, .axis line, .axis path {
 }
 
 .rect {
-  /*shape-rendering: crispEdges;*/
   stroke: transparent;
   stroke-width: 2;
 }
 .rect.hover {
-  /*shape-rendering: crispEdges;*/
   stroke: #333;
 }
 
@@ -266,27 +255,28 @@ path, line, .axis line, .axis path {
   .display(flex);
   .flex(0 0 auto);
   .flex-direction(column);
-  min-width: 35px;
+  min-width: 45px;
 }
 
 .y-axis-col {
   .display(flex);
   .flex-direction(row);
-  .flex(1 0 50px);
+  .flex(1 1);
 }
 
 .y-axis-spacer-block {
-  .flex(0 1 50px);
+  .flex(0 1 auto);
+  min-height: 30px;
 }
 
 .y-axis-div-wrapper {
   .display(flex);
   .flex-direction(column);
-  .flex(0 0 33px);
+  .flex(1 1 63px);
 }
 
 .y-axis-div {
-  .flex(1 1 100%);
+  .flex(1 1 auto);
 }
 
 .y-axis-title {
@@ -353,14 +343,15 @@ path, line, .axis line, .axis path {
 .x-axis-wrapper {
   .display(flex);
   .flex-direction(column);
-  .flex(0 1 50px);
-  overflow: visible;
+  .flex(0 1 auto);
+  min-height: 20px;
 }
 
 .x-axis-div-wrapper {
   .display(flex);
   .flex-direction(row);
-  .flex(0 1 15px);
+  .flex(0 1 auto);
+  min-height: 15px;
 }
 
 .x-axis-chart-title {
@@ -378,7 +369,8 @@ path, line, .axis line, .axis path {
 }
 
 .x-axis-div {
-  .flex(1 1 100%);
+  .flex(1 0 auto);
+  min-height: 15px;
   margin-top: -5px;
 }
 

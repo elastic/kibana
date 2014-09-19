@@ -75,8 +75,8 @@ define(function (require) {
         this.tooltip,
         this.axisTitle,
         this.chartTitle,
-        this.yAxis,
-        this.xAxis
+        this.xAxis,
+        this.yAxis
       ], Boolean);
     }
 
