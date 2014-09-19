@@ -1,5 +1,6 @@
 define(function (require) {
   var module = require('modules').get('kibana');
+  var _ = require('lodash');
   var $ = require('jquery');
 
   module.directive('clickFocus', function () {
@@ -9,11 +10,13 @@ define(function (require) {
       },
       restrict: 'A',
       link: function ($scope, $elem) {
-        $elem.bind('click', function () {
+        function handler() {
           var focusElem = $.find('input[name=' + $scope.clickFocus + ']');
           if (focusElem[0]) focusElem[0].focus();
-        });
-        $scope.$on('$destroy', $elem.unbind);
+        }
+
+        $elem.bind('click', handler);
+        $scope.$on('$destroy', _.bindKey($elem, 'unbind', 'click', handler));
       }
     };
   });
