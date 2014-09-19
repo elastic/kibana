@@ -175,7 +175,7 @@ define(function (require) {
   errors.ContainerTooSmall = function ContainerTooSmall(msg) {
     var errMessage = 'The size of this container is too small';
 
-    if (msg.length) {
+    if (msg && msg.length) {
       errMessage += ' : ' + msg;
     }
 
