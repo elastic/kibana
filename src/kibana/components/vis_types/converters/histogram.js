@@ -130,10 +130,6 @@ define(function (require) {
           datum.y = datum.y * colX.metricScale;
         }
 
-        if (hasColor) {
-          datum.aggConfigs = [columns[iX], columns[iColor]];
-        }
-
         s.values.push(datum);
       });
     };

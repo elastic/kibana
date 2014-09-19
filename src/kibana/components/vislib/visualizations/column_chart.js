@@ -29,22 +29,6 @@ define(function (require) {
 
     // Response to `click` and `hover` events
     ColumnChart.prototype.eventResponse = function (d, i) {
-
-      // Adding a look up for the field. Currently this relies on filtering the
-      // data for the label then using that with the pointIndex to get the aggConfig.
-      // It works for now... but we need something a little more robust. That will
-      // come after the first beta. :)
-      //
-      // TODO: Replace the following code with something more robust for finding the field
-      var field, series, aggConfig;
-      if (d.label) {
-        series = _.find(this.chartData.series, { label: d.label });
-        aggConfig = _.last(series.values[i].aggConfigs);
-        if (aggConfig.aggType.name === 'terms') {
-          field = aggConfig.field.name;
-        }
-      }
-
       return {
         value     : this._attr.yValue(d, i),
         point     : d,
@@ -54,10 +38,7 @@ define(function (require) {
         series    : this.chartData.series,
         config    : this._attr,
         data      : this.chartData,
-        e         : d3.event,
-        field     : field,
-        aggConfig : aggConfig,
-        vis       : this.vis
+        e         : d3.event
       };
     };
 
