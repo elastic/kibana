@@ -153,15 +153,9 @@ define(function (require) {
             barWidth = xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min);
             barSpacing = barWidth * 0.25;
 
-//            if (barWidth <= 1) {
-//              throw new Error('The height and/or width of this container is too small for this chart.');
-//            }
             return barWidth - barSpacing;
           }
 
-//          if (xScale.rangeBand() <= 1) {
-//            throw new Error('The height and/or width of this container is too small for this chart.');
-//          }
           return xScale.rangeBand();
         })
         .attr('y', function (d) {
@@ -213,6 +207,8 @@ define(function (require) {
       var margin = this._attr.margin;
       var elWidth = this._attr.width = $elem.width();
       var elHeight = this._attr.height = $elem.height();
+      var minWidth = 20;
+      var minHeight = 20;
       var div;
       var svg;
       var width;
@@ -229,8 +225,8 @@ define(function (require) {
           width = elWidth;
           height = elHeight - margin.top - margin.bottom;
 
-          // if height or width < 20 or NaN, throw error
-          if (_.isNaN(width) || width < 20 || _.isNaN(height) || height < 20) {
+          // if height or width < minimum or NaN, throw error
+          if (_.isNaN(width) || width < minWidth || _.isNaN(height) || height < minHeight) {
             throw new Error('The height and/or width of this container is too ' +
               'small for this chart.');
           }
