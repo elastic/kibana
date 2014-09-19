@@ -1,7 +1,6 @@
 var _ = require('lodash');
 module.exports = function (grunt) {
-
-  grunt.registerTask('test', function () {
+  function getTestTask() {
     var testTask = 'mocha:unit';
 
     if (grunt.option('use-sauce') || process.env.TRAVIS) {
@@ -14,13 +13,26 @@ module.exports = function (grunt) {
       }
     }
 
+    return testTask;
+  }
+
+  grunt.registerTask('test', function () {
     var tasks = [
       'jshint',
       'ruby_server',
       'maybe_start_server',
       'jade',
       'less',
-      testTask
+      getTestTask()
+    ];
+    grunt.task.run(tasks);
+  });
+
+  grunt.registerTask('quick-test', function () {
+    var tasks = [
+      'ruby_server',
+      'maybe_start_server',
+      getTestTask()
     ];
     grunt.task.run(tasks);
   });
