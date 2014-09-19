@@ -75,8 +75,7 @@ define(function (require) {
           filter.active = filter.getActive();
         });
 
-        $scope.$watchCollection('fields', function (newFields) {
-
+        var calculateFields = function (newFields) {
           // Find the top N most popular fields
           $scope.popularFields = _(newFields)
           .where(function (field) {
@@ -96,8 +95,9 @@ define(function (require) {
           $scope.fieldTypes = _.unique(_.pluck(newFields, 'type'));
           // push undefined so the user can clear the filter
           $scope.fieldTypes.unshift(undefined);
-        });
+        };
 
+        $scope.$watch('fields', calculateFields);
         $scope.$watch('data', function () {
           _.each($scope.fields, function (field) {
             if (field.details) {
@@ -108,7 +108,6 @@ define(function (require) {
 
         $scope.increaseFieldCounter = function (field) {
           $scope.indexPattern.popularizeField(field.name, 1);
-          field.count++;
         };
 
         $scope.runAgg = function (field) {
