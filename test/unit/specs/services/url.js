@@ -93,8 +93,8 @@ define(function (require) {
       it('should persist global state', function () {
         var wordCount = _.random(3, 6);
         var globalStateSpy = sinon.spy(globalStateMock, 'writeToUrl');
-        var urls = faker.Lorem.words(wordCount).map(function (url) {
-          return '/' + url;
+        var urls = faker.Lorem.words(wordCount).map(function (url, i) {
+          return '/' + url + i;
         });
 
         urls.forEach(function (url) {
