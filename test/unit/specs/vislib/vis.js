@@ -111,10 +111,12 @@ define(function (require) {
 
     describe('resize Method', function () {
       it('should resize the chart', function () {
+        var width = 555;
+
         vis.render(data);
-        $('.visualize').width(500);
+        $('.visualize').width(width);
         vis.resize();
-        expect($('.chart').width()).to.be.lessThan(500);
+        expect($('.visualize').width()).to.be.lessThan(width);
       });
     });
 
