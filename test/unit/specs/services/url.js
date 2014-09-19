@@ -214,7 +214,6 @@ define(function (require) {
           throw new Error('this should not run');
         } catch (err) {
           expect(err).to.be.an(Error);
-          console.log(err.message);
           expect(err.message).to.match(/replace_me/);
         }
       });
@@ -228,7 +227,6 @@ define(function (require) {
           throw new Error('this should not run');
         } catch (err) {
           expect(err).to.be.an(Error);
-          console.log(err.message);
           expect(err.message).to.match(/replace_me\|number/);
         }
       });
