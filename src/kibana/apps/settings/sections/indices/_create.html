@@ -24,8 +24,8 @@
           </div>
           <div class="form-group">
             <label>
-              Index Name
-              or Pattern &mdash;
+              Index name
+              or pattern &mdash;
               <small><a href="http://momentjs.com/docs/#/displaying/format/">docs</a></small>
             </label>
             <input
@@ -39,7 +39,7 @@
           <section ng-if="index.isTimeBased && index.nameIsPattern">
             <div class="form-group">
               <label>
-                Index Pattern Interval&nbsp;
+                Index pattern interval&nbsp;
                 <kbn-info info="The interval at which index names rotate."></kbn-info>
               </label>
               <select
@@ -53,7 +53,7 @@
             <div class="alert alert-danger" ng-repeat="err in index.patternErrors">{{err}}</div>
 
             <div class="alert alert-info" ng-if="index.samples">
-              Sample Index Names
+              Sample index names
               <ul>
                 <li ng-repeat="sample in index.samples">{{sample}}</li>
               </ul>
@@ -90,7 +90,7 @@
 
           <div class="form-group" ng-if="index.isTimeBased">
             <label>
-              Time-Field Name
+              Time-field name
               &nbsp;
               <kbn-info info="This field will be use to filter events with the global time filter"></kbn-info>
               &nbsp;
