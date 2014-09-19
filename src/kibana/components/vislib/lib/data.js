@@ -38,9 +38,53 @@ define(function (require) {
       return [this.data];
     };
 
+    Data.prototype.pieData = function () {
+      if (!this.data.slices) {
+        return this.data.rows ? this.data.rows : this.data.columns;
+      }
+      return [this.data];
+    };
+
+    Data.prototype.getNames = function (array) {
+      var self = this;
+      var names = [];
+
+      _.forEach(array, function (obj) {
+        if (obj.slices) {
+          var parentNames = self.getNames(obj.slices.children);
+
+          return _.forEach(parentNames, function (name) {
+            return names.push(name);
+          });
+        }
+
+        names.push(obj.name);
+
+        if (obj.children) {
+          var childNames = self.getNames(obj.children);
+
+          _.forEach(childNames, function (name) {
+            return names.push(name);
+          });
+        }
+      });
+
+      return _.uniq(names);
+    };
+
+
     // Get attributes off the data, e.g. `tooltipFormatter` or `xAxisFormatter`
     Data.prototype.get = function (thing) {
-      var data = this.chartData();
+      var data;
+
+      if (this.data.rows) {
+        data = this.data.rows;
+      } else if (this.data.columns) {
+        data = this.data.columns;
+      } else {
+        data = [this.data];
+      }
+
       // pulls the value off the first item in the array
       // these values are typically the same between data objects of the same chart
       // May need to verify this or refactor
@@ -107,49 +151,6 @@ define(function (require) {
       });
     };
 
-    Data.prototype.root = function () {
-      var data = this.data;
-      var self = this;
-
-      _.forEach(this.chartData(), function (obj) {
-        // Add a root
-        return obj.root = {
-          name: obj.xAxisLabel + ' ' + obj.yAxisLabel,
-          children: self.children(obj.series)
-        };
-      });
-
-      return data;
-    };
-
-    Data.prototype.children = function (array) {
-      var self = this;
-      var newArray = [];
-
-      _.forEach(array, function (obj) {
-        if (obj.x && obj.y) {
-          return newArray.push({
-            name: obj.x,
-            size: obj.y
-          });
-        } else if (!obj.label) {
-          return _.forEach(obj.values, function (obj) {
-            return newArray.push({
-              name: obj.x,
-              size: obj.y
-            });
-          });
-        } else {
-          return newArray.push({
-            name: obj.label,
-            children: self.children(obj.values)
-          });
-        }
-      });
-
-      return newArray;
-    };
-
     // Inject zeros into the data
     Data.prototype.injectZeros = function () {
       return injectZeros(this.data);
@@ -165,17 +166,19 @@ define(function (require) {
       return getLabels(this.data);
     };
 
-    Data.prototype.getLabelsAndXValues = function () {
-      return _.union(_.filter(this.getLabels(), Boolean), this.xValues());
-    };
-
     // Return a function that does color lookup on labels
     Data.prototype.getColorFunc = function () {
       return color(this.getLabels());
     };
 
+    // Return an array of unique names
+    Data.prototype.getPieNames = function () {
+      return this.getNames(this.pieData());
+    };
+
+    // Return a function that does color lookup on names for pie charts
     Data.prototype.getPieColorFunc = function () {
-      return color(_.union(_.filter(this.getLabels(), Boolean), this.xValues()));
+      return color(this.getPieNames());
     };
 
     return Data;

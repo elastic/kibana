@@ -17,10 +17,10 @@ define(function (require) {
       var self = this;
 
       // Visualization constructors
-      this.layout = new Layout(this.el, this.data.root(), this._attr.type);
+      this.layout = new Layout(this.el, this.data.data, this._attr.type);
 
       if (this._attr.addLegend) {
-        this.legend = new Legend(this.vis, this.el, this.data.getLabelsAndXValues(), this.data.getPieColorFunc(), this._attr);
+        this.legend = new Legend(this.vis, this.el, this.data.getPieNames(), this.data.getPieColorFunc(), this._attr);
       }
 
       this.chartTitle = new ChartTitle(this.el);
