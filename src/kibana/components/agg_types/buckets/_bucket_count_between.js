@@ -27,12 +27,12 @@ define(function (require) {
       var negative = (aIndex > bIndex);
 
       var count = aggs
-        .slice(aIndex, bIndex - aIndex - 1)
+        .slice(Math.min(aIndex, bIndex), Math.max(aIndex, bIndex))
         .reduce(function (count, cfg) {
-          if (cfg.schema.group === 'buckets') {
-            return count + 1;
-          } else {
+          if (cfg === aggConfigA || cfg === aggConfigB || cfg.schema.group !== 'buckets') {
             return count;
+          } else {
+            return count + 1;
           }
         }, 0);
 

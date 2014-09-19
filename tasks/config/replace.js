@@ -12,7 +12,7 @@ module.exports = function (grunt) {
       },
       files: [
         {
-          src: [join(src, 'server', 'DIST_README.md')],
+          src: [join(src, 'server', 'README.md')],
           dest: join(build, 'dist', 'README.md')
         },
         {

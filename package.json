@@ -41,7 +41,7 @@
   "scripts": {
     "test": "grunt test --use-jruby",
     "server": "grunt server",
-    "precommit": "grunt jshint todos"
+    "precommit": "grunt jshint todos render_readme"
   },
   "repository": {
     "type": "git",

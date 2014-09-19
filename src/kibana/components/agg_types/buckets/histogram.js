@@ -27,7 +27,7 @@ define(function (require) {
 
         {
           name: 'min_doc_count',
-          default: false,
+          default: null,
           editor: require('text!components/agg_types/controls/min_doc_count.html'),
           write: function (aggConfig, output) {
             if (aggConfig.params.min_doc_count) {
