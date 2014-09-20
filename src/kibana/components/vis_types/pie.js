@@ -19,7 +19,10 @@ define(function (require) {
           name: 'metric',
           title: 'Slice Size',
           min: 1,
-          max: 1
+          max: 1,
+          defaults: [
+            { schema: 'metric', type: 'count' }
+          ]
         },
         {
           group: 'buckets',
@@ -27,7 +30,7 @@ define(function (require) {
           icon: 'fa fa-scissors',
           title: 'Slices',
           min: 0,
-          max: 1
+          max: Infinity
         },
         {
           group: 'buckets',

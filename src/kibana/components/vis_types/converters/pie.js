@@ -96,14 +96,21 @@ define(function (require) {
         return out;
       };
 
-      var slices = chart.slices = {};
-      var name = slices.name = chart.xAxisLabel + ' ' + chart.yAxisLabel;
+      var slices = chart.slices = {
+        name: chart.xAxisLabel + ' ' + chart.yAxisLabel
+      };
       var children = slices.children = [];
-      var slicesByName = {};
 
+      function appendS(array, name) {
+        return array.push({
+          name: name,
+          children: []
+        });
+      }
+
+      // TODO: cleanup code, simplify and document
       rows.forEach(function (row) {
-        var sliceName = hasColor && row[iColor];
-        var s = hasColor ? slicesByName[sliceName] : undefined;
+        var rowLength = row.length;
 
         var datum = {
           name: (row[iX] == null) ? '_all' : row[iX],
@@ -115,22 +122,57 @@ define(function (require) {
           datum.size = datum.size * colX.metricScale;
         }
 
-        if (!s) {
-          if (hasColor) {
-            s = {
-              name: sliceName,
-              children: []
-            };
-            slicesByName[sliceName] = s;
-
-            children.push(s);
-          } else {
-            children.push(datum);
-          }
+        if (rowLength <= 2) {
+          return children.push(datum);
         } else {
-          s.children.push(datum);
+
+          var startIndex = 1;
+          var stopIndex = rowLength - 1;
+          var names = row.slice(startIndex, stopIndex).reverse();
+          var namesLength = names.length - 1;
+          var currentArray = children;
+          var prevName;
+
+          names.forEach(function (name, i) {
+            var prevNameIndex;
+            var currentNameIndex;
+
+            if (!prevName) {
+              // Find the index of the name within the children array
+              currentNameIndex = _.findIndex(currentArray, { name: name });
+
+              // if not iName, append s object to current array
+              if (currentNameIndex === -1) {
+                appendS(currentArray, name);
+              }
+            } else {
+              // Get the previous object index
+              prevNameIndex = _.findIndex(currentArray, {name: prevName});
+
+              // Update the currentArray
+              currentArray = currentArray[prevNameIndex].children;
+
+              // Get current object index
+              currentNameIndex = _.findIndex(currentArray, { name: name });
+
+              // if current object does not exist, append to the current array
+              if (currentNameIndex === -1) {
+                appendS(currentArray, name);
+              }
+            }
+
+            if (i === namesLength) {
+              // Find index of name in current array
+              currentNameIndex = _.findIndex(currentArray, { name: name });
+              currentArray[currentNameIndex].children.push(datum);
+            }
+
+            // Set prevName to current Name
+            prevName = name;
+          });
         }
       });
+
     };
   };
 });
