@@ -25,8 +25,8 @@
       </div>
       <div ng-repeat="service in services" ng-class="{ active: state.tab === service.title }" class="tab-pane">
         <ul class="list-unstyled">
-          <li ng-repeat="item in service.data">
-            <div class="pull-right">
+          <li class="item" ng-repeat="item in service.data">
+            <div class="actions pull-right">
               <button
                 ng-click="edit(service, item)"
                 class="btn btn-default">
@@ -39,13 +39,17 @@
                 <i class="fa fa-eye"></i>
               </button>
             </div>
+
             <div class="pull-left">
               <input
                 ng-click="item.checked = !item.checked; toggleDeleteBtn(service)"
                 ng-checked="item.checked"
                 type="checkbox" >
             </div>
-            <a href="#/settings/objects/{{service.service | uriescape}}/{{item.id | uriescape}}"><i ng-class="item.icon" class="fa"></i>&nbsp;{{ item.title }}</a>
+
+            <div class="item-title">
+              <a ng-click="open(item)">{{ item.title }}</a>
+            </div>
           </li>
           <li ng-if="!service.data.length" class="empty">No "{{service.title}}" found.</li>
         </ul>
