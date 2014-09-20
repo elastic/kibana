@@ -22,7 +22,7 @@ grunt test build
 
 #### Setup/Prerequisites
 
-1. install node.js (we recommend using [nvm](https://github.com/creationix/nvm))
+- install node.js (we recommend using [nvm](https://github.com/creationix/nvm))
 
   ```sh
   ## follow directions at https://github.com/creationix/nvm, then
