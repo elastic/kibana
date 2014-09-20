@@ -35,24 +35,8 @@ define(function (require) {
           children: [
             {
               type: 'div',
-              class: 'y-axis-col-wrapper',
-              children: [
-                {
-                  type: 'div',
-                  class: 'y-axis-col',
-                  children: [
-                    {
-                      type: 'div',
-                      class: 'y-axis-chart-title',
-                      splits: chartTitleSplit
-                    }
-                  ]
-                },
-                {
-                  type: 'div',
-                  class: 'y-axis-spacer-block'
-                }
-              ]
+              class: 'y-axis-chart-title',
+              splits: chartTitleSplit
             },
             {
               type: 'div',
@@ -65,14 +49,8 @@ define(function (require) {
                 },
                 {
                   type: 'div',
-                  class: 'x-axis-wrapper',
-                  children: [
-                    {
-                      type: 'div',
-                      class: 'x-axis-chart-title',
-                      splits: chartTitleSplit
-                    },
-                  ]
+                  class: 'x-axis-chart-title',
+                  splits: chartTitleSplit
                 }
               ]
             },
