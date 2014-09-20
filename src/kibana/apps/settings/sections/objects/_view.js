@@ -25,7 +25,7 @@ define(function (require) {
          * values is plain object it will recurse through all the keys till it hits
          * a string, number or an array.
          *
-         * @param {array} memo The stack of fields 
+         * @param {array} memo The stack of fields
          * @param {mixed} value The value of the field
          * @param {stirng} key The key of the field
          * @param {object} collection This is a reference the collection being reduced
@@ -105,8 +105,13 @@ define(function (require) {
           });
         };
 
+        $scope.cancel = function () {
+          $window.history.back();
+          return false;
+        };
+
         /**
-         * Deletes an object and sets the notification 
+         * Deletes an object and sets the notification
          * @param {type} name description
          * @returns {type} description
          */
