@@ -4,7 +4,7 @@ define(function (require) {
     var legendHeaderTemplate = _.template(require('text!components/vislib/partials/legend_header.html'));
 
     // Dynamically adds css file
-    require('css!components/vislib/components/styles/main');
+    require('css!components/vislib/styles/main');
 
     /*
      * Append legend to the visualization

@@ -6,7 +6,7 @@ define(function (require) {
     var Chart = Private(require('components/vislib/visualizations/_chart'));
 
     // Dynamically adds css file
-    require('css!components/vislib/components/styles/main');
+    require('css!components/vislib/styles/main');
 
     /*
      * Column chart visualization => vertical bars, stacked bars

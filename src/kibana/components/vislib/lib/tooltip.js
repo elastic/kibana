@@ -4,7 +4,7 @@ define(function (require) {
     var $ = require('jquery');
 
     // Dynamically adds css file
-    require('css!components/vislib/components/styles/main');
+    require('css!components/vislib/styles/main');
 
     /*
      * Append a tooltip div element to the visualization
