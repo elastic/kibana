@@ -58,8 +58,6 @@ define(function (require) {
           });
         }
 
-        names.push(obj.name);
-
         if (obj.children) {
           var childNames = self.getNames(obj.children);
 
@@ -67,6 +65,8 @@ define(function (require) {
             return names.push(name);
           });
         }
+
+        names.push(obj.name);
       });
 
       return _.uniq(names);
