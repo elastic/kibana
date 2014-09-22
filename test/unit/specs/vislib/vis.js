@@ -73,7 +73,7 @@ define(function (require) {
 
         el = d3.select('body')
         .append('div')
-        .attr('class', 'visualize');
+          .attr('class', 'visualize');
 
         config = {
           type: 'histogram',
@@ -110,16 +110,36 @@ define(function (require) {
     });
 
     // TODO: fix this test instead of just skipping it
-    // describe('resize Method', function () {
-    //   it('should resize the chart', function () {
-    //     var width = 555;
+    describe('resize Method', function () {
+      it('should resize the chart', function () {
+        var oldWidth, oldHeight;
+        var width = _.random(400, 600);
+        var height = _.random(400, 600);
 
-    //     vis.render(data);
-    //     $('.visualize').width(width);
-    //     vis.resize();
-    //     expect($('.visualize').width()).to.be.lessThan(width);
-    //   });
-    // });
+        // render, resize and refresh the visualization
+        vis.render(data);
+        oldWidth = $('.visualize').width();
+        oldHeight = $('.visualize').height();
+
+        $('.visualize').width(width);
+        $('.visualize').height(height);
+        vis.resize();
+
+        // ensure that the visualizaiton has been resized
+        expect($('.visualize').width()).to.not.be(oldWidth);
+        expect($('.visualize').height()).to.not.be(oldHeight);
+        expect($('.visualize').width()).to.be(width);
+        expect($('.visualize').height()).to.be(height);
+
+        // check the visualization wrapper (simulate greater/less than or equal to...)
+        expect($('.vis-wrapper').width()).to.be.lessThan(width + 1);
+        expect($('.vis-wrapper').height()).to.be.lessThan(height + 1);
+
+        // check the visualization labels
+        expect($('.x-axis-wrapper').width()).to.be.lessThan(width);
+        expect($('.y-axis-wrapper').height()).to.be.lessThan(height);
+      });
+    });
 
     describe('destroy Method', function () {
       beforeEach(function () {
