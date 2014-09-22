@@ -77,8 +77,8 @@ define(function (require) {
 
     beforeEach(function () {
       inject(function (d3, Private) {
-        Layout = Private(require('components/vislib/lib/layout'));
-        xAxisSplit = Private(require('components/vislib/components/layouts/splits/column_chart/x_axis_split'));
+        Layout = Private(require('components/vislib/lib/layout/layout'));
+        xAxisSplit = Private(require('components/vislib/lib/layout/splits/column_chart/x_axis_split'));
 
         el = d3.select('body').append('div')
           .attr('class', 'visualize-chart');

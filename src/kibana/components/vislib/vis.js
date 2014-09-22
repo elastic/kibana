@@ -5,7 +5,7 @@ define(function (require) {
 
     var ResizeChecker = Private(require('components/vislib/lib/resize_checker'));
     var Events = Private(require('factories/events'));
-    var handlerTypes = Private(require('components/vislib/handler_types'));
+    var handlerTypes = Private(require('components/vislib/lib/handler/handler_types'));
     var chartTypes = Private(require('components/vislib/vis_types'));
     var errors = require('errors');
     require('css!components/vislib/components/styles/main.css');
@@ -45,7 +45,7 @@ define(function (require) {
 
       // Save data to this object and new up the Handler constructor
       this.data = data;
-      this.handler = new handlerTypes[chartType](this);
+      this.handler = new handlerTypes[chartType](this) || handlerTypes.column(this);
 
       try {
         this.handler.render();

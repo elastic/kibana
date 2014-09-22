@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
 
     var Data = Private(require('components/vislib/lib/data'));
+    var Layout = Private(require('components/vislib/lib/layout/layout'));
     var Tooltip = Private(require('components/vislib/lib/tooltip'));
 
     /*
@@ -13,12 +14,12 @@ define(function (require) {
      *  returns an object with reference to the vis.prototype,
      *  and news up all the constructors needed to build a visualization
      */
-    function Handler(vis) {
+    function Handler(vis, opts) {
       if (!(this instanceof Handler)) {
-        return new Handler(vis);
+        return new Handler(vis, opts);
       }
 
-      this.data = new Data(vis.data, vis._attr);
+      this.data = opts.data || new Data(vis.data, vis._attr);
       this.vis = vis;
       this.el = vis.el;
       this.ChartClass = vis.ChartClass;
@@ -27,12 +28,28 @@ define(function (require) {
       });
 
       // Visualization constructors
+      this.layout = new Layout(vis.el, vis.data, vis._attr.type);
+      this.xAxis = opts.xAxis;
+      this.yAxis = opts.yAxis;
+      this.chartTitle = opts.chartTitle;
+      this.axisTitle = opts.axisTitle;
+
       if (this._attr.addTooltip) {
         this.tooltip = new Tooltip(this.el, this.data.get('tooltipFormatter'));
       }
 
+      if (this._attr.addLegend) {
+        this.legend = opts.legend;
+      }
+
       // Array of objects to render to the visualization
       this.renderArray = _.filter([
+        this.layout,
+        this.xAxis,
+        this.yAxis,
+        this.chartTitle,
+        this.axisTitle,
+        this.legend,
         this.tooltip
       ], Boolean);
     }
