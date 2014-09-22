@@ -68,8 +68,7 @@ define(function (require) {
       var savedVisState = vis.getState();
 
       var $state = appStateFactory.create({
-        vis: savedVisState,
-        filters: _.cloneDeep(searchSource.get('filter'))
+        vis: savedVisState
       });
 
       if (!angular.equals($state.vis, savedVisState)) {
@@ -123,12 +122,6 @@ define(function (require) {
           searchSource.set('query', null);
         }
 
-        if ($state.filters) {
-          searchSource.set('filter', $state.filters);
-        } else {
-          searchSource.set('filter', null);
-        }
-
         $scope.fetch();
 
       });
@@ -143,36 +136,7 @@ define(function (require) {
       $scope.$on('$destroy', function () {
         savedVis.destroy();
       });
-
-      if (!vis.listeners) vis.listeners = {};
-      vis.listeners.click = function (e) {
-        // This code is only inplace for the beta release this will all get refactored
-        // after we get the release out.
-        if (e.aggConfig && e.aggConfig.aggType && e.aggConfig.aggType.name === 'terms') {
-          var filter;
-          var filters = _.flatten([$state.filters || []], true);
-          var previous = _.find(filters, function (item) {
-            if (item && item.query) {
-              return item.query.match[e.field].query === e.label;
-            }
-          });
-          if (!previous) {
-            filter = { query: { match: {} } };
-            filter.query.match[e.field] = { query: e.label, type: 'phrase' };
-            filters.push(filter);
-            $state.filters = filters;
-          }
-        } else {
-          notify.info('Filtering is only supported for Term aggergations at the time, others are coming soon.');
-        }
-      };
     }
-
-    $scope.$watch('state.filters', function (filters) {
-      searchSource.set('filter', filters);
-      $state.save();
-      $scope.fetch();
-    });
 
     $scope.fetch = function () {
       searchSource.fetch();
