@@ -74,7 +74,7 @@ define(function (require) {
       })
       .innerRadius(function (d) {
         // option for a single layer, i.e pie chart
-        if (d.depth === 1 && !d.children && !isDonut) {
+        if (d.depth === 1 && !isDonut) {
           // return no inner radius
           return 0;
         }
