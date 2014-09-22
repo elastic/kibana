@@ -14,6 +14,9 @@ define(function (require) {
       link: function ($scope) {
         var notify = new Notifier();
         var configVals = config._vals();
+        var keyCodes = {
+          ESC: 27
+        };
 
         // determine if a value is too complex to be edditted (at this time)
         var tooComplex = function (conf) {
@@ -65,13 +68,12 @@ define(function (require) {
         });
 
         $scope.maybeCancel = function ($event, conf) {
-          if ($event.keyCode === 27) {
-            conf.editting = false;
+          if ($event.keyCode === keyCodes.ESC) {
+            $scope.cancelEdit(conf);
           }
         };
 
         $scope.edit = function (conf) {
-          console.log(conf);
           conf.unsavedValue = conf.value;
           $scope.configs.forEach(function (c) {
             c.editting = (c === conf);
@@ -82,6 +84,10 @@ define(function (require) {
           loading(conf, function () {
             return config.set(conf.name, conf.unsavedValue);
           });
+        };
+
+        $scope.cancelEdit = function (conf) {
+          conf.editting = false;
         };
 
         $scope.clear = function (conf) {

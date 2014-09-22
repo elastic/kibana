@@ -55,7 +55,7 @@
             <button
               ng-if="!conf.editting"
               ng-click="edit(conf)"
-              class="btn btn-primary"
+              class="btn btn-default"
               ng-disabled="conf.tooComplex">
               <i class="fa fa-pencil"></i>
             </button>
@@ -70,10 +70,18 @@
             </button>
 
             <button
+              ng-if="!conf.editting"
               ng-click="clear(conf)"
-              ng-disabled="conf.value === undefined"
+              ng-hide="conf.value === undefined"
               class="btn btn-danger">
               <i class="fa fa-trash-o"></i>
+            </button>
+
+            <button
+              ng-if="conf.editting"
+              ng-click="cancelEdit(conf)"
+              class="btn btn-default">
+              <i class="fa fa-times"></i>
             </button>
           </td>
         </tr>
