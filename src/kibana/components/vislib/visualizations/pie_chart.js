@@ -105,6 +105,7 @@ define(function (require) {
 
     PieChart.prototype.draw = function () {
       var self = this;
+      var isEvents = this._attr.addEvents;
 
       return function (selection) {
         selection.each(function (data) {
@@ -124,7 +125,9 @@ define(function (require) {
           var path = self.addPath(width, height, svg, slices);
 
           // add events to bars
-          self.addPathEvents(path);
+          if (isEvents) {
+            self.addPathEvents(path);
+          }
 
           return svg;
         });

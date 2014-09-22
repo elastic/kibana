@@ -148,6 +148,7 @@ define(function (require) {
       var elHeight = this._attr.height = $elem.height();
       var minWidth = 20;
       var minHeight = 20;
+      var isEvents = this._attr.addEvents;
       var div;
       var svg;
       var width;
@@ -185,7 +186,9 @@ define(function (require) {
           bars = self.addBars(svg, layers);
 
           // add events to bars
-          self.addBarEvents(bars);
+          if (isEvents) {
+            self.addBarEvents(bars);
+          }
 
           // chart base line
           var line = svg.append('line')
