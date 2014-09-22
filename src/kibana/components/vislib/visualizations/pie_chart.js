@@ -56,6 +56,7 @@ define(function (require) {
     };
 
     PieChart.prototype.addPath = function (width, height, svg, slices) {
+      var isDonut = this._attr.isDonut;
       var radius = Math.min(width, height) / 2;
       var color = this.vis.data.getPieColorFunc();
       var partition = d3.layout.partition()
@@ -72,10 +73,12 @@ define(function (require) {
         return d.x + d.dx;
       })
       .innerRadius(function (d) {
-        if (d.depth === 1) {
+        // option for a single layer, i.e pie chart
+        if (d.depth === 1 && !d.children && !isDonut) {
           // return no inner radius
           return 0;
         }
+
         return Math.sqrt(d.y);
       })
       .outerRadius(function (d) {
