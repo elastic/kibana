@@ -11,6 +11,7 @@ define(function (require) {
       }
       var type = vis._attr.type;
 
+      this.vis = vis;
       this.chartData = chartData;
       this.color = type === 'pie' ? vis.data.getPieColorFunc() : vis.data.getColorFunc();
       this._attr = _.defaults(vis._attr || {}, {
