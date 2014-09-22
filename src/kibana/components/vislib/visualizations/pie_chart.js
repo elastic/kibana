@@ -61,29 +61,32 @@ define(function (require) {
       var color = this.vis.data.getPieColorFunc();
       var partition = d3.layout.partition()
       .sort(null)
-      .size([2 * Math.PI, radius * radius])
       .value(function (d) {
         return d.size;
       });
+      var x = d3.scale.linear()
+        .range([0, 2 * Math.PI]);
+      var y = d3.scale.sqrt()
+        .range([0, radius]);
       var arc = d3.svg.arc()
-      .startAngle(function (d) {
-        return d.x;
-      })
-      .endAngle(function (d) {
-        return d.x + d.dx;
-      })
-      .innerRadius(function (d) {
-        // option for a single layer, i.e pie chart
-        if (d.depth === 1 && !isDonut) {
-          // return no inner radius
-          return 0;
-        }
+        .startAngle(function (d) {
+          return Math.max(0, Math.min(2 * Math.PI, x(d.x)));
+        })
+        .endAngle(function (d) {
+          return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx)));
+        })
+        .innerRadius(function (d) {
+          // option for a single layer, i.e pie chart
+          if (d.depth === 1 && !isDonut) {
+            // return no inner radius
+            return 0;
+          }
 
-        return Math.sqrt(d.y);
-      })
-      .outerRadius(function (d) {
-        return Math.sqrt(d.y + d.dy);
-      });
+          return Math.max(0, y(d.y));
+        })
+        .outerRadius(function (d) {
+          return Math.max(0, y(d.y + d.dy));
+        });
       var self = this;
       var path;
 
