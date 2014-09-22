@@ -10,7 +10,7 @@ define(function (require) {
         shareYAxis: true,
         addTooltip: true,
         addLegend: true,
-        addBrushing: true
+        addBrushing: false,
       },
       schemas: new Schemas([
         {

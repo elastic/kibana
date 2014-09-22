@@ -599,6 +599,10 @@ define(function (require) {
       // TODO: a legit way to update the index pattern
       $scope.vis = new Vis($scope.searchSource.get('index'), {
         type: 'histogram',
+        vislibParams: {
+          addLegend: false,
+          addBrushing: true,
+        },
         listeners: {
           click: function (e) {
             console.log(e);
