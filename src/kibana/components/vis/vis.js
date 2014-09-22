@@ -71,6 +71,7 @@ define(function (require) {
 
       this.listeners = _.assign({}, state.listeners, this.type.listeners);
 
+      this.vislibParams = state.vislibParams;
       this.aggs = new AggConfigs(this, state.aggs);
     };
 

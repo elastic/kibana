@@ -87,9 +87,8 @@ define(function (require) {
           var vislibParams = _.assign(
             {},
             vis.type.vislibParams,
-            {
-              type: vis.type.name,
-            }
+            { type: vis.type.name },
+            vis.vislibParams
           );
 
           chart = new visLib.Vis($visualize[0], vislibParams);
