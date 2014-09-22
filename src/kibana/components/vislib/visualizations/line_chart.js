@@ -216,8 +216,10 @@ define(function (require) {
     };
 
     LineChart.prototype.addClipPath = function (svg, width, height) {
+      // Prevents circles from being clipped at the top of the chart
+      var clipPathBuffer = 5;
       var startX = 0;
-      var startY = 0;
+      var startY = 0 - clipPathBuffer;
 
       // Creating clipPath
       return svg
@@ -228,7 +230,9 @@ define(function (require) {
         .attr('x', startX)
         .attr('y', startY)
         .attr('width', width)
-        .attr('height', height);
+        // Adding clipPathBuffer to height so it doesn't
+        // cutoff the lower part of the chart
+        .attr('height', height + clipPathBuffer);
     };
 
     LineChart.prototype.draw = function () {
