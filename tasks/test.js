@@ -1,24 +1,38 @@
 var _ = require('lodash');
 module.exports = function (grunt) {
-
-
-  grunt.registerTask('test', function () {
+  function getTestTask() {
     var testTask = 'mocha:unit';
-    if (process.env.TRAVIS && !process.env.SAUCE_ACCESS_KEY) {
-      grunt.log.writeln(grunt.log.wordlist([
-        '>> SAUCE_ACCESS_KEY not set in env, running with Phantom'
-      ], {color: 'yellow'}));
-    } else {
-      testTask = 'saucelabs-mocha:unit';
+
+    if (grunt.option('use-sauce') || process.env.TRAVIS) {
+      if (!process.env.SAUCE_ACCESS_KEY) {
+        grunt.log.writeln(grunt.log.wordlist([
+          '>> SAUCE_ACCESS_KEY not set in env, running with Phantom'
+        ], {color: 'yellow'}));
+      } else {
+        testTask = 'saucelabs-mocha:unit';
+      }
     }
 
+    return testTask;
+  }
+
+  grunt.registerTask('test', function () {
     var tasks = [
       'jshint',
       'ruby_server',
       'maybe_start_server',
       'jade',
       'less',
-      testTask
+      getTestTask()
+    ];
+    grunt.task.run(tasks);
+  });
+
+  grunt.registerTask('quick-test', function () {
+    var tasks = [
+      'ruby_server',
+      'maybe_start_server',
+      getTestTask()
     ];
     grunt.task.run(tasks);
   });

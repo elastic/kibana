@@ -458,3 +458,5 @@
    - This should not be needed, timefilter is only included here, it should move
  - **[test/unit/specs/directives/typeahead.js](https://github.com/elasticsearch/kibana4/blob/master/test/unit/specs/directives/typeahead.js)**
    - This should not be needed, timefilter is only included here, it should move
+ - **[test/unit/specs/vislib/vis.js](https://github.com/elasticsearch/kibana4/blob/master/test/unit/specs/vislib/vis.js)**
+   - fix this test instead of just skipping it

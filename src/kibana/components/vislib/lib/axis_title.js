@@ -39,9 +39,9 @@ define(function (require) {
           self.validateWidthandHeight(width, height);
 
           div.append('svg')
-            .attr('width', width)
-            .attr('height', height)
-            .append('text')
+          .attr('width', width)
+          .attr('height', height)
+          .append('text')
             .attr('transform', function () {
               if (div.attr('class') === 'x-axis-title') {
                 return 'translate(' + width / 2 + ',11)';
