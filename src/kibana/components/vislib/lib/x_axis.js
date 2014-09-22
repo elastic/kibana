@@ -181,7 +181,7 @@ define(function (require) {
       var textWidth = 0;
       var xAxisPadding = 15;
       var svg;
-      var maxSize = 180;
+      var xAxisLabelHt = 15;
       self._attr.isRotated = false;
       
       return function test(selection) {
@@ -191,14 +191,15 @@ define(function (require) {
         text.each(function textWidths() {
           if (d3.select(this).node().getBBox().width > maxWidth) {
             self._attr.isRotated = true;
-            textWidth = _.max([textWidth, (d3.select(this).node().getBBox().width + xAxisPadding)]);
+            xAxisLabelHt = _.max([textWidth, (Math.ceil(d3.select(this).node().getBBox().width + xAxisPadding))]);
           }
         });
-          
+        self._attr.xAxisLabelHt = xAxisLabelHt;
+
         if (self._attr.isRotated) {
           text
             .text(function truncate() {
-              return self.truncateLabel(this, maxSize);
+              return self.truncateLabel(this, xAxisLabelHt);
             })
             .style('text-anchor', 'end')
             .attr('dx', '-.8em')
@@ -206,7 +207,7 @@ define(function (require) {
             .attr('transform', function rotate() {
               return 'rotate(-90)';
             });
-          selection.select('svg').attr('height', maxSize);
+          selection.select('svg').attr('height', xAxisLabelHt);
         }
 
         // TODO: need to add mouseover to show tooltip on truncated labels
@@ -342,26 +343,30 @@ define(function (require) {
     // Appends div to make .y-axis-spacer-block
     // match height of .x-axis-wrapper
     XAxis.prototype.updateXaxisHeight = function () {
-      
+      var self = this;
       var selection = d3.selectAll('.vis-wrapper');
       var $selection = $('.vis-wrapper');
-      var size = 45;
+      var titleHts = 30;
+      var xAxisLabelHt = 15;
+
       selection.each(function () {
         var vis = d3.select(this);
         var $vis = $(this);
+        if (self._attr.xAxisLabelHt) {
+          xAxisLabelHt = self._attr.xAxisLabelHt;
+        }
+
+        $vis.find('.x-axis-wrapper').height(xAxisLabelHt + titleHts);
+        $vis.find('.x-axis-div-wrapper').height(xAxisLabelHt);
         
-        var labelSvg = vis.select('.x-axis-div-wrapper').select('g.x');
-        size = 37 + labelSvg.node().getBBox().height;
-        
-        $vis.find('.x-axis-wrapper').height(size);
-        $vis.find('.x-axis-div-wrapper').height(size - 20);
         if (vis.select('.inner-spacer-block').node() === null) {
           vis.select('.y-axis-spacer-block')
             .append('div')
             .attr('class', 'inner-spacer-block');
         }
+
         vis.select('.inner-spacer-block')
-          .style('height', size + 'px');
+          .style('height', (xAxisLabelHt + titleHts) + 'px');
       });
       
     };

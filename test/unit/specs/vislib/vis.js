@@ -111,7 +111,7 @@ define(function (require) {
     describe('resize Method', function () {
       it('should resize the chart', function () {
         vis.render(data);
-        $('.visualize').width(500);
+        $('.visualize').width(500).height(500);
         vis.resize();
         expect($('.chart').width()).to.be.lessThan(500);
       });

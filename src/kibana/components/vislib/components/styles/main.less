@@ -234,7 +234,7 @@ path, line, .axis line, .axis path {
   stroke: #333;
 }
 
-/* Flex Box */
+/* Flex Box Layout */
 .vis-wrapper {
   .display(flex);
   .flex(1 1 100%);
@@ -266,22 +266,20 @@ path, line, .axis line, .axis path {
 }
 
 .y-axis-spacer-block {
-  min-height: 50px
+  min-height: 45px;
 }
 
 .y-axis-div-wrapper {
   .display(flex);
   .flex-direction(column);
-  .flex(0 0 33px);
-  min-width: 50px;
-  min-height: 14px;
+  width: 38px;
+  min-height: 20px;
 }
 
 .y-axis-div {
-  .flex(1 1 100%);
+  .flex(1 1 25px);
   min-width: 14px;
   min-height: 14px;
-
 }
 
 .y-axis-title {
@@ -292,9 +290,8 @@ path, line, .axis line, .axis path {
 .y-axis-chart-title {
   .display(flex);
   .flex-direction(column);
-  .flex(0 0 15px);
   min-height: 14px;
-  min-width: 14px;
+  width: 14px;
 }
 
 .y-axis-title text {
@@ -322,7 +319,7 @@ path, line, .axis line, .axis path {
   .display(flex);
   .flex(1 0 20px);
   overflow: visible;
-  margin: 0 4px 0 0;
+  margin: 0 5px 0 0;
 }
 
 .chart-wrapper-column {
@@ -353,26 +350,28 @@ path, line, .axis line, .axis path {
 .x-axis-wrapper {
   .display(flex);
   .flex-direction(column);
-  min-height: 50px;
+  min-height: 45px;
   overflow: visible;
 }
 
 .x-axis-div-wrapper {
   .display(flex);
   .flex-direction(row);
-  min-height: 20px;
+  min-height: 15px;
 }
 
 .x-axis-chart-title {
   .display(flex);
   .flex-direction(row);
-  min-height: 14px;
-  min-width: 14px;
+  min-height: 15px;
+  max-height: 15px;
+  min-width: 20px;
 }
 
 .x-axis-title {
-  min-height: 14px;
-  min-width: 14px;
+  min-height: 15px;
+  max-height: 15px;
+  min-width: 20px;
 }
 
 .x-axis-title text {
@@ -381,7 +380,8 @@ path, line, .axis line, .axis path {
 
 .x-axis-div {
   margin-top: -5px;
-  min-height: 50px;
+  min-height: 20px;
+  min-width: 20px;
 }
 
 .x.axis path {
