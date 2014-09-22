@@ -61,7 +61,7 @@ define(function (require) {
         buckets: counts,
       };
     } catch (e) {
-      return { error: e };
+      return { error: e.message };
     }
 
   };
