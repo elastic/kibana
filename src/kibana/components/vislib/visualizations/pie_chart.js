@@ -24,31 +24,11 @@ define(function (require) {
       });
     }
 
-    PieChart.prototype.eventResponse = function (d, i) {
-      var getSize = this._attr.getSize;
-      var color = this.vis.data.getPieColorFunc();
-      var slices = this.chartData.slices;
-      var config = this._attr;
-      var chartData = this.chartData;
-
-      return {
-        value: getSize(d, i),
-        point: d,
-        label: d.name,
-        color: color(d.name),
-        pointIndex: i,
-        series: slices,
-        config: config,
-        data: chartData,
-        e: d3.event
-      };
-    };
-
     PieChart.prototype.addPathEvents = function (path) {
-      var self = this;
+      var events = this.events;
       var tooltip = this.vis.tooltip;
       var isTooltip = this._attr.addTooltip;
-      var dispatch = this._attr.dispatch;
+      var dispatch = this.events._attr.dispatch;
 
       path
       .on('mouseover.pie', function mouseOverPie(d, i) {
@@ -56,11 +36,11 @@ define(function (require) {
         .classed('hover', true)
         .style('cursor', 'pointer');
 
-        dispatch.hover(self.eventResponse(d, i));
+        dispatch.hover(events.eventResponse(d, i));
         d3.event.stopPropagation();
       })
       .on('click.pie', function clickPie(d, i) {
-        dispatch.click(self.eventResponse(d, i));
+        dispatch.click(events.eventResponse(d, i));
         d3.event.stopPropagation();
       })
       .on('mouseout.pie', function mouseOutPie() {
