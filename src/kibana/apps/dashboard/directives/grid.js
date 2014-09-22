@@ -43,7 +43,6 @@ define(function (require) {
               stop: readGridsterChangeHandler
             },
             draggable: {
-              handle: '.panel-title',
               stop: readGridsterChangeHandler
             }
           }).data('gridster');

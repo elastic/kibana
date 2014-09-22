@@ -2,7 +2,6 @@ define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
   var ConfigTemplate = require('utils/config_template');
-  // var filterBarClickHandler = require('components/filter_bar/_click_handler');
 
   require('directives/config');
   require('components/courier/courier');
@@ -56,8 +55,7 @@ define(function (require) {
         var stateDefaults = {
           title: dash.title,
           panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
-          query: _.cloneDeep(dash.searchSource.get('query')),
-          filters: _.cloneDeep(dash.searchSource.get('filter'))
+          query: ''
         };
 
         var $state = $scope.state = appStateFactory.create(stateDefaults);
@@ -88,15 +86,12 @@ define(function (require) {
 
         function updateQueryOnRootSource() {
           if ($state.query) {
-            dash.searchSource.set('query', $state.query);
+            dash.searchSource.set('filter', {
+              query:  $state.query
+            });
           } else {
-            dash.searchSource.set('query', null);
+            dash.searchSource.set('filter', null);
           }
-          // if ($state.filters) {
-          //   dash.searchSource.set('filter', $state.filters);
-          // } else {
-          //   dash.searchSource.set('filter', null);
-          // }
         }
 
         $scope.newDashboard = function () {
@@ -108,12 +103,6 @@ define(function (require) {
           $state.save();
           courier.fetch();
         };
-
-        // $scope.$watch('state.filters', function () {
-        //   $scope.filterResults();
-        // });
-
-        // $scope.click = filterBarClickHandler($state, notify);
 
         $scope.save = function () {
           $state.title = dash.id = dash.title;

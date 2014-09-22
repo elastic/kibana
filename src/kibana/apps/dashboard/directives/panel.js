@@ -23,11 +23,6 @@ define(function (require) {
 
           savedVisualizations.get($scope.panel.visId)
           .then(function (savedVis) {
-
-            // wire up the global click listener
-            if (!savedVis.vis.listeners) savedVis.vis.listeners = {};
-            savedVis.vis.listeners.click = $scope.$parent.click;
-
             $scope.savedVis = savedVis;
             // .destroy() called by the visualize directive
           })
