@@ -65,7 +65,7 @@ define(function (require) {
 
               // return text and position for tooltip
               return tooltipDiv.datum(d)
-                .text(self.tooltipFormatter)
+                .html(self.tooltipFormatter)
                 .style('visibility', 'visible')
                 .style('left', mouseMove.left + offset.left + 'px')
                 .style('top', mouseMove.top - offset.top + 'px');

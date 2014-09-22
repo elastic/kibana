@@ -48,6 +48,8 @@ define(function (require) {
       var color = this.vis.data.getColorFunc();
       var xScale = this.vis.xAxis.xScale;
       var yScale = this.vis.yAxis.yScale;
+      var tooltip = this.vis.tooltip;
+      var isTooltip = this._attr.addTooltip;
       var self = this;
       var layer;
       var bars;
@@ -104,13 +106,16 @@ define(function (require) {
           return yScale(d.y0) - yScale(d.y0 + d.y);
         });
 
+      // Add tooltip
+      if (isTooltip) {
+        bars.call(tooltip.render());
+      }
+
       return bars;
     };
 
     ColumnChart.prototype.addBarEvents = function (bars) {
       var events = this.events;
-      var tooltip = this.vis.tooltip;
-      var isTooltip = this._attr.addTooltip;
       var dispatch = this.events._attr.dispatch;
 
       bars
@@ -131,11 +136,6 @@ define(function (require) {
           d3.select(this).classed('hover', false)
             .style('stroke', null);
         });
-
-      // Add tooltip
-      if (isTooltip) {
-        bars.call(tooltip.render());
-      }
     };
 
     ColumnChart.prototype.draw = function () {

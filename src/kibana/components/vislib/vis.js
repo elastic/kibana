@@ -45,7 +45,7 @@ define(function (require) {
 
       // Save data to this object and new up the Handler constructor
       this.data = data;
-      this.handler = new handlerTypes[chartType](this) || handlerTypes.column(this);
+      this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
 
       try {
         this.handler.render();

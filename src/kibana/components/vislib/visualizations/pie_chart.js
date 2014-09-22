@@ -26,8 +26,6 @@ define(function (require) {
 
     PieChart.prototype.addPathEvents = function (path) {
       var events = this.events;
-      var tooltip = this.vis.tooltip;
-      var isTooltip = this._attr.addTooltip;
       var dispatch = this.events._attr.dispatch;
 
       path
@@ -48,11 +46,6 @@ define(function (require) {
         .classed('hover', false)
         .style('stroke', null);
       });
-
-      // Add tooltip
-      if (isTooltip) {
-        path.call(tooltip.render());
-      }
     };
 
     PieChart.prototype.addPath = function (width, height, svg, slices) {
@@ -65,28 +58,30 @@ define(function (require) {
         return d.size;
       });
       var x = d3.scale.linear()
-        .range([0, 2 * Math.PI]);
+      .range([0, 2 * Math.PI]);
       var y = d3.scale.sqrt()
-        .range([0, radius]);
+      .range([0, radius]);
       var arc = d3.svg.arc()
-        .startAngle(function (d) {
-          return Math.max(0, Math.min(2 * Math.PI, x(d.x)));
-        })
-        .endAngle(function (d) {
-          return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx)));
-        })
-        .innerRadius(function (d) {
-          // option for a single layer, i.e pie chart
-          if (d.depth === 1 && !isDonut) {
-            // return no inner radius
-            return 0;
-          }
+      .startAngle(function (d) {
+        return Math.max(0, Math.min(2 * Math.PI, x(d.x)));
+      })
+      .endAngle(function (d) {
+        return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx)));
+      })
+      .innerRadius(function (d) {
+        // option for a single layer, i.e pie chart
+        if (d.depth === 1 && !isDonut) {
+          // return no inner radius
+          return 0;
+        }
 
-          return Math.max(0, y(d.y));
-        })
-        .outerRadius(function (d) {
-          return Math.max(0, y(d.y + d.dy));
-        });
+        return Math.max(0, y(d.y));
+      })
+      .outerRadius(function (d) {
+        return Math.max(0, y(d.y + d.dy));
+      });
+      var tooltip = this.vis.tooltip;
+      var isTooltip = this._attr.addTooltip;
       var self = this;
       var path;
 
@@ -105,6 +100,11 @@ define(function (require) {
         .style('fill', function (d) {
           return color(d.name);
         });
+
+      // Add tooltip
+      if (isTooltip) {
+        path.call(tooltip.render());
+      }
 
       return path;
     };
