@@ -19,7 +19,6 @@ define(function (require) {
 
     // when the route changes, clear the appSource
     $rootScope.$on('$routeChangeStart', resetAppSource);
-    $rootScope.$on('$routeUpdate', resetAppSource);
 
     /**
      * Get the current AppSource
