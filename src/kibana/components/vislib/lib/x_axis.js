@@ -65,7 +65,7 @@ define(function (require) {
 
     // Return a nominal(d3 ordinal) domain
     XAxis.prototype.getOrdinalDomain = function (scale, xValues) {
-      
+
       return scale.domain(xValues);
     };
 
@@ -117,7 +117,6 @@ define(function (require) {
       this._attr.isRotated = false;
 
       return function (selection) {
-
         selection.each(function () {
           div = d3.select(this);
           width = $(this).width();
@@ -144,7 +143,7 @@ define(function (require) {
       };
     };
 
-    // Returns a function that evaluates scale type and applies 
+    // Returns a function that evaluates scale type and applies
     // filters tick labels on time scales
     // rotates and truncates labels on nominal/ordinal scales
     XAxis.prototype.filterOrRotate = function () {
@@ -157,7 +156,7 @@ define(function (require) {
         selection.each(function () {
           axis = d3.select(this);
           labels = axis.selectAll('.tick text');
-          
+
           if (!self.ordered) {
             // nominal/ordinal scale
             axis.call(self.rotateAxisLabels());
@@ -199,7 +198,7 @@ define(function (require) {
       var endChar;
 
       return function (selection) {
-        
+
         // get label maxWidth
         labels = selection.selectAll('.tick text');
         maxWidth = 0;
@@ -250,7 +249,7 @@ define(function (require) {
             myWidth = par.getBBox().width;
             halfWidth = par.getBBox().width / 2;
             maxW = $('.x-axis-div').width();
-            // trims labels that would overlap each other 
+            // trims labels that would overlap each other
             // or extend past left or right edges
             // if prev label pos (or 0) + half of label width is < label pos
             // and label pos + half width  is not > width of axis

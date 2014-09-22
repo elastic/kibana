@@ -22,7 +22,7 @@ define(function (require) {
             aggConfig: aggConfig,
             aggType: aggConfig.type,
             field: aggConfig.params.field,
-            label: aggConfig.type.title,
+            label: aggConfig.type.makeLabel(aggConfig),
           },
           _.merge(
             aggConfig.schema.params.write(aggConfig),
