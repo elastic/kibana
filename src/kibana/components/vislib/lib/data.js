@@ -38,6 +38,22 @@ define(function (require) {
       return [this.data];
     };
 
+    // Function to determine whether to display the legend or not
+    // Displays legend when more than one series of data present
+    Data.prototype.isLegendShown = function () {
+      var isLegend = false;
+
+      _.forEach(this.chartData(), function countSeriesLength(obj) {
+        var dataLength = obj.series ? obj.series.length : obj.slices.children.length;
+
+        if (dataLength > 1) {
+          isLegend = true;
+        }
+      });
+
+      return isLegend;
+    };
+
     Data.prototype.pieData = function () {
       if (!this.data.slices) {
         return this.data.rows ? this.data.rows : this.data.columns;

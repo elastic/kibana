@@ -38,10 +38,7 @@ define(function (require) {
         this.tooltip = new Tooltip(this.el, this.data.get('tooltipFormatter'));
       }
 
-      // Length of the data to determine whether to display the legend or not
-      var dataLength = vis.data.series ? vis.data.series.length : vis.data.slices.children.length;
-
-      if (this._attr.addLegend && dataLength > 1) {
+      if (this._attr.addLegend && this.data.isLegendShown()) {
         this.legend = opts.legend;
       }
 
