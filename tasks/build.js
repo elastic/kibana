@@ -14,6 +14,7 @@ module.exports = function (grunt) {
     'warble',
     'replace:dist',
     'copy:dist',
+    'compile_dist_readme',
     'chmod_kibana',
     'compress:build_zip',
     'compress:build_tarball'
