@@ -13,11 +13,12 @@ module.exports = function (grunt) {
       files: [
         {
           src: [join(src, 'server', 'bin', 'kibana.sh')],
-          dest: join(build, 'dist', 'bin', 'kibana')
+          dest: join(build, 'dist', 'kibana', 'bin', 'kibana'),
+          mode: 0755
         },
         {
           src: [join(src, 'server', 'bin', 'kibana.bat')],
-          dest: join(build, 'dist', 'bin', 'kibana.bat')
+          dest: join(build, 'dist', 'kibana', 'bin', 'kibana.bat')
         }
       ]
     }

@@ -27,10 +27,10 @@ module.exports = function (grunt) {
     var build = grunt.config.get('build');
 
     var srcReadme =  join(root, 'README.md');
-    var distReadme = join(build, 'dist', 'README');
+    var distReadme = join(build, 'dist', 'kibana', 'README.txt');
 
     var srcLicense =  join(root, 'LICENSE.md');
-    var distLicense = join(build, 'dist', 'LICENSE');
+    var distLicense = join(build, 'dist', 'kibana', 'LICENSE.txt');
 
     marked.setOptions({
       renderer: new TextRenderer(),

@@ -50,13 +50,13 @@ module.exports = function (grunt) {
           expand: true,
           cwd: '<%= build %>/kibana/',
           src: '*.jar',
-          dest: '<%= build %>/dist/lib/'
+          dest: '<%= build %>/dist/kibana/lib/'
         },
         {
           expand: true,
           cwd: '<%= src %>/server/config/',
           src: 'kibana.yml',
-          dest: '<%= build %>/dist/config/'
+          dest: '<%= build %>/dist/kibana/config/'
         }
       ]
     }

@@ -16,7 +16,6 @@ module.exports = function (grunt) {
     'copy:dist',
     'compile_dist_readme',
     'chmod_kibana',
-    'compress:build_zip',
-    'compress:build_tarball'
+    'create_packages'
   ]);
 };
