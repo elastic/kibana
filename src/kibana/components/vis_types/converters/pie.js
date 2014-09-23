@@ -6,18 +6,9 @@ define(function (require) {
 
     return function (chart, columns, rows) {
 
-      // index of the slice label with the value
-      var iX = _.findLastIndex(columns, { categoryName: 'segment'});
-      // when we don't have an x-axis, just push everything into '_all'
-      if (iX === -1) {
-        iX = columns.push({
-          label: ''
-        }) - 1;
-      }
-
-      // index of the slice size (value)
-      var iY = _.findIndex(columns, { categoryName: 'metric'});
-
+      // Checks for obj.parent.name and
+      // Returns an array of parent names
+      // if they exist.
       function checkForParentName(datum) {
         var parentNames = [];
 
@@ -32,7 +23,7 @@ define(function (require) {
         return parentNames;
       }
 
-      // setup the formatter for the label
+      // tooltip formatter for pie charts
       chart.tooltipFormatter = function (datapoint) {
         var datum = _.clone(datapoint);
 
@@ -67,75 +58,48 @@ define(function (require) {
         });
       }
 
-      // TODO: cleanup code, simplify and document
       rows.forEach(function (row) {
         var rowLength = row.length;
 
-        // Outer slice values
+        // Name is always the second to last value in the array
+        // Size is always the last value in the array
+        var iName = rowLength - 2;
+        var iSize = rowLength - 1;
+
+        // Wrap up the name and size values into an object
         var datum = {
-          name: (row[iX] == null) ? '_all' : row[iX],
-          size: row[iY === -1 ? row.length - 1 : iY]
+          name: (row[iName] == null) ? '_all' : row[iName],
+          size: row[iSize]
         };
 
-        // Create an array of the labels that should append a slice
+        // Create an array of the labels (names) that should append a slice
+        // i.e. { names: '', children: [] }
         var startIndex = 0;
         var stopIndex = rowLength - 2;
         var names = row.slice(startIndex, stopIndex);
-        var namesLength = names.length - 1;
 
-        // Keep track of the current children array and slice name
+        // Keep track of the current children array
         var currentArray = children;
-        var prevName;
 
         // For each name in the names array, append an empty slice if the
         // named object is not present, else return
-        names.forEach(function (name, i) {
-          var prevNameIndex;
-          var currentNameIndex;
+        names.forEach(function (name) {
+          // Find the index of the name in the current children array
+          var currentNameIndex = _.findIndex(currentArray, { name: name });
 
-          if (!prevName) {
-            // Find the index of the name within the top-most children array
-            currentNameIndex = _.findIndex(currentArray, { name: name });
-
-            // if the named object is not present, append a new slice
-            if (currentNameIndex === -1) {
-              appendSlice(currentArray, name);
-            }
-          } else {
-            // Get the previous named object index
-            prevNameIndex = _.findIndex(currentArray, {name: prevName});
-
-            // Update the current children array
-            currentArray = currentArray[prevNameIndex].children;
-
-            // Get current named object index
-            currentNameIndex = _.findIndex(currentArray, { name: name });
-
-            // if current named object does not exist, append a new slice
-            if (currentNameIndex === -1) {
-              appendSlice(currentArray, name);
-            }
+          // If not present, append an empty slice
+          if (currentNameIndex === -1) {
+            appendSlice(currentArray, name);
           }
 
-          // Once we've reached the last value in the names array,
-          // find the index of the last named object and append the
-          // datum to its children array
-          if (i === namesLength) {
-            currentNameIndex = _.findIndex(currentArray, { name: name });
-            currentArray[currentNameIndex].children.push(datum);
-          }
-
-          // Set prevName to the current Name
-          prevName = name;
+          // Update the current array to the new array
+          currentNameIndex = _.findIndex(currentArray, { name: name });
+          currentArray = currentArray[currentNameIndex].children;
         });
 
-        // Creates a simple pie chart
-        //
-        if (names.length === 0) {
-          children.push(datum);
-        }
+        // Append datum
+        currentArray.push(datum);
       });
-
     };
   };
 });
