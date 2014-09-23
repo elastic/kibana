@@ -6,15 +6,16 @@ module.exports = function (grunt) {
       ],
       tasks: ['mocha:unit']
     },
+
     less: {
       files: [
-        '<%= app %>/**/*.less',
         '<%= app %>/**/styles/**/*.less',
         '<%= app %>/**/components/**/*.less',
         '<%= app %>/**/components/vislib/components/styles/**/*.less'
       ],
       tasks: ['less']
     },
+
     jade: {
       files: [
         '<%= unitTestDir %>/index.jade'
