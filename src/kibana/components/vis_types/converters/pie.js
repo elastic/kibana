@@ -92,7 +92,7 @@ define(function (require) {
             appendSlice(currentArray, name);
           }
 
-          // Update the current array to the new array
+          // Update the current array
           currentNameIndex = _.findIndex(currentArray, { name: name });
           currentArray = currentArray[currentNameIndex].children;
         });
