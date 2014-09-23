@@ -400,9 +400,11 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
         // Check for error and abort if found
         if(!(_.isUndefined(results.error))) {
           $scope.panel.error = $scope.parse_error(results.error);
-        }
+        // Check for failed shards
+        } else if(results._shards.failed) {
+          $scope.panel.error = $scope.parse_failed_shards(results._shards.failures);
         // Make sure we're still on the same query/queries
-        else if($scope.query_id === query_id) {
+        } else if($scope.query_id === query_id) {
 
           var i = 0,
             time_series,

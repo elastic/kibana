@@ -109,6 +109,19 @@ function (angular, config, _) {
       return _.isNull(_error) ? data : _error[1];
     };
 
+    // This is whoafully incomplete, but will do for now
+    $scope.parse_failed_shards = function(data) {
+      // If all errors are of type SearchParseException, it is likely
+      // the result of a dashboard having a misconfigured 'Default Index'. 
+      if (_.all(data, function (error) { return error.reason.match("SearchParseException")})) {
+        return "Multiple SearchParseException - this is typically caused by a misconfigured 'Default Index' - Hint: look under Dashboard Settings / Index.";        
+      } 
+      // Otherwise, return the individual failed indices for now
+      else {
+        return "Failed to query the following indices: " + _.pluck(data, 'index').join(", ");
+      }
+    };
+
     $scope.init();
   });
 });
