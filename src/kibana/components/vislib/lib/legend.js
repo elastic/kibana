@@ -29,7 +29,7 @@ define(function (require) {
         'blurredOpacity' : 0.3,
         'focusOpacity' : 1,
         'defaultOpacity' : 1,
-        'isOpen' : false
+        'isOpen' : true
       });
     }
 
