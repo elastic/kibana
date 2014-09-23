@@ -1,6 +1,6 @@
 {
   "defaults": {
     "branch": "1.x",
-    "plugins": ["elasticsearch/marvel/latest"]
+    "plugins": ["elasticsearch/marvel/latest", "mobz/elasticsearch-head"]
   }
 }

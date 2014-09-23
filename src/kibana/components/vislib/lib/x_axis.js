@@ -31,7 +31,9 @@ define(function (require) {
 
     // Render the x axis
     XAxis.prototype.render = function () {
-      d3.select(this.el).selectAll('.x-axis-div').call(this.draw());
+      d3.select(this.el)
+      .selectAll('.x-axis-div')
+      .call(this.draw());
     };
 
     // Get the d3 scale
@@ -96,10 +98,10 @@ define(function (require) {
       }
 
       this.xAxis = d3.svg.axis()
-        .scale(this.xScale)
-        .ticks(10)
-        .tickFormat(this.xAxisFormatter)
-        .orient('bottom');
+      .scale(this.xScale)
+      .ticks(10)
+      .tickFormat(this.xAxisFormatter)
+      .orient('bottom');
     };
 
     // Returns a function that renders the x axis
@@ -116,7 +118,9 @@ define(function (require) {
 
       return function (selection) {
         n = selection[0].length;
-        parentWidth = $(self.el).find('.x-axis-div-wrapper').width();
+        parentWidth = $(self.el)
+        .find('.x-axis-div-wrapper')
+        .width();
 
         selection.each(function () {
 
@@ -132,13 +136,13 @@ define(function (require) {
           self.getXAxis(width);
 
           svg = div.append('svg')
-            .attr('width', width)
-            .attr('height', height);
+          .attr('width', width)
+          .attr('height', height);
 
           svg.append('g')
-            .attr('class', 'x axis')
-            .attr('transform', 'translate(0,0)')
-            .call(self.xAxis);
+          .attr('class', 'x axis')
+          .attr('transform', 'translate(0,0)')
+          .call(self.xAxis);
         });
 
         selection.call(self.filterOrRotate());
@@ -182,6 +186,7 @@ define(function (require) {
       var xAxisPadding = 15;
       var svg;
       var xAxisLabelHt = 15;
+      var width;
       self._attr.isRotated = false;
       
       return function test(selection) {
@@ -189,25 +194,28 @@ define(function (require) {
         text = selection.selectAll('.tick text');
         
         text.each(function textWidths() {
-          if (d3.select(this).node().getBBox().width > maxWidth) {
+          width = d3.select(this).node().getBBox().width;
+          if (width > maxWidth) {
             self._attr.isRotated = true;
-            xAxisLabelHt = _.max([textWidth, (Math.ceil(d3.select(this).node().getBBox().width + xAxisPadding))]);
+            xAxisLabelHt = _.max([textWidth, (Math.ceil(width + xAxisPadding))]);
           }
         });
         self._attr.xAxisLabelHt = xAxisLabelHt;
+        
 
         if (self._attr.isRotated) {
           text
-            .text(function truncate() {
-              return self.truncateLabel(this, xAxisLabelHt);
-            })
-            .style('text-anchor', 'end')
-            .attr('dx', '-.8em')
-            .attr('dy', '-.60em')
-            .attr('transform', function rotate() {
-              return 'rotate(-90)';
-            });
-          selection.select('svg').attr('height', xAxisLabelHt);
+          .text(function truncate() {
+            return self.truncateLabel(this, xAxisLabelHt);
+          })
+          .style('text-anchor', 'end')
+          .attr('dx', '-.8em')
+          .attr('dy', '-.60em')
+          .attr('transform', function rotate() {
+            return 'rotate(-90)';
+          });
+          selection.select('svg')
+          .attr('height', xAxisLabelHt);
         }
 
         // TODO: need to add mouseover to show tooltip on truncated labels
@@ -251,20 +259,20 @@ define(function (require) {
 
       return function (selection) {
         selection.selectAll('.tick text')
-          .text(function (d, i) {
-            par = d3.select(this.parentNode).node();
-            myX = self.xScale(d);
-            myWidth = par.getBBox().width;
-            halfWidth = par.getBBox().width / 2;
-            maxW = $(self.el).find('.x-axis-div').width();
-            
-            if ((startX + halfWidth) < myX && maxW > (myX + halfWidth)) {
-              startX = myX + halfWidth;
-              return self.xAxisFormatter(d);
-            } else {
-              d3.select(this.parentNode).remove();
-            }
-          });
+        .text(function (d, i) {
+          par = d3.select(this.parentNode).node();
+          myX = self.xScale(d);
+          myWidth = par.getBBox().width;
+          halfWidth = par.getBBox().width / 2;
+          maxW = $(self.el).find('.x-axis-div').width();
+          
+          if ((startX + halfWidth) < myX && maxW > (myX + halfWidth)) {
+            startX = myX + halfWidth;
+            return self.xAxisFormatter(d);
+          } else {
+            d3.select(this.parentNode).remove();
+          }
+        });
       };
     };
 
@@ -289,29 +297,30 @@ define(function (require) {
       return function () {
 
         visEls.each(function () {
-          visEl = this;
-          xAxisTitle = $(this).find('.x-axis-title');
-          yAxisTitle = $(this).find('.y-axis-title');
-          titleWidth = xAxisTitle.width();
-          titleHeight = yAxisTitle.height();
+          var visEl = d3.select(this);
+          var $visEl = $(this);
+          var xAxisTitle = $visEl.find('.x-axis-title');
+          var yAxisTitle = $visEl.find('.y-axis-title');
+          var titleWidth = xAxisTitle.width();
+          var titleHeight = yAxisTitle.height();
 
-          text = d3.select(this).select('.x-axis-title')
+          text = visEl.select('.x-axis-title')
             .select('svg')
             .attr('width', titleWidth)
             .select('text')
             .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
 
-          text = d3.select(this).select('.y-axis-title')
+          text = visEl.select('.y-axis-title')
             .select('svg')
             .attr('height', titleHeight)
             .select('text')
             .attr('transform', 'translate(11,' + (titleHeight / 2) + ')rotate(-90)');
 
-          if ($(this).find('.x-axis-chart-title').length) {
-            xAxisChartTitle = $(this).find('.x-axis-chart-title');
+          if ($visEl.find('.x-axis-chart-title').length) {
+            xAxisChartTitle = $visEl.find('.x-axis-chart-title');
             titleWidth = xAxisChartTitle.find('.chart-title').width();
             
-            titles = d3.select(this).select('.x-axis-chart-title').selectAll('.chart-title');
+            titles = visEl.select('.x-axis-chart-title').selectAll('.chart-title');
             titles.each(function () {
               text = d3.select(this)
                 .select('svg')
@@ -321,11 +330,11 @@ define(function (require) {
             });
           }
 
-          if ($(this).find('.y-axis-chart-title').length) {
-            yAxisChartTitle = $(this).find('.y-axis-chart-title');
+          if ($visEl.find('.y-axis-chart-title').length) {
+            yAxisChartTitle = $visEl.find('.y-axis-chart-title');
             titleHeight = yAxisChartTitle.find('.chart-title').height();
 
-            titles = d3.select(this).select('.y-axis-chart-title').selectAll('.chart-title');
+            titles = visEl.select('.y-axis-chart-title').selectAll('.chart-title');
             titles.each(function () {
               text = d3.select(this)
                 .select('svg')
@@ -349,24 +358,29 @@ define(function (require) {
       var titleHts = 30;
       var xAxisLabelHt = 15;
 
+      if (self._attr.isRotated && self._attr.xAxisLabelHt) {
+        xAxisLabelHt = self._attr.xAxisLabelHt;
+      } else {
+        xAxisLabelHt = self._attr.xAxisLabelHt = xAxisLabelHt;
+      }
+
       selection.each(function () {
-        var vis = d3.select(this);
-        var $vis = $(this);
-        if (self._attr.xAxisLabelHt) {
-          xAxisLabelHt = self._attr.xAxisLabelHt;
-        }
+        var visEl = d3.select(this);
+        var $visEl = $(this);
 
-        $vis.find('.x-axis-wrapper').height(xAxisLabelHt + titleHts);
-        $vis.find('.x-axis-div-wrapper').height(xAxisLabelHt);
+        $visEl.find('.x-axis-wrapper')
+        .height(xAxisLabelHt + titleHts);
+        $visEl.find('.x-axis-div-wrapper')
+        .height(xAxisLabelHt);
         
-        if (vis.select('.inner-spacer-block').node() === null) {
-          vis.select('.y-axis-spacer-block')
-            .append('div')
-            .attr('class', 'inner-spacer-block');
+        if (visEl.select('.inner-spacer-block').node() === null) {
+          visEl.select('.y-axis-spacer-block')
+          .append('div')
+          .attr('class', 'inner-spacer-block');
         }
 
-        vis.select('.inner-spacer-block')
-          .style('height', (xAxisLabelHt + titleHts) + 'px');
+        visEl.select('.inner-spacer-block')
+        .style('height', (xAxisLabelHt + titleHts) + 'px');
       });
       
     };
