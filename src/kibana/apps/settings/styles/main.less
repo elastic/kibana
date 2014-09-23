@@ -39,13 +39,21 @@ kbn-settings-objects {
   .action-bar {
     margin-top: 10px;
     background-color: @gray-lighter;
-    padding: 4px 8px;
+    padding: 4px 12px;
 
     .btn-xs {
       font-size: 10px;
     }
   }
 
+}
+
+kbn-settings-advanced {
+  // super specific rule to override bootstrap's equally specific rule
+  // https://github.com/twbs/bootstrap/blob/1f329f8f17aa989eabc6e94bdcab93e69ef0e463/less/tables.less#L35
+  .table > tbody > tr > td {
+    vertical-align: middle;
+  }
 }
 
 kbn-settings-objects-view {
@@ -69,6 +77,20 @@ kbn-settings-objects-view {
       &.actions {
         width: 150px;
       }
+    }
+  }
+}
+
+.objects-settings {
+  .item {
+    padding: 12px;
+
+    .item-title {
+      margin-left: 30px;
+    }
+
+    .actions {
+      margin-top: -6px;
     }
   }
 }

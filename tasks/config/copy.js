@@ -47,24 +47,16 @@ module.exports = function (grunt) {
       options: { mode: true },
       files: [
         {
-          src: '<%= root %>/LICENSE.md',
-          dest: '<%= build %>/dist/LICENSE.md'
-        },
-        {
-          src: '<%= root %>/README.md',
-          dest: '<%= build %>/dist/README.md'
-        },
-        {
           expand: true,
           cwd: '<%= build %>/kibana/',
           src: '*.jar',
-          dest: '<%= build %>/dist/lib/'
+          dest: '<%= build %>/dist/kibana/lib/'
         },
         {
           expand: true,
           cwd: '<%= src %>/server/config/',
           src: 'kibana.yml',
-          dest: '<%= build %>/dist/config/'
+          dest: '<%= build %>/dist/kibana/config/'
         }
       ]
     }

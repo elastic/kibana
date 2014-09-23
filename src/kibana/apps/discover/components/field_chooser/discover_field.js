@@ -1,8 +1,8 @@
 define(function (require) {
   var $ = require('jquery');
   var app = require('modules').get('apps/discover');
-  var html = require('text!apps/discover/partials/discover_field.html');
-  var detailsHtml = require('text!apps/discover/partials/discover_field_details.html');
+  var html = require('text!apps/discover/components/field_chooser/discover_field.html');
+  var detailsHtml = require('text!apps/discover/components/field_chooser/discover_field_details.html');
   var _ = require('lodash');
 
   require('directives/css_truncate');
@@ -14,7 +14,6 @@ define(function (require) {
       restrict: 'E',
       template: html,
       replace: true,
-      require: '^discFieldChooser',
       link: function ($scope, $elem) {
         var detailsElem;
         var detailScope = $scope.$new();
@@ -51,10 +50,6 @@ define(function (require) {
             delete field.details;
             detailsElem.remove();
           }
-        };
-
-        $scope.displayButton = function (field) {
-          return field.display ? 'btn-danger' : '';
         };
 
         init();

@@ -1,17 +1,20 @@
 define(function (require) {
-  return function ErrorHandlerFactory(Private) {
-    var _ = require('lodash');
+  var _ = require('lodash');
+  var errors = require('errors');
 
+  return function ErrorHandlerFactory(Private) {
     // Common errors shared between constructors
     function ErrorHandler() {}
 
-    // Validate that the height and width are not 0 or NaN
+    // Validate the height and width are > 0
     ErrorHandler.prototype.validateWidthandHeight = function (width, height) {
-      if (_.isNaN(height) || height <= 0 || _.isNaN(width) || width <= 0) {
-        throw new Error('The height and/or width of this container is too ' +
-          'small for this chart. w:' + width + ', h:' + height);
+      // min size must be at least 1px
+      var badWidth = _.isNaN(width) || width <= 0;
+      var badHeight = _.isNaN(height) || height <= 0;
+
+      if (badWidth || badHeight) {
+        throw new errors.ContainerTooSmall();
       }
-      return;
     };
 
     return ErrorHandler;

@@ -41,9 +41,12 @@
         </div>
         <div ng-switch-when="relative">
 
-          <div class="kbn-timepicker-section">
+          <form
+            ng-submit="applyRelative()"
+            class="form-inline"
+            name="relativeTime">
 
-            <form class="form-inline" role="form">
+            <div class="kbn-timepicker-section">
               <label>
                 From:
                 <span ng-show="relative.preview">{{relative.preview}}</span><span ng-hide="relative.preview"><i>Invalid Expression</i></span>
@@ -67,35 +70,38 @@
                   ng-checked="relative.round"
                   ng-change="formatRelative()"/> round to the {{units[relative.unit]}}
               </div>
-            </form>
 
-          </div>
+            </div>
 
-          <div class="kbn-timepicker-section">
-            <form class="form-inline" role="form">
+            <div class="kbn-timepicker-section">
               <label>
                 To: Now
               </label><br>
               <div class="form-group">
                 <input type="text" disabled class="form-control" value="Now">
               </div>
-            </form>
-          </div>
+            </div>
 
-          <div class="kbn-timepicker-section">
-            <form role="form">
-              <label>&nbsp</label>
+            <div class="kbn-timepicker-section">
+              <label>&nbsp</label><br>
               <div class="form-group">
-                <button class="btn btn-primary kbn-timepicker-go" ng-disabled="!relative.preview" ng-click="applyRelative()">Go</button>
+                <button
+                  type="submit"
+                  class="btn btn-primary kbn-timepicker-go"
+                  ng-disabled="!relative.preview">
+                  Go
+                </button>
               </div>
-            </form>
-          </div>
+            </div>
+          </form>
 
         </div>
 
         <div ng-switch-when="absolute">
-          <div class="kbn-timepicker-section">
-            <form role="form">
+
+          <form name="absoluteTime" ng-submit="applyAbsolute()">
+
+            <div class="kbn-timepicker-section">
               <div>
                 <label class="small">From: <span ng-show="!absolute.from"><i>Invalid Date</i></span></label>
                 <input type="text" required class="form-control" input-datetime="{{format}}" ng-model="absolute.from">
@@ -103,11 +109,9 @@
               <div ng-model="absolute.from">
                 <datepicker max="absolute.to" show-weeks="false"></datepicker>
               </div>
-            </form>
-          </div>
+            </div>
 
-          <div class="kbn-timepicker-section">
-            <form role="form">
+            <div class="kbn-timepicker-section">
               <div>
                 <label class="small">To: <span ng-show="!absolute.to"><i>Invalid Date</i></span></label>
                 <input type="text" required class="form-control" input-datetime="{{format}}" ng-model="absolute.to">
@@ -115,18 +119,22 @@
               <div ng-model="absolute.to">
                 <datepicker min="absolute.from" show-weeks="false"></datepicker>
               </div>
-            </form>
-          </div>
+            </div>
 
-          <div class="kbn-timepicker-section kbn-timepicker-alert">
-            <form role="form">
+            <div class="kbn-timepicker-section kbn-timepicker-alert">
               <label>&nbsp</label>
               <div class="form-group">
-                <button class="btn btn-primary kbn-timepicker-go" ng-disabled="absolute.from > absolute.to || !absolute.from || !absolute.to" ng-click="applyAbsolute()">Go</button>
+                <button
+                  class="btn btn-primary kbn-timepicker-go"
+                  ng-disabled="absolute.from > absolute.to || !absolute.from || !absolute.to"
+                  type="submit">
+                  Go
+                </button>
                 <span class="small" ng-show="absolute.from > absolute.to"><strong>From</strong> must occur before <strong>To</strong></span>
               </div>
-            </form>
-          </div>
+            </div>
+          </form>
+
 
         </div>
       </div>

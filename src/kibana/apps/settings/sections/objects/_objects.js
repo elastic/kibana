@@ -9,7 +9,7 @@ define(function (require) {
   });
 
   require('modules').get('apps/settings')
-  .directive('kbnSettingsObjects', function (config, Notifier, Private) {
+  .directive('kbnSettingsObjects', function (config, Notifier, Private, kbnUrl) {
     return {
       restrict: 'E',
       controller: function ($scope, $injector, $q, appStateFactory) {
@@ -48,6 +48,20 @@ define(function (require) {
           });
           $scope.toggleDeleteBtn(service);
         });
+
+        $scope.open = function (item) {
+          kbnUrl.change(item.url.substr(1));
+        };
+
+        $scope.edit = function (service, item) {
+          console.log(service, item);
+          var params = {
+            service: service.service,
+            id: item.id
+          };
+
+          kbnUrl.change('/settings/objects/{{ service }}/{{ id }}', params);
+        };
 
         $scope.toggleDeleteBtn = function (service) {
           $scope.deleteAllBtn = _.some(service.data, { checked: true});

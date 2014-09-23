@@ -64,7 +64,7 @@ define(function (require) {
 
     // Return a nominal(d3 ordinal) domain
     XAxis.prototype.getOrdinalDomain = function (scale, xValues) {
-      
+
       return scale.domain(xValues);
     };
 
@@ -149,7 +149,7 @@ define(function (require) {
       };
     };
 
-    // Returns a function that evaluates scale type and applies 
+    // Returns a function that evaluates scale type and applies
     // filters tick labels on time scales
     // rotates and truncates labels on nominal/ordinal scales
     XAxis.prototype.filterOrRotate = function () {
@@ -162,7 +162,7 @@ define(function (require) {
         selection.each(function () {
           axis = d3.select(this);
           labels = axis.selectAll('.tick text');
-          
+
           if (!self.ordered) {
             axis.call(self.rotateAxisLabels());
           } else {
@@ -189,7 +189,7 @@ define(function (require) {
       var width;
       self._attr.isRotated = false;
       
-      return function test(selection) {
+      return function (selection) {
 
         text = selection.selectAll('.tick text');
         

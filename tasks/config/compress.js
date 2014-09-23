@@ -15,10 +15,33 @@ module.exports = function (grunt) {
       },
       files: [
         {
+          flatten: true,
+          src: '<%= build %>/dist/bin/kibana',
+          dest: '<%= pkg.name %>/bin/kibana',
+          mode: 755
+        },
+        {
+          flatten: true,
+          src: '<%= build %>/dist/bin/kibana.bat',
+          dest: '<%= pkg.name %>/bin/kibana.bat'
+        },
+        {
+          expand: true,
+          cwd: '<%= build %>/dist/config',
+          src: ['**/*'],
+          dest: '<%= pkg.name %>/config'
+        },
+        {
+          expand: true,
+          cwd: '<%= build %>/dist/lib',
+          src: ['**/*'],
+          dest: '<%= pkg.name %>/lib'
+        },
+        {
           expand: true,
           cwd: '<%= build %>/dist',
-          src: ['**/*'],
-          dest: '<%= pkg.name %>' + (task === 'plugin' ? '/_site' : '')
+          src: ['*.txt'],
+          dest: '<%= pkg.name %>'
         }
       ]
     };

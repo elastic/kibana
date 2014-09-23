@@ -111,10 +111,10 @@
           </div>
 
           <button
-            ng-disabled="form.$invalid"
+            ng-disabled="form.$invalid || index.fetchFieldsError"
             type="submit"
             class="btn btn-success">
-            Create
+            {{index.fetchFieldsError ? "No indices found" : "Create" }}
           </button>
         </form>
       </div>

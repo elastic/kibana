@@ -3,6 +3,8 @@ define(function (require) {
   var $ = require('jquery');
   var _ = require('lodash');
   var sinon = require('test_utils/auto_release_sinon');
+  var getFakeRow = require('fixtures/fake_row');
+
 
   // Load the kibana app dependencies.
   require('angular-route');
@@ -196,19 +198,6 @@ define(function (require) {
 
     });
 
-    var longString = Array(50).join('_');
-
-    var getFakeRow = function (id) {
-      var columns = _.keys(mapping);
-      return {
-        _formatted: _.zipObject(_.map(columns, function (c) { return [c, c + '_formatted_' + id + longString]; })),
-        _source: _.zipObject(_.map(columns, function (c) { return [c, c + '_original_' + id + longString]; })),
-        _id: id,
-        _index: 'test',
-        sort: [id]
-      };
-    };
-
     describe('kbnTable', function () {
 
       var $elem = angular.element(
@@ -232,7 +221,7 @@ define(function (require) {
         sinon.stub($.prototype, 'scrollTop', function () { return -200; });
 
         var rows = _.times(200, function (i) {
-          return getFakeRow(i);
+          return getFakeRow(i, mapping);
         });
         init($elem, {
           columns: ['bytes'],
@@ -290,7 +279,7 @@ define(function (require) {
       beforeEach(function () {
 
         init($elem, {
-          row: getFakeRow(0),
+          row: getFakeRow(0, mapping),
           columns: [],
           sorting: [],
           filtering: sinon.spy(),

@@ -93,8 +93,8 @@ define(function (require) {
       it('should persist global state', function () {
         var wordCount = _.random(3, 6);
         var globalStateSpy = sinon.spy(globalStateMock, 'writeToUrl');
-        var urls = faker.Lorem.words(wordCount).map(function (url) {
-          return '/' + url;
+        var urls = faker.Lorem.words(wordCount).map(function (url, i) {
+          return '/' + url + i;
         });
 
         urls.forEach(function (url) {
@@ -214,7 +214,6 @@ define(function (require) {
           throw new Error('this should not run');
         } catch (err) {
           expect(err).to.be.an(Error);
-          console.log(err.message);
           expect(err.message).to.match(/replace_me/);
         }
       });
@@ -228,7 +227,6 @@ define(function (require) {
           throw new Error('this should not run');
         } catch (err) {
           expect(err).to.be.an(Error);
-          console.log(err.message);
           expect(err.message).to.match(/replace_me\|number/);
         }
       });

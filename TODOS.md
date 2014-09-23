@@ -448,7 +448,6 @@
  - **[src/kibana/components/vislib/vis.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/vislib/vis.js)**
    - need to come up with a solution for resizing when no data is available
  - **[src/kibana/components/vislib/visualizations/column_chart.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/vislib/visualizations/column_chart.js)**
-   - Replace the following code with something more robust for finding the field
    - refactor so that this is called from the data module
  - **[src/kibana/components/visualize/visualize.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/visualize/visualize.js)**
    - we need to have some way to clean up result requests
@@ -460,3 +459,5 @@
    - This should not be needed, timefilter is only included here, it should move
  - **[test/unit/specs/directives/typeahead.js](https://github.com/elasticsearch/kibana4/blob/master/test/unit/specs/directives/typeahead.js)**
    - This should not be needed, timefilter is only included here, it should move
+ - **[test/unit/specs/vislib/vis.js](https://github.com/elasticsearch/kibana4/blob/master/test/unit/specs/vislib/vis.js)**
+   - fix this test instead of just skipping it

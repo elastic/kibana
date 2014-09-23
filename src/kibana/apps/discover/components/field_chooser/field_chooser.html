@@ -4,7 +4,7 @@
   </div>
   <ul
     bindonce class="list-unstyled discover-selected-fields" >
-    <discover-field field="field" ng-repeat="field in fields|filter:{display:true}" data="data">
+    <discover-field ng-repeat="field in fields|filter:{display:true}">
     </discover-field>
   </ul>
 
@@ -15,7 +15,7 @@
         ng-click="showFields = !showFields"
         class="fa visible-xs visible-sm pull-right field-collapse-toggle" ></i>
       <button
-        ng-class="{ 'btn-defualt': !filter.active, 'btn-success': filter.active, 'hidden-xs': !showFields, 'hidden-sm': !showFields }"
+        ng-class="{ 'btn-default': !filter.active, 'btn-success': filter.active, 'hidden-xs': !showFields, 'hidden-sm': !showFields }"
         class="btn btn-xs btn-default pull-right discover-field-filter-toggle"
         ng-click="showFilter = !showFilter">
         <i class="fa fa-gear"></i>
@@ -33,7 +33,6 @@
           Analyzed
         </label>
         <select
-          required
           ng-options="opt.value as opt.label for opt in filter.boolOpts"
           ng-model="filter.vals.analyzed"
           class="form-control">
@@ -44,7 +43,6 @@
           Indexed
         </label>
         <select
-          required
           ng-options="opt.value as opt.label for opt in filter.boolOpts"
           ng-model="filter.vals.indexed"
           class="form-control">
@@ -55,7 +53,6 @@
           Type
         </label>
         <select
-          required
           ng-options="field as field for field in fieldTypes"
           ng-model="filter.vals.type"
           class="form-control">
@@ -83,21 +80,15 @@
   </div>
 
   <ul bindonce
-    ng-show="popularFieldChoices.length > 0"
-    class="list-unstyled sidebar-well" ng-class="{ 'hidden-sm': !showFields, 'hidden-xs': !showFields }">
+    ng-show="(fields | filter:filter.popularity).length > 0"
+    class="list-unstyled sidebar-well discover-popular-fields" ng-class="{ 'hidden-sm': !showFields, 'hidden-xs': !showFields }">
     <li class="sidebar-item sidebar-list-header"><h6>Popular fields</h6></li>
-    <discover-field
-      ng-repeat="field in popularFieldChoices = (popularFields | filter:filter.isFieldFiltered)"
-      field="field"
-      data="data">
+    <discover-field ng-repeat="field in popularFields | filter:filter.isFieldFiltered">
     </discover-field>
   </ul>
 
-  <ul bindonce class="list-unstyled" ng-class="{ 'hidden-sm': !showFields, 'hidden-xs': !showFields  }">
-    <discover-field
-      ng-repeat="field in unpopularFieldChoices = (unpopularFields | filter:filter.isFieldFiltered)"
-      field="field"
-      data="data">
+  <ul bindonce class="list-unstyled discover-unpopular-fields" ng-class="{ 'hidden-sm': !showFields, 'hidden-xs': !showFields  }">
+    <discover-field ng-repeat="field in unpopularFields | filter:filter.isFieldFiltered">
     </discover-field>
   </ul>
 

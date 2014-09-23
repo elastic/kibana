@@ -3,7 +3,7 @@ define(function (require) {
   var moment = require('moment');
   var _ = require('lodash');
   var $ = require('jquery');
-  var sinon = require('sinon/sinon');
+  var sinon = require('test_utils/auto_release_sinon');
 
 
   // Load the kibana app dependencies.
@@ -120,6 +120,27 @@ define(function (require) {
 
       it('has a disabled "to" field that contains "Now"', function (done) {
         expect($elem.find('.kbn-timepicker-section input[disabled]').val()).to.be('Now');
+        done();
+      });
+
+      it('has a submit handler', function (done) {
+        var form = $elem.find('form[ng-submit="applyRelative()"]');
+        expect(form.length).to.be(1);
+        done();
+      });
+
+      it('disables the submit button if the form is invalid', function (done) {
+        var button;
+        button = $elem.find('button[disabled]');
+        expect(button.length).to.be(0);
+
+        // Make the form invalid
+        $scope.relative.count = 'foo';
+        $scope.formatRelative();
+        $scope.$digest();
+
+        button = $elem.find('button[disabled]');
+        expect(button.length).to.be(1);
         done();
       });
 
