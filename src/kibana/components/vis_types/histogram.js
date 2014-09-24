@@ -6,7 +6,7 @@ define(function (require) {
     return new VisType({
       name: 'histogram',
       title: 'Vertical bar chart',
-      icon: 'icon-chart-bar',
+      icon: 'fa-bar-chart',
       vislibParams: {
         shareYAxis: true,
         addTooltip: true,

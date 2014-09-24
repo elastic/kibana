@@ -6,7 +6,7 @@ define(function (require) {
     return new VisType({
       name: 'pie',
       title: 'Pie chart',
-      icon: 'icon-chart-bar',
+      icon: 'fa-pie-chart',
       vislibParams: {
         addTooltip: true,
         addLegend: true
