@@ -31,7 +31,7 @@ define(function (require) {
           datum.value += ' per ' + datum.parent.value;
         }
 
-        var out = datum.name ? datum.name + '<br/>' : '';
+        var out = datum.name !== undefined ? datum.name + '<br/>' : '';
 
         // Add parent name if exists
         if (datum.parent.name) {
@@ -48,6 +48,7 @@ define(function (require) {
       };
 
 
+      // TODO: refactor this code to simplify and possibly merge with data converter code below
       // Creates a collection of all the labels
       // and their index value
       var sliceLabels = {};
@@ -103,7 +104,8 @@ define(function (require) {
 
         // Wrap up the name and size values into an object
         var datum = {
-          name: (row[iName] == null) ? '_all' : row[iName],
+//          name: (row[iName] == null) ? '_all' : row[iName],
+          name: (row[iName] == null && rowLength >= 2) ? row[iName - 1] : rowLength < 2 ? '_all' : row[iName],
           size: row[iSize]
         };
 
@@ -111,7 +113,7 @@ define(function (require) {
         // i.e. { names: '', children: [] }
         var startIndex = 0;
         var stopIndex = rowLength - 2;
-        var names = row.slice(startIndex, stopIndex);
+        var names = (row[iName] == null) ? row.slice(startIndex, stopIndex - 1) : row.slice(startIndex, stopIndex);
 
         // Keep track of the current children array
         var currentArray = children;
