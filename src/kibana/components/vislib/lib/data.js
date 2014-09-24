@@ -42,8 +42,17 @@ define(function (require) {
     // Displays legend when more than one series of data present
     Data.prototype.isLegendShown = function () {
       var isLegend = false;
+      var visData;
 
-      _.forEach(this.chartData(), function countSeriesLength(obj) {
+      if (this.data.rows) {
+        visData = this.data.rows;
+      } else if (this.data.columns) {
+        visData = this.data.columns;
+      } else {
+        visData = [this.data];
+      }
+
+      _.forEach(visData, function countSeriesLength(obj) {
         var dataLength = obj.series ? obj.series.length : obj.slices.children.length;
 
         if (dataLength > 1) {
