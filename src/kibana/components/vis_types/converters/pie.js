@@ -47,6 +47,41 @@ define(function (require) {
         return out;
       };
 
+
+      // Creates a collection of all the labels
+      // and their index value
+      var sliceLabels = {};
+
+      rows.forEach(function (row, i) {
+        var startIndex = 0;
+        var stopIndex = row.length - 1;
+        row = row.slice(startIndex, stopIndex);
+
+        // if no label available, return _all
+        if (row.length === 0) {
+          return sliceLabels['_all'] = i;
+        }
+
+        row.forEach(function (name, i) {
+          if (!sliceLabels[name]) {
+            return sliceLabels[name] = i;
+          }
+        });
+      });
+
+      // An array of all the labels sorted by their index number
+      chart.names = _(sliceLabels)
+        .pairs()
+        .sortBy(function (d) {
+          return d[1];
+        })
+        .pluck(function (d) {
+          return d[0];
+        })
+        .value();
+
+
+      // Pie Data Converter
       var slices = chart.slices = {};
       var children = slices.children = [];
 

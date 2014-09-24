@@ -94,12 +94,15 @@ define(function (require) {
         .attr('d', arc)
         .attr('class', function (d) {
           if (d.depth === 0) { return; }
+          // work around for undefined names
+          if (d.name === '_all') { return; }
           return self.colorToClass(color(d.name));
         })
         .style('stroke', '#fff')
         .style('fill', function (d) {
           return color(d.name);
-        });
+        })
+        .attr('fill-rule', 'evenodd');
 
       // Add tooltip
       if (isTooltip) {

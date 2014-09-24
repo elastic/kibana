@@ -61,34 +61,6 @@ define(function (require) {
       return [this.data];
     };
 
-    Data.prototype.getNames = function (array) {
-      var self = this;
-      var names = [];
-
-      _.forEach(array, function (obj) {
-        if (obj.slices) {
-          var parentNames = self.getNames(obj.slices.children);
-
-          return _.forEach(parentNames, function (name) {
-            return names.push(name);
-          });
-        }
-
-        if (obj.children) {
-          var childNames = self.getNames(obj.children);
-
-          _.forEach(childNames, function (name) {
-            return names.push(name);
-          });
-        }
-
-        names.push(obj.name);
-      });
-
-      return _.uniq(names);
-    };
-
-
     // Get attributes off the data, e.g. `tooltipFormatter` or `xAxisFormatter`
     Data.prototype.get = function (thing) {
       var data;
@@ -187,14 +159,9 @@ define(function (require) {
       return color(this.getLabels());
     };
 
-    // Return an array of unique names
-    Data.prototype.getPieNames = function () {
-      return this.getNames(this.pieData());
-    };
-
     // Return a function that does color lookup on names for pie charts
     Data.prototype.getPieColorFunc = function () {
-      return color(this.getPieNames());
+      return color(this.data.names);
     };
 
     return Data;
