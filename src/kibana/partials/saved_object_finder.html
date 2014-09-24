@@ -20,7 +20,7 @@
       ng-href="{{ makeUrl(hit) }}"
       ng-click="onChoose(hit, $event)">
       <li>
-        <i ng-class="hit.icon"></i> {{hit.title}}
+        <i class="fa" ng-if="hit.icon" ng-class="hit.icon"></i> {{hit.title}}
         <p ng-if="hit.description" ng-bind="hit.description"></p>
       </li>
     </a>
