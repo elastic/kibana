@@ -143,7 +143,7 @@ define(function (require) {
     };
 
     $scope.startOver = function () {
-      $location.url('/visualize');
+      kbnUrl.change('/visualize', {}, true);
     };
 
     $scope.doSave = function () {

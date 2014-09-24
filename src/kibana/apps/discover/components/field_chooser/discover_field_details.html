@@ -38,12 +38,12 @@
 
       <div ng-show="field.indexed && !field.analyzed"
           ng-click="runAgg(field)"
-          tooltip="Doc_values are not enabled on this field. This operation may be dangerous."
+          tooltip="Doc_values are not enabled on this field. This may lead to excess heap consumption"
           class="sidebar-item-button warning">Visualize</div>
 
       <div ng-show="field.indexed && field.analyzed"
           ng-click="runAgg(field)"
-          tooltip="Analyzed fields may require more memory to visualize. This operation may be dangerous."
+          tooltip="Analyzed fields may require more memory to visualize and may not give you the results you expect."
           class="sidebar-item-button danger">Visualize</div>
 
       <div ng-show="!field.indexed"

@@ -24,7 +24,7 @@ define(function (require) {
 
     Tooltip.prototype.render = function () {
       var self = this;
-      
+
       return function (selection) {
 
         // if tooltip not appended to body, append one
@@ -40,10 +40,10 @@ define(function (require) {
         var tooltipDiv = d3.select('.' + self.tooltipClass);
 
         selection.each(function () {
-          
+
           // DOM element on which the tooltip is called
           var element = d3.select(this);
-          
+
           // define selections relative to el of tooltip
           var chartXoffset;
           var chartWidth;
@@ -60,20 +60,20 @@ define(function (require) {
                 left: d3.event.clientX,
                 top: d3.event.clientY
               };
-              
+
               offset = self.getOffsets(tooltipDiv, mouseMove);
 
               // return text and position for tooltip
               return tooltipDiv.datum(d)
-                .text(self.tooltipFormatter)
-                .style('visibility', 'visible')
+                .html(self.tooltipFormatter)
+                .style('display', 'block')
                 .style('left', mouseMove.left + offset.left + 'px')
                 .style('top', mouseMove.top - offset.top + 'px');
             })
 
             .on('mouseout.tip', function () {
               // hide tooltip
-              return tooltipDiv.style('visibility', 'hidden');
+              return tooltipDiv.style('display', 'none');
             });
         });
       };
@@ -90,7 +90,7 @@ define(function (require) {
       var chartHeight;
       var tipWidth;
       var tipHeight;
-      
+
       if ($(self.el).find('.' + self.containerClass)) {
         container    = $(self.el).find('.' + self.containerClass);
         chartXoffset = container.offset().left;
@@ -113,7 +113,7 @@ define(function (require) {
           offset.top = chartYoffset + chartHeight;
         }
       }
-      
+
       return offset;
     };
 

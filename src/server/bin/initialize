@@ -28,6 +28,9 @@ parser = OptionParser.new do |opts|
   opts.on('-p', '--port PORT', 'Kibana port') do |arg|
     options[:port] = arg
   end
+  opts.on('-q', '--quiet', 'Turns off logging') do |arg|
+    options[:quiet] = arg
+  end
   opts.on('-H', '--host HOST', 'Kibana host') do |arg|
     options[:host] = arg
   end
@@ -68,6 +71,7 @@ Kibana.global_settings[:host] = host || '0.0.0.0'
 Kibana.global_settings[:config] = config
 Kibana.global_settings[:elasticsearch] = elasticsearch
 Kibana.global_settings[:root] = File.expand_path("#{File.dirname(__FILE__)}/../")
+Kibana.global_settings[:quiet] = options[:quiet]
 
 # Set the public folder based on whether we are running in production or not.
 if ENV['RACK_ENV'] == ('production')
