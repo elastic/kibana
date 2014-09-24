@@ -37,7 +37,7 @@ module Kibana
     end
 
     configure :production do
-      use JSONLogger, settings.logger
+      use JSONLogger, settings.logger unless Kibana.global_settings[:quiet]
     end
 
     configure :quiet do
@@ -45,7 +45,7 @@ module Kibana
     end
 
     configure :development do
-      use ColorLogger, settings.logger
+      use ColorLogger, settings.logger unless Kibana.global_settings[:quiet]
     end
 
     error do
