@@ -10,6 +10,8 @@ define(function (require) {
     'discover:sampleSize': 500,
     'fields:popularLimit': 10,
 
+    'truncate:maxHeight': 100,
+
     'histogram:barTarget': 50,
     'histogram:maxBars': 100,
 
