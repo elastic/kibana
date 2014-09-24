@@ -29,7 +29,7 @@ define(function (require) {
           group: 'buckets',
           name: 'segment',
           icon: 'fa fa-scissors',
-          title: 'Slices',
+          title: 'Create/Split Slices',
           min: 0,
           max: Infinity
         },
@@ -37,7 +37,7 @@ define(function (require) {
           group: 'buckets',
           name: 'split',
           icon: 'fa fa-th',
-          title: 'Rows & Columns',
+          title: 'Split Chart',
           min: 0,
           max: 1
         }

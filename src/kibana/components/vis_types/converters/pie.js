@@ -24,25 +24,23 @@ define(function (require) {
       }
 
       // tooltip formatter for pie charts
-      chart.tooltipFormatter = function (datapoint) {
-        var datum = _.clone(datapoint);
+      chart.tooltipFormatter = function (datum) {
+        var siblingSum = null;
+        var out = '';
 
         if (datum.parent) {
-          datum.value += ' per ' + datum.parent.value;
+          // sum up our parents children so we can calculate our percentage
+          siblingSum = datum.parent.children.reduce(function (sum, child) {
+            return sum + child.value;
+          }, 0);
         }
 
-        var out = datum.name !== undefined ? datum.name + '<br/>' : '';
-
-        // Add parent name if exists
-        if (datum.parent.name) {
-          var parentNames = checkForParentName(datum.parent);
-
-          _.forEach(parentNames, function (name) {
-            return out += name + '<br/>';
-          });
+        for (var cur = datum; cur.parent; cur = cur.parent) {
+          if (cur.parent.name) out = cur.parent.name + ' > ' + out;
         }
 
-        out += datum.value;
+        out += datum.name + ': ' + datum.value;
+        out += ' (' + Math.round((datum.value / siblingSum) * 100) + '%)';
 
         return out;
       };
@@ -104,7 +102,6 @@ define(function (require) {
 
         // Wrap up the name and size values into an object
         var datum = {
-//          name: (row[iName] == null) ? '_all' : row[iName],
           name: (row[iName] == null && rowLength >= 2) ? row[iName - 1] : rowLength < 2 ? '_all' : row[iName],
           size: row[iSize]
         };
