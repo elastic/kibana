@@ -226,7 +226,7 @@ define(function (require) {
     // Returns a string that is truncated to fit size
     XAxis.prototype.truncateLabel = function (text, size) {
       var node = d3.select(text).node();
-      var str = node.innerHTML;
+      var str = $(node).text();
       var width = node.getBBox().width;
       var chars = str.length;
       var pxPerChar = width / chars;
