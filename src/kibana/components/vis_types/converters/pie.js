@@ -25,24 +25,30 @@ define(function (require) {
 
       // tooltip formatter for pie charts
       chart.tooltipFormatter = function (datum) {
-        var siblingSum = null;
-        var out = '';
-
-        if (datum.parent) {
-          // sum up our parents children so we can calculate our percentage
-          siblingSum = datum.parent.children.reduce(function (sum, child) {
-            return sum + child.value;
-          }, 0);
+        function sumValue(sum, cur) {
+          return sum + cur.value;
         }
 
+        // find the root datum
+        var root = datum;
+        while (root.parent) root = root.parent;
+
+        // the value of the root datum is the sum of every row. coincidental? not certain
+        var sum = root.value;
+
+        var labels = [];
         for (var cur = datum; cur.parent; cur = cur.parent) {
-          if (cur.parent.name) out = cur.parent.name + ' > ' + out;
+          var label = cur.name + ': ' + cur.value;
+          label += ' (' + Math.round((cur.value / sum) * 100) + '%)';
+
+          if (cur === datum) {
+            label = '<b>' + label + '</b>';
+          }
+
+          labels.unshift(label);
         }
 
-        out += datum.name + ': ' + datum.value;
-        out += ' (' + Math.round((datum.value / siblingSum) * 100) + '%)';
-
-        return out;
+        return labels.join('<br>');
       };
 
 

@@ -170,7 +170,7 @@ define(function (require) {
 
     // Return a function that does color lookup on names for pie charts
     Data.prototype.getPieColorFunc = function () {
-      return color(this.data.names);
+      return color(this.get('names'));
     };
 
     return Data;
