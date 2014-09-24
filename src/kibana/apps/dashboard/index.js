@@ -55,7 +55,7 @@ define(function (require) {
         var stateDefaults = {
           title: dash.title,
           panels: dash.panelsJSON ? JSON.parse(dash.panelsJSON) : [],
-          query: ''
+          query: {query_string: {query: '*'}}
         };
 
         var $state = $scope.state = appStateFactory.create(stateDefaults);
@@ -95,7 +95,7 @@ define(function (require) {
         }
 
         $scope.newDashboard = function () {
-          $location.url('/dashboard');
+          kbnUrl.change('/dashboard', {}, true);
         };
 
         $scope.filterResults = function () {

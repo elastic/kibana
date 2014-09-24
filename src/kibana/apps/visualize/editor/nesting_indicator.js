@@ -22,29 +22,6 @@ define(function (require) {
       };
     }());
 
-    var allIndicators = [];
-    allIndicators.expanded = false;
-    allIndicators.expand = toggler(true);
-    allIndicators.contract = toggler(false, 150);
-
-    function toggler(on, delay) {
-      var all = allIndicators;
-      var work = function () {
-        if (delay && all.expanded !== on) return;
-        all.forEach(function ($scope) {
-          if (!$scope.bars) return;
-          $scope.bars.forEach(function ($el) {
-            $el.toggleClass('expand', on);
-          });
-        });
-      };
-      return function () {
-        all.expanded = on;
-        if (!delay) work();
-        else setTimeout(work, delay);
-      };
-    }
-
     return {
       restrict: 'E',
       scope: {
@@ -52,16 +29,6 @@ define(function (require) {
         list: '='
       },
       link: function ($scope, $el, attr) {
-
-        allIndicators.push($scope);
-        $el.on('mouseenter', allIndicators.expand);
-        $el.on('mouseleave', allIndicators.contract);
-
-        $scope.$on('$destroy', function () {
-          _.pull(allIndicators, $scope);
-          $el.off('mouseenter', allIndicators.expand);
-          $el.off('mouseleave', allIndicators.contract);
-        });
 
         $scope.$watchCollection('list', function () {
           if (!$scope.list || !$scope.item) return;

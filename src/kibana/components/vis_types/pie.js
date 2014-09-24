@@ -6,6 +6,7 @@ define(function (require) {
 
     return new VisType({
       name: 'pie',
+      title: 'Pie chart',
       icon: 'icon-chart-bar',
       vislibParams: {
         addEvents: true,
