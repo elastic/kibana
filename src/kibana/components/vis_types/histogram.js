@@ -11,7 +11,8 @@ define(function (require) {
         shareYAxis: true,
         addTooltip: true,
         addLegend: true,
-        addBrushing: false,
+        addEvents: true,
+        addBrushing: true
       },
       schemas: new Schemas([
         {

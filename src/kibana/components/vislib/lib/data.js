@@ -38,9 +38,50 @@ define(function (require) {
       return [this.data];
     };
 
+    // Function to determine whether to display the legend or not
+    // Displays legend when more than one series of data present
+    Data.prototype.isLegendShown = function () {
+      var isLegend = false;
+      var visData;
+
+      if (this.data.rows) {
+        visData = this.data.rows;
+      } else if (this.data.columns) {
+        visData = this.data.columns;
+      } else {
+        visData = [this.data];
+      }
+
+      _.forEach(visData, function countSeriesLength(obj) {
+        var dataLength = obj.series ? obj.series.length : obj.slices.children.length;
+
+        if (dataLength > 1) {
+          isLegend = true;
+        }
+      });
+
+      return isLegend;
+    };
+
+    Data.prototype.pieData = function () {
+      if (!this.data.slices) {
+        return this.data.rows ? this.data.rows : this.data.columns;
+      }
+      return [this.data];
+    };
+
     // Get attributes off the data, e.g. `tooltipFormatter` or `xAxisFormatter`
     Data.prototype.get = function (thing) {
-      var data = this.chartData();
+      var data;
+
+      if (this.data.rows) {
+        data = this.data.rows;
+      } else if (this.data.columns) {
+        data = this.data.columns;
+      } else {
+        data = [this.data];
+      }
+
       // pulls the value off the first item in the array
       // these values are typically the same between data objects of the same chart
       // May need to verify this or refactor
@@ -126,7 +167,12 @@ define(function (require) {
 
     // Return a function that does color lookup on labels
     Data.prototype.getColorFunc = function () {
-      return color(this.getLabels(this.data));
+      return color(this.getLabels());
+    };
+
+    // Return a function that does color lookup on names for pie charts
+    Data.prototype.getPieColorFunc = function () {
+      return color(this.get('names'));
     };
 
     return Data;

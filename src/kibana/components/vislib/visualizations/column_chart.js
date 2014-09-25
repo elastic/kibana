@@ -4,11 +4,10 @@ define(function (require) {
     var $ = require('jquery');
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
-    var Legend = Private(require('components/vislib/lib/legend'));
     var errors = require('errors');
 
     // Dynamically adds css file
-    require('css!components/vislib/components/styles/main');
+    require('css!components/vislib/styles/main');
 
     /*
      * Column chart visualization => vertical bars, stacked bars
@@ -23,25 +22,9 @@ define(function (require) {
       // Column chart specific attributes
       this._attr = _.defaults(vis._attr || {}, {
         xValue: function (d, i) { return d.x; },
-        yValue: function (d, i) { return d.y; },
-        dispatch: d3.dispatch('brush', 'click', 'hover', 'mouseenter', 'mouseleave', 'mouseover', 'mouseout'),
+        yValue: function (d, i) { return d.y; }
       });
     }
-
-    // Response to `click` and `hover` events
-    ColumnChart.prototype.eventResponse = function (d, i) {
-      return {
-        value: this._attr.yValue(d, i),
-        point: d,
-        label: d.label,
-        color: this.vis.data.getColorFunc()(d.label),
-        pointIndex: i,
-        series    : this.chartData.series,
-        config    : this._attr,
-        data      : this.chartData,
-        e         : d3.event
-      };
-    };
 
     // Stack data
     // TODO: refactor so that this is called from the data module
@@ -60,39 +43,14 @@ define(function (require) {
       }));
     };
 
-    // Add brush to the svg
-    ColumnChart.prototype.addBrush = function (xScale, svg) {
-      var self = this;
-
-      // Brush scale
-      var brush = d3.svg.brush()
-        .x(xScale)
-        .on('brushend', function brushEnd() {
-          // response returned on brush
-          return self._attr.dispatch.brush({
-            range: brush.extent(),
-            config: self._attr,
-            e: d3.event,
-            data: self.chartData
-          });
-        });
-
-      // if `addBrushing` is true, add brush canvas
-      if (self._attr.addBrushing) {
-        svg.append('g')
-        .attr('class', 'brush')
-        .call(brush)
-        .selectAll('rect')
-        .attr('height', this._attr.height - this._attr.margin.top - this._attr.margin.bottom);
-      }
-    };
-
     ColumnChart.prototype.addBars = function (svg, layers) {
       var self = this;
       var data = this.chartData;
       var color = this.vis.data.getColorFunc();
       var xScale = this.vis.xAxis.xScale;
       var yScale = this.vis.yAxis.yScale;
+      var tooltip = this.vis.tooltip;
+      var isTooltip = this._attr.addTooltip;
       var layer;
       var bars;
 
@@ -125,61 +83,59 @@ define(function (require) {
 
       // update
       bars
-      .attr('x', function (d) {
-        return xScale(d.x);
-      })
-      .attr('width', function () {
-        var barWidth;
-        var barSpacing;
+        .attr('x', function (d) {
+          return xScale(d.x);
+        })
+        .attr('width', function () {
+          var barWidth;
+          var barSpacing;
 
-        if (data.ordered && data.ordered.date) {
-          barWidth = xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min);
-          barSpacing = barWidth * 0.25;
+          if (data.ordered && data.ordered.date) {
+            barWidth = xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min);
+            barSpacing = barWidth * 0.25;
 
-          return barWidth - barSpacing;
-        }
+            return barWidth - barSpacing;
+          }
 
-        return xScale.rangeBand();
-      })
-      .attr('y', function (d) {
-        return yScale(d.y0 + d.y);
-      })
-      .attr('height', function (d) {
-        return yScale(d.y0) - yScale(d.y0 + d.y);
-      });
-
-      return bars;
-    };
-
-    ColumnChart.prototype.addBarEvents = function (bars) {
-      var self = this;
-      var tooltip = this.vis.tooltip;
-      var isTooltip = this._attr.addTooltip;
-      var dispatch = this._attr.dispatch;
-
-      bars
-      .on('mouseover.bar', function (d, i) {
-        d3.select(this)
-          .classed('hover', true)
-          .style('stroke', '#333')
-          .style('cursor', 'pointer');
-
-        dispatch.hover(self.eventResponse(d, i));
-        d3.event.stopPropagation();
-      })
-      .on('click.bar', function (d, i) {
-        dispatch.click(self.eventResponse(d, i));
-        d3.event.stopPropagation();
-      })
-      .on('mouseout.bar', function () {
-        d3.select(this).classed('hover', false)
-          .style('stroke', null);
-      });
+          return xScale.rangeBand();
+        })
+        .attr('y', function (d) {
+          return yScale(d.y0 + d.y);
+        })
+        .attr('height', function (d) {
+          return yScale(d.y0) - yScale(d.y0 + d.y);
+        });
 
       // Add tooltip
       if (isTooltip) {
         bars.call(tooltip.render());
       }
+
+      return bars;
+    };
+
+    ColumnChart.prototype.addBarEvents = function (bars) {
+      var events = this.events;
+      var dispatch = this.events._attr.dispatch;
+
+      bars
+        .on('mouseover.bar', function (d, i) {
+          d3.select(this)
+            .classed('hover', true)
+            .style('stroke', '#333')
+            .style('cursor', 'pointer');
+
+          dispatch.hover(events.eventResponse(d, i));
+          d3.event.stopPropagation();
+        })
+        .on('click.bar', function (d, i) {
+          dispatch.click(events.eventResponse(d, i));
+          d3.event.stopPropagation();
+        })
+        .on('mouseout.bar', function () {
+          d3.select(this).classed('hover', false)
+            .style('stroke', null);
+        });
     };
 
     ColumnChart.prototype.draw = function () {
@@ -192,6 +148,7 @@ define(function (require) {
       var elHeight = this._attr.height = $elem.height();
       var minWidth = 20;
       var minHeight = 20;
+      var isEvents = this._attr.addEvents;
       var div;
       var svg;
       var width;
@@ -223,13 +180,15 @@ define(function (require) {
           .attr('transform', 'translate(0,' + margin.top + ')');
 
           // addBrush canvas
-          self.addBrush(xScale, svg);
+          self.events.addBrush(xScale, svg);
 
           // add bars
           bars = self.addBars(svg, layers);
 
           // add events to bars
-          self.addBarEvents(bars);
+          if (isEvents) {
+            self.addBarEvents(bars);
+          }
 
           // chart base line
           var line = svg.append('line')

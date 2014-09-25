@@ -3,8 +3,10 @@ define(function (require) {
     var _ = require('lodash');
     var legendHeaderTemplate = _.template(require('text!components/vislib/partials/legend_header.html'));
 
+    var Tooltip = Private(require('components/vislib/lib/tooltip'));
+
     // Dynamically adds css file
-    require('css!components/vislib/components/styles/main');
+    require('css!components/vislib/styles/main');
 
     /*
      * Append legend to the visualization
@@ -23,18 +25,18 @@ define(function (require) {
       this.el = el;
       this.labels = labels;
       this.color = color;
+      this.tooltip = new Tooltip(this.el, function (d) { return d; });
       this._attr = _.defaults(_attr || {}, {
         // Legend specific attributes
         'legendClass' : 'legend-col-wrapper',
         'blurredOpacity' : 0.3,
         'focusOpacity' : 1,
         'defaultOpacity' : 1,
-        'isOpen' : false
+        'isOpen' : true
       });
     }
 
     // Add legend header
-    // Need to change the header icon
     Legend.prototype.header = function (el, args) {
       return el.append('div')
         .attr('class', 'header')
@@ -87,7 +89,8 @@ define(function (require) {
       var self = this;
 
       // toggle
-      headerIcon.on('click', function () {
+      headerIcon
+      .on('click', function legendClick() {
         if (self._attr.isOpen) {
           // close legend
           visEl.select('ul.legend-ul')
@@ -105,6 +108,10 @@ define(function (require) {
           self.vis.resize();
         }
       });
+
+      headerIcon
+      .datum(['Legend'])
+      .call(self.tooltip.render());
 
       visEl.selectAll('.color')
         .on('mouseover', function (d) {

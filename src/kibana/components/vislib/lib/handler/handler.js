@@ -1,15 +1,10 @@
 define(function (require) {
-  var _ = require('lodash');
-
   return function HandlerBaseClass(d3, Private) {
+    var _ = require('lodash');
+
     var Data = Private(require('components/vislib/lib/data'));
-    var Layout = Private(require('components/vislib/lib/layout'));
-    var Legend = Private(require('components/vislib/lib/legend'));
+    var Layout = Private(require('components/vislib/lib/layout/layout'));
     var Tooltip = Private(require('components/vislib/lib/tooltip'));
-    var XAxis = Private(require('components/vislib/lib/x_axis'));
-    var YAxis = Private(require('components/vislib/lib/y_axis'));
-    var AxisTitle = Private(require('components/vislib/lib/axis_title'));
-    var ChartTitle = Private(require('components/vislib/lib/chart_title'));
 
     /*
      * Handles building all the components of the visualization
@@ -19,12 +14,12 @@ define(function (require) {
      *  returns an object with reference to the vis.prototype,
      *  and news up all the constructors needed to build a visualization
      */
-    function Handler(vis) {
+    function Handler(vis, opts) {
       if (!(this instanceof Handler)) {
-        return new Handler(vis);
+        return new Handler(vis, opts);
       }
 
-      this.data = new Data(vis.data, vis._attr);
+      this.data = opts.data || new Data(vis.data, vis._attr);
       this.vis = vis;
       this.el = vis.el;
       this.ChartClass = vis.ChartClass;
@@ -33,50 +28,29 @@ define(function (require) {
       });
 
       // Visualization constructors
-      // Add the visualization layout
-      this.layout = new Layout(this.el, this.data.injectZeros(), this._attr.type);
+      this.layout = new Layout(vis.el, vis.data, vis._attr.type);
+      this.xAxis = opts.xAxis;
+      this.yAxis = opts.yAxis;
+      this.chartTitle = opts.chartTitle;
+      this.axisTitle = opts.axisTitle;
 
-      // Only add legend if addLegend attribute set
-      if (this._attr.addLegend) {
-        this.legend = new Legend(this.vis, this.el, this.data.getLabels(), this.data.getColorFunc(), this._attr);
-      }
-
-      // only add tooltip if addTooltip attribute set
       if (this._attr.addTooltip) {
         this.tooltip = new Tooltip(this.el, this.data.get('tooltipFormatter'));
       }
 
-      // add a x axis
-      this.xAxis = new XAxis({
-        el: this.el,
-        xValues: this.data.xValues(),
-        ordered: this.data.get('ordered'),
-        xAxisFormatter: this.data.get('xAxisFormatter'),
-        _attr: this._attr
-      });
-
-      // add a y axis
-      this.yAxis = new YAxis({
-        el: this.el,
-        yMax: this.data.getYMaxValue(),
-        _attr: this._attr
-      });
-
-      // add axis titles
-      this.axisTitle = new AxisTitle(this.el, this.data.get('xAxisLabel'), this.data.get('yAxisLabel'));
-
-      // add chart titles
-      this.chartTitle = new ChartTitle(this.el);
+      if (this._attr.addLegend && this.data.isLegendShown()) {
+        this.legend = opts.legend;
+      }
 
       // Array of objects to render to the visualization
       this.renderArray = _.filter([
         this.layout,
-        this.legend,
-        this.tooltip,
-        this.axisTitle,
-        this.chartTitle,
+        this.xAxis,
         this.yAxis,
-        this.xAxis
+        this.chartTitle,
+        this.axisTitle,
+        this.legend,
+        this.tooltip
       ], Boolean);
     }
 

@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
 
     var Legend = Private(require('components/vislib/lib/legend'));
+    var Dispatch = Private(require('components/vislib/lib/dispatch'));
 
     /*
      * Base Class for all visualizations.
@@ -16,6 +17,7 @@ define(function (require) {
       this.vis = vis;
       this.chartEl = el;
       this.chartData = chartData;
+      this.events = new Dispatch(vis, chartData);
       this._attr = _.defaults(vis._attr || {}, {});
     }
 
