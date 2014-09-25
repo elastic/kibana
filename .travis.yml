@@ -17,6 +17,3 @@ notifications:
     on_success: change
     template:
     - ! '%{repository_slug}/%{branch} by %{author}: %{commit_message} (<a href="%{build_url}">open</a>)'
-env:
-  global:
-    secure: AX9xidE0quyS07ZfOcecxEGjlNDT9YlM+fvtQHqOaODBII2jg5rgz0SyyxmTPSG68aqUNk8ML9slbRE4h0iPqNkB6fbDE2Dc6oTrRE7XFGDBjw66OHV2ZbsobdORf4UtWO06JBgLUEU2pzRYphe/B14dyA+ZO6p+bAgBmcdLd8k=
