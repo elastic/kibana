@@ -17,6 +17,7 @@ module Kibana
     }
 
     def self.log(msg)
+      return if Kibana.global_settings[:quiet]
       if ENV['RACK_ENV'] == 'production'
         data = {
           "@timestamp" => Time.now.iso8601,

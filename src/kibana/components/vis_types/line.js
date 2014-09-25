@@ -5,6 +5,7 @@ define(function (require) {
 
     return new VisType({
       name: 'line',
+      title: 'Line chart',
       icon: 'icon-chart-bar',
       vislibParams: {
         shareYAxis: true,
@@ -17,7 +18,10 @@ define(function (require) {
           name: 'metric',
           title: 'Y-Axis',
           min: 1,
-          max: 1
+          max: 1,
+          defaults: [
+            { schema: 'metric', type: 'count' }
+          ]
         },
         {
           group: 'buckets',

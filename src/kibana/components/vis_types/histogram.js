@@ -5,12 +5,14 @@ define(function (require) {
 
     return new VisType({
       name: 'histogram',
+      title: 'Vertical bar chart',
       icon: 'icon-chart-bar',
       vislibParams: {
         shareYAxis: true,
         addTooltip: true,
         addLegend: true,
-        addBrushing: false,
+        addEvents: true,
+        addBrushing: true
       },
       schemas: new Schemas([
         {

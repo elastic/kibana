@@ -7,7 +7,7 @@ define(function (require) {
     return function (chart, columns, rows) {
       // index of color
       var iColor = _.findIndex(columns, { categoryName: 'group' });
-      var hasColor = iColor !== -1;
+      var colColor = columns[iColor];
 
       /*****
        * Get values related to the X-Axis
@@ -79,20 +79,22 @@ define(function (require) {
 
 
       // setup the formatter for the label
-      chart.tooltipFormatter = function (datapoint) {
-        var datum = _.clone(datapoint);
+      chart.tooltipFormatter = function (datum) {
+        var vals = [['x', colX], ['y', colY]]
+        .map(function (set) {
+          var axis = set[0];
+          var col = set[1];
+          var val = datum[axis];
 
-        if (colX.field) datum.x = colX.field.format.convert(datum.x);
-        if (colY.field) datum.y = colY.field.format.convert(datum.y);
+          var name = (col.field && col.field.name) || col.label || axis;
+          if (col.field) val = col.field.format.convert(val);
 
-        if (colX.metricScaleText) {
-          datum.y += ' per ' + colX.metricScaleText;
-        }
+          return name + ': ' + val;
+        }).join('<br>');
 
-
-        var out = datum.label ? datum.label + '\n' : '';
-        out += datum.x + '\n';
-        out += datum.y;
+        var out = '';
+        if (datum.label) out += colColor.field.name + ': ' + datum.label + '<br>';
+        out += vals;
 
         return out;
       };
@@ -101,12 +103,12 @@ define(function (require) {
       var seriesByLabel = {};
 
       rows.forEach(function (row) {
-        var seriesLabel = hasColor && row[iColor];
-        var s = hasColor ? seriesByLabel[seriesLabel] : series[0];
+        var seriesLabel = colColor && row[iColor];
+        var s = colColor ? seriesByLabel[seriesLabel] : series[0];
 
         if (!s) {
           // I know this could be simplified but I wanted to keep the key order
-          if (hasColor) {
+          if (colColor) {
             s = {
               label: seriesLabel,
               values: []
@@ -124,6 +126,9 @@ define(function (require) {
           x: (row[iX] == null) ? '_all' : row[iX],
           y: row[iY === -1 ? row.length - 1 : iY] // y-axis value
         };
+
+        // skip this datum
+        if (datum.y == null) return;
 
         if (colX.metricScale) {
           // support scaling response values to represent an average value on the y-axis

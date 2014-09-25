@@ -75,7 +75,7 @@ define(function (require) {
     config.get = function (key, defaultVal) {
       if (vals[key] == null) {
         if (defaultVal == null) {
-          return defaults[key];
+          return defaults[key].value;
         } else {
           return _.cloneDeep(defaultVal);
         }
