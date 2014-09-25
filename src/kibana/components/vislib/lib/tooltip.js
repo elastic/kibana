@@ -12,12 +12,12 @@ define(function (require) {
      *  el => reference to DOM element
      *  formatter => tooltip formatter
      */
-    function Tooltip(vis, events) {
+    function Tooltip(handler, events) {
       if (!(this instanceof Tooltip)) {
-        return new Tooltip(vis, events);
+        return new Tooltip(handler, events);
       }
-      this.vis = vis;
-      this.el = vis.el;
+      this.handler = handler;
+      this.el = handler.el;
       this.events = events;
       this.tooltipClass = 'vis-tooltip';
       this.containerClass = 'vis-wrapper';
@@ -25,7 +25,7 @@ define(function (require) {
 
     Tooltip.prototype.render = function () {
       var self = this;
-      var tooltipFormatter = this.vis.data.get('tooltipFormatter');
+      var tooltipFormatter = this.handler.data.get('tooltipFormatter');
 
       return function (selection) {
 
@@ -59,7 +59,6 @@ define(function (require) {
 
               offset = self.getOffsets(tooltipDiv, mouseMove);
 
-              console.log(self.events.eventResponse(d, i));
               // return text and position for tooltip
               return tooltipDiv.datum(self.events.eventResponse(d, i))
                 .html(tooltipFormatter)

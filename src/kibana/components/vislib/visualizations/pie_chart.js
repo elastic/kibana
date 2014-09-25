@@ -12,13 +12,13 @@ define(function (require) {
      * Column chart visualization => vertical bars, stacked bars
      */
     _(PieChart).inherits(Chart);
-    function PieChart(vis, chartEl, chartData) {
+    function PieChart(handler, chartEl, chartData) {
       if (!(this instanceof PieChart)) {
-        return new PieChart(vis, chartEl, chartData);
+        return new PieChart(handler, chartEl, chartData);
       }
       PieChart.Super.apply(this, arguments);
 
-      this._attr = _.defaults(vis._attr || {}, {
+      this._attr = _.defaults(handler._attr || {}, {
         getSize: function (d) { return d.size; },
         dispatch: d3.dispatch('brush', 'click', 'hover', 'mouseenter', 'mouseleave', 'mouseover', 'mouseout')
       });
@@ -43,15 +43,14 @@ define(function (require) {
       })
       .on('mouseout.pie', function mouseOutPie() {
         d3.select(this)
-        .classed('hover', false)
-        .style('stroke', null);
+        .classed('hover', false);
       });
     };
 
     PieChart.prototype.addPath = function (width, height, svg, slices) {
       var isDonut = this._attr.isDonut;
       var radius = Math.min(width, height) / 2;
-      var color = this.vis.data.getPieColorFunc();
+      var color = this.handler.data.getPieColorFunc();
       var partition = d3.layout.partition()
       .sort(null)
       .value(function (d) {
@@ -98,9 +97,9 @@ define(function (require) {
         })
         .style('stroke', '#fff')
         .style('fill', function (d) {
+          if (d.depth === 0) { return 'none'; }
           return color(d.name);
-        })
-        .attr('fill-rule', 'evenodd');
+        });
 
       // Add tooltip
       if (isTooltip) {

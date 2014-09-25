@@ -7,10 +7,15 @@ define(function (require) {
 
   describe('Vislib Tooltip', function () {
     var Tooltip;
+    var Vis;
+    var Events;
+    var vis;
+    var events;
     var bars;
     var tip;
     var el;
     var chart;
+    var config;
 
     var data = [
       {
@@ -45,6 +50,8 @@ define(function (require) {
 
     beforeEach(function () {
       inject(function (d3, Private) {
+        Vis = Private(require('components/vislib/vis'));
+        Events = Private(require('components/vislib/lib/dispatch'));
         Tooltip = Private(require('components/vislib/lib/tooltip'));
 
         el = d3.select('body')
@@ -52,6 +59,17 @@ define(function (require) {
           .attr('class', 'vis-col-wrapper')
           .style('width', '40px')
           .style('height', '40px');
+
+        config = {
+          shareYAxis: true,
+          addTooltip: true,
+          addLegend: true,
+          addEvents: true,
+          addBrushing: true
+        };
+
+        vis = new Vis(el[0][0], config);
+        vis.render(data);
 
         tip = new Tooltip(el[0][0], function (d) {
           return 'd.x: ' + d.x + ', d.y: ' + d.y;
@@ -75,8 +93,6 @@ define(function (require) {
           });
 
         bars.call(tip.render());
-
-        // d3.select('.bars').on('mousemove.tip')(d3.select('.bars').node().__data__, 0);
       });
 
 

@@ -5,16 +5,16 @@ define(function (require) {
     /**
      * Events Class
      */
-    function Dispatch(vis, chartData) {
+    function Dispatch(handler, chartData) {
       if (!(this instanceof Dispatch)) {
-        return new Dispatch(vis, chartData);
+        return new Dispatch(handler, chartData);
       }
-      var type = vis._attr.type;
+      var type = handler._attr.type;
 
-      this.vis = vis;
+      this.handler = handler;
       this.chartData = chartData;
-      this.color = type === 'pie' ? vis.data.getPieColorFunc() : vis.data.getColorFunc();
-      this._attr = _.defaults(vis._attr || {}, {
+      this.color = type === 'pie' ? handler.data.getPieColorFunc() : handler.data.getColorFunc();
+      this._attr = _.defaults(handler._attr || {}, {
         yValue: function (d) {
           return d.y;
         },
@@ -29,19 +29,20 @@ define(function (require) {
       var color = this.color;
       var chartData = this.chartData;
       var attr = this._attr;
-      var vis = this.vis;
+      var handler = this.handler;
 
       return {
-        value     : getYValue(d, i),
-        point     : d,
-        label     : label,
-        color     : color(label),
+        value: getYValue(d, i),
+        point: d,
+        label: label,
+        color: color(label),
         pointIndex: i,
-        series    : chartData.series,
-        config    : attr,
-        data      : chartData,
-        e         : d3.event,
-        vis       : vis
+        series: chartData.series,
+        slices: chartData.slices,
+        config: attr,
+        data: chartData,
+        e: d3.event,
+        handler: handler
       };
     };
 

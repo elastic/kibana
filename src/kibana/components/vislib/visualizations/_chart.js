@@ -10,22 +10,22 @@ define(function (require) {
      * Base Class for all visualizations.
      * Exposes a render method.
      */
-    function Chart(vis, el, chartData) {
+    function Chart(handler, el, chartData) {
       if (!(this instanceof Chart)) {
-        return new Chart(vis, el, chartData);
+        return new Chart(handler, el, chartData);
       }
 
-      this.vis = vis;
+      this.handler = handler;
       this.chartEl = el;
       this.chartData = chartData;
-      this.events = new Dispatch(vis, chartData);
+      var events = this.events = new Dispatch(handler, chartData);
 
-      if (vis._attr.addTooltip) {
+      if (handler._attr.addTooltip) {
         // Add tooltip
-        this.tooltip = new Tooltip(vis, this.events);
+        this.tooltip = new Tooltip(handler, events);
       }
 
-      this._attr = _.defaults(vis._attr || {}, {});
+      this._attr = _.defaults(handler._attr || {}, {});
     }
 
     // Render the visualization.

@@ -66,6 +66,7 @@ define(function (require) {
         .selectAll('.chart')
         .each(function (chartData) {
           // new up the visualization type
+          console.log(self);
           var chart = new self.ChartClass(self, this, chartData);
 
           // Bind events to the chart
