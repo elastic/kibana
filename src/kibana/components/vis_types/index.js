@@ -7,7 +7,7 @@ define(function (require) {
       index: ['name'],
       initialSet: [
         Private(require('components/vis_types/histogram')),
-        // Private(require('components/vis_types/line')),
+        Private(require('components/vis_types/line')),
         // Private(require('components/vis_types/pie'))
       ]
     });
