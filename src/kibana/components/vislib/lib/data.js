@@ -38,9 +38,50 @@ define(function (require) {
       return [this.data];
     };
 
+    // Function to determine whether to display the legend or not
+    // Displays legend when more than one series of data present
+    Data.prototype.isLegendShown = function () {
+      var isLegend = false;
+      var visData;
+
+      if (this.data.rows) {
+        visData = this.data.rows;
+      } else if (this.data.columns) {
+        visData = this.data.columns;
+      } else {
+        visData = [this.data];
+      }
+
+      _.forEach(visData, function countSeriesLength(obj) {
+        var dataLength = obj.series ? obj.series.length : obj.slices.children.length;
+
+        if (dataLength > 1) {
+          isLegend = true;
+        }
+      });
+
+      return isLegend;
+    };
+
+    Data.prototype.pieData = function () {
+      if (!this.data.slices) {
+        return this.data.rows ? this.data.rows : this.data.columns;
+      }
+      return [this.data];
+    };
+
     // Get attributes off the data, e.g. `tooltipFormatter` or `xAxisFormatter`
     Data.prototype.get = function (thing) {
-      var data = this.chartData();
+      var data;
+
+      if (this.data.rows) {
+        data = this.data.rows;
+      } else if (this.data.columns) {
+        data = this.data.columns;
+      } else {
+        data = [this.data];
+      }
+
       // pulls the value off the first item in the array
       // these values are typically the same between data objects of the same chart
       // May need to verify this or refactor
@@ -62,9 +103,10 @@ define(function (require) {
       return values;
     };
 
+    // TODO: need to make this more generic
     Data.prototype.shouldBeStacked = function (series) {
       // Series should be an array
-      if (series.length > 1) {
+      if (this._attr.type === 'histogram' && series.length > 1) {
         return true;
       }
       return false;
@@ -78,7 +120,10 @@ define(function (require) {
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
       _.forEach(this.flatten(), function (series) {
-        arr.push(self.getYStackMax(series));
+        if (self.shouldBeStacked(series)) {
+          return arr.push(self.getYStackMax(series));
+        }
+        return arr.push(self.getYMax(series));
       });
 
       // return the largest value from the array
@@ -86,22 +131,20 @@ define(function (require) {
     };
 
     Data.prototype.stackData = function (series) {
-      // Determine if the data should be stacked
-      if (this.shouldBeStacked(series)) {
-        // if true, stack data
-        return this._attr.stack(series);
-      }
-      return series;
+      return this._attr.stack(series);
     };
 
     Data.prototype.getYStackMax = function (series) {
-      // Return the calculated y value
       return d3.max(this.stackData(series), function (data) {
         return d3.max(data, function (d) {
-          // if stacked, need to add d.y0 + d.y for the y value
-          if (d.y0) {
-            return d.y0 + d.y;
-          }
+          return d.y0 + d.y;
+        });
+      });
+    };
+
+    Data.prototype.getYMax = function (series) {
+      return d3.max(series, function (data) {
+        return d3.max(data, function (d) {
           return d.y;
         });
       });
@@ -124,7 +167,12 @@ define(function (require) {
 
     // Return a function that does color lookup on labels
     Data.prototype.getColorFunc = function () {
-      return color(this.getLabels(this.data));
+      return color(this.getLabels());
+    };
+
+    // Return a function that does color lookup on names for pie charts
+    Data.prototype.getPieColorFunc = function () {
+      return color(this.get('names'));
     };
 
     return Data;

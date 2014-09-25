@@ -4,7 +4,7 @@ define(function (require) {
     var $ = require('jquery');
 
     // Dynamically adds css file
-    require('css!components/vislib/components/styles/main');
+    require('css!components/vislib/styles/main');
 
     /*
      * Append a tooltip div element to the visualization
@@ -24,7 +24,7 @@ define(function (require) {
 
     Tooltip.prototype.render = function () {
       var self = this;
-      
+
       return function (selection) {
 
         // if tooltip not appended to body, append one
@@ -40,18 +40,12 @@ define(function (require) {
         var tooltipDiv = d3.select('.' + self.tooltipClass);
 
         selection.each(function () {
-          
+
           // DOM element on which the tooltip is called
           var element = d3.select(this);
-          
+
           // define selections relative to el of tooltip
-          var chartXoffset;
-          var chartWidth;
-          var chartHeight;
-          var yaxisWidth;
           var offset;
-          var tipWidth;
-          var tipHeight;
 
           element
             .on('mousemove.tip', function (d) {
@@ -60,20 +54,20 @@ define(function (require) {
                 left: d3.event.clientX,
                 top: d3.event.clientY
               };
-              
+
               offset = self.getOffsets(tooltipDiv, mouseMove);
 
               // return text and position for tooltip
               return tooltipDiv.datum(d)
-                .text(self.tooltipFormatter)
-                .style('visibility', 'visible')
+                .html(self.tooltipFormatter)
+                .style('display', 'block')
                 .style('left', mouseMove.left + offset.left + 'px')
-                .style('top', mouseMove.top - offset.top + 'px');
+                .style('top', mouseMove.top + offset.top + 'px');
             })
 
             .on('mouseout.tip', function () {
               // hide tooltip
-              return tooltipDiv.style('visibility', 'hidden');
+              return tooltipDiv.style('display', 'none');
             });
         });
       };
@@ -83,37 +77,30 @@ define(function (require) {
 
       var self = this;
       var offset = {top: 10, left: 10};
-      var container;
-      var chartXoffset;
-      var chartYoffset;
-      var chartWidth;
-      var chartHeight;
-      var tipWidth;
-      var tipHeight;
-      
+
       if ($(self.el).find('.' + self.containerClass)) {
-        container    = $(self.el).find('.' + self.containerClass);
-        chartXoffset = container.offset().left;
-        chartYoffset = container.offset().top;
-        chartWidth   = container.width();
-        chartHeight  = container.height();
-        tipWidth     = tooltipDiv[0][0].clientWidth;
-        tipHeight    = tooltipDiv[0][0].clientHeight;
+        var container    = $(self.el).find('.' + self.containerClass);
+        var chartXOffset = container.offset().left;
+        var chartYOffset = container.offset().top;
+        var chartWidth   = container.width();
+        var chartHeight  = container.height();
+        var tipWidth     = tooltipDiv[0][0].clientWidth;
+        var tipHeight    = tooltipDiv[0][0].clientHeight;
 
         // change xOffset to keep tooltip within container
         // if tip width + xOffset puts it over right edge of container, flip left
         // unless flip left puts it over left edge of container
-        if ((mouseMove.left + offset.left + tipWidth) > (chartXoffset + chartWidth) &&
-          (mouseMove.left - tipWidth - 10) > chartXoffset) {
+        if ((mouseMove.left + offset.left + tipWidth) > (chartXOffset + chartWidth) &&
+          (mouseMove.left - tipWidth - 10) > chartXOffset) {
           offset.left = -10 - tipWidth;
         }
 
         // change yOffset to keep tooltip within container
-        if ((mouseMove.top + tipHeight - 10) > (chartYoffset + chartHeight)) {
-          offset.top = chartYoffset + chartHeight;
+        if ((mouseMove.top + tipHeight - 10) > (chartYOffset + chartHeight)) {
+          offset.top = chartYOffset + chartHeight;
         }
       }
-      
+
       return offset;
     };
 

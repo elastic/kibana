@@ -25,7 +25,7 @@ module.exports = {
         },
         {
           browserName: 'firefox',
-          platform: 'Linux',
+          platform: 'Windows 7',
         },
         {
           browserName: 'internet explorer',

@@ -51,12 +51,45 @@
 
       <!-- no results -->
       <div class="col-md-10" ng-show="resultState === 'none'">
-        <div class="discover-overlay">
-          <h2>No results found <i class="fa fa-meh-o"></i></h2>
-          <div class="col-md-12">
-            Unfortunately I could not find any results matching your search. I tried really hard. I looked all over the place. Try expanding your search, or increasing your time window if searching by time. I really want to make this work for you. Help me, help you.
+          <div class="col-md-10 col-md-offset-1">
+            <h1>No results found <i class="fa fa-meh-o"></i></h1>
+
+            <p>
+              Unfortunately I could not find any results matching your search. I tried really hard. I looked all over the place and frankly, I just couldn't find anything good. Help me, help you. Here's some ideas:
+            </p>
+
+            <div ng-show="opts.timefield">
+              <p>
+                <h3>Expand your time range</h3>
+                <p>I see you are looking at an index with a date field. It is possible your query does not match anything in the current time range, or that there is not data at all in the currently selected time range. Click the button below to open the time picker. For future reference you can open the time picker by clicking the <a class="btn btn-xs navbtn" ng-click="toggleTimepicker()">time picker <i class="fa fa-clock-o"></i></a> in the top right corner of your screen.
+              </p>
+            </div>
+
+            <h3>Refine your query</h3>
+            <p>
+              The search bar at the top allows Kibana uses Elasticsearch's support for Lucene Query String syntax. Let's say we're searching web server logs that have been parsed into a few fields.
+            </p>
+
+            <p>
+
+              <h4>Examples:</h4>
+              Find requests that contain the number 200, in any field:
+              <pre>200</pre>
+
+              Or we can search in a specific field. Find 200 in the status field:
+              <pre>status:200</pre>
+
+              Find all status codes between 400-499:
+              <pre>status:[400 TO 499]</pre>
+
+              Find status codes 400-499 with the extension php:
+              <pre>status:[400 TO 499] AND extension:PHP</pre>
+
+              Or HTML
+              <pre>status:[400 TO 499] AND (extension:php OR extension:html)</pre>
+            </p>
+
           </div>
-        </div>
       </div>
 
       <!-- loading -->
@@ -74,7 +107,7 @@
           {{ opts.savedSearch.title }}
           <i tooltip="Reload saved query" ng-click="resetQuery();" class="fa fa-undo smallest small"></i>
         </h3>
-        <div class="discover-timechart" >
+        <div class="discover-timechart" ng-if="opts.timefield">
           <center class="small">
             <span tooltip="To change the time, click the clock icon in the navigation bar">{{timeRange.from | moment}} - {{timeRange.to | moment}}</span>
             <!-- TODO: Currently no way to apply this setting to the visualization -->

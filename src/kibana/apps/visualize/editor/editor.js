@@ -41,7 +41,7 @@ define(function (require) {
     'kibana/notify',
     'kibana/courier'
   ])
-  .controller('VisEditor', function ($scope, $route, timefilter, appStateFactory, $location, kbnUrl, $timeout) {
+  .controller('VisEditor', function ($scope, $route, timefilter, appStateFactory, $location, kbnUrl, $timeout, courier) {
 
     var _ = require('lodash');
     var angular = require('angular');
@@ -98,6 +98,7 @@ define(function (require) {
         delete $state.query;
       } else {
         $state.query = $state.query || searchSource.get('query');
+        courier.setRootSearchSource(searchSource);
         searchSource.set('query', $state.query);
       }
 
@@ -139,11 +140,13 @@ define(function (require) {
     }
 
     $scope.fetch = function () {
+      $state.save();
+      if (!$scope.linked) searchSource.set('query', $state.query);
       searchSource.fetch();
     };
 
     $scope.startOver = function () {
-      $location.url('/visualize');
+      kbnUrl.change('/visualize', {}, true);
     };
 
     $scope.doSave = function () {

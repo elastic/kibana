@@ -45,7 +45,7 @@ define(function (require) {
     }
   });
 
-  app.controller('discover', function ($scope, config, courier, $route, $window, savedSearches, savedVisualizations,
+  app.controller('discover', function ($scope, config, courier, $route, $window, $q, savedSearches, savedVisualizations,
     Notifier, $location, globalState, appStateFactory, timefilter, Promise, Private, kbnUrl) {
 
     var Vis = Private(require('components/vis/vis'));
@@ -56,6 +56,8 @@ define(function (require) {
     var notify = new Notifier({
       location: 'Discover'
     });
+
+    $scope.timefilter = timefilter;
 
     // the saved savedSearch
     var savedSearch = $route.current.locals.savedSearch;
@@ -209,11 +211,17 @@ define(function (require) {
           notify.error('An error occured with your request. Reset your inputs and try again.');
         }).catch(notify.fatal);
 
-        return setupVisualization().then(function () {
-          $scope.updateTime();
+        if ($scope.opts.timefield) {
+          setupVisualization().then(function () {
+            $scope.updateTime();
+            init.complete = true;
+            $scope.$emit('application.load');
+          });
+        } else {
           init.complete = true;
           $scope.$emit('application.load');
-        });
+        }
+
       });
     });
 
@@ -582,6 +590,8 @@ define(function (require) {
 
     var loadingVis;
     var setupVisualization = function () {
+      // If we're not setting anything up we need to return an empty promise
+      if (!$scope.opts.timefield) return $q.when();
       if (loadingVis) return loadingVis;
 
 

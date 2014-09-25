@@ -197,7 +197,7 @@ p.rows-label, p.columns-label {
   stroke-width: 1px;
 }
 
-path, line, .axis line, .axis path {
+.axis line, .axis path {
   stroke: #ddd;
   fill: none;
   shape-rendering: crispEdges;
@@ -218,6 +218,7 @@ path, line, .axis line, .axis path {
 }
 
 .k4tip, .vis-tooltip {
+  display: none;
   line-height: 1.1;
   font-size: 12px;
   font-weight: normal;
@@ -227,9 +228,8 @@ path, line, .axis line, .axis path {
   border-radius: 4px;
   position: fixed;
   z-index: 120;
-  visibility: hidden;
   word-wrap: break-word;
-  max-width: 140px;
+  max-width: 40%;
 }
 
 .rect {
