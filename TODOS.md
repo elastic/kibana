@@ -443,6 +443,12 @@
    - Now that all calls to _data and _removeData have been replaced
  - **[src/kibana/components/index_patterns/_mapper.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/index_patterns/_mapper.js)**
    - Change index to be the resolved in some way, last three months, last hour, last year, whatever
+ - **[src/kibana/components/vis_types/converters/pie.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/vis_types/converters/pie.js)**
+   - refactor this code to simplify and possibly merge with data converter code below
+ - **[src/kibana/components/vislib/lib/data.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/vislib/lib/data.js)**
+   - need to make this more generic
+ - **[src/kibana/components/vislib/lib/x_axis.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/vislib/lib/x_axis.js)**
+   - need to add mouseover to show tooltip on truncated labels
  - **[src/kibana/components/vislib/vis.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/vislib/vis.js)**
    - need to come up with a solution for resizing when no data is available
  - **[src/kibana/components/vislib/visualizations/column_chart.js](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/components/vislib/visualizations/column_chart.js)**

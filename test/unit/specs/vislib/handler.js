@@ -12,6 +12,7 @@ define(function (require) {
     var Data;
     var Handler;
     var handler;
+    var ColumnHandler;
     var vis;
     var el;
     var example;
@@ -92,7 +93,8 @@ define(function (require) {
       inject(function (d3, Private) {
         Vis = Private(require('components/vislib/vis'));
         Data = Private(require('components/vislib/lib/data'));
-        Handler = Private(require('components/vislib/lib/handler'));
+        Handler = Private(require('components/vislib/lib/handler/handler'));
+        ColumnHandler = Private(require('components/vislib/lib/handler/types/column'));
 
         el = d3.select('body').append('div')
           .attr('class', 'visualize');
@@ -105,14 +107,9 @@ define(function (require) {
         };
 
         vis = new Vis(el[0][0], config);
+        vis.data = data;
 
-        handler = new Handler({
-          vis: vis,
-          el: el[0][0],
-          data:  data,
-          ChartClass:  vis.ChartClass,
-          _attr: config
-        });
+        handler = ColumnHandler(vis);
 
 //        handler.render(data);
       });

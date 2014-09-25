@@ -37,7 +37,6 @@ define(function (require) {
 
     // Return the d3 y axis
     YAxis.prototype.getYAxis = function (height) {
-      var self = this;
       var yScale = this.getYScale(height);
 
       // y scale should never be `NaN`
@@ -52,7 +51,7 @@ define(function (require) {
         .ticks(this.tickScale(height))
         .orient('left');
 
-      if (self.yScale.domain()[1] <= 10) {
+      if (this.yScale.domain()[1] <= 10) {
         this.yAxis.tickFormat(d3.format('n'));
       }
 
@@ -84,9 +83,11 @@ define(function (require) {
       return function (selection) {
 
         selection.each(function () {
-          div = d3.select(this);
-          width = $(this).width();
-          height = $(this).height() - margin.top - margin.bottom;
+          var el = this;
+
+          div = d3.select(el);
+          width = $(el).width();
+          height = $(el).height() - margin.top - margin.bottom;
 
           // Validate whether width and height are not 0 or `NaN`
           self.validateWidthandHeight(width, height);

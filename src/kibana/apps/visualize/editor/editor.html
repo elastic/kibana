@@ -24,13 +24,13 @@
           <div class="input-group"
             ng-class="queryInput.$invalid ? 'has-error' : ''">
             <input
+              ng-model="state.query"
               query-input="savedVis.searchSource"
               input-focus
               kbn-typeahead-input
               placeholder="Search..."
               type="text"
-              class="form-control"
-              ng-model="state.query">
+              class="form-control">
 
             <button
               class="btn btn-default" type="submit"

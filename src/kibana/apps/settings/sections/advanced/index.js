@@ -49,10 +49,11 @@ define(function (require) {
           .catch(notify.fatal);
         };
 
-        $scope.configs = _.map(configDefaults, function (defVal, name) {
+        $scope.configs = _.map(configDefaults, function (def, name) {
           var conf = {
             name: name,
-            defVal: defVal,
+            defVal: def.value,
+            description: def.description,
             value: configVals[name]
           };
 

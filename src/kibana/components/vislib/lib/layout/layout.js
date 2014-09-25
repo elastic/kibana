@@ -2,7 +2,7 @@ define(function (require) {
   return function LayoutFactory(d3, Private) {
     var _ = require('lodash');
 
-    var layoutType = Private(require('components/vislib/layout_types'));
+    var layoutType = Private(require('components/vislib/lib/layout/layout_types'));
 
     /*
     * The Layout Constructor is responsible for rendering the visualization
