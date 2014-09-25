@@ -20,6 +20,7 @@ define(function (require) {
   require('directives/spinner');
   require('directives/paginate');
   require('directives/pretty_duration');
+  require('directives/style_compile');
   require('directives/rows');
 
 
