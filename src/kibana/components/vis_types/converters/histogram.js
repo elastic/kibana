@@ -7,7 +7,7 @@ define(function (require) {
     return function (chart, columns, rows) {
       // index of color
       var iColor = _.findIndex(columns, { categoryName: 'group' });
-      var hasColor = iColor !== -1;
+      var colColor = columns[iColor];
 
       /*****
        * Get values related to the X-Axis
@@ -79,20 +79,26 @@ define(function (require) {
 
 
       // setup the formatter for the label
-      chart.tooltipFormatter = function (datapoint) {
-        var datum = _.clone(datapoint);
+      chart.tooltipFormatter = function (datum) {
+        var x = datum.x;
+        var y = datum.y;
 
-        if (colX.field) datum.x = colX.field.format.convert(datum.x);
-        if (colY.field) datum.y = colY.field.format.convert(datum.y);
-
-        if (colX.metricScaleText) {
-          datum.y += ' per ' + colX.metricScaleText;
+        if (x != null && colX.field) {
+          x = colX.field.format.convert(x);
         }
 
+        if (y != null && colY.field) {
+          y = colY.field.format.convert(y);
+        }
 
-        var out = datum.label ? datum.label + '\n' : '';
-        out += datum.x + '\n';
-        out += datum.y;
+        if (y != null && colX.metricScaleText) {
+          y += ' in ' + colX.metricScaleText;
+        }
+
+        var out = '';
+        if (datum.label) out += colColor.field.name + ': ' + datum.label + '<br>';
+        out += colX.field.name + ': ' + x + '<br>';
+        out += colY.field.name + ': ' + y;
 
         return out;
       };
@@ -101,12 +107,12 @@ define(function (require) {
       var seriesByLabel = {};
 
       rows.forEach(function (row) {
-        var seriesLabel = hasColor && row[iColor];
-        var s = hasColor ? seriesByLabel[seriesLabel] : series[0];
+        var seriesLabel = colColor && row[iColor];
+        var s = colColor ? seriesByLabel[seriesLabel] : series[0];
 
         if (!s) {
           // I know this could be simplified but I wanted to keep the key order
-          if (hasColor) {
+          if (colColor) {
             s = {
               label: seriesLabel,
               values: []
@@ -124,6 +130,9 @@ define(function (require) {
           x: (row[iX] == null) ? '_all' : row[iX],
           y: row[iY === -1 ? row.length - 1 : iY] // y-axis value
         };
+
+        // skip this datum
+        if (datum.y == null) return;
 
         if (colX.metricScale) {
           // support scaling response values to represent an average value on the y-axis
