@@ -32,10 +32,11 @@ define(function (require) {
 
       return function (selection) {
         selection.each(function () {
-          var div = d3.select(this);
-          var width = $(this).width();
-          var height = $(this).height();
-
+          var el = this;
+          var div = d3.select(el);
+          var width = $(el).width();
+          var height = $(el).height();
+          
           self.validateWidthandHeight(width, height);
 
           div.append('svg')
