@@ -47,7 +47,7 @@ define(function (require) {
 
     LineChart.prototype.addCircleEvents = function (circles) {
       var self = this;
-      var tooltip = this.vis.tooltip;
+      var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
       var dispatch = this._attr.dispatch;
 

@@ -49,7 +49,7 @@ define(function (require) {
       var color = this.vis.data.getColorFunc();
       var xScale = this.vis.xAxis.xScale;
       var yScale = this.vis.yAxis.yScale;
-      var tooltip = this.vis.tooltip;
+      var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
       var layer;
       var bars;

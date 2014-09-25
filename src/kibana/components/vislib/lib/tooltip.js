@@ -12,18 +12,20 @@ define(function (require) {
      *  el => reference to DOM element
      *  formatter => tooltip formatter
      */
-    function Tooltip(el, formatter) {
+    function Tooltip(vis, events) {
       if (!(this instanceof Tooltip)) {
-        return new Tooltip(el, formatter);
+        return new Tooltip(vis, events);
       }
-      this.el = el;
-      this.tooltipFormatter = formatter;
+      this.vis = vis;
+      this.el = vis.el;
+      this.events = events;
       this.tooltipClass = 'vis-tooltip';
       this.containerClass = 'vis-wrapper';
     }
 
     Tooltip.prototype.render = function () {
       var self = this;
+      var tooltipFormatter = this.vis.data.get('tooltipFormatter');
 
       return function (selection) {
 
@@ -39,7 +41,7 @@ define(function (require) {
 
         var tooltipDiv = d3.select('.' + self.tooltipClass);
 
-        selection.each(function () {
+        selection.each(function (data, i) {
 
           // DOM element on which the tooltip is called
           var element = d3.select(this);
@@ -57,9 +59,10 @@ define(function (require) {
 
               offset = self.getOffsets(tooltipDiv, mouseMove);
 
+              console.log(self.events.eventResponse(d, i));
               // return text and position for tooltip
-              return tooltipDiv.datum(d)
-                .html(self.tooltipFormatter)
+              return tooltipDiv.datum(self.events.eventResponse(d, i))
+                .html(tooltipFormatter)
                 .style('display', 'block')
                 .style('left', mouseMove.left + offset.left + 'px')
                 .style('top', mouseMove.top + offset.top + 'px');

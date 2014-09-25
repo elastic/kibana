@@ -80,7 +80,7 @@ define(function (require) {
       .outerRadius(function (d) {
         return Math.max(0, y(d.y + d.dy));
       });
-      var tooltip = this.vis.tooltip;
+      var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
       var self = this;
       var path;
