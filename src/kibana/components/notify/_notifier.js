@@ -8,6 +8,8 @@ define(function (require) {
   var clearTO = clearTimeout;
   var consoleGroups = ('group' in window.console) && ('groupCollapsed' in window.console) && ('groupEnd' in window.console);
 
+  var fatalSplashScreen = require('text!components/notify/partials/fatal_splash_screen.html');
+
   var log = _.noop;
   if (typeof KIBANA_DIST === 'undefined') {
     log = function () {
@@ -170,16 +172,17 @@ define(function (require) {
     });
 
     var $container = $('#fatal-splash-screen');
-    if ($container.size()) {
-      $container.append(html);
-      return;
+
+    if (!$container.size()) {
+      $(document.body)
+        // in case the app has not completed boot
+      .removeAttr('ng-cloak')
+      .html(fatalSplashScreen);
+
+      $container = $('#fatal-splash-screen');
     }
 
-    // in case the app has not completed boot
-    $(document.body)
-      .removeAttr('ng-cloak')
-      .html('<div id="fatal-splash-screen" class="container-fuild">' + html + '</div>');
-
+    $container.append(html);
     console.error(err.stack);
   };
 
