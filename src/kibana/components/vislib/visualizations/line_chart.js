@@ -6,7 +6,7 @@ define(function (require) {
     var Chart = Private(require('components/vislib/visualizations/_chart'));
 
     // Dynamically adds css file
-    require('css!components/vislib/components/styles/main');
+    require('css!components/vislib/styles/main');
 
     _(LineChart).inherits(Chart);
     function LineChart(vis, chartEl, chartData) {
@@ -19,37 +19,13 @@ define(function (require) {
       this._attr = _.defaults(vis._attr || {}, {
         interpolate: 'linear',
         xValue: function (d) { return d.x; },
-        yValue: function (d) { return d.y; },
-        dispatch: d3.dispatch('brush', 'click', 'hover', 'mouseenter', 'mouseleave', 'mouseover', 'mouseout')
+        yValue: function (d) { return d.y; }
       });
     }
 
-    // Response to `click` and `hover` events
-    LineChart.prototype.eventResponse = function (d, i) {
-      var getYValue = this._attr.yValue;
-      var color = this.vis.data.getColorFunc();
-      var series = this.chartData.series;
-      var config = this._attr;
-      var chartData = this.chartData;
-
-      return {
-        value: getYValue(d, i),
-        point: d,
-        label: d.label,
-        color: color(d.label),
-        pointIndex: i,
-        series: series,
-        config: config,
-        data: chartData,
-        e: d3.event
-      };
-    };
-
     LineChart.prototype.addCircleEvents = function (circles) {
-      var self = this;
-      var tooltip = this.tooltip;
-      var isTooltip = this._attr.addTooltip;
-      var dispatch = this._attr.dispatch;
+      var events = this.events;
+      var dispatch = this.events._attr.dispatch;
 
       circles
       .on('mouseover.circle', function mouseOverCircle(d, i) {
@@ -60,11 +36,11 @@ define(function (require) {
         .style('stroke', '#333')
         .style('cursor', 'pointer');
 
-        dispatch.hover(self.eventResponse(d, i));
+        dispatch.hover(events.eventResponse(d, i));
         d3.event.stopPropagation();
       })
       .on('click.circle', function clickCircle(d, i) {
-        dispatch.click(self.eventResponse(d, i));
+        dispatch.click(events.eventResponse(d, i));
         d3.event.stopPropagation();
       })
       .on('mouseout.circle', function mouseOutCircle() {
@@ -74,41 +50,6 @@ define(function (require) {
         .classed('hover', false)
         .style('stroke', null);
       });
-
-      // Add tooltip
-      if (isTooltip) {
-        circles.call(tooltip.render());
-      }
-    };
-
-    // Add brush to the svg
-    LineChart.prototype.addBrush = function (xScale, svg) {
-      var brushDispatch = this._attr.dispatch.brush;
-      var height = this._attr.height;
-      var margin = this._attr.margin;
-      var self = this;
-
-      // Brush scale
-      var brush = d3.svg.brush()
-      .x(xScale)
-      .on('brushend', function brushEnd() {
-        // response returned on brush
-        return brushDispatch({
-          range: brush.extent(),
-          config: self._attr,
-          e: d3.event,
-          data: self.chartData
-        });
-      });
-
-      if (self._attr.addBrushing) {
-        // add brush canvas
-        svg.append('g')
-        .attr('class', 'brush')
-        .call(brush)
-          .selectAll('rect')
-          .attr('height', height - margin.top - margin.bottom);
-      }
     };
 
     LineChart.prototype.addCircles = function (svg, data) {
@@ -119,6 +60,8 @@ define(function (require) {
       var ordered = this.vis.data.get('ordered');
       var circleRadius = 4;
       var circleStrokeWidth = 1;
+      var tooltip = this.vis.tooltip;
+      var isTooltip = this._attr.addTooltip;
       var layer;
       var circles;
 
@@ -167,6 +110,11 @@ define(function (require) {
         return yScale(d.y);
       })
       .attr('r', circleRadius);
+
+      // Add tooltip
+      if (isTooltip) {
+        circles.call(tooltip.render());
+      }
 
       return circles;
     };
@@ -293,7 +241,7 @@ define(function (require) {
           self.addClipPath(svg, width, height);
 
           // addBrush canvas
-          self.addBrush(xScale, svg);
+          self.events.addBrush(xScale, svg);
 
           // add lines
           lines = self.addLines(svg, data.series);
