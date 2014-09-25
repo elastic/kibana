@@ -19,7 +19,10 @@
       </thead>
       <tbody>
         <tr ng-repeat="conf in configs | filter:advancedFilter" ng-class="conf.value === undefined ? 'default' : 'custom'">
-          <td class="name">{{conf.name}}</td>
+          <td class="name">
+            <b>{{conf.name}}</b><br>
+            <span class="smaller">{{conf.description}}</span>
+          </td>
           <td class="value">
             <form
               ng-if="conf.editting"
