@@ -34,7 +34,15 @@ define(function (require) {
      */
     function setAppSource(source) {
       appSource = source;
-      appSource.inherits(globalSource);
+
+      // walk the parent chain until we get to the global source or nothing
+      // that's where we will attach to the globalSource
+      var literalRoot = source;
+      while (literalRoot._parent && literalRoot._parent !== globalSource) {
+        literalRoot = literalRoot._parent;
+      }
+
+      literalRoot.inherits(globalSource);
     }
 
     /**
