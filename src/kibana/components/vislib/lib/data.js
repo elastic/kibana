@@ -103,9 +103,10 @@ define(function (require) {
       return values;
     };
 
+    // TODO: need to make this more generic
     Data.prototype.shouldBeStacked = function (series) {
       // Series should be an array
-      if (series.length > 1) {
+      if (this._attr.type === 'histogram' && series.length > 1) {
         return true;
       }
       return false;
@@ -119,7 +120,10 @@ define(function (require) {
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
       _.forEach(this.flatten(), function (series) {
-        arr.push(self.getYStackMax(series));
+        if (self.shouldBeStacked(series)) {
+          return arr.push(self.getYStackMax(series));
+        }
+        return arr.push(self.getYMax(series));
       });
 
       // return the largest value from the array
@@ -127,22 +131,20 @@ define(function (require) {
     };
 
     Data.prototype.stackData = function (series) {
-      // Determine if the data should be stacked
-      if (this.shouldBeStacked(series)) {
-        // if true, stack data
-        return this._attr.stack(series);
-      }
-      return series;
+      return this._attr.stack(series);
     };
 
     Data.prototype.getYStackMax = function (series) {
-      // Return the calculated y value
       return d3.max(this.stackData(series), function (data) {
         return d3.max(data, function (d) {
-          // if stacked, need to add d.y0 + d.y for the y value
-          if (d.y0) {
-            return d.y0 + d.y;
-          }
+          return d.y0 + d.y;
+        });
+      });
+    };
+
+    Data.prototype.getYMax = function (series) {
+      return d3.max(series, function (data) {
+        return d3.max(data, function (d) {
           return d.y;
         });
       });

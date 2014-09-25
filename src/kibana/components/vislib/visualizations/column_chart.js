@@ -44,13 +44,13 @@ define(function (require) {
     };
 
     ColumnChart.prototype.addBars = function (svg, layers) {
+      var self = this;
       var data = this.chartData;
       var color = this.vis.data.getColorFunc();
       var xScale = this.vis.xAxis.xScale;
       var yScale = this.vis.yAxis.yScale;
       var tooltip = this.vis.tooltip;
       var isTooltip = this._attr.addTooltip;
-      var self = this;
       var layer;
       var bars;
 
