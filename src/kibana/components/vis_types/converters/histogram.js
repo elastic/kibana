@@ -80,25 +80,21 @@ define(function (require) {
 
       // setup the formatter for the label
       chart.tooltipFormatter = function (datum) {
-        var x = datum.x;
-        var y = datum.y;
+        var vals = [['x', colX], ['y', colY]]
+        .map(function (set) {
+          var axis = set[0];
+          var col = set[1];
+          var val = datum[axis];
 
-        if (x != null && colX.field) {
-          x = colX.field.format.convert(x);
-        }
+          var name = (col.field && col.field.name) || col.label || axis;
+          if (col.field) val = col.field.format.convert(val);
 
-        if (y != null && colY.field) {
-          y = colY.field.format.convert(y);
-        }
-
-        if (y != null && colX.metricScaleText) {
-          y += ' in ' + colX.metricScaleText;
-        }
+          return name + ': ' + val;
+        }).join('<br>');
 
         var out = '';
         if (datum.label) out += colColor.field.name + ': ' + datum.label + '<br>';
-        out += colX.field.name + ': ' + x + '<br>';
-        out += colY.field.name + ': ' + y;
+        out += vals;
 
         return out;
       };
