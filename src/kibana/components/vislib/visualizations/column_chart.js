@@ -114,9 +114,12 @@ define(function (require) {
       return bars;
     };
 
-    ColumnChart.prototype.addBarEvents = function (bars) {
+    ColumnChart.prototype.addBarEvents = function (svg, bars, brush) {
       var events = this.events;
       var dispatch = this.events._attr.dispatch;
+      var xScale = this.vis.xAxis.xScale;
+      var startXInv;
+      var endXInv;
 
       bars
         .on('mouseover.bar', function (d, i) {
@@ -127,6 +130,17 @@ define(function (require) {
 
           dispatch.hover(events.eventResponse(d, i));
           d3.event.stopPropagation();
+        })
+        .on('mousedown.bar', function (d, i) {
+          var bar = d3.select(this);
+          var startX = d3.mouse(svg.node());
+          startXInv = xScale.invert(startX[0]);
+
+          // Reset the brush value
+          brush.extent([startXInv, startXInv]);
+
+          // Magic!
+          bar.call(brush);
         })
         .on('click.bar', function (d, i) {
           dispatch.click(events.eventResponse(d, i));
@@ -180,14 +194,18 @@ define(function (require) {
           .attr('transform', 'translate(0,' + margin.top + ')');
 
           // addBrush canvas
-          self.events.addBrush(xScale, svg);
+          var brush = self.events.addBrush(xScale, svg);
+
+          if (brush) {
+            svg.call(brush);
+          }
 
           // add bars
           bars = self.addBars(svg, layers);
 
           // add events to bars
           if (isEvents) {
-            self.addBarEvents(bars);
+            self.addBarEvents(svg, bars, brush);
           }
 
           // chart base line
