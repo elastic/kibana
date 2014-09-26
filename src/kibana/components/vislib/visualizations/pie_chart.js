@@ -4,6 +4,7 @@ define(function (require) {
     var $ = require('jquery');
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
+    var errors = require('errors');
 
     // Dynamically adds css file
     require('css!components/vislib/styles/main');
@@ -121,6 +122,12 @@ define(function (require) {
           var div = d3.select(el);
           var width = $(el).width();
           var height = $(el).height();
+          var minWidth = 20;
+          var minHeight = 20;
+
+          if (width <= minWidth || height <= minHeight) {
+            throw new errors.ContainerTooSmall();
+          }
 
           var svg = div.append('svg')
           .attr('width', width)
