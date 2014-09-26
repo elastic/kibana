@@ -25,30 +25,51 @@ define(function (require) {
 
       // tooltip formatter for pie charts
       chart.tooltipFormatter = function (datum) {
-        function sumValue(sum, cur) {
-          return sum + cur.value;
+        var parent;
+        var sum;
+        var metricCol = _.find(columns, { categoryName: 'metric' });
+
+        // the sum of values at all levels/generations is the same, but levels
+        // are seperated by their parents so the root is the simplest to find
+        for (parent = datum; parent; parent = parent.parent) {
+          sum = parent.value;
         }
 
-        // find the root datum
-        var root = datum;
-        while (root.parent) root = root.parent;
+        var rows = [];
+        for (parent = datum; parent.parent; parent = parent.parent) {
+          var col = columns[parent.depth - 1];
 
-        // the value of the root datum is the sum of every row. coincidental? not certain
-        var sum = root.value;
+          // field/agg details
+          var group = (col.field && col.field.name) || col.label || ('level ' + datum.depth);
 
-        var labels = [];
-        for (var cur = datum; cur.parent; cur = cur.parent) {
-          var label = cur.name + ': ' + cur.value;
-          label += ' (' + Math.round((cur.value / sum) * 100) + '%)';
+          // field value that defines the bucket
+          var name = parent.name;
+          if (col.field) name = col.field.format.convert(name);
 
-          if (cur === datum) {
-            label = '<b>' + label + '</b>';
-          }
+          // metric for the bucket
+          var val = parent.value;
 
-          labels.unshift(label);
+          var cells = [
+            _.repeat('&nbsp;', parent.depth - 1) + group,
+            name,
+            val + ' (' + Math.round((parent.value / sum) * 100) + '%)'
+          ];
+
+          rows.unshift('<tr><td>' + cells.join('</td><td>') + '</td></tr>');
         }
 
-        return labels.join('<br>');
+        return '<table>' +
+          '<thead>' +
+            '<tr>' +
+              '<th>field</th>' +
+              '<th>value</th>' +
+              '<th>' + metricCol.label + '</th>' +
+            '</tr>' +
+          '</thead>' +
+          '<tbody>' +
+            rows.join('') +
+          '</tbody>' +
+        '</table>';
       };
 
 
