@@ -97,6 +97,7 @@ define(function (require) {
         })
         .style('stroke', '#fff')
         .style('fill', function (d) {
+          if (d.depth === 0) { return 'none'; }
           return color(d.name);
         })
         .attr('fill-rule', 'evenodd');
