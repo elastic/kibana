@@ -156,11 +156,11 @@ define(function (require) {
 
       data.forEach(function returnNames(obj) {
         if (obj.names) {
-          names = _.union(names, obj.names);
+          names = names.concat(obj.names);
         }
       });
 
-      return names;
+      return _.unique(names);
     };
 
     // Inject zeros into the data
