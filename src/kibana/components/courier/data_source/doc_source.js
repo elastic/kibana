@@ -4,7 +4,7 @@ define(function (require) {
 
   var inherits = require('lodash').inherits;
 
-  return function DocSourceFactory(Private, Promise, es, storage) {
+  return function DocSourceFactory(Private, Promise, es, sessionStorage) {
     var sendToEs = Private(require('components/courier/data_source/_doc_send_to_es'));
     var SourceAbstract = Private(require('components/courier/data_source/_abstract'));
 
@@ -123,7 +123,7 @@ define(function (require) {
       var key = this._versionKey();
       if (!key) return;
 
-      var v = storage.get(key);
+      var v = sessionStorage.get(key);
       this._version = v ? _.parseInt(v) : void 0;
       return this._version;
     };
@@ -139,7 +139,7 @@ define(function (require) {
       var key = this._versionKey();
       if (!key) return;
       this._version = version;
-      storage.set(key, version);
+      sessionStorage.set(key, version);
     };
 
     /**
@@ -148,7 +148,7 @@ define(function (require) {
     DocSource.prototype._clearVersion = function () {
       var key = this._versionKey();
       if (!key) return;
-      storage.remove(key);
+      sessionStorage.remove(key);
     };
 
     return DocSource;

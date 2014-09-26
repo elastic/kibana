@@ -21,7 +21,7 @@ define(function (require) {
     });
 
     inject(function ($injector) {
-      storage = $injector.get('storage');
+      storage = $injector.get('localStorage');
       $window = $injector.get('$window');
     });
   }
