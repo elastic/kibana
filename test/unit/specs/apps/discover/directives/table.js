@@ -270,7 +270,6 @@ define(function (require) {
         'columns="columns" ' +
         'sorting="sorting"' +
         'filtering="filtering"' +
-        'max-length=maxLength ' +
         'mapping="mapping"' +
         'timefield="timefield" ' +
         '></tr>'

@@ -3,7 +3,6 @@
 /* vislib styles */
 .arc path {
   stroke: #fff;
-  /* stroke-width: 3px; */
 }
 
 div.columns {
@@ -155,14 +154,10 @@ li.color {
 
 /*  histogram axis and label styles  */
 .vis-canvas {
-  /* background-color: #fff; */
 }
 
 .chart-bkgd {
   fill: #ffffff;
-  /*fill: #eff3f4;*/
-  /*stroke: #ddd;*/
-  /*shape-rendering: crispEdges;*/
 }
 
 p.rows-label, p.columns-label {
@@ -189,7 +184,6 @@ p.rows-label, p.columns-label {
 .tick text {
   font-size: 7pt;
   fill: #848e96;
-  /*cursor: pointer;*/
 }
 
 .axis {
@@ -233,16 +227,14 @@ p.rows-label, p.columns-label {
 }
 
 .rect {
-  /*shape-rendering: crispEdges;*/
   stroke: transparent;
   stroke-width: 2;
 }
 .rect.hover {
-  /*shape-rendering: crispEdges;*/
   stroke: #333;
 }
 
-/* Flex Box */
+/* Flex Box Layout */
 .vis-wrapper {
   .display(flex);
   .flex(1 1 100%);
@@ -252,22 +244,19 @@ p.rows-label, p.columns-label {
 
 .error {
   .flex(1 1 100%);
-  .display(flex);
-  .align-items(center);
   text-align: center;
 
   p {
-    .flex(1 1 auto);
+    margin-top: 15%;
     font-size: 18px;
+    text-wrap: wrap;
   }
 }
 
 /* YAxis logic */
 .y-axis-col-wrapper {
   .display(flex);
-  .flex(0 0 auto);
   .flex-direction(column);
-  min-width: 35px;
 }
 
 .y-axis-col {
@@ -277,27 +266,32 @@ p.rows-label, p.columns-label {
 }
 
 .y-axis-spacer-block {
-  .flex(0 1 50px);
+  min-height: 45px;
 }
 
 .y-axis-div-wrapper {
   .display(flex);
   .flex-direction(column);
-  .flex(0 0 33px);
+  width: 38px;
+  min-height: 20px;
 }
 
 .y-axis-div {
-  .flex(1 1 100%);
+  .flex(1 1 25px);
+  min-width: 14px;
+  min-height: 14px;
 }
 
 .y-axis-title {
-  .flex(0 0 15px);
+  min-height: 14px;
+  min-width: 14px;
 }
 
 .y-axis-chart-title {
   .display(flex);
   .flex-direction(column);
-  .flex(0 0 15px);
+  min-height: 14px;
+  width: 14px;
 }
 
 .y-axis-title text {
@@ -306,6 +300,8 @@ p.rows-label, p.columns-label {
 
 .chart-title {
   .flex(1 1 100%);
+  min-height: 14px;
+  min-width: 14px;
 }
 
 .chart-title text {
@@ -323,7 +319,7 @@ p.rows-label, p.columns-label {
   .display(flex);
   .flex(1 0 20px);
   overflow: visible;
-  margin: 0 4px 0 0;
+  margin: 0 5px 0 0;
 }
 
 .chart-wrapper-column {
@@ -335,11 +331,11 @@ p.rows-label, p.columns-label {
 .chart-wrapper-row {
   .display(flex);
   .flex-direction(column);
-  .flex(1 0 50px);
+  .flex(1 0 100%);
 }
 
 .chart {
-  .flex(1 1);
+  .flex(1 1 100%);
   overflow: visible;
 }
 
@@ -354,24 +350,28 @@ p.rows-label, p.columns-label {
 .x-axis-wrapper {
   .display(flex);
   .flex-direction(column);
-  .flex(0 1 50px);
+  min-height: 45px;
   overflow: visible;
 }
 
 .x-axis-div-wrapper {
   .display(flex);
   .flex-direction(row);
-  .flex(0 1 15px);
+  min-height: 15px;
 }
 
 .x-axis-chart-title {
   .display(flex);
   .flex-direction(row);
-  .flex(0 0 15px);
+  min-height: 15px;
+  max-height: 15px;
+  min-width: 20px;
 }
 
 .x-axis-title {
-  .flex(0 0 15px);
+  min-height: 15px;
+  max-height: 15px;
+  min-width: 20px;
 }
 
 .x-axis-title text {
@@ -379,8 +379,9 @@ p.rows-label, p.columns-label {
 }
 
 .x-axis-div {
-  .flex(1 1 100%);
   margin-top: -5px;
+  min-height: 20px;
+  min-width: 20px;
 }
 
 .x.axis path {

@@ -29,7 +29,7 @@ define(function (require) {
           var services = registry.all().map(function (obj) {
             var service = $injector.get(obj.service);
             return service.find(filter).then(function (data) {
-              return { service: obj.service, title: obj.title, data: data.hits, hits: data.total };
+              return { service: obj.service, title: obj.title, data: data.hits };
             });
           });
           $q.all(services).then(function (data) {

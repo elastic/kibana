@@ -44,21 +44,31 @@
     </div>
 
     <div class="button-group">
-      <button ng-click="startOver()"><i class="fa fa-file-o"></i></button>
+      <kbn-tooltip text="New Visualization" placement="bottom" append-to-body="1">
+        <button ng-click="startOver()"><i class="fa fa-file-new-o"></i></button>
+      </kbn-tooltip>
 
-      <!-- normal save -->
-      <button ng-if="!editableVis.dirty" ng-click="toggleSave()">
-        <i class="fa fa-save"></i>
-      </button>
+      <kbn-tooltip text="Save Visualization" placement="bottom" append-to-body="1">
+        <!-- normal save -->
+        <button ng-if="!editableVis.dirty" ng-click="toggleSave()">
+          <i class="fa fa-save"></i>
+        </button>
 
-      <!-- save stub with tooltip -->
-      <button disabled ng-if="editableVis.dirty" tooltip="Apply or Discard your changes before saving">
-        <i class="fa fa-save"></i>
-      </button>
+        <!-- save stub with tooltip -->
+        <button disabled ng-if="editableVis.dirty" tooltip="Apply or Discard your changes before saving">
+          <i class="fa fa-save"></i>
+        </button>
+      </kbn-tooltip>
 
-      <button ng-click="toggleLoad()"><i class="fa fa-folder-open"></i></button>
-      <button ng-click="toggleShare()"><i class="fa fa-code"></i></button>
-      <button ng-click="fetch()"><i class="fa fa-refresh"></i></button>
+      <kbn-tooltip text="Load Saved Visualization" placement="bottom" append-to-body="1">
+        <button ng-click="toggleLoad()"><i class="fa fa-folder-open-o"></i></button>
+      </kbn-tooltip>
+      <kbn-tooltip text="Share Visualization" placement="bottom" append-to-body="1">
+        <button ng-click="toggleShare()"><i class="fa fa-external-link"></i></button>
+      </kbn-tooltip>
+      <kbn-tooltip text="Refresh" placement="bottom" append-to-body="1">
+        <button ng-click="fetch()"><i class="fa fa-refresh"></i></button>
+      </kbn-tooltip>
     </div>
   </navbar>
 
