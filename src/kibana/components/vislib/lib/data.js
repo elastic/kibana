@@ -150,6 +150,19 @@ define(function (require) {
       });
     };
 
+    Data.prototype.getNames = function () {
+      var data = this.pieData();
+      var names = [];
+
+      data.forEach(function returnNames(obj) {
+        if (obj.names) {
+          names = _.union(names, obj.names);
+        }
+      });
+
+      return names;
+    };
+
     // Inject zeros into the data
     Data.prototype.injectZeros = function () {
       return injectZeros(this.data);
@@ -172,7 +185,7 @@ define(function (require) {
 
     // Return a function that does color lookup on names for pie charts
     Data.prototype.getPieColorFunc = function () {
-      return color(this.get('names'));
+      return color(this.getNames());
     };
 
     return Data;

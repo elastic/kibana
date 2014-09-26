@@ -43,8 +43,7 @@ define(function (require) {
       })
       .on('mouseout.pie', function mouseOutPie() {
         d3.select(this)
-        .classed('hover', false)
-        .style('stroke', null);
+        .classed('hover', false);
       });
     };
 
