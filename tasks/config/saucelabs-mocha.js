@@ -13,7 +13,7 @@ module.exports = {
       build: buildId,
       concurrency: 10,
       'max-duration': 60,
-      maxRetries: 1,
+      maxRetries: 2,
       browsers: [
         {
           browserName: 'chrome',

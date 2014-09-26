@@ -45,12 +45,12 @@ define(function (require) {
       // Array of objects to render to the visualization
       this.renderArray = _.filter([
         this.layout,
-        this.xAxis,
-        this.yAxis,
-        this.chartTitle,
-        this.axisTitle,
         this.legend,
-        this.tooltip
+        this.tooltip,
+        this.axisTitle,
+        this.chartTitle,
+        this.xAxis,
+        this.yAxis
       ], Boolean);
     }
 

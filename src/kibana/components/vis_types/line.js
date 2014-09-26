@@ -6,7 +6,7 @@ define(function (require) {
     return new VisType({
       name: 'line',
       title: 'Line chart',
-      icon: 'icon-chart-bar',
+      icon: 'fa-line-chart',
       vislibParams: {
         shareYAxis: true,
         addTooltip: true,

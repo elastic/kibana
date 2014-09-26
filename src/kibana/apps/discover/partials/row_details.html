@@ -28,9 +28,7 @@
             tooltip-placement="top"
             tooltip="No cached mapping for this field. Refresh your mapping from the Settings > Indices page"
             class="fa fa-warning text-color-warning ng-scope"></i>
-          <kbn-truncated class="discover-table-details-value"
-            orig="{{row._formatted[field] || row[field]}}"
-            length=100></kbn-truncated>
+          <span class="discover-table-details-value">{{row._formatted[field] || row[field]}}</span>
         </td>
       </tr>
     </tbody>

@@ -86,7 +86,6 @@ define(function (require) {
         sorting: '=',
         filtering: '=',
         refresh: '=',
-        maxLength: '=',
         mapping: '=',
         timefield: '=?'
       },
@@ -120,7 +119,6 @@ define(function (require) {
         columns: '=',
         filtering: '=',
         mapping: '=',
-        maxLength: '=',
         timefield: '=?',
         row: '=kbnTableRow'
       },
@@ -137,11 +135,6 @@ define(function (require) {
 
         // whenever we compile, we should create a child scope that we can then detroy
         var $child;
-
-        // set the maxLength for summaries
-        if ($scope.maxLength === void 0) {
-          $scope.maxLength = 250;
-        }
 
         // toggle display of the rows details, a full list of the fields from each row
         $scope.toggleRow = function () {
@@ -235,10 +228,11 @@ define(function (require) {
         /**
          * Fill an element with the value of a field
          */
-        function _displayField(el, row, field, truncate) {
-          var val = _getValForField(row, field, truncate);
-          el.text(val);
-          return el;
+        function _displayField(el, row, field) {
+          return el.html(
+            $('<div>').addClass('truncate-by-height')
+            .text(_getValForField(row, field))
+          );
         }
 
         /**
@@ -247,10 +241,9 @@ define(function (require) {
          *
          * @param  {object} row - the row to pull the value from
          * @param  {string} field - the name of the field (dot-seperated paths are accepted)
-         * @param  {boolean} untruncate - Should truncated values have a "more" link to expand the text?
          * @return {[type]} a string, which should be inserted as text, or an element
          */
-        function _getValForField(row, field, untruncate) {
+        function _getValForField(row, field) {
           var val;
 
           // discover formats all of the values and puts them in _formatted for display
@@ -258,11 +251,6 @@ define(function (require) {
 
           // undefined and null should just be an empty string
           val = (val == null) ? '' : val;
-
-          // truncate the column text, not the details
-          if (typeof val === 'string' && val.length > $scope.maxLength) {
-            val = val.substring(0, $scope.maxLength) + '...';
-          }
 
           return val;
         }
