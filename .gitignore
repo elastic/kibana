@@ -6,3 +6,4 @@ trash
 build
 target
 .jruby
+.idea
