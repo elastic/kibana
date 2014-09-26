@@ -40,7 +40,7 @@ define(function (require) {
         {
           group: 'buckets',
           name: 'split',
-          title: 'Splits',
+          title: 'Split Chart',
           min: 0,
           max: 1
         }
