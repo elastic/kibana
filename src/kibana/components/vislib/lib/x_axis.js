@@ -256,14 +256,15 @@ define(function (require) {
       var myX;
       var myWidth;
       var halfWidth;
+      var padding = 1.1;
 
       return function (selection) {
         selection.selectAll('.tick text')
         .text(function (d, i) {
           par = d3.select(this.parentNode).node();
           myX = self.xScale(d);
-          myWidth = par.getBBox().width;
-          halfWidth = par.getBBox().width / 2;
+          myWidth = par.getBBox().width * padding;
+          halfWidth = myWidth / 2;
           maxW = $(self.el).find('.x-axis-div').width();
           
           if ((startX + halfWidth) < myX && maxW > (myX + halfWidth)) {
