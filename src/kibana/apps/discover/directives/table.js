@@ -9,6 +9,8 @@ define(function (require) {
 
   require('directives/truncated');
   require('directives/infinite_scroll');
+  require('filters/xmlescape');
+  require('filters/wbr');
 
   var module = require('modules').get('app/discover');
 
@@ -109,7 +111,7 @@ define(function (require) {
    * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
    * ```
    */
-  module.directive('kbnTableRow', function ($compile, config) {
+  module.directive('kbnTableRow', function ($compile, config, $filter) {
     // base class for all dom nodes
     var DOMNode = window.Node;
 
@@ -200,39 +202,71 @@ define(function (require) {
 
         // create a tr element that lists the value for each *column*
         function createSummaryRow(row, id) {
+          // We just create a string here because its faster.
+          var content = ['<td ' +
+            'ng-click="toggleRow()" ' +
+            '>' +
+              '<i class="fa fa-caret-down"></i>' +
+          '</td>'];
 
-          var expandTd = $('<td>')
-            .append(
-              $('<i class="fa"></span>')
-              .attr('ng-class', '{"fa-caret-right": !open, "fa-caret-down": open}')
-            )
-            .attr('ng-click', 'toggleRow()');
-          $compile(expandTd)($scope);
-          element.append(expandTd);
-
-          var td = $(document.createElement('td'));
           if ($scope.timefield) {
-            td.addClass('discover-table-timefield');
-            td.attr('width', '1%');
-            _displayField(td, row, $scope.timefield);
-            element.append(td);
+            content.push('<td class="discover-table-timefield" width="1%">' + _displayField(row, $scope.timefield) + '</td>');
           }
 
           _.each($scope.columns, function (column) {
-            td = $(document.createElement('td'));
-            _displayField(td, row, column);
-            element.append(td);
+            content.push('<td>' + _displayField(row, column, true) + '</td>');
           });
+
+          element.html(content.join(''));
         }
 
         /**
          * Fill an element with the value of a field
          */
-        function _displayField(el, row, field) {
+        function _displayField(row, field, breakWords) {
+          var text = _getValForField(row, field);
+          var cursorMax = 20;
+
+
+          if (breakWords) {
+            text = text.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/'/g, '&#39;')
+              .replace(/"/g, '&quot;');
+
+            var cursor = 0;
+            var newText = '';
+            for (var i = 0, len = text.length; i < len; i++) {
+              var chr = text.charAt(i);
+              if (chr !== ' ' &&
+                  chr !== '&' &&
+                  chr !== ';' &&
+                  chr !== ':' &&
+                  chr !== ','
+                ) {
+                cursor++;
+              } else {
+                cursor = 0;
+              }
+
+              if (cursor > cursorMax) {
+                cursor = 0;
+                newText += chr + '<wbr>';
+              } else {
+                newText += chr;
+              }
+            }
+
+            text = newText;
+          }
+          return '<div class="truncate-by-height">' + text + '</div>';
+          /*
           return el.html(
             $('<div>').addClass('truncate-by-height')
-            .text(_getValForField(row, field))
+            .html(text)
           );
+          */
         }
 
         /**
