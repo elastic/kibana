@@ -114,28 +114,45 @@ define(function (require) {
       return bars;
     };
 
-    ColumnChart.prototype.addBarEvents = function (bars) {
+    ColumnChart.prototype.addBarEvents = function (svg, bars, brush) {
       var events = this.events;
       var dispatch = this.events._attr.dispatch;
+      var xScale = this.vis.xAxis.xScale;
+      var startXInv;
 
       bars
-        .on('mouseover.bar', function (d, i) {
-          d3.select(this)
-            .classed('hover', true)
-            .style('stroke', '#333')
-            .style('cursor', 'pointer');
+      .on('mouseover.bar', function (d, i) {
+        d3.select(this)
+          .classed('hover', true)
+          .style('stroke', '#333')
+          .style('cursor', 'pointer');
 
-          dispatch.hover(events.eventResponse(d, i));
-          d3.event.stopPropagation();
-        })
-        .on('click.bar', function (d, i) {
-          dispatch.click(events.eventResponse(d, i));
-          d3.event.stopPropagation();
-        })
-        .on('mouseout.bar', function () {
-          d3.select(this).classed('hover', false)
-            .style('stroke', null);
-        });
+        dispatch.hover(events.eventResponse(d, i));
+        d3.event.stopPropagation();
+      })
+      .on('mousedown.bar', function () {
+        var bar = d3.select(this);
+        var startX = d3.mouse(svg.node());
+        startXInv = xScale.invert(startX[0]);
+
+        // Reset the brush value
+        brush.extent([startXInv, startXInv]);
+
+        // Magic!
+        // Need to call brush on svg to see brush when brushing
+        // while on top of bars.
+        // Need to call brush on bar to allow the click event to be registered
+        svg.call(brush);
+        bar.call(brush);
+      })
+      .on('click.bar', function (d, i) {
+        dispatch.click(events.eventResponse(d, i));
+        d3.event.stopPropagation();
+      })
+      .on('mouseout.bar', function () {
+        d3.select(this).classed('hover', false)
+          .style('stroke', null);
+      });
     };
 
     ColumnChart.prototype.draw = function () {
@@ -154,6 +171,7 @@ define(function (require) {
       var width;
       var height;
       var layers;
+      var brush;
       var bars;
 
       return function (selection) {
@@ -179,15 +197,15 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(0,' + margin.top + ')');
 
-          // addBrush canvas
-          self.events.addBrush(xScale, svg);
+          // addBrush canvas and return brush function
+          brush = self.events.addBrush(xScale, svg);
 
           // add bars
           bars = self.addBars(svg, layers);
 
           // add events to bars
           if (isEvents) {
-            self.addBarEvents(bars);
+            self.addBarEvents(svg, bars, brush);
           }
 
           // chart base line

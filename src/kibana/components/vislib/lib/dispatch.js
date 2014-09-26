@@ -70,12 +70,14 @@ define(function (require) {
 
       // if `addBrushing` is true, add brush canvas
       if (isBrush) {
-        return svg.append('g')
+        svg.append('g')
           .attr('class', 'brush')
           .call(brush)
           .selectAll('rect')
           .attr('height', height - margin.top - margin.bottom);
       }
+
+      return brush;
     };
 
     return Dispatch;
