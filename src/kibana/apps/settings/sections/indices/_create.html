@@ -91,7 +91,7 @@
             </div>
           </section>
 
-          <div class="form-group" ng-if="index.isTimeBased">
+          <div class="form-group" ng-if="index.isTimeBased && !index.fetchFieldsError">
             <label>
               Time-field name
               &nbsp;
@@ -108,16 +108,14 @@
               ng-model="index.timeField"
               class="form-control">
             </select>
-            <select ng-if="index.fetchFieldsError" class="form-control" disabled >
-              <option>{{index.fetchFieldsError}}</option>
-            </select>
           </div>
 
           <button
             ng-disabled="form.$invalid || index.fetchFieldsError"
+            ng-class="index.fetchFieldsError ? 'btn-default' : 'btn-success'"
             type="submit"
-            class="btn btn-success">
-            {{index.fetchFieldsError ? "No indices found" : "Create" }}
+            class="btn">
+            {{index.fetchFieldsError || "Create" }}
           </button>
         </form>
       </div>

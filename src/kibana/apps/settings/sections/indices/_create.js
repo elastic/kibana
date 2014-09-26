@@ -76,7 +76,7 @@ define(function (require) {
     };
 
     $scope.refreshFieldList = _.debounce(function () {
-      index.dateFields = index.timeField = index.fetchFieldsError = index.listUsed = null;
+      index.dateFields = index.timeField = index.listUsed = null;
       var useIndexList = index.isTimeBased && index.nameIsPattern;
 
       // we don't have enough info to continue
@@ -118,9 +118,12 @@ define(function (require) {
         });
       })
       .then(function (fields) {
-        index.dateFields = fields.filter(function (field) {
-          return field.type === 'date';
-        });
+        if (fields.length > 0) {
+          index.fetchFieldsError = null;
+          index.dateFields = fields.filter(function (field) {
+            return field.type === 'date';
+          });
+        }
       }, notify.fatal);
     }, 50, { leading: true, trailing: false });
 
