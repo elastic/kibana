@@ -18,7 +18,7 @@ define(function (require) {
   function init() {
     module('kibana/persisted_log', function ($provide) {
       // mock storage service
-      $provide.service('storage', function () {
+      $provide.service('localStorage', function () {
         this.get = sinon.stub();
         this.set = sinon.stub();
         this.remove = sinon.spy();
@@ -27,7 +27,7 @@ define(function (require) {
     });
 
     inject(function ($injector) {
-      storage = $injector.get('storage');
+      storage = $injector.get('localStorage');
       PersistedLog = $injector.get('PersistedLog');
     });
   }

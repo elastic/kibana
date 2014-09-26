@@ -3,13 +3,13 @@ define(function (require) {
   var _ = require('lodash');
 
   modules.get('kibana/persisted_log')
-  .factory('PersistedLog', function ($window, storage) {
+  .factory('PersistedLog', function ($window, localStorage) {
     function PersistedLog(name, options) {
       options = options || {};
       this.name = name;
       this.maxLength = options.maxLength || 0;
       this.filterDuplicates = options.filterDuplicates || false;
-      this.items = storage.get(this.name) || [];
+      this.items = localStorage.get(this.name) || [];
     }
 
     PersistedLog.prototype.add = function (val) {
@@ -35,7 +35,7 @@ define(function (require) {
       }
 
       // persist the stack
-      storage.set(this.name, stack);
+      localStorage.set(this.name, stack);
       return this.items = stack;
     };
 

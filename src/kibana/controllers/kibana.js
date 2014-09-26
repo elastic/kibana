@@ -94,7 +94,7 @@ define(function (require) {
         config.init()
       ]).then(function () {
         $scope.setupComplete = true;
-        $injector.invoke(function ($rootScope, courier, config, configFile, storage, $timeout, $location, timefilter, globalState) {
+        $injector.invoke(function ($rootScope, courier, config, configFile, sessionStorage, $timeout, $location, timefilter, globalState) {
 
           $rootScope.globalState = globalState;
 
@@ -102,11 +102,11 @@ define(function (require) {
           var lastPathFor = function (app, path) {
             var key = 'lastPath:' + app.id;
             if (path === void 0) {
-              app.lastPath = storage.get(key) || '/' + app.id;
+              app.lastPath = sessionStorage.get(key) || '/' + app.id;
               return app.lastPath;
             } else {
               app.lastPath = path;
-              return storage.set(key, path);
+              return sessionStorage.set(key, path);
             }
           };
 
