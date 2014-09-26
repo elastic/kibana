@@ -21,8 +21,10 @@ define(function (require) {
       var events = this.events = new Dispatch(handler, chartData);
 
       if (handler._attr.addTooltip) {
+        var $el = this.handler.el;
+        var formatter = this.handler.data.get('tooltipFormatter');
         // Add tooltip
-        this.tooltip = new Tooltip(handler, events);
+        this.tooltip = new Tooltip($el, formatter, events);
       }
 
       this._attr = _.defaults(handler._attr || {}, {});
