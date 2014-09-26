@@ -17,7 +17,9 @@
     </span>
 
     <!-- description -->
-    <span ng-if="!editorOpen && aggForm.$valid" class="vis-editor-agg-header-description">{{ describe() }}</span>
+    <span ng-if="!editorOpen && aggForm.$valid" class="vis-editor-agg-header-description">
+      {{ describe() }}
+    </span>
 
     <!-- error -->
     <span ng-if="!editorOpen && aggForm.$invalid" class="vis-editor-agg-header-description danger">
@@ -67,7 +69,8 @@
     <!-- schema editors go here -->
 
     <div class="form-group">
-      <label>Aggregation</label>
+      <label ng-if="$index < 1">Aggregation</label>
+      <label ng-if="$index >= 1">Sub Aggregation</label>
       <select
         name="agg"
         class="form-control"
