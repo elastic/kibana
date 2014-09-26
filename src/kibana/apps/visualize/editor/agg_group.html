@@ -41,7 +41,14 @@
       ng-click="addForm.visible = !addForm.visible"
       class="vis-editor-agg-wide-btn btn btn-xs btn-default" >
 
-      <i ng-if="!addForm.visible" class="fa fa-plus"></i>
+      <div ng-if="!addForm.visible">
+        <span ng-if="groupName === 'buckets' && (!group.length || group.length === 0)">
+          <i class="fa fa-plus"></i> Add Aggregation
+        </span>
+        <span ng-if="groupName === 'buckets' && group.length >= 1">
+          <i class="fa fa-code-fork"></i> Add Sub Aggregation
+        </span>
+      </div>
       <span ng-if="addForm.visible">cancel</span>
     </button>
   </div>
