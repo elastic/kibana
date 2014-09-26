@@ -67,5 +67,13 @@
 
       <div class="application" ng-view></div>
     </div>
+    <style-compile>
+      .truncate-by-height {
+        max-height: {{ truncateMaxHeight }};
+      }
+      .truncate-by-height::before {
+        top: {{ truncateGradientTop }};
+      }
+    </style-compile>
   </body>
 </html>

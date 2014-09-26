@@ -24,37 +24,36 @@ define(function (require) {
       this.xValues = args.xValues;
       this.ordered = args.ordered;
       this.xAxisFormatter = args.xAxisFormatter;
-      this._attr = _.defaults(args._attr || {}, {
-        // isDiscover: false,
-        //isRotated: true
-      });
+      this._attr = _.defaults(args._attr || {});
     }
 
     _(XAxis.prototype).extend(ErrorHandler.prototype);
 
     // Render the x axis
     XAxis.prototype.render = function () {
-      d3.select(this.el).selectAll('.x-axis-div').call(this.draw());
+      d3.select(this.el)
+      .selectAll('.x-axis-div')
+      .call(this.draw());
     };
 
     // Get the d3 scale
+    // if time, return time scale
+    // return d3 ordinal scale for nominal data
     XAxis.prototype.getScale = function (ordered) {
-      // if time, return time scale
       if (ordered && ordered.date) {
         return d3.time.scale();
       }
-      // return d3 ordinal scale for nominal data
       return d3.scale.ordinal();
     };
 
     // Add domain to the scale
+    // if time, return a time domain
+    // Calculate the min date, max date, and time interval;
+    // return a nominal domain, i.e. array of x values
     XAxis.prototype.getDomain = function (scale, ordered) {
-      // if time, return a time domain
       if (ordered && ordered.date) {
-        // Calculate the min date, max date, and time interval;
         return this.getTimeDomain(scale, ordered);
       }
-      // return a nominal domain, i.e. array of x values
       return this.getOrdinalDomain(scale, this.xValues);
     };
 
@@ -70,12 +69,12 @@ define(function (require) {
     };
 
     // Return the range for the x axis scale
+    // if time, return a normal range
+    // if nominal, return rangeBands with a default (0.1) spacer specified
     XAxis.prototype.getRange = function (scale, ordered, width) {
-      // if time, return a normal range
       if (ordered && ordered.date) {
         return scale.range([0, width]);
       }
-      // if nominal, return rangeBands with a default (0.1) spacer specified
       return scale.rangeBands([0, width], 0.1);
     };
 
@@ -89,21 +88,20 @@ define(function (require) {
     };
 
     // Create the d3 xAxis function
+    // save a reference to the xScale
+    // Scale should never === `NaN`
     XAxis.prototype.getXAxis = function (width) {
-      // save a reference to the xScale
       this.xScale = this.getXScale(this.ordered, width);
 
-      // Scale should never === `NaN`
       if (!this.xScale || _.isNaN(this.xScale)) {
         throw new Error('xScale is ' + this.xScale);
       }
 
-      // save a reference to the xAxis
       this.xAxis = d3.svg.axis()
-        .scale(this.xScale)
-        .ticks(10)
-        .tickFormat(this.xAxisFormatter)
-        .orient('bottom');
+      .scale(this.xScale)
+      .ticks(10)
+      .tickFormat(this.xAxisFormatter)
+      .orient('bottom');
     };
 
     // Returns a function that renders the x axis
@@ -114,29 +112,37 @@ define(function (require) {
       var width;
       var height;
       var svg;
+      var parentWidth;
+      var n;
       this._attr.isRotated = false;
 
       return function (selection) {
+        n = selection[0].length;
+        parentWidth = $(self.el)
+        .find('.x-axis-div-wrapper')
+        .width();
+
         selection.each(function () {
+
+          // Validate that width and height are not 0 or `NaN`
+          // return access to xAxis variable on the object
+          // append svg and x axis
           div = d3.select(this);
-          width = $(this).width();
+          width = parentWidth / n;
           height = $(this).height();
 
-          // Validate that the width and height are not 0 or `NaN`
           self.validateWidthandHeight(width, height);
 
-          // Return access to xAxis variable on the object
           self.getXAxis(width);
 
-          // Append svg and x axis
           svg = div.append('svg')
-            .attr('width', width)
-            .attr('height', height);
+          .attr('width', width)
+          .attr('height', height);
 
           svg.append('g')
-            .attr('class', 'x axis')
-            .attr('transform', 'translate(0,0)')
-            .call(self.xAxis);
+          .attr('class', 'x axis')
+          .attr('transform', 'translate(0,0)')
+          .call(self.xAxis);
         });
 
         selection.call(self.filterOrRotate());
@@ -158,80 +164,90 @@ define(function (require) {
           labels = axis.selectAll('.tick text');
 
           if (!self.ordered) {
-            // nominal/ordinal scale
             axis.call(self.rotateAxisLabels());
-            axis.call(self.truncateLabels(100));
           } else {
-            // time scale
             axis.call(self.filterAxisLabels());
           }
         });
 
+        self.updateXaxisHeight();
+
         selection.call(self.fitTitles());
+
       };
     };
 
     // Rotate the axis tick labels within selection
     XAxis.prototype.rotateAxisLabels = function () {
-      this._attr.isRotated = true;
+      var self = this;
+      var text;
+      var maxWidth = self.xScale.rangeBand();
+      var textWidth = 0;
+      var xAxisPadding = 15;
+      var svg;
+      var xAxisLabelHt = 15;
+      var width;
+      self._attr.isRotated = false;
+      
       return function (selection) {
-        selection.selectAll('.tick text')
+
+        text = selection.selectAll('.tick text');
+        
+        text.each(function textWidths() {
+          width = d3.select(this).node().getBBox().width;
+          if (width > maxWidth) {
+            self._attr.isRotated = true;
+            xAxisLabelHt = _.max([textWidth, (Math.ceil(width + xAxisPadding))]);
+          }
+        });
+        self._attr.xAxisLabelHt = xAxisLabelHt;
+        
+
+        if (self._attr.isRotated) {
+          text
+          .text(function truncate() {
+            return self.truncateLabel(this, xAxisLabelHt);
+          })
           .style('text-anchor', 'end')
           .attr('dx', '-.8em')
           .attr('dy', '-.60em')
-          .attr('transform', function () {
+          .attr('transform', function rotate() {
             return 'rotate(-90)';
           });
+          selection.select('svg')
+          .attr('height', xAxisLabelHt);
+        }
+
+        // TODO: need to add mouseover to show tooltip on truncated labels
+
       };
     };
 
-    // Returns a function that truncates tick labels
-    XAxis.prototype.truncateLabels = function (size) {
-      var self = this;
-      var labels;
-      var node;
-      var str;
-      var n;
-      var maxWidth;
-      var maxLength;
-      var pixPerChar;
-      var endChar;
+    // Returns a string that is truncated to fit size
+    XAxis.prototype.truncateLabel = function (text, size) {
+      var node = d3.select(text).node();
+      var str = $(node).text();
+      var width = node.getBBox().width;
+      var chars = str.length;
+      var pxPerChar = width / chars;
+      var endChar = 0;
+      var ellipsesPad = 4;
 
-      return function (selection) {
-
-        // get label maxWidth
-        labels = selection.selectAll('.tick text');
-        maxWidth = 0;
-        maxLength = 0;
-        labels.each(function () {
-          node = d3.select(this).node();
-          n = node.innerHTML.length;
-          maxWidth = _.max([maxWidth, node.getComputedTextLength() * 0.9]);
-          maxLength = _.max([maxLength, n]);
-        });
-        pixPerChar = maxWidth / maxLength;
-
-        // truncate str
-        selection.selectAll('.tick text')
-          .text(function (d) {
-            str = d;
-            if (maxWidth > size) {
-              endChar = 0;
-              if (Math.floor((size / pixPerChar) - 4) >= 4) {
-                endChar = Math.floor((size / pixPerChar) - 4);
-                while (str[endChar - 1] === ' ' || str[endChar - 1] === '-' || str[endChar - 1] === ',') {
-                  endChar = endChar - 1;
-                }
-              }
-              str = str.substr(0, endChar) + '...';
-              return str;
-            }
-            return str;
-          });
-      };
+      if (width > size) {
+        endChar = Math.floor((size / pxPerChar) - ellipsesPad);
+        while (str[endChar - 1] === ' ' || str[endChar - 1] === '-' || str[endChar - 1] === ',') {
+          endChar = endChar - 1;
+        }
+        str = str.substr(0, endChar) + '...';
+      }
+      return str;
     };
 
     // Filter out text labels by width and position on axis
+    // trims labels that would overlap each other 
+    // or extend past left or right edges
+    // if prev label pos (or 0) + half of label width is < label pos
+    // and label pos + half width  is not > width of axis
     XAxis.prototype.filterAxisLabels = function () {
       var self = this;
       var startX = 0;
@@ -243,57 +259,130 @@ define(function (require) {
 
       return function (selection) {
         selection.selectAll('.tick text')
-          .text(function (d, i) {
-            par = d3.select(this.parentNode).node();
-            myX = self.xScale(d);
-            myWidth = par.getBBox().width;
-            halfWidth = par.getBBox().width / 2;
-            maxW = $('.x-axis-div').width();
-            // trims labels that would overlap each other
-            // or extend past left or right edges
-            // if prev label pos (or 0) + half of label width is < label pos
-            // and label pos + half width  is not > width of axis
-            if ((startX + halfWidth) < myX && maxW > (myX + halfWidth)) {
-              startX = myX + halfWidth;
-              return self.xAxisFormatter(d);
-            } else {
-              d3.select(this.parentNode).remove();
-            }
-          });
+        .text(function (d, i) {
+          par = d3.select(this.parentNode).node();
+          myX = self.xScale(d);
+          myWidth = par.getBBox().width;
+          halfWidth = par.getBBox().width / 2;
+          maxW = $(self.el).find('.x-axis-div').width();
+          
+          if ((startX + halfWidth) < myX && maxW > (myX + halfWidth)) {
+            startX = myX + halfWidth;
+            return self.xAxisFormatter(d);
+          } else {
+            d3.select(this.parentNode).remove();
+          }
+        });
       };
     };
 
-
-    // Returns a function that adjusts axis title and
-    // all chart title transforms to fit axis labels
+    // Returns a function that adjusts axis titles and
+    // chart title transforms to fit axis label divs.
+    // Sets transform of x-axis-title to fit .x-axis-title div width
+    // if x-axis-chart-titles, set transform of x-axis-chart-titles
+    // to fit .chart-title div width
     XAxis.prototype.fitTitles = function () {
       var self = this;
-      var visEl = $(self.el);
-      var xAxisTitle = visEl.find('.x-axis-title');
-      var xAxisChartTitle = visEl.find('.x-axis-chart-title');
+      var visEls = $('.vis-wrapper');
+      var visEl;
+      var xAxisTitle;
+      var yAxisTitle;
+      var xAxisChartTitle;
+      var yAxisChartTitle;
+      var titleWidth;
+      var titleHeight;
       var text;
       var titles;
-      var titleWidth;
 
       return function () {
-        // set transform of x-axis-title text to fit .x-axis-title div width
-        titleWidth = xAxisTitle.width();
-        text = d3.select('.x-axis-title')
-          .select('svg')
-          .select('text')
-          .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
 
-        // set transform of x-axis-chart-titles text to fit .chart-title div width
-        titleWidth = xAxisChartTitle.find('.chart-title').width();
-        titles = d3.select('.x-axis-chart-title')
-          .selectAll('.chart-title');
-        titles.each(function () {
-          text = d3.select(this)
+        visEls.each(function () {
+          var visEl = d3.select(this);
+          var $visEl = $(this);
+          var xAxisTitle = $visEl.find('.x-axis-title');
+          var yAxisTitle = $visEl.find('.y-axis-title');
+          var titleWidth = xAxisTitle.width();
+          var titleHeight = yAxisTitle.height();
+
+          text = visEl.select('.x-axis-title')
             .select('svg')
+            .attr('width', titleWidth)
             .select('text')
             .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
+
+          text = visEl.select('.y-axis-title')
+            .select('svg')
+            .attr('height', titleHeight)
+            .select('text')
+            .attr('transform', 'translate(11,' + (titleHeight / 2) + ')rotate(-90)');
+
+          if ($visEl.find('.x-axis-chart-title').length) {
+            xAxisChartTitle = $visEl.find('.x-axis-chart-title');
+            titleWidth = xAxisChartTitle.find('.chart-title').width();
+            
+            titles = visEl.select('.x-axis-chart-title').selectAll('.chart-title');
+            titles.each(function () {
+              text = d3.select(this)
+                .select('svg')
+                .attr('width', titleWidth)
+                .select('text')
+                .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
+            });
+          }
+
+          if ($visEl.find('.y-axis-chart-title').length) {
+            yAxisChartTitle = $visEl.find('.y-axis-chart-title');
+            titleHeight = yAxisChartTitle.find('.chart-title').height();
+
+            titles = visEl.select('.y-axis-chart-title').selectAll('.chart-title');
+            titles.each(function () {
+              text = d3.select(this)
+                .select('svg')
+                .attr('height', titleHeight)
+                .select('text')
+                .attr('transform', 'translate(11,' + (titleHeight / 2) + ')rotate(-90)');
+            });
+          }
+          
         });
+        
       };
+    };
+
+    // Appends div to make .y-axis-spacer-block
+    // match height of .x-axis-wrapper
+    XAxis.prototype.updateXaxisHeight = function () {
+      var self = this;
+      var selection = d3.selectAll('.vis-wrapper');
+      var $selection = $('.vis-wrapper');
+      var titleHts = 30;
+      var xAxisLabelHt = 15;
+
+      if (self._attr.isRotated && self._attr.xAxisLabelHt) {
+        xAxisLabelHt = self._attr.xAxisLabelHt;
+      } else {
+        xAxisLabelHt = self._attr.xAxisLabelHt = xAxisLabelHt;
+      }
+
+      selection.each(function () {
+        var visEl = d3.select(this);
+        var $visEl = $(this);
+
+        $visEl.find('.x-axis-wrapper')
+        .height(xAxisLabelHt + titleHts);
+        $visEl.find('.x-axis-div-wrapper')
+        .height(xAxisLabelHt);
+        
+        if (visEl.select('.inner-spacer-block').node() === null) {
+          visEl.select('.y-axis-spacer-block')
+          .append('div')
+          .attr('class', 'inner-spacer-block');
+        }
+
+        visEl.select('.inner-spacer-block')
+        .style('height', (xAxisLabelHt + titleHts) + 'px');
+      });
+      
     };
 
     return XAxis;
