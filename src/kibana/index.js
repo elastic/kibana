@@ -64,7 +64,7 @@ define(function (require) {
         angular
           .bootstrap(document, ['kibana'])
           .invoke(function () {
-            $(document.body).children().show();
+            $(document.body).children(':not(style-compile)').show();
             cb();
           });
       });

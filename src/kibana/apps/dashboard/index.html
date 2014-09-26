@@ -30,11 +30,21 @@
       </form>
 
       <div class="button-group">
-        <button ng-click="newDashboard()"><i class="fa fa-file-o"></i></button>
-        <button ng-click="openAdd()"><i class="fa fa-plus"></i></button>
-        <button ng-click="openSave()"><i class="fa fa-save"></i></button>
-        <button ng-click="openLoad()"><i class="fa fa-folder-open"></i></button>
-        <button ng-click="openShare()"><i class="fa fa-code"></i></button>
+        <kbn-tooltip text="New Dashboard" placement="bottom" append-to-body="1">
+          <button ng-click="newDashboard()"><i class="fa fa-file-new-o"></i></button>
+        </kbn-tooltip>
+        <kbn-tooltip text="Save Dashboard" placement="bottom" append-to-body="1">
+          <button ng-click="openSave()"><i class="fa fa-save"></i></button>
+        </kbn-tooltip>
+        <kbn-tooltip text="Load Saved Dashboard" placement="bottom" append-to-body="1">
+          <button ng-click="openLoad()"><i class="fa fa-folder-open-o"></i></button>
+        </kbn-tooltip>
+        <kbn-tooltip text="Share" placement="bottom" append-to-body="1">
+          <button ng-click="openShare()"><i class="fa fa-external-link"></i></button>
+        </kbn-tooltip>
+        <kbn-tooltip text="Add Visualization" placement="bottom" append-to-body="1">
+          <button ng-click="openAdd()"><i class="fa fa-plus-circle"></i></button>
+        </kbn-tooltip>
       </div>
     </navbar>
   </nav>

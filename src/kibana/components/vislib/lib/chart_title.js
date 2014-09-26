@@ -79,6 +79,7 @@ define(function (require) {
           var width = $(this).width();
           var height = $(this).height();
           var size = dataType === 'rows' ? height : width;
+          var txtHtOffset = 11;
 
           // Check if width or height are 0 or NaN
           self.validateWidthandHeight(width, height);
@@ -95,9 +96,9 @@ define(function (require) {
             .attr('transform', function () {
               if (dataType === 'rows') {
                 // if `rows`, rotate the chart titles
-                return 'translate(11,' + height / 2 + ')rotate(270)';
+                return 'translate(' + txtHtOffset + ',' + height / 2 + ')rotate(270)';
               }
-              return 'translate(' + width / 2 + ',8)';
+              return 'translate(' + width / 2 + ',' + txtHtOffset + ')';
             })
             .attr('text-anchor', 'middle')
             .text(function (d) {

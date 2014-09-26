@@ -168,7 +168,8 @@ define(function (require) {
       };
 
       obj.saveSource = function (source) {
-        return docSource.doIndex(source).then(function (id) {
+        return docSource.doIndex(source)
+        .then(function (id) {
           obj.id = id;
         })
         .then(function () {

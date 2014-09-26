@@ -16,9 +16,11 @@ define(function (require) {
   require('components/url/url');
   require('directives/click_focus');
   require('directives/info');
+  require('directives/tooltip');
   require('directives/spinner');
   require('directives/paginate');
   require('directives/pretty_duration');
+  require('directives/style_compile');
   require('directives/rows');
 
 
