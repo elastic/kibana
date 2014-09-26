@@ -50,30 +50,35 @@
               </select>
             </div>
 
-            <div class="alert alert-danger" ng-repeat="err in index.patternErrors">{{err}}</div>
+            <div class="alert alert-danger" ng-repeat="err in index.patternErrors">
+              {{err}}
+            </div>
 
             <div class="alert alert-info" ng-if="index.samples">
-              Sample index names
+              Attempted to match the following indices:
               <ul>
                 <li ng-repeat="sample in index.samples">{{sample}}</li>
               </ul>
-              <a ng-click="moreSamples(true)" class="alert-link">more</a>
+              <button ng-click="moreSamples(true)" class="btn btn-default">
+                Expand Search
+              </button>
             </div>
 
             <div class="alert alert-{{index.existing.class}}" ng-if="index.existing">
-              Pattern matches {{index.existing.matchPercent}} of similar indices
+              Pattern matches {{index.existing.matchPercent}} of existing indices
               <ul>
                 <li ng-repeat="match in index.existing.matches | orderBy:'toString()'| limitTo: index.sampleCount">{{match}}</li>
               </ul>
-              <a
+              <button
                 ng-if="index.sampleCount < index.existing.matches.length"
                 ng-click="moreSamples()"
-                class="alert-link">
-                more
-              </a>
+                class="btn btn-default">
+                Expand Search
+              </button>
             </div>
+
             <div class="alert alert-danger" ng-if="index.existing.failures.length">
-              Indices that did not match:
+              Indices that were found, but did not match the pattern:
               <ul>
                 <li ng-repeat="match in index.existing.failures | limitTo: index.sampleCount">{{match}}</li>
               </ul>
@@ -84,7 +89,6 @@
                 more
               </a>
             </div>
-
           </section>
 
           <div class="form-group" ng-if="index.isTimeBased && !index.fetchFieldsError">

@@ -20,7 +20,11 @@
       <tbody>
         <tr ng-repeat="conf in configs | filter:advancedFilter" ng-class="conf.value === undefined ? 'default' : 'custom'">
           <td class="name">
-            <b>{{conf.name}}</b><br>
+            <b>{{conf.name}}</b>
+            <span class="smaller" ng-show="conf.value !== undefined">
+              (Default: <i>{{conf.defVal == undefined ? 'null' : conf.defVal}}</i>)
+            </span>
+            <br>
             <span class="smaller">{{conf.description}}</span>
           </td>
           <td class="value">
