@@ -19,7 +19,6 @@ define(function (require) {
       link: function ($scope) {
         $scope.hideErrors = true;
         $scope.dontApply = function () {
-          console.log('showing validation');
           $scope.hideErrors = false;
         };
       }
