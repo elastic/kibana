@@ -26,30 +26,31 @@
 
     <!-- controls !!!actually disabling buttons will break tooltips¡¡¡ -->
     <div class="vis-editor-agg-header-controls btn-group">
+      <!-- up button -->
       <button
         ng-if="group.length > 1"
         ng-class="{ disabled: $first }"
         ng-click="moveUp(agg)"
         tooltip="Increase Priority"
         tooltip-append-to-body="true"
-
         type="button"
         class="btn btn-xs btn-default">
         <i class="fa fa-caret-up"></i>
       </button>
 
+      <!-- down button -->
       <button
         ng-if="group.length > 1"
         ng-class="{ disabled: $last }"
         ng-click="moveDown(agg)"
         tooltip="Decrease Priority"
         tooltip-append-to-body="true"
-
         type="button"
         class="btn btn-xs btn-default">
         <i class="fa fa-caret-down"></i>
       </button>
 
+      <!-- remove button -->
       <button
         ng-if="group.length > groupMin"
         ng-click="remove(agg)"
