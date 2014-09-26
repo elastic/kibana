@@ -1,8 +1,13 @@
 define(function (require) {
-  return function HistogramConverterFn(Private, timefilter) {
+  return function HistogramConverterFn(Private, timefilter, $compile, $rootScope, $sce) {
     var _ = require('lodash');
+    var $ = require('jquery');
     var moment = require('moment');
     var interval = require('utils/interval');
+
+    var $tooltip = $(require('text!components/vis_types/tooltips/pie.html'));
+    var $tooltipScope = $rootScope.$new();
+    $compile($tooltip)($tooltipScope);
 
     return function (chart, columns, rows) {
 
@@ -27,7 +32,6 @@ define(function (require) {
       chart.tooltipFormatter = function (datum) {
         var parent;
         var sum;
-        var metricCol = _.find(columns, { categoryName: 'metric' });
 
         // the sum of values at all levels/generations is the same, but levels
         // are seperated by their parents so the root is the simplest to find
@@ -35,41 +39,33 @@ define(function (require) {
           sum = parent.value;
         }
 
-        var rows = [];
+        var rows = $tooltipScope.rows = [];
         for (parent = datum; parent.parent; parent = parent.parent) {
-          var col = columns[parent.depth - 1];
+          var i = parent.depth - 1;
+          var col = columns[i];
 
           // field/agg details
           var group = (col.field && col.field.name) || col.label || ('level ' + datum.depth);
 
           // field value that defines the bucket
-          var name = parent.name;
-          if (col.field) name = col.field.format.convert(name);
+          var bucket = parent.name;
+          if (col.field) bucket = col.field.format.convert(bucket);
 
           // metric for the bucket
           var val = parent.value;
 
-          var cells = [
-            _.repeat('&nbsp;', parent.depth - 1) + group,
-            name,
-            val + ' (' + Math.round((parent.value / sum) * 100) + '%)'
-          ];
-
-          rows.unshift('<tr><td>' + cells.join('</td><td>') + '</td></tr>');
+          rows.unshift({
+            spacer: $sce.trustAsHtml(_.repeat('&nbsp;', i)),
+            field: group,
+            bucket: bucket,
+            metric: val + ' (' + Math.round((parent.value / sum) * 100) + '%)'
+          });
         }
 
-        return '<table>' +
-          '<thead>' +
-            '<tr>' +
-              '<th>field</th>' +
-              '<th>value</th>' +
-              '<th>' + metricCol.label + '</th>' +
-            '</tr>' +
-          '</thead>' +
-          '<tbody>' +
-            rows.join('') +
-          '</tbody>' +
-        '</table>';
+        $tooltipScope.metricCol = _.find(columns, { categoryName: 'metric' });
+
+        $tooltipScope.$apply();
+        return $tooltip[0].outerHTML;
       };
 
 
