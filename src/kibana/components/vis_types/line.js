@@ -33,7 +33,7 @@ define(function (require) {
         {
           group: 'buckets',
           name: 'group',
-          title: 'Color',
+          title: 'Split Lines',
           min: 0,
           max: 1
         },
