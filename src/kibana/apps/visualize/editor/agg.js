@@ -28,7 +28,11 @@ define(function (require) {
         $scope.aggTypeOptions = aggTypes.byType[$scope.groupName];
         $scope.editorOpen = $scope.agg.brandNew;
 
-        $scope.$watch('$index', function (i) {
+        $scope.$watchMulti([
+          '$index',
+          'group.length'
+        ], function () {
+          var i = $scope.$index;
           $scope.$first = i === 0;
           $scope.$last = i === $scope.group.length - 1;
         });

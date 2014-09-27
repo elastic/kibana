@@ -35,14 +35,14 @@ define(function (require) {
         {
           group: 'buckets',
           name: 'group',
-          title: 'Color',
+          title: 'Split Bars',
           min: 0,
           max: 1
         },
         {
           group: 'buckets',
           name: 'split',
-          title: 'Splits',
+          title: 'Split Chart',
           min: 0,
           max: 1
         }
