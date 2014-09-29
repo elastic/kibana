@@ -34,6 +34,12 @@ define(function (require) {
         'defaultOpacity' : 1,
         'isOpen' : true
       });
+
+      // Adding field formatter for formatting legend labels
+      var raw = this.vis.data.raw.columns;
+      var fieldIndex = _.findIndex(raw, {'categoryName': 'group'});
+
+      this.fieldFormatter = raw[fieldIndex] ? raw[fieldIndex].field.format.convert : function (d) { return d; };
     }
 
     // Add legend header
@@ -68,7 +74,7 @@ define(function (require) {
         })
         .html(function (d) {
           // return the appropriate color for each dot
-          return '<span class="dots" style="background:' + args.color(d) + '"></span>' + d;
+          return '<span class="dots" style="background:' + args.color(d) + '"></span>' + self.fieldFormatter(d);
         });
     };
 
@@ -108,10 +114,6 @@ define(function (require) {
           self.vis.resize();
         }
       });
-
-      headerIcon
-      .datum(['Legend'])
-      .call(self.tooltip.render());
 
       visEl.selectAll('.color')
         .on('mouseover', function (d) {
