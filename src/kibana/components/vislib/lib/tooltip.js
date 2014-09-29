@@ -60,14 +60,15 @@ define(function (require) {
               // return text and position for tooltip
               return tooltipDiv.datum(d)
                 .html(self.tooltipFormatter)
-                .style('display', 'block')
+                .style('visibility', 'visible')
                 .style('left', mouseMove.left + offset.left + 'px')
                 .style('top', mouseMove.top + offset.top + 'px');
             })
 
             .on('mouseout.tip', function () {
               // hide tooltip
-              return tooltipDiv.style('display', 'none');
+              return tooltipDiv.style('visibility', 'hidden');
+              
             });
         });
       };
@@ -76,31 +77,31 @@ define(function (require) {
     Tooltip.prototype.getOffsets = function (tooltipDiv, mouseMove) {
 
       var self = this;
-      var offset = {top: 10, left: 10};
-
+      var offset = {top: -10, left: 10};
+      
       if ($(self.el).find('.' + self.containerClass)) {
-        var container    = $(self.el).find('.' + self.containerClass);
+        var tipWidth = tooltipDiv[0][0].clientWidth;
+        var tipHeight = tooltipDiv[0][0].clientHeight;
+        var container = $(self.el).find('.' + self.containerClass);
         var chartXOffset = container.offset().left;
         var chartYOffset = container.offset().top;
-        var chartWidth   = container.width();
-        var chartHeight  = container.height();
-        var tipWidth     = tooltipDiv[0][0].clientWidth;
-        var tipHeight    = tooltipDiv[0][0].clientHeight;
+        var chartWidth = container.width();
+        var chartHeight = container.height();
 
         // change xOffset to keep tooltip within container
         // if tip width + xOffset puts it over right edge of container, flip left
         // unless flip left puts it over left edge of container
-        if ((mouseMove.left + offset.left + tipWidth) > (chartXOffset + chartWidth) &&
-          (mouseMove.left - tipWidth - 10) > chartXOffset) {
+        if (mouseMove.left + offset.left + tipWidth > chartXOffset + chartWidth) {
+          //&& (mouseMove.left - tipWidth - 10) > chartXOffset) {
           offset.left = -10 - tipWidth;
         }
 
         // change yOffset to keep tooltip within container
-        if ((mouseMove.top + tipHeight - 10) > (chartYOffset + chartHeight)) {
+        if (mouseMove.top + tipHeight - 10 > chartYOffset + chartHeight) {
           offset.top = chartYOffset + chartHeight;
         }
       }
-
+      
       return offset;
     };
 
