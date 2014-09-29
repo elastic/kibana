@@ -124,8 +124,8 @@ define(function (require) {
         timefield: '=?',
         row: '=kbnTableRow'
       },
-      link: function ($scope, element, attrs) {
-        element.after('<tr>');
+      link: function ($scope, $el, attrs) {
+        $el.after('<tr>');
 
         var init = function () {
           createSummaryRow($scope.row, $scope.row._id);
@@ -145,7 +145,7 @@ define(function (require) {
 
           $scope.open = !$scope.open;
 
-          var $tr = element;
+          var $tr = $el;
           var $detailsTr = $tr.next();
 
           ///
@@ -191,33 +191,90 @@ define(function (require) {
         };
 
         $scope.$watchCollection('columns', function (columns) {
-          element.empty();
           createSummaryRow($scope.row, $scope.row._id);
         });
 
         $scope.$watch('timefield', function (timefield) {
-          element.empty();
           createSummaryRow($scope.row, $scope.row._id);
         });
 
+        // expected state of the row's html, needs to be kept in sync so that we can properly diff
+        // new html
+        var currentHtml = [];
+
         // create a tr element that lists the value for each *column*
         function createSummaryRow(row, id) {
+
           // We just create a string here because its faster.
-          var content = ['<td ' +
-            'ng-click="toggleRow()" ' +
-            '>' +
+          var html = [
+            '<td ng-click="toggleRow()" >' +
               '<i class="fa fa-caret-down"></i>' +
-          '</td>'];
+            '</td>'
+          ];
 
           if ($scope.timefield) {
-            content.push('<td class="discover-table-timefield" width="1%">' + _displayField(row, $scope.timefield) + '</td>');
+            html.push(
+              '<td class="discover-table-timefield" width="1%">' +
+                _displayField(row, $scope.timefield) +
+              '</td>'
+            );
           }
 
-          _.each($scope.columns, function (column) {
-            content.push('<td>' + _displayField(row, column, true) + '</td>');
+          $scope.columns.forEach(function (column) {
+            html.push('<td>' + _displayField(row, column, true) + '</td>');
           });
 
-          element.html(content.join(''));
+          function swap(i) {
+            var $children = $el.children();
+            var $back = $children.eq(i);
+            var $front = $children.eq(i + 1);
+
+            $front.after($back.detach());
+            currentHtml.splice(i, 0, currentHtml.splice(i, 1));
+          }
+
+          function add(i) {
+            var $after = $el.children().eq(i);
+            if ($after.size()) {
+              $after.after(html[i]);
+              currentHtml.splice(i, 0, html[i]);
+            } else {
+              $el.append(html[i]);
+              currentHtml.push(html[i]);
+            }
+          }
+
+          function remove(i) {
+            $el.children().eq(i).remove();
+          }
+
+          function replace(i) {
+            var $target = $el.children().eq(i);
+            if ($target.size()) $target.replaceWith(html[i]);
+            else $el.append(html[i]);
+
+            currentHtml[i] = html[i];
+          }
+
+          for (var i = 0; i < html.length; i++) {
+            var update = html[i];
+            var nextUpdate = html[i + 1];
+
+            var cur = currentHtml[i];
+            var nextCur = currentHtml[i + 1];
+
+            var noChange = update === cur;
+            var backMovedForward = update === nextCur;
+            var forwardMovedBack = nextUpdate === cur;
+
+            if (noChange) continue;
+            else if (forwardMovedBack && backMovedForward) swap(i);
+            else if (forwardMovedBack) add(i);
+            else if (backMovedForward) remove(i);
+            else replace(i);
+          }
+
+          currentHtml = html;
         }
 
         /**
@@ -225,7 +282,7 @@ define(function (require) {
          */
         function _displayField(row, field, breakWords) {
           var text = _getValForField(row, field);
-          var cursorMax = 20;
+          var minLineLength = 20;
 
 
           if (breakWords) {
@@ -235,38 +292,42 @@ define(function (require) {
               .replace(/'/g, '&#39;')
               .replace(/"/g, '&quot;');
 
-            var cursor = 0;
+            var lineSize = 0;
             var newText = '';
             for (var i = 0, len = text.length; i < len; i++) {
               var chr = text.charAt(i);
-              if (chr !== ' ' &&
-                  chr !== '&' &&
-                  chr !== ';' &&
-                  chr !== ':' &&
-                  chr !== ','
-                ) {
-                cursor++;
-              } else {
-                cursor = 0;
+              newText += chr;
+
+              switch (chr) {
+              case ' ':
+              case '&':
+              case ';':
+              case ':':
+              case ',':
+                // natural line break, reset line size
+                lineSize = 0;
+                break;
+              default:
+                lineSize++;
+                break;
               }
 
-              if (cursor > cursorMax) {
-                cursor = 0;
-                newText += chr + '<wbr>';
-              } else {
-                newText += chr;
+              if (lineSize > minLineLength) {
+                // continuous text is longer then we want,
+                // so break it up with a <wbr>
+                lineSize = 0;
+                newText += '<wbr>';
               }
+            }
+
+            if (text.length > minLineLength) {
+              return '<div class="truncate-by-height">' + newText + '</div>';
             }
 
             text = newText;
           }
-          return '<div class="truncate-by-height">' + text + '</div>';
-          /*
-          return el.html(
-            $('<div>').addClass('truncate-by-height')
-            .html(text)
-          );
-          */
+
+          return text;
         }
 
         /**
