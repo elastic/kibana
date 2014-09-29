@@ -36,10 +36,14 @@ define(function (require) {
       });
 
       // Adding field formatter for formatting legend labels
-      var raw = this.vis.data.raw.columns;
-      var fieldIndex = _.findIndex(raw, {'categoryName': 'group'});
+      var raw;
+      var fieldIndex;
+      if (this.vis.data.raw) {
+        raw = this.vis.data.raw.columns;
+        fieldIndex = _.findIndex(raw, {'categoryName': 'group'});
+      }
 
-      this.fieldFormatter = raw[fieldIndex] ? raw[fieldIndex].field.format.convert : function (d) { return d; };
+      this.fieldFormatter = raw && raw[fieldIndex] ? raw[fieldIndex].field.format.convert : function (d) { return d; };
     }
 
     // Add legend header
