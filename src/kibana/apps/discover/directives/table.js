@@ -9,8 +9,6 @@ define(function (require) {
 
   require('directives/truncated');
   require('directives/infinite_scroll');
-  require('filters/xmlescape');
-  require('filters/wbr');
 
   var module = require('modules').get('app/discover');
 
