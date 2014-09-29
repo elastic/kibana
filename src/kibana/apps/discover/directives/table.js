@@ -125,6 +125,7 @@ define(function (require) {
       },
       link: function ($scope, $el, attrs) {
         $el.after('<tr>');
+        $el.empty();
 
         var init = function () {
           createSummaryRow($scope.row, $scope.row._id);
@@ -134,8 +135,11 @@ define(function (require) {
         // render can easily render in the same current state
         var opened = [];
 
-        // whenever we compile, we should create a child scope that we can then detroy
-        var $child;
+        // when we compile the details, we use this $scope
+        var $detailsScope;
+
+        // when we compile the toggle button in the summary, we use this $scope
+        var $toggleScope;
 
         // toggle display of the rows details, a full list of the fields from each row
         $scope.toggleRow = function () {
@@ -155,11 +159,11 @@ define(function (require) {
 
           if (!$scope.open) {
             // close the child scope if it exists
-            $child.$destroy();
+            $detailsScope.$destroy();
             // no need to go any further
             return;
           } else {
-            $child = $scope.$new();
+            $detailsScope = $scope.$new();
           }
 
           // The fields to loop over
@@ -179,10 +183,10 @@ define(function (require) {
             return _.contains(validTypes, mapping.type);
           };
 
-          $child.row = row;
-          $child.showFilters = showFilters;
+          $detailsScope.row = row;
+          $detailsScope.showFilters = showFilters;
 
-          $compile($detailsTr)($child);
+          $compile($detailsTr)($detailsScope);
         };
 
         $scope.filter = function (row, field, operation) {
@@ -203,11 +207,16 @@ define(function (require) {
 
         // create a tr element that lists the value for each *column*
         function createSummaryRow(row, id) {
-
           // We just create a string here because its faster.
           var html = [
             '<td ng-click="toggleRow()" >' +
-              '<i class="fa fa-caret-down"></i>' +
+              '<i class="fa" ng-class="{ \'fa-caret-down\': open, \'fa-caret-right\': !open }"></i>' +
+
+              // since -caret-down is a little bigger, it causes the entire
+              // table to reflow when shown. include this hidden element
+              // strecth the cell to the full-size at all time and prevent
+              // the resize
+              '<i class="fa fa-caret-down" style="visibility: hidden"></i>' +
             '</td>'
           ];
 
@@ -233,26 +242,36 @@ define(function (require) {
           }
 
           function add(i) {
-            var $after = $el.children().eq(i);
+            var $after = $el.children().eq(i - 1);
+            var $added = $(html[i]);
             if ($after.size()) {
-              $after.after(html[i]);
+              $after.after($added);
               currentHtml.splice(i, 0, html[i]);
             } else {
-              $el.append(html[i]);
+              $el.append($added);
               currentHtml.push(html[i]);
+            }
+
+            if (i === 0) {
+              // 0 is the toggle cell, which needs to be compiled
+              $toggleScope = $scope.$new();
+              $compile($added)($toggleScope);
             }
           }
 
           function remove(i) {
             $el.children().eq(i).remove();
+            currentHtml.splice(i, 1);
+
+            if (i === 0) {
+              // 0 is the toggle cell, which has the $toggleScope
+              if ($toggleScope) $toggleScope.$destroy();
+            }
           }
 
           function replace(i) {
-            var $target = $el.children().eq(i);
-            if ($target.size()) $target.replaceWith(html[i]);
-            else $el.append(html[i]);
-
-            currentHtml[i] = html[i];
+            remove(i);
+            add(i);
           }
 
           for (var i = 0; i < html.length; i++) {
@@ -267,7 +286,8 @@ define(function (require) {
             var forwardMovedBack = nextUpdate === cur;
 
             if (noChange) continue;
-            else if (forwardMovedBack && backMovedForward) swap(i);
+
+            if (forwardMovedBack && backMovedForward) swap(i);
             else if (forwardMovedBack) add(i);
             else if (backMovedForward) remove(i);
             else replace(i);
