@@ -3,6 +3,7 @@ define(function (require) {
   var html = require('text!apps/discover/partials/table.html');
   var detailsHtml = require('text!apps/discover/partials/row_details.html');
   var moment = require('moment');
+  var htmlEscape = require('utils/html_escape');
 
   var _ = require('lodash');
   var $ = require('jquery');
@@ -284,12 +285,7 @@ define(function (require) {
 
 
           if (breakWords) {
-            text = text.replace(/&/g, '&amp;')
-              .replace(/</g, '&lt;')
-              .replace(/>/g, '&gt;')
-              .replace(/'/g, '&#39;')
-              .replace(/"/g, '&quot;');
-
+            text = htmlEscape(text);
             var lineSize = 0;
             var newText = '';
             for (var i = 0, len = text.length; i < len; i++) {
