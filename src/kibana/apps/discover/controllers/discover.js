@@ -172,21 +172,25 @@ define(function (require) {
           timefilter.enabled = !!timefield;
         });
 
-        // options are 'loading', 'ready', 'none', undefined
         $scope.$watchMulti([
           'rows',
           'fetchStatus'
         ], (function updateResultState() {
           var prev = {};
+          var status = {
+            LOADING: 'loading', // initial data load
+            READY: 'ready', // results came back
+            NO_RESULTS: 'none' // no results came back
+          };
 
           function pick(rows, oldRows, fetchStatus, oldFetchStatus) {
             // initial state, pretend we are loading
-            if (rows == null && oldRows == null) return 'loading';
+            if (rows == null && oldRows == null) return status.LOADING;
 
             var rowsEmpty = _.isEmpty(rows);
-            if (rowsEmpty && fetchStatus) return 'loading';
-            else if (!rowsEmpty) return 'ready';
-            else return 'none';
+            if (rowsEmpty && fetchStatus) return status.LOADING;
+            else if (!rowsEmpty) return status.READY;
+            else return status.NO_RESULTS;
           }
 
           return function () {
