@@ -1,6 +1,11 @@
 .vis-editor {
   .flex-parent();
 
+  @vis-editor-sidebar-basis: (100/12) * 2%; // two of twelve columns
+  @vis-editor-sidebar-min-width: 350px;
+  @vis-editor-nesting-width: 8px;
+  @vis-editor-agg-editor-spacing: 5px;
+
   navbar {
     .bitty-modal-container {
       position: relative;
@@ -39,6 +44,20 @@
     @media (min-width: @screen-md-min) {
       .flex-basis(@vis-editor-sidebar-basis);
       min-width: @vis-editor-sidebar-min-width;
+      margin-bottom: (@input-height-base * 2) - 3;
+    }
+
+    &-buttons {
+      // overrides for tablet and desktop
+      @media (min-width: @screen-md-min) {
+        position: absolute;
+        bottom: 0;
+        min-width: @vis-editor-sidebar-min-width;
+      }
+    }
+
+    .sidebar-item {
+      border-top: 0 !important;
     }
 
     .sidebar-container {
@@ -79,7 +98,6 @@
     &-group {
       .flex-parent();
       color: @text-color;
-      margin-bottom: 10px;
     }
 
     &-header {
