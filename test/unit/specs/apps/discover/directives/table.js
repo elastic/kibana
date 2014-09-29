@@ -356,6 +356,208 @@ define(function (require) {
 
       });
     });
+
+    describe('row diffing', function () {
+      var $row;
+      var $scope;
+      var $root;
+      var $before;
+
+      beforeEach(module('kibana', 'apps/discover'));
+      beforeEach(inject(function ($rootScope, $compile) {
+        $root = $rootScope;
+        $root.row = getFakeRow(0, mapping);
+        $root.columns = ['_source'];
+        $root.sorting = [];
+        $root.filtering = sinon.spy();
+        $root.maxLength = 50;
+        $root.mapping = mapping;
+        $root.timefield = 'timestamp';
+
+        $row = $('<tr>')
+        .attr({
+          'kbn-table-row': 'row',
+          'columns': 'columns',
+          'sorting': 'sortin',
+          'filtering': 'filtering',
+          'mapping': 'mapping',
+          'timefield': 'timefield',
+        });
+
+        $scope = $root.$new();
+        $compile($row)($scope);
+        $root.$apply();
+
+        $before = $row.find('td');
+        expect($before).to.have.length(3);
+        expect($before.eq(0).text()).to.be('');
+        expect($before.eq(1).text()).to.match(/^timestamp_formatted/);
+        expect($before.eq(2).text()).to.match(/^_source_formatted/);
+      }));
+
+      afterEach(function () {
+        $row.remove();
+      });
+
+      it('handles a new column', function () {
+        $root.columns.push('bytes');
+        $root.$apply();
+
+        var $after = $row.find('td');
+        expect($after).to.have.length(4);
+        expect($after[0]).to.be($before[0]);
+        expect($after[1]).to.be($before[1]);
+        expect($after[2]).to.be($before[2]);
+        expect($after.eq(3).text()).to.match(/^bytes_formatted/);
+      });
+
+      it('handles two new columns at once', function () {
+        $root.columns.push('bytes');
+        $root.columns.push('request');
+        $root.$apply();
+
+        var $after = $row.find('td');
+        expect($after).to.have.length(5);
+        expect($after[0]).to.be($before[0]);
+        expect($after[1]).to.be($before[1]);
+        expect($after[2]).to.be($before[2]);
+        expect($after.eq(3).text()).to.match(/^bytes_formatted/);
+        expect($after.eq(4).text()).to.match(/^request_formatted/);
+      });
+
+      it('handles three new columns in odd places', function () {
+        $root.columns = [
+          'timestamp',
+          'bytes',
+          '_source',
+          'request'
+        ];
+        $root.$apply();
+
+        var $after = $row.find('td');
+        expect($after).to.have.length(6);
+        expect($after[0]).to.be($before[0]);
+        expect($after[1]).to.be($before[1]);
+        expect($after.eq(2).text()).to.match(/^timestamp_formatted/);
+        expect($after.eq(3).text()).to.match(/^bytes_formatted/);
+        expect($after[4]).to.be($before[2]);
+        expect($after.eq(5).text()).to.match(/^request_formatted/);
+      });
+
+
+      it('handles a removed column', function () {
+        _.pull($root.columns, '_source');
+        $root.$apply();
+
+        var $after = $row.find('td');
+        expect($after).to.have.length(2);
+        expect($after[0]).to.be($before[0]);
+        expect($after[1]).to.be($before[1]);
+      });
+
+      it('handles two removed columns', function () {
+        // first add a column
+        $root.columns.push('timestamp');
+        $root.$apply();
+
+        var $mid = $row.find('td');
+        expect($mid).to.have.length(4);
+
+        $root.columns.pop();
+        $root.columns.pop();
+        $root.$apply();
+
+        var $after = $row.find('td');
+        expect($after).to.have.length(2);
+        expect($after[0]).to.be($before[0]);
+        expect($after[1]).to.be($before[1]);
+      });
+
+      it('handles three removed random columns', function () {
+        // first add two column
+        $root.columns.push('timestamp', 'bytes');
+        $root.$apply();
+
+        var $mid = $row.find('td');
+        expect($mid).to.have.length(5);
+
+        $root.columns[0] = false; // _source
+        $root.columns[2] = false; // bytes
+        $root.columns = $root.columns.filter(Boolean);
+        $root.$apply();
+
+        var $after = $row.find('td');
+        expect($after).to.have.length(3);
+        expect($after[0]).to.be($before[0]);
+        expect($after[1]).to.be($before[1]);
+        expect($after.eq(2).text()).to.match(/^timestamp_formatted/);
+      });
+
+      it('handles two columns with the same content', function () {
+        $root.row._formatted.bytes = $root.row._formatted._source;
+        $root.columns.push('bytes');
+        $root.$apply();
+
+        var $after = $row.find('td');
+        expect($after).to.have.length(4);
+        expect($after[0]).to.be($before[0]);
+        expect($after[1]).to.be($before[1]);
+        expect($after[2]).to.be($before[2]);
+        expect($after.eq(3).text()).to.match(/^_source_formatted/);
+      });
+
+      it('handles two columns swapping position', function () {
+        $root.columns.push('bytes');
+        $root.$apply();
+
+        var $mid = $row.find('td');
+        expect($mid).to.have.length(4);
+
+        $root.columns.reverse();
+        $root.$apply();
+
+        var $after = $row.find('td');
+        expect($after).to.have.length(4);
+        expect($after[0]).to.be($before[0]);
+        expect($after[1]).to.be($before[1]);
+        expect($after[2]).to.be($mid[3]);
+        expect($after[3]).to.be($mid[2]);
+      });
+
+      it('handles four columns all reversing position', function () {
+        $root.columns.push('bytes', 'response', 'timestamp');
+        $root.$apply();
+
+        var $mid = $row.find('td');
+        expect($mid).to.have.length(6);
+
+        $root.columns.reverse();
+        $root.$apply();
+
+        var $after = $row.find('td');
+        expect($after).to.have.length(6);
+        expect($after[0]).to.be($before[0]);
+        expect($after[1]).to.be($before[1]);
+        expect($after[2]).to.be($mid[5]);
+        expect($after[3]).to.be($mid[4]);
+        expect($after[4]).to.be($mid[3]);
+        expect($after[5]).to.be($mid[2]);
+      });
+
+      it('handles multiple columns with the same name', function () {
+        $root.columns.push('bytes', 'bytes', 'bytes');
+        $root.$apply();
+
+        var $after = $row.find('td');
+        expect($after).to.have.length(6);
+        expect($after[0]).to.be($before[0]);
+        expect($after[1]).to.be($before[1]);
+        expect($after[2]).to.be($before[2]);
+        expect($after.eq(3).text()).to.match(/^bytes_formatted/);
+        expect($after.eq(4).text()).to.match(/^bytes_formatted/);
+        expect($after.eq(5).text()).to.match(/^bytes_formatted/);
+      });
+    });
   });
 
 });
