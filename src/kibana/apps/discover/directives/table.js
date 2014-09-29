@@ -201,14 +201,10 @@ define(function (require) {
           createSummaryRow($scope.row, $scope.row._id);
         });
 
-        // expected state of the row's html, needs to be kept in sync so that we can properly diff
-        // new html
-        var currentHtml = [];
-
         // create a tr element that lists the value for each *column*
         function createSummaryRow(row, id) {
           // We just create a string here because its faster.
-          var html = [
+          var newHtmls = [
             '<td ng-click="toggleRow()" >' +
               '<i class="fa" ng-class="{ \'fa-caret-down\': open, \'fa-caret-right\': !open }"></i>' +
 
@@ -221,7 +217,7 @@ define(function (require) {
           ];
 
           if ($scope.timefield) {
-            html.push(
+            newHtmls.push(
               '<td class="discover-table-timefield" width="1%">' +
                 _displayField(row, $scope.timefield) +
               '</td>'
@@ -229,71 +225,38 @@ define(function (require) {
           }
 
           $scope.columns.forEach(function (column) {
-            html.push('<td>' + _displayField(row, column, true) + '</td>');
+            newHtmls.push('<td>' + _displayField(row, column, true) + '</td>');
           });
 
-          function swap(i) {
-            var $children = $el.children();
-            var $back = $children.eq(i);
-            var $front = $children.eq(i + 1);
+          var $cells = $el.children();
+          newHtmls.forEach(function (html, i) {
+            var $cell = $cells.eq(i);
+            if ($cell.data('discover:html') === html) return;
 
-            $front.after($back.detach());
-            currentHtml.splice(i, 0, currentHtml.splice(i, 1));
-          }
+            var reuse = _.find($cells.slice(i + 1), function (cell) {
+              return $.data(cell, 'discover:html') === html;
+            });
 
-          function add(i) {
-            var $after = $el.children().eq(i - 1);
-            var $added = $(html[i]);
-            if ($after.size()) {
-              $after.after($added);
-              currentHtml.splice(i, 0, html[i]);
+            var $target = reuse ? $(reuse).detach() : $(html);
+            $target.data('discover:html', html);
+            var $before = $cells.eq(i - 1);
+            if ($before.size()) {
+              $before.after($target);
             } else {
-              $el.append($added);
-              currentHtml.push(html[i]);
+              $el.append($target);
             }
 
-            if (i === 0) {
-              // 0 is the toggle cell, which needs to be compiled
+            // rebuild cells since we modified the children
+            $cells = $el.children();
+
+            if (i === 0 && !reuse) {
               $toggleScope = $scope.$new();
-              $compile($added)($toggleScope);
+              $compile($target)($toggleScope);
             }
-          }
+          });
 
-          function remove(i) {
-            $el.children().eq(i).remove();
-            currentHtml.splice(i, 1);
-
-            if (i === 0) {
-              // 0 is the toggle cell, which has the $toggleScope
-              if ($toggleScope) $toggleScope.$destroy();
-            }
-          }
-
-          function replace(i) {
-            remove(i);
-            add(i);
-          }
-
-          for (var i = 0; i < html.length; i++) {
-            var update = html[i];
-            var nextUpdate = html[i + 1];
-
-            var cur = currentHtml[i];
-            var nextCur = currentHtml[i + 1];
-
-            var noChange = update === cur;
-            var backMovedForward = update === nextCur;
-            var forwardMovedBack = nextUpdate === cur;
-
-            if (noChange) continue;
-
-            if (forwardMovedBack && backMovedForward) swap(i);
-            else if (forwardMovedBack) add(i);
-            else if (backMovedForward) remove(i);
-            else replace(i);
-          }
-
-          currentHtml = html;
+          // trim off cells that were not used rest of the cells
+          $cells.filter(':gt(' + (newHtmls.length - 1) + ')').remove();
         }
 
         /**

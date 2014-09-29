@@ -195,7 +195,6 @@ define(function (require) {
           expect($scope.columns[0]).to.be('bytes');
         });
       });
-
     });
 
     describe('kbnTable', function () {
@@ -259,12 +258,9 @@ define(function (require) {
         expect(tr.length).to.be(100);
         done();
       });
-
     });
 
-
     describe('kbnTableRow', function () {
-
       var $elem = angular.element(
         '<tr kbn-table-row="row" ' +
         'columns="columns" ' +
@@ -359,11 +355,7 @@ define(function (require) {
         });
 
       });
-
-
     });
-
-
   });
 
 });
