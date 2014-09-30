@@ -3,13 +3,13 @@ define(function (require) {
   require('components/state_management/app_state');
 
   describe('State Management', function () {
-    var $rootScope, $location, AppState;
+    var $rootScope, AppState;
 
     beforeEach(function () {
       module('kibana');
 
-      inject(function (_$location_, Private) {
-        $location = _$location_;
+      inject(function (_$rootScope_, _$location_, Private) {
+        $rootScope = _$rootScope_;
         AppState = Private(require('components/state_management/app_state'));
       });
     });
@@ -25,9 +25,16 @@ define(function (require) {
         expect(appState).to.have.property('destroy');
       });
 
-      it('should use passed in params');
+      it('should be destroyed on $routeChangeStart', function () {
+        var destroySpy = sinon.spy(appState, 'destroy');
+        var url = '/test/path';
 
-      it('should be destroyed on route change');
+        $rootScope.$emit('$routeChangeStart');
+
+        expect(destroySpy.callCount).to.be(1);
+      });
+
+      it('should use passed in params');
     });
   });
 });
