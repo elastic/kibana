@@ -117,6 +117,7 @@ define(function (require) {
     ColumnChart.prototype.addBarEvents = function (svg, bars, brush) {
       var events = this.events;
       var dispatch = this.events._attr.dispatch;
+      var addBrush = this._attr.addBrushing;
       var xScale = this.vis.xAxis.xScale;
       var startXInv;
 
@@ -131,19 +132,21 @@ define(function (require) {
         d3.event.stopPropagation();
       })
       .on('mousedown.bar', function () {
-        var bar = d3.select(this);
-        var startX = d3.mouse(svg.node());
-        startXInv = xScale.invert(startX[0]);
+        if (addBrush) {
+          var bar = d3.select(this);
+          var startX = d3.mouse(svg.node());
+          startXInv = xScale.invert(startX[0]);
 
-        // Reset the brush value
-        brush.extent([startXInv, startXInv]);
+          // Reset the brush value
+          brush.extent([startXInv, startXInv]);
 
-        // Magic!
-        // Need to call brush on svg to see brush when brushing
-        // while on top of bars.
-        // Need to call brush on bar to allow the click event to be registered
-        svg.call(brush);
-        bar.call(brush);
+          // Magic!
+          // Need to call brush on svg to see brush when brushing
+          // while on top of bars.
+          // Need to call brush on bar to allow the click event to be registered
+          svg.call(brush);
+          bar.call(brush);
+        }
       })
       .on('click.bar', function (d, i) {
         dispatch.click(events.eventResponse(d, i));
