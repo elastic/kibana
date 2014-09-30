@@ -35,11 +35,11 @@ define(function (require) {
         .classed('hover', true)
         .style('cursor', 'pointer');
 
-        dispatch.hover(events.eventResponse(d, i));
+        dispatch.hover(events.pieResponse(d, i));
         d3.event.stopPropagation();
       })
       .on('click.pie', function clickPie(d, i) {
-        dispatch.click(events.eventResponse(d, i));
+        dispatch.click(events.pieResponse(d, i));
         d3.event.stopPropagation();
       })
       .on('mouseout.pie', function mouseOutPie() {

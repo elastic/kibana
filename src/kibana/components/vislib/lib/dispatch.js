@@ -24,7 +24,7 @@ define(function (require) {
 
     // Response to `click` and `hover` events
     Dispatch.prototype.eventResponse = function (d, i) {
-      var label = d.label ? d.label : d.name;
+      var label = d.label;
       var getYValue = this._attr.yValue;
       var color = this.color;
       var chartData = this.chartData;
@@ -38,7 +38,28 @@ define(function (require) {
         color: color(label),
         pointIndex: i,
         series: chartData.series,
-        slices: chartData.slices,
+        config: attr,
+        data: chartData,
+        e: d3.event,
+        handler: handler
+      };
+    };
+
+    // Pie response to `click` and `hover` events
+    Dispatch.prototype.pieResponse = function (d, i) {
+      var label = d.key;
+      var color = this.color;
+      var chartData = this.chartData;
+      var attr = this._attr;
+      var handler = this.handler;
+
+      return {
+        value: d.value,
+        point: d,
+        label: label,
+        color: color(label),
+        pointIndex: i,
+        appConfig: d.appConfig,
         config: attr,
         data: chartData,
         e: d3.event,
