@@ -21,17 +21,9 @@ define(function (require) {
         appState = new AppState();
       });
 
-      it('should have a destroy method', function () {
-        expect(appState).to.have.property('destroy');
-      });
-
-      it('should be destroyed on $routeChangeStart', function () {
-        var destroySpy = sinon.spy(appState, 'destroy');
-        var url = '/test/path';
-
-        $rootScope.$emit('$routeChangeStart');
-
-        expect(destroySpy.callCount).to.be(1);
+      it('should have _urlParam of _a', function () {
+        expect(appState).to.have.property('_urlParam');
+        expect(appState._urlParam).to.equal('_a');
       });
 
       it('should use passed in params', function () {
@@ -47,6 +39,19 @@ define(function (require) {
           expect(appState._defaults).to.have.property(key);
           expect(appState._defaults[key]).to.equal(params[key]);
         });
+      });
+
+      it('should have a destroy method', function () {
+        expect(appState).to.have.property('destroy');
+      });
+
+      it('should be destroyed on $routeChangeStart', function () {
+        var destroySpy = sinon.spy(appState, 'destroy');
+        var url = '/test/path';
+
+        $rootScope.$emit('$routeChangeStart');
+
+        expect(destroySpy.callCount).to.be(1);
       });
     });
   });
