@@ -59,6 +59,8 @@ define(function (require) {
         label: label,
         color: color(label),
         pointIndex: i,
+        children: d.children ? d.children : undefined,
+        parent: d.parent ? d.parent : undefined,
         appConfig: d.appConfig,
         config: attr,
         data: chartData,
