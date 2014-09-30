@@ -34,7 +34,20 @@ define(function (require) {
         expect(destroySpy.callCount).to.be(1);
       });
 
-      it('should use passed in params');
+      it('should use passed in params', function () {
+        var params = {
+          test: true,
+          mock: false
+        };
+
+        appState = new AppState(params);
+        expect(appState).to.have.property('_defaults');
+
+        Object.keys(params).forEach(function (key) {
+          expect(appState._defaults).to.have.property(key);
+          expect(appState._defaults[key]).to.equal(params[key]);
+        });
+      });
     });
   });
 });
