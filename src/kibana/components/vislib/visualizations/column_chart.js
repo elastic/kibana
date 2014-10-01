@@ -117,7 +117,7 @@ define(function (require) {
     ColumnChart.prototype.addBarEvents = function (svg, bars, brush) {
       var events = this.events;
       var dispatch = this.events._attr.dispatch;
-      var xScale = this.vis.xAxis.xScale;
+      var xScale = this.handler.xAxis.xScale;
       var startXInv;
 
       bars
