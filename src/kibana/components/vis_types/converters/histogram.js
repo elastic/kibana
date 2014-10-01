@@ -87,7 +87,6 @@ define(function (require) {
       chart.tooltipFormatter = function (event) {
         $tooltipScope.details = columns.map(function (col) {
           var datum = event.point;
-          var aggConfig = col.aggConfig;
 
           var label;
           var val;
@@ -107,7 +106,7 @@ define(function (require) {
             break;
           }
 
-          label = aggConfig.makeLabel() || (col.field && col.field.name) || label;
+          label = (col.aggConfig && col.aggConfig.makeLabel()) || (col.field && col.field.name) || label;
           if (col.field) val = col.field.format.convert(val);
 
           return {
