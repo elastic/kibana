@@ -29,7 +29,8 @@ define(function (require) {
       }
 
       // tooltip formatter for pie charts
-      chart.tooltipFormatter = function (datum) {
+      chart.tooltipFormatter = function (event) {
+        var datum = event.point;
         var parent;
         var sum;
 
