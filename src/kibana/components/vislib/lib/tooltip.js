@@ -76,15 +76,9 @@ define(function (require) {
       var tipWidth = tip.outerWidth();
       var tipHeight = tip.outerHeight();
 
-      return _.mapValues({
-        left: {
-          default: event.clientX + OFFSET
-        }
-      });
-
       // the placements if we were to place the tip east or west
       var left = {
-        east: ,
+        east: event.clientX + OFFSET,
         west: event.clientX - tipWidth - OFFSET
       };
 
