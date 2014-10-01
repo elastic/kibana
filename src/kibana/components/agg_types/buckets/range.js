@@ -14,7 +14,7 @@ define(function (require) {
       params: [
         {
           name: 'field',
-          filterFieldTypes: ['number', 'date', 'string']
+          filterFieldTypes: ['number']
         },
         {
           name: 'ranges',

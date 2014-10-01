@@ -90,7 +90,7 @@ define(function (require) {
           // fetch the object from ES
           return docSource.fetch()
           .then(function applyESResp(resp) {
-            
+
             obj._source = _.cloneDeep(resp._source);
 
             if (!resp.found) throw new errors.SavedObjectNotFound(type);

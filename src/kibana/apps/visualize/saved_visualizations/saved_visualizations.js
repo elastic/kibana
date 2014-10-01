@@ -63,7 +63,7 @@ define(function (require) {
               catch (e) { /* missing typename handled below */ }
             }
 
-            if (!typeName) {
+            if (!typeName || !visTypes.byName[typeName]) {
               notify.info('unable to detect type from visualization source', hit);
               return;
             }
