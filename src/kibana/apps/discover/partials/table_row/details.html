@@ -1,0 +1,40 @@
+<td colspan="{{ columns.length + 2 }}">
+  <div class="discover-table-details">
+    <ul class="nav nav-tabs discover-table-details-toggle">
+      <li ng-class="{active: row._mode == 'table'}"><a ng-click="row._mode='table'">Table</a></li>
+      <li ng-class="{active: row._mode == 'json'}"><a ng-click="row._mode='json'">JSON</a></li>
+    </ul>
+
+    <table class="table table-condensed" ng-show="row._mode == 'table'" bindonce>
+      <tbody>
+        <tr ng-repeat="field in row._fields" bindonce>
+          <td field-name="field"
+              field-type="mapping[field].type"
+              width="1%"
+              class="discover-table-details-field">
+          </td>
+          <td width="1%" class="discover-table-details-buttons">
+            <span bo-show="showFilters(mapping[field])">
+              <i ng-click="filter(row, field, '+')" class="fa fa-search-plus"></i>
+              <i ng-click="filter(row, field, '-')" class="fa fa-search-minus"></i>
+            </span>
+            <span bo-show="!showFilters(mapping[field])" tooltip="Unindexed fields can not be searched">
+              <i class="fa fa-search-plus text-muted"></i>
+              <i class="fa fa-search-minus text-muted"></i>
+            </span>
+          </td>
+
+          <td>
+            <i bo-show="!mapping[field]"
+              tooltip-placement="top"
+              tooltip="No cached mapping for this field. Refresh your mapping from the Settings > Indices page"
+              class="fa fa-warning text-color-warning ng-scope"></i>
+            <span class="discover-table-details-value">{{row._formatted[field] || row[field]}}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <pre ng-show="row._mode == 'json'">{{row._source | json}}</pre>
+  </div>
+</td>
