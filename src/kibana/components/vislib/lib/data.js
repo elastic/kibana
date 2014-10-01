@@ -151,16 +151,42 @@ define(function (require) {
     };
 
     Data.prototype.getNames = function () {
-      var data = this.pieData();
-      var names = [];
+      /*
+       * 1. Flatten the data into an array of objects
+       * 2. Determine an index order for the objects in the array
+       * 3. Return an array with names sorted by index
+       */
+      var data = this.data.slices;
 
-      data.forEach(function returnNames(obj) {
-        if (obj.names) {
-          names = names.concat(obj.names);
-        }
-      });
+      function returnNames(array, index) {
+        var names = [];
 
-      return _.unique(names);
+        _.forEach(array, function (obj) {
+
+          names.push({ key: obj.name, index: index });
+
+          if (obj.children) {
+            var plusIndex = index + 1;
+
+            _.forEach(returnNames(obj.children, plusIndex), function (namedObj) {
+              names.push(namedObj);
+            });
+          }
+        });
+
+        return names;
+      }
+
+      if (data.children) {
+        var namedObj = returnNames(data.children, 0);
+        return _(namedObj)
+          .sortBy(function (obj) {
+            return obj.index;
+          })
+          .pluck('key')
+          .unique()
+          .value();
+      }
     };
 
     // Inject zeros into the data
