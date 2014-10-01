@@ -390,9 +390,9 @@ define(function (require) {
 
         $before = $row.find('td');
         expect($before).to.have.length(3);
-        expect($before.eq(0).text()).to.be('');
-        expect($before.eq(1).text()).to.match(/^timestamp_formatted/);
-        expect($before.eq(2).text()).to.match(/^_source_formatted/);
+        expect($before.eq(0).text().trim()).to.be('');
+        expect($before.eq(1).text().trim()).to.match(/^timestamp_formatted/);
+        expect($before.eq(2).text().trim()).to.match(/^_source_formatted/);
       }));
 
       afterEach(function () {
@@ -408,7 +408,7 @@ define(function (require) {
         expect($after[0]).to.be($before[0]);
         expect($after[1]).to.be($before[1]);
         expect($after[2]).to.be($before[2]);
-        expect($after.eq(3).text()).to.match(/^bytes_formatted/);
+        expect($after.eq(3).text().trim()).to.match(/^bytes_formatted/);
       });
 
       it('handles two new columns at once', function () {
@@ -421,8 +421,8 @@ define(function (require) {
         expect($after[0]).to.be($before[0]);
         expect($after[1]).to.be($before[1]);
         expect($after[2]).to.be($before[2]);
-        expect($after.eq(3).text()).to.match(/^bytes_formatted/);
-        expect($after.eq(4).text()).to.match(/^request_formatted/);
+        expect($after.eq(3).text().trim()).to.match(/^bytes_formatted/);
+        expect($after.eq(4).text().trim()).to.match(/^request_formatted/);
       });
 
       it('handles three new columns in odd places', function () {
@@ -438,10 +438,10 @@ define(function (require) {
         expect($after).to.have.length(6);
         expect($after[0]).to.be($before[0]);
         expect($after[1]).to.be($before[1]);
-        expect($after.eq(2).text()).to.match(/^timestamp_formatted/);
-        expect($after.eq(3).text()).to.match(/^bytes_formatted/);
+        expect($after.eq(2).text().trim()).to.match(/^timestamp_formatted/);
+        expect($after.eq(3).text().trim()).to.match(/^bytes_formatted/);
         expect($after[4]).to.be($before[2]);
-        expect($after.eq(5).text()).to.match(/^request_formatted/);
+        expect($after.eq(5).text().trim()).to.match(/^request_formatted/);
       });
 
 
@@ -490,7 +490,7 @@ define(function (require) {
         expect($after).to.have.length(3);
         expect($after[0]).to.be($before[0]);
         expect($after[1]).to.be($before[1]);
-        expect($after.eq(2).text()).to.match(/^timestamp_formatted/);
+        expect($after.eq(2).text().trim()).to.match(/^timestamp_formatted/);
       });
 
       it('handles two columns with the same content', function () {
@@ -503,7 +503,7 @@ define(function (require) {
         expect($after[0]).to.be($before[0]);
         expect($after[1]).to.be($before[1]);
         expect($after[2]).to.be($before[2]);
-        expect($after.eq(3).text()).to.match(/^_source_formatted/);
+        expect($after.eq(3).text().trim()).to.match(/^_source_formatted/);
       });
 
       it('handles two columns swapping position', function () {
@@ -553,9 +553,9 @@ define(function (require) {
         expect($after[0]).to.be($before[0]);
         expect($after[1]).to.be($before[1]);
         expect($after[2]).to.be($before[2]);
-        expect($after.eq(3).text()).to.match(/^bytes_formatted/);
-        expect($after.eq(4).text()).to.match(/^bytes_formatted/);
-        expect($after.eq(5).text()).to.match(/^bytes_formatted/);
+        expect($after.eq(3).text().trim()).to.match(/^bytes_formatted/);
+        expect($after.eq(4).text().trim()).to.match(/^bytes_formatted/);
+        expect($after.eq(5).text().trim()).to.match(/^bytes_formatted/);
       });
     });
   });
