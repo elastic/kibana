@@ -23,7 +23,8 @@ define(function (require) {
       // when we don't have an x-axis, just push everything into '_all'
       if (iX === -1) {
         iX = columns.push({
-          label: ''
+          label: '',
+          categoryName: 'segment'
         }) - 1;
       }
       // column that defines the x-axis
@@ -87,7 +88,6 @@ define(function (require) {
       chart.tooltipFormatter = function (event) {
         $tooltipScope.details = columns.map(function (col) {
           var datum = event.point;
-          var aggConfig = col.aggConfig;
 
           var label;
           var val;
@@ -107,7 +107,7 @@ define(function (require) {
             break;
           }
 
-          label = aggConfig.makeLabel() || (col.field && col.field.name) || label;
+          label = (col.aggConfig && col.aggConfig.makeLabel()) || (col.field && col.field.name) || label;
           if (col.field) val = col.field.format.convert(val);
 
           return {
