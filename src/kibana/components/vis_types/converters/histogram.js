@@ -1,8 +1,13 @@
 define(function (require) {
-  return function HistogramConverterFn(Private, timefilter) {
+  return function HistogramConverterFn(Private, timefilter, $compile, $rootScope) {
     var _ = require('lodash');
+    var $ = require('jquery');
     var moment = require('moment');
     var interval = require('utils/interval');
+
+    var $tooltipScope = $rootScope.$new();
+    var $tooltip = $(require('text!components/vis_types/tooltips/histogram.html'));
+    $compile($tooltip)($tooltipScope);
 
     return function (chart, columns, rows) {
       // index of color
@@ -80,23 +85,26 @@ define(function (require) {
 
       // setup the formatter for the label
       chart.tooltipFormatter = function (datum) {
-        var vals = [['x', colX], ['y', colY]]
-        .map(function (set) {
+        [['x', colX], ['y', colY], ['color', colColor]]
+        .forEach(function (set) {
           var axis = set[0];
           var col = set[1];
-          var val = datum[axis];
 
-          var name = (col.field && col.field.name) || col.label || axis;
-          if (col.field) val = col.field.format.convert(val);
+          var name;
+          var val;
 
-          return name + ': ' + val;
-        }).join('<br>');
+          if (col) {
+            val = axis === 'color' ? datum.label : datum[axis];
+            name = (col.field && col.field.name) || col.label || axis;
+            if (col.field) val = col.field.format.convert(val);
+          }
 
-        var out = '';
-        if (datum.label) out += colColor.field.name + ': ' + datum.label + '<br>';
-        out += vals;
+          $tooltipScope[axis + 'Name'] = name;
+          $tooltipScope[axis + 'Value'] = val;
+        });
 
-        return out;
+        $tooltipScope.$apply();
+        return $tooltip[0].outerHTML;
       };
 
       var series = chart.series = [];
