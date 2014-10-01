@@ -207,14 +207,8 @@ define(function (require) {
         function createSummaryRow(row, id) {
           // We just create a string here because its faster.
           var newHtmls = [
-            '<td ng-click="toggleRow()" >' +
+            '<td ng-click="toggleRow()" class="discover-table-open-toggle">' +
               '<i class="fa" ng-class="{ \'fa-caret-down\': open, \'fa-caret-right\': !open }"></i>' +
-
-              // since -caret-down is a little bigger, it causes the entire
-              // table to reflow when shown. include this hidden element
-              // strecth the cell to the full-size at all time and prevent
-              // the resize
-              '<i class="fa fa-caret-down" style="visibility: hidden"></i>' +
             '</td>'
           ];
 

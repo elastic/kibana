@@ -64,8 +64,15 @@
   padding-left: 0px !important;
   padding-right: 0px !important;
 
-  .discover-table-timefield {
+  &-timefield {
     white-space: nowrap;
+  }
+
+  &-open-toggle .fa {
+    // when switching between open and closed, the toggle changes size
+    // slightly which is a problem because it forces the entire table to
+    // re-render which is SLOW
+    width: 7px;
   }
 }
 
