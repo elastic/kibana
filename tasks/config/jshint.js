@@ -6,7 +6,7 @@ module.exports = function (grunt) {
         src: [
           'Gruntfile.js',
           '<%= root %>/tasks/**/*.js',
-          '<%= src %>/kibana/index.js',
+          '<%= src %>/kibana/*.js',
           '<%= src %>/kibana/{apps,components,controllers,directives,factories,filters,services,utils}/**/*.js',
           '<%= unitTestDir %>/**/*.js'
         ]
