@@ -401,15 +401,9 @@ function($, _, moment) {
       if(typeof obj === 'object' ) {
         if(_.isArray(obj)) {
           if(obj.length > 0 && typeof obj[0] === 'object') {
-            var strval = '';
-            for (var objidx = 0, objlen = obj.length; objidx < objlen; objidx++) {
-              if (objidx > 0) {
-                strval = strval + ', ';
-              }
-
-              strval = strval + JSON.stringify(obj[objidx]);
-            }
-            array[rootname] = strval;
+            obj.forEach(function (eobj,eindex) {
+                kbn.flatten_json(eobj,rootname + "." + eindex,array);
+            });
           } else if(obj.length === 1 && _.isNumber(obj[0])) {
             array[rootname] = parseFloat(obj[0]);
           } else {
@@ -423,7 +417,7 @@ function($, _, moment) {
       }
     }
     return kbn.sortObj(array);
-  };
+  }
 
   kbn.xmlEnt = function(value) {
     if(_.isString(value)) {
