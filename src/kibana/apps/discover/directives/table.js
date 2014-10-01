@@ -174,7 +174,9 @@ define(function (require) {
           $detailsTr
             .empty()
             .append(
-              $('<td>').attr('colspan', $scope.columns.length + 2).append(detailsHtml)
+              $('<td>')
+              .attr('colspan', '{{ columns.length + 2 }}')
+              .append(detailsHtml)
             );
 
           var showFilters = function (mapping) {
