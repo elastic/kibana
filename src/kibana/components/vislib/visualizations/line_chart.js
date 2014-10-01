@@ -9,14 +9,14 @@ define(function (require) {
     require('css!components/vislib/styles/main');
 
     _(LineChart).inherits(Chart);
-    function LineChart(vis, chartEl, chartData) {
+    function LineChart(handler, chartEl, chartData) {
       if (!(this instanceof LineChart)) {
-        return new LineChart(vis, chartEl, chartData);
+        return new LineChart(handler, chartEl, chartData);
       }
 
       LineChart.Super.apply(this, arguments);
       // Line chart specific attributes
-      this._attr = _.defaults(vis._attr || {}, {
+      this._attr = _.defaults(handler._attr || {}, {
         interpolate: 'linear',
         xValue: function (d) { return d.x; },
         yValue: function (d) { return d.y; }
@@ -54,13 +54,13 @@ define(function (require) {
 
     LineChart.prototype.addCircles = function (svg, data) {
       var self = this;
-      var color = this.vis.data.getColorFunc();
-      var xScale = this.vis.xAxis.xScale;
-      var yScale = this.vis.yAxis.yScale;
-      var ordered = this.vis.data.get('ordered');
+      var color = this.handler.data.getColorFunc();
+      var xScale = this.handler.xAxis.xScale;
+      var yScale = this.handler.yAxis.yScale;
+      var ordered = this.handler.data.get('ordered');
       var circleRadius = 4;
       var circleStrokeWidth = 1;
-      var tooltip = this.vis.tooltip;
+      var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
       var layer;
       var circles;
@@ -121,11 +121,11 @@ define(function (require) {
 
     LineChart.prototype.addLines = function (svg, data) {
       var self = this;
-      var xScale = this.vis.xAxis.xScale;
-      var yScale = this.vis.yAxis.yScale;
-      var xAxisFormatter = this.vis.data.get('xAxisFormatter');
-      var color = this.vis.data.getColorFunc();
-      var ordered = this.vis.data.get('ordered');
+      var xScale = this.handler.xAxis.xScale;
+      var yScale = this.handler.yAxis.yScale;
+      var xAxisFormatter = this.handler.data.get('xAxisFormatter');
+      var color = this.handler.data.getColorFunc();
+      var ordered = this.handler.data.get('ordered');
       var interpolate = this._attr.interpolate;
       var line = d3.svg.line()
       .interpolate(interpolate)
@@ -190,7 +190,7 @@ define(function (require) {
       var margin = this._attr.margin;
       var elWidth = this._attr.width = $elem.width();
       var elHeight = this._attr.height = $elem.height();
-      var xScale = this.vis.xAxis.xScale;
+      var xScale = this.handler.xAxis.xScale;
       var chartToSmallError = 'The height and/or width of this container is too small for this chart.';
       var minWidth = 20;
       var minHeight = 20;

@@ -13,14 +13,14 @@ define(function (require) {
      * Column chart visualization => vertical bars, stacked bars
      */
     _(ColumnChart).inherits(Chart);
-    function ColumnChart(vis, chartEl, chartData) {
+    function ColumnChart(handler, chartEl, chartData) {
       if (!(this instanceof ColumnChart)) {
-        return new ColumnChart(vis, chartEl, chartData);
+        return new ColumnChart(handler, chartEl, chartData);
       }
 
       ColumnChart.Super.apply(this, arguments);
       // Column chart specific attributes
-      this._attr = _.defaults(vis._attr || {}, {
+      this._attr = _.defaults(handler._attr || {}, {
         xValue: function (d, i) { return d.x; },
         yValue: function (d, i) { return d.y; }
       });
@@ -46,10 +46,10 @@ define(function (require) {
     ColumnChart.prototype.addBars = function (svg, layers) {
       var self = this;
       var data = this.chartData;
-      var color = this.vis.data.getColorFunc();
-      var xScale = this.vis.xAxis.xScale;
-      var yScale = this.vis.yAxis.yScale;
-      var tooltip = this.vis.tooltip;
+      var color = this.handler.data.getColorFunc();
+      var xScale = this.handler.xAxis.xScale;
+      var yScale = this.handler.yAxis.yScale;
+      var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
       var layer;
       var bars;
@@ -117,7 +117,7 @@ define(function (require) {
     ColumnChart.prototype.addBarEvents = function (svg, bars, brush) {
       var events = this.events;
       var dispatch = this.events._attr.dispatch;
-      var xScale = this.vis.xAxis.xScale;
+      var xScale = this.handler.xAxis.xScale;
       var startXInv;
 
       bars
@@ -158,7 +158,7 @@ define(function (require) {
     ColumnChart.prototype.draw = function () {
       // Attributes
       var self = this;
-      var xScale = this.vis.xAxis.xScale;
+      var xScale = this.handler.xAxis.xScale;
       var $elem = $(this.chartEl);
       var margin = this._attr.margin;
       var elWidth = this._attr.width = $elem.width();

@@ -1,8 +1,13 @@
 define(function (require) {
-  return function HistogramConverterFn(Private, timefilter) {
+  return function HistogramConverterFn(Private, timefilter, $compile, $rootScope) {
     var _ = require('lodash');
+    var $ = require('jquery');
     var moment = require('moment');
     var interval = require('utils/interval');
+
+    var $tooltipScope = $rootScope.$new();
+    var $tooltip = $(require('text!components/vis_types/tooltips/histogram.html'));
+    $compile($tooltip)($tooltipScope);
 
     return function (chart, columns, rows) {
       // index of color
@@ -79,24 +84,41 @@ define(function (require) {
 
 
       // setup the formatter for the label
-      chart.tooltipFormatter = function (datum) {
-        var vals = [['x', colX], ['y', colY]]
-        .map(function (set) {
-          var axis = set[0];
-          var col = set[1];
-          var val = datum[axis];
+      chart.tooltipFormatter = function (event) {
+        $tooltipScope.details = columns.map(function (col) {
+          var datum = event.point;
+          var aggConfig = col.aggConfig;
 
-          var name = (col.field && col.field.name) || col.label || axis;
+          var label;
+          var val;
+
+          switch (col) {
+          case colX:
+            label = 'x';
+            val = datum.x;
+            break;
+          case colY:
+            label = 'y';
+            val = datum.y;
+            break;
+          case colColor:
+            label = 'color';
+            val = datum.label;
+            break;
+          }
+
+          label = aggConfig.makeLabel() || (col.field && col.field.name) || label;
           if (col.field) val = col.field.format.convert(val);
 
-          return name + ': ' + val;
-        }).join('<br>');
+          return {
+            label: label,
+            value: val
+          };
 
-        var out = '';
-        if (datum.label) out += colColor.field.name + ': ' + datum.label + '<br>';
-        out += vals;
+        });
 
-        return out;
+        $tooltipScope.$apply();
+        return $tooltip[0].outerHTML;
       };
 
       var series = chart.series = [];

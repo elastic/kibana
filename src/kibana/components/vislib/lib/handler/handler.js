@@ -4,7 +4,6 @@ define(function (require) {
 
     var Data = Private(require('components/vislib/lib/data'));
     var Layout = Private(require('components/vislib/lib/layout/layout'));
-    var Tooltip = Private(require('components/vislib/lib/tooltip'));
 
     /*
      * Handles building all the components of the visualization
@@ -33,10 +32,6 @@ define(function (require) {
       this.yAxis = opts.yAxis;
       this.chartTitle = opts.chartTitle;
       this.axisTitle = opts.axisTitle;
-
-      if (this._attr.addTooltip) {
-        this.tooltip = new Tooltip(this.el, this.data.get('tooltipFormatter'));
-      }
 
       if (this._attr.addLegend && this.data.isLegendShown()) {
         this.legend = opts.legend;

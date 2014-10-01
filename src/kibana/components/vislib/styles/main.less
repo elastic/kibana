@@ -1,3 +1,4 @@
+@import (reference) "../../../styles/main.less";
 @import (reference) "lesshat.less";
 
 /* vislib styles */
@@ -218,12 +219,27 @@ p.rows-label, p.columns-label {
   font-weight: normal;
   padding: 8px;
   background: rgba(70, 82, 93, 0.95);
-  color: #fff;
+  color: @gray-lighter;
   border-radius: 4px;
   position: fixed;
   z-index: 120;
   word-wrap: break-word;
   max-width: 40%;
+
+  table {
+    td,th {
+      padding: 2px 4px;
+    }
+
+    tr {
+      border-bottom: 1px solid @gray;
+    }
+
+    // only apply to tr in the body, not the header
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+  }
 }
 
 .rect {
