@@ -14,6 +14,7 @@ define(function (require) {
       this.icon = opts.icon;
       this.vislibParams = opts.vislibParams || {};
       this.responseConverter = opts.responseConverter || HistogramConverter;
+      this.hierarchialData = opts.hierarchialData || false;
       this.listeners = opts.listeners || {};
       this.schemas = opts.schemas || new VisTypeSchemas();
     }

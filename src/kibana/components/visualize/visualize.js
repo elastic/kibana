@@ -9,6 +9,7 @@ define(function (require) {
     var _ = require('lodash');
     var visTypes = Private(require('components/vis_types/index'));
     var buildChartData = Private(require('components/visualize/_build_chart_data'));
+    var buildHierarchialData = Private(require('components/visualize/_build_hierarchial_data'));
 
     var notify = new Notifier({
       location: 'Visualize'
@@ -116,8 +117,15 @@ define(function (require) {
         }));
 
         $scope.$watch('esResp', prereq(function (resp, prevResp) {
+          var fn;
           if (!resp) return;
-          $scope.chartData = buildChartData($scope.vis, resp);
+          if ($scope.vis.type.hierarchialData) {
+            fn = buildHierarchialData;
+          } else {
+            fn = buildChartData;
+          }
+          var chartData = fn($scope.vis, resp);
+          $scope.chartData = chartData;
         }));
 
         $scope.$watch('chartData', function (chartData) {
