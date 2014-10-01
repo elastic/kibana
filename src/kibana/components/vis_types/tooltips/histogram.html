@@ -1,22 +1,14 @@
 <table>
   <thead>
     <tr>
-      <th>Field</th>
+      <th></th>
       <th>Value</th>
     </tr>
   </thead>
   <tbody>
-    <tr ng-if="colorName">
-      <td>{{colorName}}</td>
-      <td>{{colorValue}}</td>
-    </tr>
-    <tr>
-      <td>{{xName}}</td>
-      <td>{{xValue}}</td>
-    </tr>
-    <tr>
-      <td>{{yName}}</td>
-      <td>{{yValue}}</td>
+    <tr ng-repeat="detail in details">
+      <td>{{detail.label}}</td>
+      <td>{{detail.value}}</td>
     </tr>
   </tbody>
 </table>

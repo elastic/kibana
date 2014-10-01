@@ -84,23 +84,37 @@ define(function (require) {
 
 
       // setup the formatter for the label
-      chart.tooltipFormatter = function (datum) {
-        [['x', colX], ['y', colY], ['color', colColor]]
-        .forEach(function (set) {
-          var axis = set[0];
-          var col = set[1];
+      chart.tooltipFormatter = function (event) {
+        $tooltipScope.details = columns.map(function (col) {
+          var datum = event.point;
+          var aggConfig = col.aggConfig;
 
-          var name;
+          var label;
           var val;
 
-          if (col) {
-            val = axis === 'color' ? datum.label : datum[axis];
-            name = (col.field && col.field.name) || col.label || axis;
-            if (col.field) val = col.field.format.convert(val);
+          switch (col) {
+          case colX:
+            label = 'x';
+            val = datum.x;
+            break;
+          case colY:
+            label = 'y';
+            val = datum.y;
+            break;
+          case colColor:
+            label = 'color';
+            val = datum.label;
+            break;
           }
 
-          $tooltipScope[axis + 'Name'] = name;
-          $tooltipScope[axis + 'Value'] = val;
+          label = aggConfig.makeLabel() || (col.field && col.field.name) || label;
+          if (col.field) val = col.field.format.convert(val);
+
+          return {
+            label: label,
+            value: val
+          };
+
         });
 
         $tooltipScope.$apply();

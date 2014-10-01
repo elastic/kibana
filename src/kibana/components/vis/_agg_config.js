@@ -122,6 +122,11 @@ define(function (require) {
       );
     };
 
+    AggConfig.prototype.makeLabel = function () {
+      if (!this.type) return '';
+      return this.type.makeLabel(this);
+    };
+
     return AggConfig;
   };
 });
