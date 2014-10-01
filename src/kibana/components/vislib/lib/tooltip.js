@@ -40,23 +40,17 @@ define(function (require) {
 
         selection.each(function (data, i) {
           var element = d3.select(this);
-          var offset;
 
           element
             .on('mousemove.tip', function (d) {
-              var mouseMove = {
-                left: d3.event.clientX,
-                top: d3.event.clientY
-              };
-
-              offset = self.getOffsets(mouseMove);
+              var placement = self.getTooltipPlacement(d3.event);
 
               // return text and position for tooltip
               return tooltipDiv.datum(self.events.eventResponse(d, i))
                 .html(tooltipFormatter)
                 .style('visibility', 'visible')
-                .style('left', mouseMove.left + offset.left + 'px')
-                .style('top', mouseMove.top + offset.top + 'px');
+                .style('left', placement.left + 'px')
+                .style('top', placement.top + 'px');
             })
             .on('mouseout.tip', function () {
               return tooltipDiv.style('visibility', 'hidden')
@@ -67,35 +61,43 @@ define(function (require) {
       };
     };
 
-    Tooltip.prototype.getOffsets = function (mouseMove) {
-
+    Tooltip.prototype.getTooltipPlacement = function (event) {
       var self = this;
-      var offset = {top: -10, left: 10};
-      
-      if ($(self.el).find('.' + self.containerClass)) {
-        var container = $(self.el).find('.' + self.containerClass);
-        var chartXOffset = container.offset().left;
-        var chartYOffset = container.offset().top;
-        var chartWidth = container.width();
-        var chartHeight = container.height();
-        var tip = $('.' + self.tooltipClass)[0];
-        var tipWidth = tip.clientWidth;
-        var tipHeight = tip.clientHeight;
-        
-        // change xOffset to keep tooltip within container
-        // if tip width + xOffset puts it over right edge of container, flip left
-        // unless flip left puts it over left edge of container
-        // change yOffset to keep tooltip within container
-        if (mouseMove.left + offset.left + tipWidth > chartXOffset + chartWidth &&
-          mouseMove.left - tipWidth - 10 > chartXOffset) {
-          offset.left = -10 - tipWidth;
-        }
-        if (mouseMove.top + tipHeight - 10 > chartYOffset + chartHeight) {
-          offset.top = chartYOffset + chartHeight;
-        }
-      }
-      
-      return offset;
+      var OFFSET = 15;
+
+      var chart = $(self.el).find('.' + self.containerClass);
+      if (!chart.size()) return;
+
+      var chartPos = chart.offset();
+      chartPos.right = chartPos.left + chart.outerWidth();
+      chartPos.bottom = chartPos.top + chart.outerHeight();
+
+      var tip = $('.' + self.tooltipClass);
+      var tipWidth = tip.outerWidth();
+      var tipHeight = tip.outerHeight();
+
+      // the placements if we were to place the tip east or west
+      var left = {
+        east: event.clientX + OFFSET,
+        west: event.clientX - tipWidth - OFFSET
+      };
+
+      var eastOverEdge = left.east + tipWidth > chartPos.right;
+      var westOverEdge = left.west + tipWidth < chartPos.left;
+
+      // the placements if we were to place the tip north or south
+      var top = {
+        south: event.clientY + OFFSET,
+        north: event.clientY - tipHeight - OFFSET
+      };
+
+      var northOverEdge = top.north + tipHeight < chartPos.top;
+      var southOverEdge = top.south + tipHeight > chartPos.bottom;
+
+      return {
+        top: (southOverEdge && !northOverEdge) ? top.north : top.south,
+        left: (eastOverEdge && !westOverEdge) ? left.west : left.east
+      };
     };
 
     return Tooltip;
