@@ -39,7 +39,7 @@ define(function (require) {
 
     State.prototype._readFromURL = function () {
       var search = $location.search();
-      return rison.decode(search[this._urlParam] || '()');
+      return search[this._urlParam] ? rison.decode(search[this._urlParam]) : null;
     };
 
     /**
@@ -47,7 +47,17 @@ define(function (require) {
      * @returns {void}
      */
     State.prototype.fetch = function () {
-      var stash = this._readFromURL('fetch');
+      var stash = this._readFromURL();
+
+      // nothing to read from the url?
+      // we should save if were are ordered to persist
+      if (stash === null) {
+        if (this._persistAcrossApps) {
+          return this.save();
+        } else {
+          stash = {};
+        }
+      }
 
       _.defaults(stash, this._defaults);
       // apply diff to state from stash, will change state in place via side effect
@@ -63,7 +73,7 @@ define(function (require) {
      * @returns {void}
      */
     State.prototype.save = function () {
-      var stash = this._readFromURL('save');
+      var stash = this._readFromURL() || {};
       var state = this.toObject();
 
       _.defaults(state, this._defaults);
