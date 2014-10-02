@@ -3,10 +3,18 @@
     <i class="fa" ng-class="spyMode ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
   </small>
 </div>
-<ul ng-if="spyMode" class="nav nav-tabs visualize-spy-tabs">
-  <li
-    ng-repeat="mode in modes"
-    ng-class="{ active: spyMode.name === mode.name }">
-    <a ng-click="setSpyMode(mode)">{{mode.display}}</a>
-  </li>
-</ul>
+<header ng-if="spyMode">
+  <ul class="nav nav-justified nav-pills visualize-spy-tabs">
+    <li
+      ng-repeat="mode in modes"
+      ng-class="{ active: spyMode.name === mode.name }">
+      <a ng-click="setSpyMode(mode)">{{mode.display}}</a>
+    </li>
+  </ul>
+  <div class="controls">
+    <div ng-click="toggleFullPage()">
+      <i ng-if="!spyMode.fill" class="fa fa-expand"></i>
+      <i ng-if="spyMode.fill" class="fa fa-compress"></i>
+    </div>
+  </div>
+</header>

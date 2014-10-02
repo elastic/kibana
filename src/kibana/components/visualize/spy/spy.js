@@ -25,6 +25,11 @@ define(function (require) {
             $scope.setSpyMode($scope.spyMode ? null : defaultMode);
           };
 
+          $scope.toggleFullPage = function () {
+            fullPageSpy = $scope.spyMode.fill = !fullPageSpy;
+            $scope.$emit('change:spyMode', $scope.spyMode);
+          };
+
           $scope.setSpyMode = function (newMode) {
             // allow passing in a mode name
             if (_.isString(newMode)) newMode = modes.byName[newMode];
