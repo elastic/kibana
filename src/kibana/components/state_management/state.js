@@ -3,6 +3,7 @@ define(function (require) {
   var rison = require('utils/rison');
 
   var applyDiff = require('utils/diff_object');
+  var qs = require('utils/query_string');
 
   return function StateProvider(Private, $rootScope, $location) {
     var Events = Private(require('factories/events'));
@@ -73,8 +74,14 @@ define(function (require) {
      * @returns {void}
      */
     State.prototype.save = function () {
-      var stash = this._readFromURL() || {};
+      var stash = this._readFromURL();
       var state = this.toObject();
+      var replace = false;
+
+      if (!stash) {
+        replace = true;
+        stash = {};
+      }
 
       _.defaults(state, this._defaults);
       // apply diff to state from stash, will change state in place via side effect
@@ -87,7 +94,11 @@ define(function (require) {
       // persist the state in the URL
       var search = $location.search();
       search[this._urlParam] = this.toRISON();
-      $location.search(search);
+      if (replace) {
+        $location.search(search).replace();
+      } else {
+        $location.search(search);
+      }
     };
 
     /**
