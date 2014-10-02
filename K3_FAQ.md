@@ -1,7 +1,7 @@
 **Kibana 3 Migration FAQ:**
 
 **Q:** Where is feature X that I loved from Kibana 3?  
-**A:** It might be coming! We’ve published our immediate roadmap as tickets Check out the beta labels to see if the feature you’re missing is coming soon.
+**A:** It might be coming! We’ve published our immediate roadmap as tickets Check out the beta milestones on Github to see if the feature you’re missing is coming soon.
 
 **Q:** Is the dashboard schema compatible?  
 **A:** Unfortunately they are not compatible, in order to achieve the features we wanted it simply was not possible to keep the same schema. Aggregations work fundamentally different from facets, the new dashboard isn’t tied to rows and columns and the relationships between searches, visualizations and the dashboard are complex enough that we simply had to design something more flexible.
