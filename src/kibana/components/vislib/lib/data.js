@@ -150,35 +150,36 @@ define(function (require) {
       });
     };
 
+    // Helper function for getNames
+    // Returns an array of objects with a name (key) value and an index value.
+    // The index value allows us to sort the names in the correct nested order.
+    Data.prototype.returnNames = function (array, index) {
+      var names = [];
+
+      _.forEach(array, function (obj) {
+        names.push({ key: obj.key, index: index });
+
+        if (obj.children) {
+          var plusIndex = index + 1;
+
+          _.forEach(this.returnNames(obj.children, plusIndex), function (namedObj) {
+            names.push(namedObj);
+          });
+        }
+      });
+
+      return names;
+    };
+
+     // Flattens hierarchical data into an array of objects with a name and index value.
+     // The indexed value determines the order of nesting in the data.
+     // Returns an array with names sorted by the index value.
     Data.prototype.getNames = function () {
-      /*
-       * 1. Flatten the data into an array of objects
-       * 2. Determine an index order for the objects in the array
-       * 3. Return an array with names sorted by index
-       */
-      var data = this.data.slices;
-
-      function returnNames(array, index) {
-        var names = [];
-
-        _.forEach(array, function (obj) {
-
-          names.push({ key: obj.name, index: index });
-
-          if (obj.children) {
-            var plusIndex = index + 1;
-
-            _.forEach(returnNames(obj.children, plusIndex), function (namedObj) {
-              names.push(namedObj);
-            });
-          }
-        });
-
-        return names;
-      }
+      var data = this.data;
 
       if (data.children) {
-        var namedObj = returnNames(data.children, 0);
+        var namedObj = this.returnNames(data.children, 0);
+
         return _(namedObj)
           .sortBy(function (obj) {
             return obj.index;
