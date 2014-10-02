@@ -4,18 +4,14 @@
   .flex-wrap(wrap);
   .align-items(stretch);
 
-  max-height: @navbar-collapse-max-height;
-  margin-bottom: @navbar-margin-bottom;
-  // top and bottom padding are normally calcuated and stored in @navbar-padding-vertical, but flexbox
-  padding: @padding-base-vertical @navbar-padding-horizontal;
-  z-index: @zindex-navbar;
+  padding: @padding-base-vertical @padding-base-horizontal;
 
   /***
    * components
    ***/
 
   > * {
-    padding-right: @navbar-padding-horizontal;
+    padding-right: @padding-base-horizontal;
     .flex(0, 0, auto);
 
     &:last-child {
