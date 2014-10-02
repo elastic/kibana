@@ -29,13 +29,15 @@
         </vis-editor-agg-group>
 
         <!-- apply/discard -->
-        <li class="sidebar-item" ng-if="vis.dirty">
+        <li class="vis-editor-sidebar-buttons sidebar-item">
           <button
+            ng-disabled="!vis.dirty"
             type="submit"
             class="sidebar-item-button success">
             Apply
           </button>
           <button
+            ng-disabled="!vis.dirty"
             type="button"
             ng-click="reset()"
             class="sidebar-item-button warn">

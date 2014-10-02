@@ -172,21 +172,25 @@ define(function (require) {
           timefilter.enabled = !!timefield;
         });
 
-        // options are 'loading', 'ready', 'none', undefined
         $scope.$watchMulti([
           'rows',
           'fetchStatus'
         ], (function updateResultState() {
           var prev = {};
+          var status = {
+            LOADING: 'loading', // initial data load
+            READY: 'ready', // results came back
+            NO_RESULTS: 'none' // no results came back
+          };
 
           function pick(rows, oldRows, fetchStatus, oldFetchStatus) {
             // initial state, pretend we are loading
-            if (rows == null && oldRows == null) return 'loading';
+            if (rows == null && oldRows == null) return status.LOADING;
 
             var rowsEmpty = _.isEmpty(rows);
-            if (rowsEmpty && fetchStatus) return 'loading';
-            else if (!rowsEmpty) return 'ready';
-            else return 'none';
+            if (rowsEmpty && fetchStatus) return status.LOADING;
+            else if (!rowsEmpty) return status.READY;
+            else return status.NO_RESULTS;
           }
 
           return function () {
@@ -242,6 +246,15 @@ define(function (require) {
     };
 
     $scope.opts.fetch = $scope.fetch = function () {
+      // flag used to set the scope based on data from segmentedFetch
+      var resetRows = true;
+
+      function flushResponseData() {
+        $scope.hits = 0;
+        $scope.rows = [];
+        $scope.rows.fieldCounts = {};
+      }
+
       // ignore requests to fetch before the app inits
       if (!init.complete) return;
 
@@ -288,11 +301,17 @@ define(function (require) {
             $scope.fetchStatus = status;
           },
           first: function (resp) {
-            $scope.hits = 0;
-            $scope.rows = [];
-            $scope.rows.fieldCounts = {};
+            if (!$scope.rows) {
+              flushResponseData();
+            }
           },
           each: notify.timed('handle each segment', function (resp, req) {
+            if (resetRows) {
+              if (!resp.hits.total) return;
+              resetRows = false;
+              flushResponseData();
+            }
+
             $scope.hits += resp.hits.total;
             var rows = $scope.rows;
             var counts = rows.fieldCounts;
@@ -308,9 +327,11 @@ define(function (require) {
             }
 
             $scope.rows.forEach(function (hit) {
-              // when we are resorting on each segment we need to rebuild the
-              // counts each time
-              if (sortFn && hit._formatted) return;
+              // skip this work if we have already done it and we are NOT sorting.
+              // ---
+              // when we are sorting results, we need to redo the counts each time because the
+              // "top 500" may change with each response
+              if (hit._formatted && !sortFn) return;
 
               // Flatten the fields
               var indexPattern = $scope.searchSource.get('index');
@@ -339,10 +360,15 @@ define(function (require) {
             });
           }),
           eachMerged: function (merged) {
-            $scope.mergedEsResp = merged;
+            if (!resetRows) {
+              $scope.mergedEsResp = merged;
+            }
           }
         })
         .finally(function () {
+          if (resetRows) {
+            flushResponseData();
+          }
           $scope.fetchStatus = false;
         });
       })
@@ -601,6 +627,7 @@ define(function (require) {
         $scope.searchSource.set('aggs', undefined);
         delete $scope.vis;
       }
+
       // we shouldn't have one, or already do, return whatever we already have
       if (!$scope.opts.timefield || $scope.vis) return Promise.resolve($scope.vis);
 

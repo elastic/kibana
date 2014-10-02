@@ -4,21 +4,30 @@ define(function (require) {
 
     var Legend = Private(require('components/vislib/lib/legend'));
     var Dispatch = Private(require('components/vislib/lib/dispatch'));
+    var Tooltip = Private(require('components/vislib/lib/tooltip'));
 
     /*
      * Base Class for all visualizations.
      * Exposes a render method.
      */
-    function Chart(vis, el, chartData) {
+    function Chart(handler, el, chartData) {
       if (!(this instanceof Chart)) {
-        return new Chart(vis, el, chartData);
+        return new Chart(handler, el, chartData);
       }
 
-      this.vis = vis;
+      this.handler = handler;
       this.chartEl = el;
       this.chartData = chartData;
-      this.events = new Dispatch(vis, chartData);
-      this._attr = _.defaults(vis._attr || {}, {});
+      var events = this.events = new Dispatch(handler, chartData);
+
+      if (handler._attr.addTooltip) {
+        var $el = this.handler.el;
+        var formatter = this.handler.data.get('tooltipFormatter');
+        // Add tooltip
+        this.tooltip = new Tooltip($el, formatter, events);
+      }
+
+      this._attr = _.defaults(handler._attr || {}, {});
     }
 
     // Render the visualization.

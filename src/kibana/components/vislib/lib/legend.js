@@ -25,7 +25,6 @@ define(function (require) {
       this.el = el;
       this.labels = labels;
       this.color = color;
-      this.tooltip = new Tooltip(this.el, function (d) { return d; });
       this._attr = _.defaults(_attr || {}, {
         // Legend specific attributes
         'legendClass' : 'legend-col-wrapper',

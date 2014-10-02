@@ -13,13 +13,13 @@ define(function (require) {
      * Column chart visualization => vertical bars, stacked bars
      */
     _(PieChart).inherits(Chart);
-    function PieChart(vis, chartEl, chartData) {
+    function PieChart(handler, chartEl, chartData) {
       if (!(this instanceof PieChart)) {
-        return new PieChart(vis, chartEl, chartData);
+        return new PieChart(handler, chartEl, chartData);
       }
       PieChart.Super.apply(this, arguments);
 
-      this._attr = _.defaults(vis._attr || {}, {
+      this._attr = _.defaults(handler._attr || {}, {
         getSize: function (d) { return d.size; },
         dispatch: d3.dispatch('brush', 'click', 'hover', 'mouseenter', 'mouseleave', 'mouseover', 'mouseout')
       });
@@ -35,11 +35,11 @@ define(function (require) {
         .classed('hover', true)
         .style('cursor', 'pointer');
 
-        dispatch.hover(events.eventResponse(d, i));
+        dispatch.hover(events.pieResponse(d, i));
         d3.event.stopPropagation();
       })
       .on('click.pie', function clickPie(d, i) {
-        dispatch.click(events.eventResponse(d, i));
+        dispatch.click(events.pieResponse(d, i));
         d3.event.stopPropagation();
       })
       .on('mouseout.pie', function mouseOutPie() {
@@ -51,7 +51,7 @@ define(function (require) {
     PieChart.prototype.addPath = function (width, height, svg, slices) {
       var isDonut = this._attr.isDonut;
       var radius = Math.min(width, height) / 2;
-      var color = this.vis.data.getPieColorFunc();
+      var color = this.handler.data.getPieColorFunc();
       var partition = d3.layout.partition()
       .sort(null)
       .value(function (d) {
@@ -80,7 +80,7 @@ define(function (require) {
       .outerRadius(function (d) {
         return Math.max(0, y(d.y + d.dy));
       });
-      var tooltip = this.vis.tooltip;
+      var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
       var self = this;
       var path;
@@ -100,8 +100,7 @@ define(function (require) {
         .style('fill', function (d) {
           if (d.depth === 0) { return 'none'; }
           return color(d.name);
-        })
-        .attr('fill-rule', 'evenodd');
+        });
 
       // Add tooltip
       if (isTooltip) {
