@@ -9,7 +9,7 @@ define(function (require) {
   });
 
   require('modules').get('apps/settings')
-  .controller('settingsIndicesCreate', function ($scope, $location, Private, Notifier, indexPatterns, es, config) {
+  .controller('settingsIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config) {
     var notify = new Notifier();
     var MissingIndices = errors.IndexPatternMissingIndices;
     var refreshKibanaIndex = Private(require('apps/settings/sections/indices/_refresh_kibana_index'));
@@ -148,7 +148,7 @@ define(function (require) {
             config.set('defaultIndex', indexPattern.id);
           }
           indexPatterns.cache.clear(indexPattern.id);
-          $location.url('/settings/indices/' + indexPattern.id);
+          kbnUrl.change('/settings/indices/' + indexPattern.id);
         });
 
         // refreshFields calls save() after a successfull fetch, no need to save again

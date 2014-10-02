@@ -27,18 +27,9 @@ define(function (require) {
 
       url = self.eval(url, paramObj);
 
-      // path change
-      if (type === 'path') {
-        if (url !== $location.path()) {
-          $location.path(globalState.removeFromUrl(url));
-          doReload = (!self.matches(url));
-        }
-      // default to url change
-      } else {
-        if (url !== $location.url()) {
-          $location.url(globalState.removeFromUrl(url));
-          doReload = (!self.matches(url));
-        }
+      if (url !== $location[type]()) {
+        $location[type](url);
+        doReload = !self.matches(url);
       }
 
       if (forceReload || doReload) {
