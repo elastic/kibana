@@ -3,6 +3,7 @@ define(function (require) {
   var rison = require('utils/rison');
 
   var applyDiff = require('utils/diff_object');
+  var qs = require('utils/query_string');
 
   return function StateProvider(Private, $rootScope, $location) {
     var Events = Private(require('factories/events'));
@@ -10,19 +11,36 @@ define(function (require) {
     _(State).inherits(Events);
     function State(urlParam, defaults) {
       State.Super.call(this);
-      this._defaults = defaults || {};
-      this._urlParam = urlParam || '_s';
+
+      var self = this;
+      self._defaults = defaults || {};
+      self._urlParam = urlParam || '_s';
 
       // When the URL updates we need to fetch the values from the URL
-      this._deregisterRouteUpdate = $rootScope.$on('$routeUpdate', _.bindKey(this, 'fetch'));
+      self._cleanUpListeners = _.partial(_.callEach, [
+        // partial route update, no app reload
+        $rootScope.$on('$routeUpdate', function () {
+          self.fetch();
+        }),
+
+        // begining of full route update, new app will be initialized before
+        // $routeChangeSuccess or $routeChangeError
+        $rootScope.$on('$routeChangeStart', function () {
+          if (self._persistAcrossApps) {
+            self.fetch();
+          } else {
+            self.destroy();
+          }
+        })
+      ]);
 
       // Initialize the State with fetch
-      this.fetch();
+      self.fetch();
     }
 
-    State.prototype._readFromURL = function (method) {
+    State.prototype._readFromURL = function () {
       var search = $location.search();
-      return rison.decode(search[this._urlParam] || '()');
+      return search[this._urlParam] ? rison.decode(search[this._urlParam]) : null;
     };
 
     /**
@@ -30,7 +48,17 @@ define(function (require) {
      * @returns {void}
      */
     State.prototype.fetch = function () {
-      var stash = this._readFromURL('fetch');
+      var stash = this._readFromURL();
+
+      // nothing to read from the url?
+      // we should save if were are ordered to persist
+      if (stash === null) {
+        if (this._persistAcrossApps) {
+          return this.save();
+        } else {
+          stash = {};
+        }
+      }
 
       _.defaults(stash, this._defaults);
       // apply diff to state from stash, will change state in place via side effect
@@ -46,8 +74,14 @@ define(function (require) {
      * @returns {void}
      */
     State.prototype.save = function () {
-      var stash = this._readFromURL('save');
+      var stash = this._readFromURL();
       var state = this.toObject();
+      var replace = false;
+
+      if (!stash) {
+        replace = true;
+        stash = {};
+      }
 
       _.defaults(state, this._defaults);
       // apply diff to state from stash, will change state in place via side effect
@@ -60,7 +94,11 @@ define(function (require) {
       // persist the state in the URL
       var search = $location.search();
       search[this._urlParam] = this.toRISON();
-      $location.search(search);
+      if (replace) {
+        $location.search(search).replace();
+      } else {
+        $location.search(search);
+      }
     };
 
     /**
@@ -81,7 +119,7 @@ define(function (require) {
      */
     State.prototype.destroy = function () {
       this.off(); // removes all listners
-      this._deregisterRouteUpdate(); // Removes the $routeUpdate listner
+      this._cleanUpListeners(); // Removes the $routeUpdate listner
     };
 
     return State;

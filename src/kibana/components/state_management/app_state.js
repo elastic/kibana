@@ -1,18 +1,27 @@
 define(function (require) {
   var _ = require('lodash');
+  var modules = require('modules');
 
-  return function AppStateProvider(Private, $rootScope) {
+  function AppStateProvider(Private, $rootScope) {
     var State = Private(require('components/state_management/state'));
 
     _(AppState).inherits(State);
     function AppState(defaults) {
       AppState.Super.call(this, '_a', defaults);
-
-      // When we have a route change, destroy the app state
-      $rootScope.$on('$routeChangeStart', _.bindKey(this, 'destroy'));
     }
 
-    return AppState;
-  };
+    // if the url param is missing, write it back
+    AppState.prototype._persistAcrossApps = false;
 
+    // expose this as a factory as well
+
+    return AppState;
+  }
+
+  modules.get('kibana/global_state')
+  .factory('AppState', function (Private) {
+    return Private(AppStateProvider);
+  });
+
+  return AppStateProvider;
 });

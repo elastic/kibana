@@ -16,7 +16,7 @@ define(function (require) {
 
   function init() {
     globalStateMock = {
-      writeToUrl: function (url) {
+      removeFromUrl: function (url) {
         return url;
       }
     };
@@ -88,22 +88,6 @@ define(function (require) {
         });
 
         expect(kbnUrl.reload.callCount).to.be(uniqWordCount);
-      });
-
-      it('should persist global state', function () {
-        var wordCount = _.random(3, 6);
-        var globalStateSpy = sinon.spy(globalStateMock, 'writeToUrl');
-        var urls = faker.Lorem.words(wordCount).map(function (url, i) {
-          return '/' + url + i;
-        });
-
-        urls.forEach(function (url) {
-          kbnUrl.change(url);
-
-          expect($location.url()).to.be(url);
-        });
-
-        expect(globalStateSpy.callCount).to.be(wordCount);
       });
 
       it('should reload when forceReload is true', function () {

@@ -11,7 +11,7 @@ define(function (require) {
   require('components/filter_bar/filter_bar');
   require('components/notify/notify');
   require('components/persisted_log/persisted_log');
-  require('components/state_management/app_state_factory');
+  require('components/state_management/app_state');
   require('components/storage/storage');
   require('components/url/url');
   require('directives/click_focus');
@@ -79,9 +79,7 @@ define(function (require) {
       var notify = new Notifier();
 
       $scope.appEmbedded = $location.search().embed;
-
       $scope.httpActive = $http.pendingRequests;
-
       window.$kibanaInjector = $injector;
 
       // this is the only way to handle uncaught route.resolve errors
@@ -118,8 +116,10 @@ define(function (require) {
             var route = $location.path().split(/\//);
             var app = _.find($scope.apps, {id: route[1]});
 
+            if (!app) return;
+
             // Record the last URL w/ state of the app, use for tab.
-            lastPathFor(app, $location.url());
+            lastPathFor(app, globalState.removeFromUrl($location.url()));
 
             // Set class of container to application-<appId>
             $scope.activeApp = route ? route[1] : null;
@@ -130,25 +130,19 @@ define(function (require) {
 
           var writeGlobalStateToLastPaths = function () {
             var currentUrl = $location.url();
-            var _g = globalState.toRISON();
 
             $scope.apps.forEach(function (app) {
               var url = lastPathFor(app);
               if (!url || url === currentUrl) return;
 
-              lastPathFor(app, qs.replaceParamInUrl(url, '_g', _g));
+              lastPathFor(app, globalState.replaceParamInUrl(url));
             });
           };
 
-          var writeTime = function (newVal, oldVal) {
+          $scope.$listen(timefilter, 'update', function (newVal, oldVal) {
             globalState.time = _.clone(timefilter.time);
             globalState.save();
-            writeGlobalStateToLastPaths();
-          };
-
-          // watch the timefilter for changes, and write to globalState when it changes
-          $scope.$watch('opts.timefilter.time.from', writeTime);
-          $scope.$watch('opts.timefilter.time.to', writeTime);
+          });
 
           $scope.$on('application.load', function () {
             courier.start();

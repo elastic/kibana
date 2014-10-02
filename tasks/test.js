@@ -17,6 +17,11 @@ module.exports = function (grunt) {
   }
 
   grunt.registerTask('test', function () {
+    if (grunt.option('quick')) {
+      grunt.task.run('quick-test');
+      return;
+    }
+
     var tasks = [
       'jshint',
       'ruby_server',

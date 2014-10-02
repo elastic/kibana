@@ -1,7 +1,7 @@
 define(function (require) {
   var errors = require('errors');
 
-  return function RedirectWhenMissingFn($location, kbnUrl, globalState, Notifier) {
+  return function RedirectWhenMissingFn($location, kbnUrl, Notifier) {
     var SavedObjectNotFound = errors.SavedObjectNotFound;
 
     var notify = new Notifier();
