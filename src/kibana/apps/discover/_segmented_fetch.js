@@ -13,7 +13,7 @@ define(function (require) {
     function segmentedFetch(searchSource) {
       this.searchSource = searchSource;
       this.queue = [];
-      this.completedQueue = [];
+      this.complete = [];
       this.requestHandlers = {};
       this.activeRequest = null;
       this.notifyEvent = null;
@@ -125,8 +125,8 @@ define(function (require) {
       if (!self.requestHandlers.status) return;
 
       var status = {
-        total: self.queue.length,
-        complete: self.completedQueue.length,
+        total: self.all.length,
+        complete: self.complete.length,
         remaining: self.queue.length,
         active: active
       };
@@ -147,7 +147,11 @@ define(function (require) {
         queue = queue.reverse();
       }
 
-      return self.queue = queue;
+      self.all = queue.slice(0);
+      self.queue = queue;
+      self.complete = [];
+
+      return queue;
     };
 
     segmentedFetch.prototype._createRequest = function () {
@@ -278,7 +282,7 @@ define(function (require) {
           }
         })
         .then(function () {
-          self.completedQueue.push(index);
+          self.complete.push(index);
           if (self.queue.length) return self._processQueue(req, state, remainingSize, loopCount);
           return self._processQueueComplete(req, loopCount);
         });
