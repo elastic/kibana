@@ -10,17 +10,34 @@ define(function (require) {
     _(State).inherits(Events);
     function State(urlParam, defaults) {
       State.Super.call(this);
-      this._defaults = defaults || {};
-      this._urlParam = urlParam || '_s';
+
+      var self = this;
+      self._defaults = defaults || {};
+      self._urlParam = urlParam || '_s';
 
       // When the URL updates we need to fetch the values from the URL
-      this._deregisterRouteUpdate = $rootScope.$on('$routeUpdate', _.bindKey(this, 'fetch'));
+      self._cleanUpListeners = _.partial(_.callEach, [
+        // partial route update, no app reload
+        $rootScope.$on('$routeUpdate', function () {
+          self.fetch();
+        }),
+
+        // begining of full route update, new app will be initialized before
+        // $routeChangeSuccess or $routeChangeError
+        $rootScope.$on('$routeChangeStart', function () {
+          if (self._persistAcrossApps) {
+            self.fetch();
+          } else {
+            self.destroy();
+          }
+        })
+      ]);
 
       // Initialize the State with fetch
-      this.fetch();
+      self.fetch();
     }
 
-    State.prototype._readFromURL = function (method) {
+    State.prototype._readFromURL = function () {
       var search = $location.search();
       return rison.decode(search[this._urlParam] || '()');
     };
@@ -81,7 +98,7 @@ define(function (require) {
      */
     State.prototype.destroy = function () {
       this.off(); // removes all listners
-      this._deregisterRouteUpdate(); // Removes the $routeUpdate listner
+      this._cleanUpListeners(); // Removes the $routeUpdate listner
     };
 
     return State;

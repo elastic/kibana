@@ -46,7 +46,7 @@ define(function (require) {
   });
 
   app.controller('discover', function ($scope, config, courier, $route, $window, $q, savedSearches, savedVisualizations,
-    Notifier, $location, globalState, appStateFactory, timefilter, Promise, Private, kbnUrl) {
+    Notifier, $location, globalState, AppState, timefilter, Promise, Private, kbnUrl) {
 
     var Vis = Private(require('components/vis/vis'));
     var SegmentedFetch = Private(require('apps/discover/_segmented_fetch'));
@@ -102,7 +102,7 @@ define(function (require) {
       'year'
     ];
 
-    var $state = $scope.state = appStateFactory.create(stateDefaults);
+    var $state = $scope.state = new AppState(stateDefaults);
 
     if (!_.contains(indexPatternList, $state.index)) {
       var reason = 'The index specified in the URL is not a configured pattern. ';
