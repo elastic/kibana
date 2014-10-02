@@ -53,13 +53,6 @@ function (angular, app, _) {
     $scope.setType = function(filter) {
       $scope.selectedFilter = filter;
     };
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-
->>>>>>> Add geodistance filter to the filter list and changed the way filters are selected
-=======
->>>>>>> Rebase commits
     $scope.add = function(query) {
       if ($scope.selectedFilter.type === "querystring"){
         query = query || '*';
