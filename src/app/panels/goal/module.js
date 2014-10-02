@@ -131,7 +131,7 @@ define([
 
       request = request
         .query(boolQuery)
-        .filter(filterSrv.getBoolFilter(filterSrv.ids()))
+        .filter(filterSrv.getBoolFilter(filterSrv.ids))
         .size(0);
 
       $scope.inspector = angular.toJson(JSON.parse(request.toString()),true);
@@ -146,6 +146,7 @@ define([
           { label : 'Complete', data : complete, color: querySrv.colors[parseInt($scope.$id, 16)%8] },
           { data : remaining, color: Chromath.lighten(querySrv.colors[parseInt($scope.$id, 16)%8],0.70).toString() }
         ];
+        console.log(parseInt($scope.$id, 16)%8);
         $scope.$emit('render');
       });
     };
@@ -164,6 +165,11 @@ define([
           render_panel();
         });
 
+        // Or if the window is resized
+        angular.element(window).bind('resize', function(){
+          render_panel();
+        });
+
         // Function for rendering panel
         function render_panel() {
           // IE doesn't work without this
@@ -175,8 +181,7 @@ define([
             show: scope.panel.labels,
             radius: 0,
             formatter: function(label, series){
-              var font = parseInt(
-                (scope.panel.height||scope.row.height).replace('px',''),10)/8 + String('px');
+              var font = parseInt(scope.row.height.replace('px',''),10)/8 + String('px');
               if(!(_.isUndefined(label))) {
                 return '<div style="font-size:'+font+';font-weight:bold;text-align:center;padding:2px;color:#fff;">'+
                 Math.round(series.percent)+'%</div>';

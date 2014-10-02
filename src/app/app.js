@@ -75,7 +75,14 @@ function (angular, $, _, appLevelRequire) {
       return {
         responseError: function(resp) {
           if (resp.status === 0) {
+<<<<<<< HEAD
+<<<<<<< HEAD
             console.log("redirecting");
+=======
+>>>>>>> Redirect users to connection failed page upon http request failure
+=======
+            console.log("redirecting");
+>>>>>>> Add ignore_unavailable for ES 1.4 compat
             $location.path('/connectionFailed');
             console.log(resp);
           }

@@ -41,7 +41,11 @@
   },
   "jsonpath": {
     "version":"0.8.0",
+<<<<<<< HEAD
     "license":"MIT" 
+=======
+    "license":"MIT"
+>>>>>>> Add jsonpath to license file
   },
   "flot": {
     "version":"0.8.1",

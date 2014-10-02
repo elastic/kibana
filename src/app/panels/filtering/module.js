@@ -47,14 +47,34 @@ function (angular, app, _) {
       dashboard.refresh();
     };
 
+    $scope.filterTypes = filterSrv.filterTypes;
+    // $scope.selectedFilter = $scope.filterTypes[0];
+    // $scope.selectedFilterType = $scope.filterTypes[0];
+    $scope.setType = function(filter) {
+      $scope.selectedFilter = filter;
+    };
     $scope.add = function(query) {
-      query = query || '*';
-      filterSrv.set({
-        editing   : true,
-        type      : 'querystring',
-        query     : query,
-        mandate   : 'must'
-      },undefined,true);
+      if ($scope.selectedFilter.type === "querystring"){
+        query = query || '*';
+        filterSrv.set({
+          editing   : true,
+          type      : 'querystring',
+          query     : query,
+          mandate   : 'must'
+        },undefined,true);
+      }
+      else if ($scope.selectedFilter.type === "geo_distance") {
+        filterSrv.set({
+          editing   : true,
+          field:  'point_location_bettermap',
+          type      : 'geo_distance',
+          mandate   : 'must',
+          distance: 0,
+          unit: 'km',
+          lat: 0,
+          lon: 0
+        },undefined,true);
+      }
     };
 
     $scope.refresh = function() {
