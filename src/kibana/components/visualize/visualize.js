@@ -44,7 +44,7 @@ define(function (require) {
         };
 
         var calcResponsiveStuff = function () {
-          $scope.onlyShowSpy = $scope.spyMode && ($el.height() < 550 || $scope.spyMode.alwaysFill);
+          $scope.onlyShowSpy = $scope.spyMode && ($scope.spyMode.fill || $el.height() < 550);
           applyClassNames();
         };
 

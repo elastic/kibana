@@ -9,13 +9,15 @@ define(function (require) {
         Private(require('components/visualize/spy/_table')),
         Private(require('components/visualize/spy/_req_resp_stats'))
       ]);
-      var defaultMode = modes[0];
       modes.byName = _.indexBy(modes, 'name');
+
+      var defaultMode = modes[0];
 
       return {
         restrict: 'E',
         template: require('text!components/visualize/spy/_spy.html'),
         link: function ($scope, $el) {
+          var fullPageSpy = false;
           $scope.spyMode = null;
           $scope.modes = modes;
 
@@ -51,7 +53,7 @@ define(function (require) {
                 // copy a couple values over
                 name: newMode.name,
                 display: newMode.display,
-                alwaysFill: !!newMode.alwaysFill,
+                fill: fullPageSpy,
                 $scope: $scope.$new(),
                 $container: $('<div class="visualize-spy-container">').appendTo($el)
               };
@@ -62,6 +64,7 @@ define(function (require) {
 
             // wrapped in fn to enable early return
             set();
+
             if (change) $scope.$emit('change:spyMode', newMode);
           };
         }
