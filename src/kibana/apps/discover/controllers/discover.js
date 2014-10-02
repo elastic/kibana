@@ -326,9 +326,11 @@ define(function (require) {
             }
 
             $scope.rows.forEach(function (hit) {
-              // when we are resorting on each segment we need to rebuild the
-              // counts each time
-              if (sortFn && hit._formatted) return;
+              // skip this work if we have already done it and we are NOT sorting.
+              // ---
+              // when we are sorting results, we need to redo the counts each time because the
+              // "top 500" may change with each response
+              if (hit._formatted && !sortFn) return;
 
               // Flatten the fields
               var indexPattern = $scope.searchSource.get('index');
@@ -633,6 +635,7 @@ define(function (require) {
         type: 'histogram',
         vislibParams: {
           addLegend: false,
+          addEvents: true,
           addBrushing: true,
         },
         listeners: {

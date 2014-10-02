@@ -25,7 +25,7 @@ define(function (require) {
      * @return {Promise} - resolved with the current AppSource
      */
     function getAppSource() {
-      return prom || loadDefaultPattern();
+      return Promise.resolve(appSource || prom || loadDefaultPattern());
     }
 
     /**
