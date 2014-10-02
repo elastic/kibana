@@ -53,7 +53,6 @@ function (angular, app, _) {
     $scope.setType = function(filter) {
       $scope.selectedFilter = filter;
     };
-    
     $scope.add = function(query) {
       if ($scope.selectedFilter.type === "querystring"){
         query = query || '*';
@@ -63,7 +62,7 @@ function (angular, app, _) {
           query     : query,
           mandate   : 'must'
         },undefined,true);
-      } 
+      }
       else if ($scope.selectedFilter.type === "geo_distance") {
         filterSrv.set({
           editing   : true,

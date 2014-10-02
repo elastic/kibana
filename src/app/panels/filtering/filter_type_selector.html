@@ -7,10 +7,6 @@
   </style>
 
   <fieldset>
-<!--     <select class="input-small" ng-model="selectedFilterType" ng-change="add();dismiss()">
-      <option ng-repeat="type in filterTypes">{{type.name}}</option>
-    </select> 
- -->    
  <select ng-options="type.name for type in filterSrv.filterTypes" class="input-large" ng-model="selectedFilter" ng-change="setType(filterSrv.filterTypes[$index])">
       <option value="">-- Filter Type --</option>
   </select>
@@ -20,6 +16,6 @@
   </fieldset>
 
   <div class="pull-right">
-&nbsp<a href="" class="small" ng-click="filterHelperHelp(selectedType)"> About the {{selectedFilterType.Name}} filter</a>    
+&nbsp<a href="" class="small" ng-click="filterHelperHelp(selectedType)"> About the {{selectedFilterType.Name}} filter</a>
   </div>
 </div>
