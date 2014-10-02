@@ -5,6 +5,7 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
     var aggTypes = Private(require('components/agg_types/index'));
+    var aggSelectHtml = require('text!apps/visualize/editor/agg_select.html');
 
     require('apps/visualize/editor/agg_param');
 
@@ -41,8 +42,9 @@ define(function (require) {
         (function setupControlManagement() {
           var $editorContainer = $el.find('.vis-editor-agg-editor');
 
+          var $schemaEditor = $('<div>').addClass('schemaEditors').appendTo($editorContainer);
+          var $aggSelect = $(aggSelectHtml).appendTo($editorContainer);
           if ($scope.agg.schema.editor) {
-            var $schemaEditor = $('<div>').prependTo($editorContainer);
             $schemaEditor.append($scope.agg.schema.editor);
             $compile($schemaEditor)(editorScope());
           }
@@ -52,8 +54,12 @@ define(function (require) {
           $scope.$watch('agg.type', function updateAggParamEditor(newType, oldType) {
             if ($aggParamEditors) {
               $aggParamEditors.remove();
+              $aggParamEditors = null;
+            }
+
+            if ($aggParamEditorsScope) {
               $aggParamEditorsScope.$destroy();
-              $aggParamEditors = $aggParamEditorsScope = null;
+              $aggParamEditorsScope = null;
             }
 
             var agg = $scope.agg;
