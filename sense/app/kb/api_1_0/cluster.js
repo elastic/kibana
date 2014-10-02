@@ -74,11 +74,9 @@ define(function () {
               },
               index: "{index}",
               shard: 0,
-              from_node: "",
-              to_node: ""
-            }
-          },
-          {
+              from_node: "{node}",
+              to_node: "{node}"
+            },
             cancel: {
               __template: {
                 index: "",
@@ -87,11 +85,9 @@ define(function () {
               },
               index: "{index}",
               shard: 0,
-              node: "",
-              allow_primary: { __one_of: [false , true]}
-            }
-          },
-          {
+              node: "{node}",
+              allow_primary: { __one_of: [true, false]}
+            },
             allocate: {
               __template: {
                 index: "",
@@ -100,11 +96,12 @@ define(function () {
               },
               index: "{index}",
               shard: 0,
-              node: "",
-              allow_primary: { __one_of: [false , true]}
+              node: "{node}",
+              allow_primary: { __one_of: [true, false]}
             }
           }
-        ]
+        ],
+        dry_run: { __one_of: [true, false]}
       }
     });
   };

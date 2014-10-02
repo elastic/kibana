@@ -185,6 +185,9 @@ define([
       'nodes': function (name, parent, endpoint) {
         return new autocomplete_engine.ListComponent(name, ["_local", "_master", "data:true", "data:false",
           "master:true", "master:false"], parent)
+      },
+      'node': function (name, parent, endpoint) {
+        return new autocomplete_engine.ListComponent(name, [], parent, false)
       }
     };
 
