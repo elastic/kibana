@@ -66,7 +66,17 @@
   </div>
 
   <div class="vis-editor-agg-editor" ng-show="editorOpen">
-    <!-- schema editors go here -->
+    <div ng-show="aggIsTooLow">
+      <p class="text-danger">
+        "{{ agg.schema.title }}" aggs must run before all other buckets!
+      </p>
+      <input
+        type="number"
+        name="order"
+        ng-model="$index"
+        max="{{aggIsTooLow ? $index - 1 : $index}}"
+        style="display: none;">
+    </div>
 
     <div class="form-group">
       <label ng-if="$index < 1">Aggregation</label>
@@ -79,5 +89,7 @@
         ng-options="agg as agg.title for agg in aggTypeOptions | aggFilter:agg.schema.aggFilter">
       </select>
     </div>
+
+    <!-- schema editors get added here -->
   </div>
 </ng-form>

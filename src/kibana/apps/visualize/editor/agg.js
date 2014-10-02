@@ -35,6 +35,7 @@ define(function (require) {
           var i = $scope.$index;
           $scope.$first = i === 0;
           $scope.$last = i === $scope.group.length - 1;
+          $scope.aggIsTooLow = calcAggIsTooLow();
         });
 
         (function setupControlManagement() {
@@ -166,6 +167,22 @@ define(function (require) {
 
           aggs.splice(index, 1);
         };
+
+        function calcAggIsTooLow() {
+          if (!$scope.agg.schema.mustBeFirst) {
+            return false;
+          }
+
+          var firstDifferentSchema = _.findIndex($scope.group, function (agg) {
+            return agg.schema !== $scope.agg.schema;
+          });
+
+          if (firstDifferentSchema === -1) {
+            return false;
+          }
+
+          return $scope.$index > firstDifferentSchema;
+        }
       }
     };
   });

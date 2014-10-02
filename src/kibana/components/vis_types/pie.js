@@ -39,6 +39,7 @@ define(function (require) {
           name: 'split',
           icon: 'fa fa-th',
           title: 'Split Chart',
+          mustBeFirst: true,
           min: 0,
           max: 1
         }
