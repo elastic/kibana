@@ -1,4 +1,4 @@
-navbar {
+.control-group {
   .display(flex);
   .flex-direction(row);
   .flex-wrap(wrap);
@@ -8,11 +8,6 @@ navbar {
   margin-bottom: @navbar-margin-bottom;
   // top and bottom padding are normally calcuated and stored in @navbar-padding-vertical, but flexbox
   padding: @padding-base-vertical @navbar-padding-horizontal;
-  color: @navbar-default-color;
-  background-color: @navbar-default-bg;
-  border-style: solid;
-  border-color: @navbar-default-border;
-  border-width: 0 0 1px;
   z-index: @zindex-navbar;
 
   /***
@@ -33,33 +28,30 @@ navbar {
     .flex(1, 1, 0);
   }
 
-  // the "brand" that is displayed, usually on the left of the navbar
-  > .name {
-    .align-self(center);
-
-    font-size: @font-size-large;
-    .ellipsis();
-  }
-
   button {
     padding: @padding-base-vertical @padding-base-horizontal;
     font-size: @font-size-base;
-    color: @navbar-default-link-color;
-    background-color: inherit;
+    color: @control-group-link-color;
+    background-color: @control-group-bg;
 
     &:hover {
-      color: @navbar-default-link-hover-color;
-      background-color: @navbar-default-link-hover-bg;
+      color: @control-group-link-hover-color;
+      background-color: @control-group-link-hover-bg;
+    }
+
+    &:focus {
+      color: @control-group-link-color;
+      background-color: @control-group-bg;
     }
 
     &:active {
-      color: @navbar-default-link-active-color;
-      background-color: @navbar-default-link-active-bg;
+      color: @control-group-link-active-color;
+      background-color: @control-group-link-active-bg;
     }
 
     &[disabled] {
-      color: @navbar-default-link-disabled-color;
-      background-color: @navbar-default-link-disabled-bg;
+      color: @control-group-link-disabled-color;
+      background-color: @control-group-link-disabled-bg;
     }
 
     &:focus {
@@ -81,9 +73,11 @@ navbar {
     > * {
       .border-radius(0);
     }
+
     > :first-child {
       .border-left-radius(@input-border-radius);
     }
+
     > :last-child {
       .border-right-radius(@input-border-radius);
     }
@@ -93,30 +87,9 @@ navbar {
     input {
       height: auto;
     }
-
-    button {
-      color: @brand-primary;
-      background-color: @input-group-addon-bg;
-      border: 1px solid @input-group-addon-border-color;
-    }
   }
+}
 
-  /***
-   * responsive modifications
-   ***/
-
-  // desktop
-  @media (min-width: @screen-md-min) {
-    > .name {
-      // 500px is sort of arbitrary, not sure how to deal with lots of buttons
-      max-width: 500px;
-    }
-  }
-
-  // tablets/phones
-  @media (max-width: @screen-md-min) {
-    > .fill {
-      .flex(1, 1, @screen-md);
-    }
-  }
+.nav-controls .column {
+  .flex-direction(column);
 }
