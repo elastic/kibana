@@ -151,8 +151,7 @@ define(function (require) {
               segment: [agg],
               group: [],
               split: [],
-            }),
-            _g: globalState.toRISON()
+            })
           });
         };
 

@@ -30,13 +30,13 @@ define(function (require) {
       // path change
       if (type === 'path') {
         if (url !== $location.path()) {
-          $location.path(globalState.writeToUrl(url));
+          $location.path(globalState.removeFromUrl(url));
           doReload = (!self.matches(url));
         }
       // default to url change
       } else {
         if (url !== $location.url()) {
-          $location.url(globalState.writeToUrl(url));
+          $location.url(globalState.removeFromUrl(url));
           doReload = (!self.matches(url));
         }
       }

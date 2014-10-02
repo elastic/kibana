@@ -17,8 +17,8 @@ define(function (require) {
     // if the url param is missing, write it back
     GlobalState.prototype._persistAcrossApps = true;
 
-    GlobalState.prototype.writeToUrl = function (url) {
-      return qs.replaceParamInUrl(url, this._urlParam, this.toRISON());
+    GlobalState.prototype.removeFromUrl = function (url) {
+      return qs.replaceParamInUrl(url, this._urlParam, null);
     };
 
     return new GlobalState();

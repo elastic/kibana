@@ -75,7 +75,7 @@ define(function (require) {
 
         timefilter.enabled = true;
         $scope.timefilter = timefilter;
-        $scope.$watchCollection('globalState.time', $scope.refresh);
+        $scope.$listen(timefilter, 'update', $scope.refresh);
 
         courier.setRootSearchSource(dash.searchSource);
 

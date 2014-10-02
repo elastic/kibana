@@ -16,7 +16,7 @@ define(function (require) {
 
   function init() {
     globalStateMock = {
-      writeToUrl: function (url) {
+      removeFromUrl: function (url) {
         return url;
       }
     };
