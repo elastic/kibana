@@ -60,6 +60,15 @@ define(function (require) {
       });
     };
 
+    /**
+     * Clear the parameters for this aggConfig
+     *
+     * @return {object} the new params object
+     */
+    AggConfig.prototype.resetParams = function () {
+      return this.fillDefaults({});
+    };
+
     AggConfig.prototype.write = function () {
       return this.type.params.write(this);
     };

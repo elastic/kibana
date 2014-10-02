@@ -48,7 +48,7 @@ define(function (require) {
 
           var $aggParamEditors;
           var $aggParamEditorsScope;
-          $scope.$watch('agg.type', function updateAggParamEditor() {
+          $scope.$watch('agg.type', function updateAggParamEditor(newType, oldType) {
             if ($aggParamEditors) {
               $aggParamEditors.remove();
               $aggParamEditorsScope.$destroy();
@@ -59,7 +59,12 @@ define(function (require) {
             var type = $scope.agg.type;
 
             if (!agg) return;
-            agg.fillDefaults();
+
+            if (newType !== oldType) {
+              // don't reset on initial load, the
+              // saved params should persist
+              agg.resetParams();
+            }
 
             if (!type) return;
 
