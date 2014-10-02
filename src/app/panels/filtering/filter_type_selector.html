@@ -8,12 +8,15 @@
 
   <fieldset>
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <!--     <select class="input-small" ng-model="selectedFilterType" ng-change="add();dismiss()">
       <option ng-repeat="type in filterTypes">{{type.name}}</option>
     </select>
  -->
 >>>>>>> Add geodistance filter to the filter list and changed the way filters are selected
+=======
+>>>>>>> Rebase commits
  <select ng-options="type.name for type in filterSrv.filterTypes" class="input-large" ng-model="selectedFilter" ng-change="setType(filterSrv.filterTypes[$index])">
       <option value="">-- Filter Type --</option>
   </select>
