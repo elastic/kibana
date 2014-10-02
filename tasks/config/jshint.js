@@ -5,21 +5,15 @@ module.exports = function (grunt) {
       files: {
         src: [
           'Gruntfile.js',
-          '<%= src %>/*.js',
-          '<%= src %>/kibana/**/*.js',
-          '<%= unitTestDir %>/**/*.js',
-          '<%= root %>/tasks/**/*.js'
+          '<%= root %>/tasks/**/*.js',
+          '<%= src %>/kibana/*.js',
+          '<%= src %>/kibana/{apps,components,controllers,directives,factories,filters,services,utils}/**/*.js',
+          '<%= unitTestDir %>/**/*.js'
         ]
       }
     },
     options: {
-      jshintrc: true,
-      ignores: [
-        'node_modules/*',
-        'dist/*',
-        'sample/*',
-        '<%= src %>/kibana/bower_components/**/*'
-      ]
+      jshintrc: true
     }
   };
 };

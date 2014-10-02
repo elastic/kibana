@@ -159,6 +159,11 @@ define(function (require) {
         chunks[i] = arr.slice(start, start + size);
       }
       return chunks;
+    },
+    repeat: function (string, times) {
+      var out = '';
+      for (var i = 0; i < times; i++) out += string;
+      return out;
     }
   });
 
