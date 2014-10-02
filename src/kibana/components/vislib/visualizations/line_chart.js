@@ -168,12 +168,13 @@ define(function (require) {
       var clipPathBuffer = 5;
       var startX = 0;
       var startY = 0 - clipPathBuffer;
+      var id = 'chart-area' + _.uniqueId();
 
       // Creating clipPath
       return svg
-      .attr('clip-path', 'url(#chart-area)')
+      .attr('clip-path', 'url(#' + id + ')')
       .append('clipPath')
-        .attr('id', 'chart-area')
+        .attr('id', id)
       .append('rect')
         .attr('x', startX)
         .attr('y', startY)
