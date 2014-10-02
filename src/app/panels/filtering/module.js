@@ -53,7 +53,6 @@ function (angular, app, _) {
     $scope.setType = function(filter) {
       $scope.selectedFilter = filter;
     };
-
     $scope.add = function(query) {
       if ($scope.selectedFilter.type === "querystring"){
         query = query || '*';
