@@ -25,7 +25,7 @@ Kibana is an open source (Apache Licensed), browser based analytics and search d
 
 You're up and running! Fantastic! Kibana is now running on port 5601, so point your browser at http://YOURDOMAIN.com:5601.
 
-The first screen you arrive at will ask you to configure an **index pattern**. An index pattern describes to kibana how to access your data. We make the guess that you're working with log data, and we hope (because it's awesome) that you're working with Logstash. By default, we fill in `logstash-*` as your index pattern, thus the only thing you need to do is select which field contains the timestamp you'd like to use. Kibana reads your Elasticsearch mapping to find your time fields - select one from the list and hit *Create*.
+The first screen you arrive at will ask you to configure an **index pattern**. An index pattern describes to Kibana how to access your data. We make the guess that you're working with log data, and we hope (because it's awesome) that you're working with Logstash. By default, we fill in `logstash-*` as your index pattern, thus the only thing you need to do is select which field contains the timestamp you'd like to use. Kibana reads your Elasticsearch mapping to find your time fields - select one from the list and hit *Create*.
 
 **Tip:** there's an optimization in the way of the *Use event times to create index names* option. Since Logstash creates an index every day, Kibana uses that fact to only search indices that could possibly contain data in your selected time range.
 
@@ -128,7 +128,7 @@ Or HTML
 status:[400 TO 499] AND (extension:php OR extension:html)
 ```
 
-While lucene query syntax is simple and very powerful, Kibana also supports the full elasticsearch, JSON based, query DSL. See the [Elasticsearch documentation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) for usage and examples.
+While Lucene query syntax is simple and very powerful, Kibana also supports the full Elasticsearch, JSON based, Query DSL. See the [Elasticsearch documentation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) for usage and examples.
 <!-- /include -->
 <!-- include {"path":"docs/visualize.md"} -->
 ## Visualize
@@ -163,7 +163,7 @@ To the right of the search box there are a row of icons for creating new visuali
 
 #### Aggregation Builder
 
-The aggregation builder on the left of the screen is used for configuring the [metric](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html#_metrics_aggregations) and [bucket](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html#_bucket_aggregations) aggregations used to create a visualization. (If you are coming from the SQL world, buckets are similar to group-bys. Check out the [elasticsearch docs](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html) for more info) For a bar chart or line chart the *metric* is used for the y-axis and the *buckets* are used for the x-axis, segment bar colors, and row/column splits. For pie charts the "metric" is used for the size of the slice and the *bucket* is used for the number of slices. Other visualizations may use these in new and different ways.
+The aggregation builder on the left of the screen is used for configuring the [metric](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html#_metrics_aggregations) and [bucket](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html#_bucket_aggregations) aggregations used to create a visualization. (If you are coming from the SQL world, buckets are similar to group-bys. Check out the [Elasticsearch docs](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html) for more info) For a bar chart or line chart the *metric* is used for the y-axis and the *buckets* are used for the x-axis, segment bar colors, and row/column splits. For pie charts the "metric" is used for the size of the slice and the *bucket* is used for the number of slices. Other visualizations may use these in new and different ways.
 
 For the remainder of this documentation we are going to use the bar chart as our example when discussing the features of the aggregation panel. The same concepts apply to the other visualizations but the bar chart is the workhorse of the visualization world.
 
