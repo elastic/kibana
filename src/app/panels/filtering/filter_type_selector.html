@@ -1,0 +1,21 @@
+<div class="panel-query-meta row-fluid" style="width:260px">
+
+    <style>
+    .panel-query-meta fieldset label {
+        margin-top: 3px;
+    }
+    </style>
+
+    <fieldset>
+        <select ng-options="type.name for type in filterSrv.filterTypes" class="input-large" ng-model="selectedFilter" ng-change="setType(filterSrv.filterTypes[$index])">
+            <option value="">-- Filter Type --</option>
+        </select>
+        &nbsp
+        <a class="btn btn-mini" ng-click="dismiss();" class="pointer">Cancel</a>
+        <a class="btn btn-mini" ng-click="add();dismiss();" class="pointer">Add</a>
+    </fieldset>
+
+    <div class="pull-right">
+        &nbsp<a href="" class="small" ng-click="filterHelperHelp(selectedType)"> About the {{selectedFilterType.Name}} filter</a> 
+    </div>
+</div>
