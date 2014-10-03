@@ -20,8 +20,17 @@ define(function (require) {
         throw new Error('LabelUtil expects an object');
       }
 
+      var raw;
+      var fieldIndex;
+      if (obj.raw) {
+        raw = obj.raw.columns;
+        fieldIndex = _.findIndex(raw, {'categoryName': 'group'});
+      }
+
+      var fieldFormatter = raw && raw[fieldIndex] ? raw[fieldIndex].field.format.convert : function (d) { return d; };
+
       // Returns an array of unique chart labels
-      return getArrOfUniqLabels(getArr(obj));
+      return getArrOfUniqLabels(getArr(obj), fieldFormatter);
     };
   };
 });

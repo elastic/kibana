@@ -19,6 +19,8 @@ define(function (require) {
       }
       PieChart.Super.apply(this, arguments);
 
+      this.columns = handler.data.data.raw.columns;
+
       this._attr = _.defaults(handler._attr || {}, {
         getSize: function (d) { return d.size; },
         dispatch: d3.dispatch('brush', 'click', 'hover', 'mouseenter', 'mouseleave', 'mouseover', 'mouseout')
@@ -84,6 +86,7 @@ define(function (require) {
       var isTooltip = this._attr.addTooltip;
       var self = this;
       var path;
+      var fieldFormatter;
 
       path = svg
       .datum(slices)
@@ -94,12 +97,20 @@ define(function (require) {
         .attr('d', arc)
         .attr('class', function (d) {
           if (d.depth === 0) { return; }
-          return self.colorToClass(color(d.name));
+
+          fieldFormatter = self.columns[d.depth - 1].field ?
+            self.columns[d.depth - 1].field.format.convert :
+            function (d) { return d; };
+          return self.colorToClass(color(fieldFormatter(d.name)));
         })
         .style('stroke', '#fff')
         .style('fill', function (d) {
           if (d.depth === 0) { return 'none'; }
-          return color(d.name);
+
+          fieldFormatter = self.columns[d.depth - 1].field ?
+            self.columns[d.depth - 1].field.format.convert :
+            function (d) { return d; };
+          return color(fieldFormatter(d.name));
         });
 
       // Add tooltip

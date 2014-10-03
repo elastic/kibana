@@ -3,13 +3,19 @@ define(function (require) {
     var _ = require('lodash');
 
     // Takes an array of objects
-    return function (arr) {
+    return function (arr, formatter) {
       if (!_.isArray(arr)) {
         throw TypeError('UniqLabelUtil expects an array of objects');
       }
 
       // Returns a array of unique chart labels
-      return _.uniq(_.pluck(arr, 'label'));
+      return _(arr)
+        .pluck('label')
+        .unique()
+        .map(function (d) {
+          return formatter(d);
+        })
+        .value();
     };
   };
 });

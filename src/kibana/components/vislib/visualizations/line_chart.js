@@ -14,6 +14,16 @@ define(function (require) {
         return new LineChart(handler, chartEl, chartData);
       }
 
+      var raw;
+      var fieldIndex;
+
+      if (handler.data.data.raw) {
+        raw = handler.data.data.raw.columns;
+        fieldIndex = _.findIndex(raw, {'categoryName': 'group'});
+      }
+
+      this.fieldFormatter = raw && raw[fieldIndex] ? raw[fieldIndex].field.format.convert : function (d) { return d; };
+
       LineChart.Super.apply(this, arguments);
       // Line chart specific attributes
       this._attr = _.defaults(handler._attr || {}, {
@@ -88,13 +98,13 @@ define(function (require) {
       .enter()
         .append('circle')
         .attr('class', function circleClass(d) {
-          return self.colorToClass(color(d.label));
+          return self.colorToClass(color(self.fieldFormatter(d.label)));
         })
         .attr('fill', function (d) {
-          return color(d.label);
+          return color(self.fieldFormatter(d.label));
         })
         .attr('stroke', function strokeColor(d) {
-          return color(d.label);
+          return color(self.fieldFormatter(d.label));
         })
         .attr('stroke-width', circleStrokeWidth);
 
@@ -149,14 +159,14 @@ define(function (require) {
 
       lines.append('path')
       .attr('class', function lineClass(d) {
-        return self.colorToClass(color(d.label));
+        return self.colorToClass(color(self.fieldFormatter(d.label)));
       })
       .attr('d', function lineD(d) {
         return line(d.values);
       })
       .attr('fill', 'none')
       .attr('stroke', function lineStroke(d) {
-        return color(d.label);
+        return color(self.fieldFormatter(d.label));
       })
       .attr('stroke-width', 2);
 

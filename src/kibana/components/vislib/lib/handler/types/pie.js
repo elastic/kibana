@@ -10,7 +10,7 @@ define(function (require) {
       var data = new Data(vis.data, vis._attr);
 
       var PieHandler = new Handler(vis, {
-        legend: new Legend(vis, vis.el, data.getNames(), data.getPieColorFunc(), vis._attr),
+        legend: new Legend(vis, vis.el, data.pieNames(), data.getPieColorFunc(), vis._attr),
         chartTitle: new ChartTitle(vis.el)
       });
 

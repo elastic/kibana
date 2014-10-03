@@ -167,17 +167,61 @@ define(function (require) {
       });
     };
 
-    Data.prototype.getNames = function () {
-      var data = this.pieData();
+    // Helper function for getNames
+    // Returns an array of objects with a name (key) value and an index value.
+    // The index value allows us to sort the names in the correct nested order.
+    Data.prototype.returnNames = function (array, index, columns) {
       var names = [];
+      var self = this;
 
-      data.forEach(function returnNames(obj) {
-        if (obj.names) {
-          names = names.concat(obj.names);
+      _.forEach(array, function (obj) {
+        var fieldFormatter = columns && columns[index].field ? columns[index].field.format.convert : function (d) { return d; };
+        names.push({ key: fieldFormatter(obj.name), index: index });
+
+        if (obj.children) {
+          var plusIndex = index + 1;
+
+          _.forEach(self.returnNames(obj.children, plusIndex, columns), function (namedObj) {
+            names.push(namedObj);
+          });
         }
       });
 
-      return _.unique(names);
+      return names;
+    };
+
+     // Flattens hierarchical data into an array of objects with a name and index value.
+     // The indexed value determines the order of nesting in the data.
+     // Returns an array with names sorted by the index value.
+    Data.prototype.getNames = function (data, columns) {
+      var slices = data.slices;
+
+      if (slices.children) {
+        var namedObj = this.returnNames(slices.children, 0, columns);
+
+        return _(namedObj)
+          .sortBy(function (obj) {
+            return obj.index;
+          })
+          .pluck('key')
+          .unique()
+          .value();
+      }
+    };
+
+    Data.prototype.pieNames = function () {
+      var self = this;
+      var names = [];
+
+      _.forEach(this.getVisData(), function (obj) {
+        var columns = obj.raw ? obj.raw.columns : undefined;
+
+        _.forEach(self.getNames(obj, columns), function (name) {
+          names.push(name);
+        });
+      });
+
+      return _.uniq(names);
     };
 
     // Inject zeros into the data
@@ -202,7 +246,7 @@ define(function (require) {
 
     // Return a function that does color lookup on names for pie charts
     Data.prototype.getPieColorFunc = function () {
-      return color(this.getNames());
+      return color(this.pieNames());
     };
 
     return Data;

@@ -224,7 +224,7 @@ define(function (require) {
       beforeEach(function () {
         inject(function (d3, Private) {
           uniqLabels = Private(require('components/vislib/components/labels/uniq_labels'));
-          uniq = uniqLabels(arrObj);
+          uniq = uniqLabels(arrObj, function (d) { return d; });
           testArr = _.isArray(uniq);
         });
       });
