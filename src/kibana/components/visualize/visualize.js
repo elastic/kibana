@@ -26,27 +26,30 @@ define(function (require) {
         var chart; // set in "vis" watcher
         var $visualize = $el.find('.visualize-chart');
         var $spy = $el.find('visualize-spy');
+        var minSplitViewSize = 660;
 
         $scope.spyMode = false;
-        $scope.onlyShowSpy = false;
+        $scope.fullScreenSpy = false;
 
         var applyClassNames = function () {
+          var onlySpy = ($scope.spyMode && $scope.spyMode.fill);
+
           // external
           $el.toggleClass('only-visualization', !$scope.spyMode);
-          $el.toggleClass('visualization-and-spy', $scope.spyMode && !$scope.onlyShowSpy);
-          $el.toggleClass('only-spy', Boolean($scope.onlyShowSpy));
-
-          $spy.toggleClass('only', Boolean($scope.onlyShowSpy));
+          $el.toggleClass('visualization-and-spy', $scope.spyMode && !onlySpy);
+          $el.toggleClass('only-spy', Boolean(onlySpy));
+          $spy.toggleClass('only', Boolean(onlySpy));
 
           // internal
           $visualize.toggleClass('spy-visible', Boolean($scope.spyMode));
-          $visualize.toggleClass('spy-only', Boolean($scope.onlyShowSpy));
+          $visualize.toggleClass('spy-only', Boolean(onlySpy));
         };
 
-        var calcResponsiveStuff = function () {
-          $scope.onlyShowSpy = $scope.spyMode && ($scope.spyMode.fill || $el.height() < 550);
-          applyClassNames();
-        };
+        $scope.$watch(function () {
+          return $visualize.height();
+        }, function (visSize) {
+          $scope.fullScreenSpy = visSize < minSplitViewSize;
+        });
 
         // we need to wait for come watchers to fire at least once
         // before we are "ready", this manages that
@@ -70,7 +73,8 @@ define(function (require) {
         }());
 
         $scope.$on('change:spyMode', function (event, spyMode) {
-          calcResponsiveStuff();
+          $scope.spyMode = spyMode;
+          applyClassNames();
         });
 
         $scope.$watch('vis', prereq(function (vis, prevVis) {
