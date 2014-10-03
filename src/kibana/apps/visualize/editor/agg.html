@@ -76,7 +76,7 @@
         class="form-control"
         ng-model="agg.type"
         required
-        ng-options="agg as agg.title for agg in aggTypeOptions">
+        ng-options="agg as agg.title for agg in aggTypeOptions | aggFilter:agg.schema.aggFilter">
       </select>
     </div>
   </div>

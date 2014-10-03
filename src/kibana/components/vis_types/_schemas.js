@@ -26,6 +26,7 @@ define(function (require) {
             max: Infinity,
             group: 'buckets',
             title: schema.name,
+            aggFilter: '*',
             editor: false,
             params: []
           });
