@@ -193,12 +193,12 @@ define(function (require) {
      // Flattens hierarchical data into an array of objects with a name and index value.
      // The indexed value determines the order of nesting in the data.
      // Returns an array with names sorted by the index value.
-    Data.prototype.getNames = function () {
-      var data = this.data.slices;
+    Data.prototype.getNames = function (data) {
+      var slices = data.slices;
       var columns = this.data.raw.columns;
 
-      if (data.children) {
-        var namedObj = this.returnNames(data.children, 0, columns);
+      if (slices.children) {
+        var namedObj = this.returnNames(slices.children, 0, columns);
 
         return _(namedObj)
           .sortBy(function (obj) {
@@ -208,6 +208,19 @@ define(function (require) {
           .unique()
           .value();
       }
+    };
+
+    Data.prototype.pieNames = function () {
+      var self = this;
+      var names = [];
+
+      _.forEach(this.getVisData(), function (obj) {
+        _.forEach(self.getNames(obj), function (name) {
+          names.push(name);
+        });
+      });
+
+      return _.uniq(names);
     };
 
     // Inject zeros into the data
@@ -232,7 +245,7 @@ define(function (require) {
 
     // Return a function that does color lookup on names for pie charts
     Data.prototype.getPieColorFunc = function () {
-      return color(this.getNames());
+      return color(this.pieNames());
     };
 
     return Data;

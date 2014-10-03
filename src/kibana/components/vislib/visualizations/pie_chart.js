@@ -19,7 +19,7 @@ define(function (require) {
       }
       PieChart.Super.apply(this, arguments);
 
-      this.columns = chartData.raw.columns;
+      this.columns = handler.data.data.raw.columns;
 
       this._attr = _.defaults(handler._attr || {}, {
         getSize: function (d) { return d.size; },

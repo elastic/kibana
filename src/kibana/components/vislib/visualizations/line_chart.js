@@ -17,8 +17,8 @@ define(function (require) {
       var raw;
       var fieldIndex;
 
-      if (chartData.raw) {
-        raw = chartData.raw.columns;
+      if (handler.data.data.raw) {
+        raw = handler.data.data.raw.columns;
         fieldIndex = _.findIndex(raw, {'categoryName': 'group'});
       }
 

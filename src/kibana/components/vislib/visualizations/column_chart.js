@@ -21,8 +21,8 @@ define(function (require) {
       var raw;
       var fieldIndex;
 
-      if (chartData.raw) {
-        raw = chartData.raw.columns;
+      if (handler.data.data.raw) {
+        raw = handler.data.data.raw.columns;
         fieldIndex = _.findIndex(raw, {'categoryName': 'group'});
       }
 
@@ -85,6 +85,7 @@ define(function (require) {
       bars.enter()
         .append('rect')
         .attr('class', function (d) {
+          console.log(self.fieldFormatter(d.label));
           return self.colorToClass(color(self.fieldFormatter(d.label)));
         })
         .attr('fill', function (d) {
