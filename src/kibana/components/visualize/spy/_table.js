@@ -14,9 +14,11 @@ define(function (require) {
         var perPageDefault = 10;
         var perPageExtended = 20;
 
-        $scope.$parent.$watch('spyMode.fill', function (fill) {
-          $scope.perPage = (fill) ? perPageExtended : perPageDefault;
-        });
+        // TODO: finish this - the list should get longer in full screen mode
+        // $scope.$parent.$watch('spyMode.fill', function (fill) {
+        //   $scope.perPage = (fill) ? perPageExtended : perPageDefault;
+        // });
+        $scope.perPage = perPageDefault;
 
         $scope.sort = null;
         $scope.csv = {
