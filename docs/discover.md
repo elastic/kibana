@@ -29,7 +29,7 @@ Click the expand button again to collapse the detailed view of the document.
 
 The field list has several powerful functions. The first being the ability to add columns to the document list. If no fields are selected `_source` will be automatically selected and shown in the table. Mouse over a field name and click the **add** button that appears. Now, instead of seeing `_source` in the document list, you have the extracted value of the selected field. In addition, the field name has moved up to the **Selected** section of the field list. Add a few more fields. Sweet!
 
-Now, instead of clicking the **add** button, click the name of the field itself. You will see a break down of the 5 most popular values for the field, as well as a count of how many records in the document list the field is present in.
+Now, instead of clicking the **add** button, click the name of the field itself. You will see a breakdown of the 5 most popular values for the field, as well as a count of how many records in the document list the field is present in.
 
 In addition, the Visualize button will pop you over to the **Visualize** application and run a more detailed aggregation on the field. For more information about visualization, see the [Visualize section](#visualize) of the docs.
 
@@ -39,7 +39,7 @@ When you expand a document in the document list you will see two magnifying glas
 
 ### Sorting
 
-You may have noticed that documents appear in reverse chronological order by default, meaning the newest documents are shown first. You can change this by clicking on the **Time** column header. In fact, any column can be sorted in this manner as long as it is indexed in Elasticsearch. Note that some fields are not indexed by default, such as `_id`, and that other may have indexing disabled in the Elasticsearch mapping. See the [Settings > Index Patterns](#indices) section of the docs for more details.
+You may have noticed that documents appear in reverse chronological order by default, meaning the newest documents are shown first. You can change this by clicking on the **Time** column header. In fact, any column can be sorted in this manner as long as it is indexed in Elasticsearch. Note that some fields are not indexed by default, such as `_id`, and that others may have indexing disabled in the Elasticsearch mapping. See the [Settings > Index Patterns](#indices) section of the docs for more details.
 
 You can also reorder columns by placing your mouse over the column header and clicking the left and right arrows that appear.
 
