@@ -17,7 +17,8 @@ define(function (require) {
         restrict: 'E',
         template: require('text!components/visualize/spy/_spy.html'),
         link: function ($scope, $el) {
-          $scope.spyMode = null;
+          var fullPageSpy = false;
+          // $scope.spyMode = null; // inherited from the parent
           $scope.modes = modes;
 
           $scope.toggleDisplay = function () {
@@ -25,7 +26,7 @@ define(function (require) {
           };
 
           $scope.toggleFullPage = function () {
-            $scope.spyMode.fill = !$scope.spyMode.fill;
+            fullPageSpy = $scope.spyMode.fill = !fullPageSpy;
 
             // tell any listeners spyMode changed
             $scope.$emit('change:spyMode', $scope.spyMode);
@@ -59,7 +60,7 @@ define(function (require) {
                 // copy a couple values over
                 name: newMode.name,
                 display: newMode.display,
-                fill: $scope.spyMode.fill,
+                fill: fullPageSpy,
                 $scope: $scope.$new(),
                 $container: $('<div class="visualize-spy-container">').appendTo($el)
               };
