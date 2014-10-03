@@ -286,6 +286,9 @@ define(function (require) {
           if (self.queue.length) return self._processQueue(req, state, remainingSize, loopCount);
           return self._processQueueComplete(req, loopCount);
         });
+      })
+      .catch(function (err) {
+        notify.fatal(err);
       });
     };
 
