@@ -174,21 +174,31 @@ define(function (require) {
     };
 
     $scope.unlink = function () {
-      // display unlinking for 2 seconds, unless it is double clicked
-      $scope.unlinking = $timeout($scope.doneUnlinking, 2000);
+      return searchSource.getParent(true)
+      .then(function (parent) {
 
-      delete savedVis.savedSearchId;
+        return parent.getParent(true)
+        .then(function (parentsParent) {
+          // parentsParent can be undefined
 
-      var q = searchSource.get('query');
-      $state.query = q;
 
-      var parent = searchSource.parent();
-      // we will copy over all state minus the "aggs"
-      _(parent.toJSON()).omit('aggs').forOwn(function (val, key) {
-        searchSource.set(key, val);
-      });
+          // display unlinking for 2 seconds, unless it is double clicked
+          $scope.unlinking = $timeout($scope.doneUnlinking, 2000);
+          delete savedVis.savedSearchId;
+          var q = searchSource.get('query');
+          $state.query = q;
 
-      searchSource.inherits(parent.parent());
+          var searchState = parent.toJSON();
+
+          // copy over all state except "aggs"
+          _(searchState).omit('aggs').forOwn(function (val, key) {
+            searchSource.set(key, val);
+          });
+
+          searchSource.inherits(parentsParent);
+          courier.setRootSearchSource(searchSource);
+        });
+      }).catch(notify.fatal);
     };
 
     $scope.doneUnlinking = function () {
