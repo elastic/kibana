@@ -11,6 +11,7 @@ define(function (require) {
       link: function tableLinkFn($scope, $el) {
         var notify = new Notifier();
         var orderBy = $filter('orderBy');
+        $scope.perPage = 10;
 
         $scope.sort = null;
         $scope.csv = {
