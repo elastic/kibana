@@ -55,7 +55,7 @@ By default Kibana shows the last 15 minutes of data. You might want to expand th
 
 ### Document list
 
-Once you see some documents, you can begin to explore Discover. In the document list, Kibana will show you the localized version of the time field you specified in your index pattern, as well as the `_source` of the elasticsearch document.
+Once you see some documents, you can begin to explore Discover. In the document list, Kibana will show you the localized version of the time field you specified in your index pattern, as well as the `_source` of the Elasticsearch document.
 
 **Tip:** By default the table contains 500 of the most recent documents. You can increase the number of documents in the table from the advanced settings screen. See the [Setting section](#advanced) of the documentation.
 

@@ -13,8 +13,8 @@ module.exports = function (grunt) {
     var archiveName = join(target, packageName + '-' + version);
     var distPath = join(grunt.config.get('build'), 'dist');
 
-    var tgzCmd = 'tar -zcvf ' + archiveName + '.tar.gz kibana';
-    var zipCmd = 'zip -r ' + archiveName + '.zip kibana';
+    var tgzCmd = 'tar -zcvf ' + archiveName + '.tar.gz kibana-' + version;
+    var zipCmd = 'zip -r ' + archiveName + '.zip kibana-' + version;
 
     var options = { cwd: distPath };
 
