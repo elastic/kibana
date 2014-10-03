@@ -36,5 +36,6 @@ define(function (require) {
     indexPatterns.mapper = Private(require('components/index_patterns/_mapper'));
     indexPatterns.patternToWildcard = Private(require('components/index_patterns/_pattern_to_wildcard'));
     indexPatterns.fieldFormats = Private(require('components/index_patterns/_field_formats'));
+    indexPatterns.IndexPattern = IndexPattern;
   });
 });

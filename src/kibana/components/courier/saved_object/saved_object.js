@@ -132,7 +132,13 @@ define(function (require) {
         })
         .then(function () {
           if (obj.searchSource) {
-            return indexPatterns.get(obj.searchSource.get('index'))
+            var index = obj.searchSource.get('index');
+
+            if (index instanceof indexPatterns.IndexPattern) {
+              return;
+            }
+
+            return indexPatterns.get(index)
             .then(function (indexPattern) {
               obj.searchSource.index(indexPattern);
             });
