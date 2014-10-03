@@ -15,11 +15,6 @@ define(function (require) {
 
         $scope.paginate = {};
 
-        // pagination controls
-        $scope.$watch(attrs.perPage, function (perPage) {
-          $scope.paginate.perPage = perPage || perPageDefault;
-        });
-
         var getOtherWidth = $parse(attrs.otherWidth);
 
         $scope.$watchCollection(attrs.list, function (list) {
