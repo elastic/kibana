@@ -47,7 +47,7 @@ define(function (require) {
 
     // Pie response to `click` and `hover` events
     Dispatch.prototype.pieResponse = function (d, i) {
-      var label = d.key;
+      var label = d.name;
       var color = this.color;
       var chartData = this.chartData;
       var attr = this._attr;
