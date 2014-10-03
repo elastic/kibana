@@ -175,7 +175,7 @@ define(function (require) {
       var self = this;
 
       _.forEach(array, function (obj) {
-        var fieldFormatter = columns[index].field.format.convert;
+        var fieldFormatter = columns && columns[index].field ? columns[index].field.format.convert : function (d) { return d; };
         names.push({ key: fieldFormatter(obj.name), index: index });
 
         if (obj.children) {
@@ -193,9 +193,8 @@ define(function (require) {
      // Flattens hierarchical data into an array of objects with a name and index value.
      // The indexed value determines the order of nesting in the data.
      // Returns an array with names sorted by the index value.
-    Data.prototype.getNames = function (data) {
+    Data.prototype.getNames = function (data, columns) {
       var slices = data.slices;
-      var columns = this.data.raw.columns;
 
       if (slices.children) {
         var namedObj = this.returnNames(slices.children, 0, columns);
@@ -215,7 +214,9 @@ define(function (require) {
       var names = [];
 
       _.forEach(this.getVisData(), function (obj) {
-        _.forEach(self.getNames(obj), function (name) {
+        var columns = obj.raw ? obj.raw.columns : undefined;
+
+        _.forEach(self.getNames(obj, columns), function (name) {
           names.push(name);
         });
       });

@@ -98,14 +98,18 @@ define(function (require) {
         .attr('class', function (d) {
           if (d.depth === 0) { return; }
 
-          fieldFormatter = self.columns[d.depth - 1].field.format.convert;
+          fieldFormatter = self.columns[d.depth - 1].field ?
+            self.columns[d.depth - 1].field.format.convert :
+            function (d) { return d; };
           return self.colorToClass(color(fieldFormatter(d.name)));
         })
         .style('stroke', '#fff')
         .style('fill', function (d) {
           if (d.depth === 0) { return 'none'; }
 
-          fieldFormatter = self.columns[d.depth - 1].field.format.convert;
+          fieldFormatter = self.columns[d.depth - 1].field ?
+            self.columns[d.depth - 1].field.format.convert :
+            function (d) { return d; };
           return color(fieldFormatter(d.name));
         });
 
