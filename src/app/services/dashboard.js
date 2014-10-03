@@ -77,11 +77,15 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
     this.last = {};
     this.availablePanels = [];
 
-    $rootScope.$on('$routeChangeSuccess',function(){
+    $rootScope.$on('$routeChangeSuccess', function () {
       // Clear the current dashboard to prevent reloading
+      if ($location.path() === '/connectionFailed') { return; }
       self.current = {};
       self.indices = [];
       esVersion.isMinimum().then(function(isMinimum) {
+        if(_.isUndefined(isMinimum)) {
+          return;
+        }
         if(isMinimum) {
           route();
         } else {
@@ -286,10 +290,10 @@ function (angular, $, kbn, _, config, moment, Modernizr) {
     // TOFIX: Pretty sure this breaks when you're on a saved dashboard already
     this.share_link = function(title,type,id) {
       return {
-        location  : window.location.href.replace(window.location.hash,""),
+        location  : window.location.href.substr(0, window.location.href.indexOf('#')),
         type      : type,
         id        : id,
-        link      : window.location.href.replace(window.location.hash,"")+"#dashboard/"+type+"/"+encodeURIComponent(id),
+        link      : window.location.href.substr(0, window.location.href.indexOf('#'))+"#dashboard/"+type+"/"+encodeURIComponent(id),
         title     : title
       };
     };

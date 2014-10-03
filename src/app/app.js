@@ -69,9 +69,25 @@ function (angular, $, _, appLevelRequire) {
     }
   };
 
-  app.config(function ($routeProvider, $controllerProvider, $compileProvider, $filterProvider, $provide) {
+  app.config(function ($routeProvider, $controllerProvider, $httpProvider, $compileProvider, $filterProvider, $provide) {
+
+
+    $httpProvider.interceptors.push(['$location', function($location) {
+      return {
+        responseError: function(resp) {
+          if (resp.status === 0) {
+            console.log("redirecting");
+            $location.path('/connectionFailed');
+            console.log(resp);
+          }
+        }
+      };
+    }]);
 
     $routeProvider
+      .when('/connectionFailed', {
+        templateUrl: 'app/partials/connectionFailed.html',
+      })
       .when('/dashboard', {
         templateUrl: 'app/partials/dashboard.html',
       })
