@@ -16,6 +16,7 @@ module.exports = function (grunt) {
     'copy:dist',
     'compile_dist_readme',
     'chmod_kibana',
+    'copy:versioned_dist',
     'create_packages'
   ]);
 };
