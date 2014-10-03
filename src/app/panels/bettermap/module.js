@@ -229,7 +229,7 @@ function (angular, app, _, L, localRequire) {
         var map, makersLayerGroup, currentLayersByFilterId;
 
         function render_panel() {
-          elem.css({height:scope.row.height});
+          elem.css({height:scope.panel.height||scope.row.height});
 
           scope.require(['./leaflet/leaflet.markercluster', './leaflet/leaflet.draw'], function () {
             scope.panelMeta.loading = false;
@@ -259,8 +259,10 @@ function (angular, app, _, L, localRequire) {
             makersLayerGroup.addLayers(markerList);
 
             makersLayerGroup.addTo(map);
-
-            map.fitBounds(_.pluck(scope.data,'coordinates'));
+            var geoList = _.pluck(scope.data,'coordinates');
+            if (geoList.length > 0) {
+              map.fitBounds(geoList);
+            }
           });
         }
         
@@ -270,6 +272,18 @@ function (angular, app, _, L, localRequire) {
             center: [40, -86],
             zoom: 10
           });
+
+          // set a default osm_url if there is none
+          if (_.isUndefined(scope.panel.osm_url) || _.isNull(scope.panel.osm_url)) {
+            scope.panel.osm_url = "http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg";
+          }
+
+          L.tileLayer(scope.panel.osm_url, {
+            attribution: '"Data, imagery and map information provided by MapQuest, '+
+              'OpenStreetMap <http://www.openstreetmap.org/copyright> and contributors, ODbL',
+            maxZoom: 18,
+            minZoom: 2
+          }).addTo(map);
 
           // Initialise the FeatureGroup to store editable layers
           var drawnItems = new L.FeatureGroup();
@@ -348,18 +362,6 @@ function (angular, app, _, L, localRequire) {
               }
             }
           });
-
-          // set a default osm_url if there is none
-          if (_.isUndefined(scope.panel.osm_url) || _.isNull(scope.panel.osm_url)) {
-            scope.panel.osm_url = "http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg";
-          }
-
-          L.tileLayer(scope.panel.osm_url, {
-            attribution: '"Data, imagery and map information provided by MapQuest, '+
-              'OpenStreetMap <http://www.openstreetmap.org/copyright> and contributors, ODbL',
-            maxZoom: 18,
-            minZoom: 2
-          }).addTo(map);
         }
       }
     };
