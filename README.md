@@ -128,7 +128,7 @@ Or HTML
 status:[400 TO 499] AND (extension:php OR extension:html)
 ```
 
-While lucene query syntax is simple and very powerful, Kibana also supports the full elasticsearch, JSON based, query DSL. See the [Elasticsearch documentation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) for usage and examples.
+While Lucene query syntax is simple and very powerful, Kibana also supports the full Elasticsearch, JSON based, Query DSL. See the [Elasticsearch documentation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) for usage and examples.
 <!-- /include -->
 <!-- include {"path":"docs/visualize.md"} -->
 ## Visualize
