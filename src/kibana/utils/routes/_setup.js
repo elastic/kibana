@@ -16,7 +16,7 @@ define(function (require) {
             return indexPatterns.getIds()
             .then(function (patterns) {
               if (!config.get('defaultIndex')) {
-                throw new NoDefaultIndexPattern();
+                kbnUrl.change('/settings/indices');
               }
             });
           }
