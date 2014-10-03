@@ -5,18 +5,18 @@
 </div>
 <header ng-if="spyMode" class="control-group">
   <div class="fill visualize-spy-nav">
-    <button
+    <a
       class="btn btn-default"
       ng-repeat="mode in modes"
       ng-class="{ active: spyMode.name === mode.name }"
       ng-click="setSpyMode(mode)">
       {{mode.display}}
-    </button>
+    </a>
   </div>
   <div class="button-group">
-    <button ng-click="toggleFullPage()">
+    <a ng-click="toggleFullPage()">
       <i ng-if="!spyMode.fill" class="fa fa-expand"></i>
       <i ng-if="spyMode.fill" class="fa fa-compress"></i>
-    </button>
+    </a>
   </div>
 </header>
