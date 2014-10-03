@@ -1,5 +1,5 @@
 define(function (require) {
-  return function SavedObjectFactory(es, configFile, Promise, Private, Notifier) {
+  return function SavedObjectFactory(es, configFile, Promise, Private, Notifier, indexPatterns) {
     var errors = require('errors');
     var angular = require('angular');
     var _ = require('lodash');
@@ -111,16 +111,26 @@ define(function (require) {
             // Give obj all of the values in _source.fields
             _.assign(obj, resp._source);
 
-            // if we have a searchSource, set it's state based on the searchSourceJSON field
-            if (obj.searchSource) {
-              var state = {};
-              try {
-                state = JSON.parse(meta.searchSourceJSON);
-              } catch (e) {}
-              obj.searchSource.set(state);
-            }
+            return Promise.try(function () {
+              // if we have a searchSource, set it's state based on the searchSourceJSON field
+              if (obj.searchSource) {
+                var state = {};
+                try {
+                  state = JSON.parse(meta.searchSourceJSON);
+                } catch (e) {}
+                obj.searchSource.set(state);
+              }
 
-            return Promise.cast(afterESResp.call(obj, resp))
+              if (_.isString(obj.searchSource.get('index'))) {
+                return indexPatterns.get(obj.searchSource.get('index'))
+                .then(function (indexPattern) {
+                  obj.searchSource.index(indexPattern);
+                });
+              }
+            })
+            .then(function () {
+              return Promise.cast(afterESResp.call(obj, resp));
+            })
             .then(function () {
               // Any time obj is updated, re-call applyESResp
               docSource.onUpdate().then(applyESResp, notify.fatal);
