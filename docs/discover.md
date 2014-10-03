@@ -45,7 +45,7 @@ You can also reorder columns by placing your mouse over the column header and cl
 
 ### The Time Chart
 
-The time chart runs an Elasticsearch aggregation to show the time stamps associated with documents in the table. Hover over a bar in the chart to see the count of documents contained with in it. Clicking on the bar will narrow the selected time range to match the time range of that bar. If you hover over the background of the chart (not a bar) the cursor will become a crosshair. In this mode you can click-and-drag to select a new time range.
+The time chart runs an Elasticsearch aggregation to show the time stamps associated with documents in the table. Hover over a bar in the chart to see the count of documents contained within it. Clicking on the bar will narrow the selected time range to match the time range of that bar. If you hover over the background of the chart (not a bar) the cursor will become a crosshair. In this mode you can click-and-drag to select a new time range.
 
 ### Searching
 
@@ -53,12 +53,12 @@ See the [Querying section](#querying) of the documentation.
 
 ### Saving and reloading searches.
 
-Click the save button to save your search for later, or to reuse in other screens, such as Visualize. Saved searches can be loaded via the folder icon.
+Click the save button to save your search for later, or to reuse it in other screens, such as Visualize. Saved searches can be loaded via the folder icon.
 
 
 ### Querying
 
-The search bar at the top allows Kibana uses Elasticsearch's support for Lucene Query String syntax. Let's say we're searching web server logs that have been parsed into a few fields.
+The search bar at the top allows Kibana to use Elasticsearch's support for Lucene Query String syntax. Let's say we're searching web server logs that have been parsed into a few fields.
 
 We can of course do free text search. Find requests that contain the number 200, in any field.
 
