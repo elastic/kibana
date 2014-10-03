@@ -121,6 +121,7 @@ define(function (require) {
                 obj.searchSource.set(state);
               }
             })
+            .then(hydrateIndexPattern)
             .then(function () {
               return Promise.cast(afterESResp.call(obj, resp));
             })
@@ -130,20 +131,7 @@ define(function (require) {
             });
           });
         })
-        .then(function () {
-          if (obj.searchSource) {
-            var index = obj.searchSource.get('index');
-
-            if (index instanceof indexPatterns.IndexPattern) {
-              return;
-            }
-
-            return indexPatterns.get(index)
-            .then(function (indexPattern) {
-              obj.searchSource.index(indexPattern);
-            });
-          }
-        })
+        .then(hydrateIndexPattern)
         .then(function () {
           return customInit.call(obj);
         })
@@ -152,6 +140,27 @@ define(function (require) {
           return obj;
         });
       });
+
+      /**
+       * After creation or fetching from ES, ensure that the searchSources index indexPattern
+       * is an bonafide IndexPattern object.
+       *
+       * @return {[type]} [description]
+       */
+      function hydrateIndexPattern() {
+        if (obj.searchSource) {
+          var index = obj.searchSource.get('index');
+
+          if (index instanceof indexPatterns.IndexPattern) {
+            return;
+          }
+
+          return indexPatterns.get(index)
+          .then(function (indexPattern) {
+            obj.searchSource.index(indexPattern);
+          });
+        }
+      }
 
 
       /**
