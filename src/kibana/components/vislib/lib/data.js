@@ -170,17 +170,18 @@ define(function (require) {
     // Helper function for getNames
     // Returns an array of objects with a name (key) value and an index value.
     // The index value allows us to sort the names in the correct nested order.
-    Data.prototype.returnNames = function (array, index) {
+    Data.prototype.returnNames = function (array, index, columns) {
       var names = [];
       var self = this;
 
       _.forEach(array, function (obj) {
-        names.push({ key: obj.name, index: index });
+        var fieldFormatter = columns[index].field.format.convert;
+        names.push({ key: fieldFormatter(obj.name), index: index });
 
         if (obj.children) {
           var plusIndex = index + 1;
 
-          _.forEach(self.returnNames(obj.children, plusIndex), function (namedObj) {
+          _.forEach(self.returnNames(obj.children, plusIndex, columns), function (namedObj) {
             names.push(namedObj);
           });
         }
@@ -194,9 +195,10 @@ define(function (require) {
      // Returns an array with names sorted by the index value.
     Data.prototype.getNames = function () {
       var data = this.data.slices;
+      var columns = this.data.raw.columns;
 
       if (data.children) {
-        var namedObj = this.returnNames(data.children, 0);
+        var namedObj = this.returnNames(data.children, 0, columns);
 
         return _(namedObj)
           .sortBy(function (obj) {

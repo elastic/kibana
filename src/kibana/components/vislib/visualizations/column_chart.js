@@ -18,6 +18,16 @@ define(function (require) {
         return new ColumnChart(handler, chartEl, chartData);
       }
 
+      var raw;
+      var fieldIndex;
+
+      if (chartData.raw) {
+        raw = chartData.raw.columns;
+        fieldIndex = _.findIndex(raw, {'categoryName': 'group'});
+      }
+
+      this.fieldFormatter = raw && raw[fieldIndex] ? raw[fieldIndex].field.format.convert : function (d) { return d; };
+
       ColumnChart.Super.apply(this, arguments);
       // Column chart specific attributes
       this._attr = _.defaults(handler._attr || {}, {
@@ -75,10 +85,10 @@ define(function (require) {
       bars.enter()
         .append('rect')
         .attr('class', function (d) {
-          return self.colorToClass(color(d.label));
+          return self.colorToClass(color(self.fieldFormatter(d.label)));
         })
         .attr('fill', function (d) {
-          return color(d.label);
+          return color(self.fieldFormatter(d.label));
         });
 
       // update

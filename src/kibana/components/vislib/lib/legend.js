@@ -33,16 +33,6 @@ define(function (require) {
         'defaultOpacity' : 1,
         'isOpen' : true
       });
-
-      // Adding field formatter for formatting legend labels
-      var raw;
-      var fieldIndex;
-      if (this.vis.data.raw) {
-        raw = this.vis.data.raw.columns;
-        fieldIndex = _.findIndex(raw, {'categoryName': 'group'});
-      }
-
-      this.fieldFormatter = raw && raw[fieldIndex] ? raw[fieldIndex].field.format.convert : function (d) { return d; };
     }
 
     // Add legend header
@@ -77,7 +67,7 @@ define(function (require) {
         })
         .html(function (d) {
           // return the appropriate color for each dot
-          return '<span class="dots" style="background:' + args.color(d) + '"></span>' + self.fieldFormatter(d);
+          return '<span class="dots" style="background:' + args.color(d) + '"></span>' + d;
         });
     };
 
