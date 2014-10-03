@@ -5,7 +5,6 @@ define(function (require) {
       var $ = require('jquery');
       var _ = require('lodash');
 
-      var modeScope;
       var modes = _.flatten([
         Private(require('components/visualize/spy/_table')),
         Private(require('components/visualize/spy/_req_resp_stats'))
@@ -14,18 +13,10 @@ define(function (require) {
 
       var defaultMode = modes[0];
 
-      function renderSpyMode(spyMode) {
-        spyMode.$scope.extended = spyMode.fill;
-
-        var mode = modes.byName[spyMode.name];
-        mode.link(spyMode.$scope, spyMode.$container);
-      }
-
       return {
         restrict: 'E',
         template: require('text!components/visualize/spy/_spy.html'),
         link: function ($scope, $el) {
-          var fullPageSpy = false;
           $scope.spyMode = null;
           $scope.modes = modes;
 
@@ -34,10 +25,7 @@ define(function (require) {
           };
 
           $scope.toggleFullPage = function () {
-            fullPageSpy = $scope.spyMode.fill = !fullPageSpy;
-
-            // re-render the current mode
-            renderSpyMode($scope.spyMode);
+            $scope.spyMode.fill = !$scope.spyMode.fill;
 
             // tell any listeners spyMode changed
             $scope.$emit('change:spyMode', $scope.spyMode);
@@ -66,21 +54,18 @@ define(function (require) {
               // no further changes
               if (!newMode) return;
 
-              modeScope = $scope.$new();
-              modeScope.extended = fullPageSpy;
               change = true;
               current = $scope.spyMode = {
                 // copy a couple values over
                 name: newMode.name,
                 display: newMode.display,
-                fill: fullPageSpy,
-                $scope: modeScope,
+                fill: $scope.spyMode.fill,
+                $scope: $scope.$new(),
                 $container: $('<div class="visualize-spy-container">').appendTo($el)
               };
 
               current.$container.append($compile(newMode.template)(current.$scope));
-              // newMode.link(current.$scope, current.$container);
-              renderSpyMode(current);
+              newMode.link(current.$scope, current.$container);
             }
 
             // wrapped in fn to enable early return
