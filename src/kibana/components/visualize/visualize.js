@@ -128,25 +128,6 @@ define(function (require) {
           }
         });
 
-        $scope.$on('resize', function () {
-          var old;
-          (function waitForAnim() {
-            var cur = $el.width() + ':' + $el.height();
-            if (cur !== old) {
-              old = cur;
-              // resize can sometimes be called before animations on the element are complete.
-              // check each 50ms if the animations are complete and then render when they are
-              return setTimeout(waitForAnim, 200);
-            }
-
-            calcResponsiveStuff();
-            applyClassNames();
-
-            // chart reference changes over time, don't bind to a specific chart object.
-            if (chart) chart.resize();
-          }());
-        });
-
         $scope.$on('$destroy', function () {
           if (chart) {
             _.forOwn($scope.vis.listeners, function (listener, event) {
