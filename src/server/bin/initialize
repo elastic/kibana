@@ -14,7 +14,7 @@ end
 
 # Defaults for the options
 options = {
-  :config => File.expand_path("#{HERE}/../config/kibana.yml")  || ENV["CONFIG_PATH"]
+  :config => ENV["CONFIG_PATH"] || File.expand_path("#{HERE}/../config/kibana.yml")
 }
 
 # Create a new parser
