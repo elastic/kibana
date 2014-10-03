@@ -10,9 +10,6 @@
         &nbsp;
         This visualization is linked to a saved search:
         <b>{{ savedVis.savedSearchId | json}}</b>
-        <a href="#/discover/{{ savedVis.savedSearchId | uriescape }}">
-          <i class="fa fa-pencil" tooltip="Click here to edit the linked saved search"></i>
-        </a>
       </div>
 
       <div ng-if="linked && unlinking" ng-click="doneUnlinking()" class="bitty-modal">

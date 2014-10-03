@@ -68,12 +68,12 @@ define(function (require) {
      * Get the parent of this SearchSource
      * @return {Promise}
      */
-    SearchSource.prototype.getParent = function () {
+    SearchSource.prototype.getParent = function (onlyHardLinked) {
       var self = this;
       return getRootSourcePromise.then(function (rootSearchSource) {
         if (self._parent === false) return false;
         if (self._parent) return self._parent;
-        return rootSearchSource.get();
+        return onlyHardLinked ? undefined : rootSearchSource.get();
       });
     };
 
