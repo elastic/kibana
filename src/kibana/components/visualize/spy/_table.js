@@ -14,9 +14,9 @@ define(function (require) {
         var perPageDefault = 10;
         var perPageExtended = 20;
 
-        $scope.$watch('spyMode.fill', function (fill) {
+        $scope.$parent.$watch('spyMode.fill', function (fill) {
           $scope.perPage = (fill) ? perPageExtended : perPageDefault;
-        })
+        });
 
         $scope.sort = null;
         $scope.csv = {
