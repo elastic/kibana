@@ -55,7 +55,7 @@ By default Kibana shows the last 15 minutes of data. You might want to expand th
 
 ### Document list
 
-Once you see some documents, you can begin to explore Discover. In the document list, Kibana will show you the localized version of the time field you specified in your index pattern, as well as the `_source` of the elasticsearch document.
+Once you see some documents, you can begin to explore Discover. In the document list, Kibana will show you the localized version of the time field you specified in your index pattern, as well as the `_source` of the Elasticsearch document.
 
 **Tip:** By default the table contains 500 of the most recent documents. You can increase the number of documents in the table from the advanced settings screen. See the [Setting section](#advanced) of the documentation.
 
@@ -128,7 +128,7 @@ Or HTML
 status:[400 TO 499] AND (extension:php OR extension:html)
 ```
 
-While Lucene query syntax is simple and very powerful, Kibana also supports the full Elasticsearch, JSON based, Query DSL. See the [Elasticsearch documentation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) for usage and examples.
+While lucene query syntax is simple and very powerful, Kibana also supports the full Elasticsearch, JSON based, query DSL. See the [Elasticsearch documentation](http://www.Elasticsearch.org/guide/en/Elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) for usage and examples.
 <!-- /include -->
 <!-- include {"path":"docs/visualize.md"} -->
 ## Visualize
@@ -163,7 +163,7 @@ To the right of the search box there are a row of icons for creating new visuali
 
 #### Aggregation Builder
 
-The aggregation builder on the left of the screen is used for configuring the [metric](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html#_metrics_aggregations) and [bucket](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html#_bucket_aggregations) aggregations used to create a visualization. (If you are coming from the SQL world, buckets are similar to group-bys. Check out the [elasticsearch docs](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html) for more info) For a bar chart or line chart the *metric* is used for the y-axis and the *buckets* are used for the x-axis, segment bar colors, and row/column splits. For pie charts the "metric" is used for the size of the slice and the *bucket* is used for the number of slices. Other visualizations may use these in new and different ways.
+The aggregation builder on the left of the screen is used for configuring the [metric](http://www.Elasticsearch.org/guide/en/Elasticsearch/reference/1.x/search-aggregations.html#_metrics_aggregations) and [bucket](http://www.Elasticsearch.org/guide/en/Elasticsearch/reference/1.x/search-aggregations.html#_bucket_aggregations) aggregations used to create a visualization. (If you are coming from the SQL world, buckets are similar to group-bys. Check out the [Elasticsearch docs](http://www.Elasticsearch.org/guide/en/Elasticsearch/reference/1.x/search-aggregations.html) for more info) For a bar chart or line chart the *metric* is used for the y-axis and the *buckets* are used for the x-axis, segment bar colors, and row/column splits. For pie charts the "metric" is used for the size of the slice and the *bucket* is used for the number of slices. Other visualizations may use these in new and different ways.
 
 For the remainder of this documentation we are going to use the bar chart as our example when discussing the features of the aggregation panel. The same concepts apply to the other visualizations but the bar chart is the workhorse of the visualization world.
 
