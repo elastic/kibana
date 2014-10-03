@@ -85,7 +85,6 @@ define(function (require) {
       bars.enter()
         .append('rect')
         .attr('class', function (d) {
-          console.log(self.fieldFormatter(d.label));
           return self.colorToClass(color(self.fieldFormatter(d.label)));
         })
         .attr('fill', function (d) {
