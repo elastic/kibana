@@ -86,7 +86,7 @@ define(function (require) {
             // wrapped in fn to enable early return
             set();
 
-            if (change) $scope.$emit('change:spyMode', newMode);
+            if (change) $scope.$emit('change:spyMode', current);
           };
         }
       };

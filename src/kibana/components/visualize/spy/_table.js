@@ -12,7 +12,7 @@ define(function (require) {
         var notify = new Notifier();
         var orderBy = $filter('orderBy');
         var perPageDefault = 10;
-        var perPageExtended = 25;
+        var perPageExtended = 20;
 
         $scope.perPage = ($scope.extended) ? perPageExtended : perPageDefault;
 

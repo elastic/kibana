@@ -69,7 +69,7 @@ define(function (require) {
           };
         }());
 
-        $scope.$on('change:spyMode', function (event, newMode) {
+        $scope.$on('change:spyMode', function (event, spyMode) {
           calcResponsiveStuff();
         });
 
