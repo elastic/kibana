@@ -1,4 +1,5 @@
 module.exports = function (grunt) {
+  var version = grunt.config.get('pkg.version');
   var config = {
 
     kibana_src: {
@@ -57,6 +58,18 @@ module.exports = function (grunt) {
           cwd: '<%= src %>/server/config/',
           src: 'kibana.yml',
           dest: '<%= build %>/dist/kibana/config/'
+        }
+      ]
+    },
+
+    versioned_dist: {
+      options: { mode: true },
+      files: [
+        {
+          expand: true,
+          cwd: '<%= build %>/dist/kibana',
+          src: '**',
+          dest: '<%= build %>/dist/kibana-' + version
         }
       ]
     }
