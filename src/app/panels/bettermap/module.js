@@ -56,11 +56,11 @@ function (angular, app, _, L, localRequire) {
         }
       ],
       status  : "Experimental",
-      description : "Displays geo points in clustered groups on a map. The caveat for this panel is"+
+      description : "Displays geo points in clustered groups on a map. The cavaet for this panel is"+
         " that, for better or worse, it does NOT use the terms facet and it <b>does</b> query "+
         "sequentially. This however means that it transfers more data and is generally heavier to"+
         " compute, while showing less actual data. If you have a time filter, it will attempt to"+
-        " show to most recent points in your search, up to your defined limit."
+        " show to most recent points in your search, up to your defined limit"
     };
     
     // Set and populate defaults
@@ -226,10 +226,10 @@ function (angular, app, _, L, localRequire) {
           }
         });
 
-        var map, makersLayerGroup, currentFilterId, currentLayer=null;
+        var map, makersLayerGroup, currentLayersByFilterId;
 
         function render_panel() {
-          elem.css({height:scope.panel.height||scope.row.height});
+          elem.css({height:scope.row.height});
 
           scope.require(['./leaflet/leaflet.markercluster', './leaflet/leaflet.draw'], function () {
             scope.panelMeta.loading = false;
@@ -238,6 +238,8 @@ function (angular, app, _, L, localRequire) {
               createMap();
               // The layer that will hold our markers
               makersLayerGroup = new L.MarkerClusterGroup({maxClusterRadius:30});
+              // This will hold the list of current layers, mapped to their respective filter ids
+              currentLayersByFilterId = {};
             } else {
               makersLayerGroup.clearLayers();
             }
@@ -257,10 +259,8 @@ function (angular, app, _, L, localRequire) {
             makersLayerGroup.addLayers(markerList);
 
             makersLayerGroup.addTo(map);
-            var geoList = _.pluck(scope.data,'coordinates');
-            if (geoList.length > 0) {
-              map.fitBounds(geoList);
-            }
+
+            map.fitBounds(_.pluck(scope.data,'coordinates'));
           });
         }
         
@@ -269,6 +269,84 @@ function (angular, app, _, L, localRequire) {
             scrollWheelZoom: true,
             center: [40, -86],
             zoom: 10
+          });
+
+          // Initialise the FeatureGroup to store editable layers
+          var drawnItems = new L.FeatureGroup();
+          map.addLayer(drawnItems);
+          
+          // Initialise the draw control and pass it the FeatureGroup of editable layers
+          var drawControl = new L.Control.Draw({
+            edit: {
+              featureGroup: drawnItems
+            },
+            draw: {
+              polyline: false,
+              marker: false,
+              circle: false
+            }
+          });
+
+          map.addControl(drawControl);
+          
+          // Watch for new polygons drawn on the map, and update filters accordingly
+          map.on('draw:created', function (e) {
+              var layer = e.layer;
+
+              var filterId = filterSrv.set(
+                {
+                  type : 'geo_polygon',
+                  field : scope.panel.field,
+                  value : layer.toGeoJSON().geometry.coordinates[0],
+                  mandate : ('either')
+                }
+              );
+              layer.filterId = filterId;
+              drawnItems.addLayer(layer);
+              currentLayersByFilterId[filterId] = layer;
+            }
+          );
+
+          // Watch for polygons deleted from the map, and update filters accordingly
+          map.on('draw:deleted', function (e) {
+            var layers = e.layers;
+            layers.eachLayer(function (layer) {
+              filterSrv.remove(layer.filterId);
+            });
+            
+          });
+          
+          // Watch for polygons edited on the map, and update the existing accordingly
+          map.on('draw:edited', function (e) {
+              var layers = e.layers;
+              layers.eachLayer(
+                function (layer) {
+                  console.log("Polygon was edited, filter id " + layer.filterId);
+                  filterSrv.set(
+                    {
+                      type:'geo_polygon',
+                      field:scope.panel.field,
+                      value:layer.toGeoJSON().geometry.coordinates[0],
+                      mandate:('either')
+                    },
+                    layer.filterId);
+                }
+              );
+            }
+          );
+          
+          // Watch for changes in the list of filters, and remove filters from the map if needed to
+          // keep filter list consistent with the map
+          scope.$watch(filterSrv.ids, function(newValue, oldValue) {
+            if (_.isUndefined(newValue)) {
+              return;
+            }
+            
+            for (var id in currentLayersByFilterId) {
+              if ( !(_.contains(newValue, parseInt(id, 10))) ) {
+                map.removeLayer(currentLayersByFilterId[id]);
+              }
+            }
           });
 
           // set a default osm_url if there is none
@@ -282,72 +360,6 @@ function (angular, app, _, L, localRequire) {
             maxZoom: 18,
             minZoom: 2
           }).addTo(map);
-
-          // Initialise the FeatureGroup to store editable layers
-          var drawnItems = new L.FeatureGroup();
-          map.addLayer(drawnItems);
-          
-          // Initialise the draw control and pass it the FeatureGroup of editable layers
-          var options = {
-            edit: {
-              featureGroup: drawnItems,
-              remove: false,
-              edit: false
-            },
-            draw: {
-              polyline: false,
-              marker: false,
-              circle: false,
-              polygon: {
-                allowIntersection: false,
-                drawError: {
-                  color: "#e1e100",
-                  message: "<strong>Outch!</strong> You can not draw intersections."
-                }
-              }
-            }
-          };
-          var drawControl = new L.Control.Draw(options);
-
-          map.addControl(drawControl);
-          
-          // Watch for new polygons drawn on the map, and update filters accordingly
-          map.on('draw:created', function (e) {
-              var layer = e.layer;
-
-              var filterOptions = {
-                type : 'geo_polygon',
-                field : scope.panel.field,
-                value : layer.toGeoJSON().geometry.coordinates[0],
-                mandate: ('must')
-              };
-
-              // If a selection was made before, remove the old one and update the existing filter
-              if (!_.isNull(currentLayer)) {
-                map.removeLayer(currentLayer);
-                filterSrv.set(filterOptions, currentFilterId);
-              } else {
-                currentFilterId = filterSrv.set(filterOptions);
-              }
-              // uncomment to keep the red selection box on the map
-              //drawnItems.addLayer(layer);
-              currentLayer = layer;
-            }
-          );
-
-          // Watch for changes in the list of filters, and remove the layer from the map
-          // if needed to keep filter list consistent with the map
-          scope.$watch(filterSrv.ids, function(newValue) {
-            if (_.isUndefined(newValue) || _.isUndefined(map) || _.isNull(currentLayer)) {
-              return;
-            }
-
-            if (!(_.contains(newValue, currentFilterId))) {
-              // uncomment if you opted to keep the red selection box on the map
-              // map.removeLayer(currentLayer);
-              currentLayer = null;
-            }
-          });
         }
       }
     };
