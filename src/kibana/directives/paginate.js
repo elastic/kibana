@@ -11,10 +11,14 @@ define(function (require) {
         '<paginate-controls ng-if="page.count > 1"></paginate-controls>'
       ,
       link: function ($scope, $el, attrs) {
+        var perPageDefault = 10;
+
+        $scope.paginate = {};
+
         // pagination controls
-        $scope.paginate = {
-          perPage: _.parseInt(attrs.perPage)
-        };
+        $scope.$watch(attrs.perPage, function (perPage) {
+          $scope.paginate.perPage = perPage || perPageDefault;
+        });
 
         var getOtherWidth = $parse(attrs.otherWidth);
 

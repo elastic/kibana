@@ -49,14 +49,12 @@ define(function (require) {
       {
         name: 'request',
         display: 'Request',
-        alwaysFill: true,
         template: reqRespStatsHTML,
         link: linkReqRespStats
       },
       {
         name: 'response',
         display: 'Response',
-        alwaysFill: true,
         template: reqRespStatsHTML,
         link: linkReqRespStats
       },

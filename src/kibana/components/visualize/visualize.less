@@ -76,6 +76,7 @@ visualize-spy {
     .display(flex);
     .flex-direction(column);
 
+    height: 382px;
     padding: 10px 10px 0;
     overflow-y: auto;
 
@@ -86,6 +87,10 @@ visualize-spy {
     tr > td {
       font-size: 0.85em;
     }
+  }
+
+  &.only .visualize-spy-container {
+    height: auto;
   }
 
   // this is the default, double-arrow sort that is just a hint to the user that they can sort
@@ -120,10 +125,14 @@ visualize-spy {
     }
   }
 
-  .visualize-spy-tabs {
+  .visualize-spy-nav {
     margin-top: 10px;
     margin-bottom: 10px;
     .flex(0, 0, auto);
+
+    a.btn {
+      margin: @padding-small-vertical @padding-small-vertical;
+    }
   }
 
   pre {

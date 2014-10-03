@@ -44,7 +44,7 @@ define(function (require) {
         };
 
         var calcResponsiveStuff = function () {
-          $scope.onlyShowSpy = $scope.spyMode && ($el.height() < 550 || $scope.spyMode.alwaysFill);
+          $scope.onlyShowSpy = $scope.spyMode && ($scope.spyMode.fill || $el.height() < 550);
           applyClassNames();
         };
 
@@ -69,7 +69,7 @@ define(function (require) {
           };
         }());
 
-        $scope.$on('change:spyMode', function (event, newMode) {
+        $scope.$on('change:spyMode', function (event, spyMode) {
           calcResponsiveStuff();
         });
 
@@ -126,25 +126,6 @@ define(function (require) {
               chart.render(chartData);
             });
           }
-        });
-
-        $scope.$on('resize', function () {
-          var old;
-          (function waitForAnim() {
-            var cur = $el.width() + ':' + $el.height();
-            if (cur !== old) {
-              old = cur;
-              // resize can sometimes be called before animations on the element are complete.
-              // check each 50ms if the animations are complete and then render when they are
-              return setTimeout(waitForAnim, 200);
-            }
-
-            calcResponsiveStuff();
-            applyClassNames();
-
-            // chart reference changes over time, don't bind to a specific chart object.
-            if (chart) chart.resize();
-          }());
         });
 
         $scope.$on('$destroy', function () {
