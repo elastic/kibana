@@ -14,16 +14,11 @@ define(function (require) {
       GlobalState.Super.call(this, '_g', defaults);
     }
 
-    GlobalState.prototype.writeToUrl = function (url) {
-      return qs.replaceParamInUrl(url, this._urlParam, this.toRISON());
-    };
+    // if the url param is missing, write it back
+    GlobalState.prototype._persistAcrossApps = true;
 
-    GlobalState.prototype._readFromURL = function (method) {
-      var search = $location.search();
-      if (method === 'fetch') {
-        return (search[this._urlParam]) ? rison.decode(search[this._urlParam]) : this.toObject();
-      }
-      return rison.decode(search[this._urlParam] || '()');
+    GlobalState.prototype.removeFromUrl = function (url) {
+      return qs.replaceParamInUrl(url, this._urlParam, null);
     };
 
     return new GlobalState();

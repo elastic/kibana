@@ -41,7 +41,7 @@ define(function (require) {
     'kibana/notify',
     'kibana/courier'
   ])
-  .controller('VisEditor', function ($scope, $route, timefilter, appStateFactory, $location, kbnUrl, $timeout, courier) {
+  .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier) {
 
     var _ = require('lodash');
     var angular = require('angular');
@@ -67,7 +67,7 @@ define(function (require) {
     var $state = (function initState() {
       var savedVisState = vis.getState();
 
-      var $state = appStateFactory.create({
+      var $state = new AppState({
         vis: savedVisState
       });
 

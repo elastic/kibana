@@ -38,10 +38,7 @@ define(function (require) {
       return [this.data];
     };
 
-    // Function to determine whether to display the legend or not
-    // Displays legend when more than one series of data present
-    Data.prototype.isLegendShown = function () {
-      var isLegend = false;
+    Data.prototype.getVisData = function () {
       var visData;
 
       if (this.data.rows) {
@@ -52,10 +49,30 @@ define(function (require) {
         visData = [this.data];
       }
 
+      return visData;
+    };
+
+    // Function to determine whether to display the legend or not
+    // Displays legend when more than one series of data present
+    Data.prototype.isLegendShown = function () {
+      var isLegend = false;
+      var visData = this.getVisData();
+      var sameSeriesLabel = true;
+      var seriesLabel;
+
       _.forEach(visData, function countSeriesLength(obj) {
         var dataLength = obj.series ? obj.series.length : obj.slices.children.length;
+        var label = dataLength === 1 && obj.series ? obj.series[0].label : undefined;
 
-        if (dataLength > 1) {
+        if (!seriesLabel) {
+          seriesLabel = label;
+        }
+
+        if (seriesLabel !== label) {
+          sameSeriesLabel = false;
+        }
+
+        if (dataLength > 1 || !sameSeriesLabel) {
           isLegend = true;
         }
       });

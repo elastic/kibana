@@ -12,9 +12,9 @@ define(function (require) {
   .directive('kbnSettingsObjects', function (config, Notifier, Private, kbnUrl) {
     return {
       restrict: 'E',
-      controller: function ($scope, $injector, $q, appStateFactory) {
+      controller: function ($scope, $injector, $q, AppState) {
 
-        var $state = $scope.state = new appStateFactory.create();
+        var $state = $scope.state = new AppState();
 
         var resetCheckBoxes = function () {
           $scope.deleteAll = false;
