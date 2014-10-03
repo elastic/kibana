@@ -9,7 +9,8 @@ define(function (require) {
 
       es = esFactory({
         host: configFile.elasticsearch,
-        log: 'info'
+        log: 'info',
+        requestTimeout: 60000
       });
 
       return es;
