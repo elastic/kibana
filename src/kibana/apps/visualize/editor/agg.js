@@ -42,13 +42,19 @@ define(function (require) {
         (function setupControlManagement() {
           var $editorContainer = $el.find('.vis-editor-agg-editor');
 
+          // this will contain the controls for the schema (rows or columns?), which are unrelated to
+          // controls for the agg, which is why they are first
           var $schemaEditor = $('<div>').addClass('schemaEditors').appendTo($editorContainer);
-          var $aggSelect = $(aggSelectHtml).appendTo($editorContainer);
           if ($scope.agg.schema.editor) {
             $schemaEditor.append($scope.agg.schema.editor);
             $compile($schemaEditor)(editorScope());
           }
 
+          // allow selection of an aggregation
+          var $aggSelect = $(aggSelectHtml).appendTo($editorContainer);
+          $compile($aggSelect)($scope);
+
+          // params for the selected agg, these are rebuilt every time the agg changes
           var $aggParamEditors;
           var $aggParamEditorsScope;
           $scope.$watch('agg.type', function updateAggParamEditor(newType, oldType) {
