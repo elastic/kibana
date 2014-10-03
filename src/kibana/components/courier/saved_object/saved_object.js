@@ -120,13 +120,6 @@ define(function (require) {
                 } catch (e) {}
                 obj.searchSource.set(state);
               }
-
-              if (_.isString(obj.searchSource.get('index'))) {
-                return indexPatterns.get(obj.searchSource.get('index'))
-                .then(function (indexPattern) {
-                  obj.searchSource.index(indexPattern);
-                });
-              }
             })
             .then(function () {
               return Promise.cast(afterESResp.call(obj, resp));
@@ -136,6 +129,14 @@ define(function (require) {
               docSource.onUpdate().then(applyESResp, notify.fatal);
             });
           });
+        })
+        .then(function () {
+          if (obj.searchSource) {
+            return indexPatterns.get(obj.searchSource.get('index'))
+            .then(function (indexPattern) {
+              obj.searchSource.index(indexPattern);
+            });
+          }
         })
         .then(function () {
           return customInit.call(obj);
