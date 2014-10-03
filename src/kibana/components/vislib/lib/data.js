@@ -155,14 +155,15 @@ define(function (require) {
     // The index value allows us to sort the names in the correct nested order.
     Data.prototype.returnNames = function (array, index) {
       var names = [];
+      var self = this;
 
       _.forEach(array, function (obj) {
-        names.push({ key: obj.key, index: index });
+        names.push({ key: obj.name, index: index });
 
         if (obj.children) {
           var plusIndex = index + 1;
 
-          _.forEach(this.returnNames(obj.children, plusIndex), function (namedObj) {
+          _.forEach(self.returnNames(obj.children, plusIndex), function (namedObj) {
             names.push(namedObj);
           });
         }
@@ -175,7 +176,7 @@ define(function (require) {
      // The indexed value determines the order of nesting in the data.
      // Returns an array with names sorted by the index value.
     Data.prototype.getNames = function () {
-      var data = this.data;
+      var data = this.data.slices;
 
       if (data.children) {
         var namedObj = this.returnNames(data.children, 0);
