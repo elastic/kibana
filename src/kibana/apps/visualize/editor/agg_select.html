@@ -1,0 +1,11 @@
+<div class="form-group">
+  <label ng-if="$index < 1">Aggregation</label>
+  <label ng-if="$index >= 1">Sub Aggregation</label>
+  <select
+    name="agg"
+    class="form-control"
+    ng-model="agg.type"
+    required
+    ng-options="agg as agg.title for agg in aggTypeOptions | aggFilter:agg.schema.aggFilter">
+  </select>
+</div>

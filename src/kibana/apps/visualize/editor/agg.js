@@ -5,6 +5,7 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
     var aggTypes = Private(require('components/agg_types/index'));
+    var aggSelectHtml = require('text!apps/visualize/editor/agg_select.html');
 
     require('apps/visualize/editor/agg_param');
 
@@ -35,24 +36,36 @@ define(function (require) {
           var i = $scope.$index;
           $scope.$first = i === 0;
           $scope.$last = i === $scope.group.length - 1;
+          $scope.aggIsTooLow = calcAggIsTooLow();
         });
 
         (function setupControlManagement() {
           var $editorContainer = $el.find('.vis-editor-agg-editor');
 
+          // this will contain the controls for the schema (rows or columns?), which are unrelated to
+          // controls for the agg, which is why they are first
+          var $schemaEditor = $('<div>').addClass('schemaEditors').appendTo($editorContainer);
           if ($scope.agg.schema.editor) {
-            var $schemaEditor = $('<div>').prependTo($editorContainer);
             $schemaEditor.append($scope.agg.schema.editor);
             $compile($schemaEditor)(editorScope());
           }
 
+          // allow selection of an aggregation
+          var $aggSelect = $(aggSelectHtml).appendTo($editorContainer);
+          $compile($aggSelect)($scope);
+
+          // params for the selected agg, these are rebuilt every time the agg changes
           var $aggParamEditors;
           var $aggParamEditorsScope;
           $scope.$watch('agg.type', function updateAggParamEditor(newType, oldType) {
             if ($aggParamEditors) {
               $aggParamEditors.remove();
+              $aggParamEditors = null;
+            }
+
+            if ($aggParamEditorsScope) {
               $aggParamEditorsScope.$destroy();
-              $aggParamEditors = $aggParamEditorsScope = null;
+              $aggParamEditorsScope = null;
             }
 
             var agg = $scope.agg;
@@ -166,6 +179,22 @@ define(function (require) {
 
           aggs.splice(index, 1);
         };
+
+        function calcAggIsTooLow() {
+          if (!$scope.agg.schema.mustBeFirst) {
+            return false;
+          }
+
+          var firstDifferentSchema = _.findIndex($scope.group, function (agg) {
+            return agg.schema !== $scope.agg.schema;
+          });
+
+          if (firstDifferentSchema === -1) {
+            return false;
+          }
+
+          return $scope.$index > firstDifferentSchema;
+        }
       }
     };
   });
