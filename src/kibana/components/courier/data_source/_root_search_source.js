@@ -1,6 +1,6 @@
 define(function (require) {
   return function RootSearchSource(Private, $rootScope, config, Promise, indexPatterns, timefilter) {
-    var prom; // promise that must be resolved before the source is acurrate (updated by loadDefaultPattern)
+    var _ = require('lodash');
     var SearchSource = Private(require('components/courier/data_source/search_source'));
 
     var globalSource = new SearchSource();
@@ -10,12 +10,13 @@ define(function (require) {
       return timefilter.get(globalSource.get('index'));
     });
 
+    var ensureDefaultLoaded = _.once(__loadDefaultPattern__);
     var appSource; // set in setAppSource()
     resetAppSource();
 
     // when the default index changes, or the config is intialized, connect the defaultIndex to the globalSource
-    $rootScope.$on('change:config.defaultIndex', loadDefaultPattern);
-    $rootScope.$on('init:config', loadDefaultPattern);
+    $rootScope.$on('change:config.defaultIndex', ensureDefaultLoaded);
+    $rootScope.$on('init:config', ensureDefaultLoaded);
 
     // when the route changes, clear the appSource
     $rootScope.$on('$routeChangeStart', resetAppSource);
@@ -25,7 +26,9 @@ define(function (require) {
      * @return {Promise} - resolved with the current AppSource
      */
     function getAppSource() {
-      return Promise.resolve(appSource || prom || loadDefaultPattern());
+      return ensureDefaultLoaded().then(function () {
+        return appSource;
+      });
     }
 
     /**
@@ -51,12 +54,11 @@ define(function (require) {
      *
      * @return {Promise}
      */
-    function loadDefaultPattern() {
+    function __loadDefaultPattern__() {
       var defId = config.get('defaultIndex');
 
-      return prom = Promise.cast(defId && indexPatterns.get(defId)).then(function (pattern) {
+      return Promise.cast(defId && indexPatterns.get(defId)).then(function (pattern) {
         globalSource.set('index', pattern);
-        return appSource;
       });
     }
 

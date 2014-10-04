@@ -28,16 +28,7 @@ define(function (require) {
           hits: 0
         },
 
-        searchSource: true,
-
-        afterESResp: function () {
-          var obj = this;
-
-          return indexPatterns.get(obj.searchSource.get('index'))
-          .then(function (indexPattern) {
-            obj.searchSource.index(indexPattern);
-          });
-        }
+        searchSource: true
       });
     }
     inherits(SavedSearch, courier.SavedObject);
