@@ -7,7 +7,7 @@ The **Visualize** app is used to design and create saved visualizations that can
 To create a new visualization either click on the visualize tab at the top of the screen or the new document button in the toolbar panel to the right of the search bar. This will start the *New Visualization Wizard*.
 
 - **Step 1:** Choose the data source for the new visualization - You have 3 options here:
-  - *"New search"* : Pick an index pattern and search as you create your visualization
+  - *"From a new search"* : Pick an index pattern and search as you create your visualization
   - *"From a saved search"* : Pick a Saved Search and create a visualization from it. If you later save the visualization it will be tied to this search. This means if you edit the search later, say in Discover, any visualization that uses it will also be updated automatically.
   - *"From an existing visualization"* Pick an existing visualization and make changes to it.
 - **Step 2:** Choose a visualization type from the list of currently available visualizations.
