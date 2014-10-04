@@ -7,7 +7,7 @@ The **Visualize** app is used to design and create saved visualizations that can
 To create a new visualization either click on the visualize tab at the top of the screen or the new document button in the toolbar panel to the right of the search bar. This will start the *New Visualization Wizard*.
 
 - **Step 1:** Choose the data source for the new visualization - You have 3 options here:
-  - *"New search"* : Pick an index pattern and search as you create your visualization
+  - *"From a new search"* : Pick an index pattern and search as you create your visualization
   - *"From a saved search"* : Pick a Saved Search and create a visualization from it. If you later save the visualization it will be tied to this search. This means if you edit the search later, say in Discover, any visualization that uses it will also be updated automatically.
   - *"From an existing visualization"* Pick an existing visualization and make changes to it.
 - **Step 2:** Choose a visualization type from the list of currently available visualizations.
@@ -30,7 +30,7 @@ To the right of the search box there are a row of icons for creating new visuali
 
 #### Aggregation Builder
 
-The aggregation builder on the left of the screen is used for configuring the [metric](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html#_metrics_aggregations) and [bucket](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html#_bucket_aggregations) aggregations used to create a visualization. (If you are coming from the SQL world, buckets are similar to group-bys. Check out the [Elasticsearch docs](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html) for more info) For a bar chart or line chart the *metric* is used for the y-axis and the *buckets* are used for the x-axis, segment bar colors, and row/column splits. For pie charts the "metric" is used for the size of the slice and the *bucket* is used for the number of slices. Other visualizations may use these in new and different ways.
+The aggregation builder on the left of the screen is used for configuring the [metric](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html#_metrics_aggregations) and [bucket](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html#_bucket_aggregations) aggregations used to create a visualization. (If you are coming from the SQL world, buckets are similar to group-bys. Check out the [Elasticsearch docs](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html) for more info) For a bar chart or line chart, the *metric* is used for the y-axis and the *buckets* are used for the x-axis, segment bar colors, and row/column splits. For pie charts the "metric" is used for the size of the slice and the *bucket* is used for the number of slices. Other visualizations may use these in new and different ways.
 
 For the remainder of this documentation we are going to use the bar chart as our example when discussing the features of the aggregation panel. The same concepts apply to the other visualizations but the bar chart is the workhorse of the visualization world.
 

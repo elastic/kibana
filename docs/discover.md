@@ -29,7 +29,7 @@ Click the expand button again to collapse the detailed view of the document.
 
 The field list has several powerful functions. The first being the ability to add columns to the document list. If no fields are selected `_source` will be automatically selected and shown in the table. Mouse over a field name and click the **add** button that appears. Now, instead of seeing `_source` in the document list, you have the extracted value of the selected field. In addition, the field name has moved up to the **Selected** section of the field list. Add a few more fields. Sweet!
 
-Now, instead of clicking the **add** button, click the name of the field itself. You will see a break down of the 5 most popular values for the field, as well as a count of how many records in the document list the field is present in.
+Now, instead of clicking the **add** button, click the name of the field itself. You will see a breakdown of the 5 most popular values for the field, as well as a count of how many records in the document list the field is present in.
 
 In addition, the Visualize button will pop you over to the **Visualize** application and run a more detailed aggregation on the field. For more information about visualization, see the [Visualize section](#visualize) of the docs.
 
@@ -39,13 +39,13 @@ When you expand a document in the document list you will see two magnifying glas
 
 ### Sorting
 
-You may have noticed that documents appear in reverse chronological order by default, meaning the newest documents are shown first. You can change this by clicking on the **Time** column header. In fact, any column can be sorted in this manner as long as it is indexed in Elasticsearch. Note that some fields are not indexed by default, such as `_id`, and that other may have indexing disabled in the Elasticsearch mapping. See the [Settings > Index Patterns](#indices) section of the docs for more details.
+You may have noticed that documents appear in reverse chronological order by default, meaning the newest documents are shown first. You can change this by clicking on the **Time** column header. In fact, any column can be sorted in this manner as long as it is indexed in Elasticsearch. Note that some fields are not indexed by default, such as `_id`, and that others may have indexing disabled in the Elasticsearch mapping. See the [Settings > Index Patterns](#indices) section of the docs for more details.
 
 You can also reorder columns by placing your mouse over the column header and clicking the left and right arrows that appear.
 
 ### The Time Chart
 
-The time chart runs an Elasticsearch aggregation to show the time stamps associated with documents in the table. Hover over a bar in the chart to see the count of documents contained with in it. Clicking on the bar will narrow the selected time range to match the time range of that bar. If you hover over the background of the chart (not a bar) the cursor will become a crosshair. In this mode you can click-and-drag to select a new time range.
+The time chart runs an Elasticsearch aggregation to show the time stamps associated with documents in the table. Hover over a bar in the chart to see the count of documents contained within it. Clicking on the bar will narrow the selected time range to match the time range of that bar. If you hover over the background of the chart (not a bar) the cursor will become a crosshair. In this mode you can click-and-drag to select a new time range.
 
 ### Searching
 
@@ -53,12 +53,12 @@ See the [Querying section](#querying) of the documentation.
 
 ### Saving and reloading searches.
 
-Click the save button to save your search for later, or to reuse in other screens, such as Visualize. Saved searches can be loaded via the folder icon.
+Click the save button to save your search for later, or to reuse it in other screens, such as Visualize. Saved searches can be loaded via the folder icon.
 
 
 ### Querying
 
-The search bar at the top allows Kibana uses Elasticsearch's support for Lucene Query String syntax. Let's say we're searching web server logs that have been parsed into a few fields.
+The search bar at the top allows Kibana to use Elasticsearch's support for Lucene Query String syntax. Let's say we're searching web server logs that have been parsed into a few fields.
 
 We can of course do free text search. Find requests that contain the number 200, in any field.
 
@@ -89,5 +89,7 @@ Or HTML
 ```
 status:[400 TO 499] AND (extension:php OR extension:html)
 ```
+
+You can read more about the Lucene Query String syntax in the [Lucene documentation](https://lucene.apache.org/core/2_9_4/queryparsersyntax.html).
 
 While Lucene query syntax is simple and very powerful, Kibana also supports the full Elasticsearch, JSON based, Query DSL. See the [Elasticsearch documentation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) for usage and examples.
