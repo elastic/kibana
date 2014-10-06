@@ -48,6 +48,8 @@ Do the following to install and use ruby
 - `cd src/server`
 - `bundle`
 - `cd ../..`
+- `npm install`
+- `bower install`
 - `grunt dev`
 
 In the future, the last line will be all you need
