@@ -4,12 +4,12 @@ Charts and tables and maps oh my! But how do we constrain the data
 displayed on them. This is the role of queries and filters. Because
 Kibana is powered by Elasticsearch it supports the powerful Lucene Query
 String syntax, as well as making use of some of Elasticsearch's filter
-capabilities
+capabilities.
 
 We will assume you have already:
 
-* Installed Elasticsearch on your workstation
-* Have webserver installed on your workstation and have the distribution
+* Installed Elasticsearch on your workstation.
+* Have a webserver installed on your workstation and have the distribution
 extracted into the configured document root.
 * Have read link:./using-kibana-for-the-first-time.html[Using Kibana for the first time]
 and have the `shakespeare` index populated with the data from the
@@ -25,7 +25,7 @@ image:./tutorials/queries_filters/plays.png[image]
 
 [[queries]]
 === Queries
-Type this very simple query into the search bar
+Type this very simple query into the search bar:
 
 [source,shell]
 ------------------
@@ -37,14 +37,14 @@ However, look at the next line by Sir Andrew, it does not contain "to
 be", nor does it contain "not to be". The search we have actually
 performed is: `to OR be OR or OR not OR to OR be`.
 
-We can also match the entire phrase
+We can also match the entire phrase:
 
 [source,shell]
 --------------------
 "to be or not to be"
 --------------------
 
-Or in a specifc fields:
+Or in specifc fields:
 
 [source,shell]
 -------------
@@ -83,7 +83,7 @@ And of course to search everything:
 [[multiple-queries]]
 === Multiple queries
 
-In some cases, you might want to compare the results of two seperate queries.Kibana can handle multiple queries byjoining them with a logical
+In some cases, you might want to compare the results of two seperate queries. Kibana can handle multiple queries by joining them with a logical
 `OR` and using the knowledge that they should be treated as seperate to
 influence visualizations.
 
@@ -93,7 +93,7 @@ Click the *+* to the right of the query input to add another query.
 
 image:./tutorials/queries_filters/Addquery.png[image]
 
-You should now have this
+You should now have this:
 
 image:./tutorials/queries_filters/split.png[image]
 
