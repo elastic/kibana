@@ -11,6 +11,10 @@ define(function (require) {
     var AxisTitle = Private(require('components/vislib/lib/axis_title'));
     var ChartTitle = Private(require('components/vislib/lib/chart_title'));
 
+    /**
+     *
+     */
+
     return function (vis) {
       var data = new Data(injectZeros(vis.data), vis._attr);
 

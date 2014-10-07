@@ -2,13 +2,21 @@ define(function (require) {
   return function ZeroFillDataArrayUtilService(Private) {
     var _ = require('lodash');
 
-    // Accepts an array of zero-filled y value objects
-    // and a kibana data.series[i].values array of objects
+    /*
+     * Accepts an array of zero-filled y value objects (arr1)
+     * and a kibana data.series[i].values array of objects (arr2).
+     * Return a zero-filled array of objects (arr1).
+     */
+
     return function (arr1, arr2) {
+      if (!_.isArray(arr1) || !_.isArray(arr2)) {
+        throw new TypeError('ZeroFillDataArrayUtilService expects 2 arrays');
+      }
+
+      var max = arr2.length;
       var getX = function (d) {
         return d.x === val.x;
       };
-      var max = arr2.length;
       var i;
       var val;
       var index;
@@ -19,7 +27,6 @@ define(function (require) {
         arr1.splice(index, 1, val);
       }
 
-      // Return a zero-filled array of objects
       return arr1;
     };
   };

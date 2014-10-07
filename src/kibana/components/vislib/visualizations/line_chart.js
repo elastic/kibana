@@ -4,8 +4,6 @@ define(function (require) {
     var $ = require('jquery');
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
-
-    // Dynamically adds css file
     require('css!components/vislib/styles/main');
 
     _(LineChart).inherits(Chart);

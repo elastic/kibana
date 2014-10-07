@@ -4,7 +4,7 @@ define(function (require) {
     var chartSplit = Private(require('components/vislib/lib/layout/splits/pie_chart/chart_split'));
     var chartTitleSplit = Private(require('components/vislib/lib/layout/splits/pie_chart/chart_title_split'));
 
-    /*
+    /**
      * Specifies the visualization layout for column charts.
      *
      * This is done using an array of objects. The first object has

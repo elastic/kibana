@@ -1,6 +1,5 @@
 define(function (require) {
   return function VisFactory(d3, Private) {
-    var $ = require('jquery');
     var _ = require('lodash');
 
     var ResizeChecker = Private(require('components/vislib/lib/resize_checker'));
@@ -10,12 +9,13 @@ define(function (require) {
     var errors = require('errors');
     require('css!components/vislib/styles/main.css');
 
-    /*
-     * Visualization controller. Exposed API for creating visualizations.
-     * arguments:
-     *  $el => jquery reference to a DOM element
-     *  config => object of params for the chart.
-      *  e.g. type: 'column', addLegend: true, ...
+    /**
+     * Creates the visualizations.
+     *
+     * @class Vis
+     * @constructor
+     * @param $el {HTMLElement} jQuery selected HTML element
+     * @param config {Object} Parameters that define the chart type and chart options
      */
     _(Vis).inherits(Events);
     function Vis($el, config) {
@@ -35,7 +35,12 @@ define(function (require) {
       this.resizeChecker.on('resize', this.resize);
     }
 
-    // Exposed API for rendering charts.
+    /**
+     * Renders the visualization
+     *
+     * @method render
+     * @param data {Object} Elasticsearch query results
+     */
     Vis.prototype.render = function (data) {
       var chartType = this._attr.type;
 
@@ -43,14 +48,13 @@ define(function (require) {
         throw new Error('No valid data!');
       }
 
-      // Save data to this object and new up the Handler constructor
       this.data = data;
       this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
 
       try {
         this.handler.render();
       } catch (error) {
-        // if involving height and width of the container, log error to screen
+        // If involving height and width of the container, log error to screen.
         // Because we have to wait for the DOM element to initialize, we do not
         // want to throw an error when the DOM `el` is zero
         if (error instanceof errors.ContainerTooSmall) {
@@ -61,7 +65,11 @@ define(function (require) {
       }
     };
 
-    // Resize the chart
+    /**
+     * Resizes the visualization
+     *
+     * @method resize
+     */
     Vis.prototype.resize = function () {
       if (!this.data) {
         // TODO: need to come up with a solution for resizing when no data is available
@@ -70,25 +78,38 @@ define(function (require) {
       this.render(this.data);
     };
 
-    // Destroy the chart
+    /**
+     * Destroys the visualization
+     * Removes chart and all elements associated with it.
+     * Remove event listeners and pass destroy call down to owned objects.
+     *
+     * @method destroy
+     */
     Vis.prototype.destroy = function () {
-      // Removing chart and all elements associated with it
       d3.select(this.el).selectAll('*').remove();
-
-      // remove event listeners
       this.resizeChecker.off('resize', this.resize);
-
-      // pass destroy call down to owned objects
       this.resizeChecker.destroy();
     };
 
-    // Set attributes on the chart
+    /**
+     * Sets attributes on the visualization
+     *
+     * @method set
+     * @param name {String} An attribute name
+     * @param val {*} Value to which the attribute name is set
+     */
     Vis.prototype.set = function (name, val) {
       this._attr[name] = val;
       this.render(this.data);
     };
 
-    // Get attributes from the chart
+    /**
+     * Gets attributes from the visualization
+     *
+     * @method get
+     * @param name {String} An attribute name
+     * @returns {*} The value of the attribute name
+     */
     Vis.prototype.get = function (name) {
       return this._attr[name];
     };

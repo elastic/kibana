@@ -5,6 +5,7 @@ define(function (require) {
     /**
      * Events Class
      */
+
     function Dispatch(handler, chartData) {
       if (!(this instanceof Dispatch)) {
         return new Dispatch(handler, chartData);

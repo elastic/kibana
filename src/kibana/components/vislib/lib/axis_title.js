@@ -5,9 +5,10 @@ define(function (require) {
 
     var ErrorHandler = Private(require('components/vislib/lib/_error_handler'));
 
-    /*
+    /**
      * Appends axis title(s) to the visualization
      */
+
     function AxisTitle(el, xTitle, yTitle) {
       if (!(this instanceof AxisTitle)) {
         return new AxisTitle(el, xTitle, yTitle);

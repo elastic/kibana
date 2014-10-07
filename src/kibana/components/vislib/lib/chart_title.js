@@ -6,11 +6,12 @@ define(function (require) {
     var ErrorHandler = Private(require('components/vislib/lib/_error_handler'));
     var Tooltip = Private(require('components/vislib/lib/tooltip'));
 
-    /*
+    /**
      * Append chart titles to the visualization
      * arguments:
      *  el => reference to a DOM element
      */
+
     function ChartTitle(el) {
       if (!(this instanceof ChartTitle)) {
         return new ChartTitle(el);
@@ -47,10 +48,7 @@ define(function (require) {
             str = text.text();
             avg = length / str.length;
             end = Math.floor(maxWidth / avg) - 5;
-
             str = str.substr(0, end) + '...';
-
-            // mouseover and mouseout
             self.addMouseEvents(text);
 
             return text.text(str);
@@ -81,7 +79,6 @@ define(function (require) {
           var size = dataType === 'rows' ? height : width;
           var txtHtOffset = 11;
 
-          // Check if width or height are 0 or NaN
           self.validateWidthandHeight(width, height);
 
           div.append('svg')
@@ -95,7 +92,6 @@ define(function (require) {
             .append('text')
             .attr('transform', function () {
               if (dataType === 'rows') {
-                // if `rows`, rotate the chart titles
                 return 'translate(' + txtHtOffset + ',' + height / 2 + ')rotate(270)';
               }
               return 'translate(' + width / 2 + ',' + txtHtOffset + ')';
@@ -106,7 +102,8 @@ define(function (require) {
             });
 
           // truncate long chart titles
-          div.selectAll('text').call(self.truncate(size));
+          div.selectAll('text')
+          .call(self.truncate(size));
         });
       };
     };

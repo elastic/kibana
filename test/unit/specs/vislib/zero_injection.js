@@ -146,7 +146,7 @@ define(function (require) {
       beforeEach(function () {
         inject(function (Private) {
           uniqueKeys = Private(require('components/vislib/components/zero_injection/uniq_keys'));
-          results = uniqueKeys(multiSeriesData.series);
+          results = uniqueKeys(multiSeriesData);
         });
       });
 

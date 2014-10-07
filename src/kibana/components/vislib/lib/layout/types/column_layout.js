@@ -6,7 +6,7 @@ define(function (require) {
     var xAxisSplit = Private(require('components/vislib/lib/layout/splits/column_chart/x_axis_split'));
     var chartTitleSplit = Private(require('components/vislib/lib/layout/splits/column_chart/chart_title_split'));
 
-    /*
+    /**
      * Specifies the visualization layout for column charts.
      *
      * This is done using an array of objects. The first object has

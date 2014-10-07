@@ -247,11 +247,8 @@ define(function (require) {
       var getSeries;
       var columnsLabels;
       var rowsLabels;
-      var seriesLabels;
       var columnsArr;
       var rowsArr;
-      var seriesArr;
-      var error;
 
       beforeEach(function () {
         module('GetSeriesUtilService');
@@ -262,10 +259,8 @@ define(function (require) {
           getSeries = Private(require('components/vislib/components/labels/flatten_series'));
           columnsLabels = getSeries(columnsData);
           rowsLabels = getSeries(rowsData);
-          seriesLabels = getSeries(seriesData);
           columnsArr = _.isArray(columnsLabels);
           rowsArr = _.isArray(rowsLabels);
-          seriesArr = _.isArray(seriesLabels);
         });
       });
 
@@ -279,10 +274,6 @@ define(function (require) {
 
       it('should return an array if input is data.rows', function () {
         expect(rowsArr).to.be(true);
-      });
-
-      it('should return an empty array if input is data.series', function () {
-        expect(seriesLabels.length).to.be(0);
       });
 
       it('should return an array of the same length as as input data.columns', function () {

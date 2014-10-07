@@ -2,8 +2,16 @@ define(function (require) {
   return function FlattenDataObjectUtilService() {
     var _ = require('lodash');
 
-    // Takes a kibana data.series array of objects
+    /*
+     * Accepts a Kibana data object, flattens the data.series values array,
+     * and returns an array of values objects.
+     */
+
     return function (obj) {
+      if (!_.isObject(obj) || !obj.rows && !obj.columns && !obj.series) {
+        throw new TypeError('FlattenDataObjUtilService expects an object with a series, rows, or columns key');
+      }
+
       if (!obj.series) {
         obj = obj.rows ? obj.rows : obj.columns;
 
@@ -15,14 +23,6 @@ define(function (require) {
           .value();
       }
 
-      // Returns an array of objects
-      /*
-       * [
-       *    { x: ..., y: ...},
-       *    { x: ..., y: ...},
-       *    { x: ..., y: ...}
-       * ]
-       */
       return _.flatten(obj.series, 'values');
     };
   };

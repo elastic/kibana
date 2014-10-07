@@ -3,12 +3,9 @@ define(function (require) {
     var _ = require('lodash');
     var legendHeaderTemplate = _.template(require('text!components/vislib/partials/legend_header.html'));
 
-    var Tooltip = Private(require('components/vislib/lib/tooltip'));
-
-    // Dynamically adds css file
     require('css!components/vislib/styles/main');
 
-    /*
+    /**
      * Append legend to the visualization
      * arguments:
      *  el => reference to DOM element
@@ -16,6 +13,7 @@ define(function (require) {
      *  color => color function to assign colors to labels
      *  _attr => visualization attributes
      */
+
     function Legend(vis, el, labels, color, _attr) {
       if (!(this instanceof Legend)) {
         return new Legend(vis, el, labels, color, _attr);
@@ -26,7 +24,6 @@ define(function (require) {
       this.labels = labels;
       this.color = color;
       this._attr = _.defaults(_attr || {}, {
-        // Legend specific attributes
         'legendClass' : 'legend-col-wrapper',
         'blurredOpacity' : 0.3,
         'focusOpacity' : 1,
@@ -62,11 +59,9 @@ define(function (require) {
         .enter()
         .append('li')
         .attr('class', function (d) {
-          // class names reflect the color assigned to the labels
           return 'color ' + self.colorToClass(args.color(d));
         })
         .html(function (d) {
-          // return the appropriate color for each dot
           return '<span class="dots" style="background:' + args.color(d) + '"></span>' + d;
         });
     };

@@ -9,7 +9,6 @@ define(function () {
       selection.each(function (data) {
         var div = d3.select(this)
           .attr('class', function () {
-            // Determine the parent class
             if (data.rows) {
               return 'chart-wrapper-row';
             } else if (data.columns) {
@@ -23,7 +22,6 @@ define(function () {
         var charts = div.selectAll('charts')
           .append('div')
           .data(function (d) {
-            // Determine the child class
             if (d.rows) {
               divClass = 'chart-row';
               return d.rows;

@@ -6,6 +6,10 @@ define(function (require) {
     var Legend = Private(require('components/vislib/lib/legend'));
     var ChartTitle = Private(require('components/vislib/lib/chart_title'));
 
+    /**
+     *
+     */
+
     return function (vis) {
       var data = new Data(vis.data, vis._attr);
 
