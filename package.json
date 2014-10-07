@@ -40,12 +40,13 @@
     "request": "^2.40.0",
     "requirejs": "~2.1.14",
     "rjs-build-analysis": "0.0.3",
-    "tar": "^1.0.1"
+    "tar": "^1.0.1",
+    "grunt-s3": "~0.2.0-alpha.3"
   },
   "scripts": {
     "test": "grunt test --use-jruby",
     "server": "grunt server",
-    "precommit": "grunt jshint render_readme"
+    "precommit": "grunt jshint"
   },
   "repository": {
     "type": "git",

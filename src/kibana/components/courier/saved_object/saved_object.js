@@ -1,5 +1,5 @@
 define(function (require) {
-  return function SavedObjectFactory(es, configFile, Promise, Private, Notifier) {
+  return function SavedObjectFactory(es, configFile, Promise, Private, Notifier, indexPatterns) {
     var errors = require('errors');
     var angular = require('angular');
     var _ = require('lodash');
@@ -111,22 +111,27 @@ define(function (require) {
             // Give obj all of the values in _source.fields
             _.assign(obj, resp._source);
 
-            // if we have a searchSource, set it's state based on the searchSourceJSON field
-            if (obj.searchSource) {
-              var state = {};
-              try {
-                state = JSON.parse(meta.searchSourceJSON);
-              } catch (e) {}
-              obj.searchSource.set(state);
-            }
-
-            return Promise.cast(afterESResp.call(obj, resp))
+            return Promise.try(function () {
+              // if we have a searchSource, set it's state based on the searchSourceJSON field
+              if (obj.searchSource) {
+                var state = {};
+                try {
+                  state = JSON.parse(meta.searchSourceJSON);
+                } catch (e) {}
+                obj.searchSource.set(state);
+              }
+            })
+            .then(hydrateIndexPattern)
+            .then(function () {
+              return Promise.cast(afterESResp.call(obj, resp));
+            })
             .then(function () {
               // Any time obj is updated, re-call applyESResp
               docSource.onUpdate().then(applyESResp, notify.fatal);
             });
           });
         })
+        .then(hydrateIndexPattern)
         .then(function () {
           return customInit.call(obj);
         })
@@ -135,6 +140,27 @@ define(function (require) {
           return obj;
         });
       });
+
+      /**
+       * After creation or fetching from ES, ensure that the searchSources index indexPattern
+       * is an bonafide IndexPattern object.
+       *
+       * @return {[type]} [description]
+       */
+      function hydrateIndexPattern() {
+        if (obj.searchSource) {
+          var index = obj.searchSource.get('index');
+
+          if (index instanceof indexPatterns.IndexPattern) {
+            return;
+          }
+
+          return indexPatterns.get(index)
+          .then(function (indexPattern) {
+            obj.searchSource.index(indexPattern);
+          });
+        }
+      }
 
 
       /**

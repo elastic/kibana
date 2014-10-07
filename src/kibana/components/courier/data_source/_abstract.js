@@ -116,7 +116,7 @@ define(function (require) {
      * Noop
      */
     SourceAbstract.prototype.getParent = function () {
-      return Promise.resolve(false);
+      return Promise.resolve(undefined);
     };
 
     /**

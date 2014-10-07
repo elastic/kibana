@@ -44,9 +44,10 @@ define(function (require) {
           element
             .on('mousemove.tip', function (d) {
               var placement = self.getTooltipPlacement(d3.event);
+              var events = self.events ? self.events.eventResponse(d, i) : d;
 
               // return text and position for tooltip
-              return tooltipDiv.datum(self.events.eventResponse(d, i))
+              return tooltipDiv.datum(events)
                 .html(tooltipFormatter)
                 .style('visibility', 'visible')
                 .style('left', placement.left + 'px')

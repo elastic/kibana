@@ -18,11 +18,15 @@
         right: 0px;
         bottom: 0px;
         z-index: 10;
-        background: rgba(70, 82, 93, 0.9);
+        background: fadeout(@navbar-default-bg, 10%);
         color: white;
         text-align: center;
         padding-top: 6px;
         .user-select(none);
+      }
+
+      a {
+        color: white;
       }
     }
   }
