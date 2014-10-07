@@ -6,7 +6,7 @@ A table, bar chart or pie chart based on the results of an Elasticsearch terms f
 
 === Parameters
 
-field:: The field on which to computer the facet
+field:: The field on which to compute the facet
 exclude:: terms to exclude from the results
 missing:: Set to false to disable the display of a counter showing how much results are
 missing the field
@@ -18,7 +18,7 @@ in terms_stats mode: term, reverse_term, count, reverse_count,
 total, reverse_total, min, reverse_min, max, reverse_max, mean or reverse_mean
 donut:: In pie chart mode, draw a hole in the middle of the pie to make a tasty donut.
 tilt:: In pie chart mode, tilt the chart back to appear as more of an oval shape
-lables:: In pie chart mode, draw labels in the pie slices
+labels:: In pie chart mode, draw labels in the pie slices
 arrangement:: In bar or pie mode, arrangement of the legend. horizontal or vertical
 chart:: table, bar or pie
 counter_pos:: The location of the legend in respect to the chart, above, below, or none.
