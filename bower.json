@@ -39,6 +39,7 @@
     "inflection": "~1.3.5",
     "jquery": "~2.1.0",
     "jsonpath": "*",
+    "leaflet": "~0.7.3",
     "lesshat": "~3.0.2",
     "lodash": "~2.4.1",
     "moment": "~2.5.1",

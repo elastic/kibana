@@ -27,6 +27,7 @@ require.config({
     inflection: 'bower_components/inflection/lib/inflection',
     jquery: 'bower_components/jquery/dist/jquery',
     jsonpath: 'bower_components/jsonpath/lib/jsonpath',
+    leaflet: 'bower_components/leaflet/dist/leaflet',
     lodash_src: 'bower_components/lodash/dist/lodash',
     moment: 'bower_components/moment/moment',
     text: 'bower_components/requirejs-text/text'

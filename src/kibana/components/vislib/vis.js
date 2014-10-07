@@ -15,7 +15,7 @@ define(function (require) {
      * arguments:
      *  $el => jquery reference to a DOM element
      *  config => object of params for the chart.
-      *  e.g. type: 'column', addLegend: true, ...
+     *  e.g. type: 'column', addLegend: true, ...
      */
     _(Vis).inherits(Events);
     function Vis($el, config) {

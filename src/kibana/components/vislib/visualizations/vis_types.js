@@ -4,7 +4,8 @@ define(function (require) {
     return {
       histogram: Private(require('components/vislib/visualizations/column_chart')),
       pie: Private(require('components/vislib/visualizations/pie_chart')),
-      line: Private(require('components/vislib/visualizations/line_chart'))
+      line: Private(require('components/vislib/visualizations/line_chart')),
+      map: Private(require('components/vislib/visualizations/tile_map'))
     };
   };
 

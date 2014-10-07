@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
 
     var VisTypeSchemas = Private(require('components/vis_types/_schemas'));
-    var HistogramConverter = Private(require('components/vis_types/converters/histogram'));
+    var TileMapConverter = Private(require('components/vis_types/converters/tile_map'));
 
     function VisType(opts) {
       opts = opts || {};
@@ -13,7 +13,7 @@ define(function (require) {
 
       this.icon = opts.icon;
       this.vislibParams = opts.vislibParams || {};
-      this.responseConverter = opts.responseConverter || HistogramConverter;
+      this.responseConverter = opts.responseConverter || TileMapConverter;
       this.listeners = opts.listeners || {};
       this.schemas = opts.schemas || new VisTypeSchemas();
     }

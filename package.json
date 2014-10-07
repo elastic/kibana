@@ -27,6 +27,7 @@
     "http-proxy": "~1.1.4",
     "husky": "~0.6.0",
     "istanbul": "~0.2.4",
+    "leaflet": "~0.7.3",
     "load-grunt-config": "~0.7.0",
     "lodash": "~2.4.1",
     "marked": "^0.3.2",
