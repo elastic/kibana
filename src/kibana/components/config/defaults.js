@@ -49,6 +49,10 @@ define(function (require) {
     'truncate:maxHeight': {
       value: 100,
       description: 'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.'
+    },
+    'mapquest:apiKey': {
+      value: 'Fmjtd%7Cluur2h01n5%2Cr5%3Do5-9wbs5z',
+      description: 'Enter an API key to use Mapquest plug-in for Leaflet.'
     }
   };
 });

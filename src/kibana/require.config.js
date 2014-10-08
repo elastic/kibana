@@ -51,6 +51,9 @@ require.config({
     },
     file_saver: {
       exports: 'saveAs'
+    },
+    mapquest: {
+      deps: ['leaflet']
     }
   },
   waitSeconds: 60

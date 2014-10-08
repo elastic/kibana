@@ -23,6 +23,7 @@ define(function (require) {
         return new Vis($el, config);
       }
       Vis.Super.apply(this, arguments);
+      console.log('Vis', config, arguments);
 
       this.el = $el.get ? $el.get(0) : $el;
       this.ChartClass = chartTypes[config.type];

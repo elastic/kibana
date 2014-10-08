@@ -4,6 +4,13 @@ define(function (require) {
     var $ = require('jquery');
     var L = require('leaflet');
 
+    // mapquest api key and require
+    //console.log('Mapquest API key', config.get('mapquest:apiKey'));
+    //var url  = 'http://www.mapquestapi.com/sdk/leaflet/v1.s/mq-map.js?key=' + config.get('mapquest:apiKey');
+    //var MQ = require([url], function () {
+    //  console.log('mapquest loaded');
+    //});
+
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var errors = require('errors');
 
