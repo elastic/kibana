@@ -98,7 +98,7 @@ github)] here:
 [source,javascript]
 ----------------------------------------------------------------------------------------------
 // In this dashboard we let users pass queries as comma separated list to the query parameter.
-// Or they can specify a split character using the split aparameter
+// Or they can specify a split character using the split parameter
 // If query is defined, split it into a list of query objects
 // NOTE: ids must be integers, hence the parseInt()s
 if(!_.isUndefined(ARGS.query)) {
