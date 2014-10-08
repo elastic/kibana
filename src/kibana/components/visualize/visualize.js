@@ -24,32 +24,26 @@ define(function (require) {
       template: require('text!components/visualize/visualize.html'),
       link: function ($scope, $el, attr) {
         var chart; // set in "vis" watcher
-        var $visualize = $el.find('.visualize-chart');
+        var $visChart = $el.find('.visualize-chart');
         var $spy = $el.find('visualize-spy');
-        var minSplitViewSize = 660;
+        var minVisChartHeight = 180;
 
         $scope.spyMode = false;
         $scope.fullScreenSpy = false;
 
         var applyClassNames = function () {
-          var onlySpy = ($scope.spyMode && $scope.spyMode.fill);
+          var fullSpy = ($scope.spyMode && ($scope.spyMode.fill || $scope.fullScreenSpy));
 
           // external
           $el.toggleClass('only-visualization', !$scope.spyMode);
-          $el.toggleClass('visualization-and-spy', $scope.spyMode && !onlySpy);
-          $el.toggleClass('only-spy', Boolean(onlySpy));
-          $spy.toggleClass('only', Boolean(onlySpy));
+          $el.toggleClass('visualization-and-spy', $scope.spyMode && !fullSpy);
+          $el.toggleClass('only-spy', Boolean(fullSpy));
+          $spy.toggleClass('only', Boolean(fullSpy));
 
           // internal
-          $visualize.toggleClass('spy-visible', Boolean($scope.spyMode));
-          $visualize.toggleClass('spy-only', Boolean(onlySpy));
+          $visChart.toggleClass('spy-visible', Boolean($scope.spyMode));
+          $visChart.toggleClass('spy-only', Boolean(fullSpy));
         };
-
-        $scope.$watch(function () {
-          return $visualize.height();
-        }, function (visSize) {
-          $scope.fullScreenSpy = visSize < minSplitViewSize;
-        });
 
         // we need to wait for come watchers to fire at least once
         // before we are "ready", this manages that
@@ -72,8 +66,12 @@ define(function (require) {
           };
         }());
 
-        $scope.$on('change:spyMode', function (event, spyMode) {
+        $scope.$watchCollection('spyMode', function (spyMode, oldSpyMode) {
           $scope.spyMode = spyMode;
+          // if the spy has been opened, check chart height
+          if (spyMode && !oldSpyMode) {
+            $scope.fullScreenSpy = $visChart.height() < minVisChartHeight;
+          }
           applyClassNames();
         });
 
@@ -95,7 +93,7 @@ define(function (require) {
             vis.vislibParams
           );
 
-          chart = new visLib.Vis($visualize[0], vislibParams);
+          chart = new visLib.Vis($visChart[0], vislibParams);
 
           _.each(vis.listeners, function (listener, event) {
             chart.on(event, listener);
