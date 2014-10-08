@@ -24,8 +24,7 @@ define(function (require) {
           title: 'string',
           visState: 'json',
           description: 'string',
-          savedSearchId: 'string',
-          indexPattern: 'string'
+          savedSearchId: 'string'
         },
 
         defaults: {
@@ -37,11 +36,11 @@ define(function (require) {
             return def;
           }()),
           description: '',
-          savedSearchId: opts.savedSearchId,
-          indexPattern: opts.indexPattern
+          savedSearchId: opts.savedSearchId
         },
 
         searchSource: true,
+        indexPattern: opts.indexPattern,
 
         afterESResp: this._afterEsResp
       });
@@ -49,45 +48,21 @@ define(function (require) {
 
     SavedVis.prototype._afterEsResp = function () {
       var self = this;
-      var relatedSearch = self.savedSearchId;
-      var relatedPattern = !relatedSearch && self.indexPattern;
+      var linkedSearch = self.savedSearchId;
 
-      var promisedParent = (function () {
-        if (relatedSearch) {
-          // returns a promise
-          return savedSearches.get(self.savedSearchId);
-        }
-
-        var fakeSavedSearch = {
-          searchSource: courier.createSource('search')
-        };
-
-        if (relatedPattern) {
-          return courier.indexPatterns.get(relatedPattern)
-          .then(function (indexPattern) {
-            fakeSavedSearch.searchSource.index(indexPattern);
-            return fakeSavedSearch;
-          });
-        }
-
-        return Promise.resolve(fakeSavedSearch);
-      }());
-
-      return promisedParent
+      return Promise.resolve(linkedSearch && savedSearches.get(linkedSearch))
       .then(function (parent) {
-        self.savedSearch = parent;
-
-        self.searchSource
-          .inherits(parent.searchSource)
-          .size(0);
-
-        if (!self.vis) {
-          self.vis = self._createVis();
-        } else {
-          self.vis.indexPattern = self.searchSource.get('index');
-          self.vis.setState(self.visState);
+        if (parent) {
+          self.savedSearch = parent;
+          self.searchSource
+            .inherits(parent.searchSource);
         }
 
+        self.searchSource.size(0);
+
+        return self.vis ? self._updateVis() : self._createVis();
+      })
+      .then(function (vis) {
         self.searchSource.aggs(function () {
           return self.vis.aggs.toDsl();
         });
@@ -97,13 +72,26 @@ define(function (require) {
     };
 
     SavedVis.prototype._createVis = function () {
-      var indexPattern = this.searchSource.get('index');
+      var self = this;
 
-      if (this.stateJSON) {
-        this.visState = Vis.convertOldState(this.typeName, JSON.parse(this.stateJSON));
-      }
+      self.searchSource.get('index', true)
+      .then(function (indexPattern) {
+        if (self.stateJSON) {
+          self.visState = Vis.convertOldState(self.typeName, JSON.parse(self.stateJSON));
+        }
 
-      return new Vis(indexPattern, this.visState);
+        return self.vis = new Vis(indexPattern, self.visState);
+      });
+    };
+
+    SavedVis.prototype._updateVis = function () {
+      var self = this;
+
+      return self.searchSource.get('index', true)
+      .then(function (index) {
+        self.vis.indexPattern = index;
+        self.vis.setState(self.visState);
+      });
     };
 
     return SavedVis;
