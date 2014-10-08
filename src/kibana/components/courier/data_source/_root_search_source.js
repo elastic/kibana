@@ -10,13 +10,20 @@ define(function (require) {
       return timefilter.get(globalSource.get('index'));
     });
 
-    var ensureDefaultLoaded = _.once(__loadDefaultPattern__);
     var appSource; // set in setAppSource()
     resetAppSource();
 
+    var ensureDefaultLoaded;
+    reloadDefaultPattern();
+    function reloadDefaultPattern() {
+      // replace the "ensureDefaultLoaded" fn, so it will wait for this reload to complete
+      ensureDefaultLoaded = _.once(__loadDefaultPattern__);
+      return ensureDefaultLoaded();
+    }
+
     // when the default index changes, or the config is intialized, connect the defaultIndex to the globalSource
-    $rootScope.$on('change:config.defaultIndex', ensureDefaultLoaded);
-    $rootScope.$on('init:config', ensureDefaultLoaded);
+    $rootScope.$on('init:config', reloadDefaultPattern);
+    $rootScope.$on('change:config.defaultIndex', reloadDefaultPattern);
 
     // when the route changes, clear the appSource
     $rootScope.$on('$routeChangeStart', resetAppSource);
@@ -56,7 +63,6 @@ define(function (require) {
      */
     function __loadDefaultPattern__() {
       var defId = config.get('defaultIndex');
-
       return Promise.cast(defId && indexPatterns.get(defId)).then(function (pattern) {
         globalSource.set('index', pattern);
       });
