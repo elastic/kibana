@@ -72,12 +72,12 @@ define(function (require) {
           } else {
             $scope.configTemplate = null;
           }
-          $('body').unbind('keyup', $scope.escapeEvent);
         };
 
         $scope.escapeEvent = function (e) {
           if (e.which === 27) {
             $scope.close();
+            $('body').unbind('keyup', $scope.escapeEvent);
           }
         };
 
