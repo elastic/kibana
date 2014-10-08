@@ -1,7 +1,9 @@
 define(function (require) {
-  return function RootSearchSource(Private, $rootScope, config, Promise, indexPatterns, timefilter) {
+  return function RootSearchSource(Private, $rootScope, config, Promise, indexPatterns, timefilter, Notifier) {
     var _ = require('lodash');
     var SearchSource = Private(require('components/courier/data_source/search_source'));
+
+    var notify = new Notifier({ location: 'Root Search Source' });
 
     var globalSource = new SearchSource();
     globalSource.inherits(false); // this is the final source, it has no parents
@@ -13,13 +15,32 @@ define(function (require) {
     var appSource; // set in setAppSource()
     resetAppSource();
 
-    var ensureDefaultLoaded;
-    reloadDefaultPattern();
+    /**
+     * Get the default index from the config, and hook it up to the globalSource. Broken out
+     * so that it can be called on config change.
+     *
+     * @return {Promise}
+     */
     function reloadDefaultPattern() {
       // replace the "ensureDefaultLoaded" fn, so it will wait for this reload to complete
-      ensureDefaultLoaded = _.once(__loadDefaultPattern__);
+      ensureDefaultLoaded = _.once(function () {
+        return notify.event('loading default index pattern', function () {
+          var defId = config.get('defaultIndex');
+
+          return Promise.cast(defId && indexPatterns.get(defId))
+          .then(function (pattern) {
+            globalSource.set('index', pattern);
+            notify.log('index pattern set to', defId);
+          });
+        })
+        .catch(notify.fatal);
+      });
+
       return ensureDefaultLoaded();
     }
+
+    var ensureDefaultLoaded;
+    reloadDefaultPattern();
 
     // when the default index changes, or the config is intialized, connect the defaultIndex to the globalSource
     $rootScope.$on('init:config', reloadDefaultPattern);
@@ -55,18 +76,7 @@ define(function (require) {
       literalRoot.inherits(globalSource);
     }
 
-    /**
-     * Get the default index from the config, and hook it up to the globalSource. Broken out
-     * so that it can be called on config change.
-     *
-     * @return {Promise}
-     */
-    function __loadDefaultPattern__() {
-      var defId = config.get('defaultIndex');
-      return Promise.cast(defId && indexPatterns.get(defId)).then(function (pattern) {
-        globalSource.set('index', pattern);
-      });
-    }
+    
 
     /**
      * Sets the appSource to be a new, empty, SearchSource
