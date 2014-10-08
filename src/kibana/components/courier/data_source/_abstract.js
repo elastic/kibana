@@ -50,12 +50,32 @@ define(function (require) {
     /**
      * Get values from the state
      * @param {string} name - The name of the property desired
+     * @param {boolean} deep - Load the value from this search source, or traverse 
+     *                       the "globally" inheritted sources and look for values there.
+     * @return {any|Promise<any>} - when deep, a promise is returned, otherwise the value found
      */
-    SourceAbstract.prototype.get = function (name) {
+    SourceAbstract.prototype.get = function (name, deep) {
+      function read(source) {
+        if (source._state[name] !== void 0) return source._state[name];
+        if (source._dynamicState[name] !== void 0) return source._dynamicState[name]();
+      }
+
+      if (deep) {
+        return Promise.try(function ittr(current) {
+          if (!current) return; // stop when there is no parent
+
+          var val = read(current);
+          if (val !== void 0) return val;
+
+          return current.getParent().then(ittr);
+        }, [this]);
+      }
+
+      // synch get
       var current = this;
       while (current) {
-        if (current._state[name] !== void 0) return current._state[name];
-        if (current._dynamicState[name] !== void 0) return current._dynamicState[name]();
+        var val = read(current);
+        if (val !== void 0) return val;
         current = current._parent;
       }
     };
