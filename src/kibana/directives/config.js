@@ -72,6 +72,7 @@ define(function (require) {
           } else {
             $scope.configTemplate = null;
           }
+          $('body').unbind('keyup', $scope.escapeEvent);
         };
 
         $scope.escapeEvent = function (e) {
