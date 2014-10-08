@@ -74,24 +74,21 @@ define(function (require) {
     SavedVis.prototype._createVis = function () {
       var self = this;
 
-      self.searchSource.get('index', true)
-      .then(function (indexPattern) {
-        if (self.stateJSON) {
-          self.visState = Vis.convertOldState(self.typeName, JSON.parse(self.stateJSON));
-        }
+      if (self.stateJSON) {
+        self.visState = Vis.convertOldState(self.typeName, JSON.parse(self.stateJSON));
+      }
 
-        return self.vis = new Vis(indexPattern, self.visState);
-      });
+      return self.vis = new Vis(
+        self.searchSource.get('index'),
+        self.visState
+      );
     };
 
     SavedVis.prototype._updateVis = function () {
       var self = this;
 
-      return self.searchSource.get('index', true)
-      .then(function (index) {
-        self.vis.indexPattern = index;
-        self.vis.setState(self.visState);
-      });
+      self.vis.indexPattern = self.searchSource.get('index');
+      self.vis.setState(self.visState);
     };
 
     return SavedVis;

@@ -16,35 +16,21 @@ define(function (require) {
     resetAppSource();
 
     /**
-     * Get the default index from the config, and hook it up to the globalSource. Broken out
-     * so that it can be called on config change.
-     *
+     * Get the default index from the config, and hook it up to the globalSource.
+     * 
      * @return {Promise}
      */
-    function reloadDefaultPattern() {
-      // replace the "ensureDefaultLoaded" fn, so it will wait for this reload to complete
-      ensureDefaultLoaded = _.once(function () {
-        return notify.event('loading default index pattern', function () {
-          var defId = config.get('defaultIndex');
+    function loadDefaultPattern() {
+      return notify.event('loading default index pattern', function () {
+        var defId = config.get('defaultIndex');
 
-          return Promise.cast(defId && indexPatterns.get(defId))
-          .then(function (pattern) {
-            globalSource.set('index', pattern);
-            notify.log('index pattern set to', defId);
-          });
-        })
-        .catch(notify.fatal);
+        return Promise.cast(defId && indexPatterns.get(defId))
+        .then(function (pattern) {
+          globalSource.set('index', pattern);
+          notify.log('index pattern set to', defId);
+        });
       });
-
-      return ensureDefaultLoaded();
     }
-
-    var ensureDefaultLoaded;
-    reloadDefaultPattern();
-
-    // when the default index changes, or the config is intialized, connect the defaultIndex to the globalSource
-    $rootScope.$on('init:config', reloadDefaultPattern);
-    $rootScope.$on('change:config.defaultIndex', reloadDefaultPattern);
 
     // when the route changes, clear the appSource
     $rootScope.$on('$routeChangeStart', resetAppSource);
@@ -54,9 +40,7 @@ define(function (require) {
      * @return {Promise} - resolved with the current AppSource
      */
     function getAppSource() {
-      return ensureDefaultLoaded().then(function () {
-        return appSource;
-      });
+      return appSource;
     }
 
     /**
@@ -88,7 +72,8 @@ define(function (require) {
 
     return {
       get: getAppSource,
-      set: setAppSource
+      set: setAppSource,
+      loadDefault: loadDefaultPattern
     };
   };
 });

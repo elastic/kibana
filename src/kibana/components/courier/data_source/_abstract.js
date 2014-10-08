@@ -54,29 +54,17 @@ define(function (require) {
      *                       the "globally" inheritted sources and look for values there.
      * @return {any|Promise<any>} - when deep, a promise is returned, otherwise the value found
      */
-    SourceAbstract.prototype.get = function (name, deep) {
+    SourceAbstract.prototype.get = function (name) {
       function read(source) {
         if (source._state[name] !== void 0) return source._state[name];
         if (source._dynamicState[name] !== void 0) return source._dynamicState[name]();
       }
 
-      if (deep) {
-        return Promise.try(function ittr(current) {
-          if (!current) return; // stop when there is no parent
-
-          var val = read(current);
-          if (val !== void 0) return val;
-
-          return current.getParent().then(ittr);
-        }, [this]);
-      }
-
-      // synch get
       var current = this;
       while (current) {
         var val = read(current);
         if (val !== void 0) return val;
-        current = current._parent;
+        current = current.getParent();
       }
     };
 
@@ -136,7 +124,7 @@ define(function (require) {
      * Noop
      */
     SourceAbstract.prototype.getParent = function () {
-      return Promise.resolve(undefined);
+      return this._parent;
     };
 
     /**
@@ -249,13 +237,12 @@ define(function (require) {
         }))
         .then(function () {
           // move to this sources parent
-          return current.getParent().then(function (parent) {
-            // keep calling until we reach the top parent
-            if (parent) {
-              current = parent;
-              return ittr();
-            }
-          });
+          var parent = current.getParent();
+          // keep calling until we reach the top parent
+          if (parent) {
+            current = parent;
+            return ittr();
+          }
         });
       }())
       .then(function () {
