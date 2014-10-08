@@ -5,12 +5,17 @@ define(function (require) {
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var errors = require('errors');
-
-    // Dynamically adds css file
     require('css!components/vislib/styles/main');
 
-    /*
-     * Column chart visualization => vertical bars, stacked bars
+    /**
+     * Pie Chart Visualization
+     *
+     * @class PieChart
+     * @constructor
+     * @extends Chart
+     * @param handler {Object} Reference to the Handler Class Constructor
+     * @param el {HTMLElement} HTML element to which the chart will be appended
+     * @param chartData {Object} Elasticsearch query results for this specific chart
      */
     _(PieChart).inherits(Chart);
     function PieChart(handler, chartEl, chartData) {
@@ -22,11 +27,19 @@ define(function (require) {
       this.columns = handler.data.data.raw.columns;
 
       this._attr = _.defaults(handler._attr || {}, {
+        isDonut: handler._attr.isDonut || false,
         getSize: function (d) { return d.size; },
         dispatch: d3.dispatch('brush', 'click', 'hover', 'mouseenter', 'mouseleave', 'mouseover', 'mouseout')
       });
     }
 
+    /**
+     * Adds Events to SVG paths
+     *
+     * @method addPathEvents
+     * @param path {D3.UpdateSelection} Reference to SVG path
+     * @returns {D3.UpdateSelection} SVG path with event listeners attached
+     */
     PieChart.prototype.addPathEvents = function (path) {
       var events = this.events;
       var dispatch = this.events._attr.dispatch;
@@ -50,6 +63,16 @@ define(function (require) {
       });
     };
 
+    /**
+     * Adds pie paths to SVG
+     *
+     * @method addPath
+     * @param width {Number} Width of SVG
+     * @param height {Number} Height of SVG
+     * @param svg {HTMLElement} Chart SVG
+     * @param slices {Object} Chart data
+     * @returns {D3.Selection} SVG with paths attached
+     */
     PieChart.prototype.addPath = function (width, height, svg, slices) {
       var isDonut = this._attr.isDonut;
       var radius = Math.min(width, height) / 2;
@@ -113,7 +136,6 @@ define(function (require) {
           return color(fieldFormatter(d.name));
         });
 
-      // Add tooltip
       if (isTooltip) {
         path.call(tooltip.render());
       }
@@ -121,6 +143,12 @@ define(function (require) {
       return path;
     };
 
+    /**
+     * Renders d3 visualization
+     *
+     * @method draw
+     * @returns {Function} Creates the pie chart
+     */
     PieChart.prototype.draw = function () {
       var self = this;
       var isEvents = this._attr.addEvents;
@@ -145,10 +173,8 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
 
-          // add pie slices
           var path = self.addPath(width, height, svg, slices);
 
-          // add events to bars
           if (isEvents) {
             self.addPathEvents(path);
           }

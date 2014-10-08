@@ -145,10 +145,10 @@ define(function (require) {
      * Adds Events to SVG rect
      *
      * @method addBarEvents
-     * @param svg {HTMLElement}
-     * @param bars {HTMLElement}
-     * @param brush {Function}
-     * @returns {HTMLElement}
+     * @param svg {HTMLElement} chart SVG
+     * @param bars {D3.UpdateSelection} SVG rect
+     * @param brush {Function} D3 brush function
+     * @returns {HTMLElement} rect with event listeners attached
      */
     ColumnChart.prototype.addBarEvents = function (svg, bars, brush) {
       var self = this;
@@ -193,8 +193,8 @@ define(function (require) {
      * Mouseover Behavior
      *
      * @method mouseOverBar
-     * @param that {Object}
-     * @returns {D3.Selection}
+     * @param that {Object} Reference to this object
+     * @returns {D3.Selection} this object with '.hover' class true
      */
     ColumnChart.prototype.mouseOverBar = function (that) {
       return d3.select(that)
@@ -207,8 +207,8 @@ define(function (require) {
      * Mouseout Behavior
      *
      * @method mouseOutBar
-     * @param that {Object}
-     * @returns {D3.Selection}
+     * @param that {Object} Reference to this object
+     * @returns {D3.Selection} this object with '.hover' class false
      */
     ColumnChart.prototype.mouseOutBar = function (that) {
       return d3.select(that)
@@ -242,10 +242,8 @@ define(function (require) {
 
       return function (selection) {
         selection.each(function (data) {
-          // Stack data
           layers = self.stackData(data);
 
-          // Get the width and height
           width = elWidth;
           height = elHeight - margin.top - margin.bottom;
 
@@ -253,28 +251,21 @@ define(function (require) {
             throw new errors.ContainerTooSmall();
           }
 
-          // Select the current DOM element
           div = d3.select(this);
 
-          // Create the canvas for the visualization
           svg = div.append('svg')
           .attr('width', width)
           .attr('height', height + margin.top + margin.bottom)
           .append('g')
           .attr('transform', 'translate(0,' + margin.top + ')');
 
-          // addBrush canvas and return brush function
           brush = self.events.addBrush(xScale, svg);
-
-          // add bars
           bars = self.addBars(svg, layers);
 
-          // add events to bars
           if (isEvents) {
             self.addBarEvents(svg, bars, brush);
           }
 
-          // chart base line
           var line = svg.append('line')
           .attr('x1', 0)
           .attr('y1', height)

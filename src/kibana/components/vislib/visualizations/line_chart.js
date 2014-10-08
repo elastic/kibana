@@ -46,8 +46,8 @@ define(function (require) {
      * Adds Events to SVG circle
      *
      * @method addCircleEvents
-     * @param circles {HTMLElement} SVG to which rect are appended
-     * @returns {D3.UpdateSelection} SVG with circles added
+     * @param circles {D3.UpdateSelection} Reference to SVG circle
+     * @returns {D3.UpdateSelection} SVG circles with event listeners attached
      */
     LineChart.prototype.addCircleEvents = function (circles) {
       var events = this.events;
@@ -235,7 +235,6 @@ define(function (require) {
      * @returns {Function} Creates the line chart
      */
     LineChart.prototype.draw = function () {
-      // Attributes
       var self = this;
       var $elem = $(this.chartEl);
       var margin = this._attr.margin;
@@ -269,41 +268,30 @@ define(function (require) {
             });
           });
 
-          // Get the width and height
           width = elWidth - margin.left - margin.right;
           height = elHeight - margin.top - margin.bottom;
 
-          // if height or width < 20 or NaN, throw error
           if (_.isNaN(width) || width < minWidth || _.isNaN(height) || height < minHeight) {
             throw new Error(chartToSmallError);
           }
 
-          // Select the current DOM element
           div = d3.select(el);
 
-          // Create the canvas for the visualization
           svg = div.append('svg')
           .attr('width', width + margin.left + margin.right)
           .attr('height', height + margin.top + margin.bottom)
           .append('g')
             .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-          // add clipPath to hide circles when they go out of bounds
           self.addClipPath(svg, width, height);
 
-          // addBrush canvas
           self.events.addBrush(xScale, svg);
 
-          // add lines
           lines = self.addLines(svg, data.series);
-
-          // add circles
           circles = self.addCircles(svg, layers);
 
-          // add click and hover events to circles
           self.addCircleEvents(circles);
 
-          // chart base line
           var line = svg
           .append('line')
           .attr('x1', startLineX)
