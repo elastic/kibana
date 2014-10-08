@@ -12,7 +12,7 @@ pages:: The number of pages available
 offset:: The current page
 sort:: An array describing the sort order of the table. For example [`@timestamp',`desc']
 overflow:: The css overflow property. `min-height' (expand) or `auto' (scroll)
-fields:: the fields used a columns of the table, in an array.
+fields:: The fields used a columns of the table, in an array.
 highlight:: The fields on which to highlight, in an array
 sortable:: Set sortable to false to disable sorting
 header:: Set to false to hide the table column names
