@@ -20,7 +20,7 @@ Once that is complete just run:
 grunt test build
 ```
 
-#### Setup/Prerequisites
+#### Development Environment Setup
 
 - install node.js (we recommend using [nvm](https://github.com/creationix/nvm))
 
@@ -46,6 +46,12 @@ grunt test build
 
   ```sh
   npm install && bower install && cd src/server && bundle && cd ../..
+  ```
+
+- start the development server 
+
+  ```sh
+  grunt dev
   ```
 
 ### Submit a pull request
