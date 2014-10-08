@@ -11,7 +11,7 @@ define(function (require) {
      *
      * @class Chart
      * @constructor
-     * @param vis {Object} Reference to the Vis Class Constructor
+     * @param handler {Object} Reference to the Handler Class Constructor
      * @param el {HTMLElement} HTML element to which the chart will be appended
      * @param chartData {Object} Elasticsearch query results for this specific chart
      */
@@ -23,11 +23,13 @@ define(function (require) {
       this.handler = handler;
       this.chartEl = el;
       this.chartData = chartData;
+
       var events = this.events = new Dispatch(handler, chartData);
 
       if (handler._attr.addTooltip) {
         var $el = this.handler.el;
         var formatter = this.handler.data.get('tooltipFormatter');
+
         this.tooltip = new Tooltip($el, formatter, events);
       }
 

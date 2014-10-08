@@ -12,6 +12,7 @@ define(function (require) {
      *
      * @class ColumnChart
      * @constructor
+     * @extends Chart
      * @param handler {Object} Reference to the Handler Class Constructor
      * @param el {HTMLElement} HTML element to which the chart will be appended
      * @param chartData {Object} Elasticsearch query results for this specific chart
@@ -34,10 +35,11 @@ define(function (require) {
       this.fieldFormatter = raw && raw[fieldIndex] ? raw[fieldIndex].field.format.convert : function (d) { return d; };
 
       ColumnChart.Super.apply(this, arguments);
+
       // Column chart specific attributes
       this._attr = _.defaults(handler._attr || {}, {
-        xValue: function (d, i) { return d.x; },
-        yValue: function (d, i) { return d.y; }
+        xValue: function (d) { return d.x; },
+        yValue: function (d) { return d.y; }
       });
     }
 
@@ -65,12 +67,12 @@ define(function (require) {
     };
 
     /**
-     * Adds SVG rects to Vertical Bar Chart
+     * Adds SVG rect to Vertical Bar Chart
      *
      * @method addBars
-     * @param svg
-     * @param layers {Array}
-     * @returns {D3.UpdateSelection}
+     * @param svg {HTMLElement} SVG to which rect are appended
+     * @param layers {Array} Chart data array
+     * @returns {D3.UpdateSelection} SVG with rect added
      */
     ColumnChart.prototype.addBars = function (svg, layers) {
       var self = this;
@@ -95,10 +97,13 @@ define(function (require) {
         return d;
       });
 
-      bars.exit().remove();
+      bars
+      .exit()
+      .remove();
 
-      bars.enter()
-        .append('rect')
+      bars
+      .enter()
+      .append('rect')
         .attr('class', function (d) {
           return self.colorToClass(color(self.fieldFormatter(d.label)));
         })
@@ -107,28 +112,27 @@ define(function (require) {
         });
 
       bars
-        .attr('x', function (d) {
-          return xScale(d.x);
-        })
-        .attr('width', function () {
-          var barWidth;
-          var barSpacing;
+      .attr('x', function (d) {
+        return xScale(d.x);
+      })
+      .attr('width', function () {
+        var barWidth;
+        var barSpacing;
 
-          if (data.ordered && data.ordered.date) {
-            barWidth = xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min);
-            barSpacing = barWidth * 0.25;
+        if (data.ordered && data.ordered.date) {
+          barWidth = xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min);
+          barSpacing = barWidth * 0.25;
 
-            return barWidth - barSpacing;
-          }
-
-          return xScale.rangeBand();
-        })
-        .attr('y', function (d) {
-          return yScale(d.y0 + d.y);
-        })
-        .attr('height', function (d) {
-          return yScale(d.y0) - yScale(d.y0 + d.y);
-        });
+          return barWidth - barSpacing;
+        }
+        return xScale.rangeBand();
+      })
+      .attr('y', function (d) {
+        return yScale(d.y0 + d.y);
+      })
+      .attr('height', function (d) {
+        return yScale(d.y0) - yScale(d.y0 + d.y);
+      });
 
       if (isTooltip) {
         bars.call(tooltip.render());
@@ -137,20 +141,25 @@ define(function (require) {
       return bars;
     };
 
+    /**
+     * Adds Events to SVG rect
+     *
+     * @method addBarEvents
+     * @param svg {HTMLElement}
+     * @param bars {HTMLElement}
+     * @param brush {Function}
+     * @returns {HTMLElement}
+     */
     ColumnChart.prototype.addBarEvents = function (svg, bars, brush) {
+      var self = this;
       var events = this.events;
       var dispatch = this.events._attr.dispatch;
       var addBrush = this._attr.addBrushing;
       var xScale = this.handler.xAxis.xScale;
-      var startXInv;
 
       bars
       .on('mouseover.bar', function (d, i) {
-        d3.select(this)
-          .classed('hover', true)
-          .style('stroke', '#333')
-          .style('cursor', 'pointer');
-
+        self.mouseOverBar(this);
         dispatch.hover(events.eventResponse(d, i));
         d3.event.stopPropagation();
       })
@@ -158,7 +167,7 @@ define(function (require) {
         if (addBrush) {
           var bar = d3.select(this);
           var startX = d3.mouse(svg.node());
-          startXInv = xScale.invert(startX[0]);
+          var startXInv = xScale.invert(startX[0]);
 
           // Reset the brush value
           brush.extent([startXInv, startXInv]);
@@ -176,13 +185,44 @@ define(function (require) {
         d3.event.stopPropagation();
       })
       .on('mouseout.bar', function () {
-        d3.select(this).classed('hover', false)
-          .style('stroke', null);
+        self.mouseOutBar(this);
       });
     };
 
+    /**
+     * Mouseover Behavior
+     *
+     * @method mouseOverBar
+     * @param that {Object}
+     * @returns {D3.Selection}
+     */
+    ColumnChart.prototype.mouseOverBar = function (that) {
+      return d3.select(that)
+        .classed('hover', true)
+        .style('stroke', '#333')
+        .style('cursor', 'pointer');
+    };
+
+    /**
+     * Mouseout Behavior
+     *
+     * @method mouseOutBar
+     * @param that {Object}
+     * @returns {D3.Selection}
+     */
+    ColumnChart.prototype.mouseOutBar = function (that) {
+      return d3.select(that)
+        .classed('hover', false)
+        .style('stroke', null);
+    };
+
+    /**
+     * Renders d3 visualization
+     *
+     * @method draw
+     * @returns {Function} Creates the vertical bar chart
+     */
     ColumnChart.prototype.draw = function () {
-      // Attributes
       var self = this;
       var xScale = this.handler.xAxis.xScale;
       var $elem = $(this.chartEl);
