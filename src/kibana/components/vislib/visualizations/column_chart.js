@@ -31,8 +31,8 @@ define(function (require) {
       ColumnChart.Super.apply(this, arguments);
       // Column chart specific attributes
       this._attr = _.defaults(handler._attr || {}, {
-        xValue: function (d, i) { return d.x; },
-        yValue: function (d, i) { return d.y; }
+        xValue: function (d) { return d.x; },
+        yValue: function (d) { return d.y; }
       });
     }
 

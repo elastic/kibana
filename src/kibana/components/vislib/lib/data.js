@@ -19,9 +19,9 @@ define(function (require) {
 
       this.data = data;
       this._attr = attr;
-      // d3 stack function
       this._attr = _.defaults(attr || {}, {
-        offset: 'zero',
+        offset: attr.offset || 'zero',
+        // d3 stack function
         stack: d3.layout.stack()
           .x(function (d) { return d.x; })
           .y(function (d) { return d.y; })
