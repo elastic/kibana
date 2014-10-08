@@ -1,19 +1,21 @@
 define(function (require) {
-  return function LegendFactory(d3, Private) {
+  return function LegendFactory(d3) {
     var _ = require('lodash');
     var legendHeaderTemplate = _.template(require('text!components/vislib/partials/legend_header.html'));
 
     require('css!components/vislib/styles/main');
 
     /**
-     * Append legend to the visualization
-     * arguments:
-     *  el => reference to DOM element
-     *  labels => array of labels from the chart data
-     *  color => color function to assign colors to labels
-     *  _attr => visualization attributes
+     * Appends legend to the visualization
+     *
+     * @class Legend
+     * @constructor
+     * @param vis {Object} Reference to Vis Constructor
+     * @param el {HTMLElement} Reference to DOM element
+     * @param labels {Array} Array of chart labels
+     * @param color {Function} Color function
+     * @param _attr {Object|*} Reference to Vis options
      */
-
     function Legend(vis, el, labels, color, _attr) {
       if (!(this instanceof Legend)) {
         return new Legend(vis, el, labels, color, _attr);
@@ -32,7 +34,14 @@ define(function (require) {
       });
     }
 
-    // Add legend header
+    /**
+     * Adds legend header
+     *
+     * @method header
+     * @param el {HTMLElement} Reference to DOM element
+     * @param args {Object|*} Legend options
+     * @returns {*} HTML element
+     */
     Legend.prototype.header = function (el, args) {
       return el.append('div')
         .attr('class', 'header')
@@ -43,7 +52,15 @@ define(function (require) {
         });
     };
 
-    // Add legend list
+    /**
+     * Adds list to legend
+     *
+     * @method list
+     * @param el {HTMLElement} Reference to DOM element
+     * @param arrOfLabels {Array} Array of labels
+     * @param args {Object|*} Legend options
+     * @returns {D3.Selection} HTML element with list of labels attached
+     */
     Legend.prototype.list = function (el, arrOfLabels, args) {
       var self = this;
 
@@ -66,21 +83,32 @@ define(function (require) {
         });
     };
 
-    // Create a class name based on the colors assigned to each label
+    /**
+     * Creates a class name based on the colors assigned to each label
+     *
+     * @method colorToClass
+     * @param name {String} Label
+     * @returns {string} CSS class name
+     */
     Legend.prototype.colorToClass = function (name) {
       return 'c' + name.replace(/[#]/g, '');
     };
 
-    // Render the legend
+    /**
+     * Renders legend
+     *
+     * @method render
+     * @return {HTMLElement} Legend
+     */
     Legend.prototype.render = function () {
       var visEl = d3.select(this.el);
       var legendDiv = visEl.select('.' + this._attr.legendClass);
       var items = this.labels;
-      var header = this.header(legendDiv, this);
       var headerIcon = visEl.select('.legend-toggle');
-      var list = this.list(legendDiv, items, this);
-
       var self = this;
+
+      this.header(legendDiv, this);
+      this.list(legendDiv, items, this);
 
       // toggle
       headerIcon

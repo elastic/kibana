@@ -7,9 +7,11 @@ define(function (require) {
     var Tooltip = Private(require('components/vislib/lib/tooltip'));
 
     /**
-     * Append chart titles to the visualization
-     * arguments:
-     *  el => reference to a DOM element
+     * Appends chart titles to the visualization
+     *
+     * @class ChartTitle
+     * @constructor
+     * @param el {HTMLElement} Reference to DOM element
      */
 
     function ChartTitle(el) {
@@ -25,12 +27,23 @@ define(function (require) {
 
     _(ChartTitle.prototype).extend(ErrorHandler.prototype);
 
-    // Render chart titles
+    /**
+     * Renders chart titles
+     *
+     * @method render
+     * @returns {D3.Selection|D3.Transition.Transition} DOM element with chart titles
+     */
     ChartTitle.prototype.render = function () {
       return d3.select(this.el).selectAll('.chart-title').call(this.draw());
     };
 
-    // Return a function that truncates chart title text
+    /**
+     * Truncates chart title text
+     *
+     * @method truncate
+     * @param size {Number} Height or width of the HTML Element
+     * @returns {Function} Truncates text
+     */
     ChartTitle.prototype.truncate = function (size) {
       var self = this;
 
@@ -59,14 +72,25 @@ define(function (require) {
       };
     };
 
-    // Add mouseover and mouseout events on truncated chart titles
+    /**
+     * Adds tooltip events on truncated chart titles
+     *
+     * @method addMouseEvents
+     * @param target {HTMLElement} DOM element to attach event listeners
+     * @returns {*} DOM element with event listeners attached
+     */
     ChartTitle.prototype.addMouseEvents = function (target) {
       if (this.tooltip) {
         return target.call(this.tooltip.render());
       }
     };
 
-    // Return a callback function that appends chart titles to the visualization
+    /**
+     * Appends chart titles to the visualization
+     *
+     * @method draw
+     * @returns {Function} Appends chart titles to a D3 selection
+     */
     ChartTitle.prototype.draw = function () {
       var self = this;
 

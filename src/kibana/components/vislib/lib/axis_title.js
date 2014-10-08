@@ -7,8 +7,13 @@ define(function (require) {
 
     /**
      * Appends axis title(s) to the visualization
+     *
+     * @class AxisTitle
+     * @constructor
+     * @param el {HTMLElement} DOM element
+     * @param xTitle {String} X-axis title
+     * @param yTitle {String} Y-axis title
      */
-
     function AxisTitle(el, xTitle, yTitle) {
       if (!(this instanceof AxisTitle)) {
         return new AxisTitle(el, xTitle, yTitle);
@@ -21,13 +26,24 @@ define(function (require) {
 
     _(AxisTitle.prototype).extend(ErrorHandler.prototype);
 
-    // Render both x and y axis titles
+    /**
+     * Renders both x and y axis titles
+     *
+     * @method render
+     * @returns {HTMLElement} DOM Element with axis titles
+     */
     AxisTitle.prototype.render = function () {
       d3.select(this.el).select('.x-axis-title').call(this.draw(this.xTitle));
       d3.select(this.el).select('.y-axis-title').call(this.draw(this.yTitle));
     };
 
-    // Return a callback function that appends an svg with title text
+    /**
+     * Appends an SVG with title text
+     *
+     * @method draw
+     * @param title {String} Axis title
+     * @returns {Function} Appends axis title to a D3 selection
+     */
     AxisTitle.prototype.draw = function (title) {
       var self = this;
 

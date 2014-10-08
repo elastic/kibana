@@ -11,8 +11,9 @@ define(function (require) {
     var AxisTitle = Private(require('components/vislib/lib/axis_title'));
     var ChartTitle = Private(require('components/vislib/lib/chart_title'));
 
-    /**
-     *
+    /*
+     * Handler for Column Chart, Line Chart, and other charts using x and y axes.
+     * Otherwise known as the default Handler type.
      */
 
     return function (vis) {

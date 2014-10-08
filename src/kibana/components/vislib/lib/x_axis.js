@@ -4,16 +4,14 @@ define(function (require) {
     var _ = require('lodash');
 
     var ErrorHandler = Private(require('components/vislib/lib/_error_handler'));
-    var ChartTitle = Private(require('components/vislib/lib/chart_title'));
 
-    /*
-     * Add an x axis to the visualization
-     * aruments =>
-     *  el => reference to DOM element
-     *  xValues => array of x values from the dataset
-     *  ordered => data object that is defined when the data is ordered
-     *  xAxisFormatter => function to formatx axis tick values
-     *  _attr => visualization attributes
+    /**
+     * Adds an x axis to the visualization
+     *
+     * @class XAxis
+     * @constructor
+     * @param args {{el: (HTMLElement), xValues: (Array), ordered: (Object|*),
+     * xAxisFormatter: (Function), _attr: (Object|*)}}
      */
     function XAxis(args) {
       if (!(this instanceof XAxis)) {
@@ -29,16 +27,26 @@ define(function (require) {
 
     _(XAxis.prototype).extend(ErrorHandler.prototype);
 
-    // Render the x axis
+    /**
+     * Renders the x axis
+     *
+     * @method render
+     * @returns {D3.UpdateSelection} Appends x axis to visualization
+     */
     XAxis.prototype.render = function () {
       d3.select(this.el)
       .selectAll('.x-axis-div')
       .call(this.draw());
     };
 
-    // Get the d3 scale
-    // if time, return time scale
-    // return d3 ordinal scale for nominal data
+    /**
+     * Returns d3 x axis scale function.
+     * If time, return time scale, else return d3 ordinal scale for nominal data
+     *
+     * @method getScale
+     * @param ordered {Object|*} Time information
+     * @returns {*} D3 scale function
+     */
     XAxis.prototype.getScale = function (ordered) {
       if (ordered && ordered.date) {
         return d3.time.scale();
@@ -46,10 +54,16 @@ define(function (require) {
       return d3.scale.ordinal();
     };
 
-    // Add domain to the scale
-    // if time, return a time domain
-    // Calculate the min date, max date, and time interval;
-    // return a nominal domain, i.e. array of x values
+    /**
+     * Add domain to the x axis scale.
+     * if time, return a time domain, and calculate the min date, max date, and time interval
+     * else, return a nominal (d3.scale.ordinal) domain, i.e. array of x axis values
+     *
+     * @method getDomain
+     * @param scale {Function} D3 scale
+     * @param ordered {Object} Time information
+     * @returns {*} D3 scale function
+     */
     XAxis.prototype.getDomain = function (scale, ordered) {
       if (ordered && ordered.date) {
         return this.getTimeDomain(scale, ordered);
@@ -57,20 +71,40 @@ define(function (require) {
       return this.getOrdinalDomain(scale, this.xValues);
     };
 
-    // Returns a time domain
+    /**
+     * Returns D3 time domain
+     *
+     * @method getTimeDomain
+     * @param scale {Function} D3 scale function
+     * @param ordered {Object} Time information
+     * @returns {*} D3 scale function
+     */
     XAxis.prototype.getTimeDomain = function (scale, ordered) {
       return scale.domain([ordered.min, ordered.max]);
     };
 
-    // Return a nominal(d3 ordinal) domain
+    /**
+     * Return a nominal(d3 ordinal) domain
+     *
+     * @method getOrdinalDomain
+     * @param scale {Function} D3 scale function
+     * @param xValues {Array} Array of x axis values
+     * @returns {*} D3 scale function
+     */
     XAxis.prototype.getOrdinalDomain = function (scale, xValues) {
-
       return scale.domain(xValues);
     };
 
-    // Return the range for the x axis scale
-    // if time, return a normal range
-    // if nominal, return rangeBands with a default (0.1) spacer specified
+    /**
+     * Return the range for the x axis scale
+     * if time, return a normal range, else if nominal, return rangeBands with a default (0.1) spacer specified
+     *
+     * @method getRange
+     * @param scale {Function} D3 scale function
+     * @param ordered {Object} Time information
+     * @param width {Number} HTML Element width
+     * @returns {*} D3 scale function
+     */
     XAxis.prototype.getRange = function (scale, ordered, width) {
       if (ordered && ordered.date) {
         return scale.range([0, width]);
@@ -78,18 +112,26 @@ define(function (require) {
       return scale.rangeBands([0, width], 0.1);
     };
 
-    // Return the x axis scale
+    /**
+     * Return the x axis scale
+     *
+     * @method getXScale
+     * @param ordered {Object} Time information
+     * @param width {Number} HTML Element width
+     * @returns {*} D3 x scale function
+     */
     XAxis.prototype.getXScale = function (ordered, width) {
       var scale = this.getScale(ordered);
       var domain = this.getDomain(scale, ordered);
-      var xScale = this.getRange(domain, ordered, width);
-
-      return xScale;
+      return this.getRange(domain, ordered, width);
     };
 
-    // Create the d3 xAxis function
-    // save a reference to the xScale
-    // Scale should never === `NaN`
+    /**
+     * Creates d3 xAxis function
+     *
+     * @method getXAxis
+     * @param width {Number} HTML Element width
+     */
     XAxis.prototype.getXAxis = function (width) {
       this.xScale = this.getXScale(this.ordered, width);
 
@@ -104,10 +146,14 @@ define(function (require) {
       .orient('bottom');
     };
 
-    // Returns a function that renders the x axis
+    /**
+     * Renders the x axis
+     *
+     * @method draw
+     * @returns {Function} Renders the x axis to a D3 selection
+     */
     XAxis.prototype.draw = function () {
       var self = this;
-      var margin = this._attr.margin;
       var div;
       var width;
       var height;
@@ -124,9 +170,6 @@ define(function (require) {
 
         selection.each(function () {
 
-          // Validate that width and height are not 0 or `NaN`
-          // return access to xAxis variable on the object
-          // append svg and x axis
           div = d3.select(this);
           width = parentWidth / n;
           height = $(this).height();
@@ -149,9 +192,14 @@ define(function (require) {
       };
     };
 
-    // Returns a function that evaluates scale type and applies
-    // filters tick labels on time scales
-    // rotates and truncates labels on nominal/ordinal scales
+    /**
+     * Returns a function that evaluates scale type and applies
+     * filters tick labels on time scales
+     * rotates and truncates labels on nominal/ordinal scales
+     *
+     * @method filterOrRotate
+     * @returns {Function} Filters or rotates x axis tick labels
+     */
     XAxis.prototype.filterOrRotate = function () {
       var self = this;
       var ordered = self.ordered;
@@ -163,7 +211,7 @@ define(function (require) {
           axis = d3.select(this);
           labels = axis.selectAll('.tick text');
 
-          if (!self.ordered) {
+          if (!ordered) {
             axis.call(self.rotateAxisLabels());
           } else {
             axis.call(self.filterAxisLabels());
@@ -177,7 +225,11 @@ define(function (require) {
       };
     };
 
-    // Rotate the axis tick labels within selection
+    /**
+     * Rotate the axis tick labels within selection
+     *
+     * @returns {Function} Rotates x axis tick labels of a D3 selection
+     */
     XAxis.prototype.rotateAxisLabels = function () {
       var self = this;
       var text;
@@ -223,7 +275,14 @@ define(function (require) {
       };
     };
 
-    // Returns a string that is truncated to fit size
+    /**
+     * Returns a string that is truncated to fit size
+     *
+     * @method truncateLabel
+     * @param text {HTMLElement}
+     * @param size {Number}
+     * @returns {*|jQuery}
+     */
     XAxis.prototype.truncateLabel = function (text, size) {
       var node = d3.select(text).node();
       var str = $(node).text();
@@ -243,11 +302,16 @@ define(function (require) {
       return str;
     };
 
-    // Filter out text labels by width and position on axis
-    // trims labels that would overlap each other 
-    // or extend past left or right edges
-    // if prev label pos (or 0) + half of label width is < label pos
-    // and label pos + half width  is not > width of axis
+    /**
+     * Filter out text labels by width and position on axis
+     * trims labels that would overlap each other
+     * or extend past left or right edges
+     * if prev label pos (or 0) + half of label width is < label pos
+     * and label pos + half width  is not > width of axis
+     *
+     * @method filterAxisLabels
+     * @returns {Function}
+     */
     XAxis.prototype.filterAxisLabels = function () {
       var self = this;
       var startX = 0;
@@ -260,7 +324,7 @@ define(function (require) {
 
       return function (selection) {
         selection.selectAll('.tick text')
-        .text(function (d, i) {
+        .text(function (d) {
           par = d3.select(this.parentNode).node();
           myX = self.xScale(d);
           myWidth = par.getBBox().width * padding;
@@ -277,21 +341,20 @@ define(function (require) {
       };
     };
 
-    // Returns a function that adjusts axis titles and
-    // chart title transforms to fit axis label divs.
-    // Sets transform of x-axis-title to fit .x-axis-title div width
-    // if x-axis-chart-titles, set transform of x-axis-chart-titles
-    // to fit .chart-title div width
+    /**
+     * Returns a function that adjusts axis titles and
+     * chart title transforms to fit axis label divs.
+     * Sets transform of x-axis-title to fit .x-axis-title div width
+     * if x-axis-chart-titles, set transform of x-axis-chart-titles
+     * to fit .chart-title div width
+     *
+     * @method fitTitles
+     * @returns {Function}
+     */
     XAxis.prototype.fitTitles = function () {
-      var self = this;
       var visEls = $('.vis-wrapper');
-      var visEl;
-      var xAxisTitle;
-      var yAxisTitle;
       var xAxisChartTitle;
       var yAxisChartTitle;
-      var titleWidth;
-      var titleHeight;
       var text;
       var titles;
 
@@ -350,12 +413,15 @@ define(function (require) {
       };
     };
 
-    // Appends div to make .y-axis-spacer-block
-    // match height of .x-axis-wrapper
+    /**
+     * Appends div to make .y-axis-spacer-block
+     * match height of .x-axis-wrapper
+     *
+     * @method updateXaxisHeight
+     */
     XAxis.prototype.updateXaxisHeight = function () {
       var self = this;
       var selection = d3.selectAll('.vis-wrapper');
-      var $selection = $('.vis-wrapper');
       var titleHts = 30;
       var xAxisLabelHt = 15;
 

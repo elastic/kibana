@@ -1,7 +1,7 @@
 define(function () {
   return function ChartSplitFactory(d3) {
 
-    /**
+    /*
      * Adds div DOM elements to the `.chart-wrapper` element based on the data layout.
      * For example, if the data has rows, it returns the same number of
      * `.chart` elements as row objects.

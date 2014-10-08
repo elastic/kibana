@@ -6,8 +6,8 @@ define(function (require) {
     var Legend = Private(require('components/vislib/lib/legend'));
     var ChartTitle = Private(require('components/vislib/lib/chart_title'));
 
-    /**
-     *
+    /*
+     * Handler for Pie visualizations.
      */
 
     return function (vis) {
