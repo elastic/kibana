@@ -1,7 +1,9 @@
 define(function (require) {
-  return function RootSearchSource(Private, $rootScope, config, Promise, indexPatterns, timefilter) {
+  return function RootSearchSource(Private, $rootScope, config, Promise, indexPatterns, timefilter, Notifier) {
     var _ = require('lodash');
     var SearchSource = Private(require('components/courier/data_source/search_source'));
+
+    var notify = new Notifier({ location: 'Root Search Source' });
 
     var globalSource = new SearchSource();
     globalSource.inherits(false); // this is the final source, it has no parents
@@ -10,13 +12,26 @@ define(function (require) {
       return timefilter.get(globalSource.get('index'));
     });
 
-    var ensureDefaultLoaded = _.once(__loadDefaultPattern__);
     var appSource; // set in setAppSource()
     resetAppSource();
 
-    // when the default index changes, or the config is intialized, connect the defaultIndex to the globalSource
-    $rootScope.$on('change:config.defaultIndex', ensureDefaultLoaded);
-    $rootScope.$on('init:config', ensureDefaultLoaded);
+    /**
+     * Get the default index from the config, and hook it up to the globalSource.
+     *
+     * @return {Promise}
+     */
+    function loadDefaultPattern() {
+      return notify.event('loading default index pattern', function () {
+        var defId = config.get('defaultIndex');
+
+        return Promise.cast(defId && indexPatterns.get(defId))
+        .then(function (pattern) {
+          pattern = pattern || undefined;
+          globalSource.set('index', pattern);
+          notify.log('index pattern set to', defId);
+        });
+      });
+    }
 
     // when the route changes, clear the appSource
     $rootScope.$on('$routeChangeStart', resetAppSource);
@@ -26,9 +41,7 @@ define(function (require) {
      * @return {Promise} - resolved with the current AppSource
      */
     function getAppSource() {
-      return ensureDefaultLoaded().then(function () {
-        return appSource;
-      });
+      return appSource;
     }
 
     /**
@@ -48,19 +61,7 @@ define(function (require) {
       literalRoot.inherits(globalSource);
     }
 
-    /**
-     * Get the default index from the config, and hook it up to the globalSource. Broken out
-     * so that it can be called on config change.
-     *
-     * @return {Promise}
-     */
-    function __loadDefaultPattern__() {
-      var defId = config.get('defaultIndex');
 
-      return Promise.cast(defId && indexPatterns.get(defId)).then(function (pattern) {
-        globalSource.set('index', pattern);
-      });
-    }
 
     /**
      * Sets the appSource to be a new, empty, SearchSource
@@ -72,7 +73,8 @@ define(function (require) {
 
     return {
       get: getAppSource,
-      set: setAppSource
+      set: setAppSource,
+      loadDefault: loadDefaultPattern
     };
   };
 });

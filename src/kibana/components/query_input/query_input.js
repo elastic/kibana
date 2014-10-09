@@ -29,8 +29,48 @@ define(function (require) {
 
           var validator = function (query) {
             var index, type;
+            if (request.abort) request.abort();
 
-            var error = function (resp) {
+            if ($scope.queryInput) return useSearchSource();
+
+            return useDefaults();
+
+            function useSearchSource() {
+              var pattern = $scope.queryInput.get('index');
+              if (!pattern) return useDefaults();
+
+              if (_.isString(pattern)) {
+                index = pattern;
+              }
+              else if (_.isFunction(pattern.toIndexList)) {
+                index = pattern.toIndexList();
+              }
+              else {
+                return useDefaults();
+              }
+
+              return sendRequest();
+            }
+
+            function useDefaults() {
+              index = configFile.kibanaIndex;
+              type = '__kibanaQueryValidator';
+              return sendRequest();
+            }
+
+            function sendRequest() {
+              request = es.indices.validateQuery({
+                index: index,
+                type: type,
+                explain: true,
+                ignoreUnavailable: true,
+                body: {
+                  query: query || { match_all: {} }
+                }
+              }).then(success, error);
+            }
+
+            function error(resp) {
               var msg;
 
               ngModel.$setValidity('queryInput', false);
@@ -48,9 +88,9 @@ define(function (require) {
               errorElem.show();
 
               return undefined;
-            };
+            }
 
-            var success = function (resp) {
+            function success(resp) {
               if (resp.valid) {
                 ngModel.$setValidity('queryInput', true);
                 errorElem.hide();
@@ -58,26 +98,7 @@ define(function (require) {
               } else {
                 return error(resp);
               }
-            };
-
-            if ($scope.queryInput) {
-              index = $scope.queryInput.get('index').toIndexList();
-            } else {
-              index = configFile.kibanaIndex;
-              type = '__kibanaQueryValidator';
             }
-
-            if (request.abort) request.abort();
-
-            request = es.indices.validateQuery({
-              index: index,
-              type: type,
-              explain: true,
-              ignoreUnavailable: true,
-              body: {
-                query: query || { match_all: {} }
-              }
-            }).then(success, error);
           };
 
           var debouncedValidator = _.debounce(validator, 300, {
