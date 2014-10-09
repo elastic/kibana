@@ -56,7 +56,7 @@ define(function (require) {
           // fetch the object from ES
           return docSource.fetch()
           .then(function applyESResp(resp) {
-            if (!resp.found) throw new errors.SavedObjectNotFound(type);
+            if (!resp.found) throw new errors.SavedObjectNotFound(type, pattern.id);
 
             // deserialize any json fields
             _.forOwn(mapping, function ittr(fieldMapping, name) {

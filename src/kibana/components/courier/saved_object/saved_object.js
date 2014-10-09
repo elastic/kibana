@@ -94,7 +94,7 @@ define(function (require) {
 
             obj._source = _.cloneDeep(resp._source);
 
-            if (!resp.found) throw new errors.SavedObjectNotFound(type);
+            if (!resp.found) throw new errors.SavedObjectNotFound(type, obj.id);
 
             var meta = resp._source.kibanaSavedObjectMeta || {};
             delete resp._source.kibanaSavedObjectMeta;
