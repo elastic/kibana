@@ -14,6 +14,7 @@ define(function (require) {
 
   // This is the only thing that gets injected into controllers
   module.service('savedDashboards', function (Promise, SavedDashboard, config, es, kbnUrl) {
+    this.type = SavedDashboard.type;
 
     // Returns a single dashboard by ID, should be the name of the dashboard
     this.get = function (id) {
