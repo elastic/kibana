@@ -56,9 +56,9 @@ define(function (require) {
 
         // tell the docSource where to find the doc
         docSource
-          .index(configFile.kibanaIndex)
-          .type(type)
-          .id(obj.id);
+        .index(configFile.kibanaIndex)
+        .type(type)
+        .id(obj.id);
 
         // check that the mapping for this type is defined
         return mappingSetup.isDefined(type)
