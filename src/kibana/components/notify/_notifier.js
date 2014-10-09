@@ -133,9 +133,12 @@ define(function (require) {
   Notifier.prototype.timed = function (name, fn) {
     var self = this;
     return function WrappedNotifierFunction() {
-      var complete = self.event(name);
-      fn.apply(this, arguments);
-      complete();
+      var cntx = this;
+      var args = arguments;
+      
+      return self.event(name, function () {
+        return fn.apply(cntx, args);
+      });
     };
   };
 
@@ -304,18 +307,26 @@ define(function (require) {
       }
 
       if (exec) {
-        if (exec.length) {
-          exec(complete, failure);
-        } else {
-          try {
-            exec();
-          } catch (e) {
-            failure(e);
-            return;
-          }
-
-          complete();
+        try {
+          ret = exec();
+        } catch (e) {
+          return failure(e);
         }
+
+        if (ret && typeof ret.then === 'function') {
+          // return a new promise that proxies the value
+          // and logs about the promise outcome
+          return ret.then(function (val) {
+            complete();
+            return val;
+          }, function (err) {
+            failure(err);
+            throw err;
+          });
+        }
+
+        // the function executed fine, and didn't return a promise, move along
+        complete();
       }
 
       return ret;
