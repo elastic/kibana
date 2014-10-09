@@ -5,14 +5,14 @@ module.exports = function (grunt) {
   var app = grunt.config.get('app');
 
   var config = {
+    options: {
+      patterns: [
+        { match: 'version', replacement: '<%= pkg.version %>' },
+        { match: 'buildNum', replacement: '<%= buildNum %>' },
+        { match: 'commitSha', replacement: '<%= commitSha %>' }
+      ]
+    },
     dist: {
-      options: {
-        patterns: [
-          { match: 'version', replacement: '<%= pkg.version %>' },
-          { match: 'buildNum', replacement: '<%= buildNum %>' },
-          { match: 'commitSha', replacement: '<%= commitSha %>' }
-        ]
-      },
       files: [
         {
           src: [join(src, 'server', 'bin', 'kibana.sh')],
@@ -22,10 +22,14 @@ module.exports = function (grunt) {
         {
           src: [join(src, 'server', 'bin', 'kibana.bat')],
           dest: join(build, 'dist', 'kibana', 'bin', 'kibana.bat')
-        },
+        }
+      ]
+    },
+    build_props: {
+      files: [
         {
           src: [join(app, 'index.html')],
-          dest: join(build, 'kibana', 'public', 'index.html')
+          dest: join(build, 'src', 'index.html')
         }
       ]
     }
