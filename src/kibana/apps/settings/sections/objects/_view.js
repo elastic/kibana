@@ -14,7 +14,8 @@ define(function (require) {
   .directive('kbnSettingsObjectsView', function (config, Notifier) {
     return {
       restrict: 'E',
-      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope) {
+      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Notifier) {
+        var notifier = new Notifier({ location: 'SavedObject view' });
 
         var serviceObj = registry.get($routeParams.service);
         var service = $injector.get(serviceObj.service);
@@ -74,7 +75,8 @@ define(function (require) {
           $scope.obj = obj;
           $scope.link = service.urlFor(obj.id);
           $scope.fields = _.reduce(obj._source, createField, []);
-        });
+        })
+        .catch(notifier.fatal);
 
         // This handles the validation of the Ace Editor. Since we don't have any
         // other hooks into the editors to tell us if the content is valid or not
