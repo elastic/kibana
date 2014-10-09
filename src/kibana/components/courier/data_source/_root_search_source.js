@@ -17,7 +17,7 @@ define(function (require) {
 
     /**
      * Get the default index from the config, and hook it up to the globalSource.
-     * 
+     *
      * @return {Promise}
      */
     function loadDefaultPattern() {
@@ -26,6 +26,7 @@ define(function (require) {
 
         return Promise.cast(defId && indexPatterns.get(defId))
         .then(function (pattern) {
+          pattern = pattern || undefined;
           globalSource.set('index', pattern);
           notify.log('index pattern set to', defId);
         });
@@ -60,7 +61,7 @@ define(function (require) {
       literalRoot.inherits(globalSource);
     }
 
-    
+
 
     /**
      * Sets the appSource to be a new, empty, SearchSource
