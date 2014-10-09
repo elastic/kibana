@@ -24,8 +24,6 @@ define(function (require) {
         }
       }());
 
-      this._dynamicState = this._dynamicState || {};
-
       // set internal state values
       this._methods.forEach(function (name) {
         this[name] = function (val) {
@@ -50,20 +48,12 @@ define(function (require) {
     /**
      * Get values from the state
      * @param {string} name - The name of the property desired
-     * @param {boolean} deep - Load the value from this search source, or traverse 
-     *                       the "globally" inheritted sources and look for values there.
-     * @return {any|Promise<any>} - when deep, a promise is returned, otherwise the value found
+     * @return {any} - the value found
      */
     SourceAbstract.prototype.get = function (name) {
-      function read(source) {
-        if (source._state[name] !== void 0) return source._state[name];
-        if (source._dynamicState[name] !== void 0) return source._dynamicState[name]();
-      }
-
       var current = this;
       while (current) {
-        var val = read(current);
-        if (val !== void 0) return val;
+        if (current._state[name] !== void 0) return current._state[name];
         current = current.getParent();
       }
     };
@@ -257,8 +247,8 @@ define(function (require) {
           /**
            * Create a filter that can be reversed for filters with negate set
            * @param {boolean} reverse This will reverse the filter. If true then
-           *                          anything where negate is set will come 
-           *                          through otherwise it will filter out   
+           *                          anything where negate is set will come
+           *                          through otherwise it will filter out
            * @returns {function}
            */
           var filterNegate = function (reverse) {
