@@ -1,5 +1,6 @@
 module.exports = function (grunt) {
   grunt.registerTask('build', [
+    'get_build_props',
     'clean:target',
     'clean:build',
     'require_css_deps:copy',

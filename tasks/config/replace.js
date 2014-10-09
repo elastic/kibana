@@ -1,13 +1,16 @@
 var join = require('path').join;
 module.exports = function (grunt) {
-  var pkg = grunt.config.get('pkg');
   var build = grunt.config.get('build');
   var src = grunt.config.get('src');
+  var app = grunt.config.get('app');
+
   var config = {
     dist: {
       options: {
         patterns: [
-          { match: 'version', replacement: pkg.version  }
+          { match: 'version', replacement: '<%= pkg.version %>' },
+          { match: 'buildNum', replacement: '<%= buildNum %>' },
+          { match: 'commitSha', replacement: '<%= commitSha %>' }
         ]
       },
       files: [
@@ -19,6 +22,10 @@ module.exports = function (grunt) {
         {
           src: [join(src, 'server', 'bin', 'kibana.bat')],
           dest: join(build, 'dist', 'kibana', 'bin', 'kibana.bat')
+        },
+        {
+          src: [join(app, 'index.html')],
+          dest: join(build, 'kibana', 'public', 'index.html')
         }
       ]
     }

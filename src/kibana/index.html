@@ -12,6 +12,11 @@
     <script src="/require.config.js"></script>
     <script>require(['kibana'], function (kibana) { kibana.init(); });</script>
     <link rel="stylesheet" href="/styles/main.css" >
+    <script>
+      window.KIBANA_VERSION='@@version';
+      window.KIBANA_BUILD_NUM='@@buildNum';
+      window.KIBANA_COMMIT_SHA='@@commitSha';
+    </script>
   </head>
   <body ng-controller="kibana" ng-class="'application-'+activeApp">
     <kbn-notifications list="notifList"></kbn-notifications>
