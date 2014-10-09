@@ -54,8 +54,7 @@ define(function (require) {
       .then(function (parent) {
         if (parent) {
           self.savedSearch = parent;
-          self.searchSource
-            .inherits(parent.searchSource);
+          self.searchSource.inherits(parent.searchSource);
         }
 
         self.searchSource.size(0);
