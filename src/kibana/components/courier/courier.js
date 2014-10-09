@@ -25,6 +25,9 @@ define(function (require) {
       courier.indexPatterns = indexPatterns;
       courier.redirectWhenMissing = Private(require('components/courier/_redirect_when_missing'));
 
+      courier.DocSource = DocSource;
+      courier.SearchSource = SearchSource;
+
       var HastyRefresh = errors.HastyRefresh;
       var Abort = errors.Abort;
 
