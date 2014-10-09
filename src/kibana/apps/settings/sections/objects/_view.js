@@ -14,8 +14,8 @@ define(function (require) {
   .directive('kbnSettingsObjectsView', function (config, Notifier) {
     return {
       restrict: 'E',
-      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Notifier) {
-        var notifier = new Notifier({ location: 'SavedObject view' });
+      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, es) {
+        var notify = new Notifier({ location: 'SavedObject view' });
 
         var serviceObj = registry.get($routeParams.service);
         var service = $injector.get(serviceObj.service);
@@ -71,12 +71,17 @@ define(function (require) {
 
         $scope.title = inflection.singularize(serviceObj.title);
 
-        service.get($routeParams.id).then(function (obj) {
+        es.get({
+          index: config.file.kibanaIndex,
+          type: service.type,
+          id: $routeParams.id
+        })
+        .then(function (obj) {
           $scope.obj = obj;
-          $scope.link = service.urlFor(obj.id);
+          $scope.link = service.urlFor(obj._id);
           $scope.fields = _.reduce(obj._source, createField, []);
         })
-        .catch(notifier.fatal);
+        .catch(notify.fatal);
 
         // This handles the validation of the Ace Editor. Since we don't have any
         // other hooks into the editors to tell us if the content is valid or not
@@ -118,13 +123,15 @@ define(function (require) {
          * @returns {type} description
          */
         $scope.delete = function () {
-          $scope.obj.delete().then(function (resp) {
-            $location.path('/settings/objects').search({ _a: rison.encode({
-              tab: serviceObj.title
-            })});
-            var notify = new Notifier();
-            notify.info('You successfully deleted the "' + $scope.obj.title + '" ' + $scope.title.toLowerCase() + ' object');
-          });
+          es.delete({
+            index: config.file.kibanaIndex,
+            type: service.type,
+            id: $routeParams.id
+          })
+          .then(function (resp) {
+            return redirectHandler('deleted');
+          })
+          .catch(notify.fatal);
         };
 
         $scope.submit = function () {
@@ -145,15 +152,33 @@ define(function (require) {
             _.setValue(source, field.name, field.value);
           });
 
-          $scope.obj.saveSource(source).then(function (resp) {
-            $location.path('/settings/objects').search({ _a: rison.encode({
-              tab: serviceObj.title
-            })});
-            var notify = new Notifier();
-            notify.info('You successfully updated the "' + $scope.obj.title + '" ' + $scope.title.toLowerCase() + ' object');
-          });
+          es.index({
+            index: config.file.kibanaIndex,
+            type: service.type,
+            id: $routeParams.id,
+            body: source
+          })
+          .then(function (resp) {
+            return redirectHandler('updated');
+          })
+          .catch(notify.fatal);
         };
 
+        function redirectHandler(action) {
+          return es.indices.refresh({
+            index: config.file.kibanaIndex
+          })
+          .then(function (resp) {
+            var msg = 'You successfully ' + action + ' the "' + $scope.obj._source.title + '" ' + $scope.title.toLowerCase() + ' object';
+
+            $location.path('/settings/objects').search({
+              _a: rison.encode({
+                tab: serviceObj.title
+              })
+            });
+            notify.info(msg);
+          });
+        }
       }
     };
   });
