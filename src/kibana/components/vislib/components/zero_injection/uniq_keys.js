@@ -22,9 +22,17 @@ define(function (require) {
       flattenedData.forEach(function (d, i) {
         var key = d.x;
 
-        uniqueXValues[key] = uniqueXValues[key] === void 0 ?
-        { index: i, isNumber: _.isNumber(key) } :
-        { index: Math.max(i, uniqueXValues[key].index), isNumber: _.isNumber(key) };
+        if (uniqueXValues[key] === void 0) {
+          uniqueXValues[key] = {
+            index: i,
+            isNumber: _.isNumber(key)
+          };
+        } else {
+          uniqueXValues[key] = {
+            index: Math.max(i, uniqueXValues[key].index),
+            isNumber: _.isNumber(key)
+          };
+        }
       });
 
       return uniqueXValues;

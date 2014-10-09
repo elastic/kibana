@@ -91,14 +91,11 @@ define(function (require) {
       }
 
       if (obj.splits) {
-        d3.select(this.el)
-          .select('.' + obj.class)
-          .call(obj.splits);
+        d3.select(this.el).select('.' + obj.class).call(obj.splits);
       }
 
       if (obj.children) {
-        var newParent = d3.select(this.el)
-          .select('.' + obj.class)[0][0];
+        var newParent = d3.select(this.el).select('.' + obj.class)[0][0];
 
         _.forEach(obj.children, function (obj) {
           if (!obj.parent) {
@@ -147,9 +144,7 @@ define(function (require) {
      * @returns {D3.Selection|D3.Transition.Transition} Reference to an empty DOM element
      */
     Layout.prototype.removeAll = function (el) {
-      return d3.select(el)
-        .selectAll('*')
-        .remove();
+      return d3.select(el).selectAll('*').remove();
     };
 
     return Layout;

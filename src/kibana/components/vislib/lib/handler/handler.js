@@ -11,7 +11,8 @@ define(function (require) {
      * @class Handler
      * @constructor
      * @param vis {Object} Reference to the Vis Class Constructor
-     * @param opts {Object} Reference to Visualization constructors needed to create the visualization
+     * @param opts {Object} Reference to Visualization constructors needed to
+     * create the visualization
      */
     function Handler(vis, opts) {
       if (!(this instanceof Handler)) {
@@ -92,13 +93,13 @@ define(function (require) {
      * Removes all DOM elements from the HTML element provided
      *
      * @method removeAll
-     * @param el {HTMLElement} Reference to the HTML Element that contains the chart
-     * @returns {HTMLElement} With the chart child element removed
+     * @param el {HTMLElement} Reference to the HTML Element that
+     * contains the chart
+     * @returns {D3.Selection|D3.Transition.Transition} With the chart
+     * child element removed
      */
     Handler.prototype.removeAll = function (el) {
-      return d3.select(el)
-        .selectAll('*')
-        .remove();
+      return d3.select(el).selectAll('*').remove();
     };
 
     /**
@@ -112,12 +113,12 @@ define(function (require) {
       this.removeAll(this.el);
 
       return d3.select(this.el)
-        .append('div')
-        // class name needs `chart` in it for the polling checkSize function
-        // to continuously call render on resize
-        .attr('class', 'chart error')
-        .append('p')
-        .text(message);
+      .append('div')
+      // class name needs `chart` in it for the polling checkSize function
+      // to continuously call render on resize
+      .attr('class', 'chart error')
+      .append('p')
+      .text(message);
     };
 
     return Handler;
