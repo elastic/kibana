@@ -128,10 +128,12 @@ define(function (require) {
    * A saved object was not found
    * @param {String} field - the fields which contains the conflict
    */
-  errors.SavedObjectNotFound = function SavedObjectNotFound(type) {
+  errors.SavedObjectNotFound = function SavedObjectNotFound(type, id) {
     this.savedObjectType = type;
+    this.savedObjectId = id;
+    var idMsg = id ? ' (id: ' + id + ')' : '';
     KbnError.call(this,
-      'Could not locate that ' + type,
+      'Could not locate that ' + type + idMsg,
       errors.SavedObjectNotFound);
   };
   inherits(errors.SavedObjectNotFound, KbnError);

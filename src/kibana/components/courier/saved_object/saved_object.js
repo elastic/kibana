@@ -56,9 +56,9 @@ define(function (require) {
 
         // tell the docSource where to find the doc
         docSource
-          .index(configFile.kibanaIndex)
-          .type(type)
-          .id(obj.id);
+        .index(configFile.kibanaIndex)
+        .type(type)
+        .id(obj.id);
 
         // check that the mapping for this type is defined
         return mappingSetup.isDefined(type)
@@ -94,7 +94,7 @@ define(function (require) {
 
             obj._source = _.cloneDeep(resp._source);
 
-            if (!resp.found) throw new errors.SavedObjectNotFound(type);
+            if (!resp.found) throw new errors.SavedObjectNotFound(type, obj.id);
 
             var meta = resp._source.kibanaSavedObjectMeta || {};
             delete resp._source.kibanaSavedObjectMeta;
@@ -155,9 +155,17 @@ define(function (require) {
       function hydrateIndexPattern() {
         return Promise.try(function () {
           if (obj.searchSource) {
+
+
             var index = obj.searchSource.get('index') || config.indexPattern;
 
             if (!index) return;
+
+            if (config.clearSavedIndexPattern) {
+              obj.searchSource.set('index', undefined);
+              return;
+            }
+
             if (index instanceof indexPatterns.IndexPattern) {
               return;
             }

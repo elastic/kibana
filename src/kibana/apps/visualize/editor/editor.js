@@ -18,7 +18,6 @@ define(function (require) {
 
         return savedVisualizations.get($route.current.params)
         .catch(courier.redirectWhenMissing({
-          //'index-pattern': '/visualize',
           '*': '/visualize'
         }));
       }
@@ -30,8 +29,9 @@ define(function (require) {
       savedVis: function (savedVisualizations, courier, $route) {
         return savedVisualizations.get($route.current.params.id)
         .catch(courier.redirectWhenMissing({
-          'index-pattern': '/settings',
-          '*': '/visualize'
+          'visualization': '/visualize',
+          'search': '/settings/objects/savedVisualizations/' + $route.current.params.id,
+          'index-pattern': '/settings/objects/savedVisualizations/' + $route.current.params.id
         }));
       }
     }
