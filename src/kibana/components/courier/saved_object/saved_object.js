@@ -156,8 +156,7 @@ define(function (require) {
         return Promise.try(function () {
           if (obj.searchSource) {
 
-            var index = obj.searchSource.get('index') || config.indexPattern;
-
+            var index = config.indexPattern || obj.searchSource.getOwn('index');
             if (!index) return;
             if (config.clearSavedIndexPattern) {
               obj.searchSource.set('index', undefined);
