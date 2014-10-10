@@ -65,6 +65,11 @@ define(function (require) {
      */
     SourceAbstract.prototype.set = function (state, val) {
       if (typeof state === 'string') {
+        // the getter and setter methods check for undefined explicitly
+        // to identify getters and null to identify deletion
+        if (val === undefined) {
+          val = null;
+        }
         this[state](val);
       } else {
         this._state = state;
