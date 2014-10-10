@@ -10,7 +10,7 @@ module.exports = function (cmd, args, cwd, silent) {
     var defer = Promise.defer();
     var opts = {
       stdio: 'pipe',
-      cwd: cwd
+      cwd: cwd || path.join(__dirname, '../..')
     };
 
     var endsWithNlRE = /\n\r?$/;

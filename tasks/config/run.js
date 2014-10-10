@@ -27,6 +27,13 @@ module.exports = function (grunt) {
       args: [
         cmd
       ]
+    },
+    built_kibana: {
+      options: {
+        wait: true,
+        quiet: false,
+      },
+      cmd: './target/<%= pkg.name + "-" + pkg.version %>/bin/kibana'
     }
   };
 
