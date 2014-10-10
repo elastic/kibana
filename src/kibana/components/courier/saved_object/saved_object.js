@@ -156,23 +156,19 @@ define(function (require) {
         return Promise.try(function () {
           if (obj.searchSource) {
 
-
-            var index = obj.searchSource.get('index') || config.indexPattern;
-
+            var index = config.indexPattern || obj.searchSource.getOwn('index');
             if (!index) return;
-
             if (config.clearSavedIndexPattern) {
               obj.searchSource.set('index', undefined);
               return;
             }
 
-            if (index instanceof indexPatterns.IndexPattern) {
-              return;
+            if (!(index instanceof indexPatterns.IndexPattern)) {
+              index = indexPatterns.get(index);
             }
 
-            return indexPatterns.get(index)
-            .then(function (indexPattern) {
-              obj.searchSource.index(indexPattern);
+            return Promise.resolve(index).then(function (indexPattern) {
+              obj.searchSource.set('index', indexPattern);
             });
           }
         });

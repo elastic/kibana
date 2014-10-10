@@ -59,6 +59,15 @@ define(function (require) {
     };
 
     /**
+     * Get the value from our own state, don't traverse up the chain
+     * @param {string} name - The name of the property desired
+     * @return {any} - the value found
+     */
+    SourceAbstract.prototype.getOwn = function (name) {
+      if (this._state[name] !== void 0) return this._state[name];
+    };
+
+    /**
      * Change the entire state of a SourceAbstract
      * @param {object|string} state - The SourceAbstract's new state, or a
      *   string of the state value to set
