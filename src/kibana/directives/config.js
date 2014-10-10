@@ -75,12 +75,12 @@ define(function (require) {
           } else {
             $scope.configTemplate = null;
           }
+          $('body').off('keyup', $scope.escapeEvent);
         };
 
         $scope.escapeEvent = function (e) {
           if (e.which === 27) {
             $scope.close();
-            $('body').off('keyup', $scope.escapeEvent);
             $scope.$digest();
           }
         };
