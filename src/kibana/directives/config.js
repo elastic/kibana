@@ -59,6 +59,9 @@ define(function (require) {
             ''
           )(tmpScope));
           $('body').on('keyup', $scope.escapeEvent);
+          $scope.$on('$destroy', function () {
+            $('body').off('keyup', $scope.escapeEvent);
+          });
         };
 
         $scope.$watch('configSubmit', render);
