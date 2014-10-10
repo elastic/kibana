@@ -155,9 +155,17 @@ define(function (require) {
       function hydrateIndexPattern() {
         return Promise.try(function () {
           if (obj.searchSource) {
+
+
             var index = obj.searchSource.get('index') || config.indexPattern;
 
             if (!index) return;
+
+            if (config.clearSavedIndexPattern) {
+              obj.searchSource.set('index', undefined);
+              return;
+            }
+
             if (index instanceof indexPatterns.IndexPattern) {
               return;
             }

@@ -34,7 +34,9 @@ define(function (require) {
           panelsJSON: '[]'
         },
 
-        searchSource: true
+        searchSource: true,
+
+        clearSavedIndexPattern: true
       });
     }
 
