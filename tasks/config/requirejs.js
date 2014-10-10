@@ -61,7 +61,7 @@ module.exports = function (grunt) {
 
   // include each app
   var main = config.build.options.modules[0];
-  var configFile = require('requirejs')(grunt.config.get('app') + '/config.js');
+  var configFile = grunt.file.readYAML(grunt.config.get('configFile'));
   configFile.apps.forEach(function (app) {
     main.include.push('apps/' + app.id + '/index');
   });
