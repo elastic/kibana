@@ -1,5 +1,5 @@
 <!-- render {"template":"# Kibana <%= pkg.version %>"} -->
-# Kibana 4.0.0-BETA1
+# Kibana 4.0.0-BETA1.1
 <!-- /render -->
 
 [![Build Status](https://magnum.travis-ci.com/elasticsearch/kibana4.svg?token=tsFxSKHtVKG8EZavSjXY&branch=master)](https://magnum.travis-ci.com/elasticsearch/kibana4)
@@ -75,7 +75,7 @@ Click the expand button again to collapse the detailed view of the document.
 
 The field list has several powerful functions. The first being the ability to add columns to the document list. If no fields are selected `_source` will be automatically selected and shown in the table. Mouse over a field name and click the **add** button that appears. Now, instead of seeing `_source` in the document list, you have the extracted value of the selected field. In addition, the field name has moved up to the **Selected** section of the field list. Add a few more fields. Sweet!
 
-Now, instead of clicking the **add** button, click the name of the field itself. You will see a break down of the 5 most popular values for the field, as well as a count of how many records in the document list the field is present in.
+Now, instead of clicking the **add** button, click the name of the field itself. You will see a breakdown of the 5 most popular values for the field, as well as a count of how many records in the document list the field is present in.
 
 In addition, the Visualize button will pop you over to the **Visualize** application and run a more detailed aggregation on the field. For more information about visualization, see the [Visualize section](#visualize) of the docs.
 
@@ -85,13 +85,13 @@ When you expand a document in the document list you will see two magnifying glas
 
 ### Sorting
 
-You may have noticed that documents appear in reverse chronological order by default, meaning the newest documents are shown first. You can change this by clicking on the **Time** column header. In fact, any column can be sorted in this manner as long as it is indexed in Elasticsearch. Note that some fields are not indexed by default, such as `_id`, and that other may have indexing disabled in the Elasticsearch mapping. See the [Settings > Index Patterns](#indices) section of the docs for more details.
+You may have noticed that documents appear in reverse chronological order by default, meaning the newest documents are shown first. You can change this by clicking on the **Time** column header. In fact, any column can be sorted in this manner as long as it is indexed in Elasticsearch. Note that some fields are not indexed by default, such as `_id`, and that others may have indexing disabled in the Elasticsearch mapping. See the [Settings > Index Patterns](#indices) section of the docs for more details.
 
 You can also reorder columns by placing your mouse over the column header and clicking the left and right arrows that appear.
 
 ### The Time Chart
 
-The time chart runs an Elasticsearch aggregation to show the time stamps associated with documents in the table. Hover over a bar in the chart to see the count of documents contained with in it. Clicking on the bar will narrow the selected time range to match the time range of that bar. If you hover over the background of the chart (not a bar) the cursor will become a crosshair. In this mode you can click-and-drag to select a new time range.
+The time chart runs an Elasticsearch aggregation to show the time stamps associated with documents in the table. Hover over a bar in the chart to see the count of documents contained within it. Clicking on the bar will narrow the selected time range to match the time range of that bar. If you hover over the background of the chart (not a bar) the cursor will become a crosshair. In this mode you can click-and-drag to select a new time range.
 
 ### Searching
 
@@ -99,12 +99,12 @@ See the [Querying section](#querying) of the documentation.
 
 ### Saving and reloading searches.
 
-Click the save button to save your search for later, or to reuse in other screens, such as Visualize. Saved searches can be loaded via the folder icon.
+Click the save button to save your search for later, or to reuse it in other screens, such as Visualize. Saved searches can be loaded via the folder icon.
 
 
 ### Querying
 
-The search bar at the top allows Kibana uses Elasticsearch's support for Lucene Query String syntax. Let's say we're searching web server logs that have been parsed into a few fields.
+The search bar at the top allows Kibana to use Elasticsearch's support for Lucene Query String syntax. Let's say we're searching web server logs that have been parsed into a few fields.
 
 We can of course do free text search. Find requests that contain the number 200, in any field.
 
@@ -136,6 +136,8 @@ Or HTML
 status:[400 TO 499] AND (extension:php OR extension:html)
 ```
 
+You can read more about the Lucene Query String syntax in the [Lucene documentation](https://lucene.apache.org/core/2_9_4/queryparsersyntax.html).
+
 While Lucene query syntax is simple and very powerful, Kibana also supports the full Elasticsearch, JSON based, Query DSL. See the [Elasticsearch documentation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) for usage and examples.
 <!-- /include -->
 <!-- include {"path":"docs/visualize.md"} -->
@@ -148,7 +150,7 @@ The **Visualize** app is used to design and create saved visualizations that can
 To create a new visualization either click on the visualize tab at the top of the screen or the new document button in the toolbar panel to the right of the search bar. This will start the *New Visualization Wizard*.
 
 - **Step 1:** Choose the data source for the new visualization - You have 3 options here:
-  - *"New search"* : Pick an index pattern and search as you create your visualization
+  - *"From a new search"* : Pick an index pattern and search as you create your visualization
   - *"From a saved search"* : Pick a Saved Search and create a visualization from it. If you later save the visualization it will be tied to this search. This means if you edit the search later, say in Discover, any visualization that uses it will also be updated automatically.
   - *"From an existing visualization"* Pick an existing visualization and make changes to it.
 - **Step 2:** Choose a visualization type from the list of currently available visualizations.
@@ -171,7 +173,7 @@ To the right of the search box there are a row of icons for creating new visuali
 
 #### Aggregation Builder
 
-The aggregation builder on the left of the screen is used for configuring the [metric](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html#_metrics_aggregations) and [bucket](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html#_bucket_aggregations) aggregations used to create a visualization. (If you are coming from the SQL world, buckets are similar to group-bys. Check out the [Elasticsearch docs](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html) for more info) For a bar chart or line chart the *metric* is used for the y-axis and the *buckets* are used for the x-axis, segment bar colors, and row/column splits. For pie charts the "metric" is used for the size of the slice and the *bucket* is used for the number of slices. Other visualizations may use these in new and different ways.
+The aggregation builder on the left of the screen is used for configuring the [metric](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html#_metrics_aggregations) and [bucket](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html#_bucket_aggregations) aggregations used to create a visualization. (If you are coming from the SQL world, buckets are similar to group-bys. Check out the [Elasticsearch docs](http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations.html) for more info) For a bar chart or line chart, the *metric* is used for the y-axis and the *buckets* are used for the x-axis, segment bar colors, and row/column splits. For pie charts the "metric" is used for the size of the slice and the *bucket* is used for the number of slices. Other visualizations may use these in new and different ways.
 
 For the remainder of this documentation we are going to use the bar chart as our example when discussing the features of the aggregation panel. The same concepts apply to the other visualizations but the bar chart is the workhorse of the visualization world.
 
