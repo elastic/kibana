@@ -58,7 +58,7 @@ define(function (require) {
             '</div>' +
             ''
           )(tmpScope));
-          $('body').bind('keyup', $scope.escapeEvent);
+          $('body').on('keyup', $scope.escapeEvent);
         };
 
         $scope.$watch('configSubmit', render);
@@ -77,7 +77,7 @@ define(function (require) {
         $scope.escapeEvent = function (e) {
           if (e.which === 27) {
             $scope.close();
-            $('body').unbind('keyup', $scope.escapeEvent);
+            $('body').off('keyup', $scope.escapeEvent);
           }
         };
 
