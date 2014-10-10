@@ -37,7 +37,9 @@ define(function (require) {
     resolve: {
       dash: function (savedDashboards, Notifier, $route, $location, courier) {
         return savedDashboards.get($route.current.params.id)
-        .catch(courier.redirectWhenMissing('/dashboard'));
+        .catch(courier.redirectWhenMissing({
+          'dashboard' : '/dashboard'
+        }));
       }
     }
   });

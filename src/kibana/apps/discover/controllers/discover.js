@@ -38,8 +38,8 @@ define(function (require) {
       savedSearch: function (courier, savedSearches, $route) {
         return savedSearches.get($route.current.params.id)
         .catch(courier.redirectWhenMissing({
-          'index-pattern': '/settings/indices',
-          '*': '/discover'
+          'search': '/discover',
+          'index-pattern': '/settings/objects/savedSearches/' + $route.current.params.id
         }));
       }
     }
