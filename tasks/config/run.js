@@ -30,8 +30,10 @@ module.exports = function (grunt) {
     },
     built_kibana: {
       options: {
-        wait: true,
-        quiet: false,
+        wait: false,
+        ready: /kibana server started/i,
+        quiet: true,
+        failOnError: false
       },
       cmd: './target/<%= pkg.name + "-" + pkg.version %>/bin/kibana'
     }
