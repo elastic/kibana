@@ -29,7 +29,7 @@ Currently, the [histogram formatter](https://github.com/elasticsearch/kibana4/bl
 /* jshint ignore:end */
 
 define(function (require) {
-  return function FieldFormattingService(config) {
+  return function FieldFormattingService($rootScope, config) {
     var _ = require('lodash');
     var moment = require('moment');
 
@@ -64,9 +64,9 @@ define(function (require) {
           'date'
         ],
         name: 'date',
-        convert: _.memoize(function (val) {
+        convert: function (val) {
           return moment(val).format(config.get('dateFormat'));
-        })
+        }
       },
       {
         types: [
@@ -108,8 +108,25 @@ define(function (require) {
       geo_shape:  formats.byName.string,
       string:     formats.byName.string,
       conflict:   formats.byName.string
-
     };
+
+    /**
+     * Wrap the dateFormat.convert function in memoize,
+     * as moment is a huge performance issue if not memoized.
+     *
+     * @return {void}
+     */
+    function memoizeDateFormat() {
+      var format = formats.byName.date;
+      if (!format._origConvert) {
+        format._origConvert = format.convert;
+      }
+      format.convert = _.memoize(format._origConvert);
+    }
+
+    // memoize once config is ready, and every time the date format changes
+    $rootScope.$on('init:config', memoizeDateFormat);
+    $rootScope.$on('change:config.dateFormat', memoizeDateFormat);
 
     return formats;
   };
