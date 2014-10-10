@@ -5,10 +5,18 @@
       <a confirm-click="delete()" class="btn btn-danger"><i class="fa fa-trash-o"></i> Delete {{ title }} Object</a>
     </div>
     <h1>Edit {{ title }} Object</h1>
+    <div class="bs-callout bs-callout-danger" ng-if="notFound">
+      <h4>There is a problem with that saved object</h4>
+
+      <p ng-if="notFound === 'search'">The saved search associated with this object no longer exists.</p>
+      <p ng-if="notFound === 'index-pattern'">The index pattern associated with this object no longer exists.</p>
+
+      <p>If you know what this error means, go ahead and fix it - otherwise click the delete button above.</p>
+    </div>
     <div class="bs-callout bs-callout-warning">
       <h4>Proceed with caution</h4>
-      Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn't be.
-    </div>
+
+      <p>Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn't be.</p>
     </div>
     <form name="objectForm" ng-submit="submit()">
       <div class="form-group" ng-repeat="field in fields">

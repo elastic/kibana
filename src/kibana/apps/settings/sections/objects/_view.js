@@ -69,6 +69,8 @@ define(function (require) {
           return memo;
         };
 
+        $scope.notFound = $routeParams.notFound;
+
         $scope.title = inflection.singularize(serviceObj.title);
 
         es.get({
@@ -88,8 +90,9 @@ define(function (require) {
         // we need to use the annotations to see if they have any errors. If they
         // do then we push the field.name to aceInvalidEditor variable.
         // Otherwise we remove it.
-        $scope.aceInvalidEditors = [];
         var loadedEditors = [];
+        $scope.aceInvalidEditors = [];
+
         $scope.aceLoaded = function (editor) {
           if (_.contains(loadedEditors, editor)) return;
           loadedEditors.push(editor);
