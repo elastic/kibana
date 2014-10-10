@@ -17,7 +17,11 @@
     <script src="/bower_components/requirejs/require.js?_b=@@buildNum"></script>
     <script src="/require.config.js?_b=@@buildNum"></script>
     <script>
-      require.config({ urlArgs: '_b=' + window.KIBANA_BUILD_NUM });
+      if (window.KIBANA_BUILD_NUM.substr(0, 2) !== '@@') {
+        // only cache bust if this is really the build number
+        require.config({ urlArgs: '_b=' + window.KIBANA_BUILD_NUM });
+      }
+
       require(['kibana'], function (kibana) { kibana.init(); });
     </script>
   </head>
