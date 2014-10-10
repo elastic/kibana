@@ -78,6 +78,7 @@ define(function (require) {
           if (e.which === 27) {
             $scope.close();
             $('body').off('keyup', $scope.escapeEvent);
+            $scope.$digest();
           }
         };
 
