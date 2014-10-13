@@ -4,7 +4,8 @@
     ng-if="aggParam.options"
     ng-model="params.interval"
     required
-    ng-options="opt as opt.display for opt in aggParam.options"
+    kbn-valid-options="aggParam.options.raw | filter:optionEnabled"
+    ng-options="opt as opt.display for opt in aggParam.options.raw | filter:optionEnabled"
     class="form-control"
     name="interval">
   </select>

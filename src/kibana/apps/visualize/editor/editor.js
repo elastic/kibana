@@ -4,6 +4,7 @@ define(function (require) {
   require('apps/visualize/editor/agg_filter');
 
   require('directives/saved_object_finder');
+  require('directives/valid_options');
   require('components/visualize/visualize');
   require('filters/uriescape');
 
