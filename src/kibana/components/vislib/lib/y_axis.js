@@ -37,7 +37,10 @@ define(function (require) {
 
     // Return the d3 y axis
     YAxis.prototype.getYAxis = function (height) {
+      var self = this;
       var yScale = this.getYScale(height);
+      var tickFormat = (self._attr.offset === 'expand') ?
+        d3.format('%') : d3.format('n');
 
       // y scale should never be `NaN`
       if (!yScale || _.isNaN(yScale)) {
@@ -47,13 +50,9 @@ define(function (require) {
       // Create the d3 yAxis function
       this.yAxis = d3.svg.axis()
         .scale(yScale)
-        .tickFormat(d3.format('s'))
+        .tickFormat(tickFormat)
         .ticks(this.tickScale(height))
         .orient('left');
-
-      if (this.yScale.domain()[1] <= 10) {
-        this.yAxis.tickFormat(d3.format('n'));
-      }
 
       return this.yAxis;
     };
