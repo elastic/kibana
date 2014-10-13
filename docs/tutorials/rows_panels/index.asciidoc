@@ -99,7 +99,7 @@ speech, with a few markers between acts and scenes thrown in there.
 image:./tutorials/rows_panels/buttons_expanded.png[Row buttons]
 
 The blue button collapses your rows. Panels in collapsed rows do not
-refresh data and thur require no Elasticsearch resources to keep around.
+refresh data and thus require no Elasticsearch resources to keep around.
 Collapsed rows are great for data that you don't need to see often.
 Click the blue button again to expand the row.
 
