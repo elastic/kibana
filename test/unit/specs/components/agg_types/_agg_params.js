@@ -6,6 +6,7 @@ define(function (require) {
     var BaseAggParam;
     var FieldAggParam;
     var OptionedAggParam;
+    var RegexAggParam;
 
     beforeEach(module('kibana'));
     // stub out the param classes before we get the AggParams
@@ -16,6 +17,7 @@ define(function (require) {
       BaseAggParam = Private(require('components/agg_types/param_types/base'));
       FieldAggParam = Private(require('components/agg_types/param_types/field'));
       OptionedAggParam = Private(require('components/agg_types/param_types/optioned'));
+      RegexAggParam = Private(require('components/agg_types/param_types/regex'));
     }));
 
     describe('constructor args', function () {
@@ -53,19 +55,29 @@ define(function (require) {
         expect(aggParams[0]).to.be.a(BaseAggParam);
       });
 
-      it('Uses the OptionedAggParam class for params with defined options', function () {
+      it('Uses the OptionedAggParam class for params of type "optioned"', function () {
         var aggParams = new AggParams([
           {
             name: 'interval',
-            options: [
-              { display: 'Automatic', val: 'auto' },
-              { display: '2 Hours', val: '2h' }
-            ]
+            type: 'optioned'
           }
         ]);
 
         expect(aggParams).to.have.length(1);
         expect(aggParams[0]).to.be.a(OptionedAggParam);
+        expect(aggParams[0]).to.be.a(BaseAggParam);
+      });
+
+      it('Uses the RegexAggParam class for params of type "regex"', function () {
+        var aggParams = new AggParams([
+          {
+            name: 'exclude',
+            type: 'regex'
+          }
+        ]);
+
+        expect(aggParams).to.have.length(1);
+        expect(aggParams[0]).to.be.a(RegexAggParam);
         expect(aggParams[0]).to.be.a(BaseAggParam);
       });
 
