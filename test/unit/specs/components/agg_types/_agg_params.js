@@ -52,7 +52,6 @@ define(function (require) {
 
         expect(aggParams).to.have.length(1);
         expect(aggParams[0]).to.be.a(FieldAggParam);
-        expect(aggParams[0]).to.be.a(BaseAggParam);
       });
 
       it('Uses the OptionedAggParam class for params of type "optioned"', function () {
@@ -65,7 +64,6 @@ define(function (require) {
 
         expect(aggParams).to.have.length(1);
         expect(aggParams[0]).to.be.a(OptionedAggParam);
-        expect(aggParams[0]).to.be.a(BaseAggParam);
       });
 
       it('Uses the RegexAggParam class for params of type "regex"', function () {
@@ -78,7 +76,6 @@ define(function (require) {
 
         expect(aggParams).to.have.length(1);
         expect(aggParams[0]).to.be.a(RegexAggParam);
-        expect(aggParams[0]).to.be.a(BaseAggParam);
       });
 
       it('Always converts the params to a BaseAggParam', function () {
