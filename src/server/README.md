@@ -24,7 +24,7 @@ Coming Soon...
 - **Rakefile** - This is where the `rake` tasks go
 - **README.md** - You're looking at it :D
 
-### Development Evn Setup
+### Development Environment Setup
 
 #### JRuby
 

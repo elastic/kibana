@@ -16,7 +16,7 @@ define(function (require) {
       if (typeof opts !== 'object') opts = { id: opts };
 
       SavedVis.Super.call(self, {
-        type: 'visualization',
+        type: SavedVis.type,
 
         id: opts.id,
 
@@ -45,6 +45,8 @@ define(function (require) {
         afterESResp: this._afterEsResp
       });
     }
+
+    SavedVis.type = 'visualization';
 
     SavedVis.prototype._afterEsResp = function () {
       var self = this;

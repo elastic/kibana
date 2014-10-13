@@ -6,12 +6,24 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width">
     <title>Kibana 4</title>
-    <!-- load the root require context -->
-    <script src="/bower_components/requirejs/require.js"></script>
 
-    <script src="/require.config.js"></script>
-    <script>require(['kibana'], function (kibana) { kibana.init(); });</script>
-    <link rel="stylesheet" href="/styles/main.css" >
+    <script>
+      window.KIBANA_VERSION='@@version';
+      window.KIBANA_BUILD_NUM='@@buildNum';
+      window.KIBANA_COMMIT_SHA='@@commitSha';
+    </script>
+
+    <link rel="stylesheet" href="/styles/main.css?_b=@@buildNum">
+    <script src="/bower_components/requirejs/require.js?_b=@@buildNum"></script>
+    <script src="/require.config.js?_b=@@buildNum"></script>
+    <script>
+      if (window.KIBANA_BUILD_NUM.substr(0, 2) !== '@@') {
+        // only cache bust if this is really the build number
+        require.config({ urlArgs: '_b=' + window.KIBANA_BUILD_NUM });
+      }
+
+      require(['kibana'], function (kibana) { kibana.init(); });
+    </script>
   </head>
   <body ng-controller="kibana" ng-class="'application-'+activeApp">
     <kbn-notifications list="notifList"></kbn-notifications>

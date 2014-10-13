@@ -47,7 +47,8 @@ define(function (require) {
     ];
 
     SearchSource.prototype.index = function (indexPattern) {
-      if (indexPattern == null) return this._state.index;
+      if (indexPattern === undefined) return this._state.index;
+      if (indexPattern === null) return delete this._state.index;
       if (!indexPattern || typeof indexPattern.toIndexList !== 'function') {
         throw new TypeError('expected indexPattern to be an IndexPattern duck.');
       }

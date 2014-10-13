@@ -1,5 +1,6 @@
 define(function (require) {
   var errors = require('errors');
+  var qs = require('utils/query_string');
 
   return function RedirectWhenMissingFn($location, kbnUrl, Notifier) {
     var SavedObjectNotFound = errors.SavedObjectNotFound;
@@ -25,6 +26,8 @@ define(function (require) {
 
         var url = mapping[err.savedObjectType] || mapping['*'];
         if (!url) url = '/';
+
+        url = qs.replaceParamInUrl(url, 'notFound', err.savedObjectType);
 
         notify.error(err);
         kbnUrl.change(url);

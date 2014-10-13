@@ -38,8 +38,8 @@ define(function (require) {
       savedSearch: function (courier, savedSearches, $route) {
         return savedSearches.get($route.current.params.id)
         .catch(courier.redirectWhenMissing({
-          'index-pattern': '/settings/indices',
-          '*': '/discover'
+          'search': '/discover',
+          'index-pattern': '/settings/objects/savedSearches/' + $route.current.params.id
         }));
       }
     }
@@ -460,12 +460,15 @@ define(function (require) {
       .then(function (indexPattern) {
         $scope.opts.timefield = indexPattern.timeFieldName;
 
-        if (indexPattern !== $scope.searchSource.get('index')) {
-          // set the index on the savedSearch
-          $scope.searchSource.index(indexPattern);
+        // are we updating the indexPattern?
+        var refresh = indexPattern !== $scope.searchSource.get('index');
+
+        // make sure the pattern is set on the "leaf" searchSource, not just the root
+        $scope.searchSource.index(indexPattern);
+
+        if (refresh) {
           delete $scope.fields;
           delete $scope.columns;
-
           setFields();
         }
       });

@@ -46,7 +46,7 @@
             </div>
 
             <div class="item-title">
-              <a ng-click="open(item)">{{ item.title }}</a>
+              <a ng-click="edit(service, item)">{{ item.title }}</a>
             </div>
           </li>
           <li ng-if="!service.data.length" class="empty">No "{{service.title}}" found.</li>

@@ -54,7 +54,6 @@ define(function (require) {
         };
 
         $scope.edit = function (service, item) {
-          console.log(service, item);
           var params = {
             service: service.service,
             id: item.id
