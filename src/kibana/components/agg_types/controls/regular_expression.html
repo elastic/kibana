@@ -1,0 +1,15 @@
+<div class="form-group">
+  <label>{{ aggParam.name | label }}</label>
+  <input
+    type="text"
+    class="form-control"
+    ng-model="params[aggParam.name].pattern"
+  >
+  <div class="form-group">
+    <div ng-repeat="flag in ['CANON_EQ', 'CASE_INSENSITIVE', 'COMMENTS', 'DOTALL', 'LITERAL', 'MULTILINE', 'UNICODE_CASE', 'UNICODE_CHARACTER_CLASS', 'UNIX_LINES']">
+      <input
+        type="checkbox"
+        ng-model="params[aggParam.name].flags[flag]"> {{ flag }}
+    </div>
+  </div>
+</div>
