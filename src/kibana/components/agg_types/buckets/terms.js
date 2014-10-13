@@ -22,6 +22,7 @@ define(function (require) {
         },
         {
           name: 'order',
+          type: 'optioned',
           options: [
             { display: 'Top', val: 'desc' },
             { display: 'Bottom', val: 'asc' }

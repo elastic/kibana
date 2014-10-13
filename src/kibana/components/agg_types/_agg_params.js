@@ -36,7 +36,7 @@ define(function (require) {
           if (param.name === 'field') {
             return new FieldAggParam(param);
           }
-          else if (param.options) {
+          else if (param.type === 'optioned') {
             return new OptionedAggParam(param);
           }
           else {
