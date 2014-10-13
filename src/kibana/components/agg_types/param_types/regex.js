@@ -20,7 +20,30 @@ define(function (require) {
      * @return {undefined}
      */
     RegexAggParam.prototype.write = function (aggConfig, output) {
-      output.params[this.name] = aggConfig.params[this.name];
+      var param = aggConfig.params[this.name];
+
+      // clear aggParam if pattern is not set
+      if (!param || !param.pattern || !param.pattern.length) {
+        delete output.params[this.name];
+        return;
+      }
+
+      var obj = {
+        pattern: param.pattern
+      };
+
+      // include any selected flags
+      var flags = param.flags;
+      var selectedFlags = [];
+      Object.keys(flags).forEach(function (key) {
+        if (flags[key]) selectedFlags.push(key);
+      });
+
+      if (selectedFlags.length) {
+        obj.flags = selectedFlags.join('|');
+      }
+
+      output.params[this.name] = obj;
     };
 
     return RegexAggParam;
