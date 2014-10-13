@@ -1,6 +1,7 @@
 define(function (require) {
   return function TermsAggDefinition(Private) {
     var _ = require('lodash');
+    require('filters/label');
     var AggType = Private(require('components/agg_types/_agg_type'));
     var bucketCountBetween = Private(require('components/agg_types/buckets/_bucket_count_between'));
 
@@ -55,6 +56,12 @@ define(function (require) {
               output.subAggs.push(metricAggConfig);
             }
           }
+        },
+        {
+          name: 'exclude',
+          type: 'regex',
+          advanced: true,
+          editor: require('text!components/agg_types/controls/regular_expression.html')
         }
       ]
     });

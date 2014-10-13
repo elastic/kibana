@@ -6,6 +6,7 @@ define(function (require) {
     var BaseAggParam = Private(require('components/agg_types/param_types/base'));
     var FieldAggParam = Private(require('components/agg_types/param_types/field'));
     var OptionedAggParam = Private(require('components/agg_types/param_types/optioned'));
+    var RegexAggParam = Private(require('components/agg_types/param_types/regex'));
 
     /**
      * Wraps a list of {{#crossLink "AggParam"}}{{/crossLink}} objects; owned by an {{#crossLink "AggType"}}{{/crossLink}}
@@ -38,6 +39,9 @@ define(function (require) {
           }
           else if (param.type === 'optioned') {
             return new OptionedAggParam(param);
+          }
+          else if (param.type === 'regex') {
+            return new RegexAggParam(param);
           }
           else {
             return new BaseAggParam(param);
