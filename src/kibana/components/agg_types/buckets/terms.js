@@ -62,6 +62,12 @@ define(function (require) {
           type: 'regex',
           advanced: true,
           editor: require('text!components/agg_types/controls/regular_expression.html')
+        },
+        {
+          name: 'include',
+          type: 'regex',
+          advanced: true,
+          editor: require('text!components/agg_types/controls/regular_expression.html')
         }
       ]
     });
