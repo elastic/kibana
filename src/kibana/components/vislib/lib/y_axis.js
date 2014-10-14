@@ -39,7 +39,7 @@ define(function (require) {
     YAxis.prototype.getYAxis = function (height) {
       var self = this;
       var yScale = this.getYScale(height);
-      var tickFormat = (self._attr.offset === 'expand') ?
+      var tickFormat = (self._attr.mode === 'percentage') ?
         d3.format('%') : d3.format('n');
 
       // y scale should never be `NaN`

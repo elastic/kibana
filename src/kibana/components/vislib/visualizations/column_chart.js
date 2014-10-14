@@ -107,9 +107,9 @@ define(function (require) {
      * @returns {D3.UpdateSelection}
      */
     ColumnChart.prototype.updateBars = function (bars) {
-      var offset = this._attr.offset;
+      var offset = this._attr.mode;
 
-      if (offset === 'group') {
+      if (offset === 'grouped') {
         return this.addGroupedBars(bars);
       }
       return this.addStackedBars(bars);

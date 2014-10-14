@@ -17,6 +17,16 @@ define(function (require) {
         return new Data(data, attr);
       }
 
+      var offset;
+
+      if (attr.mode === 'stacked') {
+        offset = 'zero';
+      } else if (attr.mode === 'percentage') {
+        offset = 'expand';
+      } else {
+        offset = 'grouped';
+      }
+
       this.data = data;
       this._attr = _.defaults(attr || {}, {
 
@@ -24,7 +34,7 @@ define(function (require) {
         stack: d3.layout.stack()
           .x(function (d) { return d.x; })
           .y(function (d) { return d.y; })
-          .offset(attr.offset || 'zero')
+          .offset(offset || 'zero')
       });
     }
 
@@ -122,19 +132,16 @@ define(function (require) {
     // TODO: need to make this more generic
     Data.prototype.shouldBeStacked = function (series) {
       // Series should be an array
-      if (this._attr.type === 'histogram' && series.length > 1) {
-        return true;
-      }
-      return false;
+      return (this._attr.type === 'histogram' && series.length > 1);
     };
 
     // Calculate the max y value from this.dataArray
     Data.prototype.getYMaxValue = function () {
       var self = this;
       var arr = [];
-      var grouped = (self._attr.offset === 'group');
+      var grouped = (self._attr.mode === 'grouped');
 
-      if (self._attr.offset === 'expand') {
+      if (self._attr.mode === 'percentage') {
         return 1;
       }
 
