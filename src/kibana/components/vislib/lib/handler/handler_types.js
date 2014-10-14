@@ -4,6 +4,7 @@ define(function (require) {
     return {
       histogram: Private(require('components/vislib/lib/handler/types/column')),
       line: Private(require('components/vislib/lib/handler/types/column')),
+      area: Private(require('components/vislib/lib/handler/types/column')),
       pie: Private(require('components/vislib/lib/handler/types/pie'))
     };
   };

@@ -56,7 +56,7 @@ define(function (require) {
         if (error instanceof errors.ContainerTooSmall) {
           this.handler.error(error.message);
         } else {
-          console.error(error.message);
+          console.error(error.stack);
         }
       }
     };

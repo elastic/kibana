@@ -3,8 +3,9 @@ define(function (require) {
     // visLib visualization types
     return {
       histogram: Private(require('components/vislib/visualizations/column_chart')),
-      pie: Private(require('components/vislib/visualizations/pie_chart')),
-      line: Private(require('components/vislib/visualizations/line_chart'))
+      line: Private(require('components/vislib/visualizations/line_chart')),
+      area: Private(require('components/vislib/visualizations/area_chart')),
+      pie: Private(require('components/vislib/visualizations/pie_chart'))
     };
   };
 
