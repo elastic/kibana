@@ -6,6 +6,20 @@ define(function (require) {
 
     _(RegexAggParam).inherits(BaseAggParam);
     function RegexAggParam(config) {
+      // Java RegExp flags
+      var flags = {
+        CANON_EQ: false,
+        CASE_INSENSITIVE: false,
+        COMMENTS: false,
+        DOTALL: false,
+        LITERAL: false,
+        MULTILINE: false,
+        UNICODE_CASE: false,
+        UNICODE_CHARACTER_CLASS: false,
+        UNIX_LINES: false
+      };
+
+      _.defaults(config, { pattern: '', flags: flags });
       RegexAggParam.Super.call(this, config);
     }
 

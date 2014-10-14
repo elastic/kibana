@@ -6,7 +6,7 @@
     ng-model="params[aggParam.name].pattern"
   >
   <div class="form-group">
-    <div ng-repeat="flag in ['CANON_EQ', 'CASE_INSENSITIVE', 'COMMENTS', 'DOTALL', 'LITERAL', 'MULTILINE', 'UNICODE_CASE', 'UNICODE_CHARACTER_CLASS', 'UNIX_LINES']">
+    <div ng-repeat="(flag, i) in aggParam.flags">
       <input
         type="checkbox"
         ng-model="params[aggParam.name].flags[flag]"> {{ flag }}
