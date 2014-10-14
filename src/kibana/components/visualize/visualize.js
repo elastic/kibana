@@ -7,7 +7,7 @@ define(function (require) {
     require('css!components/visualize/visualize.css');
     var $ = require('jquery');
     var _ = require('lodash');
-    var visTypes = Private(require('components/vis_types/index'));
+    var visTypes = Private(require('registry/vis_types'));
     var buildChartData = Private(require('components/visualize/_build_chart_data'));
 
     var notify = new Notifier({

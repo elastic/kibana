@@ -54,7 +54,7 @@ define(function (require) {
 
     timefilter.enabled = false;
 
-    $scope.visTypes = Private(require('components/vis_types/index'));
+    $scope.visTypes = Private(require('registry/vis_types'));
     $scope.visTypeUrl = function (visType) {
       var query = _.defaults({
         type: visType.name
