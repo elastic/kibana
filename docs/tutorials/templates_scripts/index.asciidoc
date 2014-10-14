@@ -24,7 +24,7 @@ found on the query and filter objects of the `logstash.json` dashboard.
 Templates use handlebar syntax that allow you insert javascript clauses
 into your json. URL parameters are available on the `ARGS` object. For
 example, a snippet from `logstash.json`'s
-https://github.com/elasticsearch/kibana/blob/master/src/app/dashboards/logstash.json[(on
+https://github.com/elasticsearch/kibana/blob/3.0/src/app/dashboards/logstash.json[(on
 github)] query and filter services:
 
 [source,json]
@@ -70,7 +70,7 @@ more complex to build. The goal in a scripted dashboard is to build and
 return a javascript object that describes the dashboard schema. A well
 commented example scripted dashboard can be found in
 `app/dashboards/logstash.js`
-https://github.com/elasticsearch/kibana/blob/master/src/app/dashboards/logstash.js[(on
+https://github.com/elasticsearch/kibana/blob/3.0/src/app/dashboards/logstash.js[(on
 github)]. This file accomplishes the same goals as `logstash.json`, but
 with the added power of scripts we can do things like split queries on
 commas:
@@ -92,7 +92,7 @@ http://yourserver/index.html#/dashboard/script/logstash.js?query=status:403!stat
 --------------------------------------------------------------------------------------------------------
 
 We can see this happening in `logstash.js`
-https://github.com/elasticsearch/kibana/blob/master/src/app/dashboards/logstash.js[(on
+https://github.com/elasticsearch/kibana/blob/3.0/src/app/dashboards/logstash.js[(on
 github)] here:
 
 [source,javascript]
@@ -122,5 +122,5 @@ if(!_.isUndefined(ARGS.query)) {
 
 This dashboard takes more parameters than this, all of which are
 described in the comments at the top of `logstash.js`
-https://github.com/elasticsearch/kibana/blob/master/src/app/dashboards/logstash.js[(on
+https://github.com/elasticsearch/kibana/blob/3.0/src/app/dashboards/logstash.js[(on
 github)]
