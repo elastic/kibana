@@ -1,8 +1,8 @@
 define(function (require) {
   var _ = require('lodash');
-  var Registry = require('utils/registry/registry');
+  var IndexedArray = require('utils/indexed_array/index');
 
-  // this is generally a data-structure that Registry is good for managing
+  // this is generally a data-structure that IndexedArray is good for managing
   var users = [
     { name: 'John', id: 69, username: 'beast', group: 'admins' },
     { name: 'Anon', id:  0, username: 'shhhh', group: 'secret' },
@@ -10,20 +10,20 @@ define(function (require) {
     { name: 'Mary', id: 55, username: 'sheep', group: 'editor' }
   ];
 
-  // this is how we used to accomplish this, before Registry
+  // this is how we used to accomplish this, before IndexedArray
   users.byName = _.indexBy(users, 'name');
   users.byUsername = _.indexBy(users, 'username');
   users.byGroup = _.groupBy(users, 'group');
   users.inIdOrder = _.sortBy(users, 'id');
 
-  // then things started becoming unruly... so Registry!
+  // then things started becoming unruly... so IndexedArray!
 
-  describe('Registry', function () {
+  describe('IndexedArray', function () {
     describe('Basics', function () {
       var reg;
 
       beforeEach(function () {
-        reg = new Registry();
+        reg = new IndexedArray();
       });
 
       it('Extends Array', function () {
@@ -42,7 +42,7 @@ define(function (require) {
 
     describe('Indexing', function () {
       it('provides the initial set', function () {
-        var reg = new Registry({
+        var reg = new IndexedArray({
           initialSet: [1, 2, 3]
         });
 
@@ -54,7 +54,7 @@ define(function (require) {
       });
 
       it('indexes the initial set', function () {
-        var reg = new Registry({
+        var reg = new IndexedArray({
           index: ['username'],
           initialSet: users
         });
@@ -69,7 +69,7 @@ define(function (require) {
         var otherUsers = users.slice(1);
 
         // start off with all but the first
-        var reg = new Registry({
+        var reg = new IndexedArray({
           group: ['group'],
           order: ['id'],
           initialSet: otherUsers
@@ -85,7 +85,7 @@ define(function (require) {
 
       it('updates indices after values are removed', function () {
         // start off with all
-        var reg = new Registry({
+        var reg = new IndexedArray({
           group: ['group'],
           order: ['id'],
           initialSet: users
@@ -119,7 +119,7 @@ define(function (require) {
         // do the move
         var move = function (arr) { arr.splice(toI, 0, arr.splice(fromI, 1)[0]); };
 
-        var reg = new Registry({
+        var reg = new IndexedArray({
           index: ['username'],
           initialSet: rawUsers
         });

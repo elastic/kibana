@@ -1,7 +1,7 @@
 define(function (require) {
   return function AggParamsFactory(Private) {
     var _ = require('lodash');
-    var Registry = require('utils/registry/registry');
+    var IndexedArray = require('utils/indexed_array/index');
 
     var BaseAggParam = Private(require('components/agg_types/param_types/base'));
     var FieldAggParam = Private(require('components/agg_types/param_types/field'));
@@ -17,10 +17,10 @@ define(function (require) {
      *
      * @class AggParams
      * @constructor
-     * @extends Registry
+     * @extends IndexedArray
      * @param {object[]} params - array of params that get new-ed up as AggParam objects as descibed above
      */
-    _(AggParams).inherits(Registry);
+    _(AggParams).inherits(IndexedArray);
     function AggParams(params) {
       if (_.isPlainObject(params)) {
         // convert the names: details format into details[].name

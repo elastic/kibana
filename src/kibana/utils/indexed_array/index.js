@@ -2,8 +2,8 @@ define(function (require) {
 
   var _ = require('lodash');
 
-  var pathGetter = require('utils/registry/_path_getter');
-  var inflector = require('utils/registry/_inflector');
+  var pathGetter = require('utils/indexed_array/_path_getter');
+  var inflector = require('utils/indexed_array/_inflector');
 
   var inflectIndex = inflector('by');
   var inflectOrder = inflector('in', 'Order');
@@ -14,21 +14,21 @@ define(function (require) {
    * Generic extension of Array class, which will index (and reindex) the
    * objects it contains based on their properties.
    *
-   * @class  Registry
+   * @class  IndexedArray
    * @module utils
    * @constructor
    * @param {object}   [config]            - describes the properties of this registry object
    * @param {string[]} [config.index]      - a list of props/paths that should be used to index the docs.
    * @param {string[]} [config.group]      - a list of keys/paths to group docs by.
    * @param {string[]} [config.order]      - a list of keys/paths to order the keys by.
-   * @param {object[]} [config.initialSet] - the initial dataset the Registry should contain.
+   * @param {object[]} [config.initialSet] - the initial dataset the IndexedArray should contain.
    * @param {boolean}  [config.immutable]  - a flag that hints to people reading the implementation
-   *                                       that this Registry should not be modified. It's modification
+   *                                       that this IndexedArray should not be modified. It's modification
    *                                       methods are also removed
    */
-  _(Registry).inherits(Array);
-  function Registry(config) {
-    Registry.Super.call(this);
+  _(IndexedArray).inherits(Array);
+  function IndexedArray(config) {
+    IndexedArray.Super.call(this);
     config = config || {};
     this.raw = [];
 
@@ -63,7 +63,7 @@ define(function (require) {
    *
    * @returns {string[]}        - the public keys of all indices created
    */
-  Registry.prototype._setupIndices = function (props, inflect, op) {
+  IndexedArray.prototype._setupIndices = function (props, inflect, op) {
     // shortcut for empty props
     if (!props || props.length === 0) return;
 
@@ -102,7 +102,7 @@ define(function (require) {
    *
    * @return {undefined}
    */
-  Registry.prototype._clearIndices = function () {
+  IndexedArray.prototype._clearIndices = function () {
     var self = this;
     self._indexNames.forEach(function (name) {
       self[name] = CLEAR_CACHE;
@@ -112,7 +112,7 @@ define(function (require) {
   /**
    * Copy all array methods which have side-effects, and wrap them
    * in a function that will reindex after each call, as well
-   * as duplex the operation to the .raw version of the Registry.
+   * as duplex the operation to the .raw version of the IndexedArray.
    *
    * @param  {[type]} method [description]
    * @return {[type]}        [description]
@@ -120,7 +120,7 @@ define(function (require) {
   'pop push shift splice unshift reverse'.split(' ').forEach(function (method) {
     var orig = Array.prototype[method];
 
-    Registry.prototype[method] = function (/* args... */) {
+    IndexedArray.prototype[method] = function (/* args... */) {
       // call the original method with this context
       orig.apply(this, arguments);
 
@@ -136,9 +136,9 @@ define(function (require) {
    * provide a hook for the JSON serializer
    * @return {array} - a plain, vanilla array with our same data
    */
-  Registry.prototype.toJSON = function () {
+  IndexedArray.prototype.toJSON = function () {
     return this.raw;
   };
 
-  return Registry;
+  return IndexedArray;
 });

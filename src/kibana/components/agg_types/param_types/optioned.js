@@ -2,7 +2,7 @@ define(function (require) {
   return function OptionedAggParamFactory(Private) {
     var _ = require('lodash');
 
-    var Registry = require('utils/registry/registry');
+    var IndexedArray = require('utils/indexed_array/index');
     var editorHtml = require('text!components/agg_types/controls/field.html');
     var BaseAggParam = Private(require('components/agg_types/param_types/base'));
 
@@ -10,7 +10,7 @@ define(function (require) {
     function OptionedAggParam(config) {
       OptionedAggParam.Super.call(this, config);
 
-      this.options = new Registry({
+      this.options = new IndexedArray({
         index: ['val'],
         immutable: true,
         initialSet: this.options

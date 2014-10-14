@@ -1,7 +1,7 @@
 define(function (require) {
   return function VisTypeSchemasFactory(Private) {
     var _ = require('lodash');
-    var Registry = require('utils/registry/registry');
+    var IndexedArray = require('utils/indexed_array/index');
     var AggParams = Private(require('components/agg_types/_agg_params'));
 
     function Schemas(schemas) {
@@ -37,7 +37,7 @@ define(function (require) {
           return schema;
         })
         .tap(function (schemas) {
-          self.all = new Registry({
+          self.all = new IndexedArray({
             index: ['name'],
             group: ['group'],
             immutable: true,
@@ -46,7 +46,7 @@ define(function (require) {
         })
         .groupBy('group')
         .forOwn(function (group, groupName) {
-          self[groupName] = new Registry({
+          self[groupName] = new IndexedArray({
             index: ['name'],
             immutable: true,
             initialSet: group

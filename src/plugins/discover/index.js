@@ -5,4 +5,12 @@ define(function (require, module, exports) {
   require('plugins/discover/components/field_chooser/field_chooser');
   require('plugins/discover/controllers/discover');
   require('css!plugins/discover/styles/main.css');
+
+  var apps = require('registry/apps');
+  apps.register(function DiscoverAppModule() {
+    return {
+      name: 'Discover',
+      route: '/discover'
+    };
+  });
 });
