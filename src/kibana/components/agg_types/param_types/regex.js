@@ -33,14 +33,15 @@ define(function (require) {
       };
 
       // include any selected flags
-      var flags = param.flags;
-      var selectedFlags = [];
-      Object.keys(flags).forEach(function (key) {
-        if (flags[key]) selectedFlags.push(key);
-      });
+      if (param.flags) {
+        var selectedFlags = [];
+        Object.keys(param.flags).forEach(function (key) {
+          if (param.flags[key]) selectedFlags.push(key);
+        });
 
-      if (selectedFlags.length) {
-        obj.flags = selectedFlags.join('|');
+        if (selectedFlags.length) {
+          obj.flags = selectedFlags.join('|');
+        }
       }
 
       output.params[this.name] = obj;
