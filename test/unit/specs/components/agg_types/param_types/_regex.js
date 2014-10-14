@@ -73,7 +73,6 @@ define(function (require) {
         expect(output.params).to.have.property(paramName);
         expect(output.params[paramName]).to.have.property('flags');
         expect(typeof output.params[paramName].flags).to.be('string');
-        expect(/TEST2/.test(output.params[paramName].flags)).to.be(false);
         expect(output.params[paramName].flags).to.be('TEST1|TEST3');
       });
     });
