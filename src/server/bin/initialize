@@ -82,7 +82,7 @@ if ENV['RACK_ENV'] == ('production')
   Kibana.global_settings[:plugin_folder] = File.expand_path("#{dir}/../../plugins/")
 else
   Kibana.global_settings[:public_folder] = File.expand_path("#{dir}/../../kibana/")
-  Kibana.global_settings[:plugin_folder] = File.expand_path("#{dir}/../../../plugins/")
+  Kibana.global_settings[:plugin_folder] = File.expand_path("#{dir}/../../plugins/")
 end
 
 # Add the root of the project to the load path
