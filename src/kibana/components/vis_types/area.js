@@ -10,7 +10,8 @@ define(function (require) {
       vislibParams: {
         shareYAxis: true,
         addTooltip: true,
-        addLegend: true
+        addLegend: true,
+        mode: 'wiggle'
       },
       schemas: new Schemas([
         {

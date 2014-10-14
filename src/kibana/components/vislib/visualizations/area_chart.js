@@ -24,6 +24,8 @@ define(function (require) {
         return new AreaChart(handler, chartEl, chartData);
       }
 
+      AreaChart.Super.apply(this, arguments);
+
       var raw;
       var fieldIndex;
 
@@ -33,10 +35,8 @@ define(function (require) {
       }
 
       this.fieldFormatter = raw && raw[fieldIndex] ? raw[fieldIndex].field.format.convert : function (d) { return d; };
-
-      AreaChart.Super.apply(this, arguments);
-      // Column chart specific attributes
       this._attr = _.defaults(handler._attr || {}, {
+
         xValue: function (d) { return d.x; },
         yValue: function (d) { return d.y; }
       });
@@ -59,16 +59,38 @@ define(function (require) {
       }));
     };
 
-    AreaChart.prototype.addBars = function (svg, layers) {
+    AreaChart.prototype.addPath = function (svg, layers) {
       var self = this;
-      var data = this.chartData;
+      var ordered = this.handler.data.get('ordered');
+      var isTimeSeries = (ordered && ordered.date);
+      var isOverlapping = (self._attr.mode === 'overlap');
       var color = this.handler.data.getColorFunc();
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
-      var tooltip = this.tooltip;
-      var isTooltip = this._attr.addTooltip;
+      var height = yScale.range()[0];
+
+      var area = d3.svg.area()
+        .x(function (d) {
+          if (isTimeSeries) {
+            return xScale(d.x);
+          }
+          return xScale(d.x) + xScale.rangeBand() / 2;
+        })
+        .y0(function (d) {
+          if (isOverlapping) {
+            return height;
+          }
+          return yScale(d.y0);
+        })
+        .y1(function (d) {
+          if (isOverlapping) {
+            return yScale(d.y);
+          }
+          return yScale(d.y0 + d.y);
+        });
+
       var layer;
-      var bars;
+      var path;
 
       // Data layers
       layer = svg.selectAll('.layer')
@@ -78,68 +100,76 @@ define(function (require) {
           return i;
         });
 
-      // Append the bars
-      bars = layer.selectAll('rect')
-        .data(function (d) {
-          return d;
-        });
-
-      // exit
-      bars.exit().remove();
-
-      // enter
-      bars.enter()
-        .append('rect')
-        .attr('class', function (d) {
-          return self.colorToClass(color(self.fieldFormatter(d.label)));
-        })
-        .attr('fill', function (d) {
-          return color(self.fieldFormatter(d.label));
-        });
+      // Append path
+      path = layer.append('path')
+      .attr('class', function (d) {
+        return self.colorToClass(color(self.fieldFormatter(d[0].label)));
+      })
+      .style('fill', function (d) {
+        return color(self.fieldFormatter(d[0].label));
+      });
 
       // update
-      bars
-        .attr('x', function (d) {
-          return xScale(d.x);
-        })
-        .attr('width', function () {
-          var barWidth;
-          var barSpacing;
+      path.attr('d', function (d) {
+        return area(d);
+      });
 
-          if (data.ordered && data.ordered.date) {
-            barWidth = xScale(data.ordered.min + data.ordered.interval) - xScale(data.ordered.min);
-            barSpacing = barWidth * 0.25;
-
-            return barWidth - barSpacing;
-          }
-
-          return xScale.rangeBand();
-        })
-        .attr('y', function (d) {
-          return yScale(d.y0 + d.y);
-        })
-        .attr('height', function (d) {
-          return yScale(d.y0) - yScale(d.y0 + d.y);
-        });
-
-      // Add tooltip
-      if (isTooltip) {
-        bars.call(tooltip.render());
-      }
-
-      return bars;
+      return path;
     };
 
-    AreaChart.prototype.addLineEvents = function (svg, bars, brush) {
+    AreaChart.prototype.addLines = function (svg, data) {
+      var self = this;
+      var xScale = this.handler.xAxis.xScale;
+      var yScale = this.handler.yAxis.yScale;
+      var xAxisFormatter = this.handler.data.get('xAxisFormatter');
+      var color = this.handler.data.getColorFunc();
+      var ordered = this.handler.data.get('ordered');
+      var interpolate = this._attr.interpolate;
+      var line = d3.svg.line()
+        .interpolate(interpolate)
+        .x(function x(d) {
+          if (ordered && ordered.date) {
+            return xScale(d.x);
+          }
+          return xScale(d.x) + xScale.rangeBand() / 2;
+        })
+        .y(function y(d) {
+          return yScale(d.y);
+        });
+      var lines;
+
+      lines = svg
+        .selectAll('.lines')
+        .data(data)
+        .enter()
+        .append('g')
+        .attr('class', 'lines');
+
+      lines.append('path')
+        .attr('class', function lineClass(d) {
+          return self.colorToClass(color(self.fieldFormatter(d.label)));
+        })
+        .attr('d', function lineD(d) {
+          return line(d.values);
+        })
+        .attr('fill', 'none')
+        .attr('stroke', function lineStroke(d) {
+          return color(self.fieldFormatter(d.label));
+        })
+        .attr('stroke-width', 2);
+
+      return lines;
+    };
+
+    AreaChart.prototype.addCircleEvents = function (circles) {
       var events = this.events;
       var dispatch = this.events._attr.dispatch;
-      var addBrush = this._attr.addBrushing;
-      var xScale = this.handler.xAxis.xScale;
-      var startXInv;
 
-      bars
-        .on('mouseover.bar', function (d, i) {
-          d3.select(this)
+      circles
+        .on('mouseover.circle', function mouseOverCircle(d, i) {
+          var circle = this;
+
+          d3.select(circle)
             .classed('hover', true)
             .style('stroke', '#333')
             .style('cursor', 'pointer');
@@ -147,31 +177,105 @@ define(function (require) {
           dispatch.hover(events.eventResponse(d, i));
           d3.event.stopPropagation();
         })
-        .on('mousedown.bar', function () {
-          if (addBrush) {
-            var bar = d3.select(this);
-            var startX = d3.mouse(svg.node());
-            startXInv = xScale.invert(startX[0]);
-
-            // Reset the brush value
-            brush.extent([startXInv, startXInv]);
-
-            // Magic!
-            // Need to call brush on svg to see brush when brushing
-            // while on top of bars.
-            // Need to call brush on bar to allow the click event to be registered
-            svg.call(brush);
-            bar.call(brush);
-          }
-        })
-        .on('click.bar', function (d, i) {
+        .on('click.circle', function clickCircle(d, i) {
           dispatch.click(events.eventResponse(d, i));
           d3.event.stopPropagation();
         })
-        .on('mouseout.bar', function () {
-          d3.select(this).classed('hover', false)
+        .on('mouseout.circle', function mouseOutCircle() {
+          var circle = this;
+
+          d3.select(circle)
+            .classed('hover', false)
             .style('stroke', null);
         });
+    };
+
+    AreaChart.prototype.addCircles = function (svg, data) {
+      var self = this;
+      var color = this.handler.data.getColorFunc();
+      var xScale = this.handler.xAxis.xScale;
+      var yScale = this.handler.yAxis.yScale;
+      var ordered = this.handler.data.get('ordered');
+      var circleRadius = 4;
+      var circleStrokeWidth = 1;
+      var tooltip = this.tooltip;
+      var isTooltip = this._attr.addTooltip;
+      var layer;
+      var circles;
+
+      layer = svg.selectAll('.points')
+        .data(data)
+        .enter()
+        .append('g')
+        .attr('class', 'points');
+
+      // Append the bars
+      circles = layer
+        .selectAll('rect')
+        .data(function appendData(d) {
+          return d;
+        });
+
+      // exit
+      circles
+        .exit()
+        .remove();
+
+      // enter
+      circles
+        .enter()
+        .append('circle')
+        .attr('class', function circleClass(d) {
+          return self.colorToClass(color(self.fieldFormatter(d.label)));
+        })
+        .attr('fill', function (d) {
+          return color(self.fieldFormatter(d.label));
+        })
+        .attr('stroke', function strokeColor(d) {
+          return color(self.fieldFormatter(d.label));
+        })
+        .attr('stroke-width', circleStrokeWidth);
+
+      // update
+      circles
+        .attr('cx', function cx(d) {
+          if (ordered && ordered.date) {
+            return xScale(d.x);
+          }
+          return xScale(d.x) + xScale.rangeBand() / 2;
+        })
+        .attr('cy', function cy(d) {
+          return yScale(d.y);
+        })
+        .attr('r', circleRadius);
+
+      // Add tooltip
+      if (isTooltip) {
+        circles.call(tooltip.render());
+      }
+
+      return circles;
+    };
+
+    AreaChart.prototype.addClipPath = function (svg, width, height) {
+      // Prevents circles from being clipped at the top of the chart
+      var clipPathBuffer = 5;
+      var startX = 0;
+      var startY = 0 - clipPathBuffer;
+      var id = 'chart-area' + _.uniqueId();
+
+      // Creating clipPath
+      return svg
+        .attr('clip-path', 'url(#' + id + ')')
+        .append('clipPath')
+        .attr('id', id)
+        .append('rect')
+        .attr('x', startX)
+        .attr('y', startY)
+        .attr('width', width)
+        // Adding clipPathBuffer to height so it doesn't
+        // cutoff the lower part of the chart
+        .attr('height', height + clipPathBuffer);
     };
 
     AreaChart.prototype.draw = function () {
@@ -191,7 +295,8 @@ define(function (require) {
       var height;
       var layers;
       var brush;
-      var bars;
+      var lines;
+      var circles;
 
       return function (selection) {
         selection.each(function (data) {
@@ -216,16 +321,23 @@ define(function (require) {
             .append('g')
             .attr('transform', 'translate(0,' + margin.top + ')');
 
-          // addBrush canvas and return brush function
-          brush = self.events.addBrush(xScale, svg);
+          // add clipPath to hide circles when they go out of bounds
+          self.addClipPath(svg, width, height);
 
-          // add bars
-          bars = self.addBars(svg, layers);
+          // addBrush canvas
+          self.events.addBrush(xScale, svg);
 
-          // add events to bars
-          if (isEvents) {
-            self.addBarEvents(svg, bars, brush);
-          }
+          // add path
+          self.addPath(svg, layers);
+
+//          // add lines
+//          lines = self.addLines(svg, data.series);
+//
+//          // add circles
+//          circles = self.addCircles(svg, layers);
+
+          // add click and hover events to circles
+//          self.addCircleEvents(circles);
 
           // chart base line
           var line = svg.append('line')

@@ -17,6 +17,19 @@ define(function (require) {
         return new Data(data, attr);
       }
 
+      var offset;
+
+      if (attr.mode === 'stacked') {
+        offset = 'zero';
+      } else if (attr.mode === 'percentage') {
+        offset = 'expand';
+      } else if (attr.mode === 'grouped') {
+        offset = 'group';
+      } else {
+        offset = attr.mode;
+      }
+
+
       this.data = data;
       this._attr = attr;
       // d3 stack function
@@ -25,7 +38,7 @@ define(function (require) {
         stack: d3.layout.stack()
           .x(function (d) { return d.x; })
           .y(function (d) { return d.y; })
-          .offset(this._attr.offset)
+          .offset(offset)
       });
     }
 
@@ -122,17 +135,22 @@ define(function (require) {
 
     // TODO: need to make this more generic
     Data.prototype.shouldBeStacked = function (series) {
+      var isHistogram = (this._attr.type === 'histogram');
+      var isArea = (this._attr.type === 'area');
+      var isOverlapping = (this._attr.mode === 'overlap');
+
       // Series should be an array
-      if (this._attr.type === 'histogram' && series.length > 1) {
-        return true;
-      }
-      return false;
+      return (isHistogram || isArea && !isOverlapping && series.length > 1);
     };
 
     // Calculate the max y value from this.dataArray
     Data.prototype.getYMaxValue = function () {
       var self = this;
       var arr = [];
+
+      if (self._attr.mode === 'percentage') {
+        return 1;
+      }
 
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
