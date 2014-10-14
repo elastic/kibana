@@ -1,17 +1,17 @@
 define(function (require) {
   var app = require('modules').get('apps/discover');
-  var html = require('text!apps/discover/components/field_chooser/field_chooser.html');
+  var html = require('text!plugins/discover/components/field_chooser/field_chooser.html');
   var _ = require('lodash');
   var jsonPath = require('jsonpath');
   var rison = require('utils/rison');
   var qs = require('utils/query_string');
-  var fieldCalculator = require('apps/discover/components/field_chooser/lib/field_calculator');
+  var fieldCalculator = require('plugins/discover/components/field_chooser/lib/field_calculator');
 
 
   require('directives/css_truncate');
   require('directives/field_name');
   require('filters/unique');
-  require('apps/discover/components/field_chooser/discover_field');
+  require('plugins/discover/components/field_chooser/discover_field');
 
   app.directive('discFieldChooser', function ($location, globalState, config) {
     return {

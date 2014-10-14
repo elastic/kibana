@@ -1,7 +1,7 @@
 define(function (require) {
-  require('apps/visualize/saved_visualizations/saved_visualizations');
-  require('apps/visualize/editor/sidebar');
-  require('apps/visualize/editor/agg_filter');
+  require('plugins/visualize/saved_visualizations/saved_visualizations');
+  require('plugins/visualize/editor/sidebar');
+  require('plugins/visualize/editor/agg_filter');
 
   require('directives/saved_object_finder');
   require('components/visualize/visualize');
@@ -9,7 +9,7 @@ define(function (require) {
 
   require('routes')
   .when('/visualize/create', {
-    template: require('text!apps/visualize/editor/editor.html'),
+    template: require('text!plugins/visualize/editor/editor.html'),
     resolve: {
       savedVis: function (savedVisualizations, courier, $route) {
         if (!$route.current.params.indexPattern && !$route.current.params.savedSearchId) {
@@ -24,7 +24,7 @@ define(function (require) {
     }
   })
   .when('/visualize/edit/:id', {
-    template: require('text!apps/visualize/editor/editor.html'),
+    template: require('text!plugins/visualize/editor/editor.html'),
     resolve: {
       savedVis: function (savedVisualizations, courier, $route) {
         return savedVisualizations.get($route.current.params.id)
@@ -60,9 +60,9 @@ define(function (require) {
 
     // config panel templates
     var configTemplate = new ConfigTemplate({
-      save: require('text!apps/visualize/editor/panels/save.html'),
-      load: require('text!apps/visualize/editor/panels/load.html'),
-      share: require('text!apps/visualize/editor/panels/share.html'),
+      save: require('text!plugins/visualize/editor/panels/save.html'),
+      load: require('text!plugins/visualize/editor/panels/load.html'),
+      share: require('text!plugins/visualize/editor/panels/share.html'),
     });
 
     var $state = (function initState() {

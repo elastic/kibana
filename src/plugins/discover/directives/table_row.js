@@ -13,9 +13,9 @@ define(function (require) {
    * ```
    */
   module.directive('kbnTableRow', function ($compile, config) {
-    var openRowHtml = require('text!apps/discover/partials/table_row/open.html');
-    var detailsHtml = require('text!apps/discover/partials/table_row/details.html');
-    var cellTemplate = _.template(require('text!apps/discover/partials/table_row/cell.html'));
+    var openRowHtml = require('text!plugins/discover/partials/table_row/open.html');
+    var detailsHtml = require('text!plugins/discover/partials/table_row/details.html');
+    var cellTemplate = _.template(require('text!plugins/discover/partials/table_row/cell.html'));
     var truncateByHeightTemplate = _.template(require('text!partials/truncate_by_height.html'));
 
     return {

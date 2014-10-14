@@ -1,7 +1,7 @@
 define(function (require) {
   var _ = require('lodash');
-  var registry = require('apps/settings/saved_object_registry');
-  var objectIndexHTML = require('text!apps/settings/sections/objects/_objects.html');
+  var registry = require('plugins/settings/saved_object_registry');
+  var objectIndexHTML = require('text!plugins/settings/sections/objects/_objects.html');
 
   require('routes')
   .when('/settings/objects', {

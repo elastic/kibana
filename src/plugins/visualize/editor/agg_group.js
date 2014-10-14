@@ -2,15 +2,15 @@ define(function (require) {
   require('modules')
   .get('app/visualize')
   .directive('visEditorAggGroup', function (Private) {
-    require('apps/visualize/editor/agg');
-    require('apps/visualize/editor/nesting_indicator');
+    require('plugins/visualize/editor/agg');
+    require('plugins/visualize/editor/nesting_indicator');
 
-    var eachGroupHtml = require('text!apps/visualize/editor/agg_group.html');
+    var eachGroupHtml = require('text!plugins/visualize/editor/agg_group.html');
     var AggConfig = Private(require('components/vis/_agg_config'));
 
     return {
       restrict: 'E',
-      template: require('text!apps/visualize/editor/agg_group.html'),
+      template: require('text!plugins/visualize/editor/agg_group.html'),
       replace: true,
       scope: {
         vis: '=',

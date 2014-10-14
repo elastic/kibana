@@ -7,7 +7,7 @@ define(function (require) {
   require('components/typeahead/typeahead');
 
   // TODO: This should not be needed, timefilter is only included here, it should move
-  require('apps/discover/index');
+  require('plugins/discover/index');
 
   var typeaheadHistoryCount = 10;
   var typeaheadName = 'unittest';

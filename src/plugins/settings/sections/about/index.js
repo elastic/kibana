@@ -3,7 +3,7 @@ define(function (require) {
 
   require('routes')
   .when('/settings/about', {
-    template: require('text!apps/settings/sections/about/index.html')
+    template: require('text!plugins/settings/sections/about/index.html')
   });
 
   require('modules').get('apps/settings')

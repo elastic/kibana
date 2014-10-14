@@ -1,6 +1,6 @@
 define(function (require) {
-  require('apps/settings/sections/objects/_view');
-  require('apps/settings/sections/objects/_objects');
+  require('plugins/settings/sections/objects/_view');
+  require('plugins/settings/sections/objects/_objects');
 
   require('angular-ui-ace');
   require('angular-elastic');

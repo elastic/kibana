@@ -1,10 +1,10 @@
 define(function (require) {
-  var html = require('text!apps/discover/partials/table.html');
+  var html = require('text!plugins/discover/partials/table.html');
 
   require('directives/truncated');
   require('directives/infinite_scroll');
-  require('apps/discover/directives/table_header');
-  require('apps/discover/directives/table_row');
+  require('plugins/discover/directives/table_header');
+  require('plugins/discover/directives/table_row');
 
   var module = require('modules').get('app/discover');
 

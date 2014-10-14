@@ -5,14 +5,14 @@ define(function (require) {
 
   require('routes')
   .when('/settings/indices/', {
-    template: require('text!apps/settings/sections/indices/_create.html')
+    template: require('text!plugins/settings/sections/indices/_create.html')
   });
 
   require('modules').get('apps/settings')
   .controller('settingsIndicesCreate', function ($scope, kbnUrl, Private, Notifier, indexPatterns, es, config) {
     var notify = new Notifier();
     var MissingIndices = errors.IndexPatternMissingIndices;
-    var refreshKibanaIndex = Private(require('apps/settings/sections/indices/_refresh_kibana_index'));
+    var refreshKibanaIndex = Private(require('plugins/settings/sections/indices/_refresh_kibana_index'));
     var intervals = indexPatterns.intervals;
 
     // this and child scopes will write pattern vars here

@@ -4,7 +4,7 @@ define(function (require) {
 
   require('routes')
   .when('/settings/advanced', {
-    template: require('text!apps/settings/sections/advanced/index.html')
+    template: require('text!plugins/settings/sections/advanced/index.html')
   });
 
   require('modules').get('apps/settings')

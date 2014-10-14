@@ -10,7 +10,7 @@ define(function (require) {
 
     return {
       restrict: 'E',
-      template: require('text!apps/dashboard/partials/panel.html'),
+      template: require('text!plugins/dashboard/partials/panel.html'),
       requires: '^dashboardGrid',
       link: function ($scope, $el) {
         // using $scope inheritance, panels are available in AppState

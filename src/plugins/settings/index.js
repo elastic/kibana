@@ -1,7 +1,7 @@
 define(function (require, module, exports) {
   var _ = require('lodash');
 
-  require('css!apps/settings/styles/main.css');
+  require('css!plugins/settings/styles/main.css');
   require('filters/start_from');
 
   require('routes')
@@ -13,14 +13,14 @@ define(function (require, module, exports) {
   .directive('kbnSettingsApp', function (Private, $route, timefilter) {
     return {
       restrict: 'E',
-      template: require('text!apps/settings/app.html'),
+      template: require('text!plugins/settings/app.html'),
       transclude: true,
       scope: {
         sectionName: '@section'
       },
       link: function ($scope, $el) {
         timefilter.enabled = false;
-        $scope.sections = require('apps/settings/sections/index');
+        $scope.sections = require('plugins/settings/sections/index');
         $scope.section = _.find($scope.sections, { name: $scope.sectionName });
 
         $scope.sections.forEach(function (section) {

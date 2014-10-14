@@ -5,9 +5,9 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
     var aggTypes = Private(require('components/agg_types/index'));
-    var aggSelectHtml = require('text!apps/visualize/editor/agg_select.html');
+    var aggSelectHtml = require('text!plugins/visualize/editor/agg_select.html');
 
-    require('apps/visualize/editor/agg_param');
+    require('plugins/visualize/editor/agg_param');
 
     var notify = new Notifier({
       location: 'visAggGroup'
@@ -16,7 +16,7 @@ define(function (require) {
     return {
       restrict: 'E',
       replace: true,
-      template: require('text!apps/visualize/editor/agg.html'),
+      template: require('text!plugins/visualize/editor/agg.html'),
       scope: {
         vis: '=',
         agg: '=',

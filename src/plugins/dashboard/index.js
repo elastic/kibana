@@ -9,10 +9,10 @@ define(function (require) {
   require('components/notify/notify');
   require('components/typeahead/typeahead');
 
-  require('apps/dashboard/directives/grid');
-  require('apps/dashboard/directives/panel');
-  require('apps/dashboard/services/saved_dashboards');
-  require('css!apps/dashboard/styles/main.css');
+  require('plugins/dashboard/directives/grid');
+  require('plugins/dashboard/directives/panel');
+  require('plugins/dashboard/services/saved_dashboards');
+  require('css!plugins/dashboard/styles/main.css');
 
   var app = require('modules').get('app/dashboard', [
     'elasticsearch',
@@ -25,7 +25,7 @@ define(function (require) {
 
   require('routes')
   .when('/dashboard', {
-    template: require('text!apps/dashboard/index.html'),
+    template: require('text!plugins/dashboard/index.html'),
     resolve: {
       dash: function (savedDashboards) {
         return savedDashboards.get();
@@ -33,7 +33,7 @@ define(function (require) {
     }
   })
   .when('/dashboard/:id', {
-    template: require('text!apps/dashboard/index.html'),
+    template: require('text!plugins/dashboard/index.html'),
     resolve: {
       dash: function (savedDashboards, Notifier, $route, $location, courier) {
         return savedDashboards.get($route.current.params.id)
@@ -63,10 +63,10 @@ define(function (require) {
         var $state = $scope.state = new AppState(stateDefaults);
 
         $scope.configTemplate = new ConfigTemplate({
-          save: require('text!apps/dashboard/partials/save_dashboard.html'),
-          load: require('text!apps/dashboard/partials/load_dashboard.html'),
-          share: require('text!apps/dashboard/partials/share.html'),
-          pickVis: require('text!apps/dashboard/partials/pick_visualization.html')
+          save: require('text!plugins/dashboard/partials/save_dashboard.html'),
+          load: require('text!plugins/dashboard/partials/load_dashboard.html'),
+          share: require('text!plugins/dashboard/partials/share.html'),
+          pickVis: require('text!plugins/dashboard/partials/pick_visualization.html')
         });
 
         $scope.openSave = _.partial($scope.configTemplate.toggle, 'save');

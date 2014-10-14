@@ -2,11 +2,11 @@ define(function (require) {
   var app = require('modules').get('app/visualize');
   var _ = require('lodash');
 
-  require('apps/visualize/saved_visualizations/_saved_vis');
+  require('plugins/visualize/saved_visualizations/_saved_vis');
 
   // Register this service with the saved object registry so it can be
   // edited by the object editor.
-  require('apps/settings/saved_object_registry').register({
+  require('plugins/settings/saved_object_registry').register({
     service: 'savedVisualizations',
     title: 'visualizations'
   });

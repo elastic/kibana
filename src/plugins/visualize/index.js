@@ -1,8 +1,8 @@
 define(function (require) {
-  require('css!apps/visualize/styles/main.css');
+  require('css!plugins/visualize/styles/main.css');
 
-  require('apps/visualize/editor/editor');
-  require('apps/visualize/wizard/wizard');
+  require('plugins/visualize/editor/editor');
+  require('plugins/visualize/wizard/wizard');
 
   require('routes')
   .when('/visualize', {

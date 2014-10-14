@@ -39,7 +39,7 @@ define(function (require) {
       var Notifier = $injector.get('Notifier');
       notify = new Notifier();
 
-      SegmentedFetch = Private(require('apps/discover/_segmented_fetch'));
+      SegmentedFetch = Private(require('plugins/discover/_segmented_fetch'));
 
       // mock the searchSource
       searchSourceStubs = {

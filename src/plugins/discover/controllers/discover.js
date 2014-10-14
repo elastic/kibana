@@ -2,9 +2,9 @@ define(function (require) {
   var _ = require('lodash');
   var angular = require('angular');
   var moment = require('moment');
-  var settingsHtml = require('text!apps/discover/partials/settings.html');
-  var saveHtml = require('text!apps/discover/partials/save_search.html');
-  var loadHtml = require('text!apps/discover/partials/load_search.html');
+  var settingsHtml = require('text!plugins/discover/partials/settings.html');
+  var saveHtml = require('text!plugins/discover/partials/save_search.html');
+  var loadHtml = require('text!plugins/discover/partials/load_search.html');
 
   var interval = require('utils/interval');
   var datemath = require('utils/datemath');
@@ -19,7 +19,7 @@ define(function (require) {
   require('components/state_management/app_state');
   require('services/timefilter');
 
-  require('apps/discover/directives/table');
+  require('plugins/discover/directives/table');
 
   var app = require('modules').get('apps/discover', [
     'kibana/notify',
@@ -29,7 +29,7 @@ define(function (require) {
 
   require('routes')
   .when('/discover/:id?', {
-    template: require('text!apps/discover/index.html'),
+    template: require('text!plugins/discover/index.html'),
     reloadOnSearch: false,
     resolve: {
       indexList: function (courier) {
@@ -48,9 +48,9 @@ define(function (require) {
   app.controller('discover', function ($scope, config, courier, $route, $window, Notifier, AppState, timefilter, Promise, Private, kbnUrl) {
 
     var Vis = Private(require('components/vis/vis'));
-    var SegmentedFetch = Private(require('apps/discover/_segmented_fetch'));
+    var SegmentedFetch = Private(require('plugins/discover/_segmented_fetch'));
 
-    var HitSortFn = Private(require('apps/discover/_hit_sort_fn'));
+    var HitSortFn = Private(require('plugins/discover/_hit_sort_fn'));
 
     var notify = new Notifier({
       location: 'Discover'

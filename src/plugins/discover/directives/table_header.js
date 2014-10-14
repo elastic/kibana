@@ -3,7 +3,7 @@ define(function (require) {
   var module = require('modules').get('app/discover');
 
   module.directive('kbnTableHeader', function () {
-    var headerHtml = require('text!apps/discover/partials/table_header.html');
+    var headerHtml = require('text!plugins/discover/partials/table_header.html');
     return {
       restrict: 'A',
       scope: {
