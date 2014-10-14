@@ -20,22 +20,27 @@ define(function (require) {
         });
 
         expect(aggParam).to.be.a(BaseAggParam);
+        expect(aggParam).to.have.property('write');
       });
+    });
 
-      it('should not include param in output', function () {
-        var paramName = 'exclude';
-        var aggParam = new RegexAggParam({
+    describe('write results', function () {
+      var aggParam;
+      var aggConfig = { params: {} };
+      var output = { params: {} };
+      var paramName = 'exclude';
+
+      beforeEach(function () {
+        aggParam = new RegexAggParam({
           name: paramName,
           type: 'regex'
         });
+      });
 
-        var aggConfig = { params: {} };
-        var output = { params: {} };
+      it('should not include param in output', function () {
         aggConfig.params[paramName] = {
           pattern: ''
         };
-
-        expect(aggParam).to.have.property('write');
 
         aggParam.write(aggConfig, output);
         expect(output).to.be.an('object');
@@ -44,25 +49,32 @@ define(function (require) {
       });
 
       it('should include param in output', function () {
-        var paramName = 'exclude';
-        var aggParam = new RegexAggParam({
-          name: paramName,
-          type: 'regex'
-        });
-
-        var aggConfig = { params: {} };
-        var output = { params: {} };
         aggConfig.params[paramName] = {
           pattern: 'testing'
         };
 
-        expect(aggParam).to.have.property('write');
-
         aggParam.write(aggConfig, output);
-        expect(output).to.be.an('object');
-        expect(output).to.have.property('params');
         expect(output.params).to.have.property(paramName);
         expect(output.params[paramName]).to.eql({ pattern: 'testing' });
+        expect(output.params[paramName]).not.to.have.property('flags');
+      });
+
+      it('should include flags', function () {
+        aggConfig.params[paramName] = {
+          pattern: 'testing',
+          flags: {
+            TEST1: true,
+            TEST2: false,
+            TEST3: true
+          }
+        };
+
+        aggParam.write(aggConfig, output);
+        expect(output.params).to.have.property(paramName);
+        expect(output.params[paramName]).to.have.property('flags');
+        expect(typeof output.params[paramName].flags).to.be('string');
+        expect(/TEST2/.test(output.params[paramName].flags)).to.be(false);
+        expect(output.params[paramName].flags).to.be('TEST1|TEST3');
       });
     });
   }];
