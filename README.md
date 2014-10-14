@@ -2,7 +2,7 @@
 # Kibana 4.0.0-BETA1.1
 <!-- /render -->
 
-[![Build Status](https://magnum.travis-ci.com/elasticsearch/kibana4.svg?token=tsFxSKHtVKG8EZavSjXY&branch=master)](https://magnum.travis-ci.com/elasticsearch/kibana4)
+[![Build Status](https://travis-ci.org/elasticsearch/kibana.svg)](https://travis-ci.org/elasticsearch/kibana)
 
 Kibana is an open source (Apache Licensed), browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.
 
