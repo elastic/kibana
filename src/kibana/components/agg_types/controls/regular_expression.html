@@ -1,15 +1,20 @@
-<div class="form-group">
+<div class="form-group regex">
   <label>{{ aggParam.name | label }}</label>
   <input
     type="text"
     class="form-control"
     ng-model="params[aggParam.name].pattern"
   >
-  <div class="form-group">
-    <div ng-repeat="(flag, i) in aggParam.flags">
+  <div class="flags">
+    <span class="docs label label-info">
+      <a href="http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html#field_detail"
+        target="_blank">regex flags</a>
+    </span>
+    <label ng-repeat="(flag, i) in aggParam.flags" class="normal">
       <input
         type="checkbox"
-        ng-model="params[aggParam.name].flags[flag]"> {{ flag }}
-    </div>
+        ng-model="params[aggParam.name].flags[flag]">
+      {{ flag }}
+    </label>
   </div>
 </div>
