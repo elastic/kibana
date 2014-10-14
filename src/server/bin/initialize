@@ -62,6 +62,9 @@ host = (options[:host] || config['host'])
 # Set the override for Elasticsaerch
 elasticsearch = (options[:elasticsearch] || config['elasticsearch'])
 
+# absolute path to this directory
+dir = File.dirname(__FILE__)
+
 # If the env isn't set we need to set it to development
 ENV["RACK_ENV"] = "development" if ENV["RACK_ENV"].nil?
 
@@ -70,14 +73,16 @@ Kibana.global_settings[:port] = port || 5601
 Kibana.global_settings[:host] = host || '0.0.0.0'
 Kibana.global_settings[:config] = config
 Kibana.global_settings[:elasticsearch] = elasticsearch
-Kibana.global_settings[:root] = File.expand_path("#{File.dirname(__FILE__)}/../")
+Kibana.global_settings[:root] = File.expand_path("#{dir}/../")
 Kibana.global_settings[:quiet] = options[:quiet]
 
 # Set the public folder based on whether we are running in production or not.
 if ENV['RACK_ENV'] == ('production')
-  Kibana.global_settings[:public_folder] = File.expand_path("#{File.dirname(__FILE__)}/../public/")
+  Kibana.global_settings[:public_folder] = File.expand_path("#{dir}/../public/")
+  Kibana.global_settings[:plugin_folder] = File.expand_path("#{dir}/../../plugins/")
 else
-  Kibana.global_settings[:public_folder] = File.expand_path("#{File.dirname(__FILE__)}/../../kibana/")
+  Kibana.global_settings[:public_folder] = File.expand_path("#{dir}/../../kibana/")
+  Kibana.global_settings[:plugin_folder] = File.expand_path("#{dir}/../../../plugins/")
 end
 
 # Add the root of the project to the load path

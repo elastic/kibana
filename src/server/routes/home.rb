@@ -13,6 +13,12 @@ module Kibana
         # to the proxy for elasticsearch
         data = settings.config.clone()
         data['elasticsearch'] = "#{request.scheme}://#{request.host}:#{request.port}/elasticsearch"
+
+        plugin_pattern = File.join(settings.plugin_folder, '*', 'index.js')
+        data['plugins'] = Dir.glob(plugin_pattern).map { |path|
+          path.sub(settings.plugin_folder, 'plugins').sub(/\.js$/, '')
+        }
+
         json data
       end
 

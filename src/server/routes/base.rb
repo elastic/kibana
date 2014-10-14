@@ -13,6 +13,7 @@ module Kibana
 
         set :root, Kibana.global_settings[:root]
         set :public_folder, Kibana.global_settings[:public_folder]
+        set :plugin_folder, Kibana.global_settings[:plugin_folder]
         set :httponly, true
         set :config, config
       end
