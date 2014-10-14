@@ -23,8 +23,10 @@ define(function (require) {
         offset = 'zero';
       } else if (attr.mode === 'percentage') {
         offset = 'expand';
+      } else if (attr.mode === 'grouped') {
+        offset = 'group';
       } else {
-        offset = 'grouped';
+        offset = attr.mode;
       }
 
       this.data = data;
