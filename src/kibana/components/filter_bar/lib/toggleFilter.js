@@ -5,11 +5,12 @@ define(function (require) {
     /**
      * Toggles the filter between enabled/disabled.
      * @param {object} filter The filter to toggle
+     & @param {boolean} force disabled true/false
      * @returns {void}
      */
-    return function (filter) {
+    return function (filter, force) {
       // Toggle the disabled flag
-      var disabled = !filter.disabled;
+      var disabled = _.isUndefined(force) ? !filter.disabled : force;
       filter.disabled = disabled;
       filter.filter.disabled = disabled;
 
