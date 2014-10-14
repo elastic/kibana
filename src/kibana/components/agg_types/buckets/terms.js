@@ -60,14 +60,12 @@ define(function (require) {
         {
           name: 'exclude',
           type: 'regex',
-          advanced: true,
-          editor: require('text!components/agg_types/controls/regular_expression.html')
+          advanced: true
         },
         {
           name: 'include',
           type: 'regex',
-          advanced: true,
-          editor: require('text!components/agg_types/controls/regular_expression.html')
+          advanced: true
         }
       ]
     });
