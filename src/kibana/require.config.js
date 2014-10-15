@@ -44,7 +44,7 @@ require.config({
       exports: 'jsonPath'
     },
     gridster: ['jquery', 'css!bower_components/gridster/dist/jquery.gridster.css'],
-    'angular-chosen': ['jquery', 'chosen'],
+    'angular-chosen': ['jquery', 'chosen', 'css!bower_components/chosen/chosen.min.css'],
     'angular-route': ['angular'],
     'elasticsearch': ['angular'],
     'angular-bootstrap': ['angular'],
