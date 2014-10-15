@@ -45,9 +45,12 @@ define(function (require) {
       /*****
        * Build the chart
        *****/
+      var captureXRange = false;
 
       // X-axis description
       chart.xAxisLabel = colX.label;
+
+      // identify how the x-axis is ordered
       if (aggX && aggX.ordered && aggX.ordered.date) {
         chart.xAxisFormatter = (function () {
           var bounds = timefilter.getBounds();
@@ -62,15 +65,21 @@ define(function (require) {
           };
         }());
 
-        var timeBounds = timefilter.getBounds();
         chart.ordered = {
           date: true,
-          min: timeBounds.min.valueOf(),
-          max: timeBounds.max.valueOf(),
           interval: interval.toMs(colX.params.interval)
         };
+
+        if (colX.aggConfig.vis.indexPattern.timeFieldName) {
+          var timeBounds = timefilter.getBounds();
+          chart.ordered.min = timeBounds.min.valueOf();
+          chart.ordered.max = timeBounds.max.valueOf();
+        } else {
+          captureXRange = true;
+        }
       }
-      else {
+
+      if (!chart.ordered) {
         chart.xAxisFormatter = colX.field && colX.field.format.convert;
         chart.ordered = aggX && aggX.ordered && {};
         if (aggX !== false && colX && colX.params && colX.params.interval) {
@@ -155,6 +164,11 @@ define(function (require) {
         if (colX.metricScale) {
           // support scaling response values to represent an average value on the y-axis
           datum.y = datum.y * colX.metricScale;
+        }
+
+        if (captureXRange) {
+          chart.ordered.min = chart.ordered.min === void 0 ? datum.x : Math.min(chart.ordered.min, datum.x);
+          chart.ordered.max = chart.ordered.max === void 0 ? datum.x : Math.max(chart.ordered.max, datum.x);
         }
 
         s.values.push(datum);
