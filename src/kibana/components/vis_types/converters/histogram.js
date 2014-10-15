@@ -45,7 +45,6 @@ define(function (require) {
       /*****
        * Build the chart
        *****/
-      var captureXRange = false;
 
       // X-axis description
       chart.xAxisLabel = colX.label;
@@ -74,8 +73,6 @@ define(function (require) {
           var timeBounds = timefilter.getBounds();
           chart.ordered.min = timeBounds.min.valueOf();
           chart.ordered.max = timeBounds.max.valueOf();
-        } else {
-          captureXRange = true;
         }
       }
 
@@ -164,11 +161,6 @@ define(function (require) {
         if (colX.metricScale) {
           // support scaling response values to represent an average value on the y-axis
           datum.y = datum.y * colX.metricScale;
-        }
-
-        if (captureXRange) {
-          chart.ordered.min = chart.ordered.min === void 0 ? datum.x : Math.min(chart.ordered.min, datum.x);
-          chart.ordered.max = chart.ordered.max === void 0 ? datum.x : Math.max(chart.ordered.max, datum.x);
         }
 
         s.values.push(datum);
