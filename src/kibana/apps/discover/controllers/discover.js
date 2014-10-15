@@ -82,10 +82,10 @@ define(function (require) {
 
     var stateDefaults = {
       query: initialQuery || '',
-      columns: ['_source'],
+      columns: $scope.searchSource.get('columns') || ['_source'],
       index: $scope.searchSource.get('index').id || config.get('defaultIndex'),
       interval: 'auto',
-      filters: _.cloneDeep($scope.searchSource.get('filter'))
+      filters: _.cloneDeep($scope.searchSource.get('filter')),
     };
 
     var metaFields = config.get('metaFields');
@@ -439,6 +439,7 @@ define(function (require) {
         return sort;
       })
       .query(!$state.query ? null : $state.query)
+      .set('columns', $state.columns || [])
       .set('filter', $state.filters || []);
 
       // get the current indexPattern

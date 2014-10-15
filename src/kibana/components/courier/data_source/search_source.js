@@ -38,6 +38,7 @@ define(function (require) {
       'type',
       'query',
       'filter',
+      'columns',
       'sort',
       'highlight',
       'aggs',
@@ -173,6 +174,7 @@ define(function (require) {
           })
           .value();
         return;
+      case 'columns':
       case 'index':
       case 'type':
       case 'id':
