@@ -170,6 +170,7 @@ define(function (require) {
       var height = yScale.range()[0];
       var groupSpacingPercentage = 0.15;
       var isTimeScale = (data.ordered && data.ordered.date);
+      var minWidth = 1;
       var barWidth;
 
       // update
@@ -187,6 +188,10 @@ define(function (require) {
           return xScale(d.x) + xScale.rangeBand() / n * j;
         })
         .attr('width', function () {
+          if (barWidth < minWidth) {
+            throw new errors.ContainerTooSmall();
+          }
+
           if (isTimeScale) {
             return barWidth;
           }
