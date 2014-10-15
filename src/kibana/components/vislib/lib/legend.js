@@ -44,12 +44,12 @@ define(function (require) {
      */
     Legend.prototype.header = function (el, args) {
       return el.append('div')
-        .attr('class', 'header')
-        .append('div')
-        .attr('class', 'column-labels')
-        .html(function () {
-          return legendHeaderTemplate(args._attr);
-        });
+      .attr('class', 'header')
+      .append('div')
+      .attr('class', 'column-labels')
+      .html(function () {
+        return legendHeaderTemplate(args._attr);
+      });
     };
 
     /**
@@ -65,15 +65,15 @@ define(function (require) {
       var self = this;
 
       return el.append('ul')
-        .attr('class', function () {
-          if (args._attr.isOpen) {
-            return 'legend-ul';
-          }
-          return 'legend-ul hidden';
-        })
-        .selectAll('li')
-        .data(arrOfLabels)
-        .enter()
+      .attr('class', function () {
+        if (args._attr.isOpen) {
+          return 'legend-ul';
+        }
+        return 'legend-ul hidden';
+      })
+      .selectAll('li')
+      .data(arrOfLabels)
+      .enter()
         .append('li')
         .attr('class', function (d) {
           return 'color ' + self.colorToClass(args.color(d));
@@ -132,16 +132,16 @@ define(function (require) {
       });
 
       visEl.selectAll('.color')
-        .on('mouseover', function (d) {
-          var liClass = '.' + self.colorToClass(self.color(d));
-          visEl.selectAll('.color').style('opacity', self._attr.blurredOpacity);
-          
-          // select series on chart
-          visEl.selectAll(liClass).style('opacity', self._attr.focusOpacity);
-        })
-        .on('mouseout', function () {
-          visEl.selectAll('.color').style('opacity', self._attr.defaultOpacity);
-        });
+      .on('mouseover', function (d) {
+        var liClass = '.' + self.colorToClass(self.color(d));
+        visEl.selectAll('.color').style('opacity', self._attr.blurredOpacity);
+
+        // select series on chart
+        visEl.selectAll(liClass).style('opacity', self._attr.focusOpacity);
+      })
+      .on('mouseout', function () {
+        visEl.selectAll('.color').style('opacity', self._attr.defaultOpacity);
+      });
     };
 
     return Legend;

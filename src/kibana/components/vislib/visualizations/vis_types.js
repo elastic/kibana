@@ -6,7 +6,7 @@ define(function (require) {
      *
      * @module visLib
      * @submodule VisTypeFactory
-     * @param Private {Service} Loads any function as an angular module
+     * @param Private {Object} Loads any function as an angular module
      * @return {Function} Returns an Object of Visualization classes
      */
     return {

@@ -37,8 +37,8 @@ define(function (require) {
      * Adds Events to SVG paths
      *
      * @method addPathEvents
-     * @param path {D3.UpdateSelection} Reference to SVG path
-     * @returns {D3.UpdateSelection} SVG path with event listeners attached
+     * @param path {D3.Selection} Reference to SVG path
+     * @returns {D3.Selection} SVG path with event listeners attached
      */
     PieChart.prototype.addPathEvents = function (path) {
       var events = this.events;

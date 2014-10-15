@@ -32,7 +32,7 @@ define(function (require) {
         fieldIndex = _.findIndex(raw, {'categoryName': 'group'});
       }
 
-      this.fieldFormatter = raw && raw[fieldIndex] ? raw[fieldIndex].field.format.convert : function (d) { return d; };
+      this.fieldFormatter = (raw && raw[fieldIndex]) ? raw[fieldIndex].field.format.convert : function (d) { return d; };
 
       ColumnChart.Super.apply(this, arguments);
 
@@ -198,9 +198,9 @@ define(function (require) {
      */
     ColumnChart.prototype.mouseOverBar = function (that) {
       return d3.select(that)
-        .classed('hover', true)
-        .style('stroke', '#333')
-        .style('cursor', 'pointer');
+      .classed('hover', true)
+      .style('stroke', '#333')
+      .style('cursor', 'pointer');
     };
 
     /**
@@ -212,8 +212,8 @@ define(function (require) {
      */
     ColumnChart.prototype.mouseOutBar = function (that) {
       return d3.select(that)
-        .classed('hover', false)
-        .style('stroke', null);
+      .classed('hover', false)
+      .style('stroke', null);
     };
 
     /**

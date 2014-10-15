@@ -1,5 +1,5 @@
 define(function (require) {
-  return function DispatchClass(d3, Private) {
+  return function DispatchClass(d3) {
     var _ = require('lodash');
 
     /**
@@ -120,10 +120,10 @@ define(function (require) {
       // if `addBrushing` is true, add brush canvas
       if (isBrush) {
         svg.append('g')
-          .attr('class', 'brush')
-          .call(brush)
-          .selectAll('rect')
-          .attr('height', height - margin.top - margin.bottom);
+        .attr('class', 'brush')
+        .call(brush)
+        .selectAll('rect')
+        .attr('height', height - margin.top - margin.bottom);
       }
 
       return brush;

@@ -82,7 +82,7 @@ define(function (require) {
 
       _.forEach(visData, function countSeriesLength(obj) {
         var dataLength = obj.series ? obj.series.length : obj.slices.children.length;
-        var label = dataLength === 1 && obj.series ? obj.series[0].label : undefined;
+        var label = (dataLength === 1 && obj.series) ? obj.series[0].label : undefined;
 
         if (!seriesLabel) {
           seriesLabel = label;
@@ -167,7 +167,7 @@ define(function (require) {
      */
     Data.prototype.shouldBeStacked = function (series) {
       // Series should be an array
-      return this._attr.type === 'histogram' && series.length > 1;
+      return (this._attr.type === 'histogram' && series.length > 1);
     };
 
     /**
@@ -250,7 +250,7 @@ define(function (require) {
       var self = this;
 
       _.forEach(array, function (obj) {
-        var fieldFormatter = columns && columns[index].field ? columns[index].field.format.convert : function (d) { return d; };
+        var fieldFormatter = (columns && columns[index].field) ? columns[index].field.format.convert : function (d) { return d; };
         names.push({ key: fieldFormatter(obj.name), index: index });
 
         if (obj.children) {
@@ -282,12 +282,12 @@ define(function (require) {
         var namedObj = this.returnNames(slices.children, 0, columns);
 
         return _(namedObj)
-          .sortBy(function (obj) {
-            return obj.index;
-          })
-          .pluck('key')
-          .unique()
-          .value();
+        .sortBy(function (obj) {
+          return obj.index;
+        })
+        .pluck('key')
+        .unique()
+        .value();
       }
     };
 

@@ -31,7 +31,7 @@ define(function (require) {
         fieldIndex = _.findIndex(raw, {'categoryName': 'group'});
       }
 
-      this.fieldFormatter = raw && raw[fieldIndex] ? raw[fieldIndex].field.format.convert : function (d) { return d; };
+      this.fieldFormatter = (raw && raw[fieldIndex]) ? raw[fieldIndex].field.format.convert : function (d) { return d; };
 
       LineChart.Super.apply(this, arguments);
       // Line chart specific attributes
@@ -218,14 +218,14 @@ define(function (require) {
       return svg
       .attr('clip-path', 'url(#' + id + ')')
       .append('clipPath')
-        .attr('id', id)
+      .attr('id', id)
       .append('rect')
-        .attr('x', startX)
-        .attr('y', startY)
-        .attr('width', width)
-        // Adding clipPathBuffer to height so it doesn't
-        // cutoff the lower part of the chart
-        .attr('height', height + clipPathBuffer);
+      .attr('x', startX)
+      .attr('y', startY)
+      .attr('width', width)
+      // Adding clipPathBuffer to height so it doesn't
+      // cutoff the lower part of the chart
+      .attr('height', height + clipPathBuffer);
     };
 
     /**
@@ -281,7 +281,7 @@ define(function (require) {
           .attr('width', width + margin.left + margin.right)
           .attr('height', height + margin.top + margin.bottom)
           .append('g')
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
           self.addClipPath(svg, width, height);
 

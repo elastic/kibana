@@ -1,6 +1,5 @@
 define(function (require) {
   return function ColumnLayoutFactory(d3, Private) {
-
     var chartSplit = Private(require('components/vislib/lib/layout/splits/pie_chart/chart_split'));
     var chartTitleSplit = Private(require('components/vislib/lib/layout/splits/pie_chart/chart_title_split'));
 

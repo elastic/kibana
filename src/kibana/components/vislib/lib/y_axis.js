@@ -40,9 +40,9 @@ define(function (require) {
     YAxis.prototype.getYScale = function (height) {
       // save reference to y scale
       this.yScale = d3.scale.linear()
-        .domain([0, this.yMax])
-        .range([height, 0])
-        .nice(this.tickScale(height));
+      .domain([0, this.yMax])
+      .range([height, 0])
+      .nice(this.tickScale(height));
 
       return this.yScale;
     };
@@ -64,10 +64,10 @@ define(function (require) {
 
       // Create the d3 yAxis function
       this.yAxis = d3.svg.axis()
-        .scale(yScale)
-        .tickFormat(d3.format('s'))
-        .ticks(this.tickScale(height))
-        .orient('left');
+      .scale(yScale)
+      .tickFormat(d3.format('s'))
+      .ticks(this.tickScale(height))
+      .orient('left');
 
       if (this.yScale.domain()[1] <= 10) {
         this.yAxis.tickFormat(d3.format('n'));
@@ -88,9 +88,9 @@ define(function (require) {
      */
     YAxis.prototype.tickScale = function (height) {
       var yTickScale = d3.scale.linear()
-        .clamp(true)
-        .domain([20, 40, 1000])
-        .range([0, 3, 11]);
+      .clamp(true)
+      .domain([20, 40, 1000])
+      .range([0, 3, 11]);
 
       return Math.ceil(yTickScale(height));
     };
@@ -125,13 +125,13 @@ define(function (require) {
 
           // Append svg and y axis
           svg = div.append('svg')
-            .attr('width', width)
-            .attr('height', height + margin.top + margin.bottom);
+          .attr('width', width)
+          .attr('height', height + margin.top + margin.bottom);
 
           svg.append('g')
-            .attr('class', 'y axis')
-            .attr('transform', 'translate(' + (width - 2) + ',' + margin.top + ')')
-            .call(yAxis);
+          .attr('class', 'y axis')
+          .attr('transform', 'translate(' + (width - 2) + ',' + margin.top + ')')
+          .call(yAxis);
         });
       };
     };

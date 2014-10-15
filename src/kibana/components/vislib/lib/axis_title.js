@@ -60,14 +60,14 @@ define(function (require) {
           .attr('width', width)
           .attr('height', height)
           .append('text')
-            .attr('transform', function () {
-              if (div.attr('class') === 'x-axis-title') {
-                return 'translate(' + width / 2 + ',11)';
-              }
-              return 'translate(11,' + height / 2 + ')rotate(270)';
-            })
-            .attr('text-anchor', 'middle')
-            .text(title);
+          .attr('transform', function () {
+            if (div.attr('class') === 'x-axis-title') {
+              return 'translate(' + width / 2 + ',11)';
+            }
+            return 'translate(11,' + height / 2 + ')rotate(270)';
+          })
+          .attr('text-anchor', 'middle')
+          .text(title);
         });
       };
     };

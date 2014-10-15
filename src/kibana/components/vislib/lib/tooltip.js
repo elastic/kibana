@@ -49,22 +49,22 @@ define(function (require) {
           var element = d3.select(this);
 
           element
-            .on('mousemove.tip', function (d) {
-              var placement = self.getTooltipPlacement(d3.event);
-              var events = self.events ? self.events.eventResponse(d, i) : d;
+          .on('mousemove.tip', function (d) {
+            var placement = self.getTooltipPlacement(d3.event);
+            var events = self.events ? self.events.eventResponse(d, i) : d;
 
-              // return text and position for tooltip
-              return tooltipDiv.datum(events)
-                .html(tooltipFormatter)
-                .style('visibility', 'visible')
-                .style('left', placement.left + 'px')
-                .style('top', placement.top + 'px');
-            })
-            .on('mouseout.tip', function () {
-              return tooltipDiv.style('visibility', 'hidden')
-                .style('left', '-500px')
-                .style('top', '-500px');
-            });
+            // return text and position for tooltip
+            return tooltipDiv.datum(events)
+              .html(tooltipFormatter)
+              .style('visibility', 'visible')
+              .style('left', placement.left + 'px')
+              .style('top', placement.top + 'px');
+          })
+          .on('mouseout.tip', function () {
+            return tooltipDiv.style('visibility', 'hidden')
+              .style('left', '-500px')
+              .style('top', '-500px');
+          });
         });
       };
     };

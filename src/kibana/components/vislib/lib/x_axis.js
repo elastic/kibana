@@ -34,9 +34,7 @@ define(function (require) {
      * @returns {D3.UpdateSelection} Appends x axis to visualization
      */
     XAxis.prototype.render = function () {
-      d3.select(this.el)
-      .selectAll('.x-axis-div')
-      .call(this.draw());
+      d3.select(this.el).selectAll('.x-axis-div').call(this.draw());
     };
 
     /**
@@ -369,16 +367,16 @@ define(function (require) {
           var titleHeight = yAxisTitle.height();
 
           text = visEl.select('.x-axis-title')
-            .select('svg')
-            .attr('width', titleWidth)
-            .select('text')
-            .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
+          .select('svg')
+          .attr('width', titleWidth)
+          .select('text')
+          .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
 
           text = visEl.select('.y-axis-title')
-            .select('svg')
-            .attr('height', titleHeight)
-            .select('text')
-            .attr('transform', 'translate(11,' + (titleHeight / 2) + ')rotate(-90)');
+          .select('svg')
+          .attr('height', titleHeight)
+          .select('text')
+          .attr('transform', 'translate(11,' + (titleHeight / 2) + ')rotate(-90)');
 
           if ($visEl.find('.x-axis-chart-title').length) {
             xAxisChartTitle = $visEl.find('.x-axis-chart-title');
@@ -387,10 +385,10 @@ define(function (require) {
             titles = visEl.select('.x-axis-chart-title').selectAll('.chart-title');
             titles.each(function () {
               text = d3.select(this)
-                .select('svg')
-                .attr('width', titleWidth)
-                .select('text')
-                .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
+              .select('svg')
+              .attr('width', titleWidth)
+              .select('text')
+              .attr('transform', 'translate(' + (titleWidth / 2) + ',11)');
             });
           }
 
@@ -401,10 +399,10 @@ define(function (require) {
             titles = visEl.select('.y-axis-chart-title').selectAll('.chart-title');
             titles.each(function () {
               text = d3.select(this)
-                .select('svg')
-                .attr('height', titleHeight)
-                .select('text')
-                .attr('transform', 'translate(11,' + (titleHeight / 2) + ')rotate(-90)');
+              .select('svg')
+              .attr('height', titleHeight)
+              .select('text')
+              .attr('transform', 'translate(11,' + (titleHeight / 2) + ')rotate(-90)');
             });
           }
           
