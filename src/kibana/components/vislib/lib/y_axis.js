@@ -38,8 +38,16 @@ define(function (require) {
     // Return the d3 y axis
     YAxis.prototype.getYAxis = function (height) {
       var yScale = this.getYScale(height);
-      var tickFormat = (this._attr.mode === 'percentage') ?
-        d3.format('%') : d3.format('n');
+      var isPercentage = (this._attr.mode === 'percentage');
+      var tickFormat;
+
+      if (isPercentage) {
+        tickFormat = d3.format('%');
+      } else if (height <= 1 && !isPercentage) {
+        tickFormat = d3.format('n');
+      } else {
+        tickFormat = d3.format('s');
+      }
 
       // y scale should never be `NaN`
       if (!yScale || _.isNaN(yScale)) {
@@ -73,6 +81,8 @@ define(function (require) {
     YAxis.prototype.draw = function () {
       var self = this;
       var margin = this._attr.margin;
+      var mode = this._attr.mode;
+      var isWiggleOrSilhouette = (mode === 'wiggle' || mode === 'silhouette');
       var div;
       var width;
       var height;
@@ -92,15 +102,18 @@ define(function (require) {
 
           var yAxis = self.getYAxis(height);
 
-          // Append svg and y axis
-          svg = div.append('svg')
+          // The yAxis should not appear if mode is set to 'wiggle' or 'silhouette'
+          if (!isWiggleOrSilhouette) {
+            // Append svg and y axis
+            svg = div.append('svg')
             .attr('width', width)
             .attr('height', height + margin.top + margin.bottom);
 
-          svg.append('g')
+            svg.append('g')
             .attr('class', 'y axis')
             .attr('transform', 'translate(' + (width - 2) + ',' + margin.top + ')')
             .call(yAxis);
+          }
         });
       };
     };
