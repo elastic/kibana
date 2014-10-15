@@ -34,9 +34,18 @@ define(function (require) {
         fieldIndex = _.findIndex(raw, {'categoryName': 'group'});
       }
 
-      this.fieldFormatter = raw && raw[fieldIndex] ? raw[fieldIndex].field.format.convert : function (d) { return d; };
-      this._attr = _.defaults(handler._attr || {}, {
+      this.isOverlapping = (handler._attr.mode === 'overlap');
 
+      if (this.isOverlapping) {
+
+        // Default opacity should return to 0.6 on mouseout
+        handler._attr.defaultOpacity = 0.6;
+      }
+
+      this.fieldFormatter = (raw && raw[fieldIndex]) ?
+        raw[fieldIndex].field.format.convert : function (d) { return d; };
+
+      this._attr = _.defaults(handler._attr || {}, {
         xValue: function (d) { return d.x; },
         yValue: function (d) { return d.y; }
       });
@@ -47,6 +56,9 @@ define(function (require) {
     AreaChart.prototype.stackData = function (data) {
       var self = this;
       var stack = this._attr.stack;
+
+      // Sets the stack order to sort by index of maximum value, then use balanced weighting
+      stack.order('inside-out');
 
       return stack(data.series.map(function (d) {
         var label = d.label;
@@ -64,11 +76,12 @@ define(function (require) {
       var self = this;
       var ordered = this.handler.data.get('ordered');
       var isTimeSeries = (ordered && ordered.date);
-      var isOverlapping = (self._attr.mode === 'overlap');
+      var isOverlapping = this.isOverlapping;
       var color = this.handler.data.getColorFunc();
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
       var height = yScale.range()[0];
+      var defaultOpacity = this._attr.defaultOpacity;
 
       var area = d3.svg.area()
         .x(function (d) {
@@ -108,7 +121,8 @@ define(function (require) {
       })
       .style('fill', function (d) {
         return color(self.fieldFormatter(d[0].label));
-      });
+      })
+      .style('opacity', defaultOpacity);
 
       // update
       path.attr('d', function (d) {
@@ -159,7 +173,7 @@ define(function (require) {
       var circleStrokeWidth = 1;
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
-      var isOverlapping = (this._attr.mode === 'overlap');
+      var isOverlapping = this.isOverlapping;
       var layer;
       var circles;
 

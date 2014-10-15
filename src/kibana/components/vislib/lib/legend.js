@@ -31,6 +31,7 @@ define(function (require) {
         'blurredOpacity' : 0.3,
         'focusOpacity' : 1,
         'defaultOpacity' : 1,
+        'legendDefaultOpacity': 1,
         'isOpen' : true
       });
     }
@@ -117,7 +118,19 @@ define(function (require) {
           visEl.selectAll(liClass).style('opacity', self._attr.focusOpacity);
         })
         .on('mouseout', function () {
-          visEl.selectAll('.color').style('opacity', self._attr.defaultOpacity);
+
+          /*
+           * The default opacity of elements in charts may be modified by the
+           * chart constructor, and so may differ from that of the legend
+           */
+          visEl.select('.chart')
+          .selectAll('.color')
+          .style('opacity', self._attr.defaultOpacity);
+
+          // Legend values should always return to their default opacity of 1
+          visEl.select('.legend-ul')
+          .selectAll('.color')
+          .style('opacity', self._attr.legendDefaultOpacity);
         });
     };
 
