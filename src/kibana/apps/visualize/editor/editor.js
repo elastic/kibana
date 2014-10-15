@@ -43,7 +43,6 @@ define(function (require) {
     'kibana/courier'
   ])
   .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier) {
-
     var _ = require('lodash');
     var angular = require('angular');
     var ConfigTemplate = require('utils/config_template');
@@ -83,6 +82,7 @@ define(function (require) {
     function init() {
       // export some objects
       $scope.savedVis = savedVis;
+      $scope.searchSource = searchSource;
       $scope.vis = vis;
       $scope.editableVis = editableVis;
       $scope.state = $state;
@@ -112,6 +112,10 @@ define(function (require) {
         editableVis.dirty = !angular.equals(newState, vis.getState());
       }, true);
 
+      $scope.$watch('searchSource.get("index").timeFieldName', function (timeField) {
+        timefilter.enabled = !!timeField;
+      });
+
       $scope.$listen($state, 'fetch_with_changes', function () {
 
         vis.setState($state.vis);
@@ -128,7 +132,6 @@ define(function (require) {
 
       });
 
-      timefilter.enabled = true;
       $scope.$listen(timefilter, 'update', _.bindKey($scope, 'fetch'));
 
       $scope.$on('ready:vis', function () {
