@@ -4,11 +4,17 @@ define(function (require) {
   require('plugins/visualize/editor/editor');
   require('plugins/visualize/wizard/wizard');
 
+  require('routes')
+  .when('/visualize', {
+    redirectTo: '/visualize/step/1'
+  });
+
   var apps = require('registry/apps');
   apps.register(function VisualizeAppModule() {
     return {
+      id: 'visualize',
       name: 'Visualize',
-      route: '/visualize/step/1'
+      order: 1
     };
   });
 });

@@ -1,16 +1,23 @@
 define(function (require) {
+  var _ = require('lodash');
+  var IndexedArray = require('utils/indexed_array/index');
 
-  function Registry() {
-    this._modules = [];
-  }
+  return function createRegistry(name, indexedArrayOpts) {
+    var modules = [];
+    indexedArrayOpts = indexedArrayOpts || { index: ['name'] };
 
-  Registry.prototype.register = function (privateModule) {
-    this._modules.push(privateModule);
+    var registry = function (Private) {
+      var opts = _.cloneDeep(indexedArrayOpts);
+      opts.initialSet = modules.map(Private);
+      return new IndexedArray(opts);
+    };
+
+    registry.name = name + 'Registry';
+    registry.register = function (privateModule) {
+      modules.push(privateModule);
+    };
+
+    return registry;
   };
 
-  Registry.prototype.load = function (Private) {
-    return this._modules.map(Private);
-  };
-
-  return Registry;
 });

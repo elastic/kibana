@@ -164,8 +164,9 @@ define(function (require) {
   var apps = require('registry/apps');
   apps.register(function DashboardAppModule() {
     return {
+      id: 'dashboard',
       name: 'Dashboard',
-      route: '/dashboard'
+      order: 2
     };
   });
 });

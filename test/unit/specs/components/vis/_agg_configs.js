@@ -24,7 +24,7 @@ define(function (require) {
       AggConfigs = Private(require('components/vis/_agg_configs'));
       IndexedArray = require('utils/indexed_array/index');
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      Schemas = Private(require('components/vis_types/_schemas'));
+      Schemas = Private(require('plugins/vis_types/_schemas'));
     }));
 
     it('extends IndexedArray', function () {

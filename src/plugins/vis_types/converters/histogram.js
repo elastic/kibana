@@ -6,7 +6,7 @@ define(function (require) {
     var interval = require('utils/interval');
 
     var $tooltipScope = $rootScope.$new();
-    var $tooltip = $(require('text!components/vis_types/tooltips/histogram.html'));
+    var $tooltip = $(require('text!plugins/vis_types/tooltips/histogram.html'));
     $compile($tooltip)($tooltipScope);
 
     return function (chart, columns, rows) {

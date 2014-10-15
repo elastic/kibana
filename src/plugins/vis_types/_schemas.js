@@ -18,7 +18,7 @@ define(function (require) {
                 default: true
               }
             ];
-            schema.editor = require('text!components/vis_types/controls/rows_or_columns.html');
+            schema.editor = require('text!plugins/vis_types/controls/rows_or_columns.html');
           }
 
           _.defaults(schema, {

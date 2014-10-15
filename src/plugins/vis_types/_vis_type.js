@@ -2,8 +2,8 @@ define(function (require) {
   return function VisTypeFactory(Private) {
     var _ = require('lodash');
 
-    var VisTypeSchemas = Private(require('components/vis_types/_schemas'));
-    var HistogramConverter = Private(require('components/vis_types/converters/histogram'));
+    var VisTypeSchemas = Private(require('plugins/vis_types/_schemas'));
+    var HistogramConverter = Private(require('plugins/vis_types/converters/histogram'));
 
     function VisType(opts) {
       opts = opts || {};

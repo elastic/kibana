@@ -61,11 +61,11 @@ module.exports = function (grunt) {
 
   // include each app
   var main = config.build.options.modules[0];
-  // TODO: load files as plugins
-  // var configFile = grunt.file.readYAML(grunt.config.get('configFile'));
-  // configFile.apps.forEach(function (app) {
-  //   main.include.push('apps/' + app.id + '/index');
-  // });
+  var dirname = require('path').dirname;
+  grunt.file.expand({ cwd: '<%= plugins %>' }, '*/index.js').forEach(function (fileName) {
+    var pluginName = dirname(fileName);
+    main.include.push('plugins/' + pluginName + '/index');
+  });
 
   return config;
 };

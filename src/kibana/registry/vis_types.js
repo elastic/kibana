@@ -1,4 +1,3 @@
 define(function (require) {
-  var Registry = require('registry/_registry');
-  return new Registry();
+  return require('registry/_registry')('visTypes');
 });

@@ -5,7 +5,7 @@ define(function (require) {
     var moment = require('moment');
     var interval = require('utils/interval');
 
-    var $tooltip = $(require('text!components/vis_types/tooltips/pie.html'));
+    var $tooltip = $(require('text!plugins/vis_types/tooltips/pie.html'));
     var $tooltipScope = $rootScope.$new();
     $compile($tooltip)($tooltipScope);
 

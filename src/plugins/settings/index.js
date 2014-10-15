@@ -4,6 +4,11 @@ define(function (require, module, exports) {
   require('css!plugins/settings/styles/main.css');
   require('filters/start_from');
 
+  require('routes')
+  .when('/settings', {
+    redirectTo: '/settings/indices'
+  });
+
   require('modules').get('apps/settings')
   .directive('kbnSettingsApp', function (Private, $route, timefilter) {
     return {
@@ -28,8 +33,9 @@ define(function (require, module, exports) {
   var apps = require('registry/apps');
   apps.register(function SettingsAppModule() {
     return {
+      id: 'settings',
       name: 'Settings',
-      route: '/settings/indices'
+      order: 3
     };
   });
 });

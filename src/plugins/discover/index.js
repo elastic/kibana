@@ -9,8 +9,9 @@ define(function (require, module, exports) {
   var apps = require('registry/apps');
   apps.register(function DiscoverAppModule() {
     return {
+      id: 'discover',
       name: 'Discover',
-      route: '/discover'
+      order: 0
     };
   });
 });
