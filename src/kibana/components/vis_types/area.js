@@ -11,7 +11,6 @@ define(function (require) {
         shareYAxis: true,
         addTooltip: true,
         addLegend: true,
-        mode: 'wiggle'
       },
       schemas: new Schemas([
         {

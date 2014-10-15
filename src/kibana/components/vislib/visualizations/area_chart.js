@@ -46,8 +46,9 @@ define(function (require) {
     // TODO: refactor so that this is called from the data module
     AreaChart.prototype.stackData = function (data) {
       var self = this;
+      var stack = this._attr.stack;
 
-      return this._attr.stack(data.series.map(function (d) {
+      return stack(data.series.map(function (d) {
         var label = d.label;
         return d.values.map(function (e, i) {
           return {
@@ -117,50 +118,6 @@ define(function (require) {
       return path;
     };
 
-    AreaChart.prototype.addLines = function (svg, data) {
-      var self = this;
-      var xScale = this.handler.xAxis.xScale;
-      var yScale = this.handler.yAxis.yScale;
-      var xAxisFormatter = this.handler.data.get('xAxisFormatter');
-      var color = this.handler.data.getColorFunc();
-      var ordered = this.handler.data.get('ordered');
-      var interpolate = this._attr.interpolate;
-      var line = d3.svg.line()
-        .interpolate(interpolate)
-        .x(function x(d) {
-          if (ordered && ordered.date) {
-            return xScale(d.x);
-          }
-          return xScale(d.x) + xScale.rangeBand() / 2;
-        })
-        .y(function y(d) {
-          return yScale(d.y);
-        });
-      var lines;
-
-      lines = svg
-        .selectAll('.lines')
-        .data(data)
-        .enter()
-        .append('g')
-        .attr('class', 'lines');
-
-      lines.append('path')
-        .attr('class', function lineClass(d) {
-          return self.colorToClass(color(self.fieldFormatter(d.label)));
-        })
-        .attr('d', function lineD(d) {
-          return line(d.values);
-        })
-        .attr('fill', 'none')
-        .attr('stroke', function lineStroke(d) {
-          return color(self.fieldFormatter(d.label));
-        })
-        .attr('stroke-width', 2);
-
-      return lines;
-    };
-
     AreaChart.prototype.addCircleEvents = function (circles) {
       var events = this.events;
       var dispatch = this.events._attr.dispatch;
@@ -172,7 +129,8 @@ define(function (require) {
           d3.select(circle)
             .classed('hover', true)
             .style('stroke', '#333')
-            .style('cursor', 'pointer');
+            .style('cursor', 'pointer')
+            .style('opacity', 1);
 
           dispatch.hover(events.eventResponse(d, i));
           d3.event.stopPropagation();
@@ -186,7 +144,8 @@ define(function (require) {
 
           d3.select(circle)
             .classed('hover', false)
-            .style('stroke', null);
+            .style('stroke', null)
+            .style('opacity', 0);
         });
     };
 
@@ -200,6 +159,7 @@ define(function (require) {
       var circleStrokeWidth = 1;
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
+      var isOverlapping = (this._attr.mode === 'overlap');
       var layer;
       var circles;
 
@@ -226,7 +186,7 @@ define(function (require) {
         .enter()
         .append('circle')
         .attr('class', function circleClass(d) {
-          return self.colorToClass(color(self.fieldFormatter(d.label)));
+          return d.label;
         })
         .attr('fill', function (d) {
           return color(self.fieldFormatter(d.label));
@@ -245,9 +205,13 @@ define(function (require) {
           return xScale(d.x) + xScale.rangeBand() / 2;
         })
         .attr('cy', function cy(d) {
-          return yScale(d.y);
+          if (isOverlapping) {
+            return yScale(d.y);
+          }
+          return yScale(d.y0 + d.y);
         })
-        .attr('r', circleRadius);
+        .attr('r', circleRadius)
+        .style('opacity', 0);
 
       // Add tooltip
       if (isTooltip) {
@@ -288,15 +252,13 @@ define(function (require) {
       var elHeight = this._attr.height = $elem.height();
       var minWidth = 20;
       var minHeight = 20;
-      var isEvents = this._attr.addEvents;
       var div;
       var svg;
       var width;
       var height;
       var layers;
-      var brush;
-      var lines;
       var circles;
+      var path;
 
       return function (selection) {
         selection.each(function (data) {
@@ -328,16 +290,13 @@ define(function (require) {
           self.events.addBrush(xScale, svg);
 
           // add path
-          self.addPath(svg, layers);
+          path = self.addPath(svg, layers);
 
-//          // add lines
-//          lines = self.addLines(svg, data.series);
-//
-//          // add circles
-//          circles = self.addCircles(svg, layers);
+          // add circles
+          circles = self.addCircles(svg, layers);
 
           // add click and hover events to circles
-//          self.addCircleEvents(circles);
+          self.addCircleEvents(circles);
 
           // chart base line
           var line = svg.append('line')
