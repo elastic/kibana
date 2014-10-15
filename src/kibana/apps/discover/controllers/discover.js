@@ -82,7 +82,7 @@ define(function (require) {
 
     var stateDefaults = {
       query: initialQuery || '',
-      columns: $scope.searchSource.get('columns') || ['_source'],
+      columns: savedSearch.columns || ['_source'],
       index: $scope.searchSource.get('index').id || config.get('defaultIndex'),
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.get('filter'))
@@ -232,6 +232,7 @@ define(function (require) {
       return $scope.updateDataSource()
       .then(function () {
         savedSearch.id = savedSearch.title;
+        savedSearch.columns = $scope.state.columns;
 
         return savedSearch.save()
         .then(function () {
@@ -439,7 +440,6 @@ define(function (require) {
         return sort;
       })
       .query(!$state.query ? null : $state.query)
-      .set('columns', $state.columns || [])
       .set('filter', $state.filters || []);
 
       // get the current indexPattern
