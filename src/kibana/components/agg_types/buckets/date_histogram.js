@@ -102,7 +102,7 @@ define(function (require) {
                 min: val.min,
                 max: val.max
               };
-            } else {
+            } else if (aggConfig.vis.indexPattern.timeFieldName) {
               var tfBounds = timefilter.getBounds();
               output.params.extended_bounds = {
                 min: tfBounds.min,
