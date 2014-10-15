@@ -10,11 +10,10 @@
       <a href="http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html#field_detail"
         target="_blank">regex flags</a>
     </span>
-    <label ng-repeat="(flag, i) in aggParam.flags" class="normal">
-      <input
-        type="checkbox"
-        ng-model="params[aggParam.name].flags[flag]">
-      {{ flag }}
-    </label>
+    <select
+      multiple
+      ng-model="params[aggParam.name].flags"
+      ng-options="label for label in aggParam.flags">
+    </select>
   </div>
 </div>

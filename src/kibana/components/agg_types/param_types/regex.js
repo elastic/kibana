@@ -8,17 +8,17 @@ define(function (require) {
     _(RegexAggParam).inherits(BaseAggParam);
     function RegexAggParam(config) {
       // Java RegExp flags
-      var flags = {
-        CANON_EQ: false,
-        CASE_INSENSITIVE: false,
-        COMMENTS: false,
-        DOTALL: false,
-        LITERAL: false,
-        MULTILINE: false,
-        UNICODE_CASE: false,
-        UNICODE_CHARACTER_CLASS: false,
-        UNIX_LINES: false
-      };
+      var flags = [
+        'CANON_EQ',
+        'CASE_INSENSITIVE',
+        'COMMENTS',
+        'DOTALL',
+        'LITERAL',
+        'MULTILINE',
+        'UNICODE_CASE',
+        'UNICODE_CHARACTER_CLASS',
+        'UNIX_LINES'
+      ];
 
       _.defaults(config, { pattern: '', flags: flags });
       RegexAggParam.Super.call(this, config);
@@ -50,15 +50,8 @@ define(function (require) {
       };
 
       // include any selected flags
-      if (param.flags) {
-        var selectedFlags = [];
-        Object.keys(param.flags).forEach(function (key) {
-          if (param.flags[key]) selectedFlags.push(key);
-        });
-
-        if (selectedFlags.length) {
-          obj.flags = selectedFlags.join('|');
-        }
+      if (_.isArray(param.flags) && param.flags.length) {
+        obj.flags = param.flags.join('|');
       }
 
       output.params[this.name] = obj;
