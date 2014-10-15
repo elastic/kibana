@@ -13,12 +13,12 @@ define(function (require) {
       }
 
       return _(arr)
-        .pluck('label')
-        .unique()
-        .map(function (d) {
-          return formatter(d);
-        })
-        .value();
+      .pluck('label')
+      .unique()
+      .map(function (d) {
+        return formatter(d);
+      })
+      .value();
     };
   };
 });

@@ -15,9 +15,9 @@ define(function (require) {
       obj = obj.rows ? obj.rows : obj.columns;
 
       return _.chain(obj)
-        .pluck('series')
-        .flatten()
-        .value();
+      .pluck('series')
+      .flatten()
+      .value();
     };
   };
 });

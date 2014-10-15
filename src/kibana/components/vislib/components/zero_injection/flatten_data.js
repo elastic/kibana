@@ -16,11 +16,11 @@ define(function (require) {
         obj = obj.rows ? obj.rows : obj.columns;
 
         return _.chain(obj)
-          .pluck('series')
-          .flatten()
-          .pluck('values')
-          .flatten()
-          .value();
+        .pluck('series')
+        .flatten()
+        .pluck('values')
+        .flatten()
+        .value();
       }
 
       return _.flatten(obj.series, 'values');
