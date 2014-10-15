@@ -17,6 +17,8 @@ define(function (require) {
       location: 'saved visualization service'
     });
 
+    this.type = SavedVis.type;
+
     this.get = function (id) {
       return (new SavedVis(id)).init();
     };

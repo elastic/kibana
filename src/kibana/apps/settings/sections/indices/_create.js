@@ -17,7 +17,7 @@ define(function (require) {
 
     // this and child scopes will write pattern vars here
     var index = $scope.index = {
-      // set in updateDefaultIndexName watcher
+      // set in updateDefaultForPatternType()
       name: null,
       defaultName: null,
 
@@ -31,6 +31,7 @@ define(function (require) {
     index.timeField = null;
 
     var updateSamples = function () {
+      updateDefaultForPatternType();
       index.samples = null;
       index.existing = null;
       index.patternErrors = [];
@@ -162,7 +163,7 @@ define(function (require) {
       });
     };
 
-    var updateDefaultIndexName = function () {
+    var updateDefaultForPatternType = function () {
       var newDefault = index.nameIsPattern
         ? '[logstash-]YYYY.MM.DD'
         : 'logstash-*';
@@ -172,6 +173,11 @@ define(function (require) {
       } else {
         index.defaultName = newDefault;
       }
+
+      if (!index.nameIsPattern) {
+        delete index.nameInterval;
+        delete index.timeField;
+      }
     };
 
     $scope.moreSamples = function (andUpdate) {
@@ -179,14 +185,21 @@ define(function (require) {
       if (andUpdate) updateSamples();
     };
 
-    $scope.$watch('index.name', updateSamples);
-    $scope.$watch('index.nameInterval', updateSamples);
+    $scope.$watchMulti([
+      'index.name',
+      'index.nameInterval'
+    ], updateSamples);
 
-    $scope.$watch('index.nameIsPattern', updateDefaultIndexName);
+    $scope.$watchMulti([
+      'index.nameIsPattern',
+      'index.isTimeBased'
+    ], updateDefaultForPatternType);
 
-    $scope.$watch('index.name', $scope.refreshFieldList);
-    $scope.$watch('index.isTimeBased', $scope.refreshFieldList);
-    $scope.$watch('index.nameIsPattern', $scope.refreshFieldList);
-    $scope.$watch('index.nameInterval', $scope.refreshFieldList);
+    $scope.$watchMulti([
+      'index.name',
+      'index.isTimeBased',
+      'index.nameIsPattern',
+      'index.nameInterval'
+    ], $scope.refreshFieldList);
   });
 });

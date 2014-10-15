@@ -1,7 +1,7 @@
 {
   "name": "kibana",
   "private": true,
-  "version": "4.0.0-BETA1",
+  "version": "4.0.0-BETA1.1",
   "description": "Kibana 4",
   "main": "Gulpfile.js",
   "dependencies": {},
@@ -22,6 +22,7 @@
     "grunt-mocha": "~0.4.10",
     "grunt-replace": "^0.7.9",
     "grunt-run": "^0.2.3",
+    "grunt-s3": "~0.2.0-alpha.3",
     "grunt-saucelabs": "~8.3.2",
     "html-entities": "^1.1.1",
     "http-proxy": "~1.1.4",
@@ -34,13 +35,13 @@
     "mkdirp": "^0.5.0",
     "mocha": "~1.20.1",
     "mocha-screencast-reporter": "~0.1.4",
+    "opn": "~1.0.0",
     "path-browserify": "0.0.0",
     "progress": "^1.1.8",
     "request": "^2.40.0",
     "requirejs": "~2.1.14",
     "rjs-build-analysis": "0.0.3",
-    "tar": "^1.0.1",
-    "grunt-s3": "~0.2.0-alpha.3"
+    "tar": "^1.0.1"
   },
   "scripts": {
     "test": "grunt test --use-jruby",

@@ -12,32 +12,32 @@ module.exports = function (grunt) {
     server_src: {
       files: [
         {
-          src: '<%= src %>/server/Gemfile',
+          src: '<%= server %>/Gemfile',
           dest: '<%= build %>/kibana/Gemfile'
         },
         {
-          src: '<%= src %>/server/Gemfile.lock',
+          src: '<%= server %>/Gemfile.lock',
           dest: '<%= build %>/kibana/Gemfile.lock'
         },
         {
-          src: '<%= src %>/server/bin/initialize',
+          src: '<%= server %>/bin/initialize',
           dest: '<%= build %>/kibana/bin/initialize'
         },
         {
           expand: true,
-          cwd: '<%= src %>/server/config/',
+          cwd: '<%= server %>/config/',
           src: '**',
           dest: '<%= build %>/kibana/config'
         },
         {
           expand: true,
-          cwd: '<%= src %>/server/lib/',
+          cwd: '<%= server %>/lib/',
           src: '**',
           dest: '<%= build %>/kibana/lib'
         },
         {
           expand: true,
-          cwd: '<%= src %>/server/routes/',
+          cwd: '<%= server %>/routes/',
           src: '**',
           dest: '<%= build %>/kibana/routes'
         }
@@ -55,7 +55,7 @@ module.exports = function (grunt) {
         },
         {
           expand: true,
-          cwd: '<%= src %>/server/config/',
+          cwd: '<%= server %>/config/',
           src: 'kibana.yml',
           dest: '<%= build %>/dist/kibana/config/'
         }

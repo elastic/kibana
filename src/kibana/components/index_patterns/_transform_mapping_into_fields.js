@@ -25,8 +25,16 @@ define(function (require) {
             var mapping = _.cloneDeep(field.mapping[keys.shift()]);
             mapping.type = castMappingType(mapping.type);
 
-            // Internally, elasticsearch uses 'false' as the default for say, _id. The docs use 'no', make them the same
-            mapping.indexed = (!!!mapping.index || mapping.index === 'no') ? false : true;
+            if (name === '_id') {
+              // _id is allways indexed
+              mapping.indexed = true;
+            } else if (!mapping.index || mapping.index === 'no') {
+              // elasticsearch responds with false sometimes and 'no' others
+              mapping.indexed = false;
+            } else {
+              mapping.indexed = true;
+            }
+
             mapping.analyzed = mapping.index === 'analyzed' ? true : false;
 
             if (fields[name]) {

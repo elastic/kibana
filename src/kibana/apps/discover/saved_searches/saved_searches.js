@@ -22,6 +22,8 @@ define(function (require) {
       location: 'Saved Searches'
     });
 
+    this.type = SavedSearch.type;
+
     this.get = function (id) {
       return (new SavedSearch(id)).init();
     };

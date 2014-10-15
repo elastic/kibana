@@ -22,14 +22,12 @@ define(function (require) {
           $scope.modes = modes;
 
           $scope.toggleDisplay = function () {
+            $scope.showPageToggle = !$scope.fullScreenSpy;
             $scope.setSpyMode($scope.spyMode ? null : defaultMode);
           };
 
           $scope.toggleFullPage = function () {
             fullPageSpy = $scope.spyMode.fill = !fullPageSpy;
-
-            // tell any listeners spyMode changed
-            $scope.$emit('change:spyMode', $scope.spyMode);
           };
 
           $scope.setSpyMode = function (newMode) {
@@ -71,8 +69,6 @@ define(function (require) {
 
             // wrapped in fn to enable early return
             set();
-
-            if (change) $scope.$emit('change:spyMode', current);
           };
         }
       };

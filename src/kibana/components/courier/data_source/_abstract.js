@@ -59,12 +59,26 @@ define(function (require) {
     };
 
     /**
+     * Get the value from our own state, don't traverse up the chain
+     * @param {string} name - The name of the property desired
+     * @return {any} - the value found
+     */
+    SourceAbstract.prototype.getOwn = function (name) {
+      if (this._state[name] !== void 0) return this._state[name];
+    };
+
+    /**
      * Change the entire state of a SourceAbstract
      * @param {object|string} state - The SourceAbstract's new state, or a
      *   string of the state value to set
      */
     SourceAbstract.prototype.set = function (state, val) {
       if (typeof state === 'string') {
+        // the getter and setter methods check for undefined explicitly
+        // to identify getters and null to identify deletion
+        if (val === undefined) {
+          val = null;
+        }
         this[state](val);
       } else {
         this._state = state;

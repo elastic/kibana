@@ -75,7 +75,7 @@ define(function (require) {
         };
 
         $scope.edit = function (conf) {
-          conf.unsavedValue = conf.value;
+          conf.unsavedValue = conf.value || conf.defVal;
           $scope.configs.forEach(function (c) {
             c.editting = (c === conf);
           });
@@ -83,6 +83,10 @@ define(function (require) {
 
         $scope.save = function (conf) {
           loading(conf, function () {
+            if (conf.unsavedValue === conf.defVal) {
+              return config.clear(conf.name);
+            }
+
             return config.set(conf.name, conf.unsavedValue);
           });
         };

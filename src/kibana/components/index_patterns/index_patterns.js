@@ -12,8 +12,14 @@ define(function (require) {
     var notify = new Notifier({ location: 'IndexPatterns Service'});
 
     indexPatterns.get = function (id) {
+      if (!id) return indexPatterns.make();
+
       var cache = patternCache.get(id);
-      return cache || patternCache.set(id, (new IndexPattern(id)).init());
+      return cache || patternCache.set(id, indexPatterns.make(id));
+    };
+
+    indexPatterns.make = function (id) {
+      return (new IndexPattern(id)).init();
     };
 
     indexPatterns.delete = function (pattern) {

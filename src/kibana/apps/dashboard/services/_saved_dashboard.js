@@ -8,12 +8,12 @@ define(function (require) {
 
     // SavedDashboard constructor. Usually you'd interact with an instance of this.
     // ID is option, without it one will be generated on save.
+    _(SavedDashboard).inherits(courier.SavedObject);
     function SavedDashboard(id) {
-
       // Gives our SavedDashboard the properties of a SavedObject
       courier.SavedObject.call(this, {
         // this object will be saved at {{configFile.kibanaIndex}}/dashboard/{{id}}
-        type: 'dashboard',
+        type: SavedDashboard.type,
 
         // if this is null/undefined then the SavedObject will be assigned the defaults
         id: id,
@@ -34,12 +34,13 @@ define(function (require) {
           panelsJSON: '[]'
         },
 
-        searchSource: true
+        searchSource: true,
+
+        clearSavedIndexPattern: true
       });
     }
 
-    // Sets savedDashboard.prototype to an instance of SavedObject
-    inherits(SavedDashboard, courier.SavedObject);
+    SavedDashboard.type = 'dashboard';
 
     return SavedDashboard;
   });

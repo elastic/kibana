@@ -27,4 +27,11 @@ if [ ! -x "${JAVA}" ]; then
   exit 1
 fi
 >&2 echo "The Kibana Backend is starting up... be patient"
-KIBANA_VERSION=@@version CONFIG_PATH=${DIR}/../config/kibana.yml RACK_ENV=production exec "${JAVA}" -jar "${DIR}/../lib/kibana.jar" "$@"
+
+JAVA_OPTS="-Xmx512m $JAVA_OPTS"
+
+# Clear gem paths so that we only use the gems inside the kibana.jar
+export GEM_HOME=
+export GEM_PATH=
+
+KIBANA_VERSION=@@version CONFIG_PATH=${DIR}/../config/kibana.yml RACK_ENV=production exec "${JAVA}" $JAVA_OPTS -jar "${DIR}/../lib/kibana.jar" "$@"
