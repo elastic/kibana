@@ -46,6 +46,25 @@ define(function (require) {
     };
 
     var ordered = {};
+    var childrenObject = {
+      children: []
+    };
+    var seriesObject = {
+      series: []
+    };
+    var rowsObject = {
+      rows: []
+    };
+    var columnsObject = {
+      columns: []
+    };
+    var emptyObject = {};
+    var str = 'string';
+    var number = 24;
+    var boolean = false;
+    var nullValue = null;
+    var emptyArray = [];
+    var notAValue;
 
     describe('Zero Injection (main)', function () {
       var injectZeros;
@@ -62,6 +81,56 @@ define(function (require) {
           sample1 = injectZeros(seriesData);
           sample2 = injectZeros(multiSeriesData);
         });
+      });
+
+      it('should throw an error if the input is not an object', function () {
+        expect(function () {
+          injectZeros(str);
+        }).to.throwError();
+
+        expect(function () {
+          injectZeros(number);
+        }).to.throwError();
+
+        expect(function () {
+          injectZeros(boolean);
+        }).to.throwError();
+
+        expect(function () {
+          injectZeros(emptyArray);
+        }).to.throwError();
+
+        expect(function () {
+          injectZeros(nullValue);
+        }).to.throwError();
+
+        expect(function () {
+          injectZeros(notAValue);
+        }).to.throwError();
+      });
+
+      it('should throw an error if property series, rows, or columns is not ' +
+        'present', function () {
+
+        expect(function () {
+          injectZeros(childrenObject);
+        }).to.throwError();
+      });
+
+      it('should not throw an error if object has property series, rows, or ' +
+        'columns', function () {
+
+        expect(function () {
+          injectZeros(seriesObject);
+        }).to.not.throwError();
+
+        expect(function () {
+          injectZeros(rowsObject);
+        }).to.not.throwError();
+
+        expect(function () {
+          injectZeros(columnsObject);
+        }).to.not.throwError();
       });
 
       it('should be a function', function () {
@@ -118,6 +187,32 @@ define(function (require) {
         });
       });
 
+      it('should throw an error if input is not an object', function () {
+        expect(function () {
+          orderXValues(str);
+        }).to.throwError();
+
+        expect(function () {
+          orderXValues(number);
+        }).to.throwError();
+
+        expect(function () {
+          orderXValues(boolean);
+        }).to.throwError();
+
+        expect(function () {
+          orderXValues(nullValue);
+        }).to.throwError();
+
+        expect(function () {
+          orderXValues(emptyArray);
+        }).to.throwError();
+
+        expect(function () {
+          orderXValues(notAValue);
+        }).to.throwError();
+      });
+
       it('should return a function', function () {
         expect(_.isFunction(orderXValues)).to.be(true);
       });
@@ -148,6 +243,32 @@ define(function (require) {
           uniqueKeys = Private(require('components/vislib/components/zero_injection/uniq_keys'));
           results = uniqueKeys(multiSeriesData);
         });
+      });
+
+      it('should throw an error if input is not an object', function () {
+        expect(function () {
+          uniqueKeys(str);
+        }).to.throwError();
+
+        expect(function () {
+          uniqueKeys(number);
+        }).to.throwError();
+
+        expect(function () {
+          uniqueKeys(boolean);
+        }).to.throwError();
+
+        expect(function () {
+          uniqueKeys(nullValue);
+        }).to.throwError();
+
+        expect(function () {
+          uniqueKeys(emptyArray);
+        }).to.throwError();
+
+        expect(function () {
+          uniqueKeys(notAValue);
+        }).to.throwError();
       });
 
       it('should return a function', function () {
@@ -212,6 +333,32 @@ define(function (require) {
         });
       });
 
+      it('should throw an error if input is not an array', function () {
+        expect(function () {
+          createZeroArray(str);
+        }).to.throwError();
+
+        expect(function () {
+          createZeroArray(number);
+        }).to.throwError();
+
+        expect(function () {
+          createZeroArray(boolean);
+        }).to.throwError();
+
+        expect(function () {
+          createZeroArray(nullValue);
+        }).to.throwError();
+
+        expect(function () {
+          createZeroArray(emptyObject);
+        }).to.throwError();
+
+        expect(function () {
+          createZeroArray(notAValue);
+        }).to.throwError();
+      });
+
       it('should return a function', function () {
         expect(_.isFunction(createZeroArray)).to.be(true);
       });
@@ -273,6 +420,32 @@ define(function (require) {
           // Takes zero array as 1st arg and data array as 2nd arg
           results = zeroFillArray(arr1, arr2);
         });
+      });
+
+      it('should throw an error if input are not arrays', function () {
+        expect(function () {
+          zeroFillArray(str, str);
+        }).to.throwError();
+
+        expect(function () {
+          zeroFillArray(number, number);
+        }).to.throwError();
+
+        expect(function () {
+          zeroFillArray(boolean, boolean);
+        }).to.throwError();
+
+        expect(function () {
+          zeroFillArray(nullValue, nullValue);
+        }).to.throwError();
+
+        expect(function () {
+          zeroFillArray(emptyObject, emptyObject);
+        }).to.throwError();
+
+        expect(function () {
+          zeroFillArray(notAValue, notAValue);
+        }).to.throwError();
       });
 
       it('should return a function', function () {
