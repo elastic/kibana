@@ -20,12 +20,14 @@ define(function (require) {
         mapping: {
           title: 'string',
           description: 'string',
-          hits: 'integer'
+          hits: 'integer',
+          columns: 'string'
         },
 
         defaults: {
           title: 'New Saved Search',
           description: '',
+          columns: [],
           hits: 0
         },
 
