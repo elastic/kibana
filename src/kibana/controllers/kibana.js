@@ -23,7 +23,6 @@ define(function (require) {
   require('directives/style_compile');
   require('directives/rows');
 
-
   require('angular-bootstrap');
   require('services/private');
 
