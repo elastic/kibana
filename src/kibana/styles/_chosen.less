@@ -1,0 +1,50 @@
+@import "../bower_components/bootstrap-chosen/bootstrap-chosen.less";
+@chosen-sprite-path: "/bower_components/bootstrap-chosen/chosen-sprite.png";
+@chosen-sprite-retina-path: "/bower_components/bootstrap-chosen/chosen-sprite@2x.png";
+@chosen-border-width: @input-border-width;
+@chosen-box-shadow: none;
+@chosen-focus-box-shadow: none;
+@chosen-drop-box-shadow: none;
+@chosen-drop-border: @input-border-focus;
+
+// border overrides to match our theme
+.chosen-container-single {
+  .chosen-single,
+  .chosen-search input[type="text"] {
+    border: @input-border-width solid @chosen-border;
+  }
+}
+.chosen-container-multi {
+  .chosen-choices {
+    border: @input-border-width solid @chosen-border;
+
+    .search-choice {
+      border: @input-border-width solid @chosen-border;
+    }
+  }
+}
+.chosen-container-active {
+  .chosen-single,
+  &.chosen-with-drop .chosen-single,
+  .chosen-choices {
+    border: @input-border-width solid @chosen-focus-border;
+  }
+}
+
+// focus rules used to match our theme
+.chosen-container-active:focus {
+  .chosen-single,
+  &.chosen-with-drop .chosen-single,
+  .chosen-choices {
+    .box-shadow(@chosen-focus-box-shadow);
+  }
+}
+
+// remove the gradient on the choices
+.chosen-container-multi {
+  .chosen-choices {
+    .search-choice {
+      background-image: none;
+    }
+  }
+}
