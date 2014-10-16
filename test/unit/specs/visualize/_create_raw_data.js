@@ -39,7 +39,7 @@ define(function (require) {
 
       it('should have columns set', function () {
         expect(results).to.have.property('columns');
-        expect(results.columns).to.have.length(4);
+        expect(results.columns).to.have.length(6);
         _.each(results.columns, function (column) {
           expect(column).to.have.property('aggConfig');
           var agg = column.aggConfig;
@@ -49,23 +49,29 @@ define(function (require) {
           expect(column).to.have.property('field', agg.params.field);
           expect(column).to.have.property('label', agg.type.makeLabel(agg));
         });
+        expect(results.columns[0].aggConfig.id).to.be('agg_2');
+        expect(results.columns[1].aggConfig.id).to.be('agg_1');
+        expect(results.columns[2].aggConfig.id).to.be('agg_3');
+        expect(results.columns[3].aggConfig.id).to.be('agg_1');
+        expect(results.columns[4].aggConfig.id).to.be('agg_4');
+        expect(results.columns[5].aggConfig.id).to.be('agg_1');
       });
 
       it('should have rows set', function () {
         expect(results).to.have.property('rows');
         expect(results.rows).to.eql([
-          ['png', 'IT', 'win', 4992],
-          ['png', 'IT', 'mac', 5892],
-          ['png', 'US', 'linux', 3992],
-          ['png', 'US', 'mac', 3029],
-          ['css', 'MX', 'win', 4992],
-          ['css', 'MX', 'mac', 5892],
-          ['css', 'US', 'linux', 3992],
-          ['css', 'US', 'mac', 3029],
-          ['html', 'CN', 'win', 4992],
-          ['html', 'CN', 'mac', 5892],
-          ['html', 'FR', 'win', 3992],
-          ['html', 'FR', 'mac', 3029]
+          ['png', 412032, 'IT', 9299, 'win', 4992],
+          ['png', 412032, 'IT', 9299, 'mac', 5892],
+          ['png', 412032, 'US', 8293, 'linux', 3992],
+          ['png', 412032, 'US', 8293, 'mac', 3029],
+          ['css', 412032, 'MX', 9299, 'win', 4992],
+          ['css', 412032, 'MX', 9299, 'mac', 5892],
+          ['css', 412032, 'US', 8293, 'linux', 3992],
+          ['css', 412032, 'US', 8293, 'mac', 3029],
+          ['html', 412032, 'CN', 9299, 'win', 4992],
+          ['html', 412032, 'CN', 9299, 'mac', 5892],
+          ['html', 412032, 'FR', 8293, 'win', 3992],
+          ['html', 412032, 'FR', 8293, 'mac', 3029]
         ]);
       });
 

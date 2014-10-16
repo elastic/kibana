@@ -10,8 +10,15 @@ define(function (require) {
     var metrics = vis.aggs.bySchemaGroup.metrics;
     var buckets = vis.aggs.bySchemaGroup.buckets;
     var aggs = [];
-    if (buckets) aggs.push(buckets);
-    if (metrics) aggs.push(metrics);
+
+    if (buckets) {
+      _.each(buckets, function (bucket) {
+        aggs.push(bucket);
+        aggs.push(metrics);
+      });
+    } else {
+      aggs.push(metrics);
+    }
 
     // Create the columns
     results.columns = _(aggs).flatten().map(function (agg) {
@@ -52,6 +59,10 @@ define(function (require) {
       _.each(extractBuckets(data[agg.id]), function (bucket) {
 
         var _record = _.flatten([record, bucket.key]);
+        _.each(metrics, function (metric) {
+          var value = bucket[metric.id] && bucket[metric.id].value || bucket.doc_count;
+          _record.push(value);
+        });
 
         // If there is another agg to call we need to check to see if it has
         // buckets. If it does then we need to keep on walking the tree.
@@ -62,13 +73,8 @@ define(function (require) {
             walkBuckets(agg._next, bucket, _record);
           }
         }
-        // if there are no more aggs to walk then we need to write each metric
-        // to the record and push the record to the rows.
+        // if there are no more aggs to walk then  push the record to the rows.
         else {
-          _.each(metrics, function (metric) {
-            var value = bucket[metric.id] && bucket[metric.id].value || bucket.doc_count;
-            _record.push(value);
-          });
           results.rows.push(_record);
         }
       });
