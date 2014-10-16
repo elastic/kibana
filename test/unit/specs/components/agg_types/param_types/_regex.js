@@ -62,18 +62,14 @@ define(function (require) {
       it('should include flags', function () {
         aggConfig.params[paramName] = {
           pattern: 'testing',
-          flags: {
-            TEST1: true,
-            TEST2: false,
-            TEST3: true
-          }
+          flags: [ 'TEST1', 'TEST2', 'TEST_RED', 'TEST_BLUE' ]
         };
 
         aggParam.write(aggConfig, output);
         expect(output.params).to.have.property(paramName);
         expect(output.params[paramName]).to.have.property('flags');
         expect(typeof output.params[paramName].flags).to.be('string');
-        expect(output.params[paramName].flags).to.be('TEST1|TEST3');
+        expect(output.params[paramName].flags).to.be('TEST1|TEST2|TEST_RED|TEST_BLUE');
       });
     });
   }];
