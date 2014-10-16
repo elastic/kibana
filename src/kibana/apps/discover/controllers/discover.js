@@ -530,7 +530,7 @@ define(function (require) {
       _.each(value, function (clause) {
         var previous = _.find(filters, function (item) {
           if (item && item.query) {
-            return item.query.match[field] === { query: clause, type: 'phrase' };
+            return item.query.match[field].query === clause;
           } else if (item && item.exists && field === '_exists_') {
             return item.exists.field === clause;
           } else if (item && item.missing && field === '_missing_') {
