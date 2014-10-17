@@ -8,7 +8,10 @@ define(function (require) {
     return [
       {
         display: 'Auto',
-        val: 'auto'
+        val: 'auto',
+        enabled: function (aggConfig) {
+          return !!aggConfig.vis.indexPattern.timeFieldName;
+        }
       },
       {
         display: 'Second',

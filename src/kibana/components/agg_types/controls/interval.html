@@ -4,9 +4,10 @@
     ng-if="aggParam.options"
     ng-model="params.interval"
     required
-    ng-options="opt as opt.display for opt in aggParam.options"
+    ng-options="opt as opt.display for opt in aggParam.options.raw | filter:optionEnabled"
     class="form-control"
     name="interval">
+    <option value="">-- select a valid interval --</option>
   </select>
   <input
     ng-if="!aggParam.options"

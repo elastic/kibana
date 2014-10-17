@@ -1,15 +1,46 @@
 <div class="bar" ng-show="filters.length">
   <div class="filter" ng-class="{ negate: filter.negate, disabled: filter.disabled }" ng-repeat="filter in filters">
     <div class="filter-description">
+      <!--<span><i class="fa" ng-class="{'fa-plus': !filter.negate, 'fa-minus': filter.negate}"></i></span>-->
       <span>{{ filter.key }}:</span>
       <span>"{{ filter.value }}"</span>
     </div>
     <div class="filter-actions">
-      <a class="filter-toggle" ng-click="toggleFilter(filter)"><span ng-show="filter.disabled">enable</span><span ng-hide="filter.disabled">disable</span></a>
-      <a class="filter-remove" ng-click="removeFilter(filter)">remove</a>
+      <a class="filter-toggle" ng-click="toggleFilter(filter)">
+        <span ng-show="filter.disabled">enable</span>
+        <span ng-hide="filter.disabled">disable</span>
+      </a>
+      <a class="filter-remove" ng-click="removeFilter(filter)">
+        remove
+      </a>
     </div>
   </div>
-  <div class="filter-remove-all" ng-click="removeFilters()">
-    <div class="filter-description"><a ng-click="removeAll()">remove all</a></div>
+  <div class="filter-link">
+    <div class="filter-description small">
+      <a ng-click="showFilterActions = !showFilterActions">
+        Actions
+        <i class="fa"
+        ng-class="{'fa-caret-down': showFilterActions, 'fa-caret-right': !showFilterActions}"></i>
+      </a>
+    </div>
+  </div>
+</div>
+<div class="bar bar-condensed" ng-show="filters.length && showFilterActions">
+  <div class="filter-actions-all">
+    <div class="filter-link">
+      <div class="filter-description"><strong>All filters:</strong></div>
+    </div>
+    <div class="filter-link">
+      <div class="filter-description"><a ng-click="toggleAll(false)">Enable</a></div>
+    </div>
+    <div class="filter-link">
+      <div class="filter-description"><a ng-click="toggleAll(true)">Disable</a></div>
+    </div>
+    <div class="filter-link">
+      <div class="filter-description"><a ng-click="toggleAll()">Toggle</a></div>
+    </div>
+    <div class="filter-link">
+      <div class="filter-description"><a ng-click="removeAll()">Remove</a></div>
+    </div>
   </div>
 </div>
