@@ -4,16 +4,25 @@ define(function (require) {
     var $ = require('jquery');
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
-
-    // Dynamically adds css file
     require('css!components/vislib/styles/main');
 
+    /**
+     * Line Chart Visualization
+     *
+     * @class LineChart
+     * @constructor
+     * @extends Chart
+     * @param handler {Object} Reference to the Handler Class Constructor
+     * @param el {HTMLElement} HTML element to which the chart will be appended
+     * @param chartData {Object} Elasticsearch query results for this specific chart
+     */
     _(LineChart).inherits(Chart);
     function LineChart(handler, chartEl, chartData) {
       if (!(this instanceof LineChart)) {
         return new LineChart(handler, chartEl, chartData);
       }
 
+      // TODO: refactor
       var raw;
       var fieldIndex;
 
@@ -22,7 +31,7 @@ define(function (require) {
         fieldIndex = _.findIndex(raw, {'categoryName': 'group'});
       }
 
-      this.fieldFormatter = raw && raw[fieldIndex] ? raw[fieldIndex].field.format.convert : function (d) { return d; };
+      this.fieldFormatter = (raw && raw[fieldIndex]) ? raw[fieldIndex].field.format.convert : function (d) { return d; };
 
       LineChart.Super.apply(this, arguments);
       // Line chart specific attributes
@@ -33,6 +42,13 @@ define(function (require) {
       });
     }
 
+    /**
+     * Adds Events to SVG circle
+     *
+     * @method addCircleEvents
+     * @param circles {D3.UpdateSelection} Reference to SVG circle
+     * @returns {D3.UpdateSelection} SVG circles with event listeners attached
+     */
     LineChart.prototype.addCircleEvents = function (circles) {
       var events = this.events;
       var dispatch = this.events._attr.dispatch;
@@ -62,6 +78,14 @@ define(function (require) {
       });
     };
 
+    /**
+     * Adds circles to SVG
+     *
+     * @method addCircles
+     * @param svg {HTMLElement} SVG to which rect are appended
+     * @param data {Array} Array of object data points
+     * @returns {D3.UpdateSelection} SVG with circles added
+     */
     LineChart.prototype.addCircles = function (svg, data) {
       var self = this;
       var color = this.handler.data.getColorFunc();
@@ -81,19 +105,16 @@ define(function (require) {
         .append('g')
         .attr('class', 'points');
 
-      // Append the bars
       circles = layer
       .selectAll('rect')
       .data(function appendData(d) {
         return d;
       });
 
-      // exit
       circles
       .exit()
       .remove();
 
-      // enter
       circles
       .enter()
         .append('circle')
@@ -108,7 +129,6 @@ define(function (require) {
         })
         .attr('stroke-width', circleStrokeWidth);
 
-      // update
       circles
       .attr('cx', function cx(d) {
         if (ordered && ordered.date) {
@@ -121,7 +141,6 @@ define(function (require) {
       })
       .attr('r', circleRadius);
 
-      // Add tooltip
       if (isTooltip) {
         circles.call(tooltip.render());
       }
@@ -129,6 +148,14 @@ define(function (require) {
       return circles;
     };
 
+    /**
+     * Adds path to SVG
+     *
+     * @method addLines
+     * @param svg {HTMLElement} SVG to which path are appended
+     * @param data {Array} Array of object data points
+     * @returns {D3.UpdateSelection} SVG with paths added
+     */
     LineChart.prototype.addLines = function (svg, data) {
       var self = this;
       var xScale = this.handler.xAxis.xScale;
@@ -173,29 +200,41 @@ define(function (require) {
       return lines;
     };
 
+    /**
+     * Adds SVG clipPath
+     *
+     * @method addClipPath
+     * @param svg {HTMLElement} SVG to which clipPath is appended
+     * @param width {Number} SVG width
+     * @param height {Number} SVG height
+     * @returns {D3.UpdateSelection} SVG with clipPath added
+     */
     LineChart.prototype.addClipPath = function (svg, width, height) {
-      // Prevents circles from being clipped at the top of the chart
       var clipPathBuffer = 5;
       var startX = 0;
       var startY = 0 - clipPathBuffer;
       var id = 'chart-area' + _.uniqueId();
 
-      // Creating clipPath
       return svg
       .attr('clip-path', 'url(#' + id + ')')
       .append('clipPath')
-        .attr('id', id)
+      .attr('id', id)
       .append('rect')
-        .attr('x', startX)
-        .attr('y', startY)
-        .attr('width', width)
-        // Adding clipPathBuffer to height so it doesn't
-        // cutoff the lower part of the chart
-        .attr('height', height + clipPathBuffer);
+      .attr('x', startX)
+      .attr('y', startY)
+      .attr('width', width)
+      // Adding clipPathBuffer to height so it doesn't
+      // cutoff the lower part of the chart
+      .attr('height', height + clipPathBuffer);
     };
 
+    /**
+     * Renders d3 visualization
+     *
+     * @method draw
+     * @returns {Function} Creates the line chart
+     */
     LineChart.prototype.draw = function () {
-      // Attributes
       var self = this;
       var $elem = $(this.chartEl);
       var margin = this._attr.margin;
@@ -229,41 +268,30 @@ define(function (require) {
             });
           });
 
-          // Get the width and height
           width = elWidth - margin.left - margin.right;
           height = elHeight - margin.top - margin.bottom;
 
-          // if height or width < 20 or NaN, throw error
           if (_.isNaN(width) || width < minWidth || _.isNaN(height) || height < minHeight) {
             throw new Error(chartToSmallError);
           }
 
-          // Select the current DOM element
           div = d3.select(el);
 
-          // Create the canvas for the visualization
           svg = div.append('svg')
           .attr('width', width + margin.left + margin.right)
           .attr('height', height + margin.top + margin.bottom)
           .append('g')
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-          // add clipPath to hide circles when they go out of bounds
           self.addClipPath(svg, width, height);
 
-          // addBrush canvas
           self.events.addBrush(xScale, svg);
 
-          // add lines
           lines = self.addLines(svg, data.series);
-
-          // add circles
           circles = self.addCircles(svg, layers);
 
-          // add click and hover events to circles
           self.addCircleEvents(circles);
 
-          // chart base line
           var line = svg
           .append('line')
           .attr('x1', startLineX)

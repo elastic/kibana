@@ -4,19 +4,37 @@ define(function (require) {
 
     var flattenDataArray = Private(require('components/vislib/components/zero_injection/flatten_data'));
 
-    // accepts a kibana data.series array of objects
+    /*
+     * Accepts a Kibana data object.
+     * Returns an object with unique x axis values as keys with an object of
+     * their index numbers and an isNumber boolean as their values.
+     * e.g. { 'xAxisValue': { index: 1, isNumber: false }}, ...
+     */
+
     return function (obj) {
+      if (!_.isObject(obj)) {
+        throw new TypeError('UniqueXValuesUtilService expects an object');
+      }
+
       var flattenedData = flattenDataArray(obj);
       var uniqueXValues = {};
 
-      // Appends unique x values in the order they appear to an empty object
       flattenedData.forEach(function (d, i) {
         var key = d.x;
-        uniqueXValues[key] = uniqueXValues[key] === void 0 ?
-        { index: i, isNumber: _.isNumber(key) } : { index: Math.max(i, uniqueXValues[key].index), isNumber: _.isNumber(key) };
+
+        if (uniqueXValues[key] === void 0) {
+          uniqueXValues[key] = {
+            index: i,
+            isNumber: _.isNumber(key)
+          };
+        } else {
+          uniqueXValues[key] = {
+            index: Math.max(i, uniqueXValues[key].index),
+            isNumber: _.isNumber(key)
+          };
+        }
       });
 
-      // returns an object with unique x values
       return uniqueXValues;
     };
   };

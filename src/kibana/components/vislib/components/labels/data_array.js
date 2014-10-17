@@ -4,23 +4,19 @@ define(function (require) {
 
     var flattenSeries = Private(require('components/vislib/components/labels/flatten_series'));
 
-    /* Takes a kibana obj object
-     * for example:
-     * {
-     *   labels: '',
-     *   rows: [...],
-     *   raw: [...],
-     *   ...,
-     * };
-     * Data object can have a key that has rows, columns, or series.
+    /*
+     * Accepts a Kibana data object and returns an array of values objects.
     */
+
     return function (obj) {
+      if (!_.isObject(obj) || !obj.rows && !obj.columns && !obj.series) {
+        throw new TypeError('GetArrayUtilService expects an object with a series, rows, or columns key');
+      }
 
       if (!obj.series) {
         return flattenSeries(obj);
       }
 
-      // Returns a kibana obj.series array of objects with values array
       return obj.series;
     };
   };

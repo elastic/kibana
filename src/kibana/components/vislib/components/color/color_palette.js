@@ -4,15 +4,21 @@ define(function (require) {
 
     var seedColors = Private(require('components/vislib/components/color/seed_colors'));
 
-    // Accepts a number that represents a length of an array
-    return function (num) {
-      var usedColors = [];
+    /*
+     * Generates an array of hex colors the length of the input number.
+     * If the number is greater than the length of seed colors available,
+     * new colors are generated up to the value of the input number.
+     */
 
-      // checks if more colors are needed
+    return function (num) {
+      if (!_.isNumber(num)) {
+        throw new TypeError('ColorPaletteUtilService expects a number');
+      }
+
+      var usedColors = [];
       var diff = num - seedColors.length;
 
       if (diff > 0) {
-        // generate more colors
         usedColors = _.clone(seedColors);
 
         for (var newColor, i = 0; i < diff; i++) {
@@ -23,12 +29,9 @@ define(function (require) {
           usedColors.push(newColor);
         }
       } else {
-        // trim to length of array labels
         usedColors = _.first(seedColors, num);
       }
 
-      // Returns an array of hex colors
-      // Returned array should be same length as input (num).
       return usedColors;
     };
   };
