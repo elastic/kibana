@@ -63,14 +63,18 @@ define(function (require) {
         expect(children[0].children[0]).to.have.property('aggConfig', fixture.agg.agg_3);
         expect(children[0].children[0]).to.have.property('name', 'win');
         expect(children[0].children[1]).to.have.property('size', 1);
+        expect(children[0].children[1]).to.have.property('parent', children[0]);
         expect(children[0].children[1]).to.have.property('aggConfig', fixture.agg.agg_3);
         expect(children[0].children[1]).to.have.property('name', 'mac');
         expect(children[1].children[0]).to.have.property('size', 2);
+        expect(children[0].children[1]).to.have.property('parent', children[0]);
         expect(children[1].children[0]).to.have.property('aggConfig', fixture.agg.agg_3);
         expect(children[1].children[0]).to.have.property('name', 'win');
         expect(children[1].children[1]).to.have.property('size', 2);
+        expect(children[1].children[1]).to.have.property('parent', children[1]);
         expect(children[1].children[1]).to.have.property('aggConfig', fixture.agg.agg_3);
         expect(children[1].children[1]).to.have.property('name', 'mac');
+        expect(children[1].children[1]).to.have.property('parent', children[1]);
       });
 
     });
