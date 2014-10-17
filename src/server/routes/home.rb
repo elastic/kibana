@@ -27,7 +27,7 @@ module Kibana
         end
 
         def bundled_plugins
-          plugins_ids_in(settings.bundled_plugins_folder)
+          plugins_ids_in(settings.bundled_plugins_folder).concat(settings.bundled_plugin_ids)
         end
 
         def plugins_ids_in(dir)

@@ -17,6 +17,7 @@ module Kibana
         set :external_plugins_folder, Kibana.global_settings[:external_plugins_folder]
         set :httponly, true
         set :config, config
+        set :bundled_plugin_ids, config['bundled_plugin_ids'] || []
       end
     end
   end

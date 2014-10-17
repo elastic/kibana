@@ -32,6 +32,14 @@ module.exports = function (grunt) {
 
   grunt.config.merge(config);
 
+  var dirname = require('path').dirname;
+  var indexFiles = grunt.file.expand({ cwd: 'src/kibana/plugins' }, '*/index.js');
+  var moduleIds = indexFiles.map(function (fileName) {
+    return 'plugins/' + dirname(fileName) + '/index';
+  });
+
+  config.bundledPluginModuleIds = grunt.bundledPluginModuleIds = moduleIds;
+
   // load plugins
   require('load-grunt-config')(grunt, {
     configPath: __dirname + '/tasks/config',

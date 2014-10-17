@@ -61,15 +61,8 @@ module.exports = function (grunt) {
 
   // include bundled plugins in the build
   var main = config.build.options.modules[0];
-  var dirname = require('path').dirname;
-  var join = require('path').join;
-
-  grunt.file.expand(
-    { cwd: join(__dirname, '../../src/kibana/plugins') },
-    '*/index.js'
-  ).forEach(function (fileName) {
-    var pluginName = dirname(fileName);
-    main.include.push('plugins/' + pluginName + '/index');
+  grunt.bundledPluginModuleIds.forEach(function (moduleId) {
+    main.include.push(moduleId);
   });
 
   return config;
