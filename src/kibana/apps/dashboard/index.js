@@ -8,6 +8,8 @@ define(function (require) {
   require('components/config/config');
   require('components/notify/notify');
   require('components/typeahead/typeahead');
+  require('components/clipboard/clipboard');
+
 
   require('apps/dashboard/directives/grid');
   require('apps/dashboard/directives/panel');

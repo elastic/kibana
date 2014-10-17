@@ -2,6 +2,8 @@ define(function (require) {
   return function VisSpyReqRespStats() {
     var _ = require('lodash');
     var reqRespStatsHTML = require('text!components/visualize/spy/_req_resp_stats.html');
+    require('components/clipboard/clipboard');
+
 
     var linkReqRespStats = function ($scope, config) {
       $scope.$watch('searchSource.history.length', function () {
@@ -44,9 +46,6 @@ define(function (require) {
         };
       });
 
-      $scope.getReq = function () {
-        return $scope.history.req.toJson();
-      };
     };
 
     return [

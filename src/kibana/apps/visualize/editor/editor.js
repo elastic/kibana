@@ -3,8 +3,11 @@ define(function (require) {
   require('apps/visualize/editor/sidebar');
   require('apps/visualize/editor/agg_filter');
 
+
   require('directives/saved_object_finder');
   require('components/visualize/visualize');
+  require('components/clipboard/clipboard');
+
   require('filters/uriescape');
 
   require('routes')
