@@ -14,7 +14,7 @@ require.config({
     'angular-elastic': 'bower_components/angular-elastic/elastic',
     'angular-route': 'bower_components/angular-route/angular-route',
     'angular-ui-ace': 'bower_components/angular-ui-ace/ui-ace',
-    'ng-clip': 'bower_components/ng-clip/dest/ng-clip.min',
+    'ng-clip': 'bower_components/ng-clip/src/ngClip',
     ace: 'bower_components/ace-builds/src-noconflict/ace',
     angular: 'bower_components/angular/angular',
     async: 'bower_components/async/lib/async',

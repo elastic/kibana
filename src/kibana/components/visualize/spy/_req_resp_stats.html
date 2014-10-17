@@ -3,10 +3,12 @@
 </div>
 
 <div ng-show="spyMode.name === 'request'">
+  <a href="" clip-copy="getReq()">Copy</a>
   <pre>{{history.req | json}}</pre>
 </div>
 
 <div ng-show="spyMode.name === 'response'">
+  <a clip-copy="history.resp">Copy</a>
   <pre>{{history.resp | json}}</pre>
 </div>
 

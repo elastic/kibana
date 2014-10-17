@@ -43,6 +43,10 @@ define(function (require) {
           complete: entry.complete
         };
       });
+
+      $scope.getReq = function () {
+        return $scope.history.req.toJson();
+      };
     };
 
     return [
