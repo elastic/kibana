@@ -157,6 +157,24 @@ define(function (require) {
     });
 
     describe('Data array', function () {
+      var childrenObject = {
+        children: []
+      };
+      var seriesObject = {
+        series: []
+      };
+      var rowsObject = {
+        rows: []
+      };
+      var columnsObject = {
+        columns: []
+      };
+      var string = 'string';
+      var number = 23;
+      var boolean = false;
+      var emptyArray = [];
+      var nullValue = null;
+      var notAValue;
       var dataArray;
       var testSeries;
       var testRows;
@@ -173,6 +191,56 @@ define(function (require) {
           testSeries = _.isArray(seriesLabels);
           testRows = _.isArray(rowsLabels);
         });
+      });
+
+      it('should throw an error if the input is not an object', function () {
+        expect(function () {
+          dataArray(string);
+        }).to.throwError();
+
+        expect(function () {
+          dataArray(number);
+        }).to.throwError();
+
+        expect(function () {
+          dataArray(boolean);
+        }).to.throwError();
+
+        expect(function () {
+          dataArray(emptyArray);
+        }).to.throwError();
+
+        expect(function () {
+          dataArray(nullValue);
+        }).to.throwError();
+
+        expect(function () {
+          dataArray(notAValue);
+        }).to.throwError();
+      });
+
+      it('should throw an error if property series, rows, or columns is not ' +
+        'present', function () {
+
+        expect(function () {
+          dataArray(childrenObject);
+        }).to.throwError();
+      });
+
+      it('should not throw an error if object has property series, rows, or ' +
+        'columns', function () {
+
+        expect(function () {
+          dataArray(seriesObject);
+        }).to.not.throwError();
+
+        expect(function () {
+          dataArray(rowsObject);
+        }).to.not.throwError();
+
+        expect(function () {
+          dataArray(columnsObject);
+        }).to.not.throwError();
       });
 
       it('should be a function', function () {
@@ -214,6 +282,13 @@ define(function (require) {
         {'label': 'd'},
         {'label': 'f'}
       ];
+      var string = 'string';
+      var number = 24;
+      var boolean = false;
+      var nullValue = null;
+      var emptyObject = {};
+      var emptyArray = [];
+      var notAValue;
       var uniq;
       var testArr;
 
@@ -227,6 +302,38 @@ define(function (require) {
           uniq = uniqLabels(arrObj, function (d) { return d; });
           testArr = _.isArray(uniq);
         });
+      });
+
+      it('should throw an error if input is not an array', function () {
+        expect(function () {
+          uniqLabels(string);
+        }).to.throwError();
+
+        expect(function () {
+          uniqLabels(number);
+        }).to.throwError();
+
+        expect(function () {
+          uniqLabels(boolean);
+        }).to.throwError();
+
+        expect(function () {
+          uniqLabels(nullValue);
+        }).to.throwError();
+
+        expect(function () {
+          uniqLabels(emptyObject);
+        }).to.throwError();
+
+        expect(function () {
+          uniqLabels(notAValue);
+        }).to.throwError();
+      });
+
+      it('should not throw an error if the input is an array', function () {
+        expect(function () {
+          uniqLabels(emptyArray);
+        }).to.not.throwError();
       });
 
       it('should be a function', function () {
@@ -244,14 +351,24 @@ define(function (require) {
     });
 
     describe('Get series', function () {
+      var string = 'string';
+      var number = 24;
+      var boolean = false;
+      var nullValue = null;
+      var rowsObject = {
+        rows: []
+      };
+      var columnsObject = {
+        columns: []
+      };
+      var emptyObject = {};
+      var emptyArray = [];
+      var notAValue;
       var getSeries;
       var columnsLabels;
       var rowsLabels;
-      var seriesLabels;
       var columnsArr;
       var rowsArr;
-      var seriesArr;
-      var error;
 
       beforeEach(function () {
         module('GetSeriesUtilService');
@@ -262,11 +379,51 @@ define(function (require) {
           getSeries = Private(require('components/vislib/components/labels/flatten_series'));
           columnsLabels = getSeries(columnsData);
           rowsLabels = getSeries(rowsData);
-          seriesLabels = getSeries(seriesData);
           columnsArr = _.isArray(columnsLabels);
           rowsArr = _.isArray(rowsLabels);
-          seriesArr = _.isArray(seriesLabels);
         });
+      });
+
+      it('should throw an error if input is not an object', function () {
+        expect(function () {
+          getSeries(string);
+        }).to.throwError();
+
+        expect(function () {
+          getSeries(number);
+        }).to.throwError();
+
+        expect(function () {
+          getSeries(boolean);
+        }).to.throwError();
+
+        expect(function () {
+          getSeries(nullValue);
+        }).to.throwError();
+
+        expect(function () {
+          getSeries(emptyArray);
+        }).to.throwError();
+
+        expect(function () {
+          getSeries(notAValue);
+        }).to.throwError();
+      });
+
+      it('should throw an if property rows or columns is not set on the object', function () {
+        expect(function () {
+          getSeries(emptyObject);
+        }).to.throwError();
+      });
+
+      it('should not throw an error if rows or columns set on object', function () {
+        expect(function () {
+          getSeries(rowsObject);
+        }).to.not.throwError();
+
+        expect(function () {
+          getSeries(columnsObject);
+        }).to.not.throwError();
       });
 
       it('should be a function', function () {
@@ -279,10 +436,6 @@ define(function (require) {
 
       it('should return an array if input is data.rows', function () {
         expect(rowsArr).to.be(true);
-      });
-
-      it('should return an empty array if input is data.series', function () {
-        expect(seriesLabels.length).to.be(0);
       });
 
       it('should return an array of the same length as as input data.columns', function () {

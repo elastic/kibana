@@ -1,23 +1,26 @@
 define(function () {
   return function ZeroFilledArrayUtilService() {
-    // Accepts an array of strings or numbers
-    // and a kibana data.ordered object
+    var _ = require('lodash');
+
+    /*
+     * Accepts an array of x axis values (strings or numbers).
+     * Returns a zero filled array.
+    */
+
     return function (arr) {
-      var max = arr.length;
-      var i;
-      var val;
+      if (!_.isArray(arr)) {
+        throw new Error('ZeroFilledArrayUtilService expects an array of strings or numbers');
+      }
+
       var zeroFilledArray = [];
 
-      for (i = 0; i < max; i++) {
-        val = arr[i];
-
+      arr.forEach(function (val) {
         zeroFilledArray.push({
           x: val,
           y: 0
         });
-      }
+      });
 
-      // Returns an array of objects with y value of 0
       return zeroFilledArray;
     };
   };

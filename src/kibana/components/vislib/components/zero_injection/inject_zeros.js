@@ -6,8 +6,22 @@ define(function (require) {
     var createZeroFilledArray = Private(require('components/vislib/components/zero_injection/zero_filled_array'));
     var zeroFillDataArray = Private(require('components/vislib/components/zero_injection/zero_fill_data_array'));
 
-    // Takes the kibana data objects
+    /*
+     * A Kibana data object may have multiple series with different array lengths.
+     * This proves an impediment to stacking in the visualization library.
+     * Therefore, zero values must be injected wherever these arrays do not line up.
+     * That is, each array must have the same x values with zeros filled in where the
+     * x values were added.
+     *
+     * This function and its helper functions accepts a Kibana data object
+     * and injects zeros where needed.
+     */
+
     return function (obj) {
+      if (!_.isObject(obj) || !obj.rows && !obj.columns && !obj.series) {
+        throw new TypeError('ZeroInjectionUtilService expects an object with a series, rows, or columns key');
+      }
+
       var keys = orderXValues(obj);
       var max;
       var zeroArray;
@@ -28,12 +42,9 @@ define(function (require) {
             arr[i].series[j].values = zeroFillDataArray(zeroArray, dataArray);
           }
         }
-
         return obj;
       }
 
-      // Looping thru each arr.values object and replacing
-      // the y value of the zero-filled array
       max = obj.series.length;
 
       for (i = 0; i < max; i++) {
@@ -43,7 +54,6 @@ define(function (require) {
         obj.series[i].values = zeroFillDataArray(zeroArray, dataArray);
       }
 
-      // Returns a zero-filled array of objects
       return obj;
     };
   };
