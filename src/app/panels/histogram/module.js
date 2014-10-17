@@ -194,7 +194,7 @@ function (angular, app, $, _, kbn, moment, timeSeries, numeral) {
        */
       options       : true,
       /** @scratch /panels/histogram/3
-       * legend:: Display the legond
+       * legend:: Display the legend
        */
       legend        : true,
       /** @scratch /panels/histogram/3

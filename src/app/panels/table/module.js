@@ -76,7 +76,7 @@ function (angular, app, _, kbn, moment) {
        */
       overflow: 'min-height',
       /** @scratch /panels/table/5
-       * fields:: the fields used a columns of the table, in an array.
+       * fields:: The fields used a columns of the table, in an array.
        */
       fields  : [],
       /** @scratch /panels/table/5
@@ -106,8 +106,8 @@ function (angular, app, _, kbn, moment) {
        */
       all_fields: false,
       /** @scratch /panels/table/5
-       * trimFactor:: The trim factor is the length at which to truncate fields takinging into
-       * consideration the number of columns in the table. For example, a trimFactor of 100, with 5
+       * trimFactor:: The trim factor is the length at which to truncate fields taking the number of
+       * columns in the table into consideration. For example, a trimFactor of 100, with 5
        * columns in the table, would trim each column at 20 character. The entirety of the field is
        * still available in the expanded view of the event.
        */

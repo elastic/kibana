@@ -47,7 +47,7 @@ function (angular, app, _, $, kbn) {
       /** @scratch /panels/terms/5
        * === Parameters
        *
-       * field:: The field on which to computer the facet
+       * field:: The field on which to compute the facet
        */
       field   : '_type',
       /** @scratch /panels/terms/5
@@ -84,7 +84,7 @@ function (angular, app, _, $, kbn) {
        */
       tilt    : false,
       /** @scratch /panels/terms/5
-       * lables:: In pie chart mode, draw labels in the pie slices
+       * labels:: In pie chart mode, draw labels in the pie slices
        */
       labels  : true,
       /** @scratch /panels/terms/5

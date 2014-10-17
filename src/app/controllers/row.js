@@ -73,7 +73,7 @@ function (angular, app, _) {
        * as templated or scripted dashboards, documentation of panel properties is available in this
        * section. You may find settings here which are not exposed via the web interface.
        *
-       * Each panel type has its own properties, hover there are several that are shared.
+       * Each panel type has its own properties, however there are several that are shared.
        *
       */
 
@@ -89,7 +89,7 @@ function (angular, app, _) {
            */
           span    : _as < defaultSpan && _as > 0 ? _as : defaultSpan,
           /** @scratch /panels/1
-           * editable:: Enable or disable the edit button the the panel
+           * editable:: Enable or disable the edit button of the panel
            */
           editable: true,
           /** @scratch /panels/1
