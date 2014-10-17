@@ -17,42 +17,31 @@ define(function (require) {
      * and injects zeros where needed.
      */
 
+    function getDataArray(obj) {
+      if (obj.rows) {
+        return obj.rows;
+      } else if (obj.columns) {
+        return obj.columns;
+      } else {
+        return [obj];
+      }
+    }
+
     return function (obj) {
       if (!_.isObject(obj) || !obj.rows && !obj.columns && !obj.series) {
         throw new TypeError('ZeroInjectionUtilService expects an object with a series, rows, or columns key');
       }
 
       var keys = orderXValues(obj);
-      var max;
-      var zeroArray;
-      var dataArray;
-      var i;
-      var j;
+      var arr = getDataArray(obj);
 
-      if (!obj.series) {
-        var arr = obj.rows ? obj.rows : obj.columns;
-        max = arr.length;
+      arr.forEach(function (object) {
+        object.series.forEach(function (series) {
+          var zeroArray = createZeroFilledArray(keys);
 
-        for (i = 0; i < max; i++) {
-          var jMax = arr[i].series.length;
-
-          for (j = 0; j < jMax; j++) {
-            zeroArray = createZeroFilledArray(keys);
-            dataArray = arr[i].series[j].values;
-            arr[i].series[j].values = zeroFillDataArray(zeroArray, dataArray);
-          }
-        }
-        return obj;
-      }
-
-      max = obj.series.length;
-
-      for (i = 0; i < max; i++) {
-        zeroArray = createZeroFilledArray(keys);
-        dataArray = obj.series[i].values;
-
-        obj.series[i].values = zeroFillDataArray(zeroArray, dataArray);
-      }
+          series.values = zeroFillDataArray(zeroArray, series.values);
+        });
+      });
 
       return obj;
     };
