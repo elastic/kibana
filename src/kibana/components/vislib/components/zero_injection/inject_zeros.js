@@ -22,7 +22,7 @@ define(function (require) {
         return obj.rows;
       } else if (obj.columns) {
         return obj.columns;
-      } else {
+      } else if (obj.series) {
         return [obj];
       }
     }
