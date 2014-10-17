@@ -4,6 +4,8 @@ define(function (require) {
   return [
     require('apps/settings/sections/indices/index'),
     require('apps/settings/sections/advanced/index'),
-    require('apps/settings/sections/objects/index')
+    require('apps/settings/sections/objects/index'),
+    require('apps/settings/sections/about/index'),
+
   ];
 });

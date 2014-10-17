@@ -1,11 +1,13 @@
 module.exports = function (grunt) {
   grunt.registerTask('build', [
+    'get_build_props',
     'clean:target',
     'clean:build',
     'require_css_deps:copy',
     'less',
     'copy:kibana_src',
     'touch_config',
+    'replace:build_props',
     'requirejs',
     'clean:unneeded_source_in_build',
     'copy:server_src',

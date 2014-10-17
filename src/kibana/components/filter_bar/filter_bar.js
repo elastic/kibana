@@ -4,10 +4,11 @@ define(function (require) {
   var module = require('modules').get('kibana');
   var template = require('text!components/filter_bar/filter_bar.html');
 
-  var mapFilter = require('./lib/mapFilter');
-  var toggleFilter = require('./lib/toggleFilter');
-  var removeFilter = require('./lib/removeFilter');
-  var removeAll = require('./lib/removeAll');
+  var mapFilter = require('components/filter_bar/lib/mapFilter');
+  var toggleFilter = require('components/filter_bar/lib/toggleFilter');
+  var toggleAll = require('components/filter_bar/lib/toggleAll');
+  var removeFilter = require('components/filter_bar/lib/removeFilter');
+  var removeAll = require('components/filter_bar/lib/removeAll');
 
   module.directive('filterBar', function (courier) {
     return {
@@ -33,6 +34,7 @@ define(function (require) {
         $scope.toggleFilter = toggleFilter($scope);
         $scope.removeFilter = removeFilter($scope);
         $scope.removeAll = removeAll($scope);
+        $scope.toggleAll = toggleAll($scope);
       }
     };
   });

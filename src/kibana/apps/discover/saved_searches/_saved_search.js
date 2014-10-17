@@ -10,28 +10,33 @@ define(function (require) {
   ]);
 
   module.factory('SavedSearch', function (courier, indexPatterns) {
+    _(SavedSearch).inherits(courier.SavedObject);
     function SavedSearch(id) {
       courier.SavedObject.call(this, {
-        type: 'search',
+        type: SavedSearch.type,
 
         id: id,
 
         mapping: {
           title: 'string',
           description: 'string',
-          hits: 'integer'
+          hits: 'integer',
+          columns: 'string'
         },
 
         defaults: {
           title: 'New Saved Search',
           description: '',
+          columns: [],
           hits: 0
         },
 
         searchSource: true
       });
     }
-    inherits(SavedSearch, courier.SavedObject);
+
+    SavedSearch.type = 'search';
+
     return SavedSearch;
   });
 });

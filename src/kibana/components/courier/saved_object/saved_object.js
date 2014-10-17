@@ -7,7 +7,6 @@ define(function (require) {
     var DocSource = Private(require('components/courier/data_source/doc_source'));
     var SearchSource = Private(require('components/courier/data_source/search_source'));
     var mappingSetup = Private(require('utils/mapping_setup'));
-    var getRootSearch = Private(require('components/courier/_get_root_search'));
 
     function SavedObject(config) {
       if (!_.isObject(config)) config = {};
@@ -57,9 +56,9 @@ define(function (require) {
 
         // tell the docSource where to find the doc
         docSource
-          .index(configFile.kibanaIndex)
-          .type(type)
-          .id(obj.id);
+        .index(configFile.kibanaIndex)
+        .type(type)
+        .id(obj.id);
 
         // check that the mapping for this type is defined
         return mappingSetup.isDefined(type)
@@ -84,7 +83,9 @@ define(function (require) {
           if (!obj.id) {
             // just assign the defaults and be done
             _.assign(obj, defaults);
-            return afterESResp.call(obj);
+            return hydrateIndexPattern().then(function () {
+              return afterESResp.call(obj);
+            });
           }
 
           // fetch the object from ES
@@ -93,23 +94,28 @@ define(function (require) {
 
             obj._source = _.cloneDeep(resp._source);
 
-            if (!resp.found) throw new errors.SavedObjectNotFound(type);
+            if (!resp.found) throw new errors.SavedObjectNotFound(type, obj.id);
 
             var meta = resp._source.kibanaSavedObjectMeta || {};
             delete resp._source.kibanaSavedObjectMeta;
 
+            if (!config.indexPattern && obj._source.indexPattern) {
+              config.indexPattern = obj._source.indexPattern;
+              delete obj._source.indexPattern;
+            }
+
             // assign the defaults to the response
-            _.defaults(resp._source, defaults);
+            _.defaults(obj._source, defaults);
 
             // transform the source using _deserializers
             _.forOwn(mapping, function ittr(fieldMapping, fieldName) {
               if (fieldMapping._deserialize) {
-                resp._source[fieldName] = fieldMapping._deserialize(resp._source[fieldName], resp, fieldName, fieldMapping);
+                obj._source[fieldName] = fieldMapping._deserialize(obj._source[fieldName], resp, fieldName, fieldMapping);
               }
             });
 
             // Give obj all of the values in _source.fields
-            _.assign(obj, resp._source);
+            _.assign(obj, obj._source);
 
             return Promise.try(function () {
               // if we have a searchSource, set it's state based on the searchSourceJSON field
@@ -131,7 +137,6 @@ define(function (require) {
             });
           });
         })
-        .then(hydrateIndexPattern)
         .then(function () {
           return customInit.call(obj);
         })
@@ -148,18 +153,25 @@ define(function (require) {
        * @return {[type]} [description]
        */
       function hydrateIndexPattern() {
-        if (obj.searchSource) {
-          var index = obj.searchSource.get('index');
+        return Promise.try(function () {
+          if (obj.searchSource) {
 
-          if (index instanceof indexPatterns.IndexPattern) {
-            return;
+            var index = config.indexPattern || obj.searchSource.getOwn('index');
+            if (!index) return;
+            if (config.clearSavedIndexPattern) {
+              obj.searchSource.set('index', undefined);
+              return;
+            }
+
+            if (!(index instanceof indexPatterns.IndexPattern)) {
+              index = indexPatterns.get(index);
+            }
+
+            return Promise.resolve(index).then(function (indexPattern) {
+              obj.searchSource.set('index', indexPattern);
+            });
           }
-
-          return indexPatterns.get(index)
-          .then(function (indexPattern) {
-            obj.searchSource.index(indexPattern);
-          });
-        }
+        });
       }
 
 

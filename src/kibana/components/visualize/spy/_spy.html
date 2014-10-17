@@ -14,7 +14,7 @@
     </a>
   </div>
   <div class="button-group">
-    <a ng-click="toggleFullPage()">
+    <a ng-if="!fullScreenSpy" ng-click="toggleFullPage()">
       <i ng-if="!spyMode.fill" class="fa fa-expand"></i>
       <i ng-if="spyMode.fill" class="fa fa-compress"></i>
     </a>

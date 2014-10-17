@@ -24,8 +24,6 @@ define(function (require) {
         }
       }());
 
-      this._dynamicState = this._dynamicState || {};
-
       // set internal state values
       this._methods.forEach(function (name) {
         this[name] = function (val) {
@@ -50,14 +48,23 @@ define(function (require) {
     /**
      * Get values from the state
      * @param {string} name - The name of the property desired
+     * @return {any} - the value found
      */
     SourceAbstract.prototype.get = function (name) {
       var current = this;
       while (current) {
         if (current._state[name] !== void 0) return current._state[name];
-        if (current._dynamicState[name] !== void 0) return current._dynamicState[name]();
-        current = current._parent;
+        current = current.getParent();
       }
+    };
+
+    /**
+     * Get the value from our own state, don't traverse up the chain
+     * @param {string} name - The name of the property desired
+     * @return {any} - the value found
+     */
+    SourceAbstract.prototype.getOwn = function (name) {
+      if (this._state[name] !== void 0) return this._state[name];
     };
 
     /**
@@ -67,6 +74,11 @@ define(function (require) {
      */
     SourceAbstract.prototype.set = function (state, val) {
       if (typeof state === 'string') {
+        // the getter and setter methods check for undefined explicitly
+        // to identify getters and null to identify deletion
+        if (val === undefined) {
+          val = null;
+        }
         this[state](val);
       } else {
         this._state = state;
@@ -116,7 +128,7 @@ define(function (require) {
      * Noop
      */
     SourceAbstract.prototype.getParent = function () {
-      return Promise.resolve(undefined);
+      return this._parent;
     };
 
     /**
@@ -229,13 +241,12 @@ define(function (require) {
         }))
         .then(function () {
           // move to this sources parent
-          return current.getParent().then(function (parent) {
-            // keep calling until we reach the top parent
-            if (parent) {
-              current = parent;
-              return ittr();
-            }
-          });
+          var parent = current.getParent();
+          // keep calling until we reach the top parent
+          if (parent) {
+            current = parent;
+            return ittr();
+          }
         });
       }())
       .then(function () {
@@ -250,8 +261,8 @@ define(function (require) {
           /**
            * Create a filter that can be reversed for filters with negate set
            * @param {boolean} reverse This will reverse the filter. If true then
-           *                          anything where negate is set will come 
-           *                          through otherwise it will filter out   
+           *                          anything where negate is set will come
+           *                          through otherwise it will filter out
            * @returns {function}
            */
           var filterNegate = function (reverse) {

@@ -38,8 +38,8 @@ define(function (require) {
       savedSearch: function (courier, savedSearches, $route) {
         return savedSearches.get($route.current.params.id)
         .catch(courier.redirectWhenMissing({
-          'index-pattern': '/settings/indices',
-          '*': '/discover'
+          'search': '/discover',
+          'index-pattern': '/settings/objects/savedSearches/' + $route.current.params.id
         }));
       }
     }
@@ -82,7 +82,7 @@ define(function (require) {
 
     var stateDefaults = {
       query: initialQuery || '',
-      columns: ['_source'],
+      columns: savedSearch.columns || ['_source'],
       index: $scope.searchSource.get('index').id || config.get('defaultIndex'),
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.get('filter'))
@@ -232,6 +232,7 @@ define(function (require) {
       return $scope.updateDataSource()
       .then(function () {
         savedSearch.id = savedSearch.title;
+        savedSearch.columns = $scope.state.columns;
 
         return savedSearch.save()
         .then(function () {
@@ -460,12 +461,15 @@ define(function (require) {
       .then(function (indexPattern) {
         $scope.opts.timefield = indexPattern.timeFieldName;
 
-        if (indexPattern !== $scope.searchSource.get('index')) {
-          // set the index on the savedSearch
-          $scope.searchSource.index(indexPattern);
+        // are we updating the indexPattern?
+        var refresh = indexPattern !== $scope.searchSource.get('index');
+
+        // make sure the pattern is set on the "leaf" searchSource, not just the root
+        $scope.searchSource.index(indexPattern);
+
+        if (refresh) {
           delete $scope.fields;
           delete $scope.columns;
-
           setFields();
         }
       });
@@ -526,7 +530,7 @@ define(function (require) {
       _.each(value, function (clause) {
         var previous = _.find(filters, function (item) {
           if (item && item.query) {
-            return item.query.match[field] === { query: clause, type: 'phrase' };
+            return item.query.match[field].query === clause;
           } else if (item && item.exists && field === '_exists_') {
             return item.exists.field === clause;
           } else if (item && item.missing && field === '_missing_') {

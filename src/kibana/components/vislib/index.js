@@ -7,7 +7,13 @@ define(function (require) {
     return require('d3');
   });
 
-  // Kibana visualization library
+  /**
+   * Provides the Kibana4 Visualization Library
+   *
+   * @module visLib
+   * @main visLib
+   * @return {Object} Contains the version number and the Vis Class for creating visualizations
+   */
   module.service('visLib', function (Private) {
     return {
       version: '0.0.0',

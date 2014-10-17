@@ -28,7 +28,6 @@ define(function (require) {
           })
           .catch(function (e) {
             $scope.error = e.message;
-            console.log(e);
           });
         });
 

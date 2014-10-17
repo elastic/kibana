@@ -8,7 +8,7 @@ define(function (require) {
   module.constant('configFile', configFile);
 
   // service for delivering config variables to everywhere else
-  module.service('config', function (Private, Notifier, kbnVersion, kbnSetup) {
+  module.service('config', function (Private, Notifier, kbnVersion, kbnSetup, $rootScope) {
     var config = this;
 
     var angular = require('angular');
@@ -68,6 +68,9 @@ define(function (require) {
             });
           }
         });
+      })
+      .then(function () {
+        $rootScope.$broadcast('init:config');
       })
       .then(complete, complete.failure);
     });

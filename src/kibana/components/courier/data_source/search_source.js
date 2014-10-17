@@ -6,9 +6,6 @@ define(function (require) {
     var errors = require('errors');
     var SourceAbstract = Private(require('components/courier/data_source/_abstract'));
 
-    var getRootSourcePromise = new Promise(function (resolve) {
-      require(['components/courier/data_source/_root_search_source'], _.compose(resolve, Private));
-    });
 
     var FetchFailure = errors.FetchFailure;
     var RequestFailure = errors.RequestFailure;
@@ -17,6 +14,15 @@ define(function (require) {
       SourceAbstract.call(this, initialState);
     }
     inherits(SearchSource, SourceAbstract);
+
+    // expose a ready state for the route setup to read
+    var rootSearchSource;
+    SearchSource.ready = new Promise(function (resolve) {
+      require(['components/courier/data_source/_root_search_source'], function (PromiseModule) {
+        rootSearchSource = Private(PromiseModule);
+        resolve();
+      });
+    });
 
     /*****
      * PUBLIC API
@@ -41,7 +47,8 @@ define(function (require) {
     ];
 
     SearchSource.prototype.index = function (indexPattern) {
-      if (indexPattern == null) return this._state.index;
+      if (indexPattern === undefined) return this._state.index;
+      if (indexPattern === null) return delete this._state.index;
       if (!indexPattern || typeof indexPattern.toIndexList !== 'function') {
         throw new TypeError('expected indexPattern to be an IndexPattern duck.');
       }
@@ -66,15 +73,13 @@ define(function (require) {
 
     /**
      * Get the parent of this SearchSource
-     * @return {Promise}
+     * @return {undefined|searchSource}
      */
     SearchSource.prototype.getParent = function (onlyHardLinked) {
       var self = this;
-      return getRootSourcePromise.then(function (rootSearchSource) {
-        if (self._parent === false) return false;
-        if (self._parent) return self._parent;
-        return onlyHardLinked ? undefined : rootSearchSource.get();
-      });
+      if (self._parent === false) return;
+      if (self._parent) return self._parent;
+      return onlyHardLinked ? undefined : rootSearchSource.get();
     };
 
     /**

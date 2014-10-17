@@ -18,7 +18,6 @@ define(function (require) {
 
         return savedVisualizations.get($route.current.params)
         .catch(courier.redirectWhenMissing({
-          //'index-pattern': '/visualize',
           '*': '/visualize'
         }));
       }
@@ -30,8 +29,9 @@ define(function (require) {
       savedVis: function (savedVisualizations, courier, $route) {
         return savedVisualizations.get($route.current.params.id)
         .catch(courier.redirectWhenMissing({
-          'index-pattern': '/settings',
-          '*': '/visualize'
+          'visualization': '/visualize',
+          'search': '/settings/objects/savedVisualizations/' + $route.current.params.id,
+          'index-pattern': '/settings/objects/savedVisualizations/' + $route.current.params.id
         }));
       }
     }
@@ -43,7 +43,6 @@ define(function (require) {
     'kibana/courier'
   ])
   .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier) {
-
     var _ = require('lodash');
     var angular = require('angular');
     var ConfigTemplate = require('utils/config_template');
@@ -83,6 +82,7 @@ define(function (require) {
     function init() {
       // export some objects
       $scope.savedVis = savedVis;
+      $scope.searchSource = searchSource;
       $scope.vis = vis;
       $scope.editableVis = editableVis;
       $scope.state = $state;
@@ -112,6 +112,10 @@ define(function (require) {
         editableVis.dirty = !angular.equals(newState, vis.getState());
       }, true);
 
+      $scope.$watch('searchSource.get("index").timeFieldName', function (timeField) {
+        timefilter.enabled = !!timeField;
+      });
+
       $scope.$listen($state, 'fetch_with_changes', function () {
 
         vis.setState($state.vis);
@@ -128,7 +132,6 @@ define(function (require) {
 
       });
 
-      timefilter.enabled = true;
       $scope.$listen(timefilter, 'update', _.bindKey($scope, 'fetch'));
 
       $scope.$on('ready:vis', function () {
@@ -174,31 +177,23 @@ define(function (require) {
     };
 
     $scope.unlink = function () {
-      return searchSource.getParent(true)
-      .then(function (parent) {
+      var parent = searchSource.getParent(true);
+      var parentsParent = parent.getParent(true);
 
-        return parent.getParent(true)
-        .then(function (parentsParent) {
-          // parentsParent can be undefined
+      // display unlinking for 2 seconds, unless it is double clicked
+      $scope.unlinking = $timeout($scope.doneUnlinking, 2000);
+      delete savedVis.savedSearchId;
+      var q = searchSource.get('query');
+      $state.query = q;
 
+      var searchState = parent.toJSON();
 
-          // display unlinking for 2 seconds, unless it is double clicked
-          $scope.unlinking = $timeout($scope.doneUnlinking, 2000);
-          delete savedVis.savedSearchId;
-          var q = searchSource.get('query');
-          $state.query = q;
+      // copy over all state except "aggs"
+      _(searchState).omit('aggs').forOwn(function (val, key) {
+        searchSource.set(key, val);
+      });
 
-          var searchState = parent.toJSON();
-
-          // copy over all state except "aggs"
-          _(searchState).omit('aggs').forOwn(function (val, key) {
-            searchSource.set(key, val);
-          });
-
-          searchSource.inherits(parentsParent);
-          courier.setRootSearchSource(searchSource);
-        });
-      }).catch(notify.fatal);
+      searchSource.inherits(parentsParent);
     };
 
     $scope.doneUnlinking = function () {
