@@ -9,6 +9,7 @@ define(function (require) {
     var OptionedAggParam = Private(require('components/agg_types/param_types/optioned'));
     var RegexAggParam = Private(require('components/agg_types/param_types/regex'));
     var StringAggParam = Private(require('components/agg_types/param_types/string'));
+    var RawJSONAggParam = Private(require('components/agg_types/param_types/raw_json'));
 
     /**
      * Wraps a list of {{#crossLink "AggParam"}}{{/crossLink}} objects; owned by an {{#crossLink "AggType"}}{{/crossLink}}
@@ -47,6 +48,9 @@ define(function (require) {
           }
           else if (param.type === 'string') {
             return new StringAggParam(param);
+          }
+          else if (param.type === 'json') {
+            return new RawJSONAggParam(param);
           }
           else {
             return new BaseAggParam(param);
