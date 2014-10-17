@@ -51,8 +51,14 @@ define(function (require) {
       });
     }
 
-    // Stack data
-    // TODO: refactor so that this is called from the data module
+    /**
+     * Stacks chart data values
+     * TODO: refactor so that this is called from the data module
+     *
+     * @method stackData
+     * @param data {Object} Elasticsearch query result for this chart
+     * @returns {Array} Stacked data objects with x, y, and y0 values
+     */
     AreaChart.prototype.stackData = function (data) {
       var self = this;
       var stack = this._attr.stack;
@@ -72,6 +78,14 @@ define(function (require) {
       }));
     };
 
+    /**
+     * Adds SVG path to area chart
+     *
+     * @method addPath
+     * @param svg {HTMLElement} SVG to which rect are appended
+     * @param layers {Array} Chart data array
+     * @returns {D3.UpdateSelection} SVG with path added
+     */
     AreaChart.prototype.addPath = function (svg, layers) {
       var self = this;
       var ordered = this.handler.data.get('ordered');
@@ -84,35 +98,35 @@ define(function (require) {
       var defaultOpacity = this._attr.defaultOpacity;
 
       var area = d3.svg.area()
-        .x(function (d) {
-          if (isTimeSeries) {
-            return xScale(d.x);
-          }
-          return xScale(d.x) + xScale.rangeBand() / 2;
-        })
-        .y0(function (d) {
-          if (isOverlapping) {
-            return height;
-          }
-          return yScale(d.y0);
-        })
-        .y1(function (d) {
-          if (isOverlapping) {
-            return yScale(d.y);
-          }
-          return yScale(d.y0 + d.y);
-        });
+      .x(function (d) {
+        if (isTimeSeries) {
+          return xScale(d.x);
+        }
+        return xScale(d.x) + xScale.rangeBand() / 2;
+      })
+      .y0(function (d) {
+        if (isOverlapping) {
+          return height;
+        }
+        return yScale(d.y0);
+      })
+      .y1(function (d) {
+        if (isOverlapping) {
+          return yScale(d.y);
+        }
+        return yScale(d.y0 + d.y);
+      });
 
       var layer;
       var path;
 
       // Data layers
       layer = svg.selectAll('.layer')
-        .data(layers)
-        .enter().append('g')
-        .attr('class', function (d, i) {
-          return i;
-        });
+      .data(layers)
+      .enter().append('g')
+      .attr('class', function (d, i) {
+        return i;
+      });
 
       // Append path
       path = layer.append('path')
@@ -132,37 +146,52 @@ define(function (require) {
       return path;
     };
 
+    /**
+     * Adds Events to SVG circles
+     *
+     * @method addCircleEvents
+     * @param circles {D3.UpdateSelection} SVG circles
+     * @returns {HTMLElement} circles with event listeners attached
+     */
     AreaChart.prototype.addCircleEvents = function (circles) {
       var events = this.events;
       var dispatch = this.events._attr.dispatch;
 
       circles
-        .on('mouseover.circle', function mouseOverCircle(d, i) {
-          var circle = this;
+      .on('mouseover.circle', function mouseOverCircle(d, i) {
+        var circle = this;
 
-          d3.select(circle)
-            .classed('hover', true)
-            .style('stroke', '#333')
-            .style('cursor', 'pointer')
-            .style('opacity', 1);
+        d3.select(circle)
+        .classed('hover', true)
+        .style('stroke', '#333')
+        .style('cursor', 'pointer')
+        .style('opacity', 1);
 
-          dispatch.hover(events.eventResponse(d, i));
-          d3.event.stopPropagation();
-        })
-        .on('click.circle', function clickCircle(d, i) {
-          dispatch.click(events.eventResponse(d, i));
-          d3.event.stopPropagation();
-        })
-        .on('mouseout.circle', function mouseOutCircle() {
-          var circle = this;
+        dispatch.hover(events.eventResponse(d, i));
+        d3.event.stopPropagation();
+      })
+      .on('click.circle', function clickCircle(d, i) {
+        dispatch.click(events.eventResponse(d, i));
+        d3.event.stopPropagation();
+      })
+      .on('mouseout.circle', function mouseOutCircle() {
+        var circle = this;
 
-          d3.select(circle)
-            .classed('hover', false)
-            .style('stroke', null)
-            .style('opacity', 0);
-        });
+        d3.select(circle)
+        .classed('hover', false)
+        .style('stroke', null)
+        .style('opacity', 0);
+      });
     };
 
+    /**
+     * Adds SVG circles to area chart
+     *
+     * @method addCircles
+     * @param svg {HTMLElement} SVG to which circles are appended
+     * @param data {Array} Chart data array
+     * @returns {D3.UpdateSelection} SVG with circles added
+     */
     AreaChart.prototype.addCircles = function (svg, data) {
       var self = this;
       var color = this.handler.data.getColorFunc();
@@ -178,54 +207,52 @@ define(function (require) {
       var circles;
 
       layer = svg.selectAll('.points')
-        .data(data)
-        .enter()
+      .data(data)
+      .enter()
         .append('g')
         .attr('class', 'points');
 
       // Append the bars
       circles = layer
-        .selectAll('rect')
-        .data(function appendData(d) {
-          return d;
-        });
+      .selectAll('rect')
+      .data(function appendData(d) {
+        return d;
+      });
 
       // exit
-      circles
-        .exit()
-        .remove();
+      circles.exit().remove();
 
       // enter
       circles
-        .enter()
-        .append('circle')
-        .attr('class', function circleClass(d) {
-          return d.label;
-        })
-        .attr('fill', function (d) {
-          return color(self.fieldFormatter(d.label));
-        })
-        .attr('stroke', function strokeColor(d) {
-          return color(self.fieldFormatter(d.label));
-        })
-        .attr('stroke-width', circleStrokeWidth);
+      .enter()
+      .append('circle')
+      .attr('class', function circleClass(d) {
+        return d.label;
+      })
+      .attr('fill', function (d) {
+        return color(self.fieldFormatter(d.label));
+      })
+      .attr('stroke', function strokeColor(d) {
+        return color(self.fieldFormatter(d.label));
+      })
+      .attr('stroke-width', circleStrokeWidth);
 
       // update
       circles
-        .attr('cx', function cx(d) {
-          if (ordered && ordered.date) {
-            return xScale(d.x);
-          }
-          return xScale(d.x) + xScale.rangeBand() / 2;
-        })
-        .attr('cy', function cy(d) {
-          if (isOverlapping) {
-            return yScale(d.y);
-          }
-          return yScale(d.y0 + d.y);
-        })
-        .attr('r', circleRadius)
-        .style('opacity', 0);
+      .attr('cx', function cx(d) {
+        if (ordered && ordered.date) {
+          return xScale(d.x);
+        }
+        return xScale(d.x) + xScale.rangeBand() / 2;
+      })
+      .attr('cy', function cy(d) {
+        if (isOverlapping) {
+          return yScale(d.y);
+        }
+        return yScale(d.y0 + d.y);
+      })
+      .attr('r', circleRadius)
+      .style('opacity', 0);
 
       // Add tooltip
       if (isTooltip) {
@@ -235,6 +262,15 @@ define(function (require) {
       return circles;
     };
 
+    /**
+     * Adds SVG clipPath
+     *
+     * @method addClipPath
+     * @param svg {HTMLElement} SVG to which clipPath is appended
+     * @param width {Number} SVG width
+     * @param height {Number} SVG height
+     * @returns {D3.UpdateSelection} SVG with clipPath added
+     */
     AreaChart.prototype.addClipPath = function (svg, width, height) {
       // Prevents circles from being clipped at the top of the chart
       var clipPathBuffer = 5;
@@ -244,18 +280,24 @@ define(function (require) {
 
       // Creating clipPath
       return svg
-        .attr('clip-path', 'url(#' + id + ')')
-        .append('clipPath')
-        .attr('id', id)
-        .append('rect')
-        .attr('x', startX)
-        .attr('y', startY)
-        .attr('width', width)
-        // Adding clipPathBuffer to height so it doesn't
-        // cutoff the lower part of the chart
-        .attr('height', height + clipPathBuffer);
+      .attr('clip-path', 'url(#' + id + ')')
+      .append('clipPath')
+      .attr('id', id)
+      .append('rect')
+      .attr('x', startX)
+      .attr('y', startY)
+      .attr('width', width)
+      // Adding clipPathBuffer to height so it doesn't
+      // cutoff the lower part of the chart
+      .attr('height', height + clipPathBuffer);
     };
 
+    /**
+     * Renders d3 visualization
+     *
+     * @method draw
+     * @returns {Function} Creates the area chart
+     */
     AreaChart.prototype.draw = function () {
       // Attributes
       var self = this;
@@ -292,10 +334,10 @@ define(function (require) {
 
           // Create the canvas for the visualization
           svg = div.append('svg')
-            .attr('width', width)
-            .attr('height', height + margin.top + margin.bottom)
-            .append('g')
-            .attr('transform', 'translate(0,' + margin.top + ')');
+          .attr('width', width)
+          .attr('height', height + margin.top + margin.bottom)
+          .append('g')
+          .attr('transform', 'translate(0,' + margin.top + ')');
 
           // add clipPath to hide circles when they go out of bounds
           self.addClipPath(svg, width, height);
@@ -314,12 +356,12 @@ define(function (require) {
 
           // chart base line
           var line = svg.append('line')
-            .attr('x1', 0)
-            .attr('y1', height)
-            .attr('x2', width)
-            .attr('y2', height)
-            .style('stroke', '#ddd')
-            .style('stroke-width', 1);
+          .attr('x1', 0)
+          .attr('y1', height)
+          .attr('x2', width)
+          .attr('y2', height)
+          .style('stroke', '#ddd')
+          .style('stroke-width', 1);
 
           return svg;
         });
