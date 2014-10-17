@@ -37,6 +37,7 @@ export GEM_PATH=
 # shellcheck disable=SC2086
 KIBANA_VERSION=@@version \
   CONFIG_PATH=${DIR}/../config/kibana.yml \
+  PLUGIN_FOLDER=${DIR}/../plugins \
   RACK_ENV=production \
   exec "${JAVA}" \
   $JAVA_OPTS \

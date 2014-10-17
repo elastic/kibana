@@ -14,7 +14,8 @@ end
 
 # Defaults for the options
 options = {
-  :config => ENV["CONFIG_PATH"] || File.expand_path("#{HERE}/../config/kibana.yml")
+  :config => ENV["CONFIG_PATH"] || File.expand_path("#{HERE}/../config/kibana.yml"),
+  :plugin_folder => ENV["PLUGIN_FOLDER"] || File.expand_path("#{HERE}/../../kibana/plugins/")
 }
 
 # Create a new parser
@@ -37,6 +38,9 @@ parser = OptionParser.new do |opts|
   opts.on('-v', '--version', 'Display version') do |arg|
     puts ENV['KIBANA_VERSION'] || 'dev-build'
     exit
+  end
+  opts.on('--plugin-folder', 'Path to the folder to scan for plugins') do |arg|
+    options[:plugin_folder] = arg
   end
   opts.on('-h', '--help', 'Display this screen') do
     puts opts
@@ -62,9 +66,6 @@ host = (options[:host] || config['host'])
 # Set the override for Elasticsaerch
 elasticsearch = (options[:elasticsearch] || config['elasticsearch'])
 
-# absolute path to this directory
-dir = File.dirname(__FILE__)
-
 # If the env isn't set we need to set it to development
 ENV["RACK_ENV"] = "development" if ENV["RACK_ENV"].nil?
 
@@ -73,16 +74,15 @@ Kibana.global_settings[:port] = port || 5601
 Kibana.global_settings[:host] = host || '0.0.0.0'
 Kibana.global_settings[:config] = config
 Kibana.global_settings[:elasticsearch] = elasticsearch
-Kibana.global_settings[:root] = File.expand_path("#{dir}/../")
+Kibana.global_settings[:root] = File.expand_path("#{HERE}/../")
 Kibana.global_settings[:quiet] = options[:quiet]
+Kibana.global_settings[:plugin_folder] = options[:plugin_folder]
 
 # Set the public folder based on whether we are running in production or not.
 if ENV['RACK_ENV'] == ('production')
-  Kibana.global_settings[:public_folder] = File.expand_path("#{dir}/../public/")
-  Kibana.global_settings[:plugin_folder] = File.expand_path("#{dir}/../../plugins/")
+  Kibana.global_settings[:public_folder] = File.expand_path("#{HERE}/../public/")
 else
-  Kibana.global_settings[:public_folder] = File.expand_path("#{dir}/../../kibana/")
-  Kibana.global_settings[:plugin_folder] = File.expand_path("#{dir}/../../kibana/plugins/")
+  Kibana.global_settings[:public_folder] = File.expand_path("#{HERE}/../../kibana/")
 end
 
 # Add the root of the project to the load path
