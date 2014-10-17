@@ -5,6 +5,8 @@ define(function (require) {
   var $ = require('jquery');
 
   var toggleFilter = require('components/filter_bar/lib/toggleFilter');
+  var toggleAll = require('components/filter_bar/lib/toggleAll');
+
   var mapFilter = require('components/filter_bar/lib/mapFilter');
   var removeFilter = require('components/filter_bar/lib/removeFilter');
   var removeAll = require('components/filter_bar/lib/removeAll');
@@ -27,7 +29,7 @@ define(function (require) {
             { query: { match: { '@tags': { query: 'test' } } } },
             { query: { match: { '@tags': { query: 'bar' } } } },
             { exists: { field: '@timestamp' } },
-            { missing: { field: 'host' } },
+            { missing: { field: 'host' }, disabled: true },
           ]
         };
         done();
@@ -111,7 +113,40 @@ define(function (require) {
         });
       });
 
+      describe('toggleAll', function () {
+        var fn;
 
+        beforeEach(function () {
+          // This would normally be done by the directive
+          $rootScope.filters = _($rootScope.state.filters)
+            .filter(function (filter) {
+              return filter;
+            })
+            .flatten(true)
+            .map(mapFilter)
+            .value();
+
+          fn = toggleAll($rootScope);
+        });
+
+        it('should toggle all the filters', function () {
+          expect(_.filter($rootScope.state.filters, 'disabled')).to.have.length(1);
+          fn();
+          expect(_.filter($rootScope.state.filters, 'disabled')).to.have.length(3);
+        });
+
+        it('should disable all the filters', function () {
+          expect(_.filter($rootScope.state.filters, 'disabled')).to.have.length(1);
+          fn(true);
+          expect(_.filter($rootScope.state.filters, 'disabled')).to.have.length(4);
+        });
+
+        it('should enable all the filters', function () {
+          expect(_.filter($rootScope.state.filters, 'disabled')).to.have.length(1);
+          fn(false);
+          expect(_.filter($rootScope.state.filters, 'disabled')).to.have.length(0);
+        });
+      });
 
     });
   });
