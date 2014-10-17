@@ -69,6 +69,8 @@ define(function (require) {
           // new up the visualization type
           var chart = new self.ChartClass(self, this, chartData);
 
+          /* 
+          // FIX THIS FOR TILE MAPS
           // Bind events to the chart
           d3.rebind(chart, chart._attr.dispatch, 'on');
 
@@ -84,6 +86,7 @@ define(function (require) {
           chart.on('brush', function (e) {
             self.vis.emit('brush', e);
           });
+          */
 
           // Save reference to charts
           charts.push(chart);

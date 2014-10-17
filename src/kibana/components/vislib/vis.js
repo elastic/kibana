@@ -23,8 +23,6 @@ define(function (require) {
         return new Vis($el, config);
       }
       Vis.Super.apply(this, arguments);
-      console.log('Vis', config, arguments);
-
       this.el = $el.get ? $el.get(0) : $el;
       this.ChartClass = chartTypes[config.type];
       this._attr = _.defaults(config || {}, {});
@@ -57,7 +55,7 @@ define(function (require) {
         if (error instanceof errors.ContainerTooSmall) {
           this.handler.error(error.message);
         } else {
-          console.error(error.message);
+          console.error(error.stack);
         }
       }
     };

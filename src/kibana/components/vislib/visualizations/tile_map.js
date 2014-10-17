@@ -1,147 +1,191 @@
 define(function (require) {
-  return function TileMapFactory(Private) {
+  return function TileMapFactory(d3, Private, config) {
     var _ = require('lodash');
     var $ = require('jquery');
-    var L = require('leaflet');
-
-    // mapquest api key and require
-    //console.log('Mapquest API key', config.get('mapquest:apiKey'));
-    //var url  = 'http://www.mapquestapi.com/sdk/leaflet/v1.s/mq-map.js?key=' + config.get('mapquest:apiKey');
-    //var MQ = require([url], function () {
-    //  console.log('mapquest loaded');
-    //});
-
+    var L = require('mapbox');
+  
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var errors = require('errors');
 
-    // Dynamically adds css file
     require('css!components/vislib/styles/main');
+    
+    var mapdata;
+    var mapcenter = [41, -100];
+    var mapzoom = 4;
+    var tiles = config.get('mapbox:tiles');
+    var apiKey = config.get('mapbox:apiKey');
+    L.mapbox.accessToken = apiKey;
 
-    /*
-     * Tile map visualization => vertical maps, stacked maps
+    /**
+     * Tile Map Visualization: renders maps
+     *
+     * @class TileMap
+     * @constructor
+     * @extends Chart
+     * @param handler {Object} Reference to the Handler Class Constructor
+     * @param el {HTMLElement} HTML element to which the chart will be appended
+     * @param chartData {Object} Elasticsearch query results for this specific chart
      */
+    
     _(TileMap).inherits(Chart);
     function TileMap(handler, chartEl, chartData) {
       if (!(this instanceof TileMap)) {
         return new TileMap(handler, chartEl, chartData);
       }
-
-      var raw;
-      var fieldIndex;
-
-      if (handler.data.data.raw) {
-        raw = handler.data.data.raw.columns;
-        fieldIndex = _.findIndex(raw, {'categoryName': 'group'});
-      }
-
-      this.fieldFormatter = raw && raw[fieldIndex] ? raw[fieldIndex].field.format.convert : function (d) { return d; };
-
       TileMap.Super.apply(this, arguments);
-      // Tile map specific attributes
-      this._attr = _.defaults(handler._attr || {}, {
-        xValue: function (d, i) { return d.x; },
-        yValue: function (d, i) { return d.y; }
-      });
     }
 
-    TileMap.prototype.addMap = function (div, layers) {
-      var self = this;
-      var data = this.chartData;
-      var color = this.handler.data.getColorFunc();
-      var xScale = this.handler.xAxis.xScale;
-      var yScale = this.handler.yAxis.yScale;
-      var tooltip = this.tooltip;
-      var isTooltip = this._attr.addTooltip;
-      var layer;
-      var maps;
-
-      console.log('map data', data);
-
-      // add maps here
-
-
-      // add tooltip
-      if (isTooltip) {
-        maps.call(tooltip.render());
-      }
-
-      return maps;
-    };
-
-    TileMap.prototype.addMapEvents = function (div, maps, brush) {
-      var events = this.events;
-      var dispatch = this.events._attr.dispatch;
-      var xScale = this.handler.xAxis.xScale;
-      var startXInv;
-
-      maps
-      .on('mouseover.bar', function (d, i) {
-        // dispatch.hover(events.eventResponse(d, i));
-      })
-      .on('mousedown.bar', function () {
-        //
-      })
-      .on('click.bar', function (d, i) {
-        // dispatch.click(events.eventResponse(d, i));
-      })
-      .on('mouseout.bar', function () {
-        //
-      });
-    };
-
+    /**
+     * Renders tile map
+     *
+     * @method draw
+     * @param selection
+     * @returns {Function} Creates the map
+     */
     TileMap.prototype.draw = function () {
+      
       // Attributes
       var self = this;
-      var xScale = this.handler.xAxis.xScale;
       var $elem = $(this.chartEl);
-      var margin = this._attr.margin;
-      var elWidth = this._attr.width = $elem.width();
-      var elHeight = this._attr.height = $elem.height();
-      var minWidth = 20;
-      var minHeight = 20;
-      var isEvents = this._attr.addEvents;
       var div;
-      var width;
-      var height;
-      var layers;
-      var brush;
-      var maps;
-
+      var min;
+      var max;
+      var length;
+      var featureLayer;
+      var bounds;
+      
       return function (selection) {
 
-        console.log('map draw', selection);
-
         selection.each(function (data) {
-          // Stack data
-          layers = self.stackData(data);
 
-          // Get the width and height
-          width = elWidth;
-          height = elHeight - margin.top - margin.bottom;
-
-          if (width < minWidth || height < minHeight) {
-            throw new errors.ContainerTooSmall();
-          }
-
-          // Select the current DOM element
           div = $(this);
+          div.addClass('tilemap');
 
-          // Create the canvas for the visualization
-          div.append('div')
-          .attr('width', width)
-          .attr('height', height + margin.top + margin.bottom);
+          var map = L.mapbox.map(div[0], tiles)
+            .setView(mapcenter, mapzoom);
+          map.options.minZoom = 1;
+          map.options.maxZoom = 10;
+          var zoomScale = self.zoomScale(mapzoom);
 
-          // add maps
-          maps = self.addMaps(div, layers);
+          if (data.geoJSON) {
+            mapdata = data.geoJSON;
+            min = mapdata.properties.min;
+            max = mapdata.properties.max;
+            length = mapdata.features.length;
+            //console.log(' min:', min, ' max:', max, ' length:', length);
 
-          // add events to maps
-          if (isEvents) {
-            self.addMapEvents(div, maps, brush);
+            // add geohash data to tile map
+            featureLayer = L.geoJson(mapdata, {
+              pointToLayer: function (feature, latlng) {
+                var count = feature.properties.count;
+                var rad = zoomScale * self.radiusScale(count, max) * Math.sqrt(count);
+                return L.circleMarker(latlng, {
+                  radius: rad
+                });
+              },
+              onEachFeature: function (feature, layer) {
+                self.onEachFeature(feature, layer);
+              },
+              style: function (feature) {
+                return {
+                  // color: feature.properties.color,
+                  fillColor: '#00529b',
+                  color: '#00529b',
+                  weight: 1,
+                  opacity: 1,
+                  fillOpacity: 0.7
+                };
+              }
+            }).addTo(map);
+
+            map.fitBounds(featureLayer.getBounds());
+            bounds = map.getBounds();
+            self.redrawFeatures(map, featureLayer, bounds);
+            
           }
+
+          map.on('zoomend dragend', function () {
+            mapzoom = map.getZoom();
+            bounds = map.getBounds();
+            self.redrawFeatures(map, featureLayer, bounds);
+          });
 
           return div;
         });
       };
+    };
+
+    /**
+     * Redraws feature layer
+     *
+     * @method draw
+     * @param selection
+     * @returns {Function} Creates the map
+     */
+    TileMap.prototype.redrawFeatures = function (map, featureLayer, bounds) {
+      var self = this;
+      var zoomScale = self.zoomScale(mapzoom);
+      var max = mapdata.properties.max;
+
+      featureLayer.eachLayer(function (layer) {
+        var latlng = L.latLng(layer.feature.geometry.coordinates[1], layer.feature.geometry.coordinates[0]);
+        // do not draw features outside of bounds
+        //if (bounds.contains(latlng)) {
+        //console.log('in', latlng);
+        //} else {
+        //console.log('out', latlng);
+        //}
+        var count = layer.feature.properties.count;
+        var rad = zoomScale * self.radiusScale(count, max) * Math.sqrt(count);
+        layer.setRadius(rad);
+      });
+    };
+
+    /**
+     * Binds popup to each feature
+     *
+     * @method onEachFeature
+     * @param feature {Object}
+     * @param layer {Object}
+     * returns layer (Object} with popup
+     */
+    TileMap.prototype.onEachFeature = function (feature, layer) {
+      layer.bindPopup(feature.properties.geohash + ': ' + feature.properties.count);
+    };
+
+    /**
+     * zoomScale
+     *
+     * @method radiusScale
+     * @param value {Number}
+     * @param max {Number}
+     * @return {Number}
+     */
+    TileMap.prototype.zoomScale = function (zoom) {
+      var zScale = d3.scale.pow()
+        .exponent(4)
+        .domain([2, 10])
+        .range([0.01, 2]);
+      return zScale(zoom);
+    };
+
+    /**
+     * Return radius multiplier
+     *
+     * @method radiusScale
+     * @param value {Number}
+     * @param max {Number}
+     * @return {Number}
+     */
+    TileMap.prototype.radiusScale = function (value, max) {
+      var rScale = d3.scale.linear()
+        .domain([0, max])
+        .range([2, 20])
+        .clamp(true);
+      // needs more work
+      // console.log('radiusScale', value, max, rScale(value));
+      // return rScale(value);
+      return 1;
     };
 
     return TileMap;

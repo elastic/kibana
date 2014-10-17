@@ -1,11 +1,10 @@
 define(function (require) {
   return function ColumnLayoutFactory(d3, Private) {
 
-    var chartSplit = Private(require('components/vislib/lib/layout/splits/pie_chart/chart_split'));
-    var chartTitleSplit = Private(require('components/vislib/lib/layout/splits/pie_chart/chart_title_split'));
+    var mapSplit = Private(require('components/vislib/lib/layout/splits/tile_map/map_split'));
 
     /*
-     * Specifies the visualization layout for column charts.
+     * Specifies the visualization layout for tile maps.
      *
      * This is done using an array of objects. The first object has
      * a `parent` DOM element,  a DOM `type` (e.g. div, svg, etc),
@@ -35,28 +34,14 @@ define(function (require) {
           children: [
             {
               type: 'div',
-              class: 'y-axis-chart-title',
-              splits: chartTitleSplit
-            },
-            {
-              type: 'div',
               class: 'vis-col-wrapper',
               children: [
                 {
                   type: 'div',
                   class: 'chart-wrapper',
-                  splits: chartSplit
-                },
-                {
-                  type: 'div',
-                  class: 'x-axis-chart-title',
-                  splits: chartTitleSplit
+                  splits: mapSplit
                 }
               ]
-            },
-            {
-              type: 'div',
-              class: 'legend-col-wrapper'
             }
           ]
         }

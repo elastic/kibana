@@ -2,16 +2,14 @@ define(function (require) {
   return function TileMapVisType(Private) {
     var VisType = Private(require('components/vis_types/_vis_type'));
     var Schemas = Private(require('components/vis_types/_schemas'));
+    var TileMapConverter = Private(require('components/vis_types/converters/tile_map'));
 
     return new VisType({
       name: 'tile_map',
       title: 'Tile map',
       icon: 'fa-map-marker',
-      vislibParams: {
-        shareYAxis: true,
-        addTooltip: true,
-        addLegend: true,
-      },
+      vislibParams: {},
+      responseConverter: TileMapConverter,
       schemas: new Schemas([
         {
           group: 'metrics',
@@ -26,15 +24,8 @@ define(function (require) {
         {
           group: 'buckets',
           name: 'segment',
-          title: 'Geo coordinates',
-          min: 0,
-          max: 1
-        },
-        {
-          group: 'buckets',
-          name: 'group',
-          title: 'Data field',
-          min: 0,
+          title: 'Geo Coordinates',
+          min: 1,
           max: 1
         },
         {

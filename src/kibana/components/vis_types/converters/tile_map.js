@@ -1,163 +1,99 @@
 define(function (require) {
   return function TileMapConverterFn(Private, timefilter, $compile, $rootScope) {
     var _ = require('lodash');
-    var $ = require('jquery');
-    var moment = require('moment');
-    var interval = require('utils/interval');
-
-    var $tooltipScope = $rootScope.$new();
-    var $tooltip = $(require('text!components/vis_types/tooltips/histogram.html'));
-    $compile($tooltip)($tooltipScope);
-
-    return function (chart, columns, rows) {
-      // index of color
-      var iColor = _.findIndex(columns, { categoryName: 'group' });
-      var colColor = columns[iColor];
-
-      /*****
-       * Get values related to the location
-       *****/
-
-      // index of the location column
-      var iX = _.findIndex(columns, { categoryName: 'segment'});
-      // when we don't have a location, just push everything into '_all'
-      if (iX === -1) {
-        iX = columns.push({
-          label: '',
-          categoryName: 'segment'
-        }) - 1;
-      }
-      // column that defines the x-axis
-      var colX = columns[iX];
-      // aggregation for the location
-      var aggX = colX.aggType;
-
-      /*****
-       * Get values related to the location
-       *****/
-
-      // index of y-axis stuff
-      var iY = _.findIndex(columns, { categoryName: 'metric'});
-      // column for the y-axis
-      var colY = columns[iY];
 
 
-      /*****
-       * Build the chart
-       *****/
-
-      // location description
-      chart.xAxisLabel = colX.label;
-      if (aggX && aggX.ordered && aggX.ordered.date) {
-        chart.xAxisFormatter = (function () {
-          var bounds = timefilter.getBounds();
-          var format = interval.calculate(
-            moment(bounds.min.valueOf()),
-            moment(bounds.max.valueOf()),
-            rows.length
-          ).format;
-
-          return function (thing) {
-            return moment(thing).format(format);
-          };
-        }());
-
-        var timeBounds = timefilter.getBounds();
-        chart.ordered = {
-          date: true,
-          min: timeBounds.min.valueOf(),
-          max: timeBounds.max.valueOf(),
-          interval: interval.toMs(colX.params.interval)
-        };
-      }
-      else {
-        chart.xAxisFormatter = colX.field && colX.field.format.convert;
-        chart.ordered = aggX && aggX.ordered && {};
-        if (aggX !== false && colX && colX.params && colX.params.interval) {
-          chart.ordered.interval = colX.params.interval;
+    /*
+     * Decodes geohash to object containing
+     * top-left and bottom-right corners of
+     * rectangle and center point.
+     * 
+     * geohash.js
+     * Geohash library for Javascript
+     * (c) 2008 David Troy
+     * Distributed under the MIT License
+     * 
+     * @method refine_interval
+     * @param interval {Array} [long, lat]
+     * @param cd {Number}
+     * @param mask {Number}
+     * @return {Object} interval
+     */
+    function decodeGeoHash(geohash) {
+      var BITS = [16, 8, 4, 2, 1];
+      var BASE32 = '0123456789bcdefghjkmnpqrstuvwxyz';
+      var is_even = 1;
+      var lat = [];
+      var lon = [];
+      lat[0] = -90.0;
+      lat[1] = 90.0;
+      lon[0] = -180.0;
+      lon[1] = 180.0;
+      var lat_err = 90.0;
+      var lon_err = 180.0;
+      for (var i = 0; i < geohash.length; i++) {
+        var c = geohash[i];
+        var cd = BASE32.indexOf(c);
+        for (var j = 0; j < 5; j++) {
+          var mask = BITS[j];
+          if (is_even) {
+            lon_err /= 2;
+            refine_interval(lon, cd, mask);
+          } else {
+            lat_err /= 2;
+            refine_interval(lat, cd, mask);
+          }
+          is_even = !is_even;
         }
       }
+      lat[2] = (lat[0] + lat[1]) / 2;
+      lon[2] = (lon[0] + lon[1]) / 2;
+      return { latitude: lat, longitude: lon};
+    }
+    function refine_interval(interval, cd, mask) {
+      if (cd & mask) {
+        interval[0] = (interval[0] + interval[1]) / 2;
+      } else {
+        interval[1] = (interval[0] + interval[1]) / 2;
+      }
+    }
+    return function (chart, columns, rows) {
+      var geohash;
+      var count;
+      var location;
+      var center;
+      var rectangle;
+      var min = rows[rows.length - 1][1];
+      var max = rows[0][1];
+      
+      var geoJSON = chart.geoJSON = {
+        properties: {
+          min: min,
+          max: max
+        },
+        type: 'FeatureCollection',
+        features: []
+      };
+        
+      rows.forEach(function (row) {
 
-      // Y-axis description
-      chart.yAxisLabel = colY.label;
-      if (colY.field) chart.yAxisFormatter = colY.field.format.convert;
-
-
-
-      // setup the formatter for the label
-      chart.tooltipFormatter = function (event) {
-        $tooltipScope.details = columns.map(function (col) {
-          var datum = event.point;
-
-          var label;
-          var val;
-
-          switch (col) {
-          case colX:
-            label = 'x';
-            val = datum.x;
-            break;
-          case colY:
-            label = 'y';
-            val = datum.y;
-            break;
-          case colColor:
-            label = 'color';
-            val = datum.label;
-            break;
+        geohash = row[0];
+        count = row[1];
+        location = decodeGeoHash(geohash);
+        center = [location.longitude[2], location.latitude[2]];
+        
+        geoJSON.features.push({
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: center
+          },
+          properties: {
+            count: count,
+            geohash: geohash
           }
-
-          label = (col.aggConfig && col.aggConfig.makeLabel()) || (col.field && col.field.name) || label;
-          if (col.field) val = col.field.format.convert(val);
-
-          return {
-            label: label,
-            value: val
-          };
-
         });
 
-        $tooltipScope.$apply();
-        return $tooltip[0].outerHTML;
-      };
-
-      var series = chart.series = [];
-      var seriesByLabel = {};
-
-      rows.forEach(function (row) {
-        var seriesLabel = colColor && row[iColor];
-        var s = colColor ? seriesByLabel[seriesLabel] : series[0];
-
-        if (!s) {
-          // I know this could be simplified but I wanted to keep the key order
-          if (colColor) {
-            s = {
-              label: seriesLabel,
-              values: []
-            };
-            seriesByLabel[seriesLabel] = s;
-          } else {
-            s = {
-              values: []
-            };
-          }
-          series.push(s);
-        }
-
-        var datum = {
-          x: (row[iX] == null) ? '_all' : row[iX],
-          y: row[iY === -1 ? row.length - 1 : iY] // value
-        };
-
-        // skip this datum
-        if (datum.y == null) return;
-
-        if (colX.metricScale) {
-          // support scaling response values to represent an average value
-          datum.y = datum.y * colX.metricScale;
-        }
-
-        s.values.push(datum);
       });
     };
   };

@@ -18,13 +18,15 @@ define(function (require) {
       this.handler = handler;
       this.chartEl = el;
       this.chartData = chartData;
-      var events = this.events = new Dispatch(handler, chartData);
+      
+      //  FIX THIS FOR TILE MAPS
+      // var events = this.events = new Dispatch(handler, chartData);
 
       if (handler._attr.addTooltip) {
         var $el = this.handler.el;
         var formatter = this.handler.data.get('tooltipFormatter');
         // Add tooltip
-        this.tooltip = new Tooltip($el, formatter, events);
+        // this.tooltip = new Tooltip($el, formatter, events);
       }
 
       this._attr = _.defaults(handler._attr || {}, {});
