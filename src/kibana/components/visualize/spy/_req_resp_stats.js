@@ -4,7 +4,6 @@ define(function (require) {
     var reqRespStatsHTML = require('text!components/visualize/spy/_req_resp_stats.html');
     require('components/clipboard/clipboard');
 
-
     var linkReqRespStats = function ($scope, config) {
       $scope.$watch('searchSource.history.length', function () {
         // force the entry to be collected again
@@ -45,7 +44,6 @@ define(function (require) {
           complete: entry.complete
         };
       });
-
     };
 
     return [
