@@ -22,6 +22,8 @@ define(function (require) {
       }
 
       this.data = data;
+      this._normalizeOrdered();
+
       this._attr = attr;
       this._attr = _.defaults(attr || {}, {
         offset: 'zero',
@@ -363,6 +365,25 @@ define(function (require) {
      */
     Data.prototype.getPieColorFunc = function () {
       return color(this.pieNames());
+    };
+
+    /**
+     * ensure that the datas ordered property has a min and max
+     * if the data represents an ordered date range.
+     *
+     * @return {undefined}
+     */
+    Data.prototype._normalizeOrdered = function () {
+      if (!this.data.ordered || !this.data.ordered.date) return;
+
+      var missingMin = this.data.ordered.min == null;
+      var missingMax = this.data.ordered.max == null;
+
+      if (missingMax || missingMin) {
+        var extent = d3.extent(this.xValues());
+        if (missingMin) this.data.ordered.min = extent[0];
+        if (missingMax) this.data.ordered.max = extent[1];
+      }
     };
 
     return Data;
