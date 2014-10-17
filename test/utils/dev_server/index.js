@@ -37,7 +37,6 @@ module.exports = function DevServer(opts) {
     root: SRC,
     displayRoot: SRC,
     filter: function (filename) {
-      console.log(filename);
       return filename.match(/.*\/src\/.*\.js$/)
         && !filename.match(/.*\/src\/kibana\/bower_components\/.*\.js$/)
         && !filename.match(/.*\/src\/kibana\/utils\/(event_emitter|next_tick|rison)\.js$/);
@@ -48,7 +47,6 @@ module.exports = function DevServer(opts) {
     root: APP,
     displayRoot: SRC,
     filter: function (filename) {
-      console.log(filename);
       return filename.match(/.*\/src\/.*\.js$/)
         && !filename.match(/.*\/src\/kibana\/bower_components\/.*\.js$/)
         && !filename.match(/.*\/src\/kibana\/utils\/(event_emitter|next_tick|rison)\.js$/);
