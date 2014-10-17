@@ -24,26 +24,27 @@ define(function (require) {
      *                               for the agg
      * @return {undefined}
      */
-    RawJSONAggParam.prototype.write = function (aggConfig, output) {
-      var param = aggConfig.params[this.name];
-
-      // TODO:
-      // - loop through aggConfig.params, clobbering anything in param
+    RawJSONAggParam.prototype.write = function (aggConfig) {
+      var paramJSON;
+      var param = _.cloneDeep(aggConfig.params[this.name]);
 
       if (!param) {
         return;
       }
 
-      var obj = {
-        pattern: param.pattern
-      };
-
-      // include any selected flags
-      if (_.isArray(param.flags) && param.flags.length) {
-        obj.flags = param.flags.join('|');
+      // handle invalid JSON input
+      try {
+        paramJSON = JSON.parse(param);
+      } catch (err) {
+        return;
       }
 
-      output.params[this.name] = obj;
+      // loop through aggConfig.params, clobbering anything already in param
+      _.defaults(aggConfig.params, paramJSON);
+
+      // remove the invalid `json` key
+      delete aggConfig.params[this.name];
+      return;
     };
 
     return RawJSONAggParam;
