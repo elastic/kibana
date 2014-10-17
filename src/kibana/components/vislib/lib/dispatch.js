@@ -15,21 +15,30 @@ define(function (require) {
       this.chartData = chartData;
       this.color = type === 'pie' ? handler.data.getPieColorFunc() : handler.data.getColorFunc();
       this._attr = _.defaults(handler._attr || {}, {
-        yValue: function (d) {
-          return d.y;
-        },
+        yValue: function (d) { return d.y; },
         dispatch: d3.dispatch('brush', 'click', 'hover', 'mouseenter', 'mouseleave', 'mouseover', 'mouseout')
       });
     }
 
     // Response to `click` and `hover` events
     Dispatch.prototype.eventResponse = function (d, i) {
+      var isPercentage = (this._attr.mode === 'percentage');
       var label = d.label;
       var getYValue = this._attr.yValue;
       var color = this.color;
       var chartData = this.chartData;
       var attr = this._attr;
       var handler = this.handler;
+
+      // Find object with the actual d value and add it to the point object
+      var object = _.find(chartData.series, { 'label': label });
+      d.value = +object.values[i].y;
+
+      if (isPercentage) {
+
+        // Add the formatted percentage to the point object
+        d.percent = (100 * d.y).toFixed(1) + '%';
+      }
 
       return {
         value: getYValue(d, i),
