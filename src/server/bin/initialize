@@ -15,7 +15,7 @@ end
 # Defaults for the options
 options = {
   :config => ENV["CONFIG_PATH"] || File.expand_path("#{HERE}/../config/kibana.yml"),
-  :plugin_folder => ENV["PLUGIN_FOLDER"] || File.expand_path("#{HERE}/../../kibana/plugins/")
+  :plugins_folder => ENV["PLUGINS_FOLDER"]
 }
 
 # Create a new parser
@@ -39,8 +39,8 @@ parser = OptionParser.new do |opts|
     puts ENV['KIBANA_VERSION'] || 'dev-build'
     exit
   end
-  opts.on('--plugin-folder', 'Path to the folder to scan for plugins') do |arg|
-    options[:plugin_folder] = arg
+  opts.on('--plugins', 'Path to the folder to scan for plugins') do |arg|
+    options[:plugins_folder] = arg
   end
   opts.on('-h', '--help', 'Display this screen') do
     puts opts
@@ -76,13 +76,15 @@ Kibana.global_settings[:config] = config
 Kibana.global_settings[:elasticsearch] = elasticsearch
 Kibana.global_settings[:root] = File.expand_path("#{HERE}/../")
 Kibana.global_settings[:quiet] = options[:quiet]
-Kibana.global_settings[:plugin_folder] = options[:plugin_folder]
+Kibana.global_settings[:external_plugins_folder] = options[:plugins_folder] || nil
 
 # Set the public folder based on whether we are running in production or not.
 if ENV['RACK_ENV'] == ('production')
   Kibana.global_settings[:public_folder] = File.expand_path("#{HERE}/../public/")
+  Kibana.global_settings[:bundled_plugins_folder] = File.expand_path("#{HERE}/../public/plugins")
 else
   Kibana.global_settings[:public_folder] = File.expand_path("#{HERE}/../../kibana/")
+  Kibana.global_settings[:bundled_plugins_folder] = File.expand_path("#{HERE}/../../kibana/plugins")
 end
 
 # Add the root of the project to the load path

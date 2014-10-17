@@ -14,13 +14,31 @@ module Kibana
         data = settings.config.clone()
         data['elasticsearch'] = "#{request.scheme}://#{request.host}:#{request.port}/elasticsearch"
 
-        plugin_pattern = File.join(settings.plugin_folder, '*', 'index.js')
-        data['plugins'] = Dir.glob(plugin_pattern).map { |path|
-          path.sub(settings.plugin_folder, 'plugins').sub(/\.js$/, '')
-        }
+        plugins = external_plugins.concat(bundled_plugins)
+        data['plugins'] = plugins
 
         json data
       end
+
+      private
+
+        def external_plugins
+          plugins_ids_in(settings.external_plugins_folder)
+        end
+
+        def bundled_plugins
+          plugins_ids_in(settings.bundled_plugins_folder)
+        end
+
+        def plugins_ids_in(dir)
+          if dir
+            indexes = Dir.glob(File.join(dir, '*', 'index.js'))
+          else
+            indexes = []
+          end
+
+          indexes.map { |path| path.sub(dir, 'plugins').sub(/\.js$/, '') }
+        end
 
     end
   end
