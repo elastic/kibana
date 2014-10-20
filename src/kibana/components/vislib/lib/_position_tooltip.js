@@ -14,10 +14,7 @@ define(function (require) {
     var size = getTtSize($tooltip);
     var pos = getBasePosition(size, event);
 
-    var overflow = getOverflow(size, pos, [
-      getChartBounds($chart),
-      getViewportBounds($window)
-    ]);
+    var overflow = getOverflow(size, pos, [$chart, $window]);
 
     return placeToAvoidOverflow(pos, overflow);
   }
@@ -54,35 +51,28 @@ define(function (require) {
     };
   }
 
-  function getChartBounds($chart) {
-    var pos = $chart.offset();
-    pos.right = pos.left + $chart.outerWidth();
-    pos.bottom = pos.top + $chart.outerHeight();
-    return pos;
-  }
-
-  function getViewportBounds($window) {
-    var offset = $window.offset();
-    var pos = {
-      top: offset.top + $window.scrollTop(),
-      left: offset.left + $window.scrollLeft(),
-    };
-    pos.bottom = pos.top + $window.height();
-    pos.right = pos.left + $window.width();
-    return pos;
+  function getBounds($el) {
+    // in testing, $window is not actually a window, so we need to add
+    // the offsets to make it work right.
+    var bounds = $el.offset() || { top: 0, left: 0 };
+    bounds.top += $el.scrollTop();
+    bounds.left += $el.scrollLeft();
+    bounds.bottom = bounds.top + $el.outerHeight();
+    bounds.right = bounds.left + $el.outerWidth();
+    return bounds;
   }
 
   function getOverflow(size, pos, containers) {
     var overflow = {};
 
-    containers.forEach(function (container) {
+    containers.map(getBounds).forEach(function (bounds) {
       // number of pixels that the toolip would overflow it's far
       // side, if we placed it that way. (negative === no overflow)
       mergeOverflows(overflow, {
-        north: container.top - pos.north,
-        east: (pos.east + size.width) - container.right,
-        south: (pos.south + size.height) - container.bottom,
-        west: container.left - pos.west
+        north: bounds.top - pos.north,
+        east: (pos.east + size.width) - bounds.right,
+        south: (pos.south + size.height) - bounds.bottom,
+        west: bounds.left - pos.west
       });
     });
 
@@ -126,8 +116,7 @@ define(function (require) {
   positionTooltip.getTtSize = getTtSize;
   positionTooltip.getBasePosition = getBasePosition;
   positionTooltip.getOverflow = getOverflow;
-  positionTooltip.getChartBounds = getChartBounds;
-  positionTooltip.getViewportBounds = getViewportBounds;
+  positionTooltip.getBounds = getBounds;
   positionTooltip.placeToAvoidOverflow = placeToAvoidOverflow;
   positionTooltip.removeClone = function () {
     $clone && $clone.remove();

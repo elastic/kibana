@@ -93,22 +93,9 @@ define(function (require) {
         });
       });
 
-      describe('getChartBounds()', function () {
-        it('returns the offsets for the tlrb of the chart', function () {
-          var cbounds = posTT.getChartBounds($chart);
-
-          bounds.forEach(function (b) {
-            expect(cbounds).to.have.property(b);
-          });
-
-          expect(cbounds.top).to.be.lessThan(cbounds.bottom);
-          expect(cbounds.left).to.be.lessThan(cbounds.right);
-        });
-      });
-
-      describe('getViewportBounds()', function () {
-        it('returns the offsets for the bounds of the window/viewport', function () {
-          var cbounds = posTT.getViewportBounds($window);
+      describe('getBounds()', function () {
+        it('returns the offsets for the tlrb of the element', function () {
+          var cbounds = posTT.getBounds($chart);
 
           bounds.forEach(function (b) {
             expect(cbounds).to.have.property(b);
@@ -130,11 +117,7 @@ define(function (require) {
           // position the element based on a mouse that is in the middle of the chart
           var pos = posTT.getBasePosition(size, makeEvent(0.5, 0.5));
 
-          var overflow = posTT.getOverflow(size, pos, [
-            posTT.getChartBounds($chart),
-            posTT.getViewportBounds($window)
-          ]);
-
+          var overflow = posTT.getOverflow(size, pos, [$chart, $window]);
           positions.forEach(function (p) {
             expect(overflow).to.have.property(p);
 
@@ -148,11 +131,7 @@ define(function (require) {
 
           // position the element based on a mouse that is in the bottom right hand courner of the chart
           var pos = posTT.getBasePosition(size, makeEvent(0.99, 0.99));
-
-          var overflow = posTT.getOverflow(size, pos, [
-            posTT.getChartBounds($chart),
-            posTT.getViewportBounds($window)
-          ]);
+          var overflow = posTT.getOverflow(size, pos, [$chart, $window]);
 
           positions.forEach(function (p) {
             expect(overflow).to.have.property(p);
@@ -170,10 +149,7 @@ define(function (require) {
         it('chooses a final placement for the tooltip, based on the calculated overflows', function () {
           var size = posTT.getTtSize($tooltip);
           var pos = posTT.getBasePosition(size, makeEvent());
-          var overflow = posTT.getOverflow(size, pos, [
-            posTT.getChartBounds($chart),
-            posTT.getViewportBounds($window)
-          ]);
+          var overflow = posTT.getOverflow(size, pos, [$chart, $window]);
           var placement = posTT.placeToAvoidOverflow(pos, overflow);
 
           expect(Object.keys(placement)).to.eql(['top', 'left']);
