@@ -62,9 +62,10 @@ define(function (require) {
   }
 
   function getViewportBounds($window) {
+    var offset = $window.offset();
     var pos = {
-      top: $window.scrollTop(),
-      left: $window.scrollLeft(),
+      top: offset.top + $window.scrollTop(),
+      left: offset.left + $window.scrollLeft(),
     };
     pos.bottom = pos.top + $window.height();
     pos.right = pos.left + $window.width();
