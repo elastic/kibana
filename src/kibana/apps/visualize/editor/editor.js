@@ -3,8 +3,11 @@ define(function (require) {
   require('apps/visualize/editor/sidebar');
   require('apps/visualize/editor/agg_filter');
 
+
   require('directives/saved_object_finder');
   require('components/visualize/visualize');
+  require('components/clipboard/clipboard');
+
   require('filters/uriescape');
 
   require('routes')
@@ -172,7 +175,8 @@ define(function (require) {
       return {
         link: $location.absUrl(),
         // This sucks, but seems like the cleanest way. Uhg.
-        embed: $location.absUrl().replace('?', '?embed&')
+        embed: '<iframe src="' + $location.absUrl().replace('?', '?embed&') +
+          '" height="600" width="800"></iframe>'
       };
     };
 

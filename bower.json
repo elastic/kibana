@@ -45,7 +45,8 @@
     "moment-timezone": "~0.0.3",
     "require-css": "~0.1.2",
     "requirejs": "~2.1.10",
-    "requirejs-text": "~2.0.10"
+    "requirejs-text": "~2.0.10",
+    "ng-clip": "~0.2.4"
   },
   "devDependencies": {}
 }
