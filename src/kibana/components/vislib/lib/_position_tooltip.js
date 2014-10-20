@@ -3,31 +3,72 @@ define(function (require) {
   var $ = require('jquery');
 
   var OFFSET = 10;
+  var $clone;
 
   function positionTooltip($window, $chart, $tooltip, event) {
     $chart = $($chart);
     $tooltip = $($tooltip);
 
-    if (!$chart.size()) return;
+    if (!$chart.size() || !$tooltip.size()) return;
+
+    var size = getTtSize($tooltip);
+    var pos = getBasePosition(size, event);
+
+    var overflow = getOverflow(size, pos, [
+      getChartBounds($chart),
+      getViewportBounds($window)
+    ]);
+
+    return placeToAvoidOverflow(pos, overflow);
+  }
+
+  function getTtSize($tooltip) {
+    if (!$clone || $clone.html() !== $tooltip.html()) {
+      $clone && $clone.remove();
+
+      $clone = $tooltip
+      .clone()
+      .addClass('vis-tooltip-sizing-clone')
+      .css({
+        visibility: 'hidden',
+        position: 'absolute',
+        top: -100
+      })
+      .appendTo('body');
+    }
 
     var size = {
-      width: $tooltip.outerWidth(),
-      height: $tooltip.outerHeight()
+      width: $clone.outerWidth(),
+      height: $clone.outerHeight()
     };
 
-    var pos = {
+    return size;
+  }
+
+  function getBasePosition(size, event) {
+    return {
       east: event.clientX + OFFSET,
       west: event.clientX - size.width - OFFSET,
       south: event.clientY + OFFSET,
       north: event.clientY - size.height - OFFSET
     };
+  }
 
-    var overflow = getOverflow(size, pos, [
-      getChartPosition($chart),
-      getViewportPosition($window)
-    ]);
+  function getChartBounds($chart) {
+    var pos = $chart.offset();
+    pos.right = pos.left + $chart.outerWidth();
+    pos.bottom = pos.top + $chart.outerHeight();
+    return pos;
+  }
 
-    return placeToAvoidOverflow(pos, overflow);
+  function getViewportBounds($window) {
+    var pos = {
+      top: $window.scrollTop(),
+      left: $window.scrollLeft(),
+    };
+    pos.bottom = pos.top + $window.height();
+    pos.right = pos.left + $window.width();
+    return pos;
   }
 
   function getOverflow(size, pos, containers) {
@@ -52,23 +93,6 @@ define(function (require) {
       if (a == null || b == null) return a || b;
       return Math.max(a, b);
     });
-  }
-
-  function getChartPosition($chart) {
-    var pos = $chart.offset();
-    pos.right = pos.left + $chart.outerWidth();
-    pos.bottom = pos.top + $chart.outerHeight();
-    return pos;
-  }
-
-  function getViewportPosition($window) {
-    var pos = {
-      top: $window.scrollTop(),
-      left: $window.scrollLeft(),
-    };
-    pos.bottom = pos.top + $window.height();
-    pos.right = pos.left + $window.width();
-    return pos;
   }
 
   function placeToAvoidOverflow(pos, overflow) {
@@ -98,9 +122,11 @@ define(function (require) {
   }
 
   // expose units/helpers for testing
+  positionTooltip.getTtSize = getTtSize;
+  positionTooltip.getBasePosition = getBasePosition;
   positionTooltip.getOverflow = getOverflow;
-  positionTooltip.getChartPosition = getChartPosition;
-  positionTooltip.getViewportPosition = getViewportPosition;
+  positionTooltip.getChartBounds = getChartBounds;
+  positionTooltip.getViewportBounds = getViewportBounds;
   positionTooltip.placeToAvoidOverflow = placeToAvoidOverflow;
 
   return positionTooltip;
