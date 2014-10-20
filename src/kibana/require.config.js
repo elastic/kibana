@@ -14,11 +14,12 @@ require.config({
     'angular-elastic': 'bower_components/angular-elastic/elastic',
     'angular-route': 'bower_components/angular-route/angular-route',
     'angular-ui-ace': 'bower_components/angular-ui-ace/ui-ace',
-    'ng-clip': 'bower_components/ng-clip/src/ngClip',
+    'angular-chosen': 'bower_components/angular-chosen-localytics/chosen',
     ace: 'bower_components/ace-builds/src-noconflict/ace',
     angular: 'bower_components/angular/angular',
     async: 'bower_components/async/lib/async',
     bower_components: 'bower_components',
+    chosen: 'bower_components/chosen/chosen.jquery.min',
     css: 'bower_components/require-css/css',
     d3: 'bower_components/d3/d3',
     elasticsearch: 'bower_components/elasticsearch/elasticsearch.angular',
@@ -30,6 +31,7 @@ require.config({
     jsonpath: 'bower_components/jsonpath/lib/jsonpath',
     lodash_src: 'bower_components/lodash/dist/lodash',
     moment: 'bower_components/moment/moment',
+    'ng-clip': 'bower_components/ng-clip/src/ngClip',
     text: 'bower_components/requirejs-text/text',
     zeroclipboard: 'bower_components/zeroclipboard/dist/ZeroClipboard'
   },
@@ -41,7 +43,8 @@ require.config({
     jsonpath: {
       exports: 'jsonPath'
     },
-    gridster: ['jquery'],
+    gridster: ['jquery', 'css!bower_components/gridster/dist/jquery.gridster.css'],
+    'angular-chosen': ['jquery', 'chosen'],
     'angular-route': ['angular'],
     'elasticsearch': ['angular'],
     'angular-bootstrap': ['angular'],
