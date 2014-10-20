@@ -47,6 +47,7 @@ define(function (require) {
       afterEach(function () {
         $window.remove();
         $window = $chart = $tooltip = null;
+        posTT.removeClone();
       });
 
       function makeEvent(xPercent, yPercent) {
@@ -123,6 +124,8 @@ define(function (require) {
           // size the tooltip very small so it won't collide with the edges
           $tooltip.css({ width: 15, height: 15 });
           var size = posTT.getTtSize($tooltip);
+          expect(size).to.have.property('width', 15);
+          expect(size).to.have.property('height', 15);
 
           // position the element based on a mouse that is in the middle of the chart
           var pos = posTT.getBasePosition(size, makeEvent(0.5, 0.5));

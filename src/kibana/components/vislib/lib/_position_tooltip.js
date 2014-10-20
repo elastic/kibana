@@ -128,6 +128,10 @@ define(function (require) {
   positionTooltip.getChartBounds = getChartBounds;
   positionTooltip.getViewportBounds = getViewportBounds;
   positionTooltip.placeToAvoidOverflow = placeToAvoidOverflow;
+  positionTooltip.removeClone = function () {
+    $clone && $clone.remove();
+    $clone = null;
+  };
 
   return positionTooltip;
 });
