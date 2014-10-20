@@ -29,7 +29,8 @@ define(function (require) {
       .css({
         visibility: 'hidden',
         position: 'absolute',
-        top: -100
+        top: -500,
+        left: -500
       })
       .appendTo('body');
     }

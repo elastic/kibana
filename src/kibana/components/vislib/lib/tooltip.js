@@ -25,7 +25,6 @@ define(function (require) {
 
       this.$window = $(window);
       this.$chart = $(el).find('.' + this.containerClass);
-      this.$tip = $('.' + this.tooltipClass);
     }
 
     /**
@@ -52,6 +51,7 @@ define(function (require) {
         if (d3.select('body').select('.' + self.tooltipClass)[0][0] === null) {
           d3.select('body').append('div').attr('class', self.tooltipClass);
         }
+
         if (self.container === undefined || self.container !== d3.select(self.el).select('.' + self.containerClass)) {
           self.container = d3.select(self.el).select('.' + self.containerClass);
         }
@@ -66,7 +66,7 @@ define(function (require) {
             var placement = self.getTooltipPlacement(
               self.$window,
               self.$chart,
-              self.$tip,
+              $('.' + self.tooltipClass),
               d3.event
             );
 
