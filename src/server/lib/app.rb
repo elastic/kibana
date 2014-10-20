@@ -9,6 +9,7 @@ require "lib/ColorLogger"
 require "routes/home"
 require "sinatra/json"
 require "routes/proxy"
+require "lib/FrameOptions"
 
 class Logger
   alias_method :write, :<<
