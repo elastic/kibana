@@ -84,60 +84,58 @@ define(function (require) {
 
             if (!type) return;
 
-            var idx = 0;
-            var attrs = {
-              'agg-type': 'agg.type',
-              'agg-config': 'agg',
-              'params': 'agg.params'
+            var aggParamHTML = {
+              basic: [],
+              advanced: []
             };
 
-            var paramBuilder = function (param) {
-              // don't show params without an editor
-              if (!param.editor) {
-                idx++;
-                return;
+            // build collection of agg params html
+            type.params.forEach(function (param, i) {
+              var aggParam;
+              var type = 'basic';
+              if (param.advanced) type = 'advanced';
+
+              if (aggParam = getAggParamHTML(param, i)) {
+                aggParamHTML[type].push(aggParam);
               }
-
-              attrs['agg-param'] = 'agg.type.params[' + idx + ']';
-              if (param.advanced) {
-                attrs['ng-show'] = 'advancedToggled';
-              }
-              idx++;
-
-              return $('<vis-agg-param-editor>')
-              .attr(attrs)
-              .append(param.editor)
-              .get(0);
-            };
-
-            // process normal paramTypes
-            var basicParams = _.filter(type.params, function (param) {
-              return !param.advanced;
             });
 
-            var paramEditors = basicParams.map(paramBuilder).filter(Boolean);
+            // compile the paramEditors html elements
+            var paramEditors = aggParamHTML.basic;
 
-            // process advanced paramTypes
-            var advancedParams = _.filter(type.params, function (param) {
-              return !!param.advanced;
-            });
-
-            if (advancedParams.length) {
+            if (aggParamHTML.advanced.length) {
               paramEditors.push($(advancedToggleHtml).get(0));
-
-              advancedParams.forEach(function (param) {
-                // don't show params without an editor
-                if (!param.editor) return;
-
-                var editor = paramBuilder(param);
-                paramEditors.push(editor);
-              });
+              paramEditors = paramEditors.concat(aggParamHTML.advanced);
             }
 
             $aggParamEditorsScope = $scope.$new();
             $aggParamEditors = $(paramEditors).appendTo($editorContainer);
             $compile($aggParamEditors)($aggParamEditorsScope);
           });
+
+          // build HTML editor given an aggParam and index
+          function getAggParamHTML(param, idx) {
+            // don't show params without an editor
+            if (!param.editor) {
+              return;
+            }
+
+            var attrs = {
+              'agg-type': 'agg.type',
+              'agg-config': 'agg',
+              'params': 'agg.params'
+            };
+
+            attrs['agg-param'] = 'agg.type.params[' + idx + ']';
+            if (param.advanced) {
+              attrs['ng-show'] = 'advancedToggled';
+            }
+
+            return $('<vis-agg-param-editor>')
+            .attr(attrs)
+            .append(param.editor)
+            .get(0);
+          }
 
           // generic child scope creation, for both schema and agg
           function editorScope() {
