@@ -8,7 +8,7 @@ define(function (require) {
     _(RawJSONAggParam).inherits(BaseAggParam);
     function RawJSONAggParam(config) {
       // force name override
-      config.name = 'json';
+      config = _.defaults(config, { name: 'json' });
       RawJSONAggParam.Super.call(this, config);
     }
 
@@ -24,9 +24,9 @@ define(function (require) {
      *                               for the agg
      * @return {undefined}
      */
-    RawJSONAggParam.prototype.write = function (aggConfig) {
+    RawJSONAggParam.prototype.write = function (aggConfig, output) {
       var paramJSON;
-      var param = _.cloneDeep(aggConfig.params[this.name]);
+      var param = aggConfig.params[this.name];
 
       if (!param) {
         return;
@@ -39,11 +39,7 @@ define(function (require) {
         return;
       }
 
-      // loop through aggConfig.params, clobbering anything already in param
-      _.defaults(aggConfig.params, paramJSON);
-
-      // remove the invalid `json` key
-      delete aggConfig.params[this.name];
+      _.assign(output.params, paramJSON);
       return;
     };
 
