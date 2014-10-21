@@ -1,7 +1,6 @@
 define(function (require) {
   return function TermsAggDefinition(Private) {
     var _ = require('lodash');
-    require('filters/label');
     var AggType = Private(require('components/agg_types/_agg_type'));
     var bucketCountBetween = Private(require('components/agg_types/buckets/_bucket_count_between'));
 
@@ -67,13 +66,8 @@ define(function (require) {
         },
         {
           name: 'script',
-          editor: require('text!components/agg_types/controls/script.html'),
-          advanced: true,
-          write: function (aggConfig, output) {
-            if (aggConfig.params.script && aggConfig.params.script.length)
-              output.params.script = aggConfig.params.script;
-            return;
-          }
+          type: 'string',
+          advanced: true
         }
       ]
     });

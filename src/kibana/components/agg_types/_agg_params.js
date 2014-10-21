@@ -1,5 +1,6 @@
 define(function (require) {
   return function AggParamsFactory(Private) {
+    require('filters/label');
     var _ = require('lodash');
     var IndexedArray = require('utils/indexed_array/index');
 
@@ -7,6 +8,7 @@ define(function (require) {
     var FieldAggParam = Private(require('components/agg_types/param_types/field'));
     var OptionedAggParam = Private(require('components/agg_types/param_types/optioned'));
     var RegexAggParam = Private(require('components/agg_types/param_types/regex'));
+    var StringAggParam = Private(require('components/agg_types/param_types/string'));
 
     /**
      * Wraps a list of {{#crossLink "AggParam"}}{{/crossLink}} objects; owned by an {{#crossLink "AggType"}}{{/crossLink}}
@@ -42,6 +44,9 @@ define(function (require) {
           }
           else if (param.type === 'regex') {
             return new RegexAggParam(param);
+          }
+          else if (param.type === 'string') {
+            return new StringAggParam(param);
           }
           else {
             return new BaseAggParam(param);

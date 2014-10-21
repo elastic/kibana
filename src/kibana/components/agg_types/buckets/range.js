@@ -30,13 +30,8 @@ define(function (require) {
         },
         {
           name: 'script',
-          editor: require('text!components/agg_types/controls/script.html'),
-          advanced: true,
-          write: function (aggConfig, output) {
-            if (aggConfig.params.script && aggConfig.params.script.length)
-              output.params.script = aggConfig.params.script;
-            return;
-          }
+          type: 'string',
+          advanced: true
         }
       ]
     });
