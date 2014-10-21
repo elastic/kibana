@@ -64,6 +64,11 @@ define(function (require) {
           name: 'include',
           type: 'regex',
           advanced: true
+        },
+        {
+          name: 'value_script',
+          editor: require('text!components/agg_types/controls/value_script.html'),
+          advanced: true
         }
       ]
     });
