@@ -8,7 +8,7 @@ module.exports = function (grunt) {
     src: __dirname + '/src', // unbuild version of build
     build: __dirname + '/build', // copy of source, but optimized
     app: __dirname + '/src/kibana', // source directory for the app
-    plugins: __dirname + '/src/plugins', // source directory for the app
+    plugins: __dirname + '/src/kibana/plugins', // source directory for the app
     server: __dirname + '/src/server', // source directory for the server
     target: __dirname + '/target',  // location of the compressed build targets
     buildApp: __dirname + '/build/kibana', // build directory for the app
