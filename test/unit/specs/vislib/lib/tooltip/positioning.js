@@ -24,8 +24,7 @@ define(function (require) {
           width: size.width,
           height: size.height,
           visibility: 'hidden'
-        })
-        .appendTo('body');
+        });
 
         if ($children) {
           $el.append($children);
@@ -42,6 +41,8 @@ define(function (require) {
             $tooltip = testEl([50, 100], [35, 75])
           )
         );
+
+        $(document.body).append($window);
       });
 
       afterEach(function () {

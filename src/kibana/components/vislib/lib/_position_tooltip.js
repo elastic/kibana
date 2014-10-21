@@ -119,7 +119,7 @@ define(function (require) {
   positionTooltip.getOverflow = getOverflow;
   positionTooltip.getBounds = getBounds;
   positionTooltip.placeToAvoidOverflow = placeToAvoidOverflow;
-  positionTooltip.removeClone = function () {
+  positionTooltip.destroyClone = function () {
     $clone && $clone.remove();
     $clone = null;
   };
