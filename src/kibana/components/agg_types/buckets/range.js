@@ -27,6 +27,11 @@ define(function (require) {
             output.params.ranges = aggConfig.params.ranges;
             output.params.keyed = true;
           }
+        },
+        {
+          name: 'script',
+          editor: require('text!components/agg_types/controls/script.html'),
+          advanced: true
         }
       ]
     });
