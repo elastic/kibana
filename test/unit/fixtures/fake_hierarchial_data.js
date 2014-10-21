@@ -25,8 +25,8 @@ define(function (require) {
                   agg_1: { value: 9299 },
                   agg_4: {
                     buckets: [
-                      { key: 'win', doc_count: 4, agg_1: { value: 4992 } },
-                      { key: 'mac', doc_count: 6, agg_1: { value: 5892 } }
+                      { key: 'win', doc_count: 4, agg_1: { value: 0 } },
+                      { key: 'mac', doc_count: 6, agg_1: { value: 9299 } }
                     ]
                   }
                 },

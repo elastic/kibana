@@ -60,7 +60,10 @@ define(function (require) {
 
         var _record = _.flatten([record, bucket.key]);
         _.each(metrics, function (metric) {
-          var value = bucket[metric.id] && bucket[metric.id].value || bucket.doc_count;
+          var value = bucket.doc_count;
+          if (bucket[metric.id] && !_.isUndefined(bucket[metric.id].value)) {
+            value = bucket[metric.id].value;
+          }
           _record.push(value);
         });
 

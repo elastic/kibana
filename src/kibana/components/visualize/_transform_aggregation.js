@@ -5,7 +5,10 @@ define(function (require) {
     return _.map(extractBuckets(aggData), function (bucket) {
       // Pick the appropriate value, if the metric doesn't exist then we just
       // use the count.
-      var value = bucket[metric.id] && bucket[metric.id].value || bucket.doc_count;
+      var value = bucket.doc_count;
+      if (bucket[metric.id] && !_.isUndefined(bucket[metric.id].value)) {
+        value = bucket[metric.id].value;
+      }
 
       // Create the new branch record
       var branch = {

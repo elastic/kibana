@@ -33,7 +33,7 @@ define(function (require) {
         var agg = { id: 'agg_2', name: 'test' };
         var aggData = {
           buckets: [
-            { key: 'foo', doc_count: 1, agg_1: { value: 3 } },
+            { key: 'foo', doc_count: 1, agg_1: { value: 0 } },
             { key: 'bar', doc_count: 2, agg_1: { value: 4 } }
           ]
         };
@@ -41,7 +41,7 @@ define(function (require) {
         var children = tranform(agg, fixture.metric, aggData);
         expect(children).to.be.an(Array);
         expect(children).to.have.length(2);
-        expect(children[0]).to.have.property('size', 3);
+        expect(children[0]).to.have.property('size', 0);
         expect(children[1]).to.have.property('size', 4);
       });
 

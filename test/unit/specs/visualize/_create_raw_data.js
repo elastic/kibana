@@ -60,8 +60,8 @@ define(function (require) {
       it('should have rows set', function () {
         expect(results).to.have.property('rows');
         expect(results.rows).to.eql([
-          ['png', 412032, 'IT', 9299, 'win', 4992],
-          ['png', 412032, 'IT', 9299, 'mac', 5892],
+          ['png', 412032, 'IT', 9299, 'win', 0],
+          ['png', 412032, 'IT', 9299, 'mac', 9299],
           ['png', 412032, 'US', 8293, 'linux', 3992],
           ['png', 412032, 'US', 8293, 'mac', 3029],
           ['css', 412032, 'MX', 9299, 'win', 4992],
