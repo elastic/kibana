@@ -63,24 +63,29 @@ define(function (require) {
         return !config.type.hasNoDsl;
       })
       .forEach(function nestEachConfig(config, i, list) {
-        var prevConfig = list[i - 1];
-        var prevDsl = prevConfig && dslLvlCursor && dslLvlCursor[prevConfig.id];
+        if (!dslLvlCursor) {
+          // start at the top level
+          dslLvlCursor = dslTopLvl;
+        } else {
+          var prevConfig = list[i - 1];
+          var prevDsl = dslLvlCursor[prevConfig.id];
 
-        // advance the cursor and write to the previous agg
-        if (prevDsl && prevConfig.schema.group === 'buckets') {
-          dslLvlCursor = prevDsl.aggs;
+          // advance the cursor and nest under the previous agg, or
+          // put it on the same level if the previous agg doesn't accept
+          // sub aggs
+          dslLvlCursor = prevDsl.aggs || dslLvlCursor;
         }
 
-        // start at the top level
-        if (!dslLvlCursor) dslLvlCursor = dslTopLvl;
-
         var dsl = dslLvlCursor[config.id] = config.toDsl();
+        var subAggs;
 
-        if (config.schema.group === 'buckets') {
-          var subAggs = dsl.aggs || (dsl.aggs = {});
-          if (nestedMetric) {
-            subAggs[nestedMetric.config.id] = nestedMetric.dsl;
-          }
+        if (config.schema.group === 'buckets' && i < list.length - 1) {
+          // buckets that are not the last item in the list accept sub-aggs
+          subAggs = dsl.aggs || (dsl.aggs = {});
+        }
+
+        if (subAggs && nestedMetric) {
+          subAggs[nestedMetric.config.id] = nestedMetric.dsl;
         }
       });
 
