@@ -17,7 +17,7 @@ module.exports = function (grunt) {
       return;
     }
 
-    contents =
+    contents +=
       '\n# Plugins that are included in the build, and no longer found in the plugins/ folder' +
       '\n' + configKey + ':' +
       '\n' + idList;
