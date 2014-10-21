@@ -14,6 +14,7 @@ define(function (require) {
         addLegend: true
       },
       responseConverter: PieConverter,
+      hierarchialData: true,
       schemas: new Schemas([
         {
           group: 'metrics',
@@ -21,7 +22,6 @@ define(function (require) {
           title: 'Slice Size',
           min: 1,
           max: 1,
-          aggFilter: 'count',
           defaults: [
             { schema: 'metric', type: 'count' }
           ]
