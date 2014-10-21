@@ -6,7 +6,7 @@ define(function (require) {
   return function SourceAbstractFactory(Private, Promise, PromiseEmitter, timefilter) {
     var pendingRequests = Private(require('components/courier/_pending_requests'));
     var errorHandlers = Private(require('components/courier/_error_handlers'));
-    var fetch = Private(require('components/courier/fetch/fetch'));
+    var courierFetch = Private(require('components/courier/fetch/fetch'));
 
     function SourceAbstract(initialState) {
       this._instanceid = _.uniqueId('data_source');
@@ -38,7 +38,7 @@ define(function (require) {
       }, this);
 
       this.history = [];
-      this._fetchStrategy = fetch.strategies[this._getType()];
+      this._fetchStrategy = courierFetch.strategies[this._getType()];
     }
 
     /*****
@@ -162,7 +162,7 @@ define(function (require) {
       pendingRequests.push(req);
 
       // fetch just the requests for this source
-      fetch.these(self._getType(), pendingRequests.splice(0).filter(function (req) {
+      courierFetch.these(self._getType(), pendingRequests.splice(0).filter(function (req) {
         if (req.source !== self) {
           pendingRequests.push(req);
           return false;
