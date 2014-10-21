@@ -19,27 +19,39 @@ define(function (require) {
         }
 
         var rows = $tooltipScope.rows = [];
-        for (parent = datum; parent.parent; parent = parent.parent) {
-          var i = parent.depth - 1;
-          var col = columns[i];
 
-          // field/agg details
-          var group = (col.field && col.field.name) || col.label || ('level ' + datum.depth);
+        // walk up the branch for each parent
+        (function walk(item) {
+          // record the the depth
+          var i = item.depth - 1;
 
-          // field value that defines the bucket
-          var bucket = parent.name;
-          if (col.field) bucket = col.field.format.convert(bucket);
+          // Using the aggConfig determin what the field name is. If the aggConfig
+          // doesn't exist (which means it's an _all agg) then use the level for
+          // the field name
+          var col = item.aggConfig;
+          var field = (col && col.params && col.params.field && col.params.field.name)
+            || (col && col.label)
+            || ('level ' + datum.depth);
 
-          // metric for the bucket
-          var val = parent.value;
+          // Set the bucket name, and use the converter to format the field if
+          // the field exists.
+          var bucket = item.name;
+          if (col && col.field) bucket = col.field.format.convert(bucket);
 
+          // Add the row to the tooltipScope.rows
           rows.unshift({
             spacer: $sce.trustAsHtml(_.repeat('&nbsp;', i)),
-            field: group,
+            field: field,
             bucket: bucket,
-            metric: val + ' (' + Math.round((parent.value / sum) * 100) + '%)'
+            metric: item.value + ' (' + Math.round((item.value / sum) * 100) + '%)'
           });
-        }
+
+          // If the item has a parent and it's also a child then continue walking
+          // up the branch
+          if (item.parent && item.parent.parent) {
+            walk(item.parent);
+          }
+        })(datum);
 
         $tooltipScope.metricCol = _.find(columns, { categoryName: 'metric' });
 
