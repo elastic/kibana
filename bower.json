@@ -31,7 +31,7 @@
     "async": "~0.2.10",
     "bluebird": "~2.1.3",
     "bootstrap": "~3.1.1",
-    "bootstrap-chosen": "*",
+    "bootstrap-chosen": "61ed40742c",
     "d3": "~3.4.8",
     "elasticsearch": "*",
     "Faker": "~1.1.0",
