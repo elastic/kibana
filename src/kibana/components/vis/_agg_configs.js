@@ -45,6 +45,18 @@ define(function (require) {
     AggConfigs.prototype.toDsl = function () {
       var dslTopLvl = {};
       var dslLvlCursor;
+      var nestedMetric;
+
+      if (this.vis.type.hierarchialData) {
+        // collect the metric agg that we will copy under each bucket agg
+        var nestedMetricConfig = _.first(this.vis.aggs.bySchemaGroup.metrics);
+        if (nestedMetricConfig.type.name !== 'count') {
+          nestedMetric = {
+            config: nestedMetricConfig,
+            dsl: nestedMetricConfig.toDsl()
+          };
+        }
+      }
 
       this.getSorted()
       .filter(function (config) {
@@ -54,15 +66,22 @@ define(function (require) {
         var prevConfig = list[i - 1];
         var prevDsl = prevConfig && dslLvlCursor && dslLvlCursor[prevConfig.id];
 
-        // advance the cursor
-        if (prevDsl && prevConfig.schema.group !== 'metrics') {
-          dslLvlCursor = prevDsl.aggs || (prevDsl.aggs = {});
+        // advance the cursor and write to the previous agg
+        if (prevDsl && prevConfig.schema.group === 'buckets') {
+          dslLvlCursor = prevDsl.aggs;
         }
 
         // start at the top level
         if (!dslLvlCursor) dslLvlCursor = dslTopLvl;
 
-        dslLvlCursor[config.id] = config.toDsl();
+        var dsl = dslLvlCursor[config.id] = config.toDsl();
+
+        if (config.schema.group === 'buckets') {
+          var subAggs = dsl.aggs || (dsl.aggs = {});
+          if (nestedMetric) {
+            subAggs[nestedMetric.config.id] = nestedMetric.dsl;
+          }
+        }
       });
 
       return dslTopLvl;
