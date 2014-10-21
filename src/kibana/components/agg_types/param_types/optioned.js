@@ -3,7 +3,6 @@ define(function (require) {
     var _ = require('lodash');
 
     var IndexedArray = require('utils/indexed_array/index');
-    var Registry = require('utils/registry/registry');
     var BaseAggParam = Private(require('components/agg_types/param_types/base'));
 
     _(OptionedAggParam).inherits(BaseAggParam);
