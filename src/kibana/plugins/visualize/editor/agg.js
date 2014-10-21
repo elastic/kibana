@@ -1,12 +1,14 @@
 define(function (require) {
   require('modules')
-  .get('app/visualize')
+  .get('app/visualize', ['localytics.directives'])
   .directive('visEditorAgg', function ($compile, $parse, Private, Notifier) {
     var _ = require('lodash');
     var $ = require('jquery');
     var aggTypes = Private(require('components/agg_types/index'));
     var aggSelectHtml = require('text!plugins/visualize/editor/agg_select.html');
+    var advancedToggleHtml = require('text!apps/visualize/partials/advanced_toggle.html');
 
+    var chosen = require('angular-chosen');
     require('plugins/visualize/editor/agg_param');
 
     var notify = new Notifier({
@@ -28,6 +30,7 @@ define(function (require) {
       link: function ($scope, $el) {
         $scope.aggTypeOptions = aggTypes.byType[$scope.groupName];
         $scope.editorOpen = $scope.agg.brandNew;
+        $scope.advancedToggled = false;
 
         $scope.$watchMulti([
           '$index',
@@ -54,8 +57,8 @@ define(function (require) {
           var $aggSelect = $(aggSelectHtml).appendTo($editorContainer);
           $compile($aggSelect)($scope);
 
-          // params for the selected agg, these are rebuilt every time the agg changes
-          var $aggParamEditors;
+          // params for the selected agg, these are rebuilt every time the agg in $aggSelect changes
+          var $aggParamEditors; //  container for agg type param editors
           var $aggParamEditorsScope;
           $scope.$watch('agg.type', function updateAggParamEditor(newType, oldType) {
             if ($aggParamEditors) {
@@ -81,24 +84,58 @@ define(function (require) {
 
             if (!type) return;
 
-            var editors = type.params.map(function (param, i) {
-              if (!param.editor) return;
+            var aggParamHTML = {
+              basic: [],
+              advanced: []
+            };
 
-              return $('<vis-agg-param-editor>')
-              .attr({
-                'agg-type': 'agg.type',
-                'agg-config': 'agg',
-                'agg-param': 'agg.type.params[' + i + ']',
-                'params': 'agg.params'
-              })
-              .append(param.editor)
-              .get(0);
-            }).filter(Boolean);
+            // build collection of agg params html
+            type.params.forEach(function (param, i) {
+              var aggParam;
+              var type = 'basic';
+              if (param.advanced) type = 'advanced';
 
-            $aggParamEditors = $(editors).appendTo($editorContainer);
+              if (aggParam = getAggParamHTML(param, i)) {
+                aggParamHTML[type].push(aggParam);
+              }
+            });
+
+            // compile the paramEditors html elements
+            var paramEditors = aggParamHTML.basic;
+
+            if (aggParamHTML.advanced.length) {
+              paramEditors.push($(advancedToggleHtml).get(0));
+              paramEditors = paramEditors.concat(aggParamHTML.advanced);
+            }
+
             $aggParamEditorsScope = $scope.$new();
+            $aggParamEditors = $(paramEditors).appendTo($editorContainer);
             $compile($aggParamEditors)($aggParamEditorsScope);
           });
+
+          // build HTML editor given an aggParam and index
+          function getAggParamHTML(param, idx) {
+            // don't show params without an editor
+            if (!param.editor) {
+              return;
+            }
+
+            var attrs = {
+              'agg-type': 'agg.type',
+              'agg-config': 'agg',
+              'params': 'agg.params'
+            };
+
+            attrs['agg-param'] = 'agg.type.params[' + idx + ']';
+            if (param.advanced) {
+              attrs['ng-show'] = 'advancedToggled';
+            }
+
+            return $('<vis-agg-param-editor>')
+            .attr(attrs)
+            .append(param.editor)
+            .get(0);
+          }
 
           // generic child scope creation, for both schema and agg
           function editorScope() {

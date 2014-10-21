@@ -12,16 +12,21 @@ define(function (require) {
   require('angular-route');
   require('angular-bindonce');
 
+  // Seems bad?
+  window.ZeroClipboard = require('zeroclipboard');
+  require('ng-clip');
+
   var configFile = JSON.parse(require('text!config'));
 
   var kibana = modules.get('kibana', [
     // list external requirements here
     'elasticsearch',
     'pasvaz.bindonce',
-    'ngRoute'
+    'ngRoute',
+    'ngClipboard'
   ]);
 
-  configFile.elasticsearch = ('http://' + window.location.hostname + '/elasticsearch/');
+  configFile.elasticsearch = (window.location.protocol + '//' + window.location.hostname + '/elasticsearch/');
 
   kibana
     // This stores the Kibana revision number, @REV@ is replaced by grunt.
@@ -37,7 +42,10 @@ define(function (require) {
     // When we need to identify the current session of the app, ef shard preference
     .constant('sessionId', Date.now())
     // attach the route manager's known routes
-    .config(routes.config);
+    .config(routes.config)
+    .config(['ngClipProvider', function (ngClipProvider) {
+      ngClipProvider.setPath('bower_components/zeroclipboard/dist/ZeroClipboard.swf');
+    }]);
 
   // setup routes
   routes

@@ -8,6 +8,8 @@ define(function (require) {
   require('components/config/config');
   require('components/notify/notify');
   require('components/typeahead/typeahead');
+  require('components/clipboard/clipboard');
+
 
   require('plugins/dashboard/directives/grid');
   require('plugins/dashboard/directives/panel');
@@ -151,7 +153,8 @@ define(function (require) {
             return {
               link: $location.absUrl(),
               // This sucks, but seems like the cleanest way. Uhg.
-              embed: $location.absUrl().replace('?', '?embed&')
+              embed: '<iframe src="' + $location.absUrl().replace('?', '?embed&') +
+                '" height="600" width="800"></iframe>'
             };
           }
         };

@@ -7,7 +7,13 @@ filter-bar .bar {
   background: @gray-lighter;
   border-bottom: 1px solid #ccc;
 
-  .filter-remove-all {
+  &-condensed {
+    padding: 2px 6px 0px 6px !important;
+    font-size: 0.9em;
+    background: darken(@gray-lighter, 5%);
+  }
+
+  .filter-link {
     position: relative;
     display: inline-block;
     border: 4px solid transparent;
@@ -27,18 +33,14 @@ filter-bar .bar {
     min-width: 110px;
 
     font-size: @font-size-small;
-    background-color: @gray-dark;
+    background-color: @action-add;
     color: #fff;
     margin-right: 4px;
     margin-bottom: 4px;
     max-width: 100%;
 
     // Replace padding with border so absolute controls position correctly
-    border-color: transparent;
-    border-style: solid;
-    border-width: 4px;
-    border-left-width: 8px;
-    border-right-width: 8px;
+    padding: 4px 8px;
     border-radius: 12px;
 
 
@@ -49,12 +51,14 @@ filter-bar .bar {
 
       > .filter-description {
         opacity: 0.15;
+        background: transparent;
         overflow: hidden;
       }
     }
 
     > .filter-actions {
       position: absolute;
+      padding: 4px 8px;
       top: 0;
       left: 0;
       width: 100%;
@@ -70,7 +74,7 @@ filter-bar .bar {
     }
 
     &.negate {
-      background-color: #D18282;
+      background-color: @action-remove;
     }
 
     a {
@@ -78,7 +82,8 @@ filter-bar .bar {
     }
 
     &.disabled {
-      opacity: 0.7;
+      opacity: 0.6;
+      background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,.3) 10px, rgba(255,255,255,.3) 20px);
     }
 
     &.disabled:hover {

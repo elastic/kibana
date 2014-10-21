@@ -70,8 +70,8 @@ define(function (require) {
         var bounds = this.getBounds();
         filter = {range : {}};
         filter.range[timefield.name] = {
-          gte: bounds.min,
-          lte: bounds.max
+          gte: bounds.min.valueOf(),
+          lte: bounds.max.valueOf()
         };
       }
       return filter;

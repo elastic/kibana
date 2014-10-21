@@ -1,16 +1,17 @@
 define(function (require) {
-  return function TooltipFactory(d3, Private) {
-    var _ = require('lodash');
+  return function TooltipFactory(d3) {
     var $ = require('jquery');
 
-    // Dynamically adds css file
     require('css!components/vislib/styles/main');
 
-    /*
-     * Append a tooltip div element to the visualization
-     * arguments:
-     *  el => reference to DOM element
-     *  formatter => tooltip formatter
+    /**
+     * Add tooltip and listeners to visualization elements
+     *
+     * @class Tooltip
+     * @constructor
+     * @param el {HTMLElement} Reference to DOM element
+     * @param formatter {Function} Tooltip formatter
+     * @param events {Constructor} Allows tooltip to return event response data
      */
     function Tooltip(el, formatter, events) {
       if (!(this instanceof Tooltip)) {
@@ -23,6 +24,12 @@ define(function (require) {
       this.containerClass = 'vis-wrapper';
     }
 
+    /**
+     * Renders tooltip
+     *
+     * @method render
+     * @returns {Function} Renders tooltip on a D3 selection
+     */
     Tooltip.prototype.render = function () {
       var self = this;
       var tooltipFormatter = this.formatter;
@@ -42,26 +49,33 @@ define(function (require) {
           var element = d3.select(this);
 
           element
-            .on('mousemove.tip', function (d) {
-              var placement = self.getTooltipPlacement(d3.event);
-              var events = self.events ? self.events.eventResponse(d, i) : d;
+          .on('mousemove.tip', function (d) {
+            var placement = self.getTooltipPlacement(d3.event);
+            var events = self.events ? self.events.eventResponse(d, i) : d;
 
-              // return text and position for tooltip
-              return tooltipDiv.datum(events)
-                .html(tooltipFormatter)
-                .style('visibility', 'visible')
-                .style('left', placement.left + 'px')
-                .style('top', placement.top + 'px');
-            })
-            .on('mouseout.tip', function () {
-              return tooltipDiv.style('visibility', 'hidden')
-                .style('left', '-500px')
-                .style('top', '-500px');
-            });
+            // return text and position for tooltip
+            return tooltipDiv.datum(events)
+              .html(tooltipFormatter)
+              .style('visibility', 'visible')
+              .style('left', placement.left + 'px')
+              .style('top', placement.top + 'px');
+          })
+          .on('mouseout.tip', function () {
+            return tooltipDiv.style('visibility', 'hidden')
+              .style('left', '-500px')
+              .style('top', '-500px');
+          });
         });
       };
     };
 
+    /**
+     * Calculates values for the tooltip placement
+     *
+     * @method getTooltipPlacement
+     * @param event {Object} D3 Events Object
+     * @returns {{Object}} Coordinates for tooltip
+     */
     Tooltip.prototype.getTooltipPlacement = function (event) {
       var self = this;
       var OFFSET = 10;

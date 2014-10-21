@@ -5,11 +5,12 @@ define(function (require) {
 
     var ErrorHandler = Private(require('components/vislib/lib/_error_handler'));
 
-    /*
-     * Append a y axis to the visualization
-     * arguments:
-     *  el => reference to DOM element
-     *  _attr => visualization attributes
+    /**
+     * Appends y axis to the visualization
+     *
+     * @class YAxis
+     * @constructor
+     * @param args {{el: (HTMLElement), yMax: (Number), _attr: (Object|*)}}
      */
     function YAxis(args) {
       this.el = args.el;
@@ -19,23 +20,40 @@ define(function (require) {
 
     _(YAxis.prototype).extend(ErrorHandler.prototype);
 
-    // Render the y axis
+    /**
+     * Renders the y axis
+     *
+     * @method render
+     * @return {D3.UpdateSelection} Renders y axis to visualization
+     */
     YAxis.prototype.render = function () {
       d3.select(this.el).selectAll('.y-axis-div').call(this.draw());
     };
 
-    // Return the d3 y scale
+    /**
+     * Creates the d3 y scale function
+     *
+     * @method getYScale
+     * @param height {Number} DOM Element height
+     * @returns {D3.Scale.QuantitiveScale|*} D3 yScale function
+     */
     YAxis.prototype.getYScale = function (height) {
       // save reference to y scale
       this.yScale = d3.scale.linear()
-        .domain([0, this.yMax])
-        .range([height, 0])
-        .nice(this.tickScale(height));
+      .domain([0, this.yMax])
+      .range([height, 0])
+      .nice(this.tickScale(height));
 
       return this.yScale;
     };
 
-    // Return the d3 y axis
+    /**
+     * Creates the d3 y axis function
+     *
+     * @method getYAxis
+     * @param height {Number} DOM Element height
+     * @returns {D3.Svg.Axis|*} D3 yAxis function
+     */
     YAxis.prototype.getYAxis = function (height) {
       var yScale = this.getYScale(height);
 
@@ -46,10 +64,10 @@ define(function (require) {
 
       // Create the d3 yAxis function
       this.yAxis = d3.svg.axis()
-        .scale(yScale)
-        .tickFormat(d3.format('s'))
-        .ticks(this.tickScale(height))
-        .orient('left');
+      .scale(yScale)
+      .tickFormat(d3.format('s'))
+      .ticks(this.tickScale(height))
+      .orient('left');
 
       if (this.yScale.domain()[1] <= 10) {
         this.yAxis.tickFormat(d3.format('n'));
@@ -58,20 +76,31 @@ define(function (require) {
       return this.yAxis;
     };
 
-    // Create a tick scale for the y axis that modifies the number of ticks
-    // based on the height of the wrapping DOM element
+    /**
+     * Create a tick scale for the y axis that modifies the number of ticks
+     * based on the height of the wrapping DOM element
+     * Avoid using even numbers in the yTickScale.range
+     * Causes the top most tickValue in the chart to be missing
+     *
+     * @method tickScale
+     * @param height {Number} DOM element height
+     * @returns {number} Number of y axis ticks
+     */
     YAxis.prototype.tickScale = function (height) {
-      // Avoid using even numbers in the yTickScale.range
-      // Causes the top most tickValue in the chart to be missing
       var yTickScale = d3.scale.linear()
-        .clamp(true)
-        .domain([20, 40, 1000])
-        .range([0, 3, 11]);
+      .clamp(true)
+      .domain([20, 40, 1000])
+      .range([0, 3, 11]);
 
       return Math.ceil(yTickScale(height));
     };
 
-    // Return a function that renders the y axis
+    /**
+     * Renders the y axis to the visualization
+     *
+     * @method draw
+     * @returns {Function} Renders y axis to visualization
+     */
     YAxis.prototype.draw = function () {
       var self = this;
       var margin = this._attr.margin;
@@ -96,13 +125,13 @@ define(function (require) {
 
           // Append svg and y axis
           svg = div.append('svg')
-            .attr('width', width)
-            .attr('height', height + margin.top + margin.bottom);
+          .attr('width', width)
+          .attr('height', height + margin.top + margin.bottom);
 
           svg.append('g')
-            .attr('class', 'y axis')
-            .attr('transform', 'translate(' + (width - 2) + ',' + margin.top + ')')
-            .call(yAxis);
+          .attr('class', 'y axis')
+          .attr('transform', 'translate(' + (width - 2) + ',' + margin.top + ')')
+          .call(yAxis);
         });
       };
     };

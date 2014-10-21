@@ -6,11 +6,14 @@ define(function (require) {
     var ErrorHandler = Private(require('components/vislib/lib/_error_handler'));
     var Tooltip = Private(require('components/vislib/lib/tooltip'));
 
-    /*
-     * Append chart titles to the visualization
-     * arguments:
-     *  el => reference to a DOM element
+    /**
+     * Appends chart titles to the visualization
+     *
+     * @class ChartTitle
+     * @constructor
+     * @param el {HTMLElement} Reference to DOM element
      */
+
     function ChartTitle(el) {
       if (!(this instanceof ChartTitle)) {
         return new ChartTitle(el);
@@ -24,12 +27,23 @@ define(function (require) {
 
     _(ChartTitle.prototype).extend(ErrorHandler.prototype);
 
-    // Render chart titles
+    /**
+     * Renders chart titles
+     *
+     * @method render
+     * @returns {D3.Selection|D3.Transition.Transition} DOM element with chart titles
+     */
     ChartTitle.prototype.render = function () {
       return d3.select(this.el).selectAll('.chart-title').call(this.draw());
     };
 
-    // Return a function that truncates chart title text
+    /**
+     * Truncates chart title text
+     *
+     * @method truncate
+     * @param size {Number} Height or width of the HTML Element
+     * @returns {Function} Truncates text
+     */
     ChartTitle.prototype.truncate = function (size) {
       var self = this;
 
@@ -47,10 +61,7 @@ define(function (require) {
             str = text.text();
             avg = length / str.length;
             end = Math.floor(maxWidth / avg) - 5;
-
             str = str.substr(0, end) + '...';
-
-            // mouseover and mouseout
             self.addMouseEvents(text);
 
             return text.text(str);
@@ -61,14 +72,25 @@ define(function (require) {
       };
     };
 
-    // Add mouseover and mouseout events on truncated chart titles
+    /**
+     * Adds tooltip events on truncated chart titles
+     *
+     * @method addMouseEvents
+     * @param target {HTMLElement} DOM element to attach event listeners
+     * @returns {*} DOM element with event listeners attached
+     */
     ChartTitle.prototype.addMouseEvents = function (target) {
       if (this.tooltip) {
         return target.call(this.tooltip.render());
       }
     };
 
-    // Return a callback function that appends chart titles to the visualization
+    /**
+     * Appends chart titles to the visualization
+     *
+     * @method draw
+     * @returns {Function} Appends chart titles to a D3 selection
+     */
     ChartTitle.prototype.draw = function () {
       var self = this;
 
@@ -81,32 +103,31 @@ define(function (require) {
           var size = dataType === 'rows' ? height : width;
           var txtHtOffset = 11;
 
-          // Check if width or height are 0 or NaN
           self.validateWidthandHeight(width, height);
 
           div.append('svg')
-            .attr('width', function () {
-              if (dataType === 'rows') {
-                return 15;
-              }
-              return width;
-            })
-            .attr('height', height)
-            .append('text')
-            .attr('transform', function () {
-              if (dataType === 'rows') {
-                // if `rows`, rotate the chart titles
-                return 'translate(' + txtHtOffset + ',' + height / 2 + ')rotate(270)';
-              }
-              return 'translate(' + width / 2 + ',' + txtHtOffset + ')';
-            })
-            .attr('text-anchor', 'middle')
-            .text(function (d) {
-              return d.label;
-            });
+          .attr('width', function () {
+            if (dataType === 'rows') {
+              return 15;
+            }
+            return width;
+          })
+          .attr('height', height)
+          .append('text')
+          .attr('transform', function () {
+            if (dataType === 'rows') {
+              return 'translate(' + txtHtOffset + ',' + height / 2 + ')rotate(270)';
+            }
+            return 'translate(' + width / 2 + ',' + txtHtOffset + ')';
+          })
+          .attr('text-anchor', 'middle')
+          .text(function (d) {
+            return d.label;
+          });
 
           // truncate long chart titles
-          div.selectAll('text').call(self.truncate(size));
+          div.selectAll('text')
+          .call(self.truncate(size));
         });
       };
     };

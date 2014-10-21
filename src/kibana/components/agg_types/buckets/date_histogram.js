@@ -39,6 +39,7 @@ define(function (require) {
 
         {
           name: 'interval',
+          type: 'optioned',
           default: 'auto',
           options: Private(require('components/agg_types/buckets/_interval_options')),
           editor: require('text!components/agg_types/controls/interval.html'),
