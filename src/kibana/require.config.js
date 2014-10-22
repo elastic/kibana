@@ -24,11 +24,13 @@ require.config({
     faker: 'bower_components/Faker/faker',
     file_saver: 'bower_components/FileSaver/FileSaver',
     gridster: 'bower_components/gridster/dist/jquery.gridster',
+    heat: ['https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-heat/v0.1.0/leaflet-heat'],
     inflection: 'bower_components/inflection/lib/inflection',
     jquery: 'bower_components/jquery/dist/jquery',
     jsonpath: 'bower_components/jsonpath/lib/jsonpath',
     lodash_src: 'bower_components/lodash/dist/lodash',
     mapbox: 'bower_components/mapbox.js/mapbox',
+    markercluster: 'bower_components/leaflet.markercluster/dist/leaflet.markercluster',
     moment: 'bower_components/moment/moment',
     text: 'bower_components/requirejs-text/text'
   },
@@ -46,15 +48,24 @@ require.config({
     'angular-bootstrap': ['angular'],
     'angular-bindonce': ['angular'],
     'angular-ui-ace': ['angular', 'ace'],
+    heat: {
+      deps: ['mapbox']
+    },
     inflection: {
       exports: 'inflection'
     },
     file_saver: {
       exports: 'saveAs'
     },
-    'mapbox': {
+    mapbox: {
       deps: ['css!bower_components/mapbox.js/mapbox.css'],
       exports: 'L'
+    },
+    markercluster: {
+      deps: ['mapbox',
+      'css!bower_components/leaflet.markercluster/dist/MarkerCluster.css',
+      'css!bower_components/leaflet.markercluster/dist/MarkerCluster.Default.css'
+      ]
     }
     
   },

@@ -46,7 +46,8 @@
     "require-css": "~0.1.2",
     "requirejs": "~2.1.10",
     "requirejs-text": "~2.0.10",
-    "mapbox.js": "~2.1.1"
+    "mapbox.js": "~2.1.1",
+    "leaflet.markercluster": "~0.4.0"
   },
   "devDependencies": {}
 }
