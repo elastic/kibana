@@ -1,6 +1,6 @@
 define(function (require) {
   return function AggTypeService(Private) {
-    var Registry = require('utils/registry/registry');
+    var IndexedArray = require('utils/indexed_array/index');
 
     var aggs = {
       metrics: Private(require('components/agg_types/metric_aggs')),
@@ -22,14 +22,14 @@ define(function (require) {
 
 
     /**
-     * Registry of Aggregation Types.
+     * IndexedArray of Aggregation Types.
      *
      * These types form two groups, metric and buckets.
      *
      * @module agg_types
-     * @type {Registry}
+     * @type {IndexedArray}
      */
-    return new Registry({
+    return new IndexedArray({
 
       /**
        * @type {Array}

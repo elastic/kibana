@@ -2,9 +2,9 @@ define(function (require) {
   return function AggConfigsFactory(Private) {
     var _ = require('lodash');
     var AggConfig = Private(require('components/vis/_agg_config'));
-    var Registry = require('utils/registry/registry');
+    var IndexedArray = require('utils/indexed_array/index');
 
-    _(AggConfigs).inherits(Registry);
+    _(AggConfigs).inherits(IndexedArray);
     function AggConfigs(vis, configStates) {
       var self = this;
       this.vis = vis;

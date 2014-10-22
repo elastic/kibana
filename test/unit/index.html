@@ -19,7 +19,7 @@
       });
 
       require.config({
-        baseUrl: '/src/kibana',
+        baseUrl: '/',
         paths: {
           config: '/config',
           test_utils: '../../test/utils',
@@ -135,12 +135,13 @@
           'specs/utils/diff_time_picker_vals',
           'specs/factories/events',
           'specs/index_patterns/_flatten_search_response',
-          'specs/utils/registry/index',
+          'specs/utils/indexed_array/index',
           'specs/directives/filter_bar',
           'specs/components/agg_types/index',
           'specs/components/agg_types/param_types/index',
           'specs/components/vis/index',
           'specs/components/reflow_watcher',
+          'specs/registry/index',
           'specs/components/clipboard',
           'specs/visualize/_build_hierarchial_data',
           'specs/visualize/_extract_buckets',

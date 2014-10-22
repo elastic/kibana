@@ -6,11 +6,15 @@ var Promise = require('bluebird');
 
 var instrumentationMiddleware = require('./_instrumentation');
 var amdRapperMiddleware = require('./_amd_rapper');
-var rel = require('path').join.bind(null, __dirname);
-
 var proxy = require('http-proxy').createProxyServer({});
+
+var join = require('path').join;
+var rel = join.bind(null, __dirname);
 var ROOT = rel('../../../');
-var SRC = rel('../../../src');
+var SRC = join(ROOT, 'src');
+var APP = join(SRC, 'kibana');
+var TEST = join(SRC, 'test');
+var PLUGINS = join(SRC, 'plugins');
 
 module.exports = function DevServer(opts) {
   opts = opts || {};
@@ -19,8 +23,28 @@ module.exports = function DevServer(opts) {
   var app = connect();
   var httpServer = http.createServer(app);
 
+  // Kibana Backend Proxy
+  app.use(function (req, res, next) {
+    // Proxy config and es requests to the Kibana Backend
+    if (/^\/(config|elasticsearch\/)/.test(req.url)) {
+      return proxy.web(req, res, { target: 'http://localhost:5601' });
+    }
+
+    next();
+  });
+
   app.use(instrumentationMiddleware({
-    root: ROOT,
+    root: SRC,
+    displayRoot: SRC,
+    filter: function (filename) {
+      return filename.match(/.*\/src\/.*\.js$/)
+        && !filename.match(/.*\/src\/kibana\/bower_components\/.*\.js$/)
+        && !filename.match(/.*\/src\/kibana\/utils\/(event_emitter|next_tick|rison)\.js$/);
+    }
+  }));
+
+  app.use(instrumentationMiddleware({
+    root: APP,
     displayRoot: SRC,
     filter: function (filename) {
       return filename.match(/.*\/src\/.*\.js$/)
@@ -33,20 +57,10 @@ module.exports = function DevServer(opts) {
     root: ROOT
   }));
 
-  app.use('/es-proxy', function (req, res) {
-    req.url = req.url.replace(/^\/es-proxy/, '');
-    proxy.web(req, res, { target: 'http://localhost:' + (process.env.ES_PORT || 9200) });
-  });
-
-  // Kibana Backend Proxy
-  app.use(function (req, res, next) {
-    // Don't proxy test requests
-    if (/^\/(test|src|node_modules)/.test(req.url)) return next();
-    // Proxy everything else to the Kibana backend
-    proxy.web(req, res, { target: 'http://localhost:5601' });
-  });
-
   app.use(connect.static(ROOT));
+  app.use(connect.static(APP));
+  app.use('/test', connect.static(TEST));
+  app.use('/plugins', connect.static(PLUGINS));
 
   // respond to the "maybe_start_server" pings
   app.use(function (req, res, next) {

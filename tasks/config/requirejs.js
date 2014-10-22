@@ -59,11 +59,10 @@ module.exports = function (grunt) {
     }
   };
 
-  // include each app
+  // include bundled plugins in the build
   var main = config.build.options.modules[0];
-  var configFile = grunt.file.readYAML(grunt.config.get('configFile'));
-  configFile.apps.forEach(function (app) {
-    main.include.push('apps/' + app.id + '/index');
+  grunt.bundledPluginModuleIds.forEach(function (moduleId) {
+    main.include.push(moduleId);
   });
 
   return config;

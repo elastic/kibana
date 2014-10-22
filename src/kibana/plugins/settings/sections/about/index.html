@@ -1,0 +1,30 @@
+<kbn-settings-app section="about">
+  <div class="kbn-settings-about container" ng-controller="settingsAbout">
+    <div class="col-md-4 col-md-offset-4 jumbotron">
+      <center>
+        <img src='plugins/settings/sections/about/elk.png'><br>
+        <h1>Kibana</h1>
+        <p>
+          <table class="table table-condensed kbn-settings-about-versions">
+            <tr>
+              <td>Version</td>
+              <td>{{kbnVersion}}</td>
+            </tr>
+
+            <tr>
+              <td>Build</td>
+              <td>{{buildNum}}</td>
+            </tr>
+
+            <tr>
+              <td>Commit SHA</td>
+              <td>{{commitSha | limitTo:7}}</td>
+            </tr>
+
+          </table>
+        </p>
+        <small>© 2014 All Rights Reserved - Elasticsearch</small>
+      </center>
+    </div>
+  </div>
+</kbn-settings-app>

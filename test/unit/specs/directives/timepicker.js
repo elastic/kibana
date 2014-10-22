@@ -9,11 +9,11 @@ define(function (require) {
   // Load the kibana app dependencies.
   require('angular-route');
 
-  require('apps/visualize/index');
-  require('apps/dashboard/index');
+  require('plugins/visualize/index');
+  require('plugins/dashboard/index');
 
   // TODO: This should not be needed, timefilter is only included here, it should move
-  require('apps/discover/index');
+  require('plugins/discover/index');
 
   var $parentScope, $scope, $elem;
   var clock, anchor = '2014-01-01T06:06:06.666Z';

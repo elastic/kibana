@@ -9,6 +9,7 @@ require "lib/ColorLogger"
 require "routes/home"
 require "sinatra/json"
 require "routes/proxy"
+require "routes/plugins"
 
 class Logger
   alias_method :write, :<<
@@ -67,6 +68,7 @@ module Kibana
     # Routes go here
     use Routes::Home
     use Routes::Proxy
+    use Routes::Plugins
 
   end
 end
