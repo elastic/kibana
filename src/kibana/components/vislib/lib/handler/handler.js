@@ -70,14 +70,11 @@ define(function (require) {
       .selectAll('.chart')
       .each(function (chartData) {
         var chart = new self.ChartClass(self, this, chartData);
-        var listeners = self.vis._listeners;
-        var keys = Object.keys(listeners);
+        var keys = Object.keys(self.vis._listeners);
 
         // Copy dispatch.on methods to chart object
         d3.rebind(chart, chart.events.dispatch, 'on');
 
-        // if listeners.length, chart.on(event,)
-        // Don't bind handlers individually, use emit instead
         if (keys.length) {
           keys.forEach(function (key) {
             chart.on(key, function (e) {
