@@ -1,42 +1,68 @@
 define(function (require) {
-  return ['String', function () {
-    var _ = require('lodash');
+  var _ = require('lodash');
 
+  return ['String', function () {
+    var paramName = 'json_test';
     var BaseAggParam;
     var StringAggParam;
+    var aggParam;
+    var aggConfig;
+    var output;
+
+    function initAggParam(config) {
+      config = config || {};
+      var defaults = {
+        name: paramName,
+        type: 'string'
+      };
+
+      aggParam = new StringAggParam(_.defaults(config, defaults));
+    }
 
     beforeEach(module('kibana'));
-    // fetch out deps
+
+    // fetch our deps
     beforeEach(inject(function (Private) {
       BaseAggParam = Private(require('components/agg_types/param_types/base'));
       StringAggParam = Private(require('components/agg_types/param_types/string'));
+
+      aggConfig = { params: {} };
+      output = { params: {} };
     }));
 
     describe('constructor', function () {
       it('it is an instance of BaseAggParam', function () {
-        var aggParam = new StringAggParam({
-          name: 'field'
-        });
-
+        initAggParam();
         expect(aggParam).to.be.a(BaseAggParam);
       });
     });
 
     describe('write', function () {
-      var aggParam;
-      var aggConfig = { params: {} };
-      var output = { params: {} };
-      var paramName = 'exclude';
+      it('should append param by name', function () {
+        var paramName = 'testing';
+        var params = {};
+        params[paramName] = 'some input';
 
-      beforeEach(function () {
-        aggParam = new StringAggParam({
-          name: paramName,
-          type: 'regex'
-        });
+        initAggParam({ name: paramName });
+
+        aggConfig.params = params;
+        aggParam.write(aggConfig, output);
+
+        expect(output.params).to.eql(params);
       });
 
-      it('should append param by name');
-      it('should not include empty input');
+      it('should not be in output with empty input', function () {
+        var paramName = 'more_testing';
+        var params = {};
+        params[paramName] = '';
+
+        initAggParam({ name: paramName });
+
+        aggConfig.params = params;
+        aggParam.write(aggConfig, output);
+
+        expect(output.params).to.eql({});
+      });
     });
   }];
 });
