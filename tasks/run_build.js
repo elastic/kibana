@@ -10,7 +10,10 @@ module.exports = function (grunt) {
   var join = require('path').join;
   var extract = require('./utils/spawn')(
     'tar',
-    ['-xzf', grunt.config.process('<%= pkg.name %>-<%= pkg.version %>.tar.gz')],
+    [
+      '-xzf',
+      grunt.config.process('<%= pkg.name %>-<%= pkg.version %>.tar.gz')
+    ],
     join(__dirname, '../target')
   );
 

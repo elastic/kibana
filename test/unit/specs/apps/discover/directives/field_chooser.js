@@ -6,7 +6,7 @@ define(function (require) {
 
   // Load the kibana app dependencies.
   require('services/private');
-  require('apps/discover/components/field_chooser/field_chooser');
+  require('plugins/discover/components/field_chooser/field_chooser');
 
   var $parentScope, $scope, config, indexPattern;
 

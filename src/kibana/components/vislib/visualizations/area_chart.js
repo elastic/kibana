@@ -63,9 +63,6 @@ define(function (require) {
       var self = this;
       var stack = this._attr.stack;
 
-      // Sets the stack order to sort by index of maximum value, then use balanced weighting
-      stack.order('inside-out');
-
       return stack(data.series.map(function (d) {
         var label = d.label;
         return d.values.map(function (e, i) {

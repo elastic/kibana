@@ -2,35 +2,28 @@ define(function (require) {
   return function LabelUtilService(Private) {
     var _ = require('lodash');
 
-    var getArr = Private(require('components/vislib/components/labels/data_array'));
+    var createArr = Private(require('components/vislib/components/labels/data_array'));
     var getArrOfUniqLabels = Private(require('components/vislib/components/labels/uniq_labels'));
 
-    /* Takes a kibana data object
-     * for example:
-     * {
-     *   labels: '',
-     *   rows: [...],
-     *   raw: [...],
-     *   ...,
-     * };
-     * Data object can have a key that has rows, columns, or series.
+    /*
+     * Accepts a Kibana data object and returns an array of unique labels (strings).
+     * Extracts the field formatter from the raw object and passes it to the
+     * getArrOfUniqLabels function.
+     *
+     * Currently, this service is only used for vertical bar charts and line charts.
      */
+
     return function (obj) {
       if (!_.isObject(obj)) {
-        throw new Error('LabelUtil expects an object');
+        throw new TypeError('LabelUtil expects an object');
       }
 
-      var raw;
-      var fieldIndex;
-      if (obj.raw) {
-        raw = obj.raw.columns;
-        fieldIndex = _.findIndex(raw, {'categoryName': 'group'});
-      }
+      var raw = obj.raw;
+      var fieldIndex = raw ? _.findIndex(raw, {'categoryName': 'group'}) : undefined;
+      var fieldFormatter = raw && fieldIndex && fieldIndex !== -1 ?
+        raw[fieldIndex].field.format.convert : function (d) { return d; };
 
-      var fieldFormatter = raw && raw[fieldIndex] ? raw[fieldIndex].field.format.convert : function (d) { return d; };
-
-      // Returns an array of unique chart labels
-      return getArrOfUniqLabels(getArr(obj), fieldFormatter);
+      return getArrOfUniqLabels(createArr(obj), fieldFormatter);
     };
   };
 });

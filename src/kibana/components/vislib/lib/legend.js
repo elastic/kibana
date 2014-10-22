@@ -1,20 +1,20 @@
 define(function (require) {
-  return function LegendFactory(d3, Private) {
+  return function LegendFactory(d3) {
     var _ = require('lodash');
     var legendHeaderTemplate = _.template(require('text!components/vislib/partials/legend_header.html'));
 
-    var Tooltip = Private(require('components/vislib/lib/tooltip'));
-
-    // Dynamically adds css file
     require('css!components/vislib/styles/main');
 
-    /*
-     * Append legend to the visualization
-     * arguments:
-     *  el => reference to DOM element
-     *  labels => array of labels from the chart data
-     *  color => color function to assign colors to labels
-     *  _attr => visualization attributes
+    /**
+     * Appends legend to the visualization
+     *
+     * @class Legend
+     * @constructor
+     * @param vis {Object} Reference to Vis Constructor
+     * @param el {HTMLElement} Reference to DOM element
+     * @param labels {Array} Array of chart labels
+     * @param color {Function} Color function
+     * @param _attr {Object|*} Reference to Vis options
      */
     function Legend(vis, el, labels, color, _attr) {
       if (!(this instanceof Legend)) {
@@ -26,7 +26,6 @@ define(function (require) {
       this.labels = labels;
       this.color = color;
       this._attr = _.defaults(_attr || {}, {
-        // Legend specific attributes
         'legendClass' : 'legend-col-wrapper',
         'blurredOpacity' : 0.3,
         'focusOpacity' : 1,
@@ -36,57 +35,81 @@ define(function (require) {
       });
     }
 
-    // Add legend header
+    /**
+     * Adds legend header
+     *
+     * @method header
+     * @param el {HTMLElement} Reference to DOM element
+     * @param args {Object|*} Legend options
+     * @returns {*} HTML element
+     */
     Legend.prototype.header = function (el, args) {
       return el.append('div')
-        .attr('class', 'header')
-        .append('div')
-        .attr('class', 'column-labels')
-        .html(function () {
-          return legendHeaderTemplate(args._attr);
-        });
+      .attr('class', 'header')
+      .append('div')
+      .attr('class', 'column-labels')
+      .html(function () {
+        return legendHeaderTemplate(args._attr);
+      });
     };
 
-    // Add legend list
+    /**
+     * Adds list to legend
+     *
+     * @method list
+     * @param el {HTMLElement} Reference to DOM element
+     * @param arrOfLabels {Array} Array of labels
+     * @param args {Object|*} Legend options
+     * @returns {D3.Selection} HTML element with list of labels attached
+     */
     Legend.prototype.list = function (el, arrOfLabels, args) {
       var self = this;
 
       return el.append('ul')
-        .attr('class', function () {
-          if (args._attr.isOpen) {
-            return 'legend-ul';
-          }
-          return 'legend-ul hidden';
-        })
-        .selectAll('li')
-        .data(arrOfLabels)
-        .enter()
+      .attr('class', function () {
+        if (args._attr.isOpen) {
+          return 'legend-ul';
+        }
+        return 'legend-ul hidden';
+      })
+      .selectAll('li')
+      .data(arrOfLabels)
+      .enter()
         .append('li')
         .attr('class', function (d) {
-          // class names reflect the color assigned to the labels
           return 'color ' + self.colorToClass(args.color(d));
         })
         .html(function (d) {
-          // return the appropriate color for each dot
           return '<span class="dots" style="background:' + args.color(d) + '"></span>' + d;
         });
     };
 
-    // Create a class name based on the colors assigned to each label
+    /**
+     * Creates a class name based on the colors assigned to each label
+     *
+     * @method colorToClass
+     * @param name {String} Label
+     * @returns {string} CSS class name
+     */
     Legend.prototype.colorToClass = function (name) {
       return 'c' + name.replace(/[#]/g, '');
     };
 
-    // Render the legend
+    /**
+     * Renders legend
+     *
+     * @method render
+     * @return {HTMLElement} Legend
+     */
     Legend.prototype.render = function () {
       var visEl = d3.select(this.el);
       var legendDiv = visEl.select('.' + this._attr.legendClass);
       var items = this.labels;
-      var header = this.header(legendDiv, this);
       var headerIcon = visEl.select('.legend-toggle');
-      var list = this.list(legendDiv, items, this);
-
       var self = this;
+
+      this.header(legendDiv, this);
+      this.list(legendDiv, items, this);
 
       // toggle
       headerIcon
@@ -110,28 +133,28 @@ define(function (require) {
       });
 
       visEl.selectAll('.color')
-        .on('mouseover', function (d) {
-          var liClass = '.' + self.colorToClass(self.color(d));
-          visEl.selectAll('.color').style('opacity', self._attr.blurredOpacity);
-          
-          // select series on chart
-          visEl.selectAll(liClass).style('opacity', self._attr.focusOpacity);
-        })
-        .on('mouseout', function () {
+      .on('mouseover', function (d) {
+        var liClass = '.' + self.colorToClass(self.color(d));
+        visEl.selectAll('.color').style('opacity', self._attr.blurredOpacity);
 
-          /*
-           * The default opacity of elements in charts may be modified by the
-           * chart constructor, and so may differ from that of the legend
-           */
-          visEl.select('.chart')
-          .selectAll('.color')
-          .style('opacity', self._attr.defaultOpacity);
+        // select series on chart
+        visEl.selectAll(liClass).style('opacity', self._attr.focusOpacity);
+      })
+      .on('mouseout', function () {
 
-          // Legend values should always return to their default opacity of 1
-          visEl.select('.legend-ul')
-          .selectAll('.color')
-          .style('opacity', self._attr.legendDefaultOpacity);
-        });
+        /*
+         * The default opacity of elements in charts may be modified by the
+         * chart constructor, and so may differ from that of the legend
+         */
+        visEl.select('.chart')
+        .selectAll('.color')
+        .style('opacity', self._attr.defaultOpacity);
+
+        // Legend values should always return to their default opacity of 1
+        visEl.select('.legend-ul')
+        .selectAll('.color')
+        .style('opacity', self._attr.legendDefaultOpacity);
+      });
     };
 
     return Legend;

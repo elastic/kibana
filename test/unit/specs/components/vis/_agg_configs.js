@@ -4,7 +4,7 @@ define(function (require) {
     var sinon = require('test_utils/auto_release_sinon');
 
     var Vis;
-    var Registry;
+    var IndexedArray;
     var AggConfig;
     var AggConfigs;
     var SpiedAggConfig;
@@ -22,14 +22,14 @@ define(function (require) {
       Vis = Private(require('components/vis/vis'));
       SpiedAggConfig = Private(require('components/vis/_agg_config'));
       AggConfigs = Private(require('components/vis/_agg_configs'));
-      Registry = require('utils/registry/registry');
+      IndexedArray = require('utils/indexed_array/index');
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      Schemas = Private(require('components/vis_types/_schemas'));
+      Schemas = Private(require('plugins/vis_types/_schemas'));
     }));
 
-    it('extends Registry', function () {
+    it('extends IndexedArray', function () {
       var ac = new AggConfigs();
-      expect(ac).to.be.a(Registry);
+      expect(ac).to.be.a(IndexedArray);
     });
 
     describe('constructor', function () {
