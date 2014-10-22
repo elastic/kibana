@@ -21,6 +21,19 @@ define(function (require) {
         return new Data(data, attr);
       }
 
+      var offset;
+
+      if (attr.mode === 'stacked') {
+        offset = 'zero';
+      } else if (attr.mode === 'percentage') {
+        offset = 'expand';
+      } else if (attr.mode === 'grouped') {
+        offset = 'group';
+      } else {
+        offset = attr.mode;
+      }
+
+
       this.data = data;
       this._normalizeOrdered();
 
@@ -30,7 +43,7 @@ define(function (require) {
         stack: d3.layout.stack()
           .x(function (d) { return d.x; })
           .y(function (d) { return d.y; })
-          .offset(this._attr.offset)
+          .offset(offset)
       });
     }
 
@@ -168,8 +181,12 @@ define(function (require) {
      * @returns {boolean}
      */
     Data.prototype.shouldBeStacked = function (series) {
+      var isHistogram = (this._attr.type === 'histogram');
+      var isArea = (this._attr.type === 'area');
+      var isOverlapping = (this._attr.mode === 'overlap');
+
       // Series should be an array
-      return (this._attr.type === 'histogram' && series.length > 1);
+      return (isHistogram || isArea && !isOverlapping && series.length > 1);
     };
 
     /**
@@ -185,6 +202,12 @@ define(function (require) {
       var self = this;
       var arr = [];
 
+      if (self._attr.mode === 'percentage') {
+        return 1;
+      }
+
+      // for each object in the dataArray,
+      // push the calculated y value to the initialized array (arr)
       _.forEach(this.flatten(), function (series) {
         if (self.shouldBeStacked(series)) {
           return arr.push(self.getYStackMax(series));
