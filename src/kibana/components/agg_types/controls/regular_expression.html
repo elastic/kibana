@@ -1,0 +1,22 @@
+<div class="form-group regex">
+  <label>{{ aggParam.name | label }}</label>
+  <input
+    type="text"
+    class="form-control"
+    ng-model="params[aggParam.name].pattern"
+  >
+  <div class="flags">
+    <div class="docs">
+      <small><a href="http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html#field_detail"
+        target="_blank">Regex Flags</a></small>
+    </div>
+    <select
+      multiple
+      chosen
+      width="'100%'"
+      data-placeholder="Flags"
+      ng-model="params[aggParam.name].flags"
+      ng-options="label for label in aggParam.flags">
+    </select>
+  </div>
+</div>

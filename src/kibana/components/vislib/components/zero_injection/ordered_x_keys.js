@@ -3,19 +3,25 @@ define(function (require) {
     var _ = require('lodash');
     var getUniqKeys = Private(require('components/vislib/components/zero_injection/uniq_keys'));
 
-    // Takes a kibana data objects
+    /*
+     * Accepts a Kibana data object and returns
+     * an array of x axis values ordered by their index number.
+     */
+
     return function (obj) {
+      if (!_.isObject(obj)) {
+        throw new Error('OrderedXKeysUtilService expects an object');
+      }
+
       var objKeys = getUniqKeys(obj);
 
-      // Returns an array x axis values
       return _.chain(objKeys)
       .pairs()
       .sortBy(function (d) {
-        // sort by number
         if (d[1].isNumber) {
+          // sort by index
           return +d[0];
         }
-        return;
       })
       .map(function (d) {
         return d[1].isNumber ? +d[0] : d[0];

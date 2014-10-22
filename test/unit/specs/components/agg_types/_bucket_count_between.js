@@ -18,7 +18,7 @@ define(function (require) {
     beforeEach(inject(function (Private) {
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       Vis = Private(require('components/vis/vis'));
-      visTypes = Private(require('components/vis_types/index'));
+      visTypes = Private(require('registry/vis_types'));
       aggTypes = Private(require('components/agg_types/index'));
       AggConfig = Private(require('components/vis/_agg_config'));
       bucketCountBetween = Private(require('components/agg_types/buckets/_bucket_count_between'));

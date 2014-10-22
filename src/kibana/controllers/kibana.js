@@ -23,7 +23,6 @@ define(function (require) {
   require('directives/style_compile');
   require('directives/rows');
 
-
   require('angular-bootstrap');
   require('services/private');
 
@@ -75,7 +74,7 @@ define(function (require) {
         });
       };
     })
-    .controller('kibana', function ($rootScope, $location, $scope, Notifier, $injector, $q, $http, config, kbnSetup) {
+    .controller('kibana', function ($rootScope, $location, $scope, Notifier, $injector, $q, $http, config, kbnSetup, Private) {
       var notify = new Notifier();
 
       $scope.appEmbedded = $location.search().embed;
@@ -108,7 +107,7 @@ define(function (require) {
             }
           };
 
-          $scope.apps = configFile.apps;
+          $scope.apps = Private(require('registry/apps'));
           // initialize each apps lastPath (fetch it from storage)
           $scope.apps.forEach(function (app) { lastPathFor(app); });
 

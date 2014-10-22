@@ -1,10 +1,16 @@
 define(function (require) {
-  return function DispatchClass(d3, Private) {
+  return function DispatchClass(d3) {
     var _ = require('lodash');
 
     /**
-     * Events Class
+     * Handles event responses
+     *
+     * @class Dispatch
+     * @constructor
+     * @param handler {Object} Reference to Handler Class Object
+     * @param chartData {Object} Elasticsearch data object
      */
+
     function Dispatch(handler, chartData) {
       if (!(this instanceof Dispatch)) {
         return new Dispatch(handler, chartData);
@@ -20,7 +26,14 @@ define(function (require) {
       });
     }
 
-    // Response to `click` and `hover` events
+    /**
+     * Response to click and hover events
+     *
+     * @param d {Object} Data point
+     * @param i {Number} Index number of data point
+     * @returns {{value: *, point: *, label: *, color: *, pointIndex: *, series: *, config: *, data: (Object|*),
+     * e: (d3.event|*), handler: (Object|*)}} Event response object
+     */
     Dispatch.prototype.eventResponse = function (d, i) {
       var isPercentage = (this._attr.mode === 'percentage');
       var label = d.label;
@@ -54,7 +67,14 @@ define(function (require) {
       };
     };
 
-    // Pie response to `click` and `hover` events
+    /**
+     * Response to click and hover events for pie charts
+     *
+     * @param d {Object} Data point
+     * @param i {Number} Index number of data point
+     * @returns {{value: (d.value|*), point: *, label: (d.name|*), color: *, pointIndex: *, children: *, parent: *,
+      * appConfig: *, config: *, data: (Object|*), e: (d3.event|*), handler: (Object|*)}} Event response object
+     */
     Dispatch.prototype.pieResponse = function (d, i) {
       var label = d.name;
       var color = this.color;
@@ -78,7 +98,13 @@ define(function (require) {
       };
     };
 
-    // Add brush to the svg
+    /**
+     * Adds D3 brush to SVG and returns the brush function
+     *
+     * @param xScale {Function} D3 xScale function
+     * @param svg {HTMLElement} Reference to SVG
+     * @returns {*} Returns a D3 brush function and a SVG with a brush group attached
+     */
     Dispatch.prototype.addBrush = function (xScale, svg) {
       var dispatch = this._attr.dispatch;
       var attr = this._attr;
@@ -103,10 +129,10 @@ define(function (require) {
       // if `addBrushing` is true, add brush canvas
       if (isBrush) {
         svg.append('g')
-          .attr('class', 'brush')
-          .call(brush)
-          .selectAll('rect')
-          .attr('height', height - margin.top - margin.bottom);
+        .attr('class', 'brush')
+        .call(brush)
+        .selectAll('rect')
+        .attr('height', height - margin.top - margin.bottom);
       }
 
       return brush;
