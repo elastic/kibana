@@ -7,7 +7,8 @@ define(function (require) {
 
       var modes = _.flatten([
         Private(require('components/visualize/spy/_table')),
-        Private(require('components/visualize/spy/_req_resp_stats'))
+        Private(require('components/visualize/spy/_req_resp_stats')),
+        Private(require('components/visualize/spy/_vis'))
       ]);
       modes.byName = _.indexBy(modes, 'name');
 
