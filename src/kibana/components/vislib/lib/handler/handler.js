@@ -78,15 +78,10 @@ define(function (require) {
 
         // if listeners.length, chart.on(event,)
         // Don't bind handlers individually, use emit instead
-        //
-
-        // if there are listeners, dispatch listeners to chart
         if (keys.length) {
           keys.forEach(function (key) {
-            listeners[key].forEach(function (obj, i) {
-              chart.on(key + '.' + i, function (e) {
-                obj.handler.call(this, e);
-              });
+            chart.on(key, function (e) {
+              self.vis.emit(key, e);
             });
           });
         }
