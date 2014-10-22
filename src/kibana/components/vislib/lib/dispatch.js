@@ -15,19 +15,9 @@ define(function (require) {
         return new Dispatch(handler);
       }
 
-      var self = this;
-
       this.handler = handler;
-      this.dispatch = d3.dispatch('brush', 'click', 'hover');
-      this.listeners = Object.keys(this.dispatch);
-
-      // Add eventResponse data to be returned on dispatch
-      this.listeners.forEach(function (listener) {
-        this.dispatch.on(listener, function (d, i) {
-          self.eventResponse(d, i);
-          d3.event.stopPropagation();
-        });
-      }, this);
+      this.dispatch = d3.dispatch('brush', 'click', 'hover', 'mouseup',
+        'mousedown', 'mouseover');
     }
 
     /**
@@ -35,7 +25,8 @@ define(function (require) {
      *
      * @param d {Object} Data point
      * @param i {Number} Index number of data point
-     * @returns {{value: *, point: *, label: *, color: *, pointIndex: *, series: *, config: *, data: (Object|*),
+     * @returns {{value: *, point: *, label: *, color: *, pointIndex: *,
+      * series: *, config: *, data: (Object|*),
      * e: (d3.event|*), handler: (Object|*)}} Event response object
      */
     Dispatch.prototype.eventResponse = function (d, i) {
@@ -71,8 +62,8 @@ define(function (require) {
      */
     Dispatch.prototype.onMouseOver = function () {
       return d3.select(this).classed('hover', true)
-      .style('stroke', '#333')
-      .style('cursor', 'pointer');
+        .style('stroke', '#333')
+        .style('cursor', 'pointer');
     };
 
     /**

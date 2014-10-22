@@ -76,12 +76,16 @@ define(function (require) {
         // Copy dispatch.on methods to chart object
         d3.rebind(chart, chart.events.dispatch, 'on');
 
+        // if listeners.length, chart.on(event,)
+        // Don't bind handlers individually, use emit instead
+        //
+
         // if there are listeners, dispatch listeners to chart
         if (keys.length) {
           keys.forEach(function (key) {
             listeners[key].forEach(function (obj, i) {
               chart.on(key + '.' + i, function (e) {
-                obj.handler.call(this, arguments);
+                obj.handler.call(this, e);
               });
             });
           });

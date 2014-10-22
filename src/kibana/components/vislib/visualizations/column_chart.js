@@ -150,7 +150,7 @@ define(function (require) {
       bars
       .on('mouseover.bar', function (d, i) {
         events.onMouseOver.call(this, arguments);
-        dispatch.hover.call(this, d, i);
+        dispatch.hover.call(this, events.eventResponse(d, i));
       })
 //      .on('mousedown.bar', function () {
 //        var bar = d3.select(this);
@@ -168,10 +168,12 @@ define(function (require) {
 //        bar.call(brush);
 //      })
       .on('click.bar', function (d, i) {
-        dispatch.click.call(this, events.eventResponse.call(this, d, i));
+        dispatch.click.call(this, events.eventResponse(d, i));
+        d3.event.stopPropagation();
       })
       .on('mouseout.bar', function () {
         events.onMouseOut.call(this, arguments);
+        d3.event.stopPropagation();
       });
     };
 
