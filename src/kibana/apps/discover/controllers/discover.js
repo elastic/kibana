@@ -639,8 +639,8 @@ define(function (require) {
         type: 'histogram',
         vislibParams: {
           addLegend: false,
-          addEvents: true,
-          addBrushing: true,
+//          addEvents: true,
+//          addBrushing: true,
         },
         listeners: {
           click: function (e) {

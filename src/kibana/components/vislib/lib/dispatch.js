@@ -8,24 +8,26 @@ define(function (require) {
      * @class Dispatch
      * @constructor
      * @param handler {Object} Reference to Handler Class Object
-     * @param chartData {Object} Elasticsearch data object
      */
 
-    function Dispatch(handler, chartData) {
+    function Dispatch(handler) {
       if (!(this instanceof Dispatch)) {
-        return new Dispatch(handler, chartData);
+        return new Dispatch(handler);
       }
-      var type = handler._attr.type;
+
+      var self = this;
 
       this.handler = handler;
-      this.chartData = chartData;
-      this.color = type === 'pie' ? handler.data.getPieColorFunc() : handler.data.getColorFunc();
-      this._attr = _.defaults(handler._attr || {}, {
-        yValue: function (d) {
-          return d.y;
-        },
-        dispatch: d3.dispatch('brush', 'click', 'hover', 'mouseenter', 'mouseleave', 'mouseover', 'mouseout')
-      });
+      this.dispatch = d3.dispatch('brush', 'click', 'hover');
+      this.listeners = Object.keys(this.dispatch);
+
+      // Add eventResponse data to be returned on dispatch
+      this.listeners.forEach(function (listener) {
+        this.dispatch.on(listener, function (d, i) {
+          self.eventResponse(d, i);
+          d3.event.stopPropagation();
+        });
+      }, this);
     }
 
     /**
@@ -37,56 +39,51 @@ define(function (require) {
      * e: (d3.event|*), handler: (Object|*)}} Event response object
      */
     Dispatch.prototype.eventResponse = function (d, i) {
-      var label = d.label;
-      var getYValue = this._attr.yValue;
-      var color = this.color;
-      var chartData = this.chartData;
-      var attr = this._attr;
+      var data = d3.event.target.nearestViewportElement.__data__;
+      var isSeries = !!(data.series);
+      var isSlices = !!(data.slices);
+      var series = isSeries ? data.series : undefined;
+      var slices = isSlices ? data.slices : undefined;
       var handler = this.handler;
+      var color = handler.data.color;
 
       return {
-        value: getYValue(d, i),
+        value: d.y,
         point: d,
-        label: label,
-        color: color(label),
+        label: d.label,
+        color: color(d.label),
         pointIndex: i,
-        series: chartData.series,
-        config: attr,
-        data: chartData,
+        series: series,
+        slices: slices,
+        config: handler._attr,
+        data: data,
         e: d3.event,
         handler: handler
       };
     };
 
     /**
-     * Response to click and hover events for pie charts
+     * Mouse over Behavior
      *
-     * @param d {Object} Data point
-     * @param i {Number} Index number of data point
-     * @returns {{value: (d.value|*), point: *, label: (d.name|*), color: *, pointIndex: *, children: *, parent: *,
-      * appConfig: *, config: *, data: (Object|*), e: (d3.event|*), handler: (Object|*)}} Event response object
+     * @method mouseOverBar
+     * @param target {Object} Reference to this object
+     * @returns {D3.Selection} this object with '.hover' class true
      */
-    Dispatch.prototype.pieResponse = function (d, i) {
-      var label = d.name;
-      var color = this.color;
-      var chartData = this.chartData;
-      var attr = this._attr;
-      var handler = this.handler;
+    Dispatch.prototype.onMouseOver = function () {
+      return d3.select(this).classed('hover', true)
+      .style('stroke', '#333')
+      .style('cursor', 'pointer');
+    };
 
-      return {
-        value: d.value,
-        point: d,
-        label: label,
-        color: color(label),
-        pointIndex: i,
-        children: d.children ? d.children : undefined,
-        parent: d.parent ? d.parent : undefined,
-        appConfig: d.appConfig,
-        config: attr,
-        data: chartData,
-        e: d3.event,
-        handler: handler
-      };
+    /**
+     * Mouse out Behavior
+     *
+     * @method mouseOutBar
+     * @param target {Object} Reference to this object
+     * @returns {D3.Selection} this object with '.hover' class false
+     */
+    Dispatch.prototype.onMouseOut = function () {
+      return d3.select(this).classed('hover', false).style('stroke', null);
     };
 
     /**
@@ -96,38 +93,38 @@ define(function (require) {
      * @param svg {HTMLElement} Reference to SVG
      * @returns {*} Returns a D3 brush function and a SVG with a brush group attached
      */
-    Dispatch.prototype.addBrush = function (xScale, svg) {
-      var dispatch = this._attr.dispatch;
-      var attr = this._attr;
-      var chartData = this.chartData;
-      var isBrush = this._attr.addBrushing;
-      var height = this._attr.height;
-      var margin = this._attr.margin;
-
-      // Brush scale
-      var brush = d3.svg.brush()
-        .x(xScale)
-        .on('brushend', function brushEnd() {
-          // response returned on brush
-          return dispatch.brush({
-            range: brush.extent(),
-            config: attr,
-            e: d3.event,
-            data: chartData
-          });
-        });
-
-      // if `addBrushing` is true, add brush canvas
-      if (isBrush) {
-        svg.append('g')
-        .attr('class', 'brush')
-        .call(brush)
-        .selectAll('rect')
-        .attr('height', height - margin.top - margin.bottom);
-      }
-
-      return brush;
-    };
+//    Dispatch.prototype.addBrush = function (xScale, svg) {
+//      var dispatch = this._attr.dispatch;
+//      var attr = this._attr;
+//      var chartData = this.chartData;
+//      var isBrush = this._attr.addBrushing;
+//      var height = this._attr.height;
+//      var margin = this._attr.margin;
+//
+//      // Brush scale
+//      var brush = d3.svg.brush()
+//        .x(xScale)
+//        .on('brushend', function brushEnd() {
+//          // response returned on brush
+//          return dispatch.brush({
+//            range: brush.extent(),
+//            config: attr,
+//            e: d3.event,
+//            data: chartData
+//          });
+//        });
+//
+//      // if `addBrushing` is true, add brush canvas
+//      if (isBrush) {
+//        svg.append('g')
+//        .attr('class', 'brush')
+//        .call(brush)
+//        .selectAll('rect')
+//        .attr('height', height - margin.top - margin.bottom);
+//      }
+//
+//      return brush;
+//    };
 
     return Dispatch;
   };

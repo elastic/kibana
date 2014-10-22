@@ -23,17 +23,6 @@ define(function (require) {
         return new ColumnChart(handler, chartEl, chartData);
       }
 
-      // TODO: refactor
-      var raw;
-      var fieldIndex;
-
-      if (handler.data.data.raw) {
-        raw = handler.data.data.raw.columns;
-        fieldIndex = _.findIndex(raw, {'categoryName': 'group'});
-      }
-
-      this.fieldFormatter = (raw && raw[fieldIndex]) ? raw[fieldIndex].field.format.convert : function (d) { return d; };
-
       ColumnChart.Super.apply(this, arguments);
 
       // Column chart specific attributes
@@ -105,10 +94,10 @@ define(function (require) {
       .enter()
       .append('rect')
         .attr('class', function (d) {
-          return self.colorToClass(color(self.fieldFormatter(d.label)));
+          return self.colorToClass(color(d.label));
         })
         .attr('fill', function (d) {
-          return color(self.fieldFormatter(d.label));
+          return color(d.label);
         });
 
       bars
@@ -150,70 +139,40 @@ define(function (require) {
      * @param brush {Function} D3 brush function
      * @returns {HTMLElement} rect with event listeners attached
      */
-    ColumnChart.prototype.addBarEvents = function (svg, bars, brush) {
-      var self = this;
+    ColumnChart.prototype.addBarEvents = function (svg, bars) {
       var events = this.events;
-      var dispatch = this.events._attr.dispatch;
-      var addBrush = this._attr.addBrushing;
-      var xScale = this.handler.xAxis.xScale;
+      var dispatch = this.events.dispatch;
+//      var addBrush = this._attr.addBrushing;
+//      var xScale = this.handler.xAxis.xScale;
+//      var height = this._attr.height;
+//      var margin = this._attr.margin;
 
       bars
       .on('mouseover.bar', function (d, i) {
-        self.mouseOverBar(this);
-        dispatch.hover(events.eventResponse(d, i));
-        d3.event.stopPropagation();
+        events.onMouseOver.call(this, arguments);
+        dispatch.hover.call(this, d, i);
       })
-      .on('mousedown.bar', function () {
-        if (addBrush) {
-          var bar = d3.select(this);
-          var startX = d3.mouse(svg.node());
-          var startXInv = xScale.invert(startX[0]);
-
-          // Reset the brush value
-          brush.extent([startXInv, startXInv]);
-
-          // Magic!
-          // Need to call brush on svg to see brush when brushing
-          // while on top of bars.
-          // Need to call brush on bar to allow the click event to be registered
-          svg.call(brush);
-          bar.call(brush);
-        }
-      })
+//      .on('mousedown.bar', function () {
+//        var bar = d3.select(this);
+//        var startX = d3.mouse(svg.node());
+//        var startXInv = xScale.invert(startX[0]);
+//
+//        // Reset the brush value
+//        brush.extent([startXInv, startXInv]);
+//
+//        // Magic!
+//        // Need to call brush on svg to see brush when brushing
+//        // while on top of bars.
+//        // Need to call brush on bar to allow the click event to be registered
+//        svg.call(brush);
+//        bar.call(brush);
+//      })
       .on('click.bar', function (d, i) {
-        dispatch.click(events.eventResponse(d, i));
-        d3.event.stopPropagation();
+        dispatch.click.call(this, events.eventResponse.call(this, d, i));
       })
       .on('mouseout.bar', function () {
-        self.mouseOutBar(this);
+        events.onMouseOut.call(this, arguments);
       });
-    };
-
-    /**
-     * Mouseover Behavior
-     *
-     * @method mouseOverBar
-     * @param that {Object} Reference to this object
-     * @returns {D3.Selection} this object with '.hover' class true
-     */
-    ColumnChart.prototype.mouseOverBar = function (that) {
-      return d3.select(that)
-      .classed('hover', true)
-      .style('stroke', '#333')
-      .style('cursor', 'pointer');
-    };
-
-    /**
-     * Mouseout Behavior
-     *
-     * @method mouseOutBar
-     * @param that {Object} Reference to this object
-     * @returns {D3.Selection} this object with '.hover' class false
-     */
-    ColumnChart.prototype.mouseOutBar = function (that) {
-      return d3.select(that)
-      .classed('hover', false)
-      .style('stroke', null);
     };
 
     /**
@@ -231,13 +190,11 @@ define(function (require) {
       var elHeight = this._attr.height = $elem.height();
       var minWidth = 20;
       var minHeight = 20;
-      var isEvents = this._attr.addEvents;
       var div;
       var svg;
       var width;
       var height;
       var layers;
-      var brush;
       var bars;
 
       return function (selection) {
@@ -259,12 +216,9 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(0,' + margin.top + ')');
 
-          brush = self.events.addBrush(xScale, svg);
           bars = self.addBars(svg, layers);
 
-          if (isEvents) {
-            self.addBarEvents(svg, bars, brush);
-          }
+          self.addBarEvents(svg, bars);
 
           var line = svg.append('line')
           .attr('x1', 0)

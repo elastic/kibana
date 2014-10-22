@@ -114,6 +114,57 @@ define(function (require) {
       return this._attr[name];
     };
 
+    Vis.prototype.on = function (event, handler) {
+
+      // Adds handler to _listeners[listener] array
+      var ret = Events.prototype.on.call(this, event, handler);
+      var handlerIndex;
+
+      // Check if the charts array is available
+      if (this.handler && this.handler.charts) {
+        handlerIndex = this._listeners[event].length - 1;
+
+        // Dispatch listener to chart
+        this.handler.charts.forEach(function (chart) {
+          chart.on(event + '.' + handlerIndex, function (e) {
+            handler.call(this, arguments);
+          });
+        });
+      }
+
+      return ret;
+    };
+
+    /*
+     * To turn off event listeners, need to pass null as handler to
+     * d3.dispatch. In addition, we need to track down the particular handler
+     * from which to turn off.
+     */
+    Vis.prototype.off = function (event, handler) {
+      var ret = Events.prototype.off.call(this, event, handler);
+      var handlerIndex;
+
+      if (this._listeners[event] && this.handler.charts) {
+
+        // if no handler, set all listener handlers to null
+        if (!handler) {
+          this.handler.charts.forEach(function (chart) {
+            chart.on(event, null);
+          });
+        } else {
+
+          // if handler, get index of handler and set to null.
+          handlerIndex = _.findIndex(this._listeners[event], handler);
+
+          this.handler.charts.forEach(function (chart) {
+            chart.on(event + '.' + handlerIndex, null);
+          });
+        }
+      }
+
+      return ret;
+    };
+
     return Vis;
   };
 });

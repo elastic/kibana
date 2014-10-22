@@ -23,6 +23,8 @@ define(function (require) {
       this.vis = vis;
       this.el = vis.el;
       this.ChartClass = vis.ChartClass;
+      this.charts = [];
+
       this._attr = _.defaults(vis._attr || {}, {
         'margin' : { top: 10, right: 3, bottom: 5, left: 3 }
       });
@@ -65,28 +67,29 @@ define(function (require) {
       });
 
       d3.select(this.el)
-        .selectAll('.chart')
-        .each(function (chartData) {
-          var chart = new self.ChartClass(self, this, chartData);
+      .selectAll('.chart')
+      .each(function (chartData) {
+        var chart = new self.ChartClass(self, this, chartData);
+        var listeners = self.vis._listeners;
+        var keys = Object.keys(listeners);
 
-          d3.rebind(chart, chart._attr.dispatch, 'on');
+        // Copy dispatch.on methods to chart object
+        d3.rebind(chart, chart.events.dispatch, 'on');
 
-          // Bubble events up to the Vis Class and Events Class
-          chart.on('click', function (e) {
-            self.vis.emit('click', e);
+        // if there are listeners, dispatch listeners to chart
+        if (keys.length) {
+          keys.forEach(function (key) {
+            listeners[key].forEach(function (obj, i) {
+              chart.on(key + '.' + i, function (e) {
+                obj.handler.call(this, arguments);
+              });
+            });
           });
+        }
 
-          chart.on('hover', function (e) {
-            self.vis.emit('hover', e);
-          });
-
-          chart.on('brush', function (e) {
-            self.vis.emit('brush', e);
-          });
-
-          charts.push(chart);
-          chart.render();
-        });
+        charts.push(chart);
+        chart.render();
+      });
     };
 
     /**

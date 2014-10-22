@@ -29,7 +29,7 @@ define(function (require) {
       this._attr = _.defaults(handler._attr || {}, {
         isDonut: handler._attr.isDonut || false,
         getSize: function (d) { return d.size; },
-        dispatch: d3.dispatch('brush', 'click', 'hover', 'mouseenter', 'mouseleave', 'mouseover', 'mouseout')
+        dispatch: d3.dispatch('brush', 'click', 'hover', 'mouseover', 'mouseout')
       });
     }
 

@@ -22,6 +22,8 @@ define(function (require) {
       }
 
       this.data = data;
+      this.labels = getLabels(data);
+      this.color = color(this.labels);
       this._normalizeOrdered();
 
       this._attr = attr;
