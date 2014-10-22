@@ -1,11 +1,11 @@
 define(function (require) {
   return function buildHierarchialDataProvider(Private) {
     var _ = require('lodash');
-    var buildSplit = require('components/visualize/_build_split');
-    var extractBuckets = require('components/visualize/_extract_buckets');
-    var createRawData = require('components/visualize/_create_raw_data');
-    var arrayToLinkedList = require('components/visualize/_array_to_linked_list');
-    var tooltipFormatter = Private(require('components/visualize/_hierarchial_tooltip_formatter'));
+    var buildSplit = require('components/chart_data/hierarchical/_build_split');
+    var extractBuckets = require('components/chart_data/hierarchical/_extract_buckets');
+    var createRawData = require('components/chart_data/hierarchical/_create_raw_data');
+    var arrayToLinkedList = require('components/chart_data/hierarchical/_array_to_linked_list');
+    var tooltipFormatter = Private(require('components/chart_data/hierarchical/_hierarchical_tooltip_formatter'));
 
     return function (vis, resp) {
       // Create a refrenece to the buckets

@@ -1,16 +1,16 @@
 define(function (require) {
   return function HistogramVisType(Private) {
-    var VisType = Private(require('plugins/vis_types/_vis_type'));
+    var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
     var Schemas = Private(require('plugins/vis_types/_schemas'));
 
-    return new VisType({
-      name: 'line',
-      title: 'Line chart',
-      icon: 'fa-line-chart',
+    return new VislibVisType({
+      name: 'histogram',
+      title: 'Vertical bar chart',
+      icon: 'fa-bar-chart',
       vislibParams: {
         shareYAxis: true,
         addTooltip: true,
-        addLegend: true
+        addLegend: true,
       },
       schemas: new Schemas([
         {
@@ -33,7 +33,7 @@ define(function (require) {
         {
           group: 'buckets',
           name: 'group',
-          title: 'Split Lines',
+          title: 'Split Bars',
           min: 0,
           max: 1
         },

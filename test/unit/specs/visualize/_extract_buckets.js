@@ -1,5 +1,5 @@
 define(function (require) {
-  var extractBuckets = require('components/visualize/_extract_buckets');
+  var extractBuckets = require('components/chart_data/hierarchical/_extract_buckets');
 
   describe('buildHierarchialData()', function () {
     describe('extractBuckets()', function () {

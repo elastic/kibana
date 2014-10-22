@@ -1,5 +1,5 @@
 define(function (require) {
-  var arrayToLinkedList = require('components/visualize/_array_to_linked_list');
+  var arrayToLinkedList = require('components/chart_data/hierarchical/_array_to_linked_list');
   describe('buildHierarchialData()', function () {
     describe('arrayToLinkedList', function () {
 

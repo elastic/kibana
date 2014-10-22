@@ -1,8 +1,8 @@
 define(function (require) {
   var _ = require('lodash');
-  var fixtures = require('fixtures/fake_hierarchial_data');
-  var createRawData = require('components/visualize/_create_raw_data');
-  var arrayToLinkedList = require('components/visualize/_array_to_linked_list');
+  var fixtures = require('fixtures/fake_hierarchical_data');
+  var createRawData = require('components/chart_data/hierarchical/_create_raw_data');
+  var arrayToLinkedList = require('components/chart_data/hierarchical/_array_to_linked_list');
 
   var AggConfigs;
   var Vis;

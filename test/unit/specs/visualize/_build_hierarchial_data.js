@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var fixtures = require('fixtures/fake_hierarchial_data');
+  var fixtures = require('fixtures/fake_hierarchical_data');
 
   var AggConfigs;
   var Vis;
@@ -14,7 +14,7 @@ define(function (require) {
       Vis = Private(require('components/vis/vis'));
       AggConfigs = Private(require('components/vis/_agg_configs'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      buildHierarchialData = Private(require('components/visualize/_build_hierarchial_data'));
+      buildHierarchialData = Private(require('components/chart_data/hierarchical/build_hierarchical_data'));
     }));
 
 

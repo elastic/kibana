@@ -1,22 +1,25 @@
 define(function (require) {
   return function HistogramVisType(Private) {
-    var VisType = Private(require('plugins/vis_types/_vis_type'));
+    var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
     var Schemas = Private(require('plugins/vis_types/_schemas'));
+    var PieConverter = Private(require('plugins/vis_types/vislib/converters/pie'));
 
-    return new VisType({
-      name: 'histogram',
-      title: 'Vertical bar chart',
-      icon: 'fa-bar-chart',
+    return new VislibVisType({
+      name: 'pie',
+      title: 'Pie chart',
+      icon: 'fa-pie-chart',
       vislibParams: {
-        shareYAxis: true,
+        addEvents: true,
         addTooltip: true,
-        addLegend: true,
+        addLegend: true
       },
+      responseConverter: PieConverter,
+      hierarchicalData: true,
       schemas: new Schemas([
         {
           group: 'metrics',
           name: 'metric',
-          title: 'Y-Axis',
+          title: 'Slice Size',
           min: 1,
           max: 1,
           defaults: [
@@ -26,21 +29,17 @@ define(function (require) {
         {
           group: 'buckets',
           name: 'segment',
-          title: 'X-Axis',
+          icon: 'fa fa-scissors',
+          title: 'Split Slices',
           min: 0,
-          max: 1
-        },
-        {
-          group: 'buckets',
-          name: 'group',
-          title: 'Split Bars',
-          min: 0,
-          max: 1
+          max: Infinity
         },
         {
           group: 'buckets',
           name: 'split',
+          icon: 'fa fa-th',
           title: 'Split Chart',
+          mustBeFirst: true,
           min: 0,
           max: 1
         }
