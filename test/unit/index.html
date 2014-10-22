@@ -142,7 +142,12 @@
           'specs/components/vis/index',
           'specs/components/reflow_watcher',
           'specs/registry/index',
-          'specs/components/clipboard'
+          'specs/components/clipboard',
+          'specs/visualize/_build_hierarchial_data',
+          'specs/visualize/_extract_buckets',
+          'specs/visualize/_transform_aggregation',
+          'specs/visualize/_create_raw_data',
+          'specs/visualize/_array_to_linked_list'
         ], function (kibana, sinon) {
           kibana.load(function () {
             var xhr = sinon.useFakeXMLHttpRequest();
