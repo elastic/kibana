@@ -31,9 +31,13 @@ define(function (require) {
             var index, type;
             if (request.abort) request.abort();
 
-            if ($scope.queryInput) return useSearchSource();
+            if ($scope.queryInput) {
+              useSearchSource();
+            } else {
+              useDefaults();
+            }
 
-            return useDefaults();
+            return sendRequest();
 
             function useSearchSource() {
               var pattern = $scope.queryInput.get('index');
@@ -41,21 +45,16 @@ define(function (require) {
 
               if (_.isString(pattern)) {
                 index = pattern;
-              }
-              else if (_.isFunction(pattern.toIndexList)) {
+              } else if (_.isFunction(pattern.toIndexList)) {
                 index = pattern.toIndexList();
+              } else {
+                useDefaults();
               }
-              else {
-                return useDefaults();
-              }
-
-              return sendRequest();
             }
 
             function useDefaults() {
               index = configFile.kibanaIndex;
               type = '__kibanaQueryValidator';
-              return sendRequest();
             }
 
             function sendRequest() {
