@@ -71,7 +71,10 @@ define(function (require) {
 
       this.listeners = _.assign({}, state.listeners, this.type.listeners);
 
-      this.vislibParams = state.vislibParams;
+      if (_.has(state, 'vislibParams')) {
+        this.vislibParams = state.vislibParams;
+      }
+
       this.aggs = new AggConfigs(this, state.aggs);
     };
 
@@ -86,6 +89,10 @@ define(function (require) {
 
     Vis.prototype.clone = function () {
       return new Vis(this.indexPattern, this.getState());
+    };
+
+    Vis.prototype.isHierarchical = function () {
+      return !!this.type.hierarchical;
     };
 
     return Vis;
