@@ -19,7 +19,7 @@
       });
 
       require.config({
-        baseUrl: '/src/kibana',
+        baseUrl: '/',
         paths: {
           config: '/config',
           test_utils: '../../test/utils',
@@ -69,7 +69,7 @@
           'css!screencast_reporter_css'
         ], function (ScreencastReporter) {
           mocha.reporter(ScreencastReporter);
-          done()
+          done();
         });
       }
 
@@ -77,6 +77,7 @@
         require([
           'kibana',
           'sinon/sinon',
+          'angular',
           'specs/apps/discover/hit_sort_fn',
           'specs/apps/discover/directives/table',
           'specs/apps/discover/directives/discover_field',
@@ -134,11 +135,19 @@
           'specs/utils/diff_time_picker_vals',
           'specs/factories/events',
           'specs/index_patterns/_flatten_search_response',
-          'specs/utils/registry/index',
+          'specs/utils/indexed_array/index',
           'specs/directives/filter_bar',
           'specs/components/agg_types/index',
+          'specs/components/agg_types/param_types/index',
           'specs/components/vis/index',
-          'specs/components/reflow_watcher'
+          'specs/components/reflow_watcher',
+          'specs/registry/index',
+          'specs/components/clipboard',
+          'specs/visualize/_build_hierarchial_data',
+          'specs/visualize/_extract_buckets',
+          'specs/visualize/_transform_aggregation',
+          'specs/visualize/_create_raw_data',
+          'specs/visualize/_array_to_linked_list'
         ], function (kibana, sinon) {
           kibana.load(function () {
             var xhr = sinon.useFakeXMLHttpRequest();

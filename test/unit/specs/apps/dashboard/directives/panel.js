@@ -7,11 +7,11 @@ define(function (require) {
   require('angular-route');
 
   // Load the code for the directive
-  require('apps/visualize/index');
-  require('apps/dashboard/index');
+  require('plugins/visualize/index');
+  require('plugins/dashboard/index');
 
   // TODO: This should not be needed, timefilter is only included here
-  require('apps/discover/index');
+  require('plugins/discover/index');
 
 
   describe('Dashboard panels', function () {

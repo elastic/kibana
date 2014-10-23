@@ -4,7 +4,7 @@ define(function (require) {
 
   // Load the kibana app dependencies.
   require('angular-route');
-  require('apps/discover/index');
+  require('plugins/discover/index');
 
   var filter;
 

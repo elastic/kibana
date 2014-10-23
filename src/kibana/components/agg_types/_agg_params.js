@@ -1,11 +1,12 @@
 define(function (require) {
   return function AggParamsFactory(Private) {
     var _ = require('lodash');
-    var Registry = require('utils/registry/registry');
+    var IndexedArray = require('utils/indexed_array/index');
 
     var BaseAggParam = Private(require('components/agg_types/param_types/base'));
     var FieldAggParam = Private(require('components/agg_types/param_types/field'));
     var OptionedAggParam = Private(require('components/agg_types/param_types/optioned'));
+    var RegexAggParam = Private(require('components/agg_types/param_types/regex'));
 
     /**
      * Wraps a list of {{#crossLink "AggParam"}}{{/crossLink}} objects; owned by an {{#crossLink "AggType"}}{{/crossLink}}
@@ -17,10 +18,10 @@ define(function (require) {
      *
      * @class AggParams
      * @constructor
-     * @extends Registry
+     * @extends IndexedArray
      * @param {object[]} params - array of params that get new-ed up as AggParam objects as descibed above
      */
-    _(AggParams).inherits(Registry);
+    _(AggParams).inherits(IndexedArray);
     function AggParams(params) {
       if (_.isPlainObject(params)) {
         // convert the names: details format into details[].name
@@ -36,8 +37,11 @@ define(function (require) {
           if (param.name === 'field') {
             return new FieldAggParam(param);
           }
-          else if (param.options) {
+          else if (param.type === 'optioned') {
             return new OptionedAggParam(param);
+          }
+          else if (param.type === 'regex') {
+            return new RegexAggParam(param);
           }
           else {
             return new BaseAggParam(param);

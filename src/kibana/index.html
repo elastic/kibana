@@ -48,7 +48,7 @@
           <!-- Full navbar -->
           <div collapse="!showCollapsed" class="navbar-collapse" id="kibana-primary-navbar">
             <ul class="nav navbar-nav">
-              <li ng-repeat="app in apps" ng-class="{active: activeApp == app.id}">
+              <li ng-repeat="app in apps.inOrderOrder" ng-class="{active: activeApp == app.id}">
                 <a ng-href="#{{app.lastPath}}" bo-text="app.name"></a>
               </li>
             </ul>

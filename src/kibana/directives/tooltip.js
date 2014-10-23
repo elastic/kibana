@@ -9,6 +9,7 @@ define(function (require) {
         template: html,
         transclude: true,
         replace: true,
+        scope: true,
         link: function ($scope, $el, attr) {
           $scope.text = attr.text;
           $scope.placement = attr.placement || 'top';

@@ -38,14 +38,14 @@ define(function (require) {
       var id = identify(fn);
 
       if (cache[id]) return cache[id];
-      else if (~privPath.indexOf(id)) {
+      else if (~privPath.indexOf(fn)) {
         throw new Error(
           'Circluar refrence to "' + name(fn) + '"' +
           ' found while resolving private deps: ' + pathToString()
         );
       }
 
-      privPath.push(id);
+      privPath.push(fn);
       var context = {};
 
       var instance = $injector.invoke(fn, context);
