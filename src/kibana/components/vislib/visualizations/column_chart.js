@@ -23,17 +23,6 @@ define(function (require) {
         return new ColumnChart(handler, chartEl, chartData);
       }
 
-      // TODO: refactor
-      var raw;
-      var fieldIndex;
-
-      if (handler.data.data.raw) {
-        raw = handler.data.data.raw.columns;
-        fieldIndex = _.findIndex(raw, {'categoryName': 'group'});
-      }
-
-      this.fieldFormatter = (raw && raw[fieldIndex]) ? raw[fieldIndex].field.format.convert : function (d) { return d; };
-
       ColumnChart.Super.apply(this, arguments);
 
       // Column chart specific attributes
@@ -105,10 +94,10 @@ define(function (require) {
       .enter()
       .append('rect')
         .attr('class', function (d) {
-          return self.colorToClass(color(self.fieldFormatter(d.label)));
+          return self.colorToClass(color(d.label));
         })
         .attr('fill', function (d) {
-          return color(self.fieldFormatter(d.label));
+          return color(d.label);
         });
 
       bars
