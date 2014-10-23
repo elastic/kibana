@@ -9,7 +9,7 @@ define(function (require) {
       require('components/visualize/spy/_req_resp_stats');
 
       var modes = Private(require('registry/spy_modes'));
-      var defaultMode = modes.inOrderOrder[0];
+      var defaultMode = modes.inOrder[0];
 
       return {
         restrict: 'E',
