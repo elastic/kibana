@@ -1,12 +1,15 @@
 define(function (require) {
+  var moment = require('moment');
+  var filterBarClickHandler = require('components/filter_bar/filter_bar_click_handler');
   require('modules')
   .get('app/dashboard')
-  .directive('dashboardPanel', function (savedVisualizations, Notifier) {
+  .directive('dashboardPanel', function (savedVisualizations, Notifier, Private) {
     var _ = require('lodash');
 
     var notify = new Notifier();
 
     require('components/visualize/visualize');
+    var brushEvent = Private(require('utils/brush_event'));
 
     return {
       restrict: 'E',
@@ -24,7 +27,8 @@ define(function (require) {
           savedVisualizations.get($scope.panel.visId)
           .then(function (savedVis) {
             $scope.savedVis = savedVis;
-            // .destroy() called by the visualize directive
+            savedVis.vis.listeners.click = filterBarClickHandler($state, savedVis.vis);
+            savedVis.vis.listeners.brush = brushEvent;
           })
           .catch(function (e) {
             $scope.error = e.message;

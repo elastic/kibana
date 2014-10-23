@@ -12,8 +12,9 @@ define(function (require) {
           shareYAxis: true,
           addTooltip: true,
           addLegend: true,
+          isDonut: false
         },
-        editor: require('text!plugins/vis_types/vislib/editors/basic.html')
+        editor: require('text!plugins/vis_types/vislib/editors/pie.html')
       },
       responseConverter: false,
       hierarchicalData: true,

@@ -2,6 +2,48 @@
 @import (reference) "../../styles/theme/_theme.less";
 @import (reference) "lesshat.less";
 
+filter-bar .confirm {
+  padding: 8px 10px 4px;
+  background: @gray-lighter;
+  border-bottom: 1px solid #ccc;
+
+  ul {
+    margin-bottom: 0px;
+  }
+
+  li {
+    display: inline-block;
+  }
+
+  li:first-child {
+    font-weight: bold;
+    font-size: 1.2em;
+  }
+
+  li button {
+    font-size: 0.9em;
+    padding: 2px 8px;
+  }
+
+  .filter {
+    position: relative;
+    display: inline-block;
+    text-align: center;
+    min-width: 110px;
+
+    font-size: @font-size-small;
+    background-color: @gray-light;
+    color: #333;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    max-width: 100%;
+
+    // Replace padding with border so absolute controls position correctly
+    padding: 4px 8px;
+    border-radius: 12px;
+  }
+}
+
 filter-bar .bar {
   padding: 6px 6px 4px 6px;
   background: @gray-lighter;

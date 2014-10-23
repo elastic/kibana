@@ -4,6 +4,9 @@ define(function (require) {
     var moment = require('moment');
     var interval = require('utils/interval');
     var AggType = Private(require('components/agg_types/_agg_type'));
+    var calculateInterval = Private(require('components/agg_types/param_types/_calculate_interval'));
+
+    var createFilter = Private(require('components/agg_types/buckets/create_filter/date_histogram'));
 
     require('filters/field_type');
 
@@ -31,6 +34,7 @@ define(function (require) {
         if (aggInterval) return aggInterval.display + ' ' + params.field;
         else return params.field + ' per ' + interval.describe(params.interval);
       },
+      createFilter: createFilter,
       params: [
         {
           name: 'field',
@@ -44,10 +48,11 @@ define(function (require) {
           options: Private(require('components/agg_types/buckets/_interval_options')),
           editor: require('text!components/agg_types/controls/interval.html'),
           write: function (aggConfig, output, locals) {
-            var bounds = timefilter.getBounds();
-            var auto;
-
+            // Get the selection
             var selection = aggConfig.params.interval;
+
+            // If the selection isn't an object then it's going to be
+            // a string so we need to make it look like an object.
             if (!_.isObject(selection)) {
               // custom selection
               selection = {
@@ -56,39 +61,26 @@ define(function (require) {
               };
             }
 
-            if (selection.val === 'auto') {
-              if (locals.renderBot) {
-                throw new Error('not implemented');
-              }
-
-              var bucketTarget = config.get('histogram:barTarget');
-              auto = pickInterval(bounds, bucketTarget);
-              output.params.interval = auto.interval + 'ms';
-              output.metricScaleText = auto.description;
-              return;
+            // If the selection is set to auto and the locals.renderBot
+            // exists we need to blow up (for some unknown reason)
+            if (selection.val === 'auto' && locals.renderBot) {
+              throw new Error('not implemented');
             }
 
-            var ms = selection.ms || interval.toMs(selection.val);
-            var buckets = Math.ceil((bounds.max - bounds.min) / ms);
-            var maxBuckets = config.get('histogram:maxBars');
-            if (buckets > maxBuckets) {
-              // we should round these buckets out, and scale back the y values
-              auto = pickInterval(bounds, maxBuckets);
-              output.params.interval = auto.interval + 'ms';
+            // Calculate the actual interval
+            var result = calculateInterval(aggConfig);
 
-              // Only scale back the y values if all agg types are count/sum
-              var nonCountSumMetric = _.find(aggConfig.vis.aggs.bySchemaGroup.metrics, function (metric) {
-                return metric.type.name !== 'count' && metric.type.name !== 'sum';
-              });
+            // Set the output params interval along with the metric scale and
+            // the metric scale test which is used in the label
+            output.params.interval = result.interval + 'ms';
+            if (result.metricScale) output.metricScale = result.metricScale;
+            output.metricScaleText = result.description;
 
-              if (!nonCountSumMetric) {
-                output.metricScale = ms / auto.interval;
-              }
-
-              output.metricScaleText = selection.val || auto.description;
-            } else {
-              output.params.interval = selection.val;
-            }
+            // Since this is side effecting on output
+            // we will return right here.
+            // TODO: refactor so it's not side effecting so we can write tests
+            // around it.
+            return;
           }
         },
 

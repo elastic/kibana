@@ -53,6 +53,7 @@ define(function (require) {
     var Vis = Private(require('components/vis/vis'));
     var docTitle = Private(require('components/doc_title/doc_title'));
     var SegmentedFetch = Private(require('plugins/discover/_segmented_fetch'));
+    var brushEvent = Private(require('utils/brush_event'));
 
     var HitSortFn = Private(require('plugins/discover/_hit_sort_fn'));
 
@@ -561,8 +562,8 @@ define(function (require) {
           });
           break;
         default:
-          var filter = { query: { match: {} } };
-          filter.negate = operation === '-';
+          var filter = { $$indexPattern: $state.index, $$meta: { negate: false }, query: { match: {} } };
+          filter.$$meta.negate = operation === '-';
           filter.query.match[field] = { query: value, type: 'phrase' };
           filters.push(filter);
           break;
@@ -665,16 +666,7 @@ define(function (require) {
             timefilter.time.to = moment(e.point.x + e.data.ordered.interval);
             timefilter.time.mode = 'absolute';
           },
-          brush: function (e) {
-            var from = moment(e.range[0]);
-            var to = moment(e.range[1]);
-
-            if (to - from === 0) return;
-
-            timefilter.time.from = from;
-            timefilter.time.to = to;
-            timefilter.time.mode = 'absolute';
-          }
+          brush: brushEvent
         },
         aggs: [
           {

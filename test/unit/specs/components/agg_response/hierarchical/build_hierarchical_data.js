@@ -117,6 +117,15 @@ define(function (require) {
         expect(results).to.have.property('raw');
       });
 
+      it('should set the parent of the first item in the split', function () {
+        expect(results).to.have.property('rows');
+        expect(results.rows).to.have.length(3);
+        expect(results.rows[0]).to.have.property('slices');
+        expect(results.rows[0].slices).to.have.property('children');
+        expect(results.rows[0].slices.children).to.have.length(2);
+        expect(results.rows[0].slices.children[0]).to.have.property('aggConfigResult');
+        expect(results.rows[0].slices.children[0].aggConfigResult.$parent).to.have.property('key', 'png');
+      });
 
     });
 

@@ -4,9 +4,9 @@ define(function (require) {
 
     var _ = require('lodash');
     var moment = require('moment');
+    var AggConfigResult = require('components/vis/_agg_config_result');
 
     var pointSeriesChartDataFromTable;
-    var AggConfigResult;
     var indexPattern;
     var Table;
     var Vis;
@@ -16,14 +16,13 @@ define(function (require) {
       Vis = Private(require('components/vis/vis'));
       Table = Private(require('components/agg_response/tabify/_table'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      AggConfigResult = Private(require('components/vis/_agg_config_result'));
       pointSeriesChartDataFromTable = Private(require('components/agg_response/point_series/point_series'));
     }));
 
     it('handles a table with just a count', function () {
       var vis = new Vis(indexPattern, { type: 'histogram' });
       var agg = vis.aggs[0];
-      var result = new AggConfigResult(vis.aggs[0], void 0, 100);
+      var result = new AggConfigResult(vis.aggs[0], void 0, 100, 100);
 
       var table = new Table();
       table.columns = [ { aggConfig: agg } ];

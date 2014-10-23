@@ -6,6 +6,7 @@ define(function (require) {
 
     function StubIndexPattern(pattern, timeField, fields) {
       this.popularizeField = sinon.spy();
+      this.timeFieldName = timeField;
       this.fields = new IndexedArray({
         index: ['name'],
         group: ['type'],
