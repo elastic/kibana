@@ -1,70 +1,77 @@
 define(function (require) {
-  return function VisSpyReqRespStats() {
-    var _ = require('lodash');
-    var reqRespStatsHTML = require('text!components/visualize/spy/_req_resp_stats.html');
-    require('components/clipboard/clipboard');
 
-    var linkReqRespStats = function ($scope, config) {
-      $scope.$watch('searchSource.history.length', function () {
-        // force the entry to be collected again
-        $scope.entry = null;
-      });
+  var _ = require('lodash');
+  var reqRespStatsHTML = require('text!components/visualize/spy/_req_resp_stats.html');
+  require('components/clipboard/clipboard');
 
-      $scope.$watchMulti([
-        'entry',
-        'searchSource',
-        'entry.complete'
-      ], function () {
-        $scope.entry = null;
+  var linkReqRespStats = function ($scope, config) {
+    $scope.$watch('searchSource.history.length', function () {
+      // force the entry to be collected again
+      $scope.entry = null;
+    });
 
-        if (!$scope.searchSource) return;
+    $scope.$watchMulti([
+      'entry',
+      'searchSource',
+      'entry.complete'
+    ], function () {
+      $scope.entry = null;
 
-        var searchHistory = $scope.searchSource.history;
-        if (!searchHistory) return;
+      if (!$scope.searchSource) return;
 
-        var entry = $scope.entry = _.find(searchHistory, 'state');
-        if (!entry) return;
+      var searchHistory = $scope.searchSource.history;
+      if (!searchHistory) return;
 
-        var state = entry.state;
-        var resp = entry.resp;
-        var meta = [];
+      var entry = $scope.entry = _.find(searchHistory, 'state');
+      if (!entry) return;
 
-        if (resp && resp.took != null) meta.push(['Query Duration', resp.took + 'ms']);
-        if (entry && entry.ms != null) meta.push(['Request Duration', entry.ms + 'ms']);
-        if (resp && resp.hits) meta.push(['Hits', resp.hits.total]);
+      var state = entry.state;
+      var resp = entry.resp;
+      var meta = [];
 
-        if (state.index) meta.push(['Index', state.index]);
-        if (state.type) meta.push(['Type', state.type]);
-        if (state.id) meta.push(['Id', state.id]);
+      if (resp && resp.took != null) meta.push(['Query Duration', resp.took + 'ms']);
+      if (entry && entry.ms != null) meta.push(['Request Duration', entry.ms + 'ms']);
+      if (resp && resp.hits) meta.push(['Hits', resp.hits.total]);
 
-        $scope.history = {
-          meta: meta,
-          req: state.body,
-          resp: entry.resp,
-          complete: entry.complete
-        };
-      });
-    };
+      if (state.index) meta.push(['Index', state.index]);
+      if (state.type) meta.push(['Type', state.type]);
+      if (state.id) meta.push(['Id', state.id]);
 
-    return [
-      {
-        name: 'request',
-        display: 'Request',
-        template: reqRespStatsHTML,
-        link: linkReqRespStats
-      },
-      {
-        name: 'response',
-        display: 'Response',
-        template: reqRespStatsHTML,
-        link: linkReqRespStats
-      },
-      {
-        name: 'stats',
-        display: 'Statistics',
-        template: reqRespStatsHTML,
-        link: linkReqRespStats
-      }
-    ];
+      $scope.history = {
+        meta: meta,
+        req: state.body,
+        resp: entry.resp,
+        complete: entry.complete
+      };
+    });
   };
+
+  require('registry/spy_modes')
+  .register(function () {
+    return {
+      name: 'request',
+      display: 'Request',
+      order: 2,
+      template: reqRespStatsHTML,
+      link: linkReqRespStats
+    };
+  })
+  .register(function () {
+    return {
+      name: 'response',
+      display: 'Response',
+      order: 3,
+      template: reqRespStatsHTML,
+      link: linkReqRespStats
+    };
+  })
+  .register(function () {
+    return {
+      name: 'stats',
+      display: 'Statistics',
+      order: 4,
+      template: reqRespStatsHTML,
+      link: linkReqRespStats
+    };
+  });
 });

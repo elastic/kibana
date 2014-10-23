@@ -1,12 +1,13 @@
 define(function (require) {
-  var module = require('modules').get('app/visualize');
-  var _ = require('lodash');
-  var saveAs = require('file_saver');
+  function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
+    var _ = require('lodash');
+    var saveAs = require('file_saver');
+    var tabifyAggResponse = Private(require('components/visualize/spy/_tabify_agg_response'));
 
-  return function VisSpyTable(Notifier, $filter, $rootScope, config) {
     return {
       name: 'table',
       display: 'Table',
+      order: 1,
       template: require('text!components/visualize/spy/_table.html'),
       link: function tableLinkFn($scope, $el) {
         var notify = new Notifier();
@@ -27,16 +28,27 @@ define(function (require) {
         };
 
         $scope.colTitle = function (col) {
-          var aggConfig = col.aggConfig;
-          if (!aggConfig) return 'count';
-          if (aggConfig.schema.group !== 'metrics') return col.field.name;
-          return aggConfig.type.makeLabel(aggConfig);
+          var agg = aggConfig(col);
+          return agg.type.makeLabel(agg);
         };
+
+        function aggConfig(col) {
+          if (!col.aggConfig) {
+            throw new TypeError('Column is missing the aggConfig property');
+          }
+          return col.aggConfig;
+        }
+
+        function colField(col) {
+          var agg = aggConfig(col);
+          return agg.params && agg.params.field;
+        }
 
         $scope.getColumnClass = function (col, $first, $last) {
           var cls = [];
+          var agg = aggConfig(col);
 
-          if ($last || (col.categoryName === 'metric')) {
+          if ($last || (agg.schema.group === 'metrics')) {
             cls.push('visualize-table-right');
           }
 
@@ -109,38 +121,41 @@ define(function (require) {
         };
 
         $rootScope.$watchMulti.call($scope, [
-          'chartData',
+          'vis',
+          'esResp',
           'sort.asc',
           'sort.field'
-        ], function () {
-          if (!$scope.chartData) {
+        ], notify.timed('flatten data for table', function () {
+          if (!$scope.vis || !$scope.esResp) {
             $scope.rows = $scope.columns = null;
             return;
           }
 
-          $scope.rows = $scope.chartData.raw.rows;
-          $scope.columns = $scope.chartData.raw.columns;
+          var tabbed = tabifyAggResponse($scope.vis, $scope.esResp);
+          $scope.rows = tabbed.rows;
+          $scope.columns = tabbed.columns;
 
           var formatters = $scope.columns.map(function (col) {
-            return (col.field) ? col.field.format.convert : _.identity;
+            var field = colField(col);
+            return field ? field.format.convert : _.identity;
           });
 
-          notify.event('flatten data for table', function () {
+          // sort the row values
+          if ($scope.sort) {
+            $scope.rows = orderBy($scope.rows, $scope.sort.getter, $scope.sort.asc);
+          }
 
-            // sort the row values
-            if ($scope.sort) {
-              $scope.rows = orderBy($scope.rows, $scope.sort.getter, $scope.sort.asc);
-            }
-
-            // format all row values
-            $scope.rows = $scope.rows.map(function (row) {
-              return row.map(function (cell, i) {
-                return formatters[i](cell);
-              });
+          // format all row values
+          $scope.rows = $scope.rows.map(function (row) {
+            return row.map(function (cell, i) {
+              return formatters[i](cell);
             });
           });
-        });
+
+        }));
       }
     };
-  };
+  }
+
+  require('registry/spy_modes').register(VisSpyTableProvider);
 });

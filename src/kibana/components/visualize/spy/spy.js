@@ -5,14 +5,11 @@ define(function (require) {
       var $ = require('jquery');
       var _ = require('lodash');
 
-      var modes = _.flatten([
-        Private(require('components/visualize/spy/_table')),
-        Private(require('components/visualize/spy/_req_resp_stats')),
-        Private(require('components/visualize/spy/_vis'))
-      ]);
-      modes.byName = _.indexBy(modes, 'name');
+      require('components/visualize/spy/_table');
+      require('components/visualize/spy/_req_resp_stats');
 
-      var defaultMode = modes[0];
+      var modes = Private(require('registry/spy_modes'));
+      var defaultMode = modes.inOrderOrder[0];
 
       return {
         restrict: 'E',
