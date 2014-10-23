@@ -10,7 +10,7 @@ define(function (require) {
   var $elemScope;
   var $elem;
 
-  var mockEs;
+  var mockValidateQuery;
   var mockValidateReturns;
   var mockScope = {
     ngModel: {query_string: {query: 'test_query'}},
@@ -46,20 +46,13 @@ define(function (require) {
 
     module('kibana', function ($provide) {
       $provide.service('es', function () {
-        var mockValidateQuery = sinon.stub().returns(mockValidateReturns);
-
-        return {
-          indices: {
-            validateQuery: mockValidateQuery
-          }
-        };
+        return { indices: { validateQuery: function () {} } };
       });
 
       $provide.constant('configFile', {
         kibanaIndex: 'test-index'
       });
     });
-
 
     // Create the scope
     inject(function ($injector, $controller, $rootScope, $compile) {
@@ -68,10 +61,11 @@ define(function (require) {
       $parentScope.mockModel = mockScope.ngModel;
       $parentScope.mockQueryInput = mockScope.queryInput;
 
+      var es = $injector.get('es');
+      mockValidateQuery = sinon.stub(es.indices, 'validateQuery');
+      mockValidateQuery.returns(mockValidateReturns);
+
       $elem = angular.element(markup);
-
-      mockEs = $injector.get('es');
-
       $compile($elem)($parentScope);
       $elemScope = $elem.isolateScope();
     });
@@ -89,7 +83,7 @@ define(function (require) {
       });
 
       it('should call validate via watch setup', function () {
-        expect(mockEs.indices.validateQuery.callCount).to.be(1);
+        expect(mockValidateQuery.callCount).to.be(1);
       });
 
       it('should call validate on input change', function () {
@@ -97,7 +91,7 @@ define(function (require) {
         var checkCount = 2;
         $elem.val('someValue');
         $elem.scope().$digest();
-        expect(mockEs.indices.validateQuery.callCount).to.be(checkCount);
+        expect(mockValidateQuery.callCount).to.be(checkCount);
       });
     });
 
