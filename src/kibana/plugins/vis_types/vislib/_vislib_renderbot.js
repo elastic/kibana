@@ -2,7 +2,7 @@ define(function (require) {
   return function VislibRenderbotFactory(Private, vislib) {
     var _ = require('lodash');
     var Renderbot = Private(require('plugins/vis_types/_renderbot'));
-    var normalizeChartData = Private(require('components/chart_data/index'));
+    var normalizeChartData = Private(require('components/agg_response/index'));
 
     _(VislibRenderbot).inherits(Renderbot);
     function VislibRenderbot(vis, $el) {

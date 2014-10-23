@@ -8,6 +8,8 @@ define(function (require) {
       TemplateRenderbot.Super.call(this, vis, $el);
 
       this.$scope = $rootScope.$new();
+      this.$scope.vis = vis;
+
       $el.html($compile(this.vis.type.template)(this.$scope));
     }
 

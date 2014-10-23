@@ -4,6 +4,4 @@ define(function (require) {
   visTypes.register(require('plugins/vis_types/vislib/histogram'));
   visTypes.register(require('plugins/vis_types/vislib/line'));
   visTypes.register(require('plugins/vis_types/vislib/pie'));
-
-  visTypes.register(require('plugins/vis_types/template/table'));
 });
