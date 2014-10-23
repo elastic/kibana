@@ -21,7 +21,7 @@ module.exports = function (grunt) {
     testUtilsDir: __dirname + '/test/utils',
     bowerComponentsDir: __dirname + '/src/kibana/bower_components',
 
-    devPlugins: 'vis_details_spy',
+    devPlugins: 'vis_debug_spy',
 
     meta: {
       banner: '/*! <%= package.name %> - v<%= package.version %> - ' +
