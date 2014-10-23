@@ -1,80 +1,57 @@
 define(function (require) {
   var _ = require('lodash');
 
-  var module = require('modules').get('kibana');
+  var PER_PAGE_DEFAULT = 10;
 
-  module.directive('paginate', function ($parse) {
+  require('modules').get('kibana')
+  .directive('paginate', function ($parse, $compile) {
     return {
       restrict: 'E',
-      transclude: true,
-      template: '<div class="paginate-content" ng-transclude></div>' +
-        '<paginate-controls ng-if="page.count > 1"></paginate-controls>'
-      ,
-      link: function ($scope, $el, attrs) {
-        var perPageDefault = 10;
-
-        $scope.paginate = {};
-
-        // watchers on attributes
-        $scope.$watchCollection(attrs.list, function (list) {
-          $scope.list = list;
-          renderList();
-        });
-        $scope.$watch(attrs.perPage, function (perPage) {
-          $scope.paginate.perPage = perPage || perPageDefault;
-        });
-
-        $scope.$watch('paginate.perPage', renderList);
-        var getOtherWidth = $parse(attrs.otherWidth);
-
-        $scope.$watch('page', function (newPage, oldPage) {
-          if (!newPage) {
-            delete $scope.otherPages;
-            return;
+      scope: true,
+      controllerAs: 'paginate',
+      link: {
+        pre: function ($scope, $el) {
+          if ($el.find('paginate-controls').size() === 0) {
+            $el.append($compile('<paginate-controls>')($scope));
           }
+        },
+        post: function ($scope, $el, attrs) {
+          var paginate = $scope.paginate;
 
-          // setup the list of the other pages to link to
-          $scope.otherPages = [];
-          var width = +getOtherWidth($scope) || 5;
-          var left = newPage.i - Math.round((width - 1) / 2);
-          var right = left + width - 1;
+          // add some getters to the controller powered by attributes
+          paginate.otherWidthGetter = $parse(attrs.otherWidth);
+          paginate.perPageGetter = $parse(attrs.perPage);
+          paginate.perPageSetter = paginate.perPageGetter.assign;
 
-          // shift neg count from left to right
-          if (left < 0) {
-            right += 0 - left;
-            left = 0;
-          }
+          $scope.$watch(attrs.perPage, function (perPage) {
+            paginate.perPage = perPage || PER_PAGE_DEFAULT;
+          });
+          $scope.$watch('paginate.perPage', paginate.renderList);
+          $scope.$watch('page', paginate.changePage);
 
-          // shift extra right nums to left
-          var lastI = newPage.count - 1;
-          if (right > lastI) {
-            right = lastI;
-            left = right - width + 1;
-          }
+          $scope.$watchCollection(attrs.list, function (list) {
+            $scope.list = list;
+            paginate.renderList();
+          });
 
-          for (var i = left; i <= right; i++) {
-            var other = $scope.pages[i];
+        },
+      },
+      controller: function ($scope) {
 
-            if (!other) continue;
+        var self = this;
 
-            $scope.otherPages.push(other);
-            if (other.last) $scope.otherPages.containsLast = true;
-            if (other.first) $scope.otherPages.containsFirst = true;
-          }
-        });
-
-        $scope.goToPage = function (number) {
+        self.goToPage = function (number) {
           if (number) {
             if (number.hasOwnProperty('number')) number = number.number;
             $scope.page = $scope.pages[number - 1] || $scope.pages[0];
           }
         };
 
-        function renderList() {
+        self.renderList = function () {
           $scope.pages = [];
           if (!$scope.list) return;
 
-          var perPage = $scope.paginate.perPage;
+          var perPage = self.perPage;
           var count = Math.ceil($scope.list.length / perPage);
 
           _.times(count, function (i) {
@@ -100,15 +77,58 @@ define(function (require) {
           } else {
             $scope.page = $scope.pages[0];
           }
-        }
+        };
+
+        self.changePage = function (page) {
+          if (!page) {
+            $scope.otherPages = null;
+            return;
+          }
+
+          // setup the list of the other pages to link to
+          $scope.otherPages = [];
+          var width = +self.otherWidthGetter($scope) || 5;
+          var left = page.i - Math.round((width - 1) / 2);
+          var right = left + width - 1;
+
+          // shift neg count from left to right
+          if (left < 0) {
+            right += 0 - left;
+            left = 0;
+          }
+
+          // shift extra right nums to left
+          var lastI = page.count - 1;
+          if (right > lastI) {
+            right = lastI;
+            left = right - width + 1;
+          }
+
+          for (var i = left; i <= right; i++) {
+            var other = $scope.pages[i];
+
+            if (!other) continue;
+
+            $scope.otherPages.push(other);
+            if (other.last) $scope.otherPages.containsLast = true;
+            if (other.first) $scope.otherPages.containsFirst = true;
+          }
+        };
+      }
+    };
+  })
+  .directive('paginateControls', function () {
+    // this directive is automatically added by paginate if not found within it's $el
+    return {
+      restrict: 'E',
+      template: require('text!partials/paginate_controls.html'),
+      link: function ($scope, $el) {
+        $scope.$watch('page.count > 0', function (show) {
+          $el.toggle(show);
+        });
       }
     };
   });
 
-  module.directive('paginateControls', function () {
-    return {
-      restrict: 'E',
-      template: require('text!partials/paginate_controls.html')
-    };
-  });
+
 });
