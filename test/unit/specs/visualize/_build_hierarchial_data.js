@@ -14,7 +14,7 @@ define(function (require) {
       Vis = Private(require('components/vis/vis'));
       AggConfigs = Private(require('components/vis/_agg_configs'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      buildHierarchialData = Private(require('components/chart_data/hierarchical/build_hierarchical_data'));
+      buildHierarchialData = Private(require('components/agg_response/hierarchical/build_hierarchical_data'));
     }));
 
 
