@@ -92,7 +92,7 @@ define(function (require) {
     };
 
     Vis.prototype.isHierarchical = function () {
-      return !!this.type.hierarchical;
+      return !!this.type.hierarchicalData;
     };
 
     return Vis;
