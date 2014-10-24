@@ -53,6 +53,16 @@ define(function (require) {
       };
     };
 
+    Dispatch.prototype.addEvent = function (event, callback) {
+      return function (selection) {
+        selection.each(function () {
+          var element = d3.select(this);
+
+          element.on(event, callback);
+        });
+      };
+    };
+
     /**
      * Mouse over Behavior
      *
@@ -87,7 +97,6 @@ define(function (require) {
     Dispatch.prototype.addBrush = function (xScale, svg) {
       var dispatch = this.dispatch;
       var attr = this.handler._attr;
-      var chartData = this.handler.chartData;
       var height = attr.height;
       var margin = attr.margin;
 
@@ -99,7 +108,7 @@ define(function (require) {
             range: brush.extent(),
             config: attr,
             e: d3.event,
-            data: chartData
+            data: d3.event.sourceEvent.target.__data__
           });
         });
 

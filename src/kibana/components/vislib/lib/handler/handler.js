@@ -73,6 +73,12 @@ define(function (require) {
         var chart = new self.ChartClass(self, this, chartData);
         var enabledEvents;
 
+         /*
+          * inside handler: if there are charts, bind events to charts
+          * functionality: track in array that event is enabled
+          * clean up event handlers every time it destroys the chart
+          * rebind them every time it creates the charts
+          */
         if (chart.events.dispatch) {
           enabledEvents = self.vis.eventTypes.enabled;
 
@@ -93,14 +99,15 @@ define(function (require) {
     };
 
 
-    // inside handler: if there are charts, bind events to charts
-    // functionality: track in array that event is enabled
-    // clean up event handlers every time it destroys the chart
-    // rebind them every time it creates the charts
     /**
+     * Enables events, i.e. binds specific events to the chart
+     * object(s) `on` method. For example, `click` or `mousedown` events.
+     * Emits the event to the Events class.
      *
-     * @param event
-     * @param chart
+     * @method enable
+     * @param event {String} Event type
+     * @param chart {Object} Chart
+     * @returns {*}
      */
     Handler.prototype.enable = function (event, chart) {
       return chart.on(event, function (e) {
@@ -109,9 +116,13 @@ define(function (require) {
     };
 
     /**
+     * Disables events. According to the D3 documentation for event handling:
+     * https://github.com/mbostock/d3/wiki/Selections#on, to remove all
+     * listeners for a particular event type, pass null as the listener.
      *
-     * @param event
-     * @param chart
+     * @method disable
+     * @param event {String} Event type
+     * @param chart {Object} Chart
      * @returns {*}
      */
     Handler.prototype.disable = function (event, chart) {

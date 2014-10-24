@@ -219,37 +219,31 @@ define(function (require) {
      * Adds Events to SVG rect
      *
      * @method addBarEvents
+     * @param element {d3.UpdateSelection} target
      * @param svg {HTMLElement} chart SVG
-     * @param bars {D3.UpdateSelection} SVG rect
-     * @param brush {Function} D3 brush function
      * @returns {HTMLElement} rect with event listeners attached
      */
-    ColumnChart.prototype.addBarEvents = function (svg, bars, brush) {
-      var events = this.events;
-      var dispatch = this.events.dispatch;
-//      var addBrush = this._attr.addBrushing;
-      var xScale = this.handler.xAxis.xScale;
-//      var height = this._attr.height;
-//      var margin = this._attr.margin;
+    ColumnChart.prototype.addBarEvents = function (element, svg) {
+      var addEvent = this.events.addEvent;
+      var mouseOver = addEvent('mouseover.bar', this.mouseOver());
+      var mouseOut = addEvent('mouseout.bar', this.mouseOut());
+      var brush = addEvent('mousedown.bar', this.brush(svg));
+      var click = addEvent('click.bar', this.click());
 
-      bars
-      .on('mouseover.bar', function (d, i) {
-        dispatch.hover.call(this, events.eventResponse(d, i));
-        d3.event.stopPropagation();
-      })
-      .on('click.bar', function (d, i) {
-        events.onMouseOver.call(this, arguments);
-        dispatch.click.call(this, events.eventResponse(d, i));
-        d3.event.stopPropagation();
-      })
-      .on('mouseout.bar', function () {
-        events.onMouseOut.call(this, arguments);
-        d3.event.stopPropagation();
-      });
+      return element
+      .call(mouseOver)
+      .call(mouseOut)
+      .call(brush)
+      .call(click);
+    };
+
+    ColumnChart.prototype.brush = function (svg) {
+      var dispatch = this.events.dispatch;
+      var xScale = this.handler.xAxis.xScale;
+      var brush = this.events.addBrush(xScale, svg);
 
       if (dispatch.on('brush')) {
-        bars
-        .on('mousedown.bar', function () {
+        return function () {
           var bar = d3.select(this);
           var startX = d3.mouse(svg.node());
           var startXInv = xScale.invert(startX[0]);
@@ -263,8 +257,36 @@ define(function (require) {
           // Need to call brush on bar to allow the click event to be registered
           svg.call(brush);
           bar.call(brush);
-        });
+        };
       }
+    };
+
+    ColumnChart.prototype.mouseOver = function () {
+      var self = this;
+
+      return function (d, i) {
+        self.events.onMouseOver.call(this, arguments);
+        self.events.dispatch.hover.call(this, self.events.eventResponse(d, i));
+        d3.event.stopPropagation();
+      };
+    };
+
+    ColumnChart.prototype.mouseOut = function () {
+      var self = this;
+
+      return function () {
+        self.events.onMouseOut.call(this, arguments);
+        d3.event.stopPropagation();
+      };
+    };
+
+    ColumnChart.prototype.click = function () {
+      var self = this;
+
+      return function (d, i) {
+        self.events.dispatch.click.call(this, self.events.eventResponse(d, i));
+        d3.event.stopPropagation();
+      };
     };
 
     /**
@@ -275,7 +297,6 @@ define(function (require) {
      */
     ColumnChart.prototype.draw = function () {
       var self = this;
-      var xScale = this.handler.xAxis.xScale;
       var $elem = $(this.chartEl);
       var margin = this._attr.margin;
       var elWidth = this._attr.width = $elem.width();
@@ -310,8 +331,8 @@ define(function (require) {
 
           bars = self.addBars(svg, layers);
 
-          var brush = self.events.addBrush(xScale, svg);
-          self.addBarEvents(svg, bars, brush);
+          // Adds event listeners
+          self.addBarEvents(bars, svg);
 
           var line = svg.append('line')
           .attr('x1', 0)

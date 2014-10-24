@@ -121,27 +121,27 @@ define(function (require) {
      * Turns on event listeners.
      *
      * @param event {String}
-     * @param handler {Function}
+     * @param listener{Function}
      * @returns {*}
      */
-    Vis.prototype.on = function (event, handler) {
-      var ret = Events.prototype.on.call(this, event, handler); // Adds event to _listeners array
+    Vis.prototype.on = function (event, listener) {
+      var ret = Events.prototype.on.call(this, event, listener); // Adds event to _listeners array
       var listeners = this._listeners[event].length;
       var charts = (this.handler && this.handler.charts);
       var chartCount = charts ? charts.length : 0;
       var enabledEvents = this.eventTypes.enabled;
       var eventAbsent = (enabledEvents.indexOf(event) === -1);
 
-      // Check if the charts array is available
-      // if chart count changed from 0 to 1, call handler object
-      // this.handler.enable(event)
+      // if this is the first listener added for the event
+      // and charts are available, bind the event to the chart(s)
+      // `on` method
       if (listeners === 1 && chartCount > 0) {
         charts.forEach(function (chart) {
           this.handler.enable(event, chart);
         }, this);
       }
 
-      // update the eventType as enabled
+      // Keep track of enabled events
       if (eventAbsent) {
         enabledEvents.push(event);
       }
@@ -153,18 +153,18 @@ define(function (require) {
      * Turns off event listeners.
      *
      * @param event {String}
-     * @param handler {Function}
+     * @param listener{Function}
      * @returns {*}
      */
-    Vis.prototype.off = function (event, handler) {
-      var ret = Events.prototype.off.call(this, event, handler);  // Removes event from _listeners array
+    Vis.prototype.off = function (event, listener) {
+      var ret = Events.prototype.off.call(this, event, listener);  // Removes event from _listeners array
       var listeners = (!!this._listeners[event] && this._listeners[event].length !== 0);
       var charts = (this.handler && this.handler.charts);
       var chartCount = charts ? charts.length : 0;
       var eventIndex = this.eventTypes.enabled.indexOf(event);
       var eventPresent = (eventIndex !== -1);
 
-      // Once the handler array reaches zero, then turn off event
+      // Once the listener array reaches zero, turn off event
       if (!listeners && eventPresent) {
         if (chartCount > 0) {
           charts.forEach(function (chart) {
