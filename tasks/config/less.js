@@ -4,15 +4,15 @@ module.exports = {
   src: {
     src: [
       '<%= src %>/kibana/components/*/*.less',
-      '<%= src %>/kibana/apps/dashboard/styles/main.less',
-      '<%= src %>/kibana/apps/discover/styles/main.less',
-      '<%= src %>/kibana/apps/settings/styles/main.less',
-      '<%= src %>/kibana/apps/visualize/styles/main.less',
-      '<%= src %>/kibana/apps/visualize/styles/visualization.less',
-      '<%= src %>/kibana/apps/visualize/styles/main.less',
       '<%= src %>/kibana/styles/main.less',
       '<%= src %>/kibana/components/vislib/styles/main.less',
-      '<%= src %>/kibana/components/**/*.less'
+      '<%= src %>/kibana/components/**/*.less',
+      '<%= plugins %>/dashboard/styles/main.less',
+      '<%= plugins %>/discover/styles/main.less',
+      '<%= plugins %>/settings/styles/main.less',
+      '<%= plugins %>/visualize/styles/main.less',
+      '<%= plugins %>/visualize/styles/visualization.less',
+      '<%= plugins %>/visualize/styles/main.less'
     ],
     expand: true,
     ext: '.css',

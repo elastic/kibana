@@ -1,6 +1,7 @@
 define(function (require) {
   return function TermsAggDefinition(Private) {
     var _ = require('lodash');
+    require('filters/label');
     var AggType = Private(require('components/agg_types/_agg_type'));
     var bucketCountBetween = Private(require('components/agg_types/buckets/_bucket_count_between'));
 
@@ -22,6 +23,7 @@ define(function (require) {
         },
         {
           name: 'order',
+          type: 'optioned',
           options: [
             { display: 'Top', val: 'desc' },
             { display: 'Bottom', val: 'asc' }
@@ -41,19 +43,27 @@ define(function (require) {
 
             sort[metricAggConfig.id] = order;
 
-            /**
-             * In order to sort by a metric agg, the metric need to be an immediate
-             * decendant, this checks if that is the case.
-             *
-             * @type {boolean}
-             */
-            var metricIsOwned = bucketCountBetween(aggConfig, metricAggConfig) === 0;
+            var visNotHierarchical = !aggConfig.vis.type.hierarchicalData;
 
-            if (!metricIsOwned) {
+            // if the vis is hierarchical, then the metric will always be copied
+            // if it's not, then we need to make sure the number of buckets is 0, else wise copy it
+            var metricNotChild = visNotHierarchical && bucketCountBetween(aggConfig, metricAggConfig) !== 0;
+
+            if (metricNotChild) {
               output.subAggs = output.subAggs || [];
               output.subAggs.push(metricAggConfig);
             }
           }
+        },
+        {
+          name: 'exclude',
+          type: 'regex',
+          advanced: true
+        },
+        {
+          name: 'include',
+          type: 'regex',
+          advanced: true
         }
       ]
     });

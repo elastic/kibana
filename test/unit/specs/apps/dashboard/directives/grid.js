@@ -7,7 +7,7 @@ define(function (require) {
   require('angular-route');
 
   // Load the code for the directive
-  require('apps/dashboard/directives/panel');
+  require('plugins/dashboard/directives/panel');
 
   describe('Gridster', function () {
     var $scope, $elem, compile;

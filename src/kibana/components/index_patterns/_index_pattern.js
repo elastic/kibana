@@ -12,7 +12,7 @@ define(function (require) {
     var mappingSetup = Private(require('utils/mapping_setup'));
     var DocSource = Private(require('components/courier/data_source/doc_source'));
     var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
-    var Registry = require('utils/registry/registry');
+    var IndexedArray = require('utils/indexed_array/index');
 
     var type = 'index-pattern';
 
@@ -84,7 +84,7 @@ define(function (require) {
       };
 
       function afterFieldsSet() {
-        pattern.fields = new Registry({
+        pattern.fields = new IndexedArray({
           index: ['name'],
           group: ['type'],
           initialSet: pattern.fields.map(function (field) {

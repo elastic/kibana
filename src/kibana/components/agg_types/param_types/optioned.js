@@ -2,15 +2,14 @@ define(function (require) {
   return function OptionedAggParamFactory(Private) {
     var _ = require('lodash');
 
-    var Registry = require('utils/registry/registry');
-    var editorHtml = require('text!components/agg_types/controls/field.html');
+    var IndexedArray = require('utils/indexed_array/index');
     var BaseAggParam = Private(require('components/agg_types/param_types/base'));
 
     _(OptionedAggParam).inherits(BaseAggParam);
     function OptionedAggParam(config) {
       OptionedAggParam.Super.call(this, config);
 
-      this.options = new Registry({
+      this.options = new IndexedArray({
         index: ['val'],
         immutable: true,
         initialSet: this.options
@@ -43,7 +42,7 @@ define(function (require) {
      * @param  {AggConfig} aggConfig - the entire configuration for this agg
      * @param  {object} output - the result of calling write on all of the aggregations
      *                         parameters.
-     * @param  {object} output.param - the final object that will be included as the params
+     * @param  {object} output.params - the final object that will be included as the params
      *                               for the agg
      * @return {undefined}
      */
