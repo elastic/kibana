@@ -18,8 +18,8 @@
 
 
 define([
-  "_", "jquery", "exports"
-], function (_, $, exports) {
+    "_", "jquery", "exports"
+  ], function (_, $, exports) {
     "use strict";
 
     var baseUrl;
@@ -33,7 +33,9 @@ define([
       return esVersion;
     };
 
-    exports.send = function (method, path, data, successCallback, completeCallback, server) {
+    exports.send = function (method, path, data, server) {
+      var wrappedDfd = $.Deferred();
+
       server = server || exports.getBaseUrl();
       path = exports.constructESUrl(server, path);
       var uname_password_re = /^(https?:\/\/)?(?:(?:([^\/]*):)?([^\/]*?)@)?(.*)$/;
@@ -50,25 +52,38 @@ define([
       var options = {
         url: path,
         data: method == "GET" ? null : data,
-        password: password,
         cache: false,
-        username: uname,
         crossDomain: true,
         type: method,
-        dataType: "json"
+        password: password,
+        username: uname,
+        dataType: "text" // disable automatic guessing
       };
 
-      // If we provide callback then apply those to the options otherwise 
-      // we assume the user will use the promise interface
-      if (typeof(successCallback) === 'function') {
-        options.success = successCallback;
-      }
-      if (typeof(completeCallback) === 'function') {
-        options.complete= completeCallback;
-      }
 
-      // return the promise that other libraries can use them
-      return $.ajax(options);
+      // first try withCredentials for authentication during preflight checks
+      // sadly it also means Access-Control-Allow-Origin: * is not valid anymore (default
+      // cors setting in ES, when enabled) so we will try again without if needed.
+      $.ajax(_.defaults({},
+        options, {
+        xhrFields: { withCredentials: true} // allow preflight credentials
+      })).then(
+        function (data, textStatus, jqXHR) {
+          wrappedDfd.resolveWith(this, [data, textStatus, jqXHR]);
+        },
+        function (jqXHR, textStatus, errorThrown) {
+          if (jqXHR.status == 0) {
+            $.ajax(options).then(function () { // no withCredentials
+              wrappedDfd.resolveWith(this, arguments);
+            }, function () {
+              wrappedDfd.rejectWith(this, arguments);
+            });
+          }
+          else {
+            wrappedDfd.rejectWith(this, [jqXHR, textStatus, errorThrown])
+          }
+        });
+      return wrappedDfd;
     };
 
     exports.constructESUrl = function (server, path) {
@@ -80,7 +95,7 @@ define([
         return path;
       }
       if (server.indexOf("://") < 0) {
-        server = "http://" + server;
+        server = (document.location.protocol || "http:") + "//" + server;
       }
       if (server.substr(-1) == "/") {
         server = server.substr(0, server.length - 1);
@@ -97,7 +112,7 @@ define([
       if (baseUrl !== base) {
         var old = baseUrl;
         baseUrl = base;
-        exports.send("GET", "/", null, null, function (xhr, status) {
+        exports.send("GET", "/").done(function (data, status, xhr) {
           if (xhr.status === 200) {
             // parse for version
             var value = xhr.responseText;
@@ -111,6 +126,11 @@ define([
 
             }
           }
+          _.each(serverChangeListeners, function (cb) {
+            cb(base, old)
+          });
+        }).fail(function () {
+          esVersion = []; // unknown
           _.each(serverChangeListeners, function (cb) {
             cb(base, old)
           });

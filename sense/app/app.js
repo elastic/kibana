@@ -53,8 +53,7 @@ define([
       marvelOpts = { status: 'trial' };
     }
      
-    function submitCurrentRequestToES(cb) {
-      cb = typeof cb === 'function' ? cb : $.noop;
+    function submitCurrentRequestToES() {
 
       input.getCurrentRequest(function (req) {
         output.update('');
@@ -72,7 +71,13 @@ define([
           es_data += "\n";
         } //append a new line for bulk requests.
 
-        es.send(es_method, es_path, es_data, null, function (xhr, status) {
+        es.send(es_method, es_path, es_data).always(function (dataOrjqXHR, textStatus, jqXhrORerrorThrown) {
+            var xhr;
+            if (dataOrjqXHR.promise) {
+              xhr = dataOrjqXHR;
+            } else {
+              xhr = jqXhrORerrorThrown;
+            }
             $("#notification").text("").css("visibility", "hidden");
             if (typeof xhr.status == "number" &&
               ((xhr.status >= 400 && xhr.status < 600) ||
@@ -105,7 +110,7 @@ define([
 
             }
             else {
-              cb("Request failed to get to the server (status code: " + xhr.status + "):" + xhr.responseText, 'ace/mode/text');
+              output.update("Request failed to get to the server (status code: " + xhr.status + "):" + xhr.responseText, 'ace/mode/text');
             }
 
           }

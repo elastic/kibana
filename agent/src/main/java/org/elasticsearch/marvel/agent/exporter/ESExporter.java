@@ -50,11 +50,10 @@ import org.elasticsearch.marvel.agent.Utils;
 import org.elasticsearch.marvel.agent.event.Event;
 import org.elasticsearch.node.settings.NodeSettingsService;
 
+import javax.net.ssl.*;
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.URL;
+import java.net.*;
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -76,9 +75,14 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     volatile int timeoutInMillis;
     volatile int readTimeoutInMillis;
 
+
+    /** https support * */
+    final SSLSocketFactory sslSocketFactory;
+
     final ClusterService clusterService;
     final ClusterName clusterName;
     HttpServer httpServer;
+
 
     public final static DateTimeFormatter defaultDatePrinter = Joda.forPattern("date_time").printer();
 
@@ -91,12 +95,13 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     final ClusterStatsRenderer clusterStatsRenderer;
     final EventsRenderer eventsRenderer;
 
-    ConnectionKeepAliveWorker keepAliveWorker;
+    final ConnectionKeepAliveWorker keepAliveWorker;
     Thread keepAliveThread;
 
     @Inject
     public ESExporter(Settings settings, ClusterService clusterService, ClusterName clusterName,
-                      @ClusterDynamicSettings DynamicSettings dynamicSettings, NodeSettingsService nodeSettingsService) {
+                      @ClusterDynamicSettings DynamicSettings dynamicSettings,
+                      NodeSettingsService nodeSettingsService) {
         super(settings);
 
         this.clusterService = clusterService;
@@ -104,6 +109,17 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         this.clusterName = clusterName;
 
         hosts = settings.getAsArray(SETTINGS_HOSTS, Strings.EMPTY_ARRAY);
+
+        for (String host : hosts) {
+            try {
+                parseHostWithPath(host, "");
+            } catch (URISyntaxException e) {
+                throw new RuntimeException("[marvel.agent.exporter] invalid host: [" + host + "]. error: [" + e.getMessage() + "]");
+            } catch (MalformedURLException e) {
+                throw new RuntimeException("[marvel.agent.exporter] invalid host: [" + host + "]. error: [" + e.getMessage() + "]");
+            }
+        }
+
         indexPrefix = settings.get(SETTINGS_INDEX_PREFIX, ".marvel");
         String indexTimeFormat = settings.get(SETTINGS_INDEX_TIME_FORMAT, "YYYY.MM.dd");
         indexTimeFormatter = DateTimeFormat.forPattern(indexTimeFormat).withZoneUTC();
@@ -124,6 +140,14 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         dynamicSettings.addDynamicSetting(SETTINGS_TIMEOUT);
         dynamicSettings.addDynamicSetting(SETTINGS_READ_TIMEOUT);
         nodeSettingsService.addListener(this);
+
+        if (!settings.getByPrefix(SETTINGS_SSL_PREFIX).getAsMap().isEmpty() ||
+                !settings.getByPrefix(SETTINGS_SSL_SHIELD_PREFIX).getAsMap().isEmpty()) {
+            sslSocketFactory = createSSLSocketFactory(settings);
+        } else {
+            logger.trace("no ssl context configured");
+            sslSocketFactory = null;
+        }
 
         logger.debug("initialized with targets: {}, index prefix [{}], index time format [{}]", hosts, indexPrefix, indexTimeFormat);
     }
@@ -282,7 +306,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
     @Override
     protected void doStop() {
-        if (keepAliveWorker != null && keepAliveThread.isAlive()) {
+        if (keepAliveThread != null && keepAliveThread.isAlive()) {
             keepAliveWorker.closed = true;
             keepAliveThread.interrupt();
             try {
@@ -352,13 +376,13 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             for (; hostIndex < hosts.length; hostIndex++) {
                 String host = hosts[hostIndex];
                 try {
-                    URL url = new URL("http://" + host + "/" + path);
-                    if (url.getPort() == -1) {
-                        // url has no port, default to 9200
-                        host = host + ":9200";
-                        url = new URL("http://" + host + "/" + path);
-                    }
+                    final URL url = parseHostWithPath(host, path);
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+                    if (conn instanceof HttpsURLConnection && sslSocketFactory != null) {
+                        HttpsURLConnection httpsConn = (HttpsURLConnection) conn;
+                        httpsConn.setSSLSocketFactory(sslSocketFactory);
+                    }
 
                     conn.setRequestMethod(method);
                     conn.setConnectTimeout(timeoutInMillis);
@@ -377,6 +401,8 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
                     conn.connect();
 
                     return conn;
+                } catch (URISyntaxException e) {
+                    logger.error("error parsing host [{}]", e, host);
                 } catch (IOException e) {
                     logger.error("error connecting to [{}]", e, host);
                 }
@@ -395,6 +421,28 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         logger.error("could not connect to any configured elasticsearch instances: [{}]", hosts);
 
         return null;
+    }
+
+    static URL parseHostWithPath(String host, String path) throws URISyntaxException, MalformedURLException {
+
+        if (!host.contains("://")) {
+            // prefix with http
+            host = "http://" + host;
+        }
+        if (!host.endsWith("/")) {
+            // make sure we can safely resolves sub paths and not replace parent folders
+            host = host + "/";
+        }
+
+        URI hostUrl = new URI(host);
+
+        if (hostUrl.getPort() == -1) {
+            // url has no port, default to 9200
+            hostUrl = new URI(hostUrl.getScheme(), hostUrl.getUserInfo(), hostUrl.getHost(), 9200, hostUrl.getPath(), hostUrl.getQuery(), hostUrl.getFragment());
+
+        }
+        URI hostWithPath = hostUrl.resolve(path);
+        return hostWithPath.toURL();
     }
 
     static int parseIndexVersionFromTemplate(byte[] template) throws UnsupportedEncodingException {
@@ -776,6 +824,73 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
                 }
             }
         }
+    }
+
+    private static final String SETTINGS_SSL_PREFIX = SETTINGS_PREFIX + "ssl.";
+    private static final String SETTINGS_SSL_SHIELD_PREFIX = "shield.ssl.";
+
+    public static final String SETTINGS_SSL_CONTEXT_ALGORITHM = SETTINGS_SSL_PREFIX + "context_algorithm";
+    private static final String SETTINGS_SSL_SHIELD_CONTEXT_ALGORITHM = SETTINGS_SSL_SHIELD_PREFIX + "context_algorithm";
+    public static final String SETTINGS_SSL_TRUSTSTORE = SETTINGS_SSL_PREFIX + "truststore";
+    private static final String SETTINGS_SSL_SHIELD_TRUSTSTORE = SETTINGS_SSL_SHIELD_PREFIX + "truststore";
+    public static final String SETTINGS_SSL_TRUSTSTORE_PASSWORD = SETTINGS_SSL_PREFIX + "truststore_password";
+    private static final String SETTINGS_SSL_SHIELD_TRUSTSTORE_PASSWORD = SETTINGS_SSL_SHIELD_PREFIX + "truststore_password";
+    public static final String SETTINGS_SSL_TRUSTSTORE_ALGORITHM = SETTINGS_SSL_PREFIX + "truststore_algorithm";
+    private static final String SETTINGS_SSL_SHIELD_TRUSTSTORE_ALGORITHM = SETTINGS_SSL_SHIELD_PREFIX + "truststore_algorithm";
+
+
+    /** SSL Initialization * */
+    public SSLSocketFactory createSSLSocketFactory(Settings settings) {
+        SSLContext sslContext;
+        // Initialize sslContext
+        try {
+            String sslContextAlgorithm = settings.get(SETTINGS_SSL_CONTEXT_ALGORITHM, settings.get(SETTINGS_SSL_SHIELD_CONTEXT_ALGORITHM, "TLS"));
+            String trustStore = settings.get(SETTINGS_SSL_TRUSTSTORE, settings.get(SETTINGS_SSL_SHIELD_TRUSTSTORE, System.getProperty("javax.net.ssl.trustStore")));
+            String trustStorePassword = settings.get(SETTINGS_SSL_TRUSTSTORE_PASSWORD, settings.get(SETTINGS_SSL_SHIELD_TRUSTSTORE_PASSWORD, System.getProperty("javax.net.ssl.trustStorePassword")));
+            String trustStoreAlgorithm = settings.get(SETTINGS_SSL_TRUSTSTORE_ALGORITHM, settings.get(SETTINGS_SSL_SHIELD_TRUSTSTORE_ALGORITHM, System.getProperty("ssl.TrustManagerFactory.algorithm")));
+
+            if (trustStore == null) {
+                throw new RuntimeException("truststore is not configured, use " + SETTINGS_SSL_TRUSTSTORE);
+            }
+
+            if (trustStoreAlgorithm == null) {
+                trustStoreAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+            }
+
+            logger.debug("SSL: using trustStore[{}], trustAlgorithm[{}]", trustStore, trustStoreAlgorithm);
+
+            if (!new File(trustStore).exists()) {
+                throw new FileNotFoundException("Truststore at path [" + trustStore + "] does not exist");
+            }
+
+            FileInputStream trustStoreStream = null;
+            TrustManager[] trustManagers;
+            try {
+                trustStoreStream = new FileInputStream(trustStore);
+                // Load TrustStore
+                KeyStore ks = KeyStore.getInstance("jks");
+                ks.load(trustStoreStream, trustStorePassword == null ? null : trustStorePassword.toCharArray());
+
+                // Initialize a trust manager factory with the trusted store
+                TrustManagerFactory trustFactory = TrustManagerFactory.getInstance(trustStoreAlgorithm);
+                trustFactory.init(ks);
+
+                // Retrieve the trust managers from the factory
+                trustManagers = trustFactory.getTrustManagers();
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to initialize a TrustManagerFactory", e);
+            } finally {
+                if (trustStoreStream != null) {
+                    trustStoreStream.close();
+                }
+            }
+
+            sslContext = SSLContext.getInstance(sslContextAlgorithm);
+            sslContext.init(null, trustManagers, null);
+        } catch (Exception e) {
+            throw new RuntimeException("[marvel.agent.exporter] failed to initialize the SSLContext", e);
+        }
+        return sslContext.getSocketFactory();
     }
 }
 

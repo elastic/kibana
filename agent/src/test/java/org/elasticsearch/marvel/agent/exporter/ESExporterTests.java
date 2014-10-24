@@ -16,7 +16,6 @@
  */
 
 
-
 package org.elasticsearch.marvel.agent.exporter;
 
 import org.elasticsearch.Version;
@@ -25,7 +24,6 @@ import org.elasticsearch.cluster.ClusterService;
 import org.elasticsearch.cluster.ClusterState;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.cluster.node.DiscoveryNodes;
-import org.elasticsearch.common.io.Streams;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.transport.LocalTransportAddress;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -33,13 +31,7 @@ import org.elasticsearch.marvel.agent.event.ClusterEvent;
 import org.elasticsearch.marvel.agent.event.Event;
 import org.elasticsearch.test.ElasticsearchIntegrationTest;
 import org.elasticsearch.test.ElasticsearchIntegrationTest.ClusterScope;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.junit.Test;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 
 import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertHitCount;
 
@@ -47,18 +39,6 @@ import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertHitC
 // Transport Client instantiation also calls the marvel plugin, which then fails to find modules
 @ClusterScope(transportClientRatio = 0.0, scope = ElasticsearchIntegrationTest.Scope.TEST, numNodes = 0)
 public class ESExporterTests extends ElasticsearchIntegrationTest {
-
-    @Test
-    public void testVersionIsExtractableFromIndexTemplate() throws IOException {
-        byte[] template;
-        InputStream is = ESExporter.class.getResourceAsStream("/marvel_index_template.json");
-        if (is == null) {
-            throw new FileNotFoundException("Resource [/marvel_index_template.json] not found in classpath");
-        }
-        template = Streams.copyToByteArray(is);
-        is.close();
-        MatcherAssert.assertThat(ESExporter.parseIndexVersionFromTemplate(template), Matchers.greaterThan(0));
-    }
 
     @Test
     public void testLargeClusterStateSerialization() throws InterruptedException {
@@ -83,6 +63,5 @@ public class ESExporterTests extends ElasticsearchIntegrationTest {
         ensureYellow();
         client().admin().indices().prepareRefresh(".marvel-*").get();
         assertHitCount(client().prepareSearch().setQuery(QueryBuilders.termQuery("event_source", "test_source_unique")).get(), 1);
-
     }
 }

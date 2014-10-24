@@ -205,9 +205,9 @@ define([
   }
 
   function loadAliases(aliases) {
-    per_alias_indexes = {}
-    $.each(aliases, function (index, index_aliases) {
-      $.each(index_aliases.aliases, function (alias) {
+    per_alias_indexes = {};
+    $.each(aliases || {}, function (index, index_aliases) {
+      $.each(index_aliases.aliases || {}, function (alias) {
         if (alias === index) return; // alias which is identical to index means no index.
         var cur_aliases = per_alias_indexes[alias];
         if (!cur_aliases) {
@@ -229,8 +229,8 @@ define([
   function retrieveMappingFromServer() {
     $.when(es.send("GET", "_mapping"), es.send("GET", "_aliases"))
     .done(function (mappings, aliases) {
-      loadMappings(mappings[0]);
-      loadAliases(aliases[0]);
+      loadMappings(JSON.parse(mappings[0]));
+      loadAliases(JSON.parse(aliases[0]));
       // Trigger an update event with the mappings and aliases
       $(mappingObj).trigger('update', [mappings[0], aliases[0]]);
     });

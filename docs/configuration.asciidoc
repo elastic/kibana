@@ -14,7 +14,12 @@ This setting is update-able via the Cluster Update Settings API.
 +
 added[1.0.2] - HTTP Basic authentication credentials can be specified as part of the host name,
  i.e., ["user:pwd@host:9200"]
-
++
+added[1.3.0] - next to the host and port, you can specify a protocol to use,
+ i.e., ["https://host:9200"] (defaults to "http")
++
+added[1.3.0] - the `hostname:port` part can be extended with a base path
+ i.e., ["host:9200/monitor1"]
 
 `marvel.agent.enabled`::
 
@@ -56,6 +61,20 @@ This setting is update-able via the Cluster Update Settings API.
 Enables or disable exporting of shard level statistics. Defaults to `false`.
 +
 This setting is update-able via the Cluster Update Settings API.
+
+==== added[1.3.0] SSL settings when exporting using HTTPS
+
+`marvel.agent.exporter.es.ssl.truststore`::
+
+An absolute path for a custom trust store, which will be used for https connections.
+
+`marvel.agent.exporter.es.ssl.truststore_password`::
+
+the password to use when accessing the trust store.
+
+`marvel.agent.exporter.es.ssl.truststore_algorithm`::
+
+Trust store format (defaults to SunX509).
 
 
 [[marvel-indices]]
