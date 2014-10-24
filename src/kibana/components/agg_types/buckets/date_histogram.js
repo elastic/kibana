@@ -111,6 +111,11 @@ define(function (require) {
               };
             }
           }
+        },
+        {
+          name: 'script',
+          type: 'string',
+          advanced: true
         }
       ]
     });

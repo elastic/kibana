@@ -61,6 +61,11 @@ define(function (require) {
               return true;
             }
           }
+        },
+        {
+          name: 'script',
+          type: 'string',
+          advanced: true
         }
       ]
     });
