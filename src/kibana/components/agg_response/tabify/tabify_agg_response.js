@@ -1,104 +1,104 @@
 define(function (require) {
   return function tabifyAggResponseProvider(Private) {
-
     var _ = require('lodash');
-    var AggConfig = Private(require('components/vis/_agg_config'));
 
-    var getColumns = require('components/agg_response/tabify/_get_columns');
-    var RowWriter = require('components/agg_response/tabify/_row_writer');
+    var AggConfig = Private(require('components/vis/_agg_config'));
+    var TabbedAggResponseWriter = Private(require('components/agg_response/tabify/_response'));
     var Buckets = require('components/agg_response/tabify/_buckets');
 
-    function tabifyAggResponse(vis, resp) {
+    function tabifyAggResponse(vis, esResponse, respOpts) {
+      var resp = new TabbedAggResponseWriter(vis, respOpts);
+      var topLevelBucket = _.assign({}, esResponse.aggregations, {
+        doc_count: esResponse.hits.total
+      });
 
-      // Create the initial results structure
-      var rows = [];
-      var columns = getColumns(vis);
-
-      // pull columns off the top of this stack while recursing
-      var aggStack = _.pluck(columns, 'aggConfig');
-
-      // write row cells here while itterating, then call row.write()
-      var row = new RowWriter(vis, rows, columns);
-
-      /**
-       * read an aggregation from a bucket, which is maybe found at key,
-       * and will recurse down if the aggregation creates buckets, and then
-       * will pass the read values to the row, which writes to the rows array.
-       *
-       * @param {object} bucket - a bucket from the aggResponse
-       * @param {undefined|string} key - the key where the bucket was found
-       * @returns {undefined}
-       */
-      function collectBucket(bucket, key) {
-        var agg = aggStack.shift();
-        var aggResp = bucket[agg.id];
-
-        switch (agg.schema.group) {
-        case 'buckets':
-          var buckets = new Buckets(aggResp);
-          if (buckets.length) {
-            buckets.forEach(function (subBucket, key) {
-              row.push(bucketKey(subBucket, key));
-              collectBucket(subBucket, key);
-              row.pop();
-            });
-          } else {
-            // bucket didn't result in sub-buckets, we will try to
-            // write the row, but stop digging. This row.write will do nothing in
-            // specific scenarios known to the RowWriter
-            row.write();
-          }
-          break;
-        case 'metrics':
-          if (aggResp) {
-            row.push(metricValue(aggResp));
-          } else {
-            row.push(bucketCount(bucket));
-          }
-
-          if (!aggStack.length) {
-            row.write();
-          } else {
-            // process the next agg at this same level
-            collectBucket(bucket, key);
-          }
-
-          row.pop();
-          break;
+      if (!resp.aggStack.length) {
+        var schema = vis.type.schemas.metrics[0];
+        if (!schema) {
+          throw new Error('Unable to tabify empty response without a metric schema of some sort');
         }
 
-        aggStack.unshift(agg);
-      }
-
-      if (columns.length) {
-        collectBucket(resp.aggregations);
-      } else {
         // special case where there are no aggregations,
         // we return a temporary "count" aggregation which reads
         // the total search hit count
-        columns.push({
-          aggConfig: new AggConfig(vis, {
-            type: 'count',
-            schema: 'metrics'
-          })
+        var tempCountAgg = new AggConfig(vis, {
+          type: 'count',
+          schema: schema
         });
-        rows.push([resp.hits.total]);
+        resp.columns.push({
+          aggConfig: tempCountAgg
+        });
+        resp.aggStack.push(tempCountAgg);
       }
 
-      return {
-        rows: rows,
-        columns: columns
-      };
+      collectBucket(resp, topLevelBucket);
+
+      return resp.done();
     }
 
+    /**
+     * read an aggregation from a bucket, which is *might* be found at key (if
+     * the response came in object form), and will recurse down the aggregation
+     * tree and will pass the read values to the ResponseWriter.
+     *
+     * @param {object} bucket - a bucket from the aggResponse
+     * @param {undefined|string} key - the key where the bucket was found
+     * @returns {undefined}
+     */
+    function collectBucket(resp, bucket, key) {
+      var agg = resp.aggStack.shift();
+      var aggResp = bucket[agg.id];
+
+      switch (agg.schema.group) {
+      case 'buckets':
+        var buckets = new Buckets(aggResp);
+        if (buckets.length) {
+          var splitting = resp.canSplit && agg.schema.name === 'split';
+
+          buckets.forEach(function collectSubBucket(subBucket, subBucketKey) {
+            var key = bucketKey(subBucket, subBucketKey);
+            var recurse = function () {
+              collectBucket(resp, subBucket, key);
+            };
+
+            if (splitting) resp.split(agg, key, recurse);
+            else resp.cell(key, recurse);
+          });
+        } else {
+          // bucket didn't result in sub-buckets, we will try to
+          // write the row, but stop digging. This row.write will do nothing in
+          // specific scenarios known to the the Response
+          resp.row();
+        }
+        break;
+      case 'metrics':
+        resp.cell(aggResp ? metricValue(aggResp) : bucketCount(bucket), function () {
+          if (!resp.aggStack.length) {
+            // row complete
+            resp.row();
+          } else {
+            // process the next agg at this same level
+            collectBucket(resp, bucket, key);
+          }
+        });
+        break;
+      }
+
+      resp.aggStack.unshift(agg);
+    }
+
+    // read the metric value from a metric response
     function metricValue(aggResp) {
       return aggResp.value == null ? 0 : aggResp.value;
     }
 
+    // read the bucket count from an agg bucket
     function bucketCount(bucket) {
       return bucket.doc_count;
     }
 
+    // read the key from an agg bucket, optionally use the key the bucket
+    // was found at
     function bucketKey(bucket, key) {
       if (key != null) return key;
       return bucket.key;

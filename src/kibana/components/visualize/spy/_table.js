@@ -131,7 +131,7 @@ define(function (require) {
             return;
           }
 
-          var tabbed = tabifyAggResponse($scope.vis, $scope.esResp);
+          var tabbed = tabifyAggResponse($scope.vis, $scope.esResp, { canSplit: false });
           $scope.rows = tabbed.rows;
           $scope.columns = tabbed.columns;
 
