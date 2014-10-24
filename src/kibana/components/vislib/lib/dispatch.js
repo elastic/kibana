@@ -43,14 +43,16 @@ define(function (require) {
       var attr = this._attr;
       var handler = this.handler;
 
-      // Find object with the actual d value and add it to the point object
-      var object = _.find(chartData.series, { 'label': label });
-      d.value = +object.values[i].y;
+      if (chartData.series) {
+        // Find object with the actual d value and add it to the point object
+        var object = _.find(chartData.series, { 'label': label });
+        d.value = +object.values[i].y;
 
-      if (isPercentage) {
+        if (isPercentage) {
 
-        // Add the formatted percentage to the point object
-        d.percent = (100 * d.y).toFixed(1) + '%';
+          // Add the formatted percentage to the point object
+          d.percent = (100 * d.y).toFixed(1) + '%';
+        }
       }
 
       return {
