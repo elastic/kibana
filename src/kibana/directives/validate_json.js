@@ -13,12 +13,7 @@ define(function (require) {
         'queryInput': '=?',
       },
       link: function ($scope, $elem, attr, ngModel) {
-        var debouncedValidator = _.debounce(validator, 200, {
-          leading: true,
-          trailing: true
-        });
-
-        $scope.$watch('ngModel', debouncedValidator);
+        $scope.$watch('ngModel', validator);
 
         function validator(newValue, oldValue) {
           if (newValue.length === 0) {

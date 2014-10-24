@@ -59,7 +59,7 @@ define(function (require) {
     });
 
     // Create the scope
-    inject(function ($injector, $controller, $rootScope, $compile) {
+    inject(function ($injector, $rootScope, $compile) {
       // Give us a scope
       $parentScope = $rootScope;
       $parentScope.mockModel = mockScope.ngModel;
