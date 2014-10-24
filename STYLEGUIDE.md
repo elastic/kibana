@@ -857,6 +857,6 @@ require('routes')
 
 # Attribution
 
-This Javascript guide forked from the [node style guide](https://github.com/felixge/node-style-guide) created by [Felix Geisendörfer](http://felixge.de/) and is
+This JavaScript guide forked from the [node style guide](https://github.com/felixge/node-style-guide) created by [Felix Geisendörfer](http://felixge.de/) and is
 licensed under the [CC BY-SA 3.0](http://creativecommons.org/licenses/by-sa/3.0/)
 license.
