@@ -1,10 +1,11 @@
 define(function (require) {
-  return function tabifyAggResponseProvider(Private) {
+  return function tabifyAggResponseProvider(Private, Notifier) {
     var _ = require('lodash');
 
     var AggConfig = Private(require('components/vis/_agg_config'));
     var TabbedAggResponseWriter = Private(require('components/agg_response/tabify/_response'));
     var Buckets = require('components/agg_response/tabify/_buckets');
+    var notify = new Notifier({ location: 'agg_response/tabify'});
 
     function tabifyAggResponse(vis, esResponse, respOpts) {
       var resp = new TabbedAggResponseWriter(vis, respOpts);
@@ -104,6 +105,6 @@ define(function (require) {
       return bucket.key;
     }
 
-    return tabifyAggResponse;
+    return notify.timed('tabify agg response', tabifyAggResponse);
   };
 });

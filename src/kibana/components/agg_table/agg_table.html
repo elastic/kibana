@@ -1,0 +1,32 @@
+<paginate list="formattedRows" per-page="pickPerPage" class="visualize-table">
+  <div class="visualize-table-paginated-table">
+    <table class="table table-condensed">
+      <thead>
+        <tr bindonce>
+          <th
+            ng-repeat="col in columns"
+            ng-click="table.cycleSort(col)"
+            ng-class="table.getColumnClass(col, $first, $last)">
+            <span bo-text="table.colTitle(col)"></span>
+            <i
+              class="fa"
+              ng-class="{
+                'fa-sort-asc': table.sort.col === col && table.sort.asc,
+                'fa-sort-desc': table.sort.col === col && !table.sort.asc,
+                'fa-sort': !table.sort || table.sort.col !== col
+              }">
+            </i>
+          </th>
+        </tr>
+      </thead>
+      <tbody kbn-rows="page" kbn-rows-min="paginate.perPage"></tbody>
+    </table>
+  </div>
+
+  <div class="visualize-table-controls">
+    <a class="small" ng-click="table.exportAsCsv()">
+      Export <i class="fa fa-download"></i>
+    </a>
+    <paginate-controls></paginate-controls>
+  </div>
+</paginate>
