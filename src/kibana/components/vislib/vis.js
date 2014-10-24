@@ -27,6 +27,9 @@ define(function (require) {
       this.el = $el.get ? $el.get(0) : $el;
       this.ChartClass = chartTypes[config.type];
       this._attr = _.defaults(config || {}, {});
+      this.eventTypes = {
+        enabled: []
+      };
 
       // bind the resize function so it can be used as an event handler
       this.resize = _.bind(this.resize, this);
@@ -122,63 +125,53 @@ define(function (require) {
      * @returns {*}
      */
     Vis.prototype.on = function (event, handler) {
-
-      // Adds handler to _listeners[listener] array
-      var ret = Events.prototype.on.call(this, event, handler);
-      var handlerIndex;
+      var ret = Events.prototype.on.call(this, event, handler); // Adds event to _listeners array
+      var listeners = this._listeners[event].length;
+      var charts = (this.handler && this.handler.charts);
+      var chartCount = charts ? charts.length : 0;
+      var enabledEvents = this.eventTypes.enabled;
+      var eventAbsent = (enabledEvents.indexOf(event) === -1);
 
       // Check if the charts array is available
-      // if handler count changed from 0 to 1, call handler object
+      // if chart count changed from 0 to 1, call handler object
       // this.handler.enable(event)
+      if (listeners === 1 && chartCount > 0) {
+        charts.forEach(function (chart) {
+          this.handler.enable(event, chart);
+        }, this);
+      }
 
-      // inside handler: if there are charts, bind events to charts
-      // functionality: track in array that event is enabled
-      // clean up event handlers every time it destroys the chart
-      // rebind them everytime it creates the charts
-
-//      if (this.handler && this.handler.charts) {
-//        handlerIndex = this._listeners[event].length - 1;
-//
-//        // Dispatch listener to chart
-//        this.handler.charts.forEach(function (chart) {
-//          chart.on(event + '.' + handlerIndex, function (e) {
-//            handler.call(this, e);
-//          });
-//        });
-//      }
+      // update the eventType as enabled
+      if (eventAbsent) {
+        enabledEvents.push(event);
+      }
 
       return ret;
     };
 
     /**
-     * Turns off event listeners. Passes the null value as the handler to
-     * event listeners.
+     * Turns off event listeners.
      *
      * @param event {String}
      * @param handler {Function}
      * @returns {*}
      */
     Vis.prototype.off = function (event, handler) {
-      var ret = Events.prototype.off.call(this, event, handler);
-      var handlerIndex;
+      var ret = Events.prototype.off.call(this, event, handler);  // Removes event from _listeners array
+      var listeners = (!!this._listeners[event] && this._listeners[event].length !== 0);
+      var charts = (this.handler && this.handler.charts);
+      var chartCount = charts ? charts.length : 0;
+      var eventIndex = this.eventTypes.enabled.indexOf(event);
+      var eventPresent = (eventIndex !== -1);
 
-      if (this._listeners[event] && this.handler.charts) {
-
-        // Once the handler array reaches zero, then set event to null
-
-        // if no handler, set all listener handlers to null
-        if (!handler) {
-          this.handler.charts.forEach(function (chart) {
-            chart.on(event, null);
-          });
+      // Once the handler array reaches zero, then turn off event
+      if (!listeners && eventPresent) {
+        if (chartCount > 0) {
+          charts.forEach(function (chart) {
+            this.handler.disable(event, chart);
+          }, this);
         } else {
-
-          // if handler, turn off a specific handler
-          handlerIndex = _.findIndex(this._listeners[event], {'handler': handler});
-
-          this.handler.charts.forEach(function (chart) {
-            chart.on(event + '.' + handlerIndex, null);
-          });
+          this.eventTypes.enabled.splice(eventIndex, 1);
         }
       }
 

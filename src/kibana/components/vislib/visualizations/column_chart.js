@@ -139,35 +139,21 @@ define(function (require) {
      * @param brush {Function} D3 brush function
      * @returns {HTMLElement} rect with event listeners attached
      */
-    ColumnChart.prototype.addBarEvents = function (svg, bars) {
+    ColumnChart.prototype.addBarEvents = function (svg, bars, brush) {
       var events = this.events;
       var dispatch = this.events.dispatch;
 //      var addBrush = this._attr.addBrushing;
-//      var xScale = this.handler.xAxis.xScale;
+      var xScale = this.handler.xAxis.xScale;
 //      var height = this._attr.height;
 //      var margin = this._attr.margin;
 
       bars
       .on('mouseover.bar', function (d, i) {
-        events.onMouseOver.call(this, arguments);
         dispatch.hover.call(this, events.eventResponse(d, i));
+        d3.event.stopPropagation();
       })
-//      .on('mousedown.bar', function () {
-//        var bar = d3.select(this);
-//        var startX = d3.mouse(svg.node());
-//        var startXInv = xScale.invert(startX[0]);
-//
-//        // Reset the brush value
-//        brush.extent([startXInv, startXInv]);
-//
-//        // Magic!
-//        // Need to call brush on svg to see brush when brushing
-//        // while on top of bars.
-//        // Need to call brush on bar to allow the click event to be registered
-//        svg.call(brush);
-//        bar.call(brush);
-//      })
       .on('click.bar', function (d, i) {
+        events.onMouseOver.call(this, arguments);
         dispatch.click.call(this, events.eventResponse(d, i));
         d3.event.stopPropagation();
       })
@@ -175,6 +161,25 @@ define(function (require) {
         events.onMouseOut.call(this, arguments);
         d3.event.stopPropagation();
       });
+
+      if (dispatch.on('brush')) {
+        bars
+        .on('mousedown.bar', function () {
+          var bar = d3.select(this);
+          var startX = d3.mouse(svg.node());
+          var startXInv = xScale.invert(startX[0]);
+
+          // Reset the brush value
+          brush.extent([startXInv, startXInv]);
+
+          // Magic!
+          // Need to call brush on svg to see brush when brushing
+          // while on top of bars.
+          // Need to call brush on bar to allow the click event to be registered
+          svg.call(brush);
+          bar.call(brush);
+        });
+      }
     };
 
     /**
@@ -220,7 +225,8 @@ define(function (require) {
 
           bars = self.addBars(svg, layers);
 
-          self.addBarEvents(svg, bars);
+          var brush = self.events.addBrush(xScale, svg);
+          self.addBarEvents(svg, bars, brush);
 
           var line = svg.append('line')
           .attr('x1', 0)

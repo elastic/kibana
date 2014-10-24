@@ -60,32 +60,62 @@ define(function (require) {
       var self = this;
       var charts = this.charts = [];
 
-      _.forEach(this.renderArray, function (property) {
+      this.renderArray.forEach(function (property) {
         if (typeof property.render === 'function') {
           property.render();
         }
       });
 
+      // render the chart(s)
       d3.select(this.el)
       .selectAll('.chart')
       .each(function (chartData) {
         var chart = new self.ChartClass(self, this, chartData);
-        var keys = Object.keys(self.vis._listeners);
+        var enabledEvents;
 
-        // Copy dispatch.on methods to chart object
-        d3.rebind(chart, chart.events.dispatch, 'on');
+        if (chart.events.dispatch) {
+          enabledEvents = self.vis.eventTypes.enabled;
 
-        if (keys.length) {
-          keys.forEach(function (key) {
-            chart.on(key, function (e) {
-              self.vis.emit(key, e);
+          // Copy dispatch.on methods to chart object
+          d3.rebind(chart, chart.events.dispatch, 'on');
+
+          // Bind events to chart(s)
+          if (enabledEvents.length) {
+            enabledEvents.forEach(function (event) {
+              self.enable(event, chart);
             });
-          });
+          }
         }
 
         charts.push(chart);
         chart.render();
       });
+    };
+
+
+    // inside handler: if there are charts, bind events to charts
+    // functionality: track in array that event is enabled
+    // clean up event handlers every time it destroys the chart
+    // rebind them every time it creates the charts
+    /**
+     *
+     * @param event
+     * @param chart
+     */
+    Handler.prototype.enable = function (event, chart) {
+      return chart.on(event, function (e) {
+        this.vis.emit(event, e);
+      }.bind(this));
+    };
+
+    /**
+     *
+     * @param event
+     * @param chart
+     * @returns {*}
+     */
+    Handler.prototype.disable = function (event, chart) {
+      return chart.on(event, null);
     };
 
     /**

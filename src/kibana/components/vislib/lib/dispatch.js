@@ -84,38 +84,36 @@ define(function (require) {
      * @param svg {HTMLElement} Reference to SVG
      * @returns {*} Returns a D3 brush function and a SVG with a brush group attached
      */
-//    Dispatch.prototype.addBrush = function (xScale, svg) {
-//      var dispatch = this._attr.dispatch;
-//      var attr = this._attr;
-//      var chartData = this.chartData;
-//      var isBrush = this._attr.addBrushing;
-//      var height = this._attr.height;
-//      var margin = this._attr.margin;
-//
-//      // Brush scale
-//      var brush = d3.svg.brush()
-//        .x(xScale)
-//        .on('brushend', function brushEnd() {
-//          // response returned on brush
-//          return dispatch.brush({
-//            range: brush.extent(),
-//            config: attr,
-//            e: d3.event,
-//            data: chartData
-//          });
-//        });
-//
-//      // if `addBrushing` is true, add brush canvas
-//      if (isBrush) {
-//        svg.append('g')
-//        .attr('class', 'brush')
-//        .call(brush)
-//        .selectAll('rect')
-//        .attr('height', height - margin.top - margin.bottom);
-//      }
-//
-//      return brush;
-//    };
+    Dispatch.prototype.addBrush = function (xScale, svg) {
+      var dispatch = this.dispatch;
+      var attr = this.handler._attr;
+      var chartData = this.handler.chartData;
+      var height = attr.height;
+      var margin = attr.margin;
+
+      // Brush scale
+      var brush = d3.svg.brush()
+        .x(xScale)
+        .on('brushend', function brushEnd() {
+          return dispatch.brush({
+            range: brush.extent(),
+            config: attr,
+            e: d3.event,
+            data: chartData
+          });
+        });
+
+      // if `addBrushing` is true, add brush canvas
+      if (dispatch.on('brush')) {
+        svg.insert('g', 'g')
+          .attr('class', 'brush')
+          .call(brush)
+          .selectAll('rect')
+          .attr('height', height - margin.top - margin.bottom);
+
+        return brush;
+      }
+    };
 
     return Dispatch;
   };
