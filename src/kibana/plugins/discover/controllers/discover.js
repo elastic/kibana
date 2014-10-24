@@ -12,6 +12,7 @@ define(function (require) {
   require('components/notify/notify');
   require('components/timepicker/timepicker');
   require('directives/fixed_scroll');
+  require('directives/validate_json');
   require('directives/validate_query');
   require('filters/moment');
   require('components/courier/courier');
