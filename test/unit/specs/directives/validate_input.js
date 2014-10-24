@@ -4,7 +4,7 @@ define(function (require) {
   var sinon = require('test_utils/auto_release_sinon');
 
   // Load the kibana app dependencies.
-  require('components/query_input/query_input');
+  require('directives/validate_query');
 
   var $parentScope;
   var $elemScope;
@@ -17,7 +17,7 @@ define(function (require) {
     queryInput: undefined
   };
 
-  var markup = '<input ng-model="mockModel" query-input="mockQueryInput" input-focus type="text">';
+  var markup = '<input ng-model="mockModel" validate-query="mockQueryInput" input-focus type="text">';
 
   var checkRequest = function (index, query, type) {
     query = query || mockScope.ngModel;
@@ -38,6 +38,10 @@ define(function (require) {
 
   var invalidEsResponse = function () {
     return Promise.reject({ body: { error: 'mock invalid query' } });
+  };
+
+  var checkClass = function (className) {
+    expect($elem.hasClass(className)).to.be(true);
   };
 
   var init = function () {
@@ -71,7 +75,7 @@ define(function (require) {
     });
   };
 
-  describe('query input directive', function () {
+  describe('validate-query directive', function () {
     describe('initialization', function () {
       beforeEach(function () {
         mockValidateReturns = validEsResponse();
@@ -104,9 +108,30 @@ define(function (require) {
       it('should set valid state', function (done) {
         // give angular time to set up the directive
         setTimeout(function () {
-          expect($elem.hasClass('ng-valid-query-input')).to.be(true);
-          expect($elem.hasClass('ng-valid')).to.be(true);
+          checkClass('ng-valid-query-input');
+          checkClass('ng-valid');
           done();
+        }, 0);
+      });
+
+      it.skip('should change validity based on response', function (done) {
+        setTimeout(function () {
+          checkClass('ng-valid');
+
+          mockValidateQuery.returns(invalidEsResponse());
+          $elem.val('invalid:');
+          $elem.scope().$digest();
+          setTimeout(function () {
+            checkClass('ng-invalid');
+
+            mockValidateQuery.returns(validEsResponse());
+            $elem.val('valid');
+            $elem.scope().$digest();
+            setTimeout(function () {
+              checkClass('ng-valid');
+              done();
+            }, 0);
+          }, 0);
         }, 0);
       });
     });
@@ -120,12 +145,10 @@ define(function (require) {
       it('should set invalid state', function (done) {
         // give angular time to set up the directive
         setTimeout(function () {
-          expect($elem.hasClass('ng-invalid')).to.be(true);
+          checkClass('ng-invalid');
           done();
         }, 0);
       });
-
-      it('should change to invalid state');
     });
   });
 });
