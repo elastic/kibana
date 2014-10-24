@@ -3,6 +3,7 @@ define(function (require) {
   var ConfigTemplate = require('utils/config_template');
   var angular = require('angular');
   var module = require('modules').get('kibana');
+  var $ = require('jquery');
 
   require('directives/input_focus');
 
@@ -57,6 +58,10 @@ define(function (require) {
             '</div>' +
             ''
           )(tmpScope));
+          $('body').on('keyup', $scope.escapeEvent);
+          $scope.$on('$destroy', function () {
+            $('body').off('keyup', $scope.escapeEvent);
+          });
         };
 
         $scope.$watch('configSubmit', render);
@@ -70,7 +75,16 @@ define(function (require) {
           } else {
             $scope.configTemplate = null;
           }
+          $('body').off('keyup', $scope.escapeEvent);
         };
+
+        $scope.escapeEvent = function (e) {
+          if (e.which === 27) {
+            $scope.close();
+            $scope.$digest();
+          }
+        };
+
       }
     };
   });
