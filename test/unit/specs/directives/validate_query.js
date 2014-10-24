@@ -105,13 +105,12 @@ define(function (require) {
         init();
       });
 
-      it('should set valid state', function (done) {
+      it('should set valid state', function () {
         // give angular time to set up the directive
-        setTimeout(function () {
+        mockValidateReturns.then(function () {
           checkClass('ng-valid-query-input');
           checkClass('ng-valid');
-          done();
-        }, 0);
+        });
       });
 
       it.skip('should change validity based on response', function (done) {
@@ -142,12 +141,11 @@ define(function (require) {
         init();
       });
 
-      it('should set invalid state', function (done) {
+      it('should set invalid state', function () {
         // give angular time to set up the directive
-        setTimeout(function () {
+        mockValidateReturns.then(function () {
           checkClass('ng-invalid');
-          done();
-        }, 0);
+        });
       });
     });
   });
