@@ -1,4 +1,6 @@
 define(function (require) {
+  require('css!plugins/table_vis/styles/table_vis.css');
+
   require('modules')
   .get('kibana/table_vis', ['kibana'])
   .controller('TableVisController', function ($scope, Private) {
