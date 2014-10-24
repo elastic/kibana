@@ -6,6 +6,7 @@ define(function (require) {
   // Load the kibana app dependencies.
   require('directives/validate_query');
 
+  var debounceDelay = 300;
   var $parentScope;
   var $elemScope;
   var $elem;
@@ -113,25 +114,26 @@ define(function (require) {
         });
       });
 
-      it.skip('should change validity based on response', function (done) {
-        setTimeout(function () {
+      it('should change validity based on response', function (done) {
+        Promise.resolve()
+        .then(function () {
           checkClass('ng-valid');
-
           mockValidateQuery.returns(invalidEsResponse());
-          $elem.val('invalid:');
+          $parentScope.mockModel = 'invalid:';
           $elem.scope().$digest();
-          setTimeout(function () {
-            checkClass('ng-invalid');
-
-            mockValidateQuery.returns(validEsResponse());
-            $elem.val('valid');
-            $elem.scope().$digest();
-            setTimeout(function () {
-              checkClass('ng-valid');
-              done();
-            }, 0);
-          }, 0);
-        }, 0);
+        })
+        .delay(debounceDelay + 1)
+        .then(function () {
+          checkClass('ng-invalid');
+          mockValidateQuery.returns(validEsResponse());
+          $parentScope.mockModel = 'valid';
+          $elem.scope().$digest();
+        })
+        .delay(debounceDelay + 1)
+        .then(function () {
+          checkClass('ng-valid');
+          done();
+        });
       });
     });
 
