@@ -14,6 +14,8 @@ define(function (require) {
     var mapData;
     var mapcenter = [41, -100];
     var mapzoom = 4;
+    var precision;
+      
     var tiles = config.get('mapbox:tiles');
     var apiKey = config.get('mapbox:apiKey');
     L.mapbox.accessToken = apiKey;
@@ -35,6 +37,7 @@ define(function (require) {
         return new TileMap(handler, chartEl, chartData);
       }
       TileMap.Super.apply(this, arguments);
+
     }
 
     /**
@@ -45,7 +48,6 @@ define(function (require) {
      * @returns {Function} Creates the map
      */
     TileMap.prototype.draw = function () {
-      
       // Attributes
       var self = this;
       var $elem = $(this.chartEl);
@@ -59,27 +61,32 @@ define(function (require) {
           div.addClass('tilemap');
           var map = L.mapbox.map(div[0], tiles)
             .setView(mapcenter, mapzoom);
-          map.options.minZoom = 1;
+          map.options.minZoom = 2;
           map.options.maxZoom = 10;
           L.control.scale().addTo(map);
 
           if (data.geoJSON) {
-            self.heatMap(map, data.geoJSON);
-            // self.scaledCircleMarkers(map, data.geoJSON);
+
             // self.clusterMarkers(map, data.geoJSON);
+            // self.heatMap(map, data.geoJSON);
+            // self.scaledCircleMarkers(map, data.geoJSON);
+            self.quantizeCircleMarkers(map, data.geoJSON);
+
           }
 
         });
       };
+
     };
 
     TileMap.prototype.clusterMarkers = function (map, mapData) {
       var self = this;
+      self._attr.maptype = 'clusterMarkers';
       var min = mapData.properties.min;
       var max = mapData.properties.max;
       var length = mapData.features.length;
       var precision = mapData.features[0].properties.geohash.length;
-      console.log('clusterMarkers: features:', length, ' precision:', precision, ' min value:', min, ' max value:', max);
+      console.log('\n clusterMarkers: features:', length, ' precision:', precision, ' min value:', min, ' max value:', max);
       
       var clusterGroup = new L.MarkerClusterGroup({
         maxClusterRadius: 120,
@@ -104,11 +111,12 @@ define(function (require) {
 
     TileMap.prototype.heatMap = function (map, mapData) {
       var self = this;
+      self._attr.maptype = 'heatMap';
       var min = mapData.properties.min;
       var max = mapData.properties.max;
       var length = mapData.features.length;
       var precision = mapData.features[0].properties.geohash.length;
-      console.log('heatMap: features:', length, ' precision:', precision, ' min value:', min, ' max value:', max);
+      console.log('\n heatMap: features:', length, ' precision:', precision, ' min value:', min, ' max value:', max);
       
       var featureLayer = L.geoJson(mapData);
       var heat = L.heatLayer([], {
@@ -132,20 +140,22 @@ define(function (require) {
     TileMap.prototype.scaledCircleMarkers = function (map, mapData) {
       
       var self = this;
+      self._attr.maptype = 'scaledCircleMarkers';
       var min = mapData.properties.min;
       var max = mapData.properties.max;
       var length = mapData.features.length;
-      var precision = mapData.features[0].properties.geohash.length;
-      console.log('scaledCircleMarkers: features:', length, ' precision:', precision, ' min value:', min, ' max value:', max);
+      precision = mapData.features[0].properties.geohash.length;
+      console.log('\n scaledCircleMarkers: features:', length, ' precision:', precision, ' min value:', min, ' max value:', max);
 
       var zoomScale = self.zoomScale(mapzoom);
       var bounds;
-      var defaultColor = '#c90000';
+      var defaultColor = '#005baa';
             
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
-          var rad = zoomScale * self.radiusScale(count, max);
+          
+          var rad = zoomScale * self.radiusScale(count, max, precision);
           return L.circleMarker(latlng, {
             radius: rad
           });
@@ -154,10 +164,11 @@ define(function (require) {
           self.bindPopup(feature, layer);
         },
         style: function (feature) {
+          var count = feature.properties.count;
           return {
             // color: feature.properties.color,
             fillColor: defaultColor,
-            color: defaultColor,
+            color: self.darkerColor(defaultColor),
             weight: 1.5,
             opacity: 1,
             fillOpacity: 0.6
@@ -165,13 +176,61 @@ define(function (require) {
         }
       }).addTo(map);
 
-      self.redrawFeatures(map, mapData, featureLayer, bounds);
+      self.resizeFeatures(map, min, max, precision, featureLayer);
 
       map.on('zoomend dragend', function () {
         mapzoom = map.getZoom();
         bounds = map.getBounds();
-        self.redrawFeatures(map, mapData, featureLayer, bounds);
+        self.resizeFeatures(map, min, max, precision, featureLayer);
       });
+    };
+
+    TileMap.prototype.quantizeCircleMarkers = function (map, mapData) {
+      
+      var self = this;
+      self._attr.maptype = 'quantizeCircleMarkers';
+      var min = mapData.properties.min;
+      var max = mapData.properties.max;
+      var length = mapData.features.length;
+      precision = mapData.features[0].properties.geohash.length;
+      console.log('\n quantizeCircleMarkers: features:', length, ' precision:', precision, ' min value:', min, ' max value:', max);
+
+      var zoomScale = self.zoomScale(mapzoom);
+      var bounds;
+      var defaultColor = '#005baa';
+            
+      var featureLayer = L.geoJson(mapData, {
+        pointToLayer: function (feature, latlng) {
+          var count = feature.properties.count;
+          var rad = zoomScale * 3;
+          return L.circleMarker(latlng, {
+            radius: rad
+          });
+        },
+        onEachFeature: function (feature, layer) {
+          self.bindPopup(feature, layer);
+        },
+        style: function (feature) {
+          var count = feature.properties.count;
+          var color = self.quantizeColorScale(count, min, max);
+          return {
+            fillColor: color,
+            color: self.darkerColor(color),
+            weight: 1.5,
+            opacity: 1,
+            fillOpacity: 0.8
+          };
+        }
+      }).addTo(map);
+
+      self.resizeFeatures(map, min, max, precision, featureLayer);
+
+      map.on('zoomend dragend', function () {
+        mapzoom = map.getZoom();
+        bounds = map.getBounds();
+        self.resizeFeatures(map, min, max, precision, featureLayer);
+      });
+
     };
 
     /**
@@ -181,23 +240,21 @@ define(function (require) {
      * @param selection
      * @returns {Function} Creates the map
      */
-    TileMap.prototype.redrawFeatures = function (map, mapData, featureLayer, bounds) {
+    TileMap.prototype.resizeFeatures = function (map, min, max, precision, featureLayer) {
       
-      console.log('redrawFeatures');
       var self = this;
       var zoomScale = self.zoomScale(mapzoom);
-      var max = mapData.properties.max;
-
+      
       featureLayer.eachLayer(function (layer) {
         var latlng = L.latLng(layer.feature.geometry.coordinates[1], layer.feature.geometry.coordinates[0]);
-        // do not draw features outside of bounds
-        //if (bounds.contains(latlng)) {
-        //console.log('in', latlng);
-        //} else {
-        //console.log('out', latlng);
-        //}
+        
         var count = layer.feature.properties.count;
-        var rad = zoomScale * self.radiusScale(count, max);// * Math.sqrt(count);
+        var rad;
+        if (self._attr.maptype === 'quantizeCircleMarkers') {
+          rad = zoomScale * self.quantRadiusScale(precision);
+        } else {
+          rad = zoomScale * self.radiusScale(count, max, precision);
+        }
         layer.setRadius(rad);
       });
 
@@ -228,14 +285,11 @@ define(function (require) {
      * @return {Number}
      */
     TileMap.prototype.zoomScale = function (zoom) {
-      
-      var zs = 10 / Math.pow(zoom, 2);
       var zScale = d3.scale.pow()
-        .exponent(1.5)
-        .domain([1, 10])
-        .range([1, 12])
-        .clamp(true);
-      // console.log('zoomScale', zoom, zs, zScale(zoom));
+        .exponent(4)
+        .domain([1, 12])
+        .range([0.3, 100]);
+      //console.log('zoomScale', zoom, zScale(zoom));
       return zScale(zoom);
 
     };
@@ -250,25 +304,101 @@ define(function (require) {
      * @param max {Number}
      * @return {Number}
      */
-    TileMap.prototype.radiusScale = function (value, max) {
+    TileMap.prototype.radiusScale = function (count, max, precision) {
       
-      //var rScale = d3.scale.pow()
-      //  .exponent(2)
-      //  .domain([0, max])
-      //  .range([1, 10])
-      //  .clamp(true);
-      // console.log('radiusScale', value, max, rScale(value));
-      //return rScale(value);
-      var scaleMax = Math.pow(max, 3);
-      var rScale = d3.scale.pow()
-        .exponent(2)
-        .domain([0, scaleMax])
-        .range([0.5, 10])
-        .clamp(true);
-      // var lScale = d3.scale.linear()
-      // .domain([0, Math.sqrt(max)])
-      // .range([0, 20]);
-      return rScale(value);
+      var maxr;
+      var exp = 0.6;
+      switch (precision) {
+        case 1:
+          maxr = 200;
+          break;
+        case 2:
+          maxr = 30;
+          break;
+        case 3:
+          maxr = 9;
+          break;
+        case 4:
+          maxr = 3;
+          break;
+        case 5:
+          maxr = 1.44;
+          break;
+        case 6:
+          maxr = 1.13;
+          break;
+        default:
+          maxr = 9;
+      }
+      // pow 0.5 is sqrt
+      return Math.pow(count, exp) / Math.pow(max, exp) * maxr;
+      //return Math.pow(count, 0.6);
+      // return Math.sqrt(count);
+      //return count;
+    };
+
+    TileMap.prototype.quantRadiusScale = function (precision) {
+      
+      var maxr;
+      switch (precision) {
+        case 1:
+          maxr = 100;
+          break;
+        case 2:
+          maxr = 12;
+          break;
+        case 3:
+          maxr = 3;
+          break;
+        case 4:
+          maxr = 0.6;
+          break;
+        case 5:
+          maxr = 0.3;
+          break;
+        case 6:
+          maxr = 0.15;
+          break;
+        default:
+          maxr = 3;
+      }
+      return maxr;
+    };
+
+    TileMap.prototype.quantizeColorScale = function (count, min, max) {
+      var c1 = [
+        '#c7e9b4',
+        '#7fcdbb',
+        '#41b6c4',
+        '#2c7fb8',
+        '#253494'
+      ];
+      var c2 = [
+        '#F69CC1',
+        '#D76FA7',
+        '#B2468A',
+        '#882269',
+        '#5B0345'
+      ];
+      var c3 = [
+        '#9ecae1',
+        '#6baed6',
+        '#4292c6',
+        '#2171b5',
+        '#084594'
+      ];
+      var cScale = d3.scale.quantize()
+        .domain([min, max])
+        .range(c3);
+      return cScale(count);
+
+    };
+
+    TileMap.prototype.darkerColor = function (color) {
+      
+      var darker = d3.rgb(color).darker(0.2).toString();
+      console.log(darker);
+      return darker;
 
     };
 

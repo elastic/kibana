@@ -69,25 +69,28 @@ define(function (require) {
         .each(function (chartData) {
           var chart = new self.ChartClass(self, this, chartData);
 
-          /* 
+          
           // FIX THIS FOR TILE MAPS
           // Bind events to the chart
 
-          d3.rebind(chart, chart._attr.dispatch, 'on');
+          if (chart._attr.dispatch) {
+            
+            d3.rebind(chart, chart._attr.dispatch, 'on');
 
-          // Bubble events up to the Vis Class and Events Class
-          chart.on('click', function (e) {
-            self.vis.emit('click', e);
-          });
+            // Bubble events up to the Vis Class and Events Class
+            chart.on('click', function (e) {
+              self.vis.emit('click', e);
+            });
 
-          chart.on('hover', function (e) {
-            self.vis.emit('hover', e);
-          });
+            chart.on('hover', function (e) {
+              self.vis.emit('hover', e);
+            });
 
-          chart.on('brush', function (e) {
-            self.vis.emit('brush', e);
-          });
-          */
+            chart.on('brush', function (e) {
+              self.vis.emit('brush', e);
+            });
+          }
+          
 
           charts.push(chart);
           chart.render();

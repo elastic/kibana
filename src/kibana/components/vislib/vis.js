@@ -75,7 +75,7 @@ define(function (require) {
         // TODO: need to come up with a solution for resizing when no data is available
         return;
       }
-      this.render(this.data);
+      //  this.render(this.data);
     };
 
     /**
