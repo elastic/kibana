@@ -96,8 +96,9 @@ define(function (require) {
       var seriesLabel;
 
       _.forEach(visData, function countSeriesLength(obj) {
-        var dataLength = obj.series ? obj.series.length : obj.slices.children.length;
-        var label = (dataLength === 1 && obj.series) ? obj.series[0].label : undefined;
+        var rootSeries = obj.series || (obj.slices && obj.slices.children);
+        var dataLength = rootSeries ? rootSeries.length : 0;
+        var label = dataLength === 1 ? rootSeries[0].label : undefined;
 
         if (!seriesLabel) {
           seriesLabel = label;
