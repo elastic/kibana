@@ -33,17 +33,16 @@ define(function (require) {
         offset = attr.mode;
       }
 
-
       this.data = data;
       this._normalizeOrdered();
 
-      this._attr = attr;
       this._attr = _.defaults(attr || {}, {
-        offset: 'zero',
+
+        // d3 stack function
         stack: d3.layout.stack()
           .x(function (d) { return d.x; })
           .y(function (d) { return d.y; })
-          .offset(offset)
+          .offset(offset || 'zero')
       });
     }
 
@@ -202,6 +201,11 @@ define(function (require) {
     Data.prototype.getYMaxValue = function () {
       var self = this;
       var arr = [];
+      var grouped = (self._attr.mode === 'grouped');
+
+      if (self._attr.mode === 'percentage') {
+        return 1;
+      }
 
       if (self._attr.mode === 'percentage') {
         return 1;
@@ -210,7 +214,7 @@ define(function (require) {
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
       _.forEach(this.flatten(), function (series) {
-        if (self.shouldBeStacked(series)) {
+        if (self.shouldBeStacked(series) && !grouped) {
           return arr.push(self.getYStackMax(series));
         }
         return arr.push(self.getYMax(series));

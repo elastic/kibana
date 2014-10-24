@@ -76,10 +76,7 @@ define(function (require) {
      */
     ColumnChart.prototype.addBars = function (svg, layers) {
       var self = this;
-      var data = this.chartData;
       var color = this.handler.data.getColorFunc();
-      var xScale = this.handler.xAxis.xScale;
-      var yScale = this.handler.yAxis.yScale;
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
       var layer;
@@ -104,13 +101,53 @@ define(function (require) {
       bars
       .enter()
       .append('rect')
-        .attr('class', function (d) {
-          return self.colorToClass(color(self.fieldFormatter(d.label)));
-        })
-        .attr('fill', function (d) {
-          return color(self.fieldFormatter(d.label));
-        });
+      .attr('class', function (d) {
+        return self.colorToClass(color(self.fieldFormatter(d.label)));
+      })
+      .attr('fill', function (d) {
+        return color(self.fieldFormatter(d.label));
+      });
 
+      self.updateBars(bars);
+
+      // Add tooltip
+      if (isTooltip) {
+        bars.call(tooltip.render());
+      }
+
+      return bars;
+    };
+
+    /**
+     * Determines whether bars are grouped or stacked and updates the D3
+     * selection
+     *
+     * @method updateBars
+     * @param bars {D3.UpdateSelection} SVG with rect added
+     * @returns {D3.UpdateSelection}
+     */
+    ColumnChart.prototype.updateBars = function (bars) {
+      var offset = this._attr.mode;
+
+      if (offset === 'grouped') {
+        return this.addGroupedBars(bars);
+      }
+      return this.addStackedBars(bars);
+    };
+
+    /**
+     * Adds stacked bars to column chart visualization
+     *
+     * @method addStackedBars
+     * @param bars {D3.UpdateSelection} SVG with rect added
+     * @returns {D3.UpdateSelection}
+     */
+    ColumnChart.prototype.addStackedBars = function (bars) {
+      var data = this.chartData;
+      var xScale = this.handler.xAxis.xScale;
+      var yScale = this.handler.yAxis.yScale;
+
+      // update
       bars
       .attr('x', function (d) {
         return xScale(d.x);
@@ -134,9 +171,57 @@ define(function (require) {
         return yScale(d.y0) - yScale(d.y0 + d.y);
       });
 
-      if (isTooltip) {
-        bars.call(tooltip.render());
-      }
+      return bars;
+    };
+
+    /**
+     * Adds grouped bars to column chart visualization
+     *
+     * @method addGroupedBars
+     * @param bars {D3.UpdateSelection} SVG with rect added
+     * @returns {D3.UpdateSelection}
+     */
+    ColumnChart.prototype.addGroupedBars = function (bars) {
+      var xScale = this.handler.xAxis.xScale;
+      var yScale = this.handler.yAxis.yScale;
+      var data = this.chartData;
+      var n = data.series.length;
+      var height = yScale.range()[0];
+      var groupSpacingPercentage = 0.15;
+      var isTimeScale = (data.ordered && data.ordered.date);
+      var minWidth = 1;
+      var barWidth;
+
+      // update
+      bars
+        .attr('x', function (d, i, j) {
+          if (isTimeScale) {
+            var groupWidth = xScale(data.ordered.min + data.ordered.interval) -
+              xScale(data.ordered.min);
+            var groupSpacing = groupWidth * groupSpacingPercentage;
+
+            barWidth = (groupWidth - groupSpacing) / n;
+
+            return xScale(d.x) + barWidth * j;
+          }
+          return xScale(d.x) + xScale.rangeBand() / n * j;
+        })
+        .attr('width', function () {
+          if (barWidth < minWidth) {
+            throw new errors.ContainerTooSmall();
+          }
+
+          if (isTimeScale) {
+            return barWidth;
+          }
+          return xScale.rangeBand() / n;
+        })
+        .attr('y', function (d) {
+          return yScale(d.y);
+        })
+        .attr('height', function (d) {
+          return height - yScale(d.y);
+        });
 
       return bars;
     };

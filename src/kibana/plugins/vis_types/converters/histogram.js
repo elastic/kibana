@@ -97,6 +97,7 @@ define(function (require) {
 
           var label;
           var val;
+          var percent;
 
           switch (col) {
           case colX:
@@ -105,7 +106,8 @@ define(function (require) {
             break;
           case colY:
             label = 'y';
-            val = datum.y;
+            val = datum.value;
+            percent = datum.percent;
             break;
           case colColor:
             label = 'color';
@@ -118,7 +120,8 @@ define(function (require) {
 
           return {
             label: label,
-            value: val
+            value: val,
+            percent: percent
           };
 
         });
