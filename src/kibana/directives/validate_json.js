@@ -16,7 +16,7 @@ define(function (require) {
         $scope.$watch('ngModel', validator);
 
         function validator(newValue, oldValue) {
-          if (newValue.length === 0) {
+          if (!newValue || newValue.length === 0) {
             setValid();
             return;
           }
