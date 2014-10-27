@@ -24,13 +24,10 @@ define(function (require) {
           'esResp'
         ], function () {
           if (!$scope.vis || !$scope.esResp) {
-            $scope.rows = $scope.columns = null;
-            return;
+            $scope.table = null;
+          } else {
+            $scope.table = tabifyAggResponse($scope.vis, $scope.esResp, { canSplit: false });
           }
-
-          var tabbed = tabifyAggResponse($scope.vis, $scope.esResp, { canSplit: false });
-          $scope.rows = tabbed.rows;
-          $scope.columns = tabbed.columns;
         });
       }
     };

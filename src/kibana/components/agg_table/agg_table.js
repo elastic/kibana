@@ -1,7 +1,10 @@
 define(function (require) {
+  require('services/compile_recursive_directive');
+  require('css!components/agg_table/agg_table.css');
+
   require('modules')
   .get('kibana')
-  .directive('kbnAggTable', function ($filter, config, Private) {
+  .directive('kbnAggTable', function ($filter, config, Private, compileRecursiveDirective) {
     var _ = require('lodash');
     var saveAs = require('file_saver');
 
@@ -12,13 +15,21 @@ define(function (require) {
       restrict: 'E',
       template: require('text!components/agg_table/agg_table.html'),
       scope: {
-        rows: '=',
-        columns: '=',
-        perPage: '=?'
+        tableOrGroup: '=table',
+        perPage: '=?',
+        level: '=?'
       },
       controllerAs: 'table',
+      compile: function ($el) {
+        // Use the compile function from the RecursionHelper,
+        // And return the linking function(s) which it returns
+        return compileRecursiveDirective.compile($el);
+      },
       controller: function ($scope) {
         var self = this;
+
+        $scope.level = $scope.level ? $scope.level + 1 : 1;
+        $scope.nextLevel = $scope.level + 1;
 
         self.sort = null;
         self.csv = {
@@ -45,7 +56,7 @@ define(function (require) {
           return agg.params && agg.params.field;
         }
 
-        self.pickPageCount = function () {
+        self.getPerPage = function () {
           return $scope.perPage || Infinity;
         };
 
@@ -116,14 +127,23 @@ define(function (require) {
         };
 
         $scope.$watchMulti([
-          'columns',
-          'rows',
+          'tableOrGroup',
           'table.sort.asc',
           'table.sort.field'
         ], function () {
-          if (!$scope.rows || !$scope.columns) {
+          $scope.rows = $scope.columns = $scope.group = null;
+
+          var tOrG = $scope.tableOrGroup;
+          if (!tOrG) return;
+
+          if (tOrG.tables) {
+            $scope.group = tOrG;
+            $scope[$scope.group.aggConfig.params.row ? 'rows' : 'columns'] = tOrG.tables;
             return;
           }
+
+          $scope.rows = tOrG.rows;
+          $scope.columns = tOrG.columns;
 
           var formatters = $scope.columns.map(function (col) {
             var field = colField(col);

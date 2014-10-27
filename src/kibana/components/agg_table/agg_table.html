@@ -1,4 +1,36 @@
-<paginate list="formattedRows" per-page="pickPerPage" class="visualize-table">
+<table ng-if="group && rows" class="table">
+  <tr ng-repeat-start="table in rows">
+    <th>
+      <span class="agg-table-table-header">{{ table.title }}</span>
+    </th>
+  </tr>
+  <tr ng-repeat-end>
+    <td>
+      <kbn-agg-table table="table" per-page="getPerPage()" level="nextLevel"></kbn-agg-table>
+    </td>
+  </tr>
+</table>
+
+<table ng-if="group && columns" class="table">
+  <tr>
+    <th ng-repeat="table in columns">
+      <span class="agg-table-table-header">{{ table.title }}</span>
+    </th>
+  </tr>
+  <tr>
+    <td ng-repeat="table in columns">
+      <kbn-agg-table table="table" per-page="getPerPage()" level="nextLevel"></kbn-agg-table>
+    </td>
+  </tr>
+</table>
+
+<paginate
+  ng-if="!group"
+
+  list="formattedRows"
+  per-page="getPerPage()"
+
+  class="agg-table">
   <div class="visualize-table-paginated-table">
     <table class="table table-condensed">
       <thead>
@@ -19,7 +51,7 @@
           </th>
         </tr>
       </thead>
-      <tbody kbn-rows="page" kbn-rows-min="paginate.perPage"></tbody>
+      <tbody kbn-rows="page" kbn-rows-min="getPerPage()"></tbody>
     </table>
   </div>
 
