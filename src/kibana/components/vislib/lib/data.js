@@ -35,6 +35,7 @@ define(function (require) {
 
       this.data = data;
       this._normalizeOrdered();
+      this.seriesLabel;
 
       this._attr = _.defaults(attr || {}, {
 
@@ -92,18 +93,17 @@ define(function (require) {
       var isLegend = false;
       var visData = this.getVisData();
       var sameSeriesLabel = true;
-      var seriesLabel;
 
       _.forEach(visData, function countSeriesLength(obj) {
         var rootSeries = obj.series || (obj.slices && obj.slices.children);
         var dataLength = rootSeries ? rootSeries.length : 0;
-        var label = dataLength === 1 ? rootSeries[0].label : undefined;
+        var label = dataLength === 1 ? rootSeries[0].name : undefined;
 
-        if (!seriesLabel) {
-          seriesLabel = label;
+        if (!this.seriesLabel) {
+          this.seriesLabel = label;
         }
 
-        if (seriesLabel !== label) {
+        if (this.seriesLabel !== label) {
           sameSeriesLabel = false;
         }
 
