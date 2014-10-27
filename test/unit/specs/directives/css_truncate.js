@@ -3,7 +3,7 @@ define(function (require) {
   var $ = require('jquery');
 
   require('angular-route');
-  require('apps/discover/index');
+  require('plugins/discover/index');
 
   var $parentScope, $scope, $elem;
 

@@ -1,0 +1,39 @@
+@import (reference) "../../styles/_bootstrap.less";
+@import (reference) "../../styles/theme/_theme.less";
+@import (reference) "../../styles/_variables.less";
+
+.typeahead {
+  position: relative;
+
+  .typeahead-items {
+    border: 1px solid @popover-border-color;
+    color: @text-color;
+    background-color: @body-bg;
+    position: absolute;
+    z-index: @zindex-typeahead;
+    width: 100%;
+
+    .typeahead-item {
+      border-bottom: 1px solid lighten(@popover-border-color, 60%);
+      padding: @padding-base-vertical @padding-base-horizontal;
+    }
+
+    .typeahead-item:last-child {
+      border-bottom: 0px;
+    }
+
+    .typeahead-item.active {
+      background-color: @well-bg;
+    }
+  }
+}
+
+.button-group .typeahead.visible .input-group,
+.inline-form .typeahead.visible .input-group {
+  > :first-child {
+    .border-bottom-radius(0);
+  }
+  > :last-child {
+    .border-bottom-radius(0);
+  }
+}

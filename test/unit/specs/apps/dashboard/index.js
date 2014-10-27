@@ -9,7 +9,7 @@ define(function (require) {
   require('angular-route');
 
   // Load the code for the modules
-  require('apps/dashboard/index');
+  require('plugins/dashboard/index');
 
   describe('Dashboard app', function () {
     var $scope,

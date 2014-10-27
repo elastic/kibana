@@ -10,6 +10,7 @@ module.exports = function (grunt) {
     less: {
       files: [
         '<%= app %>/**/styles/**/*.less',
+        '<%= plugins %>/**/styles/**/*.less',
         '<%= app %>/**/components/**/*.less',
         '<%= app %>/**/components/vislib/components/styles/**/*.less'
       ],
@@ -22,6 +23,7 @@ module.exports = function (grunt) {
       ],
       tasks: ['jade:test']
     },
+
     clientside_jade: {
       files: [
         '<%= testUtilsDir %>/istanbul_reporter/report.clientside.jade'

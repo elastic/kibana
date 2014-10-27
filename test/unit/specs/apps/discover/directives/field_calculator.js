@@ -3,7 +3,7 @@ define(function (require) {
   var $ = require('jquery');
   var _ = require('lodash');
   var sinon = require('test_utils/auto_release_sinon');
-  var fieldCalculator = require('apps/discover/components/field_chooser/lib/field_calculator');
+  var fieldCalculator = require('plugins/discover/components/field_chooser/lib/field_calculator');
 
   // Load the kibana app dependencies.
   require('services/private');

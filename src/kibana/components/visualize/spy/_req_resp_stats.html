@@ -3,10 +3,18 @@
 </div>
 
 <div ng-show="spyMode.name === 'request'">
+  <label>
+    Elasticsearch request body &nbsp
+    <kbn-clipboard copy="history.req | json"></kbn-clipboard>
+  </label>
   <pre>{{history.req | json}}</pre>
 </div>
 
 <div ng-show="spyMode.name === 'response'">
+  <label>
+    Elasticsearch response body &nbsp
+    <kbn-clipboard copy="history.resp | json"></kbn-clipboard>
+  </label>
   <pre>{{history.resp | json}}</pre>
 </div>
 
@@ -17,4 +25,4 @@
       <td>{{pair[1]}}</td>
     </tr>
   </table>
-</div>
+</div

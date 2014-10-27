@@ -36,7 +36,7 @@ define(function (require) {
         $scope.getColumnClass = function (col, $first, $last) {
           var cls = [];
 
-          if ($last || (col.field && col.field.type === 'number')) {
+          if ($last || (col.categoryName === 'metric')) {
             cls.push('visualize-table-right');
           }
 
