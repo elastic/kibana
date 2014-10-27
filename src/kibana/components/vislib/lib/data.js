@@ -33,17 +33,16 @@ define(function (require) {
         offset = attr.mode;
       }
 
-
       this.data = data;
       this._normalizeOrdered();
 
-      this._attr = attr;
       this._attr = _.defaults(attr || {}, {
-        offset: 'zero',
+
+        // d3 stack function
         stack: d3.layout.stack()
           .x(function (d) { return d.x; })
           .y(function (d) { return d.y; })
-          .offset(offset)
+          .offset(offset || 'zero')
       });
     }
 
@@ -96,8 +95,9 @@ define(function (require) {
       var seriesLabel;
 
       _.forEach(visData, function countSeriesLength(obj) {
-        var dataLength = obj.series ? obj.series.length : obj.slices.children.length;
-        var label = (dataLength === 1 && obj.series) ? obj.series[0].label : undefined;
+        var rootSeries = obj.series || (obj.slices && obj.slices.children);
+        var dataLength = rootSeries ? rootSeries.length : 0;
+        var label = dataLength === 1 ? rootSeries[0].label : undefined;
 
         if (!seriesLabel) {
           seriesLabel = label;
@@ -201,6 +201,11 @@ define(function (require) {
     Data.prototype.getYMaxValue = function () {
       var self = this;
       var arr = [];
+      var grouped = (self._attr.mode === 'grouped');
+
+      if (self._attr.mode === 'percentage') {
+        return 1;
+      }
 
       if (self._attr.mode === 'percentage') {
         return 1;
@@ -209,7 +214,7 @@ define(function (require) {
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
       _.forEach(this.flatten(), function (series) {
-        if (self.shouldBeStacked(series)) {
+        if (self.shouldBeStacked(series) && !grouped) {
           return arr.push(self.getYStackMax(series));
         }
         return arr.push(self.getYMax(series));
@@ -275,7 +280,8 @@ define(function (require) {
       var self = this;
 
       _.forEach(array, function (obj) {
-        var fieldFormatter = obj.aggConfig.params.field.format.convert;
+        var fieldFormatter = obj.aggConfig ?
+          obj.aggConfig.params.field.format.convert : function (d) { return d; };
         names.push({ key: fieldFormatter(obj.name), index: index });
 
         if (obj.children) {

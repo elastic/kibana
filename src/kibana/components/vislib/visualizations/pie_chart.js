@@ -109,7 +109,7 @@ define(function (require) {
       var isTooltip = this._attr.addTooltip;
       var self = this;
       var path;
-      var fieldFormatter;
+      var fieldFormatter = function (d) { return d; };
 
       path = svg
       .datum(slices)
@@ -121,14 +121,16 @@ define(function (require) {
         .attr('class', function (d) {
           if (d.depth === 0) { return; }
 
-          fieldFormatter = d.aggConfig.params.field.format.convert;
+          fieldFormatter = d.aggConfig ?
+            d.aggConfig.params.field.format.convert : fieldFormatter;
           return self.colorToClass(color(fieldFormatter(d.name)));
         })
         .style('stroke', '#fff')
         .style('fill', function (d) {
           if (d.depth === 0) { return 'none'; }
 
-          fieldFormatter = d.aggConfig.params.field.format.convert;
+          fieldFormatter = d.aggConfig ?
+            d.aggConfig.params.field.format.convert : fieldFormatter;
           return color(fieldFormatter(d.name));
         });
 
