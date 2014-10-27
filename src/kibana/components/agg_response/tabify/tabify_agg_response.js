@@ -3,17 +3,18 @@ define(function (require) {
     var _ = require('lodash');
 
     var AggConfig = Private(require('components/vis/_agg_config'));
-    var TabbedAggResponseWriter = Private(require('components/agg_response/tabify/_response'));
+    var TabbedAggResponseWriter = Private(require('components/agg_response/tabify/_response_writer'));
     var Buckets = require('components/agg_response/tabify/_buckets');
     var notify = new Notifier({ location: 'agg_response/tabify'});
 
     function tabifyAggResponse(vis, esResponse, respOpts) {
-      var resp = new TabbedAggResponseWriter(vis, respOpts);
+      var write = new TabbedAggResponseWriter(vis, respOpts);
+
       var topLevelBucket = _.assign({}, esResponse.aggregations, {
         doc_count: esResponse.hits.total
       });
 
-      if (!resp.aggStack.length) {
+      if (!write.aggStack.length) {
         var schema = vis.type.schemas.metrics[0];
         if (!schema) {
           throw new Error('Unable to tabify empty response without a metric schema of some sort');
@@ -26,15 +27,15 @@ define(function (require) {
           type: 'count',
           schema: schema
         });
-        resp.columns.push({
+        write.columns.push({
           aggConfig: tempCountAgg
         });
-        resp.aggStack.push(tempCountAgg);
+        write.aggStack.push(tempCountAgg);
       }
 
-      collectBucket(resp, topLevelBucket);
+      collectBucket(write, topLevelBucket);
 
-      return resp.done();
+      return write.response();
     }
 
     /**
@@ -46,46 +47,48 @@ define(function (require) {
      * @param {undefined|string} key - the key where the bucket was found
      * @returns {undefined}
      */
-    function collectBucket(resp, bucket, key) {
-      var agg = resp.aggStack.shift();
+    function collectBucket(write, bucket, key) {
+      var agg = write.aggStack.shift();
       var aggResp = bucket[agg.id];
 
       switch (agg.schema.group) {
       case 'buckets':
         var buckets = new Buckets(aggResp);
         if (buckets.length) {
-          var splitting = resp.canSplit && agg.schema.name === 'split';
+          var splitting = write.canSplit && agg.schema.name === 'split';
 
-          buckets.forEach(function collectSubBucket(subBucket, subBucketKey) {
-            var key = bucketKey(subBucket, subBucketKey);
-            var recurse = function () {
-              collectBucket(resp, subBucket, key);
-            };
-
-            if (splitting) resp.split(agg, key, recurse);
-            else resp.cell(key, recurse);
-          });
+          if (splitting) {
+            write.split(agg, buckets, function (subBucket, key) {
+              collectBucket(write, subBucket, key);
+            });
+          } else {
+            buckets.forEach(function (subBucket, key) {
+              write.cell(key, function () {
+                collectBucket(write, subBucket, key);
+              });
+            });
+          }
         } else {
           // bucket didn't result in sub-buckets, we will try to
           // write the row, but stop digging. This row.write will do nothing in
           // specific scenarios known to the the Response
-          resp.row();
+          write.row();
         }
         break;
       case 'metrics':
-        resp.cell(aggResp ? metricValue(aggResp) : bucketCount(bucket), function () {
-          if (!resp.aggStack.length) {
+        write.cell(aggResp ? metricValue(aggResp) : bucketCount(bucket), function () {
+          if (!write.aggStack.length) {
             // row complete
-            resp.row();
+            write.row();
           } else {
             // process the next agg at this same level
-            collectBucket(resp, bucket, key);
+            collectBucket(write, bucket, key);
           }
         });
         break;
       }
 
-      resp.aggStack.unshift(agg);
+      write.aggStack.unshift(agg);
     }
 
     // read the metric value from a metric response
@@ -96,13 +99,6 @@ define(function (require) {
     // read the bucket count from an agg bucket
     function bucketCount(bucket) {
       return bucket.doc_count;
-    }
-
-    // read the key from an agg bucket, optionally use the key the bucket
-    // was found at
-    function bucketKey(bucket, key) {
-      if (key != null) return key;
-      return bucket.key;
     }
 
     return notify.timed('tabify agg response', tabifyAggResponse);
