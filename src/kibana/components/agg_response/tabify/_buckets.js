@@ -13,7 +13,7 @@ define(function (require) {
       _.forOwn(this.buckets, fn);
     } else {
       this.buckets.forEach(function (bucket) {
-        fn(bucket);
+        fn(bucket, bucket.key);
       });
     }
   };
