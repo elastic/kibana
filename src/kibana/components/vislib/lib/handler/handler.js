@@ -116,7 +116,8 @@ define(function (require) {
     };
 
     /**
-     * Disables events. According to the D3 documentation for event handling:
+     * Disables events by passing null to the event listener.
+     * According to the D3 documentation for event handling:
      * https://github.com/mbostock/d3/wiki/Selections#on, to remove all
      * listeners for a particular event type, pass null as the listener.
      *
