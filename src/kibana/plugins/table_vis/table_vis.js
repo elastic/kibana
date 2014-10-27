@@ -1,19 +1,41 @@
 define(function (require) {
-  require('css!plugins/table_vis/styles/table_vis.css');
+  // we need to load the css ourselved
+  require('css!plugins/table_vis/table_vis.css');
+  // we also need to load the controller used by the template
+  require('plugins/table_vis/table_vis_controller');
 
-  require('modules')
-  .get('kibana/table_vis', ['kibana'])
-  .controller('TableVisController', function ($scope, Private) {
-    var tabifyAggResponse = Private(require('components/agg_response/tabify/tabify_agg_response'));
+  // define the TableVisType
+  return function TableVisTypeProvider(Private) {
+    var TemplateVisType = Private(require('plugins/vis_types/template/template_vis_type'));
+    var Schemas = Private(require('plugins/vis_types/_schemas'));
 
-    $scope.$watch('esResponse', function (resp, oldResp) {
-      if (!resp) {
-        $scope.tableData = null;
-        return;
-      }
+    // define the TableVisController which is used in the template
+    // by angular's ng-controller directive
 
-      $scope.tableData = tabifyAggResponse($scope.vis, $scope.esResponse);
+    // return the visType object, which kibana will use to display and configure new
+    // Vis object of this type.
+    return new TemplateVisType({
+      name: 'table',
+      title: 'Data Table',
+      icon: 'fa-table',
+      template: require('text!plugins/table_vis/table_vis.html'),
+      schemas: new Schemas([
+        {
+          group: 'metrics',
+          name: 'metric',
+          title: 'Metric'
+        },
+        {
+          group: 'buckets',
+          name: 'bucket',
+          title: 'Split Rows'
+        },
+        {
+          group: 'buckets',
+          name: 'split',
+          title: 'Split Table'
+        }
+      ])
     });
-  });
-
+  };
 });
