@@ -1,5 +1,5 @@
 define(function (require) {
-  return function buildHierarchialDataProvider(Private) {
+  return function buildHierarchicalDataProvider(Private) {
     var _ = require('lodash');
     var buildSplit = require('components/agg_response/hierarchical/_build_split');
     var extractBuckets = require('components/agg_response/hierarchical/_extract_buckets');

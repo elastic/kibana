@@ -8,7 +8,7 @@ define(function (require) {
   var Vis;
   var indexPattern;
 
-  describe('buildHierarchialData()', function () {
+  describe('buildHierarchicalData()', function () {
     describe('createRawData()', function () {
       var vis, results;
 

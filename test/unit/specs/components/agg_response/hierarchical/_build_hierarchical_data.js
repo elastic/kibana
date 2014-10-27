@@ -5,16 +5,16 @@ define(function (require) {
   var AggConfigs;
   var Vis;
   var indexPattern;
-  var buildHierarchialData;
+  var buildHierarchicalData;
 
-  describe('buildHierarchialData()', function () {
+  describe('buildHierarchicalData()', function () {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private) {
       Vis = Private(require('components/vis/vis'));
       AggConfigs = Private(require('components/vis/_agg_configs'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-      buildHierarchialData = Private(require('components/agg_response/hierarchical/build_hierarchical_data'));
+      buildHierarchicalData = Private(require('components/agg_response/hierarchical/build_hierarchical_data'));
     }));
 
 
@@ -30,7 +30,7 @@ define(function (require) {
           ]
         });
         vis.aggs[0].id = 'agg_1';
-        results = buildHierarchialData(vis, fixtures.metricOnly);
+        results = buildHierarchicalData(vis, fixtures.metricOnly);
 
       });
 
@@ -66,7 +66,7 @@ define(function (require) {
         });
         // We need to set the aggs to a known value.
         _.each(vis.aggs, function (agg) { agg.id = 'agg_' + id++; });
-        results = buildHierarchialData(vis, fixtures.threeTermBuckets);
+        results = buildHierarchicalData(vis, fixtures.threeTermBuckets);
       });
 
       it('should set the hits attribute for the results', function () {
@@ -99,7 +99,7 @@ define(function (require) {
         });
         // We need to set the aggs to a known value.
         _.each(vis.aggs, function (agg) { agg.id = 'agg_' + id++; });
-        results = buildHierarchialData(vis, fixtures.oneHistogramBucket);
+        results = buildHierarchicalData(vis, fixtures.oneHistogramBucket);
       });
 
       it('should set the hits attribute for the results', function () {
@@ -140,7 +140,7 @@ define(function (require) {
         });
         // We need to set the aggs to a known value.
         _.each(vis.aggs, function (agg) { agg.id = 'agg_' + id++; });
-        results = buildHierarchialData(vis, fixtures.oneRangeBucket);
+        results = buildHierarchicalData(vis, fixtures.oneRangeBucket);
       });
 
       it('should set the hits attribute for the results', function () {
@@ -173,7 +173,7 @@ define(function (require) {
           });
         // We need to set the aggs to a known value.
         _.each(vis.aggs, function (agg) { agg.id = 'agg_' + id++; });
-        results = buildHierarchialData(vis, fixtures.oneFilterBucket);
+        results = buildHierarchicalData(vis, fixtures.oneFilterBucket);
       });
 
       it('should set the hits attribute for the results', function () {

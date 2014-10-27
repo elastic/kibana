@@ -1,5 +1,5 @@
 define(function (require) {
-  describe('buildHierarchialData()', function () {
+  describe('buildHierarchicalData()', function () {
     describe('transformAggregation()', function () {
 
       var tranform = require('components/agg_response/hierarchical/_transform_aggregation');
