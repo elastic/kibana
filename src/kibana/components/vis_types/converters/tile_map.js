@@ -63,13 +63,18 @@ define(function (require) {
       var location;
       var center;
       var rectangle;
+
+      var length = rows.length;
       var min = rows[rows.length - 1][1];
       var max = rows[0][1];
-      
+      var precision = rows[0][0].length;
+
       var geoJSON = chart.geoJSON = {
         properties: {
+          length: length,
           min: min,
-          max: max
+          max: max,
+          precision: precision
         },
         type: 'FeatureCollection',
         features: []
@@ -81,7 +86,13 @@ define(function (require) {
         count = row[1];
         location = decodeGeoHash(geohash);
         center = [location.longitude[2], location.latitude[2]];
-        
+        rectangle = [
+          [location.longitude[0], location.latitude[0]],
+          [location.longitude[1], location.latitude[0]],
+          [location.longitude[1], location.latitude[1]],
+          [location.longitude[0], location.latitude[1]]
+        ];
+
         geoJSON.features.push({
           type: 'Feature',
           geometry: {
@@ -90,7 +101,9 @@ define(function (require) {
           },
           properties: {
             count: count,
-            geohash: geohash
+            geohash: geohash,
+            center: center,
+            rectangle: rectangle
           }
         });
 

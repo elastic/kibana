@@ -24,15 +24,14 @@ define(function (require) {
       this.chartEl = el;
       this.chartData = chartData;
       
-      //  FIX THIS FOR TILE MAPS
-      // var events = this.events = new Dispatch(handler, chartData);
+      var events = this.events = new Dispatch(handler, chartData);
 
       if (handler._attr.addTooltip) {
         var $el = this.handler.el;
         var formatter = this.handler.data.get('tooltipFormatter');
 
         // Add tooltip
-        // this.tooltip = new Tooltip($el, formatter, events);
+        this.tooltip = new Tooltip($el, formatter, events);
 
       }
 

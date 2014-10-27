@@ -14,7 +14,6 @@ define(function (require) {
     var mapData;
     var mapcenter = [41, -100];
     var mapzoom = 4;
-    var precision;
       
     var tiles = config.get('mapbox:tiles');
     var apiKey = config.get('mapbox:apiKey');
@@ -37,6 +36,10 @@ define(function (require) {
         return new TileMap(handler, chartEl, chartData);
       }
       TileMap.Super.apply(this, arguments);
+      
+      // turn off resizeChecker for tile maps
+      this.handler.vis.resizeChecker.off('resize', this.resize);
+      this.handler.vis.resizeChecker.destroy();
 
     }
 
@@ -69,8 +72,8 @@ define(function (require) {
 
             // self.clusterMarkers(map, data.geoJSON);
             // self.heatMap(map, data.geoJSON);
-            // self.scaledCircleMarkers(map, data.geoJSON);
-            self.quantizeCircleMarkers(map, data.geoJSON);
+            self.scaledCircleMarkers(map, data.geoJSON);
+            // self.quantizeCircleMarkers(map, data.geoJSON);
 
           }
 
@@ -84,8 +87,8 @@ define(function (require) {
       self._attr.maptype = 'clusterMarkers';
       var min = mapData.properties.min;
       var max = mapData.properties.max;
-      var length = mapData.features.length;
-      var precision = mapData.features[0].properties.geohash.length;
+      var length = mapData.properties.length;
+      var precision = mapData.properties.precision;
       console.log('\n clusterMarkers: features:', length, ' precision:', precision, ' min value:', min, ' max value:', max);
       
       var clusterGroup = new L.MarkerClusterGroup({
@@ -114,8 +117,8 @@ define(function (require) {
       self._attr.maptype = 'heatMap';
       var min = mapData.properties.min;
       var max = mapData.properties.max;
-      var length = mapData.features.length;
-      var precision = mapData.features[0].properties.geohash.length;
+      var length = mapData.properties.length;
+      var precision = mapData.properties.precision;
       console.log('\n heatMap: features:', length, ' precision:', precision, ' min value:', min, ' max value:', max);
       
       var featureLayer = L.geoJson(mapData);
@@ -143,8 +146,8 @@ define(function (require) {
       self._attr.maptype = 'scaledCircleMarkers';
       var min = mapData.properties.min;
       var max = mapData.properties.max;
-      var length = mapData.features.length;
-      precision = mapData.features[0].properties.geohash.length;
+      var length = mapData.properties.length;
+      var precision = mapData.properties.precision;
       console.log('\n scaledCircleMarkers: features:', length, ' precision:', precision, ' min value:', min, ' max value:', max);
 
       var zoomScale = self.zoomScale(mapzoom);
@@ -191,8 +194,8 @@ define(function (require) {
       self._attr.maptype = 'quantizeCircleMarkers';
       var min = mapData.properties.min;
       var max = mapData.properties.max;
-      var length = mapData.features.length;
-      precision = mapData.features[0].properties.geohash.length;
+      var length = mapData.properties.length;
+      var precision = mapData.properties.precision;
       console.log('\n quantizeCircleMarkers: features:', length, ' precision:', precision, ' min value:', min, ' max value:', max);
 
       var zoomScale = self.zoomScale(mapzoom);

@@ -33,6 +33,8 @@ define(function (require) {
 
       this.resizeChecker = new ResizeChecker(this.el);
       this.resizeChecker.on('resize', this.resize);
+
+
     }
 
     /**
@@ -75,7 +77,13 @@ define(function (require) {
         // TODO: need to come up with a solution for resizing when no data is available
         return;
       }
-      //  this.render(this.data);
+
+      // FIX THIS FOR TILE MAPS
+      this.render(this.data);
+    };
+
+    Vis.prototype.nothing = function () {
+      console.log('nothing');
     };
 
     /**

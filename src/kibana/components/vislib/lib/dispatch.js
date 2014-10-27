@@ -19,7 +19,9 @@ define(function (require) {
 
       this.handler = handler;
       this.chartData = chartData;
-      this.color = type === 'pie' ? handler.data.getPieColorFunc() : handler.data.getColorFunc();
+      
+      // FIX THIS FOR TILE MAP
+      // this.color = type === 'pie' ? handler.data.getPieColorFunc() : handler.data.getColorFunc();
       this._attr = _.defaults(handler._attr || {}, {
         yValue: function (d) {
           return d.y;
@@ -39,7 +41,7 @@ define(function (require) {
     Dispatch.prototype.eventResponse = function (d, i) {
       var label = d.label;
       var getYValue = this._attr.yValue;
-      var color = this.color;
+      // var color = this.color;
       var chartData = this.chartData;
       var attr = this._attr;
       var handler = this.handler;
@@ -48,7 +50,7 @@ define(function (require) {
         value: getYValue(d, i),
         point: d,
         label: label,
-        color: color(label),
+        // color: color(label),
         pointIndex: i,
         series: chartData.series,
         config: attr,

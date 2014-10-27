@@ -74,7 +74,7 @@ define(function (require) {
           // Bind events to the chart
 
           if (chart._attr.dispatch) {
-            
+
             d3.rebind(chart, chart._attr.dispatch, 'on');
 
             // Bubble events up to the Vis Class and Events Class
