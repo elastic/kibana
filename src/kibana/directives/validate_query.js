@@ -1,10 +1,11 @@
 define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
+  require('services/debounce');
 
   require('modules')
     .get('kibana')
-    .directive('validateQuery', function (es, $compile, timefilter, configFile) {
+    .directive('validateQuery', function (es, $compile, timefilter, configFile, debounce) {
       return {
         restrict: 'A',
         require: 'ngModel',
@@ -98,7 +99,7 @@ define(function (require) {
             }
           };
 
-          var debouncedValidator = _.debounce(validator, 300, {
+          var debouncedValidator = debounce(validator, 300, {
             leading: true,
             trailing: true
           });
@@ -137,7 +138,7 @@ define(function (require) {
           ngModel.$parsers.push(fromUser);
           ngModel.$formatters.push(toUser);
 
-          // Use a model watch instead of parser/formatter. Debounced anyway. Parsers require the
+          // Use a model watch instead of parser/formatter. Parsers require the
           // user to actually enter input, which may not happen if the back button is clicked
           $scope.$watch('ngModel', debouncedValidator);
 
