@@ -24,7 +24,7 @@ define(function (require) {
           paginate.perPageSetter = paginate.perPageGetter.assign;
 
           $scope.$watch(attrs.perPage, function (perPage) {
-            paginate.perPage = perPage || PER_PAGE_DEFAULT;
+            paginate.perPage = perPage;
           });
           $scope.$watch('paginate.perPage', paginate.renderList);
           $scope.$watch('page', paginate.changePage);
@@ -51,12 +51,18 @@ define(function (require) {
           $scope.pages = [];
           if (!$scope.list) return;
 
-          var perPage = self.perPage;
-          var count = Math.ceil($scope.list.length / perPage);
+          var perPage = self.perPage || Infinity;
+          var count = isFinite(perPage) ? Math.ceil($scope.list.length / perPage) : 1;
 
           _.times(count, function (i) {
-            var start = perPage * i;
-            var page = $scope.list.slice(start, start + perPage);
+            var page;
+
+            if (isFinite(perPage)) {
+              var start = perPage * i;
+              page = $scope.list.slice(start, start + perPage);
+            } else {
+              page = $scope.list.slice(0);
+            }
 
             page.number = i + 1;
             page.i = i;
@@ -123,7 +129,7 @@ define(function (require) {
       restrict: 'E',
       template: require('text!partials/paginate_controls.html'),
       link: function ($scope, $el) {
-        $scope.$watch('page.count > 0', function (show) {
+        $scope.$watch('page.count > 1', function (show) {
           $el.toggle(show);
         });
       }
