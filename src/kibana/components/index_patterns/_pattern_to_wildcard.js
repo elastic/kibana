@@ -9,16 +9,24 @@ define(function (require) {
         var ch = format.charAt(i);
         switch (ch) {
         case '[':
-          if (!inEscape) inEscape = true;
-          else wildcard += ch;
+          inPattern = false;
+          if (!inEscape) {
+            inEscape = true;
+          } else {
+            wildcard += ch;
+          }
           break;
         case ']':
-          if (inEscape) inEscape = false;
-          else wildcard += ch;
+          if (inEscape) {
+            inEscape = false;
+          } else if (!inPattern) {
+            wildcard += ch;
+          }
           break;
         default:
-          if (inEscape) wildcard += ch;
-          else if (!inPattern) {
+          if (inEscape) {
+            wildcard += ch;
+          } else if (!inPattern) {
             wildcard += '*';
             inPattern = true;
           }
