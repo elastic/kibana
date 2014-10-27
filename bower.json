@@ -48,12 +48,9 @@
     "require-css": "~0.1.2",
     "requirejs": "~2.1.10",
     "requirejs-text": "~2.0.10",
-<<<<<<< HEAD
     "mapbox.js": "~2.1.1",
-    "leaflet.markercluster": "~0.4.0"
-=======
+    "leaflet.markercluster": "~0.4.0",
     "ng-clip": "~0.2.4"
->>>>>>> master
   },
   "devDependencies": {}
 }
