@@ -7,20 +7,20 @@ define(function (require) {
 
   module.service('debounce', ['$timeout', function ($timeout) {
     return function (func, wait, options) {
-      var timeout, args, context, result;
+      var timeout, args, self, result;
       options = _.defaults(options, {
         leading: false,
         trailing: true
       });
 
       function debounce() {
-        context = this;
+        self = this;
         args = arguments;
 
         var later = function () {
           timeout = null;
           if (!options.leading || options.trailing) {
-            result = func.apply(context, args);
+            result = func.apply(self, args);
           }
         };
 
@@ -32,7 +32,7 @@ define(function (require) {
         timeout = $timeout(later, wait);
 
         if (callNow) {
-          result = func.apply(context, args);
+          result = func.apply(self, args);
         }
 
         return result;
