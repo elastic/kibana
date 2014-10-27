@@ -53,6 +53,7 @@ require.config({
     'angular-bootstrap': ['angular'],
     'angular-bindonce': ['angular'],
     'angular-ui-ace': ['angular', 'ace'],
+    'ng-clip': ['angular', 'zeroclipboard'],
     heat: {
       deps: ['mapbox']
     },
