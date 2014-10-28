@@ -37,6 +37,19 @@ define(function (require) {
       var slices = isSlices ? data.slices : undefined;
       var handler = this.handler;
       var color = handler.data.color;
+      var isPercentage = (handler._attr.mode === 'percentage');
+
+      if (isSeries) {
+        // Find object with the actual d value and add it to the point object
+        var object = _.find(series, { 'label': d.label });
+        d.value = +object.values[i].y;
+
+        if (isPercentage) {
+
+          // Add the formatted percentage to the point object
+          d.percent = (100 * d.y).toFixed(1) + '%';
+        }
+      }
 
       return {
         value: d.y,
@@ -67,7 +80,6 @@ define(function (require) {
      * Mouse over Behavior
      *
      * @method mouseOverBar
-     * @param target {Object} Reference to this object
      * @returns {D3.Selection} this object with '.hover' class true
      */
     Dispatch.prototype.onMouseOver = function () {
@@ -80,7 +92,6 @@ define(function (require) {
      * Mouse out Behavior
      *
      * @method mouseOutBar
-     * @param target {Object} Reference to this object
      * @returns {D3.Selection} this object with '.hover' class false
      */
     Dispatch.prototype.onMouseOut = function () {

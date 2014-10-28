@@ -2,6 +2,7 @@ define(function (require) {
   var _ = require('lodash');
   var typeahead = require('modules').get('kibana/typeahead');
 
+  require('css!components/typeahead/typeahead.css');
   require('components/typeahead/_input');
   require('components/typeahead/_items');
 
