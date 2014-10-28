@@ -1,7 +1,6 @@
 define(function (require) {
   return function TermsAggDefinition(Private) {
     var _ = require('lodash');
-    require('filters/label');
     var AggType = Private(require('components/agg_types/_agg_type'));
     var bucketCountBetween = Private(require('components/agg_types/buckets/_bucket_count_between'));
 
