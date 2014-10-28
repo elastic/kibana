@@ -281,7 +281,8 @@ define(function (require) {
       var self = this;
 
       _.forEach(array, function (obj) {
-        var fieldFormatter = (columns && columns[index].field) ? columns[index].field.format.convert : function (d) { return d; };
+        var fieldFormatter = obj.aggConfig ?
+          obj.aggConfig.params.field.format.convert : function (d) { return d; };
         names.push({ key: fieldFormatter(obj.name), index: index });
 
         if (obj.children) {
