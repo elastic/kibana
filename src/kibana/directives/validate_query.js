@@ -65,7 +65,8 @@ define(function (require) {
                 body: {
                   query: query || { match_all: {} }
                 }
-              }).then(success, error);
+              })
+              .then(success, error);
             }
 
             function error(resp) {
@@ -140,7 +141,10 @@ define(function (require) {
 
           // Use a model watch instead of parser/formatter. Parsers require the
           // user to actually enter input, which may not happen if the back button is clicked
-          $scope.$watch('ngModel', debouncedValidator);
+          $scope.$watch('ngModel', function (newValue, oldValue) {
+            if (newValue === oldValue) return;
+            debouncedValidator(newValue);
+          });
 
           init();
         }
