@@ -16,8 +16,7 @@ define(function (require) {
       template: require('text!components/agg_table/agg_table.html'),
       scope: {
         table: '=',
-        perPage: '=?',
-        level: '=?'
+        perPage: '=?'
       },
       controllerAs: 'aggTable',
       compile: function ($el) {
@@ -27,9 +26,6 @@ define(function (require) {
       },
       controller: function ($scope) {
         var self = this;
-
-        $scope.level = $scope.level ? $scope.level + 1 : 1;
-        $scope.nextLevel = $scope.level + 1;
 
         self.sort = null;
         self.csv = {
@@ -71,7 +67,7 @@ define(function (require) {
           }
 
           if (self.sort && !self.sort.getter) {
-            var colI = $scope.columns.indexOf(self.sort.col);
+            var colI = $scope.table.columns.indexOf(self.sort.col);
             self.sort.getter = function (row) {
               return row[colI];
             };
@@ -81,9 +77,10 @@ define(function (require) {
 
         self.exportAsCsv = function () {
           self.csv.showOptions = false;
-          if (!$scope.rows || !$scope.columns) return;
 
           var text = '';
+          var rows = $scope.table.rows;
+          var columns = $scope.table.columns;
           var nonAlphaNumRE = /[^a-zA-Z0-9]/;
           var allDoubleQuoteRE = /"/g;
           var escape = function (val) {
@@ -95,12 +92,12 @@ define(function (require) {
           };
 
           // escape each cell in each row
-          var csvRows = $scope.rows.map(function (row, i) {
+          var csvRows = rows.map(function (row, i) {
             return row.map(escape);
           });
 
           // add the columns to the rows
-          csvRows.unshift($scope.columns.map(_.compose(escape, self.colTitle)));
+          csvRows.unshift(columns.map(_.compose(escape, self.colTitle)));
 
           var blob = new Blob(csvRows.map(function (row) {
             return row.join(self.csv.separator) + '\r\n';
