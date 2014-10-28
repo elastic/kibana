@@ -8,7 +8,7 @@ define(function (require) {
   module.service('debounce', ['$timeout', function ($timeout) {
     return function (func, wait, options) {
       var timeout, args, self, result;
-      options = _.defaults(options, {
+      options = _.defaults(options || {}, {
         leading: false,
         trailing: true
       });
