@@ -31,8 +31,7 @@ define(function (require) {
         self.csv = {
           showOptions: false,
           separator: config.get('csv:separator'),
-          quoteValues: config.get('csv:quoteValues'),
-          filename: 'table.csv'
+          quoteValues: config.get('csv:quoteValues')
         };
 
         self.getPerPage = function () {
@@ -97,13 +96,15 @@ define(function (require) {
           });
 
           // add the columns to the rows
-          csvRows.unshift(columns.map(_.compose(escape, self.colTitle)));
+          csvRows.unshift(columns.map(function (col) {
+            return escape(col.title);
+          }));
 
           var blob = new Blob(csvRows.map(function (row) {
             return row.join(self.csv.separator) + '\r\n';
           }), { type: 'text/plain' });
 
-          saveAs(blob, self.csv.filename);
+          saveAs(blob, ($scope.table.title() || 'table') + '.csv');
         };
 
         $scope.$watchMulti([

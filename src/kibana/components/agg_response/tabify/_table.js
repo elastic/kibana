@@ -10,6 +10,14 @@ define(function (require) {
     this.rows = [];
   }
 
+  Table.prototype.title = function () {
+    if (this.$parent) {
+      return this.$parent.title;
+    } else {
+      return '';
+    }
+  };
+
   Table.prototype.aggConfig = function (col) {
     if (!col.aggConfig) {
       throw new TypeError('Column is missing the aggConfig property');
