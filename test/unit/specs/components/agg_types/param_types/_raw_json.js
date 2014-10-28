@@ -39,6 +39,14 @@ define(function (require) {
     });
 
     describe('write', function () {
+      it('should do nothing when param is not defined', function () {
+        initAggParam();
+        expect(aggConfig.params).not.to.have.property(paramName);
+
+        aggParam.write(aggConfig, output);
+        expect(output).not.to.have.property(paramName);
+      });
+
       it('should not append param when invalid JSON', function () {
         initAggParam();
         aggConfig.params[paramName] = 'i am not json';
