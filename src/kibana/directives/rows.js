@@ -7,18 +7,21 @@ define(function (require) {
     return {
       restrict: 'A',
       link: function ($scope, $el, attr) {
-        var getter = $parse(attr.kbnRowsMin);
+        $scope.$watchMulti([
+          attr.kbnRows,
+          attr.kbnRowsMin
+        ], function (vals) {
+          var rows = vals[0];
+          var min = vals[1];
 
-        $scope.$watch(attr.kbnRows, function (rows) {
           $el.empty();
 
-          var min = getter($scope);
           var width = _.reduce(rows, function (memo, row) {
             return Math.max(memo, row.length);
           }, 0);
 
           if (!_.isArray(rows)) rows = [];
-          if (min && rows.length < min) {
+          if (isFinite(min) && rows.length < min) {
             // clone the rows so that we can add elements to it without upsetting the original
             rows = _.clone(rows);
             // crate the empty row which will be pushed into the row list over and over

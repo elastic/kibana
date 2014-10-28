@@ -16,7 +16,7 @@ define(function (require) {
       template: require('text!components/visualize/spy/_table.html'),
       link: function tableLinkFn($scope, $el) {
         $scope.$parent.$watch('spyMode.fill', function (fill) {
-          $scope.perPage = (fill) ? PER_PAGE_EXTENDED : PER_PAGE_DEFAULT;
+          $scope.perPage = fill ? PER_PAGE_EXTENDED : PER_PAGE_DEFAULT;
         });
 
         $rootScope.$watchMulti.call($scope, [
