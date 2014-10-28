@@ -115,7 +115,8 @@ define(function (require) {
       _.forEach(visData, function countSeriesLength(obj) {
         var rootSeries = obj.series || (obj.slices && obj.slices.children);
         var dataLength = rootSeries ? rootSeries.length : 0;
-        var label = dataLength === 1 ? rootSeries[0].label : undefined;
+        var label = dataLength === 1 ? rootSeries[0].label || rootSeries[0].name : undefined;
+        var children = (obj.slices && obj.slices.children && obj.slices.children[0].children);
 
         if (!seriesLabel) {
           seriesLabel = label;
@@ -125,7 +126,7 @@ define(function (require) {
           sameSeriesLabel = false;
         }
 
-        if (dataLength > 1 || !sameSeriesLabel) {
+        if (dataLength > 1 || children || !sameSeriesLabel) {
           isLegend = true;
         }
       });
