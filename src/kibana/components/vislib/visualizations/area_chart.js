@@ -141,7 +141,7 @@ define(function (require) {
      */
     AreaChart.prototype.addCircleEvents = function (circles) {
       var events = this.events;
-      var dispatch = this.events._attr.dispatch;
+      var dispatch = this.events.dispatch;
 
       circles
       .on('mouseover.circle', function mouseOverCircle(d, i) {

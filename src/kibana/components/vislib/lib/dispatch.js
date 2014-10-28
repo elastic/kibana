@@ -67,6 +67,14 @@ define(function (require) {
       };
     };
 
+    /**
+     * Returns a function that adds events and listeners to a D3 selection
+     *
+     * @method addEvent
+     * @param event {String}
+     * @param callback {Function}
+     * @returns {Function}
+     */
     Dispatch.prototype.addEvent = function (event, callback) {
       return function (selection) {
         selection.each(function () {
