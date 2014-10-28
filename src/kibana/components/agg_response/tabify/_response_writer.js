@@ -1,6 +1,8 @@
 define(function (require) {
   return function TabbedAggResponseWriterProvider(Private) {
     var _ = require('lodash');
+    var Table = require('components/agg_response/tabify/_table');
+    var TableSplit = require('components/agg_response/tabify/_table_split');
     var getColumns = require('components/agg_response/tabify/_get_columns');
 
     /**
@@ -20,26 +22,6 @@ define(function (require) {
 
       this.root = new TableSplit();
       this.stack = [this.root];
-    }
-
-    /**
-     * Simple object that wraps multiple tables. It contains information about the aggConfig
-     * and bucket that created this group and a list of the tables within it.
-     */
-    function TableSplit() {
-      this.aggConfig = null;
-      this.key = null;
-      this.title = null;
-      this.tables = [];
-    }
-
-    /**
-     * Simple table class that is used to contain the rows and columns that create
-     * a table. This is usually found at the root of the response or within a TableSplit
-     */
-    function Table() {
-      this.columns = null; // written with the first row
-      this.rows = [];
     }
 
     /**
