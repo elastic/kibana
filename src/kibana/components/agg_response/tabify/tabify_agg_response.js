@@ -56,9 +56,8 @@ define(function (require) {
         var buckets = new Buckets(aggResp);
         if (buckets.length) {
           var splitting = write.canSplit && agg.schema.name === 'split';
-
           if (splitting) {
-            write.split(agg, buckets, function (subBucket, key) {
+            write.split(agg, buckets, function forEachBucket(subBucket, key) {
               collectBucket(write, subBucket, key);
             });
           } else {

@@ -1,5 +1,5 @@
 <table ng-if="group && rows" class="table">
-  <tr ng-repeat-start="table in rows">
+  <tr ng-repeat-start="table in rows" ng-if="table.key">
     <th>
       <span class="agg-table-table-header">{{ table.title }}</span>
     </th>
@@ -13,7 +13,7 @@
 
 <table ng-if="group && columns" class="table">
   <tr>
-    <th ng-repeat="table in columns">
+    <th ng-repeat="table in columns" ng-if="table.key">
       <span class="agg-table-table-header">{{ table.title }}</span>
     </th>
   </tr>

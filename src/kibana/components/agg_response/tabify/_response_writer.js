@@ -18,63 +18,53 @@ define(function (require) {
       this.aggStack = _.pluck(this.columns, 'aggConfig');
       this.canSplit = this.opts.canSplit !== false;
 
-      this.root = new TableGroup();
+      this.root = new TableSplit();
       this.stack = [this.root];
-    }
-
-    /**
-     * Simple table class that is used to contain the rows and columns that create
-     * a table. This is usually found at the root of the response or within a TableGroup
-     *
-     * @param {TableGroup} parent - the TableGroup that should contain this Table
-     */
-    function Table(agg, key) {
-      this.rows = [];
-      this.columns = null; // written with the first row
-      this.aggConfig = agg;
-      this.key = key;
     }
 
     /**
      * Simple object that wraps multiple tables. It contains information about the aggConfig
      * and bucket that created this group and a list of the tables within it.
-     *
-     * @param {AggConfig} agg - The aggregation that created this bucket
-     * @param {any} key - The key for the bucket that created this agg
-     * @param {TableGroup} [parent] - option TableGroup that owns this TableGroup
      */
-    function TableGroup(agg) {
+    function TableSplit() {
+      this.aggConfig = null;
+      this.key = null;
+      this.title = null;
       this.tables = [];
-      this.aggConfig = agg;
     }
 
     /**
-     * Create a Table of TableGroup object, link it to it's parent (if any), and determine if
+     * Simple table class that is used to contain the rows and columns that create
+     * a table. This is usually found at the root of the response or within a TableSplit
+     */
+    function Table() {
+      this.columns = null; // written with the first row
+      this.rows = [];
+    }
+
+    /**
+     * Create a Table of TableSplit object, link it to it's parent (if any), and determine if
      * it's the root
      *
-     * @param  {boolean} group - is this a TableGroup or just a normal Table
-     * @param  {TableGroup} parent - the group that owns this table
+     * @param  {boolean} group - is this a TableSplit or just a normal Table
      * @param  {AggConfig} agg - the aggregation that create this table, only applies to groups
      * @param  {any} key - the bucketKey that this table relates to
-     * @return {Table/TableGroup} table - the created table
+     * @return {Table/TableSplit} table - the created table
      */
-    TabbedAggResponseWriter.prototype.table = function (group, parent, agg, key) {
-      var table;
+    TabbedAggResponseWriter.prototype.table = function (group, agg, key) {
+      var Class = (group) ? TableSplit : Table;
+      var table = new Class();
+
       if (group) {
-        table = new TableGroup(agg);
-      } else {
-        table = new Table(agg, key);
+        table.aggConfig = agg;
+        table.key = key;
+        table.title = agg.makeLabel() + ': ' + key;
       }
 
-      // if there hasn't been a root yet, this is it
-      if (!this.root) this.root = table;
-
+      var parent = this.stack[0];
       // link the parent and child
       table.$parent = parent;
-      if (parent) {
-        parent.tables = parent.tables || [];
-        parent.tables.push(table);
-      }
+      parent.tables.push(table);
 
       return table;
     };
@@ -88,7 +78,6 @@ define(function (require) {
      * @param  {aggConfig} agg - the aggConfig that created this split
      * @param  {Buckets} buckets - the buckets produces by the agg
      * @param  {function} block - a function to execute for each sub bucket
-     * @return {TableGroup} tableGroup - the table group created for the split
      */
     TabbedAggResponseWriter.prototype.split = function (agg, buckets, block) {
       var self = this;
@@ -97,34 +86,29 @@ define(function (require) {
         throw new Error('attempted to split when splitting is disabled');
       }
 
-      var parent = self.stack[0];
-      var tableGroup = findTable(parent, agg) || self.table(true, self.stack[0], agg);
       _.pull(self.columns, _.find(self.columns, function (col) {
         return col.aggConfig === agg;
       }));
 
-      self.stack.unshift(tableGroup);
       buckets.forEach(function (bucket, key) {
-        var table = findTable(tableGroup, agg, key);
-        if (!table) {
-          table = self.table(false, tableGroup, agg, key);
-          table.title = agg.makeLabel() + ': ' + key;
-        }
+        // find the existing split that we should extend
+        var tableSplit = _.find(self.stack[0].tables, { aggConfig: agg, key: key });
+        // create the split if it doesn't exist yet
+        if (!tableSplit) tableSplit = self.table(true, agg, key);
 
-        self.stack.unshift(table);
+        // push the split onto the stack so that it will receive written tables
+        self.stack.unshift(tableSplit);
+        // call the block
         if (_.isFunction(block)) block.call(self, bucket, key);
-        self.stack.shift();
+        // remove the split for now
+        while (true) {
+          if (tableSplit === self.stack.shift()) break;
+          if (self.stack.length === 0) {
+            throw new Error('Table split was removed from stack... unable to proceed');
+          }
+        }
       });
-      self.stack.shift();
-
-      return tableGroup;
     };
-
-    function findTable(tableGroup, agg, key) {
-      return _.find(tableGroup.tables, function (table) {
-        return table.aggConfig === agg && table.key === key;
-      });
-    }
 
     /**
      * Push a value into the row, then run a block. Once the block is
@@ -158,8 +142,8 @@ define(function (require) {
       }
 
       var table = this.stack[0];
-      if (!table || table === this.root) {
-        table = this.table(false, table);
+      if (!table || (table instanceof TableSplit)) {
+        table = this.table(false);
         this.stack.unshift(table);
       }
 
@@ -173,10 +157,6 @@ define(function (require) {
      * @return {object} - the final table-tree
      */
     TabbedAggResponseWriter.prototype.response = function () {
-      var table = this.root.tables[0];
-      if (!table) return;
-      delete table.$parent;
-
       var columns = this.columns;
 
       // give the columns some metadata
@@ -185,12 +165,12 @@ define(function (require) {
       });
 
       // walk the tree and write the columns to each table
-      (function step(table) {
+      (function step(table, group) {
         if (table.tables) table.tables.forEach(step);
         else table.columns = columns.slice(0);
-      }(table));
+      }(this.root));
 
-      return table;
+      return this.canSplit ? this.root.tables : this.root.tables[0];
     };
 
     return TabbedAggResponseWriter;
