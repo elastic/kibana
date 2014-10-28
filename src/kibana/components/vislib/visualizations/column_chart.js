@@ -90,12 +90,12 @@ define(function (require) {
       bars
       .enter()
       .append('rect')
-        .attr('class', function (d) {
-          return self.colorToClass(color(d.label));
-        })
-        .attr('fill', function (d) {
-          return color(d.label);
-        });
+      .attr('class', function (d) {
+        return self.colorToClass(color(d.label));
+      })
+      .attr('fill', function (d) {
+        return color(d.label);
+      });
 
       self.updateBars(bars);
 
@@ -183,34 +183,34 @@ define(function (require) {
 
       // update
       bars
-        .attr('x', function (d, i, j) {
-          if (isTimeScale) {
-            var groupWidth = xScale(data.ordered.min + data.ordered.interval) -
-              xScale(data.ordered.min);
-            var groupSpacing = groupWidth * groupSpacingPercentage;
+      .attr('x', function (d, i, j) {
+        if (isTimeScale) {
+          var groupWidth = xScale(data.ordered.min + data.ordered.interval) -
+            xScale(data.ordered.min);
+          var groupSpacing = groupWidth * groupSpacingPercentage;
 
-            barWidth = (groupWidth - groupSpacing) / n;
+          barWidth = (groupWidth - groupSpacing) / n;
 
-            return xScale(d.x) + barWidth * j;
-          }
-          return xScale(d.x) + xScale.rangeBand() / n * j;
-        })
-        .attr('width', function () {
-          if (barWidth < minWidth) {
-            throw new errors.ContainerTooSmall();
-          }
+          return xScale(d.x) + barWidth * j;
+        }
+        return xScale(d.x) + xScale.rangeBand() / n * j;
+      })
+      .attr('width', function () {
+        if (barWidth < minWidth) {
+          throw new errors.ContainerTooSmall();
+        }
 
-          if (isTimeScale) {
-            return barWidth;
-          }
-          return xScale.rangeBand() / n;
-        })
-        .attr('y', function (d) {
-          return yScale(d.y);
-        })
-        .attr('height', function (d) {
-          return height - yScale(d.y);
-        });
+        if (isTimeScale) {
+          return barWidth;
+        }
+        return xScale.rangeBand() / n;
+      })
+      .attr('y', function (d) {
+        return yScale(d.y);
+      })
+      .attr('height', function (d) {
+        return height - yScale(d.y);
+      });
 
       return bars;
     };
