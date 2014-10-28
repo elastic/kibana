@@ -1,38 +1,21 @@
 define(function (require) {
   var angular = require('angular');
-  var Promise = require('bluebird');
   var sinon = require('test_utils/auto_release_sinon');
 
   // Load the kibana app dependencies.
   require('directives/validate_query');
 
+  var $rootScope;
+  var $timeout;
+  var $compile;
+  var Promise;
   var debounceDelay = 300;
-  var $parentScope;
   var $elemScope;
   var $elem;
-  var $compile;
-  var $timeout;
 
+  var cycleIndex = 0;
   var mockValidateQuery;
-  var mockScope = {
-    ngModel: {query_string: {query: 'test_query'}},
-    queryInput: undefined
-  };
-
   var markup = '<input ng-model="mockModel" validate-query="mockQueryInput" input-focus type="text">';
-
-  var checkRequest = function (index, query, type) {
-    query = query || mockScope.ngModel;
-    return {
-      index: index,
-      type: type,
-      explain: true,
-      ignoreUnavailable: true,
-      body: {
-        query: query || { match_all: {} }
-      }
-    };
-  };
 
   var validEsResponse = function () {
     return Promise.resolve({ valid: true });
@@ -61,14 +44,13 @@ define(function (require) {
     });
 
     // Create the scope
-    inject(function ($injector, $rootScope, _$compile_, _$timeout_) {
+    inject(function ($injector, _$rootScope_, _$compile_, _$timeout_, _Promise_) {
       $timeout = _$timeout_;
       $compile = _$compile_;
+      Promise = _Promise_;
 
       // Give us a scope
-      $parentScope = $rootScope;
-      $parentScope.mockModel = mockScope.ngModel;
-      $parentScope.mockQueryInput = mockScope.queryInput;
+      $rootScope = _$rootScope_;
 
       var es = $injector.get('es');
       mockValidateQuery = sinon.stub(es.indices, 'validateQuery');
@@ -76,9 +58,13 @@ define(function (require) {
   };
 
   var compile = function () {
+    $rootScope.mockModel = 'cycle' + cycleIndex++;
+    $rootScope.mockQueryInput = undefined;
+
     $elem = angular.element(markup);
-    $compile($elem)($parentScope);
+    $compile($elem)($rootScope);
     $elemScope = $elem.isolateScope();
+    $rootScope.$digest();
   };
 
   describe('validate-query directive', function () {
@@ -93,59 +79,77 @@ define(function (require) {
         expect($elemScope).to.have.property('ngModel');
       });
 
-      it('should call validate via watch setup', function () {
+      it('should call validate with changes', function () {
+        // once for init
         expect(mockValidateQuery.callCount).to.be(1);
-      });
 
-      it('should call validate on input change', function () {
-        // once for $watch, once for change
-        var checkCount = 2;
-        $elem.val('someValue');
-        $elem.scope().$digest();
-        expect(mockValidateQuery.callCount).to.be(checkCount);
+        $rootScope.mockModel = 'different input';
+        $rootScope.$digest();
+        // once on change (leading edge)
+        expect(mockValidateQuery.callCount).to.be(2);
+        $timeout.flush();
+        // once on change (trailing edge)
+        expect(mockValidateQuery.callCount).to.be(3);
       });
     });
 
     describe('valid querystring', function () {
-      var mockValidateReturns = validEsResponse();
+      var mockValidateReturns;
 
       beforeEach(function () {
         init();
-        mockValidateQuery.returns(mockValidateReturns);
+        mockValidateQuery.returns(validEsResponse());
         compile();
       });
 
-      it('should set valid state', function (done) {
+      it('should set valid state', function () {
         // give angular time to set up the directive
-        mockValidateReturns.then(function () {
-          checkClass('ng-valid-query-input');
-          checkClass('ng-valid');
-          done();
-        })
-        .catch(done);
+        checkClass('ng-valid-query-input');
+        checkClass('ng-valid');
       });
     });
 
     describe('invalid querystring', function () {
-      var mockValidateReturns = invalidEsResponse();
+      var mockValidateReturns;
 
       beforeEach(function () {
         init();
-        mockValidateQuery.returns(mockValidateReturns);
+        mockValidateQuery.returns(invalidEsResponse());
         compile();
       });
 
-      it('should set invalid state', function (done) {
-        var checkInvalid = function () {
-          checkClass('ng-invalid');
-          done();
-        };
+      it('should set invalid state', function () {
+        checkClass('ng-invalid');
+      });
+    });
 
-        // give angular time to set up the directive
-        mockValidateReturns
-        // swallow the mockReturn rejected response
-        .then(checkInvalid, checkInvalid)
-        .catch(done);
+    describe('changing input', function () {
+      it('should change validity based on response', function () {
+        init();
+        mockValidateQuery.onCall(0).returns(validEsResponse());
+        compile();
+        $rootScope.$digest();
+        checkClass('ng-valid');
+
+        // leading and trailing edges
+        mockValidateQuery.onCall(1).returns(invalidEsResponse());
+        mockValidateQuery.onCall(2).returns(invalidEsResponse());
+        $rootScope.mockModel = 'invalid:';
+        // trigger model change, which fires watcher
+        $rootScope.$digest();
+        // leading edge
+        $timeout.flush(); // trailing edge
+        checkClass('ng-invalid');
+
+        // leading and trailing edges
+        mockValidateQuery.onCall(3).returns(validEsResponse());
+        mockValidateQuery.onCall(4).returns(validEsResponse());
+        $rootScope.mockModel = 'valid';
+        // trigger model change, which fires watcher
+        $rootScope.$digest();
+        // leading edge
+        $timeout.flush(); // trailing edge
+        checkClass('ng-valid');
       });
     });
   });
