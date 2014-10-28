@@ -15,11 +15,11 @@ define(function (require) {
       restrict: 'E',
       template: require('text!components/agg_table/agg_table.html'),
       scope: {
-        tableOrGroup: '=table',
+        table: '=',
         perPage: '=?',
         level: '=?'
       },
-      controllerAs: 'table',
+      controllerAs: 'aggTable',
       compile: function ($el) {
         // Use the compile function from the RecursionHelper,
         // And return the linking function(s) which it returns
@@ -39,30 +39,13 @@ define(function (require) {
           filename: 'table.csv'
         };
 
-        self.colTitle = function (col) {
-          var agg = aggConfig(col);
-          return agg.type.makeLabel(agg);
-        };
-
-        function aggConfig(col) {
-          if (!col.aggConfig) {
-            throw new TypeError('Column is missing the aggConfig property');
-          }
-          return col.aggConfig;
-        }
-
-        function colField(col) {
-          var agg = aggConfig(col);
-          return agg.params && agg.params.field;
-        }
-
         self.getPerPage = function () {
           return $scope.perPage || Infinity;
         };
 
         self.getColumnClass = function (col, $first, $last) {
           var cls = [];
-          var agg = aggConfig(col);
+          var agg = $scope.table.aggConfig(col);
 
           if ($last || (agg.schema.group === 'metrics')) {
             cls.push('visualize-table-right');
@@ -127,38 +110,30 @@ define(function (require) {
         };
 
         $scope.$watchMulti([
-          'tableOrGroup',
-          'table.sort.asc',
-          'table.sort.field'
+          'table',
+          'aggTable.sort.asc',
+          'aggTable.sort.field'
         ], function () {
-          $scope.rows = $scope.columns = $scope.group = null;
+          var table = $scope.table;
 
-          var tOrG = $scope.tableOrGroup;
-          if (!tOrG) return;
-
-          if (tOrG.tables) {
-            $scope.group = tOrG;
-            $scope[$scope.group.aggConfig.params.row ? 'rows' : 'columns'] = tOrG.tables;
+          if (!table) {
+            $scope.formattedRows = null;
             return;
           }
 
-          $scope.rows = tOrG.rows;
-          $scope.columns = tOrG.columns;
-
-          var formatters = $scope.columns.map(function (col) {
-            var field = colField(col);
-            return field ? field.format.convert : _.identity;
+          var formatters = table.columns.map(function (col) {
+            return table.fieldFormatter(col);
           });
 
           // sort the row values, not formatted
           if (self.sort) {
-            $scope.formattedRows = orderBy($scope.rows, self.sort.getter, self.sort.asc);
+            $scope.formattedRows = orderBy(table.rows, self.sort.getter, self.sort.asc);
           } else {
             $scope.formattedRows = null;
           }
 
           // format all row values
-          $scope.formattedRows = ($scope.formattedRows || $scope.rows).map(function (row) {
+          $scope.formattedRows = ($scope.formattedRows || table.rows).map(function (row) {
             return row.map(function (cell, i) {
               return formatters[i](cell);
             });

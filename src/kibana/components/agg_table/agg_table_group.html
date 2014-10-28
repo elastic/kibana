@@ -1,0 +1,27 @@
+<table ng-if="rows" class="table">
+  <tr ng-repeat-start="table in rows">
+    <th ng-if="table.title">
+      <span class="agg-table-table-header">{{ table.title }}</span>
+    </th>
+  </tr>
+  <tr ng-repeat-end>
+    <td>
+      <kbn-agg-table-group ng-if="table.tables" group="table"></kbn-agg-table-group>
+      <kbn-agg-table ng-if="table.rows" table="table"></kbn-agg-table>
+    </td>
+  </tr>
+</table>
+
+<table ng-if="columns" class="table">
+  <tr>
+    <th ng-repeat="table in columns" ng-if="table.title">
+      <span class="agg-table-table-header">{{ table.title }}</span>
+    </th>
+  </tr>
+  <tr>
+    <td ng-repeat="table in columns">
+      <kbn-agg-table-group ng-if="table.tables" group="table"></kbn-agg-table-group>
+      <kbn-agg-table ng-if="table.rows" table="table"></kbn-agg-table>
+    </td>
+  </tr>
+</table>

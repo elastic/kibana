@@ -1,8 +1,13 @@
 define(function (require) {
   // we need to load the css ourselved
   require('css!plugins/table_vis/table_vis.css');
-  // we also need to load the controller used by the template
+
+  // we also need to load the controller and used by the template
   require('plugins/table_vis/table_vis_controller');
+
+  // require the directives that we use as well
+  require('components/agg_table/agg_table');
+  require('components/agg_table/agg_table_group');
 
   // define the TableVisType
   return function TableVisTypeProvider(Private) {

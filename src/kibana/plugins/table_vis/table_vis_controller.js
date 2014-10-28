@@ -9,8 +9,8 @@ define(function (require) {
     var tabifyAggResponse = Private(require('components/agg_response/tabify/tabify_agg_response'));
 
     $scope.$watch('esResponse', function (resp, oldResp) {
-      if (!resp) $scope.table = null;
-      else $scope.table = tabifyAggResponse($scope.vis, resp);
+      if (!resp) $scope.tableGroups = null;
+      else $scope.tableGroups = tabifyAggResponse($scope.vis, resp);
     });
   });
 

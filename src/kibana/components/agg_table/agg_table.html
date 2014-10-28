@@ -1,29 +1,3 @@
-<table ng-if="group && rows" class="table">
-  <tr ng-repeat-start="table in rows" ng-if="table.key">
-    <th>
-      <span class="agg-table-table-header">{{ table.title }}</span>
-    </th>
-  </tr>
-  <tr ng-repeat-end>
-    <td>
-      <kbn-agg-table table="table" per-page="getPerPage()" level="nextLevel"></kbn-agg-table>
-    </td>
-  </tr>
-</table>
-
-<table ng-if="group && columns" class="table">
-  <tr>
-    <th ng-repeat="table in columns" ng-if="table.key">
-      <span class="agg-table-table-header">{{ table.title }}</span>
-    </th>
-  </tr>
-  <tr>
-    <td ng-repeat="table in columns">
-      <kbn-agg-table table="table" per-page="getPerPage()" level="nextLevel"></kbn-agg-table>
-    </td>
-  </tr>
-</table>
-
 <paginate
   ng-if="!group"
 
@@ -36,16 +10,16 @@
       <thead>
         <tr bindonce>
           <th
-            ng-repeat="col in columns"
-            ng-click="table.cycleSort(col)"
-            ng-class="table.getColumnClass(col, $first, $last)">
-            <span bo-text="table.colTitle(col)"></span>
+            ng-repeat="col in table.columns"
+            ng-click="aggTable.cycleSort(col)"
+            ng-class="aggTable.getColumnClass(col, $first, $last)">
+            <span bo-text="col.title"></span>
             <i
               class="fa"
               ng-class="{
-                'fa-sort-asc': table.sort.col === col && table.sort.asc,
-                'fa-sort-desc': table.sort.col === col && !table.sort.asc,
-                'fa-sort': !table.sort || table.sort.col !== col
+                'fa-sort-asc': aggTable.sort.col === col && aggTable.sort.asc,
+                'fa-sort-desc': aggTable.sort.col === col && !aggTable.sort.asc,
+                'fa-sort': !aggTable.sort || aggTable.sort.col !== col
               }">
             </i>
           </th>
@@ -56,7 +30,7 @@
   </div>
 
   <div class="visualize-table-controls">
-    <a class="small" ng-click="table.exportAsCsv()">
+    <a class="small" ng-click="aggTable.exportAsCsv()">
       Export <i class="fa fa-download"></i>
     </a>
     <paginate-controls></paginate-controls>
