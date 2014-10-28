@@ -34,7 +34,8 @@ define(function (require) {
       }
 
       this.data = data;
-      this.labels = getLabels(data);
+      this.type = this.getDataType();
+      this.labels = (this.type === 'series') ? getLabels(data) : this.pieNames();
       this.color = color(this.labels);
       this._normalizeOrdered();
 
@@ -47,6 +48,21 @@ define(function (require) {
           .offset(offset || 'zero')
       });
     }
+
+    Data.prototype.getDataType = function () {
+      var data = this.getVisData();
+      var type;
+
+      data.forEach(function (obj) {
+        if (obj.series) {
+          type = 'series';
+        } else if (obj.slices) {
+          type = 'slices';
+        }
+      });
+
+      return type;
+    };
 
     /**
      * Returns an array of the actual x and y data value objects

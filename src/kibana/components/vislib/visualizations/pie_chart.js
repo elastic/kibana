@@ -24,12 +24,9 @@ define(function (require) {
       }
       PieChart.Super.apply(this, arguments);
 
-      this.columns = handler.data.data.raw.columns;
-
       this._attr = _.defaults(handler._attr || {}, {
         isDonut: handler._attr.isDonut || false,
-        getSize: function (d) { return d.size; },
-        dispatch: d3.dispatch('brush', 'click', 'hover', 'mouseover', 'mouseout')
+        getSize: function (d) { return d.size; }
       });
     }
 
@@ -42,7 +39,7 @@ define(function (require) {
      */
     PieChart.prototype.addPathEvents = function (path) {
       var events = this.events;
-      var dispatch = this.events._attr.dispatch;
+      var dispatch = this.events.dispatch;
 
       path
       .on('mouseover.pie', function mouseOverPie(d, i) {
@@ -50,11 +47,11 @@ define(function (require) {
         .classed('hover', true)
         .style('cursor', 'pointer');
 
-        dispatch.hover(events.pieResponse(d, i));
+        dispatch.hover(events.eventResponse(d, i));
         d3.event.stopPropagation();
       })
       .on('click.pie', function clickPie(d, i) {
-        dispatch.click(events.pieResponse(d, i));
+        dispatch.click(events.eventResponse(d, i));
         d3.event.stopPropagation();
       })
       .on('mouseout.pie', function mouseOutPie() {
@@ -109,7 +106,9 @@ define(function (require) {
       var isTooltip = this._attr.addTooltip;
       var self = this;
       var path;
-      var fieldFormatter;
+      var fieldFormatter = function (label) {
+        return label;
+      };
 
       path = svg
       .datum(slices)
@@ -121,18 +120,14 @@ define(function (require) {
         .attr('class', function (d) {
           if (d.depth === 0) { return; }
 
-          fieldFormatter = self.columns[d.depth - 1].field ?
-            self.columns[d.depth - 1].field.format.convert :
-            function (d) { return d; };
+          fieldFormatter = d.aggConfig ? d.aggConfig.params.field.format.convert : fieldFormatter;
           return self.colorToClass(color(fieldFormatter(d.name)));
         })
         .style('stroke', '#fff')
         .style('fill', function (d) {
           if (d.depth === 0) { return 'none'; }
 
-          fieldFormatter = self.columns[d.depth - 1].field ?
-            self.columns[d.depth - 1].field.format.convert :
-            function (d) { return d; };
+          fieldFormatter = d.aggConfig ? d.aggConfig.params.field.format.convert : fieldFormatter;
           return color(fieldFormatter(d.name));
         });
 
