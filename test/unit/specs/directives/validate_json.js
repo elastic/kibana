@@ -52,53 +52,36 @@ define(function (require) {
       it('should use the model', function () {
         expect($elemScope).to.have.property('ngModel');
       });
+
     });
 
-    describe('input', function () {
-      beforeEach(function () {
-        init('input');
-      });
+    Object.keys(markup).forEach(function (inputType) {
+      describe(inputType, function () {
+        beforeEach(function () {
+          init(inputType);
+        });
 
-      it('should be an input', function () {
-        expect($elem.get(0).tagName).to.be('INPUT');
-      });
+        it('should be an input', function () {
+          expect($elem.get(0).tagName).to.be(inputType.toUpperCase());
+        });
 
-      it('should set valid state', function () {
-        checkValid(input.valid, 'ng-valid');
-      });
+        it('should set valid state', function () {
+          checkValid(input.valid, 'ng-valid');
+        });
 
-      it('should set invalid state', function () {
-        checkValid(input.invalid, 'ng-invalid');
-      });
+        it('should be valid when empty', function () {
+          checkValid('', 'ng-valid');
+        });
 
-      it('should update validity on changes', function () {
-        checkValid(input.valid, 'ng-valid');
-        checkValid(input.invalid, 'ng-invalid');
-        checkValid(input.valid, 'ng-valid');
-      });
-    });
+        it('should set invalid state', function () {
+          checkValid(input.invalid, 'ng-invalid');
+        });
 
-    describe('textarea', function () {
-      beforeEach(function () {
-        init('textarea');
-      });
-
-      it('should be a textarea', function () {
-        expect($elem.get(0).tagName).to.be('TEXTAREA');
-      });
-
-      it('should set valid state', function () {
-        checkValid(input.valid, 'ng-valid');
-      });
-
-      it('should set invalid state', function () {
-        checkValid(input.invalid, 'ng-invalid');
-      });
-
-      it('should update validity on changes', function () {
-        checkValid(input.valid, 'ng-valid');
-        checkValid(input.invalid, 'ng-invalid');
-        checkValid(input.valid, 'ng-valid');
+        it('should update validity on changes', function () {
+          checkValid(input.valid, 'ng-valid');
+          checkValid(input.invalid, 'ng-invalid');
+          checkValid(input.valid, 'ng-valid');
+        });
       });
     });
   });
