@@ -152,7 +152,7 @@ define(function (require) {
         else table.columns = columns.slice(0);
       }(this.root));
 
-      return this.canSplit ? this.root.tables : this.root.tables[0];
+      return this.canSplit ? this.root : this.root.tables[0];
     };
 
     return TabbedAggResponseWriter;
