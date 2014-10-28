@@ -7,7 +7,7 @@ define(function (require) {
      * Returns a unique list of formatted labels (strings).
      */
 
-    return function (arr, formatter) {
+    return function (arr) {
       if (!_.isArray(arr)) {
         throw new TypeError('UniqLabelUtil expects an array of objects');
       }
@@ -15,9 +15,6 @@ define(function (require) {
       return _(arr)
       .pluck('label')
       .unique()
-      .map(function (d) {
-        return formatter(d);
-      })
       .value();
     };
   };
