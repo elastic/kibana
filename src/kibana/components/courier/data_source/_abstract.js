@@ -6,7 +6,7 @@ define(function (require) {
   return function SourceAbstractFactory(Private, Promise, PromiseEmitter, timefilter) {
     var pendingRequests = Private(require('components/courier/_pending_requests'));
     var errorHandlers = Private(require('components/courier/_error_handlers'));
-    var fetch = Private(require('components/courier/fetch/fetch'));
+    var courierFetch = Private(require('components/courier/fetch/fetch'));
 
     function SourceAbstract(initialState) {
       this._instanceid = _.uniqueId('data_source');
@@ -38,7 +38,7 @@ define(function (require) {
       }, this);
 
       this.history = [];
-      this._fetchStrategy = fetch.strategies[this._getType()];
+      this._fetchStrategy = courierFetch.strategies[this._getType()];
     }
 
     /*****
@@ -51,10 +51,10 @@ define(function (require) {
      * @return {any} - the value found
      */
     SourceAbstract.prototype.get = function (name) {
-      var current = this;
-      while (current) {
-        if (current._state[name] !== void 0) return current._state[name];
-        current = current.getParent();
+      var self = this;
+      while (self) {
+        if (self._state[name] !== void 0) return self._state[name];
+        self = self.getParent();
       }
     };
 
@@ -73,17 +73,19 @@ define(function (require) {
      *   string of the state value to set
      */
     SourceAbstract.prototype.set = function (state, val) {
+      var self = this;
+
       if (typeof state === 'string') {
         // the getter and setter methods check for undefined explicitly
         // to identify getters and null to identify deletion
         if (val === undefined) {
           val = null;
         }
-        this[state](val);
+        self[state](val);
       } else {
-        this._state = state;
+        self._state = state;
       }
-      return this;
+      return self;
     };
 
     /**
@@ -117,9 +119,10 @@ define(function (require) {
      * @return {Promise}
      */
     SourceAbstract.prototype.onResults = function (handler) {
-      var source = this;
+      var self = this;
+
       return new PromiseEmitter(function (resolve, reject, defer) {
-        var req = source._createRequest(defer);
+        var req = self._createRequest(defer);
         pendingRequests.push(req);
       }, handler);
     };
@@ -138,9 +141,11 @@ define(function (require) {
      * @return {Promise}
      */
     SourceAbstract.prototype.onError = function (handler) {
+      var self = this;
+
       return new PromiseEmitter(function (resolve, reject, defer) {
         errorHandlers.push({
-          source: this,
+          source: self,
           defer: defer
         });
       }, handler);
@@ -151,14 +156,14 @@ define(function (require) {
      * @param {Function} cb - callback
      */
     SourceAbstract.prototype.fetch = function () {
-      var source = this;
+      var self = this;
 
-      var req = source._createRequest();
+      var req = self._createRequest();
       pendingRequests.push(req);
 
       // fetch just the requests for this source
-      fetch.these(source._getType(), pendingRequests.splice(0).filter(function (req) {
-        if (req.source !== source) {
+      courierFetch.these(self._getType(), pendingRequests.splice(0).filter(function (req) {
+        if (req.source !== self) {
           pendingRequests.push(req);
           return false;
         }
@@ -191,16 +196,18 @@ define(function (require) {
      *****/
 
     SourceAbstract.prototype._createRequest = function (defer) {
+      var self = this;
+
       var req = {
-        source: this,
+        source: self,
         defer: defer || Promise.defer()
       };
 
-      if (this.history) {
+      if (self.history) {
         // latest history at the top
-        this.history.unshift(req);
+        self.history.unshift(req);
         // trim all entries beyond 19/20
-        this.history.splice(20);
+        self.history.splice(20);
       }
 
       return req;
