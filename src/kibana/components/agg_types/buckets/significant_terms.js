@@ -27,11 +27,6 @@ define(function (require) {
           name: 'include',
           type: 'regex',
           advanced: true
-        },
-        {
-          name: 'script',
-          type: 'string',
-          advanced: true
         }
       ]
     });

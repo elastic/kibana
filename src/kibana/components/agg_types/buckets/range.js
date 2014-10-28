@@ -27,11 +27,6 @@ define(function (require) {
             output.params.ranges = aggConfig.params.ranges;
             output.params.keyed = true;
           }
-        },
-        {
-          name: 'script',
-          type: 'string',
-          advanced: true
         }
       ]
     });
