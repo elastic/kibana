@@ -48,10 +48,10 @@ grunt test build
   npm install && bower install && cd src/server && bundle && cd ../..
   ```
 
-- start the development server 
+- start the development server.
 
   ```sh
-  grunt dev
+  grunt dev # use the --es flag to install & start elasticsearch too
   ```
 
 ### Submit a pull request
