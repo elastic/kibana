@@ -26,14 +26,6 @@ define(function (require) {
 
       AreaChart.Super.apply(this, arguments);
 
-      var raw;
-      var fieldIndex;
-
-      if (handler.data.data.raw) {
-        raw = handler.data.data.raw.columns;
-        fieldIndex = _.findIndex(raw, {'categoryName': 'group'});
-      }
-
       this.isOverlapping = (handler._attr.mode === 'overlap');
 
       if (this.isOverlapping) {
@@ -41,9 +33,6 @@ define(function (require) {
         // Default opacity should return to 0.6 on mouseout
         handler._attr.defaultOpacity = 0.6;
       }
-
-      this.fieldFormatter = (raw && raw[fieldIndex]) ?
-        raw[fieldIndex].field.format.convert : function (d) { return d; };
 
       this._attr = _.defaults(handler._attr || {}, {
         xValue: function (d) { return d.x; },
@@ -128,10 +117,10 @@ define(function (require) {
       // Append path
       path = layer.append('path')
       .attr('class', function (d) {
-        return self.colorToClass(color(self.fieldFormatter(d[0].label)));
+        return self.colorToClass(color(d[0].label));
       })
       .style('fill', function (d) {
-        return color(self.fieldFormatter(d[0].label));
+        return color(d[0].label);
       })
       .style('opacity', defaultOpacity);
 
@@ -227,10 +216,10 @@ define(function (require) {
         return d.label;
       })
       .attr('fill', function (d) {
-        return color(self.fieldFormatter(d.label));
+        return color(d.label);
       })
       .attr('stroke', function strokeColor(d) {
-        return color(self.fieldFormatter(d.label));
+        return color(d.label);
       })
       .attr('stroke-width', circleStrokeWidth);
 

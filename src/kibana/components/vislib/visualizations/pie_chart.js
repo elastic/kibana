@@ -120,14 +120,16 @@ define(function (require) {
         .attr('class', function (d) {
           if (d.depth === 0) { return; }
 
-          fieldFormatter = d.aggConfig ? d.aggConfig.params.field.format.convert : fieldFormatter;
+          fieldFormatter = d.aggConfig ?
+            d.aggConfig.params.field.format.convert : fieldFormatter;
           return self.colorToClass(color(fieldFormatter(d.name)));
         })
         .style('stroke', '#fff')
         .style('fill', function (d) {
           if (d.depth === 0) { return 'none'; }
 
-          fieldFormatter = d.aggConfig ? d.aggConfig.params.field.format.convert : fieldFormatter;
+          fieldFormatter = d.aggConfig ?
+            d.aggConfig.params.field.format.convert : fieldFormatter;
           return color(fieldFormatter(d.name));
         });
 

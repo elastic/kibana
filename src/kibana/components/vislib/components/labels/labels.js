@@ -18,12 +18,7 @@ define(function (require) {
         throw new TypeError('LabelUtil expects an object');
       }
 
-      var raw = obj.raw;
-      var fieldIndex = raw ? _.findIndex(raw, {'categoryName': 'group'}) : undefined;
-      var fieldFormatter = raw && fieldIndex && fieldIndex !== -1 ?
-        raw[fieldIndex].field.format.convert : function (d) { return d; };
-
-      return getArrOfUniqLabels(createArr(obj), fieldFormatter);
+      return getArrOfUniqLabels(createArr(obj));
     };
   };
 });
