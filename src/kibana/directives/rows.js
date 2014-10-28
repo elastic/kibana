@@ -35,9 +35,9 @@ define(function (require) {
 
           $el.empty();
 
+          if (!_.isArray(rows)) rows = [];
           var width = rows.reduce(maxRowSize, 0);
 
-          if (!_.isArray(rows)) rows = [];
           if (isFinite(min) && rows.length < min) {
             // clone the rows so that we can add elements to it without upsetting the original
             rows = _.clone(rows);
