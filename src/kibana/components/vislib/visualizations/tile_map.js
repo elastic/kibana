@@ -281,21 +281,7 @@ define(function (require) {
           };
         }
       }).addTo(map);
-      console.log(featureLayer);
       
-      // add events
-      featureLayer.on('mouseover', function (e) {
-        console.log('mouseover', e);
-        //this.openPopup();
-        //console.log(d3.select(this));
-        //d3.select(this).data([e]).call(tooltip.render());
-      });
-
-      featureLayer.on('mouseout', function (e) {
-        console.log('mouseout');
-      });
-
-            
       self.resizeFeatures(map, min, max, precision, featureLayer);
 
       map.on('zoomend dragend', function () {
@@ -304,22 +290,8 @@ define(function (require) {
         self.resizeFeatures(map, min, max, precision, featureLayer);
       });
 
-      // add tooltip
-      //var tooltip = this.tooltip;
-      //var isTooltip = this._attr.addTooltip;
-
-      //var mapMarkers = d3.select(self.chartEl)
-      //  .select('.leaflet-overlay-pane')
-      //  .selectAll('.leaflet-clickable')
-      //  .datum(featureLayer._layers);
-
-      //if (isTooltip) {
-      //  mapMarkers.call(tooltip.render());
-      //}
-
       /// add legend
       self.addLegend(mapData, map);
-
 
     };
 
@@ -358,8 +330,17 @@ define(function (require) {
      * returns layer (Object} with popup
      */
     TileMap.prototype.bindPopup = function (feature, layer) {
-      
-      layer.bindPopup(feature.properties.geohash + ': ' + feature.properties.count);
+      layer.bindPopup(
+        '<b>Geohash: </b>' + feature.properties.geohash + '<br>' +
+        '<b>Center: </b>' + feature.properties.center[1].toFixed(1) + ', ' + feature.properties.center[0].toFixed(1) + '<br>' +
+        '<b>Count: </b>' + feature.properties.count
+      );
+      layer.on('mouseover', function (e) {
+        layer.openPopup();
+      });
+      layer.on('mouseout', function (e) {
+        layer.closePopup();
+      });
 
     };
 
