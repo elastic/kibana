@@ -51,7 +51,6 @@ define(function (require) {
      * @returns {Function} Creates the map
      */
     TileMap.prototype.draw = function () {
-      // Attributes
       var self = this;
       var $elem = $(this.chartEl);
       var div;
@@ -72,14 +71,60 @@ define(function (require) {
 
             // self.clusterMarkers(map, data.geoJSON);
             // self.heatMap(map, data.geoJSON);
-            self.scaledCircleMarkers(map, data.geoJSON);
-            // self.quantizeCircleMarkers(map, data.geoJSON);
+            // self.scaledCircleMarkers(map, data.geoJSON);
+            self.quantizeCircleMarkers(map, data.geoJSON);
 
+          }
+
+          if (data.geoJSON.properties.label) {
+            self.addLabel(data.geoJSON.properties.label, map);
           }
 
         });
       };
 
+    };
+
+    // Leaflet control for map label
+    TileMap.prototype.addLabel = function (mapLabel, map) {
+      var label = L.control();
+
+      label.onAdd = function () {
+        this._div = L.DomUtil.create('div', 'map-info map-label');
+        this.update();
+        return this._div;
+      };
+
+      label.update = function () {
+        this._div.innerHTML = '<h2>' + mapLabel + '</h2>';
+      };
+
+      label.addTo(map);
+
+    };
+
+    // Leaflet control for map legend
+    TileMap.prototype.addLegend = function (data, map) {
+      var self = this;
+      var legend = L.control({position: 'bottomright'});
+
+      legend.onAdd = function () {
+        
+        var div = L.DomUtil.create('div', 'map-legend');
+        var colors = self._attr.colors;
+        //var breaks = [];
+        var labels = [];
+        for (var i = 0; i < colors.length; i++) {
+          var vals = self._attr.cScale.invertExtent(colors[i]);
+          var strokecol = self.darkerColor(colors[i]);
+          labels.push(
+            '<i style="background:' + colors[i] + ';border-color:' + strokecol + '"></i> ' +
+            vals[0].toFixed(1) + ' &ndash; ' + vals[1].toFixed(1));
+        }
+        div.innerHTML = labels.join('<br>');
+        return div;
+      };
+      legend.addTo(map);
     };
 
     TileMap.prototype.clusterMarkers = function (map, mapData) {
@@ -141,7 +186,6 @@ define(function (require) {
     };
 
     TileMap.prototype.scaledCircleMarkers = function (map, mapData) {
-      
       var self = this;
       self._attr.maptype = 'scaledCircleMarkers';
       var min = mapData.properties.min;
@@ -163,9 +207,9 @@ define(function (require) {
             radius: rad
           });
         },
-        onEachFeature: function (feature, layer) {
-          self.bindPopup(feature, layer);
-        },
+        //onEachFeature: function (feature, layer) {
+        //  self.bindPopup(feature, layer);
+        //},
         style: function (feature) {
           var count = feature.properties.count;
           return {
@@ -179,6 +223,18 @@ define(function (require) {
         }
       }).addTo(map);
 
+      // add events
+      featureLayer.on('mouseover', function (e) {
+        console.log('mouseover', e);
+        //this.openPopup();
+        //console.log(d3.select(this));
+        //d3.select(this).data([e]).call(tooltip.render());
+      });
+
+      featureLayer.on('mouseout', function (e) {
+        console.log('mouseout');
+      });
+
       self.resizeFeatures(map, min, max, precision, featureLayer);
 
       map.on('zoomend dragend', function () {
@@ -186,10 +242,10 @@ define(function (require) {
         bounds = map.getBounds();
         self.resizeFeatures(map, min, max, precision, featureLayer);
       });
+
     };
 
     TileMap.prototype.quantizeCircleMarkers = function (map, mapData) {
-      
       var self = this;
       self._attr.maptype = 'quantizeCircleMarkers';
       var min = mapData.properties.min;
@@ -219,13 +275,27 @@ define(function (require) {
           return {
             fillColor: color,
             color: self.darkerColor(color),
-            weight: 1.5,
+            weight: 1,
             opacity: 1,
-            fillOpacity: 0.8
+            fillOpacity: 1
           };
         }
       }).addTo(map);
+      console.log(featureLayer);
+      
+      // add events
+      featureLayer.on('mouseover', function (e) {
+        console.log('mouseover', e);
+        //this.openPopup();
+        //console.log(d3.select(this));
+        //d3.select(this).data([e]).call(tooltip.render());
+      });
 
+      featureLayer.on('mouseout', function (e) {
+        console.log('mouseout');
+      });
+
+            
       self.resizeFeatures(map, min, max, precision, featureLayer);
 
       map.on('zoomend dragend', function () {
@@ -233,6 +303,23 @@ define(function (require) {
         bounds = map.getBounds();
         self.resizeFeatures(map, min, max, precision, featureLayer);
       });
+
+      // add tooltip
+      //var tooltip = this.tooltip;
+      //var isTooltip = this._attr.addTooltip;
+
+      //var mapMarkers = d3.select(self.chartEl)
+      //  .select('.leaflet-overlay-pane')
+      //  .selectAll('.leaflet-clickable')
+      //  .datum(featureLayer._layers);
+
+      //if (isTooltip) {
+      //  mapMarkers.call(tooltip.render());
+      //}
+
+      /// add legend
+      self.addLegend(mapData, map);
+
 
     };
 
@@ -244,7 +331,6 @@ define(function (require) {
      * @returns {Function} Creates the map
      */
     TileMap.prototype.resizeFeatures = function (map, min, max, precision, featureLayer) {
-      
       var self = this;
       var zoomScale = self.zoomScale(mapzoom);
       
@@ -308,7 +394,6 @@ define(function (require) {
      * @return {Number}
      */
     TileMap.prototype.radiusScale = function (count, max, precision) {
-      
       var maxr;
       var exp = 0.6;
       switch (precision) {
@@ -338,10 +423,10 @@ define(function (require) {
       //return Math.pow(count, 0.6);
       // return Math.sqrt(count);
       //return count;
+
     };
 
     TileMap.prototype.quantRadiusScale = function (precision) {
-      
       var maxr;
       switch (precision) {
         case 1:
@@ -366,41 +451,43 @@ define(function (require) {
           maxr = 3;
       }
       return maxr;
+
     };
 
     TileMap.prototype.quantizeColorScale = function (count, min, max) {
-      var c1 = [
+      var self = this;
+      var greens = [
         '#c7e9b4',
         '#7fcdbb',
         '#41b6c4',
         '#2c7fb8',
         '#253494'
       ];
-      var c2 = [
-        '#F69CC1',
-        '#D76FA7',
-        '#B2468A',
-        '#882269',
-        '#5B0345'
+      var reds = [
+        '#fed976',
+        '#feb24c',
+        '#fd8d3c',
+        '#f03b20',
+        '#bd0026'
       ];
-      var c3 = [
+      var blues = [
         '#9ecae1',
         '#6baed6',
         '#4292c6',
         '#2171b5',
         '#084594'
       ];
-      var cScale = d3.scale.quantize()
+
+      var colors = self._attr.colors = reds;
+      var cScale = self._attr.cScale = d3.scale.quantize()
         .domain([min, max])
-        .range(c3);
+        .range(colors);
       return cScale(count);
 
     };
 
     TileMap.prototype.darkerColor = function (color) {
-      
-      var darker = d3.rgb(color).darker(0.2).toString();
-      console.log(darker);
+      var darker = d3.rgb(color).darker(0.6).toString();
       return darker;
 
     };

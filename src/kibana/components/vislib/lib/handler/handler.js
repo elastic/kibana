@@ -91,7 +91,6 @@ define(function (require) {
             });
           }
           
-
           charts.push(chart);
           chart.render();
         });

@@ -20,6 +20,7 @@ define(function (require) {
      * @return {Object} interval
      */
     function decodeGeoHash(geohash) {
+      
       var BITS = [16, 8, 4, 2, 1];
       var BASE32 = '0123456789bcdefghjkmnpqrstuvwxyz';
       var is_even = 1;
@@ -57,6 +58,7 @@ define(function (require) {
         interval[1] = (interval[0] + interval[1]) / 2;
       }
     }
+
     return function (chart, columns, rows) {
       var geohash;
       var count;
@@ -68,9 +70,10 @@ define(function (require) {
       var min = rows[rows.length - 1][1];
       var max = rows[0][1];
       var precision = rows[0][0].length;
-
+      
       var geoJSON = chart.geoJSON = {
         properties: {
+          label: chart.label,
           length: length,
           min: min,
           max: max,

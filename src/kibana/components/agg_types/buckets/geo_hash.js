@@ -8,9 +8,9 @@ define(function (require) {
       name: 'geohash_grid',
       title: 'Geohash',
       ordered: {},
-      makeLabel: function (aggConfig) {
-        return aggConfig.params.field.name;
-      },
+      // makeLabel: function (aggConfig) {
+      //   return aggConfig.params.field.name;
+      // },
       params: [
         {
           name: 'field',
