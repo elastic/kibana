@@ -63,10 +63,6 @@ define(function (require) {
           name: 'include',
           type: 'regex',
           advanced: true
-        },
-        {
-          type: 'json',
-          advanced: true
         }
       ]
     });

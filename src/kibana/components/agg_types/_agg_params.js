@@ -34,6 +34,13 @@ define(function (require) {
         });
       }
 
+      // always append the raw JSON param
+      params.push({
+        name: 'json',
+        type: 'json',
+        advanced: true
+      });
+
       AggParams.Super.call(this, {
         index: ['name'],
         initialSet: params.map(function (param) {
