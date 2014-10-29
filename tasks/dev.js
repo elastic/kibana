@@ -11,7 +11,7 @@ module.exports = function (grunt) {
       'watch'
     ];
 
-    if (grunt.option('no-es')) {
+    if (!grunt.option('with-es')) {
       _.pull(tasks, 'esvm:dev');
     }
 
