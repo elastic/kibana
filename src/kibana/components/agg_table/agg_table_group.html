@@ -1,7 +1,7 @@
 <table ng-if="rows" class="table agg-table-group">
   <thead ng-repeat-start="table in rows">
     <tr>
-      <th ng-if="table.title">
+      <th ng-if="table.tables">
         <span class="agg-table-table-header">{{ table.title }}</span>
       </th>
     </tr>
@@ -19,7 +19,7 @@
 <table ng-if="columns" class="table agg-table-group">
   <thead>
     <tr>
-      <th ng-repeat="table in columns" ng-if="table.title">
+      <th ng-repeat="table in columns" ng-if="table.tables">
         <span class="agg-table-table-header">{{ table.title }}</span>
       </th>
     </tr>
