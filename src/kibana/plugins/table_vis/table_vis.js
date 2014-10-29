@@ -28,7 +28,11 @@ define(function (require) {
         {
           group: 'metrics',
           name: 'metric',
-          title: 'Metric'
+          title: 'Metric',
+          min: 1,
+          defaults: [
+            { type: 'count', schema: 'metric' }
+          ]
         },
         {
           group: 'buckets',

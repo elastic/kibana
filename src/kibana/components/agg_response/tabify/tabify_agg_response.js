@@ -14,25 +14,6 @@ define(function (require) {
         doc_count: esResponse.hits.total
       });
 
-      if (!write.aggStack.length) {
-        var schema = vis.type.schemas.metrics[0];
-        if (!schema) {
-          throw new Error('Unable to tabify empty response without a metric schema of some sort');
-        }
-
-        // special case where there are no aggregations,
-        // we return a temporary "count" aggregation which reads
-        // the total search hit count
-        var tempCountAgg = new AggConfig(vis, {
-          type: 'count',
-          schema: schema
-        });
-        write.columns.push({
-          aggConfig: tempCountAgg
-        });
-        write.aggStack.push(tempCountAgg);
-      }
-
       collectBucket(write, topLevelBucket);
 
       return write.response();
