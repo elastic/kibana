@@ -51,7 +51,7 @@ grunt test build
 - start the development server.
 
   ```sh
-  grunt dev # use the --es flag to install & start elasticsearch too
+  grunt dev # use the "--with-es" flag to install & start elasticsearch too
   ```
 
 ### Submit a pull request
