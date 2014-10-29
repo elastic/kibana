@@ -21,7 +21,7 @@ define(function (require) {
       this.canSplit = this.opts.canSplit !== false;
 
       this.root = new TableSplit();
-      this.stack = [this.root];
+      this.splitStack = [this.root];
     }
 
     /**
@@ -43,7 +43,7 @@ define(function (require) {
         table.title = agg.makeLabel() + ': ' + key;
       }
 
-      var parent = this.stack[0];
+      var parent = this.splitStack[0];
       // link the parent and child
       table.$parent = parent;
       parent.tables.push(table);
@@ -74,21 +74,16 @@ define(function (require) {
 
       buckets.forEach(function (bucket, key) {
         // find the existing split that we should extend
-        var tableSplit = _.find(self.stack[0].tables, { aggConfig: agg, key: key });
+        var tableSplit = _.find(self.splitStack[0].tables, { aggConfig: agg, key: key });
         // create the split if it doesn't exist yet
         if (!tableSplit) tableSplit = self.table(true, agg, key);
 
         // push the split onto the stack so that it will receive written tables
-        self.stack.unshift(tableSplit);
+        self.splitStack.unshift(tableSplit);
         // call the block
         if (_.isFunction(block)) block.call(self, bucket, key);
-        // remove the split for now
-        while (true) {
-          if (tableSplit === self.stack.shift()) break;
-          if (self.stack.length === 0) {
-            throw new Error('Table split was removed from stack... unable to proceed');
-          }
-        }
+        // remove the split from the stack
+        self.splitStack.shift();
       });
     };
 
@@ -123,11 +118,8 @@ define(function (require) {
         return;
       }
 
-      var table = this.stack[0];
-      if (!table || (table instanceof TableSplit)) {
-        table = this.table(false);
-        this.stack.unshift(table);
-      }
+      var split = this.splitStack[0];
+      var table = split.tables[0] || this.table(false);
 
       while (cells.length < this.columns.length) cells.push('');
       table.rows.push(cells);
