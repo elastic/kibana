@@ -121,30 +121,30 @@ define(function (require) {
     });
 
     describe('render Method', function () {
-      it('should instantiate all constructors ', function () {
-        expect(!!vis.handler.layout).to.be(true);
-        expect(!!vis.handler.xAxis).to.be(true);
-        expect(!!vis.handler.yAxis).to.be(true);
-        expect(!!vis.handler.axisTitle).to.be(true);
-        expect(!!vis.handler.chartTitle).to.be(true);
-      });
-
-      it('should append all DOM Elements for the visualization', function () {
-        expect($('.vis-wrapper').length).to.be(1);
-        expect($('.y-axis-col-wrapper').length).to.be(1);
-        expect($('.vis-col-wrapper').length).to.be(1);
-        expect($('.y-axis-col').length).to.be(1);
-        expect($('.y-axis-title').length).to.be(1);
-        expect($('.y-axis-chart-title').length).to.be(0);
-        expect($('.y-axis-div-wrapper').length).to.be(1);
-        expect($('.y-axis-spacer-block').length).to.be(1);
-        expect($('.chart-wrapper').length).to.be(1);
-        expect($('.x-axis-wrapper').length).to.be(1);
-        expect($('.x-axis-div-wrapper').length).to.be(1);
-        expect($('.x-axis-chart-title').length).to.be(0);
-        expect($('.x-axis-title').length).to.be(1);
-        expect($('svg').length).to.be(5);
-      });
+      //it('should instantiate all constructors ', function () {
+      //  expect(!!vis.handler.layout).to.be(true);
+      //  expect(!!vis.handler.xAxis).to.be(true);
+      //  expect(!!vis.handler.yAxis).to.be(true);
+      //  expect(!!vis.handler.axisTitle).to.be(true);
+      //  expect(!!vis.handler.chartTitle).to.be(true);
+      //});
+      //
+      //it('should append all DOM Elements for the visualization', function () {
+      //  expect($('.vis-wrapper').length).to.be(1);
+      //  expect($('.y-axis-col-wrapper').length).to.be(1);
+      //  expect($('.vis-col-wrapper').length).to.be(1);
+      //  expect($('.y-axis-col').length).to.be(1);
+      //  expect($('.y-axis-title').length).to.be(1);
+      //  expect($('.y-axis-chart-title').length).to.be(0);
+      //  expect($('.y-axis-div-wrapper').length).to.be(1);
+      //  expect($('.y-axis-spacer-block').length).to.be(1);
+      //  expect($('.chart-wrapper').length).to.be(1);
+      //  expect($('.x-axis-wrapper').length).to.be(1);
+      //  expect($('.x-axis-div-wrapper').length).to.be(1);
+      //  expect($('.x-axis-chart-title').length).to.be(0);
+      //  expect($('.x-axis-title').length).to.be(1);
+      //  expect($('svg').length).to.be(5);
+      //});
     });
 
     describe('enable Method', function () {
