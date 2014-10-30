@@ -421,7 +421,7 @@ p.rows-label, p.columns-label {
   height: 500px;
 }
 
-.map-info {
+.tilemap-info {
   padding: 3px 7px 3px 7px;
   margin: 0;
   font: 11px/13px Arial, Helvetica, sans-serif;
@@ -431,14 +431,14 @@ p.rows-label, p.columns-label {
   border-radius: 5px;
 }
 
-.map-info h2 {
+.tilemap-info h2 {
   font-size: 12px !important;
   margin: 0 !important;
   padding: 0;
   color: #444;
 }
 
-.map-legend {
+.tilemap-legend {
   padding: 5px 7px 5px 7px;
   margin: 0;
   font: 11px/13px Arial, Helvetica, sans-serif;
@@ -451,16 +451,41 @@ p.rows-label, p.columns-label {
   color: #666;
 }
 
-.map-legend i {
+.tilemap-legend i {
   width: 10px;
   height: 10px;
   float: left;
   margin: 2px 4px 0 0;
   opacity: 1;
   border-radius: 50%;
-  border-width: 1px;
+  border-width: 2px;
   border-style: solid;
   border-color: #999;
   background: #aaa;
 }
 
+.leaflet-popup-content-wrapper {
+  margin: 0;
+  padding: 0;
+}
+
+.leaflet-popup {
+  margin-bottom: 16px !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background: rgba(70, 82, 93, 0.95) !important;
+  color: @gray-lighter !important;
+  border-radius: 4px !important;
+  padding: 0 !important;
+}
+
+.leaflet-popup-content {
+  padding: 8px !important;
+  margin: 0 !important;
+  line-height: 14px !important;
+}
+
+.leaflet-popup-tip-container, .leaflet-popup-close-button {
+  display: none !important;
+}

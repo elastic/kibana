@@ -207,10 +207,6 @@ define(function (require) {
         return 1;
       }
 
-      if (self._attr.mode === 'percentage') {
-        return 1;
-      }
-
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
       _.forEach(this.flatten(), function (series) {
@@ -412,6 +408,28 @@ define(function (require) {
         if (missingMin) this.data.ordered.min = extent[0];
         if (missingMax) this.data.ordered.max = extent[1];
       }
+    };
+
+    /**
+     * Calculates min and max values for all map data
+     *
+     * @method mapDataExtents
+     * @param series {Array} Array of data objects
+     * @returns {Array} min and max values
+     */
+    Data.prototype.mapDataExtents = function (data) {
+      var values;
+      if (data.columns.length === 2) {
+        values = _.map(data.rows, function (n) {
+          return n[1];
+        });
+      } else {
+        values = _.map(data.rows, function (n) {
+          return n[2];
+        });
+      }
+      var extents = [_.min(values), _.max(values)];
+      return extents;
     };
 
     return Data;
