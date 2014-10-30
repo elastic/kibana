@@ -1,6 +1,7 @@
 require "sinatra/base"
 require "sinatra/json"
 require "yaml"
+require "timeout"
 
 module Kibana
   module Routes
@@ -18,7 +19,26 @@ module Kibana
         set :httponly, true
         set :config, config
         set :bundled_plugin_ids, config['bundledPluginIds'] || []
+
+        set :show_exceptions, false
+        set :raise_errors, false
+        set :dump_errors, false
       end
+
+      error do
+        status 500
+      end
+
+      error Errno::ECONNREFUSED do
+        status 502
+        json :message => "Unable to connect to Elasticsearch"
+      end
+
+      error Timeout::Error do
+        status 504
+        json :message => "Timeout while waiting for Elasticsearch"
+      end
+
     end
   end
 end
