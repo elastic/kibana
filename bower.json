@@ -33,7 +33,7 @@
     "bootstrap": "~3.1.1",
     "bootstrap-chosen": "61ed40742c",
     "d3": "~3.4.8",
-    "elasticsearch": "*",
+    "elasticsearch": "elasticsearch/bower-elasticsearch-js#prerelease",
     "Faker": "~1.1.0",
     "FileSaver": "*",
     "font-awesome": "~4.2.0",

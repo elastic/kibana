@@ -1,5 +1,5 @@
 define(function (require) {
-  return ['Regex', function () {
+  return ['Optioned', function () {
     var _ = require('lodash');
 
     var BaseAggParam;
