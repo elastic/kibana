@@ -187,6 +187,8 @@ define(function (require) {
         // don't throw ClusterBlockException errors
         if (err.status === 403 && err.message.match(/ClusterBlockException.+index closed/)) {
           resolve(false);
+        } else if (err.body && err.body.message) {
+          reject(err.body.message);
         } else {
           reject(err);
         }
