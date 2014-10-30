@@ -171,9 +171,10 @@ define(function (require) {
           charts.forEach(function (chart) {
             this.handler.disable(event, chart);
           }, this);
-        } else {
-          this.eventTypes.enabled.splice(eventIndex, 1);
         }
+
+        // Remove event from enabled array
+        this.eventTypes.enabled.splice(eventIndex, 1);
       }
 
       return ret;

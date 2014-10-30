@@ -150,6 +150,14 @@ define(function (require) {
 //      });
 //    });
 
+    describe('enable Method', function () {
+
+    });
+
+    describe('disable Method', function () {
+
+    });
+
     describe('removeAll Method', function () {
       beforeEach(function () {
         inject(function () {
