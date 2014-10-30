@@ -1,6 +1,0 @@
-{
-  "defaults": {
-    "version": "^1.4",
-    "plugins": ["elasticsearch/marvel/latest", "mobz/elasticsearch-head"]
-  }
-}
