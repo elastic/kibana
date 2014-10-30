@@ -14,7 +14,7 @@ define(function (require) {
         {},
         vis.type.vislibParams,
         { type: vis.type.name },
-        vis.vislibParams
+        vis.params
       );
 
       self.vislibVis = new vislib.Vis($el[0], vislibParams);
