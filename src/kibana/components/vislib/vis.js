@@ -84,6 +84,7 @@ define(function (require) {
     /**
      * Destroys the visualization
      * Removes chart and all elements associated with it.
+     * Removes chart and all elements associated with it.
      * Remove event listeners and pass destroy call down to owned objects.
      *
      * @method destroy

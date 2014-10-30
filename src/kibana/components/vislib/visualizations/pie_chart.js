@@ -34,30 +34,15 @@ define(function (require) {
      * Adds Events to SVG paths
      *
      * @method addPathEvents
-     * @param path {D3.Selection} Reference to SVG path
+     * @param element {D3.Selection} Reference to SVG path
      * @returns {D3.Selection} SVG path with event listeners attached
      */
-    PieChart.prototype.addPathEvents = function (path) {
+    PieChart.prototype.addPathEvents = function (element) {
       var events = this.events;
-      var dispatch = this.events.dispatch;
 
-      path
-      .on('mouseover.pie', function mouseOverPie(d, i) {
-        d3.select(this)
-        .classed('hover', true)
-        .style('cursor', 'pointer');
-
-        dispatch.hover(events.eventResponse(d, i));
-        d3.event.stopPropagation();
-      })
-      .on('click.pie', function clickPie(d, i) {
-        dispatch.click(events.eventResponse(d, i));
-        d3.event.stopPropagation();
-      })
-      .on('mouseout.pie', function mouseOutPie() {
-        d3.select(this)
-        .classed('hover', false);
-      });
+      return element
+        .call(events.addHoverEvent())
+        .call(events.addClickEvent());
     };
 
     /**
@@ -148,7 +133,6 @@ define(function (require) {
      */
     PieChart.prototype.draw = function () {
       var self = this;
-      var isEvents = this._attr.addEvents;
 
       return function (selection) {
         selection.each(function (data) {
@@ -159,6 +143,7 @@ define(function (require) {
           var height = $(el).height();
           var minWidth = 20;
           var minHeight = 20;
+          var path;
 
           if (width <= minWidth || height <= minHeight) {
             throw new errors.ContainerTooSmall();
@@ -170,11 +155,8 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
 
-          var path = self.addPath(width, height, svg, slices);
-
-          if (isEvents) {
-            self.addPathEvents(path);
-          }
+          path = self.addPath(width, height, svg, slices);
+          self.addPathEvents(path);
 
           return svg;
         });

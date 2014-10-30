@@ -31,6 +31,7 @@ define(function (require) {
      */
     Dispatch.prototype.eventResponse = function (d, i) {
       var data = d3.event.target.nearestViewportElement.__data__;
+      var label = d.label ? d.label : d.name;
       var isSeries = !!(data.series);
       var isSlices = !!(data.slices);
       var series = isSeries ? data.series : undefined;
@@ -55,8 +56,8 @@ define(function (require) {
       return {
         value: d.y,
         point: d,
-        label: d.label,
-        color: color(d.label),
+        label: label,
+        color: color(label),
         pointIndex: i,
         series: series,
         slices: slices,
@@ -80,31 +81,96 @@ define(function (require) {
         selection.each(function () {
           var element = d3.select(this);
 
-          element.on(event, callback);
+          if (typeof callback === 'function') {
+            return element.on(event, callback);
+          }
         });
       };
     };
 
     /**
-     * Mouse over Behavior
      *
-     * @method mouseOverBar
-     * @returns {D3.Selection} this object with '.hover' class true
+     * @method addHoverEvent
+     * @returns {Function}
      */
-    Dispatch.prototype.onMouseOver = function () {
-      return d3.select(this).classed('hover', true)
-        .style('stroke', '#333')
-        .style('cursor', 'pointer');
+    Dispatch.prototype.addHoverEvent = function () {
+      var self = this;
+      var isClickable = (this.dispatch.on('click'));
+      var addEvent = this.addEvent;
+
+      function hover(d, i) {
+        d3.event.stopPropagation();
+
+        // Add pointer if item is clickable
+        if (isClickable) {
+          self.addMousePointer.call(this, arguments);
+        }
+
+        self.dispatch.hover.call(this, self.eventResponse(d, i));
+      }
+
+      return addEvent('mouseover', hover);
     };
 
     /**
-     * Mouse out Behavior
      *
-     * @method mouseOutBar
-     * @returns {D3.Selection} this object with '.hover' class false
+     * @method addClickEvent
+     * @returns {Function}
      */
-    Dispatch.prototype.onMouseOut = function () {
-      return d3.select(this).classed('hover', false).style('stroke', null);
+    Dispatch.prototype.addClickEvent = function () {
+      var self = this;
+      var addEvent = this.addEvent;
+
+      function click(d, i) {
+        d3.event.stopPropagation();
+        self.dispatch.click.call(this, self.eventResponse(d, i));
+      }
+
+      return addEvent('click', click);
+    };
+
+    /**
+     *
+     * @param svg
+     * @returns {Function}
+     */
+    Dispatch.prototype.addBrushEvent = function (svg) {
+      var dispatch = this.dispatch;
+      var xScale = this.handler.xAxis.xScale;
+      var isBrushable = (dispatch.on('brush'));
+      var brush = this.createBrush(xScale, svg);
+      var addEvent = this.addEvent;
+
+      function brushEnd() {
+        var bar = d3.select(this);
+        var startX = d3.mouse(svg.node());
+        var startXInv = xScale.invert(startX[0]);
+
+        // Reset the brush value
+        brush.extent([startXInv, startXInv]);
+
+        // Magic!
+        // Need to call brush on svg to see brush when brushing
+        // while on top of bars.
+        // Need to call brush on bar to allow the click event to be registered
+        svg.call(brush);
+        bar.call(brush);
+      }
+
+      if (isBrushable) {
+        return addEvent('mousedown', brushEnd);
+      }
+    };
+
+
+    /**
+     * Mouse over Behavior
+     *
+     * @method addMousePointer
+     * @returns {D3.Selection}
+     */
+    Dispatch.prototype.addMousePointer = function () {
+      return d3.select(this).style('cursor', 'pointer');
     };
 
     /**
@@ -114,7 +180,7 @@ define(function (require) {
      * @param svg {HTMLElement} Reference to SVG
      * @returns {*} Returns a D3 brush function and a SVG with a brush group attached
      */
-    Dispatch.prototype.addBrush = function (xScale, svg) {
+    Dispatch.prototype.createBrush = function (xScale, svg) {
       var dispatch = this.dispatch;
       var attr = this.handler._attr;
       var height = attr.height;

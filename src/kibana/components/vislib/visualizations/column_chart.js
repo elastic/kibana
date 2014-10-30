@@ -217,76 +217,27 @@ define(function (require) {
 
     /**
      * Adds Events to SVG rect
+     * Visualization is only brushable when a brush event is added
+     * If a brush event is added, then a function should be returned.
      *
      * @method addBarEvents
-     * @param element {d3.UpdateSelection} target
-     * @param svg {HTMLElement} chart SVG
-     * @returns {HTMLElement} rect with event listeners attached
+     * @param element {D3.UpdateSelection} target
+     * @param svg {D3.UpdateSelection} chart SVG
+     * @returns {D3.Selection} rect with event listeners attached
      */
     ColumnChart.prototype.addBarEvents = function (element, svg) {
-      var addEvent = this.events.addEvent;
-      var mouseOver = addEvent('mouseover.bar', this.mouseOver());
-      var mouseOut = addEvent('mouseout.bar', this.mouseOut());
-      var brush = addEvent('mousedown.bar', this.brush(svg));
-      var click = addEvent('click.bar', this.click());
+      var events = this.events;
+      var isBrushable = (typeof events.addBrushEvent(svg) === 'function');
+      var brush = isBrushable ? events.addBrushEvent(svg) : undefined;
+      var hover = events.addHoverEvent();
+      var click = events.addClickEvent();
+      var attachedEvents = element.call(hover).call(click);
 
-      return element
-      .call(mouseOver)
-      .call(mouseOut)
-      .call(brush)
-      .call(click);
-    };
-
-    ColumnChart.prototype.brush = function (svg) {
-      var dispatch = this.events.dispatch;
-      var xScale = this.handler.xAxis.xScale;
-      var brush = this.events.addBrush(xScale, svg);
-
-      if (dispatch.on('brush')) {
-        return function () {
-          var bar = d3.select(this);
-          var startX = d3.mouse(svg.node());
-          var startXInv = xScale.invert(startX[0]);
-
-          // Reset the brush value
-          brush.extent([startXInv, startXInv]);
-
-          // Magic!
-          // Need to call brush on svg to see brush when brushing
-          // while on top of bars.
-          // Need to call brush on bar to allow the click event to be registered
-          svg.call(brush);
-          bar.call(brush);
-        };
+      if (isBrushable) {
+        attachedEvents.call(brush);
       }
-    };
 
-    ColumnChart.prototype.mouseOver = function () {
-      var self = this;
-
-      return function (d, i) {
-        self.events.onMouseOver.call(this, arguments);
-        self.events.dispatch.hover.call(this, self.events.eventResponse(d, i));
-        d3.event.stopPropagation();
-      };
-    };
-
-    ColumnChart.prototype.mouseOut = function () {
-      var self = this;
-
-      return function () {
-        self.events.onMouseOut.call(this, arguments);
-        d3.event.stopPropagation();
-      };
-    };
-
-    ColumnChart.prototype.click = function () {
-      var self = this;
-
-      return function (d, i) {
-        self.events.dispatch.click.call(this, self.events.eventResponse(d, i));
-        d3.event.stopPropagation();
-      };
+      return attachedEvents;
     };
 
     /**
