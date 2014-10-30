@@ -5,6 +5,11 @@
           ng-submit="visualizeEditor.$invalid ? dontApply() : apply()"
           name="visualizeEditor">
       <ul class="list-unstyled">
+        <!-- vis options -->
+        <vis-editor-vis-options
+          vis="vis"
+          >
+        </vis-editor-vis-options>
 
         <!-- metrics -->
         <vis-editor-agg-group

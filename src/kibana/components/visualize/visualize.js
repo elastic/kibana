@@ -44,7 +44,7 @@ define(function (require) {
           $visEl.toggleClass('spy-only', Boolean(fullSpy));
         };
 
-        // we need to wait for come watchers to fire at least once
+        // we need to wait for some watchers to fire at least once
         // before we are "ready", this manages that
         var prereq = (function () {
           var fns = [];
