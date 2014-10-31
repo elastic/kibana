@@ -1,4 +1,6 @@
 define(function (require) {
+  var _ = require('lodash');
+
   var data = {  };
 
   data.metricOnly = {
@@ -109,6 +111,53 @@ define(function (require) {
         ]
       }
     }
+  };
+
+  data.threeTermBucketsForAggs = function (vis) {
+    expect(vis.aggs).to.have.length(4);
+
+    expect(vis.aggs.bySchemaGroup).to.have.property('buckets');
+    expect(vis.aggs.bySchemaGroup.buckets).to.have.length(3);
+
+    expect(vis.aggs.bySchemaGroup).to.have.property('metrics');
+    expect(vis.aggs.bySchemaGroup.metrics).to.have.length(1);
+
+    var aggs = vis.aggs.getSorted();
+    var mapping = _.transform([
+      // buckets
+      'agg_2',
+      'agg_3',
+      'agg_4',
+
+      // metric
+      'agg_1'
+    ], function (mapping, origId, i) {
+      mapping[origId] = aggs[i];
+    }, {});
+
+    var resp = {};
+
+    (function walkLevel(orig, target) {
+      _.each(orig, function (val, key) {
+        if (key.substr && key.substr(0, 4) === 'agg_') {
+          var agg = mapping[key];
+          if (agg.type.name !== 'count') {
+            // change the key
+            key = agg.id;
+          }
+        }
+
+        if (!_.isObject(val)) {
+          target[key] = val;
+          return;
+        }
+
+        target[key] = _.isArray(val) ? [] : {};
+        walkLevel(val, target[key]);
+      });
+    }(data.threeTermBuckets, resp));
+
+    return resp;
   };
 
   data.oneRangeBucket = {
