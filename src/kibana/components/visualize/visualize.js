@@ -79,6 +79,10 @@ define(function (require) {
           if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl);
         }));
 
+        $scope.$watchCollection('vis.params', prereq(function (params) {
+          if ($scope.renderbot) $scope.renderbot.updateParams(params);
+        }));
+
         $scope.$watch('searchSource', prereq(function (searchSource) {
           if (!searchSource || attr.esResp) return;
 

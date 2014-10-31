@@ -14,11 +14,8 @@ define(function (require) {
       },
       link: function ($scope, $el) {
         var $optionContainer = $('.visualization-options');
-        $optionContainer.append($compile($scope.vis.type.params.editor)($scope));
-
-        $scope.$watchCollection('vis.params', function (params) {
-          console.log(params);
-        });
+        var $editor = $compile($scope.vis.type.params.editor)($scope);
+        $optionContainer.append($editor);
       }
     };
   });

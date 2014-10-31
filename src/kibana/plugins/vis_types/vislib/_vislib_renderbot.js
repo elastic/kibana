@@ -7,41 +7,53 @@ define(function (require) {
     _(VislibRenderbot).inherits(Renderbot);
     function VislibRenderbot(vis, $el) {
       VislibRenderbot.Super.call(this, vis, $el);
-
-      var self = this;
-
-      var vislibParams = _.assign(
-        {},
-        vis.type.vislibParams,
-        { type: vis.type.name },
-        vis.params
-      );
-
-      self.vislibVis = new vislib.Vis($el[0], vislibParams);
-
-      _.each(vis.listeners, function (listener, event) {
-        self.vislibVis.on(event, listener);
-      });
+      this.vislibVis = {};
+      this._createVis();
     }
 
+    VislibRenderbot.prototype._createVis = function () {
+      var self = this;
+
+      self.vislibParams = _.assign(
+        {},
+        self.vis.type.params.defaults,
+        { type: self.vis.type.name },
+        self.vis.params
+      );
+
+      self.vislibVis = new vislib.Vis(self.$el[0], self.vislibParams);
+
+      _.each(self.vis.listeners, function (listener, event) {
+        self.vislibVis.on(event, listener);
+      });
+    };
+
     VislibRenderbot.prototype.render = function (esResponse) {
+      var self = this;
+
       var buildChartData = normalizeChartData.flat;
-      if (this.vis.type.hierarchicalData) {
+      if (self.vis.type.hierarchicalData) {
         buildChartData = normalizeChartData.hierarchical;
       }
 
-      var chartData = buildChartData(this.vis, esResponse);
-      this.vislibVis.render(chartData);
+      var chartData = buildChartData(self.vis, esResponse);
+      self.vislibVis.render(chartData);
     };
 
     VislibRenderbot.prototype.destroy = function () {
-      var vislibVis = this.vislibVis;
+      var self = this;
 
-      _.forOwn(this.vis.listeners, function (listener, event) {
+      var vislibVis = self.vislibVis;
+
+      _.forOwn(self.vis.listeners, function (listener, event) {
         vislibVis.off(event, listener);
       });
 
       vislibVis.destroy();
+    };
+
+    VislibRenderbot.prototype.updateParams = function (params) {
+      if (!_.isEqual(params, this.vislibParams)) this._createVis(params);
     };
 
     return VislibRenderbot;
