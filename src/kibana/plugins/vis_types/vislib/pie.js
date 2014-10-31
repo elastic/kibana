@@ -3,15 +3,21 @@ define(function (require) {
     var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
     var Schemas = Private(require('plugins/vis_types/_schemas'));
     var PieConverter = Private(require('plugins/vis_types/vislib/converters/pie'));
+    var editor = require('plugins/vis_types/vislib/_vislib_editor');
+
+    var name = 'pie';
 
     return new VislibVisType({
-      name: 'pie',
+      name: name,
       title: 'Pie chart',
       icon: 'fa-pie-chart',
-      vislibParams: {
-        addEvents: true,
-        addTooltip: true,
-        addLegend: true
+      params: {
+        defaults: {
+          shareYAxis: true,
+          addTooltip: true,
+          addLegend: true,
+        },
+        editor: editor.create(name)
       },
       responseConverter: PieConverter,
       hierarchicalData: true,
