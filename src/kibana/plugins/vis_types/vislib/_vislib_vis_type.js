@@ -15,7 +15,6 @@ define(function (require) {
 
       VislibVisType.Super.call(this, opts);
 
-      this.params = opts.params || {};
       this.responseConverter = this.responseConverter || histogramConverter;
       this.hierarchicalData = opts.hierarchicalData || false;
       this.listeners = opts.listeners || {};
