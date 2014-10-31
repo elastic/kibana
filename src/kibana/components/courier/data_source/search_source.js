@@ -1,7 +1,6 @@
 define(function (require) {
 
   return function SearchSourceFactory(Promise, Private) {
-    var inherits = require('lodash').inherits;
     var _ = require('lodash');
     var errors = require('errors');
     var SourceAbstract = Private(require('components/courier/data_source/_abstract'));
@@ -10,10 +9,10 @@ define(function (require) {
     var FetchFailure = errors.FetchFailure;
     var RequestFailure = errors.RequestFailure;
 
+    _(SearchSource).inherits(SourceAbstract);
     function SearchSource(initialState) {
-      SourceAbstract.call(this, initialState);
+      SearchSource.Super.call(this, initialState);
     }
-    inherits(SearchSource, SourceAbstract);
 
     // expose a ready state for the route setup to read
     var rootSearchSource;
