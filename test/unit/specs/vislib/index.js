@@ -13,8 +13,8 @@ define(function (require) {
     });
 
     beforeEach(function () {
-      inject(function (d3, visLib) {
-        chart = visLib;
+      inject(function (d3, vislib) {
+        chart = vislib;
       });
     });
 

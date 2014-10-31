@@ -1,0 +1,24 @@
+<!-- interface for editing vislib params -->
+<div>
+  <div>
+    <label>
+      <input type="checkbox" ng-model="vis.params.addTooltip">
+      Show Tooltip
+    </label>
+  </div>
+  <div>
+    <label>
+      <input type="checkbox" ng-model="vis.params.addLegend">
+      Show Legend
+    </label>
+  </div>
+  <div>
+    <label>
+      <input type="checkbox" ng-model="vis.params.shareYAxis">
+      Share Y-Axis
+    </label>
+  </div>
+
+  <!-- vis type specific options -->
+  <%= type_options %>
+</div>

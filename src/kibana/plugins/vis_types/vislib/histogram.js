@@ -1,16 +1,24 @@
 define(function (require) {
   return function HistogramVisType(Private) {
-    var VisType = Private(require('plugins/vis_types/_vis_type'));
+    var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
     var Schemas = Private(require('plugins/vis_types/_schemas'));
+    var editor = require('plugins/vis_types/vislib/_vislib_editor');
 
-    return new VisType({
-      name: 'area',
-      title: 'Area chart',
-      icon: 'fa-area-chart',
-      vislibParams: {
-        shareYAxis: true,
-        addTooltip: true,
-        addLegend: true,
+    var name = 'histogram';
+
+    return new VislibVisType({
+      name: name,
+      title: 'Vertical bar chart',
+      icon: 'fa-bar-chart',
+      params: {
+        defaults: {
+          shareYAxis: true,
+          addTooltip: true,
+          addLegend: true,
+          mode: 'stacked'
+        },
+        modes: ['stacked', 'percentage', 'grouped'],
+        editor: editor.create(name)
       },
       schemas: new Schemas([
         {
@@ -33,7 +41,7 @@ define(function (require) {
         {
           group: 'buckets',
           name: 'group',
-          title: 'Split Area',
+          title: 'Split Bars',
           min: 0,
           max: 1
         },

@@ -1,14 +1,14 @@
 define(function (require) {
   var _ = require('lodash');
-  var fixtures = require('fixtures/fake_hierarchial_data');
-  var createRawData = require('components/visualize/_create_raw_data');
-  var arrayToLinkedList = require('components/visualize/_array_to_linked_list');
+  var fixtures = require('fixtures/fake_hierarchical_data');
+  var createRawData = require('components/agg_response/hierarchical/_create_raw_data');
+  var arrayToLinkedList = require('components/agg_response/hierarchical/_array_to_linked_list');
 
   var AggConfigs;
   var Vis;
   var indexPattern;
 
-  describe('buildHierarchialData()', function () {
+  describe('buildHierarchicalData()', function () {
     describe('createRawData()', function () {
       var vis, results;
 

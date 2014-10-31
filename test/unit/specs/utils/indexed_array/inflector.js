@@ -14,7 +14,7 @@ define(function (require) {
 
           expect(inflect('Family')).to.be('myFamily');
           expect(inflect('family')).to.be('myFamily');
-          expect(inflect('fAmIlY')).to.be('myFamily');
+          expect(inflect('fAmIlY')).to.be('myFAmIlY');
         });
 
         it('adds both a prefix and suffix', function () {
@@ -22,7 +22,24 @@ define(function (require) {
 
           expect(inflect('box')).to.be('fooBoxBar');
           expect(inflect('box.car.MAX')).to.be('fooBoxCarMaxBar');
-          expect(inflect('BaZzY')).to.be('fooBazzyBar');
+          expect(inflect('BaZzY')).to.be('fooBaZzYBar');
+        });
+
+        it('ignores prefix if it is already at the end of the inflected string', function () {
+          var inflect = inflector('foo', 'Bar');
+          expect(inflect('fooBox')).to.be('fooBoxBar');
+          expect(inflect('FooBox')).to.be('FooBoxBar');
+        });
+
+        it('ignores postfix if it is already at the end of the inflected string', function () {
+          var inflect = inflector('foo', 'Bar');
+          expect(inflect('bar')).to.be('fooBar');
+          expect(inflect('showBoxBar')).to.be('fooShowBoxBar');
+        });
+
+        it('works with "name"', function () {
+          var inflect = inflector('in', 'Order');
+          expect(inflect('name')).to.be('inNameOrder');
         });
       });
     });

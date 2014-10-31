@@ -7,7 +7,7 @@
   <div class="fill visualize-spy-nav">
     <a
       class="btn btn-default"
-      ng-repeat="mode in modes"
+      ng-repeat="mode in modes.inOrder"
       ng-class="{ active: spyMode.name === mode.name }"
       ng-click="setSpyMode(mode)">
       {{mode.display}}

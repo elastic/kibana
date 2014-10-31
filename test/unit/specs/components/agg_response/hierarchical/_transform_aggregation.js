@@ -1,8 +1,8 @@
 define(function (require) {
-  describe('buildHierarchialData()', function () {
+  describe('buildHierarchicalData()', function () {
     describe('transformAggregation()', function () {
 
-      var tranform = require('components/visualize/_transform_aggregation');
+      var tranform = require('components/agg_response/hierarchical/_transform_aggregation');
       var fixture = {};
       fixture.agg = { id: 'agg_2', name: 'test', _next: { id: 'agg_3', name: 'example' } };
       fixture.metric = { id: 'agg_1' };

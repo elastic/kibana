@@ -1,5 +1,5 @@
 define(function (require) {
-  var collectBranch = require('components/visualize/_collect_branch');
+  var collectBranch = require('components/agg_response/hierarchical/_collect_branch');
   describe('collectBranch()', function () {
     var results;
     var convert = function (name) {

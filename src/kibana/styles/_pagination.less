@@ -1,24 +1,32 @@
 paginate {
-  .display(flex);
-  .flex-direction(column);
+  display: block;
 
   paginate-controls {
     .display(flex);
-    padding: 5px 5px 10px;
+    .align-items(center);
 
+    padding: 5px 5px 10px;
+    text-align: center;
 
     .pagination {
-      margin: 0 auto !important;
-    }
+      .flex(1, 0, auto);
+      .display(flex);
+      .justify-content(center);
 
-    @media (max-width: @screen-sm-min) {
-      .jump-to-end {
-        display: none;
+      // override some bootstrap styles
+      margin: 0 auto;
+
+      > li {
+        .flex(0, 0, auto);
       }
     }
-  }
 
-  .paginate-content {
-    .flex(1, 1, auto);
+    .pagination-size {
+      .flex(0, 0, auto);
+
+      input[type=number] {
+        width: 3em;
+      }
+    }
   }
 }

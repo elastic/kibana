@@ -1,7 +1,7 @@
 define(function (require) {
-  var extractBuckets = require('components/visualize/_extract_buckets');
+  var extractBuckets = require('components/agg_response/hierarchical/_extract_buckets');
 
-  describe('buildHierarchialData()', function () {
+  describe('buildHierarchicalData()', function () {
     describe('extractBuckets()', function () {
 
       it('should normalize a bucket object into an array', function () {

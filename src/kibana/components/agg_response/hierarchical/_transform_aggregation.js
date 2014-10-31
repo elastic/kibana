@@ -1,6 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
-  var extractBuckets = require('components/visualize/_extract_buckets');
+  var extractBuckets = require('components/agg_response/hierarchical/_extract_buckets');
   return function transformAggregation(agg, metric, aggData, parent) {
     return _.map(extractBuckets(aggData), function (bucket) {
       // Pick the appropriate value, if the metric doesn't exist then we just

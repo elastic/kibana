@@ -1,22 +1,22 @@
 define(function (require) {
-  return function HistogramVisType(Private) {
+  return function TileMapVisType(Private) {
     var VisType = Private(require('plugins/vis_types/_vis_type'));
     var Schemas = Private(require('plugins/vis_types/_schemas'));
+    var TileMapConverter = Private(require('plugins/vis_types/converters/tile_map'));
 
     return new VisType({
-      name: 'line',
-      title: 'Line chart',
-      icon: 'fa-line-chart',
+      name: 'tile_map',
+      title: 'Tile map',
+      icon: 'fa-map-marker',
       vislibParams: {
-        shareYAxis: true,
-        addTooltip: true,
-        addLegend: true
+        //addTooltip: true
       },
+      responseConverter: TileMapConverter,
       schemas: new Schemas([
         {
           group: 'metrics',
           name: 'metric',
-          title: 'Y-Axis',
+          title: 'Value',
           min: 1,
           max: 1,
           defaults: [
@@ -26,15 +26,8 @@ define(function (require) {
         {
           group: 'buckets',
           name: 'segment',
-          title: 'X-Axis',
-          min: 0,
-          max: 1
-        },
-        {
-          group: 'buckets',
-          name: 'group',
-          title: 'Split Lines',
-          min: 0,
+          title: 'Geo Coordinates',
+          min: 1,
           max: 1
         },
         {

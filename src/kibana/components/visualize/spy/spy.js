@@ -5,13 +5,11 @@ define(function (require) {
       var $ = require('jquery');
       var _ = require('lodash');
 
-      var modes = _.flatten([
-        Private(require('components/visualize/spy/_table')),
-        Private(require('components/visualize/spy/_req_resp_stats'))
-      ]);
-      modes.byName = _.indexBy(modes, 'name');
+      require('components/visualize/spy/_table');
+      require('components/visualize/spy/_req_resp_stats');
 
-      var defaultMode = modes[0];
+      var modes = Private(require('registry/spy_modes'));
+      var defaultMode = modes.inOrder[0];
 
       return {
         restrict: 'E',
@@ -64,7 +62,7 @@ define(function (require) {
               };
 
               current.$container.append($compile(newMode.template)(current.$scope));
-              newMode.link(current.$scope, current.$container);
+              newMode.link && newMode.link(current.$scope, current.$container);
             }
 
             // wrapped in fn to enable early return

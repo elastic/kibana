@@ -4,7 +4,7 @@ define(function (require) {
     /**
      * Provides the HTML layouts for each visualization class
      *
-     * @module visLib
+     * @module vislib
      * @submodule LayoutTypeFactory
      * @param Private {Service} Loads any function as an angular module
      * @return {Function} Returns an Object of HTML layouts for each visualization class

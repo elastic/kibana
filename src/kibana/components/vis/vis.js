@@ -70,14 +70,15 @@ define(function (require) {
       if (_.isString(this.type)) this.type = visTypes.byName[this.type];
 
       this.listeners = _.assign({}, state.listeners, this.type.listeners);
+      this.params = _.defaults({}, state.params || {}, this.type.params.defaults || {});
 
-      this.vislibParams = state.vislibParams;
       this.aggs = new AggConfigs(this, state.aggs);
     };
 
     Vis.prototype.getState = function () {
       return {
         type: this.type.name,
+        params: this.params,
         aggs: this.aggs.map(function (agg) {
           return agg.toJSON();
         }).filter(Boolean)
@@ -86,6 +87,10 @@ define(function (require) {
 
     Vis.prototype.clone = function () {
       return new Vis(this.indexPattern, this.getState());
+    };
+
+    Vis.prototype.isHierarchical = function () {
+      return !!this.type.hierarchicalData;
     };
 
     return Vis;

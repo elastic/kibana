@@ -1,6 +1,6 @@
 define(function (require) {
-  var transformer = require('components/visualize/_transform_aggregation');
-  var collectKeys = require('components/visualize/_collect_keys');
+  var transformer = require('components/agg_response/hierarchical/_transform_aggregation');
+  var collectKeys = require('components/agg_response/hierarchical/_collect_keys');
   return function (agg, metric, aggData) {
     // Ceate the split structure
     var split = { label: '', slices: { children: [] } };

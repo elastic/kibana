@@ -4,8 +4,18 @@ define(function (require) {
     return str.charAt(0).toUpperCase() + (total ? str.substr(1).toLowerCase() : str.substr(1));
   }
 
-  function inflector(prefix, postfix) {
+  function startsWith(str, test) {
+    return str.substr(0, test.length).toLowerCase() === test.toLowerCase();
+  }
 
+  function endsWith(str, test) {
+    var tooShort = str.length < test.length;
+    if (tooShort) return;
+
+    return str.substr(str.length - test.length).toLowerCase() === test.toLowerCase();
+  }
+
+  function inflector(prefix, postfix) {
     return function inflect(key) {
       var inflected;
 
@@ -17,14 +27,14 @@ define(function (require) {
           })
           .join('');
       } else {
-        inflected = key.toLowerCase();
+        inflected = key;
       }
 
-      if (prefix && key.indexOf(prefix) !== 0) {
+      if (prefix && !startsWith(key, prefix)) {
         inflected = prefix + upFirst(inflected);
       }
 
-      if (postfix && key.lastIndexOf(postfix) !== key.length - postfix.length) {
+      if (postfix && !endsWith(key, postfix)) {
         inflected = inflected + postfix;
       }
 

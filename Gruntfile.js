@@ -21,6 +21,8 @@ module.exports = function (grunt) {
     testUtilsDir: __dirname + '/test/utils',
     bowerComponentsDir: __dirname + '/src/kibana/bower_components',
 
+    devPlugins: 'vis_debug_spy',
+
     meta: {
       banner: '/*! <%= package.name %> - v<%= package.version %> - ' +
         '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
@@ -33,7 +35,10 @@ module.exports = function (grunt) {
   grunt.config.merge(config);
 
   var dirname = require('path').dirname;
-  var indexFiles = grunt.file.expand({ cwd: 'src/kibana/plugins' }, '*/index.js');
+  var indexFiles = grunt.file.expand({ cwd: 'src/kibana/plugins' }, [
+    '*/index.js',
+    '!' + config.devPlugins + '/index.js'
+  ]);
   var moduleIds = indexFiles.map(function (fileName) {
     return 'plugins/' + dirname(fileName) + '/index';
   });
