@@ -70,6 +70,7 @@ define(function (require) {
           // TODO: need to add UI options to allow 
           // users to select one of these four map types
           if (data.geoJSON) {
+            // this._attr;
             // self.clusterMarkers(map, data.geoJSON);
             // self.heatMap(map, data.geoJSON);
             // self.scaledCircleMarkers(map, data.geoJSON);

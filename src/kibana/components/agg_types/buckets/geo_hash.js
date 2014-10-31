@@ -16,7 +16,14 @@ define(function (require) {
         {
           name: 'precision',
           default: 3,
-          editor: require('text!components/agg_types/controls/precision.html')
+          editor: require('text!components/agg_types/controls/precision.html'),
+          write: function (aggConfig, output) {
+            var precision = parseInt(aggConfig.params.precision, 10);
+            if (isNaN(precision)) {
+              precision = 3;
+            }
+            output.params.precision = precision;
+          }
         }
       ]
     });
