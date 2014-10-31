@@ -414,22 +414,23 @@ define(function (require) {
 
     /**
      * Calculates min and max values for all map data
-     *
+     * series.rows is an array of arrays
+     * each row is an array of values
+     * last value is bucket count
+     * 
      * @method mapDataExtents
      * @param series {Array} Array of data objects
      * @returns {Array} min and max values
      */
     Data.prototype.mapDataExtents = function (series) {
       var values;
-      // if series.columns.length === 2, value = n[1]
-      // if series.columns.length === 3, value = n[2]
       if (series.columns.length === 2) {
-        values = _.map(series.rows, function (n) {
-          return n[1];
+        values = _.map(series.rows, function (row) {
+          return row[1];
         });
       } else {
-        values = _.map(series.rows, function (n) {
-          return n[2];
+        values = _.map(series.rows, function (row) {
+          return row[2];
         });
       }
       var extents = [_.min(values), _.max(values)];
