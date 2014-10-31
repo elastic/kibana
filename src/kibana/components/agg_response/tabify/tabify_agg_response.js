@@ -4,7 +4,7 @@ define(function (require) {
 
     var AggConfig = Private(require('components/vis/_agg_config'));
     var TabbedAggResponseWriter = Private(require('components/agg_response/tabify/_response_writer'));
-    var Buckets = require('components/agg_response/tabify/_buckets');
+    var Buckets = Private(require('components/agg_response/tabify/_buckets'));
     var notify = new Notifier({ location: 'agg_response/tabify'});
 
     function tabifyAggResponse(vis, esResponse, respOpts) {
