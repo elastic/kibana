@@ -66,13 +66,14 @@ define(function (require) {
         });
 
         describe('params', function () {
-          it('defaults to an empty AggParams object', function () {
+          it('defaults to AggParams object with JSON param', function () {
             var aggType = new AggType({
               name: 'smart agg'
             });
 
             expect(aggType.params).to.be.an(AggParams);
-            expect(aggType.params.length).to.be(0);
+            expect(aggType.params.length).to.be(1);
+            expect(aggType.params[0].name).to.be('json');
           });
 
           it('passes the params arg directly to the AggParams constructor', function () {
@@ -80,6 +81,7 @@ define(function (require) {
               {name: 'one'},
               {name: 'two'}
             ];
+            var paramLength = params.length + 1; // json is always appended
 
             var aggType = new AggType({
               name: 'bucketeer',
@@ -87,7 +89,7 @@ define(function (require) {
             });
 
             expect(aggType.params).to.be.an(AggParams);
-            expect(aggType.params.length).to.be(2);
+            expect(aggType.params.length).to.be(paramLength);
             expect(AggParams.callCount).to.be(1);
             expect(AggParams.firstCall.args[0]).to.be(params);
           });

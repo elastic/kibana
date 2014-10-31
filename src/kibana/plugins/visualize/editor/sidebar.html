@@ -31,7 +31,7 @@
         <!-- apply/discard -->
         <li class="vis-editor-sidebar-buttons sidebar-item">
           <button
-            ng-disabled="!vis.dirty"
+            ng-disabled="!vis.dirty || visualizeEditor.$invalid"
             type="submit"
             class="sidebar-item-button success">
             Apply
