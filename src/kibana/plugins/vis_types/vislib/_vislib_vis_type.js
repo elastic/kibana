@@ -1,6 +1,9 @@
 define(function (require) {
+  require('plugins/vis_types/controls/vislib_basic_options');
+
   return function VislibVisTypeFactory(Private) {
     var _ = require('lodash');
+
     var VisTypeSchemas = Private(require('plugins/vis_types/_schemas'));
     var VisType = Private(require('plugins/vis_types/_vis_type'));
     var histogramConverter = Private(require('plugins/vis_types/vislib/converters/histogram'));

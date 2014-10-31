@@ -2,12 +2,9 @@ define(function (require) {
   return function HistogramVisType(Private) {
     var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
     var Schemas = Private(require('plugins/vis_types/_schemas'));
-    var editor = require('plugins/vis_types/vislib/_vislib_editor');
-
-    var name = 'area';
 
     return new VislibVisType({
-      name: name,
+      name: 'area',
       title: 'Area chart',
       icon: 'fa-area-chart',
       params: {
@@ -16,7 +13,7 @@ define(function (require) {
           addTooltip: true,
           addLegend: true,
         },
-        editor: editor.create(name)
+        editor: require('text!plugins/vis_types/vislib/editors/basic.html')
       },
       schemas: new Schemas([
         {
