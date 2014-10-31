@@ -41,7 +41,6 @@ define(function (require) {
 
       // clear aggParam if pattern is not set
       if (!param || !param.pattern || !param.pattern.length) {
-        delete output.params[this.name];
         return;
       }
 

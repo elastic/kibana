@@ -48,6 +48,7 @@ define(function (require) {
           // this will contain the controls for the schema (rows or columns?), which are unrelated to
           // controls for the agg, which is why they are first
           var $schemaEditor = $('<div>').addClass('schemaEditors').appendTo($editorContainer);
+
           if ($scope.agg.schema.editor) {
             $schemaEditor.append($scope.agg.schema.editor);
             $compile($schemaEditor)(editorScope());
@@ -66,6 +67,7 @@ define(function (require) {
               $aggParamEditors = null;
             }
 
+            // if there's an old scope, destroy it
             if ($aggParamEditorsScope) {
               $aggParamEditorsScope.$destroy();
               $aggParamEditorsScope = null;
