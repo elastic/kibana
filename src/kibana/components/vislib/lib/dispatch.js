@@ -43,7 +43,6 @@ define(function (require) {
      * e: (d3.event|*), handler: (Object|*)}} Event response object
      */
     Dispatch.prototype.eventResponse = function (d, i) {
-      console.log('eventResponse', d, i);
       var isPercentage = (this._attr.mode === 'percentage');
       var label = d.label;
       var getYValue = this._attr.yValue;
