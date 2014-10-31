@@ -8,9 +8,6 @@ define(function (require) {
       name: 'geohash_grid',
       title: 'Geohash',
       ordered: {},
-      // makeLabel: function (aggConfig) {
-      //   return aggConfig.params.field.name;
-      // },
       params: [
         {
           name: 'field',
@@ -19,12 +16,8 @@ define(function (require) {
         {
           name: 'precision',
           default: 3,
-          editor: require('text!components/agg_types/controls/precision.html'),
-          //write: function (aggConfig, output) {
-          //  output.params.interval = parseInt(aggConfig.params.interval, 3);
-          //}
+          editor: require('text!components/agg_types/controls/precision.html')
         }
-
       ]
     });
   };

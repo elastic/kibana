@@ -419,14 +419,16 @@ define(function (require) {
      * @param series {Array} Array of data objects
      * @returns {Array} min and max values
      */
-    Data.prototype.mapDataExtents = function (data) {
+    Data.prototype.mapDataExtents = function (series) {
       var values;
-      if (data.columns.length === 2) {
-        values = _.map(data.rows, function (n) {
+      // if series.columns.length === 2, value = n[1]
+      // if series.columns.length === 3, value = n[2]
+      if (series.columns.length === 2) {
+        values = _.map(series.rows, function (n) {
           return n[1];
         });
       } else {
-        values = _.map(data.rows, function (n) {
+        values = _.map(series.rows, function (n) {
           return n[2];
         });
       }

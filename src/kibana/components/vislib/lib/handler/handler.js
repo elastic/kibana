@@ -69,10 +69,6 @@ define(function (require) {
         .each(function (chartData) {
           var chart = new self.ChartClass(self, this, chartData);
 
-          
-          // FIX THIS FOR TILE MAPS
-          // Bind events to the chart
-
           if (chart._attr.dispatch) {
 
             d3.rebind(chart, chart._attr.dispatch, 'on');

@@ -20,8 +20,14 @@ define(function (require) {
       this.handler = handler;
       this.chartData = chartData;
       
-      // FIX THIS FOR TILE MAP
-      // this.color = type === 'pie' ? handler.data.getPieColorFunc() : handler.data.getColorFunc();
+      if (type === 'tile_map') {
+        this.color = null;
+      } else if (type === 'pie') {
+        this.color = handler.data.getPieColorFunc();
+      } else {
+        this.color = handler.data.getColorFunc();
+      }
+      
       this._attr = _.defaults(handler._attr || {}, {
         yValue: function (d) { return d.y; },
         dispatch: d3.dispatch('brush', 'click', 'hover', 'mouseenter', 'mouseleave', 'mouseover', 'mouseout')
@@ -41,7 +47,7 @@ define(function (require) {
       var isPercentage = (this._attr.mode === 'percentage');
       var label = d.label;
       var getYValue = this._attr.yValue;
-      // var color = this.color;
+      var color = this.color;
       var chartData = this.chartData;
       var attr = this._attr;
       var handler = this.handler;
@@ -62,7 +68,7 @@ define(function (require) {
         value: getYValue(d, i),
         point: d,
         label: label,
-        // color: color(label),
+        color: color(label),
         pointIndex: i,
         series: chartData.series,
         config: attr,

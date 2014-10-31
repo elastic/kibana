@@ -231,7 +231,7 @@ define(function (require) {
             // color: feature.properties.color,
             fillColor: defaultColor,
             color: self.darkerColor(defaultColor),
-            weight: 2,
+            weight: 1.4,
             opacity: 1,
             fillOpacity: 0.7
           };
@@ -292,7 +292,7 @@ define(function (require) {
           return {
             fillColor: color,
             color: self.darkerColor(color),
-            weight: 2,
+            weight: 1,
             opacity: 1,
             fillOpacity: 1
           };
@@ -485,7 +485,7 @@ define(function (require) {
      * @return {String} hex color
      */
     TileMap.prototype.darkerColor = function (color) {
-      var darker = d3.hcl(color).darker().toString();
+      var darker = d3.hcl(color).darker(1.3).toString();
       return darker;
     };
 
