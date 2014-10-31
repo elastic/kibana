@@ -13,8 +13,8 @@ define(function (require) {
         vis: '=',
       },
       link: function ($scope, $el) {
-        console.log('vis options', $scope.vis, $scope.vis.aggs);
-        $el.append($compile($scope.vis.type.params.editor)($scope));
+        var $optionContainer = $('.visualization-options');
+        $optionContainer.append($compile($scope.vis.type.params.editor)($scope));
 
         $scope.$watchCollection('vis.params', function (params) {
           console.log(params);
