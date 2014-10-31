@@ -12,8 +12,10 @@ define(function (require) {
           shareYAxis: true,
           addTooltip: true,
           addLegend: true,
+          mode: 'stacked',
         },
-        editor: require('text!plugins/vis_types/vislib/editors/basic.html')
+        modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],
+        editor: require('text!plugins/vis_types/vislib/editors/area.html')
       },
       schemas: new Schemas([
         {
