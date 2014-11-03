@@ -13,3 +13,5 @@ kibanaIndex: ".kibana"
 
 # The default application to laad.
 defaultAppId: "discover"
+
+timeout: 1

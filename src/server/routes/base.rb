@@ -10,6 +10,9 @@ module Kibana
         config = Kibana.global_settings[:config].clone()
         config['elasticsearch'] = Kibana.global_settings[:elasticsearch]
         config['port'] = Kibana.global_settings[:port].to_i
+        puts Kibana.global_settings[:timeout]
+        config['timeout'] = Kibana.global_settings[:timeout]
+
 
         set :root, Kibana.global_settings[:root]
         set :public_folder, Kibana.global_settings[:public_folder]

@@ -7,6 +7,8 @@ module Kibana
       # Rack middleware goes here
       config = settings.config
       use Rack::ReverseProxy do
+        reverse_proxy_options timeout: config["timeout"]
+
         reverse_proxy(/^\/elasticsearch(.*)$/, "#{config["elasticsearch"]}$1")
       end
     end
