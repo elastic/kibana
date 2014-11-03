@@ -1,0 +1,63 @@
+/* Axis Styles */
+.axis {
+  shape-rendering: crispEdges;
+  stroke-width: 1px;
+
+  line, path {
+    stroke: #ddd;
+    fill: none;
+    shape-rendering: crispEdges;
+  }
+}
+
+.x.axis path {
+  display: none;
+}
+
+.tick text {
+  font-size: 7pt;
+  fill: #848e96;
+}
+
+/* Brush Styling */
+.brush .extent {
+  stroke: #fff;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}
+
+/* SVG Element Default Styling */
+rect {
+  stroke: none;
+  opacity: 1;
+
+  &:hover {
+    stroke: #333;
+  }
+}
+
+circle {
+  opacity: 0;
+
+  &:hover {
+    opacity: 1;
+    stroke: #333;
+  }
+}
+
+path {
+  &:hover {
+    opacity: 1;
+  }
+}
+
+/* Visualization Styling */
+.line {
+  circle {
+    opacity: 1;
+  }
+
+  &:hover {
+    stroke: #333;
+  }
+}

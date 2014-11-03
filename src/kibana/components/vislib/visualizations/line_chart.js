@@ -36,36 +36,15 @@ define(function (require) {
      * Adds Events to SVG circle
      *
      * @method addCircleEvents
-     * @param circles {D3.UpdateSelection} Reference to SVG circle
-     * @returns {D3.UpdateSelection} SVG circles with event listeners attached
+     * @param element{D3.UpdateSelection} Reference to SVG circle
+     * @returns {D3.Selection} SVG circles with event listeners attached
      */
-    LineChart.prototype.addCircleEvents = function (circles) {
+    LineChart.prototype.addCircleEvents = function (element) {
       var events = this.events;
-      var dispatch = this.events._attr.dispatch;
 
-      circles
-      .on('mouseover.circle', function mouseOverCircle(d, i) {
-        var circle = this;
-
-        d3.select(circle)
-        .classed('hover', true)
-        .style('stroke', '#333')
-        .style('cursor', 'pointer');
-
-        dispatch.hover(events.eventResponse(d, i));
-        d3.event.stopPropagation();
-      })
-      .on('click.circle', function clickCircle(d, i) {
-        dispatch.click(events.eventResponse(d, i));
-        d3.event.stopPropagation();
-      })
-      .on('mouseout.circle', function mouseOutCircle() {
-        var circle = this;
-
-        d3.select(circle)
-        .classed('hover', false)
-        .style('stroke', null);
-      });
+      return element
+        .call(events.addHoverEvent())
+        .call(events.addClickEvent());
     };
 
     /**
@@ -93,7 +72,7 @@ define(function (require) {
       .data(data)
       .enter()
         .append('g')
-        .attr('class', 'points');
+        .attr('class', 'points line');
 
       circles = layer
       .selectAll('rect')
@@ -274,12 +253,8 @@ define(function (require) {
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
           self.addClipPath(svg, width, height);
-
-          self.events.addBrush(xScale, svg);
-
           lines = self.addLines(svg, data.series);
           circles = self.addCircles(svg, layers);
-
           self.addCircleEvents(circles);
 
           var line = svg
