@@ -22,7 +22,7 @@ define(function (require) {
     return function (list, filters) {
       if (!filters) return filters;
       if (!_.isArray(filters)) filters = filters.split(',');
-      if (_.contains(filters, '*')) return filters;
+      if (_.contains(filters, '*')) return list;
 
       filters = filters.map(function (filter) {
         var match = true;
