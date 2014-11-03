@@ -77,7 +77,12 @@
         require([
           'kibana',
           'sinon/sinon',
-          'angular',
+          'angular'
+        ], loadSpecs);
+      }
+
+      function loadSpecs(kibana, sinon) {
+        require([
           'specs/apps/discover/hit_sort_fn',
           'specs/apps/discover/directives/table',
           'specs/apps/discover/directives/discover_field',
@@ -85,17 +90,20 @@
           'specs/apps/discover/directives/field_calculator',
           'specs/apps/discover/segmented_fetch',
           'specs/directives/confirm-click',
+          'specs/directives/css_truncate',
           'specs/directives/timepicker',
           'specs/directives/truncate',
           'specs/directives/typeahead',
-          'specs/directives/css_truncate',
           'specs/directives/spinner',
+          'specs/directives/validate_query',
+          'specs/directives/validate_json',
           'specs/filters/field_type',
           'specs/filters/uriescape',
           'specs/filters/moment',
           'specs/filters/rison',
           'specs/filters/short_dots',
           'specs/filters/start_from',
+          'specs/services/debounce',
           'specs/services/storage',
           'specs/services/persisted_log',
           'specs/services/url',
@@ -150,49 +158,52 @@
           'specs/visualize/_create_raw_data',
           'specs/visualize/_array_to_linked_list',
           'specs/visualize/_collect_branch'
-        ], function (kibana, sinon) {
-          kibana.load(function () {
-            var xhr = sinon.useFakeXMLHttpRequest();
+        ], function () {
+          bootstrap(kibana, sinon);
+        });
+      }
 
-            window.mochaRunner = mocha.run().on('end', function () {
-              window.mochaResults = this.stats;
-              window.mochaResults.details = getFailedTests(this);
-              xhr.restore();
-            });
+      function bootstrap(kibana, sinon) {
+        kibana.load(function () {
+          var xhr = sinon.useFakeXMLHttpRequest();
 
-            function getFailedTests(runner) {
-              var fails = [];
-              var suiteStack = [];
-
-              (function recurse(suite) {
-                suiteStack.push(suite);
-
-                (suite.tests || [])
-                .filter(function (test) {
-                  return test.state !== 'passed' && test.state !== 'pending';
-                })
-                .forEach(function (test) {
-                  fails.push({
-                    title: suiteStack.concat(test).reduce(function (title, suite) {
-                      if (suite.title) {
-                        return (title ? title + ' ' : '') + suite.title;
-                      } else {
-                        return title;
-                      }
-                    }, ''),
-                    err: test.err ? (test.err.stack || test.err.message) : 'unknown error'
-                  });
-                });
-
-                (suite.suites || []).forEach(recurse);
-
-                suiteStack.pop();
-              }(runner.suite));
-
-              return fails;
-            }
-
+          window.mochaRunner = mocha.run().on('end', function () {
+            window.mochaResults = this.stats;
+            window.mochaResults.details = getFailedTests(this);
+            xhr.restore();
           });
+
+          function getFailedTests(runner) {
+            var fails = [];
+            var suiteStack = [];
+
+            (function recurse(suite) {
+              suiteStack.push(suite);
+
+              (suite.tests || [])
+              .filter(function (test) {
+                return test.state !== 'passed' && test.state !== 'pending';
+              })
+              .forEach(function (test) {
+                fails.push({
+                  title: suiteStack.concat(test).reduce(function (title, suite) {
+                    if (suite.title) {
+                      return (title ? title + ' ' : '') + suite.title;
+                    } else {
+                      return title;
+                    }
+                  }, ''),
+                  err: test.err ? (test.err.stack || test.err.message) : 'unknown error'
+                });
+              });
+
+              (suite.suites || []).forEach(recurse);
+
+              suiteStack.pop();
+            }(runner.suite));
+
+            return fails;
+          }
         });
       }
 

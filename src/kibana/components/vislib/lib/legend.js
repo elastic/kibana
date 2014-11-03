@@ -102,14 +102,14 @@ define(function (require) {
      * @return {HTMLElement} Legend
      */
     Legend.prototype.render = function () {
+      var self = this;
       var visEl = d3.select(this.el);
       var legendDiv = visEl.select('.' + this._attr.legendClass);
       var items = this.labels;
-      var headerIcon = '.legend-toggle';
-      var self = this;
-
       this.header(legendDiv, this);
       this.list(legendDiv, items, this);
+
+      var headerIcon = visEl.select('.legend-toggle');
 
       // toggle
       visEl.select(headerIcon)

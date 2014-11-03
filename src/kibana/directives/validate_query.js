@@ -1,12 +1,11 @@
 define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
-
-  require('css!components/query_input/query_input.css');
+  require('services/debounce');
 
   require('modules')
     .get('kibana')
-    .directive('queryInput', function (es, $compile, timefilter, configFile) {
+    .directive('validateQuery', function (es, $compile, timefilter, configFile, debounce) {
       return {
         restrict: 'A',
         require: 'ngModel',
@@ -19,7 +18,7 @@ define(function (require) {
           // track request so we can abort it if needed
           var request = {};
 
-          var errorElem = $('<i class="fa fa-ban query-input-error"></i>').hide();
+          var errorElem = $('<i class="fa fa-ban input-error"></i>').hide();
 
           var init = function () {
             elem.after(errorElem);
@@ -31,9 +30,13 @@ define(function (require) {
             var index, type;
             if (request.abort) request.abort();
 
-            if ($scope.queryInput) return useSearchSource();
+            if ($scope.queryInput) {
+              useSearchSource();
+            } else {
+              useDefaults();
+            }
 
-            return useDefaults();
+            return sendRequest();
 
             function useSearchSource() {
               var pattern = $scope.queryInput.get('index');
@@ -41,21 +44,16 @@ define(function (require) {
 
               if (_.isString(pattern)) {
                 index = pattern;
-              }
-              else if (_.isFunction(pattern.toIndexList)) {
+              } else if (_.isFunction(pattern.toIndexList)) {
                 index = pattern.toIndexList();
+              } else {
+                useDefaults();
               }
-              else {
-                return useDefaults();
-              }
-
-              return sendRequest();
             }
 
             function useDefaults() {
               index = configFile.kibanaIndex;
               type = '__kibanaQueryValidator';
-              return sendRequest();
             }
 
             function sendRequest() {
@@ -67,7 +65,8 @@ define(function (require) {
                 body: {
                   query: query || { match_all: {} }
                 }
-              }).then(success, error);
+              })
+              .then(success, error);
             }
 
             function error(resp) {
@@ -101,7 +100,7 @@ define(function (require) {
             }
           };
 
-          var debouncedValidator = _.debounce(validator, 300, {
+          var debouncedValidator = debounce(validator, 300, {
             leading: true,
             trailing: true
           });
@@ -140,9 +139,12 @@ define(function (require) {
           ngModel.$parsers.push(fromUser);
           ngModel.$formatters.push(toUser);
 
-          // Use a model watch instead of parser/formatter. Debounced anyway. Parsers require the
+          // Use a model watch instead of parser/formatter. Parsers require the
           // user to actually enter input, which may not happen if the back button is clicked
-          $scope.$watch('ngModel', debouncedValidator);
+          $scope.$watch('ngModel', function (newValue, oldValue) {
+            if (newValue === oldValue) return;
+            debouncedValidator(newValue);
+          });
 
           init();
         }

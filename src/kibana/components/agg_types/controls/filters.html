@@ -2,7 +2,7 @@
   <div ng-repeat="filter in params.filters">
     <label>Query {{$index + 1}}</label>
     <div class="form-group vis-editor-agg-form-row">
-      <input query-input
+      <input validate-query
         ng-model="filter.input.query"
         type="text"
         class="form-control"

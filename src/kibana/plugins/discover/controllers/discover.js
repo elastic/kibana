@@ -12,10 +12,11 @@ define(function (require) {
   require('components/notify/notify');
   require('components/timepicker/timepicker');
   require('directives/fixed_scroll');
+  require('directives/validate_json');
+  require('directives/validate_query');
   require('filters/moment');
   require('components/courier/courier');
   require('components/index_patterns/index_patterns');
-  require('components/query_input/query_input');
   require('components/state_management/app_state');
   require('services/timefilter');
 
