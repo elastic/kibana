@@ -168,6 +168,8 @@ define(function (require) {
       if (this.canSplit) return this.root;
 
       var table = this.root.tables[0];
+      if (!table) return;
+
       delete table.$parent;
       return table;
     };
