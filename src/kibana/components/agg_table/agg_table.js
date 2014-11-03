@@ -29,7 +29,6 @@ define(function (require) {
 
         self.sort = null;
         self.csv = {
-          showOptions: false,
           separator: config.get('csv:separator'),
           quoteValues: config.get('csv:quoteValues')
         };
@@ -75,20 +74,22 @@ define(function (require) {
         };
 
         self.exportAsCsv = function () {
-          self.csv.showOptions = false;
+          saveAs(new Blob(self.toCsv(), { type: 'text/plain' }), self.csv.filename);
+        };
 
-          var text = '';
+        self.toCsv = function () {
           var rows = $scope.table.rows;
           var columns = $scope.table.columns;
           var nonAlphaNumRE = /[^a-zA-Z0-9]/;
           var allDoubleQuoteRE = /"/g;
-          var escape = function (val) {
+
+          function escape(val) {
             val = String(val);
             if (self.csv.quoteValues && nonAlphaNumRE.test(val)) {
               val = '"' + val.replace(allDoubleQuoteRE, '""') + '"';
             }
             return val;
-          };
+          }
 
           // escape each cell in each row
           var csvRows = rows.map(function (row, i) {
@@ -100,11 +101,9 @@ define(function (require) {
             return escape(col.title);
           }));
 
-          var blob = new Blob(csvRows.map(function (row) {
+          return csvRows.map(function (row) {
             return row.join(self.csv.separator) + '\r\n';
-          }), { type: 'text/plain' });
-
-          saveAs(blob, ($scope.table.title() || 'table') + '.csv');
+          }).join('');
         };
 
         $scope.$watchMulti([
@@ -136,6 +135,9 @@ define(function (require) {
               return formatters[i](cell);
             });
           });
+
+          // update the csv file's title
+          self.csv.filename = (table.title() || 'table') + '.csv';
         });
       }
     };
