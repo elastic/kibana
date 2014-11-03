@@ -26,7 +26,7 @@ require.config({
     faker: 'bower_components/Faker/faker',
     file_saver: 'bower_components/FileSaver/FileSaver',
     gridster: 'bower_components/gridster/dist/jquery.gridster',
-    heat: ['https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-heat/v0.1.0/leaflet-heat'],
+    heat: 'https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-heat/v0.1.0/leaflet-heat',
     inflection: 'bower_components/inflection/lib/inflection',
     jquery: 'bower_components/jquery/dist/jquery',
     jsonpath: 'bower_components/jsonpath/lib/jsonpath',

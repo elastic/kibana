@@ -78,9 +78,9 @@ define(function (require) {
           if (data.geoJSON) {
             // this._attr;
             // self.clusterMarkers(map, data.geoJSON);
-            // self.heatMap(map, data.geoJSON);
+            self.heatMap(map, data.geoJSON);
             // self.scaledCircleMarkers(map, data.geoJSON);
-            self.quantizeCircleMarkers(map, data.geoJSON);
+            ///self.coloredCircleMarkers(map, data.geoJSON);
           }
           if (data.geoJSON.properties.label) {
             self.addLabel(data.geoJSON.properties.label, map);
@@ -257,14 +257,14 @@ define(function (require) {
      * creates featurelayer from mapData (geoJSON)
      * with circle markers that are shaded to illustrate values
      *
-     * @method quantizeCircleMarkers
+     * @method coloredCircleMarkers
      * @param map {Object}
      * @param mapData {Object}
      * @return {undefined}
      */
-    TileMap.prototype.quantizeCircleMarkers = function (map, mapData) {
+    TileMap.prototype.coloredCircleMarkers = function (map, mapData) {
       var self = this;
-      self._attr.maptype = 'quantizeCircleMarkers';
+      self._attr.maptype = 'coloredCircleMarkers';
       
       // TODO: add UI to select local min max or super min max
 
@@ -278,7 +278,7 @@ define(function (require) {
       
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
-      // console.log('quantizeCircleMarkers: features:', length, ' precision:', precision, ' min value:', min, ' max value:', max);
+      // console.log('coloredCircleMarkers: features:', length, ' precision:', precision, ' min value:', min, ' max value:', max);
       var zoomScale = self.zoomScale(mapzoom);
       var bounds;
       var defaultColor = '#005baa';
@@ -334,7 +334,7 @@ define(function (require) {
         
         var count = layer.feature.properties.count;
         var rad;
-        if (self._attr.maptype === 'quantizeCircleMarkers') {
+        if (self._attr.maptype === 'coloredCircleMarkers') {
           rad = zoomScale * self.quantRadiusScale(precision);
         } else {
           rad = zoomScale * self.radiusScale(count, max, precision);
