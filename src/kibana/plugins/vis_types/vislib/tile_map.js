@@ -9,7 +9,7 @@ define(function (require) {
       title: 'Tile map',
       icon: 'fa-map-marker',
       params: { 
-        defaults: { mapType: 'quantizeCircleMarkers' },
+        defaults: { mapType: 'heatMap' },
         editor: require('text!plugins/vis_types/vislib/editors/tile_map.html')
       },
       responseConverter: TileMapConverter,
@@ -28,6 +28,7 @@ define(function (require) {
           group: 'buckets',
           name: 'segment',
           title: 'Geo Coordinates',
+          aggFilter: 'geohash_grid',
           min: 1,
           max: 1
         },

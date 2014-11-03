@@ -14,7 +14,7 @@ define(function (require) {
         defaults: {
           shareYAxis: true,
           addTooltip: true,
-          addLegend: true,
+          addLegend: true
         },
         editor: editor.create(name)
       },

@@ -15,7 +15,7 @@ define(function (require) {
     var mapcenter = [41, -100];
     var mapzoom = 4;
       
-    var tiles = config.get('mapbox:tiles');
+    var mapTiles = config.get('mapbox:tiles');
     var apiKey = config.get('mapbox:apiKey');
     L.mapbox.accessToken = apiKey;
 
@@ -57,16 +57,22 @@ define(function (require) {
       var self = this;
       var $elem = $(this.chartEl);
       var div;
+      var worldBounds = L.latLngBounds([-200, -220], [200, 220]);
+      var mapOptions = {
+        minZoom: 2,
+        maxZoom: 10,
+        continuousWorld: true,
+        noWrap: true,
+        maxBounds: worldBounds
+      };
       return function (selection) {
         selection.each(function (data) {
           div = $(this);
           div.addClass('tilemap');
-          var map = L.mapbox.map(div[0], tiles)
+          var map = L.mapbox.map(div[0], mapTiles, mapOptions)
             .setView(mapcenter, mapzoom);
-          map.options.minZoom = 2;
-          map.options.maxZoom = 10;
           L.control.scale().addTo(map);
-          
+
           // TODO: need to add UI options to allow 
           // users to select one of these four map types
           if (data.geoJSON) {
