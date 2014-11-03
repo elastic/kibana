@@ -110,7 +110,7 @@ define(function (require) {
         $scope.$watchMulti([
           'table',
           'aggTable.sort.asc',
-          'aggTable.sort.field'
+          'aggTable.sort.col'
         ], function () {
           var table = $scope.table;
 
