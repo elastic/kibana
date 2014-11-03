@@ -34,6 +34,18 @@ define(function (require) {
       }
 
       this.data = data;
+      this.type = this.getDataType();
+
+      this.labels;
+
+      if (this.type === 'series') {
+        this.labels = getLabels(data);
+      } else if (this.type === 'slices') {
+        this.labels = this.pieNames();
+      }
+
+      this.color = this.labels ? color(this.labels) : undefined;
+      
       this._normalizeOrdered();
 
       this._attr = _.defaults(attr || {}, {
@@ -45,6 +57,21 @@ define(function (require) {
           .offset(offset || 'zero')
       });
     }
+
+    Data.prototype.getDataType = function () {
+      var data = this.getVisData();
+      var type;
+
+      data.forEach(function (obj) {
+        if (obj.series) {
+          type = 'series';
+        } else if (obj.slices) {
+          type = 'slices';
+        }
+      });
+
+      return type;
+    };
 
     /**
      * Returns an array of the actual x and y data value objects

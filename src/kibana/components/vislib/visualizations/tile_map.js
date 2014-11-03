@@ -12,8 +12,9 @@ define(function (require) {
     require('css!components/vislib/styles/main');
     
     var mapData;
-    var mapcenter = [41, -100];
-    var mapzoom = 4;
+    // var mapcenter = [41, -100];
+    var mapcenter = [15, 5];
+    var mapzoom = 2;
       
     var mapTiles = config.get('mapbox:tiles');
     var apiKey = config.get('mapbox:apiKey');

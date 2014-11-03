@@ -1,0 +1,59 @@
+@import (reference) "lesshat.less";
+
+.legend-col-wrapper {
+  .flex(0 1 auto);
+  z-index: 10;
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-width: 40px;
+
+  .header {
+    width: 100%;
+    height: 26px;
+    margin: 0 0 14px 0;
+    visibility: visible;
+  }
+
+  .legend-ul {
+    list-style-type: none;
+    margin: 0 0 0 14px;
+    padding: 0;
+    visibility: visible;
+    .display(flex);
+    .flex-direction(column);
+
+    li.color {
+      min-height: 22px;
+      margin: 0 18px 0 18px;
+      padding: 3px 0 3px 0;
+      text-align: left;
+      font-size: 12px;
+      line-height: 13px;
+      color: #666;
+      cursor: default;
+      text-align: left;
+      .flex-grow(2);
+      word-wrap: break-word;
+      max-width: 150px;
+
+      .dots {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        float: left;
+        margin: 1px 0 0 -14px;
+      }
+    }
+  }
+
+  .legend-ul.hidden {
+    visibility: hidden;
+  }
+
+  .legend-toggle {
+    position: relative;
+    float: right;
+    right: 9px;
+    top: 9px;
+  }
+}

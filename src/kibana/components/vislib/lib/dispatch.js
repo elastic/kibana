@@ -8,30 +8,16 @@ define(function (require) {
      * @class Dispatch
      * @constructor
      * @param handler {Object} Reference to Handler Class Object
-     * @param chartData {Object} Elasticsearch data object
      */
 
-    function Dispatch(handler, chartData) {
+    function Dispatch(handler) {
       if (!(this instanceof Dispatch)) {
-        return new Dispatch(handler, chartData);
+        return new Dispatch(handler);
       }
-      var type = handler._attr.type;
 
       this.handler = handler;
-      this.chartData = chartData;
-      
-      if (type === 'tile_map') {
-        this.color = null;
-      } else if (type === 'pie') {
-        this.color = handler.data.getPieColorFunc();
-      } else {
-        this.color = handler.data.getColorFunc();
-      }
-      
-      this._attr = _.defaults(handler._attr || {}, {
-        yValue: function (d) { return d.y; },
-        dispatch: d3.dispatch('brush', 'click', 'hover', 'mouseenter', 'mouseleave', 'mouseover', 'mouseout')
-      });
+      this.dispatch = d3.dispatch('brush', 'click', 'hover', 'mouseup',
+        'mousedown', 'mouseover');
     }
 
     /**
@@ -39,21 +25,25 @@ define(function (require) {
      *
      * @param d {Object} Data point
      * @param i {Number} Index number of data point
-     * @returns {{value: *, point: *, label: *, color: *, pointIndex: *, series: *, config: *, data: (Object|*),
+     * @returns {{value: *, point: *, label: *, color: *, pointIndex: *,
+      * series: *, config: *, data: (Object|*),
      * e: (d3.event|*), handler: (Object|*)}} Event response object
      */
     Dispatch.prototype.eventResponse = function (d, i) {
-      var isPercentage = (this._attr.mode === 'percentage');
-      var label = d.label;
-      var getYValue = this._attr.yValue;
-      var color = this.color;
-      var chartData = this.chartData;
-      var attr = this._attr;
+      var data = d3.event.target.nearestViewportElement.__data__;
+      var label = d.label ? d.label : d.name;
+      var isSeries = !!(data.series);
+      var isSlices = !!(data.slices);
+      var series = isSeries ? data.series : undefined;
+      var slices = isSlices ? data.slices : undefined;
       var handler = this.handler;
+      var color = handler.data.color;
+      var isPercentage = (handler._attr.mode === 'percentage');
 
-      if (chartData.series) {
+      if (isSeries) {
+
         // Find object with the actual d value and add it to the point object
-        var object = _.find(chartData.series, { 'label': label });
+        var object = _.find(series, { 'label': d.label });
         d.value = +object.values[i].y;
 
         if (isPercentage) {
@@ -64,48 +54,123 @@ define(function (require) {
       }
 
       return {
-        value: getYValue(d, i),
+        value: d.y,
         point: d,
         label: label,
         color: color(label),
         pointIndex: i,
-        series: chartData.series,
-        config: attr,
-        data: chartData,
+        series: series,
+        slices: slices,
+        config: handler._attr,
+        data: data,
         e: d3.event,
         handler: handler
       };
     };
 
     /**
-     * Response to click and hover events for pie charts
+     * Returns a function that adds events and listeners to a D3 selection
      *
-     * @param d {Object} Data point
-     * @param i {Number} Index number of data point
-     * @returns {{value: (d.value|*), point: *, label: (d.name|*), color: *, pointIndex: *, children: *, parent: *,
-      * appConfig: *, config: *, data: (Object|*), e: (d3.event|*), handler: (Object|*)}} Event response object
+     * @method addEvent
+     * @param event {String}
+     * @param callback {Function}
+     * @returns {Function}
      */
-    Dispatch.prototype.pieResponse = function (d, i) {
-      var label = d.name;
-      var color = this.color;
-      var chartData = this.chartData;
-      var attr = this._attr;
-      var handler = this.handler;
+    Dispatch.prototype.addEvent = function (event, callback) {
+      return function (selection) {
+        selection.each(function () {
+          var element = d3.select(this);
 
-      return {
-        value: d.value,
-        point: d,
-        label: label,
-        color: color(label),
-        pointIndex: i,
-        children: d.children ? d.children : undefined,
-        parent: d.parent ? d.parent : undefined,
-        appConfig: d.appConfig,
-        config: attr,
-        data: chartData,
-        e: d3.event,
-        handler: handler
+          if (typeof callback === 'function') {
+            return element.on(event, callback);
+          }
+        });
       };
+    };
+
+    /**
+     *
+     * @method addHoverEvent
+     * @returns {Function}
+     */
+    Dispatch.prototype.addHoverEvent = function () {
+      var self = this;
+      var isClickable = (this.dispatch.on('click'));
+      var addEvent = this.addEvent;
+
+      function hover(d, i) {
+        d3.event.stopPropagation();
+
+        // Add pointer if item is clickable
+        if (isClickable) {
+          self.addMousePointer.call(this, arguments);
+        }
+
+        self.dispatch.hover.call(this, self.eventResponse(d, i));
+      }
+
+      return addEvent('mouseover', hover);
+    };
+
+    /**
+     *
+     * @method addClickEvent
+     * @returns {Function}
+     */
+    Dispatch.prototype.addClickEvent = function () {
+      var self = this;
+      var addEvent = this.addEvent;
+
+      function click(d, i) {
+        d3.event.stopPropagation();
+        self.dispatch.click.call(this, self.eventResponse(d, i));
+      }
+
+      return addEvent('click', click);
+    };
+
+    /**
+     *
+     * @param svg
+     * @returns {Function}
+     */
+    Dispatch.prototype.addBrushEvent = function (svg) {
+      var dispatch = this.dispatch;
+      var xScale = this.handler.xAxis.xScale;
+      var isBrushable = (dispatch.on('brush'));
+      var brush = this.createBrush(xScale, svg);
+      var addEvent = this.addEvent;
+
+      function brushEnd() {
+        var bar = d3.select(this);
+        var startX = d3.mouse(svg.node());
+        var startXInv = xScale.invert(startX[0]);
+
+        // Reset the brush value
+        brush.extent([startXInv, startXInv]);
+
+        // Magic!
+        // Need to call brush on svg to see brush when brushing
+        // while on top of bars.
+        // Need to call brush on bar to allow the click event to be registered
+        svg.call(brush);
+        bar.call(brush);
+      }
+
+      if (isBrushable) {
+        return addEvent('mousedown', brushEnd);
+      }
+    };
+
+
+    /**
+     * Mouse over Behavior
+     *
+     * @method addMousePointer
+     * @returns {D3.Selection}
+     */
+    Dispatch.prototype.addMousePointer = function () {
+      return d3.select(this).style('cursor', 'pointer');
     };
 
     /**
@@ -115,37 +180,34 @@ define(function (require) {
      * @param svg {HTMLElement} Reference to SVG
      * @returns {*} Returns a D3 brush function and a SVG with a brush group attached
      */
-    Dispatch.prototype.addBrush = function (xScale, svg) {
-      var dispatch = this._attr.dispatch;
-      var attr = this._attr;
-      var chartData = this.chartData;
-      var isBrush = this._attr.addBrushing;
-      var height = this._attr.height;
-      var margin = this._attr.margin;
+    Dispatch.prototype.createBrush = function (xScale, svg) {
+      var dispatch = this.dispatch;
+      var attr = this.handler._attr;
+      var height = attr.height;
+      var margin = attr.margin;
 
       // Brush scale
       var brush = d3.svg.brush()
         .x(xScale)
         .on('brushend', function brushEnd() {
-          // response returned on brush
           return dispatch.brush({
             range: brush.extent(),
             config: attr,
             e: d3.event,
-            data: chartData
+            data: d3.event.sourceEvent.target.__data__
           });
         });
 
       // if `addBrushing` is true, add brush canvas
-      if (isBrush) {
-        svg.append('g')
-        .attr('class', 'brush')
-        .call(brush)
-        .selectAll('rect')
-        .attr('height', height - margin.top - margin.bottom);
-      }
+      if (dispatch.on('brush')) {
+        svg.insert('g', 'g')
+          .attr('class', 'brush')
+          .call(brush)
+          .selectAll('rect')
+          .attr('height', height - margin.top - margin.bottom);
 
-      return brush;
+        return brush;
+      }
     };
 
     return Dispatch;

@@ -8,15 +8,6 @@ define(function (require) {
   angular.module('HandlerFactory', ['kibana']);
 
   describe('VisLib Handler Test Suite', function () {
-    var Vis;
-    var Data;
-    var Handler;
-    var handler;
-    var ColumnHandler;
-    var vis;
-    var el;
-    var example;
-    var config;
     var data = {
       hits      : 621,
       label     : '',
@@ -81,7 +72,15 @@ define(function (require) {
       xAxisLabel: 'Date Histogram',
       yAxisLabel: 'Count'
     };
-
+    var Vis;
+    var Data;
+    var Handler;
+    var handler;
+    var ColumnHandler;
+    var vis;
+    var el;
+    var config;
+    var events;
 
     beforeEach(function () {
       module('VisFactory');
@@ -106,54 +105,93 @@ define(function (require) {
           addLegend: true
         };
 
+        events = [
+          'click',
+          'brush'
+        ];
+
         vis = new Vis(el[0][0], config);
-        vis.data = data;
-
-        handler = ColumnHandler(vis);
-
-//        handler.render(data);
+        vis.render(data);
       });
     });
 
     afterEach(function () {
+      vis.destroy();
       el.remove();
     });
 
-//    describe('render Method', function () {
-//      it('should instantiate all constructors ', function () {
-//        expect(!!handler.layout).to.be(true);
-//        expect(!!handler.legend).to.be(true);
-//        expect(!!handler.tooltip).to.be(true);
-//        expect(!!handler.xAxis).to.be(true);
-//        expect(!!handler.yAxis).to.be(true);
-//        expect(!!handler.axisTitle).to.be(true);
-//        expect(!!handler.chartTitle).to.be(true);
-//      });
-//
-//      it('should append all DOM Elements for the visualization', function () {
-//        expect($('.vis-wrapper').length).to.be(1);
-//        expect($('.y-axis-col-wrapper').length).to.be(1);
-//        expect($('.vis-col-wrapper').length).to.be(1);
-//        expect($('.legend-col-wrapper').length).to.be(1);
-//        expect($('.k4tip').length).to.be(1);
-//        expect($('.y-axis-col').length).to.be(1);
-//        expect($('.y-axis-title').length).to.be(1);
-//        expect($('.y-axis-chart-title').length).to.be(0);
-//        expect($('.y-axis-div-wrapper').length).to.be(1);
-//        expect($('.y-axis-spacer-block').length).to.be(1);
-//        expect($('.chart-wrapper').length).to.be(1);
-//        expect($('.x-axis-wrapper').length).to.be(1);
-//        expect($('.x-axis-div-wrapper').length).to.be(1);
-//        expect($('.x-axis-chart-title').length).to.be(0);
-//        expect($('.x-axis-title').length).to.be(1);
-//        expect($('svg').length).to.be(5);
-//      });
-//    });
+    describe('render Method', function () {
+      //it('should instantiate all constructors ', function () {
+      //  expect(!!vis.handler.layout).to.be(true);
+      //  expect(!!vis.handler.xAxis).to.be(true);
+      //  expect(!!vis.handler.yAxis).to.be(true);
+      //  expect(!!vis.handler.axisTitle).to.be(true);
+      //  expect(!!vis.handler.chartTitle).to.be(true);
+      //});
+      //
+      //it('should append all DOM Elements for the visualization', function () {
+      //  expect($('.vis-wrapper').length).to.be(1);
+      //  expect($('.y-axis-col-wrapper').length).to.be(1);
+      //  expect($('.vis-col-wrapper').length).to.be(1);
+      //  expect($('.y-axis-col').length).to.be(1);
+      //  expect($('.y-axis-title').length).to.be(1);
+      //  expect($('.y-axis-chart-title').length).to.be(0);
+      //  expect($('.y-axis-div-wrapper').length).to.be(1);
+      //  expect($('.y-axis-spacer-block').length).to.be(1);
+      //  expect($('.chart-wrapper').length).to.be(1);
+      //  expect($('.x-axis-wrapper').length).to.be(1);
+      //  expect($('.x-axis-div-wrapper').length).to.be(1);
+      //  expect($('.x-axis-chart-title').length).to.be(0);
+      //  expect($('.x-axis-title').length).to.be(1);
+      //  expect($('svg').length).to.be(5);
+      //});
+    });
+
+    describe('enable Method', function () {
+      var charts;
+
+      beforeEach(function () {
+        charts = vis.handler.charts;
+
+        charts.forEach(function (chart) {
+          events.forEach(function (event) {
+            vis.handler.enable(event, chart);
+          });
+        });
+      });
+
+      it('should add events to chart and emit to the Events class', function () {
+        charts.forEach(function (chart, i) {
+          expect(typeof chart.on(events[i])).to.be('function');
+        });
+      });
+    });
+
+    describe('disable Method', function () {
+      var charts;
+
+      beforeEach(function () {
+        charts = vis.handler.charts;
+
+        charts.forEach(function (chart) {
+          events.forEach(function (event) {
+            vis.handler.disable(event, chart);
+          });
+        });
+      });
+
+      it('should remove events from the chart', function () {
+        charts.forEach(function (chart, i) {
+          expect(typeof chart.on(events[i])).to.be('undefined');
+        });
+      });
+
+    });
 
     describe('removeAll Method', function () {
       beforeEach(function () {
         inject(function () {
-          handler.removeAll(el[0][0]);
+          vis.handler.removeAll(el[0][0]);
         });
       });
 
@@ -164,7 +202,7 @@ define(function (require) {
 
     describe('error Method', function () {
       beforeEach(function () {
-        handler.error('This is an error!');
+        vis.handler.error('This is an error!');
       });
 
       it('should return an error classed DOM element with a text message', function () {

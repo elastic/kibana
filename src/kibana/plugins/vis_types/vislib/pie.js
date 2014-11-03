@@ -28,6 +28,7 @@ define(function (require) {
           title: 'Slice Size',
           min: 1,
           max: 1,
+          aggFilter: ['sum', 'count'],
           defaults: [
             { schema: 'metric', type: 'count' }
           ]
