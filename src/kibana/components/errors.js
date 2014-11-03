@@ -37,8 +37,7 @@ define(function (require) {
   inherits(errors.HastyRefresh, KbnError);
 
   /**
-   * HastyRefresh error class
-   * @param {String} [msg] - An error message that will probably end up in a log.
+   * SearchTimeout error class
    */
   errors.SearchTimeout = function SearchTimeout() {
     KbnError.call(this,
