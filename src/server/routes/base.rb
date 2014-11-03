@@ -11,7 +11,9 @@ module Kibana
         config['elasticsearch'] = Kibana.global_settings[:elasticsearch]
         config['port'] = Kibana.global_settings[:port].to_i
         puts Kibana.global_settings[:timeout]
-        config['timeout'] = Kibana.global_settings[:timeout]
+        config['request_timeout'] = Kibana.global_settings[:request_timeout]
+        config['shard_timeout'] = Kibana.global_settings[:shard_timeout]
+
 
 
         set :root, Kibana.global_settings[:root]
