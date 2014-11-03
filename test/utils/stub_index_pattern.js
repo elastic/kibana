@@ -16,7 +16,7 @@ define(function (require) {
           Object.defineProperty(field, 'format', {
             enumerable: false,
             get: function () {
-              fieldFormats.defaultByType[field.type];
+              return fieldFormats.defaultByType[field.type];
             }
           });
 
