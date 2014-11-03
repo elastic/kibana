@@ -14,18 +14,23 @@ define(function (require) {
     VislibRenderbot.prototype._createVis = function () {
       var self = this;
 
-      self.vislibParams = _.assign(
-        {},
-        self.vis.type.params.defaults,
-        { type: self.vis.type.name },
-        self.vis.params
-      );
-
+      self.vislibParams = self._getVislibParams();
       self.vislibVis = new vislib.Vis(self.$el[0], self.vislibParams);
 
       _.each(self.vis.listeners, function (listener, event) {
         self.vislibVis.on(event, listener);
       });
+    };
+
+    VislibRenderbot.prototype._getVislibParams = function () {
+      var self = this;
+
+      return _.assign(
+        {},
+        self.vis.type.params.defaults,
+        { type: self.vis.type.name },
+        self.vis.params
+      );
     };
 
     VislibRenderbot.prototype.render = function (esResponse) {
@@ -53,7 +58,13 @@ define(function (require) {
     };
 
     VislibRenderbot.prototype.updateParams = function (params) {
-      if (!_.isEqual(params, this.vislibParams)) this._createVis(params);
+      var self = this;
+
+      // get full vislib params object
+      var newParams = self._getVislibParams(params);
+
+      // if there's been a change, replace the vis
+      if (!_.isEqual(newParams, self.vislibParams)) self._createVis();
     };
 
     return VislibRenderbot;
