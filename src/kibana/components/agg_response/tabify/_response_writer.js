@@ -68,9 +68,7 @@ define(function (require) {
         throw new Error('attempted to split when splitting is disabled');
       }
 
-      _.pull(self.columns, _.find(self.columns, function (col) {
-        return col.aggConfig === agg;
-      }));
+      self._removeAggFromColumns(agg);
 
       buckets.forEach(function (bucket, key) {
         // find the existing split that we should extend
@@ -85,6 +83,28 @@ define(function (require) {
         // remove the split from the stack
         self.splitStack.shift();
       });
+    };
+
+    TabbedAggResponseWriter.prototype._removeAggFromColumns = function (agg) {
+      var i = _.findIndex(this.columns, function (col) {
+        return col.aggConfig === agg;
+      });
+
+      // we must have already removed this column
+      if (i === -1) return;
+
+      this.columns.splice(i, 1);
+
+      if (!this.vis.isHierarchical()) return;
+
+      // hierarchical vis creats additional columns for each bucket
+      // we will remove those too
+      var mCol = this.columns.splice(i, 1).pop();
+      var mI = _.findIndex(this.aggStack, function (agg) {
+        return agg === mCol.aggConfig;
+      });
+
+      if (mI > -1) this.aggStack.splice(mI, 1);
     };
 
     /**
