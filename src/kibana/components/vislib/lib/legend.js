@@ -112,7 +112,7 @@ define(function (require) {
       var headerIcon = visEl.select('.legend-toggle');
 
       // toggle
-      visEl.select(headerIcon)
+      headerIcon
       .on('click', function legendClick() {
         if (self._attr.isOpen) {
           // close legend
