@@ -41,6 +41,20 @@ define(function (require) {
       expect($el.find('kbn-agg-table').size()).to.be(1);
     });
 
+    it('renders nothing if the table list is empty', function () {
+      var $el = $('<kbn-agg-table-group group="group"></kbn-agg-table-group>');
+
+      $scope.group = {
+        tables: []
+      };
+
+      $compile($el)($scope);
+      $scope.$digest();
+
+      var $subTables = $el.find('kbn-agg-table');
+      expect($subTables.size()).to.be(0);
+    });
+
     it('renders a complex response properly', function () {
       var vis = new Vis(indexPattern, {
         type: 'pie',

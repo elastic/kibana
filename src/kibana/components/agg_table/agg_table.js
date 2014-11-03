@@ -62,7 +62,7 @@ define(function (require) {
           } else if (self.sort.asc) {
             self.sort.asc = false;
           } else {
-            delete self.sort;
+            self.sort = null;
           }
 
           if (self.sort && !self.sort.getter) {
@@ -70,7 +70,7 @@ define(function (require) {
             self.sort.getter = function (row) {
               return row[colI];
             };
-            if (colI === -1) delete self.sort;
+            if (colI === -1) self.sort = null;
           }
         };
 
@@ -125,7 +125,7 @@ define(function (require) {
 
           // sort the row values, not formatted
           if (self.sort) {
-            $scope.formattedRows = orderBy(table.rows, self.sort.getter, self.sort.asc);
+            $scope.formattedRows = orderBy(table.rows, self.sort.getter, !self.sort.asc);
           } else {
             $scope.formattedRows = null;
           }
