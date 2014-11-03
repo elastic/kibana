@@ -106,8 +106,8 @@
                 <label class="small">From: <span ng-show="!absolute.from"><i>Invalid Date</i></span></label>
                 <input type="text" required class="form-control" input-datetime="{{format}}" ng-model="absolute.from">
               </div>
-              <div ng-model="absolute.from">
-                <datepicker max="absolute.to" show-weeks="false"></datepicker>
+              <div>
+                <datepicker ng-model="absolute.from" max="absolute.to" show-weeks="false"></datepicker>
               </div>
             </div>
 
@@ -116,8 +116,8 @@
                 <label class="small">To: <span ng-show="!absolute.to"><i>Invalid Date</i></span></label>
                 <input type="text" required class="form-control" input-datetime="{{format}}" ng-model="absolute.to">
               </div>
-              <div ng-model="absolute.to">
-                <datepicker min="absolute.from" show-weeks="false"></datepicker>
+              <div>
+                <datepicker ng-model="absolute.to" min="absolute.from" show-weeks="false"></datepicker>
               </div>
             </div>
 
