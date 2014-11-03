@@ -6,7 +6,6 @@ module.exports = {
       '<%= src %>/kibana/components/*/*.less',
       '<%= src %>/kibana/styles/main.less',
       '<%= src %>/kibana/components/vislib/styles/main.less',
-      '<%= src %>/kibana/components/**/*.less',
       '<%= plugins %>/dashboard/styles/main.less',
       '<%= plugins %>/discover/styles/main.less',
       '<%= plugins %>/settings/styles/main.less',
