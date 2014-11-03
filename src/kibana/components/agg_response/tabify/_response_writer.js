@@ -33,7 +33,7 @@ define(function (require) {
      * @param  {any} key - the bucketKey that this table relates to
      * @return {Table/TableGroup} table - the created table
      */
-    TabbedAggResponseWriter.prototype.table = function (group, agg, key) {
+    TabbedAggResponseWriter.prototype._table = function (group, agg, key) {
       var Class = (group) ? TableGroup : Table;
       var table = new Class();
 
@@ -76,7 +76,7 @@ define(function (require) {
         // find the existing split that we should extend
         var TableGroup = _.find(self.splitStack[0].tables, { aggConfig: agg, key: key });
         // create the split if it doesn't exist yet
-        if (!TableGroup) TableGroup = self.table(true, agg, key);
+        if (!TableGroup) TableGroup = self._table(true, agg, key);
 
         // push the split onto the stack so that it will receive written tables
         self.splitStack.unshift(TableGroup);
@@ -119,10 +119,11 @@ define(function (require) {
       }
 
       var split = this.splitStack[0];
-      var table = split.tables[0] || this.table(false);
+      var table = split.tables[0] || this._table(false);
 
       while (cells.length < this.columns.length) cells.push('');
       table.rows.push(cells);
+      return table;
     };
 
     /**
