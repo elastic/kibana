@@ -8,7 +8,7 @@ define(function (require) {
     var _ = require('lodash');
     var saveAs = require('file_saver');
 
-    var tabifyAggResponse = Private(require('components/agg_response/tabify/tabify_agg_response'));
+    var tabifyAggResponse = Private(require('components/agg_response/tabify/tabify'));
     var orderBy = $filter('orderBy');
 
     return {
