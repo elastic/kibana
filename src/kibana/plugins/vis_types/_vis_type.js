@@ -10,6 +10,7 @@ define(function (require) {
       this.responseConverter = opts.responseConverter;
       this.icon = opts.icon;
       this.schemas = opts.schemas || new VisTypeSchemas();
+      this.params = opts.params || {};
     }
 
     return VisType;

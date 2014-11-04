@@ -70,10 +70,7 @@ define(function (require) {
       if (_.isString(this.type)) this.type = visTypes.byName[this.type];
 
       this.listeners = _.assign({}, state.listeners, this.type.listeners);
-
-      if (_.has(state, 'vislibParams')) {
-        this.vislibParams = state.vislibParams;
-      }
+      this.params = _.defaults({}, state.params || {}, this.type.params.defaults || {});
 
       this.aggs = new AggConfigs(this, state.aggs);
     };
@@ -81,6 +78,7 @@ define(function (require) {
     Vis.prototype.getState = function () {
       return {
         type: this.type.name,
+        params: this.params,
         aggs: this.aggs.map(function (agg) {
           return agg.toJSON();
         }).filter(Boolean)

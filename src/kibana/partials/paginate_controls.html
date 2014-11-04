@@ -27,11 +27,7 @@
 <form class="form-inline pagination-size">
   <div class="form-group">
     <label>Page Size</label>
-    <select ng-model="paginate.perPage">
-      <option>10</option>
-      <option>25</option>
-      <option>100</option>
-      <option value="0">All</option>
+    <select ng-model="paginate.perPage" ng-options="opt.value as opt.title for opt in paginate.sizeOptions">
     </select>
   </div>
 </form>

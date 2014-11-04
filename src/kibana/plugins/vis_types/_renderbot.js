@@ -1,4 +1,6 @@
 define(function (require) {
+  var _ = require('lodash');
+
   return function RenderbotFactory(Private) {
 
     /**
@@ -34,6 +36,15 @@ define(function (require) {
     Renderbot.prototype.destroy = function () {
       throw new Error('not implemented');
     };
+
+    /**
+     * Each renderbot can optionally implement the #updateParams() method which
+     * is used to pass in new vis params and re-render the vis
+     *
+     * @override
+     * @return {undefined}
+     */
+    Renderbot.prototype.updateParams = _.noop;
 
     return Renderbot;
   };

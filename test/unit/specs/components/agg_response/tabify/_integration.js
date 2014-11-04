@@ -10,7 +10,7 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     beforeEach(inject(function (Private, $injector) {
-      tabifyAggResponse = Private(require('components/agg_response/tabify/tabify_agg_response'));
+      tabifyAggResponse = Private(require('components/agg_response/tabify/tabify'));
       Vis = Private(require('components/vis/vis'));
       indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
     }));

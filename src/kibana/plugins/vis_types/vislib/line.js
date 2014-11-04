@@ -7,10 +7,13 @@ define(function (require) {
       name: 'line',
       title: 'Line chart',
       icon: 'fa-line-chart',
-      vislibParams: {
-        shareYAxis: true,
-        addTooltip: true,
-        addLegend: true
+      params: {
+        defaults: {
+          shareYAxis: true,
+          addTooltip: true,
+          addLegend: true,
+        },
+        editor: require('text!plugins/vis_types/vislib/editors/basic.html')
       },
       schemas: new Schemas([
         {

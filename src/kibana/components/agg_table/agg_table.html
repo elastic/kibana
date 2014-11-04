@@ -2,7 +2,7 @@
   ng-if="formattedRows.length"
 
   list="formattedRows"
-  per-page="aggTable.getPerPage()"
+  per-page-prop="perPage"
 
   class="agg-table">
   <div class="agg-table-paginated">
@@ -25,7 +25,7 @@
           </th>
         </tr>
       </thead>
-      <tbody kbn-rows="page" kbn-rows-min="aggTable.getPerPage()"></tbody>
+      <tbody kbn-rows="page" kbn-rows-min="perPage"></tbody>
     </table>
   </div>
 
