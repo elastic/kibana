@@ -40,7 +40,7 @@ define(function (require) {
       if (group) {
         table.aggConfig = agg;
         table.key = key;
-        table.title = agg.makeLabel() + ': ' + key;
+        table.title = agg.makeLabel() + ': ' + (table.fieldFormat()(key));
       }
 
       var parent = this.splitStack[0];
