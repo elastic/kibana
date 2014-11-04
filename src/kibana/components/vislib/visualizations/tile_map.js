@@ -12,7 +12,6 @@ define(function (require) {
     require('css!components/vislib/styles/main');
     
     var mapData;
-    // var mapcenter = [41, -100];
     var mapcenter = [15, 5];
     var mapzoom = 2;
       
@@ -77,11 +76,15 @@ define(function (require) {
           // TODO: need to add UI options to allow 
           // users to select one of these four map types
           if (data.geoJSON) {
-            // this._attr;
-            // self.clusterMarkers(map, data.geoJSON);
-            // self.heatMap(map, data.geoJSON);
-            // self.scaledCircleMarkers(map, data.geoJSON);
-            self.coloredCircleMarkers(map, data.geoJSON);
+            if (self._attr.mapType === 'Cluster Markers') {
+              self.clusterMarkers(map, data.geoJSON);
+            } else if (self._attr.mapType === 'Heat Map') {
+              self.heatMap(map, data.geoJSON);
+            } else if (self._attr.mapType === 'Scaled Circle Markers') {
+              self.scaledCircleMarkers(map, data.geoJSON);
+            } else if (self._attr.mapType === 'Colored Circle Markers') {
+              self.coloredCircleMarkers(map, data.geoJSON);
+            }
           }
           if (data.geoJSON.properties.label) {
             self.addLabel(data.geoJSON.properties.label, map);
@@ -152,7 +155,6 @@ define(function (require) {
      */
     TileMap.prototype.clusterMarkers = function (map, mapData) {
       var self = this;
-      self._attr.maptype = 'clusterMarkers';
       var min = mapData.properties.min;
       var max = mapData.properties.max;
       var length = mapData.properties.length;
@@ -184,20 +186,24 @@ define(function (require) {
       // TODO: pass in maxHeatZoom value from UI slider
       var self = this;
       var maxHeatZoom = 7;
-      self._attr.maptype = 'heatMap';
       var min = mapData.properties.min;
       var max = mapData.properties.max;
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
       // console.log('heatMap: features:', length, ' precision:', precision, ' min value:', min, ' max value:', max);
+      var latLngs = [];
       var featureLayer = L.geoJson(mapData);
-      var heat = L.heatLayer([], {
-        maxZoom: maxHeatZoom
-      }).addTo(map);
       featureLayer.eachLayer(function (layer) {
-        heat.addLatLng(layer.getLatLng());
+        var pointData = [
+          layer.feature.geometry.coordinates[1],
+          layer.feature.geometry.coordinates[0],
+          '' + layer.feature.properties.count / max
+        ];
+        latLngs.push(pointData);
       });
-      map.fitBounds(featureLayer.getBounds());
+      var mapOptions = { maxZoom: maxHeatZoom };
+      var heat = L.heatLayer(latLngs, mapOptions).addTo(map);
+      //map.fitBounds(featureLayer.getBounds());
     };
 
     /**
@@ -212,7 +218,6 @@ define(function (require) {
      */
     TileMap.prototype.scaledCircleMarkers = function (map, mapData) {
       var self = this;
-      self._attr.maptype = 'scaledCircleMarkers';
       var min = mapData.properties.min;
       var max = mapData.properties.max;
       var length = mapData.properties.length;
@@ -265,7 +270,6 @@ define(function (require) {
      */
     TileMap.prototype.coloredCircleMarkers = function (map, mapData) {
       var self = this;
-      self._attr.maptype = 'coloredCircleMarkers';
       
       // TODO: add UI to select local min max or super min max
 
@@ -312,7 +316,9 @@ define(function (require) {
         bounds = map.getBounds();
         self.resizeFeatures(map, min, max, precision, featureLayer);
       });
-      self.addLegend(mapData, map);
+      if (mapData.features.length > 1) {
+        self.addLegend(mapData, map);
+      }
     };
 
     /**
@@ -335,7 +341,7 @@ define(function (require) {
         
         var count = layer.feature.properties.count;
         var rad;
-        if (self._attr.maptype === 'coloredCircleMarkers') {
+        if (self._attr.mapType === 'Colored Circle Markers') {
           rad = zoomScale * self.quantRadiusScale(precision);
         } else {
           rad = zoomScale * self.radiusScale(count, max, precision);
