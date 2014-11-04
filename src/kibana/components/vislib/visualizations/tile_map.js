@@ -70,16 +70,20 @@ define(function (require) {
           div = $(this);
           div.addClass('tilemap');
 
-          if (self._attr.lastZoom)   { mapZoom = self._attr.lastZoom; }
-          if (self._attr.lastCenter) { mapCenter = self._attr.lastCenter; }
+          if (self._attr.lastZoom) {
+            mapZoom = self._attr.lastZoom;
+          }
+          if (self._attr.lastCenter) {
+            mapCenter = self._attr.lastCenter;
+          }
 
           var map = L.mapbox.map(div[0], mapTiles, mapOptions)
             .setView(mapCenter, mapZoom);
           L.control.scale().addTo(map);
 
           map.on('zoomend dragend', function () {
-            self._attr.lastZoom = map.getZoom();
-            self._attr.lastCenter = map.getCenter();
+            mapZoom = self._attr.lastZoom = map.getZoom();
+            mapCenter = self._attr.lastCenter = map.getCenter();
           });
 
           // TODO: need to add UI options to allow 
