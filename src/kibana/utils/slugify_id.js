@@ -13,8 +13,8 @@ define(function (require) {
       var regex = new RegExp(key);
       id = id.replace(regex, val);
     });
-    id = id.replace(/[\s]+/g, '_');
-    id = id.replace(/[_]+/g, '_');
+    id = id.replace(/[\s]+/g, '-');
+    id = id.replace(/[\-]+/g, '-');
     return id;
   };
 });

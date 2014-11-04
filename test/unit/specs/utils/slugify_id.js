@@ -9,14 +9,14 @@ define(function (require) {
       ['test?test', 'test-questionmark-test'],
       ['test=test', 'test-equal-test'],
       ['test&test', 'test-ampersand-test'],
-      ['test / test', 'test_-slash-_test'],
-      ['test ? test', 'test_-questionmark-_test'],
-      ['test = test', 'test_-equal-_test'],
-      ['test & test', 'test_-ampersand-_test'],
-      ['test / ^test', 'test_-slash-_^test'],
-      ['test ?  test', 'test_-questionmark-_test'],
-      ['test =  test', 'test_-equal-_test'],
-      ['test &  test', 'test_-ampersand-_test']
+      ['test / test', 'test-slash-test'],
+      ['test ? test', 'test-questionmark-test'],
+      ['test = test', 'test-equal-test'],
+      ['test & test', 'test-ampersand-test'],
+      ['test / ^test', 'test-slash-^test'],
+      ['test ?  test', 'test-questionmark-test'],
+      ['test =  test', 'test-equal-test'],
+      ['test &  test', 'test-ampersand-test']
     ];
 
     _.each(fixtures, function (fixture) {
