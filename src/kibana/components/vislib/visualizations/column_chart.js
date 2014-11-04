@@ -217,77 +217,27 @@ define(function (require) {
 
     /**
      * Adds Events to SVG rect
+     * Visualization is only brushable when a brush event is added
+     * If a brush event is added, then a function should be returned.
      *
      * @method addBarEvents
-     * @param svg {HTMLElement} chart SVG
-     * @param bars {D3.UpdateSelection} SVG rect
-     * @param brush {Function} D3 brush function
-     * @returns {HTMLElement} rect with event listeners attached
+     * @param element {D3.UpdateSelection} target
+     * @param svg {D3.UpdateSelection} chart SVG
+     * @returns {D3.Selection} rect with event listeners attached
      */
-    ColumnChart.prototype.addBarEvents = function (svg, bars, brush) {
-      var self = this;
+    ColumnChart.prototype.addBarEvents = function (element, svg) {
       var events = this.events;
-      var dispatch = this.events._attr.dispatch;
-      var addBrush = this._attr.addBrushing;
-      var xScale = this.handler.xAxis.xScale;
+      var isBrushable = (typeof events.dispatch.on('brush') === 'function');
+      var brush = isBrushable ? events.addBrushEvent(svg) : undefined;
+      var hover = events.addHoverEvent();
+      var click = events.addClickEvent();
+      var attachedEvents = element.call(hover).call(click);
 
-      bars
-      .on('mouseover.bar', function (d, i) {
-        self.mouseOverBar(this);
-        dispatch.hover(events.eventResponse(d, i));
-        d3.event.stopPropagation();
-      })
-      .on('mousedown.bar', function () {
-        if (addBrush) {
-          var bar = d3.select(this);
-          var startX = d3.mouse(svg.node());
-          var startXInv = xScale.invert(startX[0]);
+      if (isBrushable) {
+        attachedEvents.call(brush);
+      }
 
-          // Reset the brush value
-          brush.extent([startXInv, startXInv]);
-
-          // Magic!
-          // Need to call brush on svg to see brush when brushing
-          // while on top of bars.
-          // Need to call brush on bar to allow the click event to be registered
-          svg.call(brush);
-          bar.call(brush);
-        }
-      })
-      .on('click.bar', function (d, i) {
-        dispatch.click(events.eventResponse(d, i));
-        d3.event.stopPropagation();
-      })
-      .on('mouseout.bar', function () {
-        self.mouseOutBar(this);
-      });
-    };
-
-    /**
-     * Mouseover Behavior
-     *
-     * @method mouseOverBar
-     * @param that {Object} Reference to this object
-     * @returns {D3.Selection} this object with '.hover' class true
-     */
-    ColumnChart.prototype.mouseOverBar = function (that) {
-      return d3.select(that)
-      .classed('hover', true)
-      .style('stroke', '#333')
-      .style('cursor', 'pointer');
-    };
-
-    /**
-     * Mouseout Behavior
-     *
-     * @method mouseOutBar
-     * @param that {Object} Reference to this object
-     * @returns {D3.Selection} this object with '.hover' class false
-     */
-    ColumnChart.prototype.mouseOutBar = function (that) {
-      return d3.select(that)
-      .classed('hover', false)
-      .style('stroke', null);
+      return attachedEvents;
     };
 
     /**
@@ -298,20 +248,17 @@ define(function (require) {
      */
     ColumnChart.prototype.draw = function () {
       var self = this;
-      var xScale = this.handler.xAxis.xScale;
       var $elem = $(this.chartEl);
       var margin = this._attr.margin;
       var elWidth = this._attr.width = $elem.width();
       var elHeight = this._attr.height = $elem.height();
       var minWidth = 20;
       var minHeight = 20;
-      var isEvents = this._attr.addEvents;
       var div;
       var svg;
       var width;
       var height;
       var layers;
-      var brush;
       var bars;
 
       return function (selection) {
@@ -333,12 +280,10 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(0,' + margin.top + ')');
 
-          brush = self.events.addBrush(xScale, svg);
           bars = self.addBars(svg, layers);
 
-          if (isEvents) {
-            self.addBarEvents(svg, bars, brush);
-          }
+          // Adds event listeners
+          self.addBarEvents(bars, svg);
 
           var line = svg.append('line')
           .attr('x1', 0)
