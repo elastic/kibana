@@ -10,6 +10,9 @@ define(function (require) {
     var Vis;
     var Renderbot;
     var VislibRenderbot;
+    var mockVisType = {
+      name: 'test'
+    };
 
     function init() {
       module('kibana');
@@ -31,7 +34,7 @@ define(function (require) {
     beforeEach(init);
 
     describe('creation', function () {
-      var vis = { type: 'vis' };
+      var vis = { type: mockVisType };
       var $el = 'element';
       var createVisStub;
       var renderbot;
@@ -52,9 +55,11 @@ define(function (require) {
 
     describe('_createVis', function () {
       var vis = {
-        type: 'vis',
+        type: mockVisType,
         listeners: {
-          'test': _.noop
+          'test': _.noop,
+          'test2': _.noop,
+          'test3': _.noop
         }
       };
       var $el = $('<div>testing</div>');
@@ -68,7 +73,7 @@ define(function (require) {
       });
 
       it('should attach listeners and set vislibVis', function () {
-        expect(listenerSpy.callCount).to.be(1);
+        expect(listenerSpy.callCount).to.be(3);
         expect(listenerSpy.calledWith('test', _.noop)).to.be(true);
         expect(renderbot.vislibVis).to.be.a(Vis);
       });
@@ -77,12 +82,11 @@ define(function (require) {
     describe('param update', function () {
       var params = { one: 'fish', two: 'fish' };
       var vis = {
-        type: {
-          name: 'test',
+        type: _.defaults({
           params: {
             defaults: params
           }
-        }
+        }, mockVisType)
       };
       var $el = 'element';
       var createVisSpy;
@@ -118,8 +122,35 @@ define(function (require) {
     });
 
     describe('destroy', function () {
-      it('should detatch listeners');
-      it('should destroy the vis');
+      var vis = {
+        type: mockVisType,
+        listeners: {
+          'test': _.noop,
+          'test2': _.noop,
+          'test3': _.noop
+        }
+      };
+      var $el = $('<div>testing</div>');
+      var listenerSpy;
+      var renderbot;
+
+      beforeEach(function () {
+        sinon.stub(VislibRenderbot.prototype, '_getVislibParams', _.constant({}));
+        listenerSpy = sinon.spy(vislib.Vis.prototype, 'off');
+        renderbot = new VislibRenderbot(vis, $el);
+      });
+
+      it('should detatch listeners', function () {
+        renderbot.destroy();
+        expect(listenerSpy.callCount).to.be(3);
+        expect(listenerSpy.calledWith('test', _.noop)).to.be(true);
+      });
+
+      it('should destroy the vis', function () {
+        var spy = sinon.spy(renderbot.vislibVis, 'destroy');
+        renderbot.destroy();
+        expect(spy.callCount).to.be(1);
+      });
     });
   }
 });
