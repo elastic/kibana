@@ -10,6 +10,7 @@ define(function (require) {
     var Vis;
     var Renderbot;
     var VislibRenderbot;
+    var normalizeChartData;
     var mockVisType = {
       name: 'test'
     };
@@ -28,6 +29,8 @@ define(function (require) {
         Vis = Private(require('components/vislib/vis'));
         Renderbot = Private(require('plugins/vis_types/_renderbot'));
         VislibRenderbot = Private(require('plugins/vis_types/vislib/_vislib_renderbot'));
+        normalizeChartData = Private(require('components/agg_response/index'));
+
       });
     }
 
@@ -116,9 +119,48 @@ define(function (require) {
     });
 
     describe('render', function () {
-      it('should normalize chart data via flatten');
-      it('should normalize chart data via hierarchical');
-      it('should render the vis');
+      var vis = { type: mockVisType };
+      var $el = $('<div>testing</div>');
+      var renderbot;
+      var stubs = {};
+
+      beforeEach(function () {
+        sinon.stub(VislibRenderbot.prototype, '_getVislibParams', _.constant({}));
+      });
+
+      it('should normalize chart data via flatten', function () {
+        var renderbot = new VislibRenderbot(vis, $el);
+        stubNormalizers(renderbot);
+        renderbot.render('flat data');
+        expect(stubs.render.callCount).to.be(1);
+        expect(stubs.flat.callCount).to.be(1);
+        expect(stubs.hierarchical.callCount).to.be(0);
+      });
+
+      it('should normalize chart data via hierarchical', function () {
+        vis = {
+          type: _.defaults({
+            hierarchicalData: true
+          }, mockVisType)
+        };
+
+        var renderbot = new VislibRenderbot(vis, $el);
+        stubNormalizers(renderbot);
+        renderbot.render('flat data');
+        expect(stubs.render.callCount).to.be(1);
+        expect(stubs.flat.callCount).to.be(0);
+        expect(stubs.hierarchical.callCount).to.be(1);
+      });
+
+      function stubNormalizers(renderbot) {
+        stubs.flat = sinon.stub(renderbot._normalizers, 'flat', _.constant({
+          flat: true
+        }));
+        stubs.hierarchical = sinon.stub(renderbot._normalizers, 'hierarchical', _.constant({
+          hierarchical: true
+        }));
+        stubs.render = sinon.stub(renderbot.vislibVis, 'render', _.noop);
+      }
     });
 
     describe('destroy', function () {

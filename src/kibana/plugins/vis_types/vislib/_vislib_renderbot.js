@@ -8,6 +8,10 @@ define(function (require) {
     function VislibRenderbot(vis, $el) {
       VislibRenderbot.Super.call(this, vis, $el);
       this.vislibVis = {};
+      this._normalizers = {
+        flat: normalizeChartData.flat,
+        hierarchical: normalizeChartData.hierarchical
+      };
       this._createVis();
     }
 
@@ -36,9 +40,9 @@ define(function (require) {
     VislibRenderbot.prototype.render = function (esResponse) {
       var self = this;
 
-      var buildChartData = normalizeChartData.flat;
+      var buildChartData = self._normalizers.flat;
       if (self.vis.type.hierarchicalData) {
-        buildChartData = normalizeChartData.hierarchical;
+        buildChartData = self._normalizers.hierarchical;
       }
 
       var chartData = buildChartData(self.vis, esResponse);
