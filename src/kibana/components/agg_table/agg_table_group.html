@@ -9,8 +9,8 @@
   <tbody ng-repeat-end>
     <tr>
       <td>
-        <kbn-agg-table-group ng-if="table.tables" group="table"></kbn-agg-table-group>
-        <kbn-agg-table ng-if="table.rows" table="table"></kbn-agg-table>
+        <kbn-agg-table-group ng-if="table.tables" group="table" per-page="perPage"></kbn-agg-table-group>
+        <kbn-agg-table ng-if="table.rows" table="table" per-page="perPage"></kbn-agg-table>
       </td>
     </tr>
   </tbody>
@@ -27,8 +27,8 @@
   <tbody>
     <tr>
       <td ng-repeat="table in columns">
-        <kbn-agg-table-group ng-if="table.tables" group="table"></kbn-agg-table-group>
-        <kbn-agg-table ng-if="table.rows" table="table"></kbn-agg-table>
+        <kbn-agg-table-group ng-if="table.tables" group="table" per-page="perPage"></kbn-agg-table-group>
+        <kbn-agg-table ng-if="table.rows" table="table" per-page="perPage"></kbn-agg-table>
       </td>
     </tr>
   </tbody>

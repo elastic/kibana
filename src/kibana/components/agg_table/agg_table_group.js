@@ -9,7 +9,8 @@ define(function (require) {
       restrict: 'E',
       template: require('text!components/agg_table/agg_table_group.html'),
       scope: {
-        group: '='
+        group: '=',
+        perPage: '=?'
       },
       compile: function ($el) {
         // Use the compile function from the RecursionHelper,

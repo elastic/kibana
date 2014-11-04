@@ -24,6 +24,12 @@ define(function (require) {
       title: 'Data Table',
       icon: 'fa-table',
       template: require('text!plugins/table_vis/table_vis.html'),
+      params: {
+        defaults: {
+          perPage: 10
+        },
+        editor: require('text!plugins/table_vis/table_vis_config.html')
+      },
       schemas: new Schemas([
         {
           group: 'metrics',
