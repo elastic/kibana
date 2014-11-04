@@ -269,8 +269,8 @@ define(function (require) {
         inputs = {
           fromInput: $elem.find('.kbn-timepicker-section input[ng-model="absolute.from"]'),
           toInput: $elem.find('.kbn-timepicker-section input[ng-model="absolute.to"]'),
-          fromCalendar: $elem.find('.kbn-timepicker-section div[ng-model="absolute.from"] '),
-          toCalendar: $elem.find('.kbn-timepicker-section div[ng-model="absolute.to"] '),
+          fromCalendar: $elem.find('.kbn-timepicker-section table[ng-model="absolute.from"] '),
+          toCalendar: $elem.find('.kbn-timepicker-section table[ng-model="absolute.to"] '),
         };
 
       });
@@ -281,7 +281,7 @@ define(function (require) {
         done();
       });
 
-      it('should have divs that contain calendars bound to absolute.from and absolute.to', function (done) {
+      it('should have tables that contain calendars bound to absolute.from and absolute.to', function (done) {
         expect(inputs.fromCalendar.length).to.be(1);
         expect(inputs.toCalendar.length).to.be(1);
         done();
