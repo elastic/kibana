@@ -33,10 +33,6 @@ define(function (require) {
           quoteValues: config.get('csv:quoteValues')
         };
 
-        self.getPerPage = function () {
-          return $scope.perPage || Infinity;
-        };
-
         self.getColumnClass = function (col, $first, $last) {
           var cls = [];
           var agg = $scope.table.aggConfig(col);

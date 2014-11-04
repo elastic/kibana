@@ -8,16 +8,22 @@ paginate {
     padding: 5px 5px 10px;
     text-align: center;
 
-    .pagination {
+    .pagination-other-pages {
       .flex(1, 0, auto);
       .display(flex);
       .justify-content(center);
 
-      // override some bootstrap styles
-      margin: 0 auto;
-
-      > li {
+      &-list {
         .flex(0, 0, auto);
+        .display(flex);
+        .justify-content(center);
+        padding: 0;
+        margin: 0;
+        list-style: none;
+
+        > li {
+          .flex(0, 0, auto);
+        }
       }
     }
 
