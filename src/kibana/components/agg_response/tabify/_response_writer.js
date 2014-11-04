@@ -1,9 +1,9 @@
 define(function (require) {
   return function TabbedAggResponseWriterProvider(Private) {
     var _ = require('lodash');
-    var Table = require('components/agg_response/tabify/_table');
-    var TableSplit = require('components/agg_response/tabify/_table_split');
-    var getColumns = require('components/agg_response/tabify/_get_columns');
+    var Table = Private(require('components/agg_response/tabify/_table'));
+    var TableGroup = Private(require('components/agg_response/tabify/_table_group'));
+    var getColumns = Private(require('components/agg_response/tabify/_get_columns'));
 
     /**
      * Writer class that collects information about an aggregation response and
@@ -20,21 +20,21 @@ define(function (require) {
       this.aggStack = _.pluck(this.columns, 'aggConfig');
       this.canSplit = this.opts.canSplit !== false;
 
-      this.root = new TableSplit();
+      this.root = new TableGroup();
       this.splitStack = [this.root];
     }
 
     /**
-     * Create a Table of TableSplit object, link it to it's parent (if any), and determine if
+     * Create a Table of TableGroup object, link it to it's parent (if any), and determine if
      * it's the root
      *
-     * @param  {boolean} group - is this a TableSplit or just a normal Table
+     * @param  {boolean} group - is this a TableGroup or just a normal Table
      * @param  {AggConfig} agg - the aggregation that create this table, only applies to groups
      * @param  {any} key - the bucketKey that this table relates to
-     * @return {Table/TableSplit} table - the created table
+     * @return {Table/TableGroup} table - the created table
      */
     TabbedAggResponseWriter.prototype.table = function (group, agg, key) {
-      var Class = (group) ? TableSplit : Table;
+      var Class = (group) ? TableGroup : Table;
       var table = new Class();
 
       if (group) {
@@ -74,12 +74,12 @@ define(function (require) {
 
       buckets.forEach(function (bucket, key) {
         // find the existing split that we should extend
-        var tableSplit = _.find(self.splitStack[0].tables, { aggConfig: agg, key: key });
+        var TableGroup = _.find(self.splitStack[0].tables, { aggConfig: agg, key: key });
         // create the split if it doesn't exist yet
-        if (!tableSplit) tableSplit = self.table(true, agg, key);
+        if (!TableGroup) TableGroup = self.table(true, agg, key);
 
         // push the split onto the stack so that it will receive written tables
-        self.splitStack.unshift(tableSplit);
+        self.splitStack.unshift(TableGroup);
         // call the block
         if (_.isFunction(block)) block.call(self, bucket, key);
         // remove the split from the stack
@@ -144,7 +144,11 @@ define(function (require) {
         else table.columns = columns.slice(0);
       }(this.root));
 
-      return this.canSplit ? this.root : this.root.tables[0];
+      if (this.canSplit) return this.root;
+
+      var table = this.root.tables[0];
+      delete table.$parent;
+      return table;
     };
 
     return TabbedAggResponseWriter;

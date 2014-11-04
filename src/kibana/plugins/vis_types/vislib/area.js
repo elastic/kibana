@@ -2,21 +2,20 @@ define(function (require) {
   return function HistogramVisType(Private) {
     var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
     var Schemas = Private(require('plugins/vis_types/_schemas'));
-    var editor = require('plugins/vis_types/vislib/_vislib_editor');
-
-    var name = 'area';
 
     return new VislibVisType({
-      name: name,
+      name: 'area',
       title: 'Area chart',
       icon: 'fa-area-chart',
       params: {
         defaults: {
           shareYAxis: true,
           addTooltip: true,
-          addLegend: true
+          addLegend: true,
+          mode: 'stacked'
         },
-        editor: editor.create(name)
+        modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],
+        editor: require('text!plugins/vis_types/vislib/editors/area.html')
       },
       schemas: new Schemas([
         {
