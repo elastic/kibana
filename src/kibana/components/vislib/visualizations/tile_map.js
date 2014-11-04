@@ -79,9 +79,9 @@ define(function (require) {
           if (data.geoJSON) {
             // this._attr;
             // self.clusterMarkers(map, data.geoJSON);
-            self.heatMap(map, data.geoJSON);
+            // self.heatMap(map, data.geoJSON);
             // self.scaledCircleMarkers(map, data.geoJSON);
-            ///self.coloredCircleMarkers(map, data.geoJSON);
+            self.coloredCircleMarkers(map, data.geoJSON);
           }
           if (data.geoJSON.properties.label) {
             self.addLabel(data.geoJSON.properties.label, map);
