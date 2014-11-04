@@ -15,6 +15,7 @@ define(function (require) {
         restrict: 'E',
         template: require('text!components/visualize/spy/_spy.html'),
         link: function ($scope, $el) {
+          var $container = $el.find('.visualize-spy-container');
           var fullPageSpy = false;
           // $scope.spyMode = null; // inherited from the parent
           $scope.modes = modes;
@@ -58,7 +59,7 @@ define(function (require) {
                 display: newMode.display,
                 fill: fullPageSpy,
                 $scope: $scope.$new(),
-                $container: $('<div class="visualize-spy-container">').appendTo($el)
+                $container: $('<div class="visualize-spy-content">').appendTo($container)
               };
 
               current.$container.append($compile(newMode.template)(current.$scope));
