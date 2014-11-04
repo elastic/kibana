@@ -12,8 +12,8 @@ define(function (require) {
     require('css!components/vislib/styles/main');
     
     var mapData;
-    var mapcenter = [15, 5];
-    var mapzoom = 2;
+    var mapCenter = [15, 5];
+    var mapZoom = 2;
       
     var mapTiles = config.get('mapbox:tiles');
     var apiKey = config.get('mapbox:apiKey');
@@ -69,9 +69,18 @@ define(function (require) {
         selection.each(function (data) {
           div = $(this);
           div.addClass('tilemap');
+
+          if (self._attr.lastZoom)   { mapZoom = self._attr.lastZoom; }
+          if (self._attr.lastCenter) { mapCenter = self._attr.lastCenter; }
+
           var map = L.mapbox.map(div[0], mapTiles, mapOptions)
-            .setView(mapcenter, mapzoom);
+            .setView(mapCenter, mapZoom);
           L.control.scale().addTo(map);
+
+          map.on('zoomend dragend', function () {
+            self._attr.lastZoom = map.getZoom();
+            self._attr.lastCenter = map.getCenter();
+          });
 
           // TODO: need to add UI options to allow 
           // users to select one of these four map types
@@ -202,7 +211,6 @@ define(function (require) {
       });
       var mapOptions = { maxZoom: maxHeatZoom };
       var heat = L.heatLayer(latLngs, mapOptions).addTo(map);
-      //map.fitBounds(featureLayer.getBounds());
     };
 
     /**
@@ -221,7 +229,7 @@ define(function (require) {
       var max = mapData.properties.max;
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
-      var zoomScale = self.zoomScale(mapzoom);
+      var zoomScale = self.zoomScale(mapZoom);
       var bounds;
       var defaultColor = '#005baa';
       var featureLayer = L.geoJson(mapData, {
@@ -250,7 +258,7 @@ define(function (require) {
       }).addTo(map);
       self.resizeFeatures(map, min, max, precision, featureLayer);
       map.on('zoomend dragend', function () {
-        mapzoom = map.getZoom();
+        mapZoom = map.getZoom();
         bounds = map.getBounds();
         self.resizeFeatures(map, min, max, precision, featureLayer);
       });
@@ -281,7 +289,7 @@ define(function (require) {
       
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
-      var zoomScale = self.zoomScale(mapzoom);
+      var zoomScale = self.zoomScale(mapZoom);
       var bounds;
       var defaultColor = '#005baa';
       var featureLayer = L.geoJson(mapData, {
@@ -309,7 +317,7 @@ define(function (require) {
       }).addTo(map);
       self.resizeFeatures(map, min, max, precision, featureLayer);
       map.on('zoomend dragend', function () {
-        mapzoom = map.getZoom();
+        mapZoom = map.getZoom();
         bounds = map.getBounds();
         self.resizeFeatures(map, min, max, precision, featureLayer);
       });
@@ -331,7 +339,7 @@ define(function (require) {
      */
     TileMap.prototype.resizeFeatures = function (map, min, max, precision, featureLayer) {
       var self = this;
-      var zoomScale = self.zoomScale(mapzoom);
+      var zoomScale = self.zoomScale(mapZoom);
       
       featureLayer.eachLayer(function (layer) {
         var latlng = L.latLng(layer.feature.geometry.coordinates[1], layer.feature.geometry.coordinates[0]);
