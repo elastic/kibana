@@ -59,9 +59,10 @@ define(function (require) {
 
     VislibRenderbot.prototype.updateParams = function (params) {
       var self = this;
+      self.vis.params = params;
 
       // get full vislib params object
-      var newParams = self._getVislibParams(params);
+      var newParams = self._getVislibParams();
 
       // if there's been a change, replace the vis
       if (!_.isEqual(newParams, self.vislibParams)) self._createVis();

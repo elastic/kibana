@@ -1,4 +1,5 @@
 define(function (require) {
+  var _ = require('lodash');
   var $ = require('jquery');
   var sinon = require('test_utils/auto_release_sinon');
 
@@ -6,31 +7,37 @@ define(function (require) {
 
   function exportWrapper() {
     var vislib;
+    var Vis;
     var Renderbot;
     var VislibRenderbot;
 
     function init() {
       module('kibana');
+      // module('kibana', function ($provide) {
+      //   $provide.service('vislib', {
+      //     version: 'test-mock',
+      //     Vis: MockVis
+      //   });
+      // });
 
-      inject(function ($injector, Private) {
-        vislib = $injector.get('vislib');
+      inject(function ($injector, Private, _vislib_) {
+        vislib = _vislib_;
+        Vis = Private(require('components/vislib/vis'));
         Renderbot = Private(require('plugins/vis_types/_renderbot'));
         VislibRenderbot = Private(require('plugins/vis_types/vislib/_vislib_renderbot'));
       });
     }
 
+    beforeEach(init);
+
     describe('creation', function () {
-      var vis;
-      var $el;
+      var vis = { type: 'vis' };
+      var $el = 'element';
       var createVisStub;
       var renderbot;
 
-      beforeEach(init);
-
       beforeEach(function () {
-        vis = { type: 'vis' };
-        $el = 'element';
-        createVisStub = sinon.stub(VislibRenderbot.prototype, '_createVis');
+        createVisStub = sinon.stub(VislibRenderbot.prototype, '_createVis', _.noop);
         renderbot = new VislibRenderbot(vis, $el);
       });
 
@@ -44,12 +51,64 @@ define(function (require) {
     });
 
     describe('_createVis', function () {
-      it('should attach listeners');
+      var vis = {
+        type: 'vis',
+        listeners: {
+          'test': _.noop
+        }
+      };
+      var $el = $('<div>testing</div>');
+      var listenerSpy;
+      var renderbot;
+
+      beforeEach(function () {
+        sinon.stub(VislibRenderbot.prototype, '_getVislibParams', _.constant({}));
+        listenerSpy = sinon.spy(vislib.Vis.prototype, 'on');
+        renderbot = new VislibRenderbot(vis, $el);
+      });
+
+      it('should attach listeners and set vislibVis', function () {
+        expect(listenerSpy.callCount).to.be(1);
+        expect(listenerSpy.calledWith('test', _.noop)).to.be(true);
+        expect(renderbot.vislibVis).to.be.a(Vis);
+      });
     });
 
     describe('param update', function () {
-      it('should create a new Vis object if params change');
-      it('should not create a new Vis object if params are the same');
+      var params = { one: 'fish', two: 'fish' };
+      var vis = {
+        type: {
+          name: 'test',
+          params: {
+            defaults: params
+          }
+        }
+      };
+      var $el = 'element';
+      var createVisSpy;
+      var getParamsStub;
+      var renderbot;
+
+      beforeEach(function () {
+        createVisSpy = sinon.spy(VislibRenderbot.prototype, '_createVis');
+        // getParamsStub = sinon.stub(VislibRenderbot.prototype, '_getVislibParams', _identity);
+        // getParamsStub.returns(params);
+        renderbot = new VislibRenderbot(vis, $el);
+      });
+
+      it('should create a new Vis object when params change', function () {
+        // called on init
+        expect(createVisSpy.callCount).to.be(1);
+        renderbot.updateParams(_.clone(params));
+        // not called again, same params
+        expect(createVisSpy.callCount).to.be(1);
+        renderbot.updateParams({ one: 'fishy', two: 'fishy' });
+        // called again, new params
+        expect(createVisSpy.callCount).to.be(2);
+        renderbot.updateParams({ one: 'fishy', two: 'fishy' });
+        // same params again, no new call
+        expect(createVisSpy.callCount).to.be(2);
+      });
     });
 
     describe('render', function () {
