@@ -23,6 +23,21 @@ paginate {
 
         > li {
           .flex(0, 0, auto);
+          .user-select(none);
+
+          a {
+            text-decoration: none;
+          }
+
+          a:hover {
+            text-decoration: underline;
+          }
+
+          &.active a {
+            text-decoration: none !important;
+            font-weight: bold;
+            color: @text-color;
+          }
         }
       }
     }
