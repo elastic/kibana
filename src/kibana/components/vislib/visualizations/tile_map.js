@@ -159,15 +159,15 @@ define(function (require) {
       var max = mapData.properties.max;
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
-      // console.log('clusterMarkers: features:', length, ' precision:', precision, ' min value:', min, ' max value:', max);
       var clusterGroup = new L.MarkerClusterGroup({
         maxClusterRadius: 120,
         disableClusteringAtZoom: 9
       });
-      var featureLayer = L.geoJson(mapData);
-      featureLayer.eachLayer(function (layer) {
-        layer.bindPopup(layer.feature.properties.geohash + ': ' + layer.feature.properties.count);
-        clusterGroup.addLayer(layer);
+      var featureLayer = L.geoJson(mapData, {
+        onEachFeature: function (feature, layer) {
+          self.bindPopup(feature, layer);
+          clusterGroup.addLayer(layer);
+        }
       });
       map.addLayer(clusterGroup);
     };
@@ -190,7 +190,6 @@ define(function (require) {
       var max = mapData.properties.max;
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
-      // console.log('heatMap: features:', length, ' precision:', precision, ' min value:', min, ' max value:', max);
       var latLngs = [];
       var featureLayer = L.geoJson(mapData);
       featureLayer.eachLayer(function (layer) {
@@ -222,7 +221,6 @@ define(function (require) {
       var max = mapData.properties.max;
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
-      // console.log('scaledCircleMarkers: features:', length, ' precision:', precision, ' min value:', min, ' max value:', max);
       var zoomScale = self.zoomScale(mapzoom);
       var bounds;
       var defaultColor = '#005baa';
@@ -283,7 +281,6 @@ define(function (require) {
       
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
-      // console.log('coloredCircleMarkers: features:', length, ' precision:', precision, ' min value:', min, ' max value:', max);
       var zoomScale = self.zoomScale(mapzoom);
       var bounds;
       var defaultColor = '#005baa';
