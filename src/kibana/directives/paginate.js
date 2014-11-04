@@ -127,12 +127,7 @@ define(function (require) {
     // this directive is automatically added by paginate if not found within it's $el
     return {
       restrict: 'E',
-      template: require('text!partials/paginate_controls.html'),
-      link: function ($scope, $el) {
-        $scope.$watch('page.count > 1', function (show) {
-          $el.toggle(show);
-        });
-      }
+      template: require('text!partials/paginate_controls.html')
     };
   });
 
