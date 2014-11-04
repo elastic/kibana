@@ -7,10 +7,15 @@ define(function (require) {
       name: 'histogram',
       title: 'Vertical bar chart',
       icon: 'fa-bar-chart',
-      vislibParams: {
-        shareYAxis: true,
-        addTooltip: true,
-        addLegend: true,
+      params: {
+        defaults: {
+          shareYAxis: true,
+          addTooltip: true,
+          addLegend: true,
+          mode: 'stacked'
+        },
+        modes: ['stacked', 'percentage', 'grouped'],
+        editor: require('text!plugins/vis_types/vislib/editors/histogram.html')
       },
       schemas: new Schemas([
         {

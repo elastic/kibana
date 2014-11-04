@@ -5,6 +5,7 @@ define(function (require) {
     var _ = require('lodash');
 
     require('plugins/visualize/editor/agg_group');
+    require('plugins/visualize/editor/vis_options');
 
     return {
       restrict: 'E',

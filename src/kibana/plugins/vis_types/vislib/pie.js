@@ -8,10 +8,13 @@ define(function (require) {
       name: 'pie',
       title: 'Pie chart',
       icon: 'fa-pie-chart',
-      vislibParams: {
-        addEvents: true,
-        addTooltip: true,
-        addLegend: true
+      params: {
+        defaults: {
+          shareYAxis: true,
+          addTooltip: true,
+          addLegend: true,
+        },
+        editor: require('text!plugins/vis_types/vislib/editors/basic.html')
       },
       responseConverter: PieConverter,
       hierarchicalData: true,

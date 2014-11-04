@@ -44,7 +44,7 @@ define(function (require) {
           $visEl.toggleClass('spy-only', Boolean(fullSpy));
         };
 
-        // we need to wait for come watchers to fire at least once
+        // we need to wait for some watchers to fire at least once
         // before we are "ready", this manages that
         var prereq = (function () {
           var fns = [];
@@ -77,6 +77,10 @@ define(function (require) {
         $scope.$watch('vis', prereq(function (vis, oldVis) {
           if (oldVis) $scope.renderbot = null;
           if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl);
+        }));
+
+        $scope.$watchCollection('vis.params', prereq(function (params) {
+          if ($scope.renderbot) $scope.renderbot.updateParams(params);
         }));
 
         $scope.$watch('searchSource', prereq(function (searchSource) {

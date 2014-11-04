@@ -7,10 +7,15 @@ define(function (require) {
       name: 'area',
       title: 'Area chart',
       icon: 'fa-area-chart',
-      vislibParams: {
-        shareYAxis: true,
-        addTooltip: true,
-        addLegend: true,
+      params: {
+        defaults: {
+          shareYAxis: true,
+          addTooltip: true,
+          addLegend: true,
+          mode: 'stacked',
+        },
+        modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],
+        editor: require('text!plugins/vis_types/vislib/editors/area.html')
       },
       schemas: new Schemas([
         {
