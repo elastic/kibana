@@ -17,7 +17,7 @@ visualize {
 
   .visualize-chart {
     .flex(1, 1);
-    overflow: hidden;
+    overflow: auto;
 
     &.spy-visible {
       margin-bottom: 10px;
@@ -76,9 +76,13 @@ visualize-spy {
     .display(flex);
     .flex-direction(column);
 
-    height: 382px;
+    height: 482px;
     padding: 10px 10px 0;
     overflow-y: auto;
+
+    header {
+      padding: 0 0 15px;
+    }
 
     > .alert {
       .flex(0 0 auto);
@@ -91,38 +95,6 @@ visualize-spy {
 
   &.only .visualize-spy-container {
     height: auto;
-  }
-
-  // this is the default, double-arrow sort that is just a hint to the user that they can sort
-  .visualize-table th i.fa-sort {
-    color: @gray-light;
-  }
-
-  .visualize-table-right {
-    text-align: right;
-  }
-
-  .visualize-table-controls {
-    padding: 0 5px;
-    text-align: right;
-  }
-
-  .visualize-csv-options {
-    .form-control {
-      padding: 0px 6px;
-      height: auto;
-    }
-    label {
-      margin: 0 10px;
-      padding: 0;
-      font-weight: normal;
-    }
-    .visualize-csv-separator {
-      width: 1.5em;
-    }
-    button[type=submit] {
-      margin-left: 5px;
-    }
   }
 
   .visualize-spy-nav {

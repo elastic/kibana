@@ -1,0 +1,38 @@
+<paginate
+  ng-if="formattedRows.length"
+
+  list="formattedRows"
+  per-page-prop="perPage"
+
+  class="agg-table">
+  <div class="agg-table-paginated">
+    <table class="table table-condensed">
+      <thead>
+        <tr bindonce>
+          <th
+            ng-repeat="col in table.columns"
+            ng-click="aggTable.cycleSort(col)"
+            ng-class="aggTable.getColumnClass(col, $first, $last)">
+            <span bo-text="col.title"></span>
+            <i
+              class="fa"
+              ng-class="{
+                'fa-sort-asc': aggTable.sort.col === col && aggTable.sort.asc,
+                'fa-sort-desc': aggTable.sort.col === col && !aggTable.sort.asc,
+                'fa-sort': !aggTable.sort || aggTable.sort.col !== col
+              }">
+            </i>
+          </th>
+        </tr>
+      </thead>
+      <tbody kbn-rows="page" kbn-rows-min="perPage"></tbody>
+    </table>
+  </div>
+
+  <div class="agg-table-controls">
+    <a class="small" ng-click="aggTable.exportAsCsv()">
+      Export <i class="fa fa-download"></i>
+    </a>
+    <paginate-controls></paginate-controls>
+  </div>
+</paginate>

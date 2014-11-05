@@ -10,11 +10,11 @@ define(function (require) {
   /**
    * Provides the Kibana4 Visualization Library
    *
-   * @module visLib
-   * @main visLib
+   * @module vislib
+   * @main vislib
    * @return {Object} Contains the version number and the Vis Class for creating visualizations
    */
-  module.service('visLib', function (Private) {
+  module.service('vislib', function (Private) {
     return {
       version: '0.0.0',
       Vis: Private(require('components/vislib/vis'))

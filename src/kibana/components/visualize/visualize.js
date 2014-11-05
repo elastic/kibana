@@ -1,15 +1,13 @@
 define(function (require) {
   require('modules')
   .get('kibana/directive')
-  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private, visLib) {
+  .directive('visualize', function (Notifier, SavedVis, indexPatterns, Private) {
 
     require('components/visualize/spy/spy');
     require('css!components/visualize/visualize.css');
     var $ = require('jquery');
     var _ = require('lodash');
     var visTypes = Private(require('registry/vis_types'));
-    var buildChartData = Private(require('components/visualize/_build_chart_data'));
-    var buildHierarchialData = Private(require('components/visualize/_build_hierarchial_data'));
 
     var notify = new Notifier({
       location: 'Visualize'
@@ -25,8 +23,8 @@ define(function (require) {
       template: require('text!components/visualize/visualize.html'),
       link: function ($scope, $el, attr) {
         var chart; // set in "vis" watcher
-        var $visChart = $el.find('.visualize-chart');
-        var $spy = $el.find('visualize-spy');
+        var $visEl = $el.find('.visualize-chart');
+        var $spyEl = $el.find('visualize-spy');
         var minVisChartHeight = 180;
 
         $scope.spyMode = false;
@@ -39,14 +37,14 @@ define(function (require) {
           $el.toggleClass('only-visualization', !$scope.spyMode);
           $el.toggleClass('visualization-and-spy', $scope.spyMode && !fullSpy);
           $el.toggleClass('only-spy', Boolean(fullSpy));
-          $spy.toggleClass('only', Boolean(fullSpy));
+          $spyEl.toggleClass('only', Boolean(fullSpy));
 
           // internal
-          $visChart.toggleClass('spy-visible', Boolean($scope.spyMode));
-          $visChart.toggleClass('spy-only', Boolean(fullSpy));
+          $visEl.toggleClass('spy-visible', Boolean($scope.spyMode));
+          $visEl.toggleClass('spy-only', Boolean(fullSpy));
         };
 
-        // we need to wait for come watchers to fire at least once
+        // we need to wait for some watchers to fire at least once
         // before we are "ready", this manages that
         var prereq = (function () {
           var fns = [];
@@ -67,38 +65,22 @@ define(function (require) {
           };
         }());
 
+        $scope.$watch('fullScreenSpy', applyClassNames);
         $scope.$watchCollection('spyMode', function (spyMode, oldSpyMode) {
-          $scope.spyMode = spyMode;
           // if the spy has been opened, check chart height
           if (spyMode && !oldSpyMode) {
-            $scope.fullScreenSpy = $visChart.height() < minVisChartHeight;
+            $scope.fullScreenSpy = $visEl.height() < minVisChartHeight;
           }
           applyClassNames();
         });
 
-        $scope.$watch('vis', prereq(function (vis, prevVis) {
-          if (prevVis && vis !== prevVis && prevVis.destroy) prevVis.destroy();
-          if (chart) {
-            _.forOwn(prevVis.listeners, function (listener, event) {
-              chart.off(event, listener);
-            });
-            chart.destroy();
-          }
+        $scope.$watch('vis', prereq(function (vis, oldVis) {
+          if (oldVis) $scope.renderbot = null;
+          if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl);
+        }));
 
-          if (!vis) return;
-
-          var vislibParams = _.assign(
-            {},
-            vis.type.vislibParams,
-            { type: vis.type.name },
-            vis.vislibParams
-          );
-
-          chart = new visLib.Vis($visChart[0], vislibParams);
-
-          _.each(vis.listeners, function (listener, event) {
-            chart.on(event, listener);
-          });
+        $scope.$watchCollection('vis.params', prereq(function (params) {
+          if ($scope.renderbot) $scope.renderbot.updateParams(params);
         }));
 
         $scope.$watch('searchSource', prereq(function (searchSource) {
@@ -117,33 +99,19 @@ define(function (require) {
         }));
 
         $scope.$watch('esResp', prereq(function (resp, prevResp) {
-          var fn;
           if (!resp) return;
-          if ($scope.vis.type.hierarchialData) {
-            fn = buildHierarchialData;
-          } else {
-            fn = buildChartData;
-          }
-          var chartData = fn($scope.vis, resp);
-          $scope.chartData = chartData;
+          $scope.renderbot.render(resp);
         }));
 
-        $scope.$watch('chartData', function (chartData) {
-          applyClassNames();
-
-          if (chart && chartData && !$scope.onlyShowSpy) {
-            notify.event('call chart render', function () {
-              chart.render(chartData);
-            });
+        $scope.$watch('renderbot', function (newRenderbot, oldRenderbot) {
+          if (oldRenderbot && newRenderbot !== oldRenderbot) {
+            oldRenderbot.destroy();
           }
         });
 
         $scope.$on('$destroy', function () {
-          if (chart) {
-            _.forOwn($scope.vis.listeners, function (listener, event) {
-              chart.off(event, listener);
-            });
-            chart.destroy();
+          if ($scope.renderbot) {
+            $scope.renderbot.destroy();
           }
         });
       }
