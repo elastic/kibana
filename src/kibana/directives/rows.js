@@ -7,18 +7,38 @@ define(function (require) {
     return {
       restrict: 'A',
       link: function ($scope, $el, attr) {
-        var getter = $parse(attr.kbnRowsMin);
+        function addCell($tr, contents) {
+          var $cell = $(document.createElement('td'));
 
-        $scope.$watch(attr.kbnRows, function (rows) {
+          // TODO: It would be better to actually check the type of the field, but we don't have
+          // access to it here. This may become a problem with the switch to BigNumber
+          if (_.isNumeric(contents)) $cell.addClass('numeric-value');
+
+          if (contents === '') {
+            $cell.html('&nbsp;');
+          } else {
+            $cell.text(contents);
+          }
+          $tr.append($cell);
+        }
+
+        function maxRowSize(max, row) {
+          return Math.max(max, row.length);
+        }
+
+        $scope.$watchMulti([
+          attr.kbnRows,
+          attr.kbnRowsMin
+        ], function (vals) {
+          var rows = vals[0];
+          var min = vals[1];
+
           $el.empty();
 
-          var min = getter($scope);
-          var width = _.reduce(rows, function (memo, row) {
-            return Math.max(memo, row.length);
-          }, 0);
-
           if (!_.isArray(rows)) rows = [];
-          if (min && rows.length < min) {
+          var width = rows.reduce(maxRowSize, 0);
+
+          if (isFinite(min) && rows.length < min) {
             // clone the rows so that we can add elements to it without upsetting the original
             rows = _.clone(rows);
             // crate the empty row which will be pushed into the row list over and over
@@ -29,28 +49,11 @@ define(function (require) {
             _.times(min - rows.length, function () { rows.push(emptyRow); });
           }
 
-          var addCell = function ($tr, contents) {
-            var $cell = $(document.createElement('td'));
-
-            // TODO: It would be better to actually check the type of the field, but we don't have
-            // access to it here. This may become a problem with the switch to BigNumber
-            if (_.isNumeric(contents)) $cell.addClass('numeric-value');
-
-            if (contents === '') {
-              $cell.html('&nbsp;');
-            } else {
-              $cell.text(contents);
-            }
-            $tr.append($cell);
-          };
-
           rows.forEach(function (row) {
-            var $tr = $(document.createElement('tr'));
-            $el.append($tr);
-
-            for (var i = 0; i < width; i++) {
-              addCell($tr, row[i]);
-            }
+            var $tr = $(document.createElement('tr')).appendTo($el);
+            row.forEach(function (cell) {
+              addCell($tr, cell);
+            });
           });
         });
       }

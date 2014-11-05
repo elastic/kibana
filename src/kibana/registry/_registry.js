@@ -15,6 +15,7 @@ define(function (require) {
     registry.name = name + 'Registry';
     registry.register = function (privateModule) {
       modules.push(privateModule);
+      return registry;
     };
 
     return registry;

@@ -5,18 +5,17 @@ define(function (require) {
       var $ = require('jquery');
       var _ = require('lodash');
 
-      var modes = _.flatten([
-        Private(require('components/visualize/spy/_table')),
-        Private(require('components/visualize/spy/_req_resp_stats'))
-      ]);
-      modes.byName = _.indexBy(modes, 'name');
+      require('components/visualize/spy/_table');
+      require('components/visualize/spy/_req_resp_stats');
 
-      var defaultMode = modes[0];
+      var modes = Private(require('registry/spy_modes'));
+      var defaultMode = modes.inOrder[0];
 
       return {
         restrict: 'E',
         template: require('text!components/visualize/spy/_spy.html'),
         link: function ($scope, $el) {
+          var $container = $el.find('.visualize-spy-container');
           var fullPageSpy = false;
           // $scope.spyMode = null; // inherited from the parent
           $scope.modes = modes;
@@ -60,11 +59,11 @@ define(function (require) {
                 display: newMode.display,
                 fill: fullPageSpy,
                 $scope: $scope.$new(),
-                $container: $('<div class="visualize-spy-container">').appendTo($el)
+                $container: $('<div class="visualize-spy-content">').appendTo($container)
               };
 
               current.$container.append($compile(newMode.template)(current.$scope));
-              newMode.link(current.$scope, current.$container);
+              newMode.link && newMode.link(current.$scope, current.$container);
             }
 
             // wrapped in fn to enable early return

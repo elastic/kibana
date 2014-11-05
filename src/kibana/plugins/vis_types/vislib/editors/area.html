@@ -1,0 +1,8 @@
+<!-- vis type specific options -->
+<div>
+  <label>
+    Chart Mode
+    <select ng-model="vis.params.mode" ng-options="mode for mode in vis.type.params.modes"></select>
+  </label>
+</div>
+<vislib-basic-options></vislib-basic-options>

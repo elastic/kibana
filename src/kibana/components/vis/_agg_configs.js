@@ -47,7 +47,7 @@ define(function (require) {
       var dslLvlCursor;
       var nestedMetric;
 
-      if (this.vis.type.hierarchialData) {
+      if (this.vis.type.hierarchicalData) {
         // collect the metric agg that we will copy under each bucket agg
         var nestedMetricConfig = _.first(this.vis.aggs.bySchemaGroup.metrics);
         if (nestedMetricConfig.type.name !== 'count') {
