@@ -123,6 +123,7 @@
           'specs/vislib/components/color',
           'specs/vislib/components/zero_injection',
           'specs/vislib/components/labels',
+          'specs/vislib/components/tooltip/index',
           'specs/vislib/lib/x_axis',
           'specs/vislib/lib/y_axis',
           'specs/vislib/lib/axis_title',
@@ -130,7 +131,6 @@
           'specs/vislib/lib/layout_types',
           'specs/vislib/lib/splits',
           'specs/vislib/lib/layout',
-          'specs/vislib/lib/tooltip',
           'specs/vislib/lib/handler',
           'specs/vislib/lib/_error_handler',
           'specs/vislib/lib/data',
@@ -160,7 +160,8 @@
           'specs/components/agg_response/hierarchical/_collect_branch',
           'specs/components/agg_response/tabify/tabify',
           'specs/components/agg_table/index',
-          'specs/plugins/vis_types/index'
+          'specs/plugins/vis_types/index',
+          'specs/utils/slugify_id'
         ], function () {
           bootstrap(kibana, sinon);
         });

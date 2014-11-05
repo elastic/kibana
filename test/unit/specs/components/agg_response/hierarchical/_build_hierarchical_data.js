@@ -50,6 +50,44 @@ define(function (require) {
 
     });
 
+    describe('rows and columns', function () {
+
+      it('should set the rows', function () {
+        var id = 1;
+        var vis = new Vis(indexPattern, {
+          type: 'pie',
+          aggs: [
+            { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+            { type: 'terms', schema: 'split', params: { field: 'extension', row: true }},
+            { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
+            { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+          ]
+        });
+        // We need to set the aggs to a known value.
+        _.each(vis.aggs, function (agg) { agg.id = 'agg_' + id++; });
+        var results = buildHierarchicalData(vis, fixtures.threeTermBuckets);
+        expect(results).to.have.property('rows');
+      });
+
+      it('should set the columns', function () {
+        var id = 1;
+        var vis = new Vis(indexPattern, {
+          type: 'pie',
+          aggs: [
+            { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+            { type: 'terms', schema: 'split', params: { field: 'extension', row: false }},
+            { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
+            { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+          ]
+        });
+        // We need to set the aggs to a known value.
+        _.each(vis.aggs, function (agg) { agg.id = 'agg_' + id++; });
+        var results = buildHierarchicalData(vis, fixtures.threeTermBuckets);
+        expect(results).to.have.property('columns');
+      });
+
+    });
+
     describe('threeTermBuckets', function () {
       var vis, results;
 

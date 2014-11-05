@@ -5,11 +5,16 @@ define(function (require) {
 
     return function checkForES() {
       var complete = notify.lifecycle('es check');
-      return es.ping({
+      return es.info({
+        method: 'GET',
         requestTimeout: 2000
       })
       .catch(function (err) {
-        throw new SetupError('Unable to connect to Elasticsearch at "<%= configFile.elasticsearch %>"', err);
+        if (err.body && err.body.message) {
+          throw new SetupError(err.body.message, err);
+        } else {
+          throw new SetupError('Unknown error while connecting to Elasticsearch', err);
+        }
       })
       .then(complete, complete.failure);
     };

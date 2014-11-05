@@ -37,6 +37,16 @@ define(function (require) {
   inherits(errors.HastyRefresh, KbnError);
 
   /**
+   * SearchTimeout error class
+   */
+  errors.SearchTimeout = function SearchTimeout() {
+    KbnError.call(this,
+      'All or part of your request has timed out. The data shown may be incomplete.',
+      errors.SearchTimeout);
+  };
+  inherits(errors.SearchTimeout, KbnError);
+
+  /**
    * Request Failure - When an entire mutli request fails
    * @param {Error} err - the Error that came back
    * @param {Object} resp - optional HTTP response
