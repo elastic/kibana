@@ -33,9 +33,6 @@ module Kibana
         data.to_json + "\n"
       end
       set :logger, logger
-      disable :raise_errors
-      disable :show_exceptions
-      disable :dump_errors
     end
 
     configure :production do
@@ -48,18 +45,6 @@ module Kibana
 
     configure :development do
       use ColorLogger, settings.logger unless Kibana.global_settings[:quiet]
-    end
-
-    error do
-      500
-    end
-
-    error 400 do
-      json :status => 500, :message => "Bad Request"
-    end
-
-    error 500 do
-      json :status => 500, :message => "Internal Server Error"
     end
 
     not_found do
