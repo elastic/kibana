@@ -30,8 +30,8 @@ require.config({
     inflection: 'bower_components/inflection/lib/inflection',
     jquery: 'bower_components/jquery/dist/jquery',
     jsonpath: 'bower_components/jsonpath/lib/jsonpath',
+    leaflet: 'bower_components/leaflet/dist/leaflet',
     lodash_src: 'bower_components/lodash/dist/lodash',
-    mapbox: 'bower_components/mapbox.js/mapbox',
     markercluster: 'bower_components/leaflet.markercluster/dist/leaflet.markercluster',
     moment: 'bower_components/moment/moment',
     'ng-clip': 'bower_components/ng-clip/src/ngClip',
@@ -55,7 +55,7 @@ require.config({
     'angular-ui-ace': ['angular', 'ace'],
     'ng-clip': ['angular', 'zeroclipboard'],
     heat: {
-      deps: ['mapbox']
+      deps: ['leaflet']
     },
     inflection: {
       exports: 'inflection'
@@ -63,12 +63,11 @@ require.config({
     file_saver: {
       exports: 'saveAs'
     },
-    mapbox: {
-      deps: ['css!bower_components/mapbox.js/mapbox.css'],
-      exports: 'L'
+    leaflet: {
+      deps: ['css!bower_components/leaflet/dist/leaflet.css']
     },
     markercluster: {
-      deps: ['mapbox',
+      deps: ['leaflet',
       'css!bower_components/leaflet.markercluster/dist/MarkerCluster.css',
       'css!bower_components/leaflet.markercluster/dist/MarkerCluster.Default.css'
       ]

@@ -2,7 +2,7 @@ define(function (require) {
   return function TileMapFactory(d3, Private, config) {
     var _ = require('lodash');
     var $ = require('jquery');
-    var L = require('mapbox');
+    var L = require('leaflet');
     require('heat');
     require('markercluster');
   
@@ -15,9 +15,6 @@ define(function (require) {
     var mapCenter = [15, 5];
     var mapZoom = 2;
       
-    var mapTiles = config.get('mapbox:tiles');
-    var apiKey = config.get('mapbox:apiKey');
-    L.mapbox.accessToken = apiKey;
 
     /**
      * Tile Map Visualization: renders maps
@@ -77,9 +74,18 @@ define(function (require) {
             mapCenter = self._attr.lastCenter;
           }
 
-          var map = L.mapbox.map(div[0], mapTiles, mapOptions)
+          var mapLayer = L.tileLayer('http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
+            attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
+              'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+              '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+            subdomains: '1234'
+          });
+          var map = L.map(div[0], { layers: mapLayer })
             .setView(mapCenter, mapZoom);
-          L.control.scale().addTo(map);
+
+          //var map = L.mapbox.map(div[0], mapTiles, mapOptions)
+          //  .setView(mapCenter, mapZoom);
+          //L.control.scale().addTo(map);
 
           map.on('zoomend dragend', function () {
             mapZoom = self._attr.lastZoom = map.getZoom();

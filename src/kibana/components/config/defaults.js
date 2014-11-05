@@ -49,14 +49,6 @@ define(function (require) {
     'truncate:maxHeight': {
       value: 100,
       description: 'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.'
-    },
-    'mapbox:apiKey': {
-      value: 'pk.eyJ1IjoianRob21hc3NpZSIsImEiOiJHaUxIakJNIn0.-YMjtvwXuWt_ZwB9L5ZZYA',
-      description: 'API key to use Mapbox with Leaflet'
-    },
-    'mapbox:tiles': {
-      value: 'jthomassie.aa9a3d27',
-      description: 'Map tiles to display.'
     }
   };
 });
