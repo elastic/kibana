@@ -1,5 +1,5 @@
 define(function (require) {
-  return function fetchService(Private, es, Promise, Notifier, sessionId) {
+  return function fetchService(Private, es, Promise, Notifier, sessionId, configFile) {
     var _ = require('lodash');
     var errors = require('errors');
     var moment = require('moment');
@@ -59,11 +59,15 @@ define(function (require) {
         body = strategy.convertStatesToBody(states);
 
         return es[strategy.clientMethod]({
+          timeout: configFile.shard_timeout,
           preference: sessionId,
           body: body
         })
         .then(function (resp) {
           var sendResponse = function (req, resp) {
+            if (resp.timed_out) {
+              notify.warning(new errors.SearchTimeout());
+            }
             req.complete = true;
             req.resp = resp;
             req.ms = req.moment.diff() * -1;

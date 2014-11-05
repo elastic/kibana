@@ -1,9 +1,11 @@
 define(function (require) {
-  return function DiscoverSegmentedFetch(es, Private, Promise, Notifier) {
+  return function DiscoverSegmentedFetch(es, Private, Promise, Notifier, configFile) {
     var _ = require('lodash');
     var moment = require('moment');
     var searchStrategy = Private(require('components/courier/fetch/strategy/search'));
     var eventName = 'segmented fetch';
+    var errors = require('errors');
+
 
     var notify = new Notifier({
       location: 'Segmented Fetch'
@@ -174,7 +176,8 @@ define(function (require) {
         index: index,
         type: state.type,
         ignoreUnavailable: true,
-        body: state.body
+        body: state.body,
+        timeout: configFile.shard_timeout
       });
 
       this.searchPromise.abort = function () {
@@ -243,6 +246,9 @@ define(function (require) {
 
       return self._executeSearch(index, state)
       .then(function (resp) {
+        if (resp.timed_out) {
+          notify.warning(new errors.SearchTimeout());
+        }
         // a response was swallowed intentionally. Try the next one
         if (!resp) {
           if (self.queue.length) return self._processQueue(req, state, remainingSize, loopCount);

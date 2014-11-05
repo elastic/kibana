@@ -13,3 +13,13 @@ kibanaIndex: ".kibana"
 
 # The default application to laad.
 defaultAppId: "discover"
+
+# Time in seconds to wait for responses from the backend or elasticsearch.
+# Note this should always be higher than "shard_timeout".
+# This must be > 0
+request_timeout: 60
+
+# Time in milliseconds for elasticsearch to wait for responses from shards
+# Note this should always be lower than "request_timeout".
+# Set to 0 to disable (not recommended).
+shard_timeout: 30000
