@@ -57,7 +57,13 @@ define(function (require) {
           split.tooltipFormatter = tooltipFormatter(raw.columns);
           return split;
         });
-        return { hits: resp.hits.total, rows: rows, raw: raw };
+        var result = { hits: resp.hits.total, raw: raw };
+        if (firstAgg.params.row) {
+          result.rows = rows;
+        } else {
+          result.columns = rows;
+        }
+        return result;
         // otherwise we can start at the first bucket.
       } else {
         return (function () {
