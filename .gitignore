@@ -7,3 +7,5 @@ trash
 build
 target
 .jruby
+.idea
+*.iml
