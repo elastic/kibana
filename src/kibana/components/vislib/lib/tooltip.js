@@ -45,11 +45,11 @@ define(function (require) {
 
         var tooltipDiv = d3.select('.' + self.tooltipClass);
 
-        selection.each(function () {
+        selection.each(function (d, i) {
           var element = d3.select(this);
 
           element
-          .on('mousemove.tip', function (d, i) {
+          .on('mousemove.tip', function () {
             var placement = self.getTooltipPlacement(d3.event);
             var events = self.events ? self.events.eventResponse(d, i) : d;
 
