@@ -56,17 +56,11 @@ define(function (require) {
   // tell the modules util to add it's modules as requirements for kibana
   modules.link(kibana);
 
-  // list of modules that will require all possible applications
-  var appModules = configFile.apps.map(function (app) {
-    return 'apps/' + app.id + '/index';
-  });
-
-
   kibana.load = _.onceWithCb(function (cb) {
     require([
       'controllers/kibana'
     ], function loadApps() {
-      require(appModules, cb);
+      require(configFile.plugins, cb);
     });
   });
 

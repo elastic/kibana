@@ -1,0 +1,11 @@
+<table>
+  <tbody>
+    <tr ng-repeat="detail in details" >
+      <td><b>{{detail.label}}</b></td>
+      <td>
+          {{detail.value}}
+          <span ng-if="detail.percent"> ({{detail.percent}})</span>
+      </td>
+    </tr>
+  </tbody>
+</table>

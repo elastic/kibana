@@ -47,7 +47,7 @@ define(function (require) {
      */
     XAxis.prototype.getScale = function (ordered) {
       if (ordered && ordered.date) {
-        return d3.time.scale();
+        return d3.time.scale.utc();
       }
       return d3.scale.ordinal();
     };
@@ -238,11 +238,11 @@ define(function (require) {
       var xAxisLabelHt = 15;
       var width;
       self._attr.isRotated = false;
-      
+
       return function (selection) {
 
         text = selection.selectAll('.tick text');
-        
+
         text.each(function textWidths() {
           width = d3.select(this).node().getBBox().width;
           if (width > maxWidth) {
@@ -251,7 +251,7 @@ define(function (require) {
           }
         });
         self._attr.xAxisLabelHt = xAxisLabelHt;
-        
+
 
         if (self._attr.isRotated) {
           text
@@ -328,7 +328,7 @@ define(function (require) {
           myWidth = par.getBBox().width * padding;
           halfWidth = myWidth / 2;
           maxW = $(self.el).find('.x-axis-div').width();
-          
+
           if ((startX + halfWidth) < myX && maxW > (myX + halfWidth)) {
             startX = myX + halfWidth;
             return self.xAxisFormatter(d);
@@ -381,7 +381,7 @@ define(function (require) {
           if ($visEl.find('.x-axis-chart-title').length) {
             xAxisChartTitle = $visEl.find('.x-axis-chart-title');
             titleWidth = xAxisChartTitle.find('.chart-title').width();
-            
+
             titles = visEl.select('.x-axis-chart-title').selectAll('.chart-title');
             titles.each(function () {
               text = d3.select(this)
@@ -405,9 +405,9 @@ define(function (require) {
               .attr('transform', 'translate(11,' + (titleHeight / 2) + ')rotate(-90)');
             });
           }
-          
+
         });
-        
+
       };
     };
 
@@ -437,7 +437,7 @@ define(function (require) {
         .height(xAxisLabelHt + titleHts);
         $visEl.find('.x-axis-div-wrapper')
         .height(xAxisLabelHt);
-        
+
         if (visEl.select('.inner-spacer-block').node() === null) {
           visEl.select('.y-axis-spacer-block')
           .append('div')
@@ -447,7 +447,7 @@ define(function (require) {
         visEl.select('.inner-spacer-block')
         .style('height', (xAxisLabelHt + titleHts) + 'px');
       });
-      
+
     };
 
     return XAxis;

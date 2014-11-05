@@ -4,13 +4,13 @@ SCRIPT=$0
 
 # SCRIPT may be an arbitrarily deep series of symlinks. Loop until we have the concrete path.
 while [ -h "$SCRIPT" ] ; do
-  ls=`ls -ld "$SCRIPT"`
+  ls=$(ls -ld "$SCRIPT")
   # Drop everything prior to ->
-  link=`expr "$ls" : '.*-> \(.*\)$'`
+  link=$(expr "$ls" : '.*-> \(.*\)$')
   if expr "$link" : '/.*' > /dev/null; then
     SCRIPT="$link"
   else
-    SCRIPT=`dirname "$SCRIPT"`/"$link"
+    SCRIPT=$(dirname "$SCRIPT")/"$link"
   fi
 done
 
@@ -19,7 +19,7 @@ DIR=$(dirname "${SCRIPT}")
 if [ -x "${JAVA_HOME}/bin/java" ]; then
   JAVA="${JAVA_HOME}/bin/java"
 else
-  JAVA=`which java`
+  JAVA=$(which java)
 fi
 
 if [ ! -x "${JAVA}" ]; then
@@ -34,4 +34,11 @@ JAVA_OPTS="-Xmx512m $JAVA_OPTS"
 export GEM_HOME=
 export GEM_PATH=
 
-KIBANA_VERSION=@@version CONFIG_PATH=${DIR}/../config/kibana.yml RACK_ENV=production exec "${JAVA}" $JAVA_OPTS -jar "${DIR}/../lib/kibana.jar" "$@"
+# shellcheck disable=SC2086
+KIBANA_VERSION=@@version \
+  CONFIG_PATH=${DIR}/../config/kibana.yml \
+  PLUGINS_FOLDER=${DIR}/../plugins \
+  RACK_ENV=production \
+  exec "${JAVA}" \
+  $JAVA_OPTS \
+  -jar "${DIR}/../lib/kibana.jar" "$@"

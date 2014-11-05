@@ -1,0 +1,60 @@
+<div dashboard-app class="app-container dashboard-container">
+  <nav ng-show="!appEmbedded" class="navbar navbar-default navbar-static-top">
+    <navbar>
+      <span class="name">
+        {{dash.title}}
+      </span>
+
+      <form name="queryInput"
+        class="fill inline-form"
+        ng-submit="filterResults()">
+
+        <div class="typeahead" kbn-typeahead="dashboard">
+          <div class="input-group"
+            ng-class="queryInput.$invalid ? 'has-error' : ''">
+
+            <input type="text" input-focus
+              placeholder="Filter..."
+              class="form-control"
+              ng-model="state.query"
+              kbn-typeahead-input
+              validate-query>
+            <button type="submit" class="btn btn-default" ng-disabled="queryInput.$invalid">
+              <span class="fa fa-search"></span>
+            </button>
+          </div>
+
+          <kbn-typeahead-items></kbn-typeahead-items>
+        </div>
+
+      </form>
+
+      <div class="button-group">
+        <kbn-tooltip text="New Dashboard" placement="bottom" append-to-body="1">
+          <button ng-click="newDashboard()"><i class="fa fa-file-new-o"></i></button>
+        </kbn-tooltip>
+        <kbn-tooltip text="Save Dashboard" placement="bottom" append-to-body="1">
+          <button ng-click="openSave()"><i class="fa fa-save"></i></button>
+        </kbn-tooltip>
+        <kbn-tooltip text="Load Saved Dashboard" placement="bottom" append-to-body="1">
+          <button ng-click="openLoad()"><i class="fa fa-folder-open-o"></i></button>
+        </kbn-tooltip>
+        <kbn-tooltip text="Share" placement="bottom" append-to-body="1">
+          <button ng-click="openShare()"><i class="fa fa-external-link"></i></button>
+        </kbn-tooltip>
+        <kbn-tooltip text="Add Visualization" placement="bottom" append-to-body="1">
+          <button ng-click="openAdd()"><i class="fa fa-plus-circle"></i></button>
+        </kbn-tooltip>
+      </div>
+    </navbar>
+  </nav>
+
+  <config config-template="configTemplate" config-object="opts"></config>
+
+  <div ng-show="!state.panels.length" class="text-center start-screen">
+    <h2>Ready to get started?</h2>
+    <p>Click the <a class="btn btn-xs navbtn-inverse" ng-click="openAdd()"><i class="fa fa-plus-circle"></i></a> button in the menu bar above to add a visualization to the dashboard. <br/>If you haven't setup a visualization yet visit the <a href="#/visualize">"Visualize"</a> tab to create your first visualization.</p>
+  </div>
+
+  <dashboard-grid></dashboard-grid>
+</div>

@@ -21,18 +21,48 @@ define(function (require) {
         return new Data(data, attr);
       }
 
+      var offset;
+
+      if (attr.mode === 'stacked') {
+        offset = 'zero';
+      } else if (attr.mode === 'percentage') {
+        offset = 'expand';
+      } else if (attr.mode === 'grouped') {
+        offset = 'group';
+      } else {
+        offset = attr.mode;
+      }
+
       this.data = data;
+      this.type = this.getDataType();
+      this.labels = (this.type === 'series') ? getLabels(data) : this.pieNames();
+      this.color = color(this.labels);
       this._normalizeOrdered();
 
-      this._attr = attr;
       this._attr = _.defaults(attr || {}, {
-        offset: 'zero',
+
+        // d3 stack function
         stack: d3.layout.stack()
           .x(function (d) { return d.x; })
           .y(function (d) { return d.y; })
-          .offset(this._attr.offset)
+          .offset(offset || 'zero')
       });
     }
+
+    Data.prototype.getDataType = function () {
+      var data = this.getVisData();
+      var type;
+
+      data.forEach(function (obj) {
+        if (obj.series) {
+          type = 'series';
+        } else if (obj.slices) {
+          type = 'slices';
+        }
+      });
+
+      return type;
+    };
 
     /**
      * Returns an array of the actual x and y data value objects
@@ -83,8 +113,10 @@ define(function (require) {
       var seriesLabel;
 
       _.forEach(visData, function countSeriesLength(obj) {
-        var dataLength = obj.series ? obj.series.length : obj.slices.children.length;
-        var label = (dataLength === 1 && obj.series) ? obj.series[0].label : undefined;
+        var rootSeries = obj.series || (obj.slices && obj.slices.children);
+        var dataLength = rootSeries ? rootSeries.length : 0;
+        var label = dataLength === 1 ? rootSeries[0].label || rootSeries[0].name : undefined;
+        var children = (obj.slices && obj.slices.children && obj.slices.children[0].children);
 
         if (!seriesLabel) {
           seriesLabel = label;
@@ -94,7 +126,7 @@ define(function (require) {
           sameSeriesLabel = false;
         }
 
-        if (dataLength > 1 || !sameSeriesLabel) {
+        if (dataLength > 1 || children || !sameSeriesLabel) {
           isLegend = true;
         }
       });
@@ -168,8 +200,12 @@ define(function (require) {
      * @returns {boolean}
      */
     Data.prototype.shouldBeStacked = function (series) {
+      var isHistogram = (this._attr.type === 'histogram');
+      var isArea = (this._attr.type === 'area');
+      var isOverlapping = (this._attr.mode === 'overlap');
+
       // Series should be an array
-      return (this._attr.type === 'histogram' && series.length > 1);
+      return (isHistogram || isArea && !isOverlapping && series.length > 1);
     };
 
     /**
@@ -184,9 +220,20 @@ define(function (require) {
     Data.prototype.getYMaxValue = function () {
       var self = this;
       var arr = [];
+      var grouped = (self._attr.mode === 'grouped');
 
+      if (self._attr.mode === 'percentage') {
+        return 1;
+      }
+
+      if (self._attr.mode === 'percentage') {
+        return 1;
+      }
+
+      // for each object in the dataArray,
+      // push the calculated y value to the initialized array (arr)
       _.forEach(this.flatten(), function (series) {
-        if (self.shouldBeStacked(series)) {
+        if (self.shouldBeStacked(series) && !grouped) {
           return arr.push(self.getYStackMax(series));
         }
         return arr.push(self.getYMax(series));
@@ -252,7 +299,8 @@ define(function (require) {
       var self = this;
 
       _.forEach(array, function (obj) {
-        var fieldFormatter = (columns && columns[index].field) ? columns[index].field.format.convert : function (d) { return d; };
+        var fieldFormatter = obj.aggConfig ?
+          obj.aggConfig.params.field.format.convert : function (d) { return d; };
         names.push({ key: fieldFormatter(obj.name), index: index });
 
         if (obj.children) {

@@ -1,0 +1,9 @@
+source "https://rubygems.org"
+
+gem 'sinatra', :require => 'sinatra/base'
+gem 'sinatra-contrib'
+gem 'puma'
+gem 'warbler'
+gem 'elasticsearch'
+gem 'rack-reverse-proxy', :require => 'rack/reverse_proxy'
+gem 'colorize'

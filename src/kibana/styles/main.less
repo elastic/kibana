@@ -32,6 +32,7 @@
 @import "./_pagination.less";
 
 // custom control style
+@import "./_input.less";
 @import "./_navbar.less";
 @import "./_sidebar.less";
 @import "./_truncate.less";
@@ -179,7 +180,6 @@ notifications {
 
 @import "./_table.less";
 @import "./_notify.less";
-@import "./_typeahead.less";
 
 //== Nav tweaks
 .nav-condensed > li > a {
@@ -379,8 +379,10 @@ button[disabled] {
 }
 
 input.ng-dirty.ng-invalid,
+textarea.ng-dirty.ng-invalid,
 select.ng-dirty.ng-invalid,
 form:not(.hide-errors) input.ng-invalid,
+form:not(.hide-errors) textarea.ng-invalid,
 form:not(.hide-errors) select.ng-invalid {
   border-color: @state-danger-bg !important;
 }
@@ -397,6 +399,10 @@ input[type="checkbox"],
     cursor: default;
     opacity: .8;
   }
+}
+
+textarea {
+  resize: vertical;
 }
 
 .field-collapse-toggle {

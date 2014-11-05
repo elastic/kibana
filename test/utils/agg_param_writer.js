@@ -3,7 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var Vis = Private(require('components/vis/vis'));
     var aggTypes = Private(require('components/agg_types/index'));
-    var visTypes = Private(require('components/vis_types/index'));
+    var visTypes = Private(require('registry/vis_types'));
     var stubbedLogstashIndexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
 
     /**

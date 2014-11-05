@@ -14,7 +14,8 @@ end
 
 # Defaults for the options
 options = {
-  :config => ENV["CONFIG_PATH"] || File.expand_path("#{HERE}/../config/kibana.yml")
+  :config => ENV["CONFIG_PATH"] || File.expand_path("#{HERE}/../config/kibana.yml"),
+  :plugins_folder => ENV["PLUGINS_FOLDER"]
 }
 
 # Create a new parser
@@ -37,6 +38,9 @@ parser = OptionParser.new do |opts|
   opts.on('-v', '--version', 'Display version') do |arg|
     puts ENV['KIBANA_VERSION'] || 'dev-build'
     exit
+  end
+  opts.on('--plugins', 'Path to the folder to scan for plugins') do |arg|
+    options[:plugins_folder] = arg
   end
   opts.on('-h', '--help', 'Display this screen') do
     puts opts
@@ -68,16 +72,22 @@ ENV["RACK_ENV"] = "development" if ENV["RACK_ENV"].nil?
 # Set the global_settings that are shared across every app
 Kibana.global_settings[:port] = port || 5601
 Kibana.global_settings[:host] = host || '0.0.0.0'
+Kibana.global_settings[:request_timeout] = config["request_timeout"].nil? ? 60 : config["request_timeout"]
+Kibana.global_settings[:shard_timeout] = config["shard_timeout"].nil? ? 30000 : config["shard_timeout"]
+
 Kibana.global_settings[:config] = config
 Kibana.global_settings[:elasticsearch] = elasticsearch
-Kibana.global_settings[:root] = File.expand_path("#{File.dirname(__FILE__)}/../")
+Kibana.global_settings[:root] = File.expand_path("#{HERE}/../")
 Kibana.global_settings[:quiet] = options[:quiet]
+Kibana.global_settings[:external_plugins_folder] = options[:plugins_folder] || nil
 
 # Set the public folder based on whether we are running in production or not.
 if ENV['RACK_ENV'] == ('production')
-  Kibana.global_settings[:public_folder] = File.expand_path("#{File.dirname(__FILE__)}/../public/")
+  Kibana.global_settings[:public_folder] = File.expand_path("#{HERE}/../public/")
+  Kibana.global_settings[:bundled_plugins_folder] = File.expand_path("#{HERE}/../public/plugins")
 else
-  Kibana.global_settings[:public_folder] = File.expand_path("#{File.dirname(__FILE__)}/../../kibana/")
+  Kibana.global_settings[:public_folder] = File.expand_path("#{HERE}/../../kibana/")
+  Kibana.global_settings[:bundled_plugins_folder] = File.expand_path("#{HERE}/../../kibana/plugins")
 end
 
 # Add the root of the project to the load path

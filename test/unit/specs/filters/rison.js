@@ -5,7 +5,7 @@ define(function (require) {
   require('angular-route');
 
   // Load kibana and its applications
-  require('apps/discover/index');
+  require('plugins/discover/index');
 
   var rison;
   var risonDecode;

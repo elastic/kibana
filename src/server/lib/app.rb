@@ -9,6 +9,8 @@ require "lib/ColorLogger"
 require "routes/home"
 require "sinatra/json"
 require "routes/proxy"
+require "lib/FrameOptions"
+require "routes/plugins"
 
 class Logger
   alias_method :write, :<<
@@ -31,9 +33,6 @@ module Kibana
         data.to_json + "\n"
       end
       set :logger, logger
-      disable :raise_errors
-      disable :show_exceptions
-      disable :dump_errors
     end
 
     configure :production do
@@ -48,18 +47,6 @@ module Kibana
       use ColorLogger, settings.logger unless Kibana.global_settings[:quiet]
     end
 
-    error do
-      500
-    end
-
-    error 400 do
-      json :status => 500, :message => "Bad Request"
-    end
-
-    error 500 do
-      json :status => 500, :message => "Internal Server Error"
-    end
-
     not_found do
       json :status => 404, :message => "Not Found"
     end
@@ -67,6 +54,7 @@ module Kibana
     # Routes go here
     use Routes::Home
     use Routes::Proxy
+    use Routes::Plugins
 
   end
 end

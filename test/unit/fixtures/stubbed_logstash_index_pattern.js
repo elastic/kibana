@@ -12,6 +12,8 @@ define(function (require) {
       { type: 'geo_point',  indexed: true,  analyzed: true,  count: 0, name: 'point' },
       { type: 'geo_shape',  indexed: true,  analyzed: true,  count: 0, name: 'area' },
       { type: 'string',     indexed: true,  analyzed: true,  count: 0, name: 'extension' },
+      { type: 'string',     indexed: true,  analyzed: true,  count: 0, name: 'machine.os' },
+      { type: 'string',     indexed: true,  analyzed: true,  count: 0, name: 'geo.src' },
       { type: 'string',     indexed: true,  analyzed: true,  count: 0, name: '_type' },
       { type: 'conflict',   indexed: false, analyzed: false, count: 0, name: 'custom_user_field' }
     ]);

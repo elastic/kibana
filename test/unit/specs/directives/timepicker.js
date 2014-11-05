@@ -9,11 +9,11 @@ define(function (require) {
   // Load the kibana app dependencies.
   require('angular-route');
 
-  require('apps/visualize/index');
-  require('apps/dashboard/index');
+  require('plugins/visualize/index');
+  require('plugins/dashboard/index');
 
   // TODO: This should not be needed, timefilter is only included here, it should move
-  require('apps/discover/index');
+  require('plugins/discover/index');
 
   var $parentScope, $scope, $elem;
   var clock, anchor = '2014-01-01T06:06:06.666Z';
@@ -269,8 +269,8 @@ define(function (require) {
         inputs = {
           fromInput: $elem.find('.kbn-timepicker-section input[ng-model="absolute.from"]'),
           toInput: $elem.find('.kbn-timepicker-section input[ng-model="absolute.to"]'),
-          fromCalendar: $elem.find('.kbn-timepicker-section div[ng-model="absolute.from"] '),
-          toCalendar: $elem.find('.kbn-timepicker-section div[ng-model="absolute.to"] '),
+          fromCalendar: $elem.find('.kbn-timepicker-section table[ng-model="absolute.from"] '),
+          toCalendar: $elem.find('.kbn-timepicker-section table[ng-model="absolute.to"] '),
         };
 
       });
@@ -281,7 +281,7 @@ define(function (require) {
         done();
       });
 
-      it('should have divs that contain calendars bound to absolute.from and absolute.to', function (done) {
+      it('should have tables that contain calendars bound to absolute.from and absolute.to', function (done) {
         expect(inputs.fromCalendar.length).to.be(1);
         expect(inputs.toCalendar.length).to.be(1);
         done();

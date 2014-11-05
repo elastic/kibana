@@ -1,12 +1,15 @@
 define(function (require) {
   return function AggParamsFactory(Private) {
+    require('filters/label');
     var _ = require('lodash');
-    var Registry = require('utils/registry/registry');
+    var IndexedArray = require('utils/indexed_array/index');
 
     var BaseAggParam = Private(require('components/agg_types/param_types/base'));
     var FieldAggParam = Private(require('components/agg_types/param_types/field'));
     var OptionedAggParam = Private(require('components/agg_types/param_types/optioned'));
     var RegexAggParam = Private(require('components/agg_types/param_types/regex'));
+    var StringAggParam = Private(require('components/agg_types/param_types/string'));
+    var RawJSONAggParam = Private(require('components/agg_types/param_types/raw_json'));
 
     /**
      * Wraps a list of {{#crossLink "AggParam"}}{{/crossLink}} objects; owned by an {{#crossLink "AggType"}}{{/crossLink}}
@@ -18,10 +21,10 @@ define(function (require) {
      *
      * @class AggParams
      * @constructor
-     * @extends Registry
+     * @extends IndexedArray
      * @param {object[]} params - array of params that get new-ed up as AggParam objects as descibed above
      */
-    _(AggParams).inherits(Registry);
+    _(AggParams).inherits(IndexedArray);
     function AggParams(params) {
       if (_.isPlainObject(params)) {
         // convert the names: details format into details[].name
@@ -30,6 +33,13 @@ define(function (require) {
           return param;
         });
       }
+
+      // always append the raw JSON param
+      params.push({
+        name: 'json',
+        type: 'json',
+        advanced: true
+      });
 
       AggParams.Super.call(this, {
         index: ['name'],
@@ -42,6 +52,12 @@ define(function (require) {
           }
           else if (param.type === 'regex') {
             return new RegexAggParam(param);
+          }
+          else if (param.type === 'string') {
+            return new StringAggParam(param);
+          }
+          else if (param.type === 'json') {
+            return new RawJSONAggParam(param);
           }
           else {
             return new BaseAggParam(param);

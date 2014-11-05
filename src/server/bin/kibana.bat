@@ -8,6 +8,7 @@ for %%I in ("%SCRIPT_DIR%..") do set DIR=%%~dpfI
 
 set RACK_ENV=production
 set CONFIG_PATH=%DIR%\config\kibana.yml
+set PLUGINS_FOLDER=%DIR%\plugins
 set KIBANA_VERSION=@@version
 
 

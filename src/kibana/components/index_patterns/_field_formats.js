@@ -23,7 +23,7 @@ $scope.onChangeFormat = function (field, format) {
 ```
 
 ### Passing the formats to a chart
-Currently, the [histogram formatter](https://github.com/elasticsearch/kibana4/blob/master/src/kibana/apps/visualize/saved_visualizations/resp_converters/histogram.js) passes the formatting function as the `xAxisFormatter` and `yAxisFormatter` function.
+Currently, the [histogram formatter](https://github.com/elasticsearch/kibana4/blob/master/src/plugins/visualize/saved_visualizations/resp_converters/histogram.js) passes the formatting function as the `xAxisFormatter` and `yAxisFormatter` function.
 
 */
 /* jshint ignore:end */

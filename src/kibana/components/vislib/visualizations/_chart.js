@@ -24,7 +24,7 @@ define(function (require) {
       this.chartEl = el;
       this.chartData = chartData;
 
-      var events = this.events = new Dispatch(handler, chartData);
+      var events = this.events = new Dispatch(handler);
 
       if (handler._attr.addTooltip) {
         var $el = this.handler.el;

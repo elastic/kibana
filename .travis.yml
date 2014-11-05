@@ -10,9 +10,10 @@ script:
 notifications:
   email:
   - rashid.khan@elasticsearch.com
+  - spencer.alger@elasticsearch.com
   hipchat:
     rooms:
-      secure: a2FERvICecrUAR62vP4vrUCTG3haRzf6kSzDDzGu6SICEXWLRrK0xeNQDpdwDAfzFmaIJ6txpkmInvEFeNPYNngTgEDyfhqdIa/lW0Ermdg+1hL0dK6QJiVmT1V6LDB2mgtaTTmfontxJqq7P2tmr0zz8ny4Eqq3lUnwPxYFNNo=
+      secure: UKrVR+5KztHarodQruQe97UJfwftutD6RNdXlVkr+oIr2GqccisDIIN9pAzS/kxl+eAnP1uT6VHzc9YI/jgbrmiSkz3DHViw+MwDwY2aIDgI8aHEbd/4B2ihtb15+OYTVbb+lytyz4+W8A8hSmbkTR/P/uFIJ+EYcBeYZfw1elo=
     format: html
     on_success: change
     template:
