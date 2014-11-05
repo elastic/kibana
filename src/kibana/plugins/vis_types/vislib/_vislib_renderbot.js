@@ -61,9 +61,8 @@ define(function (require) {
       vislibVis.destroy();
     };
 
-    VislibRenderbot.prototype.updateParams = function (params) {
+    VislibRenderbot.prototype.updateParams = function () {
       var self = this;
-      self.vis.params = params;
 
       // get full vislib params object
       var newParams = self._getVislibParams();

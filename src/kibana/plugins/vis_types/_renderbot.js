@@ -39,7 +39,7 @@ define(function (require) {
 
     /**
      * Each renderbot can optionally implement the #updateParams() method which
-     * is used to pass in new vis params and re-render the vis
+     * is used to pass in new vis params. It should not re-render the vis
      *
      * @override
      * @return {undefined}

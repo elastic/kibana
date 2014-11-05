@@ -79,8 +79,8 @@ define(function (require) {
           if (vis) $scope.renderbot = vis.type.createRenderbot(vis, $visEl);
         }));
 
-        $scope.$watchCollection('vis.params', prereq(function (params) {
-          if ($scope.renderbot) $scope.renderbot.updateParams(params);
+        $scope.$watchCollection('vis.params', prereq(function () {
+          if ($scope.renderbot) $scope.renderbot.updateParams();
         }));
 
         $scope.$watch('searchSource', prereq(function (searchSource) {
