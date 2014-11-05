@@ -2,6 +2,7 @@ require "sinatra/base"
 require "sinatra/json"
 require "yaml"
 require "timeout"
+require "openssl"
 
 module Kibana
   module Routes
@@ -31,6 +32,11 @@ module Kibana
 
       error do
         status 500
+      end
+
+      error OpenSSL::SSL::SSLError do
+        status 502
+        json :message => "SSL handshake with Elasticsearch failed"
       end
 
       error Errno::ECONNREFUSED do
