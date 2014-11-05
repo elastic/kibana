@@ -12,10 +12,9 @@ module Kibana
         # Clone the settings object and change the elasticsearch attribute
         # to the proxy for elasticsearch
         data = settings.config.clone()
-        data['elasticsearch'] = "#{request.scheme}://#{request.host}:#{request.port}/elasticsearch"
-
         plugins = external_plugins.concat(bundled_plugins)
         data['plugins'] = plugins
+        data.delete('elasticsearch')
 
         json data
       end

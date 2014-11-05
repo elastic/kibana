@@ -26,7 +26,6 @@ define(function (require) {
     'ngClipboard'
   ]);
 
-  configFile.elasticsearch = (window.location.protocol + '//' + window.location.hostname + '/elasticsearch/');
 
   kibana
     // This stores the Kibana revision number, @REV@ is replaced by grunt.
