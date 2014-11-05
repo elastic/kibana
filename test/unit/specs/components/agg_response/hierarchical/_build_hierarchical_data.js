@@ -65,7 +65,7 @@ define(function (require) {
         });
         // We need to set the aggs to a known value.
         _.each(vis.aggs, function (agg) { agg.id = 'agg_' + id++; });
-        var results = buildHierarchialData(vis, fixtures.threeTermBuckets);
+        var results = buildHierarchicalData(vis, fixtures.threeTermBuckets);
         expect(results).to.have.property('rows');
       });
 
@@ -82,7 +82,7 @@ define(function (require) {
         });
         // We need to set the aggs to a known value.
         _.each(vis.aggs, function (agg) { agg.id = 'agg_' + id++; });
-        var results = buildHierarchialData(vis, fixtures.threeTermBuckets);
+        var results = buildHierarchicalData(vis, fixtures.threeTermBuckets);
         expect(results).to.have.property('columns');
       });
 
