@@ -22,7 +22,19 @@ define(function (require) {
       this.events = events;
       this.tooltipClass = 'vis-tooltip';
       this.containerClass = 'vis-wrapper';
+
+      this.$window = $(window);
+      this.$chart = $(el).find('.' + this.containerClass);
     }
+
+    /**
+     * Calculates values for the tooltip placement
+     *
+     * @method getTooltipPlacement
+     * @param event {Object} D3 Events Object
+     * @returns {{Object}} Coordinates for tooltip
+     */
+    Tooltip.prototype.getTooltipPlacement = require('components/vislib/components/tooltip/_position_tooltip');
 
     /**
      * Renders tooltip
@@ -39,6 +51,7 @@ define(function (require) {
         if (d3.select('body').select('.' + self.tooltipClass)[0][0] === null) {
           d3.select('body').append('div').attr('class', self.tooltipClass);
         }
+
         if (self.container === undefined || self.container !== d3.select(self.el).select('.' + self.containerClass)) {
           self.container = d3.select(self.el).select('.' + self.containerClass);
         }
@@ -50,7 +63,14 @@ define(function (require) {
 
           element
           .on('mousemove.tip', function () {
-            var placement = self.getTooltipPlacement(d3.event);
+            var placement = self.getTooltipPlacement(
+              self.$window,
+              self.$chart,
+              $('.' + self.tooltipClass),
+              d3.event
+            );
+            if (!placement) return;
+
             var events = self.events ? self.events.eventResponse(d, i) : d;
 
             // return text and position for tooltip
@@ -67,74 +87,6 @@ define(function (require) {
           });
         });
       };
-    };
-
-    /**
-     * Calculates values for the tooltip placement
-     *
-     * @method getTooltipPlacement
-     * @param event {Object} D3 Events Object
-     * @returns {{Object}} Coordinates for tooltip
-     */
-    Tooltip.prototype.getTooltipPlacement = function (event) {
-      var self = this;
-      var OFFSET = 10;
-
-      var chart = $(self.el).find('.' + self.containerClass);
-      if (!chart.size()) return;
-
-      var chartPos = chart.offset();
-      chartPos.right = chartPos.left + chart.outerWidth();
-      chartPos.bottom = chartPos.top + chart.outerHeight();
-
-      var tip = $('.' + self.tooltipClass);
-      var tipWidth = tip.outerWidth();
-      var tipHeight = tip.outerHeight();
-
-      // the placements if we were to place the tip east or west
-      var left = {
-        east: event.clientX + OFFSET,
-        west: event.clientX - tipWidth - OFFSET
-      };
-
-      // the placements if we were to place the tip north or south
-      var top = {
-        south: event.clientY + OFFSET,
-        north: event.clientY - tipHeight - OFFSET
-      };
-
-      // number of pixels that the toolip would overflow it's far
-      // side, if we placed it that way. (negative === no overflow)
-      var overflow = {
-        north: chartPos.top - top.north,
-        east: (left.east + tipWidth) - chartPos.right,
-        south: (top.south + tipHeight) - chartPos.bottom,
-        west: chartPos.left - left.west
-      };
-
-      var placement = {};
-
-      if (overflow.south > 0) {
-        if (overflow.north < 0) {
-          placement.top = top.north;
-        } else {
-          placement.top = top.south - overflow.south;
-        }
-      } else {
-        placement.top = top.south;
-      }
-
-      if (overflow.east > 0) {
-        if (overflow.west < 0) {
-          placement.left = left.west;
-        } else {
-          placement.left = left.east - overflow.east;
-        }
-      } else {
-        placement.left = left.east;
-      }
-
-      return placement;
     };
 
     return Tooltip;
