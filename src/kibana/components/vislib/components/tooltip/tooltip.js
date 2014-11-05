@@ -34,7 +34,7 @@ define(function (require) {
      * @param event {Object} D3 Events Object
      * @returns {{Object}} Coordinates for tooltip
      */
-    Tooltip.prototype.getTooltipPlacement = require('components/vislib/lib/_position_tooltip');
+    Tooltip.prototype.getTooltipPlacement = require('components/vislib/components/tooltip/_position_tooltip');
 
     /**
      * Renders tooltip
