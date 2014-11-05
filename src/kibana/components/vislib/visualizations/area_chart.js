@@ -136,38 +136,15 @@ define(function (require) {
      * Adds Events to SVG circles
      *
      * @method addCircleEvents
-     * @param circles {D3.UpdateSelection} SVG circles
-     * @returns {HTMLElement} circles with event listeners attached
+     * @param element {D3.UpdateSelection} SVG circles
+     * @returns {D3.Selection} circles with event listeners attached
      */
-    AreaChart.prototype.addCircleEvents = function (circles) {
+    AreaChart.prototype.addCircleEvents = function (element) {
       var events = this.events;
-      var dispatch = this.events._attr.dispatch;
 
-      circles
-      .on('mouseover.circle', function mouseOverCircle(d, i) {
-        var circle = this;
-
-        d3.select(circle)
-        .classed('hover', true)
-        .style('stroke', '#333')
-        .style('cursor', 'pointer')
-        .style('opacity', 1);
-
-        dispatch.hover(events.eventResponse(d, i));
-        d3.event.stopPropagation();
-      })
-      .on('click.circle', function clickCircle(d, i) {
-        dispatch.click(events.eventResponse(d, i));
-        d3.event.stopPropagation();
-      })
-      .on('mouseout.circle', function mouseOutCircle() {
-        var circle = this;
-
-        d3.select(circle)
-        .classed('hover', false)
-        .style('stroke', null)
-        .style('opacity', 0);
-      });
+      return element
+        .call(events.addHoverEvent())
+        .call(events.addClickEvent());
     };
 
     /**
@@ -179,7 +156,6 @@ define(function (require) {
      * @returns {D3.UpdateSelection} SVG with circles added
      */
     AreaChart.prototype.addCircles = function (svg, data) {
-      var self = this;
       var color = this.handler.data.getColorFunc();
       var xScale = this.handler.xAxis.xScale;
       var yScale = this.handler.yAxis.yScale;
@@ -196,7 +172,7 @@ define(function (require) {
       .data(data)
       .enter()
         .append('g')
-        .attr('class', 'points');
+        .attr('class', 'points area');
 
       // Append the bars
       circles = layer
@@ -237,8 +213,7 @@ define(function (require) {
         }
         return yScale(d.y0 + d.y);
       })
-      .attr('r', circleRadius)
-      .style('opacity', 0);
+      .attr('r', circleRadius);
 
       // Add tooltip
       if (isTooltip) {
@@ -327,9 +302,6 @@ define(function (require) {
 
           // add clipPath to hide circles when they go out of bounds
           self.addClipPath(svg, width, height);
-
-          // addBrush canvas
-          self.events.addBrush(xScale, svg);
 
           // add path
           path = self.addPath(svg, layers);

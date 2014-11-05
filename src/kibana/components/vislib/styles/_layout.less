@@ -1,0 +1,144 @@
+@import (reference) "lesshat.less";
+
+.visualize-chart {
+  .display(flex);
+  .flex(1 1 100%);
+}
+
+.vis-wrapper {
+  .display(flex);
+  .flex(1 1 100%);
+  .flex-direction(row);
+  margin: 10px 0 0 6px;
+}
+
+/* YAxis logic */
+.y-axis-col-wrapper {
+  .display(flex);
+  .flex-direction(column);
+}
+
+.y-axis-col {
+  .display(flex);
+  .flex-direction(row);
+  .flex(1 0 50px);
+}
+
+.y-axis-spacer-block {
+  min-height: 45px;
+}
+
+.y-axis-div-wrapper {
+  .display(flex);
+  .flex-direction(column);
+  width: 38px;
+  min-height: 20px;
+}
+
+.y-axis-div {
+  .flex(1 1 25px);
+  min-width: 14px;
+  min-height: 14px;
+}
+
+.y-axis-title {
+  min-height: 14px;
+  min-width: 14px;
+}
+
+.y-axis-chart-title {
+  .display(flex);
+  .flex-direction(column);
+  min-height: 14px;
+  width: 14px;
+}
+
+.y-axis-title text {
+  font-size: 11px;
+}
+
+.chart-title {
+  .flex(1 1 100%);
+  min-height: 14px;
+  min-width: 14px;
+}
+
+.chart-title text {
+  font-size: 11px;
+  fill: #848e96;
+}
+
+.vis-col-wrapper {
+  .display(flex);
+  .flex(1 0 20px);
+  .flex-direction(column);
+}
+
+.chart-wrapper {
+  .display(flex);
+  .flex(1 0 20px);
+  overflow: visible;
+  margin: 0 5px 0 0;
+}
+
+.chart-wrapper-column {
+  .display(flex);
+  .flex(1 0 20px);
+  .flex-direction(row);
+}
+
+.chart-wrapper-row {
+  .display(flex);
+  .flex-direction(column);
+  .flex(1 0 100%);
+}
+
+.chart {
+  .flex(1 1 100%);
+  overflow: visible;
+}
+
+.chart-row {
+  .flex(1 1);
+}
+
+.chart-column {
+  .flex(1 1);
+}
+
+.x-axis-wrapper {
+  .display(flex);
+  .flex-direction(column);
+  min-height: 45px;
+  overflow: visible;
+}
+
+.x-axis-div-wrapper {
+  .display(flex);
+  .flex-direction(row);
+  min-height: 15px;
+}
+
+.x-axis-chart-title {
+  .display(flex);
+  .flex-direction(row);
+  min-height: 15px;
+  max-height: 15px;
+  min-width: 20px;
+}
+
+.x-axis-title {
+  min-height: 15px;
+  max-height: 15px;
+  min-width: 20px;
+}
+
+.x-axis-title text {
+  font-size: 11px;
+}
+
+.x-axis-div {
+  margin-top: -5px;
+  min-height: 20px;
+  min-width: 20px;
+}

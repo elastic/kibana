@@ -1,5 +1,5 @@
 define(function (require) {
-  return function TooltipFactory(d3) {
+  return function TooltipFactory(d3, Private) {
     var $ = require('jquery');
 
     require('css!components/vislib/styles/main');
@@ -45,11 +45,11 @@ define(function (require) {
 
         var tooltipDiv = d3.select('.' + self.tooltipClass);
 
-        selection.each(function (data, i) {
+        selection.each(function () {
           var element = d3.select(this);
 
           element
-          .on('mousemove.tip', function (d) {
+          .on('mousemove.tip', function (d, i) {
             var placement = self.getTooltipPlacement(d3.event);
             var events = self.events ? self.events.eventResponse(d, i) : d;
 

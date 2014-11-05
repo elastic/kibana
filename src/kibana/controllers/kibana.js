@@ -53,9 +53,10 @@ define(function (require) {
         expressions.forEach(function (expr, i) {
           $scope.$watch(expr, function (newVal, oldVal) {
             vals.new[i] = newVal;
-            vals.old[i] = oldVal;
 
             if (initQueue) {
+              vals.old[i] = oldVal;
+
               var qIdx = initQueue.indexOf(expr);
               if (qIdx !== -1) initQueue.splice(qIdx, 1);
               if (initQueue.length === 0) {
@@ -69,7 +70,16 @@ define(function (require) {
             fired = true;
             $scope.$evalAsync(function () {
               fired = false;
-              fn(vals.new.slice(0), vals.old.slice(0));
+
+              if (fn.length) {
+                fn(vals.new.slice(0), vals.old.slice(0));
+              } else {
+                fn();
+              }
+
+              for (var i = 0; i < vals.new.length; i++) {
+                vals.old[i] = vals.new[i];
+              }
             });
           });
         });
