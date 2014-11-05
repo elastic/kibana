@@ -1,5 +1,5 @@
 define(function (require) {
-  return function TooltipRenderingTestSuite() {
+  return function TooltipPositioningTestSuite() {
     describe('positioning', function () {
       var $ = require('jquery');
       var _ = require('lodash');
@@ -145,25 +145,58 @@ define(function (require) {
         });
       });
 
-      describe('placeToAvoidOverflow()', function () {
-        it('chooses a final placement for the tooltip, based on the calculated overflows', function () {
-          var size = posTT.getTtSize($tooltip);
-          var pos = posTT.getBasePosition(size, makeEvent());
-          var overflow = posTT.getOverflow(size, pos, [$chart, $window]);
-          var placement = posTT.placeToAvoidOverflow(pos, overflow);
+      describe('positionTooltip() integration', function () {
+        it('returns nothing if the $chart or $tooltip are not passed in', function () {
+          expect(posTT() === void 0).to.be(true);
+          expect(posTT(null, null, null) === void 0).to.be(true);
+          expect(posTT(null, $(), $()) === void 0).to.be(true);
+        });
 
-          expect(Object.keys(placement)).to.eql(['top', 'left']);
+        function check(xPercent, yPercent/*, directions... */) {
+          var directions = _.rest(arguments, 2);
+          var event = makeEvent(xPercent, yPercent);
+          var placement = posTT($window, $chart, $tooltip, event);
 
-          if (overflow.south > 0) {
-            if (overflow.north > 0) {
-              // adjusted up for the overflow of south
-              expect(placement.top).to.be.lessThan(pos.south);
-            } else {
-              expect(placement.top).to.be(pos.north);
+          expect(placement).to.have.property('top').and.property('left');
+
+          directions.forEach(function (dir) {
+            switch (dir) {
+            case 'top':
+              expect(placement.top).to.be.lessThan(event.clientY);
+              return;
+            case 'bottom':
+              expect(placement.top).to.be.greaterThan(event.clientY);
+              return;
+            case 'right':
+              expect(placement.left).to.be.greaterThan(event.clientX);
+              return;
+            case 'left':
+              expect(placement.left).to.be.lessThan(event.clientX);
+              return;
             }
-          } else {
-            expect(placement.top).to.be(pos.south);
-          }
+          });
+        }
+
+        describe('calculates placement of the tooltip properly', function () {
+          it('mouse is in the middle', function () {
+            check(0.50, 0.50, 'bottom', 'right');
+          });
+
+          it('mouse is in the top left', function () {
+            check(0.10, 0.10, 'bottom', 'right');
+          });
+
+          it('mouse is in the top right', function () {
+            check(0.99, 0.10, 'bottom', 'left');
+          });
+
+          it('mouse is in the bottom right', function () {
+            check(0.99, 0.99, 'top', 'left');
+          });
+
+          it('mouse is in the bottom left', function () {
+            check(0.10, 0.99, 'top', 'right');
+          });
         });
       });
     });
