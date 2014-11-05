@@ -29,6 +29,11 @@ define(function (require) {
         expect(renderbot).to.have.property('destroy');
         expect(renderbot).to.have.property('updateParams');
       });
+
+      it('should throw if not implemented', function () {
+        expect(renderbot.render).to.throwError();
+        expect(renderbot.destroy).to.throwError();
+      });
     });
   }
 });

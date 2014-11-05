@@ -17,12 +17,6 @@ define(function (require) {
 
     function init() {
       module('kibana');
-      // module('kibana', function ($provide) {
-      //   $provide.service('vislib', {
-      //     version: 'test-mock',
-      //     Vis: MockVis
-      //   });
-      // });
 
       inject(function ($injector, Private, _vislib_) {
         vislib = _vislib_;
