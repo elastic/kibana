@@ -77,9 +77,11 @@ define(function (require) {
               output.params.interval = auto.interval + 'ms';
 
               // Only scale back the y values if all agg types are count/sum
-              if (!_.find(aggConfig.vis.aggs.bySchemaGroup.metrics, function (metric) {
+              var nonCountSumMetric = _.find(aggConfig.vis.aggs.bySchemaGroup.metrics, function (metric) {
                 return metric.type.name !== 'count' && metric.type.name !== 'sum';
-              })) {
+              });
+
+              if (!nonCountSumMetric) {
                 output.metricScale = ms / auto.interval;
               }
 
