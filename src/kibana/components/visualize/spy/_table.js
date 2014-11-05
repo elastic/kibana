@@ -14,7 +14,6 @@ define(function (require) {
       order: 1,
       template: require('text!components/visualize/spy/_table.html'),
       link: function tableLinkFn($scope, $el) {
-        $scope.perPage = PER_PAGE_DEFAULT;
         $rootScope.$watchMulti.call($scope, [
           'vis',
           'esResp'
@@ -22,6 +21,10 @@ define(function (require) {
           if (!$scope.vis || !$scope.esResp) {
             $scope.table = null;
           } else {
+            if (!$scope.editableVis.params.spyPerPage) {
+              $scope.editableVis.params.spyPerPage = PER_PAGE_DEFAULT;
+            }
+
             $scope.table = tabifyAggResponse($scope.vis, $scope.esResp, { canSplit: false });
           }
         });
