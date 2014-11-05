@@ -1,4 +1,4 @@
-# Kibana is served by a backend server. This controls which port to use.
+# Kibana is served by a back end server. This controls which port to use.
 port: 5601
 
 # The host to bind the server to
@@ -11,15 +11,18 @@ elasticsearch: "http://localhost:9200"
 # and dashboards. It will create an new index if it doesn't already exist.
 kibanaIndex: ".kibana"
 
-# The default application to laad.
+# The default application to load.
 defaultAppId: "discover"
 
-# Time in seconds to wait for responses from the backend or elasticsearch.
+# Time in seconds to wait for responses from the back end or elasticsearch.
 # Note this should always be higher than "shard_timeout".
 # This must be > 0
 request_timeout: 60
 
-# Time in milliseconds for elasticsearch to wait for responses from shards
+# Time in milliseconds for Elasticsearch to wait for responses from shards
 # Note this should always be lower than "request_timeout".
 # Set to 0 to disable (not recommended).
 shard_timeout: 30000
+
+# Have a complete disregard for the validity of the SSL certificate
+verifySSL: true
