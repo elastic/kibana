@@ -75,7 +75,14 @@ define(function (require) {
               // we should round these buckets out, and scale back the y values
               auto = pickInterval(bounds, maxBuckets);
               output.params.interval = auto.interval + 'ms';
-              output.metricScale = ms / auto.interval;
+
+              // Only scale back the y values if all agg types are count/sum
+              if (!_.find(aggConfig.vis.aggs.bySchemaGroup.metrics, function (metric) {
+                return metric.type.name !== 'count' && metric.type.name !== 'sum';
+              })) {
+                output.metricScale = ms / auto.interval;
+              }
+
               output.metricScaleText = selection.val || auto.description;
             } else {
               output.params.interval = selection.val;
@@ -107,7 +114,7 @@ define(function (require) {
               var tfBounds = timefilter.getBounds();
               output.params.extended_bounds = {
                 min: tfBounds.min,
-                max: tfBounds.max,
+                max: tfBounds.max
               };
             }
           }
