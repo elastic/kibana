@@ -72,8 +72,8 @@ ENV["RACK_ENV"] = "development" if ENV["RACK_ENV"].nil?
 # Set the global_settings that are shared across every app
 Kibana.global_settings[:port] = port || 5601
 Kibana.global_settings[:host] = host || '0.0.0.0'
-Kibana.global_settings[:request_timeout] = config["request_timeout"] || 60
-Kibana.global_settings[:shard_timeout] = config["shard_timeout"] || 30
+Kibana.global_settings[:request_timeout] = config["request_timeout"].nil? 60 : config["request_timeout"]
+Kibana.global_settings[:shard_timeout] = config["shard_timeout"].nil? 30 : config["shard_timeout"]
 
 Kibana.global_settings[:config] = config
 Kibana.global_settings[:elasticsearch] = elasticsearch
