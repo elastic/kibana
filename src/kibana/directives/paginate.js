@@ -28,7 +28,7 @@ define(function (require) {
       controllerAs: 'paginate',
       controller: function ($scope) {
         var self = this;
-        var ALL = Infinity;
+        var ALL = 0;
 
         self.sizeOptions = [
           { title: '10', value: 10 },
@@ -86,14 +86,13 @@ define(function (require) {
           $scope.pages = [];
           if (!$scope.list) return;
 
-          var perPage = self.perPage;
-          var shouldSplit = perPage && isFinite(perPage);
-          var count = shouldSplit ? Math.ceil($scope.list.length / perPage) : 1;
+          var perPage = _.parseInt(self.perPage);
+          var count = perPage ? Math.ceil($scope.list.length / perPage) : 1;
 
           _.times(count, function (i) {
             var page;
 
-            if (isFinite(perPage)) {
+            if (perPage) {
               var start = perPage * i;
               page = $scope.list.slice(start, start + perPage);
             } else {
