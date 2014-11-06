@@ -69,10 +69,12 @@ define(function (require) {
 
     var $state = (function initState() {
       var savedVisState = vis.getState();
-
-      var $state = new AppState({
+      var stateDefaults = {
+        query: {query_string: {query: '*'}},
         vis: savedVisState
-      });
+      };
+
+      var $state = new AppState(stateDefaults);
 
       if (!angular.equals($state.vis, savedVisState)) {
         vis.setState($state.vis);
