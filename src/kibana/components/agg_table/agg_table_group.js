@@ -9,7 +9,8 @@ define(function (require) {
       restrict: 'E',
       template: require('text!components/agg_table/agg_table_group.html'),
       scope: {
-        group: '='
+        group: '=',
+        perPage: '=?'
       },
       compile: function ($el) {
         // Use the compile function from the RecursionHelper,
@@ -17,14 +18,10 @@ define(function (require) {
         return compileRecursiveDirective.compile($el, {
           post: function ($scope) {
             $scope.$watch('group', function (group) {
-              if (group && !group.tables.length) {
-                group = null;
-              }
+              // clear the previous "state"
+              $scope.rows = $scope.columns = false;
 
-              if (!group) {
-                $scope.rows = $scope.columns = false;
-                return;
-              }
+              if (!group || !group.tables.length) return;
 
               var firstTable = group.tables[0];
               var params = firstTable.aggConfig && firstTable.aggConfig.params;

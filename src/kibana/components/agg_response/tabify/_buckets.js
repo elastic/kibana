@@ -5,15 +5,25 @@ define(function (require) {
     function Buckets(aggResp) {
       aggResp = aggResp || false;
       this.buckets = aggResp.buckets || [];
-      this.length = this.buckets.length;
       this.objectMode = _.isPlainObject(this.buckets);
+
+      if (this.objectMode) {
+        this._keys = _.keys(this.buckets);
+        this.length = this._keys.length;
+      } else {
+        this.length = this.buckets.length;
+      }
     }
 
     Buckets.prototype.forEach = function (fn) {
+      var buckets = this.buckets;
+
       if (this.objectMode) {
-        _.forOwn(this.buckets, fn);
+        this._keys.forEach(function (key) {
+          fn(buckets[key], key);
+        });
       } else {
-        this.buckets.forEach(function (bucket) {
+        buckets.forEach(function (bucket) {
           fn(bucket, bucket.key);
         });
       }

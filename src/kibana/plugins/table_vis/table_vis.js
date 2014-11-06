@@ -1,5 +1,5 @@
 define(function (require) {
-  // we need to load the css ourselved
+  // we need to load the css ourselves
   require('css!plugins/table_vis/table_vis.css');
 
   // we also need to load the controller and used by the template
@@ -24,6 +24,12 @@ define(function (require) {
       title: 'Data Table',
       icon: 'fa-table',
       template: require('text!plugins/table_vis/table_vis.html'),
+      params: {
+        defaults: {
+          perPage: 10
+        },
+        editor: require('text!plugins/table_vis/table_vis_config.html')
+      },
       schemas: new Schemas([
         {
           group: 'metrics',

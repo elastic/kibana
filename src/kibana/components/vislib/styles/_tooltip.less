@@ -1,6 +1,7 @@
 @import (reference) "../../../styles/main";
 
-.vis-tooltip {
+.vis-tooltip,
+.vis-tooltip-sizing-clone {
   visibility: hidden;
   line-height: 1.1;
   font-size: 12px;
@@ -33,4 +34,11 @@
       }
     }
   }
+}
+
+.vis-tooltip-sizing-clone {
+  visibility: hidden;
+  position: fixed;
+  top: -500px;
+  left: -500px;
 }

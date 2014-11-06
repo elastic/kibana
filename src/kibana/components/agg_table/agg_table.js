@@ -8,7 +8,7 @@ define(function (require) {
     var _ = require('lodash');
     var saveAs = require('file_saver');
 
-    var tabifyAggResponse = Private(require('components/agg_response/tabify/tabify_agg_response'));
+    var tabifyAggResponse = Private(require('components/agg_response/tabify/tabify'));
     var orderBy = $filter('orderBy');
 
     return {
@@ -29,13 +29,8 @@ define(function (require) {
 
         self.sort = null;
         self.csv = {
-          showOptions: false,
           separator: config.get('csv:separator'),
           quoteValues: config.get('csv:quoteValues')
-        };
-
-        self.getPerPage = function () {
-          return $scope.perPage || Infinity;
         };
 
         self.getColumnClass = function (col, $first, $last) {
@@ -62,7 +57,7 @@ define(function (require) {
           } else if (self.sort.asc) {
             self.sort.asc = false;
           } else {
-            delete self.sort;
+            self.sort = null;
           }
 
           if (self.sort && !self.sort.getter) {
@@ -70,25 +65,27 @@ define(function (require) {
             self.sort.getter = function (row) {
               return row[colI];
             };
-            if (colI === -1) delete self.sort;
+            if (colI === -1) self.sort = null;
           }
         };
 
         self.exportAsCsv = function () {
-          self.csv.showOptions = false;
+          saveAs(new Blob(self.toCsv(), { type: 'text/plain' }), self.csv.filename);
+        };
 
-          var text = '';
+        self.toCsv = function () {
           var rows = $scope.table.rows;
           var columns = $scope.table.columns;
           var nonAlphaNumRE = /[^a-zA-Z0-9]/;
           var allDoubleQuoteRE = /"/g;
-          var escape = function (val) {
+
+          function escape(val) {
             val = String(val);
             if (self.csv.quoteValues && nonAlphaNumRE.test(val)) {
               val = '"' + val.replace(allDoubleQuoteRE, '""') + '"';
             }
             return val;
-          };
+          }
 
           // escape each cell in each row
           var csvRows = rows.map(function (row, i) {
@@ -100,17 +97,15 @@ define(function (require) {
             return escape(col.title);
           }));
 
-          var blob = new Blob(csvRows.map(function (row) {
+          return csvRows.map(function (row) {
             return row.join(self.csv.separator) + '\r\n';
-          }), { type: 'text/plain' });
-
-          saveAs(blob, ($scope.table.title() || 'table') + '.csv');
+          }).join('');
         };
 
         $scope.$watchMulti([
           'table',
           'aggTable.sort.asc',
-          'aggTable.sort.field'
+          'aggTable.sort.col'
         ], function () {
           var table = $scope.table;
 
@@ -125,7 +120,7 @@ define(function (require) {
 
           // sort the row values, not formatted
           if (self.sort) {
-            $scope.formattedRows = orderBy(table.rows, self.sort.getter, self.sort.asc);
+            $scope.formattedRows = orderBy(table.rows, self.sort.getter, !self.sort.asc);
           } else {
             $scope.formattedRows = null;
           }
@@ -136,6 +131,9 @@ define(function (require) {
               return formatters[i](cell);
             });
           });
+
+          // update the csv file's title
+          self.csv.filename = (table.title() || 'table') + '.csv';
         });
       }
     };

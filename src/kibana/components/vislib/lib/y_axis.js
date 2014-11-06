@@ -61,7 +61,7 @@ define(function (require) {
 
       if (isPercentage) {
         tickFormat = d3.format('%');
-      } else if (height <= 1 && !isPercentage) {
+      } else if (this.yMax <= 1 && !isPercentage) {
         tickFormat = d3.format('n');
       } else {
         tickFormat = d3.format('s');
