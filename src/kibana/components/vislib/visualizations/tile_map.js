@@ -80,12 +80,26 @@ define(function (require) {
               '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
             subdomains: '1234'
           });
-          var map = L.map(div[0], { layers: mapLayer })
-            .setView(mapCenter, mapZoom);
+          var satLayer = L.tileLayer('http://otile{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.jpeg', {
+            attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
+            'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+            subdomains: '1234'
+          });
+          var worldBounds = L.latLngBounds([-200, -220], [200, 220]);
+          
+          var map = L.map(div[0], {
+            layers: mapLayer,
+            center: mapCenter,
+            zoom: mapZoom,
+            maxBounds: worldBounds
+          });
 
-          //var map = L.mapbox.map(div[0], mapTiles, mapOptions)
-          //  .setView(mapCenter, mapZoom);
-          //L.control.scale().addTo(map);
+          // switch map types
+          L.control.layers({
+            'Map': mapLayer,
+            'Satellite': satLayer
+          }).addTo(map);
 
           map.on('zoomend dragend', function () {
             mapZoom = self._attr.lastZoom = map.getZoom();
@@ -128,7 +142,7 @@ define(function (require) {
       label.update = function () {
         this._div.innerHTML = '<h2>' + mapLabel + '</h2>';
       };
-      label.addTo(map);
+      label.setPosition('bottomright').addTo(map);
     };
 
     /**
@@ -255,7 +269,6 @@ define(function (require) {
         style: function (feature) {
           var count = feature.properties.count;
           return {
-            // color: feature.properties.color,
             fillColor: defaultColor,
             color: self.darkerColor(defaultColor),
             weight: 1.4,
@@ -317,9 +330,9 @@ define(function (require) {
           return {
             fillColor: color,
             color: self.darkerColor(color),
-            weight: 1,
+            weight: 1.4,
             opacity: 1,
-            fillOpacity: 1
+            fillOpacity: 0.7
           };
         }
       }).addTo(map);
