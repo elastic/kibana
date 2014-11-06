@@ -54,6 +54,8 @@ define(function (require) {
         // the list of hits, used to render display
         $scope.hits = [];
 
+        $scope.perPage = 5;
+
         /**
          * Passed the hit objects and will determine if the
          * hit should have a url in the UI, returns it if so

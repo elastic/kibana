@@ -44,7 +44,7 @@
         </div>
       </div>
 
-      <paginate list="indexPattern.fields|orderBy:table.by:table.reverse" per-page="20">
+      <paginate list="indexPattern.fields|orderBy:table.by:table.reverse" per-page-prop="perPage">
         <table class="table">
           <thead>
             <th ng-click="setFieldSort('name')">name <i ng-class="sortClass('name')"></i></th>
