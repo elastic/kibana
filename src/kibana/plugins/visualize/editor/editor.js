@@ -119,10 +119,13 @@ define(function (require) {
         timefilter.enabled = !!timeField;
       });
 
-      $scope.$listen($state, 'fetch_with_changes', function () {
-
-        vis.setState($state.vis);
-        editableVis.setState($state.vis);
+      $scope.$listen($state, 'fetch_with_changes', function (keys) {
+        if (_.contains(keys, 'vis')) {
+          // only update when we need to, otherwise colors change and we
+          // risk loosing an in-progress result
+          vis.setState($state.vis);
+          editableVis.setState($state.vis);
+        }
 
         // we use state to track query, must write before we fetch
         if ($state.query) {
