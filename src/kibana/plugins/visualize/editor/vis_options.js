@@ -16,6 +16,10 @@ define(function (require) {
         var $optionContainer = $('.visualization-options');
         var $editor = $compile($scope.vis.type.params.editor)($scope);
         $optionContainer.append($editor);
+
+        $scope.$watch('vis.type.schemas.length', function (len) {
+          $scope.alwaysShowOptions = len === 0;
+        });
       }
     };
   });
