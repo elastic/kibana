@@ -72,6 +72,15 @@ module.exports = function (grunt) {
           dest: '<%= build %>/dist/kibana-' + version
         }
       ]
+    },
+
+    plugin_readme: {
+      files: [
+        {
+          src: '<%= build %>/kibana/public/plugins/README.txt',
+          dest: '<%= build %>/dist/kibana/plugins/README.txt'
+        }
+      ]
     }
 
   };
