@@ -385,12 +385,18 @@ define(function (require) {
      * return {undefined}
      */
     TileMap.prototype.bindPopup = function (feature, layer) {
+      var props = feature.properties;
+      var popup = L.popup({
+        autoPan: false
+      })
+      .setContent(
+        'Geohash: ' + props.geohash + '<br>' +
+        'Center: ' + props.center[1].toFixed(1) + ', ' + props.center[0].toFixed(1) + '<br>' +
+        'Count: ' + props.count
+      );
+
       // TODO: tooltip-like formatter passed in?
-      layer.bindPopup(
-        'Geohash: ' + feature.properties.geohash + '<br>' +
-        'Center: ' + feature.properties.center[1].toFixed(1) + ', ' + feature.properties.center[0].toFixed(1) + '<br>' +
-        'Count: ' + feature.properties.count
-      )
+      layer.bindPopup(popup)
       .on('mouseover', function (e) {
         layer.openPopup();
       })
