@@ -12,6 +12,12 @@ define(function (require) {
         data: data
       });
 
+      MapHandler.resize = function () {
+        this.charts.forEach(function (chart) {
+          chart.resizeArea();
+        });
+      };
+
       return MapHandler;
     };
   };

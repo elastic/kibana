@@ -35,10 +35,6 @@ define(function (require) {
       var mapDataExtents = handler.data.mapDataExtents(handler.data.data.raw);
       chartData.geoJSON.properties.allmin = mapDataExtents[0];
       chartData.geoJSON.properties.allmax = mapDataExtents[1];
-
-      // turn off resizeChecker for tile maps
-      this.handler.vis.resizeChecker.off('resize', this.resize);
-      this.handler.vis.resizeChecker.destroy();
     }
 
     /**
@@ -53,7 +49,12 @@ define(function (require) {
       var $elem = $(this.chartEl);
       var div;
       var worldBounds = L.latLngBounds([-200, -220], [200, 220]);
-      
+
+      // clean up old maps
+      _.invoke(self.maps, 'destroy');
+      // create a new maps array
+      self.maps = [];
+
       return function (selection) {
         selection.each(function (data) {
           div = $(this);
@@ -92,6 +93,7 @@ define(function (require) {
           };
 
           var map = L.map(div[0], mapOptions);
+          self.maps.push(map);
 
           // switch map types
           L.control.layers({
@@ -143,7 +145,7 @@ define(function (require) {
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
-          
+
           var rad = zoomScale * self.radiusScale(count, max, precision);
           return L.circleMarker(latlng, {
             radius: rad
@@ -283,6 +285,20 @@ define(function (require) {
         return div;
       };
       legend.addTo(map);
+    };
+
+    /**
+     * Invalidate the size of the map, so that leaflet will resize to fit.
+     * then moves to center
+     *
+     * @return {undefined}
+     */
+    TileMap.prototype.resizeArea = function () {
+      this.maps.forEach(function (map) {
+        map.invalidateSize({
+          debounceMoveend: true
+        });
+      });
     };
 
     /**
@@ -494,6 +510,15 @@ define(function (require) {
     TileMap.prototype.darkerColor = function (color) {
       var darker = d3.hcl(color).darker(1.3).toString();
       return darker;
+    };
+
+    /**
+     * tell leaflet that it's time to cleanup the map
+     */
+    TileMap.prototype.destroy = function () {
+      this.maps.forEach(function (map) {
+        map.remove();
+      });
     };
 
     return TileMap;
