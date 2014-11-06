@@ -8,7 +8,6 @@ define(function (require) {
     return {
       restrict: 'E',
       scope: true,
-      controllerAs: 'paginate',
       link: {
         pre: function ($scope, $el) {
           if ($el.find('paginate-controls').size() === 0) {
@@ -19,26 +18,62 @@ define(function (require) {
           var paginate = $scope.paginate;
 
           // add some getters to the controller powered by attributes
+          paginate.getList = $parse(attrs.list);
+          paginate.perPageProp = attrs.perPageProp;
           paginate.otherWidthGetter = $parse(attrs.otherWidth);
-          paginate.perPageGetter = $parse(attrs.perPage);
-          paginate.perPageSetter = paginate.perPageGetter.assign;
 
-          $scope.$watch(attrs.perPage, function (perPage) {
-            paginate.perPage = perPage;
-          });
-          $scope.$watch('paginate.perPage', paginate.renderList);
-          $scope.$watch('page', paginate.changePage);
-
-          $scope.$watchCollection(attrs.list, function (list) {
-            $scope.list = list;
-            paginate.renderList();
-          });
-
-        },
+          paginate.init();
+        }
       },
+      controllerAs: 'paginate',
       controller: function ($scope) {
-
         var self = this;
+        var ALL = 0;
+
+        self.sizeOptions = [
+          { title: '10', value: 10 },
+          { title: '25', value: 25 },
+          { title: '100', value: 100 },
+          { title: 'All', value: ALL }
+        ];
+
+        // setup the watchers, called in the post-link function
+        self.init = function () {
+          self.perPage = $scope[self.perPageProp];
+
+          $scope.$watchMulti([
+            'paginate.perPage',
+            self.perPageProp,
+            self.otherWidthGetter
+          ], function (vals, oldVals) {
+            var intChanges = vals[0] !== oldVals[0];
+            var extChanges = vals[1] !== oldVals[1];
+
+            if (intChanges) {
+              if (!setPerPage(self.perPage)) {
+                // if we are not able to set the external value,
+                // render now, otherwise wait for the external value
+                // to trigger the watcher again
+                self.renderList();
+              }
+              return;
+            }
+
+            self.perPage = $scope[self.perPageProp];
+            if (!self.perPage) {
+              self.perPage = ALL;
+              return;
+            }
+
+            self.renderList();
+          });
+
+          $scope.$watch('page', self.changePage);
+          $scope.$watchCollection(self.getList, function (list) {
+            $scope.list = list;
+            self.renderList();
+          });
+        };
 
         self.goToPage = function (number) {
           if (number) {
@@ -51,13 +86,13 @@ define(function (require) {
           $scope.pages = [];
           if (!$scope.list) return;
 
-          var perPage = self.perPage || Infinity;
-          var count = isFinite(perPage) ? Math.ceil($scope.list.length / perPage) : 1;
+          var perPage = _.parseInt(self.perPage);
+          var count = perPage ? Math.ceil($scope.list.length / perPage) : 1;
 
           _.times(count, function (i) {
             var page;
 
-            if (isFinite(perPage)) {
+            if (perPage) {
               var start = perPage * i;
               page = $scope.list.slice(start, start + perPage);
             } else {
@@ -120,6 +155,19 @@ define(function (require) {
             if (other.first) $scope.otherPages.containsFirst = true;
           }
         };
+
+        function setPerPage(val) {
+          var $ppParent = $scope;
+
+          while ($ppParent && !_.has($ppParent, self.perPageProp)) {
+            $ppParent = $ppParent.$parent;
+          }
+
+          if ($ppParent) {
+            $ppParent[self.perPageProp] = val;
+            return true;
+          }
+        }
       }
     };
   })
@@ -127,12 +175,7 @@ define(function (require) {
     // this directive is automatically added by paginate if not found within it's $el
     return {
       restrict: 'E',
-      template: require('text!partials/paginate_controls.html'),
-      link: function ($scope, $el) {
-        $scope.$watch('page.count > 1', function (show) {
-          $el.toggle(show);
-        });
-      }
+      template: require('text!partials/paginate_controls.html')
     };
   });
 

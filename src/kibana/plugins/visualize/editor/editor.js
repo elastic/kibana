@@ -107,7 +107,7 @@ define(function (require) {
       }
 
       // track state of editable vis vs. "actual" vis
-      $scope.stageEditableVis = transferVisState(editableVis, vis);
+      $scope.stageEditableVis = transferVisState(editableVis, vis, true);
       $scope.resetEditableVis = transferVisState(vis, editableVis);
       $scope.$watch(function () {
         return editableVis.getState();
@@ -205,12 +205,14 @@ define(function (require) {
       $scope.linked = false;
     };
 
-    function transferVisState(fromVis, toVis) {
+    function transferVisState(fromVis, toVis, fetch) {
       return function () {
         toVis.setState(fromVis.getState());
         editableVis.dirty = false;
         $state.vis = vis.getState();
         $state.save();
+
+        if (fetch) $scope.fetch();
       };
     }
 

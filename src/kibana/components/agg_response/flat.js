@@ -65,6 +65,8 @@ define(function (require) {
           chartData.columns = chartColumns;
         }
 
+        if (!bucket) return;
+
         var row = new Array(chartColumns.length);
         rowStack.forEach(function (val, i) {
           row[i] = val;
@@ -134,7 +136,7 @@ define(function (require) {
               rowStack.pop();
             });
           } else {
-            writeRow(chartData, bucket);
+            writeRow(chartData);
           }
           break;
         }

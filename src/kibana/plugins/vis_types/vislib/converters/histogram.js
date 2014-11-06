@@ -133,6 +133,12 @@ define(function (require) {
       var series = chart.series = [];
       var seriesByLabel = {};
 
+      // TODO: Hack Alert!!! We need to make vislib accept an empty series.
+      if (rows.length === 0) {
+        chart.hits = 0;
+        chart.series.push({ values: [ { x: '_all', y: 0 } ] });
+      }
+
       rows.forEach(function (row) {
         var seriesLabel = colColor && row[iColor];
         var s = colColor ? seriesByLabel[seriesLabel] : series[0];

@@ -56,7 +56,8 @@ define(function (require) {
         }
         break;
       case 'metrics':
-        write.cell(aggResp ? metricValue(aggResp) : bucketCount(bucket), function () {
+        var value = (agg.type.name === 'count') ? bucketCount(bucket) : metricValue(aggResp);
+        write.cell(value, function () {
           if (!write.aggStack.length) {
             // row complete
             write.row();
