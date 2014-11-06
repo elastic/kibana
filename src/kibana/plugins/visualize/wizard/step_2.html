@@ -6,7 +6,7 @@
 
 <ul class="visualizations list-group list-group-menu">
   <a class="visualization list-group-item list-group-menu-item"
-  	ng-repeat="type in visTypes"
+  	ng-repeat="type in visTypes.inNameOrder"
   	ng-href="{{ visTypeUrl(type) }}">
     <li>
       <i class="fa" ng-class="type.icon"></i>{{type.title}}
