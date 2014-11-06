@@ -5,13 +5,13 @@ define(function (require) {
   var OFFSET = 10;
   var $clone;
 
-  function positionTooltip($window, $chart, $tooltip, event) {
+  function positionTooltip($window, $chart, $tooltip, $sizer, event) {
     $chart = $($chart);
     $tooltip = $($tooltip);
 
     if (!$chart.size() || !$tooltip.size()) return;
 
-    var size = getTtSize($tooltip);
+    var size = getTtSize($tooltip, $sizer);
     var pos = getBasePosition(size, event);
 
     var overflow = getOverflow(size, pos, [$chart, $window]);
@@ -19,25 +19,15 @@ define(function (require) {
     return placeToAvoidOverflow(pos, overflow);
   }
 
-  function getTtSize($tooltip) {
-    if (!$clone || $clone.html() !== $tooltip.html()) {
-      $clone && $clone.remove();
-
-      $clone = $tooltip
-      .clone()
-      .addClass('vis-tooltip-sizing-clone')
-      .css({
-        visibility: 'hidden',
-        position: 'absolute',
-        top: -500,
-        left: -500
-      })
-      .appendTo('body');
+  function getTtSize($tooltip, $sizer) {
+    var ttHtml = $tooltip.html();
+    if ($sizer.html() !== ttHtml) {
+      $sizer.html(ttHtml);
     }
 
     var size = {
-      width: $clone.outerWidth(),
-      height: $clone.outerHeight()
+      width: $sizer.outerWidth(),
+      height: $sizer.outerHeight()
     };
 
     return size;
