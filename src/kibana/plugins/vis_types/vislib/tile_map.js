@@ -10,9 +10,9 @@ define(function (require) {
       icon: 'fa-map-marker',
       params: { 
         defaults: {
-          mapType: 'Colored Circle Markers'
+          mapType: 'Shaded Circle Markers'
         },
-        mapTypes: ['Colored Circle Markers', 'Scaled Circle Markers', 'Cluster Markers', 'Heat Map'],
+        mapTypes: ['Shaded Circle Markers', 'Scaled Circle Markers'],
         editor: require('text!plugins/vis_types/vislib/editors/tile_map.html')
       },
       responseConverter: TileMapConverter,

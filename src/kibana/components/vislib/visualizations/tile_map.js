@@ -3,8 +3,6 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
-    require('heat');
-    require('markercluster');
   
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var errors = require('errors');
@@ -107,14 +105,10 @@ define(function (require) {
           });
 
           if (data.geoJSON) {
-            if (self._attr.mapType === 'Cluster Markers') {
-              self.clusterMarkers(map, data.geoJSON);
-            } else if (self._attr.mapType === 'Heat Map') {
-              self.heatMap(map, data.geoJSON);
-            } else if (self._attr.mapType === 'Scaled Circle Markers') {
+            if (self._attr.mapType === 'Scaled Circle Markers') {
               self.scaledCircleMarkers(map, data.geoJSON);
-            } else if (self._attr.mapType === 'Colored Circle Markers') {
-              self.coloredCircleMarkers(map, data.geoJSON);
+            } else {
+              self.shadedCircleMarkers(map, data.geoJSON);
             }
           }
 
@@ -125,67 +119,6 @@ define(function (require) {
 
         });
       };
-    };
-
-    /**
-     * Type of data overlay for map:
-     * uses leaflet plug-in to create featurelayer from mapData (geoJSON)
-     * with clustered markers that change with the map zoom
-     *
-     * @method clusterMarkers
-     * @param map {Object}
-     * @param mapData {Object}
-     * @return {undefined}
-     */
-    TileMap.prototype.clusterMarkers = function (map, mapData) {
-      var self = this;
-      var min = mapData.properties.min;
-      var max = mapData.properties.max;
-      var length = mapData.properties.length;
-      var precision = mapData.properties.precision;
-      var clusterGroup = new L.MarkerClusterGroup({
-        maxClusterRadius: 120,
-        disableClusteringAtZoom: 9
-      });
-      var featureLayer = L.geoJson(mapData, {
-        onEachFeature: function (feature, layer) {
-          self.bindPopup(feature, layer);
-          clusterGroup.addLayer(layer);
-        }
-      });
-      map.addLayer(clusterGroup);
-    };
-
-    /**
-     * Type of data overlay for map:
-     * uses leaflet plug-in to create featurelayer from mapData (geoJSON)
-     * with heatmap to illustrate values
-     *
-     * @method heatMap
-     * @param map {Object}
-     * @param mapData {Object}
-     * @return {undefined}
-     */
-    TileMap.prototype.heatMap = function (map, mapData) {
-      // TODO: pass in maxHeatZoom value from UI slider
-      var self = this;
-      var maxHeatZoom = 7;
-      var min = mapData.properties.min;
-      var max = mapData.properties.max;
-      var length = mapData.properties.length;
-      var precision = mapData.properties.precision;
-      var latLngs = [];
-      var featureLayer = L.geoJson(mapData);
-      featureLayer.eachLayer(function (layer) {
-        var pointData = [
-          layer.feature.geometry.coordinates[1],
-          layer.feature.geometry.coordinates[0],
-          '' + layer.feature.properties.count / max
-        ];
-        latLngs.push(pointData);
-      });
-      var mapOptions = { maxZoom: maxHeatZoom };
-      var heat = L.heatLayer(latLngs, mapOptions).addTo(map);
     };
 
     /**
@@ -224,7 +157,7 @@ define(function (require) {
           return {
             fillColor: defaultColor,
             color: self.darkerColor(defaultColor),
-            weight: 0.4,
+            weight: 1.0,
             opacity: 1,
             fillOpacity: 0.7
           };
@@ -243,12 +176,12 @@ define(function (require) {
      * creates featurelayer from mapData (geoJSON)
      * with circle markers that are shaded to illustrate values
      *
-     * @method coloredCircleMarkers
+     * @method shadedCircleMarkers
      * @param map {Object}
      * @param mapData {Object}
      * @return {undefined}
      */
-    TileMap.prototype.coloredCircleMarkers = function (map, mapData) {
+    TileMap.prototype.shadedCircleMarkers = function (map, mapData) {
       var self = this;
       
       // TODO: add UI to select local min max or all min max
@@ -283,7 +216,7 @@ define(function (require) {
           return {
             fillColor: color,
             color: self.darkerColor(color),
-            weight: 0.4,
+            weight: 1.0,
             opacity: 1,
             fillOpacity: 0.7
           };
@@ -372,7 +305,7 @@ define(function (require) {
         
         var count = layer.feature.properties.count;
         var rad;
-        if (self._attr.mapType === 'Colored Circle Markers') {
+        if (self._attr.mapType === 'Shaded Circle Markers') {
           rad = zoomScale * self.quantRadiusScale(precision);
         } else {
           rad = zoomScale * self.radiusScale(count, max, precision);
@@ -536,7 +469,12 @@ define(function (require) {
       var cScale = self._attr.cScale = d3.scale.quantize()
         .domain([min, max])
         .range(colors);
-      return cScale(count);
+      
+      if (max === min) {
+        return colors[0];
+      } else {
+        return cScale(count);
+      }
     };
 
     /**

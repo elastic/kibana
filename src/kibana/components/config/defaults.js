@@ -30,10 +30,6 @@ define(function (require) {
       value: 100,
       description: 'Never show more than this many bar in date histograms, scale values if needed',
     },
-    'tilemap:maxGeoHashPrecision': {
-      value: 9,
-      description: 'Can go up to 12.',
-    },
     'csv:separator': {
       value: ',',
       description: 'Separate exported values with this string',
