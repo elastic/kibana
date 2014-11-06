@@ -55,13 +55,7 @@ define(function (require) {
       var $elem = $(this.chartEl);
       var div;
       var worldBounds = L.latLngBounds([-200, -220], [200, 220]);
-      var mapOptions = {
-        minZoom: 2,
-        maxZoom: 10,
-        continuousWorld: true,
-        noWrap: true,
-        maxBounds: worldBounds
-      };
+      
       return function (selection) {
         selection.each(function (data) {
           div = $(this);
@@ -74,6 +68,7 @@ define(function (require) {
             mapCenter = self._attr.lastCenter;
           }
 
+          // mapquest layers
           var mapLayer = L.tileLayer('http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
             attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
               'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
@@ -86,14 +81,19 @@ define(function (require) {
             '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
             subdomains: '1234'
           });
-          var worldBounds = L.latLngBounds([-200, -220], [200, 220]);
-          
-          var map = L.map(div[0], {
+
+          var mapOptions = {
+            minZoom: 2,
+            maxZoom: 16,
             layers: mapLayer,
             center: mapCenter,
             zoom: mapZoom,
+            continuousWorld: true,
+            noWrap: true,
             maxBounds: worldBounds
-          });
+          };
+
+          var map = L.map(div[0], mapOptions);
 
           // switch map types
           L.control.layers({
@@ -117,61 +117,14 @@ define(function (require) {
               self.coloredCircleMarkers(map, data.geoJSON);
             }
           }
+
+          // if sub agg split, add labels
           if (data.geoJSON.properties.label) {
             self.addLabel(data.geoJSON.properties.label, map);
           }
+
         });
       };
-    };
-
-    /**
-     * Adds label div to each map when data is split
-     *
-     * @method addLabel
-     * @param mapLabel {String}
-     * @param map {Object}
-     * @return {undefined}
-     */
-    TileMap.prototype.addLabel = function (mapLabel, map) {
-      var label = L.control();
-      label.onAdd = function () {
-        this._div = L.DomUtil.create('div', 'tilemap-info tilemap-label');
-        this.update();
-        return this._div;
-      };
-      label.update = function () {
-        this._div.innerHTML = '<h2>' + mapLabel + '</h2>';
-      };
-      label.setPosition('bottomright').addTo(map);
-    };
-
-    /**
-     * Adds legend div to each map when data is split
-     * uses d3 scale from TileMap.prototype.quantizeColorScale
-     *
-     * @method addLegend
-     * @param data {Object}
-     * @param map {Object}
-     * @return {undefined}
-     */
-    TileMap.prototype.addLegend = function (data, map) {
-      var self = this;
-      var legend = L.control({position: 'bottomright'});
-      legend.onAdd = function () {
-        var div = L.DomUtil.create('div', 'tilemap-legend');
-        var colors = self._attr.colors;
-        var labels = [];
-        for (var i = 0; i < colors.length; i++) {
-          var vals = self._attr.cScale.invertExtent(colors[i]);
-          var strokecol = self.darkerColor(colors[i]);
-          labels.push(
-            '<i style="background:' + colors[i] + ';border-color:' + strokecol + '"></i> ' +
-            vals[0].toFixed(1) + ' &ndash; ' + vals[1].toFixed(1));
-        }
-        div.innerHTML = labels.join('<br>');
-        return div;
-      };
-      legend.addTo(map);
     };
 
     /**
@@ -253,7 +206,7 @@ define(function (require) {
       var precision = mapData.properties.precision;
       var zoomScale = self.zoomScale(mapZoom);
       var bounds;
-      var defaultColor = '#005baa';
+      var defaultColor = '#ff6128';
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
@@ -271,7 +224,7 @@ define(function (require) {
           return {
             fillColor: defaultColor,
             color: self.darkerColor(defaultColor),
-            weight: 1.4,
+            weight: 0.4,
             opacity: 1,
             fillOpacity: 0.7
           };
@@ -298,9 +251,9 @@ define(function (require) {
     TileMap.prototype.coloredCircleMarkers = function (map, mapData) {
       var self = this;
       
-      // TODO: add UI to select local min max or super min max
+      // TODO: add UI to select local min max or all min max
 
-      // min and max from chart data for just this map
+      // min and max from chart data for this map
       // var min = mapData.properties.min;
       // var max = mapData.properties.max;
       
@@ -330,7 +283,7 @@ define(function (require) {
           return {
             fillColor: color,
             color: self.darkerColor(color),
-            weight: 1.4,
+            weight: 0.4,
             opacity: 1,
             fillOpacity: 0.7
           };
@@ -342,9 +295,61 @@ define(function (require) {
         bounds = map.getBounds();
         self.resizeFeatures(map, min, max, precision, featureLayer);
       });
+
+      // add legend
       if (mapData.features.length > 1) {
         self.addLegend(mapData, map);
       }
+    };
+
+    /**
+     * Adds label div to each map when data is split
+     *
+     * @method addLabel
+     * @param mapLabel {String}
+     * @param map {Object}
+     * @return {undefined}
+     */
+    TileMap.prototype.addLabel = function (mapLabel, map) {
+      var label = L.control();
+      label.onAdd = function () {
+        this._div = L.DomUtil.create('div', 'tilemap-info tilemap-label');
+        this.update();
+        return this._div;
+      };
+      label.update = function () {
+        this._div.innerHTML = '<h2>' + mapLabel + '</h2>';
+      };
+      label.setPosition('bottomright').addTo(map);
+    };
+
+    /**
+     * Adds legend div to each map when data is split
+     * uses d3 scale from TileMap.prototype.quantizeColorScale
+     *
+     * @method addLegend
+     * @param data {Object}
+     * @param map {Object}
+     * @return {undefined}
+     */
+    TileMap.prototype.addLegend = function (data, map) {
+      var self = this;
+      var legend = L.control({position: 'bottomright'});
+      legend.onAdd = function () {
+        var div = L.DomUtil.create('div', 'tilemap-legend');
+        var colors = self._attr.colors;
+        var labels = [];
+        for (var i = 0; i < colors.length; i++) {
+          var vals = self._attr.cScale.invertExtent(colors[i]);
+          var strokecol = self.darkerColor(colors[i]);
+          labels.push(
+            '<i style="background:' + colors[i] + ';border-color:' + strokecol + '"></i> ' +
+            vals[0].toFixed(1) + ' &ndash; ' + vals[1].toFixed(1));
+        }
+        div.innerHTML = labels.join('<br>');
+        return div;
+      };
+      legend.addTo(map);
     };
 
     /**
@@ -451,7 +456,16 @@ define(function (require) {
           maxr = 1.44;
           break;
         case 6:
-          maxr = 1.13;
+          maxr = 1.12;
+          break;
+        case 7:
+          maxr = 0.6;
+          break;
+        case 8:
+          maxr = 0.3;
+          break;
+        case 9:
+          maxr = 0.22;
           break;
         default:
           maxr = 9;
@@ -486,7 +500,16 @@ define(function (require) {
           maxr = 0.3;
           break;
         case 6:
-          maxr = 0.15;
+          maxr = 0.22;
+          break;
+        case 7:
+          maxr = 0.18;
+          break;
+        case 8:
+          maxr = 0.16;
+          break;
+        case 9:
+          maxr = 0.14;
           break;
         default:
           maxr = 3;

@@ -30,9 +30,13 @@ define(function (require) {
       value: 100,
       description: 'Never show more than this many bar in date histograms, scale values if needed',
     },
+    'tilemap:maxGeoHashPrecision': {
+      value: 9,
+      description: 'Can go up to 12.',
+    },
     'csv:separator': {
       value: ',',
-      description: 'Seperate exported values with this string',
+      description: 'Separate exported values with this string',
     },
     'csv:quoteValues': {
       value: true,
@@ -40,7 +44,7 @@ define(function (require) {
     },
     'history:limit': {
       value: 10,
-      description: 'In fields that have history (eg query inputs), show this many recent values',
+      description: 'In fields that have history (e.g. query inputs), show this many recent values',
     },
     'shortDots:enable': {
       value: false,
