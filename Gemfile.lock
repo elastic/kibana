@@ -19,6 +19,8 @@ GEM
     multipart-post (2.0.0)
     puma (2.9.0)
       rack (>= 1.1, < 2.0)
+    puma (2.9.0-java)
+      rack (>= 1.1, < 2.0)
     rack (1.5.2)
     rack-protection (1.5.3)
       rack
@@ -47,6 +49,7 @@ GEM
       rubyzip (>= 0.9, < 1.2)
 
 PLATFORMS
+  java
   ruby
 
 DEPENDENCIES
