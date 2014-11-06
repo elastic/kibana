@@ -3,6 +3,7 @@ define(function (require) {
     var errors = require('errors');
     var angular = require('angular');
     var _ = require('lodash');
+    var slugifyId = require('utils/slugify_id');
 
     var DocSource = Private(require('components/courier/data_source/doc_source'));
     var SearchSource = Private(require('components/courier/data_source/search_source'));
@@ -197,6 +198,10 @@ define(function (require) {
             searchSourceJSON: JSON.stringify(_.omit(obj.searchSource.toJSON(), ['sort', 'size']))
           };
         }
+
+
+        // Slugify the object id
+        obj.id = slugifyId(obj.id);
 
         // ensure that the docSource has the current obj.id
         docSource.id(obj.id);

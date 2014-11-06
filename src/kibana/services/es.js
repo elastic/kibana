@@ -10,7 +10,6 @@ define(function (require) {
       es = esFactory({
         host: configFile.elasticsearch,
         log: 'info',
-        requestTimeout: 60000
       });
 
       return es;

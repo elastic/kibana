@@ -1,0 +1,8 @@
+<li class="sidebar-item">
+  <div class="sidebar-item-title" ng-click="showVisOptions = !showVisOptions">
+    view options
+    <i class="fa fa-caret-down" ng-class="{'fa-caret-down': showVisOptions, 'fa-caret-right': !showVisOptions}"></i>
+  </div>
+
+  <div class="visualization-options" ng-show="!!showVisOptions"></div>
+</li>

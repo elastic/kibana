@@ -17,8 +17,9 @@ module.exports = function (grunt) {
         '<%= build %>/kibana/public/**/*.less',
         '<%= build %>/kibana/public/config',
         '<%= build %>/kibana/public/{css-builder,normalize}.js',
-        '<%= app %>/public/{css-builder,normalize}.js',
+        '<%= app %>/public/{css-builder,normalize}.js'
       ]
-    }
+    },
+    dev_only_plugins: '<%= build %>/src/plugins/<%= devPlugins %>'
   };
 };

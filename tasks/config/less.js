@@ -11,7 +11,8 @@ module.exports = {
       '<%= plugins %>/settings/styles/main.less',
       '<%= plugins %>/visualize/styles/main.less',
       '<%= plugins %>/visualize/styles/visualization.less',
-      '<%= plugins %>/visualize/styles/main.less'
+      '<%= plugins %>/visualize/styles/main.less',
+      '<%= plugins %>/table_vis/table_vis.less'
     ],
     expand: true,
     ext: '.css',

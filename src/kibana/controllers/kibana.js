@@ -45,14 +45,23 @@ define(function (require) {
         var $scope = this;
         var initQueue = _.clone(expressions);
         var fired = false;
-        expressions.forEach(function (expr) {
-          $scope.$watch(expr, function () {
+        var vals = {
+          new: new Array(expressions.length),
+          old: new Array(expressions.length)
+        };
+
+        expressions.forEach(function (expr, i) {
+          $scope.$watch(expr, function (newVal, oldVal) {
+            vals.new[i] = newVal;
+
             if (initQueue) {
-              var i = initQueue.indexOf(expr);
-              if (i !== -1) initQueue.splice(i, 1);
+              vals.old[i] = oldVal;
+
+              var qIdx = initQueue.indexOf(expr);
+              if (qIdx !== -1) initQueue.splice(qIdx, 1);
               if (initQueue.length === 0) {
                 initQueue = false;
-                fn();
+                fn(vals.new.slice(0), vals.old.slice(0));
               }
               return;
             }
@@ -61,7 +70,16 @@ define(function (require) {
             fired = true;
             $scope.$evalAsync(function () {
               fired = false;
-              fn();
+
+              if (fn.length) {
+                fn(vals.new.slice(0), vals.old.slice(0));
+              } else {
+                fn();
+              }
+
+              for (var i = 0; i < vals.new.length; i++) {
+                vals.old[i] = vals.new[i];
+              }
             });
           });
         });

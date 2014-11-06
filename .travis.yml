@@ -13,7 +13,7 @@ notifications:
   - spencer.alger@elasticsearch.com
   hipchat:
     rooms:
-      secure: AFhp0iboaeshokQnzRvoKPElb/JOvZ09X9mi58KbxI4iYlQ1nysvudV1b7YG8wxV9av3twgvfbcgzAoHyKhC2MZJDLzDHnZFn8r2OQXzjYpFxJuhAVirO4Weo0wi2Z78/OkxQo87gWYFa24qc8urR/Dfor4WdoWfCsJU8tQ7t5I=
+      secure: UKrVR+5KztHarodQruQe97UJfwftutD6RNdXlVkr+oIr2GqccisDIIN9pAzS/kxl+eAnP1uT6VHzc9YI/jgbrmiSkz3DHViw+MwDwY2aIDgI8aHEbd/4B2ihtb15+OYTVbb+lytyz4+W8A8hSmbkTR/P/uFIJ+EYcBeYZfw1elo=
     format: html
     on_success: change
     template:

@@ -11,7 +11,7 @@ define(function (require) {
      * wire up the supporting objects required to feed in parameters, and get #write() output.
      *
      * Use cases:
-     *  - Verify that the interval parameter of the histogram visualization casts it's input to a number
+     *  - Verify that the interval parameter of the histogram visualization casts its input to a number
      *    ```js
      *    it('casts to a number', function () {
      *      var writer = new AggParamWriter({ aggType: 'histogram' });
