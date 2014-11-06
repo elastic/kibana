@@ -8,7 +8,7 @@ define(function (require) {
     window.location.protocol + '//' +
     window.location.hostname +
     (window.location.port ? ':' + window.location.port : '') +
-    '/elasticsearch/');
+    '/elasticsearch');
 
   // allow the rest of the app to get the configFile easily
   module.constant('configFile', configFile);
