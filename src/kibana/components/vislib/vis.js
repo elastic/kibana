@@ -52,9 +52,30 @@ define(function (require) {
 
       this.data = data;
       this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
+      this._runOnHandler('render');
+    };
 
+    /**
+     * Resizes the visualization
+     *
+     * @method resize
+     */
+    Vis.prototype.resize = function () {
+      if (!this.data) {
+        // TODO: need to come up with a solution for resizing when no data is available
+        return;
+      }
+
+      if (_.isFunction(this.handler.resize)) {
+        this._runOnHandler('resize');
+      } else {
+        this.render(this.data);
+      }
+    };
+
+    Vis.prototype._runOnHandler = function (method) {
       try {
-        this.handler.render();
+        this.handler[method]();
       } catch (error) {
         // If involving height and width of the container, log error to screen.
         // Because we have to wait for the DOM element to initialize, we do not
@@ -68,19 +89,6 @@ define(function (require) {
     };
 
     /**
-     * Resizes the visualization
-     *
-     * @method resize
-     */
-    Vis.prototype.resize = function () {
-      if (!this.data) {
-        // TODO: need to come up with a solution for resizing when no data is available
-        return;
-      }
-      this.render(this.data);
-    };
-
-    /**
      * Destroys the visualization
      * Removes chart and all elements associated with it.
      * Removes chart and all elements associated with it.
@@ -89,9 +97,10 @@ define(function (require) {
      * @method destroy
      */
     Vis.prototype.destroy = function () {
-      d3.select(this.el).selectAll('*').remove();
       this.resizeChecker.off('resize', this.resize);
       this.resizeChecker.destroy();
+      this._runOnHandler('destroy');
+      d3.select(this.el).selectAll('*').remove();
     };
 
     /**
