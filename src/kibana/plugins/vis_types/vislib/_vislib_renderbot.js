@@ -42,7 +42,7 @@ define(function (require) {
       var self = this;
 
       if (!esResp.hits.total) {
-        throw new NotEnoughData(esResp);
+        throw new NotEnoughData();
       }
 
       var buildChartData = self._normalizers.flat;
@@ -53,13 +53,13 @@ define(function (require) {
       var chartData = buildChartData(self.vis, esResp);
 
       [
-        chartData.raw.rows || [],
         chartData.rows,
         chartData.columns,
-        chartData.slices
+        chartData.series,
+        chartData.slices && chartData.slices.children
       ]
       .forEach(function (arr) {
-        if (arr && !_.size(arr)) throw new NotEnoughData(esResp);
+        if (arr && !_.size(arr)) throw new NotEnoughData();
       });
 
       self.vislibVis.render(chartData);

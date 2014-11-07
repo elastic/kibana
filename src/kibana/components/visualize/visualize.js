@@ -108,20 +108,20 @@ define(function (require) {
           if (!resp) return;
 
           // true unless proven otherwise
-          var enoughData = true;
+          var ned;
 
           try {
             $scope.renderbot.render(resp);
           } catch (err) {
             if (err instanceof NotEnoughData) {
-              enoughData = false;
+              ned = err;
             } else {
               // not something we know how to handler, rethrow
               throw err;
             }
           }
 
-          $scope.notEnoughData = !enoughData;
+          $scope.notEnoughData = ned;
         }));
 
         $scope.$watch('renderbot', function (newRenderbot, oldRenderbot) {
