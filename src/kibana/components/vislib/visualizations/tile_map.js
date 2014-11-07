@@ -59,7 +59,7 @@ define(function (require) {
         selection.each(function (data) {
           div = $(this);
           div.addClass('tilemap');
-          
+
           if (div.width() < minMapSize || div.height() < minMapSize) {
             throw new errors.ContainerTooSmall();
           }
@@ -77,7 +77,7 @@ define(function (require) {
               '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
             subdomains: '1234'
           });
-          
+
           var mapOptions = {
             minZoom: 2,
             maxZoom: 16,
@@ -360,7 +360,7 @@ define(function (require) {
       .setContent(
         'Geohash: ' + props.geohash + '<br>' +
         'Center: ' + props.center[1].toFixed(1) + ', ' + props.center[0].toFixed(1) + '<br>' +
-        'Count: ' + props.count
+        props.valueLabel + ': ' + props.count
       );
 
       // TODO: tooltip-like formatter passed in?
@@ -505,7 +505,7 @@ define(function (require) {
       var cScale = self._attr.cScale = d3.scale.quantize()
         .domain([min, max])
         .range(colors);
-      
+
       if (max === min) {
         return colors[0];
       } else {

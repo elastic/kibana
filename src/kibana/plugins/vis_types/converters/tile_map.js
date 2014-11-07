@@ -7,12 +7,12 @@ define(function (require) {
      * Decodes geohash to object containing
      * top-left and bottom-right corners of
      * rectangle and center point.
-     * 
+     *
      * geohash.js
      * Geohash library for Javascript
      * (c) 2008 David Troy
      * Distributed under the MIT License
-     * 
+     *
      * @method refine_interval
      * @param interval {Array} [long, lat]
      * @param cd {Number}
@@ -20,7 +20,7 @@ define(function (require) {
      * @return {Object} interval
      */
     function decodeGeoHash(geohash) {
-      
+
       var BITS = [16, 8, 4, 2, 1];
       var BASE32 = '0123456789bcdefghjkmnpqrstuvwxyz';
       var is_even = 1;
@@ -70,7 +70,7 @@ define(function (require) {
       var min = rows[rows.length - 1][1];
       var max = rows[0][1];
       var precision = rows[0][0].length;
-      
+
       var geoJSON = chart.geoJSON = {
         properties: {
           label: chart.label,
@@ -82,7 +82,14 @@ define(function (require) {
         type: 'FeatureCollection',
         features: []
       };
-        
+
+      var bucketingCol = _.find(columns, {categoryName: 'segment'});
+      var metricCol = _.find(columns, {categoryName: 'metric'});
+      if (!bucketingCol || !metricCol) return;
+
+      var aggConfig = metricCol.aggConfig;
+      var metricLabel = metricCol.aggType.makeLabel(aggConfig);
+
       rows.forEach(function (row) {
 
         geohash = row[0];
@@ -103,6 +110,7 @@ define(function (require) {
             coordinates: center
           },
           properties: {
+            valueLabel: metricLabel,
             count: count,
             geohash: geohash,
             center: center,
