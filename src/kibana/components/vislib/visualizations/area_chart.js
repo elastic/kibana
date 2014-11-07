@@ -27,6 +27,7 @@ define(function (require) {
 
       AreaChart.Super.apply(this, arguments);
 
+      this.assertEnoughData(chartData);
       this.isOverlapping = (handler._attr.mode === 'overlap');
 
       if (this.isOverlapping) {
@@ -294,12 +295,9 @@ define(function (require) {
       var layers;
       var circles;
       var path;
-      var notEnoughData;
 
       return function (selection) {
         selection.each(function (data) {
-          self.assertEnoughData(data);
-
           // Stack data
           layers = self.stackData(data);
 
