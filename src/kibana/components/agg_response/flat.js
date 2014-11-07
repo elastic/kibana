@@ -75,6 +75,8 @@ define(function (require) {
         var metric = bucket.value == null ? bucket.doc_count : bucket.value;
         if (metric != null) {
           row[row.length - 1] = metric;
+        } else {
+          return; // ignore this row that doesn't have a metric
         }
 
         chartData.rows.push(row);
