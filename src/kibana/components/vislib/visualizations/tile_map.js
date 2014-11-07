@@ -1,5 +1,5 @@
 define(function (require) {
-  return function TileMapFactory(d3, Private, config) {
+  return function TileMapFactory(d3, Private) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
@@ -12,6 +12,7 @@ define(function (require) {
     var mapData;
     var mapCenter = [15, 5];
     var mapZoom = 2;
+    var minMapSize = 60;
 
     /**
      * Tile Map Visualization: renders maps
@@ -58,6 +59,10 @@ define(function (require) {
         selection.each(function (data) {
           div = $(this);
           div.addClass('tilemap');
+          
+          if (div.width() < minMapSize || div.height() < minMapSize) {
+            throw new errors.ContainerTooSmall();
+          }
 
           if (self._attr.lastZoom) {
             mapZoom = self._attr.lastZoom;
@@ -66,20 +71,13 @@ define(function (require) {
             mapCenter = self._attr.lastCenter;
           }
 
-          // mapquest layers
           var mapLayer = L.tileLayer('http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
             attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
               'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
               '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
             subdomains: '1234'
           });
-          var satLayer = L.tileLayer('http://otile{s}.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.jpeg', {
-            attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
-            'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
-            subdomains: '1234'
-          });
-
+          
           var mapOptions = {
             minZoom: 2,
             maxZoom: 16,
@@ -111,7 +109,7 @@ define(function (require) {
             },
             onAdd: function (map) {
               var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-zoom leaflet-control-fit');
-              $(container).html('<a class="leaflet-control-zoom fa fa-crop"></a>');
+              $(container).html('<a class="leaflet-control-zoom fa fa-crop" title="Fit Data Bounds"></a>');
               $(container).on('click', fitBounds);
               return container;
             }
@@ -407,7 +405,7 @@ define(function (require) {
      */
     TileMap.prototype.radiusScale = function (count, max, precision) {
       // exp = 0.5 for true square root ratio
-      // exp = 1 for linear ration
+      // exp = 1 for linear ratio
       var exp = 0.6;
       var maxr;
       switch (precision) {
