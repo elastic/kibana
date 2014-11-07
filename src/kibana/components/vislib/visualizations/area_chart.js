@@ -256,6 +256,13 @@ define(function (require) {
       .attr('height', height + clipPathBuffer);
     };
 
+    /**
+     * Checks whether there is only one point of data and returns true if that
+     * is the case.
+     *
+     * @param data {Object} Chart data
+     * @returns {boolean}
+     */
     AreaChart.prototype.checkForNotEnoughData = function (data) {
       var notEnoughData = false;
 
@@ -297,7 +304,6 @@ define(function (require) {
         selection.each(function (data) {
 
           notEnoughData = self.checkForNotEnoughData(data);
-
           if (notEnoughData) {
             throw new notEnoughDataError(self.notEnoughDataErrorMessage);
           }
