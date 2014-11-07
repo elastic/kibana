@@ -99,7 +99,7 @@ define(function (require) {
     Vis.prototype.destroy = function () {
       this.resizeChecker.off('resize', this.resize);
       this.resizeChecker.destroy();
-      this._runOnHandler('destroy');
+      if (this.handler) this._runOnHandler('destroy');
       d3.select(this.el).selectAll('*').remove();
     };
 
