@@ -67,7 +67,6 @@ define(function (require) {
 
       var buckettingCol = _.find(columns, { categoryName: 'segment' });
       var metricCol = _.find(columns, { categoryName: 'metric' });
-      if (!buckettingCol || !metricCol) return;
 
       var length = rows.length;
       var properties = {
@@ -81,7 +80,6 @@ define(function (require) {
       if (length) {
         properties.min = rows[rows.length - 1][1];
         properties.max = rows[0][1];
-        properties.precision = rows[0][0].length;
       }
 
       var geoJSON = chart.geoJSON = {
@@ -90,6 +88,7 @@ define(function (require) {
         features: []
       };
 
+      if (!buckettingCol || !metricCol) return;
 
       var aggConfig = metricCol.aggConfig;
       var metricLabel = aggConfig.makeLabel();
