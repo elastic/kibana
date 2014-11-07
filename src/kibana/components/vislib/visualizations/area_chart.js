@@ -5,7 +5,7 @@ define(function (require) {
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var errors = require('errors');
-    var notEnoughDataError = require('errors').NotEnoughData;
+    var NotEnoughData = require('errors').NotEnoughData;
     require('css!components/vislib/styles/main');
 
     /**
@@ -28,8 +28,6 @@ define(function (require) {
       AreaChart.Super.apply(this, arguments);
 
       this.isOverlapping = (handler._attr.mode === 'overlap');
-      this.notEnoughDataErrorMessage = 'An area chart requires at least two points to ' +
-        'render a chart.';
 
       if (this.isOverlapping) {
 
@@ -257,22 +255,20 @@ define(function (require) {
     };
 
     /**
-     * Checks whether there is only one point of data and returns true if that
-     * is the case.
+     * Verify that the data contains enough data points to actually
+     * create an area for each series.
      *
-     * @param data {Object} Chart data
-     * @returns {boolean}
+     * @method assertEnoughData
+     * @param  {Object} data - the data to check
+     * @throws {NotEnoughData} - If there is any series with less than 2 points
+     * @return {undefined}
      */
-    AreaChart.prototype.checkForNotEnoughData = function (data) {
-      var notEnoughData = false;
-
+    AreaChart.prototype.assertEnoughData = function (data) {
       data.series.forEach(function (object) {
         if (object.values.length === 1) {
-          notEnoughData = true;
+          throw new NotEnoughData('An area chart requires at least two points to render a chart.');
         }
       });
-
-      return notEnoughData;
     };
 
     /**
@@ -302,11 +298,7 @@ define(function (require) {
 
       return function (selection) {
         selection.each(function (data) {
-
-          notEnoughData = self.checkForNotEnoughData(data);
-          if (notEnoughData) {
-            throw new notEnoughDataError(self.notEnoughDataErrorMessage);
-          }
+          self.assertEnoughData(data);
 
           // Stack data
           layers = self.stackData(data);
