@@ -69,14 +69,20 @@ define(function (require) {
       var metricCol = _.find(columns, { categoryName: 'metric' });
 
       var length = rows.length;
+      // default geoJson properties
       var properties = {
         label: chart.label,
         length: length,
         min: 0,
-        max: 0,
-        precision: buckettingCol.aggConfig.params.precision
+        max: 0
       };
 
+      // set precision from the bucketting column, if we have one
+      if (buckettingCol) {
+        properties.precision = buckettingCol.aggConfig.params.precision;
+      }
+
+      // if there are rows, use them to set the min and max
       if (length) {
         properties.min = rows[rows.length - 1][1];
         properties.max = rows[0][1];
@@ -88,6 +94,7 @@ define(function (require) {
         features: []
       };
 
+      // we're all done if there are no columns
       if (!buckettingCol || !metricCol) return;
 
       var aggConfig = metricCol.aggConfig;
