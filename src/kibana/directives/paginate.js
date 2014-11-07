@@ -1,8 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
 
-  var PER_PAGE_DEFAULT = 10;
-
   require('modules').get('kibana')
   .directive('paginate', function ($parse, $compile) {
     return {
@@ -19,6 +17,7 @@ define(function (require) {
 
           // add some getters to the controller powered by attributes
           paginate.getList = $parse(attrs.list);
+          paginate.perPage = _.parseInt(attrs.perPage);
           paginate.perPageProp = attrs.perPageProp;
           paginate.otherWidthGetter = $parse(attrs.otherWidth);
 
@@ -26,47 +25,15 @@ define(function (require) {
         }
       },
       controllerAs: 'paginate',
-      controller: function ($scope) {
+      controller: function ($scope, config) {
         var self = this;
-        var ALL = 0;
-
-        self.sizeOptions = [
-          { title: '10', value: 10 },
-          { title: '25', value: 25 },
-          { title: '100', value: 100 },
-          { title: 'All', value: ALL }
-        ];
+        var DEFAULT_PER_PAGE = _.parseInt(config.get('paginate:defaultPerPage')) || Infinity;
 
         // setup the watchers, called in the post-link function
         self.init = function () {
-          self.perPage = $scope[self.perPageProp];
+          setupTwoWayBindingOnPerPageProp();
 
-          $scope.$watchMulti([
-            'paginate.perPage',
-            self.perPageProp,
-            self.otherWidthGetter
-          ], function (vals, oldVals) {
-            var intChanges = vals[0] !== oldVals[0];
-            var extChanges = vals[1] !== oldVals[1];
-
-            if (intChanges) {
-              if (!setPerPage(self.perPage)) {
-                // if we are not able to set the external value,
-                // render now, otherwise wait for the external value
-                // to trigger the watcher again
-                self.renderList();
-              }
-              return;
-            }
-
-            self.perPage = $scope[self.perPageProp];
-            if (!self.perPage) {
-              self.perPage = ALL;
-              return;
-            }
-
-            self.renderList();
-          });
+          self.sizeOptions = getSizeOptions();
 
           $scope.$watch('page', self.changePage);
           $scope.$watchCollection(self.getList, function (list) {
@@ -156,6 +123,41 @@ define(function (require) {
           }
         };
 
+        function getSizeOptions() {
+          var opts = [
+            { title: '10', value: 10 },
+            { title: '25', value: 25 },
+            { title: '100', value: 100 },
+            { title: 'All', value: Infinity }
+          ];
+
+          function maybeAdd(val) {
+            var missing = !opts.some(function (opt) {
+              return opt.value === val;
+            });
+
+            if (missing) {
+              opts.push({ title: '' + val, value: val });
+              return true;
+            }
+            return false;
+          }
+
+          var added = 0;
+          added += (maybeAdd(self.perPage) ? 1 : 0);
+          added += (maybeAdd(DEFAULT_PER_PAGE) ? 1 : 0);
+          if (added > 0) opts = _.sortBy(opts, 'value');
+
+          return opts;
+        }
+
+        /**
+         * Traverse up the parent scopes to find the one that contains the perPageProp,
+         * then set the new value at that level.
+         *
+         * @param {number} val - the new value of perPage to pass up
+         * @return {boolean} - true if we were able to find the parent, otherwise false
+         */
         function setPerPage(val) {
           var $ppParent = $scope;
 
@@ -167,6 +169,51 @@ define(function (require) {
             $ppParent[self.perPageProp] = val;
             return true;
           }
+
+          return false;
+        }
+
+        /**
+         * When we are using a per-page value by reference, we do something
+         * kind of sketchy. The property on scope that should be two-way bound
+         * is sent via the per-page-prop attribute, and then read and written
+         * to using this function and the setPerPage() function.
+         *
+         * why we didn't use:
+         *   isolate scope — would prevent the inner template from accessing the parent scopes
+         *   transclusion — would prevent the pagination directive from injecting the 'page' value
+         *     into the inner templates scope
+         *
+         * @return {undefined}
+         */
+        function setupTwoWayBindingOnPerPageProp() {
+          self.perPage = $scope[self.perPageProp];
+
+          $scope.$watchMulti([
+            'paginate.perPage',
+            self.perPageProp,
+          ], function (vals, oldVals) {
+            var intChanges = vals[0] !== oldVals[0];
+            var extChanges = vals[1] !== oldVals[1];
+
+            if (intChanges) {
+              if (!setPerPage(self.perPage)) {
+                // if we are not able to set the external value,
+                // render now, otherwise wait for the external value
+                // to trigger the watcher again
+                self.renderList();
+              }
+              return;
+            }
+
+            self.perPage = $scope[self.perPageProp];
+            if (!self.perPage) {
+              self.perPage = DEFAULT_PER_PAGE;
+              return;
+            }
+
+            self.renderList();
+          });
         }
       }
     };

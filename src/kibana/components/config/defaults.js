@@ -49,6 +49,10 @@ define(function (require) {
     'truncate:maxHeight': {
       value: 100,
       description: 'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.'
+    },
+    'paginate:defaultPerPage': {
+      value: 10,
+      description: 'the maximum number of rows to display in a paginated list. Set to 0 to disable pagination'
     }
   };
 });

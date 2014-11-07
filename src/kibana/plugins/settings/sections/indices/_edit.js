@@ -22,10 +22,10 @@ define(function (require) {
 
     $scope.table = {
       by: 'name',
-      reverse: false,
-      page: 0,
-      max: 35
+      reverse: false
     };
+
+    $scope.perPage = 25;
 
     $scope.conflictFields = _.filter($scope.indexPattern.fields, {type: 'conflict'});
 
