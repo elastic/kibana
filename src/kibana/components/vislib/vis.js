@@ -6,8 +6,8 @@ define(function (require) {
     var Events = Private(require('factories/events'));
     var handlerTypes = Private(require('components/vislib/lib/handler/handler_types'));
     var chartTypes = Private(require('components/vislib/visualizations/vis_types'));
-    var errors = require('errors');
     var NotEnoughData = require('errors').NotEnoughData;
+    var ContainerTooSmall = require('errors').ContainerTooSmall;
     require('css!components/vislib/styles/main.css');
 
 
@@ -47,25 +47,24 @@ define(function (require) {
     Vis.prototype.render = function (data) {
       var chartType = this._attr.type;
 
-      if (!data) {
-        throw new Error('No valid data!');
-      }
-
+      this.assertEnoughData(data);
       this.data = data;
-      this._checkForNotEnoughDataError();
+
+      if (this.handler) this._runOnHandler('destroy');
       this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
+
       this._runOnHandler('render');
     };
 
     /**
      * Checks whether enough data is available to render the visualization.
-     * Throws an error if not enough data present.
      *
      * @private
-     * @method _checkForNotEnoughDataError
+     * @throws {NotEnoughData} - If there is not sufficient data
+     * @method assertEnoughData
      */
-    Vis.prototype._checkForNotEnoughDataError = function () {
-      var data = this.data;
+    Vis.prototype.assertEnoughData = function (data) {
+      if (!data) throw new TypeError('No valid data!');
 
       [
         data.rows,
@@ -86,10 +85,8 @@ define(function (require) {
      * @method resize
      */
     Vis.prototype.resize = function () {
-      if (!this.data) {
-        // TODO: need to come up with a solution for resizing when no data is available
-        return;
-      }
+      // can't resize unless we have successfully rendered
+      if (!this.handler) return;
 
       if (_.isFunction(this.handler.resize)) {
         this._runOnHandler('resize');
@@ -99,17 +96,27 @@ define(function (require) {
     };
 
     Vis.prototype._runOnHandler = function (method) {
+      var handler = this.handler;
+
       try {
-        this.handler[method]();
+        handler[method]();
       } catch (error) {
         // If involving height and width of the container, log error to screen.
         // Because we have to wait for the DOM element to initialize, we do not
         // want to throw an error when the DOM `el` is zero
-        if (error instanceof errors.ContainerTooSmall ||
-          error instanceof errors.NotEnoughData) {
-          this.handler.error(error.message);
+        if (error instanceof ContainerTooSmall) {
+          handler.error(error.message);
         } else {
-          console.error(error.stack);
+          if (error instanceof NotEnoughData) {
+            // clean up the handler first, so that maintanence
+            // on the handler (resize, destroy) can be skipped
+            this.handler = null;
+
+            // try to call destroy() if the error didn't come from destroy()
+            method !== 'destroy' && handler.destroy();
+          }
+
+          throw error;
         }
       }
     };
