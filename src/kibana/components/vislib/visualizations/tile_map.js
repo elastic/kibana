@@ -52,6 +52,7 @@ define(function (require) {
       var $elem = $(this.chartEl);
       var div;
       var worldBounds = L.latLngBounds([-200, -220], [200, 220]);
+      var featureLayer;
 
       // clean up old maps
       _.invoke(self.maps, 'destroy');
@@ -97,16 +98,25 @@ define(function (require) {
           var map = L.map(div[0], mapOptions);
           self.maps.push(map);
 
-          function fitBounds() {
-            if (data.geoJSON) {
-              map.fitBounds(_.map(data.geoJSON.features, function (feature) {
-                return _.clone(feature.geometry.coordinates).reverse();
-              }));
+          map.on('zoomend dragend', function () {
+            mapZoom = self._attr.lastZoom = map.getZoom();
+            mapCenter = self._attr.lastCenter = map.getCenter();
+          });
+
+          if (data.geoJSON) {
+            if (self._attr.mapType === 'Scaled Circle Markers') {
+              featureLayer = self.scaledCircleMarkers(map, data.geoJSON);
+            } else {
+              featureLayer = self.shadedCircleMarkers(map, data.geoJSON);
             }
           }
 
+          if (data.geoJSON.properties.label) {
+            self.addLabel(data.geoJSON.properties.label, map);
+          }
+
           // Add button to fit container to points
-          var fitControl = L.Control.extend({
+          var FitControl = L.Control.extend({
             options: {
               position: 'topleft'
             },
@@ -117,25 +127,12 @@ define(function (require) {
               return container;
             }
           });
-          map.addControl(new fitControl());
 
-          map.on('zoomend dragend', function () {
-            mapZoom = self._attr.lastZoom = map.getZoom();
-            mapCenter = self._attr.lastCenter = map.getCenter();
-          });
+          map.addControl(new FitControl());
 
-          if (data.geoJSON) {
-            if (self._attr.mapType === 'Scaled Circle Markers') {
-              self.scaledCircleMarkers(map, data.geoJSON);
-            } else {
-              self.shadedCircleMarkers(map, data.geoJSON);
-            }
+          function fitBounds() {
+            map.fitBounds(featureLayer.getBounds());
           }
-
-          if (data.geoJSON.properties.label) {
-            self.addLabel(data.geoJSON.properties.label, map);
-          }
-
         });
       };
     };
@@ -188,6 +185,8 @@ define(function (require) {
         bounds = map.getBounds();
         self.resizeFeatures(map, min, max, precision, featureLayer);
       });
+
+      return featureLayer;
     };
 
     /**
@@ -252,6 +251,8 @@ define(function (require) {
       if (mapData.features.length > 1) {
         self.addLegend(mapData, map);
       }
+
+      return featureLayer;
     };
 
     /**
@@ -326,7 +327,7 @@ define(function (require) {
      * @param min {Number}
      * @param max {Number}
      * @param precision {Number}
-     * @param featureLayer {Object}
+     * @param featureLayer {GeoJson Object}
      * @return {undefined}
      */
     TileMap.prototype.resizeFeatures = function (map, min, max, precision, featureLayer) {
