@@ -20,8 +20,9 @@
 define([
   'jquery',
   'exports',
+  'mappings',
   'sense_editor/theme-sense-dark'
-], function ($, exports) {
+], function ($, exports, mappings) {
   'use strict';
 
   function getFontSize() {
@@ -29,7 +30,9 @@ define([
   }
 
   function setFontSize(size) {
-    if (!/^([1-9]\d*)$/.test(size)) return false;
+    if (!/^([1-9]\d*)$/.test(size)) {
+      return false;
+    }
     localStorage.setItem("font_size", size);
     applyCurrentSettings();
     return true;
@@ -41,9 +44,35 @@ define([
   }
 
   function setWrapMode(mode) {
-    if (typeof mode !== "boolean") return false;
+    if (typeof mode !== "boolean") {
+      return false;
+    }
     localStorage.setItem("wrap_mode", mode);
     applyCurrentSettings();
+    return true;
+  }
+
+  function getAutocomplete() {
+    var settings = localStorage.getItem("autocomplete_settings");
+    var defaults = { mappings: true, indices: true};
+    if (settings) {
+      try {
+        settings = JSON.parse(settings);
+        if (typeof settings != "object") {
+          settings = defaults;
+        }
+      } catch (e) {
+        settings = defaults;
+      }
+    }
+    else {
+      settings = defaults;
+    }
+    return settings;
+  }
+
+  function setAutocomplete(settings) {
+    localStorage.setItem("autocomplete_settings", JSON.stringify(settings));
     return true;
   }
 
@@ -65,7 +94,7 @@ define([
   }
 
   function applyThemeToBody() {
-    var theme= getTheme();
+    var theme = getTheme();
     $("#bootstrapThemeCss").attr("href", "vendor/bootstrap/css/bootstrap." + theme + ".min.css");
     $("#senseThemeCss").attr("href", "css/sense." + theme + ".css");
   }
@@ -101,11 +130,29 @@ define([
   theme_ctl.val(theme);
   applyThemeToBody();
 
+  var autocompleteSettings = getAutocomplete();
+  var autocomplete_mapping_ctl = settings_popup.find("#autocomplete_mappings");
+  autocomplete_mapping_ctl.prop('checked', autocompleteSettings.mappings);
+  var autocomplete_indices_ctl = settings_popup.find("#autocomplete_indices");
+  autocomplete_indices_ctl.prop('checked', autocompleteSettings.indices);
+
+
   function save() {
-    if (!setFontSize(font_size_ctl.val())) font_size_ctl.val(getFontSize());
-    if (!setWrapMode(wrap_mode_ctl.prop("checked"))) wrap_mode_ctl.prop('checked', getWrapMode());
-    if (!setTheme(theme_ctl.val())) theme_ctl.val(getTheme());
+    if (!setFontSize(font_size_ctl.val())) {
+      font_size_ctl.val(getFontSize());
+    }
+    if (!setWrapMode(wrap_mode_ctl.prop("checked"))) {
+      wrap_mode_ctl.prop('checked', getWrapMode());
+    }
+    if (!setTheme(theme_ctl.val())) {
+      theme_ctl.val(getTheme());
+    }
+    setAutocomplete({
+      mappings: autocomplete_mapping_ctl.prop('checked'),
+      indices: autocomplete_indices_ctl.prop('checked')
+    });
     require('input').focus();
+    mappings.retrieveAutocompleteInfoFromServer();
     return true;
   }
 
@@ -119,6 +166,7 @@ define([
 
   exports.getTheme = getTheme;
   exports.getAceTheme = getAceTheme;
+  exports.getAutocomplete = getAutocomplete;
   exports.applyCurrentSettings = applyCurrentSettings;
 
 });

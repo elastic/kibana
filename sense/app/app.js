@@ -251,7 +251,9 @@ define([
       function update() {
         var newHeight;
 
-        delay = clearTimeout(delay);
+        if (delay) {
+          delay = clearTimeout(delay);
+        }
 
         newHeight = $header.outerHeight();
         if (headerHeight != newHeight) {
@@ -269,6 +271,9 @@ define([
       // update at key moments in the loading process
       $(update);
       $(window).load(update);
+      // safe guard
+      setTimeout(update, 1000);
+
 
       // and when the window resizes (once every 30 ms)
       $(window)
