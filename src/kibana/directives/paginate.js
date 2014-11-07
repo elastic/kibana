@@ -20,6 +20,14 @@ define(function (require) {
           // add some getters to the controller powered by attributes
           paginate.getList = $parse(attrs.list);
           paginate.perPageProp = attrs.perPageProp;
+
+          if (attrs.perPage) {
+            paginate.perPage = attrs.perPage;
+            $scope.showSelector = false;
+          } else {
+            $scope.showSelector = true;
+          }
+
           paginate.otherWidthGetter = $parse(attrs.otherWidth);
 
           paginate.init();
@@ -39,7 +47,8 @@ define(function (require) {
 
         // setup the watchers, called in the post-link function
         self.init = function () {
-          self.perPage = $scope[self.perPageProp];
+
+          self.perPage = _.parseInt(self.perPage) || $scope[self.perPageProp];
 
           $scope.$watchMulti([
             'paginate.perPage',
@@ -59,7 +68,7 @@ define(function (require) {
               return;
             }
 
-            self.perPage = $scope[self.perPageProp];
+            self.perPage = _.parseInt(self.perPage) || $scope[self.perPageProp];
             if (!self.perPage) {
               self.perPage = ALL;
               return;
