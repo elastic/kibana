@@ -2,7 +2,6 @@ define(function (require) {
   return function TileMapConverterFn(Private, timefilter, $compile, $rootScope) {
     var _ = require('lodash');
 
-
     /*
      * Decodes geohash to object containing
      * top-left and bottom-right corners of
@@ -20,7 +19,6 @@ define(function (require) {
      * @return {Object} interval
      */
     function decodeGeoHash(geohash) {
-
       var BITS = [16, 8, 4, 2, 1];
       var BASE32 = '0123456789bcdefghjkmnpqrstuvwxyz';
       var is_even = 1;
@@ -51,6 +49,7 @@ define(function (require) {
       lon[2] = (lon[0] + lon[1]) / 2;
       return { latitude: lat, longitude: lon};
     }
+
     function refine_interval(interval, cd, mask) {
       if (cd & mask) {
         interval[0] = (interval[0] + interval[1]) / 2;
@@ -83,15 +82,13 @@ define(function (require) {
         features: []
       };
 
-      var bucketingCol = _.find(columns, {categoryName: 'segment'});
-      var metricCol = _.find(columns, {categoryName: 'metric'});
-      if (!bucketingCol || !metricCol) return;
+      var buckettingCol = _.find(columns, { categoryName: 'segment' });
+      var metricCol = _.find(columns, { categoryName: 'metric' });
+      if (!buckettingCol || !metricCol) return;
 
-      var aggConfig = metricCol.aggConfig;
-      var metricLabel = metricCol.aggType.makeLabel(aggConfig);
+      var metricLabel = metricCol.makeLabel();
 
-      rows.forEach(function (row) {
-
+      rows.forEach(function (row, i) {
         geohash = row[0];
         count = row[1];
         location = decodeGeoHash(geohash);
