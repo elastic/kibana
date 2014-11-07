@@ -88,7 +88,7 @@ define(function (require) {
 
       var metricLabel = metricCol.makeLabel();
 
-      rows.forEach(function (row, i) {
+      rows.forEach(function (row) {
         geohash = row[0];
         count = row[1];
         location = decodeGeoHash(geohash);
