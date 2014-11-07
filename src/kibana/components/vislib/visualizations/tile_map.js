@@ -5,16 +5,15 @@ define(function (require) {
     var L = require('leaflet');
     require('heat');
     require('markercluster');
-  
+
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var errors = require('errors');
 
     require('css!components/vislib/styles/main');
-    
+
     var mapData;
     var mapCenter = [15, 5];
     var mapZoom = 2;
-      
 
     /**
      * Tile Map Visualization: renders maps
@@ -32,7 +31,7 @@ define(function (require) {
         return new TileMap(handler, chartEl, chartData);
       }
       TileMap.Super.apply(this, arguments);
-      
+
       // add allmin and allmax to geoJSON
       var mapDataExtents = handler.data.mapDataExtents(handler.data.data.raw);
       chartData.geoJSON.properties.allmin = mapDataExtents[0];
@@ -87,19 +86,37 @@ define(function (require) {
             subdomains: '1234'
           });
           var worldBounds = L.latLngBounds([-200, -220], [200, 220]);
-          
+
           var map = L.map(div[0], {
             layers: mapLayer,
             center: mapCenter,
             zoom: mapZoom,
-            maxBounds: worldBounds
+            maxBounds: worldBounds,
+            scrollWheelZoom: false,
+            fadeAnimation: false
           });
 
-          // switch map types
-          L.control.layers({
-            'Map': mapLayer,
-            'Satellite': satLayer
-          }).addTo(map);
+          function fitBounds() {
+            if (data.geoJSON) {
+              map.fitBounds(_.map(data.geoJSON.features, function (feature) {
+                return _.clone(feature.geometry.coordinates).reverse();
+              }));
+            }
+          }
+
+          // Add button to fit container to points
+          var fitControl = L.Control.extend({
+            options: {
+              position: 'topleft'
+            },
+            onAdd: function (map) {
+              var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-zoom leaflet-control-fit');
+              $(container).html('<a class="leaflet-control-zoom fa fa-crop"></a>');
+              $(container).on('click', fitBounds);
+              return container;
+            }
+          });
+          map.addControl(new fitControl());
 
           map.on('zoomend dragend', function () {
             mapZoom = self._attr.lastZoom = map.getZoom();
@@ -117,6 +134,7 @@ define(function (require) {
               self.coloredCircleMarkers(map, data.geoJSON);
             }
           }
+
           if (data.geoJSON.properties.label) {
             self.addLabel(data.geoJSON.properties.label, map);
           }
@@ -257,7 +275,7 @@ define(function (require) {
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
-          
+
           var rad = zoomScale * self.radiusScale(count, max, precision);
           return L.circleMarker(latlng, {
             radius: rad
@@ -271,7 +289,7 @@ define(function (require) {
           return {
             fillColor: defaultColor,
             color: self.darkerColor(defaultColor),
-            weight: 1.4,
+            weight: 0.5,
             opacity: 1,
             fillOpacity: 0.7
           };
@@ -297,17 +315,17 @@ define(function (require) {
      */
     TileMap.prototype.coloredCircleMarkers = function (map, mapData) {
       var self = this;
-      
+
       // TODO: add UI to select local min max or super min max
 
       // min and max from chart data for just this map
       // var min = mapData.properties.min;
       // var max = mapData.properties.max;
-      
+
       // super min and max from all chart data
       var min = mapData.properties.allmin;
       var max = mapData.properties.allmax;
-      
+
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
       var zoomScale = self.zoomScale(mapZoom);
@@ -361,10 +379,10 @@ define(function (require) {
     TileMap.prototype.resizeFeatures = function (map, min, max, precision, featureLayer) {
       var self = this;
       var zoomScale = self.zoomScale(mapZoom);
-      
+
       featureLayer.eachLayer(function (layer) {
         var latlng = L.latLng(layer.feature.geometry.coordinates[1], layer.feature.geometry.coordinates[0]);
-        
+
         var count = layer.feature.properties.count;
         var rad;
         if (self._attr.mapType === 'Colored Circle Markers') {
@@ -419,7 +437,7 @@ define(function (require) {
 
     /**
      * radiusScale returns a circle radius from
-     * approx. square root of count 
+     * approx. square root of count
      * which is multiplied by a factor based on the geohash precision
      * for relative sizing of markers
      *
@@ -460,7 +478,7 @@ define(function (require) {
     };
 
     /**
-     * returns a number to scale circle markers 
+     * returns a number to scale circle markers
      * based on the geohash precision
      *
      * @method quantRadiusScale
