@@ -125,7 +125,7 @@ define(function (require) {
 
       var $node = $('<div>').css({
         height: 40,
-        width: 40,
+        width: 40
       })
       .appendTo('body')
       .addClass('y-axis-wrapper');
@@ -196,6 +196,40 @@ define(function (require) {
       });
     });
 
+    describe('getYAxis method', function () {
+      var mode, yMax, yScale;
+      beforeEach(function () {
+        mode = yAxis._attr.mode;
+        yMax = yAxis.yMax;
+        yScale = yAxis.getYScale;
+      });
+
+      afterEach(function () {
+        yAxis._attr.mode = mode;
+        yAxis.yMax = yMax;
+        yAxis.getYScale = yScale;
+      });
+
+      it('should use percentage format for percentages', function () {
+        yAxis._attr.mode = 'percentage';
+        var tickFormat = yAxis.getYAxis().tickFormat();
+        expect(tickFormat(1)).to.be('100%');
+      });
+
+      it('should use decimal format for small values', function () {
+        yAxis.yMax = 1;
+        var tickFormat = yAxis.getYAxis().tickFormat();
+        expect(tickFormat(0.8)).to.be('0.8');
+      });
+
+      it('should throw an error if yScale is NaN', function () {
+        yAxis.getYScale = function () { return NaN; };
+        expect(function () {
+          yAxis.getYAxis();
+        }).to.throwError();
+      });
+    });
+
     describe('draw Method', function () {
       it('should be a function', function () {
         expect(_.isFunction(yAxis.draw())).to.be(true);
@@ -209,6 +243,5 @@ define(function (require) {
         expect(yAxis.tickScale(20)).to.be(0);
       });
     });
-
   });
 });
