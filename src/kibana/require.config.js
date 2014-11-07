@@ -29,6 +29,7 @@ require.config({
     inflection: 'bower_components/inflection/lib/inflection',
     jquery: 'bower_components/jquery/dist/jquery',
     jsonpath: 'bower_components/jsonpath/lib/jsonpath',
+    leaflet: 'bower_components/leaflet/dist/leaflet',
     lodash_src: 'bower_components/lodash/dist/lodash',
     moment: 'bower_components/moment/moment',
     'ng-clip': 'bower_components/ng-clip/src/ngClip',
@@ -56,7 +57,11 @@ require.config({
     },
     file_saver: {
       exports: 'saveAs'
+    },
+    leaflet: {
+      deps: ['css!bower_components/leaflet/dist/leaflet.css']
     }
+    
   },
   waitSeconds: 60
 });

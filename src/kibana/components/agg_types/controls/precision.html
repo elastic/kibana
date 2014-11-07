@@ -1,0 +1,19 @@
+<div class="vis-editor-agg-form-row">
+  <div class="form-group">
+    <label>Precision</label>
+    <div class="vis-editor-agg-form-row">
+      <input
+        name="precision"
+        ng-model="params.precision"
+        required
+        class="form-control"
+        type="range"
+        min="1"
+        max="9"
+        >
+      <div class="form-group vis-editor-agg-form-value">
+        {{params.precision}}
+      </div>
+    </div>
+  </div>
+</div>

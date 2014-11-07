@@ -1,27 +1,26 @@
 define(function (require) {
-  return function HistogramVisType(Private) {
+  return function TileMapVisType(Private) {
     var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
     var Schemas = Private(require('plugins/vis_types/_schemas'));
+    var TileMapConverter = Private(require('plugins/vis_types/converters/tile_map'));
 
     return new VislibVisType({
-      name: 'area',
-      title: 'Area chart',
-      icon: 'fa-area-chart',
-      params: {
+      name: 'tile_map',
+      title: 'Tile map',
+      icon: 'fa-map-marker',
+      params: { 
         defaults: {
-          shareYAxis: true,
-          addTooltip: true,
-          addLegend: true,
-          mode: 'stacked'
+          mapType: 'Shaded Circle Markers'
         },
-        modes: ['stacked', 'overlap', 'percentage', 'wiggle', 'silhouette'],
-        editor: require('text!plugins/vis_types/vislib/editors/area.html')
+        mapTypes: ['Shaded Circle Markers', 'Scaled Circle Markers'],
+        editor: require('text!plugins/vis_types/vislib/editors/tile_map.html')
       },
+      responseConverter: TileMapConverter,
       schemas: new Schemas([
         {
           group: 'metrics',
           name: 'metric',
-          title: 'Y-Axis',
+          title: 'Value',
           min: 1,
           max: 1,
           defaults: [
@@ -31,15 +30,9 @@ define(function (require) {
         {
           group: 'buckets',
           name: 'segment',
-          title: 'X-Axis',
-          min: 0,
-          max: 1
-        },
-        {
-          group: 'buckets',
-          name: 'group',
-          title: 'Split Area',
-          min: 0,
+          title: 'Geo Coordinates',
+          aggFilter: 'geohash_grid',
+          min: 1,
           max: 1
         },
         {

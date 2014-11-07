@@ -1,0 +1,7 @@
+<!-- vis type specific options -->
+<div ng-repeat="mapType in vis.type.params.mapTypes">
+  <label>
+    <input type="radio" value="{{mapType}}" ng-model="vis.params.mapType" name="mapType" ng-checked="mapType === vis.params.mapType">
+    {{mapType}}
+  </label>
+</div>

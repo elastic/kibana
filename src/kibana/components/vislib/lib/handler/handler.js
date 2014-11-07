@@ -162,6 +162,14 @@ define(function (require) {
       .text(message);
     };
 
+    Handler.prototype.destroy = function () {
+      this.charts.forEach(function (chart) {
+        if (_.isFunction(chart.destroy)) {
+          chart.destroy();
+        }
+      });
+    };
+
     return Handler;
   };
 });
