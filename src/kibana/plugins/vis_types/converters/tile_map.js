@@ -65,26 +65,31 @@ define(function (require) {
       var center;
       var rectangle;
 
+      var buckettingCol = _.find(columns, { categoryName: 'segment' });
+      var metricCol = _.find(columns, { categoryName: 'metric' });
+      if (!buckettingCol || !metricCol) return;
+
       var length = rows.length;
-      var min = rows[rows.length - 1][1];
-      var max = rows[0][1];
-      var precision = rows[0][0].length;
+      var properties = {
+        label: chart.label,
+        length: length,
+        min: 0,
+        max: 0,
+        precision: buckettingCol.aggConfig.params.precision
+      };
+
+      if (length) {
+        properties.min = rows[rows.length - 1][1];
+        properties.max = rows[0][1];
+        properties.precision = rows[0][0].length;
+      }
 
       var geoJSON = chart.geoJSON = {
-        properties: {
-          label: chart.label,
-          length: length,
-          min: min,
-          max: max,
-          precision: precision
-        },
+        properties: properties,
         type: 'FeatureCollection',
         features: []
       };
 
-      var buckettingCol = _.find(columns, { categoryName: 'segment' });
-      var metricCol = _.find(columns, { categoryName: 'metric' });
-      if (!buckettingCol || !metricCol) return;
 
       var aggConfig = metricCol.aggConfig;
       var metricLabel = aggConfig.makeLabel();
