@@ -2,17 +2,16 @@ define(function (require) {
   return function TileMapConverterFn(Private, timefilter, $compile, $rootScope) {
     var _ = require('lodash');
 
-
     /*
      * Decodes geohash to object containing
      * top-left and bottom-right corners of
      * rectangle and center point.
-     * 
+     *
      * geohash.js
      * Geohash library for Javascript
      * (c) 2008 David Troy
      * Distributed under the MIT License
-     * 
+     *
      * @method refine_interval
      * @param interval {Array} [long, lat]
      * @param cd {Number}
@@ -20,7 +19,6 @@ define(function (require) {
      * @return {Object} interval
      */
     function decodeGeoHash(geohash) {
-      
       var BITS = [16, 8, 4, 2, 1];
       var BASE32 = '0123456789bcdefghjkmnpqrstuvwxyz';
       var is_even = 1;
@@ -51,6 +49,7 @@ define(function (require) {
       lon[2] = (lon[0] + lon[1]) / 2;
       return { latitude: lat, longitude: lon};
     }
+
     function refine_interval(interval, cd, mask) {
       if (cd & mask) {
         interval[0] = (interval[0] + interval[1]) / 2;
@@ -70,7 +69,7 @@ define(function (require) {
       var min = rows[rows.length - 1][1];
       var max = rows[0][1];
       var precision = rows[0][0].length;
-      
+
       var geoJSON = chart.geoJSON = {
         properties: {
           label: chart.label,
@@ -82,9 +81,14 @@ define(function (require) {
         type: 'FeatureCollection',
         features: []
       };
-        
-      rows.forEach(function (row) {
 
+      var buckettingCol = _.find(columns, { categoryName: 'segment' });
+      var metricCol = _.find(columns, { categoryName: 'metric' });
+      if (!buckettingCol || !metricCol) return;
+
+      var metricLabel = metricCol.makeLabel();
+
+      rows.forEach(function (row, i) {
         geohash = row[0];
         count = row[1];
         location = decodeGeoHash(geohash);
@@ -103,6 +107,7 @@ define(function (require) {
             coordinates: center
           },
           properties: {
+            valueLabel: metricLabel,
             count: count,
             geohash: geohash,
             center: center,
