@@ -8,6 +8,7 @@ define(function (require) {
     var $ = require('jquery');
     var _ = require('lodash');
     var visTypes = Private(require('registry/vis_types'));
+    var NotEnoughData = require('errors').NotEnoughData;
 
     var notify = new Notifier({
       location: 'Visualize'
@@ -105,7 +106,22 @@ define(function (require) {
 
         $scope.$watch('esResp', prereq(function (resp, prevResp) {
           if (!resp) return;
-          $scope.renderbot.render(resp);
+
+          // true unless proven otherwise
+          var enoughData = true;
+
+          try {
+            $scope.renderbot.render(resp);
+          } catch (err) {
+            if (err instanceof NotEnoughData) {
+              enoughData = false;
+            } else {
+              // not something we know how to handler, rethrow
+              throw err;
+            }
+          }
+
+          $scope.notEnoughData = !enoughData;
         }));
 
         $scope.$watch('renderbot', function (newRenderbot, oldRenderbot) {

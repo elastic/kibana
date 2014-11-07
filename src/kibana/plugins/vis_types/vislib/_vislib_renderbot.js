@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var Renderbot = Private(require('plugins/vis_types/_renderbot'));
     var normalizeChartData = Private(require('components/agg_response/index'));
+    var NotEnoughData = require('errors').NotEnoughData;
 
     _(VislibRenderbot).inherits(Renderbot);
     function VislibRenderbot(vis, $el) {
@@ -37,15 +38,30 @@ define(function (require) {
       );
     };
 
-    VislibRenderbot.prototype.render = function (esResponse) {
+    VislibRenderbot.prototype.render = function (esResp) {
       var self = this;
+
+      if (!esResp.hits.total) {
+        throw new NotEnoughData(esResp);
+      }
 
       var buildChartData = self._normalizers.flat;
       if (self.vis.type.hierarchicalData) {
         buildChartData = self._normalizers.hierarchical;
       }
 
-      var chartData = buildChartData(self.vis, esResponse);
+      var chartData = buildChartData(self.vis, esResp);
+
+      [
+        chartData.raw.rows || [],
+        chartData.rows,
+        chartData.columns,
+        chartData.slices
+      ]
+      .forEach(function (arr) {
+        if (arr && !_.size(arr)) throw new NotEnoughData(esResp);
+      });
+
       self.vislibVis.render(chartData);
     };
 

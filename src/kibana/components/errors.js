@@ -191,5 +191,16 @@ define(function (require) {
   };
   inherits(errors.ContainerTooSmall, KbnError);
 
+  /**
+   * user with the vislib, when the container is too small
+   * @param {String} message - the message to provide with the error
+   */
+  errors.NotEnoughData = function NotEnoughData() {
+    KbnError.call(this,
+    'not enough data to render this visualization',
+    errors.NotEnoughData);
+  };
+  inherits(errors.NotEnoughData, KbnError);
+
   return errors;
 });
