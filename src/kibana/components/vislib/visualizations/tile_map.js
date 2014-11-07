@@ -3,16 +3,15 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
     var L = require('leaflet');
-  
+
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var errors = require('errors');
 
     require('css!components/vislib/styles/main');
-    
+
     var mapData;
     var mapCenter = [15, 5];
     var mapZoom = 2;
-      
 
     /**
      * Tile Map Visualization: renders maps
@@ -30,15 +29,11 @@ define(function (require) {
         return new TileMap(handler, chartEl, chartData);
       }
       TileMap.Super.apply(this, arguments);
-      
+
       // add allmin and allmax to geoJSON
       var mapDataExtents = handler.data.mapDataExtents(handler.data.data.raw);
       chartData.geoJSON.properties.allmin = mapDataExtents[0];
       chartData.geoJSON.properties.allmax = mapDataExtents[1];
-
-      // turn off resizeChecker for tile maps
-      this.handler.vis.resizeChecker.off('resize', this.resize);
-      this.handler.vis.resizeChecker.destroy();
     }
 
     /**
@@ -53,7 +48,12 @@ define(function (require) {
       var $elem = $(this.chartEl);
       var div;
       var worldBounds = L.latLngBounds([-200, -220], [200, 220]);
-      
+
+      // clean up old maps
+      _.invoke(self.maps, 'destroy');
+      // create a new maps array
+      self.maps = [];
+
       return function (selection) {
         selection.each(function (data) {
           div = $(this);
@@ -88,16 +88,35 @@ define(function (require) {
             zoom: mapZoom,
             continuousWorld: true,
             noWrap: true,
-            maxBounds: worldBounds
+            maxBounds: worldBounds,
+            scrollWheelZoom: false,
+            fadeAnimation: false
           };
 
           var map = L.map(div[0], mapOptions);
+          self.maps.push(map);
 
-          // switch map types
-          L.control.layers({
-            'Map': mapLayer,
-            'Satellite': satLayer
-          }).addTo(map);
+          function fitBounds() {
+            if (data.geoJSON) {
+              map.fitBounds(_.map(data.geoJSON.features, function (feature) {
+                return _.clone(feature.geometry.coordinates).reverse();
+              }));
+            }
+          }
+
+          // Add button to fit container to points
+          var fitControl = L.Control.extend({
+            options: {
+              position: 'topleft'
+            },
+            onAdd: function (map) {
+              var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar leaflet-control-zoom leaflet-control-fit');
+              $(container).html('<a class="leaflet-control-zoom fa fa-crop"></a>');
+              $(container).on('click', fitBounds);
+              return container;
+            }
+          });
+          map.addControl(new fitControl());
 
           map.on('zoomend dragend', function () {
             mapZoom = self._attr.lastZoom = map.getZoom();
@@ -112,7 +131,6 @@ define(function (require) {
             }
           }
 
-          // if sub agg split, add labels
           if (data.geoJSON.properties.label) {
             self.addLabel(data.geoJSON.properties.label, map);
           }
@@ -143,7 +161,7 @@ define(function (require) {
       var featureLayer = L.geoJson(mapData, {
         pointToLayer: function (feature, latlng) {
           var count = feature.properties.count;
-          
+
           var rad = zoomScale * self.radiusScale(count, max, precision);
           return L.circleMarker(latlng, {
             radius: rad
@@ -183,17 +201,17 @@ define(function (require) {
      */
     TileMap.prototype.shadedCircleMarkers = function (map, mapData) {
       var self = this;
-      
+
       // TODO: add UI to select local min max or all min max
 
       // min and max from chart data for this map
       // var min = mapData.properties.min;
       // var max = mapData.properties.max;
-      
+
       // super min and max from all chart data
       var min = mapData.properties.allmin;
       var max = mapData.properties.allmax;
-      
+
       var length = mapData.properties.length;
       var precision = mapData.properties.precision;
       var zoomScale = self.zoomScale(mapZoom);
@@ -286,6 +304,20 @@ define(function (require) {
     };
 
     /**
+     * Invalidate the size of the map, so that leaflet will resize to fit.
+     * then moves to center
+     *
+     * @return {undefined}
+     */
+    TileMap.prototype.resizeArea = function () {
+      this.maps.forEach(function (map) {
+        map.invalidateSize({
+          debounceMoveend: true
+        });
+      });
+    };
+
+    /**
      * Redraws feature layer markers
      *
      * @method resizeFeatures
@@ -299,10 +331,10 @@ define(function (require) {
     TileMap.prototype.resizeFeatures = function (map, min, max, precision, featureLayer) {
       var self = this;
       var zoomScale = self.zoomScale(mapZoom);
-      
+
       featureLayer.eachLayer(function (layer) {
         var latlng = L.latLng(layer.feature.geometry.coordinates[1], layer.feature.geometry.coordinates[0]);
-        
+
         var count = layer.feature.properties.count;
         var rad;
         if (self._attr.mapType === 'Shaded Circle Markers') {
@@ -363,7 +395,7 @@ define(function (require) {
 
     /**
      * radiusScale returns a circle radius from
-     * approx. square root of count 
+     * approx. square root of count
      * which is multiplied by a factor based on the geohash precision
      * for relative sizing of markers
      *
@@ -413,7 +445,7 @@ define(function (require) {
     };
 
     /**
-     * returns a number to scale circle markers 
+     * returns a number to scale circle markers
      * based on the geohash precision
      *
      * @method quantRadiusScale
@@ -494,6 +526,15 @@ define(function (require) {
     TileMap.prototype.darkerColor = function (color) {
       var darker = d3.hcl(color).darker(1.3).toString();
       return darker;
+    };
+
+    /**
+     * tell leaflet that it's time to cleanup the map
+     */
+    TileMap.prototype.destroy = function () {
+      this.maps.forEach(function (map) {
+        map.remove();
+      });
     };
 
     return TileMap;
