@@ -114,9 +114,12 @@ define(function (require) {
 
             // try to call destroy() if the error didn't come from destroy()
             method !== 'destroy' && handler.destroy();
+
+            throw error;
           }
 
-          throw error;
+          // TODO: WE SHOULD NOT BE SWALLOWING THIS!!!
+          console.error(error.message);
         }
       }
     };
