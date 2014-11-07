@@ -86,7 +86,8 @@ define(function (require) {
       var metricCol = _.find(columns, { categoryName: 'metric' });
       if (!buckettingCol || !metricCol) return;
 
-      var metricLabel = metricCol.makeLabel();
+      var aggConfig = metricCol.aggConfig;
+      var metricLabel = metricCol.aggType.makeLabel(aggConfig);
 
       rows.forEach(function (row) {
         geohash = row[0];
