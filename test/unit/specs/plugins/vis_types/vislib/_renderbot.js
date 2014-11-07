@@ -155,6 +155,8 @@ define(function (require) {
           hierarchical: true
         }));
         stubs.render = sinon.stub(renderbot.vislibVis, 'render', _.noop);
+        sinon.stub(renderbot, 'assertEsResponseHasHits');
+        sinon.stub(renderbot, 'assertChartDataHasData');
       }
     });
 

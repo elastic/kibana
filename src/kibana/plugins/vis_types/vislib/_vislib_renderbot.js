@@ -38,20 +38,13 @@ define(function (require) {
       );
     };
 
-    VislibRenderbot.prototype.render = function (esResp) {
-      var self = this;
-
+    VislibRenderbot.prototype.assertEsResponseHasHits = function (esResp) {
       if (!esResp.hits.total) {
         throw new NotEnoughData();
       }
+    };
 
-      var buildChartData = self._normalizers.flat;
-      if (self.vis.type.hierarchicalData) {
-        buildChartData = self._normalizers.hierarchical;
-      }
-
-      var chartData = buildChartData(self.vis, esResp);
-
+    VislibRenderbot.prototype.assertChartDataHasData = function (chartData) {
       [
         chartData.rows,
         chartData.columns,
@@ -61,8 +54,20 @@ define(function (require) {
       .forEach(function (arr) {
         if (arr && !_.size(arr)) throw new NotEnoughData();
       });
+    };
 
-      self.vislibVis.render(chartData);
+    VislibRenderbot.prototype.render = function (esResp) {
+      this.assertEsResponseHasHits(esResp);
+
+      var buildChartData = this._normalizers.flat;
+      if (this.vis.type.hierarchicalData) {
+        buildChartData = this._normalizers.hierarchical;
+      }
+
+      var chartData = buildChartData(this.vis, esResp);
+
+      this.assertChartDataHasData(chartData);
+      this.vislibVis.render(chartData);
     };
 
     VislibRenderbot.prototype.destroy = function () {
