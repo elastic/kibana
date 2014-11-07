@@ -7,6 +7,7 @@ define(function (require) {
     var handlerTypes = Private(require('components/vislib/lib/handler/handler_types'));
     var chartTypes = Private(require('components/vislib/visualizations/vis_types'));
     var errors = require('errors');
+    var NotEnoughData = require('errors').NotEnoughData;
     require('css!components/vislib/styles/main.css');
 
 
@@ -51,8 +52,31 @@ define(function (require) {
       }
 
       this.data = data;
+      this._checkForNotEnoughDataError();
       this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
       this._runOnHandler('render');
+    };
+
+    /**
+     * Checks whether enough data is available to render the visualization.
+     *
+     * @private
+     * @method _checkForNotEnoughDataError
+     */
+    Vis.prototype._checkForNotEnoughDataError = function () {
+      var data = this.data;
+
+      [
+        data.rows,
+        data.columns,
+        data.series,
+        data.slices && data.slices.children
+      ]
+        .forEach(function (arr) {
+          if (arr && !_.size(arr)) {
+            throw new NotEnoughData();
+          }
+        });
     };
 
     /**
@@ -80,7 +104,8 @@ define(function (require) {
         // If involving height and width of the container, log error to screen.
         // Because we have to wait for the DOM element to initialize, we do not
         // want to throw an error when the DOM `el` is zero
-        if (error instanceof errors.ContainerTooSmall) {
+        if (error instanceof errors.ContainerTooSmall ||
+          error instanceof errors.NotEnoughData) {
           this.handler.error(error.message);
         } else {
           console.error(error.stack);

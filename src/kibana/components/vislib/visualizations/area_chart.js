@@ -5,6 +5,7 @@ define(function (require) {
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var errors = require('errors');
+    var notEnoughDataError = require('errors').NotEnoughData;
     require('css!components/vislib/styles/main');
 
     /**
@@ -27,6 +28,8 @@ define(function (require) {
       AreaChart.Super.apply(this, arguments);
 
       this.isOverlapping = (handler._attr.mode === 'overlap');
+      this.notEnoughDataErrorMessage = 'An area chart requires at least two points to ' +
+        'render a chart.';
 
       if (this.isOverlapping) {
 
@@ -253,6 +256,18 @@ define(function (require) {
       .attr('height', height + clipPathBuffer);
     };
 
+    AreaChart.prototype.checkForNotEnoughData = function (data) {
+      var notEnoughData = false;
+
+      data.series.forEach(function (object) {
+        if (object.values.length === 1) {
+          notEnoughData = true;
+        }
+      });
+
+      return notEnoughData;
+    };
+
     /**
      * Renders d3 visualization
      *
@@ -276,9 +291,17 @@ define(function (require) {
       var layers;
       var circles;
       var path;
+      var notEnoughData;
 
       return function (selection) {
         selection.each(function (data) {
+
+          notEnoughData = self.checkForNotEnoughData(data);
+
+          if (notEnoughData) {
+            throw new notEnoughDataError(self.notEnoughDataErrorMessage);
+          }
+
           // Stack data
           layers = self.stackData(data);
 
