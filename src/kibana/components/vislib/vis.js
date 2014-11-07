@@ -59,6 +59,7 @@ define(function (require) {
 
     /**
      * Checks whether enough data is available to render the visualization.
+     * Throws an error if not enough data present.
      *
      * @private
      * @method _checkForNotEnoughDataError
@@ -72,11 +73,11 @@ define(function (require) {
         data.series,
         data.slices && data.slices.children
       ]
-        .forEach(function (arr) {
-          if (arr && !_.size(arr)) {
-            throw new NotEnoughData();
-          }
-        });
+      .forEach(function (arr) {
+        if (arr && !_.size(arr)) {
+          throw new NotEnoughData();
+        }
+      });
     };
 
     /**
