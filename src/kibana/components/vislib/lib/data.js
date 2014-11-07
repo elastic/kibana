@@ -226,10 +226,6 @@ define(function (require) {
         return 1;
       }
 
-      if (self._attr.mode === 'percentage') {
-        return 1;
-      }
-
       // for each object in the dataArray,
       // push the calculated y value to the initialized array (arr)
       _.forEach(this.flatten(), function (series) {
