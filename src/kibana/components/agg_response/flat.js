@@ -148,8 +148,13 @@ define(function (require) {
 
       if (resp.aggregations) {
         splitAndFlatten(chartData, resp.aggregations);
-      } else {
+      } else if (colStack.length === 1 && colStack[0].aggConfig.type.name === 'count') {
         writeRow(chartData, { doc_count: resp.hits.total });
+      }
+
+      // ensure chart container is always created
+      if (!chartData.rows && !chartData.splits) {
+        writeRow(chartData);
       }
 
       // add labels to each config before they are processed

@@ -31,6 +31,9 @@ define(function (require) {
       }
       TileMap.Super.apply(this, arguments);
 
+      // track the map objects
+      this.maps = [];
+
       // add allmin and allmax to geoJSON
       var mapDataExtents = handler.data.mapDataExtents(handler.data.data.raw);
       chartData.geoJSON.properties.allmin = mapDataExtents[0];
