@@ -64,10 +64,6 @@ define(function (require) {
           div = $(this);
           div.addClass('tilemap');
 
-          if (div.width() < minMapSize || div.height() < minMapSize) {
-            throw new errors.ContainerTooSmall();
-          }
-
           if (self._attr.lastZoom) {
             mapZoom = self._attr.lastZoom;
           }
