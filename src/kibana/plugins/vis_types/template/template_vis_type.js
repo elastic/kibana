@@ -8,6 +8,7 @@ define(function (require) {
     function TemplateVisType(opts) {
       TemplateVisType.Super.call(this, opts);
 
+      this.onEsResp = opts.onEsResp;
       this.template = opts.template;
       if (!this.template) {
         throw new Error('Missing template for TemplateVisType');
@@ -15,7 +16,9 @@ define(function (require) {
     }
 
     TemplateVisType.prototype.createRenderbot = function (vis, $el) {
-      return new TemplateRenderbot(vis, $el);
+      return new TemplateRenderbot(vis, $el, {
+        onEsResp: this.onEsResp
+      });
     };
 
     return TemplateVisType;

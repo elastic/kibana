@@ -9,7 +9,21 @@ visualize {
   height: 100%;
   width: 100%;
   overflow: auto;
-  position: relative;
+
+  &.only-spy > :not(visualize-spy) {
+    display: none;
+  }
+
+  // all children of visualize are designed to overlay the chart
+  // use z-index to make intent official
+  > .visualize-chart {
+    position: relative;
+    z-index: 0;
+  }
+  > :not(.visualize-chart) {
+    position: relative;
+    z-index: 10;
+  }
 
   .k4tip {
     white-space: pre-line;
@@ -22,21 +36,30 @@ visualize {
     &.spy-visible {
       margin-bottom: 10px;
     }
+  }
 
-    &.spy-only {
-      display: none;
+  .visualize-error {
+    .display(flex);
+    .align-items(center);
+    .justify-content(center);
+
+    .top {
+      .align-self(flext-start);
+    }
+
+    .bottom {
+      .align-self(flext-end);
+    }
+
+    ~ .visualize-chart {
+      visibility: hidden;
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      right: 0px;
+      bottom: 0px;
     }
   }
-}
-
-.visualize-error {
-  .display(flex);
-  .align-items(center);
-  .justify-content(center);
-  .top { .align-self(flext-start); }
-  .item { }
-  .bottom { .align-self(flext-end); }
-
 }
 
 

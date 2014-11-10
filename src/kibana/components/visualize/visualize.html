@@ -1,13 +1,11 @@
-<div ng-if="chartData.hits === 0"
-  class="text-center visualize-error visualize-chart">
+<div ng-if="visError" class="text-center visualize-error visualize-chart">
   <div class="item top"></div>
   <div class="item">
     <h2><i class="fa fa-meh-o"></i></h2>
-    <h4>No results found</h4>
+    <h4>{{visError.message}}</h4>
   </div>
   <div class="item bottom"></div>
 </div>
 
-<div ng-hide="chartData.hits === 0" class="visualize-chart"></div>
-<!-- <pre>{{chartData | json}}</pre> -->
+<div class="visualize-chart"></div>
 <visualize-spy></visualize-spy>

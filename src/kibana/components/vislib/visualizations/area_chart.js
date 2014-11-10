@@ -5,6 +5,7 @@ define(function (require) {
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
     var errors = require('errors');
+    var NotEnoughData = require('errors').NotEnoughData;
     require('css!components/vislib/styles/main');
 
     /**
@@ -26,6 +27,7 @@ define(function (require) {
 
       AreaChart.Super.apply(this, arguments);
 
+      this.assertEnoughData(chartData);
       this.isOverlapping = (handler._attr.mode === 'overlap');
 
       if (this.isOverlapping) {
@@ -251,6 +253,23 @@ define(function (require) {
       // Adding clipPathBuffer to height so it doesn't
       // cutoff the lower part of the chart
       .attr('height', height + clipPathBuffer);
+    };
+
+    /**
+     * Verify that the data contains enough data points to actually
+     * create an area for each series.
+     *
+     * @method assertEnoughData
+     * @param  {Object} data - the data to check
+     * @throws {NotEnoughData} - If there is any series with less than 2 points
+     * @return {undefined}
+     */
+    AreaChart.prototype.assertEnoughData = function (data) {
+      data.series.forEach(function (object) {
+        if (object.values.length === 1) {
+          throw new NotEnoughData('An area chart requires at least two points to render a chart.');
+        }
+      });
     };
 
     /**

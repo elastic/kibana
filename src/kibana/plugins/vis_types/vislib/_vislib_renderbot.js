@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var Renderbot = Private(require('plugins/vis_types/_renderbot'));
     var normalizeChartData = Private(require('components/agg_response/index'));
+    var NotEnoughData = require('errors').NotEnoughData;
 
     _(VislibRenderbot).inherits(Renderbot);
     function VislibRenderbot(vis, $el) {
@@ -37,16 +38,36 @@ define(function (require) {
       );
     };
 
-    VislibRenderbot.prototype.render = function (esResponse) {
-      var self = this;
+    VislibRenderbot.prototype.assertEsResponseHasHits = function (esResp) {
+      if (!esResp.hits.total) {
+        throw new NotEnoughData();
+      }
+    };
 
-      var buildChartData = self._normalizers.flat;
-      if (self.vis.type.hierarchicalData) {
-        buildChartData = self._normalizers.hierarchical;
+    VislibRenderbot.prototype.assertChartDataHasData = function (chartData) {
+      [
+        chartData.rows,
+        chartData.columns,
+        chartData.series,
+        chartData.slices && chartData.slices.children
+      ]
+      .forEach(function (arr) {
+        if (arr && !_.size(arr)) throw new NotEnoughData();
+      });
+    };
+
+    VislibRenderbot.prototype.render = function (esResp) {
+      this.assertEsResponseHasHits(esResp);
+
+      var buildChartData = this._normalizers.flat;
+      if (this.vis.type.hierarchicalData) {
+        buildChartData = this._normalizers.hierarchical;
       }
 
-      var chartData = buildChartData(self.vis, esResponse);
-      self.vislibVis.render(chartData);
+      var chartData = buildChartData(this.vis, esResp);
+
+      this.assertChartDataHasData(chartData);
+      this.vislibVis.render(chartData);
     };
 
     VislibRenderbot.prototype.destroy = function () {
