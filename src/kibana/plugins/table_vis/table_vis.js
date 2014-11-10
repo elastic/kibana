@@ -21,7 +21,7 @@ define(function (require) {
     // Vis object of this type.
     return new TemplateVisType({
       name: 'table',
-      title: 'Data Table',
+      title: 'Data table',
       icon: 'fa-table',
       template: require('text!plugins/table_vis/table_vis.html'),
       params: {
