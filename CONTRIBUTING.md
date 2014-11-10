@@ -29,17 +29,16 @@ grunt test build
   nvm install 0.10
   ```
 
-- Install ruby *1.9.3-p547* (we recommend using [rbenv](https://github.com/sstephenson/rbenv))
+- Install ruby *1.9.3* (we recommend using [rbenv](https://github.com/sstephenson/rbenv))
   - See [rbenv docs](https://github.com/sstephenson/rbenv#installation) for installation assistance
 
   ```sh
   ## install ruby and ruby-build using your local package manager (apt, brew, etc)
   ## ex. brew install rbenv ruby-build
   - Run `rbenv init` and add `eval "$(rbenv init -)"` to your shell (ex. .bashrc/.bash_profile)
-  - Run `rbenv install 1.9.3-p547` to install the required version
-  - Run `ruby -v` and make sure you are using 1.9.3-p547
-    - If not, run `rbenv global 1.9.3-p547` and check again
-    - Check the installation docs if you continue to have issues
+  - Run `rbenv install` to install the required version
+  - Run `ruby -v` and make sure you are using 1.9.3
+    - Check the installation docs if you have issues getting the correct version
   - Install bundler by running `gem install bundler`
   - Install local gems by running `cd src/server; bundle; cd ../..`
   ```
