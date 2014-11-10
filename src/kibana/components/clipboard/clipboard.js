@@ -1,4 +1,8 @@
 define(function (require) {
+  // ng-clip expects ZeroClipboard to be global, but it's AMD, so it never is
+  window.ZeroClipboard = require('zeroclipboard');
+  require('ng-clip');
+
   var $ = require('jquery');
   var html = require('text!components/clipboard/clipboard.html');
 
