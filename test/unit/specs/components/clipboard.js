@@ -1,7 +1,7 @@
 define(function (require) {
   var angular = require('angular');
   var _ = require('lodash');
-  var sinon = require('sinon/sinon');
+  var sinon = require('test_utils/auto_release_sinon');
   var $ = require('jquery');
 
   require('components/clipboard/clipboard');
@@ -13,6 +13,8 @@ define(function (require) {
     beforeEach(function (done) {
       // load the application
       module('kibana');
+
+      sinon.stub(window.ZeroClipboard, 'isFlashUnusable', _.constant(false));
 
       inject(function (_$rootScope_, _$compile_, _$interpolate_) {
         $rootScope = _$rootScope_;
