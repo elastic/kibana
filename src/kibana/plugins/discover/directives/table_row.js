@@ -66,7 +66,7 @@ define(function (require) {
           }
 
           // The fields to loop over
-          row._fields = row._fields || _.keys(row._source).concat(config.get('metaFields')).sort();
+          row._fields = row._fields || _.uniq(_.keys(row._source).concat(config.get('metaFields'))).sort();
           row._mode = 'table';
 
           // empty the details and rebuild it
