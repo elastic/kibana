@@ -1,9 +1,8 @@
-<div ng-if="notEnoughData"
-  class="text-center visualize-error visualize-chart">
+<div ng-if="visError" class="text-center visualize-error visualize-chart">
   <div class="item top"></div>
   <div class="item">
     <h2><i class="fa fa-meh-o"></i></h2>
-    <h4>{{notEnoughData.message}}</h4>
+    <h4>{{visError.message}}</h4>
   </div>
   <div class="item bottom"></div>
 </div>

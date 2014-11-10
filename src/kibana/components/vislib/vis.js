@@ -1,5 +1,6 @@
 define(function (require) {
   return function VisFactory(d3, Private) {
+    var $ = require('jquery');
     var _ = require('lodash');
 
     var ResizeChecker = Private(require('components/vislib/lib/resize_checker'));
@@ -85,14 +86,24 @@ define(function (require) {
      * @method resize
      */
     Vis.prototype.resize = function () {
-      if (this.handler && _.isFunction(this.handler.resize)) {
-        // our handler supports resizing
-        this._runOnHandler('resize');
-        return;
+      var err;
+
+      try {
+        if (this.handler && _.isFunction(this.handler.resize)) {
+          // our handler supports resizing
+          this._runOnHandler('resize');
+        }
+        else if (this.data) {
+          this.render(this.data);
+        }
+      } catch (e) {
+        err = e;
       }
 
-      if (this.data) {
-        this.render(this.data);
+      var $scope = $(this.el).scope();
+      if ($scope) {
+        $scope.visError = err;
+        $scope.$apply();
       }
     };
 
@@ -102,20 +113,20 @@ define(function (require) {
       try {
         handler[method]();
       } catch (err) {
-        // clean up the handler first, so that maintanence
-        // on the handler (resize, destroy) can be skipped
-        // try to call destroy() if the error didn't come from destroy()
-        if (err instanceof ContainerTooSmall || err instanceof NotEnoughData) {
-          this.handler = null;
-          method !== 'destroy' && handler.destroy();
-        }
-
         // If involving height and width of the container, log error to screen.
         // Because we have to wait for the DOM element to initialize, we do not
         // want to throw an error when the DOM `el` is zero
         if (err instanceof ContainerTooSmall) {
           handler.error(err.message);
           return;
+        }
+
+        // clean up the handler, so that maintanence
+        // on the handler (resize, destroy) can be skipped.
+        // try to call destroy() if the error didn't come from destroy()
+        if (err instanceof ContainerTooSmall || err instanceof NotEnoughData) {
+          this.handler = null;
+          method !== 'destroy' && handler.destroy();
         }
 
         // inform the caller that there wasn't enough data

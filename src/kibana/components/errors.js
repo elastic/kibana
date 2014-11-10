@@ -181,7 +181,7 @@ define(function (require) {
 
 
   /**
-   * user with the vislib, when the container is too small
+   * used with the vislib, when the container is too small
    * @param {String} message - the message to provide with the error
    */
   errors.ContainerTooSmall = function ContainerTooSmall() {
@@ -192,7 +192,7 @@ define(function (require) {
   inherits(errors.ContainerTooSmall, KbnError);
 
   /**
-   * user with the vislib, when the container is too small
+   * used with the vislib, when the container is too small
    * @param {String} message - the message to provide with the error
    */
   errors.NotEnoughData = function NotEnoughData(msg) {
