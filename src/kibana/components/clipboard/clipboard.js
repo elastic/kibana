@@ -1,6 +1,6 @@
 define(function (require) {
   // ng-clip expects ZeroClipboard to be global, but it's AMD, so it never is
-  window.ZeroClipboard = require('zeroclipboard');
+  var ZeroClipboard = window.ZeroClipboard = require('zeroclipboard');
   require('ng-clip');
 
   var $ = require('jquery');
@@ -18,6 +18,11 @@ define(function (require) {
         },
         transclude: true,
         link: function ($scope, $el, attr) {
+          if (ZeroClipboard.isFlashUnusable()) {
+            $scope.disabled = true;
+            return;
+          }
+
           $scope.tipPlacement = attr.tipPlacement || 'top';
           $scope.tipText = attr.tipText || 'Copy to clipboard';
           $scope.tipConfirm = attr.tipConfirm = 'Copied!';
