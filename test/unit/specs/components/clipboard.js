@@ -31,6 +31,27 @@ define(function (require) {
       });
     }
 
+    describe('With flash disabled', function () {
+      beforeEach(function () {
+        sinon.stub(window.ZeroClipboard, 'isFlashUnusable', _.constant(true));
+        init();
+      });
+
+      it('should be an empty element', function () {
+        expect(el.children()).to.have.length(0);
+      });
+
+      it('should not show the tooltip', function () {
+        var clip = el.find('[tooltip]');
+        expect(clip).to.have.length(0);
+      });
+
+      it('should not show the clipboard button', function () {
+        var clip = el.find('[clip-copy]');
+        expect(clip).to.have.length(0);
+      });
+    });
+
     describe('With flash enabled', function () {
       beforeEach(function () {
         sinon.stub(window.ZeroClipboard, 'isFlashUnusable', _.constant(false));
