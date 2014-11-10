@@ -7,6 +7,8 @@ define(function (require) {
 
   location.service('kbnUrl', function ($route, $location, $rootScope, globalState, $parse) {
     var self = this;
+    var reloading;
+    var unbindListener;
 
     self.change = function (url, paramObj) {
       self._changeLocation('url', url, paramObj);
@@ -24,7 +26,6 @@ define(function (require) {
       self._changeLocation('path', path, paramObj, true);
     };
 
-
     self._changeLocation = function (type, url, paramObj, redirect) {
       if (_.isBoolean(paramObj)) {
         redirect = paramObj;
@@ -35,11 +36,19 @@ define(function (require) {
 
       if (url !== $location[type]()) {
         $location[type](url);
+        if (redirect) {
+          $location.replace();
+        }
       }
 
-      if (redirect) {
-        self.reload();
-        $location.replace();
+      if (redirect || self.shouldAutoReload(url)) {
+        reloading = $rootScope.$on('$locationChangeSuccess', function () {
+          // call the "unlisten" function returned by $on
+          reloading();
+          reloading = false;
+
+          $route.reload();
+        });
       }
     };
 
@@ -51,8 +60,17 @@ define(function (require) {
 
     self.matches = function (url) {
       var route = $route.current.$$route;
+
       if (!route || !route.regexp) return false;
-      return route.regexp.test(url);
+      return !!url.match(route.regexp);
+    };
+
+    self.shouldAutoReload = function (url) {
+      if (reloading) return false;
+
+      var route = $route.current.$$route;
+      if (!route || route.reloadOnSearch) return false;
+      return self.matches(url);
     };
 
     function parseUrlPrams(url, paramObj) {
