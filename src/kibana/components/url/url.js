@@ -7,21 +7,27 @@ define(function (require) {
 
   location.service('kbnUrl', function ($route, $location, $rootScope, globalState, $parse) {
     var self = this;
-    self.reloading = false;
 
-    self.change = function (url, paramObj, forceReload) {
-      self._changeLocation('url', url, paramObj, forceReload);
+    self.change = function (url, paramObj) {
+      self._changeLocation('url', url, paramObj);
     };
 
-    self.changePath = function (url, paramObj, forceReload) {
-      self._changeLocation('path', url, paramObj, forceReload);
+    self.changePath = function (path, paramObj) {
+      self._changeLocation('path', path, paramObj);
     };
 
-    self._changeLocation = function (type, url, paramObj, forceReload) {
-      var doReload = false;
+    self.redirect = function (url, paramObj) {
+      self._changeLocation('url', url, paramObj, true);
+    };
 
+    self.redirectPath = function (path, paramObj) {
+      self._changeLocation('path', path, paramObj, true);
+    };
+
+
+    self._changeLocation = function (type, url, paramObj, redirect) {
       if (_.isBoolean(paramObj)) {
-        forceReload = paramObj;
+        redirect = paramObj;
         paramObj = undefined;
       }
 
@@ -29,11 +35,11 @@ define(function (require) {
 
       if (url !== $location[type]()) {
         $location[type](url);
-        doReload = !self.matches(url);
       }
 
-      if (forceReload || doReload) {
+      if (redirect) {
         self.reload();
+        $location.replace();
       }
     };
 
@@ -48,9 +54,6 @@ define(function (require) {
       if (!route || !route.regexp) return false;
       return route.regexp.test(url);
     };
-
-    $rootScope.$on('$routeUpdate', reloadingComplete);
-    $rootScope.$on('$routeChangeStart', reloadingComplete);
 
     function parseUrlPrams(url, paramObj) {
       return url.replace(/\{\{([^\}]+)\}\}/g, function (match, expr) {
@@ -75,14 +78,7 @@ define(function (require) {
     }
 
     self.reload = function () {
-      if (!self.reloading) {
-        $route.reload();
-        self.reloading = true;
-      }
+      $route.reload();
     };
-
-    function reloadingComplete() {
-      self.reloading = false;
-    }
   });
 });

@@ -52,7 +52,7 @@ define(function (require) {
         sinon.stub(kbnUrl, 'reload');
       });
 
-      it('should set $location.url and call reload when given new url', function () {
+      it('should set $location.url and not call reload', function () {
         var wordCount = _.random(3, 6);
         var callCount = 0;
         var lastUrl;
@@ -61,8 +61,6 @@ define(function (require) {
 
         // add repeat word to check that url doesn't change again
         words.push(words[wordCount - 1]);
-
-        var uniqWordCount = _.uniq(words, true).length;
 
         // validate our test data
         expect(words.length).to.be(wordCount + 1);
@@ -87,33 +85,7 @@ define(function (require) {
           lastUrl = url;
         });
 
-        expect(kbnUrl.reload.callCount).to.be(uniqWordCount);
-      });
-
-      it('should reload when forceReload is true', function () {
-        var words = [faker.Lorem.words(_.random(2, 6)).join('/')];
-        words.push(words[0]);
-
-        words.forEach(function (url) {
-          url = '/' + url;
-
-          kbnUrl.change(url, {}, true);
-        });
-
-        expect(kbnUrl.reload.callCount).to.be(words.length);
-      });
-
-      it('should allow forceReload as the 2nd param', function () {
-        var words = [faker.Lorem.words(_.random(4, 10)).join('/')];
-        words.push(words[0]);
-
-        words.forEach(function (url) {
-          url = '/' + url;
-
-          kbnUrl.change(url, true);
-        });
-
-        expect(kbnUrl.reload.callCount).to.be(words.length);
+        expect(kbnUrl.reload.callCount).to.be(0);
       });
 
       it('should uri encode replaced params', function () {
@@ -237,26 +209,11 @@ define(function (require) {
         expect($location.url()).to.be(newPath + '?search=test#hash');
       });
 
-      it('should set $location.url and call reload when path changes', function () {
+      it('should set $location.url and not call reload', function () {
         for (var i = 0; i < _.random(3, 6); i++) {
           kbnUrl.changePath('/new/path/' + i);
-          expect(kbnUrl.reload.callCount).to.be(i + 1);
+          expect(kbnUrl.reload.callCount).to.be(0);
         }
-      });
-
-      it('should reload when forceReload is set', function () {
-        var path = '/test/path';
-
-        kbnUrl.changePath(path);
-        expect(kbnUrl.reload.callCount).to.be(1);
-
-        // same url, no change in reload count
-        kbnUrl.changePath(path);
-        expect(kbnUrl.reload.callCount).to.be(1);
-
-        // same url again, but with forceReload true
-        kbnUrl.changePath(path, true);
-        expect(kbnUrl.reload.callCount).to.be(2);
       });
     });
 
