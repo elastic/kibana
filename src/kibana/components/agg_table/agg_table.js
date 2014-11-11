@@ -6,7 +6,6 @@ define(function (require) {
   .get('kibana')
   .directive('kbnAggTable', function ($filter, config, Private, compileRecursiveDirective) {
     var _ = require('lodash');
-    var saveAs = require('file_saver');
 
     var tabifyAggResponse = Private(require('components/agg_response/tabify/tabify'));
     var orderBy = $filter('orderBy');
@@ -28,6 +27,7 @@ define(function (require) {
         var self = this;
 
         self.sort = null;
+        self._saveAs = require('file_saver');
         self.csv = {
           separator: config.get('csv:separator'),
           quoteValues: config.get('csv:quoteValues')
@@ -70,8 +70,10 @@ define(function (require) {
         };
 
         self.exportAsCsv = function () {
-          saveAs(new Blob([self.toCsv()], { type: 'text/plain' }), self.csv.filename);
+          var csv = new Blob([self.toCsv()], { type: 'text/plain' });
+          self._saveAs(csv, self.csv.filename);
         };
+
 
         self.toCsv = function () {
           var rows = $scope.table.rows;
