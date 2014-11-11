@@ -29,6 +29,10 @@ Kibana is an open source (Apache Licensed), browser based analytics and search d
 * Visit [http://localhost:5601](http://localhost:5601)
 
 <!-- include {"path":"docs/quick_start.md"} -->
+
+## Building from Source
+If you want the latest code or need something that's not in a release package, you'll need to build from source. See [CONTRIBUTING.md](CONTRIBUTING.md) for instructions.
+
 ## Quick Start
 
 You're up and running! Fantastic! Kibana is now running on port 5601, so point your browser at http://YOURDOMAIN.com:5601.
