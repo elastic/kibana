@@ -79,7 +79,7 @@ define(function (require) {
 
       // set precision from the bucketting column, if we have one
       if (buckettingCol) {
-        properties.precision = buckettingCol.aggConfig.params.precision;
+        properties.precision = _.parseInt(buckettingCol.aggConfig.params.precision);
       }
 
       // if there are rows, use them to set the min and max
