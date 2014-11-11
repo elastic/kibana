@@ -12,10 +12,6 @@ define(function (require) {
   require('angular-route');
   require('angular-bindonce');
 
-  // Seems bad?
-  window.ZeroClipboard = require('zeroclipboard');
-  require('ng-clip');
-
   var configFile = JSON.parse(require('text!config'));
 
   var kibana = modules.get('kibana', [
