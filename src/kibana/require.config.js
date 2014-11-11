@@ -61,6 +61,7 @@ require.config({
     leaflet: {
       deps: ['css!bower_components/leaflet/dist/leaflet.css']
     }
+    
   },
   waitSeconds: 60
 });
