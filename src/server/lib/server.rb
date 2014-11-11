@@ -4,7 +4,6 @@ require "puma"
 require "colorize"
 require "json"
 require "socket"
-require "timeout"
 require "#{Kibana.global_settings[:root]}/lib/app"
 
 # Require the application
@@ -37,19 +36,13 @@ module Kibana
 
     def self.port_in_use(ip, port)
       begin
-        Timeout::timeout(1) do
-          begin
-            s = TCPSocket.new(ip, port)
-            s.close
-            return true
-          rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH
-            return false
-          end
-        end
-      rescue Timeout::Error
+        s = TCPServer.new(ip, port)
+        s.close
+        return false
+      rescue Errno::EADDRINUSE
+        return true
       end
-
-      return false
+      return true
     end
 
     def self.run(options = {})
