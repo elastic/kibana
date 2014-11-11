@@ -26,22 +26,17 @@ define(function (require) {
       self._changeLocation('path', path, paramObj, true);
     };
 
-    self._changeLocation = function (type, url, paramObj, redirect) {
-      if (_.isBoolean(paramObj)) {
-        redirect = paramObj;
-        paramObj = undefined;
-      }
-
+    self._changeLocation = function (type, url, paramObj, replace) {
       url = self.eval(url, paramObj);
 
       if (url !== $location[type]()) {
         $location[type](url);
-        if (redirect) {
+        if (replace) {
           $location.replace();
         }
       }
 
-      if (redirect || self.shouldAutoReload(url)) {
+      if (self.shouldAutoReload(url)) {
         reloading = $rootScope.$on('$locationChangeSuccess', function () {
           // call the "unlisten" function returned by $on
           reloading();
@@ -58,8 +53,12 @@ define(function (require) {
       return parseUrlPrams(url, paramObj);
     };
 
+    self.getRoute = function () {
+      return $route.current && $route.current.$$route;
+    };
+
     self.matches = function (url) {
-      var route = $route.current.$$route;
+      var route = self.getRoute();
 
       if (!route || !route.regexp) return false;
       return !!url.match(route.regexp);
@@ -68,8 +67,8 @@ define(function (require) {
     self.shouldAutoReload = function (url) {
       if (reloading) return false;
 
-      var route = $route.current.$$route;
-      if (!route || route.reloadOnSearch) return false;
+      var route = self.getRoute();
+      if (!route || (route.reloadOnSearch && url !== $location.url())) return false;
       return self.matches(url);
     };
 
@@ -95,8 +94,5 @@ define(function (require) {
       });
     }
 
-    self.reload = function () {
-      $route.reload();
-    };
   });
 });

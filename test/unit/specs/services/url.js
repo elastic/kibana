@@ -23,7 +23,9 @@ define(function (require) {
 
     module('kibana/url', 'kibana', function ($provide) {
       $provide.service('$route', function () {
-        return {};
+        return {
+          reload: _.noop
+        };
       });
 
       $provide.service('globalState', function () {
@@ -49,7 +51,6 @@ define(function (require) {
     describe('change', function () {
       beforeEach(function () {
         sinon.stub(kbnUrl, 'matches', function () { return false; });
-        sinon.stub(kbnUrl, 'reload');
       });
 
       it('should set $location.url and not call reload', function () {
@@ -84,8 +85,6 @@ define(function (require) {
 
           lastUrl = url;
         });
-
-        expect(kbnUrl.reload.callCount).to.be(0);
       });
 
       it('should uri encode replaced params', function () {
@@ -186,15 +185,8 @@ define(function (require) {
           expect(err.message).to.match(/replace_me\|number/);
         }
       });
-    });
 
-    describe('changePath', function () {
-      beforeEach(function () {
-        sinon.stub(kbnUrl, 'matches', function () { return false; });
-        sinon.stub(kbnUrl, 'reload');
-      });
-
-      it('should only change the path', function () {
+      it('should change the entire url', function () {
         var path = '/test/path';
         var search = {search: 'test'};
         var hash = 'hash';
@@ -203,60 +195,197 @@ define(function (require) {
         $location.path(path).search(search).hash(hash);
 
         // verify the starting state
-        expect($location.url()).to.be(path + '?search=test#hash');
+        expect($location.path()).to.be(path);
+        expect($location.search()).to.eql(search);
+        expect($location.hash()).to.be(hash);
 
-        kbnUrl.changePath(newPath);
-        expect($location.url()).to.be(newPath + '?search=test#hash');
-      });
+        kbnUrl.change(newPath);
 
-      it('should set $location.url and not call reload', function () {
-        for (var i = 0; i < _.random(3, 6); i++) {
-          kbnUrl.changePath('/new/path/' + i);
-          expect(kbnUrl.reload.callCount).to.be(0);
-        }
+        // verify the ending state
+        expect($location.path()).to.be(newPath);
+        expect($location.search()).to.eql({});
+        expect($location.hash()).to.be('');
       });
     });
 
-    describe('reload', function () {
-      require('test_utils/no_digest_promises').activateForSuite();
+    describe('changePath', function () {
+      it('should change just the path', function () {
+        var path = '/test/path';
+        var search = {search: 'test'};
+        var hash = 'hash';
+        var newPath = '/new/location';
 
+        $location.path(path).search(search).hash(hash);
+
+        // verify the starting state
+        expect($location.path()).to.be(path);
+        expect($location.search()).to.eql(search);
+        expect($location.hash()).to.be(hash);
+
+        kbnUrl.changePath(newPath);
+
+        // verify the ending state
+        expect($location.path()).to.be(newPath);
+        expect($location.search()).to.eql(search);
+        expect($location.hash()).to.be(hash);
+      });
+    });
+
+    describe('redirect', function () {
+      it('should change the entire url', function () {
+        var path = '/test/path';
+        var search = {search: 'test'};
+        var hash = 'hash';
+        var newPath = '/new/location';
+
+        $location.path(path).search(search).hash(hash);
+
+        // verify the starting state
+        expect($location.path()).to.be(path);
+        expect($location.search()).to.eql(search);
+        expect($location.hash()).to.be(hash);
+
+        kbnUrl.redirect(newPath);
+
+        // verify the ending state
+        expect($location.path()).to.be(newPath);
+        expect($location.search()).to.eql({});
+        expect($location.hash()).to.be('');
+      });
+
+      it('should replace the current history entry', function () {
+        sinon.stub($location, 'replace');
+        $location.url('/some/path');
+
+        expect($location.replace.callCount).to.be(0);
+        kbnUrl.redirect('/new/path/');
+        expect($location.replace.callCount).to.be(1);
+      });
+
+      it('should call replace on $location', function () {
+        sinon.stub(kbnUrl, 'shouldAutoReload').returns(false);
+        sinon.stub($location, 'replace');
+
+        expect($location.replace.callCount).to.be(0);
+        kbnUrl.redirect('/poop');
+        expect($location.replace.callCount).to.be(1);
+      });
+
+      it('should reload the $route in the next digest tick if needed', function () {
+        sinon.stub($route, 'reload');
+        sinon.stub(kbnUrl, 'shouldAutoReload').returns(true);
+
+        kbnUrl.redirect('/some/path');
+        expect($route.reload.callCount).to.be(0);
+        $rootScope.$apply();
+        expect($route.reload.callCount).to.be(1);
+
+
+        kbnUrl.shouldAutoReload.returns(false);
+        kbnUrl.redirect('/some/path?q=1');
+        expect($route.reload.callCount).to.be(1);
+        $rootScope.$apply();
+        expect($route.reload.callCount).to.be(1);
+      });
+    });
+
+    describe('redirectPath', function () {
+      it('should only change the path', function () {
+        var path = '/test/path';
+        var search = {search: 'test'};
+        var hash = 'hash';
+        var newPath = '/new/location';
+
+        $location
+          .path(path)
+          .search(search)
+          .hash(hash);
+
+        // verify the starting state
+        expect($location.path()).to.be(path);
+        expect($location.search()).to.eql(search);
+        expect($location.hash()).to.be(hash);
+
+        kbnUrl.redirectPath(newPath);
+
+        // verify the ending state
+        expect($location.path()).to.be(newPath);
+        expect($location.search()).to.eql(search);
+        expect($location.hash()).to.be(hash);
+      });
+
+      it('should call replace on $location', function () {
+        sinon.stub(kbnUrl, 'shouldAutoReload').returns(false);
+        sinon.stub($location, 'replace');
+
+        expect($location.replace.callCount).to.be(0);
+        kbnUrl.redirectPath('/poop');
+        expect($location.replace.callCount).to.be(1);
+      });
+
+      it('should reload the $route in the next digest tick if needed', function () {
+        sinon.stub($route, 'reload');
+        sinon.stub(kbnUrl, 'shouldAutoReload').returns(true);
+
+        kbnUrl.redirectPath('/some/path');
+        expect($route.reload.callCount).to.be(0);
+        $rootScope.$apply();
+        expect($route.reload.callCount).to.be(1);
+
+
+        kbnUrl.shouldAutoReload.returns(false);
+        kbnUrl.redirectPath('/some/path?q=1');
+        expect($route.reload.callCount).to.be(1);
+        $rootScope.$apply();
+        expect($route.reload.callCount).to.be(1);
+      });
+    });
+
+    describe('shouldAutoReload', function () {
       beforeEach(function () {
-        $route.reload = sinon.spy();
+        $route.current = {
+          $$route: {
+            regexp: /^\/is-current-route/,
+            reloadOnSearch: false
+          }
+        };
       });
 
-      it('should call $route.reload and update the reloading state', function () {
-        expect(kbnUrl.reloading).to.be(false);
-        kbnUrl.reload();
-        expect(kbnUrl.reloading).to.be(true);
-        expect($route.reload.callCount).to.be(1);
+      it('returns false if the passed url doesn\'t match the current route', function () {
+        expect(
+          kbnUrl.shouldAutoReload('/not-current-route')
+        ).to.be(false);
       });
 
-      it('should not reload when reloading state is true', function () {
-        kbnUrl.reload();
-        expect(kbnUrl.reloading).to.be(true);
-        kbnUrl.reload();
-        expect($route.reload.callCount).to.be(1);
-      });
+      describe('if the passed url does match the route', function () {
+        describe('and the route does not reload on search', function () {
+          describe('and the url is the same', function () {
+            it('returns true', function () {
+              $location.url('/is-current-route?q=search');
+              expect(kbnUrl.shouldAutoReload('/is-current-route?q=search')).to.be(true);
+            });
+          });
+          describe('and the url is different', function () {
+            it('returns true', function () {
+              $location.url('/is-current-route?q=search');
+              expect(kbnUrl.shouldAutoReload('/is-current-route?q=search')).to.be(true);
+            });
+          });
+        });
 
-      it('should reset the running state when routes change', function (done) {
-        kbnUrl.reload();
-        expect(kbnUrl.reloading).to.be(true);
-
-        function checkEvent(event, handler) {
-          $rootScope.$on(event, handler);
-          $rootScope.$emit(event);
-        }
-
-        checkEvent('$routeUpdate', function () {
-          expect(kbnUrl.reloading).to.be(false);
-
-          kbnUrl.reload();
-          expect(kbnUrl.reloading).to.be(true);
-
-          checkEvent('$routeChangeStart', function () {
-            expect(kbnUrl.reloading).to.be(false);
-
-            done();
+        describe('but the route reloads on search', function () {
+          beforeEach(function () { $route.current.$$route.reloadOnSearch = true; });
+          describe('and the url is different', function () {
+            it('returns false', function () {
+              $location.url('/is-current-route?q=search');
+              expect(kbnUrl.shouldAutoReload('/is-current-route?q=some other search')).to.be(false);
+            });
+          });
+          describe('and the url is the same', function () {
+            it('returns true', function () {
+              $location.url('/is-current-route?q=search');
+              expect(kbnUrl.shouldAutoReload('/is-current-route?q=search')).to.be(true);
+            });
           });
         });
       });
@@ -281,6 +410,7 @@ define(function (require) {
         var match = kbnUrl.matches(url);
         expect(match).to.be(false);
       });
+
       it('should return true when matching route', function () {
         var url = '/' + faker.Lorem.words(3).join('/');
 
