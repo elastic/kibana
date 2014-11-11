@@ -16,7 +16,6 @@
  */
 
 
-
 package org.elasticsearch.marvel.agent.event;
 /*
  * Licensed to ElasticSearch under one
@@ -76,7 +75,7 @@ public class ShardEvent extends Event {
     }
 
     @Override
-    String conciseDescription() {
+    public String conciseDescription() {
         switch (shardState) {
             case CREATED:
                 // no shard routing

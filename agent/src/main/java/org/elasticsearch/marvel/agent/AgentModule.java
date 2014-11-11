@@ -27,7 +27,7 @@ public class AgentModule extends AbstractModule {
     @Override
     protected void configure() {
         Multibinder<Exporter> multibinder = Multibinder.newSetBinder(binder(), Exporter.class);
-        multibinder.addBinding().to(ESExporter.class);
+        multibinder.addBinding().to(ESExporter.class).asEagerSingleton();
         bind(AgentService.class).asEagerSingleton();
     }
 }

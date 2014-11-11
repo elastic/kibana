@@ -73,7 +73,7 @@ public abstract class Event {
     /**
      * should return a short string based description of the event
      */
-    abstract String conciseDescription();
+    public abstract String conciseDescription();
 
     @Override
     public String toString() {

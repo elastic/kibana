@@ -16,7 +16,6 @@
  */
 
 
-
 package org.elasticsearch.marvel.agent.event;
 /*
  * Licensed to ElasticSearch under one
@@ -87,7 +86,7 @@ public abstract class ClusterEvent extends Event {
         }
 
         @Override
-        String conciseDescription() {
+        public String conciseDescription() {
             return (added ? "added" : "removed") + ": [" + block.toString() + "]";
         }
 
@@ -116,7 +115,7 @@ public abstract class ClusterEvent extends Event {
         }
 
         @Override
-        String conciseDescription() {
+        public String conciseDescription() {
             return "cluster status is " + clusterHealth.getStatus().name();
         }
 
@@ -157,7 +156,7 @@ public abstract class ClusterEvent extends Event {
         }
 
         @Override
-        String conciseDescription() {
+        public String conciseDescription() {
             return description;
         }
 

@@ -16,9 +16,10 @@
  */
 
 
-package org.elasticsearch.marvel.agent.exporter;
+package org.elasticsearch.marvel.agent;
 
 import org.elasticsearch.common.io.Streams;
+import org.elasticsearch.marvel.agent.exporter.ESExporter;
 import org.elasticsearch.test.ElasticsearchTestCase;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -34,7 +35,7 @@ import java.net.URL;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 
-public class ESExporterUnitTests extends ElasticsearchTestCase {
+public class UtilsUnitTests extends ElasticsearchTestCase {
 
     @Test
     public void testVersionIsExtractableFromIndexTemplate() throws IOException {
@@ -45,60 +46,60 @@ public class ESExporterUnitTests extends ElasticsearchTestCase {
         }
         template = Streams.copyToByteArray(is);
         is.close();
-        MatcherAssert.assertThat(ESExporter.parseIndexVersionFromTemplate(template), Matchers.greaterThan(0));
+        MatcherAssert.assertThat(Utils.parseIndexVersionFromTemplate(template), Matchers.greaterThan(0));
     }
 
     @Test
     public void testHostParsing() throws MalformedURLException, URISyntaxException {
-        URL url = ESExporter.parseHostWithPath("localhost:9200", "");
+        URL url = Utils.parseHostWithPath("localhost:9200", "");
         verifyUrl(url, "http", "localhost", 9200, "/");
 
-        url = ESExporter.parseHostWithPath("localhost", "_bulk");
+        url = Utils.parseHostWithPath("localhost", "_bulk");
         verifyUrl(url, "http", "localhost", 9200, "/_bulk");
 
-        url = ESExporter.parseHostWithPath("http://localhost:9200", "_bulk");
+        url = Utils.parseHostWithPath("http://localhost:9200", "_bulk");
         verifyUrl(url, "http", "localhost", 9200, "/_bulk");
 
-        url = ESExporter.parseHostWithPath("http://localhost", "_bulk");
+        url = Utils.parseHostWithPath("http://localhost", "_bulk");
         verifyUrl(url, "http", "localhost", 9200, "/_bulk");
 
-        url = ESExporter.parseHostWithPath("https://localhost:9200", "_bulk");
+        url = Utils.parseHostWithPath("https://localhost:9200", "_bulk");
         verifyUrl(url, "https", "localhost", 9200, "/_bulk");
 
-        url = ESExporter.parseHostWithPath("https://boaz-air.local:9200", "_bulk");
+        url = Utils.parseHostWithPath("https://boaz-air.local:9200", "_bulk");
         verifyUrl(url, "https", "boaz-air.local", 9200, "/_bulk");
 
-        url = ESExporter.parseHostWithPath("boaz:test@localhost:9200", "");
+        url = Utils.parseHostWithPath("boaz:test@localhost:9200", "");
         verifyUrl(url, "http", "localhost", 9200, "/", "boaz:test");
 
-        url = ESExporter.parseHostWithPath("boaz:test@localhost", "_bulk");
+        url = Utils.parseHostWithPath("boaz:test@localhost", "_bulk");
         verifyUrl(url, "http", "localhost", 9200, "/_bulk", "boaz:test");
 
-        url = ESExporter.parseHostWithPath("http://boaz:test@localhost:9200", "_bulk");
+        url = Utils.parseHostWithPath("http://boaz:test@localhost:9200", "_bulk");
         verifyUrl(url, "http", "localhost", 9200, "/_bulk", "boaz:test");
 
-        url = ESExporter.parseHostWithPath("http://boaz:test@localhost", "_bulk");
+        url = Utils.parseHostWithPath("http://boaz:test@localhost", "_bulk");
         verifyUrl(url, "http", "localhost", 9200, "/_bulk", "boaz:test");
 
-        url = ESExporter.parseHostWithPath("https://boaz:test@localhost:9200", "_bulk");
+        url = Utils.parseHostWithPath("https://boaz:test@localhost:9200", "_bulk");
         verifyUrl(url, "https", "localhost", 9200, "/_bulk", "boaz:test");
 
-        url = ESExporter.parseHostWithPath("boaz:test@localhost:9200/suburl", "");
+        url = Utils.parseHostWithPath("boaz:test@localhost:9200/suburl", "");
         verifyUrl(url, "http", "localhost", 9200, "/suburl/", "boaz:test");
 
-        url = ESExporter.parseHostWithPath("boaz:test@localhost:9200/suburl/", "");
+        url = Utils.parseHostWithPath("boaz:test@localhost:9200/suburl/", "");
         verifyUrl(url, "http", "localhost", 9200, "/suburl/", "boaz:test");
 
-        url = ESExporter.parseHostWithPath("localhost/suburl", "_bulk");
+        url = Utils.parseHostWithPath("localhost/suburl", "_bulk");
         verifyUrl(url, "http", "localhost", 9200, "/suburl/_bulk");
 
-        url = ESExporter.parseHostWithPath("http://boaz:test@localhost:9200/suburl/suburl1", "_bulk");
+        url = Utils.parseHostWithPath("http://boaz:test@localhost:9200/suburl/suburl1", "_bulk");
         verifyUrl(url, "http", "localhost", 9200, "/suburl/suburl1/_bulk", "boaz:test");
 
-        url = ESExporter.parseHostWithPath("http://boaz:test@localhost/suburl", "_bulk");
+        url = Utils.parseHostWithPath("http://boaz:test@localhost/suburl", "_bulk");
         verifyUrl(url, "http", "localhost", 9200, "/suburl/_bulk", "boaz:test");
 
-        url = ESExporter.parseHostWithPath("https://boaz:test@localhost:9200/suburl", "_bulk");
+        url = Utils.parseHostWithPath("https://boaz:test@localhost:9200/suburl", "_bulk");
         verifyUrl(url, "https", "localhost", 9200, "/suburl/_bulk", "boaz:test");
     }
 

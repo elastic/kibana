@@ -16,7 +16,6 @@
  */
 
 
-
 package org.elasticsearch.marvel.agent.event;
 /*
  * Licensed to ElasticSearch under one
@@ -107,7 +106,7 @@ public abstract class RoutingEvent extends Event {
         }
 
         @Override
-        String conciseDescription() {
+        public String conciseDescription() {
             return shardDescription(shardRouting) + " initializing on " + Utils.nodeDescription(node);
         }
     }
@@ -124,7 +123,7 @@ public abstract class RoutingEvent extends Event {
         }
 
         @Override
-        String conciseDescription() {
+        public String conciseDescription() {
             return shardDescription(shardRouting) + " started on " + Utils.nodeDescription(node);
         }
     }
@@ -141,7 +140,7 @@ public abstract class RoutingEvent extends Event {
         }
 
         @Override
-        String conciseDescription() {
+        public String conciseDescription() {
             return shardRouting.shardId() + " promoted to primary on " + Utils.nodeDescription(node);
         }
     }
@@ -162,7 +161,7 @@ public abstract class RoutingEvent extends Event {
         }
 
         @Override
-        String conciseDescription() {
+        public String conciseDescription() {
             return shardDescription(shardRouting) + " relocating to " + Utils.nodeDescription(relocatingTo) +
                     " from " + Utils.nodeDescription(node);
         }

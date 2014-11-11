@@ -18,13 +18,19 @@
 package org.elasticsearch.marvel.agent;
 
 import org.elasticsearch.cluster.node.DiscoveryNode;
+import org.elasticsearch.common.component.Lifecycle;
+import org.elasticsearch.common.logging.ESLogger;
+import org.elasticsearch.common.transport.BoundTransportAddress;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.http.HttpServer;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
+import java.io.UnsupportedEncodingException;
+import java.net.*;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Utils {
 
@@ -79,4 +85,63 @@ public class Utils {
         return builder.toString();
     }
 
+    public static String[] extractHostsFromHttpServer(HttpServer httpServer, ESLogger logger) {
+        logger.debug("deriving host setting from httpServer");
+        BoundTransportAddress boundAddress = httpServer.info().address();
+        if (httpServer.lifecycleState() != Lifecycle.State.STARTED || boundAddress == null || boundAddress.boundAddress() == null) {
+            logger.debug("local http server is not yet started. can't connect");
+            return null;
+        }
+        if (boundAddress.boundAddress().uniqueAddressTypeId() != 1) {
+            logger.error("local node is not bound via the http transport. can't connect");
+            return null;
+        }
+        InetSocketTransportAddress address = (InetSocketTransportAddress) boundAddress.boundAddress();
+        InetSocketAddress inetSocketAddress = address.address();
+        InetAddress inetAddress = inetSocketAddress.getAddress();
+        if (inetAddress == null) {
+            logger.error("failed to extract the ip address of current node.");
+            return null;
+        }
+
+        String host = inetAddress.getHostAddress();
+        if (host.indexOf(":") >= 0) {
+            // ipv6
+            host = "[" + host + "]";
+        }
+
+        return new String[]{host + ":" + inetSocketAddress.getPort()};
+    }
+
+    public static URL parseHostWithPath(String host, String path) throws URISyntaxException, MalformedURLException {
+
+        if (!host.contains("://")) {
+            // prefix with http
+            host = "http://" + host;
+        }
+        if (!host.endsWith("/")) {
+            // make sure we can safely resolves sub paths and not replace parent folders
+            host = host + "/";
+        }
+
+        URI hostUrl = new URI(host);
+
+        if (hostUrl.getPort() == -1) {
+            // url has no port, default to 9200
+            hostUrl = new URI(hostUrl.getScheme(), hostUrl.getUserInfo(), hostUrl.getHost(), 9200, hostUrl.getPath(), hostUrl.getQuery(), hostUrl.getFragment());
+
+        }
+        URI hostWithPath = hostUrl.resolve(path);
+        return hostWithPath.toURL();
+    }
+
+    public static int parseIndexVersionFromTemplate(byte[] template) throws UnsupportedEncodingException {
+        Pattern versionRegex = Pattern.compile("marvel.index_format\"\\s*:\\s*\"?(\\d+)\"?");
+        Matcher matcher = versionRegex.matcher(new String(template, "UTF-8"));
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group(1));
+        } else {
+            return -1;
+        }
+    }
 }

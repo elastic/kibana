@@ -194,6 +194,11 @@ public class AgentService extends AbstractLifecycleComponent<AgentService> imple
             e.close();
     }
 
+    // used for testing
+    public Collection<Exporter> getExporters() {
+        return exporters;
+    }
+
     @Override
     public void onRefreshSettings(Settings settings) {
         TimeValue newSamplingInterval = settings.getAsTime(SETTINGS_INTERVAL, null);

@@ -16,7 +16,6 @@
  */
 
 
-
 package org.elasticsearch.marvel.agent.event;
 /*
  * Licensed to ElasticSearch under one
@@ -87,7 +86,7 @@ public abstract class IndexEvent extends Event {
         }
 
         @Override
-        String conciseDescription() {
+        public String conciseDescription() {
             return "[" + index + "] " + (created ? " created" : " deleted");
         }
 
@@ -116,7 +115,7 @@ public abstract class IndexEvent extends Event {
         }
 
         @Override
-        String conciseDescription() {
+        public String conciseDescription() {
             return "[" + indexHealth.getIndex() + "] status is " + indexHealth.getStatus().name();
         }
 

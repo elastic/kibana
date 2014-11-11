@@ -16,7 +16,6 @@
  */
 
 
-
 package org.elasticsearch.marvel.agent.event;
 /*
  * Licensed to ElasticSearch under one
@@ -85,7 +84,7 @@ public abstract class NodeEvent extends Event {
         }
 
         @Override
-        String conciseDescription() {
+        public String conciseDescription() {
             return Utils.nodeDescription(node) + " became master";
         }
 
@@ -109,7 +108,7 @@ public abstract class NodeEvent extends Event {
         }
 
         @Override
-        String conciseDescription() {
+        public String conciseDescription() {
             return Utils.nodeDescription(node) + (joined ? " joined" : " left");
         }
 

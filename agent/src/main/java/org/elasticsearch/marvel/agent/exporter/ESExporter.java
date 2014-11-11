@@ -29,6 +29,7 @@ import org.elasticsearch.cluster.routing.ShardRouting;
 import org.elasticsearch.cluster.settings.ClusterDynamicSettings;
 import org.elasticsearch.cluster.settings.DynamicSettings;
 import org.elasticsearch.common.Base64;
+import org.elasticsearch.common.Nullable;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.component.AbstractLifecycleComponent;
@@ -39,8 +40,6 @@ import org.elasticsearch.common.joda.Joda;
 import org.elasticsearch.common.joda.time.format.DateTimeFormat;
 import org.elasticsearch.common.joda.time.format.DateTimeFormatter;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.BoundTransportAddress;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.util.concurrent.EsExecutors;
 import org.elasticsearch.common.xcontent.*;
@@ -52,12 +51,13 @@ import org.elasticsearch.node.settings.NodeSettingsService;
 
 import javax.net.ssl.*;
 import java.io.*;
-import java.net.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ESExporter extends AbstractLifecycleComponent<ESExporter> implements Exporter<ESExporter>, NodeSettingsService.Listener {
 
@@ -112,7 +112,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
         for (String host : hosts) {
             try {
-                parseHostWithPath(host, "");
+                Utils.parseHostWithPath(host, "");
             } catch (URISyntaxException e) {
                 throw new RuntimeException("[marvel.agent.exporter] invalid host: [" + host + "]. error: [" + e.getMessage() + "]");
             } catch (MalformedURLException e) {
@@ -189,7 +189,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             addXContentRendererToConnection(conn, indicesStatsRenderer);
             sendCloseExportingConnection(conn);
         } catch (IOException e) {
-            logger.error("error sending data", e);
+            logger.error("error sending data to [{}]", e, conn.getURL());
             return;
         }
     }
@@ -208,17 +208,8 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
 
     private HttpURLConnection openExportingConnection() {
-        if (!checkedAndUploadedIndexTemplate) {
-            try {
-                checkedAndUploadedIndexTemplate = checkAndUploadIndexTemplate();
-            } catch (RuntimeException e) {
-                logger.error("failed to upload index template, stopping export", e);
-                return null;
-            }
-        }
-
         logger.trace("setting up an export connection");
-        HttpURLConnection conn = openConnection("POST", "_bulk", XContentType.SMILE.restContentType());
+        HttpURLConnection conn = openAndValidateConnection("POST", "_bulk", XContentType.SMILE.restContentType());
         if (conn != null && (keepAliveThread == null || !keepAliveThread.isAlive())) {
             // start keep alive upon successful connection if not there.
             initKeepAliveThread();
@@ -290,7 +281,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             addXContentRendererToConnection(conn, xContentRenderer);
             sendCloseExportingConnection(conn);
         } catch (IOException e) {
-            logger.error("error sending data", e);
+            logger.error("error sending data to [{}]", e, conn.getURL());
             return;
         }
 
@@ -321,91 +312,71 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
     protected void doClose() {
     }
 
+    // used for testing
+    String[] getHosts() {
+        return hosts;
+    }
 
     private String getIndexName() {
         return indexPrefix + "-" + indexTimeFormatter.print(System.currentTimeMillis());
 
     }
 
-
-    private HttpURLConnection openConnection(String method, String path) {
-        return openConnection(method, path, null);
+    /**
+     * open a connection to any host, validating it has the template installed if needed
+     *
+     * @return a url connection to the selected host or null if no current host is available.
+     */
+    private HttpURLConnection openAndValidateConnection(String method, String path) {
+        return openAndValidateConnection(method, path, null);
     }
 
-    private HttpURLConnection openConnection(String method, String path, String contentType) {
-        int hostIndex = 0;
+    /**
+     * open a connection to any host, validating it has the template installed if needed
+     *
+     * @return a url connection to the selected host or null if no current host is available.
+     */
+    private HttpURLConnection openAndValidateConnection(String method, String path, String contentType) {
         if (hosts.length == 0) {
             if (httpServer == null) {
                 logger.debug("local http server is not yet injected. can't connect.");
                 return null;
             }
-            logger.debug("deriving host setting from httpServer");
-            BoundTransportAddress boundAddress = httpServer.info().address();
-            if (httpServer.lifecycleState() != Lifecycle.State.STARTED || boundAddress == null || boundAddress.boundAddress() == null) {
-                logger.debug("local http server is not yet started. can't connect");
-                return null;
-            }
-            if (boundAddress.boundAddress().uniqueAddressTypeId() != 1) {
-                logger.error("local node is not bound via the http transport. can't connect");
-                return null;
-            }
-            InetSocketTransportAddress address = (InetSocketTransportAddress) boundAddress.boundAddress();
-            InetSocketAddress inetSocketAddress = address.address();
-            InetAddress inetAddress = inetSocketAddress.getAddress();
-            if (inetAddress == null) {
-                logger.error("failed to extract the ip address of current node.");
-                return null;
-            }
 
-            String host = inetAddress.getHostAddress();
-            if (host.indexOf(":") >= 0) {
-                // ipv6
-                host = "[" + host + "]";
+            String[] extractedHosts = Utils.extractHostsFromHttpServer(httpServer, logger);
+            if (extractedHosts == null || extractedHosts.length == 0) {
+                return null;
             }
-
-            hosts = new String[]{host + ":" + inetSocketAddress.getPort()};
+            hosts = extractedHosts;
+            logger.trace("auto-resolved hosts to ", extractedHosts);
             boundToLocalNode = true;
         }
 
+        // it's important to have boundToLocalNode persistent to prevent calls during shutdown (causing ugly exceptions)
         if (boundToLocalNode && httpServer.lifecycleState() != Lifecycle.State.STARTED) {
             logger.debug("local node http server is not started. can't connect");
             return null;
         }
 
+        // out of for to move faulty hosts to the end
+        int hostIndex = 0;
         try {
             for (; hostIndex < hosts.length; hostIndex++) {
                 String host = hosts[hostIndex];
-                try {
-                    final URL url = parseHostWithPath(host, path);
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
-                    if (conn instanceof HttpsURLConnection && sslSocketFactory != null) {
-                        HttpsURLConnection httpsConn = (HttpsURLConnection) conn;
-                        httpsConn.setSSLSocketFactory(sslSocketFactory);
+                if (!checkedAndUploadedIndexTemplate) {
+                    // check templates first on the host
+                    checkedAndUploadedIndexTemplate = checkAndUploadIndexTemplate(host);
+                    if (!checkedAndUploadedIndexTemplate) {
+                        continue;
                     }
-
-                    conn.setRequestMethod(method);
-                    conn.setConnectTimeout(timeoutInMillis);
-                    conn.setReadTimeout(readTimeoutInMillis);
-                    if (contentType != null) {
-                        conn.setRequestProperty("Content-Type", contentType);
-                    }
-                    if (url.getUserInfo() != null) {
-                        String basicAuth = "Basic " + Base64.encodeBytes(url.getUserInfo().getBytes("ISO-8859-1"));
-                        conn.setRequestProperty("Authorization", basicAuth);
-                    }
-                    conn.setUseCaches(false);
-                    if (method.equalsIgnoreCase("POST") || method.equalsIgnoreCase("PUT")) {
-                        conn.setDoOutput(true);
-                    }
-                    conn.connect();
-
-                    return conn;
-                } catch (URISyntaxException e) {
-                    logger.error("error parsing host [{}]", e, host);
-                } catch (IOException e) {
-                    logger.error("error connecting to [{}]", e, host);
                 }
+                HttpURLConnection connection = openConnection(host, method, path, contentType);
+                if (connection != null) {
+                    return connection;
+                }
+                // failed hosts - reset template check , someone may have restarted the target cluster and deleted
+                // it's data folder. be safe.
+                checkedAndUploadedIndexTemplate = false;
             }
         } finally {
             if (hostIndex > 0 && hostIndex < hosts.length) {
@@ -421,47 +392,52 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         logger.error("could not connect to any configured elasticsearch instances: [{}]", hosts);
 
         return null;
+
     }
 
-    static URL parseHostWithPath(String host, String path) throws URISyntaxException, MalformedURLException {
+    /** open a connection to the given hosts, returning null when not successful * */
+    private HttpURLConnection openConnection(String host, String method, String path, @Nullable String contentType) {
+        try {
+            final URL url = Utils.parseHostWithPath(host, path);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-        if (!host.contains("://")) {
-            // prefix with http
-            host = "http://" + host;
+            if (conn instanceof HttpsURLConnection && sslSocketFactory != null) {
+                HttpsURLConnection httpsConn = (HttpsURLConnection) conn;
+                httpsConn.setSSLSocketFactory(sslSocketFactory);
+            }
+
+            conn.setRequestMethod(method);
+            conn.setConnectTimeout(timeoutInMillis);
+            conn.setReadTimeout(readTimeoutInMillis);
+            if (contentType != null) {
+                conn.setRequestProperty("Content-Type", contentType);
+            }
+            if (url.getUserInfo() != null) {
+                String basicAuth = "Basic " + Base64.encodeBytes(url.getUserInfo().getBytes("ISO-8859-1"));
+                conn.setRequestProperty("Authorization", basicAuth);
+            }
+            conn.setUseCaches(false);
+            if (method.equalsIgnoreCase("POST") || method.equalsIgnoreCase("PUT")) {
+                conn.setDoOutput(true);
+            }
+            conn.connect();
+
+            return conn;
+        } catch (URISyntaxException e) {
+            logger.error("error parsing host [{}]", e, host);
+        } catch (IOException e) {
+            logger.error("error connecting to [{}]", e, host);
         }
-        if (!host.endsWith("/")) {
-            // make sure we can safely resolves sub paths and not replace parent folders
-            host = host + "/";
-        }
-
-        URI hostUrl = new URI(host);
-
-        if (hostUrl.getPort() == -1) {
-            // url has no port, default to 9200
-            hostUrl = new URI(hostUrl.getScheme(), hostUrl.getUserInfo(), hostUrl.getHost(), 9200, hostUrl.getPath(), hostUrl.getQuery(), hostUrl.getFragment());
-
-        }
-        URI hostWithPath = hostUrl.resolve(path);
-        return hostWithPath.toURL();
-    }
-
-    static int parseIndexVersionFromTemplate(byte[] template) throws UnsupportedEncodingException {
-        Pattern versionRegex = Pattern.compile("marvel.index_format\"\\s*:\\s*\"?(\\d+)\"?");
-        Matcher matcher = versionRegex.matcher(new String(template, "UTF-8"));
-        if (matcher.find()) {
-            return Integer.parseInt(matcher.group(1));
-        } else {
-            return -1;
-        }
+        return null;
     }
 
     /**
      * Checks if the index templates already exist and if not uploads it
      * Any critical error that should prevent data exporting is communicated via an exception.
      *
-     * @return true if template exists or was uploaded.
+     * @return true if template exists or was uploaded successfully.
      */
-    private boolean checkAndUploadIndexTemplate() {
+    private boolean checkAndUploadIndexTemplate(final String host) {
         byte[] template;
         try {
             InputStream is = ESExporter.class.getResourceAsStream("/marvel_index_template.json");
@@ -476,14 +452,13 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             throw new RuntimeException("failed to load marvel_index_template.json", e);
         }
 
-
         try {
-            int expectedVersion = parseIndexVersionFromTemplate(template);
+            int expectedVersion = Utils.parseIndexVersionFromTemplate(template);
             if (expectedVersion < 0) {
                 throw new RuntimeException("failed to find an index version in pre-configured index template");
             }
-
-            HttpURLConnection conn = openConnection("GET", "_template/marvel");
+            logger.trace("verifying template via [{}]", host);
+            HttpURLConnection conn = openConnection(host, "GET", "_template/marvel", null);
             if (conn == null) {
                 return false;
             }
@@ -494,7 +469,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
                 InputStream is = conn.getInputStream();
                 byte[] existingTemplate = Streams.copyToByteArray(is);
                 is.close();
-                int foundVersion = parseIndexVersionFromTemplate(existingTemplate);
+                int foundVersion = Utils.parseIndexVersionFromTemplate(existingTemplate);
                 if (foundVersion < 0) {
                     logger.warn("found an existing index template but couldn't extract it's version. leaving it as is.");
                     hasTemplate = true;
@@ -508,11 +483,11 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             // nothing there, lets create it
             if (!hasTemplate) {
                 logger.debug("uploading index template");
-                conn = openConnection("PUT", "_template/marvel", XContentType.JSON.restContentType());
+                conn = openConnection(host, "PUT", "_template/marvel", XContentType.JSON.restContentType());
                 OutputStream os = conn.getOutputStream();
                 Streams.copy(template, os);
                 if (!(conn.getResponseCode() == 200 || conn.getResponseCode() == 201)) {
-                    logConnectionError("error adding document to elasticsearch", conn);
+                    logConnectionError("error adding the marvel template to [" + host + "]", conn);
                 } else {
                     hasTemplate = true;
                 }
@@ -521,8 +496,8 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
             return hasTemplate;
         } catch (IOException e) {
-            // if we're not sure of the template, we can't send data... re-raise exception.
-            throw new RuntimeException("failed to load/verify index template", e);
+            logger.error("failed to verify/upload the marvel template to [{}]", e, host);
+            return false;
         }
     }
 
@@ -537,7 +512,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         try {
             logger.error("{} response code [{} {}]. content: [{}]", msg, conn.getResponseCode(), conn.getResponseMessage(), err);
         } catch (IOException e) {
-            logger.error("connection had an error while reporting the error. tough life.");
+            logger.error("{}. connection had an error while reporting the error. tough life.", msg);
         }
     }
 
@@ -559,6 +534,8 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         if (newHosts != null) {
             logger.info("hosts set to [{}]", Strings.arrayToCommaDelimitedString(newHosts));
             this.hosts = newHosts;
+            this.checkedAndUploadedIndexTemplate = false;
+            this.boundToLocalNode = false;
         }
     }
 
@@ -729,7 +706,6 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         }
     }
 
-
     class EventsRenderer implements MultiXContentRenderer {
 
         Event[] events;
@@ -812,8 +788,16 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
                     if (closed) {
                         return;
                     }
-                    HttpURLConnection conn = openConnection("GET", "");
-                    if (conn != null) {
+                    String[] currentHosts = hosts;
+                    if (currentHosts.length == 0) {
+                        logger.trace("keep alive thread shutting down. no hosts defined");
+                        return; // no hosts configured at the moment.
+                    }
+                    HttpURLConnection conn = openConnection(currentHosts[0], "GET", "", null);
+                    if (conn == null) {
+                        logger.trace("keep alive thread shutting down. failed to open connection to current host [{}]", currentHosts[0]);
+                        return;
+                    } else {
                         conn.getInputStream().close(); // close and release to connection pool.
                     }
                 } catch (InterruptedException e) {
