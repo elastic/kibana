@@ -158,7 +158,7 @@ define(function (require) {
     };
 
     $scope.startOver = function () {
-      kbnUrl.change('/visualize', {}, true);
+      kbnUrl.change('/visualize', {});
     };
 
     $scope.doSave = function () {

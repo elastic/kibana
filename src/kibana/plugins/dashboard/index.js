@@ -99,7 +99,7 @@ define(function (require) {
         }
 
         $scope.newDashboard = function () {
-          kbnUrl.change('/dashboard', {}, true);
+          kbnUrl.change('/dashboard', {});
         };
 
         $scope.filterResults = function () {
