@@ -1,5 +1,5 @@
 <!-- render {"template":"# Kibana <%= pkg.version %>"} -->
-# Kibana 4.0.0-BETA1.1
+# Kibana 4.0.0-BETA2
 <!-- /render -->
 
 [![Build Status](https://travis-ci.org/elasticsearch/kibana.svg)](https://travis-ci.org/elasticsearch/kibana)
