@@ -26,7 +26,7 @@ define(function (require) {
     timestamp: {
       indexed: true,
       type: 'date'
-    }
+    },
   };
 
   // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
@@ -354,50 +354,6 @@ define(function (require) {
 
         });
 
-      });
-    });
-
-    describe('kbnTableRow meta', function () {
-      var $elem = angular.element(
-          '<tr kbn-table-row="row" ' +
-          'columns="columns" ' +
-          'sorting="sorting"' +
-          'filtering="filtering"' +
-          'mapping="mapping"' +
-          'timefield="timefield" ' +
-          '></tr>'
-      );
-      var $details;
-
-      beforeEach(function () {
-        var row = getFakeRow(0, mapping);
-        mapping._id = {indexed: true, type: 'string'};
-        row._source._id = 'foo';
-
-        init($elem, {
-          row: row,
-          columns: [],
-          sorting: [],
-          filtering: sinon.spy(),
-          maxLength: 50,
-          mapping: mapping
-        });
-
-        sinon.stub(config, 'get').withArgs('metaFields').returns(['_id']);
-
-        // Open the row
-        $scope.toggleRow();
-        $scope.$digest();
-        $details = $elem.next();
-      });
-
-      afterEach(function () {
-        delete mapping._id;
-        destroy();
-      });
-
-      it('should render even when the row source contains a field with the same name as a meta field', function () {
-        expect($details.find('tr').length).to.be(4);
       });
     });
 

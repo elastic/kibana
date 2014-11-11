@@ -66,13 +66,7 @@ define(function (require) {
           }
 
           // The fields to loop over
-          if (!row._fields) {
-            row._fields = _.union(
-              _.keys(row._source),
-              config.get('metaFields')
-            );
-            row._fields.sort();
-          }
+          row._fields = row._fields || _.keys(row._source).concat(config.get('metaFields')).sort();
           row._mode = 'table';
 
           // empty the details and rebuild it
