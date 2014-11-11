@@ -80,8 +80,6 @@ module Kibana
 
     end
 
-
-
   end
 end
 
