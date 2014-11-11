@@ -3,6 +3,8 @@ require "bundler/setup"
 require "puma"
 require "colorize"
 require "json"
+require "socket"
+require "timeout"
 require "#{Kibana.global_settings[:root]}/lib/app"
 
 # Require the application
@@ -33,7 +35,29 @@ module Kibana
       end
     end
 
+    def self.port_in_use(ip, port)
+      begin
+        Timeout::timeout(1) do
+          begin
+            s = TCPSocket.new(ip, port)
+            s.close
+            return true
+          rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH
+            return false
+          end
+        end
+      rescue Timeout::Error
+      end
+
+      return false
+    end
+
     def self.run(options = {})
+      if port_in_use(options[:host], options[:port])
+        log("tcp://#{options[:host]}:#{options[:port]} is in use")
+        return
+      end
+
       options = DEFAULTS.merge(options)
       min, max = options[:threads].split(':', 2)
 
@@ -55,6 +79,8 @@ module Kibana
       end
 
     end
+
+
 
   end
 end
