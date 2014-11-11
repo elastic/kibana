@@ -70,7 +70,7 @@ define(function (require) {
         };
 
         self.exportAsCsv = function () {
-          saveAs(new Blob(self.toCsv(), { type: 'text/plain' }), self.csv.filename);
+          saveAs(new Blob([self.toCsv()], { type: 'text/plain' }), self.csv.filename);
         };
 
         self.toCsv = function () {
