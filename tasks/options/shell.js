@@ -35,6 +35,7 @@ module.exports = function (config) {
       options: {
         stdout: true,
         failOnError: true,
+        maxBuffer: 10 * 1024 * 1024,
         execOptions: {
           cwd: '<%= agentDir %>',
         }
