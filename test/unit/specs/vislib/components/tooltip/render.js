@@ -18,7 +18,7 @@ define(function (require) {
       beforeEach(function () {
         inject(function (d3, Private) {
           vis = Private(require('vislib_fixtures/vis_fixture'))();
-          data = require('vislib_fixtures/mock_data/date_histogram/data0');
+          data = require('vislib_fixtures/mock_data/date_histogram/series');
           require('css!components/vislib/styles/main');
 
           vis.render(data);

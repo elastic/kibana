@@ -4,7 +4,9 @@ define(function (require) {
 
     return function (visLibParams) {
       var Vis = Private(require('components/vislib/vis'));
-      var visChart = $('body').append('<div class=visualize-chart></div>');
+
+      $('body').append('<div class=visualize-chart></div>');
+
       var $el = $('.visualize-chart');
       var config = visLibParams || {
         shareYAxis: true,
