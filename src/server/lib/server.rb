@@ -3,7 +3,6 @@ require "bundler/setup"
 require "puma"
 require "colorize"
 require "json"
-require "socket"
 require "#{Kibana.global_settings[:root]}/lib/app"
 
 # Require the application
@@ -34,22 +33,7 @@ module Kibana
       end
     end
 
-    def self.port_in_use(ip, port)
-      begin
-        s = TCPServer.new(ip, port)
-        s.close
-        return false
-      rescue Errno::EADDRINUSE
-        return true
-      end
-      return true
-    end
-
     def self.run(options = {})
-      if port_in_use(options[:host], options[:port])
-        log("tcp://#{options[:host]}:#{options[:port]} is in use")
-        return
-      end
 
       options = DEFAULTS.merge(options)
       min, max = options[:threads].split(':', 2)
@@ -58,7 +42,13 @@ module Kibana
       server = Puma::Server.new(app)
 
       # Configure server
-      server.add_tcp_listener(options[:host], options[:port])
+      begin
+        server.add_tcp_listener(options[:host], options[:port])
+      rescue Errno::EADDRINUSE
+        log("tcp://#{options[:host]}:#{options[:port]} is in use")
+        exit(1)
+      end
+
       server.min_threads = min
       server.max_threads = max
 
