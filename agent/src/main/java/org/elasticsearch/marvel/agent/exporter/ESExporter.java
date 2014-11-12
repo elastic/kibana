@@ -424,12 +424,20 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
             return conn;
         } catch (URISyntaxException e) {
-            logger.error("error parsing host [{}]", e, host);
+            logErrorBasedOnLevel(e, "error parsing host [{}]", host);
         } catch (IOException e) {
-            logger.error("error connecting to [{}]", e, host);
+            logErrorBasedOnLevel(e, "error connecting to [{}]", host);
         }
         return null;
     }
+
+    private void logErrorBasedOnLevel(Throwable t, String msg, Object... params) {
+        logger.error(msg + " [" + t.getMessage() + "]", params);
+        if (logger.isDebugEnabled()) {
+            logger.debug(msg + ". full error details", t, params);
+        }
+    }
+
 
     /**
      * Checks if the index templates already exist and if not uploads it
