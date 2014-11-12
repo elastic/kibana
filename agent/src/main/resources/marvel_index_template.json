@@ -184,6 +184,30 @@
               }
             }
           }
+        },
+        //thread_pool.listener.completed
+        "thread_pool": {
+          "properties": {
+            "listener": {
+              "properties": {
+                "threads": {
+                  "type": "long"
+                },
+                "rejected": {
+                  "type": "long"
+                },
+                "completed": {
+                  "type": "long"
+                },
+                "queue": {
+                  "type": "long"
+                },
+                "largest": {
+                  "type": "long"
+                }
+              }
+            }
+          }
         }
       }
     },

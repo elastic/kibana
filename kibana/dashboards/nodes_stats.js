@@ -184,8 +184,9 @@ function clusterViewFilter (query) {
 }
 
 
-function threadPoolRow(name) {
-  var field_prefix = "thread_pool." + name.toLowerCase() + ".",
+function threadPoolRow(name, field_name) {
+  field_name = field_name || name.toLowerCase();
+  var field_prefix = "thread_pool." + field_name + ".",
     name_prefix = name + " Thread Pool ";
   return {
     "title": "Thread Pools - " + name,
@@ -205,7 +206,15 @@ function threadPoolRow(name) {
         "mode": "min",
         "scaleSeconds": true,
         "y_format": "short"
-      }
+      },
+      {
+        "value_field": field_prefix + "queue",
+        "title": name_prefix + "Queue Size"
+      },
+      {
+        "value_field": field_prefix + "largest",
+        "title": name_prefix + "Largest Thread Count"
+      },
     ]
   };
 }
@@ -679,10 +688,16 @@ var rows = [
   threadPoolRow("Index"),
   threadPoolRow("Bulk"),
   threadPoolRow("Get"),
+  threadPoolRow("Generic"),
+  threadPoolRow("Management"),
   threadPoolRow("Suggest"),
   threadPoolRow("Percolate"),
+  threadPoolRow("Warmer"),
+  threadPoolRow("Flush"),
   threadPoolRow("Refresh"),
   threadPoolRow("Optimize"),
+  threadPoolRow("Snapshot"),
+  threadPoolRow("Listener"),
   {
     "title": "Disk",
     "panels": [
