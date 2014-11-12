@@ -195,6 +195,7 @@ define(function (require) {
 
     register: function (data) {
       var self = this;
+      data.creationDate = new Date().toISOString();
       this.set('registrationData', data);
       this.set('status', 'registered');
       self.saveToBrowser();
@@ -203,6 +204,7 @@ define(function (require) {
 
     confirmPurchase: function (data) {
       var self = this;
+      data.creationDate = new Date().toISOString();
       this.set('registrationData', data);
       this.set('status', 'purchased');
       this.set('registrationSent', false);
