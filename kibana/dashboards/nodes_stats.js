@@ -559,6 +559,21 @@ var rows = [
         "value_field": "indices.completion.size_in_bytes",
         "title": "Indices Completion size",
         "y_format": "bytes"
+      },
+      {
+        "value_field": "indices.segments.index_writer_memory_in_bytes",
+        "title": "Indices Index Writer Memory",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "indices.segments.version_map_memory_in_bytes",
+        "title": "Indices Version Map Memory",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "indices.segments.index_writer_max_memory_in_bytes",
+        "title": "Indices Index Writer Max Memory",
+        "y_format": "bytes"
       }
     ]
   },

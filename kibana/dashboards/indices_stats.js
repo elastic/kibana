@@ -375,7 +375,23 @@ var rows = [
         "value_field": "total.completion.size_in_bytes",
         "title": "Completion size",
         "y_format": "bytes"
+      },
+      {
+        "value_field": "total.segments.index_writer_memory_in_bytes",
+        "title": "Index Writer Memory",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "total.segments.version_map_memory_in_bytes",
+        "title": "Version Map Memory",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "total.segments.index_writer_max_memory_in_bytes",
+        "title": "Index Writer Max Memory",
+        "y_format": "bytes"
       }
+
     ]
   },
   {

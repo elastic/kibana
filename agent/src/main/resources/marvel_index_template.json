@@ -152,6 +152,19 @@
                   "type": "long"
                 }
               }
+            },
+            "segments": {
+              "properties": {
+                "index_writer_memory_in_bytes": {
+                  "type": "long"
+                },
+                "version_map_memory_in_bytes": {
+                  "type": "long"
+                },
+                "index_writer_max_memory_in_bytes": {
+                  "type": "long"
+                }
+              }
             }
           }
         },
@@ -244,6 +257,19 @@
                       "type": "long"
                     }
                   }
+                }
+              }
+            },
+            "segments": {
+              "properties": {
+                "index_writer_memory_in_bytes": {
+                  "type": "long"
+                },
+                "version_map_memory_in_bytes": {
+                  "type": "long"
+                },
+                "index_writer_max_memory_in_bytes": {
+                  "type": "long"
                 }
               }
             }
