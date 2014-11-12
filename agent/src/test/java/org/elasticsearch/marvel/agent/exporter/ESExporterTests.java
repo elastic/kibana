@@ -82,7 +82,7 @@ public class ESExporterTests extends ElasticsearchIntegrationTest {
         ImmutableSettings.Builder builder = ImmutableSettings.builder()
                 .put(AgentService.SETTINGS_INTERVAL, "200m")
                 .put("discovery.type", "zen")
-                .put("discovery.zen.ping_timeout", "200ms")
+                .put("discovery.zen.ping_timeout", "1s")
                 .put("discovery.initial_state_timeout", "100ms")
                 .put("discovery.zen.minimum_master_nodes", 2);
         cluster().startNode(builder);
