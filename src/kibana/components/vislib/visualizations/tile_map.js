@@ -130,8 +130,7 @@ define(function (require) {
 
 
           function fitBounds() {
-            var bounds = featureLayer.getBounds();
-            map.fitBounds(bounds);
+            map.fitBounds(featureLayer.getBounds());
           }
         });
       };
