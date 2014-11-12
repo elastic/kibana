@@ -75,8 +75,13 @@ define(function (require) {
           $detailsScope.row = row;
           $detailsScope.showFilters = function (mapping) {
             var validTypes = ['string', 'number', 'date', 'ip'];
-            if (!mapping.indexed) return false;
+            if (!mapping || !mapping.indexed) return false;
             return _.contains(validTypes, mapping.type);
+          };
+
+          $detailsScope.showArrayInObjectsWarning = function (row, field) {
+            var value = row._source[field];
+            return _.isArray(value) && typeof value[0] === 'object';
           };
 
           $compile($detailsTr)($detailsScope);
