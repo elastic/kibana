@@ -124,10 +124,14 @@ define(function (require) {
             }
           });
 
-          map.addControl(new FitControl());
+          if (data && data.geoJSON && data.geoJSON.features.length > 0) {
+            map.addControl(new FitControl());
+          }
+
 
           function fitBounds() {
-            map.fitBounds(featureLayer.getBounds());
+            var bounds = featureLayer.getBounds();
+            map.fitBounds(bounds);
           }
         });
       };
