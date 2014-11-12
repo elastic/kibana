@@ -1,3 +1,10 @@
-<div ng-controller="KbnTableVisController" class="TableVis">
-  <kbn-agg-table-group group="tableGroups" per-page="vis.params.perPage"></kbn-agg-table-group>
+<div ng-controller="KbnTableVisController" class="table-vis">
+  <div ng-if="!hasSomeRows" class="table-vis-error">
+    <h2><i class="fa fa-meh-o"></i></h2>
+    <h4>No results found</h4>
+  </div>
+
+  <div ng-if="tableGroups" class="table-vis-container">
+    <kbn-agg-table-group group="tableGroups" per-page="vis.params.perPage"></kbn-agg-table-group>
+  </div>
 </div>
