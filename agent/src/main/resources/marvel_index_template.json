@@ -12,7 +12,7 @@
       }
     },
     "mapper.dynamic": true,
-    "marvel.index_format": 5
+    "marvel.index_format": 6
   },
   "mappings": {
     "_default_": {
@@ -78,17 +78,6 @@
             }
           }
         },
-        "indices": {
-          "properties": {
-            "percolate": {
-              "properties": {
-                "size_in_bytes": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
         "jvm": {
           "properties": {
             "buffer_pools": {
@@ -141,6 +130,13 @@
         },
         "indices": {
           "properties": {
+            "indexing": {
+              "properties": {
+                "throttle_time_in_millis": {
+                  "type": "long"
+                }
+              }
+            },
             "percolate": {
               "properties": {
                 "total": {
@@ -206,6 +202,13 @@
             "fielddata": {
               "properties": {
                 "memory_size_in_bytes": {
+                  "type": "long"
+                }
+              }
+            },
+            "indexing": {
+              "properties": {
+                "throttle_time_in_millis": {
                   "type": "long"
                 }
               }

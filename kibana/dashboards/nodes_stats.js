@@ -430,6 +430,14 @@ var rows = [
         "title": "Indices Total Indexing Time"
       },
       {
+        "value_field": "indices.indexing.throttle_time_in_millis",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true,
+        "scale": 0.001,
+        "title": "Indices Indexing Throttling Time"
+      },
+      {
         "value_field": "indices.indexing.delete_total",
         "derivative": true,
         "mode": "min",
