@@ -185,7 +185,6 @@
             }
           }
         },
-        //thread_pool.listener.completed
         "thread_pool": {
           "properties": {
             "listener": {
