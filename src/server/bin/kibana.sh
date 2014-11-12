@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash -e
 
 SCRIPT=$0
 
