@@ -26,7 +26,8 @@ define(function (require) {
       template: require('text!plugins/table_vis/table_vis.html'),
       params: {
         defaults: {
-          perPage: 10
+          perPage: 10,
+          showPartialRows: false
         },
         editor: require('text!plugins/table_vis/table_vis_config.html')
       },

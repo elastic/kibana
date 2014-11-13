@@ -19,6 +19,7 @@ define(function (require) {
       this.columns = getColumns(vis);
       this.aggStack = _.pluck(this.columns, 'aggConfig');
       this.canSplit = this.opts.canSplit !== false;
+      this.partialRows = vis.isHierarchical() || this.opts.partialRows;
 
       this.root = new TableGroup();
       this.splitStack = [this.root];
@@ -134,7 +135,7 @@ define(function (require) {
     TabbedAggResponseWriter.prototype.row = function (buffer) {
       var cells = buffer || this.rowBuffer.slice(0);
 
-      if (!this.vis.isHierarchical() && cells.length < this.columns.length) {
+      if (!this.partialRows && cells.length < this.columns.length) {
         return;
       }
 
