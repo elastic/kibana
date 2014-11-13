@@ -14,6 +14,13 @@ cluster. For example, when your production cluster is having trouble you would
 like to make sure you can view the Marvel data easily.
 ====
 
+=== System Requirements
+
+Elasticsearch:: 0.90.9 or above
+Browser::       The latest version of Chrome, Firefox or Safari is
+                recommended. Internet Explorer 10 and above is also supported.
+
+
 === Simple install
 
 This is simplest way to install and use Marvel. Marvel data will be stored on
