@@ -50,6 +50,7 @@ define(function (require) {
         throw new Error('No valid data!');
       }
 
+      console.log(JSON.stringify(data, null, 4));
       this.data = data;
       this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
       this._runOnHandler('render');
