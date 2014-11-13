@@ -104,14 +104,18 @@ public class ESExporterTests extends ElasticsearchIntegrationTest {
     }
 
     private void assertMarvelTemplate() {
-        boolean found = false;
+        boolean found;
+        found = findMarvelTemplate();
+        assertTrue("failed to find a template named `marvel`", found);
+    }
+
+    private boolean findMarvelTemplate() {
         for (IndexTemplateMetaData template : client().admin().indices().prepareGetTemplates("marvel").get().getIndexTemplates()) {
             if (template.getName().equals("marvel")) {
-                found = true;
-                break;
+                return true;
             }
         }
-        assertTrue("failed to find a template named `marvel`", found);
+        return false;
     }
 
     @Test
@@ -142,63 +146,64 @@ public class ESExporterTests extends ElasticsearchIntegrationTest {
     }
 
     @Test
-    public void testHostFailureChecksTemplate() {
+    public void testHostFailureChecksTemplate() throws InterruptedException {
         ImmutableSettings.Builder builder = ImmutableSettings.builder()
                 .put(AgentService.SETTINGS_INTERVAL, "200m");
-        final String node1 = cluster().startNode(builder);
-        String node2 = cluster().startNode(builder);
+        final String node0 = cluster().startNode(builder);
+        String node1 = cluster().startNode(builder);
 
-        ESExporter esExporter1 = getEsExporter(node1);
-        ESExporter esExporter2 = getEsExporter(node2);
+        ESExporter esExporter0 = getEsExporter(node0);
+        final ESExporter esExporter1 = getEsExporter(node1);
 
-        logger.info("exporting events to force host resolution");
+        logger.info("--> exporting events to force host resolution");
+        esExporter0.exportEvents(new Event[]{
+                new TestEvent()
+        });
         esExporter1.exportEvents(new Event[]{
                 new TestEvent()
         });
-        esExporter2.exportEvents(new Event[]{
-                new TestEvent()
-        });
 
-        logger.info("setting exporting hosts to {} + {}", esExporter1.getHosts(), esExporter2.getHosts());
+        logger.info("--> setting exporting hosts to {} + {}", esExporter0.getHosts(), esExporter1.getHosts());
         ArrayList<String> mergedHosts = new ArrayList<String>();
+        mergedHosts.addAll(Arrays.asList(esExporter0.getHosts()));
         mergedHosts.addAll(Arrays.asList(esExporter1.getHosts()));
-        mergedHosts.addAll(Arrays.asList(esExporter2.getHosts()));
 
         assertAcked(client().admin().cluster().prepareUpdateSettings().setTransientSettings(
                 ImmutableSettings.builder().putArray(ESExporter.SETTINGS_HOSTS, mergedHosts.toArray(Strings.EMPTY_ARRAY))).get());
 
-        logger.info("exporting events to have new settings take effect");
+        logger.info("--> exporting events to have new settings take effect");
+        esExporter0.exportEvents(new Event[]{
+                new TestEvent()
+        });
         esExporter1.exportEvents(new Event[]{
                 new TestEvent()
         });
-        esExporter2.exportEvents(new Event[]{
-                new TestEvent()
-        });
 
         assertMarvelTemplate();
 
-        logger.info("removing the marvel template");
+        logger.info("--> removing the marvel template");
         assertAcked(client().admin().indices().prepareDeleteTemplate("marvel").get());
 
-        logger.info("shutting down node1");
+        logger.info("--> shutting down node0");
         cluster().stopRandomNode(new Predicate<Settings>() {
             @Override
             public boolean apply(Settings settings) {
-                return settings.get("name").equals(node1);
+                return settings.get("name").equals(node0);
             }
         });
 
-        logger.info("exporting events from node2");
-        esExporter2.exportEvents(new Event[]{
-                new TestEvent()
-        });
-        // send twice as url caching may cause the node failure to be only detected while sending the event
-        esExporter2.exportEvents(new Event[]{
-                new TestEvent()
-        });
-
-        logger.info("verifying template is inserted");
-        assertMarvelTemplate();
+        logger.info("--> exporting events from node1");
+        // we use assert busy node because url caching may cause the node failure to be only detected while sending the event
+        assertTrue("failed to find a template named 'marvel'", awaitBusy(new Predicate<Object>() {
+            @Override
+            public boolean apply(Object o) {
+                esExporter1.exportEvents(new Event[]{
+                        new TestEvent()
+                });
+                logger.debug("--> checking for template");
+                return findMarvelTemplate();
+            }
+        }));
     }
 
     private ESExporter getEsExporter() {

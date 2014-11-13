@@ -348,7 +348,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
                 return null;
             }
             hosts = extractedHosts;
-            logger.trace("auto-resolved hosts to ", extractedHosts);
+            logger.trace("auto-resolved hosts to {}", extractedHosts);
             boundToLocalNode = true;
         }
 
