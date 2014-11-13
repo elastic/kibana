@@ -118,6 +118,7 @@ define(function (require) {
       }, {});
 
       return {
+        id: self.id,
         type: self.type && self.type.name,
         schema: self.schema && self.schema.name,
         params: outParams
