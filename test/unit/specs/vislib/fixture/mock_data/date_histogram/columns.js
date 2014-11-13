@@ -13,6 +13,12 @@ define(function (require) {
           'max': 1415827508440
         },
         'yAxisLabel': 'Count of documents',
+        'xAxisFormatter': function (thing) {
+          return moment(thing);
+        },
+        'tooltipFormatter': function (d) {
+          return d;
+        },
         'series': [
           {
             'values': [
@@ -154,6 +160,12 @@ define(function (require) {
           'max': 1415827508440
         },
         'yAxisLabel': 'Count of documents',
+        'xAxisFormatter': function (thing) {
+          return moment(thing);
+        },
+        'tooltipFormatter': function (d) {
+          return d;
+        },
         'series': [
           {
             'values': [
@@ -203,6 +215,12 @@ define(function (require) {
           'max': 1415827508440
         },
         'yAxisLabel': 'Count of documents',
+        'xAxisFormatter': function (thing) {
+          return moment(thing);
+        },
+        'tooltipFormatter': function (d) {
+          return d;
+        },
         'series': [
           {
             'values': [
@@ -740,12 +758,6 @@ define(function (require) {
         ]
       ]
     },
-    'hits': 225,
-    'xAxisFormatter': function (thing) {
-      return moment(thing);
-    },
-    'tooltipFormatter': function (d) {
-      return d;
-    }
+    'hits': 225
   };
 });

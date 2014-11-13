@@ -1,6 +1,5 @@
 define(function (require) {
   var angular = require('angular');
-  var _ = require('lodash');
   var $ = require('jquery');
 
   angular.module('LayoutFactory', ['kibana']);
