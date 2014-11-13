@@ -386,7 +386,7 @@ define([
           results,
           master_nodes;
 
-        filter = filterSrv.getBoolFilter(filterSrv.ids);
+        filter = $scope.ejs.BoolFilter();
 
         var maxFilterTime, to;
         maxFilterTime = to = filterSrv.timeRange(false).to;
