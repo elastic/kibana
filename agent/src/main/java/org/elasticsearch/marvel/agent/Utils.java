@@ -124,15 +124,21 @@ public class Utils {
             host = host + "/";
         }
 
-        URI hostUrl = new URI(host);
+        URL hostUrl = new URL(host);
 
         if (hostUrl.getPort() == -1) {
-            // url has no port, default to 9200
-            hostUrl = new URI(hostUrl.getScheme(), hostUrl.getUserInfo(), hostUrl.getHost(), 9200, hostUrl.getPath(), hostUrl.getQuery(), hostUrl.getFragment());
+            // url has no port, default to 9200 - sadly we need to rebuild..
+            StringBuilder newUrl = new StringBuilder(hostUrl.getProtocol() + "://");
+            if (hostUrl.getUserInfo() != null) {
+                newUrl.append(hostUrl.getUserInfo()).append("@");
+            }
+            newUrl.append(hostUrl.getHost()).append(":9200").append(hostUrl.getPath());
+
+            hostUrl = new URL(newUrl.toString());
 
         }
-        URI hostWithPath = hostUrl.resolve(path);
-        return hostWithPath.toURL();
+        return new URL(hostUrl, path);
+
     }
 
     public static int parseIndexVersionFromTemplate(byte[] template) throws UnsupportedEncodingException {

@@ -101,6 +101,30 @@ public class UtilsUnitTests extends ElasticsearchTestCase {
 
         url = Utils.parseHostWithPath("https://boaz:test@localhost:9200/suburl", "_bulk");
         verifyUrl(url, "https", "localhost", 9200, "/suburl/_bulk", "boaz:test");
+
+        url = Utils.parseHostWithPath("https://user:test@server_with_underscore:9300", "_bulk");
+        verifyUrl(url, "https", "server_with_underscore", 9300, "/_bulk", "user:test");
+
+        url = Utils.parseHostWithPath("user:test@server_with_underscore:9300", "_bulk");
+        verifyUrl(url, "http", "server_with_underscore", 9300, "/_bulk", "user:test");
+
+        url = Utils.parseHostWithPath("server_with_underscore:9300", "_bulk");
+        verifyUrl(url, "http", "server_with_underscore", 9300, "/_bulk");
+
+        url = Utils.parseHostWithPath("server_with_underscore", "_bulk");
+        verifyUrl(url, "http", "server_with_underscore", 9200, "/_bulk");
+
+        url = Utils.parseHostWithPath("https://user:test@server-dash:9300", "_bulk");
+        verifyUrl(url, "https", "server-dash", 9300, "/_bulk", "user:test");
+
+        url = Utils.parseHostWithPath("user:test@server-dash:9300", "_bulk");
+        verifyUrl(url, "http", "server-dash", 9300, "/_bulk", "user:test");
+
+        url = Utils.parseHostWithPath("server-dash:9300", "_bulk");
+        verifyUrl(url, "http", "server-dash", 9300, "/_bulk");
+
+        url = Utils.parseHostWithPath("server-dash", "_bulk");
+        verifyUrl(url, "http", "server-dash", 9200, "/_bulk");
     }
 
     void verifyUrl(URL url, String protocol, String host, int port, String path) {
