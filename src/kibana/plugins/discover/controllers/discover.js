@@ -112,7 +112,7 @@ define(function (require) {
         $state.index = config.get('defaultIndex');
       } else {
         notify.warning(reason + 'Please set a default index to continue.');
-        kbnUrl.change('/settings/indices');
+        kbnUrl.redirect('/settings/indices');
 
         return;
       }
