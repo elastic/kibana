@@ -2,13 +2,6 @@
 
 :ref: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current
 
-Marvel is a management and monitoring product for Elasticsearch. Marvel
-aggregates cluster wide statistics and events and offers a single interface to
-view and analyze them. Marvel is free for development use but does require a
-license to run in production. For more details, please see the
-http://www.elasticsearch.com/products/marvel[Marvel product page].
-
-
 include::dashboards.asciidoc[]
 
 == System Requirements
@@ -26,3 +19,4 @@ include::upgrade.asciidoc[]
 include::configuration.asciidoc[]
 
 include::changes.asciidoc[]
+

@@ -1,6 +1,5 @@
 == Marvel's Dashboards
 
-
 === Overview Dashboard
 
 The _Overview_ dashboard is Marvel's main page. The dashboard displays the
