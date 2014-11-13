@@ -39,7 +39,7 @@ public class Plugin extends AbstractPlugin {
     public static final int V_1_0_0_Beta2_ID = 1000002;
 
 
-    public final boolean enabled;
+    public volatile boolean enabled;
 
     public Plugin() {
         if (Version.CURRENT.id == V_1_0_0_Beta1_ID || Version.CURRENT.id == V_1_0_0_Beta2_ID) {
@@ -65,6 +65,10 @@ public class Plugin extends AbstractPlugin {
 
     @Override
     public Collection<Module> modules(Settings settings) {
+        if (enabled && settings.get("tribe.name") != null) {
+            logger.trace("agent disabled due to a tribe sub node [{}]", settings.get("tribe.name"));
+            enabled = false;
+        }
         if (!enabled) {
             return ImmutableList.of();
         }

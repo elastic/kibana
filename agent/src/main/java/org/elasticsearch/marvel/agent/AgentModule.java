@@ -18,6 +18,7 @@
 package org.elasticsearch.marvel.agent;
 
 import org.elasticsearch.common.inject.AbstractModule;
+import org.elasticsearch.common.inject.Scopes;
 import org.elasticsearch.common.inject.multibindings.Multibinder;
 import org.elasticsearch.marvel.agent.exporter.ESExporter;
 import org.elasticsearch.marvel.agent.exporter.Exporter;
@@ -27,7 +28,7 @@ public class AgentModule extends AbstractModule {
     @Override
     protected void configure() {
         Multibinder<Exporter> multibinder = Multibinder.newSetBinder(binder(), Exporter.class);
-        multibinder.addBinding().to(ESExporter.class).asEagerSingleton();
-        bind(AgentService.class).asEagerSingleton();
+        multibinder.addBinding().to(ESExporter.class).in(Scopes.SINGLETON);
+        bind(AgentService.class).in(Scopes.SINGLETON);
     }
 }
