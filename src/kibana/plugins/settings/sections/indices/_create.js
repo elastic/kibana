@@ -77,7 +77,6 @@ define(function (require) {
     };
 
     $scope.refreshFieldList = _.debounce(function () {
-      console.log('refreshFieldList');
       index.dateFields = index.timeField = index.listUsed = null;
       var useIndexList = index.isTimeBased && index.nameIsPattern;
 
