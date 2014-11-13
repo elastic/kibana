@@ -19,7 +19,8 @@ define(function (require) {
         type: 'index-pattern',
         fields: [],
         body: {
-          query: { match_all: {} }
+          query: { match_all: {} },
+          size: 10000
         }
       })
       .then(function (resp) {
