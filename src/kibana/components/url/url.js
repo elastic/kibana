@@ -27,16 +27,21 @@ define(function (require) {
     };
 
     self._changeLocation = function (type, url, paramObj, replace) {
+      var prev = {
+        path: $location.path(),
+        search: $location.search()
+      };
+
       url = self.eval(url, paramObj);
+      $location[type](url);
+      if (replace) $location.replace();
 
-      if (url !== $location[type]()) {
-        $location[type](url);
-        if (replace) {
-          $location.replace();
-        }
-      }
+      var next = {
+        path: $location.path(),
+        search: $location.search()
+      };
 
-      if (self.shouldAutoReload(url)) {
+      if (self.shouldAutoReload(next, prev)) {
         reloading = $rootScope.$on('$locationChangeSuccess', function () {
           // call the "unlisten" function returned by $on
           reloading();
@@ -57,19 +62,18 @@ define(function (require) {
       return $route.current && $route.current.$$route;
     };
 
-    self.matches = function (url) {
-      var route = self.getRoute();
-
-      if (!route || !route.regexp) return false;
-      return !!url.match(route.regexp);
-    };
-
-    self.shouldAutoReload = function (url) {
+    self.shouldAutoReload = function (next, prev) {
       if (reloading) return false;
 
       var route = self.getRoute();
-      if (!route || (route.reloadOnSearch && url !== $location.url())) return false;
-      return self.matches(url);
+      if (!route) return false;
+
+      if (next.path !== prev.path) return false;
+
+      var reloadOnSearch = route.reloadOnSearch;
+      var searchSame = _.isEqual(next.search, prev.search);
+
+      return (reloadOnSearch && searchSame) || !reloadOnSearch;
     };
 
     function parseUrlPrams(url, paramObj) {
