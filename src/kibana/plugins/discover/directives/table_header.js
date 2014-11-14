@@ -14,9 +14,13 @@ define(function (require) {
       },
       template: headerHtml,
       controller: function ($scope) {
+        var sortableField = function (field) {
+          var mapping = $scope.mapping[field];
+          return mapping && mapping.indexed && mapping.type !== 'geo_point';
+        };
+
         $scope.headerClass = function (column) {
-          if (!$scope.mapping) return;
-          if ($scope.mapping[column] && !$scope.mapping[column].indexed) return;
+          if (!sortableField(column)) return;
 
           var sorting = $scope.sorting;
           var defaultClass = ['fa', 'fa-sort', 'table-header-sortchange'];
@@ -45,7 +49,7 @@ define(function (require) {
         };
 
         $scope.sort = function (column) {
-          if ($scope.mapping[column] && !$scope.mapping[column].indexed) return;
+          if (!sortableField(column)) return;
           var sorting = $scope.sorting || [];
           $scope.sorting = [column, sorting[1] === 'asc' ? 'desc' : 'asc'];
         };
