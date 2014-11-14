@@ -62,6 +62,8 @@ define(['require', 'exports', 'module' , 'ace'], function (require, exports, mod
           }
         ]),
       "method_sep": mergeTokens(
+        addEOL(["whitespace", "url.protocol_host", "url.slash"], /(\s+)(https?:\/\/[^?\/,]+)(\/)/, "start", "url"),
+        addEOL(["whitespace", "url.protocol_host"], /(\s+)(https?:\/\/[^?\/,]+)/, "start", "url"),
         addEOL(["whitespace", "url.slash"], /(\s+)(\/)/, "start", "url"),
         addEOL(["whitespace"], /(\s+)/, "start", "url")
       ),

@@ -1290,4 +1290,49 @@ define([
     ]
   );
 
+
+  context_tests(
+    {
+      "query": {
+        "field": "something"
+      },
+      "facets": {},
+      "size": 20
+    },
+    MAPPING,
+    SEARCH_KB,
+    "POST http://somehost/_search",
+    [
+      {
+        name: "fullurl - existing dictionary key, no template",
+        cursor: { row: 1, column: 6},
+        initialValue: "query",
+        addTemplate: false,
+        prefixToAdd: "",
+        suffixToAdd: "",
+        rangeToReplace: { start: { row: 1, column: 3 }, end: { row: 1, column: 10 }},
+        autoCompleteSet: ["facets", "query", "size"]
+      },
+      {
+        name: "fullurl - existing inner dictionary key",
+        cursor: { row: 2, column: 7},
+        initialValue: "field",
+        addTemplate: false,
+        prefixToAdd: "",
+        suffixToAdd: "",
+        rangeToReplace: { start: { row: 2, column: 6}, end: { row: 2, column: 13 }},
+        autoCompleteSet: ["match_all", "term"]
+      },
+      {
+        name: "fullurl - existing dictionary key, yes template",
+        cursor: { row: 4, column: 7},
+        initialValue: "facets",
+        addTemplate: true,
+        prefixToAdd: "",
+        suffixToAdd: "",
+        rangeToReplace: { start: { row: 4, column: 3 }, end: { row: 4, column: 15 }},
+        autoCompleteSet: ["facets", "query", "size"]
+      }
+    ]
+  );
 });

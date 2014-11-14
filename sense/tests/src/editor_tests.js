@@ -143,11 +143,11 @@ define([
     });
   });
 
-  utils_test("single line request data", single_line_request.prefix, single_line_request.data, function () {
+  utils_test("full url: single line request data", "POST https://somehoset/_search", single_line_request.data, function () {
     input.getCurrentRequest(function (request) {
       var expected = {
         method: "POST",
-        url: "_search",
+        url: "https://somehoset/_search",
         data: [single_line_request.data]
       };
 

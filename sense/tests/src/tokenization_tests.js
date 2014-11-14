@@ -92,6 +92,25 @@ define([
     "GET /_search"
   );
 
+  token_test(
+    [ "method", "GET", "url.protocol_host", "http://somehost", "url.slash", "/", "url.part", "_search" ],
+    "GET http://somehost/_search"
+  );
+
+  token_test(
+    [ "method", "GET", "url.protocol_host", "http://somehost" ],
+    "GET http://somehost"
+  );
+
+  token_test(
+    [ "method", "GET", "url.protocol_host", "http://somehost", "url.slash", "/" ],
+    "GET http://somehost/"
+  );
+
+  token_test(
+    [ "method", "GET", "url.protocol_host", "http://test:user@somehost", "url.slash", "/" ],
+    "GET http://test:user@somehost/"
+  );
 
   token_test(
     [ "method", "GET", "url.part", "_cluster", "url.slash", "/", "url.part" , "nodes" ],
