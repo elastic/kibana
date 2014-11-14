@@ -169,7 +169,11 @@ define(function () {
                 __scope_link: '_put_mapping.type.properties.field'
               }
             },
-            copy_to: { __one_of: ['{field}', ['{field}']] } 
+            copy_to: { __one_of: ['{field}', ['{field}']] },
+
+            // nested
+            include_in_parent: { __one_of: [true, false] },
+            include_in_root: { __one_of: [true, false] }
           }
         }
       }
