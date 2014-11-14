@@ -35,8 +35,8 @@ define(function (require) {
     });
 
     it('should set the metric label and value for count', function () {
-      expect($scope.metric.label).to.not.be.ok;
-      expect($scope.metric.value).to.not.be.ok;
+      expect($scope.metric.label).to.not.be.ok();
+      expect($scope.metric.value).to.not.be.ok();
 
       $scope.vis = metricVis;
       $scope.esResponse = {hits: {total: 4826}};
@@ -47,8 +47,8 @@ define(function (require) {
     });
 
     it('should set the metric value for average', function () {
-      expect($scope.metric.label).to.not.be.ok;
-      expect($scope.metric.value).to.not.be.ok;
+      expect($scope.metric.label).to.not.be.ok();
+      expect($scope.metric.value).to.not.be.ok();
 
       $scope.vis = averageVis;
       $scope.esResponse = {hits: {total: 4826}, aggregations: {agg: {value: 1234}}};
