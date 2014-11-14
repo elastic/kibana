@@ -19,7 +19,7 @@ define(function (require) {
       this.columns = getColumns(vis);
       this.aggStack = _.pluck(this.columns, 'aggConfig');
       this.canSplit = this.opts.canSplit !== false;
-      this.partialRows = vis.isHierarchical() || this.opts.partialRows;
+      this.partialRows = this.opts.partialRows == null ? vis.isHierarchical() : this.opts.partialRows;
 
       this.root = new TableGroup();
       this.splitStack = [this.root];
