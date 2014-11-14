@@ -63,9 +63,9 @@ define(function () {
 
   filters.exists = {
     __template: {
-      'FIELD': 'VALUE'
+      'field': 'FIELD_NAME'
     },
-    '{field}': ''
+    'field': '{field}'
   };
 
 
