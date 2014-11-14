@@ -11,7 +11,7 @@ define(function (require) {
       var colorPool = Private(require('components/vislib/components/color/color_palette'))(100);
       var assigned = {};
       return function (item) {
-        var key = item.$$hashKey;
+        var key = item.id || item.$$hashKey;
         if (!key) throw new Error('expected an item that is part of an ngRepeat');
 
         if (!assigned[key]) {
