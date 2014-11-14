@@ -25,7 +25,7 @@
       require(['kibana'], function (kibana) { kibana.init(); });
     </script>
   </head>
-  <body ng-controller="kibana" ng-class="'application-'+activeApp">
+  <body kibana ng-class="'application-' + activeApp.id">
     <kbn-notifications list="notifList"></kbn-notifications>
     <div class="content" style="display: none;">
       <nav ng-hide="appEmbedded" bindonce class="navbar navbar-inverse navbar-static-top">
@@ -38,7 +38,7 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <span class="navbar-brand visible-xs">{{activeApp}}
+            <span class="navbar-brand visible-xs">{{ activeApp.name }}
               <span ng-show="httpActive.length" class="spinner">
               </span>
             </span>
@@ -48,7 +48,7 @@
           <!-- Full navbar -->
           <div collapse="!showCollapsed" class="navbar-collapse" id="kibana-primary-navbar">
             <ul class="nav navbar-nav">
-              <li ng-repeat="app in apps.inOrder" ng-class="{active: activeApp == app.id}">
+              <li ng-repeat="app in apps.inOrder" ng-class="{active: activeApp === app}">
                 <a ng-href="#{{app.lastPath}}" bo-text="app.name"></a>
               </li>
             </ul>
@@ -58,9 +58,9 @@
                 <div class="spinner">
                 </div>
               </li>
-              <li ng-if="setupComplete" ng-show="opts.timefilter.enabled" class="navbar-timepicker-display">
+              <li ng-if="setupComplete" ng-show="timefilter.enabled" class="navbar-timepicker-display">
                 <a ng-click="toggleTimepicker()">
-                  <pretty-duration from="opts.timefilter.time.from" to="opts.timefilter.time.to"></pretty-duration>
+                  <pretty-duration from="timefilter.time.from" to="timefilter.time.to"></pretty-duration>
                   &nbsp;
                   <i class="fa fa-clock-o"></i>
                 </a>
@@ -68,14 +68,10 @@
             </ul>
           </div>
           <!-- /Full navbar -->
-
-
         </div>
       </nav>
 
-      <config
-        config-template="globalConfigTemplate" config-object="opts">
-      </config>
+      <config config-template="globalConfigTemplate" config-object="opts"></config>
 
       <div class="application" ng-view></div>
     </div>
