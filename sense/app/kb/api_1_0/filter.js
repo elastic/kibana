@@ -300,23 +300,25 @@ define(function () {
   };
 
 
-  filters.numeric_range = {
+  filters.range = {
     __template: {
       'FIELD': {
-        from: 10,
-        to: 20
+        gte: 10,
+        lte: 20
       }
     },
     "{field}": {
-      from: 1,
-      to: 20,
-      include_lower: {
-        __one_of: [true, false]
-      },
-      include_upper: {
-        __one_of: [true, false]
-      }
-    }
+      gte: 1,
+      gt: 1,
+      lte: 20,
+      lt: 20,
+      time_zone: "+1:00",
+      execution: { __one_of: ["index", "fielddata"]}
+    },
+    _cache: {
+      __one_of: [false, true]
+    },
+    _cache_key: ""
   };
 
 
@@ -365,30 +367,6 @@ define(function () {
       __one_of: [true, false]
     }
   };
-
-
-  filters.range = {
-    __template: {
-      'FIELD': {
-        from: 10,
-        to: 20
-      }
-    },
-    "{field}": {
-      from: 1,
-      to: 20,
-      include_lower: {
-        __one_of: [true, false]
-      },
-      include_upper: {
-        __one_of: [true, false]
-      },
-      _cache: {
-        __one_of: [false, true]
-      }
-    }
-  };
-
 
   filters.script = {
     __template: {

@@ -343,23 +343,20 @@ define(["_"], function (_) {
       range: {
         __template: {
           'FIELD': {
-            from: 10,
-            to: 20
+            gte: 10,
+            lte: 20
           }
         },
         '{field}': {
           __template: {
-            from: 10,
-            to: 20
+            gte: 10,
+            lte: 20
           },
-          from: 1,
-          to: 20,
-          include_lower: {
-            __one_of: [true, false]
-          },
-          include_upper: {
-            __one_of: [true, false]
-          },
+          gte: 10,
+          gt: 10,
+          lte: 20,
+          lt: 20,
+          time_zone: "+1:00",
           boost: 1.0
         }
       },
