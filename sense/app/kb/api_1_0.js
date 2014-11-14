@@ -33,6 +33,7 @@ define([
   './api_1_0/indices',
   './api_1_0/mappings',
   './api_1_0/misc',
+  './api_1_0/percolator',
   './api_1_0/query',
   './api_1_0/snapshot_restore',
   './api_1_0/search',
