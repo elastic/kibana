@@ -27,9 +27,13 @@ define(function (require) {
       params: {
         defaults: {
           perPage: 10,
-          showPartialRows: false
+          showPartialRows: false,
+          metricsAtAllLevels: false
         },
         editor: require('text!plugins/table_vis/table_vis_config.html')
+      },
+      hierarchicalData: function (vis) {
+        return !!vis.params.metricsAtAllLevels;
       },
       schemas: new Schemas([
         {
