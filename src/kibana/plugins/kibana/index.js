@@ -27,6 +27,7 @@ define(function (require) {
   require('modules').get('kibana', ['ui.bootstrap'])
   .directive('kibana', function ($rootScope, $injector, Promise, config, kbnSetup) {
     return {
+      template: require('text!plugins/kibana/kibana.html'),
       controller: function ($scope) {
         var self = this;
         var notify = new Notifier({ location: 'Kibana' });
