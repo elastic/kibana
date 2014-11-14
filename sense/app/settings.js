@@ -54,7 +54,7 @@ define([
 
   function getAutocomplete() {
     var settings = localStorage.getItem("autocomplete_settings");
-    var defaults = { mappings: true, indices: true};
+    var defaults = { fields: true, indices: true};
     if (settings) {
       try {
         settings = JSON.parse(settings);
@@ -131,8 +131,8 @@ define([
   applyThemeToBody();
 
   var autocompleteSettings = getAutocomplete();
-  var autocomplete_mapping_ctl = settings_popup.find("#autocomplete_mappings");
-  autocomplete_mapping_ctl.prop('checked', autocompleteSettings.mappings);
+  var autocomplete_fields_ctl = settings_popup.find("#autocomplete_fields");
+  autocomplete_fields_ctl.prop('checked', autocompleteSettings.fields);
   var autocomplete_indices_ctl = settings_popup.find("#autocomplete_indices");
   autocomplete_indices_ctl.prop('checked', autocompleteSettings.indices);
 
@@ -148,7 +148,7 @@ define([
       theme_ctl.val(getTheme());
     }
     setAutocomplete({
-      mappings: autocomplete_mapping_ctl.prop('checked'),
+      fields: autocomplete_fields_ctl.prop('checked'),
       indices: autocomplete_indices_ctl.prop('checked')
     });
     require('input').focus();

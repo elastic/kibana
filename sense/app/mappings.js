@@ -252,7 +252,7 @@ define([
     function retrieveAutocompleteInfoFromServer() {
       var autocompleteSettings = settings.getAutocomplete(),
         mappingPromise, aliasesPromise;
-      if (autocompleteSettings.mappings) {
+      if (autocompleteSettings.fields) {
         mappingPromise = es.send("GET", "_mapping");
       }
       else {
