@@ -11,6 +11,7 @@ define(function (require) {
   require('components/storage/storage');
   require('components/url/url');
   require('components/tooltip/tooltip');
+  require('components/style_compile/style_compile');
   require('components/watch_multi');
   require('components/listen');
   require('directives/click_focus');
@@ -18,7 +19,6 @@ define(function (require) {
   require('directives/spinner');
   require('directives/paginate');
   require('directives/pretty_duration');
-  require('directives/style_compile');
   require('directives/rows');
 
   var Notifier = require('components/notify/_notifier');
