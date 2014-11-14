@@ -49,6 +49,8 @@ define(function () {
           "segments",
           "fielddata",
           "completion",
+          "translog",
+          "query_cache",
           "_all"
         ]
       },

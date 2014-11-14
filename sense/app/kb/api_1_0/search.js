@@ -50,7 +50,8 @@ define(function () {
         preference: ["_primary", "_primary_first", "_local", "_only_node:xyz", "_prefer_node:xyz", "_shards:2,3"],
         scroll: "5m",
         scroll_id: "",
-        routing: ""
+        routing: "",
+        query_cache: [ "true", "false" ]
       },
       data_autocomplete_rules: {
         query: {

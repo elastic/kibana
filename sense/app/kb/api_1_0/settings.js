@@ -86,8 +86,10 @@ define(function () {
             tokenizer: {},
             filter: {},
             char_filter: {}
+          },
+          'index.cache.query.enable': {
+            __one_of: [true, false]
           }
-
         }
       }
     });

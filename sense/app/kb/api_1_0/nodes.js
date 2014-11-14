@@ -90,6 +90,7 @@ define(function () {
           "completion",
           "segments",
           "translog",
+          "query_cache",
           "_all"
         ]
       }
