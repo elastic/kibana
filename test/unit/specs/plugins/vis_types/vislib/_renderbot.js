@@ -114,7 +114,7 @@ define(function (require) {
     });
 
     describe('render', function () {
-      var vis = { type: mockVisType };
+      var vis = { type: mockVisType, isHierarchical: _.constant(false) };
       var $el = $('<div>testing</div>');
       var renderbot;
       var stubs = {};
@@ -134,9 +134,8 @@ define(function (require) {
 
       it('should normalize chart data via hierarchical', function () {
         vis = {
-          type: _.defaults({
-            hierarchicalData: true
-          }, mockVisType)
+          type: mockVisType,
+          isHierarchical: _.constant(true)
         };
 
         var renderbot = new VislibRenderbot(vis, $el);
