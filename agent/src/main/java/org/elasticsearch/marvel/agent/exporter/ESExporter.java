@@ -17,6 +17,7 @@
 
 package org.elasticsearch.marvel.agent.exporter;
 
+import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.action.admin.cluster.node.stats.NodeStats;
 import org.elasticsearch.action.admin.cluster.stats.ClusterStatsResponse;
 import org.elasticsearch.action.admin.indices.stats.CommonStats;
@@ -110,15 +111,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
         hosts = settings.getAsArray(SETTINGS_HOSTS, Strings.EMPTY_ARRAY);
 
-        for (String host : hosts) {
-            try {
-                Utils.parseHostWithPath(host, "");
-            } catch (URISyntaxException e) {
-                throw new RuntimeException("[marvel.agent.exporter] invalid host: [" + host + "]. error: [" + e.getMessage() + "]");
-            } catch (MalformedURLException e) {
-                throw new RuntimeException("[marvel.agent.exporter] invalid host: [" + host + "]. error: [" + e.getMessage() + "]");
-            }
-        }
+        validateHosts(hosts);
 
         indexPrefix = settings.get(SETTINGS_INDEX_PREFIX, ".marvel");
         String indexTimeFormat = settings.get(SETTINGS_INDEX_TIME_FORMAT, "YYYY.MM.dd");
@@ -149,7 +142,22 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             sslSocketFactory = null;
         }
 
-        logger.debug("initialized with targets: {}, index prefix [{}], index time format [{}]", hosts, indexPrefix, indexTimeFormat);
+        logger.debug("initialized with targets: {}, index prefix [{}], index time format [{}]",
+                Utils.santizeUrlPwds(Strings.arrayToCommaDelimitedString(hosts)), indexPrefix, indexTimeFormat);
+    }
+
+    static private void validateHosts(String[] hosts) {
+        for (String host : hosts) {
+            try {
+                Utils.parseHostWithPath(host, "");
+            } catch (URISyntaxException e) {
+                throw new RuntimeException("[marvel.agent.exporter] invalid host: [" + Utils.santizeUrlPwds(host) + "]." +
+                        " error: [" + Utils.santizeUrlPwds(e.getMessage()) + "]");
+            } catch (MalformedURLException e) {
+                throw new RuntimeException("[marvel.agent.exporter] invalid host: [" + Utils.santizeUrlPwds(host) + "]." +
+                        " error: [" + Utils.santizeUrlPwds(e.getMessage()) + "]");
+            }
+        }
     }
 
     @Override
@@ -189,7 +197,8 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             addXContentRendererToConnection(conn, indicesStatsRenderer);
             sendCloseExportingConnection(conn);
         } catch (IOException e) {
-            logger.error("error sending data to [{}]", e, conn.getURL());
+            logger.error("error sending data to [{}]: [{}]", Utils.santizeUrlPwds(conn.getURL()),
+                    Utils.santizeUrlPwds(ExceptionsHelper.detailedMessage(e)));
             return;
         }
     }
@@ -281,8 +290,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             addXContentRendererToConnection(conn, xContentRenderer);
             sendCloseExportingConnection(conn);
         } catch (IOException e) {
-            logger.error("error sending data to [{}]", e, conn.getURL());
-            return;
+            logger.error("error sending data to [{}]: {}", Utils.santizeUrlPwds(conn.getURL()), Utils.santizeUrlPwds(ExceptionsHelper.detailedMessage(e)));
         }
 
     }
@@ -385,11 +393,11 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
                 System.arraycopy(hosts, hostIndex, newHosts, 0, hosts.length - hostIndex);
                 System.arraycopy(hosts, 0, newHosts, hosts.length - hostIndex, hostIndex);
                 hosts = newHosts;
-                logger.debug("preferred target host is now [{}]", hosts[0]);
+                logger.debug("preferred target host is now [{}]", Utils.santizeUrlPwds(hosts[0]));
             }
         }
 
-        logger.error("could not connect to any configured elasticsearch instances: [{}]", hosts);
+        logger.error("could not connect to any configured elasticsearch instances: [{}]", Utils.santizeUrlPwds(Strings.arrayToCommaDelimitedString(hosts)));
 
         return null;
 
@@ -424,17 +432,17 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
             return conn;
         } catch (URISyntaxException e) {
-            logErrorBasedOnLevel(e, "error parsing host [{}]", host);
+            logErrorBasedOnLevel(e, "error parsing host [{}]", Utils.santizeUrlPwds(host));
         } catch (IOException e) {
-            logErrorBasedOnLevel(e, "error connecting to [{}]", host);
+            logErrorBasedOnLevel(e, "error connecting to [{}]", Utils.santizeUrlPwds(host));
         }
         return null;
     }
 
     private void logErrorBasedOnLevel(Throwable t, String msg, Object... params) {
-        logger.error(msg + " [" + t.getMessage() + "]", params);
+        logger.error(msg + " [" + Utils.santizeUrlPwds(t.getMessage()) + "]", params);
         if (logger.isDebugEnabled()) {
-            logger.debug(msg + ". full error details", t, params);
+            logger.debug(msg + ". full error details:\n[{}]", params, Utils.santizeUrlPwds(ExceptionsHelper.detailedMessage(t)));
         }
     }
 
@@ -465,7 +473,6 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
             if (expectedVersion < 0) {
                 throw new RuntimeException("failed to find an index version in pre-configured index template");
             }
-            logger.trace("verifying template via [{}]", host);
             HttpURLConnection conn = openConnection(host, "GET", "_template/marvel", null);
             if (conn == null) {
                 return false;
@@ -504,7 +511,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
             return hasTemplate;
         } catch (IOException e) {
-            logger.error("failed to verify/upload the marvel template to [{}]", e, host);
+            logger.error("failed to verify/upload the marvel template to [{}]:\n{}", Utils.santizeUrlPwds(host), Utils.santizeUrlPwds(e.getMessage()));
             return false;
         }
     }
@@ -518,9 +525,12 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         }
 
         try {
-            logger.error("{} response code [{} {}]. content: [{}]", msg, conn.getResponseCode(), conn.getResponseMessage(), err);
+            logger.error("{} response code [{} {}]. content: [{}]",
+                    Utils.santizeUrlPwds(msg), conn.getResponseCode(),
+                    Utils.santizeUrlPwds(conn.getResponseMessage()),
+                    Utils.santizeUrlPwds(err));
         } catch (IOException e) {
-            logger.error("{}. connection had an error while reporting the error. tough life.", msg);
+            logger.error("{}. connection had an error while reporting the error. tough life.", Utils.santizeUrlPwds(msg));
         }
     }
 
@@ -540,7 +550,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
         String[] newHosts = settings.getAsArray(SETTINGS_HOSTS, null);
         if (newHosts != null) {
-            logger.info("hosts set to [{}]", Strings.arrayToCommaDelimitedString(newHosts));
+            logger.info("hosts set to [{}]", Utils.santizeUrlPwds(Strings.arrayToCommaDelimitedString(newHosts)));
             this.hosts = newHosts;
             this.checkedAndUploadedIndexTemplate = false;
             this.boundToLocalNode = false;
@@ -803,7 +813,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
                     }
                     HttpURLConnection conn = openConnection(currentHosts[0], "GET", "", null);
                     if (conn == null) {
-                        logger.trace("keep alive thread shutting down. failed to open connection to current host [{}]", currentHosts[0]);
+                        logger.trace("keep alive thread shutting down. failed to open connection to current host [{}]", Utils.santizeUrlPwds(currentHosts[0]));
                         return;
                     } else {
                         conn.getInputStream().close(); // close and release to connection pool.
@@ -811,7 +821,8 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
                 } catch (InterruptedException e) {
                     // ignore, if closed, good....
                 } catch (Throwable t) {
-                    logger.debug("error in keep alive thread, shutting down (will be restarted after a successful connection has been made)", t);
+                    logger.debug("error in keep alive thread, shutting down (will be restarted after a successful connection has been made) {}",
+                            Utils.santizeUrlPwds(ExceptionsHelper.detailedMessage(t)));
                     return;
                 }
             }

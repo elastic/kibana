@@ -150,4 +150,12 @@ public class Utils {
             return -1;
         }
     }
+
+    private static final String userInfoChars = "\\w-\\._~!$&\\'\\(\\)*+,;=%";
+    private static Pattern urlPwdSanitizer = Pattern.compile("([" + userInfoChars + "]+?):[" + userInfoChars + "]+?@");
+
+    public static String santizeUrlPwds(Object text) {
+        Matcher matcher = urlPwdSanitizer.matcher(text.toString());
+        return matcher.replaceAll("$1:XXXXXX@");
+    }
 }
