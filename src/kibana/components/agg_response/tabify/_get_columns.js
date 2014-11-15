@@ -3,8 +3,12 @@ define(function (require) {
     var _ = require('lodash');
     var AggConfig = Private(require('components/vis/_agg_config'));
 
-    return function getColumns(vis) {
+    return function getColumns(vis, opts) {
+      if (!opts) opts = {};
+
       var aggs = vis.aggs.getSorted();
+      var isHierarchical = vis.isHierarchical();
+      var minimalMetrics = isHierarchical ? opts.minimalMetrics : true;
 
       if (!vis.aggs.bySchemaGroup.metrics) {
         aggs.push(new AggConfig(vis, {
@@ -14,7 +18,7 @@ define(function (require) {
       }
 
       // pick the columns
-      if (!vis.isHierarchical()) {
+      if (minimalMetrics) {
         return aggs.map(function (agg) {
           return { aggConfig: agg };
         });

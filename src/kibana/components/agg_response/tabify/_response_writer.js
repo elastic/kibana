@@ -16,10 +16,13 @@ define(function (require) {
       this.opts = opts || {};
       this.rowBuffer = [];
 
-      this.columns = getColumns(vis);
-      this.aggStack = _.pluck(this.columns, 'aggConfig');
+      var visIsHier = vis.isHierarchical();
       this.canSplit = this.opts.canSplit !== false;
-      this.partialRows = this.opts.partialRows == null ? vis.isHierarchical() : this.opts.partialRows;
+      this.partialRows = this.opts.partialRows == null ? visIsHier : this.opts.partialRows;
+      this.metricsAtEachLevel = visIsHier;
+
+      this.columns = getColumns(vis, this.opts);
+      this.aggStack = _.pluck(this.columns, 'aggConfig');
 
       this.root = new TableGroup();
       this.splitStack = [this.root];
