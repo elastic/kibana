@@ -5,6 +5,13 @@
 
 <div class="checkbox">
   <label>
+    <input type="checkbox" ng-model="vis.params.showMeticsAtAllLevels">
+    Show metrics for every bucket/level
+  </label>
+</div>
+
+<div class="checkbox">
+  <label>
     <input type="checkbox" ng-model="vis.params.showPartialRows">
     Show partial rows
   </label>
@@ -12,7 +19,7 @@
 
 <div class="checkbox">
   <label>
-    <input type="checkbox" ng-model="vis.params.metricsAtAllLevels">
-    Calculate metrics for each bucket
+    <input type="checkbox" ng-model="metricsAtAllLevels" disabled>
+    Calculate metrics for every bucket/level
   </label>
 </div>

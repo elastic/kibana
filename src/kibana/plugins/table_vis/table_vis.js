@@ -5,6 +5,9 @@ define(function (require) {
   // we also need to load the controller and used by the template
   require('plugins/table_vis/table_vis_controller');
 
+  // our params are a bit complex so we will manage them with a directive
+  require('plugins/table_vis/table_vis_params');
+
   // require the directives that we use as well
   require('components/agg_table/agg_table');
   require('components/agg_table/agg_table_group');
@@ -28,12 +31,12 @@ define(function (require) {
         defaults: {
           perPage: 10,
           showPartialRows: false,
-          metricsAtAllLevels: false
+          showMeticsAtAllLevels: false
         },
-        editor: require('text!plugins/table_vis/table_vis_config.html')
+        editor: '<table-vis-params></table-vis-params>'
       },
       hierarchicalData: function (vis) {
-        return !!vis.params.metricsAtAllLevels;
+        return Boolean(vis.params.showPartialRows || vis.params.showMeticsAtAllLevels);
       },
       schemas: new Schemas([
         {
