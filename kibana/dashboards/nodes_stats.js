@@ -534,20 +534,6 @@ var rows = [
         "value_field": "indices.segments.memory_in_bytes",
         "title": "Indices Lucene Memory",
         "y_format": "bytes"
-      },
-      {
-        "value_field": "indices.fielddata.evictions",
-        "title": "Indices Field Data Eviction Rate",
-        "derivative": true,
-        "mode": "min",
-        "scaleSeconds": true
-      },
-      {
-        "value_field": "indices.filter_cache.evictions",
-        "title": "Indices Filter Cache Eviction Rate",
-        "derivative": true,
-        "mode": "min",
-        "scaleSeconds": true
       }
     ]
   },
@@ -582,6 +568,11 @@ var rows = [
       {
         "value_field": "indices.segments.index_writer_max_memory_in_bytes",
         "title": "Indices Index Writer Max Memory",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "indices.query_cache.memory_size_in_bytes",
+        "title": "Indices Query Cache Memory",
         "y_format": "bytes"
       }
     ]
@@ -665,6 +656,71 @@ var rows = [
         "mode": "max",
         "title": "Field Data Circuit Breaker Trip Count"
       }      
+    ]
+  },
+  {
+    "title": "Field Data",
+    "panels": [
+      {
+        "value_field": "indices.fielddata.memory_size_in_bytes",
+        "title": "Field Data Size",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "indices.fielddata.evictions",
+        "title": "Field Data Eviction Rate",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true
+      },
+    ]
+  },
+  {
+    "title": "Filter Cache",
+    "panels": [
+      {
+        "value_field": "indices.filter_cache.memory_size_in_bytes",
+        "title": "Filter cache Size",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "indices.filter_cache.evictions",
+        "title": "Filter Cache Eviction Rate",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true
+      }
+    ]
+  },
+  {
+    "title": "Query Cache",
+    "panels": [
+      {
+        "value_field": "indices.query_cache.memory_size_in_bytes",
+        "title": "Query Cache Memory",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "indices.query_cache.evictions",
+        "title": "Query Cache Eviction Rate",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true
+      },
+      {
+        "value_field": "indices.query_cache.hit_count",
+        "title": "Query Cache Cache Hit Rate",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true
+      },
+      {
+        "value_field": "indices.query_cache.miss_count",
+        "title": "Query Cache Miss Rate",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true
+      }
     ]
   },
   {

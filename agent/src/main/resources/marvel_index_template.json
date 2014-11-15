@@ -165,6 +165,22 @@
                   "type": "long"
                 }
               }
+            },
+            "query_cache": {
+              "properties": {
+                "memory_size_in_bytes": {
+                  "type": "long"
+                },
+                "evictions": {
+                  "type": "long"
+                },
+                "hit_count": {
+                  "type": "long"
+                },
+                "miss_count": {
+                  "type": "long"
+                }
+              }
             }
           }
         },
@@ -295,6 +311,22 @@
                   "type": "long"
                 }
               }
+            },
+            "query_cache": {
+              "properties": {
+                "memory_size_in_bytes": {
+                  "type": "long"
+                },
+                "evictions": {
+                  "type": "long"
+                },
+                "hit_count": {
+                  "type": "long"
+                },
+                "miss_count": {
+                  "type": "long"
+                }
+              }
             }
           }
         },
@@ -319,9 +351,7 @@
       }
     },
     "cluster_event": {},
-    "shard_event": {
-
-    },
+    "shard_event": {},
     "indices_stats": {
       "properties": {
         "primaries": {

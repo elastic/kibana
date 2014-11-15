@@ -341,20 +341,6 @@ var rows = [
         "value_field": "total.segments.memory_in_bytes",
         "title": "Lucene Memory",
         "y_format": "bytes"
-      },
-      {
-        "value_field": "total.fielddata.evictions",
-        "title": "Indices Field Data Eviction Rate",
-        "derivative": true,
-        "mode": "min",
-        "scaleSeconds": true
-      },
-      {
-        "value_field": "total.filter_cache.evictions",
-        "title": "Indices Filter Cache Eviction Rate",
-        "derivative": true,
-        "mode": "min",
-        "scaleSeconds": true
       }
     ]
   },
@@ -408,6 +394,71 @@ var rows = [
         "title": "Nodes Allocated",
         "filter": clusterViewFilter(dashboard.services.query.list),
         "embeded": true 
+      }
+    ]
+  },
+  {
+    "title": "Field Data",
+    "panels": [
+      {
+        "value_field": "total.fielddata.memory_size_in_bytes",
+        "title": "Field Data Size",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "total.fielddata.evictions",
+        "title": "Field Data Eviction Rate",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true
+      },
+    ]
+  },
+  {
+    "title": "Filter Cache",
+    "panels": [
+      {
+        "value_field": "total.filter_cache.memory_size_in_bytes",
+        "title": "Filter cache Size",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "total.filter_cache.evictions",
+        "title": "Filter Cache Eviction Rate",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true
+      }
+    ]
+  },
+  {
+    "title": "Query Cache",
+    "panels": [
+      {
+        "value_field": "total.query_cache.memory_size_in_bytes",
+        "title": "Query Cache Memory",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "total.query_cache.evictions",
+        "title": "Query Cache Eviction Rate",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true
+      },
+      {
+        "value_field": "total.query_cache.hit_count",
+        "title": "Query Cache Cache Hit Rate",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true
+      },
+      {
+        "value_field": "total.query_cache.miss_count",
+        "title": "Query Cache Miss Rate",
+        "derivative": true,
+        "mode": "min",
+        "scaleSeconds": true
       }
     ]
   },
