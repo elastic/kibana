@@ -82,10 +82,8 @@ define(function (require) {
         it('to the value of the config if set', function () {
           var vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
           var partial = Boolean(Math.round(Math.random()));
-          sinon.spy(vis, 'isHierarchical');
 
           var writer = new ResponseWriter(vis, { partialRows: partial });
-          expect(vis.isHierarchical).to.have.property('callCount', 0);
           expect(writer).to.have.property('partialRows', partial);
         });
 
@@ -95,7 +93,6 @@ define(function (require) {
           sinon.stub(vis, 'isHierarchical').returns(hierarchical);
 
           var writer = new ResponseWriter(vis, {});
-          expect(vis.isHierarchical).to.have.property('callCount', 1);
           expect(writer).to.have.property('partialRows', hierarchical);
         });
       });

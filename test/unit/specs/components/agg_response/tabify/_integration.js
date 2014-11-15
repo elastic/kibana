@@ -39,7 +39,73 @@ define(function (require) {
       expect(resp.columns[0]).to.have.property('aggConfig', vis.aggs[0]);
     });
 
-    it('transforms a complex response properly', function () {
+    it('transforms a complex, non-hierarchical response properly', function () {
+      var vis = new Vis(indexPattern, {
+        type: 'histogram',
+        aggs: [
+          { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+          { type: 'terms', schema: 'split', params: { field: 'extension' } },
+          { type: 'terms', schema: 'segment', params: { field: 'geo.src' } },
+          { type: 'terms', schema: 'segment', params: { field: 'machine.os' } }
+        ]
+      });
+      normalizeIds(vis);
+
+      var avg = vis.aggs[0];
+      var ext = vis.aggs[1];
+      var src = vis.aggs[2];
+      var os = vis.aggs[3];
+      var esResp = _.cloneDeep(fixtures.threeTermBuckets);
+      // remove the buckets for css              in MX
+      esResp.aggregations.agg_2.buckets[1].agg_3.buckets[0].agg_4.buckets = [];
+      var resp = tabifyAggResponse(vis, esResp);
+
+      function verifyExtensionSplit(tableGroup, key) {
+        expect(tableGroup).to.have.property('tables');
+        expect(tableGroup).to.have.property('aggConfig', ext);
+        expect(tableGroup).to.have.property('key', key);
+        expect(tableGroup.tables).to.have.length(1);
+
+        tableGroup.tables.forEach(function (table) {
+          verifyTable(table, key);
+        });
+      }
+
+      function verifyTable(table, splitKey) {
+        expect(table.columns).to.have.length(3);
+        expect(table.columns[0]).to.have.property('aggConfig', src);
+        expect(table.columns[1]).to.have.property('aggConfig', os);
+        expect(table.columns[2]).to.have.property('aggConfig', avg);
+
+        table.rows.forEach(function (row) {
+          expect(row).to.have.length(3);
+
+          // two character country code
+          expect(row[0]).to.be.a('string');
+          expect(row[0]).to.have.length(2);
+
+          if (splitKey === 'css' && row[0] === 'MX') {
+            // we removed these buckets, the row shouldn't be there
+            throw new Error('expected the MX row in the CSS table to be removed');
+          } else {
+            // os
+            expect(row[1]).to.match(/^(win|mac|linux)$/);
+
+            // average bytes
+            expect(row[2]).to.be.a('number');
+            expect(row[2] === 0 || row[2] > 1000).to.be.ok();
+          }
+        });
+      }
+
+      expect(resp).to.have.property('tables');
+      expect(resp.tables).to.have.length(3);
+      verifyExtensionSplit(resp.tables[0], 'png');
+      verifyExtensionSplit(resp.tables[1], 'css');
+      verifyExtensionSplit(resp.tables[2], 'html');
+    });
+
+    it('transforms a complex response with partial rows properly', function () {
       var vis = new Vis(indexPattern, {
         type: 'pie',
         aggs: [
@@ -55,6 +121,7 @@ define(function (require) {
       var ext = vis.aggs[1];
       var src = vis.aggs[2];
       var os = vis.aggs[3];
+
       var esResp = _.cloneDeep(fixtures.threeTermBuckets);
       // remove the buckets for css              in MX
       esResp.aggregations.agg_2.buckets[1].agg_3.buckets[0].agg_4.buckets = [];
@@ -90,9 +157,10 @@ define(function (require) {
           expect(row[1] === 0 || row[1] > 1000).to.be.ok();
 
           if (splitKey === 'css' && row[0] === 'MX') {
-            // removed these buckets, we should get empty values
+            // removed these buckets, we should get empty values for the bucket
             expect(row[2]).to.be('');
-            expect(row[3]).to.be('');
+            // but we should have the metric from the MX bucket
+            expect(row[3]).to.be(9299);
           } else {
             // os
             expect(row[2]).to.match(/^(win|mac|linux)$/);
