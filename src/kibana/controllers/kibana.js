@@ -14,6 +14,7 @@ define(function (require) {
   require('components/state_management/app_state');
   require('components/storage/storage');
   require('components/url/url');
+  require('components/doc_title/doc_title');
   require('directives/click_focus');
   require('directives/info');
   require('directives/tooltip');
