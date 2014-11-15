@@ -19,9 +19,10 @@ define(function (require) {
       var visIsHier = vis.isHierarchical();
       this.canSplit = this.opts.canSplit !== false;
       this.partialRows = this.opts.partialRows == null ? visIsHier : this.opts.partialRows;
+      this.minimalColumns = visIsHier ? !!this.opts.minimalColumns : true;
       this.metricsAtEachLevel = visIsHier;
 
-      this.columns = getColumns(vis, this.opts);
+      this.columns = getColumns(vis, this.minimalColumns);
       this.aggStack = _.pluck(this.columns, 'aggConfig');
 
       this.root = new TableGroup();
