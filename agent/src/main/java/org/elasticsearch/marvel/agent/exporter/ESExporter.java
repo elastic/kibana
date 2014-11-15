@@ -218,7 +218,7 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
 
     private HttpURLConnection openExportingConnection() {
         logger.trace("setting up an export connection");
-        HttpURLConnection conn = openAndValidateConnection("POST", "_bulk", XContentType.SMILE.restContentType());
+        HttpURLConnection conn = openAndValidateConnection("POST", getIndexName() + "/_bulk", XContentType.SMILE.restContentType());
         if (conn != null && (keepAliveThread == null || !keepAliveThread.isAlive())) {
             // start keep alive upon successful connection if not there.
             initKeepAliveThread();
@@ -233,7 +233,6 @@ public class ESExporter extends AbstractLifecycleComponent<ESExporter> implement
         for (int i = 0; i < renderer.length(); i++) {
             XContentBuilder builder = XContentFactory.smileBuilder();
             builder.startObject().startObject("index")
-                    .field("_index", getIndexName())
                     .field("_type", renderer.type(i))
                     .endObject().endObject();
             builder.close();
