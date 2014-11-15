@@ -131,15 +131,12 @@ define(function (require) {
 
           function onRouteChange() {
             var route = $location.path().split(/\//);
-            var app = _.find($scope.apps, {id: route[1]});
+            var app = $rootScope.activeApp = _.find($scope.apps, {id: route[1]});
 
             if (!app) return;
 
             // Record the last URL w/ state of the app, use for tab.
             lastPathFor(app, globalState.removeFromUrl($location.url()));
-
-            // Set class of container to application-<appId>
-            $scope.activeApp = route ? route[1] : null;
           }
 
           $rootScope.$on('$routeChangeSuccess', onRouteChange);
