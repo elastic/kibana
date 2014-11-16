@@ -48,7 +48,7 @@ define(function (require) {
               });
             });
           }
-        } else if (write.partialRows && write.metricsAtEachLevel && write.minimalColumns) {
+        } else if (write.partialRows && write.metricsForAllBuckets && write.minimalColumns) {
           // we don't have any buckets, but we do have metrics at this
           // level, then pass all the empty buckets and jump back in for
           // the metrics.

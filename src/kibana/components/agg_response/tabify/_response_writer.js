@@ -17,10 +17,24 @@ define(function (require) {
       this.rowBuffer = [];
 
       var visIsHier = vis.isHierarchical();
+
+      // do the options allow for splitting? we will only split if true and
+      // tabify calls the split method.
       this.canSplit = this.opts.canSplit !== false;
+
+      // should we allow partial rows to be included in the tables? if a
+      // partial row is found, it is filled with empty strings ''
       this.partialRows = this.opts.partialRows == null ? visIsHier : this.opts.partialRows;
+
+      // if true, we will not place metric columns after every bucket
+      // even if the vis is hierarchical. if false, and the vis is
+      // hierarchical, then we will display metric columns after
+      // every bucket col
       this.minimalColumns = visIsHier ? !!this.opts.minimalColumns : true;
-      this.metricsAtEachLevel = visIsHier;
+
+      // true if we can expect metrics to have been calculated
+      // for every bucket
+      this.metricsForAllBuckets = visIsHier;
 
       this.columns = getColumns(vis, this.minimalColumns);
       this.aggStack = _.pluck(this.columns, 'aggConfig');
