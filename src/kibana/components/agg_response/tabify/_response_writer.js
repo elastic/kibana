@@ -100,7 +100,7 @@ define(function (require) {
 
       this.columns.splice(i, 1);
 
-      if (!this.vis.isHierarchical()) return;
+      if (this.minimalColumns) return;
 
       // hierarchical vis creats additional columns for each bucket
       // we will remove those too
