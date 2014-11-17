@@ -29,7 +29,10 @@ define(function () {
       url_params: {
         "version": 1,
         "routing": "",
-        "parent": ""
+        "parent": "",
+        "_source": "",
+        "_source_exclude": "",
+        "_source_include": ""
       }
     });
     api.addEndpointDescription('_get_doc_source', {
@@ -40,7 +43,9 @@ define(function () {
       url_params: {
         "version": 1,
         "routing": "",
-        "parent": ""
+        "parent": "",
+        "_source_exclude": "",
+        "_source_include": ""
       }
     });
     api.addEndpointDescription('_delete_doc', {
