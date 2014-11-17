@@ -38,6 +38,19 @@ define(function (require) {
     });
   });
 
+  // helper
+  sinon.decorateWithSpy = function (/* prop... */) {
+    var props = _.rest(arguments, 0);
+
+    return function ($delegate) {
+      props.forEach(function (prop) {
+        sinon.spy($delegate, prop);
+      });
+
+      return $delegate;
+    };
+  };
+
   afterEach(function () {
     if (!toRestore.length) return;
 

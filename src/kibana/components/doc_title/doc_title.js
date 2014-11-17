@@ -4,7 +4,7 @@ define(function (require) {
   .run(function ($rootScope, docTitle) {
     // always bind to the route events
     $rootScope.$on('$routeChangeStart', docTitle.reset);
-    $rootScope.$watch('activeApp', docTitle.ensureAppTitle);
+    $rootScope.$watch('activeApp', docTitle.ensureAppName);
   })
   .service('docTitle', function ($rootScope) {
     var baseTitle = document.title;
@@ -25,7 +25,7 @@ define(function (require) {
       self.change(baseTitle, true);
     };
 
-    self.ensureAppTitle = function () {
+    self.ensureAppName = function () {
       if (document.title === baseTitle) {
         self.change();
       }
