@@ -103,10 +103,24 @@ define(function () {
         "field": "{field}",
         "size": 10,
         "shard_size": 10,
+        "shard_min_doc_count": 10,
         "min_doc_count": 10,
-        "include": "*",
-        "exclude": "*",
-        "execution_hint": { __one_of: ["map", "ordinals", "global_ordinals"] }
+        "include": { __one_of: [ "*", { pattern: "", flags: ""}]},
+        "exclude": { __one_of: [ "*", { pattern: "", flags: ""}]},
+        "execution_hint": { __one_of: ["map", "ordinals", "global_ordinals"] },
+        "background_filter": {
+          __scope_link: "GLOBAL.filter"
+        },
+        "mutual_information": {
+          "include_negatives": { __one_of: [ true, false ] }
+        },
+        "chi_square": {
+          "include_negatives": { __one_of: [ true, false ] },
+          "background_is_superset": { __one_of: [ true, false ] }
+        },
+        "gnd": {
+          "background_is_superset": { __one_of: [ true, false ] }
+        }
       },
       "range": {
         __template: {
