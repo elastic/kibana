@@ -94,7 +94,8 @@ define(function () {
         "include": "*",
         "exclude": "*",
         "execution_hint": { __one_of: ["map", "ordinals", "global_ordinals"] },
-        "show_term_doc_count_error": { __one_of: [ true, false ]}
+        "show_term_doc_count_error": { __one_of: [ true, false ]},
+        "collect_mode": { __one_of: [ "depth_first", "breadth_first"]}
       },
       "significant_terms": {
         __template: {
