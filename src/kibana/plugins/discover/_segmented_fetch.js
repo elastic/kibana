@@ -315,30 +315,30 @@ define(function (require) {
 
       if (!resp.aggregations) return;
 
-      var aggKey = _.find(Object.keys(resp.aggregations), function (key) {
-        return key.substr(0, 4) === 'agg_';
-      });
+      Object.keys(resp.aggregations).forEach(function (aggKey) {
 
-      if (!aggKey) throw new Error('aggKey not found in response: ' + Object.keys(resp.aggregations));
-
-      // start merging aggregations
-      if (!requestStats.aggregations) {
-        requestStats.aggregations = {};
-        requestStats.aggregations[aggKey] = {
-          buckets: []
-        };
-        requestStats._bucketIndex = {};
-      }
-
-      resp.aggregations[aggKey].buckets.forEach(function (bucket) {
-        var mbucket = requestStats._bucketIndex[bucket.key];
-        if (mbucket) {
-          mbucket.doc_count += bucket.doc_count;
-          return;
+        if (!requestStats.aggregations) {
+          // start merging aggregations
+          requestStats.aggregations = {};
+          requestStats._bucketIndex = {};
         }
 
-        mbucket = requestStats._bucketIndex[bucket.key] = bucket;
-        requestStats.aggregations[aggKey].buckets.push(mbucket);
+        if (!requestStats.aggregations[aggKey]) {
+          requestStats.aggregations[aggKey] = {
+            buckets: []
+          };
+        }
+
+        resp.aggregations[aggKey].buckets.forEach(function (bucket) {
+          var mbucket = requestStats._bucketIndex[bucket.key];
+          if (mbucket) {
+            mbucket.doc_count += bucket.doc_count;
+            return;
+          }
+
+          mbucket = requestStats._bucketIndex[bucket.key] = bucket;
+          requestStats.aggregations[aggKey].buckets.push(mbucket);
+        });
       });
     }
 

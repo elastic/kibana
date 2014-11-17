@@ -54,7 +54,7 @@ define(function (require) {
             type: 'date_histogram',
             schema: 'segment'
           },
-          new AggConfig({
+          new AggConfig(vis, {
             type: 'terms',
             schema: 'split'
           })
@@ -62,6 +62,29 @@ define(function (require) {
 
         expect(ac).to.have.length(3);
         expect(SpiedAggConfig).to.have.property('callCount', 3);
+      });
+
+      it('attemps to ensure that all states have an id', function () {
+        var vis = new Vis(indexPattern, {
+          type: 'histogram',
+          aggs: []
+        });
+
+        var states = [
+          {
+            type: 'date_histogram',
+            schema: 'segment'
+          },
+          {
+            type: 'terms',
+            schema: 'split'
+          }
+        ];
+
+        var spy = sinon.spy(SpiedAggConfig, 'ensureIds');
+        var ac = new AggConfigs(vis, states);
+        expect(spy.callCount).to.be(1);
+        expect(spy.firstCall.args[0]).to.be(states);
       });
 
       describe('defaults', function () {

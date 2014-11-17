@@ -7,7 +7,7 @@ define(function (require) {
       return function promiseHandler(patterns) {
         if (!patterns || patterns.length === 0) {
           // notify.warning(new errors.NoDefinedIndexPatterns());
-          kbnUrl.changePath('/settings/indices');
+          kbnUrl.redirectPath('/settings/indices');
         }
 
         return patterns;
