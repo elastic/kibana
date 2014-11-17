@@ -99,7 +99,46 @@ define(function () {
               }
             },
             '{field}',
-            '_score'
+            '_score',
+            {
+              '_geo_distance': {
+                __template: {
+                  "FIELD": {
+                    lat: 40,
+                    lon: -70
+                  },
+                  order: "asc"
+                },
+                "{field}": {
+                  __one_of: [
+                    {
+                      __template: {
+                        lat: 40,
+                        lon: -70
+                      },
+                      lat: 40,
+                      lon: -70
+                    },
+                    [
+                      {
+                        __template: {
+                          lat: 40,
+                          lon: -70
+                        },
+                        lat: 40,
+                        lon: -70
+                      }
+                    ],
+                    [""],
+                    ""
+                  ]
+                },
+                distance_type: { __one_of: ["sloppy_arc", "arc", "plane"]},
+                sort_mode: { __one_of: ["min", "max", "avg"]},
+                order: { __one_of: ["asc", "desc"] },
+                unit: "km"
+              }
+            }
           ]
         },
         search_type: {},
