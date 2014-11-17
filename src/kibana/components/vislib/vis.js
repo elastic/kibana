@@ -50,6 +50,7 @@ define(function (require) {
         throw new Error('No valid data!');
       }
 
+      console.log(data.slices.children[0].aggConfig.params.field.format.convert);
       this.data = data;
       this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
       this._runOnHandler('render');
