@@ -93,7 +93,8 @@ define(function () {
         // TODO: these also support regex - extend!
         "include": "*",
         "exclude": "*",
-        "execution_hint": { __one_of: ["map", "ordinals", "global_ordinals"] }
+        "execution_hint": { __one_of: ["map", "ordinals", "global_ordinals"] },
+        "show_term_doc_count_error": { __one_of: [ true, false ]}
       },
       "significant_terms": {
         __template: {
