@@ -48,7 +48,16 @@ define(function () {
       data_autocomplete_rules: {
         persistent: {
           'routing.allocation.same_shard.host': { __one_of: [ false, true ]},
-          'cluster.routing.allocation.enable': { __one_of: [ "all", "primaries", "new_primaries", "none" ]}
+          cluster: {
+            routing: {
+              'allocation.enable': { __one_of: [ "all", "primaries", "new_primaries", "none" ]},
+              'allocation.disk.threshold_enabled': { __one_of: [ false, true ]},
+              'allocation.disk.watermark.low': '85%',
+              'allocation.disk.watermark.high': '90%',
+              'allocation.disk.include_relocations': { __one_of: [ true, false]},
+              'allocation.disk.reroute_interval': '60s'
+            }
+          }
         },
         transient: {
           __scope_link: '.persistent'
