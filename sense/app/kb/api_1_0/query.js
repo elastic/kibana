@@ -555,7 +555,8 @@ define(["_"], function (_) {
           functions: [
             _.defaults(
               {
-                filter: {}
+                filter: {},
+                weight: 1.0
               },
               SCORING_FUNCS
             )
