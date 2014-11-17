@@ -37,7 +37,11 @@ define(function (require) {
             if (qIdx !== -1) initQueue.splice(qIdx, 1);
             if (initQueue.length === 0) {
               initQueue = false;
-              fn(vals.new.slice(0), vals.old.slice(0));
+              if (fn.length) {
+                fn(vals.new.slice(0), vals.old.slice(0));
+              } else {
+                fn();
+              }
             }
             return;
           }
