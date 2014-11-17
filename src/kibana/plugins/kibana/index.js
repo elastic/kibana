@@ -29,7 +29,7 @@ define(function (require) {
     return {
       template: require('text!plugins/kibana/kibana.html'),
       controller: function ($scope) {
-        var self = this;
+        var self = $rootScope.kibana = this;
         var notify = new Notifier({ location: 'Kibana' });
 
         // this is the only way to handle uncaught route.resolve errors
@@ -39,7 +39,7 @@ define(function (require) {
 
         // run init functions before loading the mixins, so that we can ensure that
         // the environment is ready for them to get and use their dependencies
-        Promise.all([ kbnSetup(), config.init() ])
+        self.ready = Promise.all([ kbnSetup(), config.init() ])
         .then(function () {
           // load some "mixins"
           var mixinLocals = { $scope: $scope, notify: notify };
