@@ -16,17 +16,18 @@ module.exports = function (grunt) {
     failOnError: true
   };
 
+  var args = ['-H', '127.0.0.1'];
+
   var config = {
     mri_server: {
       options: options,
-      cmd: cmd
+      cmd: cmd,
+      args: args
     },
     jruby_server: {
       options: options,
       cmd: jruby,
-      args: [
-        cmd
-      ]
+      args: [cmd].concat(args)
     },
     built_kibana: {
       options: {
@@ -35,7 +36,8 @@ module.exports = function (grunt) {
         quiet: true,
         failOnError: false
       },
-      cmd: './target/<%= pkg.name + "-" + pkg.version %>/bin/kibana'
+      cmd: './target/<%= pkg.name + "-" + pkg.version %>/bin/kibana',
+      args: args
     }
   };
 

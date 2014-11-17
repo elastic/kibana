@@ -126,7 +126,7 @@ define(function (require) {
           });
         }
       }, notify.fatal);
-    }, 50, { leading: true, trailing: false });
+    }, 50);
 
     $scope.createIndexPattern = function () {
       // get an empty indexPattern to start

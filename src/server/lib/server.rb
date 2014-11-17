@@ -34,6 +34,7 @@ module Kibana
     end
 
     def self.run(options = {})
+
       options = DEFAULTS.merge(options)
       min, max = options[:threads].split(':', 2)
 
@@ -41,7 +42,13 @@ module Kibana
       server = Puma::Server.new(app)
 
       # Configure server
-      server.add_tcp_listener(options[:host], options[:port])
+      begin
+        server.add_tcp_listener(options[:host], options[:port])
+      rescue Errno::EADDRINUSE
+        log("tcp://#{options[:host]}:#{options[:port]} is in use")
+        exit(1)
+      end
+
       server.min_threads = min
       server.max_threads = max
 

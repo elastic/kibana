@@ -7,33 +7,48 @@ define(function (require) {
 
   location.service('kbnUrl', function ($route, $location, $rootScope, globalState, $parse) {
     var self = this;
-    self.reloading = false;
+    var reloading;
+    var unbindListener;
 
-    self.change = function (url, paramObj, forceReload) {
-      self._changeLocation('url', url, paramObj, forceReload);
+    self.change = function (url, paramObj) {
+      self._changeLocation('url', url, paramObj);
     };
 
-    self.changePath = function (url, paramObj, forceReload) {
-      self._changeLocation('path', url, paramObj, forceReload);
+    self.changePath = function (path, paramObj) {
+      self._changeLocation('path', path, paramObj);
     };
 
-    self._changeLocation = function (type, url, paramObj, forceReload) {
-      var doReload = false;
+    self.redirect = function (url, paramObj) {
+      self._changeLocation('url', url, paramObj, true);
+    };
 
-      if (_.isBoolean(paramObj)) {
-        forceReload = paramObj;
-        paramObj = undefined;
-      }
+    self.redirectPath = function (path, paramObj) {
+      self._changeLocation('path', path, paramObj, true);
+    };
+
+    self._changeLocation = function (type, url, paramObj, replace) {
+      var prev = {
+        path: $location.path(),
+        search: $location.search()
+      };
 
       url = self.eval(url, paramObj);
+      $location[type](url);
+      if (replace) $location.replace();
 
-      if (url !== $location[type]()) {
-        $location[type](url);
-        doReload = !self.matches(url);
-      }
+      var next = {
+        path: $location.path(),
+        search: $location.search()
+      };
 
-      if (forceReload || doReload) {
-        self.reload();
+      if (self.shouldAutoReload(next, prev)) {
+        reloading = $rootScope.$on('$locationChangeSuccess', function () {
+          // call the "unlisten" function returned by $on
+          reloading();
+          reloading = false;
+
+          $route.reload();
+        });
       }
     };
 
@@ -43,14 +58,23 @@ define(function (require) {
       return parseUrlPrams(url, paramObj);
     };
 
-    self.matches = function (url) {
-      var route = $route.current.$$route;
-      if (!route || !route.regexp) return false;
-      return route.regexp.test(url);
+    self.getRoute = function () {
+      return $route.current && $route.current.$$route;
     };
 
-    $rootScope.$on('$routeUpdate', reloadingComplete);
-    $rootScope.$on('$routeChangeStart', reloadingComplete);
+    self.shouldAutoReload = function (next, prev) {
+      if (reloading) return false;
+
+      var route = self.getRoute();
+      if (!route) return false;
+
+      if (next.path !== prev.path) return false;
+
+      var reloadOnSearch = route.reloadOnSearch;
+      var searchSame = _.isEqual(next.search, prev.search);
+
+      return (reloadOnSearch && searchSame) || !reloadOnSearch;
+    };
 
     function parseUrlPrams(url, paramObj) {
       return url.replace(/\{\{([^\}]+)\}\}/g, function (match, expr) {
@@ -74,15 +98,5 @@ define(function (require) {
       });
     }
 
-    self.reload = function () {
-      if (!self.reloading) {
-        $route.reload();
-        self.reloading = true;
-      }
-    };
-
-    function reloadingComplete() {
-      self.reloading = false;
-    }
   });
 });

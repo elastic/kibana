@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('lodash');
     var $ = require('jquery');
     var fixtures = require('fixtures/fake_hierarchical_data');
+    var sinon = require('test_utils/auto_release_sinon');
 
     var $rootScope;
     var $compile;
@@ -277,6 +278,58 @@ define(function (require) {
           'one,two,"with double-quotes("")"' + '\r\n' +
           '1,2,"""foobar"""' + '\r\n'
         );
+      });
+    });
+
+    describe('aggTable.exportAsCsv()', function () {
+      var origBlob;
+      function FakeBlob(slices, opts) {
+        this.slices = slices;
+        this.opts = opts;
+      }
+
+      beforeEach(function () {
+        origBlob = window.Blob;
+        window.Blob = FakeBlob;
+      });
+
+      afterEach(function () {
+        window.Blob = origBlob;
+      });
+
+      it('calls _saveAs properly', function () {
+        var $el = $compile('<kbn-agg-table table="table">')($scope);
+        $scope.$digest();
+
+        var $tableScope = $el.isolateScope();
+        var aggTable = $tableScope.aggTable;
+
+        var saveAs = sinon.stub(aggTable, '_saveAs');
+        $tableScope.table = {
+          columns: [
+            { title: 'one' },
+            { title: 'two' },
+            { title: 'with double-quotes(")' }
+          ],
+          rows: [
+            [1, 2, '"foobar"']
+          ]
+        };
+
+        aggTable.csv.filename = 'somefilename.csv';
+        aggTable.exportAsCsv();
+
+        expect(saveAs.callCount).to.be(1);
+        var call = saveAs.getCall(0);
+        expect(call.args[0]).to.be.a(FakeBlob);
+        expect(call.args[0].slices).to.eql([
+          'one,two,"with double-quotes("")"' + '\r\n' +
+          '1,2,"""foobar"""' + '\r\n'
+        ]);
+        expect(call.args[0].opts).to.eql({
+          type: 'text/plain'
+        });
+        expect(call.args[1]).to.be('somefilename.csv');
       });
     });
   }];
