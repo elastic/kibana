@@ -1,5 +1,6 @@
 define(function (require) {
   describe('docTitle Service', function () {
+    var _ = require('lodash');
     var sinon = require('test_utils/auto_release_sinon');
     var initialDocTitle;
     var MAIN_TITLE = 'Kibana 4';
@@ -17,12 +18,17 @@ define(function (require) {
     });
 
     beforeEach(module('kibana', function ($provide) {
-      $provide.decorator('docTitle', sinon.decorateWithSpy('ensureAppName'));
+      $provide.decorator('docTitle', sinon.decorateWithSpy('update'));
       $provide.decorator('$rootScope', sinon.decorateWithSpy('$on'));
     }));
 
-    beforeEach(inject(function ($injector) {
-      docTitle = $injector.get('docTitle');
+    beforeEach(inject(function ($injector, Private) {
+      if (_.random(0, 1)) {
+        docTitle = $injector.get('docTitle');
+      } else {
+        docTitle = Private(require('components/doc_title/doc_title'));
+      }
+
       $rootScope = $injector.get('$rootScope');
     }));
 
@@ -45,34 +51,14 @@ define(function (require) {
     });
 
     describe('#reset', function () {
-      it('sets the page title to whatever it was when kibana bootup', function () {
-        document.title = 'not ' + MAIN_TITLE;
+      it('clears the internal state, next update() will write the default', function () {
+        docTitle.change('some title');
+        docTitle.update();
+        expect(document.title).to.be('some title - ' + MAIN_TITLE);
+
         docTitle.reset();
+        docTitle.update();
         expect(document.title).to.be(MAIN_TITLE);
-      });
-    });
-
-    describe('#ensureAppName', function () {
-      it('triggered when active app changes, sets the page title to include the app name', function () {
-        expect(document.title).to.be(MAIN_TITLE);
-        expect(docTitle.ensureAppName).to.have.property('callCount', 0);
-
-        $rootScope.activeApp = fakeApp;
-        $rootScope.$apply();
-
-        expect(docTitle.ensureAppName).to.have.property('callCount', 1);
-        expect(document.title).to.be(fakeApp.name + ' - ' + MAIN_TITLE);
-      });
-
-      it('does nothing if the document.title has been modified', function () {
-        var changed = document.title = 'not the basic title';
-        expect(docTitle.ensureAppName).to.have.property('callCount', 0);
-
-        $rootScope.activeApp = fakeApp;
-        $rootScope.$apply();
-
-        expect(docTitle.ensureAppName).to.have.property('callCount', 1);
-        expect(document.title).to.be(changed);
       });
     });
 
