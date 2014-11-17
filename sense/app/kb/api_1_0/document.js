@@ -111,5 +111,34 @@ define(function () {
       }
     });
 
+    api.addEndpointDescription('_update', {
+      methods: ['POST'],
+      patterns: [
+        "{index}/{type}/{id}/_update"
+      ],
+      url_params: {
+        "version": 1,
+        "version_type": ["force", "internal"],
+        "routing": "",
+        "parent": "",
+        "timestamp": "",
+        "consistency": ["qurom", "one", "all"],
+        "replication": ["sync", "async"],
+        "refresh": "__flag__",
+        "timeout": "1m",
+        "retry_on_conflict": 3,
+        "fields": ""
+      },
+      data_autocomplete_rules: {
+        "script": "",
+        "lang": "groovy",
+        "params": {},
+        "doc": {},
+        "upsert": {},
+        "scripted_upsert": { __one_of: [ true, false ]}
+      }
+
+    });
+
   }
 });
