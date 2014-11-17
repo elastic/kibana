@@ -22,7 +22,23 @@ define(function () {
 
   return function init(api) {
     api.addEndpointDescription('_refresh', {
-      methods: ['POST']
+      methods: ['POST'],
+      patterns: [
+        "_refresh",
+        "{indices}/_refresh"
+      ],
+    });
+
+    api.addEndpointDescription('_flush', {
+      methods: ['POST'],
+      patterns: [
+        "_flush",
+        "{indices}/_flush"
+      ],
+      url_params: {
+        wait_if_ongoing: [ true, false],
+        force: [true, false]
+      }
     });
 
     api.addEndpointDescription('_stats', {
