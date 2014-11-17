@@ -4,31 +4,43 @@ define(function (require) {
   .run(function ($rootScope, docTitle) {
     // always bind to the route events
     $rootScope.$on('$routeChangeStart', docTitle.reset);
-    $rootScope.$watch('activeApp', docTitle.ensureAppName);
+    $rootScope.$on('$routeChangeError', docTitle.update);
+    $rootScope.$on('$routeChangeSuccess', docTitle.update);
+    $rootScope.$watch('activeApp', docTitle.update);
   })
   .service('docTitle', function ($rootScope) {
     var baseTitle = document.title;
     var self = this;
 
-    self.change = function (title, complete) {
-      title = [title];
+    var lastChange;
 
-      if (!complete) {
-        title.push($rootScope.activeApp && $rootScope.activeApp.name);
-        title.push(baseTitle);
+    function render() {
+      lastChange = lastChange || [];
+
+      var parts = [lastChange[0]];
+
+      if ($rootScope.activeApp) {
+        parts.push($rootScope.activeApp.name);
       }
 
-      document.title = title.filter(Boolean).join(' - ');
+      if (!lastChange[1]) {
+        parts.push(baseTitle);
+      }
+
+      return parts.filter(Boolean).join(' - ');
+    }
+
+    self.change = function (title, complete) {
+      lastChange = [title, complete];
+      self.update();
     };
 
     self.reset = function () {
-      self.change(baseTitle, true);
+      lastChange = null;
     };
 
-    self.ensureAppName = function () {
-      if (document.title === baseTitle) {
-        self.change();
-      }
+    self.update = function () {
+      document.title = render();
     };
   });
 
