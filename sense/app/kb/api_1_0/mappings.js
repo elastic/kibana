@@ -62,7 +62,7 @@ define(function () {
       methods: ['PUT', 'POST'],
       patterns: [
         "{indices}/{type}/_mapping",
-        "{indices}/_mapping/{type}",
+        "{indices}/_mapping/{type}"
       ],
       priority: 10, // collides with put doc by id
       data_autocomplete_rules: {
@@ -121,6 +121,27 @@ define(function () {
         'dynamic_date_formats': ['yyyy-MM-dd'],
         'date_detection': BOOLEAN,
         'numeric_detection': BOOLEAN,
+        'transform': {
+          __template: {
+            script: ""
+          },
+          __one_of: [
+            {
+              script: "",
+              params: {},
+              lang: "groovy"
+            },
+            [
+              {
+                script: "",
+                params: {},
+                lang: "groovy"
+              }
+            ]
+          ]
+
+
+        },
         'properties': {
           '*': {
             type: {
@@ -216,7 +237,7 @@ define(function () {
     api.addEndpointDescription('_put_mapping', {
       methods: ['PUT'],
       patterns: [
-        "{indices}/_mapping",
+        "{indices}/_mapping"
       ],
       data_autocomplete_rules: {
         '{type}': {
