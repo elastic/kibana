@@ -143,6 +143,7 @@ define(function () {
         },
         search_type: {},
         fields: ['{field}'],
+        fielddata_fields: ["{field}"],
         script_fields: {
           __template: {
             'FIELD': {
@@ -167,12 +168,30 @@ define(function () {
         highlight: {
           // populated by a global rule
         },
+        _source: { __one_of: [
+          "{field}",
+          [ "{field}"],
+          {
+            "include": {
+              __one_of: [
+                "{field}",
+                [ "{field}"]
+              ]
+            },
+            "exclude": {
+              __one_of: [
+                "{field}",
+                [ "{field}"]
+              ]
+            }
+          }
+        ]},
         explain: {
           __one_of: [true, false]
         },
         stats: [''],
-        timeout: "1s"
-
+        timeout: "1s",
+        version: { __one_of: [ true, false ]}
       }
     });
 

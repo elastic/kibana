@@ -307,6 +307,29 @@ define(function () {
         },
         field: "{field}",
         wrap_longitude: { __one_of: [ true, false ]}
+      },
+      "top_hits": {
+        __template: {
+          size: 10
+        },
+        from: 0,
+        size: 10,
+        sort: {
+          __template: [],
+          __scope_link: "_search.sort"
+        },
+        highlight: {
+        },
+        explain: { __one_of: [ true, false ]},
+        _source: {
+          __template: "",
+          __scope_link: "_search._source"
+        },
+        script_fields: {
+          __scope_link: "_search.script_fields"
+        },
+        fielddata_fields: ["{field}"],
+        version: { __one_of: [ true, false ]}
       }
     }
   };
