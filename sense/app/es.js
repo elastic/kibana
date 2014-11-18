@@ -33,7 +33,7 @@ define([
       return esVersion;
     };
 
-    exports.send = function (method, path, data, server) {
+    exports.send = function (method, path, data, server, disable_auth_alert) {
       var wrappedDfd = $.Deferred();
 
       server = server || exports.getBaseUrl();
@@ -49,6 +49,9 @@ define([
         method = "POST";
       }
 
+      // delayed loading for ciruclar references
+      var settings = require("settings");
+
       var options = {
         url: path,
         data: method == "GET" ? null : data,
@@ -57,31 +60,26 @@ define([
         type: method,
         password: password,
         username: uname,
-        dataType: "text" // disable automatic guessing
+        dataType: "text", // disable automatic guessing
+        xhrFields: {
+          withCredentials: settings.getBasicAuth()
+        }
       };
 
 
-      // first try withCredentials for authentication during preflight checks
-      // sadly it also means Access-Control-Allow-Origin: * is not valid anymore (default
-      // cors setting in ES, when enabled) so we will try again without if needed.
-      $.ajax(_.defaults({},
-        options, {
-        xhrFields: { withCredentials: true} // allow preflight credentials
-      })).then(
+      $.ajax(options).then(
         function (data, textStatus, jqXHR) {
           wrappedDfd.resolveWith(this, [data, textStatus, jqXHR]);
         },
         function (jqXHR, textStatus, errorThrown) {
-          if (jqXHR.status == 0) {
-            $.ajax(options).then(function () { // no withCredentials
-              wrappedDfd.resolveWith(this, arguments);
-            }, function () {
-              wrappedDfd.rejectWith(this, arguments);
-            });
+          if (jqXHR.status == 401 && !options.xhrFields.withCredentials && !disable_auth_alert) {
+            settings.showBasicAuthPopupIfNotShown();
+          } if (jqXHR.status == 0 && jqXHR.state() == "rejected") {
+            jqXHR.responseText =
+              "\nElasticsearch may not be reachable or you may need to check your CORS settings." +
+              "\nPlease check the elasticsearch documentation."
           }
-          else {
-            wrappedDfd.rejectWith(this, [jqXHR, textStatus, errorThrown])
-          }
+          wrappedDfd.rejectWith(this, [jqXHR, textStatus, errorThrown]);
         });
       return wrappedDfd;
     };
@@ -107,9 +105,12 @@ define([
       return server + "/" + path;
     };
 
+    exports.forceRefresh = function () {
+      exports.setBaseUrl(baseUrl, true)
+    };
 
-    exports.setBaseUrl = function (base) {
-      if (baseUrl !== base) {
+    exports.setBaseUrl = function (base, force) {
+      if (baseUrl !== base || force) {
         var old = baseUrl;
         baseUrl = base;
         exports.send("GET", "/").done(function (data, status, xhr) {

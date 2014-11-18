@@ -253,14 +253,14 @@ define([
       var autocompleteSettings = settings.getAutocomplete(),
         mappingPromise, aliasesPromise;
       if (autocompleteSettings.fields) {
-        mappingPromise = es.send("GET", "_mapping");
+        mappingPromise = es.send("GET", "_mapping", null, null, true);
       }
       else {
         mappingPromise = new $.Deferred();
         mappingPromise.resolve();
       }
       if (autocompleteSettings.indices) {
-        aliasesPromise = es.send("GET", "_aliases");
+        aliasesPromise = es.send("GET", "_aliases", null, null, true);
       }
       else {
         aliasesPromise = new $.Deferred();
@@ -302,10 +302,6 @@ define([
 
     es.addServerChangeListener(retrieveAutocompleteInfoFromServer);
 
-    function onInitComplete() {
-      autocomplete_retriever();
-    }
-
     return _.assign(mappingObj, {
       getFields: getFields,
       getIndices: getIndices,
@@ -314,7 +310,6 @@ define([
       loadAliases: loadAliases,
       expandAliases: expandAliases,
       clear: clear,
-      onInitComplete: onInitComplete,
       retrieveAutocompleteInfoFromServer: retrieveAutocompleteInfoFromServer
     });
 

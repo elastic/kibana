@@ -130,7 +130,7 @@ define([
       output.update("");
     }
 
-    (function loadSavedState() {
+    function loadSavedState() {
       var sourceLocation = utils.getUrlParam('load_from') || "stored";
       var previousSaveState = history.getSavedEditorState();
 
@@ -168,9 +168,9 @@ define([
         resetToValues(defaultHost);
       }
       input.moveToNextRequestEdge(true);
-    }());
+    };
 
-    (function setupAutosave() {
+    function setupAutosave() {
       var timer;
       var saveDelay = 500;
 
@@ -184,7 +184,7 @@ define([
         }
         timer = setTimeout(doSave, saveDelay);
       });
-    }());
+    };
 
     function saveCurrentState() {
       try {
@@ -321,16 +321,21 @@ define([
      */
     if (!localStorage.getItem("version_welcome_shown")) {
       require(['welcome_popup'], function ($welcomePopup) {
-        $welcomePopup.one('shown', function () {
+        $welcomePopup.on('shown', function () {
           localStorage.setItem("version_welcome_shown", '@@MARVEL_REVISION');
         });
+        $welcomePopup.one('hidden', function() {
+          loadSavedState();
+          setupAutosave();
+        });
         $welcomePopup.modal('show');
+
       });
+    } else {
+      loadSavedState();
+      setupAutosave();
     }
 
-    mappings.onInitComplete();
-
-      
     if (marvelOpts.status && marvelOpts.version && marvelOpts.report) {
       ga.pageview();
     }

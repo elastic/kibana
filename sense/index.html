@@ -161,8 +161,7 @@
         </div>
       </div>
       <div class="control-group">
-        <label class="control-label" for="font_size">Theme</label>
-
+        <label class="control-label">Theme</label>
         <div class="controls">
           <select id="theme">
             <option value="dark">Dark</option>
@@ -171,16 +170,25 @@
         </div>
       </div>
       <div class="control-group">
-        <label class="control-label" for="font_size">Autocomplete</label>
+        <label class="control-label">Autocomplete</label>
         <div class="controls">
-          <label class="checkbox">
+          <label class="checkbox" for="autocomplete_fields">
             <input id="autocomplete_fields" type="checkbox">Fields</input>
           </label>
-          <label class="checkbox">
+          <label class="checkbox" for="autocomplete_indices">
             <input id="autocomplete_indices" type="checkbox">Indices &amp; Aliases</input>
           </label>
         </div>
       </div>
+      <div class="control-group">
+        <label class="control-label">Network</label>
+        <div class="controls">
+          <label class="checkbox">
+            <input id="basic_auth" type="checkbox"> Support Basic Auth </input>
+          </label>
+        </div>
+      </div>
+
     </form>
   </div>
   <div class="modal-footer">
@@ -225,6 +233,22 @@
   </div>
 </div>
 
+<div id="auth_alert" class="modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3 class="text-warning">Authorization Needed</h3>
+  </div>
+  <div class="modal-body">
+    <p>Elasticsearch has responded with a 401 Authorization Required status code.</p>
+    <p>Basic Authentication support needs to be enabled via the settings menu, or by clicking Enable Basic Auth bellow.</p>
+    <p>Note that truning on Basic Authentication support will cause the browser to enforce stricter CORS restriction and you
+    may need to change your Elasticsearch configuration. See Marvel's documentation for more details.</p>
+  </div>
+  <div class="modal-footer">
+    <a href="#" class="btn" data-dismiss="modal">Nevermind</a>
+    <a href="#" class="btn btn-primary" id="enable_basic_auth">Enable Basic Auth Support</a>
+  </div>
+</div>
 <!-- initialize require.js -->
 <script src="vendor/require/require.js"></script>
 <script src="app/require.config.js"></script>

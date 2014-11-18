@@ -141,6 +141,8 @@ For reference, here is the `settings` section of the default template:
 [[relevant-settings]]
 === Other relevant Elasticsearch settings
 
+==== Automatic index creation
+
 Marvel relies on Elasticsearch's capability to automatically create new indices
 when indexing documents. Some people like to disable this feature to better
 protect against mistakes in production clusters. To do so but still allow the
@@ -152,3 +154,24 @@ action.auto_create_index: .marvel-*
 ----------------------
 
 More information is available {ref}/docs-index_.html#index-creation[here]
+
+[[cors]]
+==== CORS
+
+If you are using <sense> to access a remote cluster, you will need to make sure
+Cross-origin resource sharing (CORS) is enabled on the cluster. The relevant settings
+are:
+
+[source,yaml]
+-----------------------
+http.cors.enabled: true
+http.cors.allow-origin: /.*/  <1>
+http.cors.allow-credentials: true <2>
+-----------------------
+
+<1> Elasticsearch will allow CORS requests from any source, echoing the source in the Allow Origin header.
+Needed for basic authentication support.
+
+<2> Elasticsearch will respond with  `Access-Control-Allow-Credentials`. Needed for basic authentication support.
+
+Please see the {ref}/modules-http.html[Elasticsearch documentation] for more information.

@@ -54,4 +54,4 @@ define([
   });
 
   return $welcomePopup;
-})
+});

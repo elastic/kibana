@@ -1,3 +1,4 @@
+[[dashboards]]
 == Marvel's Dashboards
 
 === Overview Dashboard
@@ -52,6 +53,7 @@ and more.
 
 image:images/cluster_pulse_thumb.png["Index Statistics Dashboard",link="images/cluster_pulse.png"]
 
+[[sense]]
 === Sense
 
 _Sense_ is a lightweight developer console. The console is handy when you want
