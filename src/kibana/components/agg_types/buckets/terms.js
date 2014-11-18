@@ -1,15 +1,16 @@
 define(function (require) {
-  return function TermsAggDefinition(Private) {
+  return function TermsAggDefinition(Private, $filter) {
     var _ = require('lodash');
     var AggType = Private(require('components/agg_types/_agg_type'));
     var bucketCountBetween = Private(require('components/agg_types/buckets/_bucket_count_between'));
+    require('filters/short_dots');
 
     return new AggType({
       name: 'terms',
       title: 'Terms',
       makeLabel: function (aggConfig) {
         var params = aggConfig.params;
-        return params.order.display + ' ' + params.size + ' ' + params.field.name;
+        return params.order.display + ' ' + params.size + ' ' + $filter('shortDots')(params.field.name);
       },
       params: [
         {

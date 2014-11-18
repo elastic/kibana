@@ -1,5 +1,6 @@
 define(function (require) {
   return function HierarchicalTooltipFormaterProvider($rootScope, $compile, $sce) {
+    require('filters/short_dots');
     var _ = require('lodash');
     var $ = require('jquery');
     var $tooltip = $(require('text!plugins/vis_types/tooltips/pie.html'));

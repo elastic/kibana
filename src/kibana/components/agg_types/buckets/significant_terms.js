@@ -1,13 +1,14 @@
 define(function (require) {
-  return function SignificantTermsAggDefinition(Private) {
+  return function SignificantTermsAggDefinition(Private, $filter) {
     var _ = require('lodash');
     var AggType = Private(require('components/agg_types/_agg_type'));
+    require('filters/short_dots');
 
     return new AggType({
       name: 'significant_terms',
       title: 'Significant Terms',
       makeLabel: function (aggConfig) {
-        return 'Top ' + aggConfig.params.size + ' unusual terms in ' + aggConfig.params.field.name;
+        return 'Top ' + aggConfig.params.size + ' unusual terms in ' + $filter('shortDots')(aggConfig.params.field.name);
       },
       params: [
         {
