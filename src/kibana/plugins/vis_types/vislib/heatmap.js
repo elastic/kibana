@@ -15,7 +15,7 @@ define(function (require) {
         {
           group: 'metrics',
           name: 'metric',
-          title: 'Y-Axis',
+          title: 'Intensity',
           min: 1,
           max: 1,
           defaults: [
@@ -25,14 +25,14 @@ define(function (require) {
         {
           group: 'buckets',
           name: 'segment',
-          title: 'X-Axis',
+          title: 'Columns',
           min: 0,
           max: 1
         },
         {
           group: 'buckets',
           name: 'group',
-          title: 'Split Bars',
+          title: 'Rows',
           min: 0,
           max: 1
         },

@@ -65,7 +65,7 @@ define(function (require) {
      */
     HeatMap.prototype.addRects = function (svg, layers) {
       var self = this;
-      var color = this.handler.data.getColorFunc();
+      //var color = this.handler.data.getColorFunc();
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
       var layer;
@@ -90,19 +90,9 @@ define(function (require) {
       rects
       .enter()
       .append('rect')
-      .attr('class', function (d) {
-        return self.colorToClass(color(d.label));
-      })
-      .attr('fill', function (d) {
-        return color(d.label);
-      });
+      .attr('fill', '#d3d3d3');
 
       self.updateRects(rects);
-
-      // Add tooltip
-      if (isTooltip) {
-        rects.call(tooltip.render());
-      }
 
       return rects;
     };
@@ -147,7 +137,7 @@ define(function (require) {
 
       var col;
       var row;
-      var rowMax = 8;
+      var rowMax = 1;
 
       function gridCoords(i) {
         // reset coords
