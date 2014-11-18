@@ -1,6 +1,7 @@
 define(function (require) {
   return ['Date Histogram Agg', function () {
     var _ = require('lodash');
+    var moment = require('moment');
 
     describe('params', function () {
       var paramWriter;
@@ -48,6 +49,20 @@ define(function (require) {
           paramWriter.vis.aggs.bySchemaGroup.metrics[0].type.name = 'sum';
           output = paramWriter.write({ interval: 'second' });
           expect(output).to.have.property('metricScale');
+        });
+      });
+
+      describe('extended_bounds', function () {
+        it('should write the long value of the moment passed in', function () {
+          var now = moment();
+          var output = paramWriter.write({
+            extended_bounds: {
+              min: now,
+              max: now
+            }
+          });
+          expect(output.params.extended_bounds.min).to.be(now.valueOf());
+          expect(output.params.extended_bounds.max).to.be(now.valueOf());
         });
       });
     });
