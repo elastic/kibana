@@ -20,6 +20,12 @@
 define(function () {
   'use strict';
 
+  var INDEX_SETTING = {
+    __one_of: ['analyzed', 'not_analyzed', 'no']
+  }, BOOLEAN = {
+    __one_of: [ true, false ]
+  };
+
   return function init(api) {
     api.addEndpointDescription('_get_mapping', {
       methods: ['GET'],
@@ -65,22 +71,56 @@ define(function () {
             'FIELD': {}
           }
         },
+        '_id': {
+          'index': INDEX_SETTING,
+          'store': BOOLEAN,
+          'path': ""
+        },
+        '_type': {
+          'index': INDEX_SETTING,
+          'store': BOOLEAN
+        },
+        '_source': {
+          'enabled': BOOLEAN
+        },
+        '_all': {
+          'enabled': BOOLEAN
+        },
+        '_analyzer': {
+          'path': ""
+        },
+        '_field_names': {
+          'index': INDEX_SETTING
+        },
+        '_routing': {
+          'required': BOOLEAN,
+          'path': ""
+        },
+        '_index': {
+          'enabled': BOOLEAN
+        },
+        '_size': {
+          'enabled': BOOLEAN,
+          'store': BOOLEAN
+        },
         '_parent': {
           __template: {
             'type': ''
           },
           'type': '{type}'
         },
+        '_timestamp': {
+          'enabled': BOOLEAN,
+          'path': '',
+          'format': 'YYYY-MM-dd',
+          'default': ""
+        },
         'index_analyzer': 'standard',
         'search_analyzer': 'standard',
         'analyzer': 'standard',
         'dynamic_date_formats': ['yyyy-MM-dd'],
-        'date_detection': {
-          __one_of: [true, false]
-        },
-        'numeric_detection': {
-          __one_of: [true, false]
-        },
+        'date_detection': BOOLEAN,
+        'numeric_detection': BOOLEAN,
         'properties': {
           '*': {
             type: {
@@ -91,12 +131,8 @@ define(function () {
 
             // strings
             index_name: '',
-            store: {
-              __one_of: ['no', 'yes']
-            },
-            index: {
-              __one_of: ['analyzed', 'not_analyzed', 'no']
-            },
+            store: BOOLEAN,
+            index: INDEX_SETTING,
             term_vector: {
               __one_of: ['no', 'yes', 'with_offsets', 'with_positions', 'with_positions_offsets']
             },
@@ -119,9 +155,7 @@ define(function () {
 
             // numeric
             precision_step: 4,
-            ignore_malformed: {
-              __one_of: [true, false]
-            },
+            ignore_malformed: BOOLEAN,
 
             // dates
             format: {
@@ -172,8 +206,8 @@ define(function () {
             copy_to: { __one_of: ['{field}', ['{field}']] },
 
             // nested
-            include_in_parent: { __one_of: [true, false] },
-            include_in_root: { __one_of: [true, false] }
+            include_in_parent: BOOLEAN,
+            include_in_root: BOOLEAN
           }
         }
       }
