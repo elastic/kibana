@@ -74,7 +74,7 @@ define([
         function (jqXHR, textStatus, errorThrown) {
           if (jqXHR.status == 401 && !options.xhrFields.withCredentials && !disable_auth_alert) {
             settings.showBasicAuthPopupIfNotShown();
-          } if (jqXHR.status == 0 && jqXHR.state() == "rejected") {
+          } else if (jqXHR.status == 0 && jqXHR.state() == "rejected") {
             jqXHR.responseText =
               "\nElasticsearch may not be reachable or you may need to check your CORS settings." +
               "\nPlease check the elasticsearch documentation."

@@ -18,19 +18,19 @@
 
 
 define([
-  'curl',
-  'help_popup',
-  'history',
-  'input',
-  'jquery',
-  'mappings',
-  'output',
-  'misc_inputs',
-  'es',
-  'utils',
-  '_',
-  'analytics'
-],
+    'curl',
+    'help_popup',
+    'history',
+    'input',
+    'jquery',
+    'mappings',
+    'output',
+    'misc_inputs',
+    'es',
+    'utils',
+    '_',
+    'analytics'
+  ],
   function (curl, $helpPopup, history, input, $, mappings, output, miscInputs, es, utils, _, ga) {
     'use strict';
 
@@ -49,10 +49,11 @@ define([
       } catch (e) {
         marvelOpts = { status: 'trial' };
       } // Meh! Who cares...
-    } else {
+    }
+    else {
       marvelOpts = { status: 'trial' };
     }
-     
+
     function submitCurrentRequestToES() {
 
       input.getCurrentRequest(function (req) {
@@ -75,7 +76,8 @@ define([
             var xhr;
             if (dataOrjqXHR.promise) {
               xhr = dataOrjqXHR;
-            } else {
+            }
+            else {
               xhr = jqXhrORerrorThrown;
             }
             $("#notification").text("").css("visibility", "hidden");
@@ -168,7 +170,7 @@ define([
         resetToValues(defaultHost);
       }
       input.moveToNextRequestEdge(true);
-    };
+    }
 
     function setupAutosave() {
       var timer;
@@ -184,7 +186,7 @@ define([
         }
         timer = setTimeout(doSave, saveDelay);
       });
-    };
+    }
 
     function saveCurrentState() {
       try {
@@ -324,14 +326,15 @@ define([
         $welcomePopup.on('shown', function () {
           localStorage.setItem("version_welcome_shown", '@@MARVEL_REVISION');
         });
-        $welcomePopup.one('hidden', function() {
+        $welcomePopup.one('hidden', function () {
           loadSavedState();
           setupAutosave();
         });
         $welcomePopup.modal('show');
 
       });
-    } else {
+    }
+    else {
       loadSavedState();
       setupAutosave();
     }
@@ -343,11 +346,11 @@ define([
     if (marvelOpts.status === 'trial') {
       $('#developer-tag').removeClass('hide');
       $('#developer-tag').html('Development Trial');
-    }    
+    }
 
     if (marvelOpts.status === 'registered') {
       $('#developer-tag').removeClass('hide');
       $('#developer-tag').html('Development Mode');
-    }    
+    }
 
   });
