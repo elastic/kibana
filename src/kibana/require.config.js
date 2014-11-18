@@ -28,7 +28,6 @@ require.config({
     gridster: 'bower_components/gridster/dist/jquery.gridster',
     inflection: 'bower_components/inflection/lib/inflection',
     jquery: 'bower_components/jquery/dist/jquery',
-    jsonpath: 'bower_components/jsonpath/lib/jsonpath',
     leaflet: 'bower_components/leaflet/dist/leaflet',
     lodash_src: 'bower_components/lodash/dist/lodash',
     moment: 'bower_components/moment/moment',
@@ -40,9 +39,6 @@ require.config({
     angular: {
       deps: ['jquery'],
       exports: 'angular'
-    },
-    jsonpath: {
-      exports: 'jsonPath'
     },
     gridster: ['jquery', 'css!bower_components/gridster/dist/jquery.gridster.css'],
     'angular-chosen': ['jquery', 'chosen'],
