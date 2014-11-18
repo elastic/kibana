@@ -300,6 +300,13 @@ define(function () {
         "combine_script_id": "",
         "reduce_script_file": "",
         "reduce_script_id": ""
+      },
+      "geo_bounds": {
+        __template: {
+          field: ""
+        },
+        field: "{field}",
+        wrap_longitude: { __one_of: [ true, false ]}
       }
     }
   };
