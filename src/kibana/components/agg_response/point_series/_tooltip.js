@@ -1,5 +1,6 @@
 define(function (require) {
-  return function SeriesDataTooltip($compile, $rootScope) {
+  return function PointSeriesTooltip($compile, $rootScope) {
+    var _ = require('lodash');
     var $ = require('jquery');
 
     var $tooltipScope = $rootScope.$new();

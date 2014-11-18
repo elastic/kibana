@@ -1,55 +1,50 @@
 define(function (require) {
-  return function SeriesDataTooltip($compile, $rootScope) {
-    function readRows(table, index, chart, col) {
-      var seriesByLabel = {};
+  return function PointSeriesReadRows(Private) {
+    var _ = require('lodash');
+    var createSeriesSet = Private(require('components/agg_response/point_series/_series_set'));
 
-      function seriesForRow(row) {
-        if (!chart.series) chart.series = [];
+    function readRows(table, index, chart, col, invoke) {
+      var mutliValue = _.isArray(col.y);
+      var seriesSet = invoke(createSeriesSet);
 
-        var series;
-
-        if (col.group) {
-          var seriesLabel = String(row[index.group]);
-          series = seriesByLabel[seriesLabel];
-          if (!series) {
-            series = seriesByLabel[seriesLabel] = {
-              label: seriesLabel,
-              values: []
-            };
-            chart.series.push(series);
-          }
-        }
-
-        if (!series) series = chart.series[0];
-        if (!series) {
-          series = {
-            values: []
-          };
-          chart.series.push(series);
-        }
-
-        return series;
+      if (!mutliValue) {
+        var yIndex = index.y;
+        table.rows.forEach(function (row) { write(row, yIndex); });
+        return;
       }
 
-      function forEachRow(row) {
-        var x = (row[index.x] == null) ? '_all' : row[index.x];
+      var yIndexes = index.y;
+      var yCols = col.y;
+      table.rows.forEach(function (row) {
+        yIndexes.forEach(function (yIndex, yPos) {
+          write(row, yIndex, yCols[yPos]);
+        });
+      });
 
-        var y = row[index.y === -1 ? row.length - 1 : index.y];
-        // skip datum that don't have a y value
+      /**
+       * Write a point to a series, determined by getSeries()
+       *
+       * @param  {array} row - the row to pull values from
+       * @param  {number} yIndex - the index within the row, of the current y value we are writing
+       * @param  {object} yCol - the column for the current y value
+       * @return {undefined}
+       */
+      function write(row, yIndex, yCol) {
+        var y = row[yIndex];
         if (y == null) return;
+
         // scale y values based on the chart's yScale (determined by aggs)
         if (chart.yScale) {
           y = y * chart.yScale;
         }
 
-        var series = seriesForRow(row);
-        series.values.push({
+        var x = row[index.x] == null ? '_all' : row[index.x];
+        seriesSet.get(row, yCol).values.push({
           x: x,
-          y: y
+          y: y,
+          table: table
         });
       }
-
-      table.rows.forEach(forEachRow);
     }
 
     return readRows;

@@ -1,5 +1,5 @@
 define(function (require) {
-  return function (timefilter) {
+  return function PointSeriesXAxis(timefilter) {
     var moment = require('moment');
     var interval = require('utils/interval');
 

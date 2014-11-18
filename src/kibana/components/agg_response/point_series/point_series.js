@@ -7,17 +7,31 @@ define(function (require) {
     var readRows = Private(require('components/agg_response/point_series/_read_rows'));
     var fakeXAxis = Private(require('components/agg_response/point_series/_fake_x_axis'));
 
-    function findBySchema(name) {
+    function findSchema(name) {
       return function (columns) {
-        return _.findIndex(columns, function (col) {
-          return col.aggConfig.schema.name === name;
-        });
+        var indexs = columns.reduce(function (list, col, i) {
+          if (col.aggConfig.schema.name === name) {
+            list.push(i);
+          }
+          return list;
+        }, []);
+        return (indexs.length > 1) ? indexs : indexs[0];
       };
     }
 
-    var findXColumn = findBySchema('segment');
-    var findYColumn = findBySchema('metric');
-    var findGroupColumn = findBySchema('group');
+    function get(list, indexs) {
+      if (!_.isArray(indexs)) {
+        return list[indexs];
+      }
+
+      return indexs.map(function (i) {
+        return list[i];
+      });
+    }
+
+    var findX = findSchema('segment');
+    var findY = findSchema('metric');
+    var findSeries = findSchema('group');
 
     function createPointSeries(vis, table) {
       var columns = table.columns;
@@ -28,19 +42,25 @@ define(function (require) {
 
       // index of color
       var index = {
-        x: findXColumn(columns),
-        y: findYColumn(columns),
-        group: findGroupColumn(columns)
+        x: findX(columns),
+        y: findY(columns),
+        series: findSeries(columns)
       };
 
+      if (_.isArray(index.x) || _.isArray(index.series)) {
+        throw new TypeError('Only multiple metrics are supported');
+      }
+
       var col = {
-        x: columns[index.x],
-        y: columns[index.y],
-        group: columns[index.group]
+        x: get(columns, index.x),
+        y: get(columns, index.y),
+        series: get(columns, index.series)
       };
 
       var agg = _.mapValues(col, function (col) {
-        return col && col.aggConfig;
+        if (!col) return;
+        if (_.isArray(col)) return _.pluck(col, 'aggConfig');
+        return col.aggConfig;
       });
 
       var locals = {
