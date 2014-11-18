@@ -8,6 +8,7 @@ define(function (require) {
       this.name = opts.name;
       this.title = opts.title;
       this.responseConverter = opts.responseConverter;
+      this.hierarchicalData = opts.hierarchicalData || false;
       this.icon = opts.icon;
       this.schemas = opts.schemas || new VisTypeSchemas();
       this.params = opts.params || {};
