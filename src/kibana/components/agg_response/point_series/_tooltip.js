@@ -7,46 +7,25 @@ define(function (require) {
     var $tooltip = $(require('text!plugins/vis_types/tooltips/histogram.html'));
     $compile($tooltip)($tooltipScope);
 
-    function tooltip(chart) {
+    function tooltip(table, chart, col, index) {
       // setup the formatter for the label
       chart.tooltipFormatter = function (event) {
-        return '<p>punting for now</p>';
-        // $tooltipScope.details = columns.map(function (col) {
-        //   var datum = event.point;
+        var datum = event.point;
+        var point = datum.orig;
 
-        //   var label;
-        //   var val;
-        //   var percent;
+        var details = $tooltipScope.details = [];
+        var result = { $parent: point.aggConfigResult };
+        while ((result = result.$parent) && result.aggConfig) {
+          var agg = result.aggConfig;
 
-        //   switch (col) {
-        //   case col.x:
-        //     label = 'x';
-        //     val = datum.x;
-        //     break;
-        //   case col.y:
-        //     label = 'y';
-        //     val = datum.value;
-        //     percent = datum.percent;
-        //     break;
-        //   case col.group:
-        //     label = 'group';
-        //     val = datum.label;
-        //     break;
-        //   }
+          details.push({
+            value: agg.fieldFormatter()(result.value),
+            label: agg.makeLabel()
+          });
+        }
 
-        //   label = (col.aggConfig && col.aggConfig.makeLabel()) || (col.field && col.field.name) || label;
-        //   if (col.field) val = col.field.format.convert(val);
-
-        //   return {
-        //     label: label,
-        //     value: val,
-        //     percent: percent
-        //   };
-
-        // });
-
-        // $tooltipScope.$apply();
-        // return $tooltip[0].outerHTML;
+        $tooltipScope.$apply();
+        return $tooltip[0].outerHTML;
       };
     }
 

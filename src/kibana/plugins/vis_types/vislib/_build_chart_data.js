@@ -11,7 +11,10 @@ define(function (require) {
         return aggResponse.hierarchical(vis, esResponse);
       }
 
-      var tableGroup = aggResponse.tabify(this.vis, esResponse, { canSplit: true });
+      var tableGroup = aggResponse.tabify(this.vis, esResponse, {
+        canSplit: true,
+        asAggConfigResults: true
+      });
       var converted = convertTableGroup(vis, tableGroup);
 
       converted.hits = esResponse.hits.total;

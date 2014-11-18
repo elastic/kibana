@@ -30,7 +30,8 @@ define(function (require) {
        * @return {undefined}
        */
       function write(row, yIndex, yCol) {
-        var y = row[yIndex];
+        var yResult = row[yIndex];
+        var y = yResult.value;
         if (y == null) return;
 
         // scale y values based on the chart's yScale (determined by aggs)
@@ -38,11 +39,13 @@ define(function (require) {
           y = y * chart.yScale;
         }
 
-        var x = row[index.x] == null ? '_all' : row[index.x];
+        var xResult = row[index.x];
+        var x = (xResult == null) ? '_all' : xResult.value;
+
         seriesSet.get(row, yCol).values.push({
           x: x,
           y: y,
-          table: table
+          aggConfigResult: yResult
         });
       }
     }
