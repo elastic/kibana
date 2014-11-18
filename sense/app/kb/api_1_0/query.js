@@ -251,7 +251,7 @@ define(["_"], function (_) {
           'min_term_freq': 1,
           'max_query_terms': 12
         },
-        fields: ['{field} '],
+        fields: ['{field}'],
         like_text: '',
         percent_terms_to_match: 0.3,
         min_term_freq: 2,
@@ -263,7 +263,22 @@ define(["_"], function (_) {
         max_word_len: 0,
         boost_terms: 1,
         boost: 1.0,
-        analyzer: ''
+        analyzer: '',
+        docs: [{
+          _index: "{index}",
+          _type: "{type}",
+          _id: ""
+        }],
+        ids: [""]
+      },
+      mlt: {
+        __template: {
+          'fields': ['FIELD'],
+          'like_text': 'text like this one',
+          'min_term_freq': 1,
+          'max_query_terms': 12
+        },
+        __scope_link: ".more_like_this"
       },
       more_like_this_field: {
         __template: {
