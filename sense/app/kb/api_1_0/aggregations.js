@@ -270,8 +270,30 @@ define(function () {
         "script": "_value",
         "params": {},
         "lang": "mvel"
+      },
+      "scripted_metric": {
+        __template: {
+          "init_script": "",
+          "map_script": "",
+          "combine_script": "",
+          "reduce_script": ""
+        },
+        "init_script": "",
+        "map_script": "",
+        "combine_script": "",
+        "reduce_script": "",
+        "lang": "mvel",
+        "params": {},
+        "reduce_params": {},
+        "init_script_file": "",
+        "init_script_id": "",
+        "map_script_file": "",
+        "map_script_id": "",
+        "combine_script_file": "",
+        "combine_script_id": "",
+        "reduce_script_file": "",
+        "reduce_script_id": ""
       }
-
     }
   };
   return function init(api) {
