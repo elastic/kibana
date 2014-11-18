@@ -330,6 +330,14 @@ define(function () {
         },
         fielddata_fields: ["{field}"],
         version: { __one_of: [ true, false ]}
+      },
+      "percentile_ranks": {
+        __template: {
+          field: "",
+          values: [ 10, 15]
+        },
+        field: "{field}",
+        values: []
       }
     }
   };
