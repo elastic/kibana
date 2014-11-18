@@ -259,7 +259,9 @@ define(function () {
     },
     type: '{type}',
     query: {},
-    _scope: ''
+    _scope: '',
+    min_children: 1,
+    max_children: 10
   };
 
 

@@ -233,7 +233,9 @@ define(["_"], function (_) {
           __one_of: ['none', 'max', 'sum', 'avg']
         },
         '_scope': '',
-        'query': {}
+        'query': {},
+        'min_children': 1,
+        'max_children': 10
       },
       has_parent: {
         'parent_type': '{type}',
