@@ -93,5 +93,12 @@ define(function (require) {
       el.remove();
     });
 
+    describe('stackData method', function () {});
+    describe('addBars method', function () {});
+    describe('updateBars method', function () {});
+    describe('addStackedBars method', function () {});
+    describe('addGroupedBars method', function () {});
+    describe('addBarEvents method', function () {});
+    describe('draw method', function () {});
   });
 });

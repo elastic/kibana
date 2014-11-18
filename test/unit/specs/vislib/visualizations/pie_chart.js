@@ -6,64 +6,90 @@ define(function (require) {
 
   angular.module('PieChartFactory', ['kibana']);
 
-  describe('Vislib PieChart Class Test Suite', function () {
-    var visLibParams = {
-      type: 'pie',
-      addLegend: true,
-      addTooltip: true
-    };
-    var stubVis;
-    var vis;
-    var Vis;
-    var indexPattern;
-    var buildHierarchicalData;
+  var rowAgg = [
+    { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+    { type: 'terms', schema: 'split', params: { field: 'extension', rows: true }},
+    { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
+    { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+  ];
 
-    beforeEach(function () {
-      module('PieChartFactory');
-    });
+  var colAgg = [
+    { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+    { type: 'terms', schema: 'split', params: { field: 'extension' }},
+    { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
+    { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+  ];
 
-    beforeEach(function () {
-      inject(function (d3, Private) {
-        vis = Private(require('vislib_fixtures/vis_fixture'))(visLibParams);
-        Vis = Private(require('components/vis/vis'));
-        indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
-        buildHierarchicalData = Private(require('components/agg_response/hierarchical/build_hierarchical_data'));
-        require('css!components/vislib/styles/main');
+  var sliceAgg = [
+    { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+    { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
+    { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
+  ];
 
-        var id = 1;
-        var stubVis = new Vis(indexPattern, {
-          type: 'pie',
-          aggs: [
-            { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-            { type: 'terms', schema: 'split', params: { field: 'extension', row: true }},
-            { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
-            { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
-          ]
-        });
+  var aggArray = [
+    rowAgg,
+    colAgg,
+    sliceAgg
+  ];
 
-        // We need to set the aggs to a known value.
-        _.each(stubVis.aggs, function (agg) { agg.id = 'agg_' + id++; });
+  var names = [
+    'rows',
+    'columns',
+    'slices'
+  ];
 
-        var data = buildHierarchicalData(stubVis, fixtures.threeTermBuckets);
-        console.log(data);
+  aggArray.forEach(function (dataAgg, i) {
+    describe('Vislib PieChart Class Test Suite for ' + names[i] + ' data', function () {
+      var visLibParams = {
+        type: 'pie',
+        addLegend: true,
+        addTooltip: true
+      };
+      var vis;
+      var Vis;
+      var indexPattern;
+      var buildHierarchicalData;
 
-        vis.render(data);
+      beforeEach(function () {
+        module('PieChartFactory');
       });
-    });
 
-    afterEach(function () {
-      $(vis.el).remove();
-      vis = null;
-    });
+      beforeEach(function () {
+        inject(function (d3, Private) {
+          vis = Private(require('vislib_fixtures/vis_fixture'))(visLibParams);
+          Vis = Private(require('components/vis/vis'));
+          indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
+          buildHierarchicalData = Private(require('components/agg_response/hierarchical/build_hierarchical_data'));
+          require('css!components/vislib/styles/main');
 
-    describe('addPathEvents method', function () {});
-    describe('addPath method', function () {
+          var id = 1;
+          var stubVis = new Vis(indexPattern, {
+            type: 'pie',
+            aggs: dataAgg
+          });
 
-    });
-    describe('draw method', function () {
-      it('should return a function', function () {
-        vis.handler.charts.forEach(function (chart) {
-          expect(_.isFunction(chart.draw())).to.be(true);
+          // We need to set the aggs to a known value.
+          _.each(stubVis.aggs, function (agg) { agg.id = 'agg_' + id++; });
+
+          var data = buildHierarchicalData(stubVis, fixtures.threeTermBuckets);
+          console.log(data);
+
+          vis.render(data);
+        });
+      });
+
+      afterEach(function () {
+        $(vis.el).remove();
+        vis = null;
+      });
+
+      describe('addPathEvents method', function () {});
+      describe('addPath method', function () {});
+      describe('draw method', function () {
+        it('should return a function', function () {
+          vis.handler.charts.forEach(function (chart) {
+            expect(_.isFunction(chart.draw())).to.be(true);
+          });
         });
       });
     });
