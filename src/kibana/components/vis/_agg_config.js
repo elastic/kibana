@@ -170,6 +170,15 @@ define(function (require) {
       return this.type.makeLabel(this);
     };
 
+    AggConfig.prototype.field = function () {
+      return this.params.field;
+    };
+
+    AggConfig.prototype.fieldFormatter = function () {
+      var field = this.field();
+      return field ? field.format.convert : String;
+    };
+
     return AggConfig;
   };
 });

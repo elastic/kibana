@@ -188,48 +188,6 @@ define(function (require) {
         rows: []
       };
 
-      (function cleanup(obj) {
-        if (obj.rows && obj.columns) {
-          // this obj is a chart
-
-          if (!raw.columns) {
-            raw.columns = raw.splitColumns.concat(obj.columns);
-          }
-
-          var rows = obj.rows;
-          var cols = obj.columns;
-
-          delete obj.rows;
-          delete obj.columns;
-
-          obj.label = [].concat(labelStack, obj.label).filter(Boolean).join(' > ');
-          rows.forEach(function (row) {
-            raw.rows.push([].concat(raw.splitValStack, row));
-          });
-
-          converter(obj, cols, rows);
-        } else if (obj.splits) {
-          var splits = obj.splits;
-          delete obj.splits;
-
-          labelStack.push(obj.label);
-
-          _.forOwn(splits, function (split) {
-            raw.splitColumns.push(split.column);
-            raw.splitValStack.push(split.value);
-            delete split.column;
-            delete split.value;
-
-            cleanup(split);
-
-            raw.splitColumns.pop();
-            raw.splitValStack.pop();
-          });
-
-          labelStack.pop();
-        }
-      }(chartData));
-
       chartData.raw = raw;
       chartData.hits = resp.hits.total;
       complete();

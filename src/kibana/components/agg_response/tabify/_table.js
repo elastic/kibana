@@ -27,13 +27,11 @@ define(function (require) {
     };
 
     Table.prototype.field = function (col) {
-      var agg = this.aggConfig(col);
-      return agg.params && agg.params.field;
+      return this.aggConfig(col).field();
     };
 
     Table.prototype.fieldFormatter = function (col) {
-      var field = this.field(col);
-      return field ? field.format.convert : _.identity;
+      return this.aggConfig(col).fieldFormatter();
     };
 
 

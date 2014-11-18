@@ -59,7 +59,7 @@ define(function (require) {
       if (group) {
         table.aggConfig = agg;
         table.key = key;
-        table.title = agg.makeLabel() + ': ' + (table.fieldFormat()(key));
+        table.title = agg.makeLabel() + ': ' + (table.fieldFormatter()(key));
       }
 
       var parent = this.splitStack[0];
