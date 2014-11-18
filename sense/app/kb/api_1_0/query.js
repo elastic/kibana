@@ -340,6 +340,20 @@ define(["_"], function (_) {
         },
         tie_breaker: 0
       },
+      simple_query_string: {
+        __template: {
+          query: "",
+          fields: []
+        },
+        query: "",
+        fields: [ "{field}" ],
+        default_operator: { __one_of: [ "OR", "AND" ]},
+        analyzer: "",
+        flags: "OR|AND|PREFIX",
+        lowercase_expanded_terms: { __one_of: [ true, false ]},
+        locale: "ROOT",
+        lenient: { __one_of: [ true, false ]}
+      },
       range: {
         __template: {
           'FIELD': {
