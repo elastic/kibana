@@ -3,7 +3,7 @@ define(function (require) {
   var sinon = require('test_utils/auto_release_sinon');
 
   // Load the kibana app dependencies.
-  require('directives/validate_query');
+  require('components/validate_query/validate_query');
 
   var $rootScope;
   var $timeout;

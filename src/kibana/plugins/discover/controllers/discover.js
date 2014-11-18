@@ -13,7 +13,7 @@ define(function (require) {
   require('components/timepicker/timepicker');
   require('directives/fixed_scroll');
   require('directives/validate_json');
-  require('directives/validate_query');
+  require('components/validate_query/validate_query');
   require('filters/moment');
   require('components/courier/courier');
   require('components/index_patterns/index_patterns');

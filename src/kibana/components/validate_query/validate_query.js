@@ -1,6 +1,9 @@
 define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
+  var fromUser = require('components/validate_query/lib/fromUser');
+  var toUser = require('components/validate_query/lib/toUser');
+
   require('services/debounce');
 
   require('modules')
@@ -104,37 +107,6 @@ define(function (require) {
             leading: true,
             trailing: true
           });
-
-          // What should I make with the input from the user?
-          var fromUser = function (text) {
-
-            // If we get an empty object, treat it as a *
-            if (_.isObject(text)) {
-              if (Object.keys(text).length) {
-                return text;
-              } else {
-                return {query_string: {query: '*'}};
-              }
-            }
-
-            // Nope, not an object.
-            text = (text || '').trim();
-            try {
-              return JSON.parse(text);
-            } catch (e) {
-              return {query_string: {query: text || '*'}};
-            }
-          };
-
-          // How should I present the data back to the user in the input field?
-          var toUser = function (text) {
-            if (_.isString(text)) return text;
-            if (_.isObject(text)) {
-              if (text.query_string) return text.query_string.query;
-              return JSON.stringify(text);
-            }
-            return undefined;
-          };
 
           ngModel.$parsers.push(fromUser);
           ngModel.$formatters.push(toUser);
