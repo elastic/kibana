@@ -191,5 +191,17 @@ define(function (require) {
   };
   inherits(errors.ContainerTooSmall, KbnError);
 
+  /**
+   * error thrown when user tries to render an area chart with less
+   * than 2 data points
+   * @param {String} message - the message to provide with the error
+   */
+  errors.NotEnoughDataToRenderAreaChart = function NotEnoughDataToRenderAreaChart() {
+    KbnError.call(this,
+    'Multiple data points are required to render an area chart',
+    errors.NotEnoughDataToRenderAreaChart);
+  };
+  inherits(errors.NotEnoughDataToRenderAreaChart, KbnError);
+
   return errors;
 });
