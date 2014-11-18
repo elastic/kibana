@@ -12,6 +12,6 @@ define(function (require) {
       if (text.query_string) return text.query_string.query;
       return JSON.stringify(text);
     }
-    return undefined;
+    return text.toString();
   };
 });
