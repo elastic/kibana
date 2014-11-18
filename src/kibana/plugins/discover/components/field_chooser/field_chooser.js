@@ -2,7 +2,6 @@ define(function (require) {
   var app = require('modules').get('apps/discover');
   var html = require('text!plugins/discover/components/field_chooser/field_chooser.html');
   var _ = require('lodash');
-  var jsonPath = require('jsonpath');
   var rison = require('utils/rison');
   var qs = require('utils/query_string');
   var fieldCalculator = require('plugins/discover/components/field_chooser/lib/field_calculator');
