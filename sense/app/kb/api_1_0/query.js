@@ -59,7 +59,7 @@ define(["_"], function (_) {
           "script": "_score * doc['f'].value"
         },
         "script": "",
-        "lang": "mvel",
+        "lang": "groovy",
         "params": {
 
         }

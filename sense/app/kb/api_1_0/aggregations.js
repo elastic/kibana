@@ -25,7 +25,7 @@ define(function () {
     script: "",
     params: {
     },
-    lang: "mvel"
+    lang: "groovy"
   }, field_metric = {
     __template: { field: ""},
     field: "{field}"
@@ -53,7 +53,7 @@ define(function () {
         "field": "{field}",
         "script": "_value",
         "params": {},
-        "lang": "mvel"
+        "lang": "groovy"
       },
       "global": {},
       "filter": {},
@@ -89,7 +89,7 @@ define(function () {
         "min_doc_count": 10,
         "script": "_value",
         "params": {},
-        "lang": "mvel",
+        "lang": "groovy",
         // TODO: these also support regex - extend!
         "include": "*",
         "exclude": "*",
@@ -137,7 +137,7 @@ define(function () {
         "keyed": { __one_of: [true, false]},
         "script": "_value",
         "params": {},
-        "lang": "mvel"
+        "lang": "groovy"
       },
       "date_range": {
         __template: {
@@ -154,7 +154,7 @@ define(function () {
         "keyed": { __one_of: [true, false]},
         "script": "_value",
         "params": {},
-        "lang": "mvel"
+        "lang": "groovy"
       },
       "ip_range": {
         __template: {
@@ -171,7 +171,7 @@ define(function () {
         "keyed": { __one_of: [true, false]},
         "script": "_value",
         "params": {},
-        "lang": "mvel"
+        "lang": "groovy"
       },
       "histogram": {
         __template: {
@@ -258,7 +258,7 @@ define(function () {
         },
         "script": "_value",
         "params": {},
-        "lang": "mvel",
+        "lang": "groovy",
         "compression": 100
       },
       "cardinality": {
@@ -269,7 +269,7 @@ define(function () {
         "rehash": true,
         "script": "_value",
         "params": {},
-        "lang": "mvel"
+        "lang": "groovy"
       },
       "scripted_metric": {
         __template: {
@@ -282,7 +282,7 @@ define(function () {
         "map_script": "",
         "combine_script": "",
         "reduce_script": "",
-        "lang": "mvel",
+        "lang": "groovy",
         "params": {},
         "reduce_params": {},
         "init_script_file": "",
