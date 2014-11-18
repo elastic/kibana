@@ -59,6 +59,7 @@ define(["_"], function (_) {
           "script": "_score * doc['f'].value"
         },
         "script": "",
+        "script_id": "",
         "lang": "groovy",
         "params": {
 

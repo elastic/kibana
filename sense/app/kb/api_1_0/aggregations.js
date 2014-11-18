@@ -52,6 +52,7 @@ define(function () {
         },
         "field": "{field}",
         "script": "_value",
+        "script_id": "",
         "params": {},
         "lang": "groovy"
       },
@@ -88,6 +89,7 @@ define(function () {
         },
         "min_doc_count": 10,
         "script": "_value",
+        "script_id": "",
         "params": {},
         "lang": "groovy",
         // TODO: these also support regex - extend!
@@ -136,6 +138,7 @@ define(function () {
         ],
         "keyed": { __one_of: [true, false]},
         "script": "_value",
+        "script_id": "",
         "params": {},
         "lang": "groovy"
       },
@@ -153,6 +156,7 @@ define(function () {
         ],
         "keyed": { __one_of: [true, false]},
         "script": "_value",
+        "script_id": "",
         "params": {},
         "lang": "groovy"
       },
@@ -170,6 +174,7 @@ define(function () {
         ],
         "keyed": { __one_of: [true, false]},
         "script": "_value",
+        "script_id": "",
         "params": {},
         "lang": "groovy"
       },
@@ -257,6 +262,7 @@ define(function () {
           __any_of: []
         },
         "script": "_value",
+        "script_id": "",
         "params": {},
         "lang": "groovy",
         "compression": 100
@@ -268,6 +274,7 @@ define(function () {
         "precision_threshold": 100,
         "rehash": true,
         "script": "_value",
+        "script_id": "",
         "params": {},
         "lang": "groovy"
       },

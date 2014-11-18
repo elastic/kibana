@@ -136,6 +136,7 @@ define(function () {
       },
       data_autocomplete_rules: {
         "script": "",
+        "script_id": "",
         "lang": "groovy",
         "params": {},
         "doc": {},
@@ -144,6 +145,24 @@ define(function () {
       }
 
     });
+
+    api.addEndpointDescription('_put_script', {
+      methods: [ 'POST', 'PUT'],
+      patterns: [
+        "_scripts/{lang}/{id}",
+        "_scripts/{lang}/{id}/_create"
+      ],
+      url_components: {
+        "lang": [
+          "groovy",
+          "expressions"
+        ]
+      },
+      data_autocomplete_rules: {
+        "script": ""
+      }
+    });
+
 
   }
 });

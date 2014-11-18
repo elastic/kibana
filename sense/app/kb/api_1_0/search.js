@@ -184,9 +184,38 @@ define(function () {
         "_search/template"
       ],
       data_autocomplete_rules: {
-        __scope_link: "_search"
+        "template": {
+          __one_of: [
+            {__scope_link: "_search"},
+            { "file": "" },
+            { "id": ""}
+          ]
+        },
+        "params": {
+
+        }
       }
     });
+
+    api.addEndpointDescription('_get_delete_search_template', {
+      methods: ['GET', 'DELETE'],
+      patterns: [
+        "_search/template/{id}"
+      ]
+    });
+
+    api.addEndpointDescription('_put_search_template', {
+      methods: ['PUT'],
+      patterns: [
+        "_search/template/{id}"
+      ],
+      data_autocomplete_rules: {
+        "template": {
+          __scope_link: "_search"
+        }
+      }
+    });
+
   };
 
 });
