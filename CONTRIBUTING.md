@@ -8,7 +8,7 @@ The process for contributing to any of the Elasticsearch repositories is similar
 
 Please make sure you have signed the [Contributor License Agreement](http://www.elasticsearch.org/contributor-agreement/). We are not asking you to assign copyright to us, but to give us the right to distribute your code without restriction. We ask this of all contributors in order to assure our users of the origin and continuing existence of the code. You only need to sign the CLA once.
 
-### Run the tests and build process
+### Testing and building
 
 To ensure that your changes will not break other functionality, please run the test suite and build process before submitting your pull request.
 
@@ -19,6 +19,8 @@ Once that is complete just run:
 ```sh
 grunt test build
 ```
+
+Distributable, built packages can be found in `target/` after the build completes.
 
 #### Development Environment Setup
 
