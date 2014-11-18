@@ -70,7 +70,7 @@ define(function (require) {
 
             if (self.id) {
               if (!self.fields) return self.fetchFields();
-              afterFieldsSet();
+              setIndexedValue('fields');
             }
 
             // Any time obj is updated, re-call applyESResp
@@ -83,11 +83,12 @@ define(function (require) {
         });
       };
 
-      function afterFieldsSet() {
-        self.fields = new IndexedArray({
+      function setIndexedValue(key, value) {
+        value = value || self[key];
+        self[key] = new IndexedArray({
           index: ['name'],
           group: ['type'],
-          initialSet: self.fields.map(function (field) {
+          initialSet: value.map(function (field) {
             field.count = field.count || 0;
 
             // non-enumerable type so that it does not get included in the JSON
@@ -164,8 +165,7 @@ define(function (require) {
       self.fetchFields = function () {
         return mapper.getFieldsForIndexPattern(self, true)
         .then(function (fields) {
-          self.fields = fields;
-          afterFieldsSet();
+          setIndexedValue('fields', fields);
           return self.save();
         });
       };
