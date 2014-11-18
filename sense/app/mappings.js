@@ -283,6 +283,7 @@ define([
           if (aliases) {
             loadAliases(JSON.parse(aliases[0]));
           } else {
+            aliases = [{}];
             loadAliases({});
           }
           // Trigger an update event with the mappings and aliases
