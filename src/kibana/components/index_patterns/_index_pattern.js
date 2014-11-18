@@ -27,21 +27,21 @@ define(function (require) {
     });
 
     function IndexPattern(id) {
-      var pattern = this;
+      var self = this;
 
       // set defaults
-      pattern.id = id;
-      pattern.title = id;
-      pattern.customFormats = {};
+      self.id = id;
+      self.title = id;
+      self.customFormats = {};
 
       var docSource = new DocSource();
 
-      pattern.init = function () {
+      self.init = function () {
         // tell the docSource where to find the doc
         docSource
           .index(configFile.kibanaIndex)
           .type(type)
-          .id(pattern.id);
+          .id(self.id);
 
         // check that the mapping for this type is defined
         return mappingSetup.isDefined(type)
@@ -51,12 +51,12 @@ define(function (require) {
         })
         .then(function () {
           // If there is no id, then there is no document to fetch from elasticsearch
-          if (!pattern.id) return;
+          if (!self.id) return;
 
           // fetch the object from ES
           return docSource.fetch()
           .then(function applyESResp(resp) {
-            if (!resp.found) throw new errors.SavedObjectNotFound(type, pattern.id);
+            if (!resp.found) throw new errors.SavedObjectNotFound(type, self.id);
 
             // deserialize any json fields
             _.forOwn(mapping, function ittr(fieldMapping, name) {
@@ -66,10 +66,10 @@ define(function (require) {
             });
 
             // Give obj all of the values in _source.fields
-            _.assign(pattern, resp._source);
+            _.assign(self, resp._source);
 
-            if (pattern.id) {
-              if (!pattern.fields) return pattern.fetchFields();
+            if (self.id) {
+              if (!self.fields) return self.fetchFields();
               afterFieldsSet();
             }
 
@@ -79,22 +79,22 @@ define(function (require) {
         })
         .then(function () {
           // return our obj as the result of init()
-          return pattern;
+          return self;
         });
       };
 
       function afterFieldsSet() {
-        pattern.fields = new IndexedArray({
+        self.fields = new IndexedArray({
           index: ['name'],
           group: ['type'],
-          initialSet: pattern.fields.map(function (field) {
+          initialSet: self.fields.map(function (field) {
             field.count = field.count || 0;
 
             // non-enumerable type so that it does not get included in the JSON
             Object.defineProperty(field, 'format', {
               enumerable: false,
               get: function () {
-                var formatName = pattern.customFormats && pattern.customFormats[field.name];
+                var formatName = self.customFormats && self.customFormats[field.name];
                 return formatName ? fieldFormats.byName[formatName] : fieldFormats.defaultByType[field.type];
               }
             });
@@ -104,44 +104,44 @@ define(function (require) {
         });
       }
 
-      pattern.popularizeField = function (fieldName, unit) {
+      self.popularizeField = function (fieldName, unit) {
         if (_.isUndefined(unit)) unit = 1;
-        if (!(pattern.fields.byName && pattern.fields.byName[fieldName])) return;
+        if (!(self.fields.byName && self.fields.byName[fieldName])) return;
 
-        var field = pattern.fields.byName[fieldName];
+        var field = self.fields.byName[fieldName];
         if (!field.count && unit < 1) return;
         if (!field.count) field.count = 1;
         else field.count = field.count + (unit);
-        pattern.save();
+        self.save();
       };
 
-      pattern.getInterval = function () {
+      self.getInterval = function () {
         return this.intervalName && _.find(intervals, { name: this.intervalName });
       };
 
-      pattern.toIndexList = function (start, stop) {
+      self.toIndexList = function (start, stop) {
         var interval = this.getInterval();
         if (interval) {
-          return intervals.toIndexList(pattern.id, interval, start, stop);
+          return intervals.toIndexList(self.id, interval, start, stop);
         } else {
-          return pattern.id;
+          return self.id;
         }
       };
 
-      pattern.save = function () {
+      self.save = function () {
         var body = {};
 
         // serialize json fields
         _.forOwn(mapping, function (fieldMapping, fieldName) {
-          if (pattern[fieldName] != null) {
+          if (self[fieldName] != null) {
             body[fieldName] = (fieldMapping._serialize)
-              ? fieldMapping._serialize(pattern[fieldName])
-              : pattern[fieldName];
+              ? fieldMapping._serialize(self[fieldName])
+              : self[fieldName];
           }
         });
 
-        // ensure that the docSource has the current pattern.id
-        docSource.id(pattern.id);
+        // ensure that the docSource has the current self.id
+        docSource.id(self.id);
 
         // clear the indexPattern list cache
         getIds.clearCache();
@@ -149,36 +149,36 @@ define(function (require) {
         // index the document
         return docSource.doIndex(body)
         .then(function (id) {
-          pattern.id = id;
-          return pattern.id;
+          self.id = id;
+          return self.id;
         });
       };
 
-      pattern.refreshFields = function () {
-        return mapper.clearCache(pattern)
+      self.refreshFields = function () {
+        return mapper.clearCache(self)
         .then(function () {
-          return pattern.fetchFields();
+          return self.fetchFields();
         });
       };
 
-      pattern.fetchFields = function () {
-        return mapper.getFieldsForIndexPattern(pattern, true)
+      self.fetchFields = function () {
+        return mapper.getFieldsForIndexPattern(self, true)
         .then(function (fields) {
-          pattern.fields = fields;
+          self.fields = fields;
           afterFieldsSet();
-          return pattern.save();
+          return self.save();
         });
       };
 
-      pattern.toJSON = function () {
-        return pattern.id;
+      self.toJSON = function () {
+        return self.id;
       };
 
-      pattern.toString = function () {
-        return '' + pattern.toJSON();
+      self.toString = function () {
+        return '' + self.toJSON();
       };
 
-      pattern.flattenSearchResponse = flattenSearchResponse.bind(pattern);
+      self.flattenSearchResponse = flattenSearchResponse.bind(self);
 
     }
     return IndexPattern;
