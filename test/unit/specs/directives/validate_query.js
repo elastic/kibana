@@ -16,6 +16,9 @@ define(function (require) {
   var cycleIndex = 0;
   var mockValidateQuery;
   var markup = '<input ng-model="mockModel" validate-query="mockQueryInput" input-focus type="text">';
+  var fromUser = require('components/validate_query/lib/fromUser');
+  var toUser = require('components/validate_query/lib/toUser');
+
 
   var validEsResponse = function () {
     return Promise.resolve({ valid: true });
@@ -152,5 +155,45 @@ define(function (require) {
         checkClass('ng-valid');
       });
     });
+
+    describe('user input parser', function () {
+      it('should return the input if passed an object', function () {
+        expect(fromUser({foo: 'bar'})).to.eql({foo: 'bar'});
+      });
+
+      it('unless the object is empty, that implies a *', function () {
+        expect(fromUser({})).to.eql({query_string: {query: '*'}});
+      });
+
+      it('should treat an empty string as a *', function () {
+        expect(fromUser('')).to.eql({query_string: {query: '*'}});
+      });
+
+      it('should treat input that does not start with { as a query string', function () {
+        expect(fromUser('foo')).to.eql({query_string: {query: 'foo'}});
+        expect(fromUser('400')).to.eql({query_string: {query: '400'}});
+        expect(fromUser('true')).to.eql({query_string: {query: 'true'}});
+      });
+
+      it('should parse valid JSON', function () {
+        expect(fromUser('{}')).to.eql({});
+        expect(fromUser('{a:b}')).to.eql({query_string: {query: '{a:b}'}});
+      });
+    });
+
+    describe('model presentation formatter', function () {
+      it('should present objects as strings', function () {
+        expect(toUser({foo: 'bar'})).to.be('{"foo":"bar"}');
+      });
+
+      it('should present string as strings', function () {
+        expect(toUser('foo')).to.be('foo');
+      });
+
+      it('should present numbers as strings', function () {
+        expect(toUser(400)).to.be('400');
+      });
+    });
+
   });
 });
