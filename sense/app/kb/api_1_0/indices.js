@@ -147,6 +147,22 @@ define(function () {
         "{indices}"
       ]
     });
+
+    api.addEndpointDescription('_get_index', {
+      methods: ['GET', ],
+      patterns: [
+        "{indices}",
+        "{indices}/{feature}"
+      ],
+      url_components: {
+        "feature": [
+          "_settings",
+          "_mappings",
+          "_warmers",
+          "_aliases"
+        ]
+      }
+    });
   };
 
 });
