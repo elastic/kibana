@@ -39,9 +39,9 @@ define(function (require) {
       self.init = function () {
         // tell the docSource where to find the doc
         docSource
-          .index(configFile.kibanaIndex)
-          .type(type)
-          .id(self.id);
+        .index(configFile.kibanaIndex)
+        .type(type)
+        .id(self.id);
 
         // check that the mapping for this type is defined
         return mappingSetup.isDefined(type)
