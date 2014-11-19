@@ -21,7 +21,7 @@ Browser::       The latest version of Chrome, Firefox or Safari is
                 recommended. Internet Explorer 10 and above is also supported.
 
 CORS::          If you are using <<sense>> to access a remote cluster, you will need
-                to configure the cluster to allow CORS request. See <<cors>> from more details.
+                to configure the cluster to allow CORS requests. See <<cors>> for more details.
 
 === Simple install
 

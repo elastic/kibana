@@ -170,8 +170,10 @@ http.cors.allow-credentials: true <2>
 -----------------------
 
 <1> Elasticsearch will allow CORS requests from any source, echoing the source in the Allow Origin header.
-Needed for basic authentication support.
+Needed for basic authentication support. You may want tighten it to only allow the domain where Sense is hosted.
 
 <2> Elasticsearch will respond with  `Access-Control-Allow-Credentials`. Needed for basic authentication support.
 
 Please see the {ref}/modules-http.html[Elasticsearch documentation] for more information.
+
+NOTE: enabling CORS may result in unwarrented access to your cluster. Consider these settings carefully.
