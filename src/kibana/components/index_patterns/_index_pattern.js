@@ -22,7 +22,8 @@ define(function (require) {
       timeFieldName: 'string',
       intervalName: 'string',
       customFormats: 'json',
-      fields: 'json'
+      fields: 'json',
+      scriptedFields: 'json'
     });
 
     function IndexPattern(id) {
@@ -161,6 +162,7 @@ define(function (require) {
         return mapper.clearCache(self)
         .then(function () {
           return self._fetchFields()
+          .then(self._fetchScriptedFields)
           .then(self.save);
         });
       };
@@ -170,6 +172,10 @@ define(function (require) {
         .then(function (fields) {
           setIndexedValue('fields', fields);
         });
+      };
+
+      self._fetchScriptedFields = function () {
+        setIndexedValue('scriptedFields', []);
       };
 
       self.toJSON = function () {
