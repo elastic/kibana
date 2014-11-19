@@ -45,11 +45,13 @@ define(function (require) {
     'kibana/notify',
     'kibana/courier'
   ])
-  .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier) {
+  .controller('VisEditor', function ($scope, $route, timefilter, AppState, $location, kbnUrl, $timeout, courier, Private) {
+
     var _ = require('lodash');
     var angular = require('angular');
     var ConfigTemplate = require('utils/config_template');
     var Notifier = require('components/notify/_notifier');
+    var docTitle = Private(require('components/doc_title/doc_title'));
 
     var notify = new Notifier({
       location: 'Visualization Editor'
@@ -66,6 +68,10 @@ define(function (require) {
       load: require('text!plugins/visualize/editor/panels/load.html'),
       share: require('text!plugins/visualize/editor/panels/share.html'),
     });
+
+    if (savedVis.id) {
+      docTitle.change(savedVis.title);
+    }
 
     var $state = (function initState() {
       var savedVisState = vis.getState();

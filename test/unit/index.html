@@ -22,6 +22,7 @@
         baseUrl: '/',
         paths: {
           config: '/config',
+          specList: '/specs',
           test_utils: '../../test/utils',
           fixtures: '../../test/unit/fixtures',
           vislib_fixtures: '../../test/unit/specs/vislib/fixture',
@@ -75,99 +76,18 @@
 
       function runTests() {
         require([
+          'text!specList',
           'kibana',
           'sinon/sinon',
           'angular'
         ], loadSpecs);
       }
 
-      function loadSpecs(kibana, sinon) {
-        require([
-          'specs/apps/discover/hit_sort_fn',
-          'specs/apps/discover/directives/table',
-          'specs/apps/discover/directives/discover_field',
-          'specs/apps/discover/directives/field_chooser',
-          'specs/apps/discover/directives/field_calculator',
-          'specs/apps/discover/segmented_fetch',
-          'specs/directives/confirm-click',
-          'specs/directives/css_truncate',
-          'specs/directives/timepicker',
-          'specs/directives/truncate',
-          'specs/directives/typeahead',
-          'specs/directives/spinner',
-          'specs/directives/validate_query',
-          'specs/directives/validate_json',
-          'specs/filters/field_type',
-          'specs/filters/uriescape',
-          'specs/filters/moment',
-          'specs/filters/rison',
-          'specs/filters/short_dots',
-          'specs/filters/start_from',
-          'specs/services/debounce',
-          'specs/services/storage',
-          'specs/services/persisted_log',
-          'specs/services/url',
-          'specs/utils/datemath',
-          'specs/utils/interval',
-          'specs/utils/versionmath',
-          'specs/utils/routes/index',
-          'specs/utils/sequencer',
-          'specs/utils/html_escape',
-          'specs/courier/search_source/_get_normalized_sort',
-          'specs/factories/base_object',
-          'specs/state_management/state',
-          'specs/state_management/global_state',
-          'specs/state_management/app_state',
-          'specs/utils/diff_object',
-          'specs/factories/events',
-          'specs/vislib/components/color',
-          'specs/vislib/components/zero_injection',
-          'specs/vislib/components/labels',
-          'specs/vislib/components/tooltip/index',
-          'specs/vislib/lib/x_axis',
-          'specs/vislib/lib/y_axis',
-          'specs/vislib/lib/axis_title',
-          'specs/vislib/lib/chart_title',
-          'specs/vislib/lib/layout_types',
-          'specs/vislib/lib/splits',
-          'specs/vislib/lib/layout',
-          'specs/vislib/lib/handler',
-          'specs/vislib/lib/_error_handler',
-          'specs/vislib/lib/data',
-          'specs/vislib/lib/column_layout',
-          'specs/vislib/lib/resize_checker',
-          'specs/vislib/visualizations/_chart',
-          'specs/vislib/visualizations/vis_types',
-          'specs/vislib/index',
-          'specs/vislib/vis',
-          'specs/utils/diff_time_picker_vals',
-          'specs/factories/events',
-          'specs/index_patterns/_flatten_search_response',
-          'specs/utils/indexed_array/index',
-          'specs/directives/filter_bar',
-          'specs/registry/index',
-          'specs/components/clipboard',
-          'specs/components/vis/index',
-          'specs/components/reflow_watcher',
-          'specs/components/agg_types/index',
-          'specs/components/agg_types/param_types/index',
-          'specs/components/index_pattern/_pattern_to_wildcard',
-          'specs/components/agg_response/hierarchical/_build_hierarchical_data',
-          'specs/components/agg_response/hierarchical/_extract_buckets',
-          'specs/components/agg_response/hierarchical/_transform_aggregation',
-          'specs/components/agg_response/hierarchical/_create_raw_data',
-          'specs/components/agg_response/hierarchical/_array_to_linked_list',
-          'specs/components/agg_response/hierarchical/_collect_branch',
-          'specs/components/agg_response/tabify/tabify',
-          'specs/components/agg_table/index',
-          'specs/components/listen/listen',
-          'specs/components/watch_multi',
-          'specs/components/style_compile/style_compile',
-          'specs/plugins/vis_types/index',
-          'specs/utils/slugify_id'
-        ], function () {
-          bootstrap(kibana, sinon);
-        });
+      function loadSpecs(specListJson) {
+        var deps = JSON.parse(specListJson);
+        deps.unshift('sinon/sinon');
+        deps.unshift('kibana');
+        require(deps, bootstrap);
       }
 
       function bootstrap(kibana, sinon) {

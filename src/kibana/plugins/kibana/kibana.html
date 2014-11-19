@@ -11,8 +11,7 @@
           <span class="icon-bar"></span>
         </button>
         <span class="navbar-brand visible-xs">{{ activeApp.name }}
-          <span ng-show="httpActive.length" class="spinner">
-          </span>
+          <span ng-show="httpActive.length" class="spinner"></span>
         </span>
       </div>
 
@@ -42,7 +41,11 @@
     </div>
   </nav>
 
-  <config config-template="globalConfigTemplate" config-object="opts"></config>
+  <config
+    ng-show="opts.timefilter.enabled"
+    config-template="globalConfigTemplate"
+    config-object="opts">
+  </config>
 
   <div class="application" ng-view></div>
 </div>

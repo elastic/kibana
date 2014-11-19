@@ -10,6 +10,7 @@ define(function (require) {
   require('components/state_management/app_state');
   require('components/storage/storage');
   require('components/url/url');
+  require('components/doc_title/doc_title');
   require('components/tooltip/tooltip');
   require('components/style_compile/style_compile');
   require('components/watch_multi');

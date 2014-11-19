@@ -8,12 +8,14 @@ var instrumentationMiddleware = require('./_instrumentation');
 var amdRapperMiddleware = require('./_amd_rapper');
 var proxy = require('http-proxy').createProxyServer({});
 
-var join = require('path').join;
+var glob = require('glob');
+var path = require('path');
+var join = path.join;
 var rel = join.bind(null, __dirname);
 var ROOT = rel('../../../');
 var SRC = join(ROOT, 'src');
 var APP = join(SRC, 'kibana');
-var TEST = join(SRC, 'test');
+var TEST = join(ROOT, 'test');
 var PLUGINS = join(SRC, 'plugins');
 
 module.exports = function DevServer(opts) {
@@ -61,6 +63,21 @@ module.exports = function DevServer(opts) {
   app.use(connect.static(APP));
   app.use('/test', connect.static(TEST));
   app.use('/plugins', connect.static(PLUGINS));
+
+  app.use('/specs', function (req, res) {
+    var unit = join(ROOT, '/test/unit/');
+    glob(join(unit, 'specs/**/*.js'), function (er, files) {
+      var moduleIds = files
+      .filter(function (filename) {
+        return path.basename(filename).charAt(0) !== '_';
+      })
+      .map(function (filename) {
+        return path.relative(unit, filename).replace(/\.js$/, '');
+      });
+
+      res.end(JSON.stringify(moduleIds));
+    });
+  });
 
   // respond to the "maybe_start_server" pings
   app.use(function (req, res, next) {

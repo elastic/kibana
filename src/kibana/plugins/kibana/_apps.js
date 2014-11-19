@@ -22,7 +22,7 @@ define(function (require) {
 
     function onRouteChange() {
       var route = $location.path().split(/\//);
-      var app = $scope.activeApp = _.find($scope.apps, { id: route[1] });
+      var app = $rootScope.activeApp = _.find($scope.apps, { id: route[1] });
 
       if (!app) return;
 

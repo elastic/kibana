@@ -13,7 +13,14 @@ define(function (require) {
       var hasSomeRows = $scope.hasSomeRows = null;
 
       if (resp) {
-        tableGroups = tabifyAggResponse($scope.vis, resp);
+        var vis = $scope.vis;
+        var params = vis.params;
+
+        tableGroups = tabifyAggResponse(vis, resp, {
+          partialRows: params.showPartialRows,
+          minimalColumns: vis.isHierarchical() && !params.showMeticsAtAllLevels
+        });
+
         hasSomeRows = tableGroups.tables.some(function haveRows(table) {
           if (table.tables) return table.tables.some(haveRows);
           return table.rows.length > 0;
