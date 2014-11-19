@@ -97,10 +97,6 @@ define(function (require) {
         }
       };
 
-      self.getFieldsFor = function (indexish) {
-        return self.indexPatterns.getFieldsFor(indexish);
-      };
-
       /**
        * Abort all pending requests
        * @return {[type]} [description]
