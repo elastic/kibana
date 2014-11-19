@@ -24,5 +24,6 @@ request_timeout: 60
 # Set to 0 to disable (not recommended).
 shard_timeout: 30000
 
-# Have a complete disregard for the validity of the SSL certificate
+# Set to false to have a complete disregard for the validity of the SSL
+# certificate
 verifySSL: true

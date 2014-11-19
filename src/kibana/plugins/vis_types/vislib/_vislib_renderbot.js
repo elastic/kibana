@@ -41,7 +41,7 @@ define(function (require) {
       var self = this;
 
       var buildChartData = self._normalizers.flat;
-      if (self.vis.type.hierarchicalData) {
+      if (self.vis.isHierarchical()) {
         buildChartData = self._normalizers.hierarchical;
       }
 

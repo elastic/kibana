@@ -90,7 +90,11 @@ define(function (require) {
     };
 
     Vis.prototype.isHierarchical = function () {
-      return !!this.type.hierarchicalData;
+      if (_.isFunction(this.type.hierarchicalData)) {
+        return !!this.type.hierarchicalData(this);
+      } else {
+        return !!this.type.hierarchicalData;
+      }
     };
 
     return Vis;
