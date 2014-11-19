@@ -82,6 +82,19 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(0,' + margin.top + ')');
 
+          var rowLabels = svg.selectAll('.rowLabel')
+            .data(data.series)
+            .enter()
+            .append('text')
+            .text(function (d) { return d.label; })
+            .attr('x', 0)
+            .attr('y', function (d, i) { return i * gridHeight; })
+            .style('text-anchor', 'end')
+            .attr('transform', 'translate(-6,' + gridHeight / 1.5 + ')')
+            .attr('class', function (d) {
+              return d.label;
+            });
+
           var layer = svg.selectAll('.layer')
           .data(data.series)
           .enter()
