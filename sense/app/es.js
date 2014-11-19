@@ -76,8 +76,10 @@ define([
             settings.showBasicAuthPopupIfNotShown();
           } else if (jqXHR.status == 0 && jqXHR.state() == "rejected") {
             jqXHR.responseText =
-              "\nElasticsearch may not be reachable or you may need to check your CORS settings." +
-              "\nPlease check the elasticsearch documentation."
+              "\n\nElasticsearch may not be reachable or you may need to check your CORS settings." +
+              "If CORS is enabled, try turning off Sense's Basic Authentication support under Setting (cog icon)." +
+                "This will result in a less strict CORS enforcement by the browser." +
+              "\nPlease check the marvel documentation for more information."
           }
           wrappedDfd.rejectWith(this, [jqXHR, textStatus, errorThrown]);
         });
