@@ -8,25 +8,25 @@ define(function (require) {
   require('modules').get('kibana/courier')
   .service('courier', function ($rootScope, Private, Promise, indexPatterns) {
     function Courier() {
-      var courier = this;
+      var self = this;
 
       var DocSource = Private(require('components/courier/data_source/doc_source'));
       var SearchSource = Private(require('components/courier/data_source/search_source'));
 
       var pendingRequests = Private(require('components/courier/_pending_requests'));
 
-      var docLooper = courier.docLooper = Private(require('components/courier/looper/doc'));
-      var searchLooper = courier.searchLooper = Private(require('components/courier/looper/search'));
+      var docLooper = self.docLooper = Private(require('components/courier/looper/doc'));
+      var searchLooper = self.searchLooper = Private(require('components/courier/looper/search'));
 
       // expose some internal modules
-      courier.setRootSearchSource = Private(require('components/courier/data_source/_root_search_source')).set;
+      self.setRootSearchSource = Private(require('components/courier/data_source/_root_search_source')).set;
 
-      courier.SavedObject = Private(require('components/courier/saved_object/saved_object'));
-      courier.indexPatterns = indexPatterns;
-      courier.redirectWhenMissing = Private(require('components/courier/_redirect_when_missing'));
+      self.SavedObject = Private(require('components/courier/saved_object/saved_object'));
+      self.indexPatterns = indexPatterns;
+      self.redirectWhenMissing = Private(require('components/courier/_redirect_when_missing'));
 
-      courier.DocSource = DocSource;
-      courier.SearchSource = SearchSource;
+      self.DocSource = DocSource;
+      self.SearchSource = SearchSource;
 
       var HastyRefresh = errors.HastyRefresh;
       var Abort = errors.Abort;
@@ -36,7 +36,7 @@ define(function (require) {
        *
        * @chainable
        */
-      courier.fetchInterval = function (ms) {
+      self.fetchInterval = function (ms) {
         searchLooper.ms(ms);
         return this;
       };
@@ -45,7 +45,7 @@ define(function (require) {
        * Start fetching search requests on an interval
        * @chainable
        */
-      courier.start = function () {
+      self.start = function () {
         searchLooper.start();
         return this;
       };
@@ -55,7 +55,7 @@ define(function (require) {
        * a promise that resembles the success of the fetch completing,
        * individual errors are routed to their respective requests.
        */
-      courier.fetch = function () {
+      self.fetch = function () {
         return searchLooper.run();
       };
 
@@ -66,7 +66,7 @@ define(function (require) {
        *
        * @return {boolean}
        */
-      courier.started = function () {
+      self.started = function () {
         return searchLooper.started();
       };
 
@@ -77,7 +77,7 @@ define(function (require) {
        *
        * @chainable
        */
-      courier.stop = function () {
+      self.stop = function () {
         searchLooper.stop();
         return this;
       };
@@ -88,7 +88,7 @@ define(function (require) {
        *
        * @param {string} type - the type of Source to create
        */
-      courier.createSource = function (type) {
+      self.createSource = function (type) {
         switch (type) {
         case 'doc':
           return new DocSource();
@@ -97,15 +97,15 @@ define(function (require) {
         }
       };
 
-      courier.getFieldsFor = function (indexish) {
-        return courier.indexPatterns.getFieldsFor(indexish);
+      self.getFieldsFor = function (indexish) {
+        return self.indexPatterns.getFieldsFor(indexish);
       };
 
       /**
        * Abort all pending requests
        * @return {[type]} [description]
        */
-      courier.close = function () {
+      self.close = function () {
         searchLooper.stop();
         docLooper.stop();
 
