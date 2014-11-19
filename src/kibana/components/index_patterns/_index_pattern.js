@@ -7,7 +7,6 @@ define(function (require) {
     var getIds = Private(require('components/index_patterns/_get_ids'));
     var mapper = Private(require('components/index_patterns/_mapper'));
     var fieldFormats = Private(require('components/index_patterns/_field_formats'));
-    var patternCache = Private(require('components/index_patterns/_pattern_cache'));
     var intervals = Private(require('components/index_patterns/_intervals'));
     var mappingSetup = Private(require('utils/mapping_setup'));
     var DocSource = Private(require('components/courier/data_source/doc_source'));
@@ -43,9 +42,9 @@ define(function (require) {
         .type(type)
         .id(self.id);
 
-        // check that the mapping for this type is defined
         return mappingSetup.isDefined(type)
         .then(function (defined) {
+          // create mapping for this type if one does not exist
           if (defined) return true;
           return mappingSetup.setup(type, mapping);
         })
@@ -69,8 +68,11 @@ define(function (require) {
             _.assign(self, resp._source);
 
             if (self.id) {
-              if (!self.fields) return self.fetchFields();
-              setIndexedValue('fields');
+              if (!self.fields || !self.scriptedFields) {
+                return self.refreshFields();
+              } else {
+                setIndexedValue('fields');
+              }
             }
 
             // Any time obj is updated, re-call applyESResp
@@ -158,15 +160,15 @@ define(function (require) {
       self.refreshFields = function () {
         return mapper.clearCache(self)
         .then(function () {
-          return self.fetchFields();
+          return self._fetchFields()
+          .then(self.save);
         });
       };
 
-      self.fetchFields = function () {
+      self._fetchFields = function () {
         return mapper.getFieldsForIndexPattern(self, true)
         .then(function (fields) {
           setIndexedValue('fields', fields);
-          return self.save();
         });
       };
 
