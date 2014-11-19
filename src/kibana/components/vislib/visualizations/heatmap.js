@@ -24,173 +24,7 @@ define(function (require) {
       }
 
       HeatMap.Super.apply(this, arguments);
-
-      // HeatMap specific attributes
-      this._attr = _.defaults(handler._attr || {}, {
-        xValue: function (d) { return d.x; },
-        yValue: function (d) { return d.y; }
-      });
     }
-
-    /**
-     * Stacks chart data values
-     *
-     * @method stackData
-     * @param data {Object} Elasticsearch query result for this chart
-     * @returns {Array} Stacked data objects with x, y, and y0 values
-     */
-    HeatMap.prototype.stackData = function (data) {
-      var self = this;
-
-      return this._attr.stack(data.series.map(function (d) {
-        var label = d.label;
-        return d.values;
-        //return d.values.map(function (e, i) {
-        //  return {
-        //    label: label,
-        //    x: self._attr.xValue.call(d.values, e, i),
-        //    y: self._attr.yValue.call(d.values, e, i)
-        //  };
-        //});
-      }));
-    };
-
-    /**
-     * Adds SVG rects to HeatMap
-     *
-     * @method addRects
-     * @param svg {HTMLElement} SVG to which rect are appended
-     * @param layers {Array} Chart data array
-     * @returns {D3.UpdateSelection} SVG with rect added
-     */
-    HeatMap.prototype.addRects = function (svg, layers) {
-      var self = this;
-      //var color = this.handler.data.getColorFunc();
-      var tooltip = this.tooltip;
-      var isTooltip = this._attr.addTooltip;
-      var layer;
-      var rects;
-
-      layer = svg.selectAll('.layer')
-      .data(layers)
-      .enter().append('g')
-      .attr('class', function (d, i) {
-        return i;
-      });
-
-      rects = layer.selectAll('rect')
-      .data(function (d) {
-        return d;
-      });
-
-      rects
-      .exit()
-      .remove();
-
-      rects
-      .enter()
-      .append('rect')
-      .attr('fill', '#d3d3d3');
-
-      self.updateRects(rects);
-
-      return rects;
-    };
-
-    /**
-     * Adds stacked bars to column chart visualization
-     *
-     * @method addStackedBars
-     * @param bars {D3.UpdateSelection} SVG with rect added
-     * @returns {D3.UpdateSelection}
-     */
-    HeatMap.prototype.updateRects = function (rects) {
-
-      var self = this;
-      var data = this.chartData;
-
-      var gridSize = 13;
-      var cellPadding = 1;
-      var cellSize = gridSize - cellPadding;
-      var cornerRadius = 0;
-      var width = this._attr.width;
-      var height = this._attr.height;
-      var margin = { top: 10, right: 20, bottom: 20, left: 25 };
-
-      var hourFormat = d3.time.format('%H');
-      var dayFormat = d3.time.format('%j');
-      var timeFormat = d3.time.format('%Y-%m-%dT%X');
-      var monthDayFormat = d3.time.format('%m.%d');
-
-      var dateExtent = null;
-      var chartData = [];
-
-
-      var xExtents = d3.extent(data.series[0].values, function (d) {
-        return d.x;
-      });
-      var yExtents = d3.extent(data.series[0].values, function (d) {
-        return d.y;
-      });
-      // console.log(xExtents);
-      // console.log(yExtents);
-
-      var col;
-      var row;
-      var rowMax = 1;
-
-      function gridCoords(i) {
-        // reset coords
-        if (i === 0) {
-          col = 0;
-          row = 0;
-        }
-        if (row >= rowMax) {
-          col++;
-          row = 0;
-        }
-        var grid = {
-          x: col,
-          y: row
-        };
-        row++;
-        return grid;
-      }
-
-      // update
-      rects
-      .attr('width', function () {
-        return cellSize;
-      })
-      .attr('height', function () {
-        return cellSize;
-      })
-      .attr('x', function (d, i) {
-        return gridSize * gridCoords(i).x;
-      })
-      .attr('y', function (d, i) {
-        return gridSize * gridCoords(i).y;
-      })
-      .attr('fill', function (d) {
-        return self.gridColor(d, yExtents);
-      });
-      return rects;
-    };
-
-    HeatMap.prototype.gridColor = function (d, extents) {
-      var colors = [
-        '#fef0d9',
-        '#fdd49e',
-        '#fdbb84',
-        '#fc8d59',
-        '#e34a33',
-        '#b30000'
-      ];
-      var colorIndex = d3.scale.quantize()
-        .range([0, 1, 2, 3, 4, 5])
-        .domain(extents);
-      return colors[colorIndex(d.y)];
-    };
 
     /**
      * Renders heatmap chart
@@ -207,36 +41,81 @@ define(function (require) {
       var elHeight = this._attr.height = $elem.height();
       var minWidth = 60;
       var minHeight = 60;
-      var div;
-      var svg;
-      var width;
-      var height;
-      var layers;
-      var heatmap;
 
       return function (selection) {
         selection.each(function (data) {
-          layers = self.stackData(data);
-
-          width = elWidth;
-          height = elHeight - margin.top - margin.bottom;
+          var width = elWidth;
+          var height = elHeight - margin.top - margin.bottom;
+          var widthN = data.series[0].values.length;
+          var heightN = data.series.length;
+          var gridWidth = Math.floor(width / widthN);
+          var gridHeight = Math.floor(height / heightN);
+          var buckets = 9;
+          var colors = [
+            '#ffffd9',
+            '#edf8b1',
+            '#c7e9b4',
+            '#7fcdbb',
+            '#41b6c4',
+            '#1d91c0',
+            '#225ea8',
+            '#253494',
+            '#081d58'
+          ];
+          var colorScale = d3.scale.quantile()
+          .domain([0, buckets - 1, d3.max(data.series, function (obj) {
+            return d3.max(obj.values, function (d) {
+              return d.y;
+            });
+          })])
+          .range(colors);
 
           if (width < minWidth || height < minHeight) {
             throw new errors.ContainerTooSmall();
           }
 
-          div = d3.select(this);
+          var div = d3.select(this);
 
-          svg = div.append('svg')
+          var svg = div.append('svg')
           .attr('width', width)
           .attr('height', height + margin.top + margin.bottom)
           .append('g')
           .attr('transform', 'translate(0,' + margin.top + ')');
 
-          heatmap = self.addRects(svg, layers);
+          var layer = svg.selectAll('.layer')
+          .data(data.series)
+          .enter()
+          .append('g')
+          .attr('class', function (d) {
+            return d.label;
+          });
 
-          // Adds event listeners
-          //self.addEvents(rects, svg);
+          var heatMap = layer.selectAll('.heat')
+          .data(function (d, i) {
+            d.values.forEach(function (obj) {
+              obj.labelIndex = i;
+            });
+
+            return d.values;
+          })
+          .enter()
+          .append('rect')
+          .attr('x', function (d, i) { return (i) * gridWidth; })
+          .attr('y', function (d) { return (d.labelIndex) * gridHeight; })
+          .attr('rx', 4)
+          .attr('ry', 4)
+          .attr('class', 'rect bordered')
+          .attr('width', gridWidth)
+          .attr('height', gridHeight)
+          .style('fill', colors[0])
+          .style('stroke', '#fff')
+          .style('stroke-width', 0.5);
+
+          heatMap.transition().duration(1000)
+          .style('fill', function (d) {
+            return colorScale(d.y);
+          });
+
 
           return svg;
         });
