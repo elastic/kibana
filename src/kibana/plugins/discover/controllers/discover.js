@@ -91,17 +91,6 @@ define(function (require) {
 
     var metaFields = config.get('metaFields');
 
-    $scope.intervalOptions = [
-      'auto',
-      'second',
-      'minute',
-      'hour',
-      'day',
-      'week',
-      'month',
-      'year'
-    ];
-
     var $state = $scope.state = new AppState(stateDefaults);
 
     if (!_.contains(indexPatternList, $state.index)) {
@@ -338,14 +327,18 @@ define(function (require) {
               var indexPattern = $scope.searchSource.get('index');
               hit._source = indexPattern.flattenSearchResponse(hit._source);
 
-              hit._formatted = _.mapValues(hit._source, function (value, name) {
+              var formatValues = function (value, name) {
                 // add up the counts for each field name
                 if (counts[name]) counts[name] = counts[name] + 1;
                 else counts[name] = 1;
 
                 return ($scope.formatsByName[name] || defaultFormat).convert(value);
-              });
+              };
 
+              var formattedSource = _.mapValues(hit._source, formatValues);
+              var formattedHits = _.mapValues(hit.fields, formatValues);
+
+              hit._formatted = _.merge(formattedSource, formattedHits);
               hit._formatted._source = angular.toJson(hit._source);
             });
 
