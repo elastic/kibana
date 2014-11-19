@@ -14,9 +14,10 @@ define(function (require) {
       },
       template: headerHtml,
       controller: function ($scope) {
+        var unsortableFields = ['geo_point', 'geo_shape', 'attachment'];
         var sortableField = function (field) {
           var mapping = $scope.mapping[field];
-          return mapping && mapping.indexed && mapping.type !== 'geo_point';
+          return mapping && mapping.indexed && !_.contains(unsortableFields, mapping.type);
         };
 
         $scope.headerClass = function (column) {
