@@ -107,17 +107,14 @@ define(function (require) {
           .attr('class', 'rect bordered')
           .attr('width', gridWidth)
           .attr('height', gridHeight)
-          .style('fill', function (d) {
-            return colorScale(d.y);
-          })
-          //.style('fill', colors[0])
+          .style('fill', colors[0])
           .style('stroke', '#ddd')
           .style('stroke-width', 0.3);
 
-          //heatMap.transition().duration(1000)
-          //.style('fill', function (d) {
-          //  return colorScale(d.y);
-          //});
+          heatMap.transition().duration(1000)
+          .style('fill', function (d) {
+            return colorScale(d.y);
+          });
 
 
           return svg;
