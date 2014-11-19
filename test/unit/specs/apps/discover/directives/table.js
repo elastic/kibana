@@ -13,7 +13,7 @@ define(function (require) {
 
   var $parentScope, $scope, config;
 
-  // Stub out a minimal mapping of 3 fields
+  // Stub out a minimal mapping of 4 fields
   var mapping = {
     bytes: {
       indexed: true,
@@ -26,6 +26,10 @@ define(function (require) {
     timestamp: {
       indexed: true,
       type: 'date'
+    },
+    geo: {
+      indexed: true,
+      type: 'geo_point'
     }
   };
 
@@ -156,6 +160,11 @@ define(function (require) {
           done();
         });
 
+        it('should NOT sort geo_point fields', function (done) {
+          $scope.sort('geo');
+          expect($scope.sorting).to.be(undefined);
+          done();
+        });
       });
 
       describe('moving columns', function () {
@@ -174,10 +183,10 @@ define(function (require) {
         });
 
         it('shouldnt move the last column to the right', function () {
-          expect($scope.columns[2]).to.be('timestamp');
+          expect($scope.columns[3]).to.be('geo');
 
-          $scope.moveRight('timestamp');
-          expect($scope.columns[2]).to.be('timestamp');
+          $scope.moveRight('geo');
+          expect($scope.columns[3]).to.be('geo');
         });
 
         it('should move columns to the left', function () {
@@ -334,13 +343,7 @@ define(function (require) {
           it('should have a row for each field', function () {
             var rows = $details.find('tr');
             var row = $scope.row;
-            expect($details.find('tr').length).to.be(3);
-          });
-
-          it('should have a row for each field', function () {
-            var rows = $details.find('tr');
-            var row = $scope.row;
-            expect($details.find('tr').length).to.be(3);
+            expect($details.find('tr').length).to.be(_.keys(mapping).length);
           });
 
           describe('filtering', function () {
@@ -397,7 +400,7 @@ define(function (require) {
       });
 
       it('should render even when the row source contains a field with the same name as a meta field', function () {
-        expect($details.find('tr').length).to.be(4);
+        expect($details.find('tr').length).to.be(_.keys(mapping).length);
       });
     });
 
