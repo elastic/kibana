@@ -349,8 +349,6 @@ define(function (require) {
 
                 return ($scope.formatsByName[name] || defaultFormat).convert(value);
               });
-
-              hit._formatted._source = angular.toJson(hit._source);
             });
 
             // ensure that the meta fields always have a "row count" equal to the number of rows

@@ -436,7 +436,7 @@ define(function (require) {
         expect($before).to.have.length(3);
         expect($before.eq(0).text().trim()).to.be('');
         expect($before.eq(1).text().trim()).to.match(/^timestamp_formatted/);
-        expect($before.eq(2).text().trim()).to.match(/^_source_formatted/);
+        expect($before.eq(2).find('.source-field').length).to.be(4);
       }));
 
       afterEach(function () {
@@ -538,16 +538,16 @@ define(function (require) {
       });
 
       it('handles two columns with the same content', function () {
-        $root.row._formatted.bytes = $root.row._formatted._source;
+        $root.row._formatted.request = $root.row._formatted.bytes;
+        $root.columns.length = 0;
         $root.columns.push('bytes');
+        $root.columns.push('request');
         $root.$apply();
 
         var $after = $row.find('td');
         expect($after).to.have.length(4);
-        expect($after[0]).to.be($before[0]);
-        expect($after[1]).to.be($before[1]);
-        expect($after[2]).to.be($before[2]);
-        expect($after.eq(3).text().trim()).to.match(/^_source_formatted/);
+        expect($after.eq(2).text().trim()).to.match(/^bytes_formatted/);
+        expect($after.eq(3).text().trim()).to.match(/^bytes_formatted/);
       });
 
       it('handles two columns swapping position', function () {
