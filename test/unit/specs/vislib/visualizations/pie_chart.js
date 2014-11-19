@@ -15,7 +15,7 @@ define(function (require) {
 
   var colAgg = [
     { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-    { type: 'terms', schema: 'split', params: { field: 'extension' }},
+    { type: 'terms', schema: 'split', params: { field: 'extension', row: false }},
     { type: 'terms', schema: 'segment', params: { field: 'machine.os' }},
     { type: 'terms', schema: 'segment', params: { field: 'geo.src' }}
   ];
@@ -49,6 +49,7 @@ define(function (require) {
       var Vis;
       var indexPattern;
       var buildHierarchicalData;
+      var data;
 
       beforeEach(function () {
         module('PieChartFactory');
@@ -71,8 +72,7 @@ define(function (require) {
           // We need to set the aggs to a known value.
           _.each(stubVis.aggs, function (agg) { agg.id = 'agg_' + id++; });
 
-          var data = buildHierarchicalData(stubVis, fixtures.threeTermBuckets);
-          console.log(data);
+          data = buildHierarchicalData(stubVis, fixtures.threeTermBuckets);
 
           vis.render(data);
         });
@@ -83,12 +83,89 @@ define(function (require) {
         vis = null;
       });
 
-      describe('addPathEvents method', function () {});
-      describe('addPath method', function () {});
+      describe('addPathEvents method', function () {
+        var path;
+        var d3selectedPath;
+        var onClick;
+        var onMouseOver;
+
+        beforeEach(function () {
+          inject(function (d3) {
+            vis.handler.charts.forEach(function (chart) {
+              path = $(chart.chartEl).find('path')[0];
+              d3selectedPath = d3.select(path)[0][0];
+
+              // d3 instance of click and hover
+              onClick = (!!d3selectedPath.__onclick);
+              onMouseOver = (!!d3selectedPath.__onmouseover);
+            });
+          });
+        });
+
+        it('should attach a click event', function () {
+          vis.handler.charts.forEach(function () {
+            expect(onClick).to.be(true);
+          });
+        });
+
+        it('should attach a hover event', function () {
+          vis.handler.charts.forEach(function () {
+            expect(onMouseOver).to.be(true);
+          });
+        });
+      });
+
+      describe('addPath method', function () {
+        var width;
+        var height;
+        var svg;
+        var slices;
+
+        beforeEach(function () {
+          inject(function (d3) {
+            vis.handler.charts.forEach(function (chart) {
+              width = $(chart.chartEl).width();
+              height = $(chart.chartEl).height();
+              svg = d3.select($(chart.chartEl).find('svg')[0]);
+              slices = chart.chartData.slices;
+            });
+          });
+        });
+
+        it('should return an SVG object', function () {
+          vis.handler.charts.forEach(function (chart) {
+            expect(_.isObject(chart.addPath(width, height, svg, slices))).to.be(true);
+          });
+        });
+
+        it('should draw path elements', function () {
+          vis.handler.charts.forEach(function (chart) {
+
+            // test whether path elements are drawn
+            expect($(chart.chartEl).find('path').length).to.be.greaterThan(0);
+          });
+        });
+      });
+
       describe('draw method', function () {
         it('should return a function', function () {
           vis.handler.charts.forEach(function (chart) {
             expect(_.isFunction(chart.draw())).to.be(true);
+          });
+        });
+      });
+
+      describe('containerTooSmall error', function () {
+        beforeEach(function () {
+          $(vis.el).height(0);
+          $(vis.el).width(0);
+        });
+
+        it('should throw an error', function () {
+          vis.handler.charts.forEach(function (chart) {
+            expect(function () {
+              chart.render();
+            }).to.throwError();
           });
         });
       });
