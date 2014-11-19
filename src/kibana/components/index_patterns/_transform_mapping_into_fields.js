@@ -25,10 +25,22 @@ define(function (require) {
             var mapping = _.cloneDeep(field.mapping[keys.shift()]);
             mapping.type = castMappingType(mapping.type);
 
-            if (name === '_id') {
-              // _id is allways indexed
-              mapping.indexed = true;
-            } else if (!mapping.index || mapping.index === 'no') {
+            // Override the mapping, even if elasticsearch says otherwise
+            var mappingOverrides = {
+              _id: {
+                indexed: true
+              },
+              _timestamp: {
+                indexed: true,
+                type: 'date'
+              }
+            };
+
+            if (mappingOverrides[name]) {
+              _.merge(mapping, mappingOverrides[name]);
+            }
+
+            if (!mapping.index || mapping.index === 'no') {
               // elasticsearch responds with false sometimes and 'no' others
               mapping.indexed = false;
             } else {
