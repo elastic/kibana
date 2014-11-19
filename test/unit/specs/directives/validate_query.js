@@ -16,8 +16,8 @@ define(function (require) {
   var cycleIndex = 0;
   var mockValidateQuery;
   var markup = '<input ng-model="mockModel" validate-query="mockQueryInput" input-focus type="text">';
-  var fromUser = require('components/validate_query/lib/fromUser');
-  var toUser = require('components/validate_query/lib/toUser');
+  var fromUser = require('components/validate_query/lib/from_user');
+  var toUser = require('components/validate_query/lib/to_user');
 
 
   var validEsResponse = function () {

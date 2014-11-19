@@ -1,8 +1,8 @@
 define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
-  var fromUser = require('components/validate_query/lib/fromUser');
-  var toUser = require('components/validate_query/lib/toUser');
+  var fromUser = require('components/validate_query/lib/from_user');
+  var toUser = require('components/validate_query/lib/to_user');
 
   require('services/debounce');
 
