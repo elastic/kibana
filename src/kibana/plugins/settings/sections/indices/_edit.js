@@ -31,7 +31,7 @@ define(function (require) {
     };
 
     $scope.changeTab = function (obj) {
-      $state.tab = obj.title;
+      $state.tab = obj.index;
       $state.save();
     };
 
