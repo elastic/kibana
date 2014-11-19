@@ -49,7 +49,7 @@ define(function (require) {
           var widthN = data.series[0].values.length;
           var heightN = data.series.length;
           var gridWidth = Math.floor(width / widthN);
-          var gridHeight = Math.floor(height / heightN);
+          var gridHeight = (height / heightN);
           var buckets = 9;
           var colors = [
             '#ffffd9',
@@ -107,14 +107,17 @@ define(function (require) {
           .attr('class', 'rect bordered')
           .attr('width', gridWidth)
           .attr('height', gridHeight)
-          .style('fill', colors[0])
-          .style('stroke', '#fff')
-          .style('stroke-width', 0.5);
-
-          heatMap.transition().duration(1000)
           .style('fill', function (d) {
             return colorScale(d.y);
-          });
+          })
+          //.style('fill', colors[0])
+          .style('stroke', '#ddd')
+          .style('stroke-width', 0.3);
+
+          //heatMap.transition().duration(1000)
+          //.style('fill', function (d) {
+          //  return colorScale(d.y);
+          //});
 
 
           return svg;
