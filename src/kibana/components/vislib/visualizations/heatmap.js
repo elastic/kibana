@@ -122,7 +122,7 @@ define(function (require) {
           .attr('height', gridHeight)
           .style('fill', colors[0])
           .style('stroke', '#ddd')
-          .style('stroke-width', 0.3);
+          .style('stroke-width', 0.5);
 
           heatMap.transition().duration(1000)
           .style('fill', function (d) {
