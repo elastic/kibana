@@ -17,7 +17,7 @@ define(function (require) {
     var detailsHtml = require('text!plugins/discover/partials/table_row/details.html');
     var cellTemplate = _.template(require('text!plugins/discover/partials/table_row/cell.html'));
     var truncateByHeightTemplate = _.template(require('text!partials/truncate_by_height.html'));
-    var _sourceTemplate = _.template(require('text!plugins/discover/partials/table_row/_source.html'));
+    var sourceTemplate = _.template(require('text!plugins/discover/partials/table_row/_source.html'));
 
     return {
       restrict: 'A',
@@ -123,11 +123,8 @@ define(function (require) {
           $scope.columns.forEach(function (column) {
             var formatted;
             if (column === '_source') {
-              var body = _sourceTemplate({
+              formatted = sourceTemplate({
                 source: row._formatted
-              });
-              formatted = truncateByHeightTemplate({
-                body: body
               });
             } else {
               formatted = _displayField(row, column, true);
