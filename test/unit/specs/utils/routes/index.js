@@ -100,7 +100,7 @@ define(function (require) {
       });
     });
 
-    require('./work_queue')();
-    require('./wrap_route_with_prep')();
+    require('specs/utils/routes/_work_queue')();
+    require('specs/utils/routes/_wrap_route_with_prep')();
   });
 });

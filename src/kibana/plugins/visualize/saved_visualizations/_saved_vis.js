@@ -28,7 +28,7 @@ define(function (require) {
         },
 
         defaults: {
-          title: '',
+          title: 'New Visualization',
           visState: (function () {
             if (!opts.type) return null;
             var def = {};

@@ -13,7 +13,8 @@ define(function (require) {
       },
       params: [
         {
-          name: 'field'
+          name: 'field',
+          scriptable: true
         },
         {
           name: 'size',

@@ -11,15 +11,14 @@ define(function (require) {
     var VersionConflict = errors.VersionConflict;
     var RequestFailure = errors.RequestFailure;
 
+    _(DocSource).inherits(SourceAbstract);
     function DocSource(initialState) {
-      SourceAbstract.call(this, initialState);
+      DocSource.Super.call(this, initialState);
 
       // move onResults over to onUpdate, because that makes more sense
       this.onUpdate = this.onResults;
       this.onResults = void 0;
     }
-
-    inherits(DocSource, SourceAbstract);
 
     /*****
      * PUBLIC API
