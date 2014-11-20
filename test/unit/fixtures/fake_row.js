@@ -12,8 +12,6 @@ define(function (require) {
       sort: [id]
     };
 
-    fake._formatted._source = '_source_formatted_' + id + longString;
-
     return fake;
   };
 });

@@ -1,7 +1,5 @@
 define(function (require) {
   var angular = require('angular');
-  var _ = require('lodash');
-  var $ = require('jquery');
 
   angular.module('ColumnChartFactory', ['kibana']);
 
@@ -10,7 +8,6 @@ define(function (require) {
     var Data;
     var chart;
     var el;
-    var mydata;
     var data = {
       hits: 621,
       label: '',

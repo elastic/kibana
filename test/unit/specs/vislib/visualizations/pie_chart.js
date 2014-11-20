@@ -57,7 +57,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (d3, Private) {
-          vis = Private(require('vislib_fixtures/vis_fixture'))(visLibParams);
+          vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
           Vis = Private(require('components/vis/vis'));
           indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
           buildHierarchicalData = Private(require('components/agg_response/hierarchical/build_hierarchical_data'));

@@ -13,7 +13,7 @@ define(function (require) {
 
   var $parentScope, $scope, config;
 
-  // Stub out a minimal mapping of 3 fields
+  // Stub out a minimal mapping of 4 fields
   var mapping = {
     bytes: {
       indexed: true,
@@ -26,6 +26,10 @@ define(function (require) {
     timestamp: {
       indexed: true,
       type: 'date'
+    },
+    geo: {
+      indexed: true,
+      type: 'geo_point'
     }
   };
 
@@ -156,6 +160,11 @@ define(function (require) {
           done();
         });
 
+        it('should NOT sort geo_point fields', function (done) {
+          $scope.sort('geo');
+          expect($scope.sorting).to.be(undefined);
+          done();
+        });
       });
 
       describe('moving columns', function () {
@@ -174,10 +183,10 @@ define(function (require) {
         });
 
         it('shouldnt move the last column to the right', function () {
-          expect($scope.columns[2]).to.be('timestamp');
+          expect($scope.columns[3]).to.be('geo');
 
-          $scope.moveRight('timestamp');
-          expect($scope.columns[2]).to.be('timestamp');
+          $scope.moveRight('geo');
+          expect($scope.columns[3]).to.be('geo');
         });
 
         it('should move columns to the left', function () {
@@ -334,13 +343,7 @@ define(function (require) {
           it('should have a row for each field', function () {
             var rows = $details.find('tr');
             var row = $scope.row;
-            expect($details.find('tr').length).to.be(3);
-          });
-
-          it('should have a row for each field', function () {
-            var rows = $details.find('tr');
-            var row = $scope.row;
-            expect($details.find('tr').length).to.be(3);
+            expect($details.find('tr').length).to.be(_.keys(mapping).length);
           });
 
           describe('filtering', function () {
@@ -397,7 +400,7 @@ define(function (require) {
       });
 
       it('should render even when the row source contains a field with the same name as a meta field', function () {
-        expect($details.find('tr').length).to.be(4);
+        expect($details.find('tr').length).to.be(_.keys(mapping).length);
       });
     });
 
@@ -436,7 +439,7 @@ define(function (require) {
         expect($before).to.have.length(3);
         expect($before.eq(0).text().trim()).to.be('');
         expect($before.eq(1).text().trim()).to.match(/^timestamp_formatted/);
-        expect($before.eq(2).text().trim()).to.match(/^_source_formatted/);
+        expect($before.eq(2).find('.source-field').length).to.be(4);
       }));
 
       afterEach(function () {
@@ -538,16 +541,16 @@ define(function (require) {
       });
 
       it('handles two columns with the same content', function () {
-        $root.row._formatted.bytes = $root.row._formatted._source;
+        $root.row._formatted.request = $root.row._formatted.bytes;
+        $root.columns.length = 0;
         $root.columns.push('bytes');
+        $root.columns.push('request');
         $root.$apply();
 
         var $after = $row.find('td');
         expect($after).to.have.length(4);
-        expect($after[0]).to.be($before[0]);
-        expect($after[1]).to.be($before[1]);
-        expect($after[2]).to.be($before[2]);
-        expect($after.eq(3).text().trim()).to.match(/^_source_formatted/);
+        expect($after.eq(2).text().trim()).to.match(/^bytes_formatted/);
+        expect($after.eq(3).text().trim()).to.match(/^bytes_formatted/);
       });
 
       it('handles two columns swapping position', function () {

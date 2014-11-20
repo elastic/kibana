@@ -3,10 +3,10 @@ define(function (require) {
   var $ = require('jquery');
 
   // Data
-  var series = require('vislib_fixtures/mock_data/date_histogram/series');
-  var columns = require('vislib_fixtures/mock_data/date_histogram/columns');
-  var rows = require('vislib_fixtures/mock_data/date_histogram/rows');
-  var stackedSeries = require('vislib_fixtures/mock_data/date_histogram/stacked_series');
+  var series = require('vislib_fixtures/mock_data/date_histogram/_series');
+  var columns = require('vislib_fixtures/mock_data/date_histogram/_columns');
+  var rows = require('vislib_fixtures/mock_data/date_histogram/_rows');
+  var stackedSeries = require('vislib_fixtures/mock_data/date_histogram/_stacked_series');
   var dateHistogramArray = [
     series,
     columns,
@@ -35,7 +35,7 @@ define(function (require) {
       beforeEach(function () {
         inject(function (Private) {
           Handler = Private(require('components/vislib/lib/handler/handler'));
-          vis = Private(require('vislib_fixtures/vis_fixture'))();
+          vis = Private(require('vislib_fixtures/_vis_fixture'))();
           require('css!components/vislib/styles/main');
 
           events = [

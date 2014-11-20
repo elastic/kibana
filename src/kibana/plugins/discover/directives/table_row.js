@@ -17,6 +17,7 @@ define(function (require) {
     var detailsHtml = require('text!plugins/discover/partials/table_row/details.html');
     var cellTemplate = _.template(require('text!plugins/discover/partials/table_row/cell.html'));
     var truncateByHeightTemplate = _.template(require('text!partials/truncate_by_height.html'));
+    var sourceTemplate = _.template(require('text!plugins/discover/partials/table_row/_source.html'));
 
     return {
       restrict: 'A',
@@ -81,8 +82,13 @@ define(function (require) {
           $detailsScope.row = row;
           $detailsScope.showFilters = function (mapping) {
             var validTypes = ['string', 'number', 'date', 'ip'];
-            if (!mapping.indexed) return false;
+            if (!mapping || !mapping.indexed) return false;
             return _.contains(validTypes, mapping.type);
+          };
+
+          $detailsScope.showArrayInObjectsWarning = function (row, field) {
+            var value = row._source[field];
+            return _.isArray(value) && typeof value[0] === 'object';
           };
 
           $compile($detailsTr)($detailsScope);
@@ -115,9 +121,17 @@ define(function (require) {
           }
 
           $scope.columns.forEach(function (column) {
+            var formatted;
+            if (column === '_source') {
+              formatted = sourceTemplate({
+                source: row._formatted
+              });
+            } else {
+              formatted = _displayField(row, column, true);
+            }
             newHtmls.push(cellTemplate({
               timefield: false,
-              formatted: _displayField(row, column, true)
+              formatted: formatted
             }));
           });
 
