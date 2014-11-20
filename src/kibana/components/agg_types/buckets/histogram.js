@@ -1,16 +1,15 @@
 define(function (require) {
-  return function HistogramAggDefinition(Private, $filter) {
+  return function HistogramAggDefinition(Private) {
     var _ = require('lodash');
     var moment = require('moment');
     var AggType = Private(require('components/agg_types/_agg_type'));
-    require('filters/short_dots');
 
     return new AggType({
       name: 'histogram',
       title: 'Histogram',
       ordered: {},
       makeLabel: function (aggConfig) {
-        return $filter('shortDots')(aggConfig.params.field.name);
+        return aggConfig.getFieldName();
       },
       params: [
         {

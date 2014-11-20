@@ -1,16 +1,15 @@
 define(function (require) {
-  return function RangeAggDefinition(Private, $filter) {
+  return function RangeAggDefinition(Private) {
     var _ = require('lodash');
     var moment = require('moment');
     var angular = require('angular');
     var AggType = Private(require('components/agg_types/_agg_type'));
-    require('filters/short_dots');
 
     return new AggType({
       name: 'range',
       title: 'Range',
       makeLabel: function (aggConfig) {
-        return $filter('shortDots')(aggConfig.params.field.name) + ' ranges';
+        return aggConfig.getFieldName() + ' ranges';
       },
       params: [
         {

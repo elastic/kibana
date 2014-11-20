@@ -1,5 +1,7 @@
 define(function (require) {
-  return function AggConfigFactory(Private) {
+  require('filters/short_dots');
+
+  return function AggConfigFactory(Private, $filter) {
     var _ = require('lodash');
     var aggTypes = Private(require('components/agg_types/index'));
 
@@ -168,6 +170,10 @@ define(function (require) {
     AggConfig.prototype.makeLabel = function () {
       if (!this.type) return '';
       return this.type.makeLabel(this);
+    };
+
+    AggConfig.prototype.getFieldName = function () {
+      if (this.params && this.params.field) return $filter('shortDots')(this.params.field.name);
     };
 
     return AggConfig;
