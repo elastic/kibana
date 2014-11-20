@@ -27,10 +27,6 @@ define(function (require) {
         }
       };
 
-      if (mappingOverrides[name]) {
-        _.merge(mapping, mappingOverrides[name]);
-      }
-
       if (!mapping.index || mapping.index === 'no') {
         // elasticsearch responds with false sometimes and 'no' others
         mapping.indexed = false;
@@ -39,6 +35,10 @@ define(function (require) {
       }
 
       mapping.analyzed = mapping.index === 'analyzed' ? true : false;
+
+      if (mappingOverrides[name]) {
+        _.merge(mapping, mappingOverrides[name]);
+      }
 
       return mapping;
     };
