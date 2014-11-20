@@ -11,19 +11,19 @@ define(function (require) {
     function Mapper() {
 
       // Save a reference to mapper
-      var mapper = this;
+      var self = this;
 
       // proper-ish cache, keeps a clean copy of the object, only returns copies of it's copy
-      var fieldCache = mapper.cache = new LocalCache();
+      var fieldCache = self.cache = new LocalCache();
 
       /**
        * Gets an object containing all fields with their mappings
        * @param {dataSource} dataSource
-       * @param {boolean} skipIndexPatternCache - should we ping the index-pattern obejcts? set to true by the indexPattern service
+       * @param {boolean} skipIndexPatternCache - should we ping the index-pattern objects
        * @returns {Promise}
        * @async
        */
-      mapper.getFieldsForIndexPattern = function (indexPattern, skipIndexPatternCache) {
+      self.getFieldsForIndexPattern = function (indexPattern, skipIndexPatternCache) {
         var id = indexPattern.id;
         var indexList = indexPattern.toIndexList(-5, 5);
 
@@ -41,7 +41,7 @@ define(function (require) {
             if (resp.found && resp._source.fields) {
               fieldCache.set(id, JSON.parse(resp._source.fields));
             }
-            return mapper.getFieldsForIndexPattern(indexPattern, true);
+            return self.getFieldsForIndexPattern(indexPattern, true);
           });
         }
 
@@ -75,7 +75,7 @@ define(function (require) {
        * @returns {Promise}
        * @async
        */
-      mapper.clearCache = function (indexPattern) {
+      self.clearCache = function (indexPattern) {
         fieldCache.clear(indexPattern);
         return Promise.resolve();
       };
