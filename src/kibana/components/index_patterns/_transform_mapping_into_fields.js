@@ -3,6 +3,8 @@ define(function (require) {
     var _ = require('lodash');
     var MappingConflict = require('errors').MappingConflict;
     var castMappingType = Private(require('components/index_patterns/_cast_mapping_type'));
+    var mapField = Private(require('components/index_patterns/_map_field'));
+
 
     /**
      * Convert the ES response into the simple map for fields to
@@ -22,32 +24,7 @@ define(function (require) {
             var keys = Object.keys(field.mapping);
             if (keys.length === 0 || (name[0] === '_') && !_.contains(config.get('metaFields'), name)) return;
 
-            var mapping = _.cloneDeep(field.mapping[keys.shift()]);
-            mapping.type = castMappingType(mapping.type);
-
-            // Override the mapping, even if elasticsearch says otherwise
-            var mappingOverrides = {
-              _id: {
-                indexed: true
-              },
-              _timestamp: {
-                indexed: true,
-                type: 'date'
-              }
-            };
-
-            if (mappingOverrides[name]) {
-              _.merge(mapping, mappingOverrides[name]);
-            }
-
-            if (!mapping.index || mapping.index === 'no') {
-              // elasticsearch responds with false sometimes and 'no' others
-              mapping.indexed = false;
-            } else {
-              mapping.indexed = true;
-            }
-
-            mapping.analyzed = mapping.index === 'analyzed' ? true : false;
+            var mapping = mapField(field, name);
 
             if (fields[name]) {
               if (fields[name].type !== mapping.type
