@@ -13,7 +13,7 @@ define(function (require) {
   require('components/timepicker/timepicker');
   require('directives/fixed_scroll');
   require('directives/validate_json');
-  require('directives/validate_query');
+  require('components/validate_query/validate_query');
   require('filters/moment');
   require('components/courier/courier');
   require('components/index_patterns/index_patterns');
@@ -49,6 +49,7 @@ define(function (require) {
   app.controller('discover', function ($scope, config, courier, $route, $window, Notifier, AppState, timefilter, Promise, Private, kbnUrl) {
 
     var Vis = Private(require('components/vis/vis'));
+    var docTitle = Private(require('components/doc_title/doc_title'));
     var SegmentedFetch = Private(require('plugins/discover/_segmented_fetch'));
 
     var HitSortFn = Private(require('plugins/discover/_hit_sort_fn'));
@@ -78,8 +79,11 @@ define(function (require) {
     // Manage state & url state
     var initialQuery = $scope.searchSource.get('query');
 
-    var defaultFormat = courier.indexPatterns.fieldFormats.defaultByType.string;
+    if (savedSearch.id) {
+      docTitle.change(savedSearch.title);
+    }
 
+    var defaultFormat = courier.indexPatterns.fieldFormats.defaultByType.string;
 
     var stateDefaults = {
       query: initialQuery || '',
