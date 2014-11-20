@@ -1,0 +1,7 @@
+<dl class="source truncate-by-height">
+  <% _.each(source, function (value, field) { %>
+    <dt><%= field %>:</dt>
+    <dd><%= value %></dd>
+    <%= ' ' %>
+  <% }); %>
+</dl>

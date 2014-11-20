@@ -1,7 +1,7 @@
 <div dashboard-app class="app-container dashboard-container">
   <nav ng-show="!appEmbedded" class="navbar navbar-default navbar-static-top">
     <navbar>
-      <span class="name">
+      <span class="name" ng-if="dash.id">
         {{dash.title}}
       </span>
 

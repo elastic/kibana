@@ -25,9 +25,13 @@
           </td>
 
           <td>
-            <i bo-show="!mapping[field]"
+            <i bo-show="!mapping[field] && !showArrayInObjectsWarning(row, field)"
               tooltip-placement="top"
               tooltip="No cached mapping for this field. Refresh your mapping from the Settings > Indices page"
+              class="fa fa-warning text-color-warning ng-scope"></i>
+            <i bo-show="showArrayInObjectsWarning(row, field)"
+              tooltip-placement="top"
+              tooltip="Objects in arrays are not well supported."
               class="fa fa-warning text-color-warning ng-scope"></i>
             <span class="discover-table-details-value">{{row._formatted[field] || row[field]}}</span>
           </td>

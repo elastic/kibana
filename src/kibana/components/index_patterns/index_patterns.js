@@ -2,7 +2,7 @@ define(function (require) {
   var module = require('modules').get('kibana/index_patterns');
 
   module.service('indexPatterns', function (configFile, es, Notifier, Private, Promise) {
-    var indexPatterns = this;
+    var self = this;
     var _ = require('lodash');
     var errors = require('errors');
 
@@ -11,19 +11,19 @@ define(function (require) {
 
     var notify = new Notifier({ location: 'IndexPatterns Service'});
 
-    indexPatterns.get = function (id) {
-      if (!id) return indexPatterns.make();
+    self.get = function (id) {
+      if (!id) return self.make();
 
       var cache = patternCache.get(id);
-      return cache || patternCache.set(id, indexPatterns.make(id));
+      return cache || patternCache.set(id, self.make(id));
     };
 
-    indexPatterns.make = function (id) {
+    self.make = function (id) {
       return (new IndexPattern(id)).init();
     };
 
-    indexPatterns.delete = function (pattern) {
-      indexPatterns.getIds.clearCache();
+    self.delete = function (pattern) {
+      self.getIds.clearCache();
       patternCache.delete(pattern.id);
       return es.delete({
         index: configFile.kibanaIndex,
@@ -32,16 +32,16 @@ define(function (require) {
       });
     };
 
-    indexPatterns.errors = {
+    self.errors = {
       MissingIndices: errors.IndexPatternMissingIndices
     };
 
-    indexPatterns.cache = patternCache;
-    indexPatterns.getIds = Private(require('components/index_patterns/_get_ids'));
-    indexPatterns.intervals = Private(require('components/index_patterns/_intervals'));
-    indexPatterns.mapper = Private(require('components/index_patterns/_mapper'));
-    indexPatterns.patternToWildcard = Private(require('components/index_patterns/_pattern_to_wildcard'));
-    indexPatterns.fieldFormats = Private(require('components/index_patterns/_field_formats'));
-    indexPatterns.IndexPattern = IndexPattern;
+    self.cache = patternCache;
+    self.getIds = Private(require('components/index_patterns/_get_ids'));
+    self.intervals = Private(require('components/index_patterns/_intervals'));
+    self.mapper = Private(require('components/index_patterns/_mapper'));
+    self.patternToWildcard = Private(require('components/index_patterns/_pattern_to_wildcard'));
+    self.fieldFormats = Private(require('components/index_patterns/_field_formats'));
+    self.IndexPattern = IndexPattern;
   });
 });
