@@ -121,7 +121,7 @@ define(function (require) {
           .attr('height', cellHeight)
           .style('fill', function (d) {
             if (d.y !== 0) {
-              return quantizeColor(d.y);
+              return quantileColor(d.y);
             }
             return '#f2f2f2';
           });
