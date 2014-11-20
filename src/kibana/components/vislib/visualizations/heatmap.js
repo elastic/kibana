@@ -41,6 +41,8 @@ define(function (require) {
       var elHeight = this._attr.height = $elem.height();
       var minWidth = 60;
       var minHeight = 60;
+      var tooltip = this.tooltip;
+      var isTooltip = this._attr.addTooltip;
 
       return function (selection) {
         selection.each(function (data) {
@@ -79,21 +81,35 @@ define(function (require) {
           var svg = div.append('svg')
           .attr('width', width)
           .attr('height', height + margin.top + margin.bottom)
+          //.style('overflow', 'visible')
           .append('g')
           .attr('transform', 'translate(0,' + margin.top + ')');
 
-          var rowLabels = svg.selectAll('.rowLabel')
-            .data(data.series)
-            .enter()
-            .append('text')
-            .text(function (d) { return d.label; })
-            .attr('x', 0)
-            .attr('y', function (d, i) { return i * gridHeight; })
-            .style('text-anchor', 'end')
-            .attr('transform', 'translate(-6,' + gridHeight / 1.5 + ')')
-            .attr('class', function (d) {
-              return d.label;
-            });
+          //var rowLabels = svg.selectAll('.rowLabel')
+          //.data(data.series)
+          //.enter()
+          //.append('text')
+          //.text(function (d) { return d.label; })
+          //.attr('x', 0)
+          //.attr('y', function (d, i) { return i * gridHeight; })
+          //.style('text-anchor', 'end')
+          //.attr('transform', 'translate(-6,' + gridHeight / 1.5 + ')')
+          //.attr('class', function (d) {
+          //  return d.label;
+          //});
+
+          //var colLabels = svg.selectAll('.colLabel')
+          //.data(data.series[0].values)
+          //.enter()
+          //.append('text')
+          //.text(function (d) { return d.x; })
+          //.attr('x', function (d, i) { return i * gridWidth; })
+          //.attr('y', height + margin.top + margin.bottom)
+          //.style('text-anchor', 'middle')
+          //.attr('transform', 'translate(' + gridWidth / 2 + ', 0)')
+          //.attr('class', function (d) {
+          //  return d.x;
+          //});
 
           var layer = svg.selectAll('.layer')
           .data(data.series)
@@ -128,7 +144,6 @@ define(function (require) {
           .style('fill', function (d) {
             return colorScale(d.y);
           });
-
 
           return svg;
         });

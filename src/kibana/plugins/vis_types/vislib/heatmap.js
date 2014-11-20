@@ -9,6 +9,7 @@ define(function (require) {
       icon: 'fa-th',
       params: {
         defaults: {
+          addTooltip: true
         }
       },
       schemas: new Schemas([
