@@ -21,20 +21,23 @@ kbn-table,tbody[kbn-rows] {
     padding-right: 15px;
   }
 
-  .source {
-    line-height: 1.8em;
+  dl.source {
+    line-height: 2em;
+    margin-bottom: 0;
 
-    .source-field {
+    dt {
+      display: inline;
       background: @gray-lighter;
       padding: 0.15em 0.2em 0.15em 0.7em;
+      margin-right: 0.3em;
       font-weight: bold;
-      margin: 0 0 0 5px;
-      color: dimgray;
-      font-size: 0.85em;
+      color: #5F5F5F;
+      font-family: monospace;
     }
 
-    .source-value {
-      padding: 0 5px;
+    dd {
+      display: inline;
+      margin-right: 0.75em;
     }
   }
 }
