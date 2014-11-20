@@ -3,11 +3,16 @@ module.exports = function (grunt) {
     options: {
       version: '^1.4',
       plugins: [
-        'mobz/elasticsearch-head'
+        'elasticsearch/marvel/latest'
       ],
       config: {
         network: {
           host: '127.0.0.1'
+        },
+        marvel: {
+          agent: {
+            enabled: false
+          }
         }
       }
     },
