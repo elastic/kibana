@@ -1,6 +1,7 @@
 define(function (require) {
   return ['Date Histogram Agg', function () {
     var _ = require('lodash');
+    var moment = require('moment');
 
     describe('params', function () {
       var paramWriter;
@@ -48,6 +49,44 @@ define(function (require) {
           paramWriter.vis.aggs.bySchemaGroup.metrics[0].type.name = 'sum';
           output = paramWriter.write({ interval: 'second' });
           expect(output).to.have.property('metricScale');
+        });
+      });
+
+      describe('extended_bounds', function () {
+        it('should write a long value if a moment passed in', function () {
+          var then = moment(0);
+          var now = moment(500);
+          var output = paramWriter.write({
+            extended_bounds: {
+              min: then,
+              max: now
+            }
+          });
+
+          expect(typeof output.params.extended_bounds.min).to.be('number');
+          expect(typeof output.params.extended_bounds.max).to.be('number');
+          expect(output.params.extended_bounds.min).to.be(then.valueOf());
+          expect(output.params.extended_bounds.max).to.be(now.valueOf());
+
+
+        });
+
+        it('should write a long if a long is passed', function () {
+          var then = 0;
+          var now = 500;
+          var output = paramWriter.write({
+            extended_bounds: {
+              min: then,
+              max: now
+            }
+          });
+
+          expect(typeof output.params.extended_bounds.min).to.be('number');
+          expect(typeof output.params.extended_bounds.max).to.be('number');
+          expect(output.params.extended_bounds.min).to.be(then.valueOf());
+          expect(output.params.extended_bounds.max).to.be(now.valueOf());
+
+
         });
       });
     });
