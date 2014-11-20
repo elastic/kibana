@@ -45,32 +45,45 @@ define(function (require) {
       var isTooltip = this._attr.addTooltip;
 
       return function (selection) {
+
         selection.each(function (data) {
+          var valRange = self._attr.valRange = _.chain(data.series)
+            .pluck('values')
+            .flatten()
+            .pluck('y')
+            .without(0)
+            .value();
+          var valExtents = self._attr.valExtents = [_.min(valRange), _.max(valRange)];
+          //console.log(valRange);
+          //console.log(valExtents);
+
+          var colors = ['#d1e8c9', '#9fda9a', '#5dcb6c', '#2fa757', '#1f7f52', '#125946'];
+          function quantizeColor(val) {
+            var colorScale = d3.scale.quantize()
+              .range(_.range(colors.length))
+              .domain(self._attr.valExtents);
+            return colors[colorScale(val)];
+          }
+          function quantileColor(val) {
+            var colorScale = d3.scale.quantile()
+              .range(colors)
+              .domain(self._attr.valRange);
+            return colorScale(val);
+          }
+
           var width = elWidth;
           var height = elHeight - margin.top - margin.bottom;
           var widthN = data.series[0].values.length;
           var heightN = data.series.length;
+
+          // make gap and radius configurable
+          // and remove stroke for crisper render
+          var gap = 1;
+          var radius = 1;
           var gridWidth = Math.floor(width / widthN);
-          var gridHeight = (height / heightN);
-          var buckets = 9;
-          var colors = [
-            '#ffffd9',
-            '#edf8b1',
-            '#c7e9b4',
-            '#7fcdbb',
-            '#41b6c4',
-            '#1d91c0',
-            '#225ea8',
-            '#253494',
-            '#081d58'
-          ];
-          var colorScale = d3.scale.quantile()
-          .domain([0, buckets - 1, d3.max(data.series, function (obj) {
-            return d3.max(obj.values, function (d) {
-              return d.y;
-            });
-          })])
-          .range(colors);
+          var gridHeight = Math.floor(height / heightN);
+          var cellWidth = gridWidth - gap;
+          var cellHeight = gridHeight - gap;
 
           if (width < minWidth || height < minHeight) {
             throw new errors.ContainerTooSmall();
@@ -85,31 +98,31 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(0,' + margin.top + ')');
 
-          //var rowLabels = svg.selectAll('.rowLabel')
-          //.data(data.series)
-          //.enter()
-          //.append('text')
-          //.text(function (d) { return d.label; })
-          //.attr('x', 0)
-          //.attr('y', function (d, i) { return i * gridHeight; })
-          //.style('text-anchor', 'end')
-          //.attr('transform', 'translate(-6,' + gridHeight / 1.5 + ')')
-          //.attr('class', function (d) {
-          //  return d.label;
-          //});
+          var rowLabels = svg.selectAll('.rowLabel')
+          .data(data.series)
+          .enter()
+          .append('text')
+          .text(function (d) { return d.label; })
+          .attr('x', 0)
+          .attr('y', function (d, i) { return i * gridHeight; })
+          .style('text-anchor', 'end')
+          .attr('transform', 'translate(-6,' + gridHeight / 1.5 + ')')
+          .attr('class', function (d) {
+            return d.label;
+          });
 
-          //var colLabels = svg.selectAll('.colLabel')
-          //.data(data.series[0].values)
-          //.enter()
-          //.append('text')
-          //.text(function (d) { return d.x; })
-          //.attr('x', function (d, i) { return i * gridWidth; })
-          //.attr('y', height + margin.top + margin.bottom)
-          //.style('text-anchor', 'middle')
-          //.attr('transform', 'translate(' + gridWidth / 2 + ', 0)')
-          //.attr('class', function (d) {
-          //  return d.x;
-          //});
+          var colLabels = svg.selectAll('.colLabel')
+          .data(data.series[0].values)
+          .enter()
+          .append('text')
+          .text(function (d) { return d.x; })
+          .attr('x', function (d, i) { return i * gridWidth; })
+          .attr('y', height + margin.top + margin.bottom)
+          .style('text-anchor', 'middle')
+          .attr('transform', 'translate(' + gridWidth / 2 + ', 0)')
+          .attr('class', function (d) {
+            return d.x;
+          });
 
           var layer = svg.selectAll('.layer')
           .data(data.series)
@@ -124,25 +137,22 @@ define(function (require) {
             d.values.forEach(function (obj) {
               obj.labelIndex = i;
             });
-
             return d.values;
           })
           .enter()
           .append('rect')
           .attr('x', function (d, i) { return (i) * gridWidth; })
           .attr('y', function (d) { return (d.labelIndex) * gridHeight; })
-          .attr('rx', 4)
-          .attr('ry', 4)
+          .attr('rx', radius)
+          .attr('ry', radius)
           .attr('class', 'rect bordered')
-          .attr('width', gridWidth)
-          .attr('height', gridHeight)
-          .style('fill', colors[0])
-          .style('stroke', '#ddd')
-          .style('stroke-width', 0.5);
-
-          heatMap.transition().duration(1000)
+          .attr('width', cellWidth)
+          .attr('height', cellHeight)
           .style('fill', function (d) {
-            return colorScale(d.y);
+            if (d.y !== 0) {
+              return quantileColor(d.y);
+            }
+            return '#f2f2f2';
           });
 
           return svg;
