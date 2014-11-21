@@ -56,7 +56,26 @@ define(function (require) {
         vis = null;
       });
 
-      describe('stackData method', function () {});
+      describe('stackData method', function () {
+        var stackedData;
+        var isStacked;
+
+        beforeEach(function () {
+          vis.handler.charts.forEach(function (chart) {
+            stackedData = chart.stackData(chart.chartData);
+
+            isStacked = stackedData.every(function (arr) {
+              return arr.every(function (d) {
+                return _.isNumber(d.y0);
+              });
+            });
+          });
+        });
+
+        it('should append a d.y0 key to the data object', function () {
+          expect(isStacked).to.be(true);
+        });
+      });
 
       describe('addPath method', function () {
         it('should append a area paths', function () {
