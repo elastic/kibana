@@ -156,10 +156,17 @@ define(function (require) {
           expect(posTT(null, $(), $()) === void 0).to.be(true);
         });
 
-        function check(xPercent, yPercent/*, directions... */) {
+        function check(xPercent, yPercent/*, prev, directions... */) {
           var directions = _.rest(arguments, 2);
           var event = makeEvent(xPercent, yPercent);
-          var placement = posTT($window, $chart, $tooltip, $sizer, event);
+          var placement = posTT({
+            $window: $window,
+            $chart: $chart,
+            $sizer: $sizer,
+            event: event,
+            $el: $tooltip,
+            prev: _.isObject(directions[0]) ? directions.shift() : null
+          });
 
           expect(placement).to.have.property('top').and.property('left');
 
@@ -179,6 +186,8 @@ define(function (require) {
               return;
             }
           });
+
+          return placement;
         }
 
         describe('calculates placement of the tooltip properly', function () {
@@ -200,6 +209,18 @@ define(function (require) {
 
           it('mouse is in the bottom left', function () {
             check(0.10, 0.99, 'top', 'right');
+          });
+        });
+
+        describe('maintain the direction of the tooltip on reposition', function () {
+          it('mouse moves from the top right to the middle', function () {
+            var pos = check(0.99, 0.10, 'bottom', 'left');
+            check(0.50, 0.50, pos, 'bottom', 'left');
+          });
+
+          it('mouse moves from the bottom left to the middle', function () {
+            var pos = check(0.10, 0.99, 'top', 'right');
+            check(0.50, 0.50, pos, 'top', 'right');
           });
         });
       });
