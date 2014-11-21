@@ -7,7 +7,6 @@ define(function (require) {
   .directive('kbnAggTable', function ($filter, config, Private, compileRecursiveDirective) {
     var _ = require('lodash');
 
-    var tabifyAggResponse = Private(require('components/agg_response/tabify/tabify'));
     var orderBy = $filter('orderBy');
 
     return {

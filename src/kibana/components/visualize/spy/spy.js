@@ -17,7 +17,6 @@ define(function (require) {
         link: function ($scope, $el) {
           var $container = $el.find('.visualize-spy-container');
           var fullPageSpy = false;
-          // $scope.spyMode = null; // inherited from the parent
           $scope.modes = modes;
 
           $scope.toggleDisplay = function () {
