@@ -1,4 +1,5 @@
 define(function (require) {
+  require('components/paginated_table/paginated_table');
   require('services/compile_recursive_directive');
   require('css!components/agg_table/agg_table.css');
 
