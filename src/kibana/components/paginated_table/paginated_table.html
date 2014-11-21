@@ -1,0 +1,51 @@
+<!--
+USAGE
+
+<paginated-table
+  rows="table.rows"
+  columns="table.cols"
+    { title: 'whatever', class: 'optional list of classes', }
+  per-page="10"
+  sort-handler="someHandler"
+  show-selector="true (optional)">
+</paginated-table>
+-->
+
+<paginate
+  ng-if="rows.length"
+  list="rows"
+  per-page="paginatedTable.perPage"
+  per-page-prop="paginatedTable.perPageProp"
+  class="agg-table">
+  <h2 ng-if="sortHandler">Handler perPage:{{ perPage }} / perPageProp:{{ perPageProp }}</h2>
+  <h2 ng-if="!sortHandler">No Handler perPage:{{ perPage }} / perPageProp:{{ perPageProp }}</h2>
+  <div class="agg-table-paginated">
+    <table class="table table-condensed">
+      <thead>
+        <tr bindonce>
+          <th
+            ng-repeat="col in columns"
+            ng-click="paginatedTable.sortColumn(col)"
+            class="{{ col.class }}">
+            <span bo-text="col.title"></span>
+            <i
+              class="fa"
+              ng-if="sortHandler"
+              ng-class="{
+                'fa-sort-asc': paginatedTable.sort.columnName === col.title && paginatedTable.sort.direction === 'asc',
+                'fa-sort-desc': paginatedTable.sort.columnName === col.title && !paginatedTable.sort.direction === 'asc',
+                'fa-sort': !paginatedTable.sort.direction || paginatedTable.sort.columnName !== col.title
+              }">
+            </i>
+          </th>
+        </tr>
+      </thead>
+      <tbody kbn-rows="page" kbn-rows-min="perPage"></tbody>
+    </table>
+  </div>
+
+  <!-- auto-inserted by the paginate directive... -->
+  <!-- <paginate-controls></paginate-controls> -->
+  <div class="pagination-container" ng-transclude></div>
+
+</paginate>
