@@ -20,6 +20,11 @@ define(function (require) {
     return Notifier;
   });
 
+  module.run(function ($timeout) {
+    // provide alternate methods for setting timeouts, which will properly trigger digest cycles
+    rootNotifier._setTimerFns($timeout, $timeout.cancel);
+  });
+
   /**
    * Global Angular exception handler (NOT JUST UNCAUGHT EXCEPTIONS)
    */
