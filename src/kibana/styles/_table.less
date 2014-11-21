@@ -12,36 +12,26 @@ kbn-table,tbody[kbn-rows] {
     }
   }
 
-  tr.even td {
-    background-color: #f1f1f1;
-  }
-
   td.numeric-value {
     text-align: right;
     padding-right: 15px;
   }
 
   dl.source {
-    line-height: 2em;
     margin-bottom: 0;
+    line-height: 2em;
 
     dt {
       display: inline;
-      background: #ECECEC;
-      padding: 0.15em 0.2em 0.15em 0.7em;
-      margin-right: 0.3em;
-      font-weight: bold;
-      color: #5F5F5F;
+      background: @gray-lighter;
+      padding: @padding-xs-vertical @padding-xs-horizontal;
+      margin-right: @padding-xs-horizontal;
       font-family: monospace;
     }
 
     dd {
       display: inline;
-      margin-right: 0.75em;
     }
   }
 
-  td em {
-    background-color: yellow;
-  }
 }
