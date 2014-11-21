@@ -1,8 +1,5 @@
-define(function (require) {
-  var _ = require('lodash');
-
+define(function () {
   return function addWordBreaks(text, minLineLength) {
-    text = _.escape(text);
     var lineSize = 0;
     var newText = '';
 

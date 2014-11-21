@@ -5,6 +5,9 @@ define(function (require) {
   var noWhiteSpace = require('utils/no_white_space');
   var module = require('modules').get('app/discover');
 
+  require('components/highlight/highlight');
+  require('filters/trust_as_html');
+
   // guestimate at the minimum number of chars wide cells in the table should be
   var MIN_LINE_LENGTH = 20;
 
@@ -16,7 +19,7 @@ define(function (require) {
    * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
    * ```
    */
-  module.directive('kbnTableRow', function ($compile, config) {
+  module.directive('kbnTableRow', function ($compile, config, highlightFilter) {
     var openRowHtml = require('text!plugins/discover/partials/table_row/open.html');
     var detailsHtml = require('text!plugins/discover/partials/table_row/details.html');
     var cellTemplate = _.template(require('text!plugins/discover/partials/table_row/cell.html'));
@@ -106,7 +109,7 @@ define(function (require) {
           createSummaryRow($scope.row, $scope.row._id);
         });
 
-        $scope.$watch('timefield', function () {
+        $scope.$watchMulti(['timefield', 'row.highlight'], function () {
           createSummaryRow($scope.row, $scope.row._id);
         });
 
@@ -128,9 +131,10 @@ define(function (require) {
             var formatted;
             if (column === '_source') {
               formatted = sourceTemplate({
-                source: _.mapValues(row._formatted, function (val) {
-                  return addWordBreaks(val, MIN_LINE_LENGTH);
-                })
+                source: _.mapValues(row._formatted, function (val, field) {
+                  return _displayField(row, field, false);
+                }),
+                highlight: row.highlight
               });
             } else {
               formatted = _displayField(row, column, true);
@@ -177,6 +181,7 @@ define(function (require) {
          */
         function _displayField(row, field, breakWords) {
           var text = _getValForField(row, field);
+          text = highlightFilter(text, row.highlight && row.highlight[field]);
 
           if (breakWords) {
             text = addWordBreaks(text, MIN_LINE_LENGTH);

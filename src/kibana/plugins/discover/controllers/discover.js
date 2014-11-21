@@ -19,6 +19,7 @@ define(function (require) {
   require('components/index_patterns/index_patterns');
   require('components/state_management/app_state');
   require('services/timefilter');
+  require('components/highlight/highlight_tags');
 
   require('plugins/discover/directives/table');
 
@@ -46,7 +47,7 @@ define(function (require) {
     }
   });
 
-  app.controller('discover', function ($scope, config, courier, $route, $window, Notifier, AppState, timefilter, Promise, Private, kbnUrl) {
+  app.controller('discover', function ($scope, config, courier, $route, $window, Notifier, AppState, timefilter, Promise, Private, kbnUrl, highlightTags) {
 
     var Vis = Private(require('components/vis/vis'));
     var docTitle = Private(require('components/doc_title/doc_title'));
@@ -443,6 +444,11 @@ define(function (require) {
         return sort;
       })
       .query(!$state.query ? null : $state.query)
+      .highlight({
+        pre_tags: [highlightTags.pre],
+        post_tags: [highlightTags.post],
+        fields: {'*': {}}
+      })
       .set('filter', $state.filters || []);
 
       // get the current indexPattern
