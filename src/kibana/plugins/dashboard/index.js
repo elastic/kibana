@@ -88,7 +88,7 @@ define(function (require) {
 
           var docTitle = Private(require('components/doc_title/doc_title'));
           if (dash.id) {
-            docTitle.change($scope.$eval('dash.title'));
+            docTitle.change(dash.title);
           }
 
           $scope.$emit('application.load');
