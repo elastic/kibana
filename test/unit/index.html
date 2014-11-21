@@ -54,6 +54,7 @@
         urlArgs: COVERAGE ? 'instrument=true' : void 0
       });
 
+
       function setupCoverage(done) {
         document.title = document.title.replace('Tests', 'Coverage');
         require([
@@ -85,6 +86,11 @@
 
       function loadSpecs(specListJson) {
         var deps = JSON.parse(specListJson);
+        // Necessary to append file type otherwise
+        // it is interpreted incorrectly while running on Windows
+        for(var i = 0; i < deps.length; i++){
+          deps[i] += '.js';
+        }
         deps.unshift('sinon/sinon');
         deps.unshift('kibana');
         require(deps, bootstrap);
