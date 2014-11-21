@@ -5,4 +5,10 @@
   per-page="perPage"
   sort-handler="aggTable.cycleSort">
 
+  <div class="agg-table-controls">
+    <a class="small" ng-click="aggTable.exportAsCsv()">
+      Export <i class="fa fa-download"></i>
+    </a>
+    <paginate-controls></paginate-controls>
+  </div>
 </paginated-table>

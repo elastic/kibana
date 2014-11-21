@@ -12,7 +12,6 @@ define(function (require) {
         rows: '=',
         columns: '=',
         perPage: '=?',
-        perPageProp: '=?',
         sortHandler: '=?',
         showSelector: '=?'
       },
@@ -23,8 +22,6 @@ define(function (require) {
           columnName: null,
           direction: null
         };
-
-        self.perPage = _.parseInt(self.perPage) || $scope[self.perPageProp];
 
         self.sortColumn = function (col) {
           if (!$scope.sortHandler) return;
@@ -50,36 +47,6 @@ define(function (require) {
           }
           self.sort.columnName = columnName;
         };
-
-        // $scope.$watchMulti([
-        //   'rows',
-        //   'columns',
-        //   'paginatedTable.sort.asc',
-        //   'paginatedTable.sort.col'
-        // ], function () {
-        //   if (!$scope.rows) return;
-
-        //   var formatters = $scope.columns.map(function (col) {
-        //     return table.fieldFormatter(col);
-        //   });
-
-        //   // sort the row values, not formatted
-        //   if (self.sort) {
-        //     $scope.formattedRows = orderBy(table.rows, self.sort.getter, !self.sort.asc);
-        //   } else {
-        //     $scope.formattedRows = null;
-        //   }
-
-        //   // format all row values
-        //   $scope.formattedRows = ($scope.formattedRows || table.rows).map(function (row) {
-        //     return row.map(function (cell, i) {
-        //       return formatters[i](cell);
-        //     });
-        //   });
-
-        //   // update the csv file's title
-        //   self.csv.filename = (table.title() || 'table') + '.csv';
-        // });
       }
     };
   });
