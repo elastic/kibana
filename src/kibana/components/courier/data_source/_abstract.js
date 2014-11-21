@@ -264,6 +264,8 @@ define(function (require) {
               'match_all': {}
             };
           }
+          flatState.body.fields = ['*', '_source'];
+
 
           /**
            * Create a filter that can be reversed for filters with negate set
