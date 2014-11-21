@@ -87,11 +87,9 @@ define(function (require) {
           updateQueryOnRootSource();
 
           var docTitle = Private(require('components/doc_title/doc_title'));
-          $scope.$watch('dash.title', function (title) {
-            if (dash.id) {
-              docTitle.change(title);
-            }
-          });
+          if (dash.id) {
+            docTitle.change($scope.$eval('dash.title'));
+          }
 
           $scope.$emit('application.load');
         }
