@@ -21,8 +21,8 @@ define(function (require) {
 
         // Replace all highlight tags with proper html tags
         var tagged = section
-          .split(highlightTags.pre).join('<em>')
-          .split(highlightTags.post).join('</em>');
+          .split(highlightTags.pre).join('<mark>')
+          .split(highlightTags.post).join('</mark>');
 
         // Replace all instances of the untagged string with the properly tagged string
         formatted = formatted.split(untagged).join(tagged);

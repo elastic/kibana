@@ -28,8 +28,8 @@ define(function (require) {
         tags.pre + 'hamburger' + tags.post + ' alcatra cupim. Salami capicola boudin pork belly shank picanha.'
       ];
       var result = filter(text, highlights);
-      expect(result.indexOf('<em>hamburger</em>')).to.be.greaterThan(-1);
-      expect(result.split('<em>hamburger</em>').length).to.be(text.split('hamburger').length);
+      expect(result.indexOf('<mark>hamburger</mark>')).to.be.greaterThan(-1);
+      expect(result.split('<mark>hamburger</mark>').length).to.be(text.split('hamburger').length);
     });
 
     it('should highlight multiple results', function () {
@@ -39,8 +39,8 @@ define(function (require) {
         'Chicken' + tags.post + ' cow beef picanha. Picanha'
       ];
       var result = filter(text, highlights);
-      expect(result.indexOf('<em>Chicken</em>')).to.be.greaterThan(-1);
-      expect(result.split('<em>Chicken</em>').length).to.be(text.split('Chicken').length);
+      expect(result.indexOf('<mark>Chicken</mark>')).to.be.greaterThan(-1);
+      expect(result.split('<mark>Chicken</mark>').length).to.be(text.split('Chicken').length);
     });
 
     it('should highlight multiple hits in a result', function () {
@@ -55,8 +55,8 @@ define(function (require) {
           'belly shank picanha.'
       ];
       var result = filter(text, highlights);
-      expect(result.indexOf('<em>pork</em>')).to.be.greaterThan(-1);
-      expect(result.split('<em>pork</em>').length).to.be(text.split('pork').length);
+      expect(result.indexOf('<mark>pork</mark>')).to.be.greaterThan(-1);
+      expect(result.split('<mark>pork</mark>').length).to.be(text.split('pork').length);
     });
 
     it('should accept an object and return a string containing its properties', function () {
