@@ -228,6 +228,11 @@
     .flex-direction(column);
     overflow: auto;
 
+    &.embeded {
+      .flex-shrink(1);
+      .flex-basis(100%);
+    }
+
     // overrided for tablet and desktop
     @media (min-width: @screen-md-min) {
       .flex-shrink(1);

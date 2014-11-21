@@ -85,7 +85,7 @@
       reset="resetEditableVis();">
     </vis-editor-sidebar>
 
-    <div class="vis-editor-canvas">
+    <div class="vis-editor-canvas" ng-class="{ embeded: appEmbedded }">
       <h3 class="vis-editor-canvas-title" ng-if="savedVis.id" ng-bind="savedVis.title"></h3>
       <visualize vis="vis" editable-vis="editableVis"  search-source="savedVis.searchSource"></visualize>
     </div>
