@@ -86,7 +86,7 @@
     </vis-editor-sidebar>
 
     <div class="vis-editor-canvas">
-      <h3 class="vis-editor-canvas-title" ng-if="savedVis.id" ng-bind="savedVis.title"></h3>
+      <h3 class="vis-editor-canvas-title" ng-if="savedVis.id" bindonce bo-bind="savedVis.title"></h3>
       <visualize vis="vis" editable-vis="editableVis"  search-source="savedVis.searchSource"></visualize>
     </div>
   </div>
