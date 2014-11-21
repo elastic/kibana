@@ -54,9 +54,6 @@ define(function (require) {
             .without(0)
             .value();
           var valExtents = self._attr.valExtents = [_.min(valRange), _.max(valRange)];
-          //console.log(valRange);
-          //console.log(valExtents);
-
           var colors = ['#d1e8c9', '#9fda9a', '#5dcb6c', '#2fa757', '#1f7f52', '#125946'];
           function quantizeColor(val) {
             var colorScale = d3.scale.quantize()
@@ -98,31 +95,31 @@ define(function (require) {
           .append('g')
           .attr('transform', 'translate(0,' + margin.top + ')');
 
-          var rowLabels = svg.selectAll('.rowLabel')
-          .data(data.series)
-          .enter()
-          .append('text')
-          .text(function (d) { return d.label; })
-          .attr('x', 0)
-          .attr('y', function (d, i) { return i * gridHeight; })
-          .style('text-anchor', 'end')
-          .attr('transform', 'translate(-6,' + gridHeight / 1.5 + ')')
-          .attr('class', function (d) {
-            return d.label;
-          });
-
-          var colLabels = svg.selectAll('.colLabel')
-          .data(data.series[0].values)
-          .enter()
-          .append('text')
-          .text(function (d) { return d.x; })
-          .attr('x', function (d, i) { return i * gridWidth; })
-          .attr('y', height + margin.top + margin.bottom)
-          .style('text-anchor', 'middle')
-          .attr('transform', 'translate(' + gridWidth / 2 + ', 0)')
-          .attr('class', function (d) {
-            return d.x;
-          });
+          // var rowLabels = svg.selectAll('.rowLabel')
+          // .data(data.series)
+          // .enter()
+          // .append('text')
+          // .text(function (d) { return d.label; })
+          // .attr('x', 0)
+          // .attr('y', function (d, i) { return i * gridHeight; })
+          // .style('text-anchor', 'end')
+          // .attr('transform', 'translate(-6,' + gridHeight / 1.5 + ')')
+          // .attr('class', function (d) {
+          //   return d.label;
+          // });
+          //
+          // var colLabels = svg.selectAll('.colLabel')
+          // .data(data.series[0].values)
+          // .enter()
+          // .append('text')
+          // .text(function (d) { return d.x; })
+          // .attr('x', function (d, i) { return i * gridWidth; })
+          // .attr('y', height + margin.top + margin.bottom)
+          // .style('text-anchor', 'middle')
+          // .attr('transform', 'translate(' + gridWidth / 2 + ', 0)')
+          // .attr('class', function (d) {
+          //   return d.x;
+          // });
 
           var layer = svg.selectAll('.layer')
           .data(data.series)
@@ -136,6 +133,7 @@ define(function (require) {
           .data(function (d, i) {
             d.values.forEach(function (obj) {
               obj.labelIndex = i;
+              obj.label = d.label;
             });
             return d.values;
           })
@@ -151,9 +149,14 @@ define(function (require) {
           .style('fill', function (d) {
             if (d.y !== 0) {
               return quantileColor(d.y);
+              // return quantizeColor(d.y);
             }
             return '#f2f2f2';
           });
+
+          if (isTooltip) {
+            heatMap.call(tooltip.render());
+          }
 
           return svg;
         });
