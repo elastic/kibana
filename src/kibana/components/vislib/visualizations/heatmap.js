@@ -39,8 +39,8 @@ define(function (require) {
       var margin = this._attr.margin;
       var elWidth = this._attr.width = $elem.width();
       var elHeight = this._attr.height = $elem.height();
-      var minWidth = 60;
-      var minHeight = 60;
+      var minWidth = 40;
+      var minHeight = 40;
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
 
@@ -116,7 +116,7 @@ define(function (require) {
           })
           .enter()
           .append('rect')
-          .attr('x', function (d, i) { return (i) * gridWidth; })
+          .attr('x', function (d, i) { return 1 + i * gridWidth; })
           .attr('y', function (d) { return (d.labelIndex) * gridHeight; })
           .attr('rx', radius)
           .attr('ry', radius)
@@ -125,9 +125,13 @@ define(function (require) {
           .attr('height', cellHeight)
           .style('fill', function (d) {
             if (d.y !== 0) {
-              return self.handler._attr.quantizeColor(d.y);
+              if (self.handler._attr.colorScaleType === 'quantize') {
+                return self.handler._attr.colorScale(d.y);
+              } else {
+                return self._attr.colors[self.handler._attr.colorScale(d.y)];
+              }
             }
-            return '#f2f2f2';
+            return self.handler._attr.zeroColor;
           });
 
           if (isTooltip) {
