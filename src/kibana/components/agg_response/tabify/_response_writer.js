@@ -60,14 +60,17 @@ define(function (require) {
     TabbedAggResponseWriter.prototype._table = function (group, agg, key) {
       var Class = (group) ? TableGroup : Table;
       var table = new Class();
+      var parent = this.splitStack[0];
 
       if (group) {
         table.aggConfig = agg;
         table.key = key;
         table.title = agg.makeLabel() + ': ' + (table.fieldFormatter()(key));
+        if (this.asAggConfigResults) {
+          table.aggConfigResult = new AggConfigResult(agg, parent.aggConfigResult, key);
+        }
       }
 
-      var parent = this.splitStack[0];
       // link the parent and child
       table.$parent = parent;
       parent.tables.push(table);
@@ -144,6 +147,7 @@ define(function (require) {
         var parent = _.findLast(this.rowBuffer, function (result) {
           return result.aggConfig.schema.group === 'buckets';
         });
+        if (!parent) parent = this.splitStack[0].aggConfigResult;
 
         value = new AggConfigResult(agg, parent, value);
       }
