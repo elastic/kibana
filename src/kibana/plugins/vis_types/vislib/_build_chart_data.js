@@ -44,9 +44,7 @@ define(function (require) {
     }
 
     function convertTable(vis, table) {
-      var converter = vis.type.responseConverter;
-      var aggConfig = table.aggConfig;
-      return converter(vis, table);
+      return vis.type.responseConverter(vis, table);
     }
   };
 });
