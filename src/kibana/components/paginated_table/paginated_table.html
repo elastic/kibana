@@ -1,6 +1,6 @@
 <paginate
-  ng-if="rows.length"
-  list="rows"
+  ng-if="sortedRows.length"
+  list="sortedRows"
   per-page-prop="perPage"
   class="agg-table">
   <div class="agg-table-paginated">
@@ -16,8 +16,8 @@
               class="fa"
               ng-class="{
                 'fa-sort-asc': paginatedTable.sort.columnName === col.title && paginatedTable.sort.direction === 'asc',
-                'fa-sort-desc': paginatedTable.sort.columnName === col.title && !paginatedTable.sort.direction === 'asc',
-                'fa-sort': !paginatedTable.sort.direction || paginatedTable.sort.columnName !== col.title
+                'fa-sort-desc': paginatedTable.sort.columnName === col.title && paginatedTable.sort.direction === 'desc',
+                'fa-sort': paginatedTable.sort.direction === null || paginatedTable.sort.columnName !== col.title
               }">
             </i>
           </th>

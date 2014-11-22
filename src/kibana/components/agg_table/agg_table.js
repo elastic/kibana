@@ -48,27 +48,6 @@ define(function (require) {
           return cls.join(' ');
         };
 
-        self.cycleSort = function (col) {
-          if (!self.sort || self.sort.col !== col) {
-            self.sort = {
-              col: col,
-              asc: true
-            };
-          } else if (self.sort.asc) {
-            self.sort.asc = false;
-          } else {
-            self.sort = null;
-          }
-
-          if (self.sort && !self.sort.getter) {
-            var colI = $scope.table.columns.indexOf(self.sort.col);
-            self.sort.getter = function (row) {
-              return row[colI];
-            };
-            if (colI === -1) self.sort = null;
-          }
-        };
-
         self.exportAsCsv = function () {
           var csv = new Blob([self.toCsv()], { type: 'text/plain' });
           self._saveAs(csv, self.csv.filename);
@@ -104,11 +83,7 @@ define(function (require) {
           }).join('');
         };
 
-        $scope.$watchMulti([
-          'table',
-          'aggTable.sort.asc',
-          'aggTable.sort.col'
-        ], function () {
+        $scope.$watch('table', function () {
           var table = $scope.table;
 
           if (!table) {
@@ -119,13 +94,6 @@ define(function (require) {
           var formatters = table.columns.map(function (col) {
             return table.fieldFormatter(col);
           });
-
-          // sort the row values, not formatted
-          if (self.sort) {
-            $scope.formattedRows = orderBy(table.rows, self.sort.getter, !self.sort.asc);
-          } else {
-            $scope.formattedRows = null;
-          }
 
           // format all row values
           $scope.formattedRows = ($scope.formattedRows || table.rows).map(function (row) {
