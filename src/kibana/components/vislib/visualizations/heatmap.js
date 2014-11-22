@@ -47,38 +47,16 @@ define(function (require) {
       return function (selection) {
 
         selection.each(function (data) {
-          var valRange = self._attr.valRange = _.chain(data.series)
-            .pluck('values')
-            .flatten()
-            .pluck('y')
-            .without(0)
-            .value();
-          var valExtents = self._attr.valExtents = [_.min(valRange), _.max(valRange)];
-          var colors = ['#d1e8c9', '#9fda9a', '#5dcb6c', '#2fa757', '#1f7f52', '#125946'];
-          function quantizeColor(val) {
-            var colorScale = d3.scale.quantize()
-              .range(_.range(colors.length))
-              .domain(self._attr.valExtents);
-            return colors[colorScale(val)];
-          }
-          function quantileColor(val) {
-            var colorScale = d3.scale.quantile()
-              .range(colors)
-              .domain(self._attr.valRange);
-            return colorScale(val);
-          }
-
           var width = elWidth;
           var height = elHeight - margin.top - margin.bottom;
           var widthN = data.series[0].values.length;
           var heightN = data.series.length;
 
-          // make gap and radius configurable
-          // and remove stroke for crisper render
+          // TODO: make gap and radius user configurable
           var gap = 1;
           var radius = 1;
-          var gridWidth = Math.floor(width / widthN);
-          var gridHeight = Math.floor(height / heightN);
+          var gridWidth = width / widthN;
+          var gridHeight = height / heightN;
           var cellWidth = gridWidth - gap;
           var cellHeight = gridHeight - gap;
 
@@ -91,7 +69,6 @@ define(function (require) {
           var svg = div.append('svg')
           .attr('width', width)
           .attr('height', height + margin.top + margin.bottom)
-          //.style('overflow', 'visible')
           .append('g')
           .attr('transform', 'translate(0,' + margin.top + ')');
 
@@ -107,7 +84,7 @@ define(function (require) {
           // .attr('class', function (d) {
           //   return d.label;
           // });
-          //
+
           // var colLabels = svg.selectAll('.colLabel')
           // .data(data.series[0].values)
           // .enter()
@@ -148,8 +125,7 @@ define(function (require) {
           .attr('height', cellHeight)
           .style('fill', function (d) {
             if (d.y !== 0) {
-              return quantileColor(d.y);
-              // return quantizeColor(d.y);
+              return self.handler._attr.quantizeColor(d.y);
             }
             return '#f2f2f2';
           });
