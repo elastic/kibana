@@ -1,6 +1,13 @@
-<div class="source truncate-by-height">
-    <% _.each(source, function (value, field) { %>
-        <span class="source-field"><%- field %>:</span>
-        <span class="source-value"><%- value %></span>
-    <% }); %>
-</div>
+<dl class="source truncate-by-height">
+  <% _.each(highlight, function (value, field) { /* show fields that match the query first */ %>
+    <dt><%= field %>:</dt>
+    <dd><%= source[field] %></dd>
+    <%= ' ' %>
+  <% }); %>
+  <% _.each(source, function (value, field) { %>
+    <% if (_.has(highlight, field)) return; %>
+    <dt><%= field %>:</dt>
+    <dd><%= value %></dd>
+    <%= ' ' %>
+  <% }); %>
+</dl>

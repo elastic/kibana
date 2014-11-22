@@ -52,10 +52,10 @@ define(function (require) {
   modules.link(kibana);
 
   kibana.load = _.onceWithCb(function (cb) {
-    require([
-      'controllers/kibana'
-    ], function loadApps() {
-      require(configFile.plugins, cb);
+    var firstLoad = [ 'plugins/kibana/index' ];
+    var thenLoad = _.difference(configFile.plugins, firstLoad);
+    require(firstLoad, function loadApps() {
+      require(thenLoad, cb);
     });
   });
 
