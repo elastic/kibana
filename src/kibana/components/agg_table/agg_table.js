@@ -33,21 +33,6 @@ define(function (require) {
           quoteValues: config.get('csv:quoteValues')
         };
 
-        self.getColumnClass = function (col, $first, $last) {
-          var cls = [];
-          var agg = $scope.table.aggConfig(col);
-
-          if ($last || (agg.schema.group === 'metrics')) {
-            cls.push('visualize-table-right');
-          }
-
-          if (!self.sort || self.sort.field !== col) {
-            cls.push('no-sort');
-          }
-
-          return cls.join(' ');
-        };
-
         self.exportAsCsv = function () {
           var csv = new Blob([self.toCsv()], { type: 'text/plain' });
           self._saveAs(csv, self.csv.filename);
@@ -88,9 +73,30 @@ define(function (require) {
 
           if (!table) {
             $scope.formattedRows = null;
+            $scope.formattedColumns = null;
             return;
           }
 
+          setFormattedRows(table);
+          setFormattedColumns(table);
+        });
+
+        function setFormattedColumns(table) {
+          $scope.formattedColumns = table.columns.map(function (col, i) {
+            var cls = [];
+            var agg = $scope.table.aggConfig(col);
+            var last = i === (table.columns.length - 1);
+
+            if (last || (agg.schema.group === 'metrics')) {
+              cls.push('visualize-table-right');
+            }
+
+            col.class =  cls.join(' ');
+            return col;
+          });
+        }
+
+        function setFormattedRows(table) {
           var formatters = table.columns.map(function (col) {
             return table.fieldFormatter(col);
           });
@@ -104,7 +110,7 @@ define(function (require) {
 
           // update the csv file's title
           self.csv.filename = (table.title() || 'table') + '.csv';
-        });
+        }
       }
     };
   });
