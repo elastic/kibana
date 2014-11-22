@@ -12,7 +12,7 @@ define(function (require) {
         chart.yAxisLabel = ''; // use the legend
       } else {
         chart.yAxisFormatter = y.agg.fieldFormatter();
-        chart.yAxisLabel = y.col.label;
+        chart.yAxisLabel = y.col.title;
       }
 
       var xAggOutput = x.agg.write();

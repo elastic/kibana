@@ -1,6 +1,6 @@
 define(function (require) {
-  return function PointSeriesPrepareBasicX() {
-    return function prepareBasicXAxis(chart) {
+  return function PointSeriesInitX() {
+    return function initXAxis(chart) {
       var x = chart.aspects.x;
       chart.xAxisFormatter = x.agg ? x.agg.fieldFormatter() : String;
       chart.xAxisLabel = x.col.title;
@@ -8,8 +8,9 @@ define(function (require) {
       if (!x.agg || !x.agg.type.ordered) return;
 
       chart.ordered = {};
-      if (x.agg.params.interval) {
-        chart.ordered.interval = x.agg.params.interval;
+      var xAggOutput = x.agg.write();
+      if (xAggOutput.params.interval) {
+        chart.ordered.interval = xAggOutput.params.interval;
       }
     };
   };
