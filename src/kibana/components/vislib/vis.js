@@ -84,7 +84,7 @@ define(function (require) {
           error instanceof errors.NotEnoughDataToRenderAreaChart) {
           this.handler.error(error.message);
         } else {
-          console.error(error.stack);
+          throw error;
         }
       }
     };

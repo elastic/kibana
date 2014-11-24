@@ -196,12 +196,12 @@ define(function (require) {
    * than 2 data points
    * @param {String} message - the message to provide with the error
    */
-  errors.NotEnoughDataToRenderAreaChart = function NotEnoughDataToRenderAreaChart() {
+  errors.NotEnoughData = function NotEnoughData() {
     KbnError.call(this,
     'Multiple data points are required to render an area chart',
-    errors.NotEnoughDataToRenderAreaChart);
+    errors.NotEnoughData);
   };
-  inherits(errors.NotEnoughDataToRenderAreaChart, KbnError);
+  inherits(errors.NotEnoughData, KbnError);
 
   return errors;
 });
