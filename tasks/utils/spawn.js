@@ -16,7 +16,14 @@ module.exports = function (cmd, args, cwd, silent) {
     var endsWithNlRE = /\n\r?$/;
     var relDir = opts.cwd ? path.relative(process.cwd(), opts.cwd) + ' ' : '';
     if (!silent) grunt.log.writeln(relDir + '$ ' + cmd + ' ' + args.join(' '));
-    var childProc = cp.spawn(cmd, args, opts);
+    var childProc;
+    if (process.platform === 'win32') {
+      cmd = args && args.length > 0 ? cmd + ' ' + args.join(' ') : cmd;
+      // Spawn only works for bats and exes in Windows so will use exec
+      childProc = cp.exec(cmd, opts);
+    } else {
+      childProc = cp.spawn(cmd, args, opts);
+    }
 
     // track when we are in a series of empty lines, and use this info to limit empty lines to one
     var empty = 0;
@@ -31,7 +38,6 @@ module.exports = function (cmd, args, cwd, silent) {
           estream.map(function (line, cb) {
             if (!line) { empty ++; if (empty > maxEmpty) return; }
             else empty = 0;
-
             buffer += line + '\n';
             cb(null, '  ' + line + '\n');
           })
