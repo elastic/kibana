@@ -1,5 +1,6 @@
 define(function (require) {
   var _ = require('lodash');
+  require('components/paginated_table/paginated_table');
 
   require('routes')
   .when('/settings/indices/:id', {
@@ -22,6 +23,28 @@ define(function (require) {
     var otherIds = _.without($route.current.locals.indexPatternIds, $scope.indexPattern.id);
 
     $scope.fieldTypes = Private(require('plugins/settings/sections/indices/_field_types'));
+
+    $scope.fieldColumns = [{
+      title: 'name'
+    }, {
+      title: 'type'
+    }, {
+      title: 'analyzed',
+      info: 'Analyzed fields may require extra memory to visualize'
+    }, {
+      title: 'indexed',
+      info: 'Fields that are not indexed are unavailable for search'
+    }, {
+      title: 'popularity',
+      info: 'A gauge of how often this field is used',
+      class: 'pull-right'
+    }];
+
+    $scope.fieldRows = $scope.indexPattern.fields.map(function (field) {
+      return [field.name, field.type, field.analyzed, field.indexed, field.count];
+    });
+
+    $scope.perPage = 25;
 
     $scope.table = {
       by: 'name',
