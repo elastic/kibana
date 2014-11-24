@@ -3,16 +3,18 @@ module.exports = function (grunt) {
   var spawn = require('./utils/spawn');
 
   grunt.registerTask('get_build_props', function () {
+    var shaCmdArgs = ['log', '--format=%H', '-n1'];
+    var numCmd = 'git log --format="%h" | wc -l';
     var arg;
     if (process.platform === 'win32') {
       arg = {
-        sha: spawn.silent('git', ['log', '--format=%H', '-n1'])(),
-        num: spawn.silent('git log --format=%H | wc -l')()
+        sha: spawn.silent('git', shaCmdArgs)(),
+        num: spawn.silent(numCmd)()
       };
     } else {
       arg = {
-        sha: spawn.silent('git', ['log', '--format=%H', '-n1'])(),
-        num: spawn.silent('sh', ['-c', 'git log --format="%h" | wc -l'])()
+        sha: spawn.silent('git', shaCmdArgs)(),
+        num: spawn.silent('sh', ['-c', numCmd])()
       };
     }
 
