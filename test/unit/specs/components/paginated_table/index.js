@@ -2,8 +2,9 @@ define(function (require) {
   require('components/paginated_table/paginated_table');
   var _ = require('lodash');
   var faker = require('faker');
+  var sinon = require('sinon/sinon');
 
-  describe.only('paginated table', function () {
+  describe('paginated table', function () {
     var $el;
     var $rootScope;
     var $compile;
@@ -150,7 +151,35 @@ define(function (require) {
         expect(tableRows.eq(0).find('td').eq(0).text()).to.be(data.rows[0][0]);
         expect(tableRows.eq(lastRowIndex).find('td').eq(0).text()).to.be('aaaa');
       });
+    });
 
+    describe('custom sorting', function () {
+      var data;
+      var paginatedTable;
+      var sortHandler;
+
+      beforeEach(function () {
+        sortHandler = sinon.spy();
+        data = makeData(3, 3);
+        $scope.cols = data.columns;
+        $scope.rows = data.rows;
+        $scope.perPage = defaultPerPage;
+        $scope.sortHandler = sortHandler;
+
+        $el = $compile('<paginated-table columns="cols" rows="rows" per-page="perPage"' +
+          'sort-handler="sortHandler">')($scope);
+
+        $scope.$digest();
+        paginatedTable = $el.isolateScope().paginatedTable;
+      });
+
+      it('should allow custom sorting handler', function () {
+        var columnIndex = 1;
+        paginatedTable.sortColumn(data.columns[columnIndex]);
+        $scope.$digest();
+        expect(sortHandler.callCount).to.be(1);
+        expect(sortHandler.getCall(0).args[0]).to.be(columnIndex);
+      });
     });
   });
 });

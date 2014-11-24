@@ -25,12 +25,6 @@ define(function (require) {
         };
 
         self.sortColumn = function (col) {
-          // use custom sort handler if one was defined
-          if (_.isFunction($scope.sortHandler)) {
-            $scope.sortHandler(col, self.sort);
-          }
-
-          // use generic sort handler
           self._setSortDirection(col.title);
         };
 
@@ -40,10 +34,6 @@ define(function (require) {
           var index = cols.indexOf(columnName);
 
           if (index === -1) return;
-
-          var sortGetter = function (row) {
-            return row[index];
-          };
 
           if (self.sort.columnName !== columnName) {
             sortDirection = 'asc';
@@ -57,8 +47,20 @@ define(function (require) {
           }
 
           self.sort.columnName = columnName;
-          self.sort.getter = sortGetter;
           self.sort.direction = sortDirection;
+          self._setSortGetter(index);
+        };
+
+        self._setSortGetter = function (index) {
+          if (_.isFunction($scope.sortHandler)) {
+            // use custom sort handler
+            self.sort.getter = $scope.sortHandler(index);
+          } else {
+            // use generic sort handler
+            self.sort.getter = function (row) {
+              return row[index];
+            };
+          }
         };
 
         // update the sordedRows result
