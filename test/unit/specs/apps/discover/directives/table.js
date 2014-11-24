@@ -439,7 +439,7 @@ define(function (require) {
         expect($before).to.have.length(3);
         expect($before.eq(0).text().trim()).to.be('');
         expect($before.eq(1).text().trim()).to.match(/^timestamp_formatted/);
-        expect($before.eq(2).find('.source-field').length).to.be(4);
+        expect($before.eq(2).find('dl dt').length).to.be(4);
       }));
 
       afterEach(function () {

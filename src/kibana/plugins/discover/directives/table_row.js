@@ -1,8 +1,15 @@
 define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
-  var htmlEscape = require('utils/html_escape');
+  var addWordBreaks = require('utils/add_word_breaks');
+  var noWhiteSpace = require('utils/no_white_space');
   var module = require('modules').get('app/discover');
+
+  require('components/highlight/highlight');
+  require('filters/trust_as_html');
+
+  // guestimate at the minimum number of chars wide cells in the table should be
+  var MIN_LINE_LENGTH = 20;
 
   /**
    * kbnTableRow directive
@@ -12,12 +19,12 @@ define(function (require) {
    * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
    * ```
    */
-  module.directive('kbnTableRow', function ($compile, config) {
+  module.directive('kbnTableRow', function ($compile, config, highlightFilter) {
     var openRowHtml = require('text!plugins/discover/partials/table_row/open.html');
     var detailsHtml = require('text!plugins/discover/partials/table_row/details.html');
     var cellTemplate = _.template(require('text!plugins/discover/partials/table_row/cell.html'));
     var truncateByHeightTemplate = _.template(require('text!partials/truncate_by_height.html'));
-    var sourceTemplate = _.template(require('text!plugins/discover/partials/table_row/_source.html'));
+    var sourceTemplate = _.template(noWhiteSpace(require('text!plugins/discover/partials/table_row/_source.html')));
 
     return {
       restrict: 'A',
@@ -102,7 +109,7 @@ define(function (require) {
           createSummaryRow($scope.row, $scope.row._id);
         });
 
-        $scope.$watch('timefield', function () {
+        $scope.$watchMulti(['timefield', 'row.highlight'], function () {
           createSummaryRow($scope.row, $scope.row._id);
         });
 
@@ -124,7 +131,10 @@ define(function (require) {
             var formatted;
             if (column === '_source') {
               formatted = sourceTemplate({
-                source: row._formatted
+                source: _.mapValues(row._formatted, function (val, field) {
+                  return _displayField(row, field, false);
+                }),
+                highlight: row.highlight
               });
             } else {
               formatted = _displayField(row, column, true);
@@ -171,46 +181,16 @@ define(function (require) {
          */
         function _displayField(row, field, breakWords) {
           var text = _getValForField(row, field);
-          var minLineLength = 20;
-
+          text = highlightFilter(text, row.highlight && row.highlight[field]);
 
           if (breakWords) {
-            text = htmlEscape(text);
-            var lineSize = 0;
-            var newText = '';
-            for (var i = 0, len = text.length; i < len; i++) {
-              var chr = text.charAt(i);
-              newText += chr;
+            text = addWordBreaks(text, MIN_LINE_LENGTH);
 
-              switch (chr) {
-              case ' ':
-              case '&':
-              case ';':
-              case ':':
-              case ',':
-                // natural line break, reset line size
-                lineSize = 0;
-                break;
-              default:
-                lineSize++;
-                break;
-              }
-
-              if (lineSize > minLineLength) {
-                // continuous text is longer then we want,
-                // so break it up with a <wbr>
-                lineSize = 0;
-                newText += '<wbr>';
-              }
-            }
-
-            if (text.length > minLineLength) {
+            if (text.length > MIN_LINE_LENGTH) {
               return truncateByHeightTemplate({
-                body: newText
+                body: text
               });
             }
-
-            text = newText;
           }
 
           return text;
