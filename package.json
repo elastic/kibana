@@ -1,7 +1,7 @@
 {
   "name": "kibana",
   "private": true,
-  "version": "4.0.0-BETA1.1",
+  "version": "4.0.0-BETA2",
   "description": "Kibana 4",
   "main": "Gulpfile.js",
   "dependencies": {},
@@ -42,7 +42,8 @@
     "request": "^2.40.0",
     "requirejs": "~2.1.14",
     "rjs-build-analysis": "0.0.3",
-    "tar": "^1.0.1"
+    "tar": "^1.0.1",
+    "glob": "~4.1.3"
   },
   "scripts": {
     "test": "grunt test --use-jruby",

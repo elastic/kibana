@@ -1,0 +1,25 @@
+<div class="form-group">
+  <label>Per Page</label>
+  <input type="number" ng-model="vis.params.perPage" class="form-control">
+</div>
+
+<div class="checkbox">
+  <label>
+    <input type="checkbox" ng-model="vis.params.showMeticsAtAllLevels">
+    Show metrics for every bucket/level
+  </label>
+</div>
+
+<div class="checkbox">
+  <label>
+    <input type="checkbox" ng-model="vis.params.showPartialRows">
+    Show partial rows
+  </label>
+</div>
+
+<div class="checkbox">
+  <label>
+    <input type="checkbox" ng-model="metricsAtAllLevels" disabled>
+    Calculate metrics for every bucket/level
+  </label>
+</div>

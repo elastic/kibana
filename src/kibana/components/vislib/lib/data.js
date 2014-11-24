@@ -35,8 +35,17 @@ define(function (require) {
 
       this.data = data;
       this.type = this.getDataType();
-      this.labels = (this.type === 'series') ? getLabels(data) : this.pieNames();
-      this.color = color(this.labels);
+
+      this.labels;
+
+      if (this.type === 'series') {
+        this.labels = getLabels(data);
+      } else if (this.type === 'slices') {
+        this.labels = this.pieNames();
+      }
+
+      this.color = this.labels ? color(this.labels) : undefined;
+      
       this._normalizeOrdered();
 
       this._attr = _.defaults(attr || {}, {
@@ -221,10 +230,6 @@ define(function (require) {
       var self = this;
       var arr = [];
       var grouped = (self._attr.mode === 'grouped');
-
-      if (self._attr.mode === 'percentage') {
-        return 1;
-      }
 
       if (self._attr.mode === 'percentage') {
         return 1;
@@ -448,6 +453,25 @@ define(function (require) {
         if (missingMin) this.data.ordered.min = extent[0];
         if (missingMax) this.data.ordered.max = extent[1];
       }
+    };
+
+    /**
+     * Calculates min and max values for all map data
+     * series.rows is an array of arrays
+     * each row is an array of values
+     * last value in row array is bucket count
+     * 
+     * @method mapDataExtents
+     * @param series {Array} Array of data objects
+     * @returns {Array} min and max values
+     */
+    Data.prototype.mapDataExtents = function (series) {
+      var values;
+      values = _.map(series.rows, function (row) {
+        return row[row.length - 1];
+      });
+      var extents = [_.min(values), _.max(values)];
+      return extents;
     };
 
     return Data;

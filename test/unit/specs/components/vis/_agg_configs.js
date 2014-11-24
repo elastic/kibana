@@ -54,7 +54,7 @@ define(function (require) {
             type: 'date_histogram',
             schema: 'segment'
           },
-          new AggConfig({
+          new AggConfig(vis, {
             type: 'terms',
             schema: 'split'
           })
@@ -62,6 +62,29 @@ define(function (require) {
 
         expect(ac).to.have.length(3);
         expect(SpiedAggConfig).to.have.property('callCount', 3);
+      });
+
+      it('attemps to ensure that all states have an id', function () {
+        var vis = new Vis(indexPattern, {
+          type: 'histogram',
+          aggs: []
+        });
+
+        var states = [
+          {
+            type: 'date_histogram',
+            schema: 'segment'
+          },
+          {
+            type: 'terms',
+            schema: 'split'
+          }
+        ];
+
+        var spy = sinon.spy(SpiedAggConfig, 'ensureIds');
+        var ac = new AggConfigs(vis, states);
+        expect(spy.callCount).to.be(1);
+        expect(spy.firstCall.args[0]).to.be(states);
       });
 
       describe('defaults', function () {
@@ -241,6 +264,42 @@ define(function (require) {
           expect(dsl[histo.id].aggs).to.have.property(metric.id);
           expect(dsl[histo.id].aggs[metric.id]).to.not.have.property('aggs');
         });
+      });
+
+      it('writes multiple metric aggregations at every level if the vis is hierarchical', function () {
+        var vis = new Vis(indexPattern, {
+          type: 'histogram',
+          aggs: [
+            { type: 'terms', schema: 'segment', params: { field: 'ip' } },
+            { type: 'terms', schema: 'segment', params: { field: 'extension' } },
+            { type: 'avg', schema: 'metric', params: { field: 'bytes' }  },
+            { type: 'sum', schema: 'metric', params: { field: 'bytes' }  },
+            { type: 'min', schema: 'metric', params: { field: 'bytes' }  },
+            { type: 'max', schema: 'metric', params: { field: 'bytes' }  }
+          ]
+        });
+        vis.isHierarchical = _.constant(true);
+
+        var topLevelDsl = vis.aggs.toDsl();
+        var buckets = vis.aggs.bySchemaGroup.buckets;
+        var metrics = vis.aggs.bySchemaGroup.metrics;
+
+        (function checkLevel(dsl) {
+          var bucket = buckets.shift();
+          expect(dsl).to.have.property(bucket.id);
+
+          expect(dsl[bucket.id]).to.be.an('object');
+          expect(dsl[bucket.id]).to.have.property('aggs');
+
+          metrics.forEach(function (metric) {
+            expect(dsl[bucket.id].aggs).to.have.property(metric.id);
+            expect(dsl[bucket.id].aggs[metric.id]).to.not.have.property('aggs');
+          });
+
+          if (buckets.length) {
+            checkLevel(dsl[bucket.id].aggs);
+          }
+        }(topLevelDsl));
       });
     });
   }];

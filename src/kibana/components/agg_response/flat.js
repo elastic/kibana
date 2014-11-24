@@ -75,6 +75,8 @@ define(function (require) {
         var metric = bucket.value == null ? bucket.doc_count : bucket.value;
         if (metric != null) {
           row[row.length - 1] = metric;
+        } else {
+          return; // ignore this row that doesn't have a metric
         }
 
         chartData.rows.push(row);
@@ -146,8 +148,13 @@ define(function (require) {
 
       if (resp.aggregations) {
         splitAndFlatten(chartData, resp.aggregations);
-      } else {
+      } else if (colStack.length === 1 && colStack[0].aggConfig.type.name === 'count') {
         writeRow(chartData, { doc_count: resp.hits.total });
+      }
+
+      // ensure chart container is always created
+      if (!chartData.rows && !chartData.splits) {
+        writeRow(chartData);
       }
 
       // add labels to each config before they are processed

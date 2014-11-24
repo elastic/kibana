@@ -9,8 +9,29 @@ define(function (require) {
     var tabifyAggResponse = Private(require('components/agg_response/tabify/tabify'));
 
     $scope.$watch('esResponse', function (resp, oldResp) {
-      if (!resp) $scope.tableGroups = null;
-      else $scope.tableGroups = tabifyAggResponse($scope.vis, resp);
+      var tableGroups = $scope.tableGroups = null;
+      var hasSomeRows = $scope.hasSomeRows = null;
+
+      if (resp) {
+        var vis = $scope.vis;
+        var params = vis.params;
+
+        tableGroups = tabifyAggResponse(vis, resp, {
+          partialRows: params.showPartialRows,
+          minimalColumns: vis.isHierarchical() && !params.showMeticsAtAllLevels
+        });
+
+        hasSomeRows = tableGroups.tables.some(function haveRows(table) {
+          if (table.tables) return table.tables.some(haveRows);
+          return table.rows.length > 0;
+        });
+      }
+
+      $scope.hasSomeRows = hasSomeRows;
+      if (hasSomeRows) {
+        $scope.tableGroups = tableGroups;
+      }
+
     });
   });
 

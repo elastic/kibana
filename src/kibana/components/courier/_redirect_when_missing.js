@@ -30,7 +30,7 @@ define(function (require) {
         url = qs.replaceParamInUrl(url, 'notFound', err.savedObjectType);
 
         notify.error(err);
-        kbnUrl.change(url);
+        kbnUrl.redirect(url);
         return;
       };
     };

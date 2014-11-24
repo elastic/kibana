@@ -30,7 +30,9 @@ define(function (require) {
         var $el = this.handler.el;
         var formatter = this.handler.data.get('tooltipFormatter');
 
+        // Add tooltip
         this.tooltip = new Tooltip($el, formatter, events);
+
       }
 
       this._attr = _.defaults(handler._attr || {}, {});

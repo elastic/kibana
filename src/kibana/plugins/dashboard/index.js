@@ -48,7 +48,7 @@ define(function (require) {
 
   app.directive('dashboardApp', function (Notifier, courier, savedVisualizations, AppState, timefilter, kbnUrl) {
     return {
-      controller: function ($scope, $route, $routeParams, $location, configFile) {
+      controller: function ($scope, $route, $routeParams, $location, configFile, Private) {
         var notify = new Notifier({
           location: 'Dashboard'
         });
@@ -85,7 +85,13 @@ define(function (require) {
 
         function init() {
           updateQueryOnRootSource();
-          $scope.$broadcast('application.load');
+
+          var docTitle = Private(require('components/doc_title/doc_title'));
+          if (dash.id) {
+            docTitle.change(dash.title);
+          }
+
+          $scope.$emit('application.load');
         }
 
         function updateQueryOnRootSource() {
@@ -99,7 +105,7 @@ define(function (require) {
         }
 
         $scope.newDashboard = function () {
-          kbnUrl.change('/dashboard', {}, true);
+          kbnUrl.change('/dashboard', {});
         };
 
         $scope.filterResults = function () {

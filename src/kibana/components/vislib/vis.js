@@ -9,6 +9,7 @@ define(function (require) {
     var errors = require('errors');
     require('css!components/vislib/styles/main.css');
 
+
     /**
      * Creates the visualizations.
      *
@@ -23,7 +24,6 @@ define(function (require) {
         return new Vis($el, config);
       }
       Vis.Super.apply(this, arguments);
-
       this.el = $el.get ? $el.get(0) : $el;
       this.ChartClass = chartTypes[config.type];
       this._attr = _.defaults(config || {}, {});
@@ -33,7 +33,6 @@ define(function (require) {
 
       // bind the resize function so it can be used as an event handler
       this.resize = _.bind(this.resize, this);
-
       this.resizeChecker = new ResizeChecker(this.el);
       this.resizeChecker.on('resize', this.resize);
     }
@@ -53,9 +52,30 @@ define(function (require) {
 
       this.data = data;
       this.handler = handlerTypes[chartType](this) || handlerTypes.column(this);
+      this._runOnHandler('render');
+    };
 
+    /**
+     * Resizes the visualization
+     *
+     * @method resize
+     */
+    Vis.prototype.resize = function () {
+      if (!this.data) {
+        // TODO: need to come up with a solution for resizing when no data is available
+        return;
+      }
+
+      if (_.isFunction(this.handler.resize)) {
+        this._runOnHandler('resize');
+      } else {
+        this.render(this.data);
+      }
+    };
+
+    Vis.prototype._runOnHandler = function (method) {
       try {
-        this.handler.render();
+        this.handler[method]();
       } catch (error) {
         // If involving height and width of the container, log error to screen.
         // Because we have to wait for the DOM element to initialize, we do not
@@ -69,19 +89,6 @@ define(function (require) {
     };
 
     /**
-     * Resizes the visualization
-     *
-     * @method resize
-     */
-    Vis.prototype.resize = function () {
-      if (!this.data) {
-        // TODO: need to come up with a solution for resizing when no data is available
-        return;
-      }
-      this.render(this.data);
-    };
-
-    /**
      * Destroys the visualization
      * Removes chart and all elements associated with it.
      * Removes chart and all elements associated with it.
@@ -90,9 +97,10 @@ define(function (require) {
      * @method destroy
      */
     Vis.prototype.destroy = function () {
-      d3.select(this.el).selectAll('*').remove();
       this.resizeChecker.off('resize', this.resize);
       this.resizeChecker.destroy();
+      if (this.handler) this._runOnHandler('destroy');
+      d3.select(this.el).selectAll('*').remove();
     };
 
     /**

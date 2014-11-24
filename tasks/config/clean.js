@@ -1,5 +1,5 @@
 module.exports = function (grunt) {
-  var notIncludedComponents = '{font-awesome,requirejs}';
+  var notIncludedComponents = '{font-awesome,requirejs,zeroclipboard}';
   return {
     build: '<%= build %>',
     target: '<%= target %>',
@@ -7,12 +7,20 @@ module.exports = function (grunt) {
       src: [
         // select all top level folders in bower_components
         '<%= build %>/kibana/public/bower_components/*',
+
         // exclude the following top level components
         '!<%= build %>/kibana/public/bower_components/' + notIncludedComponents,
-        // remove the contents of K4D3, font-awesome, and requirejs except necessary files
+
+        // remove the all bower_components except for notIncludedComponents, and keep the one files they need
         '<%= build %>/kibana/public/bower_components/' + notIncludedComponents + '/*',
         '!<%= build %>/kibana/public/bower_components/requirejs/require.js',
         '!<%= build %>/kibana/public/bower_components/font-awesome/fonts',
+        '!<%= build %>/kibana/public/bower_components/zeroclipboard/dist',
+
+        // delete the contents of the dist dir, except the ZeroClipboard.swf file
+        '<%= build %>/kibana/public/bower_components/zeroclipboard/dist/*',
+        '!<%= build %>/kibana/public/bower_components/zeroclipboard/dist/ZeroClipboard.swf',
+
         '<%= build %>/kibana/public/**/_empty_',
         '<%= build %>/kibana/public/**/*.less',
         '<%= build %>/kibana/public/config',

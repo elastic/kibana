@@ -16,9 +16,28 @@ define(function (require) {
       this.opts = opts || {};
       this.rowBuffer = [];
 
-      this.columns = getColumns(vis);
-      this.aggStack = _.pluck(this.columns, 'aggConfig');
+      var visIsHier = vis.isHierarchical();
+
+      // do the options allow for splitting? we will only split if true and
+      // tabify calls the split method.
       this.canSplit = this.opts.canSplit !== false;
+
+      // should we allow partial rows to be included in the tables? if a
+      // partial row is found, it is filled with empty strings ''
+      this.partialRows = this.opts.partialRows == null ? visIsHier : this.opts.partialRows;
+
+      // if true, we will not place metric columns after every bucket
+      // even if the vis is hierarchical. if false, and the vis is
+      // hierarchical, then we will display metric columns after
+      // every bucket col
+      this.minimalColumns = visIsHier ? !!this.opts.minimalColumns : true;
+
+      // true if we can expect metrics to have been calculated
+      // for every bucket
+      this.metricsForAllBuckets = visIsHier;
+
+      this.columns = getColumns(vis, this.minimalColumns);
+      this.aggStack = _.pluck(this.columns, 'aggConfig');
 
       this.root = new TableGroup();
       this.splitStack = [this.root];
@@ -95,7 +114,7 @@ define(function (require) {
 
       this.columns.splice(i, 1);
 
-      if (!this.vis.isHierarchical()) return;
+      if (this.minimalColumns) return;
 
       // hierarchical vis creats additional columns for each bucket
       // we will remove those too
@@ -134,7 +153,7 @@ define(function (require) {
     TabbedAggResponseWriter.prototype.row = function (buffer) {
       var cells = buffer || this.rowBuffer.slice(0);
 
-      if (!this.vis.isHierarchical() && cells.length < this.columns.length) {
+      if (!this.partialRows && cells.length < this.columns.length) {
         return;
       }
 

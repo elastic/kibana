@@ -11,8 +11,8 @@ define(function (require) {
     }
 
     FieldAggParam.prototype.editor = editorHtml;
+    FieldAggParam.prototype.scriptable = false;
     FieldAggParam.prototype.filterFieldTypes = '*';
-
 
     /**
      * Called to serialize values for saving an aggConfig object

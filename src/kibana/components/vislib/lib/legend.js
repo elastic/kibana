@@ -140,7 +140,6 @@ define(function (require) {
         visEl.selectAll(liClass).style('opacity', self._attr.focusOpacity);
       })
       .on('mouseout', function () {
-
         /*
          * The default opacity of elements in charts may be modified by the
          * chart constructor, and so may differ from that of the legend

@@ -32,7 +32,7 @@ define(function (require) {
     },
     'csv:separator': {
       value: ',',
-      description: 'Seperate exported values with this string',
+      description: 'Separate exported values with this string',
     },
     'csv:quoteValues': {
       value: true,
@@ -40,14 +40,14 @@ define(function (require) {
     },
     'history:limit': {
       value: 10,
-      description: 'In fields that have history (eg query inputs), show this many recent values',
+      description: 'In fields that have history (e.g. query inputs), show this many recent values',
     },
     'shortDots:enable': {
       value: false,
       description: 'Shorten long fields, for example, instead of foo.bar.baz, show f.b.baz',
     },
     'truncate:maxHeight': {
-      value: 100,
+      value: 115,
       description: 'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.'
     }
   };

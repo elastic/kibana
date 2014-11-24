@@ -9,11 +9,12 @@ define(function (require) {
       var self = this;
       this.vis = vis;
 
+      configStates = AggConfig.ensureIds(configStates || []);
 
       AggConfigs.Super.call(this, {
         index: ['id'],
         group: ['schema.group', 'type.name', 'schema.name'],
-        initialSet: (configStates || []).map(function (aggConfigState) {
+        initialSet: configStates.map(function (aggConfigState) {
           if (aggConfigState instanceof AggConfig) return aggConfigState;
           return new AggConfig(vis, aggConfigState);
         })
@@ -33,8 +34,9 @@ define(function (require) {
         .each(function (schema) {
           if (!self.bySchemaName[schema.name]) {
             var defaults = schema.defaults.slice(0, schema.max);
-            _.each(defaults, function (def) {
-              self.push(new AggConfig(vis, def));
+            _.each(defaults, function (defaultState) {
+              var state = _.defaults({ id: AggConfig.nextId(self) }, defaultState);
+              self.push(new AggConfig(vis, state));
             });
           }
         });
@@ -47,15 +49,18 @@ define(function (require) {
       var dslLvlCursor;
       var nestedMetric;
 
-      if (this.vis.type.hierarchicalData) {
-        // collect the metric agg that we will copy under each bucket agg
-        var nestedMetricConfig = _.first(this.vis.aggs.bySchemaGroup.metrics);
-        if (nestedMetricConfig.type.name !== 'count') {
-          nestedMetric = {
-            config: nestedMetricConfig,
-            dsl: nestedMetricConfig.toDsl()
+      if (this.vis.isHierarchical()) {
+        // collect all metrics, and filter out the ones that we won't be copying
+        var nestedMetrics = _(this.vis.aggs.bySchemaGroup.metrics)
+        .filter(function (agg) {
+          return agg.type.name !== 'count';
+        })
+        .map(function (agg) {
+          return {
+            config: agg,
+            dsl: agg.toDsl()
           };
-        }
+        });
       }
 
       this.getSorted()
@@ -84,8 +89,10 @@ define(function (require) {
           subAggs = dsl.aggs || (dsl.aggs = {});
         }
 
-        if (subAggs && nestedMetric) {
-          subAggs[nestedMetric.config.id] = nestedMetric.dsl;
+        if (subAggs && nestedMetrics) {
+          nestedMetrics.forEach(function (agg) {
+            subAggs[agg.config.id] = agg.dsl;
+          });
         }
       });
 

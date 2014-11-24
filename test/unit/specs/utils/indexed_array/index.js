@@ -133,8 +133,8 @@ define(function (require) {
       });
     });
 
-    require('./inflector')();
+    require('specs/utils/indexed_array/_inflector')();
 
-    require('./path_getter')();
+    require('specs/utils/indexed_array/_path_getter')();
   });
 });

@@ -200,6 +200,12 @@
       }
     }
 
+    &-form-value {
+      .align-self(center);
+      margin: 0 0 0 @vis-editor-agg-editor-spacing;
+      font-size: 1.2em;
+    }
+
     &-wide-btn {
       .border-radius(0);
     }
@@ -221,6 +227,11 @@
     .display(flex);
     .flex-direction(column);
     overflow: auto;
+
+    &.embedded {
+      .flex-shrink(1);
+      .flex-basis(100%);
+    }
 
     // overrided for tablet and desktop
     @media (min-width: @screen-md-min) {

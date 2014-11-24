@@ -1,8 +1,8 @@
 <!-- render {"template":"# Kibana <%= pkg.version %>"} -->
-# Kibana 4.0.0-BETA1.1
+# Kibana 4.0.0-BETA2
 <!-- /render -->
 
-[![Build Status](https://travis-ci.org/elasticsearch/kibana.svg)](https://travis-ci.org/elasticsearch/kibana)
+[![Build Status](https://travis-ci.org/elasticsearch/kibana.svg?branch=master)](https://api.travis-ci.org/elasticsearch/kibana.svg?branch=master)
 
 Kibana is an open source (Apache Licensed), browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.
 
@@ -29,6 +29,7 @@ Kibana is an open source (Apache Licensed), browser based analytics and search d
 * Visit [http://localhost:5601](http://localhost:5601)
 
 <!-- include {"path":"docs/quick_start.md"} -->
+
 ## Quick Start
 
 You're up and running! Fantastic! Kibana is now running on port 5601, so point your browser at http://YOURDOMAIN.com:5601.
@@ -325,3 +326,6 @@ Clicking *Edit* will allow you to change the title, description and other settin
 
 *Note:* this operation is for advanced users only - making changes here can break large portions of the application.
 <!-- /include -->
+
+## Building from Source
+If you want the latest code or need something that's not in a release package, you'll need to build from source. See [CONTRIBUTING.md](CONTRIBUTING.md) for instructions.

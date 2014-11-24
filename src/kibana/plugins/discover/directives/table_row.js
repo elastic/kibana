@@ -1,8 +1,15 @@
 define(function (require) {
   var _ = require('lodash');
   var $ = require('jquery');
-  var htmlEscape = require('utils/html_escape');
+  var addWordBreaks = require('utils/add_word_breaks');
+  var noWhiteSpace = require('utils/no_white_space');
   var module = require('modules').get('app/discover');
+
+  require('components/highlight/highlight');
+  require('filters/trust_as_html');
+
+  // guestimate at the minimum number of chars wide cells in the table should be
+  var MIN_LINE_LENGTH = 20;
 
   /**
    * kbnTableRow directive
@@ -12,11 +19,12 @@ define(function (require) {
    * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
    * ```
    */
-  module.directive('kbnTableRow', function ($compile, config) {
+  module.directive('kbnTableRow', function ($compile, config, highlightFilter) {
     var openRowHtml = require('text!plugins/discover/partials/table_row/open.html');
     var detailsHtml = require('text!plugins/discover/partials/table_row/details.html');
     var cellTemplate = _.template(require('text!plugins/discover/partials/table_row/cell.html'));
     var truncateByHeightTemplate = _.template(require('text!partials/truncate_by_height.html'));
+    var sourceTemplate = _.template(noWhiteSpace(require('text!plugins/discover/partials/table_row/_source.html')));
 
     return {
       restrict: 'A',
@@ -66,7 +74,13 @@ define(function (require) {
           }
 
           // The fields to loop over
-          row._fields = row._fields || _.keys(row._source).concat(config.get('metaFields')).sort();
+          if (!row._fields) {
+            row._fields = _.union(
+              _.keys(row._source),
+              config.get('metaFields')
+            );
+            row._fields.sort();
+          }
           row._mode = 'table';
 
           // empty the details and rebuild it
@@ -75,8 +89,13 @@ define(function (require) {
           $detailsScope.row = row;
           $detailsScope.showFilters = function (mapping) {
             var validTypes = ['string', 'number', 'date', 'ip'];
-            if (!mapping.indexed) return false;
+            if (!mapping || !mapping.indexed) return false;
             return _.contains(validTypes, mapping.type);
+          };
+
+          $detailsScope.showArrayInObjectsWarning = function (row, field) {
+            var value = row._source[field];
+            return _.isArray(value) && typeof value[0] === 'object';
           };
 
           $compile($detailsTr)($detailsScope);
@@ -90,7 +109,7 @@ define(function (require) {
           createSummaryRow($scope.row, $scope.row._id);
         });
 
-        $scope.$watch('timefield', function () {
+        $scope.$watchMulti(['timefield', 'row.highlight'], function () {
           createSummaryRow($scope.row, $scope.row._id);
         });
 
@@ -109,9 +128,20 @@ define(function (require) {
           }
 
           $scope.columns.forEach(function (column) {
+            var formatted;
+            if (column === '_source') {
+              formatted = sourceTemplate({
+                source: _.mapValues(row._formatted, function (val, field) {
+                  return _displayField(row, field, false);
+                }),
+                highlight: row.highlight
+              });
+            } else {
+              formatted = _displayField(row, column, true);
+            }
             newHtmls.push(cellTemplate({
               timefield: false,
-              formatted: _displayField(row, column, true)
+              formatted: formatted
             }));
           });
 
@@ -151,46 +181,16 @@ define(function (require) {
          */
         function _displayField(row, field, breakWords) {
           var text = _getValForField(row, field);
-          var minLineLength = 20;
-
+          text = highlightFilter(text, row.highlight && row.highlight[field]);
 
           if (breakWords) {
-            text = htmlEscape(text);
-            var lineSize = 0;
-            var newText = '';
-            for (var i = 0, len = text.length; i < len; i++) {
-              var chr = text.charAt(i);
-              newText += chr;
+            text = addWordBreaks(text, MIN_LINE_LENGTH);
 
-              switch (chr) {
-              case ' ':
-              case '&':
-              case ';':
-              case ':':
-              case ',':
-                // natural line break, reset line size
-                lineSize = 0;
-                break;
-              default:
-                lineSize++;
-                break;
-              }
-
-              if (lineSize > minLineLength) {
-                // continuous text is longer then we want,
-                // so break it up with a <wbr>
-                lineSize = 0;
-                newText += '<wbr>';
-              }
-            }
-
-            if (text.length > minLineLength) {
+            if (text.length > MIN_LINE_LENGTH) {
               return truncateByHeightTemplate({
-                body: newText
+                body: text
               });
             }
-
-            text = newText;
           }
 
           return text;
