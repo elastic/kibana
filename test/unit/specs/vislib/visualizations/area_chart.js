@@ -113,6 +113,11 @@ define(function (require) {
           });
         });
 
+        // D3 brushing requires that a g element is appended that
+        // listens for mousedown events. This g element includes
+        // listeners, however, I was not able to test for the listener
+        // function being present. I will need to update this test
+        // in the future.
         it('should attach a brush g element', function () {
           vis.handler.charts.forEach(function () {
             expect(onBrush).to.be(true);
