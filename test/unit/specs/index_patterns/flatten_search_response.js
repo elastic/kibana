@@ -26,7 +26,8 @@ define(function (require) {
         src: 'IN'
       },
       bytes: 10039103,
-      '@timestamp': (new Date()).toString()
+      '@timestamp': (new Date()).toString(),
+      tags: [{ text: 'foo' }, { text: 'bar' }]
     };
 
     it('should only flatten keys as far as the mapping', function () {
@@ -41,5 +42,9 @@ define(function (require) {
       expect(obj).to.have.property('bytes', 10039103);
     });
 
+    it('should preserve objects in arrays', function () {
+      var obj = indexPattern.flattenSearchResponse(fixture);
+      expect(obj).to.have.property('tags', fixture['tags']);
+    });
   });
 });

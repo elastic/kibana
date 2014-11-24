@@ -47,7 +47,7 @@ define(function (require) {
       description: 'Shorten long fields, for example, instead of foo.bar.baz, show f.b.baz',
     },
     'truncate:maxHeight': {
-      value: 100,
+      value: 115,
       description: 'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.'
     }
   };

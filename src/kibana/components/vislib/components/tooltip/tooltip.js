@@ -69,18 +69,29 @@ define(function (require) {
           self.container = d3.select(self.el).select('.' + self.containerClass);
         }
 
+        self.$chart.on('mouseleave', function (event) {
+          // if the mouse moves fast enough, it can "leave"
+          // by entering the tooltip
+          if ($tooltip.is(event.relatedTarget)) return;
+
+          // only clear when we leave the chart, so that
+          // moving between points doesn't make it reposition
+          self.previousPlacement = null;
+        });
+
         selection.each(function (d, i) {
           var element = d3.select(this);
 
           element
           .on('mousemove.tip', function () {
-            var placement = self.getTooltipPlacement(
-              self.$window,
-              self.$chart,
-              $tooltip,
-              $sizer,
-              d3.event
-            );
+            var placement = self.previousPlacement = self.getTooltipPlacement({
+              $window: self.$window,
+              $chart: self.$chart,
+              $el: $tooltip,
+              $sizer: $sizer,
+              event: d3.event,
+              prev: self.previousPlacement
+            });
             if (!placement) return;
 
             var events = self.events ? self.events.eventResponse(d, i) : d;

@@ -13,7 +13,7 @@ define(function (require) {
       if (!_.isObject(config)) config = {};
 
       // save an easy reference to this
-      var obj = this;
+      var self = this;
 
       /************
        * Initialize config vars
@@ -39,10 +39,10 @@ define(function (require) {
       var customInit = config.init || _.noop;
 
       // optional search source which this object configures
-      obj.searchSource = config.searchSource && new SearchSource();
+      self.searchSource = config.searchSource && new SearchSource();
 
       // the id of the document
-      obj.id = config.id || void 0;
+      self.id = config.id || void 0;
 
       /**
        * Asynchronously initialize this object - will only run
@@ -51,7 +51,7 @@ define(function (require) {
        * @return {Promise}
        * @resolved {SavedObject}
        */
-      obj.init = _.once(function () {
+      self.init = _.once(function () {
         // ensure that the type is defined
         if (!type) throw new Error('You must define a type name to use SavedObject objects.');
 
@@ -59,7 +59,7 @@ define(function (require) {
         docSource
         .index(configFile.kibanaIndex)
         .type(type)
-        .id(obj.id);
+        .id(self.id);
 
         // check that the mapping for this type is defined
         return mappingSetup.isDefined(type)
@@ -81,11 +81,11 @@ define(function (require) {
         })
         .then(function () {
           // If there is not id, then there is no document to fetch from elasticsearch
-          if (!obj.id) {
+          if (!self.id) {
             // just assign the defaults and be done
-            _.assign(obj, defaults);
+            _.assign(self, defaults);
             return hydrateIndexPattern().then(function () {
-              return afterESResp.call(obj);
+              return afterESResp.call(self);
             });
           }
 
@@ -93,44 +93,44 @@ define(function (require) {
           return docSource.fetch()
           .then(function applyESResp(resp) {
 
-            obj._source = _.cloneDeep(resp._source);
+            self._source = _.cloneDeep(resp._source);
 
-            if (!resp.found) throw new errors.SavedObjectNotFound(type, obj.id);
+            if (!resp.found) throw new errors.SavedObjectNotFound(type, self.id);
 
             var meta = resp._source.kibanaSavedObjectMeta || {};
             delete resp._source.kibanaSavedObjectMeta;
 
-            if (!config.indexPattern && obj._source.indexPattern) {
-              config.indexPattern = obj._source.indexPattern;
-              delete obj._source.indexPattern;
+            if (!config.indexPattern && self._source.indexPattern) {
+              config.indexPattern = self._source.indexPattern;
+              delete self._source.indexPattern;
             }
 
             // assign the defaults to the response
-            _.defaults(obj._source, defaults);
+            _.defaults(self._source, defaults);
 
             // transform the source using _deserializers
             _.forOwn(mapping, function ittr(fieldMapping, fieldName) {
               if (fieldMapping._deserialize) {
-                obj._source[fieldName] = fieldMapping._deserialize(obj._source[fieldName], resp, fieldName, fieldMapping);
+                self._source[fieldName] = fieldMapping._deserialize(self._source[fieldName], resp, fieldName, fieldMapping);
               }
             });
 
             // Give obj all of the values in _source.fields
-            _.assign(obj, obj._source);
+            _.assign(self, self._source);
 
             return Promise.try(function () {
               // if we have a searchSource, set it's state based on the searchSourceJSON field
-              if (obj.searchSource) {
+              if (self.searchSource) {
                 var state = {};
                 try {
                   state = JSON.parse(meta.searchSourceJSON);
                 } catch (e) {}
-                obj.searchSource.set(state);
+                self.searchSource.set(state);
               }
             })
             .then(hydrateIndexPattern)
             .then(function () {
-              return Promise.cast(afterESResp.call(obj, resp));
+              return Promise.cast(afterESResp.call(self, resp));
             })
             .then(function () {
               // Any time obj is updated, re-call applyESResp
@@ -139,11 +139,11 @@ define(function (require) {
           });
         })
         .then(function () {
-          return customInit.call(obj);
+          return customInit.call(self);
         })
         .then(function () {
           // return our obj as the result of init()
-          return obj;
+          return self;
         });
       });
 
@@ -155,12 +155,12 @@ define(function (require) {
        */
       function hydrateIndexPattern() {
         return Promise.try(function () {
-          if (obj.searchSource) {
+          if (self.searchSource) {
 
-            var index = config.indexPattern || obj.searchSource.getOwn('index');
+            var index = config.indexPattern || self.searchSource.getOwn('index');
             if (!index) return;
             if (config.clearSavedIndexPattern) {
-              obj.searchSource.set('index', undefined);
+              self.searchSource.set('index', undefined);
               return;
             }
 
@@ -169,7 +169,7 @@ define(function (require) {
             }
 
             return Promise.resolve(index).then(function (indexPattern) {
-              obj.searchSource.set('index', indexPattern);
+              self.searchSource.set('index', indexPattern);
             });
           }
         });
@@ -182,38 +182,38 @@ define(function (require) {
        * @return {Promise}
        * @resolved {String} - The id of the doc
        */
-      obj.save = function () {
+      self.save = function () {
         var body = {};
 
         _.forOwn(mapping, function (fieldMapping, fieldName) {
-          if (obj[fieldName] != null) {
+          if (self[fieldName] != null) {
             body[fieldName] = (fieldMapping._serialize)
-              ? fieldMapping._serialize(obj[fieldName])
-              : obj[fieldName];
+              ? fieldMapping._serialize(self[fieldName])
+              : self[fieldName];
           }
         });
 
-        if (obj.searchSource) {
+        if (self.searchSource) {
           body.kibanaSavedObjectMeta = {
-            searchSourceJSON: JSON.stringify(_.omit(obj.searchSource.toJSON(), ['sort', 'size']))
+            searchSourceJSON: JSON.stringify(_.omit(self.searchSource.toJSON(), ['sort', 'size']))
           };
         }
 
 
         // Slugify the object id
-        obj.id = slugifyId(obj.id);
+        self.id = slugifyId(self.id);
 
-        // ensure that the docSource has the current obj.id
-        docSource.id(obj.id);
+        // ensure that the docSource has the current self.id
+        docSource.id(self.id);
 
         // index the document
-        return obj.saveSource(body);
+        return self.saveSource(body);
       };
 
-      obj.saveSource = function (source) {
+      self.saveSource = function (source) {
         return docSource.doIndex(source)
         .then(function (id) {
-          obj.id = id;
+          self.id = id;
         })
         .then(function () {
           return es.indices.refresh({
@@ -222,7 +222,7 @@ define(function (require) {
         })
         .then(function () {
           // ensure that the object has the potentially new id
-          return obj.id;
+          return self.id;
         });
       };
 
@@ -231,16 +231,16 @@ define(function (require) {
        *
        * @return {undefined}
        */
-      obj.destroy = function () {
+      self.destroy = function () {
         docSource.cancelPending();
-        if (obj.searchSource) obj.searchSource.cancelPending();
+        if (self.searchSource) self.searchSource.cancelPending();
       };
 
       /**
        * Delete this object from Elasticsearch
        * @return {promise}
        */
-      obj.delete = function () {
+      self.delete = function () {
         return es.delete({
           index: configFile.kibanaIndex,
           type: type,
