@@ -263,7 +263,7 @@ define(function (require) {
       });
 
       if (notEnoughData) {
-        throw new errors.NotEnoughDataToRenderAreaChart();
+        throw new errors.NotEnoughData();
       }
     };
 

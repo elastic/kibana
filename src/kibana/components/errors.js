@@ -198,8 +198,8 @@ define(function (require) {
    */
   errors.NotEnoughData = function NotEnoughData() {
     KbnError.call(this,
-    'Multiple data points are required to render an area chart',
-    errors.NotEnoughData);
+      'There are not enough data points to render this chart',
+      errors.NotEnoughData);
   };
   inherits(errors.NotEnoughData, KbnError);
 
