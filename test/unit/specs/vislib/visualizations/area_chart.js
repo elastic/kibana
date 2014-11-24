@@ -47,6 +47,10 @@ define(function (require) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
           require('css!components/vislib/styles/main');
 
+          vis.on('brush', function (e) {
+            console.log(e);
+          });
+
           vis.render(data);
         });
       });
@@ -87,7 +91,9 @@ define(function (require) {
 
       describe('addCircleEvents method', function () {
         var circle;
+        var brush;
         var d3selectedCircle;
+        var onBrush;
         var onClick;
         var onMouseOver;
 
@@ -95,12 +101,21 @@ define(function (require) {
           inject(function (d3) {
             vis.handler.charts.forEach(function (chart) {
               circle = $(chart.chartEl).find('circle')[0];
+              brush = $(chart.chartEl).find('.brush');
+              console.log(brush);
               d3selectedCircle = d3.select(circle)[0][0];
 
               // d3 instance of click and hover
+              onBrush = (!!brush);
               onClick = (!!d3selectedCircle.__onclick);
               onMouseOver = (!!d3selectedCircle.__onmouseover);
             });
+          });
+        });
+
+        it('should attach a brush g element', function () {
+          vis.handler.charts.forEach(function () {
+            expect(onBrush).to.be(true);
           });
         });
 

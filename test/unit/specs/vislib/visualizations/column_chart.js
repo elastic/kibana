@@ -56,6 +56,10 @@ define(function (require) {
           vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParamms);
           require('css!components/vislib/styles/main');
 
+          vis.on('brush', function (e) {
+            console.log(e);
+          });
+
           vis.render(data);
         });
       });
@@ -97,7 +101,8 @@ define(function (require) {
             numOfValues = chart.chartData.series[0].values.length;
             product = numOfSeries * numOfValues;
 
-            expect($(chart.chartEl).find('rect').length).to.be(product);
+            // Need to substract 4 rects from total since adding brushing
+            expect($(chart.chartEl).find('rect').length - 4).to.be(product);
           });
         });
       });
@@ -109,9 +114,7 @@ define(function (require) {
         });
 
         it('should returned grouped bars', function () {
-          vis.handler.charts.forEach(function (chart) {
-            console.log('did it!');
-          });
+          vis.handler.charts.forEach(function (chart) {});
         });
       });
 
@@ -122,19 +125,29 @@ define(function (require) {
       describe('addBarEvents method', function () {
         var rect;
         var d3selectedRect;
+        var brush;
         var onClick;
         var onMouseOver;
+        var onBrush;
 
         beforeEach(function () {
           inject(function (d3) {
             vis.handler.charts.forEach(function (chart) {
-              rect = $(chart.chartEl).find('rect')[0];
+              rect = $(chart.chartEl).find('rect')[4];
               d3selectedRect = d3.select(rect)[0][0];
+              brush = d3.select('.brush')[0][0];
 
               // d3 instance of click and hover
+              onBrush = (!!brush);
               onClick = (!!d3selectedRect.__onclick);
               onMouseOver = (!!d3selectedRect.__onmouseover);
             });
+          });
+        });
+
+        it('should attach a brush g element', function () {
+          vis.handler.charts.forEach(function () {
+            expect(onBrush).to.be(true);
           });
         });
 
