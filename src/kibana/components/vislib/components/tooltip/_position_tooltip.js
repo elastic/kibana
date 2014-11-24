@@ -5,22 +5,26 @@ define(function (require) {
   var OFFSET = 10;
   var $clone;
 
-  function positionTooltip($window, $chart, $tooltip, $sizer, event) {
-    $chart = $($chart);
-    $tooltip = $($tooltip);
+  function positionTooltip(opts) {
+    if (!opts) return;
+    var $chart = $(opts.$chart);
+    var $el = $(opts.$el);
+    var $window = $(opts.$window || window);
+    var $sizer = $(opts.$sizer);
+    var prev = opts.prev || {};
+    var event = opts.event;
 
-    if (!$chart.size() || !$tooltip.size()) return;
+    if (!$chart.size() || !$el.size()) return;
 
-    var size = getTtSize($tooltip, $sizer);
+    var size = getTtSize($el, $sizer);
     var pos = getBasePosition(size, event);
-
     var overflow = getOverflow(size, pos, [$chart, $window]);
 
-    return placeToAvoidOverflow(pos, overflow);
+    return placeToAvoidOverflow(pos, prev, overflow);
   }
 
-  function getTtSize($tooltip, $sizer) {
-    var ttHtml = $tooltip.html();
+  function getTtSize($el, $sizer) {
+    var ttHtml = $el.html();
     if ($sizer.html() !== ttHtml) {
       $sizer.html(ttHtml);
     }
@@ -77,29 +81,32 @@ define(function (require) {
     });
   }
 
-  function placeToAvoidOverflow(pos, overflow) {
+  function pickPlacement(prop, pos, overflow, prev, pref, fallback, placement) {
+    var stash = '_' + prop;
+
+    // first choice
+    var first = prev[stash] || pref;
+    // second choice
+    var second = first === pref ? fallback : pref;
+
+    if (overflow[first] > 0) {
+      if (overflow[second] < 0) {
+        placement[prop] = pos[second];
+        placement[stash] = second;
+      } else {
+        placement[prop] = pos[first] - overflow[first];
+        placement[stash] = first;
+      }
+    } else {
+      placement[prop] = pos[first];
+      placement[stash] = first;
+    }
+  }
+
+  function placeToAvoidOverflow(pos, prev, overflow) {
     var placement = {};
-
-    if (overflow.south > 0) {
-      if (overflow.north < 0) {
-        placement.top = pos.north;
-      } else {
-        placement.top = pos.south - overflow.south;
-      }
-    } else {
-      placement.top = pos.south;
-    }
-
-    if (overflow.east > 0) {
-      if (overflow.west < 0) {
-        placement.left = pos.west;
-      } else {
-        placement.left = pos.east - overflow.east;
-      }
-    } else {
-      placement.left = pos.east;
-    }
-
+    pickPlacement('top', pos, overflow, prev, 'south', 'north', placement);
+    pickPlacement('left', pos, overflow, prev, 'east', 'west', placement);
     return placement;
   }
 

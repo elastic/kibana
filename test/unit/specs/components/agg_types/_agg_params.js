@@ -10,7 +10,7 @@ define(function (require) {
 
     beforeEach(module('kibana'));
     // stub out the param classes before we get the AggParams
-    beforeEach(inject(require('specs/components/agg_types/utils/stub_agg_params')));
+    beforeEach(inject(require('specs/components/agg_types/utils/_stub_agg_params')));
     // fetch out deps
     beforeEach(inject(function (Private) {
       AggParams = Private(require('components/agg_types/_agg_params'));

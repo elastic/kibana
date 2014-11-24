@@ -109,14 +109,14 @@ define(function (require) {
 
             if (val.min != null || val.max != null) {
               output.params.extended_bounds = {
-                min: val.min,
-                max: val.max
+                min: moment(val.min).valueOf(),
+                max: moment(val.max).valueOf()
               };
             } else if (aggConfig.vis.indexPattern.timeFieldName) {
               var tfBounds = timefilter.getBounds();
               output.params.extended_bounds = {
-                min: tfBounds.min,
-                max: tfBounds.max
+                min: moment(tfBounds.min).valueOf(),
+                max: moment(tfBounds.max).valueOf()
               };
             }
           }

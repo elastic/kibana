@@ -13,12 +13,13 @@ define(function (require) {
   require('components/timepicker/timepicker');
   require('directives/fixed_scroll');
   require('directives/validate_json');
-  require('directives/validate_query');
+  require('components/validate_query/validate_query');
   require('filters/moment');
   require('components/courier/courier');
   require('components/index_patterns/index_patterns');
   require('components/state_management/app_state');
   require('services/timefilter');
+  require('components/highlight/highlight_tags');
 
   require('plugins/discover/directives/table');
 
@@ -46,9 +47,10 @@ define(function (require) {
     }
   });
 
-  app.controller('discover', function ($scope, config, courier, $route, $window, Notifier, AppState, timefilter, Promise, Private, kbnUrl) {
+  app.controller('discover', function ($scope, config, courier, $route, $window, Notifier, AppState, timefilter, Promise, Private, kbnUrl, highlightTags) {
 
     var Vis = Private(require('components/vis/vis'));
+    var docTitle = Private(require('components/doc_title/doc_title'));
     var SegmentedFetch = Private(require('plugins/discover/_segmented_fetch'));
 
     var HitSortFn = Private(require('plugins/discover/_hit_sort_fn'));
@@ -78,8 +80,11 @@ define(function (require) {
     // Manage state & url state
     var initialQuery = $scope.searchSource.get('query');
 
-    var defaultFormat = courier.indexPatterns.fieldFormats.defaultByType.string;
+    if (savedSearch.id) {
+      docTitle.change(savedSearch.title);
+    }
 
+    var defaultFormat = courier.indexPatterns.fieldFormats.defaultByType.string;
 
     var stateDefaults = {
       query: initialQuery || '',
@@ -90,17 +95,6 @@ define(function (require) {
     };
 
     var metaFields = config.get('metaFields');
-
-    $scope.intervalOptions = [
-      'auto',
-      'second',
-      'minute',
-      'hour',
-      'day',
-      'week',
-      'month',
-      'year'
-    ];
 
     var $state = $scope.state = new AppState(stateDefaults);
 
@@ -338,14 +332,18 @@ define(function (require) {
               var indexPattern = $scope.searchSource.get('index');
               hit._source = indexPattern.flattenSearchResponse(hit._source);
 
-              hit._formatted = _.mapValues(hit._source, function (value, name) {
+              var formatValues = function (value, name) {
                 // add up the counts for each field name
                 if (counts[name]) counts[name] = counts[name] + 1;
                 else counts[name] = 1;
 
                 return ($scope.formatsByName[name] || defaultFormat).convert(value);
-              });
+              };
 
+              var formattedSource = _.mapValues(hit._source, formatValues);
+              var formattedHits = _.mapValues(hit.fields, formatValues);
+
+              hit._formatted = _.merge(formattedSource, formattedHits);
               hit._formatted._source = angular.toJson(hit._source);
             });
 
@@ -441,6 +439,11 @@ define(function (require) {
         return sort;
       })
       .query(!$state.query ? null : $state.query)
+      .highlight({
+        pre_tags: [highlightTags.pre],
+        post_tags: [highlightTags.post],
+        fields: {'*': {}}
+      })
       .set('filter', $state.filters || []);
 
       // get the current indexPattern

@@ -42,7 +42,8 @@
     "request": "^2.40.0",
     "requirejs": "~2.1.14",
     "rjs-build-analysis": "0.0.3",
-    "tar": "^1.0.1"
+    "tar": "^1.0.1",
+    "glob": "~4.1.3"
   },
   "scripts": {
     "test": "grunt test --use-jruby",

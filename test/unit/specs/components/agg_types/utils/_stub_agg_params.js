@@ -15,7 +15,7 @@ define(function (require) {
    * This method should be passed directly to inject();
    *
    * ```js
-   * var stubParamClasses = require('specs/components/agg_types/utils/stub_agg_params');
+   * var stubParamClasses = require('specs/components/agg_types/utils/_stub_agg_params');
    * describe('something', function () {
    *   beforeEach(inject(stubParamClasses));
    * })

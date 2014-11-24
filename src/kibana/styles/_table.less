@@ -12,12 +12,26 @@ kbn-table,tbody[kbn-rows] {
     }
   }
 
-  tr.even td {
-    background-color: #f1f1f1;
-  }
-
   td.numeric-value {
     text-align: right;
     padding-right: 15px;
   }
+
+  dl.source {
+    margin-bottom: 0;
+    line-height: 2em;
+
+    dt {
+      display: inline;
+      background: @gray-lighter;
+      padding: @padding-xs-vertical @padding-xs-horizontal;
+      margin-right: @padding-xs-horizontal;
+      font-family: monospace;
+    }
+
+    dd {
+      display: inline;
+    }
+  }
+
 }
