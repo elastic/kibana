@@ -12,6 +12,7 @@
             ng-click="paginatedTable.sortColumn(col)"
             class="{{ col.class }}">
             <span bo-text="col.title"></span>
+            <kbn-info ng-if="col.info" info="{{ col.info }}" placement="top"></kbn-info>
             <i
               class="fa"
               ng-class="{
