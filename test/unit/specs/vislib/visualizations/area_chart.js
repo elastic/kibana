@@ -60,6 +60,32 @@ define(function (require) {
         vis = null;
       });
 
+      describe('checkIfEnoughData method', function () {
+        var errorVis;
+        var notEnoughData;
+
+        beforeEach(function () {
+          inject(function (Private) {
+            errorVis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
+            notEnoughData = require('vislib_fixtures/mock_data/not_enough_data/_one_point');
+            require('css!components/vislib/styles/main');
+
+            errorVis.render(notEnoughData);
+          });
+        });
+
+        afterEach(function () {
+          $(errorVis.el).remove();
+          errorVis = null;
+        });
+
+        it('should throw a Not Enough Data Error', function () {
+          expect(function () {
+            errorVis.ChartClass.checkIfEnoughData();
+          }).to.throwError();
+        });
+      });
+
       describe('stackData method', function () {
         var stackedData;
         var isStacked;
