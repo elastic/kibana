@@ -40,8 +40,39 @@ define(function (require) {
     });
 
     describe('rendering', function () {
-      it('should not display without rows');
-      it('should render columns and rows');
+      it('should not display without rows', function () {
+        var cols = [{
+          title: 'test1'
+        }];
+        var rows = [];
+
+        renderTable(cols, rows);
+        expect($el.children().size()).to.be(0);
+      });
+
+      it('should render columns and rows', function () {
+        var cols = [{
+          title: 'col1'
+        }, {
+          title: 'col2'
+        }];
+        var rows = [
+          ['bacon', 'pork chop'],
+          ['steak', 'tri-tip'],
+        ];
+
+        renderTable(cols, rows);
+        expect($el.children().size()).to.be(1);
+        var tableRows = $el.find('tbody tr');
+        // should pad rows
+        expect(tableRows.size()).to.be(defaultPerPage);
+        // should contain the row data
+        expect(tableRows.eq(0).find('td').eq(0).text()).to.be(rows[0][0]);
+        expect(tableRows.eq(0).find('td').eq(1).text()).to.be(rows[0][1]);
+        expect(tableRows.eq(1).find('td').eq(0).text()).to.be(rows[1][0]);
+        expect(tableRows.eq(1).find('td').eq(1).text()).to.be(rows[1][1]);
+      });
+
       it('should paginate rows');
       it('should allow custom pagination code');
     });
