@@ -54,8 +54,9 @@ define(function (require) {
           } else {
             // use generic sort handler
             self.sort.getter = function (row) {
-              if (_.isObject(row)) return row[index].value;
-              return row[index];
+              var value = row[index];
+              if (value.value) return value.value;
+              return value;
             };
           }
         };
