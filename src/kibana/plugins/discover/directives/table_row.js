@@ -7,6 +7,7 @@ define(function (require) {
 
   require('components/highlight/highlight');
   require('filters/trust_as_html');
+  require('filters/short_dots');
 
   // guestimate at the minimum number of chars wide cells in the table should be
   var MIN_LINE_LENGTH = 20;
@@ -19,7 +20,7 @@ define(function (require) {
    * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
    * ```
    */
-  module.directive('kbnTableRow', function ($compile, config, highlightFilter) {
+  module.directive('kbnTableRow', function ($compile, config, highlightFilter, shortDotsFilter) {
     var openRowHtml = require('text!plugins/discover/partials/table_row/open.html');
     var detailsHtml = require('text!plugins/discover/partials/table_row/details.html');
     var cellTemplate = _.template(require('text!plugins/discover/partials/table_row/cell.html'));
@@ -134,7 +135,8 @@ define(function (require) {
                 source: _.mapValues(row._formatted, function (val, field) {
                   return _displayField(row, field, false);
                 }),
-                highlight: row.highlight
+                highlight: row.highlight,
+                shortDotsFilter: shortDotsFilter
               });
             } else {
               formatted = _displayField(row, column, true);
