@@ -8,7 +8,7 @@ define(function (require) {
       name: 'tile_map',
       title: 'Tile map',
       icon: 'fa-map-marker',
-      params: { 
+      params: {
         defaults: {
           mapType: 'Shaded Circle Markers'
         },
