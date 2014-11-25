@@ -83,16 +83,18 @@ define(function (require) {
 
         function setFormattedColumns(table) {
           $scope.formattedColumns = table.columns.map(function (col, i) {
-            var cls = [];
+            var formattedColumn = {
+              title: col.title
+            };
+
             var agg = $scope.table.aggConfig(col);
             var last = i === (table.columns.length - 1);
 
             if (last || (agg.schema.group === 'metrics')) {
-              cls.push('visualize-table-right');
+              formattedColumn.class = 'visualize-table-right';
             }
 
-            col.class =  cls.join(' ');
-            return col;
+            return formattedColumn;
           });
         }
 
