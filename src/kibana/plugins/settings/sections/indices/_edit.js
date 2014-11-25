@@ -39,9 +39,14 @@ define(function (require) {
       info: 'A gauge of how often this field is used',
     }];
 
+    // track row scopes, so they can be destroyed as needed
+    var rowScopes = [];
     $scope.$watchCollection('indexPattern.fields', function () {
+      _.invoke(rowScopes, '$destroy');
+
       $scope.fieldRows = $scope.indexPattern.fields.map(function (field) {
         var childScope = $scope.$new();
+        rowScopes.push(childScope);
         childScope.field = field;
 
         return [field.name, field.type, field.analyzed, field.indexed,
