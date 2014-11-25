@@ -21,6 +21,7 @@ define(function (require) {
 
       flattenedData.forEach(function (d, i) {
         var key = d.x;
+        console.log(d.x, i);
 
         if (uniqueXValues[key] === void 0) {
           uniqueXValues[key] = {
