@@ -60,7 +60,10 @@ define(function (require) {
         };
 
         // update the sordedRows result
-        $scope.$watch('paginatedTable.sort.direction', function () {
+        $scope.$watchMulti([
+          'paginatedTable.sort.direction',
+          'rows'
+        ], function () {
           if (self.sort.direction == null) {
             $scope.sortedRows = $scope.rows.slice(0);
             return;
