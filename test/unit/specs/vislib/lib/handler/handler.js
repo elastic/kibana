@@ -20,7 +20,7 @@ define(function (require) {
     'stackedSeries'
   ];
 
-  angular.module('Handle/BaseClass', ['kibana']);
+  angular.module('HandlerBaseClass', ['kibana']);
 
   dateHistogramArray.forEach(function (data, i) {
     describe('VisLib Handler Test Suite for ' + names[i] + ' Data', function () {

@@ -8,6 +8,10 @@ define(function (require) {
       $('body').append('<div class=visualize-chart></div>');
 
       var $el = $('.visualize-chart');
+
+      $el.width(1024);
+      $el.height(300);
+
       var config = visLibParams || {
         shareYAxis: true,
         addTooltip: true,
