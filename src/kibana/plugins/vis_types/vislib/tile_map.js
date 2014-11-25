@@ -2,7 +2,7 @@ define(function (require) {
   return function TileMapVisType(Private) {
     var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
     var Schemas = Private(require('plugins/vis_types/_schemas'));
-    var TileMapConverter = Private(require('plugins/vis_types/converters/tile_map'));
+    var TileMapConverter = Private(require('plugins/vis_types/vislib/converters/tile_map'));
 
     return new VislibVisType({
       name: 'tile_map',
