@@ -53,13 +53,7 @@
         </li>
       </ul>
 
-      <div ng-show="state.tab == 'fields'" class="fields">
-        <paginated-table
-          columns="fieldColumns"
-          rows="fieldRows"
-          per-page="perPage">
-        </paginated-table>
-      </div>
+      <indexed-fields ng-show="state.tab == 'fields'" class="fields"></indexed-fields>
 
       <div ng-show="state.tab == 'scriptedFields'" class="scripted-fields">
         No scripted fields defined
