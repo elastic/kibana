@@ -3,7 +3,7 @@ define(function (require) {
   var _ = require('lodash');
   var module = require('modules').get('kibana');
 
-  module.directive('kbnRows', function ($compile) {
+  module.directive('kbnRows', function () {
     return {
       restrict: 'A',
       link: function ($scope, $el, attr) {
@@ -15,7 +15,7 @@ define(function (require) {
           if (_.isNumeric(contents)) $cell.addClass('numeric-value');
 
           if (_.isObject(contents)) {
-            $cell.html($compile(contents.markup)(contents.scope));
+            $cell.html($(contents.markup));
           } else {
             if (contents === '') {
               $cell.html('&nbsp;');

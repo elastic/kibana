@@ -14,7 +14,8 @@ define(function (require) {
   });
 
   require('modules').get('apps/settings')
-  .controller('settingsIndicesEdit', function ($rootScope, $scope, $location, $route, config, courier, Notifier, Private, AppState) {
+  .controller('settingsIndicesEdit', function ($scope, $location, $route, $compile,
+    config, courier, Notifier, Private, AppState) {
     var notify = new Notifier();
     var $state = $scope.state = new AppState();
     var refreshKibanaIndex = Private(require('plugins/settings/sections/indices/_refresh_kibana_index'));
@@ -51,8 +52,7 @@ define(function (require) {
 
         return [field.name, field.type, field.analyzed, field.indexed,
           {
-            markup:
-              '<div ng-mouseover="hoverState = true" ng-mouseout="hoverState = false">' +
+            markup: $compile('<div ng-mouseover="hoverState = true" ng-mouseout="hoverState = false">' +
                 '<span>{{ field.count }}</span> ' +
                 '<span class="field-popularize" ng-show="hoverState">' +
                   ' <span ng-click="indexPattern.popularizeField(field.name, 1)" ' +
@@ -60,8 +60,8 @@ define(function (require) {
                   ' <span ng-click="indexPattern.popularizeField(field.name, -1)" ' +
                     'class="label label-default"><i class="fa fa-minus"></i></span>' +
                 '</span>' +
-              '</div>',
-            scope: childScope
+              '</div>')(childScope),
+            value: field.count
           }
         ];
       });
