@@ -104,7 +104,7 @@ define(function (require) {
           var groupMap = chartData.splits || (chartData.splits = {});
 
           result.buckets.forEach(function (bucket) {
-            var bucketId = bucket.key + (col.field ? ': ' + col.field.name : '');
+            var bucketId = bucket.key + (col.field ? ': ' + col.field.displayName : '');
             var group = groupMap[bucketId];
 
             if (!group) {
@@ -167,7 +167,7 @@ define(function (require) {
         }
 
         if (config.field) {
-          config.label = config.field.name;
+          config.label = config.field.displayName;
           return;
         }
       });

@@ -7,7 +7,7 @@ define(function (require) {
       name: 'significant_terms',
       title: 'Significant Terms',
       makeLabel: function (aggConfig) {
-        return 'Top ' + aggConfig.params.size + ' unusual terms in ' + aggConfig.params.field.name;
+        return 'Top ' + aggConfig.params.size + ' unusual terms in ' + aggConfig.params.field.displayName;
       },
       params: [
         {
