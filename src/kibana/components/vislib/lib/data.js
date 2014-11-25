@@ -125,7 +125,7 @@ define(function (require) {
         var rootSeries = obj.series || (obj.slices && obj.slices.children);
         var dataLength = rootSeries ? rootSeries.length : 0;
         var label = dataLength === 1 ? rootSeries[0].label || rootSeries[0].name : undefined;
-        var children = (obj.slices && obj.slices.children && obj.slices.children[0].children);
+        var children = (obj.slices && obj.slices.children && obj.slices.children[0] && obj.slices.children[0].children);
 
         if (!seriesLabel) {
           seriesLabel = label;
