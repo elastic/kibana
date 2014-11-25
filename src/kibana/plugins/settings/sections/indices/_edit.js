@@ -16,8 +16,11 @@ define(function (require) {
   require('modules').get('apps/settings')
   .controller('settingsIndicesEdit', function ($scope, $location, $route, $compile,
     config, courier, Notifier, Private, AppState) {
+
+    var rowScopes = []; // track row scopes, so they can be destroyed as needed
     var notify = new Notifier();
     var $state = $scope.state = new AppState();
+    var popularityHtml = require('text!plugins/settings/sections/indices/_popularity.html');
     var refreshKibanaIndex = Private(require('plugins/settings/sections/indices/_refresh_kibana_index'));
 
     $scope.indexPattern = $route.current.locals.indexPattern;
@@ -40,8 +43,10 @@ define(function (require) {
       info: 'A gauge of how often this field is used',
     }];
 
-    // track row scopes, so they can be destroyed as needed
-    var rowScopes = [];
+    $scope.showPopularityControls = function (field) {
+      $scope.popularityHoverState = (field) ? field : null;
+    };
+
     $scope.$watchCollection('indexPattern.fields', function () {
       _.invoke(rowScopes, '$destroy');
 
@@ -50,17 +55,14 @@ define(function (require) {
         rowScopes.push(childScope);
         childScope.field = field;
 
+        // update the active field via object comparison
+        if (_.isEqual(field, $scope.popularityHoverState)) {
+          $scope.showPopularityControls(field);
+        }
+
         return [field.name, field.type, field.analyzed, field.indexed,
           {
-            markup: $compile('<div ng-mouseover="hoverState = true" ng-mouseout="hoverState = false">' +
-                '<span>{{ field.count }}</span> ' +
-                '<span class="field-popularize" ng-show="hoverState">' +
-                  ' <span ng-click="indexPattern.popularizeField(field.name, 1)" ' +
-                    'class="label label-default"><i class="fa fa-plus"></i></span>' +
-                  ' <span ng-click="indexPattern.popularizeField(field.name, -1)" ' +
-                    'class="label label-default"><i class="fa fa-minus"></i></span>' +
-                '</span>' +
-              '</div>')(childScope),
+            markup: $compile(popularityHtml)(childScope),
             value: field.count
           }
         ];
