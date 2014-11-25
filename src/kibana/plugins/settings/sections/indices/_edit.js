@@ -14,7 +14,7 @@ define(function (require) {
   });
 
   require('modules').get('apps/settings')
-  .controller('settingsIndicesEdit', function ($scope, $location, $route, config, courier, Notifier, Private, AppState) {
+  .controller('settingsIndicesEdit', function ($rootScope, $scope, $location, $route, config, courier, Notifier, Private, AppState) {
     var notify = new Notifier();
     var $state = $scope.state = new AppState();
     var refreshKibanaIndex = Private(require('plugins/settings/sections/indices/_refresh_kibana_index'));
@@ -37,21 +37,33 @@ define(function (require) {
     }, {
       title: 'popularity',
       info: 'A gauge of how often this field is used',
-      class: 'pull-right'
     }];
 
-    $scope.fieldRows = $scope.indexPattern.fields.map(function (field) {
-      return [field.name, field.type, field.analyzed, field.indexed, field.count];
+    $scope.$watchCollection('indexPattern.fields', function () {
+      $scope.fieldRows = $scope.indexPattern.fields.map(function (field) {
+        var childScope = $scope.$new();
+        childScope.field = field;
+
+        return [field.name, field.type, field.analyzed, field.indexed,
+          {
+            markup:
+              '<div ng-mouseover="hoverState = true" ng-mouseout="hoverState = false">' +
+                '<span>{{ field.count }}</span> ' +
+                '<span class="field-popularize" ng-show="hoverState">' +
+                  ' <span ng-click="indexPattern.popularizeField(field.name, 1)" ' +
+                    'class="label label-default"><i class="fa fa-plus"></i></span>' +
+                  ' <span ng-click="indexPattern.popularizeField(field.name, -1)" ' +
+                    'class="label label-default"><i class="fa fa-minus"></i></span>' +
+                '</span>' +
+              '</div>',
+            scope: childScope
+          }
+        ];
+      });
     });
 
-    $scope.perPage = 25;
 
-    $scope.table = {
-      by: 'name',
-      reverse: false,
-      page: 0,
-      max: 35
-    };
+    $scope.perPage = 25;
 
     $scope.changeTab = function (obj) {
       $state.tab = obj.index;
@@ -86,24 +98,6 @@ define(function (require) {
 
     $scope.setDefaultPattern = function () {
       config.set('defaultIndex', $scope.indexPattern.id);
-    };
-
-    $scope.setFieldSort = function (by) {
-      if ($scope.table.by === by) {
-        $scope.table.reverse = !$scope.table.reverse;
-      } else {
-        $scope.table.by = by;
-      }
-    };
-
-    $scope.sortClass = function (column) {
-      if ($scope.table.by !== column) return;
-      return $scope.table.reverse ? ['fa', 'fa-sort-asc'] : ['fa', 'fa-sort-desc'];
-    };
-
-    $scope.tablePages = function () {
-      if (!$scope.indexPattern.fields) return 0;
-      return Math.ceil($scope.indexPattern.fields.length / $scope.table.max);
     };
 
     $scope.setIndexPatternsTimeField = function (field) {
