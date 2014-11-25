@@ -36,6 +36,14 @@ define(function (require) {
       list: $route.current.locals.indexPatternIds
     };
 
+    $scope.$watch('stepOneMode', function (mode) {
+      if (mode === 'new') {
+        if ($scope.indexPattern.list && $scope.indexPattern.list.length === 1) {
+          $scope.indexPattern.selection = $scope.indexPattern.list[0];
+        }
+      }
+    });
+
     $scope.$watch('indexPattern.selection', function (pattern) {
       if (!pattern) return;
       kbnUrl.change('/visualize/step/2?indexPattern={{pattern}}', {pattern: pattern});
