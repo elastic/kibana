@@ -17,8 +17,8 @@ define(function (require) {
       data._attr.margin = {
         top: 5,
         right: 5,
-        bottom: 20,
-        left: 20
+        bottom: 16,
+        left: 60
       };
 
       // configurable vars
@@ -78,7 +78,6 @@ define(function (require) {
         .pluck('x')
         .unique()
         .value();
-      //console.log('colRange', colRange);
 
       // get rowLabels
       var rowData;
@@ -93,13 +92,10 @@ define(function (require) {
       } else {
         rowData = data.data.series;
       }
-      //console.log('data', data);
-      //console.log('rowData', rowData);
       var rowRange = vis._attr.colRange = _.chain(rowData)
         .pluck('label')
         .unique()
         .value();
-      //console.log('rowRange', rowRange);
 
       // legend data
       var legendRanges = vis._attr.legendRanges = ['0'];

@@ -4,6 +4,7 @@ define(function (require) {
     var $ = require('jquery');
 
     var Chart = Private(require('components/vislib/visualizations/_chart'));
+    var XAxis = Private(require('components/vislib/lib/x_axis'));
     var errors = require('errors');
     require('css!components/vislib/styles/main');
 
@@ -26,6 +27,85 @@ define(function (require) {
       HeatMap.Super.apply(this, arguments);
     }
 
+    HeatMap.prototype.addRowLabels = function (svg, data, gridWidth, gridHeight, margin) {
+      var self = this;
+      var halfLabelHeight = 3;
+      var rowLeftOffset = -3;
+      var minGridLabelHeight = 9;
+      var padding = 3;
+
+      if (gridHeight >= minGridLabelHeight) {
+        var rowLabels = svg.selectAll('.rowLabel')
+        .data(data.series)
+        .enter()
+        .append('text')
+        .text(function (d) {
+          return d.label;
+        })
+        .attr('x', 0)
+        .attr('y', function (d, i) { return i * gridHeight; })
+        .style('text-anchor', 'end')
+        .attr('transform', 'translate(' + rowLeftOffset + ',' + ((gridHeight * 0.5) + halfLabelHeight) + ')')
+        .attr('class', function (d) {
+          return 'heat-axis-label ' + d.label;
+        });
+
+        rowLabels.attr('transform', 'translate(-3,' + ((gridHeight * 0.5) + halfLabelHeight) + ')');
+        if (self.maxTextLength(rowLabels) + padding <= margin.left) {
+          //self._attr.margin.left = self.maxTextLength(rowLabels) + padding;
+          //self.draw();
+          return rowLabels.text(function (d) {
+            return d.label;
+          });
+        }
+        return rowLabels.text(function (d) {
+          return null;
+        });
+      }
+    };
+
+    HeatMap.prototype.addColLabels = function (svg, data, gridWidth, gridHeight, height, margin) {
+      var self = this;
+      var colTopOffset = -10;
+      var minGridLabelWidth = 9;
+      var padding = 3;
+
+      if (gridWidth >= minGridLabelWidth) {
+        var colLabels = svg.selectAll('.colLabel')
+        .data(data.series[0].values)
+        .enter()
+        .append('text')
+        .text(function (d) {
+          return self.chartData.xAxisFormatter(d.x);
+        })
+        .attr('x', function (d, i) { return i * gridWidth; })
+        .attr('y', height + margin.top + margin.bottom)
+        .style('text-anchor', 'middle')
+        .attr('transform', 'translate(' + (gridWidth * 0.5) + ',' + colTopOffset + ')')
+        .attr('class', function (d) {
+          return 'heat-axis-label ' + d.x;
+        });
+        if (self.maxTextLength(colLabels) + padding <= gridWidth) {
+          return colLabels.text(function (d) {
+            return self.chartData.xAxisFormatter(d.x);
+          });
+        }
+        return colLabels.text(function (d) {
+          return null;
+        });
+      }
+    };
+
+    HeatMap.prototype.maxTextLength = function (selection) {
+      var lengths = [];
+      selection.each(function textWidths() {
+        var length = Math.ceil(d3.select(this).node().getBBox().width);
+        lengths.push(length);
+      });
+      var maxLength = _.max(lengths);
+      return maxLength;
+    };
+
     /**
      * Renders heatmap chart
      *
@@ -43,12 +123,6 @@ define(function (require) {
       var isTooltip = this._attr.addTooltip;
       var minWidth = 40;
       var minHeight = 40;
-      var minGridLabelWidth = 9;
-      var minGridLabelHeight = 9;
-      var halfLabelHeight = 3;
-      var rowLeftOffset = -3;
-      var colTopOffset = -16;
-
 
       return function (selection) {
 
@@ -76,40 +150,13 @@ define(function (require) {
           var div = d3.select(this);
 
           var svg = div.append('svg')
-          .attr('width', elWidth)// + margin.left + margin.right)
-          .attr('height', elHeight)// + margin.top + margin.bottom)
+          .attr('width', elWidth)
+          .attr('height', elHeight)
           .append('g')
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-          if (gridHeight >= minGridLabelHeight) {
-            var rowLabels = svg.selectAll('.rowLabel')
-            .data(data.series)
-            .enter()
-            .append('text')
-            .text(function (d) { return d.label; })
-            .attr('x', 0)
-            .attr('y', function (d, i) { return i * gridHeight; })
-            .style('text-anchor', 'end')
-            .attr('transform', 'translate(' + rowLeftOffset + ',' + ((gridHeight * 0.5) + halfLabelHeight) + ')')
-            .attr('class', function (d) {
-              return 'heat-axis-label ' + d.label;
-            });
-          }
-
-          if (gridWidth >= minGridLabelWidth) {
-            var colLabels = svg.selectAll('.colLabel')
-            .data(data.series[0].values)
-            .enter()
-            .append('text')
-            .text(function (d) { return d.x; })
-            .attr('x', function (d, i) { return i * gridWidth; })
-            .attr('y', height + margin.top + margin.bottom)
-            .style('text-anchor', 'middle')
-            .attr('transform', 'translate(' + (gridWidth * 0.5) + ',' + colTopOffset + ')')
-            .attr('class', function (d) {
-              return 'heat-axis-label ' + d.x;
-            });
-          }
+          var rowLabels = self.addRowLabels(svg, data, gridWidth, gridHeight, margin);
+          var colLabels = self.addColLabels(svg, data, gridWidth, gridHeight, height, margin);
 
           var layer = svg.selectAll('.layer')
           .data(data.series)
