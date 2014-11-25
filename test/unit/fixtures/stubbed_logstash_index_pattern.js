@@ -1,9 +1,10 @@
 define(function (require) {
   return function stubbedLogstashIndexPatternService(Private) {
     var StubIndexPattern = Private(require('test_utils/stub_index_pattern'));
-    var fieldFormats = Private(require('components/index_patterns/_field_formats'));
+    var flattenSearchResponse = require('components/index_patterns/_flatten_search_response');
+    var _ = require('lodash');
 
-    return new StubIndexPattern('logstash-*', 'time', [
+    var indexPattern = new StubIndexPattern('logstash-*', 'time', [
       { name: 'bytes',              type: 'number',     indexed: true,  analyzed: true,   count: 10 },
       { name: 'ssl',                type: 'boolean',    indexed: true,  analyzed: true,   count: 20 },
       { name: '@timestamp',         type: 'date',       indexed: true,  analyzed: true,   count: 30 },
@@ -19,5 +20,10 @@ define(function (require) {
       { name: '_type',              type: 'string',     indexed: true,  analyzed: true,   count: 0 },
       { name: 'custom_user_field',  type: 'conflict',   indexed: false, analyzed: false,  count: 0 }
     ]);
+
+    indexPattern.flattenSearchResponse = _.bind(flattenSearchResponse, indexPattern);
+
+    return indexPattern;
+
   };
 });
