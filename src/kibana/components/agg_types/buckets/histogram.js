@@ -9,7 +9,7 @@ define(function (require) {
       title: 'Histogram',
       ordered: {},
       makeLabel: function (aggConfig) {
-        return aggConfig.params.field.name;
+        return aggConfig.params.field.displayName;
       },
       params: [
         {

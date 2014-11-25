@@ -115,7 +115,7 @@ define(function (require) {
             break;
           }
 
-          label = (col.aggConfig && col.aggConfig.makeLabel()) || (col.field && col.field.name) || label;
+          label = (col.aggConfig && col.aggConfig.makeLabel()) || (col.field && col.field.displayName) || label;
           if (col.field) val = col.field.format.convert(val);
 
           return {
