@@ -1,5 +1,6 @@
 define(function (require) {
   return function FieldAggParamFactory(Private) {
+    require('filters/short_dots');
     var _ = require('lodash');
 
     var editorHtml = require('text!components/agg_types/controls/field.html');

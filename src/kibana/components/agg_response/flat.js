@@ -111,7 +111,7 @@ define(function (require) {
               group = {
                 column: col,
                 value: bucket.key,
-                label: bucketId
+                label: col.aggConfig && col.aggConfig.getFieldName()
               };
               groupList.push(group);
               groupMap[bucketId] = group;
@@ -167,7 +167,7 @@ define(function (require) {
         }
 
         if (config.field) {
-          config.label = config.field.name;
+          config.label = config.getFieldName();
           return;
         }
       });

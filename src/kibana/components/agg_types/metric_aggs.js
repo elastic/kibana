@@ -15,7 +15,7 @@ define(function (require) {
         name: 'avg',
         title: 'Average',
         makeLabel: function (aggConfig) {
-          return 'Average ' + aggConfig.params.field.name;
+          return 'Average ' + aggConfig.getFieldName();
         },
         params: [
           {
@@ -28,7 +28,7 @@ define(function (require) {
         name: 'sum',
         title: 'Sum',
         makeLabel: function (aggConfig) {
-          return 'Sum of ' + aggConfig.params.field.name;
+          return 'Sum of ' + aggConfig.getFieldName();
         },
         params: [
           {
@@ -41,7 +41,7 @@ define(function (require) {
         name: 'min',
         title: 'Min',
         makeLabel: function (aggConfig) {
-          return 'Min ' + aggConfig.params.field.name;
+          return 'Min ' + aggConfig.getFieldName();
         },
         params: [
           {
@@ -54,7 +54,7 @@ define(function (require) {
         name: 'max',
         title: 'Max',
         makeLabel: function (aggConfig) {
-          return 'Max ' + aggConfig.params.field.name;
+          return 'Max ' + aggConfig.getFieldName();
         },
         params: [
           {
@@ -67,7 +67,7 @@ define(function (require) {
         name: 'cardinality',
         title: 'Unique count',
         makeLabel: function (aggConfig) {
-          return 'Unique count of ' + aggConfig.params.field.name;
+          return 'Unique count of ' + aggConfig.getFieldName();
         },
         params: [
           {
