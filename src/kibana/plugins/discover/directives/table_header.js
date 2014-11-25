@@ -2,6 +2,8 @@ define(function (require) {
   var _ = require('lodash');
   var module = require('modules').get('app/discover');
 
+  require('filters/short_dots');
+
   module.directive('kbnTableHeader', function () {
     var headerHtml = require('text!plugins/discover/partials/table_header.html');
     return {

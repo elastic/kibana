@@ -266,8 +266,16 @@ define(function (require) {
      * @returns {Number} Y stack max value
      */
     Data.prototype.getYStackMax = function (series) {
+      var isOrdered = (this.data.ordered && this.data.ordered.date);
+      var minDate = isOrdered ? this.data.ordered.min : undefined;
+      var maxDate = isOrdered ? this.data.ordered.max : undefined;
+
       return d3.max(this.stackData(series), function (data) {
         return d3.max(data, function (d) {
+          if (isOrdered) {
+            return (d.x >= minDate && d.x <= maxDate) ? d.y0 + d.y : undefined;
+          }
+
           return d.y0 + d.y;
         });
       });
@@ -281,8 +289,16 @@ define(function (require) {
      * @returns {Number} Y domain max value
      */
     Data.prototype.getYMax = function (series) {
+      var isOrdered = (this.data.ordered && this.data.ordered.date);
+      var minDate = isOrdered ? this.data.ordered.min : undefined;
+      var maxDate = isOrdered ? this.data.ordered.max : undefined;
+
       return d3.max(series, function (data) {
         return d3.max(data, function (d) {
+          if (isOrdered) {
+            return (d.x >= minDate && d.x <= maxDate) ? d.y : undefined;
+          }
+
           return d.y;
         });
       });

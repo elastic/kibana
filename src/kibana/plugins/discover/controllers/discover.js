@@ -47,7 +47,8 @@ define(function (require) {
     }
   });
 
-  app.controller('discover', function ($scope, config, courier, $route, $window, Notifier, AppState, timefilter, Promise, Private, kbnUrl, highlightTags) {
+  app.controller('discover', function ($scope, config, courier, $route, $window, Notifier,
+    AppState, timefilter, Promise, Private, kbnUrl, highlightTags) {
 
     var Vis = Private(require('components/vis/vis'));
     var docTitle = Private(require('components/doc_title/doc_title'));
@@ -508,6 +509,7 @@ define(function (require) {
         _.defaults(field, currentState[field.name]);
         // clone the field and add it's display prop
         var clone = _.assign({}, field, {
+          displayName: field.displayName, // this is a getter, so we need to copy it over manually
           format: field.format, // this is a getter, so we need to copy it over manually
           display: columnObjects[field.name] || false,
           rowCount: $scope.rows ? $scope.rows.fieldCounts[field.name] : 0
@@ -522,8 +524,8 @@ define(function (require) {
     }
 
     // TODO: On array fields, negating does not negate the combination, rather all terms
-    $scope.filterQuery = function (field, value, operation) {
-      value = _.isArray(value) ? value : [value];
+    $scope.filterQuery = function (field, values, operation) {
+      values = _.isArray(values) ? values : [values];
 
       var indexPattern = $scope.searchSource.get('index');
       indexPattern.popularizeField(field, 1);
@@ -531,28 +533,46 @@ define(function (require) {
       // Grap the filters from the searchSource and ensure it's an array
       var filters = _.flatten([$state.filters], true);
 
-      _.each(value, function (clause) {
-        var previous = _.find(filters, function (item) {
-          if (item && item.query) {
-            return item.query.match[field].query === clause;
-          } else if (item && item.exists && field === '_exists_') {
-            return item.exists.field === clause;
-          } else if (item && item.missing && field === '_missing_') {
-            return item.missing.field === clause;
+      _.each(values, function (value) {
+        var existing = _.find(filters, function (filter) {
+          if (!filter) return;
+
+          if (field === '_exists_' && filter.exists) {
+            return filter.exists.field === value;
+          }
+
+          if (field === '_missing_' && filter.missing) {
+            return filter.missing.field === value;
+          }
+
+          if (filter.query) {
+            return filter.query.match[field] && filter.query.match[field].query === value;
           }
         });
-        if (!previous) {
-          var filter;
-          if (field === '_exists_') {
-            filter = { exists: { field: clause } };
-          } else if (field === '_missing_') {
-            filter = { missing: { field: clause } };
-          } else {
-            filter = { query: { match: {} } };
-            filter.negate = operation === '-';
-            filter.query.match[field] = { query: clause, type: 'phrase' };
-          }
+
+        if (existing) return;
+
+        switch (field) {
+        case '_exists_':
+          filters.push({
+            exists: {
+              field: value
+            }
+          });
+          break;
+        case '_missing_':
+          filters.push({
+            missing: {
+              field: value
+            }
+          });
+          break;
+        default:
+          var filter = { query: { match: {} } };
+          filter.negate = operation === '-';
+          filter.query.match[field] = { query: value, type: 'phrase' };
           filters.push(filter);
+          break;
         }
       });
 

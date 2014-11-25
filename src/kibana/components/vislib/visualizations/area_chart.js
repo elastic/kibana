@@ -139,12 +139,19 @@ define(function (require) {
      * @param element {D3.UpdateSelection} SVG circles
      * @returns {D3.Selection} circles with event listeners attached
      */
-    AreaChart.prototype.addCircleEvents = function (element) {
+    AreaChart.prototype.addCircleEvents = function (element, svg) {
       var events = this.events;
+      var isBrushable = (typeof events.dispatch.on('brush') === 'function');
+      var brush = isBrushable ? events.addBrushEvent(svg) : undefined;
+      var hover = events.addHoverEvent();
+      var click = events.addClickEvent();
+      var attachedEvents = element.call(hover).call(click);
 
-      return element
-        .call(events.addHoverEvent())
-        .call(events.addClickEvent());
+      if (isBrushable) {
+        attachedEvents.call(brush);
+      }
+
+      return attachedEvents;
     };
 
     /**
@@ -310,7 +317,7 @@ define(function (require) {
           circles = self.addCircles(svg, layers);
 
           // add click and hover events to circles
-          self.addCircleEvents(circles);
+          self.addCircleEvents(circles, svg);
 
           // chart base line
           var line = svg.append('line')
