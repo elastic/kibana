@@ -55,6 +55,35 @@ define(function (require) {
       ]
     };
 
+    var multiSeriesNumberedData = {
+      series: [
+        {
+          label: '200',
+          values: [
+            {x: 1, y: 234},
+            {x: 2, y: 34},
+            {x: 3, y: 834},
+            {x: 4, y: 1234},
+            {x: 5, y: 4}
+          ]
+        },
+        {
+          label: '404',
+          values: [
+            {x: 1, y: 1234},
+            {x: 3, y: 234},
+            {x: 5, y: 34}
+          ]
+        },
+        {
+          label: '503',
+          values: [
+            {x: 3, y: 834}
+          ]
+        }
+      ]
+    };
+
     var ordered = {};
     var childrenObject = {
       children: []
@@ -80,6 +109,7 @@ define(function (require) {
       var injectZeros;
       var sample1;
       var sample2;
+      var sample3;
 
       beforeEach(function () {
         module('ZeroInjectionUtilService');
@@ -90,6 +120,7 @@ define(function (require) {
           injectZeros = Private(require('components/vislib/components/zero_injection/inject_zeros'));
           sample1 = injectZeros(seriesData);
           sample2 = injectZeros(multiSeriesData);
+          sample3 = injectZeros(multiSeriesNumberedData);
         });
       });
 
@@ -165,6 +196,10 @@ define(function (require) {
         expect(sample2.series[2].values[0].y).to.be(0);
         expect(sample2.series[2].values[1].y).to.be(0);
         expect(sample2.series[2].values[4].y).to.be(0);
+        expect(sample3.series[1].values[1].y).to.be(0);
+        expect(sample3.series[2].values[0].y).to.be(0);
+        expect(sample3.series[2].values[1].y).to.be(0);
+        expect(sample3.series[2].values[4].y).to.be(0);
       });
 
       it('should return values arrays with the same x values', function () {
