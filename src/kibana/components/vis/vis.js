@@ -81,7 +81,8 @@ define(function (require) {
         params: this.params,
         aggs: this.aggs.map(function (agg) {
           return agg.toJSON();
-        }).filter(Boolean)
+        }).filter(Boolean),
+        listeners: this.listeners
       };
     };
 
