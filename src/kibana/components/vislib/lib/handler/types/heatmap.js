@@ -5,7 +5,8 @@ define(function (require) {
     var Handler = Private(require('components/vislib/lib/handler/handler'));
     var Data = Private(require('components/vislib/lib/data'));
     var Legend = Private(require('components/vislib/lib/legend'));
-
+    var AxisTitle = Private(require('components/vislib/lib/axis_title'));
+    var ChartTitle = Private(require('components/vislib/lib/chart_title'));
     /*
      * Handler for Heatmap visualizations.
      */
@@ -13,25 +14,37 @@ define(function (require) {
     return function (vis) {
       var data = new Data(injectZeros(vis.data), vis._attr);
 
+      data._attr.margin = {
+        top: 5,
+        right: 5,
+        bottom: 20,
+        left: 20
+      };
+
       // configurable vars
       var zeroColor = vis._attr.zeroColor = '#f2f2f2';
       var colors = vis._attr.colors = ['#d1e8c9', '#9fda9a', '#5dcb6c', '#2fa757', '#1f7f52', '#125946'];
       var colorScaleType = vis._attr.colorScaleType = 'quantize';
 
-      // get chartData, valRange, valExtents
-      var chartData = data.data.series;
+      // get intensityData, valRange, valExtents
+      var intensityData;
       if (data.data.rows) {
-        // if split
-        chartData = _.chain(data.data.rows)
+        intensityData = _.chain(data.data.rows)
           .pluck('series')
           .flatten().value();
+      } else if (data.data.columns) {
+        intensityData = _.chain(data.data.columns)
+          .pluck('series')
+          .flatten().value();
+      } else {
+        intensityData = data.data.series;
       }
-      var valRange = vis._attr.valRange = _.chain(chartData)
-          .pluck('values')
-          .flatten()
-          .pluck('y')
-          .without(0)
-          .value();
+      var valRange = vis._attr.valRange = _.chain(intensityData)
+        .pluck('values')
+        .flatten()
+        .pluck('y')
+        .without(0)
+        .value();
       var valExtents = vis._attr.valExtents = [_.min(valRange), _.max(valRange)];
 
       // color scale
@@ -45,6 +58,48 @@ define(function (require) {
           .range(_.range(colors.length))
           .domain(valRange);
       }
+
+      // get colLabels
+      var colData;
+      if (data.data.rows) {
+        colData = _.chain(data.data.rows)
+          .pluck('series')
+          .flatten().value();
+      } else if (data.data.columns) {
+        colData = _.chain(data.data.columns)
+          .pluck('series')
+          .flatten().value();
+      } else {
+        colData = data.data.series;
+      }
+      var colRange = vis._attr.colRange = _.chain(colData)
+        .pluck('values')
+        .flatten()
+        .pluck('x')
+        .unique()
+        .value();
+      console.log('colRange', colRange);
+
+      // get rowLabels
+      var rowData;
+      if (data.data.rows) {
+        rowData = _.chain(data.data.rows)
+          .pluck('series')
+          .flatten().value();
+      } else if (data.data.columns) {
+        rowData = _.chain(data.data.columns)
+          .pluck('series')
+          .flatten().value();
+      } else {
+        rowData = data.data.series;
+      }
+      console.log('data', data);
+      console.log('rowData', rowData);
+      var rowRange = vis._attr.colRange = _.chain(rowData)
+        .pluck('label')
+        .unique()
+        .value();
+      console.log('rowRange', rowRange);
 
       // legend data
       var legendRanges = vis._attr.legendRanges = ['0'];
@@ -68,7 +123,9 @@ define(function (require) {
 
       return new Handler(vis, {
         data: data,
-        legend: new Legend(vis, vis.el, vis._attr.legendRanges, vis._attr.getHeatmapColor, vis._attr)
+        legend: new Legend(vis, vis.el, vis._attr.legendRanges, vis._attr.getHeatmapColor, vis._attr),
+        axisTitle: new AxisTitle(vis.el, data.get('xAxisLabel'), data.get('yAxisLabel')),
+        chartTitle: new ChartTitle(vis.el)
       });
     };
   };

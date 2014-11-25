@@ -1,6 +1,8 @@
 define(function (require) {
   return function ColumnLayoutFactory(d3, Private) {
     var chartSplit = Private(require('components/vislib/lib/layout/splits/column_chart/chart_split'));
+    var yAxisSplit = Private(require('components/vislib/lib/layout/splits/column_chart/y_axis_split'));
+    var xAxisSplit = Private(require('components/vislib/lib/layout/splits/column_chart/x_axis_split'));
     var chartTitleSplit = Private(require('components/vislib/lib/layout/splits/column_chart/chart_title_split'));
 
     /**
@@ -48,7 +50,7 @@ define(function (require) {
                       type: 'div',
                       class: 'y-axis-chart-title',
                       splits: chartTitleSplit
-                    },
+                    }
                   ]
                 },
                 {

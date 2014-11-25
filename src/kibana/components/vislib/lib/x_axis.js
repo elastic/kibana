@@ -17,7 +17,7 @@ define(function (require) {
       if (!(this instanceof XAxis)) {
         return new XAxis(args);
       }
-
+      console.log('XAxis', args);
       this.el = args.el;
       this.xValues = args.xValues;
       this.ordered = args.ordered;

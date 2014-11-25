@@ -39,22 +39,31 @@ define(function (require) {
       var margin = this._attr.margin;
       var elWidth = this._attr.width = $elem.width();
       var elHeight = this._attr.height = $elem.height();
-      var minWidth = 40;
-      var minHeight = 40;
       var tooltip = this.tooltip;
       var isTooltip = this._attr.addTooltip;
+      var minWidth = 40;
+      var minHeight = 40;
+      var minGridLabelWidth = 9;
+      var minGridLabelHeight = 9;
+      var halfLabelHeight = 3;
+      var rowLeftOffset = -3;
+      var colTopOffset = -16;
+
 
       return function (selection) {
 
+        // hide y axis line
+        d3.select('path.domain').attr('class', 'hidden');
+
         selection.each(function (data) {
-          var width = elWidth;
+          var width = elWidth - margin.left - margin.right;
           var height = elHeight - margin.top - margin.bottom;
           var widthN = data.series[0].values.length;
           var heightN = data.series.length;
 
           // TODO: make gap and radius user configurable
           var gap = 1;
-          var radius = 1;
+          var radius = 0;
           var gridWidth = width / widthN;
           var gridHeight = height / heightN;
           var cellWidth = gridWidth - gap;
@@ -67,36 +76,40 @@ define(function (require) {
           var div = d3.select(this);
 
           var svg = div.append('svg')
-          .attr('width', width)
-          .attr('height', height + margin.top + margin.bottom)
+          .attr('width', elWidth)// + margin.left + margin.right)
+          .attr('height', elHeight)// + margin.top + margin.bottom)
           .append('g')
-          .attr('transform', 'translate(0,' + margin.top + ')');
+          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-          // var rowLabels = svg.selectAll('.rowLabel')
-          // .data(data.series)
-          // .enter()
-          // .append('text')
-          // .text(function (d) { return d.label; })
-          // .attr('x', 0)
-          // .attr('y', function (d, i) { return i * gridHeight; })
-          // .style('text-anchor', 'end')
-          // .attr('transform', 'translate(-6,' + gridHeight / 1.5 + ')')
-          // .attr('class', function (d) {
-          //   return d.label;
-          // });
+          if (gridHeight >= minGridLabelHeight) {
+            var rowLabels = svg.selectAll('.rowLabel')
+            .data(data.series)
+            .enter()
+            .append('text')
+            .text(function (d) { return d.label; })
+            .attr('x', 0)
+            .attr('y', function (d, i) { return i * gridHeight; })
+            .style('text-anchor', 'end')
+            .attr('transform', 'translate(' + rowLeftOffset + ',' + ((gridHeight * 0.5) + halfLabelHeight) + ')')
+            .attr('class', function (d) {
+              return 'heat-axis-label ' + d.label;
+            });
+          }
 
-          // var colLabels = svg.selectAll('.colLabel')
-          // .data(data.series[0].values)
-          // .enter()
-          // .append('text')
-          // .text(function (d) { return d.x; })
-          // .attr('x', function (d, i) { return i * gridWidth; })
-          // .attr('y', height + margin.top + margin.bottom)
-          // .style('text-anchor', 'middle')
-          // .attr('transform', 'translate(' + gridWidth / 2 + ', 0)')
-          // .attr('class', function (d) {
-          //   return d.x;
-          // });
+          if (gridWidth >= minGridLabelWidth) {
+            var colLabels = svg.selectAll('.colLabel')
+            .data(data.series[0].values)
+            .enter()
+            .append('text')
+            .text(function (d) { return d.x; })
+            .attr('x', function (d, i) { return i * gridWidth; })
+            .attr('y', height + margin.top + margin.bottom)
+            .style('text-anchor', 'middle')
+            .attr('transform', 'translate(' + (gridWidth * 0.5) + ',' + colTopOffset + ')')
+            .attr('class', function (d) {
+              return 'heat-axis-label ' + d.x;
+            });
+          }
 
           var layer = svg.selectAll('.layer')
           .data(data.series)
@@ -139,6 +152,7 @@ define(function (require) {
           }
 
           return svg;
+
         });
       };
     };
