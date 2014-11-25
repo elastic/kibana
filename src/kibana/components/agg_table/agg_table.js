@@ -104,7 +104,7 @@ define(function (require) {
           });
 
           // format all row values
-          $scope.formattedRows = ($scope.formattedRows || table.rows).map(function (row) {
+          $scope.formattedRows = (table.rows).map(function (row) {
             return row.map(function (cell, i) {
               return formatters[i](cell);
             });
