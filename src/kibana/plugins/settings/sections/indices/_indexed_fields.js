@@ -4,7 +4,6 @@ define(function (require) {
 
   require('modules').get('apps/settings')
   .directive('indexedFields', function ($compile) {
-    var rowScopes = []; // track row scopes, so they can be destroyed as needed
     var popularityHtml = require('text!plugins/settings/sections/indices/_popularity.html');
 
     return {
@@ -12,6 +11,7 @@ define(function (require) {
       template: require('text!plugins/settings/sections/indices/_indexed_fields.html'),
       scope: true,
       link: function ($scope, $el, attr) {
+        var rowScopes = []; // track row scopes, so they can be destroyed as needed
         $scope.perPage = 25;
 
         $scope.columns = [{

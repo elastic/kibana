@@ -5,7 +5,7 @@ define(function (require) {
   require('modules').get('apps/settings')
   .directive('scriptedFields', function ($compile) {
     var rowScopes = []; // track row scopes, so they can be destroyed as needed
-    var popularityHtml = require('text!plugins/settings/sections/indices/_popularity.html');
+    var controlsHtml = require('text!plugins/settings/sections/indices/_scripted_field_controls.html');
 
     return {
       restrict: 'E',
@@ -18,6 +18,9 @@ define(function (require) {
           title: 'name'
         }, {
           title: 'script'
+        }, {
+          title: 'controls',
+          sortable: false
         }];
 
         $scope.rows = [
