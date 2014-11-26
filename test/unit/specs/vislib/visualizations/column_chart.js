@@ -40,7 +40,7 @@ define(function (require) {
   dataArray.forEach(function (data, i) {
     describe('VisLib Column Chart Test Suite for ' + names[i] + ' Data', function () {
       var vis;
-      var visLibParamms = {
+      var visLibParams = {
         type: 'histogram',
         addLegend: true,
         addTooltip: true,
@@ -53,7 +53,7 @@ define(function (require) {
 
       beforeEach(function () {
         inject(function (Private) {
-          vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParamms);
+          vis = Private(require('vislib_fixtures/_vis_fixture'))(visLibParams);
           require('css!components/vislib/styles/main');
 
           vis.on('brush', function (e) {

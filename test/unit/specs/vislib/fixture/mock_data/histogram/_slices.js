@@ -152,7 +152,22 @@ define(function () {
             'type': 'histogram',
             'schema': 'segment',
             'params': {
-              'field': 'bytes',
+              'field': {
+                name: 'bytes',
+                format: {
+                  convert: function (val) {
+                    if (_.isObject(val)) {
+                      return JSON.stringify(val);
+                    }
+                    else if (val == null) {
+                      return '';
+                    }
+                    else {
+                      return '' + val;
+                    }
+                  }
+                }
+              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -165,7 +180,22 @@ define(function () {
             'type': 'histogram',
             'schema': 'segment',
             'params': {
-              'field': 'bytes',
+              'field': {
+                name: 'bytes',
+                format: {
+                  convert: function (val) {
+                    if (_.isObject(val)) {
+                      return JSON.stringify(val);
+                    }
+                    else if (val == null) {
+                      return '';
+                    }
+                    else {
+                      return '' + val;
+                    }
+                  }
+                }
+              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -178,7 +208,22 @@ define(function () {
             'type': 'histogram',
             'schema': 'segment',
             'params': {
-              'field': 'bytes',
+              'field': {
+                name: 'bytes',
+                format: {
+                  convert: function (val) {
+                    if (_.isObject(val)) {
+                      return JSON.stringify(val);
+                    }
+                    else if (val == null) {
+                      return '';
+                    }
+                    else {
+                      return '' + val;
+                    }
+                  }
+                }
+              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -191,7 +236,22 @@ define(function () {
             'type': 'histogram',
             'schema': 'segment',
             'params': {
-              'field': 'bytes',
+              'field': {
+                name: 'bytes',
+                format: {
+                  convert: function (val) {
+                    if (_.isObject(val)) {
+                      return JSON.stringify(val);
+                    }
+                    else if (val == null) {
+                      return '';
+                    }
+                    else {
+                      return '' + val;
+                    }
+                  }
+                }
+              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -204,7 +264,22 @@ define(function () {
             'type': 'histogram',
             'schema': 'segment',
             'params': {
-              'field': 'bytes',
+              'field': {
+                name: 'bytes',
+                format: {
+                  convert: function (val) {
+                    if (_.isObject(val)) {
+                      return JSON.stringify(val);
+                    }
+                    else if (val == null) {
+                      return '';
+                    }
+                    else {
+                      return '' + val;
+                    }
+                  }
+                }
+              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -217,7 +292,22 @@ define(function () {
             'type': 'histogram',
             'schema': 'segment',
             'params': {
-              'field': 'bytes',
+              'field': {
+                name: 'bytes',
+                format: {
+                  convert: function (val) {
+                    if (_.isObject(val)) {
+                      return JSON.stringify(val);
+                    }
+                    else if (val == null) {
+                      return '';
+                    }
+                    else {
+                      return '' + val;
+                    }
+                  }
+                }
+              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -230,7 +320,22 @@ define(function () {
             'type': 'histogram',
             'schema': 'segment',
             'params': {
-              'field': 'bytes',
+              'field': {
+                name: 'bytes',
+                format: {
+                  convert: function (val) {
+                    if (_.isObject(val)) {
+                      return JSON.stringify(val);
+                    }
+                    else if (val == null) {
+                      return '';
+                    }
+                    else {
+                      return '' + val;
+                    }
+                  }
+                }
+              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -243,7 +348,22 @@ define(function () {
             'type': 'histogram',
             'schema': 'segment',
             'params': {
-              'field': 'bytes',
+              'field': {
+                name: 'bytes',
+                format: {
+                  convert: function (val) {
+                    if (_.isObject(val)) {
+                      return JSON.stringify(val);
+                    }
+                    else if (val == null) {
+                      return '';
+                    }
+                    else {
+                      return '' + val;
+                    }
+                  }
+                }
+              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -256,7 +376,22 @@ define(function () {
             'type': 'histogram',
             'schema': 'segment',
             'params': {
-              'field': 'bytes',
+              'field': {
+                name: 'bytes',
+                format: {
+                  convert: function (val) {
+                    if (_.isObject(val)) {
+                      return JSON.stringify(val);
+                    }
+                    else if (val == null) {
+                      return '';
+                    }
+                    else {
+                      return '' + val;
+                    }
+                  }
+                }
+              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -269,7 +404,22 @@ define(function () {
             'type': 'histogram',
             'schema': 'segment',
             'params': {
-              'field': 'bytes',
+              'field': {
+                name: 'bytes',
+                format: {
+                  convert: function (val) {
+                    if (_.isObject(val)) {
+                      return JSON.stringify(val);
+                    }
+                    else if (val == null) {
+                      return '';
+                    }
+                    else {
+                      return '' + val;
+                    }
+                  }
+                }
+              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -282,7 +432,22 @@ define(function () {
             'type': 'histogram',
             'schema': 'segment',
             'params': {
-              'field': 'bytes',
+              'field': {
+                name: 'bytes',
+                format: {
+                  convert: function (val) {
+                    if (_.isObject(val)) {
+                      return JSON.stringify(val);
+                    }
+                    else if (val == null) {
+                      return '';
+                    }
+                    else {
+                      return '' + val;
+                    }
+                  }
+                }
+              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -295,7 +460,22 @@ define(function () {
             'type': 'histogram',
             'schema': 'segment',
             'params': {
-              'field': 'bytes',
+              'field': {
+                name: 'bytes',
+                format: {
+                  convert: function (val) {
+                    if (_.isObject(val)) {
+                      return JSON.stringify(val);
+                    }
+                    else if (val == null) {
+                      return '';
+                    }
+                    else {
+                      return '' + val;
+                    }
+                  }
+                }
+              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -308,7 +488,22 @@ define(function () {
             'type': 'histogram',
             'schema': 'segment',
             'params': {
-              'field': 'bytes',
+              'field': {
+                name: 'bytes',
+                format: {
+                  convert: function (val) {
+                    if (_.isObject(val)) {
+                      return JSON.stringify(val);
+                    }
+                    else if (val == null) {
+                      return '';
+                    }
+                    else {
+                      return '' + val;
+                    }
+                  }
+                }
+              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -321,7 +516,22 @@ define(function () {
             'type': 'histogram',
             'schema': 'segment',
             'params': {
-              'field': 'bytes',
+              'field': {
+                name: 'bytes',
+                format: {
+                  convert: function (val) {
+                    if (_.isObject(val)) {
+                      return JSON.stringify(val);
+                    }
+                    else if (val == null) {
+                      return '';
+                    }
+                    else {
+                      return '' + val;
+                    }
+                  }
+                }
+              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -334,7 +544,22 @@ define(function () {
             'type': 'histogram',
             'schema': 'segment',
             'params': {
-              'field': 'bytes',
+              'field': {
+                name: 'bytes',
+                format: {
+                  convert: function (val) {
+                    if (_.isObject(val)) {
+                      return JSON.stringify(val);
+                    }
+                    else if (val == null) {
+                      return '';
+                    }
+                    else {
+                      return '' + val;
+                    }
+                  }
+                }
+              },
               'interval': 1000,
               'extended_bounds': {}
             }
@@ -347,7 +572,22 @@ define(function () {
             'type': 'histogram',
             'schema': 'segment',
             'params': {
-              'field': 'bytes',
+              'field': {
+                name: 'bytes',
+                format: {
+                  convert: function (val) {
+                    if (_.isObject(val)) {
+                      return JSON.stringify(val);
+                    }
+                    else if (val == null) {
+                      return '';
+                    }
+                    else {
+                      return '' + val;
+                    }
+                  }
+                }
+              },
               'interval': 1000,
               'extended_bounds': {}
             }
