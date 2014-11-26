@@ -699,7 +699,8 @@ define([
               }
               continue;
             case "string":
-            case "constant.numeric" :
+            case "constant.numeric":
+            case "constant.language.boolean":
             case "text":
               if (state == STATES.start) {
                 state = STATES.looking_for_key;
