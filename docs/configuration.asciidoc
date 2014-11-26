@@ -8,7 +8,8 @@
 
 A list of hosts in `hostname:port` format to which statistics  and events will
 be sent. Data will be sent to the first host, but will failover to the next
-host(s) if the first is not reachable. Defaults to `["localhost:9200"]`.
+host(s) if the first is not reachable. added[1.3.0, before the default was `localhost:9200`] If not set, the marvel agent will use
+the address of the local node (typically `localhost:9200`)
 +
 This setting is update-able via the Cluster Update Settings API.
 +
