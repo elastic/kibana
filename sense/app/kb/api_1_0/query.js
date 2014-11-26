@@ -229,6 +229,10 @@ define(["_"], function (_) {
         }
       },
       has_child: {
+        __template: {
+          type: 'TYPE',
+          query: {}
+        },
         'type': '{type}',
         'score_mode': {
           __one_of: ['none', 'max', 'sum', 'avg']
@@ -239,6 +243,10 @@ define(["_"], function (_) {
         'max_children': 10
       },
       has_parent: {
+        __template: {
+          parent_type: 'TYPE',
+          query: {}
+        },
         'parent_type': '{type}',
         'score_mode': {
           __one_of: ['none', 'score']

@@ -255,10 +255,11 @@ define(function () {
   filters.has_child = {
     __template: {
       type: 'TYPE',
-      query: {}
+      filter: {}
     },
     type: '{type}',
     query: {},
+    filter: {},
     _scope: '',
     min_children: 1,
     max_children: 10
@@ -267,11 +268,12 @@ define(function () {
 
   filters.has_parent = {
     __template: {
-      type: 'TYPE',
-      query: {}
+      parent_type: 'TYPE',
+      filter: {}
     },
-    type: '{type}',
+    parent_type: '{type}',
     query: {},
+    filter: {},
     _scope: ''
   };
 
