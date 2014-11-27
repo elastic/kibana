@@ -47,7 +47,6 @@ define(function () {
       ],
       data_autocomplete_rules: {
         persistent: {
-          'routing.allocation.same_shard.host': { __one_of: [ false, true ]},
           cluster: {
             routing: {
               'allocation.enable': { __one_of: [ "all", "primaries", "new_primaries", "none" ]},
@@ -75,7 +74,7 @@ define(function () {
                 '_id': ""
               },
               'allocation.awareness.attributes': [],
-              'cluster.routing.allocation.awareness.force': {
+              'allocation.awareness.force': {
                 '*': {
                   'values': []
                 }
@@ -83,7 +82,8 @@ define(function () {
               'allocation.allow_rebalance': { __one_of: ['always', 'indices_primaries_active', 'indices_all_active']},
               'allocation.cluster_concurrent_rebalance': 2,
               'allocation.node_initial_primaries_recoveries': 4,
-              'allocation.node_concurrent_recoveries': 2
+              'allocation.node_concurrent_recoveries': 2,
+              'allocation.same_shard.host': { __one_of: [ false, true ]}
             }
           }
 
