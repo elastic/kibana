@@ -646,16 +646,56 @@ var rows = [
     "title": "Circuit Breakers",
     "panels": [
       {
-        "value_field": "fielddata_breaker.estimated_size_in_bytes",
+        "value_field": "breakers.parent.estimated_size_in_bytes",
+        "mode": "max",
+        "title": "Parent Circuit Breaker Estimated Size",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "breakers.parent.tripped",
+        "mode": "max",
+        "title": "Parent Circuit Breaker Trip Count"
+      },
+      {
+        "value_field": "breakers.parent.limit_size_in_bytes",
+        "mode": "max",
+        "title": "Parent Circuit Breaker Limit",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "breakers.fielddata.estimated_size_in_bytes",
         "mode": "max",
         "title": "Field Data Circuit Breaker Estimated Size",
         "y_format": "bytes"
       },
       {
-        "value_field": "fielddata_breaker.tripped",
+        "value_field": "breakers.fielddata.tripped",
         "mode": "max",
         "title": "Field Data Circuit Breaker Trip Count"
-      }      
+      },
+      {
+        "value_field": "breakers.fielddata.limit_size_in_bytes",
+        "mode": "max",
+        "title": "Field Data Circuit Breaker Limit",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "breakers.request.estimated_size_in_bytes",
+        "mode": "max",
+        "title": "Request Circuit Breaker Estimated Size",
+        "y_format": "bytes"
+      },
+      {
+        "value_field": "breakers.request.tripped",
+        "mode": "max",
+        "title": "Request Circuit Breaker Trip Count"
+      },
+      {
+        "value_field": "breakers.request.limit_size_in_bytes",
+        "mode": "max",
+        "title": "Request Circuit Breaker Limit",
+        "y_format": "bytes"
+      }
     ]
   },
   {

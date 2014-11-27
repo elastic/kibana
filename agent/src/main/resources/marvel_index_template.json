@@ -42,13 +42,46 @@
     },
     "node_stats": {
       "properties": {
-        "fielddata_breaker": {
+        "breakers": {
           "properties": {
-            "estimated_size_in_bytes": {
-              "type": "long"
+            "fielddata": {
+              "properties": {
+                "estimated_size_in_bytes": {
+                  "type": "long"
+                },
+                "tripped": {
+                  "type": "long"
+                },
+                "limit_size_in_bytes": {
+                  "type": "long"
+                }
+              }
             },
-            "tripped": {
-              "type": "long"
+            "request": {
+              "properties": {
+                "estimated_size_in_bytes": {
+                  "type": "long"
+                },
+                "tripped": {
+                  "type": "long"
+                },
+                "limit_size_in_bytes": {
+                  "type": "long"
+                }
+              }
+            },
+            "parent": {
+              "properties": {
+                "estimated_size_in_bytes": {
+                  "type": "long"
+                },
+                "tripped": {
+                  "type": "long"
+                },
+                "limit_size_in_bytes": {
+                  "type": "long"
+                }
+              }
             }
           }
         },

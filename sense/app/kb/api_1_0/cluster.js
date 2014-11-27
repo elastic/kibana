@@ -85,8 +85,16 @@ define(function () {
               'allocation.node_concurrent_recoveries': 2,
               'allocation.same_shard.host': { __one_of: [ false, true ]}
             }
+          },
+          indices: {
+            breaker: {
+              "total.limit": "70%",
+              "fielddata.limit": "60%",
+              "fielddata.overhead": 1.03,
+              "request.limit": "40%",
+              "request.overhead": 1.0
+            }
           }
-
         },
         transient: {
           __scope_link: '.persistent'
