@@ -7,6 +7,14 @@ host: "0.0.0.0"
 # The Elasticsearch instance to use for all your queries.
 elasticsearch: "http://localhost:9200"
 
+# If your Elasticsearch is protected with basic auth:
+# username: user
+# password: pass
+
+# preserve_elasticsearch_host true will send the hostname specified in `elasticsearch`. If you set it to false,
+# then the host you use to connect to *this* Kibana instance will be sent.
+preserve_elasticsearch_host: true
+
 # Kibana uses an index in Elasticsearch to store saved searches, visualizations
 # and dashboards. It will create a new index if it doesn't already exist.
 kibanaIndex: ".kibana"

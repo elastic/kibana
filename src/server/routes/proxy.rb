@@ -9,7 +9,7 @@ module Kibana
       use Rack::ReverseProxy do
         reverse_proxy_options timeout: config["request_timeout"]
         @global_options[:verify_ssl] = config["verifySSL"].nil? ? true : config["verifySSL"]
-        reverse_proxy(/^\/elasticsearch(.*)$/, "#{config["elasticsearch"]}$1")
+        reverse_proxy(/^\/elasticsearch(.*)$/, "#{config["elasticsearch"]}$1", username: config["username"], password: config["password"], preserve_host: config["preserve_elasticsearch_host"])
       end
     end
   end
