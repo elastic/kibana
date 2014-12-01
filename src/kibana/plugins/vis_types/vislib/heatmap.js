@@ -2,6 +2,7 @@ define(function (require) {
   return function HeatMapVisType(Private) {
     var VislibVisType = Private(require('plugins/vis_types/vislib/_vislib_vis_type'));
     var Schemas = Private(require('plugins/vis_types/_schemas'));
+    var HeatMapConverter = Private(require('plugins/vis_types/vislib/converters/heatmap'));
 
     return new VislibVisType({
       name: 'heatmap',
@@ -13,11 +14,12 @@ define(function (require) {
           addLegend: true
         }
       },
+      responseConverter: HeatMapConverter,
       schemas: new Schemas([
         {
           group: 'metrics',
           name: 'metric',
-          title: 'Intensity',
+          title: 'Metric',
           min: 1,
           max: 1,
           defaults: [
@@ -26,15 +28,17 @@ define(function (require) {
         },
         {
           group: 'buckets',
-          name: 'segment',
+          name: 'column',
           title: 'Columns',
+          aggFilter: ['date_histogram', 'histogram', 'range', 'terms', 'filters', 'significant_terms'],
           min: 0,
           max: 1
         },
         {
           group: 'buckets',
-          name: 'group',
+          name: 'row',
           title: 'Rows',
+          aggFilter: ['histogram', 'range', 'terms', 'filters', 'significant_terms'],
           min: 0,
           max: 1
         },

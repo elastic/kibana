@@ -13,12 +13,14 @@ define(function (require) {
 
     return function (vis) {
       var data = new Data(injectZeros(vis.data), vis._attr);
+      // var data = new Data(vis.data, vis._attr);
+      console.log('heatmap.handler', data);
 
       data._attr.margin = {
         top: 5,
         right: 5,
         bottom: 16,
-        left: 60
+        left: 80
       };
 
       // configurable vars
@@ -58,44 +60,6 @@ define(function (require) {
           .range(_.range(colors.length))
           .domain(valRange);
       }
-
-      // get colLabels
-      var colData;
-      if (data.data.rows) {
-        colData = _.chain(data.data.rows)
-          .pluck('series')
-          .flatten().value();
-      } else if (data.data.columns) {
-        colData = _.chain(data.data.columns)
-          .pluck('series')
-          .flatten().value();
-      } else {
-        colData = data.data.series;
-      }
-      var colRange = vis._attr.colRange = _.chain(colData)
-        .pluck('values')
-        .flatten()
-        .pluck('x')
-        .unique()
-        .value();
-
-      // get rowLabels
-      var rowData;
-      if (data.data.rows) {
-        rowData = _.chain(data.data.rows)
-          .pluck('series')
-          .flatten().value();
-      } else if (data.data.columns) {
-        rowData = _.chain(data.data.columns)
-          .pluck('series')
-          .flatten().value();
-      } else {
-        rowData = data.data.series;
-      }
-      var rowRange = vis._attr.colRange = _.chain(rowData)
-        .pluck('label')
-        .unique()
-        .value();
 
       // legend data
       var legendRanges = vis._attr.legendRanges = ['0'];

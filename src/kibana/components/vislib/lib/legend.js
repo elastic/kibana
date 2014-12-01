@@ -27,7 +27,7 @@ define(function (require) {
       this.color = color;
       this._attr = _.defaults(_attr || {}, {
         'legendClass' : 'legend-col-wrapper',
-        'blurredOpacity' : 0.3,
+        'blurredOpacity' : 0.2,
         'focusOpacity' : 1,
         'defaultOpacity' : 1,
         'legendDefaultOpacity': 1,
