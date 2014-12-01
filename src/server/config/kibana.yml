@@ -26,4 +26,4 @@ shard_timeout: 30000
 
 # Set to false to have a complete disregard for the validity of the SSL
 # certificate.
-verifySSL: true
+verify_ssl: true
