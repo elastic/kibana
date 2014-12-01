@@ -4,21 +4,21 @@ define(function (require) {
   require('plugins/settings/sections/indices/_scripted_fields');
 
   require('routes')
-  .addResolves(/settings\/indices\/(.+)\/.+Field/, {
+  .addResolves(/settings\/indices\/(.+)\/scriptedField/, {
     indexPattern: function ($route, courier) {
       return courier.indexPatterns.get($route.current.params.id)
       .catch(courier.redirectWhenMissing('/settings/indices'));
     }
   })
-  .when('/settings/indices/:id/createField', {
+  .when('/settings/indices/:id/scriptedField', {
     template: require('text!plugins/settings/sections/indices/scripted_fields/index.html'),
   })
-  .when('/settings/indices/:id/editField/:field', {
+  .when('/settings/indices/:id/scriptedField/:field', {
     template: require('text!plugins/settings/sections/indices/scripted_fields/index.html'),
   });
 
   require('modules').get('apps/settings')
-  .controller('scriptedFieldsEdit', function ($scope, $route, $window, Notifier) {
+  .controller('scriptedFieldsEdit', function ($scope, $route, $window, Notifier, kbnUrl) {
     var notify = new Notifier();
     var createMode = (!$route.current.params.field);
     $scope.indexPattern = $route.current.locals.indexPattern;

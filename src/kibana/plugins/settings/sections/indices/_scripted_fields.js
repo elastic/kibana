@@ -44,7 +44,7 @@ define(function (require) {
             indexPattern: $scope.indexPattern.id
           };
 
-          kbnUrl.change('/settings/indices/{{ indexPattern }}/createField', params);
+          kbnUrl.change('/settings/indices/{{ indexPattern }}/scriptedField', params);
         };
 
         $scope.edit = function (field) {
