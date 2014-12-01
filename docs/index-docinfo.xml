@@ -4,7 +4,7 @@
         aggregates cluster wide statistics and events and offers a single interface to
         view and analyze them. Marvel is free for development use but does require a
         license to run in production. For more details, please see the
-        <ulink url="http://www.elasticsearch.com/marvel">Marvel product page</ulink>.
+        <ulink url="http://www.elasticsearch.com/products/marvel/">Marvel product page</ulink>.
     </simpara>
 </abstract>
 
