@@ -156,6 +156,7 @@ define(function (require) {
         chart.series.push({ values: [ { x: '_all', y: 0 } ] });
       }
 
+      /*
       // add date format to align data by interval
       var getInterval = function(ordered) {
         if (ordered.date) {
@@ -181,9 +182,7 @@ define(function (require) {
         }
         return ordered;
       };
-
-      console.log('columnOrdered:', getInterval(chart.columnOrdered));
-      console.log('rowOrdered:', getInterval(chart.rowOrdered));
+      */
 
       rows.forEach(function (row) {
         var seriesLabel = rowAxis && row[iRow];
@@ -211,14 +210,6 @@ define(function (require) {
           y: row[iMetric === -1 ? row.length - 1 : iMetric]
         };
 
-        // if (new Date(datum.x) != 'Invalid Date') {
-        //   datum.xInterval = chart.columnOrdered.format(new Date(row[iCol]);
-        // }
-
-        // if (new Date(datum.row) != 'Invalid Date') {
-        //   datum.rowInterval = chart.rowOrdered.format(new Date(row[iRow]);
-        // }
-
         // skip this datum
         if (datum.y == null) return;
 
@@ -229,8 +220,6 @@ define(function (require) {
 
         s.values.push(datum);
       });
-
-      //console.log('chart.final', chart);
 
     };
   };

@@ -13,8 +13,6 @@ define(function (require) {
 
     return function (vis) {
       var data = new Data(injectZeros(vis.data), vis._attr);
-      // var data = new Data(vis.data, vis._attr);
-      console.log('heatmap.handler', data);
 
       data._attr.margin = {
         top: 5,

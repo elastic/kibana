@@ -13,7 +13,6 @@ define(function (require) {
      * @param args {{el: (HTMLElement), yMax: (Number), _attr: (Object|*)}}
      */
     function YAxis(args) {
-      console.log('YAxis', args);
       this.el = args.el;
       this.yMax = args.yMax;
       this._attr = _.defaults(args._attr || {}, {});

@@ -401,7 +401,6 @@ define(function (require) {
      * @returns {Array} Array of x axis values
      */
     Data.prototype.xValues = function () {
-      console.log('data.xValues', orderKeys(this.data));
       return orderKeys(this.data);
     };
 
