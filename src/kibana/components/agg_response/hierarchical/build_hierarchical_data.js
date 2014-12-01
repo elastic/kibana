@@ -53,7 +53,7 @@ define(function (require) {
           var agg = firstAgg._next;
           var split = buildSplit(agg, metric, bucket[agg.id]);
           // Since splits display labels we need to set it.
-          split.label = bucket.key + ': ' + firstAgg.params.field.name;
+          split.label = bucket.key + ': ' + firstAgg.params.field.displayName;
           split.tooltipFormatter = tooltipFormatter(raw.columns);
           return split;
         });

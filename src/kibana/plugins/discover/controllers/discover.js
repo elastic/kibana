@@ -331,7 +331,7 @@ define(function (require) {
 
               // Flatten the fields
               var indexPattern = $scope.searchSource.get('index');
-              hit._source = indexPattern.flattenSearchResponse(hit._source);
+              hit._flattened = indexPattern.flattenSearchResponse(hit._source);
 
               var formatValues = function (value, name) {
                 // add up the counts for each field name
@@ -341,7 +341,7 @@ define(function (require) {
                 return ($scope.formatsByName[name] || defaultFormat).convert(value);
               };
 
-              var formattedSource = _.mapValues(hit._source, formatValues);
+              var formattedSource = _.mapValues(hit._flattened, formatValues);
               var formattedHits = _.mapValues(hit.fields, formatValues);
 
               hit._formatted = _.merge(formattedSource, formattedHits);
@@ -509,6 +509,7 @@ define(function (require) {
         _.defaults(field, currentState[field.name]);
         // clone the field and add it's display prop
         var clone = _.assign({}, field, {
+          displayName: field.displayName, // this is a getter, so we need to copy it over manually
           format: field.format, // this is a getter, so we need to copy it over manually
           display: columnObjects[field.name] || false,
           rowCount: $scope.rows ? $scope.rows.fieldCounts[field.name] : 0

@@ -1,5 +1,6 @@
 define(function (require) {
   var module = require('modules').get('kibana/index_patterns');
+  require('filters/short_dots');
 
   module.service('indexPatterns', function (configFile, es, Notifier, Private, Promise) {
     var self = this;

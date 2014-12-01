@@ -9,7 +9,7 @@ define(function (require) {
       name: 'range',
       title: 'Range',
       makeLabel: function (aggConfig) {
-        return aggConfig.params.field.name + ' ranges';
+        return aggConfig.params.field.displayName + ' ranges';
       },
       params: [
         {
