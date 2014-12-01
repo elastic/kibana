@@ -16,7 +16,7 @@ module Kibana
         data['plugins'] = plugins
 
         # Remove keys we do not want to expose
-        ["elasticsearch", "username", "password"].each { |key| data.delete(key) }
+        ["elasticsearch", "elasticsearch_username", "elasticsearch_password"].each { |key| data.delete(key) }
 
         json data
       end

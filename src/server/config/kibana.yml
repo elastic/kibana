@@ -8,8 +8,8 @@ host: "0.0.0.0"
 elasticsearch: "http://localhost:9200"
 
 # If your Elasticsearch is protected with basic auth:
-# username: user
-# password: pass
+# elasticsearch_username: user
+# elasticsearch_password: pass
 
 # preserve_elasticsearch_host true will send the hostname specified in `elasticsearch`. If you set it to false,
 # then the host you use to connect to *this* Kibana instance will be sent.
