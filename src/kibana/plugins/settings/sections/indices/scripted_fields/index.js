@@ -18,10 +18,37 @@ define(function (require) {
   });
 
   require('modules').get('apps/settings')
-  .controller('scriptedFieldsEdit', function ($scope, $route, Notifier) {
+  .controller('scriptedFieldsEdit', function ($scope, $route, $window, Notifier) {
     var notify = new Notifier();
-
-    $scope.action = ($route.current.params.field) ? 'Edit' : 'Create';
+    var createMode = (!$route.current.params.field);
     $scope.indexPattern = $route.current.locals.indexPattern;
+
+    if (createMode) {
+      $scope.action = 'Create';
+    } else {
+      $scope.action = 'Edit';
+      // TODO: fetch matching scriptedField
+    }
+
+    $scope.cancel = function () {
+      $window.history.back();
+    };
+
+    $scope.submit = function () {
+      console.log('submit', $scope.scriptedField);
+    };
+
+    $scope.$watch('scriptedField.name', function (name) {
+      checkConflict(name);
+    });
+
+    function checkConflict(name) {
+      var match = _.find($scope.indexPattern.fields, { name: name });
+      if (match !== undefined) {
+        $scope.namingConflict = true;
+      } else {
+        $scope.namingConflict = false;
+      }
+    }
   });
 });

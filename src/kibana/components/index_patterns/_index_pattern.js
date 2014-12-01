@@ -73,6 +73,7 @@ define(function (require) {
                 return self.refreshFields();
               } else {
                 setIndexedValue('fields');
+                setIndexedValue('scriptedFields');
               }
             }
 
