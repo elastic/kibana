@@ -266,6 +266,14 @@ define(function (require) {
           }
           flatState.body.fields = ['*', '_source'];
 
+          _.each(flatState.index.fields.byType['date'], function (field) {
+            if (field.indexed) {
+              flatState.body.script_fields = flatState.body.script_fields || {};
+              flatState.body.script_fields[field.name] = {
+                script: 'doc["' + field.name + '"].value'
+              };
+            }
+          });
 
           /**
            * Create a filter that can be reversed for filters with negate set
