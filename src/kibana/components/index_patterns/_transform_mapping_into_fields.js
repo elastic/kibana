@@ -18,7 +18,7 @@ define(function (require) {
     return function (response) {
       var fields = {};
       _.each(response, function (index, indexName) {
-        if (indexName === configFile.kibanaIndex) return;
+        if (indexName === configFile.kibana_index) return;
         _.each(index.mappings, function (mappings, typeName) {
           _.each(mappings, function (field, name) {
             var keys = Object.keys(field.mapping);

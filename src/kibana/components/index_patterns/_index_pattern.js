@@ -39,7 +39,7 @@ define(function (require) {
       self.init = function () {
         // tell the docSource where to find the doc
         docSource
-        .index(configFile.kibanaIndex)
+        .index(configFile.kibana_index)
         .type(type)
         .id(self.id);
 
