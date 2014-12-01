@@ -418,6 +418,7 @@ define(function (require) {
     $scope.resetQuery = function () {
       $state.reset();
       $scope.fetch();
+      setFields();
     };
 
     $scope.newQuery = function () {
@@ -614,6 +615,7 @@ define(function (require) {
 
       // Make sure there are no columns added that aren't in the displayed field list.
       $state.columns = _.intersection($state.columns, fields);
+
 
       // If no columns remain, use _source
       if (!$state.columns.length) {
