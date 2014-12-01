@@ -60,7 +60,7 @@ define(function (require) {
         };
 
         $scope.remove = function (field) {
-          console.log('remove');
+          $scope.indexPattern.removeScriptedField(field.name);
         };
       }
     };

@@ -43,7 +43,7 @@ define(function (require) {
         $scope.indexPattern.save();
       }
 
-      notify.info($scope.scriptedField.name + ' successfully saved');
+      notify.info('Scripted field \'' + $scope.scriptedField.name + '\' successfully saved');
       $window.history.back();
     };
 

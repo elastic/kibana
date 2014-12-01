@@ -125,6 +125,14 @@ define(function (require) {
         self.save();
       };
 
+      self.removeScriptedField = function (name) {
+        var index = _.findIndex(self.scriptedFields, { name: name });
+        if (index !== -1) {
+          self.scriptedFields.splice(index, 1);
+          self.save();
+        }
+      };
+
       self.popularizeField = function (fieldName, unit) {
         if (_.isUndefined(unit)) unit = 1;
         if (!(self.fields.byName && self.fields.byName[fieldName])) return;
@@ -179,7 +187,6 @@ define(function (require) {
         return mapper.clearCache(self)
         .then(function () {
           return self._fetchFields()
-          .then(self._fetchScriptedFields)
           .then(self.save);
         });
       };
@@ -189,10 +196,6 @@ define(function (require) {
         .then(function (fields) {
           setIndexedValue('fields', fields);
         });
-      };
-
-      self._fetchScriptedFields = function () {
-        setIndexedValue('scriptedFields', []);
       };
 
       self.toJSON = function () {
