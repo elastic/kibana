@@ -27,8 +27,9 @@ define(function (require) {
     if (createMode) {
       $scope.action = 'Create';
     } else {
+      var scriptName = $route.current.params.field;
       $scope.action = 'Edit';
-      // TODO: fetch matching scriptedField
+      $scope.scriptedField = $scope.indexPattern.scriptedFields.byName[scriptName];
     }
 
     $scope.cancel = function () {
