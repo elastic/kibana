@@ -45,10 +45,14 @@ define(function (require) {
         indexPattern = Private(require('fixtures/stubbed_logstash_index_pattern'));
       });
 
+      var hits = _.each(require('fixtures/hits.js'), function (hit) {
+        hit._flattened = indexPattern.flattenSearchResponse(hit._source);
+      });
+
       init($elem, {
         fields: _.map(indexPattern.fields.raw, function (v, i) { return _.merge(v, {display: false, rowCount: i}); }),
         toggle: sinon.spy(),
-        data: require('fixtures/hits'),
+        data: hits,
         filter: sinon.spy(),
         indexPattern: indexPattern
       });

@@ -29,7 +29,7 @@ define(function (require) {
           };
         } else {
           uniqueXValues[key] = {
-            index: Math.max(i, uniqueXValues[key].index),
+            index: Math.min(i, uniqueXValues[key].index),
             isNumber: _.isNumber(key)
           };
         }

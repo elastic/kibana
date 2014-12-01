@@ -87,7 +87,14 @@ define(function (require) {
     });
 
     describe('getFieldValues', function () {
-      var hits = require('fixtures/real_hits.js');
+      var hits;
+
+      beforeEach(function () {
+        hits = _.each(require('fixtures/real_hits.js'), function (hit) {
+          hit._flattened = indexPattern.flattenSearchResponse(hit._source);
+        });
+      });
+
       it('Should return an array of values for _source fields', function () {
         var extensions = fieldCalculator.getFieldValues(hits, indexPattern.fields.byName.extension);
         expect(extensions).to.be.an(Array);

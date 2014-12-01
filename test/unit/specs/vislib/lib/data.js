@@ -247,5 +247,52 @@ define(function (require) {
       });
     });
 
+    describe('getYMaxValue method', function () {
+      var Data;
+      var dataSeries;
+      var stackedDataSeries;
+      var visData;
+      var stackedVisData;
+      var series;
+      var stackedSeries;
+      var maxValue;
+      var stackedMaxValue;
+
+      beforeEach(function () {
+        module('DataFactory');
+      });
+
+      beforeEach(function () {
+        inject(function (d3, Private) {
+          Data = Private(require('components/vislib/lib/data'));
+          dataSeries = require('vislib_fixtures/mock_data/series/_data0');
+          stackedDataSeries = require('vislib_fixtures/mock_data/stacked/_stacked');
+          visData = new Data(dataSeries, {});
+          stackedVisData = new Data(stackedDataSeries, {});
+          series = visData.flatten();
+          stackedSeries = stackedVisData.flatten();
+          maxValue = 25;
+          stackedMaxValue = 60;
+        });
+      });
+
+      // The first value in the time series is less than the min date in the
+      // date range. It also has the largest y value. This value should be excluded
+      // when calculating the Y max value since it falls outside of the range.
+      it('should return the Y domain max value', function () {
+        series.forEach(function (data) {
+          expect(visData.getYMax(data)).to.be(maxValue);
+        });
+        stackedSeries.forEach(function (data) {
+          expect(stackedVisData.getYStackMax(data)).to.be(stackedMaxValue);
+        });
+      });
+
+      it('should have a minimum date value that is greater than the max value within the date range', function () {
+        expect(_.min(series, function (d) { return d.x; })).to.be.greaterThan(maxValue);
+        expect(_.min(stackedSeries, function (d) { return d.x; })).to.be.greaterThan(stackedMaxValue);
+      });
+    });
+
   });
 });

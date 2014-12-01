@@ -14,12 +14,6 @@ define(function (require) {
   require('components/url/url');
 
   function init() {
-    globalStateMock = {
-      removeFromUrl: function (url) {
-        return url;
-      }
-    };
-
     module('kibana/url', 'kibana', function ($provide) {
       $provide.service('$route', function () {
         return {
@@ -28,6 +22,12 @@ define(function (require) {
       });
 
       $provide.service('globalState', function () {
+        globalStateMock = {};
+        globalStateMock.on = globalStateMock.off = _.noop;
+        globalStateMock.removeFromUrl = function (url) {
+          return url;
+        };
+
         return globalStateMock;
       });
     });

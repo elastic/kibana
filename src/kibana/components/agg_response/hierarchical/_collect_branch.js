@@ -6,11 +6,11 @@ define(function (require) {
       // record the the depth
       var depth = item.depth - 1;
 
-      // Using the aggConfig determin what the field name is. If the aggConfig
+      // Using the aggConfig determine what the field name is. If the aggConfig
       // doesn't exist (which means it's an _all agg) then use the level for
       // the field name
       var col = item.aggConfig;
-      var field = (col && col.params && col.params.field && col.params.field.name)
+      var field = (col && col.params && col.params.field && col.params.field.displayName)
         || (col && col.label)
         || ('level ' + item.depth);
 
