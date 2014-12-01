@@ -18,10 +18,9 @@ define(function (require) {
       return _.chain(objKeys)
       .pairs()
       .sortBy(function (d) {
-        if (d[1].isNumber) {
-          // sort by index
-          return +d[0];
-        }
+
+        // sort by index
+        return d[1].index;
       })
       .map(function (d) {
         return d[1].isNumber ? +d[0] : d[0];

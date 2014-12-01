@@ -34,6 +34,8 @@ define(function (require) {
         handler._attr.defaultOpacity = 0.6;
       }
 
+      this.checkIfEnoughData();
+
       this._attr = _.defaults(handler._attr || {}, {
         xValue: function (d) { return d.x; },
         yValue: function (d) { return d.y; }
@@ -258,6 +260,18 @@ define(function (require) {
       // Adding clipPathBuffer to height so it doesn't
       // cutoff the lower part of the chart
       .attr('height', height + clipPathBuffer);
+    };
+
+    AreaChart.prototype.checkIfEnoughData = function () {
+      var series = this.chartData.series;
+
+      var notEnoughData = series.some(function (obj) {
+        return obj.values.length < 2;
+      });
+
+      if (notEnoughData) {
+        throw new errors.NotEnoughData();
+      }
     };
 
     /**

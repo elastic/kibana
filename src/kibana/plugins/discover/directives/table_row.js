@@ -77,7 +77,7 @@ define(function (require) {
           // The fields to loop over
           if (!row._fields) {
             row._fields = _.union(
-              _.keys(row._source),
+              _.keys(row._formatted),
               config.get('metaFields')
             );
             row._fields.sort();
@@ -95,7 +95,7 @@ define(function (require) {
           };
 
           $detailsScope.showArrayInObjectsWarning = function (row, field) {
-            var value = row._source[field];
+            var value = row._formatted[field];
             return _.isArray(value) && typeof value[0] === 'object';
           };
 
@@ -103,7 +103,7 @@ define(function (require) {
         };
 
         $scope.filter = function (row, field, operation) {
-          $scope.filtering(field, row._source[field] || row[field], operation);
+          $scope.filtering(field, row._flattened[field] || row[field], operation);
         };
 
         $scope.$watchCollection('columns', function () {

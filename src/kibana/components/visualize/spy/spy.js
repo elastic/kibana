@@ -17,7 +17,6 @@ define(function (require) {
         link: function ($scope, $el) {
           var $container = $el.find('.visualize-spy-container');
           var fullPageSpy = false;
-          // $scope.spyMode = null; // inherited from the parent
           $scope.modes = modes;
 
           $scope.toggleDisplay = function () {
@@ -36,38 +35,33 @@ define(function (require) {
             var current = $scope.spyMode;
             var change = false;
 
-            function set() {
-              // no change
-              if (current && newMode && newMode.name === current.name) return;
+            // no change
+            if (current && newMode && newMode.name === current.name) return;
 
-              // clear the current value
-              if (current) {
-                current.$container.remove();
-                current.$scope.$destroy();
-                delete $scope.spyMode;
-                current = null;
-                change = true;
-              }
-
-              // no further changes
-              if (!newMode) return;
-
+            // clear the current value
+            if (current) {
+              current.$container.remove();
+              current.$scope.$destroy();
+              delete $scope.spyMode;
+              current = null;
               change = true;
-              current = $scope.spyMode = {
-                // copy a couple values over
-                name: newMode.name,
-                display: newMode.display,
-                fill: fullPageSpy,
-                $scope: $scope.$new(),
-                $container: $('<div class="visualize-spy-content">').appendTo($container)
-              };
-
-              current.$container.append($compile(newMode.template)(current.$scope));
-              newMode.link && newMode.link(current.$scope, current.$container);
             }
 
-            // wrapped in fn to enable early return
-            set();
+            // no further changes
+            if (!newMode) return;
+
+            change = true;
+            current = $scope.spyMode = {
+              // copy a couple values over
+              name: newMode.name,
+              display: newMode.display,
+              fill: fullPageSpy,
+              $scope: $scope.$new(),
+              $container: $('<div class="visualize-spy-content">').appendTo($container)
+            };
+
+            current.$container.append($compile(newMode.template)(current.$scope));
+            newMode.link && newMode.link(current.$scope, current.$container);
           };
         }
       };
