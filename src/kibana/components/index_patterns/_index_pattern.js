@@ -122,7 +122,6 @@ define(function (require) {
           name: name,
           script: script
         });
-        setIndexedValue('scriptedFields');
         self.save();
       };
 
