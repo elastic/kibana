@@ -157,8 +157,8 @@ define(function (require) {
       .append('div')
       // class name needs `chart` in it for the polling checkSize function
       // to continuously call render on resize
-      .attr('class', 'chart error')
-      .append('p')
+      .attr('class', 'visualize-error chart error')
+      .append('h4')
       .text(message);
     };
 
