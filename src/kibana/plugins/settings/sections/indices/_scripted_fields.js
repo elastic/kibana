@@ -12,6 +12,7 @@ define(function (require) {
       template: require('text!plugins/settings/sections/indices/_scripted_fields.html'),
       scope: true,
       link: function ($scope, $el, attr) {
+        var fieldEditorPath = '/settings/indices/{{ indexPattern }}/scriptedField';
         $scope.perPage = 25;
 
         $scope.columns = [{
@@ -20,6 +21,7 @@ define(function (require) {
           title: 'script'
         }, {
           title: 'controls',
+          class: 'pull-right',
           sortable: false
         }];
 
@@ -27,15 +29,16 @@ define(function (require) {
           _.invoke(rowScopes, '$destroy');
 
           $scope.rows = $scope.indexPattern.scriptedFields.map(function (field, i) {
-            var scope = $scope.$new();
-            scope.field = field;
-            rowScopes.push(scope);
+            var rowScope = $scope.$new();
+            var columns = [field.name, field.script];
+            rowScope.field = field;
+            rowScopes.push(rowScope);
 
-            field.push({
-              markup: $compile(controlsHtml)(scope)
+            columns.push({
+              markup: $compile(controlsHtml)(rowScope)
             });
 
-            return field;
+            return columns;
           });
         });
 
@@ -44,7 +47,7 @@ define(function (require) {
             indexPattern: $scope.indexPattern.id
           };
 
-          kbnUrl.change('/settings/indices/{{ indexPattern }}/scriptedField', params);
+          kbnUrl.change(fieldEditorPath, params);
         };
 
         $scope.edit = function (field) {
@@ -53,7 +56,7 @@ define(function (require) {
             fieldName: field.name
           };
 
-          kbnUrl.change('/settings/indices/{{ indexPattern }}/createField/{{ fieldName }}', params);
+          kbnUrl.change(fieldEditorPath + '/{{ fieldName }}', params);
         };
 
         $scope.remove = function (field) {
