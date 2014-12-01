@@ -35,7 +35,18 @@ define(function (require) {
     };
 
     $scope.submit = function () {
-      console.log('submit', $scope.scriptedField);
+      if (createMode) {
+        $scope.indexPattern.addScriptedField($scope.scriptedField.name, $scope.scriptedField.script);
+        // redirect URL to update the app state, but not break the back button
+        kbnUrl.redirect('/settings/indices/{id}/editField/{field}', {
+          id: $scope.indexPattern.id,
+          field: $scope.scriptedField.name
+        });
+      } else {
+        $scope.indexPattern.save();
+      }
+
+      notify.info($scope.scriptedField.name + ' successfully saved');
     };
 
     $scope.$watch('scriptedField.name', function (name) {
@@ -43,8 +54,8 @@ define(function (require) {
     });
 
     function checkConflict(name) {
-      var match = _.find($scope.indexPattern.fields, { name: name });
-      if (match !== undefined) {
+      var match = $scope.indexPattern.fields.byName[name];
+      if (match) {
         $scope.namingConflict = true;
       } else {
         $scope.namingConflict = false;

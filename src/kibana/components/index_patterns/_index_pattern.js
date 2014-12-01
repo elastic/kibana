@@ -117,6 +117,15 @@ define(function (require) {
         });
       }
 
+      self.addScriptedField = function (name, script) {
+        var scriptedField = self.scriptedFields.push({
+          name: name,
+          script: script
+        });
+        setIndexedValue('scriptedFields');
+        self.save();
+      };
+
       self.popularizeField = function (fieldName, unit) {
         if (_.isUndefined(unit)) unit = 1;
         if (!(self.fields.byName && self.fields.byName[fieldName])) return;
