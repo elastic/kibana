@@ -18,7 +18,8 @@ define(function (require) {
   });
 
   require('modules').get('apps/settings')
-  .controller('scriptedFieldsEdit', function ($scope, $route, $window, Notifier, kbnUrl) {
+  .controller('scriptedFieldsEdit', function ($scope, $route, $window, Notifier) {
+    var fieldEditorPath = '/settings/indices/{{ indexPattern }}/scriptedField';
     var notify = new Notifier();
     var createMode = (!$route.current.params.field);
     $scope.indexPattern = $route.current.locals.indexPattern;
@@ -37,16 +38,12 @@ define(function (require) {
     $scope.submit = function () {
       if (createMode) {
         $scope.indexPattern.addScriptedField($scope.scriptedField.name, $scope.scriptedField.script);
-        // redirect URL to update the app state, but not break the back button
-        kbnUrl.redirect('/settings/indices/{id}/editField/{field}', {
-          id: $scope.indexPattern.id,
-          field: $scope.scriptedField.name
-        });
       } else {
         $scope.indexPattern.save();
       }
 
       notify.info($scope.scriptedField.name + ' successfully saved');
+      $window.history.back();
     };
 
     $scope.$watch('scriptedField.name', function (name) {
